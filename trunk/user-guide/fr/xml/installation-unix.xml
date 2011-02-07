@@ -5,22 +5,22 @@
 <sect1 id='installation-unix'>
   <title>Paquets Linux/Unix</title>
     <para>
-      Certains systèmes GNU/Linux et Unix fournissent les paquets pré-compilés
+      Certains systÃ¨mes GNU/Linux et Unix fournissent les paquets prÃ©-compilÃ©s
       de Gwyddion.
       La page <ulink url='http://gwyddion.net/download.php'>download</ulink>
       du projet suit aussi les initiatives de paquetage connues. Par exemple,
       Debian, Ubuntu, Gentoo, openSuSE ou FreeBSD proposent des paquets
-      Gwyddion. Si votre système d'exploitation est suffisamment récent et qu'il
+      Gwyddion. Si votre systÃ¨me d'exploitation est suffisamment rÃ©cent et qu'il
       propose un tel paquet, il suffit de l'installer avec les moyens standards
-      du système utilisé. Dans le cas contraire vous pouvez le compiler à partir
+      du systÃ¨me utilisÃ©. Dans le cas contraire vous pouvez le compiler Ã  partir
       du code source.
     </para>
     <para>
       Pour les distributions Linux utilisant le
       <ulink url='http://www.rpm.org/'>Gestionnaire de Paquets RPM</ulink>,
       tels que Fedora, openSuSE or Mandriva, vous pouvez aussi compiler
-      vous-même le paquet à partir du code source selon la méthode
-      <link linkend='installation-unix-source-rpm'>décrite plus bas</link>.
+      vous-mÃªme le paquet Ã  partir du code source selon la mÃ©thode
+      <link linkend='installation-unix-source-rpm'>dÃ©crite plus bas</link>.
     </para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

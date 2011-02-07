@@ -5,31 +5,31 @@
 <chapter id='installation' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Installation</title>
   <para>
-    <application>Gwyddion</application> source code and binaries can be
-    downloaded from the
-    <ulink url='http://gwyddion.net/download.php'>download web page</ulink>
-    of the project, or alternatively from raw
-    <ulink url='http://sourceforge.net/projects/gwyddion/files/'>SourceForge.net download page</ulink>.
-    L'installation varie légèrement selon le système d'exploitation utilisé et 
-    les différentes méthodes d'installation seront décrites dans les sections
+    Le code source de <application>Gwyddion</application> et les paquets 
+    binaires peuvent Ãªtre tÃ©lÃ©chargÃ©s Ã  partir de la
+    <ulink url='http://gwyddion.net/download.php'>page internet de tÃ©lÃ©chargement</ulink>
+    du projet, ou Ã  partir de la 
+    <ulink url='http://sourceforge.net/projects/gwyddion/files/'>page de tÃ©lÃ©chargement SourceForge.net</ulink>.
+    L'installation varie lÃ©gÃ¨rement selon le systÃ¨me d'exploitation utilisÃ© et 
+    les diffÃ©rentes mÃ©thodes d'installation seront dÃ©crites dans les sections
     qui suivent.
   </para>
   <para>
-    Gwyddion nécessite ou peut utiliser différentes librairies logicielles, 
-    décrites dans la section 
-    <link linkend='installation-dependencies'>Dépendances de compilation</link>.
-    Si vous installez des paquets binaires précompilés vous n'avez normalement
-    pas besoin de vous occuper des composants nécessaires car le créateur des
-    paquets s'en sera occupé et garantira que tous sont présents. Toutefois
-    ces librairies sont importantes si vous compilez Gwyddion à partir du code
+    Gwyddion nÃ©cessite ou peut utiliser diffÃ©rentes librairies logicielles, 
+    dÃ©crites dans la section 
+    <link linkend='installation-dependencies'>DÃ©pendances de compilation</link>.
+    Si vous installez des paquets binaires prÃ©compilÃ©s vous n'avez normalement
+    pas besoin de vous occuper des composants nÃ©cessaires car le crÃ©ateur des
+    paquets s'en sera occupÃ© et garantira que tous sont prÃ©sents. Toutefois
+    ces librairies sont importantes si vous compilez Gwyddion Ã  partir du code
     source.
   </para>
   <para>
-    Pour démarrer avec Gwyddion vous pouvez aussi télécharger les
+    Pour dÃ©marrer avec Gwyddion vous pouvez aussi tÃ©lÃ©charger les
     <ulink url='http://gwyddion.net/download.php#sample-files'>fichers d'exemple
       <application>Gwyddion</application> </ulink>.
-    Ils sont donnés au format <application>Gwyddion</application> natif et 
-    représentent des données AFM typiques.
+    Ils sont donnÃ©s au format <application>Gwyddion</application> natif et 
+    reprÃ©sentent des donnÃ©es AFM typiques.
   </para>
 
   <xi:include href='installation-unix.xml'/>

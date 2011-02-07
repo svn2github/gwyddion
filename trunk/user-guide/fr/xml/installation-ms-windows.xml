@@ -5,15 +5,15 @@
 <sect1 id='installation-ms-windows'>
   <title>Paquets MS Windows</title>
   <note>
-    La compilation des paquets exécutables sous MS Windows a changé de manière
-    significative depuis la 2.23. Si vous faites une mise à jour d'une version
-    antérieure à la 2.23 vers la version 2.23, nous vous invitons à lire la
+    La compilation des paquets exÃ©cutables sous MS Windows a changÃ© de maniÃ¨re
+    significative depuis la 2.23. Si vous faites une mise Ã  jour d'une version
+    antÃ©rieure Ã  la 2.23 vers la version 2.23, nous vous invitons Ã  lire la
     <ulink url='http://gwyddion.net/switch-to-mingw32.php'>description des
       changement</ulink>.
   </note>
   <para>
-    Si vous avez déjà installé <application>Gwyddion</application> l'installeur
-    vous demanderas si vous souhaitez remplacer la version prédédente.
+    Si vous avez dÃ©jÃ  installÃ© <application>Gwyddion</application> l'installeur
+    vous demanderas si vous souhaitez remplacer la version prÃ©dÃ©dente.
   </para>
   <informalfigure id='fig-win32-installer-upgrade-screenshot'>
     <mediaobject>
@@ -21,11 +21,11 @@
         <imagedata fileref='win32-installer-upgrade.png' format='PNG'/>
       </imageobject>
       <textobject>
-        <phrase>Capture d'écran de mise à jour d'installation sous Win32</phrase>
+        <phrase>Capture d'Ã©cran de mise Ã  jour d'installation sous Win32</phrase>
       </textobject>
       <caption>
         La question concerne ce que vous souhaitez faire de la version de
-        <application>Gwyddion</application> précédente.
+        <application>Gwyddion</application> prÃ©cÃ©dente.
       </caption>
     </mediaobject>
   </informalfigure>
@@ -36,59 +36,59 @@
     <varlistentry>
       <term>Oui (remplacer)</term>
       <listitem>
-        La versioin déjà installée sera remplacée. Il s'agit de la méthode 
-        normale de mise à jour.
+        La versioin dÃ©jÃ  installÃ©e sera remplacÃ©e. Il s'agit de la mÃ©thode 
+        normale de mise Ã  jour.
       </listitem>
     </varlistentry>
     <varlistentry>
       <term>Non (conserver)</term>
       <listitem>
-        La version déjà installée sera ignorée et l'installation continuera
-        comme s'il s'agissait d'une première installation. Il s'agit en 
-        général d'une mauvaise idée car les deux versions partageront les mêmes
-        réglages et clés de registre, et si vous en désinstallez une l'autre en 
-        sera affectée. Vous pouvez cependant considérer cette option utile dans 
+        La version dÃ©jÃ  installÃ©e sera ignorÃ©e et l'installation continuera
+        comme s'il s'agissait d'une premiÃ¨re installation. Il s'agit en 
+        gÃ©nÃ©ral d'une mauvaise idÃ©e car les deux versions partageront les mÃªmes
+        rÃ©glages et clÃ©s de registre, et si vous en dÃ©sinstallez une l'autre en 
+        sera affectÃ©e. Vous pouvez cependant considÃ©rer cette option utile dans 
         certains cas.
       </listitem>
     </varlistentry>
     <varlistentry>
       <term>Annuler</term>
       <listitem>
-        L'installation sera annulée et l'ancienne version ne sera pas modifiée.
+        L'installation sera annulÃ©e et l'ancienne version ne sera pas modifiÃ©e.
       </listitem>
     </varlistentry>
   </variablelist>
   <para>
-    Dans les étapes suivantes l'installeur vous rappelle les composants du 
+    Dans les Ã©tapes suivantes l'installeur vous rappelle les composants du 
     logiciel inclus dans le paquet ainsi que leurs licences (qui sont tous des
-    logiciels libres), puis vous propose un répertoire d'installation, et enfin
+    logiciels libres), puis vous propose un rÃ©pertoire d'installation, et enfin
     vous propose la langue de l'interface utilisateur.
   </para>
   <para>
-    L'installeur crée les clés suivantes dans 
+    L'installeur crÃ©e les clÃ©s suivantes dans 
     <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal> :
   </para>
   <variablelist>
     <varlistentry>
       <term><literal>InstallDir</literal></term>
       <listitem>
-        Répertoire d'installation, par exemple
-        <filename>C:\Program Files\Gwyddion</filename>. La lecture de cette clé
-        peut être utile pour déterminer où installer des extensions.
+        RÃ©pertoire d'installation, par exemple
+        <filename>C:\Program Files\Gwyddion</filename>. La lecture de cette clÃ©
+        peut Ãªtre utile pour dÃ©terminer oÃ¹ installer des extensions.
       </listitem>
     </varlistentry>
     <varlistentry>
       <term><literal>Version</literal></term>
       <listitem>
-        Version complète de Gwyddion sous forme de chaîne de caractères.
+        Version complÃ¨te de Gwyddion sous forme de chaÃ®ne de caractÃ¨res.
       </listitem>
     </varlistentry>
     <varlistentry>
       <term><literal>Locale</literal></term>
       <listitem>
         La langue de l'interface utilisateur de Gwyddion est choisie durant
-        l'installation (plus précisément, une localisation qui, entre autre, 
-        définit la langue). Vous pouvez la modifier en utilisant 
+        l'installation (plus prÃ©cisÃ©ment, une localisation qui, entre autre, 
+        dÃ©finit la langue). Vous pouvez la modifier en utilisant 
         <command>regedit</command> pour choisir une autre langue.
       </listitem>
     </varlistentry>
@@ -109,7 +109,7 @@
         <tbody>
           <row>
             <entry>cs_CZ.UTF-8</entry>
-            <entry>Tchèque (République Tchèque)</entry>
+            <entry>TchÃ¨que (RÃ©publique TchÃ¨que)</entry>
           </row>
           <row>
             <entry>de_DE.UTF-8</entry>
@@ -121,7 +121,7 @@
           </row>
           <row>
             <entry>fr_FR.UTF-8</entry>
-            <entry>Français (France)</entry>
+            <entry>FranÃ§ais (France)</entry>
           </row>
           <row>
             <entry>it_IT.UTF-8</entry>
@@ -135,15 +135,15 @@
       </tgroup>
     </informaltable>
   <para>
-    Si vous souhaitez désinstaller Gwyddion allez dans
+    Si vous souhaitez dÃ©sinstaller Gwyddion allez dans
     <menuchoice>
-      <guimenu>Démarrer</guimenu>
+      <guimenu>DÃ©marrer</guimenu>
       <guisubmenu>Panneau de configuration</guisubmenu>
       <guimenuitem>Ajouter ou supprimer des programmes</guimenuitem>
     </menuchoice>
-    et choisissez <application>Gwyddion</application>. Notez que cette procédure
-    est valide sous Windows XP. Le chemin pour aboutir à la fenêtre
-    <guimenuitem>Ajouter / Supprimer</guimenuitem> peut légèrement différer 
+    et choisissez <application>Gwyddion</application>. Notez que cette procÃ©dure
+    est valide sous Windows XP. Le chemin pour aboutir Ã  la fenÃªtre
+    <guimenuitem>Ajouter / Supprimer</guimenuitem> peut lÃ©gÃ¨rement diffÃ©rer 
     sur une autre version de Windows.
   </para>
 </sect1>

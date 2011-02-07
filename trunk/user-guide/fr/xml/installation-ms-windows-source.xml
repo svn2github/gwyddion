@@ -6,56 +6,56 @@
   <title>MS Windows from Source Code Tarball</title>
   <warning>
     <para>
-      La dernière version de Gwyddion pouvant être compilée avec MSVC6 est 2.22.
+      La derniÃ¨re version de Gwyddion pouvant Ãªtre compilÃ©e avec MSVC6 est 2.22.
     </para>
   </warning>
   <para>
-      La système de compilation de <application>Gwyddion</application> sous MS
-      Windows nécessite le compilateur
-      <application>Microsoft Visual C++</application> (MSVC) (la version 6 étant
-      testée et recommandée, bien qu'elle soit un peu ancienne). Il consiste en
+      La systÃ¨me de compilation de <application>Gwyddion</application> sous MS
+      Windows nÃ©cessite le compilateur
+      <application>Microsoft Visual C++</application> (MSVC) (la version 6 Ã©tant
+      testÃ©e et recommandÃ©e, bien qu'elle soit un peu ancienne). Il consiste en
       plusieurs fichiers de commande <command>nmake</command> (makefiles),
       ce qui veut dire que la compilation se fait en ligne de commande. Cette
-      approche a plusieurs avantages du point de vue de la reproductibilité et
-      de l'automatisation de la procédure. De plus, elle permet une
-      synchronisation aisée des systèmes de compilation sous Unix et MS Windows.
-      La nécessité d'utiliser la ligne de commande peut être vue comme un
-      désavantage, mais elle rend tout de même la procédure de compilation
-      plutôt simple, même si l'on est peu familier de la ligne de commande.
+      approche a plusieurs avantages du point de vue de la reproductibilitÃ© et
+      de l'automatisation de la procÃ©dure. De plus, elle permet une
+      synchronisation aisÃ©e des systÃ¨mes de compilation sous Unix et MS Windows.
+      La nÃ©cessitÃ© d'utiliser la ligne de commande peut Ãªtre vue comme un
+      dÃ©savantage, mais elle rend tout de mÃªme la procÃ©dure de compilation
+      plutÃ´t simple, mÃªme si l'on est peu familier de la ligne de commande.
     </para>
     <para>
-      En supplément de MSVC, il vous faut installer l'environnement de
-      développement Gtk+. Là encore nous vous recommandons le paquet
+      En supplÃ©ment de MSVC, il vous faut installer l'environnement de
+      dÃ©veloppement Gtk+. LÃ  encore nous vous recommandons le paquet
       <ulink url='http://downloads.sourceforge.net/gladewin32/gtk-dev-2.12.9-win32-2.exe'>GladeWin32</ulink>.
-      Notez qu'il contient l'environnement de lancement, vous n'avez donc pas à
-      installer celui-ci si vous installer l'environnement de développement.
+      Notez qu'il contient l'environnement de lancement, vous n'avez donc pas Ã 
+      installer celui-ci si vous installer l'environnement de dÃ©veloppement.
     </para>
     <sect2 id='installation-ms-windows-source-unpacking'>
-      <title>Décompression</title>
+      <title>DÃ©compression</title>
       <para>
-        Décompressez les archives du code source avec votre programme de
-        décompression favori ou avec l'explorateur de fichiers. Les archives
-        compressées avec <ulink url='http://www.bzip.org/'>bzip2</ulink>
+        DÃ©compressez les archives du code source avec votre programme de
+        dÃ©compression favori ou avec l'explorateur de fichiers. Les archives
+        compressÃ©es avec <ulink url='http://www.bzip.org/'>bzip2</ulink>
         (<filename>.bz2</filename>)
-        sont bien plus petites que celles compressées avec
+        sont bien plus petites que celles compressÃ©es avec
         <ulink url='http://www.gzip.org/'>gzip</ulink> (<filename>.gz</filename>),
-        toutefois le support de la compresssion bzip2 est bien répandu que gzip
-        sous MS Windows. Certains programmes récents supportent les deux, par
+        toutefois le support de la compresssion bzip2 est bien rÃ©pandu que gzip
+        sous MS Windows. Certains programmes rÃ©cents supportent les deux, par
         exemple
         <ulink url='http://www.7-zip.org/'><application>7zip</application></ulink>
         qui est aussi un logiciel libre.
       </para>
       <para>
-        La décompression créera le dossier <filename>gwyddion-2.19</filename>
-        (où 2.19 sera remplacé par le numéro de version actuel) dans lequel
-        toutes les étapes de compilation auront lieu.
+        La dÃ©compression crÃ©era le dossier <filename>gwyddion-2.19</filename>
+        (oÃ¹ 2.19 sera remplacÃ© par le numÃ©ro de version actuel) dans lequel
+        toutes les Ã©tapes de compilation auront lieu.
     </para>
   </sect2>
   <sect2 id='installation-ms-windows-source-configuration'>
       <title>Configuration</title>
       <para>
-        Ouvrez le fichier <filename>make.msc</filename> dans un éditeur de
-        texte. Ce fichier démarre à peu de chose près comme suit :
+        Ouvrez le fichier <filename>make.msc</filename> dans un Ã©diteur de
+        texte. Ce fichier dÃ©marre Ã  peu de chose prÃ¨s comme suit :
       </para>
       <informalexample>
         <programlisting><![CDATA[
@@ -76,57 +76,57 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
 ]]></programlisting>
     </informalexample>
     <para>
-        Vérifiez et corrigez les chemins selon les instructions. En général,
-        aucune modification n'est nécessaire, car les chemins donnés dans le
-        fichier correspondent aux chemins d'installation par défaut de chaque
+        VÃ©rifiez et corrigez les chemins selon les instructions. En gÃ©nÃ©ral,
+        aucune modification n'est nÃ©cessaire, car les chemins donnÃ©s dans le
+        fichier correspondent aux chemins d'installation par dÃ©faut de chaque
         programme.
       </para>
       <variablelist>
         <varlistentry>
           <term><envar>GTK_TOP</envar></term>
           <listitem>
-            Il doit pointer vers le premier niveau du répertoire d'installation
-            de Gtk+, il s'agit du répertoire contenant les sous-dossiers
+            Il doit pointer vers le premier niveau du rÃ©pertoire d'installation
+            de Gtk+, il s'agit du rÃ©pertoire contenant les sous-dossiers
             <filename>bin</filename>, <filename>lib</filename>,
-            <filename>share</filename>, etc. Nous ferons par la suite référence
-            à cette valeur avec <envar>$(GTK_TOP)</envar> .
+            <filename>share</filename>, etc. Nous ferons par la suite rÃ©fÃ©rence
+            Ã  cette valeur avec <envar>$(GTK_TOP)</envar> .
           </listitem>
         </varlistentry>
         <varlistentry>
           <term><envar>GTKGLEXT_TOP</envar></term>
           <listitem>
-            Il doit pointer vers le premier niveau du répertoire d'installation
-            de GtkGLExt. Il diffère de <envar>$(GTK_TOP)</envar> uniquement si
-            vous n'utilisez pas GladeWin32 et que vous avez installé GtkGLExt
-            séparément.
+            Il doit pointer vers le premier niveau du rÃ©pertoire d'installation
+            de GtkGLExt. Il diffÃ¨re de <envar>$(GTK_TOP)</envar> uniquement si
+            vous n'utilisez pas GladeWin32 et que vous avez installÃ© GtkGLExt
+            sÃ©parÃ©ment.
         </listitem>
       </varlistentry>
       <varlistentry>
           <term><envar>LIBXML2_TOP</envar></term>
           <listitem>
-            Il doit pointer vers le premier niveau du répertoire d'installation
-            de LibXML2 . Il diffère de <envar>$(GTK_TOP)</envar> uniquement si
-            vous n'utilisez pas GladeWin32 et que vous avez installé LibXML2
-            séparément.
+            Il doit pointer vers le premier niveau du rÃ©pertoire d'installation
+            de LibXML2 . Il diffÃ¨re de <envar>$(GTK_TOP)</envar> uniquement si
+            vous n'utilisez pas GladeWin32 et que vous avez installÃ© LibXML2
+            sÃ©parÃ©ment.
           </listitem>
         </varlistentry>
         <varlistentry>
           <term><envar>MSC_TOP</envar></term>
           <listitem>
-            Il doit pointer vers le premier niveau du répertoire d'installation
+            Il doit pointer vers le premier niveau du rÃ©pertoire d'installation
             de MSVC.
           </listitem>
         </varlistentry>
       </variablelist>
       <para>
-        Lancez la fenêtre de commande (MS-DOS), puis allez dans le répertoire
+        Lancez la fenÃªtre de commande (MS-DOS), puis allez dans le rÃ©pertoire
         source et lancez <command>vcvars32.bat</command>.
-        Ce fichier de commande est fourni avec MSVC, il permet de définir
-        certaines variables nécessaires au complilateur et au linker utilisés
-        en ligne de commande, il aussi de les rendre directement exécutables en
-        réglant <envar>PATH</envar>. Notez que <command>vcvars32.bat</command>
-        peut ne pas se trouver dans <envar>PATH</envar>, mais il doit être
-        aisément repérable.
+        Ce fichier de commande est fourni avec MSVC, il permet de dÃ©finir
+        certaines variables nÃ©cessaires au complilateur et au linker utilisÃ©s
+        en ligne de commande, il aussi de les rendre directement exÃ©cutables en
+        rÃ©glant <envar>PATH</envar>. Notez que <command>vcvars32.bat</command>
+        peut ne pas se trouver dans <envar>PATH</envar>, mais il doit Ãªtre
+        aisÃ©ment repÃ©rable.
     </para>
   </sect2>
   <sect2 id='installation-ms-windows-source-compilation'>
@@ -140,34 +140,34 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <informalexample>
           <literallayout><userinput>nmake -f makefile.msc install</userinput></literallayout>
         </informalexample>
-        pour l'installer dans un répertoire temporaire, à savoir le sous-dossier
-        <filename>inst</filename> (créé par cette commande). Au cas où la
-        seconde étape se déroulerais mal et que vous vouliez recommencer, pensez
-        à supprimer le répertoire <filename>inst</filename> ainsi que le fichier
-        <filename>inst.stamp</filename> pour démarrer proprement.
+        pour l'installer dans un rÃ©pertoire temporaire, Ã  savoir le sous-dossier
+        <filename>inst</filename> (crÃ©Ã© par cette commande). Au cas oÃ¹ la
+        seconde Ã©tape se dÃ©roulerais mal et que vous vouliez recommencer, pensez
+        Ã  supprimer le rÃ©pertoire <filename>inst</filename> ainsi que le fichier
+        <filename>inst.stamp</filename> pour dÃ©marrer proprement.
     </para>
   </sect2>
   <sect2 id='installation-ms-windows-source-installation'>
       <title>Installation</title>
       <para>
-        La structure du répertoire temporaire <filename>inst</filename> est
-        identique à celle de l'installation finale. Vous pouvez ainsi lancer
-        <application>Gwyddion</application> directement à partir de ce
-        répertoire (<filename>gwyddion.exe</filename> se trouve directement dans
-        <filename>inst</filename>). Si vous n'avez jamais lancé 
+        La structure du rÃ©pertoire temporaire <filename>inst</filename> est
+        identique Ã  celle de l'installation finale. Vous pouvez ainsi lancer
+        <application>Gwyddion</application> directement Ã  partir de ce
+        rÃ©pertoire (<filename>gwyddion.exe</filename> se trouve directement dans
+        <filename>inst</filename>). Si vous n'avez jamais lancÃ© 
         <application>Gwyddion</application> auparavant, il ne trouvera pas les
-        librairies Gtk+ (DLLs) nécessaires. Il faudra dans ce cas lancer
-        <command>regedit</command>, créer la clé <literal>Path</literal> dans
+        librairies Gtk+ (DLLs) nÃ©cessaires. Il faudra dans ce cas lancer
+        <command>regedit</command>, crÃ©er la clÃ© <literal>Path</literal> dans
         <informalexample>
           <literal>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\Current Version\App Paths\Gwyddion.exe</literal>
         </informalexample>
         et y mettre
-        <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> (là aussi
-        <envar>$(GTK_TOP)</envar> doit être remplacé par le dossier
-        correspondant défini dans <filename>make.msc</filename>, ne pas y mettre
-        litéralement <quote><literal>$(GTK_TOP)</literal></quote>). Si GtkGLExt
-        et/ou LibXML2 ont été installés séparément, ajoutez aussi les dossiers
-        <filename>lib</filename> et <filename>bin</filename>, séparés par un
+        <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> (lÃ  aussi
+        <envar>$(GTK_TOP)</envar> doit Ãªtre remplacÃ© par le dossier
+        correspondant dÃ©fini dans <filename>make.msc</filename>, ne pas y mettre
+        litÃ©ralement <quote><literal>$(GTK_TOP)</literal></quote>). Si GtkGLExt
+        et/ou LibXML2 ont Ã©tÃ© installÃ©s sÃ©parÃ©ment, ajoutez aussi les dossiers
+        <filename>lib</filename> et <filename>bin</filename>, sÃ©parÃ©s par un
         point-virgule. Si vous ne pouvez pas modifier le registre global
         <literal>HKEY_LOCAL_MACHINE</literal>, vous pouvez modifier
         <literal>HKEY_CURRENT_USER</literal> pour l'utilisateur courant
@@ -175,21 +175,21 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
     </para>
     <para>
         Vous pouvez alors lancer <application>Gwyddion</application> directement
-        à partir du répertoire <filename>inst</filename> ou copier celui-ci vers
+        Ã  partir du rÃ©pertoire <filename>inst</filename> ou copier celui-ci vers
         un autre emplacement, en le renommant si besoin.
       </para>
     </sect2>
     <sect2 id='installation-ms-windows-source-installers'>
       <title>Installeurs</title>
       <para>
-        Pour créer un installeur il vous faut
+        Pour crÃ©er un installeur il vous faut
         <ulink url='http://www.jrsoftware.org/isinfo.php'>Inno Setup</ulink>,
         version 4 ou plus.  Ouvrez <filename>inst/gwyddion.iss</filename> puis
-        compilez l'installeur, ce qui créera
-        <filename>Gwyddion-2.19.exe</filename> (où 2.19 sera remplacé
-        par le numéro de version actuel), là encore dans
-        <filename>inst</filename>. Vous pouvez répéter cette procédure avec
-        <filename>inst/gwyddion-devel.iss</filename> pour créer si besoin
+        compilez l'installeur, ce qui crÃ©era
+        <filename>Gwyddion-2.19.exe</filename> (oÃ¹ 2.19 sera remplacÃ©
+        par le numÃ©ro de version actuel), lÃ  encore dans
+        <filename>inst</filename>. Vous pouvez rÃ©pÃ©ter cette procÃ©dure avec
+        <filename>inst/gwyddion-devel.iss</filename> pour crÃ©er si besoin
         <filename>Gwyddion-Development-2.19.exe</filename>.
     </para>
   </sect2>
