@@ -639,7 +639,7 @@ gwy_surface_regularize(const GwySurface *surface,
  *
  * Obtains the lateral units of a surface.
  *
- * Returns: (transfer-none):
+ * Returns: (transfer none):
  *          The lateral units of @surface.
  **/
 GwyUnit*
@@ -658,7 +658,7 @@ gwy_surface_get_unit_xy(GwySurface *surface)
  *
  * Obtains the value units of a surface.
  *
- * Returns: (transfer-none):
+ * Returns: (transfer none):
  *          The value units of @surface.
  **/
 GwyUnit*

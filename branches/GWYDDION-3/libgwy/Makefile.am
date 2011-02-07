@@ -60,6 +60,7 @@ public_headers = \
 	$(srcdir)/serialize.h \
 	$(srcdir)/strfuncs.h \
 	$(srcdir)/surface.h \
+	$(srcdir)/surface-statistics.h \
 	$(srcdir)/unit.h \
 	$(srcdir)/user-fit-func.h \
 	$(srcdir)/value-format.h
@@ -143,6 +144,7 @@ libgwy3_la_SOURCES = \
 	serialize.c \
 	strfuncs.c \
 	surface.c \
+	surface-statistics.c \
 	types.c \
 	unit.c \
 	user-fit-func.c \

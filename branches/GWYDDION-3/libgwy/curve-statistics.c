@@ -32,7 +32,7 @@
  *
  * Finds the minimum and maximum value in a curve.
  *
- * If the curve is empty, @min is set to a huge positive value and @max to
+ * If the curve is empty @min is set to a huge positive value and @max to
  * a huge negative value.
  **/
 void
@@ -67,7 +67,7 @@ gwy_curve_min_max(const GwyCurve *curve,
  * Finds the minimum and maximum abscissa of a curve.
  *
  * Since the curve is sorted they can be also found by looking at x-coordinates
- * of the frist and last point.  If the curve is empty, @min and @max are set
+ * of the frist and last point.  If the curve is empty @min and @max are set
  * to NaN.
  **/
 void

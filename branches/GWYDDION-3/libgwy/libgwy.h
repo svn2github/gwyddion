@@ -63,6 +63,7 @@
 #include <libgwy/serialize.h>
 #include <libgwy/strfuncs.h>
 #include <libgwy/surface.h>
+#include <libgwy/surface-statistics.h>
 #include <libgwy/types.h>
 #include <libgwy/unit.h>
 #include <libgwy/user-fit-func.h>

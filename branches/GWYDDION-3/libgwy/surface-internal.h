@@ -24,9 +24,34 @@
 
 G_BEGIN_DECLS
 
+/* Cache operations */
+#define GWY_SURFACE_CVAL(arg, bit)  ((arg)->cache[GWY_SURFACE_CACHE_##bit])
+#define GWY_SURFACE_CBIT(bit)       (1 << GWY_SURFACE_CACHE_##bit)
+#define GWY_SURFACE_CTEST(arg, bit) ((arg)->cached & GWY_SURFACE_CBIT(bit))
+
+typedef enum {
+    GWY_SURFACE_CACHE_MIN = 0,
+    GWY_SURFACE_CACHE_MAX,
+    GWY_SURFACE_CACHE_AVG,  // Not implemented yet
+    GWY_SURFACE_CACHE_RMS,  // Not implemented yet
+    GWY_SURFACE_CACHE_MSQ,  // Not implemented yet
+    GWY_SURFACE_CACHE_MED,
+    GWY_SURFACE_CACHE_ARF,  // Not implemented yet
+    GWY_SURFACE_CACHE_ART,  // Not implemented yet
+    GWY_SURFACE_CACHE_ARE,  // Not implemented yet
+    GWY_SURFACE_CACHE_SIZE
+} GwySurfaceCached;
+
 struct _GwySurfacePrivate {
     GwyUnit *unit_xy;
     GwyUnit *unit_z;
+    gdouble xmin;
+    gdouble xmax;
+    gdouble ymin;
+    gdouble ymax;
+    gboolean cached_range;
+    guint32 cached;
+    gdouble cache[GWY_SURFACE_CACHE_SIZE];
     // TODO: Here some triangulation stuff will go once we implement it.
 };
 
