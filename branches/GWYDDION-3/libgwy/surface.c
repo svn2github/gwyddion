@@ -606,6 +606,34 @@ gwy_surface_set_from_field(GwySurface *surface,
 }
 
 /**
+ * gwy_surface_regularize:
+ * @surface: A surface.
+ * @xres: Required horizontal resolution.  Pass 0 to choose a resolution
+ *        automatically.
+ * @yres: Required vertical resolution.  Pass 0 to choose a resolution
+ *        automatically.
+ *
+ * Creates a two-dimensional data field from a surface.
+ *
+ * Returns: (allow-none):
+ *          A new two-dimensional data field or %NULL if the surface contains
+ *          no points.
+ **/
+GwyField*
+gwy_surface_regularize(const GwySurface *surface,
+                       guint xres,
+                       guint yres)
+{
+    g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
+
+    if (!surface->n)
+        return NULL;
+
+    g_warning("Implement me!");
+    return NULL;
+}
+
+/**
  * gwy_surface_get_unit_xy:
  * @surface: A surface.
  *

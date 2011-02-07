@@ -23,6 +23,7 @@
 #include <libgwy/serializable.h>
 #include <libgwy/unit.h>
 #include <libgwy/math.h>
+#include <libgwy/field.h>
 
 G_BEGIN_DECLS
 
@@ -55,12 +56,6 @@ struct _GwySurfaceClass {
     GObjectClass g_object_class;
 };
 
-G_END_DECLS
-
-#include <libgwy/field.h>
-
-G_BEGIN_DECLS
-
 #define gwy_surface_duplicate(surface) \
         (GWY_SURFACE(gwy_serializable_duplicate(GWY_SERIALIZABLE(surface))))
 #define gwy_surface_assign(dest, src) \
@@ -83,6 +78,9 @@ void            gwy_surface_copy          (const GwySurface *src,
                                            GwySurface *dest);
 void            gwy_surface_set_from_field(GwySurface *surface,
                                            const GwyField *field);
+GwyField*       gwy_surface_regularize    (const GwySurface *surface,
+                                           guint xres,
+                                           guint yres)                G_GNUC_MALLOC;
 GwyUnit*        gwy_surface_get_unit_xy   (GwySurface *surface)       G_GNUC_PURE;
 GwyUnit*        gwy_surface_get_unit_z    (GwySurface *surface)       G_GNUC_PURE;
 GwyValueFormat* gwy_surface_format_xy     (GwySurface *surface,
