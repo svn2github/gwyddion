@@ -76,6 +76,7 @@ GwySurface*     gwy_surface_new_from_field(const GwyField *field)     G_GNUC_MAL
 void            gwy_surface_data_changed  (GwySurface *surface);
 void            gwy_surface_copy          (const GwySurface *src,
                                            GwySurface *dest);
+void            gwy_surface_invalidate    (GwySurface *surface);
 void            gwy_surface_set_from_field(GwySurface *surface,
                                            const GwyField *field);
 GwyField*       gwy_surface_regularize    (const GwySurface *surface,

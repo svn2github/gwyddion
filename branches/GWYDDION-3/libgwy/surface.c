@@ -287,6 +287,20 @@ copy_info(GwySurface *dest,
     ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
 }
 
+static void
+copy_cache(GwySurface *dest,
+           const GwySurface *src)
+{
+    Surface *dpriv = dest->priv, *spriv = src->priv;
+    dpriv->cached_range = spriv->cached_range;
+    dpriv->xmin = spriv->xmin;
+    dpriv->xmax = spriv->xmax;
+    dpriv->ymin = spriv->ymin;
+    dpriv->ymax = spriv->ymax;
+    dpriv->cached = spriv->cached;
+    gwy_assign(dpriv->cache, spriv->cache, GWY_SURFACE_CACHE_SIZE);
+}
+
 static GObject*
 gwy_surface_duplicate_impl(GwySerializable *serializable)
 {
@@ -312,6 +326,7 @@ gwy_surface_assign_impl(GwySerializable *destination,
     }
     gwy_assign(dest->data, src->data, src->n);
     copy_info(dest, src);
+    copy_cache(dest, src);
     if (notify)
         g_object_notify(G_OBJECT(dest), "n-points");
 }
@@ -513,6 +528,13 @@ copy_field_to_surface(const GwyField *field,
     }
     ASSIGN_UNITS(surface->priv->unit_xy, field->priv->unit_xy);
     ASSIGN_UNITS(surface->priv->unit_z, field->priv->unit_z);
+
+    gwy_surface_invalidate(surface);
+    surface->priv->cached_range = TRUE;
+    surface->priv->xmin = xoff;
+    surface->priv->xmax = qx*(field->xres - 1) + xoff;
+    surface->priv->ymin = yoff;
+    surface->priv->ymax = qy*(field->yres - 1) + yoff;
 }
 
 /**
@@ -575,6 +597,23 @@ gwy_surface_copy(const GwySurface *src,
     g_return_if_fail(GWY_IS_SURFACE(dest));
     g_return_if_fail(dest->n == src->n);
     gwy_assign(dest->data, src->data, src->n);
+    copy_cache(dest, src);
+}
+
+/**
+ * gwy_surface_invalidate:
+ * @surface: A surface.
+ *
+ * Invalidates cached surface statistics.
+ *
+ * See gwy_field_invalidate() for discussion of invalidation and examples.
+ **/
+void
+gwy_surface_invalidate(GwySurface *surface)
+{
+    g_return_if_fail(GWY_IS_SURFACE(surface));
+    surface->priv->cached_range = FALSE;
+    surface->priv->cached = 0;
 }
 
 /**
