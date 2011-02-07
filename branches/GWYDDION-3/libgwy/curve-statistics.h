@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Necas (Yeti).
+ *  Copyright (C) 2010-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,9 @@
 G_BEGIN_DECLS
 
 void    gwy_curve_min_max  (const GwyCurve *curve,
+                            gdouble *min,
+                            gdouble *max);
+void    gwy_curve_range    (const GwyCurve *curve,
                             gdouble *min,
                             gdouble *max);
 gdouble gwy_curve_mean     (const GwyCurve *curve) G_GNUC_PURE;

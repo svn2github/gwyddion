@@ -25,8 +25,10 @@
 /**
  * gwy_curve_min_max:
  * @curve: A curve.
- * @min: Location to store the minimum to, or %NULL.
- * @max: Location to store the maximum to, or %NULL.
+ * @min: (allow-none):
+ *       Location to store the minimum value to, or %NULL.
+ * @max: (allow-none):
+ *       Location to store the maximum value to, or %NULL.
  *
  * Finds the minimum and maximum value in a curve.
  *
@@ -53,6 +55,29 @@ gwy_curve_min_max(const GwyCurve *curve,
     }
     GWY_MAYBE_SET(pmin, min);
     GWY_MAYBE_SET(pmax, max);
+}
+
+/**
+ * @curve: A curve.
+ * @min: (allow-none):
+ *       Location to store the minimum abscissa to, or %NULL.
+ * @max: (allow-none):
+ *       Location to store the maximum abscissa to, or %NULL.
+ *
+ * Finds the minimum and maximum abscissa of a curve.
+ *
+ * Since the curve is sorted they can be also found by looking at x-coordinates
+ * of the frist and last point.  If the curve is empty, @min and @max are set
+ * to NaN.
+ **/
+void
+gwy_curve_range(const GwyCurve *curve,
+                gdouble *min,
+                gdouble *max)
+{
+    g_return_if_fail(GWY_IS_CURVE(curve));
+    GWY_MAYBE_SET(min, curve->n ? curve->data[0].x : NAN);
+    GWY_MAYBE_SET(max, curve->n ? curve->data[curve->n-1].x : NAN);
 }
 
 /**
