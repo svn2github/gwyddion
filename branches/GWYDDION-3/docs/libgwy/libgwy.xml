@@ -6,10 +6,17 @@
   <bookinfo>
     <title>Gwyddion Library Reference Manual</title>
   </bookinfo>
-  <para>
-    This library contains fundamental classes and interfaces, data processing
-    functions for one- and two-dimensional data and various utilities.
-  </para>
+  <preface>
+    <title>Introduction</title>
+    <para>
+      This library contains fundamental classes and interfaces, data processing
+      functions for one- and two-dimensional data and various utilities.
+    </para>
+  </preface>
+  <chapter id='object-hierarchy'>
+    <title>Object hierarchy</title>
+    <xi:include href="xml/tree_index.sgml"/>
+  </chapter>
   <chapter id='libgwy-fundamentals'>
     <title>Fundamentals</title>
     <xi:include href="xml/main.xml"/>
@@ -81,5 +88,9 @@
     <xi:include href="xml/strfuncs.xml"/>
     <xi:include href="xml/pack.xml"/>
   </chapter>
-  <xi:include href="xml/tree_index.sgml"/>
+  <index>
+    <title>Index of all symbols</title>
+    <xi:include href="xml/api-index-full.xml"/>
+  </index>
+  <xi:include href="xml/annotation-glossary.xml"/>
 </book>
