@@ -58,6 +58,7 @@ gwy_curve_min_max(const GwyCurve *curve,
 }
 
 /**
+ * gwy_curve_range:
  * @curve: A curve.
  * @min: (allow-none):
  *       Location to store the minimum abscissa to, or %NULL.
