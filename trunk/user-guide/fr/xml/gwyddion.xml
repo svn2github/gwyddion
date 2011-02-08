@@ -196,6 +196,7 @@
             etc. vers un fichier. C'est option est pratique surtout sous Win32 
             (où les messages sont dirigés par défaut dans un fichier) à 
             condition que stdout et stderr pointent vers un endroit accessible.
+          </para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -267,7 +268,8 @@
           <para>
             Lorqu'il n'est pas défini, la valeur par défaut correspond au
             dossier pré-défini dans la variable <varname>${libdir}</varname>,
-            qui est en général <filename>/usr/local/lib</filename>.
+            qui est en général <filename>/usr/local/lib</filename> ou
+            <filename>/usr/local/lib64</filename>.
           </para>
         </listitem>
       </varlistentry>

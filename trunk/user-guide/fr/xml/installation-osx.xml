@@ -3,6 +3,31 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='installation-osx'>
+  <title>Mac OS X</title>
+  <para>
+    La majeure partie de
+    <link linkend='installation-unix-source'>la section d'installation Unix/Linux</link> 
+    s'applique aussi à OS X. Cette section traite donc en particulier des 
+    spécificités de l'installation sous OS X, certaines des étapes listées ici
+    sont expliquées de manière plus détaillée dans la section d'installation
+    Unix.
+  </para>
+  <para>
+    En plus de tout compiler par vous même (bon courage), il existe deux façons
+    d'installer <application>Gwyddion</application> :
+    <itemizedlist>
+      <listitem>
+        en utilisant <ulink url='http://www.macports.org/'>MacPorts</ulink>
+        (ex Darwinports) et en compilant un Portfile.
+      </listitem>
+      <listitem>
+        en utilisant <ulink url='http://fink.sourceforge.net/'>Fink</ulink> et
+        en compilant <application>Gwyddion</application> de la même manière
+        que sous Unix.
+      </listitem>
+    </itemizedlist>
+  </para>
+  <sect2 id='installation-osx-preparation'>
       <title>Préparation</title>
       <para>
         Pour installer et lancer <application>Gwyddion</application> il faut
@@ -20,6 +45,7 @@
         <ulink url='http://www.macports.org/install.php'>page d'installation MacPorts</ulink>.
 
       <!-- XXX rowue: look where you find it on ppc -->
+      <!-- rowue: 10.4 PPC is one DVD -->
         Il vous faut aussi un peu d'expérience avec l'utilisation de
         <application>Terminal.app</application>.  Toutes les commandes dans le
         reste de la section doivent être entrées et lancées dans
@@ -143,6 +169,7 @@
         Avec MacPorts il suffit de cliquer sur l'icône de démarrage et attendre
         que <application>Gwyddion</application> apparaisse. Avce Fink ou une
         version compilée vous devez suivre les étapes qui suivent :
+        
         Lancez <application>X11.app</application> et tapez dans
         <application>Terminal.app</application>
         <informalexample>
