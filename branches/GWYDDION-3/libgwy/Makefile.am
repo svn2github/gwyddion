@@ -189,4 +189,5 @@ distclean-local:
 check-local: check-serializable-types
 
 check-serializable-types:
-	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-serializable-types.py main.c $(libgwy3_la_SOURCES)
+	$(AM_V_at)cd $(srcdir) \
+		&& $(PYTHON) ../build/check-serializable-types.py main.c $(libgwy3_la_SOURCES)
