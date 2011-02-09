@@ -2,18 +2,18 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <!-- vim: set ts=2 sw=2 et: -->
-<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+<book id='index' xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
     <title>Gwyddion Library Reference Manual</title>
   </bookinfo>
-  <preface>
+  <preface id='libgwy-preface'>
     <title>Introduction</title>
     <para>
       This library contains fundamental classes and interfaces, data processing
       functions for one- and two-dimensional data and various utilities.
     </para>
   </preface>
-  <chapter id='object-hierarchy'>
+  <chapter id='libgwy-object-hierarchy'>
     <title>Object hierarchy</title>
     <xi:include href="xml/tree_index.sgml"/>
   </chapter>
@@ -89,7 +89,7 @@
     <xi:include href="xml/strfuncs.xml"/>
     <xi:include href="xml/pack.xml"/>
   </chapter>
-  <index>
+  <index id='libgwy-symbol-index'>
     <title>Index of all symbols</title>
     <xi:include href="xml/api-index-full.xml"/>
   </index>
