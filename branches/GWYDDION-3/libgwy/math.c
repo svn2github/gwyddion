@@ -281,7 +281,6 @@ gwy_powi(double x, int i)
  * @xc: Location to store x-coordinate of the centre of the quadratic surface.
  * @yc: Location to store y-coordinate of the centre of the quadratic surface.
  * @zc: Location to store value at the centre of the quadratic surface.
- * @returns: The number of curved dimensions (0 to 2).
  *
  * Calculates curvature parameters from two-dimensional quadratic polynomial
  * coefficients.
@@ -302,6 +301,8 @@ gwy_powi(double x, int i)
  * simply returned as the centre position.  Consequently, you should use
  * Cartesian coordinates with origin in a natural centre, for instance centre
  * of image or grain.
+ *
+ * Returns: The number of curved dimensions (0 to 2).
  **/
 guint
 gwy_math_curvature(const gdouble *coeffs,

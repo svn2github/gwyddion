@@ -47,13 +47,13 @@ double gwy_powi(double x, int i);
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
 guint  gwy_math_curvature        (const gdouble *coeffs,
-                                  gdouble *pkappa1,
-                                  gdouble *pkappa2,
-                                  gdouble *pphi1,
-                                  gdouble *pphi2,
-                                  gdouble *pxc,
-                                  gdouble *pyc,
-                                  gdouble *pzc);
+                                  gdouble *kappa1,
+                                  gdouble *kappa2,
+                                  gdouble *phi1,
+                                  gdouble *phi2,
+                                  gdouble *xc,
+                                  gdouble *yc,
+                                  gdouble *zc);
 gint    gwy_double_compare       (gconstpointer a,
                                   gconstpointer b)    G_GNUC_PURE;
 gint    gwy_double_direct_compare(gconstpointer a,
