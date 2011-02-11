@@ -480,8 +480,8 @@ gwy_mask_line_data_changed(GwyMaskLine *line)
 /**
  * gwy_mask_line_copy:
  * @src: Source one-dimensional mask line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
+ * @srcpos: Position of the line part start.
+ * @srclen: Part length (number of items).
  * @dest: Destination one-dimensional mask line.
  * @destpos: Destination position in @dest.
  *
@@ -597,8 +597,8 @@ count_row(const guint32 *row,
 /**
  * gwy_mask_line_part_count:
  * @line: A one-dimensional mask line.
- * @rectangle: (allow-none):
- *             Area in @line to process.  Pass %NULL to process entire @line.
+ * @pos: Position of the line part start.
+ * @len: Part length (number of items).
  * @value: %TRUE to count ones, %FALSE to count zeroes.
  *
  * Counts set or unset bits in a rectangular part of a mask line.
@@ -656,7 +656,7 @@ gwy_mask_line_part_count(const GwyMaskLine *line,
  * sequential access, the mask iterator #GwyMaskIter macros offers a good
  * compromise between complexity and efficiency.  In a really
  * performance-sensitive code, you also might wish to access the bits in
- * #GwyMaskLine.data directly.
+ * @data in #GwyMaskLine directly.
  **/
 
 /**
