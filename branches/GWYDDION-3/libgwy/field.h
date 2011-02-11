@@ -97,7 +97,6 @@ void            gwy_field_copy         (const GwyField *src,
                                         guint destrow);
 void            gwy_field_copy_full    (const GwyField *src,
                                         GwyField *dest);
-gdouble*        gwy_field_get_data     (GwyField *field);
 void            gwy_field_invalidate   (GwyField *field);
 void            gwy_field_set_xreal    (GwyField *field,
                                         gdouble xreal);

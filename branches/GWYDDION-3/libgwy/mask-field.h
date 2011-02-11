@@ -140,7 +140,6 @@ void         gwy_mask_field_copy         (const GwyMaskField *src,
                                           guint destrow);
 void         gwy_mask_field_copy_full    (const GwyMaskField *src,
                                           GwyMaskField *dest);
-guint32*     gwy_mask_field_get_data     (GwyMaskField *field);
 void         gwy_mask_field_invalidate   (GwyMaskField *field);
 guint        gwy_mask_field_count        (const GwyMaskField *field,
                                           const GwyMaskField *mask,

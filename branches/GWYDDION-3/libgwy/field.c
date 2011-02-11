@@ -912,55 +912,33 @@ gwy_field_copy_full(const GwyField *src,
 }
 
 /**
- * gwy_field_get_data:
- * @field: A two-dimensional data field.
- *
- * Obtains the data of a two-dimensional data field.
- *
- * This is the preferred method to obtain the data array for writing as it
- * invalidates cached values.
- *
- * Do not use it if you only want to read data because it invalidates cached
- * values.
- *
- * Returns: #GwyField-struct.data, but it invalidates the field for you.
- **/
-gdouble*
-gwy_field_get_data(GwyField *field)
-{
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    gwy_field_invalidate(field);
-    return field->data;
-}
-
-/**
  * gwy_field_invalidate:
  * @field: A two-dimensional data field.
  *
  * Invalidates cached field statistics.
  *
- * User code should seldom need this method since all #GwyField methods
- * correctly invalidate cached values when they change data, also
- * gwy_field_get_data() does.
+ * All #GwyField methods invalidate (or, in some cases, recalculate) cached
+ * statistics if they modify the data.
  *
- * However, if you mix writing to the field data with calls to methods
- * providing overall field characteristics (minimum, maximum, mean value, etc.)
- * you may have to explicitly invalidate the cached values as the methods have
- * no means of knowing whether you changed the data meanwhile or not:
+ * If you write to @field's data directly and namely mix writing to the field
+ * data with calls to methods providing overall field characteristics (minimum,
+ * maximum, mean value, etc.) you may have to explicitly invalidate the cached
+ * values as the methods have no means of knowing whether you changed the data
+ * meanwhile or not:
  * |[
- * gdouble *data;
+ * gdouble *data = field->data;
  *
- * data = gwy_field_get_data(field);    // This calls gwy_field_invalidate().
  * for (i = 0; i < xres*yres; i++) {
  *     // Change data.
  * }
- * med = gwy_field_median(field);       // This is OK, cache was invalidated.
+ * gwy_field_invalidate(data);          // Invalidate data as we changed it.
+ * med = gwy_field_median_full(field);  // This is OK, cache was invalidated.
  *                                      // But now the new median is cached.
  * for (i = 0; i < xres*yres; i++) {
  *     // Change data more.
  * }
  * gwy_field_invalidate(field);         // Forget the cached median value.
- * med = gwy_field_median(field);       // OK again, median is recalculated.
+ * med = gwy_field_median_full(field);  // OK again, median is recalculated.
  * ]|
  **/
 void
@@ -1299,13 +1277,13 @@ gwy_field_format_z(const GwyField *field,
  * columns are provided except gwy_field_index().  The usual mode of operation
  * is to access the data directly, bearing a few things in mind:
  * <itemizedlist>
- *   <listitem>All #GwyField struct fields must be considered read-only. You
- *   may write to #GwyField-struct.data  <emphasis>content</emphasis> but you
- *   must not change the field itself.  Use methods such as
+ *   <listitem>All #GwyField-struct struct fields must be considered
+ *   read-only.</listitem>
+ *   <listitem>For reading, access @data in #GwyField-struct
+ *   directly.</listitem>
+ *   <listitem>For writing, you can write to @data <emphasis>content</emphasis>
+ *   but you must not change the field itself.  Use methods such as
  *   gwy_field_set_xreal() to change the field properties.</listitem>
- *   <listitem>For writing, obtain the data with gwy_field_get_data().  This
- *   tells the field that you are going to change the data and invalidates any
- *   caches.  For reading, just access #GwyField-struct.data.</listitem>
  *   <listitem>If you mix direct changes of data with functions that obtain
  *   overall field statistics, you may have to use gwy_field_invalidate() to
  *   induce recalculation of the statistics.</listitem>

@@ -128,8 +128,9 @@ mask_field_randomize(GwyMaskField *maskfield,
     guint required = maskfield->stride * maskfield->yres;
     guint n = max_size*(max_size + 31)/32 * 4;
     guint offset = g_rand_int_range(rng, 0, n - required);
-    guint32 *data = gwy_mask_field_get_data(maskfield);
+    guint32 *data = maskfield->data;
     memcpy(data, pool + offset, required*sizeof(guint32));
+    gwy_mask_field_invalidate(maskfield);
 }
 
 static void

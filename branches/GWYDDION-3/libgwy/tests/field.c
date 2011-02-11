@@ -29,7 +29,7 @@ void
 field_randomize(GwyField *field,
                 GRand *rng)
 {
-    gdouble *d = gwy_field_get_data(field);
+    gdouble *d = field->data;
     for (guint n = field->xres*field->yres; n; n--, d++)
         *d = g_rand_double(rng);
     gwy_field_invalidate(field);
@@ -557,11 +557,12 @@ test_field_range(void)
         guint xres = g_rand_int_range(rng, 1, max_size);
         guint yres = g_rand_int_range(rng, 1, max_size);
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-        gdouble *data = gwy_field_get_data(field);
+        gdouble *data = field->data;
         for (guint i = 0; i < yres; i++) {
             for (guint j = 0; j < xres; j++)
                 data[i*xres + j] = g_rand_double_range(rng, -1.0, 1.0);
         }
+        gwy_field_invalidate(field);
 
         gdouble min, max;
         gwy_field_min_max_full(field, &min, &max);
@@ -636,11 +637,12 @@ make_planar_field(guint xres, guint yres,
                   gdouble alpha, gdouble beta)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-    gdouble *data = gwy_field_get_data(field);
+    gdouble *data = field->data;
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++)
             data[i*xres + j] = alpha*(i + 0.5)/yres + beta*(j + 0.5)/xres;
     }
+    gwy_field_invalidate(field);
     return field;
 }
 

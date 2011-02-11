@@ -711,37 +711,17 @@ gwy_mask_field_data_changed(GwyMaskField *field)
 }
 
 /**
- * gwy_mask_field_get_data:
- * @field: A two-dimensional mask field.
- *
- * Obtains the data of a two-dimensional mask field.
- *
- * This is the preferred method to obtain the data array for writing as it
- * invalidates numbered grains and segmented grain data.
- *
- * Do not use it if you only want to read data because it invalidates numbered
- * grains and segmented grain data.
- *
- * Returns: #GwyMaskField-struct.data, but it invalidates the mask field for
- * you.
- **/
-guint32*
-gwy_mask_field_get_data(GwyMaskField *field)
-{
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
-    gwy_mask_field_invalidate(field);
-    return field->data;
-}
-
-/**
  * gwy_mask_field_invalidate:
  * @field: A two-dimensional mask field.
  *
  * Invalidates mask field grain data.
  *
- * User code should seldom need this method since all #GwyMaskField methods
- * correctly invalidate grain data when they change the mask, also
- * gwy_mask_field_get_data() does.
+ * All #GwyMaskField methods invalidate (or, in some cases, recalculate) cached
+ * grain data if they modify the data.
+ *
+ * If you write to @field's data directly you may have to explicitly invalidate
+ * the cached values as the methods have no means of knowing whether you
+ * changed the data meanwhile or not.
  **/
 void
 gwy_mask_field_invalidate(GwyMaskField *field)
