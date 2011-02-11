@@ -22,6 +22,9 @@
 #ifndef __LIBGWY_MASK_FIELD_INTERNAL_H__
 #define __LIBGWY_MASK_FIELD_INTERNAL_H__
 
+#include "libgwy/mask-field.h"
+#include "libgwy/mask-internal.h"
+
 G_BEGIN_DECLS
 
 // XXX: gwy_mask_field_grow() needs to invalidate the mask *except* @grains and
@@ -48,48 +51,6 @@ typedef struct {
     guint len;
     GwyGrainSegment segments[];
 } GwyGrain;
-
-/* Note we use run-time conditions for endianess-branching even though it is
- * known at compile time.  This is to get the big-endian branch at least
- * syntax-checked.  A good optimizing compiler then eliminates the unused
- * branch entirely so we do not need to care.  (Verified that GCC 4.4 really
- * generates identical code with run-time and compile-time branches.) */
-#if (G_BYTE_ORDER != G_LITTLE_ENDIAN && G_BYTE_ORDER != G_BIG_ENDIAN)
-#error Byte order used on this system is not supported.
-#endif
-
-#define ALL_SET ((guint32)0xffffffffu)
-#define ALL_CLEAR ((guint32)0x00000000u)
-
-/* SHR moves the bits right in the mask field, which means towards the higher
- * bits on little-endian and towards the lower bits on big endian. */
-#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define FIRST_BIT ((guint32)0x1u)
-#define SHR <<
-#define SHL >>
-#endif
-
-#if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define FIRST_BIT ((guint32)0x80000000u)
-#define SHR >>
-#define SHL <<
-#endif
-
-/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
- * lowest bit is 0, the highest 0x1f for little endian and the reverse for
- * big endian. */
-#define NTH_BIT(n) (FIRST_BIT SHR (n))
-#define MAKE_MASK(firstbit, nbits) \
-    (nbits ? ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit)) : 0u)
-
-static inline guint32
-swap_bits_32(guint32 v)
-{
-    v = ((v >> 1) & 0x55555555u) | ((v & 0x55555555u) << 1);
-    v = ((v >> 2) & 0x33333333u) | ((v & 0x33333333u) << 2);
-    v = ((v >> 4) & 0x0f0f0f0fu) | ((v & 0x0f0f0f0fu) << 4);
-    return GUINT32_SWAP_LE_BE(v);
-}
 
 G_GNUC_INTERNAL
 gboolean _gwy_mask_field_check_rectangle(const GwyMaskField *field,

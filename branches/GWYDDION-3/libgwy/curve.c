@@ -824,7 +824,7 @@ gwy_curve_format_y(GwyCurve *curve,
  *
  * Object representing curve data.
  *
- * The #GwyCurve struct contains some public lines that can be directly
+ * The #GwyCurve struct contains some public fields that can be directly
  * accessed for reading.  To set them, you must use the #GwyCurve methods.
  **/
 

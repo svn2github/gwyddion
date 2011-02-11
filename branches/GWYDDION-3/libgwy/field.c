@@ -1291,9 +1291,9 @@ gwy_field_format_z(const GwyField *field,
  *
  * #GwyField represents two dimensional data in a regular grid.
  *
- * Data are stored in a flat array #GwyField-struct.data of #gdouble values,
- * stored by rows.  This means the column index is the fast index, row index is
- * the slow one, the top left corner indices are (0,0).  The array is
+ * Data are stored in a flat array @data in #GwyField-struct as #gdouble
+ * values, stored by rows.  This means the column index is the fast index, row
+ * index is the slow one, the top left corner indices are (0,0).  The array is
  * contiguous, i.e. there is no padding at the end of each row (and neither
  * beween pixels).  No methods to get and set individual values or rows and
  * columns are provided except gwy_field_index().  The usual mode of operation

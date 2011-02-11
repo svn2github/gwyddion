@@ -49,6 +49,8 @@ public_headers = \
 	$(srcdir)/mask-field.h \
 	$(srcdir)/mask-field-arithmetic.h \
 	$(srcdir)/mask-field-transform.h \
+	$(srcdir)/mask-iter.h \
+	$(srcdir)/mask-line.h \
 	$(srcdir)/math.h \
 	$(srcdir)/pack.h \
 	$(srcdir)/rectangle.h \
@@ -75,7 +77,9 @@ private_headers = \
 	field-internal.h \
 	fit-func-builtin.h \
 	line-internal.h \
+	mask-internal.h \
 	mask-field-internal.h \
+	mask-line-internal.h \
 	math-internal.h \
 	object-internal.h \
 	surface-internal.h
@@ -132,6 +136,7 @@ libgwy3_la_SOURCES = \
 	mask-field.c \
 	mask-field-arithmetic.c \
 	mask-field-transform.c \
+	mask-line.c \
 	math.c \
 	object-internal.c \
 	pack.c \

@@ -22,7 +22,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/math.h"
 #include "libgwy/mask-field.h"
-#include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/object-internal.h"
@@ -140,25 +139,6 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__VOID,
                                      G_TYPE_NONE, 0);
-}
-
-static inline guint
-stride_for_width(guint width)
-{
-    // The return value is measured in sizeof(guint32), i.e. doublewords.
-    // The row alignment is to start each row on 8byte boudnary.
-    guint stride = (width + 0x1f) >> 5;
-    return stride + (stride & 1);
-}
-
-static void
-swap_bits_uint32_array(guint32 *data,
-                       gsize n)
-{
-    while (n--) {
-        *data = swap_bits_32(*data);
-        data++;
-    }
 }
 
 static void
@@ -318,7 +298,7 @@ gwy_mask_field_duplicate_impl(GwySerializable *serializable)
     //MaskField *dpriv = duplicate->priv;
 
     gsize n = field->stride * field->yres;
-    memcpy(duplicate->data, field->data, n*sizeof(guint32));
+    gwy_assign(duplicate->data, field->data, n);
     // TODO: Duplicate precalculated grain data too.
 
     return G_OBJECT(duplicate);
@@ -347,7 +327,7 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
         dest->data = g_new(guint32, n);
         dest->priv->allocated = TRUE;
     }
-    memcpy(dest->data, src->data, n*sizeof(guint32));
+    gwy_assign(dest->data, src->data, n);
     dest->xres = src->xres;
     dest->yres = src->yres;
     dest->stride = src->stride;
@@ -691,14 +671,17 @@ gwy_mask_field_set_size(GwyMaskField *field,
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(xres && yres);
 
-    const gchar *notify[2];
+    const gchar *notify[N_PROPS];
     guint nn = 0;
+    guint stride = stride_for_width(xres);
     if (field->xres != xres)
         notify[nn++] = "x-res";
     if (field->yres != yres)
         notify[nn++] = "y-res";
+    if (field->stride != stride)
+        notify[nn++] = "stride";
 
-    if (field->xres*field->yres != xres*yres) {
+    if (field->stride*field->yres != stride*yres) {
         free_data(field);
         field->xres = xres;
         field->yres = yres;
@@ -707,8 +690,8 @@ gwy_mask_field_set_size(GwyMaskField *field,
     else {
         field->xres = xres;
         field->yres = yres;
-        if (clear)
-            gwy_mask_field_fill(field, NULL, FALSE);
+        field->stride = stride;
+        gwy_clear(field->data, yres*stride);
     }
     gwy_mask_field_invalidate(field);
     _gwy_notify_properties(G_OBJECT(field), notify, nn);
@@ -766,42 +749,6 @@ gwy_mask_field_invalidate(GwyMaskField *field)
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
     GWY_FREE(field->priv->grains);
     GWY_FREE(field->priv->graindata);
-}
-
-// GCC has a built-in __builtin_popcount().  However it is either 3x faster
-// (if something like -march=amdfam10 is given) or 3x slower.  It would be nice
-// to use it if it's actually faster.  See benchmarks/bit-count.c for some
-// benchmarks.
-static inline guint
-count_set_bits(guint32 x)
-{
-    static const guint16 table[256] = {
-        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
-    };
-    guint count = 0;
-    count += table[x & 0xff];
-    x >>= 8;
-    count += table[x & 0xff];
-    x >>= 8;
-    count += table[x & 0xff];
-    x >>= 8;
-    count += table[x & 0xff];
-    return count;
 }
 
 /**
@@ -1135,10 +1082,10 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * @title: GwyMaskField
  * @short_description: Two-dimensional bit mask
  *
- * #GwyMaskField represents two dimensional bit mask often used to specify the
+ * #GwyMaskField represents two-dimensional bit mask often used to specify the
  * area to include or exclude in #GwyField methods.
  *
- * The mask is stored in a flat array #GwyMaskField-struct.data of #guint32
+ * The mask is stored in a flat array @data in #GwyMaskField-struct as #guint32
  * values, stored by rows.  This means the bits are packed into 32-bit integers
  * and the column index is the fast index, row index is the slow one.
  *
@@ -1184,7 +1131,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  *
  * Object representing two-dimensional bit mask.
  *
- * The #GwyMaskField struct contains some public mask_fields that can be
+ * The #GwyMaskField struct contains some public fields that can be
  * directly accessed for reading.  To set them, you must use the mask field
  * methods.
  **/
@@ -1193,44 +1140,6 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * GwyMaskFieldClass:
  *
  * Class of two-dimensional bit masks.
- **/
-
-/**
- * GwyMaskingType:
- * @GWY_MASK_EXCLUDE: Exclude data under mask, i.e. take into account only
- *                    data not covered by the mask.
- * @GWY_MASK_INCLUDE: Take into account only data under the mask.
- * @GWY_MASK_IGNORE: Ignore mask, if present, and use all data.
- *
- * Mask interpretation in procedures that can apply masks.
- **/
-
-/**
- * GwyLogicalOperator:
- * @GWY_LOGICAL_ZERO: Always zero, mask clearing.
- * @GWY_LOGICAL_AND: Logical conjuction @A ∧ @B, mask intersection.
- * @GWY_LOGICAL_NIMPL: Negated implication @A ⇏ @B, ¬@A ∧ @B.
- * @GWY_LOGICAL_A: First operand @A, no change to the mask.
- * @GWY_LOGICAL_NCIMPL: Negated converse implication @A ⇍ @B, @A ∧ ¬@B, mask
- *                      subtraction.
- * @GWY_LOGICAL_B: Second operand @B, mask copying.
- * @GWY_LOGICAL_XOR: Exclusive disjunction @A ⊻ @B, symmetrical mask
- *                   subtraction.
- * @GWY_LOGICAL_OR: Disjunction @A ∨ @B, mask union.
- * @GWY_LOGICAL_NOR: Negated disjunction @A ⊽ @B.
- * @GWY_LOGICAL_NXOR: Negated exclusive disjunction ¬(@A ⊻ @B).
- * @GWY_LOGICAL_NB: Negated second operand ¬@B, copying of inverted mask.
- * @GWY_LOGICAL_CIMPL: Converse implication @A ⇐ @B, @A ∨ ¬@B.
- * @GWY_LOGICAL_NA: Negated first operand ¬@A, mask inversion.
- * @GWY_LOGICAL_IMPL: Implication @A ⇒ @B, ¬@A ∨ @B.
- * @GWY_LOGICAL_NAND: Negated conjuction @A ⊼ @B.
- * @GWY_LOGICAL_ONE: Always one, mask filling.
- *
- * Logical operators applicable to masks.
- *
- * All possible 16 logical operators are available although some are not as
- * useful as others.  If a common mask operation corresponds to the logical
- * operator it is mentioned in the list.
  **/
 
 /**
@@ -1287,45 +1196,6 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  **/
 
 /**
- * GwyMaskIter:
- * @p: Pointer to the current mask data item.
- * @bit: The current bit, i.e. value with always exactly one bit set.
- *
- * Mask iterator.
- *
- * The mask iterator is another method of accessing individual mask pixels
- * within a contiguous block, suitable especially for sequential processing.
- * It can be used for reading and writing bits and it is possible to move it
- * one pixel forward or backward within the block with gwy_mask_iter_next() or
- * gwy_mask_iter_prev(), respectively.
- *
- * The following example demonstrates the typical use on finding the minimum of
- * masked two-dimensional data.  Notice how the iterator is initialised for
- * each row because the mask field rows do not form one contiguous block
- * although each individual row is contiguous.
- * |[
- * gdouble min = G_MAXDOUBLE;
- * for (guint i = 0; i < field->height; i++) {
- *     const gdouble *d = field->data + i*field->xres;
- *     GwyMaskIter iter;
- *     gwy_mask_field_iter_init(mask, iter, 0, i);
- *     for (guint j = 0; j < field->xres; j++) {
- *         if (gwy_mask_iter_get(iter)) {
- *             if (min > d[j])
- *                 min = d[j];
- *         }
- *         gwy_mask_iter_next(iter);
- *     }
- * }
- * ]|
- * The iterator is represented by a very simple structure that is supposed to
- * be allocated as an automatic variable and passed/copied by value.  It can be
- * re-initialised any number of times, even to iterate in completely different
- * mask objects.  It can be simply forgotten when no longer useful (i.e. there
- * is no teardown function).
- **/
-
-/**
  * gwy_mask_field_iter_init:
  * @field: A two-dimensional mask field.
  * @iter: Mask iterator to initialise.  It must be an identifier.
@@ -1341,58 +1211,6 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * This macro is usable as a single statement.
  *
  * No argument validation is performed.
- **/
-
-/**
- * gwy_mask_iter_next:
- * @iter: Mask iterator.  It must be an identifier.
- *
- * Moves a mask iterator one pixel right.
- *
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
- * The caller must ensure the position does not leave the contiguous mask
- * block.
- **/
-
-/**
- * gwy_mask_iter_prev:
- * @iter: Mask iterator.  It must be an identifier.
- *
- * Moves a mask iterator one pixel left.
- *
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
- * The caller must ensure the position does not leave the contiguous mask
- * block.
- **/
-
-/**
- * gwy_mask_iter_get:
- * @iter: Mask iterator.  It must be an identifier.
- *
- * Obtains the value a mask iterator points to.
- *
- * No argument validation is performed.
- *
- * Returns: Nonzero value (not necessarily 1) if the mask bit is set, zero if
- *          it is unset.
- **/
-
-/**
- * gwy_mask_iter_set:
- * @iter: Mask iterator.  It must be an identifier.
- * @value: Nonzero value to set the bit, zero to clear it.
- *
- * Sets the value a mask iterator points to.
- *
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
- *
- * This is a low-level macro and it does not invalidate the mask object.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

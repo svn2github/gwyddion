@@ -22,8 +22,8 @@
 #ifndef __LIBGWY_FIELD_INTERNAL_H__
 #define __LIBGWY_FIELD_INTERNAL_H__
 
-#include <libgwy/interpolation.h>
-#include <libgwy/field.h>
+#include "libgwy/interpolation.h"
+#include "libgwy/field.h"
 
 G_BEGIN_DECLS
 

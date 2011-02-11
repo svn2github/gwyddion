@@ -22,6 +22,8 @@
 #ifndef __LIBGWY_SURFACE_INTERNAL_H__
 #define __LIBGWY_SURFACE_INTERNAL_H__
 
+#include "libgwy/surface.h"
+
 G_BEGIN_DECLS
 
 /* Cache operations */

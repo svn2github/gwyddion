@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,19 +19,21 @@
 
 /*< private_header >*/
 
-#ifndef __LIBGWY_CURVE_INTERNAL_H__
-#define __LIBGWY_CURVE_INTERNAL_H__
+#ifndef __LIBGWY_MASK_LINE_INTERNAL_H__
+#define __LIBGWY_MASK_LINE_INTERNAL_H__
 
-#include "libgwy/curve.h"
+#include "libgwy/mask-line.h"
+#include "libgwy/mask-internal.h"
 
 G_BEGIN_DECLS
 
-struct _GwyCurvePrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
+struct _GwyMaskLinePrivate {
+    guint stride;  // this actually mean alocated size as we have only one row
+    gboolean allocated;
+    guint32 *serialized_swapped;    // serialisation-only
 };
 
-typedef struct _GwyCurvePrivate Curve;
+typedef struct _GwyMaskLinePrivate MaskLine;
 
 G_END_DECLS
 

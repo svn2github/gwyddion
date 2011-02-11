@@ -22,6 +22,8 @@
 #ifndef __LIBGWY_LINE_INTERNAL_H__
 #define __LIBGWY_LINE_INTERNAL_H__
 
+#include "libgwy/line.h"
+
 G_BEGIN_DECLS
 
 // Evaluates to TRUE if intervals [pos1, pos1+len1-1] and [pos2, pos2+len2-1]

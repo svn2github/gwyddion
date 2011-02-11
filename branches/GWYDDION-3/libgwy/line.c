@@ -652,7 +652,7 @@ gwy_line_copy_full(const GwyLine *src,
 
 /**
  * gwy_line_copy:
- * @src: Source one-dimensional data data line.
+ * @src: Source one-dimensional data line.
  * @pos: Position of the line part start.
  * @len: Part length (number of items).
  * @dest: Destination one-dimensional data line.
@@ -824,7 +824,7 @@ gwy_line_format_y(GwyLine *line,
  *
  * #GwyLine represents one dimensional data in a regular grid.
  *
- * Data are stored in a flat array #GwyLine-struct.data of #gdouble values.
+ * Data are stored in a flat array @data in #GwyLine-struct as #gdouble values.
  **/
 
 /**
@@ -836,7 +836,7 @@ gwy_line_format_y(GwyLine *line,
  *
  * Object representing one-dimensional data in a regular grid.
  *
- * The #GwyLine struct contains some public lines that can be directly
+ * The #GwyLine struct contains some public fields that can be directly
  * accessed for reading.  To set them, you must use the methods such as
  * gwy_line_set_real().
  **/

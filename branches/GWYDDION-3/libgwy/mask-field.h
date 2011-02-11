@@ -22,14 +22,9 @@
 
 #include <libgwy/serializable.h>
 #include <libgwy/rectangle.h>
+#include <libgwy/mask-iter.h>
 
 G_BEGIN_DECLS
-
-typedef enum {
-    GWY_MASK_IGNORE  = 0,
-    GWY_MASK_INCLUDE = 1,
-    GWY_MASK_EXCLUDE = 2,
-} GwyMaskingType;
 
 #define GWY_TYPE_MASK_FIELD \
     (gwy_mask_field_get_type())
@@ -121,23 +116,12 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
     } while (0)
 #endif
 
-typedef struct {
-    guint32 *p;
-    guint32 bit;
-} GwyMaskIter;
-
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_iter_init(field, iter, col, row) \
     do { \
         iter.p = (field)->data + (field)->stride*(row) + ((col) >> 5); \
         iter.bit = 1u << ((col) & 0x1f); \
     } while (0)
-
-#define gwy_mask_iter_next(iter) \
-    do { if (!(iter.bit <<= 1)) { iter.bit = 1u; iter.p++; } } while (0)
-
-#define gwy_mask_iter_prev(iter) \
-    do { if (!(iter.bit >>= 1)) { iter.bit = 0x80000000u; iter.p--; } } while (0)
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
@@ -146,19 +130,7 @@ typedef struct {
         iter.p = (field)->data + (field)->stride*(row) + ((col) >> 5); \
         iter.bit = 0x80000000u >> ((col) & 0x1f); \
     } while (0)
-
-#define gwy_mask_iter_next(iter) \
-    do { if (!(iter.bit >>= 1)) { iter.bit = 0x80000000u; iter.p++; } } while (0)
-
-#define gwy_mask_iter_prev(iter) \
-    do { if (!(iter.bit <<= 1)) { iter.bit = 1u; iter.p--; } } while (0)
 #endif
-
-#define gwy_mask_iter_get(iter) \
-    (*(iter).p & (iter).bit)
-
-#define gwy_mask_iter_set(iter, value) \
-    do { if (value) *(iter).p |= (iter).bit; else *(iter).p &= ~(iter).bit; } while (0)
 
 void         gwy_mask_field_data_changed (GwyMaskField *field);
 void         gwy_mask_field_copy         (const GwyMaskField *src,
