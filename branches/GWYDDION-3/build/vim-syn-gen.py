@@ -151,8 +151,8 @@ def output_decls(decldict, value=''):
         output('syn keyword %s%s%s %s' % (syntax_name, value,
                                           normalize(t), ' '.join(d)))
 
-def override(decldict, overides, create_new):
-    for o, v in overides.items():
+def override(decldict, overrides, create_new):
+    for o, v in overrides.items():
         if v:
             v = v.upper()
         has_it = False
@@ -222,7 +222,7 @@ for macro, body in identdefs.items():
 if options.has_key('supplement'):
     override(decls, options['supplement'], True)
 
-if options.has_key('overide'):
+if options.has_key('override'):
     override(decls, options['override'], False)
 
 # Find types that are really present
