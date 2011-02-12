@@ -62,6 +62,8 @@ static void gwy_value_format_get_property(GObject *object,
 static void ensure_value                 (ValueFormat *format);
 static void fix_utf8_minus               (GString *str);
 
+static GParamSpec *value_format_pspecs[N_PROPS];
+
 G_DEFINE_TYPE(GwyValueFormat, gwy_value_format, G_TYPE_OBJECT)
 
 static void
@@ -75,56 +77,51 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
     gobject_class->get_property = gwy_value_format_get_property;
     gobject_class->set_property = gwy_value_format_set_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_STYLE,
-         g_param_spec_enum("style",
-                           "Value format style",
-                           "What output style is this format intended to be "
-                           "used with.",
-                           GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
-                           G_PARAM_READWRITE | STATICP));
+    value_format_pspecs[PROP_STYLE]
+        = g_param_spec_enum("style",
+                            "Value format style",
+                            "What output style is this format intended to be "
+                            "used with.",
+                            GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
+                            G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_BASE,
-         g_param_spec_double("base",
-                             "Base value",
-                             "Factor to divide the formatted number with, "
-                             "usualy a power of 1000.",
-                             G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATICP));
+    value_format_pspecs[PROP_BASE]
+        = g_param_spec_double("base",
+                              "Base value",
+                              "Factor to divide the formatted number with, "
+                              "usualy a power of 1000.",
+                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_PRECISION,
-         g_param_spec_uint("precision",
-                           "Precision",
-                           "Number of digits after the decimal point.",
-                           0, 1024, 3,
-                           G_PARAM_READWRITE | STATICP));
+    value_format_pspecs[PROP_PRECISION]
+        = g_param_spec_uint("precision",
+                            "Precision",
+                            "Number of digits after the decimal point.",
+                            0, 1024, 3,
+                            G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_UNITS,
-         g_param_spec_string("units",
-                             "Units",
-                             "Units appended to the formatted number, "
-                             "including the corresponding prefix.  May also be "
-                             "just a power of 10 or nothing.",
-                             NULL,
-                             G_PARAM_READWRITE | STATICP));
+    value_format_pspecs[PROP_UNITS]
+        = g_param_spec_string("units",
+                              "Units",
+                              "Units appended to the formatted number, "
+                              "including the corresponding prefix.  May also "
+                              "be just a power of 10 or nothing.",
+                              NULL,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_GLUE,
-         g_param_spec_string("glue",
-                             "Glue between number and units",
-                             "String put between the number and units when "
-                             "a value is formatted.  Usually a kind of "
-                             "multiplication symbol, space, may also be empty.",
-                             NULL,
-                             G_PARAM_READWRITE | STATICP));
+    value_format_pspecs[PROP_GLUE]
+        = g_param_spec_string("glue",
+                              "Glue between number and units",
+                              "String put between the number and units if a "
+                              "value is formatted.  Usually a kind of "
+                              "multiplication symbol, space, may also be "
+                              "empty.",
+                              NULL,
+                              G_PARAM_READWRITE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i,
+                                        value_format_pspecs[i]);
 }
 
 static void
@@ -355,7 +352,8 @@ gwy_value_format_set_units(GwyValueFormat *format,
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
     if (_gwy_assign_string(&priv->units, units))
-        g_object_notify(G_OBJECT(format), "units");
+        g_object_notify_by_pspec(G_OBJECT(format),
+                                 value_format_pspecs[PROP_UNITS]);
 }
 
 /**
@@ -388,7 +386,8 @@ gwy_value_format_set_glue(GwyValueFormat *format,
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
     if (_gwy_assign_string(&priv->glue, glue))
-        g_object_notify(G_OBJECT(format), "glue");
+        g_object_notify_by_pspec(G_OBJECT(format),
+                                 value_format_pspecs[PROP_GLUE]);
 }
 
 static void

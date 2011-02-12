@@ -68,6 +68,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
 };
 
 static guint mask_line_signals[N_SIGNALS];
+static GParamSpec *mask_line_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyMaskLine, gwy_mask_line, G_TYPE_OBJECT, 0,
@@ -95,14 +96,15 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
     gobject_class->get_property = gwy_mask_line_get_property;
     gobject_class->set_property = gwy_mask_line_set_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_RES,
-         g_param_spec_uint("res",
-                           "Resolution",
-                           "Pixel length of the line.",
-                           1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATICP));
+    mask_line_pspecs[PROP_RES]
+        = g_param_spec_uint("res",
+                            "Resolution",
+                            "Pixel length of the line.",
+                            1, G_MAXUINT, 1,
+                            G_PARAM_READABLE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, mask_line_pspecs[i]);
 
     /**
      * GwyMaskLine::data-changed:
@@ -272,10 +274,10 @@ gwy_mask_line_assign_impl(GwySerializable *destination,
     GwyMaskLine *dest = GWY_MASK_LINE(destination);
     GwyMaskLine *src = GWY_MASK_LINE(source);
 
-    const gchar *notify[N_PROPS];
+    GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->res != src->res)
-        notify[nn++] = "res";
+        notify[nn++] = mask_line_pspecs[PROP_RES];
 
     gsize n = src->priv->stride;
     if (dest->priv->stride != n) {
@@ -286,7 +288,7 @@ gwy_mask_line_assign_impl(GwySerializable *destination,
     }
     gwy_assign(dest->data, src->data, n);
     dest->res = src->res;
-    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -444,11 +446,11 @@ gwy_mask_line_set_size(GwyMaskLine *line,
     g_return_if_fail(GWY_IS_MASK_LINE(line));
     g_return_if_fail(res);
 
-    const gchar *notify[N_PROPS];
+    GParamSpec *notify[N_PROPS];
     guint nn = 0;
     guint stride = stride_for_width(res);
     if (line->res != res)
-        notify[nn++] = "res";
+        notify[nn++] = mask_line_pspecs[PROP_RES];
 
     if (line->priv->stride != stride) {
         free_data(line);
@@ -461,7 +463,7 @@ gwy_mask_line_set_size(GwyMaskLine *line,
         gwy_clear(line->data, stride);
     }
     gwy_mask_line_invalidate(line);
-    _gwy_notify_properties(G_OBJECT(line), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(line), notify, nn);
 }
 
 /**

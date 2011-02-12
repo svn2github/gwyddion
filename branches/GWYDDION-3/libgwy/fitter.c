@@ -118,6 +118,8 @@ static const GwyFitterSettings default_settings = {
     .residuum_change_min    = 1.0e-6,
 };
 
+static GParamSpec *fitter_pspecs[N_PROPS];
+
 G_DEFINE_TYPE(GwyFitter, gwy_fitter, G_TYPE_OBJECT)
 
 static void
@@ -131,97 +133,83 @@ gwy_fitter_class_init(GwyFitterClass *klass)
     gobject_class->get_property = gwy_fitter_get_property;
     gobject_class->set_property = gwy_fitter_set_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_N_PARAMS,
-         g_param_spec_uint("n-params",
-                           "Number of params",
-                           "Number of fitting parameters.",
-                           0, 1024, 0,
-                           G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_N_PARAMS]
+        = g_param_spec_uint("n-params",
+                            "Number of params",
+                            "Number of fitting parameters.",
+                            0, 1024, 0,
+                            G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_ITER_MAX,
-         g_param_spec_uint("max-iters",
-                           "Maximum iters",
-                           "Maximum number of iterations.",
-                           1, G_MAXUINT, default_settings.iter_max,
-                           G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_ITER_MAX]
+        = g_param_spec_uint("max-iters",
+                            "Maximum iters",
+                            "Maximum number of iterations.",
+                            1, G_MAXUINT, default_settings.iter_max,
+                            G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_SUCCESSES_TO_GET_BORED,
-         g_param_spec_uint("successes-to-get-bored",
-                           "Successes to get bored",
-                           "The number of consecutive successful steps after "
-                           "which to start checking the minimum required "
-                           "change of lambda and residuum.",
-                           1, G_MAXUINT,
-                           default_settings.successes_to_get_bored,
-                           G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_SUCCESSES_TO_GET_BORED]
+        = g_param_spec_uint("successes-to-get-bored",
+                            "Successes to get bored",
+                            "The number of consecutive successful steps after "
+                            "which to start checking the minimum required "
+                            "change of lambda and residuum.",
+                            1, G_MAXUINT,
+                            default_settings.successes_to_get_bored,
+                            G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_LAMBDA_MAX,
-         g_param_spec_double("lambda-max",
-                             "Maximum lambda",
-                             "Maximum value of Marquardt parameter lambda.",
-                             0.0, G_MAXDOUBLE, default_settings.lambda_max,
-                             G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_LAMBDA_MAX]
+        = g_param_spec_double("lambda-max",
+                              "Maximum lambda",
+                              "Maximum value of Marquardt parameter lambda.",
+                              0.0, G_MAXDOUBLE, default_settings.lambda_max,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_LAMBDA_START,
-         g_param_spec_double("lambda-start",
-                             "Lambda start",
-                             "Value to set the Marquardt parameter lambda "
-                             "to at the start of each fitting.",
-                             G_MINDOUBLE, G_MAXDOUBLE,
-                             default_settings.lambda_start,
-                             G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_LAMBDA_START]
+        = g_param_spec_double("lambda-start",
+                              "Lambda start",
+                              "Value to set the Marquardt parameter lambda "
+                              "to at the start of each fitting.",
+                              G_MINDOUBLE, G_MAXDOUBLE,
+                              default_settings.lambda_start,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_LAMBDA_INCREASE,
-         g_param_spec_double("lambda-increase",
-                             "Lambda increase",
-                             "Factor to multiply Marquardt parameter lambda "
-                             "with after an unsuccessful step.",
-                             1.0, G_MAXDOUBLE, default_settings.lambda_increase,
-                             G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_LAMBDA_INCREASE]
+        = g_param_spec_double("lambda-increase",
+                              "Lambda increase",
+                              "Factor to multiply Marquardt parameter lambda "
+                              "with after an unsuccessful step.",
+                              1.0, G_MAXDOUBLE, default_settings.lambda_increase,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_LAMBDA_DECREASE,
-         g_param_spec_double("lambda-decrease",
-                             "Lambda decrease",
-                             "Factor to divide Marquardt parameter lambda "
-                             "with after a successful step.",
-                             1.0, G_MAXDOUBLE, default_settings.lambda_decrease,
-                             G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_LAMBDA_DECREASE]
+        = g_param_spec_double("lambda-decrease",
+                              "Lambda decrease",
+                              "Factor to divide Marquardt parameter lambda "
+                              "with after a successful step.",
+                              1.0, G_MAXDOUBLE, default_settings.lambda_decrease,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_PARAM_CHANGE_MIN,
-         g_param_spec_double("min-param-change",
-                             "Minimum param change",
-                             "Minimum relative change of at least one "
-                             "parameter in a successful step.",
-                             0.0, G_MAXDOUBLE,
-                             default_settings.param_change_min,
-                             G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_PARAM_CHANGE_MIN]
+        = g_param_spec_double("min-param-change",
+                              "Minimum param change",
+                              "Minimum relative change of at least one "
+                              "parameter in a successful step.",
+                              0.0, G_MAXDOUBLE,
+                              default_settings.param_change_min,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_RESIDUUM_CHANGE_MIN,
-         g_param_spec_double("min-residuum-change",
-                             "Minimum residuum change",
-                             "Minimum relative decrease of the residuum "
-                             "in a successful step.",
-                             0.0, G_MAXDOUBLE,
-                             default_settings.residuum_change_min,
-                             G_PARAM_READWRITE | STATICP));
+    fitter_pspecs[PROP_RESIDUUM_CHANGE_MIN]
+        = g_param_spec_double("min-residuum-change",
+                              "Minimum residuum change",
+                              "Minimum relative decrease of the residuum "
+                              "in a successful step.",
+                              0.0, G_MAXDOUBLE,
+                              default_settings.residuum_change_min,
+                              G_PARAM_READWRITE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, fitter_pspecs[i]);
+
 }
 
 static void
@@ -660,7 +648,7 @@ gwy_fitter_set_n_params(GwyFitter *fitter,
 {
     g_return_if_fail(GWY_IS_FITTER(fitter));
     fitter_set_n_param(fitter->priv, nparams);
-    g_object_notify(G_OBJECT(fitter), "n-params");
+    g_object_notify_by_pspec(G_OBJECT(fitter), fitter_pspecs[PROP_N_PARAMS]);
 }
 
 /**

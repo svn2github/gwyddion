@@ -71,6 +71,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
 };
 
 static guint mask_field_signals[N_SIGNALS];
+static GParamSpec *mask_field_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyMaskField, gwy_mask_field, G_TYPE_OBJECT, 0,
@@ -98,33 +99,30 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
     gobject_class->get_property = gwy_mask_field_get_property;
     gobject_class->set_property = gwy_mask_field_set_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_XRES,
-         g_param_spec_uint("x-res",
-                           "X resolution",
-                           "Pixel width of the mask field.",
-                           1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATICP));
+    mask_field_pspecs[PROP_XRES]
+        = g_param_spec_uint("x-res",
+                            "X resolution",
+                            "Pixel width of the mask field.",
+                            1, G_MAXUINT, 1,
+                            G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_YRES,
-         g_param_spec_uint("y-res",
-                           "Y resolution",
-                           "Pixel height of the mask field.",
-                           1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATICP));
+    mask_field_pspecs[PROP_YRES]
+        = g_param_spec_uint("y-res",
+                            "Y resolution",
+                            "Pixel height of the mask field.",
+                            1, G_MAXUINT, 1,
+                            G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_STRIDE,
-         g_param_spec_uint("stride",
-                           "Stride",
-                           "Row stride of the mask field in items, i.e. "
-                           "guint32s.",
-                           1, G_MAXUINT, 2,
-                           G_PARAM_READABLE | STATICP));
+    mask_field_pspecs[PROP_STRIDE]
+        = g_param_spec_uint("stride",
+                            "Stride",
+                            "Row stride of the mask field in items, i.e. "
+                            "guint32s.",
+                            1, G_MAXUINT, 2,
+                            G_PARAM_READABLE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, mask_field_pspecs[i]);
 
     /**
      * GwyMaskField::data-changed:
@@ -312,14 +310,14 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
     GwyMaskField *src = GWY_MASK_FIELD(source);
     //MaskField *spriv = src->priv, *dpriv = dest->priv;
 
-    const gchar *notify[N_PROPS];
+    GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->xres != src->xres)
-        notify[nn++] = "x-res";
+        notify[nn++] = mask_field_pspecs[PROP_XRES];
     if (dest->yres != src->yres)
-        notify[nn++] = "y-res";
+        notify[nn++] = mask_field_pspecs[PROP_YRES];
     if (dest->stride != src->stride)
-        notify[nn++] = "stride";
+        notify[nn++] = mask_field_pspecs[PROP_STRIDE];
 
     gsize n = src->stride * src->yres;
     if (dest->stride * dest->yres != n) {
@@ -332,7 +330,7 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
     dest->yres = src->yres;
     dest->stride = src->stride;
     // TODO: Duplicate precalculated grain data too.
-    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -671,15 +669,15 @@ gwy_mask_field_set_size(GwyMaskField *field,
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(xres && yres);
 
-    const gchar *notify[N_PROPS];
+    GParamSpec *notify[N_PROPS];
     guint nn = 0;
     guint stride = stride_for_width(xres);
     if (field->xres != xres)
-        notify[nn++] = "x-res";
+        notify[nn++] = mask_field_pspecs[PROP_XRES];
     if (field->yres != yres)
-        notify[nn++] = "y-res";
+        notify[nn++] = mask_field_pspecs[PROP_YRES];
     if (field->stride != stride)
-        notify[nn++] = "stride";
+        notify[nn++] = mask_field_pspecs[PROP_STRIDE];
 
     if (field->stride*field->yres != stride*yres) {
         free_data(field);
@@ -694,7 +692,7 @@ gwy_mask_field_set_size(GwyMaskField *field,
         gwy_clear(field->data, yres*stride);
     }
     gwy_mask_field_invalidate(field);
-    _gwy_notify_properties(G_OBJECT(field), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(field), notify, nn);
 }
 
 /**
