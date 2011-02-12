@@ -30,6 +30,7 @@ G_BEGIN_DECLS
 struct _GwyMaskLinePrivate {
     guint stride;  // this actually mean alocated size as we have only one row
     gboolean allocated;
+    guint32 storage;
     guint32 *serialized_swapped;    // serialisation-only
 };
 

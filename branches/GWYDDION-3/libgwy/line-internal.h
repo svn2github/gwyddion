@@ -36,6 +36,7 @@ struct _GwyLinePrivate {
     GwyUnit *unit_x;
     GwyUnit *unit_y;
     gboolean allocated;
+    gdouble storage;
 };
 
 typedef struct _GwyLinePrivate Line;

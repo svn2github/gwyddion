@@ -51,6 +51,7 @@ struct _GwyFieldPrivate {
     GwyUnit *unit_z;
     guint32 cached;
     gboolean allocated;
+    gdouble storage;
     gdouble cache[GWY_FIELD_CACHE_SIZE];
 };
 

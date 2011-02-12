@@ -199,7 +199,7 @@ gwy_field_init(GwyField *field)
     field->priv = G_TYPE_INSTANCE_GET_PRIVATE(field, GWY_TYPE_FIELD, Field);
     field->xres = field->yres = 1;
     field->xreal = field->yreal = 1.0;
-    field->data = g_slice_new(gdouble);
+    field->data = &field->priv->storage;
 }
 
 void
@@ -241,7 +241,7 @@ free_data(GwyField *field)
     if (field->priv->allocated)
         GWY_FREE(field->data);
     else
-        GWY_SLICE_FREE(gdouble, field->data);
+        field->data = NULL;
 }
 
 static void

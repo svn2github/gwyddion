@@ -139,10 +139,8 @@ free_data(GwyMaskLine *line)
 {
     if (line->priv->allocated)
         GWY_FREE(line->data);
-    else if (line->data) {
-        g_slice_free1(line->priv->stride * sizeof(guint32), line->data);
+    else
         line->data = NULL;
-    }
 }
 
 static void
@@ -153,7 +151,7 @@ gwy_mask_line_init(GwyMaskLine *line)
                                              MaskLine);
     line->res = 1;
     line->priv->stride = stride_for_width(line->res);
-    line->data = g_slice_alloc(line->priv->stride * sizeof(guint32));
+    line->data = &line->priv->storage;
 }
 
 static void

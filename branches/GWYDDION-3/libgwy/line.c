@@ -164,7 +164,7 @@ gwy_line_init(GwyLine *line)
     line->priv = G_TYPE_INSTANCE_GET_PRIVATE(line, GWY_TYPE_LINE, Line);
     line->res = 1;
     line->real = 1.0;
-    line->data = g_slice_new(gdouble);
+    line->data = &line->priv->storage;
 }
 
 static void
@@ -184,7 +184,7 @@ free_data(GwyLine *line)
     if (line->priv->allocated)
         GWY_FREE(line->data);
     else
-        GWY_SLICE_FREE(gdouble, line->data);
+        line->data = NULL;
 }
 
 static void

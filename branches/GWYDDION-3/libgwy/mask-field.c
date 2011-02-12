@@ -156,11 +156,8 @@ free_data(GwyMaskField *field)
 {
     if (field->priv->allocated)
         GWY_FREE(field->data);
-    else if (field->data) {
-        g_slice_free1(field->stride * field->yres * sizeof(guint32),
-                      field->data);
+    else
         field->data = NULL;
-    }
 }
 
 static void
@@ -171,7 +168,7 @@ gwy_mask_field_init(GwyMaskField *field)
                                               MaskField);
     field->xres = field->yres = 1;
     field->stride = stride_for_width(field->xres);
-    field->data = g_slice_alloc(field->stride * field->yres * sizeof(guint32));
+    field->data = &field->priv->storage;
 }
 
 static void

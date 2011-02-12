@@ -35,6 +35,7 @@ struct _GwyMaskFieldPrivate {
     guint *graindata;
     guint ngrains;
     gboolean allocated;
+    guint32 storage;
     guint32 *serialized_swapped;    // serialisation-only
 };
 
