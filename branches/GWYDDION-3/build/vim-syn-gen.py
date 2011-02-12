@@ -153,7 +153,8 @@ def output_decls(decldict, value=''):
 
 def override(decldict, overides, create_new):
     for o, v in overides.items():
-        v = v.upper()
+        if v:
+            v = v.upper()
         has_it = False
         for k, d in decldict.items():
             if d.has_key(o):
@@ -162,7 +163,7 @@ def override(decldict, overides, create_new):
                 else:
                     has_it = True
                     del d[o]
-        if create_new or has_it:
+        if (create_new or has_it) and v:
             decldict[v][o] = 1
 
 decls = dict([(x, {}) for x in types])
