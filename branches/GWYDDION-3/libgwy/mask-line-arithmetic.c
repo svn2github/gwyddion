@@ -176,7 +176,7 @@ gwy_mask_line_copy(const GwyMaskLine *src,
     if (!_gwy_mask_line_limit_interval(src, &srcpos, &srclen, dest, destpos))
         return;
 
-    if (srclen == src->res) {
+    if (srclen == src->res && srclen == dest->res) {
         g_assert(srcpos == 0 && destpos == 0);
         gwy_assign(dest->data, src->data, src->priv->stride);
     }

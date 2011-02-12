@@ -321,28 +321,30 @@ gwy_mask_line_get_property(GObject *object,
 
 gboolean
 _gwy_mask_line_limit_interval(const GwyMaskLine *src,
-                              guint *srcpos, guint *srclen,
+                              guint *pos, guint *len,
                               const GwyMaskLine *dest,
                               guint destpos)
 {
     g_return_val_if_fail(GWY_IS_MASK_LINE(src), FALSE);
     g_return_val_if_fail(GWY_IS_MASK_LINE(dest), FALSE);
 
-    if (*srcpos >= src->res)
+    if (*pos >= src->res)
         return FALSE;
-    *srclen = MIN(*srclen, src->res - *srcpos);
+    *len = MIN(*len, src->res - *pos);
 
     if (destpos >= dest->res)
         return FALSE;
 
+    *len = MIN(*len, dest->res - destpos);
+
     if (src == dest) {
-        if ((OVERLAPPING(*srcpos, *srclen, destpos, *srclen))) {
+        if ((OVERLAPPING(*pos, *len, destpos, *len))) {
             g_warning("Source and destination blocks overlap.  "
                       "Data corruption is imminent.");
         }
     }
 
-    return !!*srclen;
+    return !!*len;
 }
 
 /**
