@@ -1080,7 +1080,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * sequential access, the mask iterator #GwyMaskIter macros offers a good
  * compromise between complexity and efficiency.  In a really
  * performance-sensitive code, you also might wish to access the bits in
- * #GwyMaskField.data directly.
+ * @data of #GwyMaskField directly.
  *
  * FIXME: Here should be something about invalidation, but let's get the grain
  * data implemented first.
