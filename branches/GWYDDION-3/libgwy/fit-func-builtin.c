@@ -23,13 +23,6 @@
 #include "libgwy/fit-func.h"
 #include "libgwy/fit-func-builtin.h"
 
-/*
- * TODO: fit-func.c already implements nice estimators for user functions.
- * We can utilise them also here.  Having something like half-width (determined
- * from minimum and maximum) would permite to eliminate most manual estimators
- * here.  This operates on 1D data and is not so performance-critical.
- */
-
 /****************************************************************************
  *
  * Constant
