@@ -22,6 +22,7 @@ testlibgwy_SOURCES = \
 	linalg.c \
 	line.c \
 	mask-field.c \
+	mask-line.c \
 	math.c \
 	pack.c \
 	rectangle.c \

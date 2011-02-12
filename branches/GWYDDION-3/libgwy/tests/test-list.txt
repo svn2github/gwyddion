@@ -59,6 +59,13 @@ curve/props
 curve/data-changed
 curve/serialize
 curve/regularize
+mask-line/props
+mask-line/data-changed
+mask-line/copy
+mask-line/new-part
+mask-line/serialize
+mask-line/count
+mask-line/set-size
 mask-field/stride
 mask-field/props
 mask-field/data-changed
