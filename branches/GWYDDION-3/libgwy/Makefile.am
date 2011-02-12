@@ -137,6 +137,7 @@ libgwy3_la_SOURCES = \
 	mask-field-arithmetic.c \
 	mask-field-transform.c \
 	mask-line.c \
+	mask-line-arithmetic.c \
 	math.c \
 	object-internal.c \
 	pack.c \

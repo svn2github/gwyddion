@@ -22,11 +22,9 @@
 #include "libgwy/serialize.h"
 #include "libgwy/math.h"
 #include "libgwy/mask-line.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/mask-line-internal.h"
-#include "libgwy/line-internal.h"
 
 enum { N_ITEMS = 2 };
 
@@ -321,6 +319,32 @@ gwy_mask_line_get_property(GObject *object,
     }
 }
 
+gboolean
+_gwy_mask_line_limit_interval(const GwyMaskLine *src,
+                              guint *srcpos, guint *srclen,
+                              const GwyMaskLine *dest,
+                              guint destpos)
+{
+    g_return_val_if_fail(GWY_IS_MASK_LINE(src), FALSE);
+    g_return_val_if_fail(GWY_IS_MASK_LINE(dest), FALSE);
+
+    if (*srcpos >= src->res)
+        return FALSE;
+    *srclen = MIN(*srclen, src->res - *srcpos);
+
+    if (destpos >= dest->res)
+        return FALSE;
+
+    if (src == dest) {
+        if ((OVERLAPPING(*srcpos, *srclen, destpos, *srclen))) {
+            g_warning("Source and destination blocks overlap.  "
+                      "Data corruption is imminent.");
+        }
+    }
+
+    return !!*srclen;
+}
+
 /**
  * gwy_mask_line_new:
  *
@@ -475,35 +499,6 @@ gwy_mask_line_data_changed(GwyMaskLine *line)
 {
     g_return_if_fail(GWY_IS_MASK_LINE(line));
     g_signal_emit(line, mask_line_signals[DATA_CHANGED], 0);
-}
-
-/**
- * gwy_mask_line_copy:
- * @src: Source one-dimensional mask line.
- * @srcpos: Position of the line part start.
- * @srclen: Part length (number of items).
- * @dest: Destination one-dimensional mask line.
- * @destpos: Destination position in @dest.
- *
- * Copies data from one mask line to another.
- *
- * The copied block starts at @pos in @src and its lenght is @len.  It is
- * copied to @dest starting from @destpos.
- *
- * There are no limitations on the indices or dimensions.  Only the part of the
- * block that is corrsponds to data inside @src and @dest is copied.  This can
- * also mean nothing is copied at all.
- *
- * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
- **/
-void
-gwy_mask_line_copy(const GwyMaskLine *src,
-                   guint srcpos,
-                   guint srclen,
-                   GwyMaskLine *dest,
-                   guint destpos)
-{
-    g_warning("Implement me!");
 }
 
 /**

@@ -36,6 +36,13 @@ struct _GwyMaskLinePrivate {
 
 typedef struct _GwyMaskLinePrivate MaskLine;
 
+G_GNUC_INTERNAL
+gboolean _gwy_mask_line_limit_interval(const GwyMaskLine *src,
+                                       guint *srcpos,
+                                       guint *srclen,
+                                       const GwyMaskLine *dest,
+                                       guint destpos);
+
 G_END_DECLS
 
 #endif
