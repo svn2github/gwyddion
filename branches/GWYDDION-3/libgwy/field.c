@@ -88,6 +88,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
 };
 
 static guint field_signals[N_SIGNALS];
+static GParamSpec *field_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyField, gwy_field, G_TYPE_OBJECT, 0,
@@ -115,80 +116,67 @@ gwy_field_class_init(GwyFieldClass *klass)
     gobject_class->get_property = gwy_field_get_property;
     gobject_class->set_property = gwy_field_set_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_XRES,
-         g_param_spec_uint("x-res",
-                           "X resolution",
-                           "Pixel width of the field.",
-                           1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATICP));
+    field_pspecs[PROP_XRES]
+        = g_param_spec_uint("x-res",
+                            "X resolution",
+                            "Pixel width of the field.",
+                            1, G_MAXUINT, 1,
+                            G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_YRES,
-         g_param_spec_uint("y-res",
-                           "Y resolution",
-                           "Pixel height of the field.",
-                           1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATICP));
+    field_pspecs[PROP_YRES]
+        = g_param_spec_uint("y-res",
+                            "Y resolution",
+                            "Pixel height of the field.",
+                            1, G_MAXUINT, 1,
+                            G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_XREAL,
-         g_param_spec_double("x-real",
-                             "X real size",
-                             "Width of the field in physical units.",
-                             G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATICP));
+    field_pspecs[PROP_XREAL]
+        = g_param_spec_double("x-real",
+                              "X real size",
+                              "Width of the field in physical units.",
+                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_YREAL,
-         g_param_spec_double("y-real",
-                             "Y real size",
-                             "Height of the field in physical units.",
-                             G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATICP));
+    field_pspecs[PROP_YREAL]
+        = g_param_spec_double("y-real",
+                              "Y real size",
+                              "Height of the field in physical units.",
+                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_XOFFSET,
-         g_param_spec_double("x-offset",
-                             "X offset",
-                             "Horizontal offset of the field top left corner "
-                             "in physical units.",
-                             -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                             G_PARAM_READWRITE | STATICP));
+    field_pspecs[PROP_XOFFSET]
+        = g_param_spec_double("x-offset",
+                              "X offset",
+                              "Horizontal offset of the field top left corner "
+                              "in physical units.",
+                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_YOFFSET,
-         g_param_spec_double("y-offset",
-                             "Y offset",
-                             "Vertical offset of the field top left corner "
-                             "in physical units.",
-                             -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                             G_PARAM_READWRITE | STATICP));
+    field_pspecs[PROP_YOFFSET]
+        = g_param_spec_double("y-offset",
+                              "Y offset",
+                              "Vertical offset of the field top left corner "
+                              "in physical units.",
+                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_UNIT_XY,
-         g_param_spec_object("unit-xy",
-                             "XY unit",
-                             "Physical units of lateral dimensions of the "
-                             "field.",
-                             GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATICP));
+    field_pspecs[PROP_UNIT_XY]
+        = g_param_spec_object("unit-xy",
+                              "XY unit",
+                              "Physical units of lateral dimensions of the "
+                              "field.",
+                              GWY_TYPE_UNIT,
+                              G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_UNIT_Z,
-         g_param_spec_object("unit-z",
-                             "Z unit",
-                             "Physical units of field values.",
-                             GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATICP));
+    field_pspecs[PROP_UNIT_Z]
+        = g_param_spec_object("unit-z",
+                              "Z unit",
+                              "Physical units of field values.",
+                              GWY_TYPE_UNIT,
+                              G_PARAM_READABLE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, field_pspecs[i]);
 
     /**
      * GwyField::data-changed:
@@ -461,20 +449,20 @@ gwy_field_assign_impl(GwySerializable *destination,
     GwyField *src = GWY_FIELD(source);
     Field *spriv = src->priv, *dpriv = dest->priv;
 
-    const gchar *notify[N_PROPS];
+    GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->xres != src->xres)
-        notify[nn++] = "x-res";
+        notify[nn++] = field_pspecs[PROP_XRES];
     if (dest->yres != src->yres)
-        notify[nn++] = "y-res";
+        notify[nn++] = field_pspecs[PROP_YRES];
     if (dest->xreal != src->xreal)
-        notify[nn++] = "x-real";
+        notify[nn++] = field_pspecs[PROP_XREAL];
     if (dest->yreal != src->yreal)
-        notify[nn++] = "y-real";
+        notify[nn++] = field_pspecs[PROP_YREAL];
     if (dest->xoff != src->xoff)
-        notify[nn++] = "x-offset";
+        notify[nn++] = field_pspecs[PROP_XOFFSET];
     if (dest->yoff != src->yoff)
-        notify[nn++] = "y-offset";
+        notify[nn++] = field_pspecs[PROP_YOFFSET];
 
     if (dest->xres * dest->yres != src->xres * src->yres) {
         free_data(dest);
@@ -485,7 +473,7 @@ gwy_field_assign_impl(GwySerializable *destination,
     copy_info(dest, src);
     gwy_assign(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
     dpriv->cached = spriv->cached;
-    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -795,12 +783,12 @@ gwy_field_set_size(GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(xres && yres);
 
-    const gchar *notify[2];
+    GParamSpec *notify[2];
     guint nn = 0;
     if (field->xres != xres)
-        notify[nn++] = "x-res";
+        notify[nn++] = field_pspecs[PROP_XRES];
     if (field->yres != yres)
-        notify[nn++] = "y-res";
+        notify[nn++] = field_pspecs[PROP_YRES];
 
     if (field->xres*field->yres != xres*yres) {
         free_data(field);
@@ -816,7 +804,7 @@ gwy_field_set_size(GwyField *field,
         else
             gwy_field_invalidate(field);
     }
-    _gwy_notify_properties(G_OBJECT(field), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(field), notify, nn);
 }
 
 /**
@@ -965,7 +953,7 @@ gwy_field_set_xreal(GwyField *field,
         Field *priv = field->priv;
         priv->cached &= ~CBIT(ARE);
         field->xreal = xreal;
-        g_object_notify(G_OBJECT(field), "x-real");
+        g_object_notify_by_pspec(G_OBJECT(field), field_pspecs[PROP_XREAL]);
     }
 }
 
@@ -986,7 +974,7 @@ gwy_field_set_yreal(GwyField *field,
         Field *priv = field->priv;
         priv->cached &= ~CBIT(ARE);
         field->yreal = yreal;
-        g_object_notify(G_OBJECT(field), "y-real");
+        g_object_notify_by_pspec(G_OBJECT(field), field_pspecs[PROP_YREAL]);
     }
 }
 
@@ -1005,7 +993,7 @@ gwy_field_set_xoffset(GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     if (xoffset != field->xoff) {
         field->xoff = xoffset;
-        g_object_notify(G_OBJECT(field), "x-offset");
+        g_object_notify_by_pspec(G_OBJECT(field), field_pspecs[PROP_XOFFSET]);
     }
 }
 
@@ -1024,7 +1012,7 @@ gwy_field_set_yoffset(GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     if (yoffset != field->yoff) {
         field->yoff = yoffset;
-        g_object_notify(G_OBJECT(field), "y-offset");
+        g_object_notify_by_pspec(G_OBJECT(field), field_pspecs[PROP_YOFFSET]);
     }
 }
 

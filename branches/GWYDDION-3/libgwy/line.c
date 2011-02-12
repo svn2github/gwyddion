@@ -51,21 +51,21 @@ static void     gwy_line_dispose          (GObject *object);
 static void     gwy_line_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_line_n_items          (GwySerializable *serializable);
 static gsize    gwy_line_itemize          (GwySerializable *serializable,
-                                            GwySerializableItems *items);
+                                           GwySerializableItems *items);
 static gboolean gwy_line_construct        (GwySerializable *serializable,
-                                            GwySerializableItems *items,
-                                            GwyErrorList **error_list);
+                                           GwySerializableItems *items,
+                                           GwyErrorList **error_list);
 static GObject* gwy_line_duplicate_impl   (GwySerializable *serializable);
 static void     gwy_line_assign_impl      (GwySerializable *destination,
-                                            GwySerializable *source);
+                                           GwySerializable *source);
 static void     gwy_line_set_property     (GObject *object,
-                                            guint prop_id,
-                                            const GValue *value,
-                                            GParamSpec *pspec);
+                                           guint prop_id,
+                                           const GValue *value,
+                                           GParamSpec *pspec);
 static void     gwy_line_get_property     (GObject *object,
-                                            guint prop_id,
-                                            GValue *value,
-                                            GParamSpec *pspec);
+                                           guint prop_id,
+                                           GValue *value,
+                                           GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "real",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
@@ -76,6 +76,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
 };
 
 static guint line_signals[N_SIGNALS];
+static GParamSpec *line_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyLine, gwy_line, G_TYPE_OBJECT, 0,
@@ -103,51 +104,44 @@ gwy_line_class_init(GwyLineClass *klass)
     gobject_class->get_property = gwy_line_get_property;
     gobject_class->set_property = gwy_line_set_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_RES,
-         g_param_spec_uint("res",
-                           "Resolution",
-                           "Pixel length of the line.",
-                           1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATICP));
+    line_pspecs[PROP_RES]
+        = g_param_spec_uint("res",
+                            "Resolution",
+                            "Pixel length of the line.",
+                            1, G_MAXUINT, 1,
+                            G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_REAL,
-         g_param_spec_double("real",
-                             "Real size",
-                             "Length of the line in physical units.",
-                             G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATICP));
+    line_pspecs[PROP_REAL]
+        = g_param_spec_double("real",
+                              "Real size",
+                              "Length of the line in physical units.",
+                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_OFFSET,
-         g_param_spec_double("offset",
-                             "Offset",
-                             "Offset of the line start in physical units.",
-                             -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                             G_PARAM_READWRITE | STATICP));
+    line_pspecs[PROP_OFFSET]
+        = g_param_spec_double("offset",
+                              "Offset",
+                              "Offset of the line start in physical units.",
+                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
+                              G_PARAM_READWRITE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_UNIT_X,
-         g_param_spec_object("unit-x",
-                             "X unit",
-                             "Physical units of lateral dimension of the "
-                             "line.",
-                             GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATICP));
+    line_pspecs[PROP_UNIT_X]
+         = g_param_spec_object("unit-x",
+                               "X unit",
+                               "Physical units of lateral dimension of the "
+                               "line.",
+                               GWY_TYPE_UNIT,
+                               G_PARAM_READABLE | STATICP);
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_UNIT_Y,
-         g_param_spec_object("unit-y",
-                             "Y unit",
-                             "Physical units of line values.",
-                             GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATICP));
+    line_pspecs[PROP_UNIT_Y]
+        = g_param_spec_object("unit-y",
+                              "Y unit",
+                              "Physical units of line values.",
+                              GWY_TYPE_UNIT,
+                              G_PARAM_READABLE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, line_pspecs[i]);
 
     /**
      * GwyLine::data-changed:
@@ -348,14 +342,14 @@ gwy_line_assign_impl(GwySerializable *destination,
     GwyLine *dest = GWY_LINE(destination);
     GwyLine *src = GWY_LINE(source);
 
-    const gchar *notify[N_PROPS];
+    GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->res != src->res)
-        notify[nn++] = "res";
+        notify[nn++] = line_pspecs[PROP_RES];
     if (dest->real != src->real)
-        notify[nn++] = "real";
+        notify[nn++] = line_pspecs[PROP_RES];
     if (dest->off != src->off)
-        notify[nn++] = "offset";
+        notify[nn++] = line_pspecs[PROP_OFFSET];
 
     if (dest->res != src->res) {
         free_data(dest);
@@ -364,7 +358,7 @@ gwy_line_assign_impl(GwySerializable *destination,
     }
     gwy_assign(dest->data, src->data, src->res);
     copy_info(dest, src);
-    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -608,7 +602,7 @@ gwy_line_set_size(GwyLine *line,
         free_data(line);
         line->res = res;
         alloc_data(line, clear);
-        g_object_notify(G_OBJECT(line), "res");
+        g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_RES]);
     }
     else if (clear)
         gwy_line_clear_full(line);
@@ -710,7 +704,7 @@ gwy_line_set_real(GwyLine *line,
     g_return_if_fail(real > 0.0);
     if (real != line->real) {
         line->real = real;
-        g_object_notify(G_OBJECT(line), "real");
+        g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_REAL]);
     }
 }
 
@@ -728,7 +722,7 @@ gwy_line_set_offset(GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
     if (offset != line->off) {
         line->off = offset;
-        g_object_notify(G_OBJECT(line), "offset");
+        g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_OFFSET]);
     }
 }
 

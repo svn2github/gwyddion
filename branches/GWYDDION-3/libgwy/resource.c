@@ -193,6 +193,7 @@ static const gchar *gwy_resource_trait_names[N_PROPS-1];
 static guint gwy_resource_ntraits = 0;
 
 static guint resource_signals[N_SIGNALS];
+static GParamSpec *resource_pspecs[N_PROPS];
 
 static GSList *resource_classes = NULL;
 G_LOCK_DEFINE_STATIC(resource_classes);
@@ -325,66 +326,69 @@ gwy_resource_class_init(GwyResourceClass *klass)
 
     klass->data_changed = gwy_resource_data_changed_impl;
 
-    pspec = g_param_spec_string("name",
-                                "Name",
-                                "Resource name",
-                                NULL, /* What is the default value good for? */
-                                G_PARAM_READWRITE
-                                | G_PARAM_CONSTRUCT_ONLY | STATICP);
-    g_object_class_install_property(gobject_class, PROP_NAME, pspec);
+    pspec = resource_pspecs[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Resource name",
+                              NULL, /* What is the default value good for? */
+                              G_PARAM_READWRITE
+                              | G_PARAM_CONSTRUCT_ONLY | STATICP);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = g_param_spec_string("file-name",
-                                "File name",
-                                "Name of file corresponding to the resource "
-                                "in GLib encoding, it may be NULL for "
-                                "built-in or newly created resourced.",
-                                NULL, /* What is the default value good for? */
-                                G_PARAM_READABLE | STATICP);
-    g_object_class_install_property(gobject_class, PROP_FILE_NAME, pspec);
+    pspec = resource_pspecs[PROP_FILE_NAME]
+        = g_param_spec_string("file-name",
+                              "File name",
+                              "Name of file corresponding to the resource "
+                              "in GLib encoding, it may be NULL for "
+                              "built-in or newly created resourced.",
+                              NULL, /* What is the default value good for? */
+                              G_PARAM_READABLE | STATICP);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = g_param_spec_boolean("is-preferred",
-                                 "Is preferred",
-                                 "Whether a resource is preferred",
-                                 FALSE,
-                                 G_PARAM_READWRITE | STATICP);
-    g_object_class_install_property(gobject_class, PROP_IS_PREFERRED, pspec);
+    pspec = resource_pspecs[PROP_IS_PREFERRED]
+        = g_param_spec_boolean("is-preferred",
+                               "Is preferred",
+                               "Whether a resource is preferred",
+                               FALSE,
+                               G_PARAM_READWRITE | STATICP);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = g_param_spec_boolean("is-modifiable",
-                                 "Is modifiable",
-                                 "Whether a resource is modifiable",
-                                 TRUE,
-                                 G_PARAM_READWRITE
-                                 | G_PARAM_CONSTRUCT_ONLY | STATICP);
-    g_object_class_install_property(gobject_class, PROP_IS_MODIFIABLE, pspec);
+    pspec = resource_pspecs[PROP_IS_MODIFIABLE]
+        = g_param_spec_boolean("is-modifiable",
+                               "Is modifiable",
+                               "Whether a resource is modifiable",
+                               TRUE,
+                               G_PARAM_READWRITE
+                               | G_PARAM_CONSTRUCT_ONLY | STATICP);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = g_param_spec_boolean("is-modified",
-                                 "Is modified",
-                                 "Whether a resource was modified, this is "
-                                 "set when data-changed signal is emitted",
-                                 FALSE,
-                                 G_PARAM_READABLE | STATICP);
-    g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
+    resource_pspecs[PROP_IS_MODIFIED]
+        = g_param_spec_boolean("is-modified",
+                               "Is modified",
+                               "Whether a resource was modified, this is "
+                               "set when data-changed signal is emitted",
+                               FALSE,
+                               G_PARAM_READABLE | STATICP);
 
-    pspec = g_param_spec_boolean("is-managed",
-                                 "Is managed",
-                                 "Whether a resource is managed by the class "
-                                 "inventory.  False for free-standing "
-                                 "resources.",
-                                 FALSE,
-                                 G_PARAM_READABLE | STATICP);
-    g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
+    resource_pspecs[PROP_IS_MANAGED]
+        = g_param_spec_boolean("is-managed",
+                               "Is managed",
+                               "Whether a resource is managed by the class "
+                               "inventory.  False for free-standing "
+                               "resources.",
+                               FALSE,
+                               G_PARAM_READABLE | STATICP);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, resource_pspecs[i]);
 
     /**
      * GwyResource::data-changed:
@@ -606,7 +610,8 @@ gwy_resource_rename(gpointer item,
     g_return_if_fail(priv->is_modifiable);
     g_return_if_fail(new_name);
     if (_gwy_assign_string(&priv->name, new_name))
-        g_object_notify(G_OBJECT(item), "name");
+        g_object_notify_by_pspec(G_OBJECT(item),
+                                 resource_pspecs[PROP_NAME]);
 }
 
 static gpointer
@@ -657,7 +662,8 @@ set_is_managed(GwyResource *resource,
 {
     g_return_if_fail(!resource->priv->is_managed != !is_managed);
     resource->priv->is_managed = is_managed;
-    g_object_notify(G_OBJECT(resource), "is-managed");
+    g_object_notify_by_pspec(G_OBJECT(resource),
+                             resource_pspecs[PROP_IS_MANAGED]);
 }
 
 static void
@@ -776,7 +782,8 @@ gwy_resource_set_filename(GwyResource *resource,
     }
 
     if (emit_filename_changed)
-        g_object_notify(G_OBJECT(resource), "file-name");
+        g_object_notify_by_pspec(G_OBJECT(resource),
+                                 resource_pspecs[PROP_FILE_NAME]);
 }
 
 /**
@@ -843,7 +850,8 @@ gwy_resource_set_is_preferred(GwyResource *resource,
     if (is_preferred == resource->priv->is_preferred)
         return;
     resource->priv->is_preferred = is_preferred;
-    g_object_notify(G_OBJECT(resource), "is-preferred");
+    g_object_notify_by_pspec(G_OBJECT(resource),
+                             resource_pspecs[PROP_IS_PREFERRED]);
 }
 
 /**
@@ -1033,7 +1041,8 @@ gwy_resource_save(GwyResource *resource,
     priv->is_modified = FALSE;
     if (priv->is_managed)
         priv->is_on_disk = TRUE;
-    g_object_notify(G_OBJECT(resource), "is-modified");
+    g_object_notify_by_pspec(G_OBJECT(resource),
+                             resource_pspecs[PROP_IS_MODIFIED]);
     g_object_thaw_notify(G_OBJECT(resource));
 
     return ok;
@@ -1085,7 +1094,8 @@ output_stream_for_save(GwyResource *resource,
         }
     }
     g_string_free(basename, TRUE);
-    g_object_notify(G_OBJECT(resource), "file-name");
+    g_object_notify_by_pspec(G_OBJECT(resource),
+                             resource_pspecs[PROP_FILE_NAME]);
 
     return ostream;
 }
@@ -1385,7 +1395,8 @@ gwy_resource_data_changed_impl(GwyResource *resource)
                   priv->name, G_OBJECT_TYPE_NAME(resource));
     if (!priv->is_modified) {
         priv->is_modified = TRUE;
-        g_object_notify(G_OBJECT(resource), "is-modified");
+        g_object_notify_by_pspec(G_OBJECT(resource),
+                                 resource_pspecs[PROP_IS_MODIFIED]);
     }
     manage_update(resource);
 }
@@ -1403,7 +1414,8 @@ gwy_resource_notify(GObject *object,
     // FIXME: Recursion.
     if (!priv->is_modified) {
         priv->is_modified = TRUE;
-        g_object_notify(G_OBJECT(resource), "is-modified");
+        g_object_notify_by_pspec(G_OBJECT(resource),
+                                 resource_pspecs[PROP_IS_MODIFIED]);
     }
     manage_update(resource);
 

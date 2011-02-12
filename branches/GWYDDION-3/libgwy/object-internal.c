@@ -64,6 +64,23 @@ _gwy_notify_properties(GObject *object,
     g_object_thaw_notify(object);
 }
 
+void
+_gwy_notify_properties_by_pspec(GObject *object,
+                                GParamSpec **pspecs,
+                                guint npspecs)
+{
+    if (!npspecs || !pspecs[0])
+        return;
+    if (npspecs == 1) {
+        g_object_notify_by_pspec(object, pspecs[0]);
+        return;
+    }
+    g_object_freeze_notify(object);
+    for (guint i = 0; i < npspecs && pspecs[i]; i++)
+        g_object_notify_by_pspec(object, pspecs[i]);
+    g_object_thaw_notify(object);
+}
+
 guint
 _gwy_itemize_chain_to_parent(GwySerializable *serializable,
                              GType parent_type,

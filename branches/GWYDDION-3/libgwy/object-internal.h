@@ -47,6 +47,11 @@ void _gwy_notify_properties(GObject *object,
                             guint nproperties);
 
 G_GNUC_INTERNAL
+void _gwy_notify_properties_by_pspec(GObject *object,
+                                     GParamSpec **pspecs,
+                                     guint npspecs);
+
+G_GNUC_INTERNAL
 gboolean _gwy_check_object_component(const GwySerializableItem *item,
                                      gpointer object,
                                      GType component_type,
