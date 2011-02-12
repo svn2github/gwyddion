@@ -26,7 +26,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/types.h"
 #include "libgwy/value-format.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 
 enum {

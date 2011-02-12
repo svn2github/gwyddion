@@ -22,7 +22,6 @@
 #include "libgwy/math.h"
 #include "libgwy/field-transform.h"
 #include "libgwy/mask-field.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"

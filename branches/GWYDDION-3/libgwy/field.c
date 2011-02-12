@@ -25,7 +25,6 @@
 #include "libgwy/field.h"
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/field-statistics.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"

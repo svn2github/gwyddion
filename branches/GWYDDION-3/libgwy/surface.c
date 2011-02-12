@@ -24,7 +24,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/surface.h"
 #include "libgwy/surface-statistics.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/surface-internal.h"

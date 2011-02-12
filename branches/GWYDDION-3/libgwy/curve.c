@@ -25,7 +25,6 @@
 #include "libgwy/curve.h"
 #include "libgwy/curve-statistics.h"
 #include "libgwy/line-arithmetic.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/curve-internal.h"

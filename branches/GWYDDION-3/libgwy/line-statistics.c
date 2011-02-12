@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/line-statistics.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 
 /**

@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-statistics.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
 #define CVAL GWY_FIELD_CVAL

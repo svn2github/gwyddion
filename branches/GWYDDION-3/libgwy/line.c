@@ -25,7 +25,6 @@
 #include "libgwy/line.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-statistics.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 

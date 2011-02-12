@@ -22,7 +22,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/math.h"
 #include "libgwy/mask-field.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/mask-field-internal.h"

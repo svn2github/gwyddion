@@ -24,7 +24,6 @@
 #include "libgwy/selection.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/array-internal.h"
-#include "libgwy/math-internal.h"
 
 enum { N_ITEMS = 2 };
 

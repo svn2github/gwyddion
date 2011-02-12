@@ -26,7 +26,6 @@
 #include "libgwy/math.h"
 #include "libgwy/mask-line.h"
 //#include "libgwy/mask-line-arithmetic.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/mask-line-internal.h"
 

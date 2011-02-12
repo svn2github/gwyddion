@@ -25,7 +25,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/expr.h"
 #include "libgwy/math.h"
-#include "libgwy/math-internal.h"
 
 #define GWY_EXPR_SCOPE_GLOBAL 0
 

@@ -25,7 +25,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/unit.h"
-#include "libgwy/math-internal.h"
 
 #ifdef ENABLE_PARSE_WARNINGS
 #define gwy_unit_warning g_warning
