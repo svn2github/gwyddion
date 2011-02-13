@@ -272,7 +272,8 @@ gwy_powi(double x, int i)
 
 /*
  * gwy_math_curvature:
- * @coeffs: Array of the six polynomial coefficients of a quadratic surface in
+ * @coeffs: (array fixed-size=6):
+ *          Array of the six polynomial coefficients of a quadratic surface in
  *          the following order: 1, x, y, x², xy, y².
  * @kappa1: Location to store the smaller curvature to.
  * @kappa2: Location to store the larger curvature to.
