@@ -799,7 +799,7 @@ regularise(const GwySurface *surface,
         field->yreal = yfrom ? fabs(yfrom) : 1.0;
     else
         field->yreal = (yto - yfrom)*yres/(yres - 1.0);
-    field->yoff = ymin - 0.5*gwy_field_dx(field);
+    field->yoff = ymin - 0.5*gwy_field_dy(field);
 
     if (method == GWY_SURFACE_REGULARIZE_PREVIEW)
         regularise_preview(surface, field);
