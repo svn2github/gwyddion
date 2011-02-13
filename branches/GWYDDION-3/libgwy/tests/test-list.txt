@@ -167,6 +167,7 @@ field/distributions/psdf/masked
 surface/serialize
 surface/props
 surface/data-changed
+surface/regularize
 container/data
 container/refcount
 container/keys
