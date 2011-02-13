@@ -27,6 +27,10 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_SURFACE_REGULARIZE_PREVIEW,
+} GwySurfaceRegularizeType;
+
 #define GWY_TYPE_SURFACE \
     (gwy_surface_get_type())
 #define GWY_SURFACE(obj) \
@@ -61,33 +65,42 @@ struct _GwySurfaceClass {
 #define gwy_surface_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType           gwy_surface_get_type      (void)                      G_GNUC_CONST;
-GwySurface*     gwy_surface_new           (void)                      G_GNUC_MALLOC;
-GwySurface*     gwy_surface_new_sized     (guint n)                   G_GNUC_MALLOC;
-GwySurface*     gwy_surface_new_from_data (const GwyXYZ *points,
-                                           guint n)                   G_GNUC_MALLOC;
-GwySurface*     gwy_surface_new_alike     (const GwySurface *model)   G_GNUC_MALLOC;
-GwySurface*     gwy_surface_new_part      (const GwySurface *surface,
-                                           gdouble xfrom,
-                                           gdouble xto,
-                                           gdouble yfrom,
-                                           gdouble yto)               G_GNUC_MALLOC;
-GwySurface*     gwy_surface_new_from_field(const GwyField *field)     G_GNUC_MALLOC;
-void            gwy_surface_data_changed  (GwySurface *surface);
-void            gwy_surface_copy          (const GwySurface *src,
-                                           GwySurface *dest);
-void            gwy_surface_invalidate    (GwySurface *surface);
-void            gwy_surface_set_from_field(GwySurface *surface,
-                                           const GwyField *field);
-GwyField*       gwy_surface_regularize    (const GwySurface *surface,
-                                           guint xres,
-                                           guint yres)                G_GNUC_MALLOC;
-GwyUnit*        gwy_surface_get_unit_xy   (GwySurface *surface)       G_GNUC_PURE;
-GwyUnit*        gwy_surface_get_unit_z    (GwySurface *surface)       G_GNUC_PURE;
-GwyValueFormat* gwy_surface_format_xy     (GwySurface *surface,
-                                           GwyValueFormatStyle style) G_GNUC_MALLOC;
-GwyValueFormat* gwy_surface_format_z      (GwySurface *surface,
-                                           GwyValueFormatStyle style) G_GNUC_MALLOC;
+GType           gwy_surface_get_type       (void)                      G_GNUC_CONST;
+GwySurface*     gwy_surface_new            (void)                      G_GNUC_MALLOC;
+GwySurface*     gwy_surface_new_sized      (guint n)                   G_GNUC_MALLOC;
+GwySurface*     gwy_surface_new_from_data  (const GwyXYZ *points,
+                                            guint n)                   G_GNUC_MALLOC;
+GwySurface*     gwy_surface_new_alike      (const GwySurface *model)   G_GNUC_MALLOC;
+GwySurface*     gwy_surface_new_part       (const GwySurface *surface,
+                                            gdouble xfrom,
+                                            gdouble xto,
+                                            gdouble yfrom,
+                                            gdouble yto)               G_GNUC_MALLOC;
+GwySurface*     gwy_surface_new_from_field (const GwyField *field)     G_GNUC_MALLOC;
+void            gwy_surface_data_changed   (GwySurface *surface);
+void            gwy_surface_copy           (const GwySurface *src,
+                                            GwySurface *dest);
+void            gwy_surface_invalidate     (GwySurface *surface);
+void            gwy_surface_set_from_field (GwySurface *surface,
+                                            const GwyField *field);
+GwyField*       gwy_surface_regularize_full(const GwySurface *surface,
+                                            GwySurfaceRegularizeType method,
+                                            guint xres,
+                                            guint yres)                G_GNUC_MALLOC;
+GwyField*       gwy_surface_regularize     (const GwySurface *surface,
+                                            GwySurfaceRegularizeType method,
+                                            gdouble xfrom,
+                                            gdouble xto,
+                                            gdouble yfrom,
+                                            gdouble yto,
+                                            guint xres,
+                                            guint yres)                G_GNUC_MALLOC;
+GwyUnit*        gwy_surface_get_unit_xy    (GwySurface *surface)       G_GNUC_PURE;
+GwyUnit*        gwy_surface_get_unit_z     (GwySurface *surface)       G_GNUC_PURE;
+GwyValueFormat* gwy_surface_format_xy      (GwySurface *surface,
+                                            GwyValueFormatStyle style) G_GNUC_MALLOC;
+GwyValueFormat* gwy_surface_format_z       (GwySurface *surface,
+                                            GwyValueFormatStyle style) G_GNUC_MALLOC;
 
 #define gwy_surface_index(surface, pos) \
     ((surface)->data[pos])

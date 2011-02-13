@@ -22,6 +22,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
+#include "libgwy/field-arithmetic.h"
 #include "libgwy/surface.h"
 #include "libgwy/surface-statistics.h"
 #include "libgwy/field-internal.h"
@@ -513,13 +514,13 @@ static void
 copy_field_to_surface(const GwyField *field,
                       GwySurface *surface)
 {
-    gdouble qx = gwy_field_dx(field), qy = gwy_field_dy(field);
-    gdouble xoff = 0.5*qx + field->xoff, yoff = 0.5*qy + field->yoff;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble xoff = 0.5*dx + field->xoff, yoff = 0.5*dy + field->yoff;
 
     for (guint i = 0; i < field->yres; i++) {
         for (guint j = 0; j < field->xres; j++) {
-            surface->data[i].x = qx*j + xoff;
-            surface->data[i].y = qy*i + yoff;
+            surface->data[i].x = dx*j + xoff;
+            surface->data[i].y = dy*i + yoff;
             surface->data[i].z = field->data[i];
         }
     }
@@ -529,9 +530,9 @@ copy_field_to_surface(const GwyField *field,
     gwy_surface_invalidate(surface);
     surface->priv->cached_range = TRUE;
     surface->priv->xmin = xoff;
-    surface->priv->xmax = qx*(field->xres - 1) + xoff;
+    surface->priv->xmax = dx*(field->xres - 1) + xoff;
     surface->priv->ymin = yoff;
-    surface->priv->ymax = qy*(field->yres - 1) + yoff;
+    surface->priv->ymax = dy*(field->yres - 1) + yoff;
 }
 
 /**
@@ -642,9 +643,220 @@ gwy_surface_set_from_field(GwySurface *surface,
                                  surface_pspecs[PROP_N_POINTS]);
 }
 
+static void
+regularise_preview(const GwySurface *surface,
+                   GwyField *field)
+{
+    guint xres = field->xres, yres = field->yres, totalcount = 0;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    guint *counters = g_new0(guint, xres*yres);
+
+    for (guint k = 0; k < surface->n; k++) {
+        const GwyXYZ *pt = surface->data + k;
+        gint j = (gint)floor((pt->x - field->xoff)/dx);
+        gint i = (gint)floor((pt->y - field->yoff)/dy);
+        if (j < 0 || j >= (gint)xres || i < 0 || i >= (gint)yres)
+            continue;
+
+        counters[i*xres + j]++;
+        field->data[i*xres + j] += pt->z;
+        totalcount++;
+    }
+
+    if (!totalcount) {
+        // FIXME: Do something clever instead.
+        gwy_field_fill_full(field, 0.0);
+        g_free(counters);
+        return;
+    }
+
+    // If the pixels contain at leasr something use the mean value as the
+    // representation and mark them as fixed.  Otherwise mark them as to be
+    // interpolated in iter 1.
+    for (guint k = 0; k < xres*yres; k++) {
+        if (counters[k]) {
+            field->data[k] /= counters[k];
+            counters[k] = 0;
+        }
+        else
+            counters[k] = G_MAXUINT;
+    }
+
+    GwyField *buffer = gwy_field_duplicate(field);
+    guint todo = xres*yres - totalcount;
+
+    for (guint iter = 0; todo; iter++) {
+        // Propagate already initialised values further to the uninitialised
+        // area.  At the same time interpolate in the already initialised
+        // area.
+        for (gint i = 0; i < (gint)yres; i++) {
+            for (gint j = 0; j < (gint)xres; j++) {
+                gint k = i*xres-xres + j-1;
+                guint *cb = counters + k;
+                gdouble *db = field->data + k;
+                gdouble *bb = buffer->data + k;
+                guint s = 0;
+                gdouble z = 0.0;
+
+                // Skip fixed data, everything else is a candidate for 
+                // interpolation.
+                if (!cb[xres+1])
+                    continue;
+
+                // Scan the pixel neighbourhood and gather already initialised
+                // values.
+                if (i && j && cb[0] <= iter) {
+                    z += db[0];
+                    s++;
+                }
+                if (i && cb[1] <= iter) {
+                    z += db[1];
+                    s++;
+                }
+                if (i && j < (gint)xres-1 && cb[2] <= iter) {
+                    z += db[2];
+                    s++;
+                }
+                if (j && cb[xres] <= iter) {
+                    z += db[xres];
+                    s++;
+                }
+                if (j < (gint)xres-1 && cb[xres+2] <= iter) {
+                    z += db[xres+2];
+                    s++;
+                }
+                if (i < (gint)yres-1 && j && cb[2*xres] <= iter) {
+                    z += db[2*xres];
+                    s++;
+                }
+                if (i < (gint)yres-1 && cb[2*xres+1] <= iter) {
+                    z += db[2*xres+1];
+                    s++;
+                }
+                if (i < (gint)yres-1 && j < (gint)xres-1
+                    && cb[2*xres+2] <= iter) {
+                    z += db[2*xres+2];
+                    s++;
+                }
+
+                if (cb[xres+1] <= iter) {
+                    // Interpolate previously initialised data further.
+                    bb[xres+1] = z/s;
+                }
+                else if (s) {
+                    // Mark it as done for the next iter but do not let the
+                    // value propagate in this iter.
+                    cb[xres+1] = iter+1;
+                    bb[xres+1] = z/s;
+                    todo--;
+                }
+            }
+        }
+        GWY_SWAP(GwyField*, field, buffer);
+    }
+
+    g_object_unref(buffer);
+    g_free(counters);
+}
+
+static GwyField*
+regularise(const GwySurface *surface,
+           GwySurfaceRegularizeType method,
+           gboolean full,
+           gdouble xfrom, gdouble xto,
+           gdouble yfrom, gdouble yto,
+           guint xres, guint yres)
+{
+    gdouble xmin, xmax, ymin, ymax;
+    gwy_surface_xrange(surface, &xmin, &xmax);
+    gwy_surface_yrange(surface, &ymin, &ymax);
+
+    if (full) {
+        xfrom = xmin;
+        xto = xmax;
+        yfrom = ymin;
+        yto = ymax;
+    }
+
+    if (!xres) {
+        xres = gwy_round((xto - xfrom)/(xmax - xmin)*sqrt(surface->n + 1));
+        xres = CLAMP(xres, 1, gwy_round(2.0*sqrt(surface->n)));
+    }
+    if (!yres) {
+        yres = gwy_round((yto - yfrom)/(ymax - ymin)*sqrt(surface->n + 1));
+        yres = CLAMP(yres, 1, gwy_round(2.0*sqrt(surface->n)));
+    }
+
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+    if (xres == 1 || !(xto - xfrom))
+        field->xreal = xfrom ? fabs(xfrom) : 1.0;
+    else
+        field->xreal = (xto - xfrom)*xres/(xres - 1.0);
+    field->xoff = xmin - 0.5*gwy_field_dx(field);
+
+    if (yres == 1 || !(yto - yfrom))
+        field->yreal = yfrom ? fabs(yfrom) : 1.0;
+    else
+        field->yreal = (yto - yfrom)*yres/(yres - 1.0);
+    field->yoff = ymin - 0.5*gwy_field_dx(field);
+
+    if (method == GWY_SURFACE_REGULARIZE_PREVIEW)
+        regularise_preview(surface, field);
+    else
+        g_assert_not_reached();
+
+    ASSIGN_UNITS(field->priv->unit_xy, surface->priv->unit_xy);
+    ASSIGN_UNITS(field->priv->unit_z, surface->priv->unit_z);
+
+    return field;
+}
+
+/**
+ * gwy_surface_regularize_full:
+ * @surface: A surface.
+ * @method: Regularisation method.
+ * @xres: Required horizontal resolution.  Pass 0 to choose a resolution
+ *        automatically.
+ * @yres: Required vertical resolution.  Pass 0 to choose a resolution
+ *        automatically.
+ *
+ * Creates a two-dimensional data field from an entire surface.
+ *
+ * If the surface is non-degenerate of size 2×2, composed of squares and
+ * the requested @xres×@yres matches the @surfaces's number of points, then
+ * one-to-one data point mapping can be used and the conversion will be
+ * information-preserving.  In other words, if the surface was created from a
+ * #GwyField this function can perform a perfect reversal, possibly up to some
+ * rounding errors. This is true for any @method although the method choice
+ * still can has a dramatic effect on speed and resource consumption.
+ * Otherwise the interpolated and exterpolated values are method-dependent.
+ *
+ * Returns: (allow-none):
+ *          A new two-dimensional data field or %NULL if the surface contains
+ *          no points.
+ **/
+GwyField*
+gwy_surface_regularize_full(const GwySurface *surface,
+                            GwySurfaceRegularizeType method,
+                            guint xres, guint yres)
+{
+    g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
+
+    if (!surface->n)
+        return NULL;
+
+    return regularise(surface, method, TRUE, 0.0, 0.0, 0.0, 0.0, xres, yres);
+}
+
 /**
  * gwy_surface_regularize:
  * @surface: A surface.
+ * @method: Regularisation method.
+ * @xfrom: Start the horizontal interval.
+ * @xto: End of the horizontal interval.
+ * @yfrom: Start the vertical interval.
+ * @yto: End of the vertical interval.
  * @xres: Required horizontal resolution.  Pass 0 to choose a resolution
  *        automatically.
  * @yres: Required vertical resolution.  Pass 0 to choose a resolution
@@ -656,19 +868,22 @@ gwy_surface_set_from_field(GwySurface *surface,
  *          A new two-dimensional data field or %NULL if the surface contains
  *          no points.
  **/
-// TODO: This needs the possibility to specify a sub-range.
 GwyField*
 gwy_surface_regularize(const GwySurface *surface,
-                       guint xres,
-                       guint yres)
+                       GwySurfaceRegularizeType method,
+                       gdouble xfrom, gdouble xto,
+                       gdouble yfrom, gdouble yto,
+                       guint xres, guint yres)
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
+    g_return_val_if_fail(xfrom >= xto, NULL);
+    g_return_val_if_fail(yfrom >= yto, NULL);
 
     if (!surface->n)
         return NULL;
 
-    g_warning("Implement me!");
-    return NULL;
+    return regularise(surface, method, FALSE,
+                      xfrom, xto, yfrom, yto, xres, yres);
 }
 
 /**
@@ -844,6 +1059,16 @@ gwy_surface_format_z(GwySurface *surface,
  *
  * No argument validation is performed.  If you process the data in a loop,
  * you are encouraged to access #GwySurface-struct.data directly.
+ **/
+
+/**
+ * GwySurfaceRegularizeType:
+ * @GWY_SURFACE_REGULARIZE_PREVIEW: Quick and dirty method that does not
+ *                                  require triangulation.  It should, however,
+ *                                  provide a result usable for displaying the
+ *                                  surface.
+ *
+ * Surface regularisation method.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
