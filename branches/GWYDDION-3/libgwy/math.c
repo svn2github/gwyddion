@@ -270,7 +270,7 @@ gwy_powi(double x, int i)
     return negative ? 1.0/r : r;
 }
 
-/*
+/**
  * gwy_math_curvature:
  * @coeffs: (array fixed-size=6):
  *          Array of the six polynomial coefficients of a quadratic surface in
