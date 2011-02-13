@@ -516,12 +516,14 @@ copy_field_to_surface(const GwyField *field,
 {
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     gdouble xoff = 0.5*dx + field->xoff, yoff = 0.5*dy + field->yoff;
+    guint k = 0;
 
     for (guint i = 0; i < field->yres; i++) {
         for (guint j = 0; j < field->xres; j++) {
-            surface->data[i].x = dx*j + xoff;
-            surface->data[i].y = dy*i + yoff;
-            surface->data[i].z = field->data[i];
+            surface->data[k].x = dx*j + xoff;
+            surface->data[k].y = dy*i + yoff;
+            surface->data[k].z = field->data[k];
+            k++;
         }
     }
     ASSIGN_UNITS(surface->priv->unit_xy, field->priv->unit_xy);
@@ -651,6 +653,8 @@ regularise_preview(const GwySurface *surface,
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     guint *counters = g_new0(guint, xres*yres);
 
+    gwy_field_clear_full(field);
+
     for (guint k = 0; k < surface->n; k++) {
         const GwyXYZ *pt = surface->data + k;
         gint j = (gint)floor((pt->x - field->xoff)/dx);
@@ -658,14 +662,13 @@ regularise_preview(const GwySurface *surface,
         if (j < 0 || j >= (gint)xres || i < 0 || i >= (gint)yres)
             continue;
 
-        counters[i*xres + j]++;
+        if (!counters[i*xres + j]++)
+            totalcount++;
         field->data[i*xres + j] += pt->z;
-        totalcount++;
     }
 
     if (!totalcount) {
         // FIXME: Do something clever instead.
-        gwy_field_fill_full(field, 0.0);
         g_free(counters);
         return;
     }
@@ -682,8 +685,13 @@ regularise_preview(const GwySurface *surface,
             counters[k] = G_MAXUINT;
     }
 
-    GwyField *buffer = gwy_field_duplicate(field);
     guint todo = xres*yres - totalcount;
+    if (!todo) {
+        g_free(counters);
+        return;
+    }
+
+    GwyField *buffer = gwy_field_duplicate(field);
 
     for (guint iter = 0; todo; iter++) {
         // Propagate already initialised values further to the uninitialised
@@ -778,13 +786,18 @@ regularise(const GwySurface *surface,
         yto = ymax;
     }
 
+    gdouble alpha = (xto - xfrom)/(yto - yfrom);
+    gdouble sqrtD = sqrt(4.0*alpha*surface->n + (1.0 - alpha)*(1.0 - alpha));
+    gdouble xresfull = 0.5*((1.0 - alpha) + sqrtD),
+            yresfull = 0.5*((alpha - 1.0) + sqrtD)/alpha;
+    gdouble p = sqrt((xto - xfrom)*(yto - yfrom)/(xresfull - 1)/(yresfull - 1));
     if (!xres) {
-        xres = gwy_round((xto - xfrom)/(xmax - xmin)*sqrt(surface->n + 1));
-        xres = CLAMP(xres, 1, gwy_round(2.0*sqrt(surface->n)));
+        xres = gwy_round((xto - xfrom)/p + 1);
+        xres = CLAMP(xres, 1, surface->n);
     }
     if (!yres) {
-        yres = gwy_round((yto - yfrom)/(ymax - ymin)*sqrt(surface->n + 1));
-        yres = CLAMP(yres, 1, gwy_round(2.0*sqrt(surface->n)));
+        yres = gwy_round((yto - yfrom)/p + 1);
+        yres = CLAMP(yres, 1, surface->n);
     }
 
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
