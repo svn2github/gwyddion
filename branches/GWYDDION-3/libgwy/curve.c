@@ -599,80 +599,147 @@ gwy_curve_set_from_line(GwyCurve *curve,
         g_object_notify_by_pspec(G_OBJECT(curve), curve_pspecs[PROP_N_POINTS]);
 }
 
-/**
- * gwy_curve_regularize:
- * @curve: A curve.  It must have at least one point.
- * @res: Required line resolution.  Pass 0 to chose a resolution automatically.
- *
- * Creates a one-dimensional data line from a curve.
- *
- * If the curve has at least two points with different abscissa values, they
- * are equidistant and the requested number of points matches the @curve's
- * number of points, then one-to-one data point mapping can be used and the
- * conversion will be information-preserving.  Otherwise linear interpolation
- * is used.
- *
- * Returns: (allow-none):
- *          A new one-dimensional data line or %NULL if the curve contains no
- *          points.
- **/
-// TODO: This needs the possibility to specify a sub-range.
-GwyLine*
-gwy_curve_regularize(const GwyCurve *curve,
-                     guint res)
+static gdouble
+interpolate_linear(const GwyCurve *curve,
+                   gdouble x,
+                   guint *hint)
 {
-    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    const GwyXY *cdata = curve->data;
+    guint n = curve->n;
 
-    if (!curve->n)
-        return NULL;
+    // Extrapolate the boundary points to the exterior.  This also catches n=1.
+    if (x <= cdata[0].x) {
+        *hint = 0;
+        return cdata[0].y;
+    }
+    if (x >= cdata[n-1].x) {
+        *hint = n-1;
+        return cdata[n-1].y;
+    }
 
+    // Now @x must be within the curve range.  So locate it.
+    guint j = *hint;
+    while (j > 0 && x < cdata[j].x)
+        j--;
+    while (j < n-1 && x > cdata[j+1].x)
+        j++;
+    *hint = j;
+
+    // Avoid division by zero in case of coinciding abscissas.
+    gdouble r = x - cdata[j].x;
+    if (r)
+        r /= cdata[j+1].x - cdata[j].x;
+
+    return r*cdata[j+1].y + (1.0 - r)*cdata[j].y;
+}
+
+GwyLine*
+regularise(const GwyCurve *curve,
+           gdouble from,
+           gdouble to,
+           guint res)
+{
     guint last = curve->n - 1;
     const GwyXY *cdata = curve->data;
     gdouble length = cdata[last].x - cdata[0].x;
     GwyLine *line;
 
-    if (length) {
-        if (!res) {
+    if (!res) {
+        if (length) {
             gdouble mdx = gwy_curve_median_dx(curve);
-            res = mdx ? gwy_round(length/mdx) + 1 : curve->n;
+            res = mdx ? gwy_round((to - from)/mdx) + 1
+                      : gwy_round((to - from)/length*curve->n) + 1;
             res = MIN(res, 4*curve->n);
         }
-        line = gwy_line_new_sized(res, FALSE);
-        gdouble dx = length/(res - 1);
-        gdouble *ldata = line->data;
-        line->off = cdata[0].x - dx/2.0;
-        line->real = res*dx;
-
-        *(ldata++) = cdata[0].y;
-        guint j = 0;
-        for (guint i = 1; i < res-1; i++) {
-            gdouble x = i*dx + cdata[0].x;
-            while (j+1 < res && cdata[j+1].x < x)
-                j++;
-            gdouble r = (x - cdata[j].x)/(cdata[j+1].x - cdata[j].x);
-            *(ldata++) = r*cdata[j+1].y + (1.0 - r)*cdata[j].y;
-        }
-        *ldata = cdata[last].y;
+        else
+            res = 1;
     }
-    else {
-        // Special case, usually just one point but possibly a degenerate curve.
-        res = MAX(res, 1);
-        line = gwy_line_new_sized(res, FALSE);
-        gwy_line_fill_full(line, gwy_curve_mean(curve));
+    line = gwy_line_new_sized(res, FALSE);
+    gdouble dx;
+    if (res == 1) {
+        if (!(dx = to - from))
+            dx = from ? from : 1.0;
+    }
+    else
+        dx = length/(res - 1);
+    line->off = from - dx/2.0;
+    line->real = res*dx;
 
-        gdouble x = curve->data[0].x;
-        if (x)
-            line->real = 2*x;
-        else {
-            line->real = 2.0;
-            line->off = -1.0;
-        }
+    gdouble *ldata = line->data;
+    guint j = 0;
+    if (res == 1)
+        *ldata = interpolate_linear(curve, 0.5*(from + to), &j);
+    else {
+        for (guint i = 0; i < res; i++)
+            *(ldata++) = interpolate_linear(curve, i*dx + from, &j);
     }
 
     ASSIGN_UNITS(line->priv->unit_x, curve->priv->unit_x);
     ASSIGN_UNITS(line->priv->unit_y, curve->priv->unit_y);
 
     return line;
+}
+
+/**
+ * gwy_curve_regularize_full:
+ * @curve: A curve.  It must have at least one point.
+ * @res: Required line resolution.  Pass 0 to chose a resolution automatically.
+ *
+ * Creates a one-dimensional data line from an entire curve.
+ *
+ * If the curve has at least two points with different abscissa values, they
+ * are equidistant and the requested number of points matches the @curve's
+ * number of points, then one-to-one data point mapping can be used and the
+ * conversion will be information-preserving.  In other words,If the curve was
+ * created from a #GwyLine this function performs a perfect reversal (provided
+ * the same @res or @res=0 is passed), possibly up to some rounding errors.
+ * Otherwise linear interpolation is used.
+ *
+ * Returns: (allow-none):
+ *          A new one-dimensional data line or %NULL if the curve contains no
+ *          points.
+ **/
+GwyLine*
+gwy_curve_regularize_full(const GwyCurve *curve,
+                          guint res)
+{
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+
+    if (!curve->n)
+        return NULL;
+
+    return regularise(curve, curve->data[0].x, curve->data[curve->n-1].x, res);
+}
+
+/**
+ * gwy_curve_regularize:
+ * @curve: A curve.  It must have at least one point.
+ * @from: Left end of the interval.
+ * @to: Right end of the interval.
+ * @res: Required line resolution.  Pass 0 to chose a resolution automatically.
+ *
+ * Creates a one-dimensional data line from a curve.
+ *
+ * Values are lineary interpolated between curve points.  Values outside the
+ * curve abscissa are replaced with the boundary values.
+ *
+ * Returns: (allow-none):
+ *          A new one-dimensional data line or %NULL if the curve contains no
+ *          points.
+ **/
+GwyLine*
+gwy_curve_regularize(const GwyCurve *curve,
+                     gdouble from,
+                     gdouble to,
+                     guint res)
+{
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    g_return_val_if_fail(to >= from, NULL);
+
+    if (!curve->n)
+        return NULL;
+
+    return regularise(curve, from, to, res);
 }
 
 /**
