@@ -633,7 +633,7 @@ interpolate_linear(const GwyCurve *curve,
     return r*cdata[j+1].y + (1.0 - r)*cdata[j].y;
 }
 
-GwyLine*
+static GwyLine*
 regularise(const GwyCurve *curve,
            gdouble from,
            gdouble to,
@@ -656,9 +656,9 @@ regularise(const GwyCurve *curve,
     }
     line = gwy_line_new_sized(res, FALSE);
     gdouble dx;
-    if (res == 1) {
+    if (res == 1 || !length) {
         if (!(dx = to - from))
-            dx = from ? from : 1.0;
+            dx = from ? fabs(from) : 1.0;
     }
     else
         dx = length/(res - 1);
@@ -690,10 +690,10 @@ regularise(const GwyCurve *curve,
  * If the curve has at least two points with different abscissa values, they
  * are equidistant and the requested number of points matches the @curve's
  * number of points, then one-to-one data point mapping can be used and the
- * conversion will be information-preserving.  In other words,If the curve was
- * created from a #GwyLine this function performs a perfect reversal (provided
- * the same @res or @res=0 is passed), possibly up to some rounding errors.
- * Otherwise linear interpolation is used.
+ * conversion will be information-preserving.  In other words, if the curve was
+ * created from a #GwyLine this function can perform a perfect reversal,
+ * possibly up to some rounding errors.  Otherwise linear interpolation is
+ * used.
  *
  * Returns: (allow-none):
  *          A new one-dimensional data line or %NULL if the curve contains no
