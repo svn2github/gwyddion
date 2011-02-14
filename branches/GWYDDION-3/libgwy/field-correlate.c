@@ -632,6 +632,8 @@ gwy_field_crosscorrelate(const GwyField *field,
         }
     }
 
+    fftw_destroy_plan(cplan);
+    fftw_destroy_plan(dplan);
     g_free(extreference);
     g_free(extfield);
     fftw_free(extdata);
