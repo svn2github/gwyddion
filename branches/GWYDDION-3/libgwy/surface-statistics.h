@@ -27,10 +27,10 @@ G_BEGIN_DECLS
 void    gwy_surface_min_max_full(const GwySurface *surface,
                                  gdouble *min,
                                  gdouble *max);
-void    gwy_surface_xrange      (const GwySurface *surface,
+void    gwy_surface_xrange_full (const GwySurface *surface,
                                  gdouble *min,
                                  gdouble *max);
-void    gwy_surface_yrange      (const GwySurface *surface,
+void    gwy_surface_yrange_full (const GwySurface *surface,
                                  gdouble *min,
                                  gdouble *max);
 gdouble gwy_surface_mean_full   (const GwySurface *surface) G_GNUC_PURE;

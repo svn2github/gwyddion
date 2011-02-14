@@ -793,8 +793,8 @@ regularise(const GwySurface *surface,
            guint xres, guint yres)
 {
     gdouble xmin, xmax, ymin, ymax;
-    gwy_surface_xrange(surface, &xmin, &xmax);
-    gwy_surface_yrange(surface, &ymin, &ymax);
+    gwy_surface_xrange_full(surface, &xmin, &xmax);
+    gwy_surface_yrange_full(surface, &ymin, &ymax);
 
     if (full) {
         xfrom = xmin;
@@ -997,8 +997,8 @@ gwy_surface_format_xy(GwySurface *surface,
                                                style, m, m/10.0);
     }
     gdouble xmin, xmax, ymin, ymax;
-    gwy_surface_xrange(surface, &xmin, &xmax);
-    gwy_surface_yrange(surface, &ymin, &ymax);
+    gwy_surface_xrange_full(surface, &xmin, &xmax);
+    gwy_surface_yrange_full(surface, &ymin, &ymax);
     gdouble max = MAX(MAX(fabs(xmax), fabs(xmin)), MAX(fabs(ymax), fabs(ymin)));
     if (!max)
         max = 1.0;

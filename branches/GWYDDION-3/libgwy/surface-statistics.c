@@ -101,14 +101,14 @@ surface_ensure_range(const GwySurface *surface)
 }
 
 /**
- * gwy_surface_xrange:
+ * gwy_surface_xrange_full:
  * @surface: A surface.
  * @min: (allow-none):
  *       Location to store the minimum x-coordinate to, or %NULL.
  * @max: (allow-none):
  *       Location to store the maximum x-coordinate to, or %NULL.
  *
- * Finds the minimum and maximum x-coordinates of a surface.
+ * Finds the minimum and maximum x-coordinates of an entire surface.
  *
  * If the surface is empty @min and @max are set to NaN.
  *
@@ -116,9 +116,9 @@ surface_ensure_range(const GwySurface *surface)
  * gwy_surface_invalidate().
  **/
 void
-gwy_surface_xrange(const GwySurface *surface,
-                   gdouble *pmin,
-                   gdouble *pmax)
+gwy_surface_xrange_full(const GwySurface *surface,
+                        gdouble *pmin,
+                        gdouble *pmax)
 {
     g_return_if_fail(GWY_IS_SURFACE(surface));
     if (!pmin && !pmax)
@@ -130,14 +130,14 @@ gwy_surface_xrange(const GwySurface *surface,
 }
 
 /**
- * gwy_surface_yrange:
+ * gwy_surface_yrange_full:
  * @surface: A surface.
  * @min: (allow-none):
  *       Location to store the minimum y-coordinate to, or %NULL.
  * @max: (allow-none):
  *       Location to store the maximum y-coordinate to, or %NULL.
  *
- * Finds the minimum and maximum y-coordinates of a surface.
+ * Finds the minimum and maximum y-coordinates of an entire surface.
  *
  * If the surface is empty @min and @max are set to NaN.
  *
@@ -145,9 +145,9 @@ gwy_surface_xrange(const GwySurface *surface,
  * gwy_surface_invalidate().
  **/
 void
-gwy_surface_yrange(const GwySurface *surface,
-                   gdouble *pmin,
-                   gdouble *pmax)
+gwy_surface_yrange_full(const GwySurface *surface,
+                        gdouble *pmin,
+                        gdouble *pmax)
 {
     g_return_if_fail(GWY_IS_SURFACE(surface));
     if (!pmin && !pmax)
