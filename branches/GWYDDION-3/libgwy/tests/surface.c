@@ -114,22 +114,8 @@ test_surface_data_changed(void)
     g_object_unref(surface);
 }
 
-G_GNUC_UNUSED
-static void
-print_field(const gchar *name, const GwyField *field)
-{
-    g_printerr("=====[ %s ]=====\n", name);
-    for (guint i = 0; i < field->yres; i++) {
-        g_printerr("[%02u]", i);
-        for (guint j = 0; j < field->xres; j++) {
-            g_printerr(" % .4f", field->data[i*field->xres + j]);
-        }
-        g_printerr("\n");
-    }
-}
-
 void
-test_surface_regularize(void)
+test_surface_regularize_full(void)
 {
     enum { max_size = 27 };
     GRand *rng = g_rand_new();
@@ -173,9 +159,9 @@ test_surface_regularize(void)
                           <=,
                           1e-14*fabs(field->yoff));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(field)));
+                                gwy_field_get_unit_xy(newfield)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
-                                gwy_field_get_unit_z(field)));
+                                gwy_field_get_unit_z(newfield)));
         field_assert_numerically_equal(newfield, field, 1e-14);
 
         g_object_unref(newfield);
@@ -205,11 +191,82 @@ test_surface_regularize(void)
                           <=,
                           1e-14*fabs(field->yoff));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_xy(newfield)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
+                                gwy_field_get_unit_z(newfield)));
+        field_assert_numerically_equal(newfield, field, 1e-14);
+
+        g_object_unref(newfield);
+        g_object_unref(surface);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_surface_regularize_part(void)
+{
+    enum { max_size = 37 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 50 : 10;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 6, max_size);
+        guint yres = g_rand_int_range(rng, 6, max_size);
+        guint width = g_rand_int_range(rng, 2, xres+1);
+        guint height = g_rand_int_range(rng, 2, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        gdouble step = g_rand_double_range(rng, 1, G_E)
+                       * exp(g_rand_double_range(rng, -8, 8));
+        gdouble xoff = g_rand_double_range(rng, -5, 5)*step;
+        gdouble yoff = g_rand_double_range(rng, -5, 5)*step;
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gwy_field_set_xreal(field, xres*step);
+        gwy_field_set_yreal(field, yres*step);
+        gwy_field_set_xoffset(field, xoff);
+        gwy_field_set_yoffset(field, yoff);
+
+        GwySurface *surface = gwy_surface_new_from_field(field);
+        g_assert_cmpuint(surface->n, ==, field->xres*field->yres);
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
                                 gwy_field_get_unit_xy(field)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(field)));
-        field_assert_numerically_equal(newfield, field, 1e-14);
 
+        gdouble xfrom = (col + 0.5)*gwy_field_dx(field) + field->xoff,
+                xto = xfrom + (width - 1)*gwy_field_dx(field),
+                yfrom = (row + 0.5)*gwy_field_dy(field) + field->yoff,
+                yto = yfrom + (height - 1)*gwy_field_dy(field);
+
+        GwyRectangle rectangle = { col, row, width, height };
+        GwyField *part = gwy_field_new_part(field, &rectangle, TRUE);
+        GwyField *newfield = gwy_surface_regularize
+                                     (surface, GWY_SURFACE_REGULARIZE_PREVIEW,
+                                      xfrom, xto, yfrom, yto, width, height);
+        g_assert_cmpuint(newfield->xres*newfield->yres, ==, width*height);
+        g_assert_cmpfloat(fabs(newfield->xreal - part->xreal),
+                          <=,
+                          1e-14*part->xreal);
+        g_assert_cmpfloat(fabs(newfield->yreal - part->yreal),
+                          <=,
+                          1e-14*part->yreal);
+        g_assert_cmpfloat(fabs(newfield->xoff - part->xoff),
+                          <=,
+                          1e-14*fabs(part->xoff));
+        g_assert_cmpfloat(fabs(newfield->yoff - part->yoff),
+                          <=,
+                          1e-14*fabs(part->yoff));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_xy(newfield)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
+                                gwy_field_get_unit_z(newfield)));
+        field_assert_numerically_equal(newfield, part, 1e-14);
+
+        g_object_unref(part);
         g_object_unref(newfield);
         g_object_unref(surface);
         g_object_unref(field);

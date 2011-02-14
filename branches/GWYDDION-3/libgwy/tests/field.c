@@ -95,6 +95,10 @@ static void
 print_field(const gchar *name, const GwyField *field)
 {
     g_printerr("=====[ %s ]=====\n", name);
+    g_printerr("size %u x %u, real %g x %g, offsets %g x %g\n",
+               field->xres, field->yres,
+               field->xreal, field->yreal,
+               field->xoff, field->yoff);
     for (guint i = 0; i < field->yres; i++) {
         g_printerr("[%02u]", i);
         for (guint j = 0; j < field->xres; j++) {

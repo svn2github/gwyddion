@@ -836,13 +836,13 @@ regularise(const GwySurface *surface,
         field->xreal = xfrom ? fabs(xfrom) : 1.0;
     else
         field->xreal = (xlen)*xres/(xres - 1.0);
-    field->xoff = xmin - 0.5*gwy_field_dx(field);
+    field->xoff = xfrom - 0.5*gwy_field_dx(field);
 
     if (yres == 1 || !(ylen))
         field->yreal = yfrom ? fabs(yfrom) : 1.0;
     else
         field->yreal = (ylen)*yres/(yres - 1.0);
-    field->yoff = ymin - 0.5*gwy_field_dy(field);
+    field->yoff = yfrom - 0.5*gwy_field_dy(field);
 
     if (method == GWY_SURFACE_REGULARIZE_PREVIEW)
         regularise_preview(surface, field);
@@ -919,8 +919,8 @@ gwy_surface_regularize(const GwySurface *surface,
                        guint xres, guint yres)
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
-    g_return_val_if_fail(xfrom >= xto, NULL);
-    g_return_val_if_fail(yfrom >= yto, NULL);
+    g_return_val_if_fail(xto >= xfrom, NULL);
+    g_return_val_if_fail(yto >= yfrom, NULL);
 
     if (!surface->n)
         return NULL;
