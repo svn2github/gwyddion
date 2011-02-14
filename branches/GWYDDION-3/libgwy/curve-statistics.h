@@ -24,14 +24,14 @@
 
 G_BEGIN_DECLS
 
-void    gwy_curve_min_max  (const GwyCurve *curve,
-                            gdouble *min,
-                            gdouble *max);
-void    gwy_curve_range    (const GwyCurve *curve,
-                            gdouble *min,
-                            gdouble *max);
-gdouble gwy_curve_mean     (const GwyCurve *curve) G_GNUC_PURE;
-gdouble gwy_curve_median_dx(const GwyCurve *curve) G_GNUC_PURE;
+void    gwy_curve_min_max_full  (const GwyCurve *curve,
+                                 gdouble *min,
+                                 gdouble *max);
+void    gwy_curve_range_full    (const GwyCurve *curve,
+                                 gdouble *min,
+                                 gdouble *max);
+gdouble gwy_curve_mean_full     (const GwyCurve *curve) G_GNUC_PURE;
+gdouble gwy_curve_median_dx_full(const GwyCurve *curve) G_GNUC_PURE;
 
 G_END_DECLS
 

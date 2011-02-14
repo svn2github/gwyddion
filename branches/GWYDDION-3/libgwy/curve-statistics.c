@@ -23,7 +23,7 @@
 #include "libgwy/curve-internal.h"
 
 /**
- * gwy_curve_min_max:
+ * gwy_curve_min_max_full:
  * @curve: A curve.
  * @min: (allow-none):
  *       Location to store the minimum value to, or %NULL.
@@ -36,9 +36,9 @@
  * a huge negative value.
  **/
 void
-gwy_curve_min_max(const GwyCurve *curve,
-                  gdouble *pmin,
-                  gdouble *pmax)
+gwy_curve_min_max_full(const GwyCurve *curve,
+                       gdouble *pmin,
+                       gdouble *pmax)
 {
     g_return_if_fail(GWY_IS_CURVE(curve));
     if (!pmin && !pmax)
@@ -58,7 +58,7 @@ gwy_curve_min_max(const GwyCurve *curve,
 }
 
 /**
- * gwy_curve_range:
+ * gwy_curve_range_full:
  * @curve: A curve.
  * @min: (allow-none):
  *       Location to store the minimum abscissa to, or %NULL.
@@ -72,9 +72,9 @@ gwy_curve_min_max(const GwyCurve *curve,
  * to NaN.
  **/
 void
-gwy_curve_range(const GwyCurve *curve,
-                gdouble *min,
-                gdouble *max)
+gwy_curve_range_full(const GwyCurve *curve,
+                     gdouble *min,
+                     gdouble *max)
 {
     g_return_if_fail(GWY_IS_CURVE(curve));
     GWY_MAYBE_SET(min, curve->n ? curve->data[0].x : NAN);
@@ -82,7 +82,7 @@ gwy_curve_range(const GwyCurve *curve,
 }
 
 /**
- * gwy_curve_mean:
+ * gwy_curve_mean_full:
  * @curve: A curve.
  *
  * Calculates the mean value of a curve.
@@ -90,7 +90,7 @@ gwy_curve_range(const GwyCurve *curve,
  * Returns: The mean value.  The mean value of an empty curve is NaN.
  **/
 gdouble
-gwy_curve_mean(const GwyCurve *curve)
+gwy_curve_mean_full(const GwyCurve *curve)
 {
     g_return_val_if_fail(GWY_IS_CURVE(curve), NAN);
     if (G_UNLIKELY(!curve->n))
@@ -105,7 +105,7 @@ gwy_curve_mean(const GwyCurve *curve)
 }
 
 /**
- * gwy_curve_median_dx:
+ * gwy_curve_median_dx_full:
  * @curve: A curve.
  *
  * Calculates the median of abscissa differences between neighbour points of a
@@ -115,7 +115,7 @@ gwy_curve_mean(const GwyCurve *curve)
  *          curve and zero for a single-point curve.
  **/
 gdouble
-gwy_curve_median_dx(const GwyCurve *curve)
+gwy_curve_median_dx_full(const GwyCurve *curve)
 {
     g_return_val_if_fail(GWY_IS_CURVE(curve), NAN);
     if (G_UNLIKELY(!curve->n))

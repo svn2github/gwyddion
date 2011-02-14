@@ -646,7 +646,7 @@ regularise(const GwyCurve *curve,
 
     if (!res) {
         if (length) {
-            gdouble mdx = gwy_curve_median_dx(curve);
+            gdouble mdx = gwy_curve_median_dx_full(curve);
             res = mdx ? gwy_round((to - from)/mdx) + 1
                       : gwy_round((to - from)/length*curve->n) + 1;
             res = MIN(res, 4*curve->n);
@@ -851,7 +851,7 @@ gwy_curve_format_y(GwyCurve *curve,
     g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     gdouble min, max;
     if (curve->n) {
-        gwy_curve_min_max(curve, &min, &max);
+        gwy_curve_min_max_full(curve, &min, &max);
         if (max == min) {
             max = ABS(max);
             min = 0.0;
