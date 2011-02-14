@@ -34,8 +34,8 @@ G_BEGIN_DECLS
 typedef enum {
     GWY_SURFACE_CACHE_MIN = 0,
     GWY_SURFACE_CACHE_MAX,
-    GWY_SURFACE_CACHE_AVG,  // Not implemented yet
-    GWY_SURFACE_CACHE_RMS,  // Not implemented yet
+    GWY_SURFACE_CACHE_AVG,
+    GWY_SURFACE_CACHE_RMS,
     GWY_SURFACE_CACHE_MSQ,  // Not implemented yet
     GWY_SURFACE_CACHE_MED,
     GWY_SURFACE_CACHE_ARF,  // Not implemented yet

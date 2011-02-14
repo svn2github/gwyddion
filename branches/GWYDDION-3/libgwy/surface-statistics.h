@@ -34,6 +34,7 @@ void    gwy_surface_yrange_full (const GwySurface *surface,
                                  gdouble *min,
                                  gdouble *max);
 gdouble gwy_surface_mean_full   (const GwySurface *surface) G_GNUC_PURE;
+gdouble gwy_surface_rms_full    (const GwySurface *surface) G_GNUC_PURE;
 
 G_END_DECLS
 

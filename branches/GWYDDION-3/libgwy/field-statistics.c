@@ -323,7 +323,7 @@ gwy_field_median_full(const GwyField *field)
  *        entire field, in the second case over the rectangle.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
- * Calculates the root mean square of a rectangular part of a field.
+ * Calculates the root mean square of a field.
  *
  * This function sums the squares of differences from values from the mean
  * values.  If you need a plain sum of squares see gwy_field_meansq().
@@ -421,7 +421,7 @@ gwy_field_rms_full(const GwyField *field)
  *        entire field, in the second case over the rectangle.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
- * Calculates the mean square of a rectangular part of a field.
+ * Calculates the mean square of a field.
  *
  * Unlike rms, calculated with gwy_field_rms(), this function does not subtract
  * the mean value.  It calculates squares of the data as-is.
@@ -510,8 +510,7 @@ gwy_field_meansq(const GwyField *field,
  *            Location to store the kurtosis (peakedness of value ditribution)
  *            to, or %NULL.
  *
- * Calculates numerical statistical characteristics of a rectangular part of a
- * field.
+ * Calculates numerical statistical characteristics of a field.
  *
  * The Ra value of no data is zero.  The skew and kurtosis of no data is NaN,
  * they are NaN also for flat data.
@@ -1179,7 +1178,7 @@ surface_area_mask2(const GwyField *field,
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
- * Calculates the surface area of a rectangular part of a field.
+ * Calculates the surface area of a field.
  *
  * The surface area value of the entire field is cached,
  * see gwy_field_invalidate().

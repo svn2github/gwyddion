@@ -30,7 +30,7 @@
  * @max: (allow-none):
  *       Location to store the maximum value to, or %NULL.
  *
- * Finds the minimum and maximum value in a curve.
+ * Finds the minimum and maximum value in an entire curve.
  *
  * If the curve is empty @min is set to a huge positive value and @max to
  * a huge negative value.
@@ -65,7 +65,7 @@ gwy_curve_min_max_full(const GwyCurve *curve,
  * @max: (allow-none):
  *       Location to store the maximum abscissa to, or %NULL.
  *
- * Finds the minimum and maximum abscissa of a curve.
+ * Finds the minimum and maximum abscissa of an entire curve.
  *
  * Since the curve is sorted they can be also found by looking at x-coordinates
  * of the frist and last point.  If the curve is empty @min and @max are set
@@ -85,7 +85,7 @@ gwy_curve_range_full(const GwyCurve *curve,
  * gwy_curve_mean_full:
  * @curve: A curve.
  *
- * Calculates the mean value of a curve.
+ * Calculates the mean value of an entire curve.
  *
  * Returns: The mean value.  The mean value of an empty curve is NaN.
  **/
@@ -108,8 +108,8 @@ gwy_curve_mean_full(const GwyCurve *curve)
  * gwy_curve_median_dx_full:
  * @curve: A curve.
  *
- * Calculates the median of abscissa differences between neighbour points of a
- * curve.
+ * Calculates the median of abscissa differences between neighbour points of an
+ * entire curve.
  *
  * Returns: The median abscissa difference.  NaN is returned for an empty
  *          curve and zero for a single-point curve.

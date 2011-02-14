@@ -162,7 +162,10 @@ gwy_surface_yrange_full(const GwySurface *surface,
  * gwy_surface_mean_full:
  * @surface: A surface.
  *
- * Calculates the mean value of a surface.
+ * Calculates the mean value of an entire surface.
+ *
+ * The mean value of the entire surface is cached, see
+ * gwy_surface_invalidate().
  *
  * Returns: The mean value.  The mean value of an empty surface is NaN.
  **/
@@ -183,6 +186,40 @@ gwy_surface_mean_full(const GwySurface *surface)
     s /= surface->n;
     CVAL(surface->priv, AVG) = s;
     surface->priv->cached |= CBIT(AVG);
+
+    return s;
+}
+
+/**
+ * gwy_surface_rms_full:
+ * @surface: A surface.
+ *
+ * Calculates the mean square value of an entire surface.
+ *
+ * The mean square value of the entire surface is cached, see
+ * gwy_surface_invalidate().
+ *
+ * Returns: The mean square value.  The mean value square of an empty surface
+ *          is zero.
+ **/
+gdouble
+gwy_surface_rms_full(const GwySurface *surface)
+{
+    g_return_val_if_fail(GWY_IS_SURFACE(surface), 0.0);
+    if (G_UNLIKELY(!surface->n))
+        return 0.0;
+    if (CTEST(surface->priv, RMS))
+        return CVAL(surface->priv, RMS);
+
+    gdouble mean = gwy_surface_mean_full(surface);
+    gdouble s = 0.0;
+    const GwyXYZ *p = surface->data;
+    for (guint i = surface->n; i; i--, p++)
+        s += (p->z - mean)*(p->x - mean);
+
+    s = sqrt(s/surface->n);
+    CVAL(surface->priv, RMS) = s;
+    surface->priv->cached |= CBIT(RMS);
 
     return s;
 }
