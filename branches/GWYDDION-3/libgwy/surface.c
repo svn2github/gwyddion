@@ -645,6 +645,55 @@ gwy_surface_set_from_field(GwySurface *surface,
                                  surface_pspecs[PROP_N_POINTS]);
 }
 
+static gboolean
+propagate_laplace(const gdouble *srcb, guint *cntrb,
+                  gint xres, gint yres, gint j, gint i, guint iter,
+                  gdouble *value)
+{
+    guint s = 0;
+    gdouble z = 0.0;
+
+    // Scan the pixel neighbourhood and gather already initialised values.
+    if (i && j && cntrb[0] <= iter) {
+        z += srcb[0];
+        s++;
+    }
+    if (i && cntrb[1] <= iter) {
+        z += srcb[1];
+        s++;
+    }
+    if (i && j < (gint)xres-1 && cntrb[2] <= iter) {
+        z += srcb[2];
+        s++;
+    }
+    if (j && cntrb[xres] <= iter) {
+        z += srcb[xres];
+        s++;
+    }
+    if (j < (gint)xres-1 && cntrb[xres+2] <= iter) {
+        z += srcb[xres+2];
+        s++;
+    }
+    if (i < (gint)yres-1 && j && cntrb[2*xres] <= iter) {
+        z += srcb[2*xres];
+        s++;
+    }
+    if (i < (gint)yres-1 && cntrb[2*xres+1] <= iter) {
+        z += srcb[2*xres+1];
+        s++;
+    }
+    if (i < (gint)yres-1 && j < (gint)xres-1
+        && cntrb[2*xres+2] <= iter) {
+        z += srcb[2*xres+2];
+        s++;
+    }
+    if (s) {
+        *value = z/s;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void
 regularise_preview(const GwySurface *surface,
                    GwyField *field)
@@ -694,69 +743,37 @@ regularise_preview(const GwySurface *surface,
     GwyField *buffer = gwy_field_duplicate(field);
 
     for (guint iter = 0; todo; iter++) {
-        // Propagate already initialised values further to the uninitialised
-        // area.  At the same time interpolate in the already initialised
-        // area.
+        // Interpolate in the already initialised area.
         for (gint i = 0; i < (gint)yres; i++) {
             for (gint j = 0; j < (gint)xres; j++) {
                 gint k = i*xres-xres + j-1;
                 guint *cb = counters + k;
-                gdouble *db = field->data + k;
+                const gdouble *db = field->data + k;
                 gdouble *bb = buffer->data + k;
-                guint s = 0;
-                gdouble z = 0.0;
 
-                // Skip fixed data, everything else is a candidate for 
-                // interpolation.
-                if (!cb[xres+1])
-                    continue;
+                if (cb[xres+1] && cb[xres+1] <= iter)
+                    propagate_laplace(db, cb, xres, yres, j, i, iter,
+                                      bb + xres+1);
+            }
+        }
+        GWY_SWAP(GwyField*, field, buffer);
 
-                // Scan the pixel neighbourhood and gather already initialised
-                // values.
-                if (i && j && cb[0] <= iter) {
-                    z += db[0];
-                    s++;
-                }
-                if (i && cb[1] <= iter) {
-                    z += db[1];
-                    s++;
-                }
-                if (i && j < (gint)xres-1 && cb[2] <= iter) {
-                    z += db[2];
-                    s++;
-                }
-                if (j && cb[xres] <= iter) {
-                    z += db[xres];
-                    s++;
-                }
-                if (j < (gint)xres-1 && cb[xres+2] <= iter) {
-                    z += db[xres+2];
-                    s++;
-                }
-                if (i < (gint)yres-1 && j && cb[2*xres] <= iter) {
-                    z += db[2*xres];
-                    s++;
-                }
-                if (i < (gint)yres-1 && cb[2*xres+1] <= iter) {
-                    z += db[2*xres+1];
-                    s++;
-                }
-                if (i < (gint)yres-1 && j < (gint)xres-1
-                    && cb[2*xres+2] <= iter) {
-                    z += db[2*xres+2];
-                    s++;
-                }
+        // Propagate already initialised values to the uninitialised area.
+        for (gint i = 0; i < (gint)yres; i++) {
+            for (gint j = 0; j < (gint)xres; j++) {
+                gint k = i*xres-xres + j-1;
+                guint *cb = counters + k;
+                const gdouble *db = field->data + k;
+                gdouble *bb = buffer->data + k;
 
-                if (cb[xres+1] <= iter) {
-                    // Interpolate previously initialised data further.
-                    bb[xres+1] = z/s;
-                }
-                else if (s) {
-                    // Mark it as done for the next iter but do not let the
-                    // value propagate in this iter.
-                    cb[xres+1] = iter+1;
-                    bb[xres+1] = z/s;
-                    todo--;
+                if (cb[xres+1] > iter) {
+                    if (propagate_laplace(db, cb, xres, yres, j, i, iter,
+                                          bb + xres+1)) {
+                        // Mark it as done for the next iter but do not let the
+                        // value propagate in this iter.
+                        cb[xres+1] = iter+1;
+                        todo--;
+                    }
                 }
             }
         }
