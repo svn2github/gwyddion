@@ -786,32 +786,45 @@ regularise(const GwySurface *surface,
         yto = ymax;
     }
 
-    gdouble alpha = (xto - xfrom)/(yto - yfrom);
-    gdouble sqrtD = sqrt(4.0*alpha*surface->n + (1.0 - alpha)*(1.0 - alpha));
-    gdouble xresfull = 0.5*((1.0 - alpha) + sqrtD),
-            yresfull = 0.5*((alpha - 1.0) + sqrtD)/alpha;
-    gdouble p = sqrt((xto - xfrom)*(yto - yfrom)/(xresfull - 1)/(yresfull - 1));
-    if (!xres) {
-        xres = gwy_round((xto - xfrom)/p + 1);
-        xres = CLAMP(xres, 1, surface->n);
-    }
-    if (!yres) {
-        yres = gwy_round((yto - yfrom)/p + 1);
-        yres = CLAMP(yres, 1, surface->n);
+    gdouble xlen = xto - xfrom, ylen = yto - yfrom;
+
+    if (!xres || !yres) {
+        gdouble alpha = xlen/ylen, alpha1 = 1.0 - alpha;
+        gdouble sqrtD = sqrt(4.0*alpha*surface->n + alpha1*alpha1);
+        gdouble xresfull = 0.5*(alpha1 + sqrtD),
+                yresfull = 0.5*(sqrtD - alpha1)/alpha;
+        gdouble p = sqrt(xlen*ylen/(xresfull - 1)/(yresfull - 1));
+
+        if (!xres) {
+            if (!p || isnan(p) || !xlen)
+                xres = 1;
+            else {
+                xres = gwy_round(xlen/p + 1);
+                xres = CLAMP(xres, 1, surface->n);
+            }
+        }
+        if (!yres) {
+            if (!p || isnan(p) || !ylen)
+                yres = 1;
+            else {
+                yres = gwy_round(ylen/p + 1);
+                yres = CLAMP(yres, 1, surface->n);
+            }
+        }
     }
 
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
 
-    if (xres == 1 || !(xto - xfrom))
+    if (xres == 1 || !(xlen))
         field->xreal = xfrom ? fabs(xfrom) : 1.0;
     else
-        field->xreal = (xto - xfrom)*xres/(xres - 1.0);
+        field->xreal = (xlen)*xres/(xres - 1.0);
     field->xoff = xmin - 0.5*gwy_field_dx(field);
 
-    if (yres == 1 || !(yto - yfrom))
+    if (yres == 1 || !(ylen))
         field->yreal = yfrom ? fabs(yfrom) : 1.0;
     else
-        field->yreal = (yto - yfrom)*yres/(yres - 1.0);
+        field->yreal = (ylen)*yres/(yres - 1.0);
     field->yoff = ymin - 0.5*gwy_field_dy(field);
 
     if (method == GWY_SURFACE_REGULARIZE_PREVIEW)
