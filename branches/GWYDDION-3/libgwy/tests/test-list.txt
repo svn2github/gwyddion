@@ -169,6 +169,7 @@ surface/props
 surface/data-changed
 surface/regularize/full
 surface/regularize/part
+surface/regularize/interpolation
 container/data
 container/refcount
 container/keys
