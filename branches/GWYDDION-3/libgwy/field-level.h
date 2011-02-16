@@ -34,7 +34,7 @@ typedef enum {
 } GwyRowShiftMethod;
 
 gboolean gwy_field_fit_plane      (const GwyField *field,
-                                   const GwyRectangle *rectangle,
+                                   const GwyFieldPart *fpart,
                                    const GwyMaskField *mask,
                                    GwyMaskingType masking,
                                    gdouble *a,
@@ -45,14 +45,14 @@ void     gwy_field_subtract_plane (GwyField *field,
                                    gdouble bx,
                                    gdouble by);
 gboolean gwy_field_inclination    (const GwyField *field,
-                                   const GwyRectangle *rectangle,
+                                   const GwyFieldPart *fpart,
                                    const GwyMaskField *mask,
                                    GwyMaskingType masking,
                                    gdouble damping,
                                    gdouble *bx,
                                    gdouble *by);
 gboolean gwy_field_fit_poly       (const GwyField *field,
-                                   const GwyRectangle *rectangle,
+                                   const GwyFieldPart *fpart,
                                    const GwyMaskField *mask,
                                    GwyMaskingType masking,
                                    const guint *xpowers,

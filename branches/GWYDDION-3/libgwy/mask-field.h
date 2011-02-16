@@ -21,7 +21,7 @@
 #define __LIBGWY_MASK_FIELD_H__
 
 #include <libgwy/serializable.h>
-#include <libgwy/rectangle.h>
+#include <libgwy/field-part.h>
 #include <libgwy/mask-iter.h>
 
 G_BEGIN_DECLS
@@ -70,12 +70,12 @@ GwyMaskField* gwy_mask_field_new_sized     (guint xres,
                                             guint yres,
                                             gboolean clear)            G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_part      (const GwyMaskField *field,
-                                            const GwyRectangle *rectangle) G_GNUC_MALLOC;
+                                            const GwyFieldPart *fpart) G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_resampled (const GwyMaskField *field,
                                             guint xres,
                                             guint yres)                G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
-                                            const GwyRectangle *rectangle,
+                                            const GwyFieldPart *fpart,
                                             gdouble lower,
                                             gdouble upper,
                                             gboolean complement)       G_GNUC_MALLOC;
@@ -134,7 +134,7 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
 
 void         gwy_mask_field_data_changed (GwyMaskField *field);
 void         gwy_mask_field_copy         (const GwyMaskField *src,
-                                          const GwyRectangle *srcrectangle,
+                                          const GwyFieldPart *srcrectangle,
                                           GwyMaskField *dest,
                                           guint destcol,
                                           guint destrow);
@@ -145,10 +145,10 @@ guint        gwy_mask_field_count        (const GwyMaskField *field,
                                           const GwyMaskField *mask,
                                           gboolean value);
 guint        gwy_mask_field_part_count   (const GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
+                                          const GwyFieldPart *fpart,
                                           gboolean value);
 guint        gwy_mask_field_count_rows   (const GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
+                                          const GwyFieldPart *fpart,
                                           gboolean value,
                                           guint *counts);
 const guint* gwy_mask_field_number_grains(GwyMaskField *field,

@@ -13,6 +13,7 @@ testlibgwy_SOURCES = \
 	expr.c \
 	fft.c \
 	field.c \
+	field-part.c \
 	fitting.c \
 	fit-funcs.c \
 	gl-material.c \
@@ -25,7 +26,6 @@ testlibgwy_SOURCES = \
 	mask-line.c \
 	math.c \
 	pack.c \
-	rectangle.c \
 	resource.c \
 	rgba.c \
 	serialization.c \

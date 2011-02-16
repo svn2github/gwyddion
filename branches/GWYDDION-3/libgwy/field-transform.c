@@ -170,8 +170,8 @@ swap_xy(const GwyField *source,
 /**
  * gwy_field_new_transposed:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to extract.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to extract.  Pass %NULL to process entire @field.
  * @transform_offsets: %TRUE to set the X and Y offsets of the new field
  *                     using @col, @row and @field offsets.  %FALSE to set
  *                     offsets of the new field to zeroes.
@@ -191,12 +191,11 @@ swap_xy(const GwyField *source,
  **/
 GwyField*
 gwy_field_new_transposed(const GwyField *field,
-                         const GwyRectangle *rectangle,
+                         const GwyFieldPart *fpart,
                          gboolean transform_offsets)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height))
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     GwyField *part = gwy_field_new_sized(height, width, FALSE);
@@ -222,34 +221,33 @@ gwy_field_new_transposed(const GwyField *field,
 /**
  * gwy_field_transpose:
  * @src: Source two-dimensional data field.
- * @srcrectangle: Area in field @src to transpose.  Pass %NULL to operate on
- *                entire @src.
+ * @srcpart: Area in field @src to transpose.  Pass %NULL to operate on
+ *           entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
  *
  * Copies data from one field to another, transposing it.
  *
- * The transposed rectangle is defined by @srcrectangle and it is copied to
+ * The transposed rectangle is defined by @srcpart and it is copied to
  * @dest starting from (@destcol, @destrow).  Its width in the source
  * corresponds to height in the destination and vice versa.
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * the part of the rectangle that is corresponds to data inside @src and @dest
  * is copied.  This can also mean nothing is copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_field_transpose(const GwyField *src,
-                    const GwyRectangle *srcrectangle,
+                    const GwyFieldPart *srcpart,
                     GwyField *dest,
                     guint destcol, guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_field_limit_rectangles(src, srcrectangle,
-                                     dest, destcol, destrow,
-                                     TRUE, &col, &row, &width, &height))
+    if (!_gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                TRUE, &col, &row, &width, &height))
         return;
 
     swap_xy(src, col, row, width, height, dest, destcol, destrow);
@@ -354,19 +352,19 @@ gwy_field_new_rotated_simple(const GwyField *field,
  * guint i, remainder;
  *
  * for (i = 0; i < width/block_size; i++) {
- *     GwyRectangle rectangle = {
+ *     GwyFieldPart fpart = {
  *         col + i*block_size, row, block_size, height
  *     };
- *     gwy_field_part_transpose(field, &rectangle, workspace, 0, 0);
+ *     gwy_field_part_transpose(field, &fpart, workspace, 0, 0);
  *     // Process block_size rows in workspace row-wise fashion, possibly put
  *     // back the processed data with another gwy_field_part_transpose.
  * }
  * remainder = width % block_size;
  * if (remainder) {
- *     GwyRectangle rectangle = {
+ *     GwyFieldPart fpart = {
  *         col + width/block_size*block_size, row, remainder, height
  *     };
- *     gwy_field_part_transpose(field, &rectangle, workspace, 0, 0);
+ *     gwy_field_part_transpose(field, &fpart, workspace, 0, 0);
  *     // Process block_size rows in workspace row-wise fashion, possibly put
  *     // back the processed data with another gwy_field_part_transpose.
  * }

@@ -598,7 +598,7 @@ count_row(const guint32 *row,
  * @len: Part length (number of items).
  * @value: %TRUE to count ones, %FALSE to count zeroes.
  *
- * Counts set or unset bits in a rectangular part of a mask line.
+ * Counts set or unset bits in a mask line.
  *
  * Returns: The number of bits equal to @value.
  **/

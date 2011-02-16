@@ -370,12 +370,12 @@ row_convolve_fft(const GwyField *field,
 /**
  * gwy_field_row_convolve:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
  * @kernel: Kenrel to convolve @field with.
  * @exterior: Exterior pixels handling.
@@ -393,15 +393,14 @@ row_convolve_fft(const GwyField *field,
  **/
 void
 gwy_field_row_convolve(const GwyField *field,
-                       const GwyRectangle *rectangle,
+                       const GwyFieldPart *fpart,
                        GwyField *target,
                        const GwyLine *kernel,
                        GwyExteriorType exterior,
                        gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, target, col, row, width, height,
                                     &targetcol, &targetrow))
         return;
@@ -798,12 +797,12 @@ convolve_fft(const GwyField *field,
 /**
  * gwy_field_convolve:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
  * @kernel: Kenrel to convolve @field with.
  * @exterior: Exterior pixels handling.
@@ -822,15 +821,14 @@ convolve_fft(const GwyField *field,
  **/
 void
 gwy_field_convolve(const GwyField *field,
-                   const GwyRectangle* rectangle,
+                   const GwyFieldPart *fpart,
                    GwyField *target,
                    const GwyField *kernel,
                    GwyExteriorType exterior,
                    gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, target, col, row, width, height,
                                     &targetcol, &targetrow))
         return;
@@ -897,8 +895,8 @@ make_gaussian_kernel(GwyLine *kernel,
 /**
  * gwy_field_extend:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to extend.  Pass %NULL to extend entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to extend.  Pass %NULL to extend entire @field.
  * @left: Number of pixels to extend to the left (towards lower column indices).
  * @right: Number of pixels to extend to the right (towards higher column
  *         indices).
@@ -923,15 +921,14 @@ make_gaussian_kernel(GwyLine *kernel,
  **/
 GwyField*
 gwy_field_extend(const GwyField *field,
-                 const GwyRectangle *rectangle,
+                 const GwyFieldPart *fpart,
                  guint left, guint right,
                  guint up, guint down,
                  GwyExteriorType exterior,
                  gdouble fill_value)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height))
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
@@ -958,12 +955,12 @@ gwy_field_extend(const GwyField *field,
 /**
  * gwy_field_filter_gaussian:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
  * @hsigma: Horizontal sigma parameter (square root of dispersion) of the
  *          Gaussian, in pixels.
@@ -972,7 +969,7 @@ gwy_field_extend(const GwyField *field,
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
- * Filters a rectangular part of a field with a Gaussian filter.
+ * Filters a field with a Gaussian filter.
  *
  * The Gausian is normalised, i.e. the filter is sum-preserving.
  *
@@ -983,7 +980,7 @@ gwy_field_extend(const GwyField *field,
  **/
 void
 gwy_field_filter_gaussian(const GwyField *field,
-                          const GwyRectangle* rectangle,
+                          const GwyFieldPart* rectangle,
                           GwyField *target,
                           gdouble hsigma, gdouble vsigma,
                           GwyExteriorType exterior,
@@ -1122,15 +1119,14 @@ nonlinearity_block(gdouble *a,
 
 static void
 filter_5x5(const GwyField *field,
-           const GwyRectangle* rectangle,
+           const GwyFieldPart *fpart,
            GwyField *target,
            GwyFilterType filter,
            GwyExteriorType exterior,
            gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, target, col, row, width, height,
                                     &targetcol, &targetrow))
         return;
@@ -1186,7 +1182,7 @@ combine_results_hypot(gdouble *results)
 
 static void
 combined_gradient_filter(const GwyField *field,
-                         const GwyRectangle* rectangle,
+                         const GwyFieldPart *fpart,
                          GwyField *target,
                          const gdouble *kdata1, const gdouble *kdata2,
                          guint kxres, guint kyres,
@@ -1194,8 +1190,7 @@ combined_gradient_filter(const GwyField *field,
                          gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, target, col, row, width, height,
                                     &targetcol, &targetrow))
         return;
@@ -1222,12 +1217,12 @@ combined_gradient_filter(const GwyField *field,
 /**
  * gwy_field_filter_standard:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
  * @filter: Filter to apply.
  * @exterior: Exterior pixels handling.
@@ -1237,7 +1232,7 @@ combined_gradient_filter(const GwyField *field,
  **/
 void
 gwy_field_filter_standard(const GwyField *field,
-                          const GwyRectangle* rectangle,
+                          const GwyFieldPart* rectangle,
                           GwyField *target,
                           GwyFilterType filter,
                           GwyExteriorType exterior,
@@ -1649,12 +1644,12 @@ filter_median_gsequence(const GwyField *field,
 /**
  * gwy_field_filter_median:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
  * @kernel: Kernel mask defining the shape of the area of which the median
  *          is taken.  XXX: At present its content is ignored, the shape is
@@ -1666,15 +1661,14 @@ filter_median_gsequence(const GwyField *field,
  **/
 void
 gwy_field_filter_median(const GwyField *field,
-                        const GwyRectangle* rectangle,
+                        const GwyFieldPart *fpart,
                         GwyField *target,
                         const GwyMaskField *kernel,
                         GwyExteriorType exterior,
                         gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, target, col, row, width, height,
                                     &targetcol, &targetrow))
         return;

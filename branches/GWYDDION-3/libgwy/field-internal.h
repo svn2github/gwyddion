@@ -74,24 +74,24 @@ typedef void (*RectExtendFunc)(const gdouble *in,
                                gdouble value);
 
 G_GNUC_INTERNAL
-gboolean _gwy_field_check_rectangle(const GwyField *field,
-                                    const GwyRectangle *rectangle,
+gboolean _gwy_field_check_part(const GwyField *field,
+                                    const GwyFieldPart *fpart,
                                     guint *col,
                                     guint *row,
                                     guint *width,
                                     guint *height);
 
 G_GNUC_INTERNAL
-gboolean _gwy_field_limit_rectangles(const GwyField *src,
-                                     const GwyRectangle *srcrectangle,
-                                     const GwyField *dest,
-                                     guint destcol,
-                                     guint destrow,
-                                     gboolean transpose,
-                                     guint *col,
-                                     guint *row,
-                                     guint *width,
-                                     guint *height);
+gboolean _gwy_field_limit_parts(const GwyField *src,
+                                const GwyFieldPart *srcpart,
+                                const GwyField *dest,
+                                guint destcol,
+                                guint destrow,
+                                gboolean transpose,
+                                guint *col,
+                                guint *row,
+                                guint *width,
+                                guint *height);
 
 G_GNUC_INTERNAL
 gboolean _gwy_field_check_target(const GwyField *field,
@@ -105,7 +105,7 @@ gboolean _gwy_field_check_target(const GwyField *field,
 
 G_GNUC_INTERNAL
 gboolean _gwy_field_check_mask(const GwyField *field,
-                               const GwyRectangle *rectangle,
+                               const GwyFieldPart *fpart,
                                const GwyMaskField *mask,
                                GwyMaskingType *masking,
                                guint *col,

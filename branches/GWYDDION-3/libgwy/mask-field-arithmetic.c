@@ -164,7 +164,7 @@ copy_part(const GwyMaskField *src,
  *
  * Copies data from one mask field to another.
  *
- * The copied rectangle is defined by @srcrectangle and it is copied to @dest
+ * The copied rectangle is defined by @srcpart and it is copied to @dest
  * starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
@@ -175,15 +175,14 @@ copy_part(const GwyMaskField *src,
  **/
 void
 gwy_mask_field_copy(const GwyMaskField *src,
-                    const GwyRectangle *srcrectangle,
+                    const GwyFieldPart *srcpart,
                     GwyMaskField *dest,
                     guint destcol,
                     guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_limit_rectangles(src, srcrectangle,
-                                          dest, destcol, destrow,
-                                          FALSE, &col, &row, &width, &height))
+    if (!_gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                     FALSE, &col, &row, &width, &height))
         return;
 
     if (width == src->xres
@@ -294,20 +293,19 @@ clear_part(GwyMaskField *field,
 /**
  * gwy_mask_field_fill:
  * @field: A two-dimensional mask field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @value: Value to fill the rectangle with.
  *
- * Fills a rectangular part of a mask field with the specified value.
+ * Fills a mask field with the specified value.
  **/
 void
 gwy_mask_field_fill(GwyMaskField *field,
-                    const GwyRectangle *rectangle,
+                    const GwyFieldPart *fpart,
                     gboolean value)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_rectangle(field, rectangle,
-                                         &col, &row, &width, &height))
+    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return;
 
     if (width == field->xres) {
@@ -328,9 +326,9 @@ gwy_mask_field_fill(GwyMaskField *field,
 /**
  * gwy_mask_field_fill_ellipse:
  * @field: A two-dimensional mask field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
- * @entire_rectangle: Pass %TRUE to set or clear all pixels in @rectangle.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @entire_rectangle: Pass %TRUE to set or clear all pixels in @fpart.
  *                    Pixels inside the ellipse will be set and those outside
  *                    will be cleared (or the other way round, depending on
  *                    @value).  Passing %FALSE means only pixels inside the
@@ -339,7 +337,7 @@ gwy_mask_field_fill(GwyMaskField *field,
  *
  * Fills an elliptical part of a mask field.
  *
- * The ellipse to fill is bound by @rectangle.
+ * The ellipse to fill is bound by @fpart.
  *
  * Note discretised ellipses with one dimension very small and even and the
  * other large (at least hundred times larger than the small one) may not
@@ -356,13 +354,12 @@ gwy_mask_field_fill(GwyMaskField *field,
  **/
 void
 gwy_mask_field_fill_ellipse(GwyMaskField *field,
-                            const GwyRectangle *rectangle,
+                            const GwyFieldPart *fpart,
                             gboolean entire_rectangle,
                             gboolean value)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_rectangle(field, rectangle,
-                                         &col, &row, &width, &height))
+    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return;
 
     // We could use Bresenham but we need to fill the ellipse so it would
@@ -429,18 +426,17 @@ invert_part(GwyMaskField *field,
 /**
  * gwy_mask_field_invert:
  * @field: A two-dimensional mask field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  *
  * Inverts values in a mask field.
  **/
 static void
 gwy_mask_field_invert(GwyMaskField *field,
-                      const GwyRectangle *rectangle)
+                      const GwyFieldPart *fpart)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_rectangle(field, rectangle,
-                                         &col, &row, &width, &height))
+    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return;
     invert_part(field, col, row, width, height);
     gwy_mask_field_invalidate(field);
@@ -616,8 +612,8 @@ logical_part(const GwyMaskField *src,
  * gwy_mask_field_part_logical:
  * @field: A two-dimensional mask field to modify and the first operand of
  *         the logical operation.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @operand: A two-dimensional mask field representing second operand of the
  *           logical operation.  It can be %NULL for degenerate operations that
  *           do not depend on the second operand.
@@ -625,10 +621,9 @@ logical_part(const GwyMaskField *src,
  * @oprow: Operand row in @dest.
  * @op: Logical operation to perform.
  *
- * Modifies a rectangular part of a mask field by logical operation with
- * another mask field.
+ * Modifies a mask field by logical operation with another mask field.
  *
- * The copied rectangle is defined by @rectangle and it is modified using data
+ * The copied rectangle is defined by @fpart and it is modified using data
  * in @operand starting from (@opcol, @oprow).  Note that although this method
  * resembles gwy_mask_field_copy() the arguments convention is different: the
  * destination comes first then the operand, similarly to in
@@ -642,7 +637,7 @@ logical_part(const GwyMaskField *src,
  **/
 void
 gwy_mask_field_part_logical(GwyMaskField *field,
-                            const GwyRectangle *rectangle,
+                            const GwyFieldPart *fpart,
                             const GwyMaskField *operand,
                             guint opcol,
                             guint oprow,
@@ -652,11 +647,11 @@ gwy_mask_field_part_logical(GwyMaskField *field,
     g_return_if_fail(op <= GWY_LOGICAL_ONE);
 
     guint col, row, width, height;
-    if (rectangle) {
-        col = rectangle->col;
-        row = rectangle->row;
-        width = rectangle->width;
-        height = rectangle->height;
+    if (fpart) {
+        col = fpart->col;
+        row = fpart->row;
+        width = fpart->width;
+        height = fpart->height;
         if (col >= field->xres || row >= field->yres)
             return;
         width = MIN(width, field->xres - col);
@@ -678,7 +673,7 @@ gwy_mask_field_part_logical(GwyMaskField *field,
     if (op == GWY_LOGICAL_A)
         return;
 
-    GwyRectangle rect = { col, row, width, height };
+    GwyFieldPart rect = { col, row, width, height };
     if (op == GWY_LOGICAL_ZERO) {
         gwy_mask_field_fill(field, &rect, FALSE);
         return;

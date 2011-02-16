@@ -318,8 +318,8 @@ test_field_copy(void)
             col = destcol = 0;
             width = sxres;
         }
-        GwyRectangle rectangle = { col, row, width, height };
-        gwy_field_copy(source, &rectangle, dest, destcol, destrow);
+        GwyFieldPart fpart = { col, row, width, height };
+        gwy_field_copy(source, &fpart, dest, destcol, destrow);
         field_part_copy_dumb(source, col, row, width, height,
                              reference, destcol, destrow);
         field_assert_equal(dest, reference);
@@ -357,8 +357,8 @@ test_field_new_part(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyRectangle rectangle = { col, row, width, height };
-        GwyField *part = gwy_field_new_part(source, &rectangle, TRUE);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *part = gwy_field_new_part(source, &fpart, TRUE);
         GwyField *reference = gwy_field_new_sized(width, height, FALSE);
         gwy_field_set_xreal(reference, source->xreal*width/xres);
         gwy_field_set_yreal(reference, source->yreal*height/yres);
@@ -682,29 +682,29 @@ test_field_surface_area(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyRectangle rectangle = { col, row, width, height };
+        GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
 
         gwy_field_set_xreal(field, xres/sqrt(xres*yres));
         gwy_field_set_yreal(field, yres/sqrt(xres*yres));
         gdouble area_include, area_exclude, area_ignore;
-        area_include = gwy_field_surface_area(field, &rectangle,
+        area_include = gwy_field_surface_area(field, &fpart,
                                               mask, GWY_MASK_INCLUDE);
-        area_exclude = gwy_field_surface_area(field, &rectangle,
+        area_exclude = gwy_field_surface_area(field, &fpart,
                                               mask, GWY_MASK_EXCLUDE);
-        area_ignore = gwy_field_surface_area(field, &rectangle,
+        area_ignore = gwy_field_surface_area(field, &fpart,
                                              mask, GWY_MASK_IGNORE);
         g_assert_cmpfloat(fabs(area_include + area_exclude
                                - area_ignore)/area_ignore, <=, 1e-9);
 
         gwy_field_set_xreal(field, 1.0);
         gwy_field_set_yreal(field, 1.0);
-        area_include = gwy_field_surface_area(field, &rectangle,
+        area_include = gwy_field_surface_area(field, &fpart,
                                               mask, GWY_MASK_INCLUDE);
-        area_exclude = gwy_field_surface_area(field, &rectangle,
+        area_exclude = gwy_field_surface_area(field, &fpart,
                                               mask, GWY_MASK_EXCLUDE);
-        area_ignore = gwy_field_surface_area(field, &rectangle,
+        area_ignore = gwy_field_surface_area(field, &fpart,
                                              mask, GWY_MASK_IGNORE);
         g_assert_cmpfloat(fabs(area_include + area_exclude
                                - area_ignore)/area_ignore, <=, 1e-9);
@@ -739,16 +739,16 @@ test_field_mean(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyRectangle rectangle = { col, row, width, height };
+        GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint m = gwy_mask_field_part_count(mask, &rectangle, TRUE);
-        guint n = gwy_mask_field_part_count(mask, &rectangle, FALSE);
-        gdouble mean_include = gwy_field_mean(field, &rectangle,
+        guint m = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &fpart, FALSE);
+        gdouble mean_include = gwy_field_mean(field, &fpart,
                                               mask, GWY_MASK_INCLUDE);
-        gdouble mean_exclude = gwy_field_mean(field, &rectangle,
+        gdouble mean_exclude = gwy_field_mean(field, &fpart,
                                               mask, GWY_MASK_EXCLUDE);
-        gdouble mean_ignore = gwy_field_mean(field, &rectangle,
+        gdouble mean_ignore = gwy_field_mean(field, &fpart,
                                              mask, GWY_MASK_IGNORE);
 
         if (isnan(mean_include)) {
@@ -799,20 +799,20 @@ test_field_rms(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyRectangle rectangle = { col, row, width, height };
+        GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint m = gwy_mask_field_part_count(mask, &rectangle, TRUE);
-        guint n = gwy_mask_field_part_count(mask, &rectangle, FALSE);
-        gdouble mean_include = gwy_field_mean(field, &rectangle,
+        guint m = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &fpart, FALSE);
+        gdouble mean_include = gwy_field_mean(field, &fpart,
                                               mask, GWY_MASK_INCLUDE);
-        gdouble mean_exclude = gwy_field_mean(field, &rectangle,
+        gdouble mean_exclude = gwy_field_mean(field, &fpart,
                                               mask, GWY_MASK_EXCLUDE);
-        gdouble rms_include = gwy_field_rms(field, &rectangle,
+        gdouble rms_include = gwy_field_rms(field, &fpart,
                                             mask, GWY_MASK_INCLUDE);
-        gdouble rms_exclude = gwy_field_rms(field, &rectangle,
+        gdouble rms_exclude = gwy_field_rms(field, &fpart,
                                             mask, GWY_MASK_EXCLUDE);
-        gdouble rms_ignore = gwy_field_rms(field, &rectangle,
+        gdouble rms_ignore = gwy_field_rms(field, &fpart,
                                            mask, GWY_MASK_IGNORE);
 
         if (isnan(mean_include)) {
@@ -870,21 +870,21 @@ test_field_statistics(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyRectangle rectangle = { col, row, width, height };
+        GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint m = gwy_mask_field_part_count(mask, &rectangle, TRUE);
-        guint n = gwy_mask_field_part_count(mask, &rectangle, FALSE);
+        guint m = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &fpart, FALSE);
         gdouble mean_include, rms_include;
-        gwy_field_statistics(field, &rectangle, mask, GWY_MASK_INCLUDE,
+        gwy_field_statistics(field, &fpart, mask, GWY_MASK_INCLUDE,
                              &mean_include, NULL, &rms_include,
                              NULL, NULL);
         gdouble mean_exclude, rms_exclude;
-        gwy_field_statistics(field, &rectangle, mask, GWY_MASK_EXCLUDE,
+        gwy_field_statistics(field, &fpart, mask, GWY_MASK_EXCLUDE,
                              &mean_exclude, NULL, &rms_exclude,
                              NULL, NULL);
         gdouble mean_ignore, rms_ignore;
-        gwy_field_statistics(field, &rectangle, mask, GWY_MASK_IGNORE,
+        gwy_field_statistics(field, &fpart, mask, GWY_MASK_IGNORE,
                              &mean_ignore, NULL, &rms_ignore,
                              NULL, NULL);
 
@@ -1621,28 +1621,28 @@ level_for_cf(GwyField *field,
              GwyMaskingType masking)
 {
     for (guint i = 0; i < field->yres; i++) {
-        GwyRectangle rectangle = { 0, i, field->xres, 1 };
-        gdouble mean = gwy_field_mean(field, &rectangle, mask, masking);
+        GwyFieldPart fpart = { 0, i, field->xres, 1 };
+        gdouble mean = gwy_field_mean(field, &fpart, mask, masking);
         if (!isnan(mean))
-            gwy_field_add(field, &rectangle, NULL, GWY_MASK_IGNORE, -mean);
+            gwy_field_add(field, &fpart, NULL, GWY_MASK_IGNORE, -mean);
     }
 }
 
 static GwyLine*
 cf_dumb(const GwyField *field,
-        const GwyRectangle *rectangle,
+        const GwyFieldPart *fpart,
         const GwyMaskField *mask,
         GwyMaskingType masking,
         gboolean level,
         gboolean do_hhcf)
 {
-    GwyField *part = gwy_field_new_part(field, rectangle, FALSE);
+    GwyField *part = gwy_field_new_part(field, fpart, FALSE);
     GwyLine *cf = gwy_line_new_sized(part->xres, TRUE);
     GwyLine *weights = gwy_line_new_sized(part->xres, TRUE);
 
     GwyMaskField *mpart = NULL;
     if (mask && masking != GWY_MASK_IGNORE)
-        mpart = gwy_mask_field_new_part(mask, rectangle);
+        mpart = gwy_mask_field_new_part(mask, fpart);
 
     if (level)
         level_for_cf(part, mpart, masking);
@@ -1791,20 +1791,20 @@ test_field_distributions_acf_partial(void)
             guint height = g_rand_int_range(rng, 1, yres+1);
             guint col = g_rand_int_range(rng, 0, xres-width+1);
             guint row = g_rand_int_range(rng, 0, yres-height+1);
-            GwyRectangle rectangle = { col, row, width, height };
+            GwyFieldPart fpart = { col, row, width, height };
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
-            GwyLine *acf = gwy_field_row_acf(field, &rectangle,
+            GwyLine *acf = gwy_field_row_acf(field, &fpart,
                                              mask, GWY_MASK_IGNORE, lvl);
-            GwyLine *acf0 = gwy_field_row_acf(field, &rectangle,
+            GwyLine *acf0 = gwy_field_row_acf(field, &fpart,
                                               mask, GWY_MASK_EXCLUDE, lvl);
-            GwyLine *acf1 = gwy_field_row_acf(field, &rectangle,
+            GwyLine *acf1 = gwy_field_row_acf(field, &fpart,
                                               mask, GWY_MASK_INCLUDE, lvl);
-            GwyLine *dumb_acf = cf_dumb(field, &rectangle,
+            GwyLine *dumb_acf = cf_dumb(field, &fpart,
                                         mask, GWY_MASK_IGNORE, lvl, FALSE);
-            GwyLine *dumb_acf0 = cf_dumb(field, &rectangle,
+            GwyLine *dumb_acf0 = cf_dumb(field, &fpart,
                                          mask, GWY_MASK_EXCLUDE, lvl, FALSE);
-            GwyLine *dumb_acf1 = cf_dumb(field, &rectangle,
+            GwyLine *dumb_acf1 = cf_dumb(field, &fpart,
                                          mask, GWY_MASK_INCLUDE, lvl, FALSE);
 
             line_assert_numerically_equal(acf, dumb_acf, 1e-13);
@@ -1938,20 +1938,20 @@ test_field_distributions_hhcf_partial(void)
             guint height = g_rand_int_range(rng, 1, yres+1);
             guint col = g_rand_int_range(rng, 0, xres-width+1);
             guint row = g_rand_int_range(rng, 0, yres-height+1);
-            GwyRectangle rectangle = { col, row, width, height };
+            GwyFieldPart fpart = { col, row, width, height };
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
-            GwyLine *hhcf = gwy_field_row_hhcf(field, &rectangle,
+            GwyLine *hhcf = gwy_field_row_hhcf(field, &fpart,
                                                mask, GWY_MASK_IGNORE, lvl);
-            GwyLine *hhcf0 = gwy_field_row_hhcf(field, &rectangle,
+            GwyLine *hhcf0 = gwy_field_row_hhcf(field, &fpart,
                                                 mask, GWY_MASK_EXCLUDE, lvl);
-            GwyLine *hhcf1 = gwy_field_row_hhcf(field, &rectangle,
+            GwyLine *hhcf1 = gwy_field_row_hhcf(field, &fpart,
                                                 mask, GWY_MASK_INCLUDE, lvl);
-            GwyLine *dumb_hhcf = cf_dumb(field, &rectangle,
+            GwyLine *dumb_hhcf = cf_dumb(field, &fpart,
                                          mask, GWY_MASK_IGNORE, lvl, TRUE);
-            GwyLine *dumb_hhcf0 = cf_dumb(field, &rectangle,
+            GwyLine *dumb_hhcf0 = cf_dumb(field, &fpart,
                                           mask, GWY_MASK_EXCLUDE, lvl, TRUE);
-            GwyLine *dumb_hhcf1 = cf_dumb(field, &rectangle,
+            GwyLine *dumb_hhcf1 = cf_dumb(field, &fpart,
                                           mask, GWY_MASK_INCLUDE, lvl, TRUE);
 
             line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
@@ -2074,8 +2074,8 @@ field_extend_one(GwyExteriorType exterior)
         GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(source, rng);
 
-        GwyRectangle rectangle = { col, row, width, height };
-        GwyField *field = gwy_field_extend(source, &rectangle,
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *field = gwy_field_extend(source, &fpart,
                                            left, right, up, down,
                                            exterior, G_E);
 
@@ -2152,18 +2152,18 @@ field_convolve_row_interior_one(GwyExteriorType exterior)
             guint k0 = (kres - 1)/2;
             GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
 
-            GwyRectangle rectangle = { k0, 0, res - kres/2 - k0, yres };
+            GwyFieldPart fpart = { k0, 0, res - kres/2 - k0, yres };
             for (guint pos = 0; pos < kres; pos++) {
                 gwy_line_clear_full(kernel);
                 kernel->data[pos] = 1.0;
 
-                g_assert_cmpuint(rectangle.col + rectangle.width, <=, res);
+                g_assert_cmpuint(fpart.col + fpart.width, <=, res);
                 gwy_field_copy_full(source, field);
-                gwy_field_row_convolve(field, &rectangle, field, kernel,
+                gwy_field_row_convolve(field, &fpart, field, kernel,
                                        exterior, G_E);
 
-                // Everything outside @rectangle must be equal to @source.
-                // Data inside @rectangle must be equal to @source data shifted
+                // Everything outside @fpart must be equal to @source.
+                // Data inside @fpart must be equal to @source data shifted
                 // to the right by kres-1 - pos - (kres-1)/2.
                 guint shift = (kres-1 - pos) - k0;
                 for (guint i = 0; i < yres; i++) {
@@ -2171,8 +2171,8 @@ field_convolve_row_interior_one(GwyExteriorType exterior)
                     const gdouble *drow = field->data + i*res;
                     for (guint j = 0; j < res; j++) {
                         // Outside
-                        if (j < rectangle.col
-                            || j >= rectangle.col + rectangle.width)
+                        if (j < fpart.col
+                            || j >= fpart.col + fpart.width)
                             g_assert_cmpfloat(drow[j], ==, srow[j]);
                         // Inside
                         else {
@@ -2211,16 +2211,16 @@ field_convolve_row_exterior_one(GwyExteriorType exterior)
             guint width = g_rand_int_range(rng, 0, res+1);
             guint col = g_rand_int_range(rng, 0, res-width+1);
             guint pos = g_rand_int_range(rng, 0, kres);
-            GwyRectangle rectangle = { col, 0, width, yres };
+            GwyFieldPart fpart = { col, 0, width, yres };
 
             gwy_line_clear_full(kernel);
             kernel->data[pos] = 1.0;
             gwy_field_copy_full(source, field);
-            gwy_field_row_convolve(field, &rectangle, field, kernel,
+            gwy_field_row_convolve(field, &fpart, field, kernel,
                                    exterior, G_E);
 
-            // Everything outside @rectangle must be equal to @source.
-            // Data inside @rectangle must be equal to @source data shifted
+            // Everything outside @fpart must be equal to @source.
+            // Data inside @fpart must be equal to @source data shifted
             // to the right by kres-1 - pos - (kres-1)/2, possibly extended.
             gint shift = ((gint)kres-1 - (gint)pos) - (gint)k0;
             for (guint i = 0; i < yres; i++) {
@@ -2228,8 +2228,8 @@ field_convolve_row_exterior_one(GwyExteriorType exterior)
                 const gdouble *drow = field->data + i*res;
                 for (guint j = 0; j < res; j++) {
                     // Outside
-                    if (j < rectangle.col
-                        || j >= rectangle.col + rectangle.width)
+                    if (j < fpart.col
+                        || j >= fpart.col + fpart.width)
                         g_assert_cmpfloat(drow[j], ==, srow[j]);
                     // Inside
                     else {
@@ -2707,11 +2707,11 @@ field_convolve_field_one(GwyExteriorType exterior)
         GwyField *kernel = gwy_field_new_sized(kxres, kyres, TRUE);
         kernel->data[xpos + ypos*kxres] = 1.0;
         gwy_field_invalidate(kernel);
-        GwyRectangle rectangle = { col, row, width, height };
-        gwy_field_convolve(field, &rectangle, field, kernel, exterior, G_E);
+        GwyFieldPart fpart = { col, row, width, height };
+        gwy_field_convolve(field, &fpart, field, kernel, exterior, G_E);
 
-        // Everything outside @rectangle must be equal to @source.
-        // Data inside @rectangle must be equal to @source data shifted
+        // Everything outside @fpart must be equal to @source.
+        // Data inside @fpart must be equal to @source data shifted
         // down by kyres-1 - ypos - (ykres-1)/2
         // and to the right by kxres-1 - xpos - (kxres-1)/2
         gint xshift = ((gint)kxres-1 - (gint)xpos) - (gint)kx0;
@@ -2721,10 +2721,10 @@ field_convolve_field_one(GwyExteriorType exterior)
             const gdouble *drow = field->data + i*xres;
             for (guint j = 0; j < xres; j++) {
                 // Outside
-                if (j < rectangle.col
-                    || j >= rectangle.col + rectangle.width
-                    || i < rectangle.row
-                    || i >= rectangle.row + rectangle.height) {
+                if (j < fpart.col
+                    || j >= fpart.col + fpart.width
+                    || i < fpart.row
+                    || i >= fpart.row + fpart.height) {
                     g_assert_cmpfloat(drow[j], ==, srow[j]);
                 }
                 // Inside
@@ -3318,10 +3318,10 @@ field_move_periodically(GwyField *field,
                                           MAX(xmove, 0), MAX(-xmove, 0),
                                           MAX(ymove, 0), MAX(-ymove, 0),
                                           GWY_EXTERIOR_PERIODIC, 0.0);
-    GwyRectangle rectangle = {
+    GwyFieldPart fpart = {
         MAX(-xmove, 0), MAX(-ymove, 0), field->xres, field->yres
     };
-    gwy_field_copy(extended, &rectangle, field, 0, 0);
+    gwy_field_copy(extended, &fpart, field, 0, 0);
     g_object_unref(extended);
 }
 

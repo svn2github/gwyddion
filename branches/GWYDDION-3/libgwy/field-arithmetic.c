@@ -120,7 +120,7 @@ gwy_field_is_incompatible(GwyField *field1,
 /**
  * gwy_field_clear:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to clear.  Pass %NULL to clear entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -129,12 +129,12 @@ gwy_field_is_incompatible(GwyField *field1,
  **/
 void
 gwy_field_clear(GwyField *field,
-                const GwyRectangle *rectangle,
+                const GwyFieldPart *fpart,
                 const GwyMaskField *mask,
                 GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
@@ -178,28 +178,28 @@ gwy_field_clear_full(GwyField *field)
 /**
  * gwy_field_fill:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to fill.  Pass %NULL to fill entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @value: Value to fill the rectangle with.
+ * @value: Value to fill the part with.
  *
  * Fills a field with the specified value.
  **/
 void
 gwy_field_fill(GwyField *field,
-               const GwyRectangle *rectangle,
+               const GwyFieldPart *fpart,
                const GwyMaskField *mask,
                GwyMaskingType masking,
                gdouble value)
 {
     if (!value) {
-        gwy_field_clear(field, rectangle, mask, masking);
+        gwy_field_clear(field, fpart, mask, masking);
         return;
     }
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
@@ -247,7 +247,7 @@ gwy_field_fill_full(GwyField *field,
 /**
  * gwy_field_add:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -257,13 +257,13 @@ gwy_field_fill_full(GwyField *field,
  **/
 void
 gwy_field_add(GwyField *field,
-              const GwyRectangle *rectangle,
+              const GwyFieldPart *fpart,
               const GwyMaskField *mask,
               GwyMaskingType masking,
               gdouble value)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
@@ -308,7 +308,7 @@ gwy_field_add(GwyField *field,
 /**
  * gwy_field_multiply:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -318,13 +318,13 @@ gwy_field_add(GwyField *field,
  **/
 void
 gwy_field_multiply(GwyField *field,
-                   const GwyRectangle *rectangle,
+                   const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMaskingType masking,
                    gdouble value)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
@@ -373,7 +373,7 @@ gwy_field_multiply(GwyField *field,
 /**
  * gwy_field_normalize:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -389,7 +389,7 @@ gwy_field_multiply(GwyField *field,
  **/
 gboolean
 gwy_field_normalize(GwyField *field,
-                    const GwyRectangle *rectangle,
+                    const GwyFieldPart *fpart,
                     const GwyMaskField *mask,
                     GwyMaskingType masking,
                     gdouble mean,
@@ -397,7 +397,7 @@ gwy_field_normalize(GwyField *field,
                     GwyNormalizeFlags flags)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return FALSE;
 
@@ -405,8 +405,8 @@ gwy_field_normalize(GwyField *field,
     if (flags & ~NORMALIZE_ALL)
         g_warning("Unknown normalization flags 0x%x.", flags & ~NORMALIZE_ALL);
 
-    gdouble fmean = gwy_field_mean(field, rectangle, mask, masking);
-    gdouble frms = gwy_field_rms(field, rectangle, mask, masking);
+    gdouble fmean = gwy_field_mean(field, fpart, mask, masking);
+    gdouble frms = gwy_field_rms(field, fpart, mask, masking);
     // If only rms is requested we must correct the shift to keep the mean.
     if ((flags & GWY_NORMALIZE_RMS) && !(flags & GWY_NORMALIZE_MEAN)) {
         mean = fmean;
@@ -420,7 +420,7 @@ gwy_field_normalize(GwyField *field,
             if (flags & GWY_NORMALIZE_ENTIRE_DATA)
                 gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, q);
             else
-                gwy_field_multiply(field, rectangle, mask, masking, q);
+                gwy_field_multiply(field, fpart, mask, masking, q);
         }
         else
             retval = FALSE;
@@ -429,7 +429,7 @@ gwy_field_normalize(GwyField *field,
         if (flags & GWY_NORMALIZE_ENTIRE_DATA)
             gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, mean - q*fmean);
         else
-            gwy_field_add(field, rectangle, mask, masking, mean - q*fmean);
+            gwy_field_add(field, fpart, mask, masking, mean - q*fmean);
     }
 
     return retval;
@@ -438,7 +438,7 @@ gwy_field_normalize(GwyField *field,
 /**
  * gwy_field_apply_func:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -450,7 +450,7 @@ gwy_field_normalize(GwyField *field,
  **/
 void
 gwy_field_apply_func(GwyField *field,
-                     const GwyRectangle *rectangle,
+                     const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
                      GwyRealFunc func,
@@ -459,7 +459,7 @@ gwy_field_apply_func(GwyField *field,
     g_return_if_fail(func);
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
@@ -489,7 +489,7 @@ gwy_field_apply_func(GwyField *field,
 /**
  * gwy_field_add_field:
  * @src: Source two-dimensional data data field.
- * @srcrectangle: Area in field @src to add.  Pass %NULL to add entire @src.
+ * @srcpart: Area in field @src to add.  Pass %NULL to add entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
@@ -497,11 +497,11 @@ gwy_field_apply_func(GwyField *field,
  *
  * Adds data from one field to another.
  *
- * The rectangle of added data is defined by @srcrectangle and the values are
+ * The rectangle of added data is defined by @srcpart and the values are
  * added to @dest starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * the part of the rectangle that is corresponds to data inside @src and @dest
  * is added.  This can also mean @dest is not modified at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
@@ -518,16 +518,15 @@ gwy_field_apply_func(GwyField *field,
  **/
 void
 gwy_field_add_field(const GwyField *src,
-                    const GwyRectangle *srcrectangle,
+                    const GwyFieldPart *srcpart,
                     GwyField *dest,
                     guint destcol,
                     guint destrow,
                     gdouble factor)
 {
     guint col, row, width, height;
-    if (!_gwy_field_limit_rectangles(src, srcrectangle,
-                                     dest, destcol, destrow,
-                                     FALSE, &col, &row, &width, &height))
+    if (!_gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                FALSE, &col, &row, &width, &height))
         return;
     if (!factor)
         return;
@@ -574,7 +573,7 @@ gwy_field_hypot_field(GwyField *field,
 /**
  * gwy_field_clamp:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to process.  Pass %NULL to process entire @field.
  * @lower: Lower limit value (it must not be greater than @upper).
  * @upper: Upper limit value (it must not be smaller than @lower).
@@ -586,14 +585,13 @@ gwy_field_hypot_field(GwyField *field,
  **/
 guint
 gwy_field_clamp(GwyField *field,
-                const GwyRectangle *rectangle,
+                const GwyFieldPart *fpart,
                 gdouble lower, gdouble upper)
 {
     g_return_val_if_fail(lower <= upper, 0);
 
     guint col, row, width, height;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height))
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return 0;
 
     guint count = 0;
@@ -671,7 +669,7 @@ gwy_field_clamp(GwyField *field,
  * @GWY_NORMALIZE_MEAN: Normalise the mean value to speficied.
  * @GWY_NORMALIZE_RMS: Nomalise the root mean square to speficied.
  * @GWY_NORMALIZE_ENTIRE_DATA: Apply the normalisation to entire data if
- *                             masking is used, i.e. masking and rectangle are
+ *                             masking is used, i.e. masking and part are
  *                             used only for the calculation of the mean or rms
  *                             value.
  *

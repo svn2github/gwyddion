@@ -111,8 +111,8 @@ plane_fit_mask(guint id,
 /**
  * gwy_field_fit_plane:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -120,7 +120,7 @@ plane_fit_mask(guint id,
  * @bx: Location to store the x coefficient, or %NULL.
  * @by: Location to store the y coefficient, or %NULL.
  *
- * Fits a plane through a rectangular part of a field.
+ * Fits a plane through a field.
  *
  * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
@@ -132,13 +132,13 @@ plane_fit_mask(guint id,
  **/
 gboolean
 gwy_field_fit_plane(const GwyField *field,
-                    const GwyRectangle *rectangle,
+                    const GwyFieldPart *fpart,
                     const GwyMaskField *mask,
                     GwyMaskingType masking,
                     gdouble *a, gdouble *bx, gdouble *by)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow)
         || width < 2 || height < 2)
         goto fail;
@@ -210,8 +210,8 @@ gwy_field_subtract_plane(GwyField *field,
 /**
  * gwy_field_inclination:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -221,8 +221,7 @@ gwy_field_subtract_plane(GwyField *field,
  * @bx: Location to store the x coefficient, or %NULL.
  * @by: Location to store the y coefficient, or %NULL.
  *
- * Fits a plane through a rectangular part of a field by straighenting up
- * facets.
+ * Fits a plane through a field by straighenting up facets.
  *
  * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
@@ -252,7 +251,7 @@ gwy_field_subtract_plane(GwyField *field,
  **/
 gboolean
 gwy_field_inclination(const GwyField *field,
-                      const GwyRectangle *rectangle,
+                      const GwyFieldPart *fpart,
                       const GwyMaskField *mask,
                       GwyMaskingType masking,
                       gdouble damping,
@@ -260,7 +259,7 @@ gwy_field_inclination(const GwyField *field,
                       gdouble *by)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow)
         || width < 2 || height < 2)
         goto fail;
@@ -448,8 +447,8 @@ enumerate_powers(const guint *powers, guint nterms,
 /**
  * gwy_field_fit_poly:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -463,7 +462,7 @@ enumerate_powers(const guint *powers, guint nterms,
  *          Array of length @nterms to store the individual term coefficients
  *          to.
  *
- * Fits a general polynomial through a rectangular part of a field.
+ * Fits a general polynomial through a field.
  *
  * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
@@ -484,7 +483,7 @@ enumerate_powers(const guint *powers, guint nterms,
  **/
 gboolean
 gwy_field_fit_poly(const GwyField *field,
-                   const GwyRectangle *rectangle,
+                   const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMaskingType masking,
                    const guint *xpowers, const guint *ypowers,
@@ -495,7 +494,7 @@ gwy_field_fit_poly(const GwyField *field,
         return TRUE;
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 

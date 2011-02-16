@@ -112,7 +112,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
     g_type_class_peek(GWY_TYPE_RGBA);
     g_type_class_peek(GWY_TYPE_XY);
     g_type_class_peek(GWY_TYPE_XYZ);
-    g_type_class_peek(GWY_TYPE_RECTANGLE);
+    g_type_class_peek(GWY_TYPE_FIELD_PART);
     g_type_class_peek(GWY_TYPE_FIT_PARAM);
 
     g_type_class_peek(GWY_TYPE_CONTAINER);

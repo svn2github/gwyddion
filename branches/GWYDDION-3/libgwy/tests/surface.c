@@ -242,8 +242,8 @@ test_surface_regularize_part(void)
                 yfrom = (row + 0.5)*gwy_field_dy(field) + field->yoff,
                 yto = yfrom + (height - 1)*gwy_field_dy(field);
 
-        GwyRectangle rectangle = { col, row, width, height };
-        GwyField *part = gwy_field_new_part(field, &rectangle, TRUE);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *part = gwy_field_new_part(field, &fpart, TRUE);
         GwyField *newfield = gwy_surface_regularize
                                      (surface, GWY_SURFACE_REGULARIZE_PREVIEW,
                                       xfrom, xto, yfrom, yto, width, height);

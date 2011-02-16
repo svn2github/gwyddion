@@ -17,25 +17,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testlibgwy.h"
+#ifndef __LIBGWY_FIELD_PART_H__
+#define __LIBGWY_FIELD_PART_H__
 
-/***************************************************************************
- *
- * Rectangle
- *
- ***************************************************************************/
+#include <glib-object.h>
 
-void
-test_rectangle_boxed(void)
-{
-    GwyRectangle rectangle = { 1, 2, 3, 4 };
-    GwyRectangle *copy = serialize_boxed_and_back(&rectangle,
-                                                  GWY_TYPE_RECTANGLE);
-    g_assert_cmpfloat(rectangle.col, ==, copy->col);
-    g_assert_cmpfloat(rectangle.row, ==, copy->row);
-    g_assert_cmpfloat(rectangle.width, ==, copy->width);
-    g_assert_cmpfloat(rectangle.height, ==, copy->height);
-    g_boxed_free(GWY_TYPE_RECTANGLE, copy);
-}
+G_BEGIN_DECLS
+
+typedef struct {
+    guint col;
+    guint row;
+    guint width;
+    guint height;
+} GwyFieldPart;
+
+#define GWY_TYPE_FIELD_PART (gwy_field_part_get_type())
+
+GType         gwy_field_part_get_type(void)                      G_GNUC_CONST;
+GwyFieldPart* gwy_field_part_copy    (const GwyFieldPart *fpart) G_GNUC_MALLOC;
+void          gwy_field_part_free    (GwyFieldPart *fpart);
+
+G_END_DECLS
+
+#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

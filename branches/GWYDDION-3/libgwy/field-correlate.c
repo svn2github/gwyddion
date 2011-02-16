@@ -40,12 +40,12 @@ enum {
 /**
  * gwy_field_correlate:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
+ * @fpart: (allow-none):
  *             Area in @field to process.  Pass %NULL to process entire @field.
  * @score: A two-dimensional data field where the result will be placed.
  *         It may be @field for an in-place modification.  Its dimensions may
- *         match either @field or @rectangle.  In the former case the
- *         placement of result is determined by @rectangle; in the latter case
+ *         match either @field or @fpart.  In the former case the
+ *         placement of result is determined by @fpart; in the latter case
  *         the result fills the entire @score.
  * @kernel: Kernel, i.e. the detail for which the correlation score is
  *          calculated.  It is always used as-is.  If you want it to have zero
@@ -71,7 +71,7 @@ enum {
  **/
 void
 gwy_field_correlate(const GwyField *field,
-                    const GwyRectangle* rectangle,
+                    const GwyFieldPart *fpart,
                     GwyField *score,
                     const GwyField *kernel,
                     const GwyMaskField *kmask,
@@ -80,8 +80,7 @@ gwy_field_correlate(const GwyField *field,
                     gdouble fill_value)
 {
     guint col, row, width, height, scorecol, scorerow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, score, col, row, width, height,
                                     &scorecol, &scorerow))
         return;
@@ -121,7 +120,7 @@ gwy_field_correlate(const GwyField *field,
     guint kcount = kmask ? gwy_mask_field_count(kmask, NULL, TRUE) : kxres*kyres;
     if (!kcount) {
         g_object_unref(maskedkernel);
-        GwyRectangle rect = { scorecol, scorerow, width, height };
+        GwyFieldPart rect = { scorecol, scorerow, width, height };
         gwy_field_clear(score, &rect, NULL, GWY_MASK_IGNORE);
         return;
     }
@@ -169,7 +168,7 @@ gwy_field_correlate(const GwyField *field,
     // If levelling is requested, shift the global mean value to zero first to
     // reduce numerical errors.
     if (level) {
-        gdouble mean = gwy_field_mean(field, rectangle, NULL, GWY_MASK_IGNORE);
+        gdouble mean = gwy_field_mean(field, fpart, NULL, GWY_MASK_IGNORE);
         for (guint k = 0; k < xsize*ysize; k++)
             extdata[k] -= mean;
     }
@@ -360,9 +359,9 @@ multiply_shifted_rects(const gdouble *extfield,
  * @field: A two-dimensional data field.
  * @reference: A field to cross-corelate with @field.  It must have the same
  *             dimensions as @field.
- * @rectangle: (allow-none):
- *             Area in @field and @reference to process.  Pass %NULL to process
- *             entire fields.
+ * @fpart: (allow-none):
+ *         Area in @field and @reference to process.  Pass %NULL to process
+ *         entire fields.
  * @score: (out caller-allocates) (allow-none):
  *         A two-dimensional data field where the scores will be placed,
  *         or %NULL.
@@ -396,8 +395,8 @@ multiply_shifted_rects(const gdouble *extfield,
  * placed up or to the left in @reference with respect to @field.
  *
  * The dimensions of of @score, @xoff and @yoff fields may match either @field
- * or @rectangle (all three must have the same dimensions though).  In the
- * former case the placement of result is determined by @rectangle; in the
+ * or @fpart (all three must have the same dimensions though).  In the
+ * former case the placement of result is determined by @fpart; in the
  * latter case the result fills the entire target field.
  **/
 // FIXME: Instead of colsearch and rowsearch we could also accept an arbitrary
@@ -409,7 +408,7 @@ multiply_shifted_rects(const gdouble *extfield,
 void
 gwy_field_crosscorrelate(const GwyField *field,
                          const GwyField *reference,
-                         const GwyRectangle* rectangle,
+                         const GwyFieldPart *fpart,
                          GwyField *score,
                          GwyField *xoff,
                          GwyField *yoff,
@@ -447,8 +446,7 @@ gwy_field_crosscorrelate(const GwyField *field,
         return;
 
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
         || !_gwy_field_check_target(field, target, col, row, width, height,
                                     &targetcol, &targetrow))
         return;
@@ -474,7 +472,7 @@ gwy_field_crosscorrelate(const GwyField *field,
     guint kcount = gwy_mask_field_count(kernel, NULL, TRUE);
 
     if (!kcount) {
-        GwyRectangle rect = { targetcol, targetrow, width, height };
+        GwyFieldPart rect = { targetcol, targetrow, width, height };
         if (score)
             gwy_field_clear(score, &rect, NULL, GWY_MASK_IGNORE);
         if (xoff)
@@ -536,7 +534,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
     if (level) {
-        gdouble mean = gwy_field_mean(field, rectangle, NULL, GWY_MASK_IGNORE);
+        gdouble mean = gwy_field_mean(field, fpart, NULL, GWY_MASK_IGNORE);
         for (guint k = 0; k < xsize*ysize; k++)
             extfield[k] -= mean;
     }
@@ -555,8 +553,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
     if (level) {
-        gdouble mean = gwy_field_mean(reference,
-                                      rectangle, NULL, GWY_MASK_IGNORE);
+        gdouble mean = gwy_field_mean(reference, fpart, NULL, GWY_MASK_IGNORE);
         for (guint k = 0; k < xsize*ysize; k++)
             extreference[k] -= mean;
     }
@@ -571,7 +568,7 @@ gwy_field_crosscorrelate(const GwyField *field,
     g_object_unref(unitkernel);
     fftw_free(extkernel);
 
-    GwyRectangle targetrect = { targetcol, targetrow, width, height };
+    GwyFieldPart targetrect = { targetcol, targetrow, width, height };
     if (xoff)
         gwy_field_clear(xoff, &targetrect, NULL, GWY_MASK_IGNORE);
     if (yoff)

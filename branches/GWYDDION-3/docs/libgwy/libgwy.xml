@@ -50,7 +50,7 @@
   </chapter>
   <chapter id='libgwy-two-dimensional-data'>
     <title>Two-Dimensional Data</title>
-    <xi:include href="xml/rectangle.xml"/>
+    <xi:include href="xml/field-part.xml"/>
     <xi:include href="xml/field.xml"/>
     <xi:include href="xml/field-correlate.xml"/>
     <xi:include href="xml/field-arithmetic.xml"/>

@@ -49,8 +49,8 @@ sanitize_range(gdouble *min,
 /**
  * gwy_field_value_dist:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -70,7 +70,7 @@ sanitize_range(gdouble *min,
  **/
 GwyLine*
 gwy_field_value_dist(const GwyField *field,
-                     const GwyRectangle *rectangle,
+                     const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
                      gboolean cumulative,
@@ -79,7 +79,7 @@ gwy_field_value_dist(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
@@ -87,13 +87,13 @@ gwy_field_value_dist(const GwyField *field,
     if (min < max) {
         // We know the range but have to figure out how many pixels we have.
         guint nabove, nbelow;
-        n = gwy_field_count_above_below(field, rectangle, mask, masking,
+        n = gwy_field_count_above_below(field, fpart, mask, masking,
                                         max, min, TRUE, &nabove, &nbelow);
         n -= nabove + nbelow;
     }
     else {
         // We know the number of pixels but have to figure out the range.
-        GwyRectangle rect = { maskcol, maskrow, width, height };
+        GwyFieldPart rect = { maskcol, maskrow, width, height };
         if (masking == GWY_MASK_INCLUDE)
             n = gwy_mask_field_part_count(mask, &rect, TRUE);
         else if (masking == GWY_MASK_EXCLUDE)
@@ -101,7 +101,7 @@ gwy_field_value_dist(const GwyField *field,
         else
             n = width*height;
 
-        gwy_field_min_max(field, rectangle, mask, masking, &min, &max);
+        gwy_field_min_max(field, fpart, mask, masking, &min, &max);
         sanitize_range(&min, &max);
     }
     if (!npoints) {
@@ -427,8 +427,8 @@ slope_dist_vert_gather_mask(const GwyField *field,
 /**
  * gwy_field_slope_dist:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -447,7 +447,7 @@ slope_dist_vert_gather_mask(const GwyField *field,
  **/
 GwyLine*
 gwy_field_slope_dist(const GwyField *field,
-                     const GwyRectangle *rectangle,
+                     const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
                      GwyOrientation orientation,
@@ -456,7 +456,7 @@ gwy_field_slope_dist(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
@@ -819,8 +819,8 @@ row_level_and_count(const gdouble *in,
 /**
  * gwy_field_row_acf:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -829,8 +829,7 @@ row_level_and_count(const gdouble *in,
  *         (subtract the mean value of each row) are available at present.  For
  *         SPM data, you usually wish to pass 1.
  *
- * Calculates the row-wise autocorrelation function of a rectangular part of a
- * field.
+ * Calculates the row-wise autocorrelation function of a field.
  *
  * The calculated ACF has the natural number of points, i.e. @width.
  *
@@ -845,14 +844,14 @@ row_level_and_count(const gdouble *in,
  **/
 GwyLine*
 gwy_field_row_acf(const GwyField *field,
-                  const GwyRectangle *rectangle,
+                  const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
                   GwyMaskingType masking,
                   guint level)
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
@@ -943,8 +942,8 @@ fail:
 /**
  * gwy_field_row_psdf:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -973,7 +972,7 @@ fail:
  **/
 GwyLine*
 gwy_field_row_psdf(const GwyField *field,
-                   const GwyRectangle *rectangle,
+                   const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMaskingType masking,
                    GwyWindowingType windowing,
@@ -981,7 +980,7 @@ gwy_field_row_psdf(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
@@ -1081,8 +1080,8 @@ fail:
 /**
  * gwy_field_row_hhcf:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -1107,14 +1106,14 @@ fail:
  **/
 GwyLine*
 gwy_field_row_hhcf(const GwyField *field,
-                   const GwyRectangle *rectangle,
+                   const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMaskingType masking,
                    guint level)
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 

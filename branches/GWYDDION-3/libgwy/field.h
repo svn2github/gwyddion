@@ -23,7 +23,7 @@
 #include <libgwy/serializable.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/unit.h>
-#include <libgwy/rectangle.h>
+#include <libgwy/field-part.h>
 
 G_BEGIN_DECLS
 
@@ -76,7 +76,7 @@ GwyField*       gwy_field_new_sized    (guint xres,
 GwyField*       gwy_field_new_alike    (const GwyField *model,
                                         gboolean clear)                     G_GNUC_MALLOC;
 GwyField*       gwy_field_new_part     (const GwyField *field,
-                                        const GwyRectangle *rectangle,
+                                        const GwyFieldPart *fpart,
                                         gboolean keep_offsets)              G_GNUC_MALLOC;
 GwyField*       gwy_field_new_resampled(const GwyField *field,
                                         guint xres,
@@ -91,7 +91,7 @@ void            gwy_field_set_size     (GwyField *field,
                                         gboolean clear);
 void            gwy_field_data_changed (GwyField *field);
 void            gwy_field_copy         (const GwyField *src,
-                                        const GwyRectangle *srcrectangle,
+                                        const GwyFieldPart *srcrectangle,
                                         GwyField *dest,
                                         guint destcol,
                                         guint destrow);

@@ -44,10 +44,10 @@ typedef enum {
 } GwyLogicalOperator;
 
 void         gwy_mask_field_fill         (GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
+                                          const GwyFieldPart *fpart,
                                           gboolean value);
 void         gwy_mask_field_fill_ellipse (GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
+                                          const GwyFieldPart *fpart,
                                           gboolean entire_rectangle,
                                           gboolean value);
 void         gwy_mask_field_logical      (GwyMaskField *field,
@@ -55,7 +55,7 @@ void         gwy_mask_field_logical      (GwyMaskField *field,
                                           const GwyMaskField *mask,
                                           GwyLogicalOperator op);
 void         gwy_mask_field_part_logical (GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
+                                          const GwyFieldPart *fpart,
                                           const GwyMaskField *operand,
                                           guint opcol,
                                           guint oprow,

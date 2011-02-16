@@ -39,10 +39,10 @@ GwyField* gwy_field_new_rotated_simple(const GwyField *field,
                                        GwySimpleRotation rotation,
                                        gboolean transform_offsets)       G_GNUC_MALLOC;
 GwyField* gwy_field_new_transposed    (const GwyField *field,
-                                       const GwyRectangle *rectangle,
+                                       const GwyFieldPart *fpart,
                                        gboolean transform_offsets)       G_GNUC_MALLOC;
 void      gwy_field_transpose         (const GwyField *src,
-                                       const GwyRectangle *srcrectangle,
+                                       const GwyFieldPart *srcrectangle,
                                        GwyField *dest,
                                        guint destcol,
                                        guint destrow);

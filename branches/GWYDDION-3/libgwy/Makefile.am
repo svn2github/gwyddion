@@ -30,6 +30,7 @@ public_headers = \
 	$(srcdir)/field-distributions.h \
 	$(srcdir)/field-filter.h \
 	$(srcdir)/field-level.h \
+	$(srcdir)/field-part.h \
 	$(srcdir)/field-read.h \
 	$(srcdir)/field-statistics.h \
 	$(srcdir)/field-transform.h \
@@ -53,7 +54,6 @@ public_headers = \
 	$(srcdir)/mask-line.h \
 	$(srcdir)/math.h \
 	$(srcdir)/pack.h \
-	$(srcdir)/rectangle.h \
 	$(srcdir)/resource.h \
 	$(srcdir)/rgba.h \
 	$(srcdir)/selection.h \
@@ -116,6 +116,7 @@ libgwy3_la_SOURCES = \
 	field-distributions.c \
 	field-filter.c \
 	field-level.c \
+	field-part.c \
 	field-read.c \
 	field-statistics.c \
 	field-transform.c \
@@ -141,7 +142,6 @@ libgwy3_la_SOURCES = \
 	math.c \
 	object-internal.c \
 	pack.c \
-	rectangle.c \
 	resource.c \
 	rgba.c \
 	selection.c \

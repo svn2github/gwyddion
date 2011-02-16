@@ -54,24 +54,24 @@ typedef struct {
 } GwyGrain;
 
 G_GNUC_INTERNAL
-gboolean _gwy_mask_field_check_rectangle(const GwyMaskField *field,
-                                         const GwyRectangle *rectangle,
-                                         guint *col,
-                                         guint *row,
-                                         guint *width,
-                                         guint *height);
+gboolean _gwy_mask_field_check_part(const GwyMaskField *field,
+                                    const GwyFieldPart *fpart,
+                                    guint *col,
+                                    guint *row,
+                                    guint *width,
+                                    guint *height);
 
 G_GNUC_INTERNAL
-gboolean _gwy_mask_field_limit_rectangles(const GwyMaskField *src,
-                                          const GwyRectangle *srcrectangle,
-                                          const GwyMaskField *dest,
-                                          guint destcol,
-                                          guint destrow,
-                                          gboolean transpose,
-                                          guint *col,
-                                          guint *row,
-                                          guint *width,
-                                          guint *height);
+gboolean _gwy_mask_field_limit_parts(const GwyMaskField *src,
+                                     const GwyFieldPart *srcpart,
+                                     const GwyMaskField *dest,
+                                     guint destcol,
+                                     guint destrow,
+                                     gboolean transpose,
+                                     guint *col,
+                                     guint *row,
+                                     guint *width,
+                                     guint *height);
 
 G_END_DECLS
 

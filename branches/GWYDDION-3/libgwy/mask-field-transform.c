@@ -612,7 +612,7 @@ swap_xy_src_aligned(const GwyMaskField *source,
 /**
  * gwy_mask_field_new_transposed:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to extract.  Pass %NULL to process entire @field.
+ * @fpart: Area in @field to extract.  Pass %NULL to process entire @field.
  *
  * Transposes a mask field, making rows columns and vice versa.
  *
@@ -621,11 +621,10 @@ swap_xy_src_aligned(const GwyMaskField *source,
  **/
 GwyMaskField*
 gwy_mask_field_new_transposed(const GwyMaskField *field,
-                              const GwyRectangle *rectangle)
+                              const GwyFieldPart *fpart)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_rectangle(field, rectangle,
-                                         &col, &row, &width, &height))
+    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     GwyMaskField *newfield = gwy_mask_field_new_sized(height, width, FALSE);
@@ -641,43 +640,42 @@ gwy_mask_field_new_transposed(const GwyMaskField *field,
 /**
  * gwy_mask_field_transpose:
  * @src: Source two-dimensional mask field.
- * @srcrectangle: Area in field @src to transpose.  Pass %NULL to operate on
- *                entire @src.
+ * @srcpart: Area in field @src to transpose.  Pass %NULL to operate on
+ *           entire @src.
  * @dest: Destination two-dimensional mask field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
  *
  * Copies data from one mask field to another, transposing it.
  *
- * The transposed rectangle is defined by @srcrectangle and it is copied to
+ * The transposed rectangle is defined by @srcpart and it is copied to
  * @dest starting from (@destcol, @destrow).  Its width in the source
  * corresponds to height in the destination and vice versa.
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * the part of the rectangle that is corresponds to data inside @src and @dest
  * is copied.  This can also mean nothing is copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_mask_field_transpose(const GwyMaskField *src,
-                         const GwyRectangle *srcrectangle,
+                         const GwyFieldPart *srcpart,
                          GwyMaskField *dest,
                          guint destcol, guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_limit_rectangles(src, srcrectangle,
-                                          dest, destcol, destrow,
-                                          TRUE, &col, &row, &width, &height))
+    if (!_gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                     TRUE, &col, &row, &width, &height))
         return;
 
     // FIXME: Direct transposition of unaligned data would be nice.  Can it be
     // written without going insane?
     if ((col & 0x1f) && (destcol & 0x1f)) {
-        GwyRectangle rectangle = { col, row, width, height };
-        GwyMaskField *buffer = gwy_mask_field_new_transposed(src, &rectangle);
-        rectangle = (GwyRectangle){0, 0, height, width};
-        gwy_mask_field_copy(buffer, &rectangle, dest, destcol, destrow);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyMaskField *buffer = gwy_mask_field_new_transposed(src, &fpart);
+        fpart = (GwyFieldPart){0, 0, height, width};
+        gwy_mask_field_copy(buffer, &fpart, dest, destcol, destrow);
         g_object_unref(buffer);
     }
     else if (col & 0x1f)

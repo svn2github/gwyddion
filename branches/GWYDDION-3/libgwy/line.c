@@ -657,7 +657,7 @@ gwy_line_copy_full(const GwyLine *src,
  * copied to @dest starting from @destpos.
  *
  * There are no limitations on the indices or dimensions.  Only the part of the
- * block that is corrsponds to data inside @src and @dest is copied.  This can
+ * block that is corresponds to data inside @src and @dest is copied.  This can
  * also mean nothing is copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.

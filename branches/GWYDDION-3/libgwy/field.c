@@ -633,18 +633,18 @@ gwy_field_new_alike(const GwyField *model,
 /**
  * gwy_field_new_part:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to extract to the new field.  Passing %NULL
- *             creates an identical copy of @field, similarly to
- *             gwy_field_duplicate() (though with @keep_offsets set to %FALSE
- *             the offsets are reset).
+ * @fpart: (allow-none):
+ *         Area in @field to extract to the new field.  Passing %NULL
+ *         creates an identical copy of @field, similarly to
+ *         gwy_field_duplicate() (though with @keep_offsets set to %FALSE
+ *         the offsets are reset).
  * @keep_offsets: %TRUE to set the X and Y offsets of the new field
- *                using @rectangle and @field offsets.  %FALSE to set offsets
+ *                using @fpart and @field offsets.  %FALSE to set offsets
  *                of the new field to zeroes.
  *
- * Creates a new two-dimensional field as a rectangular part of another field.
+ * Creates a new two-dimensional field as a part of another field.
  *
- * The rectangle specified by @rectangle must be entirely contained in @field.
+ * The part specified by @fpart must be entirely contained in @field.
  * Both dimensions must be non-zero.
  *
  * Data are physically copied, i.e. changing the new field data does not change
@@ -655,12 +655,11 @@ gwy_field_new_alike(const GwyField *model,
  **/
 GwyField*
 gwy_field_new_part(const GwyField *field,
-                   const GwyRectangle *rectangle,
+                   const GwyFieldPart *fpart,
                    gboolean keep_offsets)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height))
+    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     if (width == field->xres && height == field->yres) {
@@ -671,7 +670,7 @@ gwy_field_new_part(const GwyField *field,
     }
 
     GwyField *part = gwy_field_new_sized(width, height, FALSE);
-    gwy_field_copy(field, rectangle, part, 0, 0);
+    gwy_field_copy(field, fpart, part, 0, 0);
     part->xreal = width*gwy_field_dx(field);
     part->yreal = height*gwy_field_dy(field);
 
@@ -822,33 +821,32 @@ gwy_field_data_changed(GwyField *field)
 /**
  * gwy_field_copy:
  * @src: Source two-dimensional data data field.
- * @srcrectangle: Area in field @src to copy.  Pass %NULL to copy entire @src.
+ * @srcpart: Area in field @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
  *
  * Copies data from one field to another.
  *
- * The copied rectangle is defined by @srcrectangle and it is copied to @dest
+ * The copied rectangle is defined by @srcpart and it is copied to @dest
  * starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * the part of the rectangle that is corresponds to data inside @src and @dest
  * is copied.  This can also mean no data are copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_field_copy(const GwyField *src,
-               const GwyRectangle *srcrectangle,
+               const GwyFieldPart *srcpart,
                GwyField *dest,
                guint destcol,
                guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_field_limit_rectangles(src, srcrectangle,
-                                     dest, destcol, destrow,
-                                     FALSE, &col, &row, &width, &height))
+    if (!_gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                FALSE, &col, &row, &width, &height))
         return;
 
     if (width == src->xres && width == dest->xres) {
@@ -1054,26 +1052,26 @@ gwy_field_get_unit_z(const GwyField *field)
 }
 
 gboolean
-_gwy_field_check_rectangle(const GwyField *field,
-                           const GwyRectangle *rectangle,
-                           guint *col, guint *row,
-                           guint *width, guint *height)
+_gwy_field_check_part(const GwyField *field,
+                      const GwyFieldPart *fpart,
+                      guint *col, guint *row,
+                      guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
-    if (rectangle) {
-        if (!rectangle->width || !rectangle->height)
+    if (fpart) {
+        if (!fpart->width || !fpart->height)
             return FALSE;
         // The two separate conditions are to catch integer overflows.
-        g_return_val_if_fail(rectangle->col < field->xres, FALSE);
-        g_return_val_if_fail(rectangle->width <= field->xres - rectangle->col,
+        g_return_val_if_fail(fpart->col < field->xres, FALSE);
+        g_return_val_if_fail(fpart->width <= field->xres - fpart->col,
                              FALSE);
-        g_return_val_if_fail(rectangle->row < field->yres, FALSE);
-        g_return_val_if_fail(rectangle->height <= field->yres - rectangle->row,
+        g_return_val_if_fail(fpart->row < field->yres, FALSE);
+        g_return_val_if_fail(fpart->height <= field->yres - fpart->row,
                              FALSE);
-        *col = rectangle->col;
-        *row = rectangle->row;
-        *width = rectangle->width;
-        *height = rectangle->height;
+        *col = fpart->col;
+        *row = fpart->row;
+        *width = fpart->width;
+        *height = fpart->height;
     }
     else {
         *col = *row = 0;
@@ -1085,22 +1083,22 @@ _gwy_field_check_rectangle(const GwyField *field,
 }
 
 gboolean
-_gwy_field_limit_rectangles(const GwyField *src,
-                            const GwyRectangle *srcrectangle,
-                            const GwyField *dest,
-                            guint destcol, guint destrow,
-                            gboolean transpose,
-                            guint *col, guint *row,
-                            guint *width, guint *height)
+_gwy_field_limit_parts(const GwyField *src,
+                       const GwyFieldPart *srcpart,
+                       const GwyField *dest,
+                       guint destcol, guint destrow,
+                       gboolean transpose,
+                       guint *col, guint *row,
+                       guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_FIELD(src), FALSE);
     g_return_val_if_fail(GWY_IS_FIELD(dest), FALSE);
 
-    if (srcrectangle) {
-        *col = srcrectangle->col;
-        *row = srcrectangle->row;
-        *width = srcrectangle->width;
-        *height = srcrectangle->height;
+    if (srcpart) {
+        *col = srcpart->col;
+        *row = srcpart->row;
+        *width = srcpart->width;
+        *height = srcpart->height;
         if (*col >= src->xres || *row >= src->yres)
             return FALSE;
         *width = MIN(*width, src->xres - *col);
@@ -1162,20 +1160,20 @@ _gwy_field_check_target(const GwyField *field,
     }
 
     g_critical("Target field dimensions match neither source field nor the "
-               "rectangle.");
+               "part.");
     return FALSE;
 }
 
 gboolean
 _gwy_field_check_mask(const GwyField *field,
-                      const GwyRectangle *rectangle,
+                      const GwyFieldPart *fpart,
                       const GwyMaskField *mask,
                       GwyMaskingType *masking,
                       guint *col, guint *row,
                       guint *width, guint *height,
                       guint *maskcol, guint *maskrow)
 {
-    if (!_gwy_field_check_rectangle(field, rectangle, col, row, width, height))
+    if (!_gwy_field_check_part(field, fpart, col, row, width, height))
         return FALSE;
     if (mask && (*masking == GWY_MASK_INCLUDE
                  || *masking == GWY_MASK_EXCLUDE)) {
@@ -1188,7 +1186,7 @@ _gwy_field_check_mask(const GwyField *field,
             *maskcol = *maskrow = 0;
         else {
             g_critical("Mask dimensions match neither the entire field "
-                       "nor the rectangle.");
+                       "nor the part.");
             return FALSE;
         }
     }

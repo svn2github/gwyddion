@@ -37,7 +37,7 @@ deserialize/boxed
 deserialize/garbage
 xy/boxed
 xyz/boxed
-rectangle/boxed
+field-part/boxed
 rgba/boxed
 rgba/interpolate
 unit/parse

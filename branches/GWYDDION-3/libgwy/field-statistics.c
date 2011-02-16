@@ -30,13 +30,13 @@
 /**
  * gwy_field_min_max:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
- *        entire field, in the second case over the rectangle.
+ *        entire field, in the second case over the part.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @min: (out) (allow-none):
  *       Location to store the minimum to, or %NULL.
@@ -53,14 +53,14 @@
  **/
 void
 gwy_field_min_max(const GwyField *field,
-                  const GwyRectangle *rectangle,
+                  const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
                   GwyMaskingType masking,
                   gdouble *min,
                   gdouble *max)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height,
                                &maskcol, &maskrow)) {
         GWY_MAYBE_SET(min, HUGE_VAL);
@@ -142,13 +142,13 @@ gwy_field_min_max_full(const GwyField *field,
 /**
  * gwy_field_mean:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
- *        entire field, in the second case over the rectangle.
+ *        entire field, in the second case just over the part.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Calculates the mean value of a field.
@@ -159,12 +159,12 @@ gwy_field_min_max_full(const GwyField *field,
  **/
 gdouble
 gwy_field_mean(const GwyField *field,
-               const GwyRectangle *rectangle,
+               const GwyFieldPart *fpart,
                const GwyMaskField *mask,
                GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return NAN;
 
@@ -230,13 +230,13 @@ gwy_field_mean_full(const GwyField *field)
 /**
  * gwy_field_median:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
- *        entire field, in the second case over the rectangle.
+ *        entire field, in the second case over the part.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Calculates the median value of a field.
@@ -247,12 +247,12 @@ gwy_field_mean_full(const GwyField *field)
  **/
 gdouble
 gwy_field_median(const GwyField *field,
-                 const GwyRectangle *rectangle,
+                 const GwyFieldPart *fpart,
                  const GwyMaskField *mask,
                  GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return NAN;
 
@@ -314,13 +314,13 @@ gwy_field_median_full(const GwyField *field)
 /**
  * gwy_field_rms:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
- *        entire field, in the second case over the rectangle.
+ *        entire field, in the second case over the part.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Calculates the root mean square of a field.
@@ -335,17 +335,17 @@ gwy_field_median_full(const GwyField *field)
  **/
 gdouble
 gwy_field_rms(const GwyField *field,
-              const GwyRectangle *rectangle,
+              const GwyFieldPart *fpart,
               const GwyMaskField *mask,
               GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return 0.0;
 
     const gdouble *base = field->data + row*field->xres + col;
-    gdouble avg = gwy_field_mean(field, rectangle, mask, masking);
+    gdouble avg = gwy_field_mean(field, fpart, mask, masking);
     gdouble rms = 0.0;
     gboolean full_field = FALSE;
     guint n = 0;
@@ -412,13 +412,13 @@ gwy_field_rms_full(const GwyField *field)
 /**
  * gwy_field_meansq:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
- *        entire field, in the second case over the rectangle.
+ *        entire field, in the second case over the part.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Calculates the mean square of a field.
@@ -434,12 +434,12 @@ gwy_field_rms_full(const GwyField *field)
  **/
 gdouble
 gwy_field_meansq(const GwyField *field,
-                 const GwyRectangle *rectangle,
+                 const GwyFieldPart *fpart,
                  const GwyMaskField *mask,
                  GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return 0.0;
 
@@ -488,13 +488,13 @@ gwy_field_meansq(const GwyField *field,
 /**
  * gwy_field_statistics:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
- *        entire field, in the second case over the rectangle.
+ *        entire field, in the second case over the part.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @mean: Location to store the mean value (Ra) to, or %NULL.
  * @ra: (out) (allow-none):
@@ -517,21 +517,21 @@ gwy_field_meansq(const GwyField *field,
  **/
 void
 gwy_field_statistics(const GwyField *field,
-                     const GwyRectangle *rectangle,
+                     const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
                      gdouble *mean, gdouble *ra, gdouble *rms,
                      gdouble *skew, gdouble *kurtosis)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
     if (!mean && !ra && !rms && !skew && !kurtosis)
         return;
 
     const gdouble *base = field->data + row*field->xres + col;
-    gdouble avg = gwy_field_mean(field, rectangle, mask, masking);
+    gdouble avg = gwy_field_mean(field, fpart, mask, masking);
     gdouble sumabs = 0.0, sum2 = 0.0, sum3 = 0.0, sum4 = 0.0;
     gboolean full_field = FALSE;
     guint n = 0;
@@ -612,8 +612,8 @@ fail:
 /**
  * gwy_field_count_above_below:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -637,7 +637,7 @@ fail:
  * thus straightfoward:
  * |[
  * guint nabove, nbelow, count;
- * gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ * gwy_data_field_count_in_range(field, fpart, mask, masking,
  *                               b, a, TRUE, &nabove, &nbelow);
  * count = nabove + nbelow;
  * ]|
@@ -647,7 +647,7 @@ fail:
  * the complements are open intervals):
  * |[
  * guint ntotal, nabove, nbelow, count;
- * ntotal = gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ * ntotal = gwy_data_field_count_in_range(field, fpart, mask, masking,
  *                                        b, a, TRUE, &nabove, &nbelow);
  * count = ntotal - (nabove + nbelow);
  * ]|
@@ -656,7 +656,7 @@ fail:
  * (@a,@b) is straightfoward:
  * |[
  * guint nabove, nbelow, count;
- * gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ * gwy_data_field_count_in_range(field, fpart, mask, masking,
  *                               b, a, FALSE, &nabove, &nbelow);
  * count = nabove + nbelow;
  * ]|
@@ -665,7 +665,7 @@ fail:
  * (@a,@b) uses complements:
  * |[
  * guint ntotal, nabove, nbelow, count;
- * ntotal = gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ * ntotal = gwy_data_field_count_in_range(field, fpart, mask, masking,
  *                                        b, a, TRUE, &nabove, &nbelow);
  * count = ntotal - (nabove + nbelow);
  * ]|
@@ -676,11 +676,11 @@ fail:
  *
  * Returns: The total number of values considered.  This is namely useful with
  *          masking, otherwise the returned value always equals to the number
- *          of pixels in @rectangle (or the entire field).
+ *          of pixels in @fpart (or the entire field).
  **/
 guint
 gwy_field_count_above_below(const GwyField *field,
-                            const GwyRectangle *rectangle,
+                            const GwyFieldPart *fpart,
                             const GwyMaskField *mask,
                             GwyMaskingType masking,
                             gdouble above, gdouble below,
@@ -688,7 +688,7 @@ gwy_field_count_above_below(const GwyField *field,
                             guint *nabove, guint *nbelow)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height,
                                &maskcol, &maskrow)) {
         GWY_MAYBE_SET(nabove, 0);
@@ -702,7 +702,7 @@ gwy_field_count_above_below(const GwyField *field,
             || mask->yres != field->yres)
             return gwy_mask_field_count(mask, NULL, TRUE);
         else
-            return gwy_mask_field_part_count(mask, rectangle, TRUE);
+            return gwy_mask_field_part_count(mask, fpart, TRUE);
     }
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -1172,8 +1172,8 @@ surface_area_mask2(const GwyField *field,
 /**
  * gwy_field_surface_area:
  * @field: A two-dimensional data field.
- * @rectangle: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -1188,12 +1188,12 @@ surface_area_mask2(const GwyField *field,
  **/
 gdouble
 gwy_field_surface_area(const GwyField *field,
-                       const GwyRectangle *rectangle,
+                       const GwyFieldPart *fpart,
                        const GwyMaskField *mask,
                        GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         return 0.0;
 
