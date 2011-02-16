@@ -91,7 +91,7 @@ void            gwy_field_set_size     (GwyField *field,
                                         gboolean clear);
 void            gwy_field_data_changed (GwyField *field);
 void            gwy_field_copy         (const GwyField *src,
-                                        const GwyFieldPart *srcrectangle,
+                                        const GwyFieldPart *srcpart,
                                         GwyField *dest,
                                         guint destcol,
                                         guint destrow);

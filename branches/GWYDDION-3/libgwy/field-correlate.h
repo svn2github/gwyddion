@@ -38,7 +38,7 @@ typedef enum {
 } GwyCrosscorrelationFlags;
 
 void      gwy_field_correlate      (const GwyField *field,
-                                    const GwyFieldPart* rectangle,
+                                    const GwyFieldPart *fpart,
                                     GwyField *score,
                                     const GwyField *kernel,
                                     const GwyMaskField *kmask,
@@ -47,7 +47,7 @@ void      gwy_field_correlate      (const GwyField *field,
                                     gdouble fill_value);
 void      gwy_field_crosscorrelate (const GwyField *field,
                                     const GwyField *reference,
-                                    const GwyFieldPart* rectangle,
+                                    const GwyFieldPart *fpart,
                                     GwyField *score,
                                     GwyField *xoff,
                                     GwyField *yoff,

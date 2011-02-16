@@ -91,7 +91,7 @@ void     gwy_field_apply_func (GwyField *field,
                                GwyRealFunc func,
                                gpointer user_data);
 void     gwy_field_add_field  (const GwyField *src,
-                               const GwyFieldPart *srcrectangle,
+                               const GwyFieldPart *srcpart,
                                GwyField *dest,
                                guint destcol,
                                guint destrow,
