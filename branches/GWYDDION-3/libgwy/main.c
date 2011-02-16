@@ -101,6 +101,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
     g_type_class_peek(GWY_TYPE_CURVE);
     g_type_class_peek(GWY_TYPE_FIELD);
     g_type_class_peek(GWY_TYPE_SURFACE);
+    g_type_class_peek(GWY_TYPE_BRICK);
 
     g_type_class_peek(GWY_TYPE_SELECTION);
 
@@ -113,6 +114,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
     g_type_class_peek(GWY_TYPE_XY);
     g_type_class_peek(GWY_TYPE_XYZ);
     g_type_class_peek(GWY_TYPE_FIELD_PART);
+    g_type_class_peek(GWY_TYPE_BRICK_PART);
     g_type_class_peek(GWY_TYPE_FIT_PARAM);
 
     g_type_class_peek(GWY_TYPE_CONTAINER);

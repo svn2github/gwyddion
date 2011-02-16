@@ -1252,7 +1252,7 @@ gwy_field_format_z(const GwyField *field,
  * @title: GwyField
  * @short_description: Two-dimensional data in regular grid
  *
- * #GwyField represents two dimensional data in a regular grid.
+ * #GwyField represents two-dimensional data in a regular grid.
  *
  * Data are stored in a flat array @data in #GwyField-struct as #gdouble
  * values, stored by rows.  This means the column index is the fast index, row
@@ -1372,7 +1372,7 @@ gwy_field_format_z(const GwyField *field,
  * This macro expands to a left-hand side expression.
  *
  * No argument validation is performed.  If you process the data in a loop,
- * you are encouraged to access #GwyField-struct.data directly.
+ * you are encouraged to access @data in #GwyField-struct directly.
  **/
 
 /**

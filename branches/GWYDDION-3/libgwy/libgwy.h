@@ -21,6 +21,8 @@
 #define __LIBGWY_H__
 
 #include <libgwy/array.h>
+#include <libgwy/brick.h>
+#include <libgwy/brick-part.h>
 #include <libgwy/container.h>
 #include <libgwy/curve.h>
 #include <libgwy/curve-statistics.h>

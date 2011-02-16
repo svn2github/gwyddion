@@ -870,7 +870,7 @@ gwy_line_format_y(GwyLine *line,
  * This macro expands to a left-hand side expression.
  *
  * No argument validation is performed.  If you process the data in a loop,
- * you are encouraged to access #GwyLine-struct.data directly.
+ * you are encouraged to access @data in #GwyLine-struct directly.
  **/
 
 /**
