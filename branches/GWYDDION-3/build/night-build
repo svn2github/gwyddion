@@ -53,7 +53,7 @@ function update_translations() {
       popd >/dev/null
       continue
     fi
-    make -k update-gmo
+    make -k all-yes
     for lang in *.po; do
       x=${lang%.po}
       echo -n "TRANSLATION $gettext_package $x: " 1>&2
