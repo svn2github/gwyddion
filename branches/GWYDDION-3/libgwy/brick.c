@@ -384,7 +384,7 @@ gwy_brick_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[12];
     it.value.v_double_array = brick->data;
-    it.array_size = brick->xres * brick->yres * brick->xres;
+    it.array_size = brick->xres * brick->yres * brick->zres;
     items->items[items->n++] = it;
     n++;
 
@@ -1319,7 +1319,7 @@ gwy_brick_format_z(const GwyBrick *brick,
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     gdouble max = MAX(brick->zreal, fabs(brick->zreal + brick->zoff));
-    gdouble unit = gwy_brick_dx(brick);
+    gdouble unit = gwy_brick_dz(brick);
     return gwy_unit_format_with_resolution(gwy_brick_get_unit_z(brick),
                                            style, max, unit);
 }
