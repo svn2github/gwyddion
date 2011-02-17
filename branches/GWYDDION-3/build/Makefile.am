@@ -6,6 +6,7 @@ EXTRA_DIST = \
 	check-serializable-types.py \
 	coverage-plot.py \
 	coverage-test.sh \
+	documentation-stats.py \
 	expand-test-list.py \
 	generate-library-def.py \
 	gtester.make \
@@ -18,5 +19,6 @@ EXTRA_DIST = \
 	Makevars.in \
 	test-report.xsl \
 	test-report-brief.xsl \
+	translation-stats.py \
 	update-POTFILES.in.sh \
 	vim-syn-gen.py

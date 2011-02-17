@@ -3,25 +3,42 @@
 import re, sys
 
 stat_types = {
-    'documented': 'good',
-    'incomplete': 'fuzzy',
-    'not documented': 'bad'
+    'translated': 'good',
+    'fuzzy': 'fuzzy',
+    'untranslated': 'bad'
 }
 total_width = 200
 
-def parse(filename):
-    group = re.sub(r'.*/(?P<group>\w+)-undocumented\.txt', r'\g<group>', filename)
-    stat = {'group': group}
-    total = 0
+def parse(filename, domain):
+    stats = []
     for line in file(filename):
-        line.strip()
-        m = re.match(r'^(?P<count>\d+)( symbols?)? (?P<what>[a-z ]+).$', line)
-        if m:
-            count = int(m.group('count'))
-            stat[m.group('what')] = count
-            total += count
-    stat['total'] = total
-    return stat
+        m = re.match(r'TRANSLATION\s+(?P<domain>\S+)\s+(?P<content>.*)\n', line)
+        if not m:
+            continue
+        if m.group('domain') != domain:
+            continue
+        line = m.group('content')
+        m = re.match(r'(?P<group>[a-zA-Z_@.]+):', line)
+        if not m:
+            sys.stderr.write('Malformed TRANSLATION line: %s\n' % line)
+            continue
+
+        stat = {'group': m.group('group')}
+
+        if stat['group'] == 'total':
+            continue
+        else:
+            sum = 0
+            for x in stat_types:
+                m = re.search(r'\b(?P<count>\d+) %s (message|translation)' % x,
+                              line)
+                if m:
+                    stat[x] = int(m.group('count'))
+                    sum += stat[x]
+            stat['total'] = sum
+        stats.append(stat)
+
+    return stats
 
 def format_row(stat):
     rowfmt = """<tr>
@@ -72,14 +89,16 @@ def format_row(stat):
 
     return rowfmt % (stat['group'], '\n'.join(stats), sum, ''.join(box))
 
-stats = [parse(x) for x in sys.argv[1:]]
+filename = sys.argv[1]
+domain = sys.argv[2]
+stats = parse(filename, domain)
 
-print """<table summary="Documentation statistics" class="stats">
+print '<table summary="Translation statistics for ' + domain + """" class="stats">
 <thead>
 <tr>
-  <th class="odd">Library</th>
-  <th>Fully</th><th class="odd">%</th>
-  <th>Partially</th><th class="odd">%</th>
+  <th class="odd">Language</th>
+  <th>Translated</th><th class="odd">%</th>
+  <th>Fuzzy</th><th class="odd">%</th>
   <th>Missing</th><th class="odd">%</th>
   <th>Total</th>
   <th>Graph</th>

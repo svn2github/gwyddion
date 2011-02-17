@@ -1,5 +1,5 @@
 #!/bin/bash
-# @(#) $Id$
+# $Id$
 pkgname=gwyddion
 projectdir=$PWD
 logdir=$projectdir/_logs
@@ -36,6 +36,11 @@ cat >build_documentation.ignore <<':'
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^libtool: install: warning: remember to run `libtool --finish /home/yeti/Projects/Gwyddion/GWYDDION-3-HEAD/gwyddion-[0-9.]+/_inst/lib'$
+':'
+:
+
+cat >update_translations.ignore <<':'
+^TRANSLATION
 ':'
 :
 
@@ -111,10 +116,12 @@ function extract_documentation_stats() {
 }
 
 function extract_translation_stats() {
-   #logfile=update_translations.err
-   #htmlfile=translation-stats.html
-   #$projectdir/build/translation-stats.py <$logfile >$htmlfile
-   :
+  logfile=update_translations.err
+  for dir in $podirs; do
+    gettext_package=$(sed -r 's/^GETTEXT_PACKAGE *= *//;t;d' $projectdir/$dir/Makefile)
+    htmlfile=translation-stats-$gettext_package.html
+    $projectdir/build/translation-stats.py $logfile $gettext_package >$htmlfile
+  done
 }
 
 function extract_coverage_stats() {

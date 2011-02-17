@@ -1,5 +1,5 @@
 #!/bin/bash
-# @(#) $Id: gwyddion-night-build 10806 2009-12-15 10:31:30Z yeti-dn $
+# $Id$
 pkgname=gwyddion
 projectdir=$PWD
 logdir=$projectdir/_logs

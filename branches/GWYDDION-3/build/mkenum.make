@@ -1,5 +1,5 @@
 # Generic glib-mkenum rules.
-# @(#) $Id$
+# $Id$
 # Variables: mkenum_name mkenum_id mkenum_headers library
 # Adds to: BUILT_SOURCES CLEANFILES DISTCLEANFILES
 
