@@ -69,20 +69,21 @@ struct _GwyBrickClass {
 #define gwy_brick_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType           gwy_brick_get_type    (void)                      G_GNUC_CONST;
-GwyBrick*       gwy_brick_new         (void)                      G_GNUC_MALLOC;
+GType           gwy_brick_get_type    (void)                        G_GNUC_CONST;
+GwyBrick*       gwy_brick_new         (void)                        G_GNUC_MALLOC;
 GwyBrick*       gwy_brick_new_sized   (guint xres,
                                        guint yres,
                                        guint zres,
-                                       gboolean clear)            G_GNUC_MALLOC;
+                                       gboolean clear)              G_GNUC_MALLOC;
 GwyBrick*       gwy_brick_new_alike   (const GwyBrick *model,
-                                       gboolean clear)            G_GNUC_MALLOC;
+                                       gboolean clear)              G_GNUC_MALLOC;
 GwyBrick*       gwy_brick_new_part    (const GwyBrick *brick,
                                        const GwyBrickPart *bpart,
-                                       gboolean keep_offsets)     G_GNUC_MALLOC;
+                                       gboolean keep_offsets)       G_GNUC_MALLOC;
 void            gwy_brick_set_size    (GwyBrick *brick,
                                        guint xres,
                                        guint yres,
+                                       guint zres,
                                        gboolean clear);
 void            gwy_brick_data_changed(GwyBrick *brick);
 void            gwy_brick_copy        (const GwyBrick *src,
@@ -106,11 +107,13 @@ void            gwy_brick_set_yoffset (GwyBrick *brick,
                                        gdouble yoffset);
 void            gwy_brick_set_zoffset (GwyBrick *brick,
                                        gdouble zoffset);
-GwyUnit*        gwy_brick_get_unit_xy (const GwyBrick *brick)     G_GNUC_PURE;
-GwyUnit*        gwy_brick_get_unit_z  (const GwyBrick *brick)     G_GNUC_PURE;
-GwyUnit*        gwy_brick_get_unit_w  (const GwyBrick *brick)     G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_unit_xy (const GwyBrick *brick)       G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_unit_z  (const GwyBrick *brick)       G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_unit_w  (const GwyBrick *brick)       G_GNUC_PURE;
 GwyValueFormat* gwy_brick_format_xy   (const GwyBrick *brick,
-                                       GwyValueFormatStyle style) G_GNUC_MALLOC;
+                                       GwyValueFormatStyle style)   G_GNUC_MALLOC;
+GwyValueFormat* gwy_brick_format_z    (const GwyBrick *brick,
+                                       GwyValueFormatStyle style)   G_GNUC_MALLOC;
 
 #define gwy_brick_index(brick, col, row, level) \
     ((brick)->data[(brick)->xres*((brick)->yres*(level) + (row)) + (col)])

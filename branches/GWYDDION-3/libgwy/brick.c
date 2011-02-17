@@ -795,6 +795,7 @@ gwy_brick_new_part(const GwyBrick *brick,
  * @brick: A two-dimensional data brick.
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
+ * @zres: Desired Z resolution.
  * @clear: %TRUE to fill the new brick data with zeroes, %FALSE to leave it
  *         uninitialised.
  *
@@ -804,36 +805,42 @@ gwy_brick_new_part(const GwyBrick *brick,
  * marginally more efficient than destroying the old brick and creating a new
  * one.
  *
- * In no case the original data are preserved, not even if @xres and @yres are
- * equal to the current brick dimensions.  Use gwy_brick_new_part() to extract
- * a part of a brick into a new brick.  Only the dimensions are changed; all
- * other properies, such as physical dimensions, offsets and units, are kept.
+ * In no case the original data are preserved, not even if @xres, @yres and
+ * @zres are equal to the current brick dimensions.  Use gwy_brick_new_part()
+ * to extract a part of a brick into a new brick.  Only the dimensions are
+ * changed; all other properies, such as physical dimensions, offsets and
+ * units, are kept.
  **/
 void
 gwy_brick_set_size(GwyBrick *brick,
                    guint xres,
                    guint yres,
+                   guint zres,
                    gboolean clear)
 {
     g_return_if_fail(GWY_IS_BRICK(brick));
-    g_return_if_fail(xres && yres);
+    g_return_if_fail(xres && yres && zres);
 
-    GParamSpec *notify[2];
+    GParamSpec *notify[3];
     guint nn = 0;
     if (brick->xres != xres)
         notify[nn++] = brick_pspecs[PROP_XRES];
     if (brick->yres != yres)
         notify[nn++] = brick_pspecs[PROP_YRES];
+    if (brick->zres != zres)
+        notify[nn++] = brick_pspecs[PROP_ZRES];
 
-    if (brick->xres*brick->yres != xres*yres) {
+    if (brick->xres*brick->yres*brick->zres != xres*yres*zres) {
         free_data(brick);
         brick->xres = xres;
         brick->yres = yres;
+        brick->zres = zres;
         alloc_data(brick, clear);
     }
     else {
         brick->xres = xres;
         brick->yres = yres;
+        brick->zres = zres;
         if (clear)
             gwy_brick_clear_full(brick);
         else
@@ -1273,7 +1280,7 @@ _gwy_brick_check_target(const GwyBrick *brick,
  * @brick: A two-dimensional data brick.
  * @style: Output format style.
  *
- * Finds a suitable format for displaying coordinates in a data brick.
+ * Finds a suitable format for displaying lateral coordinates in a data brick.
  *
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
@@ -1285,14 +1292,35 @@ gwy_brick_format_xy(const GwyBrick *brick,
                     GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
-    gdouble max0 = MAX(MAX(brick->xreal, brick->yreal), brick->zreal);
-    gdouble maxoff = MAX(MAX(fabs(brick->xreal + brick->xoff),
-                             fabs(brick->yreal + brick->yoff)),
-                         fabs(brick->zreal + brick->zoff));
+    gdouble max0 = MAX(brick->xreal, brick->yreal);
+    gdouble maxoff = MAX(fabs(brick->xreal + brick->xoff),
+                         fabs(brick->yreal + brick->yoff));
     gdouble max = MAX(max0, maxoff);
-    gdouble unit = MIN(MIN(gwy_brick_dx(brick), gwy_brick_dy(brick)),
-                           gwy_brick_dz(brick));
+    gdouble unit = MIN(gwy_brick_dx(brick), gwy_brick_dy(brick));
     return gwy_unit_format_with_resolution(gwy_brick_get_unit_xy(brick),
+                                           style, max, unit);
+}
+
+/**
+ * gwy_brick_format_z:
+ * @brick: A two-dimensional data brick.
+ * @style: Output format style.
+ *
+ * Finds a suitable format for displaying depth coordinates in a data brick.
+ *
+ * The created format has a sufficient precision to represent coordinates
+ * of neighbour pixels as different values.
+ *
+ * Returns: A newly created value format.
+ **/
+GwyValueFormat*
+gwy_brick_format_z(const GwyBrick *brick,
+                   GwyValueFormatStyle style)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
+    gdouble max = MAX(brick->zreal, fabs(brick->zreal + brick->zoff));
+    gdouble unit = gwy_brick_dx(brick);
+    return gwy_unit_format_with_resolution(gwy_brick_get_unit_z(brick),
                                            style, max, unit);
 }
 
