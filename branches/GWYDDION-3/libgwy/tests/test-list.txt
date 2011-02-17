@@ -56,6 +56,9 @@ line/new-part
 line/serialize
 line/distribute
 line/outer-product
+line/compatibility/res
+line/compatibility/real
+line/compatibility/units
 curve/props
 curve/data-changed
 curve/serialize
