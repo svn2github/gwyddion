@@ -152,7 +152,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | STATICP);
 
-    brick_pspecs[PROP_YREAL]
+    brick_pspecs[PROP_ZREAL]
         = g_param_spec_double("z-real",
                               "Z real size",
                               "Depth of the brick in physical units.",
@@ -175,7 +175,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | STATICP);
 
-    brick_pspecs[PROP_YOFFSET]
+    brick_pspecs[PROP_ZOFFSET]
         = g_param_spec_double("z-offset",
                               "Z offset",
                               "Depth offset of the brick top left corner "
