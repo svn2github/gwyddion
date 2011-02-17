@@ -76,6 +76,7 @@ public_built_headers = \
 
 private_headers = \
 	array-internal.h \
+	brick-internal.h \
 	curve-internal.h \
 	field-internal.h \
 	fit-func-builtin.h \
