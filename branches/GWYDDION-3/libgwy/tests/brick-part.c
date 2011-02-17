@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,21 +21,23 @@
 
 /***************************************************************************
  *
- * Field part
+ * Brick part
  *
  ***************************************************************************/
 
 void
-test_field_part_boxed(void)
+test_brick_part_boxed(void)
 {
-    GwyFieldPart fpart = { 1, 2, 3, 4 };
-    GwyFieldPart *copy = serialize_boxed_and_back(&fpart,
-                                                  GWY_TYPE_FIELD_PART);
-    g_assert_cmpfloat(fpart.col, ==, copy->col);
-    g_assert_cmpfloat(fpart.row, ==, copy->row);
-    g_assert_cmpfloat(fpart.width, ==, copy->width);
-    g_assert_cmpfloat(fpart.height, ==, copy->height);
-    g_boxed_free(GWY_TYPE_FIELD_PART, copy);
+    GwyBrickPart bpart = { 1, 2, 3, 4, 5, 6 };
+    GwyBrickPart *copy = serialize_boxed_and_back(&bpart,
+                                                  GWY_TYPE_BRICK_PART);
+    g_assert_cmpfloat(bpart.col, ==, copy->col);
+    g_assert_cmpfloat(bpart.row, ==, copy->row);
+    g_assert_cmpfloat(bpart.level, ==, copy->level);
+    g_assert_cmpfloat(bpart.width, ==, copy->width);
+    g_assert_cmpfloat(bpart.height, ==, copy->height);
+    g_assert_cmpfloat(bpart.depth, ==, copy->depth);
+    g_boxed_free(GWY_TYPE_BRICK_PART, copy);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

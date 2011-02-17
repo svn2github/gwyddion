@@ -6,6 +6,7 @@ noinst_PROGRAMS = testlibgwy
 testlibgwy_SOURCES = \
 	array.c \
 	boxed-serialization.c \
+	brick-part.c \
 	cholesky.c \
 	container.c \
 	curve.c \

@@ -77,7 +77,7 @@ gwy_brick_part_itemize(gpointer boxed,
     it->value.v_uint32 = bpart->row;
     it++, items->n++;
 
-    *it = serialize_items[3];
+    *it = serialize_items[2];
     it->value.v_uint32 = bpart->level;
     it++, items->n++;
 
