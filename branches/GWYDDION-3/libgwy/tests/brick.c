@@ -445,4 +445,393 @@ test_brick_new_part(void)
     g_rand_free(rng);
 }
 
+void
+test_brick_compatibility_res(void)
+{
+    GwyBrick *brick1 = gwy_brick_new_sized(2, 3, 4, FALSE);
+    GwyBrick *brick2 = gwy_brick_new_sized(2, 2, 4, FALSE);
+    GwyBrick *brick3 = gwy_brick_new_sized(3, 2, 4, FALSE);
+    GwyBrick *brick4 = gwy_brick_new_sized(3, 2, 1, FALSE);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_YRES),
+                     ==, GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_YRES),
+                     ==, GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_YRES);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_XRES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_XRES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_XRES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_YRES),
+                     ==, GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES | GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_XRES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_YRES),
+                     ==, GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_XRES | GWY_BRICK_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_ZRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_ZRES),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick4,
+                                               GWY_BRICK_COMPATIBLE_ZRES),
+                     ==, GWY_BRICK_COMPATIBLE_ZRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick3,
+                                               GWY_BRICK_COMPATIBLE_ZRES),
+                     ==, GWY_BRICK_COMPATIBLE_ZRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick4,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_ZRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick3,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, GWY_BRICK_COMPATIBLE_ZRES);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DXDY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DXDY);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, 0);
+
+    g_object_unref(brick1);
+    g_object_unref(brick2);
+    g_object_unref(brick3);
+    g_object_unref(brick4);
+}
+
+void
+test_brick_compatibility_real(void)
+{
+    GwyBrick *brick1 = gwy_brick_new_sized(2, 2, 2, FALSE);
+    GwyBrick *brick2 = gwy_brick_new_sized(2, 2, 2, FALSE);
+    GwyBrick *brick3 = gwy_brick_new_sized(2, 2, 2, FALSE);
+    GwyBrick *brick4 = gwy_brick_new_sized(2, 2, 2, FALSE);
+
+    gwy_brick_set_yreal(brick1, 1.5);
+    gwy_brick_set_xreal(brick3, 1.5);
+    gwy_brick_set_zreal(brick4, 1.5);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_YREAL),
+                     ==, GWY_BRICK_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, GWY_BRICK_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_YREAL),
+                     ==, GWY_BRICK_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, GWY_BRICK_COMPATIBLE_YREAL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_XREAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_XREAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_XREAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_YREAL),
+                     ==, GWY_BRICK_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL | GWY_BRICK_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_XREAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_YREAL),
+                     ==, GWY_BRICK_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_REAL),
+                     ==, GWY_BRICK_COMPATIBLE_XREAL | GWY_BRICK_COMPATIBLE_YREAL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DXDY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DX),
+                     ==, GWY_BRICK_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DXDY);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick4,
+                                               GWY_BRICK_COMPATIBLE_DZ),
+                     ==, GWY_BRICK_COMPATIBLE_DZ);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick4,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick4,
+                                               GWY_BRICK_COMPATIBLE_DXDYDZ),
+                     ==, GWY_BRICK_COMPATIBLE_DY | GWY_BRICK_COMPATIBLE_DZ);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick1,
+                                               GWY_BRICK_COMPATIBLE_DZ),
+                     ==, GWY_BRICK_COMPATIBLE_DZ);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick1,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, GWY_BRICK_COMPATIBLE_DY);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_RES),
+                     ==, 0);
+
+    g_object_unref(brick1);
+    g_object_unref(brick2);
+    g_object_unref(brick3);
+}
+
+void
+test_brick_compatibility_units(void)
+{
+    GwyBrick *brick1 = gwy_brick_new();
+    GwyBrick *brick2 = gwy_brick_new();
+    GwyBrick *brick3 = gwy_brick_new();
+
+    gwy_unit_set_from_string(gwy_brick_get_unit_xy(brick1), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick3), "m", NULL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_DEPTH),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_DEPTH),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_DEPTH),
+                     ==, GWY_BRICK_COMPATIBLE_DEPTH);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_DEPTH),
+                     ==, GWY_BRICK_COMPATIBLE_DEPTH);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_DEPTH),
+                     ==, GWY_BRICK_COMPATIBLE_DEPTH);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_DEPTH),
+                     ==, GWY_BRICK_COMPATIBLE_DEPTH);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_VALUE),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_VALUE),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_VALUE),
+                     ==, 0);
+
+    g_object_unref(brick1);
+    g_object_unref(brick2);
+    g_object_unref(brick3);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

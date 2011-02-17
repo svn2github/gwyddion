@@ -181,6 +181,9 @@ brick/serialize
 brick/set-size
 brick/copy
 brick/new-part
+brick/compatibility/res
+brick/compatibility/real
+brick/compatibility/units
 container/data
 container/refcount
 container/keys
