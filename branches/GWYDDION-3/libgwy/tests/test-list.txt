@@ -171,6 +171,13 @@ surface/data-changed
 surface/regularize/full
 surface/regularize/part
 surface/regularize/interpolation
+brick/props
+brick/data-changed
+brick/units
+brick/serialize
+brick/set-size
+brick/copy
+brick/new-part
 container/data
 container/refcount
 container/keys
