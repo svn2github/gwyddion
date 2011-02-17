@@ -1,15 +1,15 @@
 # $Id$
 # Czech translation of libgwy3 mesages.
-# Copyright (C) 2011 David Necas (Yeti) and others.
+# Copyright (C) 2011 David Nečas (Yeti) and others.
 # This file is distributed under the same license as the Gwyddion 3 package.
-# David Necas (Yeti) <yeti@gwyddion.net>, 2001.
+# David Nečas (Yeti) <yeti@gwyddion.net>, 2001.
 msgid ""
 msgstr ""
 "Project-Id-Version: libgwy3\n"
 "Report-Msgid-Bugs-To: yeti@gwyddion.net\n"
 "POT-Creation-Date: 2011-02-05 12:45+0100\n"
 "PO-Revision-Date: 2011-02-17 16:29+0100\n"
-"Last-Translator: David Necas (Yeti) <yeti@gwyddion.net>\n"
+"Last-Translator: David Nečas (Yeti) <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"

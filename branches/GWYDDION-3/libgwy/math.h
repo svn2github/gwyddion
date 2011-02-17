@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009-2011 David Necas (Yeti).
+ *  Copyright (C) 2007,2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify

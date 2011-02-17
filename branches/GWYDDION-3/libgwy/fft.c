@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  The quicksort algorithm was copied from GNU C library,

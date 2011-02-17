@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Necas (Yeti).
+ *  Copyright (C) 2010 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -118,7 +118,7 @@ _gwy_check_object_component(const GwySerializableItem *item,
                                                       component_type))) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
-                               _("Component ‘%s’ of %s is of type %s "
+                               _("Component ‘%s’ of object %s is of type %s "
                                  "instead of %s."),
                                item->name,
                                G_OBJECT_TYPE_NAME(object),
@@ -135,8 +135,8 @@ _gwy_check_object_component(const GwySerializableItem *item,
                                                        component_type))) {
                 gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                    GWY_DESERIALIZE_ERROR_INVALID,
-                                   _("Object %lu in component ‘%s’ of %s "
-                                     "is of type %s instead of %s."),
+                                   _("Object %lu in component ‘%s’ of object "
+                                     "%s is of type %s instead of %s."),
                                    (gulong)i,
                                    item->name,
                                    G_OBJECT_TYPE_NAME(object),
