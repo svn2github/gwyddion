@@ -798,7 +798,7 @@ gwy_field_set_size(GwyField *field,
         field->xres = xres;
         field->yres = yres;
         if (clear)
-            gwy_field_clear(field, NULL, NULL, GWY_MASK_IGNORE);
+            gwy_field_clear_full(field);
         else
             gwy_field_invalidate(field);
     }

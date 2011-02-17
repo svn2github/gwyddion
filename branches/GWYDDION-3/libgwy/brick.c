@@ -23,9 +23,13 @@
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/brick.h"
+#include "libgwy/brick-arithmetic.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/brick-internal.h"
+
+#define BASE(brick, col, row, level) \
+    (brick->data + ((level)*brick->yres + (row))*brick->xres + (col))
 
 enum { N_ITEMS = 13 };
 
@@ -830,11 +834,9 @@ gwy_brick_set_size(GwyBrick *brick,
     else {
         brick->xres = xres;
         brick->yres = yres;
-        /* TODO 
         if (clear)
-            gwy_brick_clear(brick, NULL, NULL, GWY_MASK_IGNORE);
+            gwy_brick_clear_full(brick);
         else
-            */
             gwy_brick_invalidate(brick);
     }
     _gwy_notify_properties_by_pspec(G_OBJECT(brick), notify, nn);
@@ -897,15 +899,14 @@ gwy_brick_copy(const GwyBrick *src,
         gwy_brick_invalidate(dest);
     }
     else {
-        /*
-        const gdouble *src0 = src->data + (level*src->zres
-                                           + row)*src->xres + col;
-        gdouble *dest0 = dest->data + (destlevel*dest->zres
-                                       + destrow)*destsrc->xres + destcol;
-        for (guint i = 0; i < height; i++)
-            gwy_assign(dest0 + dest->xres*i, src0 + src->xres*i, width);
-            */
-        g_warning("Implement me!");
+        const gdouble *src0 = BASE(src, col, row, level);
+        gdouble *dest0 = BASE(dest, destcol, destrow, destlevel);
+        for (guint l = 0; l < depth; l++) {
+            const gdouble *src1 = src0 + l*src->xres*src->yres;
+            gdouble *dest1 = dest0 + l*dest->xres*dest->yres;
+            for (guint i = 0; i < height; i++)
+                gwy_assign(dest1 + dest->xres*i, src1 + src->xres*i, width);
+        }
         gwy_brick_invalidate(dest);
     }
 }

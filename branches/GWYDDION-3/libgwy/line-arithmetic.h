@@ -25,6 +25,19 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_LINE_COMPATIBLE_RES     = 1 << 0,
+    GWY_LINE_COMPATIBLE_REAL    = 1 << 1,
+    GWY_LINE_COMPATIBLE_DX      = 1 << 2,
+    GWY_LINE_COMPATIBLE_LATERAL = 1 << 3,
+    GWY_LINE_COMPATIBLE_VALUE   = 1 << 4,
+    GWY_LINE_COMPATIBLE_ALL     = 0x001fu
+} GwyLineCompatibilityFlags;
+
+GwyLineCompatibilityFlags gwy_line_is_incompatible(GwyLine *line1,
+                                                   GwyLine *line2,
+                                                   GwyLineCompatibilityFlags check);
+
 void      gwy_line_accumulate   (GwyLine *line);
 void      gwy_line_distribute   (GwyLine *line);
 void      gwy_line_add          (GwyLine *line,

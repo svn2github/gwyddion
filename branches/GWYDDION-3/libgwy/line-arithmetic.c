@@ -23,6 +23,76 @@
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-internal.h"
 
+// For compatibility checks.
+#define EPSILON 1e-6
+
+/**
+ * gwy_line_is_incompatible:
+ * @line1: A data line.
+ * @line2: Another data line.
+ * @check: Properties to check for compatibility.
+ *
+ * Checks whether two lines are compatible.
+ *
+ * Returns: Zero if all tested properties are compatible.  Flags corresponding
+ *          to failed tests if lines are not compatible.
+ **/
+GwyLineCompatibilityFlags
+gwy_line_is_incompatible(GwyLine *line1,
+                         GwyLine *line2,
+                         GwyLineCompatibilityFlags check)
+{
+
+    g_return_val_if_fail(GWY_IS_LINE(line1), check);
+    g_return_val_if_fail(GWY_IS_LINE(line2), check);
+
+    guint res1 = line1->res;
+    guint res2 = line2->res;
+    gdouble real1 = line1->real;
+    gdouble real2 = line2->real;
+    GwyLineCompatibilityFlags result = 0;
+
+    /* Resolution */
+    if (check & GWY_LINE_COMPATIBLE_RES) {
+        if (res1 != res2)
+            result |= GWY_LINE_COMPATIBLE_RES;
+    }
+
+    /* Real size */
+    /* Keeps the conditions for real numbers in negative form to catch NaNs and
+     * odd values as incompatible. */
+    if (check & GWY_LINE_COMPATIBLE_REAL) {
+        if (!(fabs(log(real1/real2)) <= EPSILON))
+            result |= GWY_LINE_COMPATIBLE_REAL;
+    }
+
+    /* Measure */
+    if (check & GWY_LINE_COMPATIBLE_DX) {
+        if (!(fabs(log(real1/res1*res2/real2)) <= EPSILON))
+            result |= GWY_LINE_COMPATIBLE_DX;
+    }
+
+    /* Lateral units */
+    if (check & GWY_LINE_COMPATIBLE_LATERAL) {
+        /* This can cause instantiation of line units as a side effect */
+        GwyUnit *unit1 = gwy_line_get_unit_x(line1);
+        GwyUnit *unit2 = gwy_line_get_unit_x(line2);
+        if (!gwy_unit_equal(unit1, unit2))
+            result |= GWY_LINE_COMPATIBLE_LATERAL;
+    }
+
+    /* Value units */
+    if (check & GWY_LINE_COMPATIBLE_VALUE) {
+        /* This can cause instantiation of line units as a side effect */
+        GwyUnit *unit1 = gwy_line_get_unit_y(line1);
+        GwyUnit *unit2 = gwy_line_get_unit_y(line2);
+        if (!gwy_unit_equal(unit1, unit2))
+            result |= GWY_LINE_COMPATIBLE_VALUE;
+    }
+
+    return result;
+}
+
 // FIXME: These two may not belong here, but they do not worth a separate
 // header.
 /**

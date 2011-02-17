@@ -19,6 +19,7 @@ Gwy3_3_0_gir_PACKAGES = gio-2.0
 public_headers = \
 	$(srcdir)/array.h \
 	$(srcdir)/brick.h \
+	$(srcdir)/brick-arithmetic.h \
 	$(srcdir)/brick-part.h \
 	$(srcdir)/container.h \
 	$(srcdir)/curve.h \
@@ -107,6 +108,7 @@ noinst_HEADERS = $(private_headers)
 libgwy3_la_SOURCES = \
 	array.c \
 	brick.c \
+	brick-arithmetic.c \
 	brick-part.c \
 	container.c \
 	curve.c \

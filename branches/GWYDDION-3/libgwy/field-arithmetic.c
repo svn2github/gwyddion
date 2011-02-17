@@ -29,7 +29,7 @@
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 
-/* for compatibility checks */
+// For compatibility checks.
 #define EPSILON 1e-6
 
 enum { NORMALIZE_ALL = 0x07 };
