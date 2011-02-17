@@ -314,4 +314,16 @@ gwy_line_outer_product(const GwyLine *column,
  * @short_description: Arithmetic operations with lines
  **/
 
+/**
+ * GwyLineCompatibilityFlags:
+ * @GWY_LINE_COMPATIBLE_RES: Resolution (size).
+ * @GWY_LINE_COMPATIBLE_REAL: Physical dimension.
+ * @GWY_LINE_COMPATIBLE_DX: Pixel size.
+ * @GWY_LINE_COMPATIBLE_LATERAL: Lateral units.
+ * @GWY_LINE_COMPATIBLE_VALUE: Value units.
+ * @GWY_LINE_COMPATIBLE_ALL: All defined properties.
+ *
+ * Line properties that can be checked for compatibility.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

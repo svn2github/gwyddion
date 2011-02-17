@@ -147,4 +147,34 @@ gwy_brick_clear_full(GwyBrick *brick)
     gwy_clear(brick->data, brick->xres*brick->yres*brick->zres);
 }
 
+/**
+ * SECTION: brick-arithmetic
+ * @section_id: GwyBrick-arithmetic
+ * @title: GwyBrick arithmetic
+ * @short_description: Arithmetic operations with bricks
+ **/
+
+/**
+ * GwyBrickCompatibilityFlags:
+ * @GWY_BRICK_COMPATIBLE_XRES: X-resolution (width).
+ * @GWY_BRICK_COMPATIBLE_YRES: Y-resolution (height)
+ * @GWY_BRICK_COMPATIBLE_ZRES: Z-resolution (depth)
+ * @GWY_BRICK_COMPATIBLE_RES: All resolutions.
+ * @GWY_BRICK_COMPATIBLE_XREAL: Physical x-dimension.
+ * @GWY_BRICK_COMPATIBLE_YREAL: Physical y-dimension.
+ * @GWY_BRICK_COMPATIBLE_ZREAL: Physical z-dimension.
+ * @GWY_BRICK_COMPATIBLE_REAL: All physical dimensions.
+ * @GWY_BRICK_COMPATIBLE_DX: Pixel size in x-direction.
+ * @GWY_BRICK_COMPATIBLE_DY: Pixel size in y-direction.
+ * @GWY_BRICK_COMPATIBLE_DXDY: Lateral pixel dimensions.
+ * @GWY_BRICK_COMPATIBLE_DZ: Pixel size in z-direction.
+ * @GWY_BRICK_COMPATIBLE_DXDYDZ: All pixel dimensions.
+ * @GWY_BRICK_COMPATIBLE_LATERAL: Lateral units.
+ * @GWY_BRICK_COMPATIBLE_DEPTH: Depth units.
+ * @GWY_BRICK_COMPATIBLE_VALUE: Value units.
+ * @GWY_BRICK_COMPATIBLE_ALL: All defined properties.
+ *
+ * Brick properties that can be checked for compatibility.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
