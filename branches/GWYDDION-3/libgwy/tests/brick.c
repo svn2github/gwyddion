@@ -752,6 +752,28 @@ test_brick_compatibility_real(void)
     g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick1,
                                                GWY_BRICK_COMPATIBLE_DXDY),
                      ==, GWY_BRICK_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick1,
+                                               GWY_BRICK_COMPATIBLE_DXDYDZ),
+                     ==, GWY_BRICK_COMPATIBLE_DY | GWY_BRICK_COMPATIBLE_DZ);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick4,
+                                               GWY_BRICK_COMPATIBLE_DZ),
+                     ==, GWY_BRICK_COMPATIBLE_DZ);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick4,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick4,
+                                               GWY_BRICK_COMPATIBLE_DXDYDZ),
+                     ==, GWY_BRICK_COMPATIBLE_DZ);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick2,
+                                               GWY_BRICK_COMPATIBLE_DZ),
+                     ==, GWY_BRICK_COMPATIBLE_DZ);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick2,
+                                               GWY_BRICK_COMPATIBLE_DXDY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick4, brick2,
+                                               GWY_BRICK_COMPATIBLE_DXDYDZ),
+                     ==, GWY_BRICK_COMPATIBLE_DZ);
 
     g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
                                                GWY_BRICK_COMPATIBLE_RES),
@@ -775,6 +797,7 @@ test_brick_compatibility_real(void)
     g_object_unref(brick1);
     g_object_unref(brick2);
     g_object_unref(brick3);
+    g_object_unref(brick4);
 }
 
 void
@@ -783,9 +806,11 @@ test_brick_compatibility_units(void)
     GwyBrick *brick1 = gwy_brick_new();
     GwyBrick *brick2 = gwy_brick_new();
     GwyBrick *brick3 = gwy_brick_new();
+    GwyBrick *brick4 = gwy_brick_new();
 
     gwy_unit_set_from_string(gwy_brick_get_unit_xy(brick1), "m", NULL);
     gwy_unit_set_from_string(gwy_brick_get_unit_z(brick3), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick4), "m", NULL);
 
     g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
                                                GWY_BRICK_COMPATIBLE_DEPTH),
@@ -807,6 +832,27 @@ test_brick_compatibility_units(void)
     g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
                                                GWY_BRICK_COMPATIBLE_DEPTH),
                      ==, GWY_BRICK_COMPATIBLE_DEPTH);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
+                                               GWY_BRICK_COMPATIBLE_LATERAL),
+                     ==, GWY_BRICK_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick1,
+                                               GWY_BRICK_COMPATIBLE_LATERAL),
+                     ==, GWY_BRICK_COMPATIBLE_LATERAL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick2, brick3,
+                                               GWY_BRICK_COMPATIBLE_LATERAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick2,
+                                               GWY_BRICK_COMPATIBLE_LATERAL),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick3,
+                                               GWY_BRICK_COMPATIBLE_LATERAL),
+                     ==, GWY_BRICK_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible(brick3, brick1,
+                                               GWY_BRICK_COMPATIBLE_LATERAL),
+                     ==, GWY_BRICK_COMPATIBLE_LATERAL);
 
     g_assert_cmpuint(gwy_brick_is_incompatible(brick1, brick2,
                                                GWY_BRICK_COMPATIBLE_VALUE),
@@ -832,6 +878,7 @@ test_brick_compatibility_units(void)
     g_object_unref(brick1);
     g_object_unref(brick2);
     g_object_unref(brick3);
+    g_object_unref(brick4);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
