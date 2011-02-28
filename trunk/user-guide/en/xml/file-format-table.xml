@@ -29,6 +29,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module anfatec.c -->
+    <row>
+      <entry>Anfatec</entry>
+      <entry>.par, .int</entry>
+      <entry>anfatec</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -259,6 +268,15 @@
       <entry>MicroProf FRT</entry>
       <entry>.frt</entry>
       <entry>microprof</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module miffile.c -->
+    <row>
+      <entry>DME MIF</entry>
+      <entry>.mif</entry>
+      <entry>miffile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -673,6 +691,15 @@ supported.</para></footnote></entry>
       <entry>WITec</entry>
       <entry>.wit</entry>
       <entry>witfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module wsffile.c -->
+    <row>
+      <entry>WSF ASCII data</entry>
+      <entry>.wsf</entry>
+      <entry>wsffile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
