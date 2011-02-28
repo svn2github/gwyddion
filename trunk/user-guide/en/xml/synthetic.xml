@@ -123,10 +123,10 @@
       <listitem>
         <para>
           The random number generator seed.  Choosing the same parameters and
-          resolutions and the same random seed causes the same surface to be
-          generated, even on different computers.  Different seeds lead to
-          different surfaces with the same overall characteristics given by
-          the generator parameters.
+          resolutions and the same random seed leads to the same surface, even
+          on different computers.  Different seeds lead to different surfaces
+          with the same overall characteristics given by the generator
+          parameters.
         </para>
       </listitem>
     </varlistentry>
@@ -359,11 +359,24 @@
           </para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Truncate</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The shapes can be truncated at a certain height, enabling creation
+            of truncated cones, pyramids, etc.  The truncation height is given
+            as a proportion to the total object height.  Unity means the shape is
+            not truncated, zero would mean complete removal of the object.
+          </para>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <para>
       Each parameter can be randomized for individual objects, this is
       controlled by <guilabel>Variance</guilabel>.  For multiplicative
-      quantities (all except orientation), the distribution is log-normal
+      quantities (all except orientation and truncation), the distribution is log-normal
       with the RMS value of the logarithmed quantity given by
       <guilabel>Variance</guilabel>.
     </para>
@@ -539,15 +552,17 @@
     <title>Pattern</title>
     <para>
       Regular geometrical patterns represent surfaces often encountered in
-      microscopy as standards or testing samples such as ridges or steps.
+      microscopy as standards or testing samples such as ridges, steps or holes.
       Each type of pattern has its own set of geometrical parameters
-      determining shape and dimensions of various part of the pattern.  Each
+      determining the shape and dimensions of various part of the pattern.  Each
       parameter has a variance control, similar to
       <link linkend='object-synthesis'>Object synthesis</link>, that permits to
-      make the pattern not completely regular in some aspects.
+      make the pattern irregular in some aspects.
     </para>
     <para>
-      Controls common to all pattern types include:
+      The placement of the pattern in the horizontal plane is controlled by
+      parameters in tab <guilabel>Placement</guilabel>, common to all pattern
+      types:
     </para>
     <variablelist>
       <varlistentry>
@@ -563,12 +578,12 @@
       </varlistentry>
     </variablelist>
     <para>
-      Enabling variation of the parameters makes the surface somewhat
-      irregular, however, the shape of its features is maintained.  This is
-      complemented by another variation method, called
-      <guilabel>Deformation</guilabel> that enables distortion of the pattern
-      in the <xi:include href="eqi-xy.xml"/> plane.  Deformation has two
-      parametres:
+      This tab also contains the deformation parameters.  While enabling the
+      variation of geometrical parameters makes the generated surface somewhat
+      irregular the shape of its features is maintained.
+      <guilabel>Deformation</guilabel> is complementary method to introduce irregularity,
+      specifcially by distorting the pattern in the <xi:include href="eqi-xy.xml"/> plane.
+      It has two parametres:
     </para>
     <variablelist>
       <varlistentry>
