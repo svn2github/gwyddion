@@ -569,6 +569,27 @@
       some discussion.
     </para>
   </sect2>
+  <sect2 id='grain-level'>
+    <title>Grain Levelling</title>
+    <indexterm><primary>grain levelling</primary></indexterm>
+    <para>
+      Grains can be aligned vertically using
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Level Grains</guimenuitem>
+      </menuchoice>.
+      This function vertically shifts each grain to make a certain
+      height-related quantity of all grains equal.  Typically, the grain
+      minimum values are aligned but other choices are possible.
+    </para>
+    <para>
+      Data between grains are also vertically shifted.  The shifts are
+      interpolated from the grain shifts using the Laplace equation, leading
+      to a smooth transition of the shifts between the grains (though with no
+      regard to other possible surface features).
+    </para>
+  </sect2>
   <sect2 id='grain-analysis-ref'>
     <title>References</title>
     <para id='grain-analysis-ref-1'>
