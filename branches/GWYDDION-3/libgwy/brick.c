@@ -1162,14 +1162,11 @@ _gwy_brick_check_part(const GwyBrick *brick,
             return FALSE;
         // The two separate conditions are to catch integer overflows.
         g_return_val_if_fail(bpart->col < brick->xres, FALSE);
-        g_return_val_if_fail(bpart->width <= brick->xres - bpart->col,
-                             FALSE);
+        g_return_val_if_fail(bpart->width <= brick->xres - bpart->col, FALSE);
         g_return_val_if_fail(bpart->row < brick->yres, FALSE);
-        g_return_val_if_fail(bpart->height <= brick->yres - bpart->row,
-                             FALSE);
+        g_return_val_if_fail(bpart->height <= brick->yres - bpart->row, FALSE);
         g_return_val_if_fail(bpart->level < brick->zres, FALSE);
-        g_return_val_if_fail(bpart->depth <= brick->zres - bpart->level,
-                             FALSE);
+        g_return_val_if_fail(bpart->depth <= brick->zres - bpart->level, FALSE);
         *col = bpart->col;
         *row = bpart->row;
         *level = bpart->level;
@@ -1200,11 +1197,9 @@ _gwy_brick_check_plane_part(const GwyBrick *brick,
             return FALSE;
         // The two separate conditions are to catch integer overflows.
         g_return_val_if_fail(fpart->col < brick->xres, FALSE);
-        g_return_val_if_fail(fpart->width <= brick->xres - fpart->col,
-                             FALSE);
+        g_return_val_if_fail(fpart->width <= brick->xres - fpart->col, FALSE);
         g_return_val_if_fail(fpart->row < brick->yres, FALSE);
-        g_return_val_if_fail(fpart->height <= brick->yres - fpart->row,
-                             FALSE);
+        g_return_val_if_fail(fpart->height <= brick->yres - fpart->row, FALSE);
         *col = fpart->col;
         *row = fpart->row;
         *width = fpart->width;
@@ -1214,6 +1209,32 @@ _gwy_brick_check_plane_part(const GwyBrick *brick,
         *col = *row = 0;
         *width = brick->xres;
         *height = brick->yres;
+    }
+
+    return TRUE;
+}
+
+gboolean
+_gwy_brick_check_line_part(const GwyBrick *brick,
+                           const GwyLinePart *lpart,
+                           guint col, guint row,
+                           guint *level, guint *depth)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
+    g_return_val_if_fail(col < brick->zres, FALSE);
+    g_return_val_if_fail(row < brick->yres, FALSE);
+    if (lpart) {
+        if (!lpart->len)
+            return FALSE;
+        // The two separate conditions are to catch integer overflows.
+        g_return_val_if_fail(lpart->pos < brick->zres, FALSE);
+        g_return_val_if_fail(lpart->len <= brick->zres - lpart->pos, FALSE);
+        *level = lpart->pos;
+        *depth = lpart->len;
+    }
+    else {
+        *level = 0;
+        *depth = brick->zres;
     }
 
     return TRUE;

@@ -24,6 +24,7 @@
 #include "libgwy/brick-arithmetic.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
+#include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/brick-internal.h"
 
@@ -365,12 +366,16 @@ gwy_brick_extract_plane(const GwyBrick *brick,
  *         extracts the full line.
  * @col: Column index in @brick.
  * @row: Row index in @brick.
- * @keep_offsets: %TRUE to set the X offset of the line using @fpart and @brick
+ * @keep_offsets: %TRUE to set the X offset of the line using @lpart and @brick
  *                offsets.  %FALSE to set offset of the line to zero.
  *
- * Extracts a vertical brick line to a line.
+ * Extracts a vertical profile in a brick to a line.
+ *
+ * Since the brick is organised in memory by planes this method has to access
+ * memory in a scattered manner.  Hence it is suitable for the extraction of
+ * a single line, however, if you process many lines at once it is better to
+ * process the data by plane.
  **/
-#if 0
 void
 gwy_brick_extract_line(const GwyBrick *brick,
                        GwyLine *target,
@@ -378,37 +383,29 @@ gwy_brick_extract_line(const GwyBrick *brick,
                        guint col, guint row,
                        gboolean keep_offsets)
 {
-    guint fcol, frow, fwidth, fheight, bcol, brow, bwidth, bheight;
-    if (!_gwy_line_check_part(target, fpart, &fcol, &frow, &fwidth, &fheight)
-        || !_gwy_brick_check_plane_part(brick, fpart,
-                                        &bcol, &brow, level, &bwidth, &bheight))
+    guint pos, len, level, depth;
+    if (!_gwy_line_check_part(target, lpart, &pos, &len)
+        || !_gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth))
         return;
 
-    // Can happen with NULL @fpart and incompatible objects.
-    g_return_if_fail(fwidth == bwidth && fheight == bheight);
+    // Can happen with NULL @lpart and incompatible objects.
+    g_return_if_fail(len == depth);
 
-    const gdouble *bbase = brick->data + (level*brick->yres + brow)*brick->xres
-                           + bcol;
-    gdouble *fbase = target->data + frow*target->xres + fcol;
+    const gdouble *bbase = brick->data + (level*brick->yres + row)*brick->xres
+                           + col;
+    gdouble *lbase = target->data + pos;
+    guint stride = brick->xres * brick->yres;
 
-    if (bwidth == brick->xres && fwidth == target->xres) {
-        g_assert(bcol == 0 && fcol == 0);
-        gwy_assign(fbase, bbase, fwidth*fheight);
-    }
-    else {
-        for (guint i = 0; i < fheight; i++)
-            gwy_assign(fbase + i*target->xres, bbase + i*brick->xres, fwidth);
-    }
+    for (guint i = 0; i < len; i++)
+        lbase[i] = bbase[i*stride];
 
-    gwy_line_set_xreal(target, bdepth*gwy_brick_dz(brick));
-    if (keep_offsets) {
-        gwy_line_set_offset(target, brick->zoff + blevel*gwy_brick_dz(brick));
-    }
+    gwy_line_set_real(target, depth*gwy_brick_dz(brick));
+    if (keep_offsets)
+        gwy_line_set_offset(target, brick->zoff + level*gwy_brick_dz(brick));
     ASSIGN_UNITS(target->priv->unit_x, brick->priv->unit_z);
     ASSIGN_UNITS(target->priv->unit_y, brick->priv->unit_w);
-    gwy_line_invalidate(target);
+    //gwy_line_invalidate(target);
 }
-#endif
 
 /**
  * gwy_brick_clear_full:

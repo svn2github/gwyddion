@@ -61,8 +61,13 @@ void gwy_brick_extract_plane(const GwyBrick *brick,
                              const GwyFieldPart *fpart,
                              guint level,
                              gboolean keep_offsets);
-
-void     gwy_brick_clear_full (GwyBrick *brick);
+void gwy_brick_extract_line (const GwyBrick *brick,
+                             GwyLine *target,
+                             const GwyLinePart *lpart,
+                             guint col,
+                             guint row,
+                             gboolean keep_offsets);
+void gwy_brick_clear_full   (GwyBrick *brick);
 
 G_END_DECLS
 

@@ -58,6 +58,14 @@ gboolean _gwy_brick_check_plane_part(const GwyBrick *brick,
                                      guint *height);
 
 G_GNUC_INTERNAL
+gboolean _gwy_brick_check_line_part(const GwyBrick *brick,
+                                    const GwyLinePart *lpart,
+                                    guint col,
+                                    guint row,
+                                    guint *level,
+                                    guint *depth);
+
+G_GNUC_INTERNAL
 gboolean _gwy_brick_limit_parts(const GwyBrick *src,
                                 const GwyBrickPart *srcpart,
                                 const GwyBrick *dest,
