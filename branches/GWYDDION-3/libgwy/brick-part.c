@@ -153,7 +153,7 @@ gwy_brick_part_free(GwyBrickPart *bpart)
 /**
  * SECTION: brick-part
  * @title: GwyBrickPart
- * @short_description: Pixel-wise rectangle in plane
+ * @short_description: Pixel-wise block in space
  *
  * #GwyBrickPart is usually used to specify a rectangular part of a
  * #GwyBrick.  It is registered as a serialisable boxed type.
