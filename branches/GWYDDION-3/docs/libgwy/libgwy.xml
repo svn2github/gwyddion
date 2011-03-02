@@ -67,8 +67,8 @@
     </para>
     <xi:include href="xml/field-part.xml"/>
     <xi:include href="xml/field.xml"/>
-    <xi:include href="xml/field-correlate.xml"/>
     <xi:include href="xml/field-arithmetic.xml"/>
+    <xi:include href="xml/field-correlate.xml"/>
     <xi:include href="xml/field-distributions.xml"/>
     <xi:include href="xml/field-filter.xml"/>
     <xi:include href="xml/field-level.xml"/>
