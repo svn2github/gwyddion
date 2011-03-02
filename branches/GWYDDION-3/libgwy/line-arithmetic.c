@@ -135,7 +135,7 @@ gwy_line_distribute(GwyLine *line)
 /**
  * gwy_line_clear:
  * @line: A one-dimensional data line.
- * @fpart: (allow-none):
+ * @lpart: (allow-none):
  *         Segment in @line to clear.  Pass %NULL to clear entire @line.
  *
  * Fills a line with zeroes.
@@ -153,7 +153,7 @@ gwy_line_clear(GwyLine *line,
 /**
  * gwy_line_fill:
  * @line: A one-dimensional data line.
- * @fpart: (allow-none):
+ * @lpart: (allow-none):
  *         Segment in @line to fill.  Pass %NULL to fill entire @line.
  * @value: Value to fill the segment with.
  *
