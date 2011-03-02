@@ -735,7 +735,7 @@ gwy_line_set_offset(GwyLine *line,
  *          The lateral units of @line.
  **/
 GwyUnit*
-gwy_line_get_unit_x(GwyLine *line)
+gwy_line_get_unit_x(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     Line *priv = line->priv;
@@ -754,7 +754,7 @@ gwy_line_get_unit_x(GwyLine *line)
  *          The value units of @line.
  **/
 GwyUnit*
-gwy_line_get_unit_y(GwyLine *line)
+gwy_line_get_unit_y(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     Line *priv = line->priv;
@@ -776,8 +776,8 @@ gwy_line_get_unit_y(GwyLine *line)
  * Returns: A newly created value format.
  **/
 GwyValueFormat*
-gwy_line_format_x(GwyLine *line,
-                 GwyValueFormatStyle style)
+gwy_line_format_x(const GwyLine *line,
+                  GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     gdouble max = MAX(line->real, fabs(line->real + line->off));
@@ -796,7 +796,7 @@ gwy_line_format_x(GwyLine *line,
  * Returns: A newly created value format.
  **/
 GwyValueFormat*
-gwy_line_format_y(GwyLine *line,
+gwy_line_format_y(const GwyLine *line,
                   GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);

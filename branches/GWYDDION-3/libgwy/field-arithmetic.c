@@ -21,6 +21,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-arithmetic.h"
+#include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
 #define CVAL GWY_FIELD_CVAL
@@ -28,9 +29,6 @@
 #define CTEST GWY_FIELD_CTEST
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
-
-// For compatibility checks.
-#define EPSILON 1e-6
 
 enum { NORMALIZE_ALL = 0x07 };
 
@@ -46,11 +44,10 @@ enum { NORMALIZE_ALL = 0x07 };
  *          to failed tests if fields are not compatible.
  **/
 GwyFieldCompatibilityFlags
-gwy_field_is_incompatible(GwyField *field1,
-                          GwyField *field2,
+gwy_field_is_incompatible(const GwyField *field1,
+                          const GwyField *field2,
                           GwyFieldCompatibilityFlags check)
 {
-
     g_return_val_if_fail(GWY_IS_FIELD(field1), check);
     g_return_val_if_fail(GWY_IS_FIELD(field2), check);
 
@@ -78,21 +75,21 @@ gwy_field_is_incompatible(GwyField *field1,
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
     if (check & GWY_FIELD_COMPATIBLE_XREAL) {
-        if (!(fabs(log(xreal1/xreal2)) <= EPSILON))
+        if (!(fabs(log(xreal1/xreal2)) <= COMPAT_EPSILON))
             result |= GWY_FIELD_COMPATIBLE_XREAL;
     }
     if (check & GWY_FIELD_COMPATIBLE_YREAL) {
-        if (!(fabs(log(yreal1/yreal2)) <= EPSILON))
+        if (!(fabs(log(yreal1/yreal2)) <= COMPAT_EPSILON))
             result |= GWY_FIELD_COMPATIBLE_YREAL;
     }
 
     /* Measure */
     if (check & GWY_FIELD_COMPATIBLE_DX) {
-        if (!(fabs(log(xreal1/xres1*xres2/xreal2)) <= EPSILON))
+        if (!(fabs(log(xreal1/xres1*xres2/xreal2)) <= COMPAT_EPSILON))
             result |= GWY_FIELD_COMPATIBLE_DX;
     }
     if (check & GWY_FIELD_COMPATIBLE_DY) {
-        if (!(fabs(log(yreal1/yres1*yres2/yreal2)) <= EPSILON))
+        if (!(fabs(log(yreal1/yres1*yres2/yreal2)) <= COMPAT_EPSILON))
             result |= GWY_FIELD_COMPATIBLE_DY;
     }
 

@@ -34,8 +34,8 @@ typedef enum {
     GWY_LINE_COMPATIBLE_ALL     = 0x001fu
 } GwyLineCompatibilityFlags;
 
-GwyLineCompatibilityFlags gwy_line_is_incompatible(GwyLine *line1,
-                                                   GwyLine *line2,
+GwyLineCompatibilityFlags gwy_line_is_incompatible(const GwyLine *line1,
+                                                   const GwyLine *line2,
                                                    GwyLineCompatibilityFlags check);
 
 void      gwy_line_accumulate   (GwyLine *line);

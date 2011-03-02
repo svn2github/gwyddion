@@ -22,6 +22,7 @@
 #ifndef __LIBGWY_BRICK_INTERNAL_H__
 #define __LIBGWY_BRICK_INTERNAL_H__
 
+#include "libgwy/field-part.h"
 #include "libgwy/brick.h"
 
 G_BEGIN_DECLS
@@ -46,6 +47,15 @@ gboolean _gwy_brick_check_part(const GwyBrick *brick,
                                guint *width,
                                guint *height,
                                guint *depth);
+
+G_GNUC_INTERNAL
+gboolean _gwy_brick_check_plane_part(const GwyBrick *brick,
+                                     const GwyFieldPart *fpart,
+                                     guint *col,
+                                     guint *row,
+                                     guint level,
+                                     guint *width,
+                                     guint *height);
 
 G_GNUC_INTERNAL
 gboolean _gwy_brick_limit_parts(const GwyBrick *src,

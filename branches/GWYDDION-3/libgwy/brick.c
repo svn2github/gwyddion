@@ -1189,6 +1189,38 @@ _gwy_brick_check_part(const GwyBrick *brick,
 }
 
 gboolean
+_gwy_brick_check_plane_part(const GwyBrick *brick,
+                            const GwyFieldPart *fpart,
+                            guint *col, guint *row, guint level,
+                            guint *width, guint *height)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
+    g_return_val_if_fail(level < brick->zres, FALSE);
+    if (fpart) {
+        if (!fpart->width || !fpart->height)
+            return FALSE;
+        // The two separate conditions are to catch integer overflows.
+        g_return_val_if_fail(fpart->col < brick->xres, FALSE);
+        g_return_val_if_fail(fpart->width <= brick->xres - fpart->col,
+                             FALSE);
+        g_return_val_if_fail(fpart->row < brick->yres, FALSE);
+        g_return_val_if_fail(fpart->height <= brick->yres - fpart->row,
+                             FALSE);
+        *col = fpart->col;
+        *row = fpart->row;
+        *width = fpart->width;
+        *height = fpart->height;
+    }
+    else {
+        *col = *row = 0;
+        *width = brick->xres;
+        *height = brick->yres;
+    }
+
+    return TRUE;
+}
+
+gboolean
 _gwy_brick_limit_parts(const GwyBrick *src,
                        const GwyBrickPart *srcpart,
                        const GwyBrick *dest,

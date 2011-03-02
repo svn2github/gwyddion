@@ -20,6 +20,8 @@
 #ifndef __LIBGWY_BRICK_ARITHMETIC_H__
 #define __LIBGWY_BRICK_ARITHMETIC_H__
 
+#include <libgwy/line-arithmetic.h>
+#include <libgwy/field-arithmetic.h>
 #include <libgwy/brick.h>
 
 G_BEGIN_DECLS
@@ -44,9 +46,21 @@ typedef enum {
     GWY_BRICK_COMPATIBLE_ALL     = 0x0fffu
 } GwyBrickCompatibilityFlags;
 
-GwyBrickCompatibilityFlags gwy_brick_is_incompatible(GwyBrick *brick1,
-                                                     GwyBrick *brick2,
+GwyBrickCompatibilityFlags gwy_brick_is_incompatible(const GwyBrick *brick1,
+                                                     const GwyBrick *brick2,
                                                      GwyBrickCompatibilityFlags check);
+GwyFieldCompatibilityFlags gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
+                                                                const GwyField *field,
+                                                                GwyFieldCompatibilityFlags check);
+GwyLineCompatibilityFlags gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
+                                                              const GwyLine *line,
+                                                              GwyLineCompatibilityFlags check);
+
+void gwy_brick_extract_plane(const GwyBrick *brick,
+                             GwyField *target,
+                             const GwyFieldPart *fpart,
+                             guint level,
+                             gboolean keep_offsets);
 
 void     gwy_brick_clear_full (GwyBrick *brick);
 

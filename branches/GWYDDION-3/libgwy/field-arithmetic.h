@@ -47,8 +47,8 @@ typedef enum {
     GWY_NORMALIZE_ENTIRE_DATA = 1 << 2
 } GwyNormalizeFlags;
 
-GwyFieldCompatibilityFlags gwy_field_is_incompatible(GwyField *field1,
-                                                     GwyField *field2,
+GwyFieldCompatibilityFlags gwy_field_is_incompatible(const GwyField *field1,
+                                                     const GwyField *field2,
                                                      GwyFieldCompatibilityFlags check);
 
 void     gwy_field_clear      (GwyField *field,

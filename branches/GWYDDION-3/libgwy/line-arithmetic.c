@@ -21,10 +21,8 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/line-arithmetic.h"
+#include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
-
-// For compatibility checks.
-#define EPSILON 1e-6
 
 /**
  * gwy_line_is_incompatible:
@@ -38,11 +36,10 @@
  *          to failed tests if lines are not compatible.
  **/
 GwyLineCompatibilityFlags
-gwy_line_is_incompatible(GwyLine *line1,
-                         GwyLine *line2,
+gwy_line_is_incompatible(const GwyLine *line1,
+                         const GwyLine *line2,
                          GwyLineCompatibilityFlags check)
 {
-
     g_return_val_if_fail(GWY_IS_LINE(line1), check);
     g_return_val_if_fail(GWY_IS_LINE(line2), check);
 
@@ -62,13 +59,13 @@ gwy_line_is_incompatible(GwyLine *line1,
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
     if (check & GWY_LINE_COMPATIBLE_REAL) {
-        if (!(fabs(log(real1/real2)) <= EPSILON))
+        if (!(fabs(log(real1/real2)) <= COMPAT_EPSILON))
             result |= GWY_LINE_COMPATIBLE_REAL;
     }
 
     /* Measure */
     if (check & GWY_LINE_COMPATIBLE_DX) {
-        if (!(fabs(log(real1/res1*res2/real2)) <= EPSILON))
+        if (!(fabs(log(real1/res1*res2/real2)) <= COMPAT_EPSILON))
             result |= GWY_LINE_COMPATIBLE_DX;
     }
 

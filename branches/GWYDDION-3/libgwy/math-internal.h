@@ -29,6 +29,8 @@ G_BEGIN_DECLS
 #define SLi gwy_lower_triangular_matrix_index
 #define MATRIX_LEN gwy_triangular_matrix_length
 
+#define COMPAT_EPSILON 1e-7
+
 typedef complex double gwycomplex;
 
 G_GNUC_INTERNAL
