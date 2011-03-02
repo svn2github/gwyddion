@@ -25,7 +25,6 @@
 #include "libgwy/brick.h"
 #include "libgwy/brick-arithmetic.h"
 #include "libgwy/object-internal.h"
-#include "libgwy/line-internal.h"
 #include "libgwy/brick-internal.h"
 
 #define BASE(brick, col, row, level) \
@@ -1260,9 +1259,9 @@ _gwy_brick_limit_parts(const GwyBrick *src,
     *depth = MIN(*depth, dest->zres - destlevel);
 
     if (src == dest) {
-        if (OVERLAPPING(*col, *width, destcol, *width)
-            && OVERLAPPING(*row, *height, destrow, *height)
-            && OVERLAPPING(*level, *depth, destlevel, *depth)) {
+        if (gwy_overlapping(*col, *width, destcol, *width)
+            && gwy_overlapping(*row, *height, destrow, *height)
+            && gwy_overlapping(*level, *depth, destlevel, *depth)) {
             g_warning("Source and destination blocks overlap.  "
                       "Data corruption is imminent.");
         }

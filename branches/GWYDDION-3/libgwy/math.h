@@ -41,28 +41,32 @@ typedef gdouble (*GwyRealFunc)(gdouble value, gpointer user_data);
 #ifdef __GNUC__
 #  define gwy_powi __builtin_powi
 #else
-double gwy_powi(double x, int i);
+double gwy_powi(double x, int i) G_GNUC_CONST;
 #endif
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
-guint  gwy_math_curvature        (const gdouble *coeffs,
-                                  gdouble *kappa1,
-                                  gdouble *kappa2,
-                                  gdouble *phi1,
-                                  gdouble *phi2,
-                                  gdouble *xc,
-                                  gdouble *yc,
-                                  gdouble *zc);
-gint    gwy_double_compare       (gconstpointer a,
-                                  gconstpointer b)    G_GNUC_PURE;
-gint    gwy_double_direct_compare(gconstpointer a,
-                                  gconstpointer b)    G_GNUC_CONST;
-void    gwy_math_sort            (gdouble *array,
-                                  guint *index_array,
-                                  gsize n);
-gdouble gwy_math_median          (gdouble *array,
-                                  gsize n);
+gboolean gwy_overlapping          (guint pos1,
+                                   guint len1,
+                                   guint pos2,
+                                   guint len2)            G_GNUC_CONST;
+guint    gwy_math_curvature       (const gdouble *coeffs,
+                                   gdouble *kappa1,
+                                   gdouble *kappa2,
+                                   gdouble *phi1,
+                                   gdouble *phi2,
+                                   gdouble *xc,
+                                   gdouble *yc,
+                                   gdouble *zc);
+gint     gwy_double_compare       (gconstpointer a,
+                                   gconstpointer b)       G_GNUC_PURE;
+gint     gwy_double_direct_compare(gconstpointer a,
+                                   gconstpointer b)       G_GNUC_CONST;
+void     gwy_math_sort            (gdouble *array,
+                                   guint *index_array,
+                                   gsize n);
+gdouble  gwy_math_median          (gdouble *array,
+                                   gsize n);
 
 #define gwy_triangular_matrix_length(n) \
     (((n) + 1)*(n)/2)

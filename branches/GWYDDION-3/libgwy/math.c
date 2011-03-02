@@ -271,6 +271,25 @@ gwy_powi(double x, int i)
 }
 
 /**
+ * gwy_overlapping:
+ * @pos1: First segment start.
+ * @len1: First segment length.
+ * @pos2: Second segment start.
+ * @len2: Second segment length.
+ *
+ * Checks whether two pixel-wise segments are overlapping.
+ *
+ * Returns: %TRUE if the two segments are overlapping, %FALSE if they are
+ *          separate.
+ **/
+gboolean
+gwy_overlapping(guint pos1, guint len1,
+                guint pos2, guint len2)
+{
+    return MAX(pos1 + len1, pos2 + len2) - MIN(pos1, pos2) < len1 + len2;
+}
+
+/**
  * gwy_math_curvature:
  * @coeffs: (array fixed-size=6):
  *          Array of the six polynomial coefficients of a quadratic surface in

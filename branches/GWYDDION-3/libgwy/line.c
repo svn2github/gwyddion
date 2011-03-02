@@ -543,7 +543,7 @@ _gwy_line_limit_parts(const GwyLine *src,
     *len = MIN(*len, dest->res - destpos);
 
     if (src == dest) {
-        if ((OVERLAPPING(*pos, *len, destpos, *len))) {
+        if (gwy_overlapping(*pos, *len, destpos, *len)) {
             g_warning("Source and destination blocks overlap.  "
                       "Data corruption is imminent.");
         }

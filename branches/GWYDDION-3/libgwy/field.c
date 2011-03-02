@@ -26,7 +26,6 @@
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/object-internal.h"
-#include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
 
 #define CVAL GWY_FIELD_CVAL
@@ -1124,10 +1123,10 @@ _gwy_field_limit_parts(const GwyField *src,
 
     if (src == dest) {
         if ((transpose
-             && OVERLAPPING(*col, *width, destcol, *height)
-             && OVERLAPPING(*row, *height, destrow, *width))
-            || (OVERLAPPING(*col, *width, destcol, *width)
-                && OVERLAPPING(*row, *height, destrow, *height))) {
+             && gwy_overlapping(*col, *width, destcol, *height)
+             && gwy_overlapping(*row, *height, destrow, *width))
+            || (gwy_overlapping(*col, *width, destcol, *width)
+                && gwy_overlapping(*row, *height, destrow, *height))) {
             g_warning("Source and destination blocks overlap.  "
                       "Data corruption is imminent.");
         }
