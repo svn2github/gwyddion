@@ -45,14 +45,9 @@ void      gwy_line_add          (GwyLine *line,
 void      gwy_line_multiply     (GwyLine *line,
                                  gdouble value);
 void      gwy_line_clear        (GwyLine *line,
-                                 guint pos,
-                                 guint len);
-void      gwy_line_clear_full   (GwyLine *line);
+                                 const GwyLinePart *lpart);
 void      gwy_line_fill         (GwyLine *line,
-                                 guint pos,
-                                 guint len,
-                                 gdouble value);
-void      gwy_line_fill_full    (GwyLine *line,
+                                 const GwyLinePart *lpart,
                                  gdouble value);
 GwyField* gwy_line_outer_product(const GwyLine *column,
                                  const GwyLine *row)    G_GNUC_MALLOC;

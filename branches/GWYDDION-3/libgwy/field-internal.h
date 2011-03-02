@@ -75,11 +75,11 @@ typedef void (*RectExtendFunc)(const gdouble *in,
 
 G_GNUC_INTERNAL
 gboolean _gwy_field_check_part(const GwyField *field,
-                                    const GwyFieldPart *fpart,
-                                    guint *col,
-                                    guint *row,
-                                    guint *width,
-                                    guint *height);
+                               const GwyFieldPart *fpart,
+                               guint *col,
+                               guint *row,
+                               guint *width,
+                               guint *height);
 
 G_GNUC_INTERNAL
 gboolean _gwy_field_limit_parts(const GwyField *src,

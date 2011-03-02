@@ -491,19 +491,83 @@ gwy_line_new_alike(const GwyLine *model,
     return line;
 }
 
+gboolean
+_gwy_line_check_part(const GwyLine *line,
+                     const GwyLinePart *lpart,
+                     guint *pos, guint *len)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
+    if (lpart) {
+        if (!lpart->len)
+            return FALSE;
+        // The two separate conditions are to catch integer overflows.
+        g_return_val_if_fail(lpart->pos < line->res, FALSE);
+        g_return_val_if_fail(lpart->len <= line->res - lpart->pos,
+                             FALSE);
+        *pos = lpart->pos;
+        *len = lpart->len;
+    }
+    else {
+        *pos = 0;
+        *len = line->res;
+    }
+
+    return TRUE;
+}
+
+gboolean
+_gwy_line_limit_parts(const GwyLine *src,
+                       const GwyLinePart *srcpart,
+                       const GwyLine *dest,
+                       guint destpos,
+                       guint *pos, guint *len)
+{
+    g_return_val_if_fail(GWY_IS_LINE(src), FALSE);
+    g_return_val_if_fail(GWY_IS_LINE(dest), FALSE);
+
+    if (srcpart) {
+        *pos = srcpart->pos;
+        *len = srcpart->len;
+        if (*pos >= src->res)
+            return FALSE;
+        *len = MIN(*len, src->res - *pos);
+    }
+    else {
+        *pos = 0;
+        *len = src->res;
+    }
+
+    if (destpos >= dest->res)
+        return FALSE;
+
+    *len = MIN(*len, dest->res - destpos);
+
+    if (src == dest) {
+        if ((OVERLAPPING(*pos, *len, destpos, *len))) {
+            g_warning("Source and destination blocks overlap.  "
+                      "Data corruption is imminent.");
+        }
+    }
+
+    return *len;
+}
+
 /**
  * gwy_line_new_part:
  * @line: A one-dimensional data line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
+ * @lpart: (allow-none):
+ *         Segment in @line to extract to the new line.  Passing %NULL
+ *         creates an identical copy of @line, similarly to
+ *         gwy_line_duplicate() (though with @keep_offsets set to %FALSE
+ *         the offsets are reset).
  * @keep_offset: %TRUE to set the offset of the new line
  *                using @pos and @line offsets.  %FALSE to set the offset
  *                of the new line to zero.
  *
  * Creates a new one-dimensional line as a part of another line.
  *
- * The block of length @len starting at @pos must be entirely contained in
- * @line.  The dimension must be non-zero.
+ * The part specified by @lpart must be entirely contained in @line.  The
+ * dimension must be non-zero.
  *
  * Data are physically copied, i.e. changing the new line data does not change
  * @line's data and vice versa.  Physical dimensions of the new line are
@@ -513,13 +577,12 @@ gwy_line_new_alike(const GwyLine *model,
  **/
 GwyLine*
 gwy_line_new_part(const GwyLine *line,
-                  guint pos,
-                  guint len,
+                  const GwyLinePart *lpart,
                   gboolean keep_offset)
 {
-    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
-    g_return_val_if_fail(len, NULL);
-    g_return_val_if_fail(pos + len <= line->res, NULL);
+    guint pos, len;
+    if (!_gwy_line_check_part(line, lpart, &pos, &len))
+        return NULL;
 
     GwyLine *part;
 
@@ -531,7 +594,7 @@ gwy_line_new_part(const GwyLine *line,
     }
 
     part = gwy_line_new_sized(len, FALSE);
-    gwy_line_copy(line, pos, len, part, 0);
+    gwy_line_copy(line, lpart, part, 0);
     part->real = line->real*len/line->res;
     ASSIGN_UNITS(part->priv->unit_x, line->priv->unit_x);
     ASSIGN_UNITS(part->priv->unit_y, line->priv->unit_y);
@@ -604,7 +667,7 @@ gwy_line_set_size(GwyLine *line,
         g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_RES]);
     }
     else if (clear)
-        gwy_line_clear_full(line);
+        gwy_line_clear(line, NULL);
 }
 
 /**
@@ -646,44 +709,30 @@ gwy_line_copy_full(const GwyLine *src,
 /**
  * gwy_line_copy:
  * @src: Source one-dimensional data line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
+ * @srcpart: Segment in line @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination one-dimensional data line.
  * @destpos: Destination position in @dest.
  *
  * Copies data from one line to another.
  *
- * The copied block starts at @pos in @src and its lenght is @len.  It is
- * copied to @dest starting from @destpos.
+ * The copied segment is defined by @srcpart and it is copied to @dest starting
+ * from @destpos.
  *
  * There are no limitations on the indices or dimensions.  Only the part of the
- * block that is corresponds to data inside @src and @dest is copied.  This can
- * also mean nothing is copied at all.
+ * segment that corresponds to data inside @src and @dest is copied.  This
+ * can also mean nothing is copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_line_copy(const GwyLine *src,
-              guint pos,
-              guint len,
+              const GwyLinePart *srcpart,
               GwyLine *dest,
               guint destpos)
 {
-    g_return_if_fail(GWY_IS_LINE(src));
-    g_return_if_fail(GWY_IS_LINE(dest));
-
-    if (pos >= src->res || destpos >= dest->res)
+    guint pos, len;
+    if (!_gwy_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
         return;
-
-    len = MIN(len, src->res - pos);
-    len = MIN(len, dest->res - destpos);
-    if (!len)
-        return;
-
-    if (src == dest && OVERLAPPING(pos, len, destpos, len)) {
-        g_warning("Source and destination blocks overlap.  "
-                  "Data corruption is imminent.");
-    }
 
     gwy_assign(dest->data + destpos, src->data + pos, len);
 }
@@ -801,7 +850,7 @@ gwy_line_format_y(const GwyLine *line,
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     gdouble min, max;
-    gwy_line_min_max(line, &min, &max);
+    gwy_line_min_max_full(line, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;

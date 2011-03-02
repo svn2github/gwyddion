@@ -47,6 +47,7 @@
       <link linkend='GwyCurve'><type>GwyCurve</type></link>
       represents a function of one variable sampled at arbitrary points.
     </para>
+    <xi:include href="xml/line-part.xml"/>
     <xi:include href="xml/line.xml"/>
     <xi:include href="xml/line-arithmetic.xml"/>
     <xi:include href="xml/line-statistics.xml"/>

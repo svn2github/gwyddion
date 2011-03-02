@@ -37,6 +37,7 @@ deserialize/boxed
 deserialize/garbage
 xy/boxed
 xyz/boxed
+line-part/boxed
 field-part/boxed
 brick-part/boxed
 rgba/boxed

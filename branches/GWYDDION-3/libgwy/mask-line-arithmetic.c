@@ -161,7 +161,7 @@ copy_part(const GwyMaskLine *src,
  * copied to @dest starting from @destpos.
  *
  * There are no limitations on the indices or dimensions.  Only the part of the
- * block that is corresponds to data inside @src and @dest is copied.  This can
+ * block that corresponds to data inside @src and @dest is copied.  This can
  * also mean nothing is copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.

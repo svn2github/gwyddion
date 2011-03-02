@@ -36,6 +36,7 @@
 #include <libgwy/field-distributions.h>
 #include <libgwy/field-filter.h>
 #include <libgwy/field-level.h>
+#include <libgwy/field-part.h>
 #include <libgwy/field-read.h>
 #include <libgwy/field-statistics.h>
 #include <libgwy/field-transform.h>
@@ -49,6 +50,7 @@
 #include <libgwy/interpolation.h>
 #include <libgwy/line.h>
 #include <libgwy/line-arithmetic.h>
+#include <libgwy/line-part.h>
 #include <libgwy/line-statistics.h>
 #include <libgwy/macros.h>
 #include <libgwy/main.h>
@@ -59,7 +61,6 @@
 #include <libgwy/mask-line.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
-#include <libgwy/field-part.h>
 #include <libgwy/resource.h>
 #include <libgwy/rgba.h>
 #include <libgwy/selection.h>

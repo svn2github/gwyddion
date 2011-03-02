@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_LINE_STATISTICS_H__
-#define __LIBGWY_LINE_STATISTICS_H__
+#include "testlibgwy.h"
 
-#include <libgwy/line.h>
+/***************************************************************************
+ *
+ * Line part
+ *
+ ***************************************************************************/
 
-G_BEGIN_DECLS
-
-void    gwy_line_min_max_full(const GwyLine *line,
-                              gdouble *min,
-                              gdouble *max);
-gdouble gwy_line_sum_full    (const GwyLine *line);
-gdouble gwy_line_mean_full   (const GwyLine *line);
-gdouble gwy_line_median_full (const GwyLine *line);
-gdouble gwy_line_rms_full    (const GwyLine *line);
-gdouble gwy_line_length_full (const GwyLine *line);
-
-G_END_DECLS
-
-#endif
+void
+test_line_part_boxed(void)
+{
+    GwyLinePart lpart = { 1, 2 };
+    GwyLinePart *copy = serialize_boxed_and_back(&lpart,
+                                                  GWY_TYPE_LINE_PART);
+    g_assert_cmpfloat(lpart.pos, ==, copy->pos);
+    g_assert_cmpfloat(lpart.len, ==, copy->len);
+    g_boxed_free(GWY_TYPE_LINE_PART, copy);
+}
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

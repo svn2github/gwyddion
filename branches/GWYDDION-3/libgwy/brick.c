@@ -877,7 +877,7 @@ gwy_brick_data_changed(GwyBrick *brick)
  * starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * the part of the rectangle that corresponds to data inside @src and @dest
  * is copied.  This can also mean no data are copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.

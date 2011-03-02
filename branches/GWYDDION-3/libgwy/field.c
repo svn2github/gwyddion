@@ -832,7 +832,7 @@ gwy_field_data_changed(GwyField *field)
  * starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corresponds to data inside @src and @dest
+ * the part of the rectangle that corresponds to data inside @src and @dest
  * is copied.  This can also mean no data are copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.

@@ -23,6 +23,7 @@
 #include <libgwy/serializable.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/unit.h>
+#include <libgwy/line-part.h>
 
 G_BEGIN_DECLS
 
@@ -69,8 +70,7 @@ GwyLine*        gwy_line_new_sized    (guint res,
 GwyLine*        gwy_line_new_alike    (const GwyLine *model,
                                        gboolean clear)                     G_GNUC_MALLOC;
 GwyLine*        gwy_line_new_part     (const GwyLine *line,
-                                       guint pos,
-                                       guint len,
+                                       const GwyLinePart *lpart,
                                        gboolean keep_offset)               G_GNUC_MALLOC;
 GwyLine*        gwy_line_new_resampled(const GwyLine *line,
                                        guint res,
@@ -80,8 +80,7 @@ void            gwy_line_set_size     (GwyLine *line,
                                        gboolean clear);
 void            gwy_line_data_changed (GwyLine *line);
 void            gwy_line_copy         (const GwyLine *src,
-                                       guint pos,
-                                       guint len,
+                                       const GwyLinePart *srcpart,
                                        GwyLine *dest,
                                        guint destpos);
 void            gwy_line_copy_full    (const GwyLine *src,

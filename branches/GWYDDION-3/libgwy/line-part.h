@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,21 +17,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_LINE_STATISTICS_H__
-#define __LIBGWY_LINE_STATISTICS_H__
+#ifndef __LIBGWY_LINE_PART_H__
+#define __LIBGWY_LINE_PART_H__
 
-#include <libgwy/line.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-void    gwy_line_min_max_full(const GwyLine *line,
-                              gdouble *min,
-                              gdouble *max);
-gdouble gwy_line_sum_full    (const GwyLine *line);
-gdouble gwy_line_mean_full   (const GwyLine *line);
-gdouble gwy_line_median_full (const GwyLine *line);
-gdouble gwy_line_rms_full    (const GwyLine *line);
-gdouble gwy_line_length_full (const GwyLine *line);
+typedef struct {
+    guint pos;
+    guint len;
+} GwyLinePart;
+
+#define GWY_TYPE_LINE_PART (gwy_line_part_get_type())
+
+GType        gwy_line_part_get_type(void)                     G_GNUC_CONST;
+GwyLinePart* gwy_line_part_copy    (const GwyLinePart *lpart) G_GNUC_MALLOC;
+void         gwy_line_part_free    (GwyLinePart *lpart);
 
 G_END_DECLS
 

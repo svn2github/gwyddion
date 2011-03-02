@@ -233,7 +233,8 @@ test_line_copy(void)
         guint len = g_rand_int_range(rng, 0, MAX(sres, dres));
         guint pos = g_rand_int_range(rng, 0, sres);
         guint destpos = g_rand_int_range(rng, 0, dres);
-        gwy_line_copy(source, pos, len, dest, destpos);
+        GwyLinePart lpart = { pos, len };
+        gwy_line_copy(source, &lpart, dest, destpos);
         line_part_copy_dumb(source, pos, len, reference, destpos);
         line_assert_equal(dest, reference);
         g_object_unref(source);
@@ -257,7 +258,8 @@ test_line_new_part(void)
         line_randomize(source, rng);
         guint len = g_rand_int_range(rng, 1, res+1);
         guint pos = g_rand_int_range(rng, 0, res-len+1);
-        GwyLine *part = gwy_line_new_part(source, pos, len, TRUE);
+        GwyLinePart lpart = { pos, len };
+        GwyLine *part = gwy_line_new_part(source, &lpart, TRUE);
         GwyLine *reference = gwy_line_new_sized(len, FALSE);
         gwy_line_set_real(reference, source->real*len/res);
         gwy_line_set_offset(reference, source->real*pos/res);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "libgwy/line-internal.h"
 
 /**
- * gwy_line_min_max:
+ * gwy_line_min_max_full:
  * @line: A one-dimensional data line.
  * @min: Location to store the minimum to, or %NULL.
  * @max: Location to store the maximum to, or %NULL.
@@ -32,9 +32,9 @@
  * Finds the minimum and maximum value in a line.
  **/
 void
-gwy_line_min_max(const GwyLine *line,
-                 gdouble *min,
-                 gdouble *max)
+gwy_line_min_max_full(const GwyLine *line,
+                      gdouble *min,
+                      gdouble *max)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     if (!min && !max)
@@ -53,7 +53,7 @@ gwy_line_min_max(const GwyLine *line,
 }
 
 /**
- * gwy_line_sum:
+ * gwy_line_sum_full:
  * @line: A one-dimensional data line.
  *
  * Calculates the sum of line values.
@@ -61,7 +61,7 @@ gwy_line_min_max(const GwyLine *line,
  * Returns: The sum of all values in the data line.
  **/
 gdouble
-gwy_line_sum(const GwyLine *line)
+gwy_line_sum_full(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
     const gdouble *d = line->data;
@@ -72,7 +72,7 @@ gwy_line_sum(const GwyLine *line)
 }
 
 /**
- * gwy_line_mean:
+ * gwy_line_mean_full:
  * @line: A one-dimensional data line.
  *
  * Calculates the mean value of a line.
@@ -80,7 +80,7 @@ gwy_line_sum(const GwyLine *line)
  * Returns: The mean value.
  **/
 gdouble
-gwy_line_mean(const GwyLine *line)
+gwy_line_mean_full(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NAN);
     const gdouble *d = line->data;
@@ -91,7 +91,7 @@ gwy_line_mean(const GwyLine *line)
 }
 
 /**
- * gwy_line_median:
+ * gwy_line_median_full:
  * @line: A one-dimensional data line.
  *
  * Calculates the median value of a line.
@@ -99,7 +99,7 @@ gwy_line_mean(const GwyLine *line)
  * Returns: The median value.
  **/
 gdouble
-gwy_line_median(const GwyLine *line)
+gwy_line_median_full(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NAN);
     gsize bufsize = line->res*sizeof(gdouble);
@@ -111,7 +111,7 @@ gwy_line_median(const GwyLine *line)
 }
 
 /**
- * gwy_line_rms:
+ * gwy_line_rms_full:
  * @line: A one-dimensional data line.
  *
  * Calculates the rooms mean square value of a line.
@@ -119,7 +119,7 @@ gwy_line_median(const GwyLine *line)
  * Returns: The root mean square of differences from the mean value.
  **/
 gdouble
-gwy_line_rms(const GwyLine *line)
+gwy_line_rms_full(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
     const gdouble *d = line->data;
@@ -136,7 +136,7 @@ gwy_line_rms(const GwyLine *line)
 }
 
 /**
- * gwy_line_length:
+ * gwy_line_length_full:
  * @line: A one-dimensional data line.
  *
  * Calculates the non-projected length of a line.
@@ -144,7 +144,7 @@ gwy_line_rms(const GwyLine *line)
  * Returns: The line length.
  **/
 gdouble
-gwy_line_length(const GwyLine *line)
+gwy_line_length_full(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
     const gdouble *d = line->data;
@@ -154,7 +154,6 @@ gwy_line_length(const GwyLine *line)
         length += hypot(q, d[1] - d[0]);
     return length;
 }
-
 
 /**
  * SECTION: line-statistics

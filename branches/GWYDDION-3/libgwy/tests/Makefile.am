@@ -23,6 +23,7 @@ testlibgwy_SOURCES = \
 	interpolation.c \
 	inventory.c \
 	linalg.c \
+	line-part.c \
 	line.c \
 	mask-field.c \
 	mask-line.c \
