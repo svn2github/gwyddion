@@ -163,7 +163,8 @@ test_mask_line_copy(void)
         guint len = g_rand_int_range(rng, 0, MAX(sres, dres));
         guint pos = g_rand_int_range(rng, 0, sres);
         guint destpos = g_rand_int_range(rng, 0, dres);
-        gwy_mask_line_copy(source, pos, len, dest, destpos);
+        GwyLinePart lpart = { pos, len };
+        gwy_mask_line_copy(source, &lpart, dest, destpos);
         mask_line_part_copy_dumb(source, pos, len, reference, destpos);
         mask_line_assert_equal(dest, reference);
         g_object_unref(source);
@@ -189,7 +190,8 @@ test_mask_line_new_part(void)
         mask_line_randomize(source, pool, max_size, rng);
         guint len = g_rand_int_range(rng, 1, res+1);
         guint pos = g_rand_int_range(rng, 0, res-len+1);
-        GwyMaskLine *part = gwy_mask_line_new_part(source, pos, len);
+        GwyLinePart lpart = { pos, len };
+        GwyMaskLine *part = gwy_mask_line_new_part(source, &lpart);
         GwyMaskLine *reference = gwy_mask_line_new_sized(len, FALSE);
         mask_line_part_copy_dumb(source, pos, len, reference, 0);
         mask_line_assert_equal(part, reference);
@@ -297,9 +299,10 @@ test_mask_line_count(void)
         guint len = g_rand_int_range(rng, 1, res+1);
         guint pos = g_rand_int_range(rng, 0, res-len+1);
 
-        g_assert_cmpuint(gwy_mask_line_part_count(line, pos, len, FALSE),
+        GwyLinePart lpart = { pos, len };
+        g_assert_cmpuint(gwy_mask_line_part_count(line, &lpart, FALSE),
                          ==, mask_line_count_dumb(line, NULL, pos, len, FALSE));
-        g_assert_cmpuint(gwy_mask_line_part_count(line, pos, len, TRUE),
+        g_assert_cmpuint(gwy_mask_line_part_count(line, &lpart, TRUE),
                          ==, mask_line_count_dumb(line, NULL, pos, len, TRUE));
 
         g_object_unref(line);

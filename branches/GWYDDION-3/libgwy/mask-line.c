@@ -320,17 +320,50 @@ gwy_mask_line_get_property(GObject *object,
 }
 
 gboolean
-_gwy_mask_line_limit_interval(const GwyMaskLine *src,
-                              guint *pos, guint *len,
-                              const GwyMaskLine *dest,
-                              guint destpos)
+_gwy_mask_line_check_part(const GwyMaskLine *line,
+                          const GwyLinePart *lpart,
+                          guint *pos, guint *len)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
+    if (lpart) {
+        if (!lpart->len)
+            return FALSE;
+        // The two separate conditions are to catch integer overflows.
+        g_return_val_if_fail(lpart->pos < line->res, FALSE);
+        g_return_val_if_fail(lpart->len <= line->res - lpart->pos,
+                             FALSE);
+        *pos = lpart->pos;
+        *len = lpart->len;
+    }
+    else {
+        *pos = 0;
+        *len = line->res;
+    }
+
+    return TRUE;
+}
+
+gboolean
+_gwy_mask_line_limit_parts(const GwyMaskLine *src,
+                           const GwyLinePart *srcpart,
+                           const GwyMaskLine *dest,
+                           guint destpos,
+                           guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_MASK_LINE(src), FALSE);
     g_return_val_if_fail(GWY_IS_MASK_LINE(dest), FALSE);
 
-    if (*pos >= src->res)
-        return FALSE;
-    *len = MIN(*len, src->res - *pos);
+    if (srcpart) {
+        *pos = srcpart->pos;
+        *len = srcpart->len;
+        if (*pos >= src->res)
+            return FALSE;
+        *len = MIN(*len, src->res - *pos);
+    }
+    else {
+        *pos = 0;
+        *len = src->res;
+    }
 
     if (destpos >= dest->res)
         return FALSE;
@@ -344,7 +377,7 @@ _gwy_mask_line_limit_interval(const GwyMaskLine *src,
         }
     }
 
-    return !!*len;
+    return *len;
 }
 
 /**
@@ -390,13 +423,15 @@ gwy_mask_line_new_sized(guint res,
 /**
  * gwy_mask_line_new_part:
  * @line: A one-dimensional mask line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
+ * @lpart: (allow-none):
+ *         Segment in @line to extract to the new line.  Passing %NULL
+ *         creates an identical copy of @line, similarly to
+ *         gwy_mask_line_duplicate().
  *
  * Creates a new one-dimensional mask line as a part of another mask line.
  *
- * The block of length @len starting at @pos must be entirely contained in
- * @line.  The dimension must be non-zero.
+ * The part specified by @lpart must be entirely contained in @line.  The
+ * dimension must be non-zero.
  *
  * Data are physically copied, i.e. changing the new mask line data does not
  * change @line's data and vice versa.
@@ -405,18 +440,17 @@ gwy_mask_line_new_sized(guint res,
  **/
 GwyMaskLine*
 gwy_mask_line_new_part(const GwyMaskLine *line,
-                       guint pos,
-                       guint len)
+                       const GwyLinePart *lpart)
 {
-    g_return_val_if_fail(GWY_IS_MASK_LINE(line), NULL);
-    g_return_val_if_fail(len, NULL);
-    g_return_val_if_fail(pos + len <= line->res, NULL);
+    guint pos, len;
+    if (!_gwy_mask_line_check_part(line, lpart, &pos, &len))
+        return NULL;
 
     if (len == line->res)
         return gwy_mask_line_duplicate(line);
 
     GwyMaskLine *part = gwy_mask_line_new_sized(len, FALSE);
-    gwy_mask_line_copy(line, pos, len, part, 0);
+    gwy_mask_line_copy(line, lpart, part, 0);
     return part;
 }
 
@@ -537,7 +571,7 @@ gwy_mask_line_count(const GwyMaskLine *line,
 {
     g_return_val_if_fail(GWY_IS_MASK_LINE(line), 0);
     if (!mask)
-        return gwy_mask_line_part_count(line, 0, line->res, value);
+        return gwy_mask_line_part_count(line, NULL, value);
 
     g_return_val_if_fail(GWY_IS_MASK_LINE(mask), 0);
     g_return_val_if_fail(line->res == mask->res, 0);
@@ -594,8 +628,8 @@ count_row(const guint32 *row,
 /**
  * gwy_mask_line_part_count:
  * @line: A one-dimensional mask line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
+ * @lpart: (allow-none):
+ *         Segment in @line to process.  Pass %NULL to process entire @line.
  * @value: %TRUE to count ones, %FALSE to count zeroes.
  *
  * Counts set or unset bits in a mask line.
@@ -604,13 +638,11 @@ count_row(const guint32 *row,
  **/
 guint
 gwy_mask_line_part_count(const GwyMaskLine *line,
-                         guint pos,
-                         guint len,
+                         const GwyLinePart *lpart,
                          gboolean value)
 {
-    g_return_val_if_fail(GWY_IS_MASK_LINE(line), 0);
-    g_return_val_if_fail(pos + len <= line->res, 0);
-    if (!len)
+    guint pos, len;
+    if (!_gwy_mask_line_check_part(line, lpart, &pos, &len))
         return 0;
 
     guint32 *base = line->data + (pos >> 5);

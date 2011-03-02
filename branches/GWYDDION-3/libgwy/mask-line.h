@@ -22,6 +22,7 @@
 
 #include <libgwy/serializable.h>
 #include <libgwy/mask-iter.h>
+#include <libgwy/line-part.h>
 
 G_BEGIN_DECLS
 
@@ -59,15 +60,14 @@ struct _GwyMaskLineClass {
 #define gwy_mask_line_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType        gwy_mask_line_get_type     (void)                    G_GNUC_CONST;
-GwyMaskLine* gwy_mask_line_new          (void)                    G_GNUC_MALLOC;
+GType        gwy_mask_line_get_type     (void)                     G_GNUC_CONST;
+GwyMaskLine* gwy_mask_line_new          (void)                     G_GNUC_MALLOC;
 GwyMaskLine* gwy_mask_line_new_sized    (guint res,
-                                         gboolean clear)          G_GNUC_MALLOC;
+                                         gboolean clear)           G_GNUC_MALLOC;
 GwyMaskLine* gwy_mask_line_new_part     (const GwyMaskLine *line,
-                                         guint pos,
-                                         guint len)               G_GNUC_MALLOC;
+                                         const GwyLinePart *lpart) G_GNUC_MALLOC;
 GwyMaskLine* gwy_mask_line_new_resampled(const GwyMaskLine *line,
-                                         guint res)               G_GNUC_MALLOC;
+                                         guint res)                G_GNUC_MALLOC;
 void         gwy_mask_line_set_size     (GwyMaskLine *line,
                                          guint res,
                                          gboolean clear);
@@ -117,8 +117,7 @@ void         gwy_mask_line_set_size     (GwyMaskLine *line,
 
 void     gwy_mask_line_data_changed(GwyMaskLine *line);
 void     gwy_mask_line_copy        (const GwyMaskLine *src,
-                                    guint srcpos,
-                                    guint srclen,
+                                    const GwyLinePart *srcpart,
                                     GwyMaskLine *dest,
                                     guint destpos);
 void     gwy_mask_line_invalidate  (GwyMaskLine *line);
@@ -126,8 +125,7 @@ guint    gwy_mask_line_count       (const GwyMaskLine *line,
                                     const GwyMaskLine *mask,
                                     gboolean value);
 guint    gwy_mask_line_part_count  (const GwyMaskLine *line,
-                                    guint pos,
-                                    guint len,
+                                    const GwyLinePart *lpart,
                                     gboolean value);
 
 G_END_DECLS

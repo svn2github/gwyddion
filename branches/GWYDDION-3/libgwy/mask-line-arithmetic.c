@@ -150,38 +150,37 @@ copy_part(const GwyMaskLine *src,
 /**
  * gwy_mask_line_copy:
  * @src: Source one-dimensional mask line.
- * @srcpos: Position of the line part start.
- * @srclen: Part length (number of items).
+ * @srcpart: Segment in line @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination one-dimensional mask line.
  * @destpos: Destination position in @dest.
  *
  * Copies data from one mask line to another.
  *
- * The copied block starts at @pos in @src and its lenght is @len.  It is
- * copied to @dest starting from @destpos.
+ * The copied segment is defined by @srcpart and it is copied to @dest starting
+ * from @destpos.
  *
  * There are no limitations on the indices or dimensions.  Only the part of the
- * block that corresponds to data inside @src and @dest is copied.  This can
- * also mean nothing is copied at all.
+ * segment that corresponds to data inside @src and @dest is copied.  This
+ * can also mean nothing is copied at all.
  *
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_mask_line_copy(const GwyMaskLine *src,
-                   guint srcpos,
-                   guint srclen,
+                   const GwyLinePart *srcpart,
                    GwyMaskLine *dest,
                    guint destpos)
 {
-    if (!_gwy_mask_line_limit_interval(src, &srcpos, &srclen, dest, destpos))
+    guint pos, len;
+    if (!_gwy_mask_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
         return;
 
-    if (srclen == src->res && srclen == dest->res) {
-        g_assert(srcpos == 0 && destpos == 0);
+    if (len == src->res && len == dest->res) {
+        g_assert(pos == 0 && destpos == 0);
         gwy_assign(dest->data, src->data, src->priv->stride);
     }
     else
-        copy_part(src, srcpos, srclen, dest, destpos);
+        copy_part(src, pos, len, dest, destpos);
     gwy_mask_line_invalidate(dest);
 }
 
