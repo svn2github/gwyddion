@@ -324,7 +324,7 @@ _gwy_mask_line_check_part(const GwyMaskLine *line,
                           const GwyLinePart *lpart,
                           guint *pos, guint *len)
 {
-    g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
+    g_return_val_if_fail(GWY_IS_MASK_LINE(line), FALSE);
     if (lpart) {
         if (!lpart->len)
             return FALSE;
