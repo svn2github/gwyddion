@@ -25,6 +25,16 @@
 
 G_BEGIN_DECLS
 
+typedef void (*GwyFieldQuartersFunc)(gdouble zul,
+                                     gdouble zur,
+                                     gdouble zlr,
+                                     gdouble zll,
+                                     gdouble wul,
+                                     gdouble wur,
+                                     gdouble wlr,
+                                     gdouble wll,
+                                     gpointer user_data);
+
 void    gwy_field_min_max          (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
@@ -75,6 +85,12 @@ guint   gwy_field_count_above_below(const GwyField *field,
                                     gboolean strict,
                                     guint *nabove,
                                     guint *nbelow);
+void    gwy_field_process_quarters (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking,
+                                    GwyFieldQuartersFunc function,
+                                    gpointer user_data);
 
 G_END_DECLS
 
