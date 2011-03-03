@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: filters.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='caldata'>
+  <title>Calibration and uncertainties</title>
+  <sect2 id='caldata-overview'>
+    <title>
+      Calibration data
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_filter-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      Calibration data can be used to provide correction of measured data
+      or perform uncertainty calculations. Generally, calibration data can be
+      of different type and different level of complexity. For most of the cases
+      user acquires error in each axis, e. g. using a calibrated standard.
+      This value can be used for data correction. Similarily, the value of uncertainty 
+      is mosttly determined for each axis from calibrated standard certificate and 
+      from measurement process uncertainty budget.
+    </para>
+    <para>
+      In more complex case, calibration data can be determined locally.
+      Scanner error cannot always be described by only three parameters (one for each axis)
+      and its uncertainty is not necessarily the same in whole range.
+      For precise measurements it is therefore practical to determine local
+      errors and namely local uncertainties that can be used for further
+      calculations. By mean "local" we mean here uncertainties that are related
+      to certain location in the complete volume that can be reached scanner.
+    </para>
+    <para>
+      To obtain local errors and uncertainties, one can use a calibration
+      standard again or use a more complex instrument, like interferometer
+      for scanning stange calibration. This is usually done in metrology institutes.
+    </para>
+    <para>
+      In Gwyddion, there is a set of tools helping local uncertainty processing.
+      Primary calibration data, related to a scanning stage, can be determined or loaded. 
+      They can be assigned to a certain SPM measurement data creating a set of calibrations. 
+      These are used automatically in tools and modules where uncertainty propagation calculation can be performed
+      in order to provide measurement uncertainty.
+    </para>
+  </sect2>
+  <sect2 id='caldata-create'>
+    <title>Calibration data acquisition</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Calibration</guisubmenu>
+        <guisubmenu>3D calibration</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+    Calibration data can be acquired in the following ways:
+     The module
+      <menuchoice>
+        <guimenu>3D calibration</guimenu>
+        <guisubmenu>Create...</guisubmenu>
+      </menuchoice>
+      can be used for creating simplest primary calibration data - based only on
+      knowledge of xyz errors and uncertainties and on scanner volume geometry.
+      We also need to specify calibration name. Primary calibration data will be
+      accesible under this name module for its data application to SPM measurements. 
+      </para>
+      <para>
+      Using 
+      <menuchoice>
+        <guimenu>3D calibration</guimenu>
+        <guisubmenu>Get simple error map...</guisubmenu>
+      </menuchoice>
+      module, we can determine primary xyz calibration data from a set of calibration
+      grating measurements. Here we need to provide several measurements
+      of calibration grating for different z-levels of the scanner. This forms
+      several cross-sections of the full scanner volume. Providing single grating detail,
+      nominal grating pitch and assuming that the grating planarity and orthogonality
+      is much higher than that of scanning stage we can determine primary calibration
+      data on the basis of correlation. Note that this way of calibrating an microscope
+      is only very approximate and its use for metrology purposes is very limited. 
+      However, it can provide a lot of useful information about our scanner properties
+      if we are unable to perform more complex analysis.
+    </para>
+    <para>
+    Finally, using 
+    <menuchoice>
+        <guimenu>3D calibration</guimenu>
+        <guisubmenu>Load from file...</guisubmenu>
+    </menuchoice>
+    we can load any primary 3D calibration data determined by an external device, like set of
+    interferometers. Data should be a plain text file containing number of calibration sets
+    and sets (x, y, z, x_err, y_err, z_err, x_unc, y_unc, z_unc).
+    </para>
+  </sect2>
+  <sect2 id='caldata-apply'>
+    <title>Calibration data application and further use</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Calibration</guisubmenu>
+        <guisubmenu>3D calibration</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+    Primary calibration data obtained in previous steps are related to a scanning stage, not to
+    concrete SPM measurements. We can use primary calibration data for different measurements.
+    To use primary calibration data for our measured data processing, we need to apply them first.
+    Using module 
+          <menuchoice>
+        <guimenu>3D calibration</guimenu>
+        <guisubmenu>Apply to data...</guisubmenu>
+      </menuchoice>
+    we can review and select calibration data applied on our height field measurements.
+    After applying calibration data a set of calibration datafields is created and
+    attached to selected data. A 'C' character appears in data browser as a sign of
+    data with attached calibration. Note that the calibration attached to SPM measurement is no
+    more related with primary calibration data (that were used for its creation).
+    </para>
+    <para>
+    When there is calibration attached to data, data reading and statistical quantities
+    evaluation modules and tools recognize it automatically. Measurement uncertainty
+    is then added to the measurement results. Uncertainty is calculated using uncertainty
+    propagation law.
+    </para>
+    </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
