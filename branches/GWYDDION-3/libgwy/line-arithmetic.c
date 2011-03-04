@@ -90,46 +90,80 @@ gwy_line_is_incompatible(const GwyLine *line1,
     return result;
 }
 
-// FIXME: These two may not belong here, but they do not worth a separate
+// FIXME: These may not belong here, but they do not worth a separate
 // header.
 /**
  * gwy_line_accumulate:
  * @line: A one-dimensional data line.
+ * @unbiased: %TRUE to perform a transformation of a distribution to
+ *            cumulative, %FALSE to simply sum the preceeding elements.
  *
- * Transforms a distribution in a line to cummulative distribution.
+ * Transforms a distribution in a line to cumulative distribution.
  *
- * Each element becomes the sum of all previous elements in the line, including
- * self.
+ * If @unbiased is %FALSE each element becomes the sum of all previous elements
+ * in the line, including self.  The first element is kept intact. This is
+ * useful for accumulating differences such as those calculated with
+ * gwy_field_find_row_shifts().
+ *
+ * For statistical distributions, @unbiased should be usually %TRUE.  In this
+ * case each element becomes the sum of all previous elements in the line plus
+ * half of self.  This is based on treating the pixels as bins, estimating the
+ * distribution within each bin as uniform and then taking samples at bin
+ * centres (as is usual).
  **/
 void
-gwy_line_accumulate(GwyLine *line)
+gwy_line_accumulate(GwyLine *line,
+                    gboolean unbiased)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     gdouble *p = line->data;
-    for (guint i = line->res-1; i; i--, p++)
-        p[1] += p[0];
+    if (unbiased) {
+        gdouble prev = p[0];
+        p[0] *= 0.5;
+        for (guint i = line->res-1; i; i--, p++) {
+            gdouble curr = p[1];
+            p[1] = p[0] + 0.5*(prev + curr);
+            prev = curr;
+        }
+    }
+    else {
+        for (guint i = line->res-1; i; i--, p++)
+            p[1] += p[0];
+    }
 }
 
 /**
  * gwy_line_distribute:
  * @line: A one-dimensional data line.
+ * @unbiased: %TRUE to perform a transformation of a cumulative distribution to
+ *            non-cumulative, %FALSE to simply subtract the following elements.
  *
- * Transforms a cummulative distribution in a line to distribution.
+ * Transforms a cumulative distribution in a line to distribution.
  *
- * Each element except the first is set to the difference beteen self and the
- * previous element.
+ * This method performs the exact inverse of gwy_line_accumulate() provided
+ * that the transformation is of the same type, i.e. the same value of
+ * @unbiased is passed.  See gwy_line_accumulate() for discussion of the two
+ * transformation types.
  *
- * The first element is kept intact to make this method the exact inverse of
- * gwy_line_accumulate().  However, you might also wish to set it to zero
- * afterwards.
+ * The first element is kept intact if @unbiased is %FALSE.  In some cases you
+ * may wish to set it to zero afterwards.
  **/
 void
-gwy_line_distribute(GwyLine *line)
+gwy_line_distribute(GwyLine *line,
+                    gboolean unbiased)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     gdouble *p = line->data + line->res-2;
     for (guint i = line->res-1; i; i--, p--)
         p[1] -= p[0];
+    if (unbiased) {
+        p = line->data;
+        for (guint i = line->res-1; i; i--, p++)
+            p[1] -= p[0];
+        p = line->data;
+        for (guint i = line->res; i; i--, p++)
+            *p *= 2.0;
+    }
 }
 
 /**

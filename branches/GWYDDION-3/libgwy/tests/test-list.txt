@@ -55,7 +55,8 @@ line/units
 line/copy
 line/new-part
 line/serialize
-line/distribute
+line/distribute/simple
+line/distribute/unbiased
 line/outer-product
 line/compatibility/res
 line/compatibility/real

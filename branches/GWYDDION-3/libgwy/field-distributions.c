@@ -154,7 +154,7 @@ gwy_field_value_dist(const GwyField *field,
     line->off = min;
     line->real = max - min;
     if (cumulative) {
-        gwy_line_accumulate(line);
+        gwy_line_accumulate(line, TRUE);
         gwy_line_multiply(line, 1.0/line->data[npoints-1]);
     }
     else
@@ -521,7 +521,7 @@ gwy_field_slope_dist(const GwyField *field,
     }
 
     if (cumulative) {
-        gwy_line_accumulate(line);
+        gwy_line_accumulate(line, TRUE);
         gwy_line_multiply(line, 1.0/line->data[npoints-1]);
     }
     else

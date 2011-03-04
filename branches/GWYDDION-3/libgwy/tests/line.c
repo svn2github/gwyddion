@@ -302,7 +302,7 @@ test_line_outer_product(void)
 }
 
 void
-test_line_distribute(void)
+test_line_distribute_simple(void)
 {
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
@@ -312,8 +312,29 @@ test_line_distribute(void)
         line_randomize(source, rng);
 
         GwyLine *line = gwy_line_duplicate(source);
-        gwy_line_accumulate(line);
-        gwy_line_distribute(line);
+        gwy_line_accumulate(line, FALSE);
+        gwy_line_distribute(line, FALSE);
+        line_assert_numerically_equal(line, source, 1e-14);
+
+        g_object_unref(line);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_line_distribute_unbiased(void)
+{
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint res = 1; res <= 13; res++) {
+        GwyLine *source = gwy_line_new_sized(res, FALSE);
+        line_randomize(source, rng);
+
+        GwyLine *line = gwy_line_duplicate(source);
+        gwy_line_accumulate(line, TRUE);
+        gwy_line_distribute(line, TRUE);
         line_assert_numerically_equal(line, source, 1e-14);
 
         g_object_unref(line);

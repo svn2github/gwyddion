@@ -38,8 +38,10 @@ GwyLineCompatibilityFlags gwy_line_is_incompatible(const GwyLine *line1,
                                                    const GwyLine *line2,
                                                    GwyLineCompatibilityFlags check);
 
-void      gwy_line_accumulate   (GwyLine *line);
-void      gwy_line_distribute   (GwyLine *line);
+void      gwy_line_accumulate   (GwyLine *line,
+                                 gboolean unbiased);
+void      gwy_line_distribute   (GwyLine *line,
+                                 gboolean unbiased);
 void      gwy_line_add          (GwyLine *line,
                                  gdouble value);
 void      gwy_line_multiply     (GwyLine *line,
