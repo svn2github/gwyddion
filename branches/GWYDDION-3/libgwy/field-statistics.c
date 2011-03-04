@@ -1109,8 +1109,8 @@ gwy_field_process_quarters(const GwyField *field,
  * Type of function used in processing fields by quarters.
  *
  * Note the values and weights are passed in a clock-wise order around the
- * square.  This means that subsequent values share a side of the square but
- * the order is different from a 2×2 field.
+ * square starting from the top-left corner.  This means that subsequent values
+ * share a side of the square but the order is different from a 2×2 field.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
