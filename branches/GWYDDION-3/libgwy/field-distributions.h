@@ -45,7 +45,10 @@ GwyLine* gwy_field_slope_dist(const GwyField *field,
                               GwyMaskingType masking,
                               GwyOrientation orientation,
                               gboolean cumulative,
-                              guint npoints)                 G_GNUC_MALLOC;
+                              gboolean continuous,
+                              guint npoints,
+                              gdouble min,
+                              gdouble max)                   G_GNUC_MALLOC;
 GwyLine* gwy_field_row_psdf  (const GwyField *field,
                               const GwyFieldPart *fpart,
                               const GwyMaskField *mask,

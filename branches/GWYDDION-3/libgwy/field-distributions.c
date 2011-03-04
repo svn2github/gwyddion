@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,18 @@
 #include "libgwy/field-distributions.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
+
+typedef struct {
+    guint n;              // Number of quarter-pixels considered.
+    guint n_in_range;     // Number of quarter-pixels within range.
+    gboolean analyse : 1;
+    gboolean count : 1;
+    gdouble dx;
+    gdouble dy;
+    gdouble min;
+    gdouble max;
+    GwyLine *dist;
+} DistributionData;
 
 static void
 sanitize_range(gdouble *min,
@@ -64,7 +76,7 @@ sanitize_range(gdouble *min,
  * Calculates the distribution of values in a field.
  *
  * Pass @max <= @min to calculate the distribution in the full data range
- * (with masking possibly considered).
+ * (with masking still considered).
  *
  * Returns: A new one-dimensional data line with the value distribution.
  **/
@@ -172,256 +184,192 @@ fail:
     return line;
 }
 
-static guint
-slope_dist_horiz_analyse(const GwyField *field,
-                         guint col, guint row,
-                         guint width, guint height,
-                         gdouble *min, gdouble *max)
+/**
+ * update_uniform_dist:
+ * @line: A data line containing the distribution, its physical dimensions are
+ *        ignored, the bins are determined by @min and @max.
+ * @min: Minimum of the first bin.
+ * @max: Maximum of the last bin.
+ * @from: Left endpoint of the contribution.
+ * @to: Right endpoint of the contribution.
+ * @weight: Total weight of the contribution to add.
+ *
+ * Adds a uniform contribution to a distribution.
+ *
+ * The contribution is uniform in [@from, @to] with integral equal to @weight.
+ * If part of the contribution lies outside [@min, @max] it will be missing in
+ * @line.
+ **/
+static void
+update_uniform_dist(GwyLine *line, gdouble min, gdouble max,
+                    gdouble from, gdouble to, gdouble weight)
 {
-    const gdouble *base = field->data + row*field->xres + col;
-    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
+    guint n = line->res;
+    gdouble binsize = n/(max - min);
+    gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
+    guint ifrom, ito;
 
-    for (guint i = 0; i < height; i++) {
-        const gdouble *d = base + i*field->xres;
-        for (guint j = width-1; j; j--, d++) {
-            gdouble v = d[1] - d[0];
-            if (v < min1)
-                min1 = v;
-            if (v > max1)
-                max1 = v;
-        }
+    if (binfrom >= n || binto <= 0.0)
+        return;
+
+    if (binfrom < 0.0) {
+        binfrom = 0.0;
+        ifrom = 0;
     }
-    *min = min1;
-    *max = max1;
-    return width*(height - 1);
-}
+    else
+        ifrom = floor(binfrom);
 
-static guint
-slope_dist_horiz_analyse_mask(const GwyField *field,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              guint col, guint row,
-                              guint width, guint height,
-                              guint maskcol, guint maskrow,
-                              gdouble *min, gdouble *max)
-{
-    const gdouble *base = field->data + row*field->xres + col;
-    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
-    guint ndata = 0;
-
-    for (guint i = 0; i < height; i++) {
-        const gdouble *d = base + i*field->xres;
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-        gboolean prev = !gwy_mask_iter_get(iter) == invert;
-        for (guint j = width-1; j; j--, d++) {
-            gboolean curr = !gwy_mask_iter_get(iter) == invert;
-            if (prev && curr) {
-                gdouble v = d[1] - d[0];
-                if (v < min1)
-                    min1 = v;
-                if (v > max1)
-                    max1 = v;
-                ndata++;
-            }
-            gwy_mask_iter_next(iter);
-            prev = curr;
-        }
+    if (binto >= n) {
+        binto = n;
+        ito = n-1;
     }
-    *min = min1;
-    *max = max1;
-    return ndata;
-}
+    else
+        ito = floor(binto);
 
-static guint
-slope_dist_vert_analyse(const GwyField *field,
-                        guint col, guint row,
-                        guint width, guint height,
-                        gdouble *min, gdouble *max)
-{
-    const gdouble *base = field->data + row*field->xres + col;
-    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
-
-    for (guint i = 0; i < height-1; i++) {
-        const gdouble *d1 = base + i*field->xres;
-        const gdouble *d2 = d1 + field->xres;
-        for (guint j = width; j; j--, d1++, d2++) {
-            gdouble v = *d2 - *d1;
-            if (v < min1)
-                min1 = v;
-            if (v > max1)
-                max1 = v;
-        }
+    if (to == from) {
+        line->data[ito] += weight;
+        return;
     }
-    *min = min1;
-    *max = max1;
-    return width*(height - 1);
-}
 
-static guint
-slope_dist_vert_analyse_mask(const GwyField *field,
-                             const GwyMaskField *mask,
-                             GwyMaskingType masking,
-                             guint col, guint row,
-                             guint width, guint height,
-                             guint maskcol, guint maskrow,
-                             gdouble *min, gdouble *max)
-{
-    const gdouble *base = field->data + row*field->xres + col;
-    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
-    guint ndata = 0;
-
-    for (guint i = 0; i < height-1; i++) {
-        const gdouble *d1 = base + i*field->xres;
-        const gdouble *d2 = d1 + field->xres;
-        GwyMaskIter iter1, iter2;
-        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
-        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
-        for (guint j = width; j; j--, d1++, d2++) {
-            if ((!gwy_mask_iter_get(iter1) == invert)
-                && (!gwy_mask_iter_get(iter2) == invert)) {
-                gdouble v = *d2 - *d1;
-                if (v < min1)
-                    min1 = v;
-                if (v > max1)
-                    max1 = v;
-                ndata++;
-            }
-            gwy_mask_iter_next(iter1);
-            gwy_mask_iter_next(iter2);
-        }
-    }
-    *min = min1;
-    *max = max1;
-    return ndata;
+    gdouble binweight = weight*binsize/(to - from);
+    line->data[ifrom] += binweight*(1.0 - (binfrom - ifrom));
+    for (guint i = ifrom+1; i < ito; i++)
+        line->data[i] += binweight;
+    line->data[ito] += binweight*(binto - to);
 }
 
 static void
-slope_dist_horiz_gather(const GwyField *field,
-                        guint col, guint row,
-                        guint width, guint height,
-                        GwyLine *line)
+update_delta_dist(GwyLine *line, gdouble min, gdouble max,
+                  gdouble value, gdouble weight)
 {
-    const gdouble *base = field->data + row*field->xres + col;
-    guint npoints = line->res;
-    gdouble q = line->real*npoints*gwy_field_dx(field);
-    gdouble min = line->off;
+    guint n = line->res;
+    gdouble binsize = n/(max - min);
+    gdouble binvalue = (value - min)/binsize;
+    guint ivalue;
 
-    for (guint i = 0; i < height; i++) {
-        const gdouble *d = base + i*field->xres;
-        for (guint j = width-1; j; j--, d++) {
-            gdouble v = d[1] - d[0];
-            guint k = (guint)((v - min)/q);
-            // Fix rounding errors.
-            if (G_UNLIKELY(k >= npoints))
-                line->data[npoints-1] += 1;
-            else
-                line->data[k] += 1;
-        }
+    if (binvalue > n || binvalue < 0.0)
+        return;
+
+    if (binvalue == n)
+        ivalue = n-1;
+    else
+        ivalue = floor(binvalue);
+
+    line->data[ivalue] += weight;
+}
+
+static inline void
+update_uniform(DistributionData *ddata,
+               gdouble v1, gdouble v2, guint w)
+{
+    gdouble vmin = MIN(v1, v2), vmax = MAX(v1, v2);
+
+    if (ddata->analyse) {
+        if (vmin < ddata->min)
+            ddata->min = vmin;
+        if (vmax > ddata->max)
+            ddata->max = vmax;
+        ddata->n_in_range += w;
+        ddata->n += w;
+    }
+    else if (ddata->count) {
+        // FIXME: We could count how much of the contribution actually falls
+        // within the range not just whether anything of it falls there.
+        if (MAX(vmax, ddata->max) - MIN(vmax, ddata->min)
+            < vmax - vmin + ddata->max - ddata->min)
+            ddata->n_in_range += w;
+        ddata->n += w;
+    }
+    else
+        update_uniform_dist(ddata->dist, ddata->min, ddata->max, vmin, vmax, w);
+}
+
+static inline void
+update_delta(DistributionData *ddata, gdouble v, guint w)
+{
+    if (ddata->analyse) {
+        if (v < ddata->min)
+            ddata->min = v;
+        if (v > ddata->max)
+            ddata->max = v;
+        ddata->n_in_range += w;
+        ddata->n += w;
+    }
+    else if (ddata->count) {
+        if (v >= ddata->min && v <= ddata->max)
+            ddata->n_in_range += w;
+        ddata->n += w;
+    }
+    else
+        update_delta_dist(ddata->dist, ddata->min, ddata->max, v, w);
+}
+
+static void
+slope_horiz_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                 guint w1, guint w2, guint w3, guint w4,
+                 gpointer user_data)
+{
+    DistributionData *ddata = (DistributionData*)user_data;
+
+    if (w1 || w2) {
+        gdouble zds = (z2 - z1)/ddata->dx;
+        gdouble zdc = zds + 0.5*(z3 - z4)/ddata->dx;
+        update_uniform(ddata, zds, zdc, w1 + w2);
+    }
+
+    if (w3 || w4) {
+        gdouble zds = (z3 - z4)/ddata->dx;
+        gdouble zdc = zds + 0.5*(z2 - z1)/ddata->dx;
+        update_uniform(ddata, zds, zdc, w3 + w4);
     }
 }
 
 static void
-slope_dist_horiz_gather_mask(const GwyField *field,
-                             const GwyMaskField *mask,
-                             GwyMaskingType masking,
-                             guint col, guint row,
-                             guint width, guint height,
-                             guint maskcol, guint maskrow,
-                             GwyLine *line)
+slope_vert_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                guint w1, guint w2, guint w3, guint w4,
+                gpointer user_data)
 {
-    const gdouble *base = field->data + row*field->xres + col;
-    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    guint npoints = line->res;
-    gdouble q = line->real*npoints*gwy_field_dx(field);
-    gdouble min = line->off;
+    DistributionData *ddata = (DistributionData*)user_data;
 
-    for (guint i = 0; i < height; i++) {
-        const gdouble *d = base + i*field->xres;
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-        gboolean prev = !gwy_mask_iter_get(iter) == invert;
-        for (guint j = width-1; j; j--, d++) {
-            gboolean curr = !gwy_mask_iter_get(iter) == invert;
-            if (prev && curr) {
-                gdouble v = d[1] - d[0];
-                guint k = (guint)((v - min)/q);
-                // Fix rounding errors.
-                if (G_UNLIKELY(k >= npoints))
-                    line->data[npoints-1] += 1;
-                else
-                    line->data[k] += 1;
-            }
-            gwy_mask_iter_next(iter);
-            prev = curr;
-        }
+    if (w1 || w4) {
+        gdouble zds = (z4 - z1)/ddata->dy;
+        gdouble zdc = zds + 0.5*(z3 - z2)/ddata->dy;
+        update_uniform(ddata, zds, zdc, w1 + w4);
+    }
+
+    if (w2 || w3) {
+        gdouble zds = (z3 - z2)/ddata->dy;
+        gdouble zdc = zds + 0.5*(z4 - z1)/ddata->dy;
+        update_uniform(ddata, zds, zdc, w2 + w3);
     }
 }
 
 static void
-slope_dist_vert_gather(const GwyField *field,
-                       guint col, guint row,
-                       guint width, guint height,
-                       GwyLine *line)
+slope_horiz_disrc(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                  guint w1, guint w2, guint w3, guint w4,
+                  gpointer user_data)
 {
-    const gdouble *base = field->data + row*field->xres + col;
-    guint npoints = line->res;
-    gdouble q = line->real*npoints*gwy_field_dy(field);
-    gdouble min = line->off;
+    DistributionData *ddata = (DistributionData*)user_data;
 
-    for (guint i = 0; i < height-1; i++) {
-        const gdouble *d1 = base + i*field->xres;
-        const gdouble *d2 = d1 + field->xres;
-        for (guint j = width; j; j--, d1++, d2++) {
-            gdouble v = *d2 - *d1;
-            guint k = (guint)((v - min)/q);
-            // Fix rounding errors.
-            if (G_UNLIKELY(k >= npoints))
-                line->data[npoints-1] += 1;
-            else
-                line->data[k] += 1;
-        }
-    }
+    if (w1 || w2)
+        update_delta(ddata, (z2 - z1)/ddata->dx, w1 + w2);
+
+    if (w3 || w4)
+        update_delta(ddata, (z3 - z4)/ddata->dx, w3 + w4);
 }
 
 static void
-slope_dist_vert_gather_mask(const GwyField *field,
-                            const GwyMaskField *mask,
-                            GwyMaskingType masking,
-                            guint col, guint row,
-                            guint width, guint height,
-                            guint maskcol, guint maskrow,
-                            GwyLine *line)
+slope_vert_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                 guint w1, guint w2, guint w3, guint w4,
+                 gpointer user_data)
 {
-    const gdouble *base = field->data + row*field->xres + col;
-    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    guint npoints = line->res;
-    gdouble q = line->real*npoints*gwy_field_dy(field);
-    gdouble min = line->off;
+    DistributionData *ddata = (DistributionData*)user_data;
 
-    for (guint i = 0; i < height-1; i++) {
-        const gdouble *d1 = base + i*field->xres;
-        const gdouble *d2 = d1 + field->xres;
-        GwyMaskIter iter1, iter2;
-        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
-        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
-        for (guint j = width; j; j--, d1++, d2++) {
-            if ((!gwy_mask_iter_get(iter1) == invert)
-                && (!gwy_mask_iter_get(iter2) == invert)) {
-                gdouble v = *d2 - *d1;
-                guint k = (guint)((v - min)/q);
-                // Fix rounding errors.
-                if (G_UNLIKELY(k >= npoints))
-                    line->data[npoints-1] += 1;
-                else
-                    line->data[k] += 1;
-            }
-            gwy_mask_iter_next(iter1);
-            gwy_mask_iter_next(iter2);
-        }
-    }
+    if (w1 || w4)
+        update_delta(ddata, (z4 - z1)/ddata->dx, w1 + w4);
+
+    if (w2 || w3)
+        update_delta(ddata, (z3 - z2)/ddata->dx, w2 + w3);
 }
 
 /**
@@ -435,13 +383,20 @@ slope_dist_vert_gather_mask(const GwyField *field,
  * @orientation: Orientation in which to compute the derivatives.
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
+ * @continuous: %TRUE to calculate the distribution of linearly interpolated
+ *              surface, %FALSE to use plain bin-counting.
  * @npoints: Distribution resolution, i.e. the number of histogram bins.
  *           Pass zero to choose a suitable resolution automatically.
+ * @min: Minimum value of the range to calculate the distribution in.
+ * @max: Maximum value of the range to calculate the distribution in.
  *
  * Calculates the distribution of slopes in a field.
  *
  * Slopes are calculated as horizontal or vertical derivatives of the value,
  * i.e. dz/dx or dz/dy.
+ *
+ * Pass @max <= @min to calculate the distribution in the full data range
+ * (with masking still considered).
  *
  * Returns: A new one-dimensional data line with the slope distribution.
  **/
@@ -452,7 +407,9 @@ gwy_field_slope_dist(const GwyField *field,
                      GwyMaskingType masking,
                      GwyOrientation orientation,
                      gboolean cumulative,
-                     guint npoints)
+                     gboolean continuous,
+                     guint npoints,
+                     gdouble min, gdouble max)
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
@@ -460,72 +417,54 @@ gwy_field_slope_dist(const GwyField *field,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
-    guint ndata;
-    gdouble min, max;
-    if (orientation == GWY_ORIENTATION_HORIZONTAL) {
-        if (masking == GWY_MASK_IGNORE)
-            ndata = slope_dist_horiz_analyse(field, col, row, width, height,
-                                             &min, &max);
-        else
-            ndata = slope_dist_horiz_analyse_mask(field, mask, masking,
-                                                  col, row, width, height,
-                                                  maskcol, maskrow,
-                                                  &min, &max);
-        min /= gwy_field_dx(field);
-        max /= gwy_field_dx(field);
-    }
-    else if (orientation == GWY_ORIENTATION_VERTICAL) {
-        if (masking == GWY_MASK_IGNORE)
-            ndata = slope_dist_vert_analyse(field, col, row, width, height,
-                                            &min, &max);
-        else
-            ndata = slope_dist_vert_analyse_mask(field, mask, masking,
-                                                 col, row, width, height,
-                                                 maskcol, maskrow,
-                                                 &min, &max);
-        min /= gwy_field_dy(field);
-        max /= gwy_field_dy(field);
-    }
-    else {
-        g_critical("Invalid orientation %d", orientation);
-        goto fail;
-    }
+    GwyFieldQuartersFunc func;
+    if (continuous)
+        func = (orientation == GWY_ORIENTATION_HORIZONTAL
+                ? slope_horiz_cont
+                : slope_vert_cont);
+    else
+        func = (orientation == GWY_ORIENTATION_HORIZONTAL
+                ? slope_horiz_disrc
+                : slope_vert_discr);
 
-    if (!ndata)
-        goto fail;
+    DistributionData ddata = {
+        0, 0,
+        min > max, TRUE,
+        gwy_field_dx(field), gwy_field_dy(field),
+        G_MAXDOUBLE, -G_MAXDOUBLE,
+        NULL,
+    };
+
+    // Run analyse (find range and count) or count (count in range).  If both
+    // is given, this serves as a somewhat inefficient masked pixel counting
+    // method.
+    gwy_field_process_quarters(field, fpart, mask, masking, func, &ddata);
+    g_assert(ddata.n % 4 == 0);
+
     if (!npoints)
-        npoints = gwy_round(3.49*cbrt(ndata));
+        npoints = gwy_round(3.49*cbrt(ddata.n_in_range/4));
+    if (!npoints)
+        goto fail;
 
-    line = gwy_line_new_sized(npoints, TRUE);
-    sanitize_range(&min, &max);
-    line->off = min;
-    line->real = max - min;
+    if (min <= max) {
+        ddata.min = min;
+        ddata.max = max;
+    }
 
-    if (orientation == GWY_ORIENTATION_HORIZONTAL) {
-        if (masking == GWY_MASK_IGNORE)
-            slope_dist_horiz_gather(field, col, row, width, height, line);
-        else
-            slope_dist_horiz_gather_mask(field, mask, masking,
-                                         col, row, width, height,
-                                         maskcol, maskrow,
-                                         line);
-    }
-    else {
-        if (masking == GWY_MASK_IGNORE)
-            slope_dist_vert_gather(field, col, row, width, height, line);
-        else
-            slope_dist_vert_gather_mask(field, mask, masking,
-                                        col, row, width, height,
-                                        maskcol, maskrow,
-                                        line);
-    }
+    line = ddata.dist = gwy_line_new_sized(npoints, TRUE);
+    sanitize_range(&ddata.min, &ddata.max);
+    line->off = ddata.min;
+    line->real = ddata.max - ddata.min;
+
+    ddata.analyse = ddata.count = FALSE;
+    gwy_field_process_quarters(field, fpart, mask, masking, func, &ddata);
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);
-        gwy_line_multiply(line, 1.0/line->data[npoints-1]);
+        gwy_line_multiply(line, 1.0/ddata.n);
     }
     else
-        gwy_line_multiply(line, npoints/(max - min)/ndata);
+        gwy_line_multiply(line, npoints/(max - min)/ddata.n);
 
 fail:
     if (!line)
