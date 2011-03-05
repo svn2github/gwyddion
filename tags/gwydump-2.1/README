@@ -1,0 +1,33 @@
+
+Gwydump dumps .gwy file structure in a human-readable text format.
+It can also extract individual data components.
+
+It does not depend on anything beyond GLib, namely it is completely
+independent of Gwyddion.
+
+File versions 1, 2 and 3 are supported, and also raw serialized objects (only
+new 2 and 3 styles).  It can print offsets, component names, types, and even
+values of atomic components and intial portions of arrays.
+
+Web: http://gwyddion.net/gwydump.php
+
+
+== Installation on Unix/Linux ======
+
+1. Install GLib, including development parts.
+2. Run `make'.
+
+
+== Cross-compilation for MS Windows ======
+
+1. Install cross-compiled GLib, including development parts.
+2. Run `make CROSSPREFIX=i686-pc-mingw32- EXEEXT=.exe'
+   Alternatively, set these variables in Makefile.
+
+The created executable requires GLib to run.  So to run the it you need to
+either (a) put gwydump.exe to the same directory as the GLib DLL (or the other
+way round) or (b) set registry key
+
+HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\gwydump.exe
+
+to point to the DLL directory.
