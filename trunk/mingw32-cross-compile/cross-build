@@ -11,6 +11,7 @@ build=$(/usr/share/libtool/config/config.guess)
              --without-pascal --without-perl --without-python --without-ruby \
              --without-kde4-thumbnailer
 make
+make -C po update-gmo
 make install
 popd
 ./copysysfiles
