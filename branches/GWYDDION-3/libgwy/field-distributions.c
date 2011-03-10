@@ -207,35 +207,133 @@ update_uniform_dist(GwyLine *line, gdouble min, gdouble max,
     guint n = line->res;
     gdouble binsize = n/(max - min);
     gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
-    guint ifrom, ito;
 
-    if (binfrom >= n || binto <= 0.0)
+    if (binfrom > n || binto < 0.0)
         return;
 
-    if (binfrom < 0.0) {
-        binfrom = 0.0;
-        ifrom = 0;
-    }
-    else
-        ifrom = floor(binfrom);
+    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
+    guint ifrom = leftext ? 0 : floor(binfrom);
+    guint ito = rightext ? n : floor(binto);
+    gdouble len = to - from;
+    gdouble wbin = binsize*weight/len;
 
-    if (binto >= n) {
-        binto = n;
-        ito = n-1;
+    guint i = ifrom;
+    if (!leftext) {
+        if (!rightext && ito == ifrom) {
+            // Entire distribution is contained in bin @i.
+            line->data[ifrom] += weight;
+            return;
+        }
+        // Distribution starts in bin @i.
+        gdouble xlen = (i*binsize - from)/len;
+        line->data[i] += weight*xlen;
+        i++;
     }
-    else
-        ito = floor(binto);
 
-    if (to == from) {
-        line->data[ito] += weight;
+    // Note if @rightext is TRUE then @ito points after the last element
+    // but if @rightext is FALSE then @ito points to the last element.
+    while (i < ito) {
+        // Open-ended contribution to bin @i.
+        line->data[i] += wbin;
+        i++;
+    }
+
+    if (!rightext) {
+        // Distribution ends in bin @i.
+        gdouble xlen = (to - i*binsize)/len;
+        line->data[i] += weight*xlen;
+    }
+}
+
+
+static void
+update_left_triangular_dist(GwyLine *line, gdouble min, gdouble max,
+                            gdouble from, gdouble to, gdouble weight)
+{
+    guint n = line->res;
+    gdouble binsize = n/(max - min);
+    gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
+
+    if (binfrom > n || binto < 0.0)
         return;
+
+    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
+    guint ifrom = leftext ? 0 : floor(binfrom);
+    guint ito = rightext ? n : floor(binto);
+    gdouble len = to - from;
+    gdouble wbin = binsize*weight/(len*len);
+
+    guint i = ifrom;
+    if (!leftext) {
+        if (!rightext && ito == ifrom) {
+            // Entire distribution is contained in bin @i.
+            line->data[ifrom] += weight;
+            return;
+        }
+        // Distribution starts in bin @i.
+        gdouble xlen = (i*binsize - from)/len;
+        line->data[i] += weight*xlen*xlen;
+        i++;
     }
 
-    gdouble binweight = weight*binsize/(to - from);
-    line->data[ifrom] += binweight*(1.0 - (binfrom - ifrom));
-    for (guint i = ifrom+1; i < ito; i++)
-        line->data[i] += binweight;
-    line->data[ito] += binweight*(binto - to);
+    // Note if @rightext is TRUE then @ito points after the last element
+    // but if @rightext is FALSE then @ito points to the last element.
+    while (i < ito) {
+        // Open-ended contribution to bin @i.
+        line->data[i] += wbin*((2.0*i + 1.0)*binsize - from);
+        i++;
+    }
+
+    if (!rightext) {
+        // Distribution ends in bin @i.
+        gdouble xlen = (to - i*binsize)/len;
+        line->data[i] += weight*(2.0 - xlen)*xlen;
+    }
+}
+
+static void
+update_right_triangular_dist(GwyLine *line, gdouble min, gdouble max,
+                             gdouble from, gdouble to, gdouble weight)
+{
+    guint n = line->res;
+    gdouble binsize = n/(max - min);
+    gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
+
+    if (binfrom > n || binto < 0.0)
+        return;
+
+    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
+    guint ifrom = leftext ? 0 : floor(binfrom);
+    guint ito = rightext ? n : floor(binto);
+    gdouble len = to - from;
+    gdouble wbin = binsize*weight/(len*len);
+
+    guint i = ifrom;
+    if (!leftext) {
+        if (!rightext && ito == ifrom) {
+            // Entire distribution is contained in bin @i.
+            line->data[ifrom] += weight;
+            return;
+        }
+        // Distribution starts in bin @i.
+        gdouble xlen = (i*binsize - from)/len;
+        line->data[i] += weight*(2.0 - xlen)*xlen;
+        i++;
+    }
+
+    // Note if @rightext is TRUE then @ito points after the last element
+    // but if @rightext is FALSE then @ito points to the last element.
+    while (i < ito) {
+        // Open-ended contribution to bin @i.
+        line->data[i] += wbin*(to - (2.0*i + 1.0)*binsize);
+        i++;
+    }
+
+    if (!rightext) {
+        // Distribution ends in bin @i.
+        gdouble xlen = (to - i*binsize)/len;
+        line->data[i] += weight*xlen*xlen;
+    }
 }
 
 static void
@@ -384,7 +482,7 @@ slope_vert_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
  * @continuous: %TRUE to calculate the distribution of linearly interpolated
- *              surface, %FALSE to use plain bin-counting.
+ *              surface, %FALSE to use plain histogram of discrete values.
  * @npoints: Distribution resolution, i.e. the number of histogram bins.
  *           Pass zero to choose a suitable resolution automatically.
  * @min: Minimum value of the range to calculate the distribution in.
