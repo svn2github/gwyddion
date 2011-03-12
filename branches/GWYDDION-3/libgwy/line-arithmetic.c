@@ -319,7 +319,7 @@ gwy_line_add_dist_uniform(GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
 
     guint n = line->res;
-    gdouble binsize = n/line->real,
+    gdouble binsize = line->real/n,
             binfrom = (from - line->off)/binsize,
             binto = (to - line->off)/binsize;
 
@@ -340,8 +340,8 @@ gwy_line_add_dist_uniform(GwyLine *line,
             return;
         }
         // Distribution starts in bin @i.
-        gdouble xlen = (i*binsize - from)/len;
-        line->data[i] += weight*xlen;
+        gdouble xlen = 1.0 - (i*binsize + line->off - from)/len;
+        line->data[i] += wbin*xlen;
         i++;
     }
 
@@ -355,8 +355,8 @@ gwy_line_add_dist_uniform(GwyLine *line,
 
     if (!rightext) {
         // Distribution ends in bin @i.
-        gdouble xlen = (to - i*binsize)/len;
-        line->data[i] += weight*xlen;
+        gdouble xlen = (to - i*binsize - line->off)/len;
+        line->data[i] += wbin*xlen;
     }
 }
 
@@ -386,7 +386,7 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
 
     guint n = line->res;
-    gdouble binsize = n/line->real,
+    gdouble binsize = line->real/n,
             binfrom = (from - line->off)/binsize,
             binto = (to - line->off)/binsize;
 
@@ -407,7 +407,7 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
             return;
         }
         // Distribution starts in bin @i.
-        gdouble xlen = (i*binsize - from)/len;
+        gdouble xlen = 1.0 - (i*binsize + line->off - from)/len;
         line->data[i] += weight*xlen*xlen;
         i++;
     }
@@ -416,13 +416,13 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
     // but if @rightext is FALSE then @ito points to the last element.
     while (i < ito) {
         // Open-ended contribution to bin @i.
-        line->data[i] += wbin*((2.0*i + 1.0)*binsize - from);
+        line->data[i] += wbin*((2.0*i + 1.0)*binsize + line->off - from);
         i++;
     }
 
     if (!rightext) {
         // Distribution ends in bin @i.
-        gdouble xlen = (to - i*binsize)/len;
+        gdouble xlen = (to - i*binsize - line->off)/len;
         line->data[i] += weight*(2.0 - xlen)*xlen;
     }
 }
@@ -453,7 +453,7 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
 
     guint n = line->res;
-    gdouble binsize = n/line->real,
+    gdouble binsize = line->real/n,
             binfrom = (from - line->off)/binsize,
             binto = (to - line->off)/binsize;
 
@@ -474,7 +474,7 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
             return;
         }
         // Distribution starts in bin @i.
-        gdouble xlen = (i*binsize - from)/len;
+        gdouble xlen = 1.0 - (i*binsize + line->off - from)/len;
         line->data[i] += weight*(2.0 - xlen)*xlen;
         i++;
     }
@@ -483,13 +483,13 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
     // but if @rightext is FALSE then @ito points to the last element.
     while (i < ito) {
         // Open-ended contribution to bin @i.
-        line->data[i] += wbin*(to - (2.0*i + 1.0)*binsize);
+        line->data[i] += wbin*(to - (2.0*i + 1.0)*binsize - line->off);
         i++;
     }
 
     if (!rightext) {
         // Distribution ends in bin @i.
-        gdouble xlen = (to - i*binsize)/len;
+        gdouble xlen = (to - i*binsize - line->off)/len;
         line->data[i] += weight*xlen*xlen;
     }
 }
@@ -516,7 +516,7 @@ gwy_line_add_dist_delta(GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
 
     guint n = line->res;
-    gdouble binsize = n/line->real,
+    gdouble binsize = line->real/n,
             binvalue = (value - line->off)/binsize;
     guint ivalue;
 
