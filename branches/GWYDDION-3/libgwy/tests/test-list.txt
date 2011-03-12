@@ -61,6 +61,7 @@ line/outer-product
 line/compatibility/res
 line/compatibility/real
 line/compatibility/units
+line/add-dist/uniform
 curve/props
 curve/data-changed
 curve/serialize

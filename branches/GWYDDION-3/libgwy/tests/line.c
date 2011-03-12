@@ -515,4 +515,75 @@ test_line_compatibility_units(void)
     g_object_unref(line3);
 }
 
+void
+test_line_add_dist_uniform(void)
+{
+    guint res = 12;
+    gdouble xmin = -1.0, xmax = 2.0;
+
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    gwy_line_set_real(line, xmax - xmin);
+    gwy_line_set_offset(line, xmin);
+
+    // Exactly full
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, xmin, xmax, G_PI);
+    //print_line("full", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
+    for (guint i = 0; i < res; i++)
+        g_assert_cmpfloat(fabs(line->data[i] - G_PI/res), <=, 1e-14);
+
+    // Right half
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, xmin - (xmax - xmin), xmax, G_PI);
+    //print_line("right", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.5*G_PI), <=, 1e-14);
+    for (guint i = 0; i < res; i++)
+        g_assert_cmpfloat(fabs(line->data[i] - 0.5*G_PI/res), <=, 1e-14);
+
+    // Left half
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, xmin, xmax + (xmax - xmin), G_PI);
+    //print_line("left", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.5*G_PI), <=, 1e-14);
+    for (guint i = 0; i < res; i++)
+        g_assert_cmpfloat(fabs(line->data[i] - 0.5*G_PI/res), <=, 1e-14);
+
+    // Inside
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, 0.0, 1.0, G_PI);
+    //print_line("inside", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
+    for (guint i = 0; i < res; i++) {
+        gdouble expected = (i < res/3 || i >= 2*res/3) ? 0.0 : 3*G_PI/res;
+        g_assert_cmpfloat(fabs(line->data[i] - expected), <=, 1e-14);
+    }
+
+    // Within one bin
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, 0.01, 0.02, G_PI);
+    //print_line("one-bin", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
+    for (guint i = 0; i < res; i++) {
+        gdouble expected = (i == res/3) ? G_PI : 0.0;
+        g_assert_cmpfloat(fabs(line->data[i] - expected), <=, 1e-14);
+    }
+
+    // Partial bins
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line,
+                              xmin + 0.75*(xmax - xmin)/res,
+                              xmax - 0.75*(xmax - xmin)/res,
+                              G_PI);
+    //print_line("partial", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
+    for (guint i = 0; i < res; i++) {
+        gdouble wb = G_PI/(res - 1.5);
+        gdouble expected = (i == 0 || i == res-1) ? 0.25*wb : wb;
+        g_assert_cmpfloat(fabs(line->data[i] - expected), <=, 1e-14);
+    }
+
+    g_object_unref(line);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
