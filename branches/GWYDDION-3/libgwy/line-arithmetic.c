@@ -340,8 +340,8 @@ gwy_line_add_dist_uniform(GwyLine *line,
             return;
         }
         // Distribution starts in bin @i.
-        gdouble xlen = 1.0 - (i*binsize + line->off - from)/len;
-        line->data[i] += wbin*xlen;
+        gdouble xlen = ((i + 1.0)*binsize + line->off - from)/len;
+        line->data[i] += weight*xlen;
         i++;
     }
 
@@ -356,7 +356,7 @@ gwy_line_add_dist_uniform(GwyLine *line,
     if (!rightext) {
         // Distribution ends in bin @i.
         gdouble xlen = (to - i*binsize - line->off)/len;
-        line->data[i] += wbin*xlen;
+        line->data[i] += weight*xlen;
     }
 }
 
@@ -407,7 +407,7 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
             return;
         }
         // Distribution starts in bin @i.
-        gdouble xlen = 1.0 - (i*binsize + line->off - from)/len;
+        gdouble xlen = ((i + 1.0)*binsize + line->off - from)/len;
         line->data[i] += weight*xlen*xlen;
         i++;
     }
@@ -474,7 +474,7 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
             return;
         }
         // Distribution starts in bin @i.
-        gdouble xlen = 1.0 - (i*binsize + line->off - from)/len;
+        gdouble xlen = ((i + 1.0)*binsize + line->off - from)/len;
         line->data[i] += weight*(2.0 - xlen)*xlen;
         i++;
     }
