@@ -184,178 +184,6 @@ fail:
     return line;
 }
 
-/**
- * update_uniform_dist:
- * @line: A data line containing the distribution, its physical dimensions are
- *        ignored, the bins are determined by @min and @max.
- * @min: Minimum of the first bin.
- * @max: Maximum of the last bin.
- * @from: Left endpoint of the contribution.
- * @to: Right endpoint of the contribution.
- * @weight: Total weight of the contribution to add.
- *
- * Adds a uniform contribution to a distribution.
- *
- * The contribution is uniform in [@from, @to] with integral equal to @weight.
- * If part of the contribution lies outside [@min, @max] it will be missing in
- * @line.
- **/
-static void
-update_uniform_dist(GwyLine *line, gdouble min, gdouble max,
-                    gdouble from, gdouble to, gdouble weight)
-{
-    guint n = line->res;
-    gdouble binsize = n/(max - min);
-    gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
-
-    if (binfrom > n || binto < 0.0)
-        return;
-
-    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
-    guint ifrom = leftext ? 0 : floor(binfrom);
-    guint ito = rightext ? n : floor(binto);
-    gdouble len = to - from;
-    gdouble wbin = binsize*weight/len;
-
-    guint i = ifrom;
-    if (!leftext) {
-        if (!rightext && ito == ifrom) {
-            // Entire distribution is contained in bin @i.
-            line->data[ifrom] += weight;
-            return;
-        }
-        // Distribution starts in bin @i.
-        gdouble xlen = (i*binsize - from)/len;
-        line->data[i] += weight*xlen;
-        i++;
-    }
-
-    // Note if @rightext is TRUE then @ito points after the last element
-    // but if @rightext is FALSE then @ito points to the last element.
-    while (i < ito) {
-        // Open-ended contribution to bin @i.
-        line->data[i] += wbin;
-        i++;
-    }
-
-    if (!rightext) {
-        // Distribution ends in bin @i.
-        gdouble xlen = (to - i*binsize)/len;
-        line->data[i] += weight*xlen;
-    }
-}
-
-
-static void
-update_left_triangular_dist(GwyLine *line, gdouble min, gdouble max,
-                            gdouble from, gdouble to, gdouble weight)
-{
-    guint n = line->res;
-    gdouble binsize = n/(max - min);
-    gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
-
-    if (binfrom > n || binto < 0.0)
-        return;
-
-    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
-    guint ifrom = leftext ? 0 : floor(binfrom);
-    guint ito = rightext ? n : floor(binto);
-    gdouble len = to - from;
-    gdouble wbin = binsize*weight/(len*len);
-
-    guint i = ifrom;
-    if (!leftext) {
-        if (!rightext && ito == ifrom) {
-            // Entire distribution is contained in bin @i.
-            line->data[ifrom] += weight;
-            return;
-        }
-        // Distribution starts in bin @i.
-        gdouble xlen = (i*binsize - from)/len;
-        line->data[i] += weight*xlen*xlen;
-        i++;
-    }
-
-    // Note if @rightext is TRUE then @ito points after the last element
-    // but if @rightext is FALSE then @ito points to the last element.
-    while (i < ito) {
-        // Open-ended contribution to bin @i.
-        line->data[i] += wbin*((2.0*i + 1.0)*binsize - from);
-        i++;
-    }
-
-    if (!rightext) {
-        // Distribution ends in bin @i.
-        gdouble xlen = (to - i*binsize)/len;
-        line->data[i] += weight*(2.0 - xlen)*xlen;
-    }
-}
-
-static void
-update_right_triangular_dist(GwyLine *line, gdouble min, gdouble max,
-                             gdouble from, gdouble to, gdouble weight)
-{
-    guint n = line->res;
-    gdouble binsize = n/(max - min);
-    gdouble binfrom = (from - min)/binsize, binto = (to - min)/binsize;
-
-    if (binfrom > n || binto < 0.0)
-        return;
-
-    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
-    guint ifrom = leftext ? 0 : floor(binfrom);
-    guint ito = rightext ? n : floor(binto);
-    gdouble len = to - from;
-    gdouble wbin = binsize*weight/(len*len);
-
-    guint i = ifrom;
-    if (!leftext) {
-        if (!rightext && ito == ifrom) {
-            // Entire distribution is contained in bin @i.
-            line->data[ifrom] += weight;
-            return;
-        }
-        // Distribution starts in bin @i.
-        gdouble xlen = (i*binsize - from)/len;
-        line->data[i] += weight*(2.0 - xlen)*xlen;
-        i++;
-    }
-
-    // Note if @rightext is TRUE then @ito points after the last element
-    // but if @rightext is FALSE then @ito points to the last element.
-    while (i < ito) {
-        // Open-ended contribution to bin @i.
-        line->data[i] += wbin*(to - (2.0*i + 1.0)*binsize);
-        i++;
-    }
-
-    if (!rightext) {
-        // Distribution ends in bin @i.
-        gdouble xlen = (to - i*binsize)/len;
-        line->data[i] += weight*xlen*xlen;
-    }
-}
-
-static void
-update_delta_dist(GwyLine *line, gdouble min, gdouble max,
-                  gdouble value, gdouble weight)
-{
-    guint n = line->res;
-    gdouble binsize = n/(max - min);
-    gdouble binvalue = (value - min)/binsize;
-    guint ivalue;
-
-    if (binvalue > n || binvalue < 0.0)
-        return;
-
-    if (binvalue == n)
-        ivalue = n-1;
-    else
-        ivalue = floor(binvalue);
-
-    line->data[ivalue] += weight;
-}
-
 static inline void
 update_uniform(DistributionData *ddata,
                gdouble v1, gdouble v2, guint w)
@@ -379,7 +207,7 @@ update_uniform(DistributionData *ddata,
         ddata->n += w;
     }
     else
-        update_uniform_dist(ddata->dist, ddata->min, ddata->max, vmin, vmax, w);
+        gwy_line_add_dist_uniform(ddata->dist, vmin, vmax, w);
 }
 
 static inline void
@@ -399,7 +227,7 @@ update_delta(DistributionData *ddata, gdouble v, guint w)
         ddata->n += w;
     }
     else
-        update_delta_dist(ddata->dist, ddata->min, ddata->max, v, w);
+        gwy_line_add_dist_delta(ddata->dist, v, w);
 }
 
 static void

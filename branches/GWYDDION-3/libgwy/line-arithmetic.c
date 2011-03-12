@@ -295,6 +295,243 @@ gwy_line_outer_product(const GwyLine *column,
 }
 
 /**
+ * gwy_line_add_dist_uniform:
+ * @line: A one-dimensional data line.
+ * @from: Left endpoint of the contribution.
+ * @to: Right endpoint of the contribution.
+ * @weight: Total weight of the contribution to add.
+ *
+ * Adds a uniform contribution to a line containing a distribution.
+ *
+ * The line elements are considered to be equally-sized bins, with the left
+ * edge of the first bin at @off and the right edge of the last bin at
+ * @off+@real.
+ *
+ * The added contribution is uniform in [@from, @to] with integral equal to
+ * @weight.  If part of the contribution lies outside the line range the
+ * corresponding part of the weight will not be added to @line.
+ **/
+void
+gwy_line_add_dist_uniform(GwyLine *line,
+                          gdouble from, gdouble to,
+                          gdouble weight)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+
+    guint n = line->res;
+    gdouble binsize = n/line->real,
+            binfrom = (from - line->off)/binsize,
+            binto = (to - line->off)/binsize;
+
+    if (binfrom > n || binto < 0.0)
+        return;
+
+    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
+    guint ifrom = leftext ? 0 : floor(binfrom);
+    guint ito = rightext ? n : floor(binto);
+    gdouble len = to - from;
+    gdouble wbin = binsize*weight/len;
+
+    guint i = ifrom;
+    if (!leftext) {
+        if (!rightext && ito == ifrom) {
+            // Entire distribution is contained in bin @i.
+            line->data[ifrom] += weight;
+            return;
+        }
+        // Distribution starts in bin @i.
+        gdouble xlen = (i*binsize - from)/len;
+        line->data[i] += weight*xlen;
+        i++;
+    }
+
+    // Note if @rightext is TRUE then @ito points after the last element
+    // but if @rightext is FALSE then @ito points to the last element.
+    while (i < ito) {
+        // Open-ended contribution to bin @i.
+        line->data[i] += wbin;
+        i++;
+    }
+
+    if (!rightext) {
+        // Distribution ends in bin @i.
+        gdouble xlen = (to - i*binsize)/len;
+        line->data[i] += weight*xlen;
+    }
+}
+
+/**
+ * gwy_line_add_dist_left_triangular:
+ * @line: A one-dimensional data line.
+ * @from: Left endpoint of the contribution.
+ * @to: Right endpoint of the contribution.
+ * @weight: Total weight of the contribution to add.
+ *
+ * Adds a left-triangular contribution to a line containing a distribution.
+ *
+ * The line elements are considered to be equally-sized bins, with the left
+ * edge of the first bin at @off and the right edge of the last bin at
+ * @off+@real.
+ *
+ * The added contribution is triangular in [@from, @to] with 0 in @from and the
+ * maximum in @to and integral equal to @weight.  If part of the contribution
+ * lies outside the line range the corresponding part of the weight will not be
+ * added to @line.
+ **/
+void
+gwy_line_add_dist_left_triangular(GwyLine *line,
+                                  gdouble from, gdouble to,
+                                  gdouble weight)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+
+    guint n = line->res;
+    gdouble binsize = n/line->real,
+            binfrom = (from - line->off)/binsize,
+            binto = (to - line->off)/binsize;
+
+    if (binfrom > n || binto < 0.0)
+        return;
+
+    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
+    guint ifrom = leftext ? 0 : floor(binfrom);
+    guint ito = rightext ? n : floor(binto);
+    gdouble len = to - from;
+    gdouble wbin = binsize*weight/(len*len);
+
+    guint i = ifrom;
+    if (!leftext) {
+        if (!rightext && ito == ifrom) {
+            // Entire distribution is contained in bin @i.
+            line->data[ifrom] += weight;
+            return;
+        }
+        // Distribution starts in bin @i.
+        gdouble xlen = (i*binsize - from)/len;
+        line->data[i] += weight*xlen*xlen;
+        i++;
+    }
+
+    // Note if @rightext is TRUE then @ito points after the last element
+    // but if @rightext is FALSE then @ito points to the last element.
+    while (i < ito) {
+        // Open-ended contribution to bin @i.
+        line->data[i] += wbin*((2.0*i + 1.0)*binsize - from);
+        i++;
+    }
+
+    if (!rightext) {
+        // Distribution ends in bin @i.
+        gdouble xlen = (to - i*binsize)/len;
+        line->data[i] += weight*(2.0 - xlen)*xlen;
+    }
+}
+
+/**
+ * gwy_line_add_dist_right_triangular:
+ * @line: A one-dimensional data line.
+ * @from: Left endpoint of the contribution.
+ * @to: Right endpoint of the contribution.
+ * @weight: Total weight of the contribution to add.
+ *
+ * Adds a right-triangular contribution to a line containing a distribution.
+ *
+ * The line elements are considered to be equally-sized bins, with the left
+ * edge of the first bin at @off and the right edge of the last bin at
+ * @off+@real.
+ *
+ * The added contribution is triangular in [@from, @to] with the maximum in
+ * @from and 0 in @to and integral equal to @weight.  If part of the
+ * contribution lies outside the line range the corresponding part of the
+ * weight will not be added to @line.
+ **/
+void
+gwy_line_add_dist_right_triangular(GwyLine *line,
+                                   gdouble from, gdouble to,
+                                   gdouble weight)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+
+    guint n = line->res;
+    gdouble binsize = n/line->real,
+            binfrom = (from - line->off)/binsize,
+            binto = (to - line->off)/binsize;
+
+    if (binfrom > n || binto < 0.0)
+        return;
+
+    gboolean leftext = binfrom < 0.0, rightext = binto >= n;
+    guint ifrom = leftext ? 0 : floor(binfrom);
+    guint ito = rightext ? n : floor(binto);
+    gdouble len = to - from;
+    gdouble wbin = binsize*weight/(len*len);
+
+    guint i = ifrom;
+    if (!leftext) {
+        if (!rightext && ito == ifrom) {
+            // Entire distribution is contained in bin @i.
+            line->data[ifrom] += weight;
+            return;
+        }
+        // Distribution starts in bin @i.
+        gdouble xlen = (i*binsize - from)/len;
+        line->data[i] += weight*(2.0 - xlen)*xlen;
+        i++;
+    }
+
+    // Note if @rightext is TRUE then @ito points after the last element
+    // but if @rightext is FALSE then @ito points to the last element.
+    while (i < ito) {
+        // Open-ended contribution to bin @i.
+        line->data[i] += wbin*(to - (2.0*i + 1.0)*binsize);
+        i++;
+    }
+
+    if (!rightext) {
+        // Distribution ends in bin @i.
+        gdouble xlen = (to - i*binsize)/len;
+        line->data[i] += weight*xlen*xlen;
+    }
+}
+
+/**
+ * gwy_line_add_dist_delta:
+ * @line: A one-dimensional data line.
+ * @value: Position of the contribution.
+ * @weight: Total weight of the contribution to add.
+ *
+ * Adds a delta-contribution to a line containing a distribution.
+ *
+ * The line elements are considered to be equally-sized bins, with the left
+ * edge of the first bin at @off and the right edge of the last bin at
+ * @off+@real.
+ *
+ * The added contribution is a δ-function at @value.
+ **/
+void
+gwy_line_add_dist_delta(GwyLine *line,
+                        gdouble value,
+                        gdouble weight)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+
+    guint n = line->res;
+    gdouble binsize = n/line->real,
+            binvalue = (value - line->off)/binsize;
+    guint ivalue;
+
+    if (binvalue > n || binvalue < 0.0)
+        return;
+
+    if (binvalue == n)
+        ivalue = n-1;
+    else
+        ivalue = floor(binvalue);
+
+    line->data[ivalue] += weight;
+}
+
+/**
  * SECTION: line-arithmetic
  * @section_id: GwyLine-arithmetic
  * @title: GwyLine arithmetic
