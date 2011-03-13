@@ -62,6 +62,8 @@ line/compatibility/res
 line/compatibility/real
 line/compatibility/units
 line/add-dist/uniform
+line/add-dist/left-triangular
+line/add-dist/right-triangular
 curve/props
 curve/data-changed
 curve/serialize
