@@ -519,7 +519,7 @@ void
 test_line_add_dist_uniform(void)
 {
     guint res = 12;
-    gdouble xmin = -1.0, xmax = 2.0;
+    gdouble xmin = -1.0, xmax = 2.0, binsize = (xmax - xmin)/res;
 
     GwyLine *line = gwy_line_new_sized(res, FALSE);
     gwy_line_set_real(line, xmax - xmin);
@@ -571,15 +571,33 @@ test_line_add_dist_uniform(void)
 
     // Partial bins
     gwy_line_clear(line, NULL);
-    gwy_line_add_dist_uniform(line,
-                              xmin + 0.75*(xmax - xmin)/res,
-                              xmax - 0.75*(xmax - xmin)/res,
+    gwy_line_add_dist_uniform(line, xmin + 0.75*binsize, xmax - 0.75*binsize,
                               G_PI);
-    //print_line("partial", line);
+    print_line("partial", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
     for (guint i = 0; i < res; i++) {
         gdouble wb = G_PI/(res - 1.5);
         gdouble expected = (i == 0 || i == res-1) ? 0.25*wb : wb;
+        g_assert_cmpfloat(fabs(line->data[i] - expected), <=, 1e-14);
+    }
+
+    // Ends in the first.
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, xmin - binsize, xmin + binsize/3, G_PI);
+    //print_line("first-end", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI/4), <=, 1e-14);
+    for (guint i = 0; i < res; i++) {
+        gdouble expected = (i == 0) ? G_PI/4 : 0.0;
+        g_assert_cmpfloat(fabs(line->data[i] - expected), <=, 1e-14);
+    }
+
+    // Begins in the last.
+    gwy_line_clear(line, NULL);
+    gwy_line_add_dist_uniform(line, xmax - binsize/3, xmax + binsize, G_PI);
+    //print_line("last-begining", line);
+    g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI/4), <=, 1e-14);
+    for (guint i = 0; i < res; i++) {
+        gdouble expected = (i == res-1) ? G_PI/4 : 0.0;
         g_assert_cmpfloat(fabs(line->data[i] - expected), <=, 1e-14);
     }
 
