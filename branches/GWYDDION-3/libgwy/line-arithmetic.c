@@ -397,7 +397,7 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
     guint ifrom = leftext ? 0 : floor(binfrom);
     guint ito = rightext ? n : floor(binto);
     gdouble len = to - from;
-    gdouble wbin = binsize*weight/(len*len);
+    gdouble wbin = 2.0*binsize*weight/(len*len);
 
     guint i = ifrom;
     if (!leftext) {
@@ -416,7 +416,7 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
     // but if @rightext is FALSE then @ito points to the last element.
     while (i < ito) {
         // Open-ended contribution to bin @i.
-        line->data[i] += wbin*((2.0*i + 1.0)*binsize + line->off - from);
+        line->data[i] += wbin*((i + 0.5)*binsize + line->off - from);
         i++;
     }
 
@@ -464,7 +464,7 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
     guint ifrom = leftext ? 0 : floor(binfrom);
     guint ito = rightext ? n : floor(binto);
     gdouble len = to - from;
-    gdouble wbin = binsize*weight/(len*len);
+    gdouble wbin = 2.0*binsize*weight/(len*len);
 
     guint i = ifrom;
     if (!leftext) {
@@ -483,7 +483,7 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
     // but if @rightext is FALSE then @ito points to the last element.
     while (i < ito) {
         // Open-ended contribution to bin @i.
-        line->data[i] += wbin*(to - (2.0*i + 1.0)*binsize - line->off);
+        line->data[i] += wbin*(to - (i + 0.5)*binsize - line->off);
         i++;
     }
 
