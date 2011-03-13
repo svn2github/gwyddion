@@ -364,7 +364,8 @@ gwy_field_slope_dist(const GwyField *field,
     // Run analyse (find range and count) or count (count in range).  If both
     // is given, this serves as a somewhat inefficient masked pixel counting
     // method.
-    gwy_field_process_quarters(field, fpart, mask, masking, func, &ddata);
+    gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
+                               func, &ddata);
     g_assert(ddata.n % 4 == 0);
 
     if (!npoints)
@@ -383,7 +384,8 @@ gwy_field_slope_dist(const GwyField *field,
     line->real = ddata.max - ddata.min;
 
     ddata.analyse = ddata.count = FALSE;
-    gwy_field_process_quarters(field, fpart, mask, masking, func, &ddata);
+    gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
+                               func, &ddata);
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);

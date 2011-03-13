@@ -89,6 +89,7 @@ void    gwy_field_process_quarters (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking,
+                                    gboolean include_borders,
                                     GwyFieldQuartersFunc function,
                                     gpointer user_data);
 
