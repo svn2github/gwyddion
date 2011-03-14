@@ -31,5 +31,6 @@
   <xi:include href='multidata.xml'/>
   <xi:include href='graph.xml'/>
   <xi:include href='synthetic.xml'/>
+  <xi:include href='calibration.xml'/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
