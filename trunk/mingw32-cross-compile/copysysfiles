@@ -1,7 +1,8 @@
 #!/usr/bin/python
 import sys, os, re, subprocess
 
-packages_redhat = 'atk cairo expat fftw fontconfig freetype gdk-pixbuf gettext glib2 gtk2 gtkglext iconv jasper libjpeg libpng libxml2 pango pixman zlib'
+# gdk-pixbuf is separate only in recent gtk+
+packages_redhat = 'atk cairo expat fftw fontconfig freetype gettext glib2 gtk2 gtkglext iconv jasper libjpeg libpng libxml2 pango pixman zlib'
 packages_suse = 'atk libcairo2 libexpat fftw3 fontconfig freetype gdk-pixbuf gettext-runtime glib2 gtk2 gtkglext libjasper libjpeg libpng libxml2 pango pixman zlib'
 
 if os.access('/etc/redhat-release', os.R_OK):
