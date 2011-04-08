@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="gwymodule-tutorial-beyond" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Beyond the Minimal Module</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Beyond the Minimal Module</refname>
+    <refpurpose>
+      Common module idioms
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Multiple Modules, Multiple Function, Multifunctions</title>
+    <para>
+      Often one wants to implement a group of closely related functions that
+      could share quite a bit of code.  There are several posibilities how
+      to do it.
+    </para>
+    <para>
+      The naive approach would be to put the code of all the modules to
+      a one file and share what is shareable.  But alas! there can be only one
+      %GWY_MODULE_QUERY per file, thus a one file can register only a one
+      module and this approach would not work.
+    </para>
+    <para>
+      The prefered solution is to register more than function for the module.
+      This is as simple as it sounds.  One just has to call
+      gwy_process_func_register() (or other feature registration method)
+      several times with different functions. It is even possible to register
+      functions of different kind in a one module, but usually there is no
+      reason to do this.
+    </para>
+    <informalexample><programlisting><![CDATA[
+static gboolean
+module_register(void)
+{
+    gwy_process_func_register("sobel_horizontal",
+                              (GwyProcessFunc)&gradient_sobel_horizontal,
+                              N_("/_Presentation/_Gradient/_Sobel (horizontal)"),
+                              NULL,
+                              GRADIENT_RUN_MODES,
+                              GWY_MENU_FLAG_DATA,
+                              N_("Horizontal Sobel gradient presentation"));
+    gwy_process_func_register("sobel_vertical",
+                              (GwyProcessFunc)&gradient_sobel_vertical,
+                              N_("/_Presentation/_Gradient/_Sobel (vertical)"),
+                              NULL,
+                              GRADIENT_RUN_MODES,
+                              GWY_MENU_FLAG_DATA,
+                              N_("Vertical Sobel gradient presentation"));
+
+    return TRUE;
+}
+]]></programlisting></informalexample>
+    <para>
+      The other posibility is to call gwy_process_func_register() several times
+      with the same <parameter>func</parameter> argument. The function can then
+      determine from its last argument (<parameter>name</parameter>) what
+      function the caller thinks it is calling.  This approach can be used
+      when the differences between the functions are very small.  Incidentally,
+      this is also exactly how the plugin-proxy module works.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Settings</title>
+    <para>
+      The nice thing about <application>Gwyddion</application> module dialog
+      boxes is that they show the same parameter values as when you last opened
+      them, and they remember the settings even across sessions.  And you of
+      course want this feature in your modules too.
+    </para>
+    <para>
+      Saving and restoring settings usually has sense only for modules with
+      a GUI, simple noninteractive modules like value inversion have no
+      settings to remember.  We will get to GUI later.
+    </para>
+    <para>
+      There is a one #GwyContainer in <application>Gwyddion</application>
+      containing settings for all modules (and other creatures). The function
+      gwy_app_settings_get() will bring it to you.  It is loaded on startup and
+      saved on exit and you don not need to take care about this. So the only
+      thing you have to care about is to read the settings from it when your
+      module starts and store them there on exit.  OK, there are in fact two
+      things you have to care about.  There are no limitations on who can
+      access what in the settings, so to avoid surprises you should use only
+      keys startings with
+      <literal>"/module/<parameter>my-module-name</parameter>/"</literal>.
+    </para>
+    <para>
+      Loading settings could look (remember they may not always exist, for
+      instance when the function is run the first time):
+    </para>
+    <informalexample><programlisting>
+GwyContainer *settings;
+
+settings = gwy_app_settings_get<!--x-->();
+ratio = 1.61803;
+gwy_container_gis_double_by_name(settings,
+                                 "/module/my_module/ratio",
+                                 &amp;ratio);
+ratio = CLAMP(ratio, 1.0, 2.0);
+</programlisting></informalexample>
+    <para>
+      Function gwy_container_gis_double_by_name() function updates its last
+      argument only when there is a corresponding value in the container.
+      The use of CLAMP() is a recommended defensive measure against corrupted
+      settings (for example manually (mis)edited by the user) that could cause
+      troubles later.
+    </para>
+    <para>
+      Saving settings is equally easy:
+    </para>
+    <informalexample><programlisting>
+GwyContainer *settings;
+
+settings = gwy_app_settings_get<!--x-->();
+gwy_container_set_double_by_name(settings,
+                                 "/module/my_module/ratio",
+                                 ratio);
+</programlisting></informalexample>
+    <para>
+      Modules customarily define a function <symbol>load_settings()</symbol>
+      that fills its internal parameter representation on the start of
+      execution and santitizes them.  Likewise function
+      <symbol>save_settings()</symbol> stores them to back to the global
+      settings upon exit.  Note to achieve the typical state preservation of
+      <application>Gwyddion</application> modules parameters have to be saved
+      both after successful execution and cancellation.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Creating New Files, Data Fields and Graphs</title>
+    <para>
+      Not always one wants to modify the original data instead one prefers to
+      create a new window for the result, or the output is perhaps of diffrent
+      kind than the source: a graph is created from two-dimensional data.
+    </para>
+    <para>
+      Modules usually do not create new files, if they create new objects, they
+      put them to the same container as the source data.  A notable exception
+      are file modules, they however just return the newly created container.
+      New data containers, if one wishes to create them, are put under the
+      control of the data browser with gwy_app_data_browser_add().  If they
+      contain no visible data, they would be inaccessible by the user and
+      present a memory leak.  Therefore some data must be added and made
+      visible later (or beforehand).
+    </para>
+    <informalexample><programlisting>
+GwyContainer *container;
+
+container = gwy_container_new<!--x-->();
+/* Fill data with something meaningful */
+...
+gwy_app_data_browser_add(container);
+g_object_unref(container);
+</programlisting></informalexample>
+    <para>
+      New data fields can be created from scratch with gwy_data_field_new(),
+      in most cases the new data field is strongly related to an existing one
+      and then gwy_data_field_new_alike() or gwy_data_field_duplicate() come
+      handy.  The former copies all properties <emphasis>except</emphasis> the
+      data itself, the latter duplicates a data field completely.
+    </para>
+    <para>
+      When we created the new object and we have to add it to the current file.
+      We <emphasis>could</emphasis> just use one of #GwyContainer functions
+    </para>
+    <informalexample><programlisting><![CDATA[
+gwy_container_set_object_by_name(container, "/12345/data", data_field);
+g_object_unref(data_field);
+]]></programlisting></informalexample>
+    <para>
+      The data browser would notice it and add the data field, but this method
+      is generally very inconvenient – for start, how we came to
+      <literal>"/12345/data"</literal>?. Therefore we use the high-level
+      interface and obtain the new channel number for free:
+    </para>
+    <informalexample><programlisting><![CDATA[
+new_id = gwy_app_data_browser_add_data_field(container, data_field);
+g_object_unref(data_field);
+gwy_app_set_data_field_title(container, new_id, _("Bogosity"));
+]]></programlisting></informalexample>
+    <para>
+      Often the new data field should inherit more properties from the original
+      one than just the dimensions, e.g., the color gradient.  This can be
+      easily achieved with gwy_app_sync_data_items()
+    </para>
+    <informalexample><programlisting><![CDATA[
+gwy_app_sync_data_items(container, container,
+                        old_id, new_id,
+                        FALSE,
+                        GWY_DATA_ITEM_GRADIENT,
+                        GWY_DATA_ITEM_MASK_COLOR,
+                        0);
+]]></programlisting></informalexample>
+    <para>
+      The id number of the source data field (<symbol>old_id</symbol>)
+      was obtained with gwy_app_data_browser_get_current()
+      (normally together with the data field itself, its key and/or other
+      current objects)
+    </para>
+    <informalexample><programlisting>
+gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD_ID, &amp;old_id, 0);
+</programlisting></informalexample>
+    <para>
+      Creation and addition of graphs is very similar.  We create a new graph
+      model with gwy_graph_model_new() or a similar function, create
+      individual curves with gwy_graph_curve_model_new() and fill the curves
+      with data.  Then we add it to the data browser
+    </para>
+    <informalexample><programlisting><![CDATA[
+new_id = gwy_app_data_browser_add_graph_model(container, graph_model);
+g_object_unref(graph_model);
+]]></programlisting></informalexample>
+  </refsect1>
+
+  <refsect1>
+    <title>Graphical User Interface (GUI)</title>
+    <para>
+      You are encouraged to use the <ulink url="http://gtk.org/">Gtk+</ulink>
+      graphical toolkit for your module GUI.  It has following advantages:
+      <itemizedlist>
+        <listitem>
+          It is used by <application>Gwyddion</application> itself.
+          Mixing multiple graphical toolkits in one application often leads
+          to intricate and hard to resolve bugs, not speaking about
+          inconsistent look and feel.
+        </listitem>
+        <listitem>
+          It is used by <application>Gwyddion</application> itself.
+          Any specialized <application>Gwyddion</application> widgets
+          you could make use of are Gtk+ widgets.
+        </listitem>
+        <listitem>
+          It is available for a variety of platforms, allowing to easily
+          create portable modules.
+        </listitem>
+        <listitem>
+          It is licensed under GNU LGPL (for all the platforms), this meaning
+          namely it is free, with complete source code available and imposing
+          few restrictions on programs using it.
+        </listitem>
+      </itemizedlist>
+      There is an extensive
+      <ulink url="http://gtk.org/tutorial/">Gtk+ Tutorial</ulink>
+      and <ulink url="http://gtk.org/api/">API Reference</ulink> available
+      on the Gtk+ Web site.  You can use existing modules as templates
+      for your module.
+    </para>
+    <para>
+      A very simple graphical user interface asking for a one value
+      (unimaginatively called Amount) can be implemented in Gtk+ as follows:
+    </para>
+    <informalexample><programlisting><![CDATA[
+static gboolean
+slope_dialog(gdouble *amount)
+{
+    GtkWidget *dialog, *table, *spin;
+    GtkObject *adjust;
+    gint response;
+
+    /* Create the dialog */
+    dialog = gtk_dialog_new_with_buttons(_("Frobnicate"), NULL, 0,
+                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                         NULL);
+    gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+
+    /* Create the parameter controls */
+    table = gtk_table_new(1, 3, FALSE);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), table,
+                       FALSE, FALSE, 4);
+
+    adjust = gtk_adjustment_new(*amount, 0, 100, 1, 10, 0);
+    spin = gwy_table_attach_hscale(table, 0, _("Amount:"), "percent",
+                                   adjust, 0);
+
+    /* Run the dialog and respond to user actions */
+    gtk_widget_show_all(dialog);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    switch (response) {
+        case GTK_RESPONSE_CANCEL:
+        case GTK_RESPONSE_DELETE_EVENT:
+        gtk_widget_destroy(dialog);
+        case GTK_RESPONSE_NONE:
+        break;
+
+        case GTK_RESPONSE_OK:
+        *amount = gtk_adjustment_get_value(GTK_ADJUSTMENT(adjust));
+        gtk_widget_destroy(dialog);
+        break;
+    }
+
+    return response == GTK_RESPONSE_OK;
+}
+]]></programlisting></informalexample>
+    <para>
+      There is no rocket science in here: the dialog is created with some
+      standard buttons and settings.  Then a table with a value entry with
+      a description is placed there and the range of allowed values is
+      specified.  Then the dialog is run and depending on user's action the
+      value of <varname>amount</varname> is possibly updated, and
+      <literal>TRUE</literal> or <literal>FALSE</literal> is returned to
+      the caller to indicate user's action (we take everything as
+      cancellation, except pressing <guibutton>OK</guibutton>).
+    </para>
+  </refsect1>
+</refentry>
+
