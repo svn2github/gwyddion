@@ -65,6 +65,12 @@ void      gwy_line_add_dist_right_triangular(GwyLine *line,
                                              gdouble from,
                                              gdouble to,
                                              gdouble weight);
+void      gwy_line_add_dist_trapezoidal     (GwyLine *line,
+                                             gdouble from,
+                                             gdouble mid1,
+                                             gdouble mid2,
+                                             gdouble to,
+                                             gdouble weight);
 void      gwy_line_add_dist_delta           (GwyLine *line,
                                              gdouble value,
                                              gdouble weight);

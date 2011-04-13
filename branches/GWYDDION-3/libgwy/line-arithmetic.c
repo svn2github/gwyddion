@@ -532,6 +532,48 @@ gwy_line_add_dist_delta(GwyLine *line,
 }
 
 /**
+ * gwy_line_add_dist_trapezoidal:
+ * @line: A one-dimensional data line.
+ * @from: Left endpoint of the contribution.
+ * @mid1: Left midpoint vertex of the trapezoid.
+ * @mid2: Left midpoint vertex of the trapezoid.
+ * @to: Right endpoint of the contribution.
+ * @weight: Total weight of the contribution to add.
+ *
+ * Adds a trapezoidal contribution to a line containing a distribution.
+ *
+ * The line elements are considered to be equally-sized bins, with the left
+ * edge of the first bin at @off and the right edge of the last bin at
+ * @off+@real.
+ *
+ * The added contribution is trapezoidal in [@from, @to], with 0 in the
+ * boundary points @from and @to, constant within [@mid1, @mid2] and triangular
+ * in intervals [@from, @mid1] and [@mid2, @to].  If part of the contribution
+ * lies outside the line range the corresponding part of the weight will not be
+ * added to @line.
+ **/
+void
+gwy_line_add_dist_trapezoidal(GwyLine *line,
+                              gdouble from, gdouble mid1,
+                              gdouble mid2, gdouble to,
+                              gdouble weight)
+{
+    if (to == from) {
+        gwy_line_add_dist_delta(line, from, weight);
+        return;
+    }
+
+    // If @to > @from at least one of the subintervals must be also non-zero.
+    gdouble w = weight/(to + mid2 - mid1 - from);
+    if (mid1 > from)
+        gwy_line_add_dist_left_triangular(line, from, mid1, w*(mid1 - from));
+    if (mid2 > mid1)
+        gwy_line_add_dist_uniform(line, mid1, mid2, 2.0*w*(mid2 - mid1));
+    if (to > mid2)
+        gwy_line_add_dist_right_triangular(line, mid2, to, w*(to - mid2));
+}
+
+/**
  * SECTION: line-arithmetic
  * @section_id: GwyLine-arithmetic
  * @title: GwyLine arithmetic
