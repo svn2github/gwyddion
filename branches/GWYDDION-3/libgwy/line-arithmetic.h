@@ -38,10 +38,6 @@ GwyLineCompatibilityFlags gwy_line_is_incompatible(const GwyLine *line1,
                                                    const GwyLine *line2,
                                                    GwyLineCompatibilityFlags check);
 
-void      gwy_line_accumulate               (GwyLine *line,
-                                             gboolean unbiased);
-void      gwy_line_distribute               (GwyLine *line,
-                                             gboolean unbiased);
 void      gwy_line_add                      (GwyLine *line,
                                              gdouble value);
 void      gwy_line_multiply                 (GwyLine *line,
@@ -53,27 +49,6 @@ void      gwy_line_fill                     (GwyLine *line,
                                              gdouble value);
 GwyField* gwy_line_outer_product            (const GwyLine *column,
                                              const GwyLine *row)        G_GNUC_MALLOC;
-void      gwy_line_add_dist_uniform         (GwyLine *line,
-                                             gdouble from,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_left_triangular (GwyLine *line,
-                                             gdouble from,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_right_triangular(GwyLine *line,
-                                             gdouble from,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_trapezoidal     (GwyLine *line,
-                                             gdouble from,
-                                             gdouble mid1,
-                                             gdouble mid2,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_delta           (GwyLine *line,
-                                             gdouble value,
-                                             gdouble weight);
 
 G_END_DECLS
 

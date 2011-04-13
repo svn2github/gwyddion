@@ -25,6 +25,7 @@
 #include "libgwy/math.h"
 #include "libgwy/fft.h"
 #include "libgwy/line-arithmetic.h"
+#include "libgwy/line-distributions.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-distributions.h"
 #include "libgwy/math-internal.h"

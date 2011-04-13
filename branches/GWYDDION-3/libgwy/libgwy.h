@@ -50,6 +50,7 @@
 #include <libgwy/interpolation.h>
 #include <libgwy/line.h>
 #include <libgwy/line-arithmetic.h>
+#include <libgwy/line-distributions.h>
 #include <libgwy/line-part.h>
 #include <libgwy/line-statistics.h>
 #include <libgwy/macros.h>

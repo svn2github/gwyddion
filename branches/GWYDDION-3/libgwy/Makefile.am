@@ -47,6 +47,7 @@ public_headers = \
 	$(srcdir)/interpolation.h \
 	$(srcdir)/line.h \
 	$(srcdir)/line-arithmetic.h \
+	$(srcdir)/line-distributions.h \
 	$(srcdir)/line-part.h \
 	$(srcdir)/line-statistics.h \
 	$(srcdir)/macros.h \
@@ -139,6 +140,7 @@ libgwy3_la_SOURCES = \
 	interpolation.c \
 	line.c \
 	line-arithmetic.c \
+	line-distributions.c \
 	line-part.c \
 	line-statistics.c \
 	macros.c \
