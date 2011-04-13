@@ -37,10 +37,12 @@ typedef struct {
     gboolean count : 1;
     gdouble dx;
     gdouble dy;
+    gdouble cos_alpha;
+    gdouble sin_alpha;
     gdouble min;
     gdouble max;
     GwyLine *dist;
-} DistributionData;
+} SlopeDistributionData;
 
 static void
 sanitize_range(gdouble *min,
@@ -184,34 +186,88 @@ fail:
     return line;
 }
 
-static inline void
-update_uniform(DistributionData *ddata,
-               gdouble v1, gdouble v2, guint w)
+static void
+slope_dist_cont1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                 gdouble w,
+                 SlopeDistributionData *ddata)
 {
-    gdouble vmin = MIN(v1, v2), vmax = MAX(v1, v2);
+    gdouble c0 = (z2 - z1)*ddata->cos_alpha/ddata->dx,
+            c1 = (z3 - z4)*ddata->cos_alpha/ddata->dx,
+            s0 = (z4 - z1)*ddata->sin_alpha/ddata->dy,
+            s1 = (z3 - z2)*ddata->sin_alpha/ddata->dy;
+    // Directional derivatives at the corners.
+    gdouble v1 = c0 + s0, v2 = c0 + s1, v3 = c1 + s1, v4 = c1 + s0;
+
+    // FIXME: Only four orders are possible:
+    // (a) v1 ≤ v2 ≤ v3 ≤ v4
+    // (b) v4 ≤ v3 ≤ v3 ≤ v1
+    // (c) v1 ≤ v3 ≤ v2 ≤ v4
+    // (d) v4 ≤ v2 ≤ v3 ≤ v1
+    // We can differentiate between (a,c) and (b,d) by comparing v1 and v4.
+    // Within each pair the order is then uniquely given by the angle.
+    if (v1 > v2)
+        GWY_SWAP(gdouble, v1, v2);
+    if (v3 > v4)
+        GWY_SWAP(gdouble, v3, v4);
+    if (v1 > v3)
+        GWY_SWAP(gdouble, v1, v3);
+    if (v2 > v4)
+        GWY_SWAP(gdouble, v2, v4);
+    if (v2 > v3)
+        GWY_SWAP(gdouble, v2, v3);
 
     if (ddata->analyse) {
-        if (vmin < ddata->min)
-            ddata->min = vmin;
-        if (vmax > ddata->max)
-            ddata->max = vmax;
+        if (v1 < ddata->min)
+            ddata->min = v1;
+        if (v4 > ddata->max)
+            ddata->max = v4;
         ddata->n_in_range += w;
         ddata->n += w;
     }
     else if (ddata->count) {
-        // FIXME: We could count how much of the contribution actually falls
-        // within the range not just whether anything of it falls there.
-        if (MAX(vmax, ddata->max) - MIN(vmax, ddata->min)
-            < vmax - vmin + ddata->max - ddata->min)
+        // FIXME: We could estimate how much of the contribution actually falls
+        // within the range not just whether anything falls there at all.
+        if (MAX(v4, ddata->max) - MIN(v1, ddata->min)
+            < v4 - v1 + ddata->max - ddata->min)
             ddata->n_in_range += w;
         ddata->n += w;
     }
     else
-        gwy_line_add_dist_uniform(ddata->dist, vmin, vmax, w);
+        gwy_line_add_dist_trapezoidal(ddata->dist, v1, v2, v3, v4, w);
 }
 
-static inline void
-update_delta(DistributionData *ddata, gdouble v, guint w)
+static void
+slope_dist_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                guint w1, guint w2, guint w3, guint w4,
+                gpointer user_data)
+{
+    SlopeDistributionData *ddata = (SlopeDistributionData*)user_data;
+
+    // If entire area is covered we can process it at once.
+    if (w1 && w2 && w3 && w4) {
+        slope_dist_cont1(z1, z2, z3, z4, w1 + w2 + w3 + w4, ddata);
+        return;
+    }
+
+    // Otherwise individual quarter-pixels need to be processed.
+    gdouble z12 = 0.5*(z1 + z2), z23 = 0.5*(z2 + z3),
+            z34 = 0.5*(z3 + z4), z41 = 0.5*(z4 + z1),
+            zc = 0.5*(z12 + z23);
+
+    if (w1)
+        slope_dist_cont1(z1, z12, zc, z41, w1, ddata);
+    if (w2)
+        slope_dist_cont1(z12, z2, z23, zc, w1, ddata);
+    if (w3)
+        slope_dist_cont1(zc, z23, z3, z34, w1, ddata);
+    if (w4)
+        slope_dist_cont1(z41, zc, z34, z4, w1, ddata);
+}
+
+static void
+slope_dist_discr1(gdouble v,
+                  gdouble w,
+                  SlopeDistributionData *ddata)
 {
     if (ddata->analyse) {
         if (v < ddata->min)
@@ -222,7 +278,8 @@ update_delta(DistributionData *ddata, gdouble v, guint w)
         ddata->n += w;
     }
     else if (ddata->count) {
-        if (v >= ddata->min && v <= ddata->max)
+        if (MAX(v, ddata->max) - MIN(v, ddata->min)
+            < v - v + ddata->max - ddata->min)
             ddata->n_in_range += w;
         ddata->n += w;
     }
@@ -231,71 +288,27 @@ update_delta(DistributionData *ddata, gdouble v, guint w)
 }
 
 static void
-slope_horiz_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
                  guint w1, guint w2, guint w3, guint w4,
                  gpointer user_data)
 {
-    DistributionData *ddata = (DistributionData*)user_data;
+    SlopeDistributionData *ddata = (SlopeDistributionData*)user_data;
 
-    if (w1 || w2) {
-        gdouble zds = (z2 - z1)/ddata->dx;
-        gdouble zdc = zds + 0.5*(z3 - z4)/ddata->dx;
-        update_uniform(ddata, zds, zdc, w1 + w2);
-    }
+    gdouble c0 = (z2 - z1)*ddata->cos_alpha/ddata->dx,
+            c1 = (z3 - z4)*ddata->cos_alpha/ddata->dx,
+            s0 = (z4 - z1)*ddata->sin_alpha/ddata->dy,
+            s1 = (z3 - z2)*ddata->sin_alpha/ddata->dy;
+    // Directional derivatives at the corners.
+    gdouble v1 = c0 + s0, v2 = c0 + s1, v3 = c1 + s1, v4 = c1 + s0;
 
-    if (w3 || w4) {
-        gdouble zds = (z3 - z4)/ddata->dx;
-        gdouble zdc = zds + 0.5*(z2 - z1)/ddata->dx;
-        update_uniform(ddata, zds, zdc, w3 + w4);
-    }
-}
-
-static void
-slope_vert_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
-                guint w1, guint w2, guint w3, guint w4,
-                gpointer user_data)
-{
-    DistributionData *ddata = (DistributionData*)user_data;
-
-    if (w1 || w4) {
-        gdouble zds = (z4 - z1)/ddata->dy;
-        gdouble zdc = zds + 0.5*(z3 - z2)/ddata->dy;
-        update_uniform(ddata, zds, zdc, w1 + w4);
-    }
-
-    if (w2 || w3) {
-        gdouble zds = (z3 - z2)/ddata->dy;
-        gdouble zdc = zds + 0.5*(z4 - z1)/ddata->dy;
-        update_uniform(ddata, zds, zdc, w2 + w3);
-    }
-}
-
-static void
-slope_horiz_disrc(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
-                  guint w1, guint w2, guint w3, guint w4,
-                  gpointer user_data)
-{
-    DistributionData *ddata = (DistributionData*)user_data;
-
-    if (w1 || w2)
-        update_delta(ddata, (z2 - z1)/ddata->dx, w1 + w2);
-
-    if (w3 || w4)
-        update_delta(ddata, (z3 - z4)/ddata->dx, w3 + w4);
-}
-
-static void
-slope_vert_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
-                 guint w1, guint w2, guint w3, guint w4,
-                 gpointer user_data)
-{
-    DistributionData *ddata = (DistributionData*)user_data;
-
-    if (w1 || w4)
-        update_delta(ddata, (z4 - z1)/ddata->dx, w1 + w4);
-
-    if (w2 || w3)
-        update_delta(ddata, (z3 - z2)/ddata->dx, w2 + w3);
+    if (w1)
+        slope_dist_discr1(v1, w1, ddata);
+    if (w2)
+        slope_dist_discr1(v2, w2, ddata);
+    if (w3)
+        slope_dist_discr1(v3, w3, ddata);
+    if (w4)
+        slope_dist_discr1(v4, w4, ddata);
 }
 
 /**
@@ -306,7 +319,10 @@ slope_vert_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @orientation: Orientation in which to compute the derivatives.
+ * @angle: Direction in which to compute the derivatives.  Zero corresponds to
+ *         positive row direction, π/2 corresponds to positive column
+ *         direction, etc.  The angle is pixel-wise; this is important if
+ *         horizontal and vertical pixel sizes differ.
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
  * @continuous: %TRUE to calculate the distribution of linearly interpolated
@@ -331,7 +347,7 @@ gwy_field_slope_dist(const GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
-                     GwyOrientation orientation,
+                     gdouble angle,
                      gboolean cumulative,
                      gboolean continuous,
                      guint npoints,
@@ -344,32 +360,25 @@ gwy_field_slope_dist(const GwyField *field,
         goto fail;
 
     GwyFieldQuartersFunc func;
-    if (continuous)
-        func = (orientation == GWY_ORIENTATION_HORIZONTAL
-                ? slope_horiz_cont
-                : slope_vert_cont);
-    else
-        func = (orientation == GWY_ORIENTATION_HORIZONTAL
-                ? slope_horiz_disrc
-                : slope_vert_discr);
+    func = continuous ? slope_dist_cont : slope_dist_discr;
 
-    DistributionData ddata = {
+    SlopeDistributionData ddata = {
         0, 0,
         min > max, TRUE,
         gwy_field_dx(field), gwy_field_dy(field),
+        cos(angle), sin(angle),
         G_MAXDOUBLE, -G_MAXDOUBLE,
         NULL,
     };
 
     // Run analyse (find range and count) or count (count in range).  If both
-    // is given, this serves as a somewhat inefficient masked pixel counting
-    // method.
+    // is given by caller, this serves as a somewhat inefficient masked pixel
+    // counting method.
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
                                func, &ddata);
-    g_assert(ddata.n % 4 == 0);
 
     if (!npoints)
-        npoints = gwy_round(3.49*cbrt(ddata.n_in_range/4));
+        npoints = gwy_round(3.49*cbrt(ddata.n_in_range/4.0));
     if (!npoints)
         goto fail;
 

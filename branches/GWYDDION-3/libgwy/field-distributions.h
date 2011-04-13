@@ -26,6 +26,7 @@
 
 G_BEGIN_DECLS
 
+// FIXME: Not used for anything.
 typedef enum {
     GWY_ORIENTATION_HORIZONTAL,
     GWY_ORIENTATION_VERTICAL,
@@ -43,7 +44,7 @@ GwyLine* gwy_field_slope_dist(const GwyField *field,
                               const GwyFieldPart *fpart,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
-                              GwyOrientation orientation,
+                              gdouble angle,
                               gboolean cumulative,
                               gboolean continuous,
                               guint npoints,
