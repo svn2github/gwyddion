@@ -9,6 +9,7 @@ EXTRA_DIST = \
 	documentation-stats.py \
 	expand-test-list.py \
 	generate-library-def.py \
+	genmarshal.make \
 	gtester.make \
 	gtkdoc-add-objects.py \
 	gwy-doc.make \
