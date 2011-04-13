@@ -187,8 +187,9 @@ gwy_field_class_init(GwyFieldClass *klass)
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
+                                     g_cclosure_marshal_VOID__BOXED,
+                                     G_TYPE_NONE, 1,
+                                     GWY_TYPE_FIELD_PART);
 }
 
 static void
@@ -807,14 +808,22 @@ gwy_field_set_size(GwyField *field,
 /**
  * gwy_field_data_changed:
  * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field that has changed.  Passing %NULL means entire field.
  *
  * Emits signal GwyField::data-changed on a field.
  **/
 void
-gwy_field_data_changed(GwyField *field)
+gwy_field_data_changed(GwyField *field,
+                       const GwyFieldPart *fpart)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    g_signal_emit(field, field_signals[DATA_CHANGED], 0);
+    if (fpart)
+        g_signal_emit(field, field_signals[DATA_CHANGED], 0, fpart);
+    else {
+        GwyFieldPart spart = { 0, 0, field->xres, field->yres };
+        g_signal_emit(field, field_signals[DATA_CHANGED], 0, &spart);
+    }
 }
 
 /**
