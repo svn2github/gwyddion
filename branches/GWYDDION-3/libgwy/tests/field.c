@@ -3399,4 +3399,142 @@ test_field_correlate_crosscorrelate(void)
     g_rand_free(rng);
 }
 
+void
+test_field_distributions_slope_simple_x(void)
+{
+    guint xres = 20, yres = 10;
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+    // Construct a non-trivial field for which the discrete and continuous
+    // are the same and at least some cases are known exactly.
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = (gdouble)i/yres;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = (gdouble)j/xres;
+            field->data[i*xres + j] = x*x + y*y;
+        }
+    }
+
+    GwyLine *ddist, *cdist;
+    gdouble real, integral;
+    real = 2.0*(xres - 1)/xres;
+
+    ddist = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                 0.0, FALSE, FALSE, xres-1,
+                                 0.0, real);
+    g_assert_cmpuint(ddist->res, ==, xres-1);
+    g_assert_cmpfloat(ddist->off, ==, 0.0);
+    g_assert_cmpfloat(ddist->real, ==, real);
+    integral = gwy_line_sum_full(ddist) * gwy_line_dx(ddist);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+
+    cdist = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                 0.0, FALSE, TRUE, xres-1,
+                                 0.0, real);
+    g_assert_cmpuint(cdist->res, ==, xres-1);
+    g_assert_cmpfloat(cdist->off, ==, 0.0);
+    g_assert_cmpfloat(cdist->real, ==, real);
+    integral = gwy_line_sum_full(cdist) * gwy_line_dx(cdist);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+
+    line_assert_numerically_equal(cdist, ddist, 1e-14);
+
+    for (guint i = 1; i < cdist->res; i++) {
+        g_assert_cmpfloat(fabs(cdist->data[i-1] - cdist->data[i]), <=, 1e-14);
+    }
+
+    g_object_unref(cdist);
+    g_object_unref(ddist);
+    g_object_unref(field);
+}
+
+void
+test_field_distributions_slope_simple_y(void)
+{
+    guint xres = 20, yres = 10;
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+    // Construct a non-trivial field for which the discrete and continuous
+    // are the same and at least some cases are known exactly.
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = (gdouble)i/yres;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = (gdouble)j/xres;
+            field->data[i*xres + j] = x*x + y*y;
+        }
+    }
+
+    GwyLine *ddist, *cdist;
+    gdouble real, integral;
+    real = 2.0*(yres - 1)/yres;
+
+    ddist = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                 G_PI/2.0, FALSE, FALSE, yres-1,
+                                 0.0, real);
+    g_assert_cmpuint(ddist->res, ==, yres-1);
+    g_assert_cmpfloat(ddist->off, ==, 0.0);
+    g_assert_cmpfloat(ddist->real, ==, real);
+    integral = gwy_line_sum_full(ddist) * gwy_line_dx(ddist);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+
+    cdist = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                 G_PI/2.0, FALSE, TRUE, yres-1,
+                                 0.0, real);
+    g_assert_cmpuint(cdist->res, ==, yres-1);
+    g_assert_cmpfloat(cdist->off, ==, 0.0);
+    g_assert_cmpfloat(cdist->real, ==, real);
+    integral = gwy_line_sum_full(cdist) * gwy_line_dx(cdist);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+
+    line_assert_numerically_equal(cdist, ddist, 1e-14);
+
+    for (guint i = 1; i < cdist->res; i++) {
+        g_assert_cmpfloat(fabs(cdist->data[i-1] - cdist->data[i]), <=, 1e-14);
+    }
+
+    g_object_unref(cdist);
+    g_object_unref(ddist);
+    g_object_unref(field);
+}
+
+void
+test_field_distributions_slope_simple_oblique(void)
+{
+    guint xres = 20, yres = 10;
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+    // Construct a non-trivial field for which the discrete and continuous
+    // are the same and at least some cases are known exactly.
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = (gdouble)i/yres;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = (gdouble)j/xres;
+            field->data[i*xres + j] = x*x + y*y;
+        }
+    }
+
+    GwyLine *ddist, *cdist;
+    gdouble integral;
+
+    ddist = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                 G_PI/2.0, FALSE, FALSE, 0,
+                                 0.0, 0.0);
+    integral = gwy_line_sum_full(ddist) * gwy_line_dx(ddist);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+
+    cdist = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                 G_PI/2.0, FALSE, TRUE, 0,
+                                 0.0, 0.0);
+    integral = gwy_line_sum_full(cdist) * gwy_line_dx(cdist);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+
+    line_assert_numerically_equal(cdist, ddist, 1e-14);
+
+    // FIXME: The expected values are bit hard to calculate.
+
+    g_object_unref(cdist);
+    g_object_unref(ddist);
+    g_object_unref(field);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

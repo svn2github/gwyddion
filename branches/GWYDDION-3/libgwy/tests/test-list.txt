@@ -173,6 +173,9 @@ field/distributions/hhcf/masked
 field/distributions/hhcf/partial
 field/distributions/psdf/full
 field/distributions/psdf/masked
+field/distributions/slope/simple-x
+field/distributions/slope/simple-y
+field/distributions/slope/simple-oblique
 surface/serialize
 surface/props
 surface/data-changed
