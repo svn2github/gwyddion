@@ -359,8 +359,8 @@ gwy_line_add_dist_trapezoidal(GwyLine *line,
                               gdouble mid2, gdouble to,
                               gdouble weight)
 {
-    if (to == from) {
-        gwy_line_add_dist_delta(line, from, weight);
+    if (to - from < 1e-12*(fabs(from) + fabs(to))) {
+        gwy_line_add_dist_delta(line, 0.5*(from + to), weight);
         return;
     }
 
