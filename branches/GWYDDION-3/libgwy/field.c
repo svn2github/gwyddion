@@ -179,6 +179,9 @@ gwy_field_class_init(GwyFieldClass *klass)
     /**
      * GwyField::data-changed:
      * @gwyfield: The #GwyField which received the signal.
+     * @arg1: (allow-none):
+     *        Area in @field that has changed.  It may be %NULL, meaning the
+     *        entire field.
      *
      * The ::data-changed signal is emitted whenever field data changes.
      **/
@@ -809,7 +812,8 @@ gwy_field_set_size(GwyField *field,
  * gwy_field_data_changed:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *         Area in @field that has changed.  Passing %NULL means entire field.
+ *         Area in @field that has changed.  Passing %NULL means the entire
+ *         field.
  *
  * Emits signal GwyField::data-changed on a field.
  **/
@@ -818,12 +822,7 @@ gwy_field_data_changed(GwyField *field,
                        const GwyFieldPart *fpart)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    if (fpart)
-        g_signal_emit(field, field_signals[DATA_CHANGED], 0, fpart);
-    else {
-        GwyFieldPart spart = { 0, 0, field->xres, field->yres };
-        g_signal_emit(field, field_signals[DATA_CHANGED], 0, &spart);
-    }
+    g_signal_emit(field, field_signals[DATA_CHANGED], 0, fpart);
 }
 
 /**

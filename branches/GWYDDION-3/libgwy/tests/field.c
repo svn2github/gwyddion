@@ -147,12 +147,13 @@ static void
 check_field_part(const GwyFieldPart *fpart,
                  const GwyFieldPart *refpart)
 {
-    g_assert(fpart);
-    g_assert(refpart);
-    g_assert_cmpuint(fpart->col, ==, refpart->col);
-    g_assert_cmpuint(fpart->row, ==, refpart->row);
-    g_assert_cmpuint(fpart->width, ==, refpart->width);
-    g_assert_cmpuint(fpart->height, ==, refpart->height);
+    g_assert((fpart && refpart) || (!fpart && !refpart));
+    if (fpart) {
+        g_assert_cmpuint(fpart->col, ==, refpart->col);
+        g_assert_cmpuint(fpart->row, ==, refpart->row);
+        g_assert_cmpuint(fpart->width, ==, refpart->width);
+        g_assert_cmpuint(fpart->height, ==, refpart->height);
+    }
 }
 
 void
@@ -174,9 +175,8 @@ test_field_data_changed(void)
     g_object_unref(field);
 
     field = gwy_field_new_sized(2, 3, FALSE);
-    fpart = (GwyFieldPart){ 0, 0, 2, 3 };
     g_signal_connect_swapped(field, "data-changed",
-                             G_CALLBACK(check_field_part), &fpart);
+                             G_CALLBACK(check_field_part), NULL);
     gwy_field_data_changed(field, NULL);
     g_object_unref(field);
 }
