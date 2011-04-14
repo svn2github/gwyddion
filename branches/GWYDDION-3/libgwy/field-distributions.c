@@ -365,7 +365,7 @@ gwy_field_slope_dist(const GwyField *field,
 
     SlopeDistributionData ddata = {
         0, 0,
-        min > max, TRUE,
+        min >= max, TRUE,
         gwy_field_dx(field), gwy_field_dy(field),
         cos(angle), sin(angle),
         G_MAXDOUBLE, -G_MAXDOUBLE,
@@ -383,7 +383,7 @@ gwy_field_slope_dist(const GwyField *field,
     if (!npoints)
         goto fail;
 
-    if (min <= max) {
+    if (min < max) {
         ddata.min = min;
         ddata.max = max;
     }
@@ -402,7 +402,7 @@ gwy_field_slope_dist(const GwyField *field,
         gwy_line_multiply(line, 1.0/ddata.n);
     }
     else
-        gwy_line_multiply(line, npoints/(max - min)/ddata.n);
+        gwy_line_multiply(line, 1.0/(gwy_line_dx(line)*ddata.n));
 
 fail:
     if (!line)
