@@ -78,7 +78,8 @@ GwyLine*        gwy_line_new_resampled(const GwyLine *line,
 void            gwy_line_set_size     (GwyLine *line,
                                        guint res,
                                        gboolean clear);
-void            gwy_line_data_changed (GwyLine *line);
+void            gwy_line_data_changed (GwyLine *line,
+                                       GwyLinePart *lpart);
 void            gwy_line_copy         (const GwyLine *src,
                                        const GwyLinePart *srcpart,
                                        GwyLine *dest,

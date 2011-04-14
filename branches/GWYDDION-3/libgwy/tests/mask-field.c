@@ -70,12 +70,28 @@ test_mask_field_props(void)
 void
 test_mask_field_data_changed(void)
 {
+    // Plain emission
     GwyMaskField *field = gwy_mask_field_new();
     guint counter = 0;
     g_signal_connect_swapped(field, "data-changed",
                              G_CALLBACK(record_signal), &counter);
-    gwy_mask_field_data_changed(field);
+    gwy_mask_field_data_changed(field, NULL);
     g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(field);
+
+    // Specified part argument
+    field = gwy_mask_field_new_sized(8, 8, FALSE);
+    GwyFieldPart fpart = { 1, 2, 3, 4 };
+    g_signal_connect_swapped(field, "data-changed",
+                             G_CALLBACK(field_part_assert_equal), &fpart);
+    gwy_mask_field_data_changed(field, &fpart);
+    g_object_unref(field);
+
+    // NULL part argument
+    field = gwy_mask_field_new_sized(2, 3, FALSE);
+    g_signal_connect_swapped(field, "data-changed",
+                             G_CALLBACK(field_part_assert_equal), NULL);
+    gwy_mask_field_data_changed(field, NULL);
     g_object_unref(field);
 }
 

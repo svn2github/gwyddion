@@ -132,7 +132,8 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
     } while (0)
 #endif
 
-void         gwy_mask_field_data_changed (GwyMaskField *field);
+void         gwy_mask_field_data_changed (GwyMaskField *field,
+                                          GwyFieldPart *fpart);
 void         gwy_mask_field_copy         (const GwyMaskField *src,
                                           const GwyFieldPart *srcrectangle,
                                           GwyMaskField *dest,

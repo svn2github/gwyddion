@@ -125,16 +125,23 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
     /**
      * GwyMaskField::data-changed:
      * @gwymaskfield: The #GwyMaskField which received the signal.
+     * @arg1: (allow-none):
+     *        Area in @gwymaskfield that has changed.
+     *        It may be %NULL, meaning the entire field.
      *
-     * The ::data-changed signal is emitted whenever mask field data changes.
+     * The ::data-changed signal is emitted when mask field data changes.  More
+     * precisely, #GwyMaskField itself never emits this signal.  You can emit
+     * it explicitly with gwy_mask_field_data_changed() to notify anything that
+     * displays (or otherwise uses) the mask field.
      **/
     mask_field_signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
+                                     g_cclosure_marshal_VOID__BOXED,
+                                     G_TYPE_NONE, 1,
+                                     GWY_TYPE_FIELD_PART);
 }
 
 static void
@@ -689,14 +696,18 @@ gwy_mask_field_set_size(GwyMaskField *field,
 /**
  * gwy_mask_field_data_changed:
  * @field: A two-dimensional mask field.
+ * @fpart: (allow-none):
+ *         Area in @field that has changed.  Passing %NULL means the entire
+ *         mask field.
  *
  * Emits signal GwyMaskField::data-changed on a mask field.
  **/
 void
-gwy_mask_field_data_changed(GwyMaskField *field)
+gwy_mask_field_data_changed(GwyMaskField *field,
+                            GwyFieldPart *fpart)
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
-    g_signal_emit(field, mask_field_signals[DATA_CHANGED], 0);
+    g_signal_emit(field, mask_field_signals[DATA_CHANGED], 0, fpart);
 }
 
 /**

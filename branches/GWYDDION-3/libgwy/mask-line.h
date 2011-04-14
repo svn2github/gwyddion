@@ -115,7 +115,8 @@ void         gwy_mask_line_set_size     (GwyMaskLine *line,
 
 #endif
 
-void     gwy_mask_line_data_changed(GwyMaskLine *line);
+void     gwy_mask_line_data_changed(GwyMaskLine *line,
+                                    GwyLinePart *lpart);
 void     gwy_mask_line_copy        (const GwyMaskLine *src,
                                     const GwyLinePart *srcpart,
                                     GwyMaskLine *dest,

@@ -53,12 +53,28 @@ test_mask_line_props(void)
 void
 test_mask_line_data_changed(void)
 {
+    // Plain emission
     GwyMaskLine *line = gwy_mask_line_new();
     guint counter = 0;
     g_signal_connect_swapped(line, "data-changed",
                              G_CALLBACK(record_signal), &counter);
-    gwy_mask_line_data_changed(line);
+    gwy_mask_line_data_changed(line, NULL);
     g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(line);
+
+    // Specified part argument
+    line = gwy_mask_line_new_sized(8, FALSE);
+    GwyLinePart lpart = { 1, 2 };
+    g_signal_connect_swapped(line, "data-changed",
+                             G_CALLBACK(line_part_assert_equal), &lpart);
+    gwy_mask_line_data_changed(line, &lpart);
+    g_object_unref(line);
+
+    // NULL part argument
+    line = gwy_mask_line_new_sized(2, FALSE);
+    g_signal_connect_swapped(line, "data-changed",
+                             G_CALLBACK(line_part_assert_equal), NULL);
+    gwy_mask_line_data_changed(line, NULL);
     g_object_unref(line);
 }
 

@@ -143,22 +143,10 @@ test_field_props(void)
     g_object_unref(field);
 }
 
-static void
-check_field_part(const GwyFieldPart *fpart,
-                 const GwyFieldPart *refpart)
-{
-    g_assert((fpart && refpart) || (!fpart && !refpart));
-    if (fpart) {
-        g_assert_cmpuint(fpart->col, ==, refpart->col);
-        g_assert_cmpuint(fpart->row, ==, refpart->row);
-        g_assert_cmpuint(fpart->width, ==, refpart->width);
-        g_assert_cmpuint(fpart->height, ==, refpart->height);
-    }
-}
-
 void
 test_field_data_changed(void)
 {
+    // Plain emission
     GwyField *field = gwy_field_new();
     guint counter = 0;
     g_signal_connect_swapped(field, "data-changed",
@@ -167,16 +155,18 @@ test_field_data_changed(void)
     g_assert_cmpuint(counter, ==, 1);
     g_object_unref(field);
 
+    // Specified part argument
     field = gwy_field_new_sized(8, 8, FALSE);
     GwyFieldPart fpart = { 1, 2, 3, 4 };
     g_signal_connect_swapped(field, "data-changed",
-                             G_CALLBACK(check_field_part), &fpart);
+                             G_CALLBACK(field_part_assert_equal), &fpart);
     gwy_field_data_changed(field, &fpart);
     g_object_unref(field);
 
+    // NULL part argument
     field = gwy_field_new_sized(2, 3, FALSE);
     g_signal_connect_swapped(field, "data-changed",
-                             G_CALLBACK(check_field_part), NULL);
+                             G_CALLBACK(field_part_assert_equal), NULL);
     gwy_field_data_changed(field, NULL);
     g_object_unref(field);
 }

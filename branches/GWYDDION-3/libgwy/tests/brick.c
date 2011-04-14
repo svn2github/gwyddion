@@ -166,12 +166,28 @@ test_brick_props(void)
 void
 test_brick_data_changed(void)
 {
+    // Plain emission
     GwyBrick *brick = gwy_brick_new();
     guint counter = 0;
     g_signal_connect_swapped(brick, "data-changed",
                              G_CALLBACK(record_signal), &counter);
-    gwy_brick_data_changed(brick);
+    gwy_brick_data_changed(brick, NULL);
     g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(brick);
+
+    // Specified part argument
+    brick = gwy_brick_new_sized(10, 10, 10, FALSE);
+    GwyBrickPart bpart = { 1, 2, 3, 4, 5, 6 };
+    g_signal_connect_swapped(brick, "data-changed",
+                             G_CALLBACK(brick_part_assert_equal), &bpart);
+    gwy_brick_data_changed(brick, &bpart);
+    g_object_unref(brick);
+
+    // NULL part argument
+    brick = gwy_brick_new_sized(2, 3, 4, FALSE);
+    g_signal_connect_swapped(brick, "data-changed",
+                             G_CALLBACK(brick_part_assert_equal), NULL);
+    gwy_brick_data_changed(brick, NULL);
     g_object_unref(brick);
 }
 

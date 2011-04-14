@@ -26,13 +26,23 @@
  ***************************************************************************/
 
 void
+line_part_assert_equal(const GwyLinePart *part,
+                       const GwyLinePart *refpart)
+{
+    g_assert((part && refpart) || (!part && !refpart));
+    if (part) {
+        g_assert_cmpuint(part->pos, ==, refpart->pos);
+        g_assert_cmpuint(part->len, ==, refpart->len);
+    }
+}
+
+void
 test_line_part_boxed(void)
 {
     GwyLinePart lpart = { 1, 2 };
     GwyLinePart *copy = serialize_boxed_and_back(&lpart,
                                                   GWY_TYPE_LINE_PART);
-    g_assert_cmpfloat(lpart.pos, ==, copy->pos);
-    g_assert_cmpfloat(lpart.len, ==, copy->len);
+    line_part_assert_equal(copy, &lpart);
     g_boxed_free(GWY_TYPE_LINE_PART, copy);
 }
 

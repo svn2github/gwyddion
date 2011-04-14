@@ -107,16 +107,23 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
     /**
      * GwyMaskLine::data-changed:
      * @gwymaskline: The #GwyMaskLine which received the signal.
+     * @arg1: (allow-none):
+     *        Segment in @gwymaskline that has changed.
+     *        It may be %NULL, meaning the entire mask line.
      *
-     * The ::data-changed signal is emitted whenever mask line data changes.
+     * The ::data-changed signal is emitted when mask line data changes.
+     * More precisely, #GwyMaskLine itself never emits this signal.  You can
+     * emit it explicitly with gwy_mask_line_data_changed() to notify anything
+     * that displays (or otherwise uses) the mask line.
      **/
     mask_line_signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
+                                     g_cclosure_marshal_VOID__BOXED,
+                                     G_TYPE_NONE, 1,
+                                     GWY_TYPE_LINE_PART);
 }
 
 static void
@@ -527,14 +534,18 @@ gwy_mask_line_set_size(GwyMaskLine *line,
 /**
  * gwy_mask_line_data_changed:
  * @line: A one-dimensional mask line.
+ * @fpart: (allow-none):
+ *         Segment in @line that has changed.  Passing %NULL means the entire
+ *         mask line.
  *
  * Emits signal GwyMaskLine::data-changed on a mask line.
  **/
 void
-gwy_mask_line_data_changed(GwyMaskLine *line)
+gwy_mask_line_data_changed(GwyMaskLine *line,
+                           GwyLinePart *lpart)
 {
     g_return_if_fail(GWY_IS_MASK_LINE(line));
-    g_signal_emit(line, mask_line_signals[DATA_CHANGED], 0);
+    g_signal_emit(line, mask_line_signals[DATA_CHANGED], 0, lpart);
 }
 
 /**

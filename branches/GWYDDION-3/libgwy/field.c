@@ -180,10 +180,13 @@ gwy_field_class_init(GwyFieldClass *klass)
      * GwyField::data-changed:
      * @gwyfield: The #GwyField which received the signal.
      * @arg1: (allow-none):
-     *        Area in @field that has changed.  It may be %NULL, meaning the
-     *        entire field.
+     *        Area in @gwyfield that has changed.
+     *        It may be %NULL, meaning the entire field.
      *
-     * The ::data-changed signal is emitted whenever field data changes.
+     * The ::data-changed signal is emitted when field data changes.
+     * More precisely, #GwyField itself never emits this signal.  You can emit
+     * it explicitly with gwy_field_data_changed() to notify anything that
+     * displays (or otherwise uses) the field.
      **/
     field_signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
@@ -819,7 +822,7 @@ gwy_field_set_size(GwyField *field,
  **/
 void
 gwy_field_data_changed(GwyField *field,
-                       const GwyFieldPart *fpart)
+                       GwyFieldPart *fpart)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_signal_emit(field, field_signals[DATA_CHANGED], 0, fpart);

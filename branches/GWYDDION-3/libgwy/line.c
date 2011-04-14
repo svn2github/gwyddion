@@ -145,16 +145,23 @@ gwy_line_class_init(GwyLineClass *klass)
     /**
      * GwyLine::data-changed:
      * @gwyline: The #GwyLine which received the signal.
+     * @arg1: (allow-none):
+     *        Segment in @gwyline that has changed.
+     *        It may be %NULL, meaning the entire line.
      *
-     * The ::data-changed signal is emitted whenever line data changes.
+     * The ::data-changed signal is emitted when line data changes.
+     * More precisely, #GwyLine itself never emits this signal.  You can emit
+     * it explicitly with gwy_line_data_changed() to notify anything that
+     * displays (or otherwise uses) the line.
      **/
     line_signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
+                                     g_cclosure_marshal_VOID__BOXED,
+                                     G_TYPE_NONE, 1,
+                                     GWY_TYPE_LINE_PART);
 }
 
 static void
@@ -673,14 +680,18 @@ gwy_line_set_size(GwyLine *line,
 /**
  * gwy_line_data_changed:
  * @line: A one-dimensional data line.
+ * @fpart: (allow-none):
+ *         Segment in @line that has changed.  Passing %NULL means the entire
+ *         line.
  *
  * Emits signal GwyLine::data-changed on a line.
  **/
 void
-gwy_line_data_changed(GwyLine *line)
+gwy_line_data_changed(GwyLine *line,
+                      GwyLinePart *lpart)
 {
     g_return_if_fail(GWY_IS_LINE(line));
-    g_signal_emit(line, line_signals[DATA_CHANGED], 0);
+    g_signal_emit(line, line_signals[DATA_CHANGED], 0, lpart);
 }
 
 /**

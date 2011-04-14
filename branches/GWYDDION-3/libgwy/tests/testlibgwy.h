@@ -71,6 +71,12 @@ void          line_randomize                (GwyLine *field,
 void          line_assert_numerically_equal (const GwyLine *result,
                                              const GwyLine *reference,
                                              gdouble eps);
+void          brick_part_assert_equal       (const GwyBrickPart *part,
+                                             const GwyBrickPart *refpart);
+void          field_part_assert_equal       (const GwyFieldPart *part,
+                                             const GwyFieldPart *refpart);
+void          line_part_assert_equal        (const GwyLinePart *part,
+                                             const GwyLinePart *refpart);
 
 GType gwy_ser_test_get_type(void) G_GNUC_CONST;
 

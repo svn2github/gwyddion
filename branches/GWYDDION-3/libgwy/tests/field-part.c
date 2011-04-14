@@ -26,15 +26,25 @@
  ***************************************************************************/
 
 void
+field_part_assert_equal(const GwyFieldPart *part,
+                        const GwyFieldPart *refpart)
+{
+    g_assert((part && refpart) || (!part && !refpart));
+    if (part) {
+        g_assert_cmpuint(part->col, ==, refpart->col);
+        g_assert_cmpuint(part->row, ==, refpart->row);
+        g_assert_cmpuint(part->width, ==, refpart->width);
+        g_assert_cmpuint(part->height, ==, refpart->height);
+    }
+}
+
+void
 test_field_part_boxed(void)
 {
     GwyFieldPart fpart = { 1, 2, 3, 4 };
     GwyFieldPart *copy = serialize_boxed_and_back(&fpart,
                                                   GWY_TYPE_FIELD_PART);
-    g_assert_cmpfloat(fpart.col, ==, copy->col);
-    g_assert_cmpfloat(fpart.row, ==, copy->row);
-    g_assert_cmpfloat(fpart.width, ==, copy->width);
-    g_assert_cmpfloat(fpart.height, ==, copy->height);
+    field_part_assert_equal(copy, &fpart);
     g_boxed_free(GWY_TYPE_FIELD_PART, copy);
 }
 

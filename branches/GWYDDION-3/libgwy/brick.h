@@ -85,7 +85,8 @@ void            gwy_brick_set_size    (GwyBrick *brick,
                                        guint yres,
                                        guint zres,
                                        gboolean clear);
-void            gwy_brick_data_changed(GwyBrick *brick);
+void            gwy_brick_data_changed(GwyBrick *brick,
+                                       GwyBrickPart *bpart);
 void            gwy_brick_copy        (const GwyBrick *src,
                                        const GwyBrickPart *srcpart,
                                        GwyBrick *dest,

@@ -214,16 +214,23 @@ gwy_brick_class_init(GwyBrickClass *klass)
     /**
      * GwyBrick::data-changed:
      * @gwybrick: The #GwyBrick which received the signal.
+     * @arg1: (allow-none):
+     *        Part of @gwybrick that has changed.
+     *        It may be %NULL, meaning the entire brick.
      *
-     * The ::data-changed signal is emitted whenever brick data changes.
+     * The ::data-changed signal is emitted when brick data changes.
+     * More precisely, #GwyBrick itself never emits this signal.  You can emit
+     * it explicitly with gwy_brick_data_changed() to notify anything that
+     * displays (or otherwise uses) the brick.
      **/
     brick_signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
+                                     g_cclosure_marshal_VOID__BOXED,
+                                     G_TYPE_NONE, 1,
+                                     GWY_TYPE_BRICK_PART);
 }
 
 static void
@@ -734,7 +741,7 @@ gwy_brick_new_alike(const GwyBrick *model,
  * gwy_brick_new_part:
  * @brick: A two-dimensional data brick.
  * @bpart: (allow-none):
- *             Area in @brick to extract to the new brick.  Passing %NULL
+ *             Part of @brick to extract to the new brick.  Passing %NULL
  *             creates an identical copy of @brick, similarly to
  *             gwy_brick_duplicate() (though with @keep_offsets set to %FALSE
  *             the offsets are reset).
@@ -744,7 +751,7 @@ gwy_brick_new_alike(const GwyBrick *model,
  *
  * Creates a new two-dimensional brick as a rectangular part of another brick.
  *
- * The rectangle specified by @bpart must be entirely contained in @brick.
+ * The box specified by @bpart must be entirely contained in @brick.
  * Both dimensions must be non-zero.
  *
  * Data are physically copied, i.e. changing the new brick data does not change
@@ -851,14 +858,18 @@ gwy_brick_set_size(GwyBrick *brick,
 /**
  * gwy_brick_data_changed:
  * @brick: A two-dimensional data brick.
+ * @bpart: (allow-none):
+ *         Part of @brick that has changed.  Passing %NULL means the entire
+ *         brick.
  *
  * Emits signal GwyBrick::data-changed on a brick.
  **/
 void
-gwy_brick_data_changed(GwyBrick *brick)
+gwy_brick_data_changed(GwyBrick *brick,
+                       GwyBrickPart *bpart)
 {
     g_return_if_fail(GWY_IS_BRICK(brick));
-    g_signal_emit(brick, brick_signals[DATA_CHANGED], 0);
+    g_signal_emit(brick, brick_signals[DATA_CHANGED], 0, bpart);
 }
 
 /**

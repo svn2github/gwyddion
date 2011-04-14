@@ -26,17 +26,27 @@
  ***************************************************************************/
 
 void
+brick_part_assert_equal(const GwyBrickPart *part,
+                        const GwyBrickPart *refpart)
+{
+    g_assert((part && refpart) || (!part && !refpart));
+    if (part) {
+        g_assert_cmpuint(part->col, ==, refpart->col);
+        g_assert_cmpuint(part->row, ==, refpart->row);
+        g_assert_cmpuint(part->level, ==, refpart->level);
+        g_assert_cmpuint(part->width, ==, refpart->width);
+        g_assert_cmpuint(part->height, ==, refpart->height);
+        g_assert_cmpuint(part->depth, ==, refpart->depth);
+    }
+}
+
+void
 test_brick_part_boxed(void)
 {
     GwyBrickPart bpart = { 1, 2, 3, 4, 5, 6 };
     GwyBrickPart *copy = serialize_boxed_and_back(&bpart,
                                                   GWY_TYPE_BRICK_PART);
-    g_assert_cmpfloat(bpart.col, ==, copy->col);
-    g_assert_cmpfloat(bpart.row, ==, copy->row);
-    g_assert_cmpfloat(bpart.level, ==, copy->level);
-    g_assert_cmpfloat(bpart.width, ==, copy->width);
-    g_assert_cmpfloat(bpart.height, ==, copy->height);
-    g_assert_cmpfloat(bpart.depth, ==, copy->depth);
+    brick_part_assert_equal(copy, &bpart);
     g_boxed_free(GWY_TYPE_BRICK_PART, copy);
 }
 
