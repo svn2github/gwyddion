@@ -534,7 +534,7 @@ gwy_mask_line_set_size(GwyMaskLine *line,
 /**
  * gwy_mask_line_data_changed:
  * @line: A one-dimensional mask line.
- * @fpart: (allow-none):
+ * @lpart: (allow-none):
  *         Segment in @line that has changed.  Passing %NULL means the entire
  *         mask line.
  *

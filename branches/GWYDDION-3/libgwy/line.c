@@ -680,7 +680,7 @@ gwy_line_set_size(GwyLine *line,
 /**
  * gwy_line_data_changed:
  * @line: A one-dimensional data line.
- * @fpart: (allow-none):
+ * @lpart: (allow-none):
  *         Segment in @line that has changed.  Passing %NULL means the entire
  *         line.
  *
