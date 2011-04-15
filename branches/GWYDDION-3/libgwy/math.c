@@ -290,6 +290,29 @@ gwy_overlapping(guint pos1, guint len1,
 }
 
 /**
+ * gwy_math_intersecting:
+ * @a: First interval left endpoint.
+ * @b: First interval right endpoint.
+ * @A: Second interval left endpoint.
+ * @B: Second interval right endpoint.
+ *
+ * Checks whether two intervals intersect.
+ *
+ * Intervals are considered to be closed, i.e. if they intersect only in an
+ * endpoint this function returns %TRUE.  This makes it useful also for
+ * zero-length intervals.
+ *
+ * Returns: %TRUE if the two intervals intersect, %FALSE if they are
+ *          separate.
+ **/
+gboolean
+gwy_math_intersecting(gdouble a, gdouble b,
+                      gdouble A, gdouble B)
+{
+    return (a < A) ? b >= A : a <= B;
+}
+
+/**
  * gwy_math_curvature:
  * @coeffs: (array fixed-size=6):
  *          Array of the six polynomial coefficients of a quadratic surface in

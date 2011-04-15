@@ -50,6 +50,10 @@ gboolean gwy_overlapping          (guint pos1,
                                    guint len1,
                                    guint pos2,
                                    guint len2)            G_GNUC_CONST;
+gboolean gwy_math_intersecting    (gdouble a,
+                                   gdouble b,
+                                   gdouble A,
+                                   gdouble B)             G_GNUC_CONST;
 guint    gwy_math_curvature       (const gdouble *coeffs,
                                    gdouble *kappa1,
                                    gdouble *kappa2,

@@ -8,6 +8,8 @@ str/isident/utf8
 pack
 math/powi/actual
 math/powi/our
+math/overlapping
+math/intersecting
 math/sort
 math/median
 math/cholesky

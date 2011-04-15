@@ -60,4 +60,38 @@ test_math_powi_our(void)
     }
 }
 
+void
+test_math_overlapping(void)
+{
+    g_assert(gwy_overlapping(0, 1, 0, 1));
+    g_assert(gwy_overlapping(1, 1, 0, 2));
+    g_assert(gwy_overlapping(0, 3, 1, 1));
+    g_assert(gwy_overlapping(1, 2, 0, 2));
+    g_assert(!gwy_overlapping(1, 1, 0, 1));
+    g_assert(!gwy_overlapping(0, 1, 1, 1));
+    g_assert(!gwy_overlapping(2, 1, 0, 2));
+    g_assert(!gwy_overlapping(0, 2, 0, 0));
+    g_assert(!gwy_overlapping(0, 2, 1, 0));
+    g_assert(!gwy_overlapping(0, 2, 2, 0));
+}
+
+void
+test_math_intersecting(void)
+{
+    g_assert(gwy_math_intersecting(0.0, 1.0, 0.0, 1.0));
+    g_assert(gwy_math_intersecting(0.0, 1.0, 1.0, 2.0));
+    g_assert(gwy_math_intersecting(1.0, 2.0, 0.0, 1.0));
+    g_assert(gwy_math_intersecting(0.0, 1.0, 0.0, 0.0));
+    g_assert(gwy_math_intersecting(0.0, 1.0, 0.5, 0.5));
+    g_assert(gwy_math_intersecting(0.0, 1.0, 1.0, 1.0));
+    g_assert(gwy_math_intersecting(0.0, 0.0, 0.0, 1.0));
+    g_assert(gwy_math_intersecting(0.5, 0.5, 0.0, 1.0));
+    g_assert(gwy_math_intersecting(1.0, 1.0, 0.0, 1.0));
+    g_assert(gwy_math_intersecting(0.0, 1.0, -HUGE_VAL, 1.0));
+    g_assert(gwy_math_intersecting(0.0, 1.0, 0.0, HUGE_VAL));
+    g_assert(gwy_math_intersecting(0.0, 1.0, -HUGE_VAL, HUGE_VAL));
+    g_assert(!gwy_math_intersecting(0.0, 1.0 - 1e-16, 1.0 + 1e-16, 2.0));
+    g_assert(!gwy_math_intersecting(1.0 + 1e-16, 2.0, 0.0, 1.0 - 1e-16));
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
