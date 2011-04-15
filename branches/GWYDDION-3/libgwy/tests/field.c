@@ -3530,10 +3530,49 @@ test_field_distributions_slope_simple_oblique(void)
 
     line_assert_numerically_equal(cdist, ddist, 1e-14);
 
-    // FIXME: The expected values are bit hard to calculate.
+    // FIXME: The expected values are a bit hard to calculate.
 
     g_object_unref(cdist);
     g_object_unref(ddist);
+    g_object_unref(field);
+}
+
+void
+test_field_distributions_slope_nonsquare(void)
+{
+    guint res = 2;
+    gdouble aspect = 2.0;
+    gdouble expected_max = 4/hypot(1.0, aspect);
+    GwyField *field = gwy_field_new_sized(res, res, TRUE);
+    field->data[res*res - 1] = 1.0;
+
+    GwyLine *dist_wide, *dist_tall;
+    gdouble integral;
+
+    gwy_field_set_xreal(field, aspect);
+    gwy_field_set_yreal(field, 1.0);
+    dist_wide = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                     atan(1.0/aspect), FALSE, FALSE, 0,
+                                     0.0, 0.0);
+    integral = gwy_line_sum_full(dist_wide) * gwy_line_dx(dist_wide);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(dist_wide->off), <=, 1e-14);
+    g_assert_cmpfloat(fabs(dist_wide->real - expected_max), <=, 1e-14);
+
+    gwy_field_set_xreal(field, 1.0);
+    gwy_field_set_yreal(field, aspect);
+    dist_tall = gwy_field_slope_dist(field, NULL, NULL, GWY_MASK_IGNORE,
+                                     atan(aspect), FALSE, FALSE, 0,
+                                     0.0, 0.0);
+    integral = gwy_line_sum_full(dist_tall) * gwy_line_dx(dist_tall);
+    g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(dist_tall->off), <=, 1e-14);
+    g_assert_cmpfloat(fabs(dist_tall->real - expected_max), <=, 1e-14);
+
+    line_assert_numerically_equal(dist_wide, dist_tall, 1e-14);
+
+    g_object_unref(dist_tall);
+    g_object_unref(dist_wide);
     g_object_unref(field);
 }
 

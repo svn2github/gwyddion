@@ -176,6 +176,7 @@ field/distributions/psdf/masked
 field/distributions/slope/simple-x
 field/distributions/slope/simple-y
 field/distributions/slope/simple-oblique
+field/distributions/slope/nonsquare
 surface/serialize
 surface/props
 surface/data-changed

@@ -322,8 +322,8 @@ slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @angle: Direction in which to compute the derivatives.  Zero corresponds to
  *         positive row direction, π/2 corresponds to positive column
- *         direction, etc.  The angle is pixel-wise; this is important if
- *         horizontal and vertical pixel sizes differ.
+ *         direction, etc.  The angle is measured in the real space, not
+ *         pixel-wise; this is important in case of non-square pixels.
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
  * @continuous: %TRUE to calculate the distribution of linearly interpolated
