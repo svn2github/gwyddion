@@ -36,17 +36,18 @@ typedef struct {
     guint n_in_range;     // Number of quarter-pixels within range.
     gboolean analyse : 1;
     gboolean count : 1;
+    gdouble min;
+    gdouble max;
+    GwyLine *dist;
+    // Slope-only
     gdouble dx;
     gdouble dy;
     gdouble cos_alpha;
     gdouble sin_alpha;
-    gdouble min;
-    gdouble max;
-    GwyLine *dist;
-} SlopeDistributionData;
+} DistributionData;
 
 static void
-sanitize_range(gdouble *min,
+sanitise_range(gdouble *min,
                gdouble *max)
 {
     if (*max > *min)
@@ -61,6 +62,212 @@ sanitize_range(gdouble *min,
     *max = 1.0;
 }
 
+static void
+value_dist_cont1(gdouble z1, gdouble z2, gdouble z3,
+                 guint w,
+                 DistributionData *ddata)
+{
+    if (z1 > z2)
+        GWY_SWAP(gdouble, z1, z2);
+    if (z2 > z3) {
+        GWY_SWAP(gdouble, z2, z3);
+        if (z1 > z2)
+            GWY_SWAP(gdouble, z1, z2);
+    }
+
+    if (ddata->analyse) {
+        if (z1 < ddata->min)
+            ddata->min = z1;
+        if (z3 > ddata->max)
+            ddata->max = z3;
+        ddata->n_in_range += w;
+        ddata->n += w;
+    }
+    else if (ddata->count) {
+        // FIXME: We could estimate how much of the contribution actually falls
+        // within the range not just whether anything falls there at all.
+        if (gwy_math_intersecting(z1, z3, ddata->min, ddata->max))
+            ddata->n_in_range += w;
+        ddata->n += w;
+    }
+    else
+        gwy_line_add_dist_trapezoidal(ddata->dist, z1, z2, z2, z3, w);
+}
+
+static void
+value_dist_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                guint w1, guint w2, guint w3, guint w4,
+                gpointer user_data)
+{
+    DistributionData *ddata = (DistributionData*)user_data;
+
+    gdouble zc = 0.25*(z1 + z2 + z3 + z4);
+
+    if (w1 || w2) {
+        gdouble z12 = 0.5*(z1 + z2);
+        value_dist_cont1(w1 ? z1 : z12, w2 ? z2 : z12, zc, w1 + w2, ddata);
+    }
+    if (w2 || w3) {
+        gdouble z23 = 0.5*(z2 + z3);
+        value_dist_cont1(w2 ? z2 : z23, w3 ? z3 : z23, zc, w2 + w3, ddata);
+    }
+    if (w3 || w4) {
+        gdouble z34 = 0.5*(z3 + z4);
+        value_dist_cont1(w3 ? z3 : z34, w4 ? z4 : z34, zc, w3 + w4, ddata);
+    }
+    if (w4 || w1) {
+        gdouble z41 = 0.5*(z4 + z1);
+        value_dist_cont1(w4 ? z4 : z41, w1 ? z1 : z41, zc, w4 + w1, ddata);
+    }
+}
+
+static void
+field_value_dist_cont(const GwyField *field,
+                      const GwyFieldPart *fpart,
+                      const GwyMaskField *mask,
+                      GwyMaskingType masking,
+                      guint npoints,
+                      DistributionData *ddata)
+{
+    // Run analyse (find range and count) or count (count in range).  If both
+    // is given by caller, this serves as a somewhat inefficient masked pixel
+    // counting method.
+    gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
+                               value_dist_cont, &ddata);
+
+    if (!npoints)
+        npoints = gwy_round(3.49*cbrt(ddata->n_in_range/4.0));
+    if (!npoints)
+        return;
+
+    sanitise_range(&ddata->min, &ddata->max);
+
+    ddata->dist = gwy_line_new_sized(npoints, TRUE);
+    ddata->dist->off = ddata->min;
+    ddata->dist->real = ddata->max - ddata->min;
+
+    ddata->analyse = ddata->count = FALSE;
+    gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
+                               value_dist_cont, &ddata);
+}
+
+static void
+value_dist_discr_analyse(const GwyField *field,
+                         const GwyFieldPart *fpart,
+                         const GwyMaskField *mask,
+                         GwyMaskingType masking,
+                         guint maskcol, guint maskrow,
+                         guint width, guint height,
+                         DistributionData *ddata)
+{
+    guint n;
+
+    if (ddata->analyse) {
+        GwyFieldPart rect = { maskcol, maskrow, width, height };
+
+        if (masking == GWY_MASK_INCLUDE)
+            n = gwy_mask_field_part_count(mask, &rect, TRUE);
+        else if (masking == GWY_MASK_EXCLUDE)
+            n = gwy_mask_field_part_count(mask, &rect, FALSE);
+        else
+            n = width*height;
+
+        gwy_field_min_max(field, fpart, mask, masking,
+                          &ddata->min, &ddata->max);
+        ddata->n_in_range = ddata->n = n;
+    }
+    else {
+        guint nabove, nbelow;
+        n = gwy_field_count_above_below(field, fpart, mask, masking,
+                                        ddata->max, ddata->min, TRUE,
+                                        &nabove, &nbelow);
+        ddata->n = n;
+        ddata->n_in_range = n - (nabove + nbelow);
+    }
+}
+
+static void
+value_dist_discr_process(const GwyField *field,
+                         const GwyMaskField *mask,
+                         GwyMaskingType masking,
+                         guint col, guint row,
+                         guint width, guint height,
+                         guint maskcol, guint maskrow,
+                         DistributionData *ddata)
+{
+    GwyLine *line = ddata->dist;
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble min = ddata->min, max = ddata->max;
+    guint npoints = line->res;
+    gdouble q = (max - min)*npoints;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            for (guint j = width; j; j--, d++) {
+                guint k = (guint)((*d - min)/q);
+                // Fix rounding errors.
+                if (G_UNLIKELY(k >= npoints))
+                    line->data[npoints-1] += 1;
+                else
+                    line->data[k] += 1;
+            }
+        }
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    guint k = (guint)((*d - min)/q);
+                    // Fix rounding errors.
+                    if (G_UNLIKELY(k >= npoints))
+                        line->data[npoints-1] += 1;
+                    else
+                        line->data[k] += 1;
+                }
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+}
+
+static void
+field_value_dist_discr(const GwyField *field,
+                       const GwyFieldPart *fpart,
+                       const GwyMaskField *mask,
+                       GwyMaskingType masking,
+                       guint npoints,
+                       DistributionData *ddata)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow))
+        return;
+
+    value_dist_discr_analyse(field, fpart, mask, masking,
+                             maskcol, maskrow, width, height,
+                             ddata);
+
+    if (!npoints)
+        npoints = gwy_round(3.49*cbrt(ddata->n_in_range));
+    if (!npoints)
+        return;
+
+    sanitise_range(&ddata->min, &ddata->max);
+
+    ddata->dist = gwy_line_new_sized(npoints, TRUE);
+    ddata->dist->off = ddata->min;
+    ddata->dist->real = ddata->max - ddata->min;
+
+    value_dist_discr_process(field, mask, masking,
+                             col, row, width, height, maskcol, maskrow,
+                             ddata);
+}
+
 /**
  * gwy_field_value_dist:
  * @field: A two-dimensional data field.
@@ -71,6 +278,9 @@ sanitize_range(gdouble *min,
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
+ * @continuous: %TRUE to calculate the distribution of triangularly
+ *              interpolated surface, %FALSE to calculate plain histogram of
+ *              discrete values.
  * @npoints: Distribution resolution, i.e. the number of histogram bins.
  *           Pass zero to choose a suitable resolution automatically.
  * @min: Minimum value of the range to calculate the distribution in.
@@ -89,94 +299,40 @@ gwy_field_value_dist(const GwyField *field,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
                      gboolean cumulative,
+                     gboolean continuous,
                      guint npoints,
                      gdouble min, gdouble max)
 {
-    guint col, row, width, height, maskcol, maskrow;
-    GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
-        goto fail;
+    gboolean explicit_range = min < max;
+    if (cumulative && explicit_range)
+        g_warning("Implement me: Zooming of cumulative distributions is not "
+                  "possible, need to calculate the integral from -infinity.");
 
-    guint n;
-    if (min < max) {
-        // We know the range but have to figure out how many pixels we have.
-        guint nabove, nbelow;
-        n = gwy_field_count_above_below(field, fpart, mask, masking,
-                                        max, min, TRUE, &nabove, &nbelow);
-        n -= nabove + nbelow;
-    }
-    else {
-        // We know the number of pixels but have to figure out the range.
-        GwyFieldPart rect = { maskcol, maskrow, width, height };
-        if (masking == GWY_MASK_INCLUDE)
-            n = gwy_mask_field_part_count(mask, &rect, TRUE);
-        else if (masking == GWY_MASK_EXCLUDE)
-            n = gwy_mask_field_part_count(mask, &rect, FALSE);
+    DistributionData ddata = {
+        0, 0,
+        !explicit_range, TRUE,
+        explicit_range ? min : G_MAXDOUBLE,
+        explicit_range ? max : -G_MAXDOUBLE,
+        NULL,
+        NAN, NAN, NAN, NAN,    // Make any (mis)use of these evident.
+    };
+
+    if (continuous)
+        field_value_dist_cont(field, fpart, mask, masking, npoints, &ddata);
+    else
+        field_value_dist_discr(field, fpart, mask, masking, npoints, &ddata);
+
+    GwyLine *line = ddata.dist;
+
+    if (line) {
+        if (cumulative) {
+            gwy_line_accumulate(line, TRUE);
+            gwy_line_multiply(line, 1.0/ddata.n);
+        }
         else
-            n = width*height;
-
-        gwy_field_min_max(field, fpart, mask, masking, &min, &max);
-        sanitize_range(&min, &max);
-    }
-    if (!npoints) {
-        npoints = gwy_round(3.49*cbrt(n));
-        npoints = MAX(npoints, 1);
-    }
-    line = gwy_line_new_sized(npoints, TRUE);
-    if (!n)
-        goto fail;
-
-    const gdouble *base = field->data + row*field->xres + col;
-    gdouble q = (max - min)*npoints;
-    guint ndata = 0;
-
-    if (masking == GWY_MASK_IGNORE) {
-        for (guint i = 0; i < height; i++) {
-            const gdouble *d = base + i*field->xres;
-            for (guint j = width; j; j--, d++) {
-                guint k = (guint)((*d - min)/q);
-                // Fix rounding errors.
-                if (G_UNLIKELY(k >= npoints))
-                    line->data[npoints-1] += 1;
-                else
-                    line->data[k] += 1;
-            }
-        }
-        ndata = width*height;
-    }
-    else {
-        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        for (guint i = 0; i < height; i++) {
-            const gdouble *d = base + i*field->xres;
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-            for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_iter_get(iter) == invert) {
-                    guint k = (guint)((*d - min)/q);
-                    // Fix rounding errors.
-                    if (G_UNLIKELY(k >= npoints))
-                        line->data[npoints-1] += 1;
-                    else
-                        line->data[k] += 1;
-                    ndata++;
-                }
-                gwy_mask_iter_next(iter);
-            }
-        }
-    }
-
-    line->off = min;
-    line->real = max - min;
-    if (cumulative) {
-        gwy_line_accumulate(line, TRUE);
-        gwy_line_multiply(line, 1.0/line->data[npoints-1]);
+            gwy_line_multiply(line, 1.0/(gwy_line_dx(line)*ddata.n));
     }
     else
-        gwy_line_multiply(line, npoints/(max - min)/ndata);
-
-fail:
-    if (!line)
         line = gwy_line_new();
 
     gwy_unit_assign(gwy_line_get_unit_x(line), gwy_field_get_unit_z(field));
@@ -190,7 +346,7 @@ fail:
 static void
 slope_dist_cont1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
                  gdouble w,
-                 SlopeDistributionData *ddata)
+                 DistributionData *ddata)
 {
     gdouble c0 = (z2 - z1)*ddata->cos_alpha/ddata->dx,
             c1 = (z3 - z4)*ddata->cos_alpha/ddata->dx,
@@ -228,8 +384,7 @@ slope_dist_cont1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     else if (ddata->count) {
         // FIXME: We could estimate how much of the contribution actually falls
         // within the range not just whether anything falls there at all.
-        if (MAX(v4, ddata->max) - MIN(v1, ddata->min)
-            < v4 - v1 + ddata->max - ddata->min)
+        if (gwy_math_intersecting(v1, v4, ddata->min, ddata->max))
             ddata->n_in_range += w;
         ddata->n += w;
     }
@@ -242,7 +397,7 @@ slope_dist_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
                 guint w1, guint w2, guint w3, guint w4,
                 gpointer user_data)
 {
-    SlopeDistributionData *ddata = (SlopeDistributionData*)user_data;
+    DistributionData *ddata = (DistributionData*)user_data;
 
     // If entire area is covered we can process it at once.
     if (w1 && w2 && w3 && w4) {
@@ -268,7 +423,7 @@ slope_dist_cont(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
 static void
 slope_dist_discr1(gdouble v,
                   gdouble w,
-                  SlopeDistributionData *ddata)
+                  DistributionData *ddata)
 {
     if (ddata->analyse) {
         if (v < ddata->min)
@@ -279,8 +434,7 @@ slope_dist_discr1(gdouble v,
         ddata->n += w;
     }
     else if (ddata->count) {
-        if (MAX(v, ddata->max) - MIN(v, ddata->min)
-            < v - v + ddata->max - ddata->min)
+        if (v >= ddata->min && v <= ddata->max)
             ddata->n_in_range += w;
         ddata->n += w;
     }
@@ -293,7 +447,7 @@ slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
                  guint w1, guint w2, guint w3, guint w4,
                  gpointer user_data)
 {
-    SlopeDistributionData *ddata = (SlopeDistributionData*)user_data;
+    DistributionData *ddata = (DistributionData*)user_data;
 
     gdouble c0 = (z2 - z1)*ddata->cos_alpha/ddata->dx,
             c1 = (z3 - z4)*ddata->cos_alpha/ddata->dx,
@@ -326,8 +480,9 @@ slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  *         pixel-wise; this is important in case of non-square pixels.
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
- * @continuous: %TRUE to calculate the distribution of linearly interpolated
- *              surface, %FALSE to use plain histogram of discrete values.
+ * @continuous: %TRUE to calculate the distribution of linearly
+ *              interpolated surface, %FALSE to calculate plain histogram of
+ *              discrete values.
  * @npoints: Distribution resolution, i.e. the number of histogram bins.
  *           Pass zero to choose a suitable resolution automatically.
  * @min: Minimum value of the range to calculate the distribution in.
@@ -360,16 +515,22 @@ gwy_field_slope_dist(const GwyField *field,
                                &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
+    gboolean explicit_range = min < max;
+    if (cumulative && explicit_range)
+        g_warning("Implement me: Zooming of cumulative distributions is not "
+                  "possible, need to calculate the integral from -infinity.");
+
     GwyFieldQuartersFunc func;
     func = continuous ? slope_dist_cont : slope_dist_discr;
 
-    SlopeDistributionData ddata = {
+    DistributionData ddata = {
         0, 0,
-        min >= max, TRUE,
+        !explicit_range, TRUE,
+        explicit_range ? min : G_MAXDOUBLE,
+        explicit_range ? max : -G_MAXDOUBLE,
+        NULL,
         gwy_field_dx(field), gwy_field_dy(field),
         cos(angle), sin(angle),
-        G_MAXDOUBLE, -G_MAXDOUBLE,
-        NULL,
     };
 
     // Run analyse (find range and count) or count (count in range).  If both
@@ -383,13 +544,9 @@ gwy_field_slope_dist(const GwyField *field,
     if (!npoints)
         goto fail;
 
-    if (min < max) {
-        ddata.min = min;
-        ddata.max = max;
-    }
+    sanitise_range(&ddata.min, &ddata.max);
 
     line = ddata.dist = gwy_line_new_sized(npoints, TRUE);
-    sanitize_range(&ddata.min, &ddata.max);
     line->off = ddata.min;
     line->real = ddata.max - ddata.min;
 

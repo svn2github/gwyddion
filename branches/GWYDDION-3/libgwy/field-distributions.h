@@ -37,6 +37,7 @@ GwyLine* gwy_field_value_dist(const GwyField *field,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
                               gboolean cumulative,
+                              gboolean continuous,
                               guint npoints,
                               gdouble min,
                               gdouble max)                   G_GNUC_MALLOC;

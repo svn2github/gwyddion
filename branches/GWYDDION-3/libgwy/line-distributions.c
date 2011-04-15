@@ -27,7 +27,7 @@
  * @unbiased: %TRUE to perform a transformation of a distribution to
  *            cumulative, %FALSE to simply sum the preceeding elements.
  *
- * Transforms a distribution in a line to cumulative distribution.
+ * Transforms a density in a line to cumulative distribution.
  *
  * If @unbiased is %FALSE each element becomes the sum of all previous elements
  * in the line, including self.  The first element is kept intact. This is
@@ -67,7 +67,7 @@ gwy_line_accumulate(GwyLine *line,
  * @unbiased: %TRUE to perform a transformation of a cumulative distribution to
  *            non-cumulative, %FALSE to simply subtract the following elements.
  *
- * Transforms a cumulative distribution in a line to distribution.
+ * Transforms a cumulative distribution in a line to density.
  *
  * This method performs the exact inverse of gwy_line_accumulate() provided
  * that the transformation is of the same type, i.e. the same value of
@@ -365,7 +365,7 @@ gwy_line_add_dist_trapezoidal(GwyLine *line,
     }
 
     // If @to > @from at least one of the subintervals must be also non-zero.
-    gdouble w = weight/(to + mid2 - mid1 - from);
+    gdouble w = weight/((to - from) + (mid2 - mid1));
     if (mid1 > from)
         gwy_line_add_dist_left_triangular(line, from, mid1, w*(mid1 - from));
     if (mid2 > mid1)
