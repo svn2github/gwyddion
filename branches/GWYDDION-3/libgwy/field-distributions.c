@@ -38,6 +38,7 @@ typedef struct {
     gboolean count : 1;
     gdouble min;
     gdouble max;
+    gdouble left_sum;     // Starting value for cumulative distributions.
     GwyLine *dist;
     // Slope-only
     gdouble dx;
@@ -91,7 +92,8 @@ value_dist_cont1(gdouble z1, gdouble z2, gdouble z3,
         ddata->n += w;
     }
     else
-        gwy_line_add_dist_trapezoidal(ddata->dist, z1, z2, z2, z3, w);
+        ddata->left_sum += gwy_line_add_dist_trapezoidal(ddata->dist,
+                                                         z1, z2, z2, z3, w);
 }
 
 static void
@@ -205,12 +207,16 @@ value_dist_discr_process(const GwyField *field,
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             for (guint j = width; j; j--, d++) {
-                guint k = (guint)((*d - min)/q);
-                // Fix rounding errors.
-                if (G_UNLIKELY(k >= npoints))
-                    line->data[npoints-1] += 1;
-                else
-                    line->data[k] += 1;
+                if (*d < min)
+                    ddata->left_sum++;
+                else if (*d <= max) {
+                    guint k = (guint)((*d - min)/q);
+                    // Fix rounding errors.
+                    if (G_UNLIKELY(k >= npoints))
+                        line->data[npoints-1] += 1;
+                    else
+                        line->data[k] += 1;
+                }
             }
         }
     }
@@ -222,12 +228,16 @@ value_dist_discr_process(const GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert) {
-                    guint k = (guint)((*d - min)/q);
-                    // Fix rounding errors.
-                    if (G_UNLIKELY(k >= npoints))
-                        line->data[npoints-1] += 1;
-                    else
-                        line->data[k] += 1;
+                    if (*d < min)
+                        ddata->left_sum++;
+                    else if (*d <= max) {
+                        guint k = (guint)((*d - min)/q);
+                        // Fix rounding errors.
+                        if (G_UNLIKELY(k >= npoints))
+                            line->data[npoints-1] += 1;
+                        else
+                            line->data[k] += 1;
+                    }
                 }
                 gwy_mask_iter_next(iter);
             }
@@ -304,16 +314,12 @@ gwy_field_value_dist(const GwyField *field,
                      gdouble min, gdouble max)
 {
     gboolean explicit_range = min < max;
-    if (cumulative && explicit_range)
-        g_warning("Implement me: Zooming of cumulative distributions is not "
-                  "possible, need to calculate the integral from -infinity.");
-
     DistributionData ddata = {
         0, 0,
         !explicit_range, TRUE,
         explicit_range ? min : G_MAXDOUBLE,
         explicit_range ? max : -G_MAXDOUBLE,
-        NULL,
+        0.0, NULL,
         NAN, NAN, NAN, NAN,    // Make any (mis)use of these evident.
     };
 
@@ -327,6 +333,7 @@ gwy_field_value_dist(const GwyField *field,
     if (line) {
         if (cumulative) {
             gwy_line_accumulate(line, TRUE);
+            gwy_line_add(line, ddata.left_sum);
             gwy_line_multiply(line, 1.0/ddata.n);
         }
         else
@@ -389,7 +396,8 @@ slope_dist_cont1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
         ddata->n += w;
     }
     else
-        gwy_line_add_dist_trapezoidal(ddata->dist, v1, v2, v3, v4, w);
+        ddata->left_sum += gwy_line_add_dist_trapezoidal(ddata->dist,
+                                                         v1, v2, v3, v4, w);
 }
 
 static void
@@ -439,7 +447,7 @@ slope_dist_discr1(gdouble v,
         ddata->n += w;
     }
     else
-        gwy_line_add_dist_delta(ddata->dist, v, w);
+        ddata->left_sum += gwy_line_add_dist_delta(ddata->dist, v, w);
 }
 
 static void
@@ -516,10 +524,6 @@ gwy_field_slope_dist(const GwyField *field,
         goto fail;
 
     gboolean explicit_range = min < max;
-    if (cumulative && explicit_range)
-        g_warning("Implement me: Zooming of cumulative distributions is not "
-                  "possible, need to calculate the integral from -infinity.");
-
     GwyFieldQuartersFunc func;
     func = continuous ? slope_dist_cont : slope_dist_discr;
 
@@ -528,7 +532,7 @@ gwy_field_slope_dist(const GwyField *field,
         !explicit_range, TRUE,
         explicit_range ? min : G_MAXDOUBLE,
         explicit_range ? max : -G_MAXDOUBLE,
-        NULL,
+        0.0, NULL,
         gwy_field_dx(field), gwy_field_dy(field),
         cos(angle), sin(angle),
     };
@@ -556,6 +560,7 @@ gwy_field_slope_dist(const GwyField *field,
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);
+        gwy_line_add(line, ddata.left_sum);
         gwy_line_multiply(line, 1.0/ddata.n);
     }
     else
