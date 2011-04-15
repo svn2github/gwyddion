@@ -23,6 +23,7 @@ public_headers = \
 	$(srcdir)/brick.h \
 	$(srcdir)/brick-arithmetic.h \
 	$(srcdir)/brick-part.h \
+	$(srcdir)/brick-statistics.h \
 	$(srcdir)/container.h \
 	$(srcdir)/curve.h \
 	$(srcdir)/curve-statistics.h \
@@ -115,6 +116,7 @@ libgwy3_la_SOURCES = \
 	brick.c \
 	brick-arithmetic.c \
 	brick-part.c \
+	brick-statistics.c \
 	container.c \
 	curve.c \
 	curve-statistics.c \

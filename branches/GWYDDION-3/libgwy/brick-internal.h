@@ -22,6 +22,7 @@
 #ifndef __LIBGWY_BRICK_INTERNAL_H__
 #define __LIBGWY_BRICK_INTERNAL_H__
 
+#include "libgwy/line-part.h"
 #include "libgwy/field-part.h"
 #include "libgwy/brick.h"
 

@@ -24,6 +24,7 @@
 #include <libgwy/brick.h>
 #include <libgwy/brick-arithmetic.h>
 #include <libgwy/brick-part.h>
+#include <libgwy/brick-statistics.h>
 #include <libgwy/container.h>
 #include <libgwy/curve.h>
 #include <libgwy/curve-statistics.h>
