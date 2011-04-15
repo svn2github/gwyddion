@@ -111,21 +111,26 @@ gwy_line_distribute(GwyLine *line,
  * The added contribution is uniform in [@from, @to] with integral equal to
  * @weight.  If part of the contribution lies outside the line range the
  * corresponding part of the weight will not be added to @line.
+ *
+ * Returns: The weight that fell left of @line.  This is namely useful to
+ *          get cumulative distributions in a subinterval right.
  **/
-void
+gdouble
 gwy_line_add_dist_uniform(GwyLine *line,
                           gdouble from, gdouble to,
                           gdouble weight)
 {
-    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
 
     guint n = line->res;
     gdouble binsize = line->real/n,
             binfrom = (from - line->off)/binsize,
             binto = (to - line->off)/binsize;
 
-    if (binfrom > n || binto < 0.0)
-        return;
+    if (binfrom > n)
+        return 0.0;
+    if (binto < 0.0)
+        return weight;
 
     gboolean leftext = binfrom < 0.0, rightext = binto >= n;
     guint ifrom = leftext ? 0 : floor(binfrom);
@@ -138,7 +143,7 @@ gwy_line_add_dist_uniform(GwyLine *line,
         if (!rightext && ito == ifrom) {
             // Entire distribution is contained in bin @i.
             line->data[ifrom] += weight;
-            return;
+            return 0.0;
         }
         // Distribution starts in bin @i.
         gdouble xlen = ((i + 1.0)*binsize + line->off - from)/len;
@@ -159,6 +164,12 @@ gwy_line_add_dist_uniform(GwyLine *line,
         gdouble xlen = (to - i*binsize - line->off)/len;
         line->data[i] += weight*xlen;
     }
+
+    if (!leftext)
+        return 0.0;
+
+    gdouble xlen = (line->off - from)/len;
+    return weight*xlen;
 }
 
 /**
@@ -178,21 +189,26 @@ gwy_line_add_dist_uniform(GwyLine *line,
  * maximum in @to and integral equal to @weight.  If part of the contribution
  * lies outside the line range the corresponding part of the weight will not be
  * added to @line.
+ *
+ * Returns: The weight that fell left of @line.  This is namely useful to
+ *          get cumulative distributions in a subinterval right.
  **/
-void
+gdouble
 gwy_line_add_dist_left_triangular(GwyLine *line,
                                   gdouble from, gdouble to,
                                   gdouble weight)
 {
-    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
 
     guint n = line->res;
     gdouble binsize = line->real/n,
             binfrom = (from - line->off)/binsize,
             binto = (to - line->off)/binsize;
 
-    if (binfrom > n || binto < 0.0)
-        return;
+    if (binfrom > n)
+        return 0.0;
+    if (binto < 0.0)
+        return weight;
 
     gboolean leftext = binfrom < 0.0, rightext = binto >= n;
     guint ifrom = leftext ? 0 : floor(binfrom);
@@ -205,7 +221,7 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
         if (!rightext && ito == ifrom) {
             // Entire distribution is contained in bin @i.
             line->data[ifrom] += weight;
-            return;
+            return 0.0;
         }
         // Distribution starts in bin @i.
         gdouble xlen = ((i + 1.0)*binsize + line->off - from)/len;
@@ -226,6 +242,12 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
         gdouble xlen = (to - i*binsize - line->off)/len;
         line->data[i] += weight*(2.0 - xlen)*xlen;
     }
+
+    if (!leftext)
+        return 0.0;
+
+    gdouble xlen = (line->off - from)/len;
+    return weight*xlen*xlen;
 }
 
 /**
@@ -245,21 +267,26 @@ gwy_line_add_dist_left_triangular(GwyLine *line,
  * @from and 0 in @to and integral equal to @weight.  If part of the
  * contribution lies outside the line range the corresponding part of the
  * weight will not be added to @line.
+ *
+ * Returns: The weight that fell left of @line.  This is namely useful to
+ *          get cumulative distributions in a subinterval right.
  **/
-void
+gdouble
 gwy_line_add_dist_right_triangular(GwyLine *line,
                                    gdouble from, gdouble to,
                                    gdouble weight)
 {
-    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
 
     guint n = line->res;
     gdouble binsize = line->real/n,
             binfrom = (from - line->off)/binsize,
             binto = (to - line->off)/binsize;
 
-    if (binfrom > n || binto < 0.0)
-        return;
+    if (binfrom > n)
+        return 0.0;
+    if (binto < 0.0)
+        return weight;
 
     gboolean leftext = binfrom < 0.0, rightext = binto >= n;
     guint ifrom = leftext ? 0 : floor(binfrom);
@@ -272,7 +299,7 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
         if (!rightext && ito == ifrom) {
             // Entire distribution is contained in bin @i.
             line->data[ifrom] += weight;
-            return;
+            return 0.0;
         }
         // Distribution starts in bin @i.
         gdouble xlen = ((i + 1.0)*binsize + line->off - from)/len;
@@ -293,6 +320,12 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
         gdouble xlen = (to - i*binsize - line->off)/len;
         line->data[i] += weight*xlen*xlen;
     }
+
+    if (!leftext)
+        return 0.0;
+
+    gdouble xlen = (line->off - from)/len;
+    return weight*(2.0 - xlen)*xlen;
 }
 
 /**
@@ -308,21 +341,26 @@ gwy_line_add_dist_right_triangular(GwyLine *line,
  * @off+@real.
  *
  * The added contribution is a δ-function at @value.
+ *
+ * Returns: The weight that fell left of @line.  This is namely useful to
+ *          get cumulative distributions in a subinterval right.
  **/
-void
+gdouble
 gwy_line_add_dist_delta(GwyLine *line,
                         gdouble value,
                         gdouble weight)
 {
-    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
 
     guint n = line->res;
     gdouble binsize = line->real/n,
             binvalue = (value - line->off)/binsize;
     guint ivalue;
 
-    if (binvalue > n || binvalue < 0.0)
-        return;
+    if (binvalue > n)
+        return 0.0;
+    if (binvalue < 0.0)
+        return weight;
 
     if (binvalue == n)
         ivalue = n-1;
@@ -330,6 +368,7 @@ gwy_line_add_dist_delta(GwyLine *line,
         ivalue = floor(binvalue);
 
     line->data[ivalue] += weight;
+    return 0.0;
 }
 
 /**
@@ -352,26 +391,30 @@ gwy_line_add_dist_delta(GwyLine *line,
  * in intervals [@from, @mid1] and [@mid2, @to].  If part of the contribution
  * lies outside the line range the corresponding part of the weight will not be
  * added to @line.
+ *
+ * Returns: The weight that fell left of @line.  This is namely useful to
+ *          get cumulative distributions in a subinterval right.
  **/
-void
+gdouble
 gwy_line_add_dist_trapezoidal(GwyLine *line,
                               gdouble from, gdouble mid1,
                               gdouble mid2, gdouble to,
                               gdouble weight)
 {
-    if (to - from < 1e-12*(fabs(from) + fabs(to))) {
-        gwy_line_add_dist_delta(line, 0.5*(from + to), weight);
-        return;
-    }
+    if (to - from < 1e-12*(fabs(from) + fabs(to)))
+        return gwy_line_add_dist_delta(line, 0.5*(from + to), weight);
 
     // If @to > @from at least one of the subintervals must be also non-zero.
     gdouble w = weight/((to - from) + (mid2 - mid1));
+    gdouble lw = 0.0;
     if (mid1 > from)
-        gwy_line_add_dist_left_triangular(line, from, mid1, w*(mid1 - from));
+        lw += gwy_line_add_dist_left_triangular(line, from, mid1, w*(mid1 - from));
     if (mid2 > mid1)
-        gwy_line_add_dist_uniform(line, mid1, mid2, 2.0*w*(mid2 - mid1));
+        lw += gwy_line_add_dist_uniform(line, mid1, mid2, 2.0*w*(mid2 - mid1));
     if (to > mid2)
-        gwy_line_add_dist_right_triangular(line, mid2, to, w*(to - mid2));
+        lw += gwy_line_add_dist_right_triangular(line, mid2, to, w*(to - mid2));
+
+    return lw;
 }
 
 /**

@@ -24,31 +24,31 @@
 
 G_BEGIN_DECLS
 
-void      gwy_line_accumulate               (GwyLine *line,
-                                             gboolean unbiased);
-void      gwy_line_distribute               (GwyLine *line,
-                                             gboolean unbiased);
-void      gwy_line_add_dist_delta           (GwyLine *line,
-                                             gdouble value,
-                                             gdouble weight);
-void      gwy_line_add_dist_uniform         (GwyLine *line,
-                                             gdouble from,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_left_triangular (GwyLine *line,
-                                             gdouble from,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_right_triangular(GwyLine *line,
-                                             gdouble from,
-                                             gdouble to,
-                                             gdouble weight);
-void      gwy_line_add_dist_trapezoidal     (GwyLine *line,
-                                             gdouble from,
-                                             gdouble mid1,
-                                             gdouble mid2,
-                                             gdouble to,
-                                             gdouble weight);
+void    gwy_line_accumulate               (GwyLine *line,
+                                           gboolean unbiased);
+void    gwy_line_distribute               (GwyLine *line,
+                                           gboolean unbiased);
+gdouble gwy_line_add_dist_delta           (GwyLine *line,
+                                           gdouble value,
+                                           gdouble weight);
+gdouble gwy_line_add_dist_uniform         (GwyLine *line,
+                                           gdouble from,
+                                           gdouble to,
+                                           gdouble weight);
+gdouble gwy_line_add_dist_left_triangular (GwyLine *line,
+                                           gdouble from,
+                                           gdouble to,
+                                           gdouble weight);
+gdouble gwy_line_add_dist_right_triangular(GwyLine *line,
+                                           gdouble from,
+                                           gdouble to,
+                                           gdouble weight);
+gdouble gwy_line_add_dist_trapezoidal     (GwyLine *line,
+                                           gdouble from,
+                                           gdouble mid1,
+                                           gdouble mid2,
+                                           gdouble to,
+                                           gdouble weight);
 
 G_END_DECLS
 
