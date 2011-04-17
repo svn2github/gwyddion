@@ -36,6 +36,14 @@ gdouble   gwy_field_get_interpolated    (const GwyField *field,
                                          GwyInterpolationType interpolation,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
+gdouble   gwy_field_get_averaged        (const GwyField *field,
+                                         gint col,
+                                         gint row,
+                                         guint ax,
+                                         guint ay,
+                                         gboolean elliptical,
+                                         GwyExteriorType exterior,
+                                         gdouble fill_value)                  G_GNUC_PURE;
 GwyField* gwy_field_interpolation_coeffs(GwyField *field,
                                          GwyInterpolationType interpolation);
 

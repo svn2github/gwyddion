@@ -158,7 +158,7 @@ gwy_field_get_interpolated(const GwyField *field,
  * If the interpolation has an interpolating basis @field itself is returned,
  * with increased reference count.  Otherwise a new field is created and
  * returned.  This means in both cases you have to release the returned field
- * by g_object_unref().
+ * using g_object_unref().
  *
  * Returns: A field containing interpolation coefficients for @field.
  **/
@@ -174,6 +174,72 @@ gwy_field_interpolation_coeffs(GwyField *field,
                                         result->xres, result->data,
                                         interpolation);
     return result;
+}
+
+/**
+ * gwy_field_get_averaged:
+ * @field: A two-dimensional data field.
+ * @col: Column index.
+ * @row: Row index.
+ * @ax: Horizontal averaging radius (half-axis).
+ * @ay: Vertical averaging radius (half-axis).
+ * @elliptical: %TRUE to process an elliptical area, %FALSE to process its
+ *              bounding rectangle.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ *
+ * Gets a single value in a field with averaging.
+ *
+ * The precise meaning of @ax and @ay is that the elliptical averagning area
+ * consist of pixels with centres lying within the ellpise of half-axes @ax+½
+ * and @ay+½ centered on the (@col,@row) pixel.  Consequently, the rectangular
+ * area has sides 2@ax+1 and 2@ay+1.  Furthermore, passing zero for either
+ * @ax and @ay means no averaging in the corresponding direction.
+ *
+ * Returns: Field value at position (@col,@row), possibly extrapolated and
+ *          averaged.
+ **/
+gdouble
+gwy_field_get_averaged(const GwyField *field,
+                       gint col, gint row,
+                       guint ax, guint ay,
+                       gboolean elliptical,
+                       GwyExteriorType exterior,
+                       gdouble fill_value)
+{
+    if (!ax && !ay)
+        return gwy_field_get(field, col, row, exterior, fill_value);
+
+    g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
+    gdouble s = 0.0;
+    guint n = 0;
+
+    if (elliptical) {
+        // We could use Bresenham but we need to fill the ellipse so it would
+        // complicate things.  One floating point calculation per row is fine.
+        gdouble rx = 0.5*(ax + 1), ry = 0.5*(ay + 1);
+        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+            gdouble eta = (i + 0.5)/ry;
+            gint xlen = gwy_round(rx*(1.0 - sqrt(eta*fmax(2.0 - eta, 0.0))));
+            g_assert(2*(guint)xlen <= 2*ax + 1);
+            for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
+                s += exterior_value(field, j + col, i + row,
+                                    exterior, fill_value);
+                n++;
+            }
+        }
+    }
+    else {
+        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+            for (gint j = -(gint)ax; j <= (gint)ax; j++) {
+                s += exterior_value(field, j + col, i + row,
+                                    exterior, fill_value);
+            }
+        }
+        n = (2*ax + 1)*(2*ay + 1);
+    }
+
+    return s/n;
 }
 
 /**
