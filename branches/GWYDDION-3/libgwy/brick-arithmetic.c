@@ -321,10 +321,13 @@ gwy_brick_extract_plane(const GwyBrick *brick,
                         guint level,
                         gboolean keep_offsets)
 {
+    // TODO: Wrong checking, must use _gwy_field_check_target_part().
     guint fcol, frow, fwidth, fheight, bcol, brow, bwidth, bheight;
-    if (!_gwy_field_check_part(target, fpart, &fcol, &frow, &fwidth, &fheight)
-        || !_gwy_brick_check_plane_part(brick, fpart,
-                                        &bcol, &brow, level, &bwidth, &bheight))
+    if (!_gwy_brick_check_plane_part(brick, fpart,
+                                     &bcol, &brow, level, &bwidth, &bheight)
+        || !_gwy_field_check_target_part(target, fpart,
+                                         brick->xres, brick->yres,
+                                         &fcol, &frow, &fwidth, &fheight))
         return;
 
     // Can happen with NULL @fpart and incompatible objects.
@@ -343,11 +346,14 @@ gwy_brick_extract_plane(const GwyBrick *brick,
             gwy_assign(fbase + i*target->xres, bbase + i*brick->xres, fwidth);
     }
 
-    gwy_field_set_xreal(target, bwidth*gwy_brick_dx(brick));
-    gwy_field_set_yreal(target, bheight*gwy_brick_dy(brick));
+    gwy_field_set_xreal(target, target->xres*gwy_brick_dx(brick));
+    gwy_field_set_yreal(target, target->yres*gwy_brick_dy(brick));
     if (keep_offsets) {
-        gwy_field_set_xoffset(target, brick->xoff + bcol*gwy_brick_dx(brick));
-        gwy_field_set_yoffset(target, brick->yoff + brow*gwy_brick_dy(brick));
+        // XXX: unsigned arithmetic would break if bcol < fcol, brow < frow.
+        gwy_field_set_xoffset(target,
+                              brick->xoff + (bcol - fcol)*gwy_brick_dx(brick));
+        gwy_field_set_yoffset(target,
+                              brick->yoff + (brow - frow)*gwy_brick_dy(brick));
     }
     ASSIGN_UNITS(target->priv->unit_xy, brick->priv->unit_xy);
     ASSIGN_UNITS(target->priv->unit_z, brick->priv->unit_w);
@@ -384,8 +390,8 @@ gwy_brick_extract_line(const GwyBrick *brick,
                        gboolean keep_offsets)
 {
     guint pos, len, level, depth;
-    if (!_gwy_line_check_part(target, lpart, &pos, &len)
-        || !_gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth))
+    if (!_gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth)
+        || !_gwy_line_check_target_part(target, lpart, brick->zres, &pos, &len))
         return;
 
     // Can happen with NULL @lpart and incompatible objects.
@@ -399,9 +405,12 @@ gwy_brick_extract_line(const GwyBrick *brick,
     for (guint i = 0; i < len; i++)
         lbase[i] = bbase[i*stride];
 
-    gwy_line_set_real(target, depth*gwy_brick_dz(brick));
-    if (keep_offsets)
-        gwy_line_set_offset(target, brick->zoff + level*gwy_brick_dz(brick));
+    gwy_line_set_real(target, target->res*gwy_brick_dz(brick));
+    if (keep_offsets) {
+        // XXX: unsigned arithmetic would break if level < pos.
+        gwy_line_set_offset(target,
+                            brick->zoff + (level - pos)*gwy_brick_dz(brick));
+    }
     ASSIGN_UNITS(target->priv->unit_x, brick->priv->unit_z);
     ASSIGN_UNITS(target->priv->unit_y, brick->priv->unit_w);
     //gwy_line_invalidate(target);

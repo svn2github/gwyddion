@@ -1093,6 +1093,50 @@ _gwy_field_check_part(const GwyField *field,
 }
 
 gboolean
+_gwy_field_check_target_part(const GwyField *field,
+                             const GwyFieldPart *fpart,
+                             guint width_full, guint height_full,
+                             guint *col, guint *row,
+                             guint *width, guint *height)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
+    if (fpart) {
+        if (!fpart->width || !fpart->height)
+            return FALSE;
+
+        if (fpart->width == field->xres && fpart->height == field->yres) {
+            // The part dimensions may correspond to the entire target field.
+            // @fpart->col, @fpart->row are then not relevant for the target.
+            *col = *row = 0;
+            *width = fpart->width;
+            *height = fpart->height;
+        }
+        else {
+            // The two separate conditions are to catch integer overflows.
+            g_return_val_if_fail(fpart->col < field->xres, FALSE);
+            g_return_val_if_fail(fpart->width <= field->xres - fpart->col,
+                                 FALSE);
+            g_return_val_if_fail(fpart->row < field->yres, FALSE);
+            g_return_val_if_fail(fpart->height <= field->yres - fpart->row,
+                                 FALSE);
+            *col = fpart->col;
+            *row = fpart->row;
+            *width = fpart->width;
+            *height = fpart->height;
+        }
+    }
+    else {
+        g_return_val_if_fail(field->xres == width_full, FALSE);
+        g_return_val_if_fail(field->yres == height_full, FALSE);
+        *col = *row = 0;
+        *width = field->xres;
+        *height = field->yres;
+    }
+
+    return TRUE;
+}
+
+gboolean
 _gwy_field_limit_parts(const GwyField *src,
                        const GwyFieldPart *srcpart,
                        const GwyField *dest,

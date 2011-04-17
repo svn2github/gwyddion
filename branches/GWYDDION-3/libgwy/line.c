@@ -523,11 +523,46 @@ _gwy_line_check_part(const GwyLine *line,
 }
 
 gboolean
+_gwy_line_check_target_part(const GwyLine *line,
+                            const GwyLinePart *lpart,
+                            guint len_full,
+                            guint *pos, guint *len)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
+    if (lpart) {
+        if (!lpart->len)
+            return FALSE;
+
+        if (lpart->len == line->res) {
+            // The part lenght may correspond to the entire target line.
+            // @lpart->pos is then not relevant for the target.
+            *pos = 0;
+            *len = lpart->len;
+        }
+        else {
+            // The two separate conditions are to catch integer overflows.
+            g_return_val_if_fail(lpart->pos < line->res, FALSE);
+            g_return_val_if_fail(lpart->len <= line->res - lpart->pos,
+                                 FALSE);
+            *pos = lpart->pos;
+            *len = lpart->len;
+        }
+    }
+    else {
+        g_return_val_if_fail(line->res == len_full, FALSE);
+        *pos = 0;
+        *len = line->res;
+    }
+
+    return TRUE;
+}
+
+gboolean
 _gwy_line_limit_parts(const GwyLine *src,
-                       const GwyLinePart *srcpart,
-                       const GwyLine *dest,
-                       guint destpos,
-                       guint *pos, guint *len)
+                      const GwyLinePart *srcpart,
+                      const GwyLine *dest,
+                      guint destpos,
+                      guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_LINE(src), FALSE);
     g_return_val_if_fail(GWY_IS_LINE(dest), FALSE);

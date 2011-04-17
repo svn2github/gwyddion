@@ -1232,7 +1232,7 @@ _gwy_brick_check_line_part(const GwyBrick *brick,
                            guint *level, guint *depth)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
-    g_return_val_if_fail(col < brick->zres, FALSE);
+    g_return_val_if_fail(col < brick->xres, FALSE);
     g_return_val_if_fail(row < brick->yres, FALSE);
     if (lpart) {
         if (!lpart->len)

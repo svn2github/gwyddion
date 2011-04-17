@@ -195,6 +195,10 @@ brick/new-part
 brick/compatibility/res
 brick/compatibility/real
 brick/compatibility/units
+brick/summarize/lines/minimum
+brick/summarize/lines/maximum
+brick/summarize/lines/mean
+brick/summarize/lines/rms
 container/data
 container/refcount
 container/keys

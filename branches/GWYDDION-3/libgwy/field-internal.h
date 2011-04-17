@@ -82,6 +82,16 @@ gboolean _gwy_field_check_part(const GwyField *field,
                                guint *height);
 
 G_GNUC_INTERNAL
+gboolean _gwy_field_check_target_part(const GwyField *field,
+                                      const GwyFieldPart *fpart,
+                                      guint width_full,
+                                      guint height_full,
+                                      guint *col,
+                                      guint *row,
+                                      guint *width,
+                                      guint *height);
+
+G_GNUC_INTERNAL
 gboolean _gwy_field_limit_parts(const GwyField *src,
                                 const GwyFieldPart *srcpart,
                                 const GwyField *dest,

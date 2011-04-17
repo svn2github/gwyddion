@@ -120,14 +120,14 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
             for (guint i = 0; i < height; i++) {
                 const gdouble *b = bbase + (l*brick->yres + i)*brick->xres;
                 const gdouble *f = fbase + i*target->xres;
-                gdouble *t = target->data + i*width;
+                gdouble *t = tmp->data + i*width;
                 for (guint j = width; j; j--, b++, f++, t++) {
                     *t += (*b - *f)*(*b - *f);
                 }
             }
         }
         for (guint i = 0; i < height; i++) {
-            const gdouble *t = target->data + i*width;
+            const gdouble *t = tmp->data + i*width;
             gdouble *f = fbase + i*target->xres;
             for (guint j = width; j; j--, f++, t++)
                 *f = sqrt(*t/depth);

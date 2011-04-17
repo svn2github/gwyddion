@@ -42,6 +42,13 @@ gboolean _gwy_line_check_part(const GwyLine *line,
                               guint *len);
 
 G_GNUC_INTERNAL
+gboolean _gwy_line_check_target_part(const GwyLine *line,
+                                     const GwyLinePart *lpart,
+                                     guint len_full,
+                                     guint *pos,
+                                     guint *len);
+
+G_GNUC_INTERNAL
 gboolean _gwy_line_limit_parts(const GwyLine *src,
                                const GwyLinePart *srcpart,
                                const GwyLine *dest,

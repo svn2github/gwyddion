@@ -897,4 +897,102 @@ test_brick_compatibility_units(void)
     g_object_unref(brick4);
 }
 
+static void
+summarize_lines_one(GwyBrickLineSummary quantity,
+                    gdouble (*line_stat_function)(const GwyLine *line))
+{
+    enum { max_size = 19 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 100 : 30;
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/2);
+        guint zres = g_rand_int_range(rng, 2, max_size/2);
+        GwyBrick *brick = gwy_brick_new_sized(xres, yres, zres, FALSE);
+        brick_randomize(brick, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint depth = g_rand_int_range(rng, 2, zres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint level = g_rand_int_range(rng, 0, zres-depth+1);
+        GwyBrickPart bpart = { col, row, level, width, height, depth };
+        GwyField *fullfield = gwy_field_new_sized(width, height, FALSE);
+        GwyField *partfield = gwy_field_new_sized(xres, yres, TRUE);
+
+        gwy_brick_summarize_lines(brick, &bpart, fullfield, quantity);
+        gwy_brick_summarize_lines(brick, &bpart, partfield, quantity);
+
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                if (i < row || i >= row + height
+                    || j < col || j > col + width)
+                    g_assert_cmpfloat(partfield->data[i*xres + j], ==, 0.0);
+            }
+        }
+
+        GwyLine *line = gwy_line_new_sized(depth, FALSE);
+        GwyLinePart lpart = { level, depth };
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                gdouble vfull = fullfield->data[i*width + j],
+                        vpart = partfield->data[(i + row)*xres + (j + col)];
+                g_assert_cmpfloat(vpart, ==, vfull);
+                gwy_brick_extract_line(brick, line, &lpart,
+                                       j + col, i + row, FALSE);
+                gdouble vline = line_stat_function(line);
+                g_assert_cmpfloat(fabs(vfull - vline), <, 1e-14);
+            }
+        }
+
+        g_object_unref(line);
+        g_object_unref(brick);
+        g_object_unref(partfield);
+        g_object_unref(fullfield);
+    }
+    g_rand_free(rng);
+}
+
+static gdouble
+line_min(const GwyLine *line)
+{
+    gdouble min, max;
+    gwy_line_min_max_full(line, &min, &max);
+    return min;
+}
+
+static gdouble
+line_max(const GwyLine *line)
+{
+    gdouble min, max;
+    gwy_line_min_max_full(line, &min, &max);
+    return max;
+}
+
+void
+test_brick_summarize_lines_minimum(void)
+{
+    summarize_lines_one(GWY_BRICK_LINE_MINIMUM, &line_min);
+}
+
+void
+test_brick_summarize_lines_maximum(void)
+{
+    summarize_lines_one(GWY_BRICK_LINE_MAXIMUM, &line_max);
+}
+
+void
+test_brick_summarize_lines_mean(void)
+{
+    summarize_lines_one(GWY_BRICK_LINE_MEAN, &gwy_line_mean_full);
+}
+
+void
+test_brick_summarize_lines_rms(void)
+{
+    summarize_lines_one(GWY_BRICK_LINE_RMS, &gwy_line_rms_full);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
