@@ -355,6 +355,10 @@ gwy_brick_extract_plane(const GwyBrick *brick,
         gwy_field_set_yoffset(target,
                               brick->yoff + (brow - frow)*gwy_brick_dy(brick));
     }
+    else {
+        gwy_field_set_xoffset(target, 0.0);
+        gwy_field_set_yoffset(target, 0.0);
+    }
     ASSIGN_UNITS(target->priv->unit_xy, brick->priv->unit_xy);
     ASSIGN_UNITS(target->priv->unit_z, brick->priv->unit_w);
     gwy_field_invalidate(target);
@@ -410,6 +414,9 @@ gwy_brick_extract_line(const GwyBrick *brick,
         // XXX: unsigned arithmetic would break if level < pos.
         gwy_line_set_offset(target,
                             brick->zoff + (level - pos)*gwy_brick_dz(brick));
+    }
+    else {
+        gwy_line_set_offset(target, 0.0);
     }
     ASSIGN_UNITS(target->priv->unit_x, brick->priv->unit_z);
     ASSIGN_UNITS(target->priv->unit_y, brick->priv->unit_w);
