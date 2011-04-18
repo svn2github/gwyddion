@@ -87,6 +87,7 @@
     <xi:include href="xml/brick-part.xml"/>
     <xi:include href="xml/brick.xml"/>
     <xi:include href="xml/brick-arithmetic.xml"/>
+    <xi:include href="xml/brick-statistics.xml"/>
   </chapter>
   <chapter id='libgwy-data-containers'>
     <title>Data Containers</title>
