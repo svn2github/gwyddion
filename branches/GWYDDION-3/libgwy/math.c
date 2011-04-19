@@ -271,6 +271,64 @@ gwy_powi(double x, int i)
 }
 
 /**
+ * gwy_power_sum:
+ * @n: Number of terms in the sum.
+ * @p: Power.
+ *
+ * Sums first N integers raised to speficied power.
+ *
+ * The function calculates the sum of @x<superscript>@p</superscript> for
+ * integral @x from 1 to @n.  If you want to sum from 0 then add 1 if @p is 0.
+ *
+ * The sum is calculate using and explicite formula, implemented only for
+ * a limited set of powers @p, at present up to 11.
+ *
+ * Returns: Sum of first @n integers raised to power @p.
+ **/
+gdouble
+gwy_power_sum(guint n,
+              guint p)
+{
+    gdouble x = n;
+
+    if (p % 2 == 0) {
+        // This is the only place where summing from 0 or from 1 matters.
+        if (p == 0)
+            return n;
+        if (p == 2)
+            return ((2*x + 3)*x + 1)*x/6;
+
+        gdouble y = x*x;
+        if (p == 4)
+            return (((6*x + 15)*x + 10)*y - 1)*x/30;
+        if (p == 6)
+            return ((((6*x + 21)*x + 21)*y - 7)*y + 1)*x/42;
+        if (p == 8)
+            return (((((10*x + 45)*x + 60)*y - 42)*y + 20)*y - 3)*x/90;
+        if (p == 10)
+            return ((((((6*x + 33)*x + 55)*y - 66)*y + 66)*y - 33)*y + 5)*x/66;
+    }
+    else {
+        gdouble a = x*(x + 1)/2;
+        if (p == 1)
+            return a;
+        if (p == 3)
+            return a*a;
+        if (p == 5)
+            return (4*a - 1)*a*a/3;
+        if (p == 7)
+            return ((12*a - 8)*a + 2)*a*a/6;
+        if (p == 9)
+            return (((16*a - 20)*a + 12)*a - 3)*a*a/5;
+        if (p == 11)
+            return ((((32*a - 64)*a + 68)*a - 40)*a + 10)*a*a/6;
+    }
+
+    g_critical("Power %u is too high.  Implement me!", p);
+    return 1.0;
+}
+
+/**
  * gwy_overlapping:
  * @pos1: First segment start.
  * @len1: First segment length.

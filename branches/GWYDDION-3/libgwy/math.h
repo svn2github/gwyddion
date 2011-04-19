@@ -46,6 +46,8 @@ double gwy_powi(double x, int i) G_GNUC_CONST;
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
+gdouble  gwy_power_sum            (guint n,
+                                   guint p)               G_GNUC_CONST;
 gboolean gwy_overlapping          (guint pos1,
                                    guint len1,
                                    guint pos2,
