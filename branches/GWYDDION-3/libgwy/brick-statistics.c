@@ -27,21 +27,17 @@
 #include "libgwy/brick-internal.h"
 
 /**
- * gwy_brick_extract_plane:
+ * gwy_brick_summarize_lines:
  * @brick: A data brick.
+ * @bpart: (allow-none):
+ *         Part of @brick to summarize.  Passing %NULL means the entire brick.
  * @target: A two-dimensional data field where the result will be placed.
- *          Its dimensions may match either @brick planes or @fpart.  In the
- *          former case the placement of result is determined by @fpart; in the
+ *          Its dimensions may match either @brick planes or @bpart.  In the
+ *          former case the placement of result is determined by @bpart; in the
  *          latter case the result fills the entire @target.
- * @fpart: (allow-none):
- *         Area in the @brick plane to extract to the field.  Passing %NULL
- *         extracts the full plane.
- * @level: Level index in @brick.
- * @keep_offsets: %TRUE to set the X and Y offsets of the field
- *                using @fpart and @brick offsets.  %FALSE to set offsets
- *                of the field to zeroes.
+ * @quantity: The summary characteristics to calculate for each line.
  *
- * Extracts a brick plane to a field.
+ * Characterises each line in a brick with a statistical quantity.
  **/
 void
 gwy_brick_summarize_lines(const GwyBrick *brick,
