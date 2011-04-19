@@ -25,18 +25,18 @@
 
 G_BEGIN_DECLS
 
-gdouble   gwy_field_get                 (const GwyField *field,
+gdouble   gwy_field_read                (const GwyField *field,
                                          gint col,
                                          gint row,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
-gdouble   gwy_field_get_interpolated    (const GwyField *field,
+gdouble   gwy_field_read_interpolated   (const GwyField *field,
                                          gdouble x,
                                          gdouble y,
                                          GwyInterpolationType interpolation,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
-gdouble   gwy_field_get_averaged        (const GwyField *field,
+gdouble   gwy_field_read_averaged       (const GwyField *field,
                                          gint col,
                                          gint row,
                                          guint ax,
@@ -44,6 +44,17 @@ gdouble   gwy_field_get_averaged        (const GwyField *field,
                                          gboolean elliptical,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
+void      gwy_field_read_slope          (const GwyField *field,
+                                         gint col,
+                                         gint row,
+                                         guint ax,
+                                         guint ay,
+                                         gboolean elliptical,
+                                         GwyExteriorType exterior,
+                                         gdouble fill_value,
+                                         gdouble *a,
+                                         gdouble *bx,
+                                         gdouble *by);
 GwyField* gwy_field_interpolation_coeffs(GwyField *field,
                                          GwyInterpolationType interpolation);
 
