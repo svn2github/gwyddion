@@ -10,6 +10,7 @@ math/powi/actual
 math/powi/our
 math/overlapping
 math/intersecting
+math/power_sum
 math/sort
 math/median
 math/cholesky

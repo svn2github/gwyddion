@@ -94,4 +94,23 @@ test_math_intersecting(void)
     g_assert(!gwy_math_intersecting(1.0 + 1e-16, 2.0, 0.0, 1.0 - 1e-16));
 }
 
+void
+test_math_power_sum(void)
+{
+    for (guint p = 0; p <= 11; p++) {
+        for (guint n = 0; n <= p+2; n++) {
+            gdouble expected_sum = 0.0;
+
+            for (guint i = 1; i <= n; i++)
+                expected_sum += gwy_powi(i, p);
+
+            gdouble sum = gwy_power_sum(n, p);
+
+            g_assert_cmpfloat(fabs(sum - expected_sum),
+                              <=,
+                              1e-14*(fabs(sum) + fabs(expected_sum)));
+        }
+    }
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
