@@ -385,7 +385,30 @@ gwy_field_curvature(const GwyField *field,
         sy4 = (2*ax + 1)*2*gwy_power_sum(ay, 4);
     }
 
-    // TODO
+    gdouble coeffs[6];
+
+    gdouble alpha = sx4*sx4 - sx2y2*sx2y2,
+            betax = sx2y2*sy2 - sx2*sy4,
+            betay = sx2y2*sx2 - sx4*sy2,
+            delta = sx2*sy2 - sx2y2;
+
+    gdouble D = alpha + sx2*betax + sy2*betay,
+            Da = sz*alpha + sxxz*betax + syyz*betay,
+            Dxx = sxxz*(sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
+            Dyy = sxxz*delta + syyz*(sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
+
+    // TODO: Handle degenerate cases: sx2 == 0, sy2 == 0, sx2sy2 == 0 and D == 0
+    coeffs[0] = Da/D;         // 1
+    coeffs[1] = sxz/sx2;      // x
+    coeffs[2] = syz/sy2;      // y
+    coeffs[3] = Dxx/D;        // x²
+    coeffs[4] = sxyz/sx2y2;   // xy
+    coeffs[5] = Dyy/D;        // y²
+    // TODO: Transform to coordinates with the same aspect ratio as physical
+    // but with lateral dimensions ≈ 1 – see Gwyddion 2.x.
+    // TODO: Calculate the curvature using gwy_math_curvature().
+    // TODO: Transform the curvature parameters to physical units.
+    // TODO: Set the results
 }
 
 /**
