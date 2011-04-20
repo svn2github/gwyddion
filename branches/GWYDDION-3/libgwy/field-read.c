@@ -63,14 +63,14 @@ exterior_value(const GwyField *field,
 }
 
 /**
- * gwy_field_read:
+ * gwy_field_value:
  * @field: A two-dimensional data field.
  * @col: Column index.
  * @row: Row index.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
- * Gets a single value in a field.
+ * Reads a single value in a field.
  *
  * The indices @col and @row may correspond to a position outside the field
  * data.  In such case the value is determined by the specified exterior type.
@@ -82,17 +82,17 @@ exterior_value(const GwyField *field,
  * Returns: Field value at position (@col,@row), possibly extrapolated.
  **/
 gdouble
-gwy_field_read(const GwyField *field,
-               gint col, gint row,
-               GwyExteriorType exterior,
-               gdouble fill_value)
+gwy_field_value(const GwyField *field,
+                gint col, gint row,
+                GwyExteriorType exterior,
+                gdouble fill_value)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
     return exterior_value(field, col, row, exterior, fill_value);
 }
 
 /**
- * gwy_field_read_interpolated:
+ * gwy_field_value_interpolated:
  * @field: A two-dimensional data field containing interpolation coefficients.
  * @x: Horizontal coordinate, pixel-centered.  This means @x=0.5 corresponds to
  *     @col=0 in gwy_field_read().
@@ -107,7 +107,7 @@ gwy_field_read(const GwyField *field,
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
- * Gets a single value in a field with interpolation.
+ * Reads a single value in a field with interpolation.
  *
  * The coordinates @x and @y may correspond to a position outside the field
  * data.  In such case the value is determined by the specified exterior type
@@ -119,11 +119,11 @@ gwy_field_read(const GwyField *field,
  *          extrapolated.
  **/
 gdouble
-gwy_field_read_interpolated(const GwyField *field,
-                            gdouble x, gdouble y,
-                            GwyInterpolationType interpolation,
-                            GwyExteriorType exterior,
-                            gdouble fill_value)
+gwy_field_value_interpolated(const GwyField *field,
+                             gdouble x, gdouble y,
+                             GwyInterpolationType interpolation,
+                             GwyExteriorType exterior,
+                             gdouble fill_value)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
 
@@ -149,7 +149,7 @@ gwy_field_read_interpolated(const GwyField *field,
 }
 
 /**
- * gwy_field_read_averaged:
+ * gwy_field_value_averaged:
  * @field: A two-dimensional data field.
  * @col: Column index.
  * @row: Row index.
@@ -160,9 +160,9 @@ gwy_field_read_interpolated(const GwyField *field,
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
- * Gets a single value in a field with averaging.
+ * Reads a single value in a field with averaging.
  *
- * The precise meaning of @ax and @ay is that the elliptical averagning area
+ * The precise meaning of @ax and @ay is that the elliptical averaging area
  * consist of pixels with centres lying within the ellpise of half-axes @ax+½
  * and @ay+½ centered on the (@col,@row) pixel.  Consequently, the rectangular
  * area has sides 2@ax+1 and 2@ay+1.  Furthermore, passing zero for either
@@ -172,7 +172,7 @@ gwy_field_read_interpolated(const GwyField *field,
  *          averaged.
  **/
 gdouble
-gwy_field_read_averaged(const GwyField *field,
+gwy_field_value_averaged(const GwyField *field,
                         gint col, gint row,
                         guint ax, guint ay,
                         gboolean elliptical,
@@ -180,7 +180,7 @@ gwy_field_read_averaged(const GwyField *field,
                         gdouble fill_value)
 {
     if (!ax && !ay)
-        return gwy_field_read(field, col, row, exterior, fill_value);
+        return gwy_field_value(field, col, row, exterior, fill_value);
 
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
     gdouble sz = 0.0;
@@ -215,7 +215,7 @@ gwy_field_read_averaged(const GwyField *field,
 }
 
 /**
- * gwy_field_read_slope:
+ * gwy_field_slope:
  * @field: A two-dimensional data field.
  * @col: Column index.
  * @row: Row index.
@@ -225,24 +225,31 @@ gwy_field_read_averaged(const GwyField *field,
  *              bounding rectangle.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ * @a: (out) (allow-none):
+ *     Location to store the local mean value to.
+ * @bx: (out) (allow-none):
+ *      Location to store the horizontal gradient to.
+ * @by: (out) (allow-none):
+ *      Location to store the vertical gradient to.
  *
- * Gets a single value in a field with averaging.
+ * Calculates local slope in a field.
  *
- * The precise meaning of @ax and @ay is that the elliptical averagning area
- * consist of pixels with centres lying within the ellpise of half-axes @ax+½
- * and @ay+½ centered on the (@col,@row) pixel.  Consequently, the rectangular
- * area has sides 2@ax+1 and 2@ay+1.  Furthermore, passing zero for either
- * @ax and @ay means no averaging in the corresponding direction.
+ * The calculated gradients are in physical units, i.e. they represent changes
+ * per one lateral unit, not per pixel.
+ *
+ * See gwy_field_value_averaged() for description of the neighbourhood shape
+ * and size.  The slope in the direction of zero averaging radius is
+ * identically zero.
  **/
 void
-gwy_field_read_slope(const GwyField *field,
-                     gint col, gint row,
-                     guint ax, guint ay,
-                     gboolean elliptical,
-                     GwyExteriorType exterior,
-                     gdouble fill_value,
-                     gdouble *a,
-                     gdouble *bx, gdouble *by)
+gwy_field_slope(const GwyField *field,
+                gint col, gint row,
+                guint ax, guint ay,
+                gboolean elliptical,
+                GwyExteriorType exterior,
+                gdouble fill_value,
+                gdouble *a,
+                gdouble *bx, gdouble *by)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sx2 = 0.0, sy2 = 0.0;
@@ -285,8 +292,100 @@ gwy_field_read_slope(const GwyField *field,
     }
 
     GWY_MAYBE_SET(a, sz/n);
-    GWY_MAYBE_SET(bx, ax ? sxz/sx2 : 0.0);
-    GWY_MAYBE_SET(by, ay ? syz/sy2 : 0.0);
+    GWY_MAYBE_SET(bx, ax ? sxz/sx2/gwy_field_dx(field) : 0.0);
+    GWY_MAYBE_SET(by, ay ? syz/sy2/gwy_field_dy(field) : 0.0);
+}
+
+/**
+ * gwy_field_curvature:
+ * @field: A two-dimensional data field.
+ * @col: Column index.
+ * @row: Row index.
+ * @ax: Horizontal averaging radius (half-axis).
+ * @ay: Vertical averaging radius (half-axis).
+ * @elliptical: %TRUE to process an elliptical area, %FALSE to process its
+ *              bounding rectangle.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ *
+ * Calculates local curvature in a field.
+ *
+ * This makes sense only if the field values are the same physical quantity
+ * as the lateral dimensions.
+ *
+ * All calculated curvatures are in physical units.  See gwy_math_curvature()
+ * for handling of degenerate cases; the antural centre is at physical
+ * coordinates corresponding to (@col+½,@row+½) in this case.
+ *
+ * See gwy_field_value_averaged() for description of the neighbourhood shape
+ * and size.  The curvature in the direction of zero averaging radius is
+ * identically zero.
+ **/
+void
+gwy_field_curvature(const GwyField *field,
+                    gint col, gint row,
+                    guint ax, guint ay,
+                    gboolean elliptical,
+                    GwyExteriorType exterior,
+                    gdouble fill_value,
+                    gdouble *kappa1, gdouble *kappa2,
+                    gdouble *phi1, gdouble *phi2,
+                    gdouble *xc, gdouble *yc, gdouble *zc)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sxxz = 0.0, sxyz = 0.0, syyz = 0.0,
+            sx2 = 0.0, sy2 = 0.0, sx4 = 0.0, sx2y2 = 0.0, sy4 = 0.0;
+    guint n = 0;
+
+    if (elliptical) {
+        // We could use Bresenham but we need to fill the ellipse so it would
+        // complicate things.  One floating point calculation per row is fine.
+        gdouble rx = 0.5*(ax + 1), ry = 0.5*(ay + 1);
+        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+            gdouble eta = (i + 0.5)/ry;
+            gint xlen = gwy_round(rx*(1.0 - sqrt(eta*fmax(2.0 - eta, 0.0))));
+            g_assert(2*(guint)xlen <= 2*ax + 1);
+            for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
+                gdouble z = exterior_value(field, j + col, i + row,
+                                           exterior, fill_value);
+                sz += z;
+                sxz += j*z;
+                syz += i*z;
+                sxxz += j*j*z;
+                sxyz += j*i*z;
+                syyz += i*i*z;
+            }
+            guint d = (2*ax + 1) - 2*xlen;
+            n += d;
+            sx2 += 2*gwy_power_sum(ax - xlen, 2);
+            sy2 += d*i*i;
+            sx4 += 2*gwy_power_sum(ax - xlen, 4);
+            sx2y2 = 2*i*i*gwy_power_sum(ax - xlen, 2);
+            sy4 += d*i*i*i*i;
+        }
+    }
+    else {
+        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+            for (gint j = -(gint)ax; j <= (gint)ax; j++) {
+                gdouble z = exterior_value(field, j + col, i + row,
+                                           exterior, fill_value);
+                sz += z;
+                sxz += j*z;
+                syz += i*z;
+                sxxz += j*j*z;
+                sxyz += j*i*z;
+                syyz += i*i*z;
+            }
+        }
+        n = (2*ax + 1)*(2*ay + 1);
+        sx2 = (2*ay + 1)*2*gwy_power_sum(ax, 2);
+        sy2 = (2*ax + 1)*2*gwy_power_sum(ay, 2);
+        sx4 = (2*ay + 1)*2*gwy_power_sum(ax, 4);
+        sx2y2 = 4*gwy_power_sum(ax, 2)*gwy_power_sum(ay, 2);
+        sy4 = (2*ax + 1)*2*gwy_power_sum(ay, 4);
+    }
+
+    // TODO
 }
 
 /**

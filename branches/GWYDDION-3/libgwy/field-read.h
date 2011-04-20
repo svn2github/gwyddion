@@ -17,26 +17,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_FIELD_READING_H__
-#define __LIBGWY_FIELD_READING_H__
+#ifndef __LIBGWY_FIELD_READ_H__
+#define __LIBGWY_FIELD_READ_H__
 
 #include <libgwy/field.h>
 #include <libgwy/interpolation.h>
 
 G_BEGIN_DECLS
 
-gdouble   gwy_field_read                (const GwyField *field,
+gdouble   gwy_field_value               (const GwyField *field,
                                          gint col,
                                          gint row,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
-gdouble   gwy_field_read_interpolated   (const GwyField *field,
+gdouble   gwy_field_value_interpolated  (const GwyField *field,
                                          gdouble x,
                                          gdouble y,
                                          GwyInterpolationType interpolation,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
-gdouble   gwy_field_read_averaged       (const GwyField *field,
+gdouble   gwy_field_value_averaged      (const GwyField *field,
                                          gint col,
                                          gint row,
                                          guint ax,
@@ -44,7 +44,7 @@ gdouble   gwy_field_read_averaged       (const GwyField *field,
                                          gboolean elliptical,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
-void      gwy_field_read_slope          (const GwyField *field,
+void      gwy_field_slope               (const GwyField *field,
                                          gint col,
                                          gint row,
                                          guint ax,
@@ -55,6 +55,21 @@ void      gwy_field_read_slope          (const GwyField *field,
                                          gdouble *a,
                                          gdouble *bx,
                                          gdouble *by);
+void      gwy_field_curvature           (const GwyField *field,
+                                         gint col,
+                                         gint row,
+                                         guint ax,
+                                         guint ay,
+                                         gboolean elliptical,
+                                         GwyExteriorType exterior,
+                                         gdouble fill_value,
+                                         gdouble *kappa1,
+                                         gdouble *kappa2,
+                                         gdouble *phi1,
+                                         gdouble *phi2,
+                                         gdouble *xc,
+                                         gdouble *yc,
+                                         gdouble *zc);
 GwyField* gwy_field_interpolation_coeffs(GwyField *field,
                                          GwyInterpolationType interpolation);
 
