@@ -55,7 +55,7 @@ void      gwy_field_slope               (const GwyField *field,
                                          gdouble *a,
                                          gdouble *bx,
                                          gdouble *by);
-void      gwy_field_curvature           (const GwyField *field,
+guint     gwy_field_curvature           (const GwyField *field,
                                          gint col,
                                          gint row,
                                          guint ax,

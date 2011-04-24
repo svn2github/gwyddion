@@ -320,19 +320,21 @@ gwy_field_slope(const GwyField *field,
  * See gwy_field_value_averaged() for description of the neighbourhood shape
  * and size.  The curvature in the direction of zero averaging radius is
  * identically zero.
+ *
+ * Returns: The number of curved dimensions, simiarly to gwy_math_curvature().
  **/
-void
+guint
 gwy_field_curvature(const GwyField *field,
                     gint col, gint row,
                     guint ax, guint ay,
                     gboolean elliptical,
                     GwyExteriorType exterior,
                     gdouble fill_value,
-                    gdouble *kappa1, gdouble *kappa2,
-                    gdouble *phi1, gdouble *phi2,
-                    gdouble *xc, gdouble *yc, gdouble *zc)
+                    gdouble *pkappa1, gdouble *pkappa2,
+                    gdouble *pphi1, gdouble *pphi2,
+                    gdouble *pxc, gdouble *pyc, gdouble *pzc)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0);
     gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sxxz = 0.0, sxyz = 0.0, syyz = 0.0,
             sx2 = 0.0, sy2 = 0.0, sx4 = 0.0, sx2y2 = 0.0, sy4 = 0.0;
     guint n = 0;
@@ -385,30 +387,69 @@ gwy_field_curvature(const GwyField *field,
         sy4 = (2*ax + 1)*2*gwy_power_sum(ay, 4);
     }
 
-    gdouble coeffs[6];
-
-    gdouble alpha = sx4*sx4 - sx2y2*sx2y2,
+    gdouble alpha = sx4*sy4 - sx2y2*sx2y2,
             betax = sx2y2*sy2 - sx2*sy4,
             betay = sx2y2*sx2 - sx4*sy2,
             delta = sx2*sy2 - sx2y2;
 
+    // FIXME: Why n does not appear here?  Some factor missing?
     gdouble D = alpha + sx2*betax + sy2*betay,
             Da = sz*alpha + sxxz*betax + syyz*betay,
             Dxx = sxxz*(sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
             Dyy = sxxz*delta + syyz*(sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
+    // q is used for transformation to coordinates with correct aspect ratio
+    // and pixel area of 1; s is then the remaining scaling factor.
+    gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
+    gdouble s = sqrt(gwy_field_dy(field)*gwy_field_dx(field));
+    gdouble coeffs[6];
 
-    // TODO: Handle degenerate cases: sx2 == 0, sy2 == 0, sx2sy2 == 0 and D == 0
-    coeffs[0] = Da/D;         // 1
-    coeffs[1] = sxz/sx2;      // x
-    coeffs[2] = syz/sy2;      // y
-    coeffs[3] = Dxx/D;        // x²
-    coeffs[4] = sxyz/sx2y2;   // xy
-    coeffs[5] = Dyy/D;        // y²
-    // TODO: Transform to coordinates with the same aspect ratio as physical
-    // but with lateral dimensions ≈ 1 – see Gwyddion 2.x.
-    // TODO: Calculate the curvature using gwy_math_curvature().
-    // TODO: Transform the curvature parameters to physical units.
-    // TODO: Set the results
+    if (ax == 0 && ay == 0) {
+        gwy_clear(coeffs, G_N_ELEMENTS(coeffs));
+        coeffs[0] = sz/n;
+    }
+    else if (ax == 0) {
+        D = n*sy4 - sy2*sy2;
+        coeffs[1] = coeffs[3] = coeffs[4] = 0.0;
+        coeffs[2] = syz/sy2;
+        coeffs[0] = (sz*sy4 - sy2*syyz)/D;
+        coeffs[5] = (n*syyz - sz*sy2)/D;
+    }
+    else if (ay == 0) {
+        D = n*sx4 - sx2*sx2;
+        coeffs[2] = coeffs[4] = coeffs[5] = 0.0;
+        coeffs[1] = sxz/sx2;
+        coeffs[0] = (sz*sx4 - sx2*sxxz)/D;
+        coeffs[3] = (n*sxxz - sz*sx2)/D;
+    }
+    else {
+        coeffs[0] = Da/D;                // 1
+        coeffs[1] = sxz/sx2    * q;      // x
+        coeffs[2] = syz/sy2    / q;      // y
+        coeffs[3] = Dxx/D      * q*q;    // x²
+        coeffs[4] = sxyz/sx2y2;          // xy
+        coeffs[5] = Dyy/D      / (q*q);  // y²
+    }
+
+    gdouble kappa1, kappa2, phi1, phi2, xc, yc, zc;
+    guint ndims = gwy_math_curvature(coeffs,
+                                     &kappa1, &kappa2, &phi1, &phi2,
+                                     &xc, &yc, &zc);
+    // Now the angles and z-values are correct, but curvatures and xy must be
+    // transformed to real physical units.
+    kappa1 /= s*s;
+    kappa2 /= s*s;
+    xc = xc/s + field->xoff + (col + 0.5)*gwy_field_dx(field);
+    yc = yc/s + field->yoff + (row + 0.5)*gwy_field_dy(field);
+
+    GWY_MAYBE_SET(pkappa1, kappa1);
+    GWY_MAYBE_SET(pkappa2, kappa2);
+    GWY_MAYBE_SET(pphi1, phi1);
+    GWY_MAYBE_SET(pphi2, phi2);
+    GWY_MAYBE_SET(pxc, xc);
+    GWY_MAYBE_SET(pyc, yc);
+    GWY_MAYBE_SET(pzc, zc);
+
+    return ndims;
 }
 
 /**
