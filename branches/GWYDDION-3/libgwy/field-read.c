@@ -131,6 +131,8 @@ gwy_field_value_interpolated(const GwyField *field,
     gint sf = -(suplen - 1)/2;
     g_return_val_if_fail(suplen > 0, NAN);
 
+    x -= 0.5;
+    y -= 0.5;
     gint col = (gint)floor(x), row = (gint)floor(y);
     x -= col;
     y -= row;
