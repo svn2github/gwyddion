@@ -189,10 +189,10 @@ gwy_field_value_averaged(const GwyField *field,
     if (elliptical) {
         // We could use Bresenham but we need to fill the ellipse so it would
         // complicate things.  One floating point calculation per row is fine.
-        gdouble rx = 0.5*(ax + 1), ry = 0.5*(ay + 1);
+        gdouble rx = ax + 0.5, ry = ay + 0.5;
         for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            gdouble eta = (i + 0.5)/ry;
-            gint xlen = gwy_round(rx*(1.0 - sqrt(eta*fmax(2.0 - eta, 0.0))));
+            gdouble eta = i/ry;
+            gint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
             g_assert(2*(guint)xlen <= 2*ax + 1);
             for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
                 sz += exterior_value(field, j + col, i + row,
@@ -258,10 +258,10 @@ gwy_field_slope(const GwyField *field,
     if (elliptical) {
         // We could use Bresenham but we need to fill the ellipse so it would
         // complicate things.  One floating point calculation per row is fine.
-        gdouble rx = 0.5*(ax + 1), ry = 0.5*(ay + 1);
+        gdouble rx = ax + 0.5, ry = ay + 0.5;
         for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            gdouble eta = (i + 0.5)/ry;
-            gint xlen = gwy_round(rx*(1.0 - sqrt(eta*fmax(2.0 - eta, 0.0))));
+            gdouble eta = i/ry;
+            gint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
             g_assert(2*(guint)xlen <= 2*ax + 1);
             for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
                 gdouble z = exterior_value(field, j + col, i + row,
@@ -342,10 +342,10 @@ gwy_field_curvature(const GwyField *field,
     if (elliptical) {
         // We could use Bresenham but we need to fill the ellipse so it would
         // complicate things.  One floating point calculation per row is fine.
-        gdouble rx = 0.5*(ax + 1), ry = 0.5*(ay + 1);
+        gdouble rx = ax + 0.5, ry = ay + 0.5;
         for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            gdouble eta = (i + 0.5)/ry;
-            gint xlen = gwy_round(rx*(1.0 - sqrt(eta*fmax(2.0 - eta, 0.0))));
+            gdouble eta = i/ry;
+            gint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
             g_assert(2*(guint)xlen <= 2*ax + 1);
             for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
                 gdouble z = exterior_value(field, j + col, i + row,
