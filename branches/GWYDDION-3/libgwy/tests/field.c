@@ -3576,4 +3576,169 @@ test_field_distributions_slope_nonsquare(void)
     g_object_unref(field);
 }
 
+void
+test_field_read_interpolated(void)
+{
+    enum { max_size = 54, niter = 40, niiter = 10 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        gdouble xreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble yreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble phi = g_rand_double_range(rng, 0.0, 2.0*G_PI);
+        gdouble q = exp(4.0*g_rand_double(rng) - 2.0);
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gwy_field_set_xreal(field, xreal);
+        gwy_field_set_yreal(field, yreal);
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                gdouble z = x*q*cos(phi) + y*q*sin(phi);
+                field->data[i*xres + j] = z;
+            }
+        }
+
+        for (guint iiter = 0; iiter < niiter; iiter++) {
+            guint col = g_rand_int_range(rng, 1, xres-1);
+            guint row = g_rand_int_range(rng, 1, yres-1);
+
+            gdouble zpix = gwy_field_value(field, col, row,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+            gdouble zint = gwy_field_value_interpolated
+                                          (field, col + 0.5, row + 0.5,
+                                           GWY_INTERPOLATION_LINEAR,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+
+            g_assert_cmpfloat(fabs(zint - zpix), <=, 1e-14);
+        }
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_read_averaged(void)
+{
+    enum { max_size = 54, niter = 40, niiter = 10 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        gdouble xreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble yreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble phi = g_rand_double_range(rng, 0.0, 2.0*G_PI);
+        gdouble q = exp(4.0*g_rand_double(rng) - 2.0);
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gwy_field_set_xreal(field, xreal);
+        gwy_field_set_yreal(field, yreal);
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                gdouble z = x*q*cos(phi) + y*q*sin(phi);
+                field->data[i*xres + j] = z;
+            }
+        }
+
+        for (guint iiter = 0; iiter < niiter; iiter++) {
+            guint col = g_rand_int_range(rng, 1, xres-1);
+            guint row = g_rand_int_range(rng, 1, yres-1);
+            guint ax = g_rand_int_range(rng, 0, MIN(col, xres-col));
+            guint ay = g_rand_int_range(rng, 0, MIN(row, yres-row));
+
+            gdouble zpix = gwy_field_value(field, col, row,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+            gdouble zar0 = gwy_field_value_averaged
+                                          (field, col, row, 0, 0, FALSE,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+            gdouble zae0 = gwy_field_value_averaged
+                                          (field, col, row, 0, 0, TRUE,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+            gdouble zar1 = gwy_field_value_averaged
+                                          (field, col, row, ax, ay, FALSE,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+            gdouble zae1 = gwy_field_value_averaged
+                                          (field, col, row, ax, ay, TRUE,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+
+            g_assert_cmpfloat(fabs(zar0 - zpix), <=, 1e-14);
+            g_assert_cmpfloat(fabs(zae0 - zpix), <=, 1e-14);
+            g_assert_cmpfloat(fabs(zar1 - zpix), <=, 1e-14);
+            g_assert_cmpfloat(fabs(zae1 - zpix), <=, 1e-14);
+        }
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_read_slope(void)
+{
+    enum { max_size = 54, niter = 40, niiter = 10 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        gdouble xreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble yreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble phi = g_rand_double_range(rng, 0.0, 2.0*G_PI);
+        gdouble q = exp(4.0*g_rand_double(rng) - 2.0);
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gwy_field_set_xreal(field, xreal);
+        gwy_field_set_yreal(field, yreal);
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                gdouble z = x*q*cos(phi) + y*q*sin(phi);
+                field->data[i*xres + j] = z;
+            }
+        }
+
+        for (guint iiter = 0; iiter < niiter; iiter++) {
+            guint col = g_rand_int_range(rng, 1, xres-1);
+            guint row = g_rand_int_range(rng, 1, yres-1);
+            guint ax = g_rand_int_range(rng, 0, MIN(col, xres-col));
+            guint ay = g_rand_int_range(rng, 0, MIN(row, yres-row));
+
+            gdouble zpix = gwy_field_value(field, col, row,
+                                           GWY_EXTERIOR_BORDER_EXTEND, NAN);
+            gdouble ar, bxr, byr, ae, bxe, bye;
+            gwy_field_slope(field, col, row, ax, ay,
+                            FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                            &ar, &bxr, &byr);
+            gwy_field_slope(field, col, row, ax, ay,
+                            TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                            &ae, &bxe, &bye);
+
+            g_assert_cmpfloat(fabs(ar - zpix), <=, 1e-14);
+            g_assert_cmpfloat(fabs(ae - zpix), <=, 1e-14);
+
+            // TODO: Check the slope too
+        }
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

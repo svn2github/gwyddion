@@ -128,6 +128,9 @@ field/extend/fixed
 field/extend/mirror
 field/extend/periodic
 field/extend/border
+field/read/interpolated
+field/read/averaged
+field/read/slope
 field/convolve/row/interior/mirror/direct
 field/convolve/row/interior/mirror/fft
 field/convolve/row/interior/border/direct
