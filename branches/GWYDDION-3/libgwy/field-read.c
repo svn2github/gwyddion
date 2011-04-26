@@ -390,13 +390,12 @@ gwy_field_curvature(const GwyField *field,
     gdouble alpha = sx4*sy4 - sx2y2*sx2y2,
             betax = sx2y2*sy2 - sx2*sy4,
             betay = sx2y2*sx2 - sx4*sy2,
-            delta = sx2*sy2 - sx2y2;
+            delta = sx2*sy2 - n*sx2y2;
 
-    // FIXME: Why n does not appear here?  Some factor missing?
-    gdouble D = alpha + sx2*betax + sy2*betay,
+    gdouble D = n*alpha + sx2*betax + sy2*betay,
             Da = sz*alpha + sxxz*betax + syyz*betay,
-            Dxx = sxxz*(sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
-            Dyy = sxxz*delta + syyz*(sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
+            Dxx = sxxz*(n*sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
+            Dyy = sxxz*delta + syyz*(n*sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
     // q is used for transformation to coordinates with correct aspect ratio
     // and pixel area of 1; s is then the remaining scaling factor.
     gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
