@@ -113,4 +113,89 @@ test_math_power_sum(void)
     }
 }
 
+void
+test_math_curvature(void)
+{
+    gdouble xc, yc, zc, k1, k2, phi1, phi2;
+    guint ndims;
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    // Flat surfaces
+    static const gdouble coeffs1[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    ndims = gwy_math_curvature(coeffs1, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpfloat(k1, ==, 0.0);
+    g_assert_cmpfloat(k2, ==, 0.0);
+    g_assert_cmpfloat(phi1, ==, 0.0);
+    g_assert_cmpfloat(phi2, ==, G_PI/2.0);
+    g_assert_cmpfloat(xc, ==, 0.0);
+    g_assert_cmpfloat(yc, ==, 0.0);
+    g_assert_cmpfloat(zc, ==, 0.0);
+
+    static const gdouble coeffs2[] = { 1.0, 2.0, 3.0, 0.0, 0.0, 0.0 };
+    ndims = gwy_math_curvature(coeffs2, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpfloat(k1, ==, 0.0);
+    g_assert_cmpfloat(k2, ==, 0.0);
+    g_assert_cmpfloat(phi1, ==, 0.0);
+    g_assert_cmpfloat(phi2, ==, G_PI/2.0);
+    g_assert_cmpfloat(xc, ==, 0.0);
+    g_assert_cmpfloat(yc, ==, 0.0);
+    g_assert_cmpfloat(zc, ==, 1.0);
+
+    // Centered surfaces
+    static const gdouble coeffs3[] = { 0.0, 0.0, 0.0, 0.5, 0.0, 1.0 };
+    ndims = gwy_math_curvature(coeffs3, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpfloat(k1, ==, 1.0);
+    g_assert_cmpfloat(k2, ==, 2.0);
+    g_assert_cmpfloat(fabs(phi1), <=, 1e-14);
+    // As the angle is exactly π/2 we get -G_PI/2 or G_PI/2 depending on the
+    // rounding errors.  Accept both but check the interval.
+    g_assert_cmpfloat(fabs(fabs(phi2) - G_PI/2), <=, 1e-14);
+    g_assert_cmpfloat(phi2, >=, -G_PI/2);
+    g_assert_cmpfloat(phi2, <=, G_PI/2);
+    g_assert_cmpfloat(xc, ==, 0.0);
+    g_assert_cmpfloat(yc, ==, 0.0);
+    g_assert_cmpfloat(zc, ==, 0.0);
+
+    static const gdouble coeffs4[] = { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 };
+    ndims = gwy_math_curvature(coeffs4, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    // Left-handed system means positive κ corresponds to negative φ.
+    g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(k2 - 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi1 - G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi2 + G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(xc, ==, 0.0);
+    g_assert_cmpfloat(yc, ==, 0.0);
+    g_assert_cmpfloat(zc, ==, 0.0);
+
+    static const gdouble coeffs5[] = { 0.0, 0.0, 0.0, 0.0, -1.0, 0.0 };
+    ndims = gwy_math_curvature(coeffs5, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(k2 - 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi1 + G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi2 - G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(xc, ==, 0.0);
+    g_assert_cmpfloat(yc, ==, 0.0);
+    g_assert_cmpfloat(zc, ==, 0.0);
+
+    for (guint i = 0; i < 10; i++) {
+        gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
+        gdouble ca = cos(2.0*alpha), sa = sin(2.0*alpha);
+        gdouble coeffs6[] = { 0.0, 0.0, 0.0, ca/2.0, sa, -ca/2.0 };
+        ndims = gwy_math_curvature(coeffs6,
+                                   &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+        g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
+        g_assert_cmpfloat(fabs(k2 - 1.0), <=, 1e-14);
+        g_printerr("%.8g :: %.8g %.8g\n", alpha/G_PI, phi1/G_PI, phi2/G_PI);
+        // Left-handed system means we get negative α
+        g_assert_cmpfloat(fabs(phi1 + alpha), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2 - (G_PI/2.0 - alpha)), <=, 1e-14);
+        g_assert_cmpfloat(xc, ==, 0.0);
+        g_assert_cmpfloat(yc, ==, 0.0);
+        g_assert_cmpfloat(zc, ==, 0.0);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

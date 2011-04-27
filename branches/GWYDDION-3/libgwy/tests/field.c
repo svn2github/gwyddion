@@ -3755,4 +3755,74 @@ test_field_read_slope(void)
     g_rand_free(rng);
 }
 
+void
+test_field_read_curvature(void)
+{
+    enum { max_size = 54, niter = 40, niiter = 10 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        gdouble xreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble yreal = exp(4.0*g_rand_double(rng) - 2.0);
+        gdouble xoff = 40.0*g_rand_double(rng) - 20.0;
+        gdouble yoff = 40.0*g_rand_double(rng) - 20.0;
+        gdouble a = 40.0*g_rand_double(rng) - 20.0;
+        gdouble bx = 10.0*g_rand_double(rng) - 5.0;
+        gdouble by = 10.0*g_rand_double(rng) - 5.0;
+        gdouble cxx = 4.0*g_rand_double(rng) - 2.0;
+        gdouble cxy = 4.0*g_rand_double(rng) - 2.0;
+        gdouble cyy = 4.0*g_rand_double(rng) - 2.0;
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gwy_field_set_xreal(field, xreal);
+        gwy_field_set_yreal(field, yreal);
+        gwy_field_set_xoffset(field, xoff);
+        gwy_field_set_yoffset(field, yoff);
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                gdouble z = a + bx*x + by*y + cxx*x*x + cxy*x*y + cyy*y*y;
+                field->data[i*xres + j] = z;
+            }
+        }
+
+        // XXX: We assume gwy_math_curvature() works.  But there is no test
+        // for it yet.
+        gdouble xc, yc, zc, kappa1, kappa2, phi1, phi2;
+        gdouble coeffs[] = { a, bx, by, cxx, cxy, cyy };
+        guint ndims = gwy_math_curvature(coeffs,
+                                         &kappa1, &kappa2, &phi1, &phi2,
+                                         &xc, &yc, &zc);
+
+        for (guint iiter = 0; iiter < niiter; iiter++) {
+            guint col = g_rand_int_range(rng, 1, xres-1);
+            guint row = g_rand_int_range(rng, 1, yres-1);
+            guint ax = g_rand_int_range(rng, 0, MIN(col, xres-col));
+            guint ay = g_rand_int_range(rng, 0, MIN(row, yres-row));
+
+            gdouble xcr, ycr, zcr, kappa1r, kappa2r, phi1r, phi2r;
+            gdouble xce, yce, zce, kappa1e, kappa2e, phi1e, phi2e;
+            guint ndimsr = gwy_field_curvature
+                                     (field, col, row, ax, ay,
+                                      FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                      &kappa1r, &kappa2r, &phi1r, &phi2r,
+                                      &xcr, &ycr, &zcr);
+            guint ndimse = gwy_field_curvature
+                                     (field, col, row, ax, ay,
+                                      TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                      &kappa1e, &kappa2e, &phi1e, &phi2e,
+                                      &xce, &yce, &zce);
+        }
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

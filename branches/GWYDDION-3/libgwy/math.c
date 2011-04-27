@@ -394,7 +394,8 @@ gwy_math_intersecting(gdouble a, gdouble b,
  * Curvatures have signs, positive mean a concave (cup-like) surface, negative
  * mean a convex (cap-like) surface.  They are ordered including the sign.
  *
- * Directions are angles from the interval (-π/2, π/2].
+ * Directions are angles from the interval [-π/2, π/2].  And the Gwyddion
+ * left-handed coordinate system (with reverted y-axis) is used.
  *
  * If the quadratic surface is degenerate, i.e. flat in at least one direction,
  * the centre is undefined.  The centre is then chosen as the closest point
@@ -476,7 +477,7 @@ gwy_math_curvature(const gdouble *coeffs,
     GWY_MAYBE_SET(pkappa2, cy);
 
     if (pphi1) {
-        gdouble phi1 = fmod(phi, G_PI);
+        gdouble phi1 = fmod(phi + 2*G_PI, G_PI);
         *pphi1 = (phi1 > G_PI/2.0) ? phi1 - G_PI : phi1;
     }
     if (pphi2) {
