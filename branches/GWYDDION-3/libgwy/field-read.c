@@ -240,8 +240,8 @@ gwy_field_value_averaged(const GwyField *field,
  * per one lateral unit, not per pixel.
  *
  * See gwy_field_value_averaged() for description of the neighbourhood shape
- * and size.  The slope in the direction of zero averaging radius is
- * identically zero.
+ * and size.  The slope in the direction of zero averaging radius is considered
+ * to be identically zero.
  **/
 void
 gwy_field_slope(const GwyField *field,
@@ -309,6 +309,13 @@ gwy_field_slope(const GwyField *field,
  *              bounding rectangle.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ * @kappa1: Location to store the smaller curvature to.
+ * @kappa2: Location to store the larger curvature to.
+ * @phi1: Location to store the direction of the smaller curvature to.
+ * @phi2: Location to store the direction of the larger curvature to.
+ * @xc: Location to store x-coordinate of the centre of the quadratic surface.
+ * @yc: Location to store y-coordinate of the centre of the quadratic surface.
+ * @zc: Location to store value at the centre of the quadratic surface.
  *
  * Calculates local curvature in a field.
  *
@@ -316,12 +323,12 @@ gwy_field_slope(const GwyField *field,
  * as the lateral dimensions.
  *
  * All calculated curvatures are in physical units.  See gwy_math_curvature()
- * for handling of degenerate cases; the antural centre is at physical
+ * for handling of degenerate cases; the natural centre is at physical
  * coordinates corresponding to (@col+½,@row+½) in this case.
  *
  * See gwy_field_value_averaged() for description of the neighbourhood shape
  * and size.  The curvature in the direction of zero averaging radius is
- * identically zero.
+ * considered to be identically zero.
  *
  * Returns: The number of curved dimensions, simiarly to gwy_math_curvature().
  **/
