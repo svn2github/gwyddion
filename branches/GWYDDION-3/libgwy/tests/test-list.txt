@@ -48,7 +48,8 @@ rgba/boxed
 rgba/interpolate
 unit/parse
 unit/assign
-unit/arithmetic
+unit/arithmetic/simple
+unit/arithmetic/commutativity
 unit/serialize
 unit/garbage
 unit/format/power10

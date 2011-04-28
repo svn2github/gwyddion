@@ -122,7 +122,7 @@ test_unit_parse(void)
 }
 
 void
-test_unit_arithmetic(void)
+test_unit_arithmetic_simple(void)
 {
     GwyUnit *u1, *u2, *u3, *u4, *u5, *u6, *u7, *u8, *u9, *u0;
 
@@ -168,6 +168,58 @@ test_unit_arithmetic(void)
     g_object_unref(u8);
     g_object_unref(u9);
     g_object_unref(u0);
+}
+
+void
+test_unit_arithmetic_commutativity(void)
+{
+    static const gchar *bases[] = { "1/m", "", "m", "m^2" };
+    enum { nbases = G_N_ELEMENTS(bases) };
+
+    GwyUnit *iref = gwy_unit_new(), *jref = gwy_unit_new(),
+            *iunit = gwy_unit_new(), *junit = gwy_unit_new(),
+            *result1 = gwy_unit_new(), *result2 = gwy_unit_new();
+
+    for (unsigned int i = 0; i < nbases; i++) {
+        gwy_unit_set_from_string(iref, bases[i], NULL);
+        for (unsigned int j = 0; j < nbases; j++) {
+            gwy_unit_set_from_string(jref, bases[j], NULL);
+            for (int ipower = -2; ipower <= 2; ipower++) {
+                for (int jpower = -2; jpower <= 2; jpower++) {
+                    gwy_unit_assign(iunit, iref);
+                    gwy_unit_assign(junit, jref);
+                    gwy_unit_power_multiply(result1,
+                                            iunit, ipower, junit, jpower);
+                    gwy_unit_power_multiply(result2,
+                                            junit, jpower, iunit, ipower);
+                    g_assert(gwy_unit_equal(result1, result2));
+                    g_assert(gwy_unit_equal(iunit, iref));
+                    g_assert(gwy_unit_equal(junit, jref));
+
+                    gwy_unit_assign(iunit, iref);
+                    gwy_unit_assign(junit, jref);
+                    gwy_unit_power_multiply(iunit,
+                                            iunit, ipower, junit, jpower);
+                    g_assert(gwy_unit_equal(iunit, result1));
+                    g_assert(gwy_unit_equal(junit, jref));
+
+                    gwy_unit_assign(iunit, iref);
+                    gwy_unit_assign(junit, jref);
+                    gwy_unit_power_multiply(iunit,
+                                            junit, jpower, iunit, ipower);
+                    g_assert(gwy_unit_equal(iunit, result2));
+                    g_assert(gwy_unit_equal(junit, jref));
+                }
+            }
+        }
+    }
+
+    g_object_unref(result2);
+    g_object_unref(result1);
+    g_object_unref(junit);
+    g_object_unref(iunit);
+    g_object_unref(jref);
+    g_object_unref(iref);
 }
 
 static void
