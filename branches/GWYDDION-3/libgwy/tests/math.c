@@ -124,6 +124,7 @@ test_math_curvature(void)
     // Flat surfaces
     static const gdouble coeffs1[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     ndims = gwy_math_curvature(coeffs1, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 0);
     g_assert_cmpfloat(k1, ==, 0.0);
     g_assert_cmpfloat(k2, ==, 0.0);
     g_assert_cmpfloat(phi1, ==, 0.0);
@@ -134,6 +135,7 @@ test_math_curvature(void)
 
     static const gdouble coeffs2[] = { 1.0, 2.0, 3.0, 0.0, 0.0, 0.0 };
     ndims = gwy_math_curvature(coeffs2, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 0);
     g_assert_cmpfloat(k1, ==, 0.0);
     g_assert_cmpfloat(k2, ==, 0.0);
     g_assert_cmpfloat(phi1, ==, 0.0);
@@ -145,12 +147,21 @@ test_math_curvature(void)
     // Centered surfaces
     static const gdouble coeffs3[] = { 0.0, 0.0, 0.0, 0.5, 0.0, 1.0 };
     ndims = gwy_math_curvature(coeffs3, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(k1, ==, 1.0);
     g_assert_cmpfloat(k2, ==, 2.0);
-    g_assert_cmpfloat(fabs(phi1), <=, 1e-14);
     // As the angle is exactly π/2 we get -G_PI/2 or G_PI/2 depending on the
     // rounding errors.  Accept both but check the interval.
-    g_assert_cmpfloat(fabs(fabs(phi2) - G_PI/2), <=, 1e-14);
+    if (phi2 > G_PI/4) {
+        g_assert_cmpfloat(fabs(phi1), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2 - G_PI/2), <=, 1e-14);
+    }
+    else {
+        g_assert_cmpfloat(fabs(phi1 + G_PI/2), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2), <=, 1e-14);
+    }
+    g_assert_cmpfloat(phi1, >=, -G_PI/2);
+    g_assert_cmpfloat(phi1, <=, G_PI/2);
     g_assert_cmpfloat(phi2, >=, -G_PI/2);
     g_assert_cmpfloat(phi2, <=, G_PI/2);
     g_assert_cmpfloat(xc, ==, 0.0);
@@ -159,21 +170,23 @@ test_math_curvature(void)
 
     static const gdouble coeffs4[] = { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 };
     ndims = gwy_math_curvature(coeffs4, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 2);
     // Left-handed system means positive κ corresponds to negative φ.
     g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(k2 - 1.0), <=, 1e-14);
-    g_assert_cmpfloat(fabs(phi1 - G_PI/4), <=, 1e-14);
-    g_assert_cmpfloat(fabs(phi2 + G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi1 + G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi2 - G_PI/4), <=, 1e-14);
     g_assert_cmpfloat(xc, ==, 0.0);
     g_assert_cmpfloat(yc, ==, 0.0);
     g_assert_cmpfloat(zc, ==, 0.0);
 
     static const gdouble coeffs5[] = { 0.0, 0.0, 0.0, 0.0, -1.0, 0.0 };
     ndims = gwy_math_curvature(coeffs5, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(k2 - 1.0), <=, 1e-14);
-    g_assert_cmpfloat(fabs(phi1 + G_PI/4), <=, 1e-14);
-    g_assert_cmpfloat(fabs(phi2 - G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi1 - G_PI/4), <=, 1e-14);
+    g_assert_cmpfloat(fabs(phi2 + G_PI/4), <=, 1e-14);
     g_assert_cmpfloat(xc, ==, 0.0);
     g_assert_cmpfloat(yc, ==, 0.0);
     g_assert_cmpfloat(zc, ==, 0.0);
@@ -184,16 +197,67 @@ test_math_curvature(void)
         gdouble coeffs6[] = { 0.0, 0.0, 0.0, ca/2.0, sa, -ca/2.0 };
         ndims = gwy_math_curvature(coeffs6,
                                    &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+        g_assert_cmpuint(ndims, ==, 2);
         g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
         g_assert_cmpfloat(fabs(k2 - 1.0), <=, 1e-14);
-        g_printerr("%.8g :: %.8g %.8g\n", alpha/G_PI, phi1/G_PI, phi2/G_PI);
-        // Left-handed system means we get negative α
-        g_assert_cmpfloat(fabs(phi1 + alpha), <=, 1e-14);
-        g_assert_cmpfloat(fabs(phi2 - (G_PI/2.0 - alpha)), <=, 1e-14);
+        g_assert_cmpfloat(phi1, >=, -G_PI/2);
+        g_assert_cmpfloat(phi1, <=, G_PI/2);
+        g_assert_cmpfloat(phi2, >=, -G_PI/2);
+        g_assert_cmpfloat(phi2, <=, G_PI/2);
+        g_assert_cmpfloat(fmin(fabs(phi1 - alpha + G_PI/2.0),
+                               fabs(phi1 - alpha - G_PI/2.0)), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2 - alpha), <=, 1e-14);
         g_assert_cmpfloat(xc, ==, 0.0);
         g_assert_cmpfloat(yc, ==, 0.0);
         g_assert_cmpfloat(zc, ==, 0.0);
     }
+
+    // Shifted surfaces
+    static const gdouble coeffs7[] = { 2.0, -2.0, 2.0, 1.0, 0.0, 1.0 };
+    ndims = gwy_math_curvature(coeffs7, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 2);
+    g_assert_cmpfloat(k1, ==, 2.0);
+    g_assert_cmpfloat(k2, ==, 2.0);
+    // As the angle is exactly π/2 we get -G_PI/2 or G_PI/2 depending on the
+    // rounding errors.  Accept both but check the interval.
+    if (phi2 > G_PI/4) {
+        g_assert_cmpfloat(fabs(phi1), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2 - G_PI/2), <=, 1e-14);
+    }
+    else {
+        g_assert_cmpfloat(fabs(phi1 + G_PI/2), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2), <=, 1e-14);
+    }
+    g_assert_cmpfloat(phi1, >=, -G_PI/2);
+    g_assert_cmpfloat(phi1, <=, G_PI/2);
+    g_assert_cmpfloat(phi2, >=, -G_PI/2);
+    g_assert_cmpfloat(phi2, <=, G_PI/2);
+    g_assert_cmpfloat(fabs(xc - 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(yc + 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(zc), <=, 1e-14);
+
+    static const gdouble coeffs8[] = { 0.5, 2.0, 1.0, 1.0, 0.0, -0.5 };
+    ndims = gwy_math_curvature(coeffs8, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    g_assert_cmpuint(ndims, ==, 2);
+    g_assert_cmpfloat(k1, ==, -1.0);
+    g_assert_cmpfloat(k2, ==, 2.0);
+    // As the angle is exactly π/2 we get -G_PI/2 or G_PI/2 depending on the
+    // rounding errors.  Accept both but check the interval.
+    if (phi1 > G_PI/4) {
+        g_assert_cmpfloat(fabs(phi2), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi1 - G_PI/2), <=, 1e-14);
+    }
+    else {
+        g_assert_cmpfloat(fabs(phi1), <=, 1e-14);
+        g_assert_cmpfloat(fabs(phi2 + G_PI/2), <=, 1e-14);
+    }
+    g_assert_cmpfloat(phi1, >=, -G_PI/2);
+    g_assert_cmpfloat(phi1, <=, G_PI/2);
+    g_assert_cmpfloat(phi2, >=, -G_PI/2);
+    g_assert_cmpfloat(phi2, <=, G_PI/2);
+    g_assert_cmpfloat(fabs(xc + 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(yc - 1.0), <=, 1e-14);
+    g_assert_cmpfloat(fabs(zc), <=, 1e-14);
 
     g_rand_free(rng);
 }
