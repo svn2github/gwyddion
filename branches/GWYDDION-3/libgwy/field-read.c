@@ -95,9 +95,9 @@ gwy_field_value(const GwyField *field,
  * gwy_field_value_interpolated:
  * @field: A two-dimensional data field containing interpolation coefficients.
  * @x: Horizontal coordinate, pixel-centered.  This means @x=0.5 corresponds to
- *     @col=0 in gwy_field_read().
+ *     @col=0 in gwy_field_value().
  * @y: Vertical coordinate, pixel-centered.  This means @y=0.5 corresponds to
- *     @row=0 in gwy_field_read().
+ *     @row=0 in gwy_field_value().
  * @interpolation: Interpolation type to use.  If it is a type with
  *                 non-interpolating basis then @field is assumed to contain
  *                 the coefficients (such a field can be created with
