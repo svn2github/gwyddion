@@ -1,0 +1,646 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: synthetic.xml 11651 2010-12-02 14:11:16Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='synthetic' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Synthèse de surfaces</title>
+  <para>
+    En plus des fonction d'analyse des surfaces mesurées, Gwyddion propose
+    plusieurs générateurs de surfaces artificielles pouvant servir pour des 
+    tests ou des simulations en dehors de Gwyddion.
+  </para>
+  <para>
+    Les différents générateurs de surfaces ont un certain nombre de paramètres
+    en commun, ceux-ci permettent de spécifier les dimensions et l'échelle de la
+    surface créée, et de contrôler le générateur de nombres aléatoires. Ces 
+    paramètres sont décrits ci-dessous, les paramètres spécifiques à chaque
+    générateur sont décrits dans les sous-sections correspondantes.
+  </para>
+  <para>
+    Paramètres de l'image :
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guilabel>Tailles horizontale et verticale</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Résolutions horizontale et verticale de la surface générée en pixels.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Image carrée</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Cette option, lorsqu'elle est activée, force les résolutions
+          horizontale et verticale à être identiques.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Largeur, hauteur</guilabel>
+      </term>
+      <listitem>
+        <para>  
+          Les dimensions physiques horizontale et verticales de la surface 
+          générée. Notez que les pixels sont supposés être carrés, le 
+          changement d'une valeur entraîne donc la modification de l'autre.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Dimension, unité de hauteur</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Unités des dimensions latérales (<guilabel>largeur</guilabel>,
+          <guilabel>hauteur</guilabel>) et des valeurs (hauteurs). Les unités
+          choisies ici déterminent aussi les unités des paramètres sans 
+          sans dimension des générateurs.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guibutton><guilabel>Prendre les dimensions à partir du canal courant</guilabel></guibutton>
+      </term>
+      <listitem>
+        <para>
+          En cliquant sur ce bouton tous les paramètres précédant se retrouvent
+          définis à partir du canal courant.
+        </para>
+        <para>
+          Notez que si les unités de valeurs sont modifiées, la valeur d'échelle
+          est quant à elle définie par des paramètres spécifiques au générateur,
+          ceux-ci ne sont pas nécessairement déduisibles des propriétés
+          statistiques du canal. Ces paramètres ne sont donc pas recalculés.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Remplacer le canal courant</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Cette option a deux effets. Elle copie d'abord les dimensions et 
+          l'échelle du canal courant. Puis elle remplace le canal courant par
+          la surface générée au lieu de créer un nouveau canal.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Démarrer à partir du canal courant</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Cette option a deux effets. Elle copie d'abord les dimensions et
+          l'échelle du canal courant. Puis elle fait démarrer le générateur
+          sur la surface contenue dans le canal courant au lieu de démarrer sur
+          une surface plane. Notez que le résultat ne change pas s'il est
+          dirigé vers le canal courant ou un nouveau canal.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Contôles du générateur aléatoire :
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guilabel>Graine aléatoire</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Il s'agit de la graine du générateur de nombres aléatoires.
+          Le fait de choisir les mêmes paramètres et résolutions ainsi
+          que la même graine aboutira à la génération de la même surface,
+          même sur des ordinateurs différents. Des graines différentes
+          donnent des surfaces différentes ayant des caractéristiques
+          identiques selon les paramètres utilisés par le générateur.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guibutton><guilabel>Nouveau</guilabel></guibutton>
+      </term>
+      <listitem>
+        <para>
+          Remplace la graine par un nombre aléatoire.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Randomiser</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Activer cette option permet d'utiliser une nouvelle graine à
+          chaque fois que le générateur est lancé. Cela permet de relancer
+          facilement le générateur avec une nouvelle rgaine en tapant
+          <keycap>Ctrl-F</keycap> (voir les <link linkend='keyboard-shortcuts'>raccourcis clavier</link>).
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <sect2 id='spectral-synthesis'>
+    <title>Synthèse spectrale</title>
+    <para>
+      Le module de synthèse spectrale permet de créer des surfaces
+      aléatoires en calculant la transformée de Fourier de la surface à
+      partir des paramètres spécifiés, puis en appliquant la transformée
+      inverse pour obtenir la surface réelle. Les surfaces générées sont
+      périodiques (i.e. parfaitement juxtaposables).
+    </para>
+    <para>
+      Les paramètres de Fourier définissent la forme de la PSD, i.e. les
+      modules des coefficients de Fourier, les phases étant choisies
+      aléatoiremnt. Actuellement toutes les surfaces générées sont
+      isotropes, i.e. leur PSD est radialement symétrique.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Moyenne quadratique (RMS, root mean square) des hauteurs
+            (ou des différences au plan moyen, qui est cependant
+            toujours le plan <xi:include href="eqi-z-is-0.xml"/> ). Le
+            bouton <guilabel>Identique au canal courant</guilabel>
+            ajuste la valeur RMS à celle du canal courant.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Fréquences minimum et maximum</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Fréquences spatiales minimum et maximum. En augmentant la
+            fréquence minimum l'image aura tendance à
+            <quote>s'applatir</quote>, i.e. les motifs larges seront
+            supprimés. La diminution de la fréquence maximum limitera la
+            finesse des détails.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Activer le multiplicateur gaussien</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Active la multiplication des coefficients de Fourier par une
+            fonction gaussienne, ce qui correspond dans l'espace réel à
+            une convolution par une gaussienne.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Longueur d'auto-corrélation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Longueur d'auto-corrélation de la gaussienne (voir la section
+            <link linkend='autocorrelation-1d'>analyse statistical</link>
+            pour une discussion sur les fonctions d'auto-corrélation).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Activer le multiplicateur puissance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Active la multiplication par un facteur proportionnel à
+            <xi:include href="eqi-1-over-k-to-p.xml"/>, où
+            <xi:include href="eqi-k.xml"/>
+            est la fréquence spatiale et <xi:include href="eqi-p.xml"/> est la
+            puissance. Cette option permet de générer différentes surfaces
+            fractales.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Puissance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Il s'agit de la puissance <xi:include href="eqi-p.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-spectral'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-spectral.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles générées par synthèse spectrale : plage de
+          fréquences spatiales réduite (à gauche), surface aléatoire gaussienne
+          (au centre) et surface fractale générée avec le multiplicateur
+          gaussien et <xi:include href="eqi-p.xml"/> égal à 1.5 (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='object-synthesis'>
+    <title>Objets</title>
+    <para>
+      La méthode de distribution d'objets permet de créer des surfaces
+      aléatoires composées d'éléments de forme spécifique. L'algorithme est
+      simple : les objets spécifiés sont placés aléatoirement sur la surface.
+      Pour chaque objet, les nouvelles hauteurs sont modifiées par
+      <xi:include href="eqi-max-z-z_0-plus-h.xml"/>, où
+      <xi:include href="eqi-z.xml"/> est la hauteur de l'objet sur ce pixel (en
+      ayant par hypothèse une base nulle) et <xi:include href="eqi-z_0.xml"/> et
+      la hauteur minimale courante sur la base de l'objet étant placé.
+      L'algorithme considère que le plan doit être rempli de copies identiques
+      de la surface, celle-ci est donc aussi périodique (i.e. parfaitement
+      juxtaposable).
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Forme</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Forme (type) d'objets placés. Les formes suivantes sont actuellement
+            disponibles : demi-sphères, boîtes, pyramides, tétraèdres ainsi que
+            quelques autres plus tordues.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Couverture</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Nombre moyen de fois im un objet couvre un pixel de l'image. Une
+            valeur de 1 indique que la surface sera exactement couverte une fois
+            par les objets, en supposant que ceux-ci la couvrent uniformément.
+            Des valeurs plus élevées impliquent de plus en plus de couches
+            d'objets – ainsi qu'une génération de surface plus lente.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Taille</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Taille latérale des objets, il s'agit en général du carré
+            circonscrit.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Rapport d'aspect</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Rapport des dimensions <xi:include href="eqi-x.xml"/> et
+            <xi:include href="eqi-y.xml"/> d'un objet – par rapport aux
+            proportions par défaut.
+          </para>
+          <para>
+            La modification du rapport d'aspect n'implique pas nécessairement
+            une simple homothétie, par exemple les objets appelés pépites vont
+            passer de demi-sphères à barreaux en fonction du rapport d'aspect.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Hauteur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantité proportionnelle à la hauteur de l'objet, il s'agit en
+            général de la hauteur du plus haut point.
+          </para>
+          <para>
+            L'option <guilabel>Mettre à l'échelle avec la taille</guilabel>
+            rend la hauteur des objets proportionnelle à leur taille. Sans cette
+            option les hauteurs sont indépendantes des tailles des objets.
+          </para>
+          <para>
+            Le bouton <guilabel>Identique au canal couran</guilabel> ajuste la
+            hauteur à celle basée sur la valeur RMS du canal courant.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Orientation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Orientation des objets par rapport à l'orientation de base, mesurée
+            dans le sens inverse des aiguilles d'une montre.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Tronquer</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Les formes peuvent être tronquées à une certaine hauteur, ce qui
+            permet de créer des cones ou des pyramides tronquées par exemple. La
+            hauteur de troncature est donnée en proportion de la hauteur totale
+            de l'objet. Une valeur de 1 signifie que la forme n'est pas
+            tronquée, tandis qu'une valeur de 0 supprimerait complètement
+            l'objet.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Chaque paramètre peut être rendu aléatoire pour chacun des objets, à
+      l'aide du paramètre <guilabel>Variance</guilabel>. Concernant les
+      quantités multiplicatives (c'est-à-dire tout excepté l'orientation et la
+      troncature) la distribution est log-normale avec la valeur RMS du
+      logarithme de la quantité donnée par la <guilabel>Variance</guilabel>.
+    </para>
+    <informalfigure id='fig-synthetic-objects'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-objects.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles générées par distribution d'objets : sphères
+          de diverses tailles (à gauche), chaumes fins avec différentes
+          orientations (au centre), pépites de différents rapports d'aspects
+          (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='noise-synthesis'>
+    <title>Bruit</title>
+    <para>
+      Un bruit alétoire et non-corrélé est généré indépendamment pour chaque
+      pixel. Plusieurs distributions sont disponibles.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Distribution</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distribution de la valeur du bruit. Celle-ci peut être gausienne,
+            exponentielle, uniforme ou triangulaire.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Direction</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Le bruit peut être symétrique autour de zéro, ou uniquement positif
+            ou négatif. La valeur moyenne de la distribution symétrique est
+            nulle, i.e. la valeur moyenne des données ne change pas si l'on y
+            ajoute un bruit symétrique. La valeur moyenne augmente ou diminue si
+            le bruit ajouté est respectivement positif ou négatif.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Moyenne quadratique de la distribution de bruit. Plus précisément,
+            il s'agit de la valeur RMS de la distribution symétrique
+            correspondante dans le cas d'une distribution positive ou négative.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='line-noise-synthesis'>
+    <title>Bruit linéaire</title>
+    <para>
+      Le bruit linéaire correspond au bruit ayant une durée non négligeable
+      donnant typiquement des sauts ou des défauts linéaires dans la direction
+      rapide du scan. Les paramètres <guilabel>Distribution</guilabel>,
+      <guilabel>Direction</guilabel> et <guilabel>RMS</guilabel> ont la même
+      signification que pour le
+      <link linkend='noise-synthesis'>bruit ponctuel</link>.  Les autres
+      paramètres contrôlent les caractéristiques latérales du bruit.
+    </para>
+    <para>
+      Deux types de défauts sont disponibles : les sauts et les rayures. Les
+      sauts représentent des changements de valeur abrupts qui se prolongent
+      jusqu'à la fin du scan (ou jusqu'à ce qu'un autre saut apparaisse). Les
+      rayures représentent des changements de valeur ayant une durée finie, i.e.
+      les valeurs retrouvent leur niveau original au bout d'un certain temps..
+    </para>
+    <para>
+      Les sauts possèdent les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Densité</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Nombre moyen de défauts pas ligne de scan, incluant les temps morts
+            (tels que déterminés par le paramètres
+            <guilabel>Dans les lignes</guilabel>).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Dans les lignes</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Fraction du temps pour scanner une ligne correspondant à
+            l'aquisition de données. Le reste du temps correspond au temps mort.
+            Une valeur de 0 signifie que le temps d'aquisition est négligeable
+            devant la durée de scan d'une ligne, et en conséquence les sauts
+            n'apparaissent qu'entre les lignes.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Cumulatif</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Dans le cas des sauts cumulatifs, la valeur aléatoire du saut est
+            toujours ajoutée à la valeur de saut courante ; pour les sauts non
+            cumulatifs la valeur de saut est directement la nouvelle valeur
+            aléatoire.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Les rayures possèdent les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Couverture</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Il s'agit de la fraction de l'image couverte par les défauts si
+            ceux-ci ne se recouvrent pas. Comme les défauts peuvent se
+            recouvrir, une valeur de 1 ne signifie pas que toute l'image sera
+            recouverte de défauts.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Longueur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Longueur des rayure en pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Variance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Variance de la longueur des rayures, voir le paragraphe
+            <link linkend='object-synthesis'>Objets</link> pour une description
+            des variances.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-line-noise'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-line-noise.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Différents types de bruit linéaires ajoutés à une surface artificielle
+          recouverte de pyramides : surface originale (à gauche) ; avec des
+          sauts non cumulatifs relativement peu fréquents (au centre) ; avec des
+          rayures d'une longueur moyenne de 16 pixels avec un taux de couverture
+          élevé (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='pattern-synthesis'>
+    <title>Motifs</title>
+    <para>
+      Les motifs géométriques réguliers font partie des surfaces couramment
+      rencontrées en microscopie en tant que standards ou comme échantillons de
+      test, parmi lesquels on trouve les crénaux, les marches ou les trous.
+      Chaque type de motif a ses propres paramètres géométriques permettant de modifier la
+      forme et les dimensions de différents éléments du motif. Chaque paramètre
+      possède un contrôle de variance similaire à la
+      <link linkend='object-synthesis'>Synthèse d'objets</link>, qui permet de
+      créer des motifs irréguliers sous certains aspects.
+    </para>
+    <para>
+      Le placement du motif dans le plan horizontal est contrôlé par les
+      paramètres de l'onglet <guilabel>Placement</guilabel>, ccommun à tous les
+      types de motif :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Orientation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Rotation du motif par rapport à une orientation de base, mesurée
+            dasn le sens inverse des aiguilles d'une montre.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Cet onglet contient aussi les paramètres de déformation. L'activation de
+      la variation des paramètres géométriques rend la surface plus ou moins
+      irrégulière, mais la forme des éléments reste la même. La
+      La <guilabel>Déformation</guilabel> est une méthode complémentaire pour
+      introduire une certaine irrégularité en distordant le motif dans le plan
+      <xi:include href="eqi-xy.xml"/>. Elle possède deux paramètres :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Amplitude</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Amplitude de la déformation latérale. Il s'agit d'une valeur
+            numérique relative déterminant la déformation pouvant être atteinte.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Echelle latérale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Taille caractéristique des déformations. Elle ne décrit pas à quel
+            point les motifs sont déplacés, mais plutôt à quel point la
+            déformation varie elle-même (rapidement ou lentement) dans le plan
+            horizontal.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-pattern'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-pattern.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles basées sur des motifs : marches raides
+          orientées à 30°, modifiées par une déformation ayant une grande
+          longueur d'autocorrélation (à gauche) ; crénaux séparés de manière non
+          uniforme avec des pentes modérées entre les niveaux haut et bas, ainsi
+          qu'une déformation ayant une courte longueur d'autocorrélation (à
+          droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
