@@ -29,6 +29,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module anfatec.c -->
+    <row>
+      <entry>Anfatec</entry>
+      <entry>.par, .int</entry>
+      <entry>anfatec</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -74,20 +83,20 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
-    <!-- From module burleigh_bii.c -->
-    <row>
-      <entry>Burleigh BII</entry>
-      <entry>.bii</entry>
-      <entry>burleigh_bii</entry>
-      <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
-    </row>
     <!-- From module burleigh.c -->
     <row>
       <entry>Burleigh IMG v2.1</entry>
       <entry>.img</entry>
       <entry>burleigh</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module burleigh_bii.c -->
+    <row>
+      <entry>Burleigh BII</entry>
+      <entry>.bii</entry>
+      <entry>burleigh_bii</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -263,6 +272,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module miffile.c -->
+    <row>
+      <entry>DME MIF</entry>
+      <entry>.mif</entry>
+      <entry>miffile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module mifile.c -->
     <row>
       <entry>Molecular Imaging MI</entry>
@@ -324,7 +342,7 @@
       <entry>nanoscope</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -673,6 +691,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>WITec</entry>
       <entry>.wit</entry>
       <entry>witfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module wsffile.c -->
+    <row>
+      <entry>WSF ASCII</entry>
+      <entry>.wsf</entry>
+      <entry>wsffile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
