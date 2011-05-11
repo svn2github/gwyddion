@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
 'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='gwyfile-format'>
-  <title>Format des Fichiers Gwyddion</title>
+  <title>Format des fichiers Gwyddion</title>
   <para>
     Les fichiers de données au format <application>Gwyddion</application>
     consistent en une structure en arborescence de plusieurs objets sérialisés.
@@ -19,7 +19,7 @@
     considérer l'interprétation possible des données contenues dans celui-ci.
   </para>
   <sect2 id='gwyfile-byte-order'>
-    <title>Ordre des Octets</title>
+    <title>Ordre des octets</title>
     <para>
       Toutes les données sont enregistrées avec l'ordre des octets little-endian
       (<quote>petit-boutiste</quote> ou <quote>miniboutiste</quote>, aussi connu
@@ -121,12 +121,12 @@
               <entry></entry>
             </row>
             <row>
-              <entry>entier 32bit</entry>
+              <entry>entier 32 bits</entry>
               <entry><literal>i</literal></entry>
               <entry></entry>
             </row>
             <row>
-              <entry>entier 64bit</entry>
+              <entry>entier 64 bits</entry>
               <entry><literal>q</literal></entry>
               <entry></entry>
             </row>
@@ -183,12 +183,12 @@
               </entry>
             </row>
             <row>
-              <entry>tableau d'entiers 32bit</entry>
+              <entry>tableau d'entiers 32 bits</entry>
               <entry><literal>I</literal></entry>
               <entry></entry>
             </row>
             <row>
-              <entry>tableau d'entiers 64bit</entry>
+              <entry>tableau d'entiers 64 bits</entry>
               <entry><literal>Q</literal></entry>
               <entry></entry>
             </row>
@@ -212,10 +212,842 @@
       </informaltable>
     </para>
   </sect2>
-  <sect2 id='gwyfile-data-objects'>
-    <title>Objets Particuliers</title>
+  <sect2 id='gwyfile-top-level-container'>
+    <title>Conteneur <type>GwyContainer</type> de premier niveau</title>
     <para>
-      A écrire.
+      Les noms (clés) des objets dans un <type>GwyContainer</type> représentant
+      un fichier Gwyddion ressemblent fortement aux noms de fichiers UNIX, i.e.
+      ils sont sous la forme de de chemins séparés par le caractère 
+      <literal>/</literal>, et présentent une structure arborescente. Par
+      exemple, le titre du premier canal, numéroté 0, est enregistré dans la clé
+      <literal>/0/data/title</literal>. Notez que certaines données ou
+      informations se trouvent dans des clés parfois illogiques, la raison est
+      en général de nature historique.
+    </para>
+    <para>
+      Les sections qui suivent décrivent l'organisation des données et
+      informations intéressantes présentes dans le <type>GwyContainer</type>. La
+      liste n'est pas nécessairement exhaustive. Toutefois, comme tous les
+      éléments d'un fichier spécifient toujours leur nom, type et taille en
+      octets, il est toujours possible de sauter des types de données inconnus
+      ou des données n'ayant pas d'intérêt pour vous, et n'extraire que les
+      éléments souhaités.
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-channels'>
+    <title>Canaux</title>
+    <para>
+      Le tableau qui suit résume les clés des données relatives au canal 0 dans
+      le conteneur de premier niveau. Pour les autres canaux, il suffit de
+      remplacer le nombre 0 par le numéro du canal correspondant. Notez que les
+      canaux sont généralement numérotés de manière séquentielle, en partant de
+      0, toutefois les canaux peuvent avoir n'importe quel numéro, et l'ensemble
+      des numéros des canaux ne sont pas nécessairement contigus.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-channel-keys'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Clé</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/0/data</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
+              <entry>
+                Données du canal.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/data/title</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Titre du canal, tel qu'affiché dans le navigateur de données.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/data/visible</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Détermine si le canal doit être affiché lors du chargement du
+                fichier.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/palette</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Nom du gradient de fausses couleurs utilisé pour afficher le
+                canal.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/range-type</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Type de visualisation (tel que défini par 
+                <link linkend='color-range'>l'outil Visualisation des couleurs</link>),
+                la valeur provient de la liste
+                <type>GwyLayerBasicRangeType</type>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/min</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Valeur minimum utilisée pour la plage d'affichage définie par
+                l'utilisateur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/max</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Valeur maximum utilisée pour la plage d'affichage définie par
+                l'utilisateur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
+              <entry>
+                Données du masque. Les dimensions en pixels de ces données 
+                doivent correspondre à celles des données du canal.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/red</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante rouge de la couleur du masque.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/green</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante verte de la couleur du masque.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/blue</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante bleue de la couleur du masque.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/alpha</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante alpha (opacité) de la couleur du masque.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/show</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
+              <entry>
+                Données de présentation. Les dimensions en pixels de ces données 
+                doivent correspondre à celles des données du canal.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/meta</literal></entry>
+              <entry><type>GwyContainer</type></entry>
+              <entry>
+                Métadonnées du canal. Les clés correspondent directement aux
+                noms affichées dans le navigateur de métadonnées, et les chaînes
+                de caractères en sont les valeurs.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/select/<replaceable>foo</replaceable></literal></entry>
+              <entry>une sous-classe de <type>GwySelection</type></entry>
+              <entry>
+                Données de sélection. Chaque type de sélection a (généralement)
+                un type d'objet différent et est enregistré sous un nom
+                différent ; le nom spécifique 
+                <replaceable>foo</replaceable> est identique à celui affiché
+                dans le 
+                <link linkend='selection-manager'>gestionnaire de sélection</link>.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les canaux sont représentés sous forme d'objets <type>GwyDataField</type>.
+      Les composants de <type>GwyDataField</type> sont résumés dans le tableau
+      suivant :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyDataField'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xres</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Taille horizontale en pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yres</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Taille verticale en pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>xreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Dimension horizontale en unités physiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Dimension verticale en unités physiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>xoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Décalage horizontal du coin supérieur gauche en unités
+                physiques. Il n'apparaît normalement que s'il est non nul.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Décalage vertical du coin supérieur gauche en unités
+                physiques. Il n'apparaît normalement que s'il est non nul.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_xy</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des dimensions latérales.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_z</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des valeurs de hauteur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>tableau de doubles</entry>
+              <entry>
+                Données, enregistrées sous forme d'un tableau de taille
+                <varname>xres</varname>×<varname>yres</varname>, allant du haut
+                vers le bas et de gauche à droite.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-graphs'>
+    <title>Graphes</title>
+    <para>
+      Les tableaux qui suivent donnent les clés les plus courantes relatives
+      aux données des graphes dans le conteneur de premier niveau du graphe
+      numéro 1. Pour les autres graphes le numéro 1 doit être remplacé par le
+      numéro de graphe correspondant. Notez que les graphes sont généralement
+      numérotés de manière séquentielle, en partant de 1, toutefois ils peuvent
+      avoir n'importe quel numéro positifs, et l'ensemble des numéros des
+      graphes n'est pas nécessairement contigu. Le numéro 0 utilisé en prefixe
+      des clés des graphes est de nature historique, il n'a pas de signification
+      particulière et vaut toujours 0.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-graph-keys'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Clé</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/0/graph/graph/1</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyGraphModel'><type>GwyGraphModel</type></link></entry>
+              <entry>
+                Objet de données de graphe.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/graph/graph/1/visible</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Détermine si le graphe doit être affiché lors du chargement du
+                fichier.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les graphes sont représentés par des objets <type>GwyGraphModel</type>.
+      Les composants de <type>GwyGraphModel</type> sont résumés dans la table
+      qui suit :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyGraphModel'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>curves</literal></entry>
+              <entry>tableau de <link linkend='table-gwyfile-GwyGraphCurveModel'><type>GwyGraphCurveModel</type></link>s</entry>
+              <entry>
+                Courbes de graphes individuelles.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>title</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Titre du graphe tel qu'affiché dans le navigateur de données.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>x_unit</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des abscisses.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>y_unit</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des ordonnées.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>top_label</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Label de l'axe du haut.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>bottom_label</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Label de l'axe du bas.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>left_label</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Label de l'axe de gauche.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>right_label</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Label de l'axe de droite.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>x_is_logarithmic</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si l'échelle des abscisses est logarithmique.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>y_is_logarithmic</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si l'échelle des ordonnées est logarithmique.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>x_min</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Valeur minimum des abscisses définie par l'utilisateur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>x_min_set</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si la valeur minimum des abscisses définie par
+                l'utilisateur doit être utilisée (dans le ca contraire la plage
+                est déterminée automatiquement).
+              </entry>
+            </row>
+            <row>
+              <entry><literal>x_max</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Valeur maximum des abscisses définie par l'utilisateur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>x_max_set</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si la valeur maximum des abscisses définie par
+                l'utilisateur doit être utilisée (dans le ca contraire la plage
+                est déterminée automatiquement).
+              </entry>
+            </row>
+            <row>
+              <entry><literal>y_min</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Valeur minimum des ordonnées définie par l'utilisateur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>y_min_set</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si la valeur mimimum des ordonnées définie par
+                l'utilisateur doit être utilisée (dans le ca contraire la plage
+                est déterminée automatiquement).
+              </entry>
+            </row>
+            <row>
+              <entry><literal>y_max</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Valeur maximum des ordonnées définie par l'utilisateur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>y_max_set</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si la valeur maximum des ordonnées définie par
+                l'utilisateur doit être utilisée (dans le ca contraire la plage
+                est déterminée automatiquement).
+              </entry>
+            </row>
+            <row>
+              <entry><literal>grid-type</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Type de la grille affichée.
+                La valeur provient de la liste <type>GwyGraphGridType</type>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>label.has_frame</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si le graphe a une grille.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>label.frame_thickness</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Epaisseur de la grille du graphe.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>label.reverse</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie s'il faut inverser la grille du graphe.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>label.visible</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si le label du graphe est visible.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>label.position</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Position (coin) dans lequel est placé le label du graphe.
+                La valeur provient de la liste
+                <type>GwyGraphLabelPosition</type>.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les courbes de graphes sont représentées par des objets
+      <type>GwyGraphCurveModel</type>. Les composants de
+      <type>GwyGraphCurveModel</type> sont résumés dans la table qui suit :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyGraphCurveModel'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xdata</literal></entry>
+              <entry>array of doubles</entry>
+              <entry>
+                Points d'abscisse.  Le nombre doit correspondre à
+                <literal>ydata</literal>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>ydata</literal></entry>
+              <entry>array of doubles</entry>
+              <entry>
+                Points d'ordonnée.  Le nombre doit correspondre à <literal>xdata</literal>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>description</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Description de la courbe (nom).
+              </entry>
+            </row>
+            <row>
+              <entry><literal>type</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Mode de la courbe (points, ligne, etc.)
+                La valeur provient de la listeThe value is from
+                <type>GwyGraphCurveType</type>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>color.red</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante rouge de la couleur de la courbe.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>color.green</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante verte de la couleur de la courbe.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>color.blue</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Composante bleue de la couleur de la courbe.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>point_type</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Type de symbole représentant les points de données. La valeur
+                provient de la liste <type>GwyGraphPointType</type>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>point_size</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Taille des symboles représentant les points.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>line_type</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Type de lignes connectant les points. La valeur provient de la
+                liste <type>GwyGraphLineType</type>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>line_size</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Epaisseur des lignes reliant les points.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-spectra'>
+    <title>Spectre</title>
+    <para>
+      Le tableau qui suit résume les clés les plus courantes relatives aux
+      données des spectres dans le conteneur de premier niveau de l'ensemble des
+      spectres 0. Pour les autres ensemble de spectres il faut remplacer le
+      nombre 0 par le numéro de l'ensemble de spectres correspondant. Notez que
+      les ensemles despectres sont généralement numérotés de manière
+      séqentielle, en partant de 0, toutefois ceux-ci peuvent avoir n'importe
+      quel numéro, et l'ensemble des numéros des spectres ne sont pas
+      nécessairement contigus.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-spectra-keys'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Clé</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/sps/0</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySpectra'><type>GwySpectra</type></link></entry>
+              <entry>
+                Données de spectre.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les spectres d'un type donné sont représentés par des objets
+      <type>GwySpectra</type>. Les composants de <type>GwySpectra</type> sont
+      résumés dans le tableau qui suit :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwySpectra'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>title</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Titre du spectre tel qu'affiché dans le navigateur de donnée.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_xy</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des coordonnées de position du spectre.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>coords</literal></entry>
+              <entry>tableau de doubles</entry>
+              <entry>
+                Coordonnées des points où les spectres ont été mesurés, en
+                unités physiques. Chaque spectre comporte deux éléments : les
+                coordonnées horizontale et verticale. Le nombre de coordonnées
+                doit correspondre au nombre de courbes dans
+                <varname>data</varname>.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>tableau de <link linkend='table-gwyfile-GwyDataLine'><type>GwyDataLine</type></link>s</entry>
+              <entry>
+                Courbes de spectres individuels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>selected</literal></entry>
+              <entry>taleau d'entiers 32 bits</entry>
+              <entry>
+                Indices des courbes de spectres sélectionnées.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les courbes individuelles des spectres sont représentées par des objets
+      <type>GwyDataLine</type>. Les composants de <type>GwyDataLine</type> sont
+      résumées dans le tableau suivant :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyDataLine'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>res</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Nombre de points de données.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>real</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Longueur en unités physiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>off</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Décalage du début en unités physiques. Il n'apparaît normalement
+                que s'il est non nul.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_x</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des abscisses.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_y</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des valeurs des données.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>tableau de doubles</entry>
+              <entry>
+                Données de ligne, enregistrées sous forme d'un tableau de
+                <varname>res</varname>, allant de gauche à droite.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-auxiliary-objects'>
+    <title>Objets auxiliaires</title>
+    <para>
+      Les composants d'un <type>GwySIUnit</type> sont résumés dans le tableau
+      qui suit :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwySIUnit'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>unitstr</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Représentation textuelle des unités, par exemple
+                <literal>"A"</literal> ou <literal>"m^-1"</literal> (pour les
+                unités SI, les préfixes sont ignorés).
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les composants d'un <type>GwySelection</type> sont résumés dans le tableau
+      suivant. Certains types de sélection peuvent avoir d'autres éléments de
+      données ; référez-vous à la documentation des classes de sélection
+      spécifiques pour savoir comment interpréter les données.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwySelection'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>max</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Nombre maximum d'objets qu'une sélection peut détenir (il s'agit
+                du nombre défini par
+                <function>gwy_selection_set_max_objects()</function>).
+              </entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>tableau de doubles</entry>
+              <entry>
+                Données de sélection. Le nombre d'éléments formant un objet
+                sélection est déterminé par le type de sélection.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </para>
   </sect2>
 </sect1>
