@@ -143,17 +143,17 @@
     </para>
   </sect2>
   <sect2 id='polynomial-distort'>
-    <title>Distortion Polynômiale</title>
-    <indexterm><primary>distortion dans le plan xy</primary></indexterm>
+    <title>Distorsion Polynômiale</title>
+    <indexterm><primary>distorsion dans le plan xy</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Traitement des Données</guimenu>
         <guisubmenu>Correction des Données</guisubmenu>
-        <guimenuitem>Distortion Polynômiale</guimenuitem>
+        <guimenuitem>Distorsion Polynômiale</guimenuitem>
       </menuchoice>
     </para>
     <para>
-      Une distortion dans le plan horizontal peut être corrigée ou créée à
+      Une distorsion dans le plan horizontal peut être corrigée ou créée à
       l'aide la distorsion polynômiale. Cet outil effectue des transformée
       pouvant être exprimées sous la forme
     </para>
