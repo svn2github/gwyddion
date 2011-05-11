@@ -128,6 +128,41 @@
         <entry>Pente</entry>
         <entry>Inclinaison φ</entry>
       </row>
+      <row>
+        <entry><varname>x_0</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Position x du centre de courbure</entry>
+      </row>
+      <row>
+        <entry><varname>y_0</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Position y du centre de courbure</entry>
+      </row>
+      <row>
+        <entry><varname>z_0</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Position z du centre de courbure</entry>
+      </row>
+      <row>
+        <entry><varname>kappa_1</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Courbure 1</entry>
+      </row>
+      <row>
+        <entry><varname>kappa_2</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Courbure 2</entry>
+      </row>
+      <row>
+        <entry><varname>phi_1</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Orientation de la courbure 1</entry>
+      </row>
+      <row>
+        <entry><varname>phi_2</varname></entry>
+        <entry>Courbure</entry>
+        <entry>Orientation de la courbure 2</entry>
+      </row>
     </tbody>
   </tgroup>
 </informaltable>
