@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 11480 2010-10-29 17:50:37Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 12437 2011-05-18 12:00:48Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
@@ -72,7 +72,7 @@
             <row>
               <entry>double</entry>
               <entry><literal>d</literal></entry>
-              <entry>число двойной точности с плавающей точкой по стандарту IEEE 754</entry>
+              <entry>конечное число с плавающей точкой двойной точности по стандарту IEEE 754, т.е. файлы не должны содержать бесконечных чисел и не числовых значений (NaN).</entry>
             </row>
             <row>
               <entry>строка</entry>

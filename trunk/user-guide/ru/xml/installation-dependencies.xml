@@ -76,7 +76,7 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Добавляет поддержку сжатия в некоторых форматах файлов (Createc).</para>
+        <para>Добавляет поддержку сжатия в некоторых форматах файлов (Createc, NRRD).</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-png">
@@ -87,7 +87,18 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Добавляет экспорт полей высот в 16битные серые изображения PNG.</para>
+        <para>Добавляет экспорт полей высот в 16битные серые изображения PNG и импорт 16битных изображений PNG.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-openexr">
+      <term>
+        <ulink url="http://www.openexr.com/">OpenEXR</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Добавляет импорт и экспорт изображений OpenEXR HDR.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-pygtk2">
