@@ -125,7 +125,7 @@
           <emphasis>Optional.</emphasis>
         </para>
         <para>
-          Enables compression support in some file formats (Createc).
+          Enables compression support in some file formats (Createc, NRRD).
         </para>
       </listitem>
     </varlistentry>
@@ -138,7 +138,21 @@
           <emphasis>Optional.</emphasis>
         </para>
         <para>
-          Enables export of heightfields to 16bit greyscale PNG images.
+          Enables export of heightfields to 16bit greyscale PNG images and
+          import of 16bit PNG images.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-openexr'>
+      <term>
+        <ulink url='http://www.openexr.com/'>OpenEXR</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables import and export of OpenEXR HDR images.
         </para>
       </listitem>
     </varlistentry>
