@@ -126,7 +126,7 @@
               <entry>double</entry>
               <entry><literal>d</literal></entry>
               <entry>
-                finite IEEE 754 double precession floating point number,
+                finite IEEE 754 double precision floating point number,
                 i.e. files must not contain infinities and not-a-numbers
               </entry>
             </row>
