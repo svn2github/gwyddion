@@ -15,7 +15,7 @@ clean:
 dist:
 	rm -rf gwybatch
 	mkdir gwybatch
-	cp gwybatch.c Makefile gwybatch/
+	cp gwybatch.c Makefile COPYING gwybatch/
 	tar -jcvf gwybatch.tar.bz2 gwybatch/
 	rm -rf gwybatch
 
