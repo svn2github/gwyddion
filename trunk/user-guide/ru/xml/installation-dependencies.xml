@@ -79,6 +79,17 @@
         <para>Добавляет поддержку сжатия в некоторых форматах файлов (Createc, NRRD).</para>
       </listitem>
     </varlistentry>
+    <varlistentry id="dependency-bzip2">
+      <term>
+        <ulink url="http://www.bzip.org/">Bzip2</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Добавляет поддержку сжатия в некоторых форматах файлов (NRRD).</para>
+      </listitem>
+    </varlistentry>
     <varlistentry id="dependency-png">
       <term>
         <ulink url="http://www.libpng.org/pub/png/">Libpng</ulink>
