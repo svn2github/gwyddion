@@ -288,6 +288,24 @@ export LDFLAGS</userinput></literallayout>
       there.
     </para>
   </sect2>
+  <sect2 id='installation-unix-source-running'>
+    <title>Running</title>
+    <para>
+      Running <application>Gwyddion</application> does not normally require any
+      additional setup.
+    </para>
+    <para>
+      The misfeatures of some desktop environments, however, may render
+      <application>Gwyddion</application> unusable and need to be disabled.
+      The hijacking of program main menu in <application>Unity</application>
+      makes most of <application>Gwyddion</application> menus inaccessible.  It
+      can be disabled by by unsetting <envar>UBUNTU_MENUPROXY</envar> while
+      running <application>Gwyddion</application>:
+      <informalexample>
+        <literallayout><userinput>UBUNTU_MENUPROXY= gwyddion</userinput></literallayout>
+      </informalexample>
+    </para>
+  </sect2>
   <sect2 id='installation-unix-source-deinstallation'>
     <title>Deinstallation</title>
     <para>
