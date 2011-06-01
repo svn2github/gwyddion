@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 12437 2011-05-18 12:00:48Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 12496 2011-06-01 10:59:41Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
@@ -40,7 +40,7 @@
     <para>
       <informaltable id="table-gwyfile-atomic-types">
         <tgroup cols="3" align="left">
-          <?dblatex lll?>
+          <?dblatex llX?>
           <thead>
             <row>
               <entry>Тип</entry>
