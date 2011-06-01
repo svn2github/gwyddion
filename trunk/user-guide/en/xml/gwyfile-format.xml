@@ -91,7 +91,7 @@
     <para>
       <informaltable id='table-gwyfile-atomic-types'>
         <tgroup cols='3' align='left'>
-          <?dblatex lll?>
+          <?dblatex llX?>
           <thead>
             <row>
               <entry>Type</entry>
@@ -228,7 +228,7 @@
       The following table summarises the common keys of channel-related data in
       the top-level container for channel number 0.  For other channels, the
       number 0 has to be replaced with the corresponding channel number.  Note
-      that channels are often numbered sequantially, starting from 0, however,
+      that channels are often numbered sequentially, starting from 0, however,
       they can have any numbers and the set of channels numbers does not have
       to be contiguous.
     </para>
@@ -455,7 +455,7 @@
       The following table summarises the common keys of graph-related data in the top-level
       container for graph number 1.  For other graphs, the number 1 has to be
       replaced with the corresponding graph number.  Note that graphs are often
-      numbered sequantially, starting from 1, however, they can have any
+      numbered sequentially, starting from 1, however, they can have any
       numbers positive and the set of graph numbers does not have to be
       contiguous.  The number 0 in the prefix of graph keys is a historical
       relict that does not mean anything and it is always 0.
@@ -792,7 +792,7 @@
       The following table summarises the common keys of spectra-related data in
       the top-level container for spectra set number 0.  For other spectra, the
       number 0 has to be replaced with the corresponding spectra set number.  Note
-      that spectra sets are often numbered sequantially, starting from 0, however,
+      that spectra sets are often numbered sequentially, starting from 0, however,
       they can have any numbers and the set of spectra set numbers does not have
       to be contiguous.
     </para>
