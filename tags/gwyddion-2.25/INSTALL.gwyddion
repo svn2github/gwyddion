@@ -1,0 +1,225 @@
+
+Contents:
+0. Prebuilt binaries
+1. From sources -- Linux/Unix
+2. From sources -- MS Windows
+3. From sources -- Mac OS X
+4. From Subversion (Linux/Unix only)
+5. Pygwy under MS Windows
+6. Modules and plug-ins
+
+===[ 0. Prebuilt binaries ]==================================================
+
+Binary packages provided by us, i.e. installers from MS Windows, require no
+additional setup after standard package installation procedure.  If you have
+never installed Gwyddion (or other Gtk+ application), you will need to
+install of Gtk+ runtime libraries prior to Gwyddion installation, we
+recommend GladeWin32 packages.
+
+We cannot tell for packages provided for other systems by other entities, but
+do not expect them to require any additional setup either.
+
+
+===[ 1. From sources -- Linux/Unix ]=========================================
+
+Prerequisities:
+- a C compiler, linker, make, etc. capable of Gtk+ compilation (you don't have
+  to compile Gtk+, but what is good enough for Gtk+ should be good enough for
+  Gwyddion), GNU toolchain is the prefered one
+- Gtk+-2.8 or newer, including development files
+  http://www.gtk.org/
+- pkg-config 0.16 or newer
+  http://pkgconfig.freedesktop.org/
+
+Recommended though optional, for 3D data view:
+- GtkGLExt-1.0 or newer, including development files
+  http://gtkglext.sourceforge.net/
+
+Recommended though optional, for speed up of some operations:
+- FFTW-3.0.0 (on 64bit systems, 3.1.0) or newer, including development files
+  http://www.fftw.org/
+
+Recommended though optional, for basic desktop integration:
+- desktop-file-utils
+  http://www.freedesktop.org/software/desktop-file-utils
+
+Recommended though optional, for `remote control':
+- libunique-1.0 or newer, including development files
+
+Recommended though optional, for Python scripting interface pygwy:
+- PyGTK2, including codegen, and all its dependencies
+  http://www.pygtk.org/
+
+Optional, for syntax highlighting in the Python console:
+- GtkSourceView, including development files
+  http://gtksourceview.sourceforge.net/
+
+Optional, for better GNOME and XFce integration (SPM file thumbnails):
+- GConf2
+  http://projects.gnome.org/gconf/
+
+Optional, for better KDE integration (SPM file thumbnails):
+- KDE4 libraries, including development files, and all their dependencies
+  http://www.kde.org/
+
+Optional, for SPML file support:
+- LibXML2, including development files
+  http://xmlsoft.org/
+
+Optional, for compressed Createc, NRRD and Matlab MAT5 file support:
+- zlib, including development files
+  http://www.gzip.org/zlib/
+
+Optional, for compressed NRRD file support:
+- libbz2, including development files
+  http://www.bzip.org/
+
+Optional, for alternative `remote control' backend:
+- LibXmu (a part of X11, though packaged separately since Xorg 7.0), including
+  development files
+  http://www.x.org
+
+Optional, for development of plug-in in various languages:
+- Python-2.2 or newer
+- Ruby-1.8 or newer
+- Perl5
+- FreePascal-1.9 or newer
+
+Read generic GNU installation instruction in INSTALL that describe the build
+process, common program arguments, and important environment variables.
+
+Quick instructions:
+Unpack tarball with sources, cd to the created directory, then run:
+  ./configure
+  make
+and as root run:
+  make install
+
+If you have Gtk+ (or other packages, e.g., FFTW) in a nonstandard directory,
+assure PKG_CONFIG_PATH environment variable points to directory where
+gtk+-2.0.pc (e.g.) resides.
+
+If you install to a subdirectory of home, you may need to adjust
+GCONF_SCHEMA_CONFIG_SOURCE, KDE4_MODULE_DIR (during make install) and
+XDG_DATA_DIRS (after installation) to get full desktop integration.
+
+To prevent the installation of GConf schemas, even though you have enabled the
+GNOME thumbnailer, run `make install DISABLE_GCONF_SCHEMAS_INSTALL=yes'.  To
+ease packaging, it is automatically disabled when DESTDIR is non-empty.
+
+
+===[ 2. Cross compilation for MS Windows ]===================================
+
+
+
+===[ 3. From sources -- Mac OS X ]===========================================
+
+Essentially, the Unix instructions apply here too.
+
+It's recommended to use Darwinports for installing the dependencies.  You
+need to install ports for gtk2, pkg-config; that should pull all the other
+dependencies.  It is recommended to install gtkglext and libxml2 too.
+
+To make sure headers and libraries are found where Darwinports install them
+you may want to explicitely set:
+
+  CFLAGS='-I/opt/local/include -I/usr/X11R6/include'
+  LDFLAGS='-L/opt/local/lib -I/usr/X11R6/lib'
+
+Also make sure /opt/local/bin is in the PATH so that pkg-config can be found.
+
+Note until Gtk+ Quartz port is finished, it's necessary to start an X11
+server before running Gwyddion.
+
+
+===[ 4. From Subversion (Linux/Unix only) ]==================================
+
+The Subversion repository generally doesn't contain generated files, no
+matter how unusual tools may be needed to generate them.  Consider use of
+nightly snapshot tarballs available at
+
+  http://gwyddion.net/download.php#head
+
+Prerequisities:
+- everything needed for compilation from tarballs
+- GNU autoconf 2.60 or newer
+- GNU automake 1.11 or newer
+- GNU libtool 1.4 or newer
+- Python-2.2 or newer
+- Perl5
+- gtk-doc 1.8 or newer
+- GNU gettext 0.12 or newer, including development stuff
+- who knows what else
+
+First of all run
+  ./autogen.sh
+with any options you'd give to ./configure, note it always adds
+--enable-maintainer-mode.  You should add at least --enable-gtk-doc to
+build the API documentation (tarballs cannot be made without it).
+
+You should be able to build executables then with
+  make
+
+At this point that all files that are included in source tarball should be
+created, and
+  make install
+or
+  make dist
+will work as expected.
+
+
+===[ 5. Pygwy under MS Windows ]=============================================
+
+1. Python 2.4.X
+   Get Python sources
+   Unpack it for example to D:\
+   Open workspace $PYTHON_DIR\PC\VC6\pcbuild.dsw in Visual Studio 6
+   Set 'pythoncore' as active project
+   Choose Release configuration using Build/Set Active Configuration menu
+   Build python24.dll
+
+2. Pygobject 2.12.X
+   If GTK is not installed, install its development version.
+   In MSVC 6 check and possibly add in Tools/Options/Directories
+   following Include files directories (GTK directories should already be
+   set in case you allowed the GTK installer to do it):
+        D:\GTK\INCLUDE
+        D:\GTK\INCLUDE\GTK-2.0
+        D:\GTK\INCLUDE\GLIB-2.0
+        D:\GTK\INCLUDE\PANGO-1.0
+        D:\GTK\INCLUDE\CAIRO
+        D:\GTK\INCLUDE\ATK-1.0
+        D:\GTK\INCLUDE\GTKGLEXT-1.0
+        D:\GTK\LIB\GTK-2.0\INCLUDE
+        D:\GTK\LIB\GTK-2.0\INCLUDE
+        D:\GTK\LIB\GLIB-2.0\INCLUDE
+        D:\GTK\LIB\GTKGLEXT-1.0\INCLUDE
+        D:\GTK\INCLUDE\LIBGLADE-2.0
+        D:\GTK\INCLUDE\LIBXML2
+        D:\PYTHON-2.4.4\INCLUDE
+        D:\PYTHON-2.4.4\PC
+   Library files:
+        D:\GTK\LIB
+        D:\PYTHON-2.4.4\PC\VC6
+   Note: Don't forget to use your own path to GTK and Python directories.
+   Get pygobject sources
+   Unpack it for example to D:\
+   Use provided workspace and project file (pygobject.dsp, pygobject.dsw)
+   and put them into pygobject directory.
+   Open workspace $PYGOBJECT_DIR\pygobject.dsw in Visual Studio 6
+   Choose Release configuration using Build/Set Active Configuration menu
+   Build pygobject.dll
+
+3. Gwyddion
+   Set path variables (PYTHON_TOP, PYGOBJECT_TOP) in make.msc to coresponding
+   values and enable pygwy by uncommenting ENABLE_PYGWY variable.
+   Compile & install
+
+Note: to see messages printed by Python interpreter to stdout you can add
+/subsystem:console to LDFLAGS in make.msc and recompile & reinstall Gwyddion.
+
+
+===[ 6. Modules and plug-ins ]===============================================
+
+To be written.
+
