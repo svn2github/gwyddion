@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: filters.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='caldata'>
+  <title>Calibration et uncertitudes</title>
+  <sect2 id='caldata-overview'>
+    <title>
+      Données de calibration
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_filter-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      Les données de calibration peuvent être utilisées pour corriger les
+      données mesurées ou pour réaliser des calculs d'incertitude. Elles peuvent
+      être en général de différents types et niveaux de complexité. Dans la
+      plupart des cas l'utilisateur fait une aquisition de l'erreur sur chaque
+      axe, par exemple à l'aide d'un calibre standard. Les valeurs acquises
+      peuvent alors être utilisées pour la correction des données. De manière
+      similaire, la valeur d'incertitude est le plus souvent déterminée pour
+      chaque axe à partir d'un bulletin de calibration et d'un budget
+      d'incertitude du proécédé de mesure.
+    </para>
+    <para>
+      Dans les cas plus complexes; les données de calibration peuvent être
+      déterminées localement. Les erreurs de scan ne peuvent pas toujours être
+      décrites par trois paramètres uniquement (un pour chaque axe) et leurs
+      incertitudes ne sont pas nécessairement constantes sur toute la dynamique.
+      Afin d'obtenir des mesure précises il est ainsi pratique de déterminer
+      les erreurs locales ainsi que les incertitudes locales afin de les
+      exploiter par la suite. En parlant de "locale", nous faisons ici référence
+      aux incertitudes reliées à une certaine position dans le volume pouvant
+      être parcouru par le scanner.
+    </para>
+    <para>
+      Afin d'obtenir les erreurs et incertitudes locales, on pourra utiliser un
+      calibre stadardisé ou utiliser une instrumentation plus complexe, tel
+      qu'un interféromètre pour calibrer les platines de translation du scanner.
+      Ce genre de calibration est couramment réalisée dans les instituts de
+      métrologie.
+    </para>
+    <para>
+      Un ensemble d'outils est disponible dans Gwyddion pour faciliter le
+      traitement des incertitudes locales. Les données de calibration primaire,
+      liées aux platines de translation, peuvent être déterminées ou chargées.
+      Elles peuvent être attibuées à une mesure SPM particulière afin de créer
+      un jeu de calibrations. Elles sont utilisées de manière automatique par
+      les outils et modules pour lesquels un calcul de propagation des
+      incertitudes peut être réalisé, de manière à déterminer une incertitude
+      de mesure finale..
+    </para>
+  </sect2>
+  <sect2 id='caldata-create'>
+    <title>Acquisition des données de calibration</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Calibration</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+      Les données de calibration peuvent être acquises des manières suivantes :
+      Le module
+      <menuchoice>
+        <guimenu>Calibration</guimenu>
+        <guisubmenu>Créer...</guisubmenu>
+      </menuchoice>
+      peut être utilisé pour créer les données de calibration primaires les plus
+      simples - en se basant seulement sur la connaissance des erreurs xyz, des
+      incertitudes et de la géométrie volumique du scanner. Il faut aussi donner
+      un nom à la calibration calculée. Les données primaires de calibration
+      sont par la suite disponibles sous ce nom pour pouvoir être appliquées
+      aux mesures SPM. 
+      </para>
+      <para>
+      En utilisant le module 
+      <menuchoice>
+        <guimenu>Calibration</guimenu>
+        <guisubmenu>Calculer une carte d'erreur basique...</guisubmenu>
+      </menuchoice>
+      on peut déterminer les données primaires de calibration à partir de
+      mesures sur des étalons calibrés. Il faut dans ce cas fournir les mesures
+      de plusieurs étalons calibrés pour différentes hauteurs z du scanner. Cela
+      forme plusieurs sections du volume entier du scanner. L'utilisation d'un
+      détail seul d'un étalon, de son pas nominal et en supposant que sa planéité
+      et son orthogonalité sont bien meilleures que celles des platines, on peut
+      déterminer les données primaires de calibration en se basant sur les
+      corrélations. Notez que cette manière de calibrer un microscope est très
+      approximative et que son intérêt est plutôt limité pour des besoins de
+      métrologie. Toutefois, elle permet d'obtenir des informations utiles sur
+      les propriétés du scanner dans le cas où l'on ne peut pas réaliser
+      une analyse plus fine des incertitudes.
+    </para>
+    <para>
+    Pour finir, le module
+    <menuchoice>
+        <guimenu>Calibration</guimenu>
+        <guisubmenu>Charger un fichier de calibration...</guisubmenu>
+    </menuchoice>
+    permet de charger un fichier de données de calibration obtenues par un
+    appareil externe, comme par exemple des interféromètres. Les données doivent
+    être sous forme de texte brut contenant les nombres des ensembles de
+    calibration et les valeurs associées (x, y, z, x_err, y_err, z_err, x_unc,
+    y_unc, z_unc).
+    </para>
+  </sect2>
+  <sect2 id='caldata-apply'>
+    <title>Application des données de calibration et utilisation ultérieure</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Calibration</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+    Les données primaires de calibration obtenues lors des étapes précédentes
+    sont liées à des platines de translation et non à des mesures SPM. On peut
+    utiliser les données de calibration pour différentes mesures. Pour utiliser
+    ces données pour traiter les données mesurées, il faut tout d'abord les
+    appliquer.
+    Le module 
+          <menuchoice>
+        <guimenu>Calibration</guimenu>
+        <guisubmenu>Appliquer aux données...</guisubmenu>
+      </menuchoice>
+    permet de lister et sélectionner les données de calibration appliquées aux
+    mesures. Après avoir appliqué les données de calibration, des champs de
+    données de calibration sont créés et rattachés aux données sélectionnées. Le
+    caractère 'C' apparaît alors dans le navigateur de données pour montrer que
+    des données de calibration sont attachées aux données correspondantes. Notez
+    que la calibration attachée à une mesure SPM n'est plus reliée aux données
+    primaires de calibration (qui ont été utilisée pour les créer).
+    </para>
+    <para>
+    Lorsqu'une calibration est attachée à des données, la lecture des données et
+    les modules de calcul des données statistiques la détecte automatiquement.
+    L'incertitude de mesure est alors ajoutée aux résultats. L'incertitude
+    totale est calculée en utilisant les lois de propagation des incertitudes.
+    </para>
+    </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
