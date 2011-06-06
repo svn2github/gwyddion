@@ -28,6 +28,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module ambfile.c -->
+    <row>
+      <entry>Ambios AMB</entry>
+      <entry>.amb</entry>
+      <entry>ambfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module anfatec.c -->
     <row>
       <entry>Anfatec</entry>
@@ -118,11 +127,29 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module csmfile.c -->
+    <row>
+      <entry>Benyuan CSM</entry>
+      <entry>.csm</entry>
+      <entry>csmfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module dmefile.c -->
     <row>
       <entry>DME Rasterscope</entry>
       <entry>.img</entry>
       <entry>dmefile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module dumbfile.c -->
+    <row>
+      <entry>Данные простых дампов Gwyddion</entry>
+      <entry>.dump</entry>
+      <entry>dumbfile</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -289,6 +316,15 @@
       <entry>Нет</entry>
       <entry>Ограничена<footnote id="table-file-formats-fn1"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
     </row>
+    <!-- From module mulfile.c -->
+    <row>
+      <entry>Aarhus MUL</entry>
+      <entry>.mul</entry>
+      <entry>mulfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module nanoeducator.c -->
     <row>
       <entry>Nanoeducator</entry>
@@ -361,6 +397,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module nrrdfile.c -->
+    <row>
+      <entry>Nearly raw raster data (NRRD)</entry>
+      <entry>.nrrd</entry>
+      <entry>nrrdfile</entry>
+      <entry>Да<footnote id="table-file-formats-fn2"><para>Не все варианты реализованы.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn3"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module nt-mdt.c -->
     <row>
       <entry>NT-MDT</entry>
@@ -428,8 +473,8 @@
       <entry>Изображения</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Да<footnote id="table-file-formats-fn2"><para>Поддержка импорта основана на Gdk-Pixbuf и в результате различается от системы к системе. Глубина цвета 16бит не поддерживается.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn3"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn4"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn5"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
       <entry>Нет</entry>
     </row>
     <!-- From module pltfile.c -->
@@ -452,8 +497,8 @@
     </row>
     <!-- From module psia.c -->
     <row>
-      <entry>PSIA</entry>
-      <entry>.tiff</entry>
+      <entry>Park Systems</entry>
+      <entry>.tiff,, .tif</entry>
       <entry>psia</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
@@ -499,16 +544,16 @@
       <entry>Текстовые данные графиков (необработанные)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Да<footnote id="table-file-formats-fn4"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn6"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
     <!-- From module rawxyz.c -->
     <row>
-      <entry>XYZ data</entry>
+      <entry>Данные XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Да<footnote id="table-file-formats-fn5"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn7"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
@@ -538,6 +583,15 @@
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
+    </row>
+    <!-- From module robotics.c -->
+    <row>
+      <entry>Automation and Robotics Dual Lens Mapper</entry>
+      <entry>.mcr, .mct, .mce</entry>
+      <entry>robotics</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
     </row>
     <!-- From module sdfile.c -->
     <row>
@@ -681,6 +735,15 @@
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
+    </row>
+    <!-- From module wipfile.c -->
+    <row>
+      <entry>WIPfile</entry>
+      <entry>.wip</entry>
+      <entry>wipfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Да</entry>
     </row>
     <!-- From module witfile.c -->
     <row>
