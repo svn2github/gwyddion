@@ -29,6 +29,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module ambfile.c -->
+    <row>
+      <entry>Ambios AMB</entry>
+      <entry>.amb</entry>
+      <entry>ambfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module anfatec.c -->
     <row>
       <entry>Anfatec</entry>
@@ -119,11 +128,29 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module csmfile.c -->
+    <row>
+      <entry>Benyuan CSM</entry>
+      <entry>.csm</entry>
+      <entry>csmfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module dmefile.c -->
     <row>
       <entry>DME Rasterscope</entry>
       <entry>.img</entry>
       <entry>dmefile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module dumbfile.c -->
+    <row>
+      <entry>Gwyddion dumb dump data</entry>
+      <entry>.dump</entry>
+      <entry>dumbfile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -290,6 +317,15 @@
       <entry>No</entry>
       <entry>Limited<footnote id="table-file-formats-fn1"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
     </row>
+    <!-- From module mulfile.c -->
+    <row>
+      <entry>Aarhus MUL</entry>
+      <entry>.mul</entry>
+      <entry>mulfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module nanoeducator.c -->
     <row>
       <entry>Nanoeducator</entry>
@@ -362,6 +398,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module nrrdfile.c -->
+    <row>
+      <entry>Nearly raw raster data (NRRD)</entry>
+      <entry>.nrrd</entry>
+      <entry>nrrdfile</entry>
+      <entry>Yes<footnote id="table-file-formats-fn2"><para>Not all variants are implemented.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn3"><para>Data are exported in a fixed attached native-endian float point format.</para></footnote></entry>
+      <entry>No</entry>
+    </row>
     <!-- From module nt-mdt.c -->
     <row>
       <entry>NT-MDT</entry>
@@ -429,9 +474,8 @@
       <entry>Pixmap images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Yes<footnote id="table-file-formats-fn2"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.
-16bit depth is not supported.</para></footnote></entry>
-      <entry>Yes<footnote id="table-file-formats-fn3"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
+      <entry>Yes<footnote id="table-file-formats-fn4"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn5"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
 export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>No</entry>
     </row>
@@ -455,8 +499,8 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
     </row>
     <!-- From module psia.c -->
     <row>
-      <entry>PSIA</entry>
-      <entry>.tiff</entry>
+      <entry>Park Systems</entry>
+      <entry>.tiff,, .tif</entry>
       <entry>psia</entry>
       <entry>Yes</entry>
       <entry>No</entry>
@@ -502,7 +546,7 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>Graph text data (raw)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Yes<footnote id="table-file-formats-fn4"><para>At present, only simple two-column data, imported as graph curves, are
+      <entry>Yes<footnote id="table-file-formats-fn6"><para>At present, only simple two-column data, imported as graph curves, are
 supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -512,7 +556,7 @@ supported.</para></footnote></entry>
       <entry>XYZ data</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Yes<footnote id="table-file-formats-fn5"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn7"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
     </row>
@@ -542,6 +586,15 @@ supported.</para></footnote></entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+    </row>
+    <!-- From module robotics.c -->
+    <row>
+      <entry>Automation and Robotics Dual Lens Mapper</entry>
+      <entry>.mcr, .mct, .mce</entry>
+      <entry>robotics</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
     </row>
     <!-- From module sdfile.c -->
     <row>
@@ -685,6 +738,15 @@ supported.</para></footnote></entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
+    </row>
+    <!-- From module wipfile.c -->
+    <row>
+      <entry>WIPfile</entry>
+      <entry>.wip</entry>
+      <entry>wipfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Yes</entry>
     </row>
     <!-- From module witfile.c -->
     <row>
