@@ -98,7 +98,7 @@
     <para>
       <informaltable id='table-gwyfile-atomic-types'>
         <tgroup cols='3' align='left'>
-          <?dblatex lll?>
+          <?dblatex llX?>
           <thead>
             <row>
               <entry>Type</entry>
@@ -134,7 +134,9 @@
               <entry>double</entry>
               <entry><literal>d</literal></entry>
               <entry>
-                Nombre à virgule flottante en double précision IEEE 754
+                Nombre fini à virgule flottante en double précision IEEE 754,
+                i.e. les fichiers ne doivent pas contenir des infinités et des
+                non-nombres
               </entry>
             </row>
             <row>
