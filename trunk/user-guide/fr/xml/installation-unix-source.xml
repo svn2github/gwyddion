@@ -177,11 +177,10 @@ export LDFLAGS</userinput></literallayout>
   <sect2 id='installation-unix-source-configuration2'>
     <title>Configuration tweaks</title>
     <para>
-        Des fonctionnalités optionnelles peuvent être activées/désactivées avec
-        des options telles que
+      Des fonctionnalités optionnelles peuvent être activées/désactivées avec
+      des options telles que
       <option>--with-foo</option>/<option>--without-foo</option>
-      ou
-      <option>--enable-foo</option>/<option>--disable-foo</option>.
+      ou <option>--enable-foo</option>/<option>--disable-foo</option>.
       La compilation avec FFTW3 peut par exemple être désactivée avec :
       <informalexample>
         <literallayout><userinput>./configure --without-fftw3</userinput></literallayout>
@@ -302,6 +301,25 @@ export LDFLAGS</userinput></literallayout>
       <informalexample>
         <programlisting>/usr/local/lib</programlisting>
       </informalexample>.
+    </para>
+  </sect2>
+  <sect2 id='installation-unix-source-running'>
+    <title>Lancement</title>
+    <para>
+      Le lancement de <application>Gwyddion</application> ne nécessite
+      normalement pas de réglage supplémentaire.
+    </para>
+    <para>
+      Toutefois, les fonctionnalités de certains environnements de bureau
+      peuvent rendre inutilisable <application>Gwyddion</application> et
+      celles-ci doivent être désactivées. Le détournement du menu principal des
+      programmes dans <application>Unity</application> rend inaccessible la
+      plupart des menus de <application>Gwyddion</application>. Cela peut être
+      désactivé en modifiant <envar>UBUNTU_MENUPROXY</envar> pour le lancement
+      de <application>Gwyddion</application> :
+      <informalexample>
+        <literallayout><userinput>UBUNTU_MENUPROXY= gwyddion</userinput></literallayout>
+      </informalexample>
     </para>
   </sect2>
   <sect2 id='installation-unix-source-deinstallation'>
