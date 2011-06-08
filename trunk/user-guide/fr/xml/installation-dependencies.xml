@@ -6,17 +6,18 @@
   <title>Dépendances de Compilation</title>
   <para>
     Le tableau suivant liste les paquets nécessaires à la compilation de
-    <application>Gwyddion</application> à partir du code source. Il ne donne
-    pas les outils communs de compilation comme un compilateur C ou
-    <command>make</command>. Les outils spécifiques à un système
-    d'exploitation sont décrits dans les sections dédiées à la compilation
-    sur un système particulier.
+    <application>Gwyddion</application> à partir du code source. Si votre
+    système d'exploitation possède des paquets de développement séparés, alors
+    ceux-ci seront nécessaires. Le tablean ne donne pas les outils communs de
+    compilation comme un compilateur C ou <command>make</command>. Les outils
+    spécifiques à un système d'exploitation sont décrits dans les sections
+    dédiées à la compilation sur un système particulier.
   </para>
     <variablelist>
     <title>Dépendances de Compilation</title>
     <varlistentry id='dependency-gtk'>
       <term>
-        <ulink url='http://www.gtk.org/'>Gtk+</ulink>
+        <ulink url='http://www.gtk.org/'>GTK+</ulink>
         ≥ 2.8.0
       </term>
       <listitem>
@@ -64,11 +65,6 @@
           </para>
           <para>
             Permet l'import des fichiers SPML.
-          </para>
-          <para>
-            Le paquet de compilation MS Windows est réglé de manière à
-            nécessiter LibXML2, et un ajustement manuel est nécessaire pour le
-            désactiver.
           </para>
         </listitem>
       </varlistentry>
@@ -130,7 +126,22 @@
           <emphasis>Facultatif.</emphasis>
         </para>
         <para>
-          Support de la compression pour certains formats de fichier (Createc).
+          Support de la compression pour certains formats de fichier (Createc,
+          NRRD).
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-bzip2'>
+      <term>
+        <ulink url='http://www.bzip.org/'>Bzip2</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Facultatif.</emphasis>
+        </para>
+        <para>
+          Permet le support de la compression pour certains formats de fichiers
+          (NRRD).
         </para>
       </listitem>
     </varlistentry>
@@ -144,7 +155,20 @@
         </para>
         <para>
           Permet l'export des données sous forme d'image en niveaux de gris au
-          format PNG 16 bits.
+          format PNG 16 bits et l'import d'images au format PNG 16 bits.
+        </para>
+      </listitem>
+     </varlistentry>
+    <varlistentry id='dependency-openexr'>
+      <term>
+        <ulink url='http://www.openexr.com/'>OpenEXR</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Facultatif.</emphasis>
+        </para>
+        <para>
+          Permet l'import et l'export des images HDR au format OpenEXR.
         </para>
       </listitem>
     </varlistentry>
