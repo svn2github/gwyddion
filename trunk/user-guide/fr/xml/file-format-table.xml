@@ -29,6 +29,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module ambfile.c -->
+    <row>
+      <entry>Ambios AMB</entry>
+      <entry>.amb</entry>
+      <entry>ambfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module anfatec.c -->
     <row>
       <entry>Anfatec</entry>
@@ -119,11 +128,29 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module csmfile.c -->
+    <row>
+      <entry>Benyuan CSM</entry>
+      <entry>.csm</entry>
+      <entry>csmfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module dmefile.c -->
     <row>
       <entry>DME Rasterscope</entry>
       <entry>.img</entry>
       <entry>dmefile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module dumbfile.c -->
+    <row>
+      <entry>Gwyddion données dumb dump</entry>
+      <entry>.dump</entry>
+      <entry>dumbfile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -290,6 +317,15 @@
       <entry>Non</entry>
       <entry>Limité<footnote id="table-file-formats-fn1"><para>Les courbes spectrales sont importées sous forme de graphes, les données de position sont perdues.</para></footnote></entry>
     </row>
+    <!-- From module mulfile.c -->
+    <row>
+      <entry>Aarhus MUL</entry>
+      <entry>.mul</entry>
+      <entry>mulfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module nanoeducator.c -->
     <row>
       <entry>Nanoeducator</entry>
@@ -360,6 +396,15 @@
       <entry>netcdf</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module nrrdfile.c -->
+    <row>
+      <entry>Nearly raw raster data (NRRD)</entry>
+      <entry>.nrrd</entry>
+      <entry>nrrdfile</entry>
+      <entry>Yes<footnote id="table-file-formats-fn2"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn3"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>Non</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -543,6 +588,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
+    <!-- From module robotics.c -->
+    <row>
+      <entry>Automation and Robotics Dual Lens Mapper</entry>
+      <entry>.mcr, .mct, .mce</entry>
+      <entry>robotics</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module sdfile.c -->
     <row>
       <entry>Surfstand Surface</entry>
@@ -685,6 +739,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
+    </row>
+    <!-- From module wipfile.c -->
+    <row>
+      <entry>WIPfile</entry>
+      <entry>.wip</entry>
+      <entry>wipfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Oui</entry>
     </row>
     <!-- From module witfile.c -->
     <row>
