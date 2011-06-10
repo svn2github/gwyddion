@@ -403,8 +403,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Yes<footnote id="table-file-formats-fn2"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
-      <entry>Yes<footnote id="table-file-formats-fn3"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
+      <entry>Oui</entry><footnote id="table-file-formats-fn2"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
+      <entry>Oui</entry><footnote id="table-file-formats-fn3"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>Non</entry>
     </row>
     <!-- From module nt-mdt.c -->
