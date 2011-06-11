@@ -403,8 +403,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Oui</entry><footnote id="table-file-formats-fn2"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
-      <entry>Oui</entry><footnote id="table-file-formats-fn3"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn2"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn3"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>Non</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -474,9 +474,9 @@
       <entry>Images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Oui<footnote id="table-file-formats-fn2"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
+      <entry>Oui<footnote id="table-file-formats-fn4"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
 Le format 16bit n'est  pas supporté.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn3"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
+      <entry>Oui<footnote id="table-file-formats-fn5"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
       en niveaux de gris 16bit est possible vers les formats PNG, TIFF et PNM.</para></footnote></entry>
       <entry>Non</entry>
     </row>
@@ -547,7 +547,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Graphe au format texte (brut)</entry>
       <entry>-</entry>
       <entry>rawgraph</entry>
-      <entry>Oui<footnote id="table-file-formats-fn4"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
+      <entry>Oui<footnote id="table-file-formats-fn6"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -557,7 +557,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Coordonnées XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Oui<footnote id="table-file-formats-fn5"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn7"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
