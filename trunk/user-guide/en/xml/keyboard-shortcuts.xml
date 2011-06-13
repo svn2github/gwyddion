@@ -80,6 +80,21 @@
           </entry>
         </row>
         <row>
+          <entry><keycap>Ctrl-H</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>File</guimenu>
+              <guisubmenu>Open Recent</guisubmenu>
+              <guimenuitem>Document History</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+          <entry>
+            Open the document history browser (or bring it forward if it is
+            already displayed).
+          </entry>
+        </row>
+        <row>
           <entry><keycap>Ctrl-Z</keycap></entry>
           <entry>
             <menuchoice>
