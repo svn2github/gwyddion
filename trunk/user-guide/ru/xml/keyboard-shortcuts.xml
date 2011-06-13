@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: keyboard-shortcuts.xml 9469 2009-07-16 20:22:10Z yeti-dn $ -->
+<!-- @(#) $Id: keyboard-shortcuts.xml 12534 2011-06-13 09:26:17Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="keyboard-shortcuts">
   <title>Клавиатурные сокращения</title>
@@ -69,6 +69,18 @@
           </entry>
           <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
           <entry>Добавить данные из файла к текущему файлу.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-H</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Файл</guimenu>
+              <guisubmenu>Последние файлы</guisubmenu>
+              <guimenuitem>Предыдущие документы</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Открыть окно просмотра предыдущих документов (или показать его окно поверх остальных, если оно уже открыто).</entry>
         </row>
         <row>
           <entry><keycap>Ctrl-Z</keycap></entry>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: introduction.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!-- @(#) $Id:$ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" id="summaries">
   <title>Сводки и таблицы </title>
@@ -8,6 +8,7 @@
   <xi:include href="gwyddion-thumbnailer.xml"/>
   <xi:include href="keyboard-shortcuts.xml"/>
   <xi:include href="file-formats.xml"/>
+  <xi:include href="pixmap-image-keys.xml"/>
   <xi:include href="expressions.xml"/>
   <xi:include href="resources.xml"/>
   <xi:include href="gwyfile-format.xml"/>

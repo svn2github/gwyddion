@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="pixmap-image-keys">
+  <title>Форматы изображений с большой глубиной цвета</title>
+  <para>Gwyddion может экспортировать данные в 16битные изображения в градациях серого в форматах PNG, PNM и TIFF и в формат OpenEXR в варианте типа данных с плавающей точкой половинной и одинарной точности и 32битным целым типом. В случае 16битных изображений полный диапазон значений данных растягивается на всю шкалу серого; OpenEXR позволяет указать множитель масштабирования значений.</para>
+  <para>Когда данные экспортируются в изображения с большой глубиной цвета, в файл сохраняется дополнительная информация чтобы его можно было автоматически загрузить обратно в Gwyddion не задавая вручную размеры и масштабы. При сохранении этой дополнительной информации в создаваемых файлах изображений их можно напрямую загружать в Gwyddion с правильными размерами и масштабами. Эта информация организована в виде пар ключ-значение, сохраненных в соответствии с индивидуальными особенностями формата, описанных в следующей таблице.</para>
+  <para>
+    <informaltable id="table-pixmap-image-metadata">
+      <tgroup cols="2" align="left">
+        <?dblatex lX?>
+        <thead>
+          <row>
+            <entry>Формат</entry>
+            <entry>Метод</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>PNG</entry>
+            <entry>блоки <varname>tEXt</varname></entry>
+          </row>
+          <row>
+            <entry>OpenEXR</entry>
+            <entry>именованные аттрибуты</entry>
+          </row>
+          <row>
+            <entry>PNM</entry>
+            <entry>комментарии заголовка в форме <literal># ключ: значение</literal></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>Большая часть ключей идентична тем. что используются в <link linkend="gsf">файлах Gwyddion с простым полем</link>, за исключением добавленных префиксов <literal>Gwy::</literal>, поэтому дополнительная информация доступна в описании GSF. Значения с плавающей точкой сохраняются напрямую, если формат это позволяет (OpenEXR), либо используется текстовое представление данных (в C-формате). Ключи перечислены ниже.</para>
+  <para>
+    <informaltable id="table-pixmap-image-keys">
+      <tgroup cols="3" align="left">
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Ключ</entry>
+            <entry>Тип</entry>
+            <entry>Значение</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>Gwy::XReal</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Горизонтальный размер в физических единицах (заданных <literal>XYUnits</literal>), положительное число с плавающей точкой.</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::YReal</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Вертикальный размер в физических единицах (заданных <literal>XYUnits</literal>), положительное число с плавающей точкой.</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::XOffset</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Горизонтальное смещение в физических единицах (заданных <literal>XYUnits</literal>).</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::YOffset</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Вертикальное смещение в физических единицах (заданных <literal>XYUnits</literal>).</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZScale</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Множитель масштабирования значений. Данные изображения должны быть умножены на этот множитель чтобы получить физические значения. Этот параметр обычно используется в форматах с плавающей точкой с ограниченным диапазоном значений, например, с половинной точностью. Для целочисленных данных обычно используются <literal>Gwy::ZMin</literal> и <literal>Gwy::ZMax</literal>.</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZMin</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Значение в физических единицах, соответствующее минимальному значению, представленному на изображении (обычно 0).</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZMax</literal></entry>
+            <entry>с плавающей точкой</entry>
+            <entry>Значение в физических единицах, соответствующее максимальному значению, представленному на изображении.</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::XYUnits</literal></entry>
+            <entry>строка</entry>
+            <entry>Горизонтальные единицы измерения, т.е. единицы физических размеров и смещений.</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZUnits</literal></entry>
+            <entry>строка</entry>
+            <entry>Единицы значений, т.е. единицы измерения значений данных.</entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::Title</literal></entry>
+            <entry>строка</entry>
+            <entry>Заголовок канала/данных.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>В случае PNG, информация о масштабировании также сохраняется в стандартных блоках <varname>sCAL</varname> и <varname>pCAL</varname> (с линейной формулой масштабирования). И наоборот, если эти блоки присутствуют (и отсутствуют специфичные для Gwyddion) информация оттуда используется при импорте. См. <ulink url="http://www.libpng.org/pub/png/spec/">спецификацию формата PNG </ulink> для описания этих блоков.</para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
