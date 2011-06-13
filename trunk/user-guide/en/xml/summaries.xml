@@ -16,6 +16,7 @@
   <xi:include href='gwyddion-thumbnailer.xml'/>
   <xi:include href='keyboard-shortcuts.xml'/>
   <xi:include href='file-formats.xml'/>
+  <xi:include href='pixmap-image-keys.xml'/>
   <xi:include href='expressions.xml'/>
   <xi:include href='resources.xml'/>
   <xi:include href='gwyfile-format.xml'/>

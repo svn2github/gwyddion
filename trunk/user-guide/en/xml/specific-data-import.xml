@@ -31,6 +31,11 @@
       module can be written for this particular format to load the files
       automatically with correctly scaled values.
     </para>
+    <para>
+      See the reference section <link linkend='pixmap-image-keys'>High-Depth
+      Image Formats</link> for the details of support for high-depth images
+      and the possibility of using them for data representations.
+    </para>
   </sect2>
   <sect2 id='graph-curve-import'>
     <title>Graph Curves</title>

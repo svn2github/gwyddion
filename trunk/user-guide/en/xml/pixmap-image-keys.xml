@@ -1,0 +1,166 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='pixmap-image-keys' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>High-Depth Image Formats</title>
+  <para>
+    Gwyddion can export data to 16bit greyscale PNG, PNM and TIFF images
+    and to OpenEXR images with half, float and 32bit data types.  In case of
+    16bit images the full data range is always stretched to the full
+    greyscale range; OpenEXR export permits to specify the value scaling
+    factor.
+  </para>
+  <para>
+    When data are exported to a high-depth image additional information is
+    stored to the file to enable automated loading back to Gwyddion without
+    having to specify the dimensions and scales manually.  By storing this
+    additional information to image files you create you can also make them
+    directly loadable to Gwyddion with correct dimensions and scales.  The
+    information is organised as key-value pairs, stored using individual
+    format-specific means for each format, described in the following table.
+  </para>
+  <para>
+    <informaltable id='table-pixmap-image-metadata'>
+      <tgroup cols='2' align='left'>
+        <?dblatex lX?>
+        <thead>
+          <row>
+            <entry>Format</entry>
+            <entry>Method</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>PNG</entry>
+            <entry><varname>tEXt</varname> chunks</entry>
+          </row>
+          <row>
+            <entry>OpenEXR</entry>
+            <entry>named attributes</entry>
+          </row>
+          <row>
+            <entry>PNM</entry>
+            <entry>
+              header comments of the form <literal># key: value</literal>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    Most keys are identical to those used in
+    <link linkend='gsf'>Gwyddion Simple Fields</link>, except for the added
+    <literal>Gwy::</literal> prefix, so see also GSF description for more
+    details.  Floating point values are stored directly if the format permits
+    it (OpenEXR), otherwise a text representation of the number is used (in
+    the C format).  The keys are listed below.
+  </para>
+  <para>
+    <informaltable id='table-pixmap-image-keys'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Key</entry>
+            <entry>Type</entry>
+            <entry>Meaning</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>Gwy::XReal</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Horizontal size in physical units (given by
+              <literal>XYUnits</literal>), a positive floating point number.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::YReal</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Vertical size in physical units (given by
+              <literal>XYUnits</literal>), a positive floating point number.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::XOffset</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Horizontal offset in physical units (given by
+              <literal>XYUnits</literal>).
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::YOffset</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Vertical offset in physical units (given by
+              <literal>XYUnits</literal>).
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZScale</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Value scaling factor.  Image data are to be multiplied by
+              this factor to obtain physical values.  This parameter is
+              usually used with limited-range floating point formats such as
+              half.  For integer data, <literal>Gwy::ZMin</literal> and
+              <literal>Gwy::ZMax</literal> is usually used.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZMin</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Value in physical units corresponding to the minimum value
+              representable in the image (normally 0).
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZMax</literal></entry>
+            <entry>floating point</entry>
+            <entry>
+              Value in physical units corresponding to the maximum value
+              representable in the image.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::XYUnits</literal></entry>
+            <entry>string</entry>
+            <entry>
+              Lateral units, i.e. units of physical sizes and offsets.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZUnits</literal></entry>
+            <entry>string</entry>
+            <entry>
+              Value units, i.e. units of data values.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::Title</literal></entry>
+            <entry>string</entry>
+            <entry>
+              Data/channel title.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    In case of PNG, the scaling information is also stored in the standard
+    <varname>sCAL</varname> and <varname>pCAL</varname> chunks (with linear
+    scaling formula).  Conversely, if these chunks are present (and the
+    Gwyddion-specific are absent) the information from them is used in
+    import.  See the
+    <ulink url='http://www.libpng.org/pub/png/spec/'>PNG speficiation</ulink>
+    for the chunk description.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
