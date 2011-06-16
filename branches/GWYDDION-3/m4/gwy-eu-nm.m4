@@ -5,7 +5,7 @@ dnl details in error messages but otherwise everything should work.
 AC_DEFUN([GWY_CHECK_EU_NM],
 [AC_CHECK_TOOL([EU_NM],[eu-nm],[:])
 if test "$EU_NM" != :; then
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([int some_variable = 0;],[]),
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([int some_variable = 0;],[])],
   [if $EU_NM -f sysv conftest.$ac_objext 2>/dev/null | $GREP '^@<:@^|@:>@*|@<:@^|@:>@*|@<:@^|@:>@*|@<:@^|@:>@*|@<:@^|@:>@*|@<:@^|@:>@*|@<:@^|@:>@*$' >/dev/null; then
      :
    else
