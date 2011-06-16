@@ -15,7 +15,7 @@ library_objects = $($(library)$(libsuffix)_la_OBJECTS)
 $(eval $(library)$(libsuffix)_la_DEPENDENCIES += $(library_def))
 
 INTROSPECTION_GIRS = $(Library_ver).gir
-INTROSPECTION_SCANNER_ARGS = --strip=gwy_ -I$(top_srcdir) -I$(top_builddir)
+INTROSPECTION_SCANNER_ARGS = --identifier-prefix=Gwy --symbol-prefix=gwy_ -I$(top_srcdir) -I$(top_builddir)
 $(eval $(Library_with_ver)_gir_LIBS = $(library)$(libsuffix).la)
 $(eval $(Library_with_ver)_gir_FILES = $($(library)$(libsuffix)_la_SOURCES) $(library_headers) $(library)$(libsuffix).la)
 girdir = $(datadir)/gir-1.0
