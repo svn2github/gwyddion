@@ -8,7 +8,7 @@ AC_CACHE_CHECK([whether $CC knows $2],
   [ac_cv_prog_ccld_option_$1],
   [GWY_PROG_CCLD_OPTION_cflags="$LDFLAGS"
    LDFLAGS="$LDFLAGS $2"
-   AC_LINK_IFELSE(AC_LANG_PROGRAM([],[]),
+   AC_LINK_IFELSE([AC_LANG_PROGRAM()],
      [ac_cv_prog_ccld_option_$1=yes],
      [ac_cv_prog_ccld_option_$1=no])
    LDFLAGS="$GWY_PROG_CCLD_OPTION_cflags"])

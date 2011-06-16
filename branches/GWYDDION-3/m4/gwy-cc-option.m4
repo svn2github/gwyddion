@@ -7,7 +7,7 @@ AC_CACHE_CHECK([whether $CC knows $2],
   [ac_cv_prog_cc_option_$1],
   [GWY_PROG_CC_OPTION_cflags="$CFLAGS"
    CFLAGS="$CFLAGS $2"
-   AC_COMPILE_IFELSE(AC_LANG_PROGRAM([],[]),
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
      [ac_cv_prog_cc_option_$1=yes],
      [ac_cv_prog_cc_option_$1=no])
    CFLAGS="$GWY_PROG_CC_OPTION_cflags"])
@@ -25,7 +25,7 @@ AC_DEFUN([GWY_CHECK_PROG_CC_OPTION],
 [AC_MSG_CHECKING([whether $CC knows $1])
 GWY_PROG_CC_OPTION_cflags="$CFLAGS"
 CFLAGS="$CFLAGS $1"
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([],[]),
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
   [AC_MSG_RESULT([yes])
    $2],
   [AC_MSG_RESULT([no])])
