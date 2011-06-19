@@ -562,7 +562,6 @@ test_serialize_error(void)
 
     GwySerTest *sertest;
     GOutputStream *stream;
-    GMemoryOutputStream *memstream;
     GError *error = NULL;
     gboolean ok;
 
@@ -571,7 +570,6 @@ test_serialize_error(void)
                                       "Test Test", 0x12345678);
     for (gsize i = 1; i < 102; i++) {
         stream = g_memory_output_stream_new(malloc(i), i, NULL, &free);
-        memstream = G_MEMORY_OUTPUT_STREAM(stream);
         ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
         g_assert(!ok);
         g_assert(error);
