@@ -38,10 +38,11 @@ typedef struct {
 
 typedef gdouble (*GwyRealFunc)(gdouble value, gpointer user_data);
 
-#ifdef __GNUC__
-#  define gwy_powi __builtin_powi
-#else
+// Put the declaration we want gtk-doc to pick up first.
+#ifndef __GNUC__
 double gwy_powi(double x, int i) G_GNUC_CONST;
+#else
+#  define gwy_powi __builtin_powi
 #endif
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
