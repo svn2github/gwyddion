@@ -986,7 +986,7 @@ deserialize_boxed(const guchar *buffer,
                   GwyErrorList **error_list)
 {
     GwySerializableItems *items = NULL;
-    const gchar *typename;
+    const gchar *typename = NULL;
     gsize pos = 0, rbytes, boxed_size;
     gpointer boxed = NULL;
     GType type;
@@ -1079,7 +1079,7 @@ deserialize_memory(const guchar *buffer,
 {
     const GwySerializableInterface *iface;
     GwySerializableItems *items = NULL;
-    const gchar *typename;
+    const gchar *typename = NULL;
     gsize pos = 0, rbytes, object_size;
     gpointer classref = NULL;
     GObject *object = NULL;
