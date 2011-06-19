@@ -97,7 +97,7 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	fi
 	if test -s $(DOC_MODULE).hierarchy; then \
 		$(PYTHON) $(ADD_OBJECTS) $(DOC_MODULE)-sections.txt $(DOC_MODULE).hierarchy $(DOC_MODULE).interfaces $(ADDOBJECTS_OPTIONS); \
-		awk '/^[^ ]/{ignore=0}; /^(GFlags|GEnum|GBoxed)/{ignore=1}; {if(!ignore)print}' $(DOC_MODULE).hierarchy >$(DOC_MODULE).tmp && mv -f $(DOC_MODULE).tmp $(DOC_MODULE).hierarchy; \
+		$(AWK) '/^[^ ]/{ignore=0}; /^(GFlags|GEnum|GBoxed)/{ignore=1}; {if(!ignore)print}' $(DOC_MODULE).hierarchy >$(DOC_MODULE).tmp && mv -f $(DOC_MODULE).tmp $(DOC_MODULE).hierarchy; \
 	fi
 	touch scan-build.stamp
 
