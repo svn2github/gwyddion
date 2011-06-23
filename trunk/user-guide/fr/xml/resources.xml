@@ -1,0 +1,562 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: resources.xml 11533 2010-11-12 14:13:45Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='resources' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Ressources</title>
+  <para>
+    Plusieurs éléments de données, par exemple les
+    <link linkend='color-map'>échelles de fausses couleurs</link>
+    ou les
+    <link linkend='raw-file-import-presets'>pré-réglages d'import de données brutes</link>,
+    sont enregistrées dans divers fichiers apellés fichiers de
+    ressources. Gwyddion recherche ces fichiers dans deux dossiers
+    différents : un système et un utilisateur.
+  </para>
+  <para>
+    Les ressources système sont installées en même temps que le
+    programme lui-même et ne sont pas modifiables. Ces fichiers sont
+    typiquement placés dans un dossier nommé
+    <filename>/usr/share/gwyddion</filename> (Unix),
+    <filename>Program Files\Gwyddion</filename>
+    (MS Windows) ou un autre répertoire déterminé par la variable
+    <link linkend='GWYDDION_DATADIR'><envar>GWYDDION_DATADIR</envar></link>.
+  </para>
+  <para>
+    Les ressources utilisateur sont placées dans un répertoire
+    utilisateur, en général
+    <filename>~/.gwyddion</filename> (Unix) ou
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+  </para>
+  <para>
+    Tous les fichiers de ressources sont de simples fichiers texte
+    pouvant être facilement examinés et modifiés par des éditeurs de
+    texte, ou être aussi envoyés à d'autres utilisateurs (si ceux-ci
+    sont copiés ou créés manuellement, Gwyddion devra être relancé pour
+    les charger). Dans la plupart des cas, seuls les caractères ASCII
+    peuvent apparaître dans ces fichiers. Si des caractères
+    internationaux peuvent y apparaître, ceux-ci doivent être encodés
+    au format UTF-8. Les valeurs numériques sont données au format
+    POSIX, i.e. avec un point pour la décimale, indépendamment du
+    caractère utilisé pour la décimale dans la langue de l'utilisateur.
+  </para>
+  <para>
+    Les ressources sont organisées en sous-dossiers en fonction de leur
+    type, par exemple les gradients de couleurs seront présents dans le
+    dossier <filename>gradients</filename>. Le nom du fichier détermine
+    le nom de la ressource – le gradient Gray sera dans le fichier
+    <filename>gradients/Gray</filename>. Les modules peuvent définir
+    leur propres types de ressources ; les types décrits plus bas font
+    partie des plus importants, mais la liste n'est pas exhaustive.
+  </para>
+  <para>
+    Chaque fichier de ressource possède la même structure. Il commence
+    par une ligne identifiant le type de ressource :
+    <informalexample>
+      <programlisting>Gwyddion resource GwyGradient</programlisting>
+    </informalexample>
+    où <type>GwyGradient</type> est le nom du type dans le
+    <ulink url='http://library.gnome.org/devel/gobject/stable/'>système de type</ulink>
+    (ceci est un détail de bas niveau), suivi par les paramètres nommés
+    sous la forme
+    <informalexample>
+      <programlisting><replaceable>nom</replaceable> <replaceable>valeur</replaceable></programlisting>
+    </informalexample>
+    et les données de ressource. Certains types de ressources peuvent ne
+    contenir que des paramètres, et d'autres uniquement des données.
+  </para>
+  <sect2 id='resource-gradients'>
+    <title>Gradients</title>
+    <para>
+      Les gradients, i.e. les échelles de fausses couleurs, se trouvent
+      dans le répertoire
+      <filename>gradients</filename>, ils sont identifiés par
+      <type>GwyGradient</type> et ne contiennent que des données. Ils
+      peuvent être édités dans l'application en utilisant
+      <link linkend='color-gradient-editor'>l'éditeur de gradients</link>.
+    </para>
+    <para>
+      Les données du gradient consistent en des lignes correspondant à
+      des points du gradients :
+      <informalexample>
+        <programlisting><replaceable>position</replaceable> <replaceable>rouge</replaceable> <replaceable>vert</replaceable> <replaceable>bleu</replaceable> <replaceable>alpha</replaceable></programlisting>
+      </informalexample>
+      La position détermine où la couleur définie par les composantes
+      <replaceable>rouge</replaceable>, <replaceable>vert</replaceable>,
+      <replaceable>bleu</replaceable> et <replaceable>alpha</replaceable>
+      est placée dans l'intervale
+      <xi:include href="eqi-interval-0-1.xml"/> où 0 correspond au début
+      du gradient, et 1 à la fin . La couleur est interpolée
+      linéairement entre les points spécifiés.
+    </para>
+    <para>
+      Les positions doivent former une séquence allant de 0 à 1 (i.e le
+      nombre minimum de points est de deux). La plage des composantes
+      de couleur est aussi  <xi:include href="eqi-interval-0-1.xml"/>.
+      Notez que la valeur alpha, correspondant à la transparence, n'est
+      pas utilisée et qu'elle doit être réglée à 1 (totalement opaque).
+    </para>
+    <para>
+      Par exemple, le gradient standard Red (rouge) allant du noir
+      (0 0 0) au rouge (1 0 0) puis au blanc (1 1 1) est défini de la
+      manière suivante :
+      <informalexample>
+        <programlisting><![CDATA[
+Gwyddion resource GwyGradient
+0.0 0 0 0 1
+0.5 1 0 0 1
+1.0 1 1 1 1
+]]></programlisting>
+      </informalexample>
+    </para>
+  </sect2>
+  <sect2 id='resource-opengl-materials'>
+    <title>Matériaux OpenGL</title>
+    <para>
+      Les matériaux OpenGL se trouvent dans le répertoire
+      <filename>glmaterials</filename>, ils sont identifiés par
+      <type>GwyGLMaterial</type> et ne contiennent que des données. Ils
+      peuvent être édités dans l'application à l'aide de
+      <link linkend='opengl-material-editor'>l'éditeur de matériaux OpenGL</link>.
+    </para>
+    <para>
+      Les données du matériau consistent en quatre lignes RGBA,
+      similaires aux
+      <link linkend='resource-gradients'>gradients</link> et
+      correspondant aux quatre composantes du matériau OpenGL, dans
+      l'ordre suivant :
+      <orderedlist>
+        <listitem>ambiante,</listitem>
+        <listitem>diffuse,</listitem>
+        <listitem>spéculaire,</listitem>
+        <listitem>émission.</listitem>
+      </orderedlist>
+      Voir la section <link linkend='opengl-material-editor'>Editeur de
+      matériaux OpenGL</link> pour plus d'explications sur les
+      composantes. Celles-ci sont suivies par une ligne contenant la
+      brillance, là encore un nombre dans l'intervalle
+      <xi:include href="eqi-interval-0-1.xml"/>.
+    </para>
+    <para>
+      Notez que la composante émission, bien que lue et écrite par
+      Gwyddion, n'est en fait pas utilisée pour les vues 3D. Il est
+      recommandé de la régler à 0 0 0 1, i.e. noire.
+    </para>
+    <para>
+      Par exemple, le matériau standard Red-Rubber (gomme rouge) ayant
+      une couleur ambiante rouge sombre, une réflection diffuse grise,
+      une réflection spéculaire rouge et une faible brillance, sera
+      définie de la manière suivante :
+      <informalexample>
+        <programlisting><![CDATA[
+Gwyddion resource GwyGLMaterial
+0.05 0.0  0.0  1.0
+0.5  0.4  0.4  1.0
+0.7  0.04 0.04 1.0
+0.0  0.0  0.0  1.0
+.078125
+]]></programlisting>
+      </informalexample>
+    </para>
+  </sect2>
+  <sect2 id='resource-grain-values'>
+    <title>Valeurs de grains</title>
+    <para>
+      Les valeurs des grains se trouvent dans le répertoire
+      <filename>grainvalues</filename>, elles sont identifiées par
+      <type>GwyGrainValue</type> et ne contiennent que des paramètres.
+      Elles peuvent être utilisées pour définir des données de grain
+      supplémentaires, qui apparaîtront dans le groupe
+      <guilabel>Utilisateur</guilabel> des
+      <link linkend='grain-analysis-statistics'>fonctions d'analyse de grains</link>.
+      A l'heure actuelle il n'existe pas d'éditeur dans l'application,
+      et les nouvelles quantités doivent être créées manuellement.
+    </para>
+    <para>
+      Les paramètres sont résumés dans la table suivante :
+    </para>
+    <para>
+      <informaltable frame='none' id='table-resource-grain-value'>
+        <tgroup cols='4'>
+          <?dblatex lllX?>
+          <thead>
+            <row>
+              <entry>Paramètre</entry>
+              <entry>Requis</entry>
+              <entry>Type</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><varname>symbol</varname></entry>
+              <entry>requis</entry>
+              <entry>identifiant</entry>
+              <entry>
+                Identifiant à utiliser dans d'autres expressions (voir
+                plus bas). Il doit s'agir d'un identifiant valide
+                constitué de lettres ASCII, de chiffres et
+                d'underscores, en démarrant par une lettre.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>expression</varname></entry>
+              <entry>requis</entry>
+              <entry>format libre</entry>
+              <entry>
+                Formule pour calculer la quantité à partir d'autres
+                paramètres de grain. La syntaxe de l'expression est
+                décrite dans la section
+                <link linkend='expression-syntax'>Expressions</link>.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>symbol_markup</varname></entry>
+              <entry>optionnel</entry>
+              <entry>format libre</entry>
+              <entry>
+                Symbole pouvant inclure des lettres grecques, des
+                indices ou des exposants exprimés avec le
+                <ulink url='http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html'>langage de balisage Pango</ulink>.
+                Il est utilisé pour les présentations dans l'application
+                donc bien qu'il soit optionnel il est recommandé de la
+                définir au moins de manière identique à
+                <varname>symbol</varname>.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>power_xy</varname></entry>
+              <entry>optionnel</entry>
+              <entry>entier</entry>
+              <entry>
+                Puissance à laquelle apparaissent les dimensions
+                latérales de la quantité. Par exemple, il s'agit de 1
+                pour les dimensions du grain, 2 pour les surfaces et les
+                volumes. La valeur par défaut est de 0.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>power_z</varname></entry>
+              <entry>optionnel</entry>
+              <entry>entier</entry>
+              <entry>
+                Puissance à laquelle la dimension de
+                <quote>hauteur</quote> apparaît dans la quantité. Par
+                exemple, il s'agit de 1 pour les valeurs et volumes, 2
+                pour les dimensions et les aires. La valeur par défaut
+                est de 0.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>same_units</varname></entry>
+              <entry>optionnel</entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                Utiliser 1 si la quantité n'a de sens que si les
+                dimensions latérales et de <quote>hauteur</quote>
+                correspondent à des quantités physiques identiques. Par
+                exemple, cette valeur est requise pour les surfaces. La
+                valeur par défaut est de 0.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>is_angle</varname></entry>
+              <entry>optionnel</entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                Utiliser 1 si la quantité est un angle. L'expression
+                doit calculer les angles en radians. Toutefois, si
+                <varname>is_angle</varname> est utilisé, Gwyddion sait
+                que la valeur peut être convertie en degrés pour la
+                présentation. La valeur par défaut est de 0.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Pour l'instant, les paramètres de grain définies par l'utilisateur
+      ne peuvent dépendre d'autres paramètres de grain utilisateurs,
+      afin d'éviter les dépendances circulaires. Les paramètres de grain
+      pré-définis sont présentés dans la liste suivante :
+    </para>
+    <para>
+<!--<xi:include href='table-grain-quantities.xml'/>-->
+    </para>
+    <para>
+      Par exemple, une nouvelle valeur de hauteur de grain, définie
+      comme la différence entre la valeur maximale et la valeur
+      minimale, peut être définie de la manière suivante :
+      <informalexample>
+        <programlisting><![CDATA[
+Gwyddion resource GwyGrainValue
+symbol dz
+symbol_markup Δz
+power_xy 0
+power_z 1
+expression z_max - z_min
+]]></programlisting>
+      </informalexample>
+    </para>
+  </sect2>
+  <sect2 id='resource-raw-file-presets'>
+    <title>Pré-réglages des données bruts</title>
+    <para>
+      Les pré-réglages des données brutes sont présents dans le
+      répertoire <filename>rawfile</filename>, ils sont identifiés par
+      <type>GwyRawFilePreset</type> et ne contiennent que des
+      paramètres. Ils sont normalement créés et édités par l'éditeur de
+      réglages dans le
+      <link linkend='raw-file-import'>module d'import des données bruts</link>.
+    </para>
+    <para>
+      Les noms des paramètres dans le fichier de ressources
+      correspondent pratiquement à ceux de l'interface utilisateur
+      expliqués en détail dans la section
+      <link linkend='raw-file-import'>import des fichiers bruts</link>.
+      Ils seront donc ici assez brièvement.
+    </para>
+    <para>
+      <informaltable frame='none' id='table-resource-rawfile-preset'>
+        <tgroup cols='3'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Paramètre</entry>
+              <entry>Type</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><varname>xres</varname>, <varname>yres</varname></entry>
+              <entry>entier</entry>
+              <entry>
+                tailles horizontale et verticale
+              </entry>
+            </row>
+            <row>
+              <entry><varname>xreal</varname>, <varname>yreal</varname></entry>
+              <entry>nombre</entry>
+              <entry>
+                dimensions physiques, en unités données par
+                <varname>xyexponent</varname> et <varname>xyunit</varname>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>xyexponent</varname></entry>
+              <entry>multiple de 3</entry>
+              <entry>
+                puissance de 10 multipliant <varname>xreal</varname> et
+                <varname>yreal</varname>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>xyunit</varname></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                unités de base de <varname>xreal</varname> et
+                <varname>yreal</varname>, par exemple
+                <literal>"m"</literal>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>zscale</varname></entry>
+              <entry>nombre</entry>
+              <entry>
+               valeur d'unité d'échantillon
+              </entry>
+            </row>
+            <row>
+              <entry><varname>zexponent</varname></entry>
+              <entry>multiple de 3</entry>
+              <entry>
+                puissance de 10 multipliant <varname>zscale</varname>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>zunit</varname></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                unités de base de <varname>zscale</varname>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>format</varname></entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                0 signifie binaire, 1 signifie texte
+              </entry>
+            </row>
+            <row>
+              <entry><varname>builtin</varname> (binaire)</entry>
+              <entry>entier</entry>
+              <entry>
+                Identifiant du format prédéfini des données, voir plus
+                bas
+              </entry>
+            </row>
+            <row>
+              <entry><varname>offset</varname> (binaire)</entry>
+              <entry>entier</entry>
+              <entry>
+                offset des données dans le fichier, en octets
+              </entry>
+            </row>
+            <row>
+              <entry><varname>size</varname> (binaire)</entry>
+              <entry>entier</entry>
+              <entry>
+                taille des valeurs de données, en bits
+              </entry>
+            </row>
+            <row>
+              <entry><varname>skip</varname> (binaire)</entry>
+              <entry>entier</entry>
+              <entry>
+                nombre de bits à sauter après chaque valeur
+              </entry>
+            </row>
+            <row>
+              <entry><varname>rowskip</varname> (binaire)</entry>
+              <entry>entier</entry>
+              <entry>
+                nombre de bits supplémentaire à sauter après chaque
+                ligne
+              </entry>
+            </row>
+            <row>
+              <entry><varname>sign</varname> (binaire)</entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                0 signifie non signé, 1 signifie signé
+              </entry>
+            </row>
+            <row>
+              <entry><varname>revsample</varname> (binaire)</entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                1 signifie qu'il faut renverser les bits des valeurs
+              </entry>
+            </row>
+            <row>
+              <entry><varname>revbyte</varname> (binaire)</entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                1 signifie qu'il faut renverser les bits des octets
+              </entry>
+            </row>
+            <row>
+              <entry><varname>byteswap</varname> (binaire)</entry>
+              <entry>entier</entry>
+              <entry>
+                motif de l'ordre des octets
+              </entry>
+            </row>
+            <row>
+              <entry><varname>lineoffset</varname> (texte)</entry>
+              <entry>entier</entry>
+              <entry>
+                nombre de lignes à sauter avant de démarrer la lecture
+                des données
+              </entry>
+            </row>
+            <row>
+              <entry><varname>skipfields</varname> (texte)</entry>
+              <entry>entier</entry>
+              <entry>
+                nombre de champs à sauter au début de chaque ligne
+              </entry>
+            </row>
+            <row>
+              <entry><varname>delimiter</varname> (texte)</entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                séparateur de champ, une chaîne de caractères vide
+                signifie tout espace
+              </entry>
+            </row>
+            <row>
+              <entry><varname>decomma</varname> (texte)</entry>
+              <entry>0 ou 1</entry>
+              <entry>
+                1 si le séparateur de décimale est une virgule, 0 pour
+                le point
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Notez que le choix d'un format binaire prédéfini, i.e. une valeur
+      de <varname>builtin</varname> non nulle, implique un format
+      binaire limité. Cela signifie que les options
+      <varname>size</varname>, <varname>revbyte</varname> et
+      <varname>sign</varname> sont ignorées car elles ne sont utilisées
+      que pour la spécification détaillées des formats utilisateur. Les
+      formats disponibles sont listés dans la table suivante :
+    </para>
+    <para>
+      <informaltable frame='none' id='table-resource-rawfile-builtin'>
+        <tgroup cols='2'>
+          <?dblatex ll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>0</entry>
+              <entry>spécifié par l'utilisateur</entry>
+            </row>
+            <row>
+              <entry>1</entry>
+              <entry>entier 8 bits signé</entry>
+            </row>
+            <row>
+              <entry>2</entry>
+              <entry>entier 8 bits non signé</entry>
+            </row>
+            <row>
+              <entry>3</entry>
+              <entry>entier 16 bits signé</entry>
+            </row>
+            <row>
+              <entry>4</entry>
+              <entry>entier 16 bits non signé</entry>
+            </row>
+            <row>
+              <entry>5</entry>
+              <entry>entier 32 bits signé</entry>
+            </row>
+            <row>
+              <entry>6</entry>
+              <entry>entier 32 bits non signé</entry>
+            </row>
+            <row>
+              <entry>7</entry>
+              <entry>flottant IEEE</entry>
+            </row>
+            <row>
+              <entry>8</entry>
+              <entry>double IEEE</entry>
+            </row>
+            <row>
+              <entry>9</entry>
+              <entry>entier 64 bits signé</entry>
+            </row>
+            <row>
+              <entry>10</entry>
+              <entry>entier 64 bits non signé</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
