@@ -8,13 +8,15 @@
     Ce chapitre fournit des informations sur différents formats, syntaxes et
     options que vous pourriez trouver utiles. La plupart de celles-ci sont liées
     à une utilisation avancée de Gwyddion, en dehors peut-être de la
-    <link linkend='keyboard-shortcuts'>table des raccourcis clavier</link> et la
+    <link linkend='keyboard-shortcuts'>table des raccourcis clavier</link>
+    et la
     <link linkend='file-formats'>table des formats de fichier supportés</link>.
   </para>
   <xi:include href='gwyddion.xml'/>
   <xi:include href='gwyddion-thumbnailer.xml'/>
   <xi:include href='keyboard-shortcuts.xml'/>
   <xi:include href='file-formats.xml'/>
+  <xi:include href='pixmap-image-keys.xml'/>
   <xi:include href='expressions.xml'/>
   <xi:include href='resources.xml'/>
   <xi:include href='gwyfile-format.xml'/>

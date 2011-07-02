@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: pixmap-image-keys.xml 12535 2011-06-13 09:51:49Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='pixmap-image-keys' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Formats d'image à grande dynamique</title>
+  <para>
+    Gwyddion peut exporter les données en images en niveaux de gris 16
+    bits au format PNG, PNM et TIFF, ainsi qu'en images OpenEXR de types
+    demi-flottant, flottant et 32 bits. Dans le cas des images 16 bits,
+    la plage complète des données est étalée sur la plage de niveaux de
+    gris ; l'export OpenEXR permet de spécifier le facteur d'échelle.
+  </para>
+  <para>
+    Lorsque les données sont exportées sous une image à grande
+    dynamique, des informations additionnelles sont enregistrées afin
+    de pouvoir les rouvrir automatiquement dans Gwyddion sans avoir à
+    spécifier manuellement les dimensions et l'échelle. Vous pouvez
+    aussi rendre vos images directement chargeables dans Gwyddion avec
+    les dimensions et échelle correctes en ajoutant ces informations
+    lors de leur création. Les informations sont organisées par paires
+    clé-valeur, enregistrées selon des méthodes propres à chaque format,
+    telles que décrites dans la table suivante.
+  </para>
+  <para>
+    <informaltable id='table-pixmap-image-metadata'>
+      <tgroup cols='2' align='left'>
+        <?dblatex lX?>
+        <thead>
+          <row>
+            <entry>Format</entry>
+            <entry>Methode</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>PNG</entry>
+            <entry>blocs <varname>tEXt</varname></entry>
+          </row>
+          <row>
+            <entry>OpenEXR</entry>
+            <entry>attributs</entry>
+          </row>
+          <row>
+            <entry>PNM</entry>
+            <entry>
+              commentaires d'en-tête sous la forme
+              <literal># key: value</literal>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    La plupart des clés sont identiques à celles utilisées dans les
+    fichiers <link linkend='gsf'>Gwyddion à champ simple</link>(GSF), mis à
+    part le préfixe <literal>Gwy::</literal>, vous pouvez donc vous
+    référer à la description GSF pour plus de détails. Les nombres en
+    virgule flottante sont directement enregistrés si le format le
+    permet (OpenEXR par exemple), dans le cas contraire une
+    representation textuelle du nombre est utilisée (au format C). Les
+    clés sont listées ci-dessous.
+  </para>
+  <para>
+    <informaltable id='table-pixmap-image-keys'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Clé</entry>
+            <entry>Type</entry>
+            <entry>Signication</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>Gwy::XReal</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Taille horizontale en unités physiques (données par
+              <literal>XYUnits</literal>), il s'agit d'un nombre positif
+              en virgule flottante.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::YReal</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Taille verticale en unités physiques (données par
+              <literal>XYUnits</literal>), il s'agit d'un nombre positif
+              en virgule flottante.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::XOffset</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Décalage horizontal en unités physiques (données par
+              <literal>XYUnits</literal>).
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::YOffset</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Décalage vertical en unités physiques (données par
+              <literal>XYUnits</literal>).
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZScale</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Facteur d'échelle. Les données de l'image doivent être
+              multipliées par ce facteur pour obtenir les valeurs
+              physiques. Ce paramètre est généralement utilisé avec les
+              formats à virgule flottante à dynamique limitée, tels que
+              les demi-flottants. Pour les données sous forme d'entier,
+              on utilisera généralement <literal>Gwy::ZMin</literal> et
+              <literal>Gwy::ZMax</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZMin</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Valeur en unités physiques correspondant à la valeur
+              minimale de l'image (normalement 0).
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZMax</literal></entry>
+            <entry>flottant</entry>
+            <entry>
+              Valeur en unités physiques correspondant à la valeur
+              maximale de l'image.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::XYUnits</literal></entry>
+            <entry>chaîne de caractères</entry>
+            <entry>
+              Unités latérales, i.e. unités des dimensions physiques et
+              des décalages.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::ZUnits</literal></entry>
+            <entry>chaîne de caractères</entry>
+            <entry>
+              Unités de valeurs, i.e. unités des valeurs de données.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Gwy::Title</literal></entry>
+            <entry>chaîne de caractères</entry>
+            <entry>
+              Titre des données.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    Dans le cas du format PNG, les informations d'échelle sont aussi
+    enregistrées dans les blocs standard <varname>sCAL</varname> et
+    <varname>pCAL</varname> (avec une formule linéaire de mise à
+    l'échelle). Inversement, si ces blocs sont présents (et que les
+    blocs spécifiques à Gwyddion sont absents), les informations qu'ils
+    contiennent seront utilisées lors de l'import. Reportez-vous aux
+    <ulink url='http://www.libpng.org/pub/png/spec/'>spécifications PNG</ulink>
+    concernant la description des blocs.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
