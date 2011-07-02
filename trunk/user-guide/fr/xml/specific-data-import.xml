@@ -36,6 +36,13 @@
       peut être développé pour ce format précis afin de charger les fichiers
       automatiquement avec les bonnes échelles.
     </para>
+    <para>
+      Reportez-vous à la section
+      <link linkend='pixmap-image-keys'>Formats d'image à grande dynamique</link>
+      pour plus de détails sur le support d'image à dynamique élevée
+      ainsi que sur la possibilité de les utiliser pour représenter des
+      données.
+    </para>
   </sect2>
   <sect2 id='graph-curve-import'>
     <title>Courbes</title>
