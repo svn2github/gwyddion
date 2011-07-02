@@ -18,12 +18,12 @@
       <surname>Anderson</surname>
     </author>
     <copyright>
-      <year>2004–2007, 2010</year>
+      <year>2004–2007, 2009-2011</year>
       <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
     </copyright>
     <releaseinfo>
       <para>
-        Version 2011-02-08.  Ce guide est issu d'un travail en progression.
+        Version du 2 juillet 2011.  Ce guide est issu d'un travail en progression.
       </para>
       <para>
         Traduction française par François Riguet.
@@ -31,7 +31,7 @@
     </releaseinfo>
     <legalnotice id='legalnotice'>
       <para>
-        Vous pouvez copier, distribuer et/ou modifier ce document selon les 
+        Vous pouvez copier, distribuer et/ou modifier ce document selon les
         termes de (au choix)
         <itemizedlist>
           <listitem>
@@ -40,7 +40,7 @@
               Version 1.2 ou plus récente publiée par la
               Free Software Foundation; sans Section Inaltérable,
               sans Texte de Page de Couverture Avant, et sans Texte de Page de
-              Couverture Arrière. Une traduction non officielle de la licence 
+              Couverture Arrière. Une traduction non officielle de la licence
               est incluse dans la section intitulée
               <link linkend='gfdl'>Licence de Documentation Libre GNU</link>.
             </para>

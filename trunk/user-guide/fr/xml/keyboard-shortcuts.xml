@@ -85,6 +85,22 @@
           </entry>
         </row>
         <row>
+          <entry><keycap>Ctrl-H</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guisubmenu>Ouvrir un fichier récent</guisubmenu>
+              <guimenuitem>Historique</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Ouvre l'historique des documents récemment ouverts (ou le
+            met en avant-plan s'il est déjà ouvert).
+          </entry>
+        </row>
+        <row>
           <entry><keycap>Ctrl-Z</keycap></entry>
           <entry>
             <menuchoice>
