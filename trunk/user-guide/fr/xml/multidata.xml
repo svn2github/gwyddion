@@ -1,0 +1,488 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: multidata.xml 11557 2010-11-15 10:36:41Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='multidata' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Multidonnées</title>
+  <sect2 id='data-arithmetic'>
+    <title>Arithmétique</title>
+    <indexterm><primary>opérations arithmétiques sur les données</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Arithmétique</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Le module d'arithmétique permet de réaliser des opérations
+      arbitraires sur un seul champ de données ou sur les points
+      correspondant à plusieurs champs (jusqu'à huit pour l'instant). Et
+      bien que ce ne soit pas le but premier, il peut aussi être utilisé
+      comme une calculatrice avec évaluation immédiate lors de l'entrée
+      d'une expression numérique simple. La syntaxe est décrite dans la
+      section <link linkend='expression-syntax'>Expressions</link>.
+    </para>
+    <para>
+      L'expression peut contenir les variables suivantes, celles-ci
+      représentant les valeurs des champs de données d'entrée :
+    </para>
+    <para>
+      <informaltable frame='none' id='table-arithmetic-variables'>
+        <tgroup cols='2'>
+          <?dblatex lX?>
+          <thead>
+            <row>
+              <entry>Variable</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><varname>d1</varname>, …, <varname>d8</varname></entry>
+              <entry>
+                Valeur du pixel. La valeur est en donnée en unités
+                physiques de base, par exemple pour une hauteur de 233
+                nm la valeur de <varname>d1</varname> sera de 2.33e-7.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>m1</varname>, …, <varname>m8</varname></entry>
+              <entry>
+                Valeur de masque du pixel. La valeur de masque est soit
+                0 (pour les pixels non masqués) soit 1 (pour les pixels
+                masqués). Les variables de masque peuvent aussi être
+                utilisées si aucun masque n'est présent ; la valeur est
+                alors 0 pour tous les pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>bx1</varname>, …, <varname>bx8</varname></entry>
+              <entry>
+                Dérivée horizontale du pixel. Là encore la valeur est
+                donnée en unités physiques. La dérivée est calculée
+                symétriquement autour du pixel, excepté pour les pixels
+                de bord d'images pour lesquels la dérivée n'est calculée
+                que d'un côté du pixel.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>by1</varname>, …, <varname>by8</varname></entry>
+              <entry>
+                Dérivée verticale du pixel, définie de manière identique
+                à la dérivée horizontale.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      De plus, la constante <xi:include href="eqi-pi.xml"/> est
+      utilisable et peut être invoquée avec
+      <xi:include href="eqi-pi.xml"/> ou <userinput>pi</userinput>.
+    </para>
+    <para>
+      Tous les champs de données apparaissant dans l'expression doivent
+      être compatibles. Cela signifie que leurs dimensions (des pixels
+      et physiques) doivent être identiques. Les autres champs de
+      données, i.e. ceux n'entrant pas dans l'expression, sont sans
+      effet. Le résultat est toujours donné dans un nouveau champ de
+      données du fichier courant (qui peut être différent des fichiers
+      de tous les opérandes).
+    </para>
+    <para>
+      Comme l'évaluation ne peut inférer automatiquement les unités
+      physiques du résultat, les unités doivent être spécifiées
+      explicitement. Ceci peut être fait de deux manières : soit en
+      sélectionnant un champ de données ayant les mêmes unités que
+      celles attendues pour le résultat, ou en choisissant l'option
+      <guilabel>Spécifier les unités</guilabel> et en tapant les unités.
+    </para>
+    <para>
+      La table qui suit liste plusieurs exemples d'expressions simples :
+    </para>
+    <para>
+      <informaltable frame='none' id='table-arithmetic-examples'>
+        <tgroup cols='2'>
+          <?dblatex lX?>
+          <thead>
+            <row>
+              <entry>Expression</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><userinput>-d1</userinput></entry>
+              <entry>
+                Inversion de valeur. Le résultat est très similaire à la
+                fonction Inverser les Valeurs, à la différence que cette
+                dernière inverse les valeurs autour de la moyenne, alors
+                qu'ici on change simplement le signe des valeurs.
+              </entry>
+            </row>
+            <row>
+              <entry><userinput>(d1 - d2)^2</userinput></entry>
+              <entry>
+                Différence au carré de deux champs.
+              </entry>
+            </row>
+            <row>
+              <entry><userinput>d1 + m1*1e-8</userinput></entry>
+              <entry>
+                Modification des valeurs sous le masque. Ici la valeur
+                10<superscript>-8</superscript> est ajoutée à tous les
+                pixels masqués.
+              </entry>
+            </row>
+            <row>
+              <entry><userinput>d1*m3 + d2*(1-m3)</userinput></entry>
+              <entry>
+                Combinaison de deux champs de données. Les pixels sont
+                pris des champs 1 ou 2, en fonction du masque du champ 3.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      En mode calculatrice l'expression est immédiatement évaluée lors
+      de la frappe et le résultat est affiché sous l'entrée de
+      l'expression. Aucune action n'est néecssaire pour passer des
+      expressions avec champs de données à la calculatrice : les
+      expressions ne contenant que des quantités numériques sont
+      immédiatement évaluées, les expressions faisant appel à des champs
+      de données sont utilisées pour calculer un nouveau champ. La
+      prévisualisation affichant le résultat d'une opération contenant
+      des champs de données n'est pas immédiatement mise à jour pendant
+      la frappe ; vous pouvez la mettre à jour en cliquant sur le bouton
+      <guibutton>Mise à jour</guibutton> ou en pressant simplement la
+      touche <keycap>Entrée</keycap> dans la ligne d'entrée de
+      l'expression.
+    </para>
+  </sect2>
+  <sect2 id='immerse'>
+    <title>Incrustation d'un détail</title>
+    <indexterm><primary>incrustation d'un détail</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Incruster un détail</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      L'incrustation permet d'insérer l'image d'un détail en haute
+      résolution dans une plus grande image. L'image sur laquelle est
+      lancée cette fonction forme l'image de base, de grande taille.
+    </para>
+    <para>
+      Le détail peut être positionné manuellement par-dessus l'image de
+      base en utilisant la souris. Le bouton
+      <guibutton>Améliorer</guibutton> peut être utilisé pour trouver
+      les coordonnées exactes dans le voisinage de la position actuelle
+      donnant la corrélation maximale entre le détail et l'image de
+      base. La meilleure position peut aussi être recherchée sur la
+      totalité de l'image de base à l'aide du bouton
+      <guibutton>Localiser</guibutton>.
+    </para>
+    <para>
+      Notez que la recherche de corrélation est insensible aux échelles
+      et aux décalages, ainsi l'ajustement automatique étant seulement
+      basé sur les motifs des données, les hauteurs absolues ne jouent
+      aucun rôle.
+    </para>
+    <para>
+      Le <guilabel>Résultat de l'échantillonnage</guilabel> contrôle la
+      taille et la résolution de l'image finale :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Sur-échantillonner l'image globale</guilabel>
+        </term>
+        <listitem>
+          La résolution de l'image finale est déterminée par celle du
+          détail. L'image résultante est donc plus grande.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Sous-échantillonner le détail</guilabel>
+        </term>
+        <listitem>
+          La résolution de l'image finale est déterminée par l'image de
+          base. L'image du détail sera donc réduite.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      La <guilabel>Mise à niveau du détail</guilabel> permet de modifier
+      les valeurs <xi:include href="eqi-z.xml"/> du détail :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Aucune</guilabel>
+        </term>
+        <listitem>
+          Aucun ajustement des valeurs <xi:include href="eqi-z.xml"/>
+          n'est appliqué.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Valeur moyenne</guilabel>
+        </term>
+        <listitem>
+          Toutes les valeurs du détail sont décalées d'une constante de
+          manière à ce que leur valeur moyenne corresponde à celle de la
+          zone correspondante de l'image de base.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='merge'>
+    <title>Fusion d'images</title>
+    <indexterm><primary>fusionner des images</primary></indexterm>
+    <indexterm><primary>joindre des images</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Fusion</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Les images faisant partie d'une image plus grande peuvent être
+      fusionnées à l'aide de cette fonction. L'image sur laquelle on la
+      lance forme l'image de base, l'image sélectionnée par
+      <guilabel>Fusionner avec</guilabel> représente le second opérande.
+      Le côté de l'image de base sur lequel sera attaché la seconde
+      image est contrôllé par la sélection
+      <guilabel>Placer le second opérande</guilabel>.
+    </para>
+    <para>
+      Si les images sont parfaitement juxtaposables, celles-ci peuvent
+      être directement placées côte à côte sans ajustement. Ce cas peut
+      être géré en sélectionnant <guilabel>Aucun</guilabel> adns le
+      contrôle de l'alignement
+      <guilabel>Aligner le second opérande</guilabel>.
+    </para>
+    <para>
+      Toutefois, un ajustement est souvent néecssaire. L'option
+      <guilabel>Corrélation</guilabel> réalise un alignement automatique
+      basée sur une recherche de la meilleure corrélation. La recherche
+      est réalisée à la fois selon la direction parallèle au côté
+      d'alignement et selon la direction perpendiculaire. Si un décalage
+      est présent le long de la direction parallèle, l'image résultante
+      est agrandie de manière à contenir totalement les deux images (les
+      données non définies étant remplie par une valeur d'arrière-plan).
+    </para>
+    <para>
+      L'option <guilabel>Traitement des bords</guilabel> n'est utile que
+      dans le cas d'images désalignées. Elle contrôle le traitement des
+      zones de recouvrement des images sources :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Premier opérande</guilabel>
+        </term>
+        <listitem>
+          Les valeurs des zones de recouvrement sont prises depuis
+          l'image de base.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Second opérande</guilabel>
+        </term>
+        <listitem>
+          Les valeurs des zones de recouvrement sont prises depuis la
+          seconde image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Doux</guilabel>
+        </term>
+        <listitem>
+          Une transition douce entre la première et la seconde image est
+          réalisée sur la zone de recouvrement à l'aide d'une moyenne
+          pondérée utilisant une fonction de pondération adaptée.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='mutual-crop'>
+    <title>Rognage mutuel</title>
+    <indexterm><primary>rognage mutuel de deux images</primary></indexterm>
+    <indexterm><primary>suppression des zones de non intersection</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Rognage mutuel</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+        Deux images légèrement différentes d'une même zone (par exemple
+        avant et après traitement) peuvent être rognées pour ne garder
+        que les zones d'intersection (ou dit autrement, les zones de
+        non-intersection sont supprimées) à l'aide de ce module.
+    </para>
+    <para>
+        La zone d'intersection est déterminée par corrélation de l'image
+        la plus grande par rapport au centre de la plus petite image.
+        Les résolutions des deux images (nombre de pixels par unité de
+        longueur) doivent être identiques.
+    </para>
+    <para>
+        Ici le seul paramètre est
+        <guilabel>Sélectionner le second opérande</guilabel> -
+        la corrélation entre celui-ci et l'image courante sera calculée
+        et les deux champs de données seront rognés pour supprimer les
+        parties proches des bords sans intersection.
+    </para>
+  </sect2>
+  <sect2 id='cross-correlation'>
+    <title>Corrélation croisée</title>
+    <indexterm><primary>corrélation croisée</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Corrélation croisée</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Ce module détermine les corrélations locales des détails de deux
+      images différentes. La sortie idéale renvoie le décalage de
+      chaque pixel de la première image tel qu'il apparaît dans la
+      seconde. Ceci peut être utilisé pour déterminer les variations
+      locales de la surface après l'avoir acquise deux fois (les
+      décalages peuvent par exemple provenir d'une déformation de
+      l'échantillon ou d'un dysfonctionnement de l'appareil de
+      mesure).
+    </para>
+    <para>
+      Pour chaque pixel du premier opérande (l'image courante), le module prend
+      son voisinage et cherche la meilleure corrélation du seconde opérande
+      dans la zone définie. La position du maximum de corrélation est utilisée
+      pour déterminer la valeur du décalage des pixels du premier opérande.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Second opérande</guilabel>
+        </term>
+        <listitem>
+          Image utilisée pour la comparaison avec le second opérande - l'image
+          de base.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Dimensions de recherche</guilabel>
+        </term>
+        <listitem>
+          Détermine la zone où l'algorithme recherchera dans le voisinage (dans
+          le second opérande). Cette zone doit être plus grande que la taille de
+          la fenêtre. Il faut augmenter cette taille s'il existe de grandes
+          différences entre les deux images.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Taille de la fenêtre</guilabel>
+        </term>
+        <listitem>
+          Détermine la taille du voisinage local (dans le premier opérande).
+          Elle doit être plus petite que la zone de recherche. L'augmentation de
+          cette valeur permet d'améliorer la fonctionnalité du module, mais elle
+          augmentera le temps de calcul.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Type de sortie</guilabel>
+        </term>
+        <listitem>
+          Détermine le format de sortie (décalage des pixels).
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Ajouter un masque de corrélation basse</guilabel>
+        </term>
+        <listitem>
+          Pour certains pixels (n'ayant pas de voisinage marqué) le score de
+          corrélation peut être faible dans toute la zone, mais l'algorithme
+          trouvera toujours un maximum de corrélation. Pour identifier ces
+          pixels et ne pas les utiliser par la suite, vous pouvez laisser le
+          module appliquer un masque de basse corrélation pour les décalage de
+          pixels ayant une probabilité élevée d'être peu précis.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='mask-by-correlation'>
+    <title>Masquer par corrélation</title>
+    <indexterm><primary>recherche par corrélation</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Masquer par corrélation</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Ce module recherche la corrélation d'un motif dans l'image courante. La
+      position du motif est alors marquée par un masque dans la fenêtre de
+      données.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Noyau de corrélation</guilabel>
+        </term>
+        <listitem>
+          Image à trouver dans l'image de base.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Type de sortie</guilabel>
+        </term>
+        <listitem>
+          Plusieurs sorties sont disponibles : maxima de corrélation locale
+          (points individuels), masques de la taille du noyau pour chaque
+          maxima de corrélation (intéressant lors des présentations), ou
+          simplement le score de corrélation.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Méthode de corrélation</guilabel>
+        </term>
+        <listitem>
+          Permet de sélectionner l'algorithme de calcul de corrélation.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Seuil</guilabel>
+        </term>
+        <listitem>
+          Seuil permettant de déterminer si un maximum local doit être
+          considéré comme un
+          <quote>noyau de corrélation trouvé à cet endroit</quote>.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
