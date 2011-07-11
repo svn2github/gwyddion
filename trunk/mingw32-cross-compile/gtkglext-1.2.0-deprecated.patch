@@ -103,7 +103,7 @@
 --- gtkglext-1.2.0.orig/gtk/gtkglwidget.c	2004-02-20 10:38:36.000000000 +0100
 +++ gtkglext-1.2.0/gtk/gtkglwidget.c	2011-01-25 10:37:39.000000000 +0100
 @@ -16,7 +16,7 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
   */
  
 -#include <gtk/gtkmain.h>
@@ -199,7 +199,7 @@
 --- gtkglext-1.2.0.orig/gdk/gdkgldrawable.c	2004-02-20 10:38:10.000000000 +0100
 +++ gtkglext-1.2.0/gdk/gdkgldrawable.c	2011-01-25 10:19:13.000000000 +0100
 @@ -16,7 +16,7 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   */
  
 -#include <gdk/gdkdrawable.h>
@@ -312,7 +312,7 @@
 --- gtkglext-1.2.0.orig/gdk/gdkglwindow.c	2004-02-20 10:38:12.000000000 +0100
 +++ gtkglext-1.2.0/gdk/gdkglwindow.c	2011-01-25 10:24:11.000000000 +0100
 @@ -16,7 +16,7 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   */
  
 -#include <gtk/gtkversion.h>
@@ -372,7 +372,7 @@
 --- gtkglext-1.2.0.orig/gdk/gdkglpixmap.c	2004-02-20 10:38:12.000000000 +0100
 +++ gtkglext-1.2.0/gdk/gdkglpixmap.c	2011-01-25 10:24:36.000000000 +0100
 @@ -16,7 +16,7 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   */
  
 -#include <gtk/gtkversion.h>
