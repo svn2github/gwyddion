@@ -62,6 +62,7 @@ public_headers = \
 	$(srcdir)/mask-line.h \
 	$(srcdir)/math.h \
 	$(srcdir)/pack.h \
+	$(srcdir)/rand.h \
 	$(srcdir)/resource.h \
 	$(srcdir)/rgba.h \
 	$(srcdir)/selection.h \
@@ -157,6 +158,7 @@ libgwy3_la_SOURCES = \
 	math.c \
 	object-internal.c \
 	pack.c \
+	rand.c \
 	resource.c \
 	rgba.c \
 	selection.c \

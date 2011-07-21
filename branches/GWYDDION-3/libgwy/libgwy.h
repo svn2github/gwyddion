@@ -63,6 +63,7 @@
 #include <libgwy/mask-line.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
+#include <libgwy/rand.h>
 #include <libgwy/resource.h>
 #include <libgwy/rgba.h>
 #include <libgwy/selection.h>

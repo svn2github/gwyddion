@@ -30,6 +30,7 @@
     <title>Numerical Tools</title>
     <xi:include href="xml/math.xml"/>
     <xi:include href="xml/interpolation.xml"/>
+    <xi:include href="xml/rand.xml"/>
     <xi:include href="xml/fft.xml"/>
     <xi:include href="xml/fitter.xml"/>
     <xi:include href="xml/fit-task.xml"/>
