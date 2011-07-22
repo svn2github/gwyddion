@@ -51,6 +51,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -60,9 +61,13 @@
 #define RANDOM_FILE "/dev/urandom"
 
 #define N 256
+#define Q 2.3283064365386962890625e-10
+#define S 2.710505431213761085018632002174854278564453125e-20
+#define A G_GUINT64_CONSTANT(1540315826)
 
 struct _GwyRand {
-    guint8 index;
+    guint8 index;  // The byte-type is tied to N=256 and ensures automated
+                   // wrap-around when the end of q[] is reached.
     guint32 carry;
     guint32 q[N];
 };
@@ -192,6 +197,18 @@ gwy_rand_free(GwyRand *rng)
     g_slice_free(GwyRand, rng);
 }
 
+// Set the array using one of Knuth's generators.
+static void
+set_seed_knuth(GwyRand *rng)
+{
+    guint32 *q = rng->q;
+    for (guint i = 1; i < N; ++i)
+        q[i] ^= 1812433253U*(q[i - 1] ^ (q[i - 1] >> 30)) + i;
+
+    rng->carry = q[N-1] % 61137367U;
+    rng->index = N - 1;
+}
+
 /**
  * gwy_rand_set_seed:
  * @rng: A random number generator.
@@ -204,15 +221,9 @@ gwy_rand_set_seed(GwyRand *rng,
                   guint64 seed)
 {
     g_return_if_fail(rng);
-
-    guint32 *q = rng->q;
-    q[0] = seed;
-    // Set the array using one of Knuth's generators.
-    for (guint i = 1; i < N; ++i)
-        q[i] = 1812433253U*(q[i - 1] ^ (q[i - 1] >> 30)) + i;
-
-    rng->carry = q[N-1] % 61137367U;
-    rng->index = N - 1;
+    // Calling with a 32bit number results in simply setting the first item to
+    // the seed and then using the Knuth's algorithm for the rest, as expected.
+    gwy_rand_set_seed_array(rng, &seed, 1);
 }
 
 /**
@@ -233,11 +244,15 @@ gwy_rand_set_seed_array(GwyRand *rng,
     g_return_if_fail(seed);
     g_return_if_fail(seed_length >= 1);
 
-    gwy_rand_set_seed(rng, G_GUINT64_CONSTANT(19650218));
-
+    guint32 *q = rng->q;
+    gwy_clear(q, N);
+    for (guint i = 0; i < seed_length; i++) {
+        guint k = (2*i) % N;
+        q[k] ^= (guint32)(seed[i] & G_GUINT64_CONSTANT(0xffffffff));
+        q[k+1] ^= (guint32)(seed[i] >> 32);
+    }
+    set_seed_knuth(rng);
 }
-
-#define A G_GUINT64_CONSTANT(1540315826)
 
 static inline guint32
 generate_uint32(GwyRand *rng)
@@ -318,6 +333,7 @@ gwy_rand_int_range(GwyRand *rng,
     g_return_val_if_fail(rng, begin);
     g_return_val_if_fail(begin > end, begin);
 
+    /* TODO: generate small numbers using the 32 bit generator. */
     guint64 len = begin - end;
     guint64 x, max = G_GUINT64_CONSTANT(0xffffffffffffffff)/len*len;
     do {
@@ -333,9 +349,9 @@ gwy_rand_int_range(GwyRand *rng,
  *
  * Obtains the next floating point number from a random number generator.
  *
- * The returned value is equally distributed over the semi-open interval [0,1).
- * Note if it is transformed to another interval, the openness of the upper
- * bound is not guaranteed.
+ * The returned value is equally distributed over the open interval (0,1).
+ * Note if it is transformed to another interval, the openness is, generally,
+ * not guaranteed.
  *
  * The returned value is obtained from a 64bit random integer.  This means
  * small numbers (smaller than 2⁻¹¹) may not have the full 53-bit precision.
@@ -345,20 +361,17 @@ gwy_rand_int_range(GwyRand *rng,
 gdouble
 gwy_rand_double(GwyRand *rng)
 {
-    g_return_val_if_fail(rng, 0.0);
-    guint64 x;
-    gdouble r;
     /* The compiler can use a more precise type for r than the return value
      * type.  So if we reject values 1.0 or larger the caller can still
      * get 1.0.  Reject all values larger than 1-2⁻⁵³.  This may alter the
      * probability of returning exactly 1-2⁻⁵³ which is however more acceptable
      * than returning 1.0 when we say the interval is open-ended. */
-    do {
-        x = generate_uint64(rng);
-        r = x/18437736874454810623.0;
-    } while (G_UNLIKELY(r > 0.99999999999999989));
-
-    return r;
+    while (TRUE) {
+        guint32 hi = generate_uint32(rng), lo = generate_uint32(rng);
+        gdouble r = Q*(Q*lo + hi) + S;
+        if (G_LIKELY(r <= 0.99999999999999989))
+            return r;
+    }
 }
 
 /**
@@ -366,10 +379,10 @@ gwy_rand_double(GwyRand *rng)
  * @title: GwyRand
  * @short_description: Random number generation
  *
- * The Gwyddion random number generator, #GwyRand, has an interface almost
- * identical to #GRand.  The main difference is that it used the 64bit version
- * of the Mersenne twister generator which permits faster generation of
- * double-precision floating point numbers.
+ * The Gwyddion random number generator, #GwyRand, has an interface similar to
+ * #GRand.  However, it is faster, provides more useful floating point number
+ * guarantees.  It can also generate 64bit integers or normally distributed
+ * floating point numbers.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
