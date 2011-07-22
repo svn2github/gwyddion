@@ -21,63 +21,6 @@
  */
 
 /*
-   The 64bit Mersenne Twister generator code was adapted from:
-
-   A C-program for MT19937-64 (2004/9/29 version).
-   Coded by Takuji Nishimura and Makoto Matsumoto.
-
-   This is a 64-bit version of Mersenne Twister pseudorandom number
-   generator.
-
-   Before using, initialize the state by using init_genrand64(seed)
-   or init_by_array64(init_key, key_length).
-
-   Copyright (C) 2004, Makoto Matsumoto and Takuji Nishimura,
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-     1. Redistributions of source code must retain the above copyright
-        notice, this list of conditions and the following disclaimer.
-
-     2. Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-
-     3. The names of its contributors may not be used to endorse or promote
-        products derived from this software without specific prior written
-        permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-
-   References:
-   T. Nishimura, ``Tables of 64-bit Mersenne Twisters''
-     ACM Transactions on Modeling and
-     Computer Simulation 10. (2000) 348--357.
-   M. Matsumoto and T. Nishimura,
-     ``Mersenne Twister: a 623-dimensionally equidistributed
-       uniform pseudorandom number generator''
-     ACM Transactions on Modeling and
-     Computer Simulation 8. (Jan. 1998) 3--30.
-
-   Any feedback is very welcome.
-   http://www.math.hiroshima-u.ac.jp/~m-mat/MT/emt.html
-   email: m-mat @ math.sci.hiroshima-u.ac.jp (remove spaces)
-*/
-
-/*
  * The urandom/time default seeding procedure was adapted from:
  *
  * GLIB - Library of useful routines for C programming
@@ -116,22 +59,12 @@
 
 #define RANDOM_FILE "/dev/urandom"
 
-#define NN 312
-#define MM 156
-#define ONE G_GUINT64_CONSTANT(1)
-#define MATRIX_A G_GUINT64_CONSTANT(0xb5026f5aa96619e9)
-/* Most significant 33 bits */
-#define UM G_GUINT64_CONSTANT(0xffffffff80000000)
-/* Least significant 31 bits */
-#define LM G_GUINT64_CONSTANT(0x7fffffff)
+#define N 256
 
 struct _GwyRand {
-    // The array for the state vector.
-    guint64 mt[NN];
-    guint mti;
-    // Auxiliary data for 32bit number generation.
-    gboolean has_spare32;
-    guint32 spare32;
+    guint8 index;
+    guint32 carry;
+    guint32 q[N];
 };
 
 /**
@@ -271,19 +204,15 @@ gwy_rand_set_seed(GwyRand *rng,
                   guint64 seed)
 {
     g_return_if_fail(rng);
-    guint64 *mt = rng->mt;
 
-    // Zero seed would produce only zeroes, fix it to some other value
-    // (the default seed of the original generator).
-    if (!seed)
-        seed = G_GUINT64_CONSTANT(5489);
+    guint32 *q = rng->q;
+    q[0] = seed;
+    // Set the array using one of Knuth's generators.
+    for (guint i = 1; i < N; ++i)
+        q[i] = 1812433253U*(q[i - 1] ^ (q[i - 1] >> 30)) + i;
 
-    mt[0] = seed;
-    for (guint mti = 1; mti < NN; mti++)
-        mt[mti] = (G_GUINT64_CONSTANT(6364136223846793005)
-                   *(mt[mti-1] ^ (mt[mti-1] >> 62)) + mti);
-    rng->mti = NN;
-    rng->has_spare32 = FALSE;
+    rng->carry = q[N-1] % 61137367U;
+    rng->index = N - 1;
 }
 
 /**
@@ -306,75 +235,32 @@ gwy_rand_set_seed_array(GwyRand *rng,
 
     gwy_rand_set_seed(rng, G_GUINT64_CONSTANT(19650218));
 
-    guint64 *mt = rng->mt;
-    guint64 i = 1, j = 0, k = MAX(NN, seed_length);
-
-    for (; k; k--) {
-        mt[i] = ((mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 62))
-                          *G_GUINT64_CONSTANT(3935559000370003845)))
-                 + seed[j] + j); // non linear
-        i++;
-        j++;
-        if (i >= NN) {
-            mt[0] = mt[NN-1];
-            i = 1;
-        }
-        if (j >= seed_length)
-            j = 0;
-    }
-    for (k = NN-1; k; k--) {
-        mt[i] = ((mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 62))
-                          *G_GUINT64_CONSTANT(2862933555777941757)))
-                 - i); // non linear
-        i++;
-        if (i >= NN) {
-            mt[0] = mt[NN-1];
-            i = 1;
-        }
-    }
-
-    // MSB is 1; assuring non-zero initial array.
-    // FIXME: This looks a bit weird.
-    mt[0] = ONE << 63;
-    rng->has_spare32 = FALSE;
 }
 
-static void
-generate_block(GwyRand *rng)
+#define A G_GUINT64_CONSTANT(1540315826)
+
+static inline guint32
+generate_uint32(GwyRand *rng)
 {
-    static const guint64 mag01[2] = { 0, MATRIX_A };
+    guint64 t = A*rng->q[++rng->index] + rng->carry;
 
-    guint64 *mt = rng->mt;
-    guint i;
+    rng->carry = (t >> 32);
+    guint32 x = t + rng->carry;
 
-    for (i = 0; i < NN-MM; i++) {
-        guint64 x = (mt[i] & UM) | (mt[i+1] & LM);
-        mt[i] = mt[i+MM] ^ (x >> 1) ^ mag01[(guint)(x & ONE)];
+    if (x < rng->carry) {
+        ++x;
+        ++rng->carry;
     }
-    for (; i < NN-1; i++) {
-        guint64 x = (mt[i] & UM) | (mt[i+1] & LM);
-        mt[i] = mt[i + (MM-NN)] ^ (x >> 1) ^ mag01[(guint)(x & ONE)];
-    }
-    guint64 x = (mt[NN-1] & UM) | (mt[0] & LM);
-    mt[NN-1] = mt[MM-1] ^ (x >> 1) ^ mag01[(guint)(x & ONE)];
-
-    rng->mti = 0;
-}
-
-static guint64
-generate_uint64(GwyRand *rng)
-{
-    // Generate NN words at one time.
-    if (G_UNLIKELY(rng->mti >= NN))
-        generate_block(rng);
-
-    guint64 x = rng->mt[rng->mti++];
-    x ^= (x >> 29) & G_GUINT64_CONSTANT(0x5555555555555555);
-    x ^= (x << 17) & G_GUINT64_CONSTANT(0x71d67fffeda60000);
-    x ^= (x << 37) & G_GUINT64_CONSTANT(0xfff7eee000000000);
-    x ^= (x >> 43);
+    rng->q[rng->index] = x;
 
     return x;
+}
+
+static inline guint64
+generate_uint64(GwyRand *rng)
+{
+    guint64 lo = generate_uint32(rng), hi = generate_uint32(rng);
+    return (hi << 32) | lo;
 }
 
 /**
@@ -391,7 +277,6 @@ guint64
 gwy_rand_uint64(GwyRand *rng)
 {
     g_return_val_if_fail(rng, 0);
-    rng->has_spare32 = FALSE;
     return generate_uint64(rng);
 }
 
@@ -409,14 +294,7 @@ guint32
 gwy_rand_uint32(GwyRand *rng)
 {
     g_return_val_if_fail(rng, 0);
-    if (rng->has_spare32) {
-        rng->has_spare32 = FALSE;
-        return rng->spare32;
-    }
-    guint64 x = generate_uint64(rng);
-    rng->spare32 = (guint32)(x >> 32);
-    rng->has_spare32 = TRUE;
-    return (guint32)(x & G_GUINT64_CONSTANT(0xffffffff));
+    return generate_uint32(rng);
 }
 
 /**
