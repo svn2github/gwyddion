@@ -11,12 +11,14 @@ noinst_PROGRAMS = \
 	convolve-row \
 	count-bits \
 	memory-access \
+	rand \
 	sort
 
 convolve_row_SOURCES = convolve-row.c
 convolve_rect_SOURCES = convolve-rect.c
 count_bits_SOURCES = count-bits.c
 memory_access_SOURCES = memory-access.c
+rand_SOURCES = rand.c
 sort_SOURCES = sort.c
 extra_sources =
 
@@ -26,6 +28,7 @@ extra_sources = \
 	convolve-row.c \
 	count-bits.c \
 	memory-access.c \
+	rand.c \
 	sort.c
 endif
 
