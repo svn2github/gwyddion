@@ -37,12 +37,13 @@ void     gwy_rand_set_seed           (GwyRand *rng,
 void     gwy_rand_set_seed_array     (GwyRand *rng,
                                       const guint64 *seed,
                                       guint seed_length);
-guint64  gwy_rand_uint64             (GwyRand *rng);
-guint32  gwy_rand_uint32             (GwyRand *rng);
+guint64  gwy_rand_int64              (GwyRand *rng);
+guint32  gwy_rand_int                (GwyRand *rng);
 gint64   gwy_rand_int_range          (GwyRand *rng,
                                       gint64 begin,
                                       gint64 end);
 gdouble  gwy_rand_double             (GwyRand *rng);
+gboolean gwy_rand_boolean            (GwyRand *rng);
 
 G_END_DECLS
 

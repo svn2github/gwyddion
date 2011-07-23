@@ -41,10 +41,12 @@
     G_GNUC_UNUSED static const gboolean run##_##prefix##_##TYPE##_ = TRUE
 
 DECLARE_SUM_TEST(GRand, guint32, g_rand, int);
-DECLARE_SUM_TEST(GwyRand, guint32, gwy_rand, uint32);
-DECLARE_SUM_TEST(GwyRand, guint64, gwy_rand, uint64);
-DECLARE_SUM_TEST(GRand, double, g_rand, double);
-DECLARE_SUM_TEST(GwyRand, double, gwy_rand, double);
+DECLARE_SUM_TEST(GwyRand, guint32, gwy_rand, int);
+DECLARE_SUM_TEST(GwyRand, guint64, gwy_rand, int64);
+DECLARE_SUM_TEST(GRand, gdouble, g_rand, double);
+DECLARE_SUM_TEST(GwyRand, gdouble, gwy_rand, double);
+DECLARE_SUM_TEST(GRand, gboolean, g_rand, boolean);
+DECLARE_SUM_TEST(GwyRand, gboolean, gwy_rand, boolean);
 
 static inline guint64
 run_g_rand_guint64(GRand *rng, guint64 n, guint32 seed)
@@ -88,6 +90,7 @@ main(int argc, char *argv[])
     guint32 su32;
     guint64 su64;
     gdouble sdbl;
+    gboolean sboo;
 
     su32 = run_g_rand_guint32(glib_rng, niter, rand_seed);
     printf("GLIB uint32 %g Mnum/s (s = %u)\n",
@@ -105,33 +108,26 @@ main(int argc, char *argv[])
     printf("GWYD uint64 %g Mnum/s (s = %" G_GUINT64_FORMAT ")\n",
            niter/gwy_benchmark_timer_get_total()/1e6, su64);
 
-    sdbl = run_g_rand_double(glib_rng, niter, rand_seed);
+    sdbl = run_g_rand_gdouble(glib_rng, niter, rand_seed);
     printf("GLIB double %g Mnum/s (s = %g)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sdbl/niter);
 
-    sdbl = run_gwy_rand_double(gwyd_rng, niter, rand_seed);
+    sdbl = run_gwy_rand_gdouble(gwyd_rng, niter, rand_seed);
     printf("GWYD double %g Mnum/s (s = %g)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sdbl/niter);
+
+    sboo = run_g_rand_gboolean(glib_rng, niter, rand_seed);
+    printf("GLIB boolean %g Mnum/s (s = %g)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, sboo/(gdouble)niter);
+
+    sboo = run_gwy_rand_gboolean(gwyd_rng, niter, rand_seed);
+    printf("GWYD boolean %g Mnum/s (s = %g)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, sboo/(gdouble)niter);
 
     g_rand_free(glib_rng);
     gwy_rand_free(gwyd_rng);
 
     return 0;
 }
-
-/*
-
-   MT-32:
-   GLIB uint32 70.9328 Mnum/s (s = 4268551034)
-   GLIB uint64 28.4376 Mnum/s (s = 11933144865068391234)
-   GLIB double 29.032 Mnum/s (s = 0.499964)
-
-   MT-64:
-   GWYD uint32 85.2644 Mnum/s (s = 1276514338)
-   GWYD uint64 69.3587 Mnum/s (s = 6195566869960707510)
-   GWYD double 31.5505 Mnum/s (s = 0.499963)
-
-*/
-
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -3,8 +3,7 @@
  *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
- *  Parts of this code were adapted from GLib and the original MT19937-64
- *  generator, see below for more.
+ *  Parts of this code were adapted from GLib, see below for more.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,9 +39,8 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
- */
-
-/*
+ *
+ *
  * Modified by the GLib Team and others 1997-2000.  See the AUTHORS
  * file for a list of people on the GLib Team.  See the ChangeLog
  * files for a list of changes.  These files are distributed with
@@ -66,10 +64,21 @@
 #define A G_GUINT64_CONSTANT(1540315826)
 
 struct _GwyRand {
+    // Generator
     guint8 index;  // The byte-type is tied to N=256 and ensures automated
                    // wrap-around when the end of q[] is reached.
     guint32 carry;
+    guint nbool;
+    guint nbyte;
+    guint32 spare_bools;
+    union {
+        guint32 u;
+        struct {
+            guint8 x[4];
+        } b;
+    } spare_bytes;
     guint32 q[N];
+    // For generation of smaller types
 };
 
 /**
@@ -252,6 +261,8 @@ gwy_rand_set_seed_array(GwyRand *rng,
         q[k+1] ^= (guint32)(seed[i] >> 32);
     }
     set_seed_knuth(rng);
+    // XXX: All code paths that reset the state must go through here.
+    rng->nbool = rng->nbyte = 0;
 }
 
 static inline guint32
@@ -278,8 +289,46 @@ generate_uint64(GwyRand *rng)
     return (hi << 32) | lo;
 }
 
+static inline gdouble
+generate_double(GwyRand *rng)
+{
+    /* The compiler can use a more precise type for r than the return value
+     * type.  So if we reject values 1.0 or larger the caller can still
+     * get 1.0.  Reject all values larger than 1-2⁻⁵³.  This may alter the
+     * probability of returning exactly 1-2⁻⁵³ which is however more acceptable
+     * than returning 1.0 when we say the interval is open-ended. */
+    while (TRUE) {
+        guint32 hi = generate_uint32(rng), lo = generate_uint32(rng);
+        gdouble r = Q*(Q*lo + hi) + S;
+        if (G_LIKELY(r <= 0.99999999999999989))
+            return r;
+    }
+}
+
+static inline gboolean
+generate_bool(GwyRand *rng)
+{
+    if (G_UNLIKELY(!rng->nbool--)) {
+        rng->spare_bools = generate_uint32(rng);
+        rng->nbool = 31;
+    }
+    gboolean retval = rng->spare_bools & 1;
+    rng->spare_bools >>= 1;
+    return retval;
+}
+
+static inline guint8
+generate_byte(GwyRand *rng)
+{
+    if (!rng->nbyte--) {
+        rng->spare_bytes.u = generate_uint32(rng);
+        rng->nbyte = 3;
+    }
+    return rng->spare_bytes.b.x[rng->nbyte];
+}
+
 /**
- * gwy_rand_uint64:
+ * gwy_rand_int64:
  * @rng: A random number generator.
  *
  * Obtains the next 64bit number from a random number generator.
@@ -289,14 +338,14 @@ generate_uint64(GwyRand *rng)
  * Returns: Random 64bit integer.
  **/
 guint64
-gwy_rand_uint64(GwyRand *rng)
+gwy_rand_int64(GwyRand *rng)
 {
     g_return_val_if_fail(rng, 0);
     return generate_uint64(rng);
 }
 
 /**
- * gwy_rand_uint32:
+ * gwy_rand_int:
  * @rng: A random number generator.
  *
  * Obtains the next 32bit number from a random number generator.
@@ -306,7 +355,7 @@ gwy_rand_uint64(GwyRand *rng)
  * Returns: Random 32bit integer.
  **/
 guint32
-gwy_rand_uint32(GwyRand *rng)
+gwy_rand_int(GwyRand *rng)
 {
     g_return_val_if_fail(rng, 0);
     return generate_uint32(rng);
@@ -361,17 +410,21 @@ gwy_rand_int_range(GwyRand *rng,
 gdouble
 gwy_rand_double(GwyRand *rng)
 {
-    /* The compiler can use a more precise type for r than the return value
-     * type.  So if we reject values 1.0 or larger the caller can still
-     * get 1.0.  Reject all values larger than 1-2⁻⁵³.  This may alter the
-     * probability of returning exactly 1-2⁻⁵³ which is however more acceptable
-     * than returning 1.0 when we say the interval is open-ended. */
-    while (TRUE) {
-        guint32 hi = generate_uint32(rng), lo = generate_uint32(rng);
-        gdouble r = Q*(Q*lo + hi) + S;
-        if (G_LIKELY(r <= 0.99999999999999989))
-            return r;
-    }
+    return generate_double(rng);
+}
+
+/**
+ * gwy_rand_boolean:
+ * @rng: A random number generator.
+ *
+ * Obtains the next boolean from a random number generator.
+ *
+ * Returns: Random boolean.
+ **/
+gboolean
+gwy_rand_boolean(GwyRand *rng)
+{
+    return generate_bool(rng);
 }
 
 /**
