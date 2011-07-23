@@ -60,6 +60,7 @@
 
 #define N 256
 #define Q 2.3283064365386962890625e-10
+#define Q2 5.42101086242752217003726400434970855712890625e-20
 #define S 2.710505431213761085018632002174854278564453125e-20
 #define A G_GUINT64_CONSTANT(1540315826)
 
@@ -287,6 +288,18 @@ generate_uint64(GwyRand *rng)
 {
     guint64 lo = generate_uint32(rng), hi = generate_uint32(rng);
     return (hi << 32) | lo;
+#if 0
+    // Funny this is slightly slower.
+    union {
+        guint64 q;
+        struct {
+            guint32 lo, hi;
+        } u;
+    } x;
+    x.u.lo = generate_uint32(rng);
+    x.u.hi = generate_uint32(rng);
+    return x.q;
+#endif
 }
 
 static inline gdouble
@@ -298,6 +311,9 @@ generate_double(GwyRand *rng)
      * probability of returning exactly 1-2⁻⁵³ which is however more acceptable
      * than returning 1.0 when we say the interval is open-ended. */
     while (TRUE) {
+        // Two conversions from 32bit int seem to be still faster than one
+        // conversion from 64bit int even on modern processors.
+        // gdouble r = Q2*generate_uint64(rng) + S;
         guint32 hi = generate_uint32(rng), lo = generate_uint32(rng);
         gdouble r = Q*(Q*lo + hi) + S;
         if (G_LIKELY(r <= 0.99999999999999989))
