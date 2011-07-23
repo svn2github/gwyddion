@@ -444,6 +444,20 @@ gwy_rand_boolean(GwyRand *rng)
 }
 
 /**
+ * gwy_rand_byte:
+ * @rng: A random number generator.
+ *
+ * Obtains the next byte from a random number generator.
+ *
+ * Returns: Random byte.
+ **/
+guint8
+gwy_rand_byte(GwyRand *rng)
+{
+    return generate_byte(rng);
+}
+
+/**
  * SECTION: rand
  * @title: GwyRand
  * @short_description: Random number generation

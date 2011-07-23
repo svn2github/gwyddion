@@ -47,6 +47,7 @@ DECLARE_SUM_TEST(GRand, gdouble, g_rand, double);
 DECLARE_SUM_TEST(GwyRand, gdouble, gwy_rand, double);
 DECLARE_SUM_TEST(GRand, gboolean, g_rand, boolean);
 DECLARE_SUM_TEST(GwyRand, gboolean, gwy_rand, boolean);
+DECLARE_SUM_TEST(GwyRand, guint8, gwy_rand, byte);
 
 static inline guint64
 run_g_rand_guint64(GRand *rng, guint64 n, guint32 seed)
@@ -58,6 +59,19 @@ run_g_rand_guint64(GRand *rng, guint64 n, guint32 seed)
         guint64 lo = g_rand_int(rng);
         guint64 hi = g_rand_int(rng);
         s += (hi << 32) | lo;
+    }
+    gwy_benchmark_timer_stop();
+    return s;
+}
+
+static inline guint8
+run_g_rand_guint8(GRand *rng, guint64 n, guint32 seed)
+{
+    g_rand_set_seed(rng, seed);
+    guint8 s = 0;
+    gwy_benchmark_timer_start();
+    while (n--) {
+        s += g_rand_int(rng) & 0xff;
     }
     gwy_benchmark_timer_stop();
     return s;
@@ -87,10 +101,11 @@ main(int argc, char *argv[])
     GRand *glib_rng = g_rand_new_with_seed(42);
     GwyRand *gwyd_rng = gwy_rand_new_with_seed(42);
 
+    gboolean sboo;
+    guint8 sbyt;
     guint32 su32;
     guint64 su64;
     gdouble sdbl;
-    gboolean sboo;
 
     su32 = run_g_rand_guint32(glib_rng, niter, rand_seed);
     printf("GLIB uint32 %g Mnum/s (s = %u)\n",
@@ -123,6 +138,14 @@ main(int argc, char *argv[])
     sboo = run_gwy_rand_gboolean(gwyd_rng, niter, rand_seed);
     printf("GWYD boolean %g Mnum/s (s = %g)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sboo/(gdouble)niter);
+
+    sbyt = run_g_rand_guint8(glib_rng, niter, rand_seed);
+    printf("GLIB byte %g Mnum/s (s = %u)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, sbyt);
+
+    sbyt = run_gwy_rand_guint8(gwyd_rng, niter, rand_seed);
+    printf("GWYD byte %g Mnum/s (s = %u)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, sbyt);
 
     g_rand_free(glib_rng);
     gwy_rand_free(gwyd_rng);
