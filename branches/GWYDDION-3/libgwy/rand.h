@@ -45,6 +45,10 @@ gint64   gwy_rand_int_range          (GwyRand *rng,
 gdouble  gwy_rand_double             (GwyRand *rng);
 gboolean gwy_rand_boolean            (GwyRand *rng);
 guint8   gwy_rand_byte               (GwyRand *rng);
+gdouble  gwy_rand_exp                (GwyRand *rng);
+gdouble  gwy_rand_exp_positive       (GwyRand *rng);
+gdouble  gwy_rand_normal             (GwyRand *rng);
+gdouble  gwy_rand_normal_positive    (GwyRand *rng);
 
 G_END_DECLS
 
