@@ -90,6 +90,8 @@ struct _GwyRand {
     // For generation of smaller types
 };
 
+G_DEFINE_BOXED_TYPE(GwyRand, gwy_rand, gwy_rand_copy, gwy_rand_free);
+
 /**
  * gwy_rand_new:
  *
@@ -169,6 +171,31 @@ gwy_rand_copy(const GwyRand *rng)
 }
 
 /**
+ * gwy_rand_free:
+ * @rng: A random number generator.
+ *
+ * Destroys a random number generator.
+ **/
+void
+gwy_rand_free(GwyRand *rng)
+{
+    g_slice_free(GwyRand, rng);
+}
+
+/**
+ * @destination: Destination random number generator.
+ * @source: Source random number generator.
+ *
+ * Copies the full state of one random number generator to another.
+ **/
+void
+gwy_rand_assign(GwyRand *destination,
+                const GwyRand *source)
+{
+    gwy_assign(destination, source, 1);
+}
+
+/**
  * gwy_rand_new_with_seed:
  * @seed: Value to initialize the random number generator with.
  *
@@ -201,18 +228,6 @@ gwy_rand_new_with_seed_array(const guint64 *seed,
     GwyRand *rng = g_slice_new0(GwyRand);
     gwy_rand_set_seed_array(rng, seed, seed_length);
     return rng;
-}
-
-/**
- * gwy_rand_free:
- * @rng: A random number generator.
- *
- * Destroys a random number generator.
- **/
-void
-gwy_rand_free(GwyRand *rng)
-{
-    g_slice_free(GwyRand, rng);
 }
 
 // Set the array using one of Knuth's generators.

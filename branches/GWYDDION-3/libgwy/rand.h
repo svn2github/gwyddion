@@ -20,18 +20,23 @@
 #ifndef __LIBGWY_RAND_H__
 #define __LIBGWY_RAND_H__
 
-#include <glib.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
+#define GWY_TYPE_RAND                         (gwy_rand_get_type())
+
 typedef struct _GwyRand GwyRand;
 
+GType    gwy_rand_get_type           (void)                G_GNUC_CONST;
 GwyRand* gwy_rand_new                (void)                G_GNUC_MALLOC;
 GwyRand* gwy_rand_copy               (const GwyRand *rng)  G_GNUC_MALLOC;
+void     gwy_rand_free               (GwyRand *rng);
+void     gwy_rand_assign             (GwyRand *destination,
+                                      const GwyRand *source);
 GwyRand* gwy_rand_new_with_seed      (guint64 seed)        G_GNUC_MALLOC;
 GwyRand* gwy_rand_new_with_seed_array(const guint64 *seed,
                                       guint seed_length)   G_GNUC_MALLOC;
-void     gwy_rand_free               (GwyRand *rng);
 void     gwy_rand_set_seed           (GwyRand *rng,
                                       guint64 seed);
 void     gwy_rand_set_seed_array     (GwyRand *rng,
