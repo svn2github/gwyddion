@@ -305,4 +305,173 @@ test_rand_uniformity_int64(void)
     check_excesses(excesses, nbits);
 }
 
+static gboolean
+kolmogorov_test(GwyRand *rng,
+                guint64 seed,
+                gdouble (*generate)(GwyRand*),
+                gdouble (*cdf)(gdouble),
+                gdouble *workspace,
+                guint nsamples)
+{
+    gwy_rand_set_seed(rng, seed);
+
+    for (guint i = 0; i < nsamples; i++)
+        workspace[i] = generate(rng);
+
+    gwy_math_sort(workspace, NULL, nsamples);
+
+    gdouble D = 0;
+    for (guint i = 0; i < nsamples; i++) {
+        gdouble F = cdf(workspace[i]);
+        gdouble ym = i/(gdouble)nsamples, yp = (i + 1)/(gdouble)nsamples;
+        gdouble dm = fabs(F - ym), dp = fabs(F - yp);
+
+        if (dm > D)
+            D = dm;
+        if (dp > D)
+            D = dp;
+    }
+
+    // This is really, really improbable.
+    g_assert_cmpfloat(D*sqrt(nsamples), <=, 4.0);
+    // Failure that can occur occasionally; make noise only if we get several
+    // of them.
+    return D*sqrt(nsamples) < 2.0;
+}
+
+static gdouble
+cdf_uniform(gdouble x)
+{
+    return x;
+}
+
+void
+test_rand_distribution_uniform(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_double, cdf_uniform,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
+static gdouble
+cdf_exp_positive(gdouble x)
+{
+    return 1.0 - exp(-x);
+}
+
+void
+test_rand_distribution_exp_positive(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_exp_positive, cdf_exp_positive,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
+static gdouble
+cdf_exp(gdouble x)
+{
+    return x <= 0.0 ? 0.5*exp(x) : 1.0 - 0.5*exp(-x);
+}
+
+void
+test_rand_distribution_exp(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_exp, cdf_exp,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
+static gdouble
+cdf_normal_positive(gdouble x)
+{
+    return erf(x/G_SQRT2);
+}
+
+void
+test_rand_distribution_normal_positive(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_normal_positive, cdf_normal_positive,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
+static gdouble
+cdf_normal(gdouble x)
+{
+    return 0.5*(1.0 + erf(x/G_SQRT2));
+}
+
+void
+test_rand_distribution_normal(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_normal, cdf_normal,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

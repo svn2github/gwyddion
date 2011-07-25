@@ -34,6 +34,11 @@ rand/range/double
 rand/uniformity/boolean
 rand/uniformity/byte
 rand/uniformity/int64
+rand/distribution/uniform
+rand/distribution/exp-positive
+rand/distribution/exp
+rand/distribution/normal-positive
+rand/distribution/normal
 fitter/props
 fit-task/point
 fit-task/vector
