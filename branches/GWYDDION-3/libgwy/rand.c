@@ -419,11 +419,11 @@ gwy_rand_int_range(GwyRand *rng,
                    gint64 end)
 {
     g_return_val_if_fail(rng, begin);
-    g_return_val_if_fail(begin > end, begin);
+    g_return_val_if_fail(begin < end, begin);
 
     /* TODO: generate small numbers using the 32 bit generator. */
-    guint64 len = begin - end;
-    guint64 x, max = G_GUINT64_CONSTANT(0xffffffffffffffff)/len*len;
+    guint64 len = end - begin;
+    guint64 x, max = G_MAXUINT64/len*len;
     do {
         x = generate_uint64(rng);
     } while (G_UNLIKELY(x >= max));
