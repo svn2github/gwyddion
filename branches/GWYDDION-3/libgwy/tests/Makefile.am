@@ -29,6 +29,7 @@ testlibgwy_SOURCES = \
 	mask-line.c \
 	math.c \
 	pack.c \
+	rand.c \
 	resource.c \
 	rgba.c \
 	serialization.c \

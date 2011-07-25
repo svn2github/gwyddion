@@ -24,6 +24,16 @@ fft/load-wisdom
 expr/evaluate
 expr/vector
 expr/garbage
+rand/seed/reproducibility
+rand/seed/difference
+rand/copy
+rand/range/boolean
+rand/range/int
+rand/range/byte
+rand/range/double
+rand/uniformity/boolean
+rand/uniformity/byte
+rand/uniformity/int64
 fitter/props
 fit-task/point
 fit-task/vector
