@@ -195,8 +195,7 @@ void
 test_brick_units(void)
 {
     enum { max_size = 30 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -251,8 +250,7 @@ void
 test_brick_serialize(void)
 {
     enum { max_size = 25 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 50 : 10;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -426,8 +424,7 @@ void
 test_brick_new_part(void)
 {
     enum { max_size = 18 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 1000 : 200;
 
     for (gsize iter = 0; iter < niter; iter++) {

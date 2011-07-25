@@ -65,10 +65,8 @@ void
 test_math_linalg(void)
 {
     guint nmax = 8, niter = 50;
-    GRand *rng = g_rand_new();
-
     /* Make it realy reproducible. */
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint n = 1; n < nmax; n++) {
         /* Use descriptive names for less cryptic g_assert() messages. */
@@ -132,9 +130,7 @@ test_math_linalg(void)
 void
 test_math_linalg_fail(void)
 {
-    GRand *rng = g_rand_new();
-    /* Make it realy reproducible. */
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint n = 2; n <= 10; n++) {
         gdouble *matrix = g_new(gdouble, n*n);

@@ -32,8 +32,7 @@ fit_func_one(const gchar *name,
              const gchar* const *param_names)
 {
     enum { ndata = 500 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     GwyFitFunc *fitfunc = gwy_fit_func_new(name, group);
     g_assert(GWY_IS_FIT_FUNC(fitfunc));

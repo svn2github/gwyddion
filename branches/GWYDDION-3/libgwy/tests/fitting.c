@@ -73,8 +73,7 @@ make_gaussian_data(gdouble xoff,
                    guint ndata,
                    guint seed)
 {
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, seed);
+    GRand *rng = g_rand_new_with_seed(seed);
     GwyXY *data = g_new(GwyXY, ndata);
     gdouble xmin = xoff - b*(2 + 3*g_rand_double(rng));
     gdouble xmax = xoff + b*(2 + 3*g_rand_double(rng));

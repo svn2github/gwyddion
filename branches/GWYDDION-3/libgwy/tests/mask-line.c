@@ -162,8 +162,7 @@ void
 test_mask_line_copy(void)
 {
     enum { max_size = 600 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_line_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 100000 : 10000;
 
@@ -195,8 +194,7 @@ void
 test_mask_line_new_part(void)
 {
     enum { max_size = 433 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_line_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 10000 : 1000;
 
@@ -223,8 +221,7 @@ void
 test_mask_line_serialize(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_line_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 50 : 10;
 
@@ -290,8 +287,7 @@ void
 test_mask_line_count(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_line_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 500 : 100;
 

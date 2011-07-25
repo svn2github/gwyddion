@@ -65,8 +65,7 @@ void
 test_surface_serialize(void)
 {
     enum { max_size = 55 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 50 : 10;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -118,8 +117,7 @@ void
 test_surface_regularize_full(void)
 {
     enum { max_size = 27 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 50 : 10;
 
     for (guint iter = 0; iter < niter; iter++) {

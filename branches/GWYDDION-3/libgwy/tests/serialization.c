@@ -591,10 +591,7 @@ test_deserialize_garbage(void)
         { ser_test_data,   sizeof(ser_test_data),   },
         { ser_test_nested, sizeof(ser_test_nested), },
     };
-    GRand *rng = g_rand_new();
-
-    /* Make it realy reproducible. */
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     gsize niter = g_test_slow() ? 100000 : 10000;
 

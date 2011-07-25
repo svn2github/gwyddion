@@ -175,8 +175,7 @@ void
 test_field_units(void)
 {
     enum { max_size = 411 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -218,8 +217,7 @@ void
 test_field_serialize(void)
 {
     enum { max_size = 55 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 50 : 10;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -307,8 +305,7 @@ void
 test_field_copy(void)
 {
     enum { max_size = 19 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 1000 : 200;
 
     for (gsize iter = 0; iter < niter; iter++) {
@@ -359,8 +356,7 @@ void
 test_field_new_part(void)
 {
     enum { max_size = 23 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 1000 : 200;
 
     for (gsize iter = 0; iter < niter; iter++) {
@@ -568,8 +564,7 @@ void
 test_field_range(void)
 {
     enum { max_size = 76 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -669,8 +664,7 @@ void
 test_field_surface_area(void)
 {
     enum { max_size = 76 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -733,8 +727,7 @@ void
 test_field_mean(void)
 {
     enum { max_size = 76 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -792,8 +785,7 @@ void
 test_field_rms(void)
 {
     enum { max_size = 76 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -859,8 +851,7 @@ void
 test_field_statistics(void)
 {
     enum { max_size = 67 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -939,8 +930,7 @@ void
 test_field_level_plane(void)
 {
     enum { max_size = 204 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 20;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -996,8 +986,7 @@ test_field_level_poly(void)
     const guint x_powers[] = { 0, 1, 0 };
     const guint y_powers[] = { 0, 0, 1 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 20;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -1054,8 +1043,7 @@ test_field_level_inclination(void)
 {
     enum { max_size = 172 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 30;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -1128,8 +1116,7 @@ static void
 test_field_row_level_one(GwyRowShiftMethod method)
 {
     enum { max_size = 260 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     enum { niter = 10 };
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -1592,8 +1579,7 @@ void
 test_field_arithmetic_normalize(void)
 {
     enum { max_size = 70 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     enum { niter = 10 };
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -1697,8 +1683,7 @@ void
 test_field_distributions_acf_full(void)
 {
     enum { max_size = 134 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 100 : 15;
 
     gwy_fft_load_wisdom();
@@ -1741,8 +1726,7 @@ void
 test_field_distributions_acf_masked(void)
 {
     enum { max_size = 134 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 100 : 15;
 
     gwy_fft_load_wisdom();
@@ -1790,8 +1774,7 @@ void
 test_field_distributions_acf_partial(void)
 {
     enum { max_size = 134 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 100 : 15;
 
     gwy_fft_load_wisdom();
@@ -1844,8 +1827,7 @@ void
 test_field_distributions_hhcf_full(void)
 {
     enum { max_size = 134 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 100 : 15;
 
     gwy_fft_load_wisdom();
@@ -1888,8 +1870,7 @@ void
 test_field_distributions_hhcf_masked(void)
 {
     enum { max_size = 134 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 100 : 15;
 
     gwy_fft_load_wisdom();
@@ -1937,8 +1918,7 @@ void
 test_field_distributions_hhcf_partial(void)
 {
     enum { max_size = 134 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 60 : 15;
 
     gwy_fft_load_wisdom();
@@ -2070,8 +2050,7 @@ field_extend_one(GwyExteriorType exterior)
 {
     enum { max_size = 35 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 300 : 100;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -2155,8 +2134,7 @@ static void
 field_convolve_row_interior_one(GwyExteriorType exterior)
 {
     enum { yres = 3 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint res = 1; res <= 30; res++) {
         GwyField *source = gwy_field_new_sized(res, yres, FALSE);
@@ -2209,8 +2187,7 @@ static void
 field_convolve_row_exterior_one(GwyExteriorType exterior)
 {
     enum { yres = 3 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint res = 1; res <= 30; res++) {
         guint niter = g_test_slow() ? MAX(4, 3*res*res) : MAX(4, res*res/2);
@@ -2698,8 +2675,7 @@ field_convolve_field_one(GwyExteriorType exterior)
 {
     enum { max_size = 30, niter = 200 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
@@ -3038,8 +3014,7 @@ test_field_distributions_psdf_full(void)
     gdouble sigma = 20e-9;
     gdouble T = 300e-9;
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     GwyField *field = gwy_field_new_sized(size, size, FALSE);
     gwy_field_set_xreal(field, size*dx);
@@ -3073,8 +3048,7 @@ test_field_distributions_psdf_masked(void)
     gdouble sigma = 20e-9;
     gdouble T = 300e-9;
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     GwyField *field = gwy_field_new_sized(size, size, FALSE);
     gwy_field_set_xreal(field, size*dx);
@@ -3126,8 +3100,7 @@ test_field_correlate_plain(void)
 {
     enum { max_size = 54, niter = 40 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         // With too small kernels we can get higher correlation score elsewhere
@@ -3175,8 +3148,7 @@ test_field_correlate_level(void)
 {
     enum { max_size = 54, niter = 40 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         // With too small kernels we can get higher correlation score elsewhere
@@ -3226,8 +3198,7 @@ test_field_correlate_scale_rms(void)
 {
     enum { max_size = 54, niter = 40 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         // With too small kernels we can get higher correlation score elsewhere
@@ -3277,8 +3248,7 @@ test_field_correlate_normalize(void)
 {
     enum { max_size = 54, niter = 40 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         // With too small kernels we can get higher correlation score elsewhere
@@ -3345,8 +3315,7 @@ test_field_correlate_crosscorrelate(void)
 {
     enum { max_size = 44, maxsearch = 5, niter = 40 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         // With too small kernels we can get higher correlation score elsewhere
@@ -3581,8 +3550,7 @@ test_field_read_interpolated(void)
 {
     enum { max_size = 54, niter = 40, niiter = 10 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 8, max_size);
@@ -3629,8 +3597,7 @@ test_field_read_averaged(void)
 {
     enum { max_size = 54, niter = 40, niiter = 10 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 8, max_size);
@@ -3690,8 +3657,7 @@ test_field_read_slope(void)
 {
     enum { max_size = 54, niter = 40, niiter = 10 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 8, max_size);
@@ -3760,8 +3726,7 @@ test_field_read_curvature(void)
 {
     enum { max_size = 54, niter = 40, niiter = 10 };
 
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 8, max_size);

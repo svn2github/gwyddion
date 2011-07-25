@@ -92,9 +92,8 @@ test_math_median(void)
 {
     guint nmax = 1000;
     gdouble *data = g_new(gdouble, nmax);
-    GRand *rng = g_rand_new();
+    GRand *rng = g_rand_new_with_seed(42);
 
-    g_rand_set_seed(rng, 42);
     for (guint n = 1; n < nmax; n++) {
         for (guint i = 0; i < n; i++)
             data[i] = i;

@@ -106,11 +106,9 @@ test_cholesky_make_vector(gdouble *d,
 void
 test_math_cholesky(void)
 {
-    guint nmax = 8, niter = 50;
-    GRand *rng = g_rand_new();
-
+    enum { nmax = 8, niter = 50 };
     /* Make it realy reproducible. */
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint n = 1; n < nmax; n++) {
         guint matlen = CHOLESKY_MATRIX_LEN(n);

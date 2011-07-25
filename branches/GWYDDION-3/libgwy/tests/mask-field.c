@@ -192,8 +192,7 @@ void
 test_mask_field_copy(void)
 {
     enum { max_size = 600 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 100000 : 10000;
 
@@ -231,8 +230,7 @@ void
 test_mask_field_new_part(void)
 {
     enum { max_size = 433 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 10000 : 1000;
 
@@ -284,8 +282,7 @@ void
 test_mask_field_logical(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 500 : 100;
 
@@ -357,8 +354,7 @@ void
 test_mask_field_logical_part(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 5000 : 1000;
 
@@ -420,8 +416,7 @@ void
 test_mask_field_fill(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 100 : 20;
 
@@ -461,8 +456,7 @@ void
 test_mask_field_serialize(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 50 : 10;
 
@@ -529,8 +523,7 @@ void
 test_mask_field_grain_no(void)
 {
     enum { max_size = 83 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 50 : 10;
 
@@ -603,8 +596,7 @@ void
 test_mask_field_count(void)
 {
     enum { max_size = 333 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 500 : 100;
 
@@ -962,8 +954,7 @@ test_mask_field_flip(void)
     test_mask_field_flip_one(orig2_str, TRUE, TRUE, bflip2_str);
 
     enum { max_size = 161 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 500 : 100;
 
@@ -1075,8 +1066,7 @@ test_mask_field_transpose(void)
     test_mask_field_transpose_one(trans2_str, orig2_str);
 
     enum { max_size = 149 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 100000 : 2000;
 
@@ -1162,8 +1152,7 @@ test_mask_field_rotate(void)
     test_mask_field_rotate_one(r270d1_str, 270, r180d1_str);
 
     enum { max_size = 161 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 5000 : 1000;
 
@@ -1188,8 +1177,7 @@ void
 test_mask_field_fill_ellipse(void)
 {
     enum { max_size = 214 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
     gsize niter = g_test_slow() ? 10000 : 2000;
 

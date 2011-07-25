@@ -118,8 +118,7 @@ test_math_curvature(void)
 {
     gdouble xc, yc, zc, k1, k2, phi1, phi2;
     guint ndims;
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     // Flat surfaces
     static const gdouble coeffs1[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };

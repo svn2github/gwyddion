@@ -167,10 +167,8 @@ test_expr_garbage(void)
 
     gsize n = 10000;
     GString *garbage = g_string_new(NULL);
-    GRand *rng = g_rand_new();
+    GRand *rng = g_rand_new_with_seed(42);
     guint count = 0;
-
-    g_rand_set_seed(rng, 42);
 
     /* No checks.  The goal is not to crash... */
     for (gsize i = 0; i < n; i++) {

@@ -134,8 +134,7 @@ void
 test_line_units(void)
 {
     enum { max_size = 411 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = 50;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -165,8 +164,7 @@ void
 test_line_serialize(void)
 {
     enum { max_size = 55 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 50 : 10;
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -233,8 +231,7 @@ void
 test_line_copy(void)
 {
     enum { max_size = 19 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 1000 : 200;
 
     for (gsize iter = 0; iter < niter; iter++) {
@@ -264,8 +261,7 @@ void
 test_line_new_part(void)
 {
     enum { max_size = 23 };
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
     gsize niter = g_test_slow() ? 1000 : 200;
 
     for (gsize iter = 0; iter < niter; iter++) {
@@ -320,8 +316,7 @@ test_line_outer_product(void)
 void
 test_line_distribute_simple(void)
 {
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint res = 1; res <= 13; res++) {
         GwyLine *source = gwy_line_new_sized(res, FALSE);
@@ -341,8 +336,7 @@ test_line_distribute_simple(void)
 void
 test_line_distribute_unbiased(void)
 {
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
+    GRand *rng = g_rand_new_with_seed(42);
 
     for (guint res = 1; res <= 13; res++) {
         GwyLine *source = gwy_line_new_sized(res, FALSE);
