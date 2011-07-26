@@ -1,0 +1,373 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: leveling.xml 10418 2009-11-13 14:53:56Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='leveling-and-background' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Mise à niveau et soustraction d'arrière plan</title>
+  <sect2 id='leveling'>
+    <title>Mise à niveau</title>
+    <para>
+      Les données acquises avec des microscopes SPM ne sont généralement pas du
+      tout mises à niveau ; le microscope sort directement les données brutes
+      données par la tension d'un piezoscanner, une jauge de contrainte, un
+      interféromètre ou les valeurs de tout autre système de mesure. Cette
+      manière d'acquérir les données permet à l'utilisateur de choisir sa propre
+      méthode de mise à niveau.
+    </para>
+    <para>
+      Le choix de la méthode de mise à niveau dépend de la configuration de
+      votre système d'acquisition SPM. Par exemple, pour les systèmes ayant des
+      scanners indépendant pour chaque axe, un simple niveau plan suffira. Pour
+      les systèmes ayant des scanner se déplaçant selon les trois axes (tube
+      scanners), on utilisera plutôt un polynôme d'ordre 2.
+    </para>
+    <para>
+      Bien évidemment vous pouvez utiliser une mise à niveau d'ordre plus élevé,
+      mais dans ce cas vous risquez de supprimer des éléments de l'image (par
+      exemple des ondulations de la surface), et donc d'altérer les fonctions
+      statistiques et les quantités évaluées sur la surface.
+    </para>
+    <sect3 id='fix-zero'>
+      <title>Fixer le zéro et Valeur moyenne à zéro</title>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Fixer le zéro</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Valeur moyenne à zéro</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Les modules les plus simples liés à la mise à niveau sont
+        <link linkend='fix-zero'>Fixer le zéro</link> et
+        <link linkend='fix-zero'>Valeur moyenne à zéro</link>,
+        qui modifient simplement la valeur moyenne des données de manière à
+        mettre la valeur minimale à zéro (Fixer le zéro) ou bien la valeur
+        moyenne (Valeur moyenne à zéro).
+      </para>
+    </sect3>
+    <sect3 id='plane-level'>
+      <title>
+        Niveau plan
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>niveau plan</primary></indexterm>
+      <indexterm>
+        <primary>mise à niveau</primary>
+        <secondary>soustraction du plan moyen</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Niveau plan</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        La mise à niveau par plan est généralement la première fonction
+        appliquée à des données SPM brutes. Le plan est calculé à partir de
+        tous les points de l'image puis est soustrait aux données.
+      </para>
+      <para>
+        Si un masque est présent, le module propose de n'utiliser que les
+        données sous le masque pour ajuster le plan, exlure les données sous le
+        masque ou bien ignorer le masque et utiliser toutes les données.
+      </para>
+      <tip>
+        Vous pouvez appliquer rapidement cette mise à niveau en faisant un clic
+        droit dans la fenêtre des données puis en sélectionnant
+        <guimenuitem>Niveau plan</guimenuitem>.
+      </tip>
+    </sect3>
+    <sect3 id='three-point-level'>
+      <title>
+        Outil de mise à niveau par trois points
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>mise à niveau par trois points</primary></indexterm>
+      <indexterm>
+        <primary>mise à niveau</primary>
+        <secondary>trois points</secondary>
+      </indexterm>
+      <para>
+        L'outil de <guilabel>mise à niveau par trois points</guilabel> peut être
+        utilisé pour mettre à niveau des surfaces ayant une structure complexe.
+        L'utilisateur peut tout simplement marquer trois points dans l'image
+        devant être au même niveau, puis cliquer sur le bouton
+        <guibutton>Appliquer</guibutton>. Le plan est calculé à partir de ces
+        trois points puis soustrait des données.
+      </para>
+    </sect3>
+    <sect3 id='facet-level'>
+      <title>
+        Mise à niveau des facettes
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_facet_level-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>mise à niveau des facettes</primary></indexterm>
+      <indexterm>
+        <primary>mise à niveau</primary>
+        <secondary>alignement horizontal des facettes</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Niveau des facettes</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        La <link linkend='facet-level'>mise à niveau des facettes</link> ajuste
+        les données en soustrayant un plan de manière similaire à la fonction de
+        <link linkend='plane-level'>mise à niveau</link> standard. Toutefois, le
+        plan est déterminé ici de manière différente : il rend les facettes de
+        la surface les plus horizontales possible. Ainsi pour les surfaces ayant
+        des zones planes horizontales le résultat obtenu sera bien meilleur que
+        celui obtenu avec la fonction Mise à niveau, particulièrement si des
+        objets de grande taille sont présents.
+      </para>
+      <para>
+        D'autre part, cette fonction n'est pas adaptée pour certains types de
+        surface. Par exemple pour les surfaces aléatoires, les données
+        comportant énormément de bruit spatialement très fin, ainsi que les
+        images ne correspondant pas à une topographie car la méthode utilisée
+        ne fonctionne pas bien si les dimensions latérales et les
+        <quote>hauteurs</quote> diffèrent de plusieurs ordres de grandeur.
+      </para>
+      <para>
+        Tout comme pour le <link linkend='plane-level'>niveau plan</link>, la
+        mise à niveau des facettes permet d'inclure ou d'exclure les données
+        sous le masque. Ce choix n'est proposé que si un masque est présent.
+      </para>
+      <para>
+        La détermination de l'orientation des facettes est un processus itératif
+        fonctionnt de la manière suivante. Tout d'abord, la variation des
+        normales locales est calculée :
+        <xi:include href="eq-facet-level-dispersion.xml"/> où
+        <xi:include href="eqi-vec-n_i.xml"/> est le vecteur normal de la facette
+        locale (voir les <link linkend='inclinations-coordinates'>coordonnés
+        d'inclinaison</link>) dans le <xi:include href="eqi-i.xml"/>-ème pixel.
+        Puis la normale dominante est estimée par
+        <xi:include href='eq-facet-level-new-normal.xml'/> où
+        <xi:include href="eqi-c-is-1-over-20.xml"/> est une constante.
+        Puis le plan correspondant à la normale dominante
+        <xi:include href="eqi-vec-n.xml"/> est soustrait, et ces trois étapes
+        sont répétées jusqu'à ce que le processus converge. Les pondérations
+        gaussiennes permettent d'utiliser un seul ensemble de normales locales
+        similaires et de converger vers leur direction moyenne. Sans ces
+        facteurs de pondération, la procédure convergerait bien évidemment en
+        une seule étape vers la normale moyenne globale – et serait ainsi
+        complètement équivalente à une simple mise à niveau plane.
+      </para>
+      <informalfigure id='fig-facet-level'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='level-plane-facet.png' format='PNG'/>
+          </imageobject>
+          <caption>
+            Exemple de mise à niveau des facettes :
+            (a) sans correction, les données sont penchées,
+            (b) données mises à niveau par l'ajustement plan standard (niveau plan),
+            (c) données mises à niveau par les facettes.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id='level-rotate'>
+      <title>Rotation de plan</title>
+      <indexterm><primary>rotation de plan</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Rotation de plan</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        La <link linkend='level-rotate'>rotation de olan</link> agit de manière
+        similaire au <link linkend='plane-level'>niveau plan</link>, mais il ne
+        soustrait pas simplement le plan ajusté aux données. Ce module utilise
+        les paramètres du plan ajusté et incline les données d'une certaine
+        quantité de manière à ce qu'elles résident dans un plan. Contrairement
+        au <link linkend='plane-level'>niveau plan</link>, ce module doit
+        préserver les données angulaires de l'image.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='background-subtraction'>
+    <title>Soustraction d'arrière-plan</title>
+    <indexterm><primary>soustraction d'arrière-plan</primary></indexterm>
+    <para>
+      Gwyddion propose plusieurs modules spécifiques de soustraction
+      d'arrière-plan. Ceux-ci permettent tous d'extraire l'arrière-plan
+      soustrait vers une fenêtre de données séparée.
+    </para>
+    <tip>
+      Pour un contrôle encore plus fin, vous pouvez utiliser un des
+      <link linkend='basic-filters'>outils de filtrage</link> de Gwyddion sur
+      une image, puis utiliser le module
+      <link linkend='data-arithmetic'>arithmétique</link> pour soustraire le
+      résultat de votre image originale.
+    </tip>
+    <sect3 id='polynomial-level'>
+      <title>
+        Arrière-plan polynômial
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>arrière-plan polynômial</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Arrière-plan polynômial</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Ajuste les données par un polynôme d'ordre donné puis soustrait ce
+        polynôme. Dans le mode <guilabel>degrés indépendants</guilabel> les
+        ordres des polynômes vertical et horizontal peuvent être modifiés
+        séparément, i.e. le polynôme ajusté est
+        <xi:include href="eq-polynomial-independent-degree.xml"/>
+        où <xi:include href="eqi-m.xml"/> et <xi:include href="eqi-n.xml"/>
+        sont respectivement les degrés sélectionnés des polynômes vertical et
+        horizontal. Dans le mode <guilabel>degré total limité</guilabel>, le
+        polynôme ajusté est
+        <xi:include href="eq-polynomial-limited-total-degree.xml"/>
+        où <xi:include href="eqi-n.xml"/> est le degré sélectionné du
+        polynôme.
+      </para>
+      <para>
+        Tout comme pour le <link linkend='plane-level'>niveau plan</link>, la
+        soustraction de l'arrière-plan polynômial peut inclure ou exclure les
+        données sous le masque. Ce choix n'est proposé qu'en présence d'un
+        masque.
+      </para>
+    </sect3>
+    <sect3 id='revolve-arc'>
+      <title>Arc de révolution</title>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Arc de révolution</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Fait tourner un <quote>arc</quote> virtuel de rayon horizontal ou
+        vertical donné sur (ou sous) les données. L'enveloppe de cet arc est
+        traité comme l'arrière-plan, ce qui aboutit (approximativement) à la
+        suppression des détails de dimension supérieure à rayon de l'arc.
+      </para>
+    </sect3>
+    <sect3 id='median-level'>
+      <title>Niveau médian</title>
+      <indexterm>
+        <primary>médiane</primary>
+        <secondary>suppression d'arrière-plan</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Niveau médian</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Filtre les données à l'aide d'un filtre médian ayant un noyau de grande
+        dimension et traite le résultat en tant qu'arrière-plan. Seuls les
+        détails de dimension approxmativement inférieure à celle du noyau sont
+        conservés.
+      </para>
+      <note>Cette méthode peut être très lente.</note>
+    </sect3>
+    <sect3 id='fit-sphere'>
+      <title>Ajuster la sphère</title>
+      <indexterm><primary>ajustement de sphère</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Ajuster la sphère</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Ajuste une portion de sphère sur les données. L'orientation de la sphère
+        (i.e. la position du centre) et les valeurs initiales de l'ajustement
+        peuvent être définies avant l'ajustement. L'algorithme
+        Marquardt-Levenberg est utilisé pour calculer le résultat.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='curvature'>
+    <title>Courbure</title>
+    <indexterm><primary>courbure</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Niveau</guisubmenu>
+          <guimenuitem>Courbure</guimenuitem>
+        </menuchoice>
+      </para>
+    <para>
+      Les paramètres de courbure de la surface globale sont calculés en ajustant
+      un polynôme quadratique et en déterminant ses axes principaux. Des rayons
+      de courbure de signes positifs correspondent à une surface concave (en
+      creux), tandis que des rayon de signes négatifs correspondent à une
+      surface convexe (en bosse), des rayons de signes différents correspondent
+      à une surface en selle de cheval.
+    </para>
+    <para>
+      En plus de la table des données, il est possible d'appliquer les axes
+      d'ajustement comme lignes de sélection sur les données et/ou directement
+      lire les données sur ceux-ci. Le zéro des abscisses est placé à
+      l'intersection des axes.
+    </para>
+    <para>
+      Comme pour les fonction de soustraction d'arrière-plan, la présence d'un
+      masque sur les données fera que le module proposera d'inclure ou non les
+      données sous le masque.
+    </para>
+    <informalfigure id='fig-curvature'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='curvature.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Capture d'écran de la boîte de dialogue de courbure montrant la
+          déformation importante d'une lame de verre comportant un film mince
+          ayant une contrainte interne en compression.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
