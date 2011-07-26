@@ -196,6 +196,7 @@ main(int argc, char *argv[])
     g_option_context_free(context);
     setvbuf(stdout, (char*)NULL, _IOLBF, 0);
 
+    guint64 rniter = (niter + 9)/10;
     GRand *glib_rng = g_rand_new_with_seed(42);
     GwyRand *gwyd_rng = gwy_rand_new_with_seed(42);
 
@@ -245,21 +246,21 @@ main(int argc, char *argv[])
     printf("GWY3 byte %g Mnum/s (s = %u)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sbyt);
 
-    sdbl = run_g_rand_normal(glib_rng, niter/10, rand_seed);
+    sdbl = run_g_rand_normal(glib_rng, rniter, rand_seed);
     printf("GWY2 normal %g Mnum/s (s = %g)\n",
-           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+           rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
 
-    sdbl = run_gwy_rand_normal(gwyd_rng, niter/10, rand_seed);
+    sdbl = run_gwy_rand_normal(gwyd_rng, rniter, rand_seed);
     printf("GWY3 normal %g Mnum/s (s = %g)\n",
-           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+           rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
 
-    sdbl = run_g_rand_exp(glib_rng, niter/10, rand_seed);
+    sdbl = run_g_rand_exp(glib_rng, rniter, rand_seed);
     printf("GWY2 exp %g Mnum/s (s = %g)\n",
-           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+           rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
 
-    sdbl = run_gwy_rand_exp(gwyd_rng, niter/10, rand_seed);
+    sdbl = run_gwy_rand_exp(gwyd_rng, rniter, rand_seed);
     printf("GWY3 exp %g Mnum/s (s = %g)\n",
-           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+           rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
 
     g_rand_free(glib_rng);
     gwy_rand_free(gwyd_rng);
