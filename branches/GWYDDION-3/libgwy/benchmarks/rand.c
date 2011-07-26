@@ -25,6 +25,8 @@
 #include "libgwy/macros.h"
 #include "libgwy/rand.h"
 
+#define GWY_SQRT6 2.449489742783178098197284074705
+
 #define DECLARE_SUM_TEST(RNG, TYPE, prefix, get) \
     static inline TYPE \
     run##_##prefix##_##TYPE(RNG *rng, guint64 n, TYPE seed) \
@@ -39,6 +41,21 @@
     } \
     /* Give the compiler something to accept semicolon after. */ \
     G_GNUC_UNUSED static const gboolean run##_##prefix##_##TYPE##_ = TRUE
+
+#define DECLARE_DIST_TEST(RNG, prefix, get) \
+    static inline gdouble \
+    run##_##prefix##_##get(RNG *rng, guint64 n, guint64 seed) \
+    { \
+        prefix##_set_seed(rng, seed); \
+        gdouble s = 0; \
+        gwy_benchmark_timer_start(); \
+        while (n--) \
+            s += prefix##_##get(rng); \
+        gwy_benchmark_timer_stop(); \
+        return s; \
+    } \
+    /* Give the compiler something to accept semicolon after. */ \
+    G_GNUC_UNUSED static const gboolean run##_##prefix##_##get##_ = TRUE
 
 DECLARE_SUM_TEST(GRand, guint32, g_rand, int);
 DECLARE_SUM_TEST(GwyRand, guint32, gwy_rand, int);
@@ -77,6 +94,87 @@ run_g_rand_guint8(GRand *rng, guint64 n, guint32 seed)
     return s;
 }
 
+static inline gdouble
+g_rand_triangle(GRand *rng)
+{
+    gdouble x;
+    do {
+        x = g_rand_double(rng);
+    } while (G_UNLIKELY(x == 0.0));
+    return (x <= 0.5 ? sqrt(2.0*x) - 1.0 : 1.0 - sqrt(2.0*(1.0 - x)))*GWY_SQRT6;
+}
+
+static inline gdouble
+g_rand_normal(GRand *rng)
+{
+    static gboolean have_spare = FALSE;
+    static gdouble spare;
+
+    gdouble x, y, w;
+
+    /* Calling with NULL rng just clears the spare random value. */
+    if (have_spare || G_UNLIKELY(!rng)) {
+        have_spare = FALSE;
+        return spare;
+    }
+
+    do {
+        x = -1.0 + 2.0*g_rand_double(rng);
+        y = -1.0 + 2.0*g_rand_double(rng);
+        w = x*x + y*y;
+    } while (w >= 1.0 || G_UNLIKELY(w == 0.0));
+
+    w = sqrt(-2.0*log(w)/w);
+    spare = y*w;
+    have_spare = TRUE;
+
+    return x*w;
+}
+
+static inline gdouble
+g_rand_exp(GRand *rng)
+{
+    static guint spare_bits = 0;
+    static guint32 spare;
+
+    gdouble x;
+    gboolean sign;
+
+    /* Calling with NULL rng just clears the spare random value. */
+    if (G_UNLIKELY(!rng)) {
+        spare_bits = 0;
+        return 0.0;
+    }
+
+    x = g_rand_double(rng);
+    /* This is how we get exact 0.0 at least sometimes */
+    if (G_UNLIKELY(x == 0.0))
+        return 0.0;
+
+    if (!spare_bits) {
+        spare = g_rand_int(rng);
+        spare_bits = 32;
+    }
+
+    sign = spare & 1;
+    spare >>= 1;
+    spare_bits--;
+
+    if (sign)
+        return -log(x)/G_SQRT2;
+    else
+        return log(x)/G_SQRT2;
+}
+
+#if 0
+DECLARE_DIST_TEST(GRand, g_rand, triangle);
+DECLARE_DIST_TEST(GwyRand, gwy_rand, triangle);
+#endif
+DECLARE_DIST_TEST(GRand, g_rand, normal);
+DECLARE_DIST_TEST(GwyRand, gwy_rand, normal);
+DECLARE_DIST_TEST(GRand, g_rand, exp);
+DECLARE_DIST_TEST(GwyRand, gwy_rand, exp);
+
 int
 main(int argc, char *argv[])
 {
@@ -112,7 +210,7 @@ main(int argc, char *argv[])
            niter/gwy_benchmark_timer_get_total()/1e6, su32);
 
     su32 = run_gwy_rand_guint32(gwyd_rng, niter, rand_seed);
-    printf("GWYD uint32 %g Mnum/s (s = %u)\n",
+    printf("GWY3 uint32 %g Mnum/s (s = %u)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, su32);
 
     su64 = run_g_rand_guint64(glib_rng, niter, rand_seed);
@@ -120,7 +218,7 @@ main(int argc, char *argv[])
            niter/gwy_benchmark_timer_get_total()/1e6, su64);
 
     su64 = run_gwy_rand_guint64(gwyd_rng, niter, rand_seed);
-    printf("GWYD uint64 %g Mnum/s (s = %" G_GUINT64_FORMAT ")\n",
+    printf("GWY3 uint64 %g Mnum/s (s = %" G_GUINT64_FORMAT ")\n",
            niter/gwy_benchmark_timer_get_total()/1e6, su64);
 
     sdbl = run_g_rand_gdouble(glib_rng, niter, rand_seed);
@@ -128,7 +226,7 @@ main(int argc, char *argv[])
            niter/gwy_benchmark_timer_get_total()/1e6, sdbl/niter);
 
     sdbl = run_gwy_rand_gdouble(gwyd_rng, niter, rand_seed);
-    printf("GWYD double %g Mnum/s (s = %g)\n",
+    printf("GWY3 double %g Mnum/s (s = %g)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sdbl/niter);
 
     sboo = run_g_rand_gboolean(glib_rng, niter, rand_seed);
@@ -136,7 +234,7 @@ main(int argc, char *argv[])
            niter/gwy_benchmark_timer_get_total()/1e6, sboo/(gdouble)niter);
 
     sboo = run_gwy_rand_gboolean(gwyd_rng, niter, rand_seed);
-    printf("GWYD boolean %g Mnum/s (s = %g)\n",
+    printf("GWY3 boolean %g Mnum/s (s = %g)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sboo/(gdouble)niter);
 
     sbyt = run_g_rand_guint8(glib_rng, niter, rand_seed);
@@ -144,8 +242,24 @@ main(int argc, char *argv[])
            niter/gwy_benchmark_timer_get_total()/1e6, sbyt);
 
     sbyt = run_gwy_rand_guint8(gwyd_rng, niter, rand_seed);
-    printf("GWYD byte %g Mnum/s (s = %u)\n",
+    printf("GWY3 byte %g Mnum/s (s = %u)\n",
            niter/gwy_benchmark_timer_get_total()/1e6, sbyt);
+
+    sdbl = run_g_rand_normal(glib_rng, niter/10, rand_seed);
+    printf("GWY2 normal %g Mnum/s (s = %g)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+
+    sdbl = run_gwy_rand_normal(gwyd_rng, niter/10, rand_seed);
+    printf("GWY3 normal %g Mnum/s (s = %g)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+
+    sdbl = run_g_rand_exp(glib_rng, niter/10, rand_seed);
+    printf("GWY2 exp %g Mnum/s (s = %g)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
+
+    sdbl = run_gwy_rand_exp(gwyd_rng, niter/10, rand_seed);
+    printf("GWY3 exp %g Mnum/s (s = %g)\n",
+           niter/gwy_benchmark_timer_get_total()/1e6, 10*sdbl/niter);
 
     g_rand_free(glib_rng);
     gwy_rand_free(gwyd_rng);
