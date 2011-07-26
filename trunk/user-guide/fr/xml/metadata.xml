@@ -5,14 +5,14 @@
 <sect1 id='metadata'>
   <title>Les Meta-Données</title>
   <para>
-    On appelle méta-données les informations annexes et les valeurs décrivant 
+    On appelle méta-données les informations annexes et les valeurs décrivant
     certaines données ou conditions de mesures. Elle peuvent par exemple
     inclure le mode SPM, le biais de la sonde, la fréquence de scan, la date
     de mesure ou des commentaire de l'utilisateur.
   </para>
   <para>
     Les méta-données sont définies pour chaque canal. Celles du canal courant
-    peuvent être affichées avec commande 
+    peuvent être affichées avec commande
     <menuchoice>
       <guimenu>Meta-données</guimenu>
       <guimenuitem>Navigateur de Meta-données</guimenuitem>
@@ -38,7 +38,7 @@
       </imageobject>
       <caption>
         Navigateur de méta-données affichant les informations d'un fichier
-        Nanoscope.
+        NT-MDT.
       </caption>
     </mediaobject>
   </informalfigure>
