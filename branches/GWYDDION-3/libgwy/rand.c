@@ -185,6 +185,7 @@ gwy_rand_free(GwyRand *rng)
 }
 
 /**
+ * gwy_rand_assign:
  * @destination: Destination random number generator.
  * @source: Source random number generator.
  *
