@@ -54,6 +54,8 @@ gdouble  gwy_rand_exp                (GwyRand *rng);
 gdouble  gwy_rand_exp_positive       (GwyRand *rng);
 gdouble  gwy_rand_normal             (GwyRand *rng);
 gdouble  gwy_rand_normal_positive    (GwyRand *rng);
+gdouble  gwy_rand_triangle           (GwyRand *rng);
+gdouble  gwy_rand_triangle_positive  (GwyRand *rng);
 
 G_END_DECLS
 

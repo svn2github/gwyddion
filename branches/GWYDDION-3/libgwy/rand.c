@@ -76,9 +76,10 @@ struct _GwyRand {
     // Generator
     guint8 index;  // The byte-type is tied to N=256 and ensures automated
                    // wrap-around when the end of q[] is reached.
+    guint8 nbool;
+    guint8 nbyte;
+    guint8 ntriangle;
     guint32 carry;
-    guint nbool;
-    guint nbyte;
     guint32 spare_bools;
     union {
         guint32 u;
@@ -86,6 +87,7 @@ struct _GwyRand {
             guint8 x[4];
         } b;
     } spare_bytes;
+    gdouble triangle;
     guint32 q[N];
     // For generation of smaller types
 };
@@ -286,7 +288,7 @@ gwy_rand_set_seed_array(GwyRand *rng,
     }
     set_seed_knuth(rng);
     // XXX: All code paths that reset the state must go through here.
-    rng->nbool = rng->nbyte = 0;
+    rng->nbool = rng->nbyte = rng->ntriangle = 0;
 }
 
 static inline guint32
@@ -609,7 +611,7 @@ generate_exp_oneside(GwyRand *rng)
  * Obtains the next one-side exponentially distributed number from a random
  * number generator.
  *
- * The probability distribution function is exp(-@x).
+ * The probability distribution function is exp(-@x) on (0,∞).
  *
  * Returns: Random floating point number.
  **/
@@ -626,7 +628,7 @@ gwy_rand_exp_positive(GwyRand *rng)
  * Obtains the next two-side exponentially distributed number from a random
  * number generator.
  *
- * The probability distribution function is exp(-|@x|)/2.
+ * The probability distribution function is exp(-|@x|)/2 on (-∞,∞).
  *
  * Returns: Random floating point number.
  **/
@@ -769,7 +771,7 @@ generate_normal_oneside(GwyRand *rng)
  * Obtains the next half-normally distributed number from a random number
  * generator.
  *
- * The probability distribution function is exp(-@x²/2)*sqrt(2/π).
+ * The probability distribution function is exp(-@x²/2)*sqrt(2/π) on (0,∞).
  *
  * Returns: Random floating point number.
  **/
@@ -785,7 +787,7 @@ gwy_rand_normal_positive(GwyRand *rng)
  *
  * Obtains the next normally distributed number from a random number generator.
  *
- * The probability distribution function is exp(-@x²/2)/sqrt(2π).
+ * The probability distribution function is exp(-@x²/2)/sqrt(2π) on (-∞,∞).
  *
  * Returns: Random floating point number.
  **/
@@ -794,6 +796,56 @@ gwy_rand_normal(GwyRand *rng)
 {
     gdouble x = generate_normal_oneside(rng);
     return generate_bool(rng) ? x : -x;
+}
+
+static gdouble
+generate_triangle(GwyRand *rng)
+{
+    if (rng->ntriangle) {
+        rng->ntriangle = 0;
+        return rng->triangle;
+    }
+
+    gdouble x = generate_double(rng), y = generate_double(rng);
+    rng->triangle = 0.5*(x - y);
+    if (G_LIKELY(rng->triangle))
+        rng->ntriangle = 1;
+    // FIXME: Can we return the boundaries here?
+    return 0.5*(x + y - 1.0);
+}
+
+/**
+ * gwy_rand_triangle_positive:
+ * @rng: A random number generator.
+ *
+ * Obtains the next half-triangular distributed number from a random number
+ * generator.
+ *
+ * The probability distribution function is 2(1-x) on (0,1).
+ *
+ * Returns: Random floating point number.
+ **/
+gdouble
+gwy_rand_triangle_positive(GwyRand *rng)
+{
+    return fabs(generate_triangle(rng));
+}
+
+/**
+ * gwy_rand_triangle:
+ * @rng: A random number generator.
+ *
+ * Obtains the next triangular distributed number from a random number
+ * generator.
+ *
+ * The probability distribution function is 1-|x| on (-1,1).
+ *
+ * Returns: Random floating point number.
+ **/
+gdouble
+gwy_rand_triangle(GwyRand *rng)
+{
+    return generate_triangle(rng);
 }
 
 /**

@@ -166,14 +166,12 @@ g_rand_exp(GRand *rng)
         return log(x)/G_SQRT2;
 }
 
-#if 0
-DECLARE_DIST_TEST(GRand, g_rand, triangle);
-DECLARE_DIST_TEST(GwyRand, gwy_rand, triangle);
-#endif
 DECLARE_DIST_TEST(GRand, g_rand, normal);
 DECLARE_DIST_TEST(GwyRand, gwy_rand, normal);
 DECLARE_DIST_TEST(GRand, g_rand, exp);
 DECLARE_DIST_TEST(GwyRand, gwy_rand, exp);
+DECLARE_DIST_TEST(GRand, g_rand, triangle);
+DECLARE_DIST_TEST(GwyRand, gwy_rand, triangle);
 
 int
 main(int argc, char *argv[])
@@ -260,6 +258,14 @@ main(int argc, char *argv[])
 
     sdbl = run_gwy_rand_exp(gwyd_rng, rniter, rand_seed);
     printf("GWY3 exp %g Mnum/s (s = %g)\n",
+           rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
+
+    sdbl = run_g_rand_triangle(glib_rng, rniter, rand_seed);
+    printf("GWY2 triangle %g Mnum/s (s = %g)\n",
+           rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
+
+    sdbl = run_gwy_rand_triangle(gwyd_rng, rniter, rand_seed);
+    printf("GWY3 triangle %g Mnum/s (s = %g)\n",
            rniter/gwy_benchmark_timer_get_total()/1e6, sdbl/rniter);
 
     g_rand_free(glib_rng);
