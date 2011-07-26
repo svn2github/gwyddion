@@ -474,4 +474,58 @@ test_rand_distribution_normal(void)
     gwy_rand_free(rng);
 }
 
+static gdouble
+cdf_triangle_positive(gdouble x)
+{
+    return x*(2.0 - x);
+}
+
+void
+test_rand_distribution_triangle_positive(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_triangle_positive, cdf_triangle_positive,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
+static gdouble
+cdf_triangle(gdouble x)
+{
+    return 0.5*x*(2.0 - fabs(x)) + 0.5;
+}
+
+void
+test_rand_distribution_triangle(void)
+{
+    enum { nsamples = 1000, niter = 100 };
+
+    GwyRand *rng = gwy_rand_new_with_seed(0);
+    gdouble *data = g_new(gdouble, nsamples);
+    guint nfailures = 0;
+
+    for (guint i = 0; i < niter; i++) {
+        if (!kolmogorov_test(rng, g_test_rand_int(),
+                             gwy_rand_triangle, cdf_triangle,
+                             data, nsamples))
+            nfailures++;
+    }
+    g_assert_cmpuint(nfailures, <=, 2);
+
+    g_free(data);
+    gwy_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

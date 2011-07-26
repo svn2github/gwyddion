@@ -864,11 +864,11 @@ generate_triangle(GwyRand *rng)
     }
 
     gdouble x = generate_double(rng), y = generate_double(rng);
-    rng->triangle = 0.5*(x - y);
+    rng->triangle = x - y;
     if (G_LIKELY(rng->triangle))
         rng->ntriangle = 1;
-    // FIXME: Can we return the boundaries here?
-    return 0.5*(x + y - 1.0);
+    // FIXME: x+y should never be 2 nor 0 but it can be exactly 1.
+    return x + y - 1.0;
 }
 
 /**
