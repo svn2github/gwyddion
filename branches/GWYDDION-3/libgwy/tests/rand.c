@@ -238,7 +238,7 @@ check_excesses(const guint *excesses, guint nc)
 {
     for (guint i = 0; i < nc; i++) {
         g_assert_cmpfloat(fabs(excesses[i]/10000.0/(1.0 - P_500_25) - 1.0),
-                          <=, 0.08);
+                          <=, 0.1);
     }
 }
 
