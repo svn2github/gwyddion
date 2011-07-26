@@ -69,7 +69,8 @@
 // Ziggurat
 enum {
     NZIGGURAT = 128,
-    ZIGGMASK = NZIGGURAT - 1,
+    ZIGGMASK = 0x7f,
+    ZIGGSIGN = 0x80,
 };
 
 struct _GwyRand {
@@ -599,8 +600,34 @@ generate_exp_oneside(GwyRand *rng)
         }
         else {
             // Exponential distribution can be generated recursively.
-            gdouble x1 = zx[1];
-            return x1 + generate_exp_oneside(rng);
+            return zx[1] + generate_exp_oneside(rng);
+        }
+    }
+}
+
+static gdouble
+generate_exp(GwyRand *rng)
+{
+    const gdouble *zx = ziggurat_exp_x, *zy = ziggurat_exp_y;
+
+    while (TRUE) {
+        guint32 l = generate_byte(rng);
+        guint level = l & ZIGGMASK;
+
+        gdouble x = generate_double(rng) * zx[level];
+        if (G_LIKELY(level != ZIGGMASK && x < zx[level+1]))
+            return (l & ZIGGSIGN) ? x : -x;
+
+        if (G_LIKELY(level != 0)) {
+            gdouble y = generate_double(rng) * (zy[level] - zy[level-1])
+                        + zy[level-1];
+            if (y <= exp(-x))
+                return (l & ZIGGSIGN) ? x : -x;
+        }
+        else {
+            // Exponential distribution can be generated recursively.
+            x = zx[1] + generate_exp_oneside(rng);
+            return (l & ZIGGSIGN) ? x : -x;
         }
     }
 }
@@ -636,8 +663,7 @@ gwy_rand_exp_positive(GwyRand *rng)
 gdouble
 gwy_rand_exp(GwyRand *rng)
 {
-    gdouble x = generate_exp_oneside(rng);
-    return generate_bool(rng) ? x : -x;
+    return generate_exp(rng);
 }
 
 // Ziggurat tables for the normal distribution {{{
@@ -765,6 +791,37 @@ generate_normal_oneside(GwyRand *rng)
     }
 }
 
+static gdouble
+generate_normal(GwyRand *rng)
+{
+    const gdouble *zx = ziggurat_normal_x, *zy = ziggurat_normal_y;
+
+    while (TRUE) {
+        guint32 l = generate_byte(rng);
+        guint level = l & ZIGGMASK;
+
+        gdouble x = generate_double(rng) * zx[level];
+        if (G_LIKELY(level != ZIGGMASK && x < zx[level+1]))
+            return (l & ZIGGSIGN) ? x : -x;
+
+        if (G_LIKELY(level != 0)) {
+            gdouble y = generate_double(rng) * (zy[level] - zy[level-1])
+                        + zy[level-1];
+            if (y <= exp(-x*x/2.0))
+                return (l & ZIGGSIGN) ? x : -x;
+        }
+        else {
+            // Normal distribution tail is generated using Marsaglia's method.
+            gdouble y, x1 = zx[1];
+            do {
+                x = generate_exp_oneside(rng)/x1;
+                y = generate_exp_oneside(rng);
+            } while (G_LIKELY(2*y > x*x));
+            return (l & ZIGGSIGN) ? x1 + x : -(x1 + x);
+        }
+    }
+}
+
 /**
  * gwy_rand_normal_positive:
  * @rng: A random number generator.
@@ -795,8 +852,7 @@ gwy_rand_normal_positive(GwyRand *rng)
 gdouble
 gwy_rand_normal(GwyRand *rng)
 {
-    gdouble x = generate_normal_oneside(rng);
-    return generate_bool(rng) ? x : -x;
+    return generate_normal(rng);
 }
 
 static gdouble
