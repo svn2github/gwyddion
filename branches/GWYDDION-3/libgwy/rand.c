@@ -19,45 +19,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * The urandom/time default seeding procedure was adapted from:
- *
- * GLIB - Library of useful routines for C programming
- * Copyright (C) 1995-1997  Peter Mattis, Spencer Kimball and Josh MacDonald
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- *
- *
- * Modified by the GLib Team and others 1997-2000.  See the AUTHORS
- * file for a list of people on the GLib Team.  See the ChangeLog
- * files for a list of changes.  These files are distributed with
- * GLib at ftp://ftp.gtk.org/pub/gtk/.
- */
-
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/rand.h"
-
-#define RANDOM_FILE "/dev/urandom"
 
 // MWC8222
 #define N 256
@@ -95,13 +61,41 @@ struct _GwyRand {
 
 G_DEFINE_BOXED_TYPE(GwyRand, gwy_rand, gwy_rand_copy, gwy_rand_free);
 
+static gpointer
+initialise_seed_generator(G_GNUC_UNUSED gpointer arg)
+{
+    // This gives us a good-enough independent source of randomness with
+    // about 16 bytes (4 ints) of entropy.
+    return g_rand_new();
+}
+
+static void
+randomise(guint64 *seed, guint n)
+{
+    static GOnce seed_generator_initialised = G_ONCE_INIT;
+    g_once(&seed_generator_initialised, initialise_seed_generator, NULL);
+
+    GRand *seed_rng = seed_generator_initialised.retval;
+    g_assert(n >= 1);
+
+    // Take a few numbers from the seed generator.
+    guint32 *s = (guint32*)seed;
+    for (guint i = 0; i < 2*n; i++)
+        s[i] = g_rand_int(seed_rng);
+
+    // Mix with the current time.
+    GTimeVal tv;
+    g_get_current_time(&tv);
+    s[0] ^= tv.tv_sec;
+    s[1] ^= tv.tv_usec;
+}
+
 /**
  * gwy_rand_new:
  *
  * Creates a new random number generator.
  *
- * The generator is initialized with a seed taken either from
- * <filename>/dev/urandom</filename> if it exists or, as a fallback, from the
+ * The generator is initialized using a seed #GRand generator, mixed with the
  * current time.
  *
  * Returns: A new random number generator.
@@ -109,54 +103,9 @@ G_DEFINE_BOXED_TYPE(GwyRand, gwy_rand, gwy_rand_copy, gwy_rand_free);
 GwyRand*
 gwy_rand_new(void)
 {
-    guint64 seed[4];
-#ifdef G_OS_UNIX
-    static gboolean dev_urandom_exists = TRUE;
-
-    if (dev_urandom_exists) {
-        FILE *dev_urandom;
-
-        do {
-            errno = 0;
-            dev_urandom = fopen(RANDOM_FILE, "rb");
-        } while (G_UNLIKELY(errno == EINTR));
-
-        if (dev_urandom) {
-            int r;
-
-            setvbuf(dev_urandom, NULL, _IONBF, 0);
-            do {
-                errno = 0;
-                r = fread(seed, sizeof(seed), 1, dev_urandom);
-            } while (G_UNLIKELY(errno == EINTR));
-
-            if (r != 1)
-                dev_urandom_exists = FALSE;
-
-            fclose(dev_urandom);
-        }
-        else
-            dev_urandom_exists = FALSE;
-    }
-#else
-    static gboolean dev_urandom_exists = FALSE;
-#endif
-
-    if (!dev_urandom_exists) {
-        GTimeVal now;
-        g_get_current_time(&now);
-
-        seed[0] = now.tv_sec;
-        seed[1] = now.tv_usec;
-        seed[2] = getpid();
-#ifdef G_OS_UNIX
-        seed[3] = getppid();
-#else
-        seed[3] = 0;
-#endif
-    }
-
-    return gwy_rand_new_with_seed_array(seed, 4);
+    static guint64 seed[3];
+    randomise(seed, G_N_ELEMENTS(seed));
+    return gwy_rand_new_with_seed_array(seed, G_N_ELEMENTS(seed));
 }
 
 /**
