@@ -173,6 +173,50 @@ DECLARE_DIST_TEST(GwyRand, gwy_rand, exp);
 DECLARE_DIST_TEST(GRand, g_rand, triangle);
 DECLARE_DIST_TEST(GwyRand, gwy_rand, triangle);
 
+static void
+run_g_rand_new(guint64 n)
+{
+    gwy_benchmark_timer_start();
+    while (n--) {
+        GRand *rng = g_rand_new();
+        g_rand_free(rng);
+    }
+    gwy_benchmark_timer_stop();
+}
+
+static void
+run_g_rand_new_seed(guint64 n, guint32 seed)
+{
+    gwy_benchmark_timer_start();
+    while (n--) {
+        GRand *rng = g_rand_new_with_seed(seed);
+        g_rand_free(rng);
+    }
+    gwy_benchmark_timer_stop();
+}
+
+static void
+run_gwy_rand_new(guint64 n)
+{
+    gwy_benchmark_timer_start();
+    while (n--) {
+        GwyRand *rng = gwy_rand_new();
+        gwy_rand_free(rng);
+    }
+    gwy_benchmark_timer_stop();
+}
+
+static void
+run_gwy_rand_new_seed(guint64 n, guint32 seed)
+{
+    gwy_benchmark_timer_start();
+    while (n--) {
+        GwyRand *rng = gwy_rand_new_with_seed(seed);
+        gwy_rand_free(rng);
+    }
+    gwy_benchmark_timer_stop();
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -194,7 +238,7 @@ main(int argc, char *argv[])
     g_option_context_free(context);
     setvbuf(stdout, (char*)NULL, _IOLBF, 0);
 
-    guint64 rniter = (niter + 9)/10;
+    guint64 rniter = (niter + 9)/10, sniter = (niter + 9999)/10000;
     GRand *glib_rng = g_rand_new_with_seed(42);
     GwyRand *gwyd_rng = gwy_rand_new_with_seed(42);
 
@@ -203,6 +247,22 @@ main(int argc, char *argv[])
     guint32 su32;
     guint64 su64;
     gdouble sdbl;
+
+    run_g_rand_new(sniter);
+    printf("GLIB new %g Mobj/s\n",
+           sniter/gwy_benchmark_timer_get_total()/1e6);
+
+    run_g_rand_new_seed(100*sniter, rand_seed);
+    printf("GLIB new_seed %g Mobj/s\n",
+           100*sniter/gwy_benchmark_timer_get_total()/1e6);
+
+    run_gwy_rand_new(100*sniter);
+    printf("GWY3 new %g Mobj/s\n",
+           100*sniter/gwy_benchmark_timer_get_total()/1e6);
+
+    run_gwy_rand_new_seed(100*sniter, rand_seed);
+    printf("GWY3 new_seed %g Mobj/s\n",
+           100*sniter/gwy_benchmark_timer_get_total()/1e6);
 
     su32 = run_g_rand_guint32(glib_rng, niter, rand_seed);
     printf("GLIB uint32 %g Mnum/s (s = %u)\n",
