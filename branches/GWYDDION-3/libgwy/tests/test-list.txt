@@ -25,7 +25,8 @@ expr/evaluate
 expr/vector
 expr/garbage
 rand/seed/reproducibility
-rand/seed/difference
+rand/difference/seed
+rand/difference/auto
 rand/copy
 rand/range/boolean
 rand/range/int

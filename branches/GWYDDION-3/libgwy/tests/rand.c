@@ -81,7 +81,7 @@ compare_uints(const void *va, const void *vb)
 }
 
 void
-test_rand_seed_difference(void)
+test_rand_difference_seed(void)
 {
     enum { niter = 16, nseed = 100000 };
 
@@ -92,6 +92,35 @@ test_rand_seed_difference(void)
         gwy_rand_set_seed(rng, seed);
         for (guint i = 0; i < niter; i++)
             values[seed*niter + i] = gwy_rand_int(rng);
+    }
+
+    qsort(values, nseed, niter*sizeof(guint32), compare_uints);
+
+    for (guint seed = 1; seed < nseed; seed++) {
+        guint32 *thisval = values + seed*niter,
+                *nextval = thisval + niter;
+        gboolean equal = TRUE;
+        for (guint i = niter; i; i--) {
+            if (*(thisval++) != *(nextval++)) {
+                equal = FALSE;
+                break;
+            }
+        }
+        g_assert(!equal);
+    }
+}
+
+void
+test_rand_difference_auto(void)
+{
+    enum { niter = 16, nseed = 100000 };
+
+    guint32 *values = g_new(guint32, niter*nseed);
+    for (guint seed = 0; seed < nseed; seed++) {
+        GwyRand *rng = gwy_rand_new();
+        for (guint i = 0; i < niter; i++)
+            values[seed*niter + i] = gwy_rand_int(rng);
+        gwy_rand_free(rng);
     }
 
     qsort(values, nseed, niter*sizeof(guint32), compare_uints);
