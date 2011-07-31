@@ -109,6 +109,16 @@
 }
 
 {
+   glib2-static-type-registration-3
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:g_realloc
+   fun:type_node_any_new_W
+   fun:g_type_register_static
+}
+
+{
    glib2-static-interface-registration-1
    Memcheck:Leak
    fun:malloc
