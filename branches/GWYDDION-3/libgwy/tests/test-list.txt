@@ -24,7 +24,8 @@ fft/load-wisdom
 expr/evaluate
 expr/vector
 expr/garbage
-rand/seed/reproducibility
+rand/reproducibility/seed
+rand/reproducibility/static
 rand/difference/seed
 rand/difference/auto
 rand/copy
