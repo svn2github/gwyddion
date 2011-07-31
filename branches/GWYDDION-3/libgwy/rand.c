@@ -3,8 +3,6 @@
  *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
- *  Parts of this code were adapted from GLib, see below for more.
- *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -56,7 +54,6 @@ struct _GwyRand {
     } spare_bytes;
     gdouble triangle;
     guint32 q[N];
-    // For generation of smaller types
 };
 
 G_DEFINE_BOXED_TYPE(GwyRand, gwy_rand, gwy_rand_copy, gwy_rand_free);
@@ -79,15 +76,16 @@ randomise(guint64 *seed, guint n)
     g_assert(n >= 1);
 
     // Take a few numbers from the seed generator.
-    guint32 *s = (guint32*)seed;
-    for (guint i = 0; i < 2*n; i++)
-        s[i] = g_rand_int(seed_rng);
+    for (guint i = 0; i < n; i++) {
+        guint64 lo = g_rand_int(seed_rng);
+        guint64 hi = g_rand_int(seed_rng);
+        seed[i] = (hi << 32) | lo;
+    }
 
     // Mix with the current time.
     GTimeVal tv;
     g_get_current_time(&tv);
-    s[0] ^= tv.tv_sec;
-    s[1] ^= tv.tv_usec;
+    seed[0] ^= ((guint64)tv.tv_sec << 32) | tv.tv_usec;
 }
 
 /**
@@ -184,7 +182,7 @@ gwy_rand_new_with_seed_array(const guint64 *seed,
 }
 
 // Set the array using one of Knuth's generators.
-static void
+static inline void
 set_seed_knuth(GwyRand *rng)
 {
     guint32 *q = rng->q;
@@ -193,6 +191,23 @@ set_seed_knuth(GwyRand *rng)
 
     rng->carry = q[N-1] % 61137367U;
     rng->index = N - 1;
+}
+
+static void
+set_seed_array(GwyRand *rng,
+               const guint64 *seed,
+               guint seed_length)
+{
+    guint32 *q = rng->q;
+    gwy_clear(q, N);
+    for (guint i = 0; i < seed_length; i++) {
+        guint k = (2*i) % N;
+        q[k] ^= (guint32)(seed[i] & G_GUINT64_CONSTANT(0xffffffff));
+        q[k+1] ^= (guint32)(seed[i] >> 32);
+    }
+    set_seed_knuth(rng);
+    // XXX: All code paths that reset the state must go through here.
+    rng->nbool = rng->nbyte = rng->ntriangle = 0;
 }
 
 /**
@@ -209,7 +224,7 @@ gwy_rand_set_seed(GwyRand *rng,
     g_return_if_fail(rng);
     // Calling with a 32bit number results in simply setting the first item to
     // the seed and then using the Knuth's algorithm for the rest, as expected.
-    gwy_rand_set_seed_array(rng, &seed, 1);
+    set_seed_array(rng, &seed, 1);
 }
 
 /**
@@ -229,17 +244,7 @@ gwy_rand_set_seed_array(GwyRand *rng,
     g_return_if_fail(rng);
     g_return_if_fail(seed);
     g_return_if_fail(seed_length >= 1);
-
-    guint32 *q = rng->q;
-    gwy_clear(q, N);
-    for (guint i = 0; i < seed_length; i++) {
-        guint k = (2*i) % N;
-        q[k] ^= (guint32)(seed[i] & G_GUINT64_CONSTANT(0xffffffff));
-        q[k+1] ^= (guint32)(seed[i] >> 32);
-    }
-    set_seed_knuth(rng);
-    // XXX: All code paths that reset the state must go through here.
-    rng->nbool = rng->nbyte = rng->ntriangle = 0;
+    set_seed_array(rng, seed, seed_length);
 }
 
 static inline guint32
@@ -262,7 +267,8 @@ generate_uint32(GwyRand *rng)
 static inline guint64
 generate_uint64(GwyRand *rng)
 {
-    guint64 lo = generate_uint32(rng), hi = generate_uint32(rng);
+    guint64 lo = generate_uint32(rng);
+    guint64 hi = generate_uint32(rng);
     return (hi << 32) | lo;
 #if 0
     // Funny this is slightly slower.
@@ -290,7 +296,8 @@ generate_double(GwyRand *rng)
         // Two conversions from 32bit int seem to be still faster than one
         // conversion from 64bit int even on modern processors.
         // gdouble r = Q2*generate_uint64(rng) + S;
-        guint32 hi = generate_uint32(rng), lo = generate_uint32(rng);
+        guint32 hi = generate_uint32(rng);
+        guint32 lo = generate_uint32(rng);
         gdouble r = Q*(Q*lo + hi) + S;
         if (G_LIKELY(r <= 0.99999999999999989))
             return r;
@@ -812,7 +819,8 @@ generate_triangle(GwyRand *rng)
         return rng->triangle;
     }
 
-    gdouble x = generate_double(rng), y = generate_double(rng);
+    gdouble x = generate_double(rng);
+    gdouble y = generate_double(rng);
     rng->triangle = x - y;
     if (G_LIKELY(rng->triangle))
         rng->ntriangle = 1;
