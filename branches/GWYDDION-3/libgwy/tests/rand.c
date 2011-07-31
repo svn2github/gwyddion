@@ -64,7 +64,11 @@ test_rand_seed_reproducibility(void)
             gdouble yd = gwy_rand_double(rng1);
             g_assert_cmpfloat(xd, ==, yd);
         }
+
+        gwy_rand_free(rng1);
     }
+
+    gwy_rand_free(rng0);
 }
 
 static int
@@ -108,6 +112,9 @@ test_rand_difference_seed(void)
         }
         g_assert(!equal);
     }
+
+    g_free(values);
+    gwy_rand_free(rng);
 }
 
 void
@@ -137,6 +144,8 @@ test_rand_difference_auto(void)
         }
         g_assert(!equal);
     }
+
+    g_free(values);
 }
 
 void
@@ -290,6 +299,7 @@ test_rand_uniformity_boolean(void)
         count_excesses(counts, excesses, nbits);
     }
     check_excesses(excesses, nbits);
+    gwy_rand_free(rng);
 }
 
 void
@@ -311,6 +321,7 @@ test_rand_uniformity_byte(void)
         count_excesses(counts, excesses, nbits);
     }
     check_excesses(excesses, nbits);
+    gwy_rand_free(rng);
 }
 
 void
@@ -332,6 +343,7 @@ test_rand_uniformity_int64(void)
         count_excesses(counts, excesses, nbits);
     }
     check_excesses(excesses, nbits);
+    gwy_rand_free(rng);
 }
 
 static gboolean
