@@ -96,7 +96,7 @@ test_rand_difference_seed(void)
 
     qsort(values, nseed, niter*sizeof(guint32), compare_uints);
 
-    for (guint seed = 1; seed < nseed; seed++) {
+    for (guint seed = 0; seed+1 < nseed; seed++) {
         guint32 *thisval = values + seed*niter,
                 *nextval = thisval + niter;
         gboolean equal = TRUE;
@@ -125,7 +125,7 @@ test_rand_difference_auto(void)
 
     qsort(values, nseed, niter*sizeof(guint32), compare_uints);
 
-    for (guint seed = 1; seed < nseed; seed++) {
+    for (guint seed = 0; seed+1 < nseed; seed++) {
         guint32 *thisval = values + seed*niter,
                 *nextval = thisval + niter;
         gboolean equal = TRUE;
