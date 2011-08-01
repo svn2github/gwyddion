@@ -1576,6 +1576,55 @@ test_field_arithmetic_cache(void)
 }
 
 void
+test_field_arithmetic_clamp(void)
+{
+    enum { max_size = 70 };
+    GRand *rng = g_rand_new_with_seed(42);
+    enum { niter = 20 };
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, 0.5);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        gdouble lo = 2.0*g_rand_double(rng) - 1.0;
+        gdouble hi = 2.0*g_rand_double(rng) - 1.0;
+        if (hi < lo)
+            GWY_SWAP(gdouble, lo, hi);
+
+        gwy_field_clamp(field, &fpart, lo, hi);
+        gdouble minp, maxp;
+        gwy_field_min_max(field, &fpart, NULL, GWY_MASK_IGNORE, &minp, &maxp);
+        g_assert_cmpfloat(minp, >=, lo);
+        g_assert_cmpfloat(maxp, <=, hi);
+
+        gwy_field_clamp(field, NULL, lo, hi);
+        gdouble minf, maxf;
+        gwy_field_min_max_full(field, &minf, &maxf);
+        g_assert_cmpfloat(minf, >=, lo);
+        g_assert_cmpfloat(maxf, <=, hi);
+        g_assert_cmpfloat(minf, <=, minp);
+        g_assert_cmpfloat(maxf, >=, maxp);
+
+        gwy_field_invalidate(field);
+        gdouble minv, maxv;
+        gwy_field_min_max_full(field, &minv, &maxv);
+        g_assert_cmpfloat(minf, ==, minv);
+        g_assert_cmpfloat(maxf, ==, maxv);
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_field_arithmetic_normalize(void)
 {
     enum { max_size = 70 };
