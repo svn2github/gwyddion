@@ -27,32 +27,36 @@ BuildRequires: findutils
 BuildRequires: elfutils
 
 %if %{distro_is_redhat}
-%define fftw3 fftw
-%define fftw3devel fftw-devel
+%global fftw3 fftw
+%global fftw3devel fftw-devel
 %endif
 
 %if %{distro_is_suse}
-%define fftw3 fftw3
-%define fftw3devel fftw3-devel
+%global fftw3 fftw3
+%global fftw3devel fftw3-devel
 %endif
 
 # Default the fftw package name to the common name in the hope the distro
 # provides that.  The expansion inside %if is somehow limited, define the
 # test in two steps.
-%define fftwundefined %{?fftw3:0}%{!?fftw3:1}
+%global fftwundefined %{?fftw3:0}%{!?fftw3:1}
 %if %{fftwundefined}
-%define fftw3 fftw
-%define fftw3devel fftw-devel
+%global fftw3 fftw
+%global fftw3devel fftw-devel
 %endif
 
 BuildRequires: %{fftw3devel} >= 3.1
 
-%define pkglibdir %{_libdir}/%{name}
-%define pkglibexecdir %{_libexecdir}/%{name}
-%define pkgdatadir %{_datadir}/%{name}
-%define pkgincludedir %{_includedir}/%{name}
-%define gtkdocdir %{_datadir}/gtk-doc/html
-%define vimdir %{_datadir}/vim/vimfiles
+%global pkglibdir %{_libdir}/%{name}
+%global pkglibexecdir %{_libexecdir}/%{name}
+%global pkgdatadir %{_datadir}/%{name}
+%global pkgincludedir %{_includedir}/%{name}
+%global gtkdocdir %{_datadir}/gtk-doc/html
+%global vimdir %{_datadir}/vim/vimfiles
+%global pkgconfigdir %{_libdir}/pkgconfig
+%global girdir %{_datadir}/gir-1.0
+%global typelibdir %{_libdir}/girepository-1.0
+
 
 %package libs
 Summary:       Gwyddion3 libraries
@@ -114,7 +118,10 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 
 %files libs -f %{name}-libgwy.lang
 %defattr(-,root,root)
-%{_libdir}/*.so.*
+# For unstable releases
+%{_libdir}/libgwy3-@PACKAGE_VERSION@.so
+#%{_libdir}/libgwy3.so.*
+%{typelibdir}/Gwy3-3.0.typelib
 
 
 %files libs-devel
@@ -124,8 +131,8 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{pkgincludedir}/*.h
 %dir %{pkgincludedir}/libgwy
 %dir %{pkgincludedir}
-%{_libdir}/*.so
-%{_libdir}/pkgconfig/%{name}.pc
-# Documentation
+%{_libdir}/libgwy3.so
+%{girdir}/Gwy3-3.0.gir
+%{pkgconfigdir}/libgwy3.pc
 %doc %{gtkdocdir}/libgwy/*
-%doc %dir %{gtkdocdir}/libgwyapp
+%doc %dir %{gtkdocdir}/libgwy
