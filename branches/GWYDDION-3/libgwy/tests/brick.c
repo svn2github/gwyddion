@@ -1159,6 +1159,7 @@ test_brick_compatibility_field_units(void)
     GwyField *field4 = gwy_field_new_sized(2, 2, FALSE);
 
     gwy_unit_set_from_string(gwy_brick_get_unit_xy(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick), "s", NULL);
     gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "A", NULL);
     gwy_unit_set_from_string(gwy_field_get_unit_xy(field1), "m", NULL);
     gwy_unit_set_from_string(gwy_field_get_unit_z(field1), "A", NULL);
@@ -1206,6 +1207,131 @@ test_brick_compatibility_field_units(void)
     g_object_unref(field2);
     g_object_unref(field3);
     g_object_unref(field4);
+    g_object_unref(brick);
+}
+
+void
+test_brick_compatibility_line_res(void)
+{
+    GwyBrick *brick = gwy_brick_new_sized(2, 3, 4, FALSE);
+    GwyLine *line1 = gwy_line_new_sized(4, FALSE);
+    GwyLine *line2 = gwy_line_new_sized(5, FALSE);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_RES),
+                     ==, GWY_LINE_COMPATIBLE_RES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_DX),
+                     ==, GWY_LINE_COMPATIBLE_DX);
+
+    g_object_unref(line1);
+    g_object_unref(line2);
+    g_object_unref(brick);
+}
+
+void
+test_brick_compatibility_line_real(void)
+{
+    GwyBrick *brick = gwy_brick_new_sized(2, 3, 4, FALSE);
+    GwyLine *line1 = gwy_line_new_sized(4, FALSE);
+    GwyLine *line2 = gwy_line_new_sized(4, FALSE);
+
+    gwy_line_set_real(line2, 2.0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_REAL),
+                     ==, GWY_LINE_COMPATIBLE_REAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_DX),
+                     ==, GWY_LINE_COMPATIBLE_DX);
+
+    g_object_unref(line1);
+    g_object_unref(line2);
+    g_object_unref(brick);
+}
+
+void
+test_brick_compatibility_line_units(void)
+{
+    GwyBrick *brick = gwy_brick_new_sized(2, 3, 4, FALSE);
+    GwyLine *line1 = gwy_line_new_sized(4, FALSE);
+    GwyLine *line2 = gwy_line_new_sized(4, FALSE);
+    GwyLine *line3 = gwy_line_new_sized(4, FALSE);
+    GwyLine *line4 = gwy_line_new_sized(4, FALSE);
+
+    gwy_unit_set_from_string(gwy_brick_get_unit_xy(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick), "s", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "A", NULL);
+    gwy_unit_set_from_string(gwy_line_get_unit_x(line1), "s", NULL);
+    gwy_unit_set_from_string(gwy_line_get_unit_y(line1), "A", NULL);
+    gwy_unit_set_from_string(gwy_line_get_unit_x(line3), "s", NULL);
+    gwy_unit_set_from_string(gwy_line_get_unit_y(line4), "A", NULL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_LATERAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line1, GWY_LINE_COMPATIBLE_UNITS),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_LATERAL),
+                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_VALUE),
+                     ==, GWY_LINE_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line2, GWY_LINE_COMPATIBLE_UNITS),
+                     ==, GWY_LINE_COMPATIBLE_UNITS);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line3, GWY_LINE_COMPATIBLE_LATERAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line3, GWY_LINE_COMPATIBLE_VALUE),
+                     ==, GWY_LINE_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line3, GWY_LINE_COMPATIBLE_UNITS),
+                     ==, GWY_LINE_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line4, GWY_LINE_COMPATIBLE_LATERAL),
+                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line4, GWY_LINE_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_line
+                                  (brick, line4, GWY_LINE_COMPATIBLE_UNITS),
+                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+
+    g_object_unref(line1);
+    g_object_unref(line2);
+    g_object_unref(line3);
+    g_object_unref(line4);
     g_object_unref(brick);
 }
 
