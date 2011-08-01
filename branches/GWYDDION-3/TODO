@@ -40,6 +40,9 @@ Classes: Review class definitions that have class data (resources, selection,
 Serializable boxed: Review type lookup locking once GAtomicArray is available,
                     it might help.
 
+                    Add return value free-function markup for G-IR, if
+                    necessary, once it becomes possible.
+
 Fit Function: Handle different sources of fitting functions (even different
               sources of built-ins).
 
@@ -58,6 +61,11 @@ Fields, Lines, Curves, Container: Data transfer functions should take the
 
 Field distributions: HHCF does not depend on the mean value so, @level has no
                      effect.  Either remove it or consider higher degrees.
+
+Fill-ellipse: Namely in mask-field.  It is not possible to fill an ellipse
+              partially sticking out of the field due to the use of
+              GwyFieldPart with unsigned members.  Change GwyFooPart position
+              members (not sized) to signed?
 
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.

@@ -1,0 +1,131 @@
+# $Id: Makefile.am 11706 2011-01-03 08:37:05Z yeti-dn $
+%{expand:%global distro_is_redhat %(test ! -f /etc/redhat-release; echo $?)}
+%{expand:%global distro_is_suse %(test ! -f /etc/SuSE-release; echo $?)}
+
+Name:          gwyddion3
+Version:       @PACKAGE_VERSION@
+Release:       1
+Summary:       An SPM data visualization and analysis tool
+
+Group:         Applications/Engineering
+License:       GNU GPL
+URL:           http://gwyddion.net/
+Source0:       http://downloads.sourceforge.net/@PACKAGE_TARNAME@/@PACKAGE_TARNAME@-%{version}.tar.xz
+Requires(pre):    /sbin/ldconfig
+Requires(postun): /sbin/ldconfig
+
+BuildRequires: glib2-devel >= 2.26
+BuildRequires: intltool >= 0.40
+# XXX: In fact, we need a yet-unreleased fixed to get plain old data docs right.
+BuildRequires: gtk-doc >= 1.17
+BuildRequires: gettext >= 0.17
+BuildRequires: gobject-introspection-devel >= 0.10.0
+BuildRequires: pkgconfig >= 0.22
+BuildRequires: python >= 2.2
+BuildRequires: findutils
+# XXX: For make check.
+BuildRequires: elfutils
+
+%if %{distro_is_redhat}
+%define fftw3 fftw
+%define fftw3devel fftw-devel
+%endif
+
+%if %{distro_is_suse}
+%define fftw3 fftw3
+%define fftw3devel fftw3-devel
+%endif
+
+# Default the fftw package name to the common name in the hope the distro
+# provides that.  The expansion inside %if is somehow limited, define the
+# test in two steps.
+%define fftwundefined %{?fftw3:0}%{!?fftw3:1}
+%if %{fftwundefined}
+%define fftw3 fftw
+%define fftw3devel fftw-devel
+%endif
+
+BuildRequires: %{fftw3devel} >= 3.1
+
+%define pkglibdir %{_libdir}/%{name}
+%define pkglibexecdir %{_libexecdir}/%{name}
+%define pkgdatadir %{_datadir}/%{name}
+%define pkgincludedir %{_includedir}/%{name}
+%define gtkdocdir %{_datadir}/gtk-doc/html
+%define vimdir %{_datadir}/vim/vimfiles
+
+%package libs
+Summary:       Gwyddion3 libraries
+Group:         System Environment/Libraries
+
+%package libs-devel
+Summary:       Development files for Gwyddion3
+Group:         Development/Libraries
+Requires:      %{name}-libs%{?_isa} = %{version}-%{release}
+# This pulls everything else
+Requires:      glib2-devel >= 2.26
+
+
+%description
+Gwyddion is a modular SPM (Scanning Probe Microsopy) data visualization and
+analysis tool written with Gtk+.
+
+This is a dummy package as no Gwyddion 3 application actually exists yet.
+
+
+%description libs
+Gwyddion3 data processing and visualisation libraries.
+
+
+%description libs-devel
+Header files, libraries and tools for development of Gwyddion3 modules and/or
+Gwyddion3-based applications.  This package also contains the API docmentation.
+
+
+%prep
+%setup -q -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
+# Don't install .la files.
+sed -i -e '/# Install the pseudo-library/,/^$/d' build/ltmain.sh
+
+
+%build
+%configure --disable-rpath --enable-gtk-doc --enable-introspection
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+install -D data/%{name}.vim $RPM_BUILD_ROOT/%{vimdir}/syntax/%{name}.vim
+%find_lang %{name}-libgwy
+find $RPM_BUILD_ROOT -name '*.la' -delete
+
+
+%post libs -p /sbin/ldconfig
+
+
+%postun libs -p /sbin/ldconfig
+
+
+%files
+%defattr(644,root,root)
+%doc AUTHORS COPYING INSTALL.gwyddion NEWS README
+
+
+%files libs -f %{name}-libgwy.lang
+%defattr(-,root,root)
+%{_libdir}/*.so.*
+
+
+%files libs-devel
+%defattr(-,root,root)
+%{vimdir}/syntax/%{name}.vim
+%{pkgincludedir}/libgwy/*.h
+%{pkgincludedir}/*.h
+%dir %{pkgincludedir}/libgwy
+%dir %{pkgincludedir}
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/%{name}.pc
+# Documentation
+%doc %{gtkdocdir}/libgwy/*
+%doc %dir %{gtkdocdir}/libgwyapp

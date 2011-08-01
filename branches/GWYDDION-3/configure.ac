@@ -29,6 +29,7 @@ AC_CONFIG_FILES([
   docs/Makefile
   docs/libgwy/Makefile
   data/Makefile
+  gwyddion3.spec:data/gwyddion3.spec.in \
 ])
 
 AM_INIT_AUTOMAKE([1.11 gnu -Wall -Wno-portability dist-xz no-dist-gzip std-options nostdinc silent-rules])
@@ -149,7 +150,7 @@ fi
 
 #############################################################################
 # Base libraries
-PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.22])
+PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.26])
 PKG_CHECK_MODULES([FFTW3],[fftw3 >= 3.1])
 
 # Needs to be configured out in stable versions.  Deprecations come and go.
@@ -177,7 +178,7 @@ AC_CHECK_PROGS([GTESTER],[gtester],[false])
 #AC_SUBST(GOBJECT_QUERY)
 
 # FIXME: Once G-IR supports boxed types change this to the required version.
-GOBJECT_INTROSPECTION_CHECK([0.6.7])
+GOBJECT_INTROSPECTION_CHECK([0.10.0])
 
 #############################################################################
 # Other tools

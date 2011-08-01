@@ -2,21 +2,22 @@
 # $Id$
 
 MAINTAINERCLEANFILES = \
-	gwyddion.vim
+	gwyddion3.vim
 
 EXTRA_DIST = \
-	gwyddion-vim-cfg.py \
-	gwyddion.vim
+	gwyddion3-vim-cfg.py \
+	gwyddion3.vim \
+	gwyddion3.spec.in
 
 noinst_DATA = \
-	gwyddion.vim
+	gwyddion3.vim
 
 vim_syn_gen = $(top_srcdir)/build/vim-syn-gen.py
-gwyddion_vim_cfg = $(srcdir)/gwyddion-vim-cfg.py
-gwyddion_vim_sources = $(top_builddir)/docs/libgwy/libgwy-decl.txt
+gwyddion3_vim_cfg = $(srcdir)/gwyddion3-vim-cfg.py
+gwyddion3_vim_sources = $(top_builddir)/docs/libgwy/libgwy-decl.txt
 
-gwyddion.vim: $(gwyddion_vim_sources) $(gwyddion_vim_cfg) $(vim_syn_gen)
-	$(AM_V_GEN)$(PYTHON) $(vim_syn_gen) $(gwyddion_vim_cfg) gwyddion.vim
+gwyddion3.vim: $(gwyddion3_vim_sources) $(gwyddion3_vim_cfg) $(vim_syn_gen)
+	$(AM_V_GEN)$(PYTHON) $(vim_syn_gen) $(gwyddion3_vim_cfg) gwyddion3.vim
 
 # VPATH fix
 distclean-local:
