@@ -211,6 +211,40 @@ test_math_curvature(void)
         g_assert_cmpfloat(zc, ==, 0.0);
     }
 
+    for (guint i = 0; i < 20; i++) {
+        gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
+        gdouble b = g_rand_double_range(rng, -2.0, 2.0);
+        gdouble c2a = cos(alpha)*cos(alpha),
+                s2a = sin(alpha)*sin(alpha),
+                csa = cos(alpha)*sin(alpha);
+        gdouble coeffs6[] = {
+            0.0, 0.0, 0.0, c2a + b*s2a, 2.0*(1.0 - b)*csa, s2a + b*c2a,
+        };
+        ndims = gwy_math_curvature(coeffs6,
+                                   &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+        // If we are unlucky, b ≈ 0 and ndims is just 1.
+        g_assert_cmpuint(ndims, ==, 2);
+        g_assert_cmpfloat(fabs(k1 - 2.0*fmin(b, 1.0)), <=, 1e-14);
+        g_assert_cmpfloat(fabs(k2 - 2.0*fmax(b, 1.0)), <=, 1e-14);
+        g_assert_cmpfloat(phi1, >=, -G_PI/2);
+        g_assert_cmpfloat(phi1, <=, G_PI/2);
+        g_assert_cmpfloat(phi2, >=, -G_PI/2);
+        g_assert_cmpfloat(phi2, <=, G_PI/2);
+        if (b < 1.0) {
+            g_assert_cmpfloat(fmin(fabs(phi1 - alpha + G_PI/2.0),
+                                   fabs(phi1 - alpha - G_PI/2.0)), <=, 1e-14);
+            g_assert_cmpfloat(fabs(phi2 - alpha), <=, 1e-14);
+        }
+        else {
+            g_assert_cmpfloat(fmin(fabs(phi2 - alpha + G_PI/2.0),
+                                   fabs(phi2 - alpha - G_PI/2.0)), <=, 1e-14);
+            g_assert_cmpfloat(fabs(phi1 - alpha), <=, 1e-14);
+        }
+        g_assert_cmpfloat(xc, ==, 0.0);
+        g_assert_cmpfloat(yc, ==, 0.0);
+        g_assert_cmpfloat(zc, ==, 0.0);
+    }
+
     // Shifted surfaces
     static const gdouble coeffs7[] = { 2.0, -2.0, 2.0, 1.0, 0.0, 1.0 };
     ndims = gwy_math_curvature(coeffs7, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
