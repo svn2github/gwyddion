@@ -221,6 +221,9 @@ brick/new-part
 brick/compatibility/res
 brick/compatibility/real
 brick/compatibility/units
+brick/compatibility/field/res
+brick/compatibility/field/real
+brick/compatibility/field/units
 brick/summarize/lines/minimum
 brick/summarize/lines/maximum
 brick/summarize/lines/mean

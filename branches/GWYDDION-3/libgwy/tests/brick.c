@@ -894,6 +894,321 @@ test_brick_compatibility_units(void)
     g_object_unref(brick4);
 }
 
+void
+test_brick_compatibility_field_res(void)
+{
+    GwyBrick *brick = gwy_brick_new_sized(2, 3, 4, FALSE);
+    GwyField *field1 = gwy_field_new_sized(2, 3, FALSE);
+    GwyField *field2 = gwy_field_new_sized(3, 2, FALSE);
+    GwyField *field3 = gwy_field_new_sized(3, 3, FALSE);
+    GwyField *field4 = gwy_field_new_sized(2, 2, FALSE);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_RES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+
+    g_object_unref(field1);
+    g_object_unref(field2);
+    g_object_unref(field3);
+    g_object_unref(field4);
+    g_object_unref(brick);
+}
+
+void
+test_brick_compatibility_field_real(void)
+{
+    GwyBrick *brick = gwy_brick_new_sized(2, 2, 4, FALSE);
+    GwyField *field1 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field2 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field3 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field4 = gwy_field_new_sized(2, 2, FALSE);
+
+    gwy_field_set_xreal(field2, 2.0);
+    gwy_field_set_yreal(field2, 2.0);
+    gwy_field_set_xreal(field3, 2.0);
+    gwy_field_set_yreal(field4, 2.0);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_REAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+
+    g_object_unref(field1);
+    g_object_unref(field2);
+    g_object_unref(field3);
+    g_object_unref(field4);
+    g_object_unref(brick);
+}
+
+void
+test_brick_compatibility_field_units(void)
+{
+    GwyBrick *brick = gwy_brick_new_sized(2, 2, 2, FALSE);
+    GwyField *field1 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field2 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field3 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field4 = gwy_field_new_sized(2, 2, FALSE);
+
+    gwy_unit_set_from_string(gwy_brick_get_unit_xy(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "A", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_xy(field1), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_z(field1), "A", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_xy(field3), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_z(field4), "A", NULL);
+
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field1, GWY_FIELD_COMPATIBLE_UNITS),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field2, GWY_FIELD_COMPATIBLE_UNITS),
+                     ==, GWY_FIELD_COMPATIBLE_UNITS);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field3, GWY_FIELD_COMPATIBLE_UNITS),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_brick_is_incompatible_with_field
+                                  (brick, field4, GWY_FIELD_COMPATIBLE_UNITS),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+
+    g_object_unref(field1);
+    g_object_unref(field2);
+    g_object_unref(field3);
+    g_object_unref(field4);
+    g_object_unref(brick);
+}
+
 static void
 summarize_lines_one(GwyBrickLineSummary quantity,
                     gdouble (*line_stat_function)(const GwyLine *line))
