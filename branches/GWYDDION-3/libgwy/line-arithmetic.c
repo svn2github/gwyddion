@@ -232,6 +232,7 @@ gwy_line_outer_product(const GwyLine *column,
  * @GWY_LINE_COMPATIBLE_DX: Pixel size.
  * @GWY_LINE_COMPATIBLE_LATERAL: Lateral units.
  * @GWY_LINE_COMPATIBLE_VALUE: Value units.
+ * @GWY_LINE_COMPATIBLE_UNITS: All units.
  * @GWY_LINE_COMPATIBLE_ALL: All defined properties.
  *
  * Line properties that can be checked for compatibility.

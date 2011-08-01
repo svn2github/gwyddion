@@ -461,6 +461,7 @@ gwy_brick_clear_full(GwyBrick *brick)
  * @GWY_BRICK_COMPATIBLE_LATERAL: Lateral units.
  * @GWY_BRICK_COMPATIBLE_DEPTH: Depth units.
  * @GWY_BRICK_COMPATIBLE_VALUE: Value units.
+ * @GWY_BRICK_COMPATIBLE_UNITS: All units.
  * @GWY_BRICK_COMPATIBLE_ALL: All defined properties.
  *
  * Brick properties that can be checked for compatibility.

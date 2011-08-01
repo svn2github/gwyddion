@@ -656,6 +656,7 @@ gwy_field_clamp(GwyField *field,
  * @GWY_FIELD_COMPATIBLE_DXDY: Pixel dimensions.
  * @GWY_FIELD_COMPATIBLE_LATERAL: Lateral units.
  * @GWY_FIELD_COMPATIBLE_VALUE: Value units.
+ * @GWY_FIELD_COMPATIBLE_UNITS: All units.
  * @GWY_FIELD_COMPATIBLE_ALL: All defined properties.
  *
  * Field properties that can be checked for compatibility.
