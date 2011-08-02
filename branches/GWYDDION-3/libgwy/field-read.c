@@ -21,6 +21,9 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-read.h"
+#include "libgwy/object-internal.h"
+#include "libgwy/curve-internal.h"
+#include "libgwy/field-internal.h"
 
 static inline guint
 elliptical_xlen(gdouble eta, gdouble rx, guint ax)
@@ -595,11 +598,13 @@ gwy_field_profile(GwyField *field,
                                                   interpolation,
                                                   exterior, fill_value);
         }
-        GwyXY point = { t*hreal, value/(2*averaging + 1) };
-        curve->data[n] = point;
+        curve->data[n] = (GwyXY){ t*hreal, value/(2*averaging + 1) };
     }
 
-    // TODO: Units...
+    Field *fpriv = field->priv;
+    Curve *cpriv = curve->priv;
+    ASSIGN_UNITS(cpriv->unit_x, fpriv->unit_xy);
+    ASSIGN_UNITS(cpriv->unit_y, fpriv->unit_z);
 
     return curve;
 }
