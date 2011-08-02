@@ -367,12 +367,13 @@ gwy_field_curvature(const GwyField *field,
                 syyz += i*i*z;
             }
             guint d = (2*ax + 1) - 2*xlen;
+            gdouble i2 = i*i;
             n += d;
             sx2 += 2*gwy_power_sum(ax - xlen, 2);
-            sy2 += d*i*i;
+            sy2 += d*i2;
             sx4 += 2*gwy_power_sum(ax - xlen, 4);
-            sx2y2 = 2*i*i*gwy_power_sum(ax - xlen, 2);
-            sy4 += d*i*i*i*i;
+            sx2y2 += 2*i2*gwy_power_sum(ax - xlen, 2);
+            sy4 += d*i2*i2;
         }
     }
     else {
