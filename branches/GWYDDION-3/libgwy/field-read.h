@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_FIELD_READ_H__
 #define __LIBGWY_FIELD_READ_H__
 
+#include <libgwy/curve.h>
 #include <libgwy/field.h>
 #include <libgwy/math.h>
 #include <libgwy/interpolation.h>
@@ -71,6 +72,17 @@ guint     gwy_field_curvature           (const GwyField *field,
                                          GwyExteriorType exterior,
                                          gdouble fill_value,
                                          GwyCurvatureParams *curvature);
+GwyCurve* gwy_field_profile             (GwyField *field,
+                                         gdouble xfrom,
+                                         gdouble yfrom,
+                                         gdouble xto,
+                                         gdouble yto,
+                                         guint res,
+                                         gdouble thickness,
+                                         guint averaging,
+                                         GwyInterpolationType interpolation,
+                                         GwyExteriorType exterior,
+                                         gdouble fill_value)                  G_GNUC_MALLOC;
 GwyField* gwy_field_interpolation_coeffs(GwyField *field,
                                          GwyInterpolationType interpolation);
 

@@ -513,6 +513,98 @@ gwy_field_interpolation_coeffs(GwyField *field,
 }
 
 /**
+ * gwy_field_profile:
+ * @field: A two-dimensional data field.
+ * @xfrom: Horizontal coordinate of the profile start, pixel-centered.
+ * @yfrom: Vertical coordinate of the profile start, pixel-centered.
+ * @xto: Horizontal coordinate of the profile end, pixel-centered.
+ * @yto: Vertical coordinate of the profile end, pixel-centered.
+ * @res: Number of samples taken on the line.  If zero it is chosen to make
+ *       the sample distance as close to the size of one @field pixel as
+ *       possible.
+ * @thickness: Profile thickness, i.e. distance in direction orthogonal to the
+ *             profile direction on each side to average over, taking
+ *             @averaging points.  Zero means no averaging.
+ * @averaging: The number of extra samples to take on each side when averaging.
+ *             It is meaningful only with non-zero @thickness.
+ * @interpolation: Interpolation type to use.  If it is a type with
+ *                 non-interpolating basis then @field is assumed to contain
+ *                 the coefficients (such a field can be created with
+ *                 gwy_field_interpolation_coeffs()).
+ *                 Using such interpolating directly with the data leads to
+ *                 incorrect results.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ *
+ * Extracts a profile from a field.
+ *
+ * See gwy_field_value_interpolated() for a discussion of precise meaning of
+ * the coordinates arguments.
+ *
+ * Returns: A newly created curve.
+ **/
+GwyCurve*
+gwy_field_profile(GwyField *field,
+                  gdouble xfrom, gdouble yfrom,
+                  gdouble xto, gdouble yto,
+                  guint res,
+                  gdouble thickness,
+                  guint averaging,
+                  GwyInterpolationType interpolation,
+                  GwyExteriorType exterior,
+                  gdouble fill_value)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_val_if_fail(thickness >= 0.0, NULL);
+
+    gdouble sx = xto - xfrom, sy = yto - yfrom;
+    gdouble len = hypot(fabs(sx) + 1, fabs(sy) + 1);
+    gdouble h = hypot(xto - xfrom, yto - yfrom);
+    gdouble hreal = hypot(sx*gwy_field_dx(field), sy*gwy_field_dy(field));
+    gdouble cosortho = 0.0, sinortho = 0.0;
+
+    if (res < 1)
+        res = gwy_round(fmax(len, 1));
+    if (thickness == 0.0)
+        averaging = 0;
+    if (averaging) {
+        // FIXME: Shouldn't we find the orthogonal direction in real
+        // coordinates instead of pixel ones?
+        if (h) {
+            cosortho = sy/h * thickness/averaging;
+            sinortho = -sx/h * thickness/averaging;
+        }
+    }
+
+    GwyCurve *curve = gwy_curve_new_sized(res);
+
+    for (guint n = 0; n < res; n++) {
+        gdouble t = (res > 1) ? n/(res - 1.0) : 0.5,
+                x = xfrom*(1.0 - t) + xto*t,
+                y = yfrom*(1.0 - t) + yto*t;
+        gdouble value = gwy_field_value_interpolated(field, x, y,
+                                                     interpolation,
+                                                     exterior, fill_value);
+
+        for (guint k = 1; k <= averaging; k++) {
+            gdouble xt = cosortho*k, yt = sinortho*k;
+            value += gwy_field_value_interpolated(field, x + xt, y + yt,
+                                                  interpolation,
+                                                  exterior, fill_value);
+            value += gwy_field_value_interpolated(field, x - xt, y - yt,
+                                                  interpolation,
+                                                  exterior, fill_value);
+        }
+        GwyXY point = { t*hreal, value/(2*averaging + 1) };
+        curve->data[n] = point;
+    }
+
+    // TODO: Units...
+
+    return curve;
+}
+
+/**
  * SECTION: field-read
  * @section_id: GwyField-read
  * @title: GwyField data reading
