@@ -21,6 +21,7 @@
 #define __LIBGWY_FIELD_READ_H__
 
 #include <libgwy/field.h>
+#include <libgwy/math.h>
 #include <libgwy/interpolation.h>
 
 G_BEGIN_DECLS
@@ -63,13 +64,7 @@ guint     gwy_field_curvature           (const GwyField *field,
                                          gboolean elliptical,
                                          GwyExteriorType exterior,
                                          gdouble fill_value,
-                                         gdouble *kappa1,
-                                         gdouble *kappa2,
-                                         gdouble *phi1,
-                                         gdouble *phi2,
-                                         gdouble *xc,
-                                         gdouble *yc,
-                                         gdouble *zc);
+                                         GwyCurvatureParams *curvature);
 GwyField* gwy_field_interpolation_coeffs(GwyField *field,
                                          GwyInterpolationType interpolation);
 

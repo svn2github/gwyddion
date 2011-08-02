@@ -3894,11 +3894,9 @@ test_field_read_curvature(void)
             }
         }
 
-        gdouble xc, yc, zc, kappa1, kappa2, phi1, phi2;
+        GwyCurvatureParams curv, curvr, curve;
         gdouble coeffs[] = { a, bx, by, cxx, cxy, cyy };
-        guint ndims = gwy_math_curvature(coeffs,
-                                         &kappa1, &kappa2, &phi1, &phi2,
-                                         &xc, &yc, &zc);
+        guint ndims = gwy_math_curvature(coeffs, &curv);
 
         for (guint iiter = 0; iiter < niiter; iiter++) {
             guint col = g_rand_int_range(rng, 2, xres-2);
@@ -3906,41 +3904,36 @@ test_field_read_curvature(void)
             guint ax = g_rand_int_range(rng, 1, MIN(col, xres-col));
             guint ay = g_rand_int_range(rng, 1, MIN(row, yres-row));
 
-            gdouble xcr, ycr, zcr, kappa1r, kappa2r, phi1r, phi2r;
-            guint ndimsr = gwy_field_curvature
-                                     (field, col, row, ax, ay,
-                                      FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
-                                      &kappa1r, &kappa2r, &phi1r, &phi2r,
-                                      &xcr, &ycr, &zcr);
-
             // Allow quite large relative errors as we have not done precise
             // uncertainty analysis and they can be large for the ‘thin’
             // sizes.
             gdouble eps = 1e-4/sqrt(2*ax + 2*ay - 3);
 
+            guint ndimsr = gwy_field_curvature
+                                     (field, col, row, ax, ay,
+                                      FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                      &curvr);
             g_assert_cmpuint(ndimsr, ==, ndims);
-            g_assert_cmpfloat(fabs(kappa1r/kappa1 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(kappa2r/kappa2 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(phi1r/phi1 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(phi2r/phi2 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(xcr/xc - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(ycr/yc - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(zcr/zc - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.k1/curv.k1 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.k2/curv.k2 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.phi1/curv.phi1 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.phi2/curv.phi2 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.xc/curv.xc - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.yc/curv.yc - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curvr.zc/curv.zc - 1.0), <=, eps);
 
-            gdouble xce, yce, zce, kappa1e, kappa2e, phi1e, phi2e;
             guint ndimse = gwy_field_curvature
                                      (field, col, row, ax, ay,
                                       TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
-                                      &kappa1e, &kappa2e, &phi1e, &phi2e,
-                                      &xce, &yce, &zce);
+                                      &curve);
             g_assert_cmpuint(ndimse, ==, ndims);
-            g_assert_cmpfloat(fabs(kappa1e/kappa1 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(kappa2e/kappa2 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(phi1e/phi1 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(phi2e/phi2 - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(xce/xc - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(yce/yc - 1.0), <=, eps);
-            g_assert_cmpfloat(fabs(zce/zc - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.k1/curv.k1 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.k2/curv.k2 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.phi1/curv.phi1 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.phi2/curv.phi2 - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.xc/curv.xc - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.yc/curv.yc - 1.0), <=, eps);
+            g_assert_cmpfloat(fabs(curve.zc/curv.zc - 1.0), <=, eps);
         }
 
         g_object_unref(field);

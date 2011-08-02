@@ -36,6 +36,16 @@ typedef struct {
     gdouble z;
 } GwyXYZ;
 
+typedef struct {
+    gdouble k1;
+    gdouble k2;
+    gdouble phi1;
+    gdouble phi2;
+    gdouble xc;
+    gdouble yc;
+    gdouble zc;
+} GwyCurvatureParams;
+
 typedef gdouble (*GwyRealFunc)(gdouble value, gpointer user_data);
 
 // Put the declaration we want gtk-doc to pick up first.
@@ -48,27 +58,21 @@ double gwy_powi(double x, int i) G_GNUC_CONST;
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
 gdouble  gwy_power_sum            (guint n,
-                                   guint p)               G_GNUC_CONST;
+                                   guint p)                        G_GNUC_CONST;
 gboolean gwy_overlapping          (guint pos1,
                                    guint len1,
                                    guint pos2,
-                                   guint len2)            G_GNUC_CONST;
+                                   guint len2)                     G_GNUC_CONST;
 gboolean gwy_math_intersecting    (gdouble a,
                                    gdouble b,
                                    gdouble A,
-                                   gdouble B)             G_GNUC_CONST;
+                                   gdouble B)                      G_GNUC_CONST;
 guint    gwy_math_curvature       (const gdouble *coeffs,
-                                   gdouble *kappa1,
-                                   gdouble *kappa2,
-                                   gdouble *phi1,
-                                   gdouble *phi2,
-                                   gdouble *xc,
-                                   gdouble *yc,
-                                   gdouble *zc);
+                                   GwyCurvatureParams *curvature);
 gint     gwy_double_compare       (gconstpointer a,
-                                   gconstpointer b)       G_GNUC_PURE;
+                                   gconstpointer b)                G_GNUC_PURE;
 gint     gwy_double_direct_compare(gconstpointer a,
-                                   gconstpointer b)       G_GNUC_CONST;
+                                   gconstpointer b)                G_GNUC_CONST;
 void     gwy_math_sort            (gdouble *array,
                                    guint *index_array,
                                    gsize n);

@@ -375,13 +375,8 @@ gwy_math_intersecting(gdouble a, gdouble b,
  * @coeffs: (array fixed-size=6):
  *          Array of the six polynomial coefficients of a quadratic surface in
  *          the following order: 1, x, y, x², xy, y².
- * @kappa1: Location to store the smaller curvature to.
- * @kappa2: Location to store the larger curvature to.
- * @phi1: Location to store the direction of the smaller curvature to.
- * @phi2: Location to store the direction of the larger curvature to.
- * @xc: Location to store x-coordinate of the centre of the quadratic surface.
- * @yc: Location to store y-coordinate of the centre of the quadratic surface.
- * @zc: Location to store value at the centre of the quadratic surface.
+ * @curvature: (out):
+ *             Location to store the curvature parameters.
  *
  * Calculates curvature parameters from two-dimensional quadratic polynomial
  * coefficients.
@@ -391,45 +386,23 @@ gwy_math_intersecting(gdouble a, gdouble b,
  * fitting a quadratic surface) do not differ from 1 by many orders.  Otherwise
  * recognition of flat surfaces will not work.
  *
- * Curvatures have signs, positive mean a concave (cup-like) surface, negative
- * mean a convex (cap-like) surface.  They are ordered including the sign.
- *
- * Directions are angles from the interval [-π/2, π/2].  The angle is measured
- * from the positive @x axis, increasing towards the positive @y axis.  This
- * does not depend on the handedness.
- *
- * If the quadratic surface is degenerate, i.e. flat in at least one direction,
- * the centre is undefined.  The centre is then chosen as the closest point
- * the origin of coordinates.  For flat surfaces this means the origin is
- * simply returned as the centre position.  Consequently, you should use
- * Cartesian coordinates with origin in a natural centre, for instance centre
- * of image or grain.
- *
  * Returns: The number of curved dimensions (0 to 2).
  **/
 guint
 gwy_math_curvature(const gdouble *coeffs,
-                   gdouble *pkappa1,
-                   gdouble *pkappa2,
-                   gdouble *pphi1,
-                   gdouble *pphi2,
-                   gdouble *pxc,
-                   gdouble *pyc,
-                   gdouble *pzc)
+                   GwyCurvatureParams *curvature)
 {
+    g_return_val_if_fail(curvature, 0);
+
     gdouble a = coeffs[0], bx = coeffs[1], by = coeffs[2],
             cxx = coeffs[3], cxy = coeffs[4], cyy = coeffs[5];
 
     /* Eliminate the mixed term */
     if (fabs(cxx) + fabs(cxy) + fabs(cyy) <= 1e-10*(fabs(bx) + fabs(by))) {
         /* Linear gradient */
-        GWY_MAYBE_SET(pkappa1, 0.0);
-        GWY_MAYBE_SET(pkappa2, 0.0);
-        GWY_MAYBE_SET(pxc, 0.0);
-        GWY_MAYBE_SET(pyc, 0.0);
-        GWY_MAYBE_SET(pzc, a);
-        GWY_MAYBE_SET(pphi1, 0.0);
-        GWY_MAYBE_SET(pphi2, G_PI/2.0);
+        gwy_clear(curvature, 1);
+        curvature->phi2 = G_PI/2.0;
+        curvature->zc = a;
         return 0;
     }
 
@@ -463,26 +436,25 @@ gwy_math_curvature(const gdouble *coeffs,
         yc = -by1/cy;
     }
 
-    GWY_MAYBE_SET(pxc, xc*cos(phi) - yc*sin(phi));
-    GWY_MAYBE_SET(pyc, xc*sin(phi) + yc*cos(phi));
-    GWY_MAYBE_SET(pzc, a + xc*bx1 + yc*by1 + 0.5*(xc*xc*cx + yc*yc*cy));
+    curvature->xc = xc*cos(phi) - yc*sin(phi);
+    curvature->yc = xc*sin(phi) + yc*cos(phi);
+    curvature->zc = a + xc*bx1 + yc*by1 + 0.5*(xc*xc*cx + yc*yc*cy);
 
     if (cx > cy) {
         GWY_SWAP(gdouble, cx, cy);
         phi += G_PI/2.0;
     }
 
-    GWY_MAYBE_SET(pkappa1, cx);
-    GWY_MAYBE_SET(pkappa2, cy);
+    curvature->k1 = cx;
+    curvature->k2 = cy;
 
-    if (pphi1) {
-        gdouble phi1 = fmod(phi + 2*G_PI, G_PI);
-        *pphi1 = (phi1 > G_PI/2.0) ? phi1 - G_PI : phi1;
-    }
-    if (pphi2) {
-        gdouble phi2 = fmod(phi + G_PI/2.0, G_PI);
-        *pphi2 = (phi2 > G_PI/2.0) ? phi2 - G_PI : phi2;
-    }
+    curvature->phi1 = fmod(phi + 2*G_PI, G_PI);
+    if (curvature->phi1 > G_PI/2.0)
+        curvature->phi1 -= G_PI;
+
+    curvature->phi2 = fmod(phi + G_PI/2.0, G_PI);
+    if (curvature->phi2 > G_PI/2.0)
+        curvature->phi2 -= G_PI;
 
     return degree;
 }
@@ -1459,6 +1431,34 @@ jump_over:
  * GWY_TYPE_XYZ:
  *
  * The #GType for a boxed type holding a #GwyXYZ.
+ **/
+
+/**
+ * GwyCurvatureParams:
+ * @k1: The smaller curvature.
+ * @k2: The larger curvature.
+ * @phi1: Direction of the smaller curvature.
+ * @phi2: Direction of the larger curvature.
+ * @xc: X-coordinate of the centre of the quadratic surface.
+ * @yc: Y-coordinate of the centre of the quadratic surface.
+ * @zc: Value at the centre of the quadratic surface.
+ *
+ * Parameters describing the curvature of a surface.
+ *
+ * Curvatures have signs, positive mean a concave (cup-like) surface, negative
+ * mean a convex (cap-like) surface.  They are ordered including the sign.
+ *
+ * Directions are angles from the interval [-π/2, π/2].  The angle is measured
+ * from the positive @x axis, increasing towards the positive @y axis.  This
+ * does not depend on the handedness.
+ *
+ * If the quadratic surface is degenerate, i.e. flat in at least one direction,
+ * the position centre is undefined in the flat direction(s).  Function
+ * calculating the curvature then choose the centre in the point closest to the
+ * origin of coordinates.  For flat surfaces this means the origin is simply
+ * returned as the centre position.  Consequently, you should use Cartesian
+ * coordinates with origin in a natural centre, for instance centre of image or
+ * grain, to obtain meaningful @xc and @yc also in these cases.
  **/
 
 /**

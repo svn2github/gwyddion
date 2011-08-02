@@ -309,13 +309,8 @@ gwy_field_slope(const GwyField *field,
  *              bounding rectangle.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
- * @kappa1: Location to store the smaller curvature to.
- * @kappa2: Location to store the larger curvature to.
- * @phi1: Location to store the direction of the smaller curvature to.
- * @phi2: Location to store the direction of the larger curvature to.
- * @xc: Location to store x-coordinate of the centre of the quadratic surface.
- * @yc: Location to store y-coordinate of the centre of the quadratic surface.
- * @zc: Location to store value at the centre of the quadratic surface.
+ * @curvature: (out):
+ *             Location to store the curvature parameters.
  *
  * Calculates local curvature in a field.
  *
@@ -339,11 +334,11 @@ gwy_field_curvature(const GwyField *field,
                     gboolean elliptical,
                     GwyExteriorType exterior,
                     gdouble fill_value,
-                    gdouble *pkappa1, gdouble *pkappa2,
-                    gdouble *pphi1, gdouble *pphi2,
-                    gdouble *pxc, gdouble *pyc, gdouble *pzc)
+                    GwyCurvatureParams *curvature)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), 0);
+    g_return_val_if_fail(curvature, 0);
+
     gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sxxz = 0.0, sxyz = 0.0, syyz = 0.0,
             sx2 = 0.0, sy2 = 0.0, sx4 = 0.0, sx2y2 = 0.0, sy4 = 0.0;
     guint n = 0;
@@ -439,24 +434,15 @@ gwy_field_curvature(const GwyField *field,
         coeffs[5] = Dyy/D      / (q*q);  // y²
     }
 
-    gdouble kappa1, kappa2, phi1, phi2, xc, yc, zc;
-    guint ndims = gwy_math_curvature(coeffs,
-                                     &kappa1, &kappa2, &phi1, &phi2,
-                                     &xc, &yc, &zc);
+    guint ndims = gwy_math_curvature(coeffs, curvature);
     // Now the angles and z-values are correct, but curvatures and xy must be
     // transformed to real physical units.
-    kappa1 /= s*s;
-    kappa2 /= s*s;
-    xc = xc*s + field->xoff + (col + 0.5)*gwy_field_dx(field);
-    yc = yc*s + field->yoff + (row + 0.5)*gwy_field_dy(field);
-
-    GWY_MAYBE_SET(pkappa1, kappa1);
-    GWY_MAYBE_SET(pkappa2, kappa2);
-    GWY_MAYBE_SET(pphi1, phi1);
-    GWY_MAYBE_SET(pphi2, phi2);
-    GWY_MAYBE_SET(pxc, xc);
-    GWY_MAYBE_SET(pyc, yc);
-    GWY_MAYBE_SET(pzc, zc);
+    curvature->k1 /= s*s;
+    curvature->k2 /= s*s;
+    curvature->xc *= s;
+    curvature->xc += field->xoff + (col + 0.5)*gwy_field_dx(field);
+    curvature->yc *= s;
+    curvature->yc += field->yoff + (row + 0.5)*gwy_field_dy(field);
 
     return ndims;
 }
