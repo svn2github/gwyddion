@@ -138,6 +138,7 @@ field/compatibility/units
 field/arithmetic/cache
 field/arithmetic/clamp
 field/arithmetic/normalize
+field/arithmetic/apply-func
 field/level/row/mean
 field/level/row/median
 field/level/row/mean-diff

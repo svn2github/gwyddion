@@ -1587,7 +1587,7 @@ test_field_arithmetic_clamp(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
-        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, 0.5);
+        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -0.5);
 
         guint width = g_rand_int_range(rng, 1, xres+1);
         guint height = g_rand_int_range(rng, 1, yres+1);
@@ -1659,6 +1659,95 @@ test_field_arithmetic_normalize(void)
                           <=, 1e-12);
 
         g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+static gdouble
+square_func(gdouble x, gpointer user_data)
+{
+    g_assert_cmpuint(GPOINTER_TO_UINT(user_data), ==, 69);
+    return x*x;
+}
+
+void
+test_field_arithmetic_apply_func(void)
+{
+    enum { max_size = 70 };
+    GRand *rng = g_rand_new_with_seed(42);
+    enum { niter = 20 };
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -0.5);
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyField *result = gwy_field_new_alike(field, FALSE);
+
+        // Ignored mask
+        gwy_field_copy_full(field, result);
+        gwy_field_apply_func(result, &fpart, mask, GWY_MASK_IGNORE,
+                             square_func, GUINT_TO_POINTER(69));
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                guint k = i*xres + j;
+                if (i >= fpart.row && i < fpart.row + fpart.height
+                    && j >= fpart.col && j < fpart.col + fpart.width)
+                    g_assert_cmpfloat(result->data[k],
+                                      ==,
+                                      field->data[k]*field->data[k]);
+                else
+                    g_assert_cmpfloat(result->data[k], ==, field->data[k]);
+            }
+        }
+
+        // Included mask
+        gwy_field_copy_full(field, result);
+        gwy_field_apply_func(result, &fpart, mask, GWY_MASK_INCLUDE,
+                             square_func, GUINT_TO_POINTER(69));
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                guint k = i*xres + j;
+                if (i >= fpart.row && i < fpart.row + fpart.height
+                    && j >= fpart.col && j < fpart.col + fpart.width
+                    && gwy_mask_field_get(mask, j, i))
+                    g_assert_cmpfloat(result->data[k],
+                                      ==,
+                                      field->data[k]*field->data[k]);
+                else
+                    g_assert_cmpfloat(result->data[k], ==, field->data[k]);
+            }
+        }
+
+        // Excluded mask
+        gwy_field_copy_full(field, result);
+        gwy_field_apply_func(result, &fpart, mask, GWY_MASK_EXCLUDE,
+                             square_func, GUINT_TO_POINTER(69));
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                guint k = i*xres + j;
+                if (i >= fpart.row && i < fpart.row + fpart.height
+                    && j >= fpart.col && j < fpart.col + fpart.width
+                    && !gwy_mask_field_get(mask, j, i))
+                    g_assert_cmpfloat(result->data[k],
+                                      ==,
+                                      field->data[k]*field->data[k]);
+                else
+                    g_assert_cmpfloat(result->data[k], ==, field->data[k]);
+            }
+        }
+
+        g_object_unref(result);
         g_object_unref(field);
     }
     g_rand_free(rng);
