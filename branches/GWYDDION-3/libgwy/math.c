@@ -280,7 +280,7 @@ gwy_powi(double x, int i)
  * The function calculates the sum of @x<superscript>@p</superscript> for
  * integral @x from 1 to @n.  If you want to sum from 0 then add 1 if @p is 0.
  *
- * The sum is calculate using and explicite formula, implemented only for
+ * The sum is calculated using an explicit formula, implemented only for
  * a limited set of powers @p, at present up to 11.
  *
  * Returns: Sum of first @n integers raised to power @p.
