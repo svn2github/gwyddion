@@ -68,12 +68,10 @@ value_dist_cont1(gdouble z1, gdouble z2, gdouble z3,
                  guint w,
                  DistributionData *ddata)
 {
-    if (z1 > z2)
-        GWY_SWAP(gdouble, z1, z2);
+    GWY_ORDER(gdouble, z1, z2);
     if (z2 > z3) {
         GWY_SWAP(gdouble, z2, z3);
-        if (z1 > z2)
-            GWY_SWAP(gdouble, z1, z2);
+        GWY_ORDER(gdouble, z1, z2);
     }
 
     if (ddata->analyse) {
@@ -369,16 +367,11 @@ slope_dist_cont1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     // (d) v4 ≤ v2 ≤ v3 ≤ v1
     // We can differentiate between (a,c) and (b,d) by comparing v1 and v4.
     // Within each pair the order is then uniquely given by the angle.
-    if (v1 > v2)
-        GWY_SWAP(gdouble, v1, v2);
-    if (v3 > v4)
-        GWY_SWAP(gdouble, v3, v4);
-    if (v1 > v3)
-        GWY_SWAP(gdouble, v1, v3);
-    if (v2 > v4)
-        GWY_SWAP(gdouble, v2, v4);
-    if (v2 > v3)
-        GWY_SWAP(gdouble, v2, v3);
+    GWY_ORDER(gdouble, v1, v2);
+    GWY_ORDER(gdouble, v3, v4);
+    GWY_ORDER(gdouble, v1, v3);
+    GWY_ORDER(gdouble, v2, v4);
+    GWY_ORDER(gdouble, v2, v3);
 
     if (ddata->analyse) {
         if (v1 < ddata->min)

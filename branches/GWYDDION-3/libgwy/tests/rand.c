@@ -566,8 +566,7 @@ test_rand_range_int(void)
                              | g_test_rand_int());
         if (hi == lo)
             continue;
-        if (hi < lo)
-            GWY_SWAP(gint64, hi, lo);
+        GWY_ORDER(gint64, lo, hi);
 
         for (guint i = 0; i < niter; i++) {
             gint64 x = gwy_rand_int_range(rng, lo, hi);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,16 @@
 
 #define GWY_SWAP(t, x, y) \
     do { t ___gwy_swap; ___gwy_swap = x; x = y; y = ___gwy_swap; } while (0)
+
+#define GWY_ORDER(t, x, y) \
+    do { \
+        if (y < x) { \
+            t ___gwy_swap; \
+            ___gwy_swap = x; \
+            x = y; \
+            y = ___gwy_swap; \
+        } \
+    } while (0)
 
 #define GWY_FREE(ptr) \
     do { if (ptr) { g_free(ptr); (ptr) = NULL; } } while (0)

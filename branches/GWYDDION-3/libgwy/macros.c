@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,12 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Note the macro naming convention: If it looks and behaves like a function,
+ * it just just implemented using a macro, the name is lowercase.  If it is a
+ * block of code the name is uppercase.
  */
 
 #include "libgwy/macros.h"
@@ -43,6 +49,21 @@
  * @y: Variable of type @t to swap with @y.
  *
  * Swaps the values of two variables.
+ *
+ * More precisely, @x and @y must be usable as both lhs and rhs expressions of
+ * type @t.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ */
+
+/**
+ * GWY_ORDER:
+ * @t: C type.
+ * @x: Variable of type @t to compare and possibly swap with @x.
+ * @y: Variable of type @t to compare and possibly swap with @y.
+ *
+ * Ensures the first variable is not larger than the second variable.
  *
  * More precisely, @x and @y must be usable as both lhs and rhs expressions of
  * type @t.

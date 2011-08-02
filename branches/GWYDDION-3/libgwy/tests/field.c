@@ -1596,8 +1596,7 @@ test_field_arithmetic_clamp(void)
         GwyFieldPart fpart = { col, row, width, height };
         gdouble lo = 2.0*g_rand_double(rng) - 1.0;
         gdouble hi = 2.0*g_rand_double(rng) - 1.0;
-        if (hi < lo)
-            GWY_SWAP(gdouble, lo, hi);
+        GWY_ORDER(gdouble, lo, hi);
 
         gwy_field_clamp(field, &fpart, lo, hi);
         gdouble minp, maxp;
