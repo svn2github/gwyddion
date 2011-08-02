@@ -350,6 +350,10 @@ gwy_field_slope(const GwyField *field,
 /**
  * gwy_field_curvature:
  * @field: A two-dimensional data field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match the dimensions of @field.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index.
  * @row: Row index.
  * @ax: Horizontal averaging radius (half-axis).
@@ -378,6 +382,8 @@ gwy_field_slope(const GwyField *field,
  **/
 guint
 gwy_field_curvature(const GwyField *field,
+                    const GwyMaskField *mask,
+                    GwyMaskingType masking,
                     gint col, gint row,
                     guint ax, guint ay,
                     gboolean elliptical,
@@ -387,56 +393,41 @@ gwy_field_curvature(const GwyField *field,
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), 0);
     g_return_val_if_fail(curvature, 0);
+    if (!mask || masking == GWY_MASK_IGNORE) {
+        mask = NULL;
+        masking = GWY_MASK_IGNORE;
+    }
+    else
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
 
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble rx = ax + 0.5, ry = ay + 0.5;
     gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sxxz = 0.0, sxyz = 0.0, syyz = 0.0,
             sx2 = 0.0, sy2 = 0.0, sx4 = 0.0, sx2y2 = 0.0, sy4 = 0.0;
     guint n = 0;
 
-    if (elliptical) {
-        gdouble rx = ax + 0.5, ry = ay + 0.5;
-        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            gdouble eta = i/ry;
-            gint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
-            g_assert(2*(guint)xlen <= 2*ax + 1);
-            for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
-                gdouble z = exterior_value(field, j + col, i + row,
-                                           exterior, fill_value);
-                sz += z;
-                sxz += j*z;
-                syz += i*z;
-                sxxz += j*j*z;
-                sxyz += j*i*z;
-                syyz += i*i*z;
-            }
-            guint d = (2*ax + 1) - 2*xlen;
+    for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+        gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
+        for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
             gdouble i2 = i*i;
-            n += d;
-            sx2 += 2*gwy_power_sum(ax - xlen, 2);
-            sy2 += d*i2;
-            sx4 += 2*gwy_power_sum(ax - xlen, 4);
-            sx2y2 += 2*i2*gwy_power_sum(ax - xlen, 2);
-            sy4 += d*i2*i2;
-        }
-    }
-    else {
-        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            for (gint j = -(gint)ax; j <= (gint)ax; j++) {
+            if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
                 gdouble z = exterior_value(field, j + col, i + row,
                                            exterior, fill_value);
+                gdouble j2 = j*j;
                 sz += z;
                 sxz += j*z;
                 syz += i*z;
-                sxxz += j*j*z;
+                sxxz += j2*z;
                 sxyz += j*i*z;
-                syyz += i*i*z;
+                syyz += i2*z;
+                sx2 += j2;
+                sy2 += i2;
+                sx4 += j2*j2;
+                sx2y2 += i2*j2;
+                sy4 += i2*i2;
+                n++;
             }
         }
-        n = (2*ax + 1)*(2*ay + 1);
-        sx2 = (2*ay + 1)*2*gwy_power_sum(ax, 2);
-        sy2 = (2*ax + 1)*2*gwy_power_sum(ay, 2);
-        sx4 = (2*ay + 1)*2*gwy_power_sum(ax, 4);
-        sx2y2 = 4*gwy_power_sum(ax, 2)*gwy_power_sum(ay, 2);
-        sy4 = (2*ax + 1)*2*gwy_power_sum(ay, 4);
     }
 
     gdouble alpha = sx4*sy4 - sx2y2*sx2y2,
@@ -445,6 +436,7 @@ gwy_field_curvature(const GwyField *field,
             delta = sx2*sy2 - n*sx2y2;
 
     gdouble D = n*alpha + sx2*betax + sy2*betay,
+            Dx = n*sx4 - sx2*sx2, Dy = n*sy4 - sy2*sy2,
             Da = sz*alpha + sxxz*betax + syyz*betay,
             Dxx = sxxz*(n*sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
             Dyy = sxxz*delta + syyz*(n*sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
@@ -452,25 +444,23 @@ gwy_field_curvature(const GwyField *field,
     // and pixel area of 1; q is then the remaining scaling factor.
     gdouble s = sqrt(gwy_field_dy(field)*gwy_field_dx(field));
     gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
-    gdouble coeffs[6];
+    gdouble coeffs[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
-    if (ax == 0 && ay == 0) {
-        gwy_clear(coeffs, G_N_ELEMENTS(coeffs));
+    if (!n) {
+        // Zero coeffs[] are all right.
+    }
+    else if (!Dx && !Dy) {
         coeffs[0] = sz/n;
     }
-    else if (ax == 0) {
-        D = n*sy4 - sy2*sy2;
-        coeffs[1] = coeffs[3] = coeffs[4] = 0.0;
+    else if (!Dx) {
         coeffs[2] = syz/sy2;
-        coeffs[0] = (sz*sy4 - sy2*syyz)/D;
-        coeffs[5] = (n*syyz - sz*sy2)/D;
+        coeffs[0] = (sz*sy4 - sy2*syyz)/Dy;
+        coeffs[5] = (n*syyz - sz*sy2)/Dy;
     }
-    else if (ay == 0) {
-        D = n*sx4 - sx2*sx2;
-        coeffs[2] = coeffs[4] = coeffs[5] = 0.0;
+    else if (!Dy) {
         coeffs[1] = sxz/sx2;
-        coeffs[0] = (sz*sx4 - sx2*sxxz)/D;
-        coeffs[3] = (n*sxxz - sz*sx2)/D;
+        coeffs[0] = (sz*sx4 - sx2*sxxz)/Dx;
+        coeffs[3] = (n*sxxz - sz*sx2)/Dx;
     }
     else {
         coeffs[0] = Da/D;                // 1

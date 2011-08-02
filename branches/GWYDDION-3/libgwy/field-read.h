@@ -61,6 +61,8 @@ void      gwy_field_slope               (const GwyField *field,
                                          gdouble *bx,
                                          gdouble *by);
 guint     gwy_field_curvature           (const GwyField *field,
+                                         const GwyMaskField *mask,
+                                         GwyMaskingType masking,
                                          gint col,
                                          gint row,
                                          guint ax,

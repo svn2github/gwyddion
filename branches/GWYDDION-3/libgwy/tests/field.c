@@ -3916,7 +3916,8 @@ test_field_read_curvature(void)
             gdouble eps = 1e-4/sqrt(2*ax + 2*ay - 3);
 
             guint ndimsr = gwy_field_curvature
-                                     (field, col, row, ax, ay,
+                                     (field, NULL, GWY_MASK_IGNORE,
+                                      col, row, ax, ay,
                                       FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
                                       &curvr);
             g_assert_cmpuint(ndimsr, ==, ndims);
@@ -3929,7 +3930,8 @@ test_field_read_curvature(void)
             g_assert_cmpfloat(fabs(curvr.zc/curv.zc - 1.0), <=, eps);
 
             guint ndimse = gwy_field_curvature
-                                     (field, col, row, ax, ay,
+                                     (field, NULL, GWY_MASK_IGNORE,
+                                      col, row, ax, ay,
                                       TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
                                       &curve);
             g_assert_cmpuint(ndimse, ==, ndims);
