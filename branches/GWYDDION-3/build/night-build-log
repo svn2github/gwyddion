@@ -44,6 +44,12 @@ cat >update_translations.ignore <<':'
 ':'
 :
 
+cat >build_rpm.ignore <<':'
+^\+ 
+':'
+:
+cat >>build_rpm.ignore <build_documentation.ignore
+
 function printerr() {
   f=$1
   shift
