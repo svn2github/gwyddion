@@ -405,10 +405,10 @@ gwy_field_curvature(const GwyField *field,
             Da = sz*alpha + sxxz*betax + syyz*betay,
             Dxx = sxxz*(n*sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
             Dyy = sxxz*delta + syyz*(n*sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
-    // q is used for transformation to coordinates with correct aspect ratio
-    // and pixel area of 1; s is then the remaining scaling factor.
-    gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
+    // s is used for transformation to coordinates with correct aspect ratio
+    // and pixel area of 1; q is then the remaining scaling factor.
     gdouble s = sqrt(gwy_field_dy(field)*gwy_field_dx(field));
+    gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
     gdouble coeffs[6];
 
     if (ax == 0 && ay == 0) {
@@ -446,8 +446,8 @@ gwy_field_curvature(const GwyField *field,
     // transformed to real physical units.
     kappa1 /= s*s;
     kappa2 /= s*s;
-    xc = xc/s + field->xoff + (col + 0.5)*gwy_field_dx(field);
-    yc = yc/s + field->yoff + (row + 0.5)*gwy_field_dy(field);
+    xc = xc*s + field->xoff + (col + 0.5)*gwy_field_dx(field);
+    yc = yc*s + field->yoff + (row + 0.5)*gwy_field_dy(field);
 
     GWY_MAYBE_SET(pkappa1, kappa1);
     GWY_MAYBE_SET(pkappa2, kappa2);
