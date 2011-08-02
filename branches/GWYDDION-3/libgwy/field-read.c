@@ -209,7 +209,7 @@ gwy_field_value_interpolated(const GwyField *field,
  * @field: A two-dimensional data field.
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
- *        Its dimensions must match either the dimensions of @field.
+ *        Its dimensions must match the dimensions of @field.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index.
  * @row: Row index.
@@ -271,6 +271,10 @@ gwy_field_value_averaged(const GwyField *field,
 /**
  * gwy_field_slope:
  * @field: A two-dimensional data field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match the dimensions of @field.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index.
  * @row: Row index.
  * @ax: Horizontal averaging radius (half-axis).
@@ -297,6 +301,8 @@ gwy_field_value_averaged(const GwyField *field,
  **/
 void
 gwy_field_slope(const GwyField *field,
+                const GwyMaskField *mask,
+                GwyMaskingType masking,
                 gint col, gint row,
                 guint ax, guint ay,
                 gboolean elliptical,
@@ -306,46 +312,39 @@ gwy_field_slope(const GwyField *field,
                 gdouble *bx, gdouble *by)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
+    if (!mask || masking == GWY_MASK_IGNORE) {
+        mask = NULL;
+        masking = GWY_MASK_IGNORE;
+    }
+    else
+        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble rx = ax + 0.5, ry = ay + 0.5;
     gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sx2 = 0.0, sy2 = 0.0;
     guint n = 0;
 
-    if (elliptical) {
-        gdouble rx = ax + 0.5, ry = ay + 0.5;
-        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            gdouble eta = i/ry;
-            gint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
-            g_assert(2*(guint)xlen <= 2*ax + 1);
-            for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
+    for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+        gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
+        for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
+            gdouble i2 = i*i;
+            if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
                 gdouble z = exterior_value(field, j + col, i + row,
                                            exterior, fill_value);
+                gdouble j2 = j*j;
                 sz += z;
                 sxz += j*z;
                 syz += i*z;
-            }
-            guint d = (2*ax + 1) - 2*xlen;
-            n += d;
-            sx2 += 2*gwy_power_sum(ax - xlen, 2);
-            sy2 += d*i*i;
-        }
-    }
-    else {
-        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            for (gint j = -(gint)ax; j <= (gint)ax; j++) {
-                gdouble z = exterior_value(field, j + col, i + row,
-                                           exterior, fill_value);
-                sz += z;
-                sxz += j*z;
-                syz += i*z;
+                sx2 += j2;
+                sy2 += i2;
+                n++;
             }
         }
-        n = (2*ax + 1)*(2*ay + 1);
-        sx2 = (2*ay + 1)*2*gwy_power_sum(ax, 2);
-        sy2 = (2*ax + 1)*2*gwy_power_sum(ay, 2);
     }
 
-    GWY_MAYBE_SET(a, sz/n);
-    GWY_MAYBE_SET(bx, ax ? sxz/sx2/gwy_field_dx(field) : 0.0);
-    GWY_MAYBE_SET(by, ay ? syz/sy2/gwy_field_dy(field) : 0.0);
+    GWY_MAYBE_SET(a, n ? sz/n : 0.0);
+    GWY_MAYBE_SET(bx, sx2 ? sxz/sx2/gwy_field_dx(field) : 0.0);
+    GWY_MAYBE_SET(by, sy2 ? syz/sy2/gwy_field_dy(field) : 0.0);
 }
 
 /**

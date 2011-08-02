@@ -48,6 +48,8 @@ gdouble   gwy_field_value_averaged      (const GwyField *field,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
 void      gwy_field_slope               (const GwyField *field,
+                                         const GwyMaskField *mask,
+                                         GwyMaskingType masking,
                                          gint col,
                                          gint row,
                                          guint ax,

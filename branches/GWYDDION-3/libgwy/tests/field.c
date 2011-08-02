@@ -3830,10 +3830,12 @@ test_field_read_slope(void)
             gdouble zpix = gwy_field_value(field, col, row,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
             gdouble ar, bxr, byr, ae, bxe, bye;
-            gwy_field_slope(field, col, row, ax, ay,
+            gwy_field_slope(field, NULL, GWY_MASK_IGNORE,
+                            col, row, ax, ay,
                             FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
                             &ar, &bxr, &byr);
-            gwy_field_slope(field, col, row, ax, ay,
+            gwy_field_slope(field, NULL, GWY_MASK_IGNORE,
+                            col, row, ax, ay,
                             TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
                             &ae, &bxe, &bye);
 
