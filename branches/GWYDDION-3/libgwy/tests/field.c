@@ -3766,16 +3766,20 @@ test_field_read_averaged(void)
             gdouble zpix = gwy_field_value(field, col, row,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
             gdouble zar0 = gwy_field_value_averaged
-                                          (field, col, row, 0, 0, FALSE,
+                                          (field, NULL, GWY_MASK_IGNORE,
+                                           col, row, 0, 0, FALSE,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
             gdouble zae0 = gwy_field_value_averaged
-                                          (field, col, row, 0, 0, TRUE,
+                                          (field, NULL, GWY_MASK_IGNORE,
+                                           col, row, 0, 0, TRUE,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
             gdouble zar1 = gwy_field_value_averaged
-                                          (field, col, row, ax, ay, FALSE,
+                                          (field, NULL, GWY_MASK_IGNORE,
+                                           col, row, ax, ay, FALSE,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
             gdouble zae1 = gwy_field_value_averaged
-                                          (field, col, row, ax, ay, TRUE,
+                                          (field, NULL, GWY_MASK_IGNORE,
+                                           col, row, ax, ay, TRUE,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
 
             g_assert_cmpfloat(fabs(zar0 - zpix), <=, 1e-14);

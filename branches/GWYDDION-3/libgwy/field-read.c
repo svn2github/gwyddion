@@ -22,6 +22,14 @@
 #include "libgwy/math.h"
 #include "libgwy/field-read.h"
 
+static inline guint
+elliptical_xlen(gdouble eta, gdouble rx, guint ax)
+{
+    guint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
+    g_assert(2*xlen <= 2*ax + 1);
+    return xlen;
+}
+
 static gdouble
 exterior_value(const GwyField *field,
                gint col, gint row,
@@ -33,6 +41,7 @@ exterior_value(const GwyField *field,
         && row >= 0 && (guint)row < field->yres)
         return field->data[col + row*field->xres];
 
+    // Exteriors
     if (exterior == GWY_EXTERIOR_UNDEFINED)
         return NAN;
 
@@ -60,6 +69,51 @@ exterior_value(const GwyField *field,
         g_return_val_if_reached(NAN);
     }
     return field->data[col + row*field->xres];
+}
+
+static gboolean
+exterior_mask(const GwyMaskField *field,
+              gboolean invert,
+              gint col, gint row,
+              GwyExteriorType exterior)
+{
+    // No masking
+    if (!field)
+        return 1;
+
+    // Interior
+    if (col >= 0 && (guint)col < field->xres
+        && row >= 0 && (guint)row < field->yres)
+        return !gwy_mask_field_get(field, col, row) == invert;
+
+    // Exteriors
+    if (exterior == GWY_EXTERIOR_UNDEFINED)
+        return 0;
+
+    if (exterior == GWY_EXTERIOR_FIXED_VALUE)
+        return 1;
+
+    if (exterior == GWY_EXTERIOR_BORDER_EXTEND) {
+        col = CLAMP(col, 0, (gint)field->xres-1);
+        row = CLAMP(row, 0, (gint)field->yres-1);
+    }
+    else if (exterior == GWY_EXTERIOR_PERIODIC) {
+        col = (col % field->xres) + (col < 0 ? field->xres : 0);
+        row = (row % field->yres) + (row < 0 ? field->yres : 0);
+    }
+    else if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
+        guint xres2 = 2*field->xres, yres2 = 2*field->yres;
+        col = (col % xres2) + (col < 0 ? xres2 : 0);
+        if ((guint)col >= field->xres)
+            col = xres2-1 - col;
+        row = (row % yres2) + (row < 0 ? yres2 : 0);
+        if ((guint)row >= field->yres)
+            row = yres2-1 - row;
+    }
+    else {
+        g_return_val_if_reached(0);
+    }
+    return !gwy_mask_field_get(field, col, row) == invert;
 }
 
 /**
@@ -153,6 +207,10 @@ gwy_field_value_interpolated(const GwyField *field,
 /**
  * gwy_field_value_averaged:
  * @field: A two-dimensional data field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match either the dimensions of @field.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index.
  * @row: Row index.
  * @ax: Horizontal averaging radius (half-axis).
@@ -175,42 +233,36 @@ gwy_field_value_interpolated(const GwyField *field,
  **/
 gdouble
 gwy_field_value_averaged(const GwyField *field,
-                        gint col, gint row,
-                        guint ax, guint ay,
-                        gboolean elliptical,
-                        GwyExteriorType exterior,
-                        gdouble fill_value)
+                         const GwyMaskField *mask,
+                         GwyMaskingType masking,
+                         gint col, gint row,
+                         guint ax, guint ay,
+                         gboolean elliptical,
+                         GwyExteriorType exterior,
+                         gdouble fill_value)
 {
-    if (!ax && !ay)
-        return gwy_field_value(field, col, row, exterior, fill_value);
-
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
+    if (!mask || masking == GWY_MASK_IGNORE) {
+        mask = NULL;
+        masking = GWY_MASK_IGNORE;
+    }
+    else
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), NAN);
+
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble rx = ax + 0.5, ry = ay + 0.5;
     gdouble sz = 0.0;
     guint n = 0;
 
-    if (elliptical) {
-        // We could use Bresenham but we need to fill the ellipse so it would
-        // complicate things.  One floating point calculation per row is fine.
-        gdouble rx = ax + 0.5, ry = ay + 0.5;
-        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            gdouble eta = i/ry;
-            gint xlen = ax - gwy_round(rx*sqrt(1.0 - eta*eta) - 0.5);
-            g_assert(2*(guint)xlen <= 2*ax + 1);
-            for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
+    for (gint i = -(gint)ay; i <= (gint)ay; i++) {
+        gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
+        for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
+            if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
                 sz += exterior_value(field, j + col, i + row,
-                                    exterior, fill_value);
-            }
-            n += (2*ax + 1) - 2*xlen;
-        }
-    }
-    else {
-        for (gint i = -(gint)ay; i <= (gint)ay; i++) {
-            for (gint j = -(gint)ax; j <= (gint)ax; j++) {
-                sz += exterior_value(field, j + col, i + row,
-                                    exterior, fill_value);
+                                     exterior, fill_value);
+                n++;
             }
         }
-        n = (2*ax + 1)*(2*ay + 1);
     }
 
     return sz/n;
@@ -258,8 +310,6 @@ gwy_field_slope(const GwyField *field,
     guint n = 0;
 
     if (elliptical) {
-        // We could use Bresenham but we need to fill the ellipse so it would
-        // complicate things.  One floating point calculation per row is fine.
         gdouble rx = ax + 0.5, ry = ay + 0.5;
         for (gint i = -(gint)ay; i <= (gint)ay; i++) {
             gdouble eta = i/ry;
@@ -344,8 +394,6 @@ gwy_field_curvature(const GwyField *field,
     guint n = 0;
 
     if (elliptical) {
-        // We could use Bresenham but we need to fill the ellipse so it would
-        // complicate things.  One floating point calculation per row is fine.
         gdouble rx = ax + 0.5, ry = ay + 0.5;
         for (gint i = -(gint)ay; i <= (gint)ay; i++) {
             gdouble eta = i/ry;
@@ -480,6 +528,17 @@ gwy_field_interpolation_coeffs(GwyField *field,
  * @section_id: GwyField-read
  * @title: GwyField data reading
  * @short_description: Reading and extraction of fields values
+ *
+ * Functions that gather information from the neighbourhood of the selected
+ * point, such as gwy_field_value_averaged(), can apply masking.  Note if this
+ * causes the entire neighbourhood to be excluded they can return NaNs.
+ * Furthermore, if the neighbourhood sticks out of the field the exterior must
+ * be handled not only for the field but also for the mask.  Exterior types
+ * that replicate the field data somehow, i.e. %GWY_EXTERIOR_BORDER_EXTEND,
+ * %GWY_EXTERIOR_MIRROR_EXTEND and %GWY_EXTERIOR_PERIODIC, are applied to the
+ * mask to replicate its data in the same fashion.  However,
+ * %GWY_EXTERIOR_UNDEFINED causes all exterior pixels to be ignored while
+ * %GWY_EXTERIOR_FIXED_VALUE causes all exterior pixels to be included.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
