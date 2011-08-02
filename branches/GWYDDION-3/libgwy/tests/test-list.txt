@@ -154,6 +154,7 @@ field/extend/border
 field/read/interpolated
 field/read/averaged
 field/read/slope
+field/read/curvature
 field/convolve/row/interior/mirror/direct
 field/convolve/row/interior/mirror/fft
 field/convolve/row/interior/border/direct
