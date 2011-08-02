@@ -193,8 +193,8 @@ test_math_curvature(void)
     for (guint i = 0; i < 10; i++) {
         gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
         gdouble ca = cos(2.0*alpha), sa = sin(2.0*alpha);
-        gdouble coeffs6[] = { 0.0, 0.0, 0.0, ca/2.0, sa, -ca/2.0 };
-        ndims = gwy_math_curvature(coeffs6,
+        gdouble coeffs[] = { 0.0, 0.0, 0.0, ca/2.0, sa, -ca/2.0 };
+        ndims = gwy_math_curvature(coeffs,
                                    &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
         g_assert_cmpuint(ndims, ==, 2);
         g_assert_cmpfloat(fabs(k1 + 1.0), <=, 1e-14);
@@ -213,32 +213,32 @@ test_math_curvature(void)
 
     for (guint i = 0; i < 20; i++) {
         gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
-        gdouble b = g_rand_double_range(rng, -2.0, 2.0);
+        gdouble a = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble b = g_rand_double_range(rng, -5.0, 5.0);
         gdouble c2a = cos(alpha)*cos(alpha),
                 s2a = sin(alpha)*sin(alpha),
                 csa = cos(alpha)*sin(alpha);
-        gdouble coeffs6[] = {
-            0.0, 0.0, 0.0, c2a + b*s2a, 2.0*(1.0 - b)*csa, s2a + b*c2a,
-        };
-        ndims = gwy_math_curvature(coeffs6,
+        gdouble cxx = a*c2a + b*s2a, cyy = a*s2a + b*c2a, cxy = 2.0*(a - b)*csa;
+        gdouble coeffs[] = { 0.0, 0.0, 0.0, cxx, cxy, cyy };
+        ndims = gwy_math_curvature(coeffs,
                                    &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
-        // If we are unlucky, b ≈ 0 and ndims is just 1.
+        // XXX: If we are unlucky, a or b ≈ 0 and ndims is just 1.
         g_assert_cmpuint(ndims, ==, 2);
-        g_assert_cmpfloat(fabs(k1 - 2.0*fmin(b, 1.0)), <=, 1e-14);
-        g_assert_cmpfloat(fabs(k2 - 2.0*fmax(b, 1.0)), <=, 1e-14);
+        g_assert_cmpfloat(fabs(k1 - 2.0*fmin(a, b)), <=, 1e-14);
+        g_assert_cmpfloat(fabs(k2 - 2.0*fmax(a, b)), <=, 1e-14);
         g_assert_cmpfloat(phi1, >=, -G_PI/2);
         g_assert_cmpfloat(phi1, <=, G_PI/2);
         g_assert_cmpfloat(phi2, >=, -G_PI/2);
         g_assert_cmpfloat(phi2, <=, G_PI/2);
-        if (b < 1.0) {
-            g_assert_cmpfloat(fmin(fabs(phi1 - alpha + G_PI/2.0),
-                                   fabs(phi1 - alpha - G_PI/2.0)), <=, 1e-14);
-            g_assert_cmpfloat(fabs(phi2 - alpha), <=, 1e-14);
-        }
-        else {
+        if (a <= b) {
             g_assert_cmpfloat(fmin(fabs(phi2 - alpha + G_PI/2.0),
                                    fabs(phi2 - alpha - G_PI/2.0)), <=, 1e-14);
             g_assert_cmpfloat(fabs(phi1 - alpha), <=, 1e-14);
+        }
+        else {
+            g_assert_cmpfloat(fmin(fabs(phi1 - alpha + G_PI/2.0),
+                                   fabs(phi1 - alpha - G_PI/2.0)), <=, 1e-14);
+            g_assert_cmpfloat(fabs(phi2 - alpha), <=, 1e-14);
         }
         g_assert_cmpfloat(xc, ==, 0.0);
         g_assert_cmpfloat(yc, ==, 0.0);
@@ -246,8 +246,8 @@ test_math_curvature(void)
     }
 
     // Shifted surfaces
-    static const gdouble coeffs7[] = { 2.0, -2.0, 2.0, 1.0, 0.0, 1.0 };
-    ndims = gwy_math_curvature(coeffs7, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    static const gdouble coeffs6[] = { 2.0, -2.0, 2.0, 1.0, 0.0, 1.0 };
+    ndims = gwy_math_curvature(coeffs6, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(k1, ==, 2.0);
     g_assert_cmpfloat(k2, ==, 2.0);
@@ -269,8 +269,8 @@ test_math_curvature(void)
     g_assert_cmpfloat(fabs(yc + 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(zc), <=, 1e-14);
 
-    static const gdouble coeffs8[] = { 0.5, 2.0, 1.0, 1.0, 0.0, -0.5 };
-    ndims = gwy_math_curvature(coeffs8, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+    static const gdouble coeffs7[] = { 0.5, 2.0, 1.0, 1.0, 0.0, -0.5 };
+    ndims = gwy_math_curvature(coeffs7, &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(k1, ==, -1.0);
     g_assert_cmpfloat(k2, ==, 2.0);
@@ -291,6 +291,48 @@ test_math_curvature(void)
     g_assert_cmpfloat(fabs(xc + 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(yc - 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(zc), <=, 1e-14);
+
+    // Rotated shifted surface
+    for (guint i = 0; i < 30; i++) {
+        gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
+        gdouble a = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble b = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble p = g_rand_double_range(rng, -2.0, 2.0);
+        gdouble q = g_rand_double_range(rng, -2.0, 2.0);
+        gdouble c2a = cos(alpha)*cos(alpha),
+                s2a = sin(alpha)*sin(alpha),
+                csa = cos(alpha)*sin(alpha);
+        gdouble cxx = a*c2a + b*s2a, cyy = a*s2a + b*c2a, cxy = 2.0*(a - b)*csa;
+        gdouble coeffs[] = {
+            p*p*cxx + q*q*cyy + p*q*cxy,
+            2.0*p*cxx + q*cxy, 2.0*q*cyy + p*cxy,
+            cxx, cxy, cyy
+        };
+        ndims = gwy_math_curvature(coeffs,
+                                   &k1, &k2, &phi1, &phi2, &xc, &yc, &zc);
+        // XXX: If we are unlucky, a or b ≈ 0 and ndims is just 1.
+        g_assert_cmpuint(ndims, ==, 2);
+        g_assert_cmpfloat(fabs(k1 - 2.0*fmin(a, b)), <=, 1e-14);
+        g_assert_cmpfloat(fabs(k2 - 2.0*fmax(a, b)), <=, 1e-14);
+        g_assert_cmpfloat(phi1, >=, -G_PI/2);
+        g_assert_cmpfloat(phi1, <=, G_PI/2);
+        g_assert_cmpfloat(phi2, >=, -G_PI/2);
+        g_assert_cmpfloat(phi2, <=, G_PI/2);
+        if (a <= b) {
+            g_assert_cmpfloat(fmin(fabs(phi2 - alpha + G_PI/2.0),
+                                   fabs(phi2 - alpha - G_PI/2.0)), <=, 1e-14);
+            g_assert_cmpfloat(fabs(phi1 - alpha), <=, 1e-14);
+        }
+        else {
+            g_assert_cmpfloat(fmin(fabs(phi1 - alpha + G_PI/2.0),
+                                   fabs(phi1 - alpha - G_PI/2.0)), <=, 1e-14);
+            g_assert_cmpfloat(fabs(phi2 - alpha), <=, 1e-14);
+        }
+        g_assert_cmpfloat(fabs(xc + p), <=, 1e-14);
+        g_assert_cmpfloat(fabs(yc + q), <=, 1e-14);
+        g_assert_cmpfloat(fabs(zc), <=, 1e-14);
+    }
+
 
     g_rand_free(rng);
 }
