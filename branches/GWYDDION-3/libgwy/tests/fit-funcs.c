@@ -25,11 +25,13 @@
  *
  ***************************************************************************/
 
+// Note for units testing we put [x] = [m], [y] = [s].
 static void
 fit_func_one(const gchar *name,
              const gchar *group,
              guint expected_nparams,
-             const gchar* const *param_names)
+             const gchar* const *param_names,
+             const gchar* const *param_units)
 {
     enum { ndata = 500 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -45,13 +47,16 @@ fit_func_one(const gchar *name,
 
     guint nparams = gwy_fit_func_n_params(fitfunc);
     g_assert_cmpuint(nparams, ==, expected_nparams);
+    guint param_map[nparams];
 
     for (guint i = 0; i < nparams; i++) {
         const gchar *pname = gwy_fit_func_param_name(fitfunc, i);
         guint j;
         for (j = 0; j < nparams; j++) {
-            if (gwy_strequal(pname, param_names[j]))
+            if (gwy_strequal(pname, param_names[j])) {
+                param_map[j] = i;
                 break;
+            }
         }
         if (j == nparams)
             g_error("Function %s has an unexpected parameter %s.",
@@ -146,6 +151,21 @@ fit_func_one(const gchar *name,
         g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, (1.0 + eps)*error[i]);
     }
 
+    /* Units */
+    GwyUnit *unit_x = gwy_unit_new_from_string("m", NULL);
+    GwyUnit *unit_y = gwy_unit_new_from_string("s", NULL);
+    for (guint i = 0; i < nparams; i++) {
+        guint j = param_map[i];
+        GwyUnit *units = gwy_fit_func_param_units(fitfunc, j, unit_x, unit_y);
+        GwyUnit *expected_units = gwy_unit_new_from_string(param_units[i],
+                                                           NULL);
+        g_assert(gwy_unit_equal(units, expected_units));
+        g_object_unref(expected_units);
+        g_object_unref(units);
+    }
+    g_object_unref(unit_y);
+    g_object_unref(unit_x);
+
     g_object_unref(curve);
     g_object_unref(curve0);
     g_object_unref(fitfunc);
@@ -156,30 +176,34 @@ void
 test_fit_func_builtin_constant(void)
 {
     const gchar *param_names[] = { "a" };
+    const gchar *param_units[] = { "s" };
     fit_func_one("Constant", "builtin",
-                 G_N_ELEMENTS(param_names), param_names);
+                 G_N_ELEMENTS(param_names), param_names, param_units);
 }
 
 void
 test_fit_func_builtin_exponential(void)
 {
     const gchar *param_names[] = { "a", "b", "y₀" };
+    const gchar *param_units[] = { "s", "m", "s" };
     fit_func_one("Exponential", "builtin",
-                 G_N_ELEMENTS(param_names), param_names);
+                 G_N_ELEMENTS(param_names), param_names, param_units);
 }
 
 void
 test_fit_func_builtin_gaussian(void)
 {
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
+    const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Gaussian", "builtin",
-                 G_N_ELEMENTS(param_names), param_names);
+                 G_N_ELEMENTS(param_names), param_names, param_units);
 }
 
 void
 test_fit_func_user(void)
 {
     const gchar *param_names[] = { "a", "b" };
+    const gchar *param_units[] = { "s", "s/m" };
     GwyInventory *userfitfuncs = gwy_user_fit_funcs();
     g_assert(GWY_IS_INVENTORY(userfitfuncs));
     if (gwy_inventory_get(userfitfuncs, "Linear"))
@@ -202,7 +226,7 @@ test_fit_func_user(void)
     gwy_fit_param_set_power_x(b, -1);
     gwy_fit_param_set_power_y(b, 1);
     fit_func_one("Linear", "userfitfunc",
-                 G_N_ELEMENTS(param_names), param_names);
+                 G_N_ELEMENTS(param_names), param_names, param_units);
 
     GwyFitFunc *fitfunc = gwy_fit_func_new("Linear", "userfitfunc");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
