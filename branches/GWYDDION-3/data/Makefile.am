@@ -7,7 +7,7 @@ MAINTAINERCLEANFILES = \
 EXTRA_DIST = \
 	gwyddion3-vim-cfg.py \
 	gwyddion3.vim \
-	gwyddion3.spec.in
+	gwyddion3.spec.in \
 
 noinst_DATA = \
 	gwyddion3.vim
