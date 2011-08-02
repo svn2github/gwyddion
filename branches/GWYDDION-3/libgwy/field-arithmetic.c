@@ -118,8 +118,9 @@ gwy_field_is_incompatible(const GwyField *field1,
  * gwy_field_clear:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *             Area in @field to clear.  Pass %NULL to clear entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
+ *         Area in @field to clear.  Pass %NULL to clear entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Fills a field with zeroes.
@@ -176,8 +177,9 @@ gwy_field_clear_full(GwyField *field)
  * gwy_field_fill:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *             Area in @field to fill.  Pass %NULL to fill entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
+ *         Area in @field to fill.  Pass %NULL to fill entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @value: Value to fill the part with.
  *
@@ -245,8 +247,9 @@ gwy_field_fill_full(GwyField *field,
  * gwy_field_add:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @value: Value to add to the data.
  *
@@ -306,8 +309,9 @@ gwy_field_add(GwyField *field,
  * gwy_field_multiply:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @value: Value to multiply the data with.
  *
@@ -371,8 +375,9 @@ gwy_field_multiply(GwyField *field,
  * gwy_field_normalize:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @mean: New mean value.
  * @rms: New rms value (it must be non-negative).
@@ -436,8 +441,9 @@ gwy_field_normalize(GwyField *field,
  * gwy_field_apply_func:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
- *             Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @func: Function to apply to the value of each pixel (or each pixel under/
  *        not under the mask if masking is used).
