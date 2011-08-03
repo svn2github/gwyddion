@@ -151,6 +151,10 @@ field/extend/fixed
 field/extend/mirror
 field/extend/periodic
 field/extend/border
+field/read/exterior/fixed
+field/read/exterior/border
+field/read/exterior/mirror
+field/read/exterior/periodic
 field/read/interpolated
 field/read/averaged
 field/read/slope

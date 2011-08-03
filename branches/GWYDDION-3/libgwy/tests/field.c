@@ -3682,6 +3682,68 @@ test_field_distributions_slope_nonsquare(void)
     g_object_unref(field);
 }
 
+static void
+field_read_exterior_one(GwyExteriorType exterior)
+{
+    enum { max_size = 31, niter = 80 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+
+        guint left = g_rand_int_range(rng, 0, 2*xres);
+        guint right = g_rand_int_range(rng, 0, 2*xres);
+        guint up = g_rand_int_range(rng, 0, 2*yres);
+        guint down = g_rand_int_range(rng, 0, 2*yres);
+
+        GwyField *extended = gwy_field_extend(field, NULL,
+                                              left, right, up, down,
+                                              exterior, G_PI);
+
+        for (guint i = 0; i < yres + up + down; i++) {
+            for (guint j = 0; j < xres + left + right; j++) {
+                gdouble zext = gwy_field_value(extended, j, i, exterior, NAN);
+                gdouble zread = gwy_field_value(field,
+                                                (gint)j - left, (gint)i - up,
+                                                exterior, G_PI);
+                g_assert_cmpfloat(zread, ==, zext);
+            }
+        }
+
+        g_object_unref(extended);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_read_exterior_fixed(void)
+{
+    field_read_exterior_one(GWY_EXTERIOR_FIXED_VALUE);
+}
+
+void
+test_field_read_exterior_border(void)
+{
+    field_read_exterior_one(GWY_EXTERIOR_BORDER_EXTEND);
+}
+
+void
+test_field_read_exterior_mirror(void)
+{
+    field_read_exterior_one(GWY_EXTERIOR_MIRROR_EXTEND);
+}
+
+void
+test_field_read_exterior_periodic(void)
+{
+    field_read_exterior_one(GWY_EXTERIOR_PERIODIC);
+}
+
 void
 test_field_read_interpolated(void)
 {
