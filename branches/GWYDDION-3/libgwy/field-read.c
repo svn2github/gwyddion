@@ -56,11 +56,15 @@ exterior_value(const GwyField *field,
         row = CLAMP(row, 0, (gint)field->yres-1);
     }
     else if (exterior == GWY_EXTERIOR_PERIODIC) {
-        col = (col % field->xres) + (col < 0 ? field->xres : 0);
-        row = (row % field->yres) + (row < 0 ? field->yres : 0);
+        col = (col % (gint)field->xres);
+        if (col < 0)
+            col += field->xres;
+        row = (row % (gint)field->yres);
+        if (row < 0)
+            row += field->yres;
     }
     else if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
-        guint xres2 = 2*field->xres, yres2 = 2*field->yres;
+        gint xres2 = 2*field->xres, yres2 = 2*field->yres;
         col = (col % xres2) + (col < 0 ? xres2 : 0);
         if ((guint)col >= field->xres)
             col = xres2-1 - col;
@@ -101,11 +105,15 @@ exterior_mask(const GwyMaskField *field,
         row = CLAMP(row, 0, (gint)field->yres-1);
     }
     else if (exterior == GWY_EXTERIOR_PERIODIC) {
-        col = (col % field->xres) + (col < 0 ? field->xres : 0);
-        row = (row % field->yres) + (row < 0 ? field->yres : 0);
+        col = (col % (gint)field->xres);
+        if (col < 0)
+            col += field->xres;
+        row = (row % (gint)field->yres);
+        if (row < 0)
+            row += field->yres;
     }
     else if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
-        guint xres2 = 2*field->xres, yres2 = 2*field->yres;
+        gint xres2 = 2*field->xres, yres2 = 2*field->yres;
         col = (col % xres2) + (col < 0 ? xres2 : 0);
         if ((guint)col >= field->xres)
             col = xres2-1 - col;
