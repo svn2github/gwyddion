@@ -926,6 +926,74 @@ test_field_statistics(void)
     g_rand_free(rng);
 }
 
+static void
+field_median_one(GwyMaskingType masking)
+{
+    enum { max_size = 75 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, TRUE);
+        field_randomize(field, rng);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint count = width*height;
+        if (masking == GWY_MASK_INCLUDE)
+            count = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        else if (masking == GWY_MASK_EXCLUDE)
+            count = gwy_mask_field_part_count(mask, &fpart, FALSE);
+
+        gdouble median = gwy_field_median(field, &fpart, mask, masking);
+        guint nabove, nbelow;
+        gwy_field_count_above_below(field, &fpart, mask, masking,
+                                    median, median, FALSE, &nabove, &nbelow);
+
+        if (isnan(median)) {
+            g_assert_cmpuint(count, ==, 0);
+            g_assert_cmpuint(nabove, ==, 0);
+            g_assert_cmpuint(nbelow, ==, 0);
+        }
+        else {
+            // XXX: Here we assert the part does not contain two identical
+            // values.  While it is extremely rare it is not impossible.
+            g_assert_cmpuint(nabove + nbelow, ==, count + 1);
+            g_assert_cmpuint(nabove, <=, nbelow);
+            g_assert_cmpuint(nabove + 1, >=, nbelow);
+        }
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_median_include(void)
+{
+    field_median_one(GWY_MASK_INCLUDE);
+}
+
+void
+test_field_median_exclude(void)
+{
+    field_median_one(GWY_MASK_EXCLUDE);
+}
+
+void
+test_field_median_ignore(void)
+{
+    field_median_one(GWY_MASK_IGNORE);
+}
+
 void
 test_field_level_plane(void)
 {
