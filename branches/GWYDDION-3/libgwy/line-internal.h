@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,27 +34,6 @@ struct _GwyLinePrivate {
 };
 
 typedef struct _GwyLinePrivate Line;
-
-G_GNUC_INTERNAL
-gboolean _gwy_line_check_part(const GwyLine *line,
-                              const GwyLinePart *lpart,
-                              guint *pos,
-                              guint *len);
-
-G_GNUC_INTERNAL
-gboolean _gwy_line_check_target_part(const GwyLine *line,
-                                     const GwyLinePart *lpart,
-                                     guint len_full,
-                                     guint *pos,
-                                     guint *len);
-
-G_GNUC_INTERNAL
-gboolean _gwy_line_limit_parts(const GwyLine *src,
-                               const GwyLinePart *srcpart,
-                               const GwyLine *dest,
-                               guint destpos,
-                               guint *pos,
-                               guint *len);
 
 G_END_DECLS
 

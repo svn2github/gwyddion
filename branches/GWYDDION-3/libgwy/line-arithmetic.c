@@ -103,7 +103,7 @@ gwy_line_clear(GwyLine *line,
                const GwyLinePart *lpart)
 {
     guint pos, len;
-    if (!_gwy_line_check_part(line, lpart, &pos, &len))
+    if (!gwy_line_check_part(line, lpart, &pos, &len))
         return;
     gwy_clear(line->data + pos, len);
 }
@@ -123,7 +123,7 @@ gwy_line_fill(GwyLine *line,
               gdouble value)
 {
     guint pos, len;
-    if (!_gwy_line_check_part(line, lpart, &pos, &len))
+    if (!gwy_line_check_part(line, lpart, &pos, &len))
         return;
 
     gdouble *p = line->data + pos;

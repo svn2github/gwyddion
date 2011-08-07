@@ -394,7 +394,7 @@ gwy_brick_extract_line(const GwyBrick *brick,
 {
     guint pos, len, level, depth;
     if (!_gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth)
-        || !_gwy_line_check_target_part(target, lpart, brick->zres, &pos, &len))
+        || !gwy_line_check_target_part(target, lpart, brick->zres, &pos, &len))
         return;
 
     // Can happen with NULL @lpart and incompatible objects.
