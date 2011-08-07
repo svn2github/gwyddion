@@ -19,11 +19,20 @@
 
 #include "libgwyui/field-render.h"
 
-cairo_surface_t*
-gwy_field_render(GwyField *field,
-                 GwyGradient *gradient)
+void
+gwy_field_render(const GwyField *field,
+                 GdkPixbuf *pixbuf,
+                 GwyGradient *gradient,
+                 gdouble xfrom, gdouble yfrom,
+                 gdouble xto, gdouble yto,
+                 gdouble min, gdouble max)
 {
-    return NULL;
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GDK_IS_PIXBUF(pixbuf));
+    g_return_if_fail(GWY_IS_GRADIENT(gradient));
+
+    if (min == max)
+        max = G_MAXDOUBLE;
 }
 
 /**

@@ -22,12 +22,16 @@
 
 #include <libgwy/field.h>
 #include <libgwy/gradient.h>
-#include <cairo/cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 G_BEGIN_DECLS
 
-cairo_surface_t* gwy_field_render(GwyField *field,
-                                  GwyGradient *gradient) G_GNUC_MALLOC;
+void gwy_field_render(const GwyField *field,
+                      GdkPixbuf *pixbuf,
+                      GwyGradient *gradient,
+                      gdouble xfrom, gdouble yfrom,
+                      gdouble xto, gdouble yto,
+                      gdouble min, gdouble max);
 
 G_END_DECLS
 
