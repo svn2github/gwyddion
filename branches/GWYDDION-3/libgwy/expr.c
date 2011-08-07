@@ -1623,7 +1623,7 @@ gwy_expr_execute(GwyExpr *expr,
 /**
  * gwy_expr_vector_execute:
  * @expr: An expression evaluator.
- * @n: The lenght of @result and of @data member arrays, that is vector length.
+ * @n: The length of @result and of @data member arrays, that is vector length.
  * @data: An array of arrays of length @n.  The arrays correspond to expression
  *        variables in gwy_expr_execute().  Zeroth array can be %NULL.
  * @result: An array of length @n to store computation results to.  It may be

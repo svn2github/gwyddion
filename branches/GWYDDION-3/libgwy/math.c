@@ -775,7 +775,7 @@ gwy_linalg_invert(gdouble *a,
  * @function: Function to fit.
  * @npoints: Number of fitted points, it must be larger than the number of
  *           parameters.
- * @params: Array of lenght @nparams to store the parameters (coefficients)
+ * @params: Array of length @nparams to store the parameters (coefficients)
  *          corresponding to the minimum on success.  It will be overwritten
  *          also on failure but not with anything useful.
  * @nparams: The number of parameters.

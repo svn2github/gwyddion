@@ -1075,7 +1075,7 @@ gwy_field_get_unit_z(const GwyField *field)
  * @height: Location to store the actual height (number of rows)
  *          of the part.
  *
- * Validates the position and dimentions of part in a field.
+ * Validates the position and dimensions of a field part.
  *
  * If @fpart is %NULL entire @field is to be used.  Otherwise @fpart must be
  * contained in @field.
@@ -1156,8 +1156,7 @@ gwy_field_check_part(const GwyField *field,
  * @height: Location to store the actual height (number of rows)
  *          of the target part.
  *
- * Validates the position and dimentions of target part in a field for
- * extraction.
+ * Validates the position and dimensions of a target field part for extraction.
  *
  * If @fpart is %NULL the dimensions of @field must match the entire source,
  * i.e. (@width_full,@height_full).  Otherwise @fpart must be contained in
@@ -1184,7 +1183,7 @@ gwy_field_check_part(const GwyField *field,
  *         return;
  *
  *     // Check @brick and perform the extraction of its plane to rectangle
- *     // given @col, @row, @width and @height in @field...
+ *     // given by @col, @row, @width and @height in @field...
  * }
  * ]|
  *
@@ -1257,11 +1256,11 @@ gwy_field_check_target_part(const GwyField *field,
  * @height: Location to store the actual height (number of rows)
  *          of the source part.
  *
- * Limits the dimensions of a field part for a copy-like operation.
+ * Limits the dimensions of a field part for copying.
  *
- * The area is limited to be contained both in @src and @dest and @col, @row,
- * @width and @height are set to the actual position and dimensions in @src.
- * If the function returns %FALSE their values are undefined.
+ * The area is limited to make it contained both in @src and @dest and @col,
+ * @row, @width and @height are set to the actual position and dimensions in
+ * @src.  If the function returns %FALSE their values are undefined.
  *
  * If @src and @dest are the same field the source and destination parts should
  * not overlap.
@@ -1357,7 +1356,7 @@ gwy_field_limit_parts(const GwyField *src,
  * @targetrow: Location to store the actual row index of the upper-left corner
  *             of the part in the target.
  *
- * Validates the position and dimentions of part in a field.
+ * Validates the position and dimensions of a target field.
  *
  * Dimensions of @target must match either @field or @fpart.  In the first case
  * the rectangular part is the same in @field and @target.  In the second case
@@ -1454,7 +1453,7 @@ gwy_field_check_target(const GwyField *field,
  * @maskrow: Location to store the actual row index of the upper-left corner
  *           of the mask part.
  *
- * Validates the position and dimentions of part in a field, including masking.
+ * Validates the position and dimensions of a masked field part.
  *
  * If @fpart is %NULL entire @field is to be used.  Otherwise @fpart must be
  * contained in @field.

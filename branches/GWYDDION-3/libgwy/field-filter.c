@@ -171,7 +171,7 @@ row_extend_base(const gdouble *in, gdouble *out,
 /***
  * row_extend_foo:
  * @in: Input row of length @res.
- * @out: Output row of lenght @width+@extend_left+@extend_right.
+ * @out: Output row of length @width+@extend_left+@extend_right.
  * @pos: Position in @in where the ROI starts.
  * @width: Length of ROI in @in.
  * @res: Total length of @in.
