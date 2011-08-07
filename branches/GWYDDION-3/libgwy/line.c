@@ -498,10 +498,50 @@ gwy_line_new_alike(const GwyLine *model,
     return line;
 }
 
+/**
+ * gwy_line_check_part:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line, possibly %NULL.
+ * @pos: Location to store the actual position of the part start.
+ * @len: Location to store the actual length (number of items)
+ *       of the part.
+ *
+ * Validates the position and length a line part.
+ *
+ * If @lpart is %NULL entire @line is to be used.  Otherwise @lpart must be
+ * contained in @line.
+ *
+ * If the position and length are valid @pos and @len are set to the actual
+ * part in @line.  If the function returns %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * line but do not work with masks.  See gwy_line_check_mask() for checking
+ * of part and mask together.  Example (note gwy_line_new_part()
+ * creates a new line from a segment of another line):
+ * |[
+ * GwyLine*
+ * extract_line_part(const GwyLine *line,
+ *                   const GwyLinePart *lpart)
+ * {
+ *     guint pos, len;
+ *     if (!gwy_line_check_part(line, lpart, &pos, &len))
+ *         return NULL;
+ *
+ *     // Extract the part of @line consisting of @len items from @pos...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and length are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @line is not a #GwyLine instance or the position or
+ *          length is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_line_check_part(const GwyLine *line,
-                     const GwyLinePart *lpart,
-                     guint *pos, guint *len)
+gwy_line_check_part(const GwyLine *line,
+                    const GwyLinePart *lpart,
+                    guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
     if (lpart) {
@@ -522,11 +562,57 @@ _gwy_line_check_part(const GwyLine *line,
     return TRUE;
 }
 
+/**
+ * gwy_line_target_check_part:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line, possibly %NULL.
+ * @len_full: Number of items of the entire source.
+ * @pos: Location to store the actual position of the part start.
+ * @len: Location to store the actual length (number of items)
+ *       of the part.
+ *
+ * Validates the position and length of a target line part for extraction.
+ *
+ * If @lpart is %NULL the length of @line must match the entire source,
+ * i.e. @len_full.  Otherwise @lpart must be contained in @line, except if its
+ * length matches the entire line in which case the offsets can be arbitrary
+ * as they pertain to the source only.
+ *
+ * If the position and length are valid @pos and @len are set to the actual
+ * segment in @line.  If the function returns %FALSE their values are
+ * undefined.
+ *
+ * This function is typically used if a line is extracted from a larger data.
+ * Example (note gwy_brick_extract_line() extracts lines from a brick):
+ * |[
+ * void
+ * extract_brick_line(const GwyBrick *brick,
+ *                    GwyLine *target,
+ *                    const GwyLinePart *lpart,
+ *                    guint col, guint row)
+ * {
+ *     guint pos, len;
+ *     if (!gwy_line_check_target_part(target, lpart, brick->zres,
+ *                                     &pos, &len))
+ *         return;
+ *
+ *     // Check @brick and perform the extraction of its section to line
+ *     // given by @pos and @len in @line...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and length are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @line is not a #GwyLine instance or the position or
+ *          length is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_line_check_target_part(const GwyLine *line,
-                            const GwyLinePart *lpart,
-                            guint len_full,
-                            guint *pos, guint *len)
+gwy_line_check_target_part(const GwyLine *line,
+                           const GwyLinePart *lpart,
+                           guint len_full,
+                           guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
     if (lpart) {
@@ -557,12 +643,57 @@ _gwy_line_check_target_part(const GwyLine *line,
     return TRUE;
 }
 
+/**
+ * gwy_line_limit_parts:
+ * @src: A source one-dimensional data line.
+ * @srcpart: (allow-none):
+ *           Segment in @src, possibly %NULL.
+ * @dest: A destination one-dimensional data line.
+ * @destpos: Column index for the upper-left corner of the part in @dest.
+ * @pos: Location to store the actual position of the sourcr part start.
+ * @len: Location to store the actual length (number of items)
+ *       of the source part.
+ *
+ * Limits the length of a line part for copying.
+ *
+ * The segment is limited to make it contained both in @src and @dest and @pos
+ * and @len are set to the actual position and length in @src.  If the function
+ * returns %FALSE their values are undefined.
+ *
+ * If @src and @dest are the same line the source and destination parts should
+ * not overlap.
+ *
+ * This function is typically used in copy-like functions that transfer a part
+ * of a line into another line.
+ * Example (note gwy_line_copy() copies line parts):
+ * |[
+ * void
+ * copy_line(const GwyLine *src,
+ *           const GwyLinePart *srcpart,
+ *           GwyLine *dest,
+ *           guint destpos)
+ * {
+ *     guint pos, len;
+ *     if (!gwy_line_limit_parts(src, srcpart, dest, destpos,
+ *                               &pos, &len))
+ *         return;
+ *
+ *     // Copy segment of length @len at @pos in @src to an equally-sized
+ *     // segment at @destpos in @dest...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the caller should proceed.  %FALSE if the caller should
+ *          not proceed, either because @line or @target is not a #GwyLine
+ *          instance (a critical error is emitted in these cases) or the actual
+ *          part is zero-sized.
+ **/
 gboolean
-_gwy_line_limit_parts(const GwyLine *src,
-                      const GwyLinePart *srcpart,
-                      const GwyLine *dest,
-                      guint destpos,
-                      guint *pos, guint *len)
+gwy_line_limit_parts(const GwyLine *src,
+                     const GwyLinePart *srcpart,
+                     const GwyLine *dest,
+                     guint destpos,
+                     guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_LINE(src), FALSE);
     g_return_val_if_fail(GWY_IS_LINE(dest), FALSE);
@@ -623,7 +754,7 @@ gwy_line_new_part(const GwyLine *line,
                   gboolean keep_offset)
 {
     guint pos, len;
-    if (!_gwy_line_check_part(line, lpart, &pos, &len))
+    if (!gwy_line_check_part(line, lpart, &pos, &len))
         return NULL;
 
     GwyLine *part;
@@ -777,7 +908,7 @@ gwy_line_copy(const GwyLine *src,
               guint destpos)
 {
     guint pos, len;
-    if (!_gwy_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
+    if (!gwy_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
         return;
 
     gwy_assign(dest->data + destpos, src->data + pos, len);
@@ -788,7 +919,7 @@ gwy_line_copy(const GwyLine *src,
  * @line: A one-dimensional data line.
  * @real: Length in physical units.
  *
- * Sets the physical lenght of a one-dimensional data line.
+ * Sets the physical length of a one-dimensional data line.
  **/
 void
 gwy_line_set_real(GwyLine *line,

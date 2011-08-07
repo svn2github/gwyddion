@@ -102,6 +102,22 @@ GwyValueFormat* gwy_line_format_y     (const GwyLine *line,
 #define gwy_line_dx(line) \
     ((line)->real/(line)->res)
 
+gboolean gwy_line_check_part       (const GwyLine *line,
+                                    const GwyLinePart *lpart,
+                                    guint *pos,
+                                    guint *len);
+gboolean gwy_line_check_target_part(const GwyLine *line,
+                                    const GwyLinePart *lpart,
+                                    guint len_full,
+                                    guint *pos,
+                                    guint *len);
+gboolean gwy_line_limit_parts      (const GwyLine *src,
+                                    const GwyLinePart *srcpart,
+                                    const GwyLine *dest,
+                                    guint destpos,
+                                    guint *pos,
+                                    guint *len);
+
 G_END_DECLS
 
 #endif
