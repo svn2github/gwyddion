@@ -121,6 +121,9 @@ mask-field/fill-ellipse
 field/props
 field/data-changed
 field/units
+field/check-part/good
+field/check-part/empty
+field/check-part/bad
 field/copy
 field/new-part
 field/serialize
