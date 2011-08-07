@@ -172,7 +172,7 @@ gwy_mask_line_copy(const GwyMaskLine *src,
                    guint destpos)
 {
     guint pos, len;
-    if (!_gwy_mask_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
+    if (!gwy_mask_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
         return;
 
     if (len == src->res && len == dest->res) {

@@ -129,6 +129,17 @@ guint    gwy_mask_line_part_count  (const GwyMaskLine *line,
                                     const GwyLinePart *lpart,
                                     gboolean value);
 
+gboolean gwy_mask_line_check_part (const GwyMaskLine *line,
+                                   const GwyLinePart *lpart,
+                                   guint *pos,
+                                   guint *len);
+gboolean gwy_mask_line_limit_parts(const GwyMaskLine *src,
+                                   const GwyLinePart *lpart,
+                                   const GwyMaskLine *dest,
+                                   guint destpos,
+                                   guint *pos,
+                                   guint *len);
+
 G_END_DECLS
 
 #endif

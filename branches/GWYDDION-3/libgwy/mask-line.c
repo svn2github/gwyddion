@@ -326,10 +326,49 @@ gwy_mask_line_get_property(GObject *object,
     }
 }
 
+/**
+ * gwy_mask_line_check_part:
+ * @line: A one-dimensional mask line.
+ * @lpart: (allow-none):
+ *         Segment in @line, possibly %NULL.
+ * @pos: Location to store the actual position of the part start.
+ * @len: Location to store the actual length (number of items)
+ *       of the part.
+ *
+ * Validates the position and length a mask line part.
+ *
+ * If @lpart is %NULL entire @line is to be used.  Otherwise @lpart must be
+ * contained in @line.
+ *
+ * If the position and length are valid @pos and @len are set to the actual
+ * part in @line.  If the function returns %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * mask line.  Example (note gwy_mask_line_new_part() creates a new mask line
+ * from a segment of another mask line):
+ * |[
+ * GwyMaskLine*
+ * extract_mask_line_part(const GwyLine *line,
+ *                        const GwyLinePart *lpart)
+ * {
+ *     guint pos, len;
+ *     if (!gwy_mask_line_check_part(line, lpart, &pos, &len))
+ *         return NULL;
+ *
+ *     // Extract the part of @line consisting of @len items from @pos...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and length are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @line is not a #GwyMaskLine instance or the position or
+ *          length is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_mask_line_check_part(const GwyMaskLine *line,
-                          const GwyLinePart *lpart,
-                          guint *pos, guint *len)
+gwy_mask_line_check_part(const GwyMaskLine *line,
+                         const GwyLinePart *lpart,
+                         guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_MASK_LINE(line), FALSE);
     if (lpart) {
@@ -350,12 +389,57 @@ _gwy_mask_line_check_part(const GwyMaskLine *line,
     return TRUE;
 }
 
+/**
+ * gwy_mask_line_limit_parts:
+ * @src: A source one-dimensional mask line.
+ * @srcpart: (allow-none):
+ *           Segment in @src, possibly %NULL.
+ * @dest: A destination one-dimensional mask line.
+ * @destpos: Column index for the upper-left corner of the part in @dest.
+ * @pos: Location to store the actual position of the sourcr part start.
+ * @len: Location to store the actual length (number of items)
+ *       of the source part.
+ *
+ * Limits the length of a mask line part for copying.
+ *
+ * The segment is limited to make it contained both in @src and @dest and @pos
+ * and @len are set to the actual position and length in @src.  If the function
+ * returns %FALSE their values are undefined.
+ *
+ * If @src and @dest are the same line the source and destination parts should
+ * not overlap.
+ *
+ * This function is typically used in copy-like functions that transfer a part
+ * of a mask line into another mask line.
+ * Example (note gwy_mask_line_copy() copies mask line parts):
+ * |[
+ * void
+ * copy_mask_line(const GwyMaskLine *src,
+ *                const GwyMaskLinePart *srcpart,
+ *                GwyMaskLine *dest,
+ *                guint destpos)
+ * {
+ *     guint pos, len;
+ *     if (!gwy_mask_line_limit_parts(src, srcpart, dest, destpos,
+ *                                    &pos, &len))
+ *         return;
+ *
+ *     // Copy segment of length @len at @pos in @src to an equally-sized
+ *     // segment at @destpos in @dest...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the caller should proceed.  %FALSE if the caller should
+ *          not proceed, either because @line or @target is not a #GwyMaskLine
+ *          instance (a critical error is emitted in these cases) or the actual
+ *          part is zero-sized.
+ **/
 gboolean
-_gwy_mask_line_limit_parts(const GwyMaskLine *src,
-                           const GwyLinePart *srcpart,
-                           const GwyMaskLine *dest,
-                           guint destpos,
-                           guint *pos, guint *len)
+gwy_mask_line_limit_parts(const GwyMaskLine *src,
+                          const GwyLinePart *srcpart,
+                          const GwyMaskLine *dest,
+                          guint destpos,
+                          guint *pos, guint *len)
 {
     g_return_val_if_fail(GWY_IS_MASK_LINE(src), FALSE);
     g_return_val_if_fail(GWY_IS_MASK_LINE(dest), FALSE);
@@ -450,7 +534,7 @@ gwy_mask_line_new_part(const GwyMaskLine *line,
                        const GwyLinePart *lpart)
 {
     guint pos, len;
-    if (!_gwy_mask_line_check_part(line, lpart, &pos, &len))
+    if (!gwy_mask_line_check_part(line, lpart, &pos, &len))
         return NULL;
 
     if (len == line->res)
@@ -653,7 +737,7 @@ gwy_mask_line_part_count(const GwyMaskLine *line,
                          gboolean value)
 {
     guint pos, len;
-    if (!_gwy_mask_line_check_part(line, lpart, &pos, &len))
+    if (!gwy_mask_line_check_part(line, lpart, &pos, &len))
         return 0;
 
     guint32 *base = line->data + (pos >> 5);
