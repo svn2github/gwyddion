@@ -15,7 +15,7 @@ mkenum_id = LIBGWYUI_TYPES
 main_header = $(srcdir)/libgwyui.h
 GwyUI3_3_0_gir_INCLUDES = Gtk-3.0
 GwyUI3_3_0_gir_PACKAGES = gtk+-3.0
-GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-3.0.gir
+GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-3.0.gir --library=$(top_builddir)/libgwy/libgwy3.la
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
@@ -67,6 +67,7 @@ library_so_version = 0:0:0
 
 libgwyui3_la_LDFLAGS = \
 	$(LIBGWYUI_DEPS_LIBS) \
+	$(top_builddir)/libgwy/libgwy3.la \
 	$(HOST_LDFLAGS) \
 	$(GWY_LIBRARY_LDFLAGS) \
 	$(version_info) \
