@@ -21,6 +21,7 @@
 #define __LIBGWYUI_H__
 
 #include <libgwyui/field-render.h>
+#include <libgwyui/types.h>
 
 #endif
 
