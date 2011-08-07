@@ -534,7 +534,7 @@ _gwy_line_check_target_part(const GwyLine *line,
             return FALSE;
 
         if (lpart->len == line->res) {
-            // The part lenght may correspond to the entire target line.
+            // The part length may correspond to the entire target line.
             // @lpart->pos is then not relevant for the target.
             *pos = 0;
             *len = lpart->len;

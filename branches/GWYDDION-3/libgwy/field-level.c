@@ -138,8 +138,8 @@ gwy_field_fit_plane(const GwyField *field,
                     gdouble *a, gdouble *bx, gdouble *by)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow)
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow)
         || width < 2 || height < 2)
         goto fail;
 
@@ -259,8 +259,8 @@ gwy_field_inclination(const GwyField *field,
                       gdouble *by)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow)
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow)
         || width < 2 || height < 2)
         goto fail;
 
@@ -494,8 +494,8 @@ gwy_field_fit_poly(const GwyField *field,
         return TRUE;
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     g_return_val_if_fail(xpowers && ypowers, FALSE);
@@ -822,9 +822,8 @@ gwy_field_find_row_shifts(const GwyField *field,
                           guint min_freedom)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, NULL, mask, &masking,
-                               &col, &row, &width, &height,
-                               &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, NULL, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return NULL;
 
     GwyLine *shifts = gwy_line_new_sized(field->yres, FALSE);

@@ -597,7 +597,7 @@ gwy_mask_field_new_from_field(const GwyField *field,
                               gboolean complement)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     GwyMaskField *mfield = gwy_mask_field_new_sized(width, height, FALSE);

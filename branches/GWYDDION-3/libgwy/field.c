@@ -665,7 +665,7 @@ gwy_field_new_part(const GwyField *field,
                    gboolean keep_offsets)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     if (width == field->xres && height == field->yres) {
@@ -855,8 +855,8 @@ gwy_field_copy(const GwyField *src,
                guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                                FALSE, &col, &row, &width, &height))
+    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                               FALSE, &col, &row, &width, &height))
         return;
 
     if (width == src->xres && width == dest->xres) {
@@ -1061,11 +1061,59 @@ gwy_field_get_unit_z(const GwyField *field)
     return priv->unit_z;
 }
 
+/**
+ * gwy_field_check_part:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field, possibly %NULL.
+ * @col: Location to store the actual column index of the upper-left corner
+ *       of the part.
+ * @row: Location to store the actual row index of the upper-left corner
+ *       of the part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the part.
+ *
+ * Validates the position and dimentions of part in a field.
+ *
+ * If @fpart is %NULL entire @field is to be used.  Otherwise @fpart must be
+ * contained in @field.
+ *
+ * If the position and dimensions are valid @col, @row, @width and @height are
+ * set to the actual rectangular part in @field.  If the function returns
+ * %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * field but do not work with masks.  See gwy_field_check_mask() for checking
+ * of part and mask together.  Example (note gwy_field_new_transposed()
+ * exists):
+ * |[
+ * GwyField*
+ * transpose_field(const GwyField *field,
+ *                 const GwyFieldPart *fpart)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_field_check_part(field, fpart,
+ *                               &col, &row, &width, &height))
+ *         return NULL;
+ *
+ *     // Perform the transposition of @field part given by @col, @row,
+ *     // @width and @height...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @field is not a #GwyField instance or the position or
+ *          dimensions is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_field_check_part(const GwyField *field,
-                      const GwyFieldPart *fpart,
-                      guint *col, guint *row,
-                      guint *width, guint *height)
+gwy_field_check_part(const GwyField *field,
+                     const GwyFieldPart *fpart,
+                     guint *col, guint *row,
+                     guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
     if (fpart) {
@@ -1092,12 +1140,65 @@ _gwy_field_check_part(const GwyField *field,
     return TRUE;
 }
 
+/**
+ * gwy_field_check_target_part:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Target area in @field, possibly %NULL.
+ * @width_full: Number of columns of the entire source.
+ * @height_full: Number of rows of the entire source.
+ * @col: Location to store the actual column index of the upper-left corner
+ *       of the target part.
+ * @row: Location to store the actual row index of the upper-left corner
+ *       of the target part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the target part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the target part.
+ *
+ * Validates the position and dimentions of target part in a field.
+ *
+ * If @fpart is %NULL the dimensions of @field must match the entire source,
+ * i.e. (@width_full,@height_full).  Otherwise @fpart must be contained in
+ * @field, except if its dimensions match the entire field in which case the
+ * offsets can be arbitrary as they pertain to the source only.
+ *
+ * If the position and dimensions are valid @col, @row, @width and @height are
+ * set to the actual rectangular part in @field.  If the function returns
+ * %FALSE their values are undefined.
+ *
+ * This function is typically used if a field is extracted from a larger data.
+ * Example (note gwy_brick_extract_plane() exists):
+ * |[
+ * void
+ * extract_brick_plane(const GwyBrick *brick,
+ *                     GwyField *target,
+ *                     const GwyFieldPart *fpart,
+ *                     guint level)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_field_check_target_part(target, fpart,
+ *                                      brick->xres, brick->yres,
+ *                                      &col, &row, &width, &height))
+ *         return;
+ *
+ *     // Check @brick and perform the extraction of its plane to rectangle
+ *     // given @col, @row, @width and @height in @field...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @field is not a #GwyField instance or the position or
+ *          dimensions is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_field_check_target_part(const GwyField *field,
-                             const GwyFieldPart *fpart,
-                             guint width_full, guint height_full,
-                             guint *col, guint *row,
-                             guint *width, guint *height)
+gwy_field_check_target_part(const GwyField *field,
+                            const GwyFieldPart *fpart,
+                            guint width_full, guint height_full,
+                            guint *col, guint *row,
+                            guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
     if (fpart) {
@@ -1137,13 +1238,13 @@ _gwy_field_check_target_part(const GwyField *field,
 }
 
 gboolean
-_gwy_field_limit_parts(const GwyField *src,
-                       const GwyFieldPart *srcpart,
-                       const GwyField *dest,
-                       guint destcol, guint destrow,
-                       gboolean transpose,
-                       guint *col, guint *row,
-                       guint *width, guint *height)
+gwy_field_limit_parts(const GwyField *src,
+                      const GwyFieldPart *srcpart,
+                      const GwyField *dest,
+                      guint destcol, guint destrow,
+                      gboolean transpose,
+                      guint *col, guint *row,
+                      guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_FIELD(src), FALSE);
     g_return_val_if_fail(GWY_IS_FIELD(dest), FALSE);
@@ -1191,14 +1292,14 @@ _gwy_field_limit_parts(const GwyField *src,
 }
 
 gboolean
-_gwy_field_check_target(const GwyField *field,
-                        const GwyField *target,
-                        guint col,
-                        guint row,
-                        guint width,
-                        guint height,
-                        guint *targetcol,
-                        guint *targetrow)
+gwy_field_check_target(const GwyField *field,
+                       const GwyField *target,
+                       guint col,
+                       guint row,
+                       guint width,
+                       guint height,
+                       guint *targetcol,
+                       guint *targetrow)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
     g_return_val_if_fail(GWY_IS_FIELD(target), FALSE);
@@ -1218,16 +1319,82 @@ _gwy_field_check_target(const GwyField *field,
     return FALSE;
 }
 
+/**
+ * gwy_field_check_mask:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field, possibly %NULL.
+ * @mask: (allow-none):
+ *        A two-dimensional mask field.
+ * @masking: (inout):
+ *           Masking mode.  If it is %GWY_MASK_IGNORE the mask is completely
+ *           ignored.  If, on the other hand, @mask is %NULL the mode is
+ *           <emphasis>set</emphasis> to %GWY_MASK_IGNORE.
+ * @col: Location to store the actual column index of the upper-left corner
+ *       of the field part.
+ * @row: Location to store the actual row index of the upper-left corner
+ *       of the field part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the part.
+ * @maskcol: Location to store the actual column index of the upper-left corner
+ *           of the mask part.
+ * @maskrow: Location to store the actual row index of the upper-left corner
+ *           of the mask part.
+ *
+ * Validates the position and dimentions of part in a field, including masking.
+ *
+ * If @fpart is %NULL entire @field is to be used.  Otherwise @fpart must be
+ * contained in @field.
+ *
+ * The dimensions of @mask, if non-%NULL, must match either @field or @fpart.
+ * In the first case the rectangular part is the same in @field and @mask.  In
+ * the second case the mask covers only the field part.
+ *
+ * If the position and dimensions are valid @col, @row, @width, @height,
+ * @maskcol and @maskrow are set to the actual rectangular part in @field.  If
+ * the function returns %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * field and allow masking.  See gwy_field_check_part() for checking of field
+ * parts only.  Example (note gwy_field_rms() exists):
+ * |[
+ * gdouble
+ * calculate_rms(const GwyField *field,
+ *               const GwyFieldPart *fpart,
+ *               const GwyMaskField *mask,
+ *               GwyMaskingType masking)
+ * {
+ *     guint col, row, width, height, maskcol, maskrow;
+ *     if (!gwy_field_check_mask(field, fpart, mask, &masking,
+ *                               &col, &row, &width, &height,
+ *                               &maskcol, &maskrow))
+ *         return 0.0;
+ *
+ *     // Calculate rms of area given by @col, @row, @width and @height in
+ *     // @field using @mask part given by @maskcol, @maskrow, @width and
+ *     // @height if @masking is not GWY_MASK_IGNORE...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @field is not a #GwyField instance, @mask is not a
+ *          #GwyMaskField instance or the position or dimensions is invalid (a
+ *          critical error is emitted in these cases) or the actual part is
+ *          zero-sized.
+ **/
 gboolean
-_gwy_field_check_mask(const GwyField *field,
-                      const GwyFieldPart *fpart,
-                      const GwyMaskField *mask,
-                      GwyMaskingType *masking,
-                      guint *col, guint *row,
-                      guint *width, guint *height,
-                      guint *maskcol, guint *maskrow)
+gwy_field_check_mask(const GwyField *field,
+                     const GwyFieldPart *fpart,
+                     const GwyMaskField *mask,
+                     GwyMaskingType *masking,
+                     guint *col, guint *row,
+                     guint *width, guint *height,
+                     guint *maskcol, guint *maskrow)
 {
-    if (!_gwy_field_check_part(field, fpart, col, row, width, height))
+    if (!gwy_field_check_part(field, fpart, col, row, width, height))
         return FALSE;
     if (mask && (*masking == GWY_MASK_INCLUDE
                  || *masking == GWY_MASK_EXCLUDE)) {
@@ -1244,8 +1411,13 @@ _gwy_field_check_mask(const GwyField *field,
             return FALSE;
         }
     }
-    else
+    else {
+        if (*masking != GWY_MASK_INCLUDE
+            && *masking != GWY_MASK_EXCLUDE
+            && *masking != GWY_MASK_IGNORE)
+            g_critical("Invalid masking mode %u.", *masking);
         *masking = GWY_MASK_IGNORE;
+    }
 
     return TRUE;
 }

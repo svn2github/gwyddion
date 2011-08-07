@@ -121,6 +121,49 @@ GwyValueFormat* gwy_field_format_z     (const GwyField *field,
 #define gwy_field_dy(field) \
     ((field)->yreal/(field)->yres)
 
+gboolean gwy_field_check_part       (const GwyField *field,
+                                     const GwyFieldPart *fpart,
+                                     guint *col,
+                                     guint *row,
+                                     guint *width,
+                                     guint *height);
+gboolean gwy_field_check_target_part(const GwyField *field,
+                                     const GwyFieldPart *fpart,
+                                     guint width_full,
+                                     guint height_full,
+                                     guint *col,
+                                     guint *row,
+                                     guint *width,
+                                     guint *height);
+gboolean gwy_field_limit_parts      (const GwyField *src,
+                                     const GwyFieldPart *srcpart,
+                                     const GwyField *dest,
+                                     guint destcol,
+                                     guint destrow,
+                                     gboolean transpose,
+                                     guint *col,
+                                     guint *row,
+                                     guint *width,
+                                     guint *height);
+gboolean gwy_field_check_target     (const GwyField *field,
+                                     const GwyField *target,
+                                     guint col,
+                                     guint row,
+                                     guint width,
+                                     guint height,
+                                     guint *targetcol,
+                                     guint *targetrow);
+gboolean gwy_field_check_mask       (const GwyField *field,
+                                     const GwyFieldPart *fpart,
+                                     const GwyMaskField *mask,
+                                     GwyMaskingType *masking,
+                                     guint *col,
+                                     guint *row,
+                                     guint *width,
+                                     guint *height,
+                                     guint *maskcol,
+                                     guint *maskrow);
+
 G_END_DECLS
 
 #endif

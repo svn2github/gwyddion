@@ -80,9 +80,9 @@ gwy_field_correlate(const GwyField *field,
                     gdouble fill_value)
 {
     guint col, row, width, height, scorecol, scorerow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, score, col, row, width, height,
-                                    &scorecol, &scorerow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, score, col, row, width, height,
+                                   &scorecol, &scorerow))
         return;
 
     if (kmask) {
@@ -446,9 +446,9 @@ gwy_field_crosscorrelate(const GwyField *field,
         return;
 
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target, col, row, width, height,
+                                   &targetcol, &targetrow))
         return;
 
     g_return_if_fail(GWY_IS_MASK_FIELD(kernel));

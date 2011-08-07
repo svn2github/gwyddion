@@ -195,7 +195,7 @@ gwy_field_new_transposed(const GwyField *field,
                          gboolean transform_offsets)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     GwyField *part = gwy_field_new_sized(height, width, FALSE);
@@ -246,8 +246,8 @@ gwy_field_transpose(const GwyField *src,
                     guint destcol, guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                                TRUE, &col, &row, &width, &height))
+    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                               TRUE, &col, &row, &width, &height))
         return;
 
     swap_xy(src, col, row, width, height, dest, destcol, destrow);

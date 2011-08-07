@@ -400,9 +400,9 @@ gwy_field_row_convolve(const GwyField *field,
                        gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target, col, row, width, height,
+                                   &targetcol, &targetrow))
         return;
 
     g_return_if_fail(GWY_IS_LINE(kernel));
@@ -828,9 +828,9 @@ gwy_field_convolve(const GwyField *field,
                    gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target, col, row, width, height,
+                                   &targetcol, &targetrow))
         return;
 
     g_return_if_fail(GWY_IS_FIELD(kernel));
@@ -928,7 +928,7 @@ gwy_field_extend(const GwyField *field,
                  gdouble fill_value)
 {
     guint col, row, width, height;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
@@ -1126,9 +1126,9 @@ filter_5x5(const GwyField *field,
            gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target, col, row, width, height,
+                                   &targetcol, &targetrow))
         return;
 
     RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
@@ -1190,9 +1190,9 @@ combined_gradient_filter(const GwyField *field,
                          gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target, col, row, width, height,
+                                   &targetcol, &targetrow))
         return;
 
     _gwy_ensure_defined_exterior(&exterior, &fill_value);
@@ -1677,9 +1677,9 @@ gwy_field_filter_median(const GwyField *field,
                         gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target, col, row, width, height,
+                                   &targetcol, &targetrow))
         return;
 
     g_return_if_fail(GWY_IS_MASK_FIELD(kernel));

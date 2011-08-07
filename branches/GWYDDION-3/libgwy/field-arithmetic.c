@@ -132,8 +132,8 @@ gwy_field_clear(GwyField *field,
                 GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     if (masking == GWY_MASK_IGNORE) {
@@ -198,8 +198,8 @@ gwy_field_fill(GwyField *field,
     }
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     if (masking == GWY_MASK_IGNORE) {
@@ -263,8 +263,8 @@ gwy_field_add(GwyField *field,
               gdouble value)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     if (masking == GWY_MASK_IGNORE) {
@@ -325,8 +325,8 @@ gwy_field_multiply(GwyField *field,
                    gdouble value)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     if (masking == GWY_MASK_IGNORE) {
@@ -399,8 +399,8 @@ gwy_field_normalize(GwyField *field,
                     GwyNormalizeFlags flags)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return FALSE;
 
     gboolean retval = TRUE;
@@ -462,8 +462,8 @@ gwy_field_apply_func(GwyField *field,
     g_return_if_fail(func);
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     if (masking == GWY_MASK_IGNORE) {
@@ -528,8 +528,8 @@ gwy_field_add_field(const GwyField *src,
                     gdouble factor)
 {
     guint col, row, width, height;
-    if (!_gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                                FALSE, &col, &row, &width, &height))
+    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                               FALSE, &col, &row, &width, &height))
         return;
     if (!factor)
         return;
@@ -594,7 +594,7 @@ gwy_field_clamp(GwyField *field,
     g_return_val_if_fail(lower <= upper, 0);
 
     guint col, row, width, height;
-    if (!_gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return 0;
 
     guint count = 0;

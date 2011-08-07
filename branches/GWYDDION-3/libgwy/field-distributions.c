@@ -252,8 +252,8 @@ field_value_dist_discr(const GwyField *field,
                        DistributionData *ddata)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     value_dist_discr_analyse(field, fpart, mask, masking,
@@ -512,8 +512,8 @@ gwy_field_slope_dist(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     gboolean explicit_range = min < max;
@@ -883,8 +883,8 @@ gwy_field_row_acf(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     if (level > 1) {
@@ -1012,8 +1012,8 @@ gwy_field_row_psdf(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     if (level > 1) {
@@ -1145,8 +1145,8 @@ gwy_field_row_hhcf(const GwyField *field,
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     if (level > 1) {

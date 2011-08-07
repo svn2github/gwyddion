@@ -321,13 +321,12 @@ gwy_brick_extract_plane(const GwyBrick *brick,
                         guint level,
                         gboolean keep_offsets)
 {
-    // TODO: Wrong checking, must use _gwy_field_check_target_part().
     guint fcol, frow, fwidth, fheight, bcol, brow, bwidth, bheight;
     if (!_gwy_brick_check_plane_part(brick, fpart,
                                      &bcol, &brow, level, &bwidth, &bheight)
-        || !_gwy_field_check_target_part(target, fpart,
-                                         brick->xres, brick->yres,
-                                         &fcol, &frow, &fwidth, &fheight))
+        || !gwy_field_check_target_part(target, fpart,
+                                        brick->xres, brick->yres,
+                                        &fcol, &frow, &fwidth, &fheight))
         return;
 
     // Can happen with NULL @fpart and incompatible objects.

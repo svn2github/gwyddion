@@ -68,9 +68,9 @@ gwy_field_min_max(const GwyField *field,
                   gdouble *max)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height,
-                               &maskcol, &maskrow)) {
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height,
+                              &maskcol, &maskrow)) {
         GWY_MAYBE_SET(min, HUGE_VAL);
         GWY_MAYBE_SET(max, -HUGE_VAL);
         return;
@@ -172,8 +172,8 @@ gwy_field_mean(const GwyField *field,
                GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -260,8 +260,8 @@ gwy_field_median(const GwyField *field,
                  GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -348,8 +348,8 @@ gwy_field_rms(const GwyField *field,
               GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return 0.0;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -447,8 +447,8 @@ gwy_field_meansq(const GwyField *field,
                  GwyMaskingType masking)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return 0.0;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -532,8 +532,8 @@ gwy_field_statistics(const GwyField *field,
                      gdouble *skew, gdouble *kurtosis)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
     if (!mean && !ra && !rms && !skew && !kurtosis)
         return;
@@ -696,9 +696,9 @@ gwy_field_count_above_below(const GwyField *field,
                             guint *nabove, guint *nbelow)
 {
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height,
-                               &maskcol, &maskrow)) {
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height,
+                              &maskcol, &maskrow)) {
         GWY_MAYBE_SET(nabove, 0);
         GWY_MAYBE_SET(nbelow, 0);
         return 0;
@@ -1083,8 +1083,8 @@ gwy_field_process_quarters(const GwyField *field,
     g_return_if_fail(function);
 
     guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, fpart, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
         return;
 
     if (masking != GWY_MASK_IGNORE)
