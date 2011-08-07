@@ -293,7 +293,6 @@ field_check_part_good(guint xres, guint yres,
     g_assert_cmpuint(row, ==, expected_row);
     g_assert_cmpuint(width, ==, expected_width);
     g_assert_cmpuint(height, ==, expected_height);
-
     g_object_unref(field);
 }
 
@@ -352,6 +351,197 @@ test_field_check_part_bad(void)
     field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 1, 26 });
     field_check_part_bad(17, 25, &(GwyFieldPart){ 17, 0, 1, 1 });
     field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 25, 1, 1 });
+}
+
+static void
+field_check_target_part_good(guint xres, guint yres,
+                             const GwyFieldPart *fpart,
+                             guint width_full, guint height_full,
+                             guint expected_col, guint expected_row,
+                             guint expected_width, guint expected_height)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    guint col, row, width, height;
+
+    g_assert(gwy_field_check_target_part(field, fpart,
+                                         width_full, height_full,
+                                         &col, &row, &width, &height));
+    g_assert_cmpuint(col, ==, expected_col);
+    g_assert_cmpuint(row, ==, expected_row);
+    g_assert_cmpuint(width, ==, expected_width);
+    g_assert_cmpuint(height, ==, expected_height);
+    g_object_unref(field);
+}
+
+void
+test_field_check_target_part_good(void)
+{
+    field_check_target_part_good(17, 25, &(GwyFieldPart){ 0, 0, 17, 25 },
+                                 1234, 5678,
+                                 0, 0, 17, 25);
+    field_check_target_part_good(17, 25, NULL,
+                                 17, 25,
+                                 0, 0, 17, 25);
+    field_check_target_part_good(17, 25, &(GwyFieldPart){ 0, 0, 3, 24 },
+                                 17, 25,
+                                 0, 0, 3, 24);
+    field_check_target_part_good(17, 25, &(GwyFieldPart){ 0, 0, 3, 24 },
+                                 1234, 5678,
+                                 0, 0, 3, 24);
+    field_check_target_part_good(17, 25, &(GwyFieldPart){ 16, 20, 1, 4 },
+                                 17, 25,
+                                 16, 20, 1, 4);
+    field_check_target_part_good(17, 25, &(GwyFieldPart){ 16, 20, 1, 4 },
+                                 1234, 5678,
+                                 16, 20, 1, 4);
+    field_check_target_part_good(17, 25, &(GwyFieldPart){ 123, 456, 17, 25 },
+                                 1234, 5678,
+                                 0, 0, 17, 25);
+}
+
+static void
+field_check_target_part_empty(guint xres, guint yres,
+                              const GwyFieldPart *fpart,
+                              guint width_full, guint height_full)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    guint col, row, width, height;
+
+    g_assert(!gwy_field_check_target_part(field, fpart,
+                                          width_full, height_full,
+                                          &col, &row, &width, &height));
+    g_object_unref(field);
+}
+
+void
+test_field_check_target_part_empty(void)
+{
+    field_check_target_part_empty(17, 25,
+                                  &(GwyFieldPart){ 0, 0, 0, 0 },
+                                  123, 456);
+    field_check_target_part_empty(17, 25,
+                                  &(GwyFieldPart){ 17, 25, 0, 0 },
+                                  123, 456);
+    field_check_target_part_empty(17, 25,
+                                  &(GwyFieldPart){ 1000, 1000, 0, 0 },
+                                  123, 456);
+    field_check_target_part_empty(17, 25,
+                                  &(GwyFieldPart){ 1000, 1000, 0, 0 },
+                                  0, 0);
+}
+
+static void
+field_check_target_part_bad(guint xres, guint yres,
+                            const GwyFieldPart *fpart,
+                            guint width_full, guint height_full)
+{
+    if (g_test_trap_fork(0,
+                         G_TEST_TRAP_SILENCE_STDOUT
+                         | G_TEST_TRAP_SILENCE_STDERR)) {
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        guint col, row, width, height;
+        gwy_field_check_target_part(field, fpart, width_full, height_full,
+                                    &col, &row, &width, &height);
+        exit(0);
+    }
+    g_test_trap_assert_failed();
+    g_test_trap_assert_stderr("*CRITICAL*");
+}
+
+void
+test_field_check_target_part_bad(void)
+{
+    field_check_target_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 18, 1 },
+                                123, 456);
+    field_check_target_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 1, 26 },
+                                123, 456);
+    field_check_target_part_bad(17, 25, &(GwyFieldPart){ 17, 0, 1, 1 },
+                                123, 456);
+    field_check_target_part_bad(17, 25, &(GwyFieldPart){ 0, 25, 1, 1 },
+                                123, 456);
+    field_check_target_part_bad(17, 25, NULL, 17, 456);
+    field_check_target_part_bad(17, 25, NULL, 123, 25);
+}
+
+static void
+field_check_target_good(guint xres, guint yres,
+                        guint txres, guint tyres,
+                        const GwyFieldPart *fpart,
+                        guint expected_col, guint expected_row)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyField *target = gwy_field_new_sized(txres, tyres, FALSE);
+    guint col, row;
+
+    g_assert(gwy_field_check_target(field, target, fpart, &col, &row));
+    g_assert_cmpuint(col, ==, expected_col);
+    g_assert_cmpuint(row, ==, expected_row);
+    g_object_unref(target);
+    g_object_unref(field);
+}
+
+void
+test_field_check_target_good(void)
+{
+    field_check_target_good(17, 25, 17, 25, NULL, 0, 0);
+    field_check_target_good(17, 25, 17, 25,
+                            &(GwyFieldPart){ 0, 0, 17, 25 }, 0, 0);
+    field_check_target_good(17, 25, 4, 3,
+                            &(GwyFieldPart){ 0, 0, 4, 3 }, 0, 0);
+    field_check_target_good(17, 25, 4, 3,
+                            &(GwyFieldPart){ 13, 22, 4, 3 }, 0, 0);
+    field_check_target_good(17, 25, 17, 25,
+                            &(GwyFieldPart){ 13, 22, 4, 3 }, 13, 22);
+}
+
+static void
+field_check_target_empty(guint xres, guint yres,
+                         guint txres, guint tyres,
+                         const GwyFieldPart *fpart)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyField *target = gwy_field_new_sized(txres, tyres, FALSE);
+    guint col, row;
+
+    g_assert(!gwy_field_check_target(field, target, fpart, &col, &row));
+    g_object_unref(target);
+    g_object_unref(field);
+}
+
+void
+test_field_check_target_empty(void)
+{
+    field_check_target_empty(17, 25, 17, 25, &(GwyFieldPart){ 0, 0, 0, 0 });
+    field_check_target_empty(17, 25, 17, 25, &(GwyFieldPart){ 17, 25, 0, 0 });
+    field_check_target_empty(17, 25, 17, 25, &(GwyFieldPart){ 100, 100, 0, 0 });
+    field_check_target_empty(17, 25, 34, 81, &(GwyFieldPart){ 100, 100, 0, 0 });
+}
+
+static void
+field_check_target_bad(guint xres, guint yres,
+                       guint txres, guint tyres,
+                       const GwyFieldPart *fpart)
+{
+    if (g_test_trap_fork(0,
+                         G_TEST_TRAP_SILENCE_STDOUT
+                         | G_TEST_TRAP_SILENCE_STDERR)) {
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        GwyField *target = gwy_field_new_sized(txres, tyres, FALSE);
+        guint col, row;
+        gwy_field_check_target(field, target, fpart, &col, &row);
+        exit(0);
+    }
+    g_test_trap_assert_failed();
+    g_test_trap_assert_stderr("*CRITICAL*");
+}
+
+void
+test_field_check_target_bad(void)
+{
+    field_check_target_bad(17, 25, 16, 25, &(GwyFieldPart){ 0, 0, 17, 25 });
+    field_check_target_bad(17, 25, 17, 26, &(GwyFieldPart){ 0, 0, 17, 25 });
+    field_check_target_bad(17, 25, 7, 7, &(GwyFieldPart){ 3, 4, 7, 8 });
+    field_check_target_bad(17, 25, 8, 8, &(GwyFieldPart){ 3, 4, 7, 8 });
 }
 
 static void

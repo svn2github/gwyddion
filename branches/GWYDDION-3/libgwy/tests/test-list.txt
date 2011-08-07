@@ -124,6 +124,12 @@ field/units
 field/check-part/good
 field/check-part/empty
 field/check-part/bad
+field/check-target-part/good
+field/check-target-part/empty
+field/check-target-part/bad
+field/check-target/good
+field/check-target/empty
+field/check-target/bad
 field/copy
 field/new-part
 field/serialize
