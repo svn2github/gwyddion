@@ -814,18 +814,23 @@ gwy_rand_normal(GwyRand *rng)
 static gdouble
 generate_triangle(GwyRand *rng)
 {
-    if (rng->ntriangle) {
-        rng->ntriangle = 0;
-        return rng->triangle;
-    }
+    gdouble retval;
 
-    gdouble x = generate_double(rng);
-    gdouble y = generate_double(rng);
-    rng->triangle = x - y;
-    if (G_LIKELY(rng->triangle))
-        rng->ntriangle = 1;
-    // FIXME: x+y should never be 2 nor 0 but it can be exactly 1.
-    return x + y - 1.0;
+    do {
+        if (rng->ntriangle) {
+            rng->ntriangle = 0;
+            return rng->triangle;
+        }
+
+        gdouble x = generate_double(rng);
+        gdouble y = generate_double(rng);
+        rng->triangle = x - y;
+        retval = x + y - 1.0;
+        if (G_LIKELY(rng->triangle))
+            rng->ntriangle = 1;
+    } while (G_UNLIKELY(!retval));
+
+    return retval;
 }
 
 /**
@@ -881,6 +886,15 @@ gwy_rand_triangle(GwyRand *rng)
  * continous probability distributions behave similarly.  The smallest number
  * depend on the specific distribution, however, typically it is about 100×
  * smaller than for the uniform distribution.
+ **/
+
+/**
+ * GwyRand:
+ *
+ * Random number generator.
+ *
+ * The #GwyRand struct is opaque and can only be accessed through the
+ * <function>gwy_rand_foo</function> functions.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
