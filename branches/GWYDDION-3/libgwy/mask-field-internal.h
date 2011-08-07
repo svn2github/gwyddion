@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -52,26 +52,6 @@ typedef struct {
     guint len;
     GwyGrainSegment segments[];
 } GwyGrain;
-
-G_GNUC_INTERNAL
-gboolean _gwy_mask_field_check_part(const GwyMaskField *field,
-                                    const GwyFieldPart *fpart,
-                                    guint *col,
-                                    guint *row,
-                                    guint *width,
-                                    guint *height);
-
-G_GNUC_INTERNAL
-gboolean _gwy_mask_field_limit_parts(const GwyMaskField *src,
-                                     const GwyFieldPart *srcpart,
-                                     const GwyMaskField *dest,
-                                     guint destcol,
-                                     guint destrow,
-                                     gboolean transpose,
-                                     guint *col,
-                                     guint *row,
-                                     guint *width,
-                                     guint *height);
 
 G_END_DECLS
 

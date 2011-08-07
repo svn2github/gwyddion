@@ -181,8 +181,8 @@ gwy_mask_field_copy(const GwyMaskField *src,
                     guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                                     FALSE, &col, &row, &width, &height))
+    if (!gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                    FALSE, &col, &row, &width, &height))
         return;
 
     if (width == src->xres
@@ -305,7 +305,7 @@ gwy_mask_field_fill(GwyMaskField *field,
                     gboolean value)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return;
 
     if (width == field->xres) {
@@ -359,7 +359,7 @@ gwy_mask_field_fill_ellipse(GwyMaskField *field,
                             gboolean value)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return;
 
     // We could use Bresenham but we need to fill the ellipse so it would
@@ -436,7 +436,7 @@ gwy_mask_field_invert(GwyMaskField *field,
                       const GwyFieldPart *fpart)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return;
     invert_part(field, col, row, width, height);
     gwy_mask_field_invalidate(field);

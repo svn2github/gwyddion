@@ -418,11 +418,58 @@ gwy_mask_field_new_sized(guint xres,
     return field;
 }
 
+/**
+ * gwy_mask_field_check_part:
+ * @field: A two-dimensional mask field.
+ * @fpart: (allow-none):
+ *         Area in @field, possibly %NULL.
+ * @col: Location to store the actual column index of the upper-left corner
+ *       of the part.
+ * @row: Location to store the actual row index of the upper-left corner
+ *       of the part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the part.
+ *
+ * Validates the position and dimensions of a mask field part.
+ *
+ * If @fpart is %NULL entire @field is to be used.  Otherwise @fpart must be
+ * contained in @field.
+ *
+ * If the position and dimensions are valid @col, @row, @width and @height are
+ * set to the actual rectangular part in @field.  If the function returns
+ * %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * field. Example (note gwy_mask_field_new_transposed() creates a transposed
+ * mask field):
+ * |[
+ * GwyMaskField*
+ * transpose_mask_field(const GwyMaskField *field,
+ *                      const GwyFieldPart *fpart)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_mask_field_check_part(field, fpart,
+ *                                    &col, &row, &width, &height))
+ *         return NULL;
+ *
+ *     // Perform the transposition of @field part given by @col, @row,
+ *     // @width and @height...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @field is not a #GwyMaskField instance or the position or
+ *          dimensions is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_mask_field_check_part(const GwyMaskField *field,
-                           const GwyFieldPart *fpart,
-                           guint *col, guint *row,
-                           guint *width, guint *height)
+gwy_mask_field_check_part(const GwyMaskField *field,
+                          const GwyFieldPart *fpart,
+                          guint *col, guint *row,
+                          guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), FALSE);
     if (fpart) {
@@ -449,14 +496,65 @@ _gwy_mask_field_check_part(const GwyMaskField *field,
     return TRUE;
 }
 
+/**
+ * gwy_mask_field_limit_parts:
+ * @src: A source two-dimensional mask field.
+ * @srcpart: (allow-none):
+ *           Area in @src, possibly %NULL.
+ * @dest: A destination two-dimensional mask field.
+ * @destcol: Column index for the upper-left corner of the part in @dest.
+ * @destrow: Row index for the upper-left corner of the part in @dest.
+ * @col: Location to store the actual column index of the upper-left corner
+ *       of the source part.
+ * @row: Location to store the actual row index of the upper-left corner
+ *       of the source part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the source part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the source part.
+ *
+ * Limits the dimensions of a mask field part for copying.
+ *
+ * The area is limited to make it contained both in @src and @dest and @col,
+ * @row, @width and @height are set to the actual position and dimensions in
+ * @src.  If the function returns %FALSE their values are undefined.
+ *
+ * If @src and @dest are the same field the source and destination parts should
+ * not overlap.
+ *
+ * This function is typically used in copy-like functions that transfer a part
+ * of a mask field into another mask field.
+ * Example (note gwy_mask_field_copy() copies mask field parts):
+ * |[
+ * void
+ * copy_mask_field(const GwyMaskField *src,
+ *                 const GwyFieldPart *srcpart,
+ *                 GwyMaskField *dest,
+ *                 guint destcol, guint destrow)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
+ *                                     &col, &row, &width, &height))
+ *         return;
+ *
+ *     // Copy area of size @width, @height at @col, @row in @src to an
+ *     // equally-sized area at @destcol, @destrow in @dest...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the caller should proceed.  %FALSE if the caller should
+ *          not proceed, either because @field or @target is not a
+ *          #GwyMaskField instance (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_mask_field_limit_parts(const GwyMaskField *src,
-                            const GwyFieldPart *srcpart,
-                            const GwyMaskField *dest,
-                            guint destcol, guint destrow,
-                            gboolean transpose,
-                            guint *col, guint *row,
-                            guint *width, guint *height)
+gwy_mask_field_limit_parts(const GwyMaskField *src,
+                           const GwyFieldPart *srcpart,
+                           const GwyMaskField *dest,
+                           guint destcol, guint destrow,
+                           gboolean transpose,
+                           guint *col, guint *row,
+                           guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(src), FALSE);
     g_return_val_if_fail(GWY_IS_MASK_FIELD(dest), FALSE);
@@ -526,7 +624,7 @@ gwy_mask_field_new_part(const GwyMaskField *field,
                         const GwyFieldPart *fpart)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     if (width == field->xres && height == field->yres)
@@ -826,7 +924,7 @@ gwy_mask_field_part_count(const GwyMaskField *field,
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
 
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return 0;
 
     guint32 *base = field->data + field->stride*row + (col >> 5);
@@ -871,7 +969,7 @@ gwy_mask_field_count_rows(const GwyMaskField *field,
     g_return_val_if_fail(counts, 0);
 
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return 0;
 
     guint32 *base = field->data + field->stride*row + (col >> 5);

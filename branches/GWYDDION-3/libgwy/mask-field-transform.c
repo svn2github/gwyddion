@@ -624,7 +624,7 @@ gwy_mask_field_new_transposed(const GwyMaskField *field,
                               const GwyFieldPart *fpart)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
 
     GwyMaskField *newfield = gwy_mask_field_new_sized(height, width, FALSE);
@@ -665,8 +665,8 @@ gwy_mask_field_transpose(const GwyMaskField *src,
                          guint destcol, guint destrow)
 {
     guint col, row, width, height;
-    if (!_gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                                     TRUE, &col, &row, &width, &height))
+    if (!gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                                    TRUE, &col, &row, &width, &height))
         return;
 
     // FIXME: Direct transposition of unaligned data would be nice.  Can it be
