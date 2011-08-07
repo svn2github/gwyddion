@@ -504,6 +504,8 @@ gwy_mask_field_check_part(const GwyMaskField *field,
  * @dest: A destination two-dimensional mask field.
  * @destcol: Column index for the upper-left corner of the part in @dest.
  * @destrow: Row index for the upper-left corner of the part in @dest.
+ * @transpose: %TRUE to assume the area is transposed (rotated by 90 degrees)
+ *             in the destination.
  * @col: Location to store the actual column index of the upper-left corner
  *       of the source part.
  * @row: Location to store the actual row index of the upper-left corner
