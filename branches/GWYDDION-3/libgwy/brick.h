@@ -22,7 +22,8 @@
 
 #include <libgwy/serializable.h>
 #include <libgwy/interpolation.h>
-#include <libgwy/unit.h>
+#include <libgwy/line.h>
+#include <libgwy/field.h>
 #include <libgwy/brick-part.h>
 
 G_BEGIN_DECLS
@@ -124,6 +125,46 @@ GwyValueFormat* gwy_brick_format_z    (const GwyBrick *brick,
     ((brick)->yreal/(brick)->yres)
 #define gwy_brick_dz(brick) \
     ((brick)->zreal/(brick)->zres)
+
+gboolean gwy_brick_check_part      (const GwyBrick *brick,
+                                    const GwyBrickPart *bpart,
+                                    guint *col,
+                                    guint *row,
+                                    guint *level,
+                                    guint *width,
+                                    guint *height,
+                                    guint *depth);
+gboolean gwy_brick_check_plane_part(const GwyBrick *brick,
+                                    const GwyFieldPart *fpart,
+                                    guint *col,
+                                    guint *row,
+                                    guint level,
+                                    guint *width,
+                                    guint *height);
+gboolean gwy_brick_check_line_part (const GwyBrick *brick,
+                                    const GwyLinePart *lpart,
+                                    guint col,
+                                    guint row,
+                                    guint *level,
+                                    guint *depth);
+gboolean gwy_brick_limit_parts     (const GwyBrick *src,
+                                    const GwyBrickPart *srcpart,
+                                    const GwyBrick *dest,
+                                    guint destcol,
+                                    guint destrow,
+                                    guint destlevel,
+                                    guint *col,
+                                    guint *row,
+                                    guint *level,
+                                    guint *width,
+                                    guint *height,
+                                    guint *depth);
+gboolean gwy_brick_check_target    (const GwyBrick *brick,
+                                    const GwyBrick *target,
+                                    const GwyBrickPart *bpart,
+                                    guint *targetcol,
+                                    guint *targetrow,
+                                    guint *targetlevel);
 
 G_END_DECLS
 

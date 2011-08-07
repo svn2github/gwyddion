@@ -22,8 +22,6 @@
 #ifndef __LIBGWY_BRICK_INTERNAL_H__
 #define __LIBGWY_BRICK_INTERNAL_H__
 
-#include "libgwy/line-part.h"
-#include "libgwy/field-part.h"
 #include "libgwy/brick.h"
 
 G_BEGIN_DECLS
@@ -38,47 +36,6 @@ struct _GwyBrickPrivate {
 };
 
 typedef struct _GwyBrickPrivate Brick;
-
-G_GNUC_INTERNAL
-gboolean _gwy_brick_check_part(const GwyBrick *brick,
-                               const GwyBrickPart *bpart,
-                               guint *col,
-                               guint *row,
-                               guint *level,
-                               guint *width,
-                               guint *height,
-                               guint *depth);
-
-G_GNUC_INTERNAL
-gboolean _gwy_brick_check_plane_part(const GwyBrick *brick,
-                                     const GwyFieldPart *fpart,
-                                     guint *col,
-                                     guint *row,
-                                     guint level,
-                                     guint *width,
-                                     guint *height);
-
-G_GNUC_INTERNAL
-gboolean _gwy_brick_check_line_part(const GwyBrick *brick,
-                                    const GwyLinePart *lpart,
-                                    guint col,
-                                    guint row,
-                                    guint *level,
-                                    guint *depth);
-
-G_GNUC_INTERNAL
-gboolean _gwy_brick_limit_parts(const GwyBrick *src,
-                                const GwyBrickPart *srcpart,
-                                const GwyBrick *dest,
-                                guint destcol,
-                                guint destrow,
-                                guint destlevel,
-                                guint *col,
-                                guint *row,
-                                guint *level,
-                                guint *width,
-                                guint *height,
-                                guint *depth);
 
 G_END_DECLS
 

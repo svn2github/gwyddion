@@ -322,8 +322,8 @@ gwy_brick_extract_plane(const GwyBrick *brick,
                         gboolean keep_offsets)
 {
     guint fcol, frow, fwidth, fheight, bcol, brow, bwidth, bheight;
-    if (!_gwy_brick_check_plane_part(brick, fpart,
-                                     &bcol, &brow, level, &bwidth, &bheight)
+    if (!gwy_brick_check_plane_part(brick, fpart,
+                                    &bcol, &brow, level, &bwidth, &bheight)
         || !gwy_field_check_target_part(target, fpart,
                                         brick->xres, brick->yres,
                                         &fcol, &frow, &fwidth, &fheight))
@@ -393,7 +393,7 @@ gwy_brick_extract_line(const GwyBrick *brick,
                        gboolean keep_offsets)
 {
     guint pos, len, level, depth;
-    if (!_gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth)
+    if (!gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth)
         || !gwy_line_check_target_part(target, lpart, brick->zres, &pos, &len))
         return;
 

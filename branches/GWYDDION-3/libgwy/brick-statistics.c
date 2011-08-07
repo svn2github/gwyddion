@@ -46,8 +46,8 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
                           GwyBrickLineSummary quantity)
 {
     guint col, row, level, width, height, depth;
-    if (!_gwy_brick_check_part(brick, bpart,
-                               &col, &row, &level, &width, &height, &depth))
+    if (!gwy_brick_check_part(brick, bpart,
+                              &col, &row, &level, &width, &height, &depth))
         return;
 
     g_return_if_fail(GWY_IS_FIELD(target));

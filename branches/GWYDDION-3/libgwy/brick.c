@@ -668,13 +668,13 @@ gwy_brick_get_property(GObject *object,
 /**
  * gwy_brick_new:
  *
- * Creates a new two-dimensional data brick.
+ * Creates a new three-dimensional data brick.
  *
  * The brick dimensions will be 1×1×1 and it will be zero-filled.  This
  * parameterless constructor exists mainly for language bindings,
  * gwy_brick_new_sized() and gwy_brick_new_alike() are usually more useful.
  *
- * Returns: A new two-dimensional data brick.
+ * Returns: A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new(void)
@@ -690,9 +690,9 @@ gwy_brick_new(void)
  * @clear: %TRUE to fill the new brick data with zeroes, %FALSE to leave it
  *         uninitialised.
  *
- * Creates a new two-dimensional data brick of specified dimensions.
+ * Creates a new three-dimensional data brick of specified dimensions.
  *
- * Returns: A new two-dimensional data brick.
+ * Returns: A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new_sized(guint xres,
@@ -713,17 +713,17 @@ gwy_brick_new_sized(guint xres,
 
 /**
  * gwy_brick_new_alike:
- * @model: A two-dimensional data brick to use as the template.
+ * @model: A three-dimensional data brick to use as the template.
  * @clear: %TRUE to fill the new brick data with zeroes, %FALSE to leave it
  *         uninitialised.
  *
- * Creates a new two-dimensional data brick similar to another brick.
+ * Creates a new three-dimensional data brick similar to another brick.
  *
  * All properties of the newly created brick will be identical to @model,
  * except the data that will be either zeroes or uninitialised.  Use
  * gwy_brick_duplicate() to completely duplicate a brick including data.
  *
- * Returns: A new two-dimensional data brick.
+ * Returns: A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new_alike(const GwyBrick *model,
@@ -739,17 +739,18 @@ gwy_brick_new_alike(const GwyBrick *model,
 
 /**
  * gwy_brick_new_part:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @bpart: (allow-none):
- *             Part of @brick to extract to the new brick.  Passing %NULL
- *             creates an identical copy of @brick, similarly to
- *             gwy_brick_duplicate() (though with @keep_offsets set to %FALSE
- *             the offsets are reset).
+ *         Part of @brick to extract to the new brick.  Passing %NULL
+ *         creates an identical copy of @brick, similarly to
+ *         gwy_brick_duplicate() (though with @keep_offsets set to %FALSE
+ *         the offsets are reset).
  * @keep_offsets: %TRUE to set the X and Y offsets of the new brick
  *                using @bpart and @brick offsets.  %FALSE to set offsets
  *                of the new brick to zeroes.
  *
- * Creates a new two-dimensional brick as a rectangular part of another brick.
+ * Creates a new three-dimensional brick as a rectangular part of another
+ * brick.
  *
  * The box specified by @bpart must be entirely contained in @brick.
  * Both dimensions must be non-zero.
@@ -758,7 +759,7 @@ gwy_brick_new_alike(const GwyBrick *model,
  * @brick's data and vice versa.  Physical dimensions of the new brick are
  * calculated to correspond to the extracted part.
  *
- * Returns: A new two-dimensional data brick.
+ * Returns: A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new_part(const GwyBrick *brick,
@@ -766,8 +767,8 @@ gwy_brick_new_part(const GwyBrick *brick,
                    gboolean keep_offsets)
 {
     guint col, row, level, width, height, depth;
-    if (!_gwy_brick_check_part(brick, bpart,
-                               &col, &row, &level, &width, &height, &depth))
+    if (!gwy_brick_check_part(brick, bpart,
+                              &col, &row, &level, &width, &height, &depth))
         return NULL;
 
     if (width == brick->xres && height == brick->yres && depth == brick->zres) {
@@ -798,14 +799,14 @@ gwy_brick_new_part(const GwyBrick *brick,
 
 /**
  * gwy_brick_set_size:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
  * @zres: Desired Z resolution.
  * @clear: %TRUE to fill the new brick data with zeroes, %FALSE to leave it
  *         uninitialised.
  *
- * Resizes a two-dimensional data brick.
+ * Resizes a three-dimensional data brick.
  *
  * If the new data size differs from the old data size this method is only
  * marginally more efficient than destroying the old brick and creating a new
@@ -857,7 +858,7 @@ gwy_brick_set_size(GwyBrick *brick,
 
 /**
  * gwy_brick_data_changed:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @bpart: (allow-none):
  *         Part of @brick that has changed.  Passing %NULL means the entire
  *         brick.
@@ -874,9 +875,9 @@ gwy_brick_data_changed(GwyBrick *brick,
 
 /**
  * gwy_brick_copy:
- * @src: Source two-dimensional data data brick.
+ * @src: Source three-dimensional data data brick.
  * @srcpart: Area in brick @src to copy.  Pass %NULL to copy entire @src.
- * @dest: Destination two-dimensional data brick.
+ * @dest: Destination three-dimensional data brick.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
  * @destlevel: Destination level in @dest.
@@ -901,8 +902,8 @@ gwy_brick_copy(const GwyBrick *src,
                guint destlevel)
 {
     guint col, row, level, width, height, depth;
-    if (!_gwy_brick_limit_parts(src, srcpart, dest, destcol, destrow, destlevel,
-                                &col, &row, &level, &width, &height, &depth))
+    if (!gwy_brick_limit_parts(src, srcpart, dest, destcol, destrow, destlevel,
+                               &col, &row, &level, &width, &height, &depth))
         return;
 
     // Entire brick part
@@ -930,8 +931,8 @@ gwy_brick_copy(const GwyBrick *src,
 
 /**
  * gwy_brick_copy_full:
- * @src: Source two-dimensional data brick.
- * @dest: Destination two-dimensional data brick.
+ * @src: Source three-dimensional data brick.
+ * @dest: Destination three-dimensional data brick.
  *
  * Copies the entire data from one brick to another.
  *
@@ -956,7 +957,7 @@ gwy_brick_copy_full(const GwyBrick *src,
 
 /**
  * gwy_brick_invalidate:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  *
  * Invalidates cached brick statistics.
  *
@@ -992,10 +993,10 @@ gwy_brick_invalidate(GwyBrick *brick)
 
 /**
  * gwy_brick_set_xreal:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @xreal: Width in physical units.
  *
- * Sets the physical width of a two-dimensional data brick.
+ * Sets the physical width of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_xreal(GwyBrick *brick,
@@ -1011,10 +1012,10 @@ gwy_brick_set_xreal(GwyBrick *brick,
 
 /**
  * gwy_brick_set_yreal:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @yreal: Width in physical units.
  *
- * Sets the physical height of a two-dimensional data brick.
+ * Sets the physical height of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_yreal(GwyBrick *brick,
@@ -1030,10 +1031,10 @@ gwy_brick_set_yreal(GwyBrick *brick,
 
 /**
  * gwy_brick_set_zreal:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @zreal: Width in physical units.
  *
- * Sets the physical height of a two-dimensional data brick.
+ * Sets the physical height of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_zreal(GwyBrick *brick,
@@ -1049,11 +1050,11 @@ gwy_brick_set_zreal(GwyBrick *brick,
 
 /**
  * gwy_brick_set_xoffset:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @xoffset: Horizontal offset of the top-left corner from [0,0,0] in physical
  *           units.
  *
- * Sets the horizontal offset of a two-dimensional data brick.
+ * Sets the horizontal offset of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_xoffset(GwyBrick *brick,
@@ -1068,11 +1069,11 @@ gwy_brick_set_xoffset(GwyBrick *brick,
 
 /**
  * gwy_brick_set_yoffset:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @yoffset: Vertical offset of the top-left corner from [0,0,0] in physical
  *           units.
  *
- * Sets the vertical offset of a two-dimensional data brick.
+ * Sets the vertical offset of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_yoffset(GwyBrick *brick,
@@ -1087,11 +1088,11 @@ gwy_brick_set_yoffset(GwyBrick *brick,
 
 /**
  * gwy_brick_set_zoffset:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @zoffset: Depth offset of the top-left corner from [0,0,0] in physical
  *           units.
  *
- * Sets the vertical offset of a two-dimensional data brick.
+ * Sets the vertical offset of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_zoffset(GwyBrick *brick,
@@ -1106,9 +1107,9 @@ gwy_brick_set_zoffset(GwyBrick *brick,
 
 /**
  * gwy_brick_get_unit_xy:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  *
- * Obtains the lateral units of a two-dimensional data brick.
+ * Obtains the lateral units of a three-dimensional data brick.
  *
  * Returns: (transfer none):
  *          The lateral units of @brick.
@@ -1125,9 +1126,9 @@ gwy_brick_get_unit_xy(const GwyBrick *brick)
 
 /**
  * gwy_brick_get_unit_z:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  *
- * Obtains the depth units of a two-dimensional data brick.
+ * Obtains the depth units of a three-dimensional data brick.
  *
  * Returns: (transfer none):
  *          The depth units of @brick.
@@ -1144,9 +1145,9 @@ gwy_brick_get_unit_z(const GwyBrick *brick)
 
 /**
  * gwy_brick_get_unit_w:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  *
- * Obtains the value units of a two-dimensional data brick.
+ * Obtains the value units of a three-dimensional data brick.
  *
  * Returns: (transfer none):
  *          The value units of @brick.
@@ -1161,11 +1162,47 @@ gwy_brick_get_unit_w(const GwyBrick *brick)
     return priv->unit_w;
 }
 
+/**
+ * gwy_brick_check_part:
+ * @brick: A three-dimensional data brick.
+ * @bpart: (allow-none):
+ *         Part of @brick, possibly %NULL.
+ * @col: Location to store the actual column index of the top upper-left corner
+ *       of the part.
+ * @row: Location to store the actual row index of the top upper-left corner
+ *       of the part.
+ * @level: Location to store the actual level index of the top upper-left
+ *         corner of the part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the part.
+ * @depth: Location to store the actual depth (number of levels)
+ *         of the part.
+ *
+ * Validates the position and dimensions of a brick part.
+ *
+ * If @bpart is %NULL entire @brick is to be used.  Otherwise @bpart must be
+ * contained in @brick.
+ *
+ * If the position and dimensions are valid @col, @row, @level, @width, @height
+ * and @depth are set to the actual rectangular part in @brick.  If the
+ * function returns %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * brick.
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @brick is not a #GwyBrick instance or the position or
+ *          dimensions is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_brick_check_part(const GwyBrick *brick,
-                      const GwyBrickPart *bpart,
-                      guint *col, guint *row, guint *level,
-                      guint *width, guint *height, guint *depth)
+gwy_brick_check_part(const GwyBrick *brick,
+                     const GwyBrickPart *bpart,
+                     guint *col, guint *row, guint *level,
+                     guint *width, guint *height, guint *depth)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
     if (bpart) {
@@ -1195,11 +1232,45 @@ _gwy_brick_check_part(const GwyBrick *brick,
     return TRUE;
 }
 
+/**
+ * gwy_brick_check_plane_part:
+ * @brick: A three-dimensional data brick.
+ * @fpart: (allow-none):
+ *         Part of @brick plane, possibly %NULL.
+ * @col: Location to store the actual column index of the top upper-left corner
+ *       of the part.
+ * @row: Location to store the actual row index of the top upper-left corner
+ *       of the part.
+ * @level: Level index in @brick.
+ * @width: Location to store the actual width (number of columns)
+ *         of the part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the part.
+ *
+ * Validates the position and dimensions of a planar brick part.
+ *
+ * If @fpart is %NULL entire @brick plane is to be used.  Otherwise @fpart must
+ * be contained in a @brick plane; @level must be a valid level index in any
+ * case.
+ *
+ * If the position and dimensions are valid @col, @row, @width and @height
+ * are set to the actual rectangular part in a @brick plane.  If the function
+ * returns %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that extract a plane of a brick
+ * into a field.
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @brick is not a #GwyBrick instance or the position or
+ *          dimensions is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_brick_check_plane_part(const GwyBrick *brick,
-                            const GwyFieldPart *fpart,
-                            guint *col, guint *row, guint level,
-                            guint *width, guint *height)
+gwy_brick_check_plane_part(const GwyBrick *brick,
+                           const GwyFieldPart *fpart,
+                           guint *col, guint *row, guint level,
+                           guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
     g_return_val_if_fail(level < brick->zres, FALSE);
@@ -1225,11 +1296,42 @@ _gwy_brick_check_plane_part(const GwyBrick *brick,
     return TRUE;
 }
 
+/**
+ * gwy_brick_check_line_part:
+ * @brick: A three-dimensional data brick.
+ * @lpart: (allow-none):
+ *         Part of @brick section, possibly %NULL.
+ * @col: Column index in @brick.
+ * @row: Row index in @brick.
+ * @level: Location to store the actual level index of the top upper-left
+ *         corner of the part.
+ * @depth: Location to store the actual depth (number of levels)
+ *         of the part.
+ *
+ * Validates the position and dimensions of a line brick part.
+ *
+ * If @lpart is %NULL entire @brick section is to be used.  Otherwise @lpart
+ * must be contained in a @brick section; @col and @row must be a valid column
+ * and row indices in any case.
+ *
+ * If the position and dimensions are valid @level and @depth are set to the
+ * actual segment in a @brick section.  If the function returns %FALSE their
+ * values are undefined.
+ *
+ * This function is typically used in functions that extract a section of a
+ * brick into a line.
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @brick is not a #GwyBrick instance or the position or
+ *          dimensions is invalid (a critical error is emitted in these cases)
+ *          or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_brick_check_line_part(const GwyBrick *brick,
-                           const GwyLinePart *lpart,
-                           guint col, guint row,
-                           guint *level, guint *depth)
+gwy_brick_check_line_part(const GwyBrick *brick,
+                          const GwyLinePart *lpart,
+                          guint col, guint row,
+                          guint *level, guint *depth)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
     g_return_val_if_fail(col < brick->xres, FALSE);
@@ -1251,13 +1353,53 @@ _gwy_brick_check_line_part(const GwyBrick *brick,
     return TRUE;
 }
 
+/**
+ * gwy_brick_limit_parts:
+ * @src: A source three-dimensional data brick.
+ * @srcpart: (allow-none):
+ *           Area in @src, possibly %NULL.
+ * @dest: A destination three-dimensional data brick.
+ * @destcol: Column index for the top upper-left corner of the part in @dest.
+ * @destrow: Row index for the top upper-left corner of the part in @dest.
+ * @destlevel: Level index for the top upper-left corner of the part in @dest.
+ * @col: Location to store the actual column index of the top upper-left corner
+ *       of the source part.
+ * @row: Location to store the actual row index of the top upper-left corner
+ *       of the source part.
+ * @level: Location to store the actual level index of the top upper-left
+ *         corner of the source part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the source part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the source part.
+ * @depth: Location to store the actual depth (number of levels)
+ *         of the source part.
+ *
+ * Limits the dimensions of a brick part for copying.
+ *
+ * The part is limited to make it contained both in @src and @dest and @col,
+ * @row, @level, @width, @height and @depth are set to the actual position and
+ * dimensions in @src.  If the function returns %FALSE their values are
+ * undefined.
+ *
+ * If @src and @dest are the same brick the source and destination parts should
+ * not overlap.
+ *
+ * This function is typically used in copy-like functions that transfer a part
+ * of a brick into another brick.
+ *
+ * Returns: %TRUE if the caller should proceed.  %FALSE if the caller should
+ *          not proceed, either because @brick or @target is not a #GwyBrick
+ *          instance (a critical error is emitted in these cases) or the actual
+ *          part is zero-sized.
+ **/
 gboolean
-_gwy_brick_limit_parts(const GwyBrick *src,
-                       const GwyBrickPart *srcpart,
-                       const GwyBrick *dest,
-                       guint destcol, guint destrow, guint destlevel,
-                       guint *col, guint *row, guint *level,
-                       guint *width, guint *height, guint *depth)
+gwy_brick_limit_parts(const GwyBrick *src,
+                      const GwyBrickPart *srcpart,
+                      const GwyBrick *dest,
+                      guint destcol, guint destrow, guint destlevel,
+                      guint *col, guint *row, guint *level,
+                      guint *width, guint *height, guint *depth)
 {
     g_return_val_if_fail(GWY_IS_BRICK(src), FALSE);
     g_return_val_if_fail(GWY_IS_BRICK(dest), FALSE);
@@ -1302,33 +1444,67 @@ _gwy_brick_limit_parts(const GwyBrick *src,
     return *width && *height && *depth;
 }
 
+/**
+ * gwy_brick_check_target:
+ * @brick: A three-dimensional data brick.
+ * @target: A three-dimensional data brick.
+ * @bpart: (allow-none):
+ *         Area in @brick and/or @target, possibly %NULL which means entire
+ *         @brick.
+ * @targetcol: Location to store the actual column index of the top upper-left
+ *             corner of the part in the target.
+ * @targetrow: Location to store the actual row index of the top upper-left
+ *             corner of the part in the target.
+ * @targetlevel: Location to store the actual level index of the top upper-left
+ *               corner of the part in the target.
+ *
+ * Validates the position and dimensions of a target brick.
+ *
+ * Dimensions of @target must match either @brick or @bpart.  In the first case
+ * the rectangular part is the same in @brick and @target.  In the second case
+ * the target corresponds only to the brick part.
+ *
+ * If the position and dimensions are valid @targetcol, @targetrow and
+ * @targetlevel are set to the actual position in @target.  If the function
+ * returns %FALSE their values are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * brick and produce data of the size of this part.
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @brick or @target is not a #GwyBrick instance or the
+ *          position or dimensions is invalid (a critical error is emitted in
+ *          these cases) or the actual part is zero-sized.
+ **/
 gboolean
-_gwy_brick_check_target(const GwyBrick *brick,
-                        const GwyBrick *target,
-                        guint col,
-                        guint row,
-                        guint level,
-                        guint width,
-                        guint height,
-                        guint depth,
-                        guint *targetcol,
-                        guint *targetrow,
-                        guint *targetlevel)
+gwy_brick_check_target(const GwyBrick *brick,
+                       const GwyBrick *target,
+                       const GwyBrickPart *bpart,
+                       guint *targetcol,
+                       guint *targetrow,
+                       guint *targetlevel)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
     g_return_val_if_fail(GWY_IS_BRICK(target), FALSE);
 
+    // We normally always pass non-NULL @bpart but permit also NULL.
+    if (!bpart)
+        bpart = &(GwyBrickPart){ 0, 0, 0, brick->xres, brick->yres, brick->zres };
+    else if (!bpart->width || !bpart->height || !bpart->depth)
+        return FALSE;
+
     if (target->xres == brick->xres
         && target->yres == brick->yres
         && target->zres == brick->zres) {
-        *targetcol = col;
-        *targetrow = row;
-        *targetlevel = level;
+        *targetcol = bpart->col;
+        *targetrow = bpart->row;
+        *targetlevel = bpart->level;
         return TRUE;
     }
-    if (target->xres == width
-        && target->yres == height
-        && target->zres == depth) {
+    if (target->xres == bpart->width
+        && target->yres == bpart->height
+        && target->zres == bpart->depth) {
         *targetcol = *targetrow = *targetlevel = 0;
         return TRUE;
     }
@@ -1340,7 +1516,7 @@ _gwy_brick_check_target(const GwyBrick *brick,
 
 /**
  * gwy_brick_format_xy:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @style: Output format style.
  *
  * Finds a suitable format for displaying lateral coordinates in a data brick.
@@ -1366,7 +1542,7 @@ gwy_brick_format_xy(const GwyBrick *brick,
 
 /**
  * gwy_brick_format_z:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @style: Output format style.
  *
  * Finds a suitable format for displaying depth coordinates in a data brick.
@@ -1434,7 +1610,7 @@ gwy_brick_format_z(const GwyBrick *brick,
  *
  * Object representing three-dimensional data in a regular grid.
  *
- * The #GwyBrick struct contains some public bricks that can be directly
+ * The #GwyBrick struct contains some public fields that can be directly
  * accessed for reading.  To set them, you must use the methods such as
  * gwy_brick_set_xreal().
  **/
