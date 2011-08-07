@@ -111,7 +111,7 @@ fi
 
 DIE=0
 project=Gwyddion
-podirs="po po-libgwy"
+podirs="po po-libgwy po-libgwyui"
 
 # Default tools.
 ACLOCAL=${ACLOCAL:-aclocal}

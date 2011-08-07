@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!-- vim: set ts=2 sw=2 et: -->
+<book id='index' xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion User Interface Library Reference Manual</title>
+  </bookinfo>
+  <preface id='libgwyui-preface'>
+    <title>Introduction</title>
+    <para>
+      This library contains widgets for displaying of scientific data and
+      various user interface utilities.
+    </para>
+  </preface>
+  <chapter id='libgwyui-object-hierarchy'>
+    <title>Object hierarchy</title>
+    <xi:include href="xml/tree_index.sgml"/>
+  </chapter>
+  <chapter id='libgwyui-field'>
+    <title>Field Views</title>
+    <xi:include href="xml/field-render.xml"/>
+  </chapter>
+  <index id='libgwyui-symbol-index'>
+    <title>Index of all symbols</title>
+    <xi:include href="xml/api-index-full.xml"/>
+  </index>
+  <xi:include href="xml/annotation-glossary.xml"/>
+</book>

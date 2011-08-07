@@ -4,8 +4,8 @@ pkgname=gwyddion
 projectdir=$PWD
 logdir=$projectdir/_logs
 installprefix=$projectdir/_inst
-libdirs="libgwy"
-podirs="po po-libgwy"
+libdirs="libgwy libgwyui"
+podirs="po po-libgwy po-libgwyui"
 oks="build documentation install dists"
 
 source $HOME/.bashrc

@@ -1,6 +1,15 @@
 # $Id$
 
-SUBDIRS = m4 build libgwy po po-libgwy docs data
+SUBDIRS = \
+	m4 \
+	build \
+	libgwy \
+	libgwyui \
+	po \
+	po-libgwy \
+	po-libgwyui \
+	docs \
+	data
 
 EXTRA_DIST = \
 	gwyddion3.spec \

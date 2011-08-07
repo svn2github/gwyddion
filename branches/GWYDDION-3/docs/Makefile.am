@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = libgwy
+SUBDIRS = libgwy libgwyui
 EXTRA_DIST = style.css
 
 # Adapted from Automake's recursive rules

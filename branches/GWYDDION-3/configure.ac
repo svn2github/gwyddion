@@ -24,10 +24,14 @@ AC_CONFIG_FILES([
   libgwy/libgwy3.pc
   libgwy/tests/Makefile
   libgwy/benchmarks/Makefile
+  libgwyui/Makefile
+  libgwyui/libgwyui3.pc
   po/Makefile.in
   po-libgwy/Makefile.in
+  po-libgwyui/Makefile.in
   docs/Makefile
   docs/libgwy/Makefile
+  docs/libgwyui/Makefile
   data/Makefile
   gwyddion3.spec:data/gwyddion3.spec.in \
 ])
@@ -150,13 +154,21 @@ fi
 
 #############################################################################
 # Base libraries
+# All libraries that are required should be checked here.
+# TODO: use macros from m4/gwy-pkg.m4 once we can make the errors meaningful.
 PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.26])
-PKG_CHECK_MODULES([FFTW3],[fftw3 >= 3.1])
+PKG_CHECK_MODULES([FFTW],[fftw3 >= 3.1])
+PKG_CHECK_MODULES([GDKPIXBUF],[gdk-pixbuf-2.0 >= 2.22])
+PKG_CHECK_MODULES([GTK],[gtk+-3.0 >= 3.0])
 
 # Needs to be configured out in stable versions.  Deprecations come and go.
 AC_SUBST([LIBGWY_COMPAT_CPPFLAGS],["-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE"])
-AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS $FFTW3_CFLAGS"])
-AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS $FFTW3_LIBS"])
+AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS $FFTW_CFLAGS"])
+AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS $FFTW_LIBS"])
+
+AC_SUBST([LIBGWYUI_COMPAT_CPPFLAGS],["-DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED"])
+AC_SUBST([LIBGWYUI_DEPS_CFLAGS],["$GTK_CFLAGS $GDKPIXBUF_CFLAGS"])
+AC_SUBST([LIBGWYUI_DEPS_LIBS],["$GTK_LIBS $GDKPIXBUF_LIBS"])
 
 #############################################################################
 # GLib tools

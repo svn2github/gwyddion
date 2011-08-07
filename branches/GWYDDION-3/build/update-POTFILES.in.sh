@@ -4,19 +4,18 @@
 # into POTFILES.in in one po directory and to POTFILES.skip in all others.
 
 # All po directories
-subdirs="po po-libgwy"
+subdirs="po po-libgwy po-libgwyui"
 
 # Directories to scan
 # PO-DIRECTORY:SOURCE-CODE-DIRECTORY
 # We do not have any translatable content for the main domain.
 POTFILES_map="
 po-libgwy:libgwy
+po-libgwyui:libgwyui
 "
 
 # Files to ignore everywhere
 POTFILES_ignore="
-build/update-library-symbols.py
-build/update-aliases.py
 "
 
 # Files to add to specific po directories

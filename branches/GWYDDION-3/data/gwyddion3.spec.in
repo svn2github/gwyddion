@@ -15,6 +15,8 @@ Requires(pre):    /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
 BuildRequires: glib2-devel >= 2.26
+BuildRequires: gdk-pixbuf2-devel >= 2.22
+BuildRequires: gtk3-devel >= 3.0
 BuildRequires: intltool >= 0.40
 # XXX: In fact, we need a yet-unreleased fixed to get plain old data docs right.
 BuildRequires: gtk-doc >= 1.17
@@ -67,7 +69,7 @@ Summary:       Development files for Gwyddion3
 Group:         Development/Libraries
 Requires:      %{name}-libs%{?_isa} = %{version}-%{release}
 # This pulls everything else
-Requires:      glib2-devel >= 2.26
+Requires:      gtk3-devel >= 3.0
 
 
 %description
@@ -101,6 +103,7 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 install -D data/%{name}.vim $RPM_BUILD_ROOT/%{vimdir}/syntax/%{name}.vim
+# TODO: Once we have more translations, add them
 %find_lang %{name}-libgwy
 find $RPM_BUILD_ROOT -name '*.la' -delete
 
@@ -120,19 +123,29 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %defattr(-,root,root)
 # For unstable releases
 %{_libdir}/libgwy3-@PACKAGE_VERSION@.so
+%{_libdir}/libgwyui3-@PACKAGE_VERSION@.so
 #%{_libdir}/libgwy3.so.*
+#%{_libdir}/libgwyui3.so.*
 %{typelibdir}/Gwy3-3.0.typelib
+%{typelibdir}/GwyUI3-3.0.typelib
 
 
 %files libs-devel
 %defattr(-,root,root)
 %{vimdir}/syntax/%{name}.vim
 %{pkgincludedir}/libgwy/*.h
+%{pkgincludedir}/libgwyui/*.h
 %{pkgincludedir}/*.h
 %dir %{pkgincludedir}/libgwy
+%dir %{pkgincludedir}/libgwyui
 %dir %{pkgincludedir}
 %{_libdir}/libgwy3.so
+%{_libdir}/libgwyui3.so
 %{girdir}/Gwy3-3.0.gir
+%{girdir}/GwyUI3-3.0.gir
 %{pkgconfigdir}/libgwy3.pc
+%{pkgconfigdir}/libgwyui3.pc
 %doc %{gtkdocdir}/libgwy/*
+%doc %{gtkdocdir}/libgwyui/*
 %doc %dir %{gtkdocdir}/libgwy
+%doc %dir %{gtkdocdir}/libgwyui

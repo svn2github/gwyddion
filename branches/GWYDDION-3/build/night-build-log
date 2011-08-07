@@ -4,8 +4,8 @@ pkgname=gwyddion
 projectdir=$PWD
 logdir=$projectdir/_logs
 tmplog=$logdir/tmplog
-libdirs="libgwy"
-podirs="po po-libgwy"
+libdirs="libgwy libgwyui"
+podirs="po po-libgwy libgwyui"
 
 source $HOME/.bashrc
 export LC_ALL=C
