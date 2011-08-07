@@ -147,10 +147,7 @@ gboolean gwy_field_limit_parts      (const GwyField *src,
                                      guint *height);
 gboolean gwy_field_check_target     (const GwyField *field,
                                      const GwyField *target,
-                                     guint col,
-                                     guint row,
-                                     guint width,
-                                     guint height,
+                                     const GwyFieldPart *fpart,
                                      guint *targetcol,
                                      guint *targetrow);
 gboolean gwy_field_check_mask       (const GwyField *field,

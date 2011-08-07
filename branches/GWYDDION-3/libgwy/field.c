@@ -1087,7 +1087,7 @@ gwy_field_get_unit_z(const GwyField *field)
  * This function is typically used in functions that operate on a part of a
  * field but do not work with masks.  See gwy_field_check_mask() for checking
  * of part and mask together.  Example (note gwy_field_new_transposed()
- * exists):
+ * creates a transposed field):
  * |[
  * GwyField*
  * transpose_field(const GwyField *field,
@@ -1156,7 +1156,8 @@ gwy_field_check_part(const GwyField *field,
  * @height: Location to store the actual height (number of rows)
  *          of the target part.
  *
- * Validates the position and dimentions of target part in a field.
+ * Validates the position and dimentions of target part in a field for
+ * extraction.
  *
  * If @fpart is %NULL the dimensions of @field must match the entire source,
  * i.e. (@width_full,@height_full).  Otherwise @fpart must be contained in
@@ -1168,7 +1169,7 @@ gwy_field_check_part(const GwyField *field,
  * %FALSE their values are undefined.
  *
  * This function is typically used if a field is extracted from a larger data.
- * Example (note gwy_brick_extract_plane() exists):
+ * Example (note gwy_brick_extract_plane() extracts planes from a brick):
  * |[
  * void
  * extract_brick_plane(const GwyBrick *brick,
@@ -1237,6 +1238,59 @@ gwy_field_check_target_part(const GwyField *field,
     return TRUE;
 }
 
+/**
+ * gwy_field_limit_parts:
+ * @src: A source two-dimensional data field.
+ * @srcpart: (allow-none):
+ *           Area in @src, possibly %NULL.
+ * @dest: A destination two-dimensional data field.
+ * @destcol: Column index for the upper-left corner of the part in @dest.
+ * @destrow: Row index for the upper-left corner of the part in @dest.
+ * @transpose: %TRUE to assume the area is transposed (rotated by 90 degrees)
+ *             in the destination.
+ * @col: Location to store the actual column index of the upper-left corner
+ *       of the source part.
+ * @row: Location to store the actual row index of the upper-left corner
+ *       of the source part.
+ * @width: Location to store the actual width (number of columns)
+ *         of the source part.
+ * @height: Location to store the actual height (number of rows)
+ *          of the source part.
+ *
+ * Limits the dimensions of a field part for a copy-like operation.
+ *
+ * The area is limited to be contained both in @src and @dest and @col, @row,
+ * @width and @height are set to the actual position and dimensions in @src.
+ * If the function returns %FALSE their values are undefined.
+ *
+ * If @src and @dest are the same field the source and destination parts should
+ * not overlap.
+ *
+ * This function is typically used in copy-like functions that transfer a part
+ * of a field into another field.
+ * Example (note gwy_field_copy() copies field parts):
+ * |[
+ * void
+ * copy_field(const GwyField *src,
+ *            const GwyFieldPart *srcpart,
+ *            GwyField *dest,
+ *            guint destcol, guint destrow)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+ *                                FALSE, &col, &row, &width, &height))
+ *         return;
+ *
+ *     // Copy area of size @width, @height at @col, @row in @src to an
+ *     // equally-sized area at @destcol, @destrow in @dest...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the caller should proceed.  %FALSE if the caller should
+ *          not proceed, either because @field or @target is not a #GwyField
+ *          instance (a critical error is emitted in these cases) or the actual
+ *          part is zero-sized.
+ **/
 gboolean
 gwy_field_limit_parts(const GwyField *src,
                       const GwyFieldPart *srcpart,
@@ -1291,25 +1345,82 @@ gwy_field_limit_parts(const GwyField *src,
     return *width && *height;
 }
 
+/**
+ * gwy_field_check_target:
+ * @field: A two-dimensional data field.
+ * @target: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field and/or @target, possibly %NULL which means entire
+ *         @field.
+ * @targetcol: Location to store the actual column index of the upper-left
+ *             corner of the part in the target.
+ * @targetrow: Location to store the actual row index of the upper-left corner
+ *             of the part in the target.
+ *
+ * Validates the position and dimentions of part in a field.
+ *
+ * Dimensions of @target must match either @field or @fpart.  In the first case
+ * the rectangular part is the same in @field and @target.  In the second case
+ * the target corresponds only to the field part.
+ *
+ * If the position and dimensions are valid @targetcol and @targetrow are set
+ * to the actual position in @target.  If the function returns %FALSE their
+ * values are undefined.
+ *
+ * This function is typically used in filters and similar functions that
+ * operate on a part of a field and produce data of the size of this part.
+ * Example (note gwy_field_filter_standard() can apply the Sobel filter):
+ * |[
+ * void
+ * sobel_filter(const GwyField *field,
+ *              const GwyFieldPart *fpart,
+ *              GwyField *target)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_field_check_part(field, fpart,
+ *                               &col, &row, &width, &height))
+ *         return;
+ *
+ *     guint targetcol, targetrow;
+ *     if !gwy_field_check_target(field, target,
+ *                                &(GwyFieldPart){ col, row, width, height },
+ *                                &targetcol, &targetrow))
+ *         return;
+ *
+ *     // Apply the filter of @field part given by @col, @row, @width and
+ *     // @height and put the result into an equally-sized area in @target at
+ *     // @targetcol, @targetrow...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @field or @target is not a #GwyField instance or the
+ *          position or dimensions is invalid (a critical error is emitted in
+ *          these cases) or the actual part is zero-sized.
+ **/
 gboolean
 gwy_field_check_target(const GwyField *field,
                        const GwyField *target,
-                       guint col,
-                       guint row,
-                       guint width,
-                       guint height,
+                       const GwyFieldPart *fpart,
                        guint *targetcol,
                        guint *targetrow)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
     g_return_val_if_fail(GWY_IS_FIELD(target), FALSE);
 
+    // We normally always pass non-NULL @fpart but permit also NULL.
+    if (!fpart)
+        fpart = &(GwyFieldPart){ 0, 0, field->xres, field->yres };
+    else if (!fpart->width || !fpart->height)
+        return FALSE;
+
     if (target->xres == field->xres && target->yres == field->yres) {
-        *targetcol = col;
-        *targetrow = row;
+        *targetcol = fpart->col;
+        *targetrow = fpart->row;
         return TRUE;
     }
-    if (target->xres == width && target->yres == height) {
+    if (target->xres == fpart->width && target->yres == fpart->height) {
         *targetcol = *targetrow = 0;
         return TRUE;
     }
@@ -1358,7 +1469,7 @@ gwy_field_check_target(const GwyField *field,
  *
  * This function is typically used in functions that operate on a part of a
  * field and allow masking.  See gwy_field_check_part() for checking of field
- * parts only.  Example (note gwy_field_rms() exists):
+ * parts only.  Example (note gwy_field_rms() calculates the rms):
  * |[
  * gdouble
  * calculate_rms(const GwyField *field,

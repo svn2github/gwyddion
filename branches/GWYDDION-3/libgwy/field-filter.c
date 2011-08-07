@@ -401,7 +401,8 @@ gwy_field_row_convolve(const GwyField *field,
 {
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target, col, row, width, height,
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &targetcol, &targetrow))
         return;
 
@@ -829,7 +830,8 @@ gwy_field_convolve(const GwyField *field,
 {
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target, col, row, width, height,
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &targetcol, &targetrow))
         return;
 
@@ -1127,7 +1129,8 @@ filter_5x5(const GwyField *field,
 {
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target, col, row, width, height,
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &targetcol, &targetrow))
         return;
 
@@ -1191,7 +1194,8 @@ combined_gradient_filter(const GwyField *field,
 {
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target, col, row, width, height,
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &targetcol, &targetrow))
         return;
 
@@ -1678,7 +1682,8 @@ gwy_field_filter_median(const GwyField *field,
 {
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target, col, row, width, height,
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &targetcol, &targetrow))
         return;
 

@@ -81,7 +81,8 @@ gwy_field_correlate(const GwyField *field,
 {
     guint col, row, width, height, scorecol, scorerow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, score, col, row, width, height,
+        || !gwy_field_check_target(field, score,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &scorecol, &scorerow))
         return;
 
@@ -447,7 +448,8 @@ gwy_field_crosscorrelate(const GwyField *field,
 
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target, col, row, width, height,
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
                                    &targetcol, &targetrow))
         return;
 
