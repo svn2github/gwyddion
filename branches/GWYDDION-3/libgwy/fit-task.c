@@ -143,7 +143,7 @@ static gboolean fit_task_gradient    (const gdouble *param,
                                       gdouble *hessian,
                                       gpointer user_data);
 
-G_DEFINE_TYPE(GwyFitTask, gwy_fit_task, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyFitTask, gwy_fit_task, G_TYPE_OBJECT);
 
 static void
 gwy_fit_task_class_init(GwyFitTaskClass *klass)

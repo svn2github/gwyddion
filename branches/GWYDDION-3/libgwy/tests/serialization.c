@@ -276,7 +276,7 @@ gwy_ser_test_serializable_init(GwySerializableInterface *iface)
 
 G_DEFINE_TYPE_EXTENDED
     (GwySerTest, gwy_ser_test, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_ser_test_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_ser_test_serializable_init));
 
 static void
 gwy_ser_test_dispose(GObject *object)

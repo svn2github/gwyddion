@@ -108,7 +108,7 @@ static guint container_signals[N_SIGNALS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyContainer, gwy_container, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_container_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_container_serializable_init));
 
 static void
 gwy_container_serializable_init(GwySerializableInterface *iface)

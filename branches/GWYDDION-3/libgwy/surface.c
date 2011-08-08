@@ -76,7 +76,7 @@ static GParamSpec *surface_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwySurface, gwy_surface, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_surface_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_surface_serializable_init));
 
 static void
 gwy_surface_serializable_init(GwySerializableInterface *iface)

@@ -90,7 +90,7 @@ static GParamSpec *field_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyField, gwy_field, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_field_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_field_serializable_init));
 
 static void
 gwy_field_serializable_init(GwySerializableInterface *iface)

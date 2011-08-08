@@ -76,7 +76,7 @@ static GParamSpec *curve_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyCurve, gwy_curve, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_curve_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_curve_serializable_init));
 
 static void
 gwy_curve_serializable_init(GwySerializableInterface *iface)

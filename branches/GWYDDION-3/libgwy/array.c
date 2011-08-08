@@ -53,7 +53,7 @@ static void         gwy_array_dispose (GObject *object);
 
 static guint array_signals[N_SIGNALS];
 
-G_DEFINE_TYPE(GwyArray, gwy_array, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyArray, gwy_array, G_TYPE_OBJECT);
 
 static void
 gwy_array_class_init(GwyArrayClass *klass)

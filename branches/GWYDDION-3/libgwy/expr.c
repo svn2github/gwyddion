@@ -252,7 +252,7 @@ static const GScannerConfig scanner_config = {
     FALSE, FALSE, 0,
 };
 
-G_DEFINE_TYPE(GwyExpr, gwy_expr, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyExpr, gwy_expr, G_TYPE_OBJECT);
 
 static void
 gwy_expr_class_init(GwyExprClass *klass)

@@ -84,7 +84,7 @@ static GParamSpec *fit_param_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyFitParam, gwy_fit_param, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_fit_param_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_fit_param_serializable_init));
 
 static void
 gwy_fit_param_serializable_init(GwySerializableInterface *iface)

@@ -72,7 +72,7 @@ G_LOCK_DEFINE_STATIC(test_expr);
 
 G_DEFINE_TYPE_EXTENDED
     (GwyUserFitFunc, gwy_user_fit_func, GWY_TYPE_RESOURCE, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_user_fit_func_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_user_fit_func_serializable_init));
 
 GwySerializableInterface *gwy_user_fit_func_parent_serializable = NULL;
 

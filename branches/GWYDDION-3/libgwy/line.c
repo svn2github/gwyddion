@@ -79,7 +79,7 @@ static GParamSpec *line_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyLine, gwy_line, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_line_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_line_serializable_init));
 
 static void
 gwy_line_serializable_init(GwySerializableInterface *iface)

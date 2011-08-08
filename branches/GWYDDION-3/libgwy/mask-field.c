@@ -73,7 +73,7 @@ static GParamSpec *mask_field_pspecs[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyMaskField, gwy_mask_field, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_mask_field_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_mask_field_serializable_init));
 
 static void
 gwy_mask_field_serializable_init(GwySerializableInterface *iface)

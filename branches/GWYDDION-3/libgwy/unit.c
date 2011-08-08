@@ -176,7 +176,7 @@ static guint unit_signals[N_SIGNALS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyUnit, gwy_unit, G_TYPE_OBJECT, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_unit_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_unit_serializable_init));
 
 static void
 gwy_unit_serializable_init(GwySerializableInterface *iface)

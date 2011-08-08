@@ -72,7 +72,7 @@ static const gchar* invent_item_name      (Inventory *inventory,
 
 static guint inventory_signals[N_SIGNALS];
 
-G_DEFINE_TYPE(GwyInventory, gwy_inventory, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyInventory, gwy_inventory, G_TYPE_OBJECT);
 
 static void
 gwy_inventory_class_init(GwyInventoryClass *klass)

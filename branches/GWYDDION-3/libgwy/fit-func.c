@@ -79,7 +79,7 @@ static gboolean evaluate                 (FitFunc *priv,
 
 static GParamSpec *fit_func_pspecs[N_PROPS];
 
-G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT);
 
 // The order is given by ESTIMATOR_FOO enum values
 static const gchar* const estimators[N_ESTIMATORS] = {

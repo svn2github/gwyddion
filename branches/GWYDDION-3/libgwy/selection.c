@@ -59,7 +59,7 @@ static guint selection_signals[N_SIGNALS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwySelection, gwy_selection, GWY_TYPE_ARRAY, G_TYPE_FLAG_ABSTRACT,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_selection_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_selection_serializable_init));
 
 static void
 gwy_selection_serializable_init(GwySerializableInterface *iface)

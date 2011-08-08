@@ -226,7 +226,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * // Define the type
  * G_DEFINE_TYPE_EXTENDED
  *     (MyObject, my_object, G_TYPE_OBJECT, 0,
- *      GWY_IMPLEMENT_SERIALIZABLE(my_object_serializable_init))
+ *      GWY_IMPLEMENT_SERIALIZABLE(my_object_serializable_init));
  *
  * // Serialised data specification, used both in itemize() and construct()
  * static const GwySerializableItem default_items[] = {
@@ -448,7 +448,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * |[
  * G_DEFINE_TYPE_EXTENDED
  *     (GwyFoo, gwy_foo, G_TYPE_OBJECT, 0,
- *      GWY_IMPLEMENT_SERIALIZABLE(gwy_foo_serializable_init))
+ *      GWY_IMPLEMENT_SERIALIZABLE(gwy_foo_serializable_init));
  * ]|
  **/
 

@@ -63,7 +63,7 @@ static void fix_utf8_minus               (GString *str);
 
 static GParamSpec *value_format_pspecs[N_PROPS];
 
-G_DEFINE_TYPE(GwyValueFormat, gwy_value_format, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyValueFormat, gwy_value_format, G_TYPE_OBJECT);
 
 static void
 gwy_value_format_class_init(GwyValueFormatClass *klass)

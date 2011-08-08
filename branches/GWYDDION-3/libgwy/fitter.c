@@ -120,7 +120,7 @@ static const GwyFitterSettings default_settings = {
 
 static GParamSpec *fitter_pspecs[N_PROPS];
 
-G_DEFINE_TYPE(GwyFitter, gwy_fitter, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GwyFitter, gwy_fitter, G_TYPE_OBJECT);
 
 static void
 gwy_fitter_class_init(GwyFitterClass *klass)

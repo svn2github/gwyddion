@@ -89,7 +89,7 @@ GwySerializableInterface *gwy_gradient_parent_serializable = NULL;
 
 G_DEFINE_TYPE_EXTENDED
     (GwyGradient, gwy_gradient, GWY_TYPE_RESOURCE, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_gradient_serializable_init))
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_gradient_serializable_init));
 
 static void
 gwy_gradient_serializable_init(GwySerializableInterface *iface)
