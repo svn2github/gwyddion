@@ -91,7 +91,7 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     raster_view_pspecs[PROP_GRADIENT]
         = g_param_spec_object("gradient",
                               "Gradient",
-                              "Gradient used for visualisastion.",
+                              "Gradient used for visualisation.",
                               GWY_TYPE_GRADIENT,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -200,6 +200,14 @@ gwy_raster_view_new(void)
     return g_object_newv(GWY_TYPE_RASTER_VIEW, 0, NULL);
 }
 
+/**
+ * gwy_raster_view_set_field:
+ * @rasterview: A raster view.
+ * @field: (allow-none):
+ *         A two-dimensional data field.
+ *
+ * Sets the field a raster view will display.
+ **/
 void
 gwy_raster_view_set_field(GwyRasterView *rasterview,
                           GwyField *field)
@@ -222,6 +230,15 @@ gwy_raster_view_set_field(GwyRasterView *rasterview,
     gtk_widget_queue_resize(GTK_WIDGET(rasterview));
 }
 
+/**
+ * gwy_raster_view_get_field:
+ * @rasterview: A raster view.
+ *
+ * Obtains the field a raster view displays.
+ *
+ * Returns: (transfer none):
+ *          The field displayed by @rasterview.
+ **/
 GwyField*
 gwy_raster_view_get_field(GwyRasterView *rasterview)
 {
@@ -229,6 +246,14 @@ gwy_raster_view_get_field(GwyRasterView *rasterview)
     return GWY_RASTER_VIEW(rasterview)->priv->field;
 }
 
+/**
+ * gwy_raster_view_set_gradient:
+ * @rasterview: A raster view.
+ * @gradient: (allow-none):
+ *            A colour gradient.
+ *
+ * Sets the false colour gradient a raster view will use for visualisation.
+ **/
 void
 gwy_raster_view_set_gradient(GwyRasterView *rasterview,
                              GwyGradient *gradient)
@@ -251,6 +276,15 @@ gwy_raster_view_set_gradient(GwyRasterView *rasterview,
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
+/**
+ * gwy_raster_view_get_gradient:
+ * @rasterview: A raster view.
+ *
+ * Obtains the false colour gradient used by a raster view for visualisation.
+ *
+ * Returns: (transfer none):
+ *          The colour gradient used by @rasterview.
+ **/
 GwyGradient*
 gwy_raster_view_get_gradient(GwyRasterView *rasterview)
 {
