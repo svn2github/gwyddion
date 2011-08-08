@@ -110,8 +110,8 @@ build_interpolation(guint n, gdouble from, gdouble to, guint res)
             ip->wprev = ip->wnext = 0.5;
         else {
             g_assert(ip->prev + 1 == ip->next);
-            ip->wprev = left - ip->prev;
-            ip->wnext = 1.0 - ip->wprev;
+            ip->wnext = left - ip->prev;
+            ip->wprev = 1.0 - ip->wnext;
             g_assert(ip->wprev >= 0.0);
             g_assert(ip->wnext >= 0.0);
         }
