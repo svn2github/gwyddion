@@ -513,12 +513,12 @@ main(int argc, char *argv[])
 
     printf("\n");
 
-    sint = glib_int_clamp_all(size, niter, rand_seed);
-    printf("GLIB int ALL %g G/s (s = %u)\n",
+    sint = glib_int_clamp_none(size, niter, rand_seed);
+    printf("GLIB int NONE %g G/s (s = %u)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sint);
 
-    sint = gwyd_int_clamp_all(size, niter, rand_seed);
-    printf("GWYD int ALL %g G/s (s = %u)\n",
+    sint = gwyd_int_clamp_none(size, niter, rand_seed);
+    printf("GWYD int NONE %g G/s (s = %u)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sint);
 
     sint = glib_int_clamp_half(size, niter, rand_seed);
@@ -529,22 +529,22 @@ main(int argc, char *argv[])
     printf("GWYD int HALF %g G/s (s = %u)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sint);
 
-    sint = glib_int_clamp_none(size, niter, rand_seed);
-    printf("GLIB int NONE %g G/s (s = %u)\n",
+    sint = glib_int_clamp_all(size, niter, rand_seed);
+    printf("GLIB int ALL %g G/s (s = %u)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sint);
 
-    sint = gwyd_int_clamp_none(size, niter, rand_seed);
-    printf("GWYD int NONE %g G/s (s = %u)\n",
+    sint = gwyd_int_clamp_all(size, niter, rand_seed);
+    printf("GWYD int ALL %g G/s (s = %u)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sint);
 
     printf("\n");
 
-    sdbl = glib_double_clamp_all(size, niter, rand_seed);
-    printf("GLIB double ALL %g G/s (s = %g)\n",
+    sdbl = glib_double_clamp_none(size, niter, rand_seed);
+    printf("GLIB double NONE %g G/s (s = %g)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sdbl);
 
-    sdbl = gwyd_double_clamp_all(size, niter, rand_seed);
-    printf("GWYD double ALL %g G/s (s = %g)\n",
+    sdbl = gwyd_double_clamp_none(size, niter, rand_seed);
+    printf("GWYD double NONE %g G/s (s = %g)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sdbl);
 
     sdbl = glib_double_clamp_half(size, niter, rand_seed);
@@ -555,12 +555,12 @@ main(int argc, char *argv[])
     printf("GWYD double HALF %g G/s (s = %g)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sdbl);
 
-    sdbl = glib_double_clamp_none(size, niter, rand_seed);
-    printf("GLIB double NONE %g G/s (s = %g)\n",
+    sdbl = glib_double_clamp_all(size, niter, rand_seed);
+    printf("GLIB double ALL %g G/s (s = %g)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sdbl);
 
-    sdbl = gwyd_double_clamp_none(size, niter, rand_seed);
-    printf("GWYD double NONE %g G/s (s = %g)\n",
+    sdbl = gwyd_double_clamp_all(size, niter, rand_seed);
+    printf("GWYD double ALL %g G/s (s = %g)\n",
            size*niter/gwy_benchmark_timer_get_total()/1e9, sdbl);
 
     return 0;
