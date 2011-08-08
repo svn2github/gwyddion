@@ -66,7 +66,7 @@ struct _GwyGradientClass {
 
 GType                   gwy_gradient_get_type        (void)                            G_GNUC_CONST;
 GwyGradient*            gwy_gradient_new             (void)                            G_GNUC_MALLOC;
-void                    gwy_gradient_get_color       (GwyGradient *gradient,
+void                    gwy_gradient_color           (GwyGradient *gradient,
                                                       gdouble x,
                                                       GwyRGBA *color);
 guint                   gwy_gradient_n_points        (GwyGradient *gradient)           G_GNUC_PURE;

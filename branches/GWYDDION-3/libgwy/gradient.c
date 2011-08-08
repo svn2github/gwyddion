@@ -353,7 +353,7 @@ gwy_gradient_new(void)
 }
 
 /**
- * gwy_gradient_get_color:
+ * gwy_gradient_color:
  * @gradient: A colour gradient.
  * @x: Position in gradient, in interval [0,1].
  * @color: Colour to fill with interpolated colour at position @x.
@@ -361,9 +361,9 @@ gwy_gradient_new(void)
  * Computes the colour at a given position of a colour gradient.
  **/
 void
-gwy_gradient_get_color(GwyGradient *gradient,
-                       gdouble x,
-                       GwyRGBA *color)
+gwy_gradient_color(GwyGradient *gradient,
+                   gdouble x,
+                   GwyRGBA *color)
 {
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
     g_return_if_fail(color);

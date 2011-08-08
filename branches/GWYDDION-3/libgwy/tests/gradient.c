@@ -294,16 +294,16 @@ test_gradient_manipulate(void)
                     ==, 0);
 
     GwyRGBA color;
-    gwy_gradient_get_color(gradient, gradient_point_red0.x, &color);
+    gwy_gradient_color(gradient, gradient_point_red0.x, &color);
     g_assert_cmpint(memcmp(&color, &gradient_point_red0.color, sizeof(GwyRGBA)),
                     ==, 0);
-    gwy_gradient_get_color(gradient, gradient_point_p1.x, &color);
+    gwy_gradient_color(gradient, gradient_point_p1.x, &color);
     g_assert_cmpint(memcmp(&color, &gradient_point_p1.color, sizeof(GwyRGBA)),
                     ==, 0);
-    gwy_gradient_get_color(gradient, gradient_point_p2.x, &color);
+    gwy_gradient_color(gradient, gradient_point_p2.x, &color);
     g_assert_cmpint(memcmp(&color, &gradient_point_p2.color, sizeof(GwyRGBA)),
                     ==, 0);
-    gwy_gradient_get_color(gradient, gradient_point_blue1.x, &color);
+    gwy_gradient_color(gradient, gradient_point_blue1.x, &color);
     g_assert_cmpint(memcmp(&color, &gradient_point_blue1.color, sizeof(GwyRGBA)),
                     ==, 0);
 
