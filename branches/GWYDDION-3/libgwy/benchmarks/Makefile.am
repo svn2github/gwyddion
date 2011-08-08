@@ -7,6 +7,7 @@ noinst_SCRIPTS = \
 
 if BENCHMARKS
 noinst_PROGRAMS = \
+	clamp \
 	convolve-rect \
 	convolve-row \
 	count-bits \
@@ -14,6 +15,7 @@ noinst_PROGRAMS = \
 	rand \
 	sort
 
+clamp_SOURCES = clamp.c
 convolve_row_SOURCES = convolve-row.c
 convolve_rect_SOURCES = convolve-rect.c
 count_bits_SOURCES = count-bits.c
@@ -24,6 +26,7 @@ extra_sources =
 
 else
 extra_sources = \
+	clamp.c \
 	convolve-rect.c \
 	convolve-row.c \
 	count-bits.c \
