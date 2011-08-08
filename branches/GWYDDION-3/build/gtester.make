@@ -9,9 +9,12 @@ CLEANFILES += \
 	test-report-brief.html \
 	test-report.xml
 
-# Run the test program
+# Run the test program.
+# If it succeeds get rid of the core files from expected failures, see
+# https://bugzilla.gnome.org/show_bug.cgi?id=656127
 test: all $(test_program)$(EXEEXT)
 	@$(GTESTER) --verbose $(test_program)$(EXEEXT) $(TEST_FLAGS)
+	@rm -f core core.[0-9]*
 
 # Produce a test report
 test-report: test-report.html test-report-brief.html
