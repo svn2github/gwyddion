@@ -33,6 +33,10 @@ cat >build_documentation.ignore <<':'
 ':'
 :
 
+cat >build_introspection.ignore <<':'
+':'
+:
+
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^libtool: install: warning: remember to run `libtool --finish /home/yeti/Projects/Gwyddion/GWYDDION-3-HEAD/gwyddion-[0-9.]+/_inst/lib'$
@@ -109,10 +113,16 @@ function extract_build_documentation() {
   logfile=build_documentation.log
   grep -E '\<(warning|error):' <$logfile \
     | grep -Evf build_documentation.ignore >>$tmplog
-  if test -s $tmplog -a -z "$h"; then
+  if test -s $tmplog; then
     echo "=====[ build_documentation ]====="
   fi
   cat $tmplog
+}
+
+function extract_build_introspection() {
+  logfile=build_introspection.err
+  outfile=introspection.log
+  grep -Evf build_introspection.ignore <$logfile >$outfile
 }
 
 function extract_documentation_stats() {
@@ -148,6 +158,7 @@ printerr set_extra_version
 printerr autogen
 printerr build
 extract_build_documentation
+extract_build_introspection
 printerr update_translations
 printerr check_debug
 printerr check_headers

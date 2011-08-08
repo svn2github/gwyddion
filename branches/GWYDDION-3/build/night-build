@@ -71,6 +71,15 @@ function build_documentation() {
   make -C data gwyddion3.vim
 }
 
+function build_introspection() {
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    rm -f Gwy*.{gir,typelib}
+    make GOBJECT_INTROSPECTION_SCANNER_FLAGS=--warn-all
+    popd >/dev/null
+  done
+}
+
 function unit_test() {
   for dir in $libdirs; do
     pushd $dir >/dev/null
@@ -169,6 +178,7 @@ else
   call autogen
   call build
   call build_documentation
+  call build_introspection
   call update_translations
   call unit_test
   call check_debug
