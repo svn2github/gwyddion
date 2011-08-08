@@ -14,6 +14,7 @@ GWY_DOC_CFLAGS = \
 	-I$(top_builddir) \
 	$(LIBGWY_DEPS_CFLAGS)
 GWY_DOC_LIBS = \
+	$(top_builddir)/libgwyui/libgwyui3.la \
 	$(top_builddir)/libgwy/libgwy3.la \
 	$(LIBGWY_DEPS_LIBS)
 
