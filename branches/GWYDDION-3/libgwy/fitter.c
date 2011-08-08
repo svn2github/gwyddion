@@ -138,14 +138,14 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                             "Number of params",
                             "Number of fitting parameters.",
                             0, 1024, 0,
-                            G_PARAM_READWRITE | STATICP);
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_ITER_MAX]
         = g_param_spec_uint("max-iters",
                             "Maximum iters",
                             "Maximum number of iterations.",
                             1, G_MAXUINT, default_settings.iter_max,
-                            G_PARAM_READWRITE | STATICP);
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_SUCCESSES_TO_GET_BORED]
         = g_param_spec_uint("successes-to-get-bored",
@@ -155,14 +155,14 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                             "change of lambda and residuum.",
                             1, G_MAXUINT,
                             default_settings.successes_to_get_bored,
-                            G_PARAM_READWRITE | STATICP);
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_LAMBDA_MAX]
         = g_param_spec_double("lambda-max",
                               "Maximum lambda",
                               "Maximum value of Marquardt parameter lambda.",
                               0.0, G_MAXDOUBLE, default_settings.lambda_max,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_LAMBDA_START]
         = g_param_spec_double("lambda-start",
@@ -171,7 +171,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                               "to at the start of each fitting.",
                               G_MINDOUBLE, G_MAXDOUBLE,
                               default_settings.lambda_start,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_LAMBDA_INCREASE]
         = g_param_spec_double("lambda-increase",
@@ -179,7 +179,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                               "Factor to multiply Marquardt parameter lambda "
                               "with after an unsuccessful step.",
                               1.0, G_MAXDOUBLE, default_settings.lambda_increase,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_LAMBDA_DECREASE]
         = g_param_spec_double("lambda-decrease",
@@ -187,7 +187,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                               "Factor to divide Marquardt parameter lambda "
                               "with after a successful step.",
                               1.0, G_MAXDOUBLE, default_settings.lambda_decrease,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_PARAM_CHANGE_MIN]
         = g_param_spec_double("min-param-change",
@@ -196,7 +196,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                               "parameter in a successful step.",
                               0.0, G_MAXDOUBLE,
                               default_settings.param_change_min,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fitter_pspecs[PROP_RESIDUUM_CHANGE_MIN]
         = g_param_spec_double("min-residuum-change",
@@ -205,7 +205,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                               "in a successful step.",
                               0.0, G_MAXDOUBLE,
                               default_settings.residuum_change_min,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, fitter_pspecs[i]);

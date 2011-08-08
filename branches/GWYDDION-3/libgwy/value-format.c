@@ -82,7 +82,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                             "What output style is this format intended to be "
                             "used with.",
                             GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
-                            G_PARAM_READWRITE | STATICP);
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     value_format_pspecs[PROP_BASE]
         = g_param_spec_double("base",
@@ -90,14 +90,14 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               "Factor to divide the formatted number with, "
                               "usualy a power of 1000.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     value_format_pspecs[PROP_PRECISION]
         = g_param_spec_uint("precision",
                             "Precision",
                             "Number of digits after the decimal point.",
                             0, 1024, 3,
-                            G_PARAM_READWRITE | STATICP);
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     value_format_pspecs[PROP_UNITS]
         = g_param_spec_string("units",
@@ -106,7 +106,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               "including the corresponding prefix.  May also "
                               "be just a power of 10 or nothing.",
                               NULL,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     value_format_pspecs[PROP_GLUE]
         = g_param_spec_string("glue",
@@ -116,7 +116,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               "multiplication symbol, space, may also be "
                               "empty.",
                               NULL,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i,

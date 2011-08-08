@@ -99,7 +99,7 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
                             "Resolution",
                             "Pixel length of the line.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, mask_line_pspecs[i]);

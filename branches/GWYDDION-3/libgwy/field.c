@@ -119,28 +119,28 @@ gwy_field_class_init(GwyFieldClass *klass)
                             "X resolution",
                             "Pixel width of the field.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_YRES]
         = g_param_spec_uint("y-res",
                             "Y resolution",
                             "Pixel height of the field.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_XREAL]
         = g_param_spec_double("x-real",
                               "X real size",
                               "Width of the field in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_YREAL]
         = g_param_spec_double("y-real",
                               "Y real size",
                               "Height of the field in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_XOFFSET]
         = g_param_spec_double("x-offset",
@@ -148,7 +148,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                               "Horizontal offset of the field top left corner "
                               "in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_YOFFSET]
         = g_param_spec_double("y-offset",
@@ -156,7 +156,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                               "Vertical offset of the field top left corner "
                               "in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_UNIT_XY]
         = g_param_spec_object("unit-xy",
@@ -164,14 +164,14 @@ gwy_field_class_init(GwyFieldClass *klass)
                               "Physical units of lateral dimensions of the "
                               "field.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     field_pspecs[PROP_UNIT_Z]
         = g_param_spec_object("unit-z",
                               "Z unit",
                               "Physical units of field values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, field_pspecs[i]);

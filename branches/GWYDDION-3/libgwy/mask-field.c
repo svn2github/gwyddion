@@ -102,14 +102,14 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                             "X resolution",
                             "Pixel width of the mask field.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     mask_field_pspecs[PROP_YRES]
         = g_param_spec_uint("y-res",
                             "Y resolution",
                             "Pixel height of the mask field.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     mask_field_pspecs[PROP_STRIDE]
         = g_param_spec_uint("stride",
@@ -117,7 +117,7 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                             "Row stride of the mask field in items, i.e. "
                             "guint32s.",
                             1, G_MAXUINT, 2,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, mask_field_pspecs[i]);

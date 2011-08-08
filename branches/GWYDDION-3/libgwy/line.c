@@ -108,21 +108,21 @@ gwy_line_class_init(GwyLineClass *klass)
                             "Resolution",
                             "Pixel length of the line.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     line_pspecs[PROP_REAL]
         = g_param_spec_double("real",
                               "Real size",
                               "Length of the line in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     line_pspecs[PROP_OFFSET]
         = g_param_spec_double("offset",
                               "Offset",
                               "Offset of the line start in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     line_pspecs[PROP_UNIT_X]
          = g_param_spec_object("unit-x",
@@ -130,14 +130,14 @@ gwy_line_class_init(GwyLineClass *klass)
                                "Physical units of lateral dimension of the "
                                "line.",
                                GWY_TYPE_UNIT,
-                               G_PARAM_READABLE | STATICP);
+                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     line_pspecs[PROP_UNIT_Y]
         = g_param_spec_object("unit-y",
                               "Y unit",
                               "Physical units of line values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, line_pspecs[i]);

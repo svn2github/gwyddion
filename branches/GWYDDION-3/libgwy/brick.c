@@ -125,42 +125,42 @@ gwy_brick_class_init(GwyBrickClass *klass)
                             "X resolution",
                             "Pixel width of the brick.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_YRES]
         = g_param_spec_uint("y-res",
                             "Y resolution",
                             "Pixel height of the brick.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_ZRES]
         = g_param_spec_uint("z-res",
                             "Z resolution",
                             "Pixel depth of the brick.",
                             1, G_MAXUINT, 1,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_XREAL]
         = g_param_spec_double("x-real",
                               "X real size",
                               "Width of the brick in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_YREAL]
         = g_param_spec_double("y-real",
                               "Y real size",
                               "Height of the brick in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_ZREAL]
         = g_param_spec_double("z-real",
                               "Z real size",
                               "Depth of the brick in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_XOFFSET]
         = g_param_spec_double("x-offset",
@@ -168,7 +168,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               "Horizontal offset of the brick top left corner "
                               "in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_YOFFSET]
         = g_param_spec_double("y-offset",
@@ -176,7 +176,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               "Vertical offset of the brick top left corner "
                               "in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_ZOFFSET]
         = g_param_spec_double("z-offset",
@@ -184,7 +184,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               "Depth offset of the brick top left corner "
                               "in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_UNIT_XY]
         = g_param_spec_object("unit-xy",
@@ -192,21 +192,21 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               "Physical units of lateral dimensions of the "
                               "brick layers.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_UNIT_Z]
         = g_param_spec_object("unit-z",
                               "Z unit",
                               "Physical units of brick depth.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     brick_pspecs[PROP_UNIT_W]
         = g_param_spec_object("unit-w",
                               "W unit",
                               "Physical units of brick values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, brick_pspecs[i]);

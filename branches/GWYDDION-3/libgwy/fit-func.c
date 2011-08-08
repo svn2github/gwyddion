@@ -114,7 +114,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               "Group the function belongs to.",
                               "builtin",
                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
-                              | STATICP);
+                              | G_PARAM_STATIC_STRINGS);
 
     fit_func_pspecs[PROP_NAME]
         = g_param_spec_string("name",
@@ -122,7 +122,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               "Function name, either built-in or user.",
                               "Constant",
                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
-                              | STATICP);
+                              | G_PARAM_STATIC_STRINGS);
 
     fit_func_pspecs[PROP_FIT_TASK]
         = g_param_spec_object("fit-task",
@@ -130,14 +130,14 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               "GwyFitTask instance used by this function. "
                               "May be NULL if no fitting has been done yet.",
                               GWY_TYPE_FIT_TASK,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     fit_func_pspecs[PROP_USER_FUNC]
         = g_param_spec_object("user-func",
                               "User function",
                               "GwyUserFitFunc wrapped by this function.",
                               GWY_TYPE_USER_FIT_FUNC,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, fit_func_pspecs[i]);

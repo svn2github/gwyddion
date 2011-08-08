@@ -105,21 +105,21 @@ gwy_curve_class_init(GwyCurveClass *klass)
                             "N points",
                             "Number of curve points.",
                             0, G_MAXUINT, 0,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     curve_pspecs[PROP_UNIT_X]
         = g_param_spec_object("unit-x",
                               "X unit",
                               "Physical units of the abscissa values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     curve_pspecs[PROP_UNIT_Y]
         = g_param_spec_object("unit-y",
                               "Y unit",
                               "Physical units of the ordinate values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, curve_pspecs[i]);

@@ -113,21 +113,21 @@ gwy_fit_param_class_init(GwyFitParamClass *klass)
                               "Parameter identifier",
                               "a",
                               G_PARAM_CONSTRUCT_ONLY
-                              | G_PARAM_READWRITE | STATICP);
+                              | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fit_param_pspecs[PROP_POWER_X]
         = g_param_spec_int("power-x",
                            "Power of X",
                            "Power of the abscissa contained in the parameter.",
                            POWER_MIN, POWER_MAX, 0,
-                           G_PARAM_READWRITE | STATICP);
+                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fit_param_pspecs[PROP_POWER_Y]
         = g_param_spec_int("power-y",
                            "Power of Y",
                            "Power of the ordinate contained in the parameter.",
                            POWER_MIN, POWER_MAX, 0,
-                           G_PARAM_READWRITE | STATICP);
+                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     fit_param_pspecs[PROP_ESTIMATE]
         = g_param_spec_string("estimate",
@@ -137,7 +137,7 @@ gwy_fit_param_class_init(GwyFitParamClass *klass)
                               "variables.  No estimate expression means the "
                               "initial parameter estimate will be zero.",
                               NULL,
-                              G_PARAM_READWRITE | STATICP);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, fit_param_pspecs[i]);

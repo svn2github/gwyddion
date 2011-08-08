@@ -27,9 +27,6 @@
 
 G_BEGIN_DECLS
 
-#define STATICP \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
-
 #define ASSIGN_UNITS(dest, src) \
     do { \
         if (src && dest) \

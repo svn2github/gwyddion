@@ -105,7 +105,7 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                             "N points",
                             "Number of surface points.",
                             0, G_MAXUINT, 0,
-                            G_PARAM_READABLE | STATICP);
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     surface_pspecs[PROP_UNIT_XY]
         = g_param_spec_object("unit-xy",
@@ -113,14 +113,14 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                               "Physical units of the lateral dimensions, this "
                               "means x and y values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     surface_pspecs[PROP_UNIT_Z]
         = g_param_spec_object("unit-z",
                               "Z unit",
                               "Physical units of the ordinate values.",
                               GWY_TYPE_UNIT,
-                              G_PARAM_READABLE | STATICP);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, surface_pspecs[i]);
