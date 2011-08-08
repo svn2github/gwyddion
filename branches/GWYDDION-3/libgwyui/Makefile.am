@@ -30,7 +30,7 @@ library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
 
 # Must init
-EXTRA_DIST = version.h.in $(test_default_suppressions)
+EXTRA_DIST = $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers)
 MAINTAINERCLEANFILES =
