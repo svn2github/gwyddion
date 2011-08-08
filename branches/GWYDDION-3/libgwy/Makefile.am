@@ -214,3 +214,5 @@ check-local: check-serializable-types
 check-serializable-types:
 	$(AM_V_at)cd $(srcdir) \
 		&& $(PYTHON) ../build/check-serializable-types.py main.c $(libgwy3_la_SOURCES)
+
+.PHONY: check-serializable-types
