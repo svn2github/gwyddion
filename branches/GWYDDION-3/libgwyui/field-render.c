@@ -85,6 +85,34 @@ gwy_rgba_to_rgba8_cairo(const GwyRGBA *rgba)
     return (alpha << 24) | (blue << 16) | (green << 8) | red;
 }
 
+static inline void
+interpolate_color(const GwyGradientPoint *pts,
+                  guint len,
+                  gdouble x,
+                  GwyRGBA *color)
+{
+    const GwyGradientPoint *pt = pts;
+    guint i;
+
+    /* find the right subinterval */
+    for (i = 0; i < len; i++) {
+        pt = pts + i;
+        if (pt->x == x) {
+            *color = pt->color;
+            return;
+        }
+        if (pt->x > x)
+            break;
+    }
+    const GwyGradientPoint *pt2 = pts + i - 1;
+
+    gdouble t = (x - pt2->x)/(pt->x - pt2->x), mt = 1.0 - t;
+    color->r = t*pt->color.r + mt*pt2->color.r;
+    color->g = t*pt->color.g + mt*pt2->color.g;
+    color->b = t*pt->color.b + mt*pt2->color.b;
+    // Alpha is ignored.  We would have to use gwy_rgba_interpolate().
+}
+
 static InterpolationPoint*
 build_interpolation(guint n, gdouble from, gdouble to, guint res)
 {
@@ -176,7 +204,10 @@ gwy_field_render_pixbuf(const GwyField *field,
 
     guint xres = field->xres, yres = field->yres;
     const gdouble *data = field->data;
+
     gdouble qc = 1.0/(max - min);
+    guint gradlen;
+    const GwyGradientPoint *gradpts = gwy_gradient_get_data(gradient, &gradlen);
 
     // TODO: If width = xto - xfrom and height = yto - yfrom do not interpolate.
     InterpolationPoint *interpx = build_interpolation(width, xfrom, xto, xres),
@@ -197,11 +228,9 @@ gwy_field_render_pixbuf(const GwyField *field,
                          + (rownext[iprev]*wxp + rownext[inext]*wxn)*wyn);
 
             z = qc*(z - min);
-            z = CLAMP(z, 0.0, 1.0);
-            // TODO: Inline the colour calculation
             // TODO: Support pixmaps with alpha
             GwyRGBA rgba;
-            gwy_gradient_color(gradient, z, &rgba);
+            interpolate_color(gradpts, gradlen, CLAMP(z, 0.0, 1.0), &rgba);
             gwy_rgba_to_rgb8_pixel(&rgba, pixrow);
             pixrow += 3;
         }
@@ -263,7 +292,10 @@ gwy_field_render_cairo(const GwyField *field,
 
     guint xres = field->xres, yres = field->yres;
     const gdouble *data = field->data;
+
     gdouble qc = 1.0/(max - min);
+    guint gradlen;
+    const GwyGradientPoint *gradpts = gwy_gradient_get_data(gradient, &gradlen);
 
     // TODO: If width = xto - xfrom and height = yto - yfrom do not interpolate.
     InterpolationPoint *interpx = build_interpolation(width, xfrom, xto, xres),
@@ -284,11 +316,9 @@ gwy_field_render_cairo(const GwyField *field,
                          + (rownext[iprev]*wxp + rownext[inext]*wxn)*wyn);
 
             z = qc*(z - min);
-            z = CLAMP(z, 0.0, 1.0);
-            // TODO: Inline the colour calculation
             // TODO: Support pixmaps with alpha
             GwyRGBA rgba;
-            gwy_gradient_color(gradient, z, &rgba);
+            interpolate_color(gradpts, gradlen, CLAMP(z, 0.0, 1.0), &rgba);
             *pixrow = gwy_rgba_to_rgb8_cairo(&rgba);
         }
     }
