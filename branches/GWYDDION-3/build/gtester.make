@@ -13,28 +13,28 @@ CLEANFILES += \
 # If it succeeds get rid of the core files from expected failures, see
 # https://bugzilla.gnome.org/show_bug.cgi?id=656127
 test: all $(test_program)$(EXEEXT)
-	@$(GTESTER) --verbose $(test_program)$(EXEEXT) $(TEST_FLAGS)
-	@rm -f core core.[0-9]*
+	$(AM_V_at)$(GTESTER) --verbose $(test_program)$(EXEEXT) $(TEST_FLAGS)
+	$(AM_V_at)rm -f core core.[0-9]*
 
 # Produce a test report
 test-report: test-report.html test-report-brief.html
 
 test-report.html: test-report.xml $(top_srcdir)/build/test-report.xsl
-	$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report.xsl test-report.xml >test-report.html
+	$(AM_V_GEN)$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report.xsl test-report.xml >test-report.html
 
 test-report-brief.html: test-report.xml $(top_srcdir)/build/test-report-brief.xsl
-	$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report-brief.xsl test-report.xml >test-report-brief.html
+	$(AM_V_GEN)$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report-brief.xsl test-report.xml >test-report-brief.html
 
 test-report.xml: $(test_program)$(EXEEXT)
-	@-$(GTESTER) $(test_program)$(EXEEXT) $(TEST_FLAGS) -k -o test-report.xml
+	$(AM_V_at)-$(GTESTER) $(test_program)$(EXEEXT) $(TEST_FLAGS) -k -o test-report.xml
 
 # Run the test program but do not execute any tests.  This produces a list of
 # ‘standard’ GLib errors we then filter out.
 $(test_program).supp: $(test_program)$(EXEEXT)
-	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
+	$(AM_V_GEN)$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
 	    --tool=memcheck --leak-check=full --show-reachable=no \
 	    $(test_program)$(EXEEXT) -l >/dev/null 5>$(test_program).supp
-	$(SED) -i -e '/^==/d' $(test_program).supp
+	$(AM_V_AT)$(SED) -i -e '/^==/d' $(test_program).supp
 
 # Run the test program with all tests (unless TEST_FLAGS says otherwise) under
 # valgrind and report any problems.
