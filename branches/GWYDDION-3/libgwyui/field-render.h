@@ -23,15 +23,28 @@
 #include <libgwy/field.h>
 #include <libgwy/gradient.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <cairo/cairo.h>
 
 G_BEGIN_DECLS
 
-void gwy_field_render(const GwyField *field,
-                      GdkPixbuf *pixbuf,
-                      GwyGradient *gradient,
-                      gdouble xfrom, gdouble yfrom,
-                      gdouble xto, gdouble yto,
-                      gdouble min, gdouble max);
+void gwy_field_render_pixbuf(const GwyField *field,
+                             GdkPixbuf *pixbuf,
+                             GwyGradient *gradient,
+                             gdouble xfrom,
+                             gdouble yfrom,
+                             gdouble xto,
+                             gdouble yto,
+                             gdouble min,
+                             gdouble max);
+void gwy_field_render_cairo (const GwyField *field,
+                             cairo_surface_t *surface,
+                             GwyGradient *gradient,
+                             gdouble xfrom,
+                             gdouble yfrom,
+                             gdouble xto,
+                             gdouble yto,
+                             gdouble min,
+                             gdouble max);
 
 G_END_DECLS
 

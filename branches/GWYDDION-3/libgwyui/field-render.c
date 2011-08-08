@@ -66,6 +66,25 @@ gwy_rgba_to_rgba8_color(const GwyRGBA *rgba)
     return alpha | (blue << 8) | (green << 16) | (red << 24);
 }
 
+static inline guint32
+gwy_rgba_to_rgb8_cairo(const GwyRGBA *rgba)
+{
+    guint red = COMPONENT_TO_PIXEL8(rgba->r),
+          green = COMPONENT_TO_PIXEL8(rgba->g),
+          blue = COMPONENT_TO_PIXEL8(rgba->b);
+    return (blue << 16) | (green << 8) | red;
+}
+
+static inline guint32
+gwy_rgba_to_rgba8_cairo(const GwyRGBA *rgba)
+{
+    guint red = COMPONENT_TO_PIXEL8(rgba->r),
+          green = COMPONENT_TO_PIXEL8(rgba->g),
+          blue = COMPONENT_TO_PIXEL8(rgba->b),
+          alpha = COMPONENT_TO_PIXEL8(rgba->a);
+    return (alpha << 24) | (blue << 16) | (green << 8) | red;
+}
+
 static InterpolationPoint*
 build_interpolation(guint n, gdouble from, gdouble to, guint res)
 {
@@ -112,7 +131,7 @@ field_render_empty_range(GdkPixbuf *pixbuf,
 }
 
 /**
- * gwy_field_render:
+ * gwy_field_render_pixbuf:
  * @field: A two-dimensional data field.
  * @pixbuf: A pixbuf.
  * @gradient: A false colour gradient.
@@ -132,12 +151,12 @@ field_render_empty_range(GdkPixbuf *pixbuf,
  * @max smaller than @min renders the gradient inversely.
  **/
 void
-gwy_field_render(const GwyField *field,
-                 GdkPixbuf *pixbuf,
-                 GwyGradient *gradient,
-                 gdouble xfrom, gdouble yfrom,
-                 gdouble xto, gdouble yto,
-                 gdouble min, gdouble max)
+gwy_field_render_pixbuf(const GwyField *field,
+                        GdkPixbuf *pixbuf,
+                        GwyGradient *gradient,
+                        gdouble xfrom, gdouble yfrom,
+                        gdouble xto, gdouble yto,
+                        gdouble min, gdouble max)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(GDK_IS_PIXBUF(pixbuf));
@@ -151,7 +170,7 @@ gwy_field_render(const GwyField *field,
     }
 
     guint width = gdk_pixbuf_get_width(pixbuf);
-    guint height = gdk_pixbuf_get_width(pixbuf);
+    guint height = gdk_pixbuf_get_height(pixbuf);
     guint rowstride = gdk_pixbuf_get_rowstride(pixbuf);
     guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
 
@@ -185,6 +204,92 @@ gwy_field_render(const GwyField *field,
             gwy_gradient_color(gradient, z, &rgba);
             gwy_rgba_to_rgb8_pixel(&rgba, pixrow);
             pixrow += 3;
+        }
+    }
+
+    g_free(interpy);
+    g_free(interpx);
+}
+
+/**
+ * gwy_field_render_cairo:
+ * @field: A two-dimensional data field.
+ * @surface: A cairo image surface of format %CAIRO_FORMAT_RGB24.
+ * @gradient: A false colour gradient.
+ * @xfrom: Horizontal coordinate of the left edge of the area.
+ * @yfrom: Vertical coordinate of the upper edge of the area.
+ * @xto: Horizontal coordinate of the right edge of the area.
+ * @yto: Vertical coordinate of the lower edge of the area.
+ * @min: Value to map to @gradient begining.
+ * @max: Value to map to @gradient end.
+ *
+ * Renders a field to cairo image surface using false colour gradient.
+ *
+ * Parameters defining the area to render are measured in pixels; the entire
+ * area must line within @field.
+ *
+ * The value range, determined by @min and @max, can be arbitrary.  Passing
+ * @max smaller than @min renders the gradient inversely.
+ **/
+void
+gwy_field_render_cairo(const GwyField *field,
+                       cairo_surface_t *surface,
+                       GwyGradient *gradient,
+                       gdouble xfrom, gdouble yfrom,
+                       gdouble xto, gdouble yto,
+                       gdouble min, gdouble max)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(surface);
+    g_return_if_fail(cairo_surface_get_type(surface)
+                     == CAIRO_SURFACE_TYPE_IMAGE);
+    g_return_if_fail(cairo_image_surface_get_format(surface)
+                     == CAIRO_FORMAT_RGB24);
+    g_return_if_fail(GWY_IS_GRADIENT(gradient));
+    g_return_if_fail(xfrom >= 0.0 && xfrom <= xto && xto <= field->xres);
+    g_return_if_fail(yfrom >= 0.0 && yfrom <= yto && yto <= field->yres);
+
+    if (min == max) {
+        // TODO
+        // field_render_empty_range(pixbuf, gradient);
+        return;
+    }
+
+    guint width = cairo_image_surface_get_width(surface);
+    guint height = cairo_image_surface_get_height(surface);
+    guint stride = cairo_image_surface_get_stride(surface);
+    g_assert(stride % 4 == 0);
+    guint32 *pixels = (guint32*)cairo_image_surface_get_data(surface);
+
+    guint xres = field->xres, yres = field->yres;
+    const gdouble *data = field->data;
+    gdouble qc = 1.0/(max - min);
+
+    // TODO: If width = xto - xfrom and height = yto - yfrom do not interpolate.
+    InterpolationPoint *interpx = build_interpolation(width, xfrom, xto, xres),
+                       *interpy = build_interpolation(height, yfrom, yto, yres);
+
+    InterpolationPoint *ipy = interpy;
+    for (guint i = 0; i < height; i++, ipy++) {
+        guint32 *pixrow = pixels + i*(stride/4);
+        const gdouble *rowprev = data + xres*ipy->prev,
+                      *rownext = data + xres*ipy->next;
+        gdouble wyp = ipy->wprev, wyn = ipy->wnext;
+        InterpolationPoint *ipx = interpx;
+
+        for (guint j = 0; j < width; j++, ipx++, pixrow++) {
+            guint iprev = ipx->prev, inext = ipx->next;
+            gdouble wxp = ipx->wprev, wxn = ipx->wnext;
+            gdouble z = ((rowprev[iprev]*wxp + rowprev[inext]*wxn)*wyp
+                         + (rownext[iprev]*wxp + rownext[inext]*wxn)*wyn);
+
+            z = qc*(z - min);
+            z = CLAMP(z, 0.0, 1.0);
+            // TODO: Inline the colour calculation
+            // TODO: Support pixmaps with alpha
+            GwyRGBA rgba;
+            gwy_gradient_color(gradient, z, &rgba);
+            *pixrow = gwy_rgba_to_rgb8_cairo(&rgba);
         }
     }
 

@@ -19,7 +19,8 @@ GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
-	$(srcdir)/field-render.h
+	$(srcdir)/field-render.h \
+	$(srcdir)/raster-view.h
 
 public_built_headers = \
 	$(mkenum_name).h
@@ -45,7 +46,8 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
 
 libgwyui3_la_SOURCES = \
-	field-render.c
+	field-render.c \
+	raster-view.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \
