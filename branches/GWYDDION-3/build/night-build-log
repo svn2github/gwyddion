@@ -134,9 +134,11 @@ function extract_translation_stats() {
 
 function extract_coverage_stats() {
   for dir in $libdirs; do
-    mv -f $projectdir/$dir/$dir-test-report{,-brief}.html .
-    sed -rn '/<table/,/<\/table>/p' $projectdir/$dir/coverage/coverage.html \
-      >$dir-coverage.html
+    if test -s $projectdir/$dir/$dir-test-report.html; then
+      mv -f $projectdir/$dir/$dir-test-report{,-brief}.html .
+      sed -rn '/<table/,/<\/table>/p' $projectdir/$dir/coverage/coverage.html \
+          >$dir-coverage.html
+    fi
   done
 }
 
