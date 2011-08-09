@@ -38,6 +38,6 @@ AC_DEFUN([GWY_PROG_CCLD_OPTIONS],
 [AC_REQUIRE([AC_PROG_CC])dnl
 GWY_options=
 m4_foreach_w([Gwy_Opt],[$2],
-  [GWY_CHECK_PROG_CCLDOPTION(Gwy_Opt, [GWY_options="$GWY_options Gwy_Opt"])])
+  [GWY_CHECK_PROG_CCLD_OPTION(Gwy_Opt, [GWY_options="$GWY_options Gwy_Opt"])])
 GWY_PROG_CCLD_$1="$GWY_options"
 ])
