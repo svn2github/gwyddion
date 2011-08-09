@@ -272,7 +272,8 @@ gwy_fit_func_get_property(GObject *object,
  *
  * Creates a new fitting function.
  *
- * Returns: A new fitting function.  It can return %NULL if @group is invalid
+ * Returns: (transfer full):
+ *          A new fitting function.  It can return %NULL if @group is invalid
  *          or no function of called @name is present in the group.
  **/
 GwyFitFunc*
@@ -443,7 +444,8 @@ gwy_fit_func_param_number(GwyFitFunc *fitfunc,
  * that all three new parameters @a, @b, @c have units that are fixed integer
  * powers of the abscissa and ordinate units, namely (0, 1), (1, 0) and (0, 0).
  *
- * Returns: A newly created @GwyUnit with the units of the @i-th parameter.
+ * Returns: (transfer full):
+ *          A newly created @GwyUnit with the units of the @i-th parameter.
  **/
 GwyUnit*
 gwy_fit_func_param_units(GwyFitFunc *fitfunc,
@@ -716,7 +718,8 @@ update_fit_task(GwyFitFunc *fitfunc)
  * the returned fit task freely.  However, the function and data is set by
  * @fitfunc and must not be changed.
  *
- * Returns: The fit task object of a fitting function.  The returned
+ * Returns: (transfer none):
+ *          The fit task object of a fitting function.  The returned
  *          object is owned by @fitfunc and no reference is added.
  **/
 GwyFitTask*
@@ -766,7 +769,8 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
  * This method can be called both with built-in and user-defined fitting
  * functions, in fact, is can be used to determine if a function is built-in.
  *
- * Returns: The user fitting function resource corresponding to @fitfunc
+ * Returns: (transfer none) (allow-none):
+ *          The user fitting function resource corresponding to @fitfunc
  *          (no reference added), or %NULL if the function is built-in.
  **/
 GwyUserFitFunc*

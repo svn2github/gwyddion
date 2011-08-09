@@ -187,7 +187,8 @@ gwy_stramong(const gchar *str,
  * On GNU systems with glibc at least 2.1 this is a just a trivial memmem()
  * wrapper.  On other systems it emulates memmem() behaviour.
  *
- * Returns: Pointer to the first byte of memory block in @haystack that matches
+ * Returns: (transfer none):
+ *          Pointer to the first byte of memory block in @haystack that matches
  *          @needle; %NULL if no such block exists.
  **/
 gpointer

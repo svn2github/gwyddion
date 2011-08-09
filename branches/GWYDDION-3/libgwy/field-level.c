@@ -811,7 +811,8 @@ find_shifts_of_good_rows(GwyLine *shifts,
  * Note this method calculates relative shifts, although gwy_field_shift_rows()
  * takes absolute shifts.
  *
- * Returns: A newly created one-dimensional data line with the same dimension
+ * Returns: (transfer full):
+ *          A newly created one-dimensional data line with the same dimension
  *          as the field vertical size, containing the relative shifts.
  **/
 GwyLine*

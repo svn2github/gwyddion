@@ -161,7 +161,8 @@ gwy_fit_task_class_init(GwyFitTaskClass *klass)
  *
  * Creates a new non-linear least-squares fitting task.
  *
- * Returns: A new non-linear least-squares fitting task.
+ * Returns: (transfer full):
+ *          A new non-linear least-squares fitting task.
  **/
 GwyFitTask*
 gwy_fit_task_new(void)
@@ -809,7 +810,8 @@ gwy_fit_task_eval_residuum(GwyFitTask *fittask)
  * fitting algorithm tunables.  However, certain low-level functions would
  * break @fittask, see the introductory section for details.
  *
- * Returns: The associated fitter.
+ * Returns: (transfer none):
+ *          The associated fitter.
  **/
 GwyFitter*
 gwy_fit_task_get_fitter(GwyFitTask *fittask)

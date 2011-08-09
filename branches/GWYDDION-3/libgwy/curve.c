@@ -376,7 +376,8 @@ gwy_curve_get_property(GObject *object,
  * mainly for language bindings, gwy_curve_new_from_data() is usually more
  * useful.
  *
- * Returns: A new curve.
+ * Returns: (transfer full):
+ *          A new curve.
  **/
 GwyCurve*
 gwy_curve_new(void)
@@ -394,7 +395,8 @@ gwy_curve_new(void)
  * values.  Remember to run gwy_curve_sort() to sort the points if you fill
  * the data with unsorted points.
  *
- * Returns: A new curve.
+ * Returns: (transfer full):
+ *          A new curve.
  **/
 GwyCurve*
 gwy_curve_new_sized(guint n)
@@ -407,14 +409,16 @@ gwy_curve_new_sized(guint n)
 
 /**
  * gwy_curve_new_from_data:
- * @points: Array of @n points with the curve data.
+ * @points: (array length=n):
+ *          Array of @n points with the curve data.
  * @n: Number of points.
  *
  * Creates a new curve, filling it with provided points.
  *
  * The points will be sorted by abscissa values.
  *
- * Returns: A new curve.
+ * Returns: (transfer full):
+ *          A new curve.
  **/
 GwyCurve*
 gwy_curve_new_from_data(const GwyXY *points,
@@ -440,7 +444,8 @@ gwy_curve_new_from_data(const GwyXY *points,
  * curve will not contain any points. Use gwy_curve_duplicate() to completely
  * duplicate a curve including data.
  *
- * Returns: A new empty data curve.
+ * Returns: (transfer full):
+ *          A new empty curve.
  **/
 GwyCurve*
 gwy_curve_new_alike(const GwyCurve *model)
@@ -465,7 +470,8 @@ gwy_curve_new_alike(const GwyCurve *model)
  * Data are physically copied, i.e. changing the new curve data does not change
  * @curve's data and vice versa.
  *
- * Returns: A new curve.
+ * Returns: (transfer full):
+ *          A new curve.
  **/
 GwyCurve*
 gwy_curve_new_part(const GwyCurve *curve,
@@ -522,7 +528,8 @@ copy_line_to_curve(const GwyLine *line,
  *
  * Abscissa and ordinate units will correspond to @line's units.
  *
- * Returns: A new curve.
+ * Returns: (transfer full):
+ *          A new curve.
  **/
 GwyCurve*
 gwy_curve_new_from_line(const GwyLine *line)
@@ -695,7 +702,7 @@ regularise(const GwyCurve *curve,
  * possibly up to some rounding errors.  Otherwise linear interpolation is
  * used.
  *
- * Returns: (allow-none):
+ * Returns: (transfer full) (allow-none):
  *          A new one-dimensional data line or %NULL if the curve contains no
  *          points.
  **/
@@ -723,7 +730,7 @@ gwy_curve_regularize_full(const GwyCurve *curve,
  * Values are lineary interpolated between curve points.  Values outside the
  * curve abscissa are replaced with the boundary values.
  *
- * Returns: (allow-none):
+ * Returns: (transfer full) (allow-none):
  *          A new one-dimensional data line or %NULL if the curve contains no
  *          points.
  **/
@@ -808,7 +815,8 @@ gwy_curve_get_unit_y(GwyCurve *curve)
  * values of neighbour points as different values.  However, if the intervals
  * differ by several orders of magnitude this is not really guaranteed.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_curve_format_x(GwyCurve *curve,
@@ -842,7 +850,8 @@ gwy_curve_format_x(GwyCurve *curve,
  *
  * Finds a suitable format for displaying values in a data curve.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_curve_format_y(GwyCurve *curve,

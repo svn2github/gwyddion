@@ -299,7 +299,8 @@ field_value_dist_discr(const GwyField *field,
  * Pass @max <= @min to calculate the distribution in the full data range
  * (with masking still considered).
  *
- * Returns: A new one-dimensional data line with the value distribution.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the value distribution.
  **/
 GwyLine*
 gwy_field_value_dist(const GwyField *field,
@@ -497,7 +498,8 @@ slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * Pass @max <= @min to calculate the distribution in the full data range
  * (with masking still considered).
  *
- * Returns: A new one-dimensional data line with the slope distribution.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the slope distribution.
  **/
 GwyLine*
 gwy_field_slope_dist(const GwyField *field,
@@ -872,7 +874,8 @@ row_level_and_count(const gdouble *in,
  * words, the weighting is fair: each contributing pixel has the same influence
  * on the result.
  *
- * Returns: A new one-dimensional data line with the ACF.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the ACF.
  **/
 GwyLine*
 gwy_field_row_acf(const GwyField *field,
@@ -1000,7 +1003,8 @@ fail:
  * to the number of contributing pixels.  In other words, the weighting is
  * fair: each contributing pixel has the same influence on the result.
  *
- * Returns: A new one-dimensional data line with the PSDF.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the PSDF.
  **/
 GwyLine*
 gwy_field_row_psdf(const GwyField *field,
@@ -1134,7 +1138,8 @@ fail:
  * words, the weighting is fair: each contributing pixel has the same influence
  * on the result.
  *
- * Returns: A new one-dimensional data line with the HHCF.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the HHCF.
  **/
 GwyLine*
 gwy_field_row_hhcf(const GwyField *field,

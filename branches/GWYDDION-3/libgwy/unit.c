@@ -941,7 +941,8 @@ canonicalize(Unit *unit)
  *
  * The precision of the returned format is left at the default value (3).
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_unit_format_for_power10(const GwyUnit *unit,
@@ -975,7 +976,8 @@ gwy_unit_format_for_power10(const GwyUnit *unit,
  *
  * Finds a format for representing a range of values with given resolution.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_unit_format_with_resolution(const GwyUnit *unit,
@@ -1019,7 +1021,8 @@ gwy_unit_format_with_resolution(const GwyUnit *unit,
  * Finds a format for representing a values with given number of significant
  * digits.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_unit_format_with_digits(const GwyUnit *unit,

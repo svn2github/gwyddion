@@ -123,7 +123,8 @@ gwy_serializable_done(GwySerializable *serializable)
  * This is a copy-constructor.  You can duplicate a %NULL, too, but you are
  * discouraged from doing it.
  *
- * Returns: The newly created object copy.
+ * Returns: (transfer full):
+ *          The newly created object copy.
  **/
 GObject*
 gwy_serializable_duplicate(GwySerializable *serializable)

@@ -387,7 +387,8 @@ gwy_surface_get_property(GObject *object,
  * exists mainly for language bindings, gwy_surface_new_from_data() is usually
  * more useful.
  *
- * Returns: A new surface.
+ * Returns: (transfer full):
+ *          A new surface.
  **/
 GwySurface*
 gwy_surface_new(void)
@@ -404,7 +405,8 @@ gwy_surface_new(void)
  * The surface will contain the speficied number of points with uninitialised
  * values.
  *
- * Returns: A new surface.
+ * Returns: (transfer full):
+ *          A new surface.
  **/
 GwySurface*
 gwy_surface_new_sized(guint n)
@@ -422,7 +424,8 @@ gwy_surface_new_sized(guint n)
  *
  * Creates a new surface, filling it with provided points.
  *
- * Returns: A new surface.
+ * Returns: (transfer full):
+ *          A new surface.
  **/
 GwySurface*
 gwy_surface_new_from_data(const GwyXYZ *points,
@@ -447,7 +450,8 @@ gwy_surface_new_from_data(const GwyXYZ *points,
  * new surface will not contain any points.  Use gwy_surface_duplicate() to
  * completely duplicate a surface including data.
  *
- * Returns: A new empty data surface.
+ * Returns: (transfer full):
+ *          A new empty surface.
  **/
 GwySurface*
 gwy_surface_new_alike(const GwySurface *model)
@@ -474,7 +478,8 @@ gwy_surface_new_alike(const GwySurface *model)
  * Data are physically copied, i.e. changing the new surface data does not
  * change @surface's data and vice versa.
  *
- * Returns: A new surface.
+ * Returns: (transfer full):
+ *          A new surface.
  **/
 GwySurface*
 gwy_surface_new_part(const GwySurface *surface,
@@ -550,7 +555,8 @@ copy_field_to_surface(const GwyField *field,
  *
  * Lateral and value units will correspond to @field's units.
  *
- * Returns: A new surface.
+ * Returns: (transfer full):
+ *          A new surface.
  **/
 GwySurface*
 gwy_surface_new_from_field(const GwyField *field)
@@ -875,7 +881,7 @@ regularise(const GwySurface *surface,
  * still can has a dramatic effect on speed and resource consumption.
  * Otherwise the interpolated and exterpolated values are method-dependent.
  *
- * Returns: (allow-none):
+ * Returns: (transfer full) (allow-none):
  *          A new two-dimensional data field or %NULL if the surface contains
  *          no points.
  **/
@@ -907,7 +913,7 @@ gwy_surface_regularize_full(const GwySurface *surface,
  *
  * Creates a two-dimensional data field from a surface.
  *
- * Returns: (allow-none):
+ * Returns: (transfer full) (allow-none):
  *          A new two-dimensional data field or %NULL if the surface contains
  *          no points.
  **/
@@ -978,7 +984,8 @@ gwy_surface_get_unit_z(GwySurface *surface)
  * values of neighbour points as different values.  However, if the intervals
  * differ by several orders of magnitude this is not really guaranteed.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_surface_format_xy(GwySurface *surface,
@@ -1016,7 +1023,8 @@ gwy_surface_format_xy(GwySurface *surface,
  *
  * Finds a suitable format for displaying values in a data surface.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_surface_format_z(GwySurface *surface,
@@ -1038,7 +1046,6 @@ gwy_surface_format_z(GwySurface *surface,
     return gwy_unit_format_with_digits(gwy_surface_get_unit_z(surface),
                                        style, max - min, 3);
 }
-
 
 /**
  * SECTION: surface

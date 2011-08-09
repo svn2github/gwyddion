@@ -674,7 +674,8 @@ gwy_brick_get_property(GObject *object,
  * parameterless constructor exists mainly for language bindings,
  * gwy_brick_new_sized() and gwy_brick_new_alike() are usually more useful.
  *
- * Returns: A new three-dimensional data brick.
+ * Returns: (transfer full):
+ *          A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new(void)
@@ -692,7 +693,8 @@ gwy_brick_new(void)
  *
  * Creates a new three-dimensional data brick of specified dimensions.
  *
- * Returns: A new three-dimensional data brick.
+ * Returns: (transfer full):
+ *          A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new_sized(guint xres,
@@ -723,7 +725,8 @@ gwy_brick_new_sized(guint xres,
  * except the data that will be either zeroes or uninitialised.  Use
  * gwy_brick_duplicate() to completely duplicate a brick including data.
  *
- * Returns: A new three-dimensional data brick.
+ * Returns: (transfer full):
+ *          A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new_alike(const GwyBrick *model,
@@ -759,7 +762,8 @@ gwy_brick_new_alike(const GwyBrick *model,
  * @brick's data and vice versa.  Physical dimensions of the new brick are
  * calculated to correspond to the extracted part.
  *
- * Returns: A new three-dimensional data brick.
+ * Returns: (transfer full):
+ *          A new three-dimensional data brick.
  **/
 GwyBrick*
 gwy_brick_new_part(const GwyBrick *brick,
@@ -1524,7 +1528,8 @@ gwy_brick_check_target(const GwyBrick *brick,
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_brick_format_xy(const GwyBrick *brick,
@@ -1550,7 +1555,8 @@ gwy_brick_format_xy(const GwyBrick *brick,
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_brick_format_z(const GwyBrick *brick,

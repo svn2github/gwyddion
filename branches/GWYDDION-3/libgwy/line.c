@@ -443,7 +443,8 @@ gwy_line_get_property(GObject *object,
  * parameterless constructor exists mainly for language bindings,
  * gwy_line_new_sized() and gwy_line_new_alike() are usually more useful.
  *
- * Returns: A new one-dimensional data line.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line.
  **/
 GwyLine*
 gwy_line_new(void)
@@ -459,7 +460,8 @@ gwy_line_new(void)
  *
  * Creates a new one-dimensional data line of specified dimension.
  *
- * Returns: A new one-dimensional data line.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line.
  **/
 GwyLine*
 gwy_line_new_sized(guint res,
@@ -486,7 +488,8 @@ gwy_line_new_sized(guint res,
  * except the data that will be either zeroes or uninitialised.  Use
  * gwy_line_duplicate() to completely duplicate a line including data.
  *
- * Returns: A new one-dimensional data line.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line.
  **/
 GwyLine*
 gwy_line_new_alike(const GwyLine *model,
@@ -746,7 +749,8 @@ gwy_line_limit_parts(const GwyLine *src,
  * @line's data and vice versa.  Physical dimensions of the new line are
  * calculated to correspond to the extracted part.
  *
- * Returns: A new one-dimensional data line.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line.
  **/
 GwyLine*
 gwy_line_new_part(const GwyLine *line,
@@ -784,7 +788,8 @@ gwy_line_new_part(const GwyLine *line,
  *
  * Creates a new one-dimensional data line by resampling another line.
  *
- * Returns: A new one-dimensional data line.
+ * Returns: (transfer full):
+ *          A new one-dimensional data line.
  **/
 GwyLine*
 gwy_line_new_resampled(const GwyLine *line,
@@ -999,7 +1004,8 @@ gwy_line_get_unit_y(const GwyLine *line)
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_line_format_x(const GwyLine *line,
@@ -1019,7 +1025,8 @@ gwy_line_format_x(const GwyLine *line,
  *
  * Finds a suitable format for displaying values in a data line.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_line_format_y(const GwyLine *line,

@@ -384,7 +384,8 @@ gwy_mask_field_get_property(GObject *object,
  * parameterless constructor exists mainly for language bindings,
  * gwy_mask_field_new_sized() is usually more useful.
  *
- * Returns: A new two-dimensional mask field.
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_new(void)
@@ -401,7 +402,8 @@ gwy_mask_field_new(void)
  *
  * Creates a new two-dimensional mask field of specified dimensions.
  *
- * Returns: A new two-dimensional mask field.
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_new_sized(guint xres,
@@ -619,7 +621,8 @@ gwy_mask_field_limit_parts(const GwyMaskField *src,
  * Data are physically copied, i.e. changing the new mask field data does not
  * change @field's data and vice versa.
  *
- * Returns: A new two-dimensional mask field.
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_new_part(const GwyMaskField *field,
@@ -645,7 +648,8 @@ gwy_mask_field_new_part(const GwyMaskField *field,
  *
  * Creates a new two-dimensional mask field by resampling another mask field.
  *
- * Returns: A new two-dimensional mask field.
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_new_resampled(const GwyMaskField *field,
@@ -687,7 +691,8 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
  * open or semi-open intervals, namely [-∞,@lower) ∪ (@upper,∞] and
  * (@lower,@upper).
  *
- * Returns: A new two-dimensional mask field.
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_new_from_field(const GwyField *field,

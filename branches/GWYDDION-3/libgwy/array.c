@@ -266,7 +266,8 @@ gwy_array_size(GwyArray *array)
  *
  * Returns pointer to an item of an array.
  *
- * Returns: Item at position @n, %NULL if there is no such item.
+ * Returns: (transfer none):
+ *          Item at position @n, %NULL if there is no such item.
  **/
 gpointer
 gwy_array_get(GwyArray *array,
@@ -318,7 +319,8 @@ gwy_array_updated(GwyArray *array,
  *
  * Inserts items into an array.
  *
- * Returns: Pointer to the first inserted item in the array, for convenience.
+ * Returns: (transfer none):
+ *          Pointer to the first inserted item in the array, for convenience.
  **/
 gpointer
 gwy_array_insert(GwyArray *array,
@@ -364,7 +366,8 @@ gwy_array_insert(GwyArray *array,
  *
  * Appends items into an array.
  *
- * Returns: Pointer to the first appended item in the array, for convenience.
+ * Returns: (transfer none):
+ *          Pointer to the first appended item in the array, for convenience.
  **/
 gpointer
 gwy_array_append(GwyArray *array,

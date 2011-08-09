@@ -606,7 +606,8 @@ fitter_invert_hessian(Fitter *fitter)
  *
  * Creates a new non-linear least-squares fitter.
  *
- * Returns: A new non-linear least-squares fitter.
+ * Returns: (transfer full):
+ *          A new non-linear least-squares fitter.
  **/
 GwyFitter*
 gwy_fitter_new(void)

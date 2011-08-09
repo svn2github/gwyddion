@@ -507,7 +507,8 @@ gwy_field_curvature(const GwyField *field,
  * returned.  This means in both cases you have to release the returned field
  * using g_object_unref().
  *
- * Returns: A field containing interpolation coefficients for @field.
+ * Returns: (transfer full):
+ *          A field containing interpolation coefficients for @field.
  **/
 GwyField*
 gwy_field_interpolation_coeffs(GwyField *field,
@@ -552,7 +553,8 @@ gwy_field_interpolation_coeffs(GwyField *field,
  * See gwy_field_value_interpolated() for a discussion of precise meaning of
  * the coordinates arguments.
  *
- * Returns: A newly created curve.
+ * Returns: (transfer full):
+ *          A newly created curve.
  **/
 GwyCurve*
 gwy_field_profile(GwyField *field,

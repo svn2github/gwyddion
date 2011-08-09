@@ -176,7 +176,8 @@ gwy_line_multiply(GwyLine *line,
  * @row while the vertical dimensions to @column.  The value units of the
  * result are equal to the product of the value units of the two lines.
  *
- * Returns: A newly created field.
+ * Returns: (transfer full):
+ *          A newly created field.
  **/
 GwyField*
 gwy_line_outer_product(const GwyLine *column,

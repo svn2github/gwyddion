@@ -1366,7 +1366,8 @@ gwy_container_gis_string(GwyContainer *container,
  * g_object_ref() if you want to access it even when @container may cease
  * to exist.
  *
- * Returns: The object as #gpointer.
+ * Returns: (transfer none):
+ *          The object as #gpointer.
  **/
 gpointer
 gwy_container_get_object(GwyContainer *container, GQuark key)
@@ -2397,8 +2398,10 @@ pstring_compare(const void *p, const void *q)
  * Only simple data types are supported as serialisation of compound objects is
  * not controllable.
  *
- * Returns: A pointer array, each item containing string with one container
- *          item representation (name, type, value).  The array is sorted by name.
+ * Returns: (transfer full) (array zero-terminated=1):
+ *          A pointer array, each item containing string with one container
+ *          item representation (name, type, value).  The array is sorted by
+ *          name.
  **/
 gchar**
 gwy_container_dump_to_text(GwyContainer *container)

@@ -919,7 +919,8 @@ make_gaussian_kernel(GwyLine *kernel,
  * field then extract the part to a temporary field and use gwy_field_extend()
  * on that.
  *
- * Returns: A newly created field.
+ * Returns: (transfer full):
+ *          A newly created field.
  **/
 GwyField*
 gwy_field_extend(const GwyField *field,

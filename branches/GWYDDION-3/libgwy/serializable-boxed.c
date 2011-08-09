@@ -215,7 +215,8 @@ gwy_serializable_boxed_itemize(GType type,
  *
  * Constructs a serialisable struct type from its flattened representation.
  *
- * Returns: Newly allocated boxed type with the deserialised data, possibly
+ * Returns: (transfer full):
+ *          Newly allocated boxed type with the deserialised data, possibly
  *          %NULL on fatal failure.
  **/
 gpointer

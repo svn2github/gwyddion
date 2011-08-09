@@ -186,7 +186,8 @@ swap_xy(const GwyField *source,
  * and then benefit from the improved memory locality and simplicity of
  * row-wise processing.
  *
- * Returns: A new two-dimensional data field containing the transposed part
+ * Returns: (transfer full):
+ *          A new two-dimensional data field containing the transposed part
  *          of @field.
  **/
 GwyField*
@@ -268,7 +269,8 @@ gwy_field_transpose(const GwyField *src,
  * The real dimensions and, depending on @transform, the offsets are
  * transformed accordingly.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new_rotated_simple(const GwyField *field,

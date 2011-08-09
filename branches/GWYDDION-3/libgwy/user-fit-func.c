@@ -407,7 +407,8 @@ fail:
  *
  * Creates a new user fitting function.
  *
- * Returns: A new free-standing user fitting function.
+ * Returns: (transfer full):
+ *          A new free-standing user fitting function.
  **/
 GwyUserFitFunc*
 gwy_user_fit_func_new(void)
@@ -533,7 +534,8 @@ gwy_user_fit_func_n_params(GwyUserFitFunc *userfitfunc)
  *
  * Obtains one user fitting function parameter.
  *
- * Returns: The parameter, owned by @userfitfunc.  You can modify
+ * Returns: (transfer none):
+ *          The parameter, owned by @userfitfunc.  You can modify
  *          to change the parameter properties.  If the formula changes
  *          the parameter object may become invalid.
  **/
@@ -558,7 +560,8 @@ gwy_user_fit_func_param(GwyUserFitFunc *userfitfunc,
  *
  * Obtains one user fitting function parameter given by index.
  *
- * Returns: The parameter, owned by @userfitfunc.  You can modify
+ * Returns: (transfer none):
+ *          The parameter, owned by @userfitfunc.  You can modify
  *          to change the parameter properties.  If the formula changes
  *          the parameter object may become invalid.
  **/

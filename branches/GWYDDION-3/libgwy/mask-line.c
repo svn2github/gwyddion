@@ -480,7 +480,8 @@ gwy_mask_line_limit_parts(const GwyMaskLine *src,
  * parameterless constructor exists mainly for language bindings,
  * gwy_mask_line_new_sized() is usually more useful.
  *
- * Returns: A new one-dimensional mask line.
+ * Returns: (transfer full):
+ *          A new one-dimensional mask line.
  **/
 GwyMaskLine*
 gwy_mask_line_new(void)
@@ -496,7 +497,8 @@ gwy_mask_line_new(void)
  *
  * Creates a new one-dimensional mask line of specified dimension.
  *
- * Returns: A new one-dimensional mask line.
+ * Returns: (transfer full):
+ *          A new one-dimensional mask line.
  **/
 GwyMaskLine*
 gwy_mask_line_new_sized(guint res,
@@ -527,7 +529,8 @@ gwy_mask_line_new_sized(guint res,
  * Data are physically copied, i.e. changing the new mask line data does not
  * change @line's data and vice versa.
  *
- * Returns: A new one-dimensional mask line.
+ * Returns: (transfer full):
+ *          A new one-dimensional mask line.
  **/
 GwyMaskLine*
 gwy_mask_line_new_part(const GwyMaskLine *line,
@@ -552,7 +555,8 @@ gwy_mask_line_new_part(const GwyMaskLine *line,
  *
  * Creates a new one-dimensional mask line by resampling another mask line.
  *
- * Returns: A new one-dimensional mask line.
+ * Returns: (transfer full):
+ *          A new one-dimensional mask line.
  **/
 GwyMaskLine*
 gwy_mask_line_new_resampled(const GwyMaskLine *line,

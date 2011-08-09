@@ -616,7 +616,8 @@ swap_xy_src_aligned(const GwyMaskField *source,
  *
  * Transposes a mask field, making rows columns and vice versa.
  *
- * Returns: A new two-dimensional mask field containing the transposed part
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field containing the transposed part
  *          of @field.
  **/
 GwyMaskField*
@@ -698,7 +699,8 @@ gwy_mask_field_transpose(const GwyMaskField *src,
  *
  * Rotates a two-dimensional mask field by a multiple by 90 degrees.
  *
- * Returns: A new two-dimensional mask field.
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_new_rotated_simple(const GwyMaskField *field,

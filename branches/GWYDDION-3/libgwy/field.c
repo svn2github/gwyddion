@@ -577,7 +577,8 @@ gwy_field_get_property(GObject *object,
  * parameterless constructor exists mainly for language bindings,
  * gwy_field_new_sized() and gwy_field_new_alike() are usually more useful.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new(void)
@@ -594,7 +595,8 @@ gwy_field_new(void)
  *
  * Creates a new two-dimensional data field of specified dimensions.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new_sized(guint xres,
@@ -623,7 +625,8 @@ gwy_field_new_sized(guint xres,
  * except the data that will be either zeroes or uninitialised.  Use
  * gwy_field_duplicate() to completely duplicate a field including data.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new_alike(const GwyField *model,
@@ -657,7 +660,8 @@ gwy_field_new_alike(const GwyField *model,
  * @field's data and vice versa.  Physical dimensions of the new field are
  * calculated to correspond to the extracted part.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new_part(const GwyField *field,
@@ -700,7 +704,8 @@ gwy_field_new_part(const GwyField *field,
  *
  * Creates a new two-dimensional data field by resampling another field.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new_resampled(const GwyField *field,
@@ -735,7 +740,8 @@ gwy_field_new_resampled(const GwyField *field,
  *
  * Creates a new two-dimensional data field from a mask field.
  *
- * Returns: A new two-dimensional data field.
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_new_from_mask(const GwyMaskField *mask,
@@ -1542,7 +1548,8 @@ gwy_field_check_mask(const GwyField *field,
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_field_format_xy(const GwyField *field,
@@ -1565,7 +1572,8 @@ gwy_field_format_xy(const GwyField *field,
  *
  * Finds a suitable format for displaying values in a data field.
  *
- * Returns: A newly created value format.
+ * Returns: (transfer full):
+ *          A newly created value format.
  **/
 GwyValueFormat*
 gwy_field_format_z(const GwyField *field,
@@ -1581,7 +1589,6 @@ gwy_field_format_z(const GwyField *field,
     return gwy_unit_format_with_digits(gwy_field_get_unit_z(field),
                                        style, max - min, 3);
 }
-
 
 /**
  * SECTION: field

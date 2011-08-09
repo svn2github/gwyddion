@@ -1177,7 +1177,8 @@ construct_filename(const gchar *resource_name)
  *
  * The resource is created as free-standing.
  *
- * Returns: A newly created resource object.
+ * Returns: (transfer full):
+ *          A newly created resource object.
  **/
 GwyResource*
 gwy_resource_load(const gchar *filename_sys,
