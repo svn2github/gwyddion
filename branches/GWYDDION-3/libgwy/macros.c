@@ -34,7 +34,7 @@
  * the original functions by setting the resource variable to an
  * unallocated/invalid state (typically %NULL).  Similar macros that work with
  * objects are described in section
- * <link linkend="libgwy-object-utils">Object utils<link>.
+ * <link linkend="libgwy-object-utils">Object utils</link>.
  * They improve readability of code such as #GObjectClass.dispose() methods
  * that can simply do
  * |[
