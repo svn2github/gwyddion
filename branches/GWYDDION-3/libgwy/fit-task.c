@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <glib.h>
-#include "libgwy/macros.h"
+#include "libgwy/object-utils.h"
 #include "libgwy/fit-task.h"
 #include "libgwy/types.h"
 #include "libgwy/math-internal.h"

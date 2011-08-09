@@ -22,6 +22,7 @@
 #ifndef __LIBGWY_OBJECT_INTERNAL_H__
 #define __LIBGWY_OBJECT_INTERNAL_H__
 
+#include "libgwy/object-utils.h"
 #include "libgwy/error-list.h"
 #include "libgwy/serializable.h"
 

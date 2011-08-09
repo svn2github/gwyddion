@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <glib/gi18n-lib.h>
-#include "libgwy/macros.h"
+#include "libgwy/object-utils.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/main.h"
 #include "libgwy/serializable.h"

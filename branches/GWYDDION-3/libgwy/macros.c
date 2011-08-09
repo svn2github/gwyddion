@@ -32,14 +32,18 @@
  *
  * Several macros are wrappers of resource freeing functions.  They differ from
  * the original functions by setting the resource variable to an
- * unallocated/invalid state (typically %NULL).  This improves readability
- * of code such as #GObjectClass.dispose() methods that can simply do
+ * unallocated/invalid state (typically %NULL).  Similar macros that work with
+ * objects are described in section
+ * <link linkend="libgwy-object-utils">Object utils<link>.
+ * They improve readability of code such as #GObjectClass.dispose() methods
+ * that can simply do
  * |[
- * GWY_SIGNAL_HANDLER_DISCONNECT(object, handler);
- * GWY_OBJECT_UNREF(object);
+ * GWY_STRING_FREE(object->str);
+ * GWY_SIGNAL_HANDLER_DISCONNECT(object->member_object, handler);
+ * GWY_OBJECT_UNREF(object->member_object);
  * ]|
- * if they know @object and @handler have either valid values or they are nul.
- * This code can be executed several times without errors from GLib.
+ * if they know @object and @handler have either valid values or they are
+ * %NULL.  This code can be executed several times without errors from GLib.
  **/
 
 /**
@@ -110,37 +114,6 @@
  *
  * This is an idempotent wrapper of g_slice_free(): if @ptr is not %NULL
  * g_free() is called on it and @ptr is set to %NULL.
- *
- * This macro may evaluate its arguments several times.
- * This macro is usable as a single statement.
- **/
-
-/**
- * GWY_OBJECT_UNREF:
- * @obj: Pointer to #GObject or %NULL (must be an l-value).
- *
- * Unreferences an object if it exists.
- *
- * This is an idempotent wrapper of g_object_unref(): if @obj is not %NULL
- * g_object_unref() is called on it and @obj is set to %NULL.
- *
- * If the object reference count is greater than one ensure it is referenced
- * elsewhere, otherwise it leaks memory.
- *
- * This macro may evaluate its arguments several times.
- * This macro is usable as a single statement.
- **/
-
-/**
- * GWY_SIGNAL_HANDLER_DISCONNECT:
- * @obj: Pointer to #GObject or %NULL.
- * @hid: Id of a signal handler connected to @obj, or 0 (must be an l-value).
- *
- * Disconnects a signal handler if it exists.
- *
- * This is an idempotent wrapper of g_signal_handler_disconnect(): if @hid is
- * nonzero and @obj is not %NULL, the signal handler identified by
- * @hid is disconnected and @hid is set to 0.
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.

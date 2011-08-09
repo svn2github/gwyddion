@@ -283,7 +283,7 @@ gwy_str_next_line(gchar **buffer)
 
 /**
  * SECTION: strfuncs
- * @title: strfuncs
+ * @title: String functions
  * @short_description: String utility functions
  **/
 

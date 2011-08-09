@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <math.h>
-#include "libgwy/macros.h"
+#include "libgwy/object-utils.h"
 #include "libgwy/brick.h"
 #include "libgwy/brick-arithmetic.h"
 #include "libgwy/math-internal.h"

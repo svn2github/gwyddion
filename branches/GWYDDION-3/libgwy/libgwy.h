@@ -62,6 +62,7 @@
 #include <libgwy/mask-iter.h>
 #include <libgwy/mask-line.h>
 #include <libgwy/math.h>
+#include <libgwy/object-utils.h>
 #include <libgwy/pack.h>
 #include <libgwy/rand.h>
 #include <libgwy/resource.h>

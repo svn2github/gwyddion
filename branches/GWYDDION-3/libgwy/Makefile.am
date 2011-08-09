@@ -61,6 +61,7 @@ public_headers = \
 	$(srcdir)/mask-iter.h \
 	$(srcdir)/mask-line.h \
 	$(srcdir)/math.h \
+	$(srcdir)/object-utils.h \
 	$(srcdir)/pack.h \
 	$(srcdir)/rand.h \
 	$(srcdir)/resource.h \
@@ -157,6 +158,7 @@ libgwy3_la_SOURCES = \
 	mask-line-arithmetic.c \
 	math.c \
 	object-internal.c \
+	object-utils.c \
 	pack.c \
 	rand.c \
 	resource.c \
