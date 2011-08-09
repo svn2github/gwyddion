@@ -89,7 +89,7 @@ void     gwy_field_apply_func (GwyField *field,
                                const GwyFieldPart *fpart,
                                const GwyMaskField *mask,
                                GwyMaskingType masking,
-                               GwyRealFunc func,
+                               GwyRealFunc function,
                                gpointer user_data);
 void     gwy_field_add_field  (const GwyField *src,
                                const GwyFieldPart *srcpart,

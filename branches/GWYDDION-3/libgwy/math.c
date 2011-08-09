@@ -772,16 +772,19 @@ gwy_linalg_invert(gdouble *a,
 
 /**
  * gwy_linear_fit:
- * @function: Function to fit.
+ * @function: (scope call):
+ *            Function to fit.
  * @npoints: Number of fitted points, it must be larger than the number of
  *           parameters.
- * @params: Array of length @nparams to store the parameters (coefficients)
+ * @params: (out) (array length=nparams):
+ *          Array of length @nparams to store the parameters (coefficients)
  *          corresponding to the minimum on success.  It will be overwritten
  *          also on failure but not with anything useful.
  * @nparams: The number of parameters.
  * @residuum: Location to store the residual sum of squares to, or %NULL if
  *            you are not interested.
- * @user_data: User data to pass to @function.
+ * @user_data: (closure function):
+ *             User data to pass to @function.
  *
  * Performs a linear least-squares fit.
  *

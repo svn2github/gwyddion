@@ -755,7 +755,8 @@ add_from_list(GPtrArray *paths,
  * "/home/yeti/.gwyddion3", "/usr/local/lib64/gwyddion3",
  * "/usr/lib64/gwyddion3".  On MS Windows, it will be probably quite short.
  *
- * Returns: %NULL-terminated list of directories, to be freed with
+ * Returns: (transfer full):
+ *          %NULL-terminated list of directories, to be freed with
  *          g_strfreev().
  **/
 gchar**
@@ -783,7 +784,8 @@ gwy_library_search_path(const gchar *subdir)
  * "/home/yeti/.gwyddion3", "/usr/local/share/gwyddion3",
  * "/usr/share/gwyddion3".  On MS Windows, it will be probably quite short.
  *
- * Returns: %NULL-terminated list of directories, to be freed with
+ * Returns: (transfer full):
+ *          %NULL-terminated list of directories, to be freed with
  *          g_strfreev().
  **/
 gchar**

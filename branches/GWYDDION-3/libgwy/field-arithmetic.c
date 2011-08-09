@@ -445,9 +445,11 @@ gwy_field_normalize(GwyField *field,
  * @mask: (allow-none):
  *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @func: Function to apply to the value of each pixel (or each pixel under/
- *        not under the mask if masking is used).
- * @user_data: User data passed to @func.
+ * @function: (scope call):
+ *            Function to apply to the value of each pixel (or each pixel
+ *            under/ not under the mask if masking is used).
+ * @user_data: (closure function):
+ *             User data passed to @function.
  *
  * Applies a function to each pixel in a field.
  **/
@@ -456,10 +458,10 @@ gwy_field_apply_func(GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
-                     GwyRealFunc func,
+                     GwyRealFunc function,
                      gpointer user_data)
 {
-    g_return_if_fail(func);
+    g_return_if_fail(function);
 
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -470,7 +472,7 @@ gwy_field_apply_func(GwyField *field,
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
             for (guint j = width; j; j--, d++)
-                *d = func(*d, user_data);
+                *d = function(*d, user_data);
         }
     }
     else {
@@ -481,7 +483,7 @@ gwy_field_apply_func(GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
-                    *d = func(*d, user_data);
+                    *d = function(*d, user_data);
                 gwy_mask_iter_next(iter);
             }
         }

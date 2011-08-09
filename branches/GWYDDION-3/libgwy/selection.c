@@ -524,9 +524,11 @@ gwy_selection_set_data(GwySelection *selection,
 /**
  * gwy_selection_filter:
  * @selection: A group of shapes selected on data.
- * @filter: Function returning %TRUE for objects that should be kept, %FALSE
+ * @filter: (scope call):
+ *          Function returning %TRUE for objects that should be kept, %FALSE
  *          for objects that should be deleted.
- * @user_data: Data passed to @filter;
+ * @user_data: (closure filter):
+ *             Data passed to @filter;
  *
  * Deletes selection objects matching certain criteria.
  **/
@@ -554,7 +556,8 @@ gwy_selection_filter(GwySelection *selection,
  *
  * Gets the units corresponding to a selection dimension.
  *
- * Returns: The units of the @i-th dimension.
+ * Returns: (transfer none):
+ *          The units of the @i-th dimension.
  **/
 GwyUnit*
 gwy_selection_get_units(GwySelection *selection,

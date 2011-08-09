@@ -579,8 +579,10 @@ hash_remove_prefix(gpointer hkey,
  * gwy_container_foreach:
  * @container: A container.
  * @prefix: A nul-terminated id prefix.
- * @function: The function called on the items.
- * @user_data: User data passed to @function.
+ * @function: (scope call):
+ *            The function called on the items.
+ * @user_data: (closure function):
+ *             User data passed to @function.
  *
  * Calls @function on each @container item whose identifier starts with
  * @prefix.
@@ -2686,7 +2688,7 @@ next:
  * @value: Item value.  It must not be modified.
  * @user_data: Data passed to gwy_container_foreach().
  *
- * Type of function passed to gwy_container_foreach.
+ * Type of function passed to gwy_container_foreach().
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
