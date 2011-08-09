@@ -566,7 +566,7 @@ gwy_line_check_part(const GwyLine *line,
 }
 
 /**
- * gwy_line_target_check_part:
+ * gwy_line_check_target_part:
  * @line: A one-dimensional data line.
  * @lpart: (allow-none):
  *         Segment in @line, possibly %NULL.
