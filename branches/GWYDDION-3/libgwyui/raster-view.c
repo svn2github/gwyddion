@@ -18,6 +18,8 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/strfuncs.h"
+#include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
 #include "libgwyui/field-render.h"
 #include "libgwyui/raster-view.h"
@@ -31,7 +33,12 @@ enum {
 
 struct _GwyRasterViewPrivate {
     GwyField *field;
+    gulong field_notify_id;
+    gulong field_data_changed_id;
+
     GwyGradient *gradient;
+    gulong gradient_data_changed_id;
+
     cairo_surface_t *surface;
     gboolean image_valid;
 };
@@ -58,6 +65,19 @@ static void     gwy_raster_view_size_allocate       (GtkWidget *widget,
                                                      GtkAllocation *allocation);
 static gboolean gwy_raster_view_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
+static void     destroy_surface                     (GwyRasterView *rasterview);
+static gboolean set_field                           (GwyRasterView *rasterview,
+                                                     GwyField *field);
+static gboolean set_gradient                        (GwyRasterView *rasterview,
+                                                     GwyGradient *gradient);
+static void     field_notify                        (GwyRasterView *rasterview,
+                                                     GParamSpec *pspec,
+                                                     GwyField *field);
+static void     field_data_changed                  (GwyRasterView *rasterview,
+                                                     GwyFieldPart *fpart,
+                                                     GwyField *field);
+static void     gradient_data_changed               (GwyRasterView *rasterview,
+                                                     GwyGradient *gradient);
 
 static GParamSpec *raster_view_pspecs[N_PROPS];
 
@@ -116,24 +136,12 @@ gwy_raster_view_finalize(GObject *object)
 }
 
 static void
-destroy_surface(RasterView *rasterview)
-{
-    if (rasterview->surface) {
-        guchar *data = cairo_image_surface_get_data(rasterview->surface);
-        cairo_surface_destroy(rasterview->surface);
-        rasterview->surface = NULL;
-        g_free(data);
-    }
-    rasterview->image_valid = FALSE;
-}
-
-static void
 gwy_raster_view_dispose(GObject *object)
 {
-    RasterView *rasterview = GWY_RASTER_VIEW(object)->priv;
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
 
-    GWY_OBJECT_UNREF(rasterview->gradient);
-    GWY_OBJECT_UNREF(rasterview->field);
+    set_field(rasterview, NULL);
+    set_gradient(rasterview, NULL);
     destroy_surface(rasterview);
 
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
@@ -149,13 +157,11 @@ gwy_raster_view_set_property(GObject *object,
 
     switch (prop_id) {
         case PROP_FIELD:
-        gwy_raster_view_set_field(rasterview,
-                                  g_value_get_object(value));
+        set_field(rasterview, g_value_get_object(value));
         break;
 
         case PROP_GRADIENT:
-        gwy_raster_view_set_gradient(rasterview,
-                                     g_value_get_object(value));
+        set_gradient(rasterview, g_value_get_object(value));
         break;
 
         default:
@@ -213,20 +219,11 @@ gwy_raster_view_set_field(GwyRasterView *rasterview,
                           GwyField *field)
 {
     g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
-    g_return_if_fail(!field || GWY_IS_FIELD(field));
-
-    RasterView *priv = rasterview->priv;
-    if (field == priv->field)
+    if (!set_field(rasterview, field))
         return;
 
-    if (field)
-        g_object_ref(field);
-
-    GwyField *old = priv->field;
-    priv->field = field;
-    GWY_OBJECT_UNREF(old);
-
-    priv->image_valid = FALSE;
+    g_object_notify_by_pspec(G_OBJECT(rasterview),
+                             raster_view_pspecs[PROP_FIELD]);
     gtk_widget_queue_resize(GTK_WIDGET(rasterview));
 }
 
@@ -259,20 +256,11 @@ gwy_raster_view_set_gradient(GwyRasterView *rasterview,
                              GwyGradient *gradient)
 {
     g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
-    g_return_if_fail(!gradient || GWY_IS_GRADIENT(gradient));
-
-    RasterView *priv = rasterview->priv;
-    if (gradient == priv->gradient)
+    if (!set_gradient(rasterview, gradient))
         return;
 
-    if (gradient)
-        g_object_ref(gradient);
-
-    GwyGradient *old = priv->gradient;
-    priv->gradient = gradient;
-    GWY_OBJECT_UNREF(old);
-
-    priv->image_valid = FALSE;
+    g_object_notify_by_pspec(G_OBJECT(rasterview),
+                             raster_view_pspecs[PROP_GRADIENT]);
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
@@ -341,7 +329,7 @@ ensure_image(GwyRasterView *rasterview)
     if (!priv->surface
         || (guint)cairo_image_surface_get_width(priv->surface) != width
         || (guint)cairo_image_surface_get_height(priv->surface) != height) {
-        destroy_surface(priv);
+        destroy_surface(rasterview);
         guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
         guchar *data = g_new(guchar, stride*height);
         priv->surface = cairo_image_surface_create_for_data(data,
@@ -379,6 +367,85 @@ gwy_raster_view_draw(GtkWidget *widget,
     cairo_paint(cr);
 
     return FALSE;
+}
+
+static void
+destroy_surface(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (priv->surface) {
+        guchar *data = cairo_image_surface_get_data(priv->surface);
+        cairo_surface_destroy(priv->surface);
+        priv->surface = NULL;
+        g_free(data);
+    }
+    priv->image_valid = FALSE;
+}
+
+static gboolean
+set_field(GwyRasterView *rasterview,
+          GwyField *field)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, field, GWY_TYPE_FIELD,
+                               &priv->field,
+                               "notify", &field_notify,
+                               &priv->field_notify_id,
+                               G_CONNECT_SWAPPED,
+                               "data-changed", &field_data_changed,
+                               &priv->field_data_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    priv->image_valid = FALSE;
+    return TRUE;
+}
+
+static gboolean
+set_gradient(GwyRasterView *rasterview,
+             GwyGradient *gradient)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, gradient, GWY_TYPE_GRADIENT,
+                               &priv->gradient,
+                               "data-changed", &gradient_data_changed,
+                               &priv->gradient_data_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    priv->image_valid = FALSE;
+    return TRUE;
+}
+
+static void
+field_notify(GwyRasterView *rasterview,
+             GParamSpec *pspec,
+             GwyField *field)
+{
+    if (gwy_strequal(pspec->name, "x-res")
+        || gwy_strequal(pspec->name, "y-res")) {
+        rasterview->priv->image_valid = FALSE;
+        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    }
+}
+
+static void
+field_data_changed(GwyRasterView *rasterview,
+                   GwyFieldPart *fpart,
+                   GwyField *field)
+{
+    rasterview->priv->image_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+static void
+gradient_data_changed(GwyRasterView *rasterview,
+                      GwyGradient *gradient)
+{
+    rasterview->priv->image_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
 /**
