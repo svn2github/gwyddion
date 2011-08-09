@@ -30,8 +30,8 @@
  * @member_field: Pointer to location storing the current member object to
  *                be replaced by @member_object.
  * @...: List of quadruplets of the form signal name, #GCallback callback,
- *       #GConnectFlags connection flags and #gulong pointer to location to
- *       hold the signal handler id.
+ *       #gulong pointer to location to hold the signal handler id, and
+ *       #GConnectFlags connection flags.
  *
  * Replaces a member object of another object, handling signal connection and
  * disconnection.
@@ -102,8 +102,8 @@ gwy_set_member_object(gpointer instance,
              signal_name;
              signal_name = va_arg(ap, const gchar*)) {
             G_GNUC_UNUSED GCallback handler = va_arg(ap, GCallback);
-            G_GNUC_UNUSED GConnectFlags flags = va_arg(ap, GConnectFlags);
             gulong *handler_id = va_arg(ap, gulong*);
+            G_GNUC_UNUSED GConnectFlags flags = va_arg(ap, GConnectFlags);
             g_signal_handler_disconnect(old_member, *handler_id);
             *handler_id = 0;
         }
@@ -119,8 +119,8 @@ gwy_set_member_object(gpointer instance,
              signal_name;
              signal_name = va_arg(ap, const gchar*)) {
             GCallback handler = va_arg(ap, GCallback);
-            GConnectFlags flags = va_arg(ap, GConnectFlags);
             gulong *handler_id = va_arg(ap, gulong*);
+            GConnectFlags flags = va_arg(ap, GConnectFlags);
             *handler_id = g_signal_connect_data(member_object, signal_name,
                                                 handler, instance, NULL,
                                                 flags);
