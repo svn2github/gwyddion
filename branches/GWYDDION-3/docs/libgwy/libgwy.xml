@@ -113,6 +113,7 @@
     <title>Utilities</title>
     <xi:include href="xml/macros.xml"/>
     <xi:include href="xml/strfuncs.xml"/>
+    <xi:include href="xml/object-utils.xml"/>
     <xi:include href="xml/pack.xml"/>
   </chapter>
   <index id='libgwy-symbol-index'>
