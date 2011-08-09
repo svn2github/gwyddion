@@ -84,7 +84,7 @@ function unit_test() {
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make test-report
-    if test -s test-report.hml; then
+    if test -s test-report.html; then
       cp -f test-report.html $dir-test-report.html
       sed -e "s/test-report\\.html/$dir-test-report\\.html/" \
           -e "s/coverage\\.html/$dir-coverage\\.html/" \
