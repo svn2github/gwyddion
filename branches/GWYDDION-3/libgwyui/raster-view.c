@@ -451,8 +451,23 @@ gradient_data_changed(GwyRasterView *rasterview,
 /**
  * SECTION: raster-view
  * @section_id: GwyRasterView
- * @title: Two-dimensional view
+ * @title: Raster view
  * @short_description: Display fields using false colour maps
+ **/
+
+/**
+ * GwyRasterView:
+ *
+ * Widget for raster display of two-dimensional data using false colour maps.
+ *
+ * The #GwyRasterView struct contains private data only and should be accessed
+ * using the functions below.
+ **/
+
+/**
+ * GwyRasterViewClass:
+ *
+ * Class of two-dimensional raster views.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
