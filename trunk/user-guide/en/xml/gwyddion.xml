@@ -317,7 +317,7 @@
             are always sent to a file as working with the terminal is
             cumbersome there.  The default log file location,
             <filename>gwyddion.log</filename> in user's Documents and Settings,
-            can be overriden with <envar>GWYDDION_LOGFILE</envar>. On Unix,
+            can be overridden with <envar>GWYDDION_LOGFILE</envar>. On Unix,
             messages go to the terminal by default and this environment
             variable has effect only if <option>--log-to-file</option> is
             given.
