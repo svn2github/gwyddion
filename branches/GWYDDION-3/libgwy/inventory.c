@@ -366,7 +366,8 @@ gwy_inventory_get_item_type(GwyInventory *inventory)
  *
  * Looks up an item in an inventory.
  *
- * Returns: Item called @name, or %NULL if there is no such item.
+ * Returns: (transfer none):
+ *          Item called @name, or %NULL if there is no such item.
  **/
 gpointer
 gwy_inventory_get(GwyInventory *inventory,
@@ -393,7 +394,8 @@ gwy_inventory_get(GwyInventory *inventory,
  * The lookup order is: the item of requested name, default item (if set), any
  * inventory item, %NULL (this can happen only when inventory is empty).
  *
- * Returns: Item called @name, or default item.
+ * Returns: (transfer none):
+ *          Item called @name, or default item.
  **/
 gpointer
 gwy_inventory_get_or_default(GwyInventory *inventory,
@@ -425,7 +427,8 @@ gwy_inventory_get_or_default(GwyInventory *inventory,
  *
  * Returns item at given position in an inventory.
  *
- * Returns: Item at given position.
+ * Returns: (transfer none):
+ *          Item at given position.
  **/
 gpointer
 gwy_inventory_get_nth(GwyInventory *inventory,
@@ -450,7 +453,7 @@ gwy_inventory_get_nth(GwyInventory *inventory,
  * Finds position of an item in an inventory.
  *
  * Returns: Item position, or %G_MAXUINT if there is no such
- * item.
+ *          item.
  **/
 guint
 gwy_inventory_position(GwyInventory *inventory,
@@ -470,8 +473,10 @@ gwy_inventory_position(GwyInventory *inventory,
 /**
  * gwy_inventory_foreach:
  * @inventory: An inventory.
- * @function: A function to call on each item.  It must not modify @inventory.
- * @user_data: Data passed to @function.
+ * @function: (scope call):
+ *            A function to call on each item.  It must not modify @inventory.
+ * @user_data: (closure function):
+ *             Data passed to @function.
  *
  * Calls a function on each item of an inventory, in order.
  **/
@@ -496,16 +501,19 @@ gwy_inventory_foreach(GwyInventory *inventory,
 /**
  * gwy_inventory_find:
  * @inventory: An inventory.
- * @predicate: A function testing some item property.  It must not modify
+ * @predicate: (scope cal):
+ *             A function testing some item property.  It must not modify
  *             @inventory.
- * @user_data: Data passed to @predicate.
+ * @user_data: (closure predicate):
+ *             Data passed to @predicate.
  *
  * Finds an inventory item using user-specified predicate function.
  *
  * @predicate is called for each item in @inventory (in order) until it returns
  * %TRUE.
  *
- * Returns: The item for which @predicate returned %TRUE.  If there is no
+ * Returns: (transfer none):
+ *          The item for which @predicate returned %TRUE.  If there is no
  *          such item in the inventory, %NULL is returned.
  **/
 gpointer
@@ -535,7 +543,8 @@ gwy_inventory_find(GwyInventory *inventory,
  *
  * Returns the default item of an inventory.
  *
- * Returns: The default item.  If there is no default item, %NULL is returned.
+ * Returns: (transfer none):
+ *          The default item.  If there is no default item, %NULL is returned.
  **/
 gpointer
 gwy_inventory_get_default(GwyInventory *inventory)
