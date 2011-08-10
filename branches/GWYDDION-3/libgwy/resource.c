@@ -902,7 +902,8 @@ ensure_class_inventory(GType type)
  *
  * Gets the inventory which holds resources of a resource type.
  *
- * Returns: Resource class inventory.
+ * Returns: (transfer none):
+ *          Resource class inventory.
  **/
 GwyInventory*
 gwy_resource_type_get_inventory(GType type)
