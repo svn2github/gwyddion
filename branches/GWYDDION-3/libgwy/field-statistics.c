@@ -1052,8 +1052,7 @@ process_quarters_masked(const GwyField *field,
  *                   borders in the processing, %FALSE to exclude them.
  * @function: (scope call):
  *            Function to apply to each set of four neighbour pixels.
- * @user_data: (closure function):
- *             User data passed to @function.
+ * @user_data: User data passed to @function.
  *
  * Processes a field by quarter-pixels.
  *

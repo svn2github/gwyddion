@@ -783,8 +783,7 @@ gwy_linalg_invert(gdouble *a,
  * @nparams: The number of parameters.
  * @residuum: Location to store the residual sum of squares to, or %NULL if
  *            you are not interested.
- * @user_data: (closure function):
- *             User data to pass to @function.
+ * @user_data: User data to pass to @function.
  *
  * Performs a linear least-squares fit.
  *

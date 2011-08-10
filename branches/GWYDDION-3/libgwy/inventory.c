@@ -475,8 +475,7 @@ gwy_inventory_position(GwyInventory *inventory,
  * @inventory: An inventory.
  * @function: (scope call):
  *            A function to call on each item.  It must not modify @inventory.
- * @user_data: (closure function):
- *             Data passed to @function.
+ * @user_data: Data passed to @function.
  *
  * Calls a function on each item of an inventory, in order.
  **/
@@ -504,8 +503,7 @@ gwy_inventory_foreach(GwyInventory *inventory,
  * @predicate: (scope cal):
  *             A function testing some item property.  It must not modify
  *             @inventory.
- * @user_data: (closure predicate):
- *             Data passed to @predicate.
+ * @user_data: Data passed to @predicate.
  *
  * Finds an inventory item using user-specified predicate function.
  *

@@ -581,8 +581,7 @@ hash_remove_prefix(gpointer hkey,
  * @prefix: A nul-terminated id prefix.
  * @function: (scope call):
  *            The function called on the items.
- * @user_data: (closure function):
- *             User data passed to @function.
+ * @user_data: User data passed to @function.
  *
  * Calls @function on each @container item whose identifier starts with
  * @prefix.

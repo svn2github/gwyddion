@@ -448,8 +448,7 @@ gwy_field_normalize(GwyField *field,
  * @function: (scope call):
  *            Function to apply to the value of each pixel (or each pixel
  *            under/ not under the mask if masking is used).
- * @user_data: (closure function):
- *             User data passed to @function.
+ * @user_data: User data passed to @function.
  *
  * Applies a function to each pixel in a field.
  **/

@@ -527,8 +527,7 @@ gwy_selection_set_data(GwySelection *selection,
  * @filter: (scope call):
  *          Function returning %TRUE for objects that should be kept, %FALSE
  *          for objects that should be deleted.
- * @user_data: (closure filter):
- *             Data passed to @filter;
+ * @user_data: Data passed to @filter;
  *
  * Deletes selection objects matching certain criteria.
  **/
