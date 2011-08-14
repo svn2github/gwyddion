@@ -500,7 +500,7 @@ gwy_inventory_foreach(GwyInventory *inventory,
 /**
  * gwy_inventory_find:
  * @inventory: An inventory.
- * @predicate: (scope cal):
+ * @predicate: (scope call):
  *             A function testing some item property.  It must not modify
  *             @inventory.
  * @user_data: Data passed to @predicate.
