@@ -1048,6 +1048,50 @@ gwy_surface_format_z(GwySurface *surface,
 }
 
 /**
+ * gwy_surface_get:
+ * @surface: A surface.
+ * @pos: Position in @surface.
+ *
+ * Obtains a single surface point.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_surface_index() or simply accessing @data in
+ * #GwySurface directly in C.
+ *
+ * Returns: The point at @pos.
+ **/
+GwyXYZ
+gwy_surface_get(const GwySurface *surface,
+                guint pos)
+{
+    g_return_val_if_fail(GWY_IS_SURFACE(surface), ((GwyXYZ){ NAN, NAN, NAN }));
+    g_return_val_if_fail(pos < surface->n, ((GwyXYZ){ NAN, NAN, NAN }));
+    return gwy_surface_index(surface, pos);
+}
+
+/**
+ * gwy_surface_set:
+ * @surface: A surface.
+ * @pos: Position in @surface.
+ * @point: Point to store at given position.
+ *
+ * Sets a single surface value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_surface_index() or simply accessing @data in
+ * #GwySurface directly in C.
+ **/
+void
+gwy_surface_set(const GwySurface *surface,
+                guint pos,
+                GwyXYZ point)
+{
+    g_return_if_fail(GWY_IS_SURFACE(surface));
+    g_return_if_fail(pos < surface->n);
+    gwy_surface_index(surface, pos) = point;
+}
+
+/**
  * SECTION: surface
  * @title: GwySurface
  * @short_description: General two-dimensional data
@@ -1109,6 +1153,13 @@ gwy_surface_format_z(GwySurface *surface,
  *
  * No argument validation is performed.  If you process the data in a loop,
  * you are encouraged to access #GwySurface-struct.data directly.
+ * |[
+ * // Read a surface point.
+ * GwyXYZ point = gwy_surface_index(surface, 5);
+ *
+ * // Write it elsewhere.
+ * gwy_surface_index(anothersurface, 6) = point;
+ * ]|
  **/
 
 /**

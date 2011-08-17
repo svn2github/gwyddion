@@ -121,6 +121,14 @@ GwyValueFormat* gwy_field_format_z     (const GwyField *field,
 #define gwy_field_dy(field) \
     ((field)->yreal/(field)->yres)
 
+gdouble gwy_field_get(const GwyField *field,
+                      guint col,
+                      guint row);
+void    gwy_field_set(const GwyField *field,
+                      guint col,
+                      guint row,
+                      gdouble value);
+
 gboolean gwy_field_check_part       (const GwyField *field,
                                      const GwyFieldPart *fpart,
                                      guint *col,

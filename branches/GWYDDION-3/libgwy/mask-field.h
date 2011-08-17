@@ -84,12 +84,24 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
                                             guint yres,
                                             gboolean clear);
 
+// For bindings; C users will see the macros.
+gboolean gwy_mask_field_get(const GwyMaskField *field,
+                            guint col,
+                            guint row);
+void     gwy_mask_field_set(const GwyMaskField *field,
+                            guint col,
+                            guint row,
+                            gboolean value);
+
+#define gwy_mask_field_get _gwy_mask_field_get
+#define gwy_mask_field_set _gwy_mask_field_set
+
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define gwy_mask_field_get(field, col, row) \
+#define _gwy_mask_field_get(field, col, row) \
     ((field)->data[(field)->stride*(row) + ((col) >> 5)] \
      & ((guint32)1 << (((col) & 0x1f))))
 
-#define gwy_mask_field_set(field, col, row, value) \
+#define _gwy_mask_field_set(field, col, row, value) \
     do { \
         if (value) \
             (field)->data[(field)->stride*(row) + ((col) >> 5)] \
@@ -101,11 +113,11 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define gwy_mask_field_get(field, col, row) \
+#define _gwy_mask_field_get(field, col, row) \
     ((field)->data[(field)->stride*(row) + ((col) >> 5)] \
      & ((guint32)0x80000000u >> (((col) & 0x1f))))
 
-#define gwy_mask_field_set(field, col, row, value) \
+#define _gwy_mask_field_set(field, col, row, value) \
     do { \
         if (value) \
             (field)->data[(field)->stride*(row) + ((col) >> 5)] \

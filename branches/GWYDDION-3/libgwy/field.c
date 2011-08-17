@@ -1591,6 +1591,59 @@ gwy_field_format_z(const GwyField *field,
 }
 
 /**
+ * gwy_field_get:
+ * @field: A two-dimensional data field.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
+ *
+ * Obtains a single field value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_field_index() or simply accessing @data in
+ * #GwyField directly in C.  See also gwy_field_value() and similar fucntions
+ * for smarter ways to obtain a single value from a #GwyField.
+ *
+ * Returns: The value at (@col,@row).
+ **/
+gdouble
+gwy_field_get(const GwyField *field,
+              guint col,
+              guint row)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
+    g_return_val_if_fail(col < field->xres, NAN);
+    g_return_val_if_fail(row < field->yres, NAN);
+    return gwy_field_index(field, col, row);
+}
+
+/**
+ * gwy_field_set:
+ * @field: A two-dimensional data field.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
+ * @value: Value to store at given position.
+ *
+ * Sets a single field value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_field_index() or simply accessing @data in
+ * #GwyField directly in C.
+ **/
+void
+gwy_field_set(const GwyField *field,
+              guint col,
+              guint row,
+              gdouble value)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(col < field->xres);
+    g_return_if_fail(row < field->yres);
+    gwy_field_index(field, col, row) = value;
+    // Invalidate.
+    field->priv->cached = 0;
+}
+
+/**
  * SECTION: field
  * @title: GwyField
  * @short_description: Two-dimensional data in regular grid
@@ -1716,6 +1769,13 @@ gwy_field_format_z(const GwyField *field,
  *
  * No argument validation is performed.  If you process the data in a loop,
  * you are encouraged to access @data in #GwyField-struct directly.
+ * |[
+ * // Read a field value.
+ * gdouble value = gwy_field_index(field, 1, 2);
+ *
+ * // Write it elsewhere.
+ * gwy_field_index(field, 3, 4) = value;
+ * ]|
  **/
 
 /**

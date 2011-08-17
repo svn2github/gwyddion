@@ -93,6 +93,12 @@ GwyValueFormat* gwy_curve_format_y       (GwyCurve *curve,
 #define gwy_curve_index(curve, pos) \
     ((curve)->data[pos])
 
+GwyXY gwy_curve_get(const GwyCurve *curve,
+                    guint pos);
+void  gwy_curve_set(const GwyCurve *curve,
+                    guint pos,
+                    GwyXY point);
+
 G_END_DECLS
 
 #endif

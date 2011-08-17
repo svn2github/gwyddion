@@ -874,6 +874,49 @@ gwy_curve_format_y(GwyCurve *curve,
                                        style, max - min, 3);
 }
 
+/**
+ * gwy_curve_get:
+ * @curve: A curve.
+ * @pos: Position in @curve.
+ *
+ * Obtains a single curve point.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_curve_index() or simply accessing @data in
+ * #GwyCurve directly in C.
+ *
+ * Returns: The point at @pos.
+ **/
+GwyXY
+gwy_curve_get(const GwyCurve *curve,
+              guint pos)
+{
+    g_return_val_if_fail(GWY_IS_CURVE(curve), ((GwyXY){ NAN, NAN }));
+    g_return_val_if_fail(pos < curve->n, ((GwyXY){ NAN, NAN }));
+    return gwy_curve_index(curve, pos);
+}
+
+/**
+ * gwy_curve_set:
+ * @curve: A curve.
+ * @pos: Position in @curve.
+ * @point: Point to store at given position.
+ *
+ * Sets a single curve value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_curve_index() or simply accessing @data in
+ * #GwyCurve directly in C.
+ **/
+void
+gwy_curve_set(const GwyCurve *curve,
+              guint pos,
+              GwyXY point)
+{
+    g_return_if_fail(GWY_IS_CURVE(curve));
+    g_return_if_fail(pos < curve->n);
+    gwy_curve_index(curve, pos) = point;
+}
 
 /**
  * SECTION: curve
@@ -938,6 +981,13 @@ gwy_curve_format_y(GwyCurve *curve,
  *
  * No argument validation is performed.  If you process the data in a loop,
  * you are encouraged to access #GwyCurve-struct.data directly.
+ * |[
+ * // Read a curve point.
+ * GwyXY point = gwy_curve_index(curve, 5);
+ *
+ * // Write it elsewhere.
+ * gwy_curve_index(anotherline, 6) = point;
+ * ]|
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

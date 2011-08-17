@@ -126,6 +126,16 @@ GwyValueFormat* gwy_brick_format_z    (const GwyBrick *brick,
 #define gwy_brick_dz(brick) \
     ((brick)->zreal/(brick)->zres)
 
+gdouble gwy_brick_get(const GwyBrick *brick,
+                      guint col,
+                      guint row,
+                      guint level);
+void    gwy_brick_set(const GwyBrick *brick,
+                      guint col,
+                      guint row,
+                      guint level,
+                      gdouble value);
+
 gboolean gwy_brick_check_part      (const GwyBrick *brick,
                                     const GwyBrickPart *bpart,
                                     guint *col,

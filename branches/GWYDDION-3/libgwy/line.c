@@ -1044,6 +1044,51 @@ gwy_line_format_y(const GwyLine *line,
 }
 
 /**
+ * gwy_line_get:
+ * @line: A one-dimensional data line.
+ * @pos: Position in @line.
+ *
+ * Obtains a single line value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_line_index() or simply accessing @data in
+ * #GwyLine directly in C.  See also gwy_line_value() and similar fucntions
+ * for smarter ways to obtain a single value from a #GwyLine.
+ *
+ * Returns: The value at @pos.
+ **/
+gdouble
+gwy_line_get(const GwyLine *line,
+             guint pos)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), NAN);
+    g_return_val_if_fail(pos < line->res, NAN);
+    return gwy_line_index(line, pos);
+}
+
+/**
+ * gwy_line_set:
+ * @line: A one-dimensional data line.
+ * @pos: Position in @line.
+ * @value: Value to store at given position.
+ *
+ * Sets a single line value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_line_index() or simply accessing @data in
+ * #GwyLine directly in C.
+ **/
+void
+gwy_line_set(const GwyLine *line,
+             guint pos,
+             gdouble value)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_if_fail(pos < line->res);
+    gwy_line_index(line, pos) = value;
+}
+
+/**
  * SECTION: line
  * @title: GwyLine
  * @short_description: One-dimensional data in regular grid
@@ -1104,6 +1149,13 @@ gwy_line_format_y(const GwyLine *line,
  *
  * No argument validation is performed.  If you process the data in a loop,
  * you are encouraged to access @data in #GwyLine-struct directly.
+ * |[
+ * // Read a line value.
+ * gdouble value = gwy_line_index(line, 5);
+ *
+ * // Write it elsewhere.
+ * gwy_line_index(line, 6) = value;
+ * ]|
  **/
 
 /**

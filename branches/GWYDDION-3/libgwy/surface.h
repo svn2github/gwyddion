@@ -105,6 +105,12 @@ GwyValueFormat* gwy_surface_format_z       (GwySurface *surface,
 #define gwy_surface_index(surface, pos) \
     ((surface)->data[pos])
 
+GwyXYZ gwy_surface_get(const GwySurface *surface,
+                       guint pos);
+void   gwy_surface_set(const GwySurface *surface,
+                       guint pos,
+                       GwyXYZ point);
+
 G_END_DECLS
 
 #endif

@@ -1135,6 +1135,68 @@ gwy_mask_field_number_grains(GwyMaskField *field,
     return priv->grains;
 }
 
+/**
+ * gwy_mask_field_get:
+ * @field: A two-dimensional mask field.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
+ *
+ * Obtains one bit value from a two-dimensional mask field.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ *
+ * For language bindings, this macro is also provided as a (much slower)
+ * function.
+ *
+ * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
+ *          unset.
+ **/
+#undef gwy_mask_field_get
+gboolean
+gwy_mask_field_get(const GwyMaskField *field,
+                   guint col,
+                   guint row)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
+    g_return_val_if_fail(col < field->xres, 0);
+    g_return_val_if_fail(row < field->yres, 0);
+    return _gwy_mask_field_get(field, col, row);
+}
+
+/**
+ * gwy_mask_field_set:
+ * @field: A two-dimensional mask field.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
+ * @value: Nonzero value to set the bit, zero to clear it.
+ *
+ * Sets one bit value in a two-dimensional mask field.
+ *
+ * This is a low-level macro and it does not invalidate the mask field.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ *
+ * For language bindings, this macro is also provided as a (much slower)
+ * function.
+ **/
+#undef gwy_mask_field_set
+void
+gwy_mask_field_set(const GwyMaskField *field,
+                   guint col,
+                   guint row,
+                   gboolean value)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(col < field->xres);
+    g_return_if_fail(row < field->yres);
+    _gwy_mask_field_set(field, col, row, value);
+}
 
 /**
  * SECTION: mask-field
@@ -1218,40 +1280,6 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * Copies the value of a two-dimensional mask field.
  *
  * This is a convenience wrapper of gwy_serializable_assign().
- **/
-
-/**
- * gwy_mask_field_get:
- * @field: A two-dimensional mask field.
- * @col: Column index in @field.
- * @row: Row index in @field.
- *
- * Obtains one bit value from a two-dimensional mask field.
- *
- * This macro may evaluate its arguments several times.
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
- *
- * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
- *          unset.
- **/
-
-/**
- * gwy_mask_field_set:
- * @field: A two-dimensional mask field.
- * @col: Column index in @field.
- * @row: Row index in @field.
- * @value: Nonzero value to set the bit, zero to clear it.
- *
- * Sets one bit value in a two-dimensional mask field.
- *
- * This is a low-level macro and it does not invalidate the mask field.
- *
- * This macro may evaluate its arguments several times.
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
  **/
 
 /**

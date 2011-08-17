@@ -72,11 +72,21 @@ void         gwy_mask_line_set_size     (GwyMaskLine *line,
                                          guint res,
                                          gboolean clear);
 
+// For bindings; C users will see the macros.
+gboolean gwy_mask_line_get(const GwyMaskLine *line,
+                           guint pos);
+void     gwy_mask_line_set(const GwyMaskLine *line,
+                           guint pos,
+                           gboolean value);
+
+#define gwy_mask_line_get _gwy_mask_line_get
+#define gwy_mask_line_set _gwy_mask_line_set
+
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define gwy_mask_line_get(line, pos) \
+#define _gwy_mask_line_get(line, pos) \
     ((line)->data[(pos) >> 5] & ((guint32)1 << (((pos) & 0x1f))))
 
-#define gwy_mask_line_set(line, pos, value) \
+#define _gwy_mask_line_set(line, pos, value) \
     do { \
         if (value) \
             (line)->data[(pos) >> 5] |= ((guint32)1 << (((pos) & 0x1f))); \
@@ -86,10 +96,10 @@ void         gwy_mask_line_set_size     (GwyMaskLine *line,
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define gwy_mask_line_get(line, pos) \
+#define _gwy_mask_line_get(line, pos) \
     ((line)->data[(pos) >> 5] & ((guint32)0x80000000u >> (((pos) & 0x1f))))
 
-#define gwy_mask_line_set(line, pos, value) \
+#define _gwy_mask_line_set(line, pos, value) \
     do { \
         if (value) \
             (line)->data[(pos) >> 5] |= ((guint32)0x80000000u >> (((pos) & 0x1f))); \

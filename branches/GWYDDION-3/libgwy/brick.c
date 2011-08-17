@@ -1570,6 +1570,64 @@ gwy_brick_format_z(const GwyBrick *brick,
 }
 
 /**
+ * gwy_brick_get:
+ * @brick: A three-dimensional data brick.
+ * @col: Column index in @brick.
+ * @row: Row index in @brick.
+ * @level: Level index in @brick.
+ *
+ * Obtains a single brick value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_brick_index() or simply accessing @data in
+ * #GwyBrick directly in C.
+ *
+ * Returns: The value at (@col,@row,@level).
+ **/
+gdouble
+gwy_brick_get(const GwyBrick *brick,
+              guint col,
+              guint row,
+              guint level)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), NAN);
+    g_return_val_if_fail(col < brick->xres, NAN);
+    g_return_val_if_fail(row < brick->yres, NAN);
+    g_return_val_if_fail(level < brick->zres, NAN);
+    return gwy_brick_index(brick, col, row, level);
+}
+
+/**
+ * gwy_brick_set:
+ * @brick: A three-dimensional data brick.
+ * @col: Column index in @brick.
+ * @row: Row index in @brick.
+ * @level: Level index in @brick.
+ * @value: Value to store at given position.
+ *
+ * Sets a single brick value.
+ *
+ * This function exists <emphasis>only for language bindings</emphasis> as it
+ * is very slow compared to gwy_brick_index() or simply accessing @data in
+ * #GwyBrick directly in C.
+ **/
+void
+gwy_brick_set(const GwyBrick *brick,
+              guint col,
+              guint row,
+              guint level,
+              gdouble value)
+{
+    g_return_if_fail(GWY_IS_BRICK(brick));
+    g_return_if_fail(col < brick->xres);
+    g_return_if_fail(row < brick->yres);
+    g_return_if_fail(level < brick->zres);
+    gwy_brick_index(brick, col, row, level) = value;
+    // Invalidate.
+    //brick->priv->cached = 0;
+}
+
+/**
  * SECTION: brick
  * @title: GwyBrick
  * @short_description: Three-dimensional data in regular grid
@@ -1660,6 +1718,13 @@ gwy_brick_format_z(const GwyBrick *brick,
  *
  * No argument validation is performed.  If you process the data in a loop,
  * you are encouraged to access @data in #GwyBrick-struct directly.
+ * |[
+ * // Read a brick value.
+ * gdouble value = gwy_brick_index(brick, 1, 2, 3);
+ *
+ * // Write it elsewhere.
+ * gwy_brick_index(brick, 4, 5, 6) = value;
+ * ]|
  **/
 
 /**

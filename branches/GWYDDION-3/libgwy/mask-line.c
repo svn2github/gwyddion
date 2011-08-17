@@ -761,6 +761,63 @@ gwy_mask_line_part_count(const GwyMaskLine *line,
 }
 
 /**
+ * gwy_mask_line_get:
+ * @line: A one-dimensional mask line.
+ * @pos: Index in @line.
+ *
+ * Obtains one bit value from a one-dimensional mask line.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ *
+ * For language bindings, this macro is also provided as a (much slower)
+ * function.
+ *
+ * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
+ *          unset.
+ **/
+#undef gwy_mask_line_get
+gboolean
+gwy_mask_line_get(const GwyMaskLine *line,
+                  guint pos)
+{
+    g_return_val_if_fail(GWY_IS_MASK_LINE(line), 0);
+    g_return_val_if_fail(pos < line->res, 0);
+    return _gwy_mask_line_get(line, pos);
+}
+
+/**
+ * gwy_mask_line_set:
+ * @line: A one-dimensional mask line.
+ * @pos: Index in @line.
+ * @value: Nonzero value to set the bit, zero to clear it.
+ *
+ * Sets one bit value in a one-dimensional mask line.
+ *
+ * This is a low-level macro and it does not invalidate the mask line.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ *
+ * For language bindings, this macro is also provided as a (much slower)
+ * function.
+ **/
+#undef gwy_mask_line_set
+void
+gwy_mask_line_set(const GwyMaskLine *line,
+                  guint pos,
+                  gboolean value)
+{
+    g_return_if_fail(GWY_IS_MASK_LINE(line));
+    g_return_if_fail(pos < line->res);
+    _gwy_mask_line_set(line, pos, value);
+}
+
+/**
  * SECTION: mask-line
  * @title: GwyMaskLine
  * @short_description: One-dimensional bit mask
@@ -822,38 +879,6 @@ gwy_mask_line_part_count(const GwyMaskLine *line,
  * Copies the value of a one-dimensional mask line.
  *
  * This is a convenience wrapper of gwy_serializable_assign().
- **/
-
-/**
- * gwy_mask_line_get:
- * @line: A one-dimensional mask line.
- * @pos: Index in @line.
- *
- * Obtains one bit value from a one-dimensional mask line.
- *
- * This macro may evaluate its arguments several times.
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
- *
- * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
- *          unset.
- **/
-
-/**
- * gwy_mask_line_set:
- * @line: A one-dimensional mask line.
- * @pos: Index in @line.
- * @value: Nonzero value to set the bit, zero to clear it.
- *
- * Sets one bit value in a one-dimensional mask line.
- *
- * This is a low-level macro and it does not invalidate the mask line.
- *
- * This macro may evaluate its arguments several times.
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
  **/
 
 /**
