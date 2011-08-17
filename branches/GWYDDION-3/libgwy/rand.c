@@ -339,7 +339,6 @@ generate_byte(GwyRand *rng)
 guint64
 gwy_rand_int64(GwyRand *rng)
 {
-    g_return_val_if_fail(rng, 0);
     return generate_uint64(rng);
 }
 
@@ -356,7 +355,6 @@ gwy_rand_int64(GwyRand *rng)
 guint32
 gwy_rand_int(GwyRand *rng)
 {
-    g_return_val_if_fail(rng, 0);
     return generate_uint32(rng);
 }
 
@@ -378,7 +376,6 @@ gwy_rand_int_range(GwyRand *rng,
                    gint64 begin,
                    gint64 end)
 {
-    g_return_val_if_fail(rng, begin);
     g_return_val_if_fail(begin < end, begin);
 
     /* TODO: generate small numbers using the 32 bit generator. */
