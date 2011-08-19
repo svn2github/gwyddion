@@ -1533,6 +1533,7 @@ gwy_field_check_mask(const GwyField *field,
             && *masking != GWY_MASK_IGNORE)
             g_critical("Invalid masking mode %u.", *masking);
         *masking = GWY_MASK_IGNORE;
+        *maskcol = *maskrow = 0;
     }
 
     return TRUE;
