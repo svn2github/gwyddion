@@ -545,6 +545,77 @@ test_field_check_target_bad(void)
 }
 
 static void
+field_check_mask_good(guint xres, guint yres,
+                      guint mxres, guint myres,
+                      const GwyFieldPart *fpart,
+                      GwyMaskingType masking,
+                      guint expected_col, guint expected_row,
+                      guint expected_width, guint expected_height,
+                      guint expected_maskcol, guint expected_maskrow,
+                      GwyMaskingType expected_masking)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyMaskField *mask = ((mxres && myres)
+                          ? gwy_mask_field_new_sized(mxres, myres, FALSE) : 0);
+    guint col, row, width, height, maskcol, maskrow;
+
+    g_assert(gwy_field_check_mask(field, fpart, mask, &masking,
+                                  &col, &row, &width, &height,
+                                  &maskcol, &maskrow));
+    g_assert_cmpuint(masking, ==, expected_masking);
+    g_assert_cmpuint(col, ==, expected_col);
+    g_assert_cmpuint(row, ==, expected_row);
+    g_assert_cmpuint(width, ==, expected_width);
+    g_assert_cmpuint(height, ==, expected_height);
+    g_assert_cmpuint(maskcol, ==, expected_maskcol);
+    g_assert_cmpuint(maskrow, ==, expected_maskrow);
+    GWY_OBJECT_UNREF(mask);
+    g_object_unref(field);
+}
+
+void
+test_field_check_mask_good(void)
+{
+    // Full field, ignoring the mask.
+    field_check_mask_good(17, 25, 0, 0, NULL, GWY_MASK_IGNORE,
+                          0, 0, 17, 25, 0, 0, GWY_MASK_IGNORE);
+    field_check_mask_good(17, 25, 0, 0, NULL, GWY_MASK_INCLUDE,
+                          0, 0, 17, 25, 0, 0, GWY_MASK_IGNORE);
+    field_check_mask_good(17, 25, 0, 0, NULL, GWY_MASK_EXCLUDE,
+                          0, 0, 17, 25, 0, 0, GWY_MASK_IGNORE);
+    field_check_mask_good(17, 25, 17, 25, NULL, GWY_MASK_IGNORE,
+                          0, 0, 17, 25, 0, 0, GWY_MASK_IGNORE);
+
+    // Full field, full mask.
+    field_check_mask_good(17, 25, 17, 25, NULL, GWY_MASK_INCLUDE,
+                          0, 0, 17, 25, 0, 0, GWY_MASK_INCLUDE);
+    field_check_mask_good(17, 25, 17, 25, NULL, GWY_MASK_EXCLUDE,
+                          0, 0, 17, 25, 0, 0, GWY_MASK_EXCLUDE);
+
+    // Partial field, partial mask.
+    field_check_mask_good(17, 25, 17, 25, &(GwyFieldPart){ 1, 2, 14, 19 },
+                          GWY_MASK_INCLUDE,
+                          1, 2, 14, 19, 1, 2, GWY_MASK_INCLUDE);
+    field_check_mask_good(17, 25, 17, 25, &(GwyFieldPart){ 1, 2, 14, 19 },
+                          GWY_MASK_EXCLUDE,
+                          1, 2, 14, 19, 1, 2, GWY_MASK_EXCLUDE);
+    field_check_mask_good(17, 25, 17, 25, &(GwyFieldPart){ 1, 2, 14, 19 },
+                          GWY_MASK_IGNORE,
+                          1, 2, 14, 19, 0, 0, GWY_MASK_IGNORE);
+
+    // Partial field, full mask.
+    field_check_mask_good(17, 25, 14, 19, &(GwyFieldPart){ 1, 2, 14, 19 },
+                          GWY_MASK_INCLUDE,
+                          1, 2, 14, 19, 0, 0, GWY_MASK_INCLUDE);
+    field_check_mask_good(17, 25, 14, 19, &(GwyFieldPart){ 1, 2, 14, 19 },
+                          GWY_MASK_EXCLUDE,
+                          1, 2, 14, 19, 0, 0, GWY_MASK_EXCLUDE);
+    field_check_mask_good(17, 25, 14, 19, &(GwyFieldPart){ 1, 2, 14, 19 },
+                          GWY_MASK_IGNORE,
+                          1, 2, 14, 19, 0, 0, GWY_MASK_IGNORE);
+}
+
+static void
 field_part_copy_dumb(const GwyField *src,
                      guint col,
                      guint row,

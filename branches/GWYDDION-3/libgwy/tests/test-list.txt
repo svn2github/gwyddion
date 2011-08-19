@@ -133,6 +133,7 @@ field/check-target-part/bad
 field/check-target/good
 field/check-target/empty
 field/check-target/bad
+field/check-mask/good
 field/copy
 field/new-part
 field/serialize
