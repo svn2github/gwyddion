@@ -17,8 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testlibgwy.h"
+#include <stdlib.h>
 #include <stdio.h>
+#include "testlibgwy.h"
 
 /***************************************************************************
  *
@@ -517,6 +518,80 @@ test_mask_field_set_size(void)
     g_assert_cmpuint(yres_changed, ==, 2);
 
     g_object_unref(maskfield);
+}
+
+static void
+mask_field_check_part_good(guint xres, guint yres,
+                      const GwyFieldPart *fpart,
+                      guint expected_col, guint expected_row,
+                      guint expected_width, guint expected_height)
+{
+    GwyMaskField *mask_field = gwy_mask_field_new_sized(xres, yres, FALSE);
+    guint col, row, width, height;
+
+    g_assert(gwy_mask_field_check_part(mask_field, fpart, &col, &row, &width, &height));
+    g_assert_cmpuint(col, ==, expected_col);
+    g_assert_cmpuint(row, ==, expected_row);
+    g_assert_cmpuint(width, ==, expected_width);
+    g_assert_cmpuint(height, ==, expected_height);
+    g_object_unref(mask_field);
+}
+
+void
+test_mask_field_check_part_good(void)
+{
+    mask_field_check_part_good(17, 25, &(GwyFieldPart){ 0, 0, 17, 25 },
+                          0, 0, 17, 25);
+    mask_field_check_part_good(17, 25, NULL,
+                          0, 0, 17, 25);
+    mask_field_check_part_good(17, 25, &(GwyFieldPart){ 0, 0, 3, 24 },
+                          0, 0, 3, 24);
+    mask_field_check_part_good(17, 25, &(GwyFieldPart){ 16, 20, 1, 4 },
+                          16, 20, 1, 4);
+}
+
+static void
+mask_field_check_part_empty(guint xres, guint yres,
+                       const GwyFieldPart *fpart)
+{
+    GwyMaskField *mask_field = gwy_mask_field_new_sized(xres, yres, FALSE);
+    guint col, row, width, height;
+
+    g_assert(!gwy_mask_field_check_part(mask_field, fpart, &col, &row, &width, &height));
+    g_object_unref(mask_field);
+}
+
+void
+test_mask_field_check_part_empty(void)
+{
+    mask_field_check_part_empty(17, 25, &(GwyFieldPart){ 0, 0, 0, 0 });
+    mask_field_check_part_empty(17, 25, &(GwyFieldPart){ 17, 25, 0, 0 });
+    mask_field_check_part_empty(17, 25, &(GwyFieldPart){ 1000, 1000, 0, 0 });
+}
+
+static void
+mask_field_check_part_bad(guint xres, guint yres,
+                     const GwyFieldPart *fpart)
+{
+    if (g_test_trap_fork(0,
+                         G_TEST_TRAP_SILENCE_STDOUT
+                         | G_TEST_TRAP_SILENCE_STDERR)) {
+        GwyMaskField *mask_field = gwy_mask_field_new_sized(xres, yres, FALSE);
+        guint col, row, width, height;
+        gwy_mask_field_check_part(mask_field, fpart, &col, &row, &width, &height);
+        exit(0);
+    }
+    g_test_trap_assert_failed();
+    g_test_trap_assert_stderr("*CRITICAL*");
+}
+
+void
+test_mask_field_check_part_bad(void)
+{
+    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 18, 1 });
+    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 1, 26 });
+    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 17, 0, 1, 1 });
+    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 25, 1, 1 });
 }
 
 void

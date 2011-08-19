@@ -102,6 +102,9 @@ mask-line/set-size
 mask-field/stride
 mask-field/props
 mask-field/data-changed
+mask-field/check-part/good
+mask-field/check-part/empty
+mask-field/check-part/bad
 mask-field/copy
 mask-field/new-part
 mask-field/logical
