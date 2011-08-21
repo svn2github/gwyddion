@@ -556,7 +556,8 @@ field_check_mask_good(guint xres, guint yres,
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     GwyMaskField *mask = ((mxres && myres)
-                          ? gwy_mask_field_new_sized(mxres, myres, FALSE) : 0);
+                          ? gwy_mask_field_new_sized(mxres, myres, FALSE)
+                          : NULL);
     guint col, row, width, height, maskcol, maskrow;
 
     g_assert(gwy_field_check_mask(field, fpart, mask, &masking,
@@ -613,6 +614,80 @@ test_field_check_mask_good(void)
     field_check_mask_good(17, 25, 14, 19, &(GwyFieldPart){ 1, 2, 14, 19 },
                           GWY_MASK_IGNORE,
                           1, 2, 14, 19, 0, 0, GWY_MASK_IGNORE);
+}
+
+static void
+field_check_mask_empty(guint xres, guint yres,
+                       guint mxres, guint myres,
+                       const GwyFieldPart *fpart,
+                       GwyMaskingType masking)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyMaskField *mask = ((mxres && myres)
+                          ? gwy_mask_field_new_sized(mxres, myres, FALSE)
+                          : NULL);
+
+    guint col, row, width, height, maskcol, maskrow;
+    g_assert(!gwy_field_check_mask(field, fpart, mask, &masking,
+                                   &col, &row, &width, &height,
+                                   &maskcol, &maskrow));
+    GWY_OBJECT_UNREF(mask);
+    g_object_unref(field);
+}
+
+void
+test_field_check_mask_empty(void)
+{
+    field_check_mask_empty(17, 25, 0, 0, &(GwyFieldPart){ 0, 0, 0, 0 },
+                           GWY_MASK_INCLUDE);
+    field_check_mask_empty(17, 25, 0, 0, &(GwyFieldPart){ 17, 25, 0, 0 },
+                           GWY_MASK_INCLUDE);
+    field_check_mask_empty(17, 25, 0, 0, &(GwyFieldPart){ 1000, 1000, 0, 0 },
+                           GWY_MASK_INCLUDE);
+    field_check_mask_empty(17, 25, 17, 25, &(GwyFieldPart){ 0, 0, 0, 0 },
+                           GWY_MASK_INCLUDE);
+    field_check_mask_empty(17, 25, 17, 25, &(GwyFieldPart){ 17, 25, 0, 0 },
+                           GWY_MASK_INCLUDE);
+    field_check_mask_empty(17, 25, 17, 25, &(GwyFieldPart){ 1000, 1000, 0, 0 },
+                           GWY_MASK_INCLUDE);
+}
+
+static void
+field_check_mask_bad(guint xres, guint yres,
+                     guint mxres, guint myres,
+                     const GwyFieldPart *fpart,
+                     GwyMaskingType masking)
+{
+    if (g_test_trap_fork(0,
+                         G_TEST_TRAP_SILENCE_STDOUT
+                         | G_TEST_TRAP_SILENCE_STDERR)) {
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        GwyMaskField *mask = ((mxres && myres)
+                              ? gwy_mask_field_new_sized(mxres, myres, FALSE)
+                              : NULL);
+        guint col, row, width, height, maskcol, maskrow;
+        gwy_field_check_mask(field, fpart, mask, &masking,
+                             &col, &row, &width, &height,
+                             &maskcol, &maskrow);
+        exit(0);
+    }
+    g_test_trap_assert_failed();
+    g_test_trap_assert_stderr("*CRITICAL*");
+}
+
+void
+test_field_check_mask_bad(void)
+{
+    field_check_mask_bad(17, 25, 0, 0, &(GwyFieldPart){ 2, 3, 16, 19 },
+                         GWY_MASK_INCLUDE);
+    field_check_mask_bad(17, 25, 0, 0, &(GwyFieldPart){ 2, 3, 11, 23 },
+                         GWY_MASK_INCLUDE);
+    field_check_mask_bad(17, 25, 17, 26, NULL, GWY_MASK_INCLUDE);
+    field_check_mask_bad(17, 25, 15, 25, NULL, GWY_MASK_INCLUDE);
+    field_check_mask_bad(17, 25, 7, 7, &(GwyFieldPart){ 2, 3, 7, 8 },
+                         GWY_MASK_INCLUDE);
+    field_check_mask_bad(17, 25, 8, 8, &(GwyFieldPart){ 2, 3, 7, 8 },
+                         GWY_MASK_INCLUDE);
 }
 
 static void
@@ -2154,6 +2229,7 @@ test_field_arithmetic_apply_func(void)
 
         g_object_unref(result);
         g_object_unref(field);
+        g_object_unref(mask);
     }
     g_rand_free(rng);
 }
