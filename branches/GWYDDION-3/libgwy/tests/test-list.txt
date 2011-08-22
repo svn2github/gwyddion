@@ -76,6 +76,8 @@ value-format/simple
 line/props
 line/data-changed
 line/units
+line/get
+line/set
 line/check-part/good
 line/check-part/empty
 line/check-part/bad
@@ -92,6 +94,8 @@ line/add-dist/uniform
 line/add-dist/left-triangular
 line/add-dist/right-triangular
 curve/props
+curve/get
+curve/set
 curve/data-changed
 curve/serialize
 curve/regularize
@@ -127,6 +131,8 @@ mask-field/fill-ellipse
 field/props
 field/data-changed
 field/units
+field/get
+field/set
 field/check-part/good
 field/check-part/empty
 field/check-part/bad
@@ -234,6 +240,8 @@ field/distributions/slope/simple-oblique
 field/distributions/slope/nonsquare
 surface/serialize
 surface/props
+surface/get
+surface/set
 surface/data-changed
 surface/regularize/full
 surface/regularize/part
@@ -241,6 +249,8 @@ surface/regularize/interpolation
 brick/props
 brick/data-changed
 brick/units
+brick/get
+brick/set
 brick/serialize
 brick/set-size
 brick/copy

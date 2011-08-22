@@ -117,6 +117,64 @@ print_brick(const gchar *name, const GwyBrick *brick)
 }
 
 void
+test_brick_get(void)
+{
+    enum { max_size = 15, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint zres = g_rand_int_range(rng, 1, max_size);
+        GwyBrick *brick = gwy_brick_new_sized(xres, yres, zres, FALSE);
+        brick_randomize(brick, rng);
+
+        for (guint k = 0; k < zres; k++) {
+            for (guint i = 0; i < yres; i++) {
+                for (guint j = 0; j < xres; j++) {
+                    g_assert_cmpfloat(brick->data[(k*yres + i)*xres + j],
+                                      ==,
+                                      gwy_brick_get(brick, j, i, k));
+                }
+            }
+        }
+        g_object_unref(brick);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_brick_set(void)
+{
+    enum { max_size = 15, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint zres = g_rand_int_range(rng, 1, max_size);
+        GwyBrick *brick = gwy_brick_new_sized(xres, yres, zres, FALSE);
+
+        for (guint k = 0; k < zres; k++) {
+            for (guint i = 0; i < yres; i++) {
+                for (guint j = 0; j < xres; j++)
+                    gwy_brick_set(brick, j, i, k, (k*yres + i)*xres + j);
+            }
+        }
+
+        for (guint k = 0; k < xres*yres*zres; k++) {
+            g_assert_cmpfloat(brick->data[k], ==, k);
+        }
+        g_object_unref(brick);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_brick_props(void)
 {
     GwyBrick *brick = gwy_brick_new_sized(21, 17, 14, FALSE);

@@ -278,6 +278,50 @@ test_line_check_part_bad(void)
     line_check_part_bad(25, &(GwyLinePart){ 25, 1 });
 }
 
+void
+test_line_get(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        line_randomize(line, rng);
+
+        for (guint i = 0; i < res; i++) {
+            g_assert_cmpfloat(line->data[i], ==, gwy_line_get(line, i));
+        }
+        g_object_unref(line);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_line_set(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+
+        for (guint i = 0; i < res; i++)
+            gwy_line_set(line, i, i);
+
+        for (guint k = 0; k < res; k++) {
+            g_assert_cmpfloat(line->data[k], ==, k);
+        }
+        g_object_unref(line);
+    }
+
+    g_rand_free(rng);
+}
+
 static void
 line_part_copy_dumb(const GwyLine *src,
                     guint pos,

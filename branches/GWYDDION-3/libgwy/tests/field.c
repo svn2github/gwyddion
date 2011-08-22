@@ -690,6 +690,58 @@ test_field_check_mask_bad(void)
                          GWY_MASK_INCLUDE);
 }
 
+void
+test_field_get(void)
+{
+    enum { max_size = 55, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                g_assert_cmpfloat(field->data[i*xres + j],
+                                  ==,
+                                  gwy_field_get(field, j, i));
+            }
+        }
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_set(void)
+{
+    enum { max_size = 55, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++)
+                gwy_field_set(field, j, i, i*xres + j);
+        }
+
+        for (guint k = 0; k < xres*yres; k++) {
+            g_assert_cmpfloat(field->data[k], ==, k);
+        }
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
 static void
 field_part_copy_dumb(const GwyField *src,
                      guint col,

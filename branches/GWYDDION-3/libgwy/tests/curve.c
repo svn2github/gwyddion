@@ -85,6 +85,56 @@ curve_assert_similar(const GwyCurve *result,
 */
 
 void
+test_curve_get(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyCurve *curve = gwy_curve_new_sized(res);
+        curve_randomize(curve, rng);
+
+        for (guint i = 0; i < res; i++) {
+            GwyXY pt = gwy_curve_get(curve, i);
+            g_assert_cmpfloat(curve->data[i].x, ==, pt.x);
+            g_assert_cmpfloat(curve->data[i].y, ==, pt.y);
+        }
+        g_object_unref(curve);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_curve_set(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyCurve *curve = gwy_curve_new_sized(res);
+
+        for (guint i = 0; i < res; i++) {
+            GwyXY pt = { i, G_PI/(i + 1) };
+            gwy_curve_set(curve, i, pt);
+        }
+
+        for (guint k = 0; k < res; k++) {
+            GwyXY pt = gwy_curve_get(curve, k);
+            g_assert_cmpfloat(pt.x, ==, k);
+            g_assert_cmpfloat(pt.y, ==, G_PI/(k + 1));
+        }
+        g_object_unref(curve);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_curve_serialize(void)
 {
     enum { max_size = 55 };

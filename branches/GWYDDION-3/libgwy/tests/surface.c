@@ -62,6 +62,58 @@ surface_assert_equal_object(GObject *object, GObject *reference)
 }
 
 void
+test_surface_get(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwySurface *surface = gwy_surface_new_sized(res);
+        surface_randomize(surface, rng);
+
+        for (guint i = 0; i < res; i++) {
+            GwyXYZ pt = gwy_surface_get(surface, i);
+            g_assert_cmpfloat(surface->data[i].x, ==, pt.x);
+            g_assert_cmpfloat(surface->data[i].y, ==, pt.y);
+            g_assert_cmpfloat(surface->data[i].z, ==, pt.z);
+        }
+        g_object_unref(surface);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_surface_set(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwySurface *surface = gwy_surface_new_sized(res);
+
+        for (guint i = 0; i < res; i++) {
+            GwyXYZ pt = { i, G_PI/(i + 1), -0.5*i*i };
+            gwy_surface_set(surface, i, pt);
+        }
+
+        for (guint k = 0; k < res; k++) {
+            GwyXYZ pt = gwy_surface_get(surface, k);
+            g_assert_cmpfloat(pt.x, ==, k);
+            g_assert_cmpfloat(pt.y, ==, G_PI/(k + 1));
+            g_assert_cmpfloat(pt.z, ==, -0.5*k*k);
+        }
+        g_object_unref(surface);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_surface_serialize(void)
 {
     enum { max_size = 55 };
