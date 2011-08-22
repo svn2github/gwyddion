@@ -76,6 +76,9 @@ value-format/simple
 line/props
 line/data-changed
 line/units
+line/check-part/good
+line/check-part/empty
+line/check-part/bad
 line/copy
 line/new-part
 line/serialize

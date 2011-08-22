@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include "testlibgwy.h"
 
 /***************************************************************************
@@ -210,6 +211,71 @@ test_line_set_size(void)
     g_assert_cmpuint(res_changed, ==, 1);
 
     g_object_unref(line);
+}
+
+static void
+line_check_part_good(guint res,
+                     const GwyLinePart *lpart,
+                     guint expected_pos, guint expected_len)
+{
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    guint pos, len;
+
+    g_assert(gwy_line_check_part(line, lpart, &pos, &len));
+    g_assert_cmpuint(pos, ==, expected_pos);
+    g_assert_cmpuint(len, ==, expected_len);
+    g_object_unref(line);
+}
+
+void
+test_line_check_part_good(void)
+{
+    line_check_part_good(25, &(GwyLinePart){ 0, 25 }, 0, 25);
+    line_check_part_good(25, NULL, 0, 25);
+    line_check_part_good(25, &(GwyLinePart){ 0, 24 }, 0, 24);
+    line_check_part_good(25, &(GwyLinePart){ 20, 4 }, 20, 4);
+}
+
+static void
+line_check_part_empty(guint res,
+                      const GwyLinePart *lpart)
+{
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    guint pos, len;
+
+    g_assert(!gwy_line_check_part(line, lpart, &pos, &len));
+    g_object_unref(line);
+}
+
+void
+test_line_check_part_empty(void)
+{
+    line_check_part_empty(25, &(GwyLinePart){ 0, 0 });
+    line_check_part_empty(25, &(GwyLinePart){ 25, 0 });
+    line_check_part_empty(25, &(GwyLinePart){ 1000, 0 });
+}
+
+static void
+line_check_part_bad(guint res,
+                    const GwyLinePart *lpart)
+{
+    if (g_test_trap_fork(0,
+                         G_TEST_TRAP_SILENCE_STDOUT
+                         | G_TEST_TRAP_SILENCE_STDERR)) {
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        guint pos, len;
+        gwy_line_check_part(line, lpart, &pos, &len);
+        exit(0);
+    }
+    g_test_trap_assert_failed();
+    g_test_trap_assert_stderr("*CRITICAL*");
+}
+
+void
+test_line_check_part_bad(void)
+{
+    line_check_part_bad(25, &(GwyLinePart){ 0, 26 });
+    line_check_part_bad(25, &(GwyLinePart){ 25, 1 });
 }
 
 static void
