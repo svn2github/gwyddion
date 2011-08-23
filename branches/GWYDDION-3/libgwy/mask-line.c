@@ -798,7 +798,8 @@ gwy_mask_line_get(const GwyMaskLine *line,
  *
  * This is a low-level macro and it does not invalidate the mask line.
  *
- * This macro may evaluate its arguments several times.
+ * This macro may evaluate its arguments several times except for @value
+ * which is evaluated only once.
  * This macro is usable as a single statement.
  *
  * No argument validation is performed.

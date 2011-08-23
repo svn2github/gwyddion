@@ -324,4 +324,64 @@ test_mask_line_count(void)
     g_rand_free(rng);
 }
 
+// Undef macros to test the exported functions.
+#undef gwy_mask_line_get
+#undef gwy_mask_line_set
+
+void
+test_mask_line_get(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+    guint32 *pool = mask_line_random_pool_new(rng, max_size);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyMaskLine *line = gwy_mask_line_new_sized(res, FALSE);
+        mask_line_randomize(line, pool, max_size, rng);
+
+        GwyMaskIter miter;
+        gwy_mask_line_iter_init(line, miter, 0);
+        for (guint j = 0; j < res; j++) {
+            g_assert_cmpuint(!gwy_mask_iter_get(miter),
+                             ==,
+                             !gwy_mask_line_get(line, j));
+            gwy_mask_iter_next(miter);
+        }
+        g_object_unref(line);
+    }
+
+    mask_line_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+void
+test_mask_line_set(void)
+{
+    enum { max_size = 255, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyMaskLine *line = gwy_mask_line_new_sized(res, FALSE);
+
+        for (guint j = 0; j < res; j++)
+            gwy_mask_line_set(line, j, (13*j % 5) % 2);
+
+        GwyMaskIter miter;
+        gwy_mask_line_iter_init(line, miter, 0);
+        for (guint j = 0; j < res; j++) {
+            g_assert_cmpuint(!gwy_mask_iter_get(miter),
+                             ==,
+                             !((13*j % 5) % 2));
+            gwy_mask_iter_next(miter);
+        }
+        g_object_unref(line);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

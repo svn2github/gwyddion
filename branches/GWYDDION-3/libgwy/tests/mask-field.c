@@ -1304,4 +1304,72 @@ random_mask_field_prob(guint xres, guint yres, GRand *rng,
     return field;
 }
 
+// Undef macros to test the exported functions.
+#undef gwy_mask_field_get
+#undef gwy_mask_field_set
+
+void
+test_mask_field_get(void)
+{
+    enum { max_size = 55, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+        mask_field_randomize(field, pool, max_size, rng);
+
+        for (guint i = 0; i < yres; i++) {
+            GwyMaskIter miter;
+            gwy_mask_field_iter_init(field, miter, 0, i);
+            for (guint j = 0; j < xres; j++) {
+                g_assert_cmpuint(!gwy_mask_iter_get(miter),
+                                 ==,
+                                 !gwy_mask_field_get(field, j, i));
+                gwy_mask_iter_next(miter);
+            }
+        }
+        g_object_unref(field);
+    }
+
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+void
+test_mask_field_set(void)
+{
+    enum { max_size = 55, niter = 40 };
+
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++)
+                gwy_mask_field_set(field, j, i, (i*j + i/3 + j/5) % 2);
+        }
+
+        for (guint i = 0; i < yres; i++) {
+            GwyMaskIter miter;
+            gwy_mask_field_iter_init(field, miter, 0, i);
+            for (guint j = 0; j < xres; j++) {
+                g_assert_cmpuint(!gwy_mask_iter_get(miter),
+                                 ==,
+                                 !((i*j + i/3 + j/5) % 2));
+                gwy_mask_iter_next(miter);
+            }
+        }
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

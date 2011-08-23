@@ -1177,7 +1177,8 @@ gwy_mask_field_get(const GwyMaskField *field,
  *
  * This is a low-level macro and it does not invalidate the mask field.
  *
- * This macro may evaluate its arguments several times.
+ * This macro may evaluate its arguments several times except for @value
+ * which is evaluated only once.
  * This macro is usable as a single statement.
  *
  * No argument validation is performed.
