@@ -71,6 +71,8 @@ GwyLine* gwy_field_find_row_shifts(const GwyField *field,
                                    GwyMaskingType masking,
                                    GwyRowShiftMethod method,
                                    guint min_freedom);
+void     gwy_field_laplace_solve  (GwyField *field,
+                                   const GwyMaskField *mask);
 
 G_END_DECLS
 
