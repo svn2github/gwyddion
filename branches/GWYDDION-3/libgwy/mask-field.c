@@ -166,6 +166,15 @@ free_data(GwyMaskField *field)
 }
 
 static void
+free_caches(GwyMaskField *field)
+{
+    MaskField *priv = field->priv;
+    GWY_FREE(priv->grains);
+    GWY_FREE(priv->grain_sizes);
+    GWY_FREE(priv->grain_bounding_boxes);
+}
+
+static void
 gwy_mask_field_init(GwyMaskField *field)
 {
     field->priv = G_TYPE_INSTANCE_GET_PRIVATE(field,
@@ -181,8 +190,7 @@ gwy_mask_field_finalize(GObject *object)
 {
     GwyMaskField *field = GWY_MASK_FIELD(object);
     free_data(field);
-    GWY_FREE(field->priv->grains);
-    GWY_FREE(field->priv->graindata);
+    free_caches(field);
     G_OBJECT_CLASS(gwy_mask_field_parent_class)->finalize(object);
 }
 
@@ -832,8 +840,7 @@ void
 gwy_mask_field_invalidate(GwyMaskField *field)
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
-    GWY_FREE(field->priv->grains);
-    GWY_FREE(field->priv->graindata);
+    free_caches(field);
 }
 
 /**

@@ -946,7 +946,11 @@ gwy_mask_field_grow(GwyMaskField *field,
     grow_field(field);
     if (separate_grains) {
         prevent_grain_merging(field);
-        GWY_FREE(field->priv->graindata);
+        // Preserve numbered grains.
+        guint *grains = field->priv->grains;
+        field->priv->grains = NULL;
+        gwy_mask_field_invalidate(field);
+        field->priv->grains = grains;
     }
     else
         gwy_mask_field_invalidate(field);
