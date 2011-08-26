@@ -91,6 +91,8 @@ typedef struct {
  */
 typedef struct {
     gsize len;
+    gsize int_size;
+    gsize float_size;
     guint *n;
     guint *k;
     gdouble *w;
@@ -1184,24 +1186,56 @@ build_grid_index(const guint *levels,
     }
 }
 
-static LaplaceIterators*
-laplace_iterators_new(guint len, guint maxneighbours)
+static void
+laplace_iterators_setup(LaplaceIterators *iterators,
+                        guint maxneighbours)
 {
-    LaplaceIterators *iterators = g_slice_new(LaplaceIterators);
+    gsize len = iterators->len;
 
-    iterators->len = len;
-
-    iterators->n = g_new0(guint, (maxneighbours + 2)*len + 2);
     iterators->k = iterators->n + (len + 2);
     iterators->gindex = iterators->k + maxneighbours*len;
 
-    iterators->z = g_new0(gdouble, (maxneighbours + 5)*len);
     iterators->rhs = iterators->z + len;
     iterators->f = iterators->rhs + len;
     iterators->v = iterators->f + len;
     iterators->t = iterators->v + len;
     iterators->w = iterators->t + len;
+}
 
+static void
+laplace_iterators_resize(LaplaceIterators *iterators,
+                         guint len,
+                         guint maxneighbours)
+{
+    gsize int_size = (maxneighbours + 2)*len + 2;
+    gsize float_size = (maxneighbours + 5)*len;
+
+    iterators->len = len;
+
+    if (int_size > iterators->int_size) {
+        GWY_FREE(iterators->n);
+        iterators->n = g_new0(guint, iterators->int_size);
+        iterators->int_size = int_size;
+    }
+    else
+        gwy_clear(iterators->n, int_size);
+
+    if (float_size > iterators->float_size) {
+        GWY_FREE(iterators->z);
+        iterators->z = g_new0(gdouble, iterators->float_size);
+        iterators->float_size = float_size;
+    }
+    else
+        gwy_clear(iterators->z, float_size);
+
+    laplace_iterators_setup(iterators, maxneighbours);
+}
+
+static LaplaceIterators*
+laplace_iterators_new(guint len, guint maxneighbours)
+{
+    LaplaceIterators *iterators = g_slice_new0(LaplaceIterators);
+    laplace_iterators_resize(iterators, len, maxneighbours);
     return iterators;
 }
 
@@ -1494,17 +1528,18 @@ build_iterator(LaplaceNeighbour *nd,
     } while (!sorted);
 }
 
-static LaplaceIterators*
-build_sparse_iterators(const guint *levels,
+static void
+build_sparse_iterators(LaplaceIterators *iterators,
+                       guint *revindex,
+                       const guint *levels,
                        const gdouble *data,
                        guint xres, guint yres)
 {
     guint len = count_grid_points(levels, xres, yres);
-    LaplaceIterators *iterators = laplace_iterators_new(len, 5);
-
-    guint *revindex = g_new(guint, xres*yres);
-    build_grid_index(levels, xres, yres, iterators->gindex, revindex);
     const guint *gindex = iterators->gindex;
+
+    laplace_iterators_resize(iterators, len, 5);
+    build_grid_index(levels, xres, yres, iterators->gindex, revindex);
 
     gdouble rhssum = 0.0, nrhs = 0.0;
     LaplaceNeighbour nd[NDIRECTIONS];
@@ -1526,28 +1561,25 @@ build_sparse_iterators(const guint *levels,
         build_iterator(nd, iterators, ipt, &nrhs, &rhssum);
     }
 
-    g_free(revindex);
-
     // Initialise with the mean value of right hand sides, including
     // multiplicity.
     rhssum /= nrhs;
     for (guint ipt = 0; ipt < len; ipt++)
         iterators->z[ipt] = rhssum;
-
-    return iterators;
 }
 
-static LaplaceIterators*
-build_dense_iterators(const guint *levels,
+static void
+build_dense_iterators(LaplaceIterators *iterators,
+                      guint *revindex,
+                      const guint *levels,
                       const gdouble *data,
                       guint xres, guint yres)
 {
     guint len = count_grid_points(levels, xres, yres);
-    LaplaceIterators *iterators = laplace_iterators_new(len, 4);
-
-    guint *revindex = g_new(guint, xres*yres);
-    build_grid_index(levels, xres, yres, iterators->gindex, revindex);
     const guint *gindex = iterators->gindex;
+
+    laplace_iterators_resize(iterators, len, 4);
+    build_grid_index(levels, xres, yres, iterators->gindex, revindex);
 
     for (guint ipt = 0; ipt < len; ipt++) {
         guint k = gindex[ipt], i = k/xres, j = k % xres, ws = 0, n = 0;
@@ -1602,10 +1634,6 @@ build_dense_iterators(const guint *levels,
         while (n--)
             *(iter_w++) = 1.0/ws;
     }
-
-    g_free(revindex);
-
-    return iterators;
 }
 
 static void
@@ -1626,16 +1654,6 @@ calculate_f(LaplaceIterators *iterators)
 
 static void
 iterate_simple(LaplaceIterators *iterators)
-{
-    const gdouble *f = iterators->f;
-    gdouble *z = iterators->z;
-
-    for (guint ipt = iterators->len; ipt; ipt--, z++, f++)
-        *z -= *f;
-}
-
-static void
-iterate_simple_stable(LaplaceIterators *iterators)
 {
     const gdouble *f = iterators->f;
     gdouble *z = iterators->z;
@@ -1901,13 +1919,13 @@ reconstruct(guint *levels,
 }
 
 static void
-laplace_sparse(gdouble *data, guint *levels, guint xres, guint yres,
+laplace_sparse(LaplaceIterators *iterators,
+               guint *revindex,
+               gdouble *data, guint *levels, guint xres, guint yres,
                guint nconjgrad, guint nsimple)
 {
     guint maxlevel = build_levels(levels, xres, yres);
-    LaplaceIterators *iterators = build_sparse_iterators(levels, data,
-                                                         xres, yres);
-
+    build_sparse_iterators(iterators, revindex, levels, data, xres, yres);
     calculate_f(iterators),
     gwy_assign(iterators->v, iterators->f, iterators->len);
     for (guint iter = 0; iter < nconjgrad; iter++)
@@ -1922,41 +1940,39 @@ laplace_sparse(gdouble *data, guint *levels, guint xres, guint yres,
 }
 
 static void
-laplace_dense(gdouble *data, guint *levels, guint xres, guint yres,
+laplace_dense(LaplaceIterators *iterators,
+              guint *revindex,
+              gdouble *data, guint *levels, guint xres, guint yres,
               guint nconjgrad, guint nsimple)
 {
-    LaplaceIterators *iterators = build_dense_iterators(levels, data,
-                                                        xres, yres);
-
+    build_dense_iterators(iterators, revindex, levels, data, xres, yres);
     calculate_f(iterators);
     gwy_assign(iterators->v, iterators->f, iterators->len);
     for (guint iter = 0; iter < nconjgrad; iter++)
         iterate_conj_grad(iterators);
     for (guint iter = 0; iter < nsimple; iter++) {
         calculate_f(iterators);
-        iterate_simple_stable(iterators);
+        iterate_simple(iterators);
     }
     move_result_to_data(iterators, data);
     laplace_iterators_free(iterators);
 }
 
-static guint*
-create_levels(const GwyMaskField *mask)
+static void
+extract_grain(const GwyMaskField *mask,
+              guint *grain)
 {
     guint xres = mask->xres, yres = mask->yres;
-    guint *levels = g_new0(guint, xres*yres), *l = levels;
 
     for (guint i = 0; i < yres; i++) {
         GwyMaskIter iter;
         gwy_mask_field_iter_init(mask, iter, 0, i);
 
         for (guint j = xres; j; j--) {
-            *(l++) = !!gwy_mask_iter_get(iter);
+            *(grain++) = !!gwy_mask_iter_get(iter);
             gwy_mask_iter_next(iter);
         }
     }
-
-    return levels;
 }
 
 void
@@ -1969,10 +1985,15 @@ gwy_field_laplace_solve(GwyField *field,
     g_return_if_fail(mask->yres == field->yres);
 
     guint xres = field->xres, yres = field->yres;
-    guint *levels = create_levels(mask);
-    laplace_sparse(field->data, levels, xres, yres, 45, 5);
-    laplace_dense(field->data, levels, xres, yres, 30, 20);
+    guint *levels = g_new(guint, xres*yres);
+    guint *revindex = g_new(guint, xres*yres);
+    extract_grain(mask, levels);
+    LaplaceIterators *iterators = laplace_iterators_new(1, 5);
+    laplace_sparse(iterators, revindex, field->data, levels, xres, yres, 45, 10);
+    laplace_dense(iterators, revindex, field->data, levels, xres, yres, 30, 20);
+    laplace_iterators_free(iterators);
     g_free(levels);
+    g_free(revindex);
 }
 
 /**
