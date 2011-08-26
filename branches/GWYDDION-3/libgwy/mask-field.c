@@ -1048,15 +1048,17 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
 /**
  * gwy_mask_field_number_grains:
  * @field: A two-dimensional mask field.
- * @ngrains: Location to store the number of the last grain, or %NULL.
+ * @ngrains: (out):
+ *           Location to store the number of the last grain, or %NULL.
  *
  * Numbers grains in a mask field.
  *
- * Returns: Array of integers of the same number of items as @field
+ * Returns: (transfer none) (array length=@ngrains):
+ *          Array of integers of the same number of items as @field
  *          (without padding) filled with grain numbers of each pixel.  Empty
  *          space is set to 0, pixels inside a grain are set to the grain
  *          number.  Grains are numbered sequentially 1, 2, 3, ...
- *          The returned array is owned by @field and become invalid when
+ *          The returned array is owned by @field and becomes invalid when
  *          the data change, gwy_mask_field_invalidate() is called or the
  *          mask field is finalized.
  **/
@@ -1140,6 +1142,100 @@ gwy_mask_field_number_grains(GwyMaskField *field,
     priv->ngrains = id;
     GWY_MAYBE_SET(ngrains, priv->ngrains);
     return priv->grains;
+}
+
+static void
+calculate_grain_properties(GwyMaskField *field)
+{
+    MaskField *priv = field->priv;
+
+    if (!priv->grains)
+        gwy_mask_field_number_grains(field, NULL);
+
+    GWY_FREE(priv->grain_sizes);
+    GWY_FREE(priv->grain_bounding_boxes);
+
+    // Put max_col to width, max_row to height first, then subtract col, row.
+    guint ngrains = priv->ngrains;
+    priv->grain_sizes = g_new0(guint, ngrains+1);
+    priv->grain_bounding_boxes = g_new(GwyFieldPart, ngrains+1);
+    GwyFieldPart *fpart;
+
+    fpart = priv->grain_bounding_boxes;
+    for (guint id = 0; id <= ngrains; id++, fpart++) {
+        *fpart = (GwyFieldPart){ G_MAXUINT, G_MAXUINT, 0, 0 };
+    }
+
+    guint xres = field->xres, yres = field->yres;
+    guint *g = priv->grains;
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            fpart = priv->grain_bounding_boxes + *g;
+
+            if (j < fpart->col)
+                fpart->col = j;
+            if (j > fpart->width)
+                fpart->width = j;
+            if (i < fpart->row)
+                fpart->row = i;
+            if (i > fpart->height)
+                fpart->height = i;
+
+            priv->grain_sizes[*g]++;
+        }
+    }
+
+    fpart = priv->grain_bounding_boxes;
+    for (guint id = 0; id <= ngrains; id++, fpart++) {
+        fpart->width = fpart->width+1 - fpart->col;
+        fpart->height = fpart->height+1 - fpart->row;
+    }
+}
+
+/**
+ * gwy_mask_field_grain_sizes:
+ * @field: A two-dimensional mask field.
+ *
+ * Obtains the number of pixels of each grain in a mask field.
+ *
+ * Returns: (transfer none):
+ *          Array of @ngrains+1 grain sizes.  Items 1 to @ngrains correspond to
+ *          grains while the 0th items corresponds to the empty space between.
+ *          The returned array is owned by @field and becomes invalid when the
+ *          data change, gwy_mask_field_invalidate() is called or the mask
+ *          field is finalized.
+ **/
+const guint*
+gwy_mask_field_grain_sizes(GwyMaskField *field)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    if (!field->priv->grain_sizes)
+        calculate_grain_properties(field);
+
+    return field->priv->grain_sizes;
+}
+
+/**
+ * gwy_mask_field_grain_bounding_boxes:
+ * @field: A two-dimensional mask field.
+ *
+ * Obtains the bounding box of each grain in a mask field.
+ *
+ * Returns: (transfer none):
+ *          Array of @ngrains+1 grain bounding boxes.  Items 1 to @ngrains
+ *          correspond to grains while the 0th items corresponds to the empty
+ *          space between.  The returned array is owned by @field and becomes
+ *          invalid when the data change, gwy_mask_field_invalidate() is called
+ *          or the mask field is finalized.
+ **/
+const GwyFieldPart*
+gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    if (!field->priv->grain_bounding_boxes)
+        calculate_grain_properties(field);
+
+    return field->priv->grain_bounding_boxes;
 }
 
 /**

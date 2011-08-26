@@ -166,6 +166,8 @@ guint        gwy_mask_field_count_rows   (const GwyMaskField *field,
                                           guint *counts);
 const guint* gwy_mask_field_number_grains(GwyMaskField *field,
                                           guint *ngrains);
+const guint* gwy_mask_field_grain_sizes  (GwyMaskField *field);
+const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(GwyMaskField *field);
 
 gboolean gwy_mask_field_check_part (const GwyMaskField *field,
                                     const GwyFieldPart *fpart,
