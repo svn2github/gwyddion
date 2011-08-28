@@ -1053,7 +1053,7 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
  *
  * Numbers grains in a mask field.
  *
- * Returns: (transfer none) (array length=@ngrains):
+ * Returns: (transfer none) (array length=ngrains):
  *          Array of integers of the same number of items as @field
  *          (without padding) filled with grain numbers of each pixel.  Empty
  *          space is set to 0, pixels inside a grain are set to the grain
