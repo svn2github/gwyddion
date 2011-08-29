@@ -1309,7 +1309,7 @@ random_mask_field_prob(guint xres, guint yres, GRand *rng,
 void
 test_mask_field_grain_sizes(void)
 {
-    enum { max_size = 208, niter = 300 };
+    enum { max_size = 208, niter = 3000 };
     GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -1324,7 +1324,7 @@ test_mask_field_grain_sizes(void)
 
         guint total = 0;
         for (guint i = 0; i <= ngrains; i++) {
-            g_assert(i || grain_sizes[i]);
+            g_assert(!i || grain_sizes[i]);
             total += grain_sizes[i];
         }
         g_assert_cmpuint(total, ==, xres*yres);
@@ -1339,6 +1339,80 @@ test_mask_field_grain_sizes(void)
         }
 
         g_free(grain_sizes_prev);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_mask_field_grain_bounding_boxes(void)
+{
+    enum { max_size = 208, niter = 3000 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble prob = g_rand_double(rng);
+        GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
+        guint ngrains;
+
+        const guint *grains = gwy_mask_field_number_grains(field, &ngrains);
+        const GwyFieldPart *grain_bboxes = gwy_mask_field_grain_bounding_boxes(field);
+
+        for (guint i = 0; i <= ngrains; i++) {
+            const GwyFieldPart *bbox = grain_bboxes + i;
+
+            if (!bbox->width) {
+                g_assert_cmpuint(i, ==, 0);
+                g_assert_cmpuint(bbox->height, ==, 0);
+                g_assert_cmpuint(bbox->col, ==, 0);
+                g_assert_cmpuint(bbox->row, ==, 0);
+            }
+            else {
+                g_assert_cmpuint(bbox->height, >, 0);
+                g_assert_cmpuint(bbox->width, <=, xres);
+                g_assert_cmpuint(bbox->height, <=, yres);
+                g_assert_cmpuint(bbox->col, <, xres);
+                g_assert_cmpuint(bbox->row, <, yres);
+                g_assert_cmpuint(bbox->col + bbox->width, <=, xres);
+                g_assert_cmpuint(bbox->row + bbox->height, <=, yres);
+            }
+        }
+
+        guint *found_edge = g_new0(guint, ngrains+1);
+
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                guint gno = grains[i*xres + j];
+                const GwyFieldPart *bbox = grain_bboxes + gno;
+
+                if (bbox->width) {
+                    g_assert_cmpuint(j, >=, bbox->col);
+                    g_assert_cmpuint(j, <, bbox->col + bbox->width);
+                    g_assert_cmpuint(i, >=, bbox->row);
+                    g_assert_cmpuint(i, <, bbox->row + bbox->height);
+                    if (j == bbox->col)
+                        found_edge[gno] |= 1 << 0;
+                    if (i == bbox->row)
+                        found_edge[gno] |= 1 << 1;
+                    if (j == bbox->col + bbox->width-1)
+                        found_edge[gno] |= 1 << 2;
+                    if (i == bbox->row + bbox->height-1)
+                        found_edge[gno] |= 1 << 3;
+                }
+            }
+        }
+
+        for (guint i = 0; i <= ngrains; i++) {
+            const GwyFieldPart *bbox = grain_bboxes + i;
+
+            if (bbox->width) {
+                g_assert_cmphex(found_edge[i], ==, 0xf);
+            }
+        }
+
+        g_free(found_edge);
         g_object_unref(field);
     }
     g_rand_free(rng);
