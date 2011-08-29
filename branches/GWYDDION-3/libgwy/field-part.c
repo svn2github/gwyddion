@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwy/field-part.h"
 #include "libgwy/serialize.h"
 #include "libgwy/serializable-boxed.h"
@@ -137,6 +138,82 @@ gwy_field_part_free(GwyFieldPart *fpart)
 }
 
 /**
+ * gwy_field_part_intersect:
+ * @fpart: Pixel-wise rectangle in plane to modify.
+ * @otherpart: Another pixel-wise rectangle in plane.
+ *
+ * Intersects two pixels-wise rectangles in plane.
+ *
+ * See also: gwy_overlapping().
+ *
+ * Returns: %TRUE if the intersection is non-empty.  %FALSE if it is empty
+ *          (the origin of the intersection is then set to (0,0) regardless
+ *          what the original column and row were).
+ **/
+gboolean
+gwy_field_part_intersect(GwyFieldPart *fpart,
+                         const GwyFieldPart *otherpart)
+{
+    g_return_val_if_fail(fpart && otherpart, FALSE);
+
+    if (!gwy_overlapping(fpart->col, fpart->width,
+                         otherpart->col, otherpart->width)
+        || !gwy_overlapping(fpart->row, fpart->height,
+                            otherpart->row, otherpart->height)) {
+        gwy_clear1(fpart);
+        return FALSE;
+    }
+
+    // Now we know the parts overlap so the intersection can be calculated
+    // easily.
+    guint diff;
+
+    diff = MAX(fpart->col, otherpart->col) - fpart->col;
+    fpart->col += diff;
+    fpart->width -= diff;
+    fpart->width = MIN(fpart->width, otherpart->width);
+
+    diff = MAX(fpart->row, otherpart->row) - fpart->row;
+    fpart->row += diff;
+    fpart->height -= diff;
+    fpart->height = MIN(fpart->height, otherpart->height);
+
+    return TRUE;
+}
+
+/**
+ * gwy_field_part_union:
+ * @fpart: Pixel-wise rectangle in plane to modify.
+ * @otherpart: Another pixel-wise rectangle in plane.
+ *
+ * Combines two pixels-wise rectangles in plane.
+ *
+ * The result is the smallest rectangle containing both @fpart and @otherpart.
+ **/
+void
+gwy_field_part_union(GwyFieldPart *fpart,
+                     const GwyFieldPart *otherpart)
+{
+    g_return_if_fail(fpart && otherpart);
+
+    if (otherpart->col + otherpart->width > fpart->col + fpart->width)
+        fpart->width = otherpart->col + otherpart->width - fpart->col;
+    if (otherpart->col < fpart->col) {
+        guint diff = fpart->col - otherpart->col;
+        fpart->col -= diff;
+        fpart->width += diff;
+    }
+
+    if (otherpart->row + otherpart->height > fpart->row + fpart->height)
+        fpart->height = otherpart->row + otherpart->height - fpart->row;
+    if (otherpart->row < fpart->row) {
+        guint diff = fpart->row - otherpart->row;
+        fpart->row -= diff;
+        fpart->height += diff;
+    }
+}
+
+/**
  * SECTION: field-part
  * @title: GwyFieldPart
  * @short_description: Pixel-wise rectangle in plane
@@ -148,7 +225,7 @@ gwy_field_part_free(GwyFieldPart *fpart)
  * that %NULL means the entire field.  The following two examples are thus
  * equivalent:
  * |[
- * // Fill the entire field using explicit full-field rectangle.
+ * // Fill the entire field using an explicit full-field rectangle.
  * GwyFieldPart fpart = { 0, 0, field->xres, field->yres };
  * gwy_field_fill(field, &fpart, NULL, GWY_MASK_IGNORE, 1.0);
  *

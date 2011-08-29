@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,9 +33,13 @@ typedef struct {
 
 #define GWY_TYPE_FIELD_PART (gwy_field_part_get_type())
 
-GType         gwy_field_part_get_type(void)                      G_GNUC_CONST;
-GwyFieldPart* gwy_field_part_copy    (const GwyFieldPart *fpart) G_GNUC_MALLOC;
-void          gwy_field_part_free    (GwyFieldPart *fpart);
+GType         gwy_field_part_get_type (void)                           G_GNUC_CONST;
+GwyFieldPart* gwy_field_part_copy     (const GwyFieldPart *fpart)      G_GNUC_MALLOC;
+void          gwy_field_part_free     (GwyFieldPart *fpart);
+gboolean      gwy_field_part_intersect(GwyFieldPart *fpart,
+                                       const GwyFieldPart *otherpart);
+void          gwy_field_part_union    (GwyFieldPart *fpart,
+                                       const GwyFieldPart *otherpart);
 
 G_END_DECLS
 
