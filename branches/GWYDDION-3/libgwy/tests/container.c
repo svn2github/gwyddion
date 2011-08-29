@@ -308,7 +308,7 @@ check_value(GQuark key, const GValue *value, gpointer user_data)
     g_assert(gwy_container_contains(reference, key));
 
     GValue refvalue;
-    gwy_clear(&refvalue, 1);
+    gwy_clear1(refvalue);
     gwy_container_get_value(reference, key, &refvalue);
     g_assert(values_are_equal(value, &refvalue));
     g_value_unset(&refvalue);

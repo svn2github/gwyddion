@@ -720,8 +720,8 @@ compare_properties(GObject *object,
     for (guint i = 0; i < nprops; i++) {
         GValue value1, value2;
         //g_printerr("%s\n", props[i]->name);
-        gwy_clear(&value1, 1);
-        gwy_clear(&value2, 1);
+        gwy_clear1(value1);
+        gwy_clear1(value2);
         g_value_init(&value1, props[i]->value_type);
         g_value_init(&value2, props[i]->value_type);
         g_object_get_property(object, props[i]->name, &value1);
