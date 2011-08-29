@@ -58,6 +58,7 @@
 #include <libgwy/main.h>
 #include <libgwy/mask-field.h>
 #include <libgwy/mask-field-arithmetic.h>
+#include <libgwy/mask-field-grains.h>
 #include <libgwy/mask-field-transform.h>
 #include <libgwy/mask-iter.h>
 #include <libgwy/mask-line.h>

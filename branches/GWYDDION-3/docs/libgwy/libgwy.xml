@@ -79,6 +79,7 @@
     <xi:include href="xml/field-transform.xml"/>
     <xi:include href="xml/mask-field.xml"/>
     <xi:include href="xml/mask-field-arithmetic.xml"/>
+    <xi:include href="xml/mask-field-grains.xml"/>
     <xi:include href="xml/mask-field-transform.xml"/>
     <xi:include href="xml/surface.xml"/>
     <xi:include href="xml/surface-statistics.xml"/>

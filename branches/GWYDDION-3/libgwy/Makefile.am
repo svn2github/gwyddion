@@ -57,6 +57,7 @@ public_headers = \
 	$(srcdir)/main.h \
 	$(srcdir)/mask-field.h \
 	$(srcdir)/mask-field-arithmetic.h \
+	$(srcdir)/mask-field-grains.h \
 	$(srcdir)/mask-field-transform.h \
 	$(srcdir)/mask-iter.h \
 	$(srcdir)/mask-line.h \
@@ -153,6 +154,7 @@ libgwy3_la_SOURCES = \
 	main.c \
 	mask-field.c \
 	mask-field-arithmetic.c \
+	mask-field-grains.c \
 	mask-field-transform.c \
 	mask-line.c \
 	mask-line-arithmetic.c \

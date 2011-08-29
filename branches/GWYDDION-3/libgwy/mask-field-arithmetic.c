@@ -24,6 +24,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/mask-field-arithmetic.h"
+#include "libgwy/mask-field-grains.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/mask-field-internal.h"
 
