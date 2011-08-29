@@ -56,6 +56,11 @@
  *
  * More precisely, @x and @y must be usable as both lhs and rhs expressions of
  * type @t.
+ * |[
+ * t z = x;
+ * x = y;
+ * y = z;
+ * ]|
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
@@ -70,7 +75,14 @@
  * Ensures the first variable is not larger than the second variable.
  *
  * More precisely, @x and @y must be usable as both lhs and rhs expressions of
- * type @t.
+ * type @t.  Pseudocode:
+ * |[
+ * if (y < x) {
+ *     t z = x;
+ *     x = y;
+ *     y = z;
+ * }
+ * ]|
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
@@ -83,7 +95,13 @@
  * Frees memory if it is allocated.
  *
  * This is an idempotent wrapper of g_free(): if @ptr is not %NULL
- * g_free() is called on it and @ptr is set to %NULL.
+ * g_free() is called on it and @ptr is set to %NULL.  Pseudocode:
+ * |[
+ * if (ptr) {
+ *     g_free(ptr);
+ *     ptr = NULL;
+ * }
+ * ]|
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
@@ -96,10 +114,17 @@
  * Frees a #GString if it is allocated.
  *
  * This is an idempotent wrapper of g_string_free(): if @str is not %NULL
- * g_string_free() is called on it and @str is set to %NULL.
+ * g_string_free() is called on it and @str is set to %NULL.  Pseudocode:
+ * |[
+ * if (str) {
+ *     g_string_free(str, TRUE);
+ *     str = NULL;
+ * }
+ * ]|
  *
- * The return value of g_string_free() is not made accessible, use the original
- * if you need that.
+ * The string is freed completely and the return value of g_string_free() is
+ * not made accessible.  The use cases when the return value is needed rarely
+ * overlap with this clean-up use.
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
@@ -113,7 +138,13 @@
  * Frees GSlice‐allocated memory if it is allocated.
  *
  * This is an idempotent wrapper of g_slice_free(): if @ptr is not %NULL
- * g_free() is called on it and @ptr is set to %NULL.
+ * g_free() is called on it and @ptr is set to %NULL.  Pseudocode:
+ * |[
+ * if (ptr) {
+ *     g_slice_free(type, ptr);
+ *     ptr = NULL;
+ * }
+ * ]|
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
