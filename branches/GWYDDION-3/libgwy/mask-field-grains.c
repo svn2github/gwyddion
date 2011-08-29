@@ -269,7 +269,7 @@ gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
 /**
  * gwy_mask_field_remove_grain:
  * @field: A two-dimensional mask field.
- * @grainid: Grain number (from 1 to @ngrains).
+ * @grain_id: Grain number (from 1 to @ngrains).
  *
  * Removes the grain of given number from a mask field.
  *
@@ -282,17 +282,17 @@ gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
  **/
 void
 gwy_mask_field_remove_grain(GwyMaskField *field,
-                            guint grainid)
+                            guint grain_id)
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
-    g_return_if_fail(grainid > 0);
+    g_return_if_fail(grain_id > 0);
     // Normally the caller must have obtained the grain id somewhere so the
     // grains are numbered.  But just in case...
     gwy_mask_field_number_grains(field, NULL);
 
     MaskField *priv = field->priv;
     guint ngrains = priv->ngrains;
-    g_return_if_fail(grainid < ngrains);
+    g_return_if_fail(grain_id < ngrains);
 
     guint xres = field->xres, yres = field->yres;
     GwyFieldPart *bboxes = priv->grain_bounding_boxes;
@@ -316,14 +316,14 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     // Renumber the grain field.
     if (bboxes) {
         // If we have the bbox it is not necessary to process the entire field.
-        GwyFieldPart *fpart = bboxes + grainid;
+        GwyFieldPart *fpart = bboxes + grain_id;
         guint ifrom = fpart->row, iend = fpart->row + fpart->height;
         for (guint i = ifrom; i < iend; i++) {
             guint *g = priv->grains + i*xres + fpart->col;
             for (guint j = fpart->width; j; j--, g++) {
-                if (*g == grainid)
+                if (*g == grain_id)
                     *g = 0;
-                else if (*g > grainid)
+                else if (*g > grain_id)
                     (*g)--;
             }
         }
@@ -332,24 +332,24 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
         gwy_field_part_union(bboxes, fpart);
 
         // Update the other changed bboxes.
-        memmove(bboxes + grainid, bboxes + (grainid + 1),
-                (ngrains - grainid)*sizeof(GwyFieldPart));
+        memmove(bboxes + grain_id, bboxes + (grain_id + 1),
+                (ngrains - grain_id)*sizeof(GwyFieldPart));
     }
     else {
         guint *g = priv->grains;
         for (guint k = xres*yres; k; k--, g++) {
-            if (*g == grainid)
+            if (*g == grain_id)
                 *g = 0;
-            else if (*g > grainid)
+            else if (*g > grain_id)
                 (*g)--;
         }
     }
 
     // If we have grain data update them too.
     if (sizes) {
-        sizes[0] += sizes[grainid];
-        memmove(sizes + grainid, sizes + (grainid + 1),
-                (ngrains - grainid)*sizeof(guint));
+        sizes[0] += sizes[grain_id];
+        memmove(sizes + grain_id, sizes + (grain_id + 1),
+                (ngrains - grain_id)*sizeof(guint));
     }
 }
 
