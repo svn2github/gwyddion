@@ -295,23 +295,32 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     guint ngrains = priv->ngrains;
     g_return_if_fail(grainid < ngrains);
 
+    guint xres = field->xres, yres = field->yres;
+    GwyFieldPart *bboxes = priv->grain_bounding_boxes;
+    guint *sizes = priv->grain_sizes;
+
     // A silly case we do not want to handle below as it is more convenient to
-    // assume grain 0 (empty space) has some pixels.  Just forget the cache.
+    // assume grain 0 (empty space) has some pixels.  We promise to keep the
+    // cache usable so do not simply call gwy_mask_field_fill() as it would
+    // destroy the cache.
     if (ngrains == 1) {
-        gwy_mask_field_fill(field, NULL, FALSE);
+        gwy_clear(field->data, field->stride*xres);
+        gwy_clear(priv->grains, xres*yres);
+        priv->ngrains = 0;
+        if (sizes)
+            sizes[0] = xres*yres;
+        if (bboxes)
+            bboxes[0] = (GwyFieldPart){ 0, 0, xres, yres };
         return;
     }
 
     // Renumber the grain field.
-    guint xres = field->xres, yres = field->yres;
-    GwyFieldPart *bboxes = priv->grain_bounding_boxes;
     if (bboxes) {
         // If we have the bbox it is not necessary to process the entire field.
         GwyFieldPart *fpart = bboxes + grainid;
-        guint ifrom = fpart->row, iend = fpart->row + fpart->height,
-              jfrom = fpart->col, jend = fpart->col + fpart->width;
+        guint ifrom = fpart->row, iend = fpart->row + fpart->height;
         for (guint i = ifrom; i < iend; i++) {
-            guint *g = priv->grains + i*xres + jfrom;
+            guint *g = priv->grains + i*xres + fpart->col;
             for (guint j = fpart->width; j; j--, g++) {
                 if (*g == grainid)
                     *g = 0;
@@ -338,7 +347,6 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     }
 
     // If we have grain data update them too.
-    guint *sizes = priv->grain_sizes;
     if (sizes) {
         sizes[0] += sizes[grainid];
         memmove(sizes + grainid, sizes + (grainid + 1),
