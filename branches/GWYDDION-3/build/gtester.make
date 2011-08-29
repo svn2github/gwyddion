@@ -43,6 +43,7 @@ test-valgrind: $(test_program).supp
 	    --show-reachable=no --suppressions=$(test_program).supp \
 	    --suppressions=$(srcdir)/$(test_default_suppressions) \
 	    --track-origins=yes --read-var-info=yes --num-callers=20 \
+	    --child-silent-after-fork=yes \
 	    $(test_program)$(EXEEXT) $(TEST_FLAGS)
 
 .PHONY: test test-report test-valgrind
