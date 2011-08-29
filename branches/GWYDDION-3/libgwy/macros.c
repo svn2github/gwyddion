@@ -179,6 +179,17 @@
  **/
 
 /**
+ * gwy_clear1:
+ * @var: Variable to clear (or a lhs expression).
+ *       This argument may be evaluated several times.
+ *
+ * Fills memory occupied by a single variable with zeroes.
+ *
+ * This is a shorthand for memset(), with the number of bytes to fill
+ * calculated from the type of the variable.
+ **/
+
+/**
  * gwy_assign:
  * @dest: Destination array.
  *        This argument may be evaluated several times.

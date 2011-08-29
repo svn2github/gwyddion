@@ -48,6 +48,9 @@
 #define gwy_clear(array, n) \
     memset((array), 0, (n)*sizeof((array)[0]))
 
+#define gwy_clear1(var) \
+    memset(&(var), 0, sizeof(var))
+
 #define gwy_assign(dest, source, n) \
     memcpy((dest), (source), (n)*sizeof((dest)[0]))
 
