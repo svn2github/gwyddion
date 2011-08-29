@@ -13,7 +13,7 @@ ADDOBJECTS_OPTIONS = --standard-files=types
 
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html
-FIXXREF_OPTIONS =
+FIXXREF_OPTIONS = --extra-dir=../libgwyui/html
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
