@@ -62,12 +62,11 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
 /**
  * gwy_mask_field_number_grains:
  * @field: A two-dimensional mask field.
- * @ngrains: (out):
- *           Location to store the number of the last grain, or %NULL.
+ * @ngrains: Location to store the number of the last grain, or %NULL.
  *
  * Numbers grains in a mask field.
  *
- * Returns: (transfer none) (array length=ngrains):
+ * Returns: (transfer none):
  *          Array of integers of the same number of items as @field
  *          (without padding) filled with grain numbers of each pixel.  Empty
  *          space is set to 0, pixels inside a grain are set to the grain
