@@ -846,7 +846,8 @@ gwy_mask_field_invalidate(GwyMaskField *field)
 /**
  * gwy_mask_field_count:
  * @field: A two-dimensional mask field.
- * @mask: A two-dimensional mask field determining to which bits of @field
+ * @mask: (allow-none):
+ *        A two-dimensional mask field determining to which bits of @field
  *        consider.  If it is %NULL entire @field is evaluated (as if
  *        all bits in @mask were set).
  * @value: %TRUE to count ones, %FALSE to count zeroes.
