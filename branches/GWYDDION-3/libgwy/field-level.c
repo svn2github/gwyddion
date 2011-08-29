@@ -21,6 +21,8 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/line-arithmetic.h"
+#include "libgwy/mask-field-arithmetic.h"
+#include "libgwy/mask-field-grains.h"
 #include "libgwy/field-level.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
@@ -1958,42 +1960,175 @@ laplace_dense(LaplaceIterators *iterators,
     laplace_iterators_free(iterators);
 }
 
+// Extract grain data from full-sized @grains and @data to workspace-sized
+// @levels and @z.
 static void
-extract_grain(const GwyMaskField *mask,
-              guint *grain)
+extract_grain(const guint *grains,
+              const gdouble *data,
+              guint xres,
+              const GwyFieldPart *fpart,
+              guint grain_id,
+              guint *levels,
+              gdouble *z)
 {
-    guint xres = mask->xres, yres = mask->yres;
+    for (guint i = 0; i < fpart->height; i++) {
+        gwy_assign(z + i*fpart->width,
+                   data + (i + fpart->row)*xres + fpart->col,
+                   fpart->width);
 
-    for (guint i = 0; i < yres; i++) {
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(mask, iter, 0, i);
+        const guint *grow = grains + (i + fpart->row)*xres + fpart->col;
+        guint *lrow = levels + i*fpart->width;
+        for (guint j = fpart->width; j; j--, lrow++, grow++)
+            *lrow = (*grow == grain_id);
+    }
+}
 
-        for (guint j = xres; j; j--) {
-            *(grain++) = !!gwy_mask_iter_get(iter);
-            gwy_mask_iter_next(iter);
+// Put interpolated grain data @z back to @data.
+static void
+insert_grain(const guint *grains,
+             gdouble *data,
+             guint xres,
+             const GwyFieldPart *fpart,
+             guint grain_id,
+             const gdouble *z)
+{
+    for (guint i = 0; i < fpart->height; i++) {
+        const gdouble *zrow = z + i*fpart->width;
+        const guint *grow = grains + (i + fpart->row)*xres + fpart->col;
+        gdouble *drow = data + (i + fpart->row)*xres + fpart->col;
+        for (guint j = fpart->width; j; j--, zrow++, drow++, grow++) {
+            if (*grow == grain_id)
+                *drow = *zrow;
         }
     }
 }
 
+static void
+enlarge_field_part(GwyFieldPart *fpart,
+                   guint xres, guint yres)
+{
+    if (fpart->col) {
+        fpart->col--;
+        fpart->width++;
+    }
+    if (fpart->col + fpart->width < xres)
+        fpart->width++;
+
+    if (fpart->row) {
+        fpart->row--;
+        fpart->height++;
+    }
+    if (fpart->row + fpart->height < yres)
+        fpart->height++;
+}
+
+/*
+ * Find the largest
+ * - grain size in the terms of pixels: this is the number of iterators for
+ *   dense iteration
+ * - grain size in the terms of extended bounding box (i.e. bounding box
+ *   including one more line of pixels to each side, if possible): this is
+ *   the size of levels, revindex and data arrays.
+ */
+static void
+find_largest_sizes(guint xres, guint yres,
+                   const GwyFieldPart *bboxes,
+                   const guint *sizes,
+                   guint gfrom, guint gto,
+                   guint *size,
+                   guint *bboxsize)
+{
+    *size = *bboxsize = 0;
+    for (guint gno = gfrom; gno <= gto; gno++) {
+        if (sizes[gno] > *size)
+            *size = sizes[gno];
+
+        GwyFieldPart bbox = bboxes[gno];
+        enlarge_field_part(&bbox, xres, yres);
+        guint bs = bbox.width * bbox.height;
+        if (bs > *bboxsize)
+            *bboxsize = bs;
+    }
+}
+
+/**
+ * gwy_field_laplace_solve:
+ * @field: A two-dimensional data field.
+ * @mask: A two-dimensional mask field defining the areas to interpolate.
+ * @grain_id: The id number of the grain to replace with the solution of
+ *           Laplace equation, from 1 to @ngrains (see
+ *           gwy_mask_field_number_grains()).  Passing 0 means to replace the
+ *           entire empty space outside grains while passing %G_MAXUINT means
+ *           to replace the entire masked area.
+ *
+ * Replaces masked areas by the solution of Laplace equation.
+ *
+ * The boundary conditions on mask boundaries are Dirichlet with values given
+ * by pixels on the outer boundary of the masked area.  Boundary conditions at
+ * field edges are Neumann conditions ∂z/∂n=0 where n denotes the normal to the
+ * edge.  If entire area of @field is to be replaced the problem is
+ * underspecified; @field will be filled with zeroes.
+ *
+ * No precision control is provided; the result should be simply good enough
+ * for image processing purposes with the typical local error of order 10⁻⁵ for
+ * very large grains and possibly much smaller for small grains.
+ **/
 void
 gwy_field_laplace_solve(GwyField *field,
-                        const GwyMaskField *mask)
+                        GwyMaskField *mask,
+                        guint grain_id)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+    g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(mask->xres == field->xres);
     g_return_if_fail(mask->yres == field->yres);
 
+    // To fill the entire empty space we need to divide it to grains too so
+    // work with the inverted mask.
+    if (grain_id == 0) {
+        mask = gwy_mask_field_duplicate(mask);
+        gwy_mask_field_logical(mask, NULL, NULL, GWY_LOGICAL_NA);
+        grain_id = G_MAXUINT;
+    }
+    else
+        g_object_ref(mask);
+
+    guint ngrains;
+    const guint *grains = gwy_mask_field_number_grains(mask, &ngrains);
+    g_return_if_fail(grain_id == G_MAXUINT || grain_id <= ngrains);
+
+    const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
+    const guint *sizes = gwy_mask_field_grain_sizes(mask);
     guint xres = field->xres, yres = field->yres;
-    guint *levels = g_new(guint, xres*yres);
-    guint *revindex = g_new(guint, xres*yres);
-    extract_grain(mask, levels);
-    LaplaceIterators *iterators = laplace_iterators_new(1, 5);
-    laplace_sparse(iterators, revindex, field->data, levels, xres, yres, 45, 10);
-    laplace_dense(iterators, revindex, field->data, levels, xres, yres, 30, 20);
+    guint gfrom = (grain_id == G_MAXUINT) ? 1 : grain_id;
+    guint gto = (grain_id == G_MAXUINT) ? ngrains : grain_id;
+
+    // Allocate everything at the maximum size to avoid reallocations.
+    guint maxsize, maxbboxsize;
+    find_largest_sizes(xres, yres, bboxes, sizes, gfrom, gto,
+                       &maxsize, &maxbboxsize);
+
+    guint *levels = g_new(guint, maxbboxsize);
+    guint *revindex = g_new(guint, maxbboxsize);
+    gdouble *z = g_new(gdouble, maxbboxsize);
+    LaplaceIterators *iterators = laplace_iterators_new(maxsize, 5);
+
+    for (grain_id = gfrom; grain_id <= gto; grain_id++) {
+        GwyFieldPart bbox = bboxes[grain_id];
+        enlarge_field_part(&bbox, xres, yres);
+        extract_grain(grains, field->data, xres, &bbox, grain_id, levels, z);
+        laplace_sparse(iterators, revindex, z, levels,
+                       bbox.width, bbox.height, 45, 10);
+        laplace_dense(iterators, revindex, z, levels,
+                      bbox.width, bbox.height, 30, 20);
+        insert_grain(grains, field->data, xres, &bbox, grain_id, z);
+    }
+
     laplace_iterators_free(iterators);
+    g_free(z);
     g_free(levels);
     g_free(revindex);
+    g_object_unref(mask);
 }
 
 /**
