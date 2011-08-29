@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/mask-field-grains.h"
+#include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/mask-field-internal.h"
 
 /* Merge grains i and j in map with full resolution */
@@ -264,6 +265,85 @@ gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
         calculate_grain_properties(field);
 
     return field->priv->grain_bounding_boxes;
+}
+
+/**
+ * gwy_mask_field_remove_grain:
+ * @field: A two-dimensional mask field.
+ * @grainid: Grain number (from 1 to @ngrains).
+ *
+ * Removes the grain of given number from a mask field.
+ *
+ * The grain number is the number used e.g. in gwy_mask_field_number_grains().
+ *
+ * The remaining grains are renumbered and the sizes and bounding boxes of
+ * empty space updated so that you can continue to use the arrays returned
+ * from e.g. gwy_mask_field_grain_sizes(), just with the number of grains one
+ * smaller.
+ **/
+void
+gwy_mask_field_remove_grain(GwyMaskField *field,
+                            guint grainid)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(grainid > 0);
+    // Normally the caller must have obtained the grain id somewhere so the
+    // grains are numbered.  But just in case...
+    gwy_mask_field_number_grains(field, NULL);
+
+    MaskField *priv = field->priv;
+    guint ngrains = priv->ngrains;
+    g_return_if_fail(grainid < ngrains);
+
+    // A silly case we do not want to handle below as it is more convenient to
+    // assume grain 0 (empty space) has some pixels.  Just forget the cache.
+    if (ngrains == 1) {
+        gwy_mask_field_fill(field, NULL, FALSE);
+        return;
+    }
+
+    // Renumber the grain field.
+    guint xres = field->xres, yres = field->yres;
+    GwyFieldPart *bboxes = priv->grain_bounding_boxes;
+    if (bboxes) {
+        // If we have the bbox it is not necessary to process the entire field.
+        GwyFieldPart *fpart = bboxes + grainid;
+        guint ifrom = fpart->row, iend = fpart->row + fpart->height,
+              jfrom = fpart->col, jend = fpart->col + fpart->width;
+        for (guint i = ifrom; i < iend; i++) {
+            guint *g = priv->grains + i*xres + jfrom;
+            for (guint j = fpart->width; j; j--, g++) {
+                if (*g == grainid)
+                    *g = 0;
+                else if (*g > grainid)
+                    (*g)--;
+            }
+        }
+
+        // Update the bbox of empty space.
+        gwy_field_part_union(bboxes, fpart);
+
+        // Update the other changed bboxes.
+        memmove(bboxes + grainid, bboxes + (grainid + 1),
+                (ngrains - grainid)*sizeof(GwyFieldPart));
+    }
+    else {
+        guint *g = priv->grains;
+        for (guint k = xres*yres; k; k--, g++) {
+            if (*g == grainid)
+                *g = 0;
+            else if (*g > grainid)
+                (*g)--;
+        }
+    }
+
+    // If we have grain data update them too.
+    guint *sizes = priv->grain_sizes;
+    if (sizes) {
+        sizes[0] += sizes[grainid];
+        memmove(sizes + grainid, sizes + (grainid + 1),
+                (ngrains - grainid)*sizeof(guint));
+    }
 }
 
 /**

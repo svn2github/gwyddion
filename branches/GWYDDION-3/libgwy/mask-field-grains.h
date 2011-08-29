@@ -28,6 +28,8 @@ const guint*        gwy_mask_field_number_grains       (GwyMaskField *field,
                                                         guint *ngrains);
 const guint*        gwy_mask_field_grain_sizes         (GwyMaskField *field);
 const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(GwyMaskField *field);
+void                gwy_mask_field_remove_grain        (GwyMaskField *field,
+                                                        guint grainid);
 
 G_END_DECLS
 
