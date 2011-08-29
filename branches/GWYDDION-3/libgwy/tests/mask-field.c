@@ -595,7 +595,7 @@ test_mask_field_check_part_bad(void)
 }
 
 void
-test_mask_field_grain_no(void)
+test_mask_field_grain_numbers(void)
 {
     enum { max_size = 83 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1302,6 +1302,46 @@ random_mask_field_prob(guint xres, guint yres, GRand *rng,
         }
     }
     return field;
+}
+
+// FIXME: This is just a weak consistency check.  How to verify the sizes
+// independently?
+void
+test_mask_field_grain_sizes(void)
+{
+    enum { max_size = 208, niter = 300 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble prob = g_rand_double(rng);
+        GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
+        guint ngrains;
+
+        gwy_mask_field_number_grains(field, &ngrains);
+        const guint *grain_sizes = gwy_mask_field_grain_sizes(field);
+
+        guint total = 0;
+        for (guint i = 0; i <= ngrains; i++) {
+            g_assert(i || grain_sizes[i]);
+            total += grain_sizes[i];
+        }
+        g_assert_cmpuint(total, ==, xres*yres);
+
+        guint *grain_sizes_prev = g_memdup(grain_sizes,
+                                           (ngrains + 1)*sizeof(guint));
+        gwy_mask_field_invalidate(field);
+        grain_sizes = gwy_mask_field_grain_sizes(field);
+
+        for (guint i = 0; i <= ngrains; i++) {
+            g_assert_cmpuint(grain_sizes[i], ==, grain_sizes_prev[i]);
+        }
+
+        g_free(grain_sizes_prev);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
 }
 
 // Undef macros to test the exported functions.

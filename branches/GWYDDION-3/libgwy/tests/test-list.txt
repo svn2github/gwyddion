@@ -125,7 +125,8 @@ mask-field/fill
 mask-field/count
 mask-field/count-rows
 mask-field/set-size
-mask-field/grain-no
+mask-field/grain/numbers
+mask-field/grain/sizes
 mask-field/shrink
 mask-field/grow
 mask-field/flip
