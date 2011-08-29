@@ -1186,7 +1186,17 @@ calculate_grain_properties(GwyMaskField *field)
     }
 
     fpart = priv->grain_bounding_boxes;
-    for (guint id = 0; id <= ngrains; id++, fpart++) {
+    // The zeroth grain (empty space) can be empty.
+    if (fpart->col < G_MAXUINT) {
+        fpart->width = fpart->width+1 - fpart->col;
+        fpart->height = fpart->height+1 - fpart->row;
+    }
+    else {
+        gwy_clear(fpart, 1);
+    }
+    fpart++;
+
+    for (guint id = 1; id <= ngrains; id++, fpart++) {
         fpart->width = fpart->width+1 - fpart->col;
         fpart->height = fpart->height+1 - fpart->row;
     }
@@ -1198,12 +1208,14 @@ calculate_grain_properties(GwyMaskField *field)
  *
  * Obtains the number of pixels of each grain in a mask field.
  *
+ * Items 1 to @ngrains correspond to grains while the 0th items corresponds to
+ * the empty space between.
+ *
  * Returns: (transfer none):
- *          Array of @ngrains+1 grain sizes.  Items 1 to @ngrains correspond to
- *          grains while the 0th items corresponds to the empty space between.
- *          The returned array is owned by @field and becomes invalid when the
- *          data change, gwy_mask_field_invalidate() is called or the mask
- *          field is finalized.
+ *          Array of @ngrains+1 grain sizes. The returned array is owned by
+ *          @field and becomes invalid when the data change,
+ *          gwy_mask_field_invalidate() is called or the mask field is
+ *          finalized.
  **/
 const guint*
 gwy_mask_field_grain_sizes(GwyMaskField *field)
@@ -1221,12 +1233,15 @@ gwy_mask_field_grain_sizes(GwyMaskField *field)
  *
  * Obtains the bounding box of each grain in a mask field.
  *
+ * Items 1 to @ngrains correspond to grains while the 0th items corresponds to
+ * the empty space between.  The dimensions of the 0th item can be zero in case
+ * the field is fully filled with ones.
+ *
  * Returns: (transfer none):
- *          Array of @ngrains+1 grain bounding boxes.  Items 1 to @ngrains
- *          correspond to grains while the 0th items corresponds to the empty
- *          space between.  The returned array is owned by @field and becomes
- *          invalid when the data change, gwy_mask_field_invalidate() is called
- *          or the mask field is finalized.
+ *          Array of @ngrains+1 grain bounding boxes.  The returned array is
+ *          owned by @field and becomes invalid when the data change,
+ *          gwy_mask_field_invalidate() is called or the mask field is
+ *          finalized.
  **/
 const GwyFieldPart*
 gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
