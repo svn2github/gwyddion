@@ -130,6 +130,7 @@ mask-field/set-size
 mask-field/grain/numbers
 mask-field/grain/sizes
 mask-field/grain/bounding-boxes
+mask-field/grain/remove
 mask-field/shrink
 mask-field/grow
 mask-field/flip

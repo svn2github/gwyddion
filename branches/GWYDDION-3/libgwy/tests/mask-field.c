@@ -1418,6 +1418,102 @@ test_mask_field_grain_bounding_boxes(void)
     g_rand_free(rng);
 }
 
+void
+test_mask_field_grain_remove(void)
+{
+    enum { max_size = 214, niter = 3000 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble prob = g_rand_double(rng);
+        GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
+
+        guint ngrains;
+        const guint *grains = gwy_mask_field_number_grains(field, &ngrains);
+        if (!ngrains) {
+            g_object_unref(field);
+            continue;
+        }
+
+        // Grain bboxes are not known.
+        // Verify that the grain was removed.
+        GwyMaskField *copy = gwy_mask_field_duplicate(field);
+        guint grain_id = g_rand_int_range(rng, 1, ngrains+1);
+        gwy_mask_field_remove_grain(copy, grain_id);
+
+        guint ngrains_new;
+        const guint *grains_new = gwy_mask_field_number_grains(copy,
+                                                               &ngrains_new);
+        g_assert_cmpuint(ngrains_new, ==, ngrains-1);
+
+        for (guint i = 0; i < yres; i++) {
+            GwyMaskIter iter1, iter2;
+            gwy_mask_field_iter_init(field, iter1, 0, i);
+            gwy_mask_field_iter_init(copy, iter2, 0, i);
+            for (guint j = 0; j < xres; j++) {
+                gboolean value = gwy_mask_iter_get(iter1);
+                gboolean value_new = gwy_mask_iter_get(iter2);
+                if (grains[i*xres + j] == grain_id) {
+                    g_assert_cmpuint(value_new, ==, 0);
+                    g_assert_cmpuint(grains_new[i*xres + j], ==, 0);
+                }
+                else {
+                    g_assert_cmpuint(value_new, ==, value);
+                    if (grains[i*xres + j] > grain_id) {
+                        g_assert_cmpuint(grains_new[i*xres + j],
+                                         ==,
+                                         grains[i*xres + j] - 1);
+                    }
+                    else {
+                        g_assert_cmpuint(grains_new[i*xres + j],
+                                         ==,
+                                         grains[i*xres + j]);
+                    }
+                }
+                gwy_mask_iter_next(iter1);
+                gwy_mask_iter_next(iter2);
+            }
+        }
+
+        // Grain bboxes are known.
+        // Verify the same result was obtained.
+        const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(field);
+        const guint *sizes = gwy_mask_field_grain_sizes(field);
+        gwy_mask_field_remove_grain(field, grain_id);
+        grains = gwy_mask_field_number_grains(field, &ngrains);
+        g_assert_cmpuint(ngrains, ==, ngrains_new);
+        mask_field_assert_equal(field, copy);
+        for (guint k = 0; k < xres*yres; k++) {
+            g_assert_cmpuint(grains[k], ==, grains_new[k]);
+        }
+
+        // Locate the grains from scratch.
+        // Verify the same result was obtained.
+        gwy_mask_field_invalidate(copy);
+        grains_new = gwy_mask_field_number_grains(copy, &ngrains_new);
+        g_assert_cmpuint(ngrains_new, ==, ngrains);
+        for (guint k = 0; k < xres*yres; k++) {
+            g_assert_cmpuint(grains_new[k], ==, grains[k]);
+        }
+        const GwyFieldPart *bboxes_ref = gwy_mask_field_grain_bounding_boxes(copy);
+        const guint *sizes_ref = gwy_mask_field_grain_sizes(copy);
+        for (guint i = 0; i <= ngrains; i++) {
+            g_assert_cmpuint(sizes[i], ==, sizes_ref[i]);
+            g_assert_cmpuint(bboxes[i].col, ==, bboxes_ref[i].col);
+            g_assert_cmpuint(bboxes[i].row, ==, bboxes_ref[i].row);
+            g_assert_cmpuint(bboxes[i].width, ==, bboxes_ref[i].width);
+            g_assert_cmpuint(bboxes[i].height, ==, bboxes_ref[i].height);
+        }
+
+        g_object_unref(copy);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
 // Undef macros to test the exported functions.
 #undef gwy_mask_field_get
 #undef gwy_mask_field_set
