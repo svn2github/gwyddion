@@ -51,7 +51,10 @@ def format_row(stat, counter=[False]):
     if entire_files and name == 'Total':
         factor /= 3
     if name == 'Total' and totalname:
-        name += ' ' + totalname
+        if not entire_files:
+            name = '%s <a href="%s.gcov">%s</a>' % (name, totalname, totalname)
+        else:
+            name += ' ' + totalname
     badlines = xround(lines * (1.0 - coverage))
     badw = xround(factor * badlines)
     goodw = xround(factor*(lines - badlines))

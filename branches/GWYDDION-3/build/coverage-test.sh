@@ -113,4 +113,4 @@ cat >>$report <<EOF
 EOF
 
 make clean
-echo "See coverage/index.html"
+echo "See coverage/coverage.html"
