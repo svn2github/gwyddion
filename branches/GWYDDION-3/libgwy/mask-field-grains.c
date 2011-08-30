@@ -292,7 +292,7 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
 
     MaskField *priv = field->priv;
     guint ngrains = priv->ngrains;
-    g_return_if_fail(grain_id < ngrains);
+    g_return_if_fail(grain_id <= ngrains);
 
     guint xres = field->xres, yres = field->yres;
     GwyFieldPart *bboxes = priv->grain_bounding_boxes;
@@ -303,7 +303,7 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     // cache usable so do not simply call gwy_mask_field_fill() as it would
     // destroy the cache.
     if (ngrains == 1) {
-        gwy_clear(field->data, field->stride*xres);
+        gwy_clear(field->data, field->stride*yres);
         gwy_clear(priv->grains, xres*yres);
         priv->ngrains = 0;
         if (sizes)
@@ -313,14 +313,24 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
         return;
     }
 
-    // Renumber the grain field.
+    // Remove the grain, renumber the field.
     if (bboxes) {
         // If we have the bbox it is not necessary to process the entire field.
         GwyFieldPart *fpart = bboxes + grain_id;
-        guint ifrom = fpart->row, iend = fpart->row + fpart->height;
-        for (guint i = ifrom; i < iend; i++) {
+        for (guint i = fpart->row; i < fpart->row + fpart->height; i++) {
             guint *g = priv->grains + i*xres + fpart->col;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(field, iter, fpart->col, i);
             for (guint j = fpart->width; j; j--, g++) {
+                if (*g == grain_id)
+                    gwy_mask_iter_set(iter, FALSE);
+                gwy_mask_iter_next(iter);
+            }
+        }
+
+        guint *g = priv->grains;
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++, g++) {
                 if (*g == grain_id)
                     *g = 0;
                 else if (*g > grain_id)
@@ -337,11 +347,15 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     }
     else {
         guint *g = priv->grains;
-        for (guint k = xres*yres; k; k--, g++) {
-            if (*g == grain_id)
-                *g = 0;
-            else if (*g > grain_id)
-                (*g)--;
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++, g++) {
+                if (*g == grain_id) {
+                    gwy_mask_field_set(field, j, i, FALSE);
+                    *g = 0;
+                }
+                else if (*g > grain_id)
+                    (*g)--;
+            }
         }
     }
 
@@ -351,6 +365,8 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
         memmove(sizes + grain_id, sizes + (grain_id + 1),
                 (ngrains - grain_id)*sizeof(guint));
     }
+
+    priv->ngrains--;
 }
 
 /**
