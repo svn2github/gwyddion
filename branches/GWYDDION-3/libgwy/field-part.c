@@ -198,21 +198,17 @@ gwy_field_part_union(GwyFieldPart *fpart,
 {
     g_return_if_fail(fpart && otherpart);
 
-    if (otherpart->col + otherpart->width > fpart->col + fpart->width)
-        fpart->width = otherpart->col + otherpart->width - fpart->col;
-    if (otherpart->col < fpart->col) {
-        guint diff = fpart->col - otherpart->col;
-        fpart->col -= diff;
-        fpart->width += diff;
-    }
+    guint m, M;
 
-    if (otherpart->row + otherpart->height > fpart->row + fpart->height)
-        fpart->height = otherpart->row + otherpart->height - fpart->row;
-    if (otherpart->row < fpart->row) {
-        guint diff = fpart->row - otherpart->row;
-        fpart->row -= diff;
-        fpart->height += diff;
-    }
+    m = MIN(otherpart->col, fpart->col);
+    M = MAX(otherpart->col + otherpart->width, fpart->col + fpart->width);
+    fpart->col = m;
+    fpart->width = M - m;
+
+    m = MIN(otherpart->row, fpart->row);
+    M = MAX(otherpart->row + otherpart->height, fpart->row + fpart->height);
+    fpart->row = m;
+    fpart->height = M - m;
 }
 
 /**
