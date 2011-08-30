@@ -62,6 +62,8 @@ xy/boxed
 xyz/boxed
 line-part/boxed
 field-part/boxed
+field-part/intersect
+field-part/union
 brick-part/boxed
 rgba/boxed
 rgba/interpolate
