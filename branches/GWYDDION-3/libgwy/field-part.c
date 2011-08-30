@@ -160,23 +160,25 @@ gwy_field_part_intersect(GwyFieldPart *fpart,
                          otherpart->col, otherpart->width)
         || !gwy_overlapping(fpart->row, fpart->height,
                             otherpart->row, otherpart->height)) {
-        gwy_clear1(fpart);
+        gwy_clear(fpart, 1);
         return FALSE;
     }
 
     // Now we know the parts overlap so the intersection can be calculated
     // easily.
-    guint diff;
+    guint m, fdiff, odiff;
 
-    diff = MAX(fpart->col, otherpart->col) - fpart->col;
-    fpart->col += diff;
-    fpart->width -= diff;
-    fpart->width = MIN(fpart->width, otherpart->width);
+    m = MAX(fpart->col, otherpart->col);
+    fdiff = m - fpart->col;
+    odiff = m - otherpart->col;
+    fpart->col += fdiff;
+    fpart->width = MIN(fpart->width - fdiff, otherpart->width - odiff);
 
-    diff = MAX(fpart->row, otherpart->row) - fpart->row;
-    fpart->row += diff;
-    fpart->height -= diff;
-    fpart->height = MIN(fpart->height, otherpart->height);
+    m = MAX(fpart->row, otherpart->row);
+    fdiff = m - fpart->row;
+    odiff = m - otherpart->row;
+    fpart->row += fdiff;
+    fpart->height = MIN(fpart->height - fdiff, otherpart->height - odiff);
 
     return TRUE;
 }
