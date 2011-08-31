@@ -1216,7 +1216,7 @@ laplace_iterators_resize(LaplaceIterators *iterators,
 
     if (int_size > iterators->int_size) {
         GWY_FREE(iterators->n);
-        iterators->n = g_new0(guint, iterators->int_size);
+        iterators->n = g_new0(guint, int_size);
         iterators->int_size = int_size;
     }
     else
@@ -1224,7 +1224,7 @@ laplace_iterators_resize(LaplaceIterators *iterators,
 
     if (float_size > iterators->float_size) {
         GWY_FREE(iterators->z);
-        iterators->z = g_new0(gdouble, iterators->float_size);
+        iterators->z = g_new0(gdouble, float_size);
         iterators->float_size = float_size;
     }
     else
@@ -1937,7 +1937,6 @@ laplace_sparse(LaplaceIterators *iterators,
         iterate_simple(iterators);
     }
     move_result_to_data(iterators, data);
-    laplace_iterators_free(iterators);
     reconstruct(levels, data, xres, yres, maxlevel);
 }
 
@@ -1957,7 +1956,6 @@ laplace_dense(LaplaceIterators *iterators,
         iterate_simple(iterators);
     }
     move_result_to_data(iterators, data);
-    laplace_iterators_free(iterators);
 }
 
 // Extract grain data from full-sized @grains and @data to workspace-sized
