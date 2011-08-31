@@ -1713,6 +1713,93 @@ test_field_level_row_median_diff(void)
     test_field_row_level_one(GWY_ROW_SHIFT_MEDIAN_DIFF);
 }
 
+static void
+field_laplace_check_unmodif(const GwyField *field,
+                            const GwyField *reference,
+                            const guint *grains,
+                            guint grain_id)
+{
+    guint n = field->xres * field->yres;
+
+    for (guint k = 0; k < n; k++) {
+        if ((grains[k] == grain_id)
+            || (grain_id == G_MAXUINT && grains[k]))
+            continue;
+        g_assert_cmpfloat(field->data[k], ==, reference->data[k]);
+    }
+}
+
+static void
+field_laplace_check_local_error(const GwyField *field,
+                                const guint *grains,
+                                guint grain_id,
+                                gdouble maxerr)
+{
+    guint xres = field->xres, yres = field->yres;
+
+    for (guint k = 0; k < xres*yres; k++) {
+        if ((grains[k] == grain_id)
+            || (grain_id == G_MAXUINT && grains[k])) {
+            guint n = 0, i = k/xres, j = k % xres;
+            gdouble z = 0;
+            if (i) {
+                z += field->data[k-xres];
+                n++;
+            }
+            if (j) {
+                z += field->data[k-1];
+                n++;
+            }
+            if (j+1 < xres) {
+                z += field->data[k+1];
+                n++;
+            }
+            if (i+1 < yres) {
+                z += field->data[k+xres];
+                n++;
+            }
+            z /= n;
+            g_assert_cmpfloat(fabs(field->data[k] - z), <=, maxerr);
+        }
+    }
+}
+
+void
+test_field_level_laplace_random(void)
+{
+    enum { max_size = 414, niter = 300 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble prob = g_rand_double(rng);
+        GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, prob);
+        guint ngrains;
+        const guint *grains = gwy_mask_field_number_grains(mask, &ngrains);
+        if (!ngrains) {
+            g_object_unref(mask);
+            continue;
+        }
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
+
+        guint grain_id = g_rand_int_range(rng, 0, ngrains+1);
+        if (!g_rand_int_range(rng, 0, 40))
+            grain_id = G_MAXUINT;
+        gwy_field_laplace_solve(field, mask, grain_id);
+
+        field_laplace_check_unmodif(field, reference, grains, grain_id);
+        field_laplace_check_local_error(field, grains, grain_id, 1e-4);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+    g_rand_free(rng);
+}
+
 void
 test_field_compatibility_res(void)
 {
