@@ -1759,6 +1759,7 @@ field_laplace_check_local_error(const GwyField *field,
                 n++;
             }
             z /= n;
+            //g_printerr("[%u,%u,%u] %g %g\n", k, j, i, field->data[k], z);
             g_assert_cmpfloat(fabs(field->data[k] - z), <=, maxerr);
         }
     }
@@ -1789,6 +1790,9 @@ test_field_level_laplace_random(void)
         if (!g_rand_int_range(rng, 0, 40))
             grain_id = G_MAXUINT;
         gwy_field_laplace_solve(field, mask, grain_id);
+
+        //print_field("reference", reference);
+        //print_field("field", field);
 
         field_laplace_check_unmodif(field, reference, grains, grain_id);
         field_laplace_check_local_error(field, grains, grain_id, 1e-4);
