@@ -1768,13 +1768,13 @@ field_laplace_check_local_error(const GwyField *field,
 void
 test_field_level_laplace_random(void)
 {
-    enum { max_size = 414, niter = 300 };
+    enum { max_size = 214, niter = 600 };
     GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
         guint yres = g_rand_int_range(rng, 1, max_size);
-        gdouble prob = g_rand_double(rng);
+        gdouble prob = cbrt(g_rand_double(rng));
         GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, prob);
         guint ngrains;
         const guint *grains = gwy_mask_field_number_grains(mask, &ngrains);
@@ -1786,13 +1786,19 @@ test_field_level_laplace_random(void)
         field_randomize(field, rng);
         GwyField *reference = gwy_field_duplicate(field);
 
-        guint grain_id = g_rand_int_range(rng, 0, ngrains+1);
+        const guint *sizes = gwy_mask_field_grain_sizes(mask);
+        guint grain_id;
         if (!g_rand_int_range(rng, 0, 40))
             grain_id = G_MAXUINT;
+        else {
+            grain_id = g_rand_int_range(rng, 0, ngrains+1);
+            for (guint i = 0; i < 10; i++) {
+                if (grain_id && sizes[grain_id] > 1)
+                    break;
+                guint grain_id = g_rand_int_range(rng, 0, ngrains+1);
+            }
+        }
         gwy_field_laplace_solve(field, mask, grain_id);
-
-        //print_field("reference", reference);
-        //print_field("field", field);
 
         field_laplace_check_unmodif(field, reference, grains, grain_id);
         field_laplace_check_local_error(field, grains, grain_id, 1e-4);
