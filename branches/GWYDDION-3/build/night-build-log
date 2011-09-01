@@ -2,15 +2,15 @@
 # $Id$
 pkgname=gwyddion
 projectdir=$PWD
-logdir=$projectdir/_logs
-tmplog=$logdir/tmplog
+logdir="$projectdir/_logs"
+tmplog="$logdir/tmplog"
 libdirs="libgwy libgwyui"
 podirs="po po-libgwy libgwyui"
 
 source $HOME/.bashrc
 export LC_ALL=C
 PATH="$HOME/bin:$PATH"
-cd $logdir || exit 1
+cd "$logdir" || exit 1
 
 cat >autogen.ignore <<':'
 ^aclocal: installing `m4/([-a-z0-9]+)\.m4' from `/usr/share/aclocal/\1\.m4'
@@ -76,10 +76,10 @@ function printerr() {
     else
       cat
     fi
-  } >$tmplog
-  test -s $tmplog || return
+  } >"$tmplog"
+  test -s "$tmplog" || return
   echo "=====[ $f ]====="
-  cat $tmplog
+  cat "$tmplog"
 }
 
 function filtererr() {
@@ -102,21 +102,21 @@ function filtererr() {
     else
       cat
     fi
-  } >$tmplog
-  cat $tmplog >$f.err
-  rm -f $tmplog
+  } >"$tmplog"
+  cat "$tmplog" >$f.err
+  rm -f "$tmplog"
 }
 
 function extract_build_documentation() {
   logfile=build_documentation.err
-  grep -Evf build_documentation.ignore <$logfile >$tmplog
+  grep -Evf build_documentation.ignore <$logfile >"$tmplog"
   logfile=build_documentation.log
   grep -E '\<(warning|error):' <$logfile \
-    | grep -Evf build_documentation.ignore >>$tmplog
-  if test -s $tmplog; then
+    | grep -Evf build_documentation.ignore >>"$tmplog"
+  if test -s "$tmplog"; then
     echo "=====[ build_documentation ]====="
   fi
-  cat $tmplog
+  cat "$tmplog"
 }
 
 function extract_build_introspection() {
@@ -129,28 +129,28 @@ function extract_documentation_stats() {
   logfile=build_documentation.log
   htmlfile=documentation-stats.html
   logs=$(echo "$libdirs" | sed -r "s:[a-z0-9]+:$projectdir/docs/\\0/\\0-undocumented.txt:g")
-  $projectdir/build/documentation-stats.py $logs >$htmlfile
-  cp $logs $logdir
+  "$projectdir/build/documentation-stats.py" $logs >"$htmlfile"
+  cp $logs "$logdir"
 }
 
 function extract_translation_stats() {
   logfile=update_translations.err
   for dir in $podirs; do
-    gettext_package=$(sed -r 's/^GETTEXT_PACKAGE *= *//;t;d' $projectdir/$dir/Makefile)
+    gettext_package=$(sed -r 's/^GETTEXT_PACKAGE *= *//;t;d' "$projectdir/$dir/Makefile")
     htmlfile=translation-stats-$gettext_package.html
-    $projectdir/build/translation-stats.py $logfile $gettext_package >$htmlfile
+    "$projectdir/build/translation-stats.py" $logfile $gettext_package >$htmlfile
   done
 }
 
 function extract_coverage_stats() {
   for dir in $libdirs; do
-    if test -s $projectdir/$dir/$dir-test-report.html; then
-      mv -f $projectdir/$dir/$dir-test-report{,-brief}.html .
+    if test -s "$projectdir/$dir/$dir-test-report.html"; then
+      mv -f "$projectdir/$dir"/$dir-test-report{,-brief}.html .
       sed -rn -e 's:(<a href=")([^"]*)\.c\.gcov":\1'"$dir"'/\2-gcov.log":' \
-          -e '/<table/,/<\/table>/p' $projectdir/$dir/coverage/coverage.html \
+          -e '/<table/,/<\/table>/p' "$projectdir/$dir/coverage/coverage.html" \
           >$dir-coverage.html
-      if test -d $projectdir/$dir/coverage; then
-        pushd $projectdir/$dir/coverage >/dev/null
+      if test -d "$projectdir/$dir/coverage"; then
+        pushd "$projectdir/$dir/coverage" >/dev/null
         rename .c.gcov -gcov.log *.c.gcov
         popd >/dev/null
       fi
@@ -178,4 +178,4 @@ extract_translation_stats
 extract_documentation_stats
 extract_coverage_stats
 
-rm -f *.ignore $tmplog
+rm -f *.ignore "$tmplog"

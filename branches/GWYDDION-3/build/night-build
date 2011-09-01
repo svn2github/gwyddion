@@ -2,8 +2,8 @@
 # $Id$
 pkgname=gwyddion
 projectdir=$PWD
-logdir=$projectdir/_logs
-installprefix=$projectdir/_inst
+logdir="$projectdir/_logs"
+installprefix="$projectdir/_inst"
 libdirs="libgwy libgwyui"
 podirs="po po-libgwy po-libgwyui"
 oks="build documentation install dists"
@@ -16,8 +16,8 @@ PATH="$HOME/bin:$PATH"
 # =====[ subroutines ]=======================================================
 # execute a function/command with logging and some setup
 function call() {
-  pushd $projectdir >/dev/null
-  $@ >$logdir/$1.log 2>$logdir/$1.err
+  pushd "$projectdir" >/dev/null
+  $@ >"$logdir/$1.log" 2>"$logdir/$1.err"
   popd >/dev/null
 }
 
@@ -33,7 +33,7 @@ function set_extra_version() {
 function autogen() {
   CONFIG_SHELL=/bin/sh ./autogen.sh \
     --enable-gtk-doc --with-valgrind \
-    --prefix=$installprefix
+    --prefix="$installprefix"
 }
 
 function build() {
@@ -159,7 +159,7 @@ function help() {
 }
 
 # =====[ main ]==============================================================
-test -d $logdir || mkdir $logdir
+test -d "$logdir" || mkdir "$logdir"
 
 if test -n "$1"; then
   if test "$1" == help; then
@@ -195,6 +195,6 @@ else
   for x in $oks; do
     test -f .ok-$x || rm -f .releaseme
   done
-  rm -rf .ok-* $installprefix
+  rm -rf .ok-* "$installprefix"
 fi
 
