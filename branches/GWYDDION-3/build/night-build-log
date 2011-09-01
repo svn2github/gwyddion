@@ -39,9 +39,9 @@ cat >build_introspection.ignore <<':'
 
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
-^libtool: install: warning: remember to run `libtool --finish /home/yeti/Projects/Gwyddion/GWYDDION-3-HEAD/gwyddion-[0-9.]+/_inst/lib'$
 ':'
 :
+echo '^libtool: install: warning: remember to run `libtool --finish '"$projectdir"'/gwyddion-[0-9.]+/_inst/lib'"'"'$' >>distcheck.ignore
 
 cat >update_translations.ignore <<':'
 ^TRANSLATION
