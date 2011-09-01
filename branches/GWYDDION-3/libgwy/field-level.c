@@ -1648,14 +1648,11 @@ calculate_f(LaplaceIterators *iterators)
                   *w = iterators->w, *rhs = iterators->rhs;
     gdouble *f = iterators->f;
 
-    gdouble maxerr = 0.0;
-
     for (guint ipt = iterators->len; ipt; ipt--, n++, z++, rhs++, f++) {
         gdouble lhs = 0.0;
         for (guint l = *(n + 1) - *n; l; l--, k++, w++)
             lhs += iz[*k]*(*w);
         *f = (*z - lhs) - *rhs;
-        maxerr = fmax(maxerr, fabs(*f));
     }
 }
 
@@ -2202,10 +2199,10 @@ gwy_field_laplace_solve(GwyField *field,
         enlarge_field_part(&bbox, xres, yres);
         extract_grain(grains, field->data, xres, &bbox, grain_id, levels, z);
         laplace_sparse(iterators, revindex, z, levels,
-                       bbox.width, bbox.height, 45, 10);
+                       bbox.width, bbox.height, 60, 20);
         if (sizes[grain_id] > 1)
             laplace_dense(iterators, revindex, z, levels,
-                          bbox.width, bbox.height, 30, 20);
+                          bbox.width, bbox.height, 60, 30);
         insert_grain(grains, field->data, xres, &bbox, grain_id, z);
     }
 

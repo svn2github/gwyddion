@@ -183,6 +183,10 @@ field/level/plane
 field/level/poly
 field/level/inclination
 field/level/laplace/random
+field/level/laplace/linear
+field/level/laplace/xy
+field/level/laplace/x2-y2
+field/level/laplace/expx-cosy
 field/extend/undef
 field/extend/fixed
 field/extend/mirror

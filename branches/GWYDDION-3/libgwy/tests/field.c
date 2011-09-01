@@ -1722,8 +1722,7 @@ field_laplace_check_unmodif(const GwyField *field,
     guint n = field->xres * field->yres;
 
     for (guint k = 0; k < n; k++) {
-        if ((grains[k] == grain_id)
-            || (grain_id == G_MAXUINT && grains[k]))
+        if ((grains[k] == grain_id) || (grain_id == G_MAXUINT && grains[k]))
             continue;
         g_assert_cmpfloat(field->data[k], ==, reference->data[k]);
     }
@@ -1738,8 +1737,7 @@ field_laplace_check_local_error(const GwyField *field,
     guint xres = field->xres, yres = field->yres;
 
     for (guint k = 0; k < xres*yres; k++) {
-        if ((grains[k] == grain_id)
-            || (grain_id == G_MAXUINT && grains[k])) {
+        if ((grains[k] == grain_id) || (grain_id == G_MAXUINT && grains[k])) {
             guint n = 0, i = k/xres, j = k % xres;
             gdouble z = 0;
             if (i) {
@@ -1759,9 +1757,38 @@ field_laplace_check_local_error(const GwyField *field,
                 n++;
             }
             z /= n;
-            //g_printerr("[%u,%u,%u] %g %g\n", k, j, i, field->data[k], z);
             g_assert_cmpfloat(fabs(field->data[k] - z), <=, maxerr);
         }
+    }
+}
+
+static void
+field_laplace_check_absolute_error(const GwyField *field,
+                                   const GwyField *reference,
+                                   const guint *grains,
+                                   guint grain_id,
+                                   gdouble maxerr)
+{
+    guint xres = field->xres, yres = field->yres;
+
+    for (guint k = 0; k < xres*yres; k++) {
+        if ((grains[k] == grain_id) || (grain_id == G_MAXUINT && grains[k])) {
+            g_assert_cmpfloat(fabs(reference->data[k] - field->data[k]),
+                              <=, maxerr);
+        }
+    }
+}
+
+static void
+field_laplace_invalidate_grain(const GwyField *field,
+                               const guint *grains,
+                               guint grain_id)
+{
+    guint xres = field->xres, yres = field->yres;
+
+    for (guint k = 0; k < xres*yres; k++) {
+        if ((grains[k] == grain_id) || (grain_id == G_MAXUINT && grains[k]))
+            field->data[k] = NAN;
     }
 }
 
@@ -1795,9 +1822,10 @@ test_field_level_laplace_random(void)
             for (guint i = 0; i < 10; i++) {
                 if (grain_id && sizes[grain_id] > 1)
                     break;
-                guint grain_id = g_rand_int_range(rng, 0, ngrains+1);
+                grain_id = g_rand_int_range(rng, 0, ngrains+1);
             }
         }
+        field_laplace_invalidate_grain(field, grains, grain_id);
         gwy_field_laplace_solve(field, mask, grain_id);
 
         field_laplace_check_unmodif(field, reference, grains, grain_id);
@@ -1808,6 +1836,138 @@ test_field_level_laplace_random(void)
         g_object_unref(reference);
     }
     g_rand_free(rng);
+}
+
+static void
+field_level_laplace_function_one(void (*function)(GwyField *field, GRand *rng),
+                                 gdouble maxerr)
+{
+    enum { max_size = 250, niter = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 12, max_size);
+        guint yres = g_rand_int_range(rng, 12, max_size);
+        GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
+        // Ensure Dirichlet boundary conditions.
+        GwyFieldPart fpart = { 1, 1, xres-2, yres-2 };
+        gwy_mask_field_fill(mask, &fpart, TRUE);
+        guint grain_id = 1;
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        function(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
+
+        gwy_field_fill(field, &fpart, NULL, GWY_MASK_IGNORE, NAN);
+        gwy_field_laplace_solve(field, mask, grain_id);
+
+        const guint *grains = gwy_mask_field_number_grains(mask, NULL);
+        field_laplace_check_unmodif(field, reference, grains, grain_id);
+        field_laplace_check_absolute_error(field, reference, grains, grain_id,
+                                           maxerr);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+    g_rand_free(rng);
+}
+
+static void
+field_fill_linear(GwyField *field,
+                  GRand *rng)
+{
+    gdouble xoff = g_rand_double(rng) - 0.5, yoff = g_rand_double(rng) - 0.5;
+    gdouble bx = g_rand_double(rng) - 0.5, by = g_rand_double(rng) - 0.5;
+    guint xres = field->xres, yres = field->yres;
+    gdouble q = 2.0/MAX(xres - 1, yres - 1);
+
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = q*i - 1.0 - yoff;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = q*j - 1.0 - xoff;
+            field->data[i*xres + j] = bx*x + by*y;
+        }
+    }
+    gwy_field_invalidate(field);
+}
+
+void
+test_field_level_laplace_linear(void)
+{
+    field_level_laplace_function_one(field_fill_linear, 2e-3);
+}
+
+static void
+field_fill_xy(GwyField *field,
+              GRand *rng)
+{
+    gdouble xoff = g_rand_double(rng) - 0.5, yoff = g_rand_double(rng) - 0.5;
+    guint xres = field->xres, yres = field->yres;
+    gdouble q = 2.0/MAX(xres - 1, yres - 1);
+
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = q*i - 1.0 - yoff;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = q*j - 1.0 - xoff;
+            field->data[i*xres + j] = x*y;
+        }
+    }
+    gwy_field_invalidate(field);
+}
+
+void
+test_field_level_laplace_xy(void)
+{
+    field_level_laplace_function_one(field_fill_xy, 2e-3);
+}
+
+static void
+field_fill_x2_y2(GwyField *field,
+                 GRand *rng)
+{
+    gdouble xoff = g_rand_double(rng) - 0.5, yoff = g_rand_double(rng) - 0.5;
+    guint xres = field->xres, yres = field->yres;
+    gdouble q = 2.0/MAX(xres - 1, yres - 1);
+
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = q*i - 1.0 - yoff;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = q*j - 1.0 - xoff;
+            field->data[i*xres + j] = x*x - y*y;
+        }
+    }
+    gwy_field_invalidate(field);
+}
+
+void
+test_field_level_laplace_x2_y2(void)
+{
+    field_level_laplace_function_one(field_fill_x2_y2, 2e-3);
+}
+
+static void
+field_fill_expx_cosy(GwyField *field,
+                     GRand *rng)
+{
+    gdouble xoff = g_rand_double(rng) - 0.5, yoff = g_rand_double(rng) - 0.5;
+    guint xres = field->xres, yres = field->yres;
+    gdouble q = 2.0/MAX(xres - 1, yres - 1);
+
+    for (guint i = 0; i < yres; i++) {
+        gdouble y = q*i - 1.0 - yoff;
+        for (guint j = 0; j < xres; j++) {
+            gdouble x = q*j - 1.0 - xoff;
+            field->data[i*xres + j] = exp(x) * cos(y);
+        }
+    }
+    gwy_field_invalidate(field);
+}
+
+void
+test_field_level_laplace_expx_cosy(void)
+{
+    field_level_laplace_function_one(field_fill_expx_cosy, 2e-3);
 }
 
 void
