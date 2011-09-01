@@ -23,6 +23,7 @@
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/mask-field-grains.h"
+#include "libgwy/field-arithmetic.h"
 #include "libgwy/field-level.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
@@ -1053,14 +1054,14 @@ reduce(const guint *levels, guint *buffer,
             guint k = (i*xres + j)*step;
 
             if (levels[k] == level
-                && (!i || !j || levels[k-vstep-step] >= level-1)
+                && (!i || !j || levels[k-vstep-step] >= level)
                 && (!i || levels[k-vstep] == level)
-                && (!i || j == nx-1 || levels[k-vstep+step] >= level-1)
+                && (!i || j == nx-1 || levels[k-vstep+step] >= level)
                 && (!j || levels[k-step] == level)
                 && (j == nx-1 || levels[k+step] == level)
-                && (i == ny-1 || !j || levels[k+vstep-step] >= level-1)
+                && (i == ny-1 || !j || levels[k+vstep-step] >= level)
                 && (i == ny-1 || levels[k+vstep] == level)
-                && (i == ny-1 || j == nx-1 || levels[k+vstep+step] >= level-1)) {
+                && (i == ny-1 || j == nx-1 || levels[k+vstep+step] >= level)) {
                 buffer[k] = level+1;
                 if (i && j)
                     buffer[k-vhalfstep-halfstep] = NONE;
@@ -1114,10 +1115,9 @@ remove_spikes(guint *levels,
 }
 
 static guint
-build_levels(guint *levels,
+build_levels(guint *levels, guint *buffer,
              guint xres, guint yres)
 {
-    guint *buffer = g_new(guint, xres*yres);
     guint step = 1, level = 0;
 
     gwy_assign(buffer, levels, xres*yres);
@@ -1150,8 +1150,6 @@ build_levels(guint *levels,
 
         gwy_assign(levels, buffer, xres*yres);
     }
-
-    g_free(buffer);
 
     return level;
 }
@@ -1215,6 +1213,8 @@ laplace_iterators_resize(LaplaceIterators *iterators,
     iterators->len = len;
 
     if (int_size > iterators->int_size) {
+        if (G_UNLIKELY(iterators->int_size))
+            g_warning("Laplace iterators need to be enlarged (int).");
         GWY_FREE(iterators->n);
         iterators->n = g_new0(guint, int_size);
         iterators->int_size = int_size;
@@ -1223,6 +1223,8 @@ laplace_iterators_resize(LaplaceIterators *iterators,
         gwy_clear(iterators->n, int_size);
 
     if (float_size > iterators->float_size) {
+        if (G_UNLIKELY(iterators->float_size))
+            g_warning("Laplace iterators need to be enlarged (float).");
         GWY_FREE(iterators->z);
         iterators->z = g_new0(gdouble, float_size);
         iterators->float_size = float_size;
@@ -1538,11 +1540,11 @@ build_sparse_iterators(LaplaceIterators *iterators,
                        guint xres, guint yres)
 {
     guint len = count_grid_points(levels, xres, yres);
-    const guint *gindex = iterators->gindex;
 
     laplace_iterators_resize(iterators, len, 5);
     build_grid_index(levels, xres, yres, iterators->gindex, revindex);
 
+    const guint *gindex = iterators->gindex;
     gdouble rhssum = 0.0, nrhs = 0.0;
     LaplaceNeighbour nd[NDIRECTIONS];
 
@@ -1578,11 +1580,11 @@ build_dense_iterators(LaplaceIterators *iterators,
                       guint xres, guint yres)
 {
     guint len = count_grid_points(levels, xres, yres);
-    const guint *gindex = iterators->gindex;
 
     laplace_iterators_resize(iterators, len, 4);
     build_grid_index(levels, xres, yres, iterators->gindex, revindex);
 
+    const guint *gindex = iterators->gindex;
     for (guint ipt = 0; ipt < len; ipt++) {
         guint k = gindex[ipt], i = k/xres, j = k % xres, ws = 0, n = 0;
         gdouble rs = 0.0;
@@ -1646,11 +1648,14 @@ calculate_f(LaplaceIterators *iterators)
                   *w = iterators->w, *rhs = iterators->rhs;
     gdouble *f = iterators->f;
 
+    gdouble maxerr = 0.0;
+
     for (guint ipt = iterators->len; ipt; ipt--, n++, z++, rhs++, f++) {
         gdouble lhs = 0.0;
         for (guint l = *(n + 1) - *n; l; l--, k++, w++)
             lhs += iz[*k]*(*w);
         *f = (*z - lhs) - *rhs;
+        maxerr = fmax(maxerr, fabs(*f));
     }
 }
 
@@ -1682,7 +1687,7 @@ matrix_multiply(LaplaceIterators *iterators,
     }
 }
 
-static void
+static gboolean
 iterate_conj_grad(LaplaceIterators *iterators)
 {
     // Temporary quantities: t = A.v, S = v.t, φ = v.f
@@ -1694,6 +1699,9 @@ iterate_conj_grad(LaplaceIterators *iterators)
         S += (*v)*(*t);
         phi += (*v)*(*f);
     }
+
+    if (S < 1e-16)
+        return TRUE;
 
     // New value and f = A.z-b
     gdouble phiS = phi/S;
@@ -1718,6 +1726,8 @@ iterate_conj_grad(LaplaceIterators *iterators)
     f = iterators->f;
     for (guint ipt = iterators->len; ipt; ipt--, v++, f++)
         *v = *f - phiS*(*v);
+
+    return FALSE;
 }
 
 static void
@@ -1921,20 +1931,83 @@ reconstruct(guint *levels,
 }
 
 static void
+init_data_simple(gdouble *data, guint *levels,
+                 guint xres, guint yres)
+{
+    for (guint k = 0; k < xres*yres; k++)
+        levels[k] = !!levels[k];
+
+    guint level = 1;
+    gboolean finished = FALSE;
+    while (!finished) {
+        finished = TRUE;
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                guint k = i*xres + j, n = 0;
+                gdouble s = 0;
+
+                if (levels[k] != level)
+                    continue;
+
+                if (i && levels[k-xres] < level) {
+                    s += data[k-xres];
+                    n++;
+                }
+                if (j && levels[k-1] < level) {
+                    s += data[k-1];
+                    n++;
+                }
+                if (j+1 < xres && levels[k+1] < level) {
+                    s += data[k+1];
+                    n++;
+                }
+                if (i+1 < yres && levels[k+xres] < level) {
+                    s += data[k+xres];
+                    n++;
+                }
+
+                if (n) {
+                    data[k] = s/n;
+                }
+                else {
+                    levels[k] = level+1;
+                    finished = FALSE;
+                }
+            }
+        }
+        level++;
+    }
+}
+
+static void
 laplace_sparse(LaplaceIterators *iterators,
                guint *revindex,
                gdouble *data, guint *levels, guint xres, guint yres,
                guint nconjgrad, guint nsimple)
 {
-    guint maxlevel = build_levels(levels, xres, yres);
+    // Revindex is filled later, use is as a temporary xres*yres-sized buffer.
+    guint maxlevel = build_levels(levels, revindex, xres, yres);
+    if (maxlevel < 3) {
+        // If the grain is nowhere thick just init the interior using boundary
+        // conditions and continue with dense iteration.  Note for single-pixel
+        // grains init_data_simple() already produces the solution.
+        init_data_simple(data, levels, xres, yres);
+        return;
+    }
+
     build_sparse_iterators(iterators, revindex, levels, data, xres, yres);
     calculate_f(iterators),
     gwy_assign(iterators->v, iterators->f, iterators->len);
-    for (guint iter = 0; iter < nconjgrad; iter++)
-        iterate_conj_grad(iterators);
-    for (guint iter = 0; iter < nsimple; iter++) {
-        calculate_f(iterators);
-        iterate_simple(iterators);
+    gboolean finished = FALSE;
+    for (guint iter = 0; iter < nconjgrad; iter++) {
+        if ((finished = iterate_conj_grad(iterators)))
+            break;
+    }
+    if (!finished) {
+        for (guint iter = 0; iter < nsimple; iter++) {
+            calculate_f(iterators);
+            iterate_simple(iterators);
+        }
     }
     move_result_to_data(iterators, data);
     reconstruct(levels, data, xres, yres, maxlevel);
@@ -1949,11 +2022,16 @@ laplace_dense(LaplaceIterators *iterators,
     build_dense_iterators(iterators, revindex, levels, data, xres, yres);
     calculate_f(iterators);
     gwy_assign(iterators->v, iterators->f, iterators->len);
-    for (guint iter = 0; iter < nconjgrad; iter++)
-        iterate_conj_grad(iterators);
-    for (guint iter = 0; iter < nsimple; iter++) {
-        calculate_f(iterators);
-        iterate_simple(iterators);
+    gboolean finished = FALSE;
+    for (guint iter = 0; iter < nconjgrad; iter++) {
+        if ((finished = iterate_conj_grad(iterators)))
+            break;
+    }
+    if (!finished) {
+        for (guint iter = 0; iter < nsimple; iter++) {
+            calculate_f(iterators);
+            iterate_simple(iterators);
+        }
     }
     move_result_to_data(iterators, data);
 }
@@ -2098,6 +2176,14 @@ gwy_field_laplace_solve(GwyField *field,
     const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
     const guint *sizes = gwy_mask_field_grain_sizes(mask);
     guint xres = field->xres, yres = field->yres;
+
+    // The underspecified case.
+    if (ngrains == 1 && sizes[1] == xres*yres) {
+        gwy_field_clear_full(field);
+        g_object_unref(mask);
+        return;
+    }
+
     guint gfrom = (grain_id == G_MAXUINT) ? 1 : grain_id;
     guint gto = (grain_id == G_MAXUINT) ? ngrains : grain_id;
 
@@ -2117,8 +2203,9 @@ gwy_field_laplace_solve(GwyField *field,
         extract_grain(grains, field->data, xres, &bbox, grain_id, levels, z);
         laplace_sparse(iterators, revindex, z, levels,
                        bbox.width, bbox.height, 45, 10);
-        laplace_dense(iterators, revindex, z, levels,
-                      bbox.width, bbox.height, 30, 20);
+        if (sizes[grain_id] > 1)
+            laplace_dense(iterators, revindex, z, levels,
+                          bbox.width, bbox.height, 30, 20);
         insert_grain(grains, field->data, xres, &bbox, grain_id, z);
     }
 
@@ -2126,7 +2213,9 @@ gwy_field_laplace_solve(GwyField *field,
     g_free(z);
     g_free(levels);
     g_free(revindex);
+
     g_object_unref(mask);
+    gwy_field_invalidate(field);
 }
 
 /**
