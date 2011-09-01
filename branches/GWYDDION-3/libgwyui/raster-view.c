@@ -25,13 +25,32 @@
 #include "libgwyui/raster-view.h"
 
 enum {
+    // Own.
     PROP_0,
     PROP_FIELD,
     PROP_GRADIENT,
-    N_PROPS
+    N_PROPS,
+    // Overriden.
+    PROP_HADJUSTMENT = N_PROPS,
+    PROP_VADJUSTMENT,
+    PROP_HSCROLL_POLICY,
+    PROP_VSCROLL_POLICY,
+    N_TOTAL_PROPS
 };
 
 struct _GwyRasterViewPrivate {
+    GtkAdjustment *hadjustment;
+    gulong hadjustment_value_changed_id;
+
+    GtkAdjustment *vadjustment;
+    gulong vadjustment_value_changed_id;
+
+    guint hscroll_policy;
+    guint vscroll_policy;
+
+    guint full_width;
+    guint full_height;
+
     GwyField *field;
     gulong field_notify_id;
     gulong field_data_changed_id;
@@ -78,10 +97,18 @@ static void     field_data_changed                  (GwyRasterView *rasterview,
                                                      GwyField *field);
 static void     gradient_data_changed               (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
+static gboolean set_hadjustment                           (GwyRasterView *rasterview,
+                                                     GtkAdjustment *adjustment);
+static gboolean set_vadjustment                           (GwyRasterView *rasterview,
+                                                     GtkAdjustment *adjustment);
+static void set_hadjustment_values(GwyRasterView *rasterview);
+static void set_vadjustment_values(GwyRasterView *rasterview);
+void adjustment_value_changed(GwyRasterView *rasterview);
 
 static GParamSpec *raster_view_pspecs[N_PROPS];
 
-G_DEFINE_TYPE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET);
+G_DEFINE_TYPE_WITH_CODE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET,
+                        G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, NULL));
 
 static void
 gwy_raster_view_class_init(GwyRasterViewClass *klass)
@@ -118,6 +145,13 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i,
                                         raster_view_pspecs[i]);
+
+    gwy_override_class_properties(gobject_class, raster_view_pspecs,
+                                  "hadjustment", PROP_HADJUSTMENT,
+                                  "vadjustment", PROP_VADJUSTMENT,
+                                  "hscroll-policy", PROP_HSCROLL_POLICY,
+                                  "vscroll-policy", PROP_VSCROLL_POLICY,
+                                  NULL);
 }
 
 static void
@@ -142,6 +176,8 @@ gwy_raster_view_dispose(GObject *object)
 
     set_field(rasterview, NULL);
     set_gradient(rasterview, NULL);
+    set_hadjustment(rasterview, NULL);
+    set_vadjustment(rasterview, NULL);
     destroy_surface(rasterview);
 
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
@@ -162,6 +198,24 @@ gwy_raster_view_set_property(GObject *object,
 
         case PROP_GRADIENT:
         set_gradient(rasterview, g_value_get_object(value));
+        break;
+
+        case PROP_HADJUSTMENT:
+        set_hadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
+        break;
+
+        case PROP_VADJUSTMENT:
+        set_vadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
+        break;
+
+        case PROP_HSCROLL_POLICY:
+        rasterview->priv->hscroll_policy = g_value_get_enum(value);
+        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+        break;
+
+        case PROP_VSCROLL_POLICY:
+        rasterview->priv->vscroll_policy = g_value_get_enum(value);
+        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
         break;
 
         default:
@@ -185,6 +239,22 @@ gwy_raster_view_get_property(GObject *object,
 
         case PROP_GRADIENT:
         g_value_set_object(value, rasterview->gradient);
+        break;
+
+        case PROP_HADJUSTMENT:
+        g_value_set_object(value, rasterview->hadjustment);
+        break;
+
+        case PROP_VADJUSTMENT:
+        g_value_set_object(value, rasterview->vadjustment);
+        break;
+
+        case PROP_HSCROLL_POLICY:
+        g_value_set_enum(value, rasterview->hscroll_policy);
+        break;
+
+        case PROP_VSCROLL_POLICY:
+        g_value_set_enum(value, rasterview->vscroll_policy);
         break;
 
         default:
@@ -398,6 +468,8 @@ set_field(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
+    priv->full_width = field ? field->xres : 1;
+    priv->full_height = field ? field->yres : 1;
     priv->image_valid = FALSE;
     return TRUE;
 }
@@ -446,6 +518,94 @@ gradient_data_changed(GwyRasterView *rasterview,
 {
     rasterview->priv->image_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+static gboolean
+set_hadjustment(GwyRasterView *rasterview,
+                GtkAdjustment *adjustment)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, adjustment, GTK_TYPE_ADJUSTMENT,
+                               &priv->hadjustment,
+                               "value-changed", &adjustment_value_changed,
+                               &priv->hadjustment_value_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    priv->image_valid = FALSE;
+    set_hadjustment_values(rasterview);
+    return TRUE;
+}
+
+static gboolean
+set_vadjustment(GwyRasterView *rasterview,
+                GtkAdjustment *adjustment)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, adjustment, GTK_TYPE_ADJUSTMENT,
+                               &priv->vadjustment,
+                               "value-changed", &adjustment_value_changed,
+                               &priv->vadjustment_value_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    priv->image_valid = FALSE;
+    set_vadjustment_values(rasterview);
+    return TRUE;
+}
+
+static void
+set_adjustment_values(GtkAdjustment *adjustment,
+                      guint size,
+                      guint full_size)
+{
+    if (!adjustment)
+        return;
+
+    gdouble old_value = gtk_adjustment_get_value(adjustment);
+    gdouble new_upper = MAX(size, full_size);
+
+    g_object_set(adjustment,
+                 "lower", 0.0,
+                 "upper", new_upper,
+                 "page-size", (gdouble)size,
+                 "step-increment", 0.1*size,
+                 "page-increment", 0.9*size,
+                 NULL);
+
+    gdouble new_value = CLAMP(old_value, 0, new_upper - size);
+    if (new_value != old_value)
+        gtk_adjustment_set_value(adjustment, new_value);
+}
+
+static void
+set_hadjustment_values(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(rasterview), &allocation);
+    set_adjustment_values(priv->hadjustment,
+                          allocation.width, priv->full_width);
+}
+
+static void
+set_vadjustment_values(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(rasterview), &allocation);
+    set_adjustment_values(priv->vadjustment,
+                          allocation.height, priv->full_height);
+}
+
+void
+adjustment_value_changed(GwyRasterView *rasterview)
+{
+    g_printerr("adjustment changed: x = %g, y = %g\n",
+               gtk_adjustment_get_value(rasterview->priv->hadjustment),
+               gtk_adjustment_get_value(rasterview->priv->vadjustment));
 }
 
 /**
