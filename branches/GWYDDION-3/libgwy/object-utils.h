@@ -37,7 +37,7 @@ gboolean gwy_set_member_object(gpointer instance,
                                gpointer member_object,
                                GType expected_type,
                                gpointer member_field,
-                               ...);
+                               ...)                    G_GNUC_NULL_TERMINATED;
 
 G_END_DECLS
 
