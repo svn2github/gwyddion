@@ -18,6 +18,7 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
@@ -29,6 +30,8 @@ enum {
     PROP_0,
     PROP_FIELD,
     PROP_GRADIENT,
+    PROP_ZOOM,
+    PROP_REAL_ASPECT_RATIO,
     N_PROPS,
     // Overriden.
     PROP_HADJUSTMENT = N_PROPS,
@@ -48,8 +51,8 @@ struct _GwyRasterViewPrivate {
     guint hscroll_policy;
     guint vscroll_policy;
 
-    guint full_width;
-    guint full_height;
+    gdouble zoom;
+    gboolean real_aspect_ratio;
 
     GwyField *field;
     gulong field_notify_id;
@@ -97,13 +100,19 @@ static void     field_data_changed                  (GwyRasterView *rasterview,
                                                      GwyField *field);
 static void     gradient_data_changed               (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
-static gboolean set_hadjustment                           (GwyRasterView *rasterview,
+static gboolean set_hadjustment                     (GwyRasterView *rasterview,
                                                      GtkAdjustment *adjustment);
-static gboolean set_vadjustment                           (GwyRasterView *rasterview,
+static gboolean set_vadjustment                     (GwyRasterView *rasterview,
                                                      GtkAdjustment *adjustment);
-static void set_hadjustment_values(GwyRasterView *rasterview);
-static void set_vadjustment_values(GwyRasterView *rasterview);
-void adjustment_value_changed(GwyRasterView *rasterview);
+static void     set_hadjustment_values              (GwyRasterView *rasterview);
+static void     set_vadjustment_values              (GwyRasterView *rasterview);
+static void     adjustment_value_changed            (GwyRasterView *rasterview);
+static gboolean set_zoom                            (GwyRasterView *rasterview,
+                                                     gdouble zoom);
+static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
+                                                     gboolean setting);
+static guint calculate_full_width(GwyRasterView *rasterview);
+static guint calculate_full_height(GwyRasterView *rasterview);
 
 static GParamSpec *raster_view_pspecs[N_PROPS];
 
@@ -141,6 +150,26 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                               "Gradient used for visualisation.",
                               GWY_TYPE_GRADIENT,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    raster_view_pspecs[PROP_ZOOM]
+        = g_param_spec_double("zoom",
+                              "Zoom",
+                              "Scaling of the field in the horizontal "
+                              "direction.  Vertical scaling depends on "
+                              "real-aspect-ratio.  Zoom of 0 means the widget "
+                              "requests the minimum size 1×1 and scales to "
+                              "whatever size is given to it.",
+                              0.0, G_MAXDOUBLE, 1.0,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    raster_view_pspecs[PROP_REAL_ASPECT_RATIO]
+        = g_param_spec_boolean("real-aspect-ratio",
+                               "Real aspect ratio",
+                               "Whether the real dimensions of the field "
+                               "determine the sizes (as opposed to pixel "
+                               "dimensions).",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i,
@@ -200,6 +229,14 @@ gwy_raster_view_set_property(GObject *object,
         set_gradient(rasterview, g_value_get_object(value));
         break;
 
+        case PROP_ZOOM:
+        set_zoom(rasterview, g_value_get_double(value));
+        break;
+
+        case PROP_REAL_ASPECT_RATIO:
+        set_real_aspect_ratio(rasterview, g_value_get_boolean(value));
+        break;
+
         case PROP_HADJUSTMENT:
         set_hadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
         break;
@@ -239,6 +276,14 @@ gwy_raster_view_get_property(GObject *object,
 
         case PROP_GRADIENT:
         g_value_set_object(value, rasterview->gradient);
+        break;
+
+        case PROP_ZOOM:
+        g_value_set_double(value, rasterview->zoom);
+        break;
+
+        case PROP_REAL_ASPECT_RATIO:
+        g_value_set_boolean(value, rasterview->real_aspect_ratio);
         break;
 
         case PROP_HADJUSTMENT:
@@ -356,8 +401,8 @@ gwy_raster_view_get_preferred_width(GtkWidget *widget,
                                     gint *natural)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    *minimum = 1;
-    *natural = rasterview->priv->field ? rasterview->priv->field->xres : 1;
+    *natural = calculate_full_width(rasterview);
+    *minimum = rasterview->priv->zoom ? *natural : 1;
 }
 
 static void
@@ -366,8 +411,8 @@ gwy_raster_view_get_preferred_height(GtkWidget *widget,
                                      gint *natural)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    *minimum = 1;
-    *natural = rasterview->priv->field ? rasterview->priv->field->yres : 1;
+    *natural = calculate_full_height(rasterview);
+    *minimum = rasterview->priv->zoom ? *natural : 1;
 }
 
 static void
@@ -379,6 +424,9 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
 
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     rasterview->priv->image_valid = FALSE;
+
+    set_hadjustment_values(rasterview);
+    set_vadjustment_values(rasterview);
 }
 
 static void
@@ -408,6 +456,39 @@ ensure_image(GwyRasterView *rasterview)
                                                             stride);
     }
 
+    guint full_width = calculate_full_width(rasterview);
+    guint full_height = calculate_full_height(rasterview);
+    g_printerr("ensure_image, zoom = %g, full_sizes = (%u, %u)\n",
+               priv->zoom, full_width, full_height);
+
+    gdouble xfrom = 0.0, yfrom = 0.0, xto, yto;
+
+    if (priv->hadjustment) {
+        gdouble offset = gtk_adjustment_get_value(priv->hadjustment);
+        g_printerr("Have adjustment, value = %g\n", offset);
+        xfrom = offset * field->xres/full_width;
+        // FIXME: We must use true zoom here, runding causes slight shiver.
+        xto = xfrom + width * field->xres/full_width;
+        // FIXME: is this right with zoom = 0?
+    }
+    else {
+        // FIXME
+        xto = field->xres;
+    }
+
+    if (priv->vadjustment) {
+        gdouble offset = gtk_adjustment_get_value(priv->vadjustment);
+        g_printerr("Have vdjustment, value = %g\n", offset);
+        yfrom = offset * field->yres/full_height;
+        // FIXME: We must use true zoom here, runding causes slight shiver.
+        yto = yfrom + height * field->xres/full_width;
+        // FIXME: is this right with zoom = 0?
+    }
+    else {
+        // FIXME
+        yto = field->yres;
+    }
+
     gdouble min, max;
     gwy_field_min_max_full(field, &min, &max);
 
@@ -415,8 +496,9 @@ ensure_image(GwyRasterView *rasterview)
                              ? priv->gradient
                              : gwy_gradients_get(NULL));
 
+    g_printerr("(%g, %g) to (%g, %g)\n", xfrom, yfrom, xto, yto);
     gwy_field_render_cairo(field, priv->surface, gradient,
-                           0.0, 0.0, field->xres, field->yres,
+                           xfrom, yfrom, xto, yto,
                            min, max);
     priv->image_valid = TRUE;
 }
@@ -468,8 +550,6 @@ set_field(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
-    priv->full_width = field ? field->xres : 1;
-    priv->full_height = field ? field->yres : 1;
     priv->image_valid = FALSE;
     return TRUE;
 }
@@ -496,9 +576,14 @@ field_notify(GwyRasterView *rasterview,
              GParamSpec *pspec,
              GwyField *field)
 {
+    RasterView *priv = rasterview->priv;
     if (gwy_strequal(pspec->name, "x-res")
         || gwy_strequal(pspec->name, "y-res")) {
-        rasterview->priv->image_valid = FALSE;
+        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    }
+    if (priv->real_aspect_ratio
+             && (gwy_strequal(pspec->name, "x-real")
+                 || gwy_strequal(pspec->name, "y-real"))) {
         gtk_widget_queue_resize(GTK_WIDGET(rasterview));
     }
 }
@@ -587,7 +672,7 @@ set_hadjustment_values(GwyRasterView *rasterview)
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(rasterview), &allocation);
     set_adjustment_values(priv->hadjustment,
-                          allocation.width, priv->full_width);
+                          allocation.width, calculate_full_width(rasterview));
 }
 
 static void
@@ -597,15 +682,74 @@ set_vadjustment_values(GwyRasterView *rasterview)
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(rasterview), &allocation);
     set_adjustment_values(priv->vadjustment,
-                          allocation.height, priv->full_height);
+                          allocation.height, calculate_full_height(rasterview));
 }
 
-void
+static void
 adjustment_value_changed(GwyRasterView *rasterview)
 {
     g_printerr("adjustment changed: x = %g, y = %g\n",
                gtk_adjustment_get_value(rasterview->priv->hadjustment),
                gtk_adjustment_get_value(rasterview->priv->vadjustment));
+
+    rasterview->priv->image_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+static gboolean
+set_zoom(GwyRasterView *rasterview,
+         gdouble zoom)
+{
+    RasterView *priv = rasterview->priv;
+    if (zoom == priv->zoom)
+        return FALSE;
+
+    priv->zoom = zoom;
+    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    return TRUE;
+}
+
+static gboolean
+set_real_aspect_ratio(GwyRasterView *rasterview,
+                      gboolean setting)
+{
+    RasterView *priv = rasterview->priv;
+    if (setting == priv->real_aspect_ratio)
+        return FALSE;
+
+    priv->real_aspect_ratio = setting;
+    // Do not trigger a resize if the aspect ratios are the same.
+    if (!priv->field
+        || (fabs(gwy_field_dy(priv->field)/gwy_field_dx(priv->field) - 1.0)
+            < 1e-6))
+        return TRUE;
+
+    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    return TRUE;
+}
+
+static guint
+calculate_full_width(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (!priv->field)
+        return 1;
+
+    gdouble xzoom = priv->zoom ? priv->zoom : 1.0;
+    return gwy_round(fmax(xzoom * priv->field->xres, 1.0));
+}
+
+static guint
+calculate_full_height(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (!priv->field)
+        return 1;
+
+    gdouble yzoom = priv->zoom ? priv->zoom : 1.0;
+    if (priv->real_aspect_ratio)
+        yzoom *= gwy_field_dy(priv->field)/gwy_field_dx(priv->field);
+    return gwy_round(fmax(yzoom * priv->field->yres, 1.0));
 }
 
 /**
