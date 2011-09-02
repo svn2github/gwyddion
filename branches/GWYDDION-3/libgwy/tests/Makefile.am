@@ -8,7 +8,6 @@ testlibgwy_SOURCES = \
 	boxed-serialization.c \
 	brick.c \
 	brick-part.c \
-	cholesky.c \
 	container.c \
 	curve.c \
 	error-list.c \
@@ -22,7 +21,6 @@ testlibgwy_SOURCES = \
 	gradient.c \
 	interpolation.c \
 	inventory.c \
-	linalg.c \
 	line-part.c \
 	line.c \
 	mask-field.c \
@@ -33,7 +31,6 @@ testlibgwy_SOURCES = \
 	resource.c \
 	rgba.c \
 	serialization.c \
-	sort.c \
 	strfuncs.c \
 	surface.c \
 	unit.c \

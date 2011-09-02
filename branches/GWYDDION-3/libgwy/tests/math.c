@@ -337,4 +337,445 @@ test_math_curvature(void)
     g_rand_free(rng);
 }
 
+/***************************************************************************
+ *
+ * Linear algebra
+ *
+ ***************************************************************************/
+
+static void
+linalg_make_vector(gdouble *d,
+                   guint n,
+                   GRand *rng)
+{
+    for (guint j = 0; j < n; j++)
+        d[j] = g_rand_double_range(rng, -1.0, 1.0)
+               * exp(g_rand_double_range(rng, -5.0, 5.0));
+}
+
+/* Multiply a vector with a matrix from left. */
+static void
+linalg_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        a[i] = 0.0;
+        for (guint j = 0; j < n; j++)
+            a[i] += m[i*n + j] * v[j];
+    }
+}
+
+/* Multiply two square matrices. */
+static void
+linalg_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        for (guint j = 0; j < n; j++) {
+            a[i*n + j] = 0.0;
+            for (guint k = 0; k < n; k++)
+                a[i*n + j] += d1[i*n + k] * d2[k*n + j];
+        }
+    }
+}
+
+/* Note the precision checks are very tolerant as the matrices we generate
+ * are not always well-conditioned. */
+void
+test_math_linalg(void)
+{
+    guint nmax = 8, niter = 50;
+    /* Make it realy reproducible. */
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 1; n < nmax; n++) {
+        /* Use descriptive names for less cryptic g_assert() messages. */
+        gdouble *matrix = g_new(gdouble, n*n);
+        gdouble *unity = g_new(gdouble, n*n);
+        gdouble *decomp = g_new(gdouble, n*n);
+        gdouble *vector = g_new(gdouble, n);
+        gdouble *rhs = g_new(gdouble, n);
+        gdouble *solution = g_new(gdouble, n);
+
+        for (guint iter = 0; iter < niter; iter++) {
+            linalg_make_vector(matrix, n*n, rng);
+            linalg_make_vector(vector, n, rng);
+            gdouble eps;
+
+            /* Solution */
+            linalg_matvec(rhs, matrix, vector, n);
+            memcpy(decomp, matrix, n*n*sizeof(gdouble));
+            g_assert(gwy_linalg_solve(decomp, rhs, solution, n));
+            eps = gwy_powi(10.0, (gint)n - 13);
+            for (guint j = 0; j < n; j++) {
+                g_assert_cmpfloat(fabs(solution[j] - vector[j]),
+                                  <=,
+                                  eps * (fabs(solution[j]) + fabs(vector[j])));
+            }
+            /* Inversion */
+            memcpy(unity, matrix, n*n*sizeof(gdouble));
+            g_assert(gwy_linalg_invert(unity, decomp, n));
+            /* Multiplication with inverted must give unity */
+            linalg_matmul(unity, matrix, decomp, n);
+            for (guint j = 0; j < n; j++) {
+                g_assert_cmpfloat(fabs(unity[j*n + j] - 1.0), <=, eps);
+                for (guint i = 0; i < n; i++) {
+                    if (i == j)
+                        continue;
+                    g_assert_cmpfloat(fabs(unity[j*n + i]), <=, eps);
+                }
+            }
+            /* Double inversion must give the original */
+            g_assert(gwy_linalg_invert(decomp, unity, n));
+            for (guint j = 0; j < n; j++) {
+                for (guint i = 0; i < n; i++) {
+                    g_assert_cmpfloat(fabs(matrix[j] - unity[j]),
+                                      <=,
+                                      eps * (fabs(matrix[j]) + fabs(unity[j])));
+                }
+            }
+        }
+
+        g_free(vector);
+        g_free(rhs);
+        g_free(solution);
+        g_free(unity);
+        g_free(matrix);
+        g_free(decomp);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_math_linalg_fail(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 2; n <= 10; n++) {
+        gdouble *matrix = g_new(gdouble, n*n);
+        gdouble *rhs = g_new(gdouble, n);
+        gdouble *solution = g_new(gdouble, n);
+        gdouble *lastrow = matrix + n*(n-1);
+
+        for (guint iter = 0; iter < 5; iter++) {
+            linalg_make_vector(matrix, n*n, rng);
+            linalg_make_vector(rhs, n, rng);
+            // Make the last row identical to some other row.
+            // FIXME: It would be nice if arbitrary linear combination failed
+            // but it often passes as `just' an ill-conditioned matrix.
+            memcpy(lastrow, matrix + n*g_rand_int_range(rng, 0, n-1),
+                   n*sizeof(gdouble));
+            g_assert(!gwy_linalg_solve(matrix, rhs, solution, n));
+        }
+
+        g_free(solution);
+        g_free(rhs);
+        g_free(matrix);
+    }
+    g_rand_free(rng);
+}
+
+typedef struct {
+    gdouble K;
+    guint n;
+    guint degree;
+} PolyData1;
+
+// Fits (virtual) symmetric Kx³ data
+static gboolean
+poly1(guint i,
+      gdouble *fvalues,
+      gdouble *value,
+      gpointer user_data)
+{
+    const PolyData1 *polydata = (const PolyData1*)user_data;
+    gdouble x = (i/(gdouble)polydata->n - 1.0)*polydata->K;
+    gdouble p = 1.0;
+    for (guint j = 0; j <= polydata->degree; j++) {
+        fvalues[j] = p;
+        p *= x;
+    }
+    *value = gwy_powi(x, 3);
+
+    return TRUE;
+}
+
+void
+test_math_fit_poly(void)
+{
+    for (guint degree = 0; degree <= 4; degree++) {
+        for (guint ndata = (degree + 2) | 1; ndata < 30; ndata += 2) {
+            PolyData1 polydata = { 1.0, ndata/2, degree };
+            gdouble coeffs[degree+1], residuum;
+            gboolean ok = gwy_linear_fit(poly1, ndata, coeffs, degree+1,
+                                         &residuum, &polydata);
+            g_assert(ok);
+
+            gdouble eps = 1e-15;
+            for (guint i = 0; i <= degree; i += 2)
+                g_assert_cmpfloat(fabs(coeffs[i]), <, eps);
+
+            if (degree >= 3) {
+                g_assert_cmpfloat(fabs(coeffs[1]), <, eps);
+                g_assert_cmpfloat(fabs(coeffs[3] - polydata.K), <, eps);
+            }
+            else if (degree == 1 || degree == 2) {
+                gdouble t = 1.0/(ndata/2);
+                t = 3.0/5.0*(1.0 + t*(1.0 - t/3.0));
+                g_assert_cmpfloat(fabs(coeffs[1] - t*polydata.K), <, eps);
+            }
+        }
+    }
+}
+
+/***************************************************************************
+ *
+ * Math sorting
+ *
+ ***************************************************************************/
+
+/* Return %TRUE if @array is ordered. */
+static gboolean
+test_sort_is_strictly_ordered(const gdouble *array, gsize n)
+{
+    gsize i;
+
+    for (i = 1; i < n; i++, array++) {
+        if (array[0] >= array[1])
+            return FALSE;
+    }
+    return TRUE;
+}
+
+/* Return %TRUE if @array is ordered and its items correspond to @orig_array
+ * items with permutations given by @index_array. */
+static gboolean
+test_sort_is_ordered_with_index(const gdouble *array, const guint *index_array,
+                                const gdouble *orig_array, gsize n)
+{
+    gsize i;
+
+    for (i = 0; i < n; i++) {
+        if (index_array[i] >= n)
+            return FALSE;
+        if (array[i] != orig_array[index_array[i]])
+            return FALSE;
+    }
+    return TRUE;
+}
+
+void
+test_math_sort(void)
+{
+    gsize nmin = 0, nmax = 65536;
+
+    if (g_test_quick())
+        nmax = 8192;
+
+    gdouble *array = g_new(gdouble, nmax);
+    gdouble *orig_array = g_new(gdouble, nmax);
+    guint *index_array = g_new(guint, nmax);
+    for (gsize n = nmin; n < nmax; n = 7*n/6 + 1) {
+        for (gsize i = 0; i < n; i++)
+            orig_array[i] = sin(n/G_SQRT2 + 1.618*i);
+
+        memcpy(array, orig_array, n*sizeof(gdouble));
+        gwy_math_sort(array, NULL, n);
+        g_assert(test_sort_is_strictly_ordered(array, n));
+
+        memcpy(array, orig_array, n*sizeof(gdouble));
+        for (gsize i = 0; i < n; i++)
+            index_array[i] = i;
+        gwy_math_sort(array, index_array, n);
+        g_assert(test_sort_is_strictly_ordered(array, n));
+        g_assert(test_sort_is_ordered_with_index(array, index_array,
+                                                 orig_array, n));
+    }
+    g_free(index_array);
+    g_free(orig_array);
+    g_free(array);
+}
+
+void
+test_math_median(void)
+{
+    guint nmax = 1000;
+    gdouble *data = g_new(gdouble, nmax);
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 1; n < nmax; n++) {
+        for (guint i = 0; i < n; i++)
+            data[i] = i;
+        for (guint i = 0; i < n; i++) {
+            guint jj1 = g_rand_int_range(rng, 0, n);
+            guint jj2 = g_rand_int_range(rng, 0, n);
+            GWY_SWAP(gdouble, data[jj1], data[jj2]);
+        }
+        gdouble med = gwy_math_median(data, n);
+        g_assert_cmpfloat(med, ==, (n/2));
+    }
+    g_rand_free(rng);
+    g_free(data);
+}
+
+/***************************************************************************
+ *
+ * Cholesky
+ *
+ ***************************************************************************/
+
+#define CHOLESKY_MATRIX_LEN(n) (((n) + 1)*(n)/2)
+#define SLi gwy_lower_triangular_matrix_index
+
+/* Square a triangular matrix. */
+static void
+test_cholesky_matsquare(gdouble *a, const gdouble *d, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        for (guint j = 0; j <= i; j++) {
+            SLi(a, i, j) = SLi(d, i, 0) * SLi(d, j, 0);
+            for (guint k = 1; k <= MIN(i, j); k++)
+                SLi(a, i, j) += SLi(d, i, k) * SLi(d, j, k);
+        }
+    }
+}
+
+/* Multiply two symmetrical matrices (NOT triangular). */
+static void
+test_cholesky_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        for (guint j = 0; j <= i; j++) {
+            SLi(a, i, j) = 0.0;
+            for (guint k = 0; k < n; k++) {
+                guint ik = MAX(i, k);
+                guint ki = MIN(i, k);
+                guint jk = MAX(j, k);
+                guint kj = MIN(j, k);
+                SLi(a, i, j) += SLi(d1, ik, ki) * SLi(d2, jk, kj);
+            }
+        }
+    }
+}
+
+/* Multiply a vector with a symmetrical matrix (NOT triangular) from left. */
+static void
+test_cholesky_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        a[i] = 0.0;
+        for (guint j = 0; j < n; j++) {
+            guint ij = MAX(i, j);
+            guint ji = MIN(i, j);
+            a[i] += SLi(m, ij, ji) * v[j];
+        }
+    }
+}
+
+/* Generate the decomposition.  As long as it has positive numbers on the
+ * diagonal, the matrix is positive-definite.   Though maybe not numerically.
+ */
+static void
+test_cholesky_make_matrix(gdouble *d,
+                          guint n,
+                          GRand *rng)
+{
+    for (guint j = 0; j < n; j++) {
+        SLi(d, j, j) = exp(g_rand_double_range(rng, -5.0, 5.0));
+        for (guint k = 0; k < j; k++) {
+            SLi(d, j, k) = (g_rand_double_range(rng, -1.0, 1.0)
+                            + g_rand_double_range(rng, -1.0, 1.0)
+                            + g_rand_double_range(rng, -1.0, 1.0))/5.0;
+        }
+    }
+}
+
+static void
+test_cholesky_make_vector(gdouble *d,
+                          guint n,
+                          GRand *rng)
+{
+    for (guint j = 0; j < n; j++)
+        d[j] = g_rand_double_range(rng, -1.0, 1.0)
+               * exp(g_rand_double_range(rng, -5.0, 5.0));
+}
+
+/* Note the precision checks are very tolerant as the matrices we generate
+ * are not always well-conditioned. */
+void
+test_math_cholesky(void)
+{
+    enum { nmax = 8, niter = 50 };
+    /* Make it realy reproducible. */
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 1; n < nmax; n++) {
+        guint matlen = CHOLESKY_MATRIX_LEN(n);
+        /* Use descriptive names for less cryptic g_assert() messages. */
+        gdouble *matrix = g_new(gdouble, matlen);
+        gdouble *decomp = g_new(gdouble, matlen);
+        gdouble *inverted = g_new(gdouble, matlen);
+        gdouble *unity = g_new(gdouble, matlen);
+        gdouble *vector = g_new(gdouble, n);
+        gdouble *solution = g_new(gdouble, n);
+
+        for (guint iter = 0; iter < niter; iter++) {
+            test_cholesky_make_matrix(decomp, n, rng);
+            test_cholesky_make_vector(vector, n, rng);
+            gdouble eps;
+
+            /* Decomposition */
+            test_cholesky_matsquare(matrix, decomp, n);
+            test_cholesky_matvec(solution, matrix, vector, n);
+            g_assert(gwy_cholesky_decompose(matrix, n));
+            for (guint j = 0; j < matlen; j++) {
+                eps = gwy_powi(10.0, (gint)j - 15);
+                g_assert_cmpfloat(fabs(matrix[j] - decomp[j]),
+                                  <=,
+                                  eps * (fabs(matrix[j]) + fabs(decomp[j])));
+            }
+
+            /* Solution */
+            eps = gwy_powi(10.0, (gint)n - 11);
+            gwy_cholesky_solve(matrix, solution, n);
+            for (guint j = 0; j < n; j++) {
+                g_assert_cmpfloat(fabs(solution[j] - vector[j]),
+                                  <=,
+                                  eps * (fabs(solution[j]) + fabs(vector[j])));
+            }
+
+            /* Inversion */
+            test_cholesky_matsquare(matrix, decomp, n);
+            memcpy(inverted, matrix, matlen*sizeof(gdouble));
+            g_assert(gwy_cholesky_invert(inverted, n));
+            /* Multiplication with inverted must give unity */
+            test_cholesky_matmul(unity, matrix, inverted, n);
+            for (guint j = 0; j < n; j++) {
+                eps = gwy_powi(10.0, (gint)n - 10);
+                for (guint k = 0; k < j; k++) {
+                    g_assert_cmpfloat(fabs(SLi(unity, j, k)), <=, eps);
+                }
+                eps = gwy_powi(10.0, (gint)n - 11);
+                g_assert_cmpfloat(fabs(SLi(unity, j, j) - 1.0), <=, eps);
+            }
+            /* Double inversion must give the original */
+            eps = gwy_powi(10.0, (gint)n - 12);
+            g_assert(gwy_cholesky_invert(inverted, n));
+            for (guint j = 0; j < matlen; j++) {
+                g_assert_cmpfloat(fabs(matrix[j] - inverted[j]),
+                                  <=,
+                                  eps * (fabs(matrix[j]) + fabs(inverted[j])));
+            }
+        }
+
+        g_free(vector);
+        g_free(solution);
+        g_free(matrix);
+        g_free(decomp);
+        g_free(inverted);
+        g_free(unity);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
