@@ -33,11 +33,14 @@ G_BEGIN_DECLS
         if (hid && obj) { g_signal_handler_disconnect(obj, hid); (hid) = 0; } \
     } while (0)
 
-gboolean gwy_set_member_object(gpointer instance,
-                               gpointer member_object,
-                               GType expected_type,
-                               gpointer member_field,
-                               ...)                    G_GNUC_NULL_TERMINATED;
+gboolean gwy_set_member_object        (gpointer instance,
+                                       gpointer member_object,
+                                       GType expected_type,
+                                       gpointer member_field,
+                                       ...)                     G_GNUC_NULL_TERMINATED;
+void     gwy_override_class_properties(GObjectClass *oclass,
+                                       GParamSpec **properties,
+                                       ...)                     G_GNUC_NULL_TERMINATED;
 
 G_END_DECLS
 

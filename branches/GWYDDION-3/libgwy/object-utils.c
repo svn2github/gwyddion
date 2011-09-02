@@ -18,7 +18,9 @@
  */
 
 #include <stdarg.h>
+#include <string.h>
 #include "libgwy/macros.h"
+#include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 
 /**
@@ -132,6 +134,64 @@ gwy_set_member_object(gpointer instance,
         g_object_unref(old_member);
 
     return TRUE;
+}
+
+/**
+ * gwy_override_class_properties:
+ * @oclass: An object class.
+ * @properties: Array of properties, indexed by the property id, to store
+ *              the #GParamSpec<!-- -->s of the overriden properties.
+ * @...: List of couples of the form property name, property id.
+ *
+ * Overrides a set of object class properties.
+ *
+ * The param spec of each property is looked up and stored into @properties
+ * at position corresponding to its id.  This is useful if you keep the array
+ * of param specs for the class around.
+ **/
+void
+gwy_override_class_properties(GObjectClass *oclass,
+                              GParamSpec **properties,
+                              ...)
+{
+    g_return_if_fail(G_IS_OBJECT_CLASS(oclass));
+    g_return_if_fail(properties);
+
+    va_list ap;
+
+    va_start(ap, properties);
+    for (const gchar *prop_name = va_arg(ap, const gchar*);
+         prop_name;
+         prop_name = va_arg(ap, const gchar*)) {
+        guint prop_id = va_arg(ap, guint);
+        g_object_class_override_property(oclass, prop_id, prop_name);
+    }
+    va_end(ap);
+
+    guint nprops = 0;
+    GParamSpec **pspecs = g_object_class_list_properties(oclass, &nprops);
+
+    va_start(ap, properties);
+    for (const gchar *prop_name = va_arg(ap, const gchar*);
+         prop_name;
+         prop_name = va_arg(ap, const gchar*)) {
+        guint prop_id = va_arg(ap, guint);
+        gboolean ok = FALSE;
+        for (guint i = 0; !ok && i < nprops; i++) {
+            if (gwy_strequal(prop_name, pspecs[i]->name)) {
+                properties[prop_id] = pspecs[i];
+                ok = TRUE;
+            }
+        }
+        if (!ok) {
+            g_critical("Cannot find property %s after overriding "
+                       "it in class %s.",
+                       G_OBJECT_CLASS_NAME(oclass), prop_name);
+        }
+    }
+    va_end(ap);
+
+    g_free(pspecs);
 }
 
 /**
