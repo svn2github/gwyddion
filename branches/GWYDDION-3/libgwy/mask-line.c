@@ -623,7 +623,7 @@ gwy_mask_line_new_resampled(const GwyMaskLine *line,
     dest = gwy_mask_line_new_sized(res, FALSE);
 
     guint req_bits;
-    gdouble step = line->res/(gdouble)res;
+    gdouble step = (gdouble)line->res/res;
     GwyMaskScalingSegment *segments = _gwy_mask_prepare_scaling(0.0, step, res,
                                                                 &req_bits);
     g_assert(req_bits == line->res);

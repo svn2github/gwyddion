@@ -23,6 +23,7 @@
 #include "libgwy/math.h"
 #include "libgwy/mask-field.h"
 #include "libgwy/object-internal.h"
+#include "libgwy/mask-line-internal.h"
 #include "libgwy/mask-field-internal.h"
 #include "libgwy/field-internal.h"
 
@@ -648,6 +649,37 @@ gwy_mask_field_new_part(const GwyMaskField *field,
     return part;
 }
 
+static void
+scale_source_row(GwyMaskIter srciter, GwyMaskScalingSegment *seg,
+                 gdouble *target, guint res, gdouble step, gdouble weight)
+{
+    if (step > 1.0) {
+        // seg->move is always nonzero.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            guint c = 0;
+            for (guint k = seg->move-1; k; k--) {
+                gwy_mask_iter_next(srciter);
+                c += !!gwy_mask_iter_get(srciter);
+            }
+            gwy_mask_iter_next(srciter);
+            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
+            *(target++) += weight*s;
+        }
+    }
+    else {
+        // seg->move is at most 1.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            if (seg->move) {
+                gwy_mask_iter_next(srciter);
+                s += seg->w1 * !!gwy_mask_iter_get(srciter);
+            }
+            *(target++) += weight*s;
+        }
+    }
+}
+
 /**
  * gwy_mask_field_new_resampled:
  * @field: A two-dimensional mask field.
@@ -671,8 +703,46 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
 
     GwyMaskField *dest;
     dest = gwy_mask_field_new_sized(xres, yres, FALSE);
-    g_warning("Implement me!");
-    // TODO
+
+    guint xreq_bits, yreq_bits;
+    gdouble xstep = (gdouble)field->xres/xres,
+            ystep = (gdouble)field->yres/yres;
+    GwyMaskScalingSegment *xsegments = _gwy_mask_prepare_scaling(0.0, xstep,
+                                                                 xres,
+                                                                 &xreq_bits),
+                          *ysegments = _gwy_mask_prepare_scaling(0.0, ystep,
+                                                                 yres,
+                                                                 &yreq_bits);
+    gdouble *row = g_new(gdouble, xres);
+    g_assert(xreq_bits == field->xres);
+    g_assert(yreq_bits == field->yres);
+
+    GwyMaskScalingSegment *yseg = ysegments;
+    for (guint i = 0, isrc = 0; i < yres; i++) {
+        GwyMaskIter iter;
+        gwy_clear(row, xres);
+        gwy_mask_field_iter_init(field, iter, 0, isrc);
+        scale_source_row(iter, xsegments, row, xres, xstep, yseg->w0);
+        if (yseg->move) {
+            for (guint k = yseg->move-1; k; k--) {
+                isrc++;
+                gwy_mask_field_iter_init(field, iter, 0, isrc);
+                scale_source_row(iter, xsegments, row, xres, xstep, 1.0/ystep);
+            }
+            isrc++;
+            gwy_mask_field_iter_init(field, iter, 0, isrc);
+            scale_source_row(iter, xsegments, row, xres, xstep, yseg->w1);
+        }
+        gwy_mask_field_iter_init(dest, iter, 0, i);
+        for (guint j = 0; j < xres; j++) {
+            gwy_mask_iter_set(iter, row[j] >= 0.5);
+            gwy_mask_iter_next(iter);
+        }
+    }
+
+    g_free(row);
+    g_free(ysegments);
+    g_free(xsegments);
 
     return dest;
 }
