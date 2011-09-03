@@ -592,7 +592,8 @@ _gwy_mask_prepare_scaling(gdouble pos, gdouble step, guint nsteps,
     seg--;
     if (seg->move && seg->w1 < 1e-6) {
         seg->move--;
-        seg->w1 = 1.0;
+        seg->w1 = seg->move ? 1.0 : 0.0;
+        end--;
     }
 
     GWY_MAYBE_SET(required_bits, end+1 - first);
