@@ -549,6 +549,58 @@ gwy_mask_line_new_part(const GwyMaskLine *line,
 }
 
 /**
+ * _gwy_mask_prepare_scaling:
+ * @pos: Initial position in the mask.  Can be non-integer.
+ * @step: The size of one target pixel in the source (the inverse of zoom).
+ * @nsteps: The number of pixels wanted for the target.
+ * @required_bits: How many input bits it will consume.  This can be used for
+ *                 verifying that the source is large enough.  All bits that
+ *                 are used with nonzero weight are counted as consumed.
+ *
+ * Prepares auxiliary data for bit mask scaling.
+ *
+ * Returns: Array of scaling segment descriptors.
+ **/
+GwyMaskScalingSegment*
+_gwy_mask_prepare_scaling(gdouble pos, gdouble step, guint nsteps,
+                          guint *required_bits)
+{
+    GwyMaskScalingSegment *segments = g_new(GwyMaskScalingSegment, nsteps),
+                          *seg = segments;
+    guint end = floor(pos), first = end;
+    gdouble x = pos - end;
+
+    for (guint i = nsteps; i; i--, seg++) {
+        guint begin = end;
+        pos += step;
+        end = floor(pos);
+        if (end == begin) {
+            seg->w0 = 1.0;
+            x = pos - end;
+            seg->w1 = 0.0;
+            seg->move = 0;
+        }
+        else {
+            seg->w0 = (1.0 - x)/step;
+            x = pos - end;
+            seg->w1 = x/step;
+            seg->move = end - begin;
+        }
+    }
+
+    // Try to avoid reading a slightly after the last bit.
+    seg--;
+    if (seg->move && seg->w1 < 1e-6) {
+        seg->move--;
+        seg->w1 = 1.0;
+    }
+
+    GWY_MAYBE_SET(required_bits, end+1 - first);
+
+    return segments;
+}
+
+/**
  * gwy_mask_line_new_resampled:
  * @line: A one-dimensional mask line.
  * @res: Desired resolution.
@@ -569,8 +621,46 @@ gwy_mask_line_new_resampled(const GwyMaskLine *line,
 
     GwyMaskLine *dest;
     dest = gwy_mask_line_new_sized(res, FALSE);
-    g_warning("Implement me!");
-    // TODO
+
+    guint req_bits;
+    gdouble step = line->res/(gdouble)res;
+    GwyMaskScalingSegment *segments = _gwy_mask_prepare_scaling(0.0, step, res,
+                                                                &req_bits);
+    g_assert(req_bits == line->res);
+
+    GwyMaskScalingSegment *seg = segments;
+    GwyMaskIter srciter, destiter;
+    gwy_mask_line_iter_init(line, srciter, 0);
+    gwy_mask_line_iter_init(dest, destiter, 0);
+    if (step > 1.0) {
+        // seg->move is always nonzero.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            guint c = 0;
+            for (guint k = seg->move-1; k; k--) {
+                gwy_mask_iter_next(srciter);
+                c += !!gwy_mask_iter_get(srciter);
+            }
+            gwy_mask_iter_next(srciter);
+            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
+            gwy_mask_iter_set(destiter, s >= 0.5);
+            gwy_mask_iter_next(destiter);
+        }
+    }
+    else {
+        // seg->move is at most 1.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            if (seg->move) {
+                gwy_mask_iter_next(srciter);
+                s += seg->w1 * !!gwy_mask_iter_get(srciter);
+            }
+            gwy_mask_iter_set(destiter, s >= 0.5);
+            gwy_mask_iter_next(destiter);
+        }
+    }
+
+    g_free(segments);
 
     return dest;
 }

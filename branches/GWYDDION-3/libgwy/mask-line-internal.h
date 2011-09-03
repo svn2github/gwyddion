@@ -36,6 +36,19 @@ struct _GwyMaskLinePrivate {
 
 typedef struct _GwyMaskLinePrivate MaskLine;
 
+typedef struct {
+    gdouble w0;
+    gdouble w1;
+    guint move;
+} GwyMaskScalingSegment;
+
+
+G_GNUC_INTERNAL
+GwyMaskScalingSegment* _gwy_mask_prepare_scaling(gdouble pos,
+                                                 gdouble step,
+                                                 guint nsteps,
+                                                 guint *required_bits) G_GNUC_MALLOC;
+
 G_END_DECLS
 
 #endif
