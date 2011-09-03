@@ -26,6 +26,7 @@ testlibgwy_SOURCES = \
 	mask-field.c \
 	mask-line.c \
 	math.c \
+	object-utils.c \
 	pack.c \
 	rand.c \
 	resource.c \

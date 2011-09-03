@@ -21,6 +21,7 @@ math/fit/poly
 interpolation
 fft/nice-size
 fft/load-wisdom
+object-utils/set-member
 expr/evaluate
 expr/vector
 expr/garbage
