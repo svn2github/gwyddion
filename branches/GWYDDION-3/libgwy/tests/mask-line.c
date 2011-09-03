@@ -324,6 +324,83 @@ test_mask_line_count(void)
     g_rand_free(rng);
 }
 
+static GwyMaskLine*
+mask_line_from_string(const gchar *str)
+{
+    guint res = strlen(str);
+    GwyMaskLine *line = gwy_mask_line_new_sized(res, TRUE);
+    GwyMaskIter iter;
+    gwy_mask_line_iter_init(line, iter, 0);
+    for (guint j = 0; j < res; j++, str++) {
+        gboolean one = (*str == '1' || *str == '@' || *str == '#');
+        gwy_mask_iter_set(iter, one);
+        gwy_mask_iter_next(iter);
+    }
+    return line;
+}
+
+static void
+mask_line_resample_one(const gchar *str_src, const gchar *str_ref)
+{
+    GwyMaskLine *src = mask_line_from_string(str_src);
+    GwyMaskLine *ref = mask_line_from_string(str_ref);
+    GwyMaskLine *result = gwy_mask_line_new_resampled(src, ref->res);
+
+    mask_line_assert_equal(result, ref);
+
+    g_object_unref(result);
+    g_object_unref(ref);
+    g_object_unref(src);
+}
+
+void
+test_mask_line_resample(void)
+{
+    mask_line_resample_one("#.", "#.");
+    mask_line_resample_one("#.", "##.");
+    mask_line_resample_one("#.", "##..");
+    mask_line_resample_one("#.", "###..");
+    mask_line_resample_one("#.", "###...");
+    mask_line_resample_one("#.", "####...");
+    mask_line_resample_one("#.", "####....");
+    mask_line_resample_one("#.", "#####....");
+
+    mask_line_resample_one("##.", "#");
+    mask_line_resample_one("##.", "#.");
+    mask_line_resample_one("##.", "##.");
+    mask_line_resample_one("##.", "###.");
+    mask_line_resample_one("##.", "###..");
+    mask_line_resample_one("##.", "####..");
+    mask_line_resample_one("##.", "#####..");
+    mask_line_resample_one("##.", "#####...");
+
+    mask_line_resample_one("#.#", "#");
+    mask_line_resample_one("#.#", "##");
+    mask_line_resample_one("#.#", "#..#");
+    mask_line_resample_one("#.#", "##.##");
+    mask_line_resample_one("#.#", "##..##");
+    mask_line_resample_one("#.#", "##...##");
+    mask_line_resample_one("#.#", "###..###");
+
+    mask_line_resample_one(".##", "#");
+    mask_line_resample_one(".##", ".#");
+    mask_line_resample_one(".##", ".##");
+    mask_line_resample_one(".##", ".###");
+    mask_line_resample_one(".##", "..###");
+    mask_line_resample_one(".##", "..####");
+    mask_line_resample_one(".##", "..#####");
+    mask_line_resample_one(".##", "...#####");
+
+    mask_line_resample_one(".#.#", "#");
+    mask_line_resample_one(".#.#", "##");
+    mask_line_resample_one(".#.#", ".##");
+    mask_line_resample_one(".#.#", ".#.#");
+    mask_line_resample_one(".#.#", ".##.#");
+    mask_line_resample_one(".#.#", ".##.##");
+    mask_line_resample_one(".#.#", "..##.##");
+    mask_line_resample_one(".#.#", "..##..##");
+}
+
 // Undef macros to test the exported functions.
 #undef gwy_mask_line_get
 #undef gwy_mask_line_set

@@ -113,6 +113,7 @@ mask-line/new-part
 mask-line/serialize
 mask-line/count
 mask-line/set-size
+mask-line/resample
 mask-field/stride
 mask-field/props
 mask-field/get
