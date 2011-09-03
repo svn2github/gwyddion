@@ -893,33 +893,6 @@ gwy_mask_field_count(const GwyMaskField *field,
     return count;
 }
 
-static inline guint
-count_row_single(const guint32 *row,
-                 guint32 m,
-                 gboolean value)
-{
-    return count_set_bits((value ? *row : ~*row) & m);
-}
-
-static guint
-count_row(const guint32 *row,
-          guint width,
-          guint off, guint end,
-          guint32 m0, guint32 m1,
-          gboolean value)
-{
-    guint j = width;
-    guint count = count_set_bits(*row & m0);
-    j -= 0x20 - off, row++;
-    while (j >= 0x20) {
-        count += count_set_bits(*row);
-        j -= 0x20, row++;
-    }
-    if (end)
-        count += count_set_bits(*row & m1);
-    return value ? count : width - count;
-}
-
 /**
  * gwy_mask_field_part_count:
  * @field: A two-dimensional mask field.
