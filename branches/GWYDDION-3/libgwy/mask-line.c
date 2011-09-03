@@ -644,7 +644,7 @@ gwy_mask_line_new_resampled(const GwyMaskLine *line,
             }
             gwy_mask_iter_next(srciter);
             s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
-            gwy_mask_iter_set(destiter, s >= 0.5);
+            gwy_mask_iter_set(destiter, s >= MASK_ROUND_THRESHOLD);
             gwy_mask_iter_next(destiter);
         }
     }
@@ -656,7 +656,7 @@ gwy_mask_line_new_resampled(const GwyMaskLine *line,
                 gwy_mask_iter_next(srciter);
                 s += seg->w1 * !!gwy_mask_iter_get(srciter);
             }
-            gwy_mask_iter_set(destiter, s >= 0.5);
+            gwy_mask_iter_set(destiter, s >= MASK_ROUND_THRESHOLD);
             gwy_mask_iter_next(destiter);
         }
     }

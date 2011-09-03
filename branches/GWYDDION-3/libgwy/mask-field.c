@@ -735,7 +735,7 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
         }
         gwy_mask_field_iter_init(dest, iter, 0, i);
         for (guint j = 0; j < xres; j++) {
-            gwy_mask_iter_set(iter, row[j] >= 0.5);
+            gwy_mask_iter_set(iter, row[j] >= MASK_ROUND_THRESHOLD);
             gwy_mask_iter_next(iter);
         }
     }
