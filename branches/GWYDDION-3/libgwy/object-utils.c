@@ -38,9 +38,14 @@
  * Replaces a member object of another object, handling signal connection and
  * disconnection.
  *
+ * If @member_object is not %NULL a reference is taken (and conversely, the
+ * reference to the previous member object is released).
+ *
  * The purpose is to simplify bookkeeping in classes that have settable
  * member objects and (usually but not necessarily) need to connect to some
- * signals of these member objects.
+ * signals of these member objects.  Since this function both connects and
+ * disconnects signals it must be always called with the same set of signals,
+ * including callbacks and flags, for a specific member object.
  *
  * Example for a #GwyFoo class owning a #GwyGradient member object, assuming
  * the usual conventions:
@@ -74,7 +79,8 @@
  * only calls <function>set_gradient()</function> but with %NULL gradient.
  *
  * Returns: %TRUE if @member_field was changed.  %FALSE means the new
- *          member is identical to the current one (or a failed assertion).
+ *          member is identical to the current one and the function reduced to
+ *          no-op (or that an assertion faled).
  **/
 gboolean
 gwy_set_member_object(gpointer instance,
