@@ -57,6 +57,8 @@ G_BEGIN_DECLS
 #define MAKE_MASK(firstbit, nbits) \
     (nbits ? ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit)) : 0u)
 
+/* Revert the bit order. The first part reorders bits within bytes, then we
+ * just use GUINT32_SWAP_LE_BE() to reorder the bytes. */
 static inline guint32
 swap_bits_32(guint32 v)
 {
