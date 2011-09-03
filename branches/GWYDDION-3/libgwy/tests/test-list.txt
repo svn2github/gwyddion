@@ -45,6 +45,8 @@ rand/distribution/normal
 rand/distribution/triangle-positive
 rand/distribution/triangle
 fitter/props
+# After fitter, it derives from it.
+object-utils/override-properties
 fit-task/point
 fit-task/vector
 fit-task/vfunc
