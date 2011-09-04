@@ -474,8 +474,7 @@ ensure_image(GwyRasterView *rasterview)
         gdouble offset = gtk_adjustment_get_value(priv->hadjustment);
         g_printerr("Have adjustment, value = %g\n", offset);
         xfrom = offset * field->xres/full_width;
-        // FIXME: We must use true zoom here, runding causes slight shiver.
-        xto = xfrom + width * field->xres/full_width;
+        xto = xfrom + (gdouble)width * field->xres/full_width;
         // FIXME: is this right with zoom = 0?
     }
     else {
@@ -487,8 +486,7 @@ ensure_image(GwyRasterView *rasterview)
         gdouble offset = gtk_adjustment_get_value(priv->vadjustment);
         g_printerr("Have vdjustment, value = %g\n", offset);
         yfrom = offset * field->yres/full_height;
-        // FIXME: We must use true zoom here, runding causes slight shiver.
-        yto = yfrom + height * field->xres/full_width;
+        yto = yfrom + (gdouble)height * field->xres/full_width;
         // FIXME: is this right with zoom = 0?
     }
     else {
