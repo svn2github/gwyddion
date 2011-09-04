@@ -156,6 +156,7 @@ libgwy3_la_SOURCES = \
 	mask-field-arithmetic.c \
 	mask-field-grains.c \
 	mask-field-transform.c \
+	mask-iter.c \
 	mask-line.c \
 	mask-line-arithmetic.c \
 	math.c \

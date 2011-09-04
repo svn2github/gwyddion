@@ -20,6 +20,8 @@
 #ifndef __LIBGWY_MASK_ITER_H__
 #define __LIBGWY_MASK_ITER_H__
 
+#include <glib.h>
+
 G_BEGIN_DECLS
 
 typedef enum {

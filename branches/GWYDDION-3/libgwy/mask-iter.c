@@ -18,6 +18,7 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwy/mask-iter.h"
 
 /**
