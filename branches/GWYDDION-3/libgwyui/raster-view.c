@@ -419,8 +419,13 @@ static void
 gwy_raster_view_size_allocate(GtkWidget *widget,
                               GtkAllocation *allocation)
 {
+    GtkAllocation prev_allocation;
+    gtk_widget_get_allocation(widget, &prev_allocation);
     gtk_widget_set_allocation(widget, allocation);
     g_printerr("ALLOC: %d,%d\n", allocation->width, allocation->height);
+
+    if (memcmp(allocation, &prev_allocation, sizeof(GtkAllocation)) == 0)
+        return;
 
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     rasterview->priv->image_valid = FALSE;
@@ -458,8 +463,8 @@ ensure_image(GwyRasterView *rasterview)
 
     guint full_width = calculate_full_width(rasterview);
     guint full_height = calculate_full_height(rasterview);
-    g_printerr("ensure_image, zoom = %g, full_sizes = (%u, %u)\n",
-               priv->zoom, full_width, full_height);
+    g_printerr("ensure_image, zoom = %g, size = (%u, %u), full_size = (%u, %u)\n",
+               priv->zoom, width, height, full_width, full_height);
 
     gdouble xfrom = 0.0, yfrom = 0.0, xto, yto;
 
