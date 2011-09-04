@@ -810,6 +810,59 @@ mask_field_from_string(const gchar *str)
     return field;
 }
 
+static void
+mask_field_resample_one(const gchar *str_src, const gchar *str_ref)
+{
+    GwyMaskField *src = mask_field_from_string(str_src);
+    GwyMaskField *ref = mask_field_from_string(str_ref);
+    GwyMaskField *result = gwy_mask_field_new_resampled(src,
+                                                        ref->xres, ref->yres);
+
+    mask_field_assert_equal(result, ref);
+
+    g_object_unref(result);
+    g_object_unref(ref);
+    g_object_unref(src);
+}
+
+void
+test_mask_field_resample(void)
+{
+    mask_field_resample_one("#.\n.#\n",
+                            "##.\n###\n.##\n");
+    mask_field_resample_one("#.\n.#\n",
+                            "##..\n##..\n####\n..##\n..##\n");
+
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "#\n");
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "##\n.#\n");
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "#.#\n##.\n..#\n");
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "#..#\n###.\n###.\n...#\n");
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "##.##\n##.##\n###..\n...##\n...##\n");
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "##..##\n##..##\n####..\n####..\n....##\n....##\n");
+    mask_field_resample_one("#.#\n##.\n..#\n",
+                            "##...##\n##...##\n#####..\n#####..\n#####..\n"
+                            ".....##\n.....##\n");
+
+    mask_field_resample_one("#.#.\n####\n.#.#\n....\n",
+                            "#\n");
+    mask_field_resample_one("#.#.\n####\n.#.#\n....\n",
+                            "##\n..\n");
+    mask_field_resample_one("#.#.\n####\n.#.#\n....\n",
+                            "####\n");
+    mask_field_resample_one("#.#.\n####\n.#.#\n....\n",
+                            "####\n.#.#\n");
+    mask_field_resample_one("#.#.\n####\n.#.#\n....\n",
+                            "#.#.\n####\n....\n");
+    mask_field_resample_one("#.#.\n####\n.#.#\n....\n",
+                            "##.\n###\n###\n..#\n...\n");
+}
+
 void
 test_mask_field_grow_one(const gchar *orig_str,
                          const gchar *grow_str,

@@ -131,6 +131,7 @@ mask-field/fill
 mask-field/count
 mask-field/count-rows
 mask-field/set-size
+mask-field/resample
 mask-field/grain/numbers
 mask-field/grain/sizes
 mask-field/grain/bounding-boxes
