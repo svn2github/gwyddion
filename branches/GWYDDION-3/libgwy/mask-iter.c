@@ -17,7 +17,63 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "libgwy/macros.h"
 #include "libgwy/mask-iter.h"
+
+/**
+ * gwy_mask_prepare_scaling:
+ * @pos: Initial position in the mask.  Can be non-integral to start within a
+ *       pixel.
+ * @step: The size of one target pixel in the source (the inverse of zoom).
+ * @nsteps: The number of pixels wanted for the target.
+ * @required_bits: How many input bits it will consume.  This can be used for
+ *                 verifying that the source is large enough.  All bits that
+ *                 are used with nonzero weight are counted as consumed.
+ *
+ * Prepares auxiliary data for bit mask scaling.
+ *
+ * Returns: (transfer full) (array length=nsteps):
+ *          Newly allocated array of scaling segment descriptors.
+ **/
+GwyMaskScalingSegment*
+gwy_mask_prepare_scaling(gdouble pos, gdouble step, guint nsteps,
+                         guint *required_bits)
+{
+    GwyMaskScalingSegment *segments = g_new(GwyMaskScalingSegment, nsteps),
+                          *seg = segments;
+    guint end = floor(pos), first = end;
+    gdouble x = pos - end;
+
+    for (guint i = nsteps; i; i--, seg++) {
+        guint begin = end;
+        pos += step;
+        end = floor(pos);
+        if (end == begin) {
+            seg->w0 = 1.0;
+            x = pos - end;
+            seg->w1 = 0.0;
+            seg->move = 0;
+        }
+        else {
+            seg->w0 = (1.0 - x)/step;
+            x = pos - end;
+            seg->w1 = x/step;
+            seg->move = end - begin;
+        }
+    }
+
+    // Try to avoid reading a slightly after the last bit.
+    seg--;
+    if (seg->move && seg->w1 < 1e-6) {
+        seg->move--;
+        seg->w1 = seg->move ? 1.0/step : 0.0;
+        end--;
+    }
+
+    GWY_MAYBE_SET(required_bits, end+1 - first);
+
+    return segments;
+}
 
 /**
  * SECTION: mask-iter
@@ -133,6 +189,22 @@
  * @GWY_MASK_IGNORE: Ignore mask, if present, and use all data.
  *
  * Mask interpretation in procedures that can apply masks.
+ **/
+
+/**
+ * GwyMaskScalingSegment:
+ * @w0: Contribution of the first bit.
+ * @w1: Contribution of the last bit.
+ * @move: How many bits to move forward.
+ *
+ * Precomputed auxiliary data for mask scaling.
+ *
+ * If scaling up @move is always at least 1; @w0 and @w1 then refer to
+ * different bits and there may be some pixels between to include completely.
+ *
+ * If, on the other hand, scaling down @move is at most 1 there are never any
+ * pixels between to include completely.  In this case @move can be also 0
+ * which means the entire contribution is within one pixel.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

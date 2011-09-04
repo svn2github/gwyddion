@@ -36,22 +36,6 @@ struct _GwyMaskLinePrivate {
 
 typedef struct _GwyMaskLinePrivate MaskLine;
 
-// Ensure that ambiguous cases are rounded up when transforming masks by not
-// comparing to exactly 1/2 but a slightly smaller number.
-#define MASK_ROUND_THRESHOLD 0.4999999
-
-typedef struct {
-    gdouble w0;
-    gdouble w1;
-    guint move;
-} GwyMaskScalingSegment;
-
-G_GNUC_INTERNAL
-GwyMaskScalingSegment* _gwy_mask_prepare_scaling(gdouble pos,
-                                                 gdouble step,
-                                                 guint nsteps,
-                                                 guint *required_bits) G_GNUC_MALLOC;
-
 G_END_DECLS
 
 #endif

@@ -55,6 +55,17 @@ typedef struct {
 #define gwy_mask_iter_set(iter, value) \
     do { if (value) *(iter).p |= (iter).bit; else *(iter).p &= ~(iter).bit; } while (0)
 
+typedef struct {
+    gdouble w0;
+    gdouble w1;
+    guint move;
+} GwyMaskScalingSegment;
+
+GwyMaskScalingSegment* gwy_mask_prepare_scaling(gdouble pos,
+                                                gdouble step,
+                                                guint nsteps,
+                                                guint *required_bits) G_GNUC_MALLOC;
+
 G_END_DECLS
 
 #endif

@@ -33,6 +33,10 @@ G_BEGIN_DECLS
 #error Byte order used on this system is not supported.
 #endif
 
+// Ensure that ambiguous cases are rounded up when transforming masks by not
+// comparing to exactly 1/2 but a slightly smaller number.
+#define MASK_ROUND_THRESHOLD 0.4999999
+
 #define ALL_SET ((guint32)0xffffffffu)
 #define ALL_CLEAR ((guint32)0x00000000u)
 

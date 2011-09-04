@@ -23,7 +23,6 @@
 #include "libgwy/math.h"
 #include "libgwy/mask-field.h"
 #include "libgwy/object-internal.h"
-#include "libgwy/mask-line-internal.h"
 #include "libgwy/mask-field-internal.h"
 #include "libgwy/field-internal.h"
 
@@ -707,12 +706,12 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
     guint xreq_bits, yreq_bits;
     gdouble xstep = (gdouble)field->xres/xres,
             ystep = (gdouble)field->yres/yres;
-    GwyMaskScalingSegment *xsegments = _gwy_mask_prepare_scaling(0.0, xstep,
-                                                                 xres,
-                                                                 &xreq_bits),
-                          *ysegments = _gwy_mask_prepare_scaling(0.0, ystep,
-                                                                 yres,
-                                                                 &yreq_bits);
+    GwyMaskScalingSegment *xsegments = gwy_mask_prepare_scaling(0.0, xstep,
+                                                                xres,
+                                                                &xreq_bits),
+                          *ysegments = gwy_mask_prepare_scaling(0.0, ystep,
+                                                                yres,
+                                                                &yreq_bits);
     gdouble *row = g_new(gdouble, xres);
     g_assert(xreq_bits == field->xres);
     g_assert(yreq_bits == field->yres);
