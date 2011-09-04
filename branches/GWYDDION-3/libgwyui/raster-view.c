@@ -57,6 +57,7 @@ struct _GwyRasterViewPrivate {
     GwyField *field;
     gulong field_notify_id;
     gulong field_data_changed_id;
+    gdouble field_aspect_ratio;
 
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
@@ -189,6 +190,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     rasterview->priv = G_TYPE_INSTANCE_GET_PRIVATE(rasterview,
                                                    GWY_TYPE_RASTER_VIEW,
                                                    RasterView);
+    rasterview->priv->field_aspect_ratio = 1.0;
     gtk_widget_set_has_window(GTK_WIDGET(rasterview), FALSE);
 }
 
@@ -555,6 +557,10 @@ set_field(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
+    priv->field_aspect_ratio = field
+                               ? gwy_field_dy(field)/gwy_field_dx(field)
+                               : 1.0;
+
     priv->image_valid = FALSE;
     return TRUE;
 }
@@ -582,6 +588,8 @@ field_notify(GwyRasterView *rasterview,
              GwyField *field)
 {
     RasterView *priv = rasterview->priv;
+    priv->field_aspect_ratio = gwy_field_dy(field)/gwy_field_dx(field);
+
     if (gwy_strequal(pspec->name, "x-res")
         || gwy_strequal(pspec->name, "y-res")) {
         gtk_widget_queue_resize(GTK_WIDGET(rasterview));
@@ -724,9 +732,7 @@ set_real_aspect_ratio(GwyRasterView *rasterview,
 
     priv->real_aspect_ratio = setting;
     // Do not trigger a resize if the aspect ratios are the same.
-    if (!priv->field
-        || (fabs(gwy_field_dy(priv->field)/gwy_field_dx(priv->field) - 1.0)
-            < 1e-6))
+    if (priv->field_aspect_ratio == 1.0)
         return TRUE;
 
     gtk_widget_queue_resize(GTK_WIDGET(rasterview));
@@ -753,7 +759,7 @@ calculate_full_height(GwyRasterView *rasterview)
 
     gdouble yzoom = priv->zoom ? priv->zoom : 1.0;
     if (priv->real_aspect_ratio)
-        yzoom *= gwy_field_dy(priv->field)/gwy_field_dx(priv->field);
+        yzoom *= priv->field_aspect_ratio;
     return gwy_round(fmax(yzoom * priv->field->yres, 1.0));
 }
 
