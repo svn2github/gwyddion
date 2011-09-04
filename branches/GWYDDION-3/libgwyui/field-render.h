@@ -21,24 +21,28 @@
 #define __LIBGWYUI_FIELD_RENDER_H__
 
 #include <libgwy/field.h>
+#include <libgwy/mask-field.h>
 #include <libgwy/gradient.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cairo/cairo.h>
 
 G_BEGIN_DECLS
 
-void gwy_field_render_pixbuf(const GwyField *field,
-                             GdkPixbuf *pixbuf,
-                             GwyGradient *gradient,
-                             cairo_rectangle_t *rectangle,
-                             gdouble min,
-                             gdouble max);
-void gwy_field_render_cairo (const GwyField *field,
-                             cairo_surface_t *surface,
-                             GwyGradient *gradient,
-                             cairo_rectangle_t *rectangle,
-                             gdouble min,
-                             gdouble max);
+void gwy_field_render_pixbuf    (const GwyField *field,
+                                 GdkPixbuf *pixbuf,
+                                 GwyGradient *gradient,
+                                 const cairo_rectangle_t *rectangle,
+                                 gdouble min,
+                                 gdouble max);
+void gwy_field_render_cairo     (const GwyField *field,
+                                 cairo_surface_t *surface,
+                                 GwyGradient *gradient,
+                                 const cairo_rectangle_t *rectangle,
+                                 gdouble min,
+                                 gdouble max);
+void gwy_mask_field_render_cairo(const GwyMaskField *field,
+                                 cairo_surface_t *surface,
+                                 const cairo_rectangle_t *rectangle);
 
 G_END_DECLS
 

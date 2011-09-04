@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+#include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwyui/field-render.h"
 
 #define NOT_QUITE_1 0.999999999999999
@@ -206,7 +209,7 @@ void
 gwy_field_render_pixbuf(const GwyField *field,
                         GdkPixbuf *pixbuf,
                         GwyGradient *gradient,
-                        cairo_rectangle_t *rectangle,
+                        const cairo_rectangle_t *rectangle,
                         gdouble min, gdouble max)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
@@ -288,7 +291,7 @@ void
 gwy_field_render_cairo(const GwyField *field,
                        cairo_surface_t *surface,
                        GwyGradient *gradient,
-                       cairo_rectangle_t *rectangle,
+                       const cairo_rectangle_t *rectangle,
                        gdouble min, gdouble max)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
@@ -351,6 +354,111 @@ gwy_field_render_cairo(const GwyField *field,
 
     g_free(interpy);
     g_free(interpx);
+}
+
+// FIXME: This duplicates mask-field.c.
+static void
+scale_source_row(GwyMaskIter srciter, GwyMaskScalingSegment *seg,
+                 gdouble *target, guint res, gdouble step, gdouble weight)
+{
+    if (step > 1.0) {
+        // seg->move is always nonzero.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            guint c = 0;
+            for (guint k = seg->move-1; k; k--) {
+                gwy_mask_iter_next(srciter);
+                c += !!gwy_mask_iter_get(srciter);
+            }
+            gwy_mask_iter_next(srciter);
+            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
+            *(target++) += weight*s;
+        }
+    }
+    else {
+        // seg->move is at most 1.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            if (seg->move) {
+                gwy_mask_iter_next(srciter);
+                s += seg->w1 * !!gwy_mask_iter_get(srciter);
+            }
+            *(target++) += weight*s;
+        }
+    }
+}
+
+/**
+ * gwy_mask_field_render_cairo:
+ * @field: A two-dimensional data field.
+ * @surface: A cairo image surface of format %CAIRO_FORMAT_A8.
+ * @rectangle: (allow-none):
+ *             Area in @field to render, %NULL for entire field.
+ *
+ * Renders a mask field to cairo image surface.
+ *
+ * Parameters defining the area to render are measured in pixels; the entire
+ * area must line within @field.
+ **/
+void
+gwy_mask_field_render_cairo(const GwyMaskField *field,
+                            cairo_surface_t *surface,
+                            const cairo_rectangle_t *rectangle)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(surface);
+    g_return_if_fail(cairo_surface_get_type(surface)
+                     == CAIRO_SURFACE_TYPE_IMAGE);
+    g_return_if_fail(cairo_image_surface_get_format(surface)
+                     == CAIRO_FORMAT_A8);
+
+    gdouble xfrom, xto, yfrom, yto;
+    if (!check_field_rectangle(rectangle, field->xres, field->yres,
+                               &xfrom, &yfrom, &xto, &yto))
+        return;
+
+    guint width = cairo_image_surface_get_width(surface);
+    guint height = cairo_image_surface_get_height(surface);
+    guint stride = cairo_image_surface_get_stride(surface);
+    guint8 *pixels = (guint8*)cairo_image_surface_get_data(surface);
+
+    guint xreq_bits, yreq_bits;
+    gdouble xstep = (xto - xfrom)/width, ystep = (yto - yfrom)/height;
+    GwyMaskScalingSegment *xsegments = gwy_mask_prepare_scaling(0.0, xstep,
+                                                                width,
+                                                                &xreq_bits),
+                          *ysegments = gwy_mask_prepare_scaling(0.0, ystep,
+                                                                height,
+                                                                &yreq_bits);
+    gdouble *row = g_new(gdouble, width);
+    guint jfrom = floor(xfrom), ifrom = floor(yfrom);
+    g_assert(jfrom + xreq_bits <= field->xres);
+    g_assert(ifrom + yreq_bits <= field->yres);
+
+    GwyMaskScalingSegment *yseg = ysegments;
+    for (guint i = 0, isrc = 0; i < height; i++, yseg++) {
+        guint8 *pixrow = pixels + i*stride;
+        GwyMaskIter iter;
+        gwy_clear(row, width);
+        gwy_mask_field_iter_init(field, iter, jfrom, ifrom + isrc);
+        scale_source_row(iter, xsegments, row, width, xstep, yseg->w0);
+        if (yseg->move) {
+            for (guint k = yseg->move-1; k; k--) {
+                isrc++;
+                gwy_mask_field_iter_init(field, iter, jfrom, ifrom + isrc);
+                scale_source_row(iter, xsegments, row, width, xstep, 1.0/ystep);
+            }
+            isrc++;
+            gwy_mask_field_iter_init(field, iter, jfrom, ifrom + isrc);
+            scale_source_row(iter, xsegments, row, width, xstep, yseg->w1);
+        }
+        for (guint j = 0; j < width; j++)
+            pixrow[j] = COMPONENT_TO_PIXEL8(row[j]);
+    }
+
+    g_free(row);
+    g_free(ysegments);
+    g_free(xsegments);
 }
 
 /**
