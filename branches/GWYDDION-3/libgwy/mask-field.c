@@ -718,7 +718,7 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
     g_assert(yreq_bits == field->yres);
 
     GwyMaskScalingSegment *yseg = ysegments;
-    for (guint i = 0, isrc = 0; i < yres; i++) {
+    for (guint i = 0, isrc = 0; i < yres; i++, yseg++) {
         GwyMaskIter iter;
         gwy_clear(row, xres);
         gwy_mask_field_iter_init(field, iter, 0, isrc);
