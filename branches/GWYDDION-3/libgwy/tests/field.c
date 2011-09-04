@@ -1804,7 +1804,7 @@ test_field_level_laplace_random(void)
         gdouble prob = cbrt(g_rand_double(rng));
         GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, prob);
         guint ngrains;
-        const guint *grains = gwy_mask_field_number_grains(mask, &ngrains);
+        const guint *grains = gwy_mask_field_grain_numbers(mask, &ngrains);
         if (!ngrains) {
             g_object_unref(mask);
             continue;
@@ -1861,7 +1861,7 @@ field_level_laplace_function_one(void (*function)(GwyField *field, GRand *rng),
         gwy_field_fill(field, &fpart, NULL, GWY_MASK_IGNORE, NAN);
         gwy_field_laplace_solve(field, mask, grain_id);
 
-        const guint *grains = gwy_mask_field_number_grains(mask, NULL);
+        const guint *grains = gwy_mask_field_grain_numbers(mask, NULL);
         field_laplace_check_unmodif(field, reference, grains, grain_id);
         field_laplace_check_absolute_error(field, reference, grains, grain_id,
                                            maxerr);

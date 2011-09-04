@@ -36,7 +36,7 @@ resolve_grain_map(guint *m, guint i, guint j)
         ;
     k = MIN(ii, jj);
 
-    /* Fix partial resultions to full */
+    /* Fix partial resolutions to full */
     for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
         m[i] = k;
         i = ii;
@@ -60,7 +60,7 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
 }
 
 /**
- * gwy_mask_field_number_grains:
+ * gwy_mask_field_grain_numbers:
  * @field: A two-dimensional mask field.
  * @ngrains: Location to store the number of the last grain, or %NULL.
  *
@@ -76,7 +76,7 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
  *          mask field is finalized.
  **/
 const guint*
-gwy_mask_field_number_grains(GwyMaskField *field,
+gwy_mask_field_grain_numbers(GwyMaskField *field,
                              guint *ngrains)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
@@ -163,7 +163,7 @@ calculate_grain_properties(GwyMaskField *field)
     MaskField *priv = field->priv;
 
     if (!priv->grains)
-        gwy_mask_field_number_grains(field, NULL);
+        gwy_mask_field_grain_numbers(field, NULL);
 
     GWY_FREE(priv->grain_sizes);
     GWY_FREE(priv->grain_bounding_boxes);
@@ -273,7 +273,7 @@ gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
  *
  * Removes the grain of given number from a mask field.
  *
- * The grain number is the number used e.g. in gwy_mask_field_number_grains().
+ * The grain number is the number used e.g. in gwy_mask_field_grain_numbers().
  *
  * The remaining grains are renumbered and the sizes and bounding boxes of
  * empty space updated so that you can continue to use the arrays returned
@@ -288,7 +288,7 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     g_return_if_fail(grain_id > 0);
     // Normally the caller must have obtained the grain id somewhere so the
     // grains are numbered.  But just in case...
-    gwy_mask_field_number_grains(field, NULL);
+    gwy_mask_field_grain_numbers(field, NULL);
 
     MaskField *priv = field->priv;
     guint ngrains = priv->ngrains;

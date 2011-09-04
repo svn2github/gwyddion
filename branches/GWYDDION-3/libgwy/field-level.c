@@ -2130,7 +2130,7 @@ find_largest_sizes(guint xres, guint yres,
  * @mask: A two-dimensional mask field defining the areas to interpolate.
  * @grain_id: The id number of the grain to replace with the solution of
  *           Laplace equation, from 1 to @ngrains (see
- *           gwy_mask_field_number_grains()).  Passing 0 means to replace the
+ *           gwy_mask_field_grain_numbers()).  Passing 0 means to replace the
  *           entire empty space outside grains while passing %G_MAXUINT means
  *           to replace the entire masked area.
  *
@@ -2167,7 +2167,7 @@ gwy_field_laplace_solve(GwyField *field,
         g_object_ref(mask);
 
     guint ngrains;
-    const guint *grains = gwy_mask_field_number_grains(mask, &ngrains);
+    const guint *grains = gwy_mask_field_grain_numbers(mask, &ngrains);
     g_return_if_fail(grain_id == G_MAXUINT || grain_id <= ngrains);
 
     const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
