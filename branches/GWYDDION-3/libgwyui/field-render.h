@@ -30,19 +30,13 @@ G_BEGIN_DECLS
 void gwy_field_render_pixbuf(const GwyField *field,
                              GdkPixbuf *pixbuf,
                              GwyGradient *gradient,
-                             gdouble xfrom,
-                             gdouble yfrom,
-                             gdouble xto,
-                             gdouble yto,
+                             cairo_rectangle_t *rectangle,
                              gdouble min,
                              gdouble max);
 void gwy_field_render_cairo (const GwyField *field,
                              cairo_surface_t *surface,
                              GwyGradient *gradient,
-                             gdouble xfrom,
-                             gdouble yfrom,
-                             gdouble xto,
-                             gdouble yto,
+                             cairo_rectangle_t *rectangle,
                              gdouble min,
                              gdouble max);
 

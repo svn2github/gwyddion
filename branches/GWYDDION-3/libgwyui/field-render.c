@@ -158,15 +158,45 @@ field_render_empty_range(GdkPixbuf *pixbuf,
     gdk_pixbuf_fill(pixbuf, color);
 }
 
+static gboolean
+check_field_rectangle(const cairo_rectangle_t *rectangle,
+                      const GwyField *field,
+                      gdouble *xfrom, gdouble *yfrom,
+                      gdouble *xto, gdouble *yto)
+{
+    if (rectangle) {
+        g_return_val_if_fail(rectangle->x >= 0.0 && rectangle->x < field->xres,
+                             FALSE);
+        g_return_val_if_fail(rectangle->width > 0.0,
+                             FALSE);
+        g_return_val_if_fail(rectangle->x + rectangle->width <= field->xres,
+                             FALSE);
+        g_return_val_if_fail(rectangle->y >= 0.0 && rectangle->y < field->yres,
+                             FALSE);
+        g_return_val_if_fail(rectangle->height > 0.0,
+                             FALSE);
+        g_return_val_if_fail(rectangle->y + rectangle->height <= field->yres,
+                             FALSE);
+        *xfrom = rectangle->x;
+        *xto = rectangle->x + rectangle->width;
+        *yfrom = rectangle->y;
+        *yto = rectangle->y + rectangle->height;
+    }
+    else {
+        *xfrom = *yfrom = 0.0;
+        *xto = field->xres;
+        *yto = field->yres;
+    }
+    return TRUE;
+}
+
 /**
  * gwy_field_render_pixbuf:
  * @field: A two-dimensional data field.
  * @pixbuf: A pixbuf.
  * @gradient: A false colour gradient.
- * @xfrom: Horizontal coordinate of the left edge of the area.
- * @yfrom: Vertical coordinate of the upper edge of the area.
- * @xto: Horizontal coordinate of the right edge of the area.
- * @yto: Vertical coordinate of the lower edge of the area.
+ * @rectangle: (allow-none):
+ *             Area in @field to render, %NULL for entire field.
  * @min: Value to map to @gradient begining.
  * @max: Value to map to @gradient end.
  *
@@ -182,15 +212,16 @@ void
 gwy_field_render_pixbuf(const GwyField *field,
                         GdkPixbuf *pixbuf,
                         GwyGradient *gradient,
-                        gdouble xfrom, gdouble yfrom,
-                        gdouble xto, gdouble yto,
+                        cairo_rectangle_t *rectangle,
                         gdouble min, gdouble max)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(GDK_IS_PIXBUF(pixbuf));
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
-    g_return_if_fail(xfrom >= 0.0 && xfrom <= xto && xto <= field->xres);
-    g_return_if_fail(yfrom >= 0.0 && yfrom <= yto && yto <= field->yres);
+
+    gdouble xfrom, xto, yfrom, yto;
+    if (!check_field_rectangle(rectangle, field, &xfrom, &yfrom, &xto, &yto))
+        return;
 
     if (min == max) {
         field_render_empty_range(pixbuf, gradient);
@@ -245,10 +276,8 @@ gwy_field_render_pixbuf(const GwyField *field,
  * @field: A two-dimensional data field.
  * @surface: A cairo image surface of format %CAIRO_FORMAT_RGB24.
  * @gradient: A false colour gradient.
- * @xfrom: Horizontal coordinate of the left edge of the area.
- * @yfrom: Vertical coordinate of the upper edge of the area.
- * @xto: Horizontal coordinate of the right edge of the area.
- * @yto: Vertical coordinate of the lower edge of the area.
+ * @rectangle: (allow-none):
+ *             Area in @field to render, %NULL for entire field.
  * @min: Value to map to @gradient begining.
  * @max: Value to map to @gradient end.
  *
@@ -264,8 +293,7 @@ void
 gwy_field_render_cairo(const GwyField *field,
                        cairo_surface_t *surface,
                        GwyGradient *gradient,
-                       gdouble xfrom, gdouble yfrom,
-                       gdouble xto, gdouble yto,
+                       cairo_rectangle_t *rectangle,
                        gdouble min, gdouble max)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
@@ -275,8 +303,10 @@ gwy_field_render_cairo(const GwyField *field,
     g_return_if_fail(cairo_image_surface_get_format(surface)
                      == CAIRO_FORMAT_RGB24);
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
-    g_return_if_fail(xfrom >= 0.0 && xfrom <= xto && xto <= field->xres);
-    g_return_if_fail(yfrom >= 0.0 && yfrom <= yto && yto <= field->yres);
+
+    gdouble xfrom, xto, yfrom, yto;
+    if (!check_field_rectangle(rectangle, field, &xfrom, &yfrom, &xto, &yto))
+        return;
 
     if (min == max) {
         // TODO

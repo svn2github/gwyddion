@@ -53,6 +53,8 @@ struct _GwyRasterViewPrivate {
 
     gdouble zoom;
     gboolean real_aspect_ratio;
+    cairo_rectangle_int_t image_rectangle;
+    cairo_rectangle_t field_rectangle;
 
     GwyField *field;
     gulong field_notify_id;
@@ -112,8 +114,8 @@ static gboolean set_zoom                            (GwyRasterView *rasterview,
                                                      gdouble zoom);
 static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
                                                      gboolean setting);
-static guint calculate_full_width(GwyRasterView *rasterview);
-static guint calculate_full_height(GwyRasterView *rasterview);
+static guint    calculate_full_width                (GwyRasterView *rasterview);
+static guint    calculate_full_height               (GwyRasterView *rasterview);
 
 static GParamSpec *raster_view_pspecs[N_PROPS];
 
@@ -437,9 +439,88 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
 }
 
 static void
+calculate_position_and_size(GwyRasterView *rasterview)
+{
+    GtkWidget *widget = GTK_WIDGET(rasterview);
+    RasterView *priv = rasterview->priv;
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_rectangle_t *frect = &priv->field_rectangle;
+    gint width = gtk_widget_get_allocated_width(widget);
+    gint height = gtk_widget_get_allocated_height(widget);
+    gint full_width = calculate_full_width(rasterview);
+    gint full_height = calculate_full_height(rasterview);
+    gint xres = priv->field ? priv->field->xres : 1;
+    gint yres = priv->field ? priv->field->yres : 1;
+    gdouble hoffset = priv->hadjustment
+                      ? gtk_adjustment_get_value(priv->hadjustment)
+                      : 0.0;
+    gdouble voffset = priv->vadjustment
+                      ? gtk_adjustment_get_value(priv->vadjustment)
+                      : 0.0;
+
+    *irect = (cairo_rectangle_int_t){ 0, 0, width, height };
+
+    if (priv->zoom) {
+        gdouble xzoom = (gdouble)xres/full_width,
+                yzoom = (gdouble)yres/full_height;
+
+        frect->x = hoffset*xzoom;
+        frect->width = width*xzoom;
+        frect->y = voffset*yzoom;
+        frect->height = height*yzoom;
+        // If we got outside the data first try to fix the adjustments and if
+        // this does not help add padding.
+        if (frect->x + frect->width > xres) {
+            if (frect->x + frect->width - xres < 1e-6)
+                frect->width = xres - frect->x;
+            else if (frect->width <= xres)
+                frect->x = xres - frect->width;
+            else {
+                irect->width = full_width;
+                irect->x = (width - irect->width)/2;
+                frect->width = xres;
+                frect->x = 0.0;
+            }
+        }
+        if (frect->y + frect->height > yres) {
+            if (frect->y + frect->height - yres < 1e-6)
+                frect->height = yres - frect->y;
+            else if (frect->height <= yres)
+                frect->y = yres - frect->height;
+            else {
+                irect->height = full_height;
+                irect->y = (height - irect->height)/2;
+                frect->height = yres;
+                frect->y = 0.0;
+            }
+        }
+    }
+    else {
+        // Scale to fit within the rectangle given to us but keeping the
+        // aspect ratio.
+        gdouble xscale = (gdouble)width/full_width,
+                yscale = (gdouble)height/full_height;
+
+        *frect = (cairo_rectangle_t){ 0, 0, xres, yres };
+        if (xscale <= yscale) {
+            irect->height = gwy_round(yscale * yres);
+            irect->height = CLAMP(irect->height, 1, height);
+            irect->y = (height - irect->height)/2;
+        }
+        else {
+            irect->width = gwy_round(xscale * xres);
+            irect->width = CLAMP(irect->width, 1, width);
+            irect->x = (width - irect->width)/2;
+        }
+    }
+}
+
+static void
 ensure_image(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_rectangle_t *frect = &priv->field_rectangle;
 
     if (priv->image_valid)
         return;
@@ -447,51 +528,22 @@ ensure_image(GwyRasterView *rasterview)
     GwyField *field = priv->field;
     g_return_if_fail(field);
 
-    GtkWidget *widget = GTK_WIDGET(rasterview);
-    guint width = gtk_widget_get_allocated_width(widget);
-    guint height = gtk_widget_get_allocated_height(widget);
+    calculate_position_and_size(rasterview);
 
+    // FIXME: If zoom is fixed and the area given to us is larger than data
+    // the surface can be kept!
     if (!priv->surface
-        || (guint)cairo_image_surface_get_width(priv->surface) != width
-        || (guint)cairo_image_surface_get_height(priv->surface) != height) {
+        || cairo_image_surface_get_width(priv->surface) != irect->width
+        || cairo_image_surface_get_height(priv->surface) != irect->height) {
         destroy_surface(rasterview);
-        guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
-        guchar *data = g_new(guchar, stride*height);
+        guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,
+                                                     irect->width);
+        guchar *data = g_new(guchar, stride*irect->height);
         priv->surface = cairo_image_surface_create_for_data(data,
                                                             CAIRO_FORMAT_RGB24,
-                                                            width, height,
+                                                            irect->width,
+                                                            irect->height,
                                                             stride);
-    }
-
-    guint full_width = calculate_full_width(rasterview);
-    guint full_height = calculate_full_height(rasterview);
-    g_printerr("ensure_image, zoom = %g, size = (%u, %u), full_size = (%u, %u)\n",
-               priv->zoom, width, height, full_width, full_height);
-
-    gdouble xfrom = 0.0, yfrom = 0.0, xto, yto;
-
-    if (priv->hadjustment) {
-        gdouble offset = gtk_adjustment_get_value(priv->hadjustment);
-        g_printerr("Have adjustment, value = %g\n", offset);
-        xfrom = offset * field->xres/full_width;
-        xto = xfrom + (gdouble)width * field->xres/full_width;
-        // FIXME: is this right with zoom = 0?
-    }
-    else {
-        // FIXME
-        xto = field->xres;
-    }
-
-    if (priv->vadjustment) {
-        gdouble offset = gtk_adjustment_get_value(priv->vadjustment);
-        g_printerr("Have vdjustment, value = %g\n", offset);
-        yfrom = offset * field->yres/full_height;
-        yto = yfrom + (gdouble)height * field->xres/full_width;
-        // FIXME: is this right with zoom = 0?
-    }
-    else {
-        // FIXME
-        yto = field->yres;
     }
 
     gdouble min, max;
@@ -501,10 +553,7 @@ ensure_image(GwyRasterView *rasterview)
                              ? priv->gradient
                              : gwy_gradients_get(NULL));
 
-    g_printerr("(%g, %g) to (%g, %g)\n", xfrom, yfrom, xto, yto);
-    gwy_field_render_cairo(field, priv->surface, gradient,
-                           xfrom, yfrom, xto, yto,
-                           min, max);
+    gwy_field_render_cairo(field, priv->surface, gradient, frect, min, max);
     priv->image_valid = TRUE;
 }
 
@@ -513,14 +562,17 @@ gwy_raster_view_draw(GtkWidget *widget,
                      cairo_t *cr)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    RasterView *priv = rasterview->priv;
 
-    if (!rasterview->priv->field)
+    if (!priv->field)
         return FALSE;
 
     //GtkStyleContext *context = gtk_widget_get_style_context(widget);
     ensure_image(rasterview);
 
-    cairo_set_source_surface(cr, rasterview->priv->surface, 0, 0);
+    cairo_set_source_surface(cr, priv->surface,
+                             priv->image_rectangle.x,
+                             priv->image_rectangle.y);
     cairo_paint(cr);
 
     return FALSE;
