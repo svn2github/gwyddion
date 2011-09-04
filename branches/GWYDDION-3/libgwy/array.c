@@ -135,16 +135,16 @@ gwy_array_class_init(GwyArrayClass *klass)
 static void
 gwy_array_init(GwyArray *array)
 {
-    array->priv =  G_TYPE_INSTANCE_GET_PRIVATE(array, GWY_TYPE_ARRAY, Array);
+    array->priv = G_TYPE_INSTANCE_GET_PRIVATE(array, GWY_TYPE_ARRAY, Array);
 }
 
 static void
 gwy_array_finalize(GObject *object)
 {
-    Array *array = GWY_ARRAY(object)->priv;
+    Array *priv = GWY_ARRAY(object)->priv;
 
-    if (array->items)
-        g_array_free(array->items, TRUE);
+    if (priv->items)
+        g_array_free(priv->items, TRUE);
 
     G_OBJECT_CLASS(gwy_array_parent_class)->finalize(object);
 }
@@ -152,13 +152,13 @@ gwy_array_finalize(GObject *object)
 static void
 gwy_array_dispose(GObject *object)
 {
-    Array *array = GWY_ARRAY(object)->priv;
+    Array *priv = GWY_ARRAY(object)->priv;
 
     // Destroy items in dispose() because they may contain pointers to objects.
-    if (array->items && array->items->len && array->destroy) {
-        GArray *items = array->items;
+    if (priv->items && priv->items->len && priv->destroy) {
+        GArray *items = priv->items;
         while (items->len) {
-            array->destroy(gwy_array_index(array, items->len - 1));
+            priv->destroy(gwy_array_index(priv, items->len - 1));
             items->len--;
         }
     }
@@ -167,10 +167,10 @@ gwy_array_dispose(GObject *object)
 }
 
 static inline void
-ensure_items(Array *array)
+ensure_items(Array *priv)
 {
-    if (G_UNLIKELY(!array->items))
-        array->items = g_array_new(FALSE, FALSE, array->size);
+    if (G_UNLIKELY(!priv->items))
+        priv->items = g_array_new(FALSE, FALSE, priv->size);
 }
 
 /**

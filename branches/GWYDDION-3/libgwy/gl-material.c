@@ -144,37 +144,37 @@ gwy_gl_material_itemize(GwySerializable *serializable,
 {
 
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(serializable);
-    Material *material = gl_material->priv;
+    Material *priv = gl_material->priv;
     GwySerializableItem it;
 
     // Our own data
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[0];
-    it.value.v_boxed = &material->ambient;
+    it.value.v_boxed = &priv->ambient;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[1];
-    it.value.v_boxed = &material->diffuse;
+    it.value.v_boxed = &priv->diffuse;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[2];
-    it.value.v_boxed = &material->specular;
+    it.value.v_boxed = &priv->specular;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[3];
-    it.value.v_boxed = &material->emission;
+    it.value.v_boxed = &priv->emission;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[4];
-    it.value.v_double = material->shininess;
+    it.value.v_double = priv->shininess;
     items->items[items->n++] = it;
 
     return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
@@ -204,18 +204,18 @@ gwy_gl_material_construct(GwySerializable *serializable,
 
     // Our own data
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(serializable);
-    Material *material = gl_material->priv;
+    Material *priv = gl_material->priv;
     const GwyRGBA *color;
 
     if ((color = its[0].value.v_boxed))
-        material->ambient = *color;
+        priv->ambient = *color;
     if ((color = its[1].value.v_boxed))
-        material->diffuse = *color;
+        priv->diffuse = *color;
     if ((color = its[2].value.v_boxed))
-        material->specular = *color;
+        priv->specular = *color;
     if ((color = its[3].value.v_boxed))
-        material->emission = *color;
-    material->shininess = its[4].value.v_double;
+        priv->emission = *color;
+    priv->shininess = its[4].value.v_double;
 
     gwy_gl_material_sanitize(gl_material);
 
@@ -272,13 +272,13 @@ gwy_gl_material_copy(GwyResource *resource)
 static void
 gwy_gl_material_sanitize(GwyGLMaterial *gl_material)
 {
-    Material *material = gl_material->priv;
+    Material *priv = gl_material->priv;
 
-    gwy_rgba_fix(&material->ambient);
-    gwy_rgba_fix(&material->diffuse);
-    gwy_rgba_fix(&material->specular);
-    gwy_rgba_fix(&material->emission);
-    material->shininess = CLAMP(material->shininess, 0.0, 1.0);
+    gwy_rgba_fix(&priv->ambient);
+    gwy_rgba_fix(&priv->diffuse);
+    gwy_rgba_fix(&priv->specular);
+    gwy_rgba_fix(&priv->emission);
+    priv->shininess = CLAMP(priv->shininess, 0.0, 1.0);
 }
 
 static gboolean
@@ -565,16 +565,16 @@ static gchar*
 gwy_gl_material_dump(GwyResource *resource)
 {
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(resource);
-    Material *material = gl_material->priv;
+    Material *priv = gl_material->priv;
     gchar *amb, *dif, *spec, *emi;
 
-    amb = gwy_resource_dump_data_line((gdouble*)&material->ambient, 4);
-    dif = gwy_resource_dump_data_line((gdouble*)&material->diffuse, 4);
-    spec = gwy_resource_dump_data_line((gdouble*)&material->specular, 4);
-    emi = gwy_resource_dump_data_line((gdouble*)&material->emission, 4);
+    amb = gwy_resource_dump_data_line((gdouble*)&priv->ambient, 4);
+    dif = gwy_resource_dump_data_line((gdouble*)&priv->diffuse, 4);
+    spec = gwy_resource_dump_data_line((gdouble*)&priv->specular, 4);
+    emi = gwy_resource_dump_data_line((gdouble*)&priv->emission, 4);
 
     gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
-    g_ascii_formatd(buffer, sizeof(buffer), "%g", material->shininess);
+    g_ascii_formatd(buffer, sizeof(buffer), "%g", priv->shininess);
 
     gchar *retval = g_strjoin("\n", amb, dif, spec, emi, buffer, "", NULL);
     g_free(amb);

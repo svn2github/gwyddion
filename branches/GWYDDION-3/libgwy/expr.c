@@ -277,18 +277,18 @@ gwy_expr_init(GwyExpr *expr)
 static void
 gwy_expr_finalize(GObject *object)
 {
-    Expr *expr = GWY_EXPR(object)->priv;
+    Expr *priv = GWY_EXPR(object)->priv;
 
-    token_list_delete(expr->tokens);
-    if (expr->identifiers)
-        g_ptr_array_free(expr->identifiers, TRUE);
-    if (expr->scanner)
-        g_scanner_destroy(expr->scanner);
-    if (expr->constants)
-        g_hash_table_destroy(expr->constants);
-    g_string_free(expr->expr, TRUE);
-    g_free(expr->input);
-    g_free(expr->stack);
+    token_list_delete(priv->tokens);
+    if (priv->identifiers)
+        g_ptr_array_free(priv->identifiers, TRUE);
+    if (priv->scanner)
+        g_scanner_destroy(priv->scanner);
+    if (priv->constants)
+        g_hash_table_destroy(priv->constants);
+    g_string_free(priv->expr, TRUE);
+    g_free(priv->input);
+    g_free(priv->stack);
 
     G_OBJECT_CLASS(gwy_expr_parent_class)->finalize(object);
 }
@@ -340,33 +340,33 @@ gwy_expr_error_quark(void)
  * interpret_stack:
  * @expr: An expression.
  *
- * Runs code in @expr->input, at the end, result is in @expr->stack[0].
+ * Runs code in @priv->input, at the end, result is in @priv->stack[0].
  *
  * No checking is done, use stack_is_executable() beforehand.
  **/
 static inline void
-interpret_stack(Expr *expr)
+interpret_stack(Expr *priv)
 {
     guint i;
 
-    expr->sp = expr->stack - 1;
-    for (i = 0; i < expr->in; i++) {
-        const GwyExprCode *code = expr->input + i;
+    priv->sp = priv->stack - 1;
+    for (i = 0; i < priv->in; i++) {
+        const GwyExprCode *code = priv->input + i;
         const gint type = (gint)code->type;
 
         if (type == GWY_EXPR_CODE_CONSTANT)
-            *(++expr->sp) = code->value;
+            *(++priv->sp) = code->value;
         else if (type > 0) {
-            call_table[type].function(&expr->sp);
+            call_table[type].function(&priv->sp);
         }
         else
-            *(++expr->sp) = expr->variables[-type];
+            *(++priv->sp) = priv->variables[-type];
     }
 }
 
 /**
  * interpret_stack_vectors:
- * @expr: An expression.
+ * @priv: An expression.
  * @n: Lenght of @result and of @data member arrays, that is vector length.
  * @data: Array of arrays, each of length @n.  The arrays correspond to
  *        individual expression variables in gwy_expr_execute().  The zeroth
@@ -379,7 +379,7 @@ interpret_stack(Expr *expr)
  * No checking is done, use stack_is_executable() beforehand.
  **/
 static inline void
-interpret_stack_vectors(Expr *expr,
+interpret_stack_vectors(Expr *priv,
                         guint n,
                         const gdouble **data,
                         gdouble *result)
@@ -387,45 +387,45 @@ interpret_stack_vectors(Expr *expr,
     guint i, j;
 
     for (j = 0; j < n; j++) {
-        expr->sp = expr->stack - 1;
-        for (i = 0; i < expr->in; i++) {
-            const GwyExprCode *code = expr->input + i;
+        priv->sp = priv->stack - 1;
+        for (i = 0; i < priv->in; i++) {
+            const GwyExprCode *code = priv->input + i;
             const gint type = (gint)code->type;
 
             if (type == GWY_EXPR_CODE_CONSTANT)
-                *(++expr->sp) = code->value;
+                *(++priv->sp) = code->value;
             else if (type > 0)
-                call_table[type].function(&expr->sp);
+                call_table[type].function(&priv->sp);
             else
-                *(++expr->sp) = data[-type][j];
+                *(++priv->sp) = data[-type][j];
         }
-        result[j] = expr->stack[0];
+        result[j] = priv->stack[0];
     }
 }
 
 /**
  * stack_is_executable:
- * @expr: An expression.
+ * @priv: An expression.
  *
  * Checks whether a stack is executable and assures it's large enough.
  *
  * Returns: %TRUE if stack is executable, %FALSE if it isn't.
  **/
 static gboolean
-stack_is_executable(Expr *expr)
+stack_is_executable(Expr *priv)
 {
     guint i;
     gint nval, max;
 
     nval = max = 0;
-    for (i = 0; i < expr->in; i++) {
-        if (expr->input[i].type == GWY_EXPR_CODE_CONSTANT
-            || (gint)expr->input[i].type < 0) {
+    for (i = 0; i < priv->in; i++) {
+        if (priv->input[i].type == GWY_EXPR_CODE_CONSTANT
+            || (gint)priv->input[i].type < 0) {
             nval++;
         }
-        else if (expr->input[i].type > 0) {
-            nval -= call_table[expr->input[i].type].in_values;
-            nval += call_table[expr->input[i].type].out_values;
+        else if (priv->input[i].type > 0) {
+            nval -= call_table[priv->input[i].type].in_values;
+            nval += call_table[priv->input[i].type].out_values;
             if (nval <= 0)
                 return FALSE;
         }
@@ -435,30 +435,30 @@ stack_is_executable(Expr *expr)
     if (nval != 1)
         return FALSE;
 
-    if ((gint)expr->slen < max) {
-        expr->slen = max;
-        expr->stack = g_renew(gdouble, expr->stack, expr->slen);
+    if ((gint)priv->slen < max) {
+        priv->slen = max;
+        priv->stack = g_renew(gdouble, priv->stack, priv->slen);
     }
 
     return TRUE;
 }
 
 G_GNUC_UNUSED static void
-print_stack(Expr *expr)
+print_stack(Expr *priv)
 {
     guint i;
     GwyExprCode *code;
 
-    g_printerr("expr->in = %d\n", expr->in);
-    for (i = 0; i < expr->in; i++) {
-        code = expr->input + i;
+    g_printerr("priv->in = %d\n", priv->in);
+    for (i = 0; i < priv->in; i++) {
+        code = priv->input + i;
         if ((gint)code->type > 0) {
             g_print("#%u Function %s\n",
                     i, call_table[code->type].name);
         }
         else if ((gint)code->type < 0) {
             g_print("#%u Argument %s\n",
-                    i, (gchar*)g_ptr_array_index(expr->identifiers,
+                    i, (gchar*)g_ptr_array_index(priv->identifiers,
                                                  -(gint)code->type));
         }
         else
@@ -469,7 +469,7 @@ print_stack(Expr *expr)
 
 /**
  * fold_constants:
- * @expr: An expression.
+ * @priv: An expression.
  *
  * Folds foldable constants in compiled op code representation.
  *
@@ -483,15 +483,15 @@ print_stack(Expr *expr)
  * Better than nothing.
  **/
 static void
-fold_constants(Expr *expr)
+fold_constants(Expr *priv)
 {
     guint from, to;
     gint last_constants = 0;
 
-    for (from = to = 0; from < expr->in; from++, to++) {
-        GwyExprCode *code = expr->input + from;
+    for (from = to = 0; from < priv->in; from++, to++) {
+        GwyExprCode *code = priv->input + from;
 
-        expr->input[to] = expr->input[from];
+        priv->input[to] = priv->input[from];
         if (code->type == GWY_EXPR_CODE_CONSTANT)
             last_constants++;
         else if ((gint)code->type < 0)
@@ -503,7 +503,7 @@ fold_constants(Expr *expr)
                 gdouble tmp[GWY_EXPR_FUNC_MAX_ARGS];
 
                 for (guint i = 0; i < (guint)func->in_values; i++)
-                    tmp[i] = expr->input[to + i - func->in_values].value;
+                    tmp[i] = priv->input[to + i - func->in_values].value;
 
                 gdouble *sp = tmp + func->in_values - 1;
                 func->function(&sp);
@@ -514,7 +514,7 @@ fold_constants(Expr *expr)
                 to -= func->in_values;
 
                 for (guint i = 0; i < (guint)func->out_values; i++) {
-                    code = expr->input + to - func->out_values + i;
+                    code = priv->input + to - func->out_values + i;
                     code->value = tmp[0];
                     code->type = GWY_EXPR_CODE_CONSTANT;
                 }
@@ -524,7 +524,7 @@ fold_constants(Expr *expr)
                 last_constants = 0;
         }
     }
-    expr->in = to;
+    priv->in = to;
 }
 
 /****************************************************************************
@@ -747,28 +747,28 @@ token_list_delete(GwyExprToken *tokens)
 
 /**
  * scan_tokens:
- * @expr: An expression.
+ * @priv: An expression.
  * @err: Location to store scanning error to.
  *
- * Scans input to tokens, filling @expr->tokens.
+ * Scans input to tokens, filling @priv->tokens.
  *
  * Returns: %TRUE on success, %FALSE if parsing failed.
  **/
 static gboolean
-scan_tokens(Expr *expr,
+scan_tokens(Expr *priv,
             GError **err)
 {
     GScanner *scanner;
     GwyExprToken *tokens = NULL, *t;
     GTokenType token;
 
-    if (expr->tokens) {
+    if (priv->tokens) {
         g_warning("Token list residua from last run");
-        token_list_delete(expr->tokens);
-        expr->tokens = NULL;
+        token_list_delete(priv->tokens);
+        priv->tokens = NULL;
     }
 
-    scanner = expr->scanner;
+    scanner = priv->scanner;
     while ((token = g_scanner_get_next_token(scanner))) {
         switch ((gint)token) {
             case G_TOKEN_LEFT_PAREN:
@@ -785,14 +785,14 @@ scan_tokens(Expr *expr,
             case G_TOKEN_SYMBOL:
             t = gwy_expr_token_new0();
             t->token = token;
-            t->value = expr->scanner->value;
+            t->value = priv->scanner->value;
             tokens = token_list_prepend(tokens, t);
             break;
 
             case G_TOKEN_IDENTIFIER:
             t = gwy_expr_token_new0();
             t->token = token;
-            t->value.v_string = expr->scanner->value.v_string;
+            t->value.v_string = priv->scanner->value.v_string;
             tokens = token_list_prepend(tokens, t);
             /* Steal the string from GScanner */
             scanner->value.v_string = NULL;
@@ -814,25 +814,25 @@ scan_tokens(Expr *expr,
         return FALSE;
     }
 
-    expr->tokens = token_list_reverse(tokens);
+    priv->tokens = token_list_reverse(tokens);
     return TRUE;
 }
 
 /**
  * rectify_token_list:
- * @expr: An expression.
+ * @priv: An expression.
  *
- * Converts some human-style notations in @expr->tokens to stricter ones.
+ * Converts some human-style notations in @priv->tokens to stricter ones.
  *
  * Namely it: Removes unary +, changes unary - to ~ operator, adds
  * multiplication operators between adjacent values, converts ~ to operator.
  **/
 static void
-rectify_token_list(Expr *expr)
+rectify_token_list(Expr *priv)
 {
     GwyExprToken *t, *prev;
 
-    for (t = expr->tokens; t; ) {
+    for (t = priv->tokens; t; ) {
         prev = t->prev;
 
         switch (t->token) {
@@ -854,7 +854,7 @@ rectify_token_list(Expr *expr)
                           && prev->token != G_TOKEN_RIGHT_PAREN)) {
                 prev = t;
                 t = t->next;
-                expr->tokens = token_list_delete_token(expr->tokens, prev);
+                priv->tokens = token_list_delete_token(priv->tokens, prev);
             }
             else
                 t = t->next;
@@ -870,7 +870,7 @@ rectify_token_list(Expr *expr)
                          || prev->token == G_TOKEN_IDENTIFIER)) {
                 prev = gwy_expr_token_new0();
                 prev->token = '*';
-                expr->tokens = token_list_insert(expr->tokens, t, prev);
+                priv->tokens = token_list_insert(priv->tokens, t, prev);
             }
             t = t->next;
             break;
@@ -890,51 +890,51 @@ rectify_token_list(Expr *expr)
 
 /**
  * initialize_scanner:
- * @expr: An expression evaluator.
+ * @priv: An expression evaluator.
  *
  * Initialises scanner, configuring it and setting up function symbol table.
  **/
 static void
-initialize_scanner(Expr *expr)
+initialize_scanner(Expr *priv)
 {
     guint i;
 
-    if (expr->scanner)
+    if (priv->scanner)
         return;
 
-    expr->scanner = g_scanner_new(&scanner_config);
+    priv->scanner = g_scanner_new(&scanner_config);
 
     for (i = 1; i < G_N_ELEMENTS(call_table); i++) {
         if (!call_table[i].name || !g_ascii_isalpha(call_table[i].name[0]))
             continue;
-        g_scanner_scope_add_symbol(expr->scanner, GWY_EXPR_SCOPE_GLOBAL,
+        g_scanner_scope_add_symbol(priv->scanner, GWY_EXPR_SCOPE_GLOBAL,
                                    call_table[i].name, GUINT_TO_POINTER(i));
     }
-    g_scanner_set_scope(expr->scanner, GWY_EXPR_SCOPE_GLOBAL);
-    expr->scanner->input_name = "expression";
+    g_scanner_set_scope(priv->scanner, GWY_EXPR_SCOPE_GLOBAL);
+    priv->scanner->input_name = "expression";
 }
 
 /**
  * parse_expr:
- * @expr: An expression.
+ * @priv: An expression.
  * @err: Location to store parsing error to
  *
- * Parses an expression to list of tokens, filling @expr->tokens.
+ * Parses an expression to list of tokens, filling @priv->tokens.
  *
  * Returns: A newly allocated token list, %NULL on failure.
  **/
 static gboolean
-parse_expr(Expr *expr,
+parse_expr(Expr *priv,
            GError **err)
 {
-    initialize_scanner(expr);
-    g_scanner_input_text(expr->scanner, expr->expr->str, expr->expr->len);
+    initialize_scanner(priv);
+    g_scanner_input_text(priv->scanner, priv->expr->str, priv->expr->len);
 
-    if (!scan_tokens(expr, err)) {
+    if (!scan_tokens(priv, err)) {
         g_assert(!err || *err);
         return FALSE;
     }
-    rectify_token_list(expr);
+    rectify_token_list(priv);
 
     return TRUE;
 }
@@ -959,7 +959,7 @@ identifier_name_is_valid(const gchar *name)
 
 /**
  * transform_values:
- * @expr: An expression.
+ * @priv: An expression.
  * @err: Location to store error to, or %NULL.
  *
  * Converts constants to single-items RPN lists and indexes identifiers.
@@ -967,12 +967,12 @@ identifier_name_is_valid(const gchar *name)
  * %G_TOKEN_IDENTIFIER strings are freed, they are converted to single-item
  * RPN lists too, with type as minus index in returned array of name.
  *
- * Modifies @expr->tokens and fills @expr->identifiers.
+ * Modifies @priv->tokens and fills @priv->identifiers.
  *
  * Returns: %TRUE on success, %FALSE if transformation failed.
  **/
 static gboolean
-transform_values(Expr *expr,
+transform_values(Expr *priv,
                  GError **err)
 {
     GwyExprToken *code, *t;
@@ -980,15 +980,15 @@ transform_values(Expr *expr,
     gdouble *cval;
     guint i;
 
-    if (!expr->identifiers) {
-        expr->identifiers = g_ptr_array_new_with_free_func(g_free);
+    if (!priv->identifiers) {
+        priv->identifiers = g_ptr_array_new_with_free_func(g_free);
         /* pos 0 is always unused */
-        g_ptr_array_add(expr->identifiers, NULL);
+        g_ptr_array_add(priv->identifiers, NULL);
     }
     else
-        g_ptr_array_set_size(expr->identifiers, 1);
+        g_ptr_array_set_size(priv->identifiers, 1);
 
-    for (t = expr->tokens; t; t = t->next) {
+    for (t = priv->tokens; t; t = t->next) {
         if (t->token == G_TOKEN_FLOAT) {
             code = gwy_expr_token_new0();
             code->token = GWY_EXPR_CODE_CONSTANT;
@@ -1003,14 +1003,14 @@ transform_values(Expr *expr,
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME,
                         _("Invalid identifier name %s."),
                         t->value.v_identifier);
-            token_list_delete(expr->tokens);
-            expr->tokens = NULL;
+            token_list_delete(priv->tokens);
+            priv->tokens = NULL;
             return FALSE;
         }
 
-        if (expr->constants) {
+        if (priv->constants) {
             if ((quark = g_quark_try_string(t->value.v_identifier))
-                && (cval = g_hash_table_lookup(expr->constants,
+                && (cval = g_hash_table_lookup(priv->constants,
                                                GUINT_TO_POINTER(quark)))) {
                 g_free(t->value.v_identifier);
                 code = gwy_expr_token_new0();
@@ -1020,15 +1020,15 @@ transform_values(Expr *expr,
                 continue;
             }
         }
-        for (i = 1; i < expr->identifiers->len; i++) {
+        for (i = 1; i < priv->identifiers->len; i++) {
             if (gwy_strequal(t->value.v_identifier,
-                             g_ptr_array_index(expr->identifiers, i))) {
+                             g_ptr_array_index(priv->identifiers, i))) {
                 g_free(t->value.v_identifier);
                 break;
             }
         }
-        if (i == expr->identifiers->len)
-            g_ptr_array_add(expr->identifiers, t->value.v_identifier);
+        if (i == priv->identifiers->len)
+            g_ptr_array_add(priv->identifiers, t->value.v_identifier);
         code = gwy_expr_token_new0();
         code->token = -i;
         t->rpn_block = token_list_prepend(t->rpn_block, code);
@@ -1165,7 +1165,7 @@ transform_functions(GwyExprToken *tokens,
 
 /**
  * transform_to_rpn_real:
- * @expr: An expression.
+ * @priv: An expression.
  * @tokens: A parenthesized list of tokens.
  * @err: Location to store conversion error to
  *
@@ -1174,7 +1174,7 @@ transform_functions(GwyExprToken *tokens,
  * Returns: Converted @tokens (it's changed in place), %NULL on failure.
  **/
 static GwyExprToken*
-transform_to_rpn_real(Expr *expr,
+transform_to_rpn_real(Expr *priv,
                       GwyExprToken *tokens,
                       GError **err)
 {
@@ -1224,7 +1224,7 @@ transform_to_rpn_real(Expr *expr,
             else
                 t = tokens = NULL;
             subblock->prev = NULL;
-            subblock = transform_to_rpn_real(expr, subblock, err);
+            subblock = transform_to_rpn_real(priv, subblock, err);
             if (!subblock) {
                 g_assert(!err || *err);
                 goto FAIL;
@@ -1311,19 +1311,19 @@ FAIL:
 
 /**
  * transform_to_rpn:
- * @expr: An expression.
+ * @priv: An expression.
  * @err: Location to store conversion error to.
  *
  * Converts list of tokens from parser to RPN stack.
  *
- * @expr->tokens is destroyed by the conversion and set to %NULL,
- * @expr->input is filled with opcodes, stack is checked for executability
+ * @priv->tokens is destroyed by the conversion and set to %NULL,
+ * @priv->input is filled with opcodes, stack is checked for executability
  * and eventually resized.
  *
  * Returns: A newly created RPN stack, %NULL on failure.
  **/
 static gboolean
-transform_to_rpn(Expr *expr,
+transform_to_rpn(Expr *priv,
                  GError **err)
 {
     GwyExprToken *t;
@@ -1332,38 +1332,38 @@ transform_to_rpn(Expr *expr,
     /* parenthesize token list */
     t = gwy_expr_token_new0();
     t->token = G_TOKEN_RIGHT_PAREN;
-    expr->tokens = token_list_concat(expr->tokens, t);
+    priv->tokens = token_list_concat(priv->tokens, t);
     t = gwy_expr_token_new0();
     t->token = G_TOKEN_LEFT_PAREN;
-    expr->tokens = token_list_prepend(expr->tokens, t);
+    priv->tokens = token_list_prepend(priv->tokens, t);
 
-    expr->tokens = transform_to_rpn_real(expr, expr->tokens, err);
-    if (!expr->tokens) {
+    priv->tokens = transform_to_rpn_real(priv, priv->tokens, err);
+    if (!priv->tokens) {
         g_assert(!err || *err);
         return FALSE;
     }
 
-    if (expr->tokens->next) {
+    if (priv->tokens->next) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_GARBAGE,
                     _("Expression contains trailing garbage."));
-        token_list_delete(expr->tokens);
-        expr->tokens = NULL;
+        token_list_delete(priv->tokens);
+        priv->tokens = NULL;
         return FALSE;
     }
 
-    expr->in = token_list_length(expr->tokens->rpn_block);
-    if (expr->in > expr->ilen) {
-        expr->ilen = expr->in;
-        expr->input = g_renew(GwyExprCode, expr->input, expr->ilen);
+    priv->in = token_list_length(priv->tokens->rpn_block);
+    if (priv->in > priv->ilen) {
+        priv->ilen = priv->in;
+        priv->input = g_renew(GwyExprCode, priv->input, priv->ilen);
     }
-    for (t = expr->tokens->rpn_block, i = 0; t; t = t->next, i++) {
-        expr->input[i].type = t->token;
-        expr->input[i].value = t->value.v_float;
+    for (t = priv->tokens->rpn_block, i = 0; t; t = t->next, i++) {
+        priv->input[i].type = t->token;
+        priv->input[i].value = t->value.v_float;
     }
-    token_list_delete(expr->tokens);
-    expr->tokens = NULL;
+    token_list_delete(priv->tokens);
+    priv->tokens = NULL;
 
-    if (!stack_is_executable(expr)) {
+    if (!stack_is_executable(priv)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_NOT_EXECUTABLE,
                    _("Expression is not executable."));
         return FALSE;
@@ -1379,14 +1379,14 @@ free_double(void *pointer)
 }
 
 static void
-ensure_constants(Expr *expr)
+ensure_constants(Expr *priv)
 {
-    if (expr->constants)
+    if (priv->constants)
         return;
 
     /* We could also put constants into scanner's symbol table, but then
      * we have to tell them apart when we get some symbol from scanner. */
-    expr->constants = g_hash_table_new_full(g_direct_hash, g_direct_equal,
+    priv->constants = g_hash_table_new_full(g_direct_hash, g_direct_equal,
                                             NULL, free_double);
 }
 
