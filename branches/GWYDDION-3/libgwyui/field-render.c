@@ -160,23 +160,17 @@ field_render_empty_range(GdkPixbuf *pixbuf,
 
 static gboolean
 check_field_rectangle(const cairo_rectangle_t *rectangle,
-                      const GwyField *field,
+                      guint xres, guint yres,
                       gdouble *xfrom, gdouble *yfrom,
                       gdouble *xto, gdouble *yto)
 {
     if (rectangle) {
-        g_return_val_if_fail(rectangle->x >= 0.0 && rectangle->x < field->xres,
-                             FALSE);
-        g_return_val_if_fail(rectangle->width > 0.0,
-                             FALSE);
-        g_return_val_if_fail(rectangle->x + rectangle->width <= field->xres,
-                             FALSE);
-        g_return_val_if_fail(rectangle->y >= 0.0 && rectangle->y < field->yres,
-                             FALSE);
-        g_return_val_if_fail(rectangle->height > 0.0,
-                             FALSE);
-        g_return_val_if_fail(rectangle->y + rectangle->height <= field->yres,
-                             FALSE);
+        g_return_val_if_fail(rectangle->x >= 0.0 && rectangle->x < xres, FALSE);
+        g_return_val_if_fail(rectangle->width > 0.0, FALSE);
+        g_return_val_if_fail(rectangle->x + rectangle->width <= xres, FALSE);
+        g_return_val_if_fail(rectangle->y >= 0.0 && rectangle->y < yres, FALSE);
+        g_return_val_if_fail(rectangle->height > 0.0, FALSE);
+        g_return_val_if_fail(rectangle->y + rectangle->height <= yres, FALSE);
         *xfrom = rectangle->x;
         *xto = rectangle->x + rectangle->width;
         *yfrom = rectangle->y;
@@ -184,8 +178,8 @@ check_field_rectangle(const cairo_rectangle_t *rectangle,
     }
     else {
         *xfrom = *yfrom = 0.0;
-        *xto = field->xres;
-        *yto = field->yres;
+        *xto = xres;
+        *yto = yres;
     }
     return TRUE;
 }
@@ -220,7 +214,8 @@ gwy_field_render_pixbuf(const GwyField *field,
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
 
     gdouble xfrom, xto, yfrom, yto;
-    if (!check_field_rectangle(rectangle, field, &xfrom, &yfrom, &xto, &yto))
+    if (!check_field_rectangle(rectangle, field->xres, field->yres,
+                               &xfrom, &yfrom, &xto, &yto))
         return;
 
     if (min == max) {
@@ -305,7 +300,8 @@ gwy_field_render_cairo(const GwyField *field,
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
 
     gdouble xfrom, xto, yfrom, yto;
-    if (!check_field_rectangle(rectangle, field, &xfrom, &yfrom, &xto, &yto))
+    if (!check_field_rectangle(rectangle, field->xres, field->yres,
+                               &xfrom, &yfrom, &xto, &yto))
         return;
 
     if (min == max) {
