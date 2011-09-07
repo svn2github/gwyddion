@@ -21,6 +21,7 @@
 #define __LIBGWYUI_RASTER_VIEW_H__
 
 #include <gtk/gtk.h>
+#include <libgwy/mask-field.h>
 #include <libgwy/field.h>
 #include <libgwy/gradient.h>
 
@@ -52,14 +53,20 @@ struct _GwyRasterViewClass {
     GtkWidgetClass widget_class;
 };
 
-GType        gwy_raster_view_get_type    (void)                       G_GNUC_CONST;
-GtkWidget*   gwy_raster_view_new         (void)                       G_GNUC_MALLOC;
-void         gwy_raster_view_set_field   (GwyRasterView *rasterview,
-                                          GwyField *field);
-GwyField*    gwy_raster_view_get_field   (GwyRasterView *rasterview);
-void         gwy_raster_view_set_gradient(GwyRasterView *rasterview,
-                                          GwyGradient *gradient);
-GwyGradient* gwy_raster_view_get_gradient(GwyRasterView *rasterview);
+GType          gwy_raster_view_get_type      (void)                       G_GNUC_CONST;
+GtkWidget*     gwy_raster_view_new           (void)                       G_GNUC_MALLOC;
+void           gwy_raster_view_set_field     (GwyRasterView *rasterview,
+                                              GwyField *field);
+GwyField*      gwy_raster_view_get_field     (GwyRasterView *rasterview);
+void           gwy_raster_view_set_mask      (GwyRasterView *rasterview,
+                                              GwyMaskField *mask);
+GwyMaskField*  gwy_raster_view_get_mask      (GwyRasterView *rasterview);
+void           gwy_raster_view_set_gradient  (GwyRasterView *rasterview,
+                                              GwyGradient *gradient);
+GwyGradient*   gwy_raster_view_get_gradient  (GwyRasterView *rasterview);
+void           gwy_raster_view_set_mask_color(GwyRasterView *rasterview,
+                                              const GwyRGBA *color);
+const GwyRGBA* gwy_raster_view_get_mask_color(GwyRasterView *rasterview);
 
 G_END_DECLS
 

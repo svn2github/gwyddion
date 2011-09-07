@@ -29,7 +29,9 @@ enum {
     // Own.
     PROP_0,
     PROP_FIELD,
+    PROP_MASK,
     PROP_GRADIENT,
+    PROP_MASK_COLOR,
     PROP_ZOOM,
     PROP_REAL_ASPECT_RATIO,
     N_PROPS,
@@ -60,12 +62,19 @@ struct _GwyRasterViewPrivate {
     gulong field_notify_id;
     gulong field_data_changed_id;
     gdouble field_aspect_ratio;
+    cairo_surface_t *field_surface;
+    gboolean field_surface_valid;
+
+    GwyMaskField *mask;
+    gulong mask_notify_id;
+    gulong mask_data_changed_id;
+    cairo_surface_t *mask_surface;
+    gboolean mask_surface_valid;
 
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
 
-    cairo_surface_t *surface;
-    gboolean image_valid;
+    GwyRGBA mask_color;
 };
 
 typedef struct _GwyRasterViewPrivate RasterView;
@@ -90,17 +99,28 @@ static void     gwy_raster_view_size_allocate       (GtkWidget *widget,
                                                      GtkAllocation *allocation);
 static gboolean gwy_raster_view_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
-static void     destroy_surface                     (GwyRasterView *rasterview);
+static void     destroy_field_surface               (GwyRasterView *rasterview);
+static void     destroy_mask_surface                (GwyRasterView *rasterview);
 static gboolean set_field                           (GwyRasterView *rasterview,
                                                      GwyField *field);
+static gboolean set_mask                            (GwyRasterView *rasterview,
+                                                     GwyMaskField *mask);
 static gboolean set_gradient                        (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
+static gboolean set_mask_color                      (GwyRasterView *rasterview,
+                                                     const GwyRGBA *color);
 static void     field_notify                        (GwyRasterView *rasterview,
+                                                     GParamSpec *pspec,
+                                                     GwyField *field);
+static void     mask_notify                         (GwyRasterView *rasterview,
                                                      GParamSpec *pspec,
                                                      GwyField *field);
 static void     field_data_changed                  (GwyRasterView *rasterview,
                                                      GwyFieldPart *fpart,
                                                      GwyField *field);
+static void     mask_data_changed                   (GwyRasterView *rasterview,
+                                                     GwyFieldPart *fpart,
+                                                     GwyMaskField *mask);
 static void     gradient_data_changed               (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
 static gboolean set_hadjustment                     (GwyRasterView *rasterview,
@@ -116,6 +136,8 @@ static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
                                                      gboolean setting);
 static guint    calculate_full_width                (GwyRasterView *rasterview);
 static guint    calculate_full_height               (GwyRasterView *rasterview);
+
+static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 
 static GParamSpec *raster_view_pspecs[N_PROPS];
 
@@ -147,12 +169,26 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                               GWY_TYPE_FIELD,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    raster_view_pspecs[PROP_MASK]
+        = g_param_spec_object("mask",
+                              "Mask",
+                              "Two-dimensional mask shown over the field.",
+                              GWY_TYPE_MASK_FIELD,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     raster_view_pspecs[PROP_GRADIENT]
         = g_param_spec_object("gradient",
                               "Gradient",
                               "Gradient used for visualisation.",
                               GWY_TYPE_GRADIENT,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    raster_view_pspecs[PROP_MASK_COLOR]
+        = g_param_spec_boxed("mask-color",
+                             "Mask color",
+                             "Colour used for mask visualisation.",
+                             GWY_TYPE_RGBA,
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     raster_view_pspecs[PROP_ZOOM]
         = g_param_spec_double("zoom",
@@ -193,6 +229,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                                                    GWY_TYPE_RASTER_VIEW,
                                                    RasterView);
     rasterview->priv->field_aspect_ratio = 1.0;
+    rasterview->priv->mask_color = mask_color_default;
     gtk_widget_set_has_window(GTK_WIDGET(rasterview), FALSE);
 }
 
@@ -208,10 +245,12 @@ gwy_raster_view_dispose(GObject *object)
     GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
 
     set_field(rasterview, NULL);
+    set_mask(rasterview, NULL);
     set_gradient(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
-    destroy_surface(rasterview);
+    destroy_field_surface(rasterview);
+    destroy_mask_surface(rasterview);
 
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
 }
@@ -229,8 +268,16 @@ gwy_raster_view_set_property(GObject *object,
         set_field(rasterview, g_value_get_object(value));
         break;
 
+        case PROP_MASK:
+        set_mask(rasterview, g_value_get_object(value));
+        break;
+
         case PROP_GRADIENT:
         set_gradient(rasterview, g_value_get_object(value));
+        break;
+
+        case PROP_MASK_COLOR:
+        set_mask_color(rasterview, g_value_get_boxed(value));
         break;
 
         case PROP_ZOOM:
@@ -278,8 +325,16 @@ gwy_raster_view_get_property(GObject *object,
         g_value_set_object(value, rasterview->field);
         break;
 
+        case PROP_MASK:
+        g_value_set_object(value, rasterview->mask);
+        break;
+
         case PROP_GRADIENT:
         g_value_set_object(value, rasterview->gradient);
+        break;
+
+        case PROP_MASK_COLOR:
+        g_value_set_boxed(value, &rasterview->mask_color);
         break;
 
         case PROP_ZOOM:
@@ -332,6 +387,10 @@ gwy_raster_view_new(void)
  *         A two-dimensional data field.
  *
  * Sets the field a raster view will display.
+ *
+ * The raster view conntects to #GwyField::data-changed which is not emitted
+ * automatically so you have to emit it to update the view.  Normally this is
+ * done once after all the modifications of the field data are finished.
  **/
 void
 gwy_raster_view_set_field(GwyRasterView *rasterview,
@@ -343,7 +402,6 @@ gwy_raster_view_set_field(GwyRasterView *rasterview,
 
     g_object_notify_by_pspec(G_OBJECT(rasterview),
                              raster_view_pspecs[PROP_FIELD]);
-    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
 }
 
 /**
@@ -360,6 +418,52 @@ gwy_raster_view_get_field(GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return GWY_RASTER_VIEW(rasterview)->priv->field;
+}
+
+/**
+ * gwy_raster_view_set_mask:
+ * @rasterview: A raster view.
+ * @mask: (allow-none):
+ *         A two-dimensional mask field.
+ *
+ * Sets the mask a raster view will display over the field.
+ *
+ * The mask dimensions must match the field dimensions.  More precisely, the
+ * dimensions must match at the time the raster view is actually drawn so you
+ * can set the field and mask independently if the dimensions will be all right
+ * at the end.
+ *
+ * The raster view conntects to #GwyMaskField::data-changed which is not
+ * emitted automatically so you have to emit it to update the view.  Normally
+ * this is done once after all the modifications of the mask data are
+ * finished.
+ **/
+void
+gwy_raster_view_set_mask(GwyRasterView *rasterview,
+                         GwyMaskField *mask)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    if (!set_mask(rasterview, mask))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterview),
+                             raster_view_pspecs[PROP_MASK]);
+}
+
+/**
+ * gwy_raster_view_get_mask:
+ * @rasterview: A raster view.
+ *
+ * Obtains the mask a raster view displays over the field.
+ *
+ * Returns: (transfer none):
+ *          The mask displayed by @rasterview over the field.
+ **/
+GwyMaskField*
+gwy_raster_view_get_mask(GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return GWY_RASTER_VIEW(rasterview)->priv->mask;
 }
 
 /**
@@ -380,7 +484,6 @@ gwy_raster_view_set_gradient(GwyRasterView *rasterview,
 
     g_object_notify_by_pspec(G_OBJECT(rasterview),
                              raster_view_pspecs[PROP_GRADIENT]);
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
 /**
@@ -397,6 +500,42 @@ gwy_raster_view_get_gradient(GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return GWY_RASTER_VIEW(rasterview)->priv->gradient;
+}
+
+/**
+ * gwy_raster_view_set_mask_color:
+ * @rasterview: A raster view.
+ * @color: A colour.
+ *
+ * Sets the colour a raster view will use for mask visualisation.
+ **/
+void
+gwy_raster_view_set_mask_color(GwyRasterView *rasterview,
+                               const GwyRGBA *color)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(color);
+    if (!set_mask_color(rasterview, color))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterview),
+                             raster_view_pspecs[PROP_MASK_COLOR]);
+}
+
+/**
+ * gwy_raster_view_get_mask_color:
+ * @rasterview: A raster view.
+ *
+ * Obtains the colour used by a raster view for mask visualisation.
+ *
+ * Returns: (transfer none):
+ *          The colour used by @rasterview for mask visualisation.
+ **/
+const GwyRGBA*
+gwy_raster_view_get_mask_color(GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return &GWY_RASTER_VIEW(rasterview)->priv->mask_color;
 }
 
 static void
@@ -432,7 +571,8 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
         return;
 
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    rasterview->priv->image_valid = FALSE;
+    rasterview->priv->field_surface_valid = FALSE;
+    rasterview->priv->mask_surface_valid = FALSE;
 
     set_hadjustment_values(rasterview);
     set_vadjustment_values(rasterview);
@@ -516,34 +656,33 @@ calculate_position_and_size(GwyRasterView *rasterview)
 }
 
 static void
-ensure_image(GwyRasterView *rasterview)
+ensure_field_surface(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
     cairo_rectangle_int_t *irect = &priv->image_rectangle;
     cairo_rectangle_t *frect = &priv->field_rectangle;
 
-    if (priv->image_valid)
+    if (priv->field_surface_valid)
         return;
 
     GwyField *field = priv->field;
     g_return_if_fail(field);
 
-    calculate_position_and_size(rasterview);
-
     // FIXME: If zoom is fixed and the area given to us is larger than data
     // the surface can be kept!
-    if (!priv->surface
-        || cairo_image_surface_get_width(priv->surface) != irect->width
-        || cairo_image_surface_get_height(priv->surface) != irect->height) {
-        destroy_surface(rasterview);
+    cairo_surface_t *surface = priv->field_surface;
+    if (!surface
+        || cairo_image_surface_get_width(surface) != irect->width
+        || cairo_image_surface_get_height(surface) != irect->height) {
+        destroy_field_surface(rasterview);
         guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,
                                                      irect->width);
         guchar *data = g_new(guchar, stride*irect->height);
-        priv->surface = cairo_image_surface_create_for_data(data,
-                                                            CAIRO_FORMAT_RGB24,
-                                                            irect->width,
-                                                            irect->height,
-                                                            stride);
+        surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_RGB24,
+                                                      irect->width,
+                                                      irect->height,
+                                                      stride);
+        priv->field_surface = surface;
     }
 
     gdouble min, max;
@@ -553,8 +692,53 @@ ensure_image(GwyRasterView *rasterview)
                              ? priv->gradient
                              : gwy_gradients_get(NULL));
 
-    gwy_field_render_cairo(field, priv->surface, gradient, frect, min, max);
-    priv->image_valid = TRUE;
+    gwy_field_render_cairo(field, surface, gradient, frect, min, max);
+    priv->field_surface_valid = TRUE;
+}
+
+static void
+ensure_mask_surface(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_rectangle_t *frect = &priv->field_rectangle;
+
+    if (priv->mask_surface_valid)
+        return;
+
+    GwyField *field = priv->field;
+    g_return_if_fail(field);
+
+    GwyMaskField *mask = priv->mask;
+
+    if (!mask)
+        return;
+    if (mask->xres != field->xres || mask->yres != field->yres) {
+        g_warning("Mask dimensions %ux%u differ from field dimensions %ux%u.",
+                  mask->xres, mask->yres, field->xres, field->yres);
+        destroy_mask_surface(rasterview);
+        return;
+    }
+
+    // FIXME: If zoom is fixed and the area given to us is larger than data
+    // the surface can be kept!
+    cairo_surface_t *surface = priv->mask_surface;
+    if (!surface
+        || cairo_image_surface_get_width(surface) != irect->width
+        || cairo_image_surface_get_height(surface) != irect->height) {
+        destroy_mask_surface(rasterview);
+        guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_A8,
+                                                     irect->width);
+        guchar *data = g_new(guchar, stride*irect->height);
+        surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_A8,
+                                                      irect->width,
+                                                      irect->height,
+                                                      stride);
+        priv->mask_surface = surface;
+    }
+
+    gwy_mask_field_render_cairo(mask, surface, frect);
+    priv->mask_surface_valid = TRUE;
 }
 
 static gboolean
@@ -568,27 +752,48 @@ gwy_raster_view_draw(GtkWidget *widget,
         return FALSE;
 
     //GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    ensure_image(rasterview);
+    calculate_position_and_size(rasterview);
+    ensure_field_surface(rasterview);
 
-    cairo_set_source_surface(cr, priv->surface,
-                             priv->image_rectangle.x,
-                             priv->image_rectangle.y);
+    cairo_set_source_surface(cr, priv->field_surface,
+                             priv->image_rectangle.x, priv->image_rectangle.y);
     cairo_paint(cr);
+
+    if (priv->mask) {
+        GwyRGBA *color = &priv->mask_color;
+        cairo_set_source_rgba(cr, color->r, color->g, color->b, color->a);
+        ensure_mask_surface(rasterview);
+        cairo_mask_surface(cr, priv->mask_surface,
+                           priv->image_rectangle.x, priv->image_rectangle.y);
+    }
 
     return FALSE;
 }
 
 static void
-destroy_surface(GwyRasterView *rasterview)
+destroy_field_surface(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
-    if (priv->surface) {
-        guchar *data = cairo_image_surface_get_data(priv->surface);
-        cairo_surface_destroy(priv->surface);
-        priv->surface = NULL;
+    if (priv->field_surface) {
+        guchar *data = cairo_image_surface_get_data(priv->field_surface);
+        cairo_surface_destroy(priv->field_surface);
+        priv->field_surface = NULL;
         g_free(data);
     }
-    priv->image_valid = FALSE;
+    priv->field_surface_valid = FALSE;
+}
+
+static void
+destroy_mask_surface(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (priv->mask_surface) {
+        guchar *data = cairo_image_surface_get_data(priv->mask_surface);
+        cairo_surface_destroy(priv->mask_surface);
+        priv->mask_surface = NULL;
+        g_free(data);
+    }
+    priv->mask_surface_valid = FALSE;
 }
 
 static gboolean
@@ -611,7 +816,30 @@ set_field(GwyRasterView *rasterview,
                                ? gwy_field_dy(field)/gwy_field_dx(field)
                                : 1.0;
 
-    priv->image_valid = FALSE;
+    priv->field_surface_valid = FALSE;
+    // TODO: Queue either resize or draw, depending on the dimensions.
+    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    return TRUE;
+}
+
+static gboolean
+set_mask(GwyRasterView *rasterview,
+         GwyMaskField *mask)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, mask, GWY_TYPE_MASK_FIELD,
+                               &priv->mask,
+                               "notify", &mask_notify,
+                               &priv->mask_notify_id,
+                               G_CONNECT_SWAPPED,
+                               "data-changed", &mask_data_changed,
+                               &priv->mask_data_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    priv->mask_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
     return TRUE;
 }
 
@@ -628,7 +856,25 @@ set_gradient(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
-    priv->image_valid = FALSE;
+    priv->field_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    return TRUE;
+}
+
+static gboolean
+set_mask_color(GwyRasterView *rasterview,
+               const GwyRGBA *color)
+{
+    RasterView *priv = rasterview->priv;
+    if (color->r == priv->mask_color.r
+        && color->g == priv->mask_color.g
+        && color->b == priv->mask_color.b
+        && color->a == priv->mask_color.a)
+        return FALSE;
+
+    priv->mask_color = *color;
+    if (priv->mask)
+        gtk_widget_queue_draw(GTK_WIDGET(rasterview));
     return TRUE;
 }
 
@@ -652,11 +898,34 @@ field_notify(GwyRasterView *rasterview,
 }
 
 static void
+mask_notify(GwyRasterView *rasterview,
+            GParamSpec *pspec,
+            GwyField *field)
+{
+    RasterView *priv = rasterview->priv;
+
+    if (gwy_strequal(pspec->name, "x-res")
+        || gwy_strequal(pspec->name, "y-res")) {
+        priv->mask_surface_valid = FALSE;
+        gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    }
+}
+
+static void
 field_data_changed(GwyRasterView *rasterview,
                    GwyFieldPart *fpart,
                    GwyField *field)
 {
-    rasterview->priv->image_valid = FALSE;
+    rasterview->priv->field_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+static void
+mask_data_changed(GwyRasterView *rasterview,
+                  GwyFieldPart *fpart,
+                  GwyMaskField *mask)
+{
+    rasterview->priv->mask_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
@@ -664,7 +933,7 @@ static void
 gradient_data_changed(GwyRasterView *rasterview,
                       GwyGradient *gradient)
 {
-    rasterview->priv->image_valid = FALSE;
+    rasterview->priv->field_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
@@ -681,7 +950,8 @@ set_hadjustment(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
-    priv->image_valid = FALSE;
+    priv->field_surface_valid = FALSE;
+    priv->mask_surface_valid = FALSE;
     set_hadjustment_values(rasterview);
     return TRUE;
 }
@@ -699,7 +969,8 @@ set_vadjustment(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
-    priv->image_valid = FALSE;
+    priv->field_surface_valid = FALSE;
+    priv->mask_surface_valid = FALSE;
     set_vadjustment_values(rasterview);
     return TRUE;
 }
@@ -755,7 +1026,8 @@ adjustment_value_changed(GwyRasterView *rasterview)
                gtk_adjustment_get_value(rasterview->priv->hadjustment),
                gtk_adjustment_get_value(rasterview->priv->vadjustment));
 
-    rasterview->priv->image_valid = FALSE;
+    rasterview->priv->field_surface_valid = FALSE;
+    rasterview->priv->mask_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 
