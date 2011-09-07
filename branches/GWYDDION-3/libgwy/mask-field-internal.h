@@ -32,6 +32,7 @@ struct _GwyMaskFieldPrivate {
     guint *grains;
     guint *grain_sizes;
     GwyFieldPart *grain_bounding_boxes;
+    GwyXY *grain_positions;
 
     gboolean allocated;
     guint32 storage;

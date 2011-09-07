@@ -172,6 +172,7 @@ free_caches(GwyMaskField *field)
     GWY_FREE(priv->grains);
     GWY_FREE(priv->grain_sizes);
     GWY_FREE(priv->grain_bounding_boxes);
+    GWY_FREE(priv->grain_positions);
 }
 
 static void

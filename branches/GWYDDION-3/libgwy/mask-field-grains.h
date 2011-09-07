@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_MASK_FIELD_GRAINS_H__
 #define __LIBGWY_MASK_FIELD_GRAINS_H__
 
+#include <libgwy/math.h>
 #include <libgwy/mask-field.h>
 
 G_BEGIN_DECLS
@@ -28,6 +29,7 @@ const guint*        gwy_mask_field_grain_numbers       (GwyMaskField *field,
                                                         guint *ngrains);
 const guint*        gwy_mask_field_grain_sizes         (GwyMaskField *field);
 const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(GwyMaskField *field);
+const GwyXY*        gwy_mask_field_grain_positions     (GwyMaskField *field);
 void                gwy_mask_field_remove_grain        (GwyMaskField *field,
                                                         guint grain_id);
 
