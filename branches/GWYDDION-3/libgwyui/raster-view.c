@@ -45,6 +45,8 @@ enum {
 };
 
 struct _GwyRasterViewPrivate {
+    GdkWindow *input_window;
+
     GtkAdjustment *hadjustment;
     gulong hadjustment_value_changed_id;
 
@@ -71,6 +73,7 @@ struct _GwyRasterViewPrivate {
     gulong mask_data_changed_id;
     cairo_surface_t *mask_surface;
     gboolean mask_surface_valid;
+    guint active_grain;
 
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
@@ -90,6 +93,10 @@ static void     gwy_raster_view_get_property        (GObject *object,
                                                      guint prop_id,
                                                      GValue *value,
                                                      GParamSpec *pspec);
+static void     gwy_raster_view_realize             (GtkWidget *widget);
+static void     gwy_raster_view_unrealize           (GtkWidget *widget);
+static void     gwy_raster_view_map                 (GtkWidget *widget);
+static void     gwy_raster_view_unmap               (GtkWidget *widget);
 static void     gwy_raster_view_get_preferred_width (GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
@@ -98,6 +105,8 @@ static void     gwy_raster_view_get_preferred_height(GtkWidget *widget,
                                                      gint *natural);
 static void     gwy_raster_view_size_allocate       (GtkWidget *widget,
                                                      GtkAllocation *allocation);
+static gboolean gwy_raster_view_motion_notify       (GtkWidget *widget,
+                                                     GdkEventMotion *event);
 static gboolean gwy_raster_view_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
 static void     destroy_field_surface               (GwyRasterView *rasterview);
@@ -158,9 +167,14 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     gobject_class->get_property = gwy_raster_view_get_property;
     gobject_class->set_property = gwy_raster_view_set_property;
 
+    widget_class->realize = gwy_raster_view_realize;
+    widget_class->unrealize = gwy_raster_view_unrealize;
+    widget_class->map = gwy_raster_view_map;
+    widget_class->unmap = gwy_raster_view_unmap;
     widget_class->get_preferred_width = gwy_raster_view_get_preferred_width;
     widget_class->get_preferred_height = gwy_raster_view_get_preferred_height;
     widget_class->size_allocate = gwy_raster_view_size_allocate;
+    widget_class->motion_notify_event = gwy_raster_view_motion_notify;
     widget_class->draw = gwy_raster_view_draw;
 
     raster_view_pspecs[PROP_FIELD]
@@ -319,47 +333,47 @@ gwy_raster_view_get_property(GObject *object,
                              GValue *value,
                              GParamSpec *pspec)
 {
-    RasterView *rasterview = GWY_RASTER_VIEW(object)->priv;
+    RasterView *priv = GWY_RASTER_VIEW(object)->priv;
 
     switch (prop_id) {
         case PROP_FIELD:
-        g_value_set_object(value, rasterview->field);
+        g_value_set_object(value, priv->field);
         break;
 
         case PROP_MASK:
-        g_value_set_object(value, rasterview->mask);
+        g_value_set_object(value, priv->mask);
         break;
 
         case PROP_GRADIENT:
-        g_value_set_object(value, rasterview->gradient);
+        g_value_set_object(value, priv->gradient);
         break;
 
         case PROP_MASK_COLOR:
-        g_value_set_boxed(value, &rasterview->mask_color);
+        g_value_set_boxed(value, &priv->mask_color);
         break;
 
         case PROP_ZOOM:
-        g_value_set_double(value, rasterview->zoom);
+        g_value_set_double(value, priv->zoom);
         break;
 
         case PROP_REAL_ASPECT_RATIO:
-        g_value_set_boolean(value, rasterview->real_aspect_ratio);
+        g_value_set_boolean(value, priv->real_aspect_ratio);
         break;
 
         case PROP_HADJUSTMENT:
-        g_value_set_object(value, rasterview->hadjustment);
+        g_value_set_object(value, priv->hadjustment);
         break;
 
         case PROP_VADJUSTMENT:
-        g_value_set_object(value, rasterview->vadjustment);
+        g_value_set_object(value, priv->vadjustment);
         break;
 
         case PROP_HSCROLL_POLICY:
-        g_value_set_enum(value, rasterview->hscroll_policy);
+        g_value_set_enum(value, priv->hscroll_policy);
         break;
 
         case PROP_VSCROLL_POLICY:
-        g_value_set_enum(value, rasterview->vscroll_policy);
+        g_value_set_enum(value, priv->vscroll_policy);
         break;
 
         default:
@@ -540,6 +554,116 @@ gwy_raster_view_get_mask_color(GwyRasterView *rasterview)
 }
 
 static void
+window_coords_to_field(const GwyRasterView *rasterview,
+                       const GwyXY *windowxy,
+                       GwyXY *fieldxy)
+{
+    GwyField *field = rasterview->priv->field;
+    if (!field) {
+        fieldxy->x = fieldxy->y = 0.0;
+        return;
+    }
+
+    RasterView *priv = rasterview->priv;
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_rectangle_t *frect = &priv->field_rectangle;
+
+    fieldxy->x = windowxy->x - irect->x;
+    if (priv->zoom)
+        fieldxy->x /= priv->zoom;
+    else
+        fieldxy->x /= irect->width/frect->width;
+
+    fieldxy->y = windowxy->y - priv->image_rectangle.y;
+    if (priv->zoom) {
+        fieldxy->y /= priv->zoom;
+        if (priv->real_aspect_ratio)
+            fieldxy->y /= priv->field_aspect_ratio;
+    }
+    else
+        fieldxy->x /= irect->height/frect->height;
+}
+
+static void
+create_input_window(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    GtkWidget *widget = GTK_WIDGET(rasterview);
+
+    g_assert(gtk_widget_get_realized(widget));
+
+    if (priv->input_window)
+        return;
+
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+
+    GdkWindowAttr attributes = {
+        .x = allocation.x,
+        .y = allocation.y,
+        .width = allocation.width,
+        .height = allocation.height,
+        .window_type = GDK_WINDOW_CHILD,
+        .wclass = GDK_INPUT_ONLY,
+        .override_redirect = TRUE,
+        .event_mask = (gtk_widget_get_events(widget)
+                       | GDK_BUTTON_PRESS_MASK
+                       | GDK_BUTTON_RELEASE_MASK
+                       | GDK_POINTER_MOTION_MASK
+                       | GDK_POINTER_MOTION_HINT_MASK),
+    };
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR | GDK_WA_CURSOR;
+    priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
+                                        &attributes, attributes_mask);
+    gdk_window_set_user_data(priv->input_window, widget);
+}
+
+static void
+destroy_input_window(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+
+    if (!priv->input_window)
+        return;
+
+    gdk_window_set_user_data(priv->input_window, NULL);
+    gdk_window_destroy(priv->input_window);
+    priv->input_window = NULL;
+}
+
+static void
+gwy_raster_view_realize(GtkWidget *widget)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->realize(widget);
+    create_input_window(rasterview);
+}
+
+static void
+gwy_raster_view_unrealize(GtkWidget *widget)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    destroy_input_window(rasterview);
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unrealize(widget);
+}
+
+static void
+gwy_raster_view_map(GtkWidget *widget)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->map(widget);
+    gdk_window_show(rasterview->priv->input_window);
+}
+
+static void
+gwy_raster_view_unmap(GtkWidget *widget)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    gdk_window_hide(rasterview->priv->input_window);
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unmap(widget);
+}
+
+static void
 gwy_raster_view_get_preferred_width(GtkWidget *widget,
                                     gint *minimum,
                                     gint *natural)
@@ -572,11 +696,52 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
         return;
 
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    rasterview->priv->field_surface_valid = FALSE;
-    rasterview->priv->mask_surface_valid = FALSE;
+    RasterView *priv = rasterview->priv;
+
+    // XXX: The input window can be smaller.  Does it matter?
+    if (priv->input_window)
+        gdk_window_move_resize(priv->input_window,
+                               allocation->x, allocation->y,
+                               allocation->width, allocation->height);
+
+    priv->field_surface_valid = FALSE;
+    priv->mask_surface_valid = FALSE;
 
     set_hadjustment_values(rasterview);
     set_vadjustment_values(rasterview);
+}
+
+static gboolean
+gwy_raster_view_motion_notify(GtkWidget *widget,
+                              GdkEventMotion *event)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    RasterView *priv = rasterview->priv;
+    GwyField *field = priv->field;
+
+    if (!field)
+        return FALSE;
+
+    GwyXY pos;
+    window_coords_to_field(rasterview, &(GwyXY){ event->x, event->y }, &pos);
+
+    if (pos.x < 0.0 || pos.x >= field->xres
+        || pos.y < 0.0 || pos.y >= field->yres)
+        return FALSE;
+
+    if (!priv->mask)
+        return FALSE;
+
+    guint j = (guint)floor(pos.x), i = (guint)floor(pos.y);
+    g_assert(j < field->xres && i < field->yres);
+    const guint *grains = gwy_mask_field_grain_numbers(priv->mask, NULL);
+
+    if (grains[i*field->xres + j] != priv->active_grain) {
+        priv->active_grain = grains[i*field->xres + j];
+        gtk_widget_queue_draw(widget);
+    }
+
+    return FALSE;
 }
 
 static void
@@ -764,6 +929,23 @@ draw_grain_numbers(GwyRasterView *rasterview,
         gchar grain_label[16];
         gint width, height;
 
+        if (i == priv->active_grain)
+            continue;
+
+        snprintf(grain_label, sizeof(grain_label), "%u", i);
+        pango_layout_set_text(layout, grain_label, -1);
+        pango_layout_get_size(layout, &width, &height);
+        cairo_move_to(cr,
+                      2*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
+                      2*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
+        pango_cairo_show_layout(cr, layout);
+    }
+    if (priv->active_grain) {
+        guint i = priv->active_grain;
+        gchar grain_label[16];
+        gint width, height;
+
+        cairo_set_source_rgb(cr, 1.0, 0.6, 0.3);
         snprintf(grain_label, sizeof(grain_label), "%u", i);
         pango_layout_set_text(layout, grain_label, -1);
         pango_layout_get_size(layout, &width, &height);
@@ -880,6 +1062,7 @@ set_mask(GwyRasterView *rasterview,
         return FALSE;
 
     priv->mask_surface_valid = FALSE;
+    priv->active_grain = 0;
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
     return TRUE;
 }
@@ -941,7 +1124,7 @@ field_notify(GwyRasterView *rasterview,
 static void
 mask_notify(GwyRasterView *rasterview,
             GParamSpec *pspec,
-            GwyField *field)
+            GwyMaskField *mask)
 {
     RasterView *priv = rasterview->priv;
 
