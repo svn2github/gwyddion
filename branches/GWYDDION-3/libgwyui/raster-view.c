@@ -22,6 +22,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
+#include "libgwy/mask-field-grains.h"
 #include "libgwyui/field-render.h"
 #include "libgwyui/raster-view.h"
 
@@ -668,8 +669,6 @@ ensure_field_surface(GwyRasterView *rasterview)
     GwyField *field = priv->field;
     g_return_if_fail(field);
 
-    // FIXME: If zoom is fixed and the area given to us is larger than data
-    // the surface can be kept!
     cairo_surface_t *surface = priv->field_surface;
     if (!surface
         || cairo_image_surface_get_width(surface) != irect->width
@@ -720,8 +719,6 @@ ensure_mask_surface(GwyRasterView *rasterview)
         return;
     }
 
-    // FIXME: If zoom is fixed and the area given to us is larger than data
-    // the surface can be kept!
     cairo_surface_t *surface = priv->mask_surface;
     if (!surface
         || cairo_image_surface_get_width(surface) != irect->width
@@ -741,6 +738,45 @@ ensure_mask_surface(GwyRasterView *rasterview)
     priv->mask_surface_valid = TRUE;
 }
 
+static void
+draw_grain_numbers(GwyRasterView *rasterview,
+                   cairo_t *cr)
+{
+    RasterView *priv = rasterview->priv;
+    GtkWidget *widget = GTK_WIDGET(rasterview);
+    PangoLayout *layout = gtk_widget_create_pango_layout(widget, NULL);
+    pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+
+    PangoAttrList *attrlist = pango_attr_list_new();
+    PangoAttribute *attr = pango_attr_scale_new(PANGO_SCALE_SMALL);
+    pango_attr_list_insert(attrlist, attr);
+    pango_layout_set_attributes(layout, attrlist);
+    pango_attr_list_unref(attrlist);
+
+    guint ngrains;
+    gwy_mask_field_grain_numbers(priv->mask, &ngrains);
+    const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
+
+    cairo_save(cr);
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_set_source_rgb(cr, 0.8, 0.0, 0.9);
+    for (guint i = 1; i <= ngrains; i++) {
+        gchar grain_label[16];
+        gint width, height;
+
+        snprintf(grain_label, sizeof(grain_label), "%u", i);
+        pango_layout_set_text(layout, grain_label, -1);
+        pango_layout_get_size(layout, &width, &height);
+        cairo_move_to(cr,
+                      2*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
+                      2*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
+        pango_cairo_show_layout(cr, layout);
+    }
+    cairo_restore(cr);
+
+    g_object_unref(layout);
+}
+
 static gboolean
 gwy_raster_view_draw(GtkWidget *widget,
                      cairo_t *cr)
@@ -755,16 +791,21 @@ gwy_raster_view_draw(GtkWidget *widget,
     calculate_position_and_size(rasterview);
     ensure_field_surface(rasterview);
 
+    cairo_save(cr);
     cairo_set_source_surface(cr, priv->field_surface,
                              priv->image_rectangle.x, priv->image_rectangle.y);
     cairo_paint(cr);
+    cairo_restore(cr);
 
     if (priv->mask) {
         GwyRGBA *color = &priv->mask_color;
+        cairo_save(cr);
         cairo_set_source_rgba(cr, color->r, color->g, color->b, color->a);
         ensure_mask_surface(rasterview);
         cairo_mask_surface(cr, priv->mask_surface,
                            priv->image_rectangle.x, priv->image_rectangle.y);
+        cairo_restore(cr);
+        draw_grain_numbers(rasterview, cr);
     }
 
     return FALSE;
