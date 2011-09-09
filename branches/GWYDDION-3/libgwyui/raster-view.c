@@ -124,7 +124,7 @@ static void     field_notify                        (GwyRasterView *rasterview,
                                                      GwyField *field);
 static void     mask_notify                         (GwyRasterView *rasterview,
                                                      GParamSpec *pspec,
-                                                     GwyField *field);
+                                                     GwyMaskField *mask);
 static void     field_data_changed                  (GwyRasterView *rasterview,
                                                      GwyFieldPart *fpart,
                                                      GwyField *field);
