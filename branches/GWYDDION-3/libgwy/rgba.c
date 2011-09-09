@@ -224,7 +224,9 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
  * @short_description: Bit depth independet RGBA colours
  *
  * #GwyRGBA is a bit depth independent representation of an RGB or RGBA colour,
- * using floating point values from the [0,1] interval.
+ * using floating point values from the [0,1] interval.  It can be directly
+ * typecast to and from #GdkRGBA and hence it is also compatible to cairo's
+ * notion of colour.
  *
  * #GwyRGBA is not an object, but a simple struct that can be allocated on
  * stack on created with g_new() or malloc().  It implements the serialisable
