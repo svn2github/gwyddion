@@ -492,7 +492,7 @@ gwy_field_apply_func(GwyField *field,
 
 /**
  * gwy_field_add_field:
- * @src: Source two-dimensional data data field.
+ * @src: Source two-dimensional data field.
  * @srcpart: Area in field @src to add.  Pass %NULL to add entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
@@ -548,8 +548,8 @@ gwy_field_add_field(const GwyField *src,
 
 /**
  * gwy_field_hypot_field:
- * @field: A two-dimensional data data field.
- *          It may be one of @operand1, @operand2.
+ * @field: A two-dimensional data field.
+ *         It may be one of @operand1, @operand2.
  * @operand1: A two-dimensional data field forming one of the operands.
  * @operand2: A two-dimensional data field forming another of the operands.
  *
