@@ -166,6 +166,44 @@ gwy_line_multiply(GwyLine *line,
 }
 
 /**
+ * gwy_line_add_line:
+ * @src: Source one-dimensional data line.
+ * @srcpart: Area in line @src to add.  Pass %NULL to add entire @src.
+ * @dest: Destination one-dimensional data line.
+ * @destpos: Destination position in @dest.
+ * @factor: Value to multiply @src data with before adding.
+ *
+ * Adds data from one line to another.
+ *
+ * The segment of added data is defined by @srcpart and the values are
+ * added to @dest starting from @destpos.
+ *
+ * There are no limitations on the positions and dimensions.  Only the part of
+ * the segment that is corresponds to data inside @src and @dest is added.
+ * This can also mean @dest is not modified at all.
+ *
+ * If @src is equal to @dest the segments may <emphasis>not</emphasis> overlap.
+ **/
+void
+gwy_line_add_line(const GwyLine *src,
+                  const GwyLinePart *srcpart,
+                  GwyLine *dest,
+                  guint destpos,
+                  gdouble factor)
+{
+    guint pos, len;
+    if (!gwy_line_limit_parts(src, srcpart, dest, destpos, &pos, &len))
+        return;
+    if (!factor)
+        return;
+
+    const gdouble *srow = src->data + pos;
+    gdouble *drow = dest->data + destpos;
+    for (guint i = len; i; i--, srow++, drow++)
+        *drow += factor*(*srow);
+}
+
+/**
  * gwy_line_outer_product:
  * @column: A one-dimensional data line that forms the column vector.
  * @row: A one-dimensional data line that forms the row vector.

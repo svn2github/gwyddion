@@ -39,17 +39,22 @@ GwyLineCompatibilityFlags gwy_line_is_incompatible(const GwyLine *line1,
                                                    const GwyLine *line2,
                                                    GwyLineCompatibilityFlags check);
 
-void      gwy_line_add                      (GwyLine *line,
-                                             gdouble value);
-void      gwy_line_multiply                 (GwyLine *line,
-                                             gdouble value);
-void      gwy_line_clear                    (GwyLine *line,
-                                             const GwyLinePart *lpart);
-void      gwy_line_fill                     (GwyLine *line,
-                                             const GwyLinePart *lpart,
-                                             gdouble value);
-GwyField* gwy_line_outer_product            (const GwyLine *column,
-                                             const GwyLine *row)        G_GNUC_MALLOC;
+void      gwy_line_add          (GwyLine *line,
+                                 gdouble value);
+void      gwy_line_multiply     (GwyLine *line,
+                                 gdouble value);
+void      gwy_line_clear        (GwyLine *line,
+                                 const GwyLinePart *lpart);
+void      gwy_line_fill         (GwyLine *line,
+                                 const GwyLinePart *lpart,
+                                 gdouble value);
+void      gwy_line_add_line     (const GwyLine *src,
+                                 const GwyLinePart *srcpart,
+                                 GwyLine *dest,
+                                 guint destpos,
+                                 gdouble factor);
+GwyField* gwy_line_outer_product(const GwyLine *column,
+                                 const GwyLine *row)         G_GNUC_MALLOC;
 
 G_END_DECLS
 
