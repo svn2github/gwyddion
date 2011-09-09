@@ -47,6 +47,12 @@ typedef struct {
     gdouble sin_alpha;
 } DistributionData;
 
+static inline guint
+dist_points_for_n_points(guint n)
+{
+    return gwy_round(3.49*cbrt(n));
+}
+
 static void
 sanitise_range(gdouble *min,
                gdouble *max)
@@ -136,7 +142,7 @@ field_value_dist_cont(const GwyField *field,
                                value_dist_cont, &ddata);
 
     if (!npoints)
-        npoints = gwy_round(3.49*cbrt(ddata->n_in_range/4.0));
+        npoints = dist_points_for_n_points(ddata->n_in_range/4.0);
     if (!npoints)
         return;
 
@@ -261,7 +267,7 @@ field_value_dist_discr(const GwyField *field,
                              ddata);
 
     if (!npoints)
-        npoints = gwy_round(3.49*cbrt(ddata->n_in_range));
+        npoints = dist_points_for_n_points(ddata->n_in_range);
     if (!npoints)
         return;
 
@@ -539,7 +545,7 @@ gwy_field_slope_dist(const GwyField *field,
                                func, &ddata);
 
     if (!npoints)
-        npoints = gwy_round(3.49*cbrt(ddata.n_in_range/4.0));
+        npoints = dist_points_for_n_points(ddata.n_in_range/4.0);
     if (!npoints)
         goto fail;
 
@@ -1273,6 +1279,295 @@ fail:
     return line;
 }
 
+/**
+ * count_edges:
+ * @mask: A mask field.
+ * @masking: Masking mode.
+ * @col: Column index.
+ * @row: Row index.
+ * @width: Part width (number of column).
+ * @height: Part height (number of rows).
+ *
+ * Counts the number of edges between two pixels.
+ *
+ * An edge is counted if both pixels are counted according to the masking mode
+ * @masking.
+ *
+ * Returns: The number of edges.
+ **/
+static guint
+count_edges(const GwyMaskField *mask,
+            GwyMaskingType masking,
+            guint maskcol, guint maskrow,
+            guint width, guint height)
+{
+    if (masking == GWY_MASK_IGNORE)
+        return 2*width*height - width - height;
+
+    g_assert(mask);
+
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint nedges = 0;
+
+    for (guint i = 0; i < height-1; i++) {
+        GwyMaskIter iter1, iter2;
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
+        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
+
+        gboolean curr = !gwy_mask_iter_get(iter1);
+        gboolean lower = !gwy_mask_iter_get(iter2);
+        if (curr == invert && lower == invert)
+            nedges++;
+
+        for (guint j = width-1; j; j--) {
+            gboolean right = curr;
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
+            curr = !gwy_mask_iter_get(iter1);
+            lower = !gwy_mask_iter_get(iter2);
+            if (curr == invert && right == invert)
+                nedges++;
+            if (curr == invert && lower == invert)
+                nedges++;
+        }
+    }
+
+    GwyMaskIter iter;
+    gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height-1);
+    gboolean curr = !gwy_mask_iter_get(iter);
+    for (guint j = width-1; j; j--) {
+        gboolean right = curr;
+        gwy_mask_iter_next(iter);
+        curr = !gwy_mask_iter_get(iter);
+        if (curr == invert && right == invert)
+            nedges++;
+    }
+
+    return nedges;
+}
+
+static inline void
+add_to_min_max_dist(GwyLine *mindist, GwyLine *maxdist,
+                    gdouble z1, gdouble z2)
+{
+    GWY_ORDER(gdouble, z1, z2);
+
+    gdouble x1 = (z1 - mindist->off)/mindist->real*mindist->res;
+    if (x1 < 0.0)
+        mindist->data[0] += 1.0;
+    else if (x1 < mindist->res)
+        mindist->data[(guint)floor(x1)] += 1.0;
+
+    gdouble x2 = (z2 - maxdist->off)/maxdist->real*maxdist->res;
+    if (x2 < 0.0)
+        maxdist->data[0] += 1.0;
+    else if (x2 < maxdist->res)
+        maxdist->data[(guint)floor(x2)] += 1.0;
+}
+
+static void
+calculate_min_max_dist(const GwyField *field,
+                       guint col, guint row,
+                       guint width, guint height,
+                       const GwyMaskField *mask,
+                       GwyMaskingType masking,
+                       guint maskcol, guint maskrow,
+                       GwyLine *mindist, GwyLine *maxdist)
+{
+    guint xres = field->xres;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height-1; i++) {
+            const gdouble *frow = field->data + (row + i)*xres + col;
+            add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
+            for (guint j = width-1; j; j--, frow++) {
+                add_to_min_max_dist(mindist, maxdist, *frow, *(frow + 1));
+                add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
+            }
+        }
+        const gdouble *frow = field->data + (row + height-1)*xres + col;
+        for (guint j = width-1; j; j--, frow++)
+            add_to_min_max_dist(mindist, maxdist, *frow, *(frow + 1));
+
+        return;
+    }
+
+    g_assert(mask);
+
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+
+    for (guint i = 0; i < height-1; i++) {
+        const gdouble *frow = field->data + (row + i)*xres + col;
+        GwyMaskIter iter1, iter2;
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
+        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
+
+        gboolean curr = !gwy_mask_iter_get(iter1);
+        gboolean lower = !gwy_mask_iter_get(iter2);
+        if (curr == invert && lower == invert)
+            add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
+
+        for (guint j = width-1; j; j--, frow++) {
+            gboolean right = curr;
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
+            curr = !gwy_mask_iter_get(iter1);
+            lower = !gwy_mask_iter_get(iter2);
+            if (curr == invert && right == invert)
+                add_to_min_max_dist(mindist, maxdist, *frow, *(frow + 1));
+            if (curr == invert && lower == invert)
+                add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
+        }
+    }
+
+    const gdouble *frow = field->data + (row + height-1)*xres + col;
+    GwyMaskIter iter;
+    gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height-1);
+    gboolean curr = !gwy_mask_iter_get(iter);
+    for (guint j = width-1; j; j--, frow++) {
+        gboolean right = curr;
+        gwy_mask_iter_next(iter);
+        curr = !gwy_mask_iter_get(iter);
+        if (curr == invert && right == invert)
+            add_to_min_max_dist(mindist, maxdist, *frow, *(frow + 1));
+    }
+}
+
+/* The calculation is based on expressing the functional as the difference of
+ * cumulative distributions of min(z1, z2) and max(z1, z2) where (z1, z2) are
+ * couples of pixels with a common edge. */
+static GwyLine*
+minkowski_surface(const GwyField *field,
+                  guint col, guint row,
+                  guint width, guint height,
+                  const GwyMaskField *mask,
+                  GwyMaskingType masking,
+                  guint maskcol, guint maskrow,
+                  guint npoints,
+                  gdouble min, gdouble max)
+{
+    GwyLine *line = NULL;
+    guint nedges = count_edges(mask, masking, maskcol, maskrow, width, height);
+
+    // FIXME: We should probably count only edges in range not all edges.
+    nedges = MAX(nedges, 1);
+    if (!npoints)
+        npoints = dist_points_for_n_points(nedges);
+
+    line = gwy_line_new_sized(npoints, TRUE);
+    line->real = max - min;
+    line->off = min;
+    GwyLine *maxdist = line, *mindist = gwy_line_duplicate(maxdist);
+    calculate_min_max_dist(field, col, row, width, height,
+                           mask, masking, maskcol, maskrow,
+                           mindist, maxdist);
+    gwy_line_add_line(maxdist, NULL, mindist, 0, -1.0);
+    g_object_unref(maxdist);
+    gwy_line_multiply(maxdist, 1.0/nedges);
+
+    return line;
+}
+
+static GwyLine*
+minkowski_connectivity(const GwyField *field,
+                       guint col, guint row,
+                       guint width, guint height,
+                       const GwyMaskField *mask,
+                       GwyMaskingType masking,
+                       guint maskcol, guint maskrow,
+                       guint npoints,
+                       gdouble min, gdouble max)
+{
+    GwyLine *line = NULL;
+
+    GwyFieldPart rect = { maskcol, maskrow, width, height };
+    guint n = width*height;
+    if (masking == GWY_MASK_INCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, TRUE);
+    else if (masking == GWY_MASK_EXCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, FALSE);
+
+    // TODO
+
+    return line;
+}
+
+/**
+ * gwy_field_minkowski:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @npoints: Resolution, i.e. the number of returned line points.
+ *           Pass zero to choose a suitable resolution automatically.
+ * @min: Minimum value of the range to calculate the distribution in.
+ * @max: Maximum value of the range to calculate the distribution in.
+ *
+ * Calculates given Minkowski functional of values in a field.
+ *
+ * Pass @max <= @min to calculate the functional in the full data range
+ * (with masking still considered).
+ *
+ * Note at present masking is implemented only for the volume and surface
+ * functionals %GWY_MINKOWSKI_VOLUME and %GWY_MINKOWSKI_SURFACE.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the requested functional.
+ **/
+GwyLine*
+gwy_field_minkowski(const GwyField *field,
+                    const GwyFieldPart *fpart,
+                    const GwyMaskField *mask,
+                    GwyMaskingType masking,
+                    GwyMinkowskiFunctionalType type,
+                    guint npoints,
+                    gdouble min, gdouble max)
+{
+    GwyLine *line = NULL;
+
+    if (type == GWY_MINKOWSKI_VOLUME) {
+        line = gwy_field_value_dist(field, fpart, mask, masking,
+                                    TRUE, FALSE, npoints, min, max);
+        for (guint i = 0; i < line->res; i++)
+            line->data[i] = 1.0 - line->data[i];
+        return line;
+    }
+
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        goto fail;
+
+    gboolean explicit_range = min < max;
+    if (!explicit_range)
+        gwy_field_min_max(field, fpart, mask, masking, &min, &max);
+    // TODO: Handle min == max.
+
+    // Cannot determine npoints here, it depends on the functional.
+    if (type == GWY_MINKOWSKI_SURFACE) {
+        line = minkowski_surface(field, col, row, width, height,
+                                 mask, masking, maskcol, maskrow,
+                                 npoints, min, max);
+    }
+    else if (type == GWY_MINKOWSKI_CONNECTIVITY) {
+        line = minkowski_connectivity(field, col, row, width, height,
+                                      mask, masking, maskcol, maskrow,
+                                      npoints, min, max);
+    }
+    else {
+        g_critical("Unknown Minkowski functional type %u.", type);
+    }
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_assign(gwy_line_get_unit_x(line), gwy_field_get_unit_z(field));
+
+    return line;
+}
 
 /**
  * SECTION: field-distributions
@@ -1286,11 +1581,19 @@ fail:
  **/
 
 /**
- * GwyOrientation:
- * @GWY_ORIENTATION_HORIZONTAL: Horizontal orientation.
- * @GWY_ORIENTATION_VERTICAL: Vertical orientation.
+ * GwyMinkowskiFunctionalType:
+ * @GWY_MINKOWSKI_VOLUME: Precentage of ‘white’ pixels from the total
+ *                        number of pixels.
+ * @GWY_MINKOWSKI_SURFACE: Percentage of ‘black–white’ pixel edges from the
+ *                         total number of edges.
+ * @GWY_MINKOWSKI_CONNECTIVITY: Difference between the numbers of ‘white’ and
+ *                              ‘black’ connected areas (grains) divided by
+ *                              the total number of pixels.
  *
- * Orientation type.
+ * Types of Minkowski functionals.
+ *
+ * Each quantity is a function of threshold; pixels above this threshold are
+ * considered ‘white’, pixels below ‘black’.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
