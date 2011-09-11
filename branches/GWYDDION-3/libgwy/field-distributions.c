@@ -1279,6 +1279,74 @@ fail:
     return line;
 }
 
+static inline void
+add_to_dist(GwyLine *dist, gdouble z)
+{
+    gdouble x = (z - dist->off)/dist->real*dist->res - 0.5;
+    if (x <= 0.0)
+        dist->data[0] += 1.0;
+    else if (x <= dist->res-1)
+        dist->data[(guint)ceil(x)] += 1.0;
+}
+
+static GwyLine*
+minkowski_volume(const GwyField *field,
+                 guint col, guint row,
+                 guint width, guint height,
+                 const GwyMaskField *mask,
+                 GwyMaskingType masking,
+                 guint maskcol, guint maskrow,
+                 guint npoints,
+                 gdouble min, gdouble max)
+{
+    GwyFieldPart rect = { maskcol, maskrow, width, height };
+    guint n = width*height;
+
+    if (masking == GWY_MASK_INCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, TRUE);
+    else if (masking == GWY_MASK_EXCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, FALSE);
+
+    if (!n)
+        return NULL;
+
+    if (!npoints)
+        npoints = dist_points_for_n_points(n);
+
+    GwyLine *dist = gwy_line_new_sized(npoints, TRUE);
+    dist->real = max - min;
+    dist->off = min;
+
+    if (masking != GWY_MASK_IGNORE) {
+        gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *drow = field->data + (i + row)*field->xres + col;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, drow++) {
+                if (!gwy_mask_iter_get(iter) == invert)
+                    add_to_dist(dist, *drow);
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+    else {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *drow = field->data + (i + row)*field->xres + col;
+            for (guint j = width; j; j--, drow++)
+                add_to_dist(dist, *drow);
+        }
+    }
+
+    // The non-cumulative distributions are already prepared pixel-centered so
+    // use plain summing here.
+    gwy_line_accumulate(dist, FALSE);
+    for (guint k = 0; k < dist->res; k++)
+        dist->data[k] = 1.0 - dist->data[k]/n;
+
+    return dist;
+}
+
 /**
  * count_edges:
  * @mask: A mask field.
@@ -1351,18 +1419,8 @@ add_to_min_max_dist(GwyLine *mindist, GwyLine *maxdist,
                     gdouble z1, gdouble z2)
 {
     GWY_ORDER(gdouble, z1, z2);
-
-    gdouble x1 = (z1 - mindist->off)/mindist->real*mindist->res - 0.5;
-    if (x1 <= 0.0)
-        mindist->data[0] += 1.0;
-    else if (x1 <= mindist->res-1)
-        mindist->data[(guint)ceil(x1)] += 1.0;
-
-    gdouble x2 = (z2 - maxdist->off)/maxdist->real*maxdist->res - 0.5;
-    if (x2 <= 0.0)
-        maxdist->data[0] += 1.0;
-    else if (x2 <= maxdist->res-1)
-        maxdist->data[(guint)ceil(x2)] += 1.0;
+    add_to_dist(mindist, z1);
+    add_to_dist(maxdist, z2);
 }
 
 static void
@@ -1449,8 +1507,12 @@ minkowski_surface(const GwyField *field,
     GwyLine *line = NULL;
     guint nedges = count_edges(mask, masking, maskcol, maskrow, width, height);
 
-    // FIXME: We should probably count only edges in range not all edges.
-    nedges = MAX(nedges, 1);
+    if (!nedges)
+        return NULL;
+
+    // FIXME: For npoints, it would be more useful to count only edges in
+    // range, not all edges.  However, the total number if needed for
+    // normalization.
     if (!npoints)
         npoints = dist_points_for_n_points(nedges);
 
@@ -1870,6 +1932,9 @@ minkowski_connectivity(const GwyField *field,
     else if (masking == GWY_MASK_EXCLUDE)
         n = gwy_mask_field_part_count(mask, &rect, FALSE);
 
+    if (!n)
+        return NULL;
+
     GwyLine *whitedist = grain_number_dist(field, col, row, width, height,
                                            mask, masking, maskcol, maskrow,
                                            TRUE, npoints, min, max);
@@ -1918,14 +1983,6 @@ gwy_field_minkowski(const GwyField *field,
 {
     GwyLine *line = NULL;
 
-    if (type == GWY_MINKOWSKI_VOLUME) {
-        line = gwy_field_value_dist(field, fpart, mask, masking,
-                                    TRUE, FALSE, npoints, min, max);
-        for (guint i = 0; i < line->res; i++)
-            line->data[i] = 1.0 - line->data[i];
-        return line;
-    }
-
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
                               &col, &row, &width, &height, &maskcol, &maskrow))
@@ -1937,7 +1994,12 @@ gwy_field_minkowski(const GwyField *field,
     sanitise_range(&min, &max);
 
     // Cannot determine npoints here, it depends on the functional.
-    if (type == GWY_MINKOWSKI_SURFACE) {
+    if (type == GWY_MINKOWSKI_VOLUME) {
+        line = minkowski_volume(field, col, row, width, height,
+                                mask, masking, maskcol, maskrow,
+                                npoints, min, max);
+    }
+    else if (type == GWY_MINKOWSKI_SURFACE) {
         line = minkowski_surface(field, col, row, width, height,
                                  mask, masking, maskcol, maskrow,
                                  npoints, min, max);
