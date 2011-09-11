@@ -1472,6 +1472,387 @@ minkowski_surface(const GwyField *field,
     return line;
 }
 
+/**
+ * fill_one_grain:
+ * @data: Arbitrary integer data.  Grain is formed by values equal to the
+ *        value at (@col, @row).
+ * @xres: The number of columns in @data.
+ * @yres: The number of rows in @data.
+ * @col: Column inside a grain.
+ * @row: Row inside a grain.
+ * @visited: An array of size @xres×@yres that contain zeroes in empty space
+ *           and yet unvisited grains.  Current grain will be filled with
+ *           @grain_no.
+ * @grain_no: Value to fill current grain with.
+ * @listv: A working buffer of size at least @xres×@yres/2 + 2, its content is
+ *         owerwritten.
+ * @listh: A working buffer of size at least @xres×@yres/2 + 2, its content is
+ *         owerwritten.
+ *
+ * Internal function to fill/number a one grain.
+ *
+ * The @visited, @listv, and @listh buffers are recyclable between calls so
+ * they don't have to be allocated and freed for each grain, speeding up
+ * sequential grain processing.  Generally, this function itself does not
+ * allocate or free any memory.
+ *
+ * Returns: The number of pixels in the grain.
+ **/
+static guint
+fill_one_grain(const guint *data,
+               guint xres, guint yres,
+               guint col, guint row,
+               guint *visited,
+               guint grain_no,
+               guint *listv, guint *listh)
+{
+    g_return_val_if_fail(grain_no, 0);
+    guint initial = row*xres + col;
+    guint look_for = data[initial];
+    guint count = 1;
+
+    // check for a single point
+    visited[initial] = grain_no;
+    if ((!col || data[initial - 1] != look_for)
+        && (!row || data[initial - xres] != look_for)
+        && (col + 1 == xres || data[initial + 1] != look_for)
+        && (row + 1 == yres || data[initial + xres] != look_for)) {
+
+        return count;
+    }
+
+    guint nv = 2, nh = 2, n = xres*yres;
+    listv[0] = listv[1] = initial;
+    listh[0] = listh[1] = initial;
+
+    while (nv) {
+        // go through vertical lines and expand them horizontally
+        for (guint i = 0; i < nv; i += 2) {
+            for (guint p = listv[i]; p <= listv[i + 1]; p += xres) {
+                guint start, stop, j;
+
+                // scan left
+                start = p - 1;
+                stop = (p/xres)*xres;
+                for (j = start; j >= stop; j--) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j < start) {
+                    listh[nh++] = j + 1;
+                    listh[nh++] = start;
+                }
+
+                // scan right
+                start = p + 1;
+                stop = (p/xres + 1)*xres;
+                for (j = start; j < stop; j++) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j > start) {
+                    listh[nh++] = start;
+                    listh[nh++] = j - 1;
+                }
+            }
+        }
+        nv = 0;
+
+        // go through horizontal lines and expand them vertically
+        for (guint i = 0; i < nh; i += 2) {
+            for (guint p = listh[i]; p <= listh[i + 1]; p++) {
+                gint start, stop, j;
+
+                // scan up
+                start = p - xres;
+                stop = p % xres;
+                for (j = start; j >= stop; j -= xres) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j < start) {
+                    listv[nv++] = j + xres;
+                    listv[nv++] = start;
+                }
+
+                // scan down
+                start = p + xres;
+                stop = p % xres + n;
+                for (j = start; j < stop; j += xres) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j > start) {
+                    listv[nv++] = start;
+                    listv[nv++] = j - xres;
+                }
+            }
+        }
+        nh = 0;
+    }
+
+    return count;
+}
+
+/* Calculate discrete heights.
+ *
+ * There are @npoints buckes, the 0th collects everything below 1/2, the rest
+ * is pixel-sized, heights above @npoints-1/2 are the uncounted remainder. This
+ * makes the distribution pixel-centered and symmetrical for white and black
+ * cases, as necessary.
+ */
+static guint*
+discretise_heights(const GwyField *field,
+                   guint col, guint row,
+                   guint width, guint height,
+                   const GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   guint maskcol, guint maskrow,
+                   guint npoints,
+                   gdouble min, gdouble max,
+                   gboolean white)
+{
+    guint *heights = g_new(guint, width*height);
+    gdouble q = (npoints - 1.0)/(max - min);
+
+    for (guint i = 0; i < height; i++) {
+        const gdouble *drow = field->data + (i + row)*field->xres + col;
+        guint *hrow = heights + i*width;
+
+        for (guint j = width; j; j--, drow++, hrow++) {
+            gdouble x = floor((white ? (*drow - min) : (max - *drow))*q + 0.5);
+            x = CLAMP(x, 0.0, npoints-1);
+            *hrow = (guint)x;
+        }
+    }
+
+    return heights;
+}
+
+/*
+ * Group pixels of the same discrete height.  nh then holds indices in
+ * hindex where each height starts.
+ * TODO: support masking (must fix cycles that go over pixels to check mask)
+ */
+static void
+group_by_height(const guint *heights,
+                guint npoints, guint n,
+                guint *nh, guint *hindex)
+{
+    // Make nh[i] the start of the block of discrete height i in hindex[].
+    for (guint i = 0; i < n; i++)
+        nh[heights[i]]++;
+    for (guint i = 1; i < npoints; i++)
+        nh[i] += nh[i-1];
+    for (guint i = npoints-1; i; i--)
+        nh[i] = nh[i-1];
+    nh[0] = 0;
+
+    // Fill the blocks in hindex[] with indices of points with the
+    // corresponding discrete height.
+    for (guint i = 0; i < n; i++)
+        hindex[nh[heights[i]]++] = i;
+    for (guint i = npoints-1; i; i--)
+        nh[i] = nh[i-1];
+    nh[0] = 0;
+    // To avoid special-cases, append the index of end of the array.
+    nh[npoints] = n;
+}
+
+/* Merge grains i and j in map with full resolution */
+static inline void
+resolve_grain_map(guint *m, guint i, guint j)
+{
+    guint ii, jj;
+
+    // Find what i and j fully resolve to.
+    for (ii = i; m[ii] != ii; ii = m[ii])
+        ;
+    for (jj = j; m[jj] != jj; jj = m[jj])
+        ;
+    guint k = MIN(ii, jj);
+
+    // Turn partial resultions to full.
+    for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
+        m[i] = k;
+        i = ii;
+    }
+    m[ii] = k;
+    for (jj = m[j]; m[jj] != jj; jj = m[jj]) {
+        m[j] = k;
+        j = jj;
+    }
+    m[jj] = k;
+}
+
+/**
+ * gwy_data_field_area_grains_tgnd_range:
+ * @data_field: A data field.
+ * @target_line: A data line to store the distribution to.  It will be
+ *               resampled to the requested width.
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ * @min: Minimum threshold value.
+ * @max: Maximum threshold value.
+ * @white: If %TRUE, hills are marked, otherwise valleys are marked.
+ * @nstats: The number of samples to take on the distribution function.  If
+ *          nonpositive, a suitable resolution is determined automatically.
+ *
+ * Calculates threshold grain number distribution in given height range.
+ *
+ * This is the number of grains for each of @nstats equidistant height
+ * threshold levels.  For large @nstats this function is much faster than the
+ * equivalent number of gwy_data_field_grains_mark_height() calls.
+ **/
+static GwyLine*
+grain_number_dist(const GwyField *field,
+                  guint col, guint row,
+                  guint width, guint height,
+                  const GwyMaskField *mask,
+                  GwyMaskingType masking,
+                  guint maskcol, guint maskrow,
+                  gboolean white,
+                  guint npoints,
+                  gdouble min, gdouble max)
+{
+    GwyLine *line = gwy_line_new_sized(npoints, FALSE);
+
+    GwyFieldPart rect = { maskcol, maskrow, width, height };
+    guint n = width*height;
+    if (masking == GWY_MASK_INCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, TRUE);
+    else if (masking == GWY_MASK_EXCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, FALSE);
+
+    n = MAX(n, 1);
+
+    guint *heights = discretise_heights(field, col, row, width, height,
+                                        mask, masking, maskcol, maskrow,
+                                        npoints, min, max, white);
+    guint *nh = g_new0(guint, npoints);
+    guint *hindex = g_new(guint, width*height);
+    group_by_height(heights, npoints, width*height, nh, hindex);
+
+    guint *grains = g_new0(guint, n);
+    guint *listv = g_new(guint, n/2 + 2);
+    guint *listh = g_new(guint, n/2 + 2);
+
+    guint *m = g_new(guint, 1), *mm = m;
+    guint msize = 0;
+
+    // Main iteration
+    guint last_grain_no = 0;
+    for (guint h = 0; h < npoints; h++) {
+        // Mark new subgrains corresponding just to height @h.
+        guint grain_no = last_grain_no;
+        //gwy_debug("Height %d, number of old grains: %d", h, grain_no);
+        for (guint i = nh[h]; i < nh[h+1]; i++) {
+            guint j = hindex[i];
+            if (!grains[j]) {
+                grain_no++;
+                fill_one_grain(heights, width, height,
+                               j % width, j/width,
+                               grains, grain_no, listv, listh);
+            }
+        }
+        //gwy_debug("new subgrains: %d", grain_no-last_grain_no);
+
+        if (grain_no == last_grain_no) {
+            //gwy_debug("skipping empty height level");
+            line->data[h] = h ? line->data[h-1] : 0;
+            continue;
+        }
+
+        // Initialize grains number maps for merge scan
+        if (grain_no+1 > msize) {
+            g_free(m);
+            m = g_new(guint, 2*(grain_no+1));
+            mm = m + grain_no+1;
+        }
+        for (guint i = 0; i <= grain_no; i++) {
+            m[i] = i;
+            mm[i] = 0;
+        }
+
+        /* Find grains that touch each other for merge.
+         *
+         * Previously existing grains that did not touch don't touch now
+         * either.  So we are only interested in neighbours of pixels of new
+         * subgrains. */
+        for (guint i = nh[h]; i < nh[h+1]; i++) {
+            guint j = hindex[i];
+            // Left
+            if (j % width && grains[j-1]
+                && m[grains[j]] != m[grains[j-1]])
+                resolve_grain_map(m, grains[j], grains[j-1]);
+            // Right
+            if ((j+1) % width && grains[j+1]
+                && m[grains[j]] != m[grains[j+1]])
+                resolve_grain_map(m, grains[j], grains[j+1]);
+            // Up
+            if (j/width && grains[j-width]
+                && m[grains[j]] != m[grains[j-width]])
+                resolve_grain_map(m, grains[j], grains[j-width]);
+            // Down
+            if (j/width < height-1 && grains[j+width]
+                && m[grains[j]] != m[grains[j+width]])
+                resolve_grain_map(m, grains[j], grains[j+width]);
+        }
+
+        // Resolve remianing grain number links in m
+        for (guint i = 1; i <= grain_no; i++)
+            m[i] = m[m[i]];
+
+        // Compactify grain numbers
+        guint k = 0;
+        for (guint i = 1; i <= grain_no; i++) {
+            if (!mm[m[i]]) {
+                k++;
+                mm[m[i]] = k;
+            }
+            m[i] = mm[m[i]];
+        }
+
+#ifdef DEBUG
+        for (guint i = 0; i <= grain_no; i++)
+            g_printerr("%d[%d] ", m[i], i);
+        g_printerr("\n");
+#endif
+
+        /* Renumber grains (we make use of the fact m[0] = 0).
+         *
+         * This is the only place where we have to scan the entire region.
+         * Since grain numbers usually vary wildly and globally, we probably
+         * can't avoid it. */
+        for (guint i = 0; i < n; i++)
+            grains[i] = m[grains[i]];
+
+        // The number of grains for this h
+        line->data[h] = k;
+        last_grain_no = k;
+    }
+
+    g_free(m);
+    g_free(listv);
+    g_free(listh);
+    g_free(grains);
+    g_free(hindex);
+    g_free(nh);
+    g_free(heights);
+
+    return line;
+}
+
 static GwyLine*
 minkowski_connectivity(const GwyField *field,
                        guint col, guint row,
@@ -1482,8 +1863,6 @@ minkowski_connectivity(const GwyField *field,
                        guint npoints,
                        gdouble min, gdouble max)
 {
-    GwyLine *line = NULL;
-
     GwyFieldPart rect = { maskcol, maskrow, width, height };
     guint n = width*height;
     if (masking == GWY_MASK_INCLUDE)
@@ -1491,9 +1870,17 @@ minkowski_connectivity(const GwyField *field,
     else if (masking == GWY_MASK_EXCLUDE)
         n = gwy_mask_field_part_count(mask, &rect, FALSE);
 
-    // TODO
+    GwyLine *whitedist = grain_number_dist(field, col, row, width, height,
+                                           mask, masking, maskcol, maskrow,
+                                           TRUE, npoints, min, max);
+    GwyLine *blackdist = grain_number_dist(field, col, row, width, height,
+                                           mask, masking, maskcol, maskrow,
+                                           FALSE, npoints, min, max);
+    gwy_line_add_line(whitedist, NULL, blackdist, 0, -1.0);
+    gwy_line_multiply(whitedist, 1.0/n);
+    g_object_unref(blackdist);
 
-    return line;
+    return whitedist;
 }
 
 /**
@@ -1586,9 +1973,9 @@ fail:
 
 /**
  * GwyMinkowskiFunctionalType:
- * @GWY_MINKOWSKI_VOLUME: Precentage of ‘white’ pixels from the total
+ * @GWY_MINKOWSKI_VOLUME: Fraction of ‘white’ pixels from the total
  *                        number of pixels.
- * @GWY_MINKOWSKI_SURFACE: Percentage of ‘black–white’ pixel edges from the
+ * @GWY_MINKOWSKI_SURFACE: Fraction of ‘black–white’ pixel edges from the
  *                         total number of edges.
  * @GWY_MINKOWSKI_CONNECTIVITY: Difference between the numbers of ‘white’ and
  *                              ‘black’ connected areas (grains) divided by
