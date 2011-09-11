@@ -1352,17 +1352,17 @@ add_to_min_max_dist(GwyLine *mindist, GwyLine *maxdist,
 {
     GWY_ORDER(gdouble, z1, z2);
 
-    gdouble x1 = (z1 - mindist->off)/mindist->real*mindist->res;
-    if (x1 < 0.0)
+    gdouble x1 = (z1 - mindist->off)/mindist->real*mindist->res - 0.5;
+    if (x1 <= 0.0)
         mindist->data[0] += 1.0;
-    else if (x1 < mindist->res)
-        mindist->data[(guint)floor(x1)] += 1.0;
+    else if (x1 <= mindist->res-1)
+        mindist->data[(guint)ceil(x1)] += 1.0;
 
-    gdouble x2 = (z2 - maxdist->off)/maxdist->real*maxdist->res;
-    if (x2 < 0.0)
+    gdouble x2 = (z2 - maxdist->off)/maxdist->real*maxdist->res - 0.5;
+    if (x2 <= 0.0)
         maxdist->data[0] += 1.0;
-    else if (x2 < maxdist->res)
-        maxdist->data[(guint)floor(x2)] += 1.0;
+    else if (x2 <= maxdist->res-1)
+        maxdist->data[(guint)ceil(x2)] += 1.0;
 }
 
 static void
@@ -1461,6 +1461,10 @@ minkowski_surface(const GwyField *field,
     calculate_min_max_dist(field, col, row, width, height,
                            mask, masking, maskcol, maskrow,
                            mindist, maxdist);
+    // The non-cumulative distributions are already prepared pixel-centered so
+    // use plain summing here.
+    gwy_line_accumulate(mindist, FALSE);
+    gwy_line_accumulate(maxdist, FALSE);
     gwy_line_add_line(maxdist, NULL, mindist, 0, -1.0);
     g_object_unref(maxdist);
     gwy_line_multiply(maxdist, 1.0/nedges);
@@ -1543,7 +1547,7 @@ gwy_field_minkowski(const GwyField *field,
     gboolean explicit_range = min < max;
     if (!explicit_range)
         gwy_field_min_max(field, fpart, mask, masking, &min, &max);
-    // TODO: Handle min == max.
+    sanitise_range(&min, &max);
 
     // Cannot determine npoints here, it depends on the functional.
     if (type == GWY_MINKOWSKI_SURFACE) {
