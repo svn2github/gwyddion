@@ -2894,6 +2894,64 @@ test_field_distributions_hhcf_partial(void)
     g_rand_free(rng);
 }
 
+void
+test_field_distributions_minkowski_volume(void)
+{
+    enum { max_size = 30, niter = 400, njter = 20 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 2, max_size);
+        guint yres = g_rand_int_range(rng, 2, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(width, height, rng);
+        GwyMaskingType masking = GWY_MASK_INCLUDE;
+
+        GwyLine *volumedist = gwy_field_minkowski(field, &fpart,
+                                                  mask, masking,
+                                                  GWY_MINKOWSKI_VOLUME,
+                                                  0, 0.0, 0.0);
+        if (volumedist->res == 1) {
+            guint count = gwy_mask_field_count(mask, NULL,
+                                               masking == GWY_MASK_INCLUDE);
+            g_assert_cmpuint(count, ==, 0);
+            continue;
+        }
+
+        for (guint k = 0; k < volumedist->res; k++)
+        for (guint jter = 0; jter < njter; jter++) {
+            guint i = g_rand_int_range(rng, 0, volumedist->res-1);
+            gdouble threshold = volumedist->off + (i + 0.5)*gwy_line_dx(volumedist);
+            guint nabove, n;
+            n = gwy_field_count_above_below(field, &fpart, mask, masking,
+                                            threshold, threshold, FALSE,
+                                            &nabove, NULL);
+            gdouble fraction = (gdouble)nabove/n;
+            if (n == 1) {
+                g_assert_cmpuint(volumedist->res, ==, 3);
+                g_assert_cmpfloat(volumedist->data[0], ==, 1.0);
+                g_assert_cmpfloat(volumedist->data[1], ==, 0.0);
+                g_assert_cmpfloat(volumedist->data[2], ==, 0.0);
+                break;
+            }
+            g_assert_cmpfloat(fabs(volumedist->data[i] - fraction), <=, 1e-14);
+        }
+
+        g_object_unref(volumedist);
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 static gdouble
 exterior_value_dumb(const gdouble *data,
                     guint size,

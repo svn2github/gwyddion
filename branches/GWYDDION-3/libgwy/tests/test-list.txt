@@ -257,6 +257,7 @@ field/distributions/slope/simple-x
 field/distributions/slope/simple-y
 field/distributions/slope/simple-oblique
 field/distributions/slope/nonsquare
+field/distributions/minkowski/volume
 surface/serialize
 surface/props
 surface/get
