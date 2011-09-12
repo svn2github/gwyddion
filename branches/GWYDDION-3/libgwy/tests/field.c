@@ -2938,7 +2938,9 @@ test_field_distributions_minkowski_volume(void)
             if (n == 1) {
                 g_assert_cmpuint(volumedist->res, ==, 3);
                 g_assert_cmpfloat(volumedist->data[0], ==, 1.0);
-                g_assert_cmpfloat(volumedist->data[1], ==, 0.0);
+                // Depends on rounding, permit both.
+                g_assert(volumedist->data[1] == 0.0
+                         || volumedist->data[1] == 1.0);
                 g_assert_cmpfloat(volumedist->data[2], ==, 0.0);
                 break;
             }
