@@ -2897,7 +2897,7 @@ test_field_distributions_hhcf_partial(void)
 void
 test_field_distributions_minkowski_volume(void)
 {
-    enum { max_size = 30, niter = 400, njter = 20 };
+    enum { max_size = 30, niter = 400 };
     GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -2929,28 +2929,24 @@ test_field_distributions_minkowski_volume(void)
             continue;
         }
 
-        for (guint k = 0; k < volumedist->res; k++) {
-            for (guint jter = 0; jter < njter; jter++) {
-                guint i = g_rand_int_range(rng, 0, volumedist->res-1);
-                gdouble threshold = (volumedist->off
-                                     + (i + 0.5)*gwy_line_dx(volumedist));
-                guint nabove, n;
-                n = gwy_field_count_above_below(field, &fpart, mask, masking,
-                                                threshold, threshold, FALSE,
-                                                &nabove, NULL);
-                gdouble fraction = (gdouble)nabove/n;
-                if (n == 1) {
-                    g_assert_cmpuint(volumedist->res, ==, 3);
-                    g_assert_cmpfloat(volumedist->data[0], ==, 1.0);
-                    // Depends on rounding, permit both.
-                    g_assert(volumedist->data[1] == 0.0
-                             || volumedist->data[1] == 1.0);
-                    g_assert_cmpfloat(volumedist->data[2], ==, 0.0);
-                    break;
-                }
-                g_assert_cmpfloat(fabs(volumedist->data[i] - fraction),
-                                  <=, 1e-14);
+        for (guint i = 0; i < volumedist->res; i++) {
+            gdouble threshold = (volumedist->off
+                                 + (i + 0.5)*gwy_line_dx(volumedist));
+            guint nabove, n;
+            n = gwy_field_count_above_below(field, &fpart, mask, masking,
+                                            threshold, threshold, FALSE,
+                                            &nabove, NULL);
+            gdouble fraction = (gdouble)nabove/n;
+            if (n == 1) {
+                g_assert_cmpuint(volumedist->res, ==, 3);
+                g_assert_cmpfloat(volumedist->data[0], ==, 1.0);
+                // Depends on rounding, permit both.
+                g_assert(volumedist->data[1] == 0.0
+                         || volumedist->data[1] == 1.0);
+                g_assert_cmpfloat(volumedist->data[2], ==, 0.0);
+                break;
             }
+            g_assert_cmpfloat(fabs(volumedist->data[i] - fraction), <=, 1e-14);
         }
 
         g_object_unref(volumedist);
@@ -2968,14 +2964,15 @@ count_black_white_edges_dumb(const GwyField *field,
                              gdouble threshold,
                              guint *bw_edge_count)
 {
-    guint xres = field->xres;
     guint count = 0, count_bw = 0;
 
-    for (guint i = fpart->row; i < fpart->row + fpart->height; i++) {
-        for (guint j = fpart->col; j < fpart->col + fpart->width; j++) {
-            if (i+1 < fpart->row + fpart->height) {
-                gdouble z1 = field->data[i*xres + j],
-                        z2 = field->data[(i + 1)*xres + j];
+    for (guint i = 0; i < fpart->height; i++) {
+        for (guint j = 0; j < fpart->width; j++) {
+            if (i+1 < fpart->height) {
+                gdouble z1 = gwy_field_index(field,
+                                             fpart->col + j, fpart->row + i),
+                        z2 = gwy_field_index(field,
+                                             fpart->col + j, fpart->row + i+1);
                 gdouble zmin = fmin(z1, z2), zmax = fmax(z1, z2);
 
                 if (masking == GWY_MASK_IGNORE
@@ -2990,9 +2987,11 @@ count_black_white_edges_dumb(const GwyField *field,
                         count_bw++;
                 }
             }
-            if (j+1 < fpart->col + fpart->width) {
-                gdouble z1 = field->data[i*xres + j],
-                        z2 = field->data[i*xres + j+1];
+            if (j+1 < fpart->width) {
+                gdouble z1 = gwy_field_index(field,
+                                             fpart->col + j, fpart->row + i),
+                        z2 = gwy_field_index(field,
+                                             fpart->col + j+1, fpart->row + i);
                 gdouble zmin = fmin(z1, z2), zmax = fmax(z1, z2);
 
                 if (masking == GWY_MASK_IGNORE
@@ -3017,7 +3016,7 @@ count_black_white_edges_dumb(const GwyField *field,
 void
 test_field_distributions_minkowski_surface(void)
 {
-    enum { max_size = 30, niter = 400, njter = 20 };
+    enum { max_size = 30, niter = 400 };
     GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -3040,36 +3039,33 @@ test_field_distributions_minkowski_surface(void)
                                                    GWY_MINKOWSKI_SURFACE,
                                                    0, 0.0, 0.0);
         if (surfacedist->res == 1) {
-            guint count = gwy_mask_field_count(mask, NULL,
-                                               masking == GWY_MASK_INCLUDE);
-            g_assert_cmpuint(count, ==, 0);
+            if (masking == GWY_MASK_IGNORE) {
+                g_assert_cmpuint(width, ==, 1);
+                g_assert_cmpuint(height, ==, 1);
+            }
+            else {
+                gboolean include = (masking == GWY_MASK_INCLUDE);
+                guint count = gwy_mask_field_count(mask, NULL, include);
+                guint ngrains;
+                if (!include)
+                    gwy_mask_field_logical(mask, NULL, NULL, GWY_LOGICAL_NA);
+                gwy_mask_field_grain_numbers(mask, &ngrains);
+                g_assert_cmpuint(count, ==, ngrains);
+            }
             g_object_unref(surfacedist);
             g_object_unref(mask);
             g_object_unref(field);
             continue;
         }
 
-        for (guint k = 0; k < surfacedist->res; k++) {
-            for (guint jter = 0; jter < njter; jter++) {
-                guint i = g_rand_int_range(rng, 0, surfacedist->res-1);
-                gdouble threshold = (surfacedist->off
-                                     + (i + 0.5)*gwy_line_dx(surfacedist));
-                guint nbw, n;
-                n = count_black_white_edges_dumb(field, &fpart, mask, masking,
-                                                 threshold, &nbw);
-                gdouble fraction = (gdouble)nbw/n;
-                if (n == 1) {
-                    g_assert_cmpuint(surfacedist->res, ==, 3);
-                    g_assert_cmpfloat(surfacedist->data[0], ==, 0.0);
-                    // Depends on rounding, permit both.
-                    g_assert(surfacedist->data[1] == 0.0
-                             || surfacedist->data[1] == 1.0);
-                    g_assert_cmpfloat(surfacedist->data[2], ==, 0.0);
-                    break;
-                }
-                g_assert_cmpfloat(fabs(surfacedist->data[i] - fraction),
-                                  <=, 1e-14);
-            }
+        for (guint i = 0; i < surfacedist->res; i++) {
+            gdouble threshold = (surfacedist->off
+                                 + (i + 0.5)*gwy_line_dx(surfacedist));
+            guint nbw, n;
+            n = count_black_white_edges_dumb(field, &fpart, mask, masking,
+                                             threshold, &nbw);
+            gdouble fraction = (gdouble)nbw/n;
+            g_assert_cmpfloat(fabs(surfacedist->data[i] - fraction), <=, 1e-14);
         }
 
         g_object_unref(surfacedist);
