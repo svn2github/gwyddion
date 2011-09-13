@@ -2923,6 +2923,9 @@ test_field_distributions_minkowski_volume(void)
             guint count = gwy_mask_field_count(mask, NULL,
                                                masking == GWY_MASK_INCLUDE);
             g_assert_cmpuint(count, ==, 0);
+            g_object_unref(volumedist);
+            g_object_unref(mask);
+            g_object_unref(field);
             continue;
         }
 
