@@ -10,7 +10,6 @@ oks="build documentation install dists"
 
 source $HOME/.bashrc
 export LC_ALL=C
-export CFLAGS="-ggdb -O2"
 PATH="$HOME/bin:$PATH"
 
 # =====[ subroutines ]=======================================================
