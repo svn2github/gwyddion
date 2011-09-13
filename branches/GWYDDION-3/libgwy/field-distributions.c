@@ -1504,7 +1504,6 @@ minkowski_surface(const GwyField *field,
                   guint npoints,
                   gdouble min, gdouble max)
 {
-    GwyLine *line = NULL;
     guint nedges = count_edges(mask, masking, maskcol, maskrow, width, height);
 
     if (!nedges)
@@ -1516,7 +1515,7 @@ minkowski_surface(const GwyField *field,
     if (!npoints)
         npoints = dist_points_for_n_points(nedges);
 
-    line = gwy_line_new_sized(npoints, TRUE);
+    GwyLine *line = gwy_line_new_sized(npoints, TRUE);
     line->real = max - min;
     line->off = min;
     GwyLine *maxdist = line, *mindist = gwy_line_duplicate(maxdist);
@@ -1528,7 +1527,7 @@ minkowski_surface(const GwyField *field,
     gwy_line_accumulate(mindist, FALSE);
     gwy_line_accumulate(maxdist, FALSE);
     gwy_line_add_line(maxdist, NULL, mindist, 0, -1.0);
-    g_object_unref(maxdist);
+    g_object_unref(mindist);
     gwy_line_multiply(maxdist, 1.0/nedges);
 
     return line;
