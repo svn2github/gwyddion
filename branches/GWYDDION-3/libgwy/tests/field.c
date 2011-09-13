@@ -3014,7 +3014,7 @@ count_black_white_edges_dumb(const GwyField *field,
 }
 
 void
-test_field_distributions_minkowski_surface(void)
+test_field_distributions_minkowski_boundary(void)
 {
     enum { max_size = 30, niter = 400 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -3034,11 +3034,11 @@ test_field_distributions_minkowski_surface(void)
         GwyMaskField *mask = random_mask_field(width, height, rng);
         GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
 
-        GwyLine *surfacedist = gwy_field_minkowski(field, &fpart,
-                                                   mask, masking,
-                                                   GWY_MINKOWSKI_SURFACE,
-                                                   0, 0.0, 0.0);
-        if (surfacedist->res == 1) {
+        GwyLine *boundarydist = gwy_field_minkowski(field, &fpart,
+                                                    mask, masking,
+                                                    GWY_MINKOWSKI_BOUNDARY,
+                                                    0, 0.0, 0.0);
+        if (boundarydist->res == 1) {
             if (masking == GWY_MASK_IGNORE) {
                 g_assert_cmpuint(width, ==, 1);
                 g_assert_cmpuint(height, ==, 1);
@@ -3052,23 +3052,23 @@ test_field_distributions_minkowski_surface(void)
                 gwy_mask_field_grain_numbers(mask, &ngrains);
                 g_assert_cmpuint(count, ==, ngrains);
             }
-            g_object_unref(surfacedist);
+            g_object_unref(boundarydist);
             g_object_unref(mask);
             g_object_unref(field);
             continue;
         }
 
-        for (guint i = 0; i < surfacedist->res; i++) {
-            gdouble threshold = (surfacedist->off
-                                 + (i + 0.5)*gwy_line_dx(surfacedist));
+        for (guint i = 0; i < boundarydist->res; i++) {
+            gdouble threshold = (boundarydist->off
+                                 + (i + 0.5)*gwy_line_dx(boundarydist));
             guint nbw, n;
             n = count_black_white_edges_dumb(field, &fpart, mask, masking,
                                              threshold, &nbw);
             gdouble fraction = (gdouble)nbw/n;
-            g_assert_cmpfloat(fabs(surfacedist->data[i] - fraction), <=, 1e-14);
+            g_assert_cmpfloat(fabs(boundarydist->data[i] - fraction), <=, 1e-14);
         }
 
-        g_object_unref(surfacedist);
+        g_object_unref(boundarydist);
         g_object_unref(mask);
         g_object_unref(field);
     }

@@ -1550,14 +1550,14 @@ calculate_min_max_dist(const GwyField *field,
  * cumulative distributions of min(z1, z2) and max(z1, z2) where (z1, z2) are
  * couples of pixels with a common edge. */
 static GwyLine*
-minkowski_surface(const GwyField *field,
-                  guint col, guint row,
-                  guint width, guint height,
-                  const GwyMaskField *mask,
-                  GwyMaskingType masking,
-                  guint maskcol, guint maskrow,
-                  guint npoints,
-                  gdouble min, gdouble max)
+minkowski_boundary(const GwyField *field,
+                   guint col, guint row,
+                   guint width, guint height,
+                   const GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   guint maskcol, guint maskrow,
+                   guint npoints,
+                   gdouble min, gdouble max)
 {
     gdouble min1, max1;
     guint nedges = count_edges(field, col, row, width, height,
@@ -2035,8 +2035,8 @@ minkowski_connectivity(const GwyField *field,
  * Pass @max <= @min to calculate the functional in the full data range
  * (with masking still considered).
  *
- * Note at present masking is implemented only for the volume and surface
- * functionals %GWY_MINKOWSKI_VOLUME and %GWY_MINKOWSKI_SURFACE.
+ * Note at present masking is implemented only for the volume and boundary
+ * functionals %GWY_MINKOWSKI_VOLUME and %GWY_MINKOWSKI_BOUNDARY.
  *
  * Returns: (transfer full):
  *          A new one-dimensional data line with the requested functional.
@@ -2063,10 +2063,10 @@ gwy_field_minkowski(const GwyField *field,
                                 mask, masking, maskcol, maskrow,
                                 npoints, min, max);
     }
-    else if (type == GWY_MINKOWSKI_SURFACE) {
-        line = minkowski_surface(field, col, row, width, height,
-                                 mask, masking, maskcol, maskrow,
-                                 npoints, min, max);
+    else if (type == GWY_MINKOWSKI_BOUNDARY) {
+        line = minkowski_boundary(field, col, row, width, height,
+                                  mask, masking, maskcol, maskrow,
+                                  npoints, min, max);
     }
     else if (type == GWY_MINKOWSKI_CONNECTIVITY) {
         line = minkowski_connectivity(field, col, row, width, height,
@@ -2101,8 +2101,8 @@ fail:
  * GwyMinkowskiFunctionalType:
  * @GWY_MINKOWSKI_VOLUME: Fraction of ‘white’ pixels from the total
  *                        number of pixels.
- * @GWY_MINKOWSKI_SURFACE: Fraction of ‘black–white’ pixel edges from the
- *                         total number of edges.
+ * @GWY_MINKOWSKI_BOUNDARY: Fraction of ‘black–white’ pixel edges from the
+ *                          total number of edges.
  * @GWY_MINKOWSKI_CONNECTIVITY: Difference between the numbers of ‘white’ and
  *                              ‘black’ connected areas (grains) divided by
  *                              the total number of pixels.
