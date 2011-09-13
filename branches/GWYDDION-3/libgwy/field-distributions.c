@@ -1302,6 +1302,11 @@ minkowski_volume(const GwyField *field,
     GwyFieldPart rect = { maskcol, maskrow, width, height };
     guint n = width*height;
 
+    if (!(min < max))
+        gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
+                          mask, masking, &min, &max);
+    sanitise_range(&min, &max);
+
     if (masking == GWY_MASK_INCLUDE)
         n = gwy_mask_field_part_count(mask, &rect, TRUE);
     else if (masking == GWY_MASK_EXCLUDE)
@@ -1355,28 +1360,44 @@ minkowski_volume(const GwyField *field,
  * @row: Row index.
  * @width: Part width (number of column).
  * @height: Part height (number of rows).
+ * @min: Location to store the minimum.
+ * @min: Location to store the maximum.
  *
  * Counts the number of edges between two pixels.
  *
  * An edge is counted if both pixels are counted according to the masking mode
  * @masking.
  *
+ * Since only edges that lie between two counted pixels contribute the minimum
+ * and maximum is also calculated edge-wise.  This essentially means that
+ * they are calculated ignoring single-pixel grains as all other masked values
+ * have some neighbour.
+ *
  * Returns: The number of edges.
  **/
 static guint
-count_edges(const GwyMaskField *mask,
+count_edges(const GwyField *field,
+            guint col, guint row,
+            guint width, guint height,
+            const GwyMaskField *mask,
             GwyMaskingType masking,
             guint maskcol, guint maskrow,
-            guint width, guint height)
+            gdouble *min, gdouble *max)
 {
-    if (masking == GWY_MASK_IGNORE)
+    if (masking == GWY_MASK_IGNORE) {
+        gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
+                          NULL, GWY_MASK_IGNORE, min, max);
         return 2*width*height - width - height;
+    }
 
     g_assert(mask);
 
     gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint xres = field->xres;
     guint nedges = 0;
 
+    gdouble min1 = G_MAXDOUBLE, max1 = -G_MAXDOUBLE;
+    const gdouble *base = field->data + row*xres + col;
     for (guint i = 0; i < height-1; i++) {
         GwyMaskIter iter1, iter2;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
@@ -1384,32 +1405,64 @@ count_edges(const GwyMaskField *mask,
 
         gboolean curr = !gwy_mask_iter_get(iter1);
         gboolean lower = !gwy_mask_iter_get(iter2);
-        if (curr == invert && lower == invert)
+        if (curr == invert && lower == invert) {
+            gdouble z1 = base[i*xres], z2 = base[(i + 1)*xres];
+            GWY_ORDER(gdouble, z1, z2);
+            if (z1 < min1)
+                min1 = z1;
+            if (z2 > max1)
+                max1 = z2;
             nedges++;
+        }
 
-        for (guint j = width-1; j; j--) {
+        for (guint j = 1; j < width; j++) {
             gboolean right = curr;
             gwy_mask_iter_next(iter1);
             gwy_mask_iter_next(iter2);
             curr = !gwy_mask_iter_get(iter1);
             lower = !gwy_mask_iter_get(iter2);
-            if (curr == invert && right == invert)
+            if (curr == invert && right == invert) {
+                gdouble z1 = base[i*xres + j-1], z2 = base[i*xres + j];
+                GWY_ORDER(gdouble, z1, z2);
+                if (z1 < min1)
+                    min1 = z1;
+                if (z2 > max1)
+                    max1 = z2;
                 nedges++;
-            if (curr == invert && lower == invert)
+            }
+            if (curr == invert && lower == invert) {
+                gdouble z1 = base[i*xres + j], z2 = base[(i + 1)*xres + j];
+                GWY_ORDER(gdouble, z1, z2);
+                if (z1 < min1)
+                    min1 = z1;
+                if (z2 > max1)
+                    max1 = z2;
                 nedges++;
+            }
         }
     }
 
     GwyMaskIter iter;
     gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height-1);
     gboolean curr = !gwy_mask_iter_get(iter);
-    for (guint j = width-1; j; j--) {
+    for (guint j = 1; j < width; j++) {
         gboolean right = curr;
         gwy_mask_iter_next(iter);
         curr = !gwy_mask_iter_get(iter);
-        if (curr == invert && right == invert)
+        if (curr == invert && right == invert) {
+            gdouble z1 = base[(height-1)*xres + j-1],
+                    z2 = base[(height-1)*xres + j];
+            GWY_ORDER(gdouble, z1, z2);
+            if (z1 < min1)
+                min1 = z1;
+            if (z2 > max1)
+                max1 = z2;
             nedges++;
+        }
     }
+
+    *min = min1;
+    *max = max1;
 
     return nedges;
 }
@@ -1438,8 +1491,9 @@ calculate_min_max_dist(const GwyField *field,
         for (guint i = 0; i < height-1; i++) {
             const gdouble *frow = field->data + (row + i)*xres + col;
             add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
-            for (guint j = width-1; j; j--, frow++) {
+            for (guint j = width-1; j; j--) {
                 add_to_min_max_dist(mindist, maxdist, *frow, *(frow + 1));
+                frow++;
                 add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
             }
         }
@@ -1465,7 +1519,7 @@ calculate_min_max_dist(const GwyField *field,
         if (curr == invert && lower == invert)
             add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
 
-        for (guint j = width-1; j; j--, frow++) {
+        for (guint j = width-1; j; j--) {
             gboolean right = curr;
             gwy_mask_iter_next(iter1);
             gwy_mask_iter_next(iter2);
@@ -1473,6 +1527,7 @@ calculate_min_max_dist(const GwyField *field,
             lower = !gwy_mask_iter_get(iter2);
             if (curr == invert && right == invert)
                 add_to_min_max_dist(mindist, maxdist, *frow, *(frow + 1));
+            frow++;
             if (curr == invert && lower == invert)
                 add_to_min_max_dist(mindist, maxdist, *frow, *(frow + xres));
         }
@@ -1504,7 +1559,10 @@ minkowski_surface(const GwyField *field,
                   guint npoints,
                   gdouble min, gdouble max)
 {
-    guint nedges = count_edges(mask, masking, maskcol, maskrow, width, height);
+    gdouble min1, max1;
+    guint nedges = count_edges(field, col, row, width, height,
+                               mask, masking, maskcol, maskrow,
+                               &min1, &max1);
 
     if (!nedges)
         return NULL;
@@ -1515,10 +1573,16 @@ minkowski_surface(const GwyField *field,
     if (!npoints)
         npoints = dist_points_for_n_points(nedges);
 
+    if (!(min < max)) {
+        min = min1;
+        max = max1;
+    }
+    sanitise_range(&min, &max);
+
     GwyLine *line = gwy_line_new_sized(npoints, TRUE);
     line->real = max - min;
     line->off = min;
-    GwyLine *maxdist = line, *mindist = gwy_line_duplicate(maxdist);
+    GwyLine *mindist = line, *maxdist = gwy_line_duplicate(mindist);
     calculate_min_max_dist(field, col, row, width, height,
                            mask, masking, maskcol, maskrow,
                            mindist, maxdist);
@@ -1527,8 +1591,8 @@ minkowski_surface(const GwyField *field,
     gwy_line_accumulate(mindist, FALSE);
     gwy_line_accumulate(maxdist, FALSE);
     gwy_line_add_line(maxdist, NULL, mindist, 0, -1.0);
-    g_object_unref(mindist);
-    gwy_line_multiply(maxdist, 1.0/nedges);
+    g_object_unref(maxdist);
+    gwy_line_multiply(mindist, 1.0/nedges);
 
     return line;
 }
@@ -1934,15 +1998,20 @@ minkowski_connectivity(const GwyField *field,
     if (!n)
         return NULL;
 
+    if (!(min < max))
+        gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
+                          mask, masking, &min, &max);
+    sanitise_range(&min, &max);
+
     GwyLine *whitedist = grain_number_dist(field, col, row, width, height,
                                            mask, masking, maskcol, maskrow,
                                            TRUE, npoints, min, max);
     GwyLine *blackdist = grain_number_dist(field, col, row, width, height,
                                            mask, masking, maskcol, maskrow,
                                            FALSE, npoints, min, max);
-    gwy_line_add_line(whitedist, NULL, blackdist, 0, -1.0);
-    gwy_line_multiply(whitedist, 1.0/n);
+    gwy_line_add_line(blackdist, NULL, whitedist, 0, -1.0);
     g_object_unref(blackdist);
+    gwy_line_multiply(whitedist, 1.0/n);
 
     return whitedist;
 }
@@ -1987,11 +2056,6 @@ gwy_field_minkowski(const GwyField *field,
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
-
-    gboolean explicit_range = min < max;
-    if (!explicit_range)
-        gwy_field_min_max(field, fpart, mask, masking, &min, &max);
-    sanitise_range(&min, &max);
 
     // Cannot determine npoints here, it depends on the functional.
     if (type == GWY_MINKOWSKI_VOLUME) {
