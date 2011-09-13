@@ -2913,7 +2913,7 @@ test_field_distributions_minkowski_volume(void)
         GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(width, height, rng);
-        GwyMaskingType masking = GWY_MASK_INCLUDE;
+        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
 
         GwyLine *volumedist = gwy_field_minkowski(field, &fpart,
                                                   mask, masking,
