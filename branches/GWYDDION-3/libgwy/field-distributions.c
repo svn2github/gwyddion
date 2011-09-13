@@ -1956,6 +1956,7 @@ minkowski_connectivity(const GwyField *field,
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @type: Type of functional to calculate.
  * @npoints: Resolution, i.e. the number of returned line points.
  *           Pass zero to choose a suitable resolution automatically.
  * @min: Minimum value of the range to calculate the distribution in.
