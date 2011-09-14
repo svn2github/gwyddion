@@ -1979,6 +1979,40 @@ grain_number_dist(const GwyField *field,
 }
 
 static GwyLine*
+minkowski_ngrains(const GwyField *field,
+                  guint col, guint row,
+                  guint width, guint height,
+                  const GwyMaskField *mask,
+                  GwyMaskingType masking,
+                  guint maskcol, guint maskrow,
+                  gboolean white,
+                  guint npoints,
+                  gdouble min, gdouble max)
+{
+    GwyFieldPart rect = { maskcol, maskrow, width, height };
+    guint n = width*height;
+    if (masking == GWY_MASK_INCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, TRUE);
+    else if (masking == GWY_MASK_EXCLUDE)
+        n = gwy_mask_field_part_count(mask, &rect, FALSE);
+
+    if (!n)
+        return NULL;
+
+    if (!(min < max))
+        gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
+                          mask, masking, &min, &max);
+    sanitise_range(&min, &max);
+
+    GwyLine *ngraindist = grain_number_dist(field, col, row, width, height,
+                                            mask, masking, maskcol, maskrow,
+                                            white, npoints, min, max);
+    gwy_line_multiply(ngraindist, 1.0/n);
+
+    return ngraindist;
+}
+
+static GwyLine*
 minkowski_connectivity(const GwyField *field,
                        guint col, guint row,
                        guint width, guint height,
@@ -2068,6 +2102,16 @@ gwy_field_minkowski(const GwyField *field,
                                   mask, masking, maskcol, maskrow,
                                   npoints, min, max);
     }
+    else if (type == GWY_MINKOWSKI_BLACK) {
+        line = minkowski_ngrains(field, col, row, width, height,
+                                 mask, masking, maskcol, maskrow,
+                                 FALSE, npoints, min, max);
+    }
+    else if (type == GWY_MINKOWSKI_WHITE) {
+        line = minkowski_ngrains(field, col, row, width, height,
+                                 mask, masking, maskcol, maskrow,
+                                 TRUE, npoints, min, max);
+    }
     else if (type == GWY_MINKOWSKI_CONNECTIVITY) {
         line = minkowski_connectivity(field, col, row, width, height,
                                       mask, masking, maskcol, maskrow,
@@ -2103,11 +2147,15 @@ fail:
  *                        number of pixels.
  * @GWY_MINKOWSKI_BOUNDARY: Fraction of ‘black–white’ pixel edges from the
  *                          total number of edges.
+ * @GWY_MINKOWSKI_BLACK: The number of ‘black’ connected areas (grains) divided
+ *                       by the total number of pixels.
+ * @GWY_MINKOWSKI_WHITE: The number of ‘white’ connected areas (grains) divided
+ *                       by the total number of pixels.
  * @GWY_MINKOWSKI_CONNECTIVITY: Difference between the numbers of ‘white’ and
  *                              ‘black’ connected areas (grains) divided by
  *                              the total number of pixels.
  *
- * Types of Minkowski functionals.
+ * Types of Minkowski functionals and related quantities.
  *
  * Each quantity is a function of threshold; pixels above this threshold are
  * considered ‘white’, pixels below ‘black’.
