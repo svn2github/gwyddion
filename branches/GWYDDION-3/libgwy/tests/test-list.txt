@@ -259,6 +259,8 @@ field/distributions/slope/simple-oblique
 field/distributions/slope/nonsquare
 field/distributions/minkowski/volume
 field/distributions/minkowski/boundary
+field/distributions/minkowski/black
+field/distributions/minkowski/white
 surface/serialize
 surface/props
 surface/get
