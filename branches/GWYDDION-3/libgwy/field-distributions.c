@@ -1850,8 +1850,6 @@ grain_number_dist(const GwyField *field,
                   guint npoints,
                   gdouble min, gdouble max)
 {
-    GwyLine *line = gwy_line_new_sized(npoints, FALSE);
-
     GwyFieldPart rect = { maskcol, maskrow, width, height };
     guint n = width*height;
     if (masking == GWY_MASK_INCLUDE)
@@ -1859,12 +1857,18 @@ grain_number_dist(const GwyField *field,
     else if (masking == GWY_MASK_EXCLUDE)
         n = gwy_mask_field_part_count(mask, &rect, FALSE);
 
-    n = MAX(n, 1);
+    if (!n)
+        return NULL;
+
+    if (!npoints)
+        npoints = dist_points_for_n_points(n);
+
+    GwyLine *line = gwy_line_new_sized(npoints, FALSE);
 
     guint *heights = discretise_heights(field, col, row, width, height,
                                         mask, masking, maskcol, maskrow,
                                         npoints, min, max, white);
-    guint *nh = g_new0(guint, npoints);
+    guint *nh = g_new0(guint, npoints+1);
     guint *hindex = g_new(guint, width*height);
     group_by_height(heights, npoints, width*height, nh, hindex);
 
