@@ -18,7 +18,6 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include "testlibgwy.h"
 
 /***************************************************************************
@@ -29,15 +28,15 @@
 
 G_GNUC_UNUSED
 static void
-mask_field_dump(const GwyMaskField *maskfield, const gchar *name)
+print_mask_field(const gchar *name, const GwyMaskField *maskfield)
 {
-    printf("%s %s %p %ux%u (stride %u)\n",
-           G_OBJECT_TYPE_NAME(maskfield), name, maskfield,
-           maskfield->xres, maskfield->yres, maskfield->stride);
+    g_printerr("%s %s %p %ux%u (stride %u)\n",
+               G_OBJECT_TYPE_NAME(maskfield), name, maskfield,
+               maskfield->xres, maskfield->yres, maskfield->stride);
     for (guint i = 0; i < maskfield->yres; i++) {
         for (guint j = 0; j < maskfield->xres; j++)
-            putchar(gwy_mask_field_get(maskfield, j, i) ? '#' : '.');
-        putchar('\n');
+            g_printerr("%c", gwy_mask_field_get(maskfield, j, i) ? '#' : '.');
+        g_printerr("%c", '\n');
     }
 }
 
