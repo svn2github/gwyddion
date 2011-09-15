@@ -1754,7 +1754,7 @@ grain_number_dist(const GwyField *field,
     // Main iteration
     guint ngrains = 1;
     for (guint h = 0; h < npoints; h++) {
-        if (h && nh[h] == nh[h-1]) {
+        if (h && nh[h] == nh[h+1]) {
             line->data[h] = line->data[h-1];
             continue;
         }
