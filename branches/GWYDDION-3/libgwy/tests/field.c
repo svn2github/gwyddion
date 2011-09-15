@@ -3113,6 +3113,10 @@ test_field_distributions_minkowski_black(void)
         if (masking != GWY_MASK_IGNORE)
             n = gwy_mask_field_count(mask, NULL, masking == GWY_MASK_INCLUDE);
 
+        //GwyField *part = gwy_field_new_part(field, &fpart, FALSE);
+        //print_field("field", part);
+        //g_object_unref(part);
+
         for (guint i = 0; i < blackdist->res; i++) {
             gdouble threshold = (blackdist->off
                                  + (i + 0.5)*gwy_line_dx(blackdist));
@@ -3125,20 +3129,17 @@ test_field_distributions_minkowski_black(void)
             else if (masking == GWY_MASK_EXCLUDE)
                 gwy_mask_field_logical(grains, mask, NULL, GWY_LOGICAL_NCIMPL);
 
-
             guint ng;
             gwy_mask_field_grain_numbers(grains, &ng);
             gdouble fraction = (gdouble)ng/n;
+            //g_printerr("[%u] %g :: %g(%u) %g(%g)\n", i, threshold, fraction, ng, blackdist->data[i], blackdist->data[i]*n);
             g_assert_cmpfloat(fabs(blackdist->data[i] - fraction), <=, 1e-14);
-            g_printerr("[%u] %g :: %g(%u) %g(%g)\n",
-                       i, threshold, fraction, ng, blackdist->data[i], blackdist->data[i]*n);
             g_object_unref(grains);
         }
 
         g_object_unref(blackdist);
         g_object_unref(mask);
         g_object_unref(field);
-        break;
     }
     g_rand_free(rng);
 }
@@ -3196,16 +3197,14 @@ test_field_distributions_minkowski_white(void)
             guint ng;
             gwy_mask_field_grain_numbers(grains, &ng);
             gdouble fraction = (gdouble)ng/n;
+            //g_printerr("[%u] %g :: %g(%u) %g(%g)\n", i, threshold, fraction, ng, whitedist->data[i], whitedist->data[i]*n);
             g_assert_cmpfloat(fabs(whitedist->data[i] - fraction), <=, 1e-14);
-            g_printerr("[%u] %g :: %g(%u) %g(%g)\n",
-                       i, threshold, fraction, ng, whitedist->data[i], whitedist->data[i]*n);
             g_object_unref(grains);
         }
 
         g_object_unref(whitedist);
         g_object_unref(mask);
         g_object_unref(field);
-        break;
     }
     g_rand_free(rng);
 }
