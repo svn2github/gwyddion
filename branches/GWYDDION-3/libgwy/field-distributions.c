@@ -1617,15 +1617,15 @@ discretise_heights(const GwyField *field,
                    gboolean white)
 {
     guint *heights = g_new(guint, width*height);
-    gdouble q = (npoints - 1.0)/(max - min);
+    gdouble q = npoints/(max - min);
 
     for (guint i = 0; i < height; i++) {
         const gdouble *drow = field->data + (i + row)*field->xres + col;
         guint *hrow = heights + i*width;
 
         for (guint j = width; j; j--, drow++, hrow++) {
-            gdouble x = floor((white ? (*drow - min) : (max - *drow))*q + 0.5);
-            x = CLAMP(x, 0.0, npoints-1);
+            gdouble x = ceil((white ? (max - *drow) : (*drow - min))*q - 0.5);
+            x = CLAMP(x, 0.0, npoints);
             *hrow = (guint)x;
         }
     }
@@ -1646,9 +1646,9 @@ group_by_height(const guint *heights,
     // Make nh[i] the start of the block of discrete height i in hindex[].
     for (guint i = 0; i < n; i++)
         nh[heights[i]]++;
-    for (guint i = 1; i < npoints; i++)
+    for (guint i = 1; i <= npoints; i++)
         nh[i] += nh[i-1];
-    for (guint i = npoints-1; i; i--)
+    for (guint i = npoints; i; i--)
         nh[i] = nh[i-1];
     nh[0] = 0;
 
@@ -1656,11 +1656,11 @@ group_by_height(const guint *heights,
     // corresponding discrete height.
     for (guint i = 0; i < n; i++)
         hindex[nh[heights[i]]++] = i;
-    for (guint i = npoints-1; i; i--)
+    for (guint i = npoints; i; i--)
         nh[i] = nh[i-1];
     nh[0] = 0;
     // To avoid special-cases, append the index of end of the array.
-    nh[npoints] = n;
+    nh[npoints+1] = n;
 }
 
 static inline guint
@@ -1684,7 +1684,7 @@ uniq_array(guint *x, guint n)
 }
 
 /**
- * gwy_data_field_area_grains_tgnd_range:
+ * grain_number_dist:
  * @data_field: A data field.
  * @target_line: A data line to store the distribution to.  It will be
  *               resampled to the requested width.
@@ -1729,11 +1729,13 @@ grain_number_dist(const GwyField *field,
         npoints = dist_points_for_n_points(n);
 
     GwyLine *line = gwy_line_new_sized(npoints, FALSE);
+    line->real = max - min;
+    line->off = min;
 
     guint *heights = discretise_heights(field, col, row, width, height,
                                         mask, masking, maskcol, maskrow,
                                         npoints, min, max, white);
-    guint *nh = g_new0(guint, npoints+1);
+    guint *nh = g_new0(guint, npoints+2);
     guint *hindex = g_new(guint, width*height);
     group_by_height(heights, npoints, width*height, nh, hindex);
 
@@ -1795,14 +1797,35 @@ grain_number_dist(const GwyField *field,
             if (m[i] == i)
                 count++;
         }
-        line->data[h] = (guint)count/n;
 
+        line->data[h] = (gdouble)count/n;
 #ifdef DEBUG
-        for (guint i = 0; i <= grain_no; i++)
-            g_printerr("%d[%d] ", m[i], i);
-        g_printerr("\n");
+        g_printerr("GRAINS %u :: %u\n", h, count);
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                if (grains[i*width + j])
+                    g_printerr("%02u", grains[i*width + j]);
+                else
+                    g_printerr("..");
+                g_printerr("%c", j == width-1 ? '\n' : ' ');
+            }
+        }
+        g_printerr("MAPPED %u\n", h);
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                if (grains[i*width + j])
+                    g_printerr("%02u", m[grains[i*width + j]]);
+                else
+                    g_printerr("..");
+                g_printerr("%c", j == width-1 ? '\n' : ' ');
+            }
+        }
 #endif
+    }
 
+    if (white) {
+        for (guint j = 0; j < npoints/2; j++)
+            GWY_SWAP(gdouble, line->data[j], line->data[npoints-1 - j]);
     }
 
     g_free(m);
@@ -1825,27 +1848,14 @@ minkowski_ngrains(const GwyField *field,
                   guint npoints,
                   gdouble min, gdouble max)
 {
-    GwyFieldPart rect = { maskcol, maskrow, width, height };
-    guint n = width*height;
-    if (masking == GWY_MASK_INCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, TRUE);
-    else if (masking == GWY_MASK_EXCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, FALSE);
-
-    if (!n)
-        return NULL;
-
     if (!(min < max))
         gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
                           mask, masking, &min, &max);
     sanitise_range(&min, &max);
 
-    GwyLine *ngraindist = grain_number_dist(field, col, row, width, height,
-                                            mask, masking, maskcol, maskrow,
-                                            white, npoints, min, max);
-    gwy_line_multiply(ngraindist, 1.0/n);
-
-    return ngraindist;
+    return grain_number_dist(field, col, row, width, height,
+                             mask, masking, maskcol, maskrow,
+                             white, npoints, min, max);
 }
 
 static GwyLine*
@@ -1858,16 +1868,6 @@ minkowski_connectivity(const GwyField *field,
                        guint npoints,
                        gdouble min, gdouble max)
 {
-    GwyFieldPart rect = { maskcol, maskrow, width, height };
-    guint n = width*height;
-    if (masking == GWY_MASK_INCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, TRUE);
-    else if (masking == GWY_MASK_EXCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, FALSE);
-
-    if (!n)
-        return NULL;
-
     if (!(min < max))
         gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
                           mask, masking, &min, &max);
@@ -1876,12 +1876,14 @@ minkowski_connectivity(const GwyField *field,
     GwyLine *whitedist = grain_number_dist(field, col, row, width, height,
                                            mask, masking, maskcol, maskrow,
                                            TRUE, npoints, min, max);
+    if (!whitedist)
+        return NULL;
+
     GwyLine *blackdist = grain_number_dist(field, col, row, width, height,
                                            mask, masking, maskcol, maskrow,
                                            FALSE, npoints, min, max);
     gwy_line_add_line(blackdist, NULL, whitedist, 0, -1.0);
     g_object_unref(blackdist);
-    gwy_line_multiply(whitedist, 1.0/n);
 
     return whitedist;
 }
