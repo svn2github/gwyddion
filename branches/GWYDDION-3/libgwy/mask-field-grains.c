@@ -23,32 +23,6 @@
 #include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/mask-field-internal.h"
 
-/* Merge grains i and j in map with full resolution */
-static inline void
-resolve_grain_map(guint *m, guint i, guint j)
-{
-    guint ii, jj, k;
-
-    /* Find what i and j fully resolve to */
-    for (ii = i; m[ii] != ii; ii = m[ii])
-        ;
-    for (jj = j; m[jj] != jj; jj = m[jj])
-        ;
-    k = MIN(ii, jj);
-
-    /* Fix partial resolutions to full */
-    for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
-        m[i] = k;
-        i = ii;
-    }
-    m[ii] = k;
-    for (jj = m[j]; m[jj] != jj; jj = m[jj]) {
-        m[j] = k;
-        j = jj;
-    }
-    m[jj] = k;
-}
-
 static inline guint32*
 ensure_map(guint max_no, guint *map, guint *mapsize)
 {
@@ -129,7 +103,8 @@ gwy_mask_field_grain_numbers(GwyMaskField *field,
         }
     }
 
-    /* Resolve remianing grain number links in map */
+    // Resolve remaining grain number links in the map.  This nicely works
+    // because we resolve downwards and go from the lowest number.
     for (guint i = 1; i <= max_id; i++)
         m[i] = m[m[i]];
 

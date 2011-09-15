@@ -30,6 +30,7 @@
 #include "libgwy/field-distributions.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
+#include "libgwy/mask-field-internal.h"
 
 typedef struct {
     guint n;              // Number of quarter-pixels considered.
@@ -1597,136 +1598,6 @@ minkowski_boundary(const GwyField *field,
     return line;
 }
 
-/**
- * fill_one_grain:
- * @data: Arbitrary integer data.  Grain is formed by values equal to the
- *        value at (@col, @row).
- * @xres: The number of columns in @data.
- * @yres: The number of rows in @data.
- * @col: Column inside a grain.
- * @row: Row inside a grain.
- * @visited: An array of size @xres×@yres that contain zeroes in empty space
- *           and yet unvisited grains.  Current grain will be filled with
- *           @grain_no.
- * @grain_no: Value to fill current grain with.
- * @listv: A working buffer of size at least @xres×@yres/2 + 2, its content is
- *         owerwritten.
- * @listh: A working buffer of size at least @xres×@yres/2 + 2, its content is
- *         owerwritten.
- *
- * Internal function to fill/number a one grain.
- *
- * The @visited, @listv, and @listh buffers are recyclable between calls so
- * they don't have to be allocated and freed for each grain, speeding up
- * sequential grain processing.  Generally, this function itself does not
- * allocate or free any memory.
- *
- * Returns: The number of pixels in the grain.
- **/
-static guint
-fill_one_grain(const guint *data,
-               guint xres, guint yres,
-               guint col, guint row,
-               guint *visited,
-               guint grain_no,
-               guint *listv, guint *listh)
-{
-    g_return_val_if_fail(grain_no, 0);
-    guint initial = row*xres + col;
-    guint look_for = data[initial];
-    guint count = 1;
-
-    // check for a single point
-    visited[initial] = grain_no;
-    if ((!col || data[initial - 1] != look_for)
-        && (!row || data[initial - xres] != look_for)
-        && (col + 1 == xres || data[initial + 1] != look_for)
-        && (row + 1 == yres || data[initial + xres] != look_for)) {
-
-        return count;
-    }
-
-    guint nv = 2, nh = 2, n = xres*yres;
-    listv[0] = listv[1] = initial;
-    listh[0] = listh[1] = initial;
-
-    while (nv) {
-        // go through vertical lines and expand them horizontally
-        for (guint i = 0; i < nv; i += 2) {
-            for (guint p = listv[i]; p <= listv[i + 1]; p += xres) {
-                guint start, stop, j;
-
-                // scan left
-                start = p - 1;
-                stop = (p/xres)*xres;
-                for (j = start; j >= stop; j--) {
-                    if (visited[j] || data[j] != look_for)
-                        break;
-                    visited[j] = grain_no;
-                    count++;
-                }
-                if (j < start) {
-                    listh[nh++] = j + 1;
-                    listh[nh++] = start;
-                }
-
-                // scan right
-                start = p + 1;
-                stop = (p/xres + 1)*xres;
-                for (j = start; j < stop; j++) {
-                    if (visited[j] || data[j] != look_for)
-                        break;
-                    visited[j] = grain_no;
-                    count++;
-                }
-                if (j > start) {
-                    listh[nh++] = start;
-                    listh[nh++] = j - 1;
-                }
-            }
-        }
-        nv = 0;
-
-        // go through horizontal lines and expand them vertically
-        for (guint i = 0; i < nh; i += 2) {
-            for (guint p = listh[i]; p <= listh[i + 1]; p++) {
-                gint start, stop, j;
-
-                // scan up
-                start = p - xres;
-                stop = p % xres;
-                for (j = start; j >= stop; j -= xres) {
-                    if (visited[j] || data[j] != look_for)
-                        break;
-                    visited[j] = grain_no;
-                    count++;
-                }
-                if (j < start) {
-                    listv[nv++] = j + xres;
-                    listv[nv++] = start;
-                }
-
-                // scan down
-                start = p + xres;
-                stop = p % xres + n;
-                for (j = start; j < stop; j += xres) {
-                    if (visited[j] || data[j] != look_for)
-                        break;
-                    visited[j] = grain_no;
-                    count++;
-                }
-                if (j > start) {
-                    listv[nv++] = start;
-                    listv[nv++] = j - xres;
-                }
-            }
-        }
-        nh = 0;
-    }
-
-    return count;
-}
-
 /* Calculate discrete heights.
  *
  * There are @npoints buckes, the 0th collects everything below 1/2, the rest
@@ -1792,30 +1663,24 @@ group_by_height(const guint *heights,
     nh[npoints] = n;
 }
 
-/* Merge grains i and j in map with full resolution */
-static inline void
-resolve_grain_map(guint *m, guint i, guint j)
+static inline guint
+uniq_array(guint *x, guint n)
 {
-    guint ii, jj;
+    guint i = 1;
+    while (i < n) {
+        guint j;
+        for (j = 0; j < i; j++) {
+            if (x[i] == x[j])
+                break;
+        }
 
-    // Find what i and j fully resolve to.
-    for (ii = i; m[ii] != ii; ii = m[ii])
-        ;
-    for (jj = j; m[jj] != jj; jj = m[jj])
-        ;
-    guint k = MIN(ii, jj);
-
-    // Turn partial resultions to full.
-    for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
-        m[i] = k;
-        i = ii;
+        if (j < i) {
+            x[i] = x[--n];
+        }
+        else
+            i++;
     }
-    m[ii] = k;
-    for (jj = m[j]; m[jj] != jj; jj = m[jj]) {
-        m[j] = k;
-        j = jj;
-    }
-    m[jj] = k;
+    return n;
 }
 
 /**
@@ -1872,85 +1737,65 @@ grain_number_dist(const GwyField *field,
     guint *hindex = g_new(guint, width*height);
     group_by_height(heights, npoints, width*height, nh, hindex);
 
-    guint *grains = g_new0(guint, n);
-    guint *listv = g_new(guint, n/2 + 2);
-    guint *listh = g_new(guint, n/2 + 2);
-
-    guint *m = g_new(guint, 1), *mm = m;
-    guint msize = 0;
+    guint *grains = g_new0(guint, width*height);
+    guint *m = g_new(guint, n+1);
 
     // Main iteration
-    guint last_grain_no = 0;
+    guint ngrains = 1;
     for (guint h = 0; h < npoints; h++) {
-        // Mark new subgrains corresponding just to height @h.
-        guint grain_no = last_grain_no;
-        //gwy_debug("Height %d, number of old grains: %d", h, grain_no);
-        for (guint i = nh[h]; i < nh[h+1]; i++) {
-            guint j = hindex[i];
-            if (!grains[j]) {
-                grain_no++;
-                fill_one_grain(heights, width, height,
-                               j % width, j/width,
-                               grains, grain_no, listv, listh);
-            }
-        }
-        //gwy_debug("new subgrains: %d", grain_no-last_grain_no);
-
-        if (grain_no == last_grain_no) {
-            //gwy_debug("skipping empty height level");
-            line->data[h] = h ? line->data[h-1] : 0;
+        if (h && nh[h] == nh[h-1]) {
+            line->data[h] = line->data[h-1];
             continue;
         }
 
-        // Initialize grains number maps for merge scan
-        if (grain_no+1 > msize) {
-            g_free(m);
-            m = g_new(guint, 2*(grain_no+1));
-            mm = m + grain_no+1;
-        }
-        for (guint i = 0; i <= grain_no; i++) {
-            m[i] = i;
-            mm[i] = 0;
-        }
+        //gwy_debug("Height %d, number of old grains: %d", h, grain_no);
+        for (guint l = nh[h]; l < nh[h+1]; l++) {
+            guint k = hindex[l], i = k/width, j = k % width;
+            g_assert(!grains[k]);
 
-        /* Find grains that touch each other for merge.
-         *
-         * Previously existing grains that did not touch don't touch now
-         * either.  So we are only interested in neighbours of pixels of new
-         * subgrains. */
-        for (guint i = nh[h]; i < nh[h+1]; i++) {
-            guint j = hindex[i];
-            // Left
-            if (j % width && grains[j-1]
-                && m[grains[j]] != m[grains[j-1]])
-                resolve_grain_map(m, grains[j], grains[j-1]);
-            // Right
-            if ((j+1) % width && grains[j+1]
-                && m[grains[j]] != m[grains[j+1]])
-                resolve_grain_map(m, grains[j], grains[j+1]);
-            // Up
-            if (j/width && grains[j-width]
-                && m[grains[j]] != m[grains[j-width]])
-                resolve_grain_map(m, grains[j], grains[j-width]);
-            // Down
-            if (j/width < height-1 && grains[j+width]
-                && m[grains[j]] != m[grains[j+width]])
-                resolve_grain_map(m, grains[j], grains[j+width]);
-        }
+            // Find grain numbers of neighbours, if any.
+            guint neigh[4], nn = 0;
+            if (i && grains[k-width])
+                neigh[nn++] = grains[k-width];
+            if (j && grains[k-1])
+                neigh[nn++] = grains[k-1];
+            if (j < width-1 && grains[k+1])
+                neigh[nn++] = grains[k+1];
+            if (i < height-1 && grains[k+width])
+                neigh[nn++] = grains[k+width];
 
-        // Resolve remianing grain number links in m
-        for (guint i = 1; i <= grain_no; i++)
-            m[i] = m[m[i]];
-
-        // Compactify grain numbers
-        guint k = 0;
-        for (guint i = 1; i <= grain_no; i++) {
-            if (!mm[m[i]]) {
-                k++;
-                mm[m[i]] = k;
+            if (nn) {
+                // Merge all grains that touch this pixel to one.
+                nn = uniq_array(neigh, nn);
+                for (guint p = 1; p < nn; p++)
+                    resolve_grain_map(m, neigh[p-1], neigh[p]);
+                guint ming = m[neigh[0]];
+                for (guint p = 1; p < nn; p++) {
+                    if (m[neigh[p]] < ming)
+                        ming = m[neigh[p]];
+                }
+                // And this is also the number the new pixel gets.
+                grains[k] = ming;
             }
-            m[i] = mm[m[i]];
+            else {
+                // A new grain not touching anything gets a new number.
+                g_assert(ngrains <= n);
+                m[ngrains] = ngrains;
+                grains[k] = ngrains++;
+                continue;
+            }
+
         }
+
+        // Resolve remaining grain number links in the map.  This nicely works
+        // because we resolve downwards and go from the lowest number.
+        guint count = 0;
+        for (guint i = 1; i < ngrains; i++) {
+            m[i] = m[m[i]];
+            if (m[i] == i)
+                count++;
+        }
+        line->data[h] = (guint)count/n;
 
 #ifdef DEBUG
         for (guint i = 0; i <= grain_no; i++)
@@ -1958,22 +1803,9 @@ grain_number_dist(const GwyField *field,
         g_printerr("\n");
 #endif
 
-        /* Renumber grains (we make use of the fact m[0] = 0).
-         *
-         * This is the only place where we have to scan the entire region.
-         * Since grain numbers usually vary wildly and globally, we probably
-         * can't avoid it. */
-        for (guint i = 0; i < n; i++)
-            grains[i] = m[grains[i]];
-
-        // The number of grains for this h
-        line->data[h] = k;
-        last_grain_no = k;
     }
 
     g_free(m);
-    g_free(listv);
-    g_free(listh);
     g_free(grains);
     g_free(hindex);
     g_free(nh);

@@ -53,6 +53,32 @@ typedef struct {
     GwyGrainSegment segments[];
 } GwyGrain;
 
+/* Merge grains i and j in map with full resolution */
+static inline void
+resolve_grain_map(guint *m, guint i, guint j)
+{
+    guint ii, jj;
+
+    // Find what i and j fully resolve to.
+    for (ii = i; m[ii] != ii; ii = m[ii])
+        ;
+    for (jj = j; m[jj] != jj; jj = m[jj])
+        ;
+    guint k = MIN(ii, jj);
+
+    // Turn partial resultions to full along the way.
+    for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
+        m[i] = k;
+        i = ii;
+    }
+    m[ii] = k;
+    for (jj = m[j]; m[jj] != jj; jj = m[jj]) {
+        m[j] = k;
+        j = jj;
+    }
+    m[jj] = k;
+}
+
 G_END_DECLS
 
 #endif
