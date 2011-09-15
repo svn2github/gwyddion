@@ -171,13 +171,7 @@ value_dist_discr_analyse(const GwyField *field,
 
     if (ddata->analyse) {
         GwyFieldPart rect = { maskcol, maskrow, width, height };
-
-        if (masking == GWY_MASK_INCLUDE)
-            n = gwy_mask_field_part_count(mask, &rect, TRUE);
-        else if (masking == GWY_MASK_EXCLUDE)
-            n = gwy_mask_field_part_count(mask, &rect, FALSE);
-        else
-            n = width*height;
+        n = gwy_mask_field_part_count_masking(mask, &rect, masking);
 
         gwy_field_min_max(field, fpart, mask, masking,
                           &ddata->min, &ddata->max);
@@ -1301,20 +1295,15 @@ minkowski_volume(const GwyField *field,
                  gdouble min, gdouble max)
 {
     GwyFieldPart rect = { maskcol, maskrow, width, height };
-    guint n = width*height;
+    guint n = gwy_mask_field_part_count_masking(mask, &rect, masking);
+
+    if (!n)
+        return NULL;
 
     if (!(min < max))
         gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
                           mask, masking, &min, &max);
     sanitise_range(&min, &max);
-
-    if (masking == GWY_MASK_INCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, TRUE);
-    else if (masking == GWY_MASK_EXCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, FALSE);
-
-    if (!n)
-        return NULL;
 
     if (!npoints)
         npoints = dist_points_for_n_points(n);
@@ -1739,11 +1728,7 @@ grain_number_dist(const GwyField *field,
                   gdouble min, gdouble max)
 {
     GwyFieldPart rect = { maskcol, maskrow, width, height };
-    guint n = width*height;
-    if (masking == GWY_MASK_INCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, TRUE);
-    else if (masking == GWY_MASK_EXCLUDE)
-        n = gwy_mask_field_part_count(mask, &rect, FALSE);
+    guint n = gwy_mask_field_part_count_masking(mask, &rect, masking);
 
     if (!n)
         return NULL;
