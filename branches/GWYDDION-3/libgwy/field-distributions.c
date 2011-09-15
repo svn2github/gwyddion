@@ -1600,8 +1600,8 @@ minkowski_boundary(const GwyField *field,
 
 /* Calculate discrete heights.
  *
- * There are @npoints buckes, the 0th collects everything below 1/2, the rest
- * is pixel-sized, heights above @npoints-1/2 are the uncounted remainder. This
+ * There are @npoints+1 buckes, the 0th collects everything below 1/2, the
+ * rest is pixel-sized, the last collects evrything above @npoints-1/2 . This
  * makes the distribution pixel-centered and symmetrical for white and black
  * cases, as necessary.
  */
@@ -1618,15 +1618,35 @@ discretise_heights(const GwyField *field,
 {
     guint *heights = g_new(guint, width*height);
     gdouble q = npoints/(max - min);
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
 
     for (guint i = 0; i < height; i++) {
         const gdouble *drow = field->data + (i + row)*field->xres + col;
         guint *hrow = heights + i*width;
 
-        for (guint j = width; j; j--, drow++, hrow++) {
-            gdouble x = ceil((white ? (max - *drow) : (*drow - min))*q - 0.5);
-            x = CLAMP(x, 0.0, npoints);
-            *hrow = (guint)x;
+        if (masking == GWY_MASK_IGNORE) {
+            for (guint j = width; j; j--, drow++, hrow++) {
+                gdouble x = white ? (max - *drow) : (*drow - min);
+                x = ceil(x*q - 0.5);
+                x = CLAMP(x, 0.0, npoints);
+                *hrow = (guint)x;
+            }
+        }
+        else {
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, drow++, hrow++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    gdouble x = white ? (max - *drow) : (*drow - min);
+                    x = ceil(x*q - 0.5);
+                    x = CLAMP(x, 0.0, npoints);
+                    *hrow = (guint)x;
+                }
+                else {
+                    *hrow = G_MAXUINT;
+                }
+                gwy_mask_iter_next(iter);
+            }
         }
     }
 
@@ -1636,16 +1656,18 @@ discretise_heights(const GwyField *field,
 /*
  * Group pixels of the same discrete height.  nh then holds indices in
  * hindex where each height starts.
- * TODO: support masking (must fix cycles that go over pixels to check mask)
  */
 static void
 group_by_height(const guint *heights,
-                guint npoints, guint n,
+                guint npoints, guint size,
                 guint *nh, guint *hindex)
 {
     // Make nh[i] the start of the block of discrete height i in hindex[].
-    for (guint i = 0; i < n; i++)
-        nh[heights[i]]++;
+    for (guint i = 0; i < size; i++) {
+        guint h = heights[i];
+        if (h != G_MAXUINT)
+            nh[h]++;
+    }
     for (guint i = 1; i <= npoints; i++)
         nh[i] += nh[i-1];
     for (guint i = npoints; i; i--)
@@ -1654,13 +1676,14 @@ group_by_height(const guint *heights,
 
     // Fill the blocks in hindex[] with indices of points with the
     // corresponding discrete height.
-    for (guint i = 0; i < n; i++)
-        hindex[nh[heights[i]]++] = i;
-    for (guint i = npoints; i; i--)
+    for (guint i = 0; i < size; i++) {
+        guint h = heights[i];
+        if (h != G_MAXUINT)
+            hindex[nh[h]++] = i;
+    }
+    for (guint i = npoints+1; i; i--)
         nh[i] = nh[i-1];
     nh[0] = 0;
-    // To avoid special-cases, append the index of end of the array.
-    nh[npoints+1] = n;
 }
 
 static inline guint
@@ -1736,10 +1759,11 @@ grain_number_dist(const GwyField *field,
                                         mask, masking, maskcol, maskrow,
                                         npoints, min, max, white);
     guint *nh = g_new0(guint, npoints+2);
-    guint *hindex = g_new(guint, width*height);
-    group_by_height(heights, npoints, width*height, nh, hindex);
+    guint *hindex = g_new(guint, n);
+    group_by_height(heights, npoints, n, nh, hindex);
 
-    guint *grains = g_new0(guint, width*height);
+    guint *grains = heights;     // No longer needed.
+    gwy_clear(grains, width*height);
     guint *m = g_new(guint, n+1);
 
     // Main iteration
@@ -1750,7 +1774,6 @@ grain_number_dist(const GwyField *field,
             continue;
         }
 
-        //gwy_debug("Height %d, number of old grains: %d", h, grain_no);
         for (guint l = nh[h]; l < nh[h+1]; l++) {
             guint k = hindex[l], i = k/width, j = k % width;
             g_assert(!grains[k]);
@@ -1829,7 +1852,6 @@ grain_number_dist(const GwyField *field,
     }
 
     g_free(m);
-    g_free(grains);
     g_free(hindex);
     g_free(nh);
     g_free(heights);
