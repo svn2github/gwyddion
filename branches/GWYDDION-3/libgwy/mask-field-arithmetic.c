@@ -962,6 +962,21 @@ gwy_mask_field_grow(GwyMaskField *field,
  * @section_id: GwyMaskField-arithmetic
  * @title: GwyMaskField arithmetic
  * @short_description: Arithmetic and logical operations with mask fields
+ *
+ * The most common logical operations with masks can be performed as follows:
+ * |[
+ * // Inversion:
+ * gwy_mask_field_logical(mask, NULL, NULL, GWY_LOGICAL_NA);
+ *
+ * // Intersection:
+ * gwy_mask_field_logical(maska, maskb, NULL, GWY_LOGICAL_AND);
+ *
+ * // Union:
+ * gwy_mask_field_logical(maska, maskb, NULL, GWY_LOGICAL_OR);
+ *
+ * // Subtraction:
+ * gwy_mask_field_logical(maska, maskb, NULL, GWY_LOGICAL_NIMPL);
+ * ]|
  **/
 
 /**
