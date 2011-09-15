@@ -1745,7 +1745,7 @@ grain_number_dist(const GwyField *field,
                                         npoints, min, max, white);
     guint *nh = g_new0(guint, npoints+2);
     guint *hindex = g_new(guint, n);
-    group_by_height(heights, npoints, n, nh, hindex);
+    group_by_height(heights, npoints, width*height, nh, hindex);
 
     guint *grains = heights;     // No longer needed.
     gwy_clear(grains, width*height);
@@ -1807,7 +1807,7 @@ grain_number_dist(const GwyField *field,
         }
 
         line->data[h] = (gdouble)count/n;
-#ifdef DEBUG
+#if 0
         g_printerr("GRAINS %u :: %u\n", h, count);
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
