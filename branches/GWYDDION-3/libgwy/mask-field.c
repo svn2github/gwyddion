@@ -1005,6 +1005,36 @@ gwy_mask_field_part_count(const GwyMaskField *field,
 }
 
 /**
+ * gwy_mask_field_part_count_masking:
+ * @field: A two-dimensional mask field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @masking: Masking mode that would be used.
+ *
+ * Counts pixels that would be used in given masking mode.
+ *
+ * This is a convenience function used in other field functions that need to
+ * know beforehand how many pixels they will process.
+ *
+ * Returns: The number of bits within the part that would be used if @field
+ *          was used as a mask with masking mode @masking.
+ **/
+guint
+gwy_mask_field_part_count_masking(const GwyMaskField *field,
+                                  const GwyFieldPart *fpart,
+                                  GwyMaskingType masking)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
+    if (masking == GWY_MASK_IGNORE)
+        return fpart ? fpart->width*fpart->height : field->xres*field->yres;
+    if (masking == GWY_MASK_INCLUDE)
+        return gwy_mask_field_part_count(field, fpart, TRUE);
+    if (masking == GWY_MASK_EXCLUDE)
+        return gwy_mask_field_part_count(field, fpart, FALSE);
+    g_return_val_if_reached(0);
+}
+
+/**
  * gwy_mask_field_count_rows:
  * @field: A two-dimensional mask field.
  * @fpart: (allow-none):

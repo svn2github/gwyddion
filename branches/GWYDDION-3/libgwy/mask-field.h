@@ -144,27 +144,29 @@ void     gwy_mask_field_set(const GwyMaskField *field,
     } while (0)
 #endif
 
-void         gwy_mask_field_data_changed (GwyMaskField *field,
-                                          GwyFieldPart *fpart);
-void         gwy_mask_field_copy         (const GwyMaskField *src,
-                                          const GwyFieldPart *srcrectangle,
-                                          GwyMaskField *dest,
-                                          guint destcol,
-                                          guint destrow);
-void         gwy_mask_field_copy_full    (const GwyMaskField *src,
-                                          GwyMaskField *dest);
-void         gwy_mask_field_invalidate   (GwyMaskField *field);
-guint        gwy_mask_field_count        (const GwyMaskField *field,
-                                          const GwyMaskField *mask,
-                                          gboolean value);
-guint        gwy_mask_field_part_count   (const GwyMaskField *field,
-                                          const GwyFieldPart *fpart,
-                                          gboolean value);
-guint        gwy_mask_field_count_rows   (const GwyMaskField *field,
-                                          const GwyFieldPart *fpart,
-                                          gboolean value,
-                                          guint *counts);
-
+void  gwy_mask_field_data_changed      (GwyMaskField *field,
+                                        GwyFieldPart *fpart);
+void  gwy_mask_field_copy              (const GwyMaskField *src,
+                                        const GwyFieldPart *srcrectangle,
+                                        GwyMaskField *dest,
+                                        guint destcol,
+                                        guint destrow);
+void  gwy_mask_field_copy_full         (const GwyMaskField *src,
+                                        GwyMaskField *dest);
+void  gwy_mask_field_invalidate        (GwyMaskField *field);
+guint gwy_mask_field_count             (const GwyMaskField *field,
+                                        const GwyMaskField *mask,
+                                        gboolean value);
+guint gwy_mask_field_part_count        (const GwyMaskField *field,
+                                        const GwyFieldPart *fpart,
+                                        gboolean value);
+guint gwy_mask_field_part_count_masking(const GwyMaskField *field,
+                                        const GwyFieldPart *fpart,
+                                        GwyMaskingType masking);
+guint gwy_mask_field_count_rows        (const GwyMaskField *field,
+                                        const GwyFieldPart *fpart,
+                                        gboolean value,
+                                        guint *counts);
 gboolean gwy_mask_field_check_part (const GwyMaskField *field,
                                     const GwyFieldPart *fpart,
                                     guint *col,
