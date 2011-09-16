@@ -4417,6 +4417,95 @@ test_field_distributions_psdf_masked(void)
     g_rand_free(rng);
 }
 
+static void
+median_filter_dumb(const GwyField *field,
+                   const GwyFieldPart *fpart,
+                   GwyField *target,
+                   const GwyMaskField *kernel,
+                   GwyExteriorType exterior,
+                   gdouble fill_value)
+{
+    guint col, row, width, height, targetcol, targetrow;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
+                                   &targetcol, &targetrow)) {
+        g_return_if_reached();
+    }
+
+    guint kxres = kernel->xres, kyres = kernel->yres;
+    guint extx = kxres - 1, exty = kyres - 1;
+    GwyField *extended = gwy_field_extend(field, fpart,
+                                          extx/2, extx - extx/2,
+                                          exty/2, exty - exty/2,
+                                          exterior, fill_value);
+    print_field("extended", extended);
+    GwyField *workspace = gwy_field_new_sized(kxres, kyres, FALSE);
+
+    for (guint i = 0; i < height; i++) {
+        for (guint j = 0; j < width; j++) {
+            gwy_field_copy(extended, &(GwyFieldPart){ j, i, kxres, kyres },
+                           workspace, 0, 0);
+            gwy_math_sort(workspace->data, NULL, kxres*kyres);
+            g_printerr("[%u,%u]", j, i);
+            for (guint k = 0; k < kxres*kyres; k++)
+                g_printerr(" %.04f", workspace->data[k]);
+            g_printerr("\n");
+            gdouble median = gwy_field_median_full(workspace);
+            gwy_field_index(target, targetcol + j, targetrow + i) = median;
+        }
+    }
+
+    g_object_unref(workspace);
+    g_object_unref(extended);
+}
+
+void
+test_field_filter_median(void)
+{
+    enum { max_size = 14, niter = 30, njter = 30 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint kxres = g_rand_int_range(rng, 1, max_size/2);
+        guint kyres = g_rand_int_range(rng, 1, max_size/2);
+
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(source, rng);
+        GwyField *target = gwy_field_new_sized(width, height, FALSE);
+        GwyField *reference = gwy_field_new_alike(target, FALSE);
+        // FIXME: Kernel is ignored apart from its dimensions and we, too,
+        // compare to the median with a rectangular kernel. Create a
+        // one-filled mask that reflects that.
+        GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
+        gwy_mask_field_fill(kernel, NULL, TRUE);
+        GwyFieldPart fpart = { col, row, width, height };
+        g_printerr("kxres = %u, kyres = %u\n", kxres, kyres);
+        g_printerr("(%u,%u) %ux%u\n", col, row, width, height);
+        gwy_field_filter_median(source, &fpart, target, kernel,
+                                GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+        print_field("source", source);
+        print_field("target", target);
+        median_filter_dumb(source, &fpart, reference, kernel,
+                           GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+
+        print_field("reference", reference);
+        field_assert_equal(target, reference);
+
+        g_object_unref(reference);
+        g_object_unref(kernel);
+        g_object_unref(target);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+
 static gdouble
 find_max(const GwyField *field,
          guint *col, guint *row)
