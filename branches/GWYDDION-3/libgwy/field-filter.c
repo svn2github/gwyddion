@@ -946,7 +946,7 @@ gwy_field_extend(const GwyField *field,
                 left, right, up, down, fill_value);
 
     result->xreal = (width + left + right)*gwy_field_dx(field);
-    result->yreal = (height + up + down)/gwy_field_dy(field);
+    result->yreal = (height + up + down)*gwy_field_dy(field);
     result->xoff = field->xoff + left*gwy_field_dx(field);
     result->yoff = field->yoff + up*gwy_field_dy(field);
     ASSIGN_UNITS(result->priv->unit_xy, field->priv->unit_xy);
