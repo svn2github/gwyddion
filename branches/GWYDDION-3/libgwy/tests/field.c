@@ -3219,6 +3219,89 @@ next:
     g_rand_free(rng);
 }
 
+void
+test_field_distributions_minkowski_connectivity(void)
+{
+    enum { max_size = 30, niter = 400 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 2, max_size);
+        guint yres = g_rand_int_range(rng, 2, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(width, height, rng);
+        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
+
+        GwyLine *conndist = gwy_field_minkowski(field, &fpart,
+                                                mask, masking,
+                                                GWY_MINKOWSKI_CONNECTIVITY,
+                                                0, 0.0, 0.0);
+        if (conndist->res == 1) {
+            guint count = gwy_mask_field_count(mask, NULL,
+                                               masking == GWY_MASK_INCLUDE);
+            g_assert_cmpuint(count, ==, 0);
+            goto next;
+        }
+
+        guint n = width*height;
+        if (masking != GWY_MASK_IGNORE)
+            n = gwy_mask_field_count(mask, NULL, masking == GWY_MASK_INCLUDE);
+
+        if (n == 1) {
+            g_assert_cmpuint(conndist->res, ==, 3);
+            g_assert_cmpfloat(conndist->data[0], ==, 1.0);
+            // Depends on rounding, permit both.
+            g_assert(conndist->data[1] == -1.0
+                     || conndist->data[1] == 0.0
+                     || conndist->data[1] == 1.0);
+            g_assert_cmpfloat(conndist->data[2], ==, -1.0);
+            goto next;
+        }
+
+        for (guint i = 0; i < conndist->res; i++) {
+            gdouble threshold = (conndist->off
+                                 + (i + 0.5)*gwy_line_dx(conndist));
+            GwyMaskField *wgrains, *bgrains;
+            wgrains = gwy_mask_field_new_from_field(field, &fpart,
+                                                    threshold, G_MAXDOUBLE,
+                                                    FALSE);
+            bgrains = gwy_mask_field_new_from_field(field, &fpart,
+                                                    -G_MAXDOUBLE, threshold,
+                                                    FALSE);
+            if (masking == GWY_MASK_INCLUDE) {
+                gwy_mask_field_logical(wgrains, mask, NULL, GWY_LOGICAL_AND);
+                gwy_mask_field_logical(bgrains, mask, NULL, GWY_LOGICAL_AND);
+            }
+            else if (masking == GWY_MASK_EXCLUDE) {
+                gwy_mask_field_logical(wgrains, mask, NULL, GWY_LOGICAL_NIMPL);
+                gwy_mask_field_logical(bgrains, mask, NULL, GWY_LOGICAL_NIMPL);
+            }
+
+            guint ngw, ngb;
+            gwy_mask_field_grain_numbers(wgrains, &ngw);
+            gwy_mask_field_grain_numbers(bgrains, &ngb);
+            gdouble fraction = (gdouble)ngw/n - (gdouble)ngb/n;
+            g_assert_cmpfloat(fabs(conndist->data[i] - fraction), <=, 1e-14);
+            g_object_unref(wgrains);
+            g_object_unref(bgrains);
+        }
+
+next:
+        g_object_unref(conndist);
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 static gdouble
 exterior_value_dumb(const gdouble *data,
                     guint size,

@@ -261,6 +261,7 @@ field/distributions/minkowski/volume
 field/distributions/minkowski/boundary
 field/distributions/minkowski/black
 field/distributions/minkowski/white
+field/distributions/minkowski/connectivity
 surface/serialize
 surface/props
 surface/get
