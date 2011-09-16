@@ -945,10 +945,11 @@ gwy_field_extend(const GwyField *field,
                 col, row, width, height, field->xres, field->yres,
                 left, right, up, down, fill_value);
 
-    result->xreal = (width + left + right)*gwy_field_dx(field);
-    result->yreal = (height + up + down)*gwy_field_dy(field);
-    result->xoff = field->xoff + left*gwy_field_dx(field);
-    result->yoff = field->yoff + up*gwy_field_dy(field);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    result->xreal = (width + left + right)*dx;
+    result->yreal = (height + up + down)*dy;
+    result->xoff = field->xoff + col*dx - left*dx;
+    result->yoff = field->yoff + row*dy - up*dy;
     ASSIGN_UNITS(result->priv->unit_xy, field->priv->unit_xy);
     ASSIGN_UNITS(result->priv->unit_z, field->priv->unit_z);
 
