@@ -3410,6 +3410,10 @@ field_extend_one(GwyExteriorType exterior)
 
         g_assert_cmpuint(field->xres, ==, width + left + right);
         g_assert_cmpuint(field->yres, ==, height + up + down);
+        g_assert_cmpfloat(fabs(log(gwy_field_dx(field)/gwy_field_dx(source))),
+                          <=, 1e-14);
+        g_assert_cmpfloat(fabs(log(gwy_field_dy(field)/gwy_field_dy(source))),
+                          <=, 1e-14);
 
         for (guint i = 0; i < field->yres; i++) {
             gint ypos = (gint)i + (gint)row - (gint)up;
