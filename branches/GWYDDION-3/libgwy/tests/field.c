@@ -4254,10 +4254,10 @@ test_field_filter_standard_step(void)
 void
 test_field_filter_standard_dechecker(void)
 {
-    guint res = 66;
+    enum { res = 66 };
 
     // A smooth function
-    GwyField *source = gwy_field_new_sized(66, 66, FALSE);
+    GwyField *source = gwy_field_new_sized(res, res, FALSE);
     for (guint i = 0; i < res; i++) {
         for (guint j = 0; j < res; j++) {
             gdouble x = 2.0*G_PI*(j + 0.5)/res, y = 2.0*G_PI*(i + 0.5)/res;
