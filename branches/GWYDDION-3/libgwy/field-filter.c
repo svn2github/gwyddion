@@ -1427,7 +1427,7 @@ filter_median_direct(const GwyField *field,
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
     guint kn = kxres*kyres;
-    guint xsize = xres + kxres - 1, ysize = yres + kyres - 1;
+    guint xsize = width + kxres - 1, ysize = height + kyres - 1;
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
     _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
@@ -1468,6 +1468,12 @@ filter_median_direct(const GwyField *field,
             gdouble *replrow = workspace + (i % kyres)*kxres;
             const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
             gwy_assign(replrow, extdatarow, kxres);
+            // XXX XXX XXX
+            // This must be done in the *pointer* space, not by sorting the
+            // values physically.  First it breaks the connection between
+            // original columns and positions in the row. Second, the order in
+            // the array does not necessarily correspond to the order given by
+            // the pointers in which case it is not useful at all!
             gwy_math_sort(replrow, NULL, kxres);
             i++;
         }
@@ -1479,7 +1485,7 @@ filter_median_direct(const GwyField *field,
             gdouble *replcol = workspace + (j % kxres);
             const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
             for (guint ki = 0; ki < kyres; ki++)
-                replcol[ki*kxres] = extdatacol[ki*xsize];
+                replcol[((ki + i) % kyres)*kxres] = extdatacol[ki*xsize];
         }
         j++;
 
@@ -1491,7 +1497,7 @@ filter_median_direct(const GwyField *field,
                 break;
 
             // Move up
-            gdouble *replrow = workspace + (i % kyres)*kxres;
+            gdouble *replrow = workspace + ((i + kyres-1) % kyres)*kxres;
             const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
             gwy_assign(replrow, extdatarow, kxres);
             gwy_math_sort(replrow, NULL, kxres);
