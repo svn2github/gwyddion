@@ -74,12 +74,12 @@ G_DEFINE_TYPE_EXTENDED
     (GwyUserFitFunc, gwy_user_fit_func, GWY_TYPE_RESOURCE, 0,
      GWY_IMPLEMENT_SERIALIZABLE(gwy_user_fit_func_serializable_init));
 
-GwySerializableInterface *gwy_user_fit_func_parent_serializable = NULL;
+static GwySerializableInterface *parent_serializable = NULL;
 
 static void
 gwy_user_fit_func_serializable_init(GwySerializableInterface *iface)
 {
-    gwy_user_fit_func_parent_serializable = g_type_interface_peek_parent(iface);
+    parent_serializable = g_type_interface_peek_parent(iface);
     iface->n_items   = gwy_user_fit_func_n_items;
     iface->itemize   = gwy_user_fit_func_itemize;
     iface->construct = gwy_user_fit_func_construct;
@@ -172,7 +172,7 @@ gwy_user_fit_func_n_items(GwySerializable *serializable)
     gsize n = N_ITEMS+1;
     for (guint i = 0; i < priv->nparams; i++)
         n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->param[i]));
-    n += gwy_user_fit_func_parent_serializable->n_items(serializable);
+    n += parent_serializable->n_items(serializable);
     return n;
 }
 
@@ -209,8 +209,7 @@ gwy_user_fit_func_itemize(GwySerializable *serializable,
     }
 
     return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
-                                        gwy_user_fit_func_parent_serializable,
-                                        items, nn);
+                                        parent_serializable, items, nn);
 }
 
 static gboolean
@@ -223,9 +222,8 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
     GwySerializableItems parent_items;
     if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
                                      "GwyUserFitFunc", error_list)) {
-        if (!gwy_user_fit_func_parent_serializable->construct(serializable,
-                                                              &parent_items,
-                                                              error_list))
+        if (!parent_serializable->construct(serializable, &parent_items,
+                                            error_list))
             goto fail;
     }
     gsize n = its[2].array_size;
@@ -289,8 +287,7 @@ gwy_user_fit_func_duplicate_impl(GwySerializable *serializable)
     GwyUserFitFunc *duplicate = g_object_newv(GWY_TYPE_USER_FIT_FUNC, 0, NULL);
     UserFitFunc *dpriv = duplicate->priv;
 
-    gwy_user_fit_func_parent_serializable->assign(GWY_SERIALIZABLE(duplicate),
-                                                  serializable);
+    parent_serializable->assign(GWY_SERIALIZABLE(duplicate), serializable);
     // FIXME: This is not very efficient
     assign_params(dpriv, priv->nparams, priv->param);
     assign_info(dpriv, priv);
@@ -306,7 +303,7 @@ gwy_user_fit_func_assign_impl(GwySerializable *destination,
     GwyUserFitFunc *src = GWY_USER_FIT_FUNC(source);
 
     g_object_freeze_notify(G_OBJECT(dest));
-    gwy_user_fit_func_parent_serializable->assign(destination, source);
+    parent_serializable->assign(destination, source);
 
     const UserFitFunc *spriv = src->priv;
     UserFitFunc *dpriv = dest->priv;

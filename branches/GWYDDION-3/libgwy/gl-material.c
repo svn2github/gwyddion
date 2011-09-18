@@ -94,12 +94,12 @@ G_DEFINE_TYPE_EXTENDED
     (GwyGLMaterial, gwy_gl_material, GWY_TYPE_RESOURCE, 0,
      GWY_IMPLEMENT_SERIALIZABLE(gwy_gl_material_serializable_init));
 
-GwySerializableInterface *gwy_gl_material_parent_serializable = NULL;
+static GwySerializableInterface *parent_serializable = NULL;
 
 static void
 gwy_gl_material_serializable_init(GwySerializableInterface *iface)
 {
-    gwy_gl_material_parent_serializable = g_type_interface_peek_parent(iface);
+    parent_serializable = g_type_interface_peek_parent(iface);
     iface->n_items   = gwy_gl_material_n_items;
     iface->itemize   = gwy_gl_material_itemize;
     iface->construct = gwy_gl_material_construct;
@@ -135,7 +135,7 @@ static gsize
 gwy_gl_material_n_items(GwySerializable *serializable)
 {
     return N_ITEMS+1 + 4*gwy_serializable_boxed_n_items(GWY_TYPE_RGBA)
-           + gwy_gl_material_parent_serializable->n_items(serializable);
+           + parent_serializable->n_items(serializable);
 }
 
 static gsize
@@ -178,8 +178,7 @@ gwy_gl_material_itemize(GwySerializable *serializable,
     items->items[items->n++] = it;
 
     return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
-                                        gwy_gl_material_parent_serializable,
-                                        items, N_ITEMS);
+                                        parent_serializable, items, N_ITEMS);
 }
 
 static gboolean
@@ -196,9 +195,8 @@ gwy_gl_material_construct(GwySerializable *serializable,
     GwySerializableItems parent_items;
     if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
                                      "GwyGLMaterial", error_list)) {
-        if (!gwy_gl_material_parent_serializable->construct(serializable,
-                                                            &parent_items,
-                                                            error_list))
+        if (!parent_serializable->construct(serializable, &parent_items,
+                                            error_list))
             goto fail;
     }
 
@@ -236,8 +234,7 @@ gwy_gl_material_duplicate_impl(GwySerializable *serializable)
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(serializable);
     GwyGLMaterial *duplicate = g_object_newv(GWY_TYPE_GL_MATERIAL, 0, NULL);
 
-    gwy_gl_material_parent_serializable->assign(GWY_SERIALIZABLE(duplicate),
-                                                serializable);
+    parent_serializable->assign(GWY_SERIALIZABLE(duplicate), serializable);
     duplicate->priv = gl_material->priv;
 
     return G_OBJECT(duplicate);
@@ -252,7 +249,7 @@ gwy_gl_material_assign_impl(GwySerializable *destination,
     gboolean emit_changed = FALSE;
 
     g_object_freeze_notify(G_OBJECT(dest));
-    gwy_gl_material_parent_serializable->assign(destination, source);
+    parent_serializable->assign(destination, source);
     if (memcmp(dest->priv, src->priv, sizeof(Material)) != 0) {
         dest->priv = src->priv;
         emit_changed = TRUE;
