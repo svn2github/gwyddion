@@ -148,7 +148,8 @@ function unit_test_valgrind() {
 
 function build_rpm() {
   version=$(sed -r 's/^GWY_VERSION_STRING *= *//;t;d' Makefile)
-  TAR_OPTIONS=--wildcards rpmbuild -ta --clean $pkgname-$version.tar.xz
+  TAR_OPTIONS=--wildcards CCACHE_DISABLE=1 \
+      rpmbuild -ta --clean $pkgname-$version.tar.xz
 }
 
 function help() {
