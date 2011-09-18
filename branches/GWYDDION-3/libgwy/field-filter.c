@@ -1468,13 +1468,6 @@ filter_median_direct(const GwyField *field,
             gdouble *replrow = workspace + (i % kyres)*kxres;
             const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
             gwy_assign(replrow, extdatarow, kxres);
-            // XXX XXX XXX
-            // This must be done in the *pointer* space, not by sorting the
-            // values physically.  First it breaks the connection between
-            // original columns and positions in the row. Second, the order in
-            // the array does not necessarily correspond to the order given by
-            // the pointers in which case it is not useful at all!
-            gwy_math_sort(replrow, NULL, kxres);
             i++;
         }
         if (j == width-1)
@@ -1482,7 +1475,10 @@ filter_median_direct(const GwyField *field,
 
         // Move right (at the bottom)
         {
-            gdouble *replcol = workspace + (j % kxres);
+            // Make sure the physical last column is also last logically.
+            // This removes column modulos when moving up/down.
+            memmove(workspace, workspace+1, (kxres*kyres-1)*sizeof(gdouble));
+            gdouble *replcol = workspace + kxres-1;
             const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
             for (guint ki = 0; ki < kyres; ki++)
                 replcol[((ki + i) % kyres)*kxres] = extdatacol[ki*xsize];
@@ -1500,7 +1496,6 @@ filter_median_direct(const GwyField *field,
             gdouble *replrow = workspace + ((i + kyres-1) % kyres)*kxres;
             const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
             gwy_assign(replrow, extdatarow, kxres);
-            gwy_math_sort(replrow, NULL, kxres);
             i--;
         }
         if (j == width-1)
@@ -1508,7 +1503,10 @@ filter_median_direct(const GwyField *field,
 
         // Move right (at the top)
         {
-            gdouble *replcol = workspace + (j % kxres);
+            // Make sure the physical last column is also last logically.
+            // This removes column modulos when moving up/down.
+            memmove(workspace, workspace+1, (kxres*kyres-1)*sizeof(gdouble));
+            gdouble *replcol = workspace + kxres-1;
             const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
             for (guint ki = 0; ki < kyres; ki++)
                 replcol[ki*kxres] = extdatacol[ki*xsize];
@@ -1546,7 +1544,7 @@ filter_median_gsequence(const GwyField *field,
 
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
-    guint xsize = xres + kxres - 1, ysize = yres + kyres - 1;
+    guint xsize = width + kxres - 1, ysize = height + kyres - 1;
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
     _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
@@ -1605,14 +1603,20 @@ filter_median_gsequence(const GwyField *field,
 
         // Move right (at the bottom)
         {
-            GSequenceIter **replcol = iters + (j % kxres);
-            for (guint ki = 0; ki < kyres; ki++)
-                g_sequence_remove(replcol[ki*kxres]);
+            // Make sure the physical last column is also last logically.
+            // This removes column modulos when moving up/down.
+            for (guint ki = 0; ki < kyres; ki++) {
+                g_sequence_remove(iters[ki*kxres]);
+                memmove(iters + ki*kxres, iters + ki*kxres + 1,
+                        (kxres-1)*sizeof(GSequenceIter*));
+            }
             const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
+            GSequenceIter **replcol = iters + kxres-1;
             for (guint ki = 0; ki < kyres; ki++) {
                 DPMangle dp = { .d = extdatacol[ki*xsize] };
-                replcol[ki*kxres] = g_sequence_insert_sorted(workspace, dp.p,
-                                                             compare, NULL);
+                guint k = (ki + i) % kyres;
+                replcol[k*kxres] = g_sequence_insert_sorted(workspace, dp.p,
+                                                            compare, NULL);
             }
         }
         j++;
@@ -1628,7 +1632,7 @@ filter_median_gsequence(const GwyField *field,
                 break;
 
             // Move up
-            GSequenceIter **replrow = iters + (i % kyres)*kxres;
+            GSequenceIter **replrow = iters + ((i + kyres-1) % kyres)*kxres;
             for (guint kj = 0; kj < kxres; kj++)
                 g_sequence_remove(replrow[kj]);
             const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
@@ -1644,10 +1648,15 @@ filter_median_gsequence(const GwyField *field,
 
         // Move right (at the top)
         {
-            GSequenceIter **replcol = iters + (j % kxres);
-            for (guint ki = 0; ki < kyres; ki++)
-                g_sequence_remove(replcol[ki*kxres]);
+            // Make sure the physical last column is also last logically.
+            // This removes column modulos when moving up/down.
+            for (guint ki = 0; ki < kyres; ki++) {
+                g_sequence_remove(iters[ki*kxres]);
+                memmove(iters + ki*kxres, iters + ki*kxres + 1,
+                        (kxres-1)*sizeof(GSequenceIter*));
+            }
             const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
+            GSequenceIter **replcol = iters + kxres-1;
             for (guint ki = 0; ki < kyres; ki++) {
                 DPMangle dp = { .d = extdatacol[ki*xsize] };
                 replcol[ki*kxres] = g_sequence_insert_sorted(workspace, dp.p,
