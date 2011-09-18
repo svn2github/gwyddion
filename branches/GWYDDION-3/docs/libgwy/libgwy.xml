@@ -109,6 +109,7 @@
   <chapter id='libgwy-selections'>
     <title>Selections</title>
     <xi:include href="xml/coords.xml"/>
+    <xi:include href="xml/coords-point.xml"/>
   </chapter>
   <chapter id='libgwy-utilities'>
     <title>Utilities</title>

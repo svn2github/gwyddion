@@ -82,11 +82,12 @@ gwy_coords_class_init(GwyCoordsClass *klass)
 
     /**
      * GwyCoords::finished:
-     * @gwyselection: The #GwyCoords which received the signal.
+     * @gwycoords: The #GwyCoords which received the signal.
      *
-     * The ::finished signal is emitted by a coords user that is
-     * continuously modifying it (typically a coords layer) when it is done
-     * with the modifications and the coords is in the final state.
+     * The ::finished signal is emitted by a coords user that is continuously
+     * modifying it (typically by dragging the shape in a data display widget)
+     * when it is done with the modifications and the coords are in the final
+     * state.
      **/
     coords_signals[FINISHED]
         = g_signal_new_class_handler("finished",
@@ -316,7 +317,7 @@ gwy_coords_assign_impl(GwySerializable *destination,
  * Obtains the number of floating point values representing one object or shape
  * of the coords.
  *
- * This value is the same for all selections of a specific type.
+ * This value is the same for all coords of a specific type.
  *
  * Returns: The number of values a single shape takes.
  **/
@@ -335,11 +336,11 @@ gwy_coords_shape_size(GwyCoords *coords)
  * Gets the coords dimension.
  *
  * Coords dimension is the number of different coordinates (dimensions)
- * in the coords.  For instance, an x-range or y-range coords on graph is
- * one-dimensional while a rectangular coords is two-dimensional.  The
+ * in the coords.  For instance, an x-range or y-range coords on graph are
+ * one-dimensional while a rectangular coords are two-dimensional.  The
  * dimension is always smaller than or equal to the shape size.
  *
- * This value is the same for all selections of a specific type.
+ * This value is the same for all coords of a specific type.
  *
  * Returns: The number of different dimensions.
  **/
@@ -358,14 +359,14 @@ gwy_coords_dimension(GwyCoords *coords)
  * Obtains the map between shape coordinates and their units.
  *
  * The unit map assigns physical units to each of the number describing a
- * single selected shape (i.e. the coordinate).  The units can be obtained with
+ * single shape/object (i.e. the coordinate).  The units can be obtained with
  * gwy_coords_get_units().
  *
  * For example, if the second item in the returned item is 0 then the units
  * of the second number in the coords object can be obtained by
  * <literal>gwy_coords_get_units(coords, 0);</literal>.
  *
- * This map is the same for all selections of a specific type.
+ * This map is the same for all coords of a specific type.
  *
  * Returns: Array of gwy_coords_shape_size() items owned by the coords
  *          class, containing the units map.
@@ -616,13 +617,13 @@ gwy_coords_finished(GwyCoords *coords)
 
 /**
  * GwyCoordsClass:
- * @shape_size: Number of double values used to described one selected
+ * @shape_size: Number of double values used to described one geometrical
  *              object/shape.
  * @dimension: Number of different coodinates in the coords.
  * @unit_map: Map assigning unit indices (used with gwy_coords_get_units())
  *            to individual numbers (coordinates) in the coords objects.
  *
- * Class of groups of geometrical objects selected on data.
+ * Class of groups coordinates of some geometrical objects.
  *
  * Specific, i.e. instantiable, subclasses have to set the data members
  * @shape_size, @dimension and @unit_map.

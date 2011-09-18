@@ -26,6 +26,7 @@ public_headers = \
 	$(srcdir)/brick-statistics.h \
 	$(srcdir)/container.h \
 	$(srcdir)/coords.h \
+	$(srcdir)/coords-point.h \
 	$(srcdir)/curve.h \
 	$(srcdir)/curve-statistics.h \
 	$(srcdir)/error-list.h \
@@ -122,6 +123,7 @@ libgwy3_la_SOURCES = \
 	brick-statistics.c \
 	container.c \
 	coords.c \
+	coords-point.c \
 	curve.c \
 	curve-statistics.c \
 	error-list.c \
