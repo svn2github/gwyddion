@@ -26,6 +26,7 @@
 #include <libgwy/brick-part.h>
 #include <libgwy/brick-statistics.h>
 #include <libgwy/container.h>
+#include <libgwy/coords.h>
 #include <libgwy/curve.h>
 #include <libgwy/curve-statistics.h>
 #include <libgwy/error-list.h>
@@ -68,7 +69,6 @@
 #include <libgwy/rand.h>
 #include <libgwy/resource.h>
 #include <libgwy/rgba.h>
-#include <libgwy/selection.h>
 #include <libgwy/serializable.h>
 #include <libgwy/serializable-boxed.h>
 #include <libgwy/serialize.h>

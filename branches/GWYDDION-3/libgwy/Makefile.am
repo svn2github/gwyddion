@@ -25,6 +25,7 @@ public_headers = \
 	$(srcdir)/brick-part.h \
 	$(srcdir)/brick-statistics.h \
 	$(srcdir)/container.h \
+	$(srcdir)/coords.h \
 	$(srcdir)/curve.h \
 	$(srcdir)/curve-statistics.h \
 	$(srcdir)/error-list.h \
@@ -67,7 +68,6 @@ public_headers = \
 	$(srcdir)/rand.h \
 	$(srcdir)/resource.h \
 	$(srcdir)/rgba.h \
-	$(srcdir)/selection.h \
 	$(srcdir)/serializable.h \
 	$(srcdir)/serializable-boxed.h \
 	$(srcdir)/serialize.h \
@@ -121,6 +121,7 @@ libgwy3_la_SOURCES = \
 	brick-part.c \
 	brick-statistics.c \
 	container.c \
+	coords.c \
 	curve.c \
 	curve-statistics.c \
 	error-list.c \
@@ -166,7 +167,6 @@ libgwy3_la_SOURCES = \
 	rand.c \
 	resource.c \
 	rgba.c \
-	selection.c \
 	serializable.c \
 	serializable-boxed.c \
 	serialize.c \
