@@ -379,9 +379,10 @@ gwy_coords_dimension(GwyCoords *coords)
  * single shape/object (i.e. the coordinate).  The units can be obtained with
  * gwy_coords_get_units().
  *
- * For example, if the second item in the returned item is 0 then the units
+ * For example, if the 2nd item in the returned item is 0 then the units
  * of the second number in the coords object can be obtained by
- * <literal>gwy_coords_get_units(coords, 0);</literal>.
+ * <literal>gwy_coords_get_units(coords, 0);</literal> which is the same
+ * as <literal>gwy_coords_get_mapped_units(coords, 2);</literal>.
  *
  * This map is the same for all coords of a specific type.
  *
@@ -588,6 +589,34 @@ gwy_coords_get_units(GwyCoords *coords,
     if (!priv->units[i])
         priv->units[i] = gwy_unit_new();
     return priv->units[i];
+}
+
+/**
+ * gwy_coords_get_mapped_units:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @i: Coordinate index.
+ *
+ * Gets the units corresponding to a specific coords coordinate.
+ *
+ * Returns: (transfer none):
+ *          The units of the @i-th coordinate.
+ **/
+GwyUnit*
+gwy_coords_get_mapped_units(GwyCoords *coords,
+                            guint i)
+{
+    g_return_val_if_fail(GWY_IS_COORDS(coords), NULL);
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    guint shape_size = klass->shape_size;
+    g_return_val_if_fail(i < shape_size, NULL);
+    g_return_val_if_fail(klass->unit_map, NULL);
+    guint mi = klass->unit_map[i];
+    Coords *priv = coords->priv;
+    guint dimension = klass->dimension;
+    ensure_units(priv, dimension, FALSE);
+    if (!priv->units[mi])
+        priv->units[mi] = gwy_unit_new();
+    return priv->units[mi];
 }
 
 /**
