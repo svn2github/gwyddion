@@ -66,11 +66,11 @@ typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType        gwy_coords_get_type        (void)                       G_GNUC_CONST;
-guint        gwy_coords_shape_size      (GwyCoords *coords)          G_GNUC_PURE;
-guint        gwy_coords_dimension       (GwyCoords *coords)          G_GNUC_PURE;
-const guint* gwy_coords_unit_map        (GwyCoords *coords)          G_GNUC_PURE;
+guint        gwy_coords_shape_size      (const GwyCoords *coords)    G_GNUC_PURE;
+guint        gwy_coords_dimension       (const GwyCoords *coords)    G_GNUC_PURE;
+const guint* gwy_coords_unit_map        (const GwyCoords *coords)    G_GNUC_PURE;
 void         gwy_coords_clear           (GwyCoords *coords);
-gboolean     gwy_coords_get             (GwyCoords *coords,
+gboolean     gwy_coords_get             (const GwyCoords *coords,
                                          guint i,
                                          gdouble *data);
 void         gwy_coords_set             (GwyCoords *coords,
@@ -78,8 +78,8 @@ void         gwy_coords_set             (GwyCoords *coords,
                                          const gdouble *data);
 void         gwy_coords_delete          (GwyCoords *coords,
                                          guint i);
-guint        gwy_coords_size            (GwyCoords *coords)          G_GNUC_PURE;
-void         gwy_coords_get_data        (GwyCoords *coords,
+guint        gwy_coords_size            (const GwyCoords *coords)    G_GNUC_PURE;
+void         gwy_coords_get_data        (const GwyCoords *coords,
                                          gdouble *data);
 void         gwy_coords_set_data        (GwyCoords *coords,
                                          guint n,

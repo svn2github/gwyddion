@@ -127,8 +127,9 @@ gwy_coords_dispose(GObject *object)
     GwyCoords *coords = GWY_COORDS(object);
     Coords *priv = coords->priv;
     guint dimension = GWY_COORDS_GET_CLASS(coords)->dimension;
-    for (guint i = 0; i < dimension; i++)
-        GWY_OBJECT_UNREF(priv->units[i]);
+    if (priv->units)
+        for (guint i = 0; i < dimension; i++)
+            GWY_OBJECT_UNREF(priv->units[i]);
     G_OBJECT_CLASS(gwy_coords_parent_class)->dispose(object);
 }
 
@@ -339,7 +340,7 @@ gwy_coords_assign_impl(GwySerializable *destination,
  * Returns: The number of values a single shape takes.
  **/
 guint
-gwy_coords_shape_size(GwyCoords *coords)
+gwy_coords_shape_size(const GwyCoords *coords)
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     g_return_val_if_fail(klass, 0);
@@ -362,7 +363,7 @@ gwy_coords_shape_size(GwyCoords *coords)
  * Returns: The number of different dimensions.
  **/
 guint
-gwy_coords_dimension(GwyCoords *coords)
+gwy_coords_dimension(const GwyCoords *coords)
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     g_return_val_if_fail(klass, 0);
@@ -390,7 +391,7 @@ gwy_coords_dimension(GwyCoords *coords)
  *          class, containing the units map.
  **/
 const guint*
-gwy_coords_unit_map(GwyCoords *coords)
+gwy_coords_unit_map(const GwyCoords *coords)
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     g_return_val_if_fail(klass, 0);
@@ -426,7 +427,7 @@ gwy_coords_clear(GwyCoords *coords)
  *          %FALSE if these is no such object and @data was left untouched.
  **/
 gboolean
-gwy_coords_get(GwyCoords *coords,
+gwy_coords_get(const GwyCoords *coords,
                guint i,
                gdouble *data)
 {
@@ -492,7 +493,7 @@ gwy_coords_delete(GwyCoords *coords,
  * Obtains the number of objects in a coords.
  **/
 guint
-gwy_coords_size(GwyCoords *coords)
+gwy_coords_size(const GwyCoords *coords)
 {
     g_return_val_if_fail(GWY_IS_COORDS(coords), 0);
     return gwy_array_size(GWY_ARRAY(coords));
@@ -507,7 +508,7 @@ gwy_coords_size(GwyCoords *coords)
  * Obtains the data of an entire coords.
  **/
 void
-gwy_coords_get_data(GwyCoords *coords,
+gwy_coords_get_data(const GwyCoords *coords,
                     gdouble *data)
 {
     g_return_if_fail(GWY_IS_COORDS(coords));
