@@ -24,7 +24,11 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/array-internal.h"
 
-enum { N_ITEMS = 0 };
+enum {
+    SHAPE_SIZE = 2,
+    DIMENSIONS = 2,
+    N_ITEMS = 0
+};
 
 typedef struct _GwyCoordsPointPrivate CoordsPoint;
 
@@ -36,7 +40,7 @@ static gboolean gwy_coords_point_construct        (GwySerializable *serializable
                                              GwySerializableItems *items,
                                              GwyErrorList **error_list);
 
-static const guint unit_map[] = { 0, 1 };
+static const guint unit_map[DIMENSIONS] = { 0, 1 };
 
 static GwySerializableInterface *parent_serializable = NULL;
 
@@ -58,14 +62,16 @@ gwy_coords_point_class_init(GwyCoordsPointClass *klass)
 {
     GwyCoordsClass *coords_class = GWY_COORDS_CLASS(klass);
 
-    coords_class->shape_size = 2;
+    coords_class->shape_size = SHAPE_SIZE;
     coords_class->dimension = G_N_ELEMENTS(unit_map);
     coords_class->unit_map = unit_map;
 }
 
 static void
-gwy_coords_point_init(G_GNUC_UNUSED GwyCoordsPoint *coords_point)
+gwy_coords_point_init(GwyCoordsPoint *coordspoint)
 {
+    gwy_array_set_item_type(GWY_ARRAY(coordspoint), SHAPE_SIZE*sizeof(gdouble),
+                            NULL);
 }
 
 static gsize
