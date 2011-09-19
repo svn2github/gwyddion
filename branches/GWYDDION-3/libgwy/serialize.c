@@ -1621,7 +1621,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                                GWY_DESERIALIZE_ERROR_ITEM,
                                _("Unexpected item ‘%s’ of type 0x%02x in the "
                                  "representation of object ‘%s’ was ignored"),
-                               name, ctype, type_name);
+                               name ? name : "(nil)", ctype, type_name);
             continue;
         }
         if (G_UNLIKELY(seen[j] == 1)) {
@@ -1630,7 +1630,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                                _("Item ‘%s’ of type 0x%02x is present multiple "
                                  "times in the representation of object ‘%s’.  "
                                  "Values other than the first were ignored."),
-                               name, ctype, type_name);
+                               name ? name : "(nil)", ctype, type_name);
             seen[j]++;
             continue;
         }
@@ -1649,7 +1649,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                                      "object ‘%s’ has type ‘%s’ "
                                      "instead of expected ‘%s’. "
                                      "It was ignored."),
-                                   name, type_name,
+                                   name ? name : "(nil)", type_name,
                                    g_type_name(item->array_size),
                                    g_type_name(template_[j].array_size));
                 continue;
