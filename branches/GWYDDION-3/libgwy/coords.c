@@ -47,6 +47,7 @@ static gsize    gwy_coords_itemize          (GwySerializable *serializable,
 static gboolean gwy_coords_construct        (GwySerializable *serializable,
                                              GwySerializableItems *items,
                                              GwyErrorList **error_list);
+static GObject* gwy_coords_duplicate_impl   (GwySerializable *serializable);
 static void     gwy_coords_assign_impl      (GwySerializable *destination,
                                              GwySerializable *source);
 
@@ -67,6 +68,7 @@ gwy_coords_serializable_init(GwySerializableInterface *iface)
     iface->n_items   = gwy_coords_n_items;
     iface->itemize   = gwy_coords_itemize;
     iface->construct = gwy_coords_construct;
+    iface->duplicate = gwy_coords_duplicate_impl;
     iface->assign    = gwy_coords_assign_impl;
 }
 
@@ -245,7 +247,6 @@ gwy_coords_construct(GwySerializable *serializable,
         _gwy_array_set_data_silent(array,
                                    its[0].value.v_double_array,
                                    its[0].array_size/shape_size);
-        its[0].value.v_double_array = NULL;
     }
 
     guint dimension = GWY_COORDS_GET_CLASS(coords)->dimension;
@@ -282,6 +283,22 @@ fail:
         GWY_OBJECT_UNREF(its[1].value.v_object_array);
     GWY_FREE(its[1].value.v_object_array);
     return ok;
+}
+
+// This creates the proper type but assigns just the coordinate data.
+// Subclasses that have other (non-coordinate) data must override this.
+static GObject*
+gwy_coords_duplicate_impl(GwySerializable *serializable)
+{
+    GType type = G_OBJECT_TYPE(serializable);
+    GwyArray *array = GWY_ARRAY(serializable);
+    gsize size = gwy_array_size(array);
+    const gdouble *array_data = gwy_array_get_data(array);
+
+    GObject *duplicate = g_object_newv(type, 0, NULL);
+    _gwy_array_set_data_silent(GWY_ARRAY(duplicate), array_data, size);
+
+    return duplicate;
 }
 
 static void
