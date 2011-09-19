@@ -534,7 +534,6 @@ _gwy_array_set_data_silent(GwyArray *array,
         g_array_append_vals(array->priv->items, items, nitems);
 }
 
-
 /**
  * SECTION: array
  * @title: GwyArray
