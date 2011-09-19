@@ -51,7 +51,6 @@ gwy_coords_point_serializable_init(GwySerializableInterface *iface)
     iface->n_items   = gwy_coords_point_n_items;
     iface->itemize   = gwy_coords_point_itemize;
     iface->construct = gwy_coords_point_construct;
-    g_printerr("iface->assign: %p\n", iface->assign);
 }
 
 static void
