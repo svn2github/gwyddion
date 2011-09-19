@@ -108,6 +108,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
 
     // Selections
     g_type_class_peek(GWY_TYPE_COORDS);
+    g_type_class_peek(GWY_TYPE_COORDS_POINT);
 
     // Resources
     g_type_class_peek(GWY_TYPE_RESOURCE);
