@@ -80,6 +80,7 @@ unit/format/power10
 value-format/simple
 coords/point/finished
 coords/point/units
+coords/point/data
 coords/point/serialize
 line/props
 line/data-changed

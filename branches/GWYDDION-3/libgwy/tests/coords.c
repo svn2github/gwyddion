@@ -44,7 +44,7 @@ coords_assert_equal(const GwyCoords *result,
         gwy_coords_get(reference, i, reference_shape);
         gwy_coords_get(result, i, result_shape);
         for (guint j = 0; j < shape_size; j++)
-            g_assert_cmpfloat(result_shape[i], ==, reference_shape[i]);
+            g_assert_cmpfloat(result_shape[j], ==, reference_shape[j]);
     }
 }
 
@@ -118,6 +118,40 @@ coords_units_one(GType type)
 }
 
 static void
+coords_data_one(GType type)
+{
+    GwyCoords *coords = GWY_COORDS(g_object_newv(type, 0, NULL));
+    guint shape_size = gwy_coords_shape_size(coords);
+
+    GRand *rng = g_rand_new_with_seed(42);
+    guint n = g_rand_int_range(rng, 0, 13);
+
+    gdouble *data = g_new(gdouble, n*shape_size);
+    for (guint i = 0; i < n*shape_size; i++)
+        data[i] = g_rand_double(rng);
+
+    gwy_coords_set_data(coords, n, data);
+    g_assert_cmpuint(gwy_coords_size(coords), ==, n);
+
+    for (guint i = 0; i < n; i++) {
+        gdouble shape[shape_size];
+        gwy_coords_get(coords, i, shape);
+        for (guint j = 0; j < shape_size; j++)
+            g_assert_cmpfloat(shape[j], ==, data[i*shape_size + j]);
+    }
+
+    gdouble *gotdata = g_new(gdouble, n*shape_size);
+    gwy_coords_get_data(coords, gotdata);
+    for (guint i = 0; i < n*shape_size; i++)
+        g_assert_cmpfloat(gotdata[i], ==, data[i]);
+
+    g_rand_free(rng);
+    g_free(gotdata);
+    g_free(data);
+    g_object_unref(coords);
+}
+
+static void
 coords_randomize(GwyCoords *coords,
                  GRand *rng)
 {
@@ -172,6 +206,12 @@ void
 test_coords_point_units(void)
 {
     coords_units_one(GWY_TYPE_COORDS_POINT);
+}
+
+void
+test_coords_point_data(void)
+{
+    coords_data_one(GWY_TYPE_COORDS_POINT);
 }
 
 void
