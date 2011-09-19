@@ -27,6 +27,7 @@
 #include <libgwy/brick-statistics.h>
 #include <libgwy/container.h>
 #include <libgwy/coords.h>
+#include <libgwy/coords-point.h>
 #include <libgwy/curve.h>
 #include <libgwy/curve-statistics.h>
 #include <libgwy/error-list.h>
