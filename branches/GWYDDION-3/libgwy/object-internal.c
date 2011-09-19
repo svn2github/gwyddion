@@ -97,11 +97,7 @@ _gwy_itemize_chain_to_parent(GwySerializable *serializable,
     it->value.v_type = parent_type;
     it++, items->n++;
 
-    guint n;
-    if ((n = parent_iface->itemize(serializable, items)))
-        return child_items + 1 + n;
-
-    return 0;
+    return child_items + 1 + parent_iface->itemize(serializable, items);
 }
 
 // Pass the object instead of the type to avoid lookup of the object GType we
