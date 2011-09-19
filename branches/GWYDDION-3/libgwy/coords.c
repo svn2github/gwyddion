@@ -103,9 +103,7 @@ gwy_coords_class_init(GwyCoordsClass *klass)
 static void
 gwy_coords_init(GwyCoords *coords)
 {
-    coords->priv = G_TYPE_INSTANCE_GET_PRIVATE(coords,
-                                                  GWY_TYPE_COORDS,
-                                                  Coords);
+    coords->priv = G_TYPE_INSTANCE_GET_PRIVATE(coords, GWY_TYPE_COORDS, Coords);
 }
 
 static void
@@ -179,18 +177,24 @@ gwy_coords_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
     GwyCoords *coords = GWY_COORDS(serializable);
+    GwyArray *array = GWY_ARRAY(coords);
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     GwySerializableItem it;
-    guint n = 0;
+    guint n = 0, size = gwy_array_size(array);
 
-    it = serialize_items[0];
-    it.value.v_double_array = gwy_array_get_data(GWY_ARRAY(coords));
-    items->items[items->n++] = it;
-    n++;
+    if (size) {
+        g_return_val_if_fail(items->len - items->n, 0);
+        it = serialize_items[0];
+        it.value.v_double_array = gwy_array_get_data(array);
+        it.array_size = size * klass->shape_size;
+        items->items[items->n++] = it;
+        n++;
+    }
 
     Coords *priv = coords->priv;
     if (priv->units) {
-        guint dimension = GWY_COORDS_GET_CLASS(coords)->dimension;
-
+        g_return_val_if_fail(items->len - items->n, 0);
+        guint dimension = klass->dimension;
         it = serialize_items[1];
         it.value.v_object_array = (GObject**)priv->units;
         it.array_size = dimension;
@@ -209,10 +213,11 @@ gwy_coords_itemize(GwySerializable *serializable,
 
 static gboolean
 gwy_coords_construct(GwySerializable *serializable,
-                        GwySerializableItems *items,
-                        GwyErrorList **error_list)
+                     GwySerializableItems *items,
+                     GwyErrorList **error_list)
 {
     GwySerializableItem its[N_ITEMS];
+    memcpy(its, serialize_items, sizeof(serialize_items));
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyCoords", error_list);
 
@@ -313,11 +318,11 @@ gwy_coords_assign_impl(GwySerializable *destination,
     Coords *spriv = GWY_COORDS(source)->priv,
            *dpriv = GWY_COORDS(destination)->priv;
 
-    if (!spriv && !dpriv)
+    if (!spriv->units && !dpriv->units)
         return;
 
     guint dimension = GWY_COORDS_GET_CLASS(destination)->dimension;
-    if (!spriv) {
+    if (!spriv->units) {
         for (guint i = 0; i < dimension; i++)
             GWY_OBJECT_UNREF(spriv->units[i]);
     }
@@ -465,8 +470,7 @@ gwy_coords_set(GwyCoords *coords,
     else if (i == n)
         gwy_array_append1(GWY_ARRAY(coords), data);
     else {
-        g_critical("Coords object index %u is beyond the end of the data.",
-                   i);
+        g_critical("Coords object index %u is beyond the end of the data.", i);
         gwy_array_append1(GWY_ARRAY(coords), data);
     }
 }
@@ -480,7 +484,7 @@ gwy_coords_set(GwyCoords *coords,
  **/
 void
 gwy_coords_delete(GwyCoords *coords,
-                     guint i)
+                  guint i)
 {
     g_return_if_fail(GWY_IS_COORDS(coords));
     gwy_array_delete1(GWY_ARRAY(coords), i);
@@ -537,7 +541,7 @@ gwy_coords_set_data(GwyCoords *coords,
                     const gdouble *data)
 {
     g_return_if_fail(GWY_IS_COORDS(coords));
-    g_return_if_fail(data);
+    g_return_if_fail(data || !n);
     gwy_array_set_data(GWY_ARRAY(coords), data, n);
 }
 
