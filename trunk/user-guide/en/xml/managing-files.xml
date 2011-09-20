@@ -47,7 +47,7 @@
       Files are opened using
       <menuchoice>
         <guimenu>File</guimenu>
-        <guisubmenu>Open</guisubmenu>
+        <guimenuitem>Open</guimenuitem>
       </menuchoice>.
       The file type is detected automatically, based solely on the file
       content.  Since the same extensions such as
@@ -98,7 +98,7 @@
       File merging, performed by
       <menuchoice>
         <guimenu>File</guimenu>
-        <guisubmenu>Merge</guisubmenu>
+        <guimenuitem>Merge</guimenuitem>
       </menuchoice>,
       is similar to normal file loading, except that the selected file (or
       files) is merged into the current open file.  In other words, channels,
@@ -130,6 +130,14 @@
       subset of the data, typically only the active channel (without masks
       and presentations).  Therefore it does <emphasis>not</emphasis>
       change the file name of the current file to the just saved file name.
+    </para>
+    <para>
+      <menuchoice>
+        <guimenu>File</guimenu>
+        <guimenuitem>Save as...</guimenuitem>
+      </menuchoice> can also be used to export channels to image formats.
+      Just enter <filename>foo.png</filename> as the file name to export
+      a PNG image the current channel, similarly for other formats.
     </para>
   </sect2>
   <sect2 id='document-history'>
