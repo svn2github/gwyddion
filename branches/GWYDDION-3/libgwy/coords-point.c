@@ -126,4 +126,23 @@ gwy_coords_point_construct(GwySerializable *serializable,
  * #GwyCoordsPointClass does not contain any public members.
  **/
 
+/**
+ * gwy_coords_point_duplicate:
+ * @coordspoint: A group of coordinates of points in plane.
+ *
+ * Duplicates a group coordinates of points in plane.
+ *
+ * This is a convenience wrapper of gwy_serializable_duplicate().
+ **/
+
+/**
+ * gwy_coords_point_assign:
+ * @dest: Destination group of coordinates of points in plane.
+ * @src: Source group of coordinates of points in plane.
+ *
+ * Copies the value of a group of coordinates of points in plane.
+ *
+ * This is a convenience wrapper of gwy_serializable_assign().
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

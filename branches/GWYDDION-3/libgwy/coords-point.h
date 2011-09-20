@@ -50,8 +50,8 @@ struct _GwyCoordsPointClass {
     GwyCoordsClass coords_class;
 };
 
-#define gwy_coords_point_duplicate(coords_point) \
-        (GWY_COORDS_POINT(gwy_serializable_duplicate(GWY_SERIALIZABLE(coords_point))))
+#define gwy_coords_point_duplicate(coordspoint) \
+        (GWY_COORDS_POINT(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordspoint))))
 #define gwy_coords_point_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
