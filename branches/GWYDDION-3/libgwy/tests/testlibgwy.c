@@ -58,6 +58,7 @@ remove_testdata(void)
         }
         g_object_unref(enumerator);
     }
+    g_object_unref(testdir);
     g_rmdir(TEST_DATA_DIR);
 }
 
