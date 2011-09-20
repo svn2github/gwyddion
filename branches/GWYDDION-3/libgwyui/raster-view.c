@@ -35,6 +35,7 @@ enum {
     PROP_MASK_COLOR,
     PROP_ZOOM,
     PROP_REAL_ASPECT_RATIO,
+    PROP_NUMBER_GRAINS,
     N_PROPS,
     // Overriden.
     PROP_HADJUSTMENT = N_PROPS,
@@ -60,6 +61,8 @@ struct _GwyRasterViewPrivate {
     gboolean real_aspect_ratio;
     cairo_rectangle_int_t image_rectangle;
     cairo_rectangle_t field_rectangle;
+
+    gboolean number_grains;
 
     GwyField *field;
     gulong field_notify_id;
@@ -144,6 +147,8 @@ static gboolean set_zoom                            (GwyRasterView *rasterview,
                                                      gdouble zoom);
 static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
                                                      gboolean setting);
+static gboolean set_number_grains                   (GwyRasterView *rasterview,
+                                                     gboolean setting);
 static guint    calculate_full_width                (GwyRasterView *rasterview);
 static guint    calculate_full_height               (GwyRasterView *rasterview);
 
@@ -225,6 +230,13 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    raster_view_pspecs[PROP_NUMBER_GRAINS]
+        = g_param_spec_boolean("number-grains",
+                               "Number grains",
+                               "Whether to display mask grain numbers.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i,
                                         raster_view_pspecs[i]);
@@ -303,6 +315,10 @@ gwy_raster_view_set_property(GObject *object,
         set_real_aspect_ratio(rasterview, g_value_get_boolean(value));
         break;
 
+        case PROP_NUMBER_GRAINS:
+        set_number_grains(rasterview, g_value_get_boolean(value));
+        break;
+
         case PROP_HADJUSTMENT:
         set_hadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
         break;
@@ -358,6 +374,10 @@ gwy_raster_view_get_property(GObject *object,
 
         case PROP_REAL_ASPECT_RATIO:
         g_value_set_boolean(value, priv->real_aspect_ratio);
+        break;
+
+        case PROP_NUMBER_GRAINS:
+        g_value_set_boolean(value, priv->number_grains);
         break;
 
         case PROP_HADJUSTMENT:
@@ -908,6 +928,9 @@ draw_grain_numbers(GwyRasterView *rasterview,
                    cairo_t *cr)
 {
     RasterView *priv = rasterview->priv;
+    if (!priv->number_grains)
+        return;
+
     GtkWidget *widget = GTK_WIDGET(rasterview);
     PangoLayout *layout = gtk_widget_create_pango_layout(widget, NULL);
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
@@ -1246,10 +1269,6 @@ set_vadjustment_values(GwyRasterView *rasterview)
 static void
 adjustment_value_changed(GwyRasterView *rasterview)
 {
-    g_printerr("adjustment changed: x = %g, y = %g\n",
-               gtk_adjustment_get_value(rasterview->priv->hadjustment),
-               gtk_adjustment_get_value(rasterview->priv->vadjustment));
-
     rasterview->priv->field_surface_valid = FALSE;
     rasterview->priv->mask_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
@@ -1273,6 +1292,7 @@ set_real_aspect_ratio(GwyRasterView *rasterview,
                       gboolean setting)
 {
     RasterView *priv = rasterview->priv;
+    setting = !!setting;
     if (setting == priv->real_aspect_ratio)
         return FALSE;
 
@@ -1307,6 +1327,24 @@ calculate_full_height(GwyRasterView *rasterview)
     if (priv->real_aspect_ratio)
         yzoom *= priv->field_aspect_ratio;
     return gwy_round(fmax(yzoom * priv->field->yres, 1.0));
+}
+
+static gboolean
+set_number_grains(GwyRasterView *rasterview,
+                  gboolean setting)
+{
+    RasterView *priv = rasterview->priv;
+    setting = !!setting;
+    if (setting == priv->real_aspect_ratio)
+        return FALSE;
+
+    priv->number_grains = setting;
+    // Do not trigger a redraw if there is no mask.
+    if (!priv->mask)
+        return TRUE;
+
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    return TRUE;
 }
 
 /**
