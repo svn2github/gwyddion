@@ -3282,8 +3282,8 @@ test_field_distributions_minkowski_connectivity(void)
                 gwy_mask_field_logical(bgrains, mask, NULL, GWY_LOGICAL_NIMPL);
             }
 
-            guint ngw = gwy_mask_field_grain_numbers(wgrains);
-            guint ngb = gwy_mask_field_grain_numbers(bgrains);
+            guint ngw = gwy_mask_field_n_grains(wgrains);
+            guint ngb = gwy_mask_field_n_grains(bgrains);
             gdouble fraction = (gdouble)ngw/n - (gdouble)ngb/n;
             g_assert_cmpfloat(fabs(conndist->data[i] - fraction), <=, 1e-14);
             g_object_unref(wgrains);
