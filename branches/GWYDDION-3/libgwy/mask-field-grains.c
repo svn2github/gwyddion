@@ -33,32 +33,11 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
     return map;
 }
 
-/**
- * gwy_mask_field_grain_numbers:
- * @field: A two-dimensional mask field.
- * @ngrains: Location to store the number of the last grain, or %NULL.
- *
- * Numbers grains in a mask field.
- *
- * Returns: (transfer none):
- *          Array of integers of the same number of items as @field
- *          (without padding) filled with grain numbers of each pixel.  Empty
- *          space is set to 0, pixels inside a grain are set to the grain
- *          number.  Grains are numbered sequentially 1, 2, 3, ...
- *          The returned array is owned by @field and becomes invalid when
- *          the data change, gwy_mask_field_invalidate() is called or the
- *          mask field is finalized.
- **/
-const guint*
-gwy_mask_field_grain_numbers(GwyMaskField *field,
-                             guint *ngrains)
+static void
+number_grains(GwyMaskField *field)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     MaskField *priv = field->priv;
-    if (priv->grains) {
-        GWY_MAYBE_SET(ngrains, priv->ngrains);
-        return priv->grains;
-    }
+    g_return_if_fail(priv->grains);
 
     guint xres = field->xres, yres = field->yres;
     priv->grains = g_new(guint, xres*yres);
@@ -128,7 +107,50 @@ gwy_mask_field_grain_numbers(GwyMaskField *field,
     g_free(m);
 
     priv->ngrains = id;
-    GWY_MAYBE_SET(ngrains, priv->ngrains);
+}
+
+/**
+ * gwy_mask_field_grain_numbers:
+ * @field: A two-dimensional mask field.
+ *
+ * Numbers grains in a mask field.
+ *
+ * Returns: The number of grains in @field.
+ **/
+guint
+gwy_mask_field_n_grains(GwyMaskField *field)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
+    MaskField *priv = field->priv;
+    if (!priv->grains)
+        number_grains(field);
+
+    return priv->ngrains;
+}
+
+/**
+ * gwy_mask_field_grain_numbers:
+ * @field: A two-dimensional mask field.
+ *
+ * Numbers grains in a mask field.
+ *
+ * Returns: (transfer none):
+ *          Array of integers of the same number of items as @field
+ *          (without padding) filled with grain numbers of each pixel.  Empty
+ *          space is set to 0, pixels inside a grain are set to the grain
+ *          number.  Grains are numbered sequentially 1, 2, 3, ...
+ *          The returned array is owned by @field and becomes invalid when
+ *          the data change, gwy_mask_field_invalidate() is called or the
+ *          mask field is finalized.
+ **/
+const guint*
+gwy_mask_field_grain_numbers(GwyMaskField *field)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    MaskField *priv = field->priv;
+    if (!priv->grains)
+        number_grains(field);
+
     return priv->grains;
 }
 
@@ -137,8 +159,7 @@ calculate_grain_properties(GwyMaskField *field)
 {
     MaskField *priv = field->priv;
 
-    if (!priv->grains)
-        gwy_mask_field_grain_numbers(field, NULL);
+    gwy_mask_field_grain_numbers(field);
 
     GWY_FREE(priv->grain_sizes);
     GWY_FREE(priv->grain_bounding_boxes);
@@ -245,8 +266,8 @@ static GwyXY*
 find_grain_positions(GwyMaskField *field)
 {
     guint xres = field->xres, yres = field->yres;
-    guint ngrains;
-    const guint *grains = gwy_mask_field_grain_numbers(field, &ngrains);
+    guint ngrains = gwy_mask_field_n_grains(field);
+    const guint *grains = gwy_mask_field_grain_numbers(field);
     const guint *sizes = gwy_mask_field_grain_sizes(field);
     GwyXY *centres = g_new0(GwyXY, ngrains+1);
     const guint *g = grains;
@@ -535,7 +556,7 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     g_return_if_fail(grain_id > 0);
     // Normally the caller must have obtained the grain id somewhere so the
     // grains are numbered.  But just in case...
-    gwy_mask_field_grain_numbers(field, NULL);
+    gwy_mask_field_grain_numbers(field);
 
     MaskField *priv = field->priv;
     guint ngrains = priv->ngrains;
@@ -627,6 +648,17 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
  * mask (two pixels with just a common corner are considered separate).  The
  * term grain has the origin in the common use of these methods on the result
  * of a grain marking function.
+ *
+ * Grains are numbered sequentially from 1 to the maximum grain number denoted
+ * @ngrains below.  The numbering is stable, i.e. it is always the same for
+ * the same mask field.  Specifically, grains are numbered by the position of
+ * the first pixel belonging to the grain.
+ *
+ * Grain functions often return or work with arrays where each item corresponds
+ * to one grain.  The dimension of such arrays is always @ngrains+1,
+ * <emphasis>not</emphasis> @ngrains.  The zeroth element may either correspond
+ * to the empty space between grains or have no meaning, but it is always
+ * present.  Elements 1 to @ngrains correspond to grains.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

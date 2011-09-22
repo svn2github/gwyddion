@@ -608,9 +608,8 @@ test_mask_field_grain_numbers(void)
                                                            FALSE);
         mask_field_randomize(maskfield, pool, max_size, rng);
 
-        guint ngrains;
-        const guint32 *grains = gwy_mask_field_grain_numbers(maskfield,
-                                                             &ngrains);
+        guint ngrains = gwy_mask_field_n_grains(maskfield);
+        const guint32 *grains = gwy_mask_field_grain_numbers(maskfield);
         guint *counts = g_new0(guint, ngrains+1);
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
@@ -1369,9 +1368,7 @@ test_mask_field_grain_sizes(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         gdouble prob = g_rand_double(rng);
         GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
-        guint ngrains;
-
-        gwy_mask_field_grain_numbers(field, &ngrains);
+        guint ngrains = gwy_mask_field_n_grains(field);
         const guint *grain_sizes = gwy_mask_field_grain_sizes(field);
 
         guint total = 0;
@@ -1407,9 +1404,8 @@ test_mask_field_grain_bounding_boxes(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         gdouble prob = g_rand_double(rng);
         GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
-        guint ngrains;
-
-        const guint *grains = gwy_mask_field_grain_numbers(field, &ngrains);
+        guint ngrains = gwy_mask_field_n_grains(field);
+        const guint *grains = gwy_mask_field_grain_numbers(field);
         const GwyFieldPart *grain_bboxes = gwy_mask_field_grain_bounding_boxes(field);
 
         for (guint i = 0; i <= ngrains; i++) {
@@ -1482,8 +1478,8 @@ test_mask_field_grain_remove(void)
         gdouble prob = g_rand_double(rng);
         GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
 
-        guint ngrains;
-        const guint *grains = gwy_mask_field_grain_numbers(field, &ngrains);
+        guint ngrains = gwy_mask_field_n_grains(field);
+        const guint *grains = gwy_mask_field_grain_numbers(field);
         if (!ngrains) {
             g_object_unref(field);
             continue;
@@ -1495,9 +1491,8 @@ test_mask_field_grain_remove(void)
         guint grain_id = g_rand_int_range(rng, 1, ngrains+1);
         gwy_mask_field_remove_grain(copy, grain_id);
 
-        guint ngrains_new;
-        const guint *grains_new = gwy_mask_field_grain_numbers(copy,
-                                                               &ngrains_new);
+        guint ngrains_new = gwy_mask_field_n_grains(copy);
+        const guint *grains_new = gwy_mask_field_grain_numbers(copy);
         g_assert_cmpuint(ngrains_new, ==, ngrains-1);
 
         for (guint i = 0; i < yres; i++) {
@@ -1534,7 +1529,8 @@ test_mask_field_grain_remove(void)
         const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(field);
         const guint *sizes = gwy_mask_field_grain_sizes(field);
         gwy_mask_field_remove_grain(field, grain_id);
-        grains = gwy_mask_field_grain_numbers(field, &ngrains);
+        ngrains = gwy_mask_field_n_grains(field);
+        grains = gwy_mask_field_grain_numbers(field);
         g_assert_cmpuint(ngrains, ==, ngrains_new);
         mask_field_assert_equal(field, copy);
         for (guint k = 0; k < xres*yres; k++) {
@@ -1544,7 +1540,8 @@ test_mask_field_grain_remove(void)
         // Locate the grains from scratch.
         // Verify the same result was obtained.
         gwy_mask_field_invalidate(copy);
-        grains_new = gwy_mask_field_grain_numbers(copy, &ngrains_new);
+        ngrains_new = gwy_mask_field_n_grains(copy);
+        grains_new = gwy_mask_field_grain_numbers(copy);
         g_assert_cmpuint(ngrains_new, ==, ngrains);
         for (guint k = 0; k < xres*yres; k++) {
             g_assert_cmpuint(grains_new[k], ==, grains[k]);

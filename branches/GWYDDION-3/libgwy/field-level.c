@@ -2166,8 +2166,8 @@ gwy_field_laplace_solve(GwyField *field,
     else
         g_object_ref(mask);
 
-    guint ngrains;
-    const guint *grains = gwy_mask_field_grain_numbers(mask, &ngrains);
+    guint ngrains = gwy_mask_field_n_grains(mask);
+    const guint *grains = gwy_mask_field_grain_numbers(mask);
     g_return_if_fail(grain_id == G_MAXUINT || grain_id <= ngrains);
 
     const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);

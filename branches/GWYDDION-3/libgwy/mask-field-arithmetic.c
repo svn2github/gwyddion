@@ -943,7 +943,7 @@ gwy_mask_field_grow(GwyMaskField *field,
     // Separated grain growth needs numbered grains but it also updates the
     // numbers to the valid state again.
     if (separate_grains)
-        gwy_mask_field_grain_numbers(field, NULL);
+        gwy_mask_field_grain_numbers(field);
     grow_field(field);
     if (separate_grains) {
         prevent_grain_merging(field);

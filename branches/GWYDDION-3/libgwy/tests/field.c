@@ -1803,8 +1803,8 @@ test_field_level_laplace_random(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         gdouble prob = cbrt(g_rand_double(rng));
         GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, prob);
-        guint ngrains;
-        const guint *grains = gwy_mask_field_grain_numbers(mask, &ngrains);
+        guint ngrains = gwy_mask_field_n_grains(mask);
+        const guint *grains = gwy_mask_field_grain_numbers(mask);
         if (!ngrains) {
             g_object_unref(mask);
             continue;
@@ -1861,7 +1861,7 @@ field_level_laplace_function_one(void (*function)(GwyField *field, GRand *rng),
         gwy_field_fill(field, &fpart, NULL, GWY_MASK_IGNORE, NAN);
         gwy_field_laplace_solve(field, mask, grain_id);
 
-        const guint *grains = gwy_mask_field_grain_numbers(mask, NULL);
+        const guint *grains = gwy_mask_field_grain_numbers(mask);
         field_laplace_check_unmodif(field, reference, grains, grain_id);
         field_laplace_check_absolute_error(field, reference, grains, grain_id,
                                            maxerr);
@@ -3046,10 +3046,9 @@ test_field_distributions_minkowski_boundary(void)
             else {
                 gboolean include = (masking == GWY_MASK_INCLUDE);
                 guint count = gwy_mask_field_count(mask, NULL, include);
-                guint ngrains;
                 if (!include)
                     gwy_mask_field_logical(mask, NULL, NULL, GWY_LOGICAL_NA);
-                gwy_mask_field_grain_numbers(mask, &ngrains);
+                guint ngrains = gwy_mask_field_n_grains(mask);
                 g_assert_cmpuint(count, ==, ngrains);
             }
             g_object_unref(boundarydist);
@@ -3132,8 +3131,7 @@ test_field_distributions_minkowski_black(void)
             else if (masking == GWY_MASK_EXCLUDE)
                 gwy_mask_field_logical(grains, mask, NULL, GWY_LOGICAL_NIMPL);
 
-            guint ng;
-            gwy_mask_field_grain_numbers(grains, &ng);
+            guint ng = gwy_mask_field_n_grains(grains);
             gdouble fraction = (gdouble)ng/n;
             g_assert_cmpfloat(fabs(blackdist->data[i] - fraction), <=, 1e-14);
             g_object_unref(grains);
@@ -3204,8 +3202,7 @@ test_field_distributions_minkowski_white(void)
             else if (masking == GWY_MASK_EXCLUDE)
                 gwy_mask_field_logical(grains, mask, NULL, GWY_LOGICAL_NIMPL);
 
-            guint ng;
-            gwy_mask_field_grain_numbers(grains, &ng);
+            guint ng = gwy_mask_field_n_grains(grains);
             gdouble fraction = (gdouble)ng/n;
             g_assert_cmpfloat(fabs(whitedist->data[i] - fraction), <=, 1e-14);
             g_object_unref(grains);
@@ -3285,9 +3282,8 @@ test_field_distributions_minkowski_connectivity(void)
                 gwy_mask_field_logical(bgrains, mask, NULL, GWY_LOGICAL_NIMPL);
             }
 
-            guint ngw, ngb;
-            gwy_mask_field_grain_numbers(wgrains, &ngw);
-            gwy_mask_field_grain_numbers(bgrains, &ngb);
+            guint ngw = gwy_mask_field_grain_numbers(wgrains);
+            guint ngb = gwy_mask_field_grain_numbers(bgrains);
             gdouble fraction = (gdouble)ngw/n - (gdouble)ngb/n;
             g_assert_cmpfloat(fabs(conndist->data[i] - fraction), <=, 1e-14);
             g_object_unref(wgrains);
