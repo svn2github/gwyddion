@@ -754,7 +754,7 @@ gwy_raster_view_motion_notify(GtkWidget *widget,
 
     guint j = (guint)floor(pos.x), i = (guint)floor(pos.y);
     g_assert(j < field->xres && i < field->yres);
-    const guint *grains = gwy_mask_field_grain_numbers(priv->mask, NULL);
+    const guint *grains = gwy_mask_field_grain_numbers(priv->mask);
 
     if (grains[i*field->xres + j] != priv->active_grain) {
         priv->active_grain = grains[i*field->xres + j];
@@ -941,8 +941,7 @@ draw_grain_numbers(GwyRasterView *rasterview,
     pango_layout_set_attributes(layout, attrlist);
     pango_attr_list_unref(attrlist);
 
-    guint ngrains;
-    gwy_mask_field_grain_numbers(priv->mask, &ngrains);
+    guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
     cairo_save(cr);
