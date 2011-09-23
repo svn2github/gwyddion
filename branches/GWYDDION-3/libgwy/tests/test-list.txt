@@ -134,6 +134,7 @@ mask-field/serialize
 mask-field/fill
 mask-field/count
 mask-field/count-rows
+mask-field/count-masking
 mask-field/set-size
 mask-field/resample
 mask-field/grain/numbers

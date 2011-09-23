@@ -764,6 +764,58 @@ test_mask_field_count_rows(void)
     g_rand_free(rng);
 }
 
+void
+test_mask_field_count_masking(void)
+{
+    enum { xres = 43, yres = 21 };
+
+    GwyMaskField *field0 = gwy_mask_field_new_sized(xres, yres, TRUE);
+    GwyMaskField *field1 = gwy_mask_field_new_sized(xres, yres, FALSE);
+    gwy_mask_field_fill(field1, NULL, TRUE);
+
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field0, NULL,
+                                                       GWY_MASK_IGNORE),
+                     ==, xres*yres);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field1, NULL,
+                                                       GWY_MASK_IGNORE),
+                     ==, xres*yres);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field0, NULL,
+                                                       GWY_MASK_INCLUDE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field1, NULL,
+                                                       GWY_MASK_INCLUDE),
+                     ==, xres*yres);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field0, NULL,
+                                                       GWY_MASK_EXCLUDE),
+                     ==, xres*yres);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field1, NULL,
+                                                       GWY_MASK_EXCLUDE),
+                     ==, 0);
+
+    GwyFieldPart fpart = { 8, 9, 10, 11 };
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field0, &fpart,
+                                                       GWY_MASK_IGNORE),
+                     ==, fpart.width * fpart.height);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field1, &fpart,
+                                                       GWY_MASK_IGNORE),
+                     ==, fpart.width * fpart.height);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field0, &fpart,
+                                                       GWY_MASK_INCLUDE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field1, &fpart,
+                                                       GWY_MASK_INCLUDE),
+                     ==, fpart.width * fpart.height);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field0, &fpart,
+                                                       GWY_MASK_EXCLUDE),
+                     ==, fpart.width * fpart.height);
+    g_assert_cmpuint(gwy_mask_field_part_count_masking(field1, &fpart,
+                                                       GWY_MASK_EXCLUDE),
+                     ==, 0);
+
+    g_object_unref(field1);
+    g_object_unref(field0);
+}
+
 static GwyMaskField*
 mask_field_from_string(const gchar *str)
 {
