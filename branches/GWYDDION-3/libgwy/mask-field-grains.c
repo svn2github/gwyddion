@@ -37,7 +37,7 @@ static void
 number_grains(GwyMaskField *field)
 {
     MaskField *priv = field->priv;
-    g_return_if_fail(priv->grains);
+    g_return_if_fail(!priv->grains);
 
     guint xres = field->xres, yres = field->yres;
     priv->grains = g_new(guint, xres*yres);
