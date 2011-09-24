@@ -1008,8 +1008,8 @@ gwy_field_filter_gaussian(const GwyField *field,
 
     // The general case.
     GwyLine *rowkernel = gwy_line_new(), *colkernel = gwy_line_new();
+    make_gaussian_kernel(rowkernel, hsigma);
     if (make_gaussian_kernel(colkernel, vsigma)) {
-        make_gaussian_kernel(rowkernel, hsigma);
         GwyField *kernel = gwy_line_outer_product(colkernel, rowkernel);
         gwy_field_convolve(field, rectangle, target, kernel,
                            exterior, fill_value);
