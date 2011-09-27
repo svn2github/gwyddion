@@ -51,7 +51,7 @@
       Les fichiers peuvent être ouverts avec
       <menuchoice>
         <guimenu>Fichier</guimenu>
-        <guisubmenu>Ouvrir</guisubmenu>
+        <guimenuitem>Ouvrir</guimenuitem>
       </menuchoice>.
       Le type de fichier est automatiquement détecté, en se basant sur le
       contenu du fichier. Etant données que des extensions telles que
@@ -101,10 +101,10 @@
       <primary>fusion</primary>
     </indexterm>
     <para>
-      La fusion de fichier, réalisée avec 
+      La fusion de fichier, réalisée avec
       <menuchoice>
         <guimenu>Fichier</guimenu>
-        <guisubmenu>Fusionner</guisubmenu>
+        <guimenuitem>Fusionner</guimenuitem>
       </menuchoice>,
       est similaire au chargement d'un fichier, toutefois le fichier
       sélectionné est fusionné avec le fichier courant. En d'autres mots, les
@@ -127,7 +127,7 @@
       les mêmes extensions telles que <filename>.img</filename>,
       <filename>.afm</filename> ou <filename>.dat</filename>, on aboutit à des
       ambiguïté. En cas de doute, il est recommandé de sélectionner
-      explicitement le type de fichier avant la sauvegarde. 
+      explicitement le type de fichier avant la sauvegarde.
     </para>
     <para>
       Etant donné que le seul type de fichier capable de représenter
@@ -137,6 +137,16 @@
       des données, typiquement le canal actif (sans les masques et sans les
       présentations). Cela ne change donc <emphasis>pas</emphasis> seulement le
       nom du fichier nouvellement enregistré.
+    </para>
+    <para>
+      La fonction
+      <menuchoice>
+        <guimenu>Fichier</guimenu>
+        <guimenuitem>Enregistrer sous...</guimenuitem>
+      </menuchoice> peut aussi être utilisé pour exporter les canaux sous des
+      formats image. Il suffit par exemple d'entrer <filename>foo.png</filename>
+      comme nom de fichier pour enregistrer le canal courant au format PNG, en
+      faisant de la même pour les autres formats image.
     </para>
   </sect2>
   <sect2 id='document-history'>
