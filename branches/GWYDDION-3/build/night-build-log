@@ -146,9 +146,11 @@ function extract_coverage_stats() {
   for dir in $libdirs; do
     if test -s "$projectdir/$dir/$dir-test-report.html"; then
       mv -f "$projectdir/$dir"/$dir-test-report{,-brief}.html .
-      sed -rn -e 's:(<a href=")([^"]*)\.c\.gcov":\1'"$dir"'/\2-gcov.log":' \
-          -e '/<table/,/<\/table>/p' "$projectdir/$dir/coverage/coverage.html" \
-          >$dir-coverage.html
+      if test -s "$projectdir/$dir/coverage/coverage.html"; then
+        sed -rn -e 's:(<a href=")([^"]*)\.c\.gcov":\1'"$dir"'/\2-gcov.log":' \
+             -e '/<table/,/<\/table>/p' "$projectdir/$dir/coverage/coverage.html" \
+             >$dir-coverage.html
+      fi
       if test -d "$projectdir/$dir/coverage"; then
         pushd "$projectdir/$dir/coverage" >/dev/null
         rename .c.gcov -gcov.log *.c.gcov
