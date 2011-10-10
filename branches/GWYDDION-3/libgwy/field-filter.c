@@ -868,32 +868,6 @@ gwy_field_convolve(const GwyField *field,
     gwy_field_invalidate(target);
 }
 
-static gboolean
-make_gaussian_kernel(GwyLine *kernel,
-                     gdouble sigma)
-{
-    // Smaller values lead to underflow even in the first non-central term.
-    if (sigma < 0.026)
-        return FALSE;
-
-    // Exclude terms smaller than machine eps compared to the central term.
-    guint res = 2*(guint)ceil(8.0*sigma) + 1;
-    // But do at least a 3-term filter so that they don't say we didn't try.
-    res = MAX(res, 3);
-    gdouble center = (res - 1.0)/2.0;
-    double s = 0.0;
-
-    gwy_line_set_size(kernel, res, FALSE);
-    for (guint k = 0; k < res; k++) {
-        gdouble x = k - center;
-        x /= sigma;
-        s += kernel->data[k] = exp(-x*x/2.0);
-    }
-    gwy_line_multiply(kernel, 1.0/s);
-
-    return TRUE;
-}
-
 /**
  * gwy_field_extend:
  * @field: A two-dimensional data field.
@@ -954,6 +928,32 @@ gwy_field_extend(const GwyField *field,
     ASSIGN_UNITS(result->priv->unit_z, field->priv->unit_z);
 
     return result;
+}
+
+static gboolean
+make_gaussian_kernel(GwyLine *kernel,
+                     gdouble sigma)
+{
+    // Smaller values lead to underflow even in the first non-central term.
+    if (sigma < 0.026)
+        return FALSE;
+
+    // Exclude terms smaller than machine eps compared to the central term.
+    guint res = 2*(guint)ceil(8.0*sigma) + 1;
+    // But do at least a 3-term filter so that they don't say we didn't try.
+    res = MAX(res, 3);
+    gdouble center = (res - 1.0)/2.0;
+    double s = 0.0;
+
+    gwy_line_set_size(kernel, res, FALSE);
+    for (guint k = 0; k < res; k++) {
+        gdouble x = k - center;
+        x /= sigma;
+        s += kernel->data[k] = exp(-x*x/2.0);
+    }
+    gwy_line_multiply(kernel, 1.0/s);
+
+    return TRUE;
 }
 
 /**
