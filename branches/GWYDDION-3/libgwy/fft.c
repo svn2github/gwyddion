@@ -215,8 +215,10 @@ static gdouble
 gwy_fft_window_kaiser(guint i, guint n, gdouble alpha)
 {
     gdouble x = 2.0*i/(n - 1) - 1.0;
+    x = x*x;
+    x = MAX(x, 0.0);
 
-    return bessel_I0(G_PI*alpha*sqrt(1.0 - x*x));
+    return bessel_I0(G_PI*alpha*sqrt(x));
 }
 
 static gdouble
