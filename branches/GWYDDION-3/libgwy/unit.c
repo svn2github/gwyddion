@@ -545,8 +545,10 @@ parse(Unit *unit,
         g_string_append_len(buf, string, end - string);
 
         /* fix sloppy notations */
-        if (gwy_strequal(buf->str, "°"))
+        if (gwy_stramong(buf->str, "°", "degree", "degrees", NULL))
             g_string_assign(buf, "deg");
+        else if (gwy_stramong(buf->str, "micro m", NULL))
+            g_string_assign(buf, "µm");
         else if (gwy_stramong(buf->str, "Å", "AA", "Ang", NULL))
             g_string_assign(buf, "Å");
         else if (gwy_stramong(buf->str, "a.u.", "a. u.", "counts", NULL))
