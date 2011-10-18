@@ -110,10 +110,10 @@ number_grains(GwyMaskField *field)
 }
 
 /**
- * gwy_mask_field_grain_numbers:
+ * gwy_mask_field_n_grains:
  * @field: A two-dimensional mask field.
  *
- * Numbers grains in a mask field.
+ * Obtains the number of contiguous grains in a mask field.
  *
  * Returns: The number of grains in @field.
  **/
@@ -132,7 +132,7 @@ gwy_mask_field_n_grains(GwyMaskField *field)
  * gwy_mask_field_grain_numbers:
  * @field: A two-dimensional mask field.
  *
- * Numbers grains in a mask field.
+ * Obtains grain numbers of a mask field.
  *
  * Returns: (transfer none):
  *          Array of integers of the same number of items as @field
