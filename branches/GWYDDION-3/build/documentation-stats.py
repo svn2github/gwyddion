@@ -23,6 +23,25 @@ def parse(filename):
     stat['total'] = total
     return stat
 
+# Redistribute rounding errors in box widths to achieve fixed total width
+def balance(ratios, total_width):
+    q = 1.0/total_width
+    widths = dict((k, int(floor(v/q + 0.5))) for k, v in ratios.items())
+    errs = [(q*v - ratios[k], k) for k, v in widths.items()]
+    sw = sum(x for x in widths.values())
+    while sw != total_width:
+        errs.sort()
+        if sw > total_width:
+            k = errs[-1][1]
+            widths[k] -= 1
+            sw -= 1
+            errs[-1] = (errs[-1][0] - q, k)
+        else:
+            k = errs[0][1]
+            widths[k] += 1
+            sw += 1
+            errs[0] = (errs[0][0] + q, k)
+    return widths
 def format_row(stat):
     rowfmt = """<tr>
 <th class="odd">%s</th>
@@ -37,30 +56,10 @@ def format_row(stat):
 
     box = []
     stats = []
-    sum = float(stat['total'])
+    sum_ = float(stat['total'])
 
-    # Redistribute rounding errors in box widths to achieve fixed total width
-    w = {}
-    sw = 0
-    for x in stat_types:
-        if stat.has_key(x):
-            w[x] = int(stat[x]/sum*total_width + 0.5)
-            sw += w[x]
-    while sw != total_width:
-        if sw > total_width:
-            m, mx = 1.0e38, None
-            for x in stat_types:
-                if stat.has_key(x) and stat[x]/sum*total_width - w[x] < m:
-                    mx = x
-            w[mx] -= 1
-            sw -= 1
-        else:
-            m, mx = 1.0e38, None
-            for x in stat_types:
-                if stat.has_key(x) and w[x] - stat[x]/sum*total_width < m:
-                    mx = x
-            w[mx] += 1
-            sw += 1
+    r = dict((x, stat[x]/sum_) for x in stat_types if x in stat)
+    w = balance(r, total_width)
 
     t = dict([(z[1], z[0]) for z in stat_types.items()])
     for x in t['good'], t['fuzzy'], t['bad']:
@@ -68,9 +67,9 @@ def format_row(stat):
             stats.append(statfmt % (0, 0.0))
             continue
         box.append(boxfmt % (stat_types[x], w[x]))
-        stats.append(statfmt % (stat[x], stat[x]/sum*100.0))
+        stats.append(statfmt % (stat[x], r[x]*100.0))
 
-    return rowfmt % (stat['group'], '\n'.join(stats), sum, ''.join(box))
+    return rowfmt % (stat['group'], '\n'.join(stats), sum_, ''.join(box))
 
 stats = [parse(x) for x in sys.argv[1:]]
 
