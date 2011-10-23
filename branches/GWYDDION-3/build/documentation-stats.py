@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # $Id$
 import re, sys
+from math import floor
 
 stat_types = {
     'documented': 'good',
