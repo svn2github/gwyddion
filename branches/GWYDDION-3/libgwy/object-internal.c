@@ -48,6 +48,18 @@ _gwy_assign_string(gchar **p, const gchar *q)
 }
 
 void
+_gwy_assign_units(GwyUnit **dest,
+                  const GwyUnit *source)
+{
+    if (*dest && source)
+        gwy_unit_assign(*dest, source);
+    else if (dest)
+        gwy_unit_set_from_string(*dest, NULL, NULL);
+    else if (source)
+        *dest = gwy_unit_duplicate(source);
+}
+
+void
 _gwy_notify_properties(GObject *object,
                        const gchar **properties,
                        guint nproperties)
@@ -145,6 +157,5 @@ _gwy_check_object_component(const GwySerializableItem *item,
     }
     g_return_val_if_reached(FALSE);
 }
-
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

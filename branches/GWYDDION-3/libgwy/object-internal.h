@@ -43,6 +43,10 @@ gboolean _gwy_assign_string(gchar **p,
                             const gchar *q);
 
 G_GNUC_INTERNAL
+void _gwy_assign_units(GwyUnit **dest,
+                       const GwyUnit *source);
+
+G_GNUC_INTERNAL
 void _gwy_notify_properties(GObject *object,
                             const gchar **properties,
                             guint nproperties);
