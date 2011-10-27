@@ -53,7 +53,7 @@ _gwy_assign_units(GwyUnit **dest,
 {
     if (*dest && source)
         gwy_unit_assign(*dest, source);
-    else if (dest)
+    else if (*dest)
         gwy_unit_set_from_string(*dest, NULL, NULL);
     else if (source)
         *dest = gwy_unit_duplicate(source);
