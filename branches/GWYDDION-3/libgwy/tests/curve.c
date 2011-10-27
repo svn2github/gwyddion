@@ -85,6 +85,45 @@ curve_assert_similar(const GwyCurve *result,
 */
 
 void
+test_curve_units_assign(void)
+{
+    GwyCurve *curve = gwy_curve_new(), *curve2 = gwy_curve_new();
+    GwyUnit *unit_x = gwy_curve_get_unit_x(curve);
+    GwyUnit *unit_y = gwy_curve_get_unit_y(curve);
+    guint count_x = 0;
+    guint count_y = 0;
+
+    g_signal_connect_swapped(unit_x, "changed",
+                             G_CALLBACK(record_signal), &count_x);
+    g_signal_connect_swapped(unit_y, "changed",
+                             G_CALLBACK(record_signal), &count_y);
+
+    gwy_unit_set_from_string(gwy_curve_get_unit_x(curve), "m", NULL);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 0);
+
+    gwy_unit_set_from_string(gwy_curve_get_unit_y(curve), "s", NULL);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 1);
+
+    gwy_curve_assign(curve, curve2);
+    g_assert_cmpuint(count_x, ==, 2);
+    g_assert_cmpuint(count_y, ==, 2);
+    g_assert(gwy_curve_get_unit_x(curve) == unit_x);
+    g_assert(gwy_curve_get_unit_y(curve) == unit_y);
+
+    // Try again to see if the signal counts change.
+    gwy_curve_assign(curve, curve2);
+    g_assert_cmpuint(count_x, ==, 2);
+    g_assert_cmpuint(count_y, ==, 2);
+    g_assert(gwy_curve_get_unit_x(curve) == unit_x);
+    g_assert(gwy_curve_get_unit_y(curve) == unit_y);
+
+    g_object_unref(curve2);
+    g_object_unref(curve);
+}
+
+void
 test_curve_get(void)
 {
     enum { max_size = 255, niter = 40 };

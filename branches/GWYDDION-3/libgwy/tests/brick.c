@@ -117,6 +117,60 @@ print_brick(const gchar *name, const GwyBrick *brick)
 }
 
 void
+test_brick_units_assign(void)
+{
+    GwyBrick *brick = gwy_brick_new(), *brick2 = gwy_brick_new();
+    GwyUnit *unit_xy = gwy_brick_get_unit_xy(brick);
+    GwyUnit *unit_z = gwy_brick_get_unit_z(brick);
+    GwyUnit *unit_w = gwy_brick_get_unit_w(brick);
+    guint count_xy = 0;
+    guint count_z = 0;
+    guint count_w = 0;
+
+    g_signal_connect_swapped(unit_xy, "changed",
+                             G_CALLBACK(record_signal), &count_xy);
+    g_signal_connect_swapped(unit_z, "changed",
+                             G_CALLBACK(record_signal), &count_z);
+    g_signal_connect_swapped(unit_w, "changed",
+                             G_CALLBACK(record_signal), &count_w);
+
+    gwy_unit_set_from_string(gwy_brick_get_unit_xy(brick), "m", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 0);
+    g_assert_cmpuint(count_w, ==, 0);
+
+    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick), "s", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 1);
+    g_assert_cmpuint(count_w, ==, 0);
+
+    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "kg", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 1);
+    g_assert_cmpuint(count_w, ==, 1);
+
+    gwy_brick_assign(brick, brick2);
+    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_z, ==, 2);
+    g_assert_cmpuint(count_w, ==, 2);
+    g_assert(gwy_brick_get_unit_xy(brick) == unit_xy);
+    g_assert(gwy_brick_get_unit_z(brick) == unit_z);
+    g_assert(gwy_brick_get_unit_w(brick) == unit_w);
+
+    // Try again to see if the signal counts change.
+    gwy_brick_assign(brick, brick2);
+    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_z, ==, 2);
+    g_assert_cmpuint(count_w, ==, 2);
+    g_assert(gwy_brick_get_unit_xy(brick) == unit_xy);
+    g_assert(gwy_brick_get_unit_z(brick) == unit_z);
+    g_assert(gwy_brick_get_unit_w(brick) == unit_w);
+
+    g_object_unref(brick2);
+    g_object_unref(brick);
+}
+
+void
 test_brick_get(void)
 {
     enum { max_size = 15, niter = 40 };

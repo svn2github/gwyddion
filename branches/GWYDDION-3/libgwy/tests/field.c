@@ -215,6 +215,45 @@ test_field_units(void)
 }
 
 void
+test_field_units_assign(void)
+{
+    GwyField *field = gwy_field_new(), *field2 = gwy_field_new();
+    GwyUnit *unit_xy = gwy_field_get_unit_xy(field);
+    GwyUnit *unit_z = gwy_field_get_unit_z(field);
+    guint count_xy = 0;
+    guint count_z = 0;
+
+    g_signal_connect_swapped(unit_xy, "changed",
+                             G_CALLBACK(record_signal), &count_xy);
+    g_signal_connect_swapped(unit_z, "changed",
+                             G_CALLBACK(record_signal), &count_z);
+
+    gwy_unit_set_from_string(gwy_field_get_unit_xy(field), "m", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 0);
+
+    gwy_unit_set_from_string(gwy_field_get_unit_z(field), "s", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 1);
+
+    gwy_field_assign(field, field2);
+    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_z, ==, 2);
+    g_assert(gwy_field_get_unit_xy(field) == unit_xy);
+    g_assert(gwy_field_get_unit_z(field) == unit_z);
+
+    // Try again to see if the signal counts change.
+    gwy_field_assign(field, field2);
+    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_z, ==, 2);
+    g_assert(gwy_field_get_unit_xy(field) == unit_xy);
+    g_assert(gwy_field_get_unit_z(field) == unit_z);
+
+    g_object_unref(field2);
+    g_object_unref(field);
+}
+
+void
 test_field_serialize(void)
 {
     enum { max_size = 55 };

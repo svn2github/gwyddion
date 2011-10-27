@@ -86,6 +86,7 @@ coords/point/serialize
 line/props
 line/data-changed
 line/units
+line/units-assign
 line/get
 line/set
 line/check-part/good
@@ -104,6 +105,7 @@ line/add-dist/uniform
 line/add-dist/left-triangular
 line/add-dist/right-triangular
 curve/props
+curve/units-assign
 curve/get
 curve/set
 curve/data-changed
@@ -151,6 +153,7 @@ mask-field/fill-ellipse
 field/props
 field/data-changed
 field/units
+field/units-assign
 field/get
 field/set
 field/check-part/good
@@ -272,6 +275,7 @@ field/distributions/minkowski/white
 field/distributions/minkowski/connectivity
 surface/serialize
 surface/props
+surface/units-assign
 surface/get
 surface/set
 surface/data-changed
@@ -281,6 +285,7 @@ surface/regularize/interpolation
 brick/props
 brick/data-changed
 brick/units
+brick/units-assign
 brick/get
 brick/set
 brick/serialize

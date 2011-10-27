@@ -62,6 +62,45 @@ surface_assert_equal_object(GObject *object, GObject *reference)
 }
 
 void
+test_surface_units_assign(void)
+{
+    GwySurface *surface = gwy_surface_new(), *surface2 = gwy_surface_new();
+    GwyUnit *unit_xy = gwy_surface_get_unit_xy(surface);
+    GwyUnit *unit_z = gwy_surface_get_unit_z(surface);
+    guint count_xy = 0;
+    guint count_z = 0;
+
+    g_signal_connect_swapped(unit_xy, "changed",
+                             G_CALLBACK(record_signal), &count_xy);
+    g_signal_connect_swapped(unit_z, "changed",
+                             G_CALLBACK(record_signal), &count_z);
+
+    gwy_unit_set_from_string(gwy_surface_get_unit_xy(surface), "m", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 0);
+
+    gwy_unit_set_from_string(gwy_surface_get_unit_z(surface), "s", NULL);
+    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_z, ==, 1);
+
+    gwy_surface_assign(surface, surface2);
+    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_z, ==, 2);
+    g_assert(gwy_surface_get_unit_xy(surface) == unit_xy);
+    g_assert(gwy_surface_get_unit_z(surface) == unit_z);
+
+    // Try again to see if the signal counts change.
+    gwy_surface_assign(surface, surface2);
+    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_z, ==, 2);
+    g_assert(gwy_surface_get_unit_xy(surface) == unit_xy);
+    g_assert(gwy_surface_get_unit_z(surface) == unit_z);
+
+    g_object_unref(surface2);
+    g_object_unref(surface);
+}
+
+void
 test_surface_get(void)
 {
     enum { max_size = 255, niter = 40 };

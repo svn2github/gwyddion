@@ -162,6 +162,45 @@ test_line_units(void)
 }
 
 void
+test_line_units_assign(void)
+{
+    GwyLine *line = gwy_line_new(), *line2 = gwy_line_new();
+    GwyUnit *unit_x = gwy_line_get_unit_x(line);
+    GwyUnit *unit_y = gwy_line_get_unit_y(line);
+    guint count_x = 0;
+    guint count_y = 0;
+
+    g_signal_connect_swapped(unit_x, "changed",
+                             G_CALLBACK(record_signal), &count_x);
+    g_signal_connect_swapped(unit_y, "changed",
+                             G_CALLBACK(record_signal), &count_y);
+
+    gwy_unit_set_from_string(gwy_line_get_unit_x(line), "m", NULL);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 0);
+
+    gwy_unit_set_from_string(gwy_line_get_unit_y(line), "s", NULL);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 1);
+
+    gwy_line_assign(line, line2);
+    g_assert_cmpuint(count_x, ==, 2);
+    g_assert_cmpuint(count_y, ==, 2);
+    g_assert(gwy_line_get_unit_x(line) == unit_x);
+    g_assert(gwy_line_get_unit_y(line) == unit_y);
+
+    // Try again to see if the signal counts change.
+    gwy_line_assign(line, line2);
+    g_assert_cmpuint(count_x, ==, 2);
+    g_assert_cmpuint(count_y, ==, 2);
+    g_assert(gwy_line_get_unit_x(line) == unit_x);
+    g_assert(gwy_line_get_unit_y(line) == unit_y);
+
+    g_object_unref(line2);
+    g_object_unref(line);
+}
+
+void
 test_line_serialize(void)
 {
     enum { max_size = 55 };
