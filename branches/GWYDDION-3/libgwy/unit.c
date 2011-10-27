@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -82,13 +82,15 @@ static void         gwy_unit_assign_impl      (GwySerializable *destination,
 static gdouble      find_number_format        (gdouble step,
                                                gdouble maximum,
                                                guint *precision);
-static gboolean     parse                     (Unit *unit,
+static gboolean     is_equal                  (const GArray *units,
+                                               const GArray *op);
+static gboolean     parse                     (GArray *units,
                                                const gchar *string,
                                                gint *power10);
 static void         power_impl                (Unit *unit,
                                                const Unit *op,
                                                gint power);
-static void         canonicalize              (Unit *unit);
+static void         canonicalize              (GArray *units);
 static const gchar* get_prefix                (gint power);
 static void         append_power_plain        (GString *str,
                                                gint power);
@@ -348,8 +350,7 @@ gwy_unit_new_from_string(const char *unit_string,
                          gint *power10)
 {
     GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
-    parse(unit->priv, unit_string, power10);
-
+    parse(unit->priv->units, unit_string, power10);
     return unit;
 }
 
@@ -369,7 +370,16 @@ gwy_unit_set_from_string(GwyUnit *unit,
                          gint *power10)
 {
     g_return_if_fail(GWY_IS_UNIT(unit));
-    parse(unit->priv, unit_string, power10);
+
+    GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
+    parse(units, unit_string, power10);
+    if (is_equal(unit->priv->units, units)) {
+        g_array_free(units, TRUE);
+        return;
+    }
+
+    g_array_free(unit->priv->units, TRUE);
+    unit->priv->units = units;
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 }
 
@@ -422,23 +432,27 @@ gwy_unit_equal(const GwyUnit *unit, const GwyUnit *op)
     if (op == unit)
         return TRUE;
 
-    Unit *priv = unit->priv, *privop = op->priv;
+    return is_equal(unit->priv->units, op->priv->units);
+}
 
-    if (privop->units->len != priv->units->len)
+static gboolean
+is_equal(const GArray *units, const GArray *op)
+{
+    if (op->len != units->len)
         return FALSE;
 
-    for (guint i = 0; i < priv->units->len; i++) {
-        const GwySimpleUnit *u = &simple_unit_index(priv->units, i);
+    for (guint i = 0; i < units->len; i++) {
+        const GwySimpleUnit *u = &simple_unit_index(units, i);
         guint j;
 
-        for (j = 0; j < privop->units->len; j++) {
-            if (simple_unit_index(privop->units, j).unit == u->unit) {
-                if (simple_unit_index(privop->units, j).power != u->power)
+        for (j = 0; j < op->len; j++) {
+            if (simple_unit_index(op, j).unit == u->unit) {
+                if (simple_unit_index(op, j).power != u->power)
                     return FALSE;
                 break;
             }
         }
-        if (j == privop->units->len)
+        if (j == op->len)
             return FALSE;
     }
 
@@ -446,7 +460,7 @@ gwy_unit_equal(const GwyUnit *unit, const GwyUnit *op)
 }
 
 static gboolean
-parse(Unit *unit,
+parse(GArray *units,
       const gchar *string,
       gint *ppower10)
 {
@@ -457,7 +471,6 @@ parse(Unit *unit,
     gint pfpower, power10;
     gboolean dividing = FALSE;
 
-    g_array_set_size(unit->units, 0);
     power10 = 0;
     GWY_MAYBE_SET(ppower10, power10);
 
@@ -655,7 +668,7 @@ parse(Unit *unit,
             if (dividing)
                 u.power = -u.power;
             power10 += u.power * pfpower;
-            g_array_append_val(unit->units, u);
+            g_array_append_val(units, u);
         }
 
         /* TODO: scan known obscure units, implement traits */
@@ -675,7 +688,7 @@ parse(Unit *unit,
         string = end;
     }
 
-    canonicalize(unit);
+    canonicalize(units);
     g_string_free(buf, TRUE);
     g_free(utf8string);
     GWY_MAYBE_SET(ppower10, power10);
@@ -896,24 +909,24 @@ gwy_unit_power_multiply(GwyUnit *unit,
     power_impl(unit->priv, op1->priv, power1);
     if (power2)
         multiply_impl(unit->priv, op2->priv, power2);
-    canonicalize(unit->priv);
+    canonicalize(unit->priv->units);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 }
 
 static void
-canonicalize(Unit *unit)
+canonicalize(GArray *units)
 {
     guint i, j;
 
     /* consolidate multiple occurences of the same unit */
     i = 0;
-    while (i < unit->units->len) {
-        GwySimpleUnit *src = &simple_unit_index(unit->units, i);
+    while (i < units->len) {
+        GwySimpleUnit *src = &simple_unit_index(units, i);
         for (j = 0; j < i; j++) {
-            GwySimpleUnit *dst = &simple_unit_index(unit->units, j);
+            GwySimpleUnit *dst = &simple_unit_index(units, j);
             if (src->unit == dst->unit) {
                 dst->power += src->power;
-                g_array_remove_index(unit->units, i);
+                g_array_remove_index(units, i);
                 break;
             }
         }
@@ -923,11 +936,11 @@ canonicalize(Unit *unit)
 
     /* remove units with zero power */
     i = 0;
-    while (i < unit->units->len) {
-        if (simple_unit_index(unit->units, i).power)
+    while (i < units->len) {
+        if (simple_unit_index(units, i).power)
             i++;
         else
-            g_array_remove_index(unit->units, i);
+            g_array_remove_index(units, i);
     }
 }
 
