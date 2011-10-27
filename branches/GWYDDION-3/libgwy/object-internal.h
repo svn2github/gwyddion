@@ -25,6 +25,7 @@
 #include "libgwy/object-utils.h"
 #include "libgwy/error-list.h"
 #include "libgwy/serializable.h"
+#include "libgwy/unit.h"
 
 G_BEGIN_DECLS
 
