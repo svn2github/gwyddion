@@ -122,6 +122,44 @@ test_unit_parse(void)
 }
 
 void
+test_unit_changed(void)
+{
+    GwyUnit *unit = gwy_unit_new();
+    guint counter = 0;
+    g_signal_connect_swapped(unit, "changed",
+                             G_CALLBACK(record_signal), &counter);
+
+    gwy_unit_set_from_string(unit, "", NULL);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_set_from_string(unit, "m", NULL);
+    g_assert_cmpuint(counter, ==, 1);
+
+    gwy_unit_set_from_string(unit, "km", NULL);
+    g_assert_cmpuint(counter, ==, 1);
+
+    gwy_unit_set_from_string(unit, "m²/m", NULL);
+    g_assert_cmpuint(counter, ==, 1);
+
+    gwy_unit_set_from_string(unit, "s", NULL);
+    g_assert_cmpuint(counter, ==, 2);
+
+    gwy_unit_set_from_string(unit, NULL, NULL);
+    g_assert_cmpuint(counter, ==, 3);
+
+    gwy_unit_set_from_string(unit, NULL, NULL);
+    g_assert_cmpuint(counter, ==, 3);
+
+    gwy_unit_set_from_string(unit, "", NULL);
+    g_assert_cmpuint(counter, ==, 3);
+
+    gwy_unit_set_from_string(unit, "100", NULL);
+    g_assert_cmpuint(counter, ==, 3);
+
+    g_object_unref(unit);
+}
+
+void
 test_unit_arithmetic_simple(void)
 {
     GwyUnit *u1, *u2, *u3, *u4, *u5, *u6, *u7, *u8, *u9, *u0;
