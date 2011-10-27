@@ -856,7 +856,7 @@ gwy_field_convolve(const GwyField *field,
     }
 
     if (target != field)
-        ASSIGN_UNITS(target->priv->unit_xy, field->priv->unit_xy);
+        _gwy_assign_units(&target->priv->unit_xy, field->priv->unit_xy);
 
     if (target->priv->unit_z || field->priv->unit_z) {
         // Force instantiation of units
@@ -924,8 +924,8 @@ gwy_field_extend(const GwyField *field,
     result->yreal = (height + up + down)*dy;
     result->xoff = field->xoff + col*dx - left*dx;
     result->yoff = field->yoff + row*dy - up*dy;
-    ASSIGN_UNITS(result->priv->unit_xy, field->priv->unit_xy);
-    ASSIGN_UNITS(result->priv->unit_z, field->priv->unit_z);
+    _gwy_assign_units(&result->priv->unit_xy, field->priv->unit_xy);
+    _gwy_assign_units(&result->priv->unit_z, field->priv->unit_z);
 
     return result;
 }
@@ -1721,8 +1721,8 @@ gwy_field_filter_median(const GwyField *field,
                              extend_rect, fill_value);
 
     if (target != field) {
-        ASSIGN_UNITS(target->priv->unit_xy, field->priv->unit_xy);
-        ASSIGN_UNITS(target->priv->unit_z, field->priv->unit_z);
+        _gwy_assign_units(&target->priv->unit_xy, field->priv->unit_xy);
+        _gwy_assign_units(&target->priv->unit_z, field->priv->unit_z);
     }
 
     gwy_field_invalidate(target);

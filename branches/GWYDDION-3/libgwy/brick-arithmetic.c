@@ -358,8 +358,8 @@ gwy_brick_extract_plane(const GwyBrick *brick,
         gwy_field_set_xoffset(target, 0.0);
         gwy_field_set_yoffset(target, 0.0);
     }
-    ASSIGN_UNITS(target->priv->unit_xy, brick->priv->unit_xy);
-    ASSIGN_UNITS(target->priv->unit_z, brick->priv->unit_w);
+    _gwy_assign_units(&target->priv->unit_xy, brick->priv->unit_xy);
+    _gwy_assign_units(&target->priv->unit_z, brick->priv->unit_w);
     gwy_field_invalidate(target);
 }
 
@@ -417,8 +417,8 @@ gwy_brick_extract_line(const GwyBrick *brick,
     else {
         gwy_line_set_offset(target, 0.0);
     }
-    ASSIGN_UNITS(target->priv->unit_x, brick->priv->unit_z);
-    ASSIGN_UNITS(target->priv->unit_y, brick->priv->unit_w);
+    _gwy_assign_units(&target->priv->unit_x, brick->priv->unit_z);
+    _gwy_assign_units(&target->priv->unit_y, brick->priv->unit_w);
     //gwy_line_invalidate(target);
 }
 

@@ -504,9 +504,9 @@ copy_info(GwyBrick *dest,
     dest->yoff = src->yoff;
     dest->zoff = src->zoff;
     Brick *dpriv = dest->priv, *spriv = src->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
-    ASSIGN_UNITS(dpriv->unit_w, spriv->unit_w);
+    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_units(&dpriv->unit_w, spriv->unit_w);
 }
 
 static void
@@ -789,9 +789,9 @@ gwy_brick_new_part(const GwyBrick *brick,
     part->zreal = depth*gwy_brick_dz(brick);
 
     Brick *spriv = brick->priv, *dpriv = part->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
-    ASSIGN_UNITS(dpriv->unit_w, spriv->unit_w);
+    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_units(&dpriv->unit_w, spriv->unit_w);
     if (keep_offsets) {
         part->xoff = brick->xoff + col*gwy_brick_dx(brick);
         part->yoff = brick->yoff + row*gwy_brick_dy(brick);

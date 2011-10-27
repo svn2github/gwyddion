@@ -337,8 +337,8 @@ copy_info(GwyLine *dest,
     dest->real = src->real;
     dest->off = src->off;
     Line *dpriv = dest->priv, *spriv = src->priv;
-    ASSIGN_UNITS(dpriv->unit_x, spriv->unit_x);
-    ASSIGN_UNITS(dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
 }
 
 static void
@@ -773,8 +773,8 @@ gwy_line_new_part(const GwyLine *line,
     part = gwy_line_new_sized(len, FALSE);
     gwy_line_copy(line, lpart, part, 0);
     part->real = line->real*len/line->res;
-    ASSIGN_UNITS(part->priv->unit_x, line->priv->unit_x);
-    ASSIGN_UNITS(part->priv->unit_y, line->priv->unit_y);
+    _gwy_assign_units(&part->priv->unit_x, line->priv->unit_x);
+    _gwy_assign_units(&part->priv->unit_y, line->priv->unit_y);
     if (keep_offset)
         part->off = line->off + line->real*pos/line->res;
     return part;

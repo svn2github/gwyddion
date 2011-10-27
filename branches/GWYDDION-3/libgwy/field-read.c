@@ -613,8 +613,8 @@ gwy_field_profile(GwyField *field,
 
     Field *fpriv = field->priv;
     Curve *cpriv = curve->priv;
-    ASSIGN_UNITS(cpriv->unit_x, fpriv->unit_xy);
-    ASSIGN_UNITS(cpriv->unit_y, fpriv->unit_z);
+    _gwy_assign_units(&cpriv->unit_x, fpriv->unit_xy);
+    _gwy_assign_units(&cpriv->unit_y, fpriv->unit_z);
 
     return curve;
 }

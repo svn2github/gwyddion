@@ -281,8 +281,8 @@ copy_info(GwySurface *dest,
           const GwySurface *src)
 {
     Surface *dpriv = dest->priv, *spriv = src->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
 }
 
 static void
@@ -531,8 +531,8 @@ copy_field_to_surface(const GwyField *field,
             k++;
         }
     }
-    ASSIGN_UNITS(surface->priv->unit_xy, field->priv->unit_xy);
-    ASSIGN_UNITS(surface->priv->unit_z, field->priv->unit_z);
+    _gwy_assign_units(&surface->priv->unit_xy, field->priv->unit_xy);
+    _gwy_assign_units(&surface->priv->unit_z, field->priv->unit_z);
 
     gwy_surface_invalidate(surface);
     surface->priv->cached_range = TRUE;
@@ -855,8 +855,8 @@ regularise(const GwySurface *surface,
     else
         g_assert_not_reached();
 
-    ASSIGN_UNITS(field->priv->unit_xy, surface->priv->unit_xy);
-    ASSIGN_UNITS(field->priv->unit_z, surface->priv->unit_z);
+    _gwy_assign_units(&field->priv->unit_xy, surface->priv->unit_xy);
+    _gwy_assign_units(&field->priv->unit_z, surface->priv->unit_z);
 
     return field;
 }

@@ -205,8 +205,8 @@ gwy_field_new_transposed(const GwyField *field,
     part->yreal = width*gwy_field_dx(field);
 
     Field *spriv = field->priv, *dpriv = part->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
     if (transform_offsets) {
         part->xoff = field->yoff + row*gwy_field_dy(field);
         part->yoff = field->xoff + col*gwy_field_dx(field);

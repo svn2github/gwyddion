@@ -286,8 +286,8 @@ copy_info(GwyCurve *dest,
           const GwyCurve *src)
 {
     Curve *dpriv = dest->priv, *spriv = src->priv;
-    ASSIGN_UNITS(dpriv->unit_x, spriv->unit_x);
-    ASSIGN_UNITS(dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
 }
 
 static GObject*
@@ -511,8 +511,8 @@ copy_line_to_curve(const GwyLine *line,
         curve->data[i].x = q*i + off;
         curve->data[i].y = line->data[i];
     }
-    ASSIGN_UNITS(curve->priv->unit_x, line->priv->unit_x);
-    ASSIGN_UNITS(curve->priv->unit_y, line->priv->unit_y);
+    _gwy_assign_units(&curve->priv->unit_x, line->priv->unit_x);
+    _gwy_assign_units(&curve->priv->unit_y, line->priv->unit_y);
 }
 
 /**
@@ -681,8 +681,8 @@ regularise(const GwyCurve *curve,
             *(ldata++) = interpolate_linear(curve, i*dx + from, &j);
     }
 
-    ASSIGN_UNITS(line->priv->unit_x, curve->priv->unit_x);
-    ASSIGN_UNITS(line->priv->unit_y, curve->priv->unit_y);
+    _gwy_assign_units(&line->priv->unit_x, curve->priv->unit_x);
+    _gwy_assign_units(&line->priv->unit_y, curve->priv->unit_y);
 
     return line;
 }

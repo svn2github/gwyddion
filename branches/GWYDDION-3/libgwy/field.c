@@ -442,8 +442,8 @@ copy_info(GwyField *dest,
     dest->xoff = src->xoff;
     dest->yoff = src->yoff;
     Field *dpriv = dest->priv, *spriv = src->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
 }
 
 static void
@@ -685,8 +685,8 @@ gwy_field_new_part(const GwyField *field,
     part->yreal = height*gwy_field_dy(field);
 
     Field *spriv = field->priv, *dpriv = part->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
     if (keep_offsets) {
         part->xoff = field->xoff + col*gwy_field_dx(field);
         part->yoff = field->yoff + row*gwy_field_dy(field);

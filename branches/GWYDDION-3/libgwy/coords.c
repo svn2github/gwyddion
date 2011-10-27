@@ -322,15 +322,9 @@ gwy_coords_assign_impl(GwySerializable *destination,
         return;
 
     guint dimension = GWY_COORDS_GET_CLASS(destination)->dimension;
-    if (!spriv->units) {
-        for (guint i = 0; i < dimension; i++)
-            GWY_OBJECT_UNREF(spriv->units[i]);
-    }
-    else {
-        ensure_units(dpriv, dimension, FALSE);
-        for (guint i = 0; i < dimension; i++)
-            ASSIGN_UNITS(dpriv->units[i], spriv->units[i]);
-    }
+    ensure_units(dpriv, dimension, FALSE);
+    for (guint i = 0; i < dimension; i++)
+        _gwy_assign_units(dpriv->units + i, spriv->units[i]);
 }
 
 /**
