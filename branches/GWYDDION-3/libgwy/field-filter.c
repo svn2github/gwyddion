@@ -979,11 +979,11 @@ gwy_field_extend(const GwyField *field,
 
     guint col, row, width, height;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
-        return NULL;
+        return;
 
     RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
     if (!extend_rect)
-        return NULL;
+        return;
 
     gwy_field_set_size(target, width + left + right, height + up + down, FALSE);
     extend_rect(field->data, field->xres, target->data, target->xres,
