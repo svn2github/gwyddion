@@ -638,6 +638,60 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
 }
 
 /**
+ * gwy_mask_field_extract_grain:
+ * @field: A two-dimensional mask field.
+ * @target: A two-dimensional mask field where the result will be placed.
+ * @grain_id: Grain number (from 1 to @ngrains).  It is permitted although not
+ *            much useful to pass 0 to extract the entire unmasked area.
+ * @border_width: Width of empty border to add at each side of the grain.
+ *
+ * Extracts a single mask grain into another mask field.
+ *
+ * To simultaneously extract also corresponding data from a #GwyField using
+ * specified border extension method, this function can be combined with
+ * gwy_field_extend():
+ * |[
+ * const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
+ * gwy_field_extend(field, bboxes + grain_id, target,
+ *                  border_width, border_width, border_width, border_width,
+ *                  exterior, fill_value, keep_offsets);
+ * ]|
+ **/
+void
+gwy_mask_field_extract_grain(GwyMaskField *field,
+                             GwyMaskField *target,
+                             guint grain_id,
+                             guint border_width)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(GWY_IS_MASK_FIELD(target));
+    guint xres = field->xres, yres = field->yres;
+    g_return_if_fail(target->xres == xres && target->yres == yres);
+
+    gwy_mask_field_grain_bounding_boxes(field);
+    MaskField *priv = field->priv;
+    guint ngrains = priv->ngrains;
+    g_return_if_fail(grain_id <= ngrains);
+
+    const GwyFieldPart *bbox = priv->grain_bounding_boxes + grain_id;
+    gwy_mask_field_set_size(target,
+                            xres + 2*border_width, yres + 2*border_width,
+                            TRUE);
+    for (guint i = 0; i < bbox->height; i++) {
+        const guint *mrow = priv->grains + ((bbox->row + i)*xres + bbox->col);
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(target, iter,
+                                 border_width + bbox->col,
+                                 border_width + bbox->row);
+        for (guint j = bbox->width; j; j--, mrow++) {
+            if (*mrow == grain_id)
+                gwy_mask_iter_set(iter, TRUE);
+            gwy_mask_iter_next(iter);
+        }
+    }
+}
+
+/**
  * SECTION: mask-field-grains
  * @section_id: GwyMaskField-grains
  * @title: GwyMaskField grains

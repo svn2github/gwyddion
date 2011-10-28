@@ -32,6 +32,10 @@ const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(GwyMaskField *field);
 const GwyXY*        gwy_mask_field_grain_positions     (GwyMaskField *field);
 void                gwy_mask_field_remove_grain        (GwyMaskField *field,
                                                         guint grain_id);
+void                gwy_mask_field_extract_grain       (GwyMaskField *field,
+                                                        GwyMaskField *target,
+                                                        guint grain_id,
+                                                        guint border_width);
 
 G_END_DECLS
 
