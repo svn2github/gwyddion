@@ -3439,9 +3439,39 @@ field_extend_one(GwyExteriorType exterior)
         field_randomize(source, rng);
 
         GwyFieldPart fpart = { col, row, width, height };
-        GwyField *field = gwy_field_extend(source, &fpart,
-                                           left, right, up, down,
-                                           exterior, G_E);
+        GwyField *field = gwy_field_new_extended(source, &fpart,
+                                                 left, right, up, down,
+                                                 exterior, G_E, TRUE);
+
+        g_assert_cmpuint(field->xres, ==, width + left + right);
+        g_assert_cmpuint(field->yres, ==, height + up + down);
+        g_assert_cmpfloat(fabs(log(gwy_field_dx(field)/gwy_field_dx(source))),
+                          <=, 1e-14);
+        g_assert_cmpfloat(fabs(log(gwy_field_dy(field)/gwy_field_dy(source))),
+                          <=, 1e-14);
+
+        for (guint i = 0; i < field->yres; i++) {
+            gint ypos = (gint)i + (gint)row - (gint)up;
+            for (guint j = 0; j < field->xres; j++) {
+                gint xpos = (gint)j + (gint)col - (gint)left;
+
+                if (exterior == GWY_EXTERIOR_UNDEFINED
+                    && (xpos != CLAMP(xpos, 0, (gint)source->xres-1)
+                        || ypos != CLAMP(ypos, 0, (gint)source->yres-1)))
+                    continue;
+
+                gdouble value = field->data[i*field->xres + j];
+                gdouble reference = exterior_value_dumb_2d(source, xpos, ypos,
+                                                           exterior, G_E);
+                g_assert_cmpfloat(value, ==, reference);
+            }
+        }
+
+        g_object_unref(field);
+
+        field = gwy_field_new();
+        gwy_field_extend(source, &fpart, field, left, right, up, down,
+                         exterior, G_E, TRUE);
 
         g_assert_cmpuint(field->xres, ==, width + left + right);
         g_assert_cmpuint(field->yres, ==, height + up + down);
@@ -4470,10 +4500,10 @@ median_filter_dumb(const GwyField *field,
 
     guint kxres = kernel->xres, kyres = kernel->yres;
     guint extx = kxres - 1, exty = kyres - 1;
-    GwyField *extended = gwy_field_extend(field, fpart,
-                                          extx/2, extx - extx/2,
-                                          exty/2, exty - exty/2,
-                                          exterior, fill_value);
+    GwyField *extended = gwy_field_new_extended(field, fpart,
+                                                extx/2, extx - extx/2,
+                                                exty/2, exty - exty/2,
+                                                exterior, fill_value, TRUE);
     GwyField *workspace = gwy_field_new_sized(kxres, kyres, FALSE);
 
     for (guint i = 0; i < height; i++) {
@@ -4767,10 +4797,11 @@ static void
 field_move_periodically(GwyField *field,
                         gint xmove, gint ymove)
 {
-    GwyField *extended = gwy_field_extend(field, NULL,
-                                          MAX(xmove, 0), MAX(-xmove, 0),
-                                          MAX(ymove, 0), MAX(-ymove, 0),
-                                          GWY_EXTERIOR_PERIODIC, 0.0);
+    GwyField *extended = gwy_field_new_extended(field, NULL,
+                                                MAX(xmove, 0), MAX(-xmove, 0),
+                                                MAX(ymove, 0), MAX(-ymove, 0),
+                                                GWY_EXTERIOR_PERIODIC, 0.0,
+                                                FALSE);
     GwyFieldPart fpart = {
         MAX(-xmove, 0), MAX(-ymove, 0), field->xres, field->yres
     };
@@ -5031,9 +5062,9 @@ field_read_exterior_one(GwyExteriorType exterior)
         guint up = g_rand_int_range(rng, 0, 2*yres);
         guint down = g_rand_int_range(rng, 0, 2*yres);
 
-        GwyField *extended = gwy_field_extend(field, NULL,
-                                              left, right, up, down,
-                                              exterior, G_PI);
+        GwyField *extended = gwy_field_new_extended(field, NULL,
+                                                    left, right, up, down,
+                                                    exterior, G_PI, TRUE);
 
         for (guint i = 0; i < yres + up + down; i++) {
             for (guint j = 0; j < xres + left + right; j++) {

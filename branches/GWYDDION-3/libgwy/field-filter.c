@@ -869,7 +869,7 @@ gwy_field_convolve(const GwyField *field,
 }
 
 /**
- * gwy_field_extend:
+ * gwy_field_new_extended:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
  *         Area in @field to extend.  Pass %NULL to extend entire @field.
@@ -880,8 +880,12 @@ gwy_field_convolve(const GwyField *field,
  * @down: Number of pixels to extend down (towards higher row indices).
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ * @keep_offsets: %TRUE to set the X and Y offsets of the new field
+ *                using @fpart and @field offsets.  %FALSE to set offsets
+ *                of the new field to zeroes.
  *
- * Extends a field using the specified method of exterior handling.
+ * Creates a new field by extending another field using the specified method of
+ * exterior handling.
  *
  * Data outside the <emphasis>entire field</emphasis> are represented using the
  * specified exterior handling method.  However, data outside the specified
@@ -897,12 +901,13 @@ gwy_field_convolve(const GwyField *field,
  *          A newly created field.
  **/
 GwyField*
-gwy_field_extend(const GwyField *field,
-                 const GwyFieldPart *fpart,
-                 guint left, guint right,
-                 guint up, guint down,
-                 GwyExteriorType exterior,
-                 gdouble fill_value)
+gwy_field_new_extended(const GwyField *field,
+                       const GwyFieldPart *fpart,
+                       guint left, guint right,
+                       guint up, guint down,
+                       GwyExteriorType exterior,
+                       gdouble fill_value,
+                       gboolean keep_offsets)
 {
     guint col, row, width, height;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
@@ -920,14 +925,84 @@ gwy_field_extend(const GwyField *field,
                 left, right, up, down, fill_value);
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    // Can just assign the values as no one is watching yet.
     result->xreal = (width + left + right)*dx;
     result->yreal = (height + up + down)*dy;
-    result->xoff = field->xoff + col*dx - left*dx;
-    result->yoff = field->yoff + row*dy - up*dy;
+    if (keep_offsets) {
+        result->xoff = field->xoff + col*dx - left*dx;
+        result->yoff = field->yoff + row*dy - up*dy;
+    }
     _gwy_assign_units(&result->priv->unit_xy, field->priv->unit_xy);
     _gwy_assign_units(&result->priv->unit_z, field->priv->unit_z);
 
     return result;
+}
+
+/**
+ * gwy_field_extend:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to extend.  Pass %NULL to extend entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It must not be @field itself.
+ * @left: Number of pixels to extend to the left (towards lower column indices).
+ * @right: Number of pixels to extend to the right (towards higher column
+ *         indices).
+ * @up: Number of pixels to extend up (towards lower row indices).
+ * @down: Number of pixels to extend down (towards higher row indices).
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ * @keep_offsets: %TRUE to set the X and Y offsets of the new field
+ *                using @fpart and @field offsets.  %FALSE to set offsets
+ *                of the new field to zeroes.
+ *
+ * Extends a field using the specified method of exterior handling into another
+ * field.
+ *
+ * The target field is resized, as necessary, and its dimensions and offsets
+ * are recalculated based on @field.
+ *
+ * See gwy_field_new_extended() for exterior discussion.
+ **/
+void
+gwy_field_extend(const GwyField *field,
+                 const GwyFieldPart *fpart,
+                 GwyField *target,
+                 guint left, guint right,
+                 guint up, guint down,
+                 GwyExteriorType exterior,
+                 gdouble fill_value,
+                 gboolean keep_offsets)
+{
+    g_return_if_fail(GWY_IS_FIELD(target));
+    g_return_if_fail((const GwyField*)target != field);
+
+    guint col, row, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return NULL;
+
+    RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return NULL;
+
+    gwy_field_set_size(target, width + left + right, height + up + down, FALSE);
+    extend_rect(field->data, field->xres, target->data, target->xres,
+                col, row, width, height, field->xres, field->yres,
+                left, right, up, down, fill_value);
+
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gwy_field_set_xreal(target, (width + left + right)*dx);
+    gwy_field_set_yreal(target, (height + up + down)*dy);
+    if (keep_offsets) {
+        gwy_field_set_xoffset(target, field->xoff + col*dx - left*dx);
+        gwy_field_set_yoffset(target, field->yoff + row*dy - up*dy);
+    }
+    else {
+        gwy_field_set_xoffset(target, 0.0);
+        gwy_field_set_yoffset(target, 0.0);
+    }
+    _gwy_assign_units(&target->priv->unit_xy, field->priv->unit_xy);
+    _gwy_assign_units(&target->priv->unit_z, field->priv->unit_z);
 }
 
 static gboolean

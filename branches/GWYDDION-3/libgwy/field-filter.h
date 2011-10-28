@@ -44,14 +44,25 @@ typedef enum {
     GWY_FILTER_NONLINEARITY,
 } GwyFilterType;
 
-GwyField* gwy_field_extend         (const GwyField *field,
+GwyField* gwy_field_new_extended   (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint left,
                                     guint right,
                                     guint up,
                                     guint down,
                                     GwyExteriorType exterior,
-                                    gdouble fill_value)         G_GNUC_MALLOC;
+                                    gdouble fill_value,
+                                    gboolean keep_offsets)      G_GNUC_MALLOC;
+void      gwy_field_extend         (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    GwyField *target,
+                                    guint left,
+                                    guint right,
+                                    guint up,
+                                    guint down,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value,
+                                    gboolean keep_offsets);
 void      gwy_field_row_convolve   (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     GwyField *target,
