@@ -78,11 +78,7 @@ struct _GwyResourceClass {
     GObjectClass g_object_class;
     struct _GwyResourceClassPrivate *priv;
 
-    /*<public>*/  /* XXX: protected, in fact, but gtk-doc omits protected */
-    /* Signals */
-    void (*data_changed)(GwyResource *resource);
-
-    /* Virtual table */
+    /*<public>*/
     void         (*setup_inventory)(GwyInventory *inventory);
     GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
@@ -93,6 +89,7 @@ struct _GwyResourceClass {
     /*< private >*/
     void (*reserved1)(void);
     void (*reserved2)(void);
+    void (*reserved3)(void);
 };
 
 GType                       gwy_resource_get_type                  (void)                                   G_GNUC_CONST;

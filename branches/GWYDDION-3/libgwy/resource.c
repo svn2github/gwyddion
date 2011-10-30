@@ -167,7 +167,7 @@ static GFileOutputStream* output_stream_for_save          (GwyResource *resource
 static GString*           construct_filename              (const gchar *resource_name);
 static void               gwy_resource_notify             (GObject *object,
                                                            GParamSpec *pspec);
-static void               gwy_resource_data_changed_impl  (GwyResource *resource);
+static void               data_changed                    (GwyResource *resource);
 static void               manage_create                   (GwyResource *resource);
 static void               manage_delete                   (GwyResource *resource);
 static void               manage_update                   (GwyResource *resource);
@@ -324,8 +324,6 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gobject_class->set_property = gwy_resource_set_property;
     gobject_class->notify = gwy_resource_notify;
 
-    klass->data_changed = gwy_resource_data_changed_impl;
-
     pspec = properties[PROP_NAME]
         = g_param_spec_string("name",
                               "Name",
@@ -397,13 +395,13 @@ gwy_resource_class_init(GwyResourceClass *klass)
      * The ::data-changed signal is emitted when resource data changes.
      */
     signals[DATA_CHANGED]
-        = g_signal_new("data-changed",
-                       G_OBJECT_CLASS_TYPE(gobject_class),
-                       G_SIGNAL_RUN_FIRST,
-                       G_STRUCT_OFFSET(GwyResourceClass, data_changed),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__VOID,
-                       G_TYPE_NONE, 0);
+        = g_signal_new_class_handler("data-changed",
+                                     G_OBJECT_CLASS_TYPE(gobject_class),
+                                     G_SIGNAL_RUN_FIRST,
+                                     G_CALLBACK(data_changed),
+                                     NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
@@ -1384,7 +1382,7 @@ gwy_resource_data_changed(GwyResource *resource)
 }
 
 static void
-gwy_resource_data_changed_impl(GwyResource *resource)
+data_changed(GwyResource *resource)
 {
     Resource *priv = resource->priv;
     if (!priv->is_modifiable)
