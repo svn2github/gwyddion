@@ -2138,7 +2138,6 @@ gwy_resource_dump_data_line(const gdouble *data,
 
 /**
  * GwyResourceClass:
- * @data_changed: "data-changed" class signal handler.
  * @setup_inventory: Sets up the class inventory after its creation.  This
  *                   may involve for example setting the default item name and
  *                   inserting the built-in system items to the inventory.
