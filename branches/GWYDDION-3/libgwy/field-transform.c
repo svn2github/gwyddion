@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -304,7 +304,6 @@ gwy_field_new_rotated_simple(const GwyField *field,
 
     return newfield;
 }
-
 
 /**
  * SECTION: field-transform
