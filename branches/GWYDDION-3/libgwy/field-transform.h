@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,25 @@ typedef enum {
     GWY_SIMPLE_ROTATE_CLOCKWISE        = 270,
 } GwySimpleRotation;
 
+typedef enum {
+    GWY_PLANE_IDENTITY = 0,
+    GWY_PLANE_MIRROR_HORIZONTALLY,
+    GWY_PLANE_MIRROR_VERTICALLY,
+    GWY_PLANE_MIRROR_DIAGONALLY,
+    GWY_PLANE_MIRROR_ANTIDIAGONALLY,
+    GWY_PLANE_MIRROR_BOTH,
+    GWY_PLANE_ROTATE_UPSIDE_DOWN = GWY_PLANE_MIRROR_BOTH,
+    GWY_PLANE_ROTATE_CLOCKWISE,
+    GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
+} GwyPlaneCongruenceType;
+
+typedef enum {
+    GWY_CONGRUENCE_ORIGIN_ZERO,
+    GWY_CONGRUENCE_ORIGIN_BEGIN,
+    GWY_CONGRUENCE_ORIGIN_END,
+    GWY_CONGRUENCE_ORIGIN_USER,
+} GwyCongruenceOrigin;
+
 void      gwy_field_flip              (GwyField *field,
                                        gboolean horizontally,
                                        gboolean vertically,
@@ -46,6 +65,20 @@ void      gwy_field_transpose         (const GwyField *src,
                                        GwyField *dest,
                                        guint destcol,
                                        guint destrow);
+
+void gwy_field_transform_congruent    (GwyField *field,
+                                       GwyPlaneCongruenceType transformation);
+GwyField* gwy_field_new_congruent    (const GwyField *field,
+                                       const GwyFieldPart *fpart,
+                                      GwyPlaneCongruenceType transformation) G_GNUC_MALLOC;
+
+void gwy_field_transform_offsets(const GwyField *source,
+                                 const GwyFieldPart *srcpart,
+                                 GwyField *dest,
+                                 GwyPlaneCongruenceType transformation,
+                                 GwyCongruenceOrigin origin,
+                                 gdouble xaxis,
+                                 gdouble yaxis);
 
 G_END_DECLS
 

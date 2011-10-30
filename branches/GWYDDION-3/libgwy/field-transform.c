@@ -305,6 +305,85 @@ gwy_field_new_rotated_simple(const GwyField *field,
     return newfield;
 }
 
+/*
+ * Simple operations:
+ * in-place horizontal mirroring
+ * in-place vertical mirroring
+ * in-place central mirroring
+ * out-of-place transposition
+ * out-of-place horizontal mirroring
+ * out-of-place vertical mirroring
+ * out-of-place central mirroring
+ * copy
+ *
+ * The plan (indirect in-place congruences require temporary buffers):
+ * in-place identity = no-op
+ * in-place mirror horizontally = in-place horizontal mirroring
+ * in-place mirror vertically = in-place vertical mirroring
+ * in-place mirror diagonally = out-of-place transposition, copy
+ *                              (temporary buffer)
+ * in-place mirror antidiagonally = out-of-place transposition, out-of-place
+ *                                  central mirroring (temporary buffer)
+ * in-place mirror both = in-place central mirroring
+ * in-place rotate clockwise = out-of-place transposition, out-of-place
+ *                             horizontal mirroring (temporary buffer)
+ * in-place rotate counterclockwise = out-of-place transposition, out-of-place
+ *                                    verical mirroring (temporary buffer)
+ * out-of-place identity = copy
+ * out-of-place mirror horizontally = out-of-place horizontal mirroring
+ * out-of-place mirror vertically = out-of-place vertical mirroring
+ * out-of-place mirror diagonally = out-of-place transposition
+ * out-of-place mirror antidiagonally = out-of-place transposition, in-place
+ *                                      central mirroring
+ * out-of-place mirror both = out-of-place central mirroring
+ * out-of-place rotate clockwise = out-of-place transposition, in-place
+ *                                 horizontal mirroring
+ * out-of-place rotate counterclockwise = out-of-place transposition, in-place
+ *                                    verical mirroring
+ */
+
+void
+gwy_field_transform_congruent(GwyField *field,
+                              GwyPlaneCongruenceType transformation)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
+
+GwyField*
+gwy_field_new_congruent(const GwyField *field,
+                        const GwyFieldPart *fpart,
+                        GwyPlaneCongruenceType transformation)
+{
+    guint col, row, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return NULL;
+    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
+                         NULL);
+
+    GwyField *part = gwy_field_new_sized(height, width, FALSE);
+
+    return part;
+}
+
+void
+gwy_field_transform_offsets(const GwyField *source,
+                            const GwyFieldPart *srcpart,
+                            GwyField *dest,
+                            GwyPlaneCongruenceType transformation,
+                            GwyCongruenceOrigin origin,
+                            gdouble xaxis,
+                            gdouble yaxis)
+{
+    guint col, row, width, height;
+    if (!gwy_field_check_part(source, srcpart, &col, &row, &width, &height))
+        return;
+    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    g_return_if_fail(GWY_IS_FIELD(dest));
+    // TODO: dest dimensions must match srcpart dimensions, but possibly
+    // swapped.
+}
+
 /**
  * SECTION: field-transform
  * @section_id: GwyField-transform
@@ -386,6 +465,43 @@ gwy_field_new_rotated_simple(const GwyField *field,
  * They are used for instance in gwy_field_new_rotated_simple() and
  * gwy_mask_field_new_rotated_simple().  The numerical values are equal to the
  * rotation angle in degrees.
+ **/
+
+/**
+ * GwyPlaneCongruenceType:
+ * @GWY_PLANE_IDENTITY: Identity, i.e. no transformation at all.
+ * @GWY_PLANE_MIRROR_HORIZONTALLY: Horizontal mirroring, i.e. reflection about
+ *                                 a vertical axis.
+ * @GWY_PLANE_MIRROR_VERTICALLY: Vertical mirroring, i.e. reflection about a
+ *                               horizontal axis.
+ * @GWY_PLANE_MIRROR_DIAGONALLY: Reflection about the main diagonal.
+ * @GWY_PLANE_MIRROR_ANTIDIAGONALLY: Reflection about the anti-diagonal.
+ * @GWY_PLANE_MIRROR_BOTH: Central reflection.
+ * @GWY_PLANE_ROTATE_UPSIDE_DOWN: Rotation by π, an alternative name for
+ *                                @GWY_PLANE_MIRROR_BOTH.
+ * @GWY_PLANE_ROTATE_CLOCKWISE: Clockwise rotation by π/2.
+ * @GWY_PLANE_ROTATE_COUNTERCLOCKWISE: Counterclockwise rotation by π/2.
+ *
+ * Type of plane congruences.
+ *
+ * More precisely, #GwyPlaneCongruenceType represents transformations that
+ * can be performed with pixel fields, leading to precise 1-to-1 pixel-wise
+ * mapping.
+ **/
+
+/**
+ * GwyCongruenceOrigin:
+ * @GWY_CONGRUENCE_ORIGIN_ZERO: Origin is at zero.
+ * @GWY_CONGRUENCE_ORIGIN_BEGIN: Origin is at the begining, left edge of the
+ *                               object.
+ * @GWY_CONGRUENCE_ORIGIN_END: Origin is at the end, right edge of the
+ *                               object.
+ * @GWY_CONGRUENCE_ORIGIN_USER: Origin is specified explicitly.
+ *
+ * Type of origin position in congruence transformations.
+ *
+ * The origin type does not influence how the pixels are laid out but it
+ * influences the real coordinates, e.g. represented by #GwyField offsets.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
