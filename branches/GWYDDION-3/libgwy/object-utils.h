@@ -33,6 +33,13 @@ G_BEGIN_DECLS
         if (hid && obj) { g_signal_handler_disconnect(obj, hid); (hid) = 0; } \
     } while (0)
 
+gboolean gwy_set_user_func            (gpointer func,
+                                       gpointer data,
+                                       GDestroyNotify destroy,
+                                       gpointer func_field,
+                                       gpointer data_field,
+                                       GDestroyNotify *destroy_field);
+
 gboolean gwy_set_member_object        (gpointer instance,
                                        gpointer member_object,
                                        GType expected_type,

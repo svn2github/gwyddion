@@ -24,6 +24,66 @@
 #include "libgwy/object-utils.h"
 
 /**
+ * GwyUserFuncData:
+ *
+ * Representation of a user function with data and destroy notifier.
+ *
+ * Usually, you define a structure with specific function type of @func and
+ * typecase it to #GwyUserFuncData when passing it to
+ * gwy_user_func_data_destroy().
+ **/
+
+/**
+ * gwy_set_user_func:
+ * @func: New function pointer.
+ * @data: New user data for @func.
+ * @destroy: New destroy notifier for @data.
+ * @func_field: Pointer to location storing the current function to
+ *              be replaced by @func.
+ * @data_field: Pointer to location storing the current data to
+ *              be replaced by @data.
+ * @destroy_field: Pointer to location storing the current data to
+ *                 be replaced by @destroy.
+ *
+ * Sets user function with data, calling the destroy notifier if any is set.
+ *
+ * Returns: %TRUE if either the function or its data has changed.  If only the
+ *          destroy notifier is changed it is called and updated but %FALSE is
+ *          returned, assuming that a change of the destroy notifier does not
+ *          influence the function.
+ **/
+gboolean
+gwy_set_user_func(gpointer func,
+                  gpointer data,
+                  GDestroyNotify destroy,
+                  gpointer func_field,
+                  gpointer data_field,
+                  GDestroyNotify *destroy_field)
+{
+    gpointer *pfunc = (gpointer*)func_field, *pdata = (gpointer*)data_field;
+
+    if (*pfunc == func && *pdata == data) {
+        if (*destroy_field == destroy)
+            return FALSE;
+
+        if (*destroy_field)
+            (*destroy_field)(data);
+        *destroy_field = destroy;
+        // Since data and function have not changed we still return FALSE.
+        // This can meaningfully happen if data is reference-counted.
+        return FALSE;
+    }
+
+    if (*destroy_field)
+        (*destroy_field)(data);
+
+    *pfunc = func;
+    *pdata = data;
+    *destroy_field = destroy;
+    return TRUE;
+}
+
+/**
  * gwy_set_member_object:
  * @instance: An object instance.
  * @member_object: Another object to be owned by @instanced, or %NULL.
@@ -173,6 +233,7 @@ gwy_override_class_properties(GObjectClass *oclass,
         g_object_class_override_property(oclass, prop_id, prop_name);
     }
     va_end(ap);
+
 
     guint nprops = 0;
     GParamSpec **pspecs = g_object_class_list_properties(oclass, &nprops);
