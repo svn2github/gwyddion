@@ -265,7 +265,7 @@ gwy_shapes_set_coords(GwyShapes *shapes,
 }
 
 /**
- * gwy_shapes_set_coords:
+ * gwy_shapes_get_coords:
  * @shapes: A group of geometrical shapes.
  *
  * Obtains the coordinates visualised by a shapes object.
@@ -395,7 +395,7 @@ set_focus(GwyShapes *shapes,
 }
 
 /**
- * gwy_shapes_set_focus:
+ * gwy_shapes_get_focus:
  * @shapes: A group of geometrical shapes.
  *
  * Obtains the index of the focused shape in a group of geometrical shapes.
@@ -557,7 +557,7 @@ gwy_shapes_key_press(GwyShapes *shapes,
 }
 
 /**
- * gwy_shapes_key_releaase:
+ * gwy_shapes_key_release:
  * @shapes: A group of geometrical shapes.
  * @event: A #GdkEventKey event.
  *
@@ -636,13 +636,19 @@ gwy_shapes_updated(GwyShapes *shapes)
 
 /**
  * GwyShapesClass:
- * @coords_type:
- * @draw:
- * @button_press:
- * @button_release:
- * @motion_notify:
- * @key_press:
- * @key_release:
+ * @coords_type: Type of #GwyCoords subclass this shapes class visualises.
+ * @draw: Virtual method implementing gwy_shapes_draw().
+ * @button_press: Virtual method implementing gwy_shapes_button_press().
+ * @button_release: Virtual method implementing gwy_shapes_button_release().
+ * @motion_notify: Virtual method implementing gwy_shapes_motion_notify().
+ * @key_press: Virtual method implementing gwy_shapes_key_press().
+ * @key_release: Virtual method implementing gwy_shapes_key_release().
+ * @coords_item_inserted: Virtual method called when the @coords object
+ *                        emits #GwyCoords:item-inserted.
+ * @coords_item_deleted: Virtual method called when the @coords object
+ *                       emits #GwyCoords:item-deleted.
+ * @coords_item_changed: Virtual method called when the @coords object
+ *                       emits #GwyCoords:item-changed.
  *
  * Class of groups of selectable geometrical shapes.
  *
@@ -656,6 +662,23 @@ gwy_shapes_updated(GwyShapes *shapes)
  * gwy_shapes_set_coords_to_view_transform().  User interaction requires also
  * the reverse function that can be set with
  * gwy_shapes_set_view_to_coords_transform().
+ **/
+
+/**
+ * GwyShapesTransformFunc:
+ * @coords_from: Coordinates to transform.
+ * @coords_to: Location to store the transformed coordinates.
+ * @user_data: User data set with gwy_shapes_set_coords_to_view_transform()
+ *             or gwy_shapes_set_view_to_coords_transform().
+ *
+ * Type of coordination transformation function.
+ *
+ * The number of items in @coords_from and @coords_to depends on the specific
+ * subclass of #GwyShapes and #GwyCoords.  The view coordinates are normally
+ * two per point because the screen is two-dimensional but the number of coords
+ * coordinates may differ.  For instance, if horizontal profiles are selected
+ * in two-dimensional data then @coords coordinates consists only the
+ * y-coordinate.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
