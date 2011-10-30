@@ -23,8 +23,8 @@ typelibdir = $(libdir)/girepository-1.0
 if HAVE_INTROSPECTION
 dist_gir_DATA = $(Library_ver).gir
 typelib_DATA = $(Library_ver).typelib
-pkgconfigdata_DATA = $(library)$(libsuffix).pc
 endif
+pkgconfigdata_DATA = $(library)$(libsuffix).pc
 
 if OS_WIN32
 library_host_ldflags = -no-undefined -export-symbols $(library)$(libsuffix).def
