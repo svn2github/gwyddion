@@ -233,4 +233,75 @@ test_object_utils_set_member(void)
     g_object_unref(field2);
 }
 
+static guint destroy1_called = 0, destroy2_called = 0;
+
+static void
+data_destroy1(gpointer user_data)
+{
+    g_assert_cmpuint(GPOINTER_TO_SIZE(user_data), ==, 0x12345678UL);
+    destroy1_called++;
+}
+
+static void
+data_destroy2(gpointer user_data)
+{
+    g_assert_cmpuint(GPOINTER_TO_SIZE(user_data), ==, 0x87654321UL);
+    destroy2_called++;
+}
+
+void
+test_object_utils_set_user_func(void)
+{
+    gpointer func = NULL, data = NULL;
+    GDestroyNotify destroy = NULL;
+
+    gwy_set_user_func(NULL, GSIZE_TO_POINTER(0x12345678UL), &data_destroy1,
+                      &func, &data, &destroy);
+    g_assert(destroy == &data_destroy1);
+    g_assert(func == NULL);
+    g_assert_cmphex(GPOINTER_TO_SIZE(data), ==, 0x12345678UL);
+    g_assert_cmpuint(destroy1_called, ==, 0);
+    g_assert_cmpuint(destroy2_called, ==, 0);
+
+    gwy_set_user_func(NULL, GSIZE_TO_POINTER(0x87654321UL), &data_destroy2,
+                      &func, &data, &destroy);
+    g_assert(destroy == &data_destroy2);
+    g_assert(func == NULL);
+    g_assert_cmphex(GPOINTER_TO_SIZE(data), ==, 0x87654321UL);
+    g_assert_cmpuint(destroy1_called, ==, 1);
+    g_assert_cmpuint(destroy2_called, ==, 0);
+
+    gwy_set_user_func(NULL, NULL, NULL, &func, &data, &destroy);
+    g_assert(destroy == NULL);
+    g_assert(func == NULL);
+    g_assert(data == NULL);
+    g_assert_cmpuint(destroy1_called, ==, 1);
+    g_assert_cmpuint(destroy2_called, ==, 1);
+
+    gwy_set_user_func(NULL, GSIZE_TO_POINTER(0x12345678UL), &data_destroy1,
+                      &func, &data, &destroy);
+    g_assert(destroy == &data_destroy1);
+    g_assert(func == NULL);
+    g_assert_cmphex(GPOINTER_TO_SIZE(data), ==, 0x12345678UL);
+    g_assert_cmpuint(destroy1_called, ==, 1);
+    g_assert_cmpuint(destroy2_called, ==, 1);
+
+    gwy_set_user_func(GSIZE_TO_POINTER(0xdeadbeefUL),
+                      GSIZE_TO_POINTER(0x12345678UL),
+                      &data_destroy1,
+                      &func, &data, &destroy);
+    g_assert(destroy == &data_destroy1);
+    g_assert_cmphex(GPOINTER_TO_SIZE(func), ==, 0xdeadbeefUL);
+    g_assert_cmphex(GPOINTER_TO_SIZE(data), ==, 0x12345678UL);
+    g_assert_cmpuint(destroy1_called, ==, 2);
+    g_assert_cmpuint(destroy2_called, ==, 1);
+
+    gwy_set_user_func(NULL, NULL, NULL, &func, &data, &destroy);
+    g_assert(destroy == NULL);
+    g_assert(func == NULL);
+    g_assert(data == NULL);
+    g_assert_cmpuint(destroy1_called, ==, 3);
+    g_assert_cmpuint(destroy2_called, ==, 1);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

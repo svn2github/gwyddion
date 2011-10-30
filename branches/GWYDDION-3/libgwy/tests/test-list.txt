@@ -22,6 +22,7 @@ interpolation
 fft/nice-size
 fft/load-wisdom
 object-utils/set-member
+object-utils/set-user-func
 expr/evaluate
 expr/vector
 expr/garbage

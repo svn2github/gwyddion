@@ -24,16 +24,6 @@
 #include "libgwy/object-utils.h"
 
 /**
- * GwyUserFuncData:
- *
- * Representation of a user function with data and destroy notifier.
- *
- * Usually, you define a structure with specific function type of @func and
- * typecase it to #GwyUserFuncData when passing it to
- * gwy_user_func_data_destroy().
- **/
-
-/**
  * gwy_set_user_func:
  * @func: New function pointer.
  * @data: New user data for @func.
@@ -75,7 +65,7 @@ gwy_set_user_func(gpointer func,
     }
 
     if (*destroy_field)
-        (*destroy_field)(data);
+        (*destroy_field)(*pdata);
 
     *pfunc = func;
     *pdata = data;
