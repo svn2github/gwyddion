@@ -59,6 +59,12 @@ struct _GwyShapesClass {
                                 guint id);
     void (*coords_item_changed)(GwyShapes *shapes,
                                 guint id);
+    /*<private>*/
+    void (*reseved1)(void);
+    void (*reseved2)(void);
+    void (*reseved3)(void);
+    void (*reseved4)(void);
+    /*<public>*/
     gboolean (*button_press)(GwyShapes *shapes,
                              GdkEvent *event);
     gboolean (*button_release)(GwyShapes *shapes,
@@ -69,6 +75,9 @@ struct _GwyShapesClass {
                           GdkEvent *event);
     gboolean (*key_release)(GwyShapes *shapes,
                             GdkEvent *event);
+    /*<private>*/
+    gboolean (*reservedevent1)(void);
+    gboolean (*reservedevent2)(void);
 };
 
 typedef void (*GwyShapesTransformFunc)(const gdouble *coords_from,
@@ -89,21 +98,28 @@ void       gwy_shapes_set_view_to_coords_transform(GwyShapes *shapes,
                                                    gpointer user_data,
                                                    GDestroyNotify destroy);
 
-void     gwy_shapes_draw          (GwyShapes *shapes,
-                                   cairo_t *cr);
-void     gwy_shapes_set_focus     (GwyShapes *shapes,
-                                   gint id);
-gint     gwy_shapes_get_focus     (GwyShapes *shapes);
-gboolean gwy_shapes_button_press  (GwyShapes *shapes,
-                                   GdkEvent *event);
-gboolean gwy_shapes_button_release(GwyShapes *shapes,
-                                   GdkEvent *event);
-gboolean gwy_shapes_motion_notify (GwyShapes *shapes,
-                                   GdkEvent *event);
-gboolean gwy_shapes_key_press     (GwyShapes *shapes,
-                                   GdkEvent *event);
-gboolean gwy_shapes_key_release   (GwyShapes *shapes,
-                                   GdkEvent *event);
+void         gwy_shapes_draw          (GwyShapes *shapes,
+                                       cairo_t *cr);
+void         gwy_shapes_set_focus     (GwyShapes *shapes,
+                                       gint id);
+gint         gwy_shapes_get_focus     (const GwyShapes *shapes) G_GNUC_PURE;
+void         gwy_shapes_coords_to_view(const GwyShapes *shapes,
+                                       const gdouble *coords,
+                                       gdouble *view);
+void         gwy_shapes_view_to_coords(const GwyShapes *shapes,
+                                       const gdouble *coords,
+                                       gdouble *view);
+GdkEventMask gwy_shapes_gdk_event_mask(const GwyShapes *shapes) G_GNUC_PURE;
+gboolean     gwy_shapes_button_press  (GwyShapes *shapes,
+                                       GdkEvent *event);
+gboolean     gwy_shapes_button_release(GwyShapes *shapes,
+                                       GdkEvent *event);
+gboolean     gwy_shapes_motion_notify (GwyShapes *shapes,
+                                       GdkEvent *event);
+gboolean     gwy_shapes_key_press     (GwyShapes *shapes,
+                                       GdkEvent *event);
+gboolean     gwy_shapes_key_release   (GwyShapes *shapes,
+                                       GdkEvent *event);
 
 G_END_DECLS
 

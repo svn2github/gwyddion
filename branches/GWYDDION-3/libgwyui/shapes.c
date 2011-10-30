@@ -242,6 +242,17 @@ set_coords(GwyShapes *shapes,
     return TRUE;
 }
 
+/**
+ * gwy_shapes_set_coords:
+ * @shapes: A group of geometrical shapes.
+ * @coords: (allow-none):
+ *          A group of coordinates.
+ *
+ * Sets the coordinates to be visualised by a shapes object.
+ *
+ * The type of the coords object must match the type used by the specific
+ * shapes class.
+ **/
 void
 gwy_shapes_set_coords(GwyShapes *shapes,
                       GwyCoords *coords)
@@ -253,6 +264,15 @@ gwy_shapes_set_coords(GwyShapes *shapes,
     g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_COORDS]);
 }
 
+/**
+ * gwy_shapes_set_coords:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains the coordinates visualised by a shapes object.
+ *
+ * Returns: (transfer none):
+ *          The coordinates object being visualised.
+ **/
 GwyCoords*
 gwy_shapes_get_coords(GwyShapes *shapes)
 {
@@ -260,6 +280,19 @@ gwy_shapes_get_coords(GwyShapes *shapes)
     return shapes->priv->coords;
 }
 
+/**
+ * gwy_shapes_set_coords_to_view_transform:
+ * @shapes: A group of geometrical shapes.
+ * @func: Function transforming @coords coordinates to view coordinates.
+ * @user_data: Data passed to @func;
+ * @destroy: Destroy notifier for @user_data.
+ *
+ * Sets the function for transformation of physical coordinates to view
+ * coordinates for a group of geometrical shapes.
+ *
+ * The sizes of the arrays the function works with must match the actual
+ * number of coordinates for the specific shapes and coords classes.
+ **/
 void
 gwy_shapes_set_coords_to_view_transform(GwyShapes *shapes,
                                         GwyShapesTransformFunc func,
@@ -277,6 +310,19 @@ gwy_shapes_set_coords_to_view_transform(GwyShapes *shapes,
     gwy_shapes_updated(shapes);
 }
 
+/**
+ * gwy_shapes_set_view_to_coords_transform:
+ * @shapes: A group of geometrical shapes.
+ * @func: Function transforming view coordinates to @coords coordinates.
+ * @user_data: Data passed to @func;
+ * @destroy: Destroy notifier for @user_data.
+ *
+ * Sets the function for transformation of view coordinates to physical
+ * coordinates for a group of geometrical shapes.
+ *
+ * The sizes of the arrays the function works with must match the actual
+ * number of coordinates for the specific shapes and coords classes.
+ **/
 void
 gwy_shapes_set_view_to_coords_transform(GwyShapes *shapes,
                                         GwyShapesTransformFunc func,
@@ -294,15 +340,35 @@ gwy_shapes_set_view_to_coords_transform(GwyShapes *shapes,
     gwy_shapes_updated(shapes);
 }
 
+/**
+ * gwy_shapes_draw:
+ * @shapes: A group of geometrical shapes.
+ * @cr: A cairo context to draw to.
+ *
+ * Draws a group of geometrical shapes using a Cairo context.
+ **/
 void
 gwy_shapes_draw(GwyShapes *shapes,
                 cairo_t *cr)
 {
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(cr);
+    g_return_if_fail(shapes->priv->coords_to_view.func);
+
     GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
-    if (klass->draw)
-        klass->draw(shapes, cr);
+    g_return_if_fail(klass->draw);
+    klass->draw(shapes, cr);
 }
 
+/**
+ * gwy_shapes_set_focus:
+ * @shapes: A group of geometrical shapes.
+ * @id: Index of the shape to focus.  Pass -1 to permit interaction with all
+ *      shapes.
+ *
+ * Limits user interaction with a group of geometrical shapes to a single
+ * shape.
+ **/
 void
 gwy_shapes_set_focus(GwyShapes *shapes,
                      gint id)
@@ -328,6 +394,105 @@ set_focus(GwyShapes *shapes,
     return TRUE;
 }
 
+/**
+ * gwy_shapes_set_focus:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains the index of the focused shape in a group of geometrical shapes.
+ *
+ * Returns: Index of the focused shape.  Value -1 is returned if no shape is
+ *          focused.
+ **/
+gint
+gwy_shapes_get_focus(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), -1);
+    return shapes->priv->focus;
+}
+
+/**
+ * gwy_shapes_coords_to_view:
+ * @shapes: A group of geometrical shapes.
+ * @coords: Physical coordinates of a single geometrical shape.
+ * @view: Array to store the corresponding view coordinates to.
+ *
+ * Transforms physical coordinates of a single shape of a geometrical shape
+ * group to view coordinates.
+ **/
+void
+gwy_shapes_coords_to_view(const GwyShapes *shapes,
+                          const gdouble *coords,
+                          gdouble *view)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(coords);
+    g_return_if_fail(view);
+    const CoordsTransform *transform = &shapes->priv->coords_to_view;
+    g_return_if_fail(transform->func);
+    transform->func(coords, view, transform->data);
+}
+
+/**
+ * gwy_shapes_view_to_coords:
+ * @shapes: A group of geometrical shapes.
+ * @coords: Physical coordinates of a single geometrical shape.
+ * @view: Array to store the corresponding view coordinates to.
+ *
+ * Transforms view coordinates of a single shape of a geometrical shape group
+ * to physical coordinates.
+ **/
+void
+gwy_shapes_view_to_coords(const GwyShapes *shapes,
+                          const gdouble *coords,
+                          gdouble *view)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(coords);
+    g_return_if_fail(view);
+    const CoordsTransform *transform = &shapes->priv->view_to_coords;
+    g_return_if_fail(transform->func);
+    transform->func(coords, view, transform->data);
+}
+
+/**
+ * gwy_shapes_gdk_event_mask:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Gets the set of Gdk events a group of geometrical shapes object requires for
+ * user interaction.
+ **/
+GdkEventMask
+gwy_shapes_gdk_event_mask(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), 0);
+    GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
+    GdkEventMask mask = 0;
+
+    if (klass->button_press)
+        mask |= GDK_BUTTON_PRESS_MASK;
+    if (klass->button_release)
+        mask |= GDK_BUTTON_RELEASE_MASK;
+    if (klass->motion_notify)
+        mask |= (GDK_BUTTON1_MOTION_MASK
+                 | GDK_POINTER_MOTION_MASK
+                 | GDK_POINTER_MOTION_HINT_MASK);
+    if (klass->key_press)
+        mask |= GDK_KEY_PRESS_MASK;
+    if (klass->key_release)
+        mask |= GDK_KEY_RELEASE_MASK;
+
+    return mask;
+}
+
+/**
+ * gwy_shapes_button_press:
+ * @shapes: A group of geometrical shapes.
+ * @event: A #GdkEventButton event.
+ *
+ * Forwards a button press event to a group of geometrical shapes.
+ *
+ * Returns: %TRUE if the event was handled.
+ **/
 gboolean
 gwy_shapes_button_press(GwyShapes *shapes,
                         GdkEvent *event)
@@ -337,6 +502,15 @@ gwy_shapes_button_press(GwyShapes *shapes,
     return method ? method(shapes, event) : FALSE;
 }
 
+/**
+ * gwy_shapes_button_release:
+ * @shapes: A group of geometrical shapes.
+ * @event: A #GdkEventButton event.
+ *
+ * Forwards a button release event to a group of geometrical shapes.
+ *
+ * Returns: %TRUE if the event was handled.
+ **/
 gboolean
 gwy_shapes_button_release(GwyShapes *shapes,
                           GdkEvent *event)
@@ -346,6 +520,15 @@ gwy_shapes_button_release(GwyShapes *shapes,
     return method ? method(shapes, event) : FALSE;
 }
 
+/**
+ * gwy_shapes_motion_notify:
+ * @shapes: A group of geometrical shapes.
+ * @event: A #GdkEventMotion event.
+ *
+ * Forwards a motion notify event to a group of geometrical shapes.
+ *
+ * Returns: %TRUE if the event was handled.
+ **/
 gboolean
 gwy_shapes_motion_notify(GwyShapes *shapes,
                          GdkEvent *event)
@@ -355,6 +538,15 @@ gwy_shapes_motion_notify(GwyShapes *shapes,
     return method ? method(shapes, event) : FALSE;
 }
 
+/**
+ * gwy_shapes_key_press:
+ * @shapes: A group of geometrical shapes.
+ * @event: A #GdkEventKey event.
+ *
+ * Forwards a key press event to a group of geometrical shapes.
+ *
+ * Returns: %TRUE if the event was handled.
+ **/
 gboolean
 gwy_shapes_key_press(GwyShapes *shapes,
                      GdkEvent *event)
@@ -364,6 +556,15 @@ gwy_shapes_key_press(GwyShapes *shapes,
     return method ? method(shapes, event) : FALSE;
 }
 
+/**
+ * gwy_shapes_key_releaase:
+ * @shapes: A group of geometrical shapes.
+ * @event: A #GdkEventKey event.
+ *
+ * Forwards a key release event to a group of geometrical shapes.
+ *
+ * Returns: %TRUE if the event was handled.
+ **/
 gboolean
 gwy_shapes_key_release(GwyShapes *shapes,
                        GdkEvent *event)
@@ -445,8 +646,16 @@ gwy_shapes_updated(GwyShapes *shapes)
  *
  * Class of groups of selectable geometrical shapes.
  *
- * Specific, i.e. instantiable, subclasses have to set @coords_type and, to be
- * actually useful, at least the draw() method.
+ * Specific, i.e. instantiable, subclasses have to set @coords_type and
+ * implement at least the draw() method.  Of the user interaction methods they
+ * should implement only those actually needed (possibly none if the subclass
+ * is intended only for passive visualisation).
+ *
+ * Drawing of the shapes with gwy_shapes_draw() requires providing a function
+ * for the transformation of physical coordinates to view coordinates using
+ * gwy_shapes_set_coords_to_view_transform().  User interaction requires also
+ * the reverse function that can be set with
+ * gwy_shapes_set_view_to_coords_transform().
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
