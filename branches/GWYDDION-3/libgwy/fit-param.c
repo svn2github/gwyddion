@@ -80,7 +80,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*3*/ { .name = "estimate", .ctype = GWY_SERIALIZABLE_STRING, },
 };
 
-static GParamSpec *fit_param_pspecs[N_PROPS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyFitParam, gwy_fit_param, G_TYPE_OBJECT, 0,
@@ -107,7 +107,7 @@ gwy_fit_param_class_init(GwyFitParamClass *klass)
     gobject_class->get_property = gwy_fit_param_get_property;
     gobject_class->set_property = gwy_fit_param_set_property;
 
-    fit_param_pspecs[PROP_NAME]
+    properties[PROP_NAME]
         = g_param_spec_string("name",
                               "Name",
                               "Parameter identifier",
@@ -115,21 +115,21 @@ gwy_fit_param_class_init(GwyFitParamClass *klass)
                               G_PARAM_CONSTRUCT_ONLY
                               | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    fit_param_pspecs[PROP_POWER_X]
+    properties[PROP_POWER_X]
         = g_param_spec_int("power-x",
                            "Power of X",
                            "Power of the abscissa contained in the parameter.",
                            POWER_MIN, POWER_MAX, 0,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    fit_param_pspecs[PROP_POWER_Y]
+    properties[PROP_POWER_Y]
         = g_param_spec_int("power-y",
                            "Power of Y",
                            "Power of the ordinate contained in the parameter.",
                            POWER_MIN, POWER_MAX, 0,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    fit_param_pspecs[PROP_ESTIMATE]
+    properties[PROP_ESTIMATE]
         = g_param_spec_string("estimate",
                               "Estimate",
                               "Expression used as the initial parameter "
@@ -140,7 +140,7 @@ gwy_fit_param_class_init(GwyFitParamClass *klass)
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, fit_param_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
 }
 
@@ -340,15 +340,15 @@ gwy_fit_param_assign_impl(GwySerializable *destination,
     guint nn = 0;
     // Names are construct-only and they cannot be assigned.
     if (dpriv->power_x != spriv->power_x) {
-        notify[nn++] = fit_param_pspecs[PROP_POWER_X];
+        notify[nn++] = properties[PROP_POWER_X];
         dpriv->power_x = spriv->power_x;
     }
     if (dpriv->power_y != spriv->power_y) {
-        notify[nn++] = fit_param_pspecs[PROP_POWER_Y];
+        notify[nn++] = properties[PROP_POWER_Y];
         dpriv->power_y = spriv->power_y;
     }
     if (_gwy_assign_string(&dpriv->estimate, spriv->estimate))
-        notify[nn++] = fit_param_pspecs[PROP_ESTIMATE];
+        notify[nn++] = properties[PROP_ESTIMATE];
 
     _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
@@ -449,8 +449,7 @@ gwy_fit_param_set_power_x(GwyFitParam *fitparam,
     if (power_x == priv->power_x)
         return;
     priv->power_x = power_x;
-    g_object_notify_by_pspec(G_OBJECT(fitparam),
-                             fit_param_pspecs[PROP_POWER_X]);
+    g_object_notify_by_pspec(G_OBJECT(fitparam), properties[PROP_POWER_X]);
 }
 
 /**
@@ -485,8 +484,7 @@ gwy_fit_param_set_power_y(GwyFitParam *fitparam,
     if (power_y == priv->power_y)
         return;
     priv->power_y = power_y;
-    g_object_notify_by_pspec(G_OBJECT(fitparam),
-                             fit_param_pspecs[PROP_POWER_Y]);
+    g_object_notify_by_pspec(G_OBJECT(fitparam), properties[PROP_POWER_Y]);
 }
 
 /**
@@ -532,8 +530,7 @@ gwy_fit_param_set_estimate(GwyFitParam *fitparam,
     }
     FitParam *priv = fitparam->priv;
     if (_gwy_assign_string(&priv->estimate, estimate))
-        g_object_notify_by_pspec(G_OBJECT(fitparam),
-                                 fit_param_pspecs[PROP_ESTIMATE]);
+        g_object_notify_by_pspec(G_OBJECT(fitparam), properties[PROP_ESTIMATE]);
 }
 
 static GwyExpr*

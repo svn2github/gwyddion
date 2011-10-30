@@ -77,7 +77,7 @@ static gboolean evaluate                 (FitFunc *priv,
                                           const gdouble *params,
                                           gdouble *retval);
 
-static GParamSpec *fit_func_pspecs[N_PROPS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT);
 
@@ -108,7 +108,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
     gobject_class->get_property = gwy_fit_func_get_property;
     gobject_class->set_property = gwy_fit_func_set_property;
 
-    fit_func_pspecs[PROP_GROUP]
+    properties[PROP_GROUP]
         = g_param_spec_string("group",
                               "Group",
                               "Group the function belongs to.",
@@ -116,7 +116,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
                               | G_PARAM_STATIC_STRINGS);
 
-    fit_func_pspecs[PROP_NAME]
+    properties[PROP_NAME]
         = g_param_spec_string("name",
                               "Name",
                               "Function name, either built-in or user.",
@@ -124,7 +124,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
                               | G_PARAM_STATIC_STRINGS);
 
-    fit_func_pspecs[PROP_FIT_TASK]
+    properties[PROP_FIT_TASK]
         = g_param_spec_object("fit-task",
                               "Fit Task",
                               "GwyFitTask instance used by this function. "
@@ -132,7 +132,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               GWY_TYPE_FIT_TASK,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    fit_func_pspecs[PROP_USER_FUNC]
+    properties[PROP_USER_FUNC]
         = g_param_spec_object("user-func",
                               "User function",
                               "GwyUserFitFunc wrapped by this function.",
@@ -140,7 +140,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, fit_func_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     builtin_functions = _gwy_fit_func_setup_builtins();
 }

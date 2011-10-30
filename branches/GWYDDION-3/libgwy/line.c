@@ -74,8 +74,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*4*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
-static guint line_signals[N_SIGNALS];
-static GParamSpec *line_pspecs[N_PROPS];
+static guint signals[N_SIGNALS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyLine, gwy_line, G_TYPE_OBJECT, 0,
@@ -103,28 +103,28 @@ gwy_line_class_init(GwyLineClass *klass)
     gobject_class->get_property = gwy_line_get_property;
     gobject_class->set_property = gwy_line_set_property;
 
-    line_pspecs[PROP_RES]
+    properties[PROP_RES]
         = g_param_spec_uint("res",
                             "Resolution",
                             "Pixel length of the line.",
                             1, G_MAXUINT, 1,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    line_pspecs[PROP_REAL]
+    properties[PROP_REAL]
         = g_param_spec_double("real",
                               "Real size",
                               "Length of the line in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    line_pspecs[PROP_OFFSET]
+    properties[PROP_OFFSET]
         = g_param_spec_double("offset",
                               "Offset",
                               "Offset of the line start in physical units.",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    line_pspecs[PROP_UNIT_X]
+    properties[PROP_UNIT_X]
          = g_param_spec_object("unit-x",
                                "X unit",
                                "Physical units of lateral dimension of the "
@@ -132,7 +132,7 @@ gwy_line_class_init(GwyLineClass *klass)
                                GWY_TYPE_UNIT,
                                G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    line_pspecs[PROP_UNIT_Y]
+    properties[PROP_UNIT_Y]
         = g_param_spec_object("unit-y",
                               "Y unit",
                               "Physical units of line values.",
@@ -140,7 +140,7 @@ gwy_line_class_init(GwyLineClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, line_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
      * GwyLine::data-changed:
@@ -154,7 +154,7 @@ gwy_line_class_init(GwyLineClass *klass)
      * it explicitly with gwy_line_data_changed() to notify anything that
      * displays (or otherwise uses) the line.
      **/
-    line_signals[DATA_CHANGED]
+    signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -351,11 +351,11 @@ gwy_line_assign_impl(GwySerializable *destination,
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->res != src->res)
-        notify[nn++] = line_pspecs[PROP_RES];
+        notify[nn++] = properties[PROP_RES];
     if (dest->real != src->real)
-        notify[nn++] = line_pspecs[PROP_RES];
+        notify[nn++] = properties[PROP_RES];
     if (dest->off != src->off)
-        notify[nn++] = line_pspecs[PROP_OFFSET];
+        notify[nn++] = properties[PROP_OFFSET];
 
     if (dest->res != src->res) {
         free_data(dest);
@@ -842,7 +842,7 @@ gwy_line_set_size(GwyLine *line,
         free_data(line);
         line->res = res;
         alloc_data(line, clear);
-        g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_RES]);
+        g_object_notify_by_pspec(G_OBJECT(line), properties[PROP_RES]);
     }
     else if (clear)
         gwy_line_clear(line, NULL);
@@ -862,7 +862,7 @@ gwy_line_data_changed(GwyLine *line,
                       GwyLinePart *lpart)
 {
     g_return_if_fail(GWY_IS_LINE(line));
-    g_signal_emit(line, line_signals[DATA_CHANGED], 0, lpart);
+    g_signal_emit(line, signals[DATA_CHANGED], 0, lpart);
 }
 
 /**
@@ -934,7 +934,7 @@ gwy_line_set_real(GwyLine *line,
     g_return_if_fail(real > 0.0);
     if (real != line->real) {
         line->real = real;
-        g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_REAL]);
+        g_object_notify_by_pspec(G_OBJECT(line), properties[PROP_REAL]);
     }
 }
 
@@ -952,7 +952,7 @@ gwy_line_set_offset(GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
     if (offset != line->off) {
         line->off = offset;
-        g_object_notify_by_pspec(G_OBJECT(line), line_pspecs[PROP_OFFSET]);
+        g_object_notify_by_pspec(G_OBJECT(line), properties[PROP_OFFSET]);
     }
 }
 

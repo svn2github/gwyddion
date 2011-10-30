@@ -56,7 +56,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "units", .ctype = GWY_SERIALIZABLE_OBJECT_ARRAY, },
 };
 
-static guint coords_signals[N_SIGNALS];
+static guint signals[N_SIGNALS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyCoords, gwy_coords, GWY_TYPE_ARRAY, G_TYPE_FLAG_ABSTRACT,
@@ -91,7 +91,7 @@ gwy_coords_class_init(GwyCoordsClass *klass)
      * when it is done with the modifications and the coords are in the final
      * state.
      **/
-    coords_signals[FINISHED]
+    signals[FINISHED]
         = g_signal_new_class_handler("finished",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -628,9 +628,8 @@ void
 gwy_coords_finished(GwyCoords *coords)
 {
     g_return_if_fail(GWY_IS_COORDS(coords));
-    g_signal_emit(coords, coords_signals[FINISHED], 0);
+    g_signal_emit(coords, signals[FINISHED], 0);
 }
-
 
 /**
  * SECTION: coords

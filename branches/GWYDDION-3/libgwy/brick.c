@@ -91,8 +91,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*12*/ { .name = "data",    .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
-static guint brick_signals[N_SIGNALS];
-static GParamSpec *brick_pspecs[N_PROPS];
+static guint signals[N_SIGNALS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyBrick, gwy_brick, G_TYPE_OBJECT, 0,
@@ -120,49 +120,49 @@ gwy_brick_class_init(GwyBrickClass *klass)
     gobject_class->get_property = gwy_brick_get_property;
     gobject_class->set_property = gwy_brick_set_property;
 
-    brick_pspecs[PROP_XRES]
+    properties[PROP_XRES]
         = g_param_spec_uint("x-res",
                             "X resolution",
                             "Pixel width of the brick.",
                             1, G_MAXUINT, 1,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_YRES]
+    properties[PROP_YRES]
         = g_param_spec_uint("y-res",
                             "Y resolution",
                             "Pixel height of the brick.",
                             1, G_MAXUINT, 1,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_ZRES]
+    properties[PROP_ZRES]
         = g_param_spec_uint("z-res",
                             "Z resolution",
                             "Pixel depth of the brick.",
                             1, G_MAXUINT, 1,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_XREAL]
+    properties[PROP_XREAL]
         = g_param_spec_double("x-real",
                               "X real size",
                               "Width of the brick in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_YREAL]
+    properties[PROP_YREAL]
         = g_param_spec_double("y-real",
                               "Y real size",
                               "Height of the brick in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_ZREAL]
+    properties[PROP_ZREAL]
         = g_param_spec_double("z-real",
                               "Z real size",
                               "Depth of the brick in physical units.",
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_XOFFSET]
+    properties[PROP_XOFFSET]
         = g_param_spec_double("x-offset",
                               "X offset",
                               "Horizontal offset of the brick top left corner "
@@ -170,7 +170,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_YOFFSET]
+    properties[PROP_YOFFSET]
         = g_param_spec_double("y-offset",
                               "Y offset",
                               "Vertical offset of the brick top left corner "
@@ -178,7 +178,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_ZOFFSET]
+    properties[PROP_ZOFFSET]
         = g_param_spec_double("z-offset",
                               "Z offset",
                               "Depth offset of the brick top left corner "
@@ -186,7 +186,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_UNIT_XY]
+    properties[PROP_UNIT_XY]
         = g_param_spec_object("unit-xy",
                               "XY unit",
                               "Physical units of lateral dimensions of the "
@@ -194,14 +194,14 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_UNIT_Z]
+    properties[PROP_UNIT_Z]
         = g_param_spec_object("unit-z",
                               "Z unit",
                               "Physical units of brick depth.",
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    brick_pspecs[PROP_UNIT_W]
+    properties[PROP_UNIT_W]
         = g_param_spec_object("unit-w",
                               "W unit",
                               "Physical units of brick values.",
@@ -209,7 +209,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, brick_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
      * GwyBrick::data-changed:
@@ -223,7 +223,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
      * it explicitly with gwy_brick_data_changed() to notify anything that
      * displays (or otherwise uses) the brick.
      **/
-    brick_signals[DATA_CHANGED]
+    signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -520,23 +520,23 @@ gwy_brick_assign_impl(GwySerializable *destination,
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->xres != src->xres)
-        notify[nn++] = brick_pspecs[PROP_XRES];
+        notify[nn++] = properties[PROP_XRES];
     if (dest->yres != src->yres)
-        notify[nn++] = brick_pspecs[PROP_YRES];
+        notify[nn++] = properties[PROP_YRES];
     if (dest->zres != src->zres)
-        notify[nn++] = brick_pspecs[PROP_ZRES];
+        notify[nn++] = properties[PROP_ZRES];
     if (dest->xreal != src->xreal)
-        notify[nn++] = brick_pspecs[PROP_XREAL];
+        notify[nn++] = properties[PROP_XREAL];
     if (dest->yreal != src->yreal)
-        notify[nn++] = brick_pspecs[PROP_YREAL];
+        notify[nn++] = properties[PROP_YREAL];
     if (dest->zreal != src->zreal)
-        notify[nn++] = brick_pspecs[PROP_ZREAL];
+        notify[nn++] = properties[PROP_ZREAL];
     if (dest->xoff != src->xoff)
-        notify[nn++] = brick_pspecs[PROP_XOFFSET];
+        notify[nn++] = properties[PROP_XOFFSET];
     if (dest->yoff != src->yoff)
-        notify[nn++] = brick_pspecs[PROP_YOFFSET];
+        notify[nn++] = properties[PROP_YOFFSET];
     if (dest->zoff != src->zoff)
-        notify[nn++] = brick_pspecs[PROP_ZOFFSET];
+        notify[nn++] = properties[PROP_ZOFFSET];
 
     if (dest->xres * dest->yres * dest->zres
         != src->xres * src->yres * src->zres) {
@@ -835,11 +835,11 @@ gwy_brick_set_size(GwyBrick *brick,
     GParamSpec *notify[3];
     guint nn = 0;
     if (brick->xres != xres)
-        notify[nn++] = brick_pspecs[PROP_XRES];
+        notify[nn++] = properties[PROP_XRES];
     if (brick->yres != yres)
-        notify[nn++] = brick_pspecs[PROP_YRES];
+        notify[nn++] = properties[PROP_YRES];
     if (brick->zres != zres)
-        notify[nn++] = brick_pspecs[PROP_ZRES];
+        notify[nn++] = properties[PROP_ZRES];
 
     if (brick->xres*brick->yres*brick->zres != xres*yres*zres) {
         free_data(brick);
@@ -874,7 +874,7 @@ gwy_brick_data_changed(GwyBrick *brick,
                        GwyBrickPart *bpart)
 {
     g_return_if_fail(GWY_IS_BRICK(brick));
-    g_signal_emit(brick, brick_signals[DATA_CHANGED], 0, bpart);
+    g_signal_emit(brick, signals[DATA_CHANGED], 0, bpart);
 }
 
 /**
@@ -1010,7 +1010,7 @@ gwy_brick_set_xreal(GwyBrick *brick,
     g_return_if_fail(xreal > 0.0);
     if (xreal != brick->xreal) {
         brick->xreal = xreal;
-        g_object_notify_by_pspec(G_OBJECT(brick), brick_pspecs[PROP_XREAL]);
+        g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_XREAL]);
     }
 }
 
@@ -1029,7 +1029,7 @@ gwy_brick_set_yreal(GwyBrick *brick,
     g_return_if_fail(yreal > 0.0);
     if (yreal != brick->yreal) {
         brick->yreal = yreal;
-        g_object_notify_by_pspec(G_OBJECT(brick), brick_pspecs[PROP_YREAL]);
+        g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_YREAL]);
     }
 }
 
@@ -1048,7 +1048,7 @@ gwy_brick_set_zreal(GwyBrick *brick,
     g_return_if_fail(zreal > 0.0);
     if (zreal != brick->zreal) {
         brick->zreal = zreal;
-        g_object_notify_by_pspec(G_OBJECT(brick), brick_pspecs[PROP_ZREAL]);
+        g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_ZREAL]);
     }
 }
 
@@ -1067,7 +1067,7 @@ gwy_brick_set_xoffset(GwyBrick *brick,
     g_return_if_fail(GWY_IS_BRICK(brick));
     if (xoffset != brick->xoff) {
         brick->xoff = xoffset;
-        g_object_notify_by_pspec(G_OBJECT(brick), brick_pspecs[PROP_XOFFSET]);
+        g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_XOFFSET]);
     }
 }
 
@@ -1086,7 +1086,7 @@ gwy_brick_set_yoffset(GwyBrick *brick,
     g_return_if_fail(GWY_IS_BRICK(brick));
     if (yoffset != brick->yoff) {
         brick->yoff = yoffset;
-        g_object_notify_by_pspec(G_OBJECT(brick), brick_pspecs[PROP_YOFFSET]);
+        g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_YOFFSET]);
     }
 }
 
@@ -1105,7 +1105,7 @@ gwy_brick_set_zoffset(GwyBrick *brick,
     g_return_if_fail(GWY_IS_BRICK(brick));
     if (zoffset != brick->zoff) {
         brick->zoff = zoffset;
-        g_object_notify_by_pspec(G_OBJECT(brick), brick_pspecs[PROP_ZOFFSET]);
+        g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_ZOFFSET]);
     }
 }
 

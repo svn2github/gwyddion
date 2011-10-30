@@ -154,7 +154,7 @@ static guint    calculate_full_height               (GwyRasterView *rasterview);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 
-static GParamSpec *raster_view_pspecs[N_TOTAL_PROPS];
+static GParamSpec *properties[N_TOTAL_PROPS];
 
 G_DEFINE_TYPE_WITH_CODE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET,
                         G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, NULL));
@@ -182,35 +182,35 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     widget_class->motion_notify_event = gwy_raster_view_motion_notify;
     widget_class->draw = gwy_raster_view_draw;
 
-    raster_view_pspecs[PROP_FIELD]
+    properties[PROP_FIELD]
         = g_param_spec_object("field",
                               "Field",
                               "Two-dimensional field shown.",
                               GWY_TYPE_FIELD,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    raster_view_pspecs[PROP_MASK]
+    properties[PROP_MASK]
         = g_param_spec_object("mask",
                               "Mask",
                               "Two-dimensional mask shown over the field.",
                               GWY_TYPE_MASK_FIELD,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    raster_view_pspecs[PROP_GRADIENT]
+    properties[PROP_GRADIENT]
         = g_param_spec_object("gradient",
                               "Gradient",
                               "Gradient used for visualisation.",
                               GWY_TYPE_GRADIENT,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    raster_view_pspecs[PROP_MASK_COLOR]
+    properties[PROP_MASK_COLOR]
         = g_param_spec_boxed("mask-color",
                              "Mask color",
                              "Colour used for mask visualisation.",
                              GWY_TYPE_RGBA,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    raster_view_pspecs[PROP_ZOOM]
+    properties[PROP_ZOOM]
         = g_param_spec_double("zoom",
                               "Zoom",
                               "Scaling of the field in the horizontal "
@@ -221,7 +221,7 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                               0.0, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    raster_view_pspecs[PROP_REAL_ASPECT_RATIO]
+    properties[PROP_REAL_ASPECT_RATIO]
         = g_param_spec_boolean("real-aspect-ratio",
                                "Real aspect ratio",
                                "Whether the real dimensions of the field "
@@ -230,7 +230,7 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    raster_view_pspecs[PROP_NUMBER_GRAINS]
+    properties[PROP_NUMBER_GRAINS]
         = g_param_spec_boolean("number-grains",
                                "Number grains",
                                "Whether to display mask grain numbers.",
@@ -238,10 +238,9 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i,
-                                        raster_view_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
-    gwy_override_class_properties(gobject_class, raster_view_pspecs,
+    gwy_override_class_properties(gobject_class, properties,
                                   "hadjustment", PROP_HADJUSTMENT,
                                   "vadjustment", PROP_VADJUSTMENT,
                                   "hscroll-policy", PROP_HSCROLL_POLICY,
@@ -435,8 +434,7 @@ gwy_raster_view_set_field(GwyRasterView *rasterview,
     if (!set_field(rasterview, field))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview),
-                             raster_view_pspecs[PROP_FIELD]);
+    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_FIELD]);
 }
 
 /**
@@ -481,8 +479,7 @@ gwy_raster_view_set_mask(GwyRasterView *rasterview,
     if (!set_mask(rasterview, mask))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview),
-                             raster_view_pspecs[PROP_MASK]);
+    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_MASK]);
 }
 
 /**
@@ -517,8 +514,7 @@ gwy_raster_view_set_gradient(GwyRasterView *rasterview,
     if (!set_gradient(rasterview, gradient))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview),
-                             raster_view_pspecs[PROP_GRADIENT]);
+    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_GRADIENT]);
 }
 
 /**
@@ -553,8 +549,7 @@ gwy_raster_view_set_mask_color(GwyRasterView *rasterview,
     if (!set_mask_color(rasterview, color))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview),
-                             raster_view_pspecs[PROP_MASK_COLOR]);
+    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_MASK_COLOR]);
 }
 
 /**

@@ -115,7 +115,7 @@ SI_prefixes[] = {
     { "m",    -3  },
     { "M",     6  },
     /* People are extremely creative when it comes to \mu replacements...
-     * NB: The two μ below are different symbols. */
+     * NB: The two μ below are different Unicode characters. */
     { "µ",    -6  },
     { "μ",    -6  },
     { "~",    -6  },
@@ -174,7 +174,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "unitstr", .ctype = GWY_SERIALIZABLE_STRING, },
 };
 
-static guint unit_signals[N_SIGNALS];
+static guint signals[N_SIGNALS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyUnit, gwy_unit, G_TYPE_OBJECT, 0,
@@ -206,7 +206,7 @@ gwy_unit_class_init(GwyUnitClass *klass)
      *
      * The ::changed signal is emitted whenever unit changes.
      **/
-    unit_signals[CHANGED]
+    signals[CHANGED]
         = g_signal_new_class_handler("changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -308,7 +308,7 @@ gwy_unit_assign_impl(GwySerializable *destination,
     g_array_set_size(dest->priv->units, 0);
     g_array_append_vals(dest->priv->units,
                         src->priv->units->data, src->priv->units->len);
-    g_signal_emit(dest, unit_signals[CHANGED], 0);
+    g_signal_emit(dest, signals[CHANGED], 0);
 }
 
 /**
@@ -380,7 +380,7 @@ gwy_unit_set_from_string(GwyUnit *unit,
 
     g_array_free(unit->priv->units, TRUE);
     unit->priv->units = units;
-    g_signal_emit(unit, unit_signals[CHANGED], 0);
+    g_signal_emit(unit, signals[CHANGED], 0);
 }
 
 static inline const GwyUnitStyleSpec*
@@ -751,7 +751,7 @@ gwy_unit_power(GwyUnit *unit,
     g_return_if_fail(GWY_IS_UNIT(op));
 
     power_impl(unit->priv, op->priv, power);
-    g_signal_emit(unit, unit_signals[CHANGED], 0);
+    g_signal_emit(unit, signals[CHANGED], 0);
 }
 
 static void
@@ -858,7 +858,7 @@ gwy_unit_nth_root(GwyUnit *unit,
     g_array_append_vals(priv->units, units->data, units->len);
     g_array_free(units, TRUE);
 
-    g_signal_emit(unit, unit_signals[CHANGED], 0);
+    g_signal_emit(unit, signals[CHANGED], 0);
 
     return TRUE;
 }
@@ -910,7 +910,7 @@ gwy_unit_power_multiply(GwyUnit *unit,
     if (power2)
         multiply_impl(unit->priv, op2->priv, power2);
     canonicalize(unit->priv->units);
-    g_signal_emit(unit, unit_signals[CHANGED], 0);
+    g_signal_emit(unit, signals[CHANGED], 0);
 }
 
 static void

@@ -61,7 +61,7 @@ static void gwy_value_format_get_property(GObject *object,
 static void ensure_value                 (ValueFormat *format);
 static void fix_utf8_minus               (GString *str);
 
-static GParamSpec *value_format_pspecs[N_PROPS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE(GwyValueFormat, gwy_value_format, G_TYPE_OBJECT);
 
@@ -76,7 +76,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
     gobject_class->get_property = gwy_value_format_get_property;
     gobject_class->set_property = gwy_value_format_set_property;
 
-    value_format_pspecs[PROP_STYLE]
+    properties[PROP_STYLE]
         = g_param_spec_enum("style",
                             "Value format style",
                             "What output style is this format intended to be "
@@ -84,7 +84,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                             GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    value_format_pspecs[PROP_BASE]
+    properties[PROP_BASE]
         = g_param_spec_double("base",
                               "Base value",
                               "Factor to divide the formatted number with, "
@@ -92,14 +92,14 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    value_format_pspecs[PROP_PRECISION]
+    properties[PROP_PRECISION]
         = g_param_spec_uint("precision",
                             "Precision",
                             "Number of digits after the decimal point.",
                             0, 1024, 3,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    value_format_pspecs[PROP_UNITS]
+    properties[PROP_UNITS]
         = g_param_spec_string("units",
                               "Units",
                               "Units appended to the formatted number, "
@@ -108,7 +108,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               NULL,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    value_format_pspecs[PROP_GLUE]
+    properties[PROP_GLUE]
         = g_param_spec_string("glue",
                               "Glue between number and units",
                               "String put between the number and units if a "
@@ -119,8 +119,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i,
-                                        value_format_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 }
 
 static void
@@ -351,8 +350,7 @@ gwy_value_format_set_units(GwyValueFormat *format,
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
     if (_gwy_assign_string(&priv->units, units))
-        g_object_notify_by_pspec(G_OBJECT(format),
-                                 value_format_pspecs[PROP_UNITS]);
+        g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_UNITS]);
 }
 
 /**
@@ -385,8 +383,7 @@ gwy_value_format_set_glue(GwyValueFormat *format,
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
     if (_gwy_assign_string(&priv->glue, glue))
-        g_object_notify_by_pspec(G_OBJECT(format),
-                                 value_format_pspecs[PROP_GLUE]);
+        g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_GLUE]);
 }
 
 static void

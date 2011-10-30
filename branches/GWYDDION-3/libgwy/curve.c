@@ -71,8 +71,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*2*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
-static guint curve_signals[N_SIGNALS];
-static GParamSpec *curve_pspecs[N_PROPS];
+static guint signals[N_SIGNALS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyCurve, gwy_curve, G_TYPE_OBJECT, 0,
@@ -100,21 +100,21 @@ gwy_curve_class_init(GwyCurveClass *klass)
     gobject_class->get_property = gwy_curve_get_property;
     gobject_class->set_property = gwy_curve_set_property;
 
-    curve_pspecs[PROP_N_POINTS]
+    properties[PROP_N_POINTS]
         = g_param_spec_uint("n-points",
                             "N points",
                             "Number of curve points.",
                             0, G_MAXUINT, 0,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    curve_pspecs[PROP_UNIT_X]
+    properties[PROP_UNIT_X]
         = g_param_spec_object("unit-x",
                               "X unit",
                               "Physical units of the abscissa values.",
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    curve_pspecs[PROP_UNIT_Y]
+    properties[PROP_UNIT_Y]
         = g_param_spec_object("unit-y",
                               "Y unit",
                               "Physical units of the ordinate values.",
@@ -122,7 +122,7 @@ gwy_curve_class_init(GwyCurveClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, curve_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
      * GwyCurve::data-changed:
@@ -130,7 +130,7 @@ gwy_curve_class_init(GwyCurveClass *klass)
      *
      * The ::data-changed signal is emitted whenever curve data changes.
      **/
-    curve_signals[DATA_CHANGED]
+    signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -315,7 +315,7 @@ gwy_curve_assign_impl(GwySerializable *destination,
     gwy_assign(dest->data, src->data, src->n);
     copy_info(dest, src);
     if (notify)
-        g_object_notify_by_pspec(G_OBJECT(dest), curve_pspecs[PROP_N_POINTS]);
+        g_object_notify_by_pspec(G_OBJECT(dest), properties[PROP_N_POINTS]);
 }
 
 static void
@@ -554,7 +554,7 @@ void
 gwy_curve_data_changed(GwyCurve *curve)
 {
     g_return_if_fail(GWY_IS_CURVE(curve));
-    g_signal_emit(curve, curve_signals[DATA_CHANGED], 0);
+    g_signal_emit(curve, signals[DATA_CHANGED], 0);
 }
 
 /**
@@ -603,7 +603,7 @@ gwy_curve_set_from_line(GwyCurve *curve,
     }
     copy_line_to_curve(line, curve);
     if (notify)
-        g_object_notify_by_pspec(G_OBJECT(curve), curve_pspecs[PROP_N_POINTS]);
+        g_object_notify_by_pspec(G_OBJECT(curve), properties[PROP_N_POINTS]);
 }
 
 static gdouble

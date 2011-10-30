@@ -65,8 +65,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*1*/ { .name = "data", .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
 };
 
-static guint mask_line_signals[N_SIGNALS];
-static GParamSpec *mask_line_pspecs[N_PROPS];
+static guint signals[N_SIGNALS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyMaskLine, gwy_mask_line, G_TYPE_OBJECT, 0,
@@ -94,7 +94,7 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
     gobject_class->get_property = gwy_mask_line_get_property;
     gobject_class->set_property = gwy_mask_line_set_property;
 
-    mask_line_pspecs[PROP_RES]
+    properties[PROP_RES]
         = g_param_spec_uint("res",
                             "Resolution",
                             "Pixel length of the line.",
@@ -102,7 +102,7 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, mask_line_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
      * GwyMaskLine::data-changed:
@@ -116,7 +116,7 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
      * emit it explicitly with gwy_mask_line_data_changed() to notify anything
      * that displays (or otherwise uses) the mask line.
      **/
-    mask_line_signals[DATA_CHANGED]
+    signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -280,7 +280,7 @@ gwy_mask_line_assign_impl(GwySerializable *destination,
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->res != src->res)
-        notify[nn++] = mask_line_pspecs[PROP_RES];
+        notify[nn++] = properties[PROP_RES];
 
     gsize n = src->priv->stride;
     if (dest->priv->stride != n) {
@@ -641,7 +641,7 @@ gwy_mask_line_set_size(GwyMaskLine *line,
     guint nn = 0;
     guint stride = stride_for_width(res);
     if (line->res != res)
-        notify[nn++] = mask_line_pspecs[PROP_RES];
+        notify[nn++] = properties[PROP_RES];
 
     if (line->priv->stride != stride) {
         free_data(line);
@@ -671,7 +671,7 @@ gwy_mask_line_data_changed(GwyMaskLine *line,
                            GwyLinePart *lpart)
 {
     g_return_if_fail(GWY_IS_MASK_LINE(line));
-    g_signal_emit(line, mask_line_signals[DATA_CHANGED], 0, lpart);
+    g_signal_emit(line, signals[DATA_CHANGED], 0, lpart);
 }
 
 /**

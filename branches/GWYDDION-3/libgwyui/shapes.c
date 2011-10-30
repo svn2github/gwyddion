@@ -83,8 +83,8 @@ static void     coords_item_changed    (GwyShapes *shapes,
                                         GwyCoords *coords);
 static void     gwy_shapes_updated     (GwyShapes *shaped);
 
-static guint shapes_signals[N_SIGNALS];
-static GParamSpec *shapes_pspecs[N_PROPS];
+static guint signals[N_SIGNALS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_ABSTRACT_TYPE(GwyShapes, gwy_shapes, G_TYPE_INITIALLY_UNOWNED);
 
@@ -100,7 +100,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
     gobject_class->get_property = gwy_shapes_get_property;
     gobject_class->set_property = gwy_shapes_set_property;
 
-    shapes_pspecs[PROP_COORDS]
+    properties[PROP_COORDS]
         = g_param_spec_object("coords",
                               "Coords",
                               "Coordinates of the shape.",
@@ -109,7 +109,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                               GWY_TYPE_COORDS,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    shapes_pspecs[PROP_FOCUS]
+    properties[PROP_FOCUS]
         = g_param_spec_int("focus",
                            "Focus",
                            "Index of focused shape that only can be "
@@ -119,7 +119,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, shapes_pspecs[i]);
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     // FIXME: This is too simplistic.  We may want multiple objects to be
     // selected.
@@ -133,7 +133,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
      * even if the layer is not editable, but it is not emitted when focus
      * is set and the user attempts to choose a different object.
      **/
-    shapes_signals[SHAPE_SELECTED]
+    signals[SHAPE_SELECTED]
         = g_signal_new_class_handler("shape-selected",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -250,7 +250,7 @@ gwy_shapes_set_coords(GwyShapes *shapes,
     if (!set_coords(shapes, coords))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(shapes), shapes_pspecs[PROP_COORDS]);
+    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_COORDS]);
 }
 
 GwyCoords*
@@ -311,7 +311,7 @@ gwy_shapes_set_focus(GwyShapes *shapes,
     if (!set_focus(shapes, id))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(shapes), shapes_pspecs[PROP_FOCUS]);
+    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_FOCUS]);
 }
 
 static gboolean
