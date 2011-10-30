@@ -22,6 +22,7 @@
 
 #include <libgwyui/field-render.h>
 #include <libgwyui/raster-view.h>
+#include <libgwyui/shapes.h>
 #include <libgwyui/types.h>
 
 #endif
