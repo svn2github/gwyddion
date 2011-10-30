@@ -154,7 +154,7 @@ static guint    calculate_full_height               (GwyRasterView *rasterview);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 
-static GParamSpec *raster_view_pspecs[N_PROPS];
+static GParamSpec *raster_view_pspecs[N_TOTAL_PROPS];
 
 G_DEFINE_TYPE_WITH_CODE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET,
                         G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, NULL));
