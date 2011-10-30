@@ -54,7 +54,7 @@ enum {
 
 G_DEFINE_TYPE(GwyPropTest, gwy_prop_test, GWY_TYPE_FITTER);
 
-static GParamSpec *prop_test_pspecs[N_PROPS];
+static GParamSpec *properties[N_PROPS];
 
 static void
 must_not_be_called(void)
@@ -120,17 +120,15 @@ gwy_prop_test_class_init(GwyPropTestClass *klass)
     gobject_class->set_property = gwy_prop_test_set_property;
     gobject_class->get_property = gwy_prop_test_get_property;
 
-    gwy_override_class_properties(gobject_class, prop_test_pspecs,
+    gwy_override_class_properties(gobject_class, properties,
                                   "lambda-start", PROP_LAMBDA_START,
                                   "n-params", PROP_N_PARAMS,
                                   NULL);
-    g_assert(prop_test_pspecs[PROP_0] == NULL);
-    g_assert(prop_test_pspecs[PROP_LAMBDA_START] != NULL);
-    g_assert_cmpstr(prop_test_pspecs[PROP_LAMBDA_START]->name,
-                    ==, "lambda-start");
-    g_assert(prop_test_pspecs[PROP_N_PARAMS] != NULL);
-    g_assert_cmpstr(prop_test_pspecs[PROP_N_PARAMS]->name,
-                    ==, "n-params");
+    g_assert(properties[PROP_0] == NULL);
+    g_assert(properties[PROP_LAMBDA_START] != NULL);
+    g_assert_cmpstr(properties[PROP_LAMBDA_START]->name, ==, "lambda-start");
+    g_assert(properties[PROP_N_PARAMS] != NULL);
+    g_assert_cmpstr(properties[PROP_N_PARAMS]->name, ==, "n-params");
 }
 
 static void
