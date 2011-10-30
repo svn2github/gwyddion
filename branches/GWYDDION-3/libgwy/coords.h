@@ -57,8 +57,8 @@ struct _GwyCoordsClass {
 };
 
 typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
-                                           guint i,
-                                           gpointer user_data);
+                                        guint i,
+                                        gpointer user_data);
 
 #define gwy_coords_duplicate(coords) \
         (GWY_COORDS(gwy_serializable_duplicate(GWY_SERIALIZABLE(coords))))
