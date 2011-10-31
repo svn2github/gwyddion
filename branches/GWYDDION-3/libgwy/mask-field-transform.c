@@ -89,6 +89,19 @@ flip_both(GwyMaskField *field,
 }
 
 static void
+flip_both_to(const GwyMaskField *source,
+             GwyMaskField *dest)
+{
+    g_assert(source->xres == dest->xres && source->yres == dest->yres);
+    guint xres = dest->xres, yres = dest->yres, stride = dest->stride;
+    for (guint i = 0; i < yres; i++) {
+        const guint32 *rows = source->data + i*stride;
+        guint32 *rowd = dest->data + (yres-1 - i)*stride;
+        flip_row_dest_aligned(rows, rowd, xres);
+    }
+}
+
+static void
 flip_horizontally(GwyMaskField *field,
                   guint32 *buffer)
 {
@@ -98,6 +111,19 @@ flip_horizontally(GwyMaskField *field,
         guint32 *rowi = field->data + i*stride;
         flip_row_dest_aligned(rowi, buffer, xres);
         memcpy(rowi, buffer, rowsize);
+    }
+}
+
+static void
+flip_horizontally_to(const GwyMaskField *source,
+                     GwyMaskField *dest)
+{
+    g_assert(source->xres == dest->xres && source->yres == dest->yres);
+    guint xres = dest->xres, yres = dest->yres, stride = dest->stride;
+    for (guint i = 0; i < yres; i++) {
+        const guint32 *rows = source->data + i*stride;
+        guint32 *rowd = dest->data + i*stride;
+        flip_row_dest_aligned(rows, rowd, xres);
     }
 }
 
@@ -113,6 +139,20 @@ flip_vertically(GwyMaskField *field,
                field->data + i*stride,
                rowsize);
         memcpy(field->data + i*stride, buffer, rowsize);
+    }
+}
+
+static void
+flip_vertically_to(const GwyMaskField *source,
+                   GwyMaskField *dest)
+{
+    g_assert(source->xres == dest->xres && source->yres == dest->yres);
+    guint yres = dest->yres, stride = dest->stride;
+    gsize rowsize = stride * sizeof(guint32);
+    for (guint i = 0; i < yres; i++) {
+        const guint32 *rows = source->data + i*stride;
+        guint32 *rowd = dest->data + (yres-1 - i)*stride;
+        memcpy(rowd, rows, rowsize);
     }
 }
 
@@ -740,6 +780,61 @@ gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
     return newfield;
 }
 */
+
+void
+gwy_mask_field_transform_congruent(GwyMaskField *field,
+                                   GwyPlaneCongruenceType transformation)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+
+    if (!gwy_plane_congruence_is_transposition(transformation)) {
+        if (transformation == GWY_PLANE_IDENTITY)
+            return;
+
+        gsize rowsize = field->stride * sizeof(guint32);
+        guint32 *buffer = g_slice_alloc(rowsize);
+        if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY)
+            flip_horizontally(field, buffer);
+        else if (transformation == GWY_PLANE_MIRROR_VERTICALLY)
+            flip_vertically(field, buffer);
+        else if (transformation == GWY_PLANE_MIRROR_BOTH)
+            flip_both(field, buffer);
+        else {
+            g_assert_not_reached();
+        }
+        g_slice_free1(rowsize, buffer);
+        return;
+    }
+
+    GwyMaskField *buffer = gwy_mask_field_new_sized(field->yres, field->xres,
+                                                    FALSE);
+    swap_xy_both_aligned(field, 0, 0, field->xres, field->yres, buffer, 0, 0);
+    // Esnure rowstride is correctly recalculated but do not emit property
+    // notifications until we are done.
+    g_object_freeze_notify(G_OBJECT(field));
+    gwy_mask_field_set_size(field, buffer->xres, buffer->yres, FALSE);
+    if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
+        gwy_mask_field_copy(buffer, NULL, field, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY)
+        flip_both_to(buffer, field);
+    else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE)
+        flip_horizontally_to(buffer, field);
+    else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE)
+        flip_vertically_to(buffer, field);
+    else {
+        g_assert_not_reached();
+    }
+    g_object_unref(buffer);
+    g_object_thaw_notify(G_OBJECT(field));
+}
+
+GwyMaskField*
+gwy_mask_field_new_congruent(const GwyMaskField *field,
+                             const GwyFieldPart *fpart,
+                             GwyPlaneCongruenceType transformation)
+{
+}
 
 /**
  * SECTION: mask-field-transform

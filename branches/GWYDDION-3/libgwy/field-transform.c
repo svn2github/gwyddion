@@ -327,14 +327,14 @@ gwy_field_transform_congruent(GwyField *field,
     g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 
     if (!gwy_plane_congruence_is_transposition(transformation)) {
+        if (transformation == GWY_PLANE_IDENTITY)
+            return;
         if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY)
             mirror_horizontally_in_place(field, 0, 0, field->xres, field->yres);
         else if (transformation == GWY_PLANE_MIRROR_VERTICALLY)
             mirror_vertically_in_place(field, 0, 0, field->xres, field->yres);
         else if (transformation == GWY_PLANE_MIRROR_BOTH)
             mirror_centrally_in_place(field, 0, 0, field->xres, field->yres);
-        else if (transformation == GWY_PLANE_IDENTITY) {
-        }
         else {
             g_assert_not_reached();
         }

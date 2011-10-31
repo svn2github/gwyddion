@@ -40,6 +40,12 @@ void          gwy_mask_field_transpose         (const GwyMaskField *src,
                                                 guint destcol,
                                                 guint destrow);
 
+void          gwy_mask_field_transform_congruent(GwyMaskField *field,
+                                                 GwyPlaneCongruenceType transformation);
+GwyMaskField* gwy_mask_field_new_congruent      (const GwyMaskField *field,
+                                                 const GwyFieldPart *fpart,
+                                                 GwyPlaneCongruenceType transformation)  G_GNUC_MALLOC;
+
 G_END_DECLS
 
 #endif
