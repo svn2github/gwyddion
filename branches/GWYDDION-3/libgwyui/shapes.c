@@ -281,6 +281,23 @@ gwy_shapes_get_coords(GwyShapes *shapes)
 }
 
 /**
+ * gwy_shapes_coords_type:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains the type of coordinates object used by a group of shapes.
+ *
+ * Returns: The #GwyCoords subclass used to represent the coordinates of
+ *          @shape.
+ **/
+GType
+gwy_shapes_coords_type(const GwyShapes *shapes)
+{
+    GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
+    g_return_val_if_fail(klass, 0);
+    return klass->coords_type;
+}
+
+/**
  * gwy_shapes_set_coords_to_view_transform:
  * @shapes: A group of geometrical shapes.
  * @func: Function transforming @coords coordinates to view coordinates.
@@ -464,8 +481,8 @@ gwy_shapes_view_to_coords(const GwyShapes *shapes,
 GdkEventMask
 gwy_shapes_gdk_event_mask(const GwyShapes *shapes)
 {
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), 0);
     GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
+    g_return_val_if_fail(klass, 0);
     GdkEventMask mask = 0;
 
     if (klass->button_press)
@@ -644,11 +661,11 @@ gwy_shapes_updated(GwyShapes *shapes)
  * @key_press: Virtual method implementing gwy_shapes_key_press().
  * @key_release: Virtual method implementing gwy_shapes_key_release().
  * @coords_item_inserted: Virtual method called when the @coords object
- *                        emits #GwyCoords:item-inserted.
+ *                        emits #GwyArray:item-inserted.
  * @coords_item_deleted: Virtual method called when the @coords object
- *                       emits #GwyCoords:item-deleted.
+ *                       emits #GwyArray:item-deleted.
  * @coords_item_changed: Virtual method called when the @coords object
- *                       emits #GwyCoords:item-changed.
+ *                       emits #GwyArray:item-changed.
  *
  * Class of groups of selectable geometrical shapes.
  *
