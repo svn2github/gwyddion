@@ -126,7 +126,7 @@ gwy_field_correlate(const GwyField *field,
         return;
     }
     // Turn convolution into correlation.
-    gwy_field_flip(maskedkernel, TRUE, TRUE, FALSE);
+    gwy_field_transform_congruent(maskedkernel, GWY_PLANE_MIRROR_BOTH);
 
     guint xsize = gwy_fft_nice_transform_size(width + kxres - 1);
     guint ysize = gwy_fft_nice_transform_size(height + kyres - 1);
@@ -486,7 +486,7 @@ gwy_field_crosscorrelate(const GwyField *field,
 
     // Turn convolution into correlation.
     GwyField *unitkernel = gwy_field_new_from_mask(kernel, 0.0, 1.0);
-    gwy_field_flip(unitkernel, TRUE, TRUE, FALSE);
+    gwy_field_transform_congruent(unitkernel, GWY_PLANE_MIRROR_BOTH);
 
     guint xres = field->xres, yres = field->yres,
           kxres = unitkernel->xres, kyres = unitkernel->yres;

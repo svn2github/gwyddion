@@ -37,24 +37,19 @@
 // nice.
 enum { BLOCK_SIZE = 64 };
 
-// XXX: The primitives do not emit signals, it's up to the API-level function
-// to do that.
+// The primitives perform no argument checking and no invalidation or signal
+// emission.  It's up to the caller to get that right.
 static void
-flip_both(GwyField *field, gboolean transform_offsets)
+mirror_centrally_in_place(GwyField *field)
 {
     guint n = field->xres * field->yres;
     gdouble *d = field->data, *e = d + n-1;
     for (guint i = n/2; i; i--, d++, e--)
         DSWAP(*d, *e);
-
-    if (transform_offsets) {
-        field->xoff = -(field->xreal + field->xoff);
-        field->yoff = -(field->yreal + field->yoff);
-    }
 }
 
 static void
-flip_horizontally(GwyField *field, gboolean transform_offsets)
+mirror_horizontally_in_place(GwyField *field)
 {
     guint xres = field->xres, yres = field->yres;
     for (guint i = 0; i < yres; i++) {
@@ -62,13 +57,10 @@ flip_horizontally(GwyField *field, gboolean transform_offsets)
         for (guint j = xres/2; j; j--, d++, e--)
             DSWAP(*d, *e);
     }
-
-    if (transform_offsets)
-        field->xoff = -(field->xreal + field->xoff);
 }
 
 static void
-flip_vertically(GwyField *field, gboolean transform_offsets)
+mirror_vertically_in_place(GwyField *field)
 {
     guint xres = field->xres, yres = field->yres;
     for (guint i = 0; i < yres/2; i++) {
@@ -77,46 +69,74 @@ flip_vertically(GwyField *field, gboolean transform_offsets)
         for (guint j = xres; j; j--, d++, e++)
             DSWAP(*d, *e);
     }
-
-    if (transform_offsets)
-        field->yoff = -(field->yreal + field->yoff);
 }
 
-/**
- * gwy_field_flip:
- * @field: A two-dimensional data field.
- * @horizontally: %TRUE to flip the field horizontally, i.e. about the vertical
- *                axis.
- * @vertically: %TRUE to flip the field vertically, i.e. about the horizontal
- *              axis.
- * @transform_offsets: %TRUE to transform the field origin offset as if the
- *                     reflections occured around the Cartesian coordinate
- *                     system axes, %FALSE to keep them intact.
- *
- * Flips a two-dimensional data field about either axis.
- **/
-void
-gwy_field_flip(GwyField *field,
-               gboolean horizontally,
-               gboolean vertically,
-               gboolean transform_offsets)
+static void
+mirror_centrally_to(const GwyField *source,
+                    guint col, guint row,
+                    guint width, guint height,
+                    GwyField *dest,
+                    guint destcol, guint destrow)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
+    guint dxres = dest->xres, sxres = source->xres;
+    const gdouble *sbase = source->data + sxres*row + col;
+    gdouble *dbase = dest->data + dxres*destrow + destcol;
 
-    if (horizontally && vertically)
-        flip_both(field, transform_offsets);
-    else if (horizontally)
-        flip_horizontally(field, transform_offsets);
-    else if (vertically)
-        flip_vertically(field, transform_offsets);
-    // Cached values do not change
-
-    if (transform_offsets) {
-        if (horizontally)
-            g_object_notify(G_OBJECT(field), "x-offset");
-        if (vertically)
-            g_object_notify(G_OBJECT(field), "y-offset");
+    for (guint i = 0; i < height; i++) {
+        const gdouble *s = sbase + i*sxres + width-1;
+        gdouble *d = dbase + (height-1 - i)*dxres;
+        for (guint j = width; j; j--, s--, d++)
+            *d = *s;
     }
+}
+
+static void
+mirror_horizontally_to(const GwyField *source,
+                       guint col, guint row,
+                       guint width, guint height,
+                       GwyField *dest,
+                       guint destcol, guint destrow)
+{
+    guint dxres = dest->xres, sxres = source->xres;
+    const gdouble *sbase = source->data + sxres*row + col;
+    gdouble *dbase = dest->data + dxres*destrow + destcol;
+
+    for (guint i = 0; i < height; i++) {
+        const gdouble *s = sbase + i*sxres + width-1;
+        gdouble *d = dbase + i*dxres;
+        for (guint j = width; j; j--, s--, d++)
+            *d = *s;
+    }
+}
+
+static void
+mirror_vertically_to(const GwyField *source,
+                     guint col, guint row,
+                     guint width, guint height,
+                     GwyField *dest,
+                     guint destcol, guint destrow)
+{
+    guint dxres = dest->xres, sxres = source->xres;
+    const gdouble *sbase = source->data + sxres*row + col;
+    gdouble *dbase = dest->data + dxres*destrow + destcol;
+
+    for (guint i = 0; i < height; i++)
+        gwy_assign(dbase + (height-1 - i)*dxres, sbase + i*sxres, width);
+}
+
+static void
+copy_to(const GwyField *source,
+        guint col, guint row,
+        guint width, guint height,
+        GwyField *dest,
+        guint destcol, guint destrow)
+{
+    guint dxres = dest->xres, sxres = source->xres;
+    const gdouble *sbase = source->data + sxres*row + col;
+    gdouble *dbase = dest->data + dxres*destrow + destcol;
+
+    for (guint i = 0; i < height; i++)
+        gwy_assign(dbase + i*dxres, sbase + i*sxres, width);
 }
 
 // Block sizes are measured in destination, in source, the dims are swapped.
@@ -133,14 +153,12 @@ swap_block(const gdouble *sb, gdouble *db,
     }
 }
 
-// No argument checking.  The source is assumed to be large enough to contain
-// all the data we copy to the destination.
 static void
-swap_xy(const GwyField *source,
-        guint col, guint row,
-        guint width, guint height,
-        GwyField *dest,
-        guint destcol, guint destrow)
+transpose_to(const GwyField *source,
+             guint col, guint row,
+             guint width, guint height,
+             GwyField *dest,
+             guint destcol, guint destrow)
 {
     guint dxres = dest->xres, dyres = dest->yres, sxres = source->xres;
     guint jmax = height/BLOCK_SIZE * BLOCK_SIZE;
@@ -167,142 +185,38 @@ swap_xy(const GwyField *source,
     }
 }
 
-/**
- * gwy_field_new_transposed:
- * @field: A two-dimensional data field.
- * @fpart: (allow-none):
- *         Area in @field to extract.  Pass %NULL to process entire @field.
- * @transform_offsets: %TRUE to set the X and Y offsets of the new field
- *                     using @col, @row and @field offsets.  %FALSE to set
- *                     offsets of the new field to zeroes.
- *
- * Transposes a field, making rows columns and vice versa.
- *
- * The real dimensions and offsets are also transposed (offsets only if
- * requested with @transform_offsets).
- *
- * The transposition is performed by a low cache-miss algorithm.  It may be
- * used to change column-wise operations to row-wise at a relatively low cost
- * and then benefit from the improved memory locality and simplicity of
- * row-wise processing.
- *
- * Returns: (transfer full):
- *          A new two-dimensional data field containing the transposed part
- *          of @field.
- **/
-GwyField*
-gwy_field_new_transposed(const GwyField *field,
-                         const GwyFieldPart *fpart,
-                         gboolean transform_offsets)
+static void
+transform_congruent_to(const GwyField *source,
+                       guint col, guint row,
+                       guint width, guint height,
+                       GwyField *dest,
+                       GwyPlaneCongruenceType transformation)
 {
-    guint col, row, width, height;
-    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
-        return NULL;
-
-    GwyField *part = gwy_field_new_sized(height, width, FALSE);
-    swap_xy(field, col, row, width, height, part, 0, 0);
-    part->xreal = height*gwy_field_dy(field);
-    part->yreal = width*gwy_field_dx(field);
-
-    Field *spriv = field->priv, *dpriv = part->priv;
-    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
-    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
-    if (transform_offsets) {
-        part->xoff = field->yoff + row*gwy_field_dy(field);
-        part->yoff = field->xoff + col*gwy_field_dx(field);
+    if (transformation == GWY_PLANE_IDENTITY)
+        copy_to(source, col, row, width, height, dest, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY)
+        mirror_horizontally_to(source, col, row, width, height, dest, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_VERTICALLY)
+        mirror_vertically_to(source, col, row, width, height, dest, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_BOTH)
+        mirror_centrally_to(source, col, row, width, height, dest, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
+        transpose_to(source, col, row, width, height, dest, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY) {
+        transpose_to(source, col, row, width, height, dest, 0, 0);
+        mirror_centrally_in_place(dest);
     }
-    if (width == field->xres && height == field->yres) {
-        gwy_assign(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
-        dpriv->cached = spriv->cached;
+    else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE) {
+        transpose_to(source, col, row, width, height, dest, 0, 0);
+        mirror_horizontally_in_place(dest);
     }
-
-    return part;
-}
-
-/**
- * gwy_field_transpose:
- * @src: Source two-dimensional data field.
- * @srcpart: Area in field @src to transpose.  Pass %NULL to operate on
- *           entire @src.
- * @dest: Destination two-dimensional data field.
- * @destcol: Destination column in @dest.
- * @destrow: Destination row in @dest.
- *
- * Copies data from one field to another, transposing it.
- *
- * The transposed rectangle is defined by @srcpart and it is copied to
- * @dest starting from (@destcol, @destrow).  Its width in the source
- * corresponds to height in the destination and vice versa.
- *
- * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corresponds to data inside @src and @dest
- * is copied.  This can also mean nothing is copied at all.
- *
- * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
- **/
-void
-gwy_field_transpose(const GwyField *src,
-                    const GwyFieldPart *srcpart,
-                    GwyField *dest,
-                    guint destcol, guint destrow)
-{
-    guint col, row, width, height;
-    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                               TRUE, &col, &row, &width, &height))
-        return;
-
-    swap_xy(src, col, row, width, height, dest, destcol, destrow);
-    gwy_field_invalidate(dest);
-}
-
-/**
- * gwy_field_new_rotated_simple:
- * @field: A two-dimensional data field.
- * @rotation: Rotation amount (it can also be any positive multiple of 90).
- * @transform_offsets: %TRUE to transform the field origin offset as if the
- *                     rotation occured around the Cartesian coordinate system
- *                     origin, %FALSE to keep them intact (except for swapping
- *                     x and y for odd multiples of 90 degrees).
- *
- * Rotates a two-dimensional data field by a multiple by 90 degrees.
- *
- * The real dimensions and, depending on @transform, the offsets are
- * transformed accordingly.
- *
- * Returns: (transfer full):
- *          A new two-dimensional data field.
- **/
-GwyField*
-gwy_field_new_rotated_simple(const GwyField *field,
-                             GwySimpleRotation rotation,
-                             gboolean transform_offsets)
-{
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    rotation %= 360;
-
-    if (rotation == GWY_SIMPLE_ROTATE_NONE)
-        return gwy_field_duplicate(field);
-
-    if (rotation == GWY_SIMPLE_ROTATE_UPSIDEDOWN) {
-        GwyField *newfield = gwy_field_duplicate(field);
-        gwy_field_flip(newfield, TRUE, TRUE, transform_offsets);
-        return newfield;
+    else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE) {
+        transpose_to(source, col, row, width, height, dest, 0, 0);
+        mirror_vertically_in_place(dest);
     }
-
-    if (rotation != GWY_SIMPLE_ROTATE_CLOCKWISE
-        && rotation != GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE) {
-        g_critical("Invalid simple rotation amount %u.", rotation);
-        return NULL;
+    else {
+        g_assert_not_reached();
     }
-
-    GwyField *newfield = gwy_field_new_transposed(field, NULL, TRUE);
-    // The field is new, no need to emit signals.
-    if (rotation == GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE)
-        flip_vertically(newfield, transform_offsets);
-    if (rotation == GWY_SIMPLE_ROTATE_CLOCKWISE)
-        flip_horizontally(newfield, transform_offsets);
-
-    return newfield;
 }
 
 /*
@@ -342,12 +256,72 @@ gwy_field_new_rotated_simple(const GwyField *field,
  *                                    verical mirroring
  */
 
+/**
+ * gwy_plane_congruence_is_transposition:
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Tells whether a plane congruence transform is transposition.
+ *
+ * If the transformation is transposition it means @x and @y are exchanged.
+ * Non-transpositions keep @x as @x and @y as @y.
+ *
+ * Returns: %TRUE if @transformation is transposing.
+ **/
+gboolean
+gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)
+{
+    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
+                         FALSE);
+    return (transformation == GWY_PLANE_MIRROR_DIAGONALLY
+            || transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY
+            || transformation == GWY_PLANE_ROTATE_CLOCKWISE
+            || transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
+
 void
 gwy_field_transform_congruent(GwyField *field,
                               GwyPlaneCongruenceType transformation)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+
+    if (!gwy_plane_congruence_is_transposition(transformation)) {
+        if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY)
+            mirror_horizontally_in_place(field);
+        else if (transformation == GWY_PLANE_MIRROR_VERTICALLY)
+            mirror_vertically_in_place(field);
+        else if (transformation == GWY_PLANE_MIRROR_BOTH)
+            mirror_centrally_in_place(field);
+        else if (transformation == GWY_PLANE_IDENTITY) {
+        }
+        else {
+            g_assert_not_reached();
+        }
+        return;
+    }
+
+    GwyField *buffer = gwy_field_new_sized(field->yres, field->xres, FALSE);
+    transpose_to(field, 0, 0, field->xres, field->yres, buffer, 0, 0);
+    GWY_SWAP(guint, field->xres, field->yres);
+    GWY_SWAP(gdouble, field->xreal, field->yreal);
+    GWY_SWAP(gdouble, field->xoff, field->yoff);
+    if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
+        copy_to(buffer, 0, 0, field->xres, field->yres, field, 0, 0);
+    else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY)
+        mirror_centrally_to(buffer, 0, 0, field->xres, field->yres,
+                            field, 0, 0);
+    else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE)
+        mirror_horizontally_to(buffer, 0, 0, field->xres, field->yres,
+                               field, 0, 0);
+    else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE)
+        mirror_vertically_to(buffer, 0, 0, field->xres, field->yres,
+                             field, 0, 0);
+    else {
+        g_assert_not_reached();
+    }
+    g_object_unref(buffer);
+
+    // TODO: Emit property notifications, if necessary.
 }
 
 GwyField*
@@ -361,7 +335,21 @@ gwy_field_new_congruent(const GwyField *field,
     g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
                          NULL);
 
-    GwyField *part = gwy_field_new_sized(height, width, FALSE);
+    gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
+    guint dwidth = is_trans ? height : width;
+    guint dheight = is_trans ? width : height;
+    GwyField *part = gwy_field_new_sized(dwidth, dheight, FALSE);
+
+    if (is_trans) {
+        part->xreal = height*gwy_field_dy(field);
+        part->yreal = width*gwy_field_dx(field);
+    }
+    else {
+        part->xreal = width*gwy_field_dx(field);
+        part->yreal = height*gwy_field_dy(field);
+    }
+    transform_congruent_to(field, col, row, width, height, part,
+                           transformation);
 
     return part;
 }
@@ -450,21 +438,6 @@ gwy_field_transform_offsets(const GwyField *source,
  * }
  * g_object_unref(workspace);
  * ]|
- **/
-
-/**
- * GwySimpleRotation:
- * @GWY_SIMPLE_ROTATE_NONE: No rotation.
- * @GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE: Rotate by 90 degrees counterclockwise.
- * @GWY_SIMPLE_ROTATE_UPSIDEDOWN: Rotate by 180 degrees (the same as flipping
- *                                in both directions).
- * @GWY_SIMPLE_ROTATE_CLOCKWISE: Rotate by 90 degrees clockwise.
- *
- * Rotations by multiples of 90 degrees, i.e. not requiring interpolation.
- *
- * They are used for instance in gwy_field_new_rotated_simple() and
- * gwy_mask_field_new_rotated_simple().  The numerical values are equal to the
- * rotation angle in degrees.
  **/
 
 /**

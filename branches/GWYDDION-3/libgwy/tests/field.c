@@ -896,7 +896,7 @@ field_flip_one(const gdouble *orig,
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     gwy_assign(field->data, orig, xres*yres);
-    gwy_field_flip(field, horizontally, vertically, FALSE);
+    //gwy_field_flip(field, horizontally, vertically, FALSE);
     g_assert(field->xres == xres);
     g_assert(field->yres == yres);
     for (guint i = 0; i < xres*yres; i++) {
@@ -967,7 +967,7 @@ field_rotate_simple_one(const gdouble *orig,
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     gwy_assign(field->data, orig, xres*yres);
-    GwyField *rotated = gwy_field_new_rotated_simple(field, rotation, FALSE);
+    GwyField *rotated /*= gwy_field_new_rotated_simple(field, rotation, FALSE)*/;
     if (rotation % 180) {
         g_assert(field->xres == rotated->yres);
         g_assert(field->yres == rotated->xres);

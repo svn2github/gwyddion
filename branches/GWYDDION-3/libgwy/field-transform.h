@@ -50,21 +50,7 @@ typedef enum {
     GWY_CONGRUENCE_ORIGIN_USER,
 } GwyCongruenceOrigin;
 
-void      gwy_field_flip              (GwyField *field,
-                                       gboolean horizontally,
-                                       gboolean vertically,
-                                       gboolean transform_offsets);
-GwyField* gwy_field_new_rotated_simple(const GwyField *field,
-                                       GwySimpleRotation rotation,
-                                       gboolean transform_offsets)  G_GNUC_MALLOC;
-GwyField* gwy_field_new_transposed    (const GwyField *field,
-                                       const GwyFieldPart *fpart,
-                                       gboolean transform_offsets)  G_GNUC_MALLOC;
-void      gwy_field_transpose         (const GwyField *src,
-                                       const GwyFieldPart *srcpart,
-                                       GwyField *dest,
-                                       guint destcol,
-                                       guint destrow);
+gboolean gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation);
 
 void gwy_field_transform_congruent    (GwyField *field,
                                        GwyPlaneCongruenceType transformation);
