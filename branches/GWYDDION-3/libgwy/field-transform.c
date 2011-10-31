@@ -40,34 +40,49 @@ enum { BLOCK_SIZE = 64 };
 // The primitives perform no argument checking and no invalidation or signal
 // emission.  It's up to the caller to get that right.
 static void
-mirror_centrally_in_place(GwyField *field)
+mirror_centrally_in_place(GwyField *field,
+                          guint col, guint row,
+                          guint width, guint height)
 {
-    guint n = field->xres * field->yres;
-    gdouble *d = field->data, *e = d + n-1;
-    for (guint i = n/2; i; i--, d++, e--)
-        DSWAP(*d, *e);
-}
-
-static void
-mirror_horizontally_in_place(GwyField *field)
-{
-    guint xres = field->xres, yres = field->yres;
-    for (guint i = 0; i < yres; i++) {
-        gdouble *d = field->data + i*xres, *e = d + xres-1;
-        for (guint j = xres/2; j; j--, d++, e--)
-            DSWAP(*d, *e);
+    guint xres = field->xres;
+    gdouble *base = field->data + xres*row + col;
+    for (guint i = 0; i < height/2; i++) {
+        gdouble *d = base + i*xres, *s = base + (height-1 - i)*xres + width-1;
+        for (guint j = width; j; j--, s--, d++)
+            DSWAP(*d, *s);
+    }
+    if (height % 2 == 0) {
+        gdouble *d = base + (height/2)*xres, *s = d + width-1;
+        for (guint j = width/2; j; j--, s--, d++)
+            DSWAP(*d, *s);
     }
 }
 
 static void
-mirror_vertically_in_place(GwyField *field)
+mirror_horizontally_in_place(GwyField *field,
+                             guint col, guint row,
+                             guint width, guint height)
 {
-    guint xres = field->xres, yres = field->yres;
-    for (guint i = 0; i < yres/2; i++) {
-        gdouble *d = field->data + i*xres,
-                *e = field->data + (yres-1 - i)*xres;
-        for (guint j = xres; j; j--, d++, e++)
-            DSWAP(*d, *e);
+    guint xres = field->xres;
+    gdouble *base = field->data + xres*row + col;
+    for (guint i = 0; i < height; i++) {
+        gdouble *d = base + i*xres, *s = d + width-1;
+        for (guint j = width/2; j; j--, s--, d++)
+            DSWAP(*d, *s);
+    }
+}
+
+static void
+mirror_vertically_in_place(GwyField *field,
+                           guint col, guint row,
+                           guint width, guint height)
+{
+    guint xres = field->xres;
+    gdouble *base = field->data + xres*row + col;
+    for (guint i = 0; i < height/2; i++) {
+        gdouble *d = base + i*xres, *s = base + (height-1 - i)*xres;
+        for (guint j = width; j; j--, s++, d++)
+            DSWAP(*d, *s);
     }
 }
 
@@ -135,8 +150,12 @@ copy_to(const GwyField *source,
     const gdouble *sbase = source->data + sxres*row + col;
     gdouble *dbase = dest->data + dxres*destrow + destcol;
 
-    for (guint i = 0; i < height; i++)
-        gwy_assign(dbase + i*dxres, sbase + i*sxres, width);
+    if (width == source->xres && width == dest->xres)
+        gwy_assign(dbase, sbase, width*height);
+    else {
+        for (guint i = 0; i < height; i++)
+            gwy_assign(dbase + i*dxres, sbase + i*sxres, width);
+    }
 }
 
 // Block sizes are measured in destination, in source, the dims are swapped.
@@ -190,29 +209,33 @@ transform_congruent_to(const GwyField *source,
                        guint col, guint row,
                        guint width, guint height,
                        GwyField *dest,
+                       guint destcol, guint destrow,
                        GwyPlaneCongruenceType transformation)
 {
     if (transformation == GWY_PLANE_IDENTITY)
-        copy_to(source, col, row, width, height, dest, 0, 0);
+        copy_to(source, col, row, width, height, dest, destcol, destrow);
     else if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY)
-        mirror_horizontally_to(source, col, row, width, height, dest, 0, 0);
+        mirror_horizontally_to(source, col, row, width, height,
+                               dest, destcol, destrow);
     else if (transformation == GWY_PLANE_MIRROR_VERTICALLY)
-        mirror_vertically_to(source, col, row, width, height, dest, 0, 0);
+        mirror_vertically_to(source, col, row, width, height,
+                             dest, destcol, destrow);
     else if (transformation == GWY_PLANE_MIRROR_BOTH)
-        mirror_centrally_to(source, col, row, width, height, dest, 0, 0);
+        mirror_centrally_to(source, col, row, width, height,
+                            dest, destcol, destrow);
     else if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
-        transpose_to(source, col, row, width, height, dest, 0, 0);
+        transpose_to(source, col, row, width, height, dest, destcol, destrow);
     else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY) {
-        transpose_to(source, col, row, width, height, dest, 0, 0);
-        mirror_centrally_in_place(dest);
+        transpose_to(source, col, row, width, height, dest, destcol, destrow);
+        mirror_centrally_in_place(dest, 0, 0, height, width);
     }
     else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE) {
-        transpose_to(source, col, row, width, height, dest, 0, 0);
-        mirror_horizontally_in_place(dest);
+        transpose_to(source, col, row, width, height, dest, destcol, destrow);
+        mirror_horizontally_in_place(dest, 0, 0, height, width);
     }
     else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE) {
-        transpose_to(source, col, row, width, height, dest, 0, 0);
-        mirror_vertically_in_place(dest);
+        transpose_to(source, col, row, width, height, dest, destcol, destrow);
+        mirror_vertically_in_place(dest, 0, 0, height, width);
     }
     else {
         g_assert_not_reached();
@@ -278,6 +301,18 @@ gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)
             || transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
+/**
+ * gwy_field_transform_congruent:
+ * @field: A two-dimensional data field.
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Performs an in-place congruence transformation of a two-dimensional field.
+ *
+ * Transposing transformations (see gwy_plane_congruence_is_transposition()
+ * for description) are not performed in-place directly and require temporary
+ * buffers.  It, therefore, makes sense to perform them using this method only
+ * if you have no use for the original data.
+ **/
 void
 gwy_field_transform_congruent(GwyField *field,
                               GwyPlaneCongruenceType transformation)
@@ -287,11 +322,11 @@ gwy_field_transform_congruent(GwyField *field,
 
     if (!gwy_plane_congruence_is_transposition(transformation)) {
         if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY)
-            mirror_horizontally_in_place(field);
+            mirror_horizontally_in_place(field, 0, 0, field->xres, field->yres);
         else if (transformation == GWY_PLANE_MIRROR_VERTICALLY)
-            mirror_vertically_in_place(field);
+            mirror_vertically_in_place(field, 0, 0, field->xres, field->yres);
         else if (transformation == GWY_PLANE_MIRROR_BOTH)
-            mirror_centrally_in_place(field);
+            mirror_centrally_in_place(field, 0, 0, field->xres, field->yres);
         else if (transformation == GWY_PLANE_IDENTITY) {
         }
         else {
@@ -321,9 +356,37 @@ gwy_field_transform_congruent(GwyField *field,
     }
     g_object_unref(buffer);
 
-    // TODO: Emit property notifications, if necessary.
+    const gchar *propnames[6];
+    guint n = 0;
+    if (field->xres != field->yres) {
+        propnames[n++] = "x-res";
+        propnames[n++] = "y-res";
+    }
+    if (field->xreal != field->yreal) {
+        propnames[n++] = "x-real";
+        propnames[n++] = "y-real";
+    }
+    if (field->xoff != field->yoff) {
+        propnames[n++] = "x-offset";
+        propnames[n++] = "y-offset";
+    }
+    _gwy_notify_properties(G_OBJECT(field), propnames, n);
 }
 
+/**
+ * gwy_field_new_congruent:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to extract to the new field.  Passing %NULL extracts
+ *         entire @field.
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Creates a new two-dimensional data field by performing a congruence
+ * transformation of another field.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional data field.
+ **/
 GwyField*
 gwy_field_new_congruent(const GwyField *field,
                         const GwyFieldPart *fpart,
@@ -348,7 +411,7 @@ gwy_field_new_congruent(const GwyField *field,
         part->xreal = width*gwy_field_dx(field);
         part->yreal = height*gwy_field_dy(field);
     }
-    transform_congruent_to(field, col, row, width, height, part,
+    transform_congruent_to(field, col, row, width, height, part, 0, 0,
                            transformation);
 
     return part;
