@@ -312,6 +312,12 @@ gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)
  * for description) are not performed in-place directly and require temporary
  * buffers.  It, therefore, makes sense to perform them using this method only
  * if you have no use for the original data.
+ *
+ * The @field offsets are not modified.  Generally, you either do not care in
+ * which case the offsets were probably zeroes anyway and thus it is all right
+ * to keep them so.  Or you may want to reset them with
+ * gwy_field_clear_offsets().  Finally, may want to transform the offsets using
+ * gwy_field_transform_offsets() with @source and @dest both being @field.
  **/
 void
 gwy_field_transform_congruent(GwyField *field,
@@ -339,7 +345,6 @@ gwy_field_transform_congruent(GwyField *field,
     transpose_to(field, 0, 0, field->xres, field->yres, buffer, 0, 0);
     GWY_SWAP(guint, field->xres, field->yres);
     GWY_SWAP(gdouble, field->xreal, field->yreal);
-    GWY_SWAP(gdouble, field->xoff, field->yoff);
     if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
         copy_to(buffer, 0, 0, field->xres, field->yres, field, 0, 0);
     else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY)
@@ -356,7 +361,7 @@ gwy_field_transform_congruent(GwyField *field,
     }
     g_object_unref(buffer);
 
-    const gchar *propnames[6];
+    const gchar *propnames[4];
     guint n = 0;
     if (field->xres != field->yres) {
         propnames[n++] = "x-res";
@@ -365,10 +370,6 @@ gwy_field_transform_congruent(GwyField *field,
     if (field->xreal != field->yreal) {
         propnames[n++] = "x-real";
         propnames[n++] = "y-real";
-    }
-    if (field->xoff != field->yoff) {
-        propnames[n++] = "x-offset";
-        propnames[n++] = "y-offset";
     }
     _gwy_notify_properties(G_OBJECT(field), propnames, n);
 }
@@ -383,6 +384,9 @@ gwy_field_transform_congruent(GwyField *field,
  *
  * Creates a new two-dimensional data field by performing a congruence
  * transformation of another field.
+ *
+ * The new field is created with zero offsets.  If you want to transform the
+ * offsets use gwy_field_transform_offsets() afterwards.
  *
  * Returns: (transfer full):
  *          A new two-dimensional data field.
@@ -417,22 +421,125 @@ gwy_field_new_congruent(const GwyField *field,
     return part;
 }
 
+static void
+transform_offsets(GwyField *dest,
+                  gdouble xoff, gdouble yoff,
+                  gdouble xend, gdouble yend,
+                  GwyPlaneCongruenceType transformation,
+                  gdouble xaxis,
+                  gdouble yaxis)
+{
+    /* The general mirroring formula with mirroring axis passing through the
+     * point A is X → X' + (A - A') where prime denotes mirroring about a
+     * parallel axis passing through the origin.  In addition, we must take
+     * into account that the first edge becomes the second edge and thus using
+     * the end instead of offset where appropriate.  */
+    if (transformation == GWY_PLANE_IDENTITY) {
+    }
+    else if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY) {
+        xoff = 2.0*xaxis - xend;
+    }
+    else if (transformation == GWY_PLANE_MIRROR_VERTICALLY) {
+        yoff = 2.0*yaxis - yend;
+    }
+    else if (transformation == GWY_PLANE_MIRROR_BOTH) {
+        xoff = 2.0*xaxis - xend;
+        yoff = 2.0*yaxis - yend;
+    }
+    else if (transformation == GWY_PLANE_MIRROR_DIAGONALLY) {
+        gdouble a = xaxis - yaxis,
+                tx = xoff + a,
+                ty = yoff - a;
+        xoff = tx;
+        yoff = ty;
+    }
+    else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY) {
+        gdouble a = xaxis + yaxis;
+        xoff = a - yend;
+        yoff = a - xend;
+    }
+    else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE) {
+        yoff = xoff;
+        xoff = -yend;
+    }
+    else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE) {
+        xoff = yoff;
+        yoff = -xend;
+    }
+    else {
+        g_assert_not_reached();
+    }
+
+    const gchar *propnames[2];
+    guint n = 0;
+    if (fabs(xoff - dest->xoff) > 1e-12*dest->xreal) {
+        dest->xoff = xoff;
+        propnames[n++] = "x-offset";
+    }
+    if (fabs(yoff - dest->yoff) > 1e-12*dest->yreal) {
+        dest->yoff = yoff;
+        propnames[n++] = "y-offset";
+    }
+    _gwy_notify_properties(G_OBJECT(dest), propnames, n);
+}
+
+/**
+ * gwy_field_transform_offsets:
+ * @source: A source two-dimenstional field from which @dest was created using
+ *          @transformation.  As a special case, if @source is the same object
+ *          as @dest it is assumed the field was transformed in-place and the
+ *          offset recalculation is modified accordingly.
+ * @srcpart: (allow-none):
+ *           Area in @source that was transformed to create @dest.  If
+ *           @source is the same object as @dest you should pass %NULL.
+ * @dest: Destination two-dimenstional field whose offsets are to be
+ *        recalculated.
+ * @transformation: Type of plane congruence transformation.
+ * @origin: (allow-none):
+ *          Rotation centre or the point the mirroring axis passes through.
+ *          Passing %NULL means the origin of coordinates (0, 0).
+ *
+ * Recalculates offsets of a two-dimenstional data field after a congruence
+ * transformation.
+ **/
 void
 gwy_field_transform_offsets(const GwyField *source,
                             const GwyFieldPart *srcpart,
                             GwyField *dest,
                             GwyPlaneCongruenceType transformation,
-                            GwyCongruenceOrigin origin,
-                            gdouble xaxis,
-                            gdouble yaxis)
+                            const GwyXY *origin)
 {
     guint col, row, width, height;
     if (!gwy_field_check_part(source, srcpart, &col, &row, &width, &height))
         return;
     g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
     g_return_if_fail(GWY_IS_FIELD(dest));
-    // TODO: dest dimensions must match srcpart dimensions, but possibly
-    // swapped.
+    gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
+    if (is_trans)
+        g_return_if_fail(dest->xres == height && dest->yres == width);
+    else
+        g_return_if_fail(dest->xres == width && dest->yres == height);
+
+    gdouble xoff = source->xoff + gwy_field_dx(source)*col,
+            yoff = source->yoff + gwy_field_dy(source)*row;
+    gdouble xend = xoff + dest->xreal,
+            yend = yoff + dest->yreal;
+    gdouble x = origin ? origin->x : 0.0,
+            y = origin ? origin->y : 0.0;
+
+    if ((const GwyField*)dest == source) {
+        g_return_if_fail(source->xres == width && source->yres == height);
+        if (is_trans) {
+            // This looks weird.  Remember the dimensions were swapped but the
+            // offsets were kept as-is.
+            xoff = source->xoff + gwy_field_dy(source)*row;
+            yoff = source->yoff + gwy_field_dx(source)*col;
+            xend = xoff + dest->yreal;
+            yend = yoff + dest->xreal;
+        }
+    }
+
+    transform_offsets(dest, xoff, yoff, xend, yend, transformation, x, y);
 }
 
 /**
@@ -523,21 +630,6 @@ gwy_field_transform_offsets(const GwyField *source,
  * More precisely, #GwyPlaneCongruenceType represents transformations that
  * can be performed with pixel fields, leading to precise 1-to-1 pixel-wise
  * mapping.
- **/
-
-/**
- * GwyCongruenceOrigin:
- * @GWY_CONGRUENCE_ORIGIN_ZERO: Origin is at zero.
- * @GWY_CONGRUENCE_ORIGIN_BEGIN: Origin is at the begining, left edge of the
- *                               object.
- * @GWY_CONGRUENCE_ORIGIN_END: Origin is at the end, right edge of the
- *                               object.
- * @GWY_CONGRUENCE_ORIGIN_USER: Origin is specified explicitly.
- *
- * Type of origin position in congruence transformations.
- *
- * The origin type does not influence how the pixels are laid out but it
- * influences the real coordinates, e.g. represented by #GwyField offsets.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

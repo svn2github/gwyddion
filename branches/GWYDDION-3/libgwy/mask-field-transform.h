@@ -28,8 +28,10 @@ G_BEGIN_DECLS
 void          gwy_mask_field_flip              (GwyMaskField *field,
                                                 gboolean horizontally,
                                                 gboolean vertically);
+/*
 GwyMaskField* gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
                                                 GwySimpleRotation rotation)  G_GNUC_MALLOC;
+                                                */
 GwyMaskField* gwy_mask_field_new_transposed    (const GwyMaskField *field,
                                                 const GwyFieldPart *fpart)   G_GNUC_MALLOC;
 void          gwy_mask_field_transpose         (const GwyMaskField *src,

@@ -1065,6 +1065,7 @@ test_mask_field_shrink(void)
     test_mask_field_shrink_one(orig2_str, shrink2_str, bord2_str);
 }
 
+#if 0
 static void
 test_mask_field_flip_one(const gchar *orig_str,
                          gboolean horizontally, gboolean vertically,
@@ -1350,6 +1351,7 @@ test_mask_field_rotate(void)
     mask_field_random_pool_free(pool);
     g_rand_free(rng);
 }
+#endif
 
 void
 test_mask_field_fill_ellipse(void)

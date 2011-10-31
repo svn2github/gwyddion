@@ -25,13 +25,6 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_SIMPLE_ROTATE_NONE             = 0,
-    GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE = 90,
-    GWY_SIMPLE_ROTATE_UPSIDEDOWN       = 180,
-    GWY_SIMPLE_ROTATE_CLOCKWISE        = 270,
-} GwySimpleRotation;
-
-typedef enum {
     GWY_PLANE_IDENTITY = 0,
     GWY_PLANE_MIRROR_HORIZONTALLY,
     GWY_PLANE_MIRROR_VERTICALLY,
@@ -42,13 +35,6 @@ typedef enum {
     GWY_PLANE_ROTATE_CLOCKWISE,
     GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
 } GwyPlaneCongruenceType;
-
-typedef enum {
-    GWY_CONGRUENCE_ORIGIN_ZERO,
-    GWY_CONGRUENCE_ORIGIN_BEGIN,
-    GWY_CONGRUENCE_ORIGIN_END,
-    GWY_CONGRUENCE_ORIGIN_USER,
-} GwyCongruenceOrigin;
 
 gboolean gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation);
 
@@ -62,9 +48,7 @@ void gwy_field_transform_offsets(const GwyField *source,
                                  const GwyFieldPart *srcpart,
                                  GwyField *dest,
                                  GwyPlaneCongruenceType transformation,
-                                 GwyCongruenceOrigin origin,
-                                 gdouble xaxis,
-                                 gdouble yaxis);
+                                 const GwyXY *origin);
 
 G_END_DECLS
 

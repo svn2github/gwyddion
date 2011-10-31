@@ -147,9 +147,9 @@ mask-field/grain/bounding-boxes
 mask-field/grain/remove
 mask-field/shrink
 mask-field/grow
-mask-field/flip
-mask-field/transpose
-mask-field/rotate
+#mask-field/flip
+#mask-field/transpose
+#mask-field/rotate
 mask-field/fill-ellipse
 field/props
 field/data-changed
@@ -173,8 +173,8 @@ field/copy
 field/new-part
 field/serialize
 field/set-size
-field/flip
-field/rotate/simple
+#field/flip
+#field/rotate/simple
 field/range
 field/mean
 field/rms

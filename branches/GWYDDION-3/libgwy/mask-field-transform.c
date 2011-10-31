@@ -702,6 +702,7 @@ gwy_mask_field_transpose(const GwyMaskField *src,
  * Returns: (transfer full):
  *          A new two-dimensional mask field.
  **/
+/*
 GwyMaskField*
 gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
                                   GwySimpleRotation rotation)
@@ -738,7 +739,7 @@ gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
 
     return newfield;
 }
-
+*/
 
 /**
  * SECTION: mask-field-transform
