@@ -173,9 +173,12 @@ field/copy
 field/new-part
 field/serialize
 field/set-size
-field/congruence/3x2
-field/congruence/2x3
-field/congruence/group
+field/congruence/in-place/3x2
+field/congruence/in-place/2x3
+field/congruence/in-place/group
+field/congruence/new/3x2
+field/congruence/new/2x3
+field/congruence/new/group
 field/range
 field/mean
 field/rms
