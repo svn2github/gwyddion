@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -90,13 +90,14 @@ flip_both(GwyMaskField *field,
 
 static void
 flip_both_to(const GwyMaskField *source,
+             guint row, guint height,
              GwyMaskField *dest)
 {
-    g_assert(source->xres == dest->xres && source->yres == dest->yres);
-    guint xres = dest->xres, yres = dest->yres, stride = dest->stride;
-    for (guint i = 0; i < yres; i++) {
-        const guint32 *rows = source->data + i*stride;
-        guint32 *rowd = dest->data + (yres-1 - i)*stride;
+    g_assert(dest->xres == source->xres && dest->yres == height);
+    guint xres = dest->xres, stride = dest->stride;
+    for (guint i = 0; i < height; i++) {
+        const guint32 *rows = source->data + (row + i)*stride;
+        guint32 *rowd = dest->data + (height-1 - i)*stride;
         flip_row_dest_aligned(rows, rowd, xres);
     }
 }
@@ -116,12 +117,13 @@ flip_horizontally(GwyMaskField *field,
 
 static void
 flip_horizontally_to(const GwyMaskField *source,
+                     guint row, guint height,
                      GwyMaskField *dest)
 {
-    g_assert(source->xres == dest->xres && source->yres == dest->yres);
-    guint xres = dest->xres, yres = dest->yres, stride = dest->stride;
-    for (guint i = 0; i < yres; i++) {
-        const guint32 *rows = source->data + i*stride;
+    g_assert(dest->xres == source->xres && dest->yres == height);
+    guint xres = dest->xres, stride = dest->stride;
+    for (guint i = 0; i < height; i++) {
+        const guint32 *rows = source->data + (row + i)*stride;
         guint32 *rowd = dest->data + i*stride;
         flip_row_dest_aligned(rows, rowd, xres);
     }
@@ -144,14 +146,15 @@ flip_vertically(GwyMaskField *field,
 
 static void
 flip_vertically_to(const GwyMaskField *source,
+                   guint row, guint height,
                    GwyMaskField *dest)
 {
-    g_assert(source->xres == dest->xres && source->yres == dest->yres);
-    guint yres = dest->yres, stride = dest->stride;
+    g_assert(dest->xres == source->xres && dest->yres == height);
+    guint stride = dest->stride;
     gsize rowsize = stride * sizeof(guint32);
-    for (guint i = 0; i < yres; i++) {
-        const guint32 *rows = source->data + i*stride;
-        guint32 *rowd = dest->data + (yres-1 - i)*stride;
+    for (guint i = 0; i < height; i++) {
+        const guint32 *rows = source->data + (row + i)*stride;
+        guint32 *rowd = dest->data + (height-1 - i)*stride;
         memcpy(rowd, rows, rowsize);
     }
 }
@@ -781,6 +784,20 @@ gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
 }
 */
 
+/**
+ * gwy_mask_field_transform_congruent:
+ * @field: A two-dimensional mask field.
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Performs an in-place congruence transformation of a two-dimensional mask
+ * field.
+ *
+ * Some operations can be performed in-place more efficiently than others.
+ * Namely transposing transformations (see
+ * gwy_plane_congruence_is_transposition() for description) are require
+ * temporary buffers.  It, therefore, makes sense to perform them using this
+ * method only if you have no use for the original data.
+ **/
 void
 gwy_mask_field_transform_congruent(GwyMaskField *field,
                                    GwyPlaneCongruenceType transformation)
@@ -810,18 +827,19 @@ gwy_mask_field_transform_congruent(GwyMaskField *field,
     GwyMaskField *buffer = gwy_mask_field_new_sized(field->yres, field->xres,
                                                     FALSE);
     swap_xy_both_aligned(field, 0, 0, field->xres, field->yres, buffer, 0, 0);
-    // Esnure rowstride is correctly recalculated but do not emit property
-    // notifications until we are done.
+    // Use gwy_mask_field_set_size() to esnure rowstride is correctly
+    // recalculated and property notifications emitted, but delay the emission
+    // until we are done.
     g_object_freeze_notify(G_OBJECT(field));
     gwy_mask_field_set_size(field, buffer->xres, buffer->yres, FALSE);
     if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
         gwy_mask_field_copy(buffer, NULL, field, 0, 0);
     else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY)
-        flip_both_to(buffer, field);
+        flip_both_to(buffer, 0, field->yres, field);
     else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE)
-        flip_horizontally_to(buffer, field);
+        flip_horizontally_to(buffer, 0, field->yres, field);
     else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE)
-        flip_vertically_to(buffer, field);
+        flip_vertically_to(buffer, 0, field->yres, field);
     else {
         g_assert_not_reached();
     }
@@ -829,11 +847,126 @@ gwy_mask_field_transform_congruent(GwyMaskField *field,
     g_object_thaw_notify(G_OBJECT(field));
 }
 
+static void
+transform_congruent_to(const GwyMaskField *source,
+                       guint col, guint row,
+                       guint width, guint height,
+                       GwyMaskField *dest,
+                       GwyPlaneCongruenceType transformation)
+{
+    GwyFieldPart fpart = { col, row, width, height };
+
+    if (transformation == GWY_PLANE_IDENTITY) {
+        gwy_mask_field_copy(source, &fpart, dest, 0, 0);
+        return;
+    }
+
+    g_assert(dest->xres == width && dest->yres == height);
+    if (width == source->xres) {
+        g_assert(col == 0);
+        if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY) {
+            flip_horizontally_to(source, row, height, dest);
+            return;
+        }
+        if (transformation == GWY_PLANE_MIRROR_VERTICALLY) {
+            flip_vertically_to(source, row, height, dest);
+            return;
+        }
+        if (transformation == GWY_PLANE_MIRROR_BOTH) {
+            flip_both_to(source, row, height, dest);
+            return;
+        }
+        if (transformation == GWY_PLANE_MIRROR_DIAGONALLY) {
+            swap_xy_both_aligned(source, col, row, width, height, dest, 0, 0);
+            return;
+        }
+
+        guint rowsize = dest->stride * sizeof(guint32);
+        guint32 *buffer = g_slice_alloc(rowsize);
+        if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY) {
+            swap_xy_both_aligned(source, col, row, width, height, dest, 0, 0);
+            flip_both(dest, buffer);
+        }
+        else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE) {
+            swap_xy_both_aligned(source, col, row, width, height, dest, 0, 0);
+            flip_horizontally(dest, buffer);
+        }
+        else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE) {
+            swap_xy_both_aligned(source, col, row, width, height, dest, 0, 0);
+            flip_vertically(dest, buffer);
+        }
+        else {
+            g_assert_not_reached();
+        }
+        g_slice_free1(rowsize, buffer);
+        return;
+    }
+
+    // If we do not operate on full rows copy to dest first (possibly
+    // transposing) and then mirror in-place to finish the operation.
+    if (gwy_plane_congruence_is_transposition(transformation)) {
+        if (col & 0x1f)
+            swap_xy_dest_aligned(source, col, row, width, height, dest, 0, 0);
+        else
+            swap_xy_both_aligned(source, col, row, width, height, dest, 0, 0);
+    }
+    else
+        gwy_mask_field_copy(source, &fpart, dest, 0, 0);
+
+    if (transformation == GWY_PLANE_MIRROR_DIAGONALLY)
+        return;
+
+    guint rowsize = dest->stride * sizeof(guint32);
+    guint32 *buffer = g_slice_alloc(rowsize);
+    if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY
+        || transformation == GWY_PLANE_ROTATE_CLOCKWISE)
+        flip_horizontally(dest, buffer);
+    else if (transformation == GWY_PLANE_MIRROR_VERTICALLY
+             || transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE)
+        flip_vertically(dest, buffer);
+    else if (transformation == GWY_PLANE_MIRROR_BOTH
+             || transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY)
+        flip_both(dest, buffer);
+    else {
+        g_assert_not_reached();
+    }
+    g_slice_free1(rowsize, buffer);
+}
+
+/**
+ * gwy_mask_field_new_congruent:
+ * @field: A two-dimensional mask field.
+ * @fpart: (allow-none):
+ *         Area in @field to extract to the new field.  Passing %NULL extracts
+ *         entire @field.
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Creates a new two-dimensional mask field by performing a congruence
+ * transformation of another mask field.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional mask field.
+ **/
 GwyMaskField*
 gwy_mask_field_new_congruent(const GwyMaskField *field,
                              const GwyFieldPart *fpart,
                              GwyPlaneCongruenceType transformation)
 {
+    guint col, row, width, height;
+    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
+        return NULL;
+    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
+                         NULL);
+
+    gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
+    guint dwidth = is_trans ? height : width;
+    guint dheight = is_trans ? width : height;
+    GwyMaskField *part = gwy_mask_field_new_sized(dwidth, dheight, FALSE);
+
+    transform_congruent_to(field, col, row, width, height, part,
+                           transformation);
+
+    return part;
 }
 
 /**
