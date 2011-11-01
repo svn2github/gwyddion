@@ -37,7 +37,7 @@
 #define l GWY_PLANE_ROTATE_COUNTERCLOCKWISE
 
 // Order of indexing is the order of transformations.  It matters!
-static const guint plane_congruence_group[8][8] = {
+const guint plane_congruence_group[8][8] = {
     { i, h, v, d, a, c, r, l },
     { h, i, c, l, r, v, a, d },
     { v, c, i, r, l, h, d, a },
@@ -140,7 +140,7 @@ print_field(const gchar *name, const GwyField *field)
     }
 }
 
-static void
+void
 check_congruence_group_sanity(void)
 {
     // Identity is identity.

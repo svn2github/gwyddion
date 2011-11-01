@@ -77,6 +77,9 @@ void          field_part_assert_equal       (const GwyFieldPart *part,
                                              const GwyFieldPart *refpart);
 void          line_part_assert_equal        (const GwyLinePart *part,
                                              const GwyLinePart *refpart);
+void          check_congruence_group_sanity (void);
+
+extern const guint plane_congruence_group[8][8];
 
 GType gwy_ser_test_get_type(void) G_GNUC_CONST;
 
