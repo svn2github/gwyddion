@@ -150,6 +150,10 @@ mask-field/grow
 #mask-field/flip
 #mask-field/transpose
 #mask-field/rotate
+mask-field/congruence/in-place/4x3
+mask-field/congruence/in-place/3x4
+mask-field/congruence/in-place/33x4
+mask-field/congruence/in-place/group
 mask-field/fill-ellipse
 field/props
 field/data-changed
