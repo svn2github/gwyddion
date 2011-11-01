@@ -173,8 +173,8 @@ field/copy
 field/new-part
 field/serialize
 field/set-size
-#field/flip
-#field/rotate/simple
+field/congruence/3x2
+field/congruence/2x3
 field/range
 field/mean
 field/rms

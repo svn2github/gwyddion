@@ -888,18 +888,23 @@ test_field_new_part(void)
     g_rand_free(rng);
 }
 
-#if 0
 static void
-field_flip_one(const gdouble *orig,
-               const gdouble *reference,
-               guint xres, guint yres,
-               gboolean horizontally, gboolean vertically)
+field_congr_one(const gdouble *orig,
+                const gdouble *reference,
+                guint xres, guint yres,
+                GwyPlaneCongruenceType transformation)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     gwy_assign(field->data, orig, xres*yres);
-    gwy_field_flip(field, horizontally, vertically, FALSE);
-    g_assert(field->xres == xres);
-    g_assert(field->yres == yres);
+    gwy_field_transform_congruent(field, transformation);
+    if (gwy_plane_congruence_is_transposition(transformation)) {
+        g_assert(field->xres == yres);
+        g_assert(field->yres == xres);
+    }
+    else {
+        g_assert(field->xres == xres);
+        g_assert(field->yres == yres);
+    }
     for (guint i = 0; i < xres*yres; i++) {
         g_assert_cmpfloat(field->data[i], ==, reference[i]);
     }
@@ -907,163 +912,108 @@ field_flip_one(const gdouble *orig,
 }
 
 void
-test_field_flip(void)
+test_field_congruence_3x2(void)
 {
-    enum { xres1 = 3, yres1 = 2 };
-    const gdouble orig1[xres1*yres1] = {
+    enum { xres = 3, yres = 2 };
+    const gdouble orig[xres*yres] = {
         1, 2, 3,
         4, 5, 6,
     };
-    const gdouble hflip1[xres1*yres1] = {
+    const gdouble hflip[xres*yres] = {
         3, 2, 1,
         6, 5, 4,
     };
-    const gdouble vflip1[xres1*yres1] = {
+    const gdouble vflip[xres*yres] = {
         4, 5, 6,
         1, 2, 3,
     };
-    const gdouble bflip1[xres1*yres1] = {
+    const gdouble bflip[xres*yres] = {
         6, 5, 4,
         3, 2, 1,
     };
-
-    field_flip_one(orig1, orig1, xres1, yres1, FALSE, FALSE);
-    field_flip_one(orig1, hflip1, xres1, yres1, TRUE, FALSE);
-    field_flip_one(orig1, vflip1, xres1, yres1, FALSE, TRUE);
-    field_flip_one(orig1, bflip1, xres1, yres1, TRUE, TRUE);
-
-    enum { xres2 = 2, yres2 = 3 };
-    const gdouble orig2[xres2*yres2] = {
-        1, 2,
-        3, 4,
-        5, 6,
+    const gdouble dflip[xres*yres] = {
+        1, 4,
+        2, 5,
+        3, 6,
     };
-    const gdouble hflip2[xres2*yres2] = {
-        2, 1,
-        4, 3,
-        6, 5,
+    const gdouble aflip[xres*yres] = {
+        6, 3,
+        5, 2,
+        4, 1,
     };
-    const gdouble vflip2[xres2*yres2] = {
-        5, 6,
-        3, 4,
-        1, 2,
+    const gdouble cwrot[xres*yres] = {
+        4, 1,
+        5, 2,
+        6, 3,
     };
-    const gdouble bflip2[xres2*yres2] = {
-        6, 5,
-        4, 3,
-        2, 1,
+    const gdouble ccwrot[xres*yres] = {
+        3, 6,
+        2, 5,
+        1, 4,
     };
 
-    field_flip_one(orig2, orig2, xres2, yres2, FALSE, FALSE);
-    field_flip_one(orig2, hflip2, xres2, yres2, TRUE, FALSE);
-    field_flip_one(orig2, vflip2, xres2, yres2, FALSE, TRUE);
-    field_flip_one(orig2, bflip2, xres2, yres2, TRUE, TRUE);
-}
-
-static void
-field_rotate_simple_one(const gdouble *orig,
-                        const gdouble *reference,
-                        guint xres, guint yres,
-                        GwySimpleRotation rotation)
-{
-    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-    gwy_assign(field->data, orig, xres*yres);
-    GwyField *rotated = gwy_field_new_rotated_simple(field, rotation, FALSE);
-    if (rotation % 180) {
-        g_assert(field->xres == rotated->yres);
-        g_assert(field->yres == rotated->xres);
-    }
-    else {
-        g_assert(field->xres == rotated->xres);
-        g_assert(field->yres == rotated->yres);
-    }
-    for (guint i = 0; i < xres*yres; i++) {
-        g_assert_cmpfloat(rotated->data[i], ==, reference[i]);
-    }
-    g_object_unref(field);
-    g_object_unref(rotated);
+    field_congr_one(orig, orig, xres, yres, GWY_PLANE_IDENTITY);
+    field_congr_one(orig, hflip, xres, yres, GWY_PLANE_MIRROR_HORIZONTALLY);
+    field_congr_one(orig, vflip, xres, yres, GWY_PLANE_MIRROR_VERTICALLY);
+    field_congr_one(orig, bflip, xres, yres, GWY_PLANE_MIRROR_BOTH);
+    field_congr_one(orig, dflip, xres, yres, GWY_PLANE_MIRROR_DIAGONALLY);
+    field_congr_one(orig, aflip, xres, yres, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    field_congr_one(orig, bflip, xres, yres, GWY_PLANE_ROTATE_UPSIDE_DOWN);
+    field_congr_one(orig, cwrot, xres, yres, GWY_PLANE_ROTATE_CLOCKWISE);
+    field_congr_one(orig, ccwrot, xres, yres, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void
-test_field_rotate_simple(void)
+test_field_congruence_2x3(void)
 {
-    const GwySimpleRotation rotations[] = {
-        GWY_SIMPLE_ROTATE_NONE,
-        GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE,
-        GWY_SIMPLE_ROTATE_UPSIDEDOWN,
-        GWY_SIMPLE_ROTATE_CLOCKWISE,
+    enum { xres = 2, yres = 3 };
+    const gdouble orig[xres*yres] = {
+        1, 2,
+        3, 4,
+        5, 6,
     };
-    enum { xres1 = 3, yres1 = 2, n1 = xres1*yres1 };
-    const double data1[][n1] = {
-        {
-            1, 2, 3,
-            4, 5, 6,
-        },
-        {
-            3, 6,
-            2, 5,
-            1, 4,
-        },
-        {
-            6, 5, 4,
-            3, 2, 1,
-        },
-        {
-            4, 1,
-            5, 2,
-            6, 3,
-        },
+    const gdouble hflip[xres*yres] = {
+        2, 1,
+        4, 3,
+        6, 5,
     };
-
-    for (guint i = 0; i < G_N_ELEMENTS(rotations); i++) {
-        const gdouble *source = data1[i];
-        for (guint j = 0; j < G_N_ELEMENTS(rotations); j++) {
-            GwySimpleRotation rotation = rotations[j];
-            const gdouble *reference = data1[(i + j) % G_N_ELEMENTS(rotations)];
-            field_rotate_simple_one(source, reference,
-                                    i % 2 ? yres1 : xres1,
-                                    i % 2 ? xres1 : yres1,
-                                    rotation);
-        }
-    }
-
-    enum { xres2 = 5, yres2 = 1, n2 = xres2*yres2 };
-    const double data2[][n2] = {
-        {
-            1, 2, 3, 4, 5,
-        },
-        {
-            5,
-            4,
-            3,
-            2,
-            1,
-        },
-        {
-            5, 4, 3, 2, 1,
-        },
-        {
-            1,
-            2,
-            3,
-            4,
-            5,
-        },
+    const gdouble vflip[xres*yres] = {
+        5, 6,
+        3, 4,
+        1, 2,
+    };
+    const gdouble bflip[xres*yres] = {
+        6, 5,
+        4, 3,
+        2, 1,
+    };
+    const gdouble dflip[xres*yres] = {
+        1, 3, 5,
+        2, 4, 6,
+    };
+    const gdouble aflip[xres*yres] = {
+        6, 4, 2,
+        5, 3, 1,
+    };
+    const gdouble cwrot[xres*yres] = {
+        5, 3, 1,
+        6, 4, 2,
+    };
+    const gdouble ccwrot[xres*yres] = {
+        2, 4, 6,
+        1, 3, 5,
     };
 
-    for (guint i = 0; i < G_N_ELEMENTS(rotations); i++) {
-        const gdouble *source = data2[i];
-        for (guint j = 0; j < G_N_ELEMENTS(rotations); j++) {
-            GwySimpleRotation rotation = rotations[j];
-            const gdouble *reference = data2[(i + j) % G_N_ELEMENTS(rotations)];
-            field_rotate_simple_one(source, reference,
-                                    i % 2 ? yres2 : xres2,
-                                    i % 2 ? xres2 : yres2,
-                                    rotation);
-        }
-    }
+    field_congr_one(orig, orig, xres, yres, GWY_PLANE_IDENTITY);
+    field_congr_one(orig, hflip, xres, yres, GWY_PLANE_MIRROR_HORIZONTALLY);
+    field_congr_one(orig, vflip, xres, yres, GWY_PLANE_MIRROR_VERTICALLY);
+    field_congr_one(orig, bflip, xres, yres, GWY_PLANE_MIRROR_BOTH);
+    field_congr_one(orig, dflip, xres, yres, GWY_PLANE_MIRROR_DIAGONALLY);
+    field_congr_one(orig, aflip, xres, yres, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    field_congr_one(orig, bflip, xres, yres, GWY_PLANE_ROTATE_UPSIDE_DOWN);
+    field_congr_one(orig, cwrot, xres, yres, GWY_PLANE_ROTATE_CLOCKWISE);
+    field_congr_one(orig, ccwrot, xres, yres, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
-#endif
 
 void
 test_field_range(void)
