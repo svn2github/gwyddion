@@ -895,15 +895,21 @@ field_congr_one(const gdouble *orig,
                 GwyPlaneCongruenceType transformation)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_field_set_xreal(field, xres);
+    gwy_field_set_yreal(field, yres);
     gwy_assign(field->data, orig, xres*yres);
     gwy_field_transform_congruent(field, transformation);
     if (gwy_plane_congruence_is_transposition(transformation)) {
-        g_assert(field->xres == yres);
-        g_assert(field->yres == xres);
+        g_assert_cmpuint(field->xres, ==, yres);
+        g_assert_cmpuint(field->yres, ==, xres);
+        g_assert_cmpfloat(field->xreal, ==, yres);
+        g_assert_cmpfloat(field->yreal, ==, xres);
     }
     else {
-        g_assert(field->xres == xres);
-        g_assert(field->yres == yres);
+        g_assert_cmpuint(field->xres, ==, xres);
+        g_assert_cmpuint(field->yres, ==, yres);
+        g_assert_cmpfloat(field->xreal, ==, xres);
+        g_assert_cmpfloat(field->yreal, ==, yres);
     }
     for (guint i = 0; i < xres*yres; i++) {
         g_assert_cmpfloat(field->data[i], ==, reference[i]);
@@ -1013,6 +1019,67 @@ test_field_congruence_2x3(void)
     field_congr_one(orig, bflip, xres, yres, GWY_PLANE_ROTATE_UPSIDE_DOWN);
     field_congr_one(orig, cwrot, xres, yres, GWY_PLANE_ROTATE_CLOCKWISE);
     field_congr_one(orig, ccwrot, xres, yres, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
+
+void
+test_field_congruence_group(void)
+{
+    // Must match the indices, i == 0, h == 1, etc.
+    enum {
+        i = GWY_PLANE_IDENTITY,
+        h = GWY_PLANE_MIRROR_HORIZONTALLY,
+        v = GWY_PLANE_MIRROR_VERTICALLY,
+        d = GWY_PLANE_MIRROR_DIAGONALLY,
+        a = GWY_PLANE_MIRROR_ANTIDIAGONALLY,
+        c = GWY_PLANE_MIRROR_BOTH,
+        r = GWY_PLANE_ROTATE_CLOCKWISE,
+        l = GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
+    };
+    // Order of indexing is the order of transformations.
+    static const guint congruence_group[8][8] = {
+        { i, h, v, d, a, c, r, l },
+        { h, i, c, l, r, v, a, d },
+        { v, c, i, r, l, h, d, a },
+        { d, r, l, i, c, a, h, v },
+        { a, l, r, c, i, d, v, h },
+        { c, v, h, a, d, i, l, r },
+        { r, d, a, v, h, l, c, i },
+        { l, a, d, h, v, r, i, c },
+    };
+
+    g_assert_cmpuint(i, ==, 0);
+    g_assert_cmpuint(h, ==, 1);
+    g_assert_cmpuint(v, ==, 2);
+    g_assert_cmpuint(d, ==, 3);
+    g_assert_cmpuint(a, ==, 4);
+    g_assert_cmpuint(c, ==, 5);
+    g_assert_cmpuint(r, ==, 6);
+    g_assert_cmpuint(l, ==, 7);
+
+    enum { max_size = 17 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 500;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
+
+        GwyPlaneCongruenceType trans1 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruenceType trans2 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruenceType compound = congruence_group[trans1][trans2];
+        gwy_field_transform_congruent(field, trans1);
+        gwy_field_transform_congruent(field, trans2);
+        gwy_field_transform_congruent(reference, compound);
+        field_assert_equal(field, reference);
+
+        g_object_unref(reference);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
 }
 
 void

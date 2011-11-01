@@ -175,6 +175,7 @@ field/serialize
 field/set-size
 field/congruence/3x2
 field/congruence/2x3
+field/congruence/group
 field/range
 field/mean
 field/rms
