@@ -1078,8 +1078,25 @@ mask_field_congr_inplace_one(const gchar *orig_str,
     g_object_unref(reference);
 }
 
+static void
+mask_field_congr_new_one(const gchar *orig_str,
+                         const gchar *reference_str,
+                         GwyPlaneCongruenceType transformation)
+{
+    GwyMaskField *source = mask_field_from_string(orig_str);
+    GwyMaskField *field = gwy_mask_field_new_congruent(source, NULL,
+                                                       transformation);
+    GwyMaskField *reference = mask_field_from_string(reference_str);
+    mask_field_assert_equal(field, reference);
+    g_object_unref(field);
+    g_object_unref(reference);
+    g_object_unref(source);
+}
+
 void
-test_mask_field_congruence_in_place_4x3(void)
+mask_field_congruence_4x3(void (*test)(const gchar *orig_str,
+                                       const gchar *reference_str,
+                                       GwyPlaneCongruenceType transformation))
 {
     const gchar *orig_str =
         "####\n"
@@ -1118,84 +1135,96 @@ test_mask_field_congruence_in_place_4x3(void)
         "#  \n"
         "###\n";
 
-    mask_field_congr_inplace_one(orig_str, orig_str,
-                                 GWY_PLANE_IDENTITY);
-    mask_field_congr_inplace_one(orig_str, hflip_str,
-                                 GWY_PLANE_MIRROR_HORIZONTALLY);
-    mask_field_congr_inplace_one(orig_str, vflip_str,
-                                 GWY_PLANE_MIRROR_VERTICALLY);
-    mask_field_congr_inplace_one(orig_str, bflip_str,
-                                 GWY_PLANE_MIRROR_BOTH);
-    mask_field_congr_inplace_one(orig_str, dflip_str,
-                                 GWY_PLANE_MIRROR_DIAGONALLY);
-    mask_field_congr_inplace_one(orig_str, aflip_str,
-                                 GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    mask_field_congr_inplace_one(orig_str, cwrot_str,
-                                 GWY_PLANE_ROTATE_CLOCKWISE);
-    mask_field_congr_inplace_one(orig_str, ccwrot_str,
-                                 GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    test(orig_str, orig_str, GWY_PLANE_IDENTITY);
+    test(orig_str, hflip_str, GWY_PLANE_MIRROR_HORIZONTALLY);
+    test(orig_str, vflip_str, GWY_PLANE_MIRROR_VERTICALLY);
+    test(orig_str, bflip_str, GWY_PLANE_MIRROR_BOTH);
+    test(orig_str, dflip_str, GWY_PLANE_MIRROR_DIAGONALLY);
+    test(orig_str, aflip_str, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    test(orig_str, cwrot_str, GWY_PLANE_ROTATE_CLOCKWISE);
+    test(orig_str, ccwrot_str, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
+
+void
+test_mask_field_congruence_in_place_4x3(void)
+{
+    mask_field_congruence_4x3(&mask_field_congr_inplace_one);
+}
+
+void
+test_mask_field_congruence_new_4x3(void)
+{
+    mask_field_congruence_4x3(&mask_field_congr_new_one);
+}
+
+static void
+mask_field_congruence_3x4(void (*test)(const gchar *orig_str,
+                                       const gchar *reference_str,
+                                       GwyPlaneCongruenceType transformation))
+{
+    const gchar *orig_str =
+        "###\n"
+        "#  \n"
+        "#  \n"
+        "#  \n";
+    const gchar *hflip_str =
+        "###\n"
+        "  #\n"
+        "  #\n"
+        "  #\n";
+    const gchar *vflip_str =
+        "#  \n"
+        "#  \n"
+        "#  \n"
+        "###\n";
+    const gchar *bflip_str =
+        "  #\n"
+        "  #\n"
+        "  #\n"
+        "###\n";
+    const gchar *dflip_str =
+        "####\n"
+        "#   \n"
+        "#   \n";
+    const gchar *aflip_str =
+        "   #\n"
+        "   #\n"
+        "####\n";
+    const gchar *cwrot_str =
+        "####\n"
+        "   #\n"
+        "   #\n";
+    const gchar *ccwrot_str =
+        "#   \n"
+        "#   \n"
+        "####\n";
+
+    test(orig_str, orig_str, GWY_PLANE_IDENTITY);
+    test(orig_str, hflip_str, GWY_PLANE_MIRROR_HORIZONTALLY);
+    test(orig_str, vflip_str, GWY_PLANE_MIRROR_VERTICALLY);
+    test(orig_str, bflip_str, GWY_PLANE_MIRROR_BOTH);
+    test(orig_str, dflip_str, GWY_PLANE_MIRROR_DIAGONALLY);
+    test(orig_str, aflip_str, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    test(orig_str, cwrot_str, GWY_PLANE_ROTATE_CLOCKWISE);
+    test(orig_str, ccwrot_str, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void
 test_mask_field_congruence_in_place_3x4(void)
 {
-    const gchar *orig_str =
-        "###\n"
-        "#  \n"
-        "#  \n"
-        "#  \n";
-    const gchar *hflip_str =
-        "###\n"
-        "  #\n"
-        "  #\n"
-        "  #\n";
-    const gchar *vflip_str =
-        "#  \n"
-        "#  \n"
-        "#  \n"
-        "###\n";
-    const gchar *bflip_str =
-        "  #\n"
-        "  #\n"
-        "  #\n"
-        "###\n";
-    const gchar *dflip_str =
-        "####\n"
-        "#   \n"
-        "#   \n";
-    const gchar *aflip_str =
-        "   #\n"
-        "   #\n"
-        "####\n";
-    const gchar *cwrot_str =
-        "####\n"
-        "   #\n"
-        "   #\n";
-    const gchar *ccwrot_str =
-        "#   \n"
-        "#   \n"
-        "####\n";
-
-    mask_field_congr_inplace_one(orig_str, orig_str,
-                                 GWY_PLANE_IDENTITY);
-    mask_field_congr_inplace_one(orig_str, hflip_str,
-                                 GWY_PLANE_MIRROR_HORIZONTALLY);
-    mask_field_congr_inplace_one(orig_str, vflip_str,
-                                 GWY_PLANE_MIRROR_VERTICALLY);
-    mask_field_congr_inplace_one(orig_str, bflip_str,
-                                 GWY_PLANE_MIRROR_BOTH);
-    mask_field_congr_inplace_one(orig_str, dflip_str,
-                                 GWY_PLANE_MIRROR_DIAGONALLY);
-    mask_field_congr_inplace_one(orig_str, aflip_str,
-                                 GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    mask_field_congr_inplace_one(orig_str, cwrot_str,
-                                 GWY_PLANE_ROTATE_CLOCKWISE);
-    mask_field_congr_inplace_one(orig_str, ccwrot_str,
-                                 GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    mask_field_congruence_3x4(&mask_field_congr_inplace_one);
 }
 
 void
-test_mask_field_congruence_in_place_33x4(void)
+test_mask_field_congruence_new_3x4(void)
+{
+    mask_field_congruence_3x4(&mask_field_congr_new_one);
+}
+
+static void
+mask_field_congruence_33x4(void (*test)(const gchar *orig_str,
+                                        const gchar *reference_str,
+                                        GwyPlaneCongruenceType transformation))
 {
     const gchar *orig_str =
         "#################################\n"
@@ -1354,22 +1383,26 @@ test_mask_field_congruence_in_place_33x4(void)
         "#   \n"
         "####\n";
 
-    mask_field_congr_inplace_one(orig_str, orig_str,
-                                 GWY_PLANE_IDENTITY);
-    mask_field_congr_inplace_one(orig_str, hflip_str,
-                                 GWY_PLANE_MIRROR_HORIZONTALLY);
-    mask_field_congr_inplace_one(orig_str, vflip_str,
-                                 GWY_PLANE_MIRROR_VERTICALLY);
-    mask_field_congr_inplace_one(orig_str, bflip_str,
-                                 GWY_PLANE_MIRROR_BOTH);
-    mask_field_congr_inplace_one(orig_str, dflip_str,
-                                 GWY_PLANE_MIRROR_DIAGONALLY);
-    mask_field_congr_inplace_one(orig_str, aflip_str,
-                                 GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    mask_field_congr_inplace_one(orig_str, cwrot_str,
-                                 GWY_PLANE_ROTATE_CLOCKWISE);
-    mask_field_congr_inplace_one(orig_str, ccwrot_str,
-                                 GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    test(orig_str, orig_str, GWY_PLANE_IDENTITY);
+    test(orig_str, hflip_str, GWY_PLANE_MIRROR_HORIZONTALLY);
+    test(orig_str, vflip_str, GWY_PLANE_MIRROR_VERTICALLY);
+    test(orig_str, bflip_str, GWY_PLANE_MIRROR_BOTH);
+    test(orig_str, dflip_str, GWY_PLANE_MIRROR_DIAGONALLY);
+    test(orig_str, aflip_str, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    test(orig_str, cwrot_str, GWY_PLANE_ROTATE_CLOCKWISE);
+    test(orig_str, ccwrot_str, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
+
+void
+test_mask_field_congruence_in_place_33x4(void)
+{
+    mask_field_congruence_33x4(&mask_field_congr_inplace_one);
+}
+
+void
+test_mask_field_congruence_new_33x4(void)
+{
+    mask_field_congruence_33x4(&mask_field_congr_new_one);
 }
 
 void
@@ -1403,315 +1436,6 @@ test_mask_field_congruence_in_place_group(void)
 
     mask_field_random_pool_free(pool);
     g_rand_free(rng);
-}
-
-static void
-mask_field_congr_new_one(const gchar *orig_str,
-                         const gchar *reference_str,
-                         GwyPlaneCongruenceType transformation)
-{
-    GwyMaskField *source = mask_field_from_string(orig_str);
-    GwyMaskField *field = gwy_mask_field_new_congruent(source, NULL,
-                                                       transformation);
-    GwyMaskField *reference = mask_field_from_string(reference_str);
-    mask_field_assert_equal(field, reference);
-    g_object_unref(field);
-    g_object_unref(reference);
-    g_object_unref(source);
-}
-
-void
-test_mask_field_congruence_new_4x3(void)
-{
-    const gchar *orig_str =
-        "####\n"
-        "#   \n"
-        "#   \n";
-    const gchar *hflip_str =
-        "####\n"
-        "   #\n"
-        "   #\n";
-    const gchar *vflip_str =
-        "#   \n"
-        "#   \n"
-        "####\n";
-    const gchar *bflip_str =
-        "   #\n"
-        "   #\n"
-        "####\n";
-    const gchar *dflip_str =
-        "###\n"
-        "#  \n"
-        "#  \n"
-        "#  \n";
-    const gchar *aflip_str =
-        "  #\n"
-        "  #\n"
-        "  #\n"
-        "###\n";
-    const gchar *cwrot_str =
-        "###\n"
-        "  #\n"
-        "  #\n"
-        "  #\n";
-    const gchar *ccwrot_str =
-        "#  \n"
-        "#  \n"
-        "#  \n"
-        "###\n";
-
-    mask_field_congr_new_one(orig_str, orig_str,
-                             GWY_PLANE_IDENTITY);
-    mask_field_congr_new_one(orig_str, hflip_str,
-                             GWY_PLANE_MIRROR_HORIZONTALLY);
-    mask_field_congr_new_one(orig_str, vflip_str,
-                             GWY_PLANE_MIRROR_VERTICALLY);
-    mask_field_congr_new_one(orig_str, bflip_str,
-                             GWY_PLANE_MIRROR_BOTH);
-    mask_field_congr_new_one(orig_str, dflip_str,
-                             GWY_PLANE_MIRROR_DIAGONALLY);
-    mask_field_congr_new_one(orig_str, aflip_str,
-                             GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    mask_field_congr_new_one(orig_str, cwrot_str,
-                             GWY_PLANE_ROTATE_CLOCKWISE);
-    mask_field_congr_new_one(orig_str, ccwrot_str,
-                             GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
-}
-
-void
-test_mask_field_congruence_new_3x4(void)
-{
-    const gchar *orig_str =
-        "###\n"
-        "#  \n"
-        "#  \n"
-        "#  \n";
-    const gchar *hflip_str =
-        "###\n"
-        "  #\n"
-        "  #\n"
-        "  #\n";
-    const gchar *vflip_str =
-        "#  \n"
-        "#  \n"
-        "#  \n"
-        "###\n";
-    const gchar *bflip_str =
-        "  #\n"
-        "  #\n"
-        "  #\n"
-        "###\n";
-    const gchar *dflip_str =
-        "####\n"
-        "#   \n"
-        "#   \n";
-    const gchar *aflip_str =
-        "   #\n"
-        "   #\n"
-        "####\n";
-    const gchar *cwrot_str =
-        "####\n"
-        "   #\n"
-        "   #\n";
-    const gchar *ccwrot_str =
-        "#   \n"
-        "#   \n"
-        "####\n";
-
-    mask_field_congr_new_one(orig_str, orig_str,
-                             GWY_PLANE_IDENTITY);
-    mask_field_congr_new_one(orig_str, hflip_str,
-                             GWY_PLANE_MIRROR_HORIZONTALLY);
-    mask_field_congr_new_one(orig_str, vflip_str,
-                             GWY_PLANE_MIRROR_VERTICALLY);
-    mask_field_congr_new_one(orig_str, bflip_str,
-                             GWY_PLANE_MIRROR_BOTH);
-    mask_field_congr_new_one(orig_str, dflip_str,
-                             GWY_PLANE_MIRROR_DIAGONALLY);
-    mask_field_congr_new_one(orig_str, aflip_str,
-                             GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    mask_field_congr_new_one(orig_str, cwrot_str,
-                             GWY_PLANE_ROTATE_CLOCKWISE);
-    mask_field_congr_new_one(orig_str, ccwrot_str,
-                             GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
-}
-
-void
-test_mask_field_congruence_new_33x4(void)
-{
-    const gchar *orig_str =
-        "#################################\n"
-        "#                                \n"
-        "#                                \n"
-        "# # # # # # # # # # # # # # # # #\n";
-    const gchar *hflip_str =
-        "#################################\n"
-        "                                #\n"
-        "                                #\n"
-        "# # # # # # # # # # # # # # # # #\n";
-    const gchar *vflip_str =
-        "# # # # # # # # # # # # # # # # #\n"
-        "#                                \n"
-        "#                                \n"
-        "#################################\n";
-    const gchar *bflip_str =
-        "# # # # # # # # # # # # # # # # #\n"
-        "                                #\n"
-        "                                #\n"
-        "#################################\n";
-    const gchar *dflip_str =
-        "####\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n";
-    const gchar *aflip_str =
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "####\n";
-    const gchar *cwrot_str =
-        "####\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n"
-        "   #\n"
-        "#  #\n";
-    const gchar *ccwrot_str =
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "#  #\n"
-        "#   \n"
-        "####\n";
-
-    mask_field_congr_new_one(orig_str, orig_str,
-                             GWY_PLANE_IDENTITY);
-    mask_field_congr_new_one(orig_str, hflip_str,
-                             GWY_PLANE_MIRROR_HORIZONTALLY);
-    mask_field_congr_new_one(orig_str, vflip_str,
-                             GWY_PLANE_MIRROR_VERTICALLY);
-    mask_field_congr_new_one(orig_str, bflip_str,
-                             GWY_PLANE_MIRROR_BOTH);
-    mask_field_congr_new_one(orig_str, dflip_str,
-                             GWY_PLANE_MIRROR_DIAGONALLY);
-    mask_field_congr_new_one(orig_str, aflip_str,
-                             GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    mask_field_congr_new_one(orig_str, cwrot_str,
-                             GWY_PLANE_ROTATE_CLOCKWISE);
-    mask_field_congr_new_one(orig_str, ccwrot_str,
-                             GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void

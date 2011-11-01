@@ -988,8 +988,41 @@ field_congr_inplace_one(const gdouble *orig,
     g_object_unref(field);
 }
 
-void
-test_field_congruence_in_place_3x2(void)
+static void
+field_congr_new_one(const gdouble *orig,
+                    const gdouble *reference,
+                    guint xres, guint yres,
+                    GwyPlaneCongruenceType transformation)
+{
+    GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_field_set_xreal(source, xres);
+    gwy_field_set_yreal(source, yres);
+    gwy_assign(source->data, orig, xres*yres);
+    GwyField *field = gwy_field_new_congruent(source, NULL, transformation);
+    if (gwy_plane_congruence_is_transposition(transformation)) {
+        g_assert_cmpuint(field->xres, ==, yres);
+        g_assert_cmpuint(field->yres, ==, xres);
+        g_assert_cmpfloat(field->xreal, ==, yres);
+        g_assert_cmpfloat(field->yreal, ==, xres);
+    }
+    else {
+        g_assert_cmpuint(field->xres, ==, xres);
+        g_assert_cmpuint(field->yres, ==, yres);
+        g_assert_cmpfloat(field->xreal, ==, xres);
+        g_assert_cmpfloat(field->yreal, ==, yres);
+    }
+    for (guint i = 0; i < xres*yres; i++) {
+        g_assert_cmpfloat(field->data[i], ==, reference[i]);
+    }
+    g_object_unref(field);
+    g_object_unref(source);
+}
+
+static void
+field_congruence_3x2(void (*test)(const gdouble *orig,
+                                  const gdouble *reference,
+                                  guint xres, guint yres,
+                                  GwyPlaneCongruenceType transformation))
 {
     enum { xres = 3, yres = 2 };
     const gdouble orig[xres*yres] = {
@@ -1029,28 +1062,34 @@ test_field_congruence_in_place_3x2(void)
         1, 4,
     };
 
-    field_congr_inplace_one(orig, orig, xres, yres,
-                            GWY_PLANE_IDENTITY);
-    field_congr_inplace_one(orig, hflip, xres, yres,
-                            GWY_PLANE_MIRROR_HORIZONTALLY);
-    field_congr_inplace_one(orig, vflip, xres, yres,
-                            GWY_PLANE_MIRROR_VERTICALLY);
-    field_congr_inplace_one(orig, bflip, xres, yres,
-                            GWY_PLANE_MIRROR_BOTH);
-    field_congr_inplace_one(orig, dflip, xres, yres,
-                            GWY_PLANE_MIRROR_DIAGONALLY);
-    field_congr_inplace_one(orig, aflip, xres, yres,
-                            GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    field_congr_inplace_one(orig, bflip, xres, yres,
-                            GWY_PLANE_ROTATE_UPSIDE_DOWN);
-    field_congr_inplace_one(orig, cwrot, xres, yres,
-                            GWY_PLANE_ROTATE_CLOCKWISE);
-    field_congr_inplace_one(orig, ccwrot, xres, yres,
-                            GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    test(orig, orig, xres, yres, GWY_PLANE_IDENTITY);
+    test(orig, hflip, xres, yres, GWY_PLANE_MIRROR_HORIZONTALLY);
+    test(orig, vflip, xres, yres, GWY_PLANE_MIRROR_VERTICALLY);
+    test(orig, bflip, xres, yres, GWY_PLANE_MIRROR_BOTH);
+    test(orig, dflip, xres, yres, GWY_PLANE_MIRROR_DIAGONALLY);
+    test(orig, aflip, xres, yres, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    test(orig, bflip, xres, yres, GWY_PLANE_ROTATE_UPSIDE_DOWN);
+    test(orig, cwrot, xres, yres, GWY_PLANE_ROTATE_CLOCKWISE);
+    test(orig, ccwrot, xres, yres, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void
-test_field_congruence_in_place_2x3(void)
+test_field_congruence_in_place_3x2(void)
+{
+    field_congruence_3x2(&field_congr_inplace_one);
+}
+
+void
+test_field_congruence_new_3x2(void)
+{
+    field_congruence_3x2(&field_congr_new_one);
+}
+
+static void
+field_congruence_2x3(void (*test)(const gdouble *orig,
+                                  const gdouble *reference,
+                                  guint xres, guint yres,
+                                  GwyPlaneCongruenceType transformation))
 {
     enum { xres = 2, yres = 3 };
     const gdouble orig[xres*yres] = {
@@ -1090,24 +1129,27 @@ test_field_congruence_in_place_2x3(void)
         1, 3, 5,
     };
 
-    field_congr_inplace_one(orig, orig, xres, yres,
-                            GWY_PLANE_IDENTITY);
-    field_congr_inplace_one(orig, hflip, xres, yres,
-                            GWY_PLANE_MIRROR_HORIZONTALLY);
-    field_congr_inplace_one(orig, vflip, xres, yres,
-                            GWY_PLANE_MIRROR_VERTICALLY);
-    field_congr_inplace_one(orig, bflip, xres, yres,
-                            GWY_PLANE_MIRROR_BOTH);
-    field_congr_inplace_one(orig, dflip, xres, yres,
-                            GWY_PLANE_MIRROR_DIAGONALLY);
-    field_congr_inplace_one(orig, aflip, xres, yres,
-                            GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    field_congr_inplace_one(orig, bflip, xres, yres,
-                            GWY_PLANE_ROTATE_UPSIDE_DOWN);
-    field_congr_inplace_one(orig, cwrot, xres, yres,
-                            GWY_PLANE_ROTATE_CLOCKWISE);
-    field_congr_inplace_one(orig, ccwrot, xres, yres,
-                            GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    test(orig, orig, xres, yres, GWY_PLANE_IDENTITY);
+    test(orig, hflip, xres, yres, GWY_PLANE_MIRROR_HORIZONTALLY);
+    test(orig, vflip, xres, yres, GWY_PLANE_MIRROR_VERTICALLY);
+    test(orig, bflip, xres, yres, GWY_PLANE_MIRROR_BOTH);
+    test(orig, dflip, xres, yres, GWY_PLANE_MIRROR_DIAGONALLY);
+    test(orig, aflip, xres, yres, GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    test(orig, bflip, xres, yres, GWY_PLANE_ROTATE_UPSIDE_DOWN);
+    test(orig, cwrot, xres, yres, GWY_PLANE_ROTATE_CLOCKWISE);
+    test(orig, ccwrot, xres, yres, GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
+
+void
+test_field_congruence_in_place_2x3(void)
+{
+    field_congruence_2x3(&field_congr_inplace_one);
+}
+
+void
+test_field_congruence_new_2x3(void)
+{
+    field_congruence_2x3(&field_congr_new_one);
 }
 
 void
@@ -1139,158 +1181,6 @@ test_field_congruence_in_place_group(void)
     }
 
     g_rand_free(rng);
-}
-
-static void
-field_congr_new_one(const gdouble *orig,
-                    const gdouble *reference,
-                    guint xres, guint yres,
-                    GwyPlaneCongruenceType transformation)
-{
-    GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
-    gwy_field_set_xreal(source, xres);
-    gwy_field_set_yreal(source, yres);
-    gwy_assign(source->data, orig, xres*yres);
-    GwyField *field = gwy_field_new_congruent(source, NULL, transformation);
-    if (gwy_plane_congruence_is_transposition(transformation)) {
-        g_assert_cmpuint(field->xres, ==, yres);
-        g_assert_cmpuint(field->yres, ==, xres);
-        g_assert_cmpfloat(field->xreal, ==, yres);
-        g_assert_cmpfloat(field->yreal, ==, xres);
-    }
-    else {
-        g_assert_cmpuint(field->xres, ==, xres);
-        g_assert_cmpuint(field->yres, ==, yres);
-        g_assert_cmpfloat(field->xreal, ==, xres);
-        g_assert_cmpfloat(field->yreal, ==, yres);
-    }
-    for (guint i = 0; i < xres*yres; i++) {
-        g_assert_cmpfloat(field->data[i], ==, reference[i]);
-    }
-    g_object_unref(field);
-    g_object_unref(source);
-}
-
-void
-test_field_congruence_new_3x2(void)
-{
-    enum { xres = 3, yres = 2 };
-    const gdouble orig[xres*yres] = {
-        1, 2, 3,
-        4, 5, 6,
-    };
-    const gdouble hflip[xres*yres] = {
-        3, 2, 1,
-        6, 5, 4,
-    };
-    const gdouble vflip[xres*yres] = {
-        4, 5, 6,
-        1, 2, 3,
-    };
-    const gdouble bflip[xres*yres] = {
-        6, 5, 4,
-        3, 2, 1,
-    };
-    const gdouble dflip[xres*yres] = {
-        1, 4,
-        2, 5,
-        3, 6,
-    };
-    const gdouble aflip[xres*yres] = {
-        6, 3,
-        5, 2,
-        4, 1,
-    };
-    const gdouble cwrot[xres*yres] = {
-        4, 1,
-        5, 2,
-        6, 3,
-    };
-    const gdouble ccwrot[xres*yres] = {
-        3, 6,
-        2, 5,
-        1, 4,
-    };
-
-    field_congr_new_one(orig, orig, xres, yres,
-                        GWY_PLANE_IDENTITY);
-    field_congr_new_one(orig, hflip, xres, yres,
-                        GWY_PLANE_MIRROR_HORIZONTALLY);
-    field_congr_new_one(orig, vflip, xres, yres,
-                        GWY_PLANE_MIRROR_VERTICALLY);
-    field_congr_new_one(orig, bflip, xres, yres,
-                        GWY_PLANE_MIRROR_BOTH);
-    field_congr_new_one(orig, dflip, xres, yres,
-                        GWY_PLANE_MIRROR_DIAGONALLY);
-    field_congr_new_one(orig, aflip, xres, yres,
-                        GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    field_congr_new_one(orig, bflip, xres, yres,
-                        GWY_PLANE_ROTATE_UPSIDE_DOWN);
-    field_congr_new_one(orig, cwrot, xres, yres,
-                        GWY_PLANE_ROTATE_CLOCKWISE);
-    field_congr_new_one(orig, ccwrot, xres, yres,
-                        GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
-}
-
-void
-test_field_congruence_new_2x3(void)
-{
-    enum { xres = 2, yres = 3 };
-    const gdouble orig[xres*yres] = {
-        1, 2,
-        3, 4,
-        5, 6,
-    };
-    const gdouble hflip[xres*yres] = {
-        2, 1,
-        4, 3,
-        6, 5,
-    };
-    const gdouble vflip[xres*yres] = {
-        5, 6,
-        3, 4,
-        1, 2,
-    };
-    const gdouble bflip[xres*yres] = {
-        6, 5,
-        4, 3,
-        2, 1,
-    };
-    const gdouble dflip[xres*yres] = {
-        1, 3, 5,
-        2, 4, 6,
-    };
-    const gdouble aflip[xres*yres] = {
-        6, 4, 2,
-        5, 3, 1,
-    };
-    const gdouble cwrot[xres*yres] = {
-        5, 3, 1,
-        6, 4, 2,
-    };
-    const gdouble ccwrot[xres*yres] = {
-        2, 4, 6,
-        1, 3, 5,
-    };
-
-    field_congr_new_one(orig, orig, xres, yres,
-                        GWY_PLANE_IDENTITY);
-    field_congr_new_one(orig, hflip, xres, yres,
-                        GWY_PLANE_MIRROR_HORIZONTALLY);
-    field_congr_new_one(orig, vflip, xres, yres,
-                        GWY_PLANE_MIRROR_VERTICALLY);
-    field_congr_new_one(orig, bflip, xres, yres,
-                        GWY_PLANE_MIRROR_BOTH);
-    field_congr_new_one(orig, dflip, xres, yres,
-                        GWY_PLANE_MIRROR_DIAGONALLY);
-    field_congr_new_one(orig, aflip, xres, yres,
-                        GWY_PLANE_MIRROR_ANTIDIAGONALLY);
-    field_congr_new_one(orig, bflip, xres, yres,
-                        GWY_PLANE_ROTATE_UPSIDE_DOWN);
-    field_congr_new_one(orig, cwrot, xres, yres,
-                        GWY_PLANE_ROTATE_CLOCKWISE);
-    field_congr_new_one(orig, ccwrot, xres, yres,
-                        GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void
