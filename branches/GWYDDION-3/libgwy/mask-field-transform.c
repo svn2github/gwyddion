@@ -159,39 +159,6 @@ flip_vertically_to(const GwyMaskField *source,
     }
 }
 
-/**
- * gwy_mask_field_flip:
- * @field: A two-dimensional mask field.
- * @horizontally: %TRUE to flip the field horizontally, i.e. about the vertical
- *                axis.
- * @vertically: %TRUE to flip the field vertically, i.e. about the horizontal
- *              axis.
- *
- * Flips a two-dimensional mask field about either axis.
- **/
-void
-gwy_mask_field_flip(GwyMaskField *field,
-                    gboolean horizontally,
-                    gboolean vertically)
-{
-    g_return_if_fail(GWY_IS_MASK_FIELD(field));
-    if (!horizontally && !vertically)
-        return;
-
-    gsize rowsize = field->stride * sizeof(guint32);
-    guint32 *buffer = g_slice_alloc(rowsize);
-
-    if (horizontally && vertically)
-        flip_both(field, buffer);
-    else if (horizontally)
-        flip_horizontally(field, buffer);
-    else if (vertically)
-        flip_vertically(field, buffer);
-
-    g_slice_free1(rowsize, buffer);
-    gwy_mask_field_invalidate(field);
-}
-
 #define C64 G_GUINT64_CONSTANT
 
 static const guint64 swap_table[0x100] = {  // {{{
@@ -614,6 +581,7 @@ swap_block_src_aligned(const guint32 *sb, guint32 *db, guint doff,
 // No argument checking.  Source column must be aligned, i.e. a multiple of
 // 0x20.  The source is assumed to be large enough to contain all the data we
 // copy to the destination.
+G_GNUC_UNUSED
 static void
 swap_xy_src_aligned(const GwyMaskField *source,
                     guint col, guint row,
@@ -651,138 +619,6 @@ swap_xy_src_aligned(const GwyMaskField *source,
                                    jend, iend, dstride, sstride);
     }
 }
-
-/**
- * gwy_mask_field_new_transposed:
- * @field: A two-dimensional mask field.
- * @fpart: Area in @field to extract.  Pass %NULL to process entire @field.
- *
- * Transposes a mask field, making rows columns and vice versa.
- *
- * Returns: (transfer full):
- *          A new two-dimensional mask field containing the transposed part
- *          of @field.
- **/
-GwyMaskField*
-gwy_mask_field_new_transposed(const GwyMaskField *field,
-                              const GwyFieldPart *fpart)
-{
-    guint col, row, width, height;
-    if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
-        return NULL;
-
-    GwyMaskField *newfield = gwy_mask_field_new_sized(height, width, FALSE);
-
-    if (col & 0x1f)
-        swap_xy_dest_aligned(field, col, row, width, height, newfield, 0, 0);
-    else
-        swap_xy_both_aligned(field, col, row, width, height, newfield, 0, 0);
-
-    return newfield;
-}
-
-/**
- * gwy_mask_field_transpose:
- * @src: Source two-dimensional mask field.
- * @srcpart: Area in field @src to transpose.  Pass %NULL to operate on
- *           entire @src.
- * @dest: Destination two-dimensional mask field.
- * @destcol: Destination column in @dest.
- * @destrow: Destination row in @dest.
- *
- * Copies data from one mask field to another, transposing it.
- *
- * The transposed rectangle is defined by @srcpart and it is copied to
- * @dest starting from (@destcol, @destrow).  Its width in the source
- * corresponds to height in the destination and vice versa.
- *
- * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corresponds to data inside @src and @dest
- * is copied.  This can also mean nothing is copied at all.
- *
- * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
- **/
-void
-gwy_mask_field_transpose(const GwyMaskField *src,
-                         const GwyFieldPart *srcpart,
-                         GwyMaskField *dest,
-                         guint destcol, guint destrow)
-{
-    guint col, row, width, height;
-    if (!gwy_mask_field_limit_parts(src, srcpart, dest, destcol, destrow,
-                                    TRUE, &col, &row, &width, &height))
-        return;
-
-    // FIXME: Direct transposition of unaligned data would be nice.  Can it be
-    // written without going insane?
-    if ((col & 0x1f) && (destcol & 0x1f)) {
-        GwyFieldPart fpart = { col, row, width, height };
-        GwyMaskField *buffer = gwy_mask_field_new_transposed(src, &fpart);
-        fpart = (GwyFieldPart){0, 0, height, width};
-        gwy_mask_field_copy(buffer, &fpart, dest, destcol, destrow);
-        g_object_unref(buffer);
-    }
-    else if (col & 0x1f)
-        swap_xy_dest_aligned(src, col, row, width, height,
-                             dest, destcol, destrow);
-    else if (destcol & 0x1f)
-        swap_xy_src_aligned(src, col, row, width, height,
-                            dest, destcol, destrow);
-    else
-        swap_xy_both_aligned(src, col, row, width, height,
-                             dest, destcol, destrow);
-
-    gwy_mask_field_invalidate(dest);
-}
-
-/**
- * gwy_mask_field_new_rotated_simple:
- * @field: A two-dimensional mask field.
- * @rotation: Rotation amount (it can also be any positive multiple of 90).
- *
- * Rotates a two-dimensional mask field by a multiple by 90 degrees.
- *
- * Returns: (transfer full):
- *          A new two-dimensional mask field.
- **/
-/*
-GwyMaskField*
-gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
-                                  GwySimpleRotation rotation)
-{
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
-    rotation %= 360;
-
-    if (rotation == GWY_SIMPLE_ROTATE_NONE)
-        return gwy_mask_field_duplicate(field);
-
-    if (rotation == GWY_SIMPLE_ROTATE_UPSIDEDOWN) {
-        GwyMaskField *newfield = gwy_mask_field_duplicate(field);
-        gwy_mask_field_flip(newfield, TRUE, TRUE);
-        return newfield;
-    }
-
-    if (rotation != GWY_SIMPLE_ROTATE_CLOCKWISE
-        && rotation != GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE) {
-        g_critical("Invalid simple rotation amount %u.", rotation);
-        return NULL;
-    }
-
-    GwyMaskField *newfield = gwy_mask_field_new_transposed(field, NULL);
-
-    gsize rowsize = field->stride * sizeof(guint32);
-    guint32 *buffer = g_slice_alloc(rowsize);
-
-    if (rotation == GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE)
-        flip_vertically(newfield, buffer);
-    if (rotation == GWY_SIMPLE_ROTATE_CLOCKWISE)
-        flip_horizontally(newfield, buffer);
-
-    g_slice_free1(rowsize, buffer);
-
-    return newfield;
-}
-*/
 
 /**
  * gwy_mask_field_transform_congruent:

@@ -1492,9 +1492,11 @@ test_mask_field_fill_ellipse(void)
         gwy_mask_field_logical(reference, NULL, NULL, GWY_LOGICAL_NA);
         mask_field_assert_equal(ellipse, reference);
         // Check symmetry
-        gwy_mask_field_flip(reference, TRUE, FALSE);
+        gwy_mask_field_transform_congruent(reference,
+                                           GWY_PLANE_MIRROR_HORIZONTALLY);
         mask_field_assert_equal(ellipse, reference);
-        gwy_mask_field_flip(reference, FALSE, TRUE);
+        gwy_mask_field_transform_congruent(reference,
+                                           GWY_PLANE_MIRROR_VERTICALLY);
         mask_field_assert_equal(ellipse, reference);
         g_object_unref(reference);
         g_object_unref(ellipse);
