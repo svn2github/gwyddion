@@ -861,7 +861,11 @@ transform_congruent_to(const GwyMaskField *source,
         return;
     }
 
-    g_assert(dest->xres == width && dest->yres == height);
+    if (gwy_plane_congruence_is_transposition(transformation))
+        g_assert(dest->xres == height && dest->yres == width);
+    else
+        g_assert(dest->xres == width && dest->yres == height);
+
     if (width == source->xres) {
         g_assert(col == 0);
         if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY) {

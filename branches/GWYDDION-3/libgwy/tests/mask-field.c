@@ -1405,148 +1405,161 @@ test_mask_field_congruence_in_place_group(void)
     g_rand_free(rng);
 }
 
-#if 0
 static void
-test_mask_field_flip_one(const gchar *orig_str,
-                         gboolean horizontally, gboolean vertically,
-                         const gchar *reference_str)
+mask_field_congr_new_one(const gchar *orig_str,
+                         const gchar *reference_str,
+                         GwyPlaneCongruenceType transformation)
 {
-    GwyMaskField *field = mask_field_from_string(orig_str);
-    gwy_mask_field_flip(field, horizontally, vertically);
+    GwyMaskField *source = mask_field_from_string(orig_str);
+    GwyMaskField *field = gwy_mask_field_new_congruent(source, NULL,
+                                                       transformation);
     GwyMaskField *reference = mask_field_from_string(reference_str);
     mask_field_assert_equal(field, reference);
     g_object_unref(field);
     g_object_unref(reference);
+    g_object_unref(source);
 }
 
 void
-test_mask_field_flip(void)
+test_mask_field_congruence_new_4x3(void)
 {
-    // Even/odd
-    const gchar *orig1_str =
+    const gchar *orig_str =
         "####\n"
         "#   \n"
         "#   \n";
-    const gchar *hflip1_str =
+    const gchar *hflip_str =
         "####\n"
         "   #\n"
         "   #\n";
-    const gchar *vflip1_str =
+    const gchar *vflip_str =
         "#   \n"
         "#   \n"
         "####\n";
-    const gchar *bflip1_str =
+    const gchar *bflip_str =
         "   #\n"
         "   #\n"
         "####\n";
-
-    test_mask_field_flip_one(orig1_str, FALSE, FALSE, orig1_str);
-    test_mask_field_flip_one(orig1_str, TRUE, FALSE, hflip1_str);
-    test_mask_field_flip_one(orig1_str, FALSE, TRUE, vflip1_str);
-    test_mask_field_flip_one(orig1_str, TRUE, TRUE, bflip1_str);
-
-    // Odd/even
-    const gchar *orig2_str =
+    const gchar *dflip_str =
         "###\n"
         "#  \n"
         "#  \n"
         "#  \n";
-    const gchar *hflip2_str =
+    const gchar *aflip_str =
+        "  #\n"
+        "  #\n"
+        "  #\n"
+        "###\n";
+    const gchar *cwrot_str =
         "###\n"
         "  #\n"
         "  #\n"
         "  #\n";
-    const gchar *vflip2_str =
+    const gchar *ccwrot_str =
         "#  \n"
         "#  \n"
         "#  \n"
         "###\n";
-    const gchar *bflip2_str =
-        "  #\n"
-        "  #\n"
-        "  #\n"
-        "###\n";
 
-    test_mask_field_flip_one(orig2_str, FALSE, FALSE, orig2_str);
-    test_mask_field_flip_one(orig2_str, TRUE, FALSE, hflip2_str);
-    test_mask_field_flip_one(orig2_str, FALSE, TRUE, vflip2_str);
-    test_mask_field_flip_one(orig2_str, TRUE, TRUE, bflip2_str);
-
-    enum { max_size = 161 };
-    GRand *rng = g_rand_new_with_seed(42);
-    guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 500 : 100;
-
-    for (guint iter = 0; iter < niter; iter++) {
-        guint xres = g_rand_int_range(rng, 1, max_size);
-        guint yres = g_rand_int_range(rng, 1, max_size/4);
-        GwyMaskField *source = gwy_mask_field_new_sized(xres, yres, FALSE);
-        mask_field_randomize(source, pool, max_size, rng);
-        GwyMaskField *dest = gwy_mask_field_duplicate(source);
-
-        gwy_mask_field_flip(dest, FALSE, FALSE);
-        mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, TRUE);
-        gwy_mask_field_flip(dest, TRUE, TRUE);
-        mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        mask_field_assert_equal(source, dest);
-
-        g_object_unref(dest);
-        g_object_unref(source);
-    }
-    mask_field_random_pool_free(pool);
-    g_rand_free(rng);
-}
-
-static void
-test_mask_field_transpose_one(const gchar *orig_str,
-                              const gchar *reference_str)
-{
-    GwyMaskField *field = mask_field_from_string(orig_str);
-    GwyMaskField *transposed = gwy_mask_field_new_transposed(field, NULL);
-    g_object_unref(field);
-    GwyMaskField *reference = mask_field_from_string(reference_str);
-    mask_field_assert_equal(transposed, reference);
-    g_object_unref(transposed);
-    g_object_unref(reference);
+    mask_field_congr_new_one(orig_str, orig_str,
+                             GWY_PLANE_IDENTITY);
+    mask_field_congr_new_one(orig_str, hflip_str,
+                             GWY_PLANE_MIRROR_HORIZONTALLY);
+    mask_field_congr_new_one(orig_str, vflip_str,
+                             GWY_PLANE_MIRROR_VERTICALLY);
+    mask_field_congr_new_one(orig_str, bflip_str,
+                             GWY_PLANE_MIRROR_BOTH);
+    mask_field_congr_new_one(orig_str, dflip_str,
+                             GWY_PLANE_MIRROR_DIAGONALLY);
+    mask_field_congr_new_one(orig_str, aflip_str,
+                             GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    mask_field_congr_new_one(orig_str, cwrot_str,
+                             GWY_PLANE_ROTATE_CLOCKWISE);
+    mask_field_congr_new_one(orig_str, ccwrot_str,
+                             GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void
-test_mask_field_transpose(void)
+test_mask_field_congruence_new_3x4(void)
 {
-    const gchar *orig1_str =
-        "####\n"
-        "#   \n"
-        "#   \n";
-    const gchar *trans1_str =
+    const gchar *orig_str =
         "###\n"
         "#  \n"
         "#  \n"
         "#  \n";
+    const gchar *hflip_str =
+        "###\n"
+        "  #\n"
+        "  #\n"
+        "  #\n";
+    const gchar *vflip_str =
+        "#  \n"
+        "#  \n"
+        "#  \n"
+        "###\n";
+    const gchar *bflip_str =
+        "  #\n"
+        "  #\n"
+        "  #\n"
+        "###\n";
+    const gchar *dflip_str =
+        "####\n"
+        "#   \n"
+        "#   \n";
+    const gchar *aflip_str =
+        "   #\n"
+        "   #\n"
+        "####\n";
+    const gchar *cwrot_str =
+        "####\n"
+        "   #\n"
+        "   #\n";
+    const gchar *ccwrot_str =
+        "#   \n"
+        "#   \n"
+        "####\n";
 
-    test_mask_field_transpose_one(orig1_str, trans1_str);
-    test_mask_field_transpose_one(trans1_str, orig1_str);
+    mask_field_congr_new_one(orig_str, orig_str,
+                             GWY_PLANE_IDENTITY);
+    mask_field_congr_new_one(orig_str, hflip_str,
+                             GWY_PLANE_MIRROR_HORIZONTALLY);
+    mask_field_congr_new_one(orig_str, vflip_str,
+                             GWY_PLANE_MIRROR_VERTICALLY);
+    mask_field_congr_new_one(orig_str, bflip_str,
+                             GWY_PLANE_MIRROR_BOTH);
+    mask_field_congr_new_one(orig_str, dflip_str,
+                             GWY_PLANE_MIRROR_DIAGONALLY);
+    mask_field_congr_new_one(orig_str, aflip_str,
+                             GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    mask_field_congr_new_one(orig_str, cwrot_str,
+                             GWY_PLANE_ROTATE_CLOCKWISE);
+    mask_field_congr_new_one(orig_str, ccwrot_str,
+                             GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+}
 
-    const gchar *orig2_str =
+void
+test_mask_field_congruence_new_33x4(void)
+{
+    const gchar *orig_str =
         "#################################\n"
         "#                                \n"
         "#                                \n"
         "# # # # # # # # # # # # # # # # #\n";
-    const gchar *trans2_str =
+    const gchar *hflip_str =
+        "#################################\n"
+        "                                #\n"
+        "                                #\n"
+        "# # # # # # # # # # # # # # # # #\n";
+    const gchar *vflip_str =
+        "# # # # # # # # # # # # # # # # #\n"
+        "#                                \n"
+        "#                                \n"
+        "#################################\n";
+    const gchar *bflip_str =
+        "# # # # # # # # # # # # # # # # #\n"
+        "                                #\n"
+        "                                #\n"
+        "#################################\n";
+    const gchar *dflip_str =
         "####\n"
         "#   \n"
         "#  #\n"
@@ -1580,118 +1593,161 @@ test_mask_field_transpose(void)
         "#  #\n"
         "#   \n"
         "#  #\n";
+    const gchar *aflip_str =
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "####\n";
+    const gchar *cwrot_str =
+        "####\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n"
+        "   #\n"
+        "#  #\n";
+    const gchar *ccwrot_str =
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "#  #\n"
+        "#   \n"
+        "####\n";
 
-    test_mask_field_transpose_one(orig2_str, trans2_str);
-    test_mask_field_transpose_one(trans2_str, orig2_str);
-
-    enum { max_size = 149 };
-    GRand *rng = g_rand_new_with_seed(42);
-    guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 100000 : 2000;
-
-    for (guint iter = 0; iter < niter; iter++) {
-        guint xres = g_rand_int_range(rng, 1, max_size);
-        guint yres = g_rand_int_range(rng, 1, max_size/4);
-        GwyMaskField *source = gwy_mask_field_new_sized(xres, yres, FALSE);
-        mask_field_randomize(source, pool, max_size, rng);
-        guint width = g_rand_int_range(rng, 1, xres+1);
-        guint height = g_rand_int_range(rng, 1, yres+1);
-        guint col = g_rand_int_range(rng, 0, xres-width+1);
-        guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyMaskField *dest = gwy_mask_field_duplicate(source);
-        GwyFieldPart fpart = { col, row, width, height };
-        GwyMaskField *part = gwy_mask_field_new_transposed(source, &fpart);
-        fpart = (GwyFieldPart){0, 0, height, width};
-        gwy_mask_field_transpose(part, &fpart, dest, col, row);
-        mask_field_assert_equal(source, dest);
-
-        g_object_unref(part);
-        g_object_unref(dest);
-        g_object_unref(source);
-    }
-    mask_field_random_pool_free(pool);
-    g_rand_free(rng);
-}
-
-static void
-test_mask_field_rotate_one(const gchar *orig_str,
-                           GwySimpleRotation rotation,
-                           const gchar *reference_str)
-{
-    GwyMaskField *field = mask_field_from_string(orig_str);
-    GwyMaskField *rotated = gwy_mask_field_new_rotated_simple(field, rotation);
-    g_object_unref(field);
-    GwyMaskField *reference = mask_field_from_string(reference_str);
-    mask_field_assert_equal(rotated, reference);
-    g_object_unref(rotated);
-    g_object_unref(reference);
+    mask_field_congr_new_one(orig_str, orig_str,
+                             GWY_PLANE_IDENTITY);
+    mask_field_congr_new_one(orig_str, hflip_str,
+                             GWY_PLANE_MIRROR_HORIZONTALLY);
+    mask_field_congr_new_one(orig_str, vflip_str,
+                             GWY_PLANE_MIRROR_VERTICALLY);
+    mask_field_congr_new_one(orig_str, bflip_str,
+                             GWY_PLANE_MIRROR_BOTH);
+    mask_field_congr_new_one(orig_str, dflip_str,
+                             GWY_PLANE_MIRROR_DIAGONALLY);
+    mask_field_congr_new_one(orig_str, aflip_str,
+                             GWY_PLANE_MIRROR_ANTIDIAGONALLY);
+    mask_field_congr_new_one(orig_str, cwrot_str,
+                             GWY_PLANE_ROTATE_CLOCKWISE);
+    mask_field_congr_new_one(orig_str, ccwrot_str,
+                             GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
 }
 
 void
-test_mask_field_rotate(void)
+test_mask_field_congruence_new_group(void)
 {
-    // Even/odd
-    const gchar *orig1_str =
-        "####\n"
-        "#   \n"
-        "#   \n";
-    const gchar *r90d1_str =
-        "#  \n"
-        "#  \n"
-        "#  \n"
-        "###\n";
-    const gchar *r180d1_str =
-        "   #\n"
-        "   #\n"
-        "####\n";
-    const gchar *r270d1_str =
-        "###\n"
-        "  #\n"
-        "  #\n"
-        "  #\n";
+    check_congruence_group_sanity();
 
-    test_mask_field_rotate_one(orig1_str, 0, orig1_str);
-    test_mask_field_rotate_one(orig1_str, 90, r90d1_str);
-    test_mask_field_rotate_one(orig1_str, 180, r180d1_str);
-    test_mask_field_rotate_one(orig1_str, 270, r270d1_str);
-
-    test_mask_field_rotate_one(r90d1_str, 0, r90d1_str);
-    test_mask_field_rotate_one(r90d1_str, 90, r180d1_str);
-    test_mask_field_rotate_one(r90d1_str, 180, r270d1_str);
-    test_mask_field_rotate_one(r90d1_str, 270, orig1_str);
-
-    test_mask_field_rotate_one(r180d1_str, 0, r180d1_str);
-    test_mask_field_rotate_one(r180d1_str, 90, r270d1_str);
-    test_mask_field_rotate_one(r180d1_str, 180, orig1_str);
-    test_mask_field_rotate_one(r180d1_str, 270, r90d1_str);
-
-    test_mask_field_rotate_one(r270d1_str, 0, r270d1_str);
-    test_mask_field_rotate_one(r270d1_str, 90, orig1_str);
-    test_mask_field_rotate_one(r270d1_str, 180, r90d1_str);
-    test_mask_field_rotate_one(r270d1_str, 270, r180d1_str);
-
-    enum { max_size = 161 };
+    enum { max_size = 97 };
     GRand *rng = g_rand_new_with_seed(42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 5000 : 1000;
+    gsize niter = 500;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
-        guint yres = g_rand_int_range(rng, 1, max_size/4);
-        GwyMaskField *source = gwy_mask_field_new_sized(xres, yres, FALSE);
-        mask_field_randomize(source, pool, max_size, rng);
-        GwyMaskField *rotccw = gwy_mask_field_new_rotated_simple(source, 90);
-        GwyMaskField *rotcw = gwy_mask_field_new_rotated_simple(source, 270);
-        gwy_mask_field_flip(rotcw, TRUE, TRUE);
-        mask_field_assert_equal(rotcw, rotccw);
-        g_object_unref(rotcw);
-        g_object_unref(rotccw);
-        g_object_unref(source);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+        mask_field_randomize(field, pool, max_size, rng);
+
+        GwyPlaneCongruenceType trans1 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruenceType trans2 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruenceType compound = plane_congruence_group[trans1][trans2];
+        GwyMaskField *reference = gwy_mask_field_new_congruent(field, NULL,
+                                                               compound);
+        GwyMaskField *tmp = gwy_mask_field_new_congruent(field, NULL, trans1);
+        GwyMaskField *result = gwy_mask_field_new_congruent(tmp, NULL, trans2);
+        mask_field_assert_equal(result, reference);
+
+        g_object_unref(result);
+        g_object_unref(tmp);
+        g_object_unref(reference);
+        g_object_unref(field);
     }
+
     mask_field_random_pool_free(pool);
     g_rand_free(rng);
 }
-#endif
 
 void
 test_mask_field_fill_ellipse(void)
