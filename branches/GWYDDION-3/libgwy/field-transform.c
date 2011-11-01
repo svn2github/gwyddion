@@ -51,7 +51,7 @@ mirror_centrally_in_place(GwyField *field,
         for (guint j = width; j; j--, s--, d++)
             DSWAP(*d, *s);
     }
-    if (height % 2 == 0) {
+    if (height % 2 == 1) {
         gdouble *d = base + (height/2)*xres, *s = d + width-1;
         for (guint j = width/2; j; j--, s--, d++)
             DSWAP(*d, *s);
