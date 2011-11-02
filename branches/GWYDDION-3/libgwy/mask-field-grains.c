@@ -34,7 +34,7 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
 }
 
 static void
-number_grains(GwyMaskField *field)
+number_grains(const GwyMaskField *field)
 {
     MaskField *priv = field->priv;
     g_return_if_fail(!priv->grains);
@@ -118,7 +118,7 @@ number_grains(GwyMaskField *field)
  * Returns: The number of grains in @field.
  **/
 guint
-gwy_mask_field_n_grains(GwyMaskField *field)
+gwy_mask_field_n_grains(const GwyMaskField *field)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
     MaskField *priv = field->priv;
@@ -144,7 +144,7 @@ gwy_mask_field_n_grains(GwyMaskField *field)
  *          mask field is finalized.
  **/
 const guint*
-gwy_mask_field_grain_numbers(GwyMaskField *field)
+gwy_mask_field_grain_numbers(const GwyMaskField *field)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     MaskField *priv = field->priv;
@@ -155,7 +155,7 @@ gwy_mask_field_grain_numbers(GwyMaskField *field)
 }
 
 static void
-calculate_grain_properties(GwyMaskField *field)
+calculate_grain_properties(const GwyMaskField *field)
 {
     MaskField *priv = field->priv;
 
@@ -227,7 +227,7 @@ calculate_grain_properties(GwyMaskField *field)
  *          finalized.
  **/
 const guint*
-gwy_mask_field_grain_sizes(GwyMaskField *field)
+gwy_mask_field_grain_sizes(const GwyMaskField *field)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     if (!field->priv->grain_sizes)
@@ -253,7 +253,7 @@ gwy_mask_field_grain_sizes(GwyMaskField *field)
  *          finalized.
  **/
 const GwyFieldPart*
-gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
+gwy_mask_field_grain_bounding_boxes(const GwyMaskField *field)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     if (!field->priv->grain_bounding_boxes)
@@ -263,7 +263,7 @@ gwy_mask_field_grain_bounding_boxes(GwyMaskField *field)
 }
 
 static GwyXY*
-find_grain_positions(GwyMaskField *field)
+find_grain_positions(const GwyMaskField *field)
 {
     guint xres = field->xres, yres = field->yres;
     guint ngrains = gwy_mask_field_n_grains(field);
@@ -525,7 +525,7 @@ find_grain_positions(GwyMaskField *field)
  *          finalized.
  **/
 const GwyXY*
-gwy_mask_field_grain_positions(GwyMaskField *field)
+gwy_mask_field_grain_positions(const GwyMaskField *field)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     if (!field->priv->grain_positions)
@@ -658,7 +658,7 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
  * ]|
  **/
 void
-gwy_mask_field_extract_grain(GwyMaskField *field,
+gwy_mask_field_extract_grain(const GwyMaskField *field,
                              GwyMaskField *target,
                              guint grain_id,
                              guint border_width)
