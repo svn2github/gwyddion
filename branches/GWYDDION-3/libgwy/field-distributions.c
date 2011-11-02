@@ -28,6 +28,7 @@
 #include "libgwy/line-distributions.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-distributions.h"
+#include "libgwy/mask-field-grains.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/mask-field-internal.h"
@@ -967,6 +968,165 @@ gwy_field_row_acf(const GwyField *field,
 fail:
     if (!line)
         line = gwy_line_new();
+
+    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
+                            gwy_field_get_unit_xy(field), 1,
+                            gwy_field_get_unit_z(field), 2);
+    return line;
+}
+
+// @accum_{data,mask} are just working buffers (they are called this for
+// consistency with normal ACF).
+static void
+grain_row_acf(const gdouble *base,
+              guint xres, guint width, guint height,
+              const GwyMaskField *mask,
+              GwyMaskingType masking,
+              guint level,
+              gdouble *fftr,
+              gwycomplex *fftc,
+              gdouble *accum_data, gdouble *accum_mask)
+{
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
+    guint nfullrows = 0, nemptyrows = 0;
+
+    fftw_plan plan = fftw_plan_dft_r2c_1d(size, fftr, fftc,
+                                          FFTW_DESTROY_INPUT
+                                          | _gwy_fft_rigour());
+    // Gather squared Fourier coefficients for all rows
+    for (guint i = 0; i < height; i++) {
+        guint count = row_level_and_count(base + i*xres, fftr, width,
+                                          mask, masking, 0, i, level);
+        if (!count) {
+            nemptyrows++;
+            continue;
+        }
+
+        // Calculate and gather squared Fourier coefficients of the data.
+        row_extfft_accum_cnorm(plan, fftr, accum_data, fftc, size, width, 1.0);
+
+        if (count == width) {
+            nfullrows++;
+            continue;
+        }
+
+        // Calculate and gather squared Fourier coefficients of the mask.
+        row_assign_mask(mask, 0, i, width, invert, fftr);
+        row_extfft_accum_cnorm(plan, fftr, accum_mask, fftc, size, width, 1.0);
+    }
+
+    // Numerator of G_k, i.e. FFT of squared data Fourier coefficients.
+    row_extfft_extract_re(plan, fftr, accum_data, fftc, size, width);
+
+    // Denominator of G_k, i.e. FFT of squared mask Fourier coefficients.
+    // Don't perform the FFT if there were no partial rows.
+    if (nfullrows + nemptyrows < height)
+        row_extfft_extract_re(plan, fftr, accum_mask, fftc, size, width);
+
+    for (guint j = 0; j < width; j++) {
+        // Denominators must be rounded to integers because they are integers
+        // and this permits to detect zeroes in the denominator.
+        accum_mask[j] = gwy_round(accum_mask[j]) + nfullrows*(width - j);
+    }
+
+    fftw_destroy_plan(plan);
+}
+
+/**
+ * gwy_field_grain_row_acf:
+ * @field: A two-dimensional data field.
+ * @mask: A two-dimensional mask field defining the areas to analyse.
+ * @grain_id: The id number of the grain to analyse, from 1 to @ngrains (see
+ *            gwy_mask_field_grain_numbers()).  Passing 0 means to analyse the
+ *            empty space outside grains as a whole and thus not much different
+ *            from gwy_field_row_acf() with %GWY_MASK_EXCLUDE masking type.
+ *            Passing %G_MAXUINT means to calculate ACF of the entire masked
+ *            area but by constructing it from single-grains ACFs which is
+ *            different from gwy_field_row_acf().
+ *
+ * Calculates the row-wise autocorrelation function of a field.
+ *
+ * The calculated ACF has the natural number of points, i.e. the width of
+ * the widest grain analysed.
+ *
+ * See gwy_field_row_acf() for calculation details.
+ *
+ * This function works with entire fields.  A single grain in the complete mask
+ * can correspond to several disjoint grains or no grain in a part of the mask.
+ * Therefore, to pass a meaningful @grain_id, you need to explicitly extract
+ * the mask part and number grains in it anyway.
+ **/
+GwyLine*
+gwy_field_grain_row_acf(const GwyField *field,
+                        const GwyMaskField *mask,
+                        guint grain_id,
+                        guint level)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), NULL);
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_val_if_fail(mask->xres == field->xres, NULL);
+    g_return_val_if_fail(mask->yres == field->yres, NULL);
+
+    if (level > 1) {
+        g_warning("Levelling degree %u is not supported, changing to 1.",
+                  level);
+        level = 1;
+    }
+
+    guint ngrains = gwy_mask_field_n_grains(mask);
+    const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
+    g_return_val_if_fail(grain_id <= ngrains || grain_id == G_MAXUINT, NULL);
+
+    guint gfrom = (grain_id == G_MAXUINT) ? 1 : grain_id;
+    guint gto = (grain_id == G_MAXUINT) ? ngrains : grain_id;
+    guint width = 0;
+
+    for (grain_id = gfrom; grain_id <= gto; grain_id++) {
+        const GwyFieldPart *bbox = bboxes + grain_id;
+        if (bbox->width > width)
+            width = bbox->width;
+    }
+
+    // Transform size must be at least twice the data size for zero padding.
+    // An even size is necessary due to alignment constraints in FFTW.
+    // Using this size for all buffers is a bit excessive but safe.
+    GwyLine *line = gwy_line_new_sized(width, TRUE);
+    gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    gsize cstride = size/2 + 1;
+    gdouble *fftr = fftw_malloc(3*size*sizeof(gdouble) + 2*width);
+    gdouble *accum_data = fftr + size;
+    gdouble *accum_mask = fftr + 2*size;
+    gdouble *total_data = fftr + 3*size;
+    gdouble *total_mask = fftr + 3*size + width;
+    gwycomplex *fftc = fftw_malloc(cstride*sizeof(gwycomplex));
+
+    gwy_clear(total_data, width);
+    gwy_clear(total_mask, width);
+    for (grain_id = gfrom; grain_id <= gto; grain_id++) {
+        GwyMaskingType masking = grain_id ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
+        const GwyFieldPart *bbox = bboxes + grain_id;
+
+        gwy_clear(accum_data, size);
+        gwy_clear(accum_mask, size);
+        grain_row_acf(field->data + bbox->row*field->xres + bbox->col,
+                      field->xres, bbox->width, bbox->height,
+                      mask, masking, level,
+                      fftr, fftc, accum_data, accum_mask);
+        row_accumulate(total_data, accum_data, width);
+        row_accumulate(total_mask, accum_mask, width);
+    }
+
+    row_divide_nonzero(accum_data, accum_mask, line->data, line->res);
+
+    fftw_free(fftc);
+    fftw_free(fftr);
+    line->real = gwy_field_dx(field)*line->res;
+    line->off = -0.5*gwy_line_dx(line);
 
     gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
     gwy_unit_power_multiply(gwy_line_get_unit_y(line),

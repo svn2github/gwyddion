@@ -34,49 +34,53 @@ typedef enum {
     GWY_MINKOWSKI_CONNECTIVITY,
 } GwyMinkowskiFunctionalType;
 
-GwyLine* gwy_field_value_dist(const GwyField *field,
-                              const GwyFieldPart *fpart,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              gboolean cumulative,
-                              gboolean continuous,
-                              guint npoints,
-                              gdouble min,
-                              gdouble max)                     G_GNUC_MALLOC;
-GwyLine* gwy_field_slope_dist(const GwyField *field,
-                              const GwyFieldPart *fpart,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              gdouble angle,
-                              gboolean cumulative,
-                              gboolean continuous,
-                              guint npoints,
-                              gdouble min,
-                              gdouble max)                     G_GNUC_MALLOC;
-GwyLine* gwy_field_row_psdf  (const GwyField *field,
-                              const GwyFieldPart *fpart,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              GwyWindowingType windowing,
-                              guint level)                     G_GNUC_MALLOC;
-GwyLine* gwy_field_row_acf   (const GwyField *field,
-                              const GwyFieldPart *fpart,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              guint level)                     G_GNUC_MALLOC;
-GwyLine* gwy_field_row_hhcf  (const GwyField *field,
-                              const GwyFieldPart *fpart,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              guint level)                     G_GNUC_MALLOC;
-GwyLine* gwy_field_minkowski (const GwyField *field,
-                              const GwyFieldPart *fpart,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              GwyMinkowskiFunctionalType type,
-                              guint npoints,
-                              gdouble min,
-                              gdouble max)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_value_dist   (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 gboolean cumulative,
+                                 gboolean continuous,
+                                 guint npoints,
+                                 gdouble min,
+                                 gdouble max)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_slope_dist   (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 gdouble angle,
+                                 gboolean cumulative,
+                                 gboolean continuous,
+                                 guint npoints,
+                                 gdouble min,
+                                 gdouble max)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_row_psdf     (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 GwyWindowingType windowing,
+                                 guint level)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_row_acf      (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 guint level)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_row_hhcf     (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 guint level)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_minkowski    (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 GwyMinkowskiFunctionalType type,
+                                 guint npoints,
+                                 gdouble min,
+                                 gdouble max)                     G_GNUC_MALLOC;
+GwyLine* gwy_field_grain_row_acf(const GwyField *field,
+                                 const GwyMaskField *mask,
+                                 guint grain_id,
+                                 guint level)                     G_GNUC_MALLOC;
 
 G_END_DECLS
 
