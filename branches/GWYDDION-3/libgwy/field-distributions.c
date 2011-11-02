@@ -1057,6 +1057,9 @@ grain_row_acf(const gdouble *base,
  * can correspond to several disjoint grains or no grain in a part of the mask.
  * Therefore, to pass a meaningful @grain_id, you need to explicitly extract
  * the mask part and number grains in it anyway.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the ACF.
  **/
 GwyLine*
 gwy_field_grain_row_acf(const GwyField *field,
