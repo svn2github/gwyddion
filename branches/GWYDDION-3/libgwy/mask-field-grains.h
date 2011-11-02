@@ -25,14 +25,14 @@
 
 G_BEGIN_DECLS
 
-guint               gwy_mask_field_n_grains            (GwyMaskField *field);
-const guint*        gwy_mask_field_grain_numbers       (GwyMaskField *field);
-const guint*        gwy_mask_field_grain_sizes         (GwyMaskField *field);
-const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(GwyMaskField *field);
-const GwyXY*        gwy_mask_field_grain_positions     (GwyMaskField *field);
+guint               gwy_mask_field_n_grains            (const GwyMaskField *field);
+const guint*        gwy_mask_field_grain_numbers       (const GwyMaskField *field);
+const guint*        gwy_mask_field_grain_sizes         (const GwyMaskField *field);
+const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(const GwyMaskField *field);
+const GwyXY*        gwy_mask_field_grain_positions     (const GwyMaskField *field);
 void                gwy_mask_field_remove_grain        (GwyMaskField *field,
                                                         guint grain_id);
-void                gwy_mask_field_extract_grain       (GwyMaskField *field,
+void                gwy_mask_field_extract_grain       (const GwyMaskField *field,
                                                         GwyMaskField *target,
                                                         guint grain_id,
                                                         guint border_width);
