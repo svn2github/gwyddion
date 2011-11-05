@@ -1,0 +1,386 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: presentations.xml 10418 2009-11-13 14:53:56Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='presentations' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Présentations</title>
+  <para>
+    Les modules <link linkend='presentations-masks'>Présentation</link> ne
+    modifient pas les données, ils donnent les résultats sur une couche séparée
+    affichée par-dessus les données originales. Les autres outils et modules de
+    traitement des données continuent à opérer sur les données sous-jacentes.
+    Pour supprimer une présentation il suffit de faire un clic droit sur la
+    fenêtre des données, et sélectionner
+    <guimenuitem>Supprimer la présentation</guimenuitem>.
+  </para>
+  <sect2 id='presentationops'>
+    <title>Opérations basiques</title>
+    <indexterm>
+      <primary>présentation</primary>
+      <primary>opérations basiques</primary>
+    </indexterm>
+    <para>
+      Le menu
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+      </menuchoice>
+      propose les opérations basiques de présentation :
+    </para>
+    <variablelist>
+      <varlistentry id='presentation-attach'>
+        <term><guimenuitem>Attacher une présentation</guimenuitem></term>
+        <listitem>
+          <para>
+            Attache un autre champ de données sous forme de présentation aux
+            données courantes. Notez que cette option très utile peut prêter à
+            confusion lorsqu'on évalue les propriétés des données, car celles-ci
+            sont évaluées sur les données sous-jacentes (et non depuis celles de
+            la présentation, même si celles-ci peuvent ressembler aux données).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='presentation-remove'>
+        <term><guimenuitem>Supprimer la présentation</guimenuitem></term>
+        <listitem>
+          <para>
+            Supprime la présentation de la fenêtre de données courante. Cette
+            opération est une alternative au menu contextuel obtenu en faisant
+            clic-droit dans la fenêtre des données.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='presentation-extract'>
+        <term><guimenuitem>Extraire la présentation</guimenuitem></term>
+        <listitem>
+          <para>
+            Extrait la présentation de la fenêtre de données courante vers un
+            nouveau canal placé dans le même fichier. On peut ainsi obtenir des
+            données de présentation que l'on pourra traiter par la suite. Notez
+            toutefois que les données extraites n'ont aucune échelle, car les
+            présentations permettent en général de visualiser certaines
+            informations, auxquelles il est difficile voire impossible
+            d'assigner une quantité physique. La plage de valeur du nouveau
+            canal est ainsi toujours <xi:include href="eqi-interval-0-1.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-presentation-examples'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='presentations.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Illustration de quelques filtres de présentation</phrase>
+        </textobject>
+        <caption>
+          Exemples de présentation :
+          (a) données originales,
+          (b) ombre,
+          (c) gradient Prewitt vertical,
+          (d) détection de bord Canny,
+          (e) détection de bord par non-linéarité locale,
+          (f) amélioration du contraste local.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='shade'>
+    <title>Ombre</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+        <guimenuitem>Ombre</guimenuitem>
+      </menuchoice>
+    </para>
+    <indexterm><primary>ombre</primary></indexterm>
+    <para>
+      Fonction simple et très utile permettant de visualiser les données telles
+      qu'elles le seraient en étant éclairées selon une direction donnée. Cette
+      dernière peut être définie pas l'utilisateur. Il est aussi possible de
+      mélanger l'image ombrée avec l'image originale pour des raisons de
+      présentation. Bien évidemment, l'image résultante n'a aucune signification
+      physique.
+    </para>
+  </sect2>
+  <sect2 id='gradient'>
+    <title>Détection de gradient</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+        <guimenuitem>Gradient</guimenuitem>
+      </menuchoice>
+    </para>
+    <indexterm><primary>filtres de gradient</primary></indexterm>
+    <indexterm><primary>gradient Sobel</primary></indexterm>
+    <indexterm><primary>gradient Prewitt</primary></indexterm>
+    <para>
+      Les filtres des gradients Sobel et Prewitt (horizontaux et verticaux)
+      créent des images similaires à celles obtenues avec la fonction Ombre,
+      mais ici les données de sortie résultent de la convolution des données par
+      des noyaux relativement standards. Elles peuvent donc être utilisées par
+      la suite pour d'autres traitements par exemple. Les noyaux des filtres
+      horizontaux sont donnés ci-dessous, les noyaux verticaux ne diffèrent que
+      par une réflection autour de la diagonale principale.
+      <xi:include href="eq-filters-sobel-prewitt.xml"/>
+    </para>
+  </sect2>
+  <sect2 id='edge'>
+    <title>Détection de bord</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+        <guisubmenu>Détection de bord</guisubmenu>
+      </menuchoice>
+    </para>
+    <indexterm><primary>détection de bord</primary></indexterm>
+    <indexterm><primary>détection de saut</primary></indexterm>
+    <para>
+      On porte souvent un intérêt particulier dans la visualisation des
+      discontinuités présentes dans l'image, en particulier celles de valeur
+      (ordre zéro) et celles de dérivée (premier ordre). Bien que les méthodes
+      de localisation des deux sont communément qualifiées de
+      <quote>détection de bord</quote>, celles-ci sont en fait assez
+      différentes, nous ferons donc référence à la première comme détection de
+      saut, et à la seconde comme détection de bord. Les méthodes de détection
+      des détails plus spécifiques, par exemple les coins, sont aussi couramment
+      utilisées, celles-ci sont généralement d'ordre zéro.
+    </para>
+    <para>
+      L'ordre d'une méthode de détection peut être visualisé facilement sur
+      l'image obtenue, la détection de bord produisant typiquement des lignes
+      doubles au niveau des discontinuités de valeur, tel qu'illustré dans
+      l'image qui suit. Bien que les positions des bords haut et bas coïncident
+      dans un saut idéal, les données d'un véritable saut contiennent en fait
+      deux bords distincts, tel que l'illustre l'image. De plus, la détection
+      de deux bords sur un saut de valeur est souvent un aspect inhérent des
+      méthodes de détection de bord.
+    </para>
+    <informalfigure id='fig-step-vs-edge'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='step-edge.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='step-edge.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Schéma du saut et du bord uni-dimensionnels</phrase>
+        </textobject>
+        <caption>
+          Comparaison entre le saut et le bord en une dimension.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Les fonctions de détection de saut et de bord suivantes sont disponibles
+      dans Gwyddion (les dernières sont plutôt expérimentales, mais elles
+      donnent souvent de meilleurs résultats que les algorithmes les plus
+      connus):
+    </para>
+    <variablelist>
+      <varlistentry id='edge-canny'>
+        <term>
+          <guilabel>Canny</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>Canny</primary>
+            <secondary>détection de bord</secondary>
+          </indexterm>
+          <para>
+            Le détecteur de bord Canny est très connu, il peut être utilisé pour
+            extraire l'image des fortes discontinuités sous forme de fines
+            lignes larges d'un pixel.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-log'>
+        <term>
+          <guilabel>Laplacien d'une gaussienne</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>Laplacien d'une gaussienne</primary>
+          </indexterm>
+          <para>
+            Ce filtre est une simple convolution par le noyau suivant (il s'agit
+            de la limite du laplacien discret d'un filtre gaussien pour
+            <xi:include href="eqi-sigma-to-0.xml"/>) :
+            <xi:include href="eq-filters-laplacian.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-zero-crossing'>
+        <term>
+          <guilabel>Coupure à zéro</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>détection de bord par coupure à zéro</primary>
+          </indexterm>
+          <para>
+            La détection de bord par coupure à zéro marque les lignes où le
+            résultat du filtre laplacien d'une gaussienne change de signe,
+            c'est-à-dire lorsqu'il coupe zéro. La largeur à mi-hauteur (FWHM) de
+            la gaussienne détermine le niveau de détail couvert par ce filtre.
+            Le seuil permet d'exclure les changements de signe sur de trop
+            petites valeurs absolues des pixels voisins, ce qui permet de
+            filtrer le bruit. Notez toutefois que pour un seuil non nul les
+            lignes de bord peuvent devenir discontinues.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-step'>
+        <indexterm>
+          <primary>détection de saut</primary>
+        </indexterm>
+        <term>
+          <guilabel>Saut</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Algorithme de détection de saut donnant une bonne résolution,
+            c'est-à-dire des lignes de discontinuités précises, ainsi qu'une
+            bonne dynamique tout en étant relativement peu sensible au bruit. Le
+            principe est assez simple : il visualise la racine de la différence
+            entre les quantiles 2/3 et 1/3 des valeurs présentes dans un
+            voisinage de 2,5 pixels de rayon centré autour de l'échantillon.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-rms'>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>RMS</primary>
+            <secondary>détection de bord</secondary>
+          </indexterm>
+          <para>
+            Ce détecteur de saut visualise les zones ayant de fortes variations
+            locales. Ce filtre calcule et affiche la moyenne quadratique des
+            écarts à la moyenne dans un voisinage circulaire de 2,5 pixels de
+            rayon centré sur chaque échantillon.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-rms-edge'>
+        <term>
+          <guilabel>Bord RMS</guilabel>
+        </term>
+        <listitem>
+          <indexterm><primary>détection de bord RMS</primary></indexterm>
+          <para>
+            Cette fonction effectue essentiellement un post traitement de la
+            sortie RMS à l'aide d'un filtre similaire au laplacien afin de
+            mettre en valeur les limites des zones ayant de fortes variations
+            locales des valeurs. Malgré son nom, ce filtre est un détecteur de
+            saut.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-local-nonlinearity'>
+        <term>
+          <guilabel>Non-linéarité locale</guilabel>
+        </term>
+        <listitem>
+          <indexterm><primary>détection de bord par non-linéarité locale</primary></indexterm>
+          <para>
+            Détecteur de bord permettant de visualiser les zones de non
+            planéité locales. Il ajuste un plan sur un voisinage circulaire de
+            2,5 pixels de rayon centré sur chaque échantillon, puis calcule la
+            somme quadratique résiduelle de cet ajustement réduit par la pente
+            du plan, c'est-à-dire divisé par
+            <xi:include href="eqi-1-plus-b_x-to-2-plus-b_y-to-2.xml"/>
+            où <xi:include href="eqi-b_x.xml"/>
+            et <xi:include href="eqi-b_y.xml"/>
+            sont respectivement les coefficients du plan dans les directions
+            <xi:include href="eqi-x.xml"/> et <xi:include href="eqi-y.xml"/>.
+            La racine carrée est finalement affichée.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='edge-inclination'>
+        <indexterm>
+          <primary>inclinaison</primary>
+          <secondary>détection de bord</secondary>
+        </indexterm>
+        <term>
+          <guilabel>Inclinaison</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Permet de visualiser l'angle d'inclinaison
+            <xi:include href="eqi-theta.xml"/> du plan local. Techniquement,
+            cette fonction appartient aux détecteurs de saut, toutefois la mise
+            en valeur des sauts n'est pas très forte et ce filtre est plutôt
+            destiné à une comparaison visuelle des différentes pentes présentes
+            dans l'image.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-edge-method-comparison'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='edge-method-comparison.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>
+            Comparaison des méthodes de détection de saut et de bord sur
+            plusieurs images
+          </phrase>
+        </textobject>
+        <caption>
+          Comparaison des méthodes de détection de saut et de bord sur plusieurs
+          exemples de données. Canny et coupure à zéro sont des détecteurs de
+          saut produisant des lignes de bord d'un pixel de large, saut et
+          inclinaison sont des détecteurs de saut donnant des données continues,
+          non-linéarité locale est un détecteur de bord – la détection de bord
+          est aisément observée sur les seconde et troisième lignes. Notez que
+          la coupure à zéro est ajustable, ses paramètres ont été choisis de
+          manière à produire des résultats intéressants pour chaque exemple.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='local-contrast'>
+    <title>Contraste local</title>
+    <indexterm><primary>amélioration locale du contraste</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+        <guimenuitem>Contraste local</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Méthode permettant de visualiser les détails dans les zones présentant des
+      variations aussi bien faibles qu'élevées. Le calcul détermine la plage de
+      valeurs locale (ou variation) autour de chaque échantillon, et l'étire de
+      manière à égaliser cette variation sur toutes les données.
+    </para>
+  </sect2>
+  <sect2 id='logscale'>
+  <title>Echelle logarithmique</title>
+    <indexterm><primary>échelle logarithmique</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+        <guimenuitem>Echelle logarithmique</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      L'échelle logarithmique est utilisée pour la présentation des données en
+      fausses couleurs.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

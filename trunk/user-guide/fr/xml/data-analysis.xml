@@ -19,7 +19,7 @@
   <xi:include href='interpolation.xml'/>
   <xi:include href='leveling.xml'/>
   <xi:include href='filters.xml'/>
-<!--  <xi:include href='presentations.xml'/> -->
+  <xi:include href='presentations.xml'/>
   <xi:include href='edit.xml'/>
   <xi:include href='edit-extended.xml'/>
 <!--  <xi:include href='statistical.xml'/> -->
