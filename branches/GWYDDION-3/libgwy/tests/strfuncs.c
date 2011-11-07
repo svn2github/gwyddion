@@ -168,4 +168,74 @@ test_str_isident_utf8(void)
     g_assert(!gwy_utf8_strisident("×Γ_α_", times, underscore));
 }
 
+static void
+randomize_string(GString *str,
+                 GRand *rng,
+                 gboolean asciionly)
+{
+    guint n = g_rand_int(rng);
+    n = ((n & 0xff) + ((n >> 8) & 0xff) + ((n >> 16) & 0xff) + (n >> 24))/100;
+    g_string_set_size(str, n);
+
+    guint x, remaining = 0;
+    for (guint i = 0; i < n; i++) {
+        guchar c;
+        do {
+            if (!remaining) {
+                x = g_rand_int(rng);
+                remaining = 4;
+            }
+            c = x & (asciionly ? 0x7f : 0xff);
+            x >>= 8;
+            remaining--;
+        } while (c);
+        str->str[i] = c;
+    }
+}
+
+void
+test_str_case_equal_ascii(void)
+{
+    enum { niter = 20000 };
+    GRand *rng = g_rand_new_with_seed(42);
+    GString *str1 = g_string_new(NULL), *str2 = g_string_new(NULL);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        randomize_string(str1, rng, FALSE);
+        randomize_string(str2, rng, FALSE);
+        gconstpointer s1 = str1->str, s2 = str2->str;
+        g_assert_cmpuint(gwy_ascii_strcase_equal(s1, s2),
+                         ==,
+                         !g_ascii_strcasecmp(s1, s2));
+    }
+
+    g_string_free(str2, TRUE);
+    g_string_free(str1, TRUE);
+    g_rand_free(rng);
+}
+
+void
+test_str_case_hash_ascii(void)
+{
+    enum { niter = 20000 };
+    GRand *rng = g_rand_new_with_seed(42);
+    GString *str1 = g_string_new(NULL), *str2 = g_string_new(NULL);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        randomize_string(str1, rng, FALSE);
+        randomize_string(str2, rng, FALSE);
+        gconstpointer s1 = str1->str, s2 = str2->str;
+        if (gwy_ascii_strcase_equal(s1, s2))
+            g_assert_cmpuint(gwy_ascii_strcase_hash(s1),
+                             ==,
+                             gwy_ascii_strcase_hash(s2));
+        if (gwy_ascii_strcase_hash(s1) != gwy_ascii_strcase_hash(s2))
+            g_assert(!gwy_ascii_strcase_equal(s1, s2));
+    }
+
+    g_string_free(str2, TRUE);
+    g_string_free(str1, TRUE);
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
