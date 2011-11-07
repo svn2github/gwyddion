@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,8 @@
 #include <stdarg.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+
+#define TOLOWER(c) ((c) >= 'A' && (c) <= 'Z' ? (c) - 'A' + 'a' : (c))
 
 /**
  * gwy_ascii_strisident:
@@ -136,6 +138,58 @@ gwy_utf8_strisident(const gchar *s,
     }
 
     return TRUE;
+}
+
+/**
+ * gwy_ascii_strcase_equal:
+ * @v1: String key.
+ * @v2: String key to compare with @v1.
+ *
+ * Compares two strings for equality, ignoring case.
+ *
+ * The case folding is performed only on ASCII letters.
+ *
+ * This function is intended to be passed to g_hash_table_new() as
+ * @key_equal_func, namely in conjuction with gwy_ascii_strcase_hash() hashing
+ * function.
+ *
+ * Returns: %TRUE if the two string keys match, ignoring case.
+ */
+gboolean
+gwy_ascii_strcase_equal(gconstpointer v1,
+                        gconstpointer v2)
+{
+    const gchar *s1 = (const gchar*)v1, *s2 = (const gchar*)v2;
+
+    while (*s1 && *s2) {
+        if (TOLOWER(*s1) != TOLOWER(*s2))
+            return FALSE;
+        s1++, s2++;
+    }
+    return !*s1 && !*s2;
+}
+
+/**
+ * gwy_ascii_strcase_hash:
+ * @v: String key.
+ *
+ * Converts a string to a hash value, ignoring case.
+ *
+ * The case folding is performed only on ASCII letters.
+ *
+ * This function is intended to be passed to g_hash_table_new() as @hash_func,
+ * namely in conjuction with gwy_ascii_strcase_equal() comparison function.
+ *
+ * Returns: The hash value corresponding to the key @v.
+ */
+guint
+gwy_ascii_strcase_hash(gconstpointer v)
+{
+    guint32 h = 5381;
+    for (const signed char *p = v; *p; p++)
+        h = (h << 5) + h + TOLOWER(*p);
+
+    return h;
 }
 
 /**
@@ -298,7 +352,7 @@ gwy_str_next_line(gchar **buffer)
  * the result to test two strings for equality.
  *
  * Compared to g_str_equal(), the advantage of gwy_strequal() is that, being
- * a macro, it can reduce to a GCC builtin.
+ * a macro, it can reduce to a compiler builtin.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
