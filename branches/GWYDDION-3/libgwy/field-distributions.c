@@ -1045,6 +1045,10 @@ grain_row_acf(const gdouble *base,
  *            Passing %G_MAXUINT means to calculate ACF of the entire masked
  *            area but by constructing it from single-grains ACFs which is
  *            different from gwy_field_row_acf().
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.  For
+ *         SPM data, you usually wish to pass 1.
  *
  * Calculates the row-wise autocorrelation function of a field.
  *
