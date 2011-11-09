@@ -979,8 +979,9 @@ fail:
 // @accum_{data,mask} are just working buffers (they are called this for
 // consistency with normal ACF).
 static void
-grain_row_acf(const gdouble *base,
-              guint xres, guint width, guint height,
+grain_row_acf(const GwyField *field,
+              guint col, guint row,
+              guint width, guint height,
               const GwyMaskField *mask,
               GwyMaskingType masking,
               guint level,
@@ -988,6 +989,7 @@ grain_row_acf(const gdouble *base,
               gwycomplex *fftc,
               gdouble *accum_data, gdouble *accum_mask)
 {
+    const gdouble *base = field->data + row*field->xres + col;
     gboolean invert = (masking == GWY_MASK_EXCLUDE);
     gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
     guint nfullrows = 0, nemptyrows = 0;
@@ -997,8 +999,8 @@ grain_row_acf(const gdouble *base,
                                           | _gwy_fft_rigour());
     // Gather squared Fourier coefficients for all rows
     for (guint i = 0; i < height; i++) {
-        guint count = row_level_and_count(base + i*xres, fftr, width,
-                                          mask, masking, 0, i, level);
+        guint count = row_level_and_count(base + i*field->xres, fftr, width,
+                                          mask, masking, col, row + i, level);
         if (!count) {
             nemptyrows++;
             continue;
@@ -1013,7 +1015,7 @@ grain_row_acf(const gdouble *base,
         }
 
         // Calculate and gather squared Fourier coefficients of the mask.
-        row_assign_mask(mask, 0, i, width, invert, fftr);
+        row_assign_mask(mask, col, row + i, width, invert, fftr);
         row_extfft_accum_cnorm(plan, fftr, accum_mask, fftc, size, width, 1.0);
     }
 
@@ -1120,8 +1122,7 @@ gwy_field_grain_row_acf(const GwyField *field,
 
         gwy_clear(accum_data, size);
         gwy_clear(accum_mask, size);
-        grain_row_acf(field->data + bbox->row*field->xres + bbox->col,
-                      field->xres, bbox->width, bbox->height,
+        grain_row_acf(field, bbox->row, bbox->col, bbox->width, bbox->height,
                       mask, masking, level,
                       fftr, fftc, accum_data, accum_mask);
         row_accumulate(total_data, accum_data, width);
