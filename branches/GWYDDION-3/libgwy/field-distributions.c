@@ -1130,7 +1130,7 @@ gwy_field_grain_row_acf(const GwyField *field,
         row_accumulate(total_mask, accum_mask, width);
     }
 
-    row_divide_nonzero(accum_data, accum_mask, line->data, line->res);
+    row_divide_nonzero(total_data, total_mask, line->data, line->res);
 
     fftw_free(fftc);
     fftw_free(fftr);
