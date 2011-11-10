@@ -335,7 +335,7 @@ gwy_fit_func_evaluate(GwyFitFunc *fitfunc,
  *          owned by @fitfunc.
  **/
 const gchar*
-gwy_fit_func_formula(GwyFitFunc *fitfunc)
+gwy_fit_func_formula(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -358,7 +358,7 @@ gwy_fit_func_formula(GwyFitFunc *fitfunc)
  * Returns: The function name. The returned string is owned by @fitfunc.
  **/
 const gchar*
-gwy_fit_func_get_name(GwyFitFunc *fitfunc)
+gwy_fit_func_get_name(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -398,7 +398,7 @@ gwy_fit_func_group(GwyFitFunc *fitfunc)
  * Returns: The number of function parameters.
  **/
 guint
-gwy_fit_func_n_params(GwyFitFunc *fitfunc)
+gwy_fit_func_n_params(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), 0);
     FitFunc *priv = fitfunc->priv;
@@ -418,7 +418,7 @@ gwy_fit_func_n_params(GwyFitFunc *fitfunc)
  *          @fitfunc (or possibly its #GwyUserFitFunc).
  **/
 const gchar*
-gwy_fit_func_param_name(GwyFitFunc *fitfunc,
+gwy_fit_func_param_name(const GwyFitFunc *fitfunc,
                         guint i)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
@@ -446,7 +446,7 @@ gwy_fit_func_param_name(GwyFitFunc *fitfunc,
  *          %G_MAXUINT.
  **/
 guint
-gwy_fit_func_param_number(GwyFitFunc *fitfunc,
+gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
                           const gchar *name)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), G_MAXUINT);
@@ -840,7 +840,7 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
  *          (no reference added), or %NULL if the function is built-in.
  **/
 GwyUserFitFunc*
-gwy_fit_func_get_user(GwyFitFunc *fitfunc)
+gwy_fit_func_get_user(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
