@@ -274,7 +274,8 @@ gwy_fit_func_get_property(GObject *object,
  *
  * Returns: (transfer full):
  *          A new fitting function.  It can return %NULL if @group is invalid
- *          or no function of called @name is present in the group.
+ *          or no function of called @name is present in the group (this is not
+ *          considered to be an error).
  **/
 GwyFitFunc*
 gwy_fit_func_new(const gchar *name,
@@ -334,6 +335,45 @@ gwy_fit_func_formula(GwyFitFunc *fitfunc)
         return priv->builtin->formula;
     else
         return gwy_user_fit_func_get_formula(priv->user);
+}
+
+/**
+ * gwy_fit_func_get_name:
+ * @fitfunc: A fitting function.
+ *
+ * Obtains the name of a fitting function.
+ *
+ * This is the same name as was used in gwy_fit_func_new().  Except if it is
+ * a user fitting function that has been renamed meanwhile.
+ *
+ * Returns: The function name. The returned string is owned by @fitfunc.
+ **/
+const gchar*
+gwy_fit_func_get_name(GwyFitFunc *fitfunc)
+{
+    g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
+    FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
+    return priv->name;
+}
+
+/**
+ * gwy_fit_func_get_group:
+ * @fitfunc: A fitting function.
+ *
+ * Obtains the group of a fitting function.
+ *
+ * This is always the same group as was used in gwy_fit_func_new().
+ *
+ * Returns: The function group. The returned string is owned by @fitfunc.
+ **/
+const gchar*
+gwy_fit_func_group(GwyFitFunc *fitfunc)
+{
+    g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
+    FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
+    return priv->group;
 }
 
 /**
