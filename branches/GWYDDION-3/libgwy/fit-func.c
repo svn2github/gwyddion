@@ -53,6 +53,7 @@ struct _GwyFitFuncPrivate {
     GwyExpr *expr;
     GwyExpr *estimate;
     gulong changed_id;
+    gulong name_changed_id;
 };
 
 typedef struct _GwyFitFuncPrivate FitFunc;
@@ -71,6 +72,9 @@ static void     gwy_fit_func_get_property(GObject *object,
 static void     evaluate_estimators      (FitFunc *priv,
                                           gdouble *estim);
 static void     user_func_changed        (GwyFitFunc *fitfunc,
+                                          GwyUserFitFunc *userfitfunc);
+static void     user_func_name_changed   (GwyFitFunc *fitfunc,
+                                          GParamSpec *pspec,
                                           GwyUserFitFunc *userfitfunc);
 static gboolean evaluate                 (FitFunc *priv,
                                           gdouble x,
@@ -175,6 +179,10 @@ gwy_fit_func_constructed(GObject *object)
                 = g_signal_connect_swapped(priv->user, "data-changed",
                                            G_CALLBACK(user_func_changed),
                                            fitfunc);
+            priv->name_changed_id
+                = g_signal_connect_swapped(priv->user, "notify::name",
+                                           G_CALLBACK(user_func_name_changed),
+                                           fitfunc);
             priv->is_valid = TRUE;
         }
     }
@@ -188,6 +196,7 @@ gwy_fit_func_dispose(GObject *object)
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
     GWY_SIGNAL_HANDLER_DISCONNECT(priv->user, priv->changed_id);
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->user, priv->name_changed_id);
     GWY_OBJECT_UNREF(priv->fittask);
     GWY_OBJECT_UNREF(priv->user);
     GWY_OBJECT_UNREF(priv->expr);
@@ -677,6 +686,23 @@ user_func_changed(GwyFitFunc *fitfunc,
     GWY_FREE(priv->indices);
     GWY_OBJECT_UNREF(priv->expr);
     priv->nparams = gwy_user_fit_func_n_params(priv->user);
+}
+
+// This does not feel right, or at least not useful.  But if the name changes
+// we should emit notify::name so just do it.
+static void
+user_func_name_changed(GwyFitFunc *fitfunc,
+                       G_GNUC_UNUSED GParamSpec *pspec,
+                       GwyUserFitFunc *userfitfunc)
+{
+    FitFunc *priv = fitfunc->priv;
+    GwyResource *resource = GWY_RESOURCE(userfitfunc);
+    const gchar *name = gwy_resource_get_name(resource);
+    if (!gwy_strequal(name, priv->name)) {
+        g_free(priv->name);
+        priv->name = g_strdup(name);
+        g_object_notify_by_pspec(G_OBJECT(fitfunc), properties[PROP_NAME]);
+    }
 }
 
 static void
