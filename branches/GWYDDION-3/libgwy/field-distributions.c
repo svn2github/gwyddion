@@ -997,6 +997,9 @@ grain_row_acf(const GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(size, fftr, fftc,
                                           FFTW_DESTROY_INPUT
                                           | _gwy_fft_rigour());
+    gwy_clear(accum_data, size);
+    gwy_clear(accum_mask, size);
+
     // Gather squared Fourier coefficients for all rows
     for (guint i = 0; i < height; i++) {
         guint count = row_level_and_count(base + i*field->xres, fftr, width,
@@ -1107,7 +1110,7 @@ gwy_field_grain_row_acf(const GwyField *field,
     // slightly larger than the real input.  Note @cstride is measured in
     // gwycomplex, multiply it by 2 for doubles.
     gsize cstride = size/2 + 1;
-    gdouble *fftr = fftw_malloc(3*size*sizeof(gdouble) + 2*width);
+    gdouble *fftr = fftw_malloc((3*size + 2*width)*sizeof(gdouble));
     gdouble *accum_data = fftr + size;
     gdouble *accum_mask = fftr + 2*size;
     gdouble *total_data = fftr + 3*size;
@@ -1120,9 +1123,7 @@ gwy_field_grain_row_acf(const GwyField *field,
         GwyMaskingType masking = grain_id ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
         const GwyFieldPart *bbox = bboxes + grain_id;
 
-        gwy_clear(accum_data, size);
-        gwy_clear(accum_mask, size);
-        grain_row_acf(field, bbox->row, bbox->col, bbox->width, bbox->height,
+        grain_row_acf(field, bbox->col, bbox->row, bbox->width, bbox->height,
                       mask, masking, level,
                       fftr, fftc, accum_data, accum_mask);
         row_accumulate(total_data, accum_data, width);
