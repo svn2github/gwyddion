@@ -499,8 +499,8 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
 GwyUnit*
 gwy_fit_func_param_units(GwyFitFunc *fitfunc,
                          guint i,
-                         GwyUnit *unit_x,
-                         GwyUnit *unit_y)
+                         const GwyUnit *unit_x,
+                         const GwyUnit *unit_y)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
