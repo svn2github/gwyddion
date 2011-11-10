@@ -77,7 +77,7 @@ void            gwy_fit_func_set_data    (GwyFitFunc *fitfunc,
                                           guint npoints);
 const gchar*    gwy_fit_func_get_name    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
 const gchar*    gwy_fit_func_get_group   (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-GwyUserFitFunc* gwy_fit_func_get_user    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+GwyUserFitFunc* gwy_fit_func_get_resource(const GwyFitFunc *fitfunc) G_GNUC_PURE;
 
 G_END_DECLS
 

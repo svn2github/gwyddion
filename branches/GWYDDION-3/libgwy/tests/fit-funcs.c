@@ -230,7 +230,7 @@ test_fit_func_user(void)
 
     GwyFitFunc *fitfunc = gwy_fit_func_new("Linear", "userfitfunc");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
-    GwyUserFitFunc *userfitfunc = gwy_fit_func_get_user(fitfunc);
+    GwyUserFitFunc *userfitfunc = gwy_fit_func_get_resource(fitfunc);
     g_assert(userfitfunc == linear);
     g_object_unref(fitfunc);
 }

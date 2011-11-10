@@ -30,7 +30,7 @@ enum {
     PROP_NAME,
     PROP_GROUP,
     PROP_FIT_TASK,
-    PROP_USER_FUNC,
+    PROP_RESOURCE,
     N_PROPS
 };
 
@@ -136,10 +136,11 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               GWY_TYPE_FIT_TASK,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_USER_FUNC]
-        = g_param_spec_object("user-func",
-                              "User function",
-                              "GwyUserFitFunc wrapped by this function.",
+    properties[PROP_RESOURCE]
+        = g_param_spec_object("resource",
+                              "Resource",
+                              "GwyUserFitFunc resource wrapped by this "
+                              "function if any.",
                               GWY_TYPE_USER_FIT_FUNC,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -261,7 +262,7 @@ gwy_fit_func_get_property(GObject *object,
         g_value_set_object(value, gwy_fit_func_get_fit_task(fitfunc));
         break;
 
-        case PROP_USER_FUNC:
+        case PROP_RESOURCE:
         g_value_set_object(value, priv->user);
         break;
 
@@ -827,7 +828,7 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
 }
 
 /**
- * gwy_fit_func_get_user:
+ * gwy_fit_func_get_resource:
  * @fitfunc: A fitting function.
  *
  * Obtains the user-defined fitting function resource of a fitting function.
@@ -840,7 +841,7 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
  *          (no reference added), or %NULL if the function is built-in.
  **/
 GwyUserFitFunc*
-gwy_fit_func_get_user(const GwyFitFunc *fitfunc)
+gwy_fit_func_get_resource(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
