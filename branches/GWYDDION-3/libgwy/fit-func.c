@@ -43,9 +43,9 @@ struct _GwyFitFuncPrivate {
 
     gboolean is_valid;  // Set to %TRUE if the function actually exists.
 
-    // Exactly one of builtin/user is set
+    // Exactly one of builtin/resource is set
     const BuiltinFitFunc *builtin;
-    GwyUserFitFunc *user;
+    GwyUserFitFunc *resource;
     guint nparams;  // Cached namely for user-defined funcs, but set for both.
 
     // User functions only
@@ -172,16 +172,16 @@ gwy_fit_func_constructed(GObject *object)
         }
     }
     else if (gwy_strequal(priv->group, "userfitfunc")) {
-        priv->user = gwy_user_fit_funcs_get(priv->name);
-        if (priv->user) {
-            g_object_ref(priv->user);
-            priv->nparams = gwy_user_fit_func_n_params(priv->user);
+        priv->resource = gwy_user_fit_funcs_get(priv->name);
+        if (priv->resource) {
+            g_object_ref(priv->resource);
+            priv->nparams = gwy_user_fit_func_n_params(priv->resource);
             priv->data_changed_id
-                = g_signal_connect_swapped(priv->user, "data-changed",
+                = g_signal_connect_swapped(priv->resource, "data-changed",
                                            G_CALLBACK(user_func_data_changed),
                                            fitfunc);
             priv->notify_name_id
-                = g_signal_connect_swapped(priv->user, "notify::name",
+                = g_signal_connect_swapped(priv->resource, "notify::name",
                                            G_CALLBACK(user_func_notify_name),
                                            fitfunc);
             priv->is_valid = TRUE;
@@ -196,10 +196,10 @@ gwy_fit_func_dispose(GObject *object)
 {
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->user, priv->data_changed_id);
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->user, priv->notify_name_id);
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->resource, priv->data_changed_id);
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->resource, priv->notify_name_id);
     GWY_OBJECT_UNREF(priv->fittask);
-    GWY_OBJECT_UNREF(priv->user);
+    GWY_OBJECT_UNREF(priv->resource);
     GWY_OBJECT_UNREF(priv->expr);
     GWY_OBJECT_UNREF(priv->estimate);
     parent_class->dispose(object);
@@ -263,7 +263,7 @@ gwy_fit_func_get_property(GObject *object,
         break;
 
         case PROP_RESOURCE:
-        g_value_set_object(value, priv->user);
+        g_value_set_object(value, priv->resource);
         break;
 
         default:
@@ -344,7 +344,7 @@ gwy_fit_func_formula(const GwyFitFunc *fitfunc)
     if (priv->builtin)
         return priv->builtin->formula;
     else
-        return gwy_user_fit_func_get_formula(priv->user);
+        return gwy_user_fit_func_get_formula(priv->resource);
 }
 
 /**
@@ -378,7 +378,7 @@ gwy_fit_func_get_name(const GwyFitFunc *fitfunc)
  * Returns: The function group. The returned string is owned by @fitfunc.
  **/
 const gchar*
-gwy_fit_func_group(GwyFitFunc *fitfunc)
+gwy_fit_func_get_group(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -431,7 +431,7 @@ gwy_fit_func_param_name(const GwyFitFunc *fitfunc,
         const BuiltinFitFunc *builtin = priv->builtin;
         return builtin->param[i].name;
     }
-    const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
+    const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->resource, i);
     return gwy_fit_param_get_name(p);
 }
 
@@ -464,7 +464,8 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
     }
     else {
         for (guint i = 0; i < priv->nparams; i++) {
-            const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
+            const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->resource,
+                                                               i);
             if (gwy_strequal(gwy_fit_param_get_name(p), name))
                 return i;
         }
@@ -517,7 +518,7 @@ gwy_fit_func_param_units(GwyFitFunc *fitfunc,
         power_y = builtin->param[i].power_y;
     }
     else {
-        const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
+        const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->resource, i);
         g_assert(p);
         power_x = gwy_fit_param_get_power_x(p);
         power_y = gwy_fit_param_get_power_y(p);
@@ -579,7 +580,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
             g_critical("Cannot define %s as a GwyExpr constant.", estimators[i]);
     }
     for (guint i = 0; i < priv->nparams; i++) {
-        const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
+        const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->resource, i);
         const gchar *estimate = gwy_fit_param_get_estimate(p);
         if (estimate
             && !gwy_expr_evaluate(priv->estimate, estimate, params + i, NULL))
@@ -686,7 +687,7 @@ user_func_data_changed(GwyFitFunc *fitfunc,
     FitFunc *priv = fitfunc->priv;
     GWY_FREE(priv->indices);
     GWY_OBJECT_UNREF(priv->expr);
-    priv->nparams = gwy_user_fit_func_n_params(priv->user);
+    priv->nparams = gwy_user_fit_func_n_params(priv->resource);
 }
 
 // This does not feel right, or at least not useful.  But if the name changes
@@ -711,14 +712,14 @@ construct_expr(FitFunc *priv)
 {
     priv->expr = _gwy_fit_func_new_expr_with_constants();
     if (!gwy_expr_compile(priv->expr,
-                          gwy_user_fit_func_get_formula(priv->user),
+                          gwy_user_fit_func_get_formula(priv->resource),
                           NULL)) {
         g_critical("Cannot compile user fitting function formula.");
         return;
     }
 
     priv->indices = g_new(guint, priv->nparams+1);
-    if (gwy_user_fit_func_resolve_params(priv->user, priv->expr, NULL,
+    if (gwy_user_fit_func_resolve_params(priv->resource, priv->expr, NULL,
                                          priv->indices)) {
         g_critical("Cannot resolve variables in user fitting function "
                    "formula.");
@@ -846,7 +847,7 @@ gwy_fit_func_get_resource(const GwyFitFunc *fitfunc)
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, NULL);
-    return priv->builtin ? NULL : priv->user;
+    return priv->builtin ? NULL : priv->resource;
 }
 
 const gchar* const*
