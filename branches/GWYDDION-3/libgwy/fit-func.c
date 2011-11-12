@@ -835,7 +835,7 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
  * Obtains the user-defined fitting function resource of a fitting function.
  *
  * This method can be called both with built-in and user-defined fitting
- * functions, in fact, is can be used to determine if a function is built-in.
+ * functions, in fact, it can be used to determine if a function is built-in.
  *
  * Returns: (transfer none) (allow-none):
  *          The user fitting function resource corresponding to @fitfunc
