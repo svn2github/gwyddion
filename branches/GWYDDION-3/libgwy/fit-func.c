@@ -378,7 +378,7 @@ gwy_fit_func_get_name(const GwyFitFunc *fitfunc)
  * Returns: The function group. The returned string is owned by @fitfunc.
  **/
 const gchar*
-gwy_fit_func_get_group(GwyFitFunc *fitfunc)
+gwy_fit_func_get_group(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -474,7 +474,7 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
 }
 
 /**
- * gwy_fit_func_param_units:
+ * gwy_fit_func_param_unit:
  * @fitfunc: A fitting function.
  * @i: Parameter number.
  * @unit_x: Unit of abscissa.
@@ -499,10 +499,10 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
  *          A newly created @GwyUnit with the units of the @i-th parameter.
  **/
 GwyUnit*
-gwy_fit_func_param_units(GwyFitFunc *fitfunc,
-                         guint i,
-                         const GwyUnit *unit_x,
-                         const GwyUnit *unit_y)
+gwy_fit_func_param_unit(GwyFitFunc *fitfunc,
+                        guint i,
+                        const GwyUnit *unit_x,
+                        const GwyUnit *unit_y)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
