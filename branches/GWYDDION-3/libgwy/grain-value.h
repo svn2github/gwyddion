@@ -25,10 +25,6 @@
 
 G_BEGIN_DECLS
 
-typedef enum {
-    GWY_GRAIN_VALUE_SAME_UNITS = 1 << 0,
-} GwyGrainValueFlags;
-
 #define GWY_TYPE_GRAIN_VALUE \
     (gwy_grain_value_get_type())
 #define GWY_GRAIN_VALUE(obj) \
@@ -55,29 +51,23 @@ struct _GwyGrainValueClass {
     GObjectClass g_object_class;
 };
 
-GType              gwy_grain_value_get_type  (void)                            G_GNUC_CONST;
-GwyGrainValue*     gwy_grain_value_new       (const gchar *name,
-                                              const gchar *group)              G_GNUC_MALLOC;
-const GwyUnit*     gwy_grain_value_unit      (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gdouble*     gwy_grain_value_data      (const GwyGrainValue *grainvalue,
-                                              guint *ngrains)                  G_GNUC_PURE;
-const gchar*       gwy_grain_value_get_name  (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gchar*       gwy_grain_value_get_ident (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gchar*       gwy_grain_value_get_symbol(const GwyGrainValue *grainvalue) G_GNUC_PURE;
-GwyGrainValueFlags gwy_grain_value_get_flags (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-GwyUserGrainValue* gwy_grain_value_get_resource(const GwyGrainValue *grainvalue) G_GNUC_PURE;
-// TODO: Something like gwy_grain_value_evaluate().  Except that we may really
-// want only the smart interface (like gwy_data_field_grains_get_quantities()
-// in 2.x).  But interface-wise, where should that go?
-// * It looks like a GwyField method but making it such raises the question:
-//   How the hell are the GwyGrainValues filled with data?
-//   as it needs some private method to do this.  Of course, if the
-//   implementation resides in grain-value.c (as it should) this presents no
-//   practical problem.
-// * Putting it here would make it look like an evaluation working on fields.
-//   So far so good but the smart evaluator takes an arbitary array of
-//   GwyGrainValues.  This could be mitigated by having also a single-value
-//   evaluator that would easily be GwyGrainValue method.
+GType              gwy_grain_value_get_type        (void)                            G_GNUC_CONST;
+GwyGrainValue*     gwy_grain_value_new             (const gchar *name,
+                                                    const gchar *group)              G_GNUC_MALLOC;
+const GwyUnit*     gwy_grain_value_unit            (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gdouble*     gwy_grain_value_data            (const GwyGrainValue *grainvalue,
+                                                    guint *ngrains)                  G_GNUC_PURE;
+const gchar*       gwy_grain_value_get_name        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gchar*       gwy_grain_value_get_ident       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gchar*       gwy_grain_value_get_symbol      (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+GwyUserGrainValue* gwy_grain_value_get_resource    (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+gboolean           gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue) G_GNUC_PURE;
+gboolean           gwy_grain_value_is_valid        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+
+void gwy_field_evaluate_grains(const GwyField *field,
+                               const GwyMaskField *mask,
+                               GwyGrainValue **grainvalues,
+                               guint nvalues);
 
 G_END_DECLS
 

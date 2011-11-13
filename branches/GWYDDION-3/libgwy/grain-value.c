@@ -37,12 +37,12 @@ enum {
 
 struct _GwyGrainValuePrivate {
     gchar *name;
-    gchar *group;
+
+    gboolean is_valid;  // Set to %TRUE if the function actually exists.
 
     guint ngrains;
     gdouble *values;
-
-    gboolean is_valid;  // Set to %TRUE if the function actually exists.
+    GwyUnit *unit;
 
     // Exactly one of builtin/resource is set
     const BuiltinGrainValue *builtin;
@@ -69,9 +69,12 @@ static void gwy_grain_value_get_property(GObject *object,
                                          GParamSpec *pspec);
 static void user_value_data_changed     (GwyGrainValue *grainvalue,
                                          GwyUserGrainValue *usergrainvalue);
-static void user_value_name_changed     (GwyGrainValue *grainvalue,
+static void user_value_notify_name      (GwyGrainValue *grainvalue,
                                          GParamSpec *pspec,
                                          GwyUserGrainValue *usergrainvalue);
+static const gchar* get_group (const GwyGrainValue *grainvalue);
+static const gchar* get_ident (const GwyGrainValue *grainvalue);
+static const gchar* get_symbol(const GwyGrainValue *grainvalue);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -95,27 +98,26 @@ gwy_grain_value_class_init(GwyGrainValueClass *klass)
     gobject_class->get_property = gwy_grain_value_get_property;
     gobject_class->set_property = gwy_grain_value_set_property;
 
-    properties[PROP_GROUP]
-        = g_param_spec_string("group",
-                              "Group",
-                              "Group the grain value belongs to.",
-                              "builtin",
-                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
-                              | G_PARAM_STATIC_STRINGS);
-
     properties[PROP_NAME]
         = g_param_spec_string("name",
                               "Name",
                               "Grain value name, either built-in or user.",
-                              "Value",
+                              "Invalid",
                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
                               | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_GROUP]
+        = g_param_spec_string("group",
+                              "Group",
+                              "Group the grain value belongs to.",
+                              "Invalid",
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_IDENT]
         = g_param_spec_string("ident",
                               "Ident",
                               "Plain identifier usable in expressions.",
-                              "z",
+                              "invalid",
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SYMBOL]
@@ -123,7 +125,7 @@ gwy_grain_value_class_init(GwyGrainValueClass *klass)
                               "Symbol",
                               "Presentational symbol that may contain "
                               "arbitrary UTF-8 and/or Pango markup.",
-                              "z",
+                              "invalid",
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_RESOURCE]
@@ -154,21 +156,18 @@ gwy_grain_value_constructed(GObject *object)
     GwyGrainValue *grainvalue = GWY_GRAIN_VALUE(object);
     GrainValue *priv = grainvalue->priv;
 
-    if (gwy_strequal(priv->group, "builtin")) {
-        priv->builtin = g_hash_table_lookup(builtin_values, priv->name);
-        if (priv->builtin) {
-            priv->is_valid = TRUE;
-        }
-    }
-    else if (gwy_strequal(priv->group, "usergrainvalue")) {
+    priv->builtin = g_hash_table_lookup(builtin_values, priv->name);
+    if (priv->builtin)
+        priv->is_valid = TRUE;
+    else {
         priv->resource = gwy_user_fit_funcs_get(priv->name);
         if (priv->resource) {
             g_object_ref(priv->resource);
-            priv->changed_id
+            priv->data_changed_id
                 = g_signal_connect_swapped(priv->resource, "data-changed",
                                            G_CALLBACK(user_value_data_changed),
                                            grainvalue);
-            priv->name_changed_id
+            priv->notify_name_id
                 = g_signal_connect_swapped(priv->resource, "notify::name",
                                            G_CALLBACK(user_value_notify_name),
                                            grainvalue);
@@ -180,12 +179,22 @@ gwy_grain_value_constructed(GObject *object)
 }
 
 static void
+invalidate(GwyGrainValue *grainvalue)
+{
+    GrainValue *priv = grainvalue->priv;
+    GWY_OBJECT_UNREF(priv->unit);
+    GWY_FREE(priv->values);
+    GWY_OBJECT_UNREF(priv->expr);
+}
+
+static void
 gwy_grain_value_dispose(GObject *object)
 {
     GwyGrainValue *grainvalue = GWY_GRAIN_VALUE(object);
     GrainValue *priv = grainvalue->priv;
     GWY_SIGNAL_HANDLER_DISCONNECT(priv->resource, priv->data_changed_id);
     GWY_SIGNAL_HANDLER_DISCONNECT(priv->resource, priv->notify_name_id);
+    GWY_OBJECT_UNREF(priv->unit);
     GWY_OBJECT_UNREF(priv->resource);
     GWY_OBJECT_UNREF(priv->expr);
     parent_class->dispose(object);
@@ -196,7 +205,6 @@ gwy_grain_value_finalize(GObject *object)
 {
     GwyGrainValue *grainvalue = GWY_GRAIN_VALUE(object);
     GrainValue *priv = grainvalue->priv;
-    GWY_FREE(priv->group);
     GWY_FREE(priv->name);
     GWY_FREE(priv->values);
     parent_class->finalize(object);
@@ -214,10 +222,6 @@ gwy_grain_value_set_property(GObject *object,
     switch (prop_id) {
         case PROP_NAME:
         priv->name = g_value_dup_string(value);
-        break;
-
-        case PROP_GROUP:
-        priv->group = g_value_dup_string(value);
         break;
 
         default:
@@ -241,21 +245,15 @@ gwy_grain_value_get_property(GObject *object,
         break;
 
         case PROP_GROUP:
-        g_value_set_string(value, priv->group);
+        g_value_set_string(value, get_group(grainvalue));
         break;
 
         case PROP_IDENT:
-        g_value_set_string(value,
-                           priv->builtin
-                           ? priv->builtin->ident
-                           : gwy_user_grain_value_get_ident(priv->resource));
+        g_value_set_string(value, get_ident(grainvalue));
         break;
 
         case PROP_SYMBOL:
-        g_value_set_string(value,
-                           priv->builtin
-                           ? priv->builtin->symbol
-                           : gwy_user_grain_value_get_symbol(priv->resource));
+        g_value_set_string(value, get_symbol(grainvalue));
         break;
 
         case PROP_RESOURCE:
@@ -272,9 +270,6 @@ gwy_grain_value_get_property(GObject *object,
  * gwy_grain_value_new:
  * @name: Grain value name.  It must correspond to either a builtin grain
  *        value or user grain value loaded from #GwyUserGrainValue resources.
- * @group: Grain value group.  At present, possible values are "builtin" for
- *         built-in grain values and "usergrainvalue" for user grain values
- *         coming from #GwyUserGrainValue resources.
  *
  * Creates a new grain value.
  *
@@ -284,12 +279,10 @@ gwy_grain_value_get_property(GObject *object,
  *          considered to be an error).
  **/
 GwyGrainValue*
-gwy_grain_value_new(const gchar *name,
-                    const gchar *group)
+gwy_grain_value_new(const gchar *name)
 {
     GwyGrainValue *grainvalue = g_object_new(GWY_TYPE_GRAIN_VALUE,
                                              "name", name,
-                                             "group", group,
                                              NULL);
     if (grainvalue->priv->is_valid)
         return grainvalue;
@@ -307,15 +300,13 @@ gwy_grain_value_new(const gchar *name,
  * This is the same name as was used in gwy_grain_value_new().  Except if it is
  * a user grain value that has been renamed meanwhile.
  *
- * Returns: The grain value name. The returned string is owned by @grainvalue.
+ * Returns: The grain value name.
  **/
 const gchar*
 gwy_grain_value_get_name(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
-    GrainValue *priv = grainvalue->priv;
-    g_return_val_if_fail(priv->is_valid, NULL);
-    return priv->name;
+    return grainvalue->priv->name;
 }
 
 /**
@@ -324,17 +315,43 @@ gwy_grain_value_get_name(const GwyGrainValue *grainvalue)
  *
  * Obtains the group of a grain value.
  *
- * This is always the same group as was used in gwy_grain_value_new().
- *
- * Returns: The grain value group. The returned string is owned by @grainvalue.
+ * Returns: The grain value group.
  **/
 const gchar*
-gwy_grain_value_group(GwyGrainValue *grainvalue)
+gwy_grain_value_get_group(GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
-    GrainValue *priv = grainvalue->priv;
-    g_return_val_if_fail(priv->is_valid, NULL);
-    return priv->group;
+    return get_group(grainvalue);
+}
+
+/**
+ * gwy_grain_value_get_ident:
+ * @grainvalue: A grain value.
+ *
+ * Obtains the identfier of a grain value.
+ *
+ * Returns: The grain value identifier.
+ **/
+const gchar*
+gwy_grain_value_get_ident(GwyGrainValue *grainvalue)
+{
+    g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
+    return get_ident(grainvalue);
+}
+
+/**
+ * gwy_grain_value_get_symbol:
+ * @grainvalue: A grain value.
+ *
+ * Obtains the symbol of a grain value.
+ *
+ * Returns: The grain value symbol.
+ **/
+const gchar*
+gwy_grain_value_get_symbol(GwyGrainValue *grainvalue)
+{
+    g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
+    return get_symbol(grainvalue);
 }
 
 /**
@@ -356,16 +373,45 @@ const GwyUnit*
 gwy_grain_value_unit(GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
-    GrainValue *priv = grainvalue->priv;
-    g_return_val_if_fail(priv->is_valid, NULL);
+    return grainvalue->priv->unit;
+}
 
-    return NULL;
+/**
+ * gwy_grain_value_data:
+ * @grainvalue: A grain value.
+ * @ngrains: (out) (allow-none):
+ *           Location to store the number of grains.
+ *
+ * Obtains the data of individual grains for a grain value.
+ *
+ * Returns: (transfer none) (allow-none) (array length=ngrains):
+ *          An array of @ngrains+1 items containing the grain values from the
+ *          last evaluation.  %NULL can be returned if @grainvalue has not been
+ *          used for any evaluation yet or the underlying resource has changed.
+ **/
+const gdouble*
+gwy_grain_value_data(const GwyGrainValue *grainvalue,
+                     guint *ngrains)
+{
+    g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
+    GWY_MAYBE_SET(ngrains, grainvalue->priv->ngrains);
+    return grainvalue->priv->values;
+}
+
+static void
+user_value_data_changed(GwyGrainValue *grainvalue,
+                        G_GNUC_UNUSED GwyUserGrainValue *usergrainvalue)
+{
+    // Just invalidate stuff, construct_expr() will create it again if
+    // necessary.
+    GrainValue *priv = fitfunc->priv;
+    GWY_OBJECT_UNREF(priv->expr);
 }
 
 // This does not feel right, or at least not useful.  But if the name changes
 // we should emit notify::name so just do it.
 static void
-user_value_name_changed(GwyGrainValue *grainvalue,
+user_value_notify_name(GwyGrainValue *grainvalue,
                         G_GNUC_UNUSED GParamSpec *pspec,
                         GwyUserGrainValue *usergrainvalue)
 {
@@ -390,49 +436,48 @@ construct_expr(GrainValue *priv)
         return;
     }
 
+    /* TODO: At some point we need to calculate the dependences.  Now?
     priv->indices = g_new(guint, priv->nparams+1);
     if (gwy_user_grain_value_resolve_params(priv->resource, priv->expr, NULL,
-                                         priv->indices)) {
+                                            priv->indices)) {
         g_critical("Cannot resolve variables in user grain value "
                    "formula.");
         return;
     }
+    */
 }
 
-static gboolean
-evaluate(GrainValue *priv,
-         gdouble x,
-         const gdouble *params,
-         gdouble *retval)
+static const gchar*
+get_group(const GwyGrainValue *grainvalue)
 {
+    GrainValue *priv = grainvalue->priv;
+    if (priv->builtin)
+        return priv->builtin->group;
+    else
+        return gwy_user_grain_value_get_group(priv->resource);
+}
+
+static const gchar*
+get_ident(const GwyGrainValue *grainvalue)
+{
+    GrainValue *priv = grainvalue->priv;
+    if (priv->builtin)
+        return priv->builtin->ident;
+    else
+        return gwy_user_grain_value_get_ident(priv->resource);
+}
+
+static const gchar*
+get_symbol(const GwyGrainValue *grainvalue)
+{
+    GrainValue *priv = grainvalue->priv;
     if (priv->builtin) {
-        const BuiltinGrainValue *builtin = priv->builtin;
-        return builtin->function(x, params, retval);
+        if (priv->builtin->symbol)
+            return priv->builtin->symbol;
+        return priv->builtin->ident;
     }
-
-    if (G_UNLIKELY(!priv->expr))
-        construct_expr(priv);
-
-    gdouble variables[priv->nparams+2];
-    for (guint j = 0; j < priv->nparams; j++)
-        variables[priv->indices[j]] = params[j];
-    variables[priv->indices[priv->nparams]] = x;
-    *retval = gwy_expr_execute(priv->expr, variables);
-    return TRUE;
-}
-
-static gboolean
-grain_value_vfunc(guint i,
-                  gpointer user_data,
-                  gdouble *retval,
-                  const gdouble *params)
-{
-    GrainValue *priv = ((GwyGrainValue*)user_data)->priv;
-    g_return_val_if_fail(i < priv->npoints, FALSE);
-    gdouble x = priv->points[i].x, y = priv->points[i].y;
-    gboolean ok = evaluate(priv, x, params, retval);
-    *retval -= y;
-    return ok;
+    else
+        return gwy_user_grain_value_get_symbol(priv->resource);
 }
 
 /**
@@ -443,19 +488,87 @@ grain_value_vfunc(guint i,
  *
  * This method can be called both with built-in and user-defined grain values
  * functions, in fact, it can be used to determine if a grain value is
- * built-in.
+ * user-defined.
  *
  * Returns: (transfer none) (allow-none):
  *          The user grain value resource corresponding to @grainvalue
- *          (no reference added), or %NULL if the function is built-in.
+ *          (no reference added), or %NULL if the grain value is not defined by
+ *          a user resource.
  **/
 GwyUserGrainValue*
 gwy_grain_value_get_resource(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
     GrainValue *priv = grainvalue->priv;
-    g_return_val_if_fail(priv->is_valid, NULL);
     return priv->builtin ? NULL : priv->resource;
+}
+
+/**
+ * gwy_grain_value_needs_same_units:
+ * @grainvalue: A grain value.
+ *
+ * Reports whether a grain value needs the same lateral and value units.
+ *
+ * Some grain values, such as surface area, are meaningful only if height is
+ * the same physical quantity as lateral dimensions.  For these grain values
+ * this function returns %TRUE.
+ *
+ * Returns: %TRUE if the grain value needs the same lateral and value units.
+ **/
+gboolean
+gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue)
+{
+    g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), FALSE);
+    GrainValue *priv = grainvalue->priv;
+    if (priv->builtin)
+        return priv->builtin->same_units;
+    else
+        return gwy_user_grain_value_get_same_units(grainvalue->resource);
+}
+
+/**
+ * gwy_grain_value_is_valid:
+ * @grainvalue: A grain value.
+ *
+ * Reports whether a grain value is valid.
+ *
+ * Since invalid grain value resources are not loaded at all and the
+ * constructor gwy_grain_value_new() returns %NULL if a non-existent grain
+ * value is requested, an invalid grain value object can only be created
+ * directly using g_object_new() with a non-existent grain value name.  So this
+ * method is mainly intended for bindings where such situation can arise more
+ * easily than in C.
+ *
+ * Returns: %TRUE if the grain value is valid and can be used for evaluation,
+ *          etc.
+ **/
+gboolean
+gwy_grain_value_is_valid(const GwyGrainValue *grainvalue)
+{
+    g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), FALSE);
+    return grainvalue->priv->is_valid;
+}
+
+/**
+ * gwy_field_evaluate_grains:
+ * @field: A two-dimensional data field.
+ * @mask: A two-dimensional mask field representing the grains.
+ * @grainvalues: (array length=nvalues):
+ *               Grain values to calculate for the grains.
+ * @nvalues: Number of items in @grainvalues.
+ *
+ * Calculates a set of grain values given a surface and mask representing the
+ * grains on this surface.
+ *
+ * The sizes of @field and @mask must match.
+ **/
+void
+gwy_field_evaluate_grains(const GwyField *field,
+                          const GwyMaskField *mask,
+                          GwyGrainValue **grainvalues,
+                          guint nvalues)
+{
+    // TODO
 }
 
 GwyExpr*

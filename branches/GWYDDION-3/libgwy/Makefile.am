@@ -48,6 +48,7 @@ public_headers = \
 	$(srcdir)/fit-task.h \
 	$(srcdir)/gl-material.h \
 	$(srcdir)/gradient.h \
+	$(srcdir)/grain-value.h \
 	$(srcdir)/inventory.h \
 	$(srcdir)/interpolation.h \
 	$(srcdir)/line.h \
@@ -77,6 +78,7 @@ public_headers = \
 	$(srcdir)/surface-statistics.h \
 	$(srcdir)/unit.h \
 	$(srcdir)/user-fit-func.h \
+	$(srcdir)/user-grain-value.h \
 	$(srcdir)/value-format.h
 
 public_built_headers = \
@@ -89,6 +91,7 @@ private_headers = \
 	curve-internal.h \
 	field-internal.h \
 	fit-func-builtin.h \
+	grain-value-builtin.h \
 	line-internal.h \
 	mask-internal.h \
 	mask-field-internal.h \
@@ -146,6 +149,8 @@ libgwy3_la_SOURCES = \
 	fit-task.c \
 	gl-material.c \
 	gradient.c \
+	grain-value.c \
+	grain-value-builtin.c \
 	inventory.c \
 	interpolation.c \
 	line.c \
@@ -178,6 +183,7 @@ libgwy3_la_SOURCES = \
 	types.c \
 	unit.c \
 	user-fit-func.c \
+	user-grain-value.c \
 	value-format.c \
 	version.c
 
