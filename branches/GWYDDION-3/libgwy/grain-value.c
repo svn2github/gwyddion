@@ -160,7 +160,7 @@ gwy_grain_value_constructed(GObject *object)
     if (priv->builtin)
         priv->is_valid = TRUE;
     else {
-        priv->resource = gwy_user_fit_funcs_get(priv->name);
+        priv->resource = gwy_user_grain_values_get(priv->name);
         if (priv->resource) {
             g_object_ref(priv->resource);
             priv->data_changed_id
@@ -333,7 +333,7 @@ gwy_grain_value_get_group(GwyGrainValue *grainvalue)
  * Returns: The grain value identifier.
  **/
 const gchar*
-gwy_grain_value_get_ident(GwyGrainValue *grainvalue)
+gwy_grain_value_get_ident(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
     return get_ident(grainvalue);
@@ -348,7 +348,7 @@ gwy_grain_value_get_ident(GwyGrainValue *grainvalue)
  * Returns: The grain value symbol.
  **/
 const gchar*
-gwy_grain_value_get_symbol(GwyGrainValue *grainvalue)
+gwy_grain_value_get_symbol(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
     return get_symbol(grainvalue);
@@ -370,7 +370,7 @@ gwy_grain_value_get_symbol(GwyGrainValue *grainvalue)
  *          A @GwyUnit with the grain value units.
  **/
 const GwyUnit*
-gwy_grain_value_unit(GwyGrainValue *grainvalue)
+gwy_grain_value_unit(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
     return grainvalue->priv->unit;
@@ -404,7 +404,7 @@ user_value_data_changed(GwyGrainValue *grainvalue,
 {
     // Just invalidate stuff, construct_expr() will create it again if
     // necessary.
-    GrainValue *priv = fitfunc->priv;
+    GrainValue *priv = grainvalue->priv;
     GWY_OBJECT_UNREF(priv->expr);
 }
 
@@ -523,7 +523,7 @@ gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue)
     if (priv->builtin)
         return priv->builtin->same_units;
     else
-        return gwy_user_grain_value_get_same_units(grainvalue->resource);
+        return gwy_user_grain_value_get_same_units(priv->resource);
 }
 
 /**

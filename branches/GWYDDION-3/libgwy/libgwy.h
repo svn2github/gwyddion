@@ -49,6 +49,7 @@
 #include <libgwy/fit-task.h>
 #include <libgwy/gl-material.h>
 #include <libgwy/gradient.h>
+#include <libgwy/grain-value.h>
 #include <libgwy/inventory.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/line.h>
@@ -79,6 +80,7 @@
 #include <libgwy/types.h>
 #include <libgwy/unit.h>
 #include <libgwy/user-fit-func.h>
+#include <libgwy/user-grain-value.h>
 #include <libgwy/value-format.h>
 #include <libgwy/version.h>
 

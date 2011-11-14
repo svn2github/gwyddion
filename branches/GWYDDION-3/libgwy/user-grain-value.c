@@ -27,6 +27,7 @@
 #include "libgwy/expr.h"
 #include "libgwy/serialize.h"
 #include "libgwy/user-grain-value.h"
+#include "libgwy/grain-value-builtin.h"
 #include "libgwy/object-internal.h"
 
 enum { POWER_MIN = -12, POWER_MAX = 12 };
@@ -64,6 +65,8 @@ static gchar*       gwy_user_grain_value_dump             (GwyResource *resource
 static gboolean     gwy_user_grain_value_parse            (GwyResource *resource,
                                                         gchar *text,
                                                         GError **error);
+
+static const gunichar more[] = { '_', 0 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "group",      .ctype = GWY_SERIALIZABLE_STRING,  },
@@ -216,7 +219,7 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     UserGrainValue *priv = usergrainvalue->priv;
 
     if (!its[0].value.v_string
-        || !g_utf8_validate(its[0].value.v_string)) {
+        || !g_utf8_validate(its[0].value.v_string, -1, NULL)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Grain value group is missing "
@@ -232,7 +235,7 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     its[1].value.v_string = NULL;
 
     if (!its[2].value.v_string
-        || !gwy_utf8_strisident(its[2].value.v_string)) {
+        || !gwy_utf8_strisident(its[2].value.v_string, more, NULL)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Grain value identifier is missing "
@@ -352,8 +355,10 @@ gwy_user_grain_value_validate(GwyUserGrainValue *usergrainvalue)
         test_expr = _gwy_grain_value_new_expr_with_constants();
     if (!gwy_expr_compile(test_expr, priv->formula, NULL))
         goto fail;
+    /*
     if (gwy_user_grain_value_resolve_params(usergrainvalue, test_expr,
                                             NULL, NULL))
+                                            */
         goto fail;
     // TODO: The formula should be resolvable using existing grain values.
     // XXX: Why fit-func uses separate physical/logical validation?  Either
@@ -437,6 +442,7 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
     const gchar **names;
     guint n = gwy_expr_get_variables(test_expr, &names);
     // This is usualy still two parameters too large as the vars contain "x".
+    /*
     GwyFitParam **newparam = g_new0(GwyFitParam*, n);
     guint np = 0;
     for (guint i = 1; i < n; i++) {
@@ -455,20 +461,10 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
             newparam[np] = g_object_ref(priv->param[j]);
         np++;
     }
+    */
     // Must not release it eariler while we still use names[].
     G_UNLOCK(test_expr);
 
-    if (!np) {
-        g_set_error(error, GWY_USER_GRAIN_VALUE_ERROR,
-                    GWY_USER_GRAIN_VALUE_ERROR_NO_PARAM,
-                    _("Fitting function has no parameters."));
-        g_free(newparam);
-        return FALSE;
-    }
-
-    free_params(priv);
-    priv->param = newparam;
-    priv->nparams = np;
     _gwy_assign_string(&priv->formula, formula);
     gwy_user_grain_value_changed(usergrainvalue);
 
@@ -484,21 +480,17 @@ gwy_user_grain_value_dump(GwyResource *resource)
 
     GString *text = g_string_new(NULL);
     g_string_append_printf(text, "formula %s\n", priv->formula);
-    if (priv->filter)
-        g_string_append_printf(text, "filter %s\n", priv->filter);
+    g_string_append_printf(text, "group %s\n", priv->group);
+    g_string_append_printf(text, "ident %s\n", priv->ident);
+    if (priv->symbol)
+        g_string_append_printf(text, "symbol %s\n", priv->symbol);
+    if (priv->power_xy)
+        g_string_append_printf(text, "power_xy %d\n", priv->power_xy);
+    if (priv->power_z)
+        g_string_append_printf(text, "power_z %d\n", priv->power_z);
+    if (priv->same_units)
+        g_string_append(text, "same_units 1\n");
 
-    for (unsigned i = 0; i < priv->nparams; i++) {
-        GwyFitParam *param = priv->param[i];
-        g_string_append_printf(text, "param %s\n",
-                               gwy_fit_param_get_name(param));
-        g_string_append_printf(text, "power_x %d\n",
-                               gwy_fit_param_get_power_x(param));
-        g_string_append_printf(text, "power_y %d\n",
-                               gwy_fit_param_get_power_y(param));
-        const gchar *s = gwy_fit_param_get_estimate(param);
-        if (s)
-            g_string_append_printf(text, "estimate %s\n", s);
-    }
     return g_string_free(text, FALSE);;
 }
 
@@ -548,8 +540,6 @@ gwy_user_grain_value_parse(GwyResource *resource,
         else {
             if (gwy_strequal(key, "formula"))
                 _gwy_assign_string(&priv->formula, value);
-            else if (gwy_strequal(key, "filter"))
-                _gwy_assign_string(&priv->filter, value);
             else
                 break;
         }
@@ -558,10 +548,6 @@ gwy_user_grain_value_parse(GwyResource *resource,
     // TODO
     if (!params)
         return FALSE;
-
-    free_params(priv);
-    priv->nparams = params->len;
-    priv->param = (GwyFitParam**)g_ptr_array_free(params, FALSE);
 
     sanitize(usergrainvalue);
     if (!gwy_user_grain_value_validate(usergrainvalue)) {

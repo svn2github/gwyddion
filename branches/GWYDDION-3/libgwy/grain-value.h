@@ -22,6 +22,8 @@
 
 #include <libgwy/user-grain-value.h>
 #include <libgwy/unit.h>
+#include <libgwy/mask-field.h>
+#include <libgwy/field.h>
 
 G_BEGIN_DECLS
 
@@ -52,8 +54,7 @@ struct _GwyGrainValueClass {
 };
 
 GType              gwy_grain_value_get_type        (void)                            G_GNUC_CONST;
-GwyGrainValue*     gwy_grain_value_new             (const gchar *name,
-                                                    const gchar *group)              G_GNUC_MALLOC;
+GwyGrainValue*     gwy_grain_value_new             (const gchar *name) G_GNUC_MALLOC;
 const GwyUnit*     gwy_grain_value_unit            (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 const gdouble*     gwy_grain_value_data            (const GwyGrainValue *grainvalue,
                                                     guint *ngrains)                  G_GNUC_PURE;

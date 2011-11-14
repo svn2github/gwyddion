@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 #define GWY_USER_GRAIN_VALUE_ERROR gwy_user_grain_value_error_quark()
 
 typedef enum {
+    GWY_USER_GRAIN_VALUE_ERROR_DEPENDS = 1,
 } GwyUserGrainValueError;
 
 GQuark gwy_user_grain_value_error_quark(void) G_GNUC_CONST;
@@ -59,7 +60,7 @@ struct _GwyUserGrainValueClass {
     GwyResourceClass resource_class;
 };
 
-#define gwy_user_grain_value_duplicate(usergrainvalue \
+#define gwy_user_grain_value_duplicate(usergrainvalue) \
         (GWY_USER_GRAIN_VALUE(gwy_serializable_duplicate(GWY_SERIALIZABLE(usergrainvalue))))
 #define gwy_user_grain_value_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
