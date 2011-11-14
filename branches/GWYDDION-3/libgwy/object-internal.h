@@ -29,6 +29,14 @@
 
 G_BEGIN_DECLS
 
+#define GWY_TAKE_STRING(p, q) \
+    do { \
+        if (p) \
+            g_free(p); \
+        (p) = (q); \
+        (q) = NULL; \
+    } while (0)
+
 G_GNUC_INTERNAL
 gboolean _gwy_assign_string(gchar **p,
                             const gchar *q);

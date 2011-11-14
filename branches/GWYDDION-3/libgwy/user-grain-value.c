@@ -59,8 +59,8 @@ static void         gwy_user_grain_value_assign_impl      (GwySerializable *dest
                                                         GwySerializable *source);
 static GwyResource* gwy_user_grain_value_copy             (GwyResource *resource);
 static void         gwy_user_grain_value_changed          (GwyUserGrainValue *usergrainvalue);
-static void         sanitize                           (GwyUserGrainValue *usergrainvalue);
-static gboolean     gwy_user_grain_value_validate         (GwyUserGrainValue *usergrainvalue);
+static gboolean     gwy_user_grain_value_validate         (GwyUserGrainValue *usergrainvalue,
+                                                           GwyErrorList **error_list);
 static gchar*       gwy_user_grain_value_dump             (GwyResource *resource);
 static gboolean     gwy_user_grain_value_parse            (GwyResource *resource,
                                                         gchar *text,
@@ -207,6 +207,8 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
     GwySerializableItems parent_items;
+    gboolean ok = FALSE;
+
     if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
                                      "GwyUserGrainValue", error_list)) {
         if (!parent_serializable->construct(serializable, &parent_items,
@@ -226,13 +228,8 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
                              "or not valid UTF-8."));
         goto fail;
     }
-    g_free(priv->group);
-    priv->group = its[0].value.v_string;
-    its[0].value.v_string = NULL;
-
-    g_free(priv->formula);
-    priv->formula = its[1].value.v_string;
-    its[1].value.v_string = NULL;
+    GWY_TAKE_STRING(priv->group, its[0].value.v_string);
+    GWY_TAKE_STRING(priv->formula, its[1].value.v_string);
 
     if (!its[2].value.v_string
         || !gwy_utf8_strisident(its[2].value.v_string, more, NULL)) {
@@ -242,9 +239,7 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
                              "or not valid UTF-8."));
         goto fail;
     }
-    g_free(priv->ident);
-    priv->ident = its[2].value.v_string;
-    its[2].value.v_string = NULL;
+    GWY_TAKE_STRING(priv->ident, its[2].value.v_string);
 
     if (its[3].value.v_string) {
         // XXX: In principle, we should validate the possible Pango markup.
@@ -256,9 +251,7 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
                                  "not valid UTF-8."));
             goto fail;
         }
-        g_free(priv->symbol);
-        priv->symbol = its[3].value.v_string;
-        its[3].value.v_string = NULL;
+        GWY_TAKE_STRING(priv->symbol, its[3].value.v_string);
     }
 
     // FIXME
@@ -266,21 +259,14 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     priv->power_z = CLAMP(its[5].value.v_int32, POWER_MIN, POWER_MAX);
     priv->same_units = !!its[6].value.v_boolean;
 
-    gboolean ok = gwy_user_grain_value_validate(usergrainvalue);
-    if (!ok) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Invalid formula or parameters."));
-    }
-
-    return ok;
+    ok = gwy_user_grain_value_validate(usergrainvalue, error_list);
 
 fail:
     GWY_FREE(its[0].value.v_string);
     GWY_FREE(its[1].value.v_string);
     GWY_FREE(its[2].value.v_string);
     GWY_FREE(its[3].value.v_string);
-    return FALSE;
+    return ok;
 }
 
 static void
@@ -343,7 +329,8 @@ gwy_user_grain_value_changed(GwyUserGrainValue *usergrainvalue)
 
 // Verify if the state is consistent logically.
 static gboolean
-gwy_user_grain_value_validate(GwyUserGrainValue *usergrainvalue)
+gwy_user_grain_value_validate(GwyUserGrainValue *usergrainvalue,
+                              GwyErrorList **error_list)
 {
     UserGrainValue *priv = usergrainvalue->priv;
 
@@ -395,7 +382,7 @@ gwy_user_grain_value_new(void)
  * Returns: The formula as a string owned by @usergrainvalue.
  **/
 const gchar*
-gwy_user_grain_value_get_formula(GwyUserGrainValue *usergrainvalue)
+gwy_user_grain_value_get_formula(const GwyUserGrainValue *usergrainvalue)
 {
     g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), NULL);
     return usergrainvalue->priv->formula;
@@ -439,10 +426,10 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
         G_UNLOCK(test_expr);
         return FALSE;
     }
+    /*
     const gchar **names;
     guint n = gwy_expr_get_variables(test_expr, &names);
     // This is usualy still two parameters too large as the vars contain "x".
-    /*
     GwyFitParam **newparam = g_new0(GwyFitParam*, n);
     guint np = 0;
     for (guint i = 1; i < n; i++) {
@@ -472,6 +459,109 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
 
 }
 
+/**
+ * gwy_user_grain_value_get_group:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Obtains the group of a user grain value.
+ *
+ * Returns: The user grain value group.
+ **/
+const gchar*
+gwy_user_grain_value_get_group(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), NULL);
+    return usergrainvalue->priv->group;
+}
+
+/**
+ * gwy_user_grain_value_set_group:
+ * @usergrainvalue: A user grain value resource.
+ * @group: Group name.
+ *
+ * Sets the group of a user grain value.
+ **/
+void
+gwy_user_grain_value_set_group(GwyUserGrainValue *usergrainvalue,
+                               const gchar *group)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(group);
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (_gwy_assign_string(&priv->group, group))
+        gwy_user_grain_value_changed(usergrainvalue);
+}
+
+/**
+ * gwy_user_grain_value_get_symbol:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Obtains the symbol of a user grain value.
+ *
+ * Returns: The user grain value symbol.
+ **/
+const gchar*
+gwy_user_grain_value_get_symbol(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), NULL);
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (priv->symbol)
+        return priv->symbol;
+    return priv->ident;
+}
+
+/**
+ * gwy_user_grain_value_set_symbol:
+ * @usergrainvalue: A user grain value resource.
+ * @symbol: Grain value symbol.
+ *
+ * Sets the symbol of a user grain value.
+ **/
+void
+gwy_user_grain_value_set_symbol(GwyUserGrainValue *usergrainvalue,
+                               const gchar *symbol)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(symbol);
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (_gwy_assign_string(&priv->symbol, symbol))
+        gwy_user_grain_value_changed(usergrainvalue);
+}
+
+/**
+ * gwy_user_grain_value_get_ident:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Obtains the identifier of a user grain value.
+ *
+ * Returns: The user grain value identifier.
+ **/
+const gchar*
+gwy_user_grain_value_get_ident(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), NULL);
+    return usergrainvalue->priv->ident;
+}
+
+/**
+ * gwy_user_grain_value_set_ident:
+ * @usergrainvalue: A user grain value resource.
+ * @ident: Identifier.
+ *
+ * Sets the identifier of a user grain value.
+ **/
+void
+gwy_user_grain_value_set_ident(GwyUserGrainValue *usergrainvalue,
+                               const gchar *ident)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(ident && gwy_utf8_strisident(ident, more, NULL));
+    // XXX: Uniqueness?  Or maybe not here?
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (_gwy_assign_string(&priv->ident, ident))
+        gwy_user_grain_value_changed(usergrainvalue);
+}
+
 static gchar*
 gwy_user_grain_value_dump(GwyResource *resource)
 {
@@ -496,17 +586,16 @@ gwy_user_grain_value_dump(GwyResource *resource)
 
 static gboolean
 gwy_user_grain_value_parse(GwyResource *resource,
-                        gchar *text,
-                        G_GNUC_UNUSED GError **error)
+                           gchar *text,
+                           G_GNUC_UNUSED GError **error)
 {
     GwyUserGrainValue *usergrainvalue = GWY_USER_GRAIN_VALUE(resource);
     UserGrainValue *priv = usergrainvalue->priv;
-    GwyFitParam *param = NULL;
-    GPtrArray *params = NULL;
 
+    guint lineno = 1;
     for (gchar *line = gwy_str_next_line(&text);
          line;
-         line = gwy_str_next_line(&text)) {
+         line = gwy_str_next_line(&text), lineno++) {
         gchar *key, *value;
         GwyResourceLineType type = gwy_resource_parse_param_line(line,
                                                                  &key, &value);
@@ -515,42 +604,25 @@ gwy_user_grain_value_parse(GwyResource *resource,
         if (type != GWY_RESOURCE_LINE_OK)
             break;
 
-        if (gwy_strequal(key, "param")) {
-            param = gwy_fit_param_new(value);
-            if (param) {
-                if (!params)
-                    params = g_ptr_array_new();
-                g_ptr_array_add(params, param);
-            }
-            // XXX: Parameter name error
-        }
-        else if (params) {
-            if (param) {
-                if (gwy_strequal(key, "power_x"))
-                    gwy_fit_param_set_power_x(param, strtol(value, NULL, 10));
-                else if (gwy_strequal(key, "power_y"))
-                    gwy_fit_param_set_power_y(param, strtol(value, NULL, 10));
-                else if (gwy_strequal(key, "estimate")
-                         && gwy_fit_param_check_estimate(value, NULL))
-                    gwy_fit_param_set_estimate(param, value);
-                else
-                    break;
-            }
-        }
-        else {
-            if (gwy_strequal(key, "formula"))
-                _gwy_assign_string(&priv->formula, value);
-            else
-                break;
-        }
+        if (gwy_strequal(key, "power_xy"))
+            priv->power_xy = strtol(value, NULL, 10);
+        else if (gwy_strequal(key, "power_z"))
+            priv->power_z = strtol(value, NULL, 10);
+        else if (gwy_strequal(key, "same_units"))
+            priv->same_units = !!strtol(value, NULL, 10);
+        else if (gwy_strequal(key, "formula"))
+            _gwy_assign_string(&priv->formula, value);
+        else if (gwy_strequal(key, "group"))
+            _gwy_assign_string(&priv->group, value);
+        else if (gwy_strequal(key, "ident"))
+            _gwy_assign_string(&priv->ident, value);
+        else if (gwy_strequal(key, "symbol"))
+            _gwy_assign_string(&priv->symbol, value);
+        else
+            g_warning("Unknown GwyUserGrainValue key ‘%s’.", key);
     }
 
-    // TODO
-    if (!params)
-        return FALSE;
-
-    sanitize(usergrainvalue);
-    if (!gwy_user_grain_value_validate(usergrainvalue)) {
+    if (!gwy_user_grain_value_validate(usergrainvalue, NULL)) {
         // TODO
         return FALSE;
     }

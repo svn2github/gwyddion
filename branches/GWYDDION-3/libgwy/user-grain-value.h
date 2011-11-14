@@ -67,20 +67,19 @@ struct _GwyUserGrainValueClass {
 
 GType              gwy_user_grain_value_get_type      (void)                              G_GNUC_CONST;
 GwyUserGrainValue* gwy_user_grain_value_new           (void)                              G_GNUC_MALLOC;
-const gchar*       gwy_user_grain_value_get_formula   (GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+const gchar*       gwy_user_grain_value_get_formula   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
 gboolean           gwy_user_grain_value_set_formula   (GwyUserGrainValue *usergrainvalue,
                                                        const gchar *formula,
                                                        GError **error);
-const gchar*       gwy_user_grain_value_get_group     (GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+const gchar*       gwy_user_grain_value_get_group     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
 void               gwy_user_grain_value_set_group     (GwyUserGrainValue *usergrainvalue,
                                                        const gchar *group);
-const gchar*       gwy_user_grain_value_get_symbol    (GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+const gchar*       gwy_user_grain_value_get_symbol    (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
 void               gwy_user_grain_value_set_symbol    (GwyUserGrainValue *usergrainvalue,
                                                        const gchar *symbol);
-const gchar*       gwy_user_grain_value_get_ident     (GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-gboolean           gwy_user_grain_value_set_ident     (GwyUserGrainValue *usergrainvalue,
-                                                       const gchar *ident,
-                                                       GError **error);
+const gchar*       gwy_user_grain_value_get_ident     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void               gwy_user_grain_value_set_ident     (GwyUserGrainValue *usergrainvalue,
+                                                       const gchar *ident);
 gint               gwy_user_grain_value_get_power_xy  (const GwyUserGrainValue *fitparam) G_GNUC_PURE;
 void               gwy_user_grain_value_set_power_xy  (GwyUserGrainValue *fitparam,
                                                        gint power_xy);
