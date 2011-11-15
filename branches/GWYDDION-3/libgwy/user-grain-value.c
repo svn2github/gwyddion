@@ -562,6 +562,46 @@ gwy_user_grain_value_set_ident(GwyUserGrainValue *usergrainvalue,
         gwy_user_grain_value_changed(usergrainvalue);
 }
 
+/**
+ * gwy_user_grain_value_get_same_units:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Gets whether a user grain value needs the same lateral and value units.
+ *
+ * Returns: %TRUE if the grain value needs the same lateral and value units.
+ **/
+gboolean
+gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), FALSE);
+    return usergrainvalue->priv->same_units;
+}
+
+/**
+ * gwy_user_grain_value_set_same_units:
+ * @usergrainvalue: A user grain value resource.
+ * @same_units: %TRUE if the grain value should require same lateral and value
+ *              units, %FALSE if it should not.
+ *
+ * Gets whether a user grain value needs the same lateral and value units.
+ *
+ * Some grain values, such as surface area, are meaningful only if height is
+ * the same physical quantity as lateral dimensions.  These grain values
+ * should have @same_units set to %TRUE.
+ **/
+void
+gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
+                                    gboolean same_units)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    UserGrainValue *priv = usergrainvalue->priv;
+    same_units = !!same_units;
+    if (same_units != priv->same_units) {
+        priv->same_units = same_units;
+        gwy_user_grain_value_changed(usergrainvalue);
+    }
+}
+
 static gchar*
 gwy_user_grain_value_dump(GwyResource *resource)
 {

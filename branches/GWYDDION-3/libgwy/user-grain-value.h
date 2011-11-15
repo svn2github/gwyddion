@@ -88,7 +88,7 @@ void               gwy_user_grain_value_set_power_z   (GwyUserGrainValue *fitpar
                                                        gint power_z);
 gboolean           gwy_user_grain_value_get_same_units(const GwyUserGrainValue *fitparam) G_GNUC_PURE;
 void               gwy_user_grain_value_set_same_units(GwyUserGrainValue *fitparam,
-                                                       gboolean setting);
+                                                       gboolean same_units);
 
 #define gwy_user_grain_values() \
     (gwy_resource_type_get_inventory(GWY_TYPE_USER_GRAIN_VALUE))
