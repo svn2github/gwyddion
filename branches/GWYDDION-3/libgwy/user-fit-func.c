@@ -58,7 +58,7 @@ static void         sanitize                           (GwyUserFitFunc *userfitf
 static gboolean     gwy_user_fit_func_validate         (GwyUserFitFunc *userfitfunc);
 static gchar*       gwy_user_fit_func_dump             (GwyResource *resource);
 static gboolean     gwy_user_fit_func_parse            (GwyResource *resource,
-                                                        gchar *text,
+                                                        GwyStrLineIter *iter,
                                                         GError **error);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
@@ -641,24 +641,23 @@ gwy_user_fit_func_dump(GwyResource *resource)
 
 static gboolean
 gwy_user_fit_func_parse(GwyResource *resource,
-                        gchar *text,
-                        G_GNUC_UNUSED GError **error)
+                        GwyStrLineIter *iter,
+                        GError **error)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(resource);
     UserFitFunc *priv = userfitfunc->priv;
     GwyFitParam *param = NULL;
     GPtrArray *params = NULL;
 
-    for (gchar *line = gwy_str_next_line(&text);
-         line;
-         line = gwy_str_next_line(&text)) {
+    while (TRUE) {
+        GwyResourceLineType line;
         gchar *key, *value;
-        GwyResourceLineType type = gwy_resource_parse_param_line(line,
-                                                                 &key, &value);
-        if (type == GWY_RESOURCE_LINE_EMPTY)
-            continue;
-        if (type != GWY_RESOURCE_LINE_OK)
+
+        line = gwy_resource_parse_param_line(iter, &key, &value, error);
+        if (line == GWY_RESOURCE_LINE_NONE)
             break;
+        if (line != GWY_RESOURCE_LINE_OK)
+            goto fail;
 
         if (gwy_strequal(key, "param")) {
             param = gwy_fit_param_new(value);
@@ -667,7 +666,12 @@ gwy_user_fit_func_parse(GwyResource *resource,
                     params = g_ptr_array_new();
                 g_ptr_array_add(params, param);
             }
-            // XXX: Parameter name error
+            else {
+                g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                            _("Parameter %u has invalid name."),
+                            (guint)params->len+1);
+                goto fail;
+            }
         }
         else if (params) {
             if (param) {
@@ -679,7 +683,7 @@ gwy_user_fit_func_parse(GwyResource *resource,
                          && gwy_fit_param_check_estimate(value, NULL))
                     gwy_fit_param_set_estimate(param, value);
                 else
-                    break;
+                   g_warning("Ignoring unknown GwyUserFitFunc key ‘%s’.", key);
             }
         }
         else {
@@ -688,13 +692,15 @@ gwy_user_fit_func_parse(GwyResource *resource,
             else if (gwy_strequal(key, "filter"))
                 _gwy_assign_string(&priv->filter, value);
             else
-                break;
+                g_warning("Ignoring unknown GwyUserFitFunc key ‘%s’.", key);
         }
     }
 
-    // TODO
-    if (!params)
+    if (!params) {
+        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                    _("Function has no parameters."));
         return FALSE;
+    }
 
     free_params(priv);
     priv->nparams = params->len;
@@ -707,6 +713,15 @@ gwy_user_fit_func_parse(GwyResource *resource,
     }
 
     return TRUE;
+
+fail:
+    if (params) {
+        for (guint i = 0; i < params->len; i++)
+            GWY_OBJECT_UNREF(g_ptr_array_index(params, i));
+        g_ptr_array_free(params, TRUE);
+    }
+
+    return FALSE;
 }
 
 /**

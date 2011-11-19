@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -50,6 +50,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <errno.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
@@ -155,7 +156,15 @@ static GwyResourceClass*  get_resource_class              (const gchar *typename
                                                            GType expected_type,
                                                            const gchar *filename_sys,
                                                            GError **error);
-static GwyResource*       parse                           (gchar *text,
+
+static void               err_filename                    (GError **error,
+                                                           guint domain,
+                                                           guint code,
+                                                           const gchar *filename_sys,
+                                                           gchar **filename_utf8,
+                                                           const gchar *format,
+                                                           ...) G_GNUC_PRINTF(6, 7);
+static GwyResource*       parse                           (GwyStrLineIter *iter,
                                                            GType expected_type,
                                                            const gchar *filename,
                                                            GError **error);
@@ -1184,7 +1193,8 @@ gwy_resource_load(const gchar *filename_sys,
     gchar *text = NULL;
 
     if (g_file_get_contents(filename_sys, &text, NULL, error)) {
-        resource = parse(text, expected_type, filename_sys, error);
+        GwyStrLineIter *iter = gwy_str_line_iter_new_take(text);
+        resource = parse(iter, expected_type, filename_sys, error);
         if (resource) {
             Resource *priv = resource->priv;
             priv->file = g_file_new_for_path(filename_sys);
@@ -1200,27 +1210,50 @@ gwy_resource_load(const gchar *filename_sys,
             // Do not set is_on_disk as we really care only about managed
             // resources so it's set in gwy_resource_type_load_directory().
         }
+        gwy_str_line_iter_free(iter);
     }
 
-    GWY_FREE(text);
     return resource;
 }
 
+static void
+err_filename(GError **error,
+             guint domain,
+             guint code,
+             const gchar *filename_sys,
+             gchar **filename_disp,
+             const gchar *format,
+             ...)
+{
+    va_list ap;
+    va_start(ap, format);
+
+    *filename_disp = g_filename_display_name(filename_sys);
+    gchar *message = g_strdup_vprintf(format, ap);
+
+    g_set_error_literal(error, domain, code, message);
+
+    g_free(message);
+    g_free(filename_disp);
+
+    va_end(ap);
+}
+
 static GwyResource*
-parse(gchar *text,
+parse(GwyStrLineIter *iter,
       GType expected_type,
       const gchar *filename_sys,
       GError **error)
 {
-    gchar *line = gwy_str_next_line(&text);
+    gchar *line = gwy_str_line_iter_next(iter);
+    gchar *filename_disp = NULL;
+    GError *err = NULL;
 
     if (!line) {
-        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                  NULL, NULL, NULL);
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                    _("Wrong or missing resource magic header in file ‘%s’."),
-                    filename_utf8);
-        g_free(filename_utf8);
+        err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
+                     filename_sys, &filename_disp,
+                     _("Wrong or missing resource magic header in file ‘%s’."),
+                     filename_disp);
         return NULL;
     }
 
@@ -1237,12 +1270,10 @@ parse(gchar *text,
         version = 2;
     }
     else {
-        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                  NULL, NULL, NULL);
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                    _("Wrong or missing resource magic header in file ‘%s’."),
-                    filename_utf8);
-        g_free(filename_utf8);
+        err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
+                     filename_sys, &filename_disp,
+                     _("Wrong or missing resource magic header in file ‘%s’."),
+                     filename_disp);
         return NULL;
     }
 
@@ -1250,39 +1281,41 @@ parse(gchar *text,
     line += strspn(line, " \t");
     const gchar *typename = line;
     if (G_UNLIKELY(!line)) {
-        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                  NULL, NULL, NULL);
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                    _("Resource header of file ‘%s’ is truncated."),
-                    filename_utf8);
-        g_free(filename_utf8);
+        err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
+                     filename_sys, &filename_disp,
+                     _("Resource header of file ‘%s’ is truncated."),
+                     filename_disp);
         return NULL;
     }
 
     /* Parse the name in v3 resources. */
     gchar *key, *name = NULL;
     if (version == 3) {
-        line = gwy_str_next_line(&text);
-        if (gwy_resource_parse_param_line(line,
-                                          &key, &name) != GWY_RESOURCE_LINE_OK
-            || !gwy_strequal(key, "name")) {
-            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                      NULL, NULL, NULL);
-            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Malformed resource name line in "
-                          "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename_utf8);
-            g_free(filename_utf8);
+        GwyResourceLineType type = gwy_resource_parse_param_line(iter,
+                                                                 &key, &name,
+                                                                 &err);
+        if (type != GWY_RESOURCE_LINE_OK) {
+            err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                         filename_sys, &filename_disp,
+                         _("Resource name line in file ‘%s’ is malformed: %s"),
+                         filename_disp, err->message);
+            g_clear_error(&err);
+            return NULL;
+        }
+        if (!gwy_strequal(key, "name")) {
+            err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                         filename_sys, &filename_disp,
+                        _("First line in version 3 resource ‘%s’ in file ‘%s’ "
+                          "does not contain the name."),
+                        typename, filename_disp);
             return NULL;
         }
         if (!strlen(name)) {
-            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                      NULL, NULL, NULL);
-            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+            err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                         filename_sys, &filename_disp,
                         _("Resource name is empty in "
                           "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename_utf8);
-            g_free(filename_utf8);
+                        typename, filename_disp);
             return NULL;
         }
     }
@@ -1295,7 +1328,7 @@ parse(gchar *text,
 
     /* Parse. */
     GwyResource *resource = g_object_newv(expected_type, 0, NULL);
-    if ((klass->parse(resource, text, error))) {
+    if ((klass->parse(resource, iter, &err))) {
         if (name) {
             resource->priv->name = g_strdup(name);
         }
@@ -1307,6 +1340,11 @@ parse(gchar *text,
         }
     }
     else {
+        err_filename(error, GWY_RESOURCE_ERROR, err->code,
+                     filename_sys, &filename_disp,
+                     _("Resource ‘%s’ in file ‘%s’ is malformed: %s"),
+                     typename, filename_disp, err->message);
+        g_clear_error(&err);
         GWY_OBJECT_UNREF(resource);
     }
     g_type_class_unref(klass);
@@ -1321,31 +1359,28 @@ get_resource_class(const gchar *typename,
                    GError **error)
 {
     GType type = g_type_from_name(typename);
+    gchar *filename_disp = NULL;
 
     if (G_UNLIKELY(!type)) {
-        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                  NULL, NULL, NULL);
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
-                    _("Resource type ‘%s’ of file ‘%s’ is invalid."),
-                   filename_utf8, typename);
-        g_free(filename_utf8);
+        err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
+                     filename_sys, &filename_disp,
+                     _("Resource type ‘%s’ of file ‘%s’ is invalid."),
+                     typename, filename_disp);
         return NULL;
     }
 
     /* Does it make sense to accept subclasses? */
     if (G_UNLIKELY(g_type_is_a(!type, expected_type))) {
-        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                  NULL, NULL, NULL);
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
-                    _("Resource type ‘%s’ of file ‘%s’ does not match "
-                      "the expected type ‘%s’."),
-                    filename_utf8, typename, g_type_name(expected_type));
-        g_free(filename_utf8);
+        err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
+                     filename_sys, &filename_disp,
+                     _("Resource type ‘%s’ of file ‘%s’ does not match "
+                       "the expected type ‘%s’."),
+                     typename, filename_disp, g_type_name(expected_type));
         return NULL;
     }
 
     /* If the resource type matches the requested type yet the type is invalid
-     * this is a programmer's error.  Fail ungracefully.  */
+     * then this is a programmer's error.  Fail ungracefully.  */
     g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE)
                          && G_TYPE_IS_INSTANTIATABLE(type)
                          && !G_TYPE_IS_ABSTRACT(type),
@@ -1671,8 +1706,8 @@ gwy_resource_type_load_directory(GType type,
     if (modifiable) {
         set_managed_directory(cpriv, gfile,
                               "Modifiable resources of type %s were already "
-                              "loaded from another directory %s different "
-                              "from %s.  Resource management will be "
+                              "loaded from another directory ‘%s’ different "
+                              "from ‘%s’.  Resource management will be "
                               "confused.");
     }
     g_object_unref(gfile);
@@ -1725,11 +1760,12 @@ name_is_unique(GwyResource *resource,
     if (!error)
         return FALSE;
 
-    // TODO: We used to have file names in the message, reimplement with GFile.
+    gchar *filename = g_file_get_parse_name(priv->file);
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
-                _("Resource named ‘%s’ "
-                  "conflicts with already loaded resource."),
-                G_OBJECT_TYPE_NAME(resource));
+                _("Resource named ‘%s’ from file ‘%s’ "
+                  "conflicts with an existing resource."),
+                G_OBJECT_TYPE_NAME(resource), filename);
+    g_free(filename);
 
     return FALSE;
 }
@@ -1780,8 +1816,8 @@ gwy_resource_type_set_managed_directory(GType type,
     g_return_if_fail(cpriv);
     GFile *gfile = g_file_new_for_path(dirname_sys);
     set_managed_directory(cpriv, gfile,
-                          "Managed directory of resource %s has been set to "
-                          "%s and it cannot be changed to %s.");
+                          "Managed directory of resource ‘%s’ has been set to "
+                          "‘%s’ and it cannot be changed to ‘%s’.");
 }
 
 /**
@@ -1954,47 +1990,95 @@ gwy_resources_finalize(void)
     resource_classes = NULL;
 }
 
+static GwyResourceLineType
+err_identifier(GError **error,
+               GwyStrLineIter *iter)
+{
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                _("Key at line %u is not a valid identifier."),
+                gwy_str_line_iter_lineno(iter));
+    return GWY_RESOURCE_LINE_INVALID;
+}
+
+static GwyResourceLineType
+err_utf8(GError **error,
+         GwyStrLineIter *iter)
+{
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                _("Value at line %u is not valid UTF-8."),
+                gwy_str_line_iter_lineno(iter));
+    return GWY_RESOURCE_LINE_INVALID;
+}
+
+static GwyResourceLineType
+err_too_few_values(GError **error,
+                   GwyStrLineIter *iter,
+                   guint nvals,
+                   guint expected)
+{
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                _("Data at line %u consists of too few values "
+                  "(%u instead of %u)."),
+                gwy_str_line_iter_lineno(iter), nvals, expected);
+    return GWY_RESOURCE_LINE_INVALID;
+}
+
+static GwyResourceLineType
+err_invalid_value(GError **error,
+                  GwyStrLineIter *iter,
+                  guint nvals)
+{
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                _("Data at line %u contain invalid/unexpected text after "
+                  "value %u."),
+                gwy_str_line_iter_lineno(iter), nvals);
+    return GWY_RESOURCE_LINE_INVALID;
+}
+
 /**
  * gwy_resource_parse_param_line:
- * @line: Text buffer containing a resource file line (writable).
+ * @iter: A text line iterator.
  * @key: Location to store the key to.
  * @value: Location to store the value to.
+ * @error: Location to store the error occuring, %NULL to ignore.  Errors from
+ *         #GwyResourceError can occur.
  *
  * Extracts one key-value pair from a resource file.
  *
  * This is a helper function for resource file parsing.
  *
  * If it returns %GWY_RESOURCE_LINE_OK, @key and @value are pointed to
- * locations in @line where the key and value on the next resource line
- * starts.  The contents of @line is modified to make @key and @value stripped
- * NUL-terminated strings.
+ * locations in the buffer where the key and value on the next resource line
+ * starts.  Whitespace is stripped from both the key and value.
  *
  * In all other cases @key and @value are not set and @line is left intact.
- * Note a line containing no value is valid, @value will be set to the empty
- * string.
+ * Note a line containing no value (just the key) is valid, @value will be set
+ * to the empty string.
  *
- * Returns: The line type, any type can be returned except
- *          %GWY_RESOURCE_LINE_BAD_NUMBER.
+ * Returns: The line type parsing result.
  **/
 GwyResourceLineType
-gwy_resource_parse_param_line(gchar *line,
+gwy_resource_parse_param_line(GwyStrLineIter *iter,
                               gchar **key,
-                              gchar **value)
+                              gchar **value,
+                              GError **error)
 {
-    // Permit sloppy use
-    if (!line)
-        return GWY_RESOURCE_LINE_EMPTY;
+    g_return_val_if_fail(iter, GWY_RESOURCE_LINE_NONE);
 
-    // Empty?
-    while (g_ascii_isspace(*line))
-        line++;
+    // Next non-empty line.
+    gchar *line;
+    do {
+        line = gwy_str_line_iter_next(iter);
+        if (!line)
+            return GWY_RESOURCE_LINE_NONE;
 
-    if (!*line)
-        return GWY_RESOURCE_LINE_EMPTY;
+        while (g_ascii_isspace(*line))
+            line++;
+    } while (*line);
 
     // Key.
     if (!g_ascii_isalpha(*line))
-        return GWY_RESOURCE_LINE_BAD_KEY;
+        return err_identifier(error, iter);
 
     gchar *s = line;
     while (g_ascii_isalnum(*s) || *s == '_')
@@ -2007,7 +2091,7 @@ gwy_resource_parse_param_line(gchar *line,
     }
 
     if (!g_ascii_isspace(*s))
-        return GWY_RESOURCE_LINE_BAD_KEY;
+        return err_identifier(error, iter);
 
     gchar *t = s;
     do {
@@ -2016,7 +2100,7 @@ gwy_resource_parse_param_line(gchar *line,
 
     // Value.
     if (!g_utf8_validate(t, -1, NULL))
-        return GWY_RESOURCE_LINE_BAD_UTF8;
+        return err_utf8(error, iter);
 
     *s = '\0';
     g_strchomp(t);
@@ -2027,43 +2111,60 @@ gwy_resource_parse_param_line(gchar *line,
 
 /**
  * gwy_resource_parse_data_line:
- * @line: Text buffer containing a resource file line.
+ * @iter: A text line iterator.
  * @ncolumns: Expected number of columns.
  * @data: Array of length @number to store the read values to.
+ * @error: Location to store the error occuring, %NULL to ignore.  Errors from
+ *         #GwyResourceError can occur.
  *
  * Extracts one row of floating point values from a resource file.
  *
  * This is a helper function for resource file parsing.
  *
  * If it returns %GWY_RESOURCE_LINE_OK, @data is filled with the parsed values.
- * They are parsed using g_ascii_strtod(), i.e. the numbers are expected to
- * be stored in POSIX format.
+ * Otherwise the content of @data is undefined.  The numbers are parsed using
+ * g_ascii_strtod(), i.e. the numbers are expected to be stored in POSIX
+ * format.
  *
- * In all other cases @key and @value are left untouched.
- *
- * Returns: The line type, it can be one of %GWY_RESOURCE_LINE_OK,
- *          %GWY_RESOURCE_LINE_EMPTY and %GWY_RESOURCE_LINE_BAD_NUMBER.
+ * Returns: The line type parsing result.
  **/
 GwyResourceLineType
-gwy_resource_parse_data_line(const gchar *line,
+gwy_resource_parse_data_line(GwyStrLineIter *iter,
                              guint ncolumns,
-                             gdouble *data)
+                             gdouble *data,
+                             GError **error)
 {
-    // Empty?
-    while (g_ascii_isspace(*line))
-        line++;
+    g_return_val_if_fail(iter, GWY_RESOURCE_LINE_NONE);
 
-    if (!*line)
-        return GWY_RESOURCE_LINE_EMPTY;
+    // Next non-empty line.
+    gchar *line;
+    do {
+        line = gwy_str_line_iter_next(iter);
+        if (!line)
+            return GWY_RESOURCE_LINE_NONE;
+
+        while (g_ascii_isspace(*line))
+            line++;
+    } while (*line);
 
     // Read the data.
+    gchar *end = line;
     for (guint i = 0; i < ncolumns; i++) {
-        gchar *end;
         data[i] = g_ascii_strtod(line, &end);
-        if (end == line)
-            return GWY_RESOURCE_LINE_BAD_NUMBER;
+        if (end == line) {
+            if (*end)
+                return err_invalid_value(error, iter, i+1);
+            else
+                return err_too_few_values(error, iter, i+1, ncolumns);
+        }
         line = end;
     }
+
+    while (g_ascii_isspace(*end))
+        *end++;
+    if (*end)
+        return err_invalid_value(error, iter, ncolumns);
+
     return GWY_RESOURCE_LINE_OK;
 }
 
@@ -2146,9 +2247,9 @@ gwy_resource_dump_data_line(const gdouble *data,
  * @copy: Creates copy of a resource.  For serializable resources, this should
  *        be the same as duplication.
  * @dump: Dumps resource data to text, the envelope is added by #GwyResource.
- * @parse: Parses back the text dump, in parses only the
- *         actual resource data, the envelope is handled by #GwyResource.
- *         The method is permitted to modify the contents of @text.
+ * @parse: Parses back the text dump (provided as a line iterator), it parses
+ *         only the actual data of the resource subclass, the envelope is
+ *         handled by #GwyResource.
  *
  * Resource class.
  **/
@@ -2173,23 +2274,19 @@ gwy_resource_dump_data_line(const gdouble *data,
  *                               error because it does not put the resource to
  *                               the inventory.
  * @GWY_RESOURCE_ERROR_DATA: Resource data is invalid.  This error code is
- *                           not used by #GwyResource, it is intended for
- *                           resource implementations.
+ *                           only set by resource line parsers and otherwise it
+ *                           is intended to be used for specific resource data
+ *                           errors.
  *
  * Error codes returned by resource operations.
  **/
 
 /**
  * GwyResourceLineType:
- * @GWY_RESOURCE_LINE_OK: Line is in the expected format.
- * @GWY_RESOURCE_LINE_EMPTY: Line contains only whitespace.
- * @GWY_RESOURCE_LINE_BAD_KEY: Line starts with characters that do not form
- *                             an identifier.
- * @GWY_RESOURCE_LINE_BAD_UTF8: The value part of line is not valid UTF-8 (the
- *                              key part is always ASCII).
- * @GWY_RESOURCE_LINE_BAD_NUMBER: It is not possible to parse the line into
- *                                the specified number of floating point
- *                                values.
+ * @GWY_RESOURCE_LINE_OK: Line is in the expected format.  This also means
+ *                        the requested values have been filled.
+ * @GWY_RESOURCE_LINE_NONE: There are no more lines.
+ * @GWY_RESOURCE_LINE_INVALID: Line is invalid and the error was set.
  *
  * The type of resource file line parsing result.
  **/

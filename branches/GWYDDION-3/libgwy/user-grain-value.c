@@ -50,21 +50,21 @@ static void         gwy_user_grain_value_finalize         (GObject *object);
 static void         gwy_user_grain_value_serializable_init(GwySerializableInterface *iface);
 static gsize        gwy_user_grain_value_n_items          (GwySerializable *serializable);
 static gsize        gwy_user_grain_value_itemize          (GwySerializable *serializable,
-                                                        GwySerializableItems *items);
+                                                           GwySerializableItems *items);
 static gboolean     gwy_user_grain_value_construct        (GwySerializable *serializable,
-                                                        GwySerializableItems *items,
-                                                        GwyErrorList **error_list);
+                                                           GwySerializableItems *items,
+                                                           GwyErrorList **error_list);
 static GObject*     gwy_user_grain_value_duplicate_impl   (GwySerializable *serializable);
 static void         gwy_user_grain_value_assign_impl      (GwySerializable *destination,
-                                                        GwySerializable *source);
+                                                           GwySerializable *source);
 static GwyResource* gwy_user_grain_value_copy             (GwyResource *resource);
 static void         gwy_user_grain_value_changed          (GwyUserGrainValue *usergrainvalue);
 static gboolean     gwy_user_grain_value_validate         (GwyUserGrainValue *usergrainvalue,
                                                            GwyErrorList **error_list);
 static gchar*       gwy_user_grain_value_dump             (GwyResource *resource);
 static gboolean     gwy_user_grain_value_parse            (GwyResource *resource,
-                                                        gchar *text,
-                                                        GError **error);
+                                                           GwyStrLineIter *iter,
+                                                           GError **error);
 
 static const gunichar more[] = { '_', 0 };
 
@@ -626,23 +626,21 @@ gwy_user_grain_value_dump(GwyResource *resource)
 
 static gboolean
 gwy_user_grain_value_parse(GwyResource *resource,
-                           gchar *text,
-                           G_GNUC_UNUSED GError **error)
+                           GwyStrLineIter *iter,
+                           GError **error)
 {
     GwyUserGrainValue *usergrainvalue = GWY_USER_GRAIN_VALUE(resource);
     UserGrainValue *priv = usergrainvalue->priv;
 
-    guint lineno = 1;
-    for (gchar *line = gwy_str_next_line(&text);
-         line;
-         line = gwy_str_next_line(&text), lineno++) {
+    while (TRUE) {
+        GwyResourceLineType line;
         gchar *key, *value;
-        GwyResourceLineType type = gwy_resource_parse_param_line(line,
-                                                                 &key, &value);
-        if (type == GWY_RESOURCE_LINE_EMPTY)
-            continue;
-        if (type != GWY_RESOURCE_LINE_OK)
+
+        line = gwy_resource_parse_param_line(iter, &key, &value, error);
+        if (line == GWY_RESOURCE_LINE_NONE)
             break;
+        if (line != GWY_RESOURCE_LINE_OK)
+            return FALSE;
 
         if (gwy_strequal(key, "power_xy"))
             priv->power_xy = strtol(value, NULL, 10);
@@ -659,7 +657,7 @@ gwy_user_grain_value_parse(GwyResource *resource,
         else if (gwy_strequal(key, "symbol"))
             _gwy_assign_string(&priv->symbol, value);
         else
-            g_warning("Unknown GwyUserGrainValue key ‘%s’.", key);
+            g_warning("Ignoring unknown GwyUserGrainValue key ‘%s’.", key);
     }
 
     if (!gwy_user_grain_value_validate(usergrainvalue, NULL)) {

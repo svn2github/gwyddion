@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #define __LIBGWY_RESOURCE_H__
 
 #include <glib-object.h>
+#include <libgwy/strfuncs.h>
 #include <libgwy/inventory.h>
 #include <libgwy/error-list.h>
 
@@ -38,10 +39,8 @@ typedef enum {
 
 typedef enum {
     GWY_RESOURCE_LINE_OK = 0,
-    GWY_RESOURCE_LINE_EMPTY,
-    GWY_RESOURCE_LINE_BAD_KEY,
-    GWY_RESOURCE_LINE_BAD_UTF8,
-    GWY_RESOURCE_LINE_BAD_NUMBER,
+    GWY_RESOURCE_LINE_NONE,
+    GWY_RESOURCE_LINE_INVALID,
 } GwyResourceLineType;
 
 typedef enum {
@@ -83,10 +82,10 @@ struct _GwyResourceClass {
     GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
     gboolean     (*parse)  (GwyResource *resource,
-                            gchar *text,
+                            GwyStrLineIter *iter,
                             GError **error);
 
-    /*< private >*/
+    /*<private>*/
     void (*reserved1)(void);
     void (*reserved2)(void);
     void (*reserved3)(void);
@@ -134,12 +133,14 @@ void                        gwy_resources_flush                    (void);
 void                        gwy_resources_lock                     (void);
 void                        gwy_resources_unlock                   (void);
 void                        gwy_resources_finalize                 (void);
-GwyResourceLineType         gwy_resource_parse_param_line          (gchar *line,
+GwyResourceLineType         gwy_resource_parse_param_line          (GwyStrLineIter *iter,
                                                                     gchar **key,
-                                                                    gchar **value);
-GwyResourceLineType         gwy_resource_parse_data_line           (const gchar *line,
+                                                                    gchar **value,
+                                                                    GError **error);
+GwyResourceLineType         gwy_resource_parse_data_line           (GwyStrLineIter *iter,
                                                                     guint ncolumns,
-                                                                    gdouble *data);
+                                                                    gdouble *data,
+                                                                    GError **error);
 gchar*                      gwy_resource_dump_data_line            (const gdouble *data,
                                                                     guint ncolumns)                         G_GNUC_MALLOC;
 

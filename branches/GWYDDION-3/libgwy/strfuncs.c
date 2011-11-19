@@ -24,6 +24,12 @@
 
 #define TOLOWER(c) ((c) >= 'A' && (c) <= 'Z' ? (c) - 'A' + 'a' : (c))
 
+struct _GwyStrLineIter {
+    gchar *buffer;
+    gchar *pos;
+    guint lineno;
+};
+
 /**
  * gwy_ascii_strisident:
  * @s: A NUL-terminated string.
@@ -334,6 +340,133 @@ gwy_str_next_line(gchar **buffer)
     return q;
 }
 
+/**
+ * gwy_str_line_iter_new:
+ * @buffer: (allow-none) (transfer none):
+ *          Writable NUL-terminated string, typically consisting of several
+ *          lines.  %NULL is permitted and means the same as an empty @buffer.
+ *
+ * Creates a new text line iterator for a caller-owned string buffer.
+ *
+ * The buffer does not become owned by the newly created iterator, even though
+ * the iterator modifies its contents along the way.  The caller needs to free
+ * it afterwards.
+ *
+ * Returns: (transfer-full):
+ *          A new text line iterator for @buffer.
+ **/
+GwyStrLineIter*
+gwy_str_line_iter_new(gchar *buffer)
+{
+    GwyStrLineIter *iter = g_slice_new0(GwyStrLineIter);
+    iter->pos = buffer;
+}
+
+/**
+ * gwy_str_line_iter_new_take:
+ * @buffer: (allow-none) (transfer full):
+ *          Writable NUL-terminated string, typically consisting of several
+ *          lines.  %NULL is permitted and means the same as an empty @buffer.
+ *
+ * Creates a new text line iterator for a string buffer, taking its ownership.
+ *
+ * The buffer becomes owned by the newly created iterator that will also
+ * modifies its contents along the way.
+ *
+ * Returns: A new text line iterator for @buffer.
+ **/
+GwyStrLineIter*
+gwy_str_line_iter_new_take(gchar *buffer)
+{
+    GwyStrLineIter *iter = g_slice_new0(GwyStrLineIter);
+    iter->pos = iter->buffer = buffer;
+}
+
+/**
+ * gwy_str_line_iter_free:
+ * @iter: A text line iterator.
+ *
+ * Frees a text line iterator.
+ **/
+void
+gwy_str_line_iter_free(GwyStrLineIter *iter)
+{
+    g_return_if_fail(iter);
+    GWY_FREE(iter->buffer);
+    g_slice_free(GwyStrLineIter, iter);
+}
+
+/**
+ * gwy_str_line_iter_next:
+ * @iter: A text line iterator.
+ *
+ * Fetches the next line from a text line iterator.
+ *
+ * The iterator immediately moves on so it is not possible to go back to the
+ * same line again.  The contents of the buffer is modified and the caller must
+ * treat it as undefined.
+ *
+ * This method can be called any number of times after returning the last line;
+ * it will simply continue returning %NULL until the caller finally gets bored
+ * and frees the iterator.
+ *
+ * The last line of the buffer needs not be terminated with any end-of-line
+ * character.
+ *
+ * A buffer with no characters is considered completely empty (i.e. not as a
+ * single empty line) and this method returns %NULL immediately in the first
+ * iteration.
+ *
+ * Returns: (allow-none) (transfer-none):
+ *          The next line, with any trailing end-of-line characters removed.
+ *          The returned string is just a pointer somewhere into the buffer.
+ *          %NULL is returned if there are no more lines.
+ **/
+gchar*
+gwy_str_line_iter_next(GwyStrLineIter *iter)
+{
+    g_return_val_if_fail(iter, NULL);
+    if (!iter->pos)
+        return NULL;
+
+    gchar *q = *iter->pos;
+    if (!*q) {
+        *iter->pos = NULL;
+        return NULL;
+    }
+
+    gchar *p;
+    for (p = q; *p != '\n' && *p != '\r' && *p; p++)
+        ;
+    if (p[0] == '\r' && p[1] == '\n') {
+        *(p++) = '\0';
+        *(p++) = '\0';
+    }
+    else if (p[0]) {
+        *(p++) = '\0';
+    }
+
+    *iter->pos = p;
+    iter->lineno++;
+    return q;
+}
+
+/**
+ * gwy_str_line_iter_lineno:
+ * @iter: A text line iterator.
+ *
+ * Obtains the current line number of a text line iterator.
+ *
+ * Returns: Zero if the iteration has not started yet.  The line number,
+ *          starting from one, of the last line returned by
+ *          gwy_str_line_iter_next() otherwise.
+ **/
+guint
+gwy_str_line_iter_lineno(const GwyStrLineIter *iter)
+{
+    g_return_val_if_fail(iter, 0);
+    return iter->lineno;
+}
 
 /**
  * SECTION: strfuncs

@@ -18,6 +18,7 @@
  */
 
 #include <string.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/serializable-boxed.h"
@@ -60,7 +61,7 @@ static void         gwy_gl_material_changed          (GwyGLMaterial *gl_material
 static void         gwy_gl_material_setup_inventory  (GwyInventory *inventory);
 static gchar*       gwy_gl_material_dump             (GwyResource *resource);
 static gboolean     gwy_gl_material_parse            (GwyResource *resource,
-                                                      gchar *text,
+                                                      GwyStrLineIter *iter,
                                                       GError **error);
 
 static const GwyRGBA black = { 0, 0, 0, 0 };
@@ -583,36 +584,35 @@ gwy_gl_material_dump(GwyResource *resource)
 }
 
 static gboolean
-parse_component(gchar **text, GwyRGBA *color)
+parse_one(GwyStrLineIter *iter, guint n, gdouble *target,
+          const gchar *name, GError **error)
 {
-    GwyResourceLineType ltype;
-    do {
-        gchar *line = gwy_str_next_line(text);
-        if (!line)
-            return FALSE;
-        ltype = gwy_resource_parse_data_line(line, 4, (gdouble*)color);
-        if (ltype == GWY_RESOURCE_LINE_OK)
-            return TRUE;
-    } while (ltype == GWY_RESOURCE_LINE_EMPTY);
+    GwyResourceLineType line = gwy_resource_parse_data_line(iter, n, target,
+                                                            error);
+
+    if (line == GWY_RESOURCE_LINE_OK)
+        return TRUE;
+    if (line == GWY_RESOURCE_LINE_INVALID)
+        return FALSE;
+
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                _("Component ‘%s’ is missing."), name);
     return FALSE;
 }
 
 static gboolean
 gwy_gl_material_parse(GwyResource *resource,
-                      gchar *text,
-                      G_GNUC_UNUSED GError **error)
+                      GwyStrLineIter *iter,
+                      GError **error)
 {
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(resource);
+    Material *priv = gl_material->priv;
 
-    if (!parse_component(&text, &gl_material->priv->ambient)
-        || !parse_component(&text, &gl_material->priv->diffuse)
-        || !parse_component(&text, &gl_material->priv->specular)
-        || !parse_component(&text, &gl_material->priv->emission))
-        return FALSE;
-
-    gchar *end;
-    gl_material->priv->shininess = g_ascii_strtod(text, &end);
-    if (end == text)
+    if (!parse_one(iter, 4, (gdouble*)&priv->ambient, "ambient", error)
+        || !parse_one(iter, 4, (gdouble*)&priv->diffuse, "diffuse", error)
+        || !parse_one(iter, 4, (gdouble*)&priv->specular, "specular", error)
+        || !parse_one(iter, 4, (gdouble*)&priv->emission, "emission", error)
+        || !parse_one(iter, 1, &priv->shininess, "shininess", error))
         return FALSE;
 
     gwy_gl_material_sanitize(gl_material);

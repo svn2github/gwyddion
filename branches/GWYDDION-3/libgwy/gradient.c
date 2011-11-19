@@ -66,7 +66,7 @@ static void         gwy_gradient_setup_inventory  (GwyInventory *inventory);
 static GwyResource* gwy_gradient_copy             (GwyResource *resource);
 static gchar*       gwy_gradient_dump             (GwyResource *resource);
 static gboolean     gwy_gradient_parse            (GwyResource *resource,
-                                                   gchar *text,
+                                                   GwyStrLineIter *iter,
                                                    GError **error);
 static void         refine_interval               (GList *points,
                                                    gint n,
@@ -308,29 +308,24 @@ gwy_gradient_dump(GwyResource *resource)
 
 static gboolean
 gwy_gradient_parse(GwyResource *resource,
-                   gchar *text,
-                   G_GNUC_UNUSED GError **error)
+                   GwyStrLineIter *iter,
+                   GError **error)
 {
     GwyGradient *gradient = GWY_GRADIENT(resource);
     GArray *points = gradient->priv->points;
     g_array_set_size(points, 0);
-    for (gchar *line = gwy_str_next_line(&text);
-         line;
-         line = gwy_str_next_line(&text)) {
+
+    while (TRUE) {
         GwyGradientPoint pt;
-        switch (gwy_resource_parse_data_line(line, 5, (gdouble*)&pt)) {
-            case GWY_RESOURCE_LINE_OK:
-            g_array_append_vals(points, &pt, 1);
-            break;
+        GwyResourceLineType line;
 
-            case GWY_RESOURCE_LINE_EMPTY:
-            case GWY_RESOURCE_LINE_BAD_NUMBER:
+        line = gwy_resource_parse_data_line(iter, 5, (gdouble*)&pt, error);
+        if (line == GWY_RESOURCE_LINE_NONE)
             break;
+        if (line != GWY_RESOURCE_LINE_OK)
+            return FALSE;
 
-            default:
-            g_assert_not_reached();
-            break;
-        }
+        g_array_append_vals(points, &pt, 1);
     }
     gwy_gradient_sanitize(gradient);
     return TRUE;

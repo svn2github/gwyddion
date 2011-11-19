@@ -45,6 +45,14 @@ gpointer gwy_memmem             (gconstpointer haystack,
                                  gconstpointer needle,
                                  gsize needle_len)          G_GNUC_PURE;
 
+typedef struct _GwyStrLineIter GwyStrLineIter;
+
+GwyStrLineIter* gwy_str_line_iter_new     (gchar *buffer)              G_GNUC_MALLOC;
+GwyStrLineIter* gwy_str_line_iter_new_take(gchar *buffer)              G_GNUC_MALLOC;
+void            gwy_str_line_iter_free    (GwyStrLineIter *iter);
+gchar*          gwy_str_line_iter_next    (GwyStrLineIter *iter);
+guint           gwy_str_line_iter_lineno  (const GwyStrLineIter *iter) G_GNUC_PURE;
+
 G_END_DECLS
 
 #endif
