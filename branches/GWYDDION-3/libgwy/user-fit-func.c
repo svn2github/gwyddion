@@ -54,8 +54,10 @@ static void         gwy_user_fit_func_assign_impl      (GwySerializable *destina
                                                         GwySerializable *source);
 static GwyResource* gwy_user_fit_func_copy             (GwyResource *resource);
 static void         gwy_user_fit_func_changed          (GwyUserFitFunc *userfitfunc);
-static void         sanitize                           (GwyUserFitFunc *userfitfunc);
-static gboolean     gwy_user_fit_func_validate         (GwyUserFitFunc *userfitfunc);
+static gboolean     validate                           (GwyUserFitFunc *userfitfunc,
+                                                        guint domain,
+                                                        guint code,
+                                                        GError **error);
 static gchar*       gwy_user_fit_func_dump             (GwyResource *resource);
 static gboolean     gwy_user_fit_func_parse            (GwyResource *resource,
                                                         GwyStrLineIter *iter,
@@ -244,30 +246,22 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
                                      GWY_TYPE_FIT_PARAM, error_list))
         goto fail;
 
-    g_free(priv->formula);
-    priv->formula = its[0].value.v_string;
-    g_free(priv->filter);
-    priv->filter = its[1].value.v_string;
+    GWY_TAKE_STRING(priv->formula, its[0].value.v_string);
+    GWY_TAKE_STRING(priv->filter, its[1].value.v_string);
 
     free_params(priv);
     priv->param = (GwyFitParam**)its[2].value.v_object_array;
     priv->nparams = n;
-    sanitize(userfitfunc);
-    gboolean ok = gwy_user_fit_func_validate(userfitfunc);
-    if (!ok) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Invalid formula or parameters."));
-    }
+    its[2].value.v_object_array = NULL;
 
-    return ok;
+    GError *err = NULL;
+    if (validate(userfitfunc,
+                 GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID, &err))
+        return TRUE;
+
+    gwy_error_list_propagate(error_list, err);
 
 fail:
-    g_free(its[0].value.v_string);
-    g_free(its[1].value.v_string);
-    for (guint i = 0; i < its[2].array_size; i++)
-        g_object_unref(its[2].value.v_object_array[i]);
-    g_free(its[2].value.v_object_array);
     return FALSE;
 }
 
@@ -326,70 +320,96 @@ gwy_user_fit_func_changed(GwyUserFitFunc *userfitfunc)
     gwy_resource_data_changed(GWY_RESOURCE(userfitfunc));
 }
 
-static void
-sanitize(GwyUserFitFunc *userfitfunc)
+// Passing the error domain and code is a bit weird but we emit errors in two
+// different context: deserialisation and resource loading.  In both the error
+// code is dedicated for specific object logic errors but, of course, different
+// in each context.
+static gboolean
+validate(GwyUserFitFunc *userfitfunc,
+         guint domain, guint code,
+         GError **error)
 {
     UserFitFunc *priv = userfitfunc->priv;
-    gchar *end;
 
-    if (!priv->formula)
-        priv->formula = g_strdup("0");
-    else if (!g_utf8_validate(priv->formula, -1, (const gchar**)&end))
-        *end = '\0';
-
-    if (priv->filter && !g_utf8_validate(priv->filter, -1, (const gchar**)&end))
-        *end = '\0';
-
-    if (!priv->nparams) {
-        free_params(priv);
-        priv->nparams = 1;
-        priv->param = g_new(GwyFitParam*, 1);
-        priv->param[0] = default_param();
+    // Formula physical sanity
+    if (!priv->formula) {
+        g_set_error(error, domain, code,
+                    _("Fitting function has no formula."));
+        return FALSE;
     }
-    else {
-        for (guint i = 0; i < priv->nparams; i++) {
-            if (!priv->param[i])
-                priv->param[i] = default_param();
+    if (!g_utf8_validate(priv->formula, -1, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Fitting function formula is not valid UTF-8."));
+        return FALSE;
+    }
+
+    // Filter physical sanity
+    if (priv->filter && !g_utf8_validate(priv->filter, -1, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Fitting function filter is not valid UTF-8."));
+        return FALSE;
+    }
+
+    // Params physical sanity
+    if (!priv->nparams) {
+        g_set_error(error, domain, code,
+                    _("Fitting function has no parameters."));
+        return FALSE;
+    }
+    guint n = priv->nparams;
+    for (guint i = 0; i < n; i++) {
+        if (!priv->param[i]) {
+            g_set_error(error, domain, code,
+                        _("Fitting function parameter %u is missing."),
+                        i+1);
+            return FALSE;
         }
     }
-}
 
-// Verify if the state is consistent logically.
-// We assume gwy_user_fit_func_sanitize() has been done.
-static gboolean
-gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
-{
-    UserFitFunc *priv = userfitfunc->priv;
     // Parameters
-    guint n = priv->nparams;
     for (guint i = 0; i < n; i++) {
         const gchar *namei = gwy_fit_param_get_name(priv->param[i]);
         for (guint j = i+1; j < n; j++) {
             const gchar *namej = gwy_fit_param_get_name(priv->param[j]);
-            if (gwy_strequal(namei, namej))
+            if (gwy_strequal(namei, namej)) {
+                g_set_error(error, domain, code,
+                            _("Fitting function has duplicate parameters."));
                 return FALSE;
+            }
         }
     }
 
     G_LOCK(test_expr);
     gboolean ok = FALSE;
 
-    // Fomula
+    // Formula
     if (!test_expr)
         test_expr = _gwy_fit_func_new_expr_with_constants();
-    if (!gwy_expr_compile(test_expr, priv->formula, NULL))
+    if (!gwy_expr_compile(test_expr, priv->formula, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Fitting function formula is invalid."));
         goto fail;
-    if (gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL))
+    }
+    if (gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Fitting function parameters do not match the formula."));
         goto fail;
+    }
 
     // Filter
     if (priv->filter && strlen(priv->filter)) {
-        if (!gwy_expr_compile(test_expr, priv->filter, NULL))
+        if (!gwy_expr_compile(test_expr, priv->filter, NULL)) {
+            g_set_error(error, domain, code,
+                        _("Fitting function filter is invalid."));
             goto fail;
+        }
         const gchar *names[1] = { "x" };
         guint indices[1];
-        if (gwy_expr_resolve_variables(test_expr, 1, names, indices))
+        if (gwy_expr_resolve_variables(test_expr, 1, names, indices)) {
+            g_set_error(error, domain, code,
+                        _("Fitting function filter is invalid."));
             goto fail;
+        }
     }
 
     ok = TRUE;
@@ -706,11 +726,9 @@ gwy_user_fit_func_parse(GwyResource *resource,
     priv->nparams = params->len;
     priv->param = (GwyFitParam**)g_ptr_array_free(params, FALSE);
 
-    sanitize(userfitfunc);
-    if (!gwy_user_fit_func_validate(userfitfunc)) {
-        // TODO
+    if (!validate(userfitfunc,
+                  GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA, error))
         return FALSE;
-    }
 
     return TRUE;
 
