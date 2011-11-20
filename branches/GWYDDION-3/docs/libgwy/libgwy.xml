@@ -83,6 +83,7 @@
     <xi:include href="xml/mask-field-transform.xml"/>
     <xi:include href="xml/surface.xml"/>
     <xi:include href="xml/surface-statistics.xml"/>
+    <xi:include href="xml/grain-value.xml"/>
   </chapter>
   <chapter id='libgwy-three-dimensional-data'>
     <title>Three-Dimensional Data</title>
@@ -105,6 +106,7 @@
     <xi:include href="xml/gl-material.xml"/>
     <xi:include href="xml/fit-param.xml"/>
     <xi:include href="xml/user-fit-func.xml"/>
+    <xi:include href="xml/user-grain-value.xml"/>
   </chapter>
   <chapter id='libgwy-selections'>
     <title>Selections</title>
