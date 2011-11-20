@@ -548,6 +548,9 @@ gwy_field_transform_offsets(const GwyField *source,
  * @title: GwyField transformations
  * @short_description: Geometrical transformations of fields
  *
+ * FIXME: This is all wrong, even the inefficient operations are directly
+ * possible now.
+ *
  * Some field transformations are performed in place while others create new
  * fields.  This simply follows which transformations <emphasis>can</emphasis>
  * be performed in place.

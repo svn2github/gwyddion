@@ -1030,6 +1030,30 @@ gwy_field_set_yoffset(GwyField *field,
 }
 
 /**
+ * gwy_field_clear_offsets:
+ * @field: A two-dimensional data field.
+ *
+ * Sets the offsets of a two-dimensional data field to zeroes.
+ **/
+void
+gwy_field_clear_offsets(GwyField *field)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+
+    GParamSpec *notify[2];
+    guint nn = 0;
+    if (field->xoff) {
+        field->xoff = 0.0;
+        notify[nn++] = properties[PROP_XOFFSET];
+    }
+    if (field->yoff) {
+        field->yoff = 0.0;
+        notify[nn++] = properties[PROP_YOFFSET];
+    }
+    _gwy_notify_properties_by_pspec(G_OBJECT(field), notify, nn);
+}
+
+/**
  * gwy_field_get_unit_xy:
  * @field: A two-dimensional data field.
  *
