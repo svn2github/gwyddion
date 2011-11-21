@@ -352,7 +352,7 @@ gwy_str_next_line(gchar **buffer)
  * the iterator modifies its contents along the way.  The caller needs to free
  * it afterwards.
  *
- * Returns: (transfer-full):
+ * Returns: (transfer full):
  *          A new text line iterator for @buffer.
  **/
 GwyStrLineIter*
@@ -417,7 +417,7 @@ gwy_str_line_iter_free(GwyStrLineIter *iter)
  * single empty line) and this method returns %NULL immediately in the first
  * iteration.
  *
- * Returns: (allow-none) (transfer-none):
+ * Returns: (allow-none) (transfer none):
  *          The next line, with any trailing end-of-line characters removed.
  *          The returned string is just a pointer somewhere into the buffer.
  *          %NULL is returned if there are no more lines.
