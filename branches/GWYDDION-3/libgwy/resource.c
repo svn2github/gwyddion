@@ -2074,7 +2074,7 @@ gwy_resource_parse_param_line(GwyStrLineIter *iter,
 
         while (g_ascii_isspace(*line))
             line++;
-    } while (*line);
+    } while (!*line);
 
     // Key.
     if (!g_ascii_isalpha(*line))
@@ -2145,7 +2145,7 @@ gwy_resource_parse_data_line(GwyStrLineIter *iter,
 
         while (g_ascii_isspace(*line))
             line++;
-    } while (*line);
+    } while (!*line);
 
     // Read the data.
     gchar *end = line;
@@ -2161,7 +2161,7 @@ gwy_resource_parse_data_line(GwyStrLineIter *iter,
     }
 
     while (g_ascii_isspace(*end))
-        *end++;
+        end++;
     if (*end)
         return err_invalid_value(error, iter, ncolumns);
 
