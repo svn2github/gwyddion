@@ -563,6 +563,76 @@ gwy_user_grain_value_set_ident(GwyUserGrainValue *usergrainvalue,
 }
 
 /**
+ * gwy_user_grain_value_get_power_xy:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Gets the power of field lateral units entering a grain value.
+ *
+ * Returns: The power of lateral units.
+ **/
+gint
+gwy_user_grain_value_get_power_xy(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), 0);
+    return usergrainvalue->priv->power_xy;
+}
+
+/**
+ * gwy_user_grain_value_set_power_xy:
+ * @usergrainvalue: A user grain value resource.
+ * @power_xy: Power of lateral units which must be between -12 and 12.
+ *
+ * Sets the power of field lateral units entering a grain value.
+ **/
+void
+gwy_user_grain_value_set_power_xy(GwyUserGrainValue *usergrainvalue,
+                                  gint power_xy)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(ABS(power_xy) <= 12);
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (power_xy != priv->power_xy) {
+        priv->power_xy = power_xy;
+        gwy_user_grain_value_changed(usergrainvalue);
+    }
+}
+
+/**
+ * gwy_user_grain_value_get_power_z:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Gets the power of field falue units entering a grain value.
+ *
+ * Returns: The power of value units.
+ **/
+gint
+gwy_user_grain_value_get_power_z(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), 0);
+    return usergrainvalue->priv->power_z;
+}
+
+/**
+ * gwy_user_grain_value_set_power_z:
+ * @usergrainvalue: A user grain value resource.
+ * @power_z: Power of value units which must be between -12 and 12.
+ *
+ * Sets the power of field value units entering a grain value.
+ **/
+void
+gwy_user_grain_value_set_power_z(GwyUserGrainValue *usergrainvalue,
+                                  gint power_z)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(ABS(power_z) <= 12);
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (power_z != priv->power_z) {
+        priv->power_z = power_z;
+        gwy_user_grain_value_changed(usergrainvalue);
+    }
+}
+
+/**
  * gwy_user_grain_value_get_same_units:
  * @usergrainvalue: A user grain value resource.
  *

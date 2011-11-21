@@ -59,6 +59,7 @@ const GwyUnit*     gwy_grain_value_unit            (const GwyGrainValue *grainva
 const gdouble*     gwy_grain_value_data            (const GwyGrainValue *grainvalue,
                                                     guint *ngrains)                  G_GNUC_PURE;
 const gchar*       gwy_grain_value_get_name        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gchar*       gwy_grain_value_get_group       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 const gchar*       gwy_grain_value_get_ident       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 const gchar*       gwy_grain_value_get_symbol      (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 GwyUserGrainValue* gwy_grain_value_get_resource    (const GwyGrainValue *grainvalue) G_GNUC_PURE;

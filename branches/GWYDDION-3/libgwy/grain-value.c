@@ -318,7 +318,7 @@ gwy_grain_value_get_name(const GwyGrainValue *grainvalue)
  * Returns: The grain value group.
  **/
 const gchar*
-gwy_grain_value_get_group(GwyGrainValue *grainvalue)
+gwy_grain_value_get_group(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), NULL);
     return get_group(grainvalue);
