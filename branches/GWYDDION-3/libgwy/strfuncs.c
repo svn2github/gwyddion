@@ -360,6 +360,7 @@ gwy_str_line_iter_new(gchar *buffer)
 {
     GwyStrLineIter *iter = g_slice_new0(GwyStrLineIter);
     iter->pos = buffer;
+    return iter;
 }
 
 /**
@@ -380,6 +381,7 @@ gwy_str_line_iter_new_take(gchar *buffer)
 {
     GwyStrLineIter *iter = g_slice_new0(GwyStrLineIter);
     iter->pos = iter->buffer = buffer;
+    return iter;
 }
 
 /**
@@ -429,9 +431,9 @@ gwy_str_line_iter_next(GwyStrLineIter *iter)
     if (!iter->pos)
         return NULL;
 
-    gchar *q = *iter->pos;
+    gchar *q = iter->pos;
     if (!*q) {
-        *iter->pos = NULL;
+        iter->pos = NULL;
         return NULL;
     }
 
@@ -446,7 +448,7 @@ gwy_str_line_iter_next(GwyStrLineIter *iter)
         *(p++) = '\0';
     }
 
-    *iter->pos = p;
+    iter->pos = p;
     iter->lineno++;
     return q;
 }
