@@ -59,8 +59,10 @@ static void         gwy_user_grain_value_assign_impl      (GwySerializable *dest
                                                            GwySerializable *source);
 static GwyResource* gwy_user_grain_value_copy             (GwyResource *resource);
 static void         gwy_user_grain_value_changed          (GwyUserGrainValue *usergrainvalue);
-static gboolean     gwy_user_grain_value_validate         (GwyUserGrainValue *usergrainvalue,
-                                                           GwyErrorList **error_list);
+static gboolean     validate                              (GwyUserGrainValue *usergrainvalue,
+                                                           guint domain,
+                                                           guint code,
+                                                           GError **error);
 static gchar*       gwy_user_grain_value_dump             (GwyResource *resource);
 static gboolean     gwy_user_grain_value_parse            (GwyResource *resource,
                                                            GwyStrLineIter *iter,
@@ -207,7 +209,6 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
     GwySerializableItems parent_items;
-    gboolean ok = FALSE;
 
     if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
                                      "GwyUserGrainValue", error_list)) {
@@ -230,43 +231,23 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     }
     GWY_TAKE_STRING(priv->group, its[0].value.v_string);
     GWY_TAKE_STRING(priv->formula, its[1].value.v_string);
-
-    if (!its[2].value.v_string
-        || !gwy_utf8_strisident(its[2].value.v_string, more, NULL)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Grain value identifier is missing "
-                             "or not valid UTF-8."));
-        goto fail;
-    }
     GWY_TAKE_STRING(priv->ident, its[2].value.v_string);
-
-    if (its[3].value.v_string) {
-        // XXX: In principle, we should validate the possible Pango markup.
-        // But it would induce a weird Pango dependence here.
-        if (!g_utf8_validate(its[3].value.v_string, -1, NULL)) {
-            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                               GWY_DESERIALIZE_ERROR_INVALID,
-                               _("Grain value symbol is not "
-                                 "not valid UTF-8."));
-            goto fail;
-        }
-        GWY_TAKE_STRING(priv->symbol, its[3].value.v_string);
-    }
+    GWY_TAKE_STRING(priv->symbol, its[3].value.v_string);
 
     // FIXME
     priv->power_xy = CLAMP(its[4].value.v_int32, POWER_MIN, POWER_MAX);
     priv->power_z = CLAMP(its[5].value.v_int32, POWER_MIN, POWER_MAX);
     priv->same_units = !!its[6].value.v_boolean;
 
-    ok = gwy_user_grain_value_validate(usergrainvalue, error_list);
+    GError *err = NULL;
+    if (validate(usergrainvalue,
+                 GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID, &err))
+        return TRUE;
+
+    gwy_error_list_propagate(error_list, err);
 
 fail:
-    GWY_FREE(its[0].value.v_string);
-    GWY_FREE(its[1].value.v_string);
-    GWY_FREE(its[2].value.v_string);
-    GWY_FREE(its[3].value.v_string);
-    return ok;
+    return FALSE;
 }
 
 static void
@@ -327,12 +308,43 @@ gwy_user_grain_value_changed(GwyUserGrainValue *usergrainvalue)
     gwy_resource_data_changed(GWY_RESOURCE(usergrainvalue));
 }
 
-// Verify if the state is consistent logically.
 static gboolean
-gwy_user_grain_value_validate(GwyUserGrainValue *usergrainvalue,
-                              GwyErrorList **error_list)
+validate(GwyUserGrainValue *usergrainvalue,
+         guint domain, guint code,
+         GError **error)
 {
     UserGrainValue *priv = usergrainvalue->priv;
+
+    // Identifier and symbol physical sanity.
+    if (!priv->ident) {
+        g_set_error(error, domain, code,
+                    _("Grain value has no identifier."));
+        return FALSE;
+    }
+    if (!gwy_ascii_strisident(priv->ident, "_", NULL)) {
+        g_set_error(error, domain, code,
+                    _("Grain value identifier is not a valid identifier."));
+        return FALSE;
+    }
+    if (priv->symbol && !g_utf8_validate(priv->symbol, -1, NULL)) {
+        // XXX: In principle, we should validate the possible Pango markup.
+        // But it would induce a weird Pango dependence here.
+        g_set_error(error, domain, code,
+                    _("Grain value symbol is not valid UTF-8."));
+        return FALSE;
+    }
+
+    // Formula physical sanity
+    if (!priv->formula) {
+        g_set_error(error, domain, code,
+                    _("Grain value has no formula."));
+        return FALSE;
+    }
+    if (!g_utf8_validate(priv->formula, -1, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Grain value formula is not valid UTF-8."));
+        return FALSE;
+    }
 
     G_LOCK(test_expr);
     gboolean ok = FALSE;
@@ -340,13 +352,16 @@ gwy_user_grain_value_validate(GwyUserGrainValue *usergrainvalue,
     // Fomula
     if (!test_expr)
         test_expr = _gwy_grain_value_new_expr_with_constants();
-    if (!gwy_expr_compile(test_expr, priv->formula, NULL))
+    if (!gwy_expr_compile(test_expr, priv->formula, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Grain value formula is invalid."));
         goto fail;
+    }
     /*
     if (gwy_user_grain_value_resolve_params(usergrainvalue, test_expr,
                                             NULL, NULL))
-                                            */
         goto fail;
+                                            */
     // TODO: The formula should be resolvable using existing grain values.
     // XXX: Why fit-func uses separate physical/logical validation?  Either
     // it is good and we accept it or it is bad and we reject it.  Lenience
@@ -730,10 +745,9 @@ gwy_user_grain_value_parse(GwyResource *resource,
             g_warning("Ignoring unknown GwyUserGrainValue key ‘%s’.", key);
     }
 
-    if (!gwy_user_grain_value_validate(usergrainvalue, NULL)) {
-        // TODO
+    if (!validate(usergrainvalue,
+                  GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA, error))
         return FALSE;
-    }
 
     return TRUE;
 }
