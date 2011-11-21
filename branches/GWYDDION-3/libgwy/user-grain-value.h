@@ -80,14 +80,14 @@ void               gwy_user_grain_value_set_symbol    (GwyUserGrainValue *usergr
 const gchar*       gwy_user_grain_value_get_ident     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
 void               gwy_user_grain_value_set_ident     (GwyUserGrainValue *usergrainvalue,
                                                        const gchar *ident);
-gint               gwy_user_grain_value_get_power_xy  (const GwyUserGrainValue *fitparam) G_GNUC_PURE;
-void               gwy_user_grain_value_set_power_xy  (GwyUserGrainValue *fitparam,
+gint               gwy_user_grain_value_get_power_xy  (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void               gwy_user_grain_value_set_power_xy  (GwyUserGrainValue *usergrainvalue,
                                                        gint power_xy);
-gint               gwy_user_grain_value_get_power_z   (const GwyUserGrainValue *fitparam) G_GNUC_PURE;
-void               gwy_user_grain_value_set_power_z   (GwyUserGrainValue *fitparam,
+gint               gwy_user_grain_value_get_power_z   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void               gwy_user_grain_value_set_power_z   (GwyUserGrainValue *usergrainvalue,
                                                        gint power_z);
-gboolean           gwy_user_grain_value_get_same_units(const GwyUserGrainValue *fitparam) G_GNUC_PURE;
-void               gwy_user_grain_value_set_same_units(GwyUserGrainValue *fitparam,
+gboolean           gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void               gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
                                                        gboolean same_units);
 
 #define gwy_user_grain_values() \
