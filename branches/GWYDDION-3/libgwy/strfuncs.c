@@ -419,6 +419,16 @@ gwy_str_line_iter_free(GwyStrLineIter *iter)
  * single empty line) and this method returns %NULL immediately in the first
  * iteration.
  *
+ * Example of typical use:
+ * |[
+ * GwyStrLineIter *iter = gwy_str_line_iter_new_take(buffer);
+ * gchar *line;
+ * while ((line = gwy_str_line_iter_next(iter))) {
+ *     // Process line.
+ * }
+ * gwy_str_line_iter_free(iter);
+ * ]|
+ *
  * Returns: (allow-none) (transfer none):
  *          The next line, with any trailing end-of-line characters removed.
  *          The returned string is just a pointer somewhere into the buffer.

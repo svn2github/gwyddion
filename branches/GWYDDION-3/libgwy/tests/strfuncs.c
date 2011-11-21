@@ -62,7 +62,7 @@ test_str_memmem(void)
 
 G_GNUC_NULL_TERMINATED
 static void
-test_next_line_check(const gchar *text, ...)
+next_line_check(const gchar *text, ...)
 {
     gchar *buf = g_strdup(text);
     gchar *p = buf;
@@ -86,28 +86,81 @@ test_next_line_check(const gchar *text, ...)
 void
 test_str_next_line(void)
 {
-    test_next_line_check(NULL, NULL);
-    test_next_line_check("", NULL);
-    test_next_line_check("\r", "", NULL);
-    test_next_line_check("\n", "", NULL);
-    test_next_line_check("\r\n", "", NULL);
-    test_next_line_check("\r\r", "", "", NULL);
-    test_next_line_check("\n\n", "", "", NULL);
-    test_next_line_check("\r\n\r\n", "", "", NULL);
-    test_next_line_check("\n\r\n", "", "", NULL);
-    test_next_line_check("\r\r\n", "", "", NULL);
-    test_next_line_check("\r\n\r", "", "", NULL);
-    test_next_line_check("\n\r\r", "", "", "", NULL);
-    test_next_line_check("X", "X", NULL);
-    test_next_line_check("X\n", "X", NULL);
-    test_next_line_check("X\r", "X", NULL);
-    test_next_line_check("X\r\n", "X", NULL);
-    test_next_line_check("\nX", "", "X", NULL);
-    test_next_line_check("\rX", "", "X", NULL);
-    test_next_line_check("\r\nX", "", "X", NULL);
-    test_next_line_check("X\r\r", "X", "", NULL);
-    test_next_line_check("X\n\n", "X", "", NULL);
-    test_next_line_check("X\nY\rZ", "X", "Y", "Z", NULL);
+    next_line_check(NULL, NULL);
+    next_line_check("", NULL);
+    next_line_check("\r", "", NULL);
+    next_line_check("\n", "", NULL);
+    next_line_check("\r\n", "", NULL);
+    next_line_check("\r\r", "", "", NULL);
+    next_line_check("\n\n", "", "", NULL);
+    next_line_check("\r\n\r\n", "", "", NULL);
+    next_line_check("\n\r\n", "", "", NULL);
+    next_line_check("\r\r\n", "", "", NULL);
+    next_line_check("\r\n\r", "", "", NULL);
+    next_line_check("\n\r\r", "", "", "", NULL);
+    next_line_check("X", "X", NULL);
+    next_line_check("X\n", "X", NULL);
+    next_line_check("X\r", "X", NULL);
+    next_line_check("X\r\n", "X", NULL);
+    next_line_check("\nX", "", "X", NULL);
+    next_line_check("\rX", "", "X", NULL);
+    next_line_check("\r\nX", "", "X", NULL);
+    next_line_check("X\r\r", "X", "", NULL);
+    next_line_check("X\n\n", "X", "", NULL);
+    next_line_check("X\nY\rZ", "X", "Y", "Z", NULL);
+}
+
+G_GNUC_NULL_TERMINATED
+static void
+next_line_check_iter(const gchar *text, ...)
+{
+    gchar *buf = g_strdup(text);
+    va_list ap;
+    const gchar *expected = NULL;
+
+    va_start(ap, text);
+    GwyStrLineIter *iter = gwy_str_line_iter_new_take(buf);
+    gchar *line;
+    guint lineno = 0;
+    g_assert_cmpuint(gwy_str_line_iter_lineno(iter), ==, lineno);
+    while ((line = gwy_str_line_iter_next(iter))) {
+        expected = va_arg(ap, const gchar*);
+        g_assert(expected != NULL);
+        g_assert_cmpstr(line, ==, expected);
+        lineno++;
+        g_assert_cmpuint(gwy_str_line_iter_lineno(iter), ==, lineno);
+    }
+    expected = va_arg(ap, const gchar*);
+    g_assert(expected == NULL);
+    va_end(ap);
+    gwy_str_line_iter_free(iter);
+}
+
+void
+test_str_line_iter(void)
+{
+    next_line_check_iter(NULL, NULL);
+    next_line_check_iter("", NULL);
+    next_line_check_iter("\r", "", NULL);
+    next_line_check_iter("\n", "", NULL);
+    next_line_check_iter("\r\n", "", NULL);
+    next_line_check_iter("\r\r", "", "", NULL);
+    next_line_check_iter("\n\n", "", "", NULL);
+    next_line_check_iter("\r\n\r\n", "", "", NULL);
+    next_line_check_iter("\n\r\n", "", "", NULL);
+    next_line_check_iter("\r\r\n", "", "", NULL);
+    next_line_check_iter("\r\n\r", "", "", NULL);
+    next_line_check_iter("\n\r\r", "", "", "", NULL);
+    next_line_check_iter("X", "X", NULL);
+    next_line_check_iter("X\n", "X", NULL);
+    next_line_check_iter("X\r", "X", NULL);
+    next_line_check_iter("X\r\n", "X", NULL);
+    next_line_check_iter("\nX", "", "X", NULL);
+    next_line_check_iter("\rX", "", "X", NULL);
+    next_line_check_iter("\r\nX", "", "X", NULL);
+    next_line_check_iter("X\r\r", "X", "", NULL);
+    next_line_check_iter("X\n\n", "X", "", NULL);
+    next_line_check_iter("X\nY\rZ", "X", "Y", "Z", NULL);
 }
 
 void
