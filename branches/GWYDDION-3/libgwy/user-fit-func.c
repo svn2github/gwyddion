@@ -320,10 +320,6 @@ gwy_user_fit_func_changed(GwyUserFitFunc *userfitfunc)
     gwy_resource_data_changed(GWY_RESOURCE(userfitfunc));
 }
 
-// Passing the error domain and code is a bit weird but we emit errors in two
-// different context: deserialisation and resource loading.  In both the error
-// code is dedicated for specific object logic errors but, of course, different
-// in each context.
 static gboolean
 validate(GwyUserFitFunc *userfitfunc,
          guint domain, guint code,
@@ -714,12 +710,6 @@ gwy_user_fit_func_parse(GwyResource *resource,
             else
                 g_warning("Ignoring unknown GwyUserFitFunc key ‘%s’.", key);
         }
-    }
-
-    if (!params) {
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
-                    _("Function has no parameters."));
-        return FALSE;
     }
 
     free_params(priv);
