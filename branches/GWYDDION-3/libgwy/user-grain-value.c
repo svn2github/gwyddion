@@ -847,6 +847,8 @@ gwy_user_grain_value_error_quark(void)
 
 /**
  * GwyUserGrainValueError:
+ * @GWY_USER_GRAIN_VALUE_ERROR_DEPENDS: The grain value has unresolved/invalid
+ *                                      dependences on other values.
  *
  * Error codes returned by user-defined grain value manipulation.
  **/

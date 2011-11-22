@@ -500,4 +500,13 @@ gwy_str_line_iter_lineno(const GwyStrLineIter *iter)
  * a macro, it can reduce to a compiler builtin.
  **/
 
+/**
+ * GwyStrLineIter:
+ *
+ * Text line iterator.
+ *
+ * The #GwyStrLineIter struct is opaque and can only be accessed through the
+ * gwy_str_line_iter_foo() functions.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
