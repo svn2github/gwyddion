@@ -67,14 +67,17 @@ struct _GwyUserFitFuncClass {
 
 GType           gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
 GwyUserFitFunc* gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
-const gchar*    gwy_user_fit_func_get_formula   (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+const gchar*    gwy_user_fit_func_get_formula   (const GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
 gboolean        gwy_user_fit_func_set_formula   (GwyUserFitFunc *userfitfunc,
                                                  const gchar *formula,
                                                  GError **error);
-guint           gwy_user_fit_func_n_params      (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
-GwyFitParam*    gwy_user_fit_func_param         (GwyUserFitFunc *userfitfunc,
+const gchar*    gwy_user_fit_func_get_group     (const GwyUserFitFunc *userfitfunc) G_GNUC_PURE;
+void            gwy_user_fit_func_set_group     (GwyUserFitFunc *userfitfunc,
+                                                 const gchar *group);
+guint           gwy_user_fit_func_n_params      (const GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+GwyFitParam*    gwy_user_fit_func_param         (const GwyUserFitFunc *userfitfunc,
                                                  const gchar *name)             G_GNUC_PURE;
-GwyFitParam*    gwy_user_fit_func_nth_param     (GwyUserFitFunc *userfitfunc,
+GwyFitParam*    gwy_user_fit_func_nth_param     (const GwyUserFitFunc *userfitfunc,
                                                  guint i)                       G_GNUC_PURE;
 guint           gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
                                                  GwyExpr *expr,

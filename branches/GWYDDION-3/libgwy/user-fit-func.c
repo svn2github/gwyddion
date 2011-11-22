@@ -30,9 +30,10 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/fit-func-builtin.h"
 
-enum { N_ITEMS = 3 };
+enum { N_ITEMS = 4 };
 
 struct _GwyUserFitFuncPrivate {
+    gchar *group;
     gchar *formula;
     gchar *filter;
     guint nparams;
@@ -64,9 +65,10 @@ static gboolean     gwy_user_fit_func_parse            (GwyResource *resource,
                                                         GError **error);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "formula",    .ctype = GWY_SERIALIZABLE_STRING,       },
-    /*1*/ { .name = "filter",     .ctype = GWY_SERIALIZABLE_STRING,       },
-    /*2*/ { .name = "param",      .ctype = GWY_SERIALIZABLE_OBJECT_ARRAY, },
+    /*0*/ { .name = "group",      .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*1*/ { .name = "formula",    .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*2*/ { .name = "filter",     .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*3*/ { .name = "param",      .ctype = GWY_SERIALIZABLE_OBJECT_ARRAY, },
 };
 
 static GwyExpr *test_expr = NULL;
@@ -149,6 +151,7 @@ gwy_user_fit_func_init(GwyUserFitFunc *userfitfunc)
     UserFitFunc *priv = userfitfunc->priv;
 
     // Constant function, by default.
+    priv->group = g_strdup("User");
     priv->formula = g_strdup("a");
     priv->nparams = 1;
     priv->param = g_new(GwyFitParam*, 1);
@@ -160,6 +163,7 @@ gwy_user_fit_func_finalize(GObject *object)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(object);
     UserFitFunc *priv = userfitfunc->priv;
+    GWY_FREE(priv->group);
     GWY_FREE(priv->formula);
     GWY_FREE(priv->filter);
     free_params(priv);
@@ -191,16 +195,20 @@ gwy_user_fit_func_itemize(GwySerializable *serializable,
 
     // Our own data
     *it = serialize_items[0];
+    it->value.v_string = priv->group;
+    it++, items->n++, nn++;
+
+    *it = serialize_items[1];
     it->value.v_string = priv->formula;
     it++, items->n++, nn++;
 
     if (priv->filter) {
-        *it = serialize_items[1];
+        *it = serialize_items[2];
         it->value.v_string = priv->filter;
         it++, items->n++, nn++;
     }
 
-    *it = serialize_items[2];
+    *it = serialize_items[3];
     it->value.v_object_array = (GObject**)priv->param;
     it->array_size = priv->nparams;
     it++, items->n++, nn++;
@@ -228,31 +236,24 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
                                             error_list))
             goto fail;
     }
-    gsize n = its[2].array_size;
+    gsize n = its[3].array_size;
 
     // Our own data
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(serializable);
     UserFitFunc *priv = userfitfunc->priv;
 
-    if (!n || n > 256) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Invalid number of user fitting function "
-                             "parameters: %lu."),
-                           (gulong)n);
-        goto fail;
-    }
     if (!_gwy_check_object_component(its + 2, userfitfunc,
                                      GWY_TYPE_FIT_PARAM, error_list))
         goto fail;
 
-    GWY_TAKE_STRING(priv->formula, its[0].value.v_string);
-    GWY_TAKE_STRING(priv->filter, its[1].value.v_string);
+    GWY_TAKE_STRING(priv->group, its[0].value.v_string);
+    GWY_TAKE_STRING(priv->formula, its[1].value.v_string);
+    GWY_TAKE_STRING(priv->filter, its[2].value.v_string);
 
     free_params(priv);
-    priv->param = (GwyFitParam**)its[2].value.v_object_array;
+    priv->param = (GwyFitParam**)its[3].value.v_object_array;
     priv->nparams = n;
-    its[2].value.v_object_array = NULL;
+    its[3].value.v_object_array = NULL;
 
     GError *err = NULL;
     if (validate(userfitfunc,
@@ -269,6 +270,7 @@ static void
 assign_info(UserFitFunc *dpriv,
             const UserFitFunc *spriv)
 {
+    _gwy_assign_string(&dpriv->group, spriv->group);
     _gwy_assign_string(&dpriv->formula, spriv->formula);
     _gwy_assign_string(&dpriv->filter, spriv->filter);
 }
@@ -326,6 +328,18 @@ validate(GwyUserFitFunc *userfitfunc,
          GError **error)
 {
     UserFitFunc *priv = userfitfunc->priv;
+
+    // Group physical sanity
+    if (!priv->group) {
+        g_set_error(error, domain, code,
+                    _("Grain value has no group."));
+        return FALSE;
+    }
+    if (!g_utf8_validate(priv->group, -1, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Grain value group is not valid UTF-8."));
+        return FALSE;
+    }
 
     // Formula physical sanity
     if (!priv->formula) {
@@ -438,7 +452,7 @@ gwy_user_fit_func_new(void)
  * Returns: The formula as a string owned by @userfitfunc.
  **/
 const gchar*
-gwy_user_fit_func_get_formula(GwyUserFitFunc *userfitfunc)
+gwy_user_fit_func_get_formula(const GwyUserFitFunc *userfitfunc)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
     return userfitfunc->priv->formula;
@@ -525,6 +539,39 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
 }
 
 /**
+ * gwy_user_fit_func_get_group:
+ * @userfitfunc: A user fitting function resource.
+ *
+ * Obtains the group of a user fitting function.
+ *
+ * Returns: The user fitting function group.
+ **/
+const gchar*
+gwy_user_fit_func_get_group(const GwyUserFitFunc *userfitfunc)
+{
+    g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
+    return userfitfunc->priv->group;
+}
+
+/**
+ * gwy_user_fit_func_set_group:
+ * @userfitfunc: A user fitting function resource.
+ * @group: Group name.
+ *
+ * Sets the group of a user fitting function.
+ **/
+void
+gwy_user_fit_func_set_group(GwyUserFitFunc *userfitfunc,
+                            const gchar *group)
+{
+    g_return_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc));
+    g_return_if_fail(group);
+    UserFitFunc *priv = userfitfunc->priv;
+    if (_gwy_assign_string(&priv->group, group))
+        gwy_user_fit_func_changed(userfitfunc);
+}
+
+/**
  * gwy_user_fit_func_n_params:
  * @userfitfunc: A user fitting function.
  *
@@ -533,7 +580,7 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
  * Returns: The number of parameters.
  **/
 guint
-gwy_user_fit_func_n_params(GwyUserFitFunc *userfitfunc)
+gwy_user_fit_func_n_params(const GwyUserFitFunc *userfitfunc)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), 0);
     UserFitFunc *priv = userfitfunc->priv;
@@ -553,7 +600,7 @@ gwy_user_fit_func_n_params(GwyUserFitFunc *userfitfunc)
  *          the parameter object may become invalid.
  **/
 GwyFitParam*
-gwy_user_fit_func_param(GwyUserFitFunc *userfitfunc,
+gwy_user_fit_func_param(const GwyUserFitFunc *userfitfunc,
                         const gchar *name)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
@@ -579,7 +626,7 @@ gwy_user_fit_func_param(GwyUserFitFunc *userfitfunc,
  *          the parameter object may become invalid.
  **/
 GwyFitParam*
-gwy_user_fit_func_nth_param(GwyUserFitFunc *userfitfunc,
+gwy_user_fit_func_nth_param(const GwyUserFitFunc *userfitfunc,
                             guint i)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
@@ -636,6 +683,7 @@ gwy_user_fit_func_dump(GwyResource *resource)
     UserFitFunc *priv = userfitfunc->priv;
 
     GString *text = g_string_new(NULL);
+    g_string_append_printf(text, "group %s\n", priv->group);
     g_string_append_printf(text, "formula %s\n", priv->formula);
     if (priv->filter)
         g_string_append_printf(text, "filter %s\n", priv->filter);
@@ -703,7 +751,9 @@ gwy_user_fit_func_parse(GwyResource *resource,
             }
         }
         else {
-            if (gwy_strequal(key, "formula"))
+            if (gwy_strequal(key, "group"))
+                _gwy_assign_string(&priv->group, value);
+            else if (gwy_strequal(key, "formula"))
                 _gwy_assign_string(&priv->formula, value);
             else if (gwy_strequal(key, "filter"))
                 _gwy_assign_string(&priv->filter, value);

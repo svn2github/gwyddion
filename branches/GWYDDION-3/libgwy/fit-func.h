@@ -53,8 +53,7 @@ struct _GwyFitFuncClass {
 };
 
 GType           gwy_fit_func_get_type    (void)                      G_GNUC_CONST;
-GwyFitFunc*     gwy_fit_func_new         (const gchar *name,
-                                          const gchar *group)        G_GNUC_MALLOC;
+GwyFitFunc*     gwy_fit_func_new         (const gchar *name)         G_GNUC_MALLOC;
 const gchar*    gwy_fit_func_formula     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
 guint           gwy_fit_func_n_params    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
 const gchar*    gwy_fit_func_param_name  (const GwyFitFunc *fitfunc,
@@ -78,6 +77,7 @@ void            gwy_fit_func_set_data    (GwyFitFunc *fitfunc,
 const gchar*    gwy_fit_func_get_name    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
 const gchar*    gwy_fit_func_get_group   (const GwyFitFunc *fitfunc) G_GNUC_PURE;
 GwyUserFitFunc* gwy_fit_func_get_resource(const GwyFitFunc *fitfunc) G_GNUC_PURE;
+gboolean        gwy_fit_func_is_valid    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
 
 G_END_DECLS
 

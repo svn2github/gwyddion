@@ -273,10 +273,9 @@ gwy_grain_value_get_property(GObject *object,
  *
  * Creates a new grain value.
  *
- * Returns: (transfer full):
- *          A new grain value.  It can return %NULL if @group is invalid
- *          or no function of called @name is present in the group (this is not
- *          considered to be an error).
+ * Returns: (transfer full) (allow-none):
+ *          A new grain value.  It can return %NULL if no grain value called
+ *          @name exists (this is not considered to be an error).
  **/
 GwyGrainValue*
 gwy_grain_value_new(const gchar *name)

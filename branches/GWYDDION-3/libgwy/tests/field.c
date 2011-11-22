@@ -4508,7 +4508,7 @@ fit_gaussian_psdf(const GwyLine *psdf,
                   gdouble *sigma,
                   gdouble *T)
 {
-    GwyFitFunc *fitfunc = gwy_fit_func_new("Gaussian", "builtin");
+    GwyFitFunc *fitfunc = gwy_fit_func_new("Gaussian");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
 
     guint n = psdf->res;

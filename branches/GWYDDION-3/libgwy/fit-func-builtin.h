@@ -62,6 +62,7 @@ typedef GwyUnit* (*BuiltinDeriveUnits)(guint param,
                                        const GwyUnit *unit_y);
 
 typedef struct {
+    const gchar *group;
     const gchar *formula;
     guint nparams;
     const FitFuncParam *param;

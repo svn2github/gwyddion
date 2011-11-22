@@ -36,7 +36,6 @@ enum {
 
 struct _GwyFitFuncPrivate {
     gchar *name;
-    gchar *group;
     GwyFitTask *fittask;
     const GwyXY *points;
     guint npoints;
@@ -46,7 +45,6 @@ struct _GwyFitFuncPrivate {
     // Exactly one of builtin/resource is set
     const BuiltinFitFunc *builtin;
     GwyUserFitFunc *resource;
-    guint nparams;  // Cached namely for user-defined funcs, but set for both.
 
     // User functions only
     guint *indices;
@@ -76,10 +74,12 @@ static void     user_func_data_changed   (GwyFitFunc *fitfunc,
 static void     user_func_notify_name    (GwyFitFunc *fitfunc,
                                           GParamSpec *pspec,
                                           GwyUserFitFunc *userfitfunc);
-static gboolean evaluate                 (FitFunc *priv,
+static gboolean evaluate                 (GwyFitFunc *fitfunc,
                                           gdouble x,
                                           const gdouble *params,
                                           gdouble *retval);
+static guint        get_nparams          (const GwyFitFunc *fitfunc);
+static const gchar* get_group            (const GwyFitFunc *fitfunc);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -117,8 +117,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                               "Group",
                               "Group the function belongs to.",
                               "builtin",
-                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
-                              | G_PARAM_STATIC_STRINGS);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_NAME]
         = g_param_spec_string("name",
@@ -164,18 +163,13 @@ gwy_fit_func_constructed(GObject *object)
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
 
-    if (gwy_strequal(priv->group, "builtin")) {
-        priv->builtin = g_hash_table_lookup(builtin_functions, priv->name);
-        if (priv->builtin) {
-            priv->nparams = priv->builtin->nparams;
-            priv->is_valid = TRUE;
-        }
-    }
-    else if (gwy_strequal(priv->group, "userfitfunc")) {
+    priv->builtin = g_hash_table_lookup(builtin_functions, priv->name);
+    if (priv->builtin)
+        priv->is_valid = TRUE;
+    else {
         priv->resource = gwy_user_fit_funcs_get(priv->name);
         if (priv->resource) {
             g_object_ref(priv->resource);
-            priv->nparams = gwy_user_fit_func_n_params(priv->resource);
             priv->data_changed_id
                 = g_signal_connect_swapped(priv->resource, "data-changed",
                                            G_CALLBACK(user_func_data_changed),
@@ -210,7 +204,6 @@ gwy_fit_func_finalize(GObject *object)
 {
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
-    GWY_FREE(priv->group);
     GWY_FREE(priv->name);
     GWY_FREE(priv->indices);
     parent_class->finalize(object);
@@ -228,10 +221,6 @@ gwy_fit_func_set_property(GObject *object,
     switch (prop_id) {
         case PROP_NAME:
         priv->name = g_value_dup_string(value);
-        break;
-
-        case PROP_GROUP:
-        priv->group = g_value_dup_string(value);
         break;
 
         default:
@@ -255,7 +244,7 @@ gwy_fit_func_get_property(GObject *object,
         break;
 
         case PROP_GROUP:
-        g_value_set_string(value, priv->group);
+        g_value_set_string(value, get_group(fitfunc));
         break;
 
         case PROP_FIT_TASK:
@@ -276,24 +265,18 @@ gwy_fit_func_get_property(GObject *object,
  * gwy_fit_func_new:
  * @name: Function name.  It must correspond to either a builtin function or
  *        user function loaded from #GwyUserFitFunc resources.
- * @group: Function group.  At present, possible values are "builtin" for
- *         built-in functions and "userfitfunc" for user fitting functions
- *         coming from #GwyUserFitFunc resources.
  *
  * Creates a new fitting function.
  *
- * Returns: (transfer full):
- *          A new fitting function.  It can return %NULL if @group is invalid
- *          or no function of called @name is present in the group (this is not
- *          considered to be an error).
+ * Returns: (transfer full) (allow-none):
+ *          A new fitting function.  It can return %NULL if no function called
+ *          @name exists (this is not considered to be an error).
  **/
 GwyFitFunc*
-gwy_fit_func_new(const gchar *name,
-                 const gchar *group)
+gwy_fit_func_new(const gchar *name)
 {
     GwyFitFunc *fitfunc = g_object_new(GWY_TYPE_FIT_FUNC,
                                        "name", name,
-                                       "group", group,
                                        NULL);
     if (fitfunc->priv->is_valid)
         return fitfunc;
@@ -323,7 +306,7 @@ gwy_fit_func_evaluate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, FALSE);
-    return evaluate(priv, x, params, value);
+    return evaluate(fitfunc, x, params, value);
 }
 
 /**
@@ -381,9 +364,7 @@ const gchar*
 gwy_fit_func_get_group(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
-    FitFunc *priv = fitfunc->priv;
-    g_return_val_if_fail(priv->is_valid, NULL);
-    return priv->group;
+    return get_group(fitfunc);
 }
 
 /**
@@ -402,10 +383,7 @@ guint
 gwy_fit_func_n_params(const GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), 0);
-    FitFunc *priv = fitfunc->priv;
-    g_return_val_if_fail(priv->is_valid, 0);
-    // The cached value for whatever backend
-    return priv->nparams;
+    return get_nparams(fitfunc);
 }
 
 /**
@@ -425,7 +403,7 @@ gwy_fit_func_param_name(const GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, NULL);
-    g_return_val_if_fail(i < priv->nparams, NULL);
+    g_return_val_if_fail(i < get_nparams(fitfunc), NULL);
 
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
@@ -455,15 +433,16 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, G_MAXUINT);
 
+    guint nparams = get_nparams(fitfunc);
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
-        for (guint i = 0; i < priv->nparams; i++) {
+        for (guint i = 0; i < nparams; i++) {
             if (gwy_strequal(builtin->param[i].name, name))
                 return i;
         }
     }
     else {
-        for (guint i = 0; i < priv->nparams; i++) {
+        for (guint i = 0; i < nparams; i++) {
             const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->resource,
                                                                i);
             if (gwy_strequal(gwy_fit_param_get_name(p), name))
@@ -507,7 +486,7 @@ gwy_fit_func_param_unit(GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, NULL);
-    g_return_val_if_fail(i < priv->nparams, NULL);
+    g_return_val_if_fail(i < get_nparams(fitfunc), NULL);
 
     gint power_x, power_y;
     if (priv->builtin) {
@@ -556,7 +535,8 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(params, FALSE);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, FALSE);
-    gwy_clear(params, priv->nparams);
+    guint nparams = get_nparams(fitfunc);
+    gwy_clear(params, nparams);
     g_return_val_if_fail(priv->npoints, FALSE);
     GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
@@ -579,7 +559,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
                                       NULL))
             g_critical("Cannot define %s as a GwyExpr constant.", estimators[i]);
     }
-    for (guint i = 0; i < priv->nparams; i++) {
+    for (guint i = 0; i < nparams; i++) {
         const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->resource, i);
         const gchar *estimate = gwy_fit_param_get_estimate(p);
         if (estimate
@@ -687,7 +667,6 @@ user_func_data_changed(GwyFitFunc *fitfunc,
     FitFunc *priv = fitfunc->priv;
     GWY_FREE(priv->indices);
     GWY_OBJECT_UNREF(priv->expr);
-    priv->nparams = gwy_user_fit_func_n_params(priv->resource);
 }
 
 // This does not feel right, or at least not useful.  But if the name changes
@@ -708,8 +687,9 @@ user_func_notify_name(GwyFitFunc *fitfunc,
 }
 
 static void
-construct_expr(FitFunc *priv)
+construct_expr(GwyFitFunc *fitfunc)
 {
+    FitFunc *priv = fitfunc->priv;
     priv->expr = _gwy_fit_func_new_expr_with_constants();
     if (!gwy_expr_compile(priv->expr,
                           gwy_user_fit_func_get_formula(priv->resource),
@@ -718,7 +698,7 @@ construct_expr(FitFunc *priv)
         return;
     }
 
-    priv->indices = g_new(guint, priv->nparams+1);
+    priv->indices = g_new(guint, get_nparams(fitfunc));
     if (gwy_user_fit_func_resolve_params(priv->resource, priv->expr, NULL,
                                          priv->indices)) {
         g_critical("Cannot resolve variables in user fitting function "
@@ -728,23 +708,25 @@ construct_expr(FitFunc *priv)
 }
 
 static gboolean
-evaluate(FitFunc *priv,
+evaluate(GwyFitFunc *fitfunc,
          gdouble x,
          const gdouble *params,
          gdouble *retval)
 {
+    FitFunc *priv = fitfunc->priv;
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         return builtin->function(x, params, retval);
     }
 
     if (G_UNLIKELY(!priv->expr))
-        construct_expr(priv);
+        construct_expr(fitfunc);
 
-    gdouble variables[priv->nparams+2];
-    for (guint j = 0; j < priv->nparams; j++)
+    guint nparams = get_nparams(fitfunc);
+    gdouble variables[nparams+2];
+    for (guint j = 0; j < nparams; j++)
         variables[priv->indices[j]] = params[j];
-    variables[priv->indices[priv->nparams]] = x;
+    variables[priv->indices[nparams]] = x;
     *retval = gwy_expr_execute(priv->expr, variables);
     return TRUE;
 }
@@ -755,10 +737,11 @@ fit_func_vfunc(guint i,
                gdouble *retval,
                const gdouble *params)
 {
-    FitFunc *priv = ((GwyFitFunc*)user_data)->priv;
+    GwyFitFunc *fitfunc = (GwyFitFunc*)user_data;
+    FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(i < priv->npoints, FALSE);
     gdouble x = priv->points[i].x, y = priv->points[i].y;
-    gboolean ok = evaluate(priv, x, params, retval);
+    gboolean ok = evaluate(fitfunc, x, params, retval);
     *retval -= y;
     return ok;
 }
@@ -768,9 +751,8 @@ update_fit_task(GwyFitFunc *fitfunc)
 {
     FitFunc *priv = fitfunc->priv;
     if (!priv->fittask) {
-        guint nparams = gwy_fit_func_n_params(fitfunc);
         priv->fittask = gwy_fit_task_new();
-        gwy_fit_task_set_vector_vfunction(priv->fittask, nparams,
+        gwy_fit_task_set_vector_vfunction(priv->fittask, get_nparams(fitfunc),
                                           fit_func_vfunc, NULL);
     }
     gwy_fit_task_set_vector_data(priv->fittask, fitfunc, priv->npoints);
@@ -828,6 +810,26 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
         update_fit_task(fitfunc);
 }
 
+static const gchar*
+get_group(const GwyFitFunc *fitfunc)
+{
+    FitFunc *priv = fitfunc->priv;
+    if (priv->builtin)
+        return priv->builtin->group;
+    else
+        return gwy_user_fit_func_get_group(priv->resource);
+}
+
+static guint
+get_nparams(const GwyFitFunc *fitfunc)
+{
+    FitFunc *priv = fitfunc->priv;
+    if (priv->builtin)
+        return priv->builtin->nparams;
+    else
+        return gwy_user_fit_func_n_params(priv->resource);
+}
+
 /**
  * gwy_fit_func_get_resource:
  * @fitfunc: A fitting function.
@@ -850,6 +852,29 @@ gwy_fit_func_get_resource(const GwyFitFunc *fitfunc)
     return priv->builtin ? NULL : priv->resource;
 }
 
+/**
+ * gwy_fit_func_is_valid:
+ * @fitfunc: A fitting function.
+ *
+ * Reports whether a fitting function is valid.
+ *
+ * Since invalid fitting function resources are not loaded at all and the
+ * constructor gwy_fit_func_new() returns %NULL if a non-existent fitting
+ * function is requested, an invalid fitting function object can only be
+ * created directly using g_object_new() with a non-existent fitting function
+ * name.  So this method is mainly intended for bindings where such situation
+ * can arise more easily than in C.
+ *
+ * Returns: %TRUE if the fitting function is valid and can be used for fitting,
+ *          etc.
+ **/
+gboolean
+gwy_fit_func_is_valid(const GwyFitFunc *fitfunc)
+{
+    g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
+    return fitfunc->priv->is_valid;
+}
+
 const gchar* const*
 _gwy_fit_func_estimators(guint *n)
 {
@@ -865,7 +890,6 @@ _gwy_fit_func_new_expr_with_constants(void)
     gwy_expr_define_constant(expr, "π", G_PI, NULL);
     return expr;
 }
-
 
 /************************** Documentation ****************************/
 

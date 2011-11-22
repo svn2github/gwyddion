@@ -53,6 +53,7 @@ const_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc const_builtin = {
+    .group = "Elementary",
     .formula = "<i>a</i>",
     .nparams = G_N_ELEMENTS(const_param),
     .param = const_param,
@@ -109,11 +110,65 @@ exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc exp_builtin = {
+    .group = "Elementary",
     .formula = "= <i>y</i>₀ + <i>a</i> exp(<i>x</i>/<i>b</i>)",
     .nparams = G_N_ELEMENTS(exp_param),
     .param = exp_param,
     .function = exp_function,
     .estimate = exp_estimate,
+};
+
+/****************************************************************************
+ *
+ * Two-sided exponential
+ *
+ ****************************************************************************/
+
+static gboolean
+two_exp_function(gdouble x,
+                 const gdouble *param,
+                 gdouble *v)
+{
+    gdouble y0_ = param[0], a = param[1], b = param[2];
+    *v = a*exp(-fabs(x)/b) + y0_;
+    return b != 0;
+}
+
+// TODO: Make it work with the negative branch
+static gboolean
+two_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                 G_GNUC_UNUSED guint npoints,
+                 const gdouble *estim,
+                 gdouble *param)
+{
+    gdouble ymin = estim[ESTIMATOR_YMIN], ymax = estim[ESTIMATOR_YMAX];
+    if (ymin == ymax) {
+        param[0] = 0.0;
+        param[1] = ymin;
+        param[2] = 10*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        return FALSE;
+    }
+
+    gdouble s = estim[ESTIMATOR_YMEAN];
+    s -= (2.0*s < ymin + ymax) ? ymin : ymax;
+
+    gdouble xymin = estim[ESTIMATOR_XYMIN], xymax = estim[ESTIMATOR_XYMAX];
+    s *= xymax - xymin;
+
+    param[2] = s/(ymax - ymin);
+    param[1] = (ymax - ymin)/(exp(xymax/param[2]) - exp(xymin/param[2]));
+    param[0] = ymin - param[1]*exp(xymin/param[2]);
+    param[2] = -param[2];
+    return TRUE;
+}
+
+static const BuiltinFitFunc two_exp_builtin = {
+    .group = "Elementary",
+    .formula = "= <i>y</i>₀ + <i>a</i> exp(-|<i>x</i>|/<i>b</i>)",
+    .nparams = G_N_ELEMENTS(exp_param),
+    .param = exp_param,
+    .function = two_exp_function,
+    .estimate = two_exp_estimate,
 };
 
 /****************************************************************************
@@ -162,11 +217,131 @@ gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc gauss_builtin = {
-    .formula = "= <i>y</i>₀ + <i>a</i> exp[−(<i>x</i> − <i>x</i>₀)²/b²]",
+    .group = "Elementary",
+    .formula = "= <i>y</i>₀ + <i>a</i> exp[−(<i>x</i> − <i>x</i>₀)²/<i>b</i>²]",
     .nparams = G_N_ELEMENTS(gauss_param),
     .param = gauss_param,
     .function = gauss_function,
     .estimate = gauss_estimate,
+};
+
+/****************************************************************************
+ *
+ * ACF Exponential
+ *
+ ****************************************************************************/
+
+static const FitFuncParam acf_param[] = {
+   { "σ", 0, 0, },
+   { "T", 1, 0, },
+};
+
+static GwyUnit*
+acf_derive_units(guint param,
+                 const GwyUnit *unit_x,
+                 const GwyUnit *unit_y)
+{
+    GwyUnit *unit = gwy_unit_new();
+
+    if (param == 0)
+        gwy_unit_nth_root(unit, unit_y, 2);
+    else if (param == 1)
+        gwy_unit_assign(unit, unit_x);
+    else {
+        g_assert_not_reached();
+    }
+
+    return unit;
+}
+
+static gboolean
+acf_exp_function(gdouble x,
+                 const gdouble *param,
+                 gdouble *v)
+{
+    gdouble sigma = param[0], T = param[1];
+    *v = sigma*sigma*exp(-x/T);
+    return T != 0;
+}
+
+static gboolean
+acf_exp_estimate(const GwyXY *pts,
+                 guint npoints,
+                 const gdouble *estim,
+                 gdouble *param)
+{
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN];
+    if (ymax <= 0.0) {
+        param[0] = ymax - ymin;
+        param[1] = 0.1*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        return FALSE;
+    }
+
+    gdouble s = 0.5*pts[0].x*pts[0].y/ymax;
+    for (guint i = 1; i+1 < npoints; i++)
+        s += (pts[i+1].x - pts[i-1].x)*pts[i].y/ymax;
+
+    param[0] = ymax;
+    param[1] = s;
+    return s > 0.0;
+}
+
+static const BuiltinFitFunc acf_exp_builtin = {
+    .group = "Autocorrelation",
+    .formula = "= <i>σ</i>² exp(<i>x</i>/<i>T</i>)",
+    .nparams = G_N_ELEMENTS(acf_param),
+    .param = acf_param,
+    .function = acf_exp_function,
+    .estimate = acf_exp_estimate,
+    .derive_units = acf_derive_units,
+};
+
+/****************************************************************************
+ *
+ * ACF Gaussian
+ *
+ ****************************************************************************/
+
+static gboolean
+acf_gauss_function(gdouble x,
+                   const gdouble *param,
+                   gdouble *v)
+{
+    gdouble sigma = param[0], T = param[1], u = x/T;
+    *v = sigma*sigma*exp(-u*u);
+    return T != 0;
+}
+
+static gboolean
+acf_gauss_estimate(const GwyXY *pts,
+                   guint npoints,
+                   const gdouble *estim,
+                   gdouble *param)
+{
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN];
+    if (ymax <= 0.0) {
+        param[0] = ymax - ymin;
+        param[1] = 0.1*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        return FALSE;
+    }
+
+    gdouble s = 0.5*pts[0].x*pts[0].y/ymax;
+    for (guint i = 1; i+1 < npoints; i++)
+        s += (pts[i+1].x - pts[i-1].x)*pts[i].y/ymax;
+
+    param[0] = ymax;
+    param[1] = 0.8*s;
+    return s > 0.0;
+}
+
+static const BuiltinFitFunc acf_gauss_builtin = {
+    .group = "Autocorrelation",
+    .formula = "= <i>σ</i>² exp(−<i>x</i>²/<i>b</i>²)",
+    .nparams = G_N_ELEMENTS(acf_param),
+    .param = acf_param,
+    .function = acf_gauss_function,
+    .estimate = acf_gauss_estimate,
+    .derive_units = acf_derive_units,
 };
 
 /****************************************************************************
@@ -186,7 +361,10 @@ _gwy_fit_func_setup_builtins(void)
     builtins = g_hash_table_new(g_str_hash, g_str_equal);
     add_builtin("Constant", const_builtin);
     add_builtin("Exponential", exp_builtin);
+    add_builtin("Exponential (two-side)", two_exp_builtin);
     add_builtin("Gaussian", gauss_builtin);
+    add_builtin("ACF Exponential", acf_exp_builtin);
+    add_builtin("ACF Gaussian", acf_gauss_builtin);
     return builtins;
 }
 

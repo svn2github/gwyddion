@@ -315,6 +315,18 @@ validate(GwyUserGrainValue *usergrainvalue,
 {
     UserGrainValue *priv = usergrainvalue->priv;
 
+    // Group physical sanity
+    if (!priv->group) {
+        g_set_error(error, domain, code,
+                    _("Grain value has no group."));
+        return FALSE;
+    }
+    if (!g_utf8_validate(priv->group, -1, NULL)) {
+        g_set_error(error, domain, code,
+                    _("Grain value group is not valid UTF-8."));
+        return FALSE;
+    }
+
     // Identifier and symbol physical sanity.
     if (!priv->ident) {
         g_set_error(error, domain, code,

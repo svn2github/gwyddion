@@ -36,7 +36,7 @@ fit_func_one(const gchar *name,
     enum { ndata = 500 };
     GRand *rng = g_rand_new_with_seed(42);
 
-    GwyFitFunc *fitfunc = gwy_fit_func_new(name, group);
+    GwyFitFunc *fitfunc = gwy_fit_func_new(name);
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
     gchar *fname, *fgroup;
     g_object_get(fitfunc, "name", &fname, "group", &fgroup, NULL);
@@ -177,7 +177,7 @@ test_fit_func_builtin_constant(void)
 {
     const gchar *param_names[] = { "a" };
     const gchar *param_units[] = { "s" };
-    fit_func_one("Constant", "builtin",
+    fit_func_one("Constant", "Elementary",
                  G_N_ELEMENTS(param_names), param_names, param_units);
 }
 
@@ -186,7 +186,7 @@ test_fit_func_builtin_exponential(void)
 {
     const gchar *param_names[] = { "a", "b", "y₀" };
     const gchar *param_units[] = { "s", "m", "s" };
-    fit_func_one("Exponential", "builtin",
+    fit_func_one("Exponential", "Elementary",
                  G_N_ELEMENTS(param_names), param_names, param_units);
 }
 
@@ -195,7 +195,7 @@ test_fit_func_builtin_gaussian(void)
 {
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
-    fit_func_one("Gaussian", "builtin",
+    fit_func_one("Gaussian", "Elementary",
                  G_N_ELEMENTS(param_names), param_names, param_units);
 }
 
@@ -206,15 +206,16 @@ test_fit_func_user(void)
     const gchar *param_units[] = { "s", "s/m" };
     GwyInventory *userfitfuncs = gwy_user_fit_funcs();
     g_assert(GWY_IS_INVENTORY(userfitfuncs));
-    if (gwy_inventory_get(userfitfuncs, "Linear"))
-        gwy_inventory_delete(userfitfuncs, "Linear");
+    if (gwy_inventory_get(userfitfuncs, "TESTLIBGWY Linear"))
+        gwy_inventory_delete(userfitfuncs, "TESTLIBGWY Linear");
     GwyUserFitFunc *linear = gwy_user_fit_func_new();
     g_assert(GWY_IS_USER_FIT_FUNC(linear));
     GwyResource *resource = GWY_RESOURCE(linear);
-    gwy_resource_set_name(resource, "Linear");
+    gwy_resource_set_name(resource, "TESTLIBGWY Linear");
     gwy_inventory_insert(userfitfuncs, linear);
     g_object_unref(linear);
     g_assert(gwy_user_fit_func_set_formula(linear, "a+b*x", NULL));
+    gwy_user_fit_func_set_group(linear, "User");
     GwyFitParam *a = gwy_user_fit_func_param(linear, "a");
     GwyFitParam *b = gwy_user_fit_func_param(linear, "b");
     g_assert(GWY_IS_FIT_PARAM(a));
@@ -225,10 +226,10 @@ test_fit_func_user(void)
     gwy_fit_param_set_estimate(b, "(yxmax-yxmin)/(xmax-xmin)");
     gwy_fit_param_set_power_x(b, -1);
     gwy_fit_param_set_power_y(b, 1);
-    fit_func_one("Linear", "userfitfunc",
+    fit_func_one("TESTLIBGWY Linear", "User",
                  G_N_ELEMENTS(param_names), param_names, param_units);
 
-    GwyFitFunc *fitfunc = gwy_fit_func_new("Linear", "userfitfunc");
+    GwyFitFunc *fitfunc = gwy_fit_func_new("TESTLIBGWY Linear");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
     GwyUserFitFunc *userfitfunc = gwy_fit_func_get_resource(fitfunc);
     g_assert(userfitfunc == linear);
