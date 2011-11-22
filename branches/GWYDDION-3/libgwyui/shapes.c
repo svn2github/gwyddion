@@ -661,11 +661,11 @@ gwy_shapes_updated(GwyShapes *shapes)
  * @key_press: Virtual method implementing gwy_shapes_key_press().
  * @key_release: Virtual method implementing gwy_shapes_key_release().
  * @coords_item_inserted: Virtual method called when the @coords object
- *                        emits #GwyArray:item-inserted.
+ *                        emits #GwyArray::item-inserted.
  * @coords_item_deleted: Virtual method called when the @coords object
- *                       emits #GwyArray:item-deleted.
+ *                       emits #GwyArray::item-deleted.
  * @coords_item_changed: Virtual method called when the @coords object
- *                       emits #GwyArray:item-changed.
+ *                       emits #GwyArray::item-changed.
  *
  * Class of groups of selectable geometrical shapes.
  *
