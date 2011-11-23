@@ -1,0 +1,393 @@
+--- gtkglext-1.2.0.orig/configure.in	2011-11-23 16:53:55.348446726 +0100
++++ gtkglext-1.2.0/configure.in	2011-11-23 16:55:26.685338120 +0100
+@@ -347,6 +347,7 @@ gtk_pkg >= gtk_required_version \
+ gdk_pkg >= gdk_required_version \
+ pango_pkg >= pango_required_version \
+ gmodule_pkg >= gmodule_required_version \
++atk \
+ ])
+ 
+ # Check for GLib
+@@ -377,44 +378,6 @@ LIBS="$save_LIBS"
+ 
+ 
+ ##################################################
+-# Checks for GDK multihead support
+-##################################################
+-
+-GDKGLEXT_MULTIHEAD_SUPPORT=no
+-
+-save_CPPFLAGS="$CPPFLAGS"
+-CPPFLAGS="$CPPFLAGS $BASE_DEPENDENCIES_CFLAGS"
+-save_LIBS="$LIBS"
+-LIBS="$LIBS $BASE_DEPENDENCIES_LIBS"
+-
+-AC_CHECK_HEADERS([gdk/gdkdisplay.h gdk/gdkscreen.h],
+-                 [GDKGLEXT_MULTIHEAD_SUPPORT=yes],
+-                 [GDKGLEXT_MULTIHEAD_SUPPORT=no])
+-
+-if test "x$GDKGLEXT_MULTIHEAD_SUPPORT" = "xyes"; then
+-  AC_MSG_CHECKING([for gdk_display_get_default in GDK library])
+-  AC_TRY_LINK([#include <gdk/gdk.h>],
+-              [gdk_display_get_default();],
+-              [GDKGLEXT_MULTIHEAD_SUPPORT=yes],
+-              [GDKGLEXT_MULTIHEAD_SUPPORT=no])
+-  AC_MSG_RESULT([$GDKGLEXT_MULTIHEAD_SUPPORT])
+-fi
+-
+-CPPFLAGS="$save_CPPFLAGS"
+-LIBS="$save_LIBS"
+-
+-if test "x$GDKGLEXT_MULTIHEAD_SUPPORT" = "xyes"; then
+-  AC_MSG_NOTICE([GDK supports multihead])
+-else
+-  AC_MSG_NOTICE([GDK doesn't support multihead])
+-fi
+-
+-AC_SUBST([GDKGLEXT_MULTIHEAD_SUPPORT])
+-AM_CONDITIONAL([MULTIHEAD_SUPPORT],
+-               [test "x$GDKGLEXT_MULTIHEAD_SUPPORT" = "xyes"])
+-
+-
+-##################################################
+ # Checks for GDK functions
+ ##################################################
+ 
+@@ -790,7 +753,7 @@ LIBS="$save_LIBS"
+ # CFLAGS and LIBS
+ ##################################################
+ 
+-GDKGLEXT_PACKAGES="gdk_pkg pango_pkg gmodule_pkg"
++GDKGLEXT_PACKAGES="gdk_pkg pango_pkg gmodule_pkg atk"
+ GDKGLEXT_EXTRA_CFLAGS="$GL_CFLAGS $GDKGLEXT_WIN_CFLAGS"
+ GDKGLEXT_EXTRA_LIBS="$GL_LIBS $GDKGLEXT_WIN_LIBS"
+ GDKGLEXT_DEP_CFLAGS="$GDKGLEXT_EXTRA_CFLAGS `$PKG_CONFIG --cflags $GDKGLEXT_PACKAGES`"
+@@ -906,15 +869,10 @@ _______EOF
+ 
+ 	cat >>$outfile <<_______EOF
+ $gdkglext_windowing
+-$gdkglext_multihead_support
+ _______EOF
+ 
+ 	cat >>$outfile <<_______EOF
+-
+-#if !defined(GDKGLEXT_MULTIHEAD_SUPPORT) && defined(GDK_MULTIHEAD_SAFE)
+-#error "Installed GdkGLExt library doesn't have multihead support."
+-#endif
+-
++#define GDKGLEXT_MULTIHEAD_SUPPORT
+ _______EOF
+ 
+ 	cat >>$outfile <<_______EOF
+@@ -953,11 +911,6 @@ elif test "x$gdktarget" = "xwin32" ; the
+ #define GDKGLEXT_WINDOWING_WIN32'
+ fi
+ 
+-if test "x$GDKGLEXT_MULTIHEAD_SUPPORT" = "xyes"; then
+-  gdkglext_multihead_support='
+-#define GDKGLEXT_MULTIHEAD_SUPPORT'
+-fi
+-
+ if test "x$GDKGLEXT_NEED_GLXFBCONFIGSGIX_TYPEDEF" = "xyes"; then
+   gdkglext_need_glxfbconfigsgix_typedef='
+ #define GDKGLEXT_NEED_GLXFBCONFIGSGIX_TYPEDEF'
+@@ -1030,7 +983,7 @@ echo "
+ configuration:
+ 	OpenGL CFLAGS:		$GL_CFLAGS
+ 	OpenGL LIBS:		$GL_LIBS
+-	multihead support:	$GDKGLEXT_MULTIHEAD_SUPPORT
++	multihead support:	yes
+ 	debug:			$enable_debug
+ 	extra defs:		$GDKGLEXT_WIN_EXTRA_DEFS
+ "
+--- gtkglext-1.2.0.orig/gtk/gtkglwidget.c	2004-02-20 10:38:36.000000000 +0100
++++ gtkglext-1.2.0/gtk/gtkglwidget.c	2011-11-23 16:54:48.310386898 +0100
+@@ -16,7 +16,7 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  */
+ 
+-#include <gtk/gtkmain.h>
++#include <gtk/gtk.h>
+ 
+ #include "gtkglprivate.h"
+ #include "gtkglwidget.h"
+@@ -127,7 +127,7 @@ gtk_gl_widget_size_allocate (GtkWidget
+    * Synchronize OpenGL and window resizing request streams.
+    */
+ 
+-  if (GTK_WIDGET_REALIZED (widget) && private->is_realized)
++  if (gtk_widget_get_realized (widget) && private->is_realized)
+     {
+       gldrawable = gdk_window_get_gl_drawable (widget->window);
+       gdk_gl_drawable_wait_gdk (gldrawable);
+@@ -154,7 +154,7 @@ gtk_gl_widget_unrealize (GtkWidget
+    * Remove OpenGL-capability from widget->window.
+    */
+ 
+-  if (GTK_WIDGET_REALIZED (widget))
++  if (gtk_widget_get_realized (widget))
+     gdk_window_unset_gl_capability (widget->window);
+ 
+   private->is_realized = FALSE;
+@@ -174,7 +174,7 @@ gtk_gl_widget_parent_set (GtkWidget   *w
+    */
+ 
+   toplevel = gtk_widget_get_toplevel (widget);
+-  if (GTK_WIDGET_TOPLEVEL (toplevel) && !GTK_WIDGET_REALIZED (toplevel))
++  if (gtk_widget_is_toplevel (toplevel) && !gtk_widget_get_realized (toplevel))
+     {
+       GTK_GL_NOTE (MISC,
+         g_message (" - Install colormap to the top-level window."));
+@@ -194,7 +194,7 @@ gtk_gl_widget_style_set (GtkWidget *widg
+    * Set a background of "None" on window to avoid AIX X server crash.
+    */
+ 
+-  if (GTK_WIDGET_REALIZED (widget))
++  if (gtk_widget_get_realized (widget))
+     {
+       GTK_GL_NOTE (MISC,
+         g_message (" - window->bg_pixmap = %p",
+@@ -250,8 +250,8 @@ gtk_widget_set_gl_capability (GtkWidget
+   GTK_GL_NOTE_FUNC ();
+ 
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), FALSE);
+-  g_return_val_if_fail (!GTK_WIDGET_NO_WINDOW (widget), FALSE);
+-  g_return_val_if_fail (!GTK_WIDGET_REALIZED (widget), FALSE);
++  g_return_val_if_fail (!gtk_widget_get_has_window (widget), FALSE);
++  g_return_val_if_fail (!gtk_widget_get_realized (widget), FALSE);
+   g_return_val_if_fail (GDK_IS_GL_CONFIG (glconfig), FALSE);
+ 
+   /* 
+@@ -432,7 +432,7 @@ gtk_widget_create_gl_context (GtkWidget
+   GTK_GL_NOTE_FUNC ();
+ 
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
+-  g_return_val_if_fail (GTK_WIDGET_REALIZED (widget), NULL);
++  g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
+ 
+   gldrawable = gdk_window_get_gl_drawable (widget->window);
+   if (gldrawable == NULL)
+@@ -474,7 +474,7 @@ gtk_widget_get_gl_context (GtkWidget *wi
+   GLWidgetPrivate *private;
+ 
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
+-  g_return_val_if_fail (GTK_WIDGET_REALIZED (widget), NULL);
++  g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
+ 
+   private = g_object_get_qdata (G_OBJECT (widget), quark_gl_private);
+   if (private == NULL)
+@@ -501,7 +501,7 @@ GdkGLWindow *
+ gtk_widget_get_gl_window (GtkWidget *widget)
+ {
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
+-  g_return_val_if_fail (GTK_WIDGET_REALIZED (widget), NULL);
++  g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
+ 
+   return gdk_window_get_gl_window (widget->window);
+ }
+--- gtkglext-1.2.0.orig/gtk/gtkglwidget.h	2004-02-20 10:38:36.000000000 +0100
++++ gtkglext-1.2.0/gtk/gtkglwidget.h	2011-11-23 16:54:48.310386898 +0100
+@@ -23,7 +23,7 @@
+ 
+ #include <gdk/gdkgl.h>
+ 
+-#include <gtk/gtkwidget.h>
++#include <gtk/gtk.h>
+ 
+ G_BEGIN_DECLS
+ 
+--- gtkglext-1.2.0.orig/gdk/gdkgldrawable.c	2004-02-20 10:38:10.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkgldrawable.c	2011-11-23 16:54:48.311386898 +0100
+@@ -16,7 +16,7 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  */
+ 
+-#include <gdk/gdkdrawable.h>
++#include <gdk/gdk.h>
+ 
+ #include "gdkglprivate.h"
+ #include "gdkglcontext.h"
+--- gtkglext-1.2.0.orig/gdk/win32/gdkglconfig-win32.c	2004-02-20 10:38:13.000000000 +0100
++++ gtkglext-1.2.0/gdk/win32/gdkglconfig-win32.c	2011-11-23 16:54:48.311386898 +0100
+@@ -20,10 +20,6 @@
+ #include "gdkglprivate-win32.h"
+ #include "gdkglconfig-win32.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkscreen.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ static void gdk_gl_config_impl_win32_class_init (GdkGLConfigImplWin32Class *klass);
+ static void gdk_gl_config_impl_win32_finalize   (GObject                   *object);
+ 
+--- gtkglext-1.2.0.orig/gdk/win32/gdkglquery-win32.c	2004-02-20 10:38:13.000000000 +0100
++++ gtkglext-1.2.0/gdk/win32/gdkglquery-win32.c	2011-11-23 16:54:48.311386898 +0100
+@@ -22,10 +22,6 @@
+ #include "gdkglprivate-win32.h"
+ #include "gdkglquery.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkdisplay.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ gboolean
+ gdk_gl_query_extension (void)
+ {
+--- gtkglext-1.2.0.orig/gdk/win32/gdkglfont-win32.c	2004-02-20 10:38:13.000000000 +0100
++++ gtkglext-1.2.0/gdk/win32/gdkglfont-win32.c	2011-11-23 16:54:48.311386898 +0100
+@@ -22,10 +22,6 @@
+ #include "gdkglprivate-win32.h"
+ #include "gdkglfont.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkdisplay.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ PangoFont *
+ gdk_gl_font_use_pango_font (const PangoFontDescription *font_desc,
+                             int                         first,
+--- gtkglext-1.2.0.orig/gdk/gdkglpixmap.h	2004-02-20 10:38:12.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkglpixmap.h	2011-11-23 16:54:48.311386898 +0100
+@@ -22,7 +22,7 @@
+ #include <gdk/gdkgldefs.h>
+ #include <gdk/gdkgltypes.h>
+ 
+-#include <gdk/gdkpixmap.h>
++#include <gdk/gdk.h>
+ 
+ G_BEGIN_DECLS
+ 
+--- gtkglext-1.2.0.orig/gdk/x11/gdkglquery-x11.c	2004-02-20 10:38:36.000000000 +0100
++++ gtkglext-1.2.0/gdk/x11/gdkglquery-x11.c	2011-11-23 16:54:48.311386898 +0100
+@@ -29,10 +29,6 @@
+ #include "gdkglconfig-x11.h"
+ #include "gdkglquery.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkdisplay.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ /**
+  * gdk_gl_query_extension:
+  *
+--- gtkglext-1.2.0.orig/gdk/x11/gdkglconfig-x11.c	2004-02-20 10:38:14.000000000 +0100
++++ gtkglext-1.2.0/gdk/x11/gdkglconfig-x11.c	2011-11-23 16:54:48.312386897 +0100
+@@ -27,10 +27,6 @@
+ #include "gdkgloverlay-x11.h"
+ #include "gdkglconfig-x11.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkscreen.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ #ifdef HAVE_LIBXMU
+ 
+ #include <X11/Xatom.h>  /* for XA_RGB_DEFAULT_MAP atom */
+--- gtkglext-1.2.0.orig/gdk/x11/gdkglfont-x11.c	2004-02-20 10:38:14.000000000 +0100
++++ gtkglext-1.2.0/gdk/x11/gdkglfont-x11.c	2011-11-23 16:54:48.312386897 +0100
+@@ -24,10 +24,6 @@
+ #include "gdkglprivate-x11.h"
+ #include "gdkglfont.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkdisplay.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ /*
+  * This code is ripped from gdk/x11/gdkfont-x11.c in GTK+.
+  */
+--- gtkglext-1.2.0.orig/gdk/x11/gdkgloverlay-x11.c	2004-02-20 10:38:36.000000000 +0100
++++ gtkglext-1.2.0/gdk/x11/gdkgloverlay-x11.c	2011-11-23 16:54:48.312386897 +0100
+@@ -20,10 +20,6 @@
+ #include "gdkglprivate-x11.h"
+ #include "gdkgloverlay-x11.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkscreen.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ #include <X11/Xmd.h>
+ 
+ /*
+--- gtkglext-1.2.0.orig/gdk/gdkglwindow.c	2004-02-20 10:38:12.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkglwindow.c	2011-11-23 16:54:48.312386897 +0100
+@@ -16,7 +16,7 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  */
+ 
+-#include <gtk/gtkversion.h>
++#include <gtk/gtk.h>
+ 
+ #include "gdkglprivate.h"
+ #include "gdkglconfig.h"
+--- gtkglext-1.2.0.orig/gdk/gdkglwindow.h	2004-02-20 10:38:12.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkglwindow.h	2011-11-23 16:54:48.312386897 +0100
+@@ -22,7 +22,7 @@
+ #include <gdk/gdkgldefs.h>
+ #include <gdk/gdkgltypes.h>
+ 
+-#include <gdk/gdkwindow.h>
++#include <gdk/gdk.h>
+ 
+ G_BEGIN_DECLS
+ 
+--- gtkglext-1.2.0.orig/gdk/gdkglconfig.h	2004-02-20 10:38:10.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkglconfig.h	2011-11-23 16:54:48.312386897 +0100
+@@ -22,7 +22,7 @@
+ #include <gdk/gdkgldefs.h>
+ #include <gdk/gdkgltypes.h>
+ 
+-#include <gdk/gdkwindow.h>
++#include <gdk/gdk.h>
+ 
+ G_BEGIN_DECLS
+ 
+--- gtkglext-1.2.0.orig/gdk/gdkglconfig.c	2004-02-20 10:38:10.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkglconfig.c	2011-11-23 16:54:48.313386895 +0100
+@@ -19,10 +19,6 @@
+ #include "gdkglprivate.h"
+ #include "gdkglconfig.h"
+ 
+-#ifdef GDKGLEXT_MULTIHEAD_SUPPORT
+-#include <gdk/gdkscreen.h>
+-#endif /* GDKGLEXT_MULTIHEAD_SUPPORT */
+-
+ gboolean _gdk_gl_config_no_standard_colormap = FALSE;
+ 
+ static void gdk_gl_config_class_init (GdkGLConfigClass *klass);
+--- gtkglext-1.2.0.orig/gdk/Makefile.am	2003-08-15 11:10:38.000000000 +0200
++++ gtkglext-1.2.0/gdk/Makefile.am	2011-11-23 16:54:48.313386895 +0100
+@@ -14,11 +14,7 @@ no_undefined = -no-undefined
+ endif
+ 
+ if OS_WIN32
+-if MULTIHEAD_SUPPORT
+ gdkglext_def = gdkglext.def
+-else
+-gdkglext_def = gdkglext-gtk20.def
+-endif
+ gdkglext_win32_symbols = -export-symbols $(gdkglext_def)
+ endif
+ 
+--- gtkglext-1.2.0.orig/gdk/gdkglpixmap.c	2004-02-20 10:38:12.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkglpixmap.c	2011-11-23 16:54:48.313386895 +0100
+@@ -16,7 +16,7 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+  */
+ 
+-#include <gtk/gtkversion.h>
++#include <gtk/gtk.h>
+ 
+ #include "gdkglprivate.h"
+ #include "gdkglconfig.h"
+--- gtkglext-1.2.0.orig/gdk/gdkgltypes.h	2004-02-20 10:38:12.000000000 +0100
++++ gtkglext-1.2.0/gdk/gdkgltypes.h	2011-11-23 16:54:48.313386895 +0100
+@@ -19,7 +19,7 @@
+ #ifndef __GDK_GL_TYPES_H__
+ #define __GDK_GL_TYPES_H__
+ 
+-#include <gdk/gdktypes.h>
++#include <gdk/gdk.h>
+ 
+ G_BEGIN_DECLS
+  

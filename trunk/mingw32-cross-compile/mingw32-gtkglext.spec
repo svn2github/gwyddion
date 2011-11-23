@@ -8,17 +8,17 @@
 %global __find_provides %{_mingw32_findprovides}
 %if %{distro_is_redhat}
 %define __debug_install_post %{_mingw32_debug_install_post}
-%define %{develdep} %{nil}
+%define develdep %{nil}
 %endif
 %if %{distro_is_suse}
 %define __os_install_post %{_mingw32_debug_install_post} \
                           %{_mingw32_install_post}
-%define %{develdep} -devel
+%define develdep -devel
 %endif
 
 Name:           mingw32-gtkglext
 Version:        1.2.0
-Release:        4
+Release:        5
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -26,7 +26,7 @@ Group:          Development/Libraries
 URL:            http://gtkglext.sourceforge.net/
 Source0:        http://dl.sourceforge.net/sourceforge/gtkglext/gtkglext-%{version}.tar.bz2
 Patch0:         gtkglext-1.2.0-nox.patch
-Patch1:         gtkglext-1.2.0-deprecated.patch
+Patch1:         gtkglext-1.2.0-nox-deprecated.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -115,6 +115,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Nov 23 2011 Yeti <yeti@gwyddion.net> - 1.2.0-5
+- Correctec compatibility of nox and deprecated patches.
+- Rebuilt to make it work with new Win32 iconv packages on F16
+
 * Thu Jan 27 2011 Yeti <yeti@gwyddion.net> - 1.2.0-4
 - BuilRequire -devel packages on openSUSE
 
