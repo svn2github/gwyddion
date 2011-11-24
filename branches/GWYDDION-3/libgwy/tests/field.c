@@ -2814,13 +2814,16 @@ test_field_distributions_acf_full(void)
             field_randomize(field, rng);
 
             GwyLine *acf = gwy_field_row_acf(field,
-                                             NULL, NULL, GWY_MASK_IGNORE, lvl);
+                                             NULL, NULL, GWY_MASK_IGNORE, lvl,
+                                             NULL);
             GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
             GwyLine *acf0 = gwy_field_row_acf(field, NULL,
-                                              mask, GWY_MASK_EXCLUDE, lvl);
+                                              mask, GWY_MASK_EXCLUDE, lvl,
+                                              NULL);
             gwy_mask_field_fill(mask, NULL, TRUE);
             GwyLine *acf1 = gwy_field_row_acf(field, NULL,
-                                              mask, GWY_MASK_INCLUDE, lvl);
+                                              mask, GWY_MASK_INCLUDE, lvl,
+                                              NULL);
             GwyLine *dumb_acf = cf_dumb(field, NULL,
                                         NULL, GWY_MASK_IGNORE, lvl, FALSE);
 
@@ -2858,11 +2861,14 @@ test_field_distributions_acf_masked(void)
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
             GwyLine *acf = gwy_field_row_acf(field, NULL,
-                                             mask, GWY_MASK_IGNORE, lvl);
+                                             mask, GWY_MASK_IGNORE, lvl,
+                                             NULL);
             GwyLine *acf0 = gwy_field_row_acf(field, NULL,
-                                              mask, GWY_MASK_EXCLUDE, lvl);
+                                              mask, GWY_MASK_EXCLUDE, lvl,
+                                              NULL);
             GwyLine *acf1 = gwy_field_row_acf(field, NULL,
-                                              mask, GWY_MASK_INCLUDE, lvl);
+                                              mask, GWY_MASK_INCLUDE, lvl,
+                                              NULL);
             GwyLine *dumb_acf = cf_dumb(field, NULL,
                                         mask, GWY_MASK_IGNORE, lvl, FALSE);
             GwyLine *dumb_acf0 = cf_dumb(field, NULL,
@@ -2911,11 +2917,14 @@ test_field_distributions_acf_partial(void)
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
             GwyLine *acf = gwy_field_row_acf(field, &fpart,
-                                             mask, GWY_MASK_IGNORE, lvl);
+                                             mask, GWY_MASK_IGNORE, lvl,
+                                             NULL);
             GwyLine *acf0 = gwy_field_row_acf(field, &fpart,
-                                              mask, GWY_MASK_EXCLUDE, lvl);
+                                              mask, GWY_MASK_EXCLUDE, lvl,
+                                              NULL);
             GwyLine *acf1 = gwy_field_row_acf(field, &fpart,
-                                              mask, GWY_MASK_INCLUDE, lvl);
+                                              mask, GWY_MASK_INCLUDE, lvl,
+                                              NULL);
             GwyLine *dumb_acf = cf_dumb(field, &fpart,
                                         mask, GWY_MASK_IGNORE, lvl, FALSE);
             GwyLine *dumb_acf0 = cf_dumb(field, &fpart,
@@ -2958,13 +2967,16 @@ test_field_distributions_hhcf_full(void)
             field_randomize(field, rng);
 
             GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
-                                               NULL, GWY_MASK_IGNORE, lvl);
+                                               NULL, GWY_MASK_IGNORE, lvl,
+                                               NULL);
             GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
             GwyLine *hhcf0 = gwy_field_row_hhcf(field, NULL,
-                                                mask, GWY_MASK_EXCLUDE, lvl);
+                                                mask, GWY_MASK_EXCLUDE, lvl,
+                                                NULL);
             gwy_mask_field_fill(mask, NULL, TRUE);
             GwyLine *hhcf1 = gwy_field_row_hhcf(field, NULL,
-                                                mask, GWY_MASK_INCLUDE, lvl);
+                                                mask, GWY_MASK_INCLUDE, lvl,
+                                                NULL);
             GwyLine *dumb_hhcf = cf_dumb(field, NULL,
                                          NULL, GWY_MASK_IGNORE, lvl, TRUE);
 
@@ -3002,11 +3014,14 @@ test_field_distributions_hhcf_masked(void)
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
             GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
-                                               mask, GWY_MASK_IGNORE, lvl);
+                                               mask, GWY_MASK_IGNORE, lvl,
+                                               NULL);
             GwyLine *hhcf0 = gwy_field_row_hhcf(field, NULL,
-                                                mask, GWY_MASK_EXCLUDE, lvl);
+                                                mask, GWY_MASK_EXCLUDE, lvl,
+                                                NULL);
             GwyLine *hhcf1 = gwy_field_row_hhcf(field, NULL,
-                                                mask, GWY_MASK_INCLUDE, lvl);
+                                                mask, GWY_MASK_INCLUDE, lvl,
+                                                NULL);
             GwyLine *dumb_hhcf = cf_dumb(field, NULL,
                                          mask, GWY_MASK_IGNORE, lvl, TRUE);
             GwyLine *dumb_hhcf0 = cf_dumb(field, NULL,
@@ -3055,11 +3070,14 @@ test_field_distributions_hhcf_partial(void)
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
             GwyLine *hhcf = gwy_field_row_hhcf(field, &fpart,
-                                               mask, GWY_MASK_IGNORE, lvl);
+                                               mask, GWY_MASK_IGNORE, lvl,
+                                               NULL);
             GwyLine *hhcf0 = gwy_field_row_hhcf(field, &fpart,
-                                                mask, GWY_MASK_EXCLUDE, lvl);
+                                                mask, GWY_MASK_EXCLUDE, lvl,
+                                                NULL);
             GwyLine *hhcf1 = gwy_field_row_hhcf(field, &fpart,
-                                                mask, GWY_MASK_INCLUDE, lvl);
+                                                mask, GWY_MASK_INCLUDE, lvl,
+                                                NULL);
             GwyLine *dumb_hhcf = cf_dumb(field, &fpart,
                                          mask, GWY_MASK_IGNORE, lvl, TRUE);
             GwyLine *dumb_hhcf0 = cf_dumb(field, &fpart,

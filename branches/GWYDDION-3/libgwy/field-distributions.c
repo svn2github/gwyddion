@@ -852,6 +852,22 @@ row_level_and_count(const gdouble *in,
     return count;
 }
 
+static void
+set_cf_units(const GwyField *field,
+             GwyLine *line,
+             GwyLine *weights)
+{
+    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
+                            gwy_field_get_unit_xy(field), 1,
+                            gwy_field_get_unit_z(field), 2);
+    if (!weights)
+        return;
+
+    gwy_unit_assign(gwy_line_get_unit_x(weights), gwy_line_get_unit_x(line));
+    gwy_unit_set_from_string(gwy_line_get_unit_y(weights), NULL, NULL);
+}
+
 /**
  * gwy_field_row_acf:
  * @field: A two-dimensional data field.
@@ -864,6 +880,11 @@ row_level_and_count(const gdouble *in,
  *         @level are subtracted.  Note only values 0 (no levelling) and 1
  *         (subtract the mean value of each row) are available at present.  For
  *         SPM data, you usually wish to pass 1.
+ * @weights: (allow-none):
+ *           Line to store the denominators to (or %NULL).  It will be resized
+ *           to match the returned line.  The denominators are integers equal
+ *           to the number of terms that contributed to each value.  They are
+ *           suitable as fitting weight if the ACF is fitted.
  *
  * Calculates the row-wise autocorrelation function of a field.
  *
@@ -884,13 +905,18 @@ gwy_field_row_acf(const GwyField *field,
                   const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
                   GwyMaskingType masking,
-                  guint level)
+                  guint level,
+                  GwyLine *weights)
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
+    if (weights && !GWY_IS_LINE(weights)) {
+        g_critical("weights is not a GwyLine");
+        weights = NULL;
+    }
 
     if (level > 1) {
         g_warning("Levelling degree %u is not supported, changing to 1.",
@@ -959,20 +985,25 @@ gwy_field_row_acf(const GwyField *field,
     }
     row_divide_nonzero(accum_data, accum_mask, line->data, line->res);
 
+    line->real = gwy_field_dx(field)*line->res;
+    line->off = -0.5*gwy_line_dx(line);
+
+    if (weights) {
+        gwy_line_set_size(weights, line->res, FALSE);
+        gwy_line_set_real(weights, line->real);
+        gwy_line_set_offset(weights, line->off);
+        gwy_assign(weights->data, accum_mask, weights->res);
+    }
+
     fftw_destroy_plan(plan);
     fftw_free(fftc);
     fftw_free(fftr);
-    line->real = gwy_field_dx(field)*line->res;
-    line->off = -0.5*gwy_line_dx(line);
 
 fail:
     if (!line)
         line = gwy_line_new();
 
-    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
-    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            gwy_field_get_unit_xy(field), 1,
-                            gwy_field_get_unit_z(field), 2);
+    set_cf_units(field, line, weights);
     return line;
 }
 
@@ -1054,6 +1085,11 @@ grain_row_acf(const GwyField *field,
  *         @level are subtracted.  Note only values 0 (no levelling) and 1
  *         (subtract the mean value of each row) are available at present.  For
  *         SPM data, you usually wish to pass 1.
+ * @weights: (allow-none):
+ *           Line to store the denominators to (or %NULL).  It will be resized
+ *           to match the returned line.  The denominators are integers equal
+ *           to the number of terms that contributed to each value.  They are
+ *           suitable as fitting weight if the ACF is fitted.
  *
  * Calculates the row-wise autocorrelation function of a field.
  *
@@ -1074,12 +1110,17 @@ GwyLine*
 gwy_field_grain_row_acf(const GwyField *field,
                         const GwyMaskField *mask,
                         guint grain_id,
-                        guint level)
+                        guint level,
+                        GwyLine *weights)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), NULL);
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     g_return_val_if_fail(mask->xres == field->xres, NULL);
     g_return_val_if_fail(mask->yres == field->yres, NULL);
+    if (weights && !GWY_IS_LINE(weights)) {
+        g_critical("weights is not a GwyLine");
+        weights = NULL;
+    }
 
     if (level > 1) {
         g_warning("Levelling degree %u is not supported, changing to 1.",
@@ -1132,15 +1173,20 @@ gwy_field_grain_row_acf(const GwyField *field,
 
     row_divide_nonzero(total_data, total_mask, line->data, line->res);
 
-    fftw_free(fftc);
-    fftw_free(fftr);
     line->real = gwy_field_dx(field)*line->res;
     line->off = -0.5*gwy_line_dx(line);
 
-    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
-    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            gwy_field_get_unit_xy(field), 1,
-                            gwy_field_get_unit_z(field), 2);
+    if (weights) {
+        gwy_line_set_size(weights, line->res, FALSE);
+        gwy_line_set_real(weights, line->real);
+        gwy_line_set_offset(weights, line->off);
+        gwy_assign(weights->data, total_mask, weights->res);
+    }
+
+    fftw_free(fftc);
+    fftw_free(fftr);
+
+    set_cf_units(field, line, weights);
     return line;
 }
 
@@ -1295,6 +1341,11 @@ fail:
  *         @level are subtracted.  Note only values 0 (no levelling) and 1
  *         (subtract the mean value of each row) are available at present.
  *         There is no difference for HHCF.
+ * @weights: (allow-none):
+ *           Line to store the denominators to (or %NULL).  It will be resized
+ *           to match the returned line.  The denominators are integers equal
+ *           to the number of terms that contributed to each value.  They are
+ *           suitable as fitting weight if the ACF is fitted.
  *
  * Calculates the row-wise height-height correlation function of a rectangular
  * part of a field.
@@ -1316,13 +1367,18 @@ gwy_field_row_hhcf(const GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMaskingType masking,
-                   guint level)
+                   guint level,
+                   GwyLine *weights)
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
+    if (weights && !GWY_IS_LINE(weights)) {
+        g_critical("weights is not a GwyLine");
+        weights = NULL;
+    }
 
     if (level > 1) {
         g_warning("Levelling degree %u is not supported, changing to 1.",
@@ -1426,11 +1482,19 @@ gwy_field_row_hhcf(const GwyField *field,
     }
     row_divide_nonzero(accum_data, accum_mask, line->data, line->res);
 
+    line->real = gwy_field_dx(field)*line->res;
+    line->off = -0.5*gwy_line_dx(line);
+
+    if (weights) {
+        gwy_line_set_size(weights, line->res, FALSE);
+        gwy_line_set_real(weights, line->real);
+        gwy_line_set_offset(weights, line->off);
+        gwy_assign(weights->data, accum_mask, weights->res);
+    }
+
     fftw_destroy_plan(plan);
     fftw_free(fftc);
     fftw_free(fftr);
-    line->real = gwy_field_dx(field)*line->res;
-    line->off = -0.5*gwy_line_dx(line);
 
 fail:
     if (!line)
@@ -1440,6 +1504,12 @@ fail:
     gwy_unit_power_multiply(gwy_line_get_unit_y(line),
                             gwy_field_get_unit_xy(field), 1,
                             gwy_field_get_unit_z(field), 2);
+    if (weights) {
+        gwy_unit_assign(gwy_line_get_unit_x(weights),
+                        gwy_line_get_unit_x(line));
+        gwy_unit_assign(gwy_line_get_unit_y(weights),
+                        gwy_line_get_unit_y(line));
+    }
     return line;
 }
 
