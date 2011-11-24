@@ -242,7 +242,7 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(serializable);
     UserFitFunc *priv = userfitfunc->priv;
 
-    if (!_gwy_check_object_component(its + 2, userfitfunc,
+    if (!_gwy_check_object_component(its + 3, userfitfunc,
                                      GWY_TYPE_FIT_PARAM, error_list))
         goto fail;
 
