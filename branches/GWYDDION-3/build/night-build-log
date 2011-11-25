@@ -153,7 +153,7 @@ function extract_coverage_stats() {
       fi
       if test -d "$projectdir/$dir/coverage"; then
         pushd "$projectdir/$dir/coverage" >/dev/null
-        rename .c.gcov -gcov.log *.c.gcov
+        rename -- .c.gcov -gcov.log *.c.gcov
         popd >/dev/null
       fi
     fi
