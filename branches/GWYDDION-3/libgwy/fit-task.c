@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -290,7 +290,7 @@ gwy_fit_task_set_point_func(GwyFitTask *fittask,
 }
 
 /**
- * gwy_fit_task_set_point_weight:
+ * gwy_fit_task_set_point_weight_func:
  * @fittask: A fitting task.
  * @weight: Weighting function.
  *
@@ -299,8 +299,8 @@ gwy_fit_task_set_point_func(GwyFitTask *fittask,
  * Note the weight is applied to the differences, not to their squares.
  **/
 void
-gwy_fit_task_set_point_weight(GwyFitTask *fittask,
-                              GwyFitTaskPointWeightFunc weight)
+gwy_fit_task_set_point_weight_func(GwyFitTask *fittask,
+                                   GwyFitTaskPointWeightFunc weight)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     FitTask *priv = fittask->priv;

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -77,18 +77,18 @@ struct _GwyFitTaskClass {
 guint       gwy_fit_task_get_max_vararg_params(void);
 GType       gwy_fit_task_get_type             (void)                              G_GNUC_CONST;
 GwyFitTask* gwy_fit_task_new                  (void)                              G_GNUC_MALLOC;
-void        gwy_fit_task_set_point_func   (GwyFitTask *fittask,
+void        gwy_fit_task_set_point_func       (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskPointFunc function);
-void        gwy_fit_task_set_point_weight     (GwyFitTask *fittask,
+void        gwy_fit_task_set_point_weight_func(GwyFitTask *fittask,
                                                GwyFitTaskPointWeightFunc weight);
 void        gwy_fit_task_set_point_data       (GwyFitTask *fittask,
                                                const GwyXY *data,
                                                guint ndata);
-void        gwy_fit_task_set_vector_func  (GwyFitTask *fittask,
+void        gwy_fit_task_set_vector_func      (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskVectorFunc function);
-void        gwy_fit_task_set_vector_vfuncs (GwyFitTask *fittask,
+void        gwy_fit_task_set_vector_vfuncs    (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskVectorVFunc function,
                                                GwyFitTaskVectorDFunc derivative);
