@@ -608,48 +608,54 @@ fit_task_residuum(const gdouble *param,
                   gdouble *residuum,
                   gpointer user_data)
 {
-    FitTask *fittask = (FitTask*)user_data;
-    guint nparam = fittask->nparam;
+    FitTask *priv = (FitTask*)user_data;
+    guint nparam = priv->nparam;
     gdouble r = 0.0;
 
-    if (fittask->type == POINT_VARARG) {
-        g_return_val_if_fail(fittask->point_func, FALSE);
-        g_return_val_if_fail(fittask->nparam <= VARARG_PARAM_MAX, FALSE);
-        GwyFitTaskPointFunc func = fittask->point_func;
-        const GwyXY *pts = fittask->point_data;
+    if (priv->type == POINT_VARARG) {
+        g_return_val_if_fail(priv->point_func, FALSE);
+        g_return_val_if_fail(priv->nparam <= VARARG_PARAM_MAX, FALSE);
+        GwyFitTaskPointFunc func = priv->point_func;
+        const GwyXY *pts = priv->point_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble x = pts[i].x, y = pts[i].y, v;
             if (!eval_point_vararg(x, param, nparam, func, &v))
                 return FALSE;
             v -= y;
-            if (fittask->point_weight)
-                v *= fittask->point_weight(x);
+            if (priv->weight_data)
+                v *= priv->weight_data[i];
+            else if (priv->point_weight)
+                v *= priv->point_weight(x);
             r += v*v;
         }
     }
-    else if (fittask->type == VECTOR_VARARG) {
-        g_return_val_if_fail(fittask->vector_func, FALSE);
-        g_return_val_if_fail(fittask->nparam <= VARARG_PARAM_MAX, FALSE);
-        GwyFitTaskVectorFunc func = fittask->vector_func;
-        gpointer data = fittask->vector_data;
+    else if (priv->type == VECTOR_VARARG) {
+        g_return_val_if_fail(priv->vector_func, FALSE);
+        g_return_val_if_fail(priv->nparam <= VARARG_PARAM_MAX, FALSE);
+        GwyFitTaskVectorFunc func = priv->vector_func;
+        gpointer data = priv->vector_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble v;
             if (!eval_vector_vararg(i, data, param, nparam, func, &v))
                 return FALSE;
+            if (priv->weight_data)
+                v *= priv->weight_data[i];
             r += v*v;
         }
     }
-    else if (fittask->type == VECTOR_ARRAY) {
-        g_return_val_if_fail(fittask->vector_vfunc, FALSE);
-        GwyFitTaskVectorVFunc vfunc = fittask->vector_vfunc;
-        gpointer data = fittask->vector_data;
+    else if (priv->type == VECTOR_ARRAY) {
+        g_return_val_if_fail(priv->vector_vfunc, FALSE);
+        GwyFitTaskVectorVFunc vfunc = priv->vector_vfunc;
+        gpointer data = priv->vector_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble v;
             if (!vfunc(i, data, &v, param))
                 return FALSE;
+            if (priv->weight_data)
+                v *= priv->weight_data[i];
             r += v*v;
         }
     }
@@ -678,12 +684,12 @@ fit_task_gradient(const gdouble *param,
                   gdouble *hessian,
                   gpointer user_data)
 {
-    FitTask *fittask = (FitTask*)user_data;
-    guint nparam = fittask->nparam;
-    const gboolean *fixed_param = fittask->fixed_param;
-    gdouble *h = fittask->h;
-    gdouble *mparam = fittask->mparam;
-    gdouble *diff = fittask->diff;
+    FitTask *priv = (FitTask*)user_data;
+    guint nparam = priv->nparam;
+    const gboolean *fixed_param = priv->fixed_param;
+    gdouble *h = priv->h;
+    gdouble *mparam = priv->mparam;
+    gdouble *diff = priv->diff;
     gwy_clear(gradient, nparam);
     gwy_clear(hessian, MATRIX_LEN(nparam));
 
@@ -691,19 +697,25 @@ fit_task_gradient(const gdouble *param,
     for (guint j = 0; j < nparam; j++)
         h[j] = param[j] ? 1e-5*fabs(param[j]) : 1e-9;
 
-    if (fittask->type == POINT_VARARG) {
-        g_return_val_if_fail(fittask->point_func, FALSE);
+    if (priv->type == POINT_VARARG) {
+        g_return_val_if_fail(priv->point_func, FALSE);
         g_return_val_if_fail(nparam <= VARARG_PARAM_MAX, FALSE);
-        GwyFitTaskPointFunc func = fittask->point_func;
-        const GwyXY *pts = fittask->point_data;
+        GwyFitTaskPointFunc func = priv->point_func;
+        const GwyXY *pts = priv->point_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble x = pts[i].x, y = pts[i].y, v;
             if (!eval_point_vararg(x, mparam, nparam, func, &v))
                 return FALSE;
             v -= y;
-            gdouble w = fittask->point_weight ? fittask->point_weight(x) : 1.0;
+
+            gdouble w = 1.0;
+            if (priv->weight_data)
+                w = priv->weight_data[i];
+            else if (priv->point_weight)
+                w = priv->point_weight(x);
             v *= w;
+
             for (guint j = 0; j < nparam; j++) {
                 if (fixed_param[j]) {
                     diff[j] = 0.0;
@@ -726,16 +738,22 @@ fit_task_gradient(const gdouble *param,
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
     }
-    else if (fittask->type == VECTOR_VARARG) {
-        g_return_val_if_fail(fittask->vector_func, FALSE);
+    else if (priv->type == VECTOR_VARARG) {
+        g_return_val_if_fail(priv->vector_func, FALSE);
         g_return_val_if_fail(nparam <= VARARG_PARAM_MAX, FALSE);
-        GwyFitTaskVectorFunc func = fittask->vector_func;
-        gpointer data = fittask->vector_data;
+        GwyFitTaskVectorFunc func = priv->vector_func;
+        gpointer data = priv->vector_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble v;
             if (!eval_vector_vararg(i, data, mparam, nparam, func, &v))
                 return FALSE;
+
+            gdouble w = 1.0;
+            if (priv->weight_data)
+                w = priv->weight_data[i];
+            v *= w;
+
             for (guint j = 0; j < nparam; j++) {
                 if (fixed_param[j]) {
                     diff[j] = 0.0;
@@ -753,35 +771,49 @@ fit_task_gradient(const gdouble *param,
                     return FALSE;
 
                 mparam[j] = param[j];
-                diff[j] = (vplus - vminus)/(2.0*h[j]);
+                diff[j] = w*(vplus - vminus)/(2.0*h[j]);
             }
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
     }
-    else if (fittask->type == VECTOR_ARRAY && fittask->vector_dfunc) {
-        g_return_val_if_fail(fittask->vector_vfunc, FALSE);
-        GwyFitTaskVectorVFunc vfunc = fittask->vector_vfunc;
-        GwyFitTaskVectorDFunc dfunc = fittask->vector_dfunc;
-        gpointer data = fittask->vector_data;
+    else if (priv->type == VECTOR_ARRAY && priv->vector_dfunc) {
+        g_return_val_if_fail(priv->vector_vfunc, FALSE);
+        GwyFitTaskVectorVFunc vfunc = priv->vector_vfunc;
+        GwyFitTaskVectorDFunc dfunc = priv->vector_dfunc;
+        gpointer data = priv->vector_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble v;
             if (!vfunc(i, data, &v, mparam))
                 return FALSE;
             if (!dfunc(i, data, fixed_param, diff, mparam))
                 return FALSE;
+
+            gdouble w = 1.0;
+            if (priv->weight_data)
+                w = priv->weight_data[i];
+            v *= w;
+            for (guint j = 0; j < nparam; j++)
+                diff[i] *= w;
+
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
     }
-    else if (fittask->type == VECTOR_ARRAY) {
-        g_return_val_if_fail(fittask->vector_vfunc, FALSE);
-        GwyFitTaskVectorVFunc vfunc = fittask->vector_vfunc;
-        gpointer data = fittask->vector_data;
+    else if (priv->type == VECTOR_ARRAY) {
+        g_return_val_if_fail(priv->vector_vfunc, FALSE);
+        GwyFitTaskVectorVFunc vfunc = priv->vector_vfunc;
+        gpointer data = priv->vector_data;
 
-        for (guint i = 0; i < fittask->ndata; i++) {
+        for (guint i = 0; i < priv->ndata; i++) {
             gdouble v;
             if (!vfunc(i, data, &v, mparam))
                 return FALSE;
+
+            gdouble w = 1.0;
+            if (priv->weight_data)
+                w = priv->weight_data[i];
+            v *= w;
+
             for (guint j = 0; j < nparam; j++) {
                 if (fixed_param[j]) {
                     diff[j] = 0.0;
@@ -799,7 +831,7 @@ fit_task_gradient(const gdouble *param,
                     return FALSE;
 
                 mparam[j] = param[j];
-                diff[j] = (vplus - vminus)/(2.0*h[j]);
+                diff[j] = w*(vplus - vminus)/(2.0*h[j]);
             }
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
@@ -828,6 +860,7 @@ gwy_fit_task_fit(GwyFitTask *fittask)
     g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     FitTask *priv = fittask->priv;
     ensure_fitter(priv);
+    g_assert(!(priv->weight_data && priv->point_weight));
     return gwy_fitter_fit(priv->fitter, priv);
 }
 
