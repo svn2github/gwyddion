@@ -24,13 +24,13 @@
 #include "libgwy/types.h"
 #include "libgwy/math-internal.h"
 
-enum { VARARG_PARAM_MAX = 5 };
+enum { VARARG_PARAM_MAX = 6 };
 
 typedef enum {
     NONE = 0,
-    POINT_VARARG,
-    VECTOR_VARARG,
-    VECTOR_ARRAY
+    POINT_VARARG,  // The fitted function gets x; and args on the stack.
+    VECTOR_VARARG, // The fitted function gets index; and args on the stack.
+    VECTOR_ARRAY   // The fitted function gets index; and args as an array.
 } GwyFitTaskInterfaceType;
 
 typedef gboolean (*GwyFitTaskPointFunc1)(gdouble x,
@@ -127,6 +127,8 @@ struct _GwyFitTaskPrivate {
     GwyFitTaskVectorVFunc vector_vfunc;
     GwyFitTaskVectorDFunc vector_dfunc;
     gpointer vector_data;
+    /* Both interfaces */
+    const gdouble *weight_data;
 };
 
 typedef struct _GwyFitTaskPrivate FitTask;
@@ -272,6 +274,8 @@ set_n_params(FitTask *fittask,
  * @function: Function to fit.
  *
  * Sets the point model function for a fit task.
+ *
+ * This function switches @fittask to the point fitting mode.
  **/
 void
 gwy_fit_task_set_point_func(GwyFitTask *fittask,
@@ -284,6 +288,7 @@ gwy_fit_task_set_point_func(GwyFitTask *fittask,
     FitTask *priv = fittask->priv;
 
     invalidate_vector_interface(priv);
+    priv->weight_data = NULL;
     priv->type = POINT_VARARG;
     set_n_params(priv, nparams);
     priv->point_func = function;
@@ -297,6 +302,9 @@ gwy_fit_task_set_point_func(GwyFitTask *fittask,
  * Sets the point model weight function for a fit task.
  *
  * Note the weight is applied to the differences, not to their squares.
+ *
+ * This method can only be used in the point fitting mode, i.e. after setting
+ * the point function with gwy_fit_task_set_point_func().
  **/
 void
 gwy_fit_task_set_point_weight_func(GwyFitTask *fittask,
@@ -308,6 +316,7 @@ gwy_fit_task_set_point_weight_func(GwyFitTask *fittask,
     invalidate_vector_interface(priv);
     g_return_if_fail(priv->type == POINT_VARARG);
     priv->point_weight = weight;
+    priv->weight_data = NULL;
 }
 
 /**
@@ -319,6 +328,10 @@ gwy_fit_task_set_point_weight_func(GwyFitTask *fittask,
  * @ndata: Number of data points.
  *
  * Sets the point data for a fit task.
+ *
+ * This method can be only used after setting the point function with
+ * gwy_fit_task_set_point_func().  Any weight data previously set with
+ * gwy_fit_task_set_weight_data() are forgotten.
  **/
 void
 gwy_fit_task_set_point_data(GwyFitTask *fittask,
@@ -329,9 +342,37 @@ gwy_fit_task_set_point_data(GwyFitTask *fittask,
     FitTask *priv = fittask->priv;
 
     invalidate_vector_interface(priv);
+    priv->weight_data = NULL;
     g_return_if_fail(priv->type == POINT_VARARG);
     priv->ndata = ndata;
     priv->point_data = data;
+}
+
+/**
+ * gwy_fit_task_set_weight_data:
+ * @fittask: A fitting task.
+ * @data: Point weight data.  An array of the same number of items as the data.
+ *        The data must exist during the lifetime of @fittask (or until another
+ *        data is set) as @fittask does not make a copy.
+ *
+ * Sets the point data for a fit task.
+ *
+ * This method can be used in any fitting mode.  However, the weight data are
+ * forgotten when the mode changed or the data to fit are set.  So setting the
+ * weight data is meaningful only after setting the function and data.  Any
+ * point weight function previously set with
+ * gwy_fit_task_set_point_weight_func() is forgotten.
+ **/
+void
+gwy_fit_task_set_weight_data(GwyFitTask *fittask,
+                             const gdouble *data)
+{
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
+    FitTask *priv = fittask->priv;
+
+    g_return_if_fail(priv->type);
+    priv->point_weight = NULL;
+    priv->weight_data = data;
 }
 
 /**
@@ -341,6 +382,8 @@ gwy_fit_task_set_point_data(GwyFitTask *fittask,
  * @function: Function to calculate theoretical minus fitted data differences.
  *
  * Sets the indexed-data model function for a fit task.
+ *
+ * This function switches @fittask to the vector fitting mode.
  **/
 void
 gwy_fit_task_set_vector_func(GwyFitTask *fittask,
@@ -355,6 +398,7 @@ gwy_fit_task_set_vector_func(GwyFitTask *fittask,
     invalidate_point_interface(priv);
     priv->vector_vfunc = NULL;
     priv->vector_dfunc = NULL;
+    priv->weight_data = NULL;
     priv->type = VECTOR_VARARG;
     set_n_params(priv, nparams);
     priv->vector_func = function;
@@ -369,6 +413,8 @@ gwy_fit_task_set_vector_func(GwyFitTask *fittask,
  *              It can be %NULL to use the built-in function.
  *
  * Sets the indexed-data model functions with parameter arrays for a fit task.
+ *
+ * This function switches @fittask to the vector fitting mode.
  **/
 void
 gwy_fit_task_set_vector_vfuncs(GwyFitTask *fittask,
@@ -382,6 +428,7 @@ gwy_fit_task_set_vector_vfuncs(GwyFitTask *fittask,
 
     invalidate_point_interface(priv);
     priv->vector_func = NULL;
+    priv->weight_data = NULL;
     priv->type = VECTOR_ARRAY;
     set_n_params(priv, nparams);
     priv->vector_vfunc = function;
@@ -395,6 +442,10 @@ gwy_fit_task_set_vector_vfuncs(GwyFitTask *fittask,
  * @ndata: Number of data points.
  *
  * Sets the indexed data for a fit task.
+ *
+ * This method can only be used in the vector fitting mode, i.e. after setting
+ * the vector function with either gwy_fit_task_set_vector_func() or
+ * gwy_fit_task_set_vector_vfuncs().
  **/
 void
 gwy_fit_task_set_vector_data(GwyFitTask *fittask,
@@ -405,6 +456,7 @@ gwy_fit_task_set_vector_data(GwyFitTask *fittask,
     FitTask *priv = fittask->priv;
 
     invalidate_point_interface(priv);
+    priv->weight_data = NULL;
     g_return_if_fail(priv->type == VECTOR_VARARG
                      || priv->type == VECTOR_ARRAY);
     priv->ndata = ndata;
@@ -514,11 +566,11 @@ eval_point_vararg(gdouble x, const gdouble *param, guint nparam,
                                            param[2], param[3]);
     if (nparam == 5)
         return ((GwyFitTaskPointFunc5)func)(x, retval, param[0], param[1],
-                                           param[2], param[3], param[5]);
+                                           param[2], param[3], param[4]);
     if (nparam == 6)
         return ((GwyFitTaskPointFunc6)func)(x, retval, param[0], param[1],
-                                           param[2], param[3], param[5],
-                                           param[6]);
+                                           param[2], param[3], param[4],
+                                           param[5]);
 
     g_return_val_if_reached(FALSE);
 }
@@ -542,11 +594,11 @@ eval_vector_vararg(guint i, gpointer data, const gdouble *param, guint nparam,
     if (nparam == 5)
         return ((GwyFitTaskVectorFunc5)func)(i, data, retval, param[0],
                                             param[1], param[2], param[3],
-                                            param[5]);
+                                            param[4]);
     if (nparam == 6)
         return ((GwyFitTaskVectorFunc6)func)(i, data, retval, param[0],
                                             param[1], param[2], param[3],
-                                            param[5], param[6]);
+                                            param[4], param[5]);
 
     g_return_val_if_reached(FALSE);
 }
