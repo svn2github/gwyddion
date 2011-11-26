@@ -1167,8 +1167,8 @@ gwy_field_grain_row_acf(const GwyField *field,
         grain_row_acf(field, bbox->col, bbox->row, bbox->width, bbox->height,
                       mask, masking, level,
                       fftr, fftc, accum_data, accum_mask);
-        row_accumulate(total_data, accum_data, width);
-        row_accumulate(total_mask, accum_mask, width);
+        row_accumulate(total_data, accum_data, bbox->width);
+        row_accumulate(total_mask, accum_mask, bbox->width);
     }
 
     row_divide_nonzero(total_data, total_mask, line->data, line->res);
