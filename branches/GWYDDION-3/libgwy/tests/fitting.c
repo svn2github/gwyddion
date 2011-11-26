@@ -187,8 +187,8 @@ test_fit_task_point(void)
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     GwyXY *data = make_gaussian_data(param[0], param[1], param[2], param[3],
                                      ndata, 42);
-    gwy_fit_task_set_point_function
-        (fittask, nparam, (GwyFitTaskPointFunc)gaussian_point);
+    gwy_fit_task_set_point_func(fittask, nparam,
+                                (GwyFitTaskPointFunc)gaussian_point);
     gwy_fit_task_set_point_data(fittask, data, ndata);
     gwy_fitter_set_params(fitter, param_init);
     check_fit(fittask, param);
@@ -206,8 +206,8 @@ test_fit_task_fixed(void)
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     GwyXY *data = make_gaussian_data(param[0], param[1], param[2], param[3],
                                      ndata, 42);
-    gwy_fit_task_set_point_function
-        (fittask, nparam, (GwyFitTaskPointFunc)gaussian_point);
+    gwy_fit_task_set_point_func(fittask, nparam,
+                                (GwyFitTaskPointFunc)gaussian_point);
     gwy_fit_task_set_point_data(fittask, data, ndata);
     for (guint i = 0; i < nparam; i++) {
         gwy_fitter_set_params(fitter, param_init);
@@ -241,8 +241,8 @@ test_fit_task_vector(void)
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     GwyXY *data = make_gaussian_data(param[0], param[1], param[2], param[3],
                                      ndata, 42);
-    gwy_fit_task_set_vector_function
-        (fittask, nparam, (GwyFitTaskVectorFunc)gaussian_vector);
+    gwy_fit_task_set_vector_func(fittask, nparam,
+                                 (GwyFitTaskVectorFunc)gaussian_vector);
     gwy_fit_task_set_vector_data(fittask, data, ndata);
     gwy_fitter_set_params(fitter, param_init);
     check_fit(fittask, param);
@@ -260,8 +260,8 @@ test_fit_task_vfunc(void)
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     GwyXY *data = make_gaussian_data(param[0], param[1], param[2], param[3],
                                      ndata, 42);
-    gwy_fit_task_set_vector_vfunction
-        (fittask, nparam, (GwyFitTaskVectorVFunc)gaussian_vfunc, NULL);
+    gwy_fit_task_set_vector_vfuncs(fittask, nparam,
+                                   (GwyFitTaskVectorVFunc)gaussian_vfunc, NULL);
     gwy_fit_task_set_vector_data(fittask, data, ndata);
     gwy_fitter_set_params(fitter, param_init);
     check_fit(fittask, param);

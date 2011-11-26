@@ -752,8 +752,8 @@ update_fit_task(GwyFitFunc *fitfunc)
     FitFunc *priv = fitfunc->priv;
     if (!priv->fittask) {
         priv->fittask = gwy_fit_task_new();
-        gwy_fit_task_set_vector_vfunction(priv->fittask, get_nparams(fitfunc),
-                                          fit_func_vfunc, NULL);
+        gwy_fit_task_set_vector_vfuncs(priv->fittask, get_nparams(fitfunc),
+                                       fit_func_vfunc, NULL);
     }
     gwy_fit_task_set_vector_data(priv->fittask, fitfunc, priv->npoints);
 }

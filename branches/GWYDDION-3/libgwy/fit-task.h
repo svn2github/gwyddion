@@ -77,7 +77,7 @@ struct _GwyFitTaskClass {
 guint       gwy_fit_task_get_max_vararg_params(void);
 GType       gwy_fit_task_get_type             (void)                              G_GNUC_CONST;
 GwyFitTask* gwy_fit_task_new                  (void)                              G_GNUC_MALLOC;
-void        gwy_fit_task_set_point_function   (GwyFitTask *fittask,
+void        gwy_fit_task_set_point_func   (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskPointFunc function);
 void        gwy_fit_task_set_point_weight     (GwyFitTask *fittask,
@@ -85,10 +85,10 @@ void        gwy_fit_task_set_point_weight     (GwyFitTask *fittask,
 void        gwy_fit_task_set_point_data       (GwyFitTask *fittask,
                                                const GwyXY *data,
                                                guint ndata);
-void        gwy_fit_task_set_vector_function  (GwyFitTask *fittask,
+void        gwy_fit_task_set_vector_func  (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskVectorFunc function);
-void        gwy_fit_task_set_vector_vfunction (GwyFitTask *fittask,
+void        gwy_fit_task_set_vector_vfuncs (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskVectorVFunc function,
                                                GwyFitTaskVectorDFunc derivative);

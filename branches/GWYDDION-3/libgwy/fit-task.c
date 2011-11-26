@@ -217,8 +217,7 @@ ensure_fitter(FitTask *fittask)
         return;
 
     fittask->fitter = gwy_fitter_new();
-    gwy_fitter_set_functions(fittask->fitter,
-                             fit_task_residuum, fit_task_gradient);
+    gwy_fitter_set_funcs(fittask->fitter, fit_task_residuum, fit_task_gradient);
 }
 
 /* The values would not confuse us when using the current interface but we
@@ -267,7 +266,7 @@ set_n_params(FitTask *fittask,
 }
 
 /**
- * gwy_fit_task_set_point_function:
+ * gwy_fit_task_set_point_func:
  * @fittask: A fitting task.
  * @nparams: Number of function parameters.
  * @function: Function to fit.
@@ -275,9 +274,9 @@ set_n_params(FitTask *fittask,
  * Sets the point model function for a fit task.
  **/
 void
-gwy_fit_task_set_point_function(GwyFitTask *fittask,
-                                guint nparams,
-                                GwyFitTaskPointFunc function)
+gwy_fit_task_set_point_func(GwyFitTask *fittask,
+                            guint nparams,
+                            GwyFitTaskPointFunc function)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(nparams > 0);
@@ -336,7 +335,7 @@ gwy_fit_task_set_point_data(GwyFitTask *fittask,
 }
 
 /**
- * gwy_fit_task_set_vector_function:
+ * gwy_fit_task_set_vector_func:
  * @fittask: A fitting task.
  * @nparams: Number of function parameters.
  * @function: Function to calculate theoretical minus fitted data differences.
@@ -344,9 +343,9 @@ gwy_fit_task_set_point_data(GwyFitTask *fittask,
  * Sets the indexed-data model function for a fit task.
  **/
 void
-gwy_fit_task_set_vector_function(GwyFitTask *fittask,
-                                 guint nparams,
-                                 GwyFitTaskVectorFunc function)
+gwy_fit_task_set_vector_func(GwyFitTask *fittask,
+                             guint nparams,
+                             GwyFitTaskVectorFunc function)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(nparams > 0);
@@ -362,7 +361,7 @@ gwy_fit_task_set_vector_function(GwyFitTask *fittask,
 }
 
 /**
- * gwy_fit_task_set_vector_vfunction:
+ * gwy_fit_task_set_vector_vfuncs:
  * @fittask: A fitting task.
  * @nparams: Number of function parameters.
  * @function: Function to calculate theoretical minus fitted data differences.
@@ -372,10 +371,10 @@ gwy_fit_task_set_vector_function(GwyFitTask *fittask,
  * Sets the indexed-data model functions with parameter arrays for a fit task.
  **/
 void
-gwy_fit_task_set_vector_vfunction(GwyFitTask *fittask,
-                                  guint nparams,
-                                  GwyFitTaskVectorVFunc function,
-                                  GwyFitTaskVectorDFunc derivative)
+gwy_fit_task_set_vector_vfuncs(GwyFitTask *fittask,
+                               guint nparams,
+                               GwyFitTaskVectorVFunc function,
+                               GwyFitTaskVectorDFunc derivative)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(nparams > 0);
@@ -1020,7 +1019,7 @@ gwy_fit_task_chi(GwyFitTask *fittask)
  *
  * Since #GwyFitTask supplies its own evaluation methods and controls the
  * number of parameters, the low-level #GwyFitter setup methods
- * gwy_fitter_set_functions() and gwy_fitter_set_n_params() must not be used
+ * gwy_fitter_set_funcs() and gwy_fitter_set_n_params() must not be used
  * on its fitter obtained with gwy_fit_task_get_fitter().
  * Neither you can use gwy_fitter_fit() and gwy_fitter_eval_residuum() as you
  * cannot pass the correct @user_data; use gwy_fit_task_fit() and
@@ -1047,7 +1046,7 @@ gwy_fit_task_chi(GwyFitTask *fittask)
  *     GwyFitTask *fittask = gwy_fit_task_new();
  *     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
  *
- *     gwy_fit_task_set_point_function(fittask, 4, (GwyFitTaskPointFunc)gaussian);
+ *     gwy_fit_task_set_point_func(fittask, 4, (GwyFitTaskPointFunc)gaussian);
  *     gwy_fitter_set_params(fitter, param);
  *     gwy_fit_task_set_point_data(fittask, data, ndata);
  *     if (!gwy_fit_task_fit(fittask))
@@ -1083,7 +1082,7 @@ gwy_fit_task_chi(GwyFitTask *fittask)
  *
  * Although the formal function type has a variable number of arguments the
  * particular functions are expected to take exactly @nparams parameter
- * arguments (where @nparams is set in gwy_fit_task_set_point_function()).
+ * arguments (where @nparams is set in gwy_fit_task_set_point_func()).
  *
  * The maximum number of parameters for the point model functions is given
  * by gwy_fit_task_get_max_vararg_params().
@@ -1113,7 +1112,7 @@ gwy_fit_task_chi(GwyFitTask *fittask)
  *
  * Although the formal function type has a variable number of arguments the
  * particular functions are expected to take exactly @nparams parameter
- * arguments (where @nparams is set in gwy_fit_task_set_point_function()).
+ * arguments (where @nparams is set in gwy_fit_task_set_point_func()).
  *
  * The maximum number of parameters for the point model functions is given
  * by gwy_fit_task_get_max_vararg_params().

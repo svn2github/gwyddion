@@ -84,7 +84,7 @@ void       gwy_fitter_set_params     (GwyFitter *fitter,
                                       const gdouble *params);
 gboolean   gwy_fitter_get_params     (GwyFitter *fitter,
                                       gdouble *params);
-void       gwy_fitter_set_functions  (GwyFitter *fitter,
+void       gwy_fitter_set_funcs      (GwyFitter *fitter,
                                       GwyFitterResiduumFunc eval_residuum,
                                       GwyFitterGradientFunc eval_gradient);
 void       gwy_fitter_set_constraint (GwyFitter *fitter,

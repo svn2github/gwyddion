@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -739,7 +739,7 @@ gwy_fitter_iter_number(GwyFitter *fitter)
 }
 
 /**
- * gwy_fitter_set_functions:
+ * gwy_fitter_set_funcs:
  * @fitter: A non-linear least-squares fitter.
  * @eval_residuum: Function to calculate the sum of squares.
  * @eval_gradient: Function to calculate the gradient and Hessian.
@@ -751,9 +751,9 @@ gwy_fitter_iter_number(GwyFitter *fitter)
  * the data to fit.  See #GwyFitTask for the high-level interface.
  **/
 void
-gwy_fitter_set_functions(GwyFitter *fitter,
-                         GwyFitterResiduumFunc eval_residuum,
-                         GwyFitterGradientFunc eval_gradient)
+gwy_fitter_set_funcs(GwyFitter *fitter,
+                     GwyFitterResiduumFunc eval_residuum,
+                     GwyFitterGradientFunc eval_gradient)
 
 {
     g_return_if_fail(GWY_IS_FITTER(fitter));
@@ -783,7 +783,7 @@ gwy_fitter_set_constraint(GwyFitter *fitter,
 /**
  * gwy_fitter_fit:
  * @fitter: A non-linear least-squares fitter.
- * @user_data: Data passed to functions defined in gwy_fitter_set_functions().
+ * @user_data: Data passed to functions defined in gwy_fitter_set_funcs().
  *
  * Performs a non-linear least-squares fit with a fitter.
  *
@@ -832,7 +832,7 @@ gwy_fitter_residuum(GwyFitter *fitter)
 /**
  * gwy_fitter_eval_residuum:
  * @fitter: A non-linear least-squares fitter.
- * @user_data: Data passed to functions defined in gwy_fitter_set_functions().
+ * @user_data: Data passed to functions defined in gwy_fitter_set_funcs().
  *
  * Calculates the sum of squares of a fitter.
  *
