@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -98,39 +98,25 @@ check_fit(GwyFitTask *fittask,
     g_assert(gwy_fit_task_fit(fittask));
     gdouble res = gwy_fitter_residuum(fitter);
     g_assert_cmpfloat(res, >, 0.0);
-    g_assert_cmpfloat(res, <, 0.01*res_init);
+    g_assert_cmpfloat(res, <, 0.05*res_init);
     gdouble param_final[nparam];
     g_assert(gwy_fitter_get_params(fitter, param_final));
     /* Conservative result check */
     gdouble eps = 0.2;
-    g_assert_cmpfloat(fabs(param_final[0] - param_good[0]),
-                      <=,
-                      eps*fabs(param_good[0]));
-    g_assert_cmpfloat(fabs(param_final[1] - param_good[1]),
-                      <=,
-                      eps*fabs(param_good[1]));
-    g_assert_cmpfloat(fabs(param_final[2] - param_good[2]),
-                      <=,
-                      eps*fabs(param_good[2]));
-    g_assert_cmpfloat(fabs(param_final[3] - param_good[3]),
-                      <=,
-                      eps*fabs(param_good[3]));
+    for (guint i = 0; i < nparam; i++) {
+        g_assert_cmpfloat(fabs(param_final[i] - param_good[i]),
+                          <=,
+                          eps*fabs(param_good[i]));
+    }
     /* Error estimate check */
     gdouble error[nparam];
-    eps = 0.3;
+    eps = 1.0;
     g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
-    g_assert_cmpfloat(fabs((param_final[0] - param_good[0])/error[0]),
-                      <=,
-                      1.0 + eps);
-    g_assert_cmpfloat(fabs((param_final[1] - param_good[1])/error[1]),
-                      <=,
-                      1.0 + eps);
-    g_assert_cmpfloat(fabs((param_final[2] - param_good[2])/error[2]),
-                      <=,
-                      1.0 + eps);
-    g_assert_cmpfloat(fabs((param_final[3] - param_good[3])/error[3]),
-                      <=,
-                      1.0 + eps);
+    for (guint i = 0; i < nparam; i++) {
+        g_assert_cmpfloat(fabs((param_final[i] - param_good[i])/error[i]),
+                          <=,
+                          1.0 + eps);
+    }
 }
 
 void
@@ -265,6 +251,209 @@ test_fit_task_vfunc(void)
     gwy_fit_task_set_vector_data(fittask, data, ndata);
     gwy_fitter_set_params(fitter, param_init);
     check_fit(fittask, param);
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+static gboolean
+const_point(G_GNUC_UNUSED gdouble x,
+            gdouble *retval,
+            gdouble a)
+{
+    *retval = a;
+    return TRUE;
+}
+
+static gboolean
+const_vector(guint i,
+             gpointer user_data,
+             gdouble *retval,
+             gdouble a)
+{
+    GwyXY *pts = (GwyXY*)user_data;
+    *retval = a - pts[i].y;
+    return TRUE;
+}
+
+static gboolean
+const_vfunc(guint i,
+            gpointer user_data,
+            gdouble *retval,
+            const gdouble *params)
+{
+    GwyXY *pts = (GwyXY*)user_data;
+    *retval = params[0] - pts[i].y;
+    return TRUE;
+}
+
+#define SPLIT_AT 0.5
+
+static GwyXY*
+make_split_const_data(gdouble a1,
+                      gdouble a2,
+                      gdouble split_at,
+                      guint ndata,
+                      guint seed)
+{
+    GRand *rng = g_rand_new_with_seed(seed);
+    GwyXY *data = g_new(GwyXY, ndata);
+    gdouble noise = 0.15*hypot(a1, a2);
+    for (guint i = 0; i < ndata; i++) {
+        data[i].x = g_rand_double(rng);
+        const_point(data[i].x, &data[i].y, data[i].x < split_at ? a1 : a2);
+        data[i].y += g_rand_double_range(rng, -noise, noise);
+    }
+    g_rand_free(rng);
+    return data;
+}
+
+static gdouble*
+make_split_const_weight(const GwyXY *data,
+                        guint ndata,
+                        gdouble split_at,
+                        gboolean first)
+{
+    gdouble *weight = g_new(gdouble, ndata);
+    for (guint i = 0; i < ndata; i++)
+        weight[i] = first ^ (data[i].x >= split_at);
+    return weight;
+}
+
+static gdouble
+weight_point1(gdouble x)
+{
+    return x < SPLIT_AT;
+}
+
+static gdouble
+weight_point2(gdouble x)
+{
+    return x >= SPLIT_AT;
+}
+
+/* Elementary tests whether weighting works at all.  We fit each segmenet of a
+ * piecewise-constant function with a constant by giving part of the data the
+ * weight of 1 and the rest weight of 0. */
+void
+test_fit_task_weight_func(void)
+{
+    enum { nparam = 1, ndata = 100 };
+    const gdouble a1 = -2.4, a2 = 1.3;
+    const gdouble param_init[nparam] = { 0.5*(a1 + a2) };
+    gdouble param[nparam];
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyXY *data = make_split_const_data(a1, a2, SPLIT_AT, ndata, 42);
+    gwy_fit_task_set_point_func(fittask, nparam,
+                                (GwyFitTaskPointFunc)const_point);
+    gwy_fit_task_set_point_data(fittask, data, ndata);
+
+    gwy_fit_task_set_point_weight_func(fittask, weight_point1);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a1;
+    check_fit(fittask, param);
+
+    gwy_fit_task_set_point_weight_func(fittask, weight_point2);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a2;
+    check_fit(fittask, param);
+
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+void
+test_fit_task_weight_data_point(void)
+{
+    enum { nparam = 1, ndata = 100 };
+    const gdouble a1 = -2.4, a2 = 1.3;
+    const gdouble param_init[nparam] = { 0.5*(a1 + a2) };
+    gdouble param[nparam];
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyXY *data = make_split_const_data(a1, a2, SPLIT_AT, ndata, 42);
+    gwy_fit_task_set_point_func(fittask, nparam,
+                                (GwyFitTaskPointFunc)const_point);
+    gwy_fit_task_set_point_data(fittask, data, ndata);
+
+    gdouble *weight1 = make_split_const_weight(data, ndata, SPLIT_AT, TRUE);
+    gwy_fit_task_set_weight_data(fittask, weight1);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a1;
+    check_fit(fittask, param);
+    g_free(weight1);
+
+    gdouble *weight2 = make_split_const_weight(data, ndata, SPLIT_AT, FALSE);
+    gwy_fit_task_set_weight_data(fittask, weight2);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a2;
+    check_fit(fittask, param);
+    g_free(weight2);
+
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+void
+test_fit_task_weight_data_vector(void)
+{
+    enum { nparam = 1, ndata = 100 };
+    const gdouble a1 = -2.4, a2 = 1.3;
+    const gdouble param_init[nparam] = { 0.5*(a1 + a2) };
+    gdouble param[nparam];
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyXY *data = make_split_const_data(a1, a2, SPLIT_AT, ndata, 42);
+    gwy_fit_task_set_vector_func(fittask, nparam,
+                                 (GwyFitTaskVectorFunc)const_vector);
+    gwy_fit_task_set_vector_data(fittask, data, ndata);
+
+    gdouble *weight1 = make_split_const_weight(data, ndata, SPLIT_AT, TRUE);
+    gwy_fit_task_set_weight_data(fittask, weight1);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a1;
+    check_fit(fittask, param);
+    g_free(weight1);
+
+    gdouble *weight2 = make_split_const_weight(data, ndata, SPLIT_AT, FALSE);
+    gwy_fit_task_set_weight_data(fittask, weight2);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a2;
+    check_fit(fittask, param);
+    g_free(weight2);
+
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+void
+test_fit_task_weight_data_vfunc(void)
+{
+    enum { nparam = 1, ndata = 100 };
+    const gdouble a1 = -2.4, a2 = 1.3;
+    const gdouble param_init[nparam] = { 0.5*(a1 + a2) };
+    gdouble param[nparam];
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyXY *data = make_split_const_data(a1, a2, SPLIT_AT, ndata, 42);
+    gwy_fit_task_set_vector_vfuncs(fittask, nparam,
+                                   (GwyFitTaskVectorVFunc)const_vfunc, NULL);
+    gwy_fit_task_set_vector_data(fittask, data, ndata);
+
+    gdouble *weight1 = make_split_const_weight(data, ndata, SPLIT_AT, TRUE);
+    gwy_fit_task_set_weight_data(fittask, weight1);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a1;
+    check_fit(fittask, param);
+    g_free(weight1);
+
+    gdouble *weight2 = make_split_const_weight(data, ndata, SPLIT_AT, FALSE);
+    gwy_fit_task_set_weight_data(fittask, weight2);
+    gwy_fitter_set_params(fitter, param_init);
+    param[0] = a2;
+    check_fit(fittask, param);
+    g_free(weight2);
+
     g_free(data);
     g_object_unref(fittask);
 }

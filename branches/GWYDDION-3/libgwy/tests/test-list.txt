@@ -55,6 +55,10 @@ fit-task/point
 fit-task/vector
 fit-task/vfunc
 fit-task/fixed
+fit-task/weight/func
+fit-task/weight/data/point
+fit-task/weight/data/vector
+fit-task/weight/data/vfunc
 serialize/simple
 serialize/data
 serialize/nested
