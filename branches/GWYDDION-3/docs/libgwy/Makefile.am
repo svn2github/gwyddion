@@ -22,7 +22,7 @@ HTML_IMAGES = \
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
-content_files =
+content_files = builtin-fit-func.xml
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
@@ -35,3 +35,15 @@ include $(top_srcdir)/build/gwy-doc.make
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
 EXTRA_DIST +=
+
+# Specialised introspection programs
+AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
+AM_CFLAGS =  $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
+AM_LDFLAGS = $(LIBGWY_DEPS_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy3.la
+CLEANFILES += builtin-fit-func.xml
+
+noinst_PROGRAMS = fit-funcs
+fit_funcs_SOURCES = fit-funcs.c
+
+builtin-fit-func.xml: fit-funcs$(EXEEXT)
+	$(LIBTOOL) --mode=execute ./fit-funcs$(EXEEXT) >builtin-fit-func.xml
