@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,13 +25,16 @@
  *
  ***************************************************************************/
 
-// Note for units testing we put [x] = [m], [y] = [s].
+// Note for units testing we put [x] = [m], [y] = [s]^ypower.  The power is
+// present because the natural parametres of some functions (ACF, HHCF) are
+// expressed using roots of y-units.  Pass ypower=1 for common functions.
 static void
 fit_func_one(const gchar *name,
              const gchar *group,
              guint expected_nparams,
              const gchar* const *param_names,
-             const gchar* const *param_units)
+             const gchar* const *param_units,
+             gint ypower)
 {
     enum { ndata = 500 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -154,6 +157,8 @@ fit_func_one(const gchar *name,
     /* Units */
     GwyUnit *unit_x = gwy_unit_new_from_string("m", NULL);
     GwyUnit *unit_y = gwy_unit_new_from_string("s", NULL);
+    gwy_unit_power(unit_y, unit_y, ypower);
+
     for (guint i = 0; i < nparams; i++) {
         guint j = param_map[i];
         GwyUnit *units = gwy_fit_func_param_unit(fitfunc, j, unit_x, unit_y);
@@ -178,7 +183,7 @@ test_fit_func_builtin_constant(void)
     const gchar *param_names[] = { "a" };
     const gchar *param_units[] = { "s" };
     fit_func_one("Constant", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 }
 
 void
@@ -187,7 +192,7 @@ test_fit_func_builtin_exponential(void)
     const gchar *param_names[] = { "a", "b", "y₀" };
     const gchar *param_units[] = { "s", "m", "s" };
     fit_func_one("Exponential", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 }
 
 void
@@ -196,7 +201,7 @@ test_fit_func_builtin_gaussian(void)
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Gaussian", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 }
 
 void
@@ -205,7 +210,7 @@ test_fit_func_builtin_exponential_two_side(void)
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Exponential (two-side)", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 }
 
 void
@@ -214,7 +219,7 @@ test_fit_func_builtin_lorentzian(void)
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Lorentzian", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 }
 
 void
@@ -245,7 +250,7 @@ test_fit_func_user(void)
     gwy_fit_param_set_power_x(b, -1);
     gwy_fit_param_set_power_y(b, 1);
     fit_func_one("TESTLIBGWY Linear", "User",
-                 G_N_ELEMENTS(param_names), param_names, param_units);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 
     GwyFitFunc *fitfunc = gwy_fit_func_new("TESTLIBGWY Linear");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
