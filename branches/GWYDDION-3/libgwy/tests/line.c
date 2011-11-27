@@ -45,7 +45,7 @@ line_randomize(GwyLine *line,
         *d = g_rand_double(rng);
 }
 
-static void
+void
 line_assert_equal(const GwyLine *result,
                   const GwyLine *reference)
 {

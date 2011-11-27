@@ -68,6 +68,8 @@ void          field_assert_numerically_equal(const GwyField *result,
                                              gdouble eps);
 void          line_randomize                (GwyLine *field,
                                              GRand *rng);
+void          line_assert_equal             (const GwyLine *result,
+                                             const GwyLine *reference);
 void          line_assert_numerically_equal (const GwyLine *result,
                                              const GwyLine *reference,
                                              gdouble eps);

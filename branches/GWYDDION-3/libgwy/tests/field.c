@@ -2753,11 +2753,11 @@ cf_dumb(const GwyField *field,
         const GwyMaskField *mask,
         GwyMaskingType masking,
         gboolean level,
-        gboolean do_hhcf)
+        gboolean do_hhcf,
+        GwyLine *weights)
 {
     GwyField *part = gwy_field_new_part(field, fpart, FALSE);
     GwyLine *cf = gwy_line_new_sized(part->xres, TRUE);
-    GwyLine *weights = gwy_line_new_sized(part->xres, TRUE);
 
     GwyMaskField *mpart = NULL;
     if (mask && masking != GWY_MASK_IGNORE)
@@ -2765,6 +2765,10 @@ cf_dumb(const GwyField *field,
 
     if (level)
         level_for_cf(part, mpart, masking);
+
+    gwy_line_set_size(weights, part->xres, TRUE);
+    weights->real = gwy_field_dx(field)*weights->res;
+    weights->off = -0.5*gwy_field_dx(field);
 
     for (guint i = 0; i < part->yres; i++) {
         const gdouble *row = part->data + i*part->xres;
@@ -2792,7 +2796,6 @@ cf_dumb(const GwyField *field,
     for (guint k = 0; k < part->xres; k++)
         cf->data[k] = weights->data[k] ? cf->data[k]/weights->data[k] : 0.0;
     g_object_unref(part);
-    g_object_unref(weights);
 
     return cf;
 }
@@ -2813,28 +2816,39 @@ test_field_distributions_acf_full(void)
 
             field_randomize(field, rng);
 
+            GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new();
             GwyLine *acf = gwy_field_row_acf(field,
                                              NULL, NULL, GWY_MASK_IGNORE, lvl,
-                                             NULL);
+                                             weights);
             GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
+            GwyLine *weights0 = gwy_line_new();
             GwyLine *acf0 = gwy_field_row_acf(field, NULL,
                                               mask, GWY_MASK_EXCLUDE, lvl,
-                                              NULL);
+                                              weights0);
             gwy_mask_field_fill(mask, NULL, TRUE);
+            GwyLine *weights1 = gwy_line_new();
             GwyLine *acf1 = gwy_field_row_acf(field, NULL,
                                               mask, GWY_MASK_INCLUDE, lvl,
-                                              NULL);
+                                              weights1);
             GwyLine *dumb_acf = cf_dumb(field, NULL,
-                                        NULL, GWY_MASK_IGNORE, lvl, FALSE);
+                                        NULL, GWY_MASK_IGNORE, lvl, FALSE,
+                                        dumb_weights);
 
             line_assert_numerically_equal(acf, dumb_acf, 1e-13);
             line_assert_numerically_equal(acf0, dumb_acf, 1e-13);
             line_assert_numerically_equal(acf1, dumb_acf, 1e-13);
+            line_assert_equal(weights, dumb_weights);
+            line_assert_equal(weights0, dumb_weights);
+            line_assert_equal(weights1, dumb_weights);
 
             g_object_unref(acf);
             g_object_unref(acf1);
             g_object_unref(acf0);
             g_object_unref(dumb_acf);
+            g_object_unref(weights);
+            g_object_unref(weights1);
+            g_object_unref(weights0);
+            g_object_unref(dumb_weights);
             g_object_unref(mask);
             g_object_unref(field);
         }
@@ -2860,25 +2874,34 @@ test_field_distributions_acf_masked(void)
             field_randomize(field, rng);
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new(),
+                    *weights0 = gwy_line_new(), *dumb_weights0 = gwy_line_new(),
+                    *weights1 = gwy_line_new(), *dumb_weights1 = gwy_line_new();
             GwyLine *acf = gwy_field_row_acf(field, NULL,
                                              mask, GWY_MASK_IGNORE, lvl,
-                                             NULL);
+                                             weights);
             GwyLine *acf0 = gwy_field_row_acf(field, NULL,
                                               mask, GWY_MASK_EXCLUDE, lvl,
-                                              NULL);
+                                              weights0);
             GwyLine *acf1 = gwy_field_row_acf(field, NULL,
                                               mask, GWY_MASK_INCLUDE, lvl,
-                                              NULL);
+                                              weights1);
             GwyLine *dumb_acf = cf_dumb(field, NULL,
-                                        mask, GWY_MASK_IGNORE, lvl, FALSE);
+                                        mask, GWY_MASK_IGNORE, lvl, FALSE,
+                                        dumb_weights);
             GwyLine *dumb_acf0 = cf_dumb(field, NULL,
-                                         mask, GWY_MASK_EXCLUDE, lvl, FALSE);
+                                         mask, GWY_MASK_EXCLUDE, lvl, FALSE,
+                                         dumb_weights0);
             GwyLine *dumb_acf1 = cf_dumb(field, NULL,
-                                         mask, GWY_MASK_INCLUDE, lvl, FALSE);
+                                         mask, GWY_MASK_INCLUDE, lvl, FALSE,
+                                         dumb_weights1);
 
             line_assert_numerically_equal(acf, dumb_acf, 1e-13);
             line_assert_numerically_equal(acf0, dumb_acf0, 1e-13);
             line_assert_numerically_equal(acf1, dumb_acf1, 1e-13);
+            line_assert_equal(weights, dumb_weights);
+            line_assert_equal(weights0, dumb_weights0);
+            line_assert_equal(weights1, dumb_weights1);
 
             g_object_unref(acf);
             g_object_unref(acf0);
@@ -2886,6 +2909,12 @@ test_field_distributions_acf_masked(void)
             g_object_unref(dumb_acf);
             g_object_unref(dumb_acf0);
             g_object_unref(dumb_acf1);
+            g_object_unref(weights);
+            g_object_unref(weights0);
+            g_object_unref(weights1);
+            g_object_unref(dumb_weights);
+            g_object_unref(dumb_weights0);
+            g_object_unref(dumb_weights1);
             g_object_unref(mask);
             g_object_unref(field);
         }
@@ -2916,25 +2945,34 @@ test_field_distributions_acf_partial(void)
             GwyFieldPart fpart = { col, row, width, height };
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new(),
+                    *weights0 = gwy_line_new(), *dumb_weights0 = gwy_line_new(),
+                    *weights1 = gwy_line_new(), *dumb_weights1 = gwy_line_new();
             GwyLine *acf = gwy_field_row_acf(field, &fpart,
                                              mask, GWY_MASK_IGNORE, lvl,
-                                             NULL);
+                                             weights);
             GwyLine *acf0 = gwy_field_row_acf(field, &fpart,
                                               mask, GWY_MASK_EXCLUDE, lvl,
-                                              NULL);
+                                              weights0);
             GwyLine *acf1 = gwy_field_row_acf(field, &fpart,
                                               mask, GWY_MASK_INCLUDE, lvl,
-                                              NULL);
+                                              weights1);
             GwyLine *dumb_acf = cf_dumb(field, &fpart,
-                                        mask, GWY_MASK_IGNORE, lvl, FALSE);
+                                        mask, GWY_MASK_IGNORE, lvl, FALSE,
+                                        dumb_weights);
             GwyLine *dumb_acf0 = cf_dumb(field, &fpart,
-                                         mask, GWY_MASK_EXCLUDE, lvl, FALSE);
+                                         mask, GWY_MASK_EXCLUDE, lvl, FALSE,
+                                         dumb_weights0);
             GwyLine *dumb_acf1 = cf_dumb(field, &fpart,
-                                         mask, GWY_MASK_INCLUDE, lvl, FALSE);
+                                         mask, GWY_MASK_INCLUDE, lvl, FALSE,
+                                         dumb_weights1);
 
             line_assert_numerically_equal(acf, dumb_acf, 1e-13);
             line_assert_numerically_equal(acf0, dumb_acf0, 1e-13);
             line_assert_numerically_equal(acf1, dumb_acf1, 1e-13);
+            line_assert_equal(weights, dumb_weights);
+            line_assert_equal(weights0, dumb_weights0);
+            line_assert_equal(weights1, dumb_weights1);
 
             g_object_unref(acf);
             g_object_unref(acf0);
@@ -2942,6 +2980,12 @@ test_field_distributions_acf_partial(void)
             g_object_unref(dumb_acf);
             g_object_unref(dumb_acf0);
             g_object_unref(dumb_acf1);
+            g_object_unref(weights);
+            g_object_unref(weights0);
+            g_object_unref(weights1);
+            g_object_unref(dumb_weights);
+            g_object_unref(dumb_weights0);
+            g_object_unref(dumb_weights1);
             g_object_unref(mask);
             g_object_unref(field);
         }
@@ -2966,27 +3010,38 @@ test_field_distributions_hhcf_full(void)
 
             field_randomize(field, rng);
 
+            GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new();
             GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
                                                NULL, GWY_MASK_IGNORE, lvl,
-                                               NULL);
+                                               weights);
             GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
+            GwyLine *weights0 = gwy_line_new();
             GwyLine *hhcf0 = gwy_field_row_hhcf(field, NULL,
                                                 mask, GWY_MASK_EXCLUDE, lvl,
-                                                NULL);
+                                                weights0);
             gwy_mask_field_fill(mask, NULL, TRUE);
+            GwyLine *weights1 = gwy_line_new();
             GwyLine *hhcf1 = gwy_field_row_hhcf(field, NULL,
                                                 mask, GWY_MASK_INCLUDE, lvl,
-                                                NULL);
+                                                weights1);
             GwyLine *dumb_hhcf = cf_dumb(field, NULL,
-                                         NULL, GWY_MASK_IGNORE, lvl, TRUE);
+                                         NULL, GWY_MASK_IGNORE, lvl, TRUE,
+                                         dumb_weights);
 
             line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
             line_assert_numerically_equal(hhcf0, dumb_hhcf, 1e-13);
             line_assert_numerically_equal(hhcf1, dumb_hhcf, 1e-13);
+            line_assert_equal(weights, dumb_weights);
+            line_assert_equal(weights0, dumb_weights);
+            line_assert_equal(weights1, dumb_weights);
 
             g_object_unref(hhcf);
             g_object_unref(hhcf1);
             g_object_unref(hhcf0);
+            g_object_unref(weights);
+            g_object_unref(weights1);
+            g_object_unref(weights0);
+            g_object_unref(dumb_weights);
             g_object_unref(dumb_hhcf);
             g_object_unref(mask);
             g_object_unref(field);
@@ -3013,25 +3068,34 @@ test_field_distributions_hhcf_masked(void)
             field_randomize(field, rng);
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new(),
+                    *weights0 = gwy_line_new(), *dumb_weights0 = gwy_line_new(),
+                    *weights1 = gwy_line_new(), *dumb_weights1 = gwy_line_new();
             GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
                                                mask, GWY_MASK_IGNORE, lvl,
-                                               NULL);
+                                               weights);
             GwyLine *hhcf0 = gwy_field_row_hhcf(field, NULL,
                                                 mask, GWY_MASK_EXCLUDE, lvl,
-                                                NULL);
+                                                weights0);
             GwyLine *hhcf1 = gwy_field_row_hhcf(field, NULL,
                                                 mask, GWY_MASK_INCLUDE, lvl,
-                                                NULL);
+                                                weights1);
             GwyLine *dumb_hhcf = cf_dumb(field, NULL,
-                                         mask, GWY_MASK_IGNORE, lvl, TRUE);
+                                         mask, GWY_MASK_IGNORE, lvl, TRUE,
+                                         dumb_weights);
             GwyLine *dumb_hhcf0 = cf_dumb(field, NULL,
-                                          mask, GWY_MASK_EXCLUDE, lvl, TRUE);
+                                          mask, GWY_MASK_EXCLUDE, lvl, TRUE,
+                                          dumb_weights0);
             GwyLine *dumb_hhcf1 = cf_dumb(field, NULL,
-                                          mask, GWY_MASK_INCLUDE, lvl, TRUE);
+                                          mask, GWY_MASK_INCLUDE, lvl, TRUE,
+                                          dumb_weights1);
 
             line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
             line_assert_numerically_equal(hhcf0, dumb_hhcf0, 1e-13);
             line_assert_numerically_equal(hhcf1, dumb_hhcf1, 1e-13);
+            line_assert_equal(weights, dumb_weights);
+            line_assert_equal(weights0, dumb_weights0);
+            line_assert_equal(weights1, dumb_weights1);
 
             g_object_unref(hhcf);
             g_object_unref(hhcf0);
@@ -3039,6 +3103,12 @@ test_field_distributions_hhcf_masked(void)
             g_object_unref(dumb_hhcf);
             g_object_unref(dumb_hhcf0);
             g_object_unref(dumb_hhcf1);
+            g_object_unref(weights);
+            g_object_unref(weights0);
+            g_object_unref(weights1);
+            g_object_unref(dumb_weights);
+            g_object_unref(dumb_weights0);
+            g_object_unref(dumb_weights1);
             g_object_unref(mask);
             g_object_unref(field);
         }
@@ -3069,25 +3139,34 @@ test_field_distributions_hhcf_partial(void)
             GwyFieldPart fpart = { col, row, width, height };
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new(),
+                    *weights0 = gwy_line_new(), *dumb_weights0 = gwy_line_new(),
+                    *weights1 = gwy_line_new(), *dumb_weights1 = gwy_line_new();
             GwyLine *hhcf = gwy_field_row_hhcf(field, &fpart,
                                                mask, GWY_MASK_IGNORE, lvl,
-                                               NULL);
+                                               weights);
             GwyLine *hhcf0 = gwy_field_row_hhcf(field, &fpart,
                                                 mask, GWY_MASK_EXCLUDE, lvl,
-                                                NULL);
+                                                weights0);
             GwyLine *hhcf1 = gwy_field_row_hhcf(field, &fpart,
                                                 mask, GWY_MASK_INCLUDE, lvl,
-                                                NULL);
+                                                weights1);
             GwyLine *dumb_hhcf = cf_dumb(field, &fpart,
-                                         mask, GWY_MASK_IGNORE, lvl, TRUE);
+                                         mask, GWY_MASK_IGNORE, lvl, TRUE,
+                                         dumb_weights);
             GwyLine *dumb_hhcf0 = cf_dumb(field, &fpart,
-                                          mask, GWY_MASK_EXCLUDE, lvl, TRUE);
+                                          mask, GWY_MASK_EXCLUDE, lvl, TRUE,
+                                          dumb_weights0);
             GwyLine *dumb_hhcf1 = cf_dumb(field, &fpart,
-                                          mask, GWY_MASK_INCLUDE, lvl, TRUE);
+                                          mask, GWY_MASK_INCLUDE, lvl, TRUE,
+                                          dumb_weights1);
 
             line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
             line_assert_numerically_equal(hhcf0, dumb_hhcf0, 1e-13);
             line_assert_numerically_equal(hhcf1, dumb_hhcf1, 1e-13);
+            line_assert_equal(weights, dumb_weights);
+            line_assert_equal(weights0, dumb_weights0);
+            line_assert_equal(weights1, dumb_weights1);
 
             g_object_unref(hhcf);
             g_object_unref(hhcf0);
@@ -3095,6 +3174,12 @@ test_field_distributions_hhcf_partial(void)
             g_object_unref(dumb_hhcf);
             g_object_unref(dumb_hhcf0);
             g_object_unref(dumb_hhcf1);
+            g_object_unref(weights);
+            g_object_unref(weights0);
+            g_object_unref(weights1);
+            g_object_unref(dumb_weights);
+            g_object_unref(dumb_weights0);
+            g_object_unref(dumb_weights1);
             g_object_unref(mask);
             g_object_unref(field);
         }
