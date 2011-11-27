@@ -89,15 +89,17 @@ if test "x$ac_cv_prog_cc_c99" = xno; then
 fi
 
 GWY_PROG_CC_OPTIONS([MATH],[-fexcess-precision=fast -fno-math-errno -fstrict-overflow])
+#GWY_PROG_CC_OPTIONS([OPTIMIZE],[-flto -O3])
 GWY_PROG_CC_OPTIONS([WARNINGS],[-Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wredundant-decls -Wlogical-op -Werror=implicit-function-declaration -Werror=implicit-int])
 
-GWY_CFLAGS="$GWY_PROG_CC_MATH $GWY_PROG_CC_WARNINGS"
+GWY_CFLAGS="$GWY_PROG_CC_MATH $GWY_PROG_CC_WARNINGS $GWY_PROG_CC_OPTIMIZE"
 AC_SUBST([GWY_CFLAGS])
 
 # We may want to make this controlled by a configure option
 GWY_PROG_CCLD_OPTION([SYMBOLIC_FUNCTIONS],[-Wl,-Bsymbolic-functions])
+#GWY_PROG_CCLD_OPTION([OPTIMIZE],[-flto -O3])
 
-GWY_LIBRARY_LDFLAGS="$GWY_PROG_CCLD_SYMBOLIC_FUNCTIONS"
+GWY_LIBRARY_LDFLAGS="$GWY_PROG_CCLD_SYMBOLIC_FUNCTIONS $GWY_PROG_CCLD_OPTIMIZE"
 AC_SUBST([GWY_LIBRARY_LDFLAGS])
 
 AC_CHECK_SIZEOF([double])
@@ -121,11 +123,11 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.17])
 AC_SUBST(GETTEXT_PACKAGE)
 
-IT_PROG_INTLTOOL([0.40],[no-xml])
+IT_PROG_INTLTOOL([0.41],[no-xml])
 
 #############################################################################
 # Gtk-doc
-GTK_DOC_CHECK([1.11])
+GTK_DOC_CHECK([1.17])
 
 #############################################################################
 # Python
