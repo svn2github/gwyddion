@@ -2,7 +2,7 @@
 DOMAIN = @domain@
 subdir = @subdir@
 top_builddir = ..
-XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
+XGETTEXT_OPTIONS = --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2
 COPYRIGHT_HOLDER = David Nečas (Yeti) and others
 MSGID_BUGS_ADDRESS = yeti@gwyddion.net
 EXTRA_LOCALE_CATEGORIES =
