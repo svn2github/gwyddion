@@ -147,8 +147,13 @@ fit_func_one(const gchar *name,
 
     /* Error estimate check */
     gdouble error[nparams];
-    eps = 0.5;
+    eps = 1.0;
     g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
+    if (g_test_verbose()) {
+        for (guint i = 0; i < nparams; i++)
+            g_printerr("Estimated error %s = %g\n",
+                       gwy_fit_func_param_name(fitfunc, i), error[i]);
+    }
     for (guint i = 0; i < nparams; i++) {
         g_assert_cmpfloat(error[i], >=, 0.0);
         g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, (1.0 + eps)*error[i]);
@@ -220,6 +225,24 @@ test_fit_func_builtin_lorentzian(void)
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Lorentzian", "Elementary",
                  G_N_ELEMENTS(param_names), param_names, param_units, 1);
+}
+
+void
+test_fit_func_builtin_acf_gaussian(void)
+{
+    const gchar *param_names[] = { "σ", "T" };
+    const gchar *param_units[] = { "s", "m" };
+    fit_func_one("ACF Gaussian", "Autocorrelation",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2);
+}
+
+void
+test_fit_func_builtin_acf_exponential(void)
+{
+    const gchar *param_names[] = { "σ", "T" };
+    const gchar *param_units[] = { "s", "m" };
+    fit_func_one("ACF Exponential", "Autocorrelation",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2);
 }
 
 void

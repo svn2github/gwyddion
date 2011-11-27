@@ -344,6 +344,8 @@ fit-func/builtin/exponential
 fit-func/builtin/exponential-two-side
 fit-func/builtin/gaussian
 fit-func/builtin/lorentzian
+fit-func/builtin/acf-gaussian
+fit-func/builtin/acf-exponential
 fit-func/user
 # Finalisation tests, should go last.
 fft/save-wisdom
