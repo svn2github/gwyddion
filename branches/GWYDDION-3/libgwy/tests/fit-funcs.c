@@ -200,6 +200,24 @@ test_fit_func_builtin_gaussian(void)
 }
 
 void
+test_fit_func_builtin_exponential_two_side(void)
+{
+    const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
+    const gchar *param_units[] = { "s", "m", "m", "s" };
+    fit_func_one("Exponential (two-side)", "Elementary",
+                 G_N_ELEMENTS(param_names), param_names, param_units);
+}
+
+void
+test_fit_func_builtin_lorentzian(void)
+{
+    const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
+    const gchar *param_units[] = { "s", "m", "m", "s" };
+    fit_func_one("Lorentzian", "Elementary",
+                 G_N_ELEMENTS(param_names), param_names, param_units);
+}
+
+void
 test_fit_func_user(void)
 {
     const gchar *param_names[] = { "a", "b" };

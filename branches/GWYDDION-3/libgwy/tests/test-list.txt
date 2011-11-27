@@ -341,7 +341,9 @@ user-fit-func/serialize
 user-fit-func/inventory
 fit-func/builtin/constant
 fit-func/builtin/exponential
+fit-func/builtin/exponential-two-side
 fit-func/builtin/gaussian
+fit-func/builtin/lorentzian
 fit-func/user
 # Finalisation tests, should go last.
 fft/save-wisdom
