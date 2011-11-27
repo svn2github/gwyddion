@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/fit-func.h"
@@ -53,7 +53,7 @@ const_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc const_builtin = {
-    .group = "Elementary",
+    .group = NC_("function group", "Elementary"),
     .formula = "<i>a</i>",
     .nparams = G_N_ELEMENTS(const_param),
     .param = const_param,
@@ -110,8 +110,8 @@ exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc exp_builtin = {
-    .group = "Elementary",
-    .formula = "= <i>y</i>₀ + <i>a</i> exp(<i>x</i>/<i>b</i>)",
+    .group = NC_("function group", "Elementary"),
+    .formula = "<i>y</i>₀ + <i>a</i> exp(<i>x</i>/<i>b</i>)",
     .nparams = G_N_ELEMENTS(exp_param),
     .param = exp_param,
     .function = exp_function,
@@ -124,49 +124,50 @@ static const BuiltinFitFunc exp_builtin = {
  *
  ****************************************************************************/
 
+static const FitFuncParam peak_param[] = {
+   { "x₀", 1, 0, },
+   { "y₀", 0, 1, },
+   { "a",  0, 1, },
+   { "b",  1, 0, },
+};
+
 static gboolean
 two_exp_function(gdouble x,
                  const gdouble *param,
                  gdouble *v)
 {
-    gdouble y0_ = param[0], a = param[1], b = param[2];
-    *v = a*exp(-fabs(x)/b) + y0_;
+    gdouble x0 = param[0], y0_ = param[1], a = param[2], b = param[3];
+    gdouble u = (x - x0)/b;
+    *v = a*exp(-fabs(u)) + y0_;
     return b != 0;
 }
 
-// TODO: Make it work with the negative branch
 static gboolean
 two_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
                  G_GNUC_UNUSED guint npoints,
                  const gdouble *estim,
                  gdouble *param)
 {
-    gdouble ymin = estim[ESTIMATOR_YMIN], ymax = estim[ESTIMATOR_YMAX];
-    if (ymin == ymax) {
-        param[0] = 0.0;
-        param[1] = ymin;
-        param[2] = 10*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+    if (!estim[ESTIMATOR_HWPEAK]) {
+        param[0] = estim[ESTIMATOR_XMID];
+        param[1] = estim[ESTIMATOR_YMIN];
+        param[2] = 0.0;
+        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
-    gdouble s = estim[ESTIMATOR_YMEAN];
-    s -= (2.0*s < ymin + ymax) ? ymin : ymax;
-
-    gdouble xymin = estim[ESTIMATOR_XYMIN], xymax = estim[ESTIMATOR_XYMAX];
-    s *= xymax - xymin;
-
-    param[2] = s/(ymax - ymin);
-    param[1] = (ymax - ymin)/(exp(xymax/param[2]) - exp(xymin/param[2]));
-    param[0] = ymin - param[1]*exp(xymin/param[2]);
-    param[2] = -param[2];
+    param[0] = estim[ESTIMATOR_XPEAK];
+    param[1] = estim[ESTIMATOR_Y0PEAK];
+    param[2] = estim[ESTIMATOR_APEAK];
+    param[3] = 1.44*estim[ESTIMATOR_HWPEAK];
     return TRUE;
 }
 
 static const BuiltinFitFunc two_exp_builtin = {
-    .group = "Elementary",
-    .formula = "= <i>y</i>₀ + <i>a</i> exp(-|<i>x</i>|/<i>b</i>)",
-    .nparams = G_N_ELEMENTS(exp_param),
-    .param = exp_param,
+    .group = NC_("function group", "Elementary"),
+    .formula = "<i>y</i>₀ + <i>a</i> exp(-|<i>x</i> - <i>x</i>₀|/<i>b</i>)",
+    .nparams = G_N_ELEMENTS(peak_param),
+    .param = peak_param,
     .function = two_exp_function,
     .estimate = two_exp_estimate,
 };
@@ -177,21 +178,14 @@ static const BuiltinFitFunc two_exp_builtin = {
  *
  ****************************************************************************/
 
-static const FitFuncParam gauss_param[] = {
-   { "x₀", 1, 0, },
-   { "y₀", 0, 1, },
-   { "a",  0, 1, },
-   { "b",  1, 0, },
-};
-
 static gboolean
 gauss_function(gdouble x,
                const gdouble *param,
                gdouble *v)
 {
     gdouble x0 = param[0], y0_ = param[1], a = param[2], b = param[3];
-    gdouble t = (x - x0)/b;
-    *v = a*exp(-t*t) + y0_;
+    gdouble u = (x - x0)/b;
+    *v = a*exp(-u*u) + y0_;
     return b != 0;
 }
 
@@ -217,12 +211,59 @@ gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc gauss_builtin = {
-    .group = "Elementary",
-    .formula = "= <i>y</i>₀ + <i>a</i> exp[−(<i>x</i> − <i>x</i>₀)²/<i>b</i>²]",
-    .nparams = G_N_ELEMENTS(gauss_param),
-    .param = gauss_param,
+    .group = NC_("function group", "Elementary"),
+    .formula = "<i>y</i>₀ + <i>a</i> exp[−(<i>x</i> − <i>x</i>₀)²/<i>b</i>²]",
+    .nparams = G_N_ELEMENTS(peak_param),
+    .param = peak_param,
     .function = gauss_function,
     .estimate = gauss_estimate,
+};
+
+/****************************************************************************
+ *
+ * Lorentzian
+ *
+ ****************************************************************************/
+
+static gboolean
+lorentz_function(gdouble x,
+                 const gdouble *param,
+                 gdouble *v)
+{
+    gdouble x0 = param[0], y0_ = param[1], a = param[2], b = param[3];
+    gdouble u = (x - x0)/b;
+    *v = a/(1.0 + u*u) + y0_;
+    return b != 0;
+}
+
+static gboolean
+lorentz_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                 G_GNUC_UNUSED guint npoints,
+                 const gdouble *estim,
+                 gdouble *param)
+{
+    if (!estim[ESTIMATOR_HWPEAK]) {
+        param[0] = estim[ESTIMATOR_XMID];
+        param[1] = estim[ESTIMATOR_YMIN];
+        param[2] = 0.0;
+        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        return FALSE;
+    }
+
+    param[0] = estim[ESTIMATOR_XPEAK];
+    param[1] = estim[ESTIMATOR_Y0PEAK];
+    param[2] = estim[ESTIMATOR_APEAK];
+    param[3] = estim[ESTIMATOR_HWPEAK];
+    return TRUE;
+}
+
+static const BuiltinFitFunc lorentz_builtin = {
+    .group = NC_("function group", "Elementary"),
+    .formula = "<i>y</i>₀ + <i>ab</i>²/((<i>x</i> - <i>x</i>₀)² + <i>b</i>²)",
+    .nparams = G_N_ELEMENTS(peak_param),
+    .param = peak_param,
+    .function = lorentz_function,
+    .estimate = lorentz_estimate,
 };
 
 /****************************************************************************
@@ -287,8 +328,8 @@ acf_exp_estimate(const GwyXY *pts,
 }
 
 static const BuiltinFitFunc acf_exp_builtin = {
-    .group = "Autocorrelation",
-    .formula = "= <i>σ</i>² exp(<i>x</i>/<i>T</i>)",
+    .group = NC_("function group", "Autocorrelation"),
+    .formula = "<i>σ</i>² exp(<i>x</i>/<i>T</i>)",
     .nparams = G_N_ELEMENTS(acf_param),
     .param = acf_param,
     .function = acf_exp_function,
@@ -335,8 +376,8 @@ acf_gauss_estimate(const GwyXY *pts,
 }
 
 static const BuiltinFitFunc acf_gauss_builtin = {
-    .group = "Autocorrelation",
-    .formula = "= <i>σ</i>² exp(−<i>x</i>²/<i>b</i>²)",
+    .group = NC_("function group", "Autocorrelation"),
+    .formula = "<i>σ</i>² exp(−<i>x</i>²/<i>b</i>²)",
     .nparams = G_N_ELEMENTS(acf_param),
     .param = acf_param,
     .function = acf_gauss_function,
@@ -359,12 +400,13 @@ _gwy_fit_func_setup_builtins(void)
     GHashTable *builtins;
 
     builtins = g_hash_table_new(g_str_hash, g_str_equal);
-    add_builtin("Constant", const_builtin);
-    add_builtin("Exponential", exp_builtin);
-    add_builtin("Exponential (two-side)", two_exp_builtin);
-    add_builtin("Gaussian", gauss_builtin);
-    add_builtin("ACF Exponential", acf_exp_builtin);
-    add_builtin("ACF Gaussian", acf_gauss_builtin);
+    add_builtin(NC_("function", "Constant"), const_builtin);
+    add_builtin(NC_("function", "Exponential"), exp_builtin);
+    add_builtin(NC_("function", "Exponential (two-side)"), two_exp_builtin);
+    add_builtin(NC_("function", "Gaussian"), gauss_builtin);
+    add_builtin(NC_("function", "Lorentzian"), lorentz_builtin);
+    add_builtin(NC_("function", "ACF Exponential"), acf_exp_builtin);
+    add_builtin(NC_("function", "ACF Gaussian"), acf_gauss_builtin);
     return builtins;
 }
 
