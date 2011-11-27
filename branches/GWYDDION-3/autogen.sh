@@ -4,6 +4,9 @@
 # You can override the default tool choice by setting AUTOCONF, etc.
 # These should be bare executables, options go to AUTOCONF_FLAGS, etc.
 
+# Avoid the exact string that identifies generated files.
+generated=GENERATED
+
 # Get required version of a maintainer tool from configure.ac.  This ensures
 # the version required here and in configure.ac is the same.
 # Expected format: MACRO([VERSION...]) or MACRO(VERSION...)
@@ -35,6 +38,8 @@ get_version() {
 # find it, try also TOOL-MAJOR.MINOR (hello BSD).  Note cmd and othercmds are
 # names of variables, i.e. indirect references, as we may need to change the
 # variables contents to the versioned name.
+# TODO: Use compgen or a similar mechanism (if available) to find also newer
+# tools named TOOL-MAJOR.MINOR, not just the exact version.
 check_tool() {
   local name=$1
   local cmd=$2
@@ -185,8 +190,9 @@ for subdir in $podirs; do
   else
     rm -f $subdir/Makefile.in.in~
   fi
+  echo "# This is a $generated file.  Created by autogen.sh" >$subdir/Makevars
   sed -e "s#@domain@#$domain#" -e "s#@subdir@#$subdir#" \
-      build/Makevars.in >$subdir/Makevars
+      build/Makevars.in >>$subdir/Makevars
 done
 
 # Finally we can run configure
