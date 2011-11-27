@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -889,6 +889,34 @@ _gwy_fit_func_new_expr_with_constants(void)
     gwy_expr_define_constant(expr, "pi", G_PI, NULL);
     gwy_expr_define_constant(expr, "π", G_PI, NULL);
     return expr;
+}
+
+static void
+add_name(gpointer key, G_GNUC_UNUSED gpointer value, gpointer user_data)
+{
+    GPtrArray *list = (GPtrArray*)user_data;
+    g_ptr_array_add(list, key);
+}
+
+/**
+ * gwy_fit_func_list_builtins:
+ *
+ * Obtain the list of all built-in fitting function names.
+ *
+ * Returns: (transfer container) (array zero-terminated=1):
+ *          A newly allocated %NULL-terminated list with function names.
+ *          The caller must free the list with g_free() but not the individual
+ *          names.
+ **/
+const gchar**
+gwy_fit_func_list_builtins(void)
+{
+    GPtrArray *names = g_ptr_array_new();
+    gpointer klass = g_type_class_ref(GWY_TYPE_FIT_FUNC);
+    g_hash_table_foreach(builtin_functions, &add_name, names);
+    g_ptr_array_add(names, NULL);
+    g_type_class_unref(klass);
+    return (const gchar**)g_ptr_array_free(names, FALSE);
 }
 
 /************************** Documentation ****************************/
