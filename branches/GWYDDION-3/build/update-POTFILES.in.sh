@@ -45,7 +45,7 @@ for m in $POTFILES_map; do
   podir=${m%:*}
   srcdir=${m#*:}
   files="$(find $srcdir -name \*.\[ch\] \
-           | xargs egrep -l '\<[QNC]?_\(|\<[a-z_]{,5}gettext\(' \
+           | xargs egrep -l '\<(_|Q_|N_|C_|NC_|[a-z_]{,5}gettext)\(' \
            | sort)"
   for subdir in $subdirs; do
     echo "# $srcdir" >>$subdir/POTFILES.in.new
