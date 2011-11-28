@@ -8,7 +8,7 @@ if len(sys.argv) < 3:
 found_init = set()
 ok = True
 for line in file(sys.argv[1]):
-    m = re.match(r'^\s*g_type_class_peek\s*\(GWY_TYPE_(?P<TYPENAME>\w+)\);\s*$',
+    m = re.match(r'^\s*g_type_class_peek(?:_static)?\s*\(GWY_TYPE_(?P<TYPENAME>\w+)\);\s*$',
                  line)
     if m:
         found_init.add(m.group('TYPENAME'))
