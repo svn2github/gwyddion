@@ -35,27 +35,6 @@ enum {
     N_PROPS
 };
 
-struct _GwyGrainValuePrivate {
-    gchar *name;
-
-    gboolean is_valid;  // Set to %TRUE if the function actually exists.
-
-    guint ngrains;
-    gdouble *values;
-    GwyUnit *unit;
-
-    // Exactly one of builtin/resource is set
-    const BuiltinGrainValue *builtin;
-    GwyUserGrainValue *resource;
-
-    // User values only
-    GwyExpr *expr;
-    gulong data_changed_id;
-    gulong notify_name_id;
-};
-
-typedef struct _GwyGrainValuePrivate GrainValue;
-
 static void gwy_grain_value_constructed (GObject *object);
 static void gwy_grain_value_dispose     (GObject *object);
 static void gwy_grain_value_finalize    (GObject *object);
