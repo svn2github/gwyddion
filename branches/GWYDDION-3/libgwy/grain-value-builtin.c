@@ -363,6 +363,46 @@ calc_surface_area(GwyGrainValue *grainvalue,
 }
 
 static void
+calc_half_height_area(GwyGrainValue *grainvalue,
+                      const GwyGrainValue *mingrainvalue,
+                      const GwyGrainValue *maxgrainvalue,
+                      const guint *grains,
+                      const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(priv->builtin
+                     && priv->builtin->id == GWY_GRAIN_VALUE_HALF_HEIGHT_AREA);
+    guint nn = field->xres * field->yres;
+    gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
+    guint ngrains = priv->ngrains;
+    gdouble *values = priv->values;
+    const gdouble *d = field->data;
+    const gdouble *min = mingrainvalue->priv->values;
+    const gdouble *max = maxgrainvalue->priv->values;
+
+    // Find the grain half-heights, i.e. (z_min + z_max)/2.
+    gdouble *zhalf = g_new(gdouble, ngrains + 1);
+    for (guint gno = 0; gno <= ngrains; gno++)
+        zhalf[gno] = 0.5*(min[gno] + max[gno]);
+
+    // Calculate the area of pixels above the half-heights.
+    guint *zhsizes = g_new0(guint, ngrains + 1);
+    for (guint k = 0; k < nn; k++) {
+        guint gno = grains[k];
+        if (d[k] >= zhalf[gno])
+            zhsizes[gno]++;
+    }
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] = dxdy*zhsizes[gno];
+
+    g_free(zhalf);
+    g_free(zhsizes);
+}
+
+static void
 calc_median(GwyGrainValue *grainvalue,
             const guint *grains,
             const guint *sizes,
@@ -408,6 +448,111 @@ calc_median(GwyGrainValue *grainvalue,
     g_free(csizes);
     g_free(pos);
     g_free(tmp);
+}
+
+static void
+calc_flat_boundary_length(GwyGrainValue *grainvalue,
+                          const guint *grains,
+                          const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(priv->builtin
+                     && priv->builtin->id == GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH);
+    guint xres = field->xres, yres = field->yres;
+    gdouble dx = gwy_field_dx(field);
+    gdouble dy = gwy_field_dy(field);
+    gdouble diag = hypot(dx, dy);
+    gdouble *values = priv->values;
+
+    // Note the cycles go to xres and yres inclusive as we calculate the
+    // boundary, not pixel interiors.
+    for (guint i = 0; i <= yres; i++) {
+        for (guint j = 0; j <= xres; j++) {
+            // Hope the compiler will optimize this mess...
+            guint g1 = (i > 0 && j > 0) ? grains[i*xres + j - xres - 1] : 0;
+            guint g2 = (i > 0 && j < xres) ? grains[i*xres + j - xres] : 0;
+            guint g3 = (i < yres && j > 0) ? grains[i*xres + j - 1] : 0;
+            guint g4 = (i < yres && j < xres) ? grains[i*xres + j] : 0;
+            guint f = (g1 > 0) + (g2 > 0) + (g3 > 0) + (g4 > 0);
+            if (f == 0 || f == 4)
+                continue;
+
+            if (f == 1 || f == 3) {
+                // Try to avoid too many if-thens by using the fact they
+                // are all either zero or an identical value.
+                values[g1 | g2 | g3 | g4] += diag/2.0;
+            }
+            else if (g1 && g4) {
+                // This works for both g1 == g4 and g1 != g4.
+                values[g1] += diag/2.0;
+                values[g4] += diag/2.0;
+            }
+            else if (g2 && g3) {
+                // This works for both g2 == g3 and g2 != g3.
+                values[g2] += diag/2.0;
+                values[g3] += diag/2.0;
+            }
+            else if (g1 == g2)
+                values[g1 | g3] += dx;
+            else if (g1 == g3)
+                values[g1 | g2] += dy;
+            else {
+                g_assert_not_reached();
+            }
+        }
+    }
+}
+
+static void
+calc_boundary_extrema(GwyGrainValue *mingrainvalue,
+                      GwyGrainValue *maxgrainvalue,
+                      const guint *grains,
+                      const GwyField *field)
+{
+    if (!mingrainvalue && !maxgrainvalue)
+        return;
+
+    GrainValue *minpriv = NULL, *maxpriv = NULL;
+    gdouble *minvalues = NULL, *maxvalues = NULL;
+
+    if (mingrainvalue) {
+        minpriv = mingrainvalue->priv;
+        g_return_if_fail(minpriv->builtin
+                         && minpriv->builtin->id == GWY_GRAIN_VALUE_BOUNDARY_MINIMUM);
+        minvalues = minpriv->values;
+    }
+    if (maxgrainvalue) {
+        maxpriv = maxgrainvalue->priv;
+        g_return_if_fail(maxpriv->builtin
+                         && maxpriv->builtin->id == GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM);
+        maxvalues = maxpriv->values;
+    }
+    guint xres = field->xres, yres = field->yres;
+    const gdouble *d = field->data;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, d++) {
+            guint gno = grains[i*xres + j];
+            if (!gno)
+                continue;
+
+            if (i && j && i < yres-1 && j < xres - 1
+                && grains[(i - 1)*xres + j] == gno
+                && grains[i*xres + j - 1] == gno
+                && grains[i*xres + j + 1] == gno
+                && grains[(i + 1)*xres + j] == gno)
+                continue;
+
+            gdouble z = *d;
+            if (minvalues && z < minvalues[gno])
+                minvalues[gno] = z;
+            if (maxvalues && z > maxvalues[gno])
+                maxvalues[gno] = z;
+        }
+    }
 }
 
 void
@@ -557,109 +702,18 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     calc_equiv_disc_radius(ourvalues[GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS],
                            field, sizes);
     calc_surface_area(ourvalues[GWY_GRAIN_VALUE_SURFACE_AREA], grains, field);
+    calc_half_height_area(ourvalues[GWY_GRAIN_VALUE_HALF_HEIGHT_AREA],
+                          ourvalues[GWY_GRAIN_VALUE_MINIMUM],
+                          ourvalues[GWY_GRAIN_VALUE_MAXIMUM],
+                          grains, field);
     calc_median(ourvalues[GWY_GRAIN_VALUE_MEDIAN], grains, sizes, field);
+    calc_flat_boundary_length(ourvalues[GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH],
+                              grains, field);
+    calc_boundary_extrema(ourvalues[GWY_GRAIN_VALUE_BOUNDARY_MINIMUM],
+                          ourvalues[GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM],
+                          grains, field);
 
 #if 0
-    if ((p = quantity_data[GWY_GRAIN_VALUE_HALF_HEIGHT_AREA])) {
-        gdouble *zhalf;
-        guint *zhsizes;
-
-        /* Find the grain half-heights, i.e. (z_min + z_max)/2, first */
-        zhalf = g_new(gdouble, ngrains + 1);
-        for (gno = 0; gno <= ngrains; gno++)
-            zhalf[gno] = (min[gno] + max[gno])/2.0;
-        /* Calculate the area of pixels above the half-heights */
-        zhsizes = g_new0(gint, ngrains + 1);
-        for (k = 0; k < nn; k++) {
-            gno = grains[k];
-            if (d[k] >= zhalf[gno])
-                zhsizes[gno]++;
-        }
-        for (gno = 0; gno <= ngrains; gno++)
-            p[gno] = dxdy*zhsizes[gno];
-        /* Finalize */
-        g_free(zhalf);
-        g_free(zhsizes);
-    }
-    if ((p = quantity_data[GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH])) {
-        gwy_clear(p, ngrains + 1);
-        /* Note the cycles go to xres and yres inclusive as we calculate the
-         * boundary, not pixel interiors. */
-        for (i = 0; i <= yres; i++) {
-            for (j = 0; j <= xres; j++) {
-                gint g1, g2, g3, g4, f;
-
-                /* Hope compiler will optimize this mess... */
-                g1 = (i > 0 && j > 0) ? grains[i*xres + j - xres - 1] : 0;
-                g2 = (i > 0 && j < xres) ? grains[i*xres + j - xres] : 0;
-                g3 = (i < yres && j > 0) ? grains[i*xres + j - 1] : 0;
-                g4 = (i < yres && j < xres) ? grains[i*xres + j] : 0;
-                f = (g1 > 0) + (g2 > 0) + (g3 > 0) + (g4 > 0);
-                if (f == 0 || f == 4)
-                    continue;
-
-                if (f == 1 || f == 3) {
-                    /* Try to avoid too many if-thens by using the fact they
-                     * are all either zero or an identical value */
-                    p[g1 | g2 | g3 | g4] += diag/2.0;
-                }
-                else if (g1 && g4) {
-                    /* This works for both g1 == g4 and g1 != g4 */
-                    p[g1] += diag/2.0;
-                    p[g4] += diag/2.0;
-                }
-                else if (g2 && g3) {
-                    /* This works for both g2 == g3 and g2 != g3 */
-                    p[g2] += diag/2.0;
-                    p[g3] += diag/2.0;
-                }
-                else if (g1 == g2)
-                    p[g1 | g3] += dx;
-                else if (g1 == g3)
-                    p[g1 | g2] += dy;
-                else {
-                    g_assert_not_reached();
-                }
-            }
-        }
-    }
-    if (quantity_data[GWY_GRAIN_VALUE_BOUNDARY_MINIMUM]
-        || quantity_data[GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM]) {
-        gdouble *pmin = quantity_data[GWY_GRAIN_VALUE_BOUNDARY_MINIMUM];
-        gdouble *pmax = quantity_data[GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM];
-
-        if (pmin) {
-            for (gno = 0; gno <= ngrains; gno++)
-                pmin[gno] = G_MAXDOUBLE;
-        }
-        if (pmax) {
-            for (gno = 0; gno <= ngrains; gno++)
-                pmax[gno] = -G_MAXDOUBLE;
-        }
-
-        for (i = 0; i < yres; i++) {
-            for (j = 0; j < xres; j++) {
-                gdouble z;
-
-                /* Processing of the none-grain boundary is waste of time. */
-                if (!(gno = grains[i*xres + j]))
-                    continue;
-
-                if (i && j && i < yres-1 && j < xres - 1
-                    && grains[(i - 1)*xres + j] == gno
-                    && grains[i*xres + j - 1] == gno
-                    && grains[i*xres + j + 1] == gno
-                    && grains[(i + 1)*xres + j] == gno)
-                    continue;
-
-                z = d[i*xres + j];
-                if (pmin && z < pmin[gno])
-                    pmin[gno] = z;
-                if (pmax && z > pmax[gno])
-                    pmax[gno] = z;
-            }
-        }
-    }
     if (quantity_data[GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE]
         || quantity_data[GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE]
         || quantity_data[GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE]
