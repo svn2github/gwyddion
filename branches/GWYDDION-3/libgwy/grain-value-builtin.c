@@ -37,6 +37,12 @@ enum {
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
 };
 
+// Must be signed, we use signed differences.
+typedef struct {
+    gint i;
+    gint j;
+} GridPoint;
+
 // TODO: Move this to builtin_table.
 static const guint value_dependences[GWY_GRAIN_NVALUES] = {
     NEED_XVALUE,                  /* centre x */
@@ -715,6 +721,290 @@ calc_boundary_extrema(GwyGrainValue *mingrainvalue,
     }
 }
 
+/**
+ * find_grain_convex_hull:
+ * @xres: The number of columns in @grains.
+ * @yres: The number of rows in @grains.
+ * @grains: Grain numbers filled with gwy_data_field_number_grains().
+ * @pos: Position of the top-left vertex of grain's convex hull.
+ * @vertices: Array to fill with vertices.
+ *
+ * Finds vertices of a grain's convex hull.
+ *
+ * The grain is identified by @pos which must lie in a grain.
+ *
+ * The positions are returned as indices to vertex grid.  NB: The size of the
+ * grid is (@xres + 1)*(@yres + 1), not @xres*@yres.
+ *
+ * The method is a bit naive, some atan2() calculations could be easily saved.
+ **/
+static void
+find_grain_convex_hull(gint xres, gint yres,
+                       const guint *grains,
+                       gint pos,
+                       GArray *vertices)
+{
+    enum { RIGHT = 0, DOWN, LEFT, UP } newdir = RIGHT, dir;
+    g_return_if_fail(grains[pos]);
+    gint initpos = pos;
+    guint gno = grains[pos];
+    GridPoint v = { .i = pos/xres, .j = pos % xres };
+    g_array_set_size(vertices, 0);
+    g_array_append_val(vertices, v);
+
+    do {
+        dir = newdir;
+        switch (dir) {
+            case RIGHT:
+            v.j++;
+            if (v.i > 0 && v.j < xres && grains[(v.i-1)*xres + v.j] == gno)
+                newdir = UP;
+            else if (v.j < xres && grains[v.i*xres + v.j] == gno)
+                newdir = RIGHT;
+            else
+                newdir = DOWN;
+            break;
+
+            case DOWN:
+            v.i++;
+            if (v.j < xres && v.i < yres && grains[v.i*xres + v.j] == gno)
+                newdir = RIGHT;
+            else if (v.i < yres && grains[v.i*xres + v.j-1] == gno)
+                newdir = DOWN;
+            else
+                newdir = LEFT;
+            break;
+
+            case LEFT:
+            v.j--;
+            if (v.i < yres && v.j > 0 && grains[v.i*xres + v.j-1] == gno)
+                newdir = DOWN;
+            else if (v.j > 0 && grains[(v.i-1)*xres + v.j-1] == gno)
+                newdir = LEFT;
+            else
+                newdir = UP;
+            break;
+
+            case UP:
+            v.i--;
+            if (v.j > 0 && v.i > 0 && grains[(v.i-1)*xres + v.j-1] == gno)
+                newdir = LEFT;
+            else if (v.i > 0 && grains[(v.i-1)*xres + v.j] == gno)
+                newdir = UP;
+            else
+                newdir = RIGHT;
+            break;
+
+            default:
+            g_assert_not_reached();
+            break;
+        }
+
+        /* When we turn right, the previous point is a potential vertex, and
+         * it can also supersed previous vertices. */
+        if (newdir == (dir + 1) % 4) {
+            g_array_append_val(vertices, v);
+            guint len = vertices->len;
+            while (len > 2) {
+                GridPoint *cur = &g_array_index(vertices, GridPoint, len-1);
+                GridPoint *mid = &g_array_index(vertices, GridPoint, len-2);
+                GridPoint *prev = &g_array_index(vertices, GridPoint, len-3);
+                gdouble phi = atan2(cur->i - mid->i, cur->j - mid->j);
+                gdouble phim = atan2(mid->i - prev->i, mid->j - prev->j);
+                phi = fmod(phi - phim + 4.0*G_PI, 2.0*G_PI);
+                /* This should be fairly safe as (a) not real harm is done
+                 * when we have an occasional extra vertex (b) the greatest
+                 * possible angle is G_PI/2.0 */
+                if (phi > 1e-12 && phi < G_PI)
+                    break;
+
+                // Get rid of mid, it is in a locally concave part.
+                g_array_index(vertices, GridPoint, len-2) = *cur;
+                g_array_set_size(vertices, len-1);
+            }
+        }
+    } while (v.i*xres + v.j != initpos);
+
+    // The last point is duplicated first point.
+    g_array_set_size(vertices, vertices->len-1);
+}
+
+/**
+ * grain_maximum_bound:
+ * @vertices: Convex hull vertex list.
+ * @qx: Scale (pixel size) in x-direction.
+ * @qy: Scale (pixel size) in y-direction.
+ * @vx: Location to store vector x component to.
+ * @vy: Location to store vector y component to.
+ *
+ * Given a list of integer convex hull vertices, return the vector between
+ * the two most distance vertices.
+ *
+ * FIXME: This is a blatantly naive O(n^2) algorithm.
+ **/
+static void
+grain_maximum_bound(const GArray *vertices,
+                    gdouble qx, gdouble qy,
+                    gdouble *vx, gdouble *vy)
+{
+    gdouble vm = -G_MAXDOUBLE;
+    for (guint g1 = 0; g1 < vertices->len; g1++) {
+        const GridPoint *a = &g_array_index(vertices, GridPoint, g1);
+        for (guint g2 = g1 + 1; g2 < vertices->len; g2++) {
+            const GridPoint *x = &g_array_index(vertices, GridPoint, g2);
+            gdouble dx = qx*(x->j - a->j);
+            gdouble dy = qy*(x->i - a->i);
+            gdouble v = dx*dx + dy*dy;
+            if (v > vm) {
+                vm = v;
+                *vx = dx;
+                *vy = dy;
+            }
+        }
+    }
+}
+
+/**
+ * grain_minimum_bound:
+ * @vertices: Convex hull vertex list.
+ * @qx: Scale (pixel size) in x-direction.
+ * @qy: Scale (pixel size) in y-direction.
+ * @vx: Location to store vector x component to.
+ * @vy: Location to store vector y component to.
+ *
+ * Given a list of integer convex hull vertices, return the vector
+ * corresponding to the minimum linear projection.
+ *
+ * FIXME: This is a blatantly naive O(n^2) algorithm.
+ **/
+static void
+grain_minimum_bound(const GArray *vertices,
+                    gdouble qx, gdouble qy,
+                    gdouble *vx, gdouble *vy)
+{
+    g_return_if_fail(vertices->len >= 3);
+    gdouble vm = G_MAXDOUBLE;
+    for (guint g1 = 0; g1 < vertices->len; g1++) {
+        const GridPoint *a = &g_array_index(vertices, GridPoint, g1);
+        guint g1p = (g1 + 1) % vertices->len;
+        const GridPoint *b = &g_array_index(vertices, GridPoint, g1p);
+        gdouble bx = qx*(b->j - a->j);
+        gdouble by = qy*(b->i - a->i);
+        gdouble b2 = bx*bx + by*by;
+        gdouble vm1 = -G_MAXDOUBLE, vx1 = -G_MAXDOUBLE, vy1 = -G_MAXDOUBLE;
+        for (guint g2 = 0; g2 < vertices->len; g2++) {
+            const GridPoint *x = &g_array_index(vertices, GridPoint, g2);
+            gdouble dx = qx*(x->j - a->j);
+            gdouble dy = qy*(x->i - a->i);
+            gdouble s = (dx*bx + dy*by)/b2;
+            dx -= s*bx;
+            dy -= s*by;
+            gdouble v = dx*dx + dy*dy;
+            if (v > vm1) {
+                vm1 = v;
+                vx1 = dx;
+                vy1 = dy;
+            }
+        }
+        if (vm1 < vm) {
+            vm = vm1;
+            *vx = vx1;
+            *vy = vy1;
+        }
+    }
+}
+
+static void
+calc_convex_hull(GwyGrainValue *minsizegrainvalue,
+                 GwyGrainValue *minanglegrainvalue,
+                 GwyGrainValue *maxsizegrainvalue,
+                 GwyGrainValue *maxanglegrainvalue,
+                 const guint *grains,
+                 const guint *anyboundpos,
+                 const GwyField *field)
+{
+    if (!minsizegrainvalue && !maxsizegrainvalue
+        && !minanglegrainvalue && !maxanglegrainvalue)
+        return;
+
+    GrainValue *minsizepriv = NULL, *maxsizepriv = NULL,
+               *minanglepriv = NULL, *maxanglepriv = NULL;
+    gdouble *minsizevalues = NULL, *maxsizevalues = NULL,
+            *minanglevalues = NULL, *maxanglevalues = NULL;
+    guint ngrains = 0;
+
+    if (minsizegrainvalue) {
+        minsizepriv = minsizegrainvalue->priv;
+        const BuiltinGrainValue *builtin = minsizepriv->builtin;
+        g_return_if_fail(builtin
+                         && builtin->id == GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE);
+        minsizevalues = minsizepriv->values;
+        ngrains = minsizepriv->ngrains;
+    }
+    if (maxsizegrainvalue) {
+        maxsizepriv = maxsizegrainvalue->priv;
+        const BuiltinGrainValue *builtin = maxsizepriv->builtin;
+        g_return_if_fail(builtin
+                         && builtin->id == GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE);
+        maxsizevalues = maxsizepriv->values;
+        ngrains = maxsizepriv->ngrains;
+    }
+    if (minanglegrainvalue) {
+        minanglepriv = minanglegrainvalue->priv;
+        const BuiltinGrainValue *builtin = minanglepriv->builtin;
+        g_return_if_fail(builtin
+                         && builtin->id == GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE);
+        minanglevalues = minanglepriv->values;
+        ngrains = minanglepriv->ngrains;
+    }
+    if (maxanglegrainvalue) {
+        maxanglepriv = maxanglegrainvalue->priv;
+        const BuiltinGrainValue *builtin = maxanglepriv->builtin;
+        g_return_if_fail(builtin
+                         && builtin->id == GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE);
+        maxanglevalues = maxanglepriv->values;
+        ngrains = maxanglepriv->ngrains;
+    }
+
+    guint xres = field->xres, yres = field->yres;
+    gdouble dx = gwy_field_dx(field);
+    gdouble dy = gwy_field_dy(field);
+
+    // Find the complete convex hulls.
+    GArray *vertices = g_array_new(FALSE, FALSE, sizeof(GridPoint));
+    for (guint gno = 1; gno <= ngrains; gno++) {
+        gdouble vx = dx, vy = dy;
+
+        find_grain_convex_hull(xres, yres, grains, anyboundpos[gno], vertices);
+        if (minsizevalues || minanglevalues) {
+            grain_minimum_bound(vertices, dx, dy, &vx, &vy);
+            if (minsizevalues)
+                minsizevalues[gno] = hypot(vx, vy);
+            if (minanglevalues) {
+                minanglevalues[gno] = atan2(-vy, vx);
+                if (minanglevalues[gno] <= -G_PI/2.0)
+                    minanglevalues[gno] += G_PI;
+                else if (minanglevalues[gno] > G_PI/2.0)
+                    minanglevalues[gno] -= G_PI;
+            }
+        }
+        if (maxsizevalues || maxanglevalues) {
+            grain_maximum_bound(vertices, dx, dy, &vx, &vy);
+            if (maxsizevalues)
+                maxsizevalues[gno] = hypot(vx, vy);
+            if (maxanglevalues) {
+                maxanglevalues[gno] = atan2(-vy, vx);
+                if (maxanglevalues[gno] <= -G_PI/2.0)
+                    maxanglevalues[gno] += G_PI;
+                else if (maxanglevalues[gno] > G_PI/2.0)
+                    maxanglevalues[gno] -= G_PI;
+            }
+        }
+    }
+
+    g_array_free(vertices, TRUE);
+}
+
 static void
 calc_slope(GwyGrainValue *thetagrainvalue,
            GwyGrainValue *phigrainvalue,
@@ -1057,16 +1347,6 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                    field);
 
-    /*
-    const gdouble *d = field->data;
-    gdouble dx = gwy_field_dx(field);
-    gdouble dy = gwy_field_dy(field);
-    gdouble diag = hypot(dx, dy);
-    gdouble dxdy = dx*dy;
-    gdouble eqside = sqrt(dxdy);
-    GwyGrainValue *grainvalue;
-    */
-
     // Calculate specific requested quantities that do not directly correspond
     // to auxiliary quantities.
     calc_projected_area(ourvalues[GWY_GRAIN_VALUE_PROJECTED_AREA],
@@ -1084,52 +1364,13 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     calc_boundary_extrema(ourvalues[GWY_GRAIN_VALUE_BOUNDARY_MINIMUM],
                           ourvalues[GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM],
                           grains, field);
+    calc_convex_hull(ourvalues[GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE],
+                     ourvalues[GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE],
+                     ourvalues[GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE],
+                     ourvalues[GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE],
+                     grains, anyboundpos, field);
 
 #if 0
-    if (quantity_data[GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE]
-        || quantity_data[GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE]
-        || quantity_data[GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE]
-        || quantity_data[GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE]) {
-        gdouble *psmin = quantity_data[GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE];
-        gdouble *psmax = quantity_data[GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE];
-        gdouble *pamin = quantity_data[GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE];
-        gdouble *pamax = quantity_data[GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE];
-        GArray *vertices;
-
-        /* Find the complete convex hulls */
-        vertices = g_array_new(FALSE, FALSE, sizeof(GridPoint));
-        for (gno = 1; gno <= ngrains; gno++) {
-            gdouble dx = dx, dy = dy;
-
-            find_grain_convex_hull(xres, yres, grains, anyboundpos[gno], vertices);
-            if (psmin || pamin) {
-                grain_minimum_bound(vertices, dx, dy, &dx, &dy);
-                if (psmin)
-                    psmin[gno] = hypot(dx, dy);
-                if (pamin) {
-                    pamin[gno] = atan2(-dy, dx);
-                    if (pamin[gno] <= -G_PI/2.0)
-                        pamin[gno] += G_PI;
-                    else if (pamin[gno] > G_PI/2.0)
-                        pamin[gno] -= G_PI;
-                }
-            }
-            if (psmax || pamax) {
-                grain_maximum_bound(vertices, dx, dy, &dx, &dy);
-                if (psmax)
-                    psmax[gno] = hypot(dx, dy);
-                if (pamax) {
-                    pamax[gno] = atan2(-dy, dx);
-                    if (pamax[gno] <= -G_PI/2.0)
-                        pamax[gno] += G_PI;
-                    else if (pamax[gno] > G_PI/2.0)
-                        pamax[gno] -= G_PI;
-                }
-            }
-        }
-        /* Finalize */
-        g_array_free(vertices, TRUE);
-    }
     if (quantity_data[GWY_GRAIN_VALUE_VOLUME_0]
         || quantity_data[GWY_GRAIN_VALUE_VOLUME_MIN]) {
         gdouble *pv0 = quantity_data[GWY_GRAIN_VALUE_VOLUME_0];
