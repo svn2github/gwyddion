@@ -20,20 +20,21 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include "libgwy/macros.h"
+#include "libgwy/object-utils.h"
 #include "libgwy/math.h"
 #include "libgwy/grain-value.h"
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/grain-value-builtin.h"
 
 enum {
-    NEED_SIZES = 1 << 0,
+    NEED_SIZE = 1 << 0,
     NEED_ANYBOUNDPOS = 1 << 1,
     NEED_MIN = 1 << 2,
     NEED_MAX = 1 << 3,
-    NEED_XVALUE = (1 << 4) | NEED_SIZES,
-    NEED_YVALUE = (1 << 5) | NEED_SIZES,
-    NEED_ZVALUE = (1 << 6) | NEED_SIZES,
-    NEED_LINEAR = (1 << 7) | NEED_ZVALUE | NEED_XVALUE | NEED_YVALUE,
+    NEED_XMEAN = (1 << 4) | NEED_SIZE,
+    NEED_YMEAN = (1 << 5) | NEED_SIZE,
+    NEED_ZMEAN = (1 << 6) | NEED_SIZE,
+    NEED_LINEAR = (1 << 7) | NEED_ZMEAN | NEED_XMEAN | NEED_YMEAN,
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
 };
 
@@ -43,93 +44,277 @@ typedef struct {
     gint j;
 } GridPoint;
 
-// TODO: Move this to builtin_table.
-static const guint value_dependences[GWY_GRAIN_NVALUES] = {
-    NEED_XVALUE,                  /* centre x */
-    NEED_YVALUE,                  /* centre y */
-    NEED_SIZES,                   /* projected area */
-    NEED_SIZES,                   /* equiv disc radius */
-    0,                            /* surface area */
-    NEED_MIN | NEED_MAX,          /* half-height area */
-    NEED_MIN,                     /* minimum */
-    NEED_MAX,                     /* maximum */
-    NEED_ZVALUE,                  /* mean */
-    NEED_SIZES,                   /* median */
-    0,                            /* flat boundary length */
-    NEED_ANYBOUNDPOS,             /* min bounding size */
-    NEED_ANYBOUNDPOS,             /* min bounding direction */
-    NEED_ANYBOUNDPOS,             /* max bounding size */
-    NEED_ANYBOUNDPOS,             /* max bounding direction */
-    0,                            /* boundary minimum */
-    0,                            /* boundary maximum */
-    0,                            /* volume, 0-based */
-    NEED_MIN,                     /* volume, min-based */
-    0,                            /* volume, Laplace-based */
-    NEED_LINEAR,                  /* slope theta */
-    NEED_LINEAR,                  /* slope phi */
-    NEED_QUADRATIC,               /* curvature centre x */
-    NEED_QUADRATIC,               /* curvature centre y */
-    NEED_QUADRATIC,               /* curvature centre z */
-    NEED_QUADRATIC,               /* curvature invrad 1 */
-    NEED_QUADRATIC,               /* curvature invrad 2 */
-    NEED_QUADRATIC,               /* curvature direction 1 */
-    NEED_QUADRATIC,               /* curvature direction 2 */
+static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
+    {
+        .id = GWY_GRAIN_VALUE_CENTER_X,
+        .need = NEED_XMEAN,
+        .name = NC_("grain value", "Center x position"),
+        .group = NC_("grain value group", "Position"),
+        .ident = "x_0",
+        .symbol = "<i>x</i>₀",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CENTER_Y,
+        .need = NEED_YMEAN,
+        .name = NC_("grain value", "Center y position"),
+        .group = NC_("grain value group", "Position"),
+        .ident = "y_0",
+        .symbol = "<i>y</i>₀",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_PROJECTED_AREA,
+        .need = NEED_SIZE,
+        .name = NC_("grain value", "Projected area"),
+        .group = NC_("grain value group", "Area"),
+        .ident = "A_0",
+        .symbol = "<i>A</i>₀",
+        .powerxy = 2,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS,
+        .need = NEED_SIZE,
+        .name = NC_("grain value", "Equivalent disc radius"),
+        .group = NC_("grain value group", "Area"),
+        .ident = "r_eq",
+        .symbol = "<i>r</i><sub>eq</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SURFACE_AREA,
+        .name = NC_("grain value", "Surface area"),
+        .group = NC_("grain value group", "Area"),
+        .ident = "A_s",
+        .symbol = "<i>A</i><sub>s</sub>",
+        .same_units = TRUE,
+        .powerxy = 2,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_HALF_HEIGHT_AREA,
+        .need = NEED_MIN | NEED_MAX,
+        .name = NC_("grain value", "Area above half-height"),
+        .group = NC_("grain value group", "Area"),
+        .ident = "A_h",
+        .symbol = "<i>A</i><sub>h</sub>",
+        .powerxy = 2,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MINIMUM,
+        .need = NEED_MIN,
+        .name = NC_("grain value", "Minimum value"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "z_min",
+        .symbol = "<i>z</i><sub>min</sub>",
+        .powerz = 1,
+        .fillvalue = G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MAXIMUM,
+        .need = NEED_MAX,
+        .name = NC_("grain value", "Maximum value"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "z_max",
+        .symbol = "<i>z</i><sub>max</sub>",
+        .powerz = 1,
+        .fillvalue = -G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MEAN,
+        .need = NEED_ZMEAN,
+        .name = NC_("grain value", "Mean value"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "z_m",
+        .symbol = "<i>z</i><sub>m</sub>",
+        .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MEDIAN,
+        .need = NEED_SIZE,
+        .name = NC_("grain value", "Median value"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "z_med",
+        .symbol = "<i>z</i><sub>med</sub>",
+        .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH,
+        .name = NC_("grain value", "Projected boundary length"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "L_b0",
+        .symbol = "<i>L</i><sub>b0</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Minimum bounding size"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "D_min",
+        .symbol = "<i>D</i><sub>min</sub>",
+        .powerxy = 1,
+        .fillvalue = G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Minimum bounding direction"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "phi_min",
+        .symbol = "<i>φ</i><sub>min</sub>",
+        .is_angle = TRUE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Maximum bounding size"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "D_max",
+        .symbol = "<i>D</i><sub>max</sub>",
+        .powerxy = 1,
+        .fillvalue = -G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Maximum bounding direction"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "phi_max",
+        .symbol = "<i>φ</i><sub>max</sub>",
+        .is_angle = TRUE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_BOUNDARY_MINIMUM,
+        .name = NC_("grain value", "Minimum value on boundary"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "b_min",
+        .symbol = "<i>b</i><sub>min</sub>",
+        .powerz = 1,
+        .fillvalue = G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM,
+        .name = NC_("grain value", "Maximum value on boundary"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "b_max",
+        .symbol = "<i>b</i><sub>max</sub>",
+        .powerz = 1,
+        .fillvalue = -G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_VOLUME_0,
+        .name = NC_("grain value", "Zero-based volume"),
+        .group = NC_("grain value group", "Volume"),
+        .ident = "V_0",
+        .symbol = "<i>V</i>₀",
+        .powerxy = 2,
+        .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_VOLUME_MIN,
+        .need = NEED_MIN,
+        .name = NC_("grain value", "Minimum-based volume"),
+        .group = NC_("grain value group", "Volume"),
+        .ident = "V_min",
+        .symbol = "<i>V</i><sub>min</sub>",
+        .powerxy = 2,
+        .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_VOLUME_LAPLACE,
+        .name = NC_("grain value", "Laplace-based volume"),
+        .group = NC_("grain value group", "Volume"),
+        .ident = "V_L",
+        .symbol = "<i>V</i><sub>L</sub>",
+        .powerxy = 2,
+        .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SLOPE_THETA,
+        .need = NEED_LINEAR,
+        .name = NC_("grain value", "Slope normal angle"),
+        .group = NC_("grain value group", "Slope"),
+        .ident = "theta",
+        .symbol = "<i>ϑ</i>",
+        .same_units = TRUE,
+        .is_angle = TRUE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SLOPE_PHI,
+        .need = NEED_LINEAR,
+        .name = NC_("grain value", "Slope direction"),
+        .group = NC_("grain value group", "Slope"),
+        .ident = "phi",
+        .symbol = "<i>ϑ</i>",
+        .same_units = TRUE,
+        .is_angle = TRUE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE_CENTER_X,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature center x position"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "x_c",
+        .symbol = "<i>x</i><sub>c</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE_CENTER_Y,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature center y position"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "y_c",
+        .symbol = "<i>y</i><sub>c</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE_CENTER_Z,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature center value"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "z_c",
+        .symbol = "<i>z</i><sub>c</sub>",
+        .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE1,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature 1"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "kappa_1",
+        .symbol = "<i>κ</i>₁",
+        .same_units = TRUE,
+        .powerz = -1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE2,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature 2"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "kappa_2",
+        .symbol = "<i>κ</i>₂",
+        .same_units = TRUE,
+        .powerz = -1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE_ANGLE1,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature direction 1"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "phi_1",
+        .symbol = "<i>φ</i>₁",
+        .is_angle = TRUE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CURVATURE_ANGLE2,
+        .need = NEED_QUADRATIC,
+        .name = NC_("grain value", "Curvature direction 2"),
+        .group = NC_("grain value group", "Curvature"),
+        .ident = "phi_2",
+        .symbol = "<i>φ</i>₂",
+        .is_angle = TRUE,
+    },
 };
-
-// TODO: Initialise this
-static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES];
-// TODO: Move to builtin_table.
-static const gchar *const value_names[GWY_GRAIN_NVALUES] = {
-    NC_("grain value", "Center X position"),
-    NC_("grain value", "Center Y position"),
-    NC_("grain value", "Projected area"),
-    NC_("grain value", "Equivalent disc radius"),
-    NC_("grain value", "Surface area"),
-    NC_("grain value", "Half-height area"),
-    NC_("grain value", "Minimum"),
-    NC_("grain value", "Maximum"),
-    NC_("grain value", "Mean"),
-    NC_("grain value", "Median"),
-    NC_("grain value", "Flat boundary length"),
-    NC_("grain value", "Minimum bounding size"),
-    NC_("grain value", "Minimum bounding angle"),
-    NC_("grain value", "Maximum bounding size"),
-    NC_("grain value", "Maximum bounding angle"),
-    NC_("grain value", "Zero-based volume"),
-    NC_("grain value", "Minimum-based volume"),
-    NC_("grain value", "Laplace-based volume"),
-    NC_("grain value", "Slope normal angle"),
-    NC_("grain value", "Slope azimuth"),
-    NC_("grain value", "Curvature center X position"),
-    NC_("grain value", "Curvature center Y position"),
-    NC_("grain value", "Curvature central value"),
-    NC_("grain value", "Curvature 1"),
-    NC_("grain value", "Curvature 2"),
-    NC_("grain value", "Curvature angle 1"),
-    NC_("grain value", "Curvature angle 2"),
-};
-
-#define add_builtin(name, func) \
-    g_hash_table_insert(builtins, (gpointer)name, (gpointer)&func)
-
-GHashTable*
-_gwy_grain_value_setup_builtins(void)
-{
-    GHashTable *builtins;
-
-    builtins = g_hash_table_new(g_str_hash, g_str_equal);
-    return builtins;
-}
-
-void
-_gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
-{
-    GrainValue *priv = grainvalue->priv;
-    if (priv->ngrains != ngrains) {
-        GWY_FREE(priv->values);
-        priv->values = g_new(gdouble, ngrains);
-    }
-}
 
 static void
 ensure_value(BuiltinGrainValueId id,
@@ -1275,11 +1460,14 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
         _gwy_grain_value_set_size(grainvalue, ngrains);
     }
 
-    // Figure out which quantities are requested.
+    // Figure out which quantities are requested and the auxiliary data to
+    // calculate.
     GwyGrainValue **ourvalues = g_new0(GwyGrainValue*, GWY_GRAIN_NVALUES);
+    guint need = 0;
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
         BuiltinGrainValueId id = grainvalue->priv->builtin->id;
+        need |= grainvalue->priv->builtin->need;
 
         // Take the first if the same quantity is requested multiple times.
         // We will deal with this later.
@@ -1287,17 +1475,8 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
             ourvalues[id] = g_object_ref(grainvalue);
     }
 
-    // Figure out the auxiliary data to calculate.  Do this after we gathered
-    // all quantities as some auxiliary data are in fact quantities too.
-    guint need = 0;
-    for (guint i = 0; i < nvalues; i++) {
-        GwyGrainValue *grainvalue = grainvalues[i];
-        BuiltinGrainValueId id = grainvalue->priv->builtin->id;
-        need |= value_dependences[id];
-    }
-
     // Integer data.
-    const guint *sizes = ((need & NEED_SIZES)
+    const guint *sizes = ((need & NEED_SIZE)
                           ? gwy_mask_field_grain_sizes(mask) : NULL);
 
     guint *anyboundpos = NULL;
@@ -1313,11 +1492,11 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
         ensure_value(GWY_GRAIN_VALUE_MINIMUM, ourvalues, ngrains);
     if (need & NEED_MAX)
         ensure_value(GWY_GRAIN_VALUE_MAXIMUM, ourvalues, ngrains);
-    if (need & NEED_XVALUE)
+    if (need & NEED_XMEAN)
         ensure_value(GWY_GRAIN_VALUE_CENTER_X, ourvalues, ngrains);
-    if (need & NEED_YVALUE)
+    if (need & NEED_YMEAN)
         ensure_value(GWY_GRAIN_VALUE_CENTER_Y, ourvalues, ngrains);
-    if (need & NEED_ZVALUE)
+    if (need & NEED_ZMEAN)
         ensure_value(GWY_GRAIN_VALUE_MEAN, ourvalues, ngrains);
 
     for (guint i = 0; i < GWY_GRAIN_NVALUES; i++) {
@@ -1476,11 +1655,35 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
 
     // TODO: Units (probably in specific evaluators).
 
+    for (guint i = 0; i < GWY_GRAIN_NVALUES; i++)
+        GWY_OBJECT_UNREF(ourvalues[i]);
 
     g_free(ourvalues);
     GWY_FREE(anyboundpos);
     GWY_FREE(quadratic);
     GWY_FREE(linear);
+}
+
+#define add_builtin(name, func) \
+    g_hash_table_insert(builtins, (gpointer)name, (gpointer)&func)
+
+GHashTable*
+_gwy_grain_value_setup_builtins(void)
+{
+    GHashTable *builtins;
+
+    builtins = g_hash_table_new(g_str_hash, g_str_equal);
+    return builtins;
+}
+
+void
+_gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
+{
+    GrainValue *priv = grainvalue->priv;
+    if (priv->ngrains != ngrains) {
+        GWY_FREE(priv->values);
+        priv->values = g_new(gdouble, ngrains);
+    }
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
