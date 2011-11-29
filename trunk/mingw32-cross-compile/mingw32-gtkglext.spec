@@ -18,7 +18,7 @@
 
 Name:           mingw32-gtkglext
 Version:        1.2.0
-Release:        5
+Release:        6
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -115,8 +115,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Nov 29 2011 Yeti <yeti@gwyddion.net> - 1.2.0-6
+- Corrected inverted gtk_widget_get_has_window() assertion in depecated patch.
+
 * Wed Nov 23 2011 Yeti <yeti@gwyddion.net> - 1.2.0-5
-- Correctec compatibility of nox and deprecated patches.
+- Corrected compatibility of nox and deprecated patches.
 - Rebuilt to make it work with new Win32 iconv packages on F16
 
 * Thu Jan 27 2011 Yeti <yeti@gwyddion.net> - 1.2.0-4
