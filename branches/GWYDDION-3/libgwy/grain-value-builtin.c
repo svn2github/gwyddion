@@ -76,10 +76,8 @@ calc_aux(const GwyField *field,
          const guint *grains,
          const guint *sizes,
          guint *anyboundpos,
-         GwyGrainValue *mingrainvalue,
-         GwyGrainValue *maxgrainvalue,
-         GwyGrainValue *xgrainvalue,
-         GwyGrainValue *ygrainvalue,
+         const GwyGrainValue *xgrainvalue,
+         const GwyGrainValue *ygrainvalue,
          GwyGrainValue *zgrainvalue,
          gdouble *linear,
          gdouble *quadratic)
@@ -97,30 +95,6 @@ calc_aux(const GwyField *field,
         }
     }
 
-    if (mingrainvalue) {
-        gdouble *min = mingrainvalue->priv->values;
-        const guint *g = grains;
-        const gdouble *d = field->data;
-        for (guint k = nn; k; k--, g++, d++) {
-            guint gno = *g;
-            gdouble z = *d;
-            if (z < min[gno])
-                min[gno] = z;
-        }
-    }
-
-    if (maxgrainvalue) {
-        gdouble *max = maxgrainvalue->priv->values;
-        const guint *g = grains;
-        const gdouble *d = field->data;
-        for (guint k = nn; k; k--, g++, d++) {
-            guint gno = *g;
-            gdouble z = *d;
-            if (z > max[gno])
-                max[gno] = z;
-        }
-    }
-
     if (zgrainvalue) {
         g_assert(sizes);
         gdouble *zvalue = zgrainvalue->priv->values;
@@ -134,36 +108,6 @@ calc_aux(const GwyField *field,
         }
         for (guint gno = 0; gno <= ngrains; gno++)
             zvalue[gno] /= sizes[gno];
-    }
-
-    if (xgrainvalue) {
-        g_assert(sizes);
-        gdouble *xvalue = xgrainvalue->priv->values;
-        const guint *g = grains;
-        guint ngrains = zgrainvalue->priv->ngrains;
-        for (guint i = 0; i < yres; i++) {
-            for (guint j = 0; j < xres; j++, g++) {
-                guint gno = *g;
-                xvalue[gno] += j;
-            }
-        }
-        for (guint gno = 0; gno <= ngrains; gno++)
-            xvalue[gno] /= sizes[gno];
-    }
-
-    if (ygrainvalue) {
-        g_assert(sizes);
-        gdouble *yvalue = ygrainvalue->priv->values;
-        const guint *g = grains;
-        guint ngrains = zgrainvalue->priv->ngrains;
-        for (guint i = 0; i < yres; i++) {
-            for (guint j = 0; j < xres; j++, g++) {
-                guint gno = *g;
-                yvalue[gno] += i;
-            }
-        }
-        for (guint gno = 0; gno <= ngrains; gno++)
-            yvalue[gno] /= sizes[gno];
     }
 
     if (linear) {
@@ -261,6 +205,110 @@ ensure_value(BuiltinGrainValueId id,
 }
 
 static void
+calc_minimum(GwyGrainValue *grainvalue,
+             const guint *grains,
+             const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(priv->builtin
+                     && priv->builtin->id == GWY_GRAIN_VALUE_MINIMUM);
+    guint nn = field->xres * field->yres;
+    gdouble *values = priv->values;
+    const guint *g = grains;
+    const gdouble *d = field->data;
+
+    for (guint k = nn; k; k--, g++, d++) {
+        guint gno = *g;
+        gdouble z = *d;
+        if (z < values[gno])
+            values[gno] = z;
+    }
+}
+
+static void
+calc_maximum(GwyGrainValue *grainvalue,
+             const guint *grains,
+             const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(priv->builtin
+                     && priv->builtin->id == GWY_GRAIN_VALUE_MAXIMUM);
+    guint nn = field->xres * field->yres;
+    gdouble *values = priv->values;
+    const guint *g = grains;
+    const gdouble *d = field->data;
+
+    for (guint k = nn; k; k--, g++, d++) {
+        guint gno = *g;
+        gdouble z = *d;
+        if (z > values[gno])
+            values[gno] = z;
+    }
+}
+
+static void
+calc_centre_x(GwyGrainValue *grainvalue,
+              const guint *grains,
+              const guint *sizes,
+              const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(sizes);
+    g_return_if_fail(priv->builtin
+                     && priv->builtin->id == GWY_GRAIN_VALUE_CENTER_X);
+    guint xres = field->xres, yres = field->yres;
+    guint ngrains = grainvalue->priv->ngrains;
+    gdouble *values = priv->values;
+    const guint *g = grains;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            guint gno = *g;
+            values[gno] += j;
+        }
+    }
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] /= sizes[gno];
+}
+
+static void
+calc_centre_y(GwyGrainValue *grainvalue,
+              const guint *grains,
+              const guint *sizes,
+              const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(sizes);
+    g_return_if_fail(priv->builtin
+                     && priv->builtin->id == GWY_GRAIN_VALUE_CENTER_Y);
+    guint xres = field->xres, yres = field->yres;
+    guint ngrains = grainvalue->priv->ngrains;
+    gdouble *values = priv->values;
+    const guint *g = grains;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            guint gno = *g;
+            values[gno] += i;
+        }
+    }
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] /= sizes[gno];
+}
+
+static void
 calc_projected_area(GwyGrainValue *grainvalue,
                     const GwyField *field,
                     const guint *sizes)
@@ -269,6 +317,7 @@ calc_projected_area(GwyGrainValue *grainvalue,
         return;
 
     GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(sizes);
     g_return_if_fail(priv->builtin
                      && priv->builtin->id == GWY_GRAIN_VALUE_PROJECTED_AREA);
     guint ngrains = priv->ngrains;
@@ -287,6 +336,7 @@ calc_equiv_disc_radius(GwyGrainValue *grainvalue,
         return;
 
     GrainValue *priv = grainvalue->priv;
+    g_return_if_fail(sizes);
     g_return_if_fail(priv->builtin
                      && priv->builtin->id == GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS);
     guint ngrains = priv->ngrains;
@@ -674,12 +724,15 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     gdouble *quadratic = ((need & NEED_QUADRATIC)
                           ?  g_new0(gdouble, 12*(ngrains + 1)) : NULL);
 
+    calc_minimum(ourvalues[GWY_GRAIN_VALUE_MINIMUM], grains, field);
+    calc_maximum(ourvalues[GWY_GRAIN_VALUE_MAXIMUM], grains, field);
+    calc_centre_x(ourvalues[GWY_GRAIN_VALUE_CENTER_X], grains, sizes, field);
+    calc_centre_y(ourvalues[GWY_GRAIN_VALUE_CENTER_Y], grains, sizes, field);
     // Calculate auxiliary quantities (in pixel lateral coordinates).
     // FIXME: Most of this can be formulated as separate calc-foo methods
     // such as below.
+
     calc_aux(field, grains, sizes, anyboundpos,
-             ourvalues[GWY_GRAIN_VALUE_MINIMUM],
-             ourvalues[GWY_GRAIN_VALUE_MAXIMUM],
              ourvalues[GWY_GRAIN_VALUE_CENTER_X],
              ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
              ourvalues[GWY_GRAIN_VALUE_MEAN],
