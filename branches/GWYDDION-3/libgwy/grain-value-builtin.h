@@ -73,6 +73,7 @@ typedef struct {
     const gchar *ident;
     const gchar *symbol;
     BuiltinGrainValueId id;
+    guint need;
     gboolean same_units;
     gint powerxy;
     gint powerz;
