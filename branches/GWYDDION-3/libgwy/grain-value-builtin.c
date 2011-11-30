@@ -36,6 +36,7 @@ enum {
     NEED_ZMEAN = (1 << 6) | NEED_SIZE,
     NEED_LINEAR = (1 << 7) | NEED_ZMEAN | NEED_XMEAN | NEED_YMEAN,
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
+    NEED_VOLUME = (1 << 9),
 };
 
 // Must be signed, we use signed differences.
@@ -43,6 +44,22 @@ typedef struct {
     gint i;
     gint j;
 } GridPoint;
+
+// Grain values that satisfy the NEEDs defined above.  G_MAXUINT means an
+// integer/non-scalar auxiliary value that does not directly correspond to any
+// grain value.
+static const BuiltinGrainValueId satisfies_needs[] = {
+    /* NEED_SIZE */        G_MAXUINT,
+    /* NEED_ANYBOUNDPOS */ G_MAXUINT,
+    /* NEED_MIN */         GWY_GRAIN_VALUE_MINIMUM,
+    /* NEED_MAX */         GWY_GRAIN_VALUE_MAXIMUM,
+    /* NEED_XMEAN */       GWY_GRAIN_VALUE_CENTER_X,
+    /* NEED_YMEAN */       GWY_GRAIN_VALUE_CENTER_Y,
+    /* NEED_ZMEAN */       GWY_GRAIN_VALUE_MEAN,
+    /* NEED_LINEAR */      G_MAXUINT,
+    /* NEED_QUADRATIC */   G_MAXUINT,
+    /* NEED_VOLUME */      GWY_GRAIN_VALUE_VOLUME_0,
+};
 
 static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     {
@@ -203,6 +220,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_VOLUME_0,
+        .need = NEED_VOLUME,
         .name = NC_("grain value", "Zero-based volume"),
         .group = NC_("grain value group", "Volume"),
         .ident = "V_0",
@@ -212,7 +230,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_VOLUME_MIN,
-        .need = NEED_MIN,
+        .need = NEED_MIN | NEED_VOLUME | NEED_SIZE,
         .name = NC_("grain value", "Minimum-based volume"),
         .group = NC_("grain value group", "Volume"),
         .ident = "V_min",
@@ -496,6 +514,49 @@ calc_mean(GwyGrainValue *grainvalue,
         values[gno] /= sizes[gno];
 }
 
+static void
+calc_volume_0(GwyGrainValue *grainvalue,
+              const guint *grains,
+              const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    const BuiltinGrainValue *builtin = priv->builtin;
+    g_return_if_fail(builtin
+                     && builtin->id == GWY_GRAIN_VALUE_VOLUME_0);
+    guint xres = field->xres, yres = field->yres;
+    gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
+    gdouble *values = priv->values;
+    guint ngrains = grainvalue->priv->ngrains;
+    const guint *g = grains;
+    const gdouble *d = field->data;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            guint gno = *g;
+            if (!gno)
+                continue;
+
+            guint ix = i*xres;
+            guint imx = (i > 0) ? ix-xres : ix;
+            guint ipx = (i < yres-1) ? ix+xres : ix;
+            guint jm = (j > 0) ? j-1 : j;
+            guint jp = (j < yres-1) ? j+1 : j;
+
+            gdouble v = (52.0*d[ix + j] + 10.0*(d[imx + j] + d[ix + jm]
+                                                + d[ix + jp] + d[ipx + j])
+                         + (d[imx + jm] + d[imx + jp]
+                            + d[ipx + jm] + d[ipx + jp]));
+
+            values[gno] += v;
+        }
+    }
+    for (guint gno = 1; gno <= ngrains; gno++)
+        values[gno] *= dxdy/96.0;
+}
+
 // The coordinate origin is always the grain centre.
 // Also the sums are *NOT* divided by grain sizes because these will cancel out.
 // FIXME: It would be also nice to use MEAN as the value origin to reduce
@@ -709,17 +770,18 @@ calc_surface_area(GwyGrainValue *grainvalue,
     gdouble dx2 = dx*dx, dy2 = dy*dy, dxdy = dx*dy;
     guint ngrains = priv->ngrains;
     gdouble *values = priv->values;
+    const guint *g = grains;
     const gdouble *d = field->data;
 
     // Every contribution is calculated twice -- for each pixel (vertex)
     // participating to a particular triangle.  So we divide by 8, not by 4.
     for (guint i = 0; i < yres; i++) {
-        for (guint j = 0; j < xres; j++) {
-            guint ix = i*xres;
-            guint gno = grains[ix + j];
+        for (guint j = 0; j < xres; j++, g++) {
+            guint gno = *g;
             if (!gno)
                 continue;
 
+            guint ix = i*xres;
             guint imx = (i > 0) ? ix-xres : ix;
             guint ipx = (i < yres-1) ? ix+xres : ix;
             guint jm = (j > 0) ? j-1 : j;
@@ -882,11 +944,12 @@ calc_boundary_extrema(GwyGrainValue *mingrainvalue,
         maxvalues = maxpriv->values;
     }
     guint xres = field->xres, yres = field->yres;
+    const guint *g = grains;
     const gdouble *d = field->data;
 
     for (guint i = 0; i < yres; i++) {
-        for (guint j = 0; j < xres; j++, d++) {
-            guint gno = grains[i*xres + j];
+        for (guint j = 0; j < xres; j++, d++, g++) {
+            guint gno = *g;
             if (!gno)
                 continue;
 
@@ -1191,6 +1254,39 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
 }
 
 static void
+calc_volume_min(GwyGrainValue *grainvalue,
+                const GwyGrainValue *mingrainvalue,
+                const GwyGrainValue *v0grainvalue,
+                const guint *sizes,
+                const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    const BuiltinGrainValue *builtin = priv->builtin;
+    g_return_if_fail(builtin
+                     && builtin->id == GWY_GRAIN_VALUE_VOLUME_MIN);
+    g_return_if_fail(mingrainvalue && v0grainvalue);
+    const GrainValue *minpriv = mingrainvalue->priv;
+    const GrainValue *v0priv = v0grainvalue->priv;
+    const BuiltinGrainValue *minbuiltin = minpriv->builtin;
+    const BuiltinGrainValue *v0builtin = v0priv->builtin;
+    g_return_if_fail(minbuiltin
+                     && minbuiltin->id == GWY_GRAIN_VALUE_MINIMUM);
+    g_return_if_fail(v0builtin
+                     && v0builtin->id == GWY_GRAIN_VALUE_VOLUME_0);
+    gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
+    guint ngrains = priv->ngrains;
+    gdouble *values = priv->values;
+    const gdouble *min = minpriv->values;
+    const gdouble *v0 = v0priv->values;
+
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] = v0[gno] - dxdy*sizes[gno]*min[gno];
+}
+
+static void
 calc_slope(GwyGrainValue *thetagrainvalue,
            GwyGrainValue *phigrainvalue,
            const gdouble *linear,
@@ -1488,23 +1584,17 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
 
     // Floating point data that coincide with some grain value.  If it is
     // requested by caller we use that otherwise create a new GwyGrainValue.
-    if (need & NEED_MIN)
-        ensure_value(GWY_GRAIN_VALUE_MINIMUM, ourvalues, ngrains);
-    if (need & NEED_MAX)
-        ensure_value(GWY_GRAIN_VALUE_MAXIMUM, ourvalues, ngrains);
-    if (need & NEED_XMEAN)
-        ensure_value(GWY_GRAIN_VALUE_CENTER_X, ourvalues, ngrains);
-    if (need & NEED_YMEAN)
-        ensure_value(GWY_GRAIN_VALUE_CENTER_Y, ourvalues, ngrains);
-    if (need & NEED_ZMEAN)
-        ensure_value(GWY_GRAIN_VALUE_MEAN, ourvalues, ngrains);
+    for (guint i = 0; i < G_N_ELEMENTS(satisfies_needs); i++) {
+        if (satisfies_needs[i] != G_MAXUINT && (need & (1 << i)))
+            ensure_value(satisfies_needs[i], ourvalues, ngrains);
+    }
 
     for (guint i = 0; i < GWY_GRAIN_NVALUES; i++) {
         if (ourvalues[i])
             init_values(ourvalues[i]);
     }
 
-    // Complex floating point data.
+    // Non-scalar auxiliary floating point data.
     gdouble *linear = ((need & NEED_LINEAR)
                        ? g_new0(gdouble, 5*(ngrains + 1)) : NULL);
 
@@ -1517,6 +1607,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     calc_centre_x(ourvalues[GWY_GRAIN_VALUE_CENTER_X], grains, sizes, field);
     calc_centre_y(ourvalues[GWY_GRAIN_VALUE_CENTER_Y], grains, sizes, field);
     calc_mean(ourvalues[GWY_GRAIN_VALUE_MEAN], grains, sizes, field);
+    calc_volume_0(ourvalues[GWY_GRAIN_VALUE_VOLUME_0], grains, field);
     calc_linear(linear, grains,
                 ourvalues[GWY_GRAIN_VALUE_CENTER_X],
                 ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
@@ -1527,7 +1618,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    field);
 
     // Calculate specific requested quantities that do not directly correspond
-    // to auxiliary quantities.
+    // to auxiliary quantities and may depend on them.
     calc_projected_area(ourvalues[GWY_GRAIN_VALUE_PROJECTED_AREA],
                         field, sizes);
     calc_equiv_disc_radius(ourvalues[GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS],
@@ -1548,6 +1639,10 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                      ourvalues[GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE],
                      ourvalues[GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE],
                      grains, anyboundpos, field);
+    calc_volume_min(ourvalues[GWY_GRAIN_VALUE_VOLUME_MIN],
+                    ourvalues[GWY_GRAIN_VALUE_MINIMUM],
+                    ourvalues[GWY_GRAIN_VALUE_VOLUME_0],
+                    sizes, field);
 
 #if 0
     if (quantity_data[GWY_GRAIN_VALUE_VOLUME_0]
