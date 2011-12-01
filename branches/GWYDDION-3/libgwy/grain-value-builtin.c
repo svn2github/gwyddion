@@ -1768,6 +1768,11 @@ _gwy_grain_value_setup_builtins(void)
     GHashTable *builtins;
 
     builtins = g_hash_table_new(g_str_hash, g_str_equal);
+    for (guint i = 0; i < GWY_GRAIN_NVALUES; i++) {
+        const BuiltinGrainValue *builtin = builtin_table + i;
+        g_hash_table_insert(builtins,
+                            (gpointer)builtin->name, (gpointer)builtin);
+    }
     return builtins;
 }
 
