@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: keyboard-shortcuts.xml 12534 2011-06-13 09:26:17Z yeti-dn $ -->
+<!-- @(#) $Id: keyboard-shortcuts.xml 13108 2011-12-03 10:52:58Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="keyboard-shortcuts">
-  <title>Клавиатурные сокращения</title>
+  <title>Комбинации клавиш</title>
   <informaltable frame="topbot" id="table-keyboard-shortcuts">
     <tgroup cols="4" align="left">
     <?dblatex llXX?>
       <thead>
         <row>
-          <entry>Сокращение</entry>
+          <entry>Комбинация</entry>
           <entry>Эквивалент меню</entry>
           <entry>Контекст</entry>
           <entry>Действие</entry>
@@ -191,5 +191,9 @@
       </tbody>
     </tgroup>
   </informaltable>
+  <para>Можно присвоить свои комбинации клавиш всем функциям в меню, также возможно вызывать инструменты комбинацией клавиш.</para>
+  <para>Чтобы изменить комбинацию клавиш для пункта меню просто нужно выбрать его с помощью мыши или клавиш-стрелок, нажать требуемую комбинацию клавиш, и она незамедлительно будет установлена. Комбинация клавиш должна быть или специальной клавишей, т.е. <keycap>F3</keycap>, или сочетанием, включающим модификаторы, т.е. <keycap>Ctrl-Shift-D</keycap>. Нельзя присваивать просто буквенно-цифровые клавиши, такие как <keycap>Q</keycap>.</para>
+  <para>Чтобы предотвратить случайное изменение комбинаций клавиш, они могут меняться только при включенной опции <menuchoice><guimenu>Правка</guimenu><guimenuitem>Комбинации клавиш</guimenuitem></menuchoice>. Изменения по умолчанию выключены, что рекомендуется делать при обычном использовании.</para>
+  <para>Все комбинации клавиш хранятся в файле <filename>ui/accel_map</filename> в каталоге пользователя, который обычно называется <filename>~/.gwyddion</filename> (Unix) или <filename>Documents and Settings\gwyddion</filename> (MS Windows). Присвоить комбинации клавиш инструментам можно только путём редактирования этого файла. Каждая строка соответствует действию, вызываемому этой комбинацией клавиш. Например, строка для инструмента "Редактор маски" по умолчанию выглядит так: <informalexample><programlisting>; (gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "")</programlisting></informalexample>Точки с запятой обозначают комментарии, т.е. строки. начинающиеся с них будут неактивными. Следовательно, чтобы присвоить сочетание клавиш <keycap>Ctrl-Shift-E</keycap> инструменту "Редактор маски", удалите точку с запятой чтобы сделать эту строку активной и запишите своё сочетание клавиш в пустое место между кавычками: <informalexample><programlisting>(gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "&lt;Control&gt;&lt;Shift&gt;e")</programlisting></informalexample></para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
