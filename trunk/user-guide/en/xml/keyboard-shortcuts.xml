@@ -211,5 +211,46 @@
       </tbody>
     </tgroup>
   </informaltable>
+  <para>
+    You can assign your own keyboard shortcuts to all functions in the menus
+    and it is also possible to invoke tool with keyboard shortcuts.
+  </para>
+  <para>
+    To change the keyboard shortcut of a menu item simply select the item
+    using the mouse or arrow keys, press the key combination you want to
+    assing to it and it will be immediately assigned.  The shortcut must be
+    either a special key, e.g. <keycap>F3</keycap>, or a key combination
+    including modifiers, e.g. <keycap>Ctrl-Shift-D</keycap>.  It is not
+    possible to assign bare keys such as <keycap>Q</keycap>.
+  </para>
+  <para>
+    To prevent inadvertent modification of shortcuts, they can be changed
+    only if
+    <menuchoice>
+      <guimenu>Edit</guimenu>
+      <guimenuitem>Keyboard Shortcuts</guimenuitem>
+    </menuchoice>
+    is enabled.  Modifications are disabled by default which is also the
+    recommended setting during normal use.
+  </para>
+  <para>
+    All keyboard shortucts are stored in file <filename>ui/accel_map</filename>
+    in the user's directory, which usually means
+    <filename>~/.gwyddion</filename> (Unix) or
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+    Assigning shortcuts to tools can be only done by editting this file.  Each
+    line corresponds to an action that can be invoked with a shortcut.  For
+    instance the Mask Editor tool's line is by default:
+    <informalexample>
+      <programlisting>; (gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "")</programlisting>
+    </informalexample>
+    Semicolons represents comments, i.e. lines starting with a seimicolon are
+    inactive.  Hence, to assign the combo <keycap>Ctrl-Shift-E</keycap> to the
+    Mask Editor tool, remove the semicolon to make the line active and fill the
+    desired shortcut in the empty quotes:
+    <informalexample>
+      <programlisting>(gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "&lt;Control&gt;&lt;Shift&gt;e")</programlisting>
+    </informalexample>
+  </para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
