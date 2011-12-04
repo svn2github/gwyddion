@@ -87,7 +87,7 @@ static gboolean     is_equal                  (const GArray *units,
 static gboolean     parse                     (GArray *units,
                                                const gchar *string,
                                                gint *power10);
-static void         power_impl                (Unit *unit,
+static gboolean     power_impl                (Unit *unit,
                                                const Unit *op,
                                                gint power);
 static void         canonicalize              (GArray *units);
@@ -750,17 +750,21 @@ gwy_unit_power(GwyUnit *unit,
     g_return_if_fail(GWY_IS_UNIT(unit));
     g_return_if_fail(GWY_IS_UNIT(op));
 
-    power_impl(unit->priv, op->priv, power);
-    g_signal_emit(unit, signals[CHANGED], 0);
+    if (power_impl(unit->priv, op->priv, power))
+        g_signal_emit(unit, signals[CHANGED], 0);
 }
 
-static void
+// Returns TRUE if @unit has actually changed.
+static gboolean
 power_impl(Unit *unit,
            const Unit *op,
            gint power)
 {
-    /* Perform power in-place */
+    // In place power.
     if (unit == op) {
+        if (power == 1 || !unit->units->len)
+            return FALSE;
+
         if (power) {
             for (guint j = 0; j < unit->units->len; j++) {
                 GwySimpleUnit *u = &simple_unit_index(unit->units, j);
@@ -769,9 +773,10 @@ power_impl(Unit *unit,
         }
         else
             g_array_set_size(unit->units, 0);
-        return;
+        return TRUE;
     }
 
+    // Out of place power.
     GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
 
     if (power) {
@@ -782,9 +787,15 @@ power_impl(Unit *unit,
         }
     }
 
+    if (is_equal(unit->units, units)) {
+        g_array_free(units, TRUE);
+        return FALSE;
+    }
+
     g_array_set_size(unit->units, 0);
     g_array_append_vals(unit->units, units->data, units->len);
     g_array_free(units, TRUE);
+    return TRUE;
 }
 
 static void
@@ -890,8 +901,10 @@ gwy_unit_power_multiply(GwyUnit *unit,
     g_return_if_fail(GWY_IS_UNIT(op2));
 
     /* Ensure @unit is different from at least one of @op1, @op2. */
-    if (unit == op1 && unit == op2)
-        return gwy_unit_power(unit, unit, power1 + power2);
+    if (unit == op1 && unit == op2) {
+        gwy_unit_power(unit, unit, power1 + power2);
+        return;
+    }
 
     /* Try to avoid hard work by making @op2 the simplier argument, but
      * primarily make it different from @unit. */
@@ -906,9 +919,14 @@ gwy_unit_power_multiply(GwyUnit *unit,
     }
     g_assert(op2 != unit);
 
+    if (!power2 || !op2->priv->units->len) {
+        if (power_impl(unit->priv, op1->priv, power1))
+            g_signal_emit(unit, signals[CHANGED], 0);
+        return;
+    }
+
     power_impl(unit->priv, op1->priv, power1);
-    if (power2)
-        multiply_impl(unit->priv, op2->priv, power2);
+    multiply_impl(unit->priv, op2->priv, power2);
     canonicalize(unit->priv->units);
     g_signal_emit(unit, signals[CHANGED], 0);
 }
