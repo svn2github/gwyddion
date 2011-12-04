@@ -72,7 +72,7 @@ GwyLine* gwy_field_find_row_shifts(const GwyField *field,
                                    GwyRowShiftMethod method,
                                    guint min_freedom);
 void     gwy_field_laplace_solve  (GwyField *field,
-                                   GwyMaskField *mask,
+                                   const GwyMaskField *mask,
                                    guint grain_id);
 
 G_END_DECLS

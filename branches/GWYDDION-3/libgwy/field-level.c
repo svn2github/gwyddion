@@ -2148,7 +2148,7 @@ find_largest_sizes(guint xres, guint yres,
  **/
 void
 gwy_field_laplace_solve(GwyField *field,
-                        GwyMaskField *mask,
+                        const GwyMaskField *mask,
                         guint grain_id)
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(mask));
@@ -2158,26 +2158,27 @@ gwy_field_laplace_solve(GwyField *field,
 
     // To fill the entire empty space we need to divide it to grains too so
     // work with the inverted mask.
+    GwyMaskField *ourmask;
     if (grain_id == 0) {
-        mask = gwy_mask_field_duplicate(mask);
-        gwy_mask_field_logical(mask, NULL, NULL, GWY_LOGICAL_NA);
+        ourmask = gwy_mask_field_duplicate(mask);
+        gwy_mask_field_logical(ourmask, NULL, NULL, GWY_LOGICAL_NA);
         grain_id = G_MAXUINT;
     }
     else
-        g_object_ref(mask);
+        ourmask = g_object_ref((gpointer)mask);
 
-    guint ngrains = gwy_mask_field_n_grains(mask);
-    const guint *grains = gwy_mask_field_grain_numbers(mask);
+    guint ngrains = gwy_mask_field_n_grains(ourmask);
+    const guint *grains = gwy_mask_field_grain_numbers(ourmask);
     g_return_if_fail(grain_id == G_MAXUINT || grain_id <= ngrains);
 
-    const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
-    const guint *sizes = gwy_mask_field_grain_sizes(mask);
+    const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(ourmask);
+    const guint *sizes = gwy_mask_field_grain_sizes(ourmask);
     guint xres = field->xres, yres = field->yres;
 
     // The underspecified case.
     if (ngrains == 1 && sizes[1] == xres*yres) {
         gwy_field_clear_full(field);
-        g_object_unref(mask);
+        g_object_unref(ourmask);
         return;
     }
 
@@ -2211,7 +2212,7 @@ gwy_field_laplace_solve(GwyField *field,
     g_free(levels);
     g_free(revindex);
 
-    g_object_unref(mask);
+    g_object_unref(ourmask);
     gwy_field_invalidate(field);
 }
 
