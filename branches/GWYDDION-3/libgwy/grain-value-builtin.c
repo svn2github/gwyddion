@@ -23,6 +23,7 @@
 #include "libgwy/object-utils.h"
 #include "libgwy/math.h"
 #include "libgwy/grain-value.h"
+#include "libgwy/field-level.h"
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/grain-value-builtin.h"
 
@@ -240,6 +241,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_VOLUME_LAPLACE,
+        .need = NEED_VOLUME | NEED_SIZE,
         .name = NC_("grain value", "Laplace-based volume"),
         .group = NC_("grain value group", "Volume"),
         .ident = "V_L",
@@ -1287,6 +1289,44 @@ calc_volume_min(GwyGrainValue *grainvalue,
 }
 
 static void
+calc_volume_laplace(GwyGrainValue *grainvalue,
+                    const GwyGrainValue *v0grainvalue,
+                    const guint *grains,
+                    const GwyMaskField *mask,
+                    const GwyField *field)
+{
+    if (!grainvalue)
+        return;
+
+    GrainValue *priv = grainvalue->priv;
+    const BuiltinGrainValue *builtin = priv->builtin;
+    g_return_if_fail(builtin
+                     && builtin->id == GWY_GRAIN_VALUE_VOLUME_LAPLACE);
+    g_return_if_fail(v0grainvalue);
+    const GrainValue *v0priv = v0grainvalue->priv;
+    const BuiltinGrainValue *v0builtin = v0priv->builtin;
+    g_return_if_fail(v0builtin
+                     && v0builtin->id == GWY_GRAIN_VALUE_VOLUME_0);
+    guint ngrains = grainvalue->priv->ngrains;
+    gdouble *values = grainvalue->priv->values;
+    const gdouble *v0 = v0priv->values;
+
+    GwyField *workspace = gwy_field_duplicate(field);
+    gwy_field_laplace_solve(workspace, mask, G_MAXUINT);
+
+    GwyGrainValue *laplacebase = gwy_grain_value_new(v0grainvalue->priv->name);
+    g_assert(laplacebase);
+
+    calc_volume_0(laplacebase, grains, workspace);
+    const gdouble *lbv = laplacebase->priv->values;
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] = v0[gno] - lbv[gno];
+
+    g_object_unref(laplacebase);
+    g_object_unref(workspace);
+}
+
+static void
 calc_slope(GwyGrainValue *thetagrainvalue,
            GwyGrainValue *phigrainvalue,
            const gdouble *linear,
@@ -1617,8 +1657,8 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                    field);
 
-    // Calculate specific requested quantities that do not directly correspond
-    // to auxiliary quantities and may depend on them.
+    // Values that do not directly correspond to auxiliary values and may
+    // depend on them.
     calc_projected_area(ourvalues[GWY_GRAIN_VALUE_PROJECTED_AREA],
                         field, sizes);
     calc_equiv_disc_radius(ourvalues[GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS],
@@ -1643,76 +1683,9 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                     ourvalues[GWY_GRAIN_VALUE_MINIMUM],
                     ourvalues[GWY_GRAIN_VALUE_VOLUME_0],
                     sizes, field);
-
-#if 0
-    if (quantity_data[GWY_GRAIN_VALUE_VOLUME_0]
-        || quantity_data[GWY_GRAIN_VALUE_VOLUME_MIN]) {
-        gdouble *pv0 = quantity_data[GWY_GRAIN_VALUE_VOLUME_0];
-        gdouble *pvm = quantity_data[GWY_GRAIN_VALUE_VOLUME_MIN];
-
-        if (pv0)
-            gwy_clear(pv0, ngrains + 1);
-        if (pvm)
-            gwy_clear(pvm, ngrains + 1);
-
-        for (i = 0; i < yres; i++) {
-            for (j = 0; j < xres; j++) {
-                gint ix, ipx, imx, jp, jm;
-                gdouble v;
-
-                ix = i*xres;
-                if (!(gno = grains[ix + j]))
-                    continue;
-
-                imx = (i > 0) ? ix-xres : ix;
-                ipx = (i < yres-1) ? ix+xres : ix;
-                jm = (j > 0) ? j-1 : j;
-                jp = (j < yres-1) ? j+1 : j;
-
-                v = (52.0*d[ix + j] + 10.0*(d[imx + j] + d[ix + jm]
-                                            + d[ix + jp] + d[ipx + j])
-                     + (d[imx + jm] + d[imx + jp] + d[ipx + jm] + d[ipx + jp]));
-
-                /* We know the basis would appear with total weight -96 so
-                 * don't bother subtracting it from individual heights */
-                if (pv0)
-                    pv0[gno] += v;
-                if (pvm)
-                    pvm[gno] += v - 96.0*min[gno];
-            }
-        }
-        if (pv0) {
-            for (gno = 1; gno <= ngrains; gno++)
-                pv0[gno] *= dxdy/96.0;
-        }
-        if (pvm) {
-            for (gno = 1; gno <= ngrains; gno++)
-                pvm[gno] *= dxdy/96.0;
-        }
-    }
-    if ((p = quantity_data[GWY_GRAIN_VALUE_VOLUME_LAPLACE])) {
-        gint *bbox;
-
-        gwy_clear(p, ngrains + 1);
-        /* Fail gracefully when there is one big `grain' over all data.
-         * FIXME: Is this correct?  The grain can touch all sides but still
-         * have an exterior. */
-        bbox = gwy_field_get_grain_bounding_boxes(field,
-                                                       ngrains, grains, NULL);
-        if (ngrains == 1
-            && (bbox[4] == 0 && bbox[5] == 0
-                && bbox[6] == xres && bbox[7] == yres)) {
-            g_warning("Cannot interpolate from exterior of the grain when it "
-                      "has no exterior.");
-        }
-        else {
-            for (gno = 1; gno <= ngrains; gno++)
-                p[gno] = dxdy/96.0*grain_volume_laplace(field, grains,
-                                                         gno, bbox + 4*gno);
-        }
-        g_free(bbox);
-    }
-#endif
+    calc_volume_laplace(ourvalues[GWY_GRAIN_VALUE_VOLUME_LAPLACE],
+                        ourvalues[GWY_GRAIN_VALUE_VOLUME_0],
+                        grains, mask, field);
     calc_slope(ourvalues[GWY_GRAIN_VALUE_SLOPE_THETA],
                ourvalues[GWY_GRAIN_VALUE_SLOPE_PHI],
                linear, field);
