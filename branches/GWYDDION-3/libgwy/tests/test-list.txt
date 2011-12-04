@@ -80,6 +80,7 @@ rgba/boxed
 rgba/interpolate
 unit/parse
 unit/changed
+unit/changed/arithmetic
 unit/assign
 unit/arithmetic/simple
 unit/arithmetic/commutativity

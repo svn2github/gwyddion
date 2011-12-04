@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -206,6 +206,66 @@ test_unit_arithmetic_simple(void)
     g_object_unref(u8);
     g_object_unref(u9);
     g_object_unref(u0);
+}
+
+void
+test_unit_changed_arithmetic(void)
+{
+    GwyUnit *u1 = gwy_unit_new_from_string("m", NULL);
+    GwyUnit *u2 = gwy_unit_new_from_string("m²", NULL);
+    GwyUnit *u3 = gwy_unit_new_from_string("m/s", NULL);
+    GwyUnit *u4 = gwy_unit_new_from_string("s", NULL);
+    GwyUnit *u5 = gwy_unit_new_from_string("m", NULL);
+    GwyUnit *u6 = gwy_unit_new_from_string("m/s²", NULL);
+    GwyUnit *u7 = gwy_unit_new();
+
+    guint counter = 0;
+    g_signal_connect_swapped(u1, "changed",
+                             G_CALLBACK(record_signal), &counter);
+
+    gwy_unit_assign(u1, u5);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_multiply(u1, u3, u4);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_divide(u1, u2, u5);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power(u1, u5, 1);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_nth_root(u1, u2, 2);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u5, 1, u7, 0);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u5, 1, u7, -3);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u7, 0, u5, 1);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u7, 2, u5, 1);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u5, 2, u5, -1);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u1, 2, u1, -1);
+    g_assert_cmpuint(counter, ==, 0);
+
+    gwy_unit_power_multiply(u1, u3, 2, u6, -1);
+    g_assert_cmpuint(counter, ==, 0);
+
+    g_object_unref(u7);
+    g_object_unref(u6);
+    g_object_unref(u5);
+    g_object_unref(u4);
+    g_object_unref(u3);
+    g_object_unref(u2);
+    g_object_unref(u1);
 }
 
 void
