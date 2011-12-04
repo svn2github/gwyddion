@@ -1710,18 +1710,27 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                      gwy_field_dy(field),
                      0.5*gwy_field_dy(field) + field->yoff);
 
-    // Copy data to all other instances of the same grain value.
+    // Copy data to all other instances of the same grain value and set units.
+    GwyUnit *unitxy = gwy_field_get_unit_xy(field);
+    GwyUnit *unitz = gwy_field_get_unit_z(field);
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
-        BuiltinGrainValueId id = grainvalue->priv->builtin->id;
+        GrainValue *priv = grainvalue->priv;
+        const BuiltinGrainValue *builtin = priv->builtin;
+        BuiltinGrainValueId id = builtin->id;
+
         if (grainvalue != ourvalues[id]) {
             gwy_assign(grainvalue->priv->values,
                        ourvalues[id]->priv->values,
                        ngrains+1);
         }
-    }
 
-    // TODO: Units (probably in specific evaluators).
+        if (!priv->unit)
+            priv->unit = gwy_unit_new();
+        gwy_unit_power_multiply(priv->unit,
+                                unitxy, builtin->powerxy,
+                                unitz, builtin->powerz);
+    }
 
     for (guint i = 0; i < GWY_GRAIN_NVALUES; i++)
         GWY_OBJECT_UNREF(ourvalues[i]);
