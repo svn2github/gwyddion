@@ -935,10 +935,10 @@ gwy_field_row_acf(const GwyField *field,
     gsize cstride = size/2 + 1;
     const gdouble *base = field->data + row*field->xres + col;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    gdouble *fftr = fftw_malloc(3*size*sizeof(gdouble));
+    gdouble *fftr = fftw_alloc_real(3*size);
     gdouble *accum_data = fftr + size;
     gdouble *accum_mask = fftr + 2*size;
-    gwycomplex *fftc = fftw_malloc(cstride*sizeof(gwycomplex));
+    gwycomplex *fftc = fftw_alloc_complex(cstride);
     guint nfullrows = 0, nemptyrows = 0;
 
     fftw_plan plan = fftw_plan_dft_r2c_1d(size, fftr, fftc,
@@ -1151,12 +1151,12 @@ gwy_field_grain_row_acf(const GwyField *field,
     // slightly larger than the real input.  Note @cstride is measured in
     // gwycomplex, multiply it by 2 for doubles.
     gsize cstride = size/2 + 1;
-    gdouble *fftr = fftw_malloc((3*size + 2*width)*sizeof(gdouble));
+    gdouble *fftr = fftw_alloc_real(3*size + 2*width);
     gdouble *accum_data = fftr + size;
     gdouble *accum_mask = fftr + 2*size;
     gdouble *total_data = fftr + 3*size;
     gdouble *total_mask = fftr + 3*size + width;
-    gwycomplex *fftc = fftw_malloc(cstride*sizeof(gwycomplex));
+    gwycomplex *fftc = fftw_alloc_complex(cstride);
 
     gwy_clear(total_data, width);
     gwy_clear(total_mask, width);
@@ -1252,11 +1252,11 @@ gwy_field_row_psdf(const GwyField *field,
     gsize size = (width + 3)/4*4;
     const gdouble *base = field->data + row*field->xres + col;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    gdouble *fftr = fftw_malloc(4*size*sizeof(gdouble));
+    gdouble *fftr = fftw_alloc_real(4*size);
     gdouble *accum_data = fftr + 1*size;
     gdouble *accum_mask = fftr + 2*size;
     gdouble *window = fftr + 3*size;
-    gwycomplex *fftc = fftw_malloc(cstride*sizeof(gwycomplex));
+    gwycomplex *fftc = fftw_alloc_complex(cstride);
     guint nfullrows = 0, nemptyrows = 0;
 
     gwy_clear(accum_data, size);
@@ -1397,11 +1397,11 @@ gwy_field_row_hhcf(const GwyField *field,
     gsize cstride = size/2 + 1;
     const gdouble *base = field->data + row*field->xres + col;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    gdouble *fftr = fftw_malloc(4*size*sizeof(gdouble));
+    gdouble *fftr = fftw_alloc_real(4*size);
     gdouble *accum_data = fftr + size;
     gdouble *accum_mask = fftr + 2*size;
     gdouble *accum_v = fftr + 3*size;
-    gwycomplex *fftc = fftw_malloc(2*cstride*sizeof(gwycomplex));
+    gwycomplex *fftc = fftw_alloc_complex(2*cstride);
     gwycomplex *tmp = fftc + cstride;
     guint nfullrows = 0, nemptyrows = 0;
     gdouble *p;

@@ -159,7 +159,7 @@ fi
 # All libraries that are required should be checked here.
 # TODO: use macros from m4/gwy-pkg.m4 once we can make the errors meaningful.
 PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.26])
-PKG_CHECK_MODULES([FFTW],[fftw3 >= 3.1])
+PKG_CHECK_MODULES([FFTW],[fftw3 >= 3.3])
 PKG_CHECK_MODULES([GDKPIXBUF],[gdk-pixbuf-2.0 >= 2.22])
 PKG_CHECK_MODULES([GTK],[gtk+-3.0 >= 3.0])
 

@@ -330,8 +330,8 @@ row_convolve_fft(const GwyField *field,
     // slightly larger than the real input.  Note @cstride is measured in
     // gwycomplex, multiply it by 2 for doubles.
     guint cstride = size/2 + 1;
-    gdouble *extdata = fftw_malloc(size*sizeof(gdouble));
-    gwycomplex *datac = fftw_malloc(2*cstride*sizeof(gwycomplex));
+    gdouble *extdata = fftw_alloc_real(size);
+    gwycomplex *datac = fftw_alloc_complex(2*cstride);
     gwycomplex *kernelc = datac + cstride;
     // The R2C plan for transforming the extended data row (or kernel).
     fftw_plan dplan = fftw_plan_dft_r2c_1d(size, extdata, datac,
@@ -749,9 +749,9 @@ convolve_fft(const GwyField *field,
     _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
     // Use in-place transforms.  Let FFTW figure out whether allocating
     // temporary buffers worths it or not.
-    gwycomplex *datac = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gwycomplex *datac = fftw_alloc_complex(cstride*ysize);
     gdouble *extdata = (gdouble*)datac;
-    gwycomplex *kernelc = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gwycomplex *kernelc = fftw_alloc_complex(cstride*ysize);
     // The R2C plan for transforming the extended kernel.  The input is in
     // extdata to make it an out-of-place transform (this also means the input
     // data row stride is just xsize, not 2*cstride).
