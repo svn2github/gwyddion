@@ -344,9 +344,9 @@ ensure_value(BuiltinGrainValueId id,
     if (!ourvalues[id]) {
         ourvalues[id] = gwy_grain_value_new(builtin_table[id].name);
         g_assert(ourvalues[id]);
-        g_assert(ourvalues[id]->priv->builtin->id == id);
-        _gwy_grain_value_set_size(ourvalues[id], ngrains);
     }
+    g_assert(ourvalues[id]->priv->builtin->id == id);
+    _gwy_grain_value_set_size(ourvalues[id], ngrains);
 }
 
 static void
@@ -1612,11 +1612,11 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     }
 
     // Integer data.
-    const guint *sizes = ((need & NEED_SIZE)
+    const guint *sizes = (((need & NEED_SIZE) == NEED_SIZE)
                           ? gwy_mask_field_grain_sizes(mask) : NULL);
 
     guint *anyboundpos = NULL;
-    if (need & NEED_ANYBOUNDPOS) {
+    if ((need & NEED_ANYBOUNDPOS) == NEED_ANYBOUNDPOS) {
         anyboundpos = g_new(guint, ngrains + 1);
         for (guint i = 0; i <= ngrains; i++)
             anyboundpos[i] = G_MAXUINT;
@@ -1635,10 +1635,10 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     }
 
     // Non-scalar auxiliary floating point data.
-    gdouble *linear = ((need & NEED_LINEAR)
+    gdouble *linear = (((need & NEED_LINEAR) == NEED_LINEAR)
                        ? g_new0(gdouble, 5*(ngrains + 1)) : NULL);
 
-    gdouble *quadratic = ((need & NEED_QUADRATIC)
+    gdouble *quadratic = (((need & NEED_QUADRATIC) == NEED_QUADRATIC)
                           ?  g_new0(gdouble, 12*(ngrains + 1)) : NULL);
 
     calc_anyboundpos(anyboundpos, grains, field);
@@ -1720,6 +1720,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
         BuiltinGrainValueId id = builtin->id;
 
         if (grainvalue != ourvalues[id]) {
+            _gwy_grain_value_set_size(grainvalue, ngrains);
             gwy_assign(grainvalue->priv->values,
                        ourvalues[id]->priv->values,
                        ngrains+1);
@@ -1764,7 +1765,8 @@ _gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
     GrainValue *priv = grainvalue->priv;
     if (priv->ngrains != ngrains) {
         GWY_FREE(priv->values);
-        priv->values = g_new(gdouble, ngrains);
+        priv->values = g_new(gdouble, ngrains+1);
+        priv->ngrains = ngrains;
     }
 }
 
