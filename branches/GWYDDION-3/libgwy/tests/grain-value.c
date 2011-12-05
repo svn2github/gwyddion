@@ -300,7 +300,7 @@ dumb_slope_phi(const GwyMaskField *mask, const GwyField *field)
                     cx, cy, ax, ay, FALSE,
                     GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                     NULL, &bx, &by);
-    return atan2(by, bx);
+    return atan2(by, -bx);
 }
 
 void
