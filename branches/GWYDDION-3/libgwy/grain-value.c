@@ -570,7 +570,26 @@ gwy_field_evaluate_grains(const GwyField *field,
                           GwyGrainValue **grainvalues,
                           guint nvalues)
 {
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+    if (!nvalues)
+        return;
+    g_return_if_fail(grainvalues);
+
     // TODO
+    GPtrArray *builtins = g_ptr_array_new();
+    for (guint i = 0; i < nvalues; i++) {
+        GwyGrainValue *grainvalue = grainvalues[i];
+        g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
+        if (grainvalue->priv->builtin)
+            g_ptr_array_add(builtins, grainvalue);
+        else
+            g_warning("Implement me: non-builtin grain values.");
+    }
+    _gwy_grain_value_evaluate_builtins(field, mask,
+                                       (GwyGrainValue**)builtins->pdata,
+                                       builtins->len);
+    g_ptr_array_free(builtins, TRUE);
 }
 
 GwyExpr*
