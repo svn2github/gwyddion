@@ -215,6 +215,42 @@ gwy_field_value_interpolated(const GwyField *field,
     return retval;
 }
 
+static guint
+local_centre(const GwyField *field,
+             const GwyMaskField *mask,
+             GwyMaskingType masking,
+             gint col, gint row,
+             gint ax, gint ay,
+             gboolean elliptical,
+             GwyExteriorType exterior,
+             gdouble fill_value,
+             gdouble *xmean, gdouble *ymean, gdouble *zmean)
+{
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble rx = ax + 0.5, ry = ay + 0.5;
+    gdouble sx = 0.0, sy = 0.0, sz = 0.0;
+    guint n = 0;
+
+    for (gint i = -ay; i <= ay; i++) {
+        gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
+        for (gint j = -ax + xlen; j <= ax - xlen; j++) {
+            if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
+                sx += j;
+                sy += i;
+                sz += exterior_value(field, j + col, i + row,
+                                     exterior, fill_value);
+                n++;
+            }
+        }
+    }
+
+    *xmean = sx/n;
+    *ymean = sy/n;
+    *zmean = sz/n;
+
+    return n;
+}
+
 /**
  * gwy_field_value_averaged:
  * @field: A two-dimensional data field.
@@ -240,7 +276,8 @@ gwy_field_value_interpolated(const GwyField *field,
  * @ax and @ay means no averaging in the corresponding direction.
  *
  * Returns: Field value at position (@col,@row), possibly extrapolated and
- *          averaged.
+ *          averaged.  The returned value may be NaN if the neighbourhood is
+ *          empty.
  **/
 gdouble
 gwy_field_value_averaged(const GwyField *field,
@@ -308,9 +345,12 @@ gwy_field_value_averaged(const GwyField *field,
  *
  * See gwy_field_value_averaged() for description of the neighbourhood shape
  * and size.  The slope in the direction of zero averaging radius is considered
- * to be identically zero.
+ * to be identically zero.  The local mean value may be NaN if the
+ * neighbourhood is empty.
+ *
+ * Returns: The number of data values in the neighbourhood.
  **/
-void
+guint
 gwy_field_slope(const GwyField *field,
                 const GwyMaskField *mask,
                 GwyMaskingType masking,
@@ -322,40 +362,71 @@ gwy_field_slope(const GwyField *field,
                 gdouble *a,
                 gdouble *bx, gdouble *by)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0);
     if (!mask || masking == GWY_MASK_IGNORE) {
         mask = NULL;
         masking = GWY_MASK_IGNORE;
     }
     else
-        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
 
     gboolean invert = (masking == GWY_MASK_EXCLUDE);
     gdouble rx = ax + 0.5, ry = ay + 0.5;
-    gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sx2 = 0.0, sy2 = 0.0;
-    guint n = 0;
+    gdouble sxy = 0.0, sxz = 0.0, syz = 0.0, sxx = 0.0, syy = 0.0;
+    gdouble xmean, ymean, zmean;
+    guint n = local_centre(field, mask, masking,
+                           col, row, ax, ay, elliptical,
+                           exterior, fill_value,
+                           &xmean, &ymean, &zmean);
+
+    GWY_MAYBE_SET(a, zmean);
+    GWY_MAYBE_SET(bx, 0.0);
+    GWY_MAYBE_SET(by, 0.0);
+    if (n < 2)
+        return n;
 
     for (gint i = -(gint)ay; i <= (gint)ay; i++) {
         gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
         for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
-            gdouble i2 = i*i;
+            gdouble y = i - ymean;
+            gdouble y2 = y*y;
             if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
                 gdouble z = exterior_value(field, j + col, i + row,
-                                           exterior, fill_value);
-                gdouble j2 = j*j;
-                sz += z;
-                sxz += j*z;
-                syz += i*z;
-                sx2 += j2;
-                sy2 += i2;
-                n++;
+                                           exterior, fill_value) - zmean;
+                gdouble x = j - xmean;
+                gdouble x2 = x*x;
+                sxz += x*z;
+                syz += y*z;
+                sxy += x*y;
+                sxx += x2;
+                syy += y2;
             }
         }
     }
 
-    GWY_MAYBE_SET(a, n ? sz/n : 0.0);
-    GWY_MAYBE_SET(bx, sx2 ? sxz/sx2/gwy_field_dx(field) : 0.0);
-    GWY_MAYBE_SET(by, sy2 ? syz/sy2/gwy_field_dy(field) : 0.0);
+    // Both sxx and syy can be zero only if n < 2.
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    if (sxx == 0.0)
+        GWY_MAYBE_SET(by, syz/syy/dy);
+    else if (syy == 0.0)
+        GWY_MAYBE_SET(bx, sxz/sxx/dx);
+    else {
+        gdouble D = sxx*syy - sxy*sxy;
+
+        if (fabs(D) < 1e-13) {
+            // Projection of the slope in the one direction where the slope
+            // is defined to x and y.  It is assumed to be 0 in the other
+            // direction.
+            GWY_MAYBE_SET(bx, sxz/(sxx + syy)/dx);
+            GWY_MAYBE_SET(by, syz/(sxx + syy)/dy);
+        }
+        else {
+            GWY_MAYBE_SET(bx, (sxz*syy - sxy*syz)/(dx*D));
+            GWY_MAYBE_SET(by, (syz*sxx - sxy*sxz)/(dy*D));
+        }
+    }
+
+    return n;
 }
 
 /**
@@ -391,6 +462,8 @@ gwy_field_slope(const GwyField *field,
  *
  * Returns: The number of curved dimensions, simiarly to gwy_math_curvature().
  **/
+// XXX: This is broken with masking as the area is no longer symmetrical and
+// some mean values do not vanish.
 guint
 gwy_field_curvature(const GwyField *field,
                     const GwyMaskField *mask,
