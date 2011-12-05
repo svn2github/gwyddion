@@ -352,6 +352,7 @@ fit-func/builtin/lorentzian
 fit-func/builtin/acf-gaussian
 fit-func/builtin/acf-exponential
 fit-func/user
+grain-value/builtin/projected-area
 # Finalisation tests, should go last.
 fft/save-wisdom
 resource/finalize

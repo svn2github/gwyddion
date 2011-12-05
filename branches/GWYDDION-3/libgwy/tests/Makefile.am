@@ -20,6 +20,7 @@ testlibgwy_SOURCES = \
 	fit-funcs.c \
 	gl-material.c \
 	gradient.c \
+	grain-value.c \
 	interpolation.c \
 	inventory.c \
 	line-part.c \
