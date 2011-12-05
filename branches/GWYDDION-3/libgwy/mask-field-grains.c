@@ -641,6 +641,8 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
  * gwy_mask_field_extract_grain:
  * @field: A two-dimensional mask field.
  * @target: A two-dimensional mask field where the result will be placed.
+ *          It will be resized to the size of the grain (plus the border,
+ *          if requested).
  * @grain_id: Grain number (from 1 to @ngrains).  It is permitted although not
  *            much useful to pass 0 to extract the entire unmasked area.
  * @border_width: Width of empty border to add at each side of the grain.
@@ -665,8 +667,7 @@ gwy_mask_field_extract_grain(const GwyMaskField *field,
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(GWY_IS_MASK_FIELD(target));
-    guint xres = field->xres, yres = field->yres;
-    g_return_if_fail(target->xres == xres && target->yres == yres);
+    guint xres = field->xres;
 
     gwy_mask_field_grain_bounding_boxes(field);
     MaskField *priv = field->priv;
@@ -675,14 +676,13 @@ gwy_mask_field_extract_grain(const GwyMaskField *field,
 
     const GwyFieldPart *bbox = priv->grain_bounding_boxes + grain_id;
     gwy_mask_field_set_size(target,
-                            xres + 2*border_width, yres + 2*border_width,
+                            bbox->width + 2*border_width,
+                            bbox->height + 2*border_width,
                             TRUE);
     for (guint i = 0; i < bbox->height; i++) {
         const guint *mrow = priv->grains + ((bbox->row + i)*xres + bbox->col);
         GwyMaskIter iter;
-        gwy_mask_field_iter_init(target, iter,
-                                 border_width + bbox->col,
-                                 border_width + bbox->row);
+        gwy_mask_field_iter_init(target, iter, border_width, border_width + i);
         for (guint j = bbox->width; j; j--, mrow++) {
             if (*mrow == grain_id)
                 gwy_mask_iter_set(iter, TRUE);
