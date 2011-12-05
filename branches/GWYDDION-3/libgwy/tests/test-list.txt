@@ -353,6 +353,16 @@ fit-func/builtin/acf-gaussian
 fit-func/builtin/acf-exponential
 fit-func/user
 grain-value/builtin/projected-area
+grain-value/builtin/equivalent-radius
+grain-value/builtin/surface-area
+grain-value/builtin/center-x
+grain-value/builtin/center-y
+grain-value/builtin/minimum
+grain-value/builtin/maximum
+grain-value/builtin/mean
+grain-value/builtin/median
+grain-value/builtin/slope-theta
+grain-value/builtin/slope-phi
 # Finalisation tests, should go last.
 fft/save-wisdom
 resource/finalize

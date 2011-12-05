@@ -741,7 +741,7 @@ calc_equiv_disc_radius(GwyGrainValue *grainvalue,
     gdouble *values = priv->values;
     gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
     for (guint gno = 0; gno <= ngrains; gno++)
-        values[gno] = sqrt(dxdy*sizes[gno]);
+        values[gno] = sqrt(dxdy*sizes[gno]/G_PI);
 }
 
 // Calculate twice the `contribution of one corner' (the twice is to move
