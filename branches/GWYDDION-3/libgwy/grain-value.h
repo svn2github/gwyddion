@@ -64,6 +64,7 @@ const gchar*       gwy_grain_value_get_ident       (const GwyGrainValue *grainva
 const gchar*       gwy_grain_value_get_symbol      (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 GwyUserGrainValue* gwy_grain_value_get_resource    (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 gboolean           gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue) G_GNUC_PURE;
+gboolean           gwy_grain_value_is_angle        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 gboolean           gwy_grain_value_is_valid        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
 
 void gwy_field_evaluate_grains(const GwyField *field,

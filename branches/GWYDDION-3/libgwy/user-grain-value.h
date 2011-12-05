@@ -65,8 +65,8 @@ struct _GwyUserGrainValueClass {
 #define gwy_user_grain_value_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType              gwy_user_grain_value_get_type      (void)                              G_GNUC_CONST;
-GwyUserGrainValue* gwy_user_grain_value_new           (void)                              G_GNUC_MALLOC;
+GType              gwy_user_grain_value_get_type      (void)                                    G_GNUC_CONST;
+GwyUserGrainValue* gwy_user_grain_value_new           (void)                                    G_GNUC_MALLOC;
 const gchar*       gwy_user_grain_value_get_formula   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
 gboolean           gwy_user_grain_value_set_formula   (GwyUserGrainValue *usergrainvalue,
                                                        const gchar *formula,
@@ -89,6 +89,9 @@ void               gwy_user_grain_value_set_power_z   (GwyUserGrainValue *usergr
 gboolean           gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
 void               gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
                                                        gboolean same_units);
+gboolean           gwy_user_grain_value_get_is_angle  (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void               gwy_user_grain_value_set_is_angle  (GwyUserGrainValue *usergrainvalue,
+                                                       gboolean is_angle);
 
 #define gwy_user_grain_values() \
     (gwy_resource_type_get_inventory(GWY_TYPE_USER_GRAIN_VALUE))

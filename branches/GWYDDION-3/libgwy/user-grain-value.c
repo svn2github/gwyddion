@@ -32,7 +32,7 @@
 
 enum { POWER_MIN = -12, POWER_MAX = 12 };
 
-enum { N_ITEMS = 7 };
+enum { N_ITEMS = 8 };
 
 struct _GwyUserGrainValuePrivate {
     gchar *group;
@@ -42,6 +42,7 @@ struct _GwyUserGrainValuePrivate {
     gint power_xy;
     gint power_z;
     gboolean same_units;
+    gboolean is_angle;
 };
 
 typedef struct _GwyUserGrainValuePrivate UserGrainValue;
@@ -78,6 +79,7 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*4*/ { .name = "xy-power",   .ctype = GWY_SERIALIZABLE_INT32,   },
     /*5*/ { .name = "z-power",    .ctype = GWY_SERIALIZABLE_INT32,   },
     /*6*/ { .name = "same-units", .ctype = GWY_SERIALIZABLE_BOOLEAN, },
+    /*7*/ { .name = "is-angle",   .ctype = GWY_SERIALIZABLE_BOOLEAN, },
 };
 
 static GwyExpr *test_expr = NULL;
@@ -121,8 +123,8 @@ static void
 gwy_user_grain_value_init(GwyUserGrainValue *usergrainvalue)
 {
     usergrainvalue->priv = G_TYPE_INSTANCE_GET_PRIVATE(usergrainvalue,
-                                                    GWY_TYPE_USER_GRAIN_VALUE,
-                                                    UserGrainValue);
+                                                       GWY_TYPE_USER_GRAIN_VALUE,
+                                                       UserGrainValue);
     UserGrainValue *priv = usergrainvalue->priv;
 
     // Constant, by default.
@@ -197,6 +199,12 @@ gwy_user_grain_value_itemize(GwySerializable *serializable,
         it++, items->n++, nn++;
     }
 
+    if (priv->is_angle) {
+        *it = serialize_items[7];
+        it->value.v_boolean = priv->is_angle;
+        it++, items->n++, nn++;
+    }
+
     return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
                                         parent_serializable, items, nn);
 }
@@ -238,6 +246,7 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     priv->power_xy = CLAMP(its[4].value.v_int32, POWER_MIN, POWER_MAX);
     priv->power_z = CLAMP(its[5].value.v_int32, POWER_MIN, POWER_MAX);
     priv->same_units = !!its[6].value.v_boolean;
+    priv->is_angle = !!its[7].value.v_boolean;
 
     GError *err = NULL;
     if (validate(usergrainvalue,
@@ -261,6 +270,7 @@ assign_info(UserGrainValue *dpriv,
     dpriv->power_xy = spriv->power_xy;
     dpriv->power_z = spriv->power_z;
     dpriv->same_units = spriv->same_units;
+    dpriv->is_angle = spriv->is_angle;
 }
 
 static GObject*
@@ -680,7 +690,7 @@ gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue)
  * @same_units: %TRUE if the grain value should require same lateral and value
  *              units, %FALSE if it should not.
  *
- * Gets whether a user grain value needs the same lateral and value units.
+ * Sets whether a user grain value needs the same lateral and value units.
  *
  * Some grain values, such as surface area, are meaningful only if height is
  * the same physical quantity as lateral dimensions.  These grain values
@@ -695,6 +705,47 @@ gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
     same_units = !!same_units;
     if (same_units != priv->same_units) {
         priv->same_units = same_units;
+        gwy_user_grain_value_changed(usergrainvalue);
+    }
+}
+
+/**
+ * gwy_user_grain_value_get_is_angle:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Gets whether a user grain value represents an angle.
+ *
+ * Returns: %TRUE if the grain value represents an angle.
+ **/
+gboolean
+gwy_user_grain_value_get_is_angle(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), FALSE);
+    return usergrainvalue->priv->is_angle;
+}
+
+/**
+ * gwy_user_grain_value_set_is_angle:
+ * @usergrainvalue: A user grain value resource.
+ * @is_angle: %TRUE if the grain value should require same lateral and value
+ *              units, %FALSE if it should not.
+ *
+ * Sets whether a user grain value represents an angle.
+ *
+ * Grain values that represent angles are calculated in radians and reported
+ * as unitless.  To present them to the user they usually should be converted
+ * to degrees.  To tell them apart from other unitless values they should have
+ * @is_angle set to %TRUE.
+ **/
+void
+gwy_user_grain_value_set_is_angle(GwyUserGrainValue *usergrainvalue,
+                                  gboolean is_angle)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    UserGrainValue *priv = usergrainvalue->priv;
+    is_angle = !!is_angle;
+    if (is_angle != priv->is_angle) {
+        priv->is_angle = is_angle;
         gwy_user_grain_value_changed(usergrainvalue);
     }
 }
@@ -717,6 +768,8 @@ gwy_user_grain_value_dump(GwyResource *resource)
         g_string_append_printf(text, "power_z %d\n", priv->power_z);
     if (priv->same_units)
         g_string_append(text, "same_units 1\n");
+    if (priv->is_angle)
+        g_string_append(text, "is_angle 1\n");
 
     return g_string_free(text, FALSE);;
 }
@@ -745,6 +798,8 @@ gwy_user_grain_value_parse(GwyResource *resource,
             priv->power_z = strtol(value, NULL, 10);
         else if (gwy_strequal(key, "same_units"))
             priv->same_units = !!strtol(value, NULL, 10);
+        else if (gwy_strequal(key, "is_angle"))
+            priv->is_angle = !!strtol(value, NULL, 10);
         else if (gwy_strequal(key, "formula"))
             _gwy_assign_string(&priv->formula, value);
         else if (gwy_strequal(key, "group"))

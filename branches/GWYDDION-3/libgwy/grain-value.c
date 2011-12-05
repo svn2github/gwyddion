@@ -505,6 +505,30 @@ gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue)
 }
 
 /**
+ * gwy_grain_value_is_angle:
+ * @grainvalue: A grain value.
+ *
+ * Reports whether a grain value represents an angle.
+ *
+ * Grain values that represent angles are calculated in radians and reported
+ * as unitless.  To present them to the user they usually should be converted
+ * to degrees.  Using this method you can tell apart angular values from other
+ * unitless values.
+ *
+ * Returns: %TRUE if the grain value represents an angle.
+ **/
+gboolean
+gwy_grain_value_is_angle(const GwyGrainValue *grainvalue)
+{
+    g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), FALSE);
+    GrainValue *priv = grainvalue->priv;
+    if (priv->builtin)
+        return priv->builtin->is_angle;
+    else
+        return gwy_user_grain_value_get_is_angle(priv->resource);
+}
+
+/**
  * gwy_grain_value_is_valid:
  * @grainvalue: A grain value.
  *
