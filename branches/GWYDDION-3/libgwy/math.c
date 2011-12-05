@@ -329,6 +329,28 @@ gwy_power_sum(guint n,
 }
 
 /**
+ * gwy_standardize_direction:
+ * @phi: An angle (in radians).
+ *
+ * Standardises an angle of an undirected line in plane.
+ *
+ * Undirected means the also angles @phi and @phi+π are considered equivalent,
+ * not just @phi and @phi+2π.
+ *
+ * Returns: Angle @phi standardised to the interval (-π/2,π/2].
+ **/
+gdouble
+gwy_standardize_direction(gdouble phi)
+{
+    phi = fmod(phi, G_PI);
+    if (phi <= -G_PI/2.0)
+        phi += G_PI;
+    if (phi > G_PI/2.0)
+        phi -= G_PI;
+    return phi;
+}
+
+/**
  * gwy_overlapping:
  * @pos1: First segment start.
  * @len1: First segment length.
@@ -447,14 +469,8 @@ gwy_math_curvature(const gdouble *coeffs,
 
     curvature->k1 = cx;
     curvature->k2 = cy;
-
-    curvature->phi1 = fmod(phi + 2*G_PI, G_PI);
-    if (curvature->phi1 > G_PI/2.0)
-        curvature->phi1 -= G_PI;
-
-    curvature->phi2 = fmod(phi + G_PI/2.0, G_PI);
-    if (curvature->phi2 > G_PI/2.0)
-        curvature->phi2 -= G_PI;
+    curvature->phi1 = gwy_standardize_direction(phi);
+    curvature->phi2 = gwy_standardize_direction(phi + G_PI/2.0);
 
     return degree;
 }

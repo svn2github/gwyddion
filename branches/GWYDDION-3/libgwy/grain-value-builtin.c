@@ -1230,25 +1230,15 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
             grain_minimum_bound(vertices, dx, dy, &vx, &vy);
             if (minsizevalues)
                 minsizevalues[gno] = hypot(vx, vy);
-            if (minanglevalues) {
-                minanglevalues[gno] = atan2(-vy, vx);
-                if (minanglevalues[gno] <= -G_PI/2.0)
-                    minanglevalues[gno] += G_PI;
-                else if (minanglevalues[gno] > G_PI/2.0)
-                    minanglevalues[gno] -= G_PI;
-            }
+            if (minanglevalues)
+                minanglevalues[gno] = gwy_standardize_direction(atan2(-vy, vx));
         }
         if (maxsizevalues || maxanglevalues) {
             grain_maximum_bound(vertices, dx, dy, &vx, &vy);
             if (maxsizevalues)
                 maxsizevalues[gno] = hypot(vx, vy);
-            if (maxanglevalues) {
-                maxanglevalues[gno] = atan2(-vy, vx);
-                if (maxanglevalues[gno] <= -G_PI/2.0)
-                    maxanglevalues[gno] += G_PI;
-                else if (maxanglevalues[gno] > G_PI/2.0)
-                    maxanglevalues[gno] -= G_PI;
-            }
+            if (maxanglevalues)
+                maxanglevalues[gno] = gwy_standardize_direction(atan2(-vy, vx));
         }
     }
 
