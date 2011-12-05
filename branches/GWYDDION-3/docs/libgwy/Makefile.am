@@ -46,4 +46,4 @@ noinst_PROGRAMS = fit-funcs
 fit_funcs_SOURCES = fit-funcs.c
 
 builtin-fit-func.xml: fit-funcs$(EXEEXT)
-	$(LIBTOOL) --mode=execute ./fit-funcs$(EXEEXT) >builtin-fit-func.xml
+	$(AM_V_GEN)$(LIBTOOL) --mode=execute ./fit-funcs$(EXEEXT) >builtin-fit-func.xml
