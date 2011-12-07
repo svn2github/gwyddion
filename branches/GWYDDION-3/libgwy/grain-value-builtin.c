@@ -545,7 +545,7 @@ calc_volume_0(GwyGrainValue *grainvalue,
             guint imx = (i > 0) ? ix-xres : ix;
             guint ipx = (i < yres-1) ? ix+xres : ix;
             guint jm = (j > 0) ? j-1 : j;
-            guint jp = (j < yres-1) ? j+1 : j;
+            guint jp = (j < xres-1) ? j+1 : j;
 
             gdouble v = (52.0*d[ix + j] + 10.0*(d[imx + j] + d[ix + jm]
                                                 + d[ix + jp] + d[ipx + j])
@@ -744,14 +744,19 @@ calc_equiv_disc_radius(GwyGrainValue *grainvalue,
         values[gno] = sqrt(dxdy*sizes[gno]/G_PI);
 }
 
-// Calculate twice the `contribution of one corner' (the twice is to move
+// Calculate twice the ‘contribution of one corner’ (the twice is to move
 // multiplications from inner loops) to the surface area.
+// Direction 1-2 is x, 1-4 is y.
 static inline gdouble
 square_area2w_1c(gdouble z1, gdouble z2, gdouble z4, gdouble c,
-                 gdouble x, gdouble y)
+                 gdouble xx, gdouble yy)
 {
-    return sqrt(1.0 + (z1 - z2)*(z1 - z2)/x + (z1 + z2 - c)*(z1 + z2 - c)/y)
-            + sqrt(1.0 + (z1 - z4)*(z1 - z4)/y + (z1 + z4 - c)*(z1 + z4 - c)/x);
+    gdouble z12 = z1 - z2,
+            z14 = z1 - z4,
+            z12c = z1 + z2 - c,
+            z14c = z1 + z4 - c;
+    return sqrt(1.0 + z12*z12/xx + z12c*z12c/yy)
+           + sqrt(1.0 + z14*z14/yy + z14c*z14c/xx);
 }
 
 static void
@@ -777,17 +782,21 @@ calc_surface_area(GwyGrainValue *grainvalue,
 
     // Every contribution is calculated twice -- for each pixel (vertex)
     // participating to a particular triangle.  So we divide by 8, not by 4.
+    guint cnt = 0;
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++, g++) {
             guint gno = *g;
             if (!gno)
                 continue;
 
+            if (gno == 80)
+                g_printerr("GRAIN [%u] %g\n", cnt++, d[i*xres + j]);
+
             guint ix = i*xres;
             guint imx = (i > 0) ? ix-xres : ix;
             guint ipx = (i < yres-1) ? ix+xres : ix;
             guint jm = (j > 0) ? j-1 : j;
-            guint jp = (j < yres-1) ? j+1 : j;
+            guint jp = (j < xres-1) ? j+1 : j;
             gdouble c;
 
             c = 0.5*(d[ix + j] + d[ix + jm] + d[imx + jm] + d[imx + j]);
