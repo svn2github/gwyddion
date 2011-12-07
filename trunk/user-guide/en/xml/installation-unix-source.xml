@@ -24,8 +24,8 @@
       If you know the drill:
     </para>
     <informalexample>
-      <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2
-cd gwyddion-2.23
+      <literallayout><userinput>tar -jxvf gwyddion-2.26.tar.xz
+cd gwyddion-2.26
 ./configure
 make install</userinput></literallayout>
     </informalexample>
@@ -35,23 +35,23 @@ make install</userinput></literallayout>
     <para>
       Unpack the source code tarball with
       <informalexample>
-        <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2</userinput></literallayout>
+        <literallayout><userinput>tar -Jxvf gwyddion-2.26.tar.xz</userinput></literallayout>
       </informalexample>
-      replacing 2.23 with the actual version number. It will create directory
-      <filename>gwyddion-2.23</filename> (again, with the actual version
-      number in place of 2.23), <command>cd</command> to this directory.
+      replacing 2.26 with the actual version number. It will create directory
+      <filename>gwyddion-2.26</filename> (again, with the actual version
+      number in place of 2.26), <command>cd</command> to this directory.
       All other compilation actions will take place there.
     </para>
     <para>
-      If your operating system does not come with bzip2 you might want to
-      download <filename>gwyddion-2.23.tar.gz</filename> (compressed with
+      If your operating system does not come with xz you might want to
+      download <filename>gwyddion-2.26.tar.gz</filename> (compressed with
       gzip) instead and unpack it with
       <informalexample>
-        <literallayout><userinput>tar -zxvf gwyddion-2.23.tar.gz</userinput></literallayout>
+        <literallayout><userinput>tar -zxvf gwyddion-2.26.tar.gz</userinput></literallayout>
       </informalexample>
-      However, modern Unix and Unix-like systems come with both bzip2 and
+      However, modern Unix and Unix-like systems come with both xz and
       gzip so, the considerably smaller
-      <filename>gwyddion-2.23.tar.bz2</filename> should be normally the
+      <filename>gwyddion-2.26.tar.xz</filename> should be normally the
       better choice.
     </para>
   </sect2>
@@ -327,9 +327,9 @@ export LDFLAGS</userinput></literallayout>
       It is possible to build RPM packages on RPM-based GNU/Linux
       distributions directly from source code tarballs with
       <informalexample>
-        <literallayout><userinput>rpmbuild -tb gwyddion-2.23.tar.bz2</userinput></literallayout>
+        <literallayout><userinput>rpmbuild -tb gwyddion-2.26.tar.xz</userinput></literallayout>
       </informalexample>
-      where 2.23 is to be replaced with the actual version as above.
+      where 2.26 is to be replaced with the actual version as above.
       This method was tested mainly on Fedora, openSuSE and Mandriva and
       the RPM spec file contains some specific provisions for these systems.
       Specific support for other RPM-based systems can be added on request.
