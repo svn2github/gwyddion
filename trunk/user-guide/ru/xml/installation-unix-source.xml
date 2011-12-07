@@ -8,16 +8,16 @@
     <title>Быстрые инструкции</title>
     <para>Если вам знакома последовательность действий:</para>
     <informalexample>
-      <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2
-cd gwyddion-2.23
+      <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.xz
+cd gwyddion-2.26
 ./configure
 make install</userinput></literallayout>
     </informalexample>
   </sect2>
   <sect2 id="installation-unix-source-unpacking">
     <title>Распаковка исходного кода</title>
-    <para>Распакуйте архив с исходным кодом командой <informalexample><literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2</userinput></literallayout></informalexample>заменяя 2.23 реальным номером версии. При этом будет создан каталог  <filename>gwyddion-2.23</filename> (снова с текущим номером версии вместо 2.23), перейдите с помощью <command>cd</command> в этот каталог. Все остальные действия по сборке будут проходить там.</para>
-    <para>Если в операционной системе отсутствует bzip2, можно скачать <filename>gwyddion-2.23.tar.gz</filename> (сжатый с помощью gzip) вместо предыдущего архива и распаковать его с помощью <informalexample><literallayout><userinput>tar -zxvf gwyddion-2.23.tar.gz</userinput></literallayout></informalexample> Однако, современные Unix и подобные им системы поддерживают и gzip, и bzip2, и заметно меньший <filename>gwyddion-2.23.tar.bz2</filename> обычно будет лучшим вариантом.</para>
+    <para>Распакуйте архив с исходным кодом командой <informalexample><literallayout><userinput>tar -jxvf gwyddion-2.26.tar.xz</userinput></literallayout></informalexample>заменяя 2.26 реальным номером версии. При этом будет создан каталог <filename>gwyddion-2.26</filename> (снова с текущим номером версии вместо 2.26), перейдите с помощью <command>cd</command> в этот каталог. Все остальные действия по сборке будут проходить там.</para>
+    <para>Если в операционной системе отсутствует xz, можно скачать <filename>gwyddion-2.26.tar.gz</filename> (сжатый с помощью gzip) вместо предыдущего архива и распаковать его с помощью <informalexample><literallayout><userinput>tar -zxvf gwyddion-2.26.tar.gz</userinput></literallayout></informalexample> Однако, современные Unix и подобные им системы поддерживают и gzip, и xz, и заметно меньший <filename>gwyddion-2.26.tar.xz</filename> обычно будет лучшим вариантом.</para>
   </sect2>
   <sect2 id="installation-unix-source-configuration">
     <title>Настройка</title>
@@ -40,7 +40,7 @@ export PKG_CONFIG_PATH</userinput></literallayout></informalexample></para>
         <varlistentry>
           <term><envar>CPPFLAGS</envar>, <envar>LDFLAGS</envar></term>
           <listitem>
-            <para>Может потребоваться настроить эти переменные чтобы включить нестандартные каталоги с заголовочными файлами и библиотеками пакетов, с которыми не шло файлов pkg-config, например, для libTIFF в <filename>/usr/local</filename> можно установить: <informalexample><literallayout><userinput>CPPFLAGS=-I/usr/local/include 
+            <para>Может потребоваться настроить эти переменные чтобы включить нестандартные каталоги с заголовочными файлами и библиотеками пакетов, с которыми не шло файлов pkg-config, например, для libTIFF в <filename>/usr/local</filename> можно установить: <informalexample><literallayout><userinput>CPPFLAGS=-I/usr/local/include
 export CPPFLAGS
 LDFLAGS=-L/usr/local/lib
 export LDFLAGS</userinput></literallayout></informalexample></para>
@@ -83,7 +83,7 @@ export LDFLAGS</userinput></literallayout></informalexample></para>
   </sect2>
   <sect2 id="installation-unix-source-rpm">
     <title>Пакеты RPM</title>
-    <para>В основанных на RPM дистрибутивах GNU/Linux можно собрать RPM-пакеты напрямую из архивов с исходным кодом выполнив команду <informalexample><literallayout><userinput>rpmbuild -tb gwyddion-2.23.tar.bz2</userinput></literallayout></informalexample> где 2.23 – текущая версия, как упоминалось ранее. Этот метод тестировался в основном на Fedora, openSuSE и Mandriva и spec-файл RPM содержит некоторые специальные положения для этих систем. Специальная поддержка других основанных на RPM систем может быть добавлена по запросу.</para>
+    <para>В основанных на RPM дистрибутивах GNU/Linux можно собрать RPM-пакеты напрямую из архивов с исходным кодом выполнив команду <informalexample><literallayout><userinput>rpmbuild -tb gwyddion-2.26.tar.xz</userinput></literallayout></informalexample> где 2.26 – текущая версия, как упоминалось ранее. Этот метод тестировался в основном на Fedora, openSuSE и Mandriva и spec-файл RPM содержит некоторые специальные положения для этих систем. Специальная поддержка других основанных на RPM систем может быть добавлена по запросу.</para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
