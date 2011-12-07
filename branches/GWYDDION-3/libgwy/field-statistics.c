@@ -779,7 +779,7 @@ gwy_field_count_above_below(const GwyField *field,
 }
 
 /**
- * surface_area_nonsquare:
+ * surface_area_square:
  * @z1: Z-value in first corner.
  * @z2: Z-value in second corner.
  * @z3: Z-value in third corner.
