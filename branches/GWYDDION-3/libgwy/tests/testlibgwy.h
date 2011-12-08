@@ -33,6 +33,9 @@
 typedef void (*CompareObjectDataFunc)(GObject *object, GObject *reference);
 
 // Helpers
+void          base62_format                 (guint x,
+                                             gchar *out,
+                                             guint outsize);
 void          dump_error_list               (GwyErrorList *error_list);
 gboolean      values_are_equal              (const GValue *value1,
                                              const GValue *value2);
@@ -50,6 +53,8 @@ void          record_item_change            (GObject *object,
                                              guint pos,
                                              guint64 *counter);
 void          record_signal                 (guint *counter);
+void          mask_line_print               (const gchar *name,
+                                             const GwyMaskLine *maskline);
 GwyMaskField* random_mask_field             (guint xres,
                                              guint yres,
                                              GRand *rng);
@@ -57,10 +62,20 @@ GwyMaskField* random_mask_field_prob        (guint xres,
                                              guint yres,
                                              GRand *rng,
                                              gdouble probability);
+void          mask_field_print              (const gchar *name,
+                                             const GwyMaskField *maskfield);
+void          mask_field_print_grains       (const gchar *name,
+                                             const GwyMaskField *maskfield,
+                                             guint grain_id);
 void          curve_randomize               (GwyCurve *field,
                                              GRand *rng);
 void          field_randomize               (GwyField *field,
                                              GRand *rng);
+void          field_print                   (const gchar *name,
+                                             const GwyField *field);
+void          field_print_row               (const gchar *name,
+                                             const gdouble *data,
+                                             gsize size);
 void          field_assert_equal            (const GwyField *result,
                                              const GwyField *reference);
 void          field_assert_numerically_equal(const GwyField *result,
@@ -68,11 +83,15 @@ void          field_assert_numerically_equal(const GwyField *result,
                                              gdouble eps);
 void          line_randomize                (GwyLine *field,
                                              GRand *rng);
+void          line_print                    (const gchar *name,
+                                             const GwyLine *line);
 void          line_assert_equal             (const GwyLine *result,
                                              const GwyLine *reference);
 void          line_assert_numerically_equal (const GwyLine *result,
                                              const GwyLine *reference,
                                              gdouble eps);
+void          brick_print                   (const gchar *name,
+                                             const GwyBrick *brick);
 void          brick_part_assert_equal       (const GwyBrickPart *part,
                                              const GwyBrickPart *refpart);
 void          field_part_assert_equal       (const GwyFieldPart *part,

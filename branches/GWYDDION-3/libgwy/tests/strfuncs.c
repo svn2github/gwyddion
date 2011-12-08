@@ -26,6 +26,25 @@
  *
  ***************************************************************************/
 
+// A helper for other tests.
+void
+base62_format(guint x, gchar *out, guint outsize)
+{
+    out += outsize-1;
+    *out = '\0';
+    out--;
+    for (guint n = outsize-1; n; n--, out--) {
+        guint digit = x % 62;
+        if (digit < 10)
+            *out = '0' + x;
+        else if (digit < 36)
+            *out = 'a' + (x - 10);
+        else
+            *out = 'A' + (x - 36);
+        x /= 62;
+    }
+}
+
 /* FIXME: On GNU systems we test the libc memmem() here.  On the other hand,
  * this is the implementation we are going to use, so let's test it. */
 void

@@ -26,9 +26,8 @@
  *
  ***************************************************************************/
 
-G_GNUC_UNUSED
-static void
-print_line(const gchar *name, const GwyLine *line)
+void
+line_print(const gchar *name, const GwyLine *line)
 {
     g_printerr("%s", name);
     for (guint i = 0; i < line->res; i++)

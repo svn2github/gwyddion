@@ -26,9 +26,8 @@
  *
  ***************************************************************************/
 
-G_GNUC_UNUSED
-static void
-mask_line_dump(const GwyMaskLine *maskline, const gchar *name)
+void
+mask_line_print(const gchar *name, const GwyMaskLine *maskline)
 {
     printf("%s %s %p %u\n",
            G_OBJECT_TYPE_NAME(maskline), name, maskline,

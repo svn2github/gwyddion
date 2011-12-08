@@ -112,9 +112,8 @@ field_assert_numerically_equal(const GwyField *result,
     }
 }
 
-G_GNUC_UNUSED
-static void
-print_row(const gchar *name, const gdouble *data, gsize size)
+void
+field_print_row(const gchar *name, const gdouble *data, gsize size)
 {
     g_printerr("%s", name);
     while (size--)
@@ -122,9 +121,8 @@ print_row(const gchar *name, const gdouble *data, gsize size)
     g_printerr("\n");
 }
 
-G_GNUC_UNUSED
-static void
-print_field(const gchar *name, const GwyField *field)
+void
+field_print(const gchar *name, const GwyField *field)
 {
     g_printerr("=====[ %s ]=====\n", name);
     g_printerr("size %u x %u, real %g x %g, offsets %g x %g\n",

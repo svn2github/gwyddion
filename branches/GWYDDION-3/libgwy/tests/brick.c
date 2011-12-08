@@ -26,6 +26,25 @@
  ***************************************************************************/
 
 void
+brick_print(const gchar *name, const GwyBrick *brick)
+{
+    g_printerr("=====[ %s ]=====\n", name);
+    g_printerr("size %u x %u x %u, real %g x %g x %g, offsets %g x %g x %g\n",
+               brick->xres, brick->yres, brick->zres,
+               brick->xreal, brick->yreal, brick->zreal,
+               brick->xoff, brick->yoff, brick->zoff);
+    for (guint l = 0; l < brick->zres; l++) {
+        for (guint i = 0; i < brick->yres; i++) {
+            g_printerr("[%02u][%02u]", l, i);
+            for (guint j = 0; j < brick->xres; j++) {
+                g_printerr(" % .4f", gwy_brick_index(brick, j, i, l));
+            }
+            g_printerr("\n");
+        }
+    }
+}
+
+void
 brick_randomize(GwyBrick *brick,
                 GRand *rng)
 {
@@ -92,26 +111,6 @@ brick_assert_numerically_equal(const GwyBrick *result,
                 //g_printerr("[%u,%u,%u] %g %g\n", j, i, l, value, ref);
                 g_assert_cmpfloat(fabs(value - ref), <=, eps);
             }
-        }
-    }
-}
-
-G_GNUC_UNUSED
-static void
-print_brick(const gchar *name, const GwyBrick *brick)
-{
-    g_printerr("=====[ %s ]=====\n", name);
-    g_printerr("size %u x %u x %u, real %g x %g x %g, offsets %g x %g x %g\n",
-               brick->xres, brick->yres, brick->zres,
-               brick->xreal, brick->yreal, brick->zreal,
-               brick->xoff, brick->yoff, brick->zoff);
-    for (guint l = 0; l < brick->zres; l++) {
-        for (guint i = 0; i < brick->yres; i++) {
-            g_printerr("[%02u][%02u]", l, i);
-            for (guint j = 0; j < brick->xres; j++) {
-                g_printerr(" % .4f", gwy_brick_index(brick, j, i, l));
-            }
-            g_printerr("\n");
         }
     }
 }

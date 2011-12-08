@@ -26,9 +26,34 @@
  *
  ***************************************************************************/
 
-G_GNUC_UNUSED
-static void
-print_mask_field(const gchar *name, const GwyMaskField *maskfield)
+void
+mask_field_print_grains(const gchar *name,
+                        const GwyMaskField *maskfield,
+                        guint grain_id)
+{
+    g_printerr("%s %s %p %ux%u (stride %u)\n",
+               G_OBJECT_TYPE_NAME(maskfield), name, maskfield,
+               maskfield->xres, maskfield->yres, maskfield->stride);
+    const guint *grains = gwy_mask_field_grain_numbers(maskfield);
+    for (guint i = 0; i < maskfield->yres; i++) {
+        for (guint j = 0; j < maskfield->xres; j++) {
+            guint k = i*maskfield->xres + j;
+            if (grains[k] == grain_id)
+                g_printerr("**");
+            else if (grains[k]) {
+                gchar buf[3];
+                base62_format(grains[k], buf, 3);
+                g_printerr("%s", buf);
+            }
+            else
+                g_printerr("..");
+        }
+        g_printerr("\n");
+    }
+}
+
+void
+mask_field_print(const gchar *name, const GwyMaskField *maskfield)
 {
     g_printerr("%s %s %p %ux%u (stride %u)\n",
                G_OBJECT_TYPE_NAME(maskfield), name, maskfield,
