@@ -614,23 +614,30 @@ calc_quadratic(gdouble *quadratic,
                const guint *grains,
                const GwyGrainValue *xgrainvalue,
                const GwyGrainValue *ygrainvalue,
+               const GwyGrainValue *zgrainvalue,
                const GwyField *field)
 {
     if (!quadratic)
         return;
 
     g_return_if_fail(xgrainvalue && ygrainvalue);
-    const GrainValue *xpriv = xgrainvalue->priv, *ypriv = ygrainvalue->priv;
+    const GrainValue *xpriv = xgrainvalue->priv,
+                     *ypriv = ygrainvalue->priv,
+                     *zpriv = zgrainvalue->priv;
     const BuiltinGrainValue *xbuiltin = xpriv->builtin;
     const BuiltinGrainValue *ybuiltin = ypriv->builtin;
+    const BuiltinGrainValue *zbuiltin = zpriv->builtin;
     g_return_if_fail(xbuiltin
                      && xbuiltin->id == GWY_GRAIN_VALUE_CENTER_X);
     g_return_if_fail(ybuiltin
                      && ybuiltin->id == GWY_GRAIN_VALUE_CENTER_Y);
+    g_return_if_fail(zbuiltin
+                     && zbuiltin->id == GWY_GRAIN_VALUE_MEAN);
     guint xres = field->xres;
     guint yres = field->yres;
     const gdouble *xvalue = xpriv->values;
     const gdouble *yvalue = ypriv->values;
+    const gdouble *zvalue = zpriv->values;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -640,10 +647,10 @@ calc_quadratic(gdouble *quadratic,
             gdouble *t = quadratic + 12*gno;
             gdouble x = j - xvalue[gno];
             gdouble y = i - yvalue[gno];
+            gdouble z = *d - zvalue[gno];
             gdouble xx = x*x;
             gdouble xy = x*y;
             gdouble yy = y*y;
-            gdouble z = *d;
             *(t++) += xx*x;
             *(t++) += xx*y;
             *(t++) += x*yy;
@@ -1521,7 +1528,7 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
             a[19] = quad[7];
             a[20] = quad[8];
             if (gwy_cholesky_decompose(a, 6)) {
-                b[0] = n*zvalues[gno];
+                b[0] = 0; //n*zvalues[gno];
                 b[1] = lin[3];
                 b[2] = lin[4];
                 b[3] = quad[9];
@@ -1560,7 +1567,7 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
         if (ycvalues)
             ycvalues[gno] = eqside*a[5] + yvalues[gno];
         if (zcvalues)
-            zcvalues[gno] = a[6];
+            zcvalues[gno] = zvalues[gno] + a[6];
     }
 }
 
@@ -1656,6 +1663,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     calc_quadratic(quadratic, grains,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_X],
                    ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
+                   ourvalues[GWY_GRAIN_VALUE_MEAN],
                    field);
 
     // Values that do not directly correspond to auxiliary values and may
