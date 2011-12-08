@@ -782,15 +782,11 @@ calc_surface_area(GwyGrainValue *grainvalue,
 
     // Every contribution is calculated twice -- for each pixel (vertex)
     // participating to a particular triangle.  So we divide by 8, not by 4.
-    guint cnt = 0;
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++, g++) {
             guint gno = *g;
             if (!gno)
                 continue;
-
-            if (gno == 80)
-                g_printerr("GRAIN [%u] %g\n", cnt++, d[i*xres + j]);
 
             guint ix = i*xres;
             guint imx = (i > 0) ? ix-xres : ix;
