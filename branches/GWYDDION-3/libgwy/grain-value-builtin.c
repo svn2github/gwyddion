@@ -561,30 +561,35 @@ calc_volume_0(GwyGrainValue *grainvalue,
 
 // The coordinate origin is always the grain centre.
 // Also the sums are *NOT* divided by grain sizes because these will cancel out.
-// FIXME: It would be also nice to use MEAN as the value origin to reduce
-// rounding errors in the z-direction.
 static void
 calc_linear(gdouble *linear,
             const guint *grains,
             const GwyGrainValue *xgrainvalue,
             const GwyGrainValue *ygrainvalue,
+            const GwyGrainValue *zgrainvalue,
             const GwyField *field)
 {
     if (!linear)
         return;
 
     g_return_if_fail(xgrainvalue && ygrainvalue);
-    const GrainValue *xpriv = xgrainvalue->priv, *ypriv = ygrainvalue->priv;
+    const GrainValue *xpriv = xgrainvalue->priv,
+                     *ypriv = ygrainvalue->priv,
+                     *zpriv = zgrainvalue->priv;
     const BuiltinGrainValue *xbuiltin = xpriv->builtin;
     const BuiltinGrainValue *ybuiltin = ypriv->builtin;
+    const BuiltinGrainValue *zbuiltin = zpriv->builtin;
     g_return_if_fail(xbuiltin
                      && xbuiltin->id == GWY_GRAIN_VALUE_CENTER_X);
     g_return_if_fail(ybuiltin
                      && ybuiltin->id == GWY_GRAIN_VALUE_CENTER_Y);
+    g_return_if_fail(zbuiltin
+                     && zbuiltin->id == GWY_GRAIN_VALUE_MEAN);
     guint xres = field->xres;
     guint yres = field->yres;
     const gdouble *xvalue = xpriv->values;
     const gdouble *yvalue = ypriv->values;
+    const gdouble *zvalue = ypriv->values;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -594,7 +599,7 @@ calc_linear(gdouble *linear,
             gdouble *t = linear + 5*gno;
             gdouble x = j - xvalue[gno];
             gdouble y = i - yvalue[gno];
-            gdouble z = *d;
+            gdouble z = *d - zvalue[gno];
             *(t++) += x*x;
             *(t++) += x*y;
             *(t++) += y*y;
@@ -1646,6 +1651,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     calc_linear(linear, grains,
                 ourvalues[GWY_GRAIN_VALUE_CENTER_X],
                 ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
+                ourvalues[GWY_GRAIN_VALUE_MEAN],
                 field);
     calc_quadratic(quadratic, grains,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_X],
