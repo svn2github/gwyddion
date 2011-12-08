@@ -48,8 +48,10 @@ static void
 test_one_value(const gchar *name,
                const gchar *expected_group,
                gboolean expected_builtin,
-               gdouble (*dumb_evaluator)(const GwyMaskField *mask,
-                                         const GwyField *field))
+               gdouble (*dumb_evaluate)(const GwyMaskField *mask,
+                                        const GwyField *field),
+               void (*compare)(gdouble reference,
+                               gdouble result))
 {
     enum { max_size = 85, niter = 30 };
 
@@ -82,10 +84,15 @@ test_one_value(const gchar *name,
 
         for (guint gno = 1; gno <= ngrains; gno++) {
             extract_grain_with_data(mask, grainmask, field, grainfield, gno);
-            gdouble reference = dumb_evaluator(grainmask, grainfield);
+            gdouble reference = dumb_evaluate(grainmask, grainfield);
             gdouble value = values[gno];
-            gdouble eps = 1e-9*fmax(fabs(value), fabs(reference));
-            g_assert_cmpfloat(fabs(value - reference), <=, eps);
+            gdouble eps = 1e-10*fmax(fabs(value), fabs(reference));
+            //g_printerr("%s[%u:%u] %g %g\n", name, iter, gno, reference, value);
+            if (compare)
+                compare(reference, value);
+            else {
+                g_assert_cmpfloat(fabs(value - reference), <=, eps);
+            }
         }
 
         g_object_unref(mask);
@@ -108,7 +115,8 @@ dumb_projected_area(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_projected_area(void)
 {
-    test_one_value("Projected area", "Area", TRUE, &dumb_projected_area);
+    test_one_value("Projected area", "Area", TRUE,
+                   &dumb_projected_area, NULL);
 }
 
 static gdouble
@@ -122,7 +130,7 @@ void
 test_grain_value_builtin_equivalent_radius(void)
 {
     test_one_value("Equivalent disc radius", "Area", TRUE,
-                   &dumb_equivalent_radius);
+                   &dumb_equivalent_radius, NULL);
 }
 
 static gdouble
@@ -134,7 +142,8 @@ dumb_surface_area(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_surface_area(void)
 {
-    test_one_value("Surface area", "Area", TRUE, &dumb_surface_area);
+    test_one_value("Surface area", "Area", TRUE,
+                   &dumb_surface_area, NULL);
 }
 
 static gdouble
@@ -155,7 +164,8 @@ dumb_center_x(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_center_x(void)
 {
-    test_one_value("Center x position", "Position", TRUE, &dumb_center_x);
+    test_one_value("Center x position", "Position", TRUE,
+                   &dumb_center_x, NULL);
 }
 
 static gdouble
@@ -175,7 +185,8 @@ dumb_center_y(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_center_y(void)
 {
-    test_one_value("Center y position", "Position", TRUE, &dumb_center_y);
+    test_one_value("Center y position", "Position", TRUE,
+                   &dumb_center_y, NULL);
 }
 
 static gdouble
@@ -189,7 +200,8 @@ dumb_minimum(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_minimum(void)
 {
-    test_one_value("Minimum value", "Value", TRUE, &dumb_minimum);
+    test_one_value("Minimum value", "Value", TRUE,
+                   &dumb_minimum, NULL);
 }
 
 static gdouble
@@ -203,7 +215,8 @@ dumb_maximum(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_maximum(void)
 {
-    test_one_value("Maximum value", "Value", TRUE, &dumb_maximum);
+    test_one_value("Maximum value", "Value", TRUE,
+                   &dumb_maximum, NULL);
 }
 
 static gdouble
@@ -215,7 +228,8 @@ dumb_mean(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_mean(void)
 {
-    test_one_value("Mean value", "Value", TRUE, &dumb_mean);
+    test_one_value("Mean value", "Value", TRUE,
+                   &dumb_mean, NULL);
 }
 
 static gdouble
@@ -227,7 +241,8 @@ dumb_median(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_median(void)
 {
-    test_one_value("Median value", "Value", TRUE, &dumb_median);
+    test_one_value("Median value", "Value", TRUE,
+                   &dumb_median, NULL);
 }
 
 static gdouble
@@ -246,7 +261,8 @@ dumb_slope_theta(const GwyMaskField *mask, const GwyField *field)
 void
 test_grain_value_builtin_slope_theta(void)
 {
-    test_one_value("Slope normal angle", "Slope", TRUE, &dumb_slope_theta);
+    test_one_value("Slope normal angle", "Slope", TRUE,
+                   &dumb_slope_theta, NULL);
 }
 
 static gdouble
@@ -262,10 +278,25 @@ dumb_slope_phi(const GwyMaskField *mask, const GwyField *field)
     return atan2(by, -bx);
 }
 
+// Rounding errors and sign-of-zero issues may cause null gradients to be
+// either returned with direction 0 or π.  Accept both.
+static void
+compare_slope_phi(gdouble reference, gdouble result)
+{
+    if (fabs(reference - G_PI) < 1e-13 && fabs(result) < 1e-13)
+        return;
+    if (fabs(reference) < 1e-13 && fabs(result - G_PI) < 1e-13)
+        return;
+
+    gdouble eps = 2e-9*fmax(fabs(result), fabs(reference));
+    g_assert_cmpfloat(fabs(result - reference), <=, eps);
+}
+
 void
 test_grain_value_builtin_slope_phi(void)
 {
-    test_one_value("Slope direction", "Slope", TRUE, &dumb_slope_phi);
+    test_one_value("Slope direction", "Slope", TRUE,
+                   &dumb_slope_phi, &compare_slope_phi);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
