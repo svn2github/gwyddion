@@ -5678,24 +5678,29 @@ test_field_read_slope(void)
             gdouble zpix = gwy_field_value(field, col, row,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
             gdouble ar, bxr, byr, ae, bxe, bye;
-            gwy_field_slope(field, NULL, GWY_MASK_IGNORE,
-                            col, row, ax, ay,
-                            FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
-                            &ar, &bxr, &byr);
-            gwy_field_slope(field, NULL, GWY_MASK_IGNORE,
-                            col, row, ax, ay,
-                            TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
-                            &ae, &bxe, &bye);
+            gboolean okr, oke;
+            okr = gwy_field_slope(field, NULL, GWY_MASK_IGNORE,
+                                  col, row, ax, ay,
+                                  FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                  &ar, &bxr, &byr);
+            oke = gwy_field_slope(field, NULL, GWY_MASK_IGNORE,
+                                  col, row, ax, ay,
+                                  TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                  &ae, &bxe, &bye);
 
             g_assert_cmpfloat(fabs(ar - zpix), <=, 1e-14);
             g_assert_cmpfloat(fabs(ae - zpix), <=, 1e-14);
             if (ax == 0 || ay == 0) {
+                g_assert(!okr);
+                g_assert(!oke);
                 g_assert_cmpfloat(bxr, ==, 0.0);
                 g_assert_cmpfloat(bxe, ==, 0.0);
                 g_assert_cmpfloat(byr, ==, 0.0);
                 g_assert_cmpfloat(bye, ==, 0.0);
             }
             else {
+                g_assert(okr);
+                g_assert(oke);
                 g_assert_cmpfloat(fabs(bxr - q*cos(phi)), <=, 1e-13);
                 g_assert_cmpfloat(fabs(bxe - q*cos(phi)), <=, 1e-13);
                 g_assert_cmpfloat(fabs(byr - q*sin(phi)), <=, 1e-13);
