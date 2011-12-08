@@ -916,11 +916,13 @@ process_quarters(const GwyField *field,
     if (include_borders || row > 0) {
         d1 = (row == 0) ? base-1 : base-1 - xres;
         d2 = base-1;
-        function(d1[F], d1[1], d2[1], d2[F], 0, 0, 1, 0, user_data);
+        if (include_borders || col > 0)
+            function(d1[F], d1[1], d2[1], d2[F], 0, 0, 1, 0, user_data);
         d1++, d2++;
         for (guint j = width-1; j; j--, d1++, d2++)
             function(d1[0], d1[1], d2[1], d2[0], 0, 0, 1, 1, user_data);
-        function(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, 1, user_data);
+        if (include_borders || col + width < xres)
+            function(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, 1, user_data);
     }
 
     // Middle part
@@ -940,11 +942,13 @@ process_quarters(const GwyField *field,
     if (include_borders || row + height < yres) {
         d1 = base-1 + (height - 1)*xres;
         d2 = (row + height == yres) ? d1 : d1 + xres;
-        function(d1[F], d1[1], d2[1], d2[F], 0, 1, 0, 0, user_data);
+        if (include_borders || col > 0)
+            function(d1[F], d1[1], d2[1], d2[F], 0, 1, 0, 0, user_data);
         d1++, d2++;
         for (guint j = width-1; j; j--, d1++, d2++)
             function(d1[0], d1[1], d2[1], d2[0], 1, 1, 0, 0, user_data);
-        function(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 0, user_data);
+        if (include_borders || col + width < xres)
+            function(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 0, user_data);
     }
 }
 
