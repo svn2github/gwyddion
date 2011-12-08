@@ -897,12 +897,12 @@ gwy_field_surface_area(const GwyField *field,
 }
 
 static void
-process_quarters(const GwyField *field,
-                 guint col, guint row,
-                 guint width, guint height,
-                 gboolean include_borders,
-                 GwyFieldQuartersFunc function,
-                 gpointer user_data)
+process_quarters_unmasked(const GwyField *field,
+                          guint col, guint row,
+                          guint width, guint height,
+                          gboolean include_borders,
+                          GwyFieldQuartersFunc function,
+                          gpointer user_data)
 {
     guint xres = field->xres;
     guint yres = field->yres;
@@ -980,18 +980,19 @@ process_quarters_masked(const GwyField *field,
         d2 = base-1;
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
         w3 = !gwy_mask_iter_get(iter2) == invert;
-        if (w3)
+        if ((include_borders || col > 0) && w3)
             function(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, user_data);
         d1++, d2++;
+        gwy_mask_iter_next(iter2);
         for (guint j = width-1; j; j--, d1++, d2++) {
             w4 = w3;
             w3 = !gwy_mask_iter_get(iter2) == invert;
-            if (w3 || w4)
+            if (w3 | w4)
                 function(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4, user_data);
             gwy_mask_iter_next(iter2);
         }
         w4 = w3;
-        if (w4)
+        if ((include_borders || col + width < xres) && w4)
             function(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, w4, user_data);
     }
 
@@ -999,26 +1000,28 @@ process_quarters_masked(const GwyField *field,
     for (guint i = 0; i+1 < height; i++) {
         d1 = base-1 + i*xres;
         d2 = d1 + xres;
-        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
         w2 = !gwy_mask_iter_get(iter1) == invert;
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
         w3 = !gwy_mask_iter_get(iter2) == invert;
-        if ((include_borders || col > 0) && (w2 || w3))
+        if ((include_borders || col > 0) && (w2 | w3))
             function(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0, user_data);
         d1++, d2++;
+        gwy_mask_iter_next(iter1);
+        gwy_mask_iter_next(iter2);
         for (guint j = width-1; j; j--, d1++, d2++) {
             w1 = w2;
             w2 = !gwy_mask_iter_get(iter1) == invert;
             w4 = w3;
             w3 = !gwy_mask_iter_get(iter2) == invert;
-            if (w1 || w2 || w3 || w4)
+            if (w1 | w2 | w3 | w4)
                 function(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4, user_data);
             gwy_mask_iter_next(iter1);
             gwy_mask_iter_next(iter2);
         }
         w1 = w2;
         w4 = w3;
-        if ((include_borders || col + width < xres) && (w1 || w4))
+        if ((include_borders || col + width < xres) && (w1 | w4))
             function(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, w4, user_data);
     }
 
@@ -1028,18 +1031,19 @@ process_quarters_masked(const GwyField *field,
         d2 = (row + height == yres) ? d1 : d1 + xres;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
         w2 = !gwy_mask_iter_get(iter1) == invert;
-        if (w2)
+        if ((include_borders || col > 0) && w2)
             function(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, user_data);
         d1++, d2++;
+        gwy_mask_iter_next(iter1);
         for (guint j = width-1; j; j--, d1++, d2++) {
             w1 = w2;
             w2 = !gwy_mask_iter_get(iter1) == invert;
-            if (w1 || w2)
+            if (w1 | w2)
                 function(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0, user_data);
             gwy_mask_iter_next(iter1);
         }
         w1 = w2;
-        if (w1)
+        if ((include_borders || col + width < xres) && w1)
             function(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, 0, user_data);
     }
 }
@@ -1097,8 +1101,8 @@ gwy_field_process_quarters(const GwyField *field,
                                 mask, masking, maskcol, maskrow,
                                 include_borders, function, user_data);
     else
-        process_quarters(field, col, row, width, height,
-                         include_borders, function, user_data);
+        process_quarters_unmasked(field, col, row, width, height,
+                                  include_borders, function, user_data);
 }
 
 /**
