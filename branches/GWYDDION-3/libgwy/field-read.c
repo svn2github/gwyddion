@@ -325,8 +325,10 @@ gwy_field_value_averaged(const GwyField *field,
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index.
  * @row: Row index.
- * @ax: Horizontal averaging radius (half-axis).
- * @ay: Vertical averaging radius (half-axis).
+ * @ax: Horizontal averaging radius (half-axis).  It must be at least 1 to
+ *      actually obtain any slope information.
+ * @ay: Vertical averaging radius (half-axis).  It must be at least 1 to
+ *      actually obtain any slope information.
  * @elliptical: %TRUE to process an elliptical area, %FALSE to process its
  *              bounding rectangle.
  * @exterior: Exterior pixels handling.
@@ -344,13 +346,15 @@ gwy_field_value_averaged(const GwyField *field,
  * per one lateral unit, not per pixel.
  *
  * See gwy_field_value_averaged() for description of the neighbourhood shape
- * and size.  The slope in the direction of zero averaging radius is considered
- * to be identically zero.  The local mean value may be NaN if the
- * neighbourhood is empty.
+ * and size.  If the neighbourhood contains an insufficient number of pixels
+ * to determine the slope (taking masking into account) the coefficients are
+ * set to 0 and %FALSE is returned.  If the neighbourhood is completely empty
+ * @a is set to NaN.
  *
- * Returns: The number of data values in the neighbourhood.
+ * Returns: %TRUE if the neighbourhood was sufficient to determine the slopes,
+ *          %FALSE otherwise.
  **/
-guint
+gboolean
 gwy_field_slope(const GwyField *field,
                 const GwyMaskField *mask,
                 GwyMaskingType masking,
@@ -362,13 +366,13 @@ gwy_field_slope(const GwyField *field,
                 gdouble *a,
                 gdouble *bx, gdouble *by)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), 0);
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
     if (!mask || masking == GWY_MASK_IGNORE) {
         mask = NULL;
         masking = GWY_MASK_IGNORE;
     }
     else
-        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), FALSE);
 
     gboolean invert = (masking == GWY_MASK_EXCLUDE);
     gdouble rx = ax + 0.5, ry = ay + 0.5;
@@ -383,7 +387,7 @@ gwy_field_slope(const GwyField *field,
     GWY_MAYBE_SET(bx, 0.0);
     GWY_MAYBE_SET(by, 0.0);
     if (n < 2)
-        return n;
+        return FALSE;
 
     for (gint i = -(gint)ay; i <= (gint)ay; i++) {
         gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
@@ -406,27 +410,14 @@ gwy_field_slope(const GwyField *field,
 
     // Both sxx and syy can be zero only if n < 2.
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    if (sxx == 0.0)
-        GWY_MAYBE_SET(by, syz/syy/dy);
-    else if (syy == 0.0)
-        GWY_MAYBE_SET(bx, sxz/sxx/dx);
-    else {
-        gdouble D = sxx*syy - sxy*sxy;
+    gdouble D = sxx*syy - sxy*sxy;
 
-        if (fabs(D) < 1e-13) {
-            // Projection of the slope in the one direction where the slope
-            // is defined to x and y.  It is assumed to be 0 in the other
-            // direction.
-            GWY_MAYBE_SET(bx, sxz/(sxx + syy)/dx);
-            GWY_MAYBE_SET(by, syz/(sxx + syy)/dy);
-        }
-        else {
-            GWY_MAYBE_SET(bx, (sxz*syy - sxy*syz)/(dx*D));
-            GWY_MAYBE_SET(by, (syz*sxx - sxy*sxz)/(dy*D));
-        }
-    }
+    if (fabs(D) < 1e-10*fmax(fmax(sxx*syy, sxy*sxy), 1.0))
+        return FALSE;
 
-    return n;
+    GWY_MAYBE_SET(bx, (sxz*syy - sxy*syz)/(dx*D));
+    GWY_MAYBE_SET(by, (syz*sxx - sxy*sxz)/(dy*D));
+    return TRUE;
 }
 
 /**

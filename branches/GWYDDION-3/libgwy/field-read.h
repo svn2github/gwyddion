@@ -48,7 +48,7 @@ gdouble   gwy_field_value_averaged      (const GwyField *field,
                                          gboolean elliptical,
                                          GwyExteriorType exterior,
                                          gdouble fill_value)                  G_GNUC_PURE;
-guint     gwy_field_slope               (const GwyField *field,
+gboolean  gwy_field_slope               (const GwyField *field,
                                          const GwyMaskField *mask,
                                          GwyMaskingType masking,
                                          gint col,

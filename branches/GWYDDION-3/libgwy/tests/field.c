@@ -5689,19 +5689,15 @@ test_field_read_slope(void)
 
             g_assert_cmpfloat(fabs(ar - zpix), <=, 1e-14);
             g_assert_cmpfloat(fabs(ae - zpix), <=, 1e-14);
-            if (ax == 0) {
+            if (ax == 0 || ay == 0) {
                 g_assert_cmpfloat(bxr, ==, 0.0);
                 g_assert_cmpfloat(bxe, ==, 0.0);
-            }
-            else {
-                g_assert_cmpfloat(fabs(bxr - q*cos(phi)), <=, 1e-13);
-                g_assert_cmpfloat(fabs(bxe - q*cos(phi)), <=, 1e-13);
-            }
-            if (ay == 0) {
                 g_assert_cmpfloat(byr, ==, 0.0);
                 g_assert_cmpfloat(bye, ==, 0.0);
             }
             else {
+                g_assert_cmpfloat(fabs(bxr - q*cos(phi)), <=, 1e-13);
+                g_assert_cmpfloat(fabs(bxe - q*cos(phi)), <=, 1e-13);
                 g_assert_cmpfloat(fabs(byr - q*sin(phi)), <=, 1e-13);
                 g_assert_cmpfloat(fabs(bye - q*sin(phi)), <=, 1e-13);
             }
