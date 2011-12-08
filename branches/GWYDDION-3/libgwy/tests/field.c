@@ -1277,6 +1277,177 @@ test_field_range(void)
     g_rand_free(rng);
 }
 
+static void
+sum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
+             guint wul, guint wur, guint wlr, guint wll,
+             gpointer user_data)
+{
+    gdouble *s = (gdouble*)user_data;
+    *s += zul*wul + zur*wur + zlr*wlr + zll*wll;
+}
+
+void
+test_field_process_quarters_unmasked_border(void)
+{
+    enum { max_size = 15, niter = 100 };
+    gdouble eps = 1e-12;
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gdouble result = 0.0;
+        gwy_field_process_quarters(field, &fpart, NULL, 0,
+                                   TRUE, sum_quarters, &result);
+        gdouble reference = 0.0;
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                reference += 4.0*gwy_field_index(field, col + j, row + i);
+            }
+        }
+        g_assert_cmpfloat(fabs(result - reference), <=, eps);
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_process_quarters_unmasked_noborder(void)
+{
+    enum { max_size = 15, niter = 100 };
+    gdouble eps = 1e-12;
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gdouble result = 0.0;
+        gwy_field_process_quarters(field, &fpart, NULL, 0,
+                                   FALSE, sum_quarters, &result);
+        gdouble reference = 0.0;
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                guint wh = (col + j > 0) + (col + j < xres-1);
+                guint wv = (row + i > 0) + (row + i < yres-1);
+                reference += wh*wv*gwy_field_index(field, col + j, row + i);
+            }
+        }
+        g_assert_cmpfloat(fabs(result - reference), <=, eps);
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_process_quarters_masked_border(void)
+{
+    enum { max_size = 15, niter = 100 };
+    gdouble eps = 1e-12;
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, 0.5);
+        gdouble result = 0.0, result0 = 0.0, result1 = 0.0;
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_IGNORE,
+                                   TRUE, sum_quarters, &result);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_EXCLUDE,
+                                   TRUE, sum_quarters, &result0);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_INCLUDE,
+                                   TRUE, sum_quarters, &result1);
+        gdouble reference = 0.0, reference0 = 0.0, reference1 = 0.0;
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                gdouble v = 4.0*gwy_field_index(field, col + j, row + i);
+                reference += v;
+                if (gwy_mask_field_get(mask, col + j, row + i))
+                    reference1 += v;
+                else
+                    reference0 += v;
+            }
+        }
+        g_assert_cmpfloat(fabs(result - reference), <=, eps);
+        g_assert_cmpfloat(fabs(result0 - reference0), <=, eps);
+        g_assert_cmpfloat(fabs(result1 - reference1), <=, eps);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_process_quarters_masked_noborder(void)
+{
+    enum { max_size = 15, niter = 100 };
+    gdouble eps = 1e-12;
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, 0.5);
+        gdouble result = 0.0, result0 = 0.0, result1 = 0.0;
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_IGNORE,
+                                   FALSE, sum_quarters, &result);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_EXCLUDE,
+                                   FALSE, sum_quarters, &result0);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_INCLUDE,
+                                   FALSE, sum_quarters, &result1);
+        gdouble reference = 0.0, reference0 = 0.0, reference1 = 0.0;
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                guint wh = (col + j > 0) + (col + j < xres-1);
+                guint wv = (row + i > 0) + (row + i < yres-1);
+                gdouble v = wh*wv*gwy_field_index(field, col + j, row + i);
+                reference += v;
+                if (gwy_mask_field_get(mask, col + j, row + i))
+                    reference1 += v;
+                else
+                    reference0 += v;
+            }
+        }
+        g_assert_cmpfloat(fabs(result - reference), <=, eps);
+        g_assert_cmpfloat(fabs(result0 - reference0), <=, eps);
+        g_assert_cmpfloat(fabs(result1 - reference1), <=, eps);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 static gdouble
 planar_field_surface_area(const GwyField *field)
 {

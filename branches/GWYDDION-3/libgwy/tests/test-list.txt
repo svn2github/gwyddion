@@ -193,6 +193,10 @@ field/congruence/new/3x2
 field/congruence/new/2x3
 field/congruence/new/group
 field/range
+field/process-quarters/unmasked/border
+field/process-quarters/unmasked/noborder
+field/process-quarters/masked/border
+field/process-quarters/masked/noborder
 field/mean
 field/rms
 field/statistics
