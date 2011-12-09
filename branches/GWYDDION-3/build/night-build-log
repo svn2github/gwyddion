@@ -16,7 +16,8 @@ cat >autogen.ignore <<':'
 ^aclocal: installing `m4/([-a-z0-9]+)\.m4' from `/usr/share/aclocal/\1\.m4'
 ^configure\.ac:[0-9]+: installing `build/[-a-z.]+'
 ^Makefile\.am: installing `\./INSTALL'
-^lib[a-z]*/Makefile\.am: installing `build/depcomp'
+^libgwy[a-z]*/Makefile\.am: installing `build/depcomp'
+^docs/libgwy[a-z]*/Makefile\.am: installing `build/depcomp'
 ':'
 :
 
