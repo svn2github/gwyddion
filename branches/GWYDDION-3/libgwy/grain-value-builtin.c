@@ -1418,9 +1418,9 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
     const BuiltinGrainValue *ybuiltin = ypriv->builtin;
     const BuiltinGrainValue *zbuiltin = zpriv->builtin;
     g_return_if_fail(xbuiltin
-                     && xbuiltin->id == GWY_GRAIN_VALUE_MINIMUM);
+                     && xbuiltin->id == GWY_GRAIN_VALUE_CENTER_X);
     g_return_if_fail(ybuiltin
-                     && ybuiltin->id == GWY_GRAIN_VALUE_MAXIMUM);
+                     && ybuiltin->id == GWY_GRAIN_VALUE_CENTER_Y);
     g_return_if_fail(zbuiltin
                      && zbuiltin->id == GWY_GRAIN_VALUE_MEAN);
 
