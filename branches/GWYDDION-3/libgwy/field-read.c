@@ -551,13 +551,13 @@ gwy_field_curvature(const GwyField *field,
         matrix[17] = syyy;
         matrix[19] = sxyyy;
         matrix[20] = syyyy;
-        coeffs[0] = sz;
-        coeffs[1] = sxz;
-        coeffs[2] = syz;
-        coeffs[3] = sxxz;
-        coeffs[4] = sxyz;
-        coeffs[5] = syyz;
         if (gwy_cholesky_decompose(matrix, 6)) {
+            coeffs[0] = sz;
+            coeffs[1] = sxz;
+            coeffs[2] = syz;
+            coeffs[3] = sxxz;
+            coeffs[4] = sxyz;
+            coeffs[5] = syyz;
             gwy_cholesky_solve(matrix, coeffs, 6);
             coeffs[1] *= q;
             coeffs[2] /= q;
@@ -565,8 +565,6 @@ gwy_field_curvature(const GwyField *field,
             coeffs[5] /= q*q;
             ok = G_MAXINT;
         }
-        else
-            gwy_clear(coeffs, 6);
     }
 
     // gwy_math_curvature() does The Right Thing if coeffs are all zeroes.
