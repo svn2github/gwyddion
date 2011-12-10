@@ -391,19 +391,19 @@ gwy_field_slope(const GwyField *field,
 
     for (gint i = -(gint)ay; i <= (gint)ay; i++) {
         gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
+        gdouble y = i - ymean;
+        gdouble yy = y*y;
         for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
-            gdouble y = i - ymean;
-            gdouble y2 = y*y;
             if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
                 gdouble z = exterior_value(field, j + col, i + row,
                                            exterior, fill_value) - zmean;
                 gdouble x = j - xmean;
-                gdouble x2 = x*x;
+                gdouble xx = x*x;
                 sxz += x*z;
                 syz += y*z;
                 sxy += x*y;
-                sxx += x2;
-                syy += y2;
+                sxx += xx;
+                syy += yy;
             }
         }
     }
@@ -429,8 +429,12 @@ gwy_field_slope(const GwyField *field,
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index.
  * @row: Row index.
- * @ax: Horizontal averaging radius (half-axis).
- * @ay: Vertical averaging radius (half-axis).
+ * @ax: Horizontal averaging radius (half-axis).  It must be at least 1 to
+ *      actually obtain any slope information for rectangular neighbourhoods
+ *      and larger than 1 for elliptical areas.
+ * @ay: Vertical averaging radius (half-axis).  It must be at least 1 to
+ *      actually obtain any slope information for rectangular neighbourhoods
+ *      and larger than 1 for elliptical areas.
  * @elliptical: %TRUE to process an elliptical area, %FALSE to process its
  *              bounding rectangle.
  * @exterior: Exterior pixels handling.
@@ -448,14 +452,14 @@ gwy_field_slope(const GwyField *field,
  * coordinates corresponding to (@col+½,@row+½) in this case.
  *
  * See gwy_field_value_averaged() for description of the neighbourhood shape
- * and size.  The curvature in the direction of zero averaging radius is
- * considered to be identically zero.
+ * and size.  If the neighbourhood contains an insufficient number of pixels to
+ * determine the slope (taking masking into account) the parameters are set to
+ * values corresponding to a flat surface and a negative value is returned.
  *
  * Returns: The number of curved dimensions, simiarly to gwy_math_curvature().
+ *          If the the 
  **/
-// XXX: This is broken with masking as the area is no longer symmetrical and
-// some mean values do not vanish.
-guint
+gint
 gwy_field_curvature(const GwyField *field,
                     const GwyMaskField *mask,
                     GwyMaskingType masking,
@@ -466,87 +470,107 @@ gwy_field_curvature(const GwyField *field,
                     gdouble fill_value,
                     GwyCurvatureParams *curvature)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), 0);
-    g_return_val_if_fail(curvature, 0);
+    g_return_val_if_fail(GWY_IS_FIELD(field), -1);
+    g_return_val_if_fail(curvature, -1);
     if (!mask || masking == GWY_MASK_IGNORE) {
         mask = NULL;
         masking = GWY_MASK_IGNORE;
     }
     else
-        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), -1);
 
     gboolean invert = (masking == GWY_MASK_EXCLUDE);
     gdouble rx = ax + 0.5, ry = ay + 0.5;
-    gdouble sz = 0.0, sxz = 0.0, syz = 0.0, sxxz = 0.0, sxyz = 0.0, syyz = 0.0,
-            sx2 = 0.0, sy2 = 0.0, sx4 = 0.0, sx2y2 = 0.0, sy4 = 0.0;
+    // Do not use local_centre() here, that would move the natural origin from
+    // (col, row) to the local centre.
+    gdouble sx = 0.0, sy = 0.0,
+            sxx = 0.0, sxy = 0.0, syy = 0.0,
+            sxxx = 0.0, sxxy = 0.0, sxyy = 0.0, syyy = 0.0,
+            sxxxx = 0.0, sxxxy = 0.0, sxxyy = 0.0, sxyyy = 0.0, syyyy = 0.0,
+            sz = 0.0, sxz = 0.0, syz = 0.0, sxxz = 0.0, sxyz = 0.0, syyz = 0.0;
     guint n = 0;
 
     for (gint i = -(gint)ay; i <= (gint)ay; i++) {
         gint xlen = elliptical ? elliptical_xlen(i/ry, rx, ax) : 0;
+        gdouble y = i;
+        gdouble yy = y*y;
         for (gint j = -(gint)ax + xlen; j <= (gint)ax - xlen; j++) {
-            gdouble i2 = i*i;
             if (exterior_mask(mask, invert, j + col, i + row, exterior)) {
                 gdouble z = exterior_value(field, j + col, i + row,
                                            exterior, fill_value);
-                gdouble j2 = j*j;
+                gdouble x = j;
+                gdouble xx = x*x;
+                gdouble xy = x*y;
+                sx += x;
+                sy += y;
+                sxx += xx;
+                sxy += xy;
+                syy += yy;
+                sxxx += xx*x;
+                sxxy += xx*y;
+                sxyy += x*yy;
+                syyy += y*yy;
+                sxxxx += xx*xx;
+                sxxxy += xx*xy;
+                sxxyy += xx*yy;
+                sxyyy += xy*yy;
+                syyyy += yy*yy;
                 sz += z;
-                sxz += j*z;
-                syz += i*z;
-                sxxz += j2*z;
-                sxyz += j*i*z;
-                syyz += i2*z;
-                sx2 += j2;
-                sy2 += i2;
-                sx4 += j2*j2;
-                sx2y2 += i2*j2;
-                sy4 += i2*i2;
+                sxz += x*z;
+                syz += y*z;
+                sxxz += xx*z;
+                sxyz += xy*z;
+                syyz += yy*z;
                 n++;
             }
         }
     }
 
-    gdouble alpha = sx4*sy4 - sx2y2*sx2y2,
-            betax = sx2y2*sy2 - sx2*sy4,
-            betay = sx2y2*sx2 - sx4*sy2,
-            delta = sx2*sy2 - n*sx2y2;
-
-    gdouble D = n*alpha + sx2*betax + sy2*betay,
-            Dx = n*sx4 - sx2*sx2, Dy = n*sy4 - sy2*sy2,
-            Da = sz*alpha + sxxz*betax + syyz*betay,
-            Dxx = sxxz*(n*sy4 - sy2*sy2) + syyz*delta + sz*(sx2y2*sy2 - sx2*sy4),
-            Dyy = sxxz*delta + syyz*(n*sx4 - sx2*sx2) + sz*(sx2*sx2y2 - sx4*sy2);
-    // s is used for transformation to coordinates with correct aspect ratio
-    // and pixel area of 1; q is then the remaining scaling factor.
+    // q is used for transformation from square pixels to coordinates with
+    // correct aspect ratio and pixel area of 1; s is then the remaining
+    // uniform scaling factor.
     gdouble s = sqrt(gwy_field_dy(field)*gwy_field_dx(field));
     gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
     gdouble coeffs[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    gint ok = -1;
 
-    if (!n) {
-        // Zero coeffs[] are all right.
-    }
-    else if (!Dx && !Dy) {
-        coeffs[0] = sz/n;
-    }
-    else if (!Dx) {
-        coeffs[2] = syz/sy2;
-        coeffs[0] = (sz*sy4 - sy2*syyz)/Dy;
-        coeffs[5] = (n*syyz - sz*sy2)/Dy;
-    }
-    else if (!Dy) {
-        coeffs[1] = sxz/sx2;
-        coeffs[0] = (sz*sx4 - sx2*sxxz)/Dx;
-        coeffs[3] = (n*sxxz - sz*sx2)/Dx;
-    }
-    else {
-        coeffs[0] = Da/D;                // 1
-        coeffs[1] = sxz/sx2    * q;      // x
-        coeffs[2] = syz/sy2    / q;      // y
-        coeffs[3] = Dxx/D      * q*q;    // x²
-        coeffs[4] = sxyz/sx2y2;          // xy
-        coeffs[5] = Dyy/D      / (q*q);  // y²
+    if (n) {
+        gdouble matrix[21];
+        matrix[0] = n;
+        matrix[1] = sx;
+        matrix[2] = matrix[6] = sxx;
+        matrix[3] = sy;
+        matrix[4] = matrix[10] = sxy;
+        matrix[5] = matrix[15] = syy;
+        matrix[7] = sxxx;
+        matrix[8] = matrix[11] = sxxy;
+        matrix[9] = sxxxx;
+        matrix[12] = matrix[16] = sxyy;
+        matrix[13] = sxxxy;
+        matrix[14] = matrix[18] = sxxyy;
+        matrix[17] = syyy;
+        matrix[19] = sxyyy;
+        matrix[20] = syyyy;
+        coeffs[0] = sz;
+        coeffs[1] = sxz;
+        coeffs[2] = syz;
+        coeffs[3] = sxxz;
+        coeffs[4] = sxyz;
+        coeffs[5] = syyz;
+        if (gwy_cholesky_decompose(matrix, 6)) {
+            gwy_cholesky_solve(matrix, coeffs, 6);
+            coeffs[1] *= q;
+            coeffs[2] /= q;
+            coeffs[3] *= q*q;
+            coeffs[5] /= q*q;
+            ok = G_MAXINT;
+        }
+        else
+            gwy_clear(coeffs, 6);
     }
 
-    guint ndims = gwy_math_curvature(coeffs, curvature);
+    // gwy_math_curvature() does The Right Thing if coeffs are all zeroes.
+    gint ndims = gwy_math_curvature(coeffs, curvature);
     // Now the angles and z-values are correct, but curvatures and xy must be
     // transformed to real physical units.
     curvature->k1 /= s*s;
@@ -556,7 +580,7 @@ gwy_field_curvature(const GwyField *field,
     curvature->yc *= s;
     curvature->yc += field->yoff + (row + 0.5)*gwy_field_dy(field);
 
-    return ndims;
+    return MIN(ndims, ok);
 }
 
 /**

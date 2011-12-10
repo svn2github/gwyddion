@@ -61,7 +61,7 @@ gboolean  gwy_field_slope               (const GwyField *field,
                                          gdouble *a,
                                          gdouble *bx,
                                          gdouble *by);
-guint     gwy_field_curvature           (const GwyField *field,
+gint      gwy_field_curvature           (const GwyField *field,
                                          const GwyMaskField *mask,
                                          GwyMaskingType masking,
                                          gint col,
