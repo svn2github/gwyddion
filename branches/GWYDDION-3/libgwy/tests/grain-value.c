@@ -51,7 +51,9 @@ test_one_value(const gchar *name,
                gdouble (*dumb_evaluate)(const GwyMaskField *mask,
                                         const GwyField *field),
                void (*compare)(gdouble reference,
-                               gdouble result))
+                               gdouble result,
+                               const GwyMaskField *mask,
+                               guint grain_id))
 {
     enum { max_size = 85, niter = 30 };
 
@@ -89,7 +91,7 @@ test_one_value(const gchar *name,
             gdouble eps = 1e-10*fmax(fabs(value), fabs(reference));
             //g_printerr("%s[%u:%u] %g %g\n", name, iter, gno, reference, value);
             if (compare)
-                compare(reference, value);
+                compare(reference, value, mask, gno);
             else {
                 g_assert_cmpfloat(fabs(value - reference), <=, eps);
             }
@@ -281,12 +283,17 @@ dumb_slope_phi(const GwyMaskField *mask, const GwyField *field)
 // Rounding errors and sign-of-zero issues may cause null gradients to be
 // either returned with direction 0 or π.  Accept both.
 static void
-compare_slope_phi(gdouble reference, gdouble result)
+compare_slope_phi(gdouble reference, gdouble result,
+                  const GwyMaskField *mask, guint grain_id)
 {
-    if (fabs(reference - G_PI) < 1e-13 && fabs(result) < 1e-13)
-        return;
-    if (fabs(reference) < 1e-13 && fabs(result - G_PI) < 1e-13)
-        return;
+    const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
+
+    if (bboxes[grain_id].width == 1 || bboxes[grain_id].height == 1) {
+        if (fabs(reference - G_PI) < 1e-13 && fabs(result) < 1e-13)
+            return;
+        if (fabs(reference) < 1e-13 && fabs(result - G_PI) < 1e-13)
+            return;
+    }
 
     gdouble eps = 2e-9*fmax(fabs(result), fabs(reference));
     g_assert_cmpfloat(fabs(result - reference), <=, eps);
