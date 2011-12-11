@@ -529,12 +529,12 @@ gwy_field_curvature(const GwyField *field,
     // q is used for transformation from square pixels to coordinates with
     // correct aspect ratio and pixel area of 1; s is then the remaining
     // uniform scaling factor.
-    gdouble s = sqrt(gwy_field_dy(field)*gwy_field_dx(field));
-    gdouble q = sqrt(gwy_field_dy(field)/gwy_field_dx(field));
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble s = sqrt(dx*dy), q = sqrt(dy/dx);
     gdouble coeffs[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     gint ok = -1;
 
-    if (n) {
+    if (n >= 6) {
         gdouble matrix[21];
         matrix[0] = n;
         matrix[1] = sx;
