@@ -551,8 +551,9 @@ gwy_math_median(gdouble *array, gsize n)
 
 /**
  * gwy_cholesky_decompose:
- * @matrix: Lower triangular part of a symmetric matrix, see
- *          gwy_lower_triangular_matrix_index() for storage details.
+ * @matrix: Lower triangular part of a symmetric, presumably positive definite,
+ *          matrix.  See gwy_lower_triangular_matrix_index() for storage
+ *          details.
  * @n: Dimension of @matrix.
  *
  * Decomposes a symmetric positive definite matrix in place.
@@ -623,8 +624,9 @@ gwy_cholesky_solve(const gdouble *a, gdouble *b, guint n)
 
 /**
  * gwy_cholesky_invert:
- * @a: Lower triangular part of a symmetric matrix, see
- *     gwy_lower_triangular_matrix_index() for storage details.
+ * @matrix: Lower triangular part of a symmetric, presumably positive definite,
+ *          matrix.  See gwy_lower_triangular_matrix_index() for storage
+ *          details.
  * @n: Dimension of @matrix.
  *
  * Inverts a positive definite matrix in place.
@@ -659,6 +661,58 @@ gwy_cholesky_invert(gdouble *a, guint n)
             a[q + i] = x[i];
     }
     return TRUE;
+}
+
+// Note it does not return the norm but the norm divided by √n.
+gdouble
+symetrical_norm2(const gdouble *a, guint n)
+{
+    gdouble s = 0.0;
+
+    for (guint i = 0; i < n; i++) {
+        for (guint j = 0; j < i; j++) {
+            s += 2.0*(*a)*(*a);
+            a++;
+        }
+        s += (*a)*(*a);
+        a++;
+    }
+
+    return sqrt(s/MATRIX_LEN(n));
+}
+
+/**
+ * gwy_cholesky_condition:
+ * @matrix: Lower triangular part of a symmetric, presumably positive definite,
+ *          matrix.  See gwy_lower_triangular_matrix_index() for storage
+ *          details.
+ * @n: Dimension of @matrix.
+ *
+ * Estimates condition number of a symmetric positive definite matrix.
+ *
+ * The estimate is obtained by actually inverting the matrix and calculating
+ * the L₂ norms of the matrix and its inverse.  If the inversion fails the
+ * matrix is considered to be singular.
+ *
+ * Returns: The estimated conditon number, %HUGE_VAL if the matrix appears to
+ *          be singular.
+ **/
+gdouble
+gwy_cholesky_condition(const gdouble *a, guint n)
+{
+    gdouble c = symetrical_norm2(a, n);
+    if (G_UNLIKELY(!c))
+        return HUGE_VAL;
+
+    guint len = MATRIX_LEN(n);
+    gdouble *inva = g_slice_alloc(len*sizeof(gdouble));
+    // Factor out the norm of a, making the elements ~1 for condition number 1.
+    for (guint i = 0; i < len; i++)
+        inva[i] = a[i]/c;
+    gboolean ok = gwy_cholesky_invert(inva, n);
+    gdouble cinv = ok ? symetrical_norm2(inva, n) : HUGE_VAL;
+    g_slice_free1(len*sizeof(gdouble), inva);
+    return cinv;
 }
 
 /* Solve an arbitrary number (i.e. @k) of linear systems with the same matrix
@@ -728,11 +782,11 @@ gwy_linalg_multisolve(gdouble *a,
 
 /**
  * gwy_linalg_solve:
- * @a: Matrix of the system (@n×@n), ordered by row, then column.
- *     It will be overwritten during the solving with intermediate
- *     results.
- * @b: Right hand side of the sytem.  It will be overwritten during the
- *     solving with intermediate results.
+ * @matrix: Matrix of the system (@n×@n), ordered by row, then column.
+ *          It will be overwritten during the solving with intermediate
+ *          results.
+ * @rhs: Right hand side of the sytem.  It will be overwritten during the
+ *       solving with intermediate results.
  * @result: Array of length @n to store solution to.
  * @n: Size of the system.
  *
@@ -755,8 +809,8 @@ gwy_linalg_solve(gdouble *a,
 
 /**
  * gwy_linalg_invert:
- * @a: Matrix @n×@n, ordered by row, then column.  It will be overwritten
- *     during the inversion with intermediate results.
+ * @matrix: Matrix @n×@n, ordered by row, then column.  It will be overwritten
+ *          during the inversion with intermediate results.
  * @inv: Matrix @n×@n to store the inverted @a to.
  * @n: Size of the system.
  *

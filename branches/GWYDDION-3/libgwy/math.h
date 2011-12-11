@@ -91,13 +91,15 @@ gboolean gwy_cholesky_decompose(gdouble *matrix,
 void     gwy_cholesky_solve    (const gdouble *decomp,
                                 gdouble *rhs,
                                 guint n);
-gboolean gwy_cholesky_invert   (gdouble *a,
+gboolean gwy_cholesky_invert   (gdouble *matrix,
                                 guint n);
-gboolean gwy_linalg_solve      (gdouble *a,
-                                gdouble *b,
+gdouble  gwy_cholesky_condition(const gdouble *matrix,
+                                guint n)               G_GNUC_PURE;
+gboolean gwy_linalg_solve      (gdouble *matrix,
+                                gdouble *rhs,
                                 gdouble *result,
                                 guint n);
-gboolean gwy_linalg_invert     (gdouble *a,
+gboolean gwy_linalg_invert     (gdouble *matrix,
                                 gdouble *inv,
                                 guint n);
 
