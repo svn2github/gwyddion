@@ -1536,7 +1536,8 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
             a[19] = quad[7];
             a[20] = quad[8];
 
-            if (gwy_cholesky_decompose(a, 6)) {
+            if (gwy_cholesky_decompose(a, 6)
+                && gwy_cholesky_condition(a, 6) < 1e9) {
                 b[0] = 0;
                 b[1] = lin[3];
                 b[2] = lin[4];
