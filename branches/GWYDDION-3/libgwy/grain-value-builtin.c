@@ -596,6 +596,9 @@ calc_linear(gdouble *linear,
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++, g++, d++) {
             guint gno = *g;
+            if (!gno)
+                continue;
+
             gdouble *t = linear + 5*gno;
             gdouble x = j - xvalue[gno];
             gdouble y = i - yvalue[gno];
@@ -644,6 +647,9 @@ calc_quadratic(gdouble *quadratic,
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++, g++, d++) {
             guint gno = *g;
+            if (!gno)
+                continue;
+
             gdouble *t = quadratic + 12*gno;
             gdouble x = j - xvalue[gno];
             gdouble y = i - yvalue[gno];
@@ -1493,10 +1499,11 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
     const gdouble *yvalues = ypriv->values;
     const gdouble *zvalues = zpriv->values;
 
+    // q is used for transformation from square pixels to coordinates with
+    // correct aspect ratio and pixel area of 1; s is then the remaining
+    // uniform scaling factor.
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    gdouble mx = sqrt(dx/dy), my = sqrt(dy/dx);
-    gdouble dxdy = dx*dy;
-    gdouble eqside = sqrt(dx*dy);
+    gdouble s = sqrt(dx*dy), q = sqrt(dy/dx);
 
     for (guint gno = 1; gno <= ngrains; gno++) {
         /* a:
@@ -1512,6 +1519,7 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
         const gdouble *lin = linear + 5*gno, *quad = quadratic + 12*gno;
         guint n = sizes[gno];
 
+        gwy_clear(b, 6);
         if (n >= 6) {
             a[0] = n;
             a[1] = a[3] = 0.0;
@@ -1527,47 +1535,39 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
             a[17] = quad[3];
             a[19] = quad[7];
             a[20] = quad[8];
+
             if (gwy_cholesky_decompose(a, 6)) {
-                b[0] = 0; //n*zvalues[gno];
+                b[0] = 0;
                 b[1] = lin[3];
                 b[2] = lin[4];
                 b[3] = quad[9];
                 b[4] = quad[10];
                 b[5] = quad[11];
                 gwy_cholesky_solve(a, b, 6);
-                // Get pixel aspect ratio right while keeping pixel size
-                // around 1.
-                b[1] /= mx;
-                b[2] /= my;
-                b[3] /= mx*mx;
-                b[5] /= my*my;
+                b[1] *= q;
+                b[2] /= q;
+                b[3] *= q*q;
+                b[5] /= q*q;
             }
-            else
-                n = 0;
         }
 
         GwyCurvatureParams curvature;
-        if (n >= 6)
-            gwy_math_curvature(b, &curvature);
-        else {
-            gwy_clear1(curvature);
-            curvature.phi2 = G_PI/2.0;
-            curvature.zc = zvalues[gno];
-        }
+        gwy_math_curvature(b, &curvature);
+
         if (c1values)
-            c1values[gno] = a[0]/dxdy;
+            c1values[gno] = curvature.k1/(s*s);
         if (c2values)
-            c2values[gno] = a[1]/dxdy;
+            c2values[gno] = curvature.k2/(s*s);
         if (a1values)
-            a1values[gno] = a[2];
+            a1values[gno] = curvature.phi1;
         if (a2values)
-            a2values[gno] = a[3];
+            a2values[gno] = curvature.phi2;
         if (xcvalues)
-            xcvalues[gno] = eqside*a[4] + xvalues[gno];
+            xcvalues[gno] = s*curvature.xc + xvalues[gno];
         if (ycvalues)
-            ycvalues[gno] = eqside*a[5] + yvalues[gno];
+            ycvalues[gno] = s*curvature.yc + yvalues[gno];
         if (zcvalues)
-            zcvalues[gno] = zvalues[gno] + a[6];
+            zcvalues[gno] = curvature.zc + zvalues[gno];
     }
 }
 
