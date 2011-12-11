@@ -644,7 +644,8 @@ gwy_user_fit_func_nth_param(const GwyUserFitFunc *userfitfunc,
  *                    the default "x".
  * @indices: Array to store the map from the parameter number to the
  *           @expr variable number.  The abscissa goes last after all
- *           parameters.
+ *           parameters, i.e. the array must have one item more than the number
+ *           of function parameters.
  *
  * Resolves the mapping between paramters and formula variables for a
  * user fitting function.
@@ -670,10 +671,12 @@ gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
     for (guint i = 0; i < n; i++)
         names[i] = gwy_fit_param_get_name(priv->param[i]);
     names[n] = independent_name;
-    if (!indices)
-        indices = g_newa(guint, n+1);
 
-    return gwy_expr_resolve_variables(expr, n+1, names, indices);
+    if (indices)
+        return gwy_expr_resolve_variables(expr, n+1, names, indices);
+
+    guint myindices[n+1];
+    return gwy_expr_resolve_variables(expr, n+1, names, myindices);
 }
 
 static gchar*
