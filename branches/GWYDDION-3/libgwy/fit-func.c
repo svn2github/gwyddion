@@ -698,7 +698,7 @@ construct_expr(GwyFitFunc *fitfunc)
         return;
     }
 
-    priv->indices = g_new(guint, get_nparams(fitfunc));
+    priv->indices = g_new(guint, get_nparams(fitfunc)+1);
     if (gwy_user_fit_func_resolve_params(priv->resource, priv->expr, NULL,
                                          priv->indices)) {
         g_critical("Cannot resolve variables in user fitting function "
