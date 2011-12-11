@@ -299,4 +299,44 @@ test_grain_value_builtin_slope_phi(void)
                    &dumb_slope_phi, &compare_slope_phi);
 }
 
+static gdouble
+dumb_curvature_k1(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                        cx, cy, ax, ay, FALSE,
+                        GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                        &curvature);
+    return curvature.k1;
+}
+
+void
+test_grain_value_builtin_curvature_k1(void)
+{
+    test_one_value("Curvature 1", "Curvature", TRUE,
+                   &dumb_curvature_k1, NULL);
+}
+
+static gdouble
+dumb_curvature_k2(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                        cx, cy, ax, ay, FALSE,
+                        GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                        &curvature);
+    return curvature.k2;
+}
+
+void
+test_grain_value_builtin_curvature_k2(void)
+{
+    test_one_value("Curvature 2", "Curvature", TRUE,
+                   &dumb_curvature_k2, NULL);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
