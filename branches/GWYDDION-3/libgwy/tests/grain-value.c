@@ -436,4 +436,24 @@ test_grain_value_builtin_curvature_center_y(void)
                    &dumb_curvature_center_y, NULL);
 }
 
+static gdouble
+dumb_curvature_center_z(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                        cx, cy, ax, ay, FALSE,
+                        GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                        &curvature);
+    return curvature.zc;
+}
+
+void
+test_grain_value_builtin_curvature_center_z(void)
+{
+    test_one_value("Curvature center value", "Curvature", TRUE,
+                   &dumb_curvature_center_z, NULL);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

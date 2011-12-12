@@ -373,6 +373,7 @@ grain-value/builtin/curvature-phi1
 grain-value/builtin/curvature-phi2
 grain-value/builtin/curvature-center-x
 grain-value/builtin/curvature-center-y
+grain-value/builtin/curvature-center-z
 # Finalisation tests, should go last.
 fft/save-wisdom
 resource/finalize
