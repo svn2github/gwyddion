@@ -8,8 +8,8 @@
 
 static const gchar file_prologue[] =
 "<?xml version='1.0' encoding='utf-8'?>\n"
-"<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.1.2//EN'\n"
-"          'http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd'>\n"
+"<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'\n"
+"          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>\n"
 "<!-- This is a %s file.  Created by docs/libgwy/fit-funcs.c. -->\n"
 "<refentry id='%s'>\n"
 "<refmeta>\n"
@@ -24,19 +24,51 @@ static const gchar file_prologue[] =
 static const gchar file_epilogue[] =
 "</refentry>\n";
 
-static const gchar function_prologue[] =
+static const gchar group_prologue[] =
 "<refsect1 id='%s.%s'>\n"
-"<title>%s</title>\n";
+"<title>%s</title>\n"
+"<para>Functions in group %s:</para>\n"
+"<informaltable frame='none' rowsep='0' colsep='0' rules='none' cellspacing='12'>\n"
+"<tgroup cols='3'>\n"
+"<colspec align='left'/>\n"
+"<colspec align='left'/>\n"
+"<colspec align='left'/>\n"
+"<thead>\n"
+"<row>\n"
+"<entry align='center'>Name</entry>\n"
+"<entry align='center'>Formula</entry>\n"
+"<entry align='center'>Parameters</entry>\n"
+"</row>\n"
+"</thead>\n"
+"<tbody>\n";
 
-static const gchar function_epilogue[] =
+static const gchar group_epilogue[] =
+"</tbody>\n"
+"</tgroup>\n"
+"</informaltable>\n"
 "</refsect1>\n";
 
+static const gchar function_prologue[] =
+"<row id='%s.%s'>\n"
+"<entry>%s</entry>\n";
+
+static const gchar function_epilogue[] =
+"</row>\n";
+
 static int
-compare_names(const void *a, const void *b)
+compare_functions(const void *a, const void *b)
 {
-    const gchar *stra = *(const gchar**)a;
-    const gchar *strb = *(const gchar**)b;
-    return g_utf8_collate(stra, strb);
+    const GwyFitFunc *fa = *(const GwyFitFunc**)a,
+                     *fb = *(const GwyFitFunc**)b;
+    const gchar *ga = gwy_fit_func_get_group(fa),
+                *gb = gwy_fit_func_get_group(fb);
+    gint cmp = g_utf8_collate(ga, gb);
+    if (cmp)
+        return cmp;
+
+    const gchar *na = gwy_fit_func_get_name(fa),
+                *nb = gwy_fit_func_get_name(fb);
+    return g_utf8_collate(na, nb);
 }
 
 static void
@@ -94,33 +126,49 @@ main(void)
     printf(file_prologue, generated, id);
 
     const gchar **names = gwy_fit_func_list_builtins();
-    qsort(names, g_strv_length((gchar**)names), sizeof(gchar*), compare_names);
+    guint nfuncs = g_strv_length((gchar**)names);
+    GwyFitFunc **fitfuncs = g_new(GwyFitFunc*, nfuncs);
+    for (guint i = 0; i < nfuncs; i++) {
+        fitfuncs[i] = gwy_fit_func_new(names[i]);
+        g_assert(GWY_IS_FIT_FUNC(fitfuncs[i]));
+    }
+    qsort(fitfuncs, nfuncs, sizeof(GwyFitFunc*), compare_functions);
 
     GString *str = g_string_new(NULL);
-    for (guint i = 0; names[i]; i++) {
-        const gchar *name = names[i];
-        GwyFitFunc *fitfunc = gwy_fit_func_new(name);
+    const gchar *processing_group = "NONE";
+    for (guint i = 0; i < nfuncs; i++) {
+        GwyFitFunc *fitfunc = fitfuncs[i];
+        const gchar *name = gwy_fit_func_get_name(fitfunc);
+        const gchar *group = gwy_fit_func_get_group(fitfunc);
+        if (!gwy_strequal(group, processing_group)) {
+            if (!gwy_strequal(processing_group, "NONE"))
+                printf(group_epilogue);
+            g_string_assign(str, group);
+            make_id(str);
+            printf(group_prologue, id, str->str, group, group);
+            processing_group = group;
+        }
         g_string_assign(str, name);
         make_id(str);
         printf(function_prologue, id, str->str, name);
-        printf("<para>Group: %s</para>\n", gwy_fit_func_get_group(fitfunc));
         g_string_assign(str, gwy_fit_func_formula(fitfunc));
         convert_pango_to_docbook(str);
         make_math(str);
-        printf("<para>Formula: %s</para>", str->str);
+        printf("<entry>%s</entry>\n", str->str);
         guint n = gwy_fit_func_n_params(fitfunc);
-        printf("<para>Parameters:");
+        printf("<entry>");
         for (guint j = 0; j < n; j++) {
             g_string_assign(str, gwy_fit_func_param_name(fitfunc, j));
             convert_pango_to_docbook(str);
             make_math(str);
             printf("%s %s", j ? "," : "", str->str);
         }
-        printf("</para>\n");
+        printf("</entry>\n");
         printf(function_epilogue);
         g_object_unref(fitfunc);
     }
-    g_free(names);
+    if (!gwy_strequal(processing_group, "NONE"))
+        printf(group_epilogue);
 
     printf(file_epilogue);
 
