@@ -5672,8 +5672,8 @@ test_field_read_slope(void)
         for (guint iiter = 0; iiter < niiter; iiter++) {
             guint col = g_rand_int_range(rng, 1, xres-1);
             guint row = g_rand_int_range(rng, 1, yres-1);
-            guint ax = g_rand_int_range(rng, 0, MIN(col, xres-col));
-            guint ay = g_rand_int_range(rng, 0, MIN(row, yres-row));
+            guint ax = g_rand_int_range(rng, 0, MIN(col+1, xres-col));
+            guint ay = g_rand_int_range(rng, 0, MIN(row+1, yres-row));
 
             gdouble zpix = gwy_field_value(field, col, row,
                                            GWY_EXTERIOR_BORDER_EXTEND, NAN);
@@ -5751,25 +5751,25 @@ test_field_read_curvature(void)
 
         GwyCurvatureParams curv, curvr, curve;
         gdouble coeffs[] = { a, bx, by, cxx, cxy, cyy };
-        guint ndims = gwy_math_curvature(coeffs, &curv);
+        gint ndims = gwy_math_curvature(coeffs, &curv);
 
         for (guint iiter = 0; iiter < niiter; iiter++) {
             guint col = g_rand_int_range(rng, 2, xres-2);
             guint row = g_rand_int_range(rng, 2, yres-2);
-            guint ax = g_rand_int_range(rng, 1, MIN(col, xres-col));
-            guint ay = g_rand_int_range(rng, 1, MIN(row, yres-row));
+            guint ax = g_rand_int_range(rng, 2, MIN(col+1, xres-col));
+            guint ay = g_rand_int_range(rng, 2, MIN(row+1, yres-row));
 
             // Allow quite large relative errors as we have not done precise
             // uncertainty analysis and they can be large for the ‘thin’
             // sizes.
             gdouble eps = 1e-4/sqrt(2*ax + 2*ay - 3);
 
-            guint ndimsr = gwy_field_curvature
+            gint ndimsr = gwy_field_curvature
                                      (field, NULL, GWY_MASK_IGNORE,
                                       col, row, ax, ay,
                                       FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
                                       &curvr);
-            g_assert_cmpuint(ndimsr, ==, ndims);
+            g_assert_cmpint(ndimsr, ==, ndims);
             g_assert_cmpfloat(fabs(curvr.k1/curv.k1 - 1.0), <=, eps);
             g_assert_cmpfloat(fabs(curvr.k2/curv.k2 - 1.0), <=, eps);
             g_assert_cmpfloat(fabs(curvr.phi1/curv.phi1 - 1.0), <=, eps);
@@ -5778,12 +5778,12 @@ test_field_read_curvature(void)
             g_assert_cmpfloat(fabs(curvr.yc/curv.yc - 1.0), <=, eps);
             g_assert_cmpfloat(fabs(curvr.zc/curv.zc - 1.0), <=, eps);
 
-            guint ndimse = gwy_field_curvature
+            gint ndimse = gwy_field_curvature
                                      (field, NULL, GWY_MASK_IGNORE,
                                       col, row, ax, ay,
                                       TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
                                       &curve);
-            g_assert_cmpuint(ndimse, ==, ndims);
+            g_assert_cmpint(ndimse, ==, ndims);
             g_assert_cmpfloat(fabs(curve.k1/curv.k1 - 1.0), <=, eps);
             g_assert_cmpfloat(fabs(curve.k2/curv.k2 - 1.0), <=, eps);
             g_assert_cmpfloat(fabs(curve.phi1/curv.phi1 - 1.0), <=, eps);
