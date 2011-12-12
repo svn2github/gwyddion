@@ -1503,6 +1503,7 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
     // correct aspect ratio and pixel area of 1; s is then the remaining
     // uniform scaling factor.
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble xoff = 0.5*dx + field->xoff, yoff = 0.5*dy + field->yoff;
     gdouble s = sqrt(dx*dy), q = sqrt(dy/dx);
 
     for (guint gno = 1; gno <= ngrains; gno++) {
@@ -1564,9 +1565,9 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
         if (a2values)
             a2values[gno] = curvature.phi2;
         if (xcvalues)
-            xcvalues[gno] = s*curvature.xc + xvalues[gno];
+            xcvalues[gno] = s*curvature.xc + dx*xvalues[gno] + xoff;
         if (ycvalues)
-            ycvalues[gno] = s*curvature.yc + yvalues[gno];
+            ycvalues[gno] = s*curvature.yc + dy*yvalues[gno] + yoff;
         if (zcvalues)
             zcvalues[gno] = curvature.zc + zvalues[gno];
     }
