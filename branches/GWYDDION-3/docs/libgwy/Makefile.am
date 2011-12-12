@@ -22,7 +22,7 @@ HTML_IMAGES = \
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
-content_files = builtin-fit-func.xml
+content_files = builtin-fit-func.xml builtin-grain-value.xml
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
@@ -40,10 +40,14 @@ EXTRA_DIST +=
 AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
 AM_CFLAGS =  $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_LDFLAGS = $(LIBGWY_DEPS_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy3.la
-CLEANFILES += builtin-fit-func.xml
+CLEANFILES += builtin-fit-func.xml builtin-grain-value.xml
 
-noinst_PROGRAMS = fit-funcs
+noinst_PROGRAMS = fit-funcs grain-values
 fit_funcs_SOURCES = fit-funcs.c
+grain_values_SOURCES = grain-values.c
 
 builtin-fit-func.xml: fit-funcs$(EXEEXT)
 	$(AM_V_GEN)$(LIBTOOL) --mode=execute ./fit-funcs$(EXEEXT) >builtin-fit-func.xml
+
+builtin-grain-value.xml: grain-values$(EXEEXT)
+	$(AM_V_GEN)$(LIBTOOL) --mode=execute ./grain-values$(EXEEXT) >builtin-grain-value.xml

@@ -107,6 +107,7 @@
     <xi:include href="xml/fit-param.xml"/>
     <xi:include href="builtin-fit-func.xml"/>
     <xi:include href="xml/user-fit-func.xml"/>
+    <xi:include href="builtin-grain-value.xml"/>
     <xi:include href="xml/user-grain-value.xml"/>
   </chapter>
   <chapter id='libgwy-selections'>

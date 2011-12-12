@@ -22,22 +22,22 @@
 #include <stdio.h>
 #include "libgwy/libgwy.h"
 
-#define id "libgwy-builtin-fit-func"
+#define id "libgwy-builtin-grain-value"
 #define generated "GENERATED"
 
 static const gchar file_prologue[] =
 "<?xml version='1.0' encoding='utf-8'?>\n"
 "<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'\n"
 "          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>\n"
-"<!-- This is a %s file.  Created by docs/libgwy/fit-funcs.c. -->\n"
+"<!-- This is a %s file.  Created by docs/libgwy/grain-values.c. -->\n"
 "<refentry id='%s'>\n"
 "<refmeta>\n"
 "<manvolnum>3</manvolnum>\n"
 "<refmiscinfo>LIBGWY Library</refmiscinfo>\n"
 "</refmeta>\n"
 "<refnamediv>\n"
-"<refname>Builtin fit funcs</refname>\n"
-"<refpurpose>List of built-in fitting functions</refpurpose>\n"
+"<refname>Builtin grain values</refname>\n"
+"<refpurpose>List of built-in grain values</refpurpose>\n"
 "</refnamediv>\n";
 
 static const gchar file_epilogue[] =
@@ -46,17 +46,19 @@ static const gchar file_epilogue[] =
 static const gchar group_prologue[] =
 "<refsect1 id='%s.%s'>\n"
 "<title>%s</title>\n"
-"<para>Functions in group %s:</para>\n"
+"<para>Values in group %s:</para>\n"
 "<informaltable frame='none' rowsep='0' colsep='0' rules='none' cellspacing='12'>\n"
-"<tgroup cols='3'>\n"
+"<tgroup cols='4'>\n"
+"<colspec align='left'/>\n"
 "<colspec align='left'/>\n"
 "<colspec align='left'/>\n"
 "<colspec align='left'/>\n"
 "<thead>\n"
 "<row>\n"
 "<entry align='center'>Name</entry>\n"
-"<entry align='center'>Formula</entry>\n"
-"<entry align='center'>Parameters</entry>\n"
+"<entry align='center'>Symbol</entry>\n"
+"<entry align='center'>Identifier</entry>\n"
+"<entry align='center'>Notes</entry>\n"
 "</row>\n"
 "</thead>\n"
 "<tbody>\n";
@@ -67,11 +69,11 @@ static const gchar group_epilogue[] =
 "</informaltable>\n"
 "</refsect1>\n";
 
-static const gchar function_prologue[] =
+static const gchar value_prologue[] =
 "<row id='%s.%s'>\n"
 "<entry>%s</entry>\n";
 
-static const gchar function_epilogue[] =
+static const gchar value_epilogue[] =
 "</row>\n";
 
 static int
@@ -144,6 +146,14 @@ convert_pango_to_docbook(GString *str)
     replace_tag(str, "sub", "subscript");
 }
 
+static void
+append_separated(GString *str, const gchar *what)
+{
+    if (str->len)
+        g_string_append(str, ", ");
+    g_string_append(str, what);
+}
+
 int
 main(void)
 {
@@ -151,21 +161,21 @@ main(void)
 
     printf(file_prologue, generated, id);
 
-    const gchar **names = gwy_fit_func_list_builtins();
-    guint nfuncs = g_strv_length((gchar**)names);
-    GwyFitFunc **fitfuncs = g_new(GwyFitFunc*, nfuncs);
-    for (guint i = 0; i < nfuncs; i++) {
-        fitfuncs[i] = gwy_fit_func_new(names[i]);
-        g_assert(GWY_IS_FIT_FUNC(fitfuncs[i]));
+    const gchar **names = gwy_grain_value_list_builtins();
+    guint nvalues = g_strv_length((gchar**)names);
+    GwyGrainValue **grainvalues = g_new(GwyGrainValue*, nvalues);
+    for (guint i = 0; i < nvalues; i++) {
+        grainvalues[i] = gwy_grain_value_new(names[i]);
+        g_assert(GWY_IS_GRAIN_VALUE(grainvalues[i]));
     }
-    qsort(fitfuncs, nfuncs, sizeof(GwyFitFunc*), compare);
+    qsort(grainvalues, nvalues, sizeof(GwyGrainValue*), compare);
 
     GString *str = g_string_new(NULL);
     const gchar *processing_group = "NONE";
-    for (guint i = 0; i < nfuncs; i++) {
-        GwyFitFunc *fitfunc = fitfuncs[i];
-        const gchar *name = gwy_fit_func_get_name(fitfunc);
-        const gchar *group = gwy_fit_func_get_group(fitfunc);
+    for (guint i = 0; i < nvalues; i++) {
+        GwyGrainValue *grainvalue = grainvalues[i];
+        const gchar *name = gwy_grain_value_get_name(grainvalue);
+        const gchar *group = gwy_grain_value_get_group(grainvalue);
         if (!gwy_strequal(group, processing_group)) {
             if (!gwy_strequal(processing_group, "NONE"))
                 printf(group_epilogue);
@@ -176,22 +186,21 @@ main(void)
         }
         g_string_assign(str, name);
         make_id(str);
-        printf(function_prologue, id, str->str, name);
-        g_string_assign(str, gwy_fit_func_formula(fitfunc));
+        printf(value_prologue, id, str->str, name);
+        g_string_assign(str, gwy_grain_value_get_symbol(grainvalue));
         convert_pango_to_docbook(str);
         make_math(str);
         printf("<entry>%s</entry>\n", str->str);
-        guint n = gwy_fit_func_n_params(fitfunc);
-        printf("<entry>");
-        for (guint j = 0; j < n; j++) {
-            g_string_assign(str, gwy_fit_func_param_name(fitfunc, j));
-            convert_pango_to_docbook(str);
-            make_math(str);
-            printf("%s %s", j ? "," : "", str->str);
-        }
-        printf("</entry>\n");
-        printf(function_epilogue);
-        g_object_unref(fitfunc);
+        printf("<entry><code>%s</code></entry>",
+               gwy_grain_value_get_ident(grainvalue));
+        g_string_assign(str, "");
+        if (gwy_grain_value_needs_same_units(grainvalue))
+            append_separated(str, "needs same lateral and value units");
+        if (gwy_grain_value_is_angle(grainvalue))
+            append_separated(str, "represents angle in radians");
+        printf("<entry>%s</entry>\n", str->str);
+        printf(value_epilogue);
+        g_object_unref(grainvalue);
     }
     if (!gwy_strequal(processing_group, "NONE"))
         printf(group_epilogue);
