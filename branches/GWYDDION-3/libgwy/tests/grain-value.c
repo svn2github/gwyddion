@@ -324,7 +324,7 @@ boundary_maximum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
 static gdouble
 dumb_boundary_maximum(const GwyMaskField *mask, const GwyField *field)
 {
-    gdouble max = G_MAXDOUBLE;
+    gdouble max = -G_MAXDOUBLE;
     gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
                                &boundary_maximum_quarters, &max);
     return max;
@@ -335,6 +335,39 @@ test_grain_value_builtin_boundary_maximum(void)
 {
     test_one_value("Maximum value on boundary", "Boundary", TRUE,
                    &dumb_boundary_maximum, NULL);
+}
+
+static void
+projected_boundary_length_quarters(G_GNUC_UNUSED gdouble zul,
+                                   G_GNUC_UNUSED gdouble zur,
+                                   G_GNUC_UNUSED gdouble zlr,
+                                   G_GNUC_UNUSED gdouble zll,
+                                   guint wul, guint wur, guint wlr, guint wll,
+                                   gpointer user_data)
+{
+    gdouble *p = (gdouble*)user_data;
+    p[16] += p[8*wul + 4*wur + 2*wlr + wll];
+}
+
+static gdouble
+dumb_projected_boundary_length(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field),
+            hh = hypot(dx, dy), h = 0.5*hh;
+    gdouble p[17] = {
+        0.0, h, h, dx, h, hh, dy, h, h, dy, hh, h, dx, h, h, 0.0,
+        0.0,
+    };
+    gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
+                               &projected_boundary_length_quarters, &p[0]);
+    return p[16];
+}
+
+void
+test_grain_value_builtin_projected_boundary_length(void)
+{
+    test_one_value("Projected boundary length", "Boundary", TRUE,
+                   &dumb_projected_boundary_length, NULL);
 }
 
 static gdouble

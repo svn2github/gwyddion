@@ -369,6 +369,7 @@ grain-value/builtin/mean
 grain-value/builtin/median
 grain-value/builtin/boundary-minimum
 grain-value/builtin/boundary-maximum
+grain-value/builtin/projected-boundary-length
 grain-value/builtin/slope-theta
 grain-value/builtin/slope-phi
 grain-value/builtin/curvature-k1
