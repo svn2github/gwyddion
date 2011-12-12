@@ -277,6 +277,66 @@ test_grain_value_builtin_median(void)
                    &dumb_median, NULL);
 }
 
+static void
+boundary_minimum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
+                          guint wul, guint wur, guint wlr, guint wll,
+                          gpointer user_data)
+{
+    const gdouble z[4] = { zul, zur, zlr, zll };
+    const guint w[4] = { wul, wur, wlr, wll };
+    gdouble *min = (gdouble*)user_data;
+    for (guint i = 0; i < 4; i++) {
+        if (w[i] && (!w[(i + 1) % 4] || !w[(i + 3) % 4]) && z[i] < *min)
+            *min = z[i];
+    }
+}
+
+static gdouble
+dumb_boundary_minimum(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble min = G_MAXDOUBLE;
+    gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
+                               &boundary_minimum_quarters, &min);
+    return min;
+}
+
+void
+test_grain_value_builtin_boundary_minimum(void)
+{
+    test_one_value("Minimum value on boundary", "Boundary", TRUE,
+                   &dumb_boundary_minimum, NULL);
+}
+
+static void
+boundary_maximum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
+                          guint wul, guint wur, guint wlr, guint wll,
+                          gpointer user_data)
+{
+    const gdouble z[4] = { zul, zur, zlr, zll };
+    const guint w[4] = { wul, wur, wlr, wll };
+    gdouble *max = (gdouble*)user_data;
+    for (guint i = 0; i < 4; i++) {
+        if (w[i] && (!w[(i + 1) % 4] || !w[(i + 3) % 4]) && z[i] > *max)
+            *max = z[i];
+    }
+}
+
+static gdouble
+dumb_boundary_maximum(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble max = G_MAXDOUBLE;
+    gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
+                               &boundary_maximum_quarters, &max);
+    return max;
+}
+
+void
+test_grain_value_builtin_boundary_maximum(void)
+{
+    test_one_value("Maximum value on boundary", "Boundary", TRUE,
+                   &dumb_boundary_maximum, NULL);
+}
+
 static gdouble
 dumb_slope_theta(const GwyMaskField *mask, const GwyField *field)
 {
