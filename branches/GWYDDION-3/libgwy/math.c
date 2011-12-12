@@ -664,7 +664,7 @@ gwy_cholesky_invert(gdouble *a, guint n)
 }
 
 // Note it does not return the norm but the norm divided by √n.
-gdouble
+static gdouble
 symetrical_norm2(const gdouble *a, guint n)
 {
     gdouble s = 0.0;
