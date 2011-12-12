@@ -55,7 +55,7 @@ test_one_value(const gchar *name,
                                const GwyMaskField *mask,
                                guint grain_id))
 {
-    enum { max_size = 85, niter = 30 };
+    enum { max_size = 85, niter = 30/30 };
 
     GwyGrainValue *grainvalue = gwy_grain_value_new(name);
     g_assert(grainvalue);
@@ -76,6 +76,8 @@ test_one_value(const gchar *name,
         field_randomize(field, rng);
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
         guint ngrains = gwy_mask_field_n_grains(mask);
+        const guint *sizes = gwy_mask_field_grain_sizes(mask);
+        const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
 
         gwy_field_evaluate_grains(field, mask, &grainvalue, 1);
         guint grainvaluengrains;
@@ -89,7 +91,11 @@ test_one_value(const gchar *name,
             gdouble reference = dumb_evaluate(grainmask, grainfield);
             gdouble value = values[gno];
             gdouble eps = 5e-9*fmax(fabs(value), fabs(reference));
-            //g_printerr("%s[%u:%u] %g %g\n", name, iter, gno, reference, value);
+            if (g_test_verbose())
+                g_printerr("%s[%u:%u, %u, %ux%u] %g %g (%.8g)\n",
+                           name, iter, gno,
+                           sizes[gno], bboxes[gno].width, bboxes[gno].height,
+                           reference, value, (value - reference));
             if (compare)
                 compare(reference, value, mask, gno);
             else {
@@ -384,6 +390,50 @@ test_grain_value_builtin_curvature_phi2(void)
 {
     test_one_value("Curvature direction 2", "Curvature", TRUE,
                    &dumb_curvature_phi2, NULL);
+}
+
+static gdouble
+dumb_curvature_center_x(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    if (gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                            cx, cy, ax, ay, FALSE,
+                            GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                            &curvature) >= 0)
+        return curvature.xc;
+    else
+        return dumb_center_x(mask, field);
+}
+
+void
+test_grain_value_builtin_curvature_center_x(void)
+{
+    test_one_value("Curvature center x position", "Curvature", TRUE,
+                   &dumb_curvature_center_x, NULL);
+}
+
+static gdouble
+dumb_curvature_center_y(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    if (gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                            cx, cy, ax, ay, FALSE,
+                            GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                            &curvature) >= 0)
+        return curvature.yc;
+    else
+        return dumb_center_y(mask, field);
+}
+
+void
+test_grain_value_builtin_curvature_center_y(void)
+{
+    test_one_value("Curvature center y position", "Curvature", TRUE,
+                   &dumb_curvature_center_y, NULL);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
