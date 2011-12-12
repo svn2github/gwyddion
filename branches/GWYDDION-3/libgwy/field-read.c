@@ -578,6 +578,8 @@ gwy_field_curvature(const GwyField *field,
     curvature->xc += field->xoff + (col + 0.5)*gwy_field_dx(field);
     curvature->yc *= s;
     curvature->yc += field->yoff + (row + 0.5)*gwy_field_dy(field);
+    if (ok < 0 && n)
+        curvature->zc = sz/n;
 
     return MIN(ndims, ok);
 }
