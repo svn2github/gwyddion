@@ -3163,6 +3163,74 @@ test_field_distributions_acf_partial(void)
     g_rand_free(rng);
 }
 
+static void
+extract_grain_with_data(const GwyMaskField *mask,
+                        GwyMaskField *mask_target,
+                        const GwyField *field,
+                        GwyField *field_target,
+                        guint grain_id,
+                        guint border)
+{
+    const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
+    const GwyFieldPart *fpart = bboxes + grain_id;
+    gwy_mask_field_set_size(mask_target, fpart->width, fpart->height, FALSE);
+    gwy_mask_field_extract_grain(mask, mask_target, grain_id, border);
+    gwy_field_extend(field, fpart, field_target, border, border, border, border,
+                     GWY_EXTERIOR_MIRROR_EXTEND, NAN, TRUE);
+    g_assert_cmpfloat(fabs(gwy_field_dx(field_target) - gwy_field_dx(field)),
+                      <=, 1e-16);
+    g_assert_cmpfloat(fabs(gwy_field_dy(field_target) - gwy_field_dy(field)),
+                      <=, 1e-16);
+}
+
+void
+test_field_distributions_acf_grain(void)
+{
+    enum { max_size = 40, niter = 15 };
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyField *grainfield = gwy_field_new();
+    GwyMaskField *grainmask = gwy_mask_field_new();
+    GwyLine *weights = gwy_line_new(), *dumb_weights = gwy_line_new();
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 8, max_size);
+            guint yres = g_rand_int_range(rng, 8, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+            field_randomize(field, rng);
+            GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            guint ngrains = gwy_mask_field_n_grains(mask);
+
+            for (guint gno = 1; gno <= ngrains; gno++) {
+                extract_grain_with_data(mask, grainmask, field, grainfield,
+                                        gno, 0);
+
+                GwyLine *acf = gwy_field_grain_row_acf(field, mask, gno, lvl,
+                                                       weights);
+                GwyLine *dumb_acf = cf_dumb(grainfield, NULL,
+                                            grainmask, GWY_MASK_INCLUDE,
+                                            lvl, FALSE,
+                                            dumb_weights);
+
+                line_assert_numerically_equal(acf, dumb_acf, 1e-13);
+                line_assert_equal(weights, dumb_weights);
+
+                g_object_unref(dumb_acf);
+                g_object_unref(acf);
+            }
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+    g_object_unref(dumb_weights);
+    g_object_unref(weights);
+    g_object_unref(grainmask);
+    g_object_unref(grainfield);
+
+    g_rand_free(rng);
+}
+
 void
 test_field_distributions_hhcf_full(void)
 {

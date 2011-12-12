@@ -281,6 +281,7 @@ field/correlate/crosscorrelate
 field/distributions/acf/full
 field/distributions/acf/masked
 field/distributions/acf/partial
+field/distributions/acf/grain
 field/distributions/hhcf/full
 field/distributions/hhcf/masked
 field/distributions/hhcf/partial

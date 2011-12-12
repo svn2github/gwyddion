@@ -30,13 +30,14 @@ extract_grain_with_data(const GwyMaskField *mask,
                         GwyMaskField *mask_target,
                         const GwyField *field,
                         GwyField *field_target,
-                        guint grain_id)
+                        guint grain_id,
+                        guint border)
 {
     const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(mask);
     const GwyFieldPart *fpart = bboxes + grain_id;
     gwy_mask_field_set_size(mask_target, fpart->width, fpart->height, FALSE);
-    gwy_mask_field_extract_grain(mask, mask_target, grain_id, 1);
-    gwy_field_extend(field, fpart, field_target, 1, 1, 1, 1,
+    gwy_mask_field_extract_grain(mask, mask_target, grain_id, border);
+    gwy_field_extend(field, fpart, field_target, border, border, border, border,
                      GWY_EXTERIOR_MIRROR_EXTEND, NAN, TRUE);
     g_assert_cmpfloat(fabs(gwy_field_dx(field_target) - gwy_field_dx(field)),
                       <=, 1e-16);
@@ -87,7 +88,7 @@ test_one_value(const gchar *name,
         g_assert_cmpuint(grainvaluengrains, ==, ngrains);
 
         for (guint gno = 1; gno <= ngrains; gno++) {
-            extract_grain_with_data(mask, grainmask, field, grainfield, gno);
+            extract_grain_with_data(mask, grainmask, field, grainfield, gno, 1);
             gdouble reference = dumb_evaluate(grainmask, grainfield);
             gdouble value = values[gno];
             gdouble eps = 5e-9*fmax(fabs(value), fabs(reference));
