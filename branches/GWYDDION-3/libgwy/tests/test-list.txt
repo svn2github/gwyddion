@@ -369,6 +369,8 @@ grain-value/builtin/slope-theta
 grain-value/builtin/slope-phi
 grain-value/builtin/curvature-k1
 grain-value/builtin/curvature-k2
+grain-value/builtin/curvature-phi1
+grain-value/builtin/curvature-phi2
 # Finalisation tests, should go last.
 fft/save-wisdom
 resource/finalize

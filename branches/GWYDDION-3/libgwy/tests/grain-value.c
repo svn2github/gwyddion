@@ -88,7 +88,7 @@ test_one_value(const gchar *name,
             extract_grain_with_data(mask, grainmask, field, grainfield, gno);
             gdouble reference = dumb_evaluate(grainmask, grainfield);
             gdouble value = values[gno];
-            gdouble eps = 1e-10*fmax(fabs(value), fabs(reference));
+            gdouble eps = 5e-9*fmax(fabs(value), fabs(reference));
             //g_printerr("%s[%u:%u] %g %g\n", name, iter, gno, reference, value);
             if (compare)
                 compare(reference, value, mask, gno);
@@ -344,6 +344,46 @@ test_grain_value_builtin_curvature_k2(void)
 {
     test_one_value("Curvature 2", "Curvature", TRUE,
                    &dumb_curvature_k2, NULL);
+}
+
+static gdouble
+dumb_curvature_phi1(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                        cx, cy, ax, ay, FALSE,
+                        GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                        &curvature);
+    return curvature.phi1;
+}
+
+void
+test_grain_value_builtin_curvature_phi1(void)
+{
+    test_one_value("Curvature direction 1", "Curvature", TRUE,
+                   &dumb_curvature_phi1, NULL);
+}
+
+static gdouble
+dumb_curvature_phi2(const GwyMaskField *mask, const GwyField *field)
+{
+    guint cx = field->xres/2, ax = (field->xres - 1)/2;
+    guint cy = field->yres/2, ay = (field->yres - 1)/2;
+    GwyCurvatureParams curvature;
+    gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
+                        cx, cy, ax, ay, FALSE,
+                        GWY_EXTERIOR_MIRROR_EXTEND, NAN,
+                        &curvature);
+    return curvature.phi2;
+}
+
+void
+test_grain_value_builtin_curvature_phi2(void)
+{
+    test_one_value("Curvature direction 2", "Curvature", TRUE,
+                   &dumb_curvature_phi2, NULL);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
