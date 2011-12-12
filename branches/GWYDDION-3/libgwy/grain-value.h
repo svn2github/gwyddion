@@ -72,6 +72,8 @@ void gwy_field_evaluate_grains(const GwyField *field,
                                GwyGrainValue **grainvalues,
                                guint nvalues);
 
+const gchar** gwy_grain_value_list_builtins(void) G_GNUC_MALLOC;
+
 G_END_DECLS
 
 #endif
