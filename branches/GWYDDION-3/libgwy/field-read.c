@@ -551,8 +551,8 @@ gwy_field_curvature(const GwyField *field,
         matrix[17] = syyy;
         matrix[19] = sxyyy;
         matrix[20] = syyyy;
-        if (gwy_cholesky_decompose(matrix, 6)
-            && gwy_cholesky_condition(matrix, 6) < 1e9) {
+        if (gwy_cholesky_condition(matrix, 6) < 1e9) {
+            gwy_cholesky_decompose(matrix, 6);
             coeffs[0] = sz;
             coeffs[1] = sxz;
             coeffs[2] = syz;
