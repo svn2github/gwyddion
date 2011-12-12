@@ -1034,7 +1034,7 @@ grain_row_acf(const GwyField *field,
     // Gather squared Fourier coefficients for all rows
     for (guint i = 0; i < height; i++) {
         guint count = row_level_and_count(base + i*field->xres, fftr, width,
-                                          mask, masking, col, row + i, level);
+                                          mask, masking, 0, i, level);
         if (!count) {
             nemptyrows++;
             continue;
@@ -1049,7 +1049,7 @@ grain_row_acf(const GwyField *field,
         }
 
         // Calculate and gather squared Fourier coefficients of the mask.
-        row_assign_mask(mask, col, row + i, width, invert, fftr);
+        row_assign_mask(mask, 0, i, width, invert, fftr);
         row_extfft_accum_cnorm(plan, fftr, accum_mask, fftc, size, width, 1.0);
     }
 
@@ -1160,16 +1160,20 @@ gwy_field_grain_row_acf(const GwyField *field,
 
     gwy_clear(total_data, width);
     gwy_clear(total_mask, width);
+
+    GwyMaskField *grainmask = gwy_mask_field_new();
     for (grain_id = gfrom; grain_id <= gto; grain_id++) {
         GwyMaskingType masking = grain_id ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
         const GwyFieldPart *bbox = bboxes + grain_id;
 
+        gwy_mask_field_extract_grain(mask, grainmask, grain_id, 0);
         grain_row_acf(field, bbox->col, bbox->row, bbox->width, bbox->height,
-                      mask, masking, level,
+                      grainmask, masking, level,
                       fftr, fftc, accum_data, accum_mask);
         row_accumulate(total_data, accum_data, bbox->width);
         row_accumulate(total_mask, accum_mask, bbox->width);
     }
+    g_object_unref(grainmask);
 
     row_divide_nonzero(total_data, total_mask, line->data, line->res);
 
