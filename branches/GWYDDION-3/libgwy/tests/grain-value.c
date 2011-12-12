@@ -142,6 +142,29 @@ test_grain_value_builtin_equivalent_radius(void)
 }
 
 static gdouble
+dumb_half_height_area(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble min, max;
+    gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &min, &max);
+    gdouble avg = 0.5*(min + max);
+    GwyMaskField *above = gwy_mask_field_new_from_field(field, NULL,
+                                                        avg, G_MAXDOUBLE,
+                                                        FALSE);
+    gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
+    gdouble area = gwy_mask_field_count(mask, above, TRUE)*dxdy;
+    g_object_unref(above);
+
+    return area;
+}
+
+void
+test_grain_value_builtin_half_height_area(void)
+{
+    test_one_value("Area above half-height", "Area", TRUE,
+                   &dumb_half_height_area, NULL);
+}
+
+static gdouble
 dumb_surface_area(const GwyMaskField *mask, const GwyField *field)
 {
     return gwy_field_surface_area(field, NULL, mask, GWY_MASK_INCLUDE);

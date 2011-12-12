@@ -358,6 +358,7 @@ fit-func/builtin/acf-exponential
 fit-func/user
 grain-value/builtin/projected-area
 grain-value/builtin/equivalent-radius
+grain-value/builtin/half-height-area
 grain-value/builtin/surface-area
 grain-value/builtin/center-x
 grain-value/builtin/center-y
