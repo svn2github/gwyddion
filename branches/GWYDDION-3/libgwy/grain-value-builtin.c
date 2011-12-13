@@ -266,7 +266,6 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Slope"),
         .ident = "phi",
         .symbol = "<i>ϑ</i>",
-        .same_units = TRUE,
         .is_angle = TRUE,
     },
     {
