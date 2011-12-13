@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdarg.h>
 #include <string.h>
 #include <glib/gi18n.h>
 #include "libgwy/macros.h"
@@ -364,6 +365,54 @@ init_values(GwyGrainValue *grainvalue)
         gwy_clear(v, n);
 }
 
+static gboolean
+check_target(GwyGrainValue *grainvalue,
+             gdouble **values,
+             BuiltinGrainValueId id)
+{
+    if (!grainvalue) {
+        *values = NULL;
+        return TRUE;
+    }
+
+    GrainValue *priv = grainvalue->priv;
+    const BuiltinGrainValue *builtin = priv->builtin;
+    g_return_val_if_fail(builtin && builtin->id == id, FALSE);
+    *values = priv->values;
+    return TRUE;
+}
+
+static gboolean
+check_dependence(const GwyGrainValue *grainvalue,
+                 const gdouble **values,
+                 BuiltinGrainValueId id)
+{
+    *values = NULL;
+    g_return_val_if_fail(grainvalue, FALSE);
+    GrainValue *priv = grainvalue->priv;
+    const BuiltinGrainValue *builtin = priv->builtin;
+    g_return_val_if_fail(builtin && builtin->id == id, FALSE);
+    *values = priv->values;
+    return TRUE;
+}
+
+static gboolean
+all_null(guint n, guint *ngrains, ...)
+{
+    va_list ap;
+    va_start(ap, ngrains);
+    for (guint i = 0; i < n; i++) {
+        const GwyGrainValue *grainvalue = va_arg(ap, const GwyGrainValue*);
+        if (grainvalue) {
+            GWY_MAYBE_SET(ngrains, grainvalue->priv->ngrains);
+            va_end(ap);
+            return FALSE;
+        }
+    }
+    va_end(ap);
+    return TRUE;
+}
+
 static void
 calc_anyboundpos(guint *anyboundpos,
                  const guint *grains,
@@ -386,15 +435,12 @@ calc_minimum(GwyGrainValue *grainvalue,
              const guint *grains,
              const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_MINIMUM))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_MINIMUM);
     guint nn = field->xres * field->yres;
-    gdouble *values = priv->values;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -411,15 +457,12 @@ calc_maximum(GwyGrainValue *grainvalue,
              const guint *grains,
              const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_MAXIMUM))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_MAXIMUM);
     guint nn = field->xres * field->yres;
-    gdouble *values = priv->values;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -438,17 +481,14 @@ calc_centre_x(GwyGrainValue *grainvalue,
               const guint *sizes,
               const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_CENTER_X))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
     g_return_if_fail(sizes);
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_CENTER_X);
     guint xres = field->xres, yres = field->yres;
     guint ngrains = grainvalue->priv->ngrains;
-    gdouble *values = priv->values;
     const guint *g = grains;
 
     for (guint i = 0; i < yres; i++) {
@@ -467,16 +507,14 @@ calc_centre_y(GwyGrainValue *grainvalue,
               const guint *sizes,
               const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
-    GrainValue *priv = grainvalue->priv;
     g_return_if_fail(sizes);
-    g_return_if_fail(priv->builtin
-                     && priv->builtin->id == GWY_GRAIN_VALUE_CENTER_Y);
     guint xres = field->xres, yres = field->yres;
     guint ngrains = grainvalue->priv->ngrains;
-    gdouble *values = priv->values;
     const guint *g = grains;
 
     for (guint i = 0; i < yres; i++) {
@@ -495,16 +533,13 @@ calc_mean(GwyGrainValue *grainvalue,
           const guint *sizes,
           const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue 
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_MEAN))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
     g_return_if_fail(sizes);
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_MEAN);
     guint nn = field->xres * field->yres;
-    gdouble *values = priv->values;
     guint ngrains = grainvalue->priv->ngrains;
     const guint *g = grains;
     const gdouble *d = field->data;
@@ -520,16 +555,13 @@ calc_volume_0(GwyGrainValue *grainvalue,
               const guint *grains,
               const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_VOLUME_0))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_VOLUME_0);
     guint xres = field->xres, yres = field->yres;
     gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
-    gdouble *values = priv->values;
     guint ngrains = grainvalue->priv->ngrains;
     const guint *g = grains;
     const gdouble *d = field->data;
@@ -568,27 +600,15 @@ calc_linear(gdouble *linear,
             const GwyGrainValue *zgrainvalue,
             const GwyField *field)
 {
-    if (!linear)
+    const gdouble *xvalue, *yvalue, *zvalue;
+    if (!linear
+        || !check_dependence(xgrainvalue, &xvalue, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalue, GWY_GRAIN_VALUE_CENTER_Y)
+        || !check_dependence(zgrainvalue, &zvalue, GWY_GRAIN_VALUE_MEAN))
         return;
 
-    g_return_if_fail(xgrainvalue && ygrainvalue);
-    const GrainValue *xpriv = xgrainvalue->priv,
-                     *ypriv = ygrainvalue->priv,
-                     *zpriv = zgrainvalue->priv;
-    const BuiltinGrainValue *xbuiltin = xpriv->builtin;
-    const BuiltinGrainValue *ybuiltin = ypriv->builtin;
-    const BuiltinGrainValue *zbuiltin = zpriv->builtin;
-    g_return_if_fail(xbuiltin
-                     && xbuiltin->id == GWY_GRAIN_VALUE_CENTER_X);
-    g_return_if_fail(ybuiltin
-                     && ybuiltin->id == GWY_GRAIN_VALUE_CENTER_Y);
-    g_return_if_fail(zbuiltin
-                     && zbuiltin->id == GWY_GRAIN_VALUE_MEAN);
     guint xres = field->xres;
     guint yres = field->yres;
-    const gdouble *xvalue = xpriv->values;
-    const gdouble *yvalue = ypriv->values;
-    const gdouble *zvalue = ypriv->values;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -619,27 +639,15 @@ calc_quadratic(gdouble *quadratic,
                const GwyGrainValue *zgrainvalue,
                const GwyField *field)
 {
-    if (!quadratic)
+    const gdouble *xvalue, *yvalue, *zvalue;
+    if (!quadratic
+        || !check_dependence(xgrainvalue, &xvalue, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalue, GWY_GRAIN_VALUE_CENTER_Y)
+        || !check_dependence(zgrainvalue, &zvalue, GWY_GRAIN_VALUE_MEAN))
         return;
 
-    g_return_if_fail(xgrainvalue && ygrainvalue);
-    const GrainValue *xpriv = xgrainvalue->priv,
-                     *ypriv = ygrainvalue->priv,
-                     *zpriv = zgrainvalue->priv;
-    const BuiltinGrainValue *xbuiltin = xpriv->builtin;
-    const BuiltinGrainValue *ybuiltin = ypriv->builtin;
-    const BuiltinGrainValue *zbuiltin = zpriv->builtin;
-    g_return_if_fail(xbuiltin
-                     && xbuiltin->id == GWY_GRAIN_VALUE_CENTER_X);
-    g_return_if_fail(ybuiltin
-                     && ybuiltin->id == GWY_GRAIN_VALUE_CENTER_Y);
-    g_return_if_fail(zbuiltin
-                     && zbuiltin->id == GWY_GRAIN_VALUE_MEAN);
     guint xres = field->xres;
     guint yres = field->yres;
-    const gdouble *xvalue = xpriv->values;
-    const gdouble *yvalue = ypriv->values;
-    const gdouble *zvalue = zpriv->values;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -678,16 +686,13 @@ calc_median(GwyGrainValue *grainvalue,
             const guint *sizes,
             const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_MEDIAN))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_MEDIAN);
     guint nn = field->xres * field->yres;
-    guint ngrains = priv->ngrains;
-    gdouble *values = priv->values;
+    guint ngrains = grainvalue->priv->ngrains;
     const gdouble *d = field->data;
     guint *csizes = g_new0(guint, ngrains + 1);
     guint *pos = g_new0(guint, ngrains + 1);
@@ -726,16 +731,13 @@ calc_projected_area(GwyGrainValue *grainvalue,
                     const GwyField *field,
                     const guint *sizes)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_PROJECTED_AREA))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
     g_return_if_fail(sizes);
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_PROJECTED_AREA);
-    guint ngrains = priv->ngrains;
-    gdouble *values = priv->values;
+    guint ngrains = grainvalue->priv->ngrains;
     gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
     for (guint gno = 0; gno <= ngrains; gno++)
         values[gno] = dxdy*sizes[gno];
@@ -746,16 +748,13 @@ calc_equiv_disc_radius(GwyGrainValue *grainvalue,
                        const GwyField *field,
                        const guint *sizes)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
     g_return_if_fail(sizes);
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS);
-    guint ngrains = priv->ngrains;
-    gdouble *values = priv->values;
+    guint ngrains = grainvalue->priv->ngrains;
     gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
     for (guint gno = 0; gno <= ngrains; gno++)
         values[gno] = sqrt(dxdy*sizes[gno]/G_PI);
@@ -781,19 +780,15 @@ calc_surface_area(GwyGrainValue *grainvalue,
                   const guint *grains,
                   const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_SURFACE_AREA))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_SURFACE_AREA);
     guint xres = field->xres, yres = field->yres;
-    gdouble dx = gwy_field_dx(field);
-    gdouble dy = gwy_field_dy(field);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     gdouble dx2 = dx*dx, dy2 = dy*dy, dxdy = dx*dy;
-    guint ngrains = priv->ngrains;
-    gdouble *values = priv->values;
+    guint ngrains = grainvalue->priv->ngrains;
     const guint *g = grains;
     const gdouble *d = field->data;
 
@@ -841,29 +836,18 @@ calc_half_height_area(GwyGrainValue *grainvalue,
                       const guint *grains,
                       const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    const gdouble *min, *max;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_HALF_HEIGHT_AREA)
+        || !check_dependence(mingrainvalue, &min, GWY_GRAIN_VALUE_MINIMUM)
+        || !check_dependence(maxgrainvalue, &max, GWY_GRAIN_VALUE_MAXIMUM))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_HALF_HEIGHT_AREA);
-    g_return_if_fail(mingrainvalue && maxgrainvalue);
-    const GrainValue *minpriv = mingrainvalue->priv;
-    const GrainValue *maxpriv = maxgrainvalue->priv;
-    const BuiltinGrainValue *minbuiltin = minpriv->builtin;
-    const BuiltinGrainValue *maxbuiltin = maxpriv->builtin;
-    g_return_if_fail(minbuiltin
-                     && minbuiltin->id == GWY_GRAIN_VALUE_MINIMUM);
-    g_return_if_fail(maxbuiltin
-                     && maxbuiltin->id == GWY_GRAIN_VALUE_MAXIMUM);
     guint nn = field->xres * field->yres;
     gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
-    guint ngrains = priv->ngrains;
-    gdouble *values = priv->values;
+    guint ngrains = grainvalue->priv->ngrains;
     const gdouble *d = field->data;
-    const gdouble *min = minpriv->values;
-    const gdouble *max = maxpriv->values;
 
     // Find the grain half-heights, i.e. (z_min + z_max)/2.
     gdouble *zhalf = g_new(gdouble, ngrains + 1);
@@ -889,18 +873,15 @@ calc_flat_boundary_length(GwyGrainValue *grainvalue,
                           const guint *grains,
                           const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    if (!grainvalue
+        || !check_target(grainvalue, &values,
+                         GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH);
     guint xres = field->xres, yres = field->yres;
-    gdouble dx = gwy_field_dx(field);
-    gdouble dy = gwy_field_dy(field);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     gdouble diag = hypot(dx, dy);
-    gdouble *values = priv->values;
 
     // Note the cycles go to xres and yres inclusive as we calculate the
     // boundary, not pixel interiors.
@@ -947,26 +928,14 @@ calc_boundary_extrema(GwyGrainValue *mingrainvalue,
                       const guint *grains,
                       const GwyField *field)
 {
-    if (!mingrainvalue && !maxgrainvalue)
+    gdouble *minvalues, *maxvalues;
+    if (all_null(2, NULL, mingrainvalue, maxgrainvalue)
+        || !check_target(mingrainvalue, &minvalues,
+                         GWY_GRAIN_VALUE_BOUNDARY_MINIMUM)
+        || !check_target(maxgrainvalue, &maxvalues,
+                         GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM))
         return;
 
-    GrainValue *minpriv = NULL, *maxpriv = NULL;
-    gdouble *minvalues = NULL, *maxvalues = NULL;
-
-    if (mingrainvalue) {
-        minpriv = mingrainvalue->priv;
-        const BuiltinGrainValue *builtin = minpriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_BOUNDARY_MINIMUM);
-        minvalues = minpriv->values;
-    }
-    if (maxgrainvalue) {
-        maxpriv = maxgrainvalue->priv;
-        const BuiltinGrainValue *builtin = maxpriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_BOUNDARY_MAXIMUM);
-        maxvalues = maxpriv->values;
-    }
     guint xres = field->xres, yres = field->yres;
     const guint *g = grains;
     const gdouble *d = field->data;
@@ -1195,48 +1164,19 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
                  const guint *anyboundpos,
                  const GwyField *field)
 {
-    if (!minsizegrainvalue && !maxsizegrainvalue
-        && !minanglegrainvalue && !maxanglegrainvalue)
+    guint ngrains;
+    gdouble *minsizevalues, *maxsizevalues, *minanglevalues, *maxanglevalues;
+    if (all_null(4, &ngrains, minsizegrainvalue, maxsizegrainvalue,
+                 minanglegrainvalue, maxanglegrainvalue)
+        || !check_target(minsizegrainvalue, &minsizevalues,
+                         GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE)
+        || !check_target(maxsizegrainvalue, &maxsizevalues,
+                         GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE)
+        || !check_target(minanglegrainvalue, &minanglevalues,
+                         GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE)
+        || !check_target(maxanglegrainvalue, &maxanglevalues,
+                         GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE))
         return;
-
-    GrainValue *minsizepriv = NULL, *maxsizepriv = NULL,
-               *minanglepriv = NULL, *maxanglepriv = NULL;
-    gdouble *minsizevalues = NULL, *maxsizevalues = NULL,
-            *minanglevalues = NULL, *maxanglevalues = NULL;
-    guint ngrains = 0;
-
-    if (minsizegrainvalue) {
-        minsizepriv = minsizegrainvalue->priv;
-        const BuiltinGrainValue *builtin = minsizepriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE);
-        minsizevalues = minsizepriv->values;
-        ngrains = minsizepriv->ngrains;
-    }
-    if (maxsizegrainvalue) {
-        maxsizepriv = maxsizegrainvalue->priv;
-        const BuiltinGrainValue *builtin = maxsizepriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE);
-        maxsizevalues = maxsizepriv->values;
-        ngrains = maxsizepriv->ngrains;
-    }
-    if (minanglegrainvalue) {
-        minanglepriv = minanglegrainvalue->priv;
-        const BuiltinGrainValue *builtin = minanglepriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE);
-        minanglevalues = minanglepriv->values;
-        ngrains = minanglepriv->ngrains;
-    }
-    if (maxanglegrainvalue) {
-        maxanglepriv = maxanglegrainvalue->priv;
-        const BuiltinGrainValue *builtin = maxanglepriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE);
-        maxanglevalues = maxanglepriv->values;
-        ngrains = maxanglepriv->ngrains;
-    }
 
     guint xres = field->xres, yres = field->yres;
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
@@ -1273,28 +1213,16 @@ calc_volume_min(GwyGrainValue *grainvalue,
                 const guint *sizes,
                 const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    const gdouble *min, *v0;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_VOLUME_MIN)
+        || !check_dependence(mingrainvalue, &min, GWY_GRAIN_VALUE_MINIMUM)
+        || !check_dependence(v0grainvalue, &v0, GWY_GRAIN_VALUE_VOLUME_0))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_VOLUME_MIN);
-    g_return_if_fail(mingrainvalue && v0grainvalue);
-    const GrainValue *minpriv = mingrainvalue->priv;
-    const GrainValue *v0priv = v0grainvalue->priv;
-    const BuiltinGrainValue *minbuiltin = minpriv->builtin;
-    const BuiltinGrainValue *v0builtin = v0priv->builtin;
-    g_return_if_fail(minbuiltin
-                     && minbuiltin->id == GWY_GRAIN_VALUE_MINIMUM);
-    g_return_if_fail(v0builtin
-                     && v0builtin->id == GWY_GRAIN_VALUE_VOLUME_0);
     gdouble dxdy = gwy_field_dx(field)*gwy_field_dy(field);
-    guint ngrains = priv->ngrains;
-    gdouble *values = priv->values;
-    const gdouble *min = minpriv->values;
-    const gdouble *v0 = v0priv->values;
-
+    guint ngrains = grainvalue->priv->ngrains;
     for (guint gno = 0; gno <= ngrains; gno++)
         values[gno] = v0[gno] - dxdy*sizes[gno]*min[gno];
 }
@@ -1306,22 +1234,14 @@ calc_volume_laplace(GwyGrainValue *grainvalue,
                     const GwyMaskField *mask,
                     const GwyField *field)
 {
-    if (!grainvalue)
+    gdouble *values;
+    const gdouble *v0;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_VOLUME_LAPLACE)
+        || !check_dependence(v0grainvalue, &v0, GWY_GRAIN_VALUE_VOLUME_0))
         return;
 
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_if_fail(builtin
-                     && builtin->id == GWY_GRAIN_VALUE_VOLUME_LAPLACE);
-    g_return_if_fail(v0grainvalue);
-    const GrainValue *v0priv = v0grainvalue->priv;
-    const BuiltinGrainValue *v0builtin = v0priv->builtin;
-    g_return_if_fail(v0builtin
-                     && v0builtin->id == GWY_GRAIN_VALUE_VOLUME_0);
     guint ngrains = grainvalue->priv->ngrains;
-    gdouble *values = grainvalue->priv->values;
-    const gdouble *v0 = v0priv->values;
-
     GwyField *workspace = gwy_field_duplicate(field);
     gwy_field_laplace_solve(workspace, mask, G_MAXUINT);
 
@@ -1343,32 +1263,15 @@ calc_slope(GwyGrainValue *thetagrainvalue,
            const gdouble *linear,
            const GwyField *field)
 {
-    if (!thetagrainvalue && !phigrainvalue)
+    guint ngrains;
+    gdouble *thetavalues, *phivalues;
+    if (all_null(2, &ngrains, thetagrainvalue, phigrainvalue)
+        || !check_target(thetagrainvalue, &thetavalues,
+                         GWY_GRAIN_VALUE_SLOPE_THETA)
+        || !check_target(phigrainvalue, &phivalues, GWY_GRAIN_VALUE_SLOPE_PHI))
         return;
 
-    GrainValue *thetapriv = NULL, *phipriv = NULL;
-    gdouble *thetavalues = NULL, *phivalues = NULL;
-    guint ngrains = 0;
-
-    if (thetagrainvalue) {
-        thetapriv = thetagrainvalue->priv;
-        const BuiltinGrainValue *builtin = thetapriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_SLOPE_THETA);
-        thetavalues = thetapriv->values;
-        ngrains = thetapriv->ngrains;
-    }
-    if (phigrainvalue) {
-        phipriv = phigrainvalue->priv;
-        const BuiltinGrainValue *builtin = phipriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_SLOPE_PHI);
-        phivalues = phipriv->values;
-        ngrains = phipriv->ngrains;
-    }
-
-    gdouble dx = gwy_field_dx(field);
-    gdouble dy = gwy_field_dy(field);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
 
     for (guint gno = 1; gno <= ngrains; gno++) {
         const gdouble *lin = linear + 5*gno;
@@ -1406,96 +1309,32 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
                const gdouble *quadratic,
                const GwyField *field)
 {
-    if (!xcgrainvalue && !ycgrainvalue && !zcgrainvalue
-        && !c1grainvalue && !c2grainvalue
-        && !a1grainvalue && !a2grainvalue)
+    guint ngrains;
+    gdouble *xcvalues, *ycvalues, *zcvalues,
+            *c1values, *c2values, *a1values, *a2values;
+    const gdouble *xvalues, *yvalues, *zvalues;
+    if (all_null(7, &ngrains, xcgrainvalue, ycgrainvalue, zcgrainvalue,
+                 c1grainvalue, c2grainvalue, a1grainvalue, a2grainvalue)
+        || !check_target(xcgrainvalue, &xcvalues,
+                         GWY_GRAIN_VALUE_CURVATURE_CENTER_X)
+        || !check_target(ycgrainvalue, &ycvalues,
+                         GWY_GRAIN_VALUE_CURVATURE_CENTER_Y)
+        || !check_target(zcgrainvalue, &zcvalues,
+                         GWY_GRAIN_VALUE_CURVATURE_CENTER_Z)
+        || !check_target(c1grainvalue, &c1values, GWY_GRAIN_VALUE_CURVATURE1)
+        || !check_target(c2grainvalue, &c2values, GWY_GRAIN_VALUE_CURVATURE2)
+        || !check_target(a1grainvalue, &a1values,
+                         GWY_GRAIN_VALUE_CURVATURE_ANGLE1)
+        || !check_target(a2grainvalue, &a2values,
+                         GWY_GRAIN_VALUE_CURVATURE_ANGLE2)
+        || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y)
+        || !check_dependence(zgrainvalue, &zvalues, GWY_GRAIN_VALUE_MEAN))
         return;
 
     g_return_if_fail(sizes);
     g_return_if_fail(linear);
     g_return_if_fail(quadratic);
-    g_return_if_fail(xgrainvalue && ygrainvalue && zgrainvalue);
-    const GrainValue *xpriv = xgrainvalue->priv;
-    const GrainValue *ypriv = ygrainvalue->priv;
-    const GrainValue *zpriv = zgrainvalue->priv;
-    const BuiltinGrainValue *xbuiltin = xpriv->builtin;
-    const BuiltinGrainValue *ybuiltin = ypriv->builtin;
-    const BuiltinGrainValue *zbuiltin = zpriv->builtin;
-    g_return_if_fail(xbuiltin
-                     && xbuiltin->id == GWY_GRAIN_VALUE_CENTER_X);
-    g_return_if_fail(ybuiltin
-                     && ybuiltin->id == GWY_GRAIN_VALUE_CENTER_Y);
-    g_return_if_fail(zbuiltin
-                     && zbuiltin->id == GWY_GRAIN_VALUE_MEAN);
-
-    GrainValue *xcpriv = NULL, *ycpriv = NULL, *zcpriv = NULL,
-               *c1priv = NULL, *c2priv = NULL,
-               *a1priv = NULL, *a2priv = NULL;
-    gdouble *xcvalues = NULL, *ycvalues = NULL, *zcvalues = NULL,
-            *c1values = NULL, *c2values = NULL,
-            *a1values = NULL, *a2values = NULL;
-    guint ngrains = 0;
-
-    if (xcgrainvalue) {
-        xcpriv = xcgrainvalue->priv;
-        const BuiltinGrainValue *builtin = xcpriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE_CENTER_X);
-        xcvalues = xcpriv->values;
-        ngrains = xcpriv->ngrains;
-    }
-    if (ycgrainvalue) {
-        ycpriv = ycgrainvalue->priv;
-        const BuiltinGrainValue *builtin = ycpriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE_CENTER_Y);
-        ycvalues = ycpriv->values;
-        ngrains = ycpriv->ngrains;
-    }
-    if (zcgrainvalue) {
-        zcpriv = zcgrainvalue->priv;
-        const BuiltinGrainValue *builtin = zcpriv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE_CENTER_Z);
-        zcvalues = zcpriv->values;
-        ngrains = zcpriv->ngrains;
-    }
-    if (c1grainvalue) {
-        c1priv = c1grainvalue->priv;
-        const BuiltinGrainValue *builtin = c1priv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE1);
-        c1values = c1priv->values;
-        ngrains = c1priv->ngrains;
-    }
-    if (c2grainvalue) {
-        c2priv = c2grainvalue->priv;
-        const BuiltinGrainValue *builtin = c2priv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE2);
-        c2values = c2priv->values;
-        ngrains = c2priv->ngrains;
-    }
-    if (a1grainvalue) {
-        a1priv = a1grainvalue->priv;
-        const BuiltinGrainValue *builtin = a1priv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE_ANGLE1);
-        ngrains = a1priv->ngrains;
-        a1values = a1priv->values;
-    }
-    if (a2grainvalue) {
-        a2priv = a2grainvalue->priv;
-        const BuiltinGrainValue *builtin = a2priv->builtin;
-        g_return_if_fail(builtin
-                         && builtin->id == GWY_GRAIN_VALUE_CURVATURE_ANGLE2);
-        ngrains = a2priv->ngrains;
-        a2values = a2priv->values;
-    }
-
-    const gdouble *xvalues = xpriv->values;
-    const gdouble *yvalues = ypriv->values;
-    const gdouble *zvalues = zpriv->values;
 
     // q is used for transformation from square pixels to coordinates with
     // correct aspect ratio and pixel area of 1; s is then the remaining
