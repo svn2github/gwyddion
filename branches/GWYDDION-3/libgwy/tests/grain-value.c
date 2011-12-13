@@ -370,6 +370,85 @@ test_grain_value_builtin_projected_boundary_length(void)
                    &dumb_projected_boundary_length, NULL);
 }
 
+static void
+increment(GHashTable *table,
+          guint key)
+{
+    gpointer pkey = GUINT_TO_POINTER(key);
+    guint val = GPOINTER_TO_UINT(g_hash_table_lookup(table, pkey));
+    g_hash_table_insert(table, pkey, GUINT_TO_POINTER(val+1));
+}
+
+static void
+find_all_vertices(const GwyMaskField *mask,
+                  GHashTable *vertices)
+{
+    guint xres = mask->xres, yres = mask->yres;
+    guint k = 0;
+
+    for (guint i = 0; i < yres; i++, k++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            if (gwy_mask_field_get(mask, j, i)) {
+                increment(vertices, k);
+                increment(vertices, k+1);
+                increment(vertices, k+xres+1);
+                increment(vertices, k+xres+2);
+            }
+        }
+    }
+}
+
+static GArray*
+outer_vertices(const GwyMaskField *mask)
+{
+    GHashTable *vertices = g_hash_table_new(g_direct_hash, g_direct_equal);
+    find_all_vertices(mask, vertices);
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, vertices);
+    GArray *outervertices = g_array_new(sizeof(guint), FALSE, FALSE);
+    gpointer pkey, pvalue;
+    while (g_hash_table_iter_next(&iter, &pkey, &pvalue)) {
+        if (GPOINTER_TO_UINT(pvalue) == 1) {
+            guint k = GPOINTER_TO_UINT(pkey);
+            g_array_append_val(outervertices, k);
+        }
+    }
+    g_hash_table_destroy(vertices);
+    return outervertices;
+}
+
+static gdouble
+dumb_maximum_bounding_size(const GwyMaskField *mask, const GwyField *field)
+{
+    GArray *vertices = outer_vertices(mask);
+    guint xres = field->xres;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble max = 0.0;
+    for (guint m = 1; m < vertices->len; m++) {
+        guint km = g_array_index(vertices, guint, m);
+        gdouble xm = (km % (xres+1))*dx;
+        gdouble ym = (km/(xres+1))*dy;
+        for (guint l = 0; l < m; l++) {
+            guint kl = g_array_index(vertices, guint, l);
+            gdouble xl = (kl % (xres+1))*dx;
+            gdouble yl = (kl/(xres+1))*dy;
+            gdouble d = (xm - xl)*(xm - xl) + (ym - yl)*(ym - yl);
+            if (d > max)
+                max = d;
+        }
+    }
+    g_array_free(vertices, TRUE);
+    return sqrt(max);
+}
+
+void
+test_grain_value_builtin_maximum_bounding_size(void)
+{
+    test_one_value("Maximum bounding size", "Boundary", TRUE,
+                   &dumb_maximum_bounding_size, NULL);
+}
+
+
 static gdouble
 dumb_slope_theta(const GwyMaskField *mask, const GwyField *field)
 {

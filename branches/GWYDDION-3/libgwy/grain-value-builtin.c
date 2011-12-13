@@ -1239,8 +1239,7 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
     }
 
     guint xres = field->xres, yres = field->yres;
-    gdouble dx = gwy_field_dx(field);
-    gdouble dy = gwy_field_dy(field);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
 
     // Find the complete convex hulls.
     GArray *vertices = g_array_new(FALSE, FALSE, sizeof(GridPoint));
