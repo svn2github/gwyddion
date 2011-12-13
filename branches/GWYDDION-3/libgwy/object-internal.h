@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -67,6 +67,9 @@ guint _gwy_itemize_chain_to_parent(GwySerializable *serializable,
                                    GwySerializableInterface *parent_iface,
                                    GwySerializableItems *items,
                                    guint child_items);
+
+G_GNUC_INTERNAL
+gpointer _gwy_hash_table_keys(GHashTable *table);
 
 G_END_DECLS
 

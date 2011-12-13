@@ -601,13 +601,6 @@ _gwy_grain_value_new_expr_with_constants(void)
     return expr;
 }
 
-static void
-add_name(gpointer key, G_GNUC_UNUSED gpointer value, gpointer user_data)
-{
-    GPtrArray *list = (GPtrArray*)user_data;
-    g_ptr_array_add(list, key);
-}
-
 /**
  * gwy_grain_value_list_builtins:
  *
@@ -621,12 +614,10 @@ add_name(gpointer key, G_GNUC_UNUSED gpointer value, gpointer user_data)
 const gchar**
 gwy_grain_value_list_builtins(void)
 {
-    GPtrArray *names = g_ptr_array_new();
     gpointer klass = g_type_class_ref(GWY_TYPE_GRAIN_VALUE);
-    g_hash_table_foreach(builtin_values, &add_name, names);
-    g_ptr_array_add(names, NULL);
+    const gchar **retval = _gwy_hash_table_keys(builtin_values);
     g_type_class_unref(klass);
-    return (const gchar**)g_ptr_array_free(names, FALSE);
+    return retval;
 }
 
 /************************** Documentation ****************************/

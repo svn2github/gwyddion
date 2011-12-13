@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -156,6 +156,18 @@ _gwy_check_object_component(const GwySerializableItem *item,
         return TRUE;
     }
     g_return_val_if_reached(FALSE);
+}
+
+gpointer
+_gwy_hash_table_keys(GHashTable *table)
+{
+    gpointer *keys = g_new(gpointer, g_hash_table_size(table)+1), *key = keys;
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, table);
+    while (g_hash_table_iter_next(&iter, key, NULL))
+        key++;
+    *key = NULL;
+    return keys;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

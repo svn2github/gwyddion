@@ -65,18 +65,12 @@ static GObject* gwy_container_duplicate_impl   (GwySerializable *object);
 static void     gwy_container_assign_impl      (GwySerializable *destination,
                                                 GwySerializable *source);
 static void     value_destroy                  (gpointer data);
-static void     hash_object_dispose            (gpointer hkey,
-                                                gpointer hvalue,
-                                                gpointer hdata);
 static GValue*  get_value_of_type              (GwyContainer *container,
                                                 GQuark key,
                                                 GType type);
 static GValue*  gis_value_of_type              (GwyContainer *container,
                                                 GQuark key,
                                                 GType type);
-static void     hash_count_items               (gpointer hkey,
-                                                gpointer hvalue,
-                                                gpointer hdata);
 static void     hash_itemize                   (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
@@ -86,16 +80,7 @@ static gboolean hash_remove_prefix             (gpointer hkey,
 static void     hash_foreach                   (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
-static void     keys_foreach                   (gpointer hkey,
-                                                gpointer hvalue,
-                                                gpointer hdata);
-static void     keys_by_name_foreach           (gpointer hkey,
-                                                gpointer hvalue,
-                                                gpointer hdata);
 static void     hash_duplicate                 (gpointer hkey,
-                                                gpointer hvalue,
-                                                gpointer hdata);
-static void     hash_find_keys                 (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
 static int      pstring_compare                (const void *p,
@@ -170,48 +155,37 @@ gwy_container_finalize(GObject *object)
 static void
 gwy_container_dispose(GObject *object)
 {
-    g_hash_table_foreach(GWY_CONTAINER(object)->priv->values,
-                         hash_object_dispose, NULL);
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, GWY_CONTAINER(object)->priv->values);
+    gpointer pvalue;
+    while (g_hash_table_iter_next(&iter, NULL, &pvalue)) {
+        GValue *value = (GValue*)pvalue;
+        if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
+            g_value_reset(value);
+    }
     G_OBJECT_CLASS(gwy_container_parent_class)->dispose(object);
-}
-
-static void
-hash_object_dispose(G_GNUC_UNUSED gpointer hkey,
-                    gpointer hvalue,
-                    G_GNUC_UNUSED gpointer hdata)
-{
-    GValue *value = (GValue*)hvalue;
-
-    if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
-        g_value_reset(value);
 }
 
 static gsize
 gwy_container_n_items(GwySerializable *serializable)
 {
     gsize n_items = 0;
-    g_hash_table_foreach(GWY_CONTAINER(serializable)->priv->values,
-                         hash_count_items, &n_items);
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, GWY_CONTAINER(serializable)->priv->values);
+    gpointer pvalue;
+    while (g_hash_table_iter_next(&iter, NULL, &pvalue)) {
+        GValue *value = (GValue*)pvalue;
+        GType type = G_VALUE_TYPE(value);
+        n_items++;
+        if (g_type_is_a(type, G_TYPE_OBJECT)) {
+            GObject *object = g_value_get_object(value);
+            n_items += gwy_serializable_n_items(GWY_SERIALIZABLE(object));
+        }
+        else if (g_type_is_a(type, G_TYPE_BOXED)) {
+            n_items += gwy_serializable_boxed_n_items(type);
+        }
+    }
     return n_items;
-}
-
-static void
-hash_count_items(G_GNUC_UNUSED gpointer hkey,
-                 gpointer hvalue,
-                 gpointer hdata)
-{
-    const GValue *value = (GValue*)hvalue;
-    gsize *n_items = (gsize*)hdata;
-
-    (*n_items)++;
-    GType type = G_VALUE_TYPE(value);
-    if (g_type_is_a(type, G_TYPE_OBJECT)) {
-        GObject *object = g_value_get_object(value);
-        *n_items += gwy_serializable_n_items(GWY_SERIALIZABLE(object));
-    }
-    else if (g_type_is_a(type, G_TYPE_BOXED)) {
-        *n_items += gwy_serializable_boxed_n_items(type);
-    }
 }
 
 static gsize
@@ -219,7 +193,6 @@ gwy_container_itemize(GwySerializable *serializable,
                       GwySerializableItems *items)
 {
     GwyContainer *container = GWY_CONTAINER(serializable);
-
     g_hash_table_foreach(container->priv->values, hash_itemize, items);
     return g_hash_table_size(container->priv->values);
 }
@@ -649,23 +622,15 @@ GQuark*
 gwy_container_keys(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
-    guint n = g_hash_table_size(container->priv->values);
-    GArray *array = g_array_sized_new(FALSE, FALSE, sizeof(GQuark), n+1);
-    g_hash_table_foreach(container->priv->values, keys_foreach, array);
-    GQuark sentinel = 0;
-    g_array_append_val(array, sentinel);
-    return (GQuark*)g_array_free(array, FALSE);
-}
-
-static void
-keys_foreach(gpointer hkey,
-             G_GNUC_UNUSED gpointer hvalue,
-             gpointer hdata)
-{
-    GQuark key = GPOINTER_TO_UINT(hkey);
-    GArray *array = (GArray*)hdata;
-
-    g_array_append_val(array, key);
+    guint i = 0, n = g_hash_table_size(container->priv->values);
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, container->priv->values);
+    GQuark *quarks = g_new(GQuark, n+1);
+    gpointer key;
+    while (g_hash_table_iter_next(&iter, &key, NULL))
+        quarks[i++] = GPOINTER_TO_UINT(key);
+    quarks[i] = 0;
+    return quarks;
 }
 
 /**
@@ -685,22 +650,15 @@ const gchar**
 gwy_container_keys_n(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
-    guint n = g_hash_table_size(container->priv->values);
-    GPtrArray *array = g_ptr_array_sized_new(n + 1);
-    g_hash_table_foreach(container->priv->values, keys_by_name_foreach, array);
-    g_ptr_array_add(array, NULL);
-    return (const gchar**)g_ptr_array_free(array, FALSE);
-}
-
-static void
-keys_by_name_foreach(gpointer hkey,
-                     G_GNUC_UNUSED gpointer hvalue,
-                     gpointer hdata)
-{
-    GQuark key = GPOINTER_TO_UINT(hkey);
-    GPtrArray *array = (GPtrArray*)hdata;
-
-    g_ptr_array_add(array, (gpointer)g_quark_to_string(key));
+    guint i = 0, n = g_hash_table_size(container->priv->values);
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, container->priv->values);
+    const gchar **strings = g_new(const gchar*, n+1);
+    gpointer key;
+    while (g_hash_table_iter_next(&iter, &key, NULL))
+        strings[i++] = g_quark_to_string(GPOINTER_TO_UINT(key));
+    strings[i] = NULL;
+    return strings;
 }
 
 /**
@@ -2263,10 +2221,6 @@ gwy_container_transfer(GwyContainer *source,
                        gboolean deep,
                        gboolean force)
 {
-    PrefixData pfdata;
-    GString *key;
-    guint dpflen;
-
     g_return_val_if_fail(GWY_IS_CONTAINER(source), 0);
     g_return_val_if_fail(GWY_IS_CONTAINER(dest), 0);
     if (!source_prefix)
@@ -2282,29 +2236,35 @@ gwy_container_transfer(GwyContainer *source,
     }
 
     /* Build a list of item keys we need to tansfer. */
-    pfdata.container = source;
-    pfdata.prefix = source_prefix;
-    pfdata.prefix_length = strlen(pfdata.prefix);
-    pfdata.count = 0;
-    pfdata.keylist = NULL;
-    pfdata.closed_prefix = !pfdata.prefix_length
-                           || (source_prefix[pfdata.prefix_length - 1]
-                               == GWY_CONTAINER_PATHSEP);
-    g_hash_table_foreach(source->priv->values, hash_find_keys, &pfdata);
-    if (!pfdata.keylist)
+    guint prefix_length = strlen(source_prefix);
+    gboolean closed_prefix = (!prefix_length
+                              || (source_prefix[prefix_length-1]
+                                  == GWY_CONTAINER_PATHSEP));
+    GSList *keylist = NULL;
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, source->priv->values);
+    gpointer pkey;
+    while (g_hash_table_iter_next(&iter, &pkey, NULL)) {
+        GQuark quark = GPOINTER_TO_UINT(pkey);
+        const gchar *name = g_quark_to_string(quark);
+        if (g_str_has_prefix(name, source_prefix)
+            && (closed_prefix || name[prefix_length] == GWY_CONTAINER_PATHSEP))
+            keylist = g_slist_prepend(keylist, pkey);
+    }
+    if (!keylist)
         return 0;
 
-    pfdata.keylist = g_slist_reverse(pfdata.keylist);
-    key = g_string_new(dest_prefix);
-    dpflen = strlen(dest_prefix);
-    if (dpflen && dest_prefix[dpflen - 1] == GWY_CONTAINER_PATHSEP)
+    keylist = g_slist_reverse(keylist);
+    GString *key = g_string_new(dest_prefix);
+    guint dpflen = strlen(dest_prefix);
+    if (dpflen && dest_prefix[dpflen-1] == GWY_CONTAINER_PATHSEP)
         dpflen--;
-    if (pfdata.closed_prefix && pfdata.prefix_length)
-        pfdata.prefix_length--;
+    if (closed_prefix && prefix_length)
+        prefix_length--;
 
     /* Transfer the items */
-    pfdata.count = 0;
-    for (GSList *l = pfdata.keylist; l; l = g_slist_next(l)) {
+    guint count = 0;
+    for (GSList *l = keylist; l; l = g_slist_next(l)) {
         GValue *val = (GValue*)g_hash_table_lookup(source->priv->values,
                                                    l->data);
         if (G_UNLIKELY(!val)) {
@@ -2316,7 +2276,7 @@ gwy_container_transfer(GwyContainer *source,
         g_string_truncate(key, dpflen);
         g_string_append(key,
                         g_quark_to_string(GPOINTER_TO_UINT(l->data))
-                        + pfdata.prefix_length);
+                        + prefix_length);
 
         GQuark quark = g_quark_from_string(key->str);
         GValue *copy = (GValue*)g_hash_table_lookup(dest->priv->values,
@@ -2355,33 +2315,12 @@ gwy_container_transfer(GwyContainer *source,
             g_hash_table_insert(dest->priv->values,
                                 GUINT_TO_POINTER(quark), copy);
         g_signal_emit(dest, signals[ITEM_CHANGED], quark, quark);
-        pfdata.count++;
+        count++;
     }
-    g_slist_free(pfdata.keylist);
+    g_slist_free(keylist);
     g_string_free(key, TRUE);
 
-    return pfdata.count;
-}
-
-static void
-hash_find_keys(gpointer hkey,
-               G_GNUC_UNUSED gpointer hvalue,
-               gpointer hdata)
-{
-    GQuark key = GPOINTER_TO_UINT(hkey);
-    PrefixData *pfdata = (PrefixData*)hdata;
-    const gchar *name;
-
-    if (pfdata->prefix
-        && (!(name = g_quark_to_string(key))
-            || !g_str_has_prefix(name, pfdata->prefix)
-            || (!pfdata->closed_prefix
-                && name[pfdata->prefix_length] != GWY_CONTAINER_PATHSEP)))
-        return;
-
-    pfdata->count++;
-    pfdata->keylist = g_slist_prepend(pfdata->keylist,
-                                      GUINT_TO_POINTER(hkey));
+    return count;
 }
 
 static int
