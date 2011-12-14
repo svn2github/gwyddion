@@ -52,6 +52,7 @@ function update_translations() {
       popd >/dev/null
       continue
     fi
+    make -k update-po
     make -k all-yes
     for lang in *.po; do
       x=${lang%.po}
