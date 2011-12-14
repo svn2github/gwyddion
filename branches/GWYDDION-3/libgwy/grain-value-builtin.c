@@ -1097,6 +1097,7 @@ find_grain_convex_hull(gint xres, gint yres,
                 // Get rid of mid, it is in a locally concave part.
                 g_array_index(vertices, GridPoint, len-2) = *cur;
                 g_array_set_size(vertices, len-1);
+                len = vertices->len;
             }
         }
     } while (v.i*xres + v.j != initpos);
