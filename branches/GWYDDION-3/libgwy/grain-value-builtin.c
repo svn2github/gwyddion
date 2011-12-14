@@ -157,6 +157,15 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .powerz = 1,
     },
     {
+        .id = GWY_GRAIN_VALUE_RMS_INTRA,
+        .need = NEED_ZMEAN,
+        .name = NC_("grain value", "Value rms (intragrain)"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "sigma_i",
+        .symbol = "<i>σ</i><sub>i</sub>",
+        .powerz = 1,
+    },
+    {
         .id = GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH,
         .name = NC_("grain value", "Projected boundary length"),
         .group = NC_("grain value group", "Boundary"),
@@ -724,6 +733,32 @@ calc_median(GwyGrainValue *grainvalue,
     g_free(csizes);
     g_free(pos);
     g_free(tmp);
+}
+
+static void
+calc_rms_intra(GwyGrainValue *grainvalue,
+               const GwyGrainValue *zgrainvalue,
+               const guint *grains,
+               const guint *sizes,
+               const GwyField *field)
+{
+    gdouble *values;
+    const gdouble *zvalue;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_RMS_INTRA)
+        || !check_dependence(zgrainvalue, &zvalue, GWY_GRAIN_VALUE_MEAN))
+        return;
+
+    g_return_if_fail(sizes);
+    guint nn = field->xres * field->yres;
+    guint ngrains = grainvalue->priv->ngrains;
+    const guint *g = grains;
+    const gdouble *d = field->data;
+
+    for (guint k = nn; k; k--, g++, d++)
+        values[*g] += (*d - zvalue[*g])*(*d - zvalue[*g]);
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] = sqrt(values[gno]/sizes[gno]);
 }
 
 static void
@@ -1432,6 +1467,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
 {
     guint ngrains = gwy_mask_field_n_grains(mask);
     const guint *grains = gwy_mask_field_grain_numbers(mask);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
 
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
@@ -1517,6 +1553,9 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                           ourvalues[GWY_GRAIN_VALUE_MAXIMUM],
                           grains, field);
     calc_median(ourvalues[GWY_GRAIN_VALUE_MEDIAN], grains, sizes, field);
+    calc_rms_intra(ourvalues[GWY_GRAIN_VALUE_MEDIAN],
+                   ourvalues[GWY_GRAIN_VALUE_MEAN],
+                   grains, sizes, field);
     calc_flat_boundary_length(ourvalues[GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH],
                               grains, field);
     calc_boundary_extrema(ourvalues[GWY_GRAIN_VALUE_BOUNDARY_MINIMUM],
@@ -1552,11 +1591,9 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     // NB: This must be done last because other function expect coordinates
     // in pixels.
     linear_transform(ourvalues[GWY_GRAIN_VALUE_CENTER_X],
-                     gwy_field_dx(field),
-                     0.5*gwy_field_dx(field) + field->xoff);
+                     dx, 0.5*dx + field->xoff);
     linear_transform(ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
-                     gwy_field_dy(field),
-                     0.5*gwy_field_dy(field) + field->yoff);
+                     dy, 0.5*dy + field->yoff);
 
     // Copy data to all other instances of the same grain value and set units.
     GwyUnit *unitxy = gwy_field_get_unit_xy(field);
