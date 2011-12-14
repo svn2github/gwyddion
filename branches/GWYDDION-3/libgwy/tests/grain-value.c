@@ -461,6 +461,48 @@ test_grain_value_builtin_maximum_bounding_size(void)
                    &dumb_maximum_bounding_size, NULL);
 }
 
+static gdouble
+dumb_maximum_bounding_angle(const GwyMaskField *mask, const GwyField *field)
+{
+    GArray *vertices = outer_vertices(mask);
+    guint xres = field->xres;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble max = 0.0, amax = NAN;
+    for (guint m = 1; m < vertices->len; m++) {
+        guint km = g_array_index(vertices, guint, m);
+        gdouble xm = (km % (xres+1))*dx;
+        gdouble ym = (km/(xres+1))*dy;
+        for (guint l = 0; l < m; l++) {
+            guint kl = g_array_index(vertices, guint, l);
+            gdouble xl = (kl % (xres+1))*dx;
+            gdouble yl = (kl/(xres+1))*dy;
+            gdouble d = (xm - xl)*(xm - xl) + (ym - yl)*(ym - yl);
+            if (d > max) {
+                max = d;
+                amax = gwy_standardize_direction(atan2(yl - ym, xm - xl));
+            }
+        }
+    }
+    g_array_free(vertices, TRUE);
+    return amax;
+}
+
+// The maximum bounding direction is has two values for rectangular grains.
+static void
+compare_bounding_direction(gdouble reference, gdouble result,
+                           const GwyMaskField *mask, guint grain_id)
+{
+    gdouble eps = 2e-9*fmax(fabs(result), fabs(reference));
+    result = copysign(result, reference);
+    g_assert_cmpfloat(fabs(result - reference), <=, eps);
+}
+
+void
+test_grain_value_builtin_maximum_bounding_angle(void)
+{
+    test_one_value("Maximum bounding direction", "Boundary", TRUE,
+                   &dumb_maximum_bounding_angle, &compare_bounding_direction);
+}
 
 static gdouble
 dumb_slope_theta(const GwyMaskField *mask, const GwyField *field)
