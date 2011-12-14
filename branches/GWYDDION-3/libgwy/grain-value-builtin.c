@@ -1554,7 +1554,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                           ourvalues[GWY_GRAIN_VALUE_MAXIMUM],
                           grains, field);
     calc_median(ourvalues[GWY_GRAIN_VALUE_MEDIAN], grains, sizes, field);
-    calc_rms_intra(ourvalues[GWY_GRAIN_VALUE_MEDIAN],
+    calc_rms_intra(ourvalues[GWY_GRAIN_VALUE_RMS_INTRA],
                    ourvalues[GWY_GRAIN_VALUE_MEAN],
                    grains, sizes, field);
     calc_flat_boundary_length(ourvalues[GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH],

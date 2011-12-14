@@ -277,6 +277,19 @@ test_grain_value_builtin_median(void)
                    &dumb_median, NULL);
 }
 
+static gdouble
+dumb_rms_intra(const GwyMaskField *mask, const GwyField *field)
+{
+    return gwy_field_rms(field, NULL, mask, GWY_MASK_INCLUDE);
+}
+
+void
+test_grain_value_builtin_rms_intra(void)
+{
+    test_one_value("Value rms (intragrain)", "Value", TRUE,
+                   &dumb_rms_intra, NULL);
+}
+
 static void
 boundary_minimum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
                           guint wul, guint wur, guint wlr, guint wll,
