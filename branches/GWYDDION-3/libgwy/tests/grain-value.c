@@ -405,7 +405,7 @@ outer_vertices(const GwyMaskField *mask)
     find_all_vertices(mask, vertices);
     GHashTableIter iter;
     g_hash_table_iter_init(&iter, vertices);
-    GArray *outervertices = g_array_new(sizeof(guint), FALSE, FALSE);
+    GArray *outervertices = g_array_new(FALSE, FALSE, sizeof(guint));
     gpointer pkey, pvalue;
     while (g_hash_table_iter_next(&iter, &pkey, &pvalue)) {
         if (GPOINTER_TO_UINT(pvalue) == 1) {
