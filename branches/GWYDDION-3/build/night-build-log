@@ -29,7 +29,7 @@ cat >build.ignore <<':'
 cat >build_documentation.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^Computing chunks\.\.\.
-^.*: warning: no link for: 'gwy-[-a-z]+\<foo\>
+^.*: warning: no link for: 'gwy-[-a-z]*\<foo\>
 ^.*: warning: no link for: 'GwyFoo
 ^Use of uninitialized value within %DeclarationTypes in lc at /usr/bin/gtkdoc-mkdb line [0-9]+\.
 ':'
