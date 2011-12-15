@@ -25,6 +25,14 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_FIELD_VOLUME_DEFAULT = 0,
+    GWY_FIELD_VOLUME_GWYDDION2,
+    GWY_FIELD_VOLUME_TRIANGULAR,
+    GWY_FIELD_VOLUME_BILINEAR,
+    GWY_FIELD_VOLUME_BIQUADRATIC,
+} GwyFieldVolumeMethod;
+
 typedef void (*GwyFieldQuartersFunc)(gdouble zul,
                                      gdouble zur,
                                      gdouble zlr,
@@ -76,6 +84,11 @@ gdouble gwy_field_surface_area     (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking);
+gdouble gwy_field_volume           (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking,
+                                    GwyFieldVolumeMethod method);
 guint   gwy_field_count_above_below(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,

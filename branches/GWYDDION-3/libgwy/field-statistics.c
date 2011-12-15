@@ -35,6 +35,12 @@ typedef struct {
     gdouble dy2;
 } SurfaceAreaData;
 
+typedef struct {
+    gdouble s;
+    gdouble wself;
+    gdouble wortho;
+} VolumeQuadratureData;
+
 /**
  * gwy_field_min_max:
  * @field: A two-dimensional data field.
@@ -872,8 +878,7 @@ gwy_field_surface_area(const GwyField *field,
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
 
-    gdouble dx = gwy_field_dx(field);
-    gdouble dy = gwy_field_dy(field);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     gboolean square_pixels = fabs(log(dx/dy)) < COMPAT_EPSILON;
     gboolean full_field = ((!mask || masking == GWY_MASK_IGNORE)
                            && (!fpart || (fpart->width == field->xres
@@ -894,6 +899,66 @@ gwy_field_surface_area(const GwyField *field,
         field->priv->cached |= CBIT(ARE);
     }
     return area;
+}
+
+static void
+volume_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                  guint w1, guint w2, guint w3, guint w4,
+                  gpointer user_data)
+{
+    VolumeQuadratureData *vqdata = (VolumeQuadratureData*)user_data;
+    gdouble ss = (w1*z1 + w2*z2 + w3*z3 + w4*z4)*vqdata->wself;
+    gdouble so = ((w1 + w3)*(z2 + z4) + (w2 + w4)*(z1 + z3))*vqdata->wortho;
+    gdouble sd = w1*z3 + w2*z4 + w3*z1 + w4*z2;
+    vqdata->s += ss + so + sd;
+}
+
+/**
+ * gwy_field_volume:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @method: Quadrature method.  Pass %GWY_FIELD_VOLUME_DEFAULT (zero).
+ *
+ * Calculates the volume under a field surface.
+ *
+ * This method calculates the classical quadrature representing volume under
+ * the surface with basis at @z=0, positive field values adding to the volume,
+ * negative field values subtracting from the volume.
+ *
+ * Returns: The volume under the field surface.
+ **/
+gdouble
+gwy_field_volume(const GwyField *field,
+                 const GwyFieldPart *fpart,
+                 const GwyMaskField *mask,
+                 GwyMaskingType masking,
+                 GwyFieldVolumeMethod method)
+{
+    // We store only the self and orthogonal weight, the diagonal is always 1.
+    static const gdouble weights[][2] = {
+        { 484.0, 22.0, },  // Default = biqudratic
+        { 52.0, 10.0, },   // Gwyddion2
+        { 36.0, 6.0, },    // Triangular
+        { 28.0, 4.0, },    // Bilinear
+        { 484.0, 22.0, },  // Biqudratic
+    };
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
+    g_return_val_if_fail(method < G_N_ELEMENTS(weights), 0.0);
+
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    VolumeQuadratureData vqdata = {
+        0.0,
+        weights[method][0], weights[method][1],
+    };
+    gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
+                               volume_quadrature, &vqdata);
+
+    gdouble volume = vqdata.s*dx*dy/(vqdata.wself + 4.0*vqdata.wortho + 4.0);
+    return volume;
 }
 
 static void
@@ -1136,6 +1201,23 @@ gwy_field_process_quarters(const GwyField *field,
  * Note the values and weights are passed in a clock-wise order around the
  * square starting from the top-left corner.  This means that subsequent values
  * share a side of the square but the order is different from a 2×2 field.
+ **/
+
+/**
+ * GwyFieldVolumeMethod:
+ * @GWY_FIELD_VOLUME_DEFAULT: The default method, whatever it is (currently
+ *                            %GWY_FIELD_VOLUME_BIQUADRATIC).  The only method
+ *                            you need.
+ * @GWY_FIELD_VOLUME_GWYDDION2: Reproducing how Gwyddion 2.x calculated the
+ *                              volume by using the same quadrature weights,
+ *                              although they are of unclear origin.
+ * @GWY_FIELD_VOLUME_TRIANGULAR: Calculate the volume under the Gwyddion 2.x
+ *                               surface area style triangulation.
+ * @GWY_FIELD_VOLUME_BILINEAR: Exactly integrate bilinear interpolation in
+ *                             each quarter.
+ * @GWY_FIELD_VOLUME_BIQUADRATIC: Exactly integrate biquadratic interpolation.
+ *
+ * Field volume calculation methods.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
