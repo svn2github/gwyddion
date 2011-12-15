@@ -631,10 +631,9 @@ gwy_grain_value_list_builtins(void)
  * individual grains, with formula and capability to derive units from the
  * units of the data field.
  *
- * It can wrap either a built-in grain value or user grain value resources
- * #GwyUserGrainValue.
- *
- * FIXME: Built-in grain values should be listed here.  Once we implement some.
+ * It can wrap either a built-in grain value (see
+ * <link linkend='libgwy-builtin-grain-value'>Builtin grain values</link>
+ * for a list) or user grain value resources #GwyUserGrainValue.
  **/
 
 /**

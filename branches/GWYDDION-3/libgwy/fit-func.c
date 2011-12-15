@@ -921,10 +921,10 @@ gwy_fit_func_list_builtins(void)
  * parameters, capability to estimate parameters values or derive their units
  * from the units of fitted data.
  *
- * It can wrap either a built-in fitting function or user function resources
+ * It can wrap either a built-in fitting function (see
+ * <link linkend='libgwy-builtin-fit-func'>Builtin fit funcs</link>
+ * for a list) or user function resources
  * #GwyUserFitFunc.
- *
- * FIXME: Built-in functions should be listed here.  Once we implement some.
  **/
 
 /**
