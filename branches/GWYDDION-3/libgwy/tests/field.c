@@ -1485,7 +1485,7 @@ make_planar_field(guint xres, guint yres,
 }
 
 void
-test_field_surface_area(void)
+test_field_surface_area_planar(void)
 {
     enum { max_size = 76 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1509,6 +1509,23 @@ test_field_surface_area(void)
         area = gwy_field_surface_area(field, NULL, NULL, GWY_MASK_IGNORE);
         area_expected = planar_field_surface_area(field);
         g_assert_cmpfloat(fabs(area - area_expected)/area_expected, <=, 1e-9);
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_surface_area_masked(void)
+{
+    enum { max_size = 76 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
 
         field_randomize(field, rng);
         guint width = g_rand_int_range(rng, 1, xres+1);

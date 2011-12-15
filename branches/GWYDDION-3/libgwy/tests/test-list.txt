@@ -203,7 +203,8 @@ field/statistics
 field/median/include
 field/median/exclude
 field/median/ignore
-field/surface-area
+field/surface-area/planar
+field/surface-area/masked
 field/compatibility/res
 field/compatibility/real
 field/compatibility/units
