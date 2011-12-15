@@ -377,7 +377,7 @@ row_convolve_fft(const GwyField *field,
  *          match either @field or @fpart.  In the former case the
  *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
- * @kernel: Kenrel to convolve @field with.
+ * @kernel: Kernel to convolve @field with.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
@@ -805,7 +805,7 @@ convolve_fft(const GwyField *field,
  *          match either @field or @fpart.  In the former case the
  *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
- * @kernel: Kenrel to convolve @field with.
+ * @kernel: Kernel to convolve @field with.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
