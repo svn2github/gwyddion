@@ -29,6 +29,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module alicona.c -->
+    <row>
+      <entry>Alicona Imaging AL3D data</entry>
+      <entry>.al3d</entry>
+      <entry>alicona</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module ambfile.c -->
     <row>
       <entry>Ambios AMB</entry>
@@ -115,6 +124,15 @@
       <entry>Burleigh exported data</entry>
       <entry>.txt, .bin</entry>
       <entry>burleigh_exp</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module codevfile.c -->
+    <row>
+      <entry>Code V interferogram data</entry>
+      <entry>.int</entry>
+      <entry>codevfile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -218,6 +236,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module hitachi-sem.c -->
+    <row>
+      <entry>Hitachi S-3700 and S-4800 SEM data</entry>
+      <entry>.txt, +, image</entry>
+      <entry>hitachi-sem</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module igorfile.c -->
     <row>
       <entry>WaveMetrics IGOR binary wave v5</entry>
@@ -235,6 +262,15 @@
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
+    </row>
+    <!-- From module iso28600.c -->
+    <row>
+      <entry>ISO 28600:2011 SPM data transfer format</entry>
+      <entry>.spm</entry>
+      <entry>iso28600</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
+      <entry>Limited<footnote id="table-file-formats-fn1"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -315,7 +351,7 @@
       <entry>mifile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnote id="table-file-formats-fn1"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -576,7 +612,7 @@ supported.</para></footnote></entry>
       <entry>rhk-sm4</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>No</entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -748,6 +784,15 @@ supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>Yes</entry>
     </row>
+    <!-- From module witec-asc.c -->
+    <row>
+      <entry>WITec ASCII export</entry>
+      <entry>.dat</entry>
+      <entry>witec-asc</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module witfile.c -->
     <row>
       <entry>WITec</entry>
@@ -771,6 +816,15 @@ supported.</para></footnote></entry>
       <entry>Nanotec WSxM</entry>
       <entry>.tom</entry>
       <entry>wsxmfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module zeiss.c -->
+    <row>
+      <entry>Carl Zeiss SEM scans</entry>
+      <entry>.tif</entry>
+      <entry>zeiss</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
