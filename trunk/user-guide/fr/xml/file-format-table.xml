@@ -29,6 +29,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module alicona.c -->
+    <row>
+      <entry>Alicona Imaging AL3D</entry>
+      <entry>.al3d</entry>
+      <entry>alicona</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module ambfile.c -->
     <row>
       <entry>Ambios AMB</entry>
@@ -115,6 +124,15 @@
       <entry>Burleigh données exportées</entry>
       <entry>.txt, .bin</entry>
       <entry>burleigh_exp</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module codevfile.c -->
+    <row>
+      <entry>Code V interférogramme</entry>
+      <entry>.int</entry>
+      <entry>codevfile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -218,6 +236,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module hitachi-sem.c -->
+    <row>
+      <entry>Hitachi S-3700 et S-4800 SEM</entry>
+      <entry>.txt, +, image</entry>
+      <entry>hitachi-sem</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module igorfile.c -->
     <row>
       <entry>WaveMetrics IGOR binaire v5</entry>
@@ -235,6 +262,15 @@
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
+    </row>
+    <!-- From module iso28600.c -->
+    <row>
+      <entry>ISO 28600:2011</entry>
+      <entry>.spm</entry>
+      <entry>iso28600</entry>
+      <entry>Oui</entry>
+      <entry>Oui</entry>
+      <entry>Limité<footnote id="table-file-formats-fn1"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -749,6 +785,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Oui</entry>
     </row>
+    <!-- From module witec-asc.c -->
+    <row>
+      <entry>WITec ASCII</entry>
+      <entry>.dat</entry>
+      <entry>witec-asc</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module witfile.c -->
     <row>
       <entry>WITec</entry>
@@ -772,6 +817,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Nanotec WSxM</entry>
       <entry>.tom</entry>
       <entry>wsxmfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module zeiss.c -->
+    <row>
+      <entry>Carl Zeiss SEM</entry>
+      <entry>.tif</entry>
+      <entry>zeiss</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
