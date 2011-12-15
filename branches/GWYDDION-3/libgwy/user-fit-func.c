@@ -332,12 +332,12 @@ validate(GwyUserFitFunc *userfitfunc,
     // Group physical sanity
     if (!priv->group) {
         g_set_error(error, domain, code,
-                    _("Grain value has no group."));
+                    _("Fitting function has no group."));
         return FALSE;
     }
     if (!g_utf8_validate(priv->group, -1, NULL)) {
         g_set_error(error, domain, code,
-                    _("Grain value group is not valid UTF-8."));
+                    _("Fitting function group is not valid UTF-8."));
         return FALSE;
     }
 
@@ -635,11 +635,12 @@ gwy_user_fit_func_nth_param(const GwyUserFitFunc *userfitfunc,
     return priv->param[i];
 }
 
-// FIXME: This is illogical.  Why should the user pass the compiled expr?
 /**
  * gwy_user_fit_func_resolve_params:
  * @userfitfunc: A user fitting function.
  * @expr: An expression, presumably with compiled @userfitfunc's formula.
+ *        If the expression does not represent the @userfitfunc's formula it
+ *        will be set to this formula and compiled.
  * @independent_name: Name of independent variable (abscissa), pass %NULL for
  *                    the default "x".
  * @indices: Array to store the map from the parameter number to the
@@ -665,6 +666,15 @@ gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
     if (!independent_name)
         independent_name = "x";
     UserFitFunc *priv = userfitfunc->priv;
+
+    if (!gwy_strequal(gwy_expr_get_expression(expr), priv->formula)) {
+        GError *err = NULL;
+        if (!gwy_expr_compile(expr, priv->formula, &err)) {
+            g_critical("Suddenly cannot compile the formula: %s", err->message);
+            g_clear_error(&err);
+            return G_MAXUINT;
+        }
+    }
 
     guint n = priv->nparams;
     const gchar *names[n+1];

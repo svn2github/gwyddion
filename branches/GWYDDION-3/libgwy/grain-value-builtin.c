@@ -1667,4 +1667,14 @@ _gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
     }
 }
 
+const gchar**
+_gwy_grain_value_list_builtin_idents(void)
+{
+    const gchar **idents = g_new(const gchar*, GWY_GRAIN_NVALUES+1);
+    for (guint i = 0; i < GWY_GRAIN_NVALUES; i++)
+        idents[i] = builtin_table[i].ident;
+    idents[GWY_GRAIN_NVALUES] = NULL;
+    return idents;
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

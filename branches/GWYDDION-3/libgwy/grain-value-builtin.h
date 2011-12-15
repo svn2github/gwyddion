@@ -123,6 +123,9 @@ void _gwy_grain_value_evaluate_builtins(const GwyField *field,
                                         GwyGrainValue **grainvalues,
                                         guint nvalues);
 
+G_GNUC_INTERNAL
+const gchar** _gwy_grain_value_list_builtin_idents(void);
+
 G_END_DECLS
 
 #endif

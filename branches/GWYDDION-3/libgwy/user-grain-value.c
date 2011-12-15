@@ -445,8 +445,8 @@ gwy_user_grain_value_get_formula(const GwyUserGrainValue *usergrainvalue)
  **/
 gboolean
 gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
-                              const gchar *formula,
-                              GError **error)
+                                 const gchar *formula,
+                                 GError **error)
 {
     g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), FALSE);
     g_return_val_if_fail(formula, FALSE);
@@ -463,37 +463,26 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
         G_UNLOCK(test_expr);
         return FALSE;
     }
-    /*
-    const gchar **names;
-    guint n = gwy_expr_get_variables(test_expr, &names);
-    // This is usualy still two parameters too large as the vars contain "x".
-    GwyFitParam **newparam = g_new0(GwyFitParam*, n);
-    guint np = 0;
-    for (guint i = 1; i < n; i++) {
-        if (gwy_strequal(names[i], "x"))
-            continue;
-
-        guint j = 0;
-        while (j < priv->nparams) {
-            if (gwy_strequal(names[i], gwy_fit_param_get_name(priv->param[j])))
-                break;
-            j++;
-        }
-        if (j == priv->nparams)
-            newparam[np] = gwy_fit_param_new(names[i]);
-        else
-            newparam[np] = g_object_ref(priv->param[j]);
-        np++;
-    }
-    */
-    // Must not release it eariler while we still use names[].
+    const gchar **idents = _gwy_grain_value_list_builtin_idents();
+    guint nidents = g_strv_length((gchar**)idents);
+    guint *indices = g_slice_alloc((nidents + 1)*sizeof(guint));
+    guint unresolved = gwy_expr_resolve_variables(test_expr,
+                                                  nidents, idents, indices);
     G_UNLOCK(test_expr);
+    g_slice_free1((nidents + 1)*sizeof(guint), indices);
+    g_free(idents);
+
+    if (unresolved) {
+        g_set_error(error, GWY_USER_GRAIN_VALUE_ERROR,
+                    GWY_USER_GRAIN_VALUE_ERROR_DEPENDS,
+                    _("Grain value formula contains unknown variables."));
+        return G_MAXUINT;
+    }
 
     _gwy_assign_string(&priv->formula, formula);
     gwy_user_grain_value_changed(usergrainvalue);
 
     return TRUE;
-
 }
 
 /**
