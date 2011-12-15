@@ -28,6 +28,15 @@
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/grain-value-builtin.h"
 
+// There are several possible choices for the volume quadrature coefficients:
+// Bilinear interpolation:                          7/12, 1/12, 1/48
+// Triangular interpolation (like surface area):    9/16, 3/32, 1/64
+// Gwyddion 2 (how I obtained these? maybe a bug):  13/24, 5/48, 1/96
+// Exact integration of all bi-quadratic functions: 121/144, 11/288, 1/576
+#define VOLUME_W_SELF  0.840277777777777777777777777777
+#define VOLUME_W_ORTHO 0.0381944444444444444444444444444
+#define VOLUME_W_DIAG  0.00173611111111111111111111111111
+
 enum {
     NEED_SIZE = 1 << 0,
     NEED_ANYBOUNDPOS = 1 << 1,
@@ -587,16 +596,17 @@ calc_volume_0(GwyGrainValue *grainvalue,
             guint jm = (j > 0) ? j-1 : j;
             guint jp = (j < xres-1) ? j+1 : j;
 
-            gdouble v = (52.0*d[ix + j] + 10.0*(d[imx + j] + d[ix + jm]
-                                                + d[ix + jp] + d[ipx + j])
-                         + (d[imx + jm] + d[imx + jp]
-                            + d[ipx + jm] + d[ipx + jp]));
+            gdouble v = (VOLUME_W_SELF*d[ix + j]
+                         + VOLUME_W_ORTHO*(d[imx + j] + d[ix + jm]
+                                           + d[ix + jp] + d[ipx + j])
+                         + VOLUME_W_DIAG*(d[imx + jm] + d[imx + jp]
+                                          + d[ipx + jm] + d[ipx + jp]));
 
             values[gno] += v;
         }
     }
     for (guint gno = 1; gno <= ngrains; gno++)
-        values[gno] *= dxdy/96.0;
+        values[gno] *= dxdy;
 }
 
 // The coordinate origin is always the grain centre.

@@ -25,6 +25,11 @@
  *
  ***************************************************************************/
 
+// TODO: We may want non-random test on known data at least for some quantities
+// that are difficult to verify independently:
+// - minimum/maximum bounding direction/size
+// - volume (exact integration of specific shapes)
+
 static void
 extract_grain_with_data(const GwyMaskField *mask,
                         GwyMaskField *mask_target,
@@ -490,7 +495,8 @@ dumb_maximum_bounding_angle(const GwyMaskField *mask, const GwyField *field)
 // The maximum bounding direction is has two values for rectangular grains.
 static void
 compare_bounding_direction(gdouble reference, gdouble result,
-                           const GwyMaskField *mask, guint grain_id)
+                           G_GNUC_UNUSED const GwyMaskField *mask,
+                           G_GNUC_UNUSED guint grain_id)
 {
     gdouble eps = 2e-9*fmax(fabs(result), fabs(reference));
     result = copysign(result, reference);
@@ -502,6 +508,34 @@ test_grain_value_builtin_maximum_bounding_angle(void)
 {
     test_one_value("Maximum bounding direction", "Boundary", TRUE,
                    &dumb_maximum_bounding_angle, &compare_bounding_direction);
+}
+
+static gdouble
+dumb_volume_0(const GwyMaskField *mask, const GwyField *field)
+{
+    static const gdouble weights[3*3] = {
+        1.0/576.0, 11.0/288.0, 1.0/576.0,
+        11.0/288.0, 121.0/144.0, 11.0/288.0,
+        1.0/576.0, 11.0/288.0, 1.0/576.0,
+    };
+    GwyField *kernel = gwy_field_new_sized(3, 3, FALSE);
+    gwy_assign(kernel->data, weights, 3*3);
+    GwyField *weighted = gwy_field_new_alike(field, FALSE);
+    gwy_field_convolve(field, NULL, weighted, kernel,
+                       GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+    g_object_unref(kernel);
+    gdouble volume = (gwy_field_mean(weighted, NULL, mask, GWY_MASK_INCLUDE)
+                      * gwy_mask_field_count(mask, NULL, TRUE)
+                      * gwy_field_dx(field)*gwy_field_dy(field));
+    g_object_unref(weighted);
+    return volume;
+}
+
+void
+test_grain_value_builtin_volume_0(void)
+{
+    test_one_value("Zero-based volume", "Volume", TRUE,
+                   &dumb_volume_0, NULL);
 }
 
 static gdouble
