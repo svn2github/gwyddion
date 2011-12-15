@@ -205,6 +205,14 @@ field/median/exclude
 field/median/ignore
 field/surface-area/planar
 field/surface-area/masked
+field/volume/planar/gwyddion2
+field/volume/planar/triangular
+field/volume/planar/bilinear
+field/volume/planar/biquadratic
+field/volume/masked/gwyddion2
+field/volume/masked/triangular
+field/volume/masked/bilinear
+field/volume/masked/biquadratic
 field/compatibility/res
 field/compatibility/real
 field/compatibility/units

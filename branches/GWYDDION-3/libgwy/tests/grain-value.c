@@ -513,22 +513,8 @@ test_grain_value_builtin_maximum_bounding_angle(void)
 static gdouble
 dumb_volume_0(const GwyMaskField *mask, const GwyField *field)
 {
-    static const gdouble weights[3*3] = {
-        1.0/576.0, 11.0/288.0, 1.0/576.0,
-        11.0/288.0, 121.0/144.0, 11.0/288.0,
-        1.0/576.0, 11.0/288.0, 1.0/576.0,
-    };
-    GwyField *kernel = gwy_field_new_sized(3, 3, FALSE);
-    gwy_assign(kernel->data, weights, 3*3);
-    GwyField *weighted = gwy_field_new_alike(field, FALSE);
-    gwy_field_convolve(field, NULL, weighted, kernel,
-                       GWY_EXTERIOR_MIRROR_EXTEND, NAN);
-    g_object_unref(kernel);
-    gdouble volume = (gwy_field_mean(weighted, NULL, mask, GWY_MASK_INCLUDE)
-                      * gwy_mask_field_count(mask, NULL, TRUE)
-                      * gwy_field_dx(field)*gwy_field_dy(field));
-    g_object_unref(weighted);
-    return volume;
+    return gwy_field_volume(field, NULL, mask, GWY_MASK_INCLUDE,
+                            GWY_FIELD_VOLUME_DEFAULT);
 }
 
 void

@@ -1564,6 +1564,163 @@ test_field_surface_area_masked(void)
     g_rand_free(rng);
 }
 
+// Screw the borders.
+static gdouble
+planar_field_volume(const GwyField *field)
+{
+    guint xres = field->xres, yres = field->yres;
+    gdouble z00 = (gwy_field_index(field, 0, 0)
+                   + gwy_field_index(field, 1, 0)
+                   + gwy_field_index(field, 0, 1)
+                   + gwy_field_index(field, 1, 1))/4.0;
+    gdouble zm0 = (gwy_field_index(field, xres-2, 0)
+                   + gwy_field_index(field, xres-1, 0)
+                   + gwy_field_index(field, xres-2, 1)
+                   + gwy_field_index(field, xres-1, 1))/4.0;
+    gdouble z0m = (gwy_field_index(field, 0, yres-2)
+                   + gwy_field_index(field, 1, yres-2)
+                   + gwy_field_index(field, 0, yres-1)
+                   + gwy_field_index(field, 1, yres-1))/4.0;
+    gdouble zmm = (gwy_field_index(field, xres-2, yres-2)
+                   + gwy_field_index(field, xres-1, yres-2)
+                   + gwy_field_index(field, xres-2, yres-1)
+                   + gwy_field_index(field, xres-1, yres-1))/4.0;
+    g_assert(fabs(zmm - (z00 + (zm0 - z00) + (z0m - z00))) < 1e-9);
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    return (xres - 2)*(yres - 2)*dx*dy*(z00 + zm0 + z0m + zmm)/4.0;
+}
+
+void
+field_volume_planar_one(GwyFieldVolumeMethod method)
+{
+    enum { max_size = 76 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 3, max_size);
+        guint yres = g_rand_int_range(rng, 3, max_size);
+        gdouble alpha = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble beta = g_rand_double_range(rng, -5.0, 5.0);
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
+        GwyFieldPart fpart = { 1, 1, xres-2, yres-2 };
+        gdouble volume, volume_expected;
+        gwy_field_set_xreal(field, xres/sqrt(xres*yres));
+        gwy_field_set_yreal(field, yres/sqrt(xres*yres));
+        volume = gwy_field_volume(field, &fpart, NULL, GWY_MASK_IGNORE, method);
+        volume_expected = planar_field_volume(field);
+        g_assert_cmpfloat(fabs((volume - volume_expected)/volume_expected),
+                          <=, 1e-9);
+
+        gwy_field_set_xreal(field, 1.0);
+        gwy_field_set_yreal(field, 1.0);
+        volume = gwy_field_volume(field, &fpart, NULL, GWY_MASK_IGNORE, method);
+        volume_expected = planar_field_volume(field);
+        g_assert_cmpfloat(fabs((volume - volume_expected)/volume_expected),
+                          <=, 1e-9);
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_volume_planar_gwyddion2(void)
+{
+    field_volume_planar_one(GWY_FIELD_VOLUME_GWYDDION2);
+}
+
+void
+test_field_volume_planar_triangular(void)
+{
+    field_volume_planar_one(GWY_FIELD_VOLUME_TRIANGULAR);
+}
+
+void
+test_field_volume_planar_bilinear(void)
+{
+    field_volume_planar_one(GWY_FIELD_VOLUME_BILINEAR);
+}
+
+void
+test_field_volume_planar_biquadratic(void)
+{
+    field_volume_planar_one(GWY_FIELD_VOLUME_BIQUADRATIC);
+}
+
+void
+field_volume_masked_one(GwyFieldVolumeMethod method)
+{
+    enum { max_size = 76 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+        field_randomize(field, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+
+        gwy_field_set_xreal(field, xres/sqrt(xres*yres));
+        gwy_field_set_yreal(field, yres/sqrt(xres*yres));
+        gdouble volume_include, volume_exclude, volume_ignore;
+        volume_include = gwy_field_volume(field, &fpart,
+                                          mask, GWY_MASK_INCLUDE, method);
+        volume_exclude = gwy_field_volume(field, &fpart,
+                                          mask, GWY_MASK_EXCLUDE, method);
+        volume_ignore = gwy_field_volume(field, &fpart,
+                                         mask, GWY_MASK_IGNORE, method);
+        g_assert_cmpfloat(fabs(volume_include + volume_exclude
+                               - volume_ignore)/volume_ignore, <=, 1e-9);
+
+        gwy_field_set_xreal(field, 1.0);
+        gwy_field_set_yreal(field, 1.0);
+        volume_include = gwy_field_volume(field, &fpart,
+                                          mask, GWY_MASK_INCLUDE, method);
+        volume_exclude = gwy_field_volume(field, &fpart,
+                                          mask, GWY_MASK_EXCLUDE, method);
+        volume_ignore = gwy_field_volume(field, &fpart,
+                                         mask, GWY_MASK_IGNORE, method);
+        g_assert_cmpfloat(fabs(volume_include + volume_exclude
+                               - volume_ignore)/volume_ignore, <=, 1e-9);
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_volume_masked_gwyddion2(void)
+{
+    field_volume_masked_one(GWY_FIELD_VOLUME_GWYDDION2);
+}
+
+void
+test_field_volume_masked_triangular(void)
+{
+    field_volume_masked_one(GWY_FIELD_VOLUME_TRIANGULAR);
+}
+
+void
+test_field_volume_masked_bilinear(void)
+{
+    field_volume_masked_one(GWY_FIELD_VOLUME_BILINEAR);
+}
+
+void
+test_field_volume_masked_biquadratic(void)
+{
+    field_volume_masked_one(GWY_FIELD_VOLUME_BIQUADRATIC);
+}
+
 void
 test_field_mean(void)
 {
