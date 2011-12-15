@@ -950,14 +950,11 @@ gwy_field_volume(const GwyField *field,
     g_return_val_if_fail(method < G_N_ELEMENTS(weights), 0.0);
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    VolumeQuadratureData vqdata = {
-        0.0,
-        weights[method][0], weights[method][1],
-    };
+    gdouble wself = weights[method][0], wortho = weights[method][1];
+    VolumeQuadratureData vqdata = { 0.0, 0.25*wself, 0.5*wortho };
     gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
                                volume_quadrature, &vqdata);
-
-    gdouble volume = vqdata.s*dx*dy/(vqdata.wself + 4.0*vqdata.wortho + 4.0);
+    gdouble volume = vqdata.s*dx*dy/(wself + 4.0*wortho + 4.0);
     return volume;
 }
 
