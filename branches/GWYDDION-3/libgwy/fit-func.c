@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010,2011 David Nečas (Yeti).
+ *  Copyright (C) 2010-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -95,7 +95,7 @@ static const gchar* const estimators[N_ESTIMATORS] = {
 };
 
 static GObjectClass *parent_class = NULL;
-static GHashTable *builtin_functions = NULL;
+static BuiltinFitFuncTable builtin_table = { NULL, 0, NULL };
 
 static void
 gwy_fit_func_class_init(GwyFitFuncClass *klass)
@@ -146,7 +146,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
-    builtin_functions = _gwy_fit_func_setup_builtins();
+    _gwy_fit_func_setup_builtins(&builtin_table);
 }
 
 static void
@@ -163,7 +163,7 @@ gwy_fit_func_constructed(GObject *object)
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
 
-    priv->builtin = g_hash_table_lookup(builtin_functions, priv->name);
+    priv->builtin = g_hash_table_lookup(builtin_table.table, priv->name);
     if (priv->builtin)
         priv->is_valid = TRUE;
     else {
@@ -897,15 +897,13 @@ _gwy_fit_func_new_expr_with_constants(void)
  * Obtain the list of all built-in fitting function names.
  *
  * Returns: (transfer container) (array zero-terminated=1):
- *          A newly allocated %NULL-terminated list with function names.
- *          The caller must free the list with g_free() but not the individual
- *          names.
+ *          A %NULL-terminated array with function names.
  **/
-const gchar**
+const gchar* const*
 gwy_fit_func_list_builtins(void)
 {
     gpointer klass = g_type_class_ref(GWY_TYPE_FIT_FUNC);
-    const gchar **retval = _gwy_hash_table_keys(builtin_functions);
+    const gchar* const *retval = builtin_table.names;
     g_type_class_unref(klass);
     return retval;
 }

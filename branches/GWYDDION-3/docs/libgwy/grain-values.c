@@ -161,7 +161,7 @@ main(void)
 
     printf(file_prologue, generated, id);
 
-    const gchar **names = gwy_grain_value_list_builtins();
+    const gchar* const *names = gwy_grain_value_list_builtins();
     guint nvalues = g_strv_length((gchar**)names);
     GwyGrainValue **grainvalues = g_new(GwyGrainValue*, nvalues);
     for (guint i = 0; i < nvalues; i++) {

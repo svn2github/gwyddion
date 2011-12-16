@@ -463,14 +463,13 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
         G_UNLOCK(test_expr);
         return FALSE;
     }
-    const gchar **idents = _gwy_grain_value_list_builtin_idents();
+    const gchar* const *idents = _gwy_grain_value_list_builtin_idents();
     guint nidents = g_strv_length((gchar**)idents);
     guint *indices = g_slice_alloc((nidents + 1)*sizeof(guint));
     guint unresolved = gwy_expr_resolve_variables(test_expr,
                                                   nidents, idents, indices);
     G_UNLOCK(test_expr);
     g_slice_free1((nidents + 1)*sizeof(guint), indices);
-    g_free(idents);
 
     if (unresolved) {
         g_set_error(error, GWY_USER_GRAIN_VALUE_ERROR,

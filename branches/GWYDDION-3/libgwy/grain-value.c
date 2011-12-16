@@ -60,7 +60,7 @@ static GParamSpec *properties[N_PROPS];
 G_DEFINE_TYPE(GwyGrainValue, gwy_grain_value, G_TYPE_OBJECT);
 
 static GObjectClass *parent_class = NULL;
-static GHashTable *builtin_values = NULL;
+static BuiltinGrainValueTable builtin_table = { NULL, 0, NULL, NULL };
 
 static void
 gwy_grain_value_class_init(GwyGrainValueClass *klass)
@@ -118,7 +118,7 @@ gwy_grain_value_class_init(GwyGrainValueClass *klass)
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
-    builtin_values = _gwy_grain_value_setup_builtins();
+    _gwy_grain_value_setup_builtins(&builtin_table);
 }
 
 static void
@@ -135,7 +135,7 @@ gwy_grain_value_constructed(GObject *object)
     GwyGrainValue *grainvalue = GWY_GRAIN_VALUE(object);
     GrainValue *priv = grainvalue->priv;
 
-    priv->builtin = g_hash_table_lookup(builtin_values, priv->name);
+    priv->builtin = g_hash_table_lookup(builtin_table.table, priv->name);
     if (priv->builtin)
         priv->is_valid = TRUE;
     else {
@@ -606,16 +606,23 @@ _gwy_grain_value_new_expr_with_constants(void)
  *
  * Obtain the list of all built-in grain value names.
  *
- * Returns: (transfer container) (array zero-terminated=1):
- *          A newly allocated %NULL-terminated list with grain value names.
- *          The caller must free the list with g_free() but not the individual
- *          names.
+ * Returns: (transfer none) (array zero-terminated=1):
+ *          A %NULL-terminated array with grain value names.
  **/
-const gchar**
+const gchar* const*
 gwy_grain_value_list_builtins(void)
 {
     gpointer klass = g_type_class_ref(GWY_TYPE_GRAIN_VALUE);
-    const gchar **retval = _gwy_hash_table_keys(builtin_values);
+    const gchar* const *retval = builtin_table.names;
+    g_type_class_unref(klass);
+    return retval;
+}
+
+const gchar* const*
+_gwy_grain_value_list_builtin_idents(void)
+{
+    gpointer klass = g_type_class_ref(GWY_TYPE_GRAIN_VALUE);
+    const gchar* const *retval = builtin_table.idents;
     g_type_class_unref(klass);
     return retval;
 }

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -50,6 +50,12 @@ typedef struct {
     gint power_y;
 } FitFuncParam;
 
+typedef struct {
+    GHashTable *table;
+    guint n;
+    const gchar **names;
+} BuiltinFitFuncTable;
+
 typedef gboolean (*BuiltinFunction)(gdouble x,
                                     const gdouble *param,
                                     gdouble *value);
@@ -74,13 +80,13 @@ typedef struct {
 } BuiltinFitFunc;
 
 G_GNUC_INTERNAL
-GHashTable* _gwy_fit_func_setup_builtins(void) G_GNUC_MALLOC;
-
-G_GNUC_INTERNAL
 const gchar* const* _gwy_fit_func_estimators(guint *n) G_GNUC_PURE;
 
 G_GNUC_INTERNAL
 GwyExpr* _gwy_fit_func_new_expr_with_constants(void) G_GNUC_MALLOC;
+
+G_GNUC_INTERNAL
+void _gwy_fit_func_setup_builtins(BuiltinFitFuncTable *table);
 
 G_END_DECLS
 

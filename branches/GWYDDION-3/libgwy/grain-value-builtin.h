@@ -71,6 +71,13 @@ typedef enum {
 } BuiltinGrainValueId;
 
 typedef struct {
+    GHashTable *table;
+    guint n;
+    const gchar **names;
+    const gchar **idents;
+} BuiltinGrainValueTable;
+
+typedef struct {
     BuiltinGrainValueId id;
     guint need;
     const gchar *name;
@@ -107,7 +114,7 @@ struct _GwyGrainValuePrivate {
 typedef struct _GwyGrainValuePrivate GrainValue;
 
 G_GNUC_INTERNAL
-GHashTable* _gwy_grain_value_setup_builtins(void) G_GNUC_MALLOC;
+void _gwy_grain_value_setup_builtins(BuiltinGrainValueTable *table);
 
 G_GNUC_INTERNAL
 GwyExpr* _gwy_grain_value_new_expr_with_constants(void) G_GNUC_MALLOC;
@@ -124,7 +131,7 @@ void _gwy_grain_value_evaluate_builtins(const GwyField *field,
                                         guint nvalues);
 
 G_GNUC_INTERNAL
-const gchar** _gwy_grain_value_list_builtin_idents(void);
+const gchar* const* _gwy_grain_value_list_builtin_idents(void);
 
 G_END_DECLS
 

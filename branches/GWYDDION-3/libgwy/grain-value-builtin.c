@@ -1638,22 +1638,23 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     GWY_FREE(linear);
 }
 
-#define add_builtin(name, func) \
-    g_hash_table_insert(builtins, (gpointer)name, (gpointer)&func)
-
-GHashTable*
-_gwy_grain_value_setup_builtins(void)
+void
+_gwy_grain_value_setup_builtins(BuiltinGrainValueTable *builtins)
 {
-    GHashTable *builtins;
-
-    builtins = g_hash_table_new(g_str_hash, g_str_equal);
+    builtins->table = g_hash_table_new(g_str_hash, g_str_equal);
+    builtins->n = GWY_GRAIN_NVALUES;
+    builtins->names = g_new(const gchar*, builtins->n + 1);
+    builtins->idents = g_new(const gchar*, builtins->n + 1);
     for (guint i = 0; i < GWY_GRAIN_NVALUES; i++) {
         const BuiltinGrainValue *builtin = builtin_table + i;
         g_assert(builtin->id == i);
-        g_hash_table_insert(builtins,
+        g_hash_table_insert(builtins->table,
                             (gpointer)builtin->name, (gpointer)builtin);
+        builtins->names[i] = builtin->name;
+        builtins->idents[i] = builtin->ident;
     }
-    return builtins;
+    builtins->names[builtins->n] = NULL;
+    builtins->idents[builtins->n] = NULL;
 }
 
 void
@@ -1665,16 +1666,6 @@ _gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
         priv->values = g_new(gdouble, ngrains+1);
         priv->ngrains = ngrains;
     }
-}
-
-const gchar**
-_gwy_grain_value_list_builtin_idents(void)
-{
-    const gchar **idents = g_new(const gchar*, GWY_GRAIN_NVALUES+1);
-    for (guint i = 0; i < GWY_GRAIN_NVALUES; i++)
-        idents[i] = builtin_table[i].ident;
-    idents[GWY_GRAIN_NVALUES] = NULL;
-    return idents;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

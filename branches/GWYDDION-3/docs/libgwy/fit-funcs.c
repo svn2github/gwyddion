@@ -151,7 +151,7 @@ main(void)
 
     printf(file_prologue, generated, id);
 
-    const gchar **names = gwy_fit_func_list_builtins();
+    const gchar* const *names = gwy_fit_func_list_builtins();
     guint nfuncs = g_strv_length((gchar**)names);
     GwyFitFunc **fitfuncs = g_new(GwyFitFunc*, nfuncs);
     for (guint i = 0; i < nfuncs; i++) {

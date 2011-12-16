@@ -392,14 +392,12 @@ static const BuiltinFitFunc acf_gauss_builtin = {
  ****************************************************************************/
 
 #define add_builtin(name, func) \
-    g_hash_table_insert(builtins, (gpointer)name, (gpointer)&func)
+    g_hash_table_insert(builtins->table, (gpointer)name, (gpointer)&func)
 
-GHashTable*
-_gwy_fit_func_setup_builtins(void)
+void
+_gwy_fit_func_setup_builtins(BuiltinFitFuncTable *builtins)
 {
-    GHashTable *builtins;
-
-    builtins = g_hash_table_new(g_str_hash, g_str_equal);
+    builtins->table = g_hash_table_new(g_str_hash, g_str_equal);
     add_builtin(NC_("function", "Constant"), const_builtin);
     add_builtin(NC_("function", "Exponential"), exp_builtin);
     add_builtin(NC_("function", "Exponential (two-side)"), two_exp_builtin);
@@ -407,7 +405,15 @@ _gwy_fit_func_setup_builtins(void)
     add_builtin(NC_("function", "Lorentzian"), lorentz_builtin);
     add_builtin(NC_("function", "ACF Exponential"), acf_exp_builtin);
     add_builtin(NC_("function", "ACF Gaussian"), acf_gauss_builtin);
-    return builtins;
+    builtins->n = g_hash_table_size(builtins->table);
+    builtins->names = g_new(const gchar*, builtins->n + 1);
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, builtins->table);
+    gpointer key;
+    guint i = 0;
+    while (g_hash_table_iter_next(&iter, &key, NULL))
+        builtins->names[i++] = key;
+    builtins->names[builtins->n] = NULL;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

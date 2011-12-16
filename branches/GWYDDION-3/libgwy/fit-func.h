@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010,2011 David Nečas (Yeti).
+ *  Copyright (C) 2010-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -52,33 +52,33 @@ struct _GwyFitFuncClass {
     GObjectClass g_object_class;
 };
 
-GType           gwy_fit_func_get_type     (void)                      G_GNUC_CONST;
-GwyFitFunc*     gwy_fit_func_new          (const gchar *name)         G_GNUC_MALLOC;
-const gchar*    gwy_fit_func_formula      (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-guint           gwy_fit_func_n_params     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-const gchar*    gwy_fit_func_param_name   (const GwyFitFunc *fitfunc,
-                                           guint i)                   G_GNUC_PURE;
-guint           gwy_fit_func_param_number (const GwyFitFunc *fitfunc,
-                                           const gchar *name)         G_GNUC_PURE;
-GwyUnit*        gwy_fit_func_param_unit   (GwyFitFunc *fitfunc,
-                                           guint i,
-                                           const GwyUnit *unit_x,
-                                           const GwyUnit *unit_y)     G_GNUC_MALLOC;
-gboolean        gwy_fit_func_evaluate     (GwyFitFunc *fitfunc,
-                                           gdouble x,
-                                           const gdouble *params,
-                                           gdouble *value);
-gboolean        gwy_fit_func_estimate     (GwyFitFunc *fitfunc,
-                                           gdouble *params);
-GwyFitTask*     gwy_fit_func_get_fit_task (GwyFitFunc *fitfunc)       G_GNUC_PURE;
-void            gwy_fit_func_set_data     (GwyFitFunc *fitfunc,
-                                           const GwyXY *points,
-                                           guint npoints);
-const gchar*    gwy_fit_func_get_name     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-const gchar*    gwy_fit_func_get_group    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-GwyUserFitFunc* gwy_fit_func_get_resource (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-gboolean        gwy_fit_func_is_valid     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
-const gchar**   gwy_fit_func_list_builtins(void)                      G_GNUC_MALLOC;
+GType               gwy_fit_func_get_type     (void)                      G_GNUC_CONST;
+GwyFitFunc*         gwy_fit_func_new          (const gchar *name)         G_GNUC_MALLOC;
+const gchar*        gwy_fit_func_formula      (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+guint               gwy_fit_func_n_params     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+const gchar*        gwy_fit_func_param_name   (const GwyFitFunc *fitfunc,
+                                               guint i)                   G_GNUC_PURE;
+guint               gwy_fit_func_param_number (const GwyFitFunc *fitfunc,
+                                               const gchar *name)         G_GNUC_PURE;
+GwyUnit*            gwy_fit_func_param_unit   (GwyFitFunc *fitfunc,
+                                               guint i,
+                                               const GwyUnit *unit_x,
+                                               const GwyUnit *unit_y)     G_GNUC_MALLOC;
+gboolean            gwy_fit_func_evaluate     (GwyFitFunc *fitfunc,
+                                               gdouble x,
+                                               const gdouble *params,
+                                               gdouble *value);
+gboolean            gwy_fit_func_estimate     (GwyFitFunc *fitfunc,
+                                               gdouble *params);
+GwyFitTask*         gwy_fit_func_get_fit_task (GwyFitFunc *fitfunc)       G_GNUC_PURE;
+void                gwy_fit_func_set_data     (GwyFitFunc *fitfunc,
+                                               const GwyXY *points,
+                                               guint npoints);
+const gchar*        gwy_fit_func_get_name     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+const gchar*        gwy_fit_func_get_group    (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+GwyUserFitFunc*     gwy_fit_func_get_resource (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+gboolean            gwy_fit_func_is_valid     (const GwyFitFunc *fitfunc) G_GNUC_PURE;
+const gchar* const* gwy_fit_func_list_builtins(void);
 
 G_END_DECLS
 
