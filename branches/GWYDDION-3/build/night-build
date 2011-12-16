@@ -140,9 +140,11 @@ function unit_test_valgrind() {
   # Must be run after install, recompiles things with different CFLAGS.
   for dir in $libdirs; do
     pushd $dir >/dev/null
-    make clean
-    make CFLAGS="-O0 -ggdb"
-    make test-valgrind
+    if grep -q -s '^test-valgrind:' Makefile; then
+        make clean
+        make CFLAGS="-O0 -ggdb"
+        make test-valgrind
+    fi
     popd >/dev/null
   done
 }
