@@ -28,6 +28,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module alicona.c -->
+    <row>
+      <entry>Данные Alicona Imaging AL3D</entry>
+      <entry>.al3d</entry>
+      <entry>alicona</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module ambfile.c -->
     <row>
       <entry>Ambios AMB</entry>
@@ -114,6 +123,15 @@
       <entry>Экспортированные данные Burleigh</entry>
       <entry>.txt, .bin</entry>
       <entry>burleigh_exp</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module codevfile.c -->
+    <row>
+      <entry>Данные интерферограмм Code V</entry>
+      <entry>.int</entry>
+      <entry>codevfile</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -217,6 +235,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module hitachi-sem.c -->
+    <row>
+      <entry>Данные РЭМ Hitachi S-3700 и S-4800</entry>
+      <entry>.txt, +, image</entry>
+      <entry>hitachi-sem</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module igorfile.c -->
     <row>
       <entry>WaveMetrics IGOR binary wave v5</entry>
@@ -234,6 +261,15 @@
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
+    </row>
+    <!-- From module iso28600.c -->
+    <row>
+      <entry>Формат передачи данных СЗМ ISO 28600:2011</entry>
+      <entry>.spm</entry>
+      <entry>iso28600</entry>
+      <entry>Да</entry>
+      <entry>Да</entry>
+      <entry>Ограничена<footnote id="table-file-formats-fn1"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -314,7 +350,7 @@
       <entry>mifile</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnote id="table-file-formats-fn1"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -506,7 +542,7 @@
     </row>
     <!-- From module pt3file.c -->
     <row>
-      <entry>SymPhoTime TTTR v2.0 data</entry>
+      <entry>Данные SymPhoTime TTTR v2.0</entry>
       <entry>.pt3</entry>
       <entry>pt3file</entry>
       <entry>Да</entry>
@@ -573,7 +609,7 @@
       <entry>rhk-sm4</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -745,6 +781,15 @@
       <entry>Нет</entry>
       <entry>Да</entry>
     </row>
+    <!-- From module witec-asc.c -->
+    <row>
+      <entry>Экспорт в ASCII WITec</entry>
+      <entry>.dat</entry>
+      <entry>witec-asc</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module witfile.c -->
     <row>
       <entry>WITec</entry>
@@ -756,7 +801,7 @@
     </row>
     <!-- From module wsffile.c -->
     <row>
-      <entry>WSF ASCII data</entry>
+      <entry>Данные WSF ASCII</entry>
       <entry>.wsf</entry>
       <entry>wsffile</entry>
       <entry>Да</entry>
@@ -768,6 +813,15 @@
       <entry>Nanotec WSxM</entry>
       <entry>.tom</entry>
       <entry>wsxmfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module zeiss.c -->
+    <row>
+      <entry>Сканы РЭМ Carl Zeiss</entry>
+      <entry>.tif</entry>
+      <entry>zeiss</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
