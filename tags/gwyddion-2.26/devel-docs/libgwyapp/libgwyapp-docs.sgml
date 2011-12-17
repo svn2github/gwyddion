@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Application Library Reference Manual</title>
+    <xi:include href="releaseinfo.xml"/>
+  </bookinfo>
+
+  <xi:include href="xml/app.xml"/>
+  <xi:include href="xml/data-browser.xml"/>
+  <xi:include href="xml/datachooser.xml"/>
+  <xi:include href="xml/settings.xml"/>
+  <xi:include href="xml/file.xml"/>
+  <xi:include href="xml/filelist.xml"/>
+  <xi:include href="xml/funcuse.xml"/>
+  <xi:include href="xml/resource-editor.xml"/>
+  <xi:include href="xml/glmaterial-editor.xml"/>
+  <xi:include href="xml/gradient-editor.xml"/>
+  <xi:include href="xml/menu.xml"/>
+  <xi:include href="xml/undo.xml"/>
+  <xi:include href="xml/gwytool.xml"/>
+  <xi:include href="xml/gwyplaintool.xml"/>
+  <xi:include href="xml/gwymoduleutils.xml"/>
+  <xi:include href="xml/gwymoduleutils-file.xml"/>
+  <xi:include href="xml/validate.xml"/>
+  <xi:include href="xml/wait.xml"/>
+</book>
