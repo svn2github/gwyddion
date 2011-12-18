@@ -257,6 +257,7 @@ gwy_resource_get_type(void)
         };
         g_type_add_interface_static(newtype, GWY_TYPE_SERIALIZABLE,
                                     &iface_info);
+        g_type_add_class_private(newtype, sizeof(ResourceClass));
         g_once_init_leave(&type, newtype);
     }
     return type;
@@ -301,9 +302,8 @@ gwy_resource_class_intern_init(gpointer klass)
 static void
 gwy_resource_class_base_init(GwyResourceClass *klass)
 {
-    // FIXME: In future, there might be a function similar to
-    // g_type_class_add_private() for class data.
-    klass->priv = g_new0(ResourceClass, 1);
+    klass->priv = G_TYPE_CLASS_GET_PRIVATE(klass, GWY_TYPE_RESOURCE,
+                                           ResourceClass);
     klass->priv->is_managed = TRUE;
     klass->priv->item_type = resource_item_type;
     klass->priv->item_type.type = G_TYPE_FROM_CLASS(klass);
