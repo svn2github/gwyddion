@@ -351,7 +351,7 @@
       <entry>mifile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnote id="table-file-formats-fn1"><para>Les courbes spectrales sont importées sous forme de graphes, les données de position sont perdues.</para></footnote></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
