@@ -170,11 +170,11 @@ gwy_user_grain_value_itemize(GwySerializable *serializable,
 
     // Our own data
     *it = serialize_items[0];
-    it->value.v_string = priv->formula;
+    it->value.v_string = priv->group;
     it++, items->n++, nn++;
 
     *it = serialize_items[1];
-    it->value.v_string = priv->group;
+    it->value.v_string = priv->formula;
     it++, items->n++, nn++;
 
     *it = serialize_items[2];
@@ -551,7 +551,7 @@ gwy_user_grain_value_get_symbol(const GwyUserGrainValue *usergrainvalue)
  **/
 void
 gwy_user_grain_value_set_symbol(GwyUserGrainValue *usergrainvalue,
-                               const gchar *symbol)
+                                const gchar *symbol)
 {
     g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
     g_return_if_fail(symbol);
