@@ -77,7 +77,7 @@ test_user_grain_value_load(void)
 {
     static const gchar usergrainvalue_v2[] =
         "Gwyddion resource GwyUserGrainValue\n"
-        "formula (z_max - z_min)/D_max\n"
+        "formula atan((z_max - z_min)/D_max)\n"
         "power_xy 0\n"
         "power_z 0\n"
         "is_angle 1\n"
@@ -87,7 +87,7 @@ test_user_grain_value_load(void)
         "Gwyddion3 resource GwyUserGrainValue\n"
         "name Sloppiness v3\n"
         "group Group that hopefully does not exist\n"
-        "formula (z_max - z_min)/D_max\n"
+        "formula atan((z_max - z_min)/D_max)\n"
         "power_xy 0\n"
         "power_z 0\n"
         "is_angle 1\n"
@@ -96,7 +96,7 @@ test_user_grain_value_load(void)
     static const gchar usergrainvalue_v3_ugly[] =
         "Gwyddion3 resource GwyUserGrainValue\n"
         " name    Sloppiness³   \t\n"
-        "        formula\t(z_max - z_min)/D_max\n"
+        "        formula\tatan((z_max - z_min)/D_max)\n"
         "            \tis_angle \t1\n"
         "\t \n"
         "\tsame_units\t1\t           \t\n";
@@ -108,7 +108,8 @@ test_user_grain_value_load(void)
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Sloppiness2");
     g_assert(!error);
     user_grain_value_load_check("Sloppiness", "Sloppiness", "User",
-                                "(z_max - z_min)/D_max", 0, 0, TRUE, TRUE);
+                                "atan((z_max - z_min)/D_max)",
+                                0, 0, TRUE, TRUE);
 
     // Version3 resource
     g_assert(g_file_set_contents("Sloppiness3", usergrainvalue_v3, -1, &error));
@@ -116,7 +117,8 @@ test_user_grain_value_load(void)
     g_assert(!error);
     user_grain_value_load_check("Sloppiness3", "Sloppiness v3",
                                 "Group that hopefully does not exist",
-                                "(z_max - z_min)/D_max", 0, 0, TRUE, TRUE);
+                                "atan((z_max - z_min)/D_max)",
+                                0, 0, TRUE, TRUE);
 
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Slop", usergrainvalue_v3_ugly, -1,
@@ -124,44 +126,43 @@ test_user_grain_value_load(void)
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Slop");
     g_assert(!error);
     user_grain_value_load_check("Ugly-Slop", "Sloppiness³", "User",
-                                "(z_max - z_min)/D_max", 0, 0, TRUE, TRUE);
+                                "atan((z_max - z_min)/D_max)",
+                                0, 0, TRUE, TRUE);
 }
 
-#if 0
 static GwyUserGrainValue*
-make_test_grain_value(GwyFitParam **funcparams)
+make_test_grain_value(void)
 {
-    GwyFitParam *params[] = {
-        gwy_fit_param_new_set("a", 0, 1, "1.0"),
-        gwy_fit_param_new_set("b", -1, 1, "(yxmax-yxmin)/(xmax-xmin)"),
-    };
-    enum { np = G_N_ELEMENTS(params) };
-
     GwyUserGrainValue *usergrainvalue = gwy_user_grain_value_new();
     GwyResource *resource = GWY_RESOURCE(usergrainvalue);
 
-    gwy_resource_set_name(resource, "Linear 2");
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Linear 2");
-
-    gwy_user_grain_value_set_group(usergrainvalue,
-                                "Another group we assume to be nonexistent");
+    gwy_resource_set_name(resource, "Bloat");
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Bloat");
+    gwy_user_grain_value_set_group(usergrainvalue, "The Bloat Group");
     g_assert_cmpstr(gwy_user_grain_value_get_group(usergrainvalue),
-                    ==,
-                    "Another group we assume to be nonexistent");
+                    ==, "The Bloat Group");
 
-    g_assert(gwy_user_grain_value_set_formula(usergrainvalue, "a+b*x", NULL));
-    g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue), ==, "a+b*x");
-    g_assert_cmpuint(gwy_user_grain_value_n_params(usergrainvalue), ==, np);
-    GwyFitParam *param;
-    g_assert(gwy_user_grain_value_param(usergrainvalue, "a"));
-    param = gwy_user_grain_value_param(usergrainvalue, "a");
-    gwy_fit_param_assign(param, params[0]);
-    g_assert(gwy_user_grain_value_param(usergrainvalue, "b"));
-    param = gwy_user_grain_value_param(usergrainvalue, "b");
-    gwy_fit_param_assign(param, params[1]);
+    gwy_user_grain_value_set_symbol(usergrainvalue, "Blt₃");
+    g_assert_cmpstr(gwy_user_grain_value_get_symbol(usergrainvalue),
+                    ==, "Blt₃");
 
-    funcparams[0] = params[0];
-    funcparams[1] = params[1];
+    gwy_user_grain_value_set_ident(usergrainvalue, "Blt_3");
+    g_assert_cmpstr(gwy_user_grain_value_get_ident(usergrainvalue),
+                    ==, "Blt_3");
+
+    g_assert(gwy_user_grain_value_set_formula(usergrainvalue, "V_0/L_b0^3",
+                                              NULL));
+    g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue),
+                    ==, "V_0/L_b0^3");
+
+    gwy_user_grain_value_set_power_xy(usergrainvalue, -1);
+    g_assert_cmpint(gwy_user_grain_value_get_power_xy(usergrainvalue), ==, -1);
+
+    gwy_user_grain_value_set_power_z(usergrainvalue, 1);
+    g_assert_cmpint(gwy_user_grain_value_get_power_z(usergrainvalue), ==, 1);
+
+    g_assert(!gwy_user_grain_value_get_is_angle(usergrainvalue));
+    g_assert(!gwy_user_grain_value_get_same_units(usergrainvalue));
 
     return usergrainvalue;
 }
@@ -169,20 +170,18 @@ make_test_grain_value(GwyFitParam **funcparams)
 void
 test_user_grain_value_save(void)
 {
-    enum { np = 2 };
-    GwyFitParam *params[np];
-    GwyUserGrainValue *usergrainvalue = make_test_grain_value(params);
+    GwyUserGrainValue *usergrainvalue = make_test_grain_value();
     GwyResource *resource = GWY_RESOURCE(usergrainvalue);
 
     GError *error = NULL;
-    gwy_resource_set_filename(resource, "Linear2");
+    gwy_resource_set_filename(resource, "Bloat3");
     g_assert(gwy_resource_save(resource, &error));
     g_assert(!error);
-    g_test_queue_destroy((GDestroyNotify)g_unlink, "Linear2");
+    g_test_queue_destroy((GDestroyNotify)g_unlink, "Bloat3");
 
     gchar *res_filename = NULL;
     g_object_get(resource, "file-name", &res_filename, NULL);
-    GFile *gfile = g_file_new_for_path("Linear2");
+    GFile *gfile = g_file_new_for_path("Bloat3");
     GFile *res_gfile = g_file_new_for_path(res_filename);
     g_assert(g_file_equal(gfile, res_gfile));
     g_object_unref(gfile);
@@ -191,43 +190,41 @@ test_user_grain_value_save(void)
 
     GWY_OBJECT_UNREF(usergrainvalue);
 
-    user_grain_value_load_check("Linear2", "Linear 2",
-                             "Another group we assume to be nonexistent",
-                             "a+b*x", np, params);
-
-    for (guint i = 0; i < np; i++)
-        GWY_OBJECT_UNREF(params[i]);
+    user_grain_value_load_check("Bloat3", "Bloat", "The Bloat Group",
+                                "V_0/L_b0^3",
+                                -1, 1, FALSE, FALSE);
 }
 
 void
 test_user_grain_value_serialize(void)
 {
-    enum { np = 2 };
-    GwyFitParam *params[np];
-    GwyUserGrainValue *usergrainvalue = make_test_grain_value(params);
+    GwyUserGrainValue *usergrainvalue = make_test_grain_value();
 
     serializable_duplicate(GWY_SERIALIZABLE(usergrainvalue), NULL);
     serializable_assign(GWY_SERIALIZABLE(usergrainvalue), NULL);
 
     GwyUserGrainValue *newusergrainvalue
-        = (GwyUserGrainValue*)serialize_and_back(G_OBJECT(usergrainvalue), NULL);
+        = (GwyUserGrainValue*)serialize_and_back(G_OBJECT(usergrainvalue),
+                                                 NULL);
     GwyResource *newresource = GWY_RESOURCE(newusergrainvalue);
-    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Linear 2");
-    g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue), ==, "a+b*x");
-    user_grain_value_param_check(newusergrainvalue, np, params);
+    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Bloat");
+    g_assert_cmpstr(gwy_user_grain_value_get_group(usergrainvalue),
+                    ==, "The Bloat Group");
+    g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue),
+                    ==, "V_0/L_b0^3");
+    g_assert_cmpint(gwy_user_grain_value_get_power_xy(usergrainvalue), ==, -1);
+    g_assert_cmpint(gwy_user_grain_value_get_power_z(usergrainvalue), ==, 1);
+    g_assert(!gwy_user_grain_value_get_same_units(usergrainvalue));
+    g_assert(!gwy_user_grain_value_get_is_angle(usergrainvalue));
 
     g_object_unref(usergrainvalue);
     g_object_unref(newusergrainvalue);
-    for (guint i = 0; i < np; i++)
-        GWY_OBJECT_UNREF(params[i]);
 }
 
 void
 test_user_grain_value_inventory(void)
 {
-    enum { np = 2 };
-    GwyFitParam *params[np];
-    GwyUserGrainValue *usergrainvalue = make_test_grain_value(params);
+    GwyUserGrainValue *usergrainvalue = make_test_grain_value();
     GwyResource *resource = GWY_RESOURCE(usergrainvalue);
 
     const GwyInventoryItemType *item_type;
@@ -254,14 +251,14 @@ test_user_grain_value_inventory(void)
     usergrainvalue = gwy_user_grain_values_get(NULL);
     g_assert(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
     resource = GWY_RESOURCE(usergrainvalue);
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Linear 2");
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Bloat");
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
 
     usergrainvalue = gwy_inventory_get_default(usergrainvalues);
     g_assert(!usergrainvalue);
 
-    gwy_inventory_copy(usergrainvalues, "Linear 2", "Another");
+    gwy_inventory_copy(usergrainvalues, "Bloat", "Another");
     g_assert_cmpuint(gwy_inventory_size(usergrainvalues), ==, 2);
     usergrainvalue = gwy_inventory_get(usergrainvalues, "Another");
     resource = GWY_RESOURCE(usergrainvalue);
@@ -278,10 +275,6 @@ test_user_grain_value_inventory(void)
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
     g_object_unref(usergrainvalue);
-
-    for (guint i = 0; i < np; i++)
-        GWY_OBJECT_UNREF(params[i]);
 }
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

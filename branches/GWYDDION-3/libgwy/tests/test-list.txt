@@ -393,9 +393,9 @@ grain-value/builtin/curvature-center-x
 grain-value/builtin/curvature-center-y
 grain-value/builtin/curvature-center-z
 user-grain-value/load
-#user-grain-value/save
-#user-grain-value/serialize
-#user-grain-value/inventory
+user-grain-value/save
+user-grain-value/serialize
+user-grain-value/inventory
 # Finalisation tests, should go last.
 fft/save-wisdom
 resource/finalize
