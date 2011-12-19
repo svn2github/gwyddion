@@ -28,9 +28,9 @@
  ***************************************************************************/
 
 static void
-test_user_fit_func_param_check(GwyUserFitFunc *userfitfunc,
-                               guint expected_n_params,
-                               GwyFitParam **expected_params)
+user_fit_func_param_check(GwyUserFitFunc *userfitfunc,
+                          guint expected_n_params,
+                          GwyFitParam **expected_params)
 {
     g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc),
                      ==, expected_n_params);
@@ -52,11 +52,11 @@ test_user_fit_func_param_check(GwyUserFitFunc *userfitfunc,
 }
 
 static void
-test_user_fit_func_load_check(const gchar *filename,
-                              const gchar *expected_name,
-                              const gchar *expected_formula,
-                              guint expected_n_params,
-                              GwyFitParam **expected_params)
+user_fit_func_load_check(const gchar *filename,
+                         const gchar *expected_name,
+                         const gchar *expected_formula,
+                         guint expected_n_params,
+                         GwyFitParam **expected_params)
 {
     GError *error = NULL;
     GwyResource *resource = gwy_resource_load(filename, GWY_TYPE_USER_FIT_FUNC,
@@ -79,8 +79,7 @@ test_user_fit_func_load_check(const gchar *filename,
 
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc),
                     ==, expected_formula);
-    test_user_fit_func_param_check(userfitfunc,
-                                   expected_n_params, expected_params);
+    user_fit_func_param_check(userfitfunc, expected_n_params, expected_params);
     GWY_OBJECT_UNREF(userfitfunc);
 }
 
@@ -137,20 +136,20 @@ test_user_fit_func_load(void)
     g_assert(g_file_set_contents("Linear", userfitfunc_v2, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Linear");
     g_assert(!error);
-    test_user_fit_func_load_check("Linear", "Linear", "a+b*x", np, params);
+    user_fit_func_load_check("Linear", "Linear", "a+b*x", np, params);
 
     // Version3 resource
     g_assert(g_file_set_contents("LLL", userfitfunc_v3, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "LLL");
     g_assert(!error);
-    test_user_fit_func_load_check("LLL", "Linear", "a+b*x", np, params);
+    user_fit_func_load_check("LLL", "Linear", "a+b*x", np, params);
 
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Lin", userfitfunc_v3_ugly, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Lin");
     g_assert(!error);
-    test_user_fit_func_load_check("Ugly-Lin", "Linear that is up to x¹",
-                                  "a+b*x", np, params);
+    user_fit_func_load_check("Ugly-Lin", "Linear that is up to x¹",
+                             "a+b*x", np, params);
 
     for (guint i = 0; i < np; i++)
         GWY_OBJECT_UNREF(params[i]);
@@ -213,7 +212,7 @@ test_user_fit_func_save(void)
 
     GWY_OBJECT_UNREF(userfitfunc);
 
-    test_user_fit_func_load_check("Linear2", "Linear 2", "a+b*x", np, params);
+    user_fit_func_load_check("Linear2", "Linear 2", "a+b*x", np, params);
 
     for (guint i = 0; i < np; i++)
         GWY_OBJECT_UNREF(params[i]);
@@ -234,7 +233,7 @@ test_user_fit_func_serialize(void)
     GwyResource *newresource = GWY_RESOURCE(newuserfitfunc);
     g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Linear 2");
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
-    test_user_fit_func_param_check(newuserfitfunc, np, params);
+    user_fit_func_param_check(newuserfitfunc, np, params);
 
     g_object_unref(userfitfunc);
     g_object_unref(newuserfitfunc);
