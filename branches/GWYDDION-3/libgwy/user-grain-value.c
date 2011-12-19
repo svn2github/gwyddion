@@ -64,6 +64,10 @@ static gboolean     validate                              (GwyUserGrainValue *us
                                                            guint domain,
                                                            guint code,
                                                            GError **error);
+static void         ensure_test_expr                      (void);
+static gboolean     resolve_params                        (GError **error,
+                                                           guint domain,
+                                                           guint code);
 static gchar*       gwy_user_grain_value_dump             (GwyResource *resource);
 static gboolean     gwy_user_grain_value_parse            (GwyResource *resource,
                                                            GwyStrLineIter *iter,
@@ -82,6 +86,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*7*/ { .name = "is-angle",   .ctype = GWY_SERIALIZABLE_BOOLEAN, },
 };
 
+static guint test_expr_nidents = 0;
+static guint *test_expr_indices = NULL;
 static GwyExpr *test_expr = NULL;
 G_LOCK_DEFINE_STATIC(test_expr);
 
@@ -368,30 +374,18 @@ validate(GwyUserGrainValue *usergrainvalue,
         return FALSE;
     }
 
+    // Formula
+    gboolean ok = TRUE;
     G_LOCK(test_expr);
-    gboolean ok = FALSE;
-
-    // Fomula
-    if (!test_expr)
-        test_expr = _gwy_grain_value_new_expr_with_constants();
-    if (!gwy_expr_compile(test_expr, priv->formula, NULL)) {
+    ensure_test_expr();
+    if (ok && !gwy_expr_compile(test_expr, priv->formula, NULL)) {
         g_set_error(error, domain, code,
                     _("Grain value formula is invalid."));
-        goto fail;
+        ok = FALSE;
     }
-    /*
-    if (gwy_user_grain_value_resolve_params(usergrainvalue, test_expr,
-                                            NULL, NULL))
-        goto fail;
-                                            */
-    // TODO: The formula should be resolvable using existing grain values.
-    // XXX: Why fit-func uses separate physical/logical validation?  Either
-    // it is good and we accept it or it is bad and we reject it.  Lenience
-    // makes sense only wrt values that have some defaults.
+    if (ok && !resolve_params(error, domain, code))
+        ok = FALSE;
 
-    ok = TRUE;
-
-fail:
     G_UNLOCK(test_expr);
     return ok;
 }
@@ -456,32 +450,45 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
         return TRUE;
 
     G_LOCK(test_expr);
-    if (!test_expr)
-        test_expr = _gwy_grain_value_new_expr_with_constants();
-
-    if (!gwy_expr_compile(test_expr, formula, error)) {
-        G_UNLOCK(test_expr);
-        return FALSE;
-    }
-    const gchar* const *idents = _gwy_grain_value_list_builtin_idents();
-    guint nidents = g_strv_length((gchar**)idents);
-    guint *indices = g_slice_alloc((nidents + 1)*sizeof(guint));
-    guint unresolved = gwy_expr_resolve_variables(test_expr,
-                                                  nidents, idents, indices);
+    ensure_test_expr();
+    gboolean ok = (gwy_expr_compile(test_expr, formula, error)
+                   && resolve_params(error, GWY_USER_GRAIN_VALUE_ERROR,
+                                     GWY_USER_GRAIN_VALUE_ERROR_DEPENDS));
     G_UNLOCK(test_expr);
-    g_slice_free1((nidents + 1)*sizeof(guint), indices);
 
-    if (unresolved) {
-        g_set_error(error, GWY_USER_GRAIN_VALUE_ERROR,
-                    GWY_USER_GRAIN_VALUE_ERROR_DEPENDS,
-                    _("Grain value formula contains unknown variables."));
-        return G_MAXUINT;
+    if (ok) {
+        _gwy_assign_string(&priv->formula, formula);
+        gwy_user_grain_value_changed(usergrainvalue);
     }
 
-    _gwy_assign_string(&priv->formula, formula);
-    gwy_user_grain_value_changed(usergrainvalue);
+    return ok;
+}
 
-    return TRUE;
+// Must be called with locked test_expr.
+static void
+ensure_test_expr(void)
+{
+    if (test_expr)
+        return;
+
+    const gchar* const *idents = _gwy_grain_value_list_builtin_idents();
+    test_expr = _gwy_grain_value_new_expr_with_constants();
+    test_expr_nidents = g_strv_length((gchar**)idents);
+    test_expr_indices = g_slice_alloc((test_expr_nidents + 1)*sizeof(guint));
+}
+
+// Must be called with locked test_expr.
+static gboolean
+resolve_params(GError **error, guint domain, guint code)
+{
+    const gchar* const *idents = _gwy_grain_value_list_builtin_idents();
+    if (gwy_expr_resolve_variables(test_expr, test_expr_nidents, idents,
+                                   test_expr_indices))
+        return TRUE;
+
+    g_set_error(error, domain, code,
+                _("Grain value formula contains unknown variables."));
+    return FALSE;
 }
 
 /**
