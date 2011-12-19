@@ -65,7 +65,7 @@ static gboolean     validate                              (GwyUserGrainValue *us
                                                            guint code,
                                                            GError **error);
 static void         ensure_test_expr                      (void);
-static gboolean     resolve_params                        (GError **error,
+static gboolean     resolve_deps                          (GError **error,
                                                            guint domain,
                                                            guint code);
 static gchar*       gwy_user_grain_value_dump             (GwyResource *resource);
@@ -383,7 +383,7 @@ validate(GwyUserGrainValue *usergrainvalue,
                     _("Grain value formula is invalid."));
         ok = FALSE;
     }
-    if (ok && !resolve_params(error, domain, code))
+    if (ok && !resolve_deps(error, domain, code))
         ok = FALSE;
 
     G_UNLOCK(test_expr);
@@ -452,8 +452,8 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
     G_LOCK(test_expr);
     ensure_test_expr();
     gboolean ok = (gwy_expr_compile(test_expr, formula, error)
-                   && resolve_params(error, GWY_USER_GRAIN_VALUE_ERROR,
-                                     GWY_USER_GRAIN_VALUE_ERROR_DEPENDS));
+                   && resolve_deps(error, GWY_USER_GRAIN_VALUE_ERROR,
+                                   GWY_USER_GRAIN_VALUE_ERROR_DEPENDS));
     G_UNLOCK(test_expr);
 
     if (ok) {
@@ -479,11 +479,11 @@ ensure_test_expr(void)
 
 // Must be called with locked test_expr.
 static gboolean
-resolve_params(GError **error, guint domain, guint code)
+resolve_deps(GError **error, guint domain, guint code)
 {
     const gchar* const *idents = _gwy_grain_value_list_builtin_idents();
-    if (gwy_expr_resolve_variables(test_expr, test_expr_nidents, idents,
-                                   test_expr_indices))
+    if (!gwy_expr_resolve_variables(test_expr, test_expr_nidents, idents,
+                                    test_expr_indices))
         return TRUE;
 
     g_set_error(error, domain, code,
