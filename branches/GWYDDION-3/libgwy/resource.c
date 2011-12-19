@@ -160,10 +160,9 @@ static GwyResourceClass*  get_resource_class              (const gchar *typename
 static void               err_filename                    (GError **error,
                                                            guint domain,
                                                            guint code,
-                                                           const gchar *filename_sys,
                                                            gchar **filename_utf8,
                                                            const gchar *format,
-                                                           ...) G_GNUC_PRINTF(6, 7);
+                                                           ...) G_GNUC_PRINTF(5, 6);
 static GwyResource*       parse                           (GwyStrLineIter *iter,
                                                            GType expected_type,
                                                            const gchar *filename,
@@ -1220,7 +1219,6 @@ static void
 err_filename(GError **error,
              guint domain,
              guint code,
-             const gchar *filename_sys,
              gchar **filename_disp,
              const gchar *format,
              ...)
@@ -1228,13 +1226,12 @@ err_filename(GError **error,
     va_list ap;
     va_start(ap, format);
 
-    *filename_disp = g_filename_display_name(filename_sys);
     gchar *message = g_strdup_vprintf(format, ap);
 
     g_set_error_literal(error, domain, code, message);
 
     g_free(message);
-    g_free(filename_disp);
+    g_free(*filename_disp);
 
     va_end(ap);
 }
@@ -1251,9 +1248,9 @@ parse(GwyStrLineIter *iter,
 
     if (!line) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                     filename_sys, &filename_disp,
+                     &filename_disp,
                      _("Wrong or missing resource magic header in file ‘%s’."),
-                     filename_disp);
+                     (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
     }
 
@@ -1271,9 +1268,9 @@ parse(GwyStrLineIter *iter,
     }
     else {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                     filename_sys, &filename_disp,
+                     &filename_disp,
                      _("Wrong or missing resource magic header in file ‘%s’."),
-                     filename_disp);
+                     (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
     }
 
@@ -1282,9 +1279,9 @@ parse(GwyStrLineIter *iter,
     const gchar *typename = line;
     if (G_UNLIKELY(!line)) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                     filename_sys, &filename_disp,
+                     &filename_disp,
                      _("Resource header of file ‘%s’ is truncated."),
-                     filename_disp);
+                     (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
     }
 
@@ -1296,26 +1293,29 @@ parse(GwyStrLineIter *iter,
                                                                  &err);
         if (type != GWY_RESOURCE_LINE_OK) {
             err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                         filename_sys, &filename_disp,
+                         &filename_disp,
                          _("Resource name line in file ‘%s’ is malformed: %s"),
-                         filename_disp, err->message);
+                         (filename_disp = g_filename_display_name(filename_sys)),
+                         err->message);
             g_clear_error(&err);
             return NULL;
         }
         if (!gwy_strequal(key, "name")) {
             err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                         filename_sys, &filename_disp,
+                         &filename_disp,
                         _("First line in version 3 resource ‘%s’ in file ‘%s’ "
                           "does not contain the name."),
-                        typename, filename_disp);
+                        typename,
+                        (filename_disp = g_filename_display_name(filename_sys)));
             return NULL;
         }
         if (!strlen(name)) {
             err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                         filename_sys, &filename_disp,
+                         &filename_disp,
                         _("Resource name is empty in "
                           "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename_disp);
+                        typename,
+                        (filename_disp = g_filename_display_name(filename_sys)));
             return NULL;
         }
     }
@@ -1341,9 +1341,11 @@ parse(GwyStrLineIter *iter,
     }
     else {
         err_filename(error, GWY_RESOURCE_ERROR, err->code,
-                     filename_sys, &filename_disp,
+                     &filename_disp,
                      _("Resource ‘%s’ in file ‘%s’ is malformed: %s"),
-                     typename, filename_disp, err->message);
+                     typename,
+                     (filename_disp = g_filename_display_name(filename_sys)),
+                     err->message);
         g_clear_error(&err);
         GWY_OBJECT_UNREF(resource);
     }
@@ -1363,19 +1365,22 @@ get_resource_class(const gchar *typename,
 
     if (G_UNLIKELY(!type)) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
-                     filename_sys, &filename_disp,
+                     &filename_disp,
                      _("Resource type ‘%s’ of file ‘%s’ is invalid."),
-                     typename, filename_disp);
+                     typename,
+                     (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
     }
 
     /* Does it make sense to accept subclasses? */
     if (G_UNLIKELY(g_type_is_a(!type, expected_type))) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
-                     filename_sys, &filename_disp,
+                     &filename_disp,
                      _("Resource type ‘%s’ of file ‘%s’ does not match "
                        "the expected type ‘%s’."),
-                     typename, filename_disp, g_type_name(expected_type));
+                     typename,
+                     (filename_disp = g_filename_display_name(filename_sys)),
+                     g_type_name(expected_type));
         return NULL;
     }
 
