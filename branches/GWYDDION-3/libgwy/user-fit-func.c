@@ -400,7 +400,7 @@ validate(GwyUserFitFunc *userfitfunc,
                     _("Fitting function formula is invalid."));
         goto fail;
     }
-    if (gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL)) {
+    if (gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL)) {
         g_set_error(error, domain, code,
                     _("Fitting function parameters do not match the formula."));
         goto fail;
@@ -472,6 +472,8 @@ gwy_user_fit_func_get_formula(const GwyUserFitFunc *userfitfunc)
  * new formula.  Same-named parameters in the old and new formula are assumed
  * to be the same parameter and so their properties are retained.  Parameters
  * not present in the old formula are defined with default properties.
+ *
+ * The independent variable is denoted "x".
  *
  * Returns: %TRUE if the formula was been changed to @formula, %FALSE if
  *          @formula is invalid and hence it was not set as the new formula.
@@ -641,8 +643,6 @@ gwy_user_fit_func_nth_param(const GwyUserFitFunc *userfitfunc,
  * @expr: An expression, presumably with compiled @userfitfunc's formula.
  *        If the expression does not represent the @userfitfunc's formula it
  *        will be set to this formula and compiled.
- * @independent_name: Name of independent variable (abscissa), pass %NULL for
- *                    the default "x".
  * @indices: Array to store the map from the parameter number to the
  *           @expr variable number.  The abscissa goes last after all
  *           parameters, i.e. the array must have one item more than the number
@@ -658,13 +658,10 @@ gwy_user_fit_func_nth_param(const GwyUserFitFunc *userfitfunc,
 guint
 gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
                                  GwyExpr *expr,
-                                 const gchar *independent_name,
                                  guint *indices)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), G_MAXUINT);
     g_return_val_if_fail(GWY_IS_EXPR(expr), G_MAXUINT);
-    if (!independent_name)
-        independent_name = "x";
     UserFitFunc *priv = userfitfunc->priv;
 
     if (!gwy_strequal(gwy_expr_get_expression(expr), priv->formula)) {
@@ -680,7 +677,7 @@ gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
     const gchar *names[n+1];
     for (guint i = 0; i < n; i++)
         names[i] = gwy_fit_param_get_name(priv->param[i]);
-    names[n] = independent_name;
+    names[n] = "x";
 
     if (indices)
         return gwy_expr_resolve_variables(expr, n+1, names, indices);

@@ -81,7 +81,6 @@ GwyFitParam*    gwy_user_fit_func_nth_param     (const GwyUserFitFunc *userfitfu
                                                  guint i)                       G_GNUC_PURE;
 guint           gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
                                                  GwyExpr *expr,
-                                                 const gchar *independent_name,
                                                  guint *indices);
 
 #define gwy_user_fit_funcs() \
