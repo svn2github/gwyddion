@@ -38,6 +38,7 @@ testlibgwy_SOURCES = \
 	surface.c \
 	unit.c \
 	user-fit-func.c \
+	user-grain-value.c \
 	value-format.c \
 	version.c \
 	xy.c \
