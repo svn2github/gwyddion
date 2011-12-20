@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010-2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,20 @@
  * Resources
  *
  ***************************************************************************/
+
+void
+resource_check_file(GwyResource *resource,
+                    const gchar *filename)
+{
+    gchar *res_filename = NULL;
+    g_object_get(resource, "file-name", &res_filename, NULL);
+    GFile *gfile = g_file_new_for_path(filename);
+    GFile *res_gfile = g_file_new_for_path(res_filename);
+    g_assert(g_file_equal(gfile, res_gfile));
+    g_object_unref(gfile);
+    g_object_unref(res_gfile);
+    g_free(res_filename);
+}
 
 void
 test_resource_finalize(void)

@@ -50,14 +50,7 @@ user_grain_value_load_check(const gchar *filename,
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
 
-    gchar *res_filename = NULL;
-    g_object_get(resource, "file-name", &res_filename, NULL);
-    GFile *gfile = g_file_new_for_path(filename);
-    GFile *res_gfile = g_file_new_for_path(res_filename);
-    g_assert(g_file_equal(gfile, res_gfile));
-    g_object_unref(gfile);
-    g_object_unref(res_gfile);
-    g_free(res_filename);
+    resource_check_file(resource, filename);
 
     g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue),
                     ==, expected_formula);
@@ -178,18 +171,8 @@ test_user_grain_value_save(void)
     g_assert(gwy_resource_save(resource, &error));
     g_assert(!error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Bloat3");
-
-    gchar *res_filename = NULL;
-    g_object_get(resource, "file-name", &res_filename, NULL);
-    GFile *gfile = g_file_new_for_path("Bloat3");
-    GFile *res_gfile = g_file_new_for_path(res_filename);
-    g_assert(g_file_equal(gfile, res_gfile));
-    g_object_unref(gfile);
-    g_object_unref(res_gfile);
-    g_free(res_filename);
-
+    resource_check_file(resource, "Bloat3");
     GWY_OBJECT_UNREF(usergrainvalue);
-
     user_grain_value_load_check("Bloat3", "Bloat", "The Bloat Group",
                                 "V_0/L_b0^3",
                                 -1, 1, FALSE, FALSE);

@@ -71,14 +71,7 @@ user_fit_func_load_check(const gchar *filename,
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
 
-    gchar *res_filename = NULL;
-    g_object_get(resource, "file-name", &res_filename, NULL);
-    GFile *gfile = g_file_new_for_path(filename);
-    GFile *res_gfile = g_file_new_for_path(res_filename);
-    g_assert(g_file_equal(gfile, res_gfile));
-    g_object_unref(gfile);
-    g_object_unref(res_gfile);
-    g_free(res_filename);
+    resource_check_file(resource, filename);
 
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc),
                     ==, expected_formula);
@@ -212,18 +205,8 @@ test_user_fit_func_save(void)
     g_assert(gwy_resource_save(resource, &error));
     g_assert(!error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Linear2");
-
-    gchar *res_filename = NULL;
-    g_object_get(resource, "file-name", &res_filename, NULL);
-    GFile *gfile = g_file_new_for_path("Linear2");
-    GFile *res_gfile = g_file_new_for_path(res_filename);
-    g_assert(g_file_equal(gfile, res_gfile));
-    g_object_unref(gfile);
-    g_object_unref(res_gfile);
-    g_free(res_filename);
-
+    resource_check_file(resource, "Linear2");
     GWY_OBJECT_UNREF(userfitfunc);
-
     user_fit_func_load_check("Linear2", "Linear 2",
                              "Another group we assume to be nonexistent",
                              "a+b*x", np, params);

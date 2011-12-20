@@ -99,6 +99,8 @@ void          field_part_assert_equal       (const GwyFieldPart *part,
 void          line_part_assert_equal        (const GwyLinePart *part,
                                              const GwyLinePart *refpart);
 void          check_congruence_group_sanity (void);
+void          resource_check_file           (GwyResource *resource,
+                                             const gchar *filename);
 
 extern const guint plane_congruence_group[8][8];
 
