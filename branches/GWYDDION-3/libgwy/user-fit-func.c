@@ -753,9 +753,17 @@ gwy_user_fit_func_parse(GwyResource *resource,
                     gwy_fit_param_set_power_x(param, strtol(value, NULL, 10));
                 else if (gwy_strequal(key, "power_y"))
                     gwy_fit_param_set_power_y(param, strtol(value, NULL, 10));
-                else if (gwy_strequal(key, "estimate")
-                         && gwy_fit_param_check_estimate(value, NULL))
-                    gwy_fit_param_set_estimate(param, value);
+                else if (gwy_strequal(key, "estimate")) {
+                    if (gwy_fit_param_check_estimate(value, NULL))
+                        gwy_fit_param_set_estimate(param, value);
+                    else {
+                        g_set_error(error, GWY_RESOURCE_ERROR,
+                                    GWY_RESOURCE_ERROR_DATA,
+                                    _("Parameter ‘%s’ has invalid estimate."),
+                                    gwy_fit_param_get_name(param));
+                        goto fail;
+                    }
+                }
                 else
                    g_warning("Ignoring unknown GwyUserFitFunc key ‘%s’.", key);
             }

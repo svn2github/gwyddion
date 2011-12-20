@@ -291,18 +291,14 @@ gwy_fit_param_construct(GwySerializable *serializable,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Fiting parameter name is missing or not valid "
                              "UTF-8."));
-        goto fail;
+        return FALSE;
     }
 
-    g_free(priv->name);
-    priv->name = its[0].value.v_string;
-    its[0].value.v_string = NULL;
+    GWY_TAKE_STRING(priv->name, its[0].value.v_string);
     // FIXME
     priv->power_x = CLAMP(its[1].value.v_int32, POWER_MIN, POWER_MAX);
     priv->power_y = CLAMP(its[2].value.v_int32, POWER_MIN, POWER_MAX);
-    g_free(priv->estimate);
-    priv->estimate = its[3].value.v_string;
-    its[3].value.v_string = NULL;
+    GWY_TAKE_STRING(priv->estimate, its[3].value.v_string);
     if (!gwy_fit_param_check_estimate(priv->estimate, NULL)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
@@ -311,12 +307,8 @@ gwy_fit_param_construct(GwySerializable *serializable,
                            priv->name);
         return FALSE;
     }
-    return TRUE;
 
-fail:
-    GWY_FREE(its[0].value.v_string);
-    GWY_FREE(its[3].value.v_string);
-    return FALSE;
+    return TRUE;
 }
 
 static GObject*

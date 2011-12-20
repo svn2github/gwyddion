@@ -479,11 +479,8 @@ gwy_resource_construct(GwySerializable *serializable,
     GwyResource *resource = GWY_RESOURCE(serializable);
     Resource *priv = resource->priv;
 
-    if (its[0].value.v_string) {
-        GWY_FREE(priv->name);
-        priv->name = its[0].value.v_string;
-        its[0].value.v_string = NULL;
-    }
+    if (its[0].value.v_string)
+        GWY_TAKE_STRING(priv->name, its[0].value.v_string);
 
     return TRUE;
 }
