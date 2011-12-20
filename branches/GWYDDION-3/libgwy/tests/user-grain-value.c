@@ -105,7 +105,7 @@ test_user_grain_value_load(void)
 
     // Version2 resource
     g_assert(g_file_set_contents("Sloppiness", usergrainvalue_v2, -1, &error));
-    g_test_queue_destroy((GDestroyNotify)g_unlink, "Sloppiness2");
+    g_test_queue_destroy((GDestroyNotify)g_unlink, "Sloppiness");
     g_assert(!error);
     user_grain_value_load_check("Sloppiness", "Sloppiness", "User",
                                 "atan((z_max - z_min)/D_max)",
