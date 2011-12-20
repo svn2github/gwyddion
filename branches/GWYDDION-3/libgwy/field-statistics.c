@@ -30,9 +30,8 @@
 
 typedef struct {
     gdouble s;
-    gdouble q;
-    gdouble dx2;
-    gdouble dy2;
+    gdouble dx;
+    gdouble dy;
 } SurfaceAreaData;
 
 typedef struct {
@@ -785,41 +784,6 @@ gwy_field_count_above_below(const GwyField *field,
 }
 
 /**
- * surface_area_square:
- * @z1: Z-value in first corner.
- * @z2: Z-value in second corner.
- * @z3: Z-value in third corner.
- * @z4: Z-value in fourth corner.
- * @w1: Weight of first corner (0 or 1).
- * @w2: Weight of second corner (0 or 1).
- * @w3: Weight of third corner (0 or 1).
- * @w4: Weight of fourth corner (0 or 1).
- * @user_data: #SurfaceAreaData.
- *
- * Calculates approximate area of a one square pixel with some corners possibly
- * missing.
- **/
-static void
-surface_area_square(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
-                    guint w1, guint w2, guint w3, guint w4,
-                    gpointer user_data)
-{
-    SurfaceAreaData *sadata = (SurfaceAreaData*)user_data;
-    gdouble s, c = (z1 + z2 + z3 + z4)/4.0;
-
-    z1 -= c;
-    z2 -= c;
-    z3 -= c;
-    z4 -= c;
-
-    s = ((w1 + w2)*sqrt(1.0 + 2.0*(z1*z1 + z2*z2)/sadata->q)
-         + (w2 + w3)*sqrt(1.0 + 2.0*(z2*z2 + z3*z3)/sadata->q)
-         + (w3 + w4)*sqrt(1.0 + 2.0*(z3*z3 + z4*z4)/sadata->q)
-         + (w4 + w1)*sqrt(1.0 + 2.0*(z4*z4 + z1*z1)/sadata->q))/2.0;
-    sadata->s += s;
-}
-
-/**
  * surface_area_nonsquare:
  * @z1: Z-value in first corner.
  * @z2: Z-value in second corner.
@@ -835,21 +799,42 @@ surface_area_square(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * corners possibly missing.
  **/
 static void
-surface_area_nonsquare(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
-                       guint w1, guint w2, guint w3, guint w4,
-                       gpointer user_data)
+pixel_quarter_area(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                   guint w1, guint w2, guint w3, guint w4,
+                   gpointer user_data)
 {
     SurfaceAreaData *sadata = (SurfaceAreaData*)user_data;
-    gdouble s, c = (z1 + z2 + z3 + z4)/2.0;
+    gdouble dx = sadata->dx, dy = sadata->dy,
+            d21 = (z2 - z1)/dx, d23 = (z2 - z3)/dy,
+            d14 = (z1 - z4)/dy, d34 = (z3 - z4)/dx,
+            d1423 = 0.75*d14 + 0.25*d23, d2134 = 0.75*d21 + 0.25*d34,
+            d2314 = 0.75*d23 + 0.25*d14, d3421 = 0.75*d34 + 0.25*d21,
+            D1423 = d1423*d1423, D2134 = d2134*d2134,
+            D2314 = d2314*d2314, D3421 = d3421*d3421,
+            D21 = 1.0 + d21*d21, D14 = 1.0 + d14*d14,
+            D34 = 1.0 + d34*d34, D23 = 1.0 + d23*d23,
+            Dv = 1.0 + 0.25*(d14 + d23)*(d14 + d23),
+            Dh = 1.0 + 0.25*(d21 + d34)*(d21 + d34);
+    guint w;
+    gdouble s = 0.0;
 
-    s = ((w1 + w2)*sqrt(1.0 + (z1 - z2)*(z1 - z2)/sadata->dx2
-                        + (z1 + z2 - c)*(z1 + z2 - c)/sadata->dy2)
-         + (w2 + w3)*sqrt(1.0 + (z2 - z3)*(z2 - z3)/sadata->dy2
-                          + (z2 + z3 - c)*(z2 + z3 - c)/sadata->dx2)
-         + (w3 + w4)*sqrt(1.0 + (z3 - z4)*(z3 - z4)/sadata->dx2
-                          + (z3 + z4 - c)*(z3 + z4 - c)/sadata->dy2)
-         + (w4 + w1)*sqrt(1.0 + (z1 - z4)*(z1 - z4)/sadata->dy2
-                          + (z1 + z4 - c)*(z1 + z4 - c)/sadata->dx2))/2.0;
+    if ((w = (w1 + w2)))
+        s += w*sqrt(Dv + D2134);
+    if ((w = (w2 + w3)))
+        s += w*sqrt(Dh + D2314);
+    if ((w = (w3 + w4)))
+        s += w*sqrt(Dv + D3421);
+    if ((w = (w4 + w1)))
+        s += w*sqrt(Dh + D1423);
+    if (w1)
+        s += sqrt(D21 + D1423) + sqrt(D14 + D2134);
+    if (w2)
+        s += sqrt(D21 + D2314) + sqrt(D23 + D2134);
+    if (w3)
+        s += sqrt(D34 + D2314) + sqrt(D23 + D3421);
+    if (w4)
+        s += sqrt(D34 + D1423) + sqrt(D14 + D3421);
+
     sadata->s += s;
 }
 
@@ -879,21 +864,15 @@ gwy_field_surface_area(const GwyField *field,
     g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    gboolean square_pixels = fabs(log(dx/dy)) < COMPAT_EPSILON;
     gboolean full_field = ((!mask || masking == GWY_MASK_IGNORE)
                            && (!fpart || (fpart->width == field->xres
                                           && fpart->height == field->yres
                                           && fpart->col == 0
                                           && fpart->row == 0)));
-    SurfaceAreaData sadata = { 0.0, dx*dy, dx*dx, dy*dy };
-    if (square_pixels)
-        gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                                   surface_area_square, &sadata);
-    else
-        gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                                   surface_area_nonsquare, &sadata);
-
-    gdouble area = sadata.s*sadata.q/4.0;
+    SurfaceAreaData sadata = { 0.0, dx, dy };
+    gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
+                               &pixel_quarter_area, &sadata);
+    gdouble area = sadata.s*dx*dy/16.0;
     if (full_field) {
         CVAL(field->priv, ARE) = area;
         field->priv->cached |= CBIT(ARE);

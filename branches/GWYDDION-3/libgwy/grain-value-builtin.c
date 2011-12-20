@@ -805,19 +805,22 @@ calc_equiv_disc_radius(GwyGrainValue *grainvalue,
         values[gno] = sqrt(dxdy*sizes[gno]/G_PI);
 }
 
-// Calculate twice the ‘contribution of one corner’ (the twice is to move
-// multiplications from inner loops) to the surface area.
-// Direction 1-2 is x, 1-4 is y.
+// Calculate the ‘contribution of one corner’ to the surface area.
+// Direction 1-2 is x, 1-4 is y, 3 is the opposite corner.
 static inline gdouble
-square_area2w_1c(gdouble z1, gdouble z2, gdouble z4, gdouble c,
-                 gdouble xx, gdouble yy)
+pixel_quarter_area_2(gdouble z1, gdouble z2, gdouble z4, gdouble z3,
+                     gdouble dx, gdouble dy)
 {
-    gdouble z12 = z1 - z2,
-            z14 = z1 - z4,
-            z12c = z1 + z2 - c,
-            z14c = z1 + z4 - c;
-    return sqrt(1.0 + z12*z12/xx + z12c*z12c/yy)
-           + sqrt(1.0 + z14*z14/yy + z14c*z14c/xx);
+    gdouble d21 = (z2 - z1)/dx, d23 = (z2 - z3)/dy,
+            d14 = (z1 - z4)/dy, d34 = (z3 - z4)/dx,
+            d1423 = 0.75*d14 + 0.25*d23, d2134 = 0.75*d21 + 0.25*d34,
+            D1423 = d1423*d1423, D2134 = d2134*d2134,
+            D21 = 1.0 + d21*d21, D14 = 1.0 + d14*d14,
+            Dv = 1.0 + 0.25*(d14 + d23)*(d14 + d23),
+            Dh = 1.0 + 0.25*(d21 + d34)*(d21 + d34);
+
+    return (sqrt(Dv + D2134) + sqrt(Dh + D1423)
+            + sqrt(D21 + D1423) + sqrt(D14 + D2134));
 }
 
 static void
@@ -832,13 +835,11 @@ calc_surface_area(GwyGrainValue *grainvalue,
 
     guint xres = field->xres, yres = field->yres;
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    gdouble dx2 = dx*dx, dy2 = dy*dy, dxdy = dx*dy;
+    gdouble dxdy = dx*dy;
     guint ngrains = grainvalue->priv->ngrains;
     const guint *g = grains;
     const gdouble *d = field->data;
 
-    // Every contribution is calculated twice -- for each pixel (vertex)
-    // participating to a particular triangle.  So we divide by 8, not by 4.
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++, g++) {
             guint gno = *g;
@@ -850,28 +851,24 @@ calc_surface_area(GwyGrainValue *grainvalue,
             guint ipx = (i < yres-1) ? ix+xres : ix;
             guint jm = (j > 0) ? j-1 : j;
             guint jp = (j < xres-1) ? j+1 : j;
-            gdouble c;
 
-            c = 0.5*(d[ix + j] + d[ix + jm] + d[imx + jm] + d[imx + j]);
-            values[gno] += square_area2w_1c(d[ix + j], d[ix + jm],
-                                            d[imx + j], c, dx2, dy2);
-
-            c = 0.5*(d[ix + j] + d[ix + jp] + d[imx + jp] + d[imx + j]);
-            values[gno] += square_area2w_1c(d[ix + j], d[ix + jp],
-                                            d[imx + j], c, dx2, dy2);
-
-            c = 0.5*(d[ix + j] + d[ix + jm] + d[ipx + jm] + d[ipx + j]);
-            values[gno] += square_area2w_1c(d[ix + j], d[ix + jm],
-                                            d[ipx + j], c, dx2, dy2);
-
-            c = 0.5*(d[ix + j] + d[ix + jp] + d[ipx + jp] + d[ipx + j]);
-            values[gno] += square_area2w_1c(d[ix + j], d[ix + jp],
-                                            d[ipx + j], c, dx2, dy2);
+            values[gno] += pixel_quarter_area_2(d[ix + j], d[ix + jm],
+                                                d[imx + j], d[imx + jm],
+                                                dx, dy);
+            values[gno] += pixel_quarter_area_2(d[ix + j], d[ix + jp],
+                                                d[imx + j], d[imx + jp],
+                                                dx, dy);
+            values[gno] += pixel_quarter_area_2(d[ix + j], d[ix + jm],
+                                                d[ipx + j], d[ipx + jm],
+                                                dx, dy);
+            values[gno] += pixel_quarter_area_2(d[ix + j], d[ix + jp],
+                                                d[ipx + j], d[ipx + jp],
+                                                dx, dy);
         }
     }
 
     for (guint gno = 0; gno <= ngrains; gno++)
-        values[gno] *= dxdy/8.0;
+        values[gno] *= dxdy/16.0;
 }
 
 static void

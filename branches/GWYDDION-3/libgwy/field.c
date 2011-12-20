@@ -492,10 +492,12 @@ gwy_field_set_property(GObject *object,
     switch (prop_id) {
         case PROP_XREAL:
         field->xreal = g_value_get_double(value);
+        // TODO: Invalidate cached surface area
         break;
 
         case PROP_YREAL:
         field->yreal = g_value_get_double(value);
+        // TODO: Invalidate cached surface area
         break;
 
         case PROP_XOFFSET:
