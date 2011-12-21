@@ -1370,7 +1370,7 @@ get_resource_class(const gchar *typename,
     }
 
     /* Does it make sense to accept subclasses? */
-    if (G_UNLIKELY(g_type_is_a(!type, expected_type))) {
+    if (G_UNLIKELY(!g_type_is_a(type, expected_type))) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
                      &filename_disp,
                      _("Resource type ‘%s’ of file ‘%s’ does not match "
