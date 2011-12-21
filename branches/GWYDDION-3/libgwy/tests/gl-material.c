@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -262,6 +262,104 @@ test_gl_material_inventory(void)
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
     g_object_unref(gl_material);
+}
+
+void
+test_gl_material_error_bad_line(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name Broken gl_material\n"
+         "WTF?!\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_gl_material_error_no_name(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+}
+
+void
+test_gl_material_error_bad_name(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name \n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name \x8e\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+}
+
+void
+test_gl_material_error_bad_data(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name Broken GL material 3\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name Broken GL material 3\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name Broken GL material 3\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0.5\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name Broken GL material 3\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n"
+         "0 0 0 0\n",
+         GWY_TYPE_GL_MATERIAL,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

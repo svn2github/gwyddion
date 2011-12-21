@@ -300,6 +300,21 @@ test_user_fit_func_inventory(void)
 }
 
 void
+test_user_fit_func_error_bad_line(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "WTF?!\n"
+         "group User\n"
+         "formula a\n"
+         "param a\n"
+         "estimate 1",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
 test_user_fit_func_error_no_name(void)
 {
     resource_assert_load_error
@@ -389,6 +404,14 @@ test_user_fit_func_error_nonmatching_params(void)
          "name Broken fit function\n"
          "group User\n"
          "formula a\n"
+         "param a\x80\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a\n"
          "param b\n",
          GWY_TYPE_USER_FIT_FUNC,
          GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
@@ -410,6 +433,29 @@ test_user_fit_func_error_nonmatching_params(void)
          "param b\n"
          "param c\n"
          "param b\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_user_fit_func_error_bad_param_estimate(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a\n"
+         "param a\n"
+         "estimate /123",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a\n"
+         "param a\n"
+         "estimate nonexistent_estimator",
          GWY_TYPE_USER_FIT_FUNC,
          GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
 }

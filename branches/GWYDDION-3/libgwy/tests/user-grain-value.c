@@ -71,6 +71,7 @@ test_user_grain_value_load(void)
     static const gchar usergrainvalue_v2[] =
         "Gwyddion resource GwyUserGrainValue\n"
         "formula atan((z_max - z_min)/D_max)\n"
+        "ident sloppiness_2\n"
         "power_xy 0\n"
         "power_z 0\n"
         "is_angle 1\n"
@@ -81,6 +82,7 @@ test_user_grain_value_load(void)
         "name Sloppiness v3\n"
         "group Group that hopefully does not exist\n"
         "formula atan((z_max - z_min)/D_max)\n"
+        "ident sloppiness_2\n"
         "power_xy 0\n"
         "power_z 0\n"
         "is_angle 1\n"
@@ -89,6 +91,7 @@ test_user_grain_value_load(void)
     static const gchar usergrainvalue_v3_ugly[] =
         "Gwyddion3 resource GwyUserGrainValue\n"
         " name    Sloppiness³   \t\n"
+        "  ident\t \tsloppiness_2               \n"
         "        formula\tatan((z_max - z_min)/D_max)\n"
         "            \tis_angle \t1\n"
         "\t \n"
@@ -261,6 +264,20 @@ test_user_grain_value_inventory(void)
 }
 
 void
+test_user_grain_value_error_bad_line(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "WTF?!\n"
+         "group User\n"
+         "formula z_min\n"
+         "ident broken_grain_value\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
 test_user_grain_value_error_no_name(void)
 {
     resource_assert_load_error
@@ -331,6 +348,60 @@ test_user_grain_value_error_bad_formula(void)
          "name Broken grain value\n"
          "group User\n"
          "formula nonexistent_builtin_grain_value_foobar\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_user_grain_value_error_bad_ident(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula z_min\n"
+         "ident \x80\n"
+         "symbol BrokenX80",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula z_min\n"
+         "ident \n"
+         "symbol BrokenX80",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula z_min\n"
+         "ident just testing\n"
+         "symbol BrokenX80",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula z_min\n"
+         "symbol BrokenX80",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_user_grain_value_error_bad_symbol(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula z_min\n"
+         "ident broken_grain_value\n"
+         "symbol \x80",
          GWY_TYPE_USER_GRAIN_VALUE,
          GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
 }

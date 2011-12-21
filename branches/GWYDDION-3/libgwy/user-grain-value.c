@@ -136,7 +136,7 @@ gwy_user_grain_value_init(GwyUserGrainValue *usergrainvalue)
     // Constant, by default.
     priv->formula = g_strdup("0");
     priv->group = g_strdup("User");
-    priv->ident = g_strdup("zero");
+    priv->ident = g_strdup("");
 }
 
 static void
@@ -235,14 +235,6 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     GwyUserGrainValue *usergrainvalue = GWY_USER_GRAIN_VALUE(serializable);
     UserGrainValue *priv = usergrainvalue->priv;
 
-    if (!its[0].value.v_string
-        || !g_utf8_validate(its[0].value.v_string, -1, NULL)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Grain value group is missing "
-                             "or not valid UTF-8."));
-        goto fail;
-    }
     GWY_TAKE_STRING(priv->group, its[0].value.v_string);
     GWY_TAKE_STRING(priv->formula, its[1].value.v_string);
     GWY_TAKE_STRING(priv->ident, its[2].value.v_string);
@@ -344,7 +336,7 @@ validate(GwyUserGrainValue *usergrainvalue,
     }
 
     // Identifier and symbol physical sanity.
-    if (!priv->ident) {
+    if (!priv->ident || !*priv->ident) {
         g_set_error(error, domain, code,
                     _("Grain value has no identifier."));
         return FALSE;
@@ -363,7 +355,7 @@ validate(GwyUserGrainValue *usergrainvalue,
     }
 
     // Formula physical sanity
-    if (!priv->formula) {
+    if (!priv->formula || !*priv->formula) {
         g_set_error(error, domain, code,
                     _("Grain value has no formula."));
         return FALSE;
