@@ -101,6 +101,10 @@ void          line_part_assert_equal        (const GwyLinePart *part,
 void          check_congruence_group_sanity (void);
 void          resource_check_file           (GwyResource *resource,
                                              const gchar *filename);
+void          resource_assert_load_error    (const gchar *string,
+                                             GType type,
+                                             guint errdomain,
+                                             gint errcode);
 
 extern const guint plane_congruence_group[8][8];
 

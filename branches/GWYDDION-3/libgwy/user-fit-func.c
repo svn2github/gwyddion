@@ -330,7 +330,7 @@ validate(GwyUserFitFunc *userfitfunc,
     UserFitFunc *priv = userfitfunc->priv;
 
     // Group physical sanity
-    if (!priv->group) {
+    if (!priv->group || !*priv->group) {
         g_set_error(error, domain, code,
                     _("Fitting function has no group."));
         return FALSE;
@@ -781,8 +781,10 @@ gwy_user_fit_func_parse(GwyResource *resource,
     }
 
     free_params(priv);
-    priv->nparams = params->len;
-    priv->param = (GwyFitParam**)g_ptr_array_free(params, FALSE);
+    if (params) {
+        priv->nparams = params->len;
+        priv->param = (GwyFitParam**)g_ptr_array_free(params, FALSE);
+    }
 
     if (!validate(userfitfunc,
                   GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA, error))

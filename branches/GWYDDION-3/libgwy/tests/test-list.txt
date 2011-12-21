@@ -345,6 +345,8 @@ container/text
 container/boxed
 array/data
 inventory/data
+resource/error/unknown-type
+resource/error/different-type
 gradient/load
 gradient/save
 gradient/serialize
@@ -358,6 +360,11 @@ user-fit-func/load
 user-fit-func/save
 user-fit-func/serialize
 user-fit-func/inventory
+user-fit-func/error/no-name
+user-fit-func/error/bad-name
+user-fit-func/error/bad-group
+user-fit-func/error/bad-formula
+user-fit-func/error/nonmatching-params
 fit-func/builtin/constant
 fit-func/builtin/exponential
 fit-func/builtin/exponential-two-side
@@ -396,6 +403,10 @@ user-grain-value/load
 user-grain-value/save
 user-grain-value/serialize
 user-grain-value/inventory
+user-grain-value/error/no-name
+user-grain-value/error/bad-name
+user-grain-value/error/bad-group
+user-grain-value/error/bad-formula
 # Finalisation tests, should go last.
 fft/save-wisdom
 resource/finalize

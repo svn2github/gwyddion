@@ -299,4 +299,119 @@ test_user_fit_func_inventory(void)
         GWY_OBJECT_UNREF(params[i]);
 }
 
+void
+test_user_fit_func_error_no_name(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "group User\n"
+         "formula a\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+}
+
+void
+test_user_fit_func_error_bad_name(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name \n"
+         "group User\n"
+         "formula a\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name \x8e\n"
+         "group User\n"
+         "formula a\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+}
+
+void
+test_user_fit_func_error_bad_group(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group \n"
+         "formula a\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group \x8e\n"
+         "formula a\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_user_fit_func_error_bad_formula(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula /a\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a\x8e\n"
+         "param a\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_user_fit_func_error_nonmatching_params(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula 1\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a\n"
+         "param b\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a+b*x+c*x*x\n"
+         "param a\n"
+         "param b\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserFitFunc\n"
+         "name Broken fit function\n"
+         "group User\n"
+         "formula a+b*x+c*x*x\n"
+         "param a\n"
+         "param b\n"
+         "param c\n"
+         "param b\n",
+         GWY_TYPE_USER_FIT_FUNC,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

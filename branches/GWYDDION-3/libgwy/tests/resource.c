@@ -18,6 +18,8 @@
  */
 
 #include "testlibgwy.h"
+#include <glib/gstdio.h>
+#include <stdio.h>
 
 /***************************************************************************
  *
@@ -37,6 +39,44 @@ resource_check_file(GwyResource *resource,
     g_object_unref(gfile);
     g_object_unref(res_gfile);
     g_free(res_filename);
+}
+
+void
+resource_assert_load_error(const gchar *string,
+                           GType type,
+                           guint errdomain, gint errcode)
+{
+    static const gchar *filename = "Broken-resource";
+
+    GError *error = NULL;
+    g_assert(g_file_set_contents(filename, string, -1, &error));
+    g_test_queue_destroy((GDestroyNotify)g_unlink, (gpointer)filename);
+    g_assert(!error);
+
+    GwyResource *resource = gwy_resource_load(filename, type, TRUE, &error);
+    g_assert_error(error, errdomain, errcode);
+    g_clear_error(&error);
+    g_assert(!resource);
+}
+
+void
+test_resource_error_unknown_type(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyFoobar\n"
+         "name Broken resource\n",
+         GWY_TYPE_GRADIENT,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE);
+}
+
+void
+test_resource_error_different_type(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyGLMaterial\n"
+         "name Broken resource\n",
+         GWY_TYPE_GRADIENT,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE);
 }
 
 void

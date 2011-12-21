@@ -260,4 +260,79 @@ test_user_grain_value_inventory(void)
     g_object_unref(usergrainvalue);
 }
 
+void
+test_user_grain_value_error_no_name(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "group User\n"
+         "formula z_min\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+}
+
+void
+test_user_grain_value_error_bad_name(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name \n"
+         "group User\n"
+         "formula z_min\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name \x8e\n"
+         "group User\n"
+         "formula z_min\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME);
+}
+
+void
+test_user_grain_value_error_bad_group(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group \n"
+         "formula z_min\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group \x8e\n"
+         "formula z_min\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
+void
+test_user_grain_value_error_bad_formula(void)
+{
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula /z_min\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula z_min\x8e\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+    resource_assert_load_error
+        ("Gwyddion3 resource GwyUserGrainValue\n"
+         "name Broken grain value\n"
+         "group User\n"
+         "formula nonexistent_builtin_grain_value_foobar\n",
+         GWY_TYPE_USER_GRAIN_VALUE,
+         GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

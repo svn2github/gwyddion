@@ -332,7 +332,7 @@ validate(GwyUserGrainValue *usergrainvalue,
     UserGrainValue *priv = usergrainvalue->priv;
 
     // Group physical sanity
-    if (!priv->group) {
+    if (!priv->group || !*priv->group) {
         g_set_error(error, domain, code,
                     _("Grain value has no group."));
         return FALSE;
