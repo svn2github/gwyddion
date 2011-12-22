@@ -21,6 +21,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/expr.h"
+#include "libgwy/mask-field-grains.h"
 #include "libgwy/grain-value.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/grain-value-builtin.h"
@@ -163,7 +164,6 @@ invalidate(GwyGrainValue *grainvalue)
     GrainValue *priv = grainvalue->priv;
     GWY_OBJECT_UNREF(priv->unit);
     GWY_FREE(priv->values);
-    GWY_OBJECT_UNREF(priv->expr);
 }
 
 static void
@@ -175,7 +175,6 @@ gwy_grain_value_dispose(GObject *object)
     GWY_SIGNAL_HANDLER_DISCONNECT(priv->resource, priv->notify_name_id);
     GWY_OBJECT_UNREF(priv->unit);
     GWY_OBJECT_UNREF(priv->resource);
-    GWY_OBJECT_UNREF(priv->expr);
     parent_class->dispose(object);
 }
 
@@ -383,7 +382,6 @@ user_value_data_changed(GwyGrainValue *grainvalue,
     // Just invalidate stuff, construct_expr() will create it again if
     // necessary.
     GrainValue *priv = grainvalue->priv;
-    GWY_OBJECT_UNREF(priv->expr);
 }
 
 // This does not feel right, or at least not useful.  But if the name changes
@@ -401,28 +399,6 @@ user_value_notify_name(GwyGrainValue *grainvalue,
         priv->name = g_strdup(name);
         g_object_notify_by_pspec(G_OBJECT(grainvalue), properties[PROP_NAME]);
     }
-}
-
-static void
-construct_expr(GrainValue *priv)
-{
-    priv->expr = _gwy_grain_value_new_expr_with_constants();
-    if (!gwy_expr_compile(priv->expr,
-                          gwy_user_grain_value_get_formula(priv->resource),
-                          NULL)) {
-        g_critical("Cannot compile user grain value formula.");
-        return;
-    }
-
-    /* TODO: At some point we need to calculate the dependences.  Now?
-    priv->indices = g_new(guint, priv->nparams+1);
-    if (gwy_user_grain_value_resolve_params(priv->resource, priv->expr, NULL,
-                                            priv->indices)) {
-        g_critical("Cannot resolve variables in user grain value "
-                   "formula.");
-        return;
-    }
-    */
 }
 
 static const gchar*
@@ -551,6 +527,60 @@ gwy_grain_value_is_valid(const GwyGrainValue *grainvalue)
     return grainvalue->priv->is_valid;
 }
 
+static void
+add_deps(GwyGrainValue *grainvalue,
+         GwyExpr *expr,
+         GwyGrainValue **builtins,
+         guint *indices)
+{
+    GwyUserGrainValue *usergrainvalue = grainvalue->priv->resource;
+    g_return_if_fail(usergrainvalue);
+    const gchar *formula = gwy_user_grain_value_get_formula(usergrainvalue);
+    guint n = builtin_table.n;
+    if (!gwy_expr_compile(expr, formula, NULL)) {
+        g_critical("Cannot compile grain value expresion for %s.",
+                   gwy_resource_get_name(GWY_RESOURCE(usergrainvalue)));
+        return;
+    }
+    if (gwy_expr_resolve_variables(expr, n, builtin_table.idents, indices)) {
+        g_critical("Cannot resolve variables in grain value expression for %s.",
+                   gwy_resource_get_name(GWY_RESOURCE(usergrainvalue)));
+        return;
+    }
+    for (guint i = 0; i < n; i++) {
+        if (indices[i] && !builtins[i])
+            builtins[i] = gwy_grain_value_new(builtin_table.names[i]);
+    }
+}
+
+static void
+calc_derived(GwyGrainValue *grainvalue,
+             GwyExpr *expr,
+             GwyGrainValue **builtins,
+             guint *indices,
+             const gdouble **vectors,
+             guint ngrains)
+{
+    GwyUserGrainValue *usergrainvalue = grainvalue->priv->resource;
+    g_return_if_fail(usergrainvalue);
+    const gchar *formula = gwy_user_grain_value_get_formula(usergrainvalue);
+    guint n = builtin_table.n;
+    if (!gwy_expr_compile(expr, formula, NULL)) {
+        g_critical("Cannot compile grain value expresion for %s.",
+                   gwy_resource_get_name(GWY_RESOURCE(usergrainvalue)));
+        return;
+    }
+    if (gwy_expr_resolve_variables(expr, n, builtin_table.idents, indices)) {
+        g_critical("Cannot resolve variables in grain value expression for %s.",
+                   gwy_resource_get_name(GWY_RESOURCE(usergrainvalue)));
+        return;
+    }
+
+    for (guint i = 0; i < n; i++)
+        vectors[indices[i]] = builtins[i]->priv->values;
+    gwy_expr_vector_execute(expr, ngrains+1, vectors, grainvalue->priv->values);
+}
+
 /**
  * gwy_field_evaluate_grains:
  * @field: A two-dimensional data field.
@@ -576,20 +606,75 @@ gwy_field_evaluate_grains(const GwyField *field,
         return;
     g_return_if_fail(grainvalues);
 
-    // TODO
-    GPtrArray *builtins = g_ptr_array_new();
+    guint ngrains = gwy_mask_field_n_grains(mask);
+    guint n = builtin_table.n;
+    gsize tablesize = n*sizeof(GwyGrainValue*);
+    GwyGrainValue **builtins = g_slice_alloc0(tablesize);
+    const gdouble **vectors = NULL;
+    guint *indices = NULL;
+    GwyExpr *expr = NULL;
+
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
         g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
-        if (grainvalue->priv->builtin)
-            g_ptr_array_add(builtins, grainvalue);
-        else
-            g_warning("Implement me: non-builtin grain values.");
+        GrainValue *priv = grainvalue->priv;
+        if (priv->builtin) {
+            BuiltinGrainValueId id = priv->builtin->id;
+            if (!builtins[id])
+                builtins[id] = g_object_ref(grainvalue);
+        }
+        else {
+            if (!expr) {
+                indices = g_slice_alloc(n*sizeof(guint));
+                vectors = g_slice_alloc((n + 1)*sizeof(gdouble*));
+                expr = gwy_expr_new();
+            }
+            add_deps(grainvalue, expr, builtins, indices);
+        }
     }
-    _gwy_grain_value_evaluate_builtins(field, mask,
-                                       (GwyGrainValue**)builtins->pdata,
-                                       builtins->len);
-    g_ptr_array_free(builtins, TRUE);
+
+    GwyGrainValue **compact_builtins = g_slice_alloc0(tablesize);
+    guint bcount = 0;
+    for (guint i = 0; i < n; i++) {
+        if ((compact_builtins[bcount] = builtins[i]))
+            bcount++;
+    }
+    _gwy_grain_value_evaluate_builtins(field, mask, compact_builtins, bcount);
+
+    GwyUnit *unitxy = gwy_field_get_unit_xy(field);
+    GwyUnit *unitz = gwy_field_get_unit_z(field);
+    for (guint i = 0; i < nvalues; i++) {
+        GwyGrainValue *grainvalue = grainvalues[i];
+        GrainValue *priv = grainvalue->priv;
+        if (priv->builtin) {
+            BuiltinGrainValueId id = priv->builtin->id;
+            if (builtins[id] != grainvalue)
+                _gwy_grain_value_assign(grainvalue, builtins[id]);
+        }
+        else {
+            _gwy_grain_value_set_size(grainvalue, ngrains);
+            calc_derived(grainvalue, expr, builtins, indices, vectors, ngrains);
+
+            GwyUserGrainValue *usergrainvalue = grainvalue->priv->resource;
+            if (!priv->unit)
+                priv->unit = gwy_unit_new();
+            gwy_unit_power_multiply(priv->unit,
+                                    unitxy,
+                                    gwy_user_grain_value_get_power_xy(usergrainvalue),
+                                    unitz,
+                                    gwy_user_grain_value_get_power_xy(usergrainvalue));
+        }
+    }
+
+    for (guint i = 0; i < bcount; i++)
+        g_object_unref(compact_builtins[i]);
+    if (expr) {
+        g_object_unref(expr);
+        g_slice_free1(n*sizeof(guint), indices);
+        g_slice_free1((n + 1)*sizeof(gdouble*), vectors);
+    }
+    g_slice_free1(tablesize, compact_builtins);
+    g_slice_free1(tablesize, builtins);
 }
 
 GwyExpr*
@@ -599,6 +684,30 @@ _gwy_grain_value_new_expr_with_constants(void)
     gwy_expr_define_constant(expr, "pi", G_PI, NULL);
     gwy_expr_define_constant(expr, "π", G_PI, NULL);
     return expr;
+}
+
+void
+_gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
+{
+    GrainValue *priv = grainvalue->priv;
+    if (priv->ngrains != ngrains) {
+        GWY_FREE(priv->values);
+        priv->values = g_new(gdouble, ngrains+1);
+        priv->ngrains = ngrains;
+    }
+}
+
+void
+_gwy_grain_value_assign(GwyGrainValue *dest,
+                        const GwyGrainValue *source)
+{
+    GrainValue *dpriv = dest->priv;
+    const GrainValue *spriv = source->priv;
+    g_return_if_fail(gwy_strequal(dpriv->name, spriv->name));
+
+    _gwy_grain_value_set_size(dest, spriv->ngrains);
+    gwy_assign(dpriv->values, spriv->values, spriv->ngrains+1);
+    _gwy_assign_units(&dpriv->unit, spriv->unit);
 }
 
 /**

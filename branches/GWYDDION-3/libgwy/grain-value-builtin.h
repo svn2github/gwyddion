@@ -106,7 +106,6 @@ struct _GwyGrainValuePrivate {
     GwyUserGrainValue *resource;
 
     // User values only
-    GwyExpr *expr;
     gulong data_changed_id;
     gulong notify_name_id;
 };
@@ -122,6 +121,10 @@ GwyExpr* _gwy_grain_value_new_expr_with_constants(void) G_GNUC_MALLOC;
 G_GNUC_INTERNAL
 void _gwy_grain_value_set_size(GwyGrainValue *grainvalue,
                                guint ngrains);
+
+G_GNUC_INTERNAL
+void _gwy_grain_value_assign(GwyGrainValue *dest,
+                             const GwyGrainValue *source);
 
 // Like gwy_field_evaluate_grains() but only for builtins.
 G_GNUC_INTERNAL

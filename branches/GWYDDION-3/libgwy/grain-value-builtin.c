@@ -1612,18 +1612,15 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
         const BuiltinGrainValue *builtin = priv->builtin;
         BuiltinGrainValueId id = builtin->id;
 
-        if (grainvalue != ourvalues[id]) {
-            _gwy_grain_value_set_size(grainvalue, ngrains);
-            gwy_assign(grainvalue->priv->values,
-                       ourvalues[id]->priv->values,
-                       ngrains+1);
+        if (grainvalue == ourvalues[id]) {
+            if (!priv->unit)
+                priv->unit = gwy_unit_new();
+            gwy_unit_power_multiply(priv->unit,
+                                    unitxy, builtin->powerxy,
+                                    unitz, builtin->powerz);
         }
-
-        if (!priv->unit)
-            priv->unit = gwy_unit_new();
-        gwy_unit_power_multiply(priv->unit,
-                                unitxy, builtin->powerxy,
-                                unitz, builtin->powerz);
+        else
+            _gwy_grain_value_assign(grainvalue, ourvalues[i]);
     }
 
     for (guint i = 0; i < GWY_GRAIN_NVALUES; i++)
@@ -1652,17 +1649,6 @@ _gwy_grain_value_setup_builtins(BuiltinGrainValueTable *builtins)
     }
     builtins->names[builtins->n] = NULL;
     builtins->idents[builtins->n] = NULL;
-}
-
-void
-_gwy_grain_value_set_size(GwyGrainValue *grainvalue, guint ngrains)
-{
-    GrainValue *priv = grainvalue->priv;
-    if (priv->ngrains != ngrains) {
-        GWY_FREE(priv->values);
-        priv->values = g_new(gdouble, ngrains+1);
-        priv->ngrains = ngrains;
-    }
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

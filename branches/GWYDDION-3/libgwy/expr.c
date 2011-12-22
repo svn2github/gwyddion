@@ -1553,11 +1553,15 @@ gwy_expr_get_variables(GwyExpr *expr,
  * @names: List of variable names to get positions of.
  * @indices: Array to store variable positions to.  The positions are the same
  *           as in gwy_expr_execute().  Variables not present in the expression
- *           are assigned (reserved) position 0.  This allows to safely
- *           substitute values of all variables before execution wthout caring
- *           which variables are actually present.
+ *           are assigned the (reserved) position 0.  This allows you to safely
+ *           substitute values of all variables before execution without caring
+ *           which variables are actually present in the expression.
  *
  * Finds positions of variables in an expression.
+ *
+ * Each item in @indices will is filled with a number from 0 to @n
+ * (inclusively) defining the position in the array passed to
+ * gwy_expr_execute() or gwy_expr_vector_execute().
  *
  * Returns: The number of remaining, unresolved variables in @expr.
  **/
