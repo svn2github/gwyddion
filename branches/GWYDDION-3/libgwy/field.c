@@ -488,16 +488,23 @@ gwy_field_set_property(GObject *object,
                        GParamSpec *pspec)
 {
     GwyField *field = GWY_FIELD(object);
+    gdouble dblvalue;
 
     switch (prop_id) {
         case PROP_XREAL:
-        field->xreal = g_value_get_double(value);
-        // TODO: Invalidate cached surface area
+        dblvalue = g_value_get_double(value);
+        if (field->xreal != dblvalue) {
+            field->priv->cached &= ~CBIT(ARE);
+            field->xreal = dblvalue;
+        }
         break;
 
         case PROP_YREAL:
-        field->yreal = g_value_get_double(value);
-        // TODO: Invalidate cached surface area
+        dblvalue = g_value_get_double(value);
+        if (field->yreal != dblvalue) {
+            field->priv->cached &= ~CBIT(ARE);
+            field->yreal = dblvalue;
+        }
         break;
 
         case PROP_XOFFSET:
