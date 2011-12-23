@@ -159,14 +159,6 @@ gwy_grain_value_constructed(GObject *object)
 }
 
 static void
-invalidate(GwyGrainValue *grainvalue)
-{
-    GrainValue *priv = grainvalue->priv;
-    GWY_OBJECT_UNREF(priv->unit);
-    GWY_FREE(priv->values);
-}
-
-static void
 gwy_grain_value_dispose(GObject *object)
 {
     GwyGrainValue *grainvalue = GWY_GRAIN_VALUE(object);
@@ -361,6 +353,9 @@ gwy_grain_value_unit(const GwyGrainValue *grainvalue)
  *
  * Obtains the data of individual grains for a grain value.
  *
+ * The zeroth item in the returned array does not contain any meaningful value
+ * and is present for consistent indexing by grain numbers (that start from 1).
+ *
  * Returns: (transfer none) (allow-none) (array length=ngrains):
  *          An array of @ngrains+1 items containing the grain values from the
  *          last evaluation.  %NULL can be returned if @grainvalue has not been
@@ -375,21 +370,19 @@ gwy_grain_value_data(const GwyGrainValue *grainvalue,
     return grainvalue->priv->values;
 }
 
+// XXX: Nothing to do here?
 static void
-user_value_data_changed(GwyGrainValue *grainvalue,
+user_value_data_changed(G_GNUC_UNUSED GwyGrainValue *grainvalue,
                         G_GNUC_UNUSED GwyUserGrainValue *usergrainvalue)
 {
-    // Just invalidate stuff, construct_expr() will create it again if
-    // necessary.
-    GrainValue *priv = grainvalue->priv;
 }
 
 // This does not feel right, or at least not useful.  But if the name changes
 // we should emit notify::name so just do it.
 static void
 user_value_notify_name(GwyGrainValue *grainvalue,
-                        G_GNUC_UNUSED GParamSpec *pspec,
-                        GwyUserGrainValue *usergrainvalue)
+                       G_GNUC_UNUSED GParamSpec *pspec,
+                       GwyUserGrainValue *usergrainvalue)
 {
     GrainValue *priv = grainvalue->priv;
     GwyResource *resource = GWY_RESOURCE(usergrainvalue);
@@ -602,9 +595,13 @@ gwy_field_evaluate_grains(const GwyField *field,
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+    g_return_if_fail(field->xres == mask->xres);
+    g_return_if_fail(field->yres == mask->yres);
     if (!nvalues)
         return;
     g_return_if_fail(grainvalues);
+    for (guint i = 0; i < nvalues; i++)
+        g_return_if_fail(GWY_IS_GRAIN_VALUE(grainvalues[i]));
 
     guint ngrains = gwy_mask_field_n_grains(mask);
     guint n = builtin_table.n;
@@ -616,7 +613,6 @@ gwy_field_evaluate_grains(const GwyField *field,
 
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
-        g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
         GrainValue *priv = grainvalue->priv;
         if (priv->builtin) {
             BuiltinGrainValueId id = priv->builtin->id;
@@ -656,13 +652,11 @@ gwy_field_evaluate_grains(const GwyField *field,
             calc_derived(grainvalue, expr, builtins, indices, vectors, ngrains);
 
             GwyUserGrainValue *usergrainvalue = grainvalue->priv->resource;
+            gint powerxy = gwy_user_grain_value_get_power_xy(usergrainvalue);
+            gint powerz = gwy_user_grain_value_get_power_z(usergrainvalue);
             if (!priv->unit)
                 priv->unit = gwy_unit_new();
-            gwy_unit_power_multiply(priv->unit,
-                                    unitxy,
-                                    gwy_user_grain_value_get_power_xy(usergrainvalue),
-                                    unitz,
-                                    gwy_user_grain_value_get_power_xy(usergrainvalue));
+            gwy_unit_power_multiply(priv->unit, unitxy, powerxy, unitz, powerz);
         }
     }
 
@@ -675,6 +669,42 @@ gwy_field_evaluate_grains(const GwyField *field,
     }
     g_slice_free1(tablesize, compact_builtins);
     g_slice_free1(tablesize, builtins);
+}
+
+/**
+ * gwy_grain_value_evaluate:
+ * @grainvalue: A grain value.
+ * @field: A two-dimensional data field.
+ * @mask: A two-dimensional mask field representing the grains.
+ *
+ * Evaluates a single grain value given a surface and mask representing the
+ * grains on this surface.
+ *
+ * The sizes of @field and @mask must match.
+ *
+ * Evaluation of grain values using a #GwyGrainValue method, instead of
+ * gwy_field_evaluate_grains() which is a #GwyField method, may be sometimes
+ * convenient.  Note, however, that evaluation of multiple grain values is
+ * considerably more efficient using gwy_field_evaluate_grains(), especially if
+ * the values are related because it ensures the common calculations are
+ * performed only once.
+ **/
+void
+gwy_grain_value_evaluate(GwyGrainValue *grainvalue,
+                         const GwyField *field,
+                         const GwyMaskField *mask)
+{
+    g_return_if_fail(GWY_IS_GRAIN_VALUE(grainvalue));
+
+    if (grainvalue->priv->builtin) {
+        g_return_if_fail(GWY_IS_FIELD(field));
+        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+        g_return_if_fail(field->xres == mask->xres);
+        g_return_if_fail(field->yres == mask->yres);
+        _gwy_grain_value_evaluate_builtins(field, mask, &grainvalue, 1);
+    }
+    else
+        gwy_field_evaluate_grains(field, mask, &grainvalue, 1);
 }
 
 GwyExpr*
@@ -713,7 +743,10 @@ _gwy_grain_value_assign(GwyGrainValue *dest,
 /**
  * gwy_grain_value_list_builtins:
  *
- * Obtain the list of all built-in grain value names.
+ * Obtains the list of all built-in grain value names.
+ *
+ * The list is valid permanently. Neither the list nor its elements may be
+ * modified or freed.
  *
  * Returns: (transfer none) (array zero-terminated=1):
  *          A %NULL-terminated array with grain value names.
@@ -747,9 +780,18 @@ _gwy_grain_value_list_builtin_idents(void)
  * individual grains, with formula and capability to derive units from the
  * units of the data field.
  *
- * It can wrap either a built-in grain value (see
+ * A #GwyGrainValue can wrap either a built-in grain value (see
  * <link linkend='libgwy-builtin-grain-value'>Builtin grain values</link>
  * for a list) or user grain value resources #GwyUserGrainValue.
+ *
+ * After evaluation using gwy_field_evaluate_grains() it holds the results,
+ * i.e. the obtained grain data and their units that can be accessed using
+ * gwy_grain_value_data() and gwy_grain_value_unit().  The grain value objects
+ * take no references to the mask or field and changes in the mask, field or
+ * even definition of the grain value (in the case of user grain values) do not
+ * cause automatic re-evaluation.  So to re-evaluate, you need to use
+ * gwy_field_evaluate_grains() again.  On the other hand this independence mean
+ * grain values remains valid after the mask and field are destroyed.
  **/
 
 /**
