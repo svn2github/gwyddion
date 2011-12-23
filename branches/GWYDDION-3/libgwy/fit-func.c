@@ -894,7 +894,10 @@ _gwy_fit_func_new_expr_with_constants(void)
 /**
  * gwy_fit_func_list_builtins:
  *
- * Obtain the list of all built-in fitting function names.
+ * Obtains the list of all built-in fitting function names.
+ *
+ * The list is valid permanently. Neither the list nor its elements may be
+ * modified or freed.
  *
  * Returns: (transfer container) (array zero-terminated=1):
  *          A %NULL-terminated array with function names.
