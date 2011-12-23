@@ -37,7 +37,7 @@ test_gradient_load_check(const gchar *filename,
     GError *error = NULL;
     GwyResource *resource = gwy_resource_load(filename, GWY_TYPE_GRADIENT, TRUE,
                                               &error);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert(GWY_IS_GRADIENT(resource));
     GwyGradient *gradient = GWY_GRADIENT(resource);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
@@ -93,21 +93,21 @@ test_gradient_load(void)
     // Version2 resource
     g_assert(g_file_set_contents("Yellow Blue 2", gradient_v2, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Yellow Blue 2");
-    g_assert(!error);
+    g_assert_no_error(error);
     test_gradient_load_check("Yellow Blue 2", "Yellow Blue 2", 5,
                              &gradient_point_black0, &gradient_point_white1);
 
     // Version3 resource
     g_assert(g_file_set_contents("YBL2", gradient_v3, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "YBL2");
-    g_assert(!error);
+    g_assert_no_error(error);
     test_gradient_load_check("YBL2", "Yellow Blue 2", 5,
                              &gradient_point_black0, &gradient_point_white1);
 
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Gray", gradient_v3_ugly, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Gray");
-    g_assert(!error);
+    g_assert_no_error(error);
     test_gradient_load_check("Ugly-Gray", "Testing Gray²", 2,
                              &gradient_point_black0, &gradient_point_white1);
 
@@ -137,7 +137,7 @@ test_gradient_save(void)
     GError *error = NULL;
     gwy_resource_set_filename(resource, "Tricolor");
     g_assert(gwy_resource_save(resource, &error));
-    g_assert(!error);
+    g_assert_no_error(error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Tricolor");
     resource_check_file(resource, "Tricolor");
     GWY_OBJECT_UNREF(gradient);

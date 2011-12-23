@@ -335,7 +335,7 @@ test_unit_serialize_one(GwyUnit *unit1)
     memstream = G_MEMORY_OUTPUT_STREAM(stream);
     ok = gwy_serialize_gio(GWY_SERIALIZABLE(unit1), stream, &error);
     g_assert(ok);
-    g_assert(error == NULL);
+    g_assert_no_error(error);
     len = g_memory_output_stream_get_data_size(memstream);
     unit2 = (GwyUnit*)(gwy_deserialize_memory
                        (g_memory_output_stream_get_data(memstream),

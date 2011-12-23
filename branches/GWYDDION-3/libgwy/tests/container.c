@@ -356,8 +356,7 @@ test_container_serialize(void)
     gboolean ok = gwy_serialize_gio(GWY_SERIALIZABLE(container), stream,
                                     &error);
     g_assert(ok);
-    g_assert(!error);
-    g_clear_error(&error);
+    g_assert_no_error(error);
 
     gsize len = g_memory_output_stream_get_data_size(memstream);
     const guchar *buffer = g_memory_output_stream_get_data(memstream);

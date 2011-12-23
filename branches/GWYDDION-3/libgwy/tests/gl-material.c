@@ -40,7 +40,7 @@ test_gl_material_load_check(const gchar *filename,
     GwyResource *resource = gwy_resource_load(filename, GWY_TYPE_GL_MATERIAL,
                                               TRUE,
                                               &error);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert(GWY_IS_GL_MATERIAL(resource));
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(resource);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
@@ -112,14 +112,14 @@ test_gl_material_load(void)
     g_assert(g_file_set_contents("Rainbow Surprise", gl_material_v2, -1,
                                  &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Rainbow Surprise");
-    g_assert(!error);
+    g_assert_no_error(error);
     test_gl_material_load_check("Rainbow Surprise", "Rainbow Surprise",
                                 &red, &green, &blue, &white, 0.5);
 
     // Version3 resource
     g_assert(g_file_set_contents("RS3", gl_material_v3, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "RS3");
-    g_assert(!error);
+    g_assert_no_error(error);
     test_gl_material_load_check("RS3", "Rainbow Surprise",
                                 &red, &green, &blue, &white, 0.5);
 
@@ -127,7 +127,7 @@ test_gl_material_load(void)
     g_assert(g_file_set_contents("Alpha-Omega", gl_material_v3_ugly, -1,
                                  &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Alpha-Omega");
-    g_assert(!error);
+    g_assert_no_error(error);
     test_gl_material_load_check("Alpha-Omega", "α→ω",
                                 &red, &green, &blue, &white, 0.5);
 }
@@ -155,7 +155,7 @@ test_gl_material_save(void)
     GError *error = NULL;
     gwy_resource_set_filename(resource, "AlienGL");
     g_assert(gwy_resource_save(resource, &error));
-    g_assert(!error);
+    g_assert_no_error(error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "AlienGL");
     resource_check_file(resource, "AlienGL");
     GWY_OBJECT_UNREF(gl_material);

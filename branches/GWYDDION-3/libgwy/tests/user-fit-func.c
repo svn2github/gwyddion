@@ -62,7 +62,7 @@ user_fit_func_load_check(const gchar *filename,
     GError *error = NULL;
     GwyResource *resource = gwy_resource_load(filename, GWY_TYPE_USER_FIT_FUNC,
                                               TRUE, &error);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert(GWY_IS_USER_FIT_FUNC(resource));
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(resource);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
@@ -132,13 +132,13 @@ test_user_fit_func_load(void)
     // Version2 resource
     g_assert(g_file_set_contents("Linear", userfitfunc_v2, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Linear");
-    g_assert(!error);
+    g_assert_no_error(error);
     user_fit_func_load_check("Linear", "Linear", "User", "a+b*x", np, params);
 
     // Version3 resource
     g_assert(g_file_set_contents("LLL", userfitfunc_v3, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "LLL");
-    g_assert(!error);
+    g_assert_no_error(error);
     user_fit_func_load_check("LLL", "Linear",
                              "Group that hopefully does not exist",
                              "a+b*x", np, params);
@@ -146,7 +146,7 @@ test_user_fit_func_load(void)
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Lin", userfitfunc_v3_ugly, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Lin");
-    g_assert(!error);
+    g_assert_no_error(error);
     user_fit_func_load_check("Ugly-Lin", "Linear that is up to x¹", "User",
                              "a+b*x", np, params);
 
@@ -203,7 +203,7 @@ test_user_fit_func_save(void)
     GError *error = NULL;
     gwy_resource_set_filename(resource, "Linear2");
     g_assert(gwy_resource_save(resource, &error));
-    g_assert(!error);
+    g_assert_no_error(error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Linear2");
     resource_check_file(resource, "Linear2");
     GWY_OBJECT_UNREF(userfitfunc);

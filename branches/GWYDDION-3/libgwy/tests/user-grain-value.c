@@ -41,7 +41,7 @@ user_grain_value_load_check(const gchar *filename,
     GwyResource *resource = gwy_resource_load(filename,
                                               GWY_TYPE_USER_GRAIN_VALUE,
                                               TRUE, &error);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert(GWY_IS_USER_GRAIN_VALUE(resource));
     GwyUserGrainValue *usergrainvalue = GWY_USER_GRAIN_VALUE(resource);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
@@ -102,7 +102,7 @@ test_user_grain_value_load(void)
     // Version2 resource
     g_assert(g_file_set_contents("Sloppiness", usergrainvalue_v2, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Sloppiness");
-    g_assert(!error);
+    g_assert_no_error(error);
     user_grain_value_load_check("Sloppiness", "Sloppiness", "User",
                                 "atan((z_max - z_min)/D_max)",
                                 0, 0, TRUE, TRUE);
@@ -110,7 +110,7 @@ test_user_grain_value_load(void)
     // Version3 resource
     g_assert(g_file_set_contents("Sloppiness3", usergrainvalue_v3, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Sloppiness3");
-    g_assert(!error);
+    g_assert_no_error(error);
     user_grain_value_load_check("Sloppiness3", "Sloppiness v3",
                                 "Group that hopefully does not exist",
                                 "atan((z_max - z_min)/D_max)",
@@ -120,7 +120,7 @@ test_user_grain_value_load(void)
     g_assert(g_file_set_contents("Ugly-Slop", usergrainvalue_v3_ugly, -1,
                                  &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Slop");
-    g_assert(!error);
+    g_assert_no_error(error);
     user_grain_value_load_check("Ugly-Slop", "Sloppiness³", "User",
                                 "atan((z_max - z_min)/D_max)",
                                 0, 0, TRUE, TRUE);
@@ -172,7 +172,7 @@ test_user_grain_value_save(void)
     GError *error = NULL;
     gwy_resource_set_filename(resource, "Bloat3");
     g_assert(gwy_resource_save(resource, &error));
-    g_assert(!error);
+    g_assert_no_error(error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Bloat3");
     resource_check_file(resource, "Bloat3");
     GWY_OBJECT_UNREF(usergrainvalue);

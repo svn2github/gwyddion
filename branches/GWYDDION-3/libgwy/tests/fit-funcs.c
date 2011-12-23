@@ -280,6 +280,7 @@ test_fit_func_user(void)
     GwyUserFitFunc *userfitfunc = gwy_fit_func_get_resource(fitfunc);
     g_assert(userfitfunc == linear);
     g_object_unref(fitfunc);
+    gwy_inventory_delete(userfitfuncs, "TESTLIBGWY Linear");
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

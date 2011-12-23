@@ -572,7 +572,7 @@ test_serialize_error(void)
         stream = g_memory_output_stream_new(malloc(i), i, NULL, &free);
         ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
         g_assert(!ok);
-        g_assert(error);
+        g_assert_error(error, G_IO_ERROR, G_IO_ERROR_NO_SPACE);
         g_assert_cmpint(sertest->done_called, ==, 0);
         g_object_unref(stream);
         g_clear_error(&error);
@@ -761,7 +761,7 @@ serialize_and_back(GObject *object,
     GError *error = NULL;
     gboolean ok = gwy_serialize_gio(GWY_SERIALIZABLE(object), stream, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     gsize datalen = g_memory_output_stream_get_data_size(memstream);
     gpointer data = g_memory_output_stream_get_data(memstream);
     //g_file_set_contents("ser.gwy", data, datalen, NULL);

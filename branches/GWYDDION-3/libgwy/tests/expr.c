@@ -35,40 +35,35 @@ test_expr_evaluate(void)
 
     ok = gwy_expr_evaluate(expr, "1/5 hypot(3 cos 0, sqrt 16)", &result, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert_cmpfloat(fabs(result - 1.0), <, 1e-15);
-    g_clear_error(&error);
 
     ok = gwy_expr_evaluate(expr, "1+1", &result, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert_cmpfloat(result, ==, 2.0);
-    g_clear_error(&error);
 
     ok = gwy_expr_evaluate(expr, "exp atanh (1/2)^2", &result, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert_cmpfloat(fabs(result - 3.0), <, 1e-15);
-    g_clear_error(&error);
 
     ok = gwy_expr_evaluate(expr, "exp lgamma 5/exp lgamma 4", &result, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert_cmpfloat(fabs(result - 4.0), <, 1e-15);
     g_clear_error(&error);
 
     ok = gwy_expr_evaluate(expr, "-5(-4--3)(-1+2)", &result, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert_cmpfloat(fabs(result - 5.0), <, 1e-15);
-    g_clear_error(&error);
 
     ok = gwy_expr_evaluate(expr, "3^2^2*-3^-2 - hypot hypot 1,2,2",
                            &result, &error);
     g_assert(ok);
-    g_assert(!error);
+    g_assert_no_error(error);
     g_assert_cmpfloat(fabs(result - 6.0), <, 1e-15);
-    g_clear_error(&error);
 
     g_object_unref(expr);
 }
@@ -82,21 +77,18 @@ test_expr_vector(void)
 
     ok = gwy_expr_define_constant(expr, "π", G_PI, &error);
     g_assert(ok);
-    g_assert(!error);
-    g_clear_error(&error);
+    g_assert_no_error(error);
 
     ok = gwy_expr_compile(expr, "1+1", &error);
     g_assert(ok);
-    g_assert(!error);
-    g_clear_error(&error);
+    g_assert_no_error(error);
 
     gsize nvars1 = gwy_expr_get_variables(expr, NULL);
     g_assert_cmpuint(nvars1, ==, 1);
 
     ok = gwy_expr_compile(expr, "sqrt(a^2+π*β/c₂)-sqrt(a^2+π*c₂/β)", &error);
     g_assert(ok);
-    g_assert(!error);
-    g_clear_error(&error);
+    g_assert_no_error(error);
 
     gsize nvars4 = gwy_expr_get_variables(expr, NULL);
     g_assert_cmpuint(nvars4, ==, 4);
@@ -193,8 +185,10 @@ test_expr_garbage(void)
                 g_string_append_printf(garbage, "%g", -log(g_rand_double(rng)));
         }
         ok = gwy_expr_evaluate(expr, garbage->str, &result, &error);
-        g_assert(ok || error);
-        g_clear_error(&error);
+        if (ok)
+            g_assert_no_error(error);
+        else
+            g_clear_error(&error);
         if (ok)
             count++;
     }

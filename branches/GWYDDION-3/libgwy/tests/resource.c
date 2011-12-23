@@ -51,7 +51,7 @@ resource_assert_load_error(const gchar *string,
     GError *error = NULL;
     g_assert(g_file_set_contents(filename, string, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, (gpointer)filename);
-    g_assert(!error);
+    g_assert_no_error(error);
 
     GwyResource *resource = gwy_resource_load(filename, type, TRUE, &error);
     g_assert_error(error, errdomain, errcode);
