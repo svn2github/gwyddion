@@ -225,7 +225,7 @@ AM_CONDITIONAL([BENCHMARKS],[test "x$gwy_enable_benchmarks" = xyes])
 # Translation Makefiles
 AC_CONFIG_COMMANDS([sed-po-makefiles],
 [
-  for x in libgwy; do
+  for x in libgwy libgwyui; do
     sed -e "/POTFILES =/r po-$x/POTFILES" po-$x/Makefile.in > po-$x/Makefile \
       && touch po-$x/stamp-it
   done
