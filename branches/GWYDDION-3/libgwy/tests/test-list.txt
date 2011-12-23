@@ -409,6 +409,7 @@ grain-value/builtin/curvature-phi2
 grain-value/builtin/curvature-center-x
 grain-value/builtin/curvature-center-y
 grain-value/builtin/curvature-center-z
+grain-value/evaluate/multiple
 user-grain-value/load
 user-grain-value/save
 user-grain-value/serialize
