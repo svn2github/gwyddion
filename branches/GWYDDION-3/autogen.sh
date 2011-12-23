@@ -185,7 +185,8 @@ for subdir in $podirs; do
   domain=gwyddion3${subdir#po}
   if test $subdir != po; then
     rm -f $subdir/Makefile.in.in
-    sed -e "s#^\(GETTEXT_PACKAGE = \)@GETTEXT_PACKAGE@#\1$domain#" \
+    sed -e "s#^\\(GETTEXT_PACKAGE = \\)@GETTEXT_PACKAGE@#\\1$domain#" \
+        -e "s#^\\(subdir = \\)po#\\1$subdir#" \
         po/Makefile.in.in >$subdir/Makefile.in.in
   else
     rm -f $subdir/Makefile.in.in~
