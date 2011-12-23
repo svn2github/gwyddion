@@ -695,14 +695,23 @@ values_are_equal(const GValue *value1,
     if (g_type_is_a(type, G_TYPE_ENUM))
         return g_value_get_enum(value1) == g_value_get_enum(value2);
 
-    if (g_type_is_a(type, GWY_TYPE_UNIT))
-        return gwy_unit_equal(GWY_UNIT(g_value_get_object(value1)),
-                              GWY_UNIT(g_value_get_object(value2)));
+    if (g_type_is_a(type, GWY_TYPE_UNIT)) {
+        GObject *obj1 = g_value_get_object(value1),
+                *obj2 = g_value_get_object(value2);
+        if (!obj1 || !obj2)
+            return !obj1 && !obj2;
+        return gwy_unit_equal(GWY_UNIT(obj1), GWY_UNIT(obj2));
+    }
 
-    if (g_type_is_a(type, G_TYPE_OBJECT))
-        return compare_properties(g_value_get_object(value1),
-                                  g_value_get_object(value2));
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
+        GObject *obj1 = g_value_get_object(value1),
+                *obj2 = g_value_get_object(value2);
+        if (!obj1 || !obj2)
+            return !obj1 && !obj2;
+        return compare_properties(obj1, obj2);
+    }
 
+    // FIXME: Are NULLs acceptable also here?
     if (g_type_is_a(type, G_TYPE_BOXED))
         return gwy_serializable_boxed_equal(type,
                                             g_value_get_boxed(value1),
@@ -717,7 +726,7 @@ gboolean
 compare_properties(GObject *object,
                    GObject *reference)
 {
-    g_assert(G_OBJECT_TYPE(object) == G_OBJECT_TYPE(reference));
+    g_assert_cmpuint(G_OBJECT_TYPE(object), ==, G_OBJECT_TYPE(reference));
     GObjectClass *klass = G_OBJECT_GET_CLASS(reference);
     guint nprops;
     GParamSpec **props = g_object_class_list_properties(klass, &nprops);
