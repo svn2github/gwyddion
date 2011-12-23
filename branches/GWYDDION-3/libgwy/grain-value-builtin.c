@@ -1291,6 +1291,8 @@ calc_volume_laplace(GwyGrainValue *grainvalue,
     GwyGrainValue *laplacebase = gwy_grain_value_new(v0grainvalue->priv->name);
     g_assert(laplacebase);
 
+    _gwy_grain_value_set_size(laplacebase, ngrains);
+    init_values(laplacebase);
     calc_volume_0(laplacebase, grains, workspace);
     const gdouble *lbv = laplacebase->priv->values;
     for (guint gno = 0; gno <= ngrains; gno++)
@@ -1479,7 +1481,6 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
 
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
-        g_return_if_fail(GWY_IS_GRAIN_VALUE(grainvalue));
         GrainValue *priv = grainvalue->priv;
         g_return_if_fail(priv->is_valid && priv->builtin);
         g_return_if_fail(priv->builtin->id < GWY_GRAIN_NVALUES);
