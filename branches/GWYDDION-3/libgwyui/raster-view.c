@@ -26,6 +26,8 @@
 #include "libgwyui/field-render.h"
 #include "libgwyui/raster-view.h"
 
+#define IGNORE_ME N_("A translatable string.")
+
 enum {
     // Own.
     PROP_0,
