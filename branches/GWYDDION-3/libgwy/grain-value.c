@@ -569,8 +569,10 @@ calc_derived(GwyGrainValue *grainvalue,
         return;
     }
 
-    for (guint i = 0; i < n; i++)
-        vectors[indices[i]] = builtins[i]->priv->values;
+    for (guint i = 0; i < n; i++) {
+        if (indices[i])
+            vectors[indices[i]] = builtins[i]->priv->values;
+    }
     gwy_expr_vector_execute(expr, ngrains+1, vectors, grainvalue->priv->values);
 }
 
@@ -686,8 +688,8 @@ gwy_field_evaluate_grains(const GwyField *field,
  * gwy_field_evaluate_grains() which is a #GwyField method, may be sometimes
  * convenient.  Note, however, that evaluation of multiple grain values is
  * considerably more efficient using gwy_field_evaluate_grains(), especially if
- * the values are related because it ensures the common calculations are
- * performed only once.
+ * the values are related because this method ensures that common calculations
+ * are performed only once.
  **/
 void
 gwy_grain_value_evaluate(GwyGrainValue *grainvalue,
