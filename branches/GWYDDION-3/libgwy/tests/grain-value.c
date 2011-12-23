@@ -798,4 +798,45 @@ test_grain_value_evaluate_multiple(void)
     g_rand_free(rng);
 }
 
+static gdouble
+dumb_height(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble min, max;
+    gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &min, &max);
+    return max - min;
+}
+
+void
+test_grain_value_user(void)
+{
+    GwyInventory *usergrainvalues = gwy_user_grain_values();
+    g_assert(GWY_IS_INVENTORY(usergrainvalues));
+    if (gwy_inventory_get(usergrainvalues, "TESTLIBGWY Height"))
+        gwy_inventory_delete(usergrainvalues, "TESTLIBGWY Height");
+    GwyUserGrainValue *height = gwy_user_grain_value_new();
+    g_assert(GWY_IS_USER_GRAIN_VALUE(height));
+    GwyResource *resource = GWY_RESOURCE(height);
+    gwy_resource_set_name(resource, "TESTLIBGWY Height");
+    gwy_inventory_insert(usergrainvalues, height);
+    g_object_unref(height);
+    GError *error = NULL;
+    g_assert(gwy_user_grain_value_set_formula(height, "z_max-z_min", &error));
+    g_assert_no_error(error);
+    gwy_user_grain_value_set_group(height, "User");
+    gwy_user_grain_value_set_ident(height, "h_testlibgwy");
+    gwy_user_grain_value_set_symbol(height, "h<sub>testlibwgy</sub>");
+    gwy_user_grain_value_set_power_xy(height, 0);
+    gwy_user_grain_value_set_power_z(height, 1);
+    gwy_user_grain_value_set_is_angle(height, FALSE);
+    gwy_user_grain_value_set_same_units(height, FALSE);
+
+    test_one_value("TESTLIBGWY Height", "User", FALSE, &dumb_height, NULL);
+
+    GwyGrainValue *grainvalue = gwy_grain_value_new("TESTLIBGWY Height");
+    g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
+    GwyUserGrainValue *usergrainvalue = gwy_grain_value_get_resource(grainvalue);
+    g_assert(usergrainvalue == height);
+    g_object_unref(grainvalue);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
