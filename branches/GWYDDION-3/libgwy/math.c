@@ -1466,6 +1466,12 @@ jump_over:
  **/
 
 /**
+ * GWY_SQRT3:
+ *
+ * The square root of 3.
+ **/
+
+/**
  * gwycomplex:
  *
  * Shorthand for C99 <type>double complex</type> type.

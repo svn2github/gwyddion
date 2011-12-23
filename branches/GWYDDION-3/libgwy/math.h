@@ -25,6 +25,8 @@
 
 G_BEGIN_DECLS
 
+#define GWY_SQRT3 1.73205080756887729352744634150587236694280525381038
+
 typedef struct {
     gdouble x;
     gdouble y;
