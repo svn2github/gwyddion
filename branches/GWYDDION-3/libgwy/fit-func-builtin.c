@@ -23,15 +23,49 @@
 #include "libgwy/fit-func.h"
 #include "libgwy/fit-func-builtin.h"
 
+static const FitFuncParam const_param[] = {
+   { "a", 0, 1, },
+};
+
+static const FitFuncParam exp_param[] = {
+   { "y₀", 0, 1, },
+   { "a",  0, 1, },
+   { "b",  1, 0, },
+};
+
+static const FitFuncParam peak_param[] = {
+   { "x₀", 1, 0, },
+   { "y₀", 0, 1, },
+   { "a",  0, 1, },
+   { "b",  1, 0, },
+};
+
+static const FitFuncParam acf_param[] = {
+   { "σ", 0, 0, },
+   { "T", 1, 0, },
+};
+
+static const FitFuncParam step_param[] = {
+   { "x₀",  1, 0, },
+   { "y₀",  0, 1, },
+   { "a",   0, 1, },
+   { "β",   1, 0, },
+   { "c",  -1, 1, },
+};
+
+static const FitFuncParam bump_param[] = {
+   { "x₀",  1, 0, },
+   { "y₀",  0, 1, },
+   { "a",   0, 1, },
+   { "b",   1, 0, },
+   { "c",  -1, 1, },
+};
+
 /****************************************************************************
  *
  * Constant
  *
  ****************************************************************************/
-
-static const FitFuncParam const_param[] = {
-   { "a", 0, 1, },
-};
 
 static gboolean
 const_function(G_GNUC_UNUSED gdouble x,
@@ -66,12 +100,6 @@ static const BuiltinFitFunc const_builtin = {
  * Exponential
  *
  ****************************************************************************/
-
-static const FitFuncParam exp_param[] = {
-   { "y₀", 0, 1, },
-   { "a",  0, 1, },
-   { "b",  1, 0, },
-};
 
 static gboolean
 exp_function(gdouble x,
@@ -124,13 +152,6 @@ static const BuiltinFitFunc exp_builtin = {
  *
  ****************************************************************************/
 
-static const FitFuncParam peak_param[] = {
-   { "x₀", 1, 0, },
-   { "y₀", 0, 1, },
-   { "a",  0, 1, },
-   { "b",  1, 0, },
-};
-
 static gboolean
 two_exp_function(gdouble x,
                  const gdouble *param,
@@ -165,7 +186,7 @@ two_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
 
 static const BuiltinFitFunc two_exp_builtin = {
     .group = NC_("function group", "Elementary"),
-    .formula = "<i>y</i>₀ + <i>a</i> exp(-|<i>x</i> - <i>x</i>₀|/<i>b</i>)",
+    .formula = "<i>y</i>₀ + <i>a</i> exp(−|<i>x</i> − <i>x</i>₀|/<i>b</i>)",
     .nparams = G_N_ELEMENTS(peak_param),
     .param = peak_param,
     .function = two_exp_function,
@@ -259,7 +280,7 @@ lorentz_estimate(G_GNUC_UNUSED const GwyXY *pts,
 
 static const BuiltinFitFunc lorentz_builtin = {
     .group = NC_("function group", "Elementary"),
-    .formula = "<i>y</i>₀ + <i>ab</i>²/((<i>x</i> - <i>x</i>₀)² + <i>b</i>²)",
+    .formula = "<i>y</i>₀ + <i>ab</i>²/((<i>x</i> − <i>x</i>₀)² + <i>b</i>²)",
     .nparams = G_N_ELEMENTS(peak_param),
     .param = peak_param,
     .function = lorentz_function,
@@ -271,11 +292,6 @@ static const BuiltinFitFunc lorentz_builtin = {
  * ACF Exponential
  *
  ****************************************************************************/
-
-static const FitFuncParam acf_param[] = {
-   { "σ", 0, 0, },
-   { "T", 1, 0, },
-};
 
 static GwyUnit*
 acf_derive_units(guint param,
@@ -387,6 +403,182 @@ static const BuiltinFitFunc acf_gauss_builtin = {
 
 /****************************************************************************
  *
+ * Edge
+ *
+ ****************************************************************************/
+
+static gboolean
+step_function(gdouble x,
+              const gdouble *param,
+              gdouble *v)
+{
+    gdouble x0 = param[0], y0_ = param[1],
+            a = param[2], beta = fabs(param[3]), c = param[4],
+            u = x - x0;
+    if (u >= 0.5*beta)
+        *v = y0_ + 0.5*a + u*c;
+    else if (u <= -0.5*beta)
+        *v = y0_ - 0.5*a + u*c;
+    else
+        *v = y0_ + u*(a/beta + c);
+    return TRUE;
+}
+
+static gboolean
+step_estimate(const GwyXY *pts,
+              guint npoints,
+              const gdouble *estim,
+              gdouble *param)
+{
+    gdouble xmin = estim[ESTIMATOR_XMIN], xmax = estim[ESTIMATOR_XMAX];
+    gdouble yxmin = estim[ESTIMATOR_YXMIN], yxmax = estim[ESTIMATOR_YXMAX];
+    if (yxmin == yxmax || npoints < 5) {
+        param[0] = estim[ESTIMATOR_XMID];
+        param[1] = estim[ESTIMATOR_YMEAN];
+        param[2] = 0.0;
+        param[3] = 0.1*(xmax - xmin);
+        param[4] = 0.0;
+        return FALSE;
+    }
+
+    gdouble ymid = 0.5*(yxmin + yxmax), x = xmin, d = 0.5*fabs(yxmin - yxmax);
+    for (guint i = 1; i < npoints; i++) {
+        if (fabs(pts[i].y - ymid) < d) {
+            x = pts[i].x;
+            d = fabs(pts[i].y - ymid);
+        }
+    }
+
+    param[0] = x;
+    param[1] = ymid;
+    param[2] = yxmax - yxmin;
+    param[3] = 0.1*(xmax - xmin);
+    param[4] = 0.0;
+    return x > xmin && x < xmax;
+}
+
+static const BuiltinFitFunc step_builtin = {
+    .group = NC_("function group", "Profile"),
+    .formula = "<i>y</i>₀ + <i>a</i>(|<i>u</i> − <i>β</i>/2| − |<i>u</i> + <i>β</i>/2|)/<i>β</i> + <i>c</i><i>u</i>,\n"
+        "where <i>u</i> = <i>x</i> − <i>x</i>₀",
+    .nparams = G_N_ELEMENTS(step_param),
+    .param = step_param,
+    .function = step_function,
+    .estimate = step_estimate,
+};
+
+/****************************************************************************
+ *
+ * Parabolic bump
+ *
+ ****************************************************************************/
+
+static gboolean
+parabolic_bump_function(gdouble x,
+                        const gdouble *param,
+                        gdouble *v)
+{
+    gdouble x0 = param[0], y0_ = param[1],
+            a = param[2], b = 0.5*fabs(param[3]), c = param[4],
+            u = x - x0;
+    if (fabs(u) >= b)
+        *v = y0_ + u*c;
+    else
+        *v = y0_ + u*c + a*(1.0 - u*u/(b*b));
+    return b != 0.0;
+}
+
+static gboolean
+parabolic_bump_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                        G_GNUC_UNUSED guint npoints,
+                        const gdouble *estim,
+                        gdouble *param)
+{
+    if (!estim[ESTIMATOR_HWPEAK]) {
+        param[0] = estim[ESTIMATOR_XMID];
+        param[1] = estim[ESTIMATOR_YMIN];
+        param[2] = 0.0;
+        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[4] = 0.0;
+        return FALSE;
+    }
+
+    param[0] = estim[ESTIMATOR_XPEAK];
+    param[1] = estim[ESTIMATOR_Y0PEAK];
+    param[2] = estim[ESTIMATOR_APEAK];
+    param[3] = 2.0*G_SQRT2*estim[ESTIMATOR_HWPEAK];
+    param[4] = (estim[ESTIMATOR_YXMAX] - estim[ESTIMATOR_YXMIN])
+               /(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
+    return TRUE;
+}
+
+static const BuiltinFitFunc parabolic_bump_builtin = {
+    .group = NC_("function group", "Profile"),
+    .formula = "<i>y</i>₀ + <i>a</i> max(0, 1 − 4<i>u</i>²/<i>b</i>²) + <i>c</i><i>u</i>,\n"
+        "where <i>u</i> = <i>x</i> − <i>x</i>₀",
+    .nparams = G_N_ELEMENTS(bump_param),
+    .param = bump_param,
+    .function = parabolic_bump_function,
+    .estimate = parabolic_bump_estimate,
+};
+
+/****************************************************************************
+ *
+ * Elliptic bump
+ *
+ ****************************************************************************/
+
+static gboolean
+elliptic_bump_function(gdouble x,
+                       const gdouble *param,
+                       gdouble *v)
+{
+    gdouble x0 = param[0], y0_ = param[1],
+            a = param[2], b = 0.5*fabs(param[3]), c = param[4],
+            u = x - x0;
+    if (fabs(u) >= b)
+        *v = y0_ + u*c;
+    else
+        *v = y0_ + u*c + a*sqrt(fmax(0.0, 1.0 - u*u/(b*b)));
+    return b != 0.0;
+}
+
+static gboolean
+elliptic_bump_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                       G_GNUC_UNUSED guint npoints,
+                       const gdouble *estim,
+                       gdouble *param)
+{
+    if (!estim[ESTIMATOR_HWPEAK]) {
+        param[0] = estim[ESTIMATOR_XMID];
+        param[1] = estim[ESTIMATOR_YMIN];
+        param[2] = 0.0;
+        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[4] = 0.0;
+        return FALSE;
+    }
+
+    param[0] = estim[ESTIMATOR_XPEAK];
+    param[1] = estim[ESTIMATOR_Y0PEAK];
+    param[2] = estim[ESTIMATOR_APEAK];
+    param[3] = 4.0/GWY_SQRT3*estim[ESTIMATOR_HWPEAK];
+    param[4] = (estim[ESTIMATOR_YXMAX] - estim[ESTIMATOR_YXMIN])
+               /(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
+    return TRUE;
+}
+
+static const BuiltinFitFunc elliptic_bump_builtin = {
+    .group = NC_("function group", "Profile"),
+    .formula = "<i>y</i>₀ + <i>a</i> sqrt(max(0, 1 − 4<i>u</i>²/<i>b</i>²)) + <i>c</i><i>u</i>,\n"
+        "where <i>u</i> = <i>x</i> − <i>x</i>₀",
+    .nparams = G_N_ELEMENTS(bump_param),
+    .param = bump_param,
+    .function = elliptic_bump_function,
+    .estimate = elliptic_bump_estimate,
+};
+
+/****************************************************************************
+ *
  * Main
  *
  ****************************************************************************/
@@ -405,6 +597,9 @@ _gwy_fit_func_setup_builtins(BuiltinFitFuncTable *builtins)
     add_builtin(NC_("function", "Lorentzian"), lorentz_builtin);
     add_builtin(NC_("function", "ACF Exponential"), acf_exp_builtin);
     add_builtin(NC_("function", "ACF Gaussian"), acf_gauss_builtin);
+    add_builtin(NC_("function", "Step"), step_builtin);
+    add_builtin(NC_("function", "Parabolic bump"), parabolic_bump_builtin);
+    add_builtin(NC_("function", "Elliptic bump"), elliptic_bump_builtin);
     builtins->n = g_hash_table_size(builtins->table);
     builtins->names = g_new(const gchar*, builtins->n + 1);
     GHashTableIter iter;
