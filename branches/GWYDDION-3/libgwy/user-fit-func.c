@@ -874,7 +874,7 @@ gwy_user_fit_func_error_quark(void)
  *     <listitem>Maximum ordinate (@y) value.</listitem>
  *   </varlistentry>
  *   <varlistentry>
- *     <term>@xmean</term>
+ *     <term>@ymean</term>
  *     <listitem>Average ordinate (@y) value.</listitem>
  *   </varlistentry>
  *   <varlistentry>
