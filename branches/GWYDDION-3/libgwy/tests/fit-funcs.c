@@ -83,7 +83,11 @@ fit_func_one(const gchar *name,
         // Be very conservative with parameters as they can be exponents of
         // Gaussians and such.  Only use positive values, these are usually
         // safe.
-        param0[i] = g_rand_double_range(rng, 0.2, 5.0);
+        if (gwy_strequal(group, "Profile")
+            && gwy_strequal(gwy_fit_func_param_name(fitfunc, i), "c"))
+            param0[i] = g_rand_double_range(rng, -0.3, 0.3);
+        else
+            param0[i] = g_rand_double_range(rng, 0.2, 5.0);
         if (g_test_verbose())
             g_printerr("True value %s = %g\n",
                        gwy_fit_func_param_name(fitfunc, i), param0[i]);
@@ -97,6 +101,7 @@ fit_func_one(const gchar *name,
         pt->x = g_rand_double_range(rng, 0.1, 10.0);
         gboolean evaluate_ok = gwy_fit_func_evaluate(fitfunc, pt->x, param0,
                                                      &pt->y);
+        //g_print("%g %g\n", pt->x, pt->y);
         g_assert(evaluate_ok);
     }
 
@@ -147,7 +152,7 @@ fit_func_one(const gchar *name,
 
     /* Error estimate check */
     gdouble error[nparams];
-    eps = 1.0;
+    eps = 1.5;
     g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
     if (g_test_verbose()) {
         for (guint i = 0; i < nparams; i++)
@@ -243,6 +248,33 @@ test_fit_func_builtin_acf_exponential(void)
     const gchar *param_units[] = { "s", "m" };
     fit_func_one("ACF Exponential", "Autocorrelation",
                  G_N_ELEMENTS(param_names), param_names, param_units, 2);
+}
+
+void
+test_fit_func_builtin_step(void)
+{
+    const gchar *param_names[] = { "a", "β", "c", "x₀", "y₀" };
+    const gchar *param_units[] = { "s", "m", "s/m", "m", "s" };
+    fit_func_one("Step", "Profile",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+}
+
+void
+test_fit_func_builtin_parabolic_bump(void)
+{
+    const gchar *param_names[] = { "a", "b", "c", "x₀", "y₀" };
+    const gchar *param_units[] = { "s", "m", "s/m", "m", "s" };
+    fit_func_one("Parabolic bump", "Profile",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+}
+
+void
+test_fit_func_builtin_elliptic_bump(void)
+{
+    const gchar *param_names[] = { "a", "b", "c", "x₀", "y₀" };
+    const gchar *param_units[] = { "s", "m", "s/m", "m", "s" };
+    fit_func_one("Elliptic bump", "Profile",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
 }
 
 void
