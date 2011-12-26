@@ -40,7 +40,7 @@ static const FitFuncParam peak_param[] = {
    { "b",  1, 0, },
 };
 
-static const FitFuncParam acf_param[] = {
+static const FitFuncParam roughness_param[] = {
    { "σ", 0, 0, },
    { "T", 1, 0, },
 };
@@ -121,7 +121,7 @@ exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
     if (ymin == ymax) {
         param[0] = 0.0;
         param[1] = ymin;
-        param[2] = 10*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[2] = 10*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
@@ -173,7 +173,7 @@ two_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
         param[0] = estim[ESTIMATOR_XMID];
         param[1] = estim[ESTIMATOR_YMIN];
         param[2] = 0.0;
-        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[3] = 3*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
@@ -220,7 +220,7 @@ gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
         param[0] = estim[ESTIMATOR_XMID];
         param[1] = estim[ESTIMATOR_YMIN];
         param[2] = 0.0;
-        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[3] = 3*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
@@ -267,7 +267,7 @@ lorentz_estimate(G_GNUC_UNUSED const GwyXY *pts,
         param[0] = estim[ESTIMATOR_XMID];
         param[1] = estim[ESTIMATOR_YMIN];
         param[2] = 0.0;
-        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[3] = 3*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
@@ -322,32 +322,29 @@ acf_exp_function(gdouble x,
 }
 
 static gboolean
-acf_exp_estimate(const GwyXY *pts,
-                 guint npoints,
+acf_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                 G_GNUC_UNUSED guint npoints,
                  const gdouble *estim,
                  gdouble *param)
 {
-    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN];
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN],
+            s = estim[ESTIMATOR_INTEGR];
     if (ymax <= 0.0) {
         param[0] = ymax - ymin;
-        param[1] = 0.1*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[1] = 0.1*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
-    gdouble s = 0.5*pts[0].x*pts[0].y/ymax;
-    for (guint i = 1; i+1 < npoints; i++)
-        s += (pts[i+1].x - pts[i-1].x)*pts[i].y/ymax;
-
-    param[0] = ymax;
-    param[1] = s;
+    param[0] = sqrt(ymax);
+    param[1] = s/ymax;
     return s > 0.0;
 }
 
 static const BuiltinFitFunc acf_exp_builtin = {
     .group = NC_("function group", "Autocorrelation"),
     .formula = "<i>σ</i>² exp(<i>x</i>/<i>T</i>)",
-    .nparams = G_N_ELEMENTS(acf_param),
-    .param = acf_param,
+    .nparams = G_N_ELEMENTS(roughness_param),
+    .param = roughness_param,
     .function = acf_exp_function,
     .estimate = acf_exp_estimate,
     .derive_units = acf_derive_units,
@@ -370,35 +367,142 @@ acf_gauss_function(gdouble x,
 }
 
 static gboolean
-acf_gauss_estimate(const GwyXY *pts,
-                   guint npoints,
+acf_gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                   G_GNUC_UNUSED guint npoints,
                    const gdouble *estim,
                    gdouble *param)
 {
-    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN];
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN],
+            s = estim[ESTIMATOR_INTEGR];
     if (ymax <= 0.0) {
         param[0] = ymax - ymin;
-        param[1] = 0.1*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[1] = 0.1*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
-    gdouble s = 0.5*pts[0].x*pts[0].y/ymax;
-    for (guint i = 1; i+1 < npoints; i++)
-        s += (pts[i+1].x - pts[i-1].x)*pts[i].y/ymax;
-
-    param[0] = ymax;
-    param[1] = 0.8*s;
+    param[0] = sqrt(ymax);
+    param[1] = 0.8*s/ymax;
     return s > 0.0;
 }
 
 static const BuiltinFitFunc acf_gauss_builtin = {
     .group = NC_("function group", "Autocorrelation"),
-    .formula = "<i>σ</i>² exp(−<i>x</i>²/<i>b</i>²)",
-    .nparams = G_N_ELEMENTS(acf_param),
-    .param = acf_param,
+    .formula = "<i>σ</i>² exp(−<i>x</i>²/<i>T</i>²)",
+    .nparams = G_N_ELEMENTS(roughness_param),
+    .param = roughness_param,
     .function = acf_gauss_function,
     .estimate = acf_gauss_estimate,
     .derive_units = acf_derive_units,
+};
+
+/****************************************************************************
+ *
+ * PSDF Exponential
+ *
+ ****************************************************************************/
+
+static GwyUnit*
+psdf_derive_units(guint param,
+                  const GwyUnit *unit_x,
+                  const GwyUnit *unit_y)
+{
+    GwyUnit *unit = gwy_unit_new();
+
+    if (param == 0) {
+        gwy_unit_multiply(unit, unit_x, unit_y);
+        gwy_unit_nth_root(unit, unit, 2);
+    }
+    else if (param == 1)
+        gwy_unit_power(unit, unit_x, -1);
+    else {
+        g_assert_not_reached();
+    }
+
+    return unit;
+}
+
+static gboolean
+psdf_exp_function(gdouble x,
+                  const gdouble *param,
+                  gdouble *v)
+{
+    gdouble sigma = param[0], T = param[1], u = x*T;
+    *v = sigma*sigma*T/G_PI/(1.0 + u*u);
+    return T != 0;
+}
+
+static gboolean
+psdf_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                  G_GNUC_UNUSED guint npoints,
+                  const gdouble *estim,
+                  gdouble *param)
+{
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN],
+            s = estim[ESTIMATOR_INTEGR];
+    if (ymax <= 0.0 || s <= 0.0) {
+        param[1] = 10.0/(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
+        param[0] = sqrt((ymax - ymin)/param[1]);
+        return FALSE;
+    }
+
+    param[0] = sqrt(2.0*s);
+    param[1] = G_PI*ymax/(2.0*s);
+    return s > 0.0;
+}
+
+static const BuiltinFitFunc psdf_exp_builtin = {
+    .group = NC_("function group", "Power Spectrum"),
+    .formula = "<i>σ</i>²<i>T</i>/π 1/(1 + <i>x</i>²<i>T</i>²)",
+    .nparams = G_N_ELEMENTS(roughness_param),
+    .param = roughness_param,
+    .function = psdf_exp_function,
+    .estimate = psdf_exp_estimate,
+    .derive_units = psdf_derive_units,
+};
+
+/****************************************************************************
+ *
+ * PSDF Gaussian
+ *
+ ****************************************************************************/
+
+static gboolean
+psdf_gauss_function(gdouble x,
+                    const gdouble *param,
+                    gdouble *v)
+{
+    gdouble sigma = param[0], T_2 = 0.5*param[1], u = x*T_2;
+    *v = sigma*sigma*T_2/GWY_SQRT_PI*exp(-u*u);
+    return T_2 != 0;
+}
+
+static gboolean
+psdf_gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                    G_GNUC_UNUSED guint npoints,
+                    const gdouble *estim,
+                    gdouble *param)
+{
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN],
+            s = estim[ESTIMATOR_INTEGR];
+    if (ymax <= 0.0 || s <= 0.0) {
+        param[1] = 10.0/(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
+        param[0] = sqrt((ymax - ymin)/param[1]);
+        return FALSE;
+    }
+
+    param[0] = sqrt(2.0*s);
+    param[1] = GWY_SQRT_PI*ymax/s;
+    return TRUE;
+}
+
+static const BuiltinFitFunc psdf_gauss_builtin = {
+    .group = NC_("function group", "Power Spectrum"),
+    .formula = "<i>σ</i>²<i>T</i>/2√π exp(−<i>x</i>²<i>T</i>²/4)",
+    .nparams = G_N_ELEMENTS(roughness_param),
+    .param = roughness_param,
+    .function = psdf_gauss_function,
+    .estimate = psdf_gauss_estimate,
+    .derive_units = psdf_derive_units,
 };
 
 /****************************************************************************
@@ -498,7 +602,7 @@ parabolic_bump_estimate(G_GNUC_UNUSED const GwyXY *pts,
         param[0] = estim[ESTIMATOR_XMID];
         param[1] = estim[ESTIMATOR_YMIN];
         param[2] = 0.0;
-        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[3] = 3*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         param[4] = 0.0;
         return FALSE;
     }
@@ -553,7 +657,7 @@ elliptic_bump_estimate(G_GNUC_UNUSED const GwyXY *pts,
         param[0] = estim[ESTIMATOR_XMID];
         param[1] = estim[ESTIMATOR_YMIN];
         param[2] = 0.0;
-        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        param[3] = 3*(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
         param[4] = 0.0;
         return FALSE;
     }
@@ -597,6 +701,8 @@ _gwy_fit_func_setup_builtins(BuiltinFitFuncTable *builtins)
     add_builtin(NC_("function", "Lorentzian"), lorentz_builtin);
     add_builtin(NC_("function", "ACF Exponential"), acf_exp_builtin);
     add_builtin(NC_("function", "ACF Gaussian"), acf_gauss_builtin);
+    add_builtin(NC_("function", "PSDF Exponential"), psdf_exp_builtin);
+    add_builtin(NC_("function", "PSDF Gaussian"), psdf_gauss_builtin);
     add_builtin(NC_("function", "Step"), step_builtin);
     add_builtin(NC_("function", "Parabolic bump"), parabolic_bump_builtin);
     add_builtin(NC_("function", "Elliptic bump"), elliptic_bump_builtin);
