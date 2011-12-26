@@ -923,6 +923,10 @@ gwy_user_fit_func_error_quark(void)
  *     <listitem>Peak background value (@y).  It is usually equal to @ymin for
  *               upward peaks and to @ymax for downward peak.</listitem>
  *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@integr</term>
+ *     <listitem>Integral, estimated using the trapezoidal rule.</listitem>
+ *   </varlistentry>
  * </variablelist>
  *
  * Since the data fitted in different situations can differ by many orders of

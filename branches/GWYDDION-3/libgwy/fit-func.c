@@ -92,6 +92,7 @@ static const gchar* const estimators[N_ESTIMATORS] = {
     "yxmin", "yxmid", "yxmax",
     "xymax", "xymin",
     "xpeak", "apeak", "hwpeak", "y0peak",
+    "integr",
 };
 
 static GObjectClass *parent_class = NULL;
@@ -573,15 +574,20 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
 static void
 evaluate_estimators(FitFunc *priv, gdouble *estim)
 {
+    const GwyXY *pts = priv->points;
+    guint n = priv->npoints;
+
     estim[ESTIMATOR_XMIN]
         = estim[ESTIMATOR_XMAX]
         = estim[ESTIMATOR_XMID]
         = estim[ESTIMATOR_XYMIN]
         = estim[ESTIMATOR_XYMAX]
         = estim[ESTIMATOR_XPEAK]
-        = priv->points[0].x;
+        = pts[0].x;
 
-    estim[ESTIMATOR_HWPEAK] = 0.0;
+    estim[ESTIMATOR_HWPEAK]
+        = estim[ESTIMATOR_INTEGR]
+        = 0.0;
 
     estim[ESTIMATOR_YMIN]
         = estim[ESTIMATOR_YMAX]
@@ -591,10 +597,10 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
         = estim[ESTIMATOR_YXMAX]
         = estim[ESTIMATOR_APEAK]
         = estim[ESTIMATOR_Y0PEAK]
-        = priv->points[0].y;
+        = pts[0].y;
 
-    for (guint i = 1; i < priv->npoints; i++) {
-        gdouble x = priv->points[i].x, y = priv->points[i].y;
+    for (guint i = 1; i < n; i++) {
+        gdouble x = pts[i].x, y = pts[i].y;
         if (x < estim[ESTIMATOR_XMIN]) {
             estim[ESTIMATOR_XMIN] = x;
             estim[ESTIMATOR_YXMIN] = y;
@@ -613,13 +619,22 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
         }
         estim[ESTIMATOR_YMEAN] += y;
     }
-    estim[ESTIMATOR_YMEAN] /= priv->npoints;
+    estim[ESTIMATOR_YMEAN] /= n;
+
+    // Integral.
+    if (n >= 2) {
+        estim[ESTIMATOR_INTEGR] += (pts[1].x - pts[0].x)*pts[0].y;
+        for (guint i = 1; i+1 < n; i++)
+            estim[ESTIMATOR_INTEGR] += (pts[i+1].x - pts[i-1].x)*pts[i].y;
+        estim[ESTIMATOR_INTEGR] += (pts[n-1].x - pts[n-2].x)*pts[n-1].y;
+        estim[ESTIMATOR_INTEGR] *= 0.5;
+    }
 
     // The middle point
     gdouble xmid = (estim[ESTIMATOR_XMIN] + estim[ESTIMATOR_XMAX])/2;
     gdouble mindist = fabs(estim[ESTIMATOR_XMID] - xmid);
-    for (guint i = 1; i < priv->npoints; i++) {
-        gdouble x = priv->points[i].x, y = priv->points[i].y;
+    for (guint i = 1; i < n; i++) {
+        gdouble x = pts[i].x, y = pts[i].y;
         if (fabs(x - xmid) < mindist) {
             estim[ESTIMATOR_XMID] = x;
             estim[ESTIMATOR_YXMID] = y;
@@ -631,8 +646,8 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
     gdouble xymax2l = estim[ESTIMATOR_XMIN], xymax2r = estim[ESTIMATOR_XMAX],
             xymin2l = estim[ESTIMATOR_XMIN], xymin2r = estim[ESTIMATOR_XMAX];
     gdouble h = 0.5*(estim[ESTIMATOR_YMIN] + estim[ESTIMATOR_YMAX]);
-    for (guint i = 0; i < priv->npoints; i++) {
-        gdouble x = priv->points[i].x, y = priv->points[i].y;
+    for (guint i = 0; i < n; i++) {
+        gdouble x = pts[i].x, y = pts[i].y;
         if (y <= h && x < estim[ESTIMATOR_XYMAX] && x > xymax2l)
             xymax2l = x;
         if (y <= h && x > estim[ESTIMATOR_XYMAX] && x < xymax2r)
