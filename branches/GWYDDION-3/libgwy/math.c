@@ -1472,6 +1472,12 @@ jump_over:
  **/
 
 /**
+ * GWY_SQRT_PI:
+ *
+ * The square root of π.
+ **/
+
+/**
  * gwycomplex:
  *
  * Shorthand for C99 <type>double complex</type> type.
