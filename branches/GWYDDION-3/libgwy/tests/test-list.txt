@@ -382,6 +382,8 @@ fit-func/builtin/gaussian
 fit-func/builtin/lorentzian
 fit-func/builtin/acf-gaussian
 fit-func/builtin/acf-exponential
+fit-func/builtin/psdf-gaussian
+fit-func/builtin/psdf-exponential
 fit-func/builtin/step
 fit-func/builtin/parabolic-bump
 fit-func/builtin/elliptic-bump

@@ -25,16 +25,18 @@
  *
  ***************************************************************************/
 
-// Note for units testing we put [x] = [m], [y] = [s]^ypower.  The power is
-// present because the natural parametres of some functions (ACF, HHCF) are
-// expressed using roots of y-units.  Pass ypower=1 for common functions.
+// Note for units testing we put [x] = [m], [y] = [s]^ypower * [m]^yxpower.
+// The power is present because the natural parametres of some functions (ACF,
+// HHCF) are expressed using roots of y-units and the values of others (PSDF)
+// are mixed powers of parametres.  Pass ypower=1, yxpower=0 for common
+// functions.
 static void
 fit_func_one(const gchar *name,
              const gchar *group,
              guint expected_nparams,
              const gchar* const *param_names,
              const gchar* const *param_units,
-             gint ypower)
+             gint ypower, gint yxpower)
 {
     enum { ndata = 500 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -167,7 +169,7 @@ fit_func_one(const gchar *name,
     /* Units */
     GwyUnit *unit_x = gwy_unit_new_from_string("m", NULL);
     GwyUnit *unit_y = gwy_unit_new_from_string("s", NULL);
-    gwy_unit_power(unit_y, unit_y, ypower);
+    gwy_unit_power_multiply(unit_y, unit_y, ypower, unit_x, yxpower);
 
     for (guint i = 0; i < nparams; i++) {
         guint j = param_map[i];
@@ -193,7 +195,7 @@ test_fit_func_builtin_constant(void)
     const gchar *param_names[] = { "a" };
     const gchar *param_units[] = { "s" };
     fit_func_one("Constant", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -202,7 +204,7 @@ test_fit_func_builtin_exponential(void)
     const gchar *param_names[] = { "a", "b", "y₀" };
     const gchar *param_units[] = { "s", "m", "s" };
     fit_func_one("Exponential", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -211,7 +213,7 @@ test_fit_func_builtin_gaussian(void)
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Gaussian", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -220,7 +222,7 @@ test_fit_func_builtin_exponential_two_side(void)
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Exponential (two-side)", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -229,7 +231,7 @@ test_fit_func_builtin_lorentzian(void)
     const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "m", "s" };
     fit_func_one("Lorentzian", "Elementary",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -238,7 +240,7 @@ test_fit_func_builtin_acf_gaussian(void)
     const gchar *param_names[] = { "σ", "T" };
     const gchar *param_units[] = { "s", "m" };
     fit_func_one("ACF Gaussian", "Autocorrelation",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 2);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2, 0);
 }
 
 void
@@ -247,7 +249,25 @@ test_fit_func_builtin_acf_exponential(void)
     const gchar *param_names[] = { "σ", "T" };
     const gchar *param_units[] = { "s", "m" };
     fit_func_one("ACF Exponential", "Autocorrelation",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 2);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2, 0);
+}
+
+void
+test_fit_func_builtin_psdf_gaussian(void)
+{
+    const gchar *param_names[] = { "σ", "T" };
+    const gchar *param_units[] = { "s", "m^-1" };
+    fit_func_one("PSDF Gaussian", "Power Spectrum",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2, -1);
+}
+
+void
+test_fit_func_builtin_psdf_exponential(void)
+{
+    const gchar *param_names[] = { "σ", "T" };
+    const gchar *param_units[] = { "s", "m^-1" };
+    fit_func_one("PSDF Exponential", "Power Spectrum",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2, -1);
 }
 
 void
@@ -256,7 +276,7 @@ test_fit_func_builtin_step(void)
     const gchar *param_names[] = { "a", "β", "c", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "s/m", "m", "s" };
     fit_func_one("Step", "Profile",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -265,7 +285,7 @@ test_fit_func_builtin_parabolic_bump(void)
     const gchar *param_names[] = { "a", "b", "c", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "s/m", "m", "s" };
     fit_func_one("Parabolic bump", "Profile",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -274,7 +294,7 @@ test_fit_func_builtin_elliptic_bump(void)
     const gchar *param_names[] = { "a", "b", "c", "x₀", "y₀" };
     const gchar *param_units[] = { "s", "m", "s/m", "m", "s" };
     fit_func_one("Elliptic bump", "Profile",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 }
 
 void
@@ -305,7 +325,7 @@ test_fit_func_user(void)
     gwy_fit_param_set_power_x(b, -1);
     gwy_fit_param_set_power_y(b, 1);
     fit_func_one("TESTLIBGWY Linear", "User",
-                 G_N_ELEMENTS(param_names), param_names, param_units, 1);
+                 G_N_ELEMENTS(param_names), param_names, param_units, 1, 0);
 
     GwyFitFunc *fitfunc = gwy_fit_func_new("TESTLIBGWY Linear");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
