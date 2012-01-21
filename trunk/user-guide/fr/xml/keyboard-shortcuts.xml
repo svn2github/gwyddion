@@ -226,5 +226,50 @@
       </tbody>
     </tgroup>
   </informaltable>
+  <para>
+    Vous pouvez appliquer vos propre raccourcis clavier pour toutes les
+    fonctions des menus, et il est aussi possible de lancer les outils à partir
+    du clavier.
+  </para>
+  <para>
+    Pour modifier un raccourci clavier, il suffit de sélectionner un élément du
+    menu avec la souris ou les touches de navigation et presser la combinaison
+    de touches qui sera alors immédiatement assignée. Le raccourci doit être
+    soit une touche spéciale, par exemple <keycap>F3</keycap>, ou une
+    combinaison de touches incluant une touche modificatrice, par exemple
+    <keycap>Ctrl-Maj-D</keycap>. Il n'est pas possible d'assigner une simple
+    touche telle que <keycap>Q</keycap>.
+  </para>
+  <para>
+    Pour éviter de modifier par inadvertance les raccourcis, ceux-ci ne peuvent
+    être changés que si l'entrée
+    <menuchoice>
+      <guimenu>Editer</guimenu>
+      <guimenuitem>Raccourcis clavier</guimenuitem>
+    </menuchoice>
+    est activée. Les modifications sont désactivées par défaut, ce qui est
+    recommandé pendant l'usage normale.
+  </para>
+  <para>
+    Tous les raccourcis clavier sont enregistrés dans le fichier
+    <filename>ui/accel_map</filename> dans le répertoire utilisateur,
+    c'est-à-dire <filename>~/.gwyddion</filename> (Unix) ou
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+    L'assignation de raccourcis aux outils ne peut se faire qu'en éditant ce
+    fichier. Chaque ligne correspond à une action pouvant être lancée par un
+    raccourci. Par exemple, la ligne de l'outil d'édition de masque est par
+    défaut :
+    <informalexample>
+      <programlisting>; (gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "")</programlisting>
+    </informalexample>
+    Les points-virgules représentent des commentaires, i.e. les lignes
+    commençant par un point-virgule sont inactives. Ainsi pour assigner la
+    combinaison <keycap>Ctrl-Maj-E</keycap> à l'outil d'édition de masque, il
+    faut supprimer le point-virgule pour activer la ligne et ajouter le
+    raccourci dans les guillemets vides:
+    <informalexample>
+      <programlisting>(gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "&lt;Control&gt;&lt;Shift&gt;e")</programlisting>
+    </informalexample>
+  </para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
