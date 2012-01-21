@@ -25,8 +25,8 @@
         Si vous connaissez l'exercice :
       </para>
       <informalexample>
-        <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2
-cd gwyddion-2.23
+        <literallayout><userinput>tar -jxvf gwyddion-2.26.tar.xz
+cd gwyddion-2.26
 ./configure
 make install</userinput></literallayout>
       </informalexample>
@@ -36,24 +36,24 @@ make install</userinput></literallayout>
       <para>
         Dépaqueter les archives du code source avec
         <informalexample>
-          <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2</userinput></literallayout>
+          <literallayout><userinput>tar -jxvf gwyddion-2.26.tar.xz</userinput></literallayout>
         </informalexample>
-        en remplaçant 2.23 par le numéro de version actuel. Cette commande
-        créera le dossier <filename>gwyddion-2.23</filename> (là encore avec
-        le numéro de version actuel en lieu et place de 2.23),
+        en remplaçant 2.26 par le numéro de version actuel. Cette commande
+        créera le dossier <filename>gwyddion-2.26</filename> (là encore avec
+        le numéro de version actuel en lieu et place de 2.26),
         <command>cd</command> vers ce dossier.
         Toutes les autres étapes de la compilation se dérouleront à cet endroit.
       </para>
       <para>
         Si votre système d'exploitation ne possède pas bzip2 vous pouvez
-        télécharger <filename>gwyddion-2.23.tar.gz</filename> (compressé avec
+        télécharger <filename>gwyddion-2.26.tar.gz</filename> (compressé avec
         gzip) à la place et dépaqueter avec
         <informalexample>
-          <userinput>tar -zxvf gwyddion-2.23.tar.gz</userinput>
+          <userinput>tar -zxvf gwyddion-2.26.tar.gz</userinput>
         </informalexample>
         Cependant, les systèmes Unix ou basés sur Unix récents possèdent à la
         fois bzip2 et gzip, étant donnée sa taille plus petite,
-        <filename>gwyddion-2.23.tar.bz2</filename> devrait être logiquement
+        <filename>gwyddion-2.26.tar.xz</filename> devrait être logiquement
         préféré.
       </para>
     </sect2>
@@ -78,8 +78,8 @@ make install</userinput></literallayout>
         <filename>config.log</filename>. Ce fichier contient les détails du
         processus de détection, qu'il est utile d'include dans les rapports de
         bug liés à la compilation.
-        <command>configure</command> affiche finalement un résumé des 
-        fonctionnalités optionnelles activées ou désactivées, en précisant les 
+        <command>configure</command> affiche finalement un résumé des
+        fonctionnalités optionnelles activées ou désactivées, en précisant les
         raisons pour lesquelles certaines fonctionnalités ont été désactivées.
     </para>
     <para>
@@ -191,7 +191,7 @@ export LDFLAGS</userinput></literallayout>
         <command>configure</command>.
     </para>
     <para>
-      La liste complète des options de <command>configure</command> et des 
+      La liste complète des options de <command>configure</command> et des
       variables importantes peut être obtenues avec :
       <informalexample>
         <literallayout><userinput>./configure --help</userinput></literallayout>
@@ -213,11 +213,11 @@ export LDFLAGS</userinput></literallayout>
         et n'ont donc pas à être désactivées dans <command>configure</command>.
     </para>
     <para>
-      Si vous souhaiter créer un patch ou modifier d'une manière ou d'une autre 
-      le code source de Gwyddion, passez l'option 
+      Si vous souhaiter créer un patch ou modifier d'une manière ou d'une autre
+      le code source de Gwyddion, passez l'option
       <option>--enable-maintainer-mode</option> à <command>configure</command>
       pour activer diverses mises à jour et recompiler les règles non utilisées
-      dans la compilation de base. En fonction de la nature des modifications, 
+      dans la compilation de base. En fonction de la nature des modifications,
       certains des outils supplémentaires décrits dans la section
       <link linkend='installation-devel'>Subversion, Développement</link>
       peuvent être nécessaires.
@@ -294,7 +294,7 @@ export LDFLAGS</userinput></literallayout>
     <para>
       Si vous installez Gwyddion dans <filename>/usr/local</filename> et obtenez
       le message comme quoi <filename>libgwyapp.so.0</filename> ne peut être
-      trouvé, il y a de fortes chances que votre système ne possède pas certains 
+      trouvé, il y a de fortes chances que votre système ne possède pas certains
       répertoires de librairies standards dans la configuration de l'éditeur de
       liens dynamiques. Cela arrive par exmple sous Ubuntu. Editez le fichier
       <filename>/etc/ld.so.conf</filename> et ajoutez-y la ligne suivante :
@@ -345,9 +345,9 @@ export LDFLAGS</userinput></literallayout>
         GNU/Linux basées sur RPM directement à partir des archives du code
         source grâce à la commande
         <informalexample>
-          <literallayout><userinput>rpmbuild -tb gwyddion-2.23.tar.bz2</userinput></literallayout>
+          <literallayout><userinput>rpmbuild -tb gwyddion-2.26.tar.xz</userinput></literallayout>
         </informalexample>,
-        où 2.23 doit être remplacé par le numéro de version actuel. Cette
+        où 2.26 doit être remplacé par le numéro de version actuel. Cette
         méthode a été testée sur Fedora, openSuSE et Mandriva, et le fichier de
         spécifications RPM contient certaines informations pour ces systèmes. Un
         support spécifique à d'autres systèmes basés sur RPM peut être ajouté
