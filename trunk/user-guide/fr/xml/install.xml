@@ -5,18 +5,18 @@
 <chapter id='installation' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Installation</title>
   <para>
-    Le code source de <application>Gwyddion</application> et les paquets 
+    Le code source de <application>Gwyddion</application> et les paquets
     binaires peuvent être téléchargés à partir de la
     <ulink url='http://gwyddion.net/download.php'>page internet de téléchargement</ulink>
-    du projet, ou à partir de la 
+    du projet, ou à partir de la
     <ulink url='http://sourceforge.net/projects/gwyddion/files/'>page de téléchargement SourceForge.net</ulink>.
-    L'installation varie légèrement selon le système d'exploitation utilisé et 
+    L'installation varie légèrement selon le système d'exploitation utilisé et
     les différentes méthodes d'installation seront décrites dans les sections
     qui suivent.
   </para>
   <para>
-    Gwyddion nécessite ou peut utiliser différentes librairies logicielles, 
-    décrites dans la section 
+    Gwyddion nécessite ou peut utiliser différentes librairies logicielles,
+    décrites dans la section
     <link linkend='installation-dependencies'>Dépendances de compilation</link>.
     Si vous installez des paquets binaires précompilés vous n'avez normalement
     pas besoin de vous occuper des composants nécessaires car le créateur des
@@ -28,7 +28,7 @@
     Pour démarrer avec Gwyddion vous pouvez aussi télécharger les
     <ulink url='http://gwyddion.net/download.php#sample-files'>fichers d'exemple
       <application>Gwyddion</application> </ulink>.
-    Ils sont donnés au format <application>Gwyddion</application> natif et 
+    Ils sont donnés au format <application>Gwyddion</application> natif et
     représentent des données AFM typiques.
   </para>
 
@@ -38,7 +38,6 @@
   <xi:include href='installation-unix-source.xml'/>
   <xi:include href='installation-osx.xml'/>
   <xi:include href='installation-cross-mingw32.xml'/>
-  <xi:include href='installation-ms-windows-source.xml'/>
   <xi:include href='installation-devel.xml'/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
