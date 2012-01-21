@@ -14,7 +14,7 @@
     la fin de ce chapitre, comme l'import de fichiers bruts ou le contrôle
     à distance, peuvent être considérés comme avancés et inutiles pour un usage
     habituel. Comme son nom ne l'indique pas, il n'est pas nécessaire de lire
-    entièrement ce chapitre pour utiliser Gwyddion. L'interface utilisateur 
+    entièrement ce chapitre pour utiliser Gwyddion. L'interface utilisateur
     est intuitive et la plupart desfonctionnalités peuvent être découvertes
     en s'amusant avec le logiciel. Les explications des concepts basqiques
     et des composants fournies ici devraient normalement faciliter ces
@@ -36,7 +36,7 @@
   <xi:include href='graph-windows.xml'/>
   <xi:include href='tools.xml'/>
   <xi:include href='color-map.xml'/>
-<!--  <xi:include href='presentations-masks.xml'/> -->
+  <xi:include href='presentations-masks.xml'/>
   <xi:include href='selections.xml'/>
   <xi:include href='opengl-3d-view.xml'/>
   <xi:include href='single-point-spectra.xml'/>
