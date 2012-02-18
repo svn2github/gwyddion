@@ -1,0 +1,627 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: grains.xml 12154 2011-03-01 15:46:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='grain-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Analyse des grains</title>
+  <indexterm><primary>marquage des grains</primary></indexterm>
+  <para>
+    Plusieurs algorithmes relatifs aux grains sont implémentés dans Gwyddion.
+    On peut tout d'abord utiliser des algorithmes de seuillage (par hauteur,
+    pente ou courbure). Ceux-ci sont très efficaces pour l'analyse de particules
+    (pour marquer les particules présentes sur une surface plane).
+  </para>
+  <para id='grain-threshold'>
+    <indexterm><primary>marquage de grain par seuil</primary></indexterm>
+    Les méthodes de seuillage sont accessibles dans le menu
+    <menuchoice>
+      <guimenu>Traitement des données</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Marquer par seuil</guimenuitem>
+    </menuchoice>.
+    Les seuiilage par hauteur, pente et courbure sont implémentés dans ce
+    module. Les résultats de chacune de ces méthodes de seuillage peuvent être
+    fusionnés à l'aide d'opérateurs.
+  </para>
+  <para id='grain-remove-thresholding'>
+    De manière similaire, les grains peuvent être supprimés du masque à l'aide
+    du menu
+    <menuchoice>
+      <guimenu>Traitement des données</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Supprimer par seuil</guimenuitem>
+    </menuchoice>.
+    Les seuillages par hauteur maximale et/ou surface peuvent être utilisés pour
+    éliminer de faux grains provoqués par exemple par du bruit ou des particules
+    de poussière. Vous pouvez aussi utiliser l'outil interactif de suppression
+    de grain pour faire réaliser cette tâche manuellement.
+  </para>
+  <sect2 id='grain-watershed'>
+    <title>Segmentation</title>
+    <indexterm><primary>marquage de grain par segmentation</primary></indexterm>
+    <para>
+      Dans le cas de structures plus complexes, les algorithmes de seuillage vus
+      précédemment peuvent être inéfficaces. Dans ce cas l'algorithme de
+      <emphasis>segmentation</emphasis> peut être utilisé de manière beaucoups
+      plus efficace pour le marquage de grains ou de particules.
+    </para>
+    <para>
+      L'algorithme de segmentation est généralement utilisé pour la détection de
+      minima locaux et pour la segmentation d'image en traitement d'image.
+      Comme le problème de la détermination de la position des grains peut être
+      considéré comme un problème de détection d'extrema locaux, cet algorithme
+      peut être utilisé pour des besoins de segmentation o ude marquage de
+      grains. par souci de simplicité nous traiterons des données inversées
+      selon la direction <xi:include href="eqi-z.xml"/> pour la description de
+      l'algorithme (i.e. le sommet des grains sont des des minima locaux dans le
+      texte qui suit). Deux niveaux de traitement sont appliqués pour l'analyse
+      de grain (voir [<link linkend='grain-analysis-ref-1'>1</link>]) :
+    </para>
+    <orderedlist>
+      <listitem>
+        Une goutte virtuelle est déposée en chaque point de la surface inversée.
+        Dans le cas où la goutte ne se trouve pas déjà sur un minimum local,
+        celle-ci suit la pente la plus forte afin de minimiser son énergie
+        potentielle. La goutte s'arrête dès qu'elle atteind un minimum local.
+        Elle remplit ainsi partiellement le minimum local en fonction de son
+        volume (voir la figure et sa légende ci-dessous). Ce procédé est répété
+        plusieurs fois. Il en résulte un ensemble de lacs de différentes tailles
+        remplissant la surface inversée. Les surfaces des lacs sont ensuite
+        évaluées, et les plus petits d'entre eux sont supprimés, en prenant pour
+        hypothèse que ceux-ci se sont formés dans les minima locaux provoqués
+        par le bruit. Les lacs les plus importants sont utilisés pour identifier
+        la position des grains. On élimine ainsi le bruit de mesure présent dans
+        les données AFM.
+      </listitem>
+      <listitem>
+        Les grains trouvés lors de la première étape sont marqués (chacun avec
+        un numéro différent). Les gouttes continuent de tomber vers la surface
+        et de remplir les minima locaux. Comme les grains ont déjà été marqués
+        et identifiés lors de la première étape, les situations suivantes
+        peuvent apparaître dès qu'une goutte atteind un minimum local :
+        <orderedlist>
+          <listitem>
+            La goutte atteind un endroit déjà marqué comme étant un grain. Dans
+            ce cas la goutte est fusionnée avec le grain, i.e. elle est marquée
+            comme faisant partie du même grain.
+          </listitem>
+          <listitem>
+            La goutte atteind un endroit non marqué, mais un grain se trouve à
+            proximité immédiate. Dans ce cas la goutte est là aussi fusionnée
+            avec le grain.
+          </listitem>
+          <listitem>
+            La goutte atteind un endroit non marqué et n'ayant aucun grain à
+            proximité immédiate. Dans ce cas la goutte n'est pas marquée.
+          </listitem>
+          <listitem>
+            La goutte atteind un endroit non marqué mais ayant plus d'un grain
+            à proximité immédiate (par exemple lorsque deux grains se trouvent
+            à proximité). Dans ce cas la goutte est marquée comme limite du
+            grain.
+          </listitem>
+          <listitem>
+            La goutte atteind un endroit marqué comme limite de grain. Dans ce
+            cas la goutte est là aussi marquée comme limite de grain.
+          </listitem>
+        </orderedlist>
+      </listitem>
+    </orderedlist>
+    <para>
+      On peut ainsi identifier la position des grains et déterminer ensuite le
+      volume occupé par chaque grain.
+    </para>
+    <informalfigure id='fig-grain-marking'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='allgrains.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Image d'une surface à structure granuleuse (a) et résultats
+          correspondant au seuillage par hauteur (b), au seuillage par courbure
+          (c), et à l'algorithme de segmentation (d). Grâce à l'algorithme de
+          segmentation, il est même possible de segmenter encore plus finement
+          l'image.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='grain-analysis-statistics'>
+    <title>Statistiques</title>
+    <indexterm><primary>nombre de grains</primary></indexterm>
+    <para>
+      Les propriétés des grains peuvent être analysées à l'aide de plusieurs
+      fonctions. La plus simple d'entre elles est la Statistique des Grains
+    </para>
+    <sect3 id='grain-statistics'>
+      <title>Statistiques des grains</title>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Statistiques</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Cette fonction calcule le nombre de grains marqués, leur aire (projetée)
+        en valeur absolue et en fraction de l'aire totale du champ de données,
+        ainsi que l'aire moyenne et la taille du carré équivalent moyen.
+      </para>
+      <para>
+        Les caractéristiques globales de la zone marquée sont disponibles dans
+        l'outil Statistiques en utilisant l'option <guilabel>Inclure
+        uniquement la région masquée</guilabel>. On obtient les mêmes
+        informations pour les zones non marquées en inversant le masque.
+      </para>
+    </sect3>
+    <sect3 id='grain-distributions'>
+      <title>
+        Distributions des grains
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_graph-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Distributions</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        L'outil de calcul des distributions des grains est le plus puissant et
+        le plus complexe. Il comporte deux modes d'opération : l'affichage de
+        graphiques et l'export de données. Dans le mode affichage de graphiques,
+        les caractéristiques sélectionnées sont calculées et rassemblées dans
+        des graphes donnant leurs distributions.
+      </para>
+      <para>
+        L'export de données est utile pour les experts ayant besoin par exemple
+        de corréler les propriétés des grains. Dans ce mode les caractéristiques
+        sélectionnées sont calculées et compilées dans un fichier texte sous la
+        forme d'un tableau où chaque ligne correspond à un grain et chaque
+        colonne à une caractéristique. L'ordre des colonnes est identique à
+        celui des quantités présentées dans la fenêtre de dialogue ; toutes les
+        valeurs sont données en unités SI, comme partout dans
+        <application>Gwyddion</application>.
+      </para>
+    </sect3>
+    <sect3 id='grain-correlation'>
+      <title>
+        Corrélation des caractéristiques des grains
+      </title>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Corrélation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Affiche un graphe de corrélation d'une caractéristique en fonction d'une
+        autre, permettant ainsi de visualiser les corrélations entre celles-ci.
+      </para>
+    </sect3>
+    <sect3 id='grain-measure'>
+      <title>
+        Outil de mesure des grains
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <para>
+        L'outil de mesure des grains est une manière interactive de déterminer
+        les mêmes caractéristiques que celles données par
+        <link linkend='grain-distributions'>distribution des grains</link> en
+        mode texte. Il suffit de cliquer sur un grain dans la fenêtre de
+        données pour que toutes les quantités soient affichées dans la
+        fenêtre de l'outil.
+      </para>
+      <para>
+        Cet outil affiche aussi le numéro du grain. Le numéro du grain
+        correspond au numéro de ligne (en partant de 1) des fichiers exportés
+        par le calcul des
+        <link linkend='grain-distributions'>distributions des grains</link>.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='grain-properties'>
+    <title>Caractéristiques des grains</title>
+    <para>
+      Les <link linkend='grain-distributions'>distribution des grains</link> et
+      <link linkend='grain-measure'>l'outil de mesure des grains</link> peuvent
+      alculer les caractéristiques suivantes :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Caractéristiques liées à la valeur</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <indexterm>
+                <primary>minimum</primary>
+                <secondary>d'un grain</secondary>
+              </indexterm>
+              <guilabel>Minimum</guilabel>,
+              valeur (hauteur) minimale présente dans le grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>maximum</primary>
+                <secondary>d'un grain</secondary>
+              </indexterm>
+              <guilabel>Maximum</guilabel>,
+              valeur (hauteur) maximale présente dans le grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>moyenne</primary>
+                <secondary>d'un grain</secondary>
+              </indexterm>
+              <guilabel>Moyenne</guilabel>,
+              moyenne des valeurs présentes dans le grain, c'est-à-dire la
+              hauteur moyenne du grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>médiane</primary>
+                <secondary>d'un grain</secondary>
+              </indexterm>
+              <guilabel>Médiane</guilabel>
+              médiane des valeurs présentes dans le grain, c'est-à-dire la
+              hauteur médiane du grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>minimum</primary>
+                <secondary>du bord d'un grain</secondary>
+              </indexterm>
+              <guilabel>Minimum du bord</guilabel>,
+              valeur (hauteur) minimale présente sur le bord interne d'un grain.
+              Le bord est représenté par les pixels présents dans le grain et
+              ayant au moins un pixel voisin en dehors du grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>maximum</primary>
+                <secondary>du bord d'un grain</secondary>
+              </indexterm>
+              <guilabel>Maximum du bord</guilabel>,
+              valeur (hauteur) maximale présente sur le bord interne d'un grain,
+              défini de la même manière que pour le minimum.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées à la surface</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Surface projetée</guilabel>,
+              aire projetée (i.e. plane) du grain.
+            </listitem>
+            <listitem>
+              <guilabel>Côté équivalent</guilabel>,
+              taille du carré ayant la même surface que la surface projetée du
+              grain.
+            </listitem>
+            <listitem>
+              <guilabel>Rayon équivalent</guilabel>,
+              rayon du disque ayant la même surface que la surface projetée du
+              grain.
+            </listitem>
+            <listitem>
+              <guilabel>Surface</guilabel>,
+              surface du grain, reportez-vous à la section
+              <link linkend='surface-area-calculation'>quantités statistiques</link>
+              pour une description de la méthode d'estimation de la surface.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées au bord</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Périmètre projeté</guilabel>,
+              longueur du bord du grain projeté sur le plan horizontal (et non
+              sur la surface tri-dimensionnelle). La méthode d'estimation du
+              périmètre est décrite plus bas.
+            </listitem>
+            <listitem>
+              <guilabel>Largeur</guilabel>,
+              dimension minimale du grain dans le plan horizontal. On peut voir
+              celle-ci comme étant le plus petit écart au travers duquel
+              passerait le grain.
+            </listitem>
+            <listitem>
+              <guilabel>Orientation de la largeur</guilabel>,
+              orientation de l'écart décrit précédemment. Si le grain présente
+              une symétrie lui conférant plusieurs directions possibles,
+              celle-ci est choisie arbitrairement.
+            </listitem>
+            <listitem>
+              <guilabel>Longueur</guilabel>,
+              dimension maximale du grain dans le plan horizontal.  On peut voir
+              celle-ci comme étant le plus grand écart que le grain pourrait
+              remplir
+            </listitem>
+            <listitem>
+              <guilabel>Orientation de la longueur</guilabel>,
+              orientation de l'écart décrit précédemment. Si le grain présente
+              une symétrie lui conférant plusieurs directions possibles,
+              celle-ci est choisie arbitrairement.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées au volume</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Base zéro</guilabel>,
+              volume entre la surface du grain et le plan
+              <xi:include href="eqi-z-is-0.xml"/>. Les valeurs en-dessous de
+              zéro représentent un volume négatif. Le niveau zéro doit être
+              défini à une valeur raisonnable (en général la fonction
+              <link linkend='fix-zero'>fixer le zéro</link> suffit) pour que le
+              résultat ait un sens, ce qui est aussi l'avantage de cette
+              méthode : on peut utiliser le plan de base que l'on souhaite.
+            </listitem>
+            <listitem>
+              <guilabel>Base minimum du grain</guilabel>,
+              volume entre la surface du grain et le plan
+              <xi:include href="eqi-z-is-z_min.xml"/>, où
+              <xi:include href="eqi-z_min.xml"/> est la valeur (hauteur)
+              minimale présente dans le grain. Cette méthode tient compte de
+              l'environnement du grain, mais typiquement elle sous-estime le
+              volume, en particulier pour les petits grains.
+            </listitem>
+            <listitem>
+              <guilabel>Base arrière-plan laplacien</guilabel>,
+              volume entre la surface du grain et la surface de base formée
+              par l'interpolation laplacienne des valeurs environnantes. Plus
+              précisément, il s'agit du volume qui disparaîtrait après avoir
+              appliquéla fonction
+              <link linkend='remove-data-under-mask'>supprimer les données sous le masque</link>
+              ou l'outil
+              <link linkend='tool-remove-grains'>suppression de grain</link>
+              avec l'interpolation laplacienne. Il s'agit de la méthode la plus
+              sophistiquée, mais aussi la moins intuitive.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées à la position</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Position centrale x</guilabel>,
+              coordonnée horizontale du centre du grain. Comme la surface du
+              grain est définie par la surface couverte par les pixels du
+              masque, le centre d'un grain ne faisant qu'un seul pixel sera un
+              demi-entier et non un entier. Le décalage de l'origine du champ de
+              données est pris en compte.
+            </listitem>
+            <listitem>
+              <guilabel>Position centrale y</guilabel>,
+              coordonnée horizontale du centre du grain. Voir l'interprétation
+              plus haut.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées à la pente</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Inclinaison θ</guilabel>,
+              déviation de la normale du plan moyen par rapport à l'axe
+              <xi:include href="eqi-z.xml"/>, reportez-vous au paragraphe
+              <link linkend='inclinations-coordinates'>inclinaisons</link>
+              pour plus de détails.
+            </listitem>
+            <listitem>
+              <guilabel>Inclinaison φ</guilabel>,
+              azimuth de la pente, telle que définie dans le paragraphe
+              <link linkend='inclinations-coordinates'>inclinaisons</link>.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées à la courbure</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Position <xi:include href="eqi-x.xml"/> du centre de courbure</guilabel>,
+              position horizontale du centre de la surface quadratique ajustée à
+              la surface du grain.
+            </listitem>
+            <listitem>
+              <guilabel>Position <xi:include href="eqi-y.xml"/> du centre de courbure</guilabel>,
+              position verticale du centre de la surface quadratique ajustée à
+              la surface du grain.
+            </listitem>
+            <listitem>
+              <guilabel>Valeur <xi:include href="eqi-z.xml"/> du centre de courbure</guilabel>,
+              valeur au centre de la surface quadratique ajustée à
+              la surface du grain. Notez qu'il s'agit de la valeur sur la
+              surface ajustée et non sur la surface réelle.
+            </listitem>
+            <listitem>
+              <guilabel>Courbure 1</guilabel>,
+              la plus petite courbure (i.e. l'inverse du rayon de courbure) au
+              centre.
+            </listitem>
+            <listitem>
+              <guilabel>Courbure 2</guilabel>,
+              la plus grande courbure (i.e. l'inverse du rayon de courbure) au
+              centre.
+            </listitem>
+            <listitem>
+              <guilabel>Angle de courbure 1</guilabel>,
+              direction correspondant à <guilabel>Courbure 1</guilabel>.
+            </listitem>
+            <listitem>
+              <guilabel>Angle de courbure 2</guilabel>,
+              direction correspondant à <guilabel>Courbure 2</guilabel>.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-grain-bounding-dims'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='grain-bounding-dims.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='grain-bounding-dims.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Dimensions minimale et maximale, et orientations correspondantes d'un grain.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para id='boundary-length-calculation'>
+      <indexterm><primary>calcul du périmètre</primary></indexterm>
+      Le périmètre des grains est estimé en sommant des contributions estimées
+      de chacune des configurations à quatre pixels sur le bord du grain. Les
+      contributions sont affichées sur la figure suivante pour chaque
+      configuration, où <xi:include href="eqi-h_x.xml"/> et
+      <xi:include href="eqi-h_y.xml"/> sont les dimensions du pixel selon les
+      axes correspondants, et <xi:include href="eqi-h.xml"/> est la longueur de
+      la diagonale du pixel :
+      <xi:include href="eq-grain-boundary-pixel-diagonal.xml"/>
+      Les contributions correspondent une à une aux longueurs des segments du
+      bord du polygone approximant la forme du grain. La construction du
+      polygone équivalent est aussi visible sur la figure.
+    </para>
+    <informalfigure id='fig-boundary-length'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='boundary-length.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='boundary-length.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Contributions des configurations de pixels sur la longueur estimée du
+          bord (en haut). Les carrés en gris représentent les pixels à
+          l'intérieur du grain, et les carrés en blanc ceux à l'extérieur. La
+          contribution estimée de chaque configuration est :
+          (a) <xi:include href="eqi-h-over-2.xml"/>,
+          (b1), (b2) <xi:include href="eqi-h.xml"/>,
+          (c) <xi:include href="eqi-h_y.xml"/>,
+          (d) <xi:include href="eqi-h_x.xml"/>,
+          (e) <xi:include href="eqi-h-over-2.xml"/>.
+          Les cas (b1) et (b2) ne diffèrent que dans la visualisation de la
+          forme des segments du polygone, les longueurs estimées du bord sont
+          identiques. La partie inférieure de la figure illustre la manière dont
+          les segments se joignent pour former le polygone.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para id='grain-volume-calculation'>
+      <indexterm><primary>calcul du volume</primary></indexterm>
+      Le volume est, après soustraction de la base, estimée comme étant le
+      volume de l'objet dont la surface supérieure est celle utilisée pour le
+      <link linkend='fig-surface-area-vertices'>calcul de surface</link>.
+      Notez que pour le volume entre les vertex, ceci est équivalent à la
+      méthode classique des trapèzes pour l'intégration en deux dimensions.
+      Cependant, nous calculons le volume sous un masque centré sur les vertex,
+      leur contribution à l'intégrale est donc distribuée de manière différente,
+      tel que montré dans la figure suivante.
+    </para>
+    <informalfigure id='fig-volume-pixel-weights'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='volume-pixel-weights.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='volume-pixel-weights.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Contributions des pixels individuels au volume d'un pixel (en gris).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Les caractéristiques liées à la courbure des grains sont calculées de
+      manière identique à la courbure globale donnée par la fonction
+      <link linkend='curvature'>courbure</link>.  Référez-vous à sa description
+      pour plus de détails.
+    </para>
+  </sect2>
+  <sect2 id='grain-level'>
+    <title>Mise à niveau des grains</title>
+    <indexterm><primary>mise à niveau des grains</primary></indexterm>
+    <para>
+      Les grains peuvent être alignés verticalement en utilisant
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Mise à niveau des grains</guimenuitem>
+      </menuchoice>.
+      Cette fonction décale verticalement chaque grain de façon à ce qu'une
+      caractéristique liée à la hauteur soit égale pour tous les grains. En
+      général, on aligne la valeur minimale des grains, mais d'autres choix sont
+      possibles.
+    </para>
+    <para>
+      Les données entre les grains sont aussi décalées verticalement. Les
+      décalages sont interpolés par rapport aus décalages des grains à l'aide de
+      l'équation de Laplace, ce qui donne une transition douce des décalages
+      entre les grains (toutefois on ne considère pas les autres éléments
+      présents sur la surface).
+    </para>
+  </sect2>
+  <sect2 id='grain-analysis-ref'>
+    <title>Références</title>
+    <para id='grain-analysis-ref-1'>
+      [1] <ulink url='http://klapetek.cz/download.html'>
+        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
+        Acta Physica Slovaca, 3 (223-230), 2003
+      </ulink>
+    </para>
+  </sect2>
+  <!--  Doesn't work well, needs serious formatting improvements.
+  <bibliography>
+    <biblioentry>
+      <biblioset relation='article'>
+        <authorgroup>
+          <author><firstname>Petr</firstname><surname>Klapetek</surname></author>
+          <author><firstname>Ivan</firstname><surname>Ohlídal</surname></author>
+          <author><firstname>Daniel</firstname><surname>Franta</surname></author>
+          <author><firstname>Alberto</firstname><surname>Montaigne-Ramil</surname></author>
+          <author><firstname>Alberta</firstname><surname>Bonanni</surname></author>
+          <author><firstname>David</firstname><surname>Stifter</surname></author>
+          <author><firstname>Helmut</firstname><surname>Stifter</surname></author>
+        </authorgroup>
+        <title>Atomic force microscopy characterization of ZnTe epitaxial films</title>
+      </biblioset>
+      <biblioset relation='journal'>
+        <title>Acta Physica Slovaca</title>
+        <volumenum>3</volumenum>
+        <pagenums>223-230</pagenums>
+        <pubdate>2003</pubdate>
+      </biblioset>
+    </biblioentry>
+  </bibliography>
+  -->
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
