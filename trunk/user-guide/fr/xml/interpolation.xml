@@ -6,7 +6,7 @@
   <title>Interpolation</title>
   <indexterm><primary>interpolation</primary></indexterm>
   <para>
-    La plupart des transformatoins géométriques, telles que la rotation, la mise
+    La plupart des transformations géométriques, telles que la rotation, la mise
     à l'échelle ou la
     <link linkend='drift-compensation'>compensation de la dérive</link>,
     utilisent ou dépendent de l'interpolation des données. D'autres opérations,
@@ -23,10 +23,10 @@
   </para>
   <para>
     Nous décrivons ici les principes et propriétés des méthodes d'interpolation
-    uni-dimensionnelle. Toutes les méthodes d'inetrpolation bi-dimensionnelle
+    uni-dimensionnelle. Toutes les méthodes d'interpolation bi-dimensionnelles
     implémentées sont séparables et donc simplement composées des méthodes
-    uni-dimensionnelles correspondantes. Les types d'interpolation suivants sont
-    disponibles :
+    uni-dimensionnelles correspondantes. Les types d'interpolation qui suivent
+    sont disponibles :
   </para>
   <variablelist>
     <varlistentry id='interpolation-round'>
@@ -52,7 +52,7 @@
           Il s'agit d'une interpolation linéaire entre les deux points de
           données les plus proches. La valeur
           <xi:include href="eqi-z.xml"/> au point de position relative
-          <xi:include href="eqi-x.xml"/> est obtenue avec 
+          <xi:include href="eqi-x.xml"/> est obtenue avec
           <xi:include href="eq-interpolation-linear.xml"/>
           où <xi:include href="eqi-z_0.xml"/> et
           <xi:include href="eqi-z_1.xml"/> sont les valeurs des points
@@ -67,7 +67,7 @@
       <term>Key</term>
       <listitem>
         <para>
-          L'interpolation Key (ou plus précsément l'interpolation de Key avec
+          L'interpolation Key (ou plus précisément l'interpolation de Key avec
           <xi:include href="eqi-a-is-minus-1-over-2.xml"/>
           ayant l'ordre d'interpolation le plus élevé) utilise aussi les valeurs
           les points précédents et suivants, respectivement
@@ -77,7 +77,7 @@
           <xi:include href="eq-interpolation-w1234.xml"/>
           où
           <xi:include href="eq-interpolation-key.xml"/>
-          sont les pondérations de l'interpolatoin.
+          sont les pondérations de l'interpolation.
           L'interpolation de Key a un degré de 3, sa régularité
           <xi:include href="eqi-C-to-1.xml"/> et son ordre sont de 3.
         </para>
@@ -104,7 +104,7 @@
           L'approximation du voisin le plus proche (Nearest Neighbour
           Approximation) est elle aussi calculée à partir des valeurs des quatre
           points les plus proches, mais contrairement aux autres elles n'est pas
-          de forme polynomiale. Les pondérations d'interpolation sont 
+          de forme polynomiale. Les pondérations d'interpolation sont
           <xi:include href="eq-interpolation-nna.xml"/>
           pour <xi:include href="eqi-k-is-minus-1-to-2.xml"/>, où
           <xi:include href="eqi-r_minus-1-is-1-plus-x.xml"/>,
@@ -126,7 +126,7 @@
           de fonction comme précédemment, mais avec des coefficients
           d'interpolation calculés à partir des valeurs de fonction
           [<link linkend='interpolation-ref-1'>1</link>].
-          Son degré polynomial est de 3, sa régularité 
+          Son degré polynomial est de 3, sa régularité
           <xi:include href="eqi-C-to-2.xml"/> et son ordre sont de 4.
         </para>
       </listitem>
