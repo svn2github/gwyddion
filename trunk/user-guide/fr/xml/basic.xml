@@ -101,16 +101,18 @@
         conserve la valeur moyenne.
       </listitem>
       <listitem id='limit-range'>
-        Limit the data range by cutting values outside a specified range by
+        Limiter les valeurs des données en coupant les valeurs situées en dehors
+        de la plage spécifiée par
         <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Limit Range</guimenuitem>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Opérations basiques</guisubmenu>
+          <guimenuitem>Limiter la plage des valeurs</guimenuitem>
         </menuchoice>.
-        The range can be set numerically or taken from the false colour map range
-        previously set using the <link linkend='color-range'>Color range tool</link>
-        and it is also possible to cut off outliers farther than a chosen multiple
-        of RMS from the mean value.
+        La plage peut être ajustée manuellement ou à partir de la plage de
+        fausses couleurs définie précédemment avec l'outil
+        <link linkend='color-range'>plage de couleurs</link>, il est aussi
+        possible de supprimer les points aberrants en dehors d'un multiple
+        arbitraire du RMS à partir de la valeur moyenne.
       </listitem>
       <listitem id='square-samples'>
         <indexterm>
@@ -145,7 +147,7 @@
           <guisubmenu>Opérations Basiques</guisubmenu>
           <guimenuitem>Dimensions et Unités</guimenuitem>
         </menuchoice>.
-        Cette fonction est très utile lorsque des données brutes ont été 
+        Cette fonction est très utile lorsque des données brutes ont été
         importées avec des échelles erronées ou tout simplement pour recalibrer
         les dimensions et/ou les hauteurs.
       </listitem>
