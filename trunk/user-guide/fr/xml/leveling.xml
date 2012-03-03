@@ -255,7 +255,7 @@
         Ajuste les données par un polynôme d'ordre donné puis soustrait ce
         polynôme. Dans le mode <guilabel>degrés indépendants</guilabel> les
         ordres des polynômes vertical et horizontal peuvent être modifiés
-        séparément, i.e. le polynôme ajusté est
+        séparément, c'est-à-dire que le polynôme ajusté est
         <xi:include href="eq-polynomial-independent-degree.xml"/>
         où <xi:include href="eqi-m.xml"/> et <xi:include href="eqi-n.xml"/>
         sont respectivement les degrés sélectionnés des polynômes vertical et
@@ -321,7 +321,7 @@
       </para>
       <para>
         Ajuste une portion de sphère sur les données. L'orientation de la sphère
-        (i.e. la position du centre) et les valeurs initiales de l'ajustement
+        (c'est-à-dire la position du centre) et les valeurs initiales de l'ajustement
         peuvent être définies avant l'ajustement. L'algorithme
         Marquardt-Levenberg est utilisé pour calculer le résultat.
       </para>

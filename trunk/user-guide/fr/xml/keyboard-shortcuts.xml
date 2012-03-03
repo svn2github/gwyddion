@@ -262,7 +262,7 @@
     <informalexample>
       <programlisting>; (gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "")</programlisting>
     </informalexample>
-    Les points-virgules représentent des commentaires, i.e. les lignes
+    Les points-virgules représentent des commentaires, c'est-à-dire que les lignes
     commençant par un point-virgule sont inactives. Ainsi pour assigner la
     combinaison <keycap>Ctrl-Maj-E</keycap> à l'outil d'édition de masque, il
     faut supprimer le point-virgule pour activer la ligne et ajouter le

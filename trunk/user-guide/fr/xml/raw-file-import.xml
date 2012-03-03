@@ -76,7 +76,7 @@
     <para>
       Dans le second onglet, <guilabel>Format de données</guilabel>, des formats
       particuliers de données peuvent être choisis. Il existe deux possibilités
-      indépendantes : <guilabel>Données texte</guilabel> et 
+      indépendantes : <guilabel>Données texte</guilabel> et
       <guilabel>Données binaires</guilabel>.
     </para>
     <para>
@@ -89,8 +89,8 @@
           <term><guilabel>Débuter à la ligne</guilabel></term>
           <listitem>
             <para>
-              La ligne à partir de laquelles commencent les données, 
-              c'est-à-dire le nombre de ligne à ignorer à partir du début du 
+              La ligne à partir de laquelles commencent les données,
+              c'est-à-dire le nombre de ligne à ignorer à partir du début du
               fichier. Tous les types de marqueurs de fin de ligne sont reconnus
               (Unix, MS-DOS, Macintosh).
             </para>
@@ -109,12 +109,12 @@
           <term><guilabel>Autre délimiteur</guilabel></term>
           <listitem>
             <para>
-              Si le délimiteur est 
+              Si le délimiteur est
               <guimenuitem>N'importe quel espace</guimenuitem>, tout nombre non
-              nul de caractères espace est considéré comme un délimiteur de 
+              nul de caractères espace est considéré comme un délimiteur de
               champ. Si un caractère espace est sélectionné, le délimiteur doit
               être ce caractère. Dans le cas contraire les champs sont séparés
-              par un caractère spécifié ou un mot et tout espace entourant 
+              par un caractère spécifié ou un mot et tout espace entourant
               le délimiteur est ignoré.
             </para>
           </listitem>
@@ -123,7 +123,7 @@
           <term><guilabel>Le séparateur de décimale est la virgule</guilabel></term>
           <listitem>
             <para>
-              Par défaut, les nombres en virgule flottante sont supposés 
+              Par défaut, les nombres en virgule flottante sont supposés
               utiliser un point pour symboliser la décimale. Cette option change
               ce symbole par la virgule.
             </para>
@@ -153,16 +153,16 @@
               option n'est accessible que pour les formats prédéfinis ayant plus
               d'un octet. Le nombre de bits correspond aux groupes d'octets à
               inverser : si le <xi:include href="eqi-j.xml"/>-ème bit est
-              défini, les groupes adjacents de 
+              défini, les groupes adjacents de
               <xi:include href="eqi-2-to-j.xml"/> bits sont inversés.
             </para>
             <para>
               Une valeur de 3 par exemple signifie que l'échantillon sera divisé
               en paires (bit 1) d'octets et les paires adjacentes d'octets sont
               inversées, puis en octets individuels (bit 0) et les octets
-              adjacents seront inversés. Le bilan de ces opérations est une 
+              adjacents seront inversés. Le bilan de ces opérations est une
               inversion des l'ordre des octets par groupe de quatre octets. De
-              manière générale, si vous souhaitez inverser l'ordre des octets  
+              manière générale, si vous souhaitez inverser l'ordre des octets
               par groupes de taille <xi:include href="eqi-2-to-j.xml"/>,
               ce qui correspond au cas le plus courant, utilisez un ordre de
               <xi:include href="eqi-j-minus-1.xml"/>.
@@ -182,10 +182,10 @@
           <term><guilabel>Taille d'échantillon</guilabel></term>
           <listitem>
             <para>
-              Taille en bits d'un échantillon pour les formats définis par 
-              l'utilisateur. Mettez par exemple 4 ici si vous avez un fichier 
+              Taille en bits d'un échantillon pour les formats définis par
+              l'utilisateur. Mettez par exemple 4 ici si vous avez un fichier
               n'ayant que 4 bits par échantillon. En ce qui concerne les formats
-              prédéfinis, leur taille y est affichée, mais elle n'est pas 
+              prédéfinis, leur taille y est affichée, mais elle n'est pas
               modifiable.
             </para>
           </listitem>
@@ -200,8 +200,8 @@
               En général les échantillons se suivent dans un fichier. Mais
               parfois il existe certains bits ou octets inutiles entre chaque.
               Cette option permet de spécifier cette possibilité. Notez que pour
-              les formats prédéfinis cette valeur doit être un multiple de 8 
-              (i.e. seuls des octets complets peuvent être sautés).
+              les formats prédéfinis cette valeur doit être un multiple de 8
+              (c'est-à-dire que seuls des octets complets peuvent être sautés).
             </para>
           </listitem>
         </varlistentry>
@@ -216,8 +216,8 @@
               En général les lignes se suivent dans un fichier. Mais
               parfois il existe certains bits ou octets inutiles entre chacune.
               Cette option permet de spécifier cette possibilité. Notez que pour
-              les formats prédéfinis cette valeur doit être un multiple de 8 
-              (i.e. seuls des octets complets peuvent être sautés).
+              les formats prédéfinis cette valeur doit être un multiple de 8
+              (c'est-à-dire que seuls des octets complets peuvent être sautés).
             </para>
           </listitem>
         </varlistentry>
@@ -233,7 +233,7 @@
           <term><guilabel>Inverser les bits dans les octets</guilabel></term>
           <listitem>
             <para>
-              Spécifie si l'ordre des bits dans chaque échantillon doit être 
+              Spécifie si l'ordre des bits dans chaque échantillon doit être
               inversé (pour les formats définis par l'utilisateur).
             </para>
           </listitem>
@@ -243,7 +243,7 @@
           <listitem>
             <para>
               Cette option permet d'interpréter les échantillons comme étant des
-              nombres signés (par opposition aux nombres non signés). Ce 
+              nombres signés (par opposition aux nombres non signés). Ce
               paramètre est affiché pour les formats prédéfinis, mais il n'est
               pas modifiable.
             </para>
@@ -260,12 +260,12 @@
     </para>
     <para>
       Le bouton <guibutton>Enregistrer</guibutton> sauve les réglages d'import
-      courants sous le nom spécifié dans le champ 
-      <guilabel>Nom du préréglage</guilabel>. Le bouton 
+      courants sous le nom spécifié dans le champ
+      <guilabel>Nom du préréglage</guilabel>. Le bouton
       <guibutton>Renommer</guibutton> change le nom du réglage sélectionné par
       le nom spécifié, le bouton <guibutton>Supprimer</guibutton> efface le
-      réglage sélectionné, et le bouton <guibutton>Charger</guibutton> 
-      remplace les réglages d'import courants par ceux du préréglage 
+      réglage sélectionné, et le bouton <guibutton>Charger</guibutton>
+      remplace les réglages d'import courants par ceux du préréglage
       sélectionné.
     </para>
   </sect2>

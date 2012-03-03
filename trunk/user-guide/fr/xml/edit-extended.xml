@@ -169,7 +169,7 @@
       une fonction non équivoque.
     </para>
     <para>
-      Les coefficients du polynôme sont sans unité, i.e. comme si les plages de
+      Les coefficients du polynôme sont sans unité, c'est-à-dire comme si les plages de
       coordonnéess étaient toujours [0, 1]. Si la case
       <guilabel>Mise à jour automatique</guilabel> est activée, la touche
       <keysym>Entrée</keysym> lors de la saisie d'un coefficient (ou simplement

@@ -9,7 +9,7 @@
     La transformée en ondelettes est similaire à la transformée de Fourier (et
     encore plus à la transformée de Fourier locale) avec une fonction de mérite
     complètement différente. La différence principale est la suivante : la
-    transformée de Fourier décompose le signal en sinus et en cosinus, i.e. les
+    transformée de Fourier décompose le signal en sinus et en cosinus, c'est-à-dire en
     fonctions localisées dans l'espace de Fourier ; contrairement à la
     transformée en ondelettes qui utilise des fonctions localisées à la fois
     dans l'espace réel et dans l'espace de Fourier. De manière générale, la
@@ -97,13 +97,13 @@
       où <xi:include href="eqi-S.xml"/> est un facteur d'échelle (prenant
       généralement une valeur de 2). De plus, la zone entre les fonctions doit
       être normalisée et la fonction d'échelle doit être orthogonale par
-      translation, i.e.
+      translation, c'est-à-dire qu'on a
       <xi:include href="eq-wavelet-orthogonality.xml"/>
     </para>
     <para>
       Après introduction de conditions supplémentaires (les réstrictions
       précédentes ne produisent pas une solution unique) nous pouvons obtenir
-      le résultat de toutes ces équations, i.e. un ensemble fini de coefficients
+      le résultat de toutes ces équations, c'est-à-dire un ensemble fini de coefficients
       <xi:include href="eqi-a_k.xml"/> définissant la fonction d'échelle ainsi
       que l'ondelette. L'ondelette est obtenue à partir de la fonction d'échelle
       grâce à <xi:include href="eq-wavelet-scaling-function.xml"/> où
@@ -253,7 +253,7 @@
     </para>
     <para>
       En principe la transformée en ondelettes continue fonctionne en utilisant
-      directement la définition de la transformée en ondelettes, i.e. en
+      directement la définition de la transformée en ondelettes, c'est-à-dire en
       calculant la convolution du signal par l'ondelette mise à l'échelle. Nous
       obtenons de cette manière pour chaque échelle un ensemble de longueur
       <xi:include href="eqi-N.xml"/> identique à celle du signal. En utilisant

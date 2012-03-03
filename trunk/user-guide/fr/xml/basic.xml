@@ -69,8 +69,8 @@
           <primary>renverser</primary>
           <secondary>verticalement</secondary>
         </indexterm>
-        Renverser les données horizontalement (i.e. autour de l'axe vertical) et
-        verticalement (i.e. autour de l'axe horizontal) avec
+        Renverser les données horizontalement (c'est-à-dire autour de l'axe vertical) et
+        verticalement (c'est-à-dire autour de l'axe horizontal) avec
         <menuchoice>
           <guimenu>Traitement des Données</guimenu>
           <guisubmenu>Opérations Basiques</guisubmenu>
@@ -81,7 +81,7 @@
         respectivement.
       </listitem>
       <listitem id='flip-both'>
-        Renverser les données autour du centre (i.e. autour des deux axes) avec
+        Renverser les données autour du centre (c'est-à-dire autour des deux axes) avec
         <menuchoice>
           <guimenu>Traitement des Données</guimenu>
           <guisubmenu>Opérations Basiques</guisubmenu>

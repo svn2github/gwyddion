@@ -132,7 +132,7 @@
         <listitem>
           <para>
             De manière générale, la zone masquée est considérée comme celle
-            étant d'intérêt, i.e. celle sur lesquelles on effectue des
+            étant d'intérêt, c'est-à-dire celle sur lesquelles on effectue des
             opérations. Cela s'applique pour les fonctions statistiques telles
             que
             <link linkend='stat-quantities'>l'outil de calcul des statistiques</link>.
@@ -367,7 +367,7 @@
       </varlistentry>
     </variablelist>
     <para>
-      Les opérations globales sur les masques, i.e. l'inversion, la suppression
+      Les opérations globales sur les masques, c'est-à-dire l'inversion, la suppression
       et le remplissage complet des données par un masque, sont disponibles dans
       la ligne <guilabel>actions</guilabel>. On trouve parmi les opérations
       supplémentaires :

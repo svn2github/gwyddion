@@ -37,7 +37,7 @@
     peuvent apparaître dans ces fichiers. Si des caractères
     internationaux peuvent y apparaître, ceux-ci doivent être encodés
     au format UTF-8. Les valeurs numériques sont données au format
-    POSIX, i.e. avec un point pour la décimale, indépendamment du
+    POSIX, c'est-à-dire avec un point pour la décimale, indépendamment du
     caractère utilisé pour la décimale dans la langue de l'utilisateur.
   </para>
   <para>
@@ -68,7 +68,7 @@
   <sect2 id='resource-gradients'>
     <title>Gradients</title>
     <para>
-      Les gradients, i.e. les échelles de fausses couleurs, se trouvent
+      Les gradients, c'est-à-dire les échelles de fausses couleurs, se trouvent
       dans le répertoire
       <filename>gradients</filename>, ils sont identifiés par
       <type>GwyGradient</type> et ne contiennent que des données. Ils
@@ -140,7 +140,7 @@ Gwyddion resource GwyGradient
     <para>
       Notez que la composante émission, bien que lue et écrite par
       Gwyddion, n'est en fait pas utilisée pour les vues 3D. Il est
-      recommandé de la régler à 0 0 0 1, i.e. noire.
+      recommandé de la régler à 0 0 0 1, c'est-à-dire noire.
     </para>
     <para>
       Par exemple, le matériau standard Red-Rubber (gomme rouge) ayant
@@ -490,8 +490,8 @@ expression z_max - z_min
       </informaltable>
     </para>
     <para>
-      Notez que le choix d'un format binaire prédéfini, i.e. une valeur
-      de <varname>builtin</varname> non nulle, implique un format
+      Notez que le choix d'un format binaire prédéfini, c'est-à-dire une valeur
+      pour <varname>builtin</varname> non nulle, implique un format
       binaire limité. Cela signifie que les options
       <varname>size</varname>, <varname>revbyte</varname> et
       <varname>sign</varname> sont ignorées car elles ne sont utilisées

@@ -204,7 +204,7 @@
       motif du filtre est interprété de deux manières :
       <itemizedlist>
         <listitem>
-          Si le motif contien des métacaractères, i.e. <literal>*</literal> ou
+          Si le motif contient des métacaractères, tels que <literal>*</literal> ou
           <literal>?</literal>, celui-ci sera interprété comme un motif
           particulier (glob). Cela signifie que <literal>?</literal> représente
           représente un caractère arbitraire unique, <literal>*</literal>

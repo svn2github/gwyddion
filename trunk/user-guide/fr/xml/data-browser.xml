@@ -83,7 +83,7 @@
     <title>Canaux</title>
     <para>
       La liste des canaux montre des vignettes de chaque canal, des cases à
-      cocher permettant de choisir la visibilité d'un canal (i.e. son affichage
+      cocher permettant de choisir la visibilité d'un canal (c'est-à-dire son affichage
       à l'écran), ainsi que le nom des canaux. A droite du nom la présence d'une
       <link linkend='presentations-masks'>présentation et/ou d'un masque</link>
       est indiquée par les lettres suivantes :

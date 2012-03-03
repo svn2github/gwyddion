@@ -141,7 +141,7 @@
             <entry><literal>Gwy::XYUnits</literal></entry>
             <entry>chaîne de caractères</entry>
             <entry>
-              Unités latérales, i.e. unités des dimensions physiques et
+              Unités latérales, c'est-à-dire les unités des dimensions physiques et
               des décalages.
             </entry>
           </row>
@@ -149,7 +149,7 @@
             <entry><literal>Gwy::ZUnits</literal></entry>
             <entry>chaîne de caractères</entry>
             <entry>
-              Unités de valeurs, i.e. unités des valeurs de données.
+              Unités de valeurs, c'est-à-dire les unités des valeurs de données.
             </entry>
           </row>
           <row>

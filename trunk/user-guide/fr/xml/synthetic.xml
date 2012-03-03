@@ -6,13 +6,13 @@
   <title>Synthèse de surfaces</title>
   <para>
     En plus des fonction d'analyse des surfaces mesurées, Gwyddion propose
-    plusieurs générateurs de surfaces artificielles pouvant servir pour des 
+    plusieurs générateurs de surfaces artificielles pouvant servir pour des
     tests ou des simulations en dehors de Gwyddion.
   </para>
   <para>
     Les différents générateurs de surfaces ont un certain nombre de paramètres
     en commun, ceux-ci permettent de spécifier les dimensions et l'échelle de la
-    surface créée, et de contrôler le générateur de nombres aléatoires. Ces 
+    surface créée, et de contrôler le générateur de nombres aléatoires. Ces
     paramètres sont décrits ci-dessous, les paramètres spécifiques à chaque
     générateur sont décrits dans les sous-sections correspondantes.
   </para>
@@ -46,9 +46,9 @@
         <guilabel>Largeur, hauteur</guilabel>
       </term>
       <listitem>
-        <para>  
-          Les dimensions physiques horizontale et verticales de la surface 
-          générée. Notez que les pixels sont supposés être carrés, le 
+        <para>
+          Les dimensions physiques horizontale et verticales de la surface
+          générée. Notez que les pixels sont supposés être carrés, le
           changement d'une valeur entraîne donc la modification de l'autre.
         </para>
       </listitem>
@@ -61,7 +61,7 @@
         <para>
           Unités des dimensions latérales (<guilabel>largeur</guilabel>,
           <guilabel>hauteur</guilabel>) et des valeurs (hauteurs). Les unités
-          choisies ici déterminent aussi les unités des paramètres sans 
+          choisies ici déterminent aussi les unités des paramètres sans
           sans dimension des générateurs.
         </para>
       </listitem>
@@ -89,7 +89,7 @@
       </term>
       <listitem>
         <para>
-          Cette option a deux effets. Elle copie d'abord les dimensions et 
+          Cette option a deux effets. Elle copie d'abord les dimensions et
           l'échelle du canal courant. Puis elle remplace le canal courant par
           la surface générée au lieu de créer un nouveau canal.
         </para>
@@ -160,13 +160,13 @@
       aléatoires en calculant la transformée de Fourier de la surface à
       partir des paramètres spécifiés, puis en appliquant la transformée
       inverse pour obtenir la surface réelle. Les surfaces générées sont
-      périodiques (i.e. parfaitement juxtaposables).
+      périodiques (c'est-à-dire parfaitement juxtaposables).
     </para>
     <para>
-      Les paramètres de Fourier définissent la forme de la PSD, i.e. les
+      Les paramètres de Fourier définissent la forme de la PSD, c'est-à-dire les
       modules des coefficients de Fourier, les phases étant choisies
-      aléatoiremnt. Actuellement toutes les surfaces générées sont
-      isotropes, i.e. leur PSD est radialement symétrique.
+      aléatoirement. Actuellement toutes les surfaces générées sont
+      isotropes, c'est-à-dire que leur PSD est radialement symétrique.
     </para>
     <variablelist>
       <varlistentry>
@@ -191,7 +191,7 @@
           <para>
             Fréquences spatiales minimum et maximum. En augmentant la
             fréquence minimum l'image aura tendance à
-            <quote>s'applatir</quote>, i.e. les motifs larges seront
+            <quote>s'applatir</quote>, c'est-à-dire que les motifs larges seront
             supprimés. La diminution de la fréquence maximum limitera la
             finesse des détails.
           </para>
@@ -273,7 +273,7 @@
       ayant par hypothèse une base nulle) et <xi:include href="eqi-z_0.xml"/> et
       la hauteur minimale courante sur la base de l'objet étant placé.
       L'algorithme considère que le plan doit être rempli de copies identiques
-      de la surface, celle-ci est donc aussi périodique (i.e. parfaitement
+      de la surface, celle-ci est donc aussi périodique (c'est-à-dire parfaitement
       juxtaposable).
     </para>
     <variablelist>
@@ -425,7 +425,7 @@
           <para>
             Le bruit peut être symétrique autour de zéro, ou uniquement positif
             ou négatif. La valeur moyenne de la distribution symétrique est
-            nulle, i.e. la valeur moyenne des données ne change pas si l'on y
+            nulle, c'est-à-dire que la valeur moyenne des données ne change pas si l'on y
             ajoute un bruit symétrique. La valeur moyenne augmente ou diminue si
             le bruit ajouté est respectivement positif ou négatif.
           </para>
@@ -460,8 +460,8 @@
       Deux types de défauts sont disponibles : les sauts et les rayures. Les
       sauts représentent des changements de valeur abrupts qui se prolongent
       jusqu'à la fin du scan (ou jusqu'à ce qu'un autre saut apparaisse). Les
-      rayures représentent des changements de valeur ayant une durée finie, i.e.
-      les valeurs retrouvent leur niveau original au bout d'un certain temps..
+      rayures représentent des changements de valeur ayant une durée finie, c'est-à-dire
+      que les valeurs retrouvent leur niveau original au bout d'un certain temps..
     </para>
     <para>
       Les sauts possèdent les paramètres suivants :

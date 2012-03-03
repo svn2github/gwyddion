@@ -86,7 +86,7 @@
       Tous les champs de données apparaissant dans l'expression doivent
       être compatibles. Cela signifie que leurs dimensions (des pixels
       et physiques) doivent être identiques. Les autres champs de
-      données, i.e. ceux n'entrant pas dans l'expression, sont sans
+      données, c'est-à-dire ceux n'entrant pas dans l'expression, sont sans
       effet. Le résultat est toujours donné dans un nouveau champ de
       données du fichier courant (qui peut être différent des fichiers
       de tous les opérandes).

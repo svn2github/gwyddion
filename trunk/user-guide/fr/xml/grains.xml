@@ -53,7 +53,7 @@
       peut être utilisé pour des besoins de segmentation o ude marquage de
       grains. par souci de simplicité nous traiterons des données inversées
       selon la direction <xi:include href="eqi-z.xml"/> pour la description de
-      l'algorithme (i.e. le sommet des grains sont des des minima locaux dans le
+      l'algorithme (c'est-à-dire que le sommet des grains sont des des minima locaux dans le
       texte qui suit). Deux niveaux de traitement sont appliqués pour l'analyse
       de grain (voir [<link linkend='grain-analysis-ref-1'>1</link>]) :
     </para>
@@ -82,7 +82,7 @@
         <orderedlist>
           <listitem>
             La goutte atteind un endroit déjà marqué comme étant un grain. Dans
-            ce cas la goutte est fusionnée avec le grain, i.e. elle est marquée
+            ce cas la goutte est fusionnée avec le grain, c'est-à-dire qu'elle est marquée
             comme faisant partie du même grain.
           </listitem>
           <listitem>
@@ -307,7 +307,7 @@
           <itemizedlist>
             <listitem>
               <guilabel>Surface projetée</guilabel>,
-              aire projetée (i.e. plane) du grain.
+              aire projetée (c'est-à-dire plane) du grain.
             </listitem>
             <listitem>
               <guilabel>Côté équivalent</guilabel>,
@@ -464,12 +464,12 @@
             </listitem>
             <listitem>
               <guilabel>Courbure 1</guilabel>,
-              la plus petite courbure (i.e. l'inverse du rayon de courbure) au
+              la plus petite courbure (c'est-à-dire l'inverse du rayon de courbure) au
               centre.
             </listitem>
             <listitem>
               <guilabel>Courbure 2</guilabel>,
-              la plus grande courbure (i.e. l'inverse du rayon de courbure) au
+              la plus grande courbure (c'est-à-dire l'inverse du rayon de courbure) au
               centre.
             </listitem>
             <listitem>

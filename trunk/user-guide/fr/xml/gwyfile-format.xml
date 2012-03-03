@@ -135,7 +135,7 @@
               <entry><literal>d</literal></entry>
               <entry>
                 Nombre fini à virgule flottante en double précision IEEE 754,
-                i.e. les fichiers ne doivent pas contenir des infinités et des
+                c'est-à-dire que les fichiers ne doivent pas contenir des infinis et des
                 non-nombres
               </entry>
             </row>
@@ -218,8 +218,8 @@
     <title>Conteneur <type>GwyContainer</type> de premier niveau</title>
     <para>
       Les noms (clés) des objets dans un <type>GwyContainer</type> représentant
-      un fichier Gwyddion ressemblent fortement aux noms de fichiers UNIX, i.e.
-      ils sont sous la forme de de chemins séparés par le caractère 
+      un fichier Gwyddion ressemblent fortement aux noms de fichiers UNIX, c'est-à-dire
+      qu'ils sont sous la forme de de chemins séparés par le caractère
       <literal>/</literal>, et présentent une structure arborescente. Par
       exemple, le titre du premier canal, numéroté 0, est enregistré dans la clé
       <literal>/0/data/title</literal>. Notez que certaines données ou
@@ -292,7 +292,7 @@
               <entry><literal>/0/base/range-type</literal></entry>
               <entry>entier 32 bits</entry>
               <entry>
-                Type de visualisation (tel que défini par 
+                Type de visualisation (tel que défini par
                 <link linkend='color-range'>l'outil Visualisation des couleurs</link>),
                 la valeur provient de la liste
                 <type>GwyLayerBasicRangeType</type>.
@@ -318,7 +318,7 @@
               <entry><literal>/0/mask</literal></entry>
               <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
               <entry>
-                Données du masque. Les dimensions en pixels de ces données 
+                Données du masque. Les dimensions en pixels de ces données
                 doivent correspondre à celles des données du canal.
               </entry>
             </row>
@@ -354,7 +354,7 @@
               <entry><literal>/0/show</literal></entry>
               <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
               <entry>
-                Données de présentation. Les dimensions en pixels de ces données 
+                Données de présentation. Les dimensions en pixels de ces données
                 doivent correspondre à celles des données du canal.
               </entry>
             </row>
@@ -373,9 +373,9 @@
               <entry>
                 Données de sélection. Chaque type de sélection a (généralement)
                 un type d'objet différent et est enregistré sous un nom
-                différent ; le nom spécifique 
+                différent ; le nom spécifique
                 <replaceable>foo</replaceable> est identique à celui affiché
-                dans le 
+                dans le
                 <link linkend='selection-manager'>gestionnaire de sélection</link>.
               </entry>
             </row>
