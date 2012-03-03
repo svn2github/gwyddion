@@ -1,0 +1,662 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: statistical.xml 11797 2011-01-19 18:52:14Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='statistical-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Analyse statistique</title>
+  <para>
+    L'analyse de surfaces rugueuses nécessite généralement une approche
+    statistique afin de déterminer certains caractéristiques représentatives.
+    Gwyddion propose différentes manières d'effectuer cette analyse. Cette
+    section présente les différents outils et modules statistiques présents
+    dans Gwyddion, et donne aussi les équations de base utilisées pour
+    développer les algorithmes mis en œuvre..
+  </para>
+  <para>
+    Les données de microscopie à balayage sont généralement représentées par des
+    champs de données à deux dimensions de taille
+    <xi:include href="eqi-NxM.xml"/>, où <xi:include href="eqi-N.xml"/> et
+    <xi:include href="eqi-M.xml"/> sont respectvement les nombres de lignes et
+    de colonnes du champ de données. La surface réelle est notée
+    <xi:include href="eqi-L_x-times-L_y.xml"/> où
+    <xi:include href="eqi-L_x.xml"/> et <xi:include href="eqi-L_y.xml"/>
+    sont les dimensions le long des axes respectifs. L'échantillonnage (distance
+    entre deux points adjacents du balayage) est noté
+    <xi:include href="eqi-Delta.xml"/>. On suppose que l'échantillonnage est
+    identique selon les directions <xi:include href="eqi-x.xml"/> et
+    <xi:include href="eqi-y.xml"/>, et que la hauteur de la surface à point
+    <xi:include href="eqi-coords-x-y.xml"/> donné peut être décrit par une
+    fonction aléatoire <xi:include href="eqi-xi-x-y.xml"/> ayant certaines
+    propriétés statistiques.
+  </para>
+  <para>
+    Notez que les données AFM sont généralement acquises selon des lignes le
+    long de l'axe <xi:include href="eqi-x.xml"/>, et que celles-ci sont ensuite
+    concaténées pour former l'image en deux dimensions. La vitesse de balayage
+    selon la direction <xi:include href="eqi-x.xml"/> est par conséquent bien
+    plus élevée que selon la direction <xi:include href="eqi-y.xml"/>. Il en
+    résulte que les propriétés statistiques des données AFM sont généralement
+    calculées pour des profils selon <xi:include href="eqi-x.xml"/> car ceux-ci
+    sont moins affectés par le bruit de basse fréquence et les variations
+    thermiques de l'échantillon.
+  </para>
+  <sect2 id='stat-quantities'>
+    <title>
+      Outil statistiques
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_stat_quantities-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>Outil de calcul des propriétés statistiques</primary></indexterm>
+    <para>
+      On trouve parmi les quantités statistiques les propriétés basiques des
+      hauteurs telles que la variance, l'asymétrie et le kurtosis. Les quantités
+      accessibles dans Gwyddion à l'aide de l'outil
+      <guilabel>statistiques</guilabel> sont les suivantes :
+    </para>
+    <itemizedlist>
+      <listitem>
+        <indexterm>
+          <primary>moyenne</primary>
+          <secondary>d'une zone de données</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>médiane</primary>
+          <secondary>d'une zone de données</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>d'une zone de données</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>d'une zone de données</secondary>
+        </indexterm>
+        Valeurs moyenne, minimale, maximale et médiane.
+      </listitem>
+      <listitem>
+        <indexterm>
+          <primary>RMS</primary>
+          <secondary>d'une zone de données</secondary>
+        </indexterm>
+        Valeur RMS des irrégularités de la surface : cette quantité est calculée
+        à partir de la variance des données.
+      </listitem>
+      <listitem>
+        Valeur <xi:include href="eqi-R_a.xml"/> des irrégularités de hauteur :
+        cette valeur est similaire à la valeur RMS, elle ne diffère que dans
+        l'exposant (puissance) dans la somme de la variance des données. Dans le
+        cas du RMS l'exposant est <xi:include href="eqi-q-is-2.xml"/>, la valeur
+        <xi:include href="eqi-R_a.xml"/> est calculée avec l'exposant
+        <xi:include href="eqi-q-is-1.xml"/> et la valeur absolue des données
+        (moyenne nulle).
+      </listitem>
+      <listitem>
+        Asymétrie de la distribution des hauteurs : calculée à partir du moment
+        d'ordre 3 des données.
+      </listitem>
+      <listitem>
+        Kurtosis de la distribution des hauteurs : calculée à partir du moment
+        d'ordre 4 des données.
+      </listitem>
+      <listitem>
+        Surface et surface projetée : calculées par simple triangulation.
+      </listitem>
+      <listitem>
+        Inclinaison moyenne des facettes : calculée en moyennant les vecteurs
+        normaux des facettes.
+      </listitem>
+    </itemizedlist>
+    <tip>
+      L'outil statistiques affiche par défaut les données en se basant sur
+      l'image entière. Si vous ne souhaitez analyser qu'une partie de l'image
+      il suffit de sélectionner celle-ci dans la fenêtre des données. La
+      fenêtre de l'outil mettra automatiquement à jour les nouvelles données
+      basées sur la zone sélectionnée. Si vous souhaitez obtenir les
+      statistiques de l'image entière, il suffit de cliquer une seule fois sur
+      l'image, et l'outil se réinitialisera.
+    </tip>
+    <para>
+      Les valeurs de RMS (<xi:include href="eqi-sigma.xml"/>), asymétrie
+      (<xi:include href="eqi-gamma_1.xml"/>), et kurtosis
+      (<xi:include href="eqi-gamma_2.xml"/>) sont calculées à partir des moments
+      de <xi:include href="eqi-i.xml"/>-ième ordre
+      <xi:include href="eqi-mu_i.xml"/> selon les formules suivantes :
+      <xi:include href="eq-statistical-quantities.xml"/>
+    </para>
+    <para id='surface-area-calculation'>
+      <indexterm><primary>calcul d'aire</primary></indexterm>
+      L'aire d'une surface est évaluée selon la méthode suivante.
+      Soient <xi:include href="eqi-z_i.xml"/> pour
+      <xi:include href="eqi-i-is-1-to-4.xml"/> les valeurs pour quatre points
+      voisins (les centres des pixels), et <xi:include href="eqi-h_x.xml"/> et
+      <xi:include href="eqi-h_y.xml"/> les dimension du pixel selon les axes
+      correspondant. Si on ajoute un point au centre du rectangle, ce qui
+      correspond au point commun aux quatres pixels (en utilisant la moyenne des
+      valeurs des pixels), on forme quatre triangles et l'aire de la surface
+      peut être approximée par la somme de leurs aires. On obtient les formules
+      suivantes pour l'aire d'un triangle (en haut) et l'aire d'un pixel (en
+      bas) :
+      <xi:include href="eq-area-calculation.xml"/>
+    </para>
+    <para>
+      La méthode est correctement définie pour les pixels intérieurs de la
+      région analysée. Chacune des valeurs participe à huit triangles, deux pour
+      chacune des quatre valeurs voisines. La moitié de chacun de ces triangles
+      se trouve sur un pixel, l'autre moitié sur un autre pixel. En
+      comptabilisant l'aire présente sur chaque pixel, l'aire totale est aussi
+      définie pour les grains et les zones masquées. Il reste maintenant à
+      définir l'aire pout les pixels du bord du champ de donné. Cette opération
+      est étendant virtuellement l'image par une copie des pixels de bord sur
+      chaque côté, rendant ainsi tous les pixels de l'image initiale à
+      l'intérieur de la zone d'intérêt.
+    </para>
+    <informalfigure id='fig-surface-area-vertices'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='surface-area-vertices.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='surface-area-vertices.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Schéma de triangulation pour le calcul d'aire (à gauche). Application
+          de ce schéma sur un zone marquée de trois pixels (à droite), un grain
+          par exemple. Les petits cercles représentes les vertex
+          <xi:include href="eqi-z_i.xml"/> des centres des pixels, les lignes en
+          pointillés représentent les bords des pixels, tandis que les lignes
+          continues matérialisent la triangulation. L'aire estimée est ici égale
+          à l'aire couverte par le masque (en gris).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='sfunctions'>
+    <title>
+      Outil d'analyse des fonctions statistiques
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_graph_halfgauss-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>Outil d'analyse des fonctions statistiques</primary></indexterm>
+    <para>
+      Les fonctions statistiques uni-dimensionnelles sont accessibles en
+      utilisant l'outil <guilabel>fonctions statistiques</guilabel>.
+      L'outil vous permet de sélectionner la fonction à évaluer en utilisant la
+      liste déroulante sur la gauche de la fenêtre. La prévisualisation du
+      graphe est automatiquement rafraîchie. Vous pouvez sélectionner la
+      direction à analyser (horizontale ou verticale), mais là encore il est
+      préférable d'utiliser la direction du balayage rapide. Vous pouvez aussi
+      choisir la <link linkend='interpolation'>méthode d'interpolation</link> à
+      utiliser. Une fois les réglages réalisés, vous pouvez cliquer sur
+      <guibutton>appliquer</guibutton> pour fermer la fenêtre de l'outil et
+      obtenir une nouvelle fenêtre de graphe contenant les données statistiques.
+    </para>
+    <tip>
+      De la même manière que l'outil
+      <link linkend='stat-quantities'>statistiques</link>, cet outil évalue par
+      défaut les fonctions sur l'image entière, mais vous pouvez là aussi
+      sélectionner une région de l'image.
+    </tip>
+    <sect3 id='height-angle-distribution'>
+      <title>Distributions des hauteurs et des angles</title>
+      <indexterm><primary>distribution des hauteurs</primary></indexterm>
+      <indexterm>
+        <primary>distribution des angles</primary>
+        <secondary>1D</secondary>
+      </indexterm>
+      <para>
+        Les distributions des hauteurs et des pentes sont les fonctions les
+        plus simples. Elles peuvent être calculées de manière non cumulative
+        (i.e les densités), ou cumulative. Ces fonctions sont calculées sous
+        forme d'histogrammes normalisés des hauteurs ou des pentes (obtenues à
+        partir des dérivées selon la direction sélectionnée – horizontale ou
+        verticale). En d'autres termes, les valeurs données en abscisse pour la
+        <quote>distribution angulaire</quote> correspondent aux tangentes des
+        angles, et non aux angles eux-mêmes.
+      </para>
+      <para>
+        La normalisation des densités <xi:include href="eqi-rho-of-p.xml"/>
+        (où <xi:include href="eqi-p.xml"/> est la quantité correspondante, la
+        hauteur ou la pente) est telle que
+        <xi:include href="eq-distribution-density-normalization.xml"/>
+      </para>
+      <para>
+        Bien évidemment, l'échelle des valeurs est alors indépendante du nombre
+        de points et du nombre de classes de l'histogramme. Les distributions
+        cumulatives correspondent aux intégrales des densités et leurs valeurs
+        sont dans l'intervalle <xi:include href="eqi-interval-0-1.xml"/>.
+      </para>
+    </sect3>
+    <sect3 id='first-order-vs-second-order-quantities'>
+      <title>Quantités de premier et de second ordre</title>
+      <para>
+        Les distributions des hauteurs et des pentes sont des quantités
+        statistiques de premier ordre, elles ne décrivent que les propriétés
+        statistiques des points individuels. Pour un description complète des
+        propriétés de la surface il est nécessaire d'étudier des fonctions
+        d'ordre supérieur. On emploie en général des quantités statistiques de
+        second ordre donnant les relations mututlles entre deux points de la
+        surface. On trouve parmi ces quantités la fonction d'autocorrélation,
+        la fonction de corrélation hauteur-hauteur et la densité spectrale de
+        puissance. Une description de chacune de ces fonctions est donnée
+        ci-dessous :
+      </para>
+    </sect3>
+    <sect3 id='autocorrelation-1d'>
+      <title>Fonction d'autocorrelation (ACF)</title>
+      <indexterm>
+        <primary>fonction d'autocorrélation</primary>
+        <secondary>uni-dimensionnelle</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>fonction d'autocorrélation</primary>
+        <secondary>bi-dimensionnelle</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>fonction d'autocorrélation</primary>
+        <secondary>radiale</secondary>
+      </indexterm>
+      <para>
+        La fonction d'autocorrélation est donnée par
+        <xi:include href="eq-autocorrelation-definition.xml"/>
+        où <xi:include href="eqi-z_1.xml"/> et
+        <xi:include href="eqi-z_2.xml"/> sont les valeurs des hauteurs aux points
+        <xi:include href="eqi-coords-x_1-y_1.xml"/>,
+        <xi:include href="eqi-coords-x_2-y_2.xml"/> ; on a de plus,
+        <xi:include href="eqi-tau_x-is-x_1-minus-x_2.xml"/> et
+        <xi:include href="eqi-tau_y-is-y_1-minus-y_2.xml"/>.
+        La fonction <xi:include href="eqi-w-z_1-z_2-tau_x-tau_y.xml"/>
+        décrit la densité de probabilité bi-dimensionnelle de la fonction
+        aléatoire <xi:include href="eqi-xi-x-y.xml"/> correspondant aux points
+        <xi:include href="eqi-coords-x_1-y_1.xml"/>,
+        <xi:include href="eqi-coords-x_2-y_2.xml"/>, et la distance entre ces
+        points <xi:include href="eqi-tau.xml"/>.
+      </para>
+      <para id='autocorrelation-2d'>
+        On peut évaluer cette fonction à partir de données AFM discrètes avec
+        <xi:include href="eq-autocorrelation-discrete-2d.xml"/>
+        où <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>,
+        <xi:include href="eqi-n-is-tau_y-over-Delta-y.xml"/>.
+        La fonction peut ainsi être évaluée par une série de valeurs discrètes
+        <xi:include href="eqi-tau_x.xml"/> et
+        <xi:include href="eqi-tau_y.xml"/> séparées respectivement par les
+        intervalles d'échantillonnage  <xi:include href="eqi-Delta-x.xml"/> et
+        <xi:include href="eqi-Delta-y.xml"/>. La fonction d'autocorrélation
+        bi-dimensionnelle peut peut être lancée par
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Statistiques</guisubmenu>
+          <guimenuitem>Autocorrélation 2D</guimenuitem>
+        </menuchoice>.
+      </para>
+      <para>
+        Pour les mesures AFM, on évalue généralement la fonction
+        d'autocorrélation uni-dimensionnelle basée uniquement sur les profils
+        pris le long de l'axe rapide de balayage. On peut dès lors l'évaluer sur
+        les données avec
+        <xi:include href="eq-autocorrelation-discrete-1d.xml"/>
+      </para>
+      <para>
+        La fonction d'autocorrélation uni-dimensionnelle est souvent de forme
+        gaussienne, c'est-à-dire qu'elle peut être donnée  par la relation
+        suivante :
+        <xi:include href="eq-autocorrelation-gaussian.xml"/>
+        où <xi:include href="eqi-sigma.xml"/> correspond à l'écart
+        quadratique des hauteurs et <xi:include href="eqi-T.xml"/> correspond
+        à la longueur d'autocorrélation.
+      </para>
+      <para>
+        Nous avons la relation suivante pour la fonction d'autocorrélation
+        exponentielle :
+        <xi:include href="eq-autocorrelation-exponential.xml"/>
+      </para>
+      <informalfigure id='fig-gaussian-acf'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='gaussian-acf.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='gaussian-acf.png' format='PNG'/>
+          </imageobject>
+          <caption>
+            Fonction d'autocorrélation obtenue pour une surface aléatoire
+            gaussienne artificielle (c'est-à-dire avec ayant une fonction
+            d'autocorrélation gaussienne)
+            avec <xi:include href="eqi-sigma-approx-20-nm.xml"/> et
+            <xi:include href="eqi-T-approx-300-nm.xml"/>.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+      <para>
+        On peut aussi présenter la fonction d'aucorrélation moyennée radialement
+        <xi:include href="eqi-G_r-of-tau.xml"/> qui contient évidemment la même
+        information que la fonction d'autocorrélation uni-dimensionnelle pour
+        les surfaces isotropes :
+        <xi:include href="eq-autocorrelation-radial.xml"/>
+      </para>
+      <note>
+        Concernant les mesures optique (la spectroscopie à interférence
+        réflectométrique ou l'ellipsométrie par exemple) la fonction
+        d'autocorrélation gaussienne concorde généralement assez bien avec les
+        propriétés de la surface. Toutefois certains articles traitant de la
+        croissance ou de l'oxydation de surfaces postulent que la forme
+        exponentielle est plus fidèle à la réalité.
+      </note>
+    </sect3>
+    <sect3 id='height-height-correlation-1d'>
+      <title>Fonction de corrélation hauteur-hauteur (HHCF)</title>
+      <indexterm><primary>fonction de corrélation hauteur-hauteur</primary></indexterm>
+      <para>
+        La différence entre la fonction de corrélation hauteur-hauteur et la
+        fonction d'autocorrélation est très mince. Comme pour la fonction
+        d'autocorrélation, on somme le produit de deux valeurs. Pour la fonction
+        d'autocorrélation ces valeurs représentent les distances entre les
+        points. Dans le cas de la fonction de corrélation hauteur-hauteur, on
+        utilise le carré des différences entre les points.
+      </para>
+      <para>
+        Dans le cas des mesures AFM on évalue généralement la fonction de
+        corrélation hauteur-hauteur uni-dimensionnelle basée sur les profils
+        pris le long d'axe rapide de balayage. On peut dès lors l'évaluer sur
+        les données avec
+        <xi:include href="eq-height-height-correlation-discrete.xml"/>
+        où <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>.
+        La fonction peut ainsi être évaluée par une série de valeurs discrètes
+        <xi:include href="eqi-tau_x.xml"/> séparées par l'intervalle
+        d'échantillonnage  <xi:include href="eqi-Delta-x.xml"/>.
+      </para>
+      <para>
+        La fonction de corrélation hauteur-hauteur uni-dimensionnelle est
+        souvent de forme gaussienne, c'est-à-dire qu'elle peut être donnée  par
+        la relation suivante :
+        <xi:include href="eq-height-height-correlation-gaussian.xml"/>
+        où <xi:include href="eqi-sigma.xml"/> est l'écart quadratique des
+        hauteurs et <xi:include href="eqi-T.xml"/> est la longueur
+        d'autocorrélation.
+      </para>
+      <para>
+        Nous avons la relation suivante pour la fonction de corrélation
+        hauteur-hauteur exponentielle :
+        <xi:include href="eq-height-height-correlation-exponential.xml"/>
+      </para>
+      <para>
+        La figure suivante donne la fonction de corrélation hauteur-hauteur
+        obtenue pour une surface gaussienne simulée. Elle est ajustée à l'aide
+        de la formule donnée plus haut. Les valeurs résultantes de
+        <xi:include href="eqi-sigma.xml"/> et <xi:include href="eqi-T.xml"/>
+        obtenues par l'ajustement de la fonction de corrélation hauteur-hauteur
+        sont pratiquement identiques à celles de la fonction d'autocorrélation.
+      </para>
+      <informalfigure id='fig-gaussian-hhcf'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='gaussian-hhcf.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='gaussian-hhcf.png' format='PNG'/>
+          </imageobject>
+          <caption>
+            Fonction de corrélation hauteur-hauteur obtenue pour une surface
+            aléatoire gaussienne artificielle avec
+            <xi:include href="eqi-sigma-approx-20-nm.xml"/> et
+            <xi:include href="eqi-T-approx-300-nm.xml"/>.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id='power-spectral-density-1d'>
+      <title>Densité spectrale de puissance (PSD)</title>
+      <indexterm>
+        <primary>densité spectrale de puissance</primary>
+        <secondary>uni-dimensionnelle</secondary>
+      </indexterm>
+      <para>
+        La densité spectrale de puissance bi-dimensionnelle correspond à la
+        transformée de Fourier de la fonction d'autocorrélation
+        <xi:include href="eq-power-spectral-density-fft.xml"/>
+      </para>
+      <para>
+        Comme pour la fonction d'autocorrélation, on évalue généralement la
+        densité spectrale de puissance uni-dimensionnelle, donnée par l'équation
+        <xi:include href="eq-power-spectral-density-1d.xml"/>
+      </para>
+      <para>
+        Cette fonction peut être calculée à l'aide d'une transforme de Fourier
+        rapide (FFT) de la manière suivante :
+        <xi:include href="eq-power-spectral-density-1d-fft.xml"/>
+        où <xi:include href="eqi-P_j-of-K_x.xml"/> est le coefficient de Fourier
+       de la <xi:include href="eqi-j.xml"/>-ième ligne, c'est-à-dire
+        <xi:include href="eq-power-spectral-density-Pj.xml"/>
+      </para>
+      <para>
+        Si nous choisissons la fonction d'autocorrélation gaussienne, la
+        relation gaussienne correspondante pour la PSD est
+        <xi:include href="eq-power-spectral-density-1d-gaussian.xml"/>
+      </para>
+      <para>
+        Pour une surface ayant une fonction d'autocorrélation exponentielle nous
+        avons <xi:include href="eq-power-spectral-density-1d-exponential.xml"/>
+      </para>
+      <para>
+        La figure qui suit donne la PSD et son ajustement pour la même surface
+        que celle utilisée pour la
+        <link linkend='fig-gaussian-acf'>fonction d'autocorrélation</link> et la
+        <link linkend='fig-gaussian-hhcf'>fonction de corrélation hauteur-hauteur</link>.
+        On peut constater que la fonction peut là aussi être ajustée par une
+        PSD gaussienne. Les valeurs résultantes de
+        <xi:include href="eqi-sigma.xml"/> et
+        <xi:include href="eqi-T.xml"/> sont pratiquement identiques à celles
+        obtenues pour l'ajustement de la fonction d'autocorrélation et la
+        fonction de corrélation hauteur-hauteur.
+      </para>
+      <informalfigure id='fig-gaussian-psdf'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='gaussian-psdf.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='gaussian-psdf.png' format='PNG'/>
+          </imageobject>
+          <caption>
+            PSD obtenue pour des données générées, avec la fonction
+            d'autocorrélation gaussienne.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+      <para id='psdf-radial'>
+        <indexterm>
+          <primary>densité spectrale de puissance</primary>
+          <secondary>radiale</secondary>
+        </indexterm>
+        On peut de même appliquer la PSD radiale
+        <xi:include href="eqi-W_r-of-K.xml"/> qui contient les mêmes
+        informations que la PSD uni-dimensionnelle pour les surfaces isotropes :
+        <xi:include href="eq-power-spectral-density-radial.xml"/>
+      </para>
+      <para>
+        Pour une surface ayant une fonction d'autocorrélation gaussienne, cette
+        fonction est exprimée par
+        <xi:include href="eq-power-spectral-density-radial-gaussian.xml"/>
+        alors que pour une fonction d'autocorrélation exponentielle nous avons
+        <xi:include href="eq-power-spectral-density-radial-exponential.xml"/>
+      </para>
+      <tip>
+        Gwyddion vous permet d'ajuster toutes les fonctions statistiques
+        présentées ici par leurs formes gaussienne et exponentielle. Il suffit
+        de cliquer sur <guibutton>appliquer</guibutton> dans la fenêtre de
+        l'outil <link linkend='sfunctions'>fonctions statistique</link>. Cela
+        créera une nouvelle fenêtre de graphe. Après avoir sélectionné celle-ci,
+        cliquez sur
+        <menuchoice>
+          <guimenu>Graphe</guimenu>
+          <guimenuitem><link linkend='graph-fit'>Ajustement de graphe</link></guimenuitem>
+        </menuchoice>.
+      </tip>
+    </sect3>
+    <sect3 id='minkowski-functionals'>
+      <title>Fonctions de Minkowski</title>
+      <indexterm><primary>Fonctions de Minkowski</primary></indexterm>
+      <para>
+        Les fonctions de Minkowski permettent de décrire les caractéristiques
+        géométriques globales de structures. Les caractéristiques
+        bi-dimensionnelles discrètes de volume <xi:include href="eqi-V.xml"/>,
+        de surface <xi:include href="eqi-S.xml"/> et de connectivité
+        (caractéristique d'Euler-Poincaré) <xi:include href="eqi-chi.xml"/> sont
+        calculées à l'aide des formules suivantes :
+        <xi:include href="eq-minkowski-functionals.xml"/>
+        Où <xi:include href="eqi-N.xml"/> correspond au nombre total de pixels,
+        <xi:include href="eqi-N_white.xml"/> au nombre de pixels
+        <quote>blancs</quote>, c'est-à-dire au-dessus du seuil. Les pixels
+        en-dessous du seuil sont considérés comme étant <quote>noirs</quote>. Le
+        symbole <xi:include href="eqi-N_bound.xml"/> correspond au nombre de
+        délimitations blanc-noir. Pour finir,
+        <xi:include href="eqi-C_white.xml"/> et
+        <xi:include href="eqi-C_black.xml"/> correspondent aux nombres
+        de groupes continus de pixels respectivement blancs et noirs.
+      </para>
+      <para>
+        Dans le cas d'une image ayant des ensembles de valeurs continus les
+        fonctions sont paramétrées par le seuil de hauteur
+        <xi:include href="eqi-theta.xml"/> qui sépare pixels blancs des pixels
+        noirs, c'est-à-dire qu'on peut les voir comme des fonctions de ce
+        paramètre. Et ce sont les fonctions
+        <xi:include href="eqi-V-of-theta.xml"/>,
+        <xi:include href="eqi-S-of-theta.xml"/> et
+        <xi:include href="eqi-chi-of-theta.xml"/> qui sont affichées.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='line-stats'>
+    <title>
+      Outil d'analyse des statistiques de lignes/colonnes
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_graph_vertical-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>Outil statistiques de lignes/colonnes</primary></indexterm>
+    <para>
+      Cet outil calcule les caractéristiques de chaque ligne ou colonne et
+      les affiche en fonction de leur position. Cet outil est complémentaire
+      de l'outil <link linkend='sfunctions'>focntions statistiques</link>.
+      Les caractéristiques disponibles sont les suivantes :
+    </para>
+    <itemizedlist>
+      <listitem>
+        <indexterm>
+          <primary>moyenne</primary>
+          <secondary>d'une ligne/colonne</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>médiane</primary>
+          <secondary>d'une ligne/colonne</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>d'une ligne/colonne</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>d'une ligne/colonne</secondary>
+        </indexterm>
+        Valeur moyenne, minimale, maximale et médiane.
+      </listitem>
+      <listitem>
+        <indexterm>
+          <primary>RMS</primary>
+          <secondary>d'une ligne/colonne</secondary>
+        </indexterm>
+        Valeur RMS des irrégularités de hauteur calculée à partir de la variance
+        <xi:include href="eqi-R_q.xml"/>.
+      </listitem>
+      <listitem>
+        Asymétrie et kurtosis de la distribution des hauteurs.
+      </listitem>
+      <listitem>
+        Longueur le long de la surface. Celle-ci est estimée en prenant la
+        longueur totale des segments joignant les valeurs de hauteur dans la
+        ligne ou la colonne.
+      </listitem>
+      <listitem>
+        Pente globale, c-à-d la tangente de la droite moyenne ajustée sur la
+        ligne ou la colonne.
+      </listitem>
+      <listitem>
+        Tangente <xi:include href="eqi-beta_0.xml"/>. Il s'agit de la raideur
+        des pentes locales, fortement liée au comportement des fonctions
+        d'autocorrélation et de corrélation hauteur-hauteur autour de zéro. Dans
+        le cas de valeurs discrètes on la calcule de la manière suivante :
+        <xi:include href="eq-tan-beta0.xml"/>
+      </listitem>
+      <listitem>
+        Paramètres de rugosité standards
+        <!-- FIXME: Formulas break inside links in dblatex. -->
+        <link linkend='iso-Ra'>Ra</link>,
+        <link linkend='iso-Rz'>Rz</link>,
+        <link linkend='iso-Rt'>Rt</link>.
+      </listitem>
+    </itemizedlist>
+    <para>
+      En complément du graphe, la valeur moyenne et l'écart type de la quantité
+      sélectionnée sont calculés à partir des valeurs obtenues pour les lignes
+      ou les colonnes.
+    </para>
+  </sect2>
+  <sect2 id='slope-distribution'>
+    <title>Statistiques des pentes bi-dimensionnelles</title>
+    <indexterm><primary>distribution des pentes (2D)</primary></indexterm>
+    <indexterm>
+      <primary>distribution angulaire</primary>
+      <secondary>2D</secondary>
+    </indexterm>
+    <para>
+      Plusieurs fonctions du menu
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Statistiques</guisubmenu>
+      </menuchoice>
+      concernent les statistiques des pentes (dérivées) bi-dimensionnelles.
+    </para>
+    <para>
+      La <guimenuitem>distribution des pentes</guimenuitem> calcule simplement
+      la distribution bi-dimensionnelle des dérivées, les coordonnées verticales
+      et horizontales de l'image résultante sont respectivement les dérivées
+      verticales et horizontales. Les pentes peuvent être calculées localement
+      (en se basant sur un seul côté en bord d'image), ou si l'option
+      <guilabel>utiliser l'ajustement du plan local</guilabel> est activée, en
+      ajustant un plan sur les pixels environnants et en utilisant les gradients
+      de celui-ci. La <guimenuitem>distribution des pentes</guimenuitem> propose
+      aussi un autre mode appelé <guilabel>graphe directionnel</guilabel>, qui
+      affiche la distribution <xi:include href="eqi-r-to-2.xml"/> sur
+      <xi:include href="eqi-phi.xml"/> où l'on utilise les coordonnées polaires
+      <xi:include href="eqi-coords-r-phi.xml"/> dans le plan des dérivées. Les
+      relations entre les coordonnées cartésiennes de la distribution
+      bi-dimensionnelle des pentes et les
+      <link linkend='inclinations-coordinates'>angles d'inclinaison des facettes</link>
+      sont données par les formules suivantes :
+      <xi:include href="eq-facet-theta-phi.xml"/>
+    </para>
+    <para id='angle-distribution'>
+      La <guimenuitem>distribution angulaire</guimenuitem> est un outil de
+      visualisation qui ne calcule pas une distribution au sens strict du terme.
+      Pour chaque dérivée <xi:include href="eqi-v.xml"/>, elle affiche le cercle
+      de points satisfaisant <xi:include href="eq-angle-distribution.xml"/>
+      Le nombre de points sur le cercle est donné par le
+      <guilabel>nombre de pas</guilabel>.
+    </para>
+  </sect2>
+  <xi:include href='facet-analysis.xml'/>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
