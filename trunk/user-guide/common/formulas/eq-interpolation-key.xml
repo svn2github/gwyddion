@@ -16,7 +16,7 @@
 \def\Q{\vphantom{(^)_y}}
 \vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
 w_{-1}&\bigl(-{1\over2} + (1 - {x\over2})x\bigr)x\cr
-w_0&1 + (-{5\over2} + {2\over2}x)x^2\cr
+w_0&1 + (-{5\over2} + {3\over2}x)x^2\cr
 w_1&\bigl({1\over2} + (2 - {3\over2}x)x\bigr)x\cr
 w_2&(-{1\over2} + {x\over2})x^2\cr
 }}

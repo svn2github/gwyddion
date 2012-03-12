@@ -34,7 +34,7 @@
       <listitem>
         <para>
           Round interpolation (also called nearest neighbourhood
-          interpolation) is the simplest method – it just takes round value
+          interpolation) is the simplest method – it just takes rounded value
           of the expected position and finds therefore the closest data value
           at integer position.
           Its polynomial degree is 0, regularity
