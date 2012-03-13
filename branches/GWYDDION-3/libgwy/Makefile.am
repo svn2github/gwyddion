@@ -24,6 +24,7 @@ public_headers = \
 	$(srcdir)/brick-arithmetic.h \
 	$(srcdir)/brick-part.h \
 	$(srcdir)/brick-statistics.h \
+	$(srcdir)/calc.h \
 	$(srcdir)/container.h \
 	$(srcdir)/coords.h \
 	$(srcdir)/coords-point.h \
@@ -124,6 +125,7 @@ libgwy3_la_SOURCES = \
 	brick-arithmetic.c \
 	brick-part.c \
 	brick-statistics.c \
+	calc.c \
 	container.c \
 	coords.c \
 	coords-point.c \
