@@ -562,7 +562,7 @@ parse(GArray *units,
             g_string_assign(buf, "deg");
         else if (gwy_stramong(buf->str, "micro m", NULL))
             g_string_assign(buf, "µm");
-        else if (gwy_stramong(buf->str, "Å", "AA", "Ang", NULL))
+        else if (gwy_stramong(buf->str, "Å", "AA", "Ang", "Angstrom", NULL))
             g_string_assign(buf, "Å");
         else if (gwy_stramong(buf->str, "a.u.", "a. u.", "counts", NULL))
             g_string_assign(buf, "");
