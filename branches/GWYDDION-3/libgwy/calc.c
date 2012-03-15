@@ -25,7 +25,7 @@
 #include "libgwy/calc.h"
 
 struct _GwyCalcPrivate {
-    GObject g_object;
+    int unused;
 };
 
 typedef struct _GwyCalcPrivate Calc;

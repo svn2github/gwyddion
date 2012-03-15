@@ -108,7 +108,6 @@ typedef gboolean (*GwyFitTaskVectorFunc6)(guint i,
                                           gdouble p5);
 
 struct _GwyFitTaskPrivate {
-    GObject g_object;
     GwyFitter *fitter;
     GwyFitTaskInterfaceType type;
     guint nparam;

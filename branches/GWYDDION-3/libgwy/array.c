@@ -37,8 +37,6 @@ enum {
 };
 
 struct _GwyArrayPrivate {
-    GObject g_object;
-
     GArray *items;
 
     gsize size;

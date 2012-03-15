@@ -36,8 +36,6 @@ enum {
 };
 
 struct _GwyInventoryPrivate {
-    GObject g_object;
-
     GSequence *items;
     GHashTable *hash;
 

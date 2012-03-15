@@ -62,7 +62,6 @@ typedef struct {
 } GwyFitterSettings;
 
 struct _GwyFitterPrivate {
-    GObject g_object;
     GwyFitterSettings settings;
     GwyFitterStatus status;
     GwyFitterValid valid;

@@ -45,7 +45,6 @@ typedef struct {
 } PrefixData;
 
 struct _GwyContainerPrivate {
-    GObject g_object;
     GHashTable *values;
     gboolean in_construction : 1;
 };
