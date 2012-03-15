@@ -66,6 +66,7 @@
 #include <libgwy/mask-field-transform.h>
 #include <libgwy/mask-iter.h>
 #include <libgwy/mask-line.h>
+#include <libgwy/master.h>
 #include <libgwy/math.h>
 #include <libgwy/object-utils.h>
 #include <libgwy/pack.h>
