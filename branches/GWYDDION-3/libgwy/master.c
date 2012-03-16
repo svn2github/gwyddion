@@ -21,7 +21,7 @@
 #include <string.h>
 #include <glib.h>
 #include "libgwy/macros.h"
-#include "libgwy/strfuncs.h"
+#include "libgwy/main.h"
 #include "libgwy/master.h"
 
 typedef enum {
@@ -317,7 +317,9 @@ gwy_master_new(void)
 /**
  * gwy_master_create_workers:
  * @master: Parallel task manager.
- * @nworkers: Number of worker threads to create.
+ * @nworkers: Number of worker threads to create.  Passing zero means leaving
+ *            the decision on @master which normally results in creating as
+ *            many worker threads as there are available processor cores.
  * @error: Return location for the error, or %NULL.
  *
  * Creates worker threads for a parallel task manager.
@@ -339,7 +341,7 @@ gwy_master_create_workers(GwyMaster *master,
     g_return_val_if_fail(GWY_IS_MASTER(master), FALSE);
 
     if (nworkers < 1)
-        nworkers = 1;   // TODO: auto-detection
+        nworkers = gwy_n_cpus();
 
     Master *priv = master->priv;
     g_return_val_if_fail(priv->worker, FALSE);
