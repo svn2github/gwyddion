@@ -322,6 +322,12 @@ gwy_master_new(void)
  *
  * Creates worker threads for a parallel task manager.
  *
+ * This method can be only called after the worker functions were set up with
+ * gwy_master_set_worker_func() and possibly gwy_master_set_create_data_func()
+ * and gwy_master_set_destroy_data_func().
+ *
+ * The threads are not destroyed until @master is finalised.
+ *
  * Returns: %TRUE if all worker threads were successfully created, %FALSE on
  *          failure.
  **/
@@ -356,6 +362,14 @@ gwy_master_create_workers(GwyMaster *master,
     return TRUE;
 }
 
+/**
+ * gwy_master_manage_tasks:
+ * @master: Parallel task manager.
+ *
+ * Runs a chunked parallel calculation.
+ *
+ * This method returns when all the work is done.
+ **/
 void
 gwy_master_manage_tasks(GwyMaster *master)
 {
@@ -407,6 +421,16 @@ gwy_master_manage_tasks(GwyMaster *master)
     }
 }
 
+/**
+ * gwy_master_set_worker_func:
+ * @master: Parallel task manager.
+ * @worker: Worker function.
+ *
+ * Sets the worker function for a parallel task manager.
+ *
+ * The worker function is executed, possibly repeatedly, in the worker threads
+ * with tasks provided by the task function.
+ **/
 void
 gwy_master_set_worker_func(GwyMaster *master,
                            GwyMasterWorkerFunc worker)
@@ -416,6 +440,21 @@ gwy_master_set_worker_func(GwyMaster *master,
     priv->worker = worker;
 }
 
+/**
+ * gwy_master_set_create_data_func:
+ * @master: Parallel task manager.
+ * @createdata: Function to create worker data.
+ * @user_data: User data passed to function @createdata.
+ *
+ * Sets the worker data creation function for a parallel task manager.
+ *
+ * The worker data creation function is executed in each worker thread exactly
+ * once before the tasks start coming.  Its purpose is to create auxiliary
+ * data the worker thread will repeatedly reuse.
+ *
+ * Calling gwy_master_set_create_data_func() after gwy_master_create_workers()
+ * has no effect.
+ **/
 void
 gwy_master_set_create_data_func(GwyMaster *master,
                                 GwyMasterCreateDataFunc createdata,
@@ -427,6 +466,21 @@ gwy_master_set_create_data_func(GwyMaster *master,
     priv->create_data_user_data = user_data;
 }
 
+/**
+ * gwy_master_set_destroy_data_func:
+ * @master: Parallel task manager.
+ * @destroydata: Function to destroy worker data.
+ *
+ * Sets the worker data destruction function for a parallel task manager.
+ *
+ * The worker data destruction function is executed in each worker thread
+ * exactly once before the thread terminates.  Its purpose is to destruct
+ * auxiliary data created by the function set by
+ * gwy_master_set_create_data_func().
+ *
+ * Calling gwy_master_set_destroy_data_func() after gwy_master_create_workers()
+ * has no effect.
+ **/
 void
 gwy_master_set_destroy_data_func(GwyMaster *master,
                                  GwyMasterDestroyDataFunc destroydata)
@@ -436,6 +490,21 @@ gwy_master_set_destroy_data_func(GwyMaster *master,
     priv->destroy_data = destroydata;
 }
 
+/**
+ * gwy_master_set_task_func:
+ * @master: Parallel task manager.
+ * @provide_task: Function providing individual tasks.
+ * @user_data: User data passed to @provide_task.
+ *
+ * Sets the function that will provide the individual tasks managed by a
+ * parallel task manager.
+ *
+ * The task provider function will be called in the master thread to provide
+ * individual tasks.  Once it returns %NULL it is assumed there is no more work
+ * to do in this batch.
+ *
+ * The task function must be set before calling gwy_master_manage_tasks().
+ **/
 void
 gwy_master_set_task_func(GwyMaster *master,
                          GwyMasterTaskFunc provide_task,
@@ -447,6 +516,20 @@ gwy_master_set_task_func(GwyMaster *master,
     priv->provide_task_user_data = user_data;
 }
 
+/**
+ * gwy_master_set_result_func:
+ * @master: Parallel task manager.
+ * @consume_result: Function consuming task results.
+ * @user_data: User data passed to @consume_result.
+ *
+ * Sets the function that will consume the results of individual tasks managed
+ * by a parallel task manager.
+ *
+ * In most cases, it is avisable that the results are not actually created by
+ * workers.  Instead, the task function specified storage for the result and
+ * the worker then returns the task again as the result – just with the
+ * resulting values filled in.
+ **/
 void
 gwy_master_set_result_func(GwyMaster *master,
                            GwyMasterResultFunc consume_result,
@@ -485,6 +568,61 @@ gwy_master_set_result_func(GwyMaster *master,
  * GwyMasterClass:
  *
  * Class of parallel task managers.
+ **/
+
+/**
+ * GwyMasterWorkerFunc:
+ * @task: Task data returned by the task provider set by
+ *        gwy_master_set_task_func().
+ * @data: Auxiliary data created by the auxiliary data creation function set by
+ *        gwy_master_set_create_data_func().
+ *
+ * Type of function performing one chunk in parallel processing in the
+ * individual worker threads.
+ *
+ * Returns: Result pointer passed to function set up by
+ *          gwy_master_set_result_func().  If no such function is set up the
+ *          return value is ignored.
+ **/
+
+/**
+ * GwyMasterCreateDataFunc:
+ * @user_data: User data speficied in gwy_master_set_create_data_func().
+ *
+ * Type of function creating auxiliary data structures for each worker thread
+ * in a parallel processing.
+ *
+ * Returns: Pointer to the auxiliary data, presumably some newly created
+ *          buffers but it can be anything the worker thread expects.
+ **/
+
+/**
+ * GwyMasterDestroyDataFunc:
+ * @worker_data: Data created by function set by
+ *               gwy_master_set_destroy_data_func().
+ *
+ * Type of function destroying auxiliary data structures in each worker thread
+ * in a parallel task processing.
+ **/
+
+/**
+ * GwyMasterTaskFunc:
+ * @master: Parallel task manager.
+ * @user_data: User data speficied in gwy_master_set_task_func().
+ *
+ * Type of function providing individual tasks in chunked parallel processing.
+ *
+ * Returns: The new task, passed to the worker function if not %NULL.  If it is
+ *          %NULL it means there is no more work to do.
+ **/
+
+/**
+ * GwyMasterResultFunc:
+ * @master: Parallel task manager.
+ * @result: Result data of one task obtained from a worker.
+ * @user_data: User data speficied in gwy_master_set_result_func().
+ *
+ * Type of function gathering results of individual tasks.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
