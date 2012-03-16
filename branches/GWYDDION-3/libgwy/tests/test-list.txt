@@ -8,6 +8,7 @@ str/isident/ascii
 str/isident/utf8
 str/case/equal-ascii
 str/case/hash-ascii
+get-n-cpus
 pack
 math/powi/actual
 math/powi/our

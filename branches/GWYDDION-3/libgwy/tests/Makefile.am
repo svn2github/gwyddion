@@ -25,6 +25,7 @@ testlibgwy_SOURCES = \
 	inventory.c \
 	line-part.c \
 	line.c \
+	main.c \
 	mask-field.c \
 	mask-line.c \
 	math.c \
