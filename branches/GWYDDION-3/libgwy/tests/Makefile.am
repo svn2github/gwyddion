@@ -28,6 +28,7 @@ testlibgwy_SOURCES = \
 	main.c \
 	mask-field.c \
 	mask-line.c \
+	master.c \
 	math.c \
 	object-utils.c \
 	pack.c \

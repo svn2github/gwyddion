@@ -70,6 +70,13 @@ deserialize/data
 deserialize/nested
 deserialize/boxed
 deserialize/garbage
+master/sum/1
+master/sum/2
+master/sum/3
+master/sum/4
+master/sum/8
+master/sum/16
+master/sum/auto
 xy/boxed
 xyz/boxed
 line-part/boxed
