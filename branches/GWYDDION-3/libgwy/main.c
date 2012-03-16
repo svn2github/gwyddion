@@ -20,12 +20,23 @@
 #include "config.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <glib/gstdio.h>
 
+#ifdef __GLIBC__
+#include <sys/sysinfo.h>
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__bsdi__)
+#define USE_SYSCTL
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+
 #ifdef G_OS_WIN32
-#  define STRICT
-#  include <windows.h>
-#  undef STRICT
+#define STRICT
+#include <windows.h>
+#undef STRICT
 #endif
 
 #ifdef __APPLE__
@@ -42,6 +53,11 @@
 
 #ifndef X_OK
 #define X_OK 1
+#endif
+
+// Turn _SC_NPROC_ONLN to _SC_NPROCESSORS_ONLN on IRIX.
+#if (!defined(_SC_NPROCESSORS_ONLN) && defined(_SC_NPROC_ONLN))
+#define _SC_NPROC_ONLN _SC_NPROCESSORS_ONLN
 #endif
 
 #include "libgwy/libgwy.h"
@@ -801,6 +817,83 @@ gwy_data_search_path(const gchar *subdir)
     add_from_list(paths, g_getenv("XDG_DATA_DIRS"), subdir);
     g_ptr_array_add(paths, NULL);
     return (gchar**)g_ptr_array_free(paths, FALSE);
+}
+
+
+/*
+ * HP-UX (defined(__hpux__) or defined(__hpux)) alternatives:
+ * (a)
+ * return mpctl(MPC_GETNUMSPUS, NULL, NULL);
+ *
+ * (b)
+ * struct pst_dynamic psd;
+ * if (pstat_getdynamic(&psd, sizeof(psd), 1, 0) == 1)
+ *     return psd.psd_proc_cnt;
+ * return 0;
+ **/
+
+/* distcc has also some code for Stratos VOS.  Probably not relevant. */
+
+static gint
+count_processors_impl(void)
+{
+#if defined(PTW32_VERSION) || defined(__hpux)
+    return pthread_num_processors_np();
+#elif defined(__GLIBC__)
+    return get_nprocs();
+#elif defined(USE_SYSCTL)
+    int count = 0;
+    size_t size = sizeof(count);
+    if (!sysctlbyname("hw.availcpu", &count, &size, NULL, 0) && count > 0)
+        return count;
+    if (!sysctlbyname("hw.ncpu", &count, &size, NULL, 0) && count > 0)
+        return count;
+    return 0;
+#elif defined(_SC_NPROCESSORS_ONLN)
+    // Mostly generic Unix; works on Linux, Solaris, AIX and others.
+    return sysconf(_SC_NPROCESSORS_ONLN);
+#elif defined(G_OS_WIN32)
+    SYSTEM_INFO info;
+    gwy_clear1(info);
+    GetSystemInfo(&info);
+    return info.dwNumberOfProcessors;
+#else
+    return 0;
+#endif
+}
+
+static gpointer
+count_processors(G_GNUC_UNUSED gpointer arg)
+{
+    guint retval = count_processors_impl();
+    if (retval <= 0) {
+        g_warning("Failed to count available processors, assuming one.");
+        retval = 1;
+    }
+    return GUINT_TO_POINTER(retval);
+}
+
+/**
+ * gwy_n_cpus:
+ *
+ * Count available processor cores.
+ *
+ * The counting method is platform-dependent and also the precise
+ * interpretation of the return value differs: it can be either the number of
+ * available processor cores or all processors together.  The maximum number of
+ * threads for a CPU-bound parallel calculation should not be higher than the
+ * returned value, however, the optimum number may be even lower.
+ *
+ * Returns: The number of available processor cores.  It is always at least one
+ *          even if the counting fails for whatever reason.
+ **/
+guint
+gwy_n_cpus(void)
+{
+    // XXX: Assume the number of CPUs does not change.  Usually reasonable.
+    static GOnce processors_counted = G_ONCE_INIT;
+    g_once(&processors_counted, count_processors, NULL);
+    return GPOINTER_TO_UINT(processors_counted.retval);
 }
 
 /**
