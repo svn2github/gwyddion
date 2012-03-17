@@ -17,6 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// TODO: If create-data and destroy-data are implemented as messages (i.e.
+// the former is separated from the thread creation and the latter from RETIRE)
+// then we can perform complete teardown/setup cycle without terminating and
+// re-creating the threads.  Consequently, one Master could be recycled for
+// everything.
+
 #include "config.h"
 #include <string.h>
 #include <glib.h>
@@ -370,7 +376,22 @@ gwy_master_create_workers(GwyMaster *master,
  *
  * Runs a chunked parallel calculation.
  *
- * This method returns when all the work is done.
+ * Prior to executing this method it is necessary to create the worker threads
+ * (once) using gwy_master_create_workers() and, of course, set a non-%NULL
+ * task provider using gwy_master_set_task_func().  More precisely, it is not
+ * an error to call gwy_master_manage_tasks() with a %NULL or unset task
+ * provider function but it then just returns immediately.
+ *
+ * This method is <emphasis>synchronous</emphasis> in the sense it returns when
+ * all the work is done.  Therefore, you probably want to run it in a separate
+ * thread in GUI programs but it is usually all right to just call it in the
+ * main thread in batch processing.
+ *
+ * Staged calculations that require a part of the calculation to be completed
+ * before the next one can be started are implemented by running
+ * gwy_master_manage_tasks() for each stage separately.  Even the task provider
+ * can be kept unchanged if it returns %NULL once at the end of each stage and
+ * then starts returning non-%NULL tasks again.
  **/
 void
 gwy_master_manage_tasks(GwyMaster *master)
@@ -378,7 +399,9 @@ gwy_master_manage_tasks(GwyMaster *master)
     g_return_if_fail(GWY_IS_MASTER(master));
 
     Master *priv = master->priv;
-    g_return_if_fail(priv->provide_task);
+    if (!priv->provide_task)
+        return;
+
     g_return_if_fail(priv->nworkers);
 
     MessageQueue *master_to_workers = &priv->master_to_workers;
@@ -527,6 +550,9 @@ gwy_master_set_task_func(GwyMaster *master,
  * Sets the function that will consume the results of individual tasks managed
  * by a parallel task manager.
  *
+ * The result consumer function will be called in the master thread to process
+ * the results of individual tasks.
+ *
  * In most cases, it is avisable that the results are not actually created by
  * workers.  Instead, the task function specified storage for the result and
  * the worker then returns the task again as the result – just with the
@@ -555,6 +581,11 @@ gwy_master_set_result_func(GwyMaster *master,
  * stops providing them the work ceases whether it is truly finished or
  * cancelled.  Simialrly, the consumer of the results can easily do accounting
  * of the finished tasks.
+ *
+ * The main difference between #GwyMaster and #GThreadPool is, therefore, that
+ * #GThreadPool is intended for running jobs in the background, i.e. it has a
+ * non-blocking interface, whereas #GwyMaster is intended for parallelisation
+ * of immediately performed work, i.e. it has a blocking interface.
  **/
 
 /**
