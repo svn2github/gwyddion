@@ -90,20 +90,21 @@ master_sum_numbers_one(guint nproc)
     enum { niter = 1000 };
     GRand *rng = g_rand_new_with_seed(42);
 
+    //g_test_timer_start();
     for (guint iter = 0; iter < niter; iter++) {
         GwyMaster *master = gwy_master_new();
         guint64 size = g_rand_int_range(rng, 1000, 1000000);
         guint64 chunk_size = g_rand_int_range(rng, 1, size+1);
 
-        gwy_master_set_worker_func(master, &sum_numbers_worker);
         gboolean ok = gwy_master_create_workers(master, nproc, &error);
         g_assert_no_error(error);
         g_assert(ok);
 
         SumNumbersState state = { size, chunk_size, 0, 0 };
-        gwy_master_set_task_func(master, &sum_numbers_task, &state);
-        gwy_master_set_result_func(master, &sum_numbers_result, &state);
-        gwy_master_manage_tasks(master);
+        ok = gwy_master_manage_tasks(master, 0, &sum_numbers_worker,
+                                     &sum_numbers_task, &sum_numbers_result,
+                                     &state,
+                                     NULL);
 
         g_object_unref(master);
 
@@ -112,6 +113,7 @@ master_sum_numbers_one(guint nproc)
                           <=,
                           1e-14*expected);
     }
+    //g_printerr("%g\n", g_test_timer_elapsed());
 
     g_rand_free(rng);
 }

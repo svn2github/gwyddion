@@ -31,57 +31,61 @@
 #include "libgwy/master.h"
 
 typedef enum {
-    MSG_TASK_PUBLISHED = 1,
-    MSG_TASK_TAKEN     = 2,
-    MSG_TASK_DONE      = 3,
-    MSG_RETIRE         = 4,
-    MSG_RETIRED        = 5,
+    MSG_0,
+    MSG_TASK,
+    MSG_WORKER,
+    MSG_CREATE,
+    MSG_DESTROY,
+    MSG_RETIRE,
 } MessageType;
 
 typedef struct {
     MessageType type;
-    gulong id;
+    guint worker_id;
+    gulong task_id;
     gpointer data;
 } Message;
 
 typedef struct {
-    GArray *messages;
-    GMutex *lock;
-    GCond *cond;
-    const gchar *name;
-} MessageQueue;
+    GwyMasterCreateDataFunc func;
+    gpointer user_data;
+} CreateDataFuncInfo;
+
+typedef struct {
+    GAsyncQueue *from_master;
+    GAsyncQueue *to_master;
+} WorkerInfo;
+
+typedef struct {
+    GThread *thread;
+    GAsyncQueue *queue;
+    WorkerInfo *info;
+    gulong task_id;
+} WorkerData;
 
 struct _GwyMasterPrivate {
-    MessageQueue master_to_workers;
-    MessageQueue workers_to_master;
+    // XXX: It is not clear what we want to lock with it.  Other threads must
+    // do anything except for querying the state -- once we have some of that
+    // implemented.
+    GMutex *lock;
+    GAsyncQueue *queue;
+
+    GSList *idle_workers;
+    gulong task_id;
+    guint active_tasks;
+    gboolean cancelled;
+    gboolean exhausted;
 
     guint nworkers;
-    GThread **threads;
+    WorkerData *workers;
 
-    GwyMasterWorkerFunc worker;
-
-    GwyMasterCreateDataFunc create_data;
-    gpointer create_data_user_data;
-
-    GwyMasterDestroyDataFunc destroy_data;
-
-    GwyMasterTaskFunc provide_task;
-    gpointer provide_task_user_data;
-
-    GwyMasterResultFunc consume_result;
-    gpointer consume_result_user_data;
+    GwyMasterWorkerFunc work;
 };
 
 typedef struct _GwyMasterPrivate Master;
 
 static void     gwy_master_finalize   (GObject *object);
-static void     init_message_queue    (MessageQueue *queue,
-                                       const gchar *name);
-static void     finalize_message_queue(MessageQueue *queue);
 static void     retire_workers        (GwyMaster *master);
-static void     publish_message       (MessageQueue *queue,
-                                       const Message *message);
-static Message  receive_message       (MessageQueue *queue);
 static gpointer worker_thread_main    (gpointer thread_data);
 
 G_DEFINE_TYPE(GwyMaster, gwy_master, G_TYPE_OBJECT);
@@ -100,8 +104,9 @@ static void
 gwy_master_init(GwyMaster *master)
 {
     master->priv = G_TYPE_INSTANCE_GET_PRIVATE(master, GWY_TYPE_MASTER, Master);
-    init_message_queue(&master->priv->master_to_workers, "Master to workers");
-    init_message_queue(&master->priv->workers_to_master, "Workers to master");
+    Master *priv = master->priv;
+    priv->queue = g_async_queue_new();
+    priv->lock = g_mutex_new();
 }
 
 static void
@@ -110,199 +115,120 @@ gwy_master_finalize(GObject *object)
     GwyMaster *master = GWY_MASTER(object);
     Master *priv = master->priv;
 
+    g_assert(!priv->active_tasks);
+
     retire_workers(master);
-    finalize_message_queue(&priv->master_to_workers);
-    finalize_message_queue(&priv->workers_to_master);
+    g_async_queue_unref(priv->queue);
+    g_mutex_free(priv->lock);
 
     G_OBJECT_CLASS(gwy_master_parent_class)->finalize(object);
 }
 
-static void
-init_message_queue(MessageQueue *queue,
-                   const gchar *name)
+static Message*
+message_new(Master *priv,
+            MessageType type,
+            guint worker_id,
+            gpointer data)
 {
-    queue->name = name;
-    queue->messages = g_array_sized_new(FALSE, FALSE, sizeof(Message), 16);
-    queue->lock = g_mutex_new();
-    queue->cond = g_cond_new();
+    Message *message = g_slice_new(Message);
+    message->type = type;
+    message->worker_id = worker_id;
+    message->task_id = ++priv->task_id;
+    message->data = data;
+    return message;
 }
 
 static void
-finalize_message_queue(MessageQueue *queue)
+notify_all_workers(GwyMaster *master,
+                   MessageType type,
+                   gpointer data)
 {
-    // XXX: Check for locked mutex/waited on queue and complain?
-    g_cond_free(queue->cond);
-    g_mutex_free(queue->lock);
+    Master *priv = master->priv;
+    g_return_if_fail(!priv->active_tasks);
+
+    g_mutex_lock(priv->lock);
+    for (guint i = 0; i < priv->nworkers; i++) {
+        Message *message = message_new(priv, type, i, data);
+        WorkerData *workerdata = priv->workers + i;
+        workerdata->task_id = 1;
+        g_async_queue_push(workerdata->queue, message);
+    }
+    g_mutex_unlock(priv->lock);
+
+    guint nworkers = priv->nworkers;
+    for (guint i = 0; i < nworkers; i++) {
+        Message *message = g_async_queue_pop(priv->queue);
+        g_mutex_lock(priv->lock);
+        guint worker_id = message->worker_id;
+        g_assert(worker_id < nworkers);
+        WorkerData *workerdata = priv->workers + worker_id;
+        g_assert(workerdata->task_id == 1);
+        g_assert(message->type == type);
+        workerdata->task_id = 0;
+        g_slice_free(Message, message);
+        g_mutex_unlock(priv->lock);
+    }
 }
 
 static void
 retire_workers(GwyMaster *master)
 {
     Master *priv = master->priv;
-    MessageQueue *master_to_workers = &priv->master_to_workers;
-    MessageQueue *workers_to_master = &priv->workers_to_master;
-
-    for (unsigned int i = 0; i < priv->nworkers; i++) {
-        Message message = { MSG_RETIRE, i, NULL };
-        publish_message(master_to_workers, &message);
+    notify_all_workers(master, MSG_RETIRE, NULL);
+    for (guint i = 0; i < priv->nworkers; i++) {
+        g_async_queue_unref(priv->workers[i].queue);
+        g_slice_free(WorkerInfo, priv->workers[i].info);
     }
-
-    while (priv->nworkers) {
-        Message message = receive_message(workers_to_master);
-        if (message.type == MSG_RETIRED) {
-            priv->nworkers--;
-        }
-        else {
-            g_printerr("Bogus message to master %u\n", message.type);
-        }
-    }
-}
-
-#ifdef DEBUG
-static inline gulong
-thread_id(void)
-{
-    return (gulong)GPOINTER_TO_SIZE(g_thread_self());
-}
-
-static inline const gchar*
-message_name(guint id)
-{
-    static const gchar *message_names[] = {
-        NULL,
-        "TASK PUBLISHED",
-        "TASK TAKEN",
-        "TASK DONE",
-        "RETIRE",
-        "RETIRED",
-    };
-
-    if (id && id < G_N_ELEMENTS(message_names))
-        return message_names[id];
-    return "???";
-}
-#endif
-
-static void
-publish_message(MessageQueue *queue,
-                const Message *message)
-{
-#ifdef DEBUG
-    g_printerr("Thread %lx sends %d %s using queue %s (id %lu)\n",
-               thread_id(),
-               message->type, message_name(message->type),
-               queue->name, message->id);
-#endif
-    g_mutex_lock(queue->lock);
-#ifdef DEBUG
-    g_printerr("Thread %lx locked queue %s\n",
-               thread_id(), queue->name);
-#endif
-    g_array_append_vals(queue->messages, message, 1);
-#ifdef DEBUG
-    g_printerr("Thread %lx signals message in queue %s\n",
-               thread_id(), queue->name);
-#endif
-    g_cond_signal(queue->cond);
-    g_mutex_unlock(queue->lock);
-#ifdef DEBUG
-    g_printerr("  Thread %lx unlocked queue %s\n",
-            thread_id(), queue->name);
-#endif
-}
-
-static Message
-receive_message(MessageQueue *queue)
-{
-#ifdef DEBUG
-    g_printerr("Thread %lx checks for message in queue %s\n",
-               thread_id(), queue->name);
-#endif
-    GArray *messages = queue->messages;
-
-restart:
-    g_mutex_lock(queue->lock);
-#ifdef DEBUG
-    g_printerr("Thread %lx locked queue %s\n",
-               thread_id(), queue->name);
-#endif
-    if (!messages->len) {
-#ifdef DEBUG
-        g_printerr("Thread %lx found queue %s empty, waiting on condition\n",
-                   thread_id(), queue->name);
-#endif
-        g_cond_wait(queue->cond, queue->lock);
-#ifdef DEBUG
-        g_printerr("Thread %lx waiting on queue %s was waken on condition\n",
-                   thread_id(), queue->name);
-        g_printerr("Thread %lx finds queue %s to have %u items after wakeup\n",
-                   thread_id(), queue->name, messages->len);
-#endif
-        if (!messages->len) {
-            g_mutex_unlock(queue->lock);
-            goto restart;
-        }
-    }
-    Message message = g_array_index(messages, Message, 0);
-    g_array_remove_index(messages, 0);
-#ifdef DEBUG
-    g_printerr("Thread %lx picked up message %d %s from queue %s (id %lu)\n",
-               thread_id(),
-               message.type, message_name(message.type),
-               queue->name, message.id);
-#endif
-    g_mutex_unlock(queue->lock);
-#ifdef DEBUG
-    g_printerr("Thread %lx unlocked queue %s\n",
-               thread_id(), queue->name);
-#endif
-    return message;
+    g_slist_free(priv->idle_workers);
+    priv->idle_workers = NULL;
+    GWY_FREE(priv->workers);
+    priv->nworkers = 0;
 }
 
 static gpointer
 worker_thread_main(gpointer thread_data)
 {
-    GwyMaster *master = GWY_MASTER(thread_data);
-    Master *priv = master->priv;
-
-    GwyMasterWorkerFunc worker = priv->worker;
-    MessageQueue *master_to_workers = &priv->master_to_workers;
-    MessageQueue *workers_to_master = &priv->workers_to_master;
-
+    WorkerInfo *winfo = (WorkerInfo*)thread_data;
+    GAsyncQueue *from_master = winfo->from_master;
+    GAsyncQueue *to_master = winfo->to_master;
+    GwyMasterWorkerFunc worker = NULL;
     void *data = NULL;
-    gulong id;
+    MessageType type = MSG_0;
 
-    if (priv->create_data)
-        data = priv->create_data(priv->create_data_user_data);
+    do {
+        Message *message = g_async_queue_pop(from_master);
+        type = message->type;
 
-    while (TRUE) {
-        // Run calculation.
-        Message message = receive_message(master_to_workers);
-        gpointer task = message.data;
-
-        id = message.id;
-        if (message.type == MSG_RETIRE)
-            break;
-
-        if (message.type != MSG_TASK_PUBLISHED) {
-            g_warning("Bogus message to worker %u\n", message.type);
-            continue;
+        if (message->type == MSG_TASK) {
+            gpointer task = message->data;
+            if (G_LIKELY(worker))
+                message->data = worker(task, data);
+            else
+                g_critical("Trying to run caclulation "
+                           "with no worker function set.");
+        }
+        else if (message->type == MSG_WORKER) {
+            worker = (GwyMasterWorkerFunc)message->data;
+        }
+        else if (message->type == MSG_CREATE) {
+            CreateDataFuncInfo *cdinfo = (CreateDataFuncInfo*)message->data;
+            data = cdinfo->func ? cdinfo->func(cdinfo->user_data) : NULL;
+        }
+        else if (message->type == MSG_DESTROY) {
+            GwyMasterDestroyDataFunc destroy = (GwyMasterDestroyDataFunc)message->data;
+            if (destroy)
+                destroy(data);
+            data = NULL;
+        }
+        else if (type == MSG_RETIRE) {
+            // Nothing special.
+        }
+        else {
+            g_warning("Bogus message to worker %u\n", message->type);
         }
 
-        message = (Message){ MSG_TASK_TAKEN, id, NULL };
-        publish_message(workers_to_master, &message);
-
-        gpointer result = worker(task, data);
-
-        message = (Message){ MSG_TASK_DONE, id, result };
-        publish_message(workers_to_master, &message);
-    }
-
-    if (priv->destroy_data)
-        priv->destroy_data(data);
-
-    Message message = { MSG_RETIRED, id, NULL };
-    publish_message(workers_to_master, &message);
+        g_async_queue_push(to_master, message);
+    } while (type != MSG_RETIRE);
 
     return NULL;
 }
@@ -326,15 +252,16 @@ gwy_master_new(void)
  * @nworkers: Number of worker threads to create.  Passing zero means leaving
  *            the decision on @master which normally results in creating as
  *            many worker threads as there are available processor cores.
- * @error: Return location for the error, or %NULL.
+ * @error: Return location for the error, or %NULL.  The error canbe from the
+ *         #GThreadError domain.
  *
  * Creates worker threads for a parallel task manager.
  *
- * This method can be only called after the worker functions were set up with
- * gwy_master_set_worker_func() and possibly gwy_master_set_create_data_func()
- * and gwy_master_set_destroy_data_func().
- *
  * The threads are not destroyed until @master is finalised.
+ *
+ * Worker threads must be created prior to running functions that execute some
+ * code in each worker thread, such as gwy_master_manage_tasks(),
+ * gwy_master_create_data() or gwy_master_destroy_data().
  *
  * Returns: %TRUE if all worker threads were successfully created, %FALSE on
  *          failure.
@@ -346,26 +273,35 @@ gwy_master_create_workers(GwyMaster *master,
 {
     g_return_val_if_fail(GWY_IS_MASTER(master), FALSE);
 
-    if (nworkers < 1)
-        nworkers = gwy_n_cpus();
-
     Master *priv = master->priv;
-    g_return_val_if_fail(priv->worker, FALSE);
-
-    if (priv->threads) {
+    if (priv->workers) {
         g_warning("Master already has workers.");
         return TRUE;
     }
 
-    priv->threads = g_new0(GThread*, nworkers);
+    if (nworkers < 1)
+        nworkers = gwy_n_cpus();
+
+    priv->workers = g_new0(WorkerData, nworkers);
     for (guint i = 0; i < nworkers; i++) {
-        if (!(priv->threads[i] = g_thread_create(&worker_thread_main,
-                                                 master, FALSE, error))) {
+        WorkerData *workerdata = priv->workers + i;
+        WorkerInfo *winfo = g_slice_new(WorkerInfo);
+        workerdata->info = winfo;
+        workerdata->queue = g_async_queue_new();
+        winfo->from_master = workerdata->queue;
+        winfo->to_master = priv->queue;
+        if (!(workerdata->thread = g_thread_create(&worker_thread_main,
+                                                   winfo, FALSE, error))) {
+            g_slice_free(WorkerInfo, winfo);
             retire_workers(master);
             return FALSE;
         }
         priv->nworkers++;
     }
+
+    for (guint i = 0; i < nworkers; i++)
+        priv->idle_workers = g_slist_prepend(priv->idle_workers,
+                                             GUINT_TO_POINTER(i));
 
     return TRUE;
 }
@@ -373,200 +309,197 @@ gwy_master_create_workers(GwyMaster *master,
 /**
  * gwy_master_manage_tasks:
  * @master: Parallel task manager.
+ * @nworkers: Maximum number of parallel tasks to run.  The actual number will
+ *            never be larger than the number of worker threads created by
+ *            gwy_master_create_workers().  Pass zero for no specific limit.
+ * @work: Worker function called, usually repeatedly, in worker threads
+ *        to perform individual chunks of the work.
+ * @provide_task: Function providing individual tasks.
+ * @consume_result: (allow-none):
+ *                  Function consuming task results.
+ * @user_data: User data passed to function @provide_task and @consume_result.
+ * @cancellable: (allow-none):
+ *               A #GCancellable for the calculation.
  *
  * Runs a chunked parallel calculation.
  *
  * Prior to executing this method it is necessary to create the worker threads
- * (once) using gwy_master_create_workers() and, of course, set a non-%NULL
- * task provider using gwy_master_set_task_func().  More precisely, it is not
- * an error to call gwy_master_manage_tasks() with a %NULL or unset task
- * provider function but it then just returns immediately.
+ * (once) using gwy_master_create_workers().
  *
  * This method is <emphasis>synchronous</emphasis> in the sense it returns when
- * all the work is done.  Therefore, you probably want to run it in a separate
- * thread in GUI programs but it is usually all right to just call it in the
- * main thread in batch processing.
+ * all the work is done (or cancelled).  Therefore, you probably want to run it
+ * in a separate thread in GUI programs but it is usually all right to just
+ * call it in the main thread in the case of batch processing.
  *
  * Staged calculations that require a part of the calculation to be completed
  * before the next one can be started are implemented by running
- * gwy_master_manage_tasks() for each stage separately.  Even the task provider
- * can be kept unchanged if it returns %NULL once at the end of each stage and
- * then starts returning non-%NULL tasks again.
+ * gwy_master_manage_tasks() for each stage separately without creating and
+ * destroying the auxiliary data.
+ *
+ * Functions @task_func and @result_func will be called in the master thread.
+ * Therefore, they should be quite lightweight.
+ *
+ * Returns: %TRUE if the caculation finished by exhausting tasks; %FALSE if
+ *          it was cancelled.
  **/
-void
-gwy_master_manage_tasks(GwyMaster *master)
+gboolean
+gwy_master_manage_tasks(GwyMaster *master,
+                        guint nworkers,
+                        GwyMasterWorkerFunc work,
+                        GwyMasterTaskFunc provide_task,
+                        GwyMasterResultFunc consume_result,
+                        gpointer user_data,
+                        GCancellable *cancellable)
 {
-    g_return_if_fail(GWY_IS_MASTER(master));
+    g_return_val_if_fail(GWY_IS_MASTER(master), FALSE);
+    g_return_val_if_fail(provide_task, FALSE);
+    g_return_val_if_fail(work, FALSE);
 
     Master *priv = master->priv;
-    if (!priv->provide_task)
-        return;
+    g_return_val_if_fail(priv->workers, FALSE);
 
-    g_return_if_fail(priv->nworkers);
+    GAsyncQueue *queue = priv->queue;
+    nworkers = MIN(nworkers ? nworkers : G_MAXUINT, priv->nworkers);
 
-    MessageQueue *master_to_workers = &priv->master_to_workers;
-    MessageQueue *workers_to_master = &priv->workers_to_master;
-    GwyMasterTaskFunc provide_task = priv->provide_task;
-    GwyMasterResultFunc consume_result = priv->consume_result;
-    gpointer task_data = priv->provide_task_user_data;
-    gpointer result_data = priv->consume_result_user_data;
-    guint active_tasks = 0, unfinished_tasks = 0, nworkers = priv->nworkers;
-    gulong id = 0;
-    gboolean exhausted = FALSE;
+    if (priv->work != work) {
+        notify_all_workers(master, MSG_WORKER, work);
+        priv->work = work;
+    }
+    g_assert(g_slist_length(priv->idle_workers) == priv->nworkers);
 
-    while (!exhausted || unfinished_tasks) {
-        // Obtain a new task if we can.
-        if (active_tasks < nworkers && !exhausted) {
-            gpointer task_to_do = provide_task(master, task_data);
-            if (task_to_do) {
-                Message message = { MSG_TASK_PUBLISHED, id++, task_to_do };
-                publish_message(master_to_workers, &message);
-                unfinished_tasks++;
+    g_mutex_lock(priv->lock);
+    priv->exhausted = priv->cancelled = FALSE;
+    priv->active_tasks = 0;
+    g_mutex_unlock(priv->lock);
+
+    while ((!priv->exhausted && !priv->cancelled) || priv->active_tasks) {
+        // Obtain new tasks if we can and send them to idle workers.
+        if (!priv->exhausted && !priv->cancelled) {
+            g_mutex_lock(priv->lock);
+            while (priv->idle_workers) {
+                gpointer task = provide_task(master, user_data);
+                if (!task) {
+                    priv->exhausted = TRUE;
+                    break;
+                }
+                guint worker_id = GPOINTER_TO_UINT(priv->idle_workers->data);
+                priv->idle_workers = g_slist_delete_link(priv->idle_workers,
+                                                         priv->idle_workers);
+                priv->active_tasks++;
+                Message *message = message_new(priv, MSG_TASK, worker_id, task);
+                WorkerData *workerdata = priv->workers + worker_id;
+                g_assert(!workerdata->task_id);
+                workerdata->task_id = message->task_id;
+                //g_printerr("SEND TASK %lu to worker %u.\n", message->task_id, message->worker_id);
+                g_async_queue_push(workerdata->queue, message);
             }
-            else
-                exhausted = TRUE;
+            g_mutex_unlock(priv->lock);
         }
+        if (!priv->active_tasks)
+            break;
+        // Receive results from workers.
+        //g_printerr("WAIT for a result (%u active tasks).\n", priv->active_tasks);
+        Message *message = g_async_queue_pop(queue);
+        do {
+            g_mutex_lock(priv->lock);
+            guint worker_id = message->worker_id;
+            g_assert(worker_id < nworkers);
+            WorkerData *workerdata = priv->workers + worker_id;
+            g_assert(workerdata->task_id == message->task_id);
+            //g_printerr("GOT RESULT %lu from worker %u.\n", message->task_id, message->worker_id);
+            if (consume_result)
+                consume_result(master, message->data, user_data);
+            g_slice_free(Message, message);
 
-        // Receive a message from workers.
-        if (unfinished_tasks) {
-            Message message = receive_message(workers_to_master);
-            if (message.type == MSG_TASK_DONE) {
-                if (consume_result)
-                    consume_result(master, message.data, result_data);
-                unfinished_tasks--;
-                active_tasks--;
-            }
-            else if (message.type == MSG_TASK_TAKEN) {
-                active_tasks++;
-            }
-            else {
-                g_warning("Bogus message to master %u\n", message.type);
-            }
-        }
+            g_assert(priv->active_tasks > 0);
+            priv->active_tasks--;
+
+            workerdata->task_id = 0;
+            priv->idle_workers = g_slist_prepend(priv->idle_workers,
+                                                 GUINT_TO_POINTER(worker_id));
+            g_mutex_unlock(priv->lock);
+            //g_printerr("TRY-WAIT for a result (%u active tasks).\n", priv->active_tasks);
+        } while (priv->active_tasks
+                 && (message = g_async_queue_try_pop(queue)));
+
+        if (cancellable && g_cancellable_is_cancelled(cancellable))
+            priv->cancelled = TRUE;
+    }
+
+    g_assert(priv->active_tasks == 0);
+    g_assert(g_slist_length(priv->idle_workers) == priv->nworkers);
+
+    return !priv->cancelled;
+}
+
+/**
+ * gwy_master_create_data:
+ * @master: Parallel task manager.
+ * @create_data: (allow-none):
+ *               Function to create worker data.  Passing %NULL is the same as
+ *               passing a function that returns %NULL.
+ * @user_data: User data passed to function @createdata.
+ *
+ * Invokes auxiliary worker data creation in each worker thread of a parallel
+ * task manager.
+ *
+ * The threads must be created beforehand using gwy_master_create_workers().
+ * Worker data creation must not be invoked while the calculation is running.
+ *
+ * This method blocks until the operation finishes.
+ **/
+void
+gwy_master_create_data(GwyMaster *master,
+                       GwyMasterCreateDataFunc create_data,
+                       gpointer user_data)
+{
+    g_return_if_fail(GWY_IS_MASTER(master));
+    Master *priv = master->priv;
+    if (G_UNLIKELY(priv->active_tasks)) {
+        g_critical("Cannot modify the calculation setup while it is running.");
+    }
+    else if (G_UNLIKELY(!priv->nworkers)) {
+        g_critical("No worker threads are available.");
+    }
+    else {
+        CreateDataFuncInfo info = { create_data, user_data };
+        notify_all_workers(master, MSG_CREATE, &info);
     }
 }
 
 /**
- * gwy_master_set_worker_func:
+ * gwy_master_destroy_data:
  * @master: Parallel task manager.
- * @worker: Worker function.
+ * @destroy_data: (allow-none):
+ *                Function to destroy worker data.  Passing %NULL is possible
+ *                and it means no destruction will be performed; this is
+ *                meaningful only when unsetting a previously set destruction
+ *                function.
  *
- * Sets the worker function for a parallel task manager.
- *
- * The worker function is executed, possibly repeatedly, in the worker threads
- * with tasks provided by the task function.
- **/
-void
-gwy_master_set_worker_func(GwyMaster *master,
-                           GwyMasterWorkerFunc worker)
-{
-    g_return_if_fail(GWY_IS_MASTER(master));
-    Master *priv = master->priv;
-    priv->worker = worker;
-}
-
-/**
- * gwy_master_set_create_data_func:
- * @master: Parallel task manager.
- * @createdata: Function to create worker data.
- * @user_data: User data passed to function @createdata.
- *
- * Sets the worker data creation function for a parallel task manager.
- *
- * The worker data creation function is executed in each worker thread exactly
- * once before the tasks start coming.  Its purpose is to create auxiliary
- * data the worker thread will repeatedly reuse.
- *
- * Calling gwy_master_set_create_data_func() after gwy_master_create_workers()
- * has no effect.
- **/
-void
-gwy_master_set_create_data_func(GwyMaster *master,
-                                GwyMasterCreateDataFunc createdata,
-                                gpointer user_data)
-{
-    g_return_if_fail(GWY_IS_MASTER(master));
-    Master *priv = master->priv;
-    priv->create_data = createdata;
-    priv->create_data_user_data = user_data;
-}
-
-/**
- * gwy_master_set_destroy_data_func:
- * @master: Parallel task manager.
- * @destroydata: Function to destroy worker data.
- *
- * Sets the worker data destruction function for a parallel task manager.
- *
- * The worker data destruction function is executed in each worker thread
- * exactly once before the thread terminates.  Its purpose is to destruct
- * auxiliary data created by the function set by
- * gwy_master_set_create_data_func().
- *
- * Calling gwy_master_set_destroy_data_func() after gwy_master_create_workers()
- * has no effect.
- **/
-void
-gwy_master_set_destroy_data_func(GwyMaster *master,
-                                 GwyMasterDestroyDataFunc destroydata)
-{
-    g_return_if_fail(GWY_IS_MASTER(master));
-    Master *priv = master->priv;
-    priv->destroy_data = destroydata;
-}
-
-/**
- * gwy_master_set_task_func:
- * @master: Parallel task manager.
- * @provide_task: Function providing individual tasks.
- * @user_data: User data passed to @provide_task.
- *
- * Sets the function that will provide the individual tasks managed by a
+ * Invokes auxiliary worker data destruction in each worker thread of a
  * parallel task manager.
  *
- * The task provider function will be called in the master thread to provide
- * individual tasks.  Once it returns %NULL it is assumed there is no more work
- * to do in this batch.
+ * The threads must be created beforehand using gwy_master_create_workers().
+ * Worker data destruction must not be invoked while the calculation is
+ * running.
  *
- * The task function must be set before calling gwy_master_manage_tasks().
+ * This method blocks until the operation finishes.
  **/
 void
-gwy_master_set_task_func(GwyMaster *master,
-                         GwyMasterTaskFunc provide_task,
-                         gpointer user_data)
+gwy_master_destroy_data(GwyMaster *master,
+                        GwyMasterDestroyDataFunc destroy_data)
 {
     g_return_if_fail(GWY_IS_MASTER(master));
     Master *priv = master->priv;
-    priv->provide_task = provide_task;
-    priv->provide_task_user_data = user_data;
-}
-
-/**
- * gwy_master_set_result_func:
- * @master: Parallel task manager.
- * @consume_result: Function consuming task results.
- * @user_data: User data passed to @consume_result.
- *
- * Sets the function that will consume the results of individual tasks managed
- * by a parallel task manager.
- *
- * The result consumer function will be called in the master thread to process
- * the results of individual tasks.
- *
- * In most cases, it is avisable that the results are not actually created by
- * workers.  Instead, the task function specified storage for the result and
- * the worker then returns the task again as the result – just with the
- * resulting values filled in.
- **/
-void
-gwy_master_set_result_func(GwyMaster *master,
-                           GwyMasterResultFunc consume_result,
-                           gpointer user_data)
-{
-    g_return_if_fail(GWY_IS_MASTER(master));
-    Master *priv = master->priv;
-    priv->consume_result = consume_result;
-    priv->consume_result_user_data = user_data;
+    if (G_UNLIKELY(priv->active_tasks)) {
+        g_critical("Cannot modify the calculation setup while it is running.");
+    }
+    else if (G_UNLIKELY(!priv->nworkers)) {
+        g_critical("No worker threads are available.");
+    }
+    else {
+        notify_all_workers(master, MSG_DESTROY, destroy_data);
+    }
 }
 
 /**

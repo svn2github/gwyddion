@@ -21,6 +21,7 @@
 #define __LIBGWY_MASTER_H__
 
 #include <glib-object.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -60,25 +61,23 @@ struct _GwyMasterClass {
     GObjectClass g_object_class;
 };
 
-GType      gwy_master_get_type             (void)                                 G_GNUC_CONST;
-GwyMaster* gwy_master_new                  (void)                                 G_GNUC_MALLOC;
-void       gwy_master_set_worker_func      (GwyMaster *master,
-                                            GwyMasterWorkerFunc worker);
-void       gwy_master_set_create_data_func (GwyMaster *master,
-                                            GwyMasterCreateDataFunc createdata,
-                                            gpointer user_data);
-void       gwy_master_set_destroy_data_func(GwyMaster *master,
-                                            GwyMasterDestroyDataFunc destroydata);
-void       gwy_master_set_task_func        (GwyMaster *master,
-                                            GwyMasterTaskFunc provide_task,
-                                            gpointer user_data);
-void       gwy_master_set_result_func      (GwyMaster *master,
-                                            GwyMasterResultFunc consume_result,
-                                            gpointer user_data);
-gboolean   gwy_master_create_workers       (GwyMaster *master,
-                                            guint nworkers,
-                                            GError **error);
-void       gwy_master_manage_tasks         (GwyMaster *master);
+GType      gwy_master_get_type      (void)                                  G_GNUC_CONST;
+GwyMaster* gwy_master_new           (void)                                  G_GNUC_MALLOC;
+gboolean   gwy_master_create_workers(GwyMaster *master,
+                                     guint nworkers,
+                                     GError **error);
+void       gwy_master_create_data   (GwyMaster *master,
+                                     GwyMasterCreateDataFunc createdata,
+                                     gpointer user_data);
+void       gwy_master_destroy_data  (GwyMaster *master,
+                                     GwyMasterDestroyDataFunc destroydata);
+gboolean   gwy_master_manage_tasks  (GwyMaster *master,
+                                     guint nworkers,
+                                     GwyMasterWorkerFunc work,
+                                     GwyMasterTaskFunc provide_task,
+                                     GwyMasterResultFunc consume_result,
+                                     gpointer user_data,
+                                     GCancellable *cancellable);
 
 G_END_DECLS
 
