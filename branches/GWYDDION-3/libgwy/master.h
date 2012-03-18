@@ -67,10 +67,10 @@ gboolean   gwy_master_create_workers(GwyMaster *master,
                                      guint nworkers,
                                      GError **error);
 void       gwy_master_create_data   (GwyMaster *master,
-                                     GwyMasterCreateDataFunc createdata,
+                                     GwyMasterCreateDataFunc create_data,
                                      gpointer user_data);
 void       gwy_master_destroy_data  (GwyMaster *master,
-                                     GwyMasterDestroyDataFunc destroydata);
+                                     GwyMasterDestroyDataFunc destroy_data);
 gboolean   gwy_master_manage_tasks  (GwyMaster *master,
                                      guint nworkers,
                                      GwyMasterWorkerFunc work,

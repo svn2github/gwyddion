@@ -538,22 +538,22 @@ gwy_master_destroy_data(GwyMaster *master,
 
 /**
  * GwyMasterWorkerFunc:
- * @task: Task data returned by the task provider set by
- *        gwy_master_set_task_func().
+ * @task: Task data returned by the task provider specified while calling
+ *        gwy_master_manage_tasks().
  * @data: Auxiliary data created by the auxiliary data creation function set by
- *        gwy_master_set_create_data_func().
+ *        gwy_master_create_data().
  *
  * Type of function performing one chunk in parallel processing in the
  * individual worker threads.
  *
- * Returns: Result pointer passed to function set up by
- *          gwy_master_set_result_func().  If no such function is set up the
+ * Returns: Result pointer passed to function set specified while calling
+ *          gwy_master_manage_tasks().  If no such function is set up the
  *          return value is ignored.
  **/
 
 /**
  * GwyMasterCreateDataFunc:
- * @user_data: User data speficied in gwy_master_set_create_data_func().
+ * @user_data: User data speficied in gwy_master_create_data().
  *
  * Type of function creating auxiliary data structures for each worker thread
  * in a parallel processing.
@@ -564,8 +564,7 @@ gwy_master_destroy_data(GwyMaster *master,
 
 /**
  * GwyMasterDestroyDataFunc:
- * @worker_data: Data created by function set by
- *               gwy_master_set_destroy_data_func().
+ * @worker_data: Data created by function set by gwy_master_destroy_data().
  *
  * Type of function destroying auxiliary data structures in each worker thread
  * in a parallel task processing.
@@ -574,7 +573,7 @@ gwy_master_destroy_data(GwyMaster *master,
 /**
  * GwyMasterTaskFunc:
  * @master: Parallel task manager.
- * @user_data: User data speficied in gwy_master_set_task_func().
+ * @user_data: User data speficied in gwy_master_manage_tasks().
  *
  * Type of function providing individual tasks in chunked parallel processing.
  *
@@ -586,7 +585,7 @@ gwy_master_destroy_data(GwyMaster *master,
  * GwyMasterResultFunc:
  * @master: Parallel task manager.
  * @result: Result data of one task obtained from a worker.
- * @user_data: User data speficied in gwy_master_set_result_func().
+ * @user_data: User data speficied in gwy_master_manage_tasks().
  *
  * Type of function gathering results of individual tasks.
  **/
