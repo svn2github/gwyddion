@@ -519,6 +519,81 @@ gwy_master_destroy_data(GwyMaster *master,
  * #GThreadPool is intended for running jobs in the background, i.e. it has a
  * non-blocking interface, whereas #GwyMaster is intended for parallelisation
  * of immediately performed work, i.e. it has a blocking interface.
+ *
+ * A complete example showing parallelisation of the summation of numbers up to
+ * @n (of course, one would use gwy_power_sum() in practice):
+ * |[
+ * typedef struct {
+ *     guint64 from;
+ *     guint64 to;
+ *     guint64 result;
+ * } SumNumbersTask;
+ *
+ * typedef struct {
+ *     guint64 size;
+ *     guint64 chunk_size;
+ *     guint64 current;
+ *     guint64 total_sum;
+ * } SumNumbersState;
+ *
+ * static gpointer
+ * sum_numbers_worker(gpointer taskp,
+ *                    G_GNUC_UNUSED gpointer data)
+ * {
+ *     SumNumbersTask *task = (SumNumbersTask*)taskp;
+ *     guint64 s = 0, from = task->from, to = task->to;
+ *
+ *     for (guint64 i = from; i < to; i++)
+ *         s += i;
+ *
+ *     task->result = s;
+ *     return taskp;
+ * }
+ *
+ * static gpointer
+ * sum_numbers_task(G_GNUC_UNUSED GwyMaster *master,
+ *                  gpointer user_data)
+ * {
+ *     SumNumbersState *state = (SumNumbersState*)user_data;
+ *     if (state->current == state->size)
+ *         return NULL;
+ *
+ *     SumNumbersTask *task = g_slice_new(SumNumbersTask);
+ *     task->from = state->current;
+ *     task->to = state->current + MIN(state->chunk_size,
+ *                                     state->size - state->current);
+ *     state->current = task->to;
+ *     return task;
+ * }
+ *
+ * static void
+ * sum_numbers_result(G_GNUC_UNUSED GwyMaster *master,
+ *                    gpointer result,
+ *                    gpointer user_data)
+ * {
+ *     SumNumbersTask *task = (SumNumbersTask*)result;
+ *     SumNumbersState *state = (SumNumbersState*)user_data;
+ *
+ *     state->total_sum += task->result;
+ *     g_slice_free(SumNumbersTask, task);
+ * }
+ *
+ * static void
+ * sum_numbers(guint from, guint to, guint chunk_size)
+ * {
+ *     GwyMaster *master = gwy_master_new();
+ *     gwy_master_create_workers(master, 0, NULL);
+ *
+ *     SumNumbersState state = { to, chunk_size, from, 0 };
+ *     gwy_master_manage_tasks(master, 0, &sum_numbers_worker,
+ *                             &sum_numbers_task, &sum_numbers_result,
+ *                             &state,
+ *                             NULL);
+ *     g_object_unref(master);
+ *
+ *     return state.total_sum;
+ * }
+ * ]|
  **/
 
 /**
