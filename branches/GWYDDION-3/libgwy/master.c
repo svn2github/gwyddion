@@ -64,10 +64,6 @@ typedef struct {
 } WorkerData;
 
 struct _GwyMasterPrivate {
-    // XXX: It is not clear what we want to lock with it.  Other threads must
-    // do anything except for querying the state -- once we have some of that
-    // implemented.
-    GMutex *lock;
     GAsyncQueue *queue;
 
     GSList *idle_workers;
@@ -106,7 +102,6 @@ gwy_master_init(GwyMaster *master)
     master->priv = G_TYPE_INSTANCE_GET_PRIVATE(master, GWY_TYPE_MASTER, Master);
     Master *priv = master->priv;
     priv->queue = g_async_queue_new();
-    priv->lock = g_mutex_new();
 }
 
 static void
@@ -119,7 +114,6 @@ gwy_master_finalize(GObject *object)
 
     retire_workers(master);
     g_async_queue_unref(priv->queue);
-    g_mutex_free(priv->lock);
 
     G_OBJECT_CLASS(gwy_master_parent_class)->finalize(object);
 }
@@ -146,19 +140,16 @@ notify_all_workers(GwyMaster *master,
     Master *priv = master->priv;
     g_return_if_fail(!priv->active_tasks);
 
-    g_mutex_lock(priv->lock);
     for (guint i = 0; i < priv->nworkers; i++) {
         Message *message = message_new(priv, type, i, data);
         WorkerData *workerdata = priv->workers + i;
         workerdata->task_id = 1;
         g_async_queue_push(workerdata->queue, message);
     }
-    g_mutex_unlock(priv->lock);
 
     guint nworkers = priv->nworkers;
     for (guint i = 0; i < nworkers; i++) {
         Message *message = g_async_queue_pop(priv->queue);
-        g_mutex_lock(priv->lock);
         guint worker_id = message->worker_id;
         g_assert(worker_id < nworkers);
         WorkerData *workerdata = priv->workers + worker_id;
@@ -166,7 +157,6 @@ notify_all_workers(GwyMaster *master,
         g_assert(message->type == type);
         workerdata->task_id = 0;
         g_slice_free(Message, message);
-        g_mutex_unlock(priv->lock);
     }
 }
 
@@ -340,6 +330,8 @@ gwy_master_create_workers(GwyMaster *master,
  * Functions @task_func and @result_func will be called in the master thread.
  * Therefore, they should be quite lightweight.
  *
+ * This method blocks until the operation finishes.
+ *
  * Returns: %TRUE if the caculation finished by exhausting tasks; %FALSE if
  *          it was cancelled.
  **/
@@ -368,15 +360,12 @@ gwy_master_manage_tasks(GwyMaster *master,
     }
     g_assert(g_slist_length(priv->idle_workers) == priv->nworkers);
 
-    g_mutex_lock(priv->lock);
     priv->exhausted = priv->cancelled = FALSE;
     priv->active_tasks = 0;
-    g_mutex_unlock(priv->lock);
 
     while ((!priv->exhausted && !priv->cancelled) || priv->active_tasks) {
         // Obtain new tasks if we can and send them to idle workers.
         if (!priv->exhausted && !priv->cancelled) {
-            g_mutex_lock(priv->lock);
             while (priv->idle_workers) {
                 gpointer task = provide_task(user_data);
                 if (!task) {
@@ -394,7 +383,6 @@ gwy_master_manage_tasks(GwyMaster *master,
                 //g_printerr("SEND TASK %lu to worker %u.\n", message->task_id, message->worker_id);
                 g_async_queue_push(workerdata->queue, message);
             }
-            g_mutex_unlock(priv->lock);
         }
         if (!priv->active_tasks)
             break;
@@ -402,7 +390,6 @@ gwy_master_manage_tasks(GwyMaster *master,
         //g_printerr("WAIT for a result (%u active tasks).\n", priv->active_tasks);
         Message *message = g_async_queue_pop(queue);
         do {
-            g_mutex_lock(priv->lock);
             guint worker_id = message->worker_id;
             g_assert(worker_id < nworkers);
             WorkerData *workerdata = priv->workers + worker_id;
@@ -418,7 +405,6 @@ gwy_master_manage_tasks(GwyMaster *master,
             workerdata->task_id = 0;
             priv->idle_workers = g_slist_prepend(priv->idle_workers,
                                                  GUINT_TO_POINTER(worker_id));
-            g_mutex_unlock(priv->lock);
             //g_printerr("TRY-WAIT for a result (%u active tasks).\n", priv->active_tasks);
         } while (priv->active_tasks
                  && (message = g_async_queue_try_pop(queue)));
@@ -519,7 +505,10 @@ gwy_master_destroy_data(GwyMaster *master,
  * The main difference between #GwyMaster and #GThreadPool is, therefore, that
  * #GThreadPool is intended for running jobs in the background, i.e. it has a
  * non-blocking interface, whereas #GwyMaster is intended for parallelisation
- * of immediately performed work, i.e. it has a blocking interface.
+ * of an immediately performed work, i.e. it has a blocking interface.
+ * #GwyMastter is not thread-safe in the sense the object could be meaningfully
+ * accessed from multiple threads apart from cancelling the work using the
+ * #GCancellable passed to gwy_master_manage_tasks().
  *
  * A complete example showing parallelisation of the summation of numbers up to
  * @n (of course, one would use gwy_power_sum() in practice):
@@ -632,6 +621,9 @@ gwy_master_destroy_data(GwyMaster *master,
  * Type of function creating auxiliary data structures for each worker thread
  * in a parallel processing.
  *
+ * It is invoked, immediately but in parallel, in each worker thread by
+ * gwy_master_create_data().
+ *
  * Returns: Pointer to the auxiliary data, presumably some newly created
  *          buffers but it can be anything the worker thread expects.
  **/
@@ -642,6 +634,10 @@ gwy_master_destroy_data(GwyMaster *master,
  *
  * Type of function destroying auxiliary data structures in each worker thread
  * in a parallel task processing.
+ *
+ * It is invoked, immediately but in parallel, in each worker thread by
+ * gwy_master_destroy_data().  It is <emphasis>not</emphasis> invoked when the
+ * #GwyMaster is finialised.
  **/
 
 /**
@@ -649,6 +645,12 @@ gwy_master_destroy_data(GwyMaster *master,
  * @user_data: User data speficied in gwy_master_manage_tasks().
  *
  * Type of function providing individual tasks in chunked parallel processing.
+ *
+ * It is not guaranteed that the function will be called until it returns
+ * %NULL as the work may be cancelled.  So if a clean-up is necessary it should
+ * be done by the caller of gwy_master_manage_tasks().
+ *
+ * It is guaranteed that once it returns %NULL it will not be called any more.
  *
  * Returns: The new task, passed to the worker function if not %NULL.  If it is
  *          %NULL it means there is no more work to do.
