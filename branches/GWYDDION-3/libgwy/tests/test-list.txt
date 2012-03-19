@@ -77,6 +77,13 @@ master/sum/4
 master/sum/8
 master/sum/16
 master/sum/auto
+master/cancel/1
+master/cancel/2
+master/cancel/3
+master/cancel/4
+master/cancel/8
+master/cancel/16
+master/cancel/auto
 xy/boxed
 xyz/boxed
 line-part/boxed
