@@ -317,7 +317,8 @@ gwy_master_create_workers(GwyMaster *master,
  * @provide_task: Function providing individual tasks.
  * @consume_result: (allow-none):
  *                  Function consuming task results.
- * @user_data: User data passed to function @provide_task and @consume_result.
+ * @user_data: (scope call):
+ *             User data passed to function @provide_task and @consume_result.
  * @cancellable: (allow-none):
  *               A #GCancellable for the calculation.
  *
@@ -377,7 +378,7 @@ gwy_master_manage_tasks(GwyMaster *master,
         if (!priv->exhausted && !priv->cancelled) {
             g_mutex_lock(priv->lock);
             while (priv->idle_workers) {
-                gpointer task = provide_task(master, user_data);
+                gpointer task = provide_task(user_data);
                 if (!task) {
                     priv->exhausted = TRUE;
                     break;
@@ -408,7 +409,7 @@ gwy_master_manage_tasks(GwyMaster *master,
             g_assert(workerdata->task_id == message->task_id);
             //g_printerr("GOT RESULT %lu from worker %u.\n", message->task_id, message->worker_id);
             if (consume_result)
-                consume_result(master, message->data, user_data);
+                consume_result(message->data, user_data);
             g_slice_free(Message, message);
 
             g_assert(priv->active_tasks > 0);
@@ -551,8 +552,7 @@ gwy_master_destroy_data(GwyMaster *master,
  * }
  *
  * static gpointer
- * sum_numbers_task(G_GNUC_UNUSED GwyMaster *master,
- *                  gpointer user_data)
+ * sum_numbers_task(gpointer user_data)
  * {
  *     SumNumbersState *state = (SumNumbersState*)user_data;
  *     if (state->current == state->size)
@@ -567,8 +567,7 @@ gwy_master_destroy_data(GwyMaster *master,
  * }
  *
  * static void
- * sum_numbers_result(G_GNUC_UNUSED GwyMaster *master,
- *                    gpointer result,
+ * sum_numbers_result(gpointer result,
  *                    gpointer user_data)
  * {
  *     SumNumbersTask *task = (SumNumbersTask*)result;
@@ -647,7 +646,6 @@ gwy_master_destroy_data(GwyMaster *master,
 
 /**
  * GwyMasterTaskFunc:
- * @master: Parallel task manager.
  * @user_data: User data speficied in gwy_master_manage_tasks().
  *
  * Type of function providing individual tasks in chunked parallel processing.
@@ -658,7 +656,6 @@ gwy_master_destroy_data(GwyMaster *master,
 
 /**
  * GwyMasterResultFunc:
- * @master: Parallel task manager.
  * @result: Result data of one task obtained from a worker.
  * @user_data: User data speficied in gwy_master_manage_tasks().
  *

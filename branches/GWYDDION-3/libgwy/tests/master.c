@@ -55,8 +55,7 @@ sum_numbers_worker(gpointer taskp,
 }
 
 static gpointer
-sum_numbers_task(G_GNUC_UNUSED GwyMaster *master,
-                 gpointer user_data)
+sum_numbers_task(gpointer user_data)
 {
     SumNumbersState *state = (SumNumbersState*)user_data;
     if (state->current == state->size)
@@ -72,8 +71,7 @@ sum_numbers_task(G_GNUC_UNUSED GwyMaster *master,
 }
 
 static void
-sum_numbers_result(G_GNUC_UNUSED GwyMaster *master,
-                   gpointer result,
+sum_numbers_result(gpointer result,
                    gpointer user_data)
 {
     SumNumbersTask *task = (SumNumbersTask*)result;

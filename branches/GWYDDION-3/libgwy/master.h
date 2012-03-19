@@ -45,10 +45,8 @@ typedef gpointer (*GwyMasterWorkerFunc)(gpointer task,
                                         gpointer data);
 typedef gpointer (*GwyMasterCreateDataFunc)(gpointer user_data);
 typedef void     (*GwyMasterDestroyDataFunc)(gpointer worker_data);
-typedef gpointer (*GwyMasterTaskFunc)(GwyMaster *master,
-                                       gpointer user_data);
-typedef void     (*GwyMasterResultFunc)(GwyMaster *master,
-                                        gpointer result,
+typedef gpointer (*GwyMasterTaskFunc)(gpointer user_data);
+typedef void     (*GwyMasterResultFunc)(gpointer result,
                                         gpointer user_data);
 
 struct _GwyMaster {
