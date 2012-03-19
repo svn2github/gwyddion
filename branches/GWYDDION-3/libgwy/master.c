@@ -646,6 +646,9 @@ gwy_master_destroy_data(GwyMaster *master,
  *
  * Type of function providing individual tasks in chunked parallel processing.
  *
+ * The task function is run in the master thread, i.e. that in which
+ * gwy_master_manage_tasks() was called.
+ *
  * It is not guaranteed that the function will be called until it returns
  * %NULL as the work may be cancelled.  So if a clean-up is necessary it should
  * be done by the caller of gwy_master_manage_tasks().
@@ -662,6 +665,9 @@ gwy_master_destroy_data(GwyMaster *master,
  * @user_data: User data speficied in gwy_master_manage_tasks().
  *
  * Type of function gathering results of individual tasks.
+ *
+ * The result function is run in the master thread, i.e. that in which
+ * gwy_master_manage_tasks() was called.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
