@@ -197,7 +197,7 @@ cancel_cancel(gpointer user_data)
     return NULL;
 }
 
-void
+static void
 master_cancel_one(guint nproc)
 {
     if (g_test_trap_fork(10000000UL, 0)) {
@@ -281,6 +281,48 @@ void
 test_master_cancel_auto(void)
 {
     master_cancel_one(0);
+}
+
+typedef struct {
+    gint create_count;
+    gint destroy_count;
+} DataCount;
+
+static gpointer
+data_create(gpointer user_data)
+{
+    DataCount *counts = (DataCount*)user_data;
+    g_atomic_int_inc(&counts->create_count);
+    return counts;
+}
+
+static void
+data_destroy(gpointer data)
+{
+    DataCount *counts = (DataCount*)data;
+    g_atomic_int_inc(&counts->destroy_count);
+}
+
+void
+test_master_data(void)
+{
+    for (gint nproc = 1; nproc < 20; nproc++) {
+        GError *error = NULL;
+        GwyMaster *master = gwy_master_new();
+        gboolean ok = gwy_master_create_workers(master, nproc, &error);
+        g_assert_no_error(error);
+        g_assert(ok);
+
+        DataCount counts = { 0, 0 };
+
+        gwy_master_create_data(master, &data_create, &counts);
+        gwy_master_destroy_data(master, &data_destroy);
+
+        g_assert_cmpint(counts.create_count, ==, nproc);
+        g_assert_cmpint(counts.destroy_count, ==, nproc);
+
+        g_object_unref(master);
+    }
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

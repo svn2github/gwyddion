@@ -77,6 +77,7 @@ master/sum/4
 master/sum/8
 master/sum/16
 master/sum/auto
+master/data
 master/cancel/1
 master/cancel/2
 master/cancel/3
