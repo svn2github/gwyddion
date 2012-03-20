@@ -351,6 +351,9 @@ gwy_master_manage_tasks(GwyMaster *master,
     Master *priv = master->priv;
     g_return_val_if_fail(priv->workers, FALSE);
 
+    if (cancellable && g_cancellable_is_cancelled(cancellable))
+        return FALSE;
+
     GAsyncQueue *queue = priv->queue;
     nworkers = MIN(nworkers ? nworkers : G_MAXUINT, priv->nworkers);
 
@@ -359,6 +362,8 @@ gwy_master_manage_tasks(GwyMaster *master,
         priv->work = work;
     }
     g_assert(g_slist_length(priv->idle_workers) == priv->nworkers);
+    if (cancellable && g_cancellable_is_cancelled(cancellable))
+        return FALSE;
 
     priv->exhausted = priv->cancelled = FALSE;
     priv->active_tasks = 0;
