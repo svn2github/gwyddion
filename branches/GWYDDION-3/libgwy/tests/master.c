@@ -104,6 +104,7 @@ master_sum_numbers_one(guint nproc)
                                      &sum_numbers_task, &sum_numbers_result,
                                      &state,
                                      NULL);
+        g_assert(ok);
 
         g_object_unref(master);
 
@@ -225,6 +226,7 @@ master_cancel_one(guint nproc)
             ok = gwy_master_manage_tasks(master, 0, &cancel_worker,
                                          &cancel_task, &cancel_result,
                                          &count, cancellable);
+            g_assert(!ok);
 
             g_object_unref(master);
             g_object_unref(cancellable);
