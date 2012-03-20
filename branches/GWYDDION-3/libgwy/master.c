@@ -330,6 +330,10 @@ gwy_master_create_workers(GwyMaster *master,
  * Functions @task_func and @result_func will be called in the master thread.
  * Therefore, they should be quite lightweight.
  *
+ * Individual task are always allowed to finish, i.e. if @provide_task is run
+ * and returns non-%NULL task the entire sequence to @work and @consume_result
+ * result will be completed for this task.
+ *
  * This method blocks until the operation finishes.
  *
  * Returns: %TRUE if the caculation finished by exhausting tasks; %FALSE if
