@@ -8,17 +8,17 @@
 %global __find_provides %{_mingw32_findprovides}
 %if %{distro_is_redhat}
 %define __debug_install_post %{_mingw32_debug_install_post}
-%define %{develdep} %{nil}
+%define develdep %{nil}
 %endif
 %if %{distro_is_suse}
 %define __os_install_post %{_mingw32_debug_install_post} \
                           %{_mingw32_install_post}
-%define %{develdep} -devel
+%define develdep -devel
 %endif
 
 Name:           mingw32-fftw
-Version:        3.2.2
-Release:        2
+Version:        3.3
+Release:        1
 Summary:        MinGW Windows FFTW library
 
 License:        GPLv2+
@@ -53,7 +53,7 @@ MinGW Windows FFTW library.
 
 
 %build
-%{_mingw32_configure} --enable-shared --disable-static --disable-fortran --with-our-malloc16 --enable-sse2
+%{_mingw32_configure} --disable-alloca --enable-shared --disable-static --disable-fortran --with-our-malloc16 --enable-sse2
 make %{?_smp_mflags}
 
 #==========================================
@@ -66,6 +66,7 @@ rm -rf ${RPM_BUILD_ROOT}%{_mingw32_prefix}/share/info
 rm -rf ${RPM_BUILD_ROOT}%{_mingw32_prefix}/share/man
 # We do not build the Fortran stuff
 rm -f ${RPM_BUILD_ROOT}%{_mingw32_includedir}/fftw3.f
+rm -f ${RPM_BUILD_ROOT}%{_mingw32_includedir}/fftw3.f03
 
 
 %clean
@@ -87,6 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Nov 29 2011 Yeti <yeti@gwyddion.net> - 3.3-1
+- Updated to upstream version 3.3
+
 * Wed Jan 26 2011 Yeti <yeti@gwyddion.net> - 3.2.2-2
 - Modified to build on openSUSE
 
