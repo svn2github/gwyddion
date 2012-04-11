@@ -17,7 +17,7 @@
 %endif
 
 Name:           mingw32-fftw
-Version:        3.3
+Version:        3.3.1
 Release:        1
 Summary:        MinGW Windows FFTW library
 
@@ -66,7 +66,7 @@ rm -rf ${RPM_BUILD_ROOT}%{_mingw32_prefix}/share/info
 rm -rf ${RPM_BUILD_ROOT}%{_mingw32_prefix}/share/man
 # We do not build the Fortran stuff
 rm -f ${RPM_BUILD_ROOT}%{_mingw32_includedir}/fftw3.f
-rm -f ${RPM_BUILD_ROOT}%{_mingw32_includedir}/fftw3.f03
+rm -f ${RPM_BUILD_ROOT}%{_mingw32_includedir}/fftw3{l,q,}.f03
 
 
 %clean
@@ -88,6 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Apr 11 2012 Yeti <yeti@gwyddion.net> - 3.3.1-1
+- Updated to upstream version 3.3.1
+
 * Tue Nov 29 2011 Yeti <yeti@gwyddion.net> - 3.3-1
 - Updated to upstream version 3.3
 
