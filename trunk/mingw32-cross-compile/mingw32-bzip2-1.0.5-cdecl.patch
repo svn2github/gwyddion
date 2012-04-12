@@ -1,0 +1,16 @@
+--- bzip2-1.0.5.orig/bzlib.h	2007-12-09 13:34:39.000000000 +0100
++++ bzip2-1.0.5/bzlib.h	2012-04-12 14:29:21.344450207 +0200
+@@ -82,11 +82,11 @@ typedef
+ #      undef small
+ #   endif
+ #   ifdef BZ_EXPORT
+-#   define BZ_API(func) WINAPI func
++#   define BZ_API(func) func
+ #   define BZ_EXTERN extern
+ #   else
+    /* import windows dll dynamically */
+-#   define BZ_API(func) (WINAPI * func)
++#   define BZ_API(func) (* func)
+ #   define BZ_EXTERN
+ #   endif
+ #else
