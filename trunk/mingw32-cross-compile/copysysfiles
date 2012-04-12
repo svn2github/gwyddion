@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys, os, re, subprocess
 
-packages_redhat = 'atk bzip2 cairo expat libffi fftw fontconfig freetype gettext gdk-pixbuf glib2 gtk2 gtkglext jasper libjpeg-turbo libpng libxml2 minizip pango pixman win-iconv zlib'
+packages_redhat = 'atk bzip2-cdecl cairo expat libffi fftw fontconfig freetype gettext gdk-pixbuf glib2 gtk2 gtkglext jasper libjpeg-turbo libpng libxml2 minizip pango pixman win-iconv zlib'
 packages_suse = 'atk bzip2 libcairo2 libexpat libffi fftw3 fontconfig freetype gdk-pixbuf gettext-runtime glib2 gtk2 gtkglext libjasper libjpeg libpng libxml2 pango pixman zlib'
 
 if os.access('/etc/redhat-release', os.R_OK):
