@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -58,6 +58,12 @@ typedef struct {
     const gchar *number_unit_glue;
     AppendPowerFunc append_power;
 } GwyUnitStyleSpec;
+
+typedef struct {
+    guint len;
+    const gchar *symbol;
+    const gchar *name;
+} GwyUnitLongName;
 
 struct _GwyUnitPrivate {
     GArray *units;
@@ -139,6 +145,26 @@ SI_prefixes[] = {
 /* Units that can conflict with prefixes */
 static const gchar *known_units[] = {
     "deg", "Pa", "cd", "mol", "cal", "px", "pt", "cps"
+};
+
+/* Long names.  Keep the list sorted by length so that we can give up quickly
+ * and only attempt to translate long names. */
+static const GwyUnitLongName long_names[] = {
+    { 3, "Ω", "Ohm", },
+    { 4, "V", "Volt", },
+    { 4, "W", "Watt", },
+    { 5, "Hz", "Hertz", },
+    { 5, "J", "Joule", },
+    { 5, "m", "meter", },
+    { 5, "m", "metre", },
+    { 6, "A", "Ampere", },
+    { 6, "deg", "degree", },
+    { 6, "K", "Kelvin", },
+    { 6, "N", "Newton", },
+    { 6, "Pa", "Pascal", },
+    { 6, "s", "second", },
+    { 7, "cd", "candela", },
+    { 8, "Å", "Angstrom", },
 };
 
 /* Unit formats */
@@ -459,6 +485,52 @@ is_equal(const GArray *units, const GArray *op)
     return TRUE;
 }
 
+/* fix all kinds of sloppy and strange notations */
+static void
+fix_unit_name(GString *str)
+{
+    const gchar *s = str->str;
+    guint l = str->len;
+
+    if (s[0] == '\272') {
+        if (!s[1])
+            g_string_assign(str, "deg");
+        else {
+            g_string_erase(str, 0, 1);
+            g_string_prepend(str, "°");
+        }
+    }
+    else if (gwy_strequal(s, "°") || gwy_strequal(s, "Deg"))
+        g_string_assign(str, "deg");
+    else if ((s[0] == '\305' && !s[1])
+             || gwy_stramong(s, "Å", "AA", "ang", "Ang", NULL))
+        g_string_assign(str, "Å");
+    else if (gwy_strequal(s, "micro m"))
+        g_string_assign(str, "µm");
+    else if (l >= 4 && gwy_stramong(s, "a.u.", "a. u.", "counts", NULL))
+        g_string_assign(str, "");
+    else if (gwy_strequal(s, "sec"))
+        g_string_assign(str, "s");
+    else {
+        const GwyUnitLongName *long_name = long_names;
+        guint i;
+
+        for (i = G_N_ELEMENTS(long_names); i; i--, long_name++) {
+            const gchar *name = long_name->name;
+            guint ll = long_name->len;
+
+            if (l < ll)
+                break;
+            if (g_ascii_strncasecmp(s, name, ll) == 0
+                && (l == ll || (l+1 == ll
+                                && g_ascii_tolower(s[ll]) == 's'))) {
+                g_string_assign(str, long_name->symbol);
+                break;
+            }
+        }
+    }
+}
+
 static gboolean
 parse(GArray *units,
       const gchar *string,
@@ -468,7 +540,7 @@ parse(GArray *units,
     const gchar *end;
     gchar *p, *e, *utf8string = NULL;
     guint n, i;
-    gint pfpower, power10;
+    gint power10;
     gboolean dividing = FALSE;
 
     power10 = 0;
@@ -556,25 +628,31 @@ parse(GArray *units,
 
         g_string_set_size(buf, 0);
         g_string_append_len(buf, string, end - string);
+        fix_unit_name(buf);
 
-        /* fix sloppy notations */
-        if (gwy_stramong(buf->str, "°", "degree", "degrees", NULL))
-            g_string_assign(buf, "deg");
-        else if (gwy_stramong(buf->str, "micro m", NULL))
-            g_string_assign(buf, "µm");
-        else if (gwy_stramong(buf->str, "Å", "AA", "Ang", "Angstrom", NULL))
-            g_string_assign(buf, "Å");
-        else if (gwy_stramong(buf->str, "a.u.", "a. u.", "counts", NULL))
-            g_string_assign(buf, "");
-
+        gint pfpower = 0;
+        gboolean may_split_prefix = buf->len > 1;
         /* get prefix, but be careful not to split mol to mili-ol */
-        pfpower = 0;
-        for (i = 0; i < G_N_ELEMENTS(known_units); i++) {
-            if (g_str_has_prefix(buf->str, known_units[i])
-                && !g_ascii_isalpha(buf->str[strlen(known_units[i])]))
-                break;
+        if (may_split_prefix) {
+            for (i = 0; i < G_N_ELEMENTS(known_units); i++) {
+                if (g_str_has_prefix(buf->str, known_units[i])
+                    && !g_ascii_isalpha(buf->str[strlen(known_units[i])])) {
+                    may_split_prefix = FALSE;
+                    break;
+                }
+            }
         }
-        if (i == G_N_ELEMENTS(known_units) && strlen(buf->str) > 1) {
+        /* also don't split prefixes of long words, they are unlikely to be
+         * symbols. */
+        if (may_split_prefix && buf->len > 4) {
+           for (i = 0; i < buf->len; i++) {
+               if (!g_ascii_isalpha(buf->str[i]))
+                   break;
+           }
+           if (i == buf->len)
+               may_split_prefix = FALSE;
+        }
+        if (may_split_prefix) {
             for (i = 0; i < G_N_ELEMENTS(SI_prefixes); i++) {
                 const gchar *pfx = SI_prefixes[i].prefix;
 
