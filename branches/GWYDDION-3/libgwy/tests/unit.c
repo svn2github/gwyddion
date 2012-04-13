@@ -122,6 +122,36 @@ test_unit_parse(void)
 }
 
 void
+test_unit_word_names(void)
+{
+    gint pw1, pw2, pw3, pw4;
+    GwyUnit *u1 = gwy_unit_new_from_string("m", &pw1);
+    GwyUnit *u2 = gwy_unit_new_from_string("Metre", &pw2);
+    GwyUnit *u3 = gwy_unit_new_from_string("METER", &pw3);
+    GwyUnit *u4 = gwy_unit_new_from_string("metres", &pw4);
+
+    g_assert(gwy_unit_equal(u2, u1));
+    g_assert(gwy_unit_equal(u3, u1));
+    g_assert(gwy_unit_equal(u4, u1));
+    g_assert_cmpint(pw1, ==, 0);
+    g_assert_cmpint(pw2, ==, 0);
+    g_assert_cmpint(pw3, ==, 0);
+    g_assert_cmpint(pw4, ==, 0);
+    g_object_unref(u4);
+    g_object_unref(u3);
+    g_object_unref(u2);
+    g_object_unref(u1);
+
+    gint pw5;
+    GwyUnit *u5 = gwy_unit_new_from_string("furlong", &pw5);
+    g_assert_cmpint(pw5, ==, 0);
+    gchar *s = gwy_unit_to_string(u5, GWY_VALUE_FORMAT_PLAIN);
+    g_assert_cmpstr(s, ==, "furlong");
+    g_free(s);
+    g_object_unref(u5);
+}
+
+void
 test_unit_changed(void)
 {
     GwyUnit *unit = gwy_unit_new();

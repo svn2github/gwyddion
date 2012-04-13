@@ -522,8 +522,8 @@ fix_unit_name(GString *str)
             if (l < ll)
                 break;
             if (g_ascii_strncasecmp(s, name, ll) == 0
-                && (l == ll || (l+1 == ll
-                                && g_ascii_tolower(s[ll]) == 's'))) {
+                && (l == ll
+                    || (l == ll+1 && g_ascii_tolower(s[ll]) == 's'))) {
                 g_string_assign(str, long_name->symbol);
                 break;
             }
