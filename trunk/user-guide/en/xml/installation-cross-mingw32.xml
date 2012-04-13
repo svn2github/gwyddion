@@ -111,11 +111,16 @@ zypper install wine</userinput></literallayout>
         not available in the Fedora and/or openSUSE MinGW environment, namely
         GtkGLExt and FFTW.  They can be omitted though you will have to modify
         some scripts if you do so.  At the time of writing this, Fedora lacks
-        both packages while openSuSE lacks only GtkGLExt.
+        both packages while openSuSE lacks only GtkGLExt.  In addition, the
+        default Bzip2 package is built to use the stdcall calling convention
+        and is not found by configure.
       </para>
       <para>
-        The source packages <filename>mingw32-fftw</filename> and
-        <filename>mingw32-gtkglext</filename> can be downloaded from
+        The source packages
+        <filename>mingw32-fftw</filename>,
+        <filename>mingw32-gtkglext</filename> and
+        <filename>mingw32-bzip2-cdecl</filename>
+        can be downloaded from
         <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>Gwyddion SourceForge pages</ulink>.
         Build binary packages using <command>rpmbuild</command>:
         <informalexample>
@@ -132,7 +137,7 @@ yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.
 # openSUSE
 zypper install ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
         </informalexample>
-        The same applies to <filename>mingw32-gtkglext</filename> (all built
+        The same applies to the other source packages (all built
         RPMs can be installed at once with a single <command>yum</command> or
         <command>zypper</command> invocation).
       </para>
