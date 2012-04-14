@@ -90,6 +90,17 @@
         <para>Добавляет поддержку сжатия в некоторых форматах файлов (NRRD).</para>
       </listitem>
     </varlistentry>
+    <varlistentry id="dependency-minizip">
+      <term>
+        <ulink url="http://www.gzip.org/zlib/">Minizip</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Позволяет импортировать некоторые сжатые форматы данных (NanoObserver).</para>
+      </listitem>
+    </varlistentry>
     <varlistentry id="dependency-png">
       <term>
         <ulink url="http://www.libpng.org/pub/png/">Libpng</ulink>

@@ -7,7 +7,7 @@
   <para>Эти инструкции описывают компиляцию в дистрибутиве <ulink url="http://fedoraproject.org/">Fedora</ulink> используя дистрибутивную <ulink url="http://fedoraproject.org/wiki/SIGs/MinGW">поддержку кросс-компиляции MinGW</ulink> поскольку разработчики Gwyddion используют именно этот вариант. Инструкции для <ulink url="http://opensuse.org/">openSUSE</ulink> также приведены. Компиляция в других дистрибутивах или в MinGW под Windows также должна быть возможна – мы будем рады получить отчёты об успешной (или неудачной) сборке на других системах и дополнить эти инструкции.</para>
   <para>Полная кросс-компиляция включает в себя следующие шаги:</para>
   <itemizedlist>
-    <listitem>настройка для mingw2,</listitem>
+    <listitem>настройка для mingw32,</listitem>
     <listitem>компиляция,</listitem>
     <listitem>установка во временный каталог</listitem>
     <listitem>создание программы установки используя NSIS.</listitem>
@@ -19,46 +19,39 @@
     <sect3 id="installation-cross-mingw32-setup-base">
       <title>Основные пакеты MinGW32</title>
       <para>В Fedora всё находится в основном репозитории <quote>Everything</quote>. В openSUSE необходимо добавить дополнительные репозитории пакетов <filename>windows:mingw:win32/openSUSE_11.3</filename> и <filename>devel:tools/openSUSE_11.3</filename>, где 11.3, естественно, необходимо заменить действительной версией дистрибутива. если что-то вызывает сомнения, можно найти пакеты в сетевом <ulink url="http://software.opensuse.org/">поиске пакетов openSUSE</ulink>.</para>
-      <para>Запустите с правами root: <informalexample><literallayout><userinput># Fedora
-yum install mingw32-{gcc-c++,gtk2,libxml2} 
+      <para>Запустите с правами root: <informalexample><literallayout><userinput># Fedora yum install mingw32-{gcc-c++,gtk2,libxml2}
 
-# openSUSE 
-zypper install mingw32-cross-{gcc,gcc-c++,pkg-config} \ mingw32-{gtk2,expat,libxml2,fftw3,libjasper,libcairo2} \ mingw32-{gtk2,libxml2,fftw3,libjasper,libcairo2}-devel</userinput></literallayout></informalexample> чтобы установить необходимые пакеты mingw32 (некоторые другие пакеты будут установлены как зависимости указанных здесь явно).</para>
+# openSUSE zypper install mingw32-cross-{gcc,gcc-c++,pkg-config} \
+mingw32-{gtk2,expat,libxml2,fftw3,libjasper,libcairo2} \
+mingw32-{gtk2,libxml2,fftw3,libjasper,libcairo2}-devel</userinput></literallayout></informalexample> чтобы установить необходимые пакеты mingw32 (некоторые другие пакеты будут установлены как зависимости указанных здесь явно).</para>
     </sect3>
     <sect3 id="installation-cross-mingw32-setup-wine">
       <title>Wine</title>
       <para>Wine является слоем совместимости/(не) эмулятором MS Windows для Unix. Он используется для запуска NSIS который создает программу установки Gwyddion для Windows. Wine также можно использовать для запуска и тестирования собранного кросс-компиляцией Gwyddion, как <link linkend="installation-cross-mingw32-running">описано ниже</link>.</para>
-      <para>Запустите <informalexample><literallayout><userinput># Fedora
-yum install wine
+      <para>Запустите <informalexample><literallayout><userinput># Fedora yum install wine 
 
-# openSUSE
-zypper install wine</userinput></literallayout></informalexample> чтобы установить Wine.</para>
+# openSUSE zypper install wine</userinput></literallayout></informalexample> чтобы установить Wine.</para>
     </sect3>
     <sect3 id="installation-cross-mingw32-setup-nsis">
       <title>NSIS</title>
       <para><ulink url="http://nsis.sourceforge.net/">Nullsoft scriptable install system</ulink> (NSIS) используется для создания программы установки Gwyddion. Поскольку это программа для MS Windows, она устанавливается <emphasis>под Wine</emphasis>.</para>
-      <para>Скачайте NSIS с его веб-страницы и запустите <informalexample><literallayout><userinput>wine nsis-2.46-setup.exe</userinput></literallayout></informalexample> заменяя 2.46 текущей версией. Версия NSIS 2.46 самая старая из протестированных.</para>
+      <para>Загрузите NSIS с его веб-страницы и запустите <informalexample><literallayout><userinput>wine nsis-2.46-setup.exe</userinput></literallayout></informalexample> заменяя 2.46 текущей версией. Версия NSIS 2.46 самая старая из протестированных.</para>
     </sect3>
     <sect3 id="installation-cross-mingw32-setup-libraries">
       <title>Дополнительные пакеты MinGW32</title>
-      <para>Официальные пакеты Gwyddion используют дополнительные библиотеки. которые не доступны в среде MinGW в Fedora и/или openSUSE, а именно GtkGLExt и FFTW. Они могут быть пропущены, хотя может потребоваться изменение некоторых скриптов если вы так сделаете. на момент описания в Fedora отсутствовали оба пакета, в openSUSE только GtkGLExt.</para>
-      <para>Пакеты исходного кода <filename>mingw32-fftw</filename> и <filename>mingw32-gtkglext</filename> могут быть скачаны с <ulink url="http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/">страниц Gwyddion на SourceForge</ulink>. Соберите пакеты используя команду <command>rpmbuild</command>: <informalexample><literallayout><userinput>rpmbuild -bb mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout></informalexample> заменяя имя файла именем скачанного (оно может отличаться). Если команда <command>rpmbuild</command> сообщает об отсутствующих зависимостях, установите их с помощью <command>yum install</command> как ранее. Собранные пакеты могут быть установлены с правами суперпользователя:<informalexample><literallayout><userinput>#Fedora
-yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm
+      <para>Официальные пакеты Gwyddion используют дополнительные библиотеки, которые не доступны в среде MinGW в Fedora и/или openSUSE, а именно GtkGLExt и FFTW. Они могут быть пропущены, хотя может потребоваться изменение некоторых скриптов если вы так сделаете. на момент описания в Fedora отсутствовали оба пакета, в openSUSE только GtkGLExt. В дополнение, по умолчанию пакет Bzip2 собран с использованием формата вызовов stdcall и не обнаруживается configure.</para>
+      <para>Пакеты исходного кода <filename>mingw32-fftw</filename>, <filename>mingw32-gtkglext</filename> и <filename>mingw32-bzip2-cdecl</filename> могут быть загружены с <ulink url="http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/">страниц Gwyddion на SourceForge</ulink>. Необходимо собрать пакеты используя команду <command>rpmbuild</command>: <informalexample><literallayout><userinput>rpmbuild -bb mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout></informalexample> заменяя имя файла именем загруженного (оно может отличаться). Если команда <command>rpmbuild</command> сообщает об отсутствующих зависимостях, установите их с помощью <command>yum install</command> как ранее. Собранные пакеты могут быть установлены с правами суперпользователя:<informalexample><literallayout><userinput>#Fedora yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm
 
-# openSUSE
-zypper install ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout></informalexample> То же самое относится и к <filename>mingw32-gtkglext</filename> (все собранные RPM-пакеты могут быть установлены сразу одним вызовом <command>yum</command> или <command>zypper</command>).</para>
-      <para>Если вы ни разу не собирали RPM сначала нужно поставить и инициализировать поддержку сборки пакетов. Запустите с правами root: <informalexample><literallayout><userinput># Fedora
-yum install rpm-build rpmdevtools
-
-# openSUSE 
-zypper install rpmdevtools </userinput></literallayout></informalexample> и затем от пользователя, который будет собирать RPM-пакеты: <informalexample><literallayout><userinput>rpmdev-setuptree</userinput></literallayout></informalexample> При этом будет создано дерево каталогов в <filename>~/rpmbuild</filename>, где и будет происходить сборка пакетов.</para>
+# openSUSE zypper install ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout></informalexample> То же самое относится и к остальным пакетам с исходным кодом (все собранные RPM-пакеты могут быть установлены сразу одним вызовом <command>yum</command> или <command>zypper</command>).</para>
+      <para>Если вы ни разу не собирали RPM сначала нужно поставить и инициализировать поддержку сборки пакетов. Запустите с правами root: <informalexample><literallayout><userinput># Fedora yum install rpm-build rpmdevtools # openSUSE zypper install rpmdevtools </userinput></literallayout></informalexample> и затем от пользователя, который будет собирать RPM-пакеты: <informalexample><literallayout><userinput>rpmdev-setuptree</userinput></literallayout></informalexample> При этом будет создано дерево каталогов в <filename>~/rpmbuild</filename>, где и будет происходить сборка пакетов.</para>
     </sect3>
     <sect3 id="installation-cross-mingw32-scripts">
       <title>Скрипты поддержки</title>
       <para>Скрипты поддержки и данные доступны в модуле <filename>mingw32-cross-compile</filename> репозитория subversion программы Gwyddion. запустите <informalexample><literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/mingw32-cross-compile</userinput></literallayout></informalexample> чтобы получить снимок репозитория.</para>
-      <para>Наиболее важным из полученных вами является скрипт <command>cross-build</command>, который автоматизирует все шаги кросс-компиляции. Перед тем, как запускать его в первый раз, просмотрите файл <filename>setup</filename>, который определяет где находятся различные нужные вещи. По умолчанию его содержимое выглядит следующим образом: <informalexample><programlisting>source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32
-mingw32_prefix=/usr/i686-pc-mingw32/sys-root/mingw
-target_prefix=$HOME/opt/gwyddion-mingw32
+      <para>Наиболее важным из полученных вами является скрипт <command>cross-build</command>, который автоматизирует все шаги кросс-компиляции. Перед тем, как запускать его в первый раз, просмотрите файл <filename>setup</filename>, который определяет где находятся различные нужные вещи. По умолчанию его содержимое выглядит следующим образом: <informalexample><programlisting>
+source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32
+mingw32_prefix=/usr/i686-pc-mingw32/sys-root/
+mingwtarget_prefix=$HOME/opt/gwyddion-mingw32
 nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting></informalexample> Переменная <varname>source_dir</varname> задаёт место, куда был распакован архив или сохранён снимок репозитория исходного кода Gwyddion и эту переменную скорей всего нужно будет изменить. Переменная <varname>target_prefix</varname> указывает каталог установки (временный каталог) для собранного кросс-компиляцией Gwyddion. Значение по умолчанию должно работать и вам не нужно его менять если вы этого не хотите. Оставшиеся две переменные, <varname>mingw32_prefix</varname> и <varname>nsis_compiler</varname>, задают место файлов MinGW и компилятора NSIS, соответственно, и их не надо менять с значений по умолчанию в нормальных условиях, хотя NSIS может быть установлен либо в <filename>Program Files (x86)</filename>, либо в <filename>Program Files</filename> в зависимости от настроек Wine. Следует отметить, что <filename>setup</filename> читается оболочкой, и, следовательно, вокруг <literal>=</literal> не должно быть пробелов.</para>
     </sect3>
   </sect2>
