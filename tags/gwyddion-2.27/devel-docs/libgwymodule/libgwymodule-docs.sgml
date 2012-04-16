@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Module Library Reference Manual</title>
+    <xi:include href="releaseinfo.xml"/>
+  </bookinfo>
+
+  <chapter id="ModuleLibrary">
+    <title>Gwyddion Module Library</title>
+    <xi:include href="xml/gwymoduleenums.xml"/>
+    <xi:include href="xml/gwymoduleloader.xml"/>
+    <xi:include href="xml/gwymodule-file.xml"/>
+    <xi:include href="xml/gwymodule-process.xml"/>
+    <xi:include href="xml/gwymodule-tool.xml"/>
+    <xi:include href="xml/gwymodule-graph.xml"/>
+    <xi:include href="xml/gwymodule-layer.xml"/>
+    <xi:include href="xml/gwymodulebrowser.xml"/>
+  </chapter>
+
+  <chapter id="ModuleTutorial">
+    <title>Gwyddion Module Tutorial</title>
+    <xi:include href="xml/module-tutorial-overview.xml"/>
+    <xi:include href="xml/module-tutorial-minimal.xml"/>
+    <xi:include href="xml/module-tutorial-beyond.xml"/>
+    <xi:include href="xml/module-tutorial-process.xml"/>
+    <xi:include href="xml/module-tutorial-file.xml"/>
+    <xi:include href="xml/module-tutorial-graph.xml"/>
+    <xi:include href="xml/module-tutorial-tool.xml"/>
+    <xi:include href="xml/module-tutorial-layer.xml"/>
+    <xi:include href="module-tutorial-install.xml"/>
+  </chapter>
+
+  <chapter id="PluginProxyReference">
+    <title>Plug-in Proxy Reference</title>
+    <xi:include href="plugin-proxy-overview.xml"/>
+    <xi:include href="plugin-proxy-process.xml"/>
+    <xi:include href="plugin-proxy-file.xml"/>
+    <xi:include href="plugin-proxy-dump.xml"/>
+    <xi:include href="plugin-proxy-rgi.xml"/>
+  </chapter>
+</book>
