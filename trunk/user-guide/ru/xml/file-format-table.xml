@@ -388,6 +388,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module nanoobserver.c -->
+    <row>
+      <entry>NanoObserver</entry>
+      <entry>.nao</entry>
+      <entry>nanoobserver</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module nanoscan.c -->
     <row>
       <entry>Nanoscan XML</entry>
@@ -450,6 +459,15 @@
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Да</entry>
+    </row>
+    <!-- From module oldmda.c -->
+    <row>
+      <entry>oldmda</entry>
+      <entry>.sxml, .dat</entry>
+      <entry>oldmda</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
     </row>
     <!-- From module ols.c -->
     <row>
