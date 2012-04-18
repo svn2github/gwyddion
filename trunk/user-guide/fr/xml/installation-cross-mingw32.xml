@@ -6,11 +6,11 @@
   <title>Compilation croisée pour MS Windows</title>
   <para>
     La compilation croisée de Gwyddion pour MS Windows sous Linux est assez
-    similaire à la compilation habituelle sous Linux, avec quelques réglages et 
+    similaire à la compilation habituelle sous Linux, avec quelques réglages et
     étapes supplémentaires. Bien que le processus soit assez simple, la mise en
     place intiale peut paraître un peu compliquée. Si de plus vous n'êtes pas
-    habitué à la compilation sous Linux il vous faudra peut-être vous 
-    familiariser avec la procédure de base avant de vous lancer dans la 
+    habitué à la compilation sous Linux il vous faudra peut-être vous
+    familiariser avec la procédure de base avant de vous lancer dans la
     compilation croisée.
   </para>
   <para>
@@ -33,25 +33,25 @@
     <listitem>création d'un installeur avec NSIS.</listitem>
   </itemizedlist>
   <para>
-    Un script est disponible pour automatiser toutes ces étapes, telles que 
+    Un script est disponible pour automatiser toutes ces étapes, telles que
     <link linkend='installation-cross-mingw32-scripts'>décrites plus bas</link>.
   </para>
   <sect2 id='installation-cross-mingw32-setup'>
     <title>Configuration</title>
     <para>
-      Il vous faut configurer l'environnement de compilation croisée avant de 
-      réaliser la première compilation. Cette opération n'est à faire qu'une 
+      Il vous faut configurer l'environnement de compilation croisée avant de
+      réaliser la première compilation. Cette opération n'est à faire qu'une
       seule fois.
     </para>
     <sect3 id='installation-cross-mingw32-setup-base'>
       <title>Paquets MinGW32 de base</title>
       <para>
         Sous Fedora, tout se trouve dans le dépôt <quote>Everything</quote> par
-        défaut. Sous openSUSE, il faut ajouter les dépôts 
+        défaut. Sous openSUSE, il faut ajouter les dépôts
         <filename>windows:mingw:win32/openSUSE_11.3</filename> et
         <filename>devel:tools/openSUSE_11.3</filename>, où 11.3 doit bien
         évidemment être remplacé par la version actuelle d'openSUSE. En cas de
-        doute vous pouvez aussi obtenir des informations sur les paquets à 
+        doute vous pouvez aussi obtenir des informations sur les paquets à
         partir de la
         <ulink url='http://software.opensuse.org/'>recherche de paquets openSUSE</ulink>.
         en ligne.
@@ -75,9 +75,9 @@ zypper install mingw32-cross-{gcc,gcc-c++,pkg-config} \
       <title>Wine</title>
       <para>
         Wine est une couche de compatibilité de MS Windows pour for Unix. Il est
-        utilisé pour lancer NSIS et créer l'installeur de Gwyddion pour Windows. 
+        utilisé pour lancer NSIS et créer l'installeur de Gwyddion pour Windows.
         Wine peut aussi être utilisé pour lancer et tester la compilation
-        croisée de Gwyddion, tel que 
+        croisée de Gwyddion, tel que
         <link linkend='installation-cross-mingw32-running'>présenté plus bas</link>.
       </para>
       <para>
@@ -96,8 +96,8 @@ zypper install wine</userinput></literallayout>
       <title>NSIS</title>
       <para>
         <ulink url='http://nsis.sourceforge.net/'>Nullsoft scriptable install system</ulink>
-        (NSIS) est utilisé utilisé pour créer l'installeur de Gwyddion. Il 
-        s'agit d'un programme MS Windows, il est donc installé 
+        (NSIS) est utilisé utilisé pour créer l'installeur de Gwyddion. Il
+        s'agit d'un programme MS Windows, il est donc installé
         <emphasis>sous Wine</emphasis>.
       </para>
       <para>
@@ -112,17 +112,22 @@ zypper install wine</userinput></literallayout>
     <sect3 id='installation-cross-mingw32-setup-libraries'>
       <title>Paquets MinGW32 supplémentaires</title>
       <para>
-        Les paquets officiels de Gwyddion utilisent des librairies 
+        Les paquets officiels de Gwyddion utilisent des librairies
         supplémentaires non disponibles dans l'environnement MinGW de Fedora
         et/ou d'openSUSE, plus précisément GtkGLExt and FFTW. Ils peuvent être
-        ommis, à condition de modifier certains scripts si tel est le cas. Au 
-        moment où ce manuel est écrit, il manque les deux paquets sous Fedora, 
-        et seulement GtkGLExt sous openSUSE.
+        ommis, à condition de modifier certains scripts si tel est le cas. Au
+        moment où ce manuel est écrit, il manque les deux paquets sous Fedora,
+        et seulement GtkGLExt sous openSUSE. De plus, le paquet Bzip2 par défaut
+        est compilé de manière à utiliser le protocole d'appel stdcall et n'est
+        pas trouvé par configure.
       </para>
       <para>
-        Les paquets source <filename>mingw32-fftw</filename> et
-        <filename>mingw32-gtkglext</filename> peuvent être téléchargés à partir
-        de la <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>SourceForge de Gwyddion</ulink>.
+        Les paquets sources
+        <filename>mingw32-fftw</filename>,
+        <filename>mingw32-gtkglext</filename> et
+        <filename>mingw32-bzip2-cdecl</filename>
+        peuvent être téléchargés sur la
+        <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>page SourceForge de Gwyddion</ulink>.
         Compilez les paquets avec <command>rpmbuild</command> :
         <informalexample>
           <literallayout><userinput>rpmbuild --rebuild mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout>
@@ -138,7 +143,7 @@ yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.
 # openSUSE
 zypper install ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
         </informalexample>
-        Cela s'applique aussi à <filename>mingw32-gtkglext</filename> (tous les
+        Cela s'applique aussi aux autres paquets sources (tous les
         RPMs compilés peuvent être installés d'un coup avec une seule invocation
         de <command>yum</command> ou de <command>zypper</command>).
       </para>
@@ -166,7 +171,7 @@ zypper install rpmdevtools
       <title>Scripts</title>
       <para>
         Des scripts et données sont disponibles dans le module
-        <filename>mingw32-cross-compile</filename> du dépôt subversion de 
+        <filename>mingw32-cross-compile</filename> du dépôt subversion de
         Gwyddion. Lancez
         <informalexample>
           <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/mingw32-cross-compile</userinput></literallayout>
@@ -187,10 +192,10 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
         </informalexample>
         La variable <varname>source_dir</varname> spécifie la localisation du
         code source de Gwyddion (décompressée ou directement récupérée du dépôt
-        subversion), elle devra être probablement modifiée. La variable 
+        subversion), elle devra être probablement modifiée. La variable
         <varname>target_prefix</varname> spécifie le répertoire d'installation
         (zone temporaire) pour la compilation croisée de Gwyddion. La valeur
-        par défaut est normalement adaptée et n'aura pas à être modifiée, à 
+        par défaut est normalement adaptée et n'aura pas à être modifiée, à
         moins que vous ne le souhaitiez. Les deux dernière variables,
         <varname>mingw32_prefix</varname> et <varname>nsis_compiler</varname>,
         spécifient la localisation des fichiers MinGW et du compilateur NSIS
@@ -212,7 +217,7 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
         <literallayout><userinput>./cross-build</userinput></literallayout>
       </informalexample>
       dans le répertoire <filename>mingw32-cross-compile</filename>. C'est tout.
-      En cas de succès un installeur de Gwyddion pour Windows intégrant GTK+ 
+      En cas de succès un installeur de Gwyddion pour Windows intégrant GTK+
       sera créé dans <varname>$target_prefix</varname>.
     </para>
     <para>
@@ -230,9 +235,9 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       </informalexample>
       Pour lancer <filename>gwyddion.exe</filename> l'éditeur de liens doit être
       capable de trouver les DLLs nécessaires. Ceci est assuré de manière assez
-      simple par le script <command>copysysfiles</command> qui copie tous les 
-      fichiers MinGW nécessaires du système vers 
-      <varname>$target_prefix</varname>. Comme <command>copysysfiles</command> 
+      simple par le script <command>copysysfiles</command> qui copie tous les
+      fichiers MinGW nécessaires du système vers
+      <varname>$target_prefix</varname>. Comme <command>copysysfiles</command>
       est exécuté par <command>cross-build</command> vous n'avez normalment pas
       à le faire manuellement.
     </para>
@@ -241,8 +246,8 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       <informalexample>
         <literallayout>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\gwyddion.exe</literallayout>
       </informalexample>
-      pour pointer vers <filename>gwyddion.exe</filename> et la valeur 
-      <literal>Path</literal> pour pointer vers le répertoire 
+      pour pointer vers <filename>gwyddion.exe</filename> et la valeur
+      <literal>Path</literal> pour pointer vers le répertoire
       <filename>bin</filename>.
     </para>
   </sect2>

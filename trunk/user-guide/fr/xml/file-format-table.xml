@@ -389,6 +389,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module nanoobserver.c -->
+    <row>
+      <entry>NanoObserver</entry>
+      <entry>.nao</entry>
+      <entry>nanoobserver</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module nanoscan.c -->
     <row>
       <entry>Nanoscan XML</entry>
@@ -451,6 +460,15 @@
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Oui</entry>
+    </row>
+    <!-- From module oldmda.c -->
+    <row>
+      <entry>Old MDA</entry>
+      <entry>.sxml, .dat</entry>
+      <entry>oldmda</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
     </row>
     <!-- From module ols.c -->
     <row>

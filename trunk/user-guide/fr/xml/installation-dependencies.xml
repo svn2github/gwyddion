@@ -145,6 +145,19 @@
         </para>
       </listitem>
     </varlistentry>
+    <varlistentry id='dependency-minizip'>
+      <term>
+        <ulink url='http://www.gzip.org/zlib/'>Minizip</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Facultatif.</emphasis>
+        </para>
+        <para>
+          Permet l'import de certains formats compressés (NanoObserver).
+        </para>
+      </listitem>
+    </varlistentry>
     <varlistentry id='dependency-png'>
       <term>
         <ulink url='http://www.libpng.org/pub/png/'>Libpng</ulink>
