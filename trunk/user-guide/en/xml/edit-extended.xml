@@ -167,5 +167,45 @@
       keyboard focus elsewhere) updates the preview.
     </para>
   </sect2>
+  <sect2 id='xy-denoise'>
+    <title>XY denoising</title>
+    <indexterm><primary>xy denoising</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>XY denoise</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Calculates denoised image on the basis of two measurements of the same area
+      - one performed in x direction and on in y direction (and rotated back to be aligned
+      the same way as the x direction one). It is based on
+      work of E. Anguiano and M. Aguilar (see [<link linkend='edit-extended-ref-1'>1</link>]).
+      Module performs FFT of both images, combines information from both images in reciprocal space, and then
+      performs backward FFT in order to get denoised image. It is useful namely for large scars
+      and fast scanning axis stripes removal.
+    </para>
+    <informalfigure id='fig-edit-extended-xy-denoise'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='xydenoise.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        XY denoise procedure simulation: A) original data, B) simulated measurement in x axis,
+        C) simulated measurement in y axis, D) denoised image.
+      </caption>
+    </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='edit-extended-ref'>
+    <title>References</title>
+    <para id='grain-analysis-ref-1'>
+      [1] <ulink url='http://dx.doi.org/10.1016/S0304-3991(98)00074-6'>
+         E. Anguiano and M. Aguilar, Ultramicroscopy, 76 (1999) 47
+      </ulink>
+    </para>
+  </sect2>
+
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
