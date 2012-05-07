@@ -7,7 +7,7 @@
   <para>
      Cette section présente certains modules conçus pour réaliser des
      corrections particulières des données SPM. L'utilisation des outils
-     basiques de d'édition présentés dans le chpitre
+     basiques de d'édition présentés dans le chapitre
      <link linkend='editing-correction' endterm='editing-correction.title'/>
      permet de corriger la plupart des défauts locaux de scan que l'on trouve
      souvent sur les images de mesure SPM. Il existe aussi de nombreuses sources
@@ -169,13 +169,56 @@
       une fonction non équivoque.
     </para>
     <para>
-      Les coefficients du polynôme sont sans unité, c'est-à-dire comme si les plages de
-      coordonnéess étaient toujours [0, 1]. Si la case
+      Les coefficients du polynôme sont sans unité, c'est-à-dire que les plages
+      de coordonnées sont toujours [0, 1]. Si la case
       <guilabel>Mise à jour automatique</guilabel> est activée, la touche
-      <keysym>Entrée</keysym> lors de la saisie d'un coefficient (ou simplement
-      le déplacement vers une autre case) permet de mettre à jour la
-      prévisualisation du résultat.
+      <keysym>Entrée</keysym> après la saisie d'un coefficient (ou simplement
+      le déplacement vers une autre case) mettra à jour la prévisualisation du
+      résultat.
     </para>
   </sect2>
+  <sect2 id='xy-denoise'>
+    <title>Débruitage XY</title>
+    <indexterm><primary>débruitage xy</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Multidonnées</guisubmenu>
+        <guimenuitem>Débruitage XY</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Calcule une image débruitée en se basant sur deux mesures de la même zone
+      – l'une réalisée selon la direction x et l'autre selon y (puis tournée de
+      manière à être alignée avec l'image x). Le calcul est basé sur les travaux
+      de E. Anguiano et M. Aguilar (voir [<link linkend='edit-extended-ref-1'>1</link>]).
+      Le module calcule la transformée de Fourier des deux images, combine leurs
+      informations dans l'espace réciproque, puis applique la transformée
+      inverse pour obtenir l'image débruitée. Cette fonction est utile pour la
+      suppression des défauts linéaires et des artefacts le long de l'axe rapide
+      de scan.
+    </para>
+    <informalfigure id='fig-edit-extended-xy-denoise'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='xydenoise.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Simulation de la procédures de débruitage XY : A) données initiales, B)
+        mesure simulée selon l'axe x, C) mesure simulée selon l'axe y, D) image
+        débruitée.
+      </caption>
+    </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='edit-extended-ref'>
+    <title>Références</title>
+    <para id='grain-analysis-ref-1'>
+      [1] <ulink url='http://dx.doi.org/10.1016/S0304-3991(98)00074-6'>
+         E. Anguiano and M. Aguilar, Ultramicroscopy, 76 (1999) 47
+      </ulink>
+    </para>
+  </sect2>
+
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
