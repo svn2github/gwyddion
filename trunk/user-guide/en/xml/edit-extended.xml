@@ -181,7 +181,7 @@
       Calculates denoised image on the basis of two measurements of the same area
       - one performed in x direction and on in y direction (and rotated back to be aligned
       the same way as the x direction one). It is based on
-      work of E. Anguiano and M. Aguilar (see [<link linkend='edit-extended-ref-1'>1</link>]).
+      work of E. Anguiano and M. Aguilar (see [<link linkend='xy-denoise-ref-1'>1</link>]).
       Module performs FFT of both images, combines information from both images in reciprocal space, and then
       performs backward FFT in order to get denoised image. It is useful namely for large scars
       and fast scanning axis stripes removal.
@@ -200,7 +200,7 @@
   </sect2>
   <sect2 id='edit-extended-ref'>
     <title>References</title>
-    <para id='grain-analysis-ref-1'>
+    <para id='xy-denoise-ref-1'>
       [1] <ulink url='http://dx.doi.org/10.1016/S0304-3991(98)00074-6'>
          E. Anguiano and M. Aguilar, Ultramicroscopy, 76 (1999) 47
       </ulink>
