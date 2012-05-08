@@ -191,7 +191,7 @@
       Calcule une image débruitée en se basant sur deux mesures de la même zone
       – l'une réalisée selon la direction x et l'autre selon y (puis tournée de
       manière à être alignée avec l'image x). Le calcul est basé sur les travaux
-      de E. Anguiano et M. Aguilar (voir [<link linkend='edit-extended-ref-1'>1</link>]).
+      de E. Anguiano et M. Aguilar (voir [<link linkend='xy-denoise-ref-1'>1</link>]).
       Le module calcule la transformée de Fourier des deux images, combine leurs
       informations dans l'espace réciproque, puis applique la transformée
       inverse pour obtenir l'image débruitée. Cette fonction est utile pour la
@@ -213,7 +213,7 @@
   </sect2>
   <sect2 id='edit-extended-ref'>
     <title>Références</title>
-    <para id='grain-analysis-ref-1'>
+    <para id='xy-denoise-ref-1'>
       [1] <ulink url='http://dx.doi.org/10.1016/S0304-3991(98)00074-6'>
          E. Anguiano and M. Aguilar, Ultramicroscopy, 76 (1999) 47
       </ulink>
