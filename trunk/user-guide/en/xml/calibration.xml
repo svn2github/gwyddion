@@ -7,13 +7,6 @@
   <sect2 id='caldata-overview'>
     <title>
       Calibration data
-      <guiicon>
-        <inlinemediaobject>
-          <imageobject>
-            <imagedata fileref='gwy_filter-24.png' format='PNG'/>
-          </imageobject>
-        </inlinemediaobject>
-      </guiicon>
     </title>
     <para>
       Calibration data can be used to provide correction of measured data
