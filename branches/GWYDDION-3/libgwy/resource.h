@@ -49,7 +49,7 @@ typedef enum {
     GWY_RESOURCE_MANAGEMENT_MAIN,
 } GwyResourceManagementType;
 
-GQuark gwy_resource_error_quark(void);
+GQuark gwy_resource_error_quark(void) G_GNUC_CONST;
 
 #define GWY_TYPE_RESOURCE \
     (gwy_resource_get_type())

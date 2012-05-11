@@ -33,7 +33,7 @@ typedef enum {
     GWY_PACK_ERROR_DATA,
 } GwyPackError;
 
-GQuark gwy_pack_error_quark(void);
+GQuark gwy_pack_error_quark(void)                 G_GNUC_CONST;
 gsize  gwy_pack_size       (const gchar *format,
                             GError **error);
 gsize  gwy_pack            (const gchar *format,
