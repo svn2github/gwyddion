@@ -239,8 +239,35 @@
   <xsl:text>\noalign{\smallskip}&#10;</xsl:text>
 </xsl:template>
 
-<xsl:template match='table|informaltable|tbody'>
+<xsl:template match='tbody'>
   <xsl:apply-templates/>
+</xsl:template>
+
+<!-- Footnotes with references (i.e. multiple marks pointing to the same
+     note) do not work in tables but that's what we usually need in tables.
+     So make them work with manually set marks using label attributes. The
+     primary use is the file format table and this one is generated anyway. -->
+<xsl:template match='table|informaltable'>
+  <xsl:apply-templates/>
+  <xsl:for-each select='descendant::footnote'>
+    <xsl:text>\textsuperscript{\normalfont </xsl:text>
+    <xsl:value-of select='@label'/>
+    <xsl:text>} </xsl:text>
+    <xsl:value-of select='.'/>
+    <xsl:text>\par&#10;</xsl:text>
+  </xsl:for-each>
+</xsl:template>
+
+<xsl:template match="footnote[ancestor::entry]">
+  <xsl:text>\textsuperscript{\normalfont </xsl:text>
+  <xsl:value-of select='@label'/>
+  <xsl:text>}</xsl:text>
+</xsl:template>
+
+<xsl:template match="footnoteref[ancestor::entry]">
+  <xsl:text>\textsuperscript{\normalfont </xsl:text>
+  <xsl:value-of select='@label'/>
+  <xsl:text>}</xsl:text>
 </xsl:template>
 
 </xsl:stylesheet>
