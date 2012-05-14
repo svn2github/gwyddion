@@ -279,7 +279,7 @@
       <entry>iso28600</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>Limited<footnote id="table-file-formats-fn1"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
+      <entry>Limited<footnote id="table-file-formats-fn1" label="a"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -360,7 +360,7 @@
       <entry>mifile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -441,7 +441,7 @@
       <entry>nanoscope</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -466,8 +466,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Yes<footnote id="table-file-formats-fn2"><para>Not all variants are implemented.</para></footnote></entry>
-      <entry>Yes<footnote id="table-file-formats-fn3"><para>Data are exported in a fixed attached native-endian float point format.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn2" label="b"><para>Not all variants are implemented.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn3" label="c"><para>Data are exported in a fixed attached native-endian float point format.</para></footnote></entry>
       <entry>No</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -546,8 +546,8 @@
       <entry>Pixmap images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Yes<footnote id="table-file-formats-fn4"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.</para></footnote></entry>
-      <entry>Yes<footnote id="table-file-formats-fn5"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
+      <entry>Yes<footnote id="table-file-formats-fn4" label="d"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn5" label="e"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
 export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>No</entry>
     </row>
@@ -618,7 +618,7 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>Graph text data (raw)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Yes<footnote id="table-file-formats-fn6"><para>At present, only simple two-column data, imported as graph curves, are
+      <entry>Yes<footnote id="table-file-formats-fn6" label="f"><para>At present, only simple two-column data, imported as graph curves, are
 supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -628,7 +628,7 @@ supported.</para></footnote></entry>
       <entry>XYZ data</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Yes<footnote id="table-file-formats-fn7"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn7" label="g"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
     </row>
@@ -639,7 +639,7 @@ supported.</para></footnote></entry>
       <entry>rhk-sm3</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -648,7 +648,7 @@ supported.</para></footnote></entry>
       <entry>rhk-sm4</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -657,7 +657,7 @@ supported.</para></footnote></entry>
       <entry>rhk-spm32</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module robotics.c -->
     <row>
