@@ -80,11 +80,13 @@
       The channel list shows channel thumbnails, check-boxes controlling
       whether the channel is visible (i.e. displayed in a window) and channel
       names.  Right to the name the presence of
-      <link linkend='presentations-masks'>presentation and/or mask</link> is
+      <link linkend='presentations-masks'>presentation, mask</link> or
+      <link linkend='caldata'>calibration</link> is
       indicated by the following letters:
       <itemizedlist>
         <listitem><guilabel>M</guilabel> – mask</listitem>
         <listitem><guilabel>P</guilabel> – presentation</listitem>
+        <listitem><guilabel>C</guilabel> – calibration</listitem>
       </itemizedlist>
     </para>
   </sect2>

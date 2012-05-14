@@ -108,7 +108,7 @@
       </menuchoice>
     we can review and select calibration data applied on our height field measurements.
     After applying calibration data a set of calibration datafields is created and
-    attached to selected data. A 'C' character appears in data browser as a sign of
+    attached to selected data. A ‘C’ character appears in data browser as a sign of
     data with attached calibration. Note that the calibration attached to SPM measurement is no
     more related with primary calibration data (that were used for its creation).
     </para>
