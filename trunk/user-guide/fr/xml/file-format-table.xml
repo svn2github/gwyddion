@@ -7,7 +7,7 @@
     <primary>formats supportés</primary>
   </indexterm>
   <tgroup cols='6' align='left'>
-    <?dblatex XXXccc?>
+    <?dblatex XXlccc?>
     <thead>
       <row>
         <entry>Format de fichier</entry>
@@ -155,6 +155,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module dm3file.c -->
+    <row>
+      <entry>Digital Micrograph DM3 TEM</entry>
+      <entry>.dm3</entry>
+      <entry>dm3file</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module dmefile.c -->
     <row>
       <entry>DME Rasterscope</entry>
@@ -270,7 +279,7 @@
       <entry>iso28600</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Limité<footnote id="table-file-formats-fn1"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
+      <entry>Limité<footnote id="table-file-formats-fn1" label="a"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -351,7 +360,7 @@
       <entry>mifile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -407,6 +416,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module nanoscantech.c -->
+    <row>
+      <entry>NanoScanTech</entry>
+      <entry>.nstdat</entry>
+      <entry>nanoscantech</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Oui</entry>
+    </row>
     <!-- From module nanoscope-ii.c -->
     <row>
       <entry>Veeco Nanoscope II</entry>
@@ -423,7 +441,7 @@
       <entry>nanoscope</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -448,8 +466,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Oui<footnote id="table-file-formats-fn2"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn3"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn2" label="b"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn3" label="c"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>Non</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -463,7 +481,7 @@
     </row>
     <!-- From module oldmda.c -->
     <row>
-      <entry>Old MDA</entry>
+      <entry>NT-MDT old MDA</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Oui</entry>
@@ -528,9 +546,9 @@
       <entry>Images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Oui<footnote id="table-file-formats-fn4"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
+      <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
 Le format 16bit n'est  pas supporté.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn5"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
+      <entry>Oui<footnote id="table-file-formats-fn5" label="e"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
       en niveaux de gris 16bit est possible vers les formats PNG, TIFF et PNM.</para></footnote></entry>
       <entry>Non</entry>
     </row>
@@ -601,7 +619,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Graphe au format texte (brut)</entry>
       <entry>-</entry>
       <entry>rawgraph</entry>
-      <entry>Oui<footnote id="table-file-formats-fn6"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
+      <entry>Oui<footnote id="table-file-formats-fn6" label="f"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -611,7 +629,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Coordonnées XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Oui<footnote id="table-file-formats-fn7"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn7" label="g"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
@@ -622,7 +640,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-sm3</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -640,7 +658,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-spm32</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -781,6 +799,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Surf</entry>
       <entry>.sur</entry>
       <entry>surffile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module tiaser.c -->
+    <row>
+      <entry>FEI Tecnai imaging and analysis (anciennement Emispec)</entry>
+      <entry>.ser</entry>
+      <entry>tiaser</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
