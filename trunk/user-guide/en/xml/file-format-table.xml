@@ -155,6 +155,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module dm3file.c -->
+    <row>
+      <entry>Digital Micrograph DM3 TEM data</entry>
+      <entry>.dm3</entry>
+      <entry>dm3file</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module dmefile.c -->
     <row>
       <entry>DME Rasterscope</entry>
@@ -407,6 +416,15 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module nanoscantech.c -->
+    <row>
+      <entry>NanoScanTech</entry>
+      <entry>.nstdat</entry>
+      <entry>nanoscantech</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Yes</entry>
+    </row>
     <!-- From module nanoscope-ii.c -->
     <row>
       <entry>Veeco Nanoscope II</entry>
@@ -463,7 +481,7 @@
     </row>
     <!-- From module oldmda.c -->
     <row>
-      <entry>oldmda</entry>
+      <entry>NT-MDT old MDA</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Yes</entry>
@@ -780,6 +798,15 @@ supported.</para></footnote></entry>
       <entry>Surf</entry>
       <entry>.sur</entry>
       <entry>surffile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module tiaser.c -->
+    <row>
+      <entry>FEI Tecnai imaging and analysis (former Emispec) data</entry>
+      <entry>.ser</entry>
+      <entry>tiaser</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
