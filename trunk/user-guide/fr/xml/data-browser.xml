@@ -84,12 +84,15 @@
     <para>
       La liste des canaux montre des vignettes de chaque canal, des cases à
       cocher permettant de choisir la visibilité d'un canal (c'est-à-dire son affichage
-      à l'écran), ainsi que le nom des canaux. A droite du nom la présence d'une
-      <link linkend='presentations-masks'>présentation et/ou d'un masque</link>
-      est indiquée par les lettres suivantes :
+      à l'écran), ainsi que le nom des canaux. La présence d'une
+      <link linkend='presentations-masks'>présentation</link>, d'un
+      <link linkend='presentations-masks'>masque</link>
+      ou d'une <link linkend='caldata'>calibration</link> est indiquée à droite
+      du nom par les lettres suivantes :
       <itemizedlist>
         <listitem><guilabel>M</guilabel> – masque</listitem>
         <listitem><guilabel>P</guilabel> – présentation</listitem>
+        <listitem><guilabel>C</guilabel> – calibration</listitem>
       </itemizedlist>
     </para>
   </sect2>

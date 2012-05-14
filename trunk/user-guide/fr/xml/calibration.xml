@@ -75,10 +75,10 @@
       incertitudes et de la géométrie volumique du scanner. Il faut aussi donner
       un nom à la calibration calculée. Les données primaires de calibration
       sont par la suite disponibles sous ce nom pour pouvoir être appliquées
-      aux mesures SPM. 
+      aux mesures SPM.
       </para>
       <para>
-      En utilisant le module 
+      En utilisant le module
       <menuchoice>
         <guimenu>Calibration</guimenu>
         <guisubmenu>Calculer une carte d'erreur basique...</guisubmenu>
@@ -123,7 +123,7 @@
     utiliser les données de calibration pour différentes mesures. Pour utiliser
     ces données pour traiter les données mesurées, il faut tout d'abord les
     appliquer.
-    Le module 
+    Le module
           <menuchoice>
         <guimenu>Calibration</guimenu>
         <guisubmenu>Appliquer aux données...</guisubmenu>
@@ -131,7 +131,7 @@
     permet de lister et sélectionner les données de calibration appliquées aux
     mesures. Après avoir appliqué les données de calibration, des champs de
     données de calibration sont créés et rattachés aux données sélectionnées. Le
-    caractère 'C' apparaît alors dans le navigateur de données pour montrer que
+    caractère ‘C’ apparaît alors dans le navigateur de données pour montrer que
     des données de calibration sont attachées aux données correspondantes. Notez
     que la calibration attachée à une mesure SPM n'est plus reliée aux données
     primaires de calibration (qui ont été utilisée pour les créer).
