@@ -6,7 +6,7 @@
     <primary>поддерживаемые форматы</primary>
   </indexterm>
   <tgroup cols="6" align="left">
-    <?dblatex XXXccc?>
+    <?dblatex XXlccc?>
     <thead>
       <row>
         <entry>Формат файлов</entry>
@@ -154,6 +154,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module dm3file.c -->
+    <row>
+      <entry>Данные TEM Digital Micrograph DM3</entry>
+      <entry>.dm3</entry>
+      <entry>dm3file</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module dmefile.c -->
     <row>
       <entry>DME Rasterscope</entry>
@@ -269,7 +278,7 @@
       <entry>iso28600</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Ограничена<footnote id="table-file-formats-fn1"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
+      <entry>Ограничена<footnote id="table-file-formats-fn1" label="a"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -350,7 +359,7 @@
       <entry>mifile</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -406,6 +415,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module nanoscantech.c -->
+    <row>
+      <entry>NanoScanTech</entry>
+      <entry>.nstdat</entry>
+      <entry>nanoscantech</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Да</entry>
+    </row>
     <!-- From module nanoscope-ii.c -->
     <row>
       <entry>Veeco Nanoscope II</entry>
@@ -422,7 +440,7 @@
       <entry>nanoscope</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -447,8 +465,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Да<footnote id="table-file-formats-fn2"><para>Не все варианты реализованы.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn3"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn2" label="b"><para>Не все варианты реализованы.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn3" label="c"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
       <entry>Нет</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -462,7 +480,7 @@
     </row>
     <!-- From module oldmda.c -->
     <row>
-      <entry>oldmda</entry>
+      <entry>NT-MDT old MDA</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Да</entry>
@@ -527,8 +545,8 @@
       <entry>Изображения</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Да<footnote id="table-file-formats-fn4"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn5"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn4" label="d"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn5" label="e"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
       <entry>Нет</entry>
     </row>
     <!-- From module pltfile.c -->
@@ -598,7 +616,7 @@
       <entry>Текстовые данные графиков (необработанные)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Да<footnote id="table-file-formats-fn6"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn6" label="f"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
@@ -607,7 +625,7 @@
       <entry>Данные XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Да<footnote id="table-file-formats-fn7"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn7" label="g"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
@@ -618,7 +636,7 @@
       <entry>rhk-sm3</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -627,7 +645,7 @@
       <entry>rhk-sm4</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -636,7 +654,7 @@
       <entry>rhk-spm32</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -777,6 +795,15 @@
       <entry>Surf</entry>
       <entry>.sur</entry>
       <entry>surffile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module tiaser.c -->
+    <row>
+      <entry>Данные FEI Tecnai imaging and analysis (бывший Emispec)</entry>
+      <entry>.ser</entry>
+      <entry>tiaser</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
