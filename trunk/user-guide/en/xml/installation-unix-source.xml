@@ -189,27 +189,58 @@ export LDFLAGS</userinput></literallayout>
       </informalexample>
     </para>
     <para>
-      Certain auxiliary installation actions can be disabled in
-      <command>configure</command>: Updating of Freedesktop files can be
-      disabled with <userinput>--disable-desktop-file-update</userinput>.
-      Installation of GConf2 schemas can be disabled with
-      <userinput>--disable-schemas-install</userinput>.  However, the usual
-      reason for disabling these actions is that Gwyddion is installed into
-      a staging area instead of the final directory (commonly done when
-      building Linux packages).  In this case the auxiliary actions are
-      disabled automatically by non-empty <varname>DESTDIR</varname> (see
-      <link linkend='installation-unix-source-installation'>installation</link>)
-      and hence they need not be disabled in <command>configure</command>.
+      Most of these options control inclusion/exclusion of optional features.
+      Some interesting general options are explained below.
     </para>
-    <para>
-      If you intend to patch or otherwise modify Gwyddion source code pass option
-      <option>--enable-maintainer-mode</option> to <command>configure</command>
-      to enable various update and rebuild rules that are not used in mere
-      compilation.  Depending on the nature of the modifications, some of the
-      additional tools described in section
-      <link linkend='installation-devel'>Subversion Checkout, Development</link>
-      may be necessary.
-    </para>
+    <sect3 id='installation-unix-source-configuration-user'>
+      <title>Users's tweaks</title>
+      <para>
+        Gwyddion comes with various desktop integration files defining MIME
+        types, menu entries, file associations, thumbnailers, etc.
+        If you install Gwyddion to a system prefix they usually end up in
+        the correct location.  However, if you install it somewhere to your
+        home directory then these files need to be placed elsewhere, namely
+        into certain dot-directories in your home.
+      </para>
+      <para>
+        This can be requested using <option>--enable-home-installation</option>
+        option of <command>configure</command>.
+        Note that using this option causes installation of files outside the
+        specified prefix.
+      </para>
+    </sect3>
+    <sect3 id='installation-unix-source-configuration-packager'>
+      <title>Packager's tweaks</title>
+      <para>
+        If Gwyddion is installed into a staging area for a subsequent
+        packaging it is necessary to disable certain post-installation actions
+        that need to be done on the target system, not while packaging.
+      </para>
+      <para>
+        Updating of Freedesktop files can be
+        disabled with <option>--disable-desktop-file-update</option>.
+        Installation of GConf2 schemas can be disabled with
+        <option>--disable-schemas-install</option>.  Usually, this
+        does not have to be done explicitly as installations into a staging
+        area use non-empty <varname>DESTDIR</varname> (see
+        <link linkend='installation-unix-source-installation'>installation</link>).
+        If <varname>DESTDIR</varname> is found to be non-empty the
+        build system skips post-installation actions automatically.
+      </para>
+    </sect3>
+    <sect3 id='installation-unix-source-configuration-developer'>
+      <title>Developer's tweaks</title>
+      <para>
+        If you intend to patch or otherwise modify Gwyddion source code pass
+        option <option>--enable-maintainer-mode</option> to
+        <command>configure</command>
+        to enable various update and rebuild rules that are not used in plain
+        compilation.  Depending on the nature of the modifications, some of the
+        additional tools described in section
+        <link linkend='installation-devel'>Subversion Checkout, Development</link>
+        may be necessary.
+      </para>
+    </sect3>
   </sect2>
   <sect2 id='installation-unix-source-compilation'>
     <title>Compilation</title>
