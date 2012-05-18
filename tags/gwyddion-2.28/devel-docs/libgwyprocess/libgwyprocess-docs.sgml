@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Data Processing Library Reference Manual</title>
+    <xi:include href="releaseinfo.xml"/>
+  </bookinfo>
+
+  <para>
+    This library contains classes representing one- and twodimensional data,
+    and all kinds of data processing methods operating on them.
+  </para>
+  <xi:include href="xml/dataline.xml"/>
+  <xi:include href="xml/datafield.xml"/>
+  <xi:include href="xml/spectra.xml"/>
+  <xi:include href="xml/gwycalibration.xml"/>
+  <xi:include href="xml/gwycaldata.xml"/>
+  <xi:include href="xml/arithmetic.xml"/>
+  <xi:include href="xml/cdline.xml"/>
+  <xi:include href="xml/correct.xml"/>
+  <xi:include href="xml/correlation.xml"/>
+  <xi:include href="xml/cwt.xml"/>
+  <xi:include href="xml/dwt.xml"/>
+  <xi:include href="xml/elliptic.xml"/>
+  <xi:include href="xml/filters.xml"/>
+  <xi:include href="xml/fractals.xml"/>
+  <xi:include href="xml/grains.xml"/>
+  <xi:include href="xml/gwygrainvalue.xml"/>
+  <xi:include href="xml/hough.xml"/>
+  <xi:include href="xml/inttrans.xml"/>
+  <xi:include href="xml/interpolation.xml"/>
+  <xi:include href="xml/level.xml"/>
+  <xi:include href="xml/linestats.xml"/>
+  <xi:include href="xml/simplefft.xml"/>
+  <xi:include href="xml/stats.xml"/>
+  <xi:include href="xml/stats_uncertainty.xml"/>
+  <xi:include href="xml/tip.xml"/>
+  <xi:include href="xml/triangulation.xml"/>
+  <xi:include href="xml/gwyprocess.xml"/>
+  <xi:include href="xml/gwyprocessenums.xml"/>
+</book>
