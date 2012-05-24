@@ -219,7 +219,7 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
     </para>
   </sect2>
   <sect2 id='installation-cross-mingw32-running'>
-    <title>Running Under Wine</title>
+    <title>Running under Wine</title>
     <para>
       Compiled Gwyddion can be run under Wine.   Assuming the default value of
       <varname>target_prefix</varname>:
@@ -240,6 +240,72 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       </informalexample>
       to point to <filename>gwyddion.exe</filename> and the value
       <literal>Path</literal> to point to the <filename>bin</filename> subdirectory.
+    </para>
+  </sect2>
+  <sect2 id='installation-cross-mingw32-modules'>
+    <title>Cross-compilation of standalone modules</title>
+    <para>
+      Cross-compilation of standalone modules requires only Gwyddion headers and
+      Win32 development libraries.  While they can be surely obtained by cross-compiling
+      entire Gwyddion is it not necessary to do so.  By compiling only the libraries
+      you can avoid the installation of various rarer Gwyddion dependences.
+    </para>
+    <para>
+      The MinGW Gwyddion libraries can be built as a RPM package,
+      <filename>mingw32-gwyddion-libs</filename>, and then installed and used as any
+      other MinGW package.  To build it you need (of course, replace 2.28 with the
+      current version):
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <filename>gwyddion-2.28.tar.xz</filename>
+        </term>
+        <listitem>
+          <para>
+            Copy (or link) the source code tarball to
+            <filename>~/rpmbuild/RPM/SOURCES</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>gwyddion-2.22-build-only-libs.patch</filename>
+        </term>
+        <listitem>
+          <para>
+            This patch can be found in among the other
+            <link linkend='installation-cross-mingw32-scripts'>build scripts</link> in
+            <filename>mingw32-cross-compile</filename> subversion module.  Put it
+            also to <filename>~/rpmbuild/RPM/SOURCES</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>mingw32-gwyddion-libs.spec</filename>
+        </term>
+        <listitem>
+          <para>
+            The RPM spec file can be found in subdirectory <filename>data</filename> of
+            has to be placed to
+            <filename>~/rpmbuild/RPM/SPECS</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Then run
+      <informalexample>
+        <literallayout><userinput>rpmbuild -bb ~/rpmbuild/RPM/SOURCES/mingw32-gwyddion-libs.spec</userinput></literallayout>
+      </informalexample>
+      and install the created package.
+    </para>
+    <para>
+      Once you have it installed you can try cross-compilation of the sample standalone
+      module <filename>threshold-example</filename> that is available in the subversion
+      repository (or as a tarball).  See <filename>README</filename> therein for some
+      more details.
     </para>
   </sect2>
 </sect1>
