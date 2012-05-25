@@ -198,30 +198,62 @@ export LDFLAGS</userinput></literallayout>
       </informalexample>
     </para>
     <para>
-        Certaines actions auxiliaires de l'installation peuvent être
-        désactivées dans <command>configure</command> : la mise à jour des
-        fichiers Freedesktop peut être désactivée avec
-        <userinput>--disable-desktop-file-update</userinput>.
-        L'installation des schémas GConf2 peut être désactivée avec
-        <userinput>--disable-schemas-install</userinput>.  Cependant, la raison
-        habituelle pour désactiver ces actions est l'installation de Gwyddion
-        dans un répertoire temporaire au lieu du répertoire final (c'est souvent
-        le cas lors de la compilation de paquets Linux). Dans ce cas ces
-        actions auxiliaires sont automatiquement déastivées par un
-        <varname>DESTDIR</varname> non vide (voir
-        <link linkend='installation-unix-source-installation'>installation</link>)
-        et n'ont donc pas à être désactivées dans <command>configure</command>.
+      La plupart de ces options contrôlent l'inclusion ou l'exclusion de
+      fonctionnalités optionnelles. Quelques options d'intérêt général sont
+      présentées ci-dessous.
     </para>
-    <para>
-      Si vous souhaiter créer un patch ou modifier d'une manière ou d'une autre
-      le code source de Gwyddion, passez l'option
-      <option>--enable-maintainer-mode</option> à <command>configure</command>
-      pour activer diverses mises à jour et recompiler les règles non utilisées
-      dans la compilation de base. En fonction de la nature des modifications,
-      certains des outils supplémentaires décrits dans la section
-      <link linkend='installation-devel'>Subversion, Développement</link>
-      peuvent être nécessaires.
-    </para>
+    <sect3 id='installation-unix-source-configuration-user'>
+      <title>Options pour les utilisateurs</title>
+      <para>
+        Gwyddion fournit plusieurs fichiers d'intégration définissant les types
+        MIME, les entrées dans les menus, les associations de fichiers, les
+        générateurs de vignettes, etc. Ceux-ci devraient naturellement se
+        retrouver aux bons emplacements si vous installez Gwyddion dans un
+        répertoire système. Toutefois, si vous l'installez dans un autre
+        répertoire, tel que votre répertoire home, ces fichiers devront être
+        replacés dans des sous-répertoires masqués (dont le nom commence par un
+        point) de votre répertoire home.
+      </para>
+      <para>
+        Cette option peut être activée en utilisant
+        <option>--enable-home-installation</option> dans
+        <command>configure</command>. Notez que cette option installera des
+        fichiers en dehors du répertoire préfixe spécifié.
+      </para>
+    </sect3>
+    <sect3 id='installation-unix-source-configuration-packager'>
+      <title>Options pour les packageurs</title>
+      <para>
+        Si Gwyddion est installé dans un répertoire temporaire dans le but d'en
+        faire un paquet, il sera nécessaire de désactiver certaines actions
+        de post-installation ayant normalement lieu sur le système cible, et non
+        lors de la construction du paquet.
+      </para>
+      <para>
+        La mise à jour des fichiers Freedesktop peut être inactivée avec
+        <option>--disable-desktop-file-update</option>. L'installation des
+        schémas GConf2 peut être inactivée avec
+        <option>--disable-schemas-install</option>. En règle générale il n'est
+        pas nécessaire de le faire de manière explicite car l'installation dans
+        un répertoire temporaire utilise un <varname>DESTDIR</varname> non vide
+        (voir <link linkend='installation-unix-source-installation'>installation</link>).
+        Si <varname>DESTDIR</varname> est non vide, le processus de construction
+        omet automatiquement les actions de post-installation.
+      </para>
+    </sect3>
+    <sect3 id='installation-unix-source-configuration-developer'>
+      <title>Options pour les développeurs</title>
+      <para>
+        Si vous souhaitez corriger ou modifier d'une quelconque manière le code
+        source de Gwyddion, passez l'option
+        <option>--enable-maintainer-mode</option> à <command>configure</command>
+        pour activer les mises à jour et reconstruire les règles non utilisées
+        dans la compilation de base. En fonction de la nature des modifications,
+        certains des outils supplémentaires décrits dans la section
+        <link linkend='installation-devel'>Subversion, Développement</link>
+        peuvent être nécessaires.
+      </para>
+    </sect3>
   </sect2>
   <sect2 id='installation-unix-source-compilation'>
     <title>Compilation</title>

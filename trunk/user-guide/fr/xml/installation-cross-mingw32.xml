@@ -251,5 +251,73 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       <filename>bin</filename>.
     </para>
   </sect2>
+  <sect2 id='installation-cross-mingw32-modules'>
+    <title>Compilation croisée de modules autonomes</title>
+    <para>
+      La compilation croisée de modules autonomes ne nécessite que les en-têtes
+      de Gwyddion ainsi que les lirairies de développement Win32. Bien qu'on
+      puisse la réaliser en compilant totalement Gwyddion, il s'avère qu'il
+      n'est pas nécessaire de faire ainsi. En ne compilant que les librairies,
+      vous éviterez l'installation de différentes dépendances de Gwyddion.
+    </para>
+    <para>
+      Les librairies Gwyddion pour MinGW peuvent être construites sous forme
+      d'un paquet RPM, <filename>mingw32-gwyddion-libs</filename>, et être
+      ainsi installées et utilisées comme tout autre paquet MinGW. Pour ce faire
+      il vous faudra (en remplaçant bien évidemment 2.28 par le numéro de
+      version actuel) :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <filename>gwyddion-2.28.tar.xz</filename>
+        </term>
+        <listitem>
+          <para>
+            Copiez (ou liez) le code source à
+            <filename>~/rpmbuild/RPM/SOURCES</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>gwyddion-2.22-build-only-libs.patch</filename>
+        </term>
+        <listitem>
+          <para>
+            Ce patch peut être trouvé parmi les
+            <link linkend='installation-cross-mingw32-scripts'>scripts de compilation</link>
+            dans le module <filename>mingw32-cross-compile</filename>. Mettez le
+            aussi dans <filename>~/rpmbuild/RPM/SOURCES</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>mingw32-gwyddion-libs.spec</filename>
+        </term>
+        <listitem>
+          <para>
+            Le fichier de spécification RPM se trouve dans le sous-répertoire
+            <filename>data</filename>, il doit être placé dans
+            <filename>~/rpmbuild/RPM/SPECS</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Lancez ensuite
+      <informalexample>
+        <literallayout><userinput>rpmbuild -bb ~/rpmbuild/RPM/SOURCES/mingw32-gwyddion-libs.spec</userinput></literallayout>
+      </informalexample>
+      et installez le paquet ainsi créé.
+    </para>
+    <para>
+      Une fois installé, vous pouvez essayer la compilation croisée de l'exemple
+      de module autonome <filename>threshold-example</filename> disponible dans
+      le répertoire subversion (ou dans l'archive du code source). Voir le
+      fichier <filename>README</filename> s'y trouvant pour plus de détails.
+    </para>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
