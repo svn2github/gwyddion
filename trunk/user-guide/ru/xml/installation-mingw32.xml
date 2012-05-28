@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="installation-mingw32">
+  <title>Компиляция для MS Windows с использованием MinGW</title>
+  <para>Хотя стандартные исполняемые файлы для MS Windows создаются с помощью <link linkend="installation-cross-mingw32">кросс-компиляции</link>, также возможно собрать Gwyddion под MS Windows используя порт утилит GNU <ulink url="http://www.mingw.org/">MinGW</ulink> на MS Windows. Стандартные исполняемые файлы MS Windows также идут с включенными практическими всеми опциональными возможностями – заметным исключением из которых является поддержка скриптов на Python. Чтобы заставить эти компоненты работать в MS Windows потребуются дополнительные усилия. Однако, наиболее вероятной причиной компиляции на MS Windows является получение всех необходимых файлов для создания отдельных модулей Gwyddion, и для этого применения опциональные компоненты не являются необходимыми.‭</para>
+  <para>Процедура в основном такая же, как при нормальной <link linkend="installation-unix-source">компиляции под Unix</link>. Некоторые специфичные для MinGW замечания ниже.</para>
+  <para>Сообщалось, что можно успешно использовать <ulink url="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/">сборку Gtk+ 2.24.10</ulink>. После установки, задайте в оболочке MSYS <informalexample><literallayout><userinput>PKG_CONFIG=<varname>ПУТЬ-К-GTK+</varname>/gtk+/bin/pkg-config.exe</userinput></literallayout></informalexample> где <varname>ПУТЬ-К-GTK+</varname> надо заменить на настоящий каталог установки Gtk+.</para>
+  <para>Чтобы собрать только библиотеки может оказаться полезным патч <filename>gwyddion-2.22-build-only-libs.patch</filename> описанный в <link linkend="installation-cross-mingw32-modules">разделе о кросс-компиляции</link>. В дополнение, похоже что MinGW libintl переопределяет <function>printf()</function> на <function>libintl_printf()</function>, которую, однако, не содержит. Это приводит к сбою компоновки (link) <filename>gwyddion.exe</filename>. Можно 'исправить' эту ошибку простым удалением <filename>include/libintl.h</filename> в каталоге Gtk+.</para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
