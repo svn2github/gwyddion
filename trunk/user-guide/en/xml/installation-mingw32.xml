@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-mingw32'>
+  <title>Compiling on MS Windows using MinGW</title>
+  <para>
+    Although the standard MS Windows executables are created using
+    <link linkend='installation-cross-mingw32'>cross-compilation</link>
+    it is also possible to build Gwyddion on MS Windows using the
+    <ulink url='http://www.mingw.org/'>MinGW</ulink> port of GNU tools to
+    MS Windows.  The standard MS Windows excutables also come with
+    almost all the optional features packaged – the notable exception being
+    Python scripting.  Getting all these components work in MS Windows
+    requires additional effort.  However, the most likely reason for
+    compiling on MS Windows is to obtain all the necessary files to develop
+    and build standalone Gwyddion modules and for this purpose the building
+    all the optional components is not necessary.
+  </para>
+  <para>
+    The procedure is essentially the same as the normal
+    <link linkend='installation-unix-source'>Unix compilation</link>.
+    Some MinGW-specific remarks follow.
+  </para>
+  <para>
+    It has been reported that FIXME Gtk+ package can be successfully used.
+    After installing it, set in the MSYS shell
+    <informalexample>
+      <literallayout><userinput>PKG_CONFIG=<varname>PATH-TO-GTK+</varname>/gtk+/bin/pkg-config.exe</userinput></literallayout>
+    </informalexample>
+    where <varname>PATH-TO-GTK+</varname> needs to be replaced with the
+    actual Gtk+ installation directory.
+  </para>
+  <para>
+    To compile only the libraries, it may be useful to use the patch
+    <filename>gwyddion-2.22-build-only-libs.patch</filename>
+    described in the
+    <link linkend='installation-cross-mingw32-modules'>cross-compilation
+    section</link>.  In addition, it seems that the MinGW libintl redefines
+    <function>printf()</function> to <function>libintl_printf()</function>
+    which it, however, does not provide.  This leads to link failure of
+    <filename>gwyddion.exe</filename>.  This can be ‘fixed’ by simply
+    removing <filename>include/libintl.h</filename> in the Gtk+ directory.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
