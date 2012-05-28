@@ -23,7 +23,9 @@
     Some MinGW-specific remarks follow.
   </para>
   <para>
-    It has been reported that FIXME Gtk+ package can be successfully used.
+    It has been reported that the
+    <ulink url='http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/'>Gtk+ 2.24.10 bundle</ulink>
+    can be successfully used.
     After installing it, set in the MSYS shell
     <informalexample>
       <literallayout><userinput>PKG_CONFIG=<varname>PATH-TO-GTK+</varname>/gtk+/bin/pkg-config.exe</userinput></literallayout>
