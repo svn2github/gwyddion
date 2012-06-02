@@ -14,7 +14,7 @@
     Python scripting.  Getting all these components work in MS Windows
     requires additional effort.  However, the most likely reason for
     compiling on MS Windows is to obtain all the necessary files to develop
-    and build standalone Gwyddion modules and for this purpose the building
+    and build standalone Gwyddion modules and for this purpose building
     all the optional components is not necessary.
   </para>
   <para>
