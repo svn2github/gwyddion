@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: installation-mingw32.xml 13497 2012-05-28 14:57:57Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-mingw32'>
+  <title>Compilation sous MS Windows avec MinGW</title>
+  <para>
+    Bien que les exécutables MS Windows soient créés par
+    <link linkend='installation-cross-mingw32'>compilation croisée</link>, il
+    est aussi possible de compiler Gwyddion sous MS Windows à l'aide de
+    <ulink url='http://www.mingw.org/'>MinGW</ulink>, le portage des outils GNU
+    pour MS Windows. Les exécutables MS Windows standard fournissent
+    pratiquement la totalité des fonctionnalités – à l'exception notable des
+    possibilités de scripts Python. Il faut quelques efforts pour faire
+    fonctionner tous ces composants sous MS Windows. Toutefois, la raison
+    principale pour compiler sous MS Windows est d'obtenir tous les fichiers
+    nécessaires pour développer des modules autonomes pour Gwyddion, et dans ce
+    cas la compilation de tous les composants optionnels n'est pas nécessaire.
+  </para>
+  <para>
+    La précédure est globalement la même que la
+    <link linkend='installation-unix-source'>compilation sous Unix</link>
+    habituelle. Certaines remarques spécifiques à MinGW sont données ci-dessous.
+  </para>
+  <para>
+    Il a été reporté que le
+    <ulink url='http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/'>paquet Gtk+ 2.24.10</ulink>
+    pouvait être utilisé. Après l'avoir installé, définissez dans MSYS
+    <informalexample>
+      <literallayout><userinput>PKG_CONFIG=<varname>PATH-TO-GTK+</varname>/gtk+/bin/pkg-config.exe</userinput></literallayout>
+    </informalexample>
+    où <varname>PATH-TO-GTK+</varname> doit être remplacé par le répertoire
+    d'installation de Gtk+.
+  </para>
+  <para>
+    Pour ne compiler que les librairies, il peut être utile d'utiliser le patch
+    <filename>gwyddion-2.22-build-only-libs.patch</filename> décrit dans la
+    section
+    <link linkend='installation-cross-mingw32-modules'>compilation croisée
+    section</link>.  De plus, il semble que la librairie libintl de MinGW
+    redéfinisse la fonction <function>printf()</function> en
+    <function>libintl_printf()</function>, qui n'est par ailleurs pas fournie.
+    Cela aboutit à une erreur lors de l'édition des liens de
+    <filename>gwyddion.exe</filename>. Ceci peut être corrigé en supprimant
+    simplement <filename>include/libintl.h</filename> du répertoire Gtk+.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

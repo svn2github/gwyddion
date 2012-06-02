@@ -38,6 +38,7 @@
   <xi:include href='installation-unix-source.xml'/>
   <xi:include href='installation-osx.xml'/>
   <xi:include href='installation-cross-mingw32.xml'/>
+  <xi:include href='installation-mingw32.xml'/>
   <xi:include href='installation-devel.xml'/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
