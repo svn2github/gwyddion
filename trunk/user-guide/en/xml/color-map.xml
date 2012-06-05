@@ -194,7 +194,7 @@
     <title>Color Gradient Editor</title>
     <indexterm>
       <primary>color map</primary>
-      <secondary>editting</secondary>
+      <secondary>editing</secondary>
     </indexterm>
     <indexterm>
       <primary>color map</primary>
@@ -208,7 +208,7 @@
       It consists of a gradient list similar to the full gradient selector,
       with an additional button panel, and the actual editor that can be
       invoked by double-clicking on a gradient you wish to edit or by
-      activating the <guilabel>Edit</guilabel> button.  Renaming is p
+      activating the <guilabel>Edit</guilabel> button.  Renaming is possible.
       Only user-created
       color gradients can be edited or deleted, system gradients installed
       with Gwyddion are immutable.

@@ -255,7 +255,7 @@ Gwyddion resource GwyGLMaterial
     </para>
     <para>
       At present, user-defined grain quantities cannot depend on other
-      user-defined grain quantities to avoid circular dependences.  The
+      user-defined grain quantities to avoid circular dependencies.  The
       built-in grain quantities are listed below:
     </para>
     <para>

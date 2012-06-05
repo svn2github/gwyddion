@@ -36,7 +36,7 @@
     <title>Masks</title>
     <para>
       Masks are used for special areal selections, e.g. grains, defects or
-      factes with certain orientation.  Masks can have any shape and within the
+      facets with certain orientation.  Masks can have any shape and within the
       data window and they are visualized by a color overlayed over the data.
       The mask color and opacity can be changed in the right-click context
       menu of the data window.
@@ -110,7 +110,7 @@
             (<link linkend='mask-by-correlation'>Mask by Correlation</link>,
             <link linkend='facet-analysis'>Facet Analysis</link>,
             <link linkend='tip-certainty-map'>Certainty Map</link>).
-            In addition, some general mask editting functions provide means to
+            In addition, some general mask editing functions provide means to
             create masks from scratch.
           </para>
           <para>
@@ -148,7 +148,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          Editting
+          Editing
         </term>
         <listitem>
           <para>
@@ -165,7 +165,7 @@
             as
             <link linkend='mask-editor'>Mask Editor tool</link> and
             <link linkend='mark-with'>Mark With</link>
-            focused on general mask editting.
+            focused on general mask editing.
           </para>
         </listitem>
       </varlistentry>

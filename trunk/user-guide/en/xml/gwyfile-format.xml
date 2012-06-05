@@ -74,7 +74,7 @@
           Name, stored as a <constant>NUL</constant>-terminated string.
         </listitem>
         <listitem>
-          Type, stored as a signle unsigned byte (character).  The table of
+          Type, stored as a single unsigned byte (character).  The table of
           possible component types is presented below.
         </listitem>
         <listitem>

@@ -127,7 +127,7 @@ zypper install wine</userinput></literallayout>
           <literallayout><userinput>rpmbuild --rebuild mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout>
         </informalexample>
         replacing the file name with the name of the downloaded file.  If the
-        <command>rpmbuild</command> command complains about missing dependences install
+        <command>rpmbuild</command> command complains about missing dependencies install
         them using <command>yum install</command> as before.  The created
         package can then be installed as root:
         <informalexample>
@@ -248,7 +248,7 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       Cross-compilation of standalone modules requires only Gwyddion headers and
       Win32 development libraries.  While they can be surely obtained by cross-compiling
       entire Gwyddion is it not necessary to do so.  By compiling only the libraries
-      you can avoid the installation of various rarer Gwyddion dependences.
+      you can avoid the installation of various rarer Gwyddion dependencies.
     </para>
     <para>
       The MinGW Gwyddion libraries can be built as a RPM package,

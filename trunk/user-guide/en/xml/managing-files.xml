@@ -22,7 +22,7 @@
         loss due to rounding.
       </listitem>
     </itemizedlist>
-    Therefore, we recommned to use this format for saving of processed files.
+    Therefore, we recommend to use this format for saving of processed files.
   </para>
   <para>
     Other data file formats are handled with appropriate file loading and
@@ -194,7 +194,7 @@
         <listitem>
           If the pattern contains wildcards, i.e. <literal>*</literal> or
           <literal>?</literal>, it is interpreted as file glob.  This means
-          <literal>?</literal> represents a signle arbitrary character,
+          <literal>?</literal> represents a single arbitrary character,
           <literal>*</literal> represents an arbitrary sequence of zero or
           more characters, and the file name has to precisely match the
           pattern.  Note directory separators (<literal>/</literal> or

@@ -47,11 +47,11 @@
   </para>
   <para>
     Pressing Shift during selection restricts the degrees of freedom of the
-    shape, making it easier to draw shapes form a specific subset.
+    shape, making it easier to draw shapes from a specific subset.
     Specifically, pressing Shift restricts
     <itemizedlist>
       <listitem>
-        rectanglular selections to perfect squares,
+        rectangular selections to perfect squares,
       </listitem>
       <listitem>
         elliptical selections to perfect circles,

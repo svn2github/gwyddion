@@ -26,7 +26,7 @@
       (GNU GPL).
     </para>
     <para>
-      The main idea behind Gwyddion developement is to provide modular
+      The main idea behind Gwyddion development is to provide modular
       program for 2D data analysis that could be easily extended by modules
       and plug-ins with no need of core recompilation. Moreover, the status of
       free software enables to provide source codes to developers and users,
@@ -41,11 +41,11 @@
       that is supported by Gtk+.
     </para>
     <para>
-      Gwyddion core developement is currently funded by
+      Gwyddion core development is currently funded by
       <ulink url='http://www.cmi.cz/?lang=2'>Czech Metrology Institute</ulink>.
       The project started as a part of the Nanomet initiative (covered by
       Euromet) in August, 2004. It is supposed that more persons and
-      institutions will participate on developement. Project is open for
+      institutions will participate on development. Project is open for
       anyone. Welcome…
     </para>
   </sect1>
@@ -83,13 +83,13 @@
             However, it is also possible to execute third-party programs from
             Gwyddion and these do not necessarily have to be distributed under
             the same license – if they are not derived works of Gwyddion
-            (which, admittely, is not always easy to determine).
+            (which, admittedly, is not always easy to determine).
           </para>
         </listitem>
       </itemizedlist>
       The main reasons, why the program is covered by this kind of license
       are here: first of all, this licensing policy enables us to make
-      modular program that can be easily developed my many persons from
+      modular program that can be easily developed by many persons from
       different institutions. Second, this license protects the rights of
       developers that their code, here given to public, cannot be copied and
       used for closed proprietary products.

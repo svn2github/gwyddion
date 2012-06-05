@@ -278,7 +278,7 @@
       </term>
       <listitem>
         <para>
-          Measures distances – similarly to Read value it tool enables user to
+          Measures distances – similarly to Read value this tool enables user to
           measure horizontal, vertical and Euclidean distance and angle between
           points in the data field.  In addition it displays the difference of
           data values between points.
@@ -336,7 +336,7 @@
         <para>
           Computes basic statistical quantities (RMS, Ra, minimum, maximum,
           projected and surface area, etc.) from a selection of full data
-          field. It can also calculate them only the masked area, or even
+          field. It can also calculate them only on the masked area, or even
           combine these two types of selection of area of interest.
         </para>
       </listitem>

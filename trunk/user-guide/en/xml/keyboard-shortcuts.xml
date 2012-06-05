@@ -238,7 +238,7 @@
     in the user's directory, which usually means
     <filename>~/.gwyddion</filename> (Unix) or
     <filename>Documents and Settings\gwyddion</filename> (MS Windows).
-    Assigning shortcuts to tools can be only done by editting this file.  Each
+    Assigning shortcuts to tools can be only done by editing this file.  Each
     line corresponds to an action that can be invoked with a shortcut.  For
     instance the Mask Editor tool's line is by default:
     <informalexample>

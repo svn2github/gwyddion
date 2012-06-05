@@ -28,7 +28,7 @@
     wavelet transforms. Here we show only the division based on the wavelet
     orthogonality. We can use <emphasis>orthogonal wavelets</emphasis> for
     discrete wavelet transform development and <emphasis>non-orthogonal
-      wavelets</emphasis> for continuous wavelet transform developement.
+      wavelets</emphasis> for continuous wavelet transform development.
     These two transforms have the following properties:
   </para>
   <orderedlist>

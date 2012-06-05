@@ -93,7 +93,7 @@
   <sect2 id='installation-osx-macports'>
     <title>MacPorts</title>
     <para>
-      MacPorts is an <application>Port</application> based System for
+      MacPorts is a <application>Port</application> based System for
       porting and installing Open Source/GNU software to OS X. It's based
       on using installation files called <quote>Portfiles</quote> which
       where describing the steps to compile and install an application. So
@@ -117,7 +117,7 @@
   on Leopard and the Port <application>xorg-server</application> on
   Tiger.
 
-  After installing the suggested X11-System, 
+  After installing the suggested X11-System,
   <application>Gwyddion</application> can be then build and installed
       simply by
       <informalexample>
@@ -161,7 +161,7 @@
     <para>
     On MacPorts you simply click on the StartUp-Icon and
   wait until <application>Gwyddion</application> appears. Using
-  Fink or an self-compiled version you should follow 
+  Fink or a self-compiled version you should follow
   the steps below:
 
       Start <application>X11.app</application> and type

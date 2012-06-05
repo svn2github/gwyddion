@@ -119,7 +119,7 @@
   </variablelist>
   <para>
     The axes in Fractal Dimension graphs always show already logarithmed
-    quantities, therefore the linear dependences mentioned above corresponds
+    quantities, therefore the linear dependencies mentioned above corresponds
     to straight lines there.  The measure of the axes should be treated as
     arbitrary.
   </para>
@@ -139,7 +139,7 @@
   </informalfigure>
   <para>
     Moreover, the results of the fractal analysis can be influenced strongly by
-    the tip convolution. We recommned therefore to check the certainty map
+    the tip convolution. We recommend therefore to check the certainty map
     before fractal analysis. In cases when the surface is influenced a lot by
     tip imaging, the results of the fractal analysis can be misrepresented
     strongly.
