@@ -339,6 +339,12 @@
       certaines fonctions peuvent être plus appropriées pour certains types de
       données.
     </para>
+    <tip>
+      La correction des lignes par médiane peut tenir compte du masque. Dans le
+      cas où un masque est présent sur les données, la fonction propose
+      de n'utiliser que les données situées sous le masque, exclure les données
+      sous le masque ou ignorer le masque et utiliser la totalité des données.
+    </tip>
     <para>
       La fonction de
       <guimenuitem>correction des lignes par différence médiane</guimenuitem>

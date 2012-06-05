@@ -87,6 +87,13 @@
         à partir de la variance des données.
       </listitem>
       <listitem>
+        Valeur RMS des grains, qui ne diffère du RMS habituel que dans le cas où
+        un masque est utilisé. La valeur moyenne est alors déterminée pour
+        chaque grain (parties contiguës du masque ou de l'inverse du masque, en
+        fonction du type de masque) et la variance est calculée à partie des
+        valeurs moyennes des grains.
+      </listitem>
+      <listitem>
         Valeur <xi:include href="eqi-R_a.xml"/> des irrégularités de hauteur :
         cette valeur est similaire à la valeur RMS, elle ne diffère que dans
         l'exposant (puissance) dans la somme de la variance des données. Dans le
