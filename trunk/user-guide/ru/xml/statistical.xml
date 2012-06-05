@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: statistical.xml 11797 2011-01-19 18:52:14Z yeti-dn $ -->
+<!-- @(#) $Id: statistical.xml 13519 2012-06-05 09:15:36Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="statistical-analysis">
   <title>Статистический анализ</title>
@@ -13,6 +13,7 @@
     <itemizedlist>
       <listitem><indexterm><primary>среднее</primary><secondary>области данных</secondary></indexterm><indexterm><primary>срединное</primary><secondary>области данных</secondary></indexterm><indexterm><primary>минимум</primary><secondary>области данных</secondary></indexterm><indexterm><primary>максимум</primary><secondary>области данных</secondary></indexterm> Среднее значение, минимум, максимум, срединное значение.</listitem>
       <listitem><indexterm><primary>среднеквадратичное (rms)</primary><secondary>области данных</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных.</listitem>
+      <listitem>Значение среднеквадратичного отклонения зерён которое будет отличаться от обычного среднеквадратичного только при использовании маски. Среднее значение при этом определяется отдельно для каждого зерна (непрерывной части маски или инвертированной маски, в зависимости от типа маскирования) и дисперсия затем вычисляется относительно этих средних для зёрен значений.</listitem>
       <listitem><xi:include href="eqi-R_a.xml"/> значение неровностей высоты: эта величина аналогична среднеквадратичному значению с единственной разницей в экспоненте (степени) в сумме отклонений данных. Поскольку для среднеквадратичного эта экспонента равна <xi:include href="eqi-q-is-2.xml"/>, значение <xi:include href="eqi-R_a.xml"/> рассчитывается с экспонентой <xi:include href="eqi-q-is-1.xml"/> и модулем значений данных (нулевым средним). </listitem>
       <listitem>Коэффициент асимметрии распределения высот: вычисляется из третьего центрального момента значений данных.</listitem>
       <listitem>Эксцесс распределения высот:  вычисляется из четвёртого центрального момента значений данных.</listitem>
