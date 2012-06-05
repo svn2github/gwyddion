@@ -86,6 +86,13 @@
         data variance.
       </listitem>
       <listitem>
+        Grain-wise RMS value which differs from the ordinary RMS only if
+        masking is used.  The mean value is then determined for each grain
+        (contiguous part of mask or inverted mask, depending on masking type)
+        separately and the variance is then calculated from these per-grain
+        mean values.
+      </listitem>
+      <listitem>
         <xi:include href="eqi-R_a.xml"/> value of the height irregularities:
         this quantity is similar to RMS value with the only difference in
         exponent (power) within the data variance sum. As for the RMS this

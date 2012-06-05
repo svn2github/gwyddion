@@ -323,6 +323,11 @@
       is often very similar, although some can be more suitable for certain
       type of data than others.
     </para>
+    <tip>
+      Median line correction supports masking.  If a mask is present it
+      offers to use the data under mask for the levelling, exclude the data
+      under mask or ignore the mask and use the entire data.
+    </tip>
     <para>
       Function <guimenuitem>Median Difference Line Correction</guimenuitem>
       shifts the lines so that the median of differences (between vertical

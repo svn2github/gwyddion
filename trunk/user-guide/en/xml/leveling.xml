@@ -80,7 +80,7 @@
       </para>
       <para>
         If a mask is present plane leveling offers to use the data under mask
-        for the plane fitting, exclude the data under mask or ignore the maks
+        for the plane fitting, exclude the data under mask or ignore the mask
         and use the entire data.
       </para>
       <tip>
