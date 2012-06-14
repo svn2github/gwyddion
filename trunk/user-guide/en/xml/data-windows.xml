@@ -8,7 +8,7 @@
     Two-dimensional data are presented in so called data windows. It is the
     main widget used for working with Gwyddion. The data are presented as a
     field of false colors corresponding to heights. Color axis that represents
-    mapping the colors to real height values is on the right side of the data
+    mapping of colors to real height values is on the right side of the data
     window.
   </para>
   <para>
@@ -25,7 +25,7 @@
   </para>
   <para>
     There is a context menu available also for the data area. This menu
-    consist of basic data and presentation operations. To reach all the
+    consists of basic data and presentation operations. To reach all the
     possible operations use
     <menuchoice>
       <guimenu>Data process...</guimenu>

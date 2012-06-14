@@ -8,18 +8,18 @@
   <para>
     Data browser is a window that displays the structure of currently focused
     file.  It shows the content as represented in Gwyddion which may differ
-    somehwat from the organization in the original software.
+    somewhat from the organization in the original software.
   </para>
   <para>
     Gwyddion supports an arbitrary number of two-dimensional data fields per
     file.  Depending on the context, they are also often called channels or
     height fields in this guide.  The dimensions of channels in one file may
-    difffer and also the physical dimensions and values can be arbitrary
+    differ and also the physical dimensions and values can be arbitrary
     physical quantities.
   </para>
   <para>
     In addition, one-dimensional data, represented as graphs, and single-point
-    spectra can present in the same file.  The data browser is a tool for
+    spectra can be present in the same file.  The data browser is a tool for
     browsing and managing all the available data in the file.
   </para>
   <informalfigure id='fig-data-browser'>
@@ -51,7 +51,7 @@
         <listitem><guilabel>Spectra</guilabel></listitem>
       </itemizedlist>
       Each list shows names of the data objects and some additional properties
-      that depend on the specific data type.  The names can be editted after
+      that depend on the specific data type.  The names can be edited after
       double-clicking on them.
     </para>
     <para>
@@ -104,7 +104,7 @@
       The spectrum list shows the spectra name and the number of points in the
       set.  Since single-point spectra are displayed and operated on only in
       connection with a two-dimensional data using the
-      <link linkend='single-point-spectra'>spectroscopy tool</link> there is
+      <link linkend='single-point-spectra'>spectroscopy tool</link>, there is
       no check-box controlling the visibility.
     </para>
   </sect2>

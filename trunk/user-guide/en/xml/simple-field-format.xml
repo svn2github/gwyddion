@@ -244,7 +244,7 @@ Title = ADC2</programlisting>
       multiple of 4 larger than <xi:include href='eqi-N.xml'/>.
     </para>
     <para>This padding to a multiple of 4 ensures aligned memory access when
-      mapping the the file directly to memory.  The number of NUL bytes is
+      mapping the file directly to memory.  The number of NUL bytes is
       uniquely determined by the remainder of the length modulo four
       (<xi:include href='eqi-N-mod-4.xml'/>):
     </para>

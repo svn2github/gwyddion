@@ -25,10 +25,10 @@
   </para>
   <para>
     The 3D window has two possible forms: with basic and expanded controls.
-    It starts with basic controls only, this form is displayed on
+    It starts with basic controls only, this form is displayed on the
     <link linkend='fig-opengl-3d-view-screenshot'>following figure</link>.
     It can be switched to the expanded form (and back) with an expander button
-    it the upper right corner.  Clicking on the view with right mouse button
+    in the upper right corner.  Clicking on the view with right mouse button
     brings a quick color gradient/GL material selector.
   </para>
   <informalfigure id='fig-opengl-3d-view-screenshot' float='0'>
@@ -88,7 +88,7 @@
       <itemizedlist>
         <listitem>
           <guilabel>Basic</guilabel> – controls to set rotations and scales
-          numerically and to switch on an off axes, axis labels, and
+          numerically and to switch on and off axes, axis labels, and
           perspective projection.
         </listitem>
         <listitem>

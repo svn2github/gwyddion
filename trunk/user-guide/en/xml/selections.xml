@@ -20,7 +20,7 @@
     they are recalled when a tool which uses them is activated again.  E.g.
     when you select several lines with Profile extraction tool, then switch
     to Statistical quantities (the lines disappear) and select a rectangular
-    area to calculate statistical characteristics of, and then switch back to
+    area to calculate its statistical characteristics, and then switch back to
     Profile extraction, the rectangle disappears and the lines appear again.
   </para>
   <para id='selection-sharing'>
@@ -70,7 +70,7 @@
       copy them to other channels.
     </para>
     <para>
-      For each selection, the selection shows the name, which is how the
+      For each selection, the tool shows the name, which is how the
       selection is identified in the <filename>.gwy</filename> file; the
       selection type and the number of objects (points, lines, rectangles, …)
       selected.  Usually, there is at most one selection of any type because

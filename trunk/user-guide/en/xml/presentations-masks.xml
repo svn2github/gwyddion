@@ -129,14 +129,14 @@
             In general, the mask-covered area is considered to be the area of
             interest, i.e. the area to operate on.  This applies namely to
             statistical functions such as the
-            <link linkend='stat-quantities'>Statstical Quantities tool</link>.
+            <link linkend='stat-quantities'>Statistical Quantities tool</link>.
             Function
             <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
             replaces the data under mask, while the
             <link linkend='remove-grains'>Remove Grains tool</link> can perform
             such replacement for individual grains.  There are several functions
             for the examination of grain properties, see section
-            <link linkend='grain-analysis-statistics'>Grain Statstics</link>.
+            <link linkend='grain-analysis-statistics'>Grain Statistics</link>.
           </para>
           <para>
             Some functions ask whether to consider the area under mask included
