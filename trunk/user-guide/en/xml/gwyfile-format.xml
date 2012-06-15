@@ -68,7 +68,7 @@
   <sect2 id='gwyfile-components'>
     <title>Components</title>
     <para>
-      Each component consits of three parts (in the following order):
+      Each component consists of three parts (in the following order):
       <itemizedlist>
         <listitem>
           Name, stored as a <constant>NUL</constant>-terminated string.
@@ -210,7 +210,7 @@
       The names (keys) of data objects in a <type>GwyContainer</type> representing a Gwyddion
       file strongly resemble UNIX file names, i.e. they have the form of
       <literal>/</literal>-separated paths and form a sort of tree-like structure.
-      For instance the title of the first channel, numbered 0, is stored under they key
+      For instance the title of the first channel, numbered 0, is stored under the key
       <literal>/0/data/title</literal>.  Note some data or information is found under keys
       that do not seem logical; the reason is usually historical.
     </para>
@@ -603,7 +603,7 @@
               <entry>boolean</entry>
               <entry>
                 Whether user-set maximum value of the abscissa should be used (otherwise
-                the range is determaxed automatically).
+                the range is determined automatically).
               </entry>
             </row>
             <row>
@@ -633,7 +633,7 @@
               <entry>boolean</entry>
               <entry>
                 Whether user-set maximum value of the ordinate should be used (otherwise
-                the range is determaxed automatically).
+                the range is determined automatically).
               </entry>
             </row>
             <row>
@@ -854,7 +854,7 @@
               <entry>array of doubles</entry>
               <entry>
                 Coordinates of points where the spectra were taken, in physical units.
-                Each spectrum takes two items: for the horizontal and vertical coodrdinate.
+                Each spectrum takes two items: for the horizontal and vertical coordinate.
                 The number of coordinates must match the number of curves in
                 <varname>data</varname>.
               </entry>
