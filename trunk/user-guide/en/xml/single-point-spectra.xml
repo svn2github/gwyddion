@@ -31,7 +31,7 @@
       The primary spectra visualization and extraction tool is the
       Point spectroscopy tool.  It displays a list of measurement points and
       shows their positions on the data window.  Individual curves can be
-      selected either in the list on by selecting the corresponding crosses
+      selected either in the list or by selecting the corresponding crosses
       on the data window.  If the file contains more than one spectrum set,
       one can choose among them by selecting the desired one in the
       <guilabel>Spectra</guilabel> tab list of the data browser.

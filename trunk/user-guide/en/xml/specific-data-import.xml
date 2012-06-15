@@ -12,10 +12,10 @@
     <title>Graphics Formats</title>
     <para>
       Importing data from image formats such as PNG, TIFF, JPEG or BMP is
-      similar to import from raw/unknown file formats, only simplier.
+      similar to import from raw/unknown file formats, only simpler.
     </para>
     <para>
-      It is simplier because the file structure is known and the file format is
+      It is simpler because the file structure is known and the file format is
       automatically detected.  Hence the file type does need to be selected
       explicitly.  However, the data interpretation is still unknown and must
       be specified manually.  The Pixmap import dialog therefore resembles the
@@ -127,7 +127,7 @@
     <para>
       The former two interpolation types are based on Delaunay/Voronoi
       triangulation which is not well-defined for point sets where more than
-      two points line on a line or more than three lie on a circle.  If this
+      two points lie on a line or more than three lie on a circle.  If this
       happens the triangulation fails and the import module displays an error
       message.
     </para>

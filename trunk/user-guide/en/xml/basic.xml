@@ -105,7 +105,7 @@
           <guisubmenu>Basic Operations</guisubmenu>
           <guimenuitem>Limit Range</guimenuitem>
         </menuchoice>.
-        The range can be set numerically or taken from the false colour map range
+        The range can be set numerically or taken from the false color map range
         previously set using the <link linkend='color-range'>Color range tool</link>
         and it is also possible to cut off outliers farther than a chosen multiple
         of RMS from the mean value.
@@ -152,7 +152,7 @@
   <sect2 id='basic-value-reading'>
     <title>Reading Values</title>
     <para>
-      The simpliest value reading method is to place the mouse cursor over the
+      The simplest value reading method is to place the mouse cursor over the
       point you want to read value of.  The coordinates and/or value is then
       displayed in the
       <link linkend='data-windows'>data window</link> or
@@ -178,8 +178,8 @@
       </indexterm>
       <para>
         Tool <guilabel>Read Value</guilabel> offers more value reading
-        posibilities: It displays coordinates and values of the last point of
-        the data window the mouse button was pressed.  It can avergae the
+        possibilities: it displays coordinates and values of the last point of
+        the data window the mouse button was pressed.  It can average the
         value from a circular neighbourhood around the selected point, this
         is controlled by option <guilabel>Averaging radius</guilabel>.  When
         the radius is 1, the value of a single pixel is displayed (as the

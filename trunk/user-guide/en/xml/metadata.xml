@@ -23,7 +23,7 @@
     <guibutton>Save</guibutton> button.
   </para>
   <para>
-    The level of metadata support differs wildly between file formats.
+    The level of metadata support differs widely between file formats.
     For file formats that are well documented and/or allow to import all
     metainformation generically lots of auxiliary data including obscure
     hardware settings can be listed.  On the other hand it is possible that

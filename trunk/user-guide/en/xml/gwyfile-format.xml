@@ -269,14 +269,14 @@
               <entry><literal>/0/base/palette</literal></entry>
               <entry>string</entry>
               <entry>
-                Name of the false colour gradient used to display the channel.
+                Name of the false color gradient used to display the channel.
               </entry>
             </row>
             <row>
               <entry><literal>/0/base/range-type</literal></entry>
               <entry>32bit integer</entry>
               <entry>
-                False colour mapping type (as set by the
+                False color mapping type (as set by the
                 <link linkend='color-range'>Color range tool</link>), the value is from
                 <type>GwyLayerBasicRangeType</type> enum.
               </entry>
@@ -307,28 +307,28 @@
               <entry><literal>/0/mask/red</literal></entry>
               <entry>double</entry>
               <entry>
-                Red component of the mask colour.
+                Red component of the mask color.
               </entry>
             </row>
             <row>
               <entry><literal>/0/mask/green</literal></entry>
               <entry>double</entry>
               <entry>
-                Green component of the mask colour.
+                Green component of the mask color.
               </entry>
             </row>
             <row>
               <entry><literal>/0/mask/blue</literal></entry>
               <entry>double</entry>
               <entry>
-                Blue component of the mask colour.
+                Blue component of the mask color.
               </entry>
             </row>
             <row>
               <entry><literal>/0/mask/alpha</literal></entry>
               <entry>double</entry>
               <entry>
-                Alpha (opacity) component of the mask colour.
+                Alpha (opacity) component of the mask color.
               </entry>
             </row>
             <row>
@@ -734,21 +734,21 @@
               <entry><literal>color.red</literal></entry>
               <entry>double</entry>
               <entry>
-                Red component of the curve colour.
+                Red component of the curve color.
               </entry>
             </row>
             <row>
               <entry><literal>color.green</literal></entry>
               <entry>double</entry>
               <entry>
-                Green component of the curve colour.
+                Green component of the curve color.
               </entry>
             </row>
             <row>
               <entry><literal>color.blue</literal></entry>
               <entry>double</entry>
               <entry>
-                Blue component of the curve colour.
+                Blue component of the curve color.
               </entry>
             </row>
             <row>

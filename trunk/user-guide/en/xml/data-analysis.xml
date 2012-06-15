@@ -6,12 +6,12 @@
   <title>Data Processing and Analysis</title>
   <para>
     The number and breadth of data manipulation and analysis functions is one
-    of the Gwyddion main strenghts.  The description of their principles and
+    of the Gwyddion main strengths.  The description of their principles and
     applications is the purpose of this chapter, with focus on the explanation
     of how they work and what they calculate or perform.  Elements of their
     user interface are also occasionaly described where it seems useful,
     nevertheless, it is assumed the reader is familiar with the basic
-    organization of data and controls in Gwydion, as described in the
+    organization of data and controls in Gwyddion, as described in the
     <link linkend='getting-started'>previous chapter</link>.
   </para>
   <xi:include href='basic.xml'/>

@@ -150,7 +150,7 @@
           ambient color <xi:include href="eqi-k_a-alpha.xml"/>
           (where <xi:include href="eqi-alpha-is-red-green-blue.xml"/>),
           controlling the reflection of ambient
-          light that is assumed come uniformly from all directions,
+          light that is assumed coming uniformly from all directions,
         </listitem>
         <listitem>
           diffuse color <xi:include href="eqi-k_d-alpha.xml"/>,

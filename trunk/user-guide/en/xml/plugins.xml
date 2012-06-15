@@ -7,8 +7,8 @@
   <para>
     Plug-ins are external programs that can be executed by Gwyddion to either
     perform some operation on the data or to read or write data in
-    a third-party file format. In general, plug-ins are programe that can
-    register itself within Gwyddion (for example printing something on
+    a third-party file format. In general, plug-ins are programs that can
+    register themself within Gwyddion (for example printing something on
     standard output) to enable Gwyddion to create plugin menu choice and can
     be used for data processing (or IO operation).
   </para>
@@ -24,7 +24,7 @@
   </para>
   <warning>
     The plug-in mechanism is deprecated.  It will remain supported in Gwyddion
-    2.x, however, it will not be exteneded or improved.  The recommended method
+    2.x, however, it will not be extended or improved.  The recommended method
     to extend Gwyddion by routines in another language is to use language
     bindings, at this moment a Python interface is available.  The recommended
     method to run third-party programs is to write a small specialized C module
