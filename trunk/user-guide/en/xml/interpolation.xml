@@ -73,7 +73,7 @@
           in the before-preceding and after-following points
           <xi:include href="eqi-z_minus-1.xml"/> and
           <xi:include href="eqi-z_2.xml"/>, respectively.  In other words it
-          has support of length 4, The value is then obtained as
+          has support of length 4. The value is then obtained as
           <xi:include href="eq-interpolation-w1234.xml"/>
           where
           <xi:include href="eq-interpolation-key.xml"/>
@@ -120,7 +120,7 @@
       <listitem>
         <para>
           The weights are
-          <xi:include href="eq-interpolation-bspline.xml"/>.
+          <xi:include href="eq-interpolation-bspline.xml"/>
           However, they are not used with directly function values as above,
           but with interpolation coefficients calculated from function
           values [<link linkend='interpolation-ref-1'>1</link>].

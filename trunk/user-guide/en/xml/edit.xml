@@ -325,7 +325,7 @@
     </para>
     <tip>
       Median line correction supports masking.  If a mask is present it
-      offers to use the data under mask for the levelling, exclude the data
+      offers to use the data under mask for the leveling, exclude the data
       under mask or ignore the mask and use the entire data.
     </tip>
     <para>

@@ -570,8 +570,8 @@
     </para>
   </sect2>
   <sect2 id='grain-level'>
-    <title>Grain Levelling</title>
-    <indexterm><primary>grain levelling</primary></indexterm>
+    <title>Grain Leveling</title>
+    <indexterm><primary>grain leveling</primary></indexterm>
     <para>
       Grains can be aligned vertically using
       <menuchoice>

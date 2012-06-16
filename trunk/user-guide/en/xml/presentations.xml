@@ -52,7 +52,7 @@
         <term><guimenuitem>Extract Presentation</guimenuitem></term>
         <listitem>
           <para>
-            Extracts presentation from the current data window to a a new
+            Extracts presentation from the current data window to a new
             channel in the same file.  In this way one can get presentation
             data for further processing.  Note, however, the extracted data
             have no absolute scale information as
@@ -174,7 +174,7 @@
     </informalfigure>
     <para>
       The following step and edge detection functions are available in
-      Gwyddion (the later ones are somewhat experimental, on they other
+      Gwyddion (the later ones are somewhat experimental, on the other
       hand they usually give better results than the well-known algorithms):
     </para>
     <variablelist>
@@ -188,7 +188,7 @@
             <secondary>edge detection</secondary>
           </indexterm>
           <para>
-            Canny edge detector is a well-known step detector can be used to
+            Canny edge detector is a well-known step detector that can be used to
             extract the image of sharp value discontinuities in the data as
             thin single-pixel lines.
           </para>
@@ -332,7 +332,7 @@
           Comparison of step and edge detection methods on several interesting,
           or typical example data.  Canny and Zero crossing are step detectors
           that produce one pixel wide edge lines, Step and Inclination are step
-          detectors with continous output, Local nonlinearity is an edge
+          detectors with continuous output, Local nonlinearity is an edge
           detector – the edge detection can be easily observed on the second
           and third row. Note zero crossing is tunable, it parameters were
           chosen to produce reasonable output in each example.

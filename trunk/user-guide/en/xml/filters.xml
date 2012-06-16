@@ -28,7 +28,7 @@
           <primary>mean</primary>
           <secondary>filter</secondary>
         </indexterm>
-        Mean filter – takes the mean value of neighborhood of the
+        Mean filter – takes the mean value of neighbourhood of the
         filtered value as the value.
       </listitem>
       <listitem id='filter-median'>
@@ -36,13 +36,13 @@
           <primary>median</primary>
           <secondary>filter</secondary>
         </indexterm>
-        Median filter – takes the median value of neighborhood of the
+        Median filter – takes the median value of neighbourhood of the
         filtered value as the value.
       </listitem>
       <listitem id='filter-conservative-denoise'>
         <indexterm><primary>conservative denoise filter</primary></indexterm>
         Conservative denoise filter – checks whether the value is not extreme
-        within the neighborhood. If yes, filter substitutes the value by
+        within the neighbourhood. If yes, filter substitutes the value by
         of the next highest (lowest) value.
       </listitem>
       <listitem id='filter-kuwahara'>
@@ -56,7 +56,7 @@
         </indexterm>
         <indexterm><primary>erosion filter</primary></indexterm>
         Minimum filter – also known as erode filter, replaces values by
-        minimum found in neighborhood.
+        minimum found in neighbourhood.
       </listitem>
       <listitem id='filter-maximum'>
         <indexterm>
@@ -65,7 +65,7 @@
         </indexterm>
         <indexterm><primary>dilation filter</primary></indexterm>
         Maximum filter – also known as dilate filter, replaces values by
-        maximum found in neighborhood.
+        maximum found in neighbourhood.
       </listitem>
       <listitem id='filter-dechecker'>
         <indexterm><primary>dechecker filter</primary></indexterm>
