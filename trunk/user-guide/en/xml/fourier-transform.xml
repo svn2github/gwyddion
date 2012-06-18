@@ -12,8 +12,8 @@
       <guisubmenu>Integral Transforms</guisubmenu>
       <guimenuitem>2D FFT</guimenuitem>
     </menuchoice>
-    which implements the Fast Fourier transform (FFT). Fourier transform
-    decomposes signal into its harmonic compoments, it is therefore useful
+    which implements the Fast Fourier Transform (FFT). Fourier transform
+    decomposes signal into its harmonic components, it is therefore useful
     while studying spectral frequencies present in the SPM data.
   </para>
   <para>
@@ -34,7 +34,7 @@
         Imaginary – imaginary part of the complex coefficient.
       </listitem>
     </itemizedlist>
-    and some their combinations for convenience.
+    and some of their combinations for convenience.
   </para>
   <para id='psdf-section'>
     <indexterm>

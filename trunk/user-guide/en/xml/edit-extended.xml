@@ -124,7 +124,7 @@
      FFT transform. Therefore, the spatial frequencies that should be
      filtered must be selected in 2D using mask editor. As the frequencies
      are related to center of the image (corresponding to zero frequency),
-     the mask can snapped to the center (coordinate system origin) while
+     the mask can be snapped to the center (coordinate system origin) while
      being edited. There are also different display and output modes that are
      self-explanatory – image or FFT coefficients can be outputted by module
      (or both).

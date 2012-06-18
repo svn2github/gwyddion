@@ -23,7 +23,7 @@
     The centre of facet view always correspond to zero inclination (horizontal
     facets), slope in <xi:include href="eqi-x.xml"/>-direction
     increases towards left and right border and slope in
-    <xi:include href="eqi-x.xml"/>-direction increases towards top and bottom
+    <xi:include href="eqi-y.xml"/>-direction increases towards top and bottom
     borders.  The exact coordinate system is a bit complex and it adapts to the
     range of slopes in the particular data displayed.
   </para>

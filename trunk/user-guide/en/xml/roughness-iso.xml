@@ -13,7 +13,7 @@
     the <link linkend='tool-roughness'>roughness tool</link>.
   </para>
   <para>
-    The one-dimensional texture is split to waviness (the low-frequency
+    The one-dimensional texture is split into waviness (the low-frequency
     components defining the overall shape) and roughness (the high-frequency
     components) at the cut-off frequency.  This frequency is specified in the
     units of the Nyquist frequency, that is value 1.0 corresponds to the
@@ -91,7 +91,7 @@
           </para>
           <para>
             Lowest valley. There is the depth of the deepest valley in the
-            roghness profile over the evaluation length
+            roughness profile over the evaluation length
             <xi:include href="eq-roughness-iso-Rv.xml"/>
           </para>
         </listitem>
@@ -244,7 +244,7 @@
             Standards: ISO 4287-1997.
           </para>
           <para>
-            The amplitude distribution function s a probability function that
+            The amplitude distribution function is a probability function that
             gives the probability that a profile of the surface has a certain
             height <xi:include href="eqi-z.xml"/> at any position
             <xi:include href="eqi-x.xml"/>.

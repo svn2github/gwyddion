@@ -222,7 +222,7 @@
         The simplest statistical functions are the height and slope
         distribution functions. These can be computed as non-cumulative (i.e.
         densities) or cumulative. These functions are computed as normalized
-        histograms of the height or slope (obtained as dreivatives in the
+        histograms of the height or slope (obtained as derivatives in the
         selected direction – horizontal or vertical) values. In other words,
         the quantity on the abscissa in <quote>angle distribution</quote> is
         the tangent of the angle, not the angle itself.
@@ -620,7 +620,7 @@
         <guimenu>Data Process</guimenu>
         <guisubmenu>Statistics</guisubmenu>
       </menuchoice>
-      operate on two-dimensional slope (derviative) statistics.
+      operate on two-dimensional slope (derivative) statistics.
     </para>
     <para>
       <guimenuitem>Slope Distribution</guimenuitem> calculates a plain
@@ -631,7 +631,7 @@
       if <guilabel>Use local plane fitting</guilabel> is enabled, by fitting
       a local plane through the neighbourhood of each point and using its
       gradient.  <guimenuitem>Slope Distribution</guimenuitem> has also
-      another mode operation called <guilabel>Per-angle graph</guilabel>.
+      another mode operation called <guilabel>Per-angle graph</guilabel>,
       in which it plots the distribution of <xi:include href="eqi-r-to-2.xml"/>
       over <xi:include href="eqi-phi.xml"/> where we introduced polar
       coordinates <xi:include href="eqi-coords-r-phi.xml"/> in the plane of

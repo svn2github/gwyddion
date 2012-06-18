@@ -6,10 +6,10 @@
   <title>Wavelet Transform</title>
   <indexterm><primary>wavelet transform</primary></indexterm>
   <para>
-    The wavelet transform is a transform similar to the Fourier transform
+    The wavelet transform is similar to the Fourier transform
     (or much more to the windowed Fourier transform) with a completely
     different merit function. The main difference is this: Fourier
-    transform decomposes the signal into sines and cosinesm, i.e. the
+    transform decomposes the signal into sines and cosines, i.e. the
     functions localized in Fourier space; in contrary the wavelet transform
     uses functions that are localized in both the real and Fourier space.
     Generally, the wavelet transform can be expressed by the following
@@ -46,16 +46,16 @@
     <listitem>
       The continuous wavelet transform in contrary returns an array one
       dimension larger thatn the input data. For a 1D data we obtain an
-      image of the time-frequecy plane. We can easily see the signal
+      image of the time-frequency plane. We can easily see the signal
       frequencies evolution during the duration of the signal and compare
-      the spectrum with other signals spertra. As here is used the
+      the spectrum with other signals spectra. As here is used the
       non-orthogonal set of wavelets, data are correlated highly, so big
       redundancy is seen here. This helps to see the results in a more
       humane form.
     </listitem>
   </orderedlist>
   <para>
-    For more details on wavelet transorm see any of the thousands of
+    For more details on wavelet transform see any of the thousands of
     wavelet resources on the Web, or for example
     [<link linkend='wavelet-transform-ref-1'>1</link>].
   </para>
@@ -93,7 +93,7 @@
       <xi:include href="eq-wavelet-dilation-equation.xml"/>
       where <xi:include href="eqi-S.xml"/> is a scaling factor (usually chosen
       as 2). Moreover, the area between the function must be normalized and
-      scaling function must be ortogonal to its integer translates, i.e.
+      scaling function must be ortogonal to its integer translations, i.e.
       <xi:include href="eq-wavelet-orthogonality.xml"/>
     </para>
     <para>
