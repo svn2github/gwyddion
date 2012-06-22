@@ -98,25 +98,25 @@
     </para>
     <para>
       After introducing some more conditions (as the restrictions above
-      does not produce unique solution) we can obtain results of all this
+      does not produce unique solution) we can obtain results of all these
       equations, i.e. the finite set of coefficients
       <xi:include href="eqi-a_k.xml"/> that define the scaling function and
       also the wavelet. The wavelet is obtained from the scaling function as
       <xi:include href="eq-wavelet-scaling-function.xml"/> where
       <xi:include href="eqi-N.xml"/> is an even integer. The set of wavelets
-      than forms an orthonormal basis which we use to decompose signal. Note
+      then forms an orthonormal basis which we use to decompose the signal. Note
       that usually only few of the coefficients
-      <xi:include href="eqi-a_k.xml"/> are nonzero which simplifies the
+      <xi:include href="eqi-a_k.xml"/> are nonzero, which simplifies the
       calculations.
     </para>
     <para>
       In the following figure, some wavelet scaling functions and wavelets
       are plotted. The most known family of orthonormal wavelets is
-      a family of Daubechies. Her wavelets are usually denominated by the
+      the family of Daubechies. Her wavelets are usually denominated by the
       number of nonzero coefficients <xi:include href="eqi-a_k.xml"/>,
       so we usually talk about Daubechies 4, Daubechies 6, etc. wavelets.
       Roughly said, with the increasing number of wavelet coeficients the
-      functions become more smooth. See the comparison of wavelets Daubechies
+      functions become smoother. See the comparison of wavelets Daubechies
       4 and 20 below. Another mentioned wavelet is the simplest one, the Haar
       wavelet, which uses a box function as the scaling function.
     </para>
@@ -164,8 +164,8 @@
     </informalfigure>
     <para>
       There are several types of implementation of the DWT algorithm. The
-      oldest and most known one is the Malaat (pyramidal) algoritm. In this
-      algorithm two filters – smoothing and non-smoothing one are
+      oldest and most known one is the Mallat (pyramidal) algorithm. In this
+      algorithm two filters – smoothing and non-smoothing one – are
       constructed from the wavelet coefficients and those filters
       are recurrently used to obtain data for all the scales. If the total
       number of data <xi:include href="eqi-D-is-2-to-N.xml"/> is used and
@@ -190,7 +190,7 @@
       coefficients of the discrete wavelet transform spectrum, and we
       perform an inverse transform (with the same wavelet basis) we can
       obtain more or less denoised signal. There are several ways how to
-      choose the coefficients that will be keeped. Within Gwyddion, the
+      choose the coefficients that will be kept. Within Gwyddion, the
       universal thresholding, scale adaptive thresholding
       [<link linkend='wavelet-transform-ref-2'>2</link>] and scale and
       space adaptive thresholding
@@ -200,14 +200,14 @@
       variance guess given by
       <xi:include href="eq-wavelet-variance-guess.xml"/>
       where <xi:include href="eqi-Y_ij.xml"/>
-      corresponds to all the coefficients of the highst scale subband of
-      the decomposition (where most of the noise is assumend to be
+      corresponds to all the coefficients of the highest scale subband of
+      the decomposition (where most of the noise is assumed to be
       present). Alternatively, the noise variance can be obtained in an
       independent way, for example from the AFM signal variance while not
       scanning. For the highest frequency subband (universal thresholding)
       or for each subband (for scale adaptive thresholding) or for each
       pixel neighbourhood within subband (for scale and space adaptive
-      thresholding) the variance is the computed as
+      thresholding) the variance is computed as
       <xi:include href="eq-wavelet-variance-sum.xml"/>
     </para>
     <para>
@@ -236,14 +236,14 @@
       <secondary>continuous</secondary>
     </indexterm>
     <para>
-      Continuous wavelet transform (CWT) is an implementaion of the wavelet
-      transform using an arbitrary scales and almost arbitrary wavelets.
+      Continuous wavelet transform (CWT) is an implementation of the wavelet
+      transform using arbitrary scales and almost arbitrary wavelets.
       The wavelets used are not orthogonal and the data obtained by this
-      transform are highly correlated. For the disctete time series we can
-      uset this transform as well, with the limitation that the smallest
+      transform are highly correlated. For the discrete time series we can
+      use this transform as well, with the limitation that the smallest
       wavelet translations must be equal to the data sampling. This is
       sometimes called Discrete Time Continuous Wavelet Transform (DT-CWT)
-      and it is the mostly used way of computing CWT in real applications.
+      and it is the most used way of computing CWT in real applications.
     </para>
     <para>
       In principle the continuous wavelet transform works by using directly
@@ -253,17 +253,17 @@
       <xi:include href="eqi-N.xml"/> as the signal has. By using
       <xi:include href="eqi-M.xml"/> arbitrarily chosen scales we obtain
       a field <xi:include href="eqi-NxM.xml"/> that represents the
-      time-frequency plane directly. The algoritm used for this computaion can
+      time-frequency plane directly. The algorithm used for this computation can
       be based on a direct convolution or on a convolution by means of
-      multiplication in Fourier space (this is sometimes called Fast wavelet
-      transform).
+      multiplication in Fourier space (this is sometimes called Fast Wavelet
+      Transform).
     </para>
     <para>
       The choice of the wavelet that is used for time-frequency
       decomposition is the most important thing. By this choice we can
-      inlfuence the time and frequency resolution of the result. We cannot
+      influence the time and frequency resolution of the result. We cannot
       change the main features of WT by this way (low frequencies have good
-      frequecny and bad time resolution; high frequencies have good time
+      frequency and bad time resolution; high frequencies have good time
       and bad frequency resolution), but we can somehow increase the total
       frequency of total time resolution. This is directly proportional to
       the width of the used wavelet in real and Fourier space. If we use
