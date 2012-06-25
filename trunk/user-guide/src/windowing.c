@@ -57,7 +57,8 @@ main(int argc, char *argv[])
     if (gwy_strequal(name, "Kaiser-2.5"))
         cmpname = "Kaiser 2.5";
     for (i = 0; wtypes[i].name; i++) {
-        if (gwy_strequal(cmpname, wtypes[i].name))
+        const gchar *wname = gwy_sgettext(wtypes[i].name);
+        if (gwy_strequal(cmpname, wname))
             break;
     }
     if (!wtypes[i].name) {
