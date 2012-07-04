@@ -63,7 +63,7 @@
       <listitem>
         is very similar to cube counting method and is also based directly on
         the box-counting fractal dimension definition. The method works as
-        follows: A grid of unit dimension <xi:include href="eqi-l.xml"/>
+        follows: a grid of unit dimension <xi:include href="eqi-l.xml"/>
         is placed on the surface. This defines the location of the vertices of
         a number of triangles.  When, for example,
         <xi:include href="eqi-l-is-X-over-4.xml"/>,
@@ -89,7 +89,7 @@
         is based on the scale dependence of the
         variance of fractional Brownian motion. In practice, in the variance
         method one divides the full surface into equal-sized squared boxes, and
-        the variance (power of RMS value of heights), is calculated for
+        the variance (power of RMS value of heights), is calculated for a
         particular box size. Fractal dimension is
         evaluated from the slope <xi:include href="eqi-beta.xml"/>
         of a least-square regression line fit to the data points in log-log
@@ -107,10 +107,7 @@
         motion. In the power spectrum method, every line height profiles that
         forms the image is Fourier transformed and the power spectrum evaluated
         and then all these power spectra are averaged. Fractal dimension is
-        evaluated from the slope In the power spectrum method, every line
-        height profiles that forms the image is Fourier transformed and the
-        power spectrum evaluated and then all these power spectra are averaged.
-        Fractal dimension is evaluated from the slope
+        evaluated from the slope
         <xi:include href="eqi-beta.xml"/> of a least-square regression line fit
         to the data points in log-log plot of power spectrum as
         <xi:include href="eqi-D_f-is-7-over-2-minus-beta-over-2.xml"/>.
@@ -119,7 +116,7 @@
   </variablelist>
   <para>
     The axes in Fractal Dimension graphs always show already logarithmed
-    quantities, therefore the linear dependencies mentioned above corresponds
+    quantities, therefore the linear dependencies mentioned above correspond
     to straight lines there.  The measure of the axes should be treated as
     arbitrary.
   </para>
@@ -158,13 +155,13 @@
       15 April 1995, 51
     </para>
     <para id='fractal-analysis-ref-2'>
-      [2] W. Zahn, A. Zösch: The dependance of fractal dimension on measuring
+      [2] W. Zahn, A. Zösch: The dependence of fractal dimension on measuring
       conditions of scanning probe microscopy. Fresenius J Analen Chem (1999)
       365: 168-172
     </para>
     <para id='fractal-analysis-ref-3'>
       [3] A. Van Put, A. Vertes, D. Wegrzynek, B. Treiger, R. Van Grieken:
-      Quantitative characerization of individual particle sutfaces by fractal
+      Quantitative characterization of individual particle surfaces by fractal
       analysis of scanning electron microscope images. Fresenius J Analen
       Chem (1994) 350: 440-447
     </para>

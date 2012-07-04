@@ -67,7 +67,7 @@
             <row>
               <entry><varname>by1</varname>, …, <varname>by8</varname></entry>
               <entry>
-                Vertical derivative at the pixel, definied similarly to the
+                Vertical derivative at the pixel, defined similarly to the
                 horizontal derivative.
               </entry>
             </row>
@@ -164,11 +164,11 @@
       </menuchoice>
     </para>
     <para>
-      Immerse insets a detail, high-resolution image into a larger image.
+      Immerse insets a detailed, high-resolution image into a larger image.
       The image the function was run on forms the large, base image.
     </para>
     <para>
-      The detail can positioned manually on the large image with mouse.
+      The detail can be positioned manually on the large image with mouse.
       Button <guibutton>Improve</guibutton> can then be used to find the
       exact coordinates in the neighbourhood of the current position that give
       the maximum correlation between the detail and the large image.
@@ -176,7 +176,7 @@
       with <guibutton>Locate</guibutton>.
     </para>
     <para>
-      It should be noted the correlation search is insensitive to value scales
+      It should be noted that correlation search is insensitive to value scales
       and offsets, therefore the automated matching is based solely on
       data features, absolute heights play no role.
     </para>
@@ -309,21 +309,21 @@
       </menuchoice>
     </para>
     <para>
-		Two slightly different images of the same area (for example,
-		before and after some treatment) can be croped to intersecting
-		area (or non-intersecting parts can be removed) with this module.
+    Two slightly different images of the same area (for example,
+    before and after some treatment) can be croped to intersecting
+    area (or non-intersecting parts can be removed) with this module.
     </para>
-    <para>	
-		Intersecting part is determined by correlation of larger image
-		with center area of smaller image. Images resolution (pixels per
-		linear unit) should be equal. 
-	</para>
     <para>
-		The only parameter now is <guilabel>Select second operand</guilabel> -
-		correlation between it and current image will be calculated and
-		both data fields will be cropped to remove non-intersecting
-		near-border parts.
-	</para>
+    Intersecting part is determined by correlation of larger image
+    with center area of smaller image. Images resolution (pixels per
+    linear unit) should be equal.
+  </para>
+    <para>
+    The only parameter now is <guilabel>Select second operand</guilabel> -
+    correlation between it and current image will be calculated and
+    both data fields will be cropped to remove non-intersecting
+    near-border parts.
+  </para>
   </sect2>
   <sect2 id='cross-correlation'>
     <title>Cross-Correlation</title>

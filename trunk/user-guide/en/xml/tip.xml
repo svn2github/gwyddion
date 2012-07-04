@@ -23,7 +23,7 @@
     </mediaobject>
   </informalfigure>
   <para>
-    We can fortunately simulate and/or correct the tip efects using
+    We can fortunately simulate and/or correct the tip effects using
     algorithms of dilation and/or erosion, respectively. These algorithms
     were published by Villarubia
     (see [<link linkend='tip-convolution-artefacts-ref-1'>1</link>]).
@@ -36,17 +36,17 @@
     </indexterm>
     <para>
       For studying the tip influence on the data we need to know tip geometry
-      firts. In general, the geometry of the SPM tip can be determined in
+      first. In general, the geometry of the SPM tip can be determined in
       these ways:
     </para>
     <orderedlist>
       <listitem>
-        use manufacturer's specifications (tip geometry, apex radiius and
+        use manufacturer's specifications (tip geometry, apex radius and
         angle)
       </listitem>
       <listitem>
         use scanning electron microscope of other independent technique to
-        determine tip properties.
+        determine tip properties
       </listitem>
       <listitem>
         use known tip characterizer sample (with steep edges)
@@ -79,7 +79,7 @@
     <para>
       Blind tip estimation algorithm is an extension of the well-known fact
       that on some surface data we can see images of certain parts of tip
-      directly. The algortihm iterates over all the surface data and at each
+      directly. The algorithm iterates over all the surface data and at each
       point tries to refine each tip point according to steepest slope in the
       direction between concrete tip point and tip apex.
     </para>
@@ -87,9 +87,9 @@
       We can use two modification of this algorithm within Gwyddion:
       <emphasis>partial</emphasis> tip estimation that uses only limited
       number of highest points on the image and <emphasis>full</emphasis> tip
-      estimation taht uses full image (and is much slower therefore). Within
+      estimation that uses full image (and is much slower therefore). Within
       Gwyddion tip estimation module we can use also partial tip estimation
-      results as starting point for full estimation. This shlould improve the
+      results as starting point for full estimation. This should improve the
       full tip estimation algorithm speed.
     </para>
     <informalfigure id='fig-tip-alltips'>
@@ -125,12 +125,12 @@
       (see e.g. [<link linkend='tip-convolution-artefacts-ref-2'>2</link>]).
     </para>
     <para>
-      Note this alrgorithms (as well as the following two) requires compatible
+      Note this algorithm (as well as the following two) requires compatible
       scan and tip data, i.e. the physical dimensions of a scan pixel and
       of a tip image pixels have to be equal.  This relation is automatically
       guaranteed for tips obtained by blind estimate when used on the same
       data (or data with an identical measure).  If you obtained the tip
-      image other means, you may need to resample it.
+      image by other means, you may need to resample it.
     </para>
     <informalfigure id='fig-tip-simulated-convolution'>
       <mediaobject>
@@ -156,7 +156,7 @@
         <guisubmenu>Tip</guisubmenu>
         <guimenuitem>Surface Reconstruction</guimenuitem>
       </menuchoice>).
-      Of course, the data corresponding to point in image not touched by tip
+      Of course, the data corresponding to points in image not touched by tip
       (e. g. pores) cannot be reconstructed as there is no information about
       these points.
     </para>
@@ -176,9 +176,9 @@
         <secondary>certainty map</secondary>
       </indexterm>
       As it can be seen, the most problematic parts of SPM image are data
-      points, where tip did not touch the surface in a single point, mut in
+      points where tip did not touch the surface in a single point, but in
       multiple points. There is a loss of information in these points.
-      Certainty map algorithm can mark point where surface was probably
+      Certainty map algorithm can mark points where surface was probably
       touched in a single point.
     </para>
     <informalfigure id='fig-tip-certainty-map'>
@@ -195,11 +195,11 @@
       </mediaobject>
     </informalfigure>
     <para>
-      Certainty map algortihm can be therefore used to mark data in the SPM
+      Certainty map algorithm can be therefore used to mark data in the SPM
       image that are corrupted by tip convolution in an irreversible way. For
       SPM data analysis on surfaces with large slopes it is important to
       check always presence of these points. Within Gwyddion you can use
-      Ceratinty Map function for creating these maps
+      Certainty Map function for creating these maps
       (<menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Tip</guisubmenu>
