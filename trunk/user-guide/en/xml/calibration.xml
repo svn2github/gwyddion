@@ -11,30 +11,30 @@
     <para>
       Calibration data can be used to provide correction of measured data
       or perform uncertainty calculations. Generally, calibration data can be
-      of different type and different level of complexity. For most of the cases
+      of different types and different levels of complexity. For most of the cases
       user acquires error in each axis, e. g. using a calibrated standard.
-      This value can be used for data correction. Similarily, the value of uncertainty 
-      is mosttly determined for each axis from calibrated standard certificate and 
+      This value can be used for data correction. Similarly, the value of uncertainty
+      is mostly determined for each axis from calibrated standard certificate and
       from measurement process uncertainty budget.
     </para>
     <para>
-      In more complex case, calibration data can be determined locally.
+      In more complex cases, calibration data can be determined locally.
       Scanner error cannot always be described by only three parameters (one for each axis)
       and its uncertainty is not necessarily the same in whole range.
       For precise measurements it is therefore practical to determine local
       errors and namely local uncertainties that can be used for further
-      calculations. By mean "local" we mean here uncertainties that are related
-      to certain location in the complete volume that can be reached scanner.
+      calculations. By "local" we mean here uncertainties that are related
+      to certain location in the complete volume that can be reached by the scanner.
     </para>
     <para>
       To obtain local errors and uncertainties, one can use a calibration
       standard again or use a more complex instrument, like interferometer
-      for scanning stange calibration. This is usually done in metrology institutes.
+      for scanning stage calibration. This is usually done in metrology institutes.
     </para>
     <para>
       In Gwyddion, there is a set of tools helping local uncertainty processing.
-      Primary calibration data, related to a scanning stage, can be determined or loaded. 
-      They can be assigned to a certain SPM measurement data creating a set of calibrations. 
+      Primary calibration data, related to a scanning stage, can be determined or loaded.
+      They can be assigned to a certain SPM measurement data creating a set of calibrations.
       These are used automatically in tools and modules where uncertainty propagation calculation can be performed
       in order to provide measurement uncertainty.
     </para>
@@ -50,7 +50,9 @@
     </para>
     <para>
     Calibration data can be acquired in the following ways:
-     The module
+      </para>
+      <para>
+      The module
       <menuchoice>
         <guimenu>3D calibration</guimenu>
         <guisubmenu>Create...</guisubmenu>
@@ -58,10 +60,10 @@
       can be used for creating simplest primary calibration data - based only on
       knowledge of xyz errors and uncertainties and on scanner volume geometry.
       We also need to specify calibration name. Primary calibration data will be
-      accesible under this name module for its data application to SPM measurements. 
+      accessible under this name module for its data application to SPM measurements.
       </para>
       <para>
-      Using 
+      Using
       <menuchoice>
         <guimenu>3D calibration</guimenu>
         <guisubmenu>Get simple error map...</guisubmenu>
@@ -72,13 +74,13 @@
       several cross-sections of the full scanner volume. Providing single grating detail,
       nominal grating pitch and assuming that the grating planarity and orthogonality
       is much higher than that of scanning stage we can determine primary calibration
-      data on the basis of correlation. Note that this way of calibrating an microscope
-      is only very approximate and its use for metrology purposes is very limited. 
+      data on the basis of correlation. Note that this way of calibrating a microscope
+      is only very approximate and its use for metrology purposes is very limited.
       However, it can provide a lot of useful information about our scanner properties
       if we are unable to perform more complex analysis.
     </para>
     <para>
-    Finally, using 
+    Finally, using
     <menuchoice>
         <guimenu>3D calibration</guimenu>
         <guisubmenu>Load from file...</guisubmenu>
@@ -101,7 +103,7 @@
     Primary calibration data obtained in previous steps are related to a scanning stage, not to
     concrete SPM measurements. We can use primary calibration data for different measurements.
     To use primary calibration data for our measured data processing, we need to apply them first.
-    Using module 
+    Using module
           <menuchoice>
         <guimenu>3D calibration</guimenu>
         <guisubmenu>Apply to data...</guisubmenu>

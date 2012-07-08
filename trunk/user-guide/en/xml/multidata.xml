@@ -242,7 +242,7 @@
     </para>
     <para>
       Images that form parts of a larger image can be merged together with
-      Merge.  The image the function was run on forms corresponds to the base
+      Merge.  The image the function was run on corresponds to the base
       image, the image selected with <guilabel>Merge with</guilabel>
       represents the second operand. The side of the base image the second one
       will be attached to is controlled with
@@ -336,7 +336,7 @@
       </menuchoice>
     </para>
     <para>
-      Module finds local correlations between details on two different
+      This module finds local correlations between details on two different
       images. As an ideal output, the shift of every pixel on the first image
       as seen on the second image is returned. This can be used for
       determining local changes on the surface while imaged twice (shifts can
@@ -346,7 +346,7 @@
     <para>
       For every pixel on the first operand (actual window), the module takes
       its neighbourhood and searches for the best correlation in the second
-      operand within defined area. The postion of the correlation maximum is
+      operand within defined area. The position of the correlation maximum is
       used to set up the value of shift for the mentioned pixel on the first
       operand.
     </para>
@@ -364,7 +364,7 @@
           <guilabel>Search size</guilabel>
         </term>
         <listitem>
-          Used to set the area whera algoritgm will search for the local
+          Used to set the area whera algorithm will search for the local
           neighbourhood (on the second operand). Should be larger than window
           size. Increase this size if there are big differences between the
           compared images.
@@ -415,7 +415,7 @@
       </menuchoice>
     </para>
     <para>
-      Module searches for a given correlation pattern within the actual
+      This module searches for a given correlation pattern within the actual
       image. The resulting pattern position is marked as a mask in the data
       window.
     </para>

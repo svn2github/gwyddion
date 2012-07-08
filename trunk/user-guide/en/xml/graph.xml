@@ -5,7 +5,7 @@
 <sect1 id='graph-processing'>
   <title>Graph Processing</title>
   <para>
-    Many of the Gwyddion data processing modules produce graph as a output.
+    Many of the Gwyddion data processing modules produce graph as an output.
     Graphs can be exported into text files or further analyzed within
     Gwyddion by several graph processing modules. These modules can be found
     in the Graph menu in the Gwyddion main window. Note that the number of
@@ -32,7 +32,7 @@
       </listitem>
       <listitem>
         Zoom in and zoom out – after selecting zoom in simply draw the area
-        that should be zoomed by mouse. Zoom out restores the state when all
+        that should be zoomed by mouse. Zoom out restores the state where all
         data can be seen.
       </listitem>
       <listitem>
@@ -160,7 +160,7 @@
     <indexterm><primary>DOS spectrum</primary></indexterm>
     <para>
         DOS spectrum module intended to obtain Density-of-States spectra
-        from I-V STM spectroscopy. It calculates 
+        from I-V STM spectroscopy. It calculates
         <xi:include href="eq-graph-dos.xml"/> and plots it as graph.
     </para>
   </sect2>

@@ -316,7 +316,7 @@
         </term>
         <listitem>
           <para>
-            Freehand erasing with an eraser of radius speficied by parameter
+            Freehand erasing with an eraser of radius specified by parameter
             <guilabel>Radius</guilabel>.  Note this may be slow on slow computers
             and/or large data fields.
           </para>

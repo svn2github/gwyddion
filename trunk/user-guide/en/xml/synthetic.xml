@@ -271,7 +271,7 @@
       pixel, <xi:include href="eqi-h.xml"/> is the height of the object at this
       pixel (assuming a zero basis) and <xi:include href="eqi-z_0.xml"/>
       is the current minimum height over the basis of the object being placed.
-      The algorithm consideres the horizontal plane to be filled with identical
+      The algorithm considers the horizontal plane to be filled with identical
       copies of the surface, hence, the generated surfaces are also periodic
       (i.e. perfectly tilable).
     </para>
@@ -417,10 +417,10 @@
         </term>
         <listitem>
           <para>
-            The noise can be generated as symetrical or one-sided.  The
+            The noise can be generated as symmetrical or one-sided.  The
             mean value of the distribution of a symmetrical noise is zero,
             i.e. the mean value of data does not change when a symmetrical
-            noise is added.  One-sided noise only increases (if positivie)
+            noise is added.  One-sided noise only increases (if positive)
             or decreases (if negative) the data values.
           </para>
         </listitem>
@@ -581,9 +581,9 @@
       This tab also contains the deformation parameters.  While enabling the
       variation of geometrical parameters makes the generated surface somewhat
       irregular the shape of its features is maintained.
-      <guilabel>Deformation</guilabel> is complementary method to introduce irregularity,
-      specifcially by distorting the pattern in the <xi:include href="eqi-xy.xml"/> plane.
-      It has two parametres:
+      <guilabel>Deformation</guilabel> is a complementary method to introduce irregularity,
+      specifically by distorting the pattern in the <xi:include href="eqi-xy.xml"/> plane.
+      It has two parameters:
     </para>
     <variablelist>
       <varlistentry>
@@ -604,7 +604,7 @@
         </term>
         <listitem>
           <para>
-            The characteristic size of the deformations.  It descrbies not
+            The characteristic size of the deformations.  It describes not
             how far the features are moved but how sharply or slowly the
             deformation itself changes within the horizontal plane.
           </para>
@@ -619,8 +619,8 @@
         <caption>
           Artificial pattern surfaces: sharp steps oriented at 30 deg, deformed
           with a deformation with a large autocorrelation length (left);
-          non-unofrmly spaced ridges with moderate slopes between the top and
-          bottom planes, defomed with a deformation with a small
+          non-uniformly spaced ridges with moderate slopes between the top and
+          bottom planes, deformed with a deformation with a small
           autocorrelation length (right).
         </caption>
       </mediaobject>
