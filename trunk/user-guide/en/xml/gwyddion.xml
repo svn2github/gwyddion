@@ -171,7 +171,7 @@
         </term>
         <listitem>
           <para>
-            Redirect messages from GLib, Gtk+, Gwyddion, etc. to
+            Redirects messages from GLib, Gtk+, Gwyddion, etc. to
             <filename>~/.gwyddion/gwyddion.log</filename> or file given in
             <link linkend='GWYDDION_LOGFILE'><envar>GWYDDION_LOGFILE</envar></link>
             environment variable.  This option is most useful on Unix as on

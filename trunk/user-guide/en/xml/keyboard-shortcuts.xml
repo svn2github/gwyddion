@@ -244,7 +244,7 @@
     <informalexample>
       <programlisting>; (gtk_accel_path "&lt;tool&gt;/GwyToolMaskEditor" "")</programlisting>
     </informalexample>
-    Semicolons represents comments, i.e. lines starting with a seimicolon are
+    Semicolons represents comments, i.e. lines starting with a semicolon are
     inactive.  Hence, to assign the combo <keycap>Ctrl-Shift-E</keycap> to the
     Mask Editor tool, remove the semicolon to make the line active and fill the
     desired shortcut in the empty quotes:

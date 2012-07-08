@@ -7,7 +7,7 @@
   <para>
     Various bits of data, e.g. <link linkend='color-map'>false color maps</link>
     or <link linkend='raw-file-import-presets'>raw file import presets</link>,
-    are stored in standalone files that are collectivelly called resource
+    are stored in standalone files that are collectively called resource
     files. Gwyddion looks for resources in two different locations: system
     and user-specific.
   </para>
@@ -231,7 +231,7 @@ Gwyddion resource GwyGLMaterial
               <entry>optional</entry>
               <entry>0 or 1</entry>
               <entry>
-                Give as 1 if the quantity makes sense only for lateral and
+                Given as 1 if the quantity makes sense only for lateral and
                 <quote>height</quote> dimensions being the same physical
                 quantities.  For instance, this is required for the surface
                 area.  The default is 0.
@@ -242,7 +242,7 @@ Gwyddion resource GwyGLMaterial
               <entry>optional</entry>
               <entry>0 or 1</entry>
               <entry>
-                Give as 1 if the quantity is an angle.  The expression should
+                Given as 1 if the quantity is an angle.  The expression should
                 calculate angles in radians.  However, if
                 <varname>is_angle</varname> is set Gwyddion knowns the value
                 can be converted to degrees for presentation.
@@ -262,7 +262,7 @@ Gwyddion resource GwyGLMaterial
       <xi:include href='table-grain-quantities.xml'/>
     </para>
     <para>
-      For instance, a new grain value Height, measuing the grain height as the
+      For instance, a new grain value Height, measuring the grain height as the
       difference between the maximum and minimum value, can be defined as
       follows:
       <informalexample>

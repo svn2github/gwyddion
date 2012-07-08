@@ -15,7 +15,7 @@
 
   <refnamediv>
     <refname>gwyddion-thumbnailer</refname>
-    <refpurpose>Create thumbnails of SPM data files</refpurpose>
+    <refpurpose>Creates thumbnails of SPM data files</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv id='gwyddion-thumbnailer-synopsis'>
@@ -118,7 +118,7 @@
     </cmdsynopsis>
     <para>
       In <option>gnome2</option> mode, gwyddion-thumbnailer creates PNG
-      thumbnails according to the Gnome thumbnailer specification.  Usings
+      thumbnails according to the Gnome thumbnailer specification.  Using
       the convention from this specification, it should be run
     </para>
     <informalexample>
@@ -192,7 +192,7 @@ find scans -type f -name '*.afm' -print0 \\
       Do <emphasis>not</emphasis> use this mode from the command line.  It is
       documented for completness, however, the protocol between
       gwythumbcreator and gwyddion-thumbnailer must be considered private and
-      it can change any time.
+      it can change at any time.
     </para>
   </refsect1>
   <refsect1 id='gwyddion-thumbnailer-check'>

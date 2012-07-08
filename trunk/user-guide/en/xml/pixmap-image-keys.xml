@@ -159,7 +159,7 @@
     scaling formula).  Conversely, if these chunks are present (and the
     Gwyddion-specific are absent) the information from them is used in
     import.  See the
-    <ulink url='http://www.libpng.org/pub/png/spec/'>PNG speficiation</ulink>
+    <ulink url='http://www.libpng.org/pub/png/spec/'>PNG specifiation</ulink>
     for the chunk description.
   </para>
 </sect1>

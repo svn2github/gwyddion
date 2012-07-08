@@ -297,7 +297,7 @@
         </term>
         <listitem>
           <para>
-            Freehand drawing with a pencil of radius speficied by parameter
+            Freehand drawing with a pencil of radius specified by parameter
             <guilabel>Radius</guilabel>.  Note this may be slow on slow computers
             and/or large data fields.
           </para>

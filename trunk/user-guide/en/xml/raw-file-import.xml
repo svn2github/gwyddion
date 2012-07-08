@@ -186,7 +186,7 @@
             <para>
               Usually, samples are adjacent to each other in the file.  But
               sometimes there are unused bits or bytes between them, that
-              can be speficified with this option.  Note for predefined
+              can be specified with this option.  Note for predefined
               types the value must be a multiple of 8 (i.e., only whole
               bytes can be skipped).
             </para>
@@ -202,7 +202,7 @@
             <para>
               Usually, rows are adjacent to each other in the file.  But
               sometimes there are unused bits or bytes between them, that
-              can be speficified with this option.  Note for predefined
+              can be specified with this option.  Note for predefined
               types the value must be a multiple of 8 (i.e., only whole
               bytes can be skipped).
             </para>
