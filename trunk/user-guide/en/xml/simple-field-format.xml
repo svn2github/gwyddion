@@ -239,7 +239,7 @@ Title = ADC2</programlisting>
       The text header is followed by one to four NUL (<literal>\0</literal>,
       ASCII 0x00) bytes that (a) terminate it and (b) align the data start to
       an offset from the begining of file that is a multiple of 4.  More
-      precisely, denoting <xi:include href='eqi-N.xml'/> the total lenght of
+      precisely, denoting <xi:include href='eqi-N.xml'/> the total length of
       the magic line and the text header, the data starts at the nearest
       multiple of 4 larger than <xi:include href='eqi-N.xml'/>.
     </para>

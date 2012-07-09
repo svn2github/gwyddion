@@ -28,7 +28,7 @@
   <sect2 id='bug-reports'>
     <title>Bug reports</title>
     <para>
-      We will be very happy if you send as bug reports if you find errors in
+      We will be very happy if you send us bug reports if you find errors in
       Gwyddion. For doing this, please, specify as much as possible the
       situation that led to error, operating system and Gwyddion version
       used. You can also send us the SPM data that were being processed when

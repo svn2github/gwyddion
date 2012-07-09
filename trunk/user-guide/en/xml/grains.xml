@@ -508,7 +508,7 @@
       axes and <xi:include href="eqi-h.xml"/> is the length of the pixel
       diagonal:
       <xi:include href="eq-grain-boundary-pixel-diagonal.xml"/>
-      The contributions correspond one-to-one to lenghts of segments of the
+      The contributions correspond one-to-one to lengths of segments of the
       boundary of a polygon approximating the grain shape.  The construction of
       the equivalent polygonal shape can also be seen in the figure.
     </para>

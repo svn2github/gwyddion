@@ -458,7 +458,7 @@
       numbered sequentially, starting from 1, however, they can have any
       numbers positive and the set of graph numbers does not have to be
       contiguous.  The number 0 in the prefix of graph keys is a historical
-      relict that does not mean anything and it is always 0.
+      relic that does not mean anything and it is always 0.
     </para>
     <para>
       <informaltable id='table-gwyfile-graph-keys'>
