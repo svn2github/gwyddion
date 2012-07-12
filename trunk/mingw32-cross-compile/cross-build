@@ -10,7 +10,17 @@ build=$(/usr/share/libtool/config/config.guess)
              --without-libiconv-prefix --without-libintl-prefix \
              --disable-schemas-install --disable-desktop-file-update \
              --without-pascal --without-perl --without-python --without-ruby \
-             --without-kde4-thumbnailer
+             --without-kde4-thumbnailer --enable-pygwy \
+             PYTHON="wine $python_dir/python.exe" \
+             PYTHON_SYSCFG_BASECFLAGS="-I$python_dir/include" \
+             PYTHON_SYSCFG_LDFLAGS="-L$python_dir/libs" \
+             CPPFLAGS="-I$python_dir/include -I$python_dir/include/pygtk-2.0" \
+             PYGTK_CFLAGS="-I$python_dir/include" \
+             PYGTK_LIBS="-L$python_dir/libs" \
+             PYGTK_CODEGENDIR="$python_dir/Lib/site-packages/gtk-2.0/codegen"
+# FIXME: Somehow, we get forward and backward slashes mixed up in one path and
+# it causes trouble.
+find . -name Makefile | xargs sed -i 's%\\Lib\\site-packages%/Lib/site-packages%g'
 make
 make -C po update-gmo
 make install
