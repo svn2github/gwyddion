@@ -17,7 +17,7 @@
 %endif
 
 Name:           mingw32-fftw
-Version:        3.3.1
+Version:        3.3.2
 Release:        1
 Summary:        MinGW Windows FFTW library
 
@@ -88,6 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jul 12 2012 Yeti <yeti@gwyddion.net> - 3.3.2-1
+- Updated to upstream version 3.3.2
+
 * Wed Apr 11 2012 Yeti <yeti@gwyddion.net> - 3.3.1-1
 - Updated to upstream version 3.3.1
 

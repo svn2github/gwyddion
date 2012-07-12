@@ -8,8 +8,8 @@
 %define run_tests 0
 
 Name:           mingw32-bzip2-cdecl
-Version:        1.0.5
-Release:        11%{?dist}
+Version:        1.0.6
+Release:        1%{?dist}
 Summary:        MinGW port of bzip2 file compression utility
 
 License:        BSD
@@ -20,12 +20,12 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
 
-Patch0:         bzip2-1.0.4-saneso.patch
-Patch5:         bzip2-1.0.4-cflags.patch
+Patch0:         bzip2-1.0.6-saneso.patch
+Patch5:         bzip2-1.0.6-cflags.patch
 Patch6:         bzip2-1.0.4-bzip2recover.patch
 
 Patch10:        mingw32-bzip2-1.0.5-slash.patch
-Patch11:        mingw32-bzip2-1.0.5-dll.patch
+Patch11:        mingw32-bzip2-1.0.6-dll.patch
 Patch12:        mingw32-bzip2-1.0.5-cdecl.patch
 
 BuildRequires:  mingw32-filesystem >= 49
@@ -137,5 +137,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jul 12 2012 Yeti <yeti@gwyddion.net> - 1.0.6-1
+- Updated to upstream 1.0.6.
+
 * Thu Apr 12 2012 Yeti <yeti@gwyddion.net> - 1.0.5-1
 - Forked from mingw32-bzip2.
