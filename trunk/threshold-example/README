@@ -65,6 +65,10 @@ Specify the host system to configure:
 and then continue as in a normal Unix compilation to produce a MS Windows
 DLL of the module.
 
+In order to create a usable DLL you will likely need to run `make install'
+so use --with-dest option of configure to specify (an arbitrary) destination
+directory, see above.
+
 
 == SVN Checkout & Development ======
 
