@@ -60,7 +60,7 @@ versions of Gwyddion libraries.
 
 Specify the host system to configure:
 
-    ./configure --host=i686-pc-mingw32 --build=$(/usr/share/libtool/config/config.guess) [OPTIONS...]
+    ./configure --host=i686-pc-mingw32 --build=$(/usr/share/libtool/config/config.guess) PKG_CONFIG_PATH=usr/i686-pc-mingw32/sys-root/mingw/lib [OPTIONS...]
 
 and then continue as in a normal Unix compilation to produce a MS Windows
 DLL of the module.
