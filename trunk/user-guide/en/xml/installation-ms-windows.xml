@@ -58,92 +58,126 @@
       </listitem>
     </varlistentry>
   </variablelist>
-  <para>
-    In the following steps the installer reminds you of the software components
-    included in the package and their licenses (that are all Free Software),
-    lets you change the installation directory and offers a choice of languages
-    to use for the user interface.
-  </para>
-  <para>
-    The installer creates the following useful keys under
-    <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:
-  </para>
-  <variablelist>
-    <varlistentry>
-      <term><literal>InstallDir</literal></term>
-      <listitem>
-        Installation directory, e.g. <filename>C:\Program Files\Gwyddion</filename>.
-        Reading this key can be useful for determining where to install
-        extensions.
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><literal>Version</literal></term>
-      <listitem>
-        Full Gwyddion version as a string.
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><literal>Locale</literal></term>
-      <listitem>
-        Language of Gwyddion user interface chosen during the installation (more precisely,
-        a locale specification that, among other things, defines the language).  You can
-        modify it using <command>regedit</command> to choose another language
-        as described below.
-      </listitem>
-    </varlistentry>
-  </variablelist>
-  <para>
-    The list of available languages and corresponding <literal>Locale</literal> values
-    include:
-  </para>
-  <informaltable frame='none' id='table-locales'>
-    <tgroup cols='2'>
-      <?dblatex ll?>
-      <thead>
-        <row>
-          <entry><literal>Locale</literal></entry>
-          <entry>Language</entry>
-        </row>
-      </thead>
-      <tbody>
-        <row>
-          <entry><literal>cs_CZ.UTF-8</literal></entry>
-          <entry>Czech (Czech Republic)</entry>
-        </row>
-        <row>
-          <entry><literal>de_DE.UTF-8</literal></entry>
-          <entry>German (Germany)</entry>
-        </row>
-        <row>
-          <entry><literal>en_US.UTF-8</literal></entry>
-          <entry>English (Unites States)</entry>
-        </row>
-        <row>
-          <entry><literal>fr_FR.UTF-8</literal></entry>
-          <entry>French (France)</entry>
-        </row>
-        <row>
-          <entry><literal>it_IT.UTF-8</literal></entry>
-          <entry>Italian (Italy)</entry>
-        </row>
-        <row>
-          <entry><literal>ru_RU.UTF-8</literal></entry>
-          <entry>Russian (Russia)</entry>
-        </row>
-      </tbody>
-    </tgroup>
-  </informaltable>
-  <para>
-    If you want to uninstall Gwyddion go to
-    <menuchoice>
-      <guimenu>Start</guimenu>
-      <guisubmenu>Control Panel</guisubmenu>
-      <guimenuitem>Add or Remove Programs</guimenuitem>
-    </menuchoice>
-    and choose <application>Gwyddion</application>. Note that this is valid for
-    Windows XP. The path to the <guimenuitem>Add/Remove</guimenuitem> window
-    may be slightly different on other Windows OS.
-  </para>
+  <sect2 id='installation-ms-windows-uninstall'>
+    <title>Uninstallation</title>
+    <para>
+      In the following steps the installer reminds you of the software
+      components included in the package and their licenses (that are all
+      Free Software), lets you change the installation directory and offers
+      a choice of languages to use for the user interface.
+    </para>
+  </sect2>
+  <sect2 id='installation-ms-windows-registry'>
+    <title>Registry keys</title>
+    <para>
+      If you want to uninstall Gwyddion go to
+      <menuchoice>
+        <guimenu>Start</guimenu>
+        <guisubmenu>Control Panel</guisubmenu>
+        <guimenuitem>Add or Remove Programs</guimenuitem>
+      </menuchoice>
+      and choose <application>Gwyddion</application>. Note that this is valid for
+      Windows XP. The path to the <guimenuitem>Add/Remove</guimenuitem> window
+      may be slightly different on other Windows OS.
+    </para>
+    <para>
+      The installer creates the following useful keys under
+      <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><literal>InstallDir</literal></term>
+        <listitem>
+          Installation directory, e.g.
+          <filename>C:\Program Files\Gwyddion</filename>.
+          Reading this key can be useful for determining where to install
+          extensions.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Version</literal></term>
+        <listitem>
+          Full Gwyddion version as a string.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Locale</literal></term>
+        <listitem>
+          Language of Gwyddion user interface chosen during the installation
+          (more precisely, a locale specification that, among other things,
+          defines the language).  You can modify it using
+          <command>regedit</command> to choose another language as described
+          below.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      The list of available languages and corresponding
+      <literal>Locale</literal> values include:
+    </para>
+    <informaltable frame='none' id='table-locales'>
+      <tgroup cols='2'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry><literal>Locale</literal></entry>
+            <entry>Language</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>cs_CZ.UTF-8</literal></entry>
+            <entry>Czech (Czech Republic)</entry>
+          </row>
+          <row>
+            <entry><literal>de_DE.UTF-8</literal></entry>
+            <entry>German (Germany)</entry>
+          </row>
+          <row>
+            <entry><literal>en_US.UTF-8</literal></entry>
+            <entry>English (Unites States)</entry>
+          </row>
+          <row>
+            <entry><literal>fr_FR.UTF-8</literal></entry>
+            <entry>French (France)</entry>
+          </row>
+          <row>
+            <entry><literal>it_IT.UTF-8</literal></entry>
+            <entry>Italian (Italy)</entry>
+          </row>
+          <row>
+            <entry><literal>ru_RU.UTF-8</literal></entry>
+            <entry>Russian (Russia)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id='installation-ms-windows-pygwy'>
+    <title>Enabling pygwy</title>
+    <para>
+      The Python scripting interface, pygwy, is included in the installer,
+      however, you need to install Python and PyGTK2 separately to use Python
+      scripting. This can be done either prior to Gwyddion installation or
+      any time later. If Python and PyGTK2 is not present pygwy simply does
+      not register itself upon Gwyddion startup.
+    </para>
+    <para>
+      MS Windows Python installer can be obtained at
+      <ulink url="http://python.org/download/releases/">http://python.org/download/releases/</ulink>.
+      Since pygwy requires Python 2 install the latest Python 2.7 version,
+      which will probably be <filename>python-2.7.3.msi</filename>.
+    </para>
+    <para>
+      Three packages are required for PyGTK2: PyGTK, PyCairo and PyGObject.
+      Follow the corresponding download links for these modules at
+      <ulink url="http://www.pygtk.org/downloads.html">http://www.pygtk.org/downloads.html</ulink>
+      to obtain the installers
+      <filename>pygobject-2.28.3.win32-py2.7.msi</filename>,
+      <filename>pycairo-1.8.10.win32-py2.7.msi</filename>, and
+      <filename>pygtk-2.24.0.win32-py2.7.msi</filename>
+      or possibly newer versions (if available).
+    </para>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

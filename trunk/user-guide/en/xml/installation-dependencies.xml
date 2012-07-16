@@ -193,10 +193,6 @@
         <para>
           Enables pygwy, the Gwyddion Python scripting interface.
         </para>
-        <para>
-          Note that pygwy is not really functional on MS Windows at this
-          moment.
-        </para>
       </listitem>
     </varlistentry>
     <varlistentry id='dependency-gtksourceview'>
