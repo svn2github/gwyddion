@@ -58,17 +58,14 @@
       </listitem>
     </varlistentry>
   </variablelist>
+  <para>
+    In the following steps the installer reminds you of the software
+    components included in the package and their licenses (that are all
+    Free Software), lets you change the installation directory and offers
+    a choice of languages to use for the user interface.
+  </para>
   <sect2 id='installation-ms-windows-uninstall'>
     <title>Uninstallation</title>
-    <para>
-      In the following steps the installer reminds you of the software
-      components included in the package and their licenses (that are all
-      Free Software), lets you change the installation directory and offers
-      a choice of languages to use for the user interface.
-    </para>
-  </sect2>
-  <sect2 id='installation-ms-windows-registry'>
-    <title>Registry keys</title>
     <para>
       If you want to uninstall Gwyddion go to
       <menuchoice>
@@ -80,6 +77,9 @@
       Windows XP. The path to the <guimenuitem>Add/Remove</guimenuitem> window
       may be slightly different on other Windows OS.
     </para>
+  </sect2>
+  <sect2 id='installation-ms-windows-registry'>
+    <title>Registry keys</title>
     <para>
       The installer creates the following useful keys under
       <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:
