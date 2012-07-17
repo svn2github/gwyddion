@@ -9,7 +9,7 @@
     significative depuis la 2.23. Si vous faites une mise à jour d'une version
     antérieure à la 2.23 vers la version 2.23, nous vous invitons à lire la
     <ulink url='http://gwyddion.net/switch-to-mingw32.php'>description des
-      changement</ulink>.
+      changements</ulink>.
   </note>
   <para>
     Si vous avez déjà installé <application>Gwyddion</application> l'installeur
@@ -36,7 +36,7 @@
     <varlistentry>
       <term>Oui (remplacer)</term>
       <listitem>
-        La versioin déjà installée sera remplacée. Il s'agit de la méthode 
+        La version déjà installée sera remplacée. Il s'agit de la méthode
         normale de mise à jour.
       </listitem>
     </varlistentry>
@@ -44,10 +44,10 @@
       <term>Non (conserver)</term>
       <listitem>
         La version déjà installée sera ignorée et l'installation continuera
-        comme s'il s'agissait d'une première installation. Il s'agit en 
+        comme s'il s'agissait d'une première installation. Il s'agit en
         général d'une mauvaise idée car les deux versions partageront les mêmes
-        réglages et clés de registre, et si vous en désinstallez une l'autre en 
-        sera affectée. Vous pouvez cependant considérer cette option utile dans 
+        réglages et clés de registre, et si vous en désinstallez une l'autre en
+        sera affectée. Vous pouvez cependant considérer cette option utile dans
         certains cas.
       </listitem>
     </varlistentry>
@@ -59,44 +59,61 @@
     </varlistentry>
   </variablelist>
   <para>
-    Dans les étapes suivantes l'installeur vous rappelle les composants du 
+    Dans les étapes suivantes l'installeur vous rappelle les composants du
     logiciel inclus dans le paquet ainsi que leurs licences (qui sont tous des
     logiciels libres), puis vous propose un répertoire d'installation, et enfin
     vous propose la langue de l'interface utilisateur.
   </para>
-  <para>
-    L'installeur crée les clés suivantes dans 
-    <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal> :
-  </para>
-  <variablelist>
-    <varlistentry>
-      <term><literal>InstallDir</literal></term>
-      <listitem>
-        Répertoire d'installation, par exemple
-        <filename>C:\Program Files\Gwyddion</filename>. La lecture de cette clé
-        peut être utile pour déterminer où installer des extensions.
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><literal>Version</literal></term>
-      <listitem>
-        Version complète de Gwyddion sous forme de chaîne de caractères.
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><literal>Locale</literal></term>
-      <listitem>
-        La langue de l'interface utilisateur de Gwyddion est choisie durant
-        l'installation (plus précisément, une localisation qui, entre autre, 
-        définit la langue). Vous pouvez la modifier en utilisant 
-        <command>regedit</command> pour choisir une autre langue.
-      </listitem>
-    </varlistentry>
-  </variablelist>
-  <para>
-    Voici la liste des langues disponibles et les valeurs des 
-    <literal>localisations</literal> correspondantes :
-  </para>
+  <sect2 id='installation-ms-windows-uninstall'>
+    <title>Désinstallation</title>
+    <para>
+      Si vous souhaitez désinstaller Gwyddion, allez dans le menu
+      <menuchoice>
+        <guimenu>Démarrer</guimenu>
+        <guisubmenu>Panneau de configuration</guisubmenu>
+        <guimenuitem>Ajout/Suppression de programmes</guimenuitem>
+      </menuchoice>
+      et choisissez <application>Gwyddion</application>. Notez que cette
+      procédure est valable sous Windows XP. Le chemin vers la fenêtre
+      <guimenuitem>Ajout/Suprression</guimenuitem> peut être légèrement
+      différent sur d'autres versions de Windows.
+    </para>
+  </sect2>
+  <sect2 id='installation-ms-windows-registry'>
+    <title>Clés de registre</title>
+    <para>
+      L'installeur crée les clés suivantes dans
+      <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal> :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><literal>InstallDir</literal></term>
+        <listitem>
+          Répertoire d'installation, par exemple
+          <filename>C:\Program Files\Gwyddion</filename>. La lecture de cette clé
+          peut être utile pour déterminer où installer des extensions.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Version</literal></term>
+        <listitem>
+          Version complète de Gwyddion sous forme de chaîne de caractères.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Locale</literal></term>
+        <listitem>
+          La langue de l'interface utilisateur de Gwyddion est choisie durant
+          l'installation (plus précisément, une localisation qui, entre autre,
+          définit la langue). Vous pouvez la modifier en utilisant
+          <command>regedit</command> pour choisir une autre langue.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Voici la liste des langues disponibles et les valeurs des
+      <literal>localisations</literal> correspondantes :
+    </para>
     <informaltable frame='none' id='table-locales'>
       <tgroup cols='2'>
         <?dblatex ll?>
@@ -134,17 +151,33 @@
         </tbody>
       </tgroup>
     </informaltable>
-  <para>
-    Si vous souhaitez désinstaller Gwyddion allez dans
-    <menuchoice>
-      <guimenu>Démarrer</guimenu>
-      <guisubmenu>Panneau de configuration</guisubmenu>
-      <guimenuitem>Ajouter ou supprimer des programmes</guimenuitem>
-    </menuchoice>
-    et choisissez <application>Gwyddion</application>. Notez que cette procédure
-    est valide sous Windows XP. Le chemin pour aboutir à la fenêtre
-    <guimenuitem>Ajouter / Supprimer</guimenuitem> peut légèrement différer 
-    sur une autre version de Windows.
-  </para>
+  </sect2>
+  <sect2 id='installation-ms-windows-pygwy'>
+    <title>Installation de pygwy</title>
+    <para>
+      L'interface de script Python, pygwy, est inclue dans l'installeur,
+      toutefois il vous faudra installer Python et PyGTK2 afin d'activer les
+      possibilités de script Python. Ceci peut être réalisé avant l'installation
+      de Gwyddion, ou bien ultérieurement. Si Python ou PyGTK2 ne sont pas
+      présents, pygwy ne pourra pas s'enregistrer lors du démarrage de Gwyddion.
+    </para>
+    <para>
+      L'installeur de Python pour MS Windows peut être téléchargé sur
+      <ulink url="http://python.org/download/releases/">http://python.org/download/releases/</ulink>.
+      Pygwy nécessite Python 2, il vous faudra donc installer la dernière
+      version de Python 2.7, soit probablement
+      <filename>python-2.7.3.msi</filename>.
+    </para>
+    <para>
+      Trois paquets sont nécessaires pour faire fonctionner PyGTK2 : PyGTK,
+      PyCairo et PyGObject. Utilisez les liens de téléchargement sur
+      <ulink url="http://www.pygtk.org/downloads.html">http://www.pygtk.org/downloads.html</ulink>
+      et téléchargez les installeurs
+      <filename>pygobject-2.28.3.win32-py2.7.msi</filename>,
+      <filename>pycairo-1.8.10.win32-py2.7.msi</filename>, et
+      <filename>pygtk-2.24.0.win32-py2.7.msi</filename> ou plus récents (si
+      disponibles).
+    </para>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

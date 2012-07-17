@@ -196,10 +196,6 @@
           <para>
             Permet d'utiliser pygwy, l'interface de script Python pour Gwyddion.
           </para>
-          <para>
-            Notez que pygwy n'est pour l'instant pas encore complètement
-            fonctionnel sur MS Windows.
-          </para>
         </listitem>
       </varlistentry>
       <varlistentry id='dependency-gtksourceview'>
