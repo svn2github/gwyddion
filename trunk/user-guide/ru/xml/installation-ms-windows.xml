@@ -32,59 +32,71 @@
     </varlistentry>
   </variablelist>
   <para>На следующих шагах программа установки напоминает о включенных в состав пакета программных компонентах и их лицензиях (что они все являются свободным программным обеспечением), дают поменять каталог установки и предлагают выбрать язык, используемый для отображения интерфейса пользователя.</para>
-  <para>Программа установки создаёт следующие нужные ключи в ветке реестра <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:</para>
-  <variablelist>
-    <varlistentry>
-      <term><literal>InstallDir</literal></term>
-      <listitem>Каталог установки, т.е. <filename>C:\Program Files\Gwyddion</filename>. Чтение этого ключа может быть полезным чтобы определить, куда ставить дополнения.</listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><literal>Version</literal></term>
-      <listitem>Полная версия Gwyddion как строка.</listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><literal>Locale</literal></term>
-      <listitem>Язык интерфейса пользователя Gwyddion, выбранный при установке (точнее, задание локали, которое в том числе определяет и язык). Можно изменить его используя <command>regedit</command> чтобы выбрать другой язык как описано ниже.</listitem>
-    </varlistentry>
-  </variablelist>
-  <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:</para>
-  <informaltable frame="none" id="table-locales">
-    <tgroup cols="2">
-      <?dblatex ll?>
-      <thead>
-        <row>
-          <entry><literal>Locale</literal></entry>
-          <entry>Язык</entry>
-        </row>
-      </thead>
-      <tbody>
-        <row>
-          <entry><literal>cs_CZ.UTF-8</literal></entry>
-          <entry>Чешский (Чехия)</entry>
-        </row>
-        <row>
-          <entry><literal>de_DE.UTF-8</literal></entry>
-          <entry>Немецкий (Германия)</entry>
-        </row>
-        <row>
-          <entry><literal>en_US.UTF-8</literal></entry>
-          <entry>Английский (США)</entry>
-        </row>
-        <row>
-          <entry><literal>fr_FR.UTF-8</literal></entry>
-          <entry>Французский (Франция)</entry>
-        </row>
-        <row>
-          <entry><literal>it_IT.UTF-8</literal></entry>
-          <entry>Итальянский (Италия)</entry>
-        </row>
-        <row>
-          <entry><literal>ru_RU.UTF-8</literal></entry>
-          <entry>Русский (Россия)</entry>
-        </row>
-      </tbody>
-    </tgroup>
-  </informaltable>
-  <para>Если вы хотите удалить Gwyddion, перейдите в <menuchoice><guimenu>Пуск</guimenu><guisubmenu>Панель управления</guisubmenu><guimenuitem>Установка и удаление программ</guimenuitem></menuchoice> (<menuchoice><guimenu>Пуск</guimenu><guisubmenu>Панель управления</guisubmenu><guimenuitem>Программы и компоненты</guimenuitem></menuchoice> в некоторых версиях Windows) и выберите <application>Gwyddion</application>. Этот путь может отличаться в других версиях Windows.</para>
+  <sect2 id="installation-ms-windows-uninstall">
+    <title>Отмена установки</title>
+    <para>Если вы хотите удалить Gwyddion, перейдите в <menuchoice><guimenu>Пуск</guimenu><guisubmenu>Панель управления</guisubmenu><guimenuitem>Установка и удаление программ</guimenuitem></menuchoice> (<menuchoice><guimenu>Пуск</guimenu><guisubmenu>Панель управления</guisubmenu><guimenuitem>Программы и компоненты</guimenuitem></menuchoice> в некоторых версиях Windows) и выберите <application>Gwyddion</application>. Этот путь может отличаться в других версиях Windows.</para>
+  </sect2>
+  <sect2 id="installation-ms-windows-registry">
+    <title>Ключи реестра</title>
+    <para>Программа установки создаёт следующие нужные ключи в ветке реестра <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:</para>
+    <variablelist>
+      <varlistentry>
+        <term><literal>InstallDir</literal></term>
+        <listitem>Каталог установки, т.е. <filename>C:\Program Files\Gwyddion</filename>. Чтение этого ключа может быть полезным чтобы определить, куда ставить дополнения.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Version</literal></term>
+        <listitem>Полная версия Gwyddion как строка.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Locale</literal></term>
+        <listitem>Язык интерфейса пользователя Gwyddion, выбранный при установке (точнее, задание локали, которое в том числе определяет и язык). Можно изменить его используя <command>regedit</command> чтобы выбрать другой язык как описано ниже.</listitem>
+      </varlistentry>
+    </variablelist>
+    <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:</para>
+    <informaltable frame="none" id="table-locales">
+      <tgroup cols="2">
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry><literal>Locale</literal></entry>
+            <entry>Язык</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>cs_CZ.UTF-8</literal></entry>
+            <entry>Чешский (Чехия)</entry>
+          </row>
+          <row>
+            <entry><literal>de_DE.UTF-8</literal></entry>
+            <entry>Немецкий (Германия)</entry>
+          </row>
+          <row>
+            <entry><literal>en_US.UTF-8</literal></entry>
+            <entry>Английский (США)</entry>
+          </row>
+          <row>
+            <entry><literal>fr_FR.UTF-8</literal></entry>
+            <entry>Французский (Франция)</entry>
+          </row>
+          <row>
+            <entry><literal>it_IT.UTF-8</literal></entry>
+            <entry>Итальянский (Италия)</entry>
+          </row>
+          <row>
+            <entry><literal>ru_RU.UTF-8</literal></entry>
+            <entry>Русский (Россия)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id="installation-ms-windows-pygwy">
+    <title>Включение pygwy</title>
+    <para>Интерфейс написания скриптов на Python, pygwy, включен в инсталятор, но необходимо отдельно установить Python и PyGTK2 чтобы заработали скрипты на Python. Это можно сделать как до установки Gwyddion, так и в любое время после. Если отсутствуют Python и PyGTK2, pygwy просто не будет регистрировать себя при запуске Gwyddion.</para>
+    <para>Пакет установки Python для MS Windows можно загрузить на <ulink url="http://python.org/download/releases/">http://python.org/download/releases/</ulink>. Поскольку pygwy требует Python второй версии, установите последнюю версию Python 2.7, которой вероятно будет <filename>python-2.7.3.msi</filename>.</para>
+    <para>Для PyGTK2 нужны три пакета: PyGTK, PyCairo и PyGObject. Перейдите по соответствующим ссылкам для загрузки этих модулей на  <ulink url="http://www.pygtk.org/downloads.html">http://www.pygtk.org/downloads.html</ulink> чтобы получить пакеты установки для <filename>pygobject-2.28.3.win32-py2.7.msi</filename>, <filename>pycairo-1.8.10.win32-py2.7.msi</filename> и <filename>pygtk-2.24.0.win32-py2.7.msi</filename> или, возможно, более новые версии, если они доступны.</para>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

@@ -130,7 +130,6 @@
           <emphasis>Опционально.</emphasis>
         </para>
         <para>Включает pygwy, скриптовый интерфейс на Python для Gwyddion</para>
-        <para>Следует отметить, что pygwy практически не работает на MS Windows в настоящий момент.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-gtksourceview">

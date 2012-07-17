@@ -229,7 +229,7 @@
             <row>
               <entry><literal>/0/select/<replaceable>foo</replaceable></literal></entry>
               <entry>подкласс <type>GwySelection</type></entry>
-              <entry>Данные выделения. Каждый тип выделения имеет (обычно) отдельный тип объекта и сохраняется под отдельным именем; конкретное имя <replaceable>foo</replaceable> будет тем же, что показано в <link linkend="selection-manager">менеджер выделенного</link>.</entry>
+              <entry>Данные выделения. Каждый тип выделения имеет (обычно) отдельный тип объекта и сохраняется под отдельным именем; конкретное имя <replaceable>foo</replaceable> будет тем же, что показано в <link linkend="selection-manager">менеджере выделенного</link>.</entry>
             </row>
           </tbody>
         </tgroup>
