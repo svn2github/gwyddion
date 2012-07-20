@@ -151,7 +151,8 @@
           <emphasis>Optional.</emphasis>
         </para>
         <para>
-          Enables the import of some compressed formats (NanoObserver).
+          Enables the import of some compressed formats (NanoObserver,
+          NanoScanTech).
         </para>
       </listitem>
     </varlistentry>
@@ -234,8 +235,10 @@
           <emphasis>Optional.</emphasis>
         </para>
         <para>
-          Enables better GNOME and XFce integration, in particular automatic
-          generation of SPM file thumbnails in Nautilus and Thunar.
+          Enables better GNOME2 and XFce integration (up to XFce 4.6), in
+          particular automatic generation of SPM file thumbnails in Nautilus
+          and Thunar.  Newer versions of these desktop environments use
+          different mechanisms.
         </para>
       </listitem>
     </varlistentry>
