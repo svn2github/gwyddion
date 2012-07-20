@@ -142,9 +142,11 @@
       </para>
       <para>
         This function calculates the total number of marked grains, their total
-        (projected) area both as an absolute value and as a fraction of total
-        data field area, total length of grain boundaries and the mean area
-        and equivalent square size of one grain.
+        projected area, both as an absolute value and as a fraction of total
+        data field area, total grain volumes, total length of grain boundaries
+        and the mean area and equivalent square size of one grain.  The mean
+        size is calculated by averaging the equivalent square sides so its
+        square is not, in general, equal to the mean area.
       </para>
       <para>
         Overall characteristics of the marked area can be also obtained with
