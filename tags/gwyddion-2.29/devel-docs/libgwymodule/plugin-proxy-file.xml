@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="plugin-proxy-file" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>File Type Plug-ins</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>File Type Plug-ins</refname>
+    <refpurpose>
+      Plug-in loading and/or saving third party data formats.
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Registration</title>
+    <para>
+      When the plug-in is called with <literal>register</literal> as
+      its first argument it should dump following information to standard
+      output (each on a separate line) and terminate:
+      <itemizedlist>
+        <listitem>plug-in name</listitem>
+        <listitem>file format description</listitem>
+        <listitem>file globs</listitem>
+        <listitem>supported operations</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      These information correspond to similar
+      <link linkend="libgwymodule-gwymodule-file">file module</link>
+      information.  All fields are case-sensitive.  The supported operations
+      line consists of a space-separated sublist from:
+      <simplelist>
+        <member><literal>load</literal></member>
+        <member><literal>save</literal></member>
+      </simplelist>
+      The file globs line consists of a space separated list of file globs
+      (not just extensions; note to Unix users: they are in fact GPatternSpec
+      globs, so character classes are not supported) of files the plug-in
+      claims it can read and/or
+      write.  Note the plug-in proxy has a notion of file glob specificity
+      and prefers to give chance to the plug-in whose file glob is the most
+      specific if more than one match.  So while it is possible to register
+      <filename>*.*</filename> the effect is quite the opposite of getting
+      all files <application>Gwyddion</application> tries to open or write.
+    </para>
+    <para>
+      So the output of plugin <command>acme_v5</command> when run as
+      <command>acme_v5 register</command> could look:
+    </para>
+    <informalexample><programlisting><![CDATA[
+acme_v5
+ACME AFM Data Format v5 (*.ac5)
+*.ac5 *.acme5
+load save
+]]></programlisting></informalexample>
+  </refsect1>
+  <refsect1>
+    <title>Loading</title>
+    <para>
+      When the plug-in is called with <literal>load</literal> as its first
+      argument then the second argument is the name of
+      <link linkend="plugin-proxy-dump">dump file</link> to write the data
+      to, and the last, third argument is the name of the file to load.
+    </para>
+    <para>
+      The plug-in reads the specified file and dumps the data to the dump
+      file.  The dump file is created as an empty file before the plug-in
+      is run to avoid race conditions.  The plug-in should just overwrite
+      with actual data.  Leaving the dump file empty is a mark of failure
+      to load the given file.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>Saving</title>
+    <para>
+      Saving works much like loading.  When the first argument is
+      <literal>save</literal>, then the second and third arguments are again
+      names of dump file and the file to save (the order of arguments is the
+      same as in loading, dump file always comes first, then the real file).
+    </para>
+    <para>
+      The plug-in reads the dump file and writes the data to the file given
+      as the last argument.  Since the file to be written can already exist
+      the only reliable signal of failure to save the file is returning
+      nonzero exit code.
+    </para>
+  </refsect1>
+</refentry>
+

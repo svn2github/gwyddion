@@ -1,0 +1,6 @@
+# @(#) $Id$
+
+SUBDIRS = \
+	file \
+	process
+
