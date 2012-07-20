@@ -193,7 +193,7 @@ export LDFLAGS</userinput></literallayout>
       Some interesting general options are explained below.
     </para>
     <sect3 id='installation-unix-source-configuration-user'>
-      <title>Users's tweaks</title>
+      <title>User's tweaks</title>
       <para>
         Gwyddion comes with various desktop integration files defining MIME
         types, menu entries, file associations, thumbnailers, etc.
