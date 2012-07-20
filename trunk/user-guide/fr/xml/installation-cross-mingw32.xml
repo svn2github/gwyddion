@@ -174,7 +174,7 @@ zypper install rpmdevtools
         <filename>mingw32-cross-compile</filename> du dépôt subversion de
         Gwyddion. Lancez
         <informalexample>
-          <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/mingw32-cross-compile</userinput></literallayout>
+          <literallayout><userinput>svn checkout http://svn.code.sf.net/p/gwyddion/code/trunk/mingw32-cross-compile</userinput></literallayout>
         </informalexample>
         pour récupérer le contenu du répertoire.
       </para>

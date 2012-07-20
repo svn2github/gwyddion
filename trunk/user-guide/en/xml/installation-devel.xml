@@ -13,7 +13,7 @@
       web pages</ulink>.  For example the current head revision of
     the program itself can be checked out with
     <informalexample>
-      <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput></literallayout>
+      <literallayout><userinput>svn checkout http://svn.code.sf.net/p/gwyddion/code/trunk/gwyddion</userinput></literallayout>
     </informalexample>
   </para>
   <para>

@@ -79,7 +79,7 @@ Some random remarks:
   and other tools are not distributed in the tarballs.  However, you can find
   them in src/ subdirectory of the subversion repository
 
-  https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/user-guide/
+  http://svn.code.sf.net/p/gwyddion/code/trunk/user-guide
 
 * If you make screenshots, run fixpngres (built by `make common' or
   `make fixpngres') on the images to standardize the resolution to 150dpi.

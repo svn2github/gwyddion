@@ -14,7 +14,7 @@
     compiled software from source code, you very likely met autotools and
     already know how to proceed.  This section shall describe the
     compilation procedure in enough detail even for the uninitiated though.
-    File <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/gwyddion/trunk/gwyddion/INSTALL'><filename>INSTALL</filename></ulink>
+    File <ulink url='https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/INSTALL?force=True'><filename>INSTALL</filename></ulink>
     in the top-level directory of the
     source tarball contains generic GNU autotools installation instructions.
   </para>

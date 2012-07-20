@@ -13,7 +13,7 @@
       <ulink url='http://gwyddion.net/resources.php#subversion'>la page web du projet</ulink>.
       La dernière révision peut ainsi être contrôlée avec
       <informalexample>
-        <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput></literallayout>
+        <literallayout><userinput>svn checkout http://svn.code.sf.net/p/gwyddion/code/trunk/gwyddion</userinput></literallayout>
       </informalexample>
     </para>
     <para>
