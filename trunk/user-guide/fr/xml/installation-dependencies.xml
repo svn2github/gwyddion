@@ -154,7 +154,8 @@
           <emphasis>Facultatif.</emphasis>
         </para>
         <para>
-          Permet l'import de certains formats compressés (NanoObserver).
+          Permet l'import de certains formats compressés (NanoObserver,
+          NanoScanTech).
         </para>
       </listitem>
     </varlistentry>
@@ -238,8 +239,10 @@
           </para>
           <para>
             Permet une meilleure intérgation dans les environnements graphiques
-            GNOME et XFce, en particulier la génération automatique
+            GNOME2 et XFce (jusqu'à XFce 4.6), en particulier la génération automatique
             de vignettes d'aperçu des fichiers SPM dans Nautilus et Thunar.
+            Les versions plus récentes de ces environnements utilisent des
+            mécanismes différents.
           </para>
       </listitem>
     </varlistentry>

@@ -143,10 +143,13 @@
         </menuchoice>
       </para>
       <para>
-        Cette fonction calcule le nombre de grains marqués, leur aire (projetée)
-        en valeur absolue et en fraction de l'aire totale du champ de données,
-        la longueur totale de bord des grains ainsi que l'aire moyenne et la
-        taille du carré équivalent moyen.
+        Cette fonction calcule le nombre de grains marqués, leur aire projetée,
+        à la fois en valeur absolue et en fraction de l'aire totale du champ de
+        données, le total des volumes des grains, la longueur totale des
+        périmètres des grains, l'aire moyenne ainsi que la taille du carré
+        équivalent des grains. La taille moyenne est calculée en moyennant
+        la taille des carrés équivalents, donc le carré de cette moyenne n'est
+        en général pas égal à l'aire moyenne.
       </para>
       <para>
         Les caractéristiques globales de la zone marquée sont disponibles dans
