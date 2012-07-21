@@ -809,7 +809,7 @@ supported.</para></footnote></entry>
       <entry>tiaser</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>No</entry>
+      <entry>Yes</entry>
     </row>
     <!-- From module unisoku.c -->
     <row>
@@ -872,6 +872,15 @@ supported.</para></footnote></entry>
       <entry>zeiss</entry>
       <entry>Yes</entry>
       <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module hdrimage.cc -->
+    <row>
+      <entry>OpenEXR images</entry>
+      <entry>.exr</entry>
+      <entry>hdrimage.cc</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
       <entry>No</entry>
     </row>
     </tbody>
