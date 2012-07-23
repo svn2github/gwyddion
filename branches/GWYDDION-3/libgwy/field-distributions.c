@@ -694,7 +694,7 @@ row_accum_cprod(const gwycomplex *fftca,
     }
 }
 
-// Used in cases when we expted the imaginary part to be zero but do not want
+// Used in cases when we expect the imaginary part to be zero but do not want
 // to bother with specialised DCT.
 static void
 row_extfft_extract_re(fftw_plan plan,
