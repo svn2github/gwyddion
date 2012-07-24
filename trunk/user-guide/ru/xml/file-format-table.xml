@@ -480,7 +480,7 @@
     </row>
     <!-- From module oldmda.c -->
     <row>
-      <entry>NT-MDT old MDA</entry>
+      <entry>старый формат MDA от NT-MDT</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Да</entry>
@@ -806,7 +806,7 @@
       <entry>tiaser</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>Да</entry>
     </row>
     <!-- From module unisoku.c -->
     <row>
@@ -869,6 +869,15 @@
       <entry>zeiss</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module hdrimage.cc -->
+    <row>
+      <entry>изображения OpenEXR</entry>
+      <entry>.exr</entry>
+      <entry>hdrimage.cc</entry>
+      <entry>Да</entry>
+      <entry>Да</entry>
       <entry>Нет</entry>
     </row>
     </tbody>

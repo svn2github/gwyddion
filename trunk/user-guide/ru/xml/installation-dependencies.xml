@@ -98,7 +98,7 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Позволяет импортировать некоторые сжатые форматы данных (NanoObserver).</para>
+        <para>Позволяет импортировать некоторые сжатые форматы данных (NanoObserver, NanoScanTech).</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-png">
@@ -158,7 +158,7 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Включает лучшую интеграцию с GNOME и XFce, например, автоматическую генерацию миниатюр для файлов СЗМ в Nautilus и Thunar.</para>
+        <para>Включает лучшую интеграцию с GNOME2 и XFce (до версии 4.6), например, автоматическую генерацию миниатюр для файлов СЗМ в Nautilus и Thunar.</para>
       </listitem>
     </varlistentry>
   </variablelist>
