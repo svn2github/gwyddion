@@ -141,7 +141,7 @@
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+                    <imagedata fileref='gwy_polynom_level-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
@@ -439,7 +439,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+              <imagedata fileref='gwy_polynom_level-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
