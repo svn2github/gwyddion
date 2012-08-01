@@ -4,7 +4,7 @@ set -e
 rm -rf "$target_prefix"
 pushd "$source_dir"
 build=$(/usr/share/libtool/config/config.guess)
-./autogen.sh --host=i686-pc-mingw32 --build=$build --prefix="$target_prefix" \
+./autogen.sh --host=i686-w64-mingw32 --build=$build --prefix="$target_prefix" \
              --enable-maintainer-mode --disable-gtk-doc --without-x \
              --disable-dependency-tracking \
              --without-libiconv-prefix --without-libintl-prefix \
