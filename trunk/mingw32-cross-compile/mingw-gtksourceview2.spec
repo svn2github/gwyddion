@@ -4,7 +4,7 @@
 
 Name:           mingw-gtksourceview2
 Version:        2.11.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        MinGW Windows library for viewing source files
 
 # the library itself is LGPL, some .lang files are GPL
@@ -19,7 +19,9 @@ BuildArch:      noarch
 BuildRequires:  mingw32-filesystem >= 95
 BuildRequires:  mingw64-filesystem >= 95
 BuildRequires:  mingw32-gcc
+BuildRequires:  mingw64-gcc
 BuildRequires:  mingw32-binutils
+BuildRequires:  mingw64-binutils
 BuildRequires:  mingw32-gettext
 BuildRequires:  mingw64-gettext
 BuildRequires:  mingw32-gtk2
@@ -86,7 +88,7 @@ sed -i -e 's/\<G_CONST_RETURN\>/const/g' \
   --disable-gtk-doc \
   --disable-introspection
 
-%{mingw_make} %{?_smp_mflags} V=1
+%{mingw_make} %{?_smp_mflags}
 
 
 %install
@@ -130,6 +132,10 @@ rm -rf $RPM_BUILD_ROOT%{mingw64_datadir}/gtk-doc
 
 
 %changelog
+* Sat Aug  4 2012 Yeti <yeti@gwyddion.net> - 2.11.2-3
+- Duplicated all system dependences to include mingw64 variants
+- Made build quiet
+
 * Wed Aug  1 2012 Yeti <yeti@gwyddion.net> - 2.11.2-2
 - Update to F17 mingw-w64 toolchain and RPM macros
 - Build Win64 package
