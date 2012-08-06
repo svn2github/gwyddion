@@ -2,7 +2,7 @@
 
 Name:           mingw-gtkglext
 Version:        1.2.0
-Release:        7
+Release:        7%{?dist}
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
