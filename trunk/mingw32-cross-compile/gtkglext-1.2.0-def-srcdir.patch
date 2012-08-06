@@ -1,0 +1,22 @@
+--- gtkglext-1.2.0.orig/gtk/Makefile.am	2003-05-09 15:55:05.000000000 +0200
++++ gtkglext-1.2.0/gtk/Makefile.am	2012-08-06 16:49:40.005288691 +0200
+@@ -10,7 +10,7 @@ no_undefined = -no-undefined
+ endif
+ 
+ if OS_WIN32
+-gtkglext_def = gtkglext.def
++gtkglext_def = $(srcdir)/gtkglext.def
+ gtkglext_win32_symbols = -export-symbols $(gtkglext_def)
+ endif
+ 
+--- gtkglext-1.2.0.orig/gdk/Makefile.am	2012-08-06 16:49:04.000000000 +0200
++++ gtkglext-1.2.0/gdk/Makefile.am	2012-08-06 16:49:27.371325281 +0200
+@@ -14,7 +14,7 @@ no_undefined = -no-undefined
+ endif
+ 
+ if OS_WIN32
+-gdkglext_def = gdkglext.def
++gdkglext_def = $(srcdir)/gdkglext.def
+ gdkglext_win32_symbols = -export-symbols $(gdkglext_def)
+ endif
+ 
