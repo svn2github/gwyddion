@@ -391,3 +391,14 @@
  
  G_BEGIN_DECLS
   
+--- gtkglext-1.2.0.orig/gdk/win32/gdkglpixmap-win32.c	2004-02-20 10:38:13.000000000 +0100
++++ gtkglext-1.2.0/gdk/win32/gdkglpixmap-win32.c	2012-08-06 17:07:18.844300666 +0200
+@@ -185,7 +185,7 @@ gdk_gl_pixmap_new (GdkGLConfig *glconfig
+    * Create offscreen rendering area.
+    */
+ 
+-  gdk_drawable_get_size (GDK_DRAWABLE (pixmap), &width, &height);
++  gdk_pixmap_get_size (pixmap, &width, &height);
+   depth = gdk_drawable_get_depth (GDK_DRAWABLE (pixmap));
+ 
+   pixmap_gl = gdk_pixmap_new (NULL, width, height, depth);
