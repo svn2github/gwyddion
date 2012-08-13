@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -928,13 +928,14 @@ calc_flat_boundary_length(GwyGrainValue *grainvalue,
     // Note the cycles go to xres and yres inclusive as we calculate the
     // boundary, not pixel interiors.
     for (guint i = 0; i <= yres; i++) {
-        for (guint j = 0; j <= xres; j++) {
+        const guint *g = grains + i*xres - xres - 1;
+        for (guint j = 0; j <= xres; j++, g++) {
             // Hope the compiler will optimize this mess...
-            guint g1 = (i > 0 && j > 0) ? grains[i*xres + j - xres - 1] : 0;
-            guint g2 = (i > 0 && j < xres) ? grains[i*xres + j - xres] : 0;
-            guint g3 = (i < yres && j > 0) ? grains[i*xres + j - 1] : 0;
-            guint g4 = (i < yres && j < xres) ? grains[i*xres + j] : 0;
-            guint f = (g1 > 0) + (g2 > 0) + (g3 > 0) + (g4 > 0);
+            guint g1 = (i > 0 && j > 0) ? g[0] : 0;
+            guint g2 = (i > 0 && j < xres) ? g[1] : 0;
+            guint g3 = (i < yres && j > 0) ? g[xres] : 0;
+            guint g4 = (i < yres && j < xres) ? g[xres + 1] : 0;
+            guint f = !!g1 + !!g2 + !!g3 + !!g4;
             if (f == 0 || f == 4)
                 continue;
 
