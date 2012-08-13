@@ -2,4 +2,4 @@ source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32
 target_prefix=$HOME/opt/gwyddion-mingw32
 python_dir=$HOME/.wine/drive_c/Python27
 mingw32_prefix=/usr/i686-w64-mingw32/sys-root/mingw
-nsis_compiler=makensis
+nsis_compiler=$HOME/.wine/drive_c/Program\ Files\ \(x86\)/NSIS/makensis.exe

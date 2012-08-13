@@ -29,5 +29,5 @@ popd
 cp -v Licenses/*.txt $target_prefix
 ./expandnsi <"$source_dir/data/gwyddion.nsit" >"$target_prefix/gwyddion.nsi"
 pushd "$target_prefix"
-$nsis_compiler gwyddion.nsi
+wine $nsis_compiler gwyddion.nsi
 popd
