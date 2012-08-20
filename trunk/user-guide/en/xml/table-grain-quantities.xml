@@ -79,6 +79,11 @@
         <entry>Area above half-height</entry>
       </row>
       <row>
+        <entry><varname>A_c</varname></entry>
+        <entry>Area</entry>
+        <entry>Area of convex hull</entry>
+      </row>
+      <row>
         <entry><varname>V_0</varname></entry>
         <entry>Volume</entry>
         <entry>Zero basis volume</entry>
@@ -117,6 +122,36 @@
         <entry><varname>phi_max</varname></entry>
         <entry>Boundary</entry>
         <entry>Maximum bounding direction</entry>
+      </row>
+      <row>
+        <entry><varname>R_i</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Maximum inscribed disc radius</entry>
+      </row>
+      <row>
+        <entry><varname>x_i</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Maximum inscribed disc centre x position</entry>
+      </row>
+      <row>
+        <entry><varname>y_i</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Maximum inscribed disc centre y position</entry>
+      </row>
+      <row>
+        <entry><varname>R_e</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Minimum circumcircle radius</entry>
+      </row>
+      <row>
+        <entry><varname>x_e</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Minimum circumcircle centre x position</entry>
+      </row>
+      <row>
+        <entry><varname>y_e</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Minimum circumcircle centre y position</entry>
       </row>
       <row>
         <entry><varname>theta</varname></entry>
