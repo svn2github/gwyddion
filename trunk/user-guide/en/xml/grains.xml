@@ -32,7 +32,13 @@
     </menuchoice> menu choice.
     Maximum height and/or size thresholding methods can be used to eliminate
     false grains occurred by noise or some dust particles, for example. You can
-    use also interactive grain removal tool for doing this manually.
+    use also interactive <link linkend='tool-remove-grains'>grain removal</link>
+    tool for doing this manually.
+  </para>
+  <para>
+    This function can also remove all grains that touch image sides which is
+    useful if such grains are considered incomplete and must be excluded from
+    analysis.
   </para>
   <sect2 id='grain-watershed'>
     <title>Watershed</title>
@@ -327,6 +333,14 @@
                 quantities</link> section for description of the surface area
               estimation method.
             </listitem>
+            <listitem>
+              <guilabel>Area of convex hull</guilabel>,
+              the projected area of grain convex hull.  The convex hull area is
+              slightly larger than the grain area even for grains that appear
+              to be fairly convex due to pixelization of the mask.  The only
+              grains with exactly the same area as their convex hulls are
+              perfectly rectangular grains.
+            </listitem>
           </itemizedlist>
         </listitem>
       </varlistentry>
@@ -364,6 +378,41 @@
               the direction of the gap from the previous item.  If the grain
               exhibits a symmetry that makes several directions to qualify,
               an arbitrary direction is chosen.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum inscribed disc radius</guilabel>,
+              the radius of maximum disc that fits inside the grain.
+              The entire full disc must fit, not just its boundary circle,
+              which matters for grains with voids within.  You can use
+              <link linkend='tool-mask-editor'>Mask Editor tool</link> to
+              fill voids in grains to get rid of voids.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum inscribed disc center x position</guilabel>,
+              the horizontal coordinate of center of the maximum inscribed
+              disc.  More precisely, of one such disc if it is not unique.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum inscribed disc center y position</guilabel>,
+              the vertical coordinate of center of the maximum inscribed
+              disc.  More precisely, of one such disc if it is not unique but
+              of the same as in the previous item.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum circumcircle radius</guilabel>,
+              the radius of minimum circle that contains the grain.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum circumcircle center x position</guilabel>,
+              the horizontal coordinate of center of the minimum
+              circumcircle.  More precisely, of one such circle if it is not
+              unique.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum circumcircle center y position</guilabel>,
+              the vertical coordinate of center of the minimum
+              circumcircle.  More precisely, of one such circle if it is not
+              unique but of the same as in the previous item.
             </listitem>
           </itemizedlist>
         </listitem>
@@ -412,15 +461,15 @@
           <itemizedlist>
             <listitem>
               <guilabel>Center x position</guilabel>,
-              the horizontal coordinate of the grain centre.  Since the
+              the horizontal coordinate of the grain center.  Since the
               grain area is defined as the area covered by the
-              corresponding mask pixels, the centre of a single-pixel grain
+              corresponding mask pixels, the center of a single-pixel grain
               has half-integer coordinates, not integer ones.  Data field
               origin offset (if any) is taken into account.
             </listitem>
             <listitem>
               <guilabel>Center y position</guilabel>,
-              the vertical coordinate of the grain centre.  See above for
+              the vertical coordinate of the grain center.  See above for
               the interpretation.
             </listitem>
           </itemizedlist>
@@ -569,6 +618,37 @@
       identically to the global curvature calculated by
       <link linkend='curvature'>Curvature</link>.  See its description for
       some discussion.
+    </para>
+    <informalfigure id='fig-grain-inscribed-exscribed'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='grain-inscribed-exscribed.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='grain-inscribed-exscribed.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Maximum inscribed disc and minimum circumcircle of a grain.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Inscribed discs and circumcircles of grains can be visualized using
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Select Inscribed Discs</guimenuitem>
+      </menuchoice>
+      and
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Select Exscribed Circles</guimenuitem>
+      </menuchoice>.
+      These functions create circular selections representing the
+      corresponding disc or circle for each grain that can be subsequently
+      displayed using <link linkend='tool-selection-manager'>Selection
+      Manager tool</link>.
     </para>
   </sect2>
   <sect2 id='grain-level'>

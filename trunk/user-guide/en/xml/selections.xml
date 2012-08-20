@@ -90,6 +90,9 @@
       </mediaobject>
     </informalfigure>
     <para>
+      Selection chosen in the list is displayed in the data window.
+    </para>
+    <para>
       It is possible to delete individual selections by choosing them in the
       list and pressing <keycode>Delete</keycode> – this is equivalent to
       clearing the selection in the corresponding tool.  The
