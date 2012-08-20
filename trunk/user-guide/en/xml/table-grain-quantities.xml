@@ -131,12 +131,12 @@
       <row>
         <entry><varname>x_i</varname></entry>
         <entry>Boundary</entry>
-        <entry>Maximum inscribed disc centre x position</entry>
+        <entry>Maximum inscribed disc center x position</entry>
       </row>
       <row>
         <entry><varname>y_i</varname></entry>
         <entry>Boundary</entry>
-        <entry>Maximum inscribed disc centre y position</entry>
+        <entry>Maximum inscribed disc center y position</entry>
       </row>
       <row>
         <entry><varname>R_e</varname></entry>
@@ -146,12 +146,12 @@
       <row>
         <entry><varname>x_e</varname></entry>
         <entry>Boundary</entry>
-        <entry>Minimum circumcircle centre x position</entry>
+        <entry>Minimum circumcircle center x position</entry>
       </row>
       <row>
         <entry><varname>y_e</varname></entry>
         <entry>Boundary</entry>
-        <entry>Minimum circumcircle centre y position</entry>
+        <entry>Minimum circumcircle center y position</entry>
       </row>
       <row>
         <entry><varname>theta</varname></entry>
