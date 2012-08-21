@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: table-grain-quantities.xml 11554 2010-11-15 10:21:37Z yeti-dn $ -->
+<!-- @(#) $Id: table-grain-quantities.xml 13709 2012-08-20 19:47:34Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <informaltable frame="none" id="table-grain-quantities">
   <tgroup cols="3">
@@ -78,6 +78,11 @@
         <entry>Площадь выше половинной высоты</entry>
       </row>
       <row>
+        <entry><varname>A_c</varname></entry>
+        <entry>Площадь</entry>
+        <entry>Площадь выпуклой оболочки</entry>
+      </row>
+      <row>
         <entry><varname>V_0</varname></entry>
         <entry>Объём</entry>
         <entry>Объём между нулевой плоскостью и поверхностью</entry>
@@ -116,6 +121,36 @@
         <entry><varname>phi_max</varname></entry>
         <entry>Граница</entry>
         <entry>Направление максимального ограничивающего размера</entry>
+      </row>
+      <row>
+        <entry><varname>R_i</varname></entry>
+        <entry>Граница</entry>
+        <entry>Максимальный радиус вписанного диска</entry>
+      </row>
+      <row>
+        <entry><varname>x_i</varname></entry>
+        <entry>Граница</entry>
+        <entry>Положение центра по x максимального вписанного диска</entry>
+      </row>
+      <row>
+        <entry><varname>y_i</varname></entry>
+        <entry>Граница</entry>
+        <entry>Положение центра по y максимального вписанного диска</entry>
+      </row>
+      <row>
+        <entry><varname>R_e</varname></entry>
+        <entry>Граница</entry>
+        <entry>Минимальный радиус описанной окружности</entry>
+      </row>
+      <row>
+        <entry><varname>x_e</varname></entry>
+        <entry>Граница</entry>
+        <entry>Положение центра по x минимальной описанной окружности</entry>
+      </row>
+      <row>
+        <entry><varname>y_e</varname></entry>
+        <entry>Граница</entry>
+        <entry>Положение центра по y минимальной описанной окружности</entry>
       </row>
       <row>
         <entry><varname>theta</varname></entry>
