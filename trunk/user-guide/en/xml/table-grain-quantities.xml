@@ -154,6 +154,11 @@
         <entry>Minimum circumcircle center y position</entry>
       </row>
       <row>
+        <entry><varname>R_m</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Mean radius</entry>
+      </row>
+      <row>
         <entry><varname>theta</varname></entry>
         <entry>Slope</entry>
         <entry>Inclination θ</entry>

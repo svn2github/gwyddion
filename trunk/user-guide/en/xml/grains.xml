@@ -414,6 +414,12 @@
               circumcircle.  More precisely, of one such circle if it is not
               unique but of the same as in the previous item.
             </listitem>
+            <listitem>
+              <guilabel>Mean radius</guilabel>,
+              the mean distance from grain center of mass to its boundary.
+              This quantity is mostly meaningful only for convex or
+              nearly-convex grains.
+            </listitem>
           </itemizedlist>
         </listitem>
       </varlistentry>
