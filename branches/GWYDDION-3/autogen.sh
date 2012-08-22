@@ -147,18 +147,23 @@ check_tool Intltool "INTLTOOLIZE" ""           $INTLTOOL_REQVER ftp://ftp.gnome.
 check_tool Libtool  "LIBTOOLIZE"  ""           $LIBTOOL_REQVER  ftp://ftp.gnu.org/pub/gnu/libtool/
 
 # XXX: Getting introspection.m4 is difficult.  Hard-depend on g-ir-devel now.
-if g-ir-scanner --help >/dev/null; then
-  echo "GObject-introspection: OK"
+if test -n "$ACLOCAL"; then
+  ac_dir="$($ACLOCAL $ACLOCAL_FLAGS --print-ac-dir)"
+  if test -s "$ac_dir/introspection.m4"; then
+    echo "GObject-introspection-devel: OK"
+  else
+    echo "ERROR: GObject-introspection-devel is required to bootstrap $project."
+    echo "       Install the appropriate package for your operating system,"
+    echo "       or get the source tarball of GObject-introspection at"
+    echo "       http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/"
+    echo "       Or complain if"
+    echo "       https://bugzilla.gnome.org/show_bug.cgi?id=615518"
+    echo "       has been reasonably fixed."
+    echo
+    DIE=1
+  fi
 else
-  echo "ERROR: GObject-introspection is required to bootstrap $project."
-  echo "       Install the appropriate package for your operating system,"
-  echo "       or get the source tarball of GObject-introspection at"
-  echo "       http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/"
-  echo "       Or complain if"
-  echo "       https://bugzilla.gnome.org/show_bug.cgi?id=615518"
-  echo "       has been reasonably fixed."
-  echo
-  DIE=1
+  echo "GObject-introspection-devel: who knows"
 fi
 
 if test "$DIE" = 1; then
