@@ -59,7 +59,7 @@ test-list.c: test-list.txt
 
 AM_CFLAGS = $(LIBGWY_DEPS_CFLAGS) $(VALGRIND_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir) $(LIBGWY_COMPAT_CPPFLAGS)
-AM_LDFLAGS = ../libgwy3.la
+AM_LDFLAGS = ../libgwy3.la $(HOST_LDFLAGS) $(LIBGWY_DEPS_LIBS)
 
 # The tests are run in the parent directory
 test:
