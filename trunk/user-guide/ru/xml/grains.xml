@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: grains.xml 13712 2012-08-20 20:43:58Z yeti-dn $ -->
+<!-- @(#) $Id: grains.xml 13727 2012-08-22 11:00:23Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="grain-analysis">
   <title>Анализ зёрен</title>
@@ -122,6 +122,7 @@
             <listitem><guilabel>Минимальный радиус описанной окружности</guilabel>, радиус минимальной окружности, целиком содержащей зерно.</listitem>
             <listitem><guilabel>Положение центра по x минимальной описанной окружности</guilabel>, горизонтальная координата центра минимальной описанной окружности. Точнее, одной такой окружности если она не уникальна.</listitem>
             <listitem><guilabel>Положение центра по y минимальной описанной окружности</guilabel>, вертикальная координата центра минимальной описанной окружности. Точнее, одной такой окружности, если их несколько, и той же, что и у предыдущего элемента.</listitem>
+            <listitem><guilabel>Средний радиус</guilabel>, среднее расстояние от центра масс зерна до его границы. Это свойство в основном имеет смысл только для выпуклых или почти выпуклых зёрен.</listitem>
           </itemizedlist>
         </listitem>
       </varlistentry>
