@@ -44,8 +44,9 @@ enum {
     NEED_MAX = 1 << 3,
     NEED_XMEAN = (1 << 4) | NEED_SIZE,
     NEED_YMEAN = (1 << 5) | NEED_SIZE,
+    NEED_CENTER = NEED_XMEAN | NEED_YMEAN,
     NEED_ZMEAN = (1 << 6) | NEED_SIZE,
-    NEED_LINEAR = (1 << 7) | NEED_ZMEAN | NEED_XMEAN | NEED_YMEAN,
+    NEED_LINEAR = (1 << 7) | NEED_ZMEAN | NEED_CENTER,
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
     NEED_VOLUME = (1 << 9),
 };
@@ -55,6 +56,33 @@ typedef struct {
     gint i;
     gint j;
 } GridPoint;
+
+// Inscribed/excrcribed disc/circle.
+typedef struct {
+    gdouble x;
+    gdouble y;
+    gdouble R2;
+    guint size;   // For candidate sorting.
+} FooscribedDisc;
+
+// Iterative algorithms that try to moving some position use NDIRECTIONS
+// directions in each quadrant; shift_directions[] lists the vectors.
+enum { NDIRECTIONS = 12 };
+
+static const gdouble shift_directions[NDIRECTIONS*2] = {
+    1.0, 0.0,
+    0.9914448613738104, 0.1305261922200516,
+    0.9659258262890683, 0.2588190451025207,
+    0.9238795325112867, 0.3826834323650898,
+    0.8660254037844387, 0.5,
+    0.7933533402912352, 0.6087614290087207,
+    0.7071067811865475, 0.7071067811865475,
+    0.6087614290087207, 0.7933533402912352,
+    0.5,                0.8660254037844387,
+    0.3826834323650898, 0.9238795325112867,
+    0.2588190451025207, 0.9659258262890683,
+    0.1305261922200517, 0.9914448613738104,
+};
 
 // Grain values that satisfy the NEEDs defined above.  G_MAXUINT means an
 // integer/non-scalar auxiliary value that does not directly correspond to any
@@ -125,6 +153,15 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Area"),
         .ident = "A_h",
         .symbol = "<i>A</i><sub>h</sub>",
+        .powerxy = 2,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CONVEX_HULL_AREA,
+        .need = NEED_MIN | NEED_MAX,
+        .name = NC_("grain value", "Area of convex hull"),
+        .group = NC_("grain value group", "Area"),
+        .ident = "A_c",
+        .symbol = "<i>A</i><sub>c</sub>",
         .powerxy = 2,
     },
     {
@@ -237,6 +274,69 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .symbol = "<i>b</i><sub>max</sub>",
         .powerz = 1,
         .fillvalue = -G_MAXDOUBLE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_R,
+        .need = NEED_CENTER,
+        .name = NC_("grain value", "Maximum inscribed disc radius"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "R_i",
+        .symbol = "<i>R</i><sub>i</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_X,
+        .need = NEED_CENTER,
+        .name = NC_("grain value", "Maximum inscribed disc center x position"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "x_i",
+        .symbol = "<i>x</i><sub>i</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_Y,
+        .need = NEED_CENTER,
+        .name = NC_("grain value", "Maximum inscribed disc center y position"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "y_i",
+        .symbol = "<i>y</i><sub>i</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CIRCUMCIRCLE_R,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Minimum circumcircle radius"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "R_e",
+        .symbol = "<i>R</i><sub>e</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CIRCUMCIRCLE_X,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Minimum circumcircle center x position"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "x_e",
+        .symbol = "<i>x</i><sub>e</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y,
+        .need = NEED_ANYBOUNDPOS,
+        .name = NC_("grain value", "Minimum circumcircle center y position"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "y_e",
+        .symbol = "<i>y</i><sub>e</sub>",
+        .powerxy = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MEAN_RADIUS,
+        .need = NEED_CENTER,
+        .name = NC_("grain value", "Mean radius"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "R_m",
+        .symbol = "<i>R</i><sub>m</sub>",
+        .powerxy = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_VOLUME_0,
@@ -1199,19 +1299,146 @@ grain_minimum_bound(const GArray *vertices,
     }
 }
 
+static gdouble
+grain_convex_hull_area(const GArray *vertices, gdouble dx, gdouble dy)
+{
+    g_return_val_if_fail(vertices->len >= 4, 0.0);
+
+    const GridPoint *a = &g_array_index(vertices, GridPoint, 0),
+                    *b = &g_array_index(vertices, GridPoint, 1),
+                    *c = &g_array_index(vertices, GridPoint, 2);
+    gdouble s = 0.0;
+
+    for (guint i = 2; i < vertices->len; i++) {
+        gdouble bx = b->j - a->j, by = b->i - a->i,
+                cx = c->j - a->j, cy = c->i - a->i;
+        s += 0.5*(bx*cy - by*cx);
+        b = c;
+        c++;
+    }
+
+    return dx*dy*s;
+}
+
+static void
+grain_convex_hull_centre(const GArray *vertices,
+                         gdouble dx, gdouble dy,
+                         gdouble *centrex, gdouble *centrey)
+{
+    g_return_if_fail(vertices->len >= 4);
+
+    const GridPoint *a = &g_array_index(vertices, GridPoint, 0),
+                    *b = &g_array_index(vertices, GridPoint, 1),
+                    *c = &g_array_index(vertices, GridPoint, 2);
+    gdouble s = 0.0, xc = 0.0, yc = 0.0;
+
+    for (guint i = 2; i < vertices->len; i++) {
+        gdouble bx = b->j - a->j, by = b->i - a->i,
+                cx = c->j - a->j, cy = c->i - a->i;
+        gdouble s1 = bx*cy - by*cx;
+        xc += s1*(a->j + b->j + c->j);
+        yc += s1*(a->i + b->i + c->i);
+        s += s1;
+        b = c;
+        c++;
+    }
+    *centrex = xc*dx/(3.0*s);
+    *centrey = yc*dy/(3.0*s);
+}
+
+static gdouble
+minimize_circle_radius(FooscribedDisc *circle,
+                       const GArray *vertices,
+                       gdouble dx, gdouble dy)
+{
+    const GridPoint *v = (const GridPoint*)vertices->data;
+    gdouble x = circle->x, y = circle->y, r2best = 0.0;
+    guint n = vertices->len;
+
+    while (n--) {
+        gdouble deltax = dx*v->j - x, deltay = dy*v->i - y;
+        gdouble r2 = deltax*deltax + deltay*deltay;
+
+        if (r2 > r2best)
+            r2best = r2;
+
+        v++;
+    }
+
+    return r2best;
+}
+
+static void
+improve_circumscribed_circle(FooscribedDisc *circle,
+                             const GArray *vertices,
+                             gdouble dx, gdouble dy)
+{
+    gdouble eps = 1.0, improvement, qgeom = sqrt(dx*dy);
+
+    do {
+        FooscribedDisc best = *circle;
+
+        improvement = 0.0;
+        for (guint i = 0; i < NDIRECTIONS; i++) {
+            FooscribedDisc cand;
+            gdouble sx = eps*qgeom*shift_directions[2*i],
+                    sy = eps*qgeom*shift_directions[2*i + 1];
+
+            cand.size = circle->size;
+
+            cand.x = circle->x + sx;
+            cand.y = circle->y + sy;
+            if ((cand.R2 = minimize_circle_radius(&cand, vertices, dx, dy))
+                < best.R2)
+                best = cand;
+
+            cand.x = circle->x - sy;
+            cand.y = circle->y + sx;
+            if ((cand.R2 = minimize_circle_radius(&cand, vertices, dx, dy))
+                < best.R2)
+                best = cand;
+
+            cand.x = circle->x - sx;
+            cand.y = circle->y - sy;
+            if ((cand.R2 = minimize_circle_radius(&cand, vertices, dx, dy))
+                < best.R2)
+                best = cand;
+
+            cand.x = circle->x + sy;
+            cand.y = circle->y - sx;
+            if ((cand.R2 = minimize_circle_radius(&cand, vertices, dx, dy))
+                < best.R2)
+                best = cand;
+        }
+        if (best.R2 < circle->R2) {
+            improvement = (best.R2 - circle->R2)/(dx*dy);
+            *circle = best;
+        }
+        else {
+            eps *= 0.5;
+        }
+    } while (eps > 1e-3 || improvement > 1e-3);
+}
+
 static void
 calc_convex_hull(GwyGrainValue *minsizegrainvalue,
                  GwyGrainValue *minanglegrainvalue,
                  GwyGrainValue *maxsizegrainvalue,
                  GwyGrainValue *maxanglegrainvalue,
+                 GwyGrainValue *chullareagrainvalue,
+                 GwyGrainValue *excircrgrainvalue,
+                 GwyGrainValue *excircxgrainvalue,
+                 GwyGrainValue *excircygrainvalue,
                  const guint *grains,
                  const guint *anyboundpos,
                  const GwyField *field)
 {
     guint ngrains;
-    gdouble *minsizevalues, *maxsizevalues, *minanglevalues, *maxanglevalues;
-    if (all_null(4, &ngrains, minsizegrainvalue, maxsizegrainvalue,
-                 minanglegrainvalue, maxanglegrainvalue)
+    gdouble *minsizevalues, *maxsizevalues, *minanglevalues, *maxanglevalues,
+            *chullareavalues, *excircrvalues, *excircxvalues, *excircyvalues;
+    if (all_null(8, &ngrains, minsizegrainvalue, maxsizegrainvalue,
+                 minanglegrainvalue, maxanglegrainvalue, chullareagrainvalue,
+                 excircrgrainvalue, excircxgrainvalue, excircygrainvalue)
         || !check_target(minsizegrainvalue, &minsizevalues,
                          GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE)
         || !check_target(maxsizegrainvalue, &maxsizevalues,
@@ -1219,7 +1446,15 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
         || !check_target(minanglegrainvalue, &minanglevalues,
                          GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE)
         || !check_target(maxanglegrainvalue, &maxanglevalues,
-                         GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE))
+                         GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE)
+        || !check_target(chullareagrainvalue, &chullareavalues,
+                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA)
+        || !check_target(excircrgrainvalue, &excircrvalues,
+                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA)
+        || !check_target(excircxgrainvalue, &excircxvalues,
+                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA)
+        || !check_target(excircygrainvalue, &excircyvalues,
+                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA))
         return;
 
     guint xres = field->xres, yres = field->yres;
@@ -1244,6 +1479,22 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
                 maxsizevalues[gno] = hypot(vx, vy);
             if (maxanglevalues)
                 maxanglevalues[gno] = gwy_standardize_direction(atan2(-vy, vx));
+        }
+        if (chullareavalues)
+            chullareavalues[gno] = grain_convex_hull_area(vertices, dx, dy);
+        if (excircrvalues || excircxvalues || excircyvalues) {
+            FooscribedDisc circle = { 0.0, 0.0, 0.0, 0 };
+
+            grain_convex_hull_centre(vertices, dx, dy, &circle.x, &circle.y);
+            circle.R2 = minimize_circle_radius(&circle, vertices, dx, dy);
+            improve_circumscribed_circle(&circle, vertices, dx, dy);
+
+            if (excircrvalues)
+                excircrvalues[gno] = sqrt(circle.R2);
+            if (excircxvalues)
+                excircxvalues[gno] = circle.x + field->xoff;
+            if (excircyvalues)
+                excircyvalues[gno] = circle.y + field->yoff;
         }
     }
 
@@ -1575,7 +1826,12 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                      ourvalues[GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE],
                      ourvalues[GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE],
                      ourvalues[GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE],
+                     ourvalues[GWY_GRAIN_VALUE_CONVEX_HULL_AREA],
+                     ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_R],
+                     ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_X],
+                     ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y],
                      grains, anyboundpos, field);
+    // TODO: mean radius, inscribed disc
     calc_volume_min(ourvalues[GWY_GRAIN_VALUE_VOLUME_MIN],
                     ourvalues[GWY_GRAIN_VALUE_MINIMUM],
                     ourvalues[GWY_GRAIN_VALUE_VOLUME_0],
@@ -1598,7 +1854,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    ourvalues[GWY_GRAIN_VALUE_MEAN],
                    sizes, linear, quadratic, field);
 
-    // NB: This must be done last because other function expect coordinates
+    // NB: This must be done last because other functions expect coordinates
     // in pixels.
     linear_transform(ourvalues[GWY_GRAIN_VALUE_CENTER_X],
                      dx, 0.5*dx + field->xoff);
