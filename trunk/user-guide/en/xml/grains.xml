@@ -405,14 +405,12 @@
             <listitem>
               <guilabel>Minimum circumcircle center x position</guilabel>,
               the horizontal coordinate of center of the minimum
-              circumcircle.  More precisely, of one such circle if it is not
-              unique.
+              circumcircle.
             </listitem>
             <listitem>
               <guilabel>Minimum circumcircle center y position</guilabel>,
               the vertical coordinate of center of the minimum
-              circumcircle.  More precisely, of one such circle if it is not
-              unique but of the same as in the previous item.
+              circumcircle.
             </listitem>
             <listitem>
               <guilabel>Mean radius</guilabel>,
