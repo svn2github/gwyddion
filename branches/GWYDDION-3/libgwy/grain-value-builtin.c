@@ -656,11 +656,11 @@ calc_maximum(GwyGrainValue *grainvalue,
 }
 
 void
-_gwy_mask_fied_grain_centre_x(gdouble *values,
-                              const guint *grains,
-                              const guint *sizes,
-                              guint ngrains,
-                              guint xres, guint yres)
+_gwy_mask_field_grain_centre_x(gdouble *values,
+                               const guint *grains,
+                               const guint *sizes,
+                               guint ngrains,
+                               guint xres, guint yres)
 {
     g_return_if_fail(sizes);
     g_return_if_fail(grains);
@@ -679,11 +679,11 @@ _gwy_mask_fied_grain_centre_x(gdouble *values,
 }
 
 void
-_gwy_mask_fied_grain_centre_y(gdouble *values,
-                              const guint *grains,
-                              const guint *sizes,
-                              guint ngrains,
-                              guint xres, guint yres)
+_gwy_mask_field_grain_centre_y(gdouble *values,
+                               const guint *grains,
+                               const guint *sizes,
+                               guint ngrains,
+                               guint xres, guint yres)
 {
     g_return_if_fail(sizes);
     g_return_if_fail(grains);
@@ -713,9 +713,9 @@ calc_centre_x(GwyGrainValue *grainvalue,
         || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_CENTER_X))
         return;
 
-    _gwy_mask_fied_grain_centre_x(values, grains, sizes,
-                                  grainvalue->priv->ngrains,
-                                  field->xres, field->yres);
+    _gwy_mask_field_grain_centre_x(values, grains, sizes,
+                                   grainvalue->priv->ngrains,
+                                   field->xres, field->yres);
 }
 
 static void
@@ -729,9 +729,9 @@ calc_centre_y(GwyGrainValue *grainvalue,
         || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
-    _gwy_mask_fied_grain_centre_y(values, grains, sizes,
-                                  grainvalue->priv->ngrains,
-                                  field->xres, field->yres);
+    _gwy_mask_field_grain_centre_y(values, grains, sizes,
+                                   grainvalue->priv->ngrains,
+                                   field->xres, field->yres);
 }
 
 static void
@@ -1991,7 +1991,7 @@ improve_inscribed_disc(FooscribedDisc *disc, EdgeList *edges, guint dist)
 }
 
 void
-_gwy_mask_fied_grain_inscribed_discs(gdouble *inscrdrvalues,
+_gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
                                      gdouble *inscrdxvalues,
                                      gdouble *inscrdyvalues,
                                      const gdouble *xvalues,
@@ -2152,12 +2152,12 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
         || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
-    _gwy_mask_fied_grain_inscribed_discs(inscrdrvalues, inscrdxvalues,
-                                         inscrdyvalues,
-                                         xvalues, yvalues,
-                                         grains, sizes, ngrains, mask,
-                                         gwy_field_dx(field),
-                                         gwy_field_dy(field));
+    _gwy_mask_field_grain_inscribed_discs(inscrdrvalues, inscrdxvalues,
+                                          inscrdyvalues,
+                                          xvalues, yvalues,
+                                          grains, sizes, ngrains, mask,
+                                          gwy_field_dx(field),
+                                          gwy_field_dy(field));
 
     if (inscrdxvalues) {
         gdouble off = field->xoff;
