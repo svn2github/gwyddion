@@ -752,7 +752,7 @@ test_grain_value_builtin_curvature_center_z(void)
 void
 test_grain_value_evaluate_multiple(void)
 {
-    enum { xres = 30, yres = 20, niter = 100 };
+    enum { xres = 30, yres = 20, niter = 200 };
     const gchar* const *names = gwy_grain_value_list_builtins();
     guint n = g_strv_length((gchar**)names);
 

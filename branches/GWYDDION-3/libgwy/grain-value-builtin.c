@@ -157,7 +157,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_CONVEX_HULL_AREA,
-        .need = NEED_MIN | NEED_MAX,
+        .need = NEED_ANYBOUNDPOS,
         .name = NC_("grain value", "Area of convex hull"),
         .group = NC_("grain value group", "Area"),
         .ident = "A_c",
@@ -1450,11 +1450,11 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
         || !check_target(chullareagrainvalue, &chullareavalues,
                          GWY_GRAIN_VALUE_CONVEX_HULL_AREA)
         || !check_target(excircrgrainvalue, &excircrvalues,
-                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA)
+                         GWY_GRAIN_VALUE_CIRCUMCIRCLE_R)
         || !check_target(excircxgrainvalue, &excircxvalues,
-                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA)
+                         GWY_GRAIN_VALUE_CIRCUMCIRCLE_X)
         || !check_target(excircygrainvalue, &excircyvalues,
-                         GWY_GRAIN_VALUE_CONVEX_HULL_AREA))
+                         GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y))
         return;
 
     guint xres = field->xres, yres = field->yres;
