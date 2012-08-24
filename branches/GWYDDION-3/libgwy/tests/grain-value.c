@@ -752,49 +752,52 @@ test_grain_value_builtin_curvature_center_z(void)
 void
 test_grain_value_evaluate_multiple(void)
 {
-    enum { xres = 30, yres = 20, niter = 200 };
+    enum { xres = 30, yres = 20, niter = 40, nmiter = 5 };
     const gchar* const *names = gwy_grain_value_list_builtins();
     guint n = g_strv_length((gchar**)names);
 
     GRand *rng = g_rand_new_with_seed(42);
-    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-    field_randomize(field, rng);
-    GwyMaskField *mask = random_mask_field(xres, yres, rng);
+    for (guint miter = 0; miter < nmiter; miter++) {
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
 
-    for (guint iter = 0; iter < niter; iter++) {
-        guint nvalues = g_rand_int_range(rng, 2, 7)
-                        + g_rand_int_range(rng, 2, 7);
-        GwyGrainValue **grainvalues = g_new(GwyGrainValue*, nvalues);
-        for (guint i = 0; i < nvalues; i++) {
-            guint id = g_rand_int_range(rng, 0, n);
-            const gchar *name = names[id];
-            //g_printerr("[%u] %u <%s> %u\n", i, id, name, n);
-            grainvalues[i] = gwy_grain_value_new(name);
-            g_assert(GWY_IS_GRAIN_VALUE(grainvalues[i]));
-            g_assert(gwy_grain_value_is_valid(grainvalues[i]));
-            g_assert_cmpstr(gwy_grain_value_get_name(grainvalues[i]), ==, name);
+        for (guint iter = 0; iter < niter; iter++) {
+            guint nvalues = g_rand_int_range(rng, 2, 7)
+                            + g_rand_int_range(rng, 2, 7);
+            GwyGrainValue **grainvalues = g_new(GwyGrainValue*, nvalues);
+            for (guint i = 0; i < nvalues; i++) {
+                guint id = g_rand_int_range(rng, 0, n);
+                const gchar *name = names[id];
+                //g_printerr("[%u] %u <%s> %u\n", i, id, name, n);
+                grainvalues[i] = gwy_grain_value_new(name);
+                g_assert(GWY_IS_GRAIN_VALUE(grainvalues[i]));
+                g_assert(gwy_grain_value_is_valid(grainvalues[i]));
+                g_assert_cmpstr(gwy_grain_value_get_name(grainvalues[i]),
+                                ==, name);
+            }
+
+            gwy_field_evaluate_grains(field, mask, grainvalues, nvalues);
+
+            for (guint i = 0; i < nvalues; i++) {
+                const gchar *name = gwy_grain_value_get_name(grainvalues[i]);
+                GwyGrainValue *grainvalue = gwy_grain_value_new(name);
+                g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
+                g_assert(gwy_grain_value_is_valid(grainvalue));
+                g_assert_cmpstr(gwy_grain_value_get_name(grainvalue), ==, name);
+                gwy_grain_value_evaluate(grainvalue, field, mask);
+                grain_value_assert_equal(grainvalues[i], grainvalue);
+                g_object_unref(grainvalue);
+            }
+
+            for (guint i = 0; i < nvalues; i++)
+                g_object_unref(grainvalues[i]);
+            g_free(grainvalues);
         }
 
-        gwy_field_evaluate_grains(field, mask, grainvalues, nvalues);
-
-        for (guint i = 0; i < nvalues; i++) {
-            const gchar *name = gwy_grain_value_get_name(grainvalues[i]);
-            GwyGrainValue *grainvalue = gwy_grain_value_new(name);
-            g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
-            g_assert(gwy_grain_value_is_valid(grainvalue));
-            g_assert_cmpstr(gwy_grain_value_get_name(grainvalue), ==, name);
-            gwy_grain_value_evaluate(grainvalue, field, mask);
-            grain_value_assert_equal(grainvalues[i], grainvalue);
-            g_object_unref(grainvalue);
-        }
-
-        for (guint i = 0; i < nvalues; i++)
-            g_object_unref(grainvalues[i]);
-        g_free(grainvalues);
+        g_object_unref(mask);
+        g_object_unref(field);
     }
-
-    g_object_unref(mask);
-    g_object_unref(field);
     g_rand_free(rng);
 }
 
