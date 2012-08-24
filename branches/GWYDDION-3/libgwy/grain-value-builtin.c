@@ -63,6 +63,21 @@ typedef struct {
     GridPoint *points;
 } GridPointList;
 
+// Edges are used for inscribed discs.
+typedef struct {
+    gdouble xa;
+    gdouble ya;
+    gdouble xb;
+    gdouble yb;
+    gdouble r2;    // Used to remember squared distance from current centre.
+} Edge;
+
+typedef struct {
+    guint size;
+    guint len;
+    Edge *edges;
+} EdgeList;
+
 // Inscribed/excrcribed disc/circle.
 typedef struct {
     gdouble x;
@@ -283,7 +298,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_R,
-        .need = NEED_CENTER,
+        .need = NEED_SIZE | NEED_CENTER,
         .name = NC_("grain value", "Maximum inscribed disc radius"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "R_i",
@@ -292,7 +307,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_X,
-        .need = NEED_CENTER,
+        .need = NEED_SIZE | NEED_CENTER,
         .name = NC_("grain value", "Maximum inscribed disc center x position"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "x_i",
@@ -301,7 +316,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_Y,
-        .need = NEED_CENTER,
+        .need = NEED_SIZE | NEED_CENTER,
         .name = NC_("grain value", "Maximum inscribed disc center y position"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "y_i",
@@ -472,6 +487,34 @@ grid_point_list_add(GridPointList *list,
     list->points[list->len].i = i;
     list->points[list->len].j = j;
     list->len++;
+}
+
+static inline void
+edge_list_add(EdgeList *list,
+              gdouble xa, gdouble ya,
+              gdouble xb, gdouble yb)
+{
+    if (G_UNLIKELY(list->len == list->size)) {
+        list->size = MAX(2*list->size, 16);
+        list->edges = g_renew(Edge, list->edges, list->size);
+    }
+
+    list->edges[list->len].xa = xa;
+    list->edges[list->len].ya = ya;
+    list->edges[list->len].xb = xb;
+    list->edges[list->len].yb = yb;
+    list->len++;
+}
+
+static guint*
+grain_maybe_realloc(guint *grain, guint w, guint h, guint *grainsize)
+{
+    if (w*h > *grainsize) {
+        g_free(grain);
+        *grainsize = w*h;
+        grain = g_new(guint, *grainsize);
+    }
+    return grain;
 }
 
 static void
@@ -1244,8 +1287,6 @@ find_grain_convex_hull(gint xres, gint yres,
  *
  * Given a list of integer convex hull vertices, return the vector between
  * the two most distance vertices.
- *
- * FIXME: This is a blatantly naive O(n^2) algorithm.
  **/
 static void
 grain_maximum_bound(const GridPointList *vertices,
@@ -1279,8 +1320,6 @@ grain_maximum_bound(const GridPointList *vertices,
  *
  * Given a list of integer convex hull vertices, return the vector
  * corresponding to the minimum linear projection.
- *
- * FIXME: This is a blatantly naive O(n^2) algorithm.
  **/
 static void
 grain_minimum_bound(const GridPointList *vertices,
@@ -1340,6 +1379,7 @@ grain_convex_hull_area(const GridPointList *vertices, gdouble dx, gdouble dy)
     return dx*dy*s;
 }
 
+// By centre we mean centre of mass of its area.
 static void
 grain_convex_hull_centre(const GridPointList *vertices,
                          gdouble dx, gdouble dy,
@@ -1522,6 +1562,553 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
     g_slice_free(GridPointList, vertices);
 }
 
+static guint*
+extract_upsampled_square_pixel_grain(const guint *grains, guint xres,
+                                     guint gno,
+                                     const GwyFieldPart *bbox,
+                                     guint *grain, guint *grainsize,
+                                     guint *widthup, guint *heightup,
+                                     gdouble dx, gdouble dy)
+{
+    guint col = bbox->col, row = bbox->row, w = bbox->width, h = bbox->height;
+    guint w2 = 2*w, h2 = 2*h;
+
+    /* Do not bother with nearly square pixels and upsample also 2×2. */
+    if (fabs(log(dy/dx)) < 0.05) {
+        grain = grain_maybe_realloc(grain, w2, h2, grainsize);
+        for (guint i = 0; i < h; i++) {
+            guint k2 = w2*(2*i);
+            guint k = (i + row)*xres + col;
+            for (guint j = 0; j < w; j++, k++, k2 += 2) {
+                guint v = (grains[k] == gno) ? G_MAXUINT : 0;
+                grain[k2] = v;
+                grain[k2+1] = v;
+                grain[k2 + w2] = v;
+                grain[k2 + w2+1] = v;
+            }
+        }
+    }
+    else if (dy < dx) {
+        /* Horizontal upsampling, precalculate index map to use in each row. */
+        w2 = gwy_round(dx/dy*w2);
+        grain = grain_maybe_realloc(grain, w2, h2, grainsize);
+        guint *indices = (guint*)g_slice_alloc(w2*sizeof(guint));
+        for (guint j = 0; j < w2; j++) {
+            gint jj = gwy_round(0.5*j*dy/dx);
+            indices[j] = CLAMP(jj, 0, (gint)w-1);
+        }
+        for (guint i = 0; i < h; i++) {
+            guint k = (i + row)*xres + col;
+            guint k2 = w2*(2*i);
+            for (guint j = 0; j < w2; j++) {
+                guint v = (grains[k + indices[j]] == gno) ? G_MAXUINT : 0;
+                grain[k2 + j] = v;
+                grain[k2 + w2 + j] = v;
+            }
+        }
+        g_slice_free1(w2*sizeof(guint), indices);
+    }
+    else {
+        /* Vertical upsampling, rows are 2× scaled copies but uneven. */
+        h2 = gwy_round(dy/dx*h2);
+        grain = grain_maybe_realloc(grain, w2, h2, grainsize);
+        for (guint i = 0; i < h2; i++) {
+            guint k, k2 = i*w2;
+            gint ii = gwy_round(0.5*i*dx/dy);
+            ii = CLAMP(ii, 0, (gint)h-1);
+            k = (ii + row)*xres + col;
+            for (guint j = 0; j < w; j++) {
+                guint v = (grains[k + j] == gno) ? G_MAXUINT : 0;
+                grain[k2 + 2*j] = v;
+                grain[k2 + 2*j + 1] = v;
+            }
+        }
+    }
+
+    *widthup = w2;
+    *heightup = h2;
+    return grain;
+}
+
+/* Init @queue with all Von Neumann-neighbourhood boundary pixels. */
+static void
+init_erosion(guint *grain,
+             guint width, guint height,
+             GridPointList *queue)
+{
+    queue->len = 0;
+    for (guint i = 0, k = 0; i < height; i++) {
+        for (guint j = 0; j < width; j++, k++) {
+            if (!grain[k])
+                continue;
+
+            if (!i || !grain[k - width]
+                || !j || !grain[k - 1]
+                || j == width-1 || !grain[k + 1]
+                || i == height-1 || !grain[k + width]) {
+                grain[k] = 1;
+                grid_point_list_add(queue, j, i);
+            }
+        }
+    }
+}
+
+static gboolean
+erode_4(guint *grain,
+        guint width, guint height,
+        guint id,
+        const GridPointList *inqueue,
+        GridPointList *outqueue)
+{
+    const GridPoint *ipt = inqueue->points;
+
+    outqueue->len = 0;
+    for (guint m = inqueue->len; m; m--, ipt++) {
+        guint i = ipt->i, j = ipt->j, k = i*width + j;
+
+        if (i && grain[k - width] == G_MAXUINT) {
+            grain[k - width] = id+1;
+            grid_point_list_add(outqueue, j, i-1);
+        }
+        if (j && grain[k - 1] == G_MAXUINT) {
+            grain[k - 1] = id+1;
+            grid_point_list_add(outqueue, j-1, i);
+        }
+        if (j < width-1 && grain[k + 1] == G_MAXUINT) {
+            grain[k + 1] = id+1;
+            grid_point_list_add(outqueue, j+1, i);
+        }
+        if (i < height-1 && grain[k + width] == G_MAXUINT) {
+            grain[k + width] = id+1;
+            grid_point_list_add(outqueue, j, i+1);
+        }
+    }
+
+    return outqueue->len;
+}
+
+static gboolean
+erode_8(guint *grain,
+        guint width, guint height,
+        guint id,
+        const GridPointList *inqueue,
+        GridPointList *outqueue)
+{
+    const GridPoint *ipt = inqueue->points;
+
+    outqueue->len = 0;
+    for (guint m = inqueue->len; m; m--, ipt++) {
+        guint i = ipt->i, j = ipt->j, k = i*width + j;
+        if (i && j && grain[k - width - 1] == G_MAXUINT) {
+            grain[k - width - 1] = id+1;
+            grid_point_list_add(outqueue, j-1, i-1);
+        }
+        if (i && grain[k - width] == G_MAXUINT) {
+            grain[k - width] = id+1;
+            grid_point_list_add(outqueue, j, i-1);
+        }
+        if (i && j < width-1 && grain[k - width + 1] == G_MAXUINT) {
+            grain[k - width + 1] = id+1;
+            grid_point_list_add(outqueue, j+1, i-1);
+        }
+        if (j && grain[k - 1] == G_MAXUINT) {
+            grain[k - 1] = id+1;
+            grid_point_list_add(outqueue, j-1, i);
+        }
+        if (j < width-1 && grain[k + 1] == G_MAXUINT) {
+            grain[k + 1] = id+1;
+            grid_point_list_add(outqueue, j+1, i);
+        }
+        if (i < height-1 && j && grain[k + width - 1] == G_MAXUINT) {
+            grain[k + width - 1] = id+1;
+            grid_point_list_add(outqueue, j-1, i+1);
+        }
+        if (i < height-1 && grain[k + width] == G_MAXUINT) {
+            grain[k + width] = id+1;
+            grid_point_list_add(outqueue, j, i+1);
+        }
+        if (i < height-1 && j < width-1 && grain[k + width + 1] == G_MAXUINT) {
+            grain[k + width + 1] = id+1;
+            grid_point_list_add(outqueue, j+1, i+1);
+        }
+    }
+
+    return outqueue->len;
+}
+
+static gint
+compare_candidates(gconstpointer a,
+                   gconstpointer b)
+{
+    const FooscribedDisc *da = (const FooscribedDisc*)a;
+    const FooscribedDisc *db = (const FooscribedDisc*)b;
+
+    if (da->size < db->size)
+        return -1;
+    if (da->size > db->size)
+        return 1;
+
+    if (da->R2 < db->R2)
+        return -1;
+    if (da->R2 > db->R2)
+        return 1;
+
+    return 0;
+}
+
+static void
+find_disc_centre_candidates(GArray *candidates,
+                            GridPointList *inqueue,
+                            gdouble dx, gdouble dy,
+                            gdouble centrex, gdouble centrey)
+{
+    /* Grain numbering for sparse areas, we reorder inqueue to contiguous
+     * blocks, each getting the area number in candareas[]. */
+    guint start = 0, end = 1;
+
+    g_array_set_size(candidates, 0);
+    for (guint m = 0; m < inqueue->len; m++) {
+        GridPoint *mpt = inqueue->points + m;
+        guint i = mpt->i, j = mpt->j;
+
+        for (guint n = end; n < inqueue->len; n++) {
+            GridPoint *npt = inqueue->points + n;
+            guint ii = npt->i, jj = npt->j;
+
+            if ((ii == i && (jj == j+1 || jj+1 == j))
+                || (jj == j && (ii == i+1 || ii+1 == i))) {
+                if (n != end)
+                    GWY_SWAP(GridPoint, inqueue->points[end], *npt);
+                end++;
+            }
+        }
+
+        if (end == m+1 || end == inqueue->len) {
+            FooscribedDisc cand = { 0.0, 0.0, 0.0, 0 };
+            const GridPoint *npt = inqueue->points + start;
+
+            for (guint n = end - start; n; n--, npt++) {
+                cand.x += npt->j;
+                cand.y += npt->i;
+                cand.size++;
+            }
+            cand.x = (cand.x/cand.size + 0.5)*dx;
+            cand.y = (cand.y/cand.size + 0.5)*dy;
+            /* Use R2 temporarily for distance from the entire grain centre;
+             * this is only for sorting below. */
+            cand.R2 = ((cand.x - centrex)*(cand.x - centrex)
+                        + (cand.y - centrey)*(cand.y - centrey));
+            g_array_append_val(candidates, cand);
+            if (end == inqueue->len)
+                break;
+            start = end;
+            end++;
+        }
+    }
+
+    g_array_sort(candidates, &compare_candidates);
+}
+
+static void
+find_all_edges(EdgeList *edges,
+               const guint *grains, guint xres,
+               guint gno, const GwyFieldPart *bbox,
+               gdouble dx, gdouble dy)
+{
+    guint col = bbox->col, row = bbox->row, w = bbox->width, h = bbox->height;
+    guint *vertices = g_slice_alloc((w + 1)*sizeof(guint));
+
+    memset(vertices, 0xff, sizeof(guint)*(w + 1));
+    edges->len = 0;
+    for (guint i = 0; i <= h; i++) {
+        guint k = (i + row)*xres + col;
+        guint vertex = G_MAXUINT;
+
+        for (guint j = 0; j <= w; j++, k++) {
+            /*
+             * 1 2
+             * 3 4
+             */
+            guint g0 = i && j && grains[k - xres - 1] == gno;
+            guint g1 = i && j < w && grains[k - xres] == gno;
+            guint g2 = i < h && j && grains[k - 1] == gno;
+            guint g3 = i < h && j < w && grains[k] == gno;
+            guint g = g0 | (g1 << 1) | (g2 << 2) | (g3 << 3);
+
+            if (g == 8 || g == 7) {
+                vertex = j;
+                vertices[j] = i;
+            }
+            else if (g == 2 || g == 13) {
+                edge_list_add(edges, dx*j, dy*vertices[j], dx*j, dy*i);
+                vertex = j;
+                vertices[j] = G_MAXUINT;
+            }
+            else if (g == 4 || g == 11) {
+                edge_list_add(edges, dx*vertex, dy*i, dx*j, dy*i);
+                vertex = G_MAXUINT;
+                vertices[j] = i;
+            }
+            else if (g == 1 || g == 14) {
+                edge_list_add(edges, dx*vertex, dy*i, dx*j, dy*i);
+                edge_list_add(edges, dx*j, dy*vertices[j], dx*j, dy*i);
+                vertex = G_MAXUINT;
+                vertices[j] = G_MAXUINT;
+            }
+            else if (g == 6 || g == 9) {
+                edge_list_add(edges, dx*vertex, dy*i, dx*j, dy*i);
+                edge_list_add(edges, dx*j, dy*vertices[j], dx*j, dy*i);
+                vertex = j;
+                vertices[j] = i;
+            }
+        }
+    }
+
+    g_slice_free1((w + 1)*sizeof(guint), vertices);
+}
+
+static gdouble
+maximize_disc_radius(FooscribedDisc *disc, Edge *edges, guint n)
+{
+    gdouble x = disc->x, y = disc->y, r2best = HUGE_VAL;
+
+    while (n--) {
+        gdouble rax = edges->xa - x, ray = edges->ya - y,
+                rbx = edges->xb - x, rby = edges->yb - y,
+                deltax = edges->xb - edges->xa, deltay = edges->yb - edges->ya;
+        gdouble ca = -(deltax*rax + deltay*ray),
+                cb = deltax*rbx + deltay*rby;
+
+        if (ca <= 0.0)
+            edges->r2 = rax*rax + ray*ray;
+        else if (cb <= 0.0)
+            edges->r2 = rbx*rbx + rby*rby;
+        else {
+            gdouble tx = cb*rax + ca*rbx, ty = cb*ray + ca*rby, D = ca + cb;
+            edges->r2 = (tx*tx + ty*ty)/(D*D);
+        }
+
+        if (edges->r2 < r2best)
+            r2best = edges->r2;
+        edges++;
+    }
+
+    return r2best;
+}
+
+static guint
+filter_relevant_edges(EdgeList *edges, gdouble r2, gdouble eps)
+{
+    Edge *edge = edges->edges, *enear = edges->edges;
+    gdouble limitr = sqrt(r2) + 4.0*eps + 0.5, limit = limitr*limitr;
+
+    for (guint i = edges->len; i; i--, edge++) {
+        if (edge->r2 <= limit) {
+            if (edge != enear)
+                GWY_SWAP(Edge, *edge, *enear);
+            enear++;
+        }
+    }
+
+    return enear - edges->edges;
+}
+
+static void
+improve_inscribed_disc(FooscribedDisc *disc, EdgeList *edges, guint dist)
+{
+    gdouble eps = 0.5 + 0.25*(dist > 4) + 0.25*(dist > 16), improvement;
+
+    do {
+        disc->R2 = maximize_disc_radius(disc, edges->edges, edges->len);
+        FooscribedDisc best = *disc;
+        guint nr = filter_relevant_edges(edges, best.R2, eps);
+
+        improvement = 0.0;
+        for (guint i = 0; i < NDIRECTIONS; i++) {
+            FooscribedDisc cand = { .size = disc->size };
+            gdouble sx = eps*shift_directions[2*i],
+                    sy = eps*shift_directions[2*i + 1];
+
+            cand.x = disc->x + sx;
+            cand.y = disc->y + sy;
+            if ((cand.R2 = maximize_disc_radius(&cand, edges->edges, nr))
+                > best.R2)
+                best = cand;
+
+            cand.x = disc->x - sy;
+            cand.y = disc->y + sx;
+            if ((cand.R2 = maximize_disc_radius(&cand, edges->edges, nr))
+                > best.R2)
+                best = cand;
+
+            cand.x = disc->x - sx;
+            cand.y = disc->y - sy;
+            if ((cand.R2 = maximize_disc_radius(&cand, edges->edges, nr))
+                > best.R2)
+                best = cand;
+
+            cand.x = disc->x + sy;
+            cand.y = disc->y - sx;
+            if ((cand.R2 = maximize_disc_radius(&cand, edges->edges, nr))
+                > best.R2)
+                best = cand;
+        }
+
+        if (best.R2 > disc->R2) {
+            improvement = sqrt(best.R2) - sqrt(disc->R2);
+            *disc = best;
+        }
+        else {
+            eps *= 0.5;
+        }
+    } while (eps > 1e-3 || improvement > 1e-3);
+}
+
+static void
+calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
+                    GwyGrainValue *inscrdxgrainvalue,
+                    GwyGrainValue *inscrdygrainvalue,
+                    const GwyGrainValue *xgrainvalue,
+                    const GwyGrainValue *ygrainvalue,
+                    const guint *grains,
+                    const guint *sizes,
+                    const GwyMaskField *mask,
+                    const GwyField *field)
+{
+    guint ngrains;
+    const gdouble *xvalues, *yvalues;
+    gdouble *inscrdrvalues, *inscrdxvalues, *inscrdyvalues;
+    if (all_null(3, &ngrains,
+                 inscrdrgrainvalue, inscrdxgrainvalue, inscrdygrainvalue)
+        || !check_target(inscrdrgrainvalue, &inscrdrvalues,
+                         GWY_GRAIN_VALUE_INSCRIBED_DISC_R)
+        || !check_target(inscrdxgrainvalue, &inscrdxvalues,
+                         GWY_GRAIN_VALUE_INSCRIBED_DISC_X)
+        || !check_target(inscrdygrainvalue, &inscrdyvalues,
+                         GWY_GRAIN_VALUE_INSCRIBED_DISC_Y)
+        || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
+        return;
+
+    const GwyFieldPart *bbox = gwy_mask_field_grain_bounding_boxes(mask);
+    guint xres = mask->xres;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field),
+            qgeom = sqrt(dx*dy);
+
+    guint *grain = NULL;
+    guint grainsize = 0;
+    GridPointList *inqueue = g_slice_new0(GridPointList);
+    GridPointList *outqueue = g_slice_new0(GridPointList);
+    GArray *candidates = g_array_new(FALSE, FALSE, sizeof(FooscribedDisc));
+    EdgeList edges = { 0, 0, NULL };
+    FooscribedDisc *cand;
+
+    /*
+     * For each grain:
+     *    Extract it, find all boundary pixels.
+     *    Use (octagnoal) erosion to find disc centre candidate(s).
+     *    For each candidate:
+     *       Find maximum disc that fits with this centre.
+     *       By expanding/moving try to find a larger disc until we cannot
+     *       improve it.
+     */
+    for (guint gno = 1; gno <= ngrains; gno++) {
+        guint w = bbox[gno].width, h = bbox[gno].height;
+        gdouble xoff = dx*bbox[gno].col + field->xoff,
+                yoff = dy*bbox[gno].row + field->yoff;
+
+        /* If the grain is rectangular, calculate the disc directly.
+         * Large rectangular grains are rare but the point is to catch
+         * grains with width of height of 1 here. */
+        if (sizes[gno] == w*h) {
+            gdouble sdx = 0.5*w*dx, sdy = 0.5*h*dy;
+            if (inscrdrvalues)
+                inscrdrvalues[gno] = 0.999999*MIN(sdx, sdy);
+            if (inscrdxvalues)
+                inscrdxvalues[gno] = sdx + xoff;
+            if (inscrdyvalues)
+                inscrdyvalues[gno] = sdy + yoff;
+            continue;
+        }
+
+        /* Upsampling twice combined with octagonal erosion has the nice
+         * property that we get candidate pixels in places such as corners
+         * or junctions of one-pixel thin lines. */
+        guint width, height;
+        grain = extract_upsampled_square_pixel_grain(grains, xres, gno,
+                                                     bbox + gno,
+                                                     grain, &grainsize,
+                                                     &width, &height,
+                                                     dx, dy);
+        /* Size of upsamples pixel in original squeezed pixel coordinates.
+         * Normally equal to 1/2 and always approximately 1:1. */
+        gdouble sdx = w*(dx/qgeom)/width;
+        gdouble sdy = h*(dy/qgeom)/height;
+        /* Grain centre in squeezed pixel coordinates within the bbox. */
+        gdouble centrex = (xvalues[gno] + 0.5)*(dx/qgeom);
+        gdouble centrey = (yvalues[gno] + 0.5)*(dy/qgeom);
+
+        guint dist = 1;
+        init_erosion(grain, width, height, inqueue);
+        while (TRUE) {
+            if (!erode_8(grain, width, height, dist, inqueue, outqueue))
+                break;
+            GWY_SWAP(GridPointList*, inqueue, outqueue);
+            dist++;
+
+            if (!erode_4(grain, width, height, dist, inqueue, outqueue))
+                break;
+            GWY_SWAP(GridPointList*, inqueue, outqueue);
+            dist++;
+        }
+#if 0
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                if (!grain[i*width + j])
+                    g_printerr("..");
+                else
+                    g_printerr("%02u", grain[i*width + j]);
+                g_printerr("%c", j == width-1 ? '\n' : ' ');
+            }
+        }
+#endif
+        /* Now inqueue is always non-empty and contains max-distance
+         * pixels of the upscaled grain. */
+        find_disc_centre_candidates(candidates, inqueue, sdx, sdy,
+                                    centrex, centrey);
+        find_all_edges(&edges, grains, xres, gno, bbox + gno,
+                       dx/qgeom, dy/qgeom);
+
+        /* Try a few first candidates for the inscribed disc centre. */
+        guint ncand = MIN(7, candidates->len);
+        for (guint i = 0; i < ncand; i++) {
+            cand = &g_array_index(candidates, FooscribedDisc, i);
+            improve_inscribed_disc(cand, &edges, dist);
+        }
+
+        cand = &g_array_index(candidates, FooscribedDisc, 0);
+        for (guint i = 1; i < ncand; i++) {
+            if (g_array_index(candidates, FooscribedDisc, i).R2 > cand->R2)
+                cand = &g_array_index(candidates, FooscribedDisc, i);
+        }
+
+        if (inscrdrvalues)
+            inscrdrvalues[gno] = sqrt(cand->R2)*qgeom;
+        if (inscrdxvalues)
+            inscrdxvalues[gno] = cand->x*qgeom + xoff;
+        if (inscrdyvalues)
+            inscrdyvalues[gno] = cand->y*qgeom + yoff;
+    }
+
+    g_free(grain);
+    g_free(inqueue->points);
+    g_free(outqueue->points);
+    g_slice_free(GridPointList, inqueue);
+    g_slice_free(GridPointList, outqueue);
+    g_free(edges.edges);
+    g_array_free(candidates, TRUE);
+}
+
 static void
 calc_mean_radius(GwyGrainValue *grainvalue,
                  const GwyGrainValue *xgrainvalue,
@@ -1530,11 +2117,11 @@ calc_mean_radius(GwyGrainValue *grainvalue,
                  const GwyField *field)
 {
     gdouble *values;
-    const gdouble *x, *y;
+    const gdouble *xvalues, *yvalues;
     if (!grainvalue
         || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_MEAN_RADIUS)
-        || !check_dependence(xgrainvalue, &x, GWY_GRAIN_VALUE_CENTER_X)
-        || !check_dependence(ygrainvalue, &y, GWY_GRAIN_VALUE_CENTER_Y))
+        || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
     guint xres = field->xres, yres = field->yres;
@@ -1549,7 +2136,7 @@ calc_mean_radius(GwyGrainValue *grainvalue,
             if (!gno)
                 continue;
 
-            gdouble xc = x[gno], yc = y[gno];
+            gdouble xc = xvalues[gno], yc = yvalues[gno];
             if (!i || !grains[k - xres]) {
                 values[gno] += hypot(dx*(j+0.5 - xc), dy*(i - yc));
                 values[gno] += hypot(dx*(j+1 - xc), dy*(i - yc));
@@ -1839,8 +2426,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     guint *anyboundpos = NULL;
     if ((need & NEED_ANYBOUNDPOS) == NEED_ANYBOUNDPOS) {
         anyboundpos = g_new(guint, ngrains + 1);
-        for (guint i = 0; i <= ngrains; i++)
-            anyboundpos[i] = G_MAXUINT;
+        memset(anyboundpos, 0xff, (ngrains + 1)*sizeof(guint));
     }
 
     // Floating point data that coincide with some grain value.  If it is
@@ -1909,11 +2495,16 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                      ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_X],
                      ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y],
                      grains, anyboundpos, field);
+    calc_inscribed_disc(ourvalues[GWY_GRAIN_VALUE_INSCRIBED_DISC_R],
+                        ourvalues[GWY_GRAIN_VALUE_INSCRIBED_DISC_X],
+                        ourvalues[GWY_GRAIN_VALUE_INSCRIBED_DISC_Y],
+                        ourvalues[GWY_GRAIN_VALUE_CENTER_X],
+                        ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
+                        grains, sizes, mask, field);
     calc_mean_radius(ourvalues[GWY_GRAIN_VALUE_MEAN_RADIUS],
                      ourvalues[GWY_GRAIN_VALUE_CENTER_X],
                      ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                      grains, field);
-    // TODO: inscribed disc
     calc_volume_min(ourvalues[GWY_GRAIN_VALUE_VOLUME_MIN],
                     ourvalues[GWY_GRAIN_VALUE_MINIMUM],
                     ourvalues[GWY_GRAIN_VALUE_VOLUME_0],
