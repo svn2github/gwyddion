@@ -22,6 +22,7 @@
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/mask-field-internal.h"
+#include "libgwy/grain-value-builtin.h"
 
 static inline guint32*
 ensure_map(guint max_no, guint *map, guint *mapsize)
@@ -265,245 +266,38 @@ gwy_mask_field_grain_bounding_boxes(const GwyMaskField *field)
 static GwyXY*
 find_grain_positions(const GwyMaskField *field)
 {
-    guint xres = field->xres, yres = field->yres;
-    guint ngrains = gwy_mask_field_n_grains(field);
     const guint *grains = gwy_mask_field_grain_numbers(field);
     const guint *sizes = gwy_mask_field_grain_sizes(field);
-    GwyXY *centres = g_new0(GwyXY, ngrains+1);
-    const guint *g = grains;
+    MaskField *priv = field->priv;
+    guint ngrains = priv->ngrains;
+    guint xres = field->xres, yres = field->yres;
+    guint memsize = (ngrains + 1)*sizeof(guint);
 
-    //if (xres == 1 || yres == 1) {
-        for (guint i = 0; i < yres; i++) {
-            for (guint j = 0; j < xres; j++, g++) {
-                guint grain_id = *g;
-                centres[grain_id].x += j;
-                centres[grain_id].y += i;
-            }
-        }
-        centres[0].x = centres[0].y = NAN;
-        for (guint k = 1; k <= ngrains; k++) {
-            centres[k].x /= sizes[k];
-            centres[k].y /= sizes[k];
-        }
-        return centres;
-    //}
+    gdouble *xc = g_slice_alloc0(memsize),
+            *yc = g_slice_alloc0(memsize),
+            *inscrdx = g_slice_alloc(memsize),
+            *inscrdy = g_slice_alloc(memsize);
 
-    // FIXME: This needs some rethinking.  All proper methods seem terribly
-    // slow.
-#if 0
-    guint *levels = g_new0(guint, 2*xres*yres),
-          *todo = levels + xres*yres,
-          *new_todo = todo + xres*yres/2;
+    _gwy_mask_field_grain_centre_x(xc, grains, sizes, ngrains, xres, yres);
+    _gwy_mask_field_grain_centre_x(yc, grains, sizes, ngrains, xres, yres);
+    // Use 1.0 for pixel size.  This is sufficient even if the mask field is
+    // displayed with non-1:1 pixel aspect ratio.
+    _gwy_mask_field_grain_inscribed_discs(NULL, inscrdx, inscrdy, xc, yc,
+                                          grains, sizes, ngrains, field,
+                                          1.0, 1.0);
 
-    guint *l = levels;
-    guint todopos = 0, todofrom = 0, k = 0;
-    guint grain_id;
-
-    // Locate the boundary.
-    // The trick here is to avoid ever adding boundary points to todo.  Then
-    // the subsequent iterations never touch the boundaries and we do not have
-    // to check for it at all.
-
-    // Top row.
-    if ((grain_id = *g)) {
-        centres[grain_id].x += 0;
-        centres[grain_id].y += 0;
-        *l = 1;
-        guint right_id = *(g + 1), lower_id = *(g + xres);
-        if (right_id && !*(l + 1))
-            *(l + 1) = 2;
-        if (lower_id && !*(l + xres))
-            *(l + xres) = 2;
-    }
-    g++, l++, k++;
-    for (guint j = 1; j < xres-1; j++, g++, l++, k++) {
-        if ((grain_id = *g)) {
-            centres[grain_id].x += j;
-            centres[grain_id].y += 0;
-            *l = 1;
-            guint left_id = *(g - 1), right_id = *(g + 1),
-                  lower_id = *(g + xres);
-            if (left_id && !*(l - 1))
-                *(l - 1) = 2;
-            if (right_id && !*(l + 1))
-                *(l + 1) = 2;
-            if (lower_id && !*(l + xres)) {
-                *(l + xres) = 2;
-                if (yres > 2)
-                    todo[todopos++] = k + xres;
-            }
-        }
-    }
-    if ((grain_id = *g)) {
-        centres[grain_id].x += xres-1;
-        centres[grain_id].y += 0;
-        *l = 1;
-        guint left_id = *(g - 1), lower_id = *(g + xres);
-        if (left_id && !*(l - 1))
-            *(l - 1) = 2;
-        if (lower_id && !*(l + xres))
-            *(l + xres) = 2;
-    }
-    g++, l++, k++;
-
-    // Middle rows.
-    for (guint i = 1; i < yres-1; i++) {
-        if ((grain_id = *g)) {
-            centres[grain_id].x += 0;
-            centres[grain_id].y += i;
-            *l = 1;
-            guint upper_id = *(g - xres), right_id = *(g + 1),
-                  lower_id = *(g + xres);
-            if (upper_id && !*(l - xres))
-                *(l - xres) = 2;
-            if (right_id && !*(l + 1)) {
-                *(l + 1) = 2;
-                if (xres > 2)
-                    todo[todopos++] = k + 1;
-            }
-            if (lower_id && !*(l + xres))
-                *(l + xres) = 2;
-        }
-        g++, l++, k++;
-
-        for (guint j = 1; j < xres-1; j++, g++, l++, k++) {
-            if ((grain_id = *g)) {
-                centres[grain_id].x += j;
-                centres[grain_id].y += i;
-                guint upper_id = *(g - xres), left_id = *(g - 1),
-                      right_id = *(g + 1), lower_id = *(g + xres);
-                if (!(upper_id | left_id | right_id | lower_id)) {
-                    *l = 1;
-                    if (upper_id && !*(l - xres)) {
-                        *(l - xres) = 2;
-                        if (i > 1)
-                            todo[todopos++] = k - xres;
-                    }
-                    if (left_id && !*(l - 1)) {
-                        *(l - 1) = 2;
-                        if (j > 1)
-                            todo[todopos++] = k - 1;
-                    }
-                    if (right_id && !*(l + 1)) {
-                        *(l + 1) = 2;
-                        if (j < xres-2)
-                            todo[todopos++] = k + 1;
-                    }
-                    if (lower_id && !*(l + xres)) {
-                        *(l + xres) = 2;
-                        if (i < yres-2)
-                            todo[todopos++] = k + xres;
-                    }
-                }
-            }
-        }
-
-        if ((grain_id = *g)) {
-            centres[grain_id].x += xres-1;
-            centres[grain_id].y += i;
-            *l = 1;
-            guint upper_id = *(g - xres), left_id = *(g - 1),
-                  lower_id = *(g + xres);
-                if (upper_id && !*(l - xres))
-                    *(l - xres) = 2;
-                if (left_id && !*(l - 1)) {
-                    *(l - 1) = 2;
-                    if (xres > 2)
-                        todo[todopos++] = k - 1;
-                }
-                if (lower_id && !*(l + xres))
-                    *(l + xres) = 2;
-        }
-        g++, l++, k++;
+    GwyXY *centres = g_new(GwyXY, ngrains+1);
+    for (guint i = 1; i <= ngrains; i++) {
+        centres[i].x = inscrdx[i];
+        centres[i].y = inscrdy[i];
     }
 
-    // Bottom row.
-    if ((grain_id = *g)) {
-        centres[grain_id].x += 0;
-        centres[grain_id].y += yres-1;
-        *l = 1;
-        guint right_id = *(g + 1), upper_id = *(g - xres);
-        if (upper_id && !*(l - xres))
-            *(l - xres) = 2;
-        if (right_id && !*(l + 1))
-            *(l + 1) = 2;
-    }
-    g++, l++, k++;
-    for (guint j = 1; j < xres-1; j++, g++, l++, k++) {
-        if ((grain_id = *g)) {
-            centres[grain_id].x += j;
-            centres[grain_id].y += yres-1;
-            *l = 1;
-            guint left_id = *(g - 1), right_id = *(g + 1),
-                  upper_id = *(g - xres);
-            if (upper_id && !*(l - xres)) {
-                *(l - xres) = 2;
-                if (yres > 2)
-                    todo[todopos++] = k - xres;
-            }
-            if (left_id && !*(l - 1))
-                *(l - 1) = 2;
-            if (right_id && !*(l + 1))
-                *(l + 1) = 2;
-        }
-    }
-    if ((grain_id = *g)) {
-        centres[grain_id].x += xres-1;
-        centres[grain_id].y += yres-1;
-        *l = 1;
-        guint left_id = *(g - 1), upper_id = *(g - xres);
-        if (upper_id && !*(l - xres))
-            *(l - xres) = 2;
-        if (left_id && !*(l - 1))
-            *(l - 1) = 2;
-    }
-    g++, l++, k++;
-    g_assert(todopos <= xres*yres/2);
+    g_slice_free1(memsize, xc);
+    g_slice_free1(memsize, yc);
+    g_slice_free1(memsize, inscrdx);
+    g_slice_free1(memsize, inscrdy);
 
-    for (guint k = 0; k <= ngrains; k++) {
-        centres[k].x /= sizes[k];
-        centres[k].y /= sizes[k];
-    }
-
-    // Fill the insides by stages.
-    guint level = 3;
-    while (todopos) {
-        guint n = todopos;
-        todopos = 0;
-        for (guint m = 0; m < n; m++) {
-            k = todo[m];
-            g = grains + k;
-            l = levels + k;
-            if (*(g - xres) && !*(l - xres)) {
-                *(l - xres) = level;
-                new_todo[todopos++] = k - xres;
-            }
-            if (*(g - 1) && !*(l - 1)) {
-                *(l - 1) = level;
-                new_todo[todopos++] = k - 1;
-            }
-            if (*(g + 1) && !*(l + 1)) {
-                *(l + 1) = level;
-                new_todo[todopos++] = k + 1;
-            }
-            if (*(g + xres) && !*(l + xres)) {
-                *(l + xres) = level;
-                new_todo[todopos++] = k + xres;
-            }
-        }
-        level++;
-        GWY_SWAP(guint*, todo, new_todo);
-        g_assert(todopos <= xres*yres/2);
-    }
-
-    // For each grain, find the max-level pixel that is closest to the centre.
-    GwyXY *visual_centres = g_new0(GwyXY, ngrains+1);
-
-    g_free(levels);
-    g_free(centres);
-
-    return visual_centres;
-#endif
+    return centres;
 }
 
 /**
@@ -516,7 +310,9 @@ find_grain_positions(const GwyMaskField *field)
  *
  * The returned positions should be suitable for drawing a marker, for instance
  * the grain number, in a visual representation of the field.  They may not
- * have any direct relation to grain mass centres and similar quantities.
+ * have any direct relation to grain mass centres and similar quantities.  The
+ * positions are in pixel coordinates, i.e. zeroes corresponding to left and
+ * top edges of the field while @xres and @yres to the right and bottom edges.
  *
  * Returns: (transfer none):
  *          Array of @ngrains+1 grain bounding boxes.  The returned array is
