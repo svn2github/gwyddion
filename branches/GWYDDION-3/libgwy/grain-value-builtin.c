@@ -1523,6 +1523,63 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
 }
 
 static void
+calc_mean_radius(GwyGrainValue *grainvalue,
+                 const GwyGrainValue *xgrainvalue,
+                 const GwyGrainValue *ygrainvalue,
+                 const guint *grains,
+                 const GwyField *field)
+{
+    gdouble *values;
+    const gdouble *x, *y;
+    if (!grainvalue
+        || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_MEAN_RADIUS)
+        || !check_dependence(xgrainvalue, &x, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &y, GWY_GRAIN_VALUE_CENTER_Y))
+        return;
+
+    guint xres = field->xres, yres = field->yres;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    guint ngrains = grainvalue->priv->ngrains;
+    guint *blen = g_new0(guint, ngrains+1);
+
+    for (guint i = 0, k = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            guint gno = grains[k];
+
+            if (!gno)
+                continue;
+
+            gdouble xc = x[gno], yc = y[gno];
+            if (!i || !grains[k - xres]) {
+                values[gno] += hypot(dx*(j+0.5 - xc), dy*(i - yc));
+                values[gno] += hypot(dx*(j+1 - xc), dy*(i - yc));
+                blen[gno]++;
+            }
+            if (!j || !grains[k-1]) {
+                values[gno] += hypot(dx*(j - xc), dy*(i - yc));
+                values[gno] += hypot(dx*(j - xc), dy*(i+0.5 - yc));
+                blen[gno]++;
+            }
+            if (j == xres-1 || !grains[k+1]) {
+                values[gno] += hypot(dx*(j+1 - xc), dy*(i+0.5 - yc));
+                values[gno] += hypot(dx*(j+1 - xc), dy*(i+1 - yc));
+                blen[gno]++;
+            }
+            if (i == yres-1 || !grains[k + xres]) {
+                values[gno] += hypot(dx*(j - xc), dy*(i+1 - yc));
+                values[gno] += hypot(dx*(j+0.5 - xc), dy*(i+1 - yc));
+                blen[gno]++;
+            }
+        }
+    }
+
+    for (guint gno = 1; gno <= ngrains; gno++)
+        values[gno] /= 2*blen[gno];
+
+    g_free(blen);
+}
+
+static void
 calc_volume_min(GwyGrainValue *grainvalue,
                 const GwyGrainValue *mingrainvalue,
                 const GwyGrainValue *v0grainvalue,
@@ -1852,7 +1909,11 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                      ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_X],
                      ourvalues[GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y],
                      grains, anyboundpos, field);
-    // TODO: mean radius, inscribed disc
+    calc_mean_radius(ourvalues[GWY_GRAIN_VALUE_MEAN_RADIUS],
+                     ourvalues[GWY_GRAIN_VALUE_CENTER_X],
+                     ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
+                     grains, field);
+    // TODO: inscribed disc
     calc_volume_min(ourvalues[GWY_GRAIN_VALUE_VOLUME_MIN],
                     ourvalues[GWY_GRAIN_VALUE_MINIMUM],
                     ourvalues[GWY_GRAIN_VALUE_VOLUME_0],
