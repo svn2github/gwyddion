@@ -655,6 +655,52 @@ calc_maximum(GwyGrainValue *grainvalue,
     }
 }
 
+void
+_gwy_mask_fied_grain_centre_x(gdouble *values,
+                              const guint *grains,
+                              const guint *sizes,
+                              guint ngrains,
+                              guint xres, guint yres)
+{
+    g_return_if_fail(sizes);
+    g_return_if_fail(grains);
+    g_return_if_fail(values);
+
+    const guint *g = grains;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            guint gno = *g;
+            values[gno] += j;
+        }
+    }
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] /= sizes[gno];
+}
+
+void
+_gwy_mask_fied_grain_centre_y(gdouble *values,
+                              const guint *grains,
+                              const guint *sizes,
+                              guint ngrains,
+                              guint xres, guint yres)
+{
+    g_return_if_fail(sizes);
+    g_return_if_fail(grains);
+    g_return_if_fail(values);
+
+    const guint *g = grains;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            guint gno = *g;
+            values[gno] += i;
+        }
+    }
+    for (guint gno = 0; gno <= ngrains; gno++)
+        values[gno] /= sizes[gno];
+}
+
 // Note all coordinates are pixel-wise, not real.
 static void
 calc_centre_x(GwyGrainValue *grainvalue,
@@ -667,19 +713,9 @@ calc_centre_x(GwyGrainValue *grainvalue,
         || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_CENTER_X))
         return;
 
-    g_return_if_fail(sizes);
-    guint xres = field->xres, yres = field->yres;
-    guint ngrains = grainvalue->priv->ngrains;
-    const guint *g = grains;
-
-    for (guint i = 0; i < yres; i++) {
-        for (guint j = 0; j < xres; j++, g++) {
-            guint gno = *g;
-            values[gno] += j;
-        }
-    }
-    for (guint gno = 0; gno <= ngrains; gno++)
-        values[gno] /= sizes[gno];
+    _gwy_mask_fied_grain_centre_x(values, grains, sizes,
+                                  grainvalue->priv->ngrains,
+                                  field->xres, field->yres);
 }
 
 static void
@@ -693,19 +729,9 @@ calc_centre_y(GwyGrainValue *grainvalue,
         || !check_target(grainvalue, &values, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
-    g_return_if_fail(sizes);
-    guint xres = field->xres, yres = field->yres;
-    guint ngrains = grainvalue->priv->ngrains;
-    const guint *g = grains;
-
-    for (guint i = 0; i < yres; i++) {
-        for (guint j = 0; j < xres; j++, g++) {
-            guint gno = *g;
-            values[gno] += i;
-        }
-    }
-    for (guint gno = 0; gno <= ngrains; gno++)
-        values[gno] /= sizes[gno];
+    _gwy_mask_fied_grain_centre_y(values, grains, sizes,
+                                  grainvalue->priv->ngrains,
+                                  field->xres, field->yres);
 }
 
 static void
@@ -1976,6 +2002,13 @@ _gwy_mask_fied_grain_inscribed_discs(gdouble *inscrdrvalues,
                                      const GwyMaskField *mask,
                                      gdouble dx, gdouble dy)
 {
+    g_return_if_fail(grains);
+    g_return_if_fail(sizes);
+    g_return_if_fail(xvalues);
+    g_return_if_fail(yvalues);
+    g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+    g_return_if_fail(inscrdrvalues || inscrdxvalues || inscrdyvalues);
+
     const GwyFieldPart *bbox = gwy_mask_field_grain_bounding_boxes(mask);
     guint xres = mask->xres;
     gdouble qgeom = sqrt(dx*dy);

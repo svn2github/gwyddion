@@ -157,6 +157,22 @@ void _gwy_mask_fied_grain_inscribed_discs(gdouble *inscrdrvalues,
                                           gdouble dx,
                                           gdouble dy);
 
+G_GNUC_INTERNAL
+void _gwy_mask_fied_grain_centre_x(gdouble *values,
+                                   const guint *grains,
+                                   const guint *sizes,
+                                   guint ngrains,
+                                   guint xres,
+                                   guint yres);
+
+G_GNUC_INTERNAL
+void _gwy_mask_fied_grain_centre_y(gdouble *values,
+                                   const guint *grains,
+                                   const guint *sizes,
+                                   guint ngrains,
+                                   guint xres,
+                                   guint yres);
+
 G_END_DECLS
 
 #endif
