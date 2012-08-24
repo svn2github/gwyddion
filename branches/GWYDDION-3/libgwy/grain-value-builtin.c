@@ -57,6 +57,12 @@ typedef struct {
     gint j;
 } GridPoint;
 
+typedef struct {
+    guint size;
+    guint len;
+    GridPoint *points;
+} GridPointList;
+
 // Inscribed/excrcribed disc/circle.
 typedef struct {
     gdouble x;
@@ -453,6 +459,20 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .is_angle = TRUE,
     },
 };
+
+static inline void
+grid_point_list_add(GridPointList *list,
+                    gint j, gint i)
+{
+    if (G_UNLIKELY(list->len == list->size)) {
+        list->size = MAX(2*list->size, 16);
+        list->points = g_renew(GridPoint, list->points, list->size);
+    }
+
+    list->points[list->len].i = i;
+    list->points[list->len].j = j;
+    list->len++;
+}
 
 static void
 ensure_value(BuiltinGrainValueId id,
@@ -1126,15 +1146,15 @@ static void
 find_grain_convex_hull(gint xres, gint yres,
                        const guint *grains,
                        gint pos,
-                       GArray *vertices)
+                       GridPointList *vertices)
 {
     enum { RIGHT = 0, DOWN, LEFT, UP } newdir = RIGHT, dir;
     g_return_if_fail(grains[pos]);
     gint initpos = pos;
     guint gno = grains[pos];
     GridPoint v = { .i = pos/xres, .j = pos % xres };
-    g_array_set_size(vertices, 0);
-    g_array_append_val(vertices, v);
+    vertices->len = 0;
+    grid_point_list_add(vertices, v.j, v.i);
 
     do {
         dir = newdir;
@@ -1187,12 +1207,12 @@ find_grain_convex_hull(gint xres, gint yres,
         /* When we turn right, the previous point is a potential vertex, and
          * it can also supersed previous vertices. */
         if (newdir == (dir + 1) % 4) {
-            g_array_append_val(vertices, v);
+            grid_point_list_add(vertices, v.j, v.i);
             guint len = vertices->len;
             while (len > 2) {
-                GridPoint *cur = &g_array_index(vertices, GridPoint, len-1);
-                GridPoint *mid = &g_array_index(vertices, GridPoint, len-2);
-                GridPoint *prev = &g_array_index(vertices, GridPoint, len-3);
+                GridPoint *cur = vertices->points + (len-1);
+                GridPoint *mid = vertices->points + (len-2);
+                GridPoint *prev = vertices->points + (len-3);
                 gdouble phi = atan2(cur->i - mid->i, cur->j - mid->j);
                 gdouble phim = atan2(mid->i - prev->i, mid->j - prev->j);
                 phi = fmod(phi - phim + 4.0*G_PI, 2.0*G_PI);
@@ -1203,15 +1223,15 @@ find_grain_convex_hull(gint xres, gint yres,
                     break;
 
                 // Get rid of mid, it is in a locally concave part.
-                g_array_index(vertices, GridPoint, len-2) = *cur;
-                g_array_set_size(vertices, len-1);
+                vertices->points[len-2] = *cur;
+                vertices->len--;
                 len = vertices->len;
             }
         }
     } while (v.i*xres + v.j != initpos);
 
     // The last point is duplicated first point.
-    g_array_set_size(vertices, vertices->len-1);
+    vertices->len--;
 }
 
 /**
@@ -1228,15 +1248,15 @@ find_grain_convex_hull(gint xres, gint yres,
  * FIXME: This is a blatantly naive O(n^2) algorithm.
  **/
 static void
-grain_maximum_bound(const GArray *vertices,
+grain_maximum_bound(const GridPointList *vertices,
                     gdouble qx, gdouble qy,
                     gdouble *vx, gdouble *vy)
 {
     gdouble vm = -G_MAXDOUBLE;
     for (guint g1 = 0; g1 < vertices->len; g1++) {
-        const GridPoint *a = &g_array_index(vertices, GridPoint, g1);
+        const GridPoint *a = vertices->points + g1;
         for (guint g2 = g1 + 1; g2 < vertices->len; g2++) {
-            const GridPoint *x = &g_array_index(vertices, GridPoint, g2);
+            const GridPoint *x = vertices->points + g2;
             gdouble dx = qx*(x->j - a->j);
             gdouble dy = qy*(x->i - a->i);
             gdouble v = dx*dx + dy*dy;
@@ -1263,22 +1283,22 @@ grain_maximum_bound(const GArray *vertices,
  * FIXME: This is a blatantly naive O(n^2) algorithm.
  **/
 static void
-grain_minimum_bound(const GArray *vertices,
+grain_minimum_bound(const GridPointList *vertices,
                     gdouble qx, gdouble qy,
                     gdouble *vx, gdouble *vy)
 {
     g_return_if_fail(vertices->len >= 3);
     gdouble vm = G_MAXDOUBLE;
     for (guint g1 = 0; g1 < vertices->len; g1++) {
-        const GridPoint *a = &g_array_index(vertices, GridPoint, g1);
+        const GridPoint *a = vertices->points + g1;
         guint g1p = (g1 + 1) % vertices->len;
-        const GridPoint *b = &g_array_index(vertices, GridPoint, g1p);
+        const GridPoint *b = vertices->points + g1p;
         gdouble bx = qx*(b->j - a->j);
         gdouble by = qy*(b->i - a->i);
         gdouble b2 = bx*bx + by*by;
         gdouble vm1 = -G_MAXDOUBLE, vx1 = -G_MAXDOUBLE, vy1 = -G_MAXDOUBLE;
         for (guint g2 = 0; g2 < vertices->len; g2++) {
-            const GridPoint *x = &g_array_index(vertices, GridPoint, g2);
+            const GridPoint *x = vertices->points + g2;
             gdouble dx = qx*(x->j - a->j);
             gdouble dy = qy*(x->i - a->i);
             gdouble s = (dx*bx + dy*by)/b2;
@@ -1300,13 +1320,13 @@ grain_minimum_bound(const GArray *vertices,
 }
 
 static gdouble
-grain_convex_hull_area(const GArray *vertices, gdouble dx, gdouble dy)
+grain_convex_hull_area(const GridPointList *vertices, gdouble dx, gdouble dy)
 {
     g_return_val_if_fail(vertices->len >= 4, 0.0);
 
-    const GridPoint *a = &g_array_index(vertices, GridPoint, 0),
-                    *b = &g_array_index(vertices, GridPoint, 1),
-                    *c = &g_array_index(vertices, GridPoint, 2);
+    const GridPoint *a = vertices->points,
+                    *b = vertices->points + 1,
+                    *c = vertices->points + 2;
     gdouble s = 0.0;
 
     for (guint i = 2; i < vertices->len; i++) {
@@ -1321,15 +1341,15 @@ grain_convex_hull_area(const GArray *vertices, gdouble dx, gdouble dy)
 }
 
 static void
-grain_convex_hull_centre(const GArray *vertices,
+grain_convex_hull_centre(const GridPointList *vertices,
                          gdouble dx, gdouble dy,
                          gdouble *centrex, gdouble *centrey)
 {
     g_return_if_fail(vertices->len >= 4);
 
-    const GridPoint *a = &g_array_index(vertices, GridPoint, 0),
-                    *b = &g_array_index(vertices, GridPoint, 1),
-                    *c = &g_array_index(vertices, GridPoint, 2);
+    const GridPoint *a = vertices->points,
+                    *b = vertices->points + 1,
+                    *c = vertices->points + 2;
     gdouble s = 0.0, xc = 0.0, yc = 0.0;
 
     for (guint i = 2; i < vertices->len; i++) {
@@ -1348,10 +1368,10 @@ grain_convex_hull_centre(const GArray *vertices,
 
 static gdouble
 minimize_circle_radius(FooscribedDisc *circle,
-                       const GArray *vertices,
+                       const GridPointList *vertices,
                        gdouble dx, gdouble dy)
 {
-    const GridPoint *v = (const GridPoint*)vertices->data;
+    const GridPoint *v = vertices->points;
     gdouble x = circle->x, y = circle->y, r2best = 0.0;
     guint n = vertices->len;
 
@@ -1370,7 +1390,7 @@ minimize_circle_radius(FooscribedDisc *circle,
 
 static void
 improve_circumscribed_circle(FooscribedDisc *circle,
-                             const GArray *vertices,
+                             const GridPointList *vertices,
                              gdouble dx, gdouble dy)
 {
     gdouble eps = 1.0, improvement, qgeom = sqrt(dx*dy);
@@ -1461,7 +1481,7 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
 
     // Find the complete convex hulls.
-    GArray *vertices = g_array_new(FALSE, FALSE, sizeof(GridPoint));
+    GridPointList *vertices = g_slice_new0(GridPointList);
     for (guint gno = 1; gno <= ngrains; gno++) {
         gdouble vx = dx, vy = dy;
 
@@ -1498,7 +1518,8 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
         }
     }
 
-    g_array_free(vertices, TRUE);
+    g_free(vertices->points);
+    g_slice_free(GridPointList, vertices);
 }
 
 static void
