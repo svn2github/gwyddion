@@ -1964,36 +1964,21 @@ improve_inscribed_disc(FooscribedDisc *disc, EdgeList *edges, guint dist)
     } while (eps > 1e-3 || improvement > 1e-3);
 }
 
-static void
-calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
-                    GwyGrainValue *inscrdxgrainvalue,
-                    GwyGrainValue *inscrdygrainvalue,
-                    const GwyGrainValue *xgrainvalue,
-                    const GwyGrainValue *ygrainvalue,
-                    const guint *grains,
-                    const guint *sizes,
-                    const GwyMaskField *mask,
-                    const GwyField *field)
+void
+_gwy_mask_fied_grain_inscribed_discs(gdouble *inscrdrvalues,
+                                     gdouble *inscrdxvalues,
+                                     gdouble *inscrdyvalues,
+                                     const gdouble *xvalues,
+                                     const gdouble *yvalues,
+                                     const guint *grains,
+                                     const guint *sizes,
+                                     guint ngrains,
+                                     const GwyMaskField *mask,
+                                     gdouble dx, gdouble dy)
 {
-    guint ngrains;
-    const gdouble *xvalues, *yvalues;
-    gdouble *inscrdrvalues, *inscrdxvalues, *inscrdyvalues;
-    if (all_null(3, &ngrains,
-                 inscrdrgrainvalue, inscrdxgrainvalue, inscrdygrainvalue)
-        || !check_target(inscrdrgrainvalue, &inscrdrvalues,
-                         GWY_GRAIN_VALUE_INSCRIBED_DISC_R)
-        || !check_target(inscrdxgrainvalue, &inscrdxvalues,
-                         GWY_GRAIN_VALUE_INSCRIBED_DISC_X)
-        || !check_target(inscrdygrainvalue, &inscrdyvalues,
-                         GWY_GRAIN_VALUE_INSCRIBED_DISC_Y)
-        || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
-        || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
-        return;
-
     const GwyFieldPart *bbox = gwy_mask_field_grain_bounding_boxes(mask);
     guint xres = mask->xres;
-    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field),
-            qgeom = sqrt(dx*dy);
+    gdouble qgeom = sqrt(dx*dy);
 
     guint *grain = NULL;
     guint grainsize = 0;
@@ -2014,8 +1999,7 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
      */
     for (guint gno = 1; gno <= ngrains; gno++) {
         guint w = bbox[gno].width, h = bbox[gno].height;
-        gdouble xoff = dx*bbox[gno].col + field->xoff,
-                yoff = dy*bbox[gno].row + field->yoff;
+        gdouble xoff = dx*bbox[gno].col, yoff = dy*bbox[gno].row;
 
         /* If the grain is rectangular, calculate the disc directly.
          * Large rectangular grains are rare but the point is to catch
@@ -2107,6 +2091,51 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
     g_slice_free(GridPointList, outqueue);
     g_free(edges.edges);
     g_array_free(candidates, TRUE);
+}
+
+static void
+calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
+                    GwyGrainValue *inscrdxgrainvalue,
+                    GwyGrainValue *inscrdygrainvalue,
+                    const GwyGrainValue *xgrainvalue,
+                    const GwyGrainValue *ygrainvalue,
+                    const guint *grains,
+                    const guint *sizes,
+                    const GwyMaskField *mask,
+                    const GwyField *field)
+{
+    guint ngrains;
+    const gdouble *xvalues, *yvalues;
+    gdouble *inscrdrvalues, *inscrdxvalues, *inscrdyvalues;
+    if (all_null(3, &ngrains,
+                 inscrdrgrainvalue, inscrdxgrainvalue, inscrdygrainvalue)
+        || !check_target(inscrdrgrainvalue, &inscrdrvalues,
+                         GWY_GRAIN_VALUE_INSCRIBED_DISC_R)
+        || !check_target(inscrdxgrainvalue, &inscrdxvalues,
+                         GWY_GRAIN_VALUE_INSCRIBED_DISC_X)
+        || !check_target(inscrdygrainvalue, &inscrdyvalues,
+                         GWY_GRAIN_VALUE_INSCRIBED_DISC_Y)
+        || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
+        return;
+
+    _gwy_mask_fied_grain_inscribed_discs(inscrdrvalues, inscrdxvalues,
+                                         inscrdyvalues,
+                                         xvalues, yvalues,
+                                         grains, sizes, ngrains, mask,
+                                         gwy_field_dx(field),
+                                         gwy_field_dy(field));
+
+    if (inscrdxvalues) {
+        gdouble off = field->xoff;
+        for (guint i = 1; i <= ngrains; i++)
+            inscrdxvalues[i] += off;
+    }
+    if (inscrdyvalues) {
+        gdouble off = field->yoff;
+        for (guint i = 1; i <= ngrains; i++)
+            inscrdyvalues[i] += off;
+    }
 }
 
 static void

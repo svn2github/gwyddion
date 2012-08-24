@@ -144,6 +144,19 @@ void _gwy_grain_value_evaluate_builtins(const GwyField *field,
 G_GNUC_INTERNAL
 const gchar* const* _gwy_grain_value_list_builtin_idents(void);
 
+G_GNUC_INTERNAL
+void _gwy_mask_fied_grain_inscribed_discs(gdouble *inscrdrvalues,
+                                          gdouble *inscrdxvalues,
+                                          gdouble *inscrdyvalues,
+                                          const gdouble *xvalues,
+                                          const gdouble *yvalues,
+                                          const guint *grains,
+                                          const guint *sizes,
+                                          guint ngrains,
+                                          const GwyMaskField *mask,
+                                          gdouble dx,
+                                          gdouble dy);
+
 G_END_DECLS
 
 #endif
