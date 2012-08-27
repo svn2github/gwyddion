@@ -63,14 +63,15 @@ mkdir $outdir
 for x in *.c; do
   b=${x%.c}
   test -f .libs/$b.gcno || continue
-  gcov -f -o .libs $x >$outdir/$x.func
-  if grep -s -q 'no functions found' $outdir/$x.func; then
+  gcov -f -o .libs $x >$outdir/$x.func 2>coverage.tmp
+  if grep -s -q 'no functions found' coverage.tmp; then
     rm -f $x.gcov $outdir/$x.func
   else
     mv $x.gcov $outdir/
     extract_funcs $outdir/$x.func >$outdir/$x.dat
   fi
 done
+rm -f coverage.tmp
 extract_files $outdir/*.func >$outdir/files.dat
 
 cat >$report <<EOF
