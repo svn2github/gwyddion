@@ -83,7 +83,7 @@ test_one_value(const gchar *name,
                                const GwyMaskField *mask,
                                guint grain_id))
 {
-    enum { max_size = 85, niter = 30 };
+    enum { max_size = 85, niter = 15 };
 
     GwyGrainValue *grainvalue = gwy_grain_value_new(name);
     g_assert(grainvalue);
@@ -757,7 +757,7 @@ test_grain_value_builtin_inscribed_disc(void)
         "Maximum inscribed disc center x position",
         "Maximum inscribed disc center y position",
     };
-    enum { max_size = 85, niter = 15, circsteps = 720 };
+    enum { max_size = 85, niter = 25, circsteps = 720 };
 
     GwyGrainValue *grainvalues[3];
     for (guint i = 0; i < 3; i++) {
@@ -813,6 +813,75 @@ test_grain_value_builtin_inscribed_disc(void)
                 g_assert_cmpint(ii, <, yres);
 
                 g_assert_cmpuint(grains[ii*xres + jj], ==, gno);
+            }
+        }
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+
+    g_object_unref(grainmask);
+    g_object_unref(grainfield);
+    for (guint i = 0; i < 3; i++)
+        g_object_unref(grainvalues[i]);
+    g_rand_free(rng);
+}
+
+void
+test_grain_value_builtin_exscribed_circle(void)
+{
+    const gchar *names[3] = {
+        "Minimum circumcircle radius",
+        "Minimum circumcircle center x position",
+        "Minimum circumcircle center y position",
+    };
+    enum { max_size = 85, niter = 25, circsteps = 720 };
+
+    GwyGrainValue *grainvalues[3];
+    for (guint i = 0; i < 3; i++) {
+        grainvalues[i] = gwy_grain_value_new(names[i]);
+        g_assert(grainvalues[i]);
+        g_assert(gwy_grain_value_is_valid(grainvalues[i]));
+        g_assert_cmpstr(gwy_grain_value_get_name(grainvalues[i]), ==, names[i]);
+        g_assert_cmpstr(gwy_grain_value_get_group(grainvalues[i]),
+                        ==, "Boundary");
+        g_assert_cmpuint(!gwy_grain_value_get_resource(grainvalues[i]), ==, 1);
+    }
+
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyField *grainfield = gwy_field_new();
+    GwyMaskField *grainmask = gwy_mask_field_new();
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint ngrains = gwy_mask_field_n_grains(mask);
+        const guint *grains = gwy_mask_field_grain_numbers(mask);
+
+        gwy_field_evaluate_grains(field, mask, grainvalues, 3);
+        const gdouble *values[3];
+        for (guint i = 0; i < 3; i++) {
+            guint grainvaluengrains;
+            values[i] = gwy_grain_value_data(grainvalues[i],
+                                             &grainvaluengrains);
+            g_assert(values[i]);
+            g_assert_cmpuint(grainvaluengrains, ==, ngrains);
+        }
+
+        for (guint gno = 1; gno <= ngrains; gno++) {
+            gdouble R = values[0][gno], x = values[1][gno], y = values[2][gno];
+
+            for (guint j = 0; j < circsteps; j++) {
+                gdouble shiftx = (1.0 + 1e-6)*R*cos(2.0*M_PI*j/circsteps),
+                        shifty = (1.0 + 1e-6)*R*sin(2.0*M_PI*j/circsteps);
+                gdouble px = (x + shiftx)/dx, py = (y + shifty)/dy;
+                gint jj = (gint)floor(px), ii = (gint)floor(py);
+                if (jj >= 0 && jj < (gint)xres && ii >= 0 && ii < (gint)yres)
+                    g_assert_cmpuint(grains[ii*xres + jj], !=, gno);
             }
         }
 

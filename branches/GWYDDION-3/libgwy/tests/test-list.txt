@@ -432,6 +432,7 @@ grain-value/builtin/curvature-center-x
 grain-value/builtin/curvature-center-y
 grain-value/builtin/curvature-center-z
 grain-value/builtin/inscribed-disc
+grain-value/builtin/exscribed-circle
 grain-value/user
 grain-value/evaluate/multiple
 user-grain-value/load
