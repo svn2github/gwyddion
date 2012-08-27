@@ -64,8 +64,12 @@ for x in *.c; do
   b=${x%.c}
   test -f .libs/$b.gcno || continue
   gcov -f -o .libs $x >$outdir/$x.func
-  mv $x.gcov $outdir/
-  extract_funcs $outdir/$x.func >$outdir/$x.dat
+  if grep -s -q 'no functions found' $outdir/$x.func; then
+    rm -f $x.gcov $outdir/$x.func
+  else
+    mv $x.gcov $outdir/
+    extract_funcs $outdir/$x.func >$outdir/$x.dat
+  fi
 done
 extract_files $outdir/*.func >$outdir/files.dat
 
