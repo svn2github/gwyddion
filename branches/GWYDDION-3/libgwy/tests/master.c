@@ -217,9 +217,8 @@ master_cancel_one(guint nproc)
             GCancellable *cancellable = g_cancellable_new();
             g_object_set_data(G_OBJECT(cancellable),
                               "delay", GUINT_TO_POINTER(delay));
-            GThread *cthread = g_thread_create(&cancel_cancel,
-                                               cancellable, FALSE, &error);
-            g_assert_no_error(error);
+            GThread *cthread = g_thread_new("canceller", &cancel_cancel,
+                                            cancellable);
             g_assert(cthread);
 
             guint count = 0;
@@ -227,6 +226,10 @@ master_cancel_one(guint nproc)
                                          &cancel_task, &cancel_result,
                                          &count, cancellable);
             g_assert(!ok);
+
+            // Wait until the cancellation is performed.  Fixes master being
+            // destroyed and test terminated before cancel_cancel() gets to run.
+            g_thread_join(cthread);
 
             g_object_unref(master);
             g_object_unref(cancellable);

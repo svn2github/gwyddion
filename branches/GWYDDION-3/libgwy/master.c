@@ -171,6 +171,8 @@ retire_workers(GwyMaster *master)
     }
     g_slist_free(priv->idle_workers);
     priv->idle_workers = NULL;
+    for (guint i = 0; i < priv->nworkers; i++)
+        g_thread_unref(priv->workers[i].thread);
     GWY_FREE(priv->workers);
     priv->nworkers = 0;
 }
@@ -280,8 +282,11 @@ gwy_master_create_workers(GwyMaster *master,
         workerdata->queue = g_async_queue_new();
         winfo->from_master = workerdata->queue;
         winfo->to_master = priv->queue;
-        if (!(workerdata->thread = g_thread_create(&worker_thread_main,
-                                                   winfo, FALSE, error))) {
+
+        gchar buf[16];
+        g_snprintf(buf, sizeof(buf), "worker%u", i);
+        if (!(workerdata->thread = g_thread_try_new(buf, &worker_thread_main,
+                                                    winfo, error))) {
             g_slice_free(WorkerInfo, winfo);
             retire_workers(master);
             return FALSE;
