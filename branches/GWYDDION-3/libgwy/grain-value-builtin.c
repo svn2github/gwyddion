@@ -2095,7 +2095,7 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
                        dx/qgeom, dy/qgeom);
 
         /* Try a few first candidates for the inscribed disc centre. */
-        guint ncand = MIN(7, candidates->len);
+        guint ncand = MIN(15, candidates->len);
         FooscribedDisc *cand;
         for (guint i = 0; i < ncand; i++) {
             cand = &g_array_index(candidates, FooscribedDisc, i);
