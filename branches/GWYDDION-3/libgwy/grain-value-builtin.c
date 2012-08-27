@@ -1976,20 +1976,14 @@ improve_inscribed_disc(FooscribedDisc *disc, EdgeList *edges, guint dist)
             *disc = best;
             // This scales up *each* successive improvement after 3 so eps can
             // grow very quickly.
-            if (nsuccessiveimprovements++ > 2) {
-                g_printerr("#");
+            if (nsuccessiveimprovements++ > 2)
                 eps *= 1.5;
-            }
-            else
-                g_printerr("+");
         }
         else {
             eps *= 0.5;
             nsuccessiveimprovements = 0;
-            g_printerr("-");
         }
     } while (eps > 1e-3 || improvement > 1e-3);
-    g_printerr("\n");
 }
 
 void
