@@ -17,8 +17,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include "testlibgwy.h"
+#include <stdlib.h>
+
+#ifdef HAVE_VALGRIND
+#include <valgrind/valgrind.h>
+#else
+#define RUNNING_ON_VALGRIND 0
+#endif
 
 /***************************************************************************
  *
@@ -201,7 +207,13 @@ cancel_cancel(gpointer user_data)
 static void
 master_cancel_one(guint nproc)
 {
-    if (g_test_trap_fork(10000000UL, 0)) {
+    guint64 timeout;
+    if (RUNNING_ON_VALGRIND)
+        timeout = G_GUINT64_CONSTANT(1000000000);
+    else
+        timeout = G_GUINT64_CONSTANT(10000000);
+
+    if (g_test_trap_fork(timeout, 0)) {
         GError *error = NULL;
         enum { niter = 200 };
         GRand *rng = g_rand_new_with_seed(42);
@@ -228,7 +240,8 @@ master_cancel_one(guint nproc)
             g_assert(!ok);
 
             // Wait until the cancellation is performed.  Fixes master being
-            // destroyed and test terminated before cancel_cancel() gets to run.
+            // destroyed and test terminated before cancel_cancel() gets to
+            // finish.
             g_thread_join(cthread);
 
             g_object_unref(master);
