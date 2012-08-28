@@ -203,7 +203,7 @@ AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
 AC_ARG_WITH([valgrind],
             [AS_HELP_STRING([--with-valgrind=ARG],[compile with Valgrind support for testing (no)])],
             [gwy_enable_valgrind=$withval],
-            [gwy_enable_valgrind=no])
+            [gwy_enable_valgrind=yes])
 if test "x$gwy_enable_valgrind" = xyes; then
   PKG_CHECK_EXISTS([valgrind],
                    [gwy_enable_valgrind=yes
