@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -112,6 +112,12 @@ static void     gwy_raster_view_size_allocate       (GtkWidget *widget,
                                                      GtkAllocation *allocation);
 static gboolean gwy_raster_view_motion_notify       (GtkWidget *widget,
                                                      GdkEventMotion *event);
+static gboolean gwy_raster_view_button_press        (GtkWidget *widget,
+                                                     GdkEventButton *event);
+static gboolean gwy_raster_view_button_release      (GtkWidget *widget,
+                                                     GdkEventButton *event);
+static gboolean gwy_raster_view_leave_notify        (GtkWidget *widget,
+                                                     GdkEventCrossing *event);
 static gboolean gwy_raster_view_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
 static void     destroy_field_surface               (GwyRasterView *rasterview);
@@ -182,6 +188,9 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     widget_class->get_preferred_height = gwy_raster_view_get_preferred_height;
     widget_class->size_allocate = gwy_raster_view_size_allocate;
     widget_class->motion_notify_event = gwy_raster_view_motion_notify;
+    widget_class->button_press_event = gwy_raster_view_button_press;
+    widget_class->button_release_event = gwy_raster_view_button_release;
+    widget_class->leave_notify_event = gwy_raster_view_leave_notify;
     widget_class->draw = gwy_raster_view_draw;
 
     properties[PROP_FIELD]
@@ -736,28 +745,62 @@ gwy_raster_view_motion_notify(GtkWidget *widget,
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     RasterView *priv = rasterview->priv;
     GwyField *field = priv->field;
+    GwyMaskField *mask = priv->mask;
 
-    if (!field)
+    if (!field || !mask)
         return FALSE;
 
     GwyXY pos;
     window_coords_to_field(rasterview, &(GwyXY){ event->x, event->y }, &pos);
 
     if (pos.x < 0.0 || pos.x >= field->xres
-        || pos.y < 0.0 || pos.y >= field->yres)
+        || pos.y < 0.0 || pos.y >= field->yres) {
+        if (priv->active_grain) {
+            priv->active_grain = 0;
+            gtk_widget_queue_draw(widget);
+        }
         return FALSE;
-
-    if (!priv->mask)
-        return FALSE;
+    }
 
     guint j = (guint)floor(pos.x), i = (guint)floor(pos.y);
     g_assert(j < field->xres && i < field->yres);
-    const guint *grains = gwy_mask_field_grain_numbers(priv->mask);
+    const guint *grains = gwy_mask_field_grain_numbers(mask);
 
     if (grains[i*field->xres + j] != priv->active_grain) {
         priv->active_grain = grains[i*field->xres + j];
         gtk_widget_queue_draw(widget);
     }
+
+    return FALSE;
+}
+
+static gboolean
+gwy_raster_view_button_press(GtkWidget *widget,
+                             GdkEventButton *event)
+{
+    return FALSE;
+}
+
+static gboolean
+gwy_raster_view_button_release(GtkWidget *widget,
+                               GdkEventButton *event)
+{
+    return FALSE;
+}
+
+static gboolean
+gwy_raster_view_leave_notify(GtkWidget *widget,
+                             GdkEventCrossing *event)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    RasterView *priv = rasterview->priv;
+
+    g_assert(event->type == GDK_LEAVE_NOTIFY);
+    if (!priv->field || !priv->mask || !priv->active_grain)
+        return FALSE;
+
+    priv->active_grain = 0;
+    gtk_widget_queue_draw(widget);
 
     return FALSE;
 }
@@ -785,13 +828,13 @@ calculate_position_and_size(GwyRasterView *rasterview)
     *irect = (cairo_rectangle_int_t){ 0, 0, width, height };
 
     if (priv->zoom) {
-        gdouble xzoom = (gdouble)xres/full_width,
-                yzoom = (gdouble)yres/full_height;
+        gdouble xzoom = (gdouble)full_width/xres,
+                yzoom = (gdouble)full_height/yres;
 
-        frect->x = hoffset*xzoom;
-        frect->width = width*xzoom;
-        frect->y = voffset*yzoom;
-        frect->height = height*yzoom;
+        frect->x = hoffset/xzoom;
+        frect->width = width/xzoom;
+        frect->y = voffset/yzoom;
+        frect->height = height/yzoom;
         // If we got outside the data first try to fix the adjustments and if
         // this does not help add padding.
         if (frect->x + frect->width > xres) {
@@ -942,6 +985,11 @@ draw_grain_numbers(GwyRasterView *rasterview,
     guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
+    gint full_width = calculate_full_width(rasterview);
+    gint full_height = calculate_full_height(rasterview);
+    gdouble xzoom = (gdouble)full_width/priv->mask->xres,
+            yzoom = (gdouble)full_height/priv->mask->yres;
+
     cairo_save(cr);
     cairo_rectangle_int_t *irect = &priv->image_rectangle;
     cairo_set_source_rgb(cr, 0.8, 0.0, 0.9);
@@ -956,8 +1004,8 @@ draw_grain_numbers(GwyRasterView *rasterview,
         pango_layout_set_text(layout, grain_label, -1);
         pango_layout_get_size(layout, &width, &height);
         cairo_move_to(cr,
-                      2*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
-                      2*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
+                      xzoom*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
+                      yzoom*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
         pango_cairo_show_layout(cr, layout);
     }
     if (priv->active_grain) {
@@ -965,13 +1013,13 @@ draw_grain_numbers(GwyRasterView *rasterview,
         gchar grain_label[16];
         gint width, height;
 
-        cairo_set_source_rgb(cr, 1.0, 0.6, 0.3);
+        cairo_set_source_rgb(cr, 1.0, 0.2, 0.3);
         snprintf(grain_label, sizeof(grain_label), "%u", i);
         pango_layout_set_text(layout, grain_label, -1);
         pango_layout_get_size(layout, &width, &height);
         cairo_move_to(cr,
-                      2*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
-                      2*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
+                      xzoom*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
+                      yzoom*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
         pango_cairo_show_layout(cr, layout);
     }
     cairo_restore(cr);
