@@ -12,8 +12,7 @@
    Memcheck:Cond
    fun:__GI___strncasecmp_l
    fun:____strtod_l_internal
-   fun:g_ascii_strtod
-   fun:parse
+   ...
    fun:gwy_unit_set_from_string
 }
 
@@ -22,35 +21,16 @@
    Memcheck:Value8
    fun:__GI___strncasecmp_l
    fun:____strtod_l_internal
-   fun:g_ascii_strtod
-   fun:parse
+   ...
    fun:gwy_unit_set_from_string
 }
 
 {
-   glibc-2.12-x86_64-strtod-buffer-overrun-cond.part.2
-   Memcheck:Cond
-   fun:__GI___strncasecmp_l
-   fun:____strtod_l_internal
-   fun:parse.part.2
-   fun:gwy_unit_set_from_string
-}
-
-{
-   glibc-2.12-x86_64-strtod-buffer-overrun-value.part.2
-   Memcheck:Value8
-   fun:__GI___strncasecmp_l
-   fun:____strtod_l_internal
-   fun:parse.part.2
-   fun:gwy_unit_set_from_string
-}
-
-{
-   glibc-2.12-x86_64-strtod-buffer-overrun-addr.part.2
+   glibc-2.12-x86_64-strtod-buffer-overrun-addr
    Memcheck:Addr8
    fun:__GI___strncasecmp_l
    fun:____strtod_l_internal
-   fun:parse.part.2
+   ...
    fun:gwy_unit_set_from_string
 }
 
