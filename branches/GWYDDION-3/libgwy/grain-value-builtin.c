@@ -1618,7 +1618,8 @@ extract_upsampled_square_pixel_grain(const guint *grains, guint xres,
         /* Horizontal upsampling, precalculate index map to use in each row. */
         w2 = gwy_round(dx/dy*w2);
         grain = grain_maybe_realloc(grain, w2, h2, grainsize);
-        guint *indices = (guint*)g_slice_alloc(w2*sizeof(guint));
+        guint memsize = w2*sizeof(guint);
+        guint *indices = (guint*)g_slice_alloc(memsize);
         for (guint j = 0; j < w2; j++) {
             gint jj = (gint)floor(0.5*j*dy/dx);
             indices[j] = CLAMP(jj, 0, (gint)w-1);
@@ -1632,7 +1633,7 @@ extract_upsampled_square_pixel_grain(const guint *grains, guint xres,
                 grain[k2 + w2 + j] = v;
             }
         }
-        g_slice_free1(w2*sizeof(guint), indices);
+        g_slice_free1(memsize, indices);
     }
     else {
         /* Vertical upsampling, rows are 2× scaled copies but uneven. */
@@ -1831,9 +1832,10 @@ find_all_edges(EdgeList *edges,
                gdouble dx, gdouble dy)
 {
     guint col = bbox->col, row = bbox->row, w = bbox->width, h = bbox->height;
-    guint *vertices = g_slice_alloc((w + 1)*sizeof(guint));
+    guint memsize = (w + 1)*sizeof(guint);
+    guint *vertices = g_slice_alloc(memsize);
 
-    memset(vertices, 0xff, sizeof(guint)*(w + 1));
+    memset(vertices, 0xff, memsize);
     edges->len = 0;
     for (guint i = 0; i <= h; i++) {
         guint k = (i + row)*xres + col;
@@ -1879,7 +1881,7 @@ find_all_edges(EdgeList *edges,
         }
     }
 
-    g_slice_free1((w + 1)*sizeof(guint), vertices);
+    g_slice_free1(memsize, vertices);
 }
 
 static gdouble

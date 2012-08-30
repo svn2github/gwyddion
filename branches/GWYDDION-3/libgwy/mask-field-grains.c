@@ -271,7 +271,7 @@ find_grain_positions(const GwyMaskField *field)
     MaskField *priv = field->priv;
     guint ngrains = priv->ngrains;
     guint xres = field->xres, yres = field->yres;
-    guint memsize = (ngrains + 1)*sizeof(guint);
+    guint memsize = (ngrains + 1)*sizeof(gdouble);
 
     gdouble *xc = g_slice_alloc0(memsize),
             *yc = g_slice_alloc0(memsize),
