@@ -48,7 +48,7 @@ enum {
 };
 
 struct _GwyRasterViewPrivate {
-    GdkWindow *input_window;
+    GdkWindow *window;
 
     GtkAdjustment *hadjustment;
     gulong hadjustment_value_changed_id;
@@ -602,14 +602,14 @@ window_coords_to_field(const GwyRasterView *rasterview,
 }
 
 static void
-create_input_window(GwyRasterView *rasterview)
+create_window(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
     GtkWidget *widget = GTK_WIDGET(rasterview);
 
     g_assert(gtk_widget_get_realized(widget));
 
-    if (priv->input_window)
+    if (priv->window)
         return;
 
     GtkAllocation allocation;
@@ -621,47 +621,48 @@ create_input_window(GwyRasterView *rasterview)
         .width = allocation.width,
         .height = allocation.height,
         .window_type = GDK_WINDOW_CHILD,
-        .wclass = GDK_INPUT_ONLY,
-        .override_redirect = TRUE,
+        .wclass = GDK_INPUT_OUTPUT,
         .event_mask = (gtk_widget_get_events(widget)
+                       | GDK_EXPOSURE_MASK
                        | GDK_BUTTON_PRESS_MASK
                        | GDK_BUTTON_RELEASE_MASK
                        | GDK_POINTER_MOTION_MASK
                        | GDK_POINTER_MOTION_HINT_MASK),
+        .visual = gtk_widget_get_visual(widget),
     };
-    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR | GDK_WA_CURSOR;
-    priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
-                                        &attributes, attributes_mask);
-    gdk_window_set_user_data(priv->input_window, widget);
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
+    priv->window = gdk_window_new(gtk_widget_get_parent_window(widget),
+                                  &attributes, attributes_mask);
+    gtk_widget_set_window(widget, priv->window);
+    gdk_window_set_user_data(priv->window, widget);
 }
 
 static void
-destroy_input_window(GwyRasterView *rasterview)
+destroy_window(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
 
-    if (!priv->input_window)
+    if (!priv->window)
         return;
 
-    gdk_window_set_user_data(priv->input_window, NULL);
-    gdk_window_destroy(priv->input_window);
-    priv->input_window = NULL;
+    gdk_window_set_user_data(priv->window, NULL);
+    gdk_window_destroy(priv->window);
+    priv->window = NULL;
 }
 
 static void
 gwy_raster_view_realize(GtkWidget *widget)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->realize(widget);
-    create_input_window(rasterview);
+    gtk_widget_set_realized(widget, TRUE);
+    create_window(rasterview);
 }
 
 static void
 gwy_raster_view_unrealize(GtkWidget *widget)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    destroy_input_window(rasterview);
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unrealize(widget);
+    destroy_window(rasterview);
 }
 
 static void
@@ -669,14 +670,14 @@ gwy_raster_view_map(GtkWidget *widget)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->map(widget);
-    gdk_window_show(rasterview->priv->input_window);
+    gdk_window_show(rasterview->priv->window);
 }
 
 static void
 gwy_raster_view_unmap(GtkWidget *widget)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    gdk_window_hide(rasterview->priv->input_window);
+    gdk_window_hide(rasterview->priv->window);
     GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unmap(widget);
 }
 
@@ -716,8 +717,8 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
     RasterView *priv = rasterview->priv;
 
     // XXX: The input window can be smaller.  Does it matter?
-    if (priv->input_window)
-        gdk_window_move_resize(priv->input_window,
+    if (priv->window)
+        gdk_window_move_resize(priv->window,
                                allocation->x, allocation->y,
                                allocation->width, allocation->height);
 
