@@ -1668,6 +1668,34 @@ test_mask_field_grain_bounding_boxes(void)
 }
 
 void
+test_mask_field_grain_positions(void)
+{
+    enum { max_size = 208, niter = 200 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble prob = g_rand_double(rng);
+        GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
+        guint ngrains = gwy_mask_field_n_grains(field);
+        const guint *grains = gwy_mask_field_grain_numbers(field);
+        const GwyXY *grain_positions = gwy_mask_field_grain_positions(field);
+
+        for (guint i = 1; i <= ngrains; i++) {
+            const GwyXY *xy = grain_positions + i;
+            gint x = (gint)floor(xy->x), y = (gint)floor(xy->y);
+
+            g_assert(gwy_mask_field_get(field, x, y));
+            g_assert_cmpuint(grains[y*xres + x], ==, i);
+        }
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_mask_field_grain_remove(void)
 {
     enum { max_size = 214, niter = 3000 };

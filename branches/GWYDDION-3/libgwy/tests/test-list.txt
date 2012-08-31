@@ -169,6 +169,7 @@ mask-field/resample
 mask-field/grain/numbers
 mask-field/grain/sizes
 mask-field/grain/bounding-boxes
+mask-field/grain/positions
 mask-field/grain/remove
 mask-field/shrink
 mask-field/grow
