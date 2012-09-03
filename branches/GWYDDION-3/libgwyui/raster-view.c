@@ -118,6 +118,12 @@ static gboolean gwy_raster_view_button_release      (GtkWidget *widget,
                                                      GdkEventButton *event);
 static gboolean gwy_raster_view_leave_notify        (GtkWidget *widget,
                                                      GdkEventCrossing *event);
+static void     window_coords_to_field              (const GwyRasterView *rasterview,
+                                                     const GwyXY *windowxy,
+                                                     GwyXY *fieldxy);
+static void     field_coords_to_window              (const GwyRasterView *rasterview,
+                                                     const GwyXY *fieldxy,
+                                                     GwyXY *windowxy);
 static gboolean gwy_raster_view_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
 static void     destroy_field_surface               (GwyRasterView *rasterview);
@@ -157,8 +163,8 @@ static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
                                                      gboolean setting);
 static gboolean set_number_grains                   (GwyRasterView *rasterview,
                                                      gboolean setting);
-static guint    calculate_full_width                (GwyRasterView *rasterview);
-static guint    calculate_full_height               (GwyRasterView *rasterview);
+static guint    calculate_full_width                (const GwyRasterView *rasterview);
+static guint    calculate_full_height               (const GwyRasterView *rasterview);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 
@@ -580,37 +586,6 @@ gwy_raster_view_get_mask_color(GwyRasterView *rasterview)
 }
 
 static void
-window_coords_to_field(const GwyRasterView *rasterview,
-                       const GwyXY *windowxy,
-                       GwyXY *fieldxy)
-{
-    GwyField *field = rasterview->priv->field;
-    if (!field) {
-        fieldxy->x = fieldxy->y = 0.0;
-        return;
-    }
-
-    RasterView *priv = rasterview->priv;
-    cairo_rectangle_int_t *irect = &priv->image_rectangle;
-    cairo_rectangle_t *frect = &priv->field_rectangle;
-
-    fieldxy->x = windowxy->x - irect->x;
-    if (priv->zoom)
-        fieldxy->x /= priv->zoom;
-    else
-        fieldxy->x /= irect->width/frect->width;
-
-    fieldxy->y = windowxy->y - priv->image_rectangle.y;
-    if (priv->zoom) {
-        fieldxy->y /= priv->zoom;
-        if (priv->real_aspect_ratio)
-            fieldxy->y /= priv->field_aspect_ratio;
-    }
-    else
-        fieldxy->x /= irect->height/frect->height;
-}
-
-static void
 create_window(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
@@ -828,13 +803,13 @@ calculate_position_and_size(GwyRasterView *rasterview)
     *irect = (cairo_rectangle_int_t){ 0, 0, width, height };
 
     if (priv->zoom) {
-        gdouble xzoom = (gdouble)full_width/xres,
-                yzoom = (gdouble)full_height/yres;
+        gdouble xscale = (gdouble)full_width/xres;
+        gdouble yscale = (gdouble)full_height/yres;
 
-        frect->x = hoffset/xzoom;
-        frect->width = width/xzoom;
-        frect->y = voffset/yzoom;
-        frect->height = height/yzoom;
+        frect->x = hoffset/xscale;
+        frect->width = width/xscale;
+        frect->y = voffset/yscale;
+        frect->height = height/yscale;
         // If we got outside the data first try to fix the adjustments and if
         // this does not help add padding.
         if (frect->x + frect->width > xres) {
@@ -863,23 +838,83 @@ calculate_position_and_size(GwyRasterView *rasterview)
         }
     }
     else {
-        // Scale to fit within the rectangle given to us but keeping the
-        // aspect ratio.
-        gdouble xscale = (gdouble)width/full_width,
-                yscale = (gdouble)height/full_height;
+        gdouble xscale = (gdouble)width/full_width;
+        gdouble yscale = (gdouble)height/full_height;
 
         *frect = (cairo_rectangle_t){ 0, 0, xres, yres };
         if (xscale <= yscale) {
-            irect->height = gwy_round(yscale * yres);
+            irect->height = gwy_round(xscale * yres);
             irect->height = CLAMP(irect->height, 1, height);
             irect->y = (height - irect->height)/2;
         }
         else {
-            irect->width = gwy_round(xscale * xres);
+            irect->width = gwy_round(yscale * xres);
             irect->width = CLAMP(irect->width, 1, width);
             irect->x = (width - irect->width)/2;
         }
     }
+}
+
+static void
+window_coords_to_field(const GwyRasterView *rasterview,
+                       const GwyXY *windowxy,
+                       GwyXY *fieldxy)
+{
+    GwyField *field = rasterview->priv->field;
+    if (!field) {
+        fieldxy->x = fieldxy->y = 0.0;
+        return;
+    }
+
+    RasterView *priv = rasterview->priv;
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_rectangle_t *frect = &priv->field_rectangle;
+
+    fieldxy->x = windowxy->x - irect->x;
+    if (priv->zoom)
+        fieldxy->x /= priv->zoom;
+    else
+        fieldxy->x /= irect->width/frect->width;
+
+    fieldxy->y = windowxy->y - irect->y;
+    if (priv->zoom) {
+        fieldxy->y /= priv->zoom;
+        if (priv->real_aspect_ratio)
+            fieldxy->y /= priv->field_aspect_ratio;
+    }
+    else
+        fieldxy->x /= irect->height/frect->height;
+}
+
+static void
+field_coords_to_window(const GwyRasterView *rasterview,
+                       const GwyXY *fieldxy,
+                       GwyXY *windowxy)
+{
+    GwyField *field = rasterview->priv->field;
+    if (!field) {
+        windowxy->x = windowxy->y = 0.0;
+        return;
+    }
+
+    RasterView *priv = rasterview->priv;
+    cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    cairo_rectangle_t *frect = &priv->field_rectangle;
+
+    if (priv->zoom)
+        windowxy->x = priv->zoom*fieldxy->x;
+    else
+        windowxy->x = irect->width/frect->width*fieldxy->x;
+    windowxy->x += irect->x;
+
+    if (priv->zoom) {
+        windowxy->y = priv->zoom*fieldxy->y;
+        if (priv->real_aspect_ratio)
+            windowxy->y *= priv->field_aspect_ratio;
+    }
+    else
+        windowxy->y = irect->height/frect->height*fieldxy->y;
+    windowxy->y += irect->y;
 }
 
 static void
@@ -965,6 +1000,25 @@ ensure_mask_surface(GwyRasterView *rasterview)
 }
 
 static void
+draw_grain_number(GwyRasterView *rasterview,
+                  cairo_t *cr, PangoLayout *layout,
+                  guint gno, const GwyXY *pos)
+{
+    GwyXY windowxy;
+    gchar grain_label[16];
+    gint w, h;
+
+    snprintf(grain_label, sizeof(grain_label), "%u", gno);
+    pango_layout_set_text(layout, grain_label, -1);
+    pango_layout_get_size(layout, &w, &h);
+    field_coords_to_window(rasterview, pos, &windowxy);
+    cairo_move_to(cr,
+                  windowxy.x - 0.5*w/PANGO_SCALE,
+                  windowxy.y - 0.5*h/PANGO_SCALE);
+    pango_cairo_show_layout(cr, layout);
+}
+
+static void
 draw_grain_numbers(GwyRasterView *rasterview,
                    cairo_t *cr)
 {
@@ -985,42 +1039,16 @@ draw_grain_numbers(GwyRasterView *rasterview,
     guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
-    gint full_width = calculate_full_width(rasterview);
-    gint full_height = calculate_full_height(rasterview);
-    gdouble xzoom = (gdouble)full_width/priv->mask->xres,
-            yzoom = (gdouble)full_height/priv->mask->yres;
-
     cairo_save(cr);
-    cairo_rectangle_int_t *irect = &priv->image_rectangle;
     cairo_set_source_rgb(cr, 0.8, 0.0, 0.9);
-    for (guint i = 1; i <= ngrains; i++) {
-        gchar grain_label[16];
-        gint width, height;
-
-        if (i == priv->active_grain)
-            continue;
-
-        snprintf(grain_label, sizeof(grain_label), "%u", i);
-        pango_layout_set_text(layout, grain_label, -1);
-        pango_layout_get_size(layout, &width, &height);
-        cairo_move_to(cr,
-                      xzoom*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
-                      yzoom*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
-        pango_cairo_show_layout(cr, layout);
+    for (guint gno = 1; gno <= ngrains; gno++) {
+        if (gno != priv->active_grain)
+            draw_grain_number(rasterview, cr, layout, gno, positions + gno);
     }
     if (priv->active_grain) {
-        guint i = priv->active_grain;
-        gchar grain_label[16];
-        gint width, height;
-
+        guint gno = priv->active_grain;
         cairo_set_source_rgb(cr, 1.0, 0.2, 0.3);
-        snprintf(grain_label, sizeof(grain_label), "%u", i);
-        pango_layout_set_text(layout, grain_label, -1);
-        pango_layout_get_size(layout, &width, &height);
-        cairo_move_to(cr,
-                      xzoom*positions[i].x - 0.5*width/PANGO_SCALE + irect->x,
-                      yzoom*positions[i].y - 0.5*height/PANGO_SCALE + irect->y);
-        pango_cairo_show_layout(cr, layout);
+        draw_grain_number(rasterview, cr, layout, gno, positions + gno);
     }
     cairo_restore(cr);
 
@@ -1351,9 +1379,9 @@ set_real_aspect_ratio(GwyRasterView *rasterview,
 }
 
 static guint
-calculate_full_width(GwyRasterView *rasterview)
+calculate_full_width(const GwyRasterView *rasterview)
 {
-    RasterView *priv = rasterview->priv;
+    const RasterView *priv = rasterview->priv;
     if (!priv->field)
         return 1;
 
@@ -1362,9 +1390,9 @@ calculate_full_width(GwyRasterView *rasterview)
 }
 
 static guint
-calculate_full_height(GwyRasterView *rasterview)
+calculate_full_height(const GwyRasterView *rasterview)
 {
-    RasterView *priv = rasterview->priv;
+    const RasterView *priv = rasterview->priv;
     if (!priv->field)
         return 1;
 
