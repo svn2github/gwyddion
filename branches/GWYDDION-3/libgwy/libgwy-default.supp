@@ -34,6 +34,17 @@
    fun:gwy_unit_set_from_string
 }
 
+# Appeared in 2.15, again reading by larger blocks.
+
+{
+    glibc-2.15-x86_64-wcslen-addr
+    Memcheck:Addr8
+    fun:wcslen
+    fun:wcsxfrm_l
+    fun:g_utf8_collate_key
+    fun:gwy_resource_compare
+}
+
 ###########################################################################
 # Dynamic linker errors that appeared with GNU ld 2.13.
 
