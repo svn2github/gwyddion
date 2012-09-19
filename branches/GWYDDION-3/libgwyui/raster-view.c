@@ -38,6 +38,7 @@ enum {
     PROP_ZOOM,
     PROP_REAL_ASPECT_RATIO,
     PROP_NUMBER_GRAINS,
+    PROP_GRAIN_NUMBER_COLOR,
     N_PROPS,
     // Overriden.
     PROP_HADJUSTMENT = N_PROPS,
@@ -84,6 +85,7 @@ struct _GwyRasterViewPrivate {
     gulong gradient_data_changed_id;
 
     GwyRGBA mask_color;
+    GwyRGBA grain_number_color;
 };
 
 typedef struct _GwyRasterViewPrivate RasterView;
@@ -136,6 +138,8 @@ static gboolean set_gradient                        (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
 static gboolean set_mask_color                      (GwyRasterView *rasterview,
                                                      const GwyRGBA *color);
+static gboolean set_grain_number_color              (GwyRasterView *rasterview,
+                                                     const GwyRGBA *color);
 static void     field_notify                        (GwyRasterView *rasterview,
                                                      GParamSpec *pspec,
                                                      GwyField *field);
@@ -167,6 +171,7 @@ static guint    calculate_full_width                (const GwyRasterView *raster
 static guint    calculate_full_height               (const GwyRasterView *rasterview);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
+static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
 
 static GParamSpec *properties[N_TOTAL_PROPS];
 
@@ -254,6 +259,13 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_GRAIN_NUMBER_COLOR]
+        = g_param_spec_boxed("grain-number-color",
+                             "Grain number color",
+                             "Colour used for grain number visualisation.",
+                             GWY_TYPE_RGBA,
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -273,6 +285,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                                                    RasterView);
     rasterview->priv->field_aspect_ratio = 1.0;
     rasterview->priv->mask_color = mask_color_default;
+    rasterview->priv->grain_number_color = grain_number_color_default;
     gtk_widget_set_has_window(GTK_WIDGET(rasterview), FALSE);
 }
 
@@ -335,6 +348,10 @@ gwy_raster_view_set_property(GObject *object,
         set_number_grains(rasterview, g_value_get_boolean(value));
         break;
 
+        case PROP_GRAIN_NUMBER_COLOR:
+        set_grain_number_color(rasterview, g_value_get_boxed(value));
+        break;
+
         case PROP_HADJUSTMENT:
         set_hadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
         break;
@@ -394,6 +411,10 @@ gwy_raster_view_get_property(GObject *object,
 
         case PROP_NUMBER_GRAINS:
         g_value_set_boolean(value, priv->number_grains);
+        break;
+
+        case PROP_GRAIN_NUMBER_COLOR:
+        g_value_set_boxed(value, &priv->grain_number_color);
         break;
 
         case PROP_HADJUSTMENT:
@@ -583,6 +604,42 @@ gwy_raster_view_get_mask_color(GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return &GWY_RASTER_VIEW(rasterview)->priv->mask_color;
+}
+
+/**
+ * gwy_raster_view_set_grain_number_color:
+ * @rasterview: A raster view.
+ * @color: A colour.
+ *
+ * Sets the colour a raster view will use for grain number visualisation.
+ **/
+void
+gwy_raster_view_set_grain_number_color(GwyRasterView *rasterview,
+                                       const GwyRGBA *color)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(color);
+    if (!set_grain_number_color(rasterview, color))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterview),
+                             properties[PROP_GRAIN_NUMBER_COLOR]);
+}
+
+/**
+ * gwy_raster_view_get_grain_number_color:
+ * @rasterview: A raster view.
+ *
+ * Obtains the colour used by a raster view for grain number visualisation.
+ *
+ * Returns: (transfer none):
+ *          The colour used by @rasterview for grain number visualisation.
+ **/
+const GwyRGBA*
+gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return &GWY_RASTER_VIEW(rasterview)->priv->grain_number_color;
 }
 
 static void
@@ -1039,15 +1096,25 @@ draw_grain_numbers(GwyRasterView *rasterview,
     guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
+    const GwyRGBA *color = &priv->grain_number_color;
     cairo_save(cr);
-    cairo_set_source_rgb(cr, 0.8, 0.0, 0.9);
+    cairo_set_source_rgba(cr, color->r, color->g, color->b, color->a);
     for (guint gno = 1; gno <= ngrains; gno++) {
         if (gno != priv->active_grain)
             draw_grain_number(rasterview, cr, layout, gno, positions + gno);
     }
     if (priv->active_grain) {
         guint gno = priv->active_grain;
-        cairo_set_source_rgb(cr, 1.0, 0.2, 0.3);
+        const GwyRGBA *mcolor = &priv->mask_color;
+        // FIXME
+        GwyRGBA acolor = {
+            .r = 1.4*color->r - 0.4*mcolor->r,
+            .g = 1.4*color->g - 0.4*mcolor->g,
+            .b = 1.4*color->b - 0.4*mcolor->b,
+            .a = color->a,
+        };
+        gwy_rgba_fix(&acolor);
+        cairo_set_source_rgba(cr, acolor.r, acolor.g, acolor.b, acolor.a);
         draw_grain_number(rasterview, cr, layout, gno, positions + gno);
     }
     cairo_restore(cr);
@@ -1076,7 +1143,7 @@ gwy_raster_view_draw(GtkWidget *widget,
     cairo_restore(cr);
 
     if (priv->mask) {
-        GwyRGBA *color = &priv->mask_color;
+        const GwyRGBA *color = &priv->mask_color;
         cairo_save(cr);
         cairo_set_source_rgba(cr, color->r, color->g, color->b, color->a);
         ensure_mask_surface(rasterview);
@@ -1194,6 +1261,23 @@ set_mask_color(GwyRasterView *rasterview,
 
     priv->mask_color = *color;
     if (priv->mask)
+        gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    return TRUE;
+}
+
+static gboolean
+set_grain_number_color(GwyRasterView *rasterview,
+                       const GwyRGBA *color)
+{
+    RasterView *priv = rasterview->priv;
+    if (color->r == priv->mask_color.r
+        && color->g == priv->mask_color.g
+        && color->b == priv->mask_color.b
+        && color->a == priv->mask_color.a)
+        return FALSE;
+
+    priv->grain_number_color = *color;
+    if (priv->mask && priv->number_grains)
         gtk_widget_queue_draw(GTK_WIDGET(rasterview));
     return TRUE;
 }
