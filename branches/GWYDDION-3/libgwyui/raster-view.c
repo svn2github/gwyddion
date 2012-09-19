@@ -940,7 +940,7 @@ window_coords_to_field(const GwyRasterView *rasterview,
             fieldxy->y /= priv->field_aspect_ratio;
     }
     else
-        fieldxy->x /= irect->height/frect->height;
+        fieldxy->y /= irect->height/frect->height;
 }
 
 static void
