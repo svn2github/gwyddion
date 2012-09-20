@@ -458,5 +458,198 @@
       </varlistentry>
     </variablelist>
   </sect2>
+  <sect2 id='neural-network'>
+    <title>Neural network processing</title>
+    <indexterm><primary>neural network</primary></indexterm>
+    <para>
+      Neural network processing can be used to calculate one kind of data
+      from another even if the formula or relation between them is not
+      explicitly known.  The relation is built into the network implicitly by
+      a process called training which employs pairs of known input and output
+      data, usually called model and signal.  In this process, the network is
+      optimised to reproduce as well as possible the signal from model.
+      A trained network can then be used to process model data for which the
+      output signal is not available and obtain – usually somewhat
+      approximately – what the signal would look like.  Another possible
+      application is the approximation of data processing methods that are
+      exact but very time-consuming.  In this case the signal is the output
+      of the exact method and the network is trained to reproduce that.
+    </para>
+    <para>
+      Since training and application are two disparate steps they are present
+      as two different functions in Gwyddion.
+    </para>
+    <sect3 id='neural-network-training'>
+      <title>Training</title>
+      <indexterm>
+        <primary>neural network</primary>
+        <secondary>training</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Multidata</guisubmenu>
+          <guimenuitem>Neural Network Training</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        The main functions that control the training process are contained in
+        tab <guilabel>Training</guilabel>:
+        <variablelist>
+          <varlistentry>
+            <term><guilabel>Model</guilabel></term>
+            <listitem>
+              Model data, i.e. input for training.  Multiple models
+              can be chosen sequentially for training (with corresponding
+              signals).
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Signal</guilabel></term>
+            <listitem>
+              Signal data for training, i.e. the output the trained network
+              should produce.  The signal data field must be compatible
+              with model field, i.e. it must have the same pixel and
+              physical dimensions.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Training steps</guilabel></term>
+            <listitem>
+              Number of training steps to perform when
+              <guibutton>Train</guibutton> is pressed.  Each step consists
+              of one pass through the entire signal data.  It is
+              possible to set the number of training steps to zero; no
+              training pass is performed then but the model is still
+              evaluated with the network and you can observe the result.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guibutton>Train</guibutton></term>
+            <listitem>
+              Starts training.  This is a relatively slow process,
+              especially if the data and/or window size are large.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guibutton>Reinitialize</guibutton></term>
+            <listitem>
+              Reinitialises the neural network to an untrained state.
+              More precisely, this means neuron weights are set to random
+              numbers.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Masking Mode</guilabel></term>
+            <listitem>
+              It is possible to train the network only on a subset of the
+              signal, specified by a mask on the signal data.  (Masking of
+              model would be meaningless due to the window size.)
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+      <para>
+        Neural network parameters can be modified in tab
+        <guilabel>Parameters</guilabel>.  Chaning either the window
+        dimensions or the number of hidden nodes means the network is
+        reinitialised (as if you pressed <guibutton>Reinitialize</guibutton>).
+        <variablelist>
+          <varlistentry>
+            <term><guilabel>Window width</guilabel></term>
+            <listitem>
+              Horizontal size of the window.  The input data for the network
+              consits of an area around the model pixel, called window.
+              The window is centered on the pixel so, odd sizes are usually
+              preferred.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Window height</guilabel></term>
+            <listitem>
+              Vertical size of the window.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Hidden nodes</guilabel></term>
+            <listitem>
+              Number of nodes in the <quote>hidden</quote> layer of the
+              neural network. More nodes can lead to more capable network, on
+              the other hand, it means slower training and application.
+              Typically, this number is small compared to the number of
+              pixels in the window.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Power of source XY</guilabel></term>
+            <listitem>
+              The power in which the model lateral dimensions units should
+              appear in the signal.  This is only used when the network is
+              applied.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Power of source Z</guilabel></term>
+            <listitem>
+              The power in which the model <quote>height</quote> units should
+              appear in the signal.  This is only used when the network is
+              applied.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Fixed units</guilabel></term>
+            <listitem>
+              Fixed units of the result.  They are combined with the other
+              units parameters so if you want result units that are
+              independent of input units you have to set both powers to 0.
+              This is only used when the network is applied.
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+      <para>
+        Trained neural network can be saved, loaded to be retrained on
+        different data, etc.  The network list management is similar to
+        <link linkend='raw-file-import'>raw file presets</link>.
+      </para>
+      <para>
+        In addition to the networks in the list, there is one more unnamed
+        network and that the network currently in training.  When you load
+        a network the network in training becomes a copy of the loaded
+        network.  Training then does not change the named networks; to save
+        the network after training (under existing or new name) you must
+        explicitly use <guibutton>Store</guibutton>.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Application</title>
+      <indexterm>
+        <primary>neural network</primary>
+        <secondary>application</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Multidata</guisubmenu>
+          <guimenuitem>Apply Neural Network</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Application of a trained neural network is simple: just choose one
+        from the list and press <guibutton>OK</guibutton>.  The unnamed
+        network currently in training is also present in the list under the
+        label <quote>In training</quote>.
+      </para>
+      <para>
+        Since neural networks process and produce normalised data, it
+        does not perserve porportionality well, especially if the scale of
+        training model differs considerably from the scale of real inputs.  If
+        the output is expected to scale with input you can enable option
+        <guilabel>Scale proportionally to input</guilabel> that scales the
+        output with the inverse ratio of actual and training input data
+        ranges.
+      </para>
+    </sect3>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
