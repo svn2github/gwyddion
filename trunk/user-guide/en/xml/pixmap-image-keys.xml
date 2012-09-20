@@ -15,7 +15,8 @@
     When data are exported to a high-depth image additional information is
     stored to the file to enable automated loading back to Gwyddion without
     having to specify the dimensions and scales manually.  By storing this
-    additional information to image files you create you can also make them
+    additional information to image files you create in other programs,
+    you can also make them
     directly loadable to Gwyddion with correct dimensions and scales.  The
     information is organised as key-value pairs, stored using individual
     format-specific means for each format, described in the following table.
