@@ -32,6 +32,7 @@ enum {
 
 enum {
     SHAPE_SELECTED,
+    UPDATED,
     N_SIGNALS
 };
 
@@ -48,6 +49,7 @@ typedef struct {
 
 struct _GwyShapesPrivate {
     gint focus;
+    gboolean is_updated;
 
     GwyCoords *coords;
     gulong coords_item_inserted_id;
@@ -81,7 +83,6 @@ static void     coords_item_deleted    (GwyShapes *shapes,
 static void     coords_item_changed    (GwyShapes *shapes,
                                         guint id,
                                         GwyCoords *coords);
-static void     gwy_shapes_updated     (GwyShapes *shaped);
 
 static guint signals[N_SIGNALS];
 static GParamSpec *properties[N_PROPS];
@@ -122,7 +123,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
     // FIXME: This is too simplistic.  We may want multiple objects to be
-    // selected.
+    // selected.  This can be implemented using a GwyMaskLine.
     /**
      * GwyShapes::shape-selected:
      * @gwyshapes: The #GwyShapes which received the signal.
@@ -139,6 +140,23 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__INT,
+                                     G_TYPE_NONE, 0);
+
+    /**
+     * GwyShapes::updated:
+     * @gwyshapes: The #GwyShapes which received the signal.
+     *
+     * The ::updated signal is emitted when the coords change, a transform
+     * function changes or there is another reason to redraw the shapes.
+     * The signal is emitted only once between invocations of the draw()
+     * method.
+     **/
+    signals[UPDATED]
+        = g_signal_new_class_handler("updated",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
                                      G_TYPE_NONE, 0);
 }
 
@@ -238,7 +256,7 @@ set_coords(GwyShapes *shapes,
                                NULL))
         return FALSE;
 
-    gwy_shapes_updated(shapes);
+    gwy_shapes_update(shapes);
     return TRUE;
 }
 
@@ -324,7 +342,7 @@ gwy_shapes_set_coords_to_view_transform(GwyShapes *shapes,
                            &transform->destroy))
         return;
 
-    gwy_shapes_updated(shapes);
+    gwy_shapes_update(shapes);
 }
 
 /**
@@ -354,7 +372,7 @@ gwy_shapes_set_view_to_coords_transform(GwyShapes *shapes,
                            &transform->destroy))
         return;
 
-    gwy_shapes_updated(shapes);
+    gwy_shapes_update(shapes);
 }
 
 /**
@@ -600,7 +618,7 @@ coords_item_inserted(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_inserted;
     if (method)
         method(shapes, id);
-    gwy_shapes_updated(shapes);
+    gwy_shapes_update(shapes);
 }
 
 static void
@@ -612,7 +630,7 @@ coords_item_deleted(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_deleted;
     if (method)
         method(shapes, id);
-    gwy_shapes_updated(shapes);
+    gwy_shapes_update(shapes);
 }
 
 static void
@@ -624,13 +642,44 @@ coords_item_changed(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_changed;
     if (method)
         method(shapes, id);
-    gwy_shapes_updated(shapes);
+    gwy_shapes_update(shapes);
 }
 
-static void
-gwy_shapes_updated(GwyShapes *shapes)
+/**
+ * gwy_shapes_update:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Enforces a group of geometrical shapes to ‘updated’ state.
+ *
+ * Is this is the first time after drawing the shapes they are updated the
+ * GwyShapes::updated signal is emitted.  Otherwise this method is no-op.
+ **/
+void
+gwy_shapes_update(GwyShapes *shapes)
 {
-    g_printerr("Shapes %p (%s) updated.\n", shapes, G_OBJECT_TYPE_NAME(shapes));
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    if (priv->is_updated)
+        return;
+
+    priv->is_updated = TRUE;
+    g_signal_emit(shapes, signals[UPDATED], 0);
+}
+
+/**
+ * gwy_shapes_is_updated:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Checks whether a group of geometrical shapes has been updates since the last
+ * drawing.
+ *
+ * Returns: %TRUE if @shapes has been updated, %FALSE otherwise.
+ **/
+gboolean
+gwy_shapes_is_updated(GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    return shapes->priv->is_updated;
 }
 
 /**
