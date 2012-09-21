@@ -316,6 +316,22 @@ gwy_shapes_coords_type(const GwyShapes *shapes)
 }
 
 /**
+ * gwy_shapes_class_coords_type:
+ * @shapes: The class of a group of geometrical shapes.
+ *
+ * Obtains the type of coordinates object used by a group of shapes class.
+ *
+ * Returns: The #GwyCoords subclass used to represent the coordinates of
+ *          shapes of this class.
+ **/
+GType
+gwy_shapes_class_coords_type(const GwyShapesClass *klass)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES_CLASS(klass), 0);
+    return klass->coords_type;
+}
+
+/**
  * gwy_shapes_set_coords_to_view_transform:
  * @shapes: A group of geometrical shapes.
  * @func: Function transforming @coords coordinates to view coordinates.
