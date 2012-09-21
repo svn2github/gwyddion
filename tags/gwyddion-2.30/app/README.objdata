@@ -1,0 +1,24 @@
+
+Data set on various gwyddion objects by main app (g_object_set_data()).
+May change, namely many may get some "gwy-app-" prefix.
+
+Toolbox (gwy_app_main_window_get()):
+    "accel_group":       The toolbox's main accelerator group
+
+Process menu:
+    "gwy-app-menu-repeat-last":    Menu item representing repeat-last
+    "gwy-app-menu-reshow-last":    Menu item representing reshow-last
+
+`Recent Files' menu items:
+    "filename":          The file name
+
+Toolbar show/hide buttons:
+    "arrow":             The arrow widget
+    "key":               Settings key holding visibility for this toolbox
+                         ("/app/toolbox/visible/SOMETHING")
+
+Data Containers:
+    "metadata-browser"   If set, there is already a metadata browser active for
+                         this data and the pointer is its window widget.
+
+# @(#) $Id$
