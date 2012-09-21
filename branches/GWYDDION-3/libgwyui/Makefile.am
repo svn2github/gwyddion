@@ -21,7 +21,8 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 public_headers = \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
-	$(srcdir)/shapes.h
+	$(srcdir)/shapes.h \
+	$(srcdir)/shapes-point.h
 
 public_built_headers = \
 	$(mkenum_name).h
@@ -49,7 +50,8 @@ noinst_HEADERS = $(private_headers)
 libgwyui3_la_SOURCES = \
 	field-render.c \
 	raster-view.c \
-	shapes.c
+	shapes.c \
+	shapes-point.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -409,6 +409,7 @@ gwy_shapes_draw(GwyShapes *shapes,
     GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
     g_return_if_fail(klass->draw);
     klass->draw(shapes, cr);
+    shapes->priv->is_updated = FALSE;
 }
 
 /**
