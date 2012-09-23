@@ -34,6 +34,7 @@ enum {
     PROP_FIELD,
     PROP_MASK,
     PROP_GRADIENT,
+    PROP_SHAPES,
     PROP_MASK_COLOR,
     PROP_ZOOM,
     PROP_REAL_ASPECT_RATIO,
@@ -83,6 +84,9 @@ struct _GwyRasterViewPrivate {
 
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
+
+    GwyShapes *shapes;
+    gulong shapes_updated_id;
 
     GwyRGBA mask_color;
     GwyRGBA grain_number_color;
@@ -136,6 +140,15 @@ static gboolean set_mask                            (GwyRasterView *rasterview,
                                                      GwyMaskField *mask);
 static gboolean set_gradient                        (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
+static gboolean set_shapes                          (GwyRasterView *rasterview,
+                                                     GwyShapes *shapes);
+static void     set_shapes_transforms               (GwyRasterView *rasterview);
+static void     shapes_coords_to_view               (const gdouble *coords_from,
+                                                     gdouble *coords_to,
+                                                     gpointer user_data);
+static void     shapes_view_to_coords               (const gdouble *coords_from,
+                                                     gdouble *coords_to,
+                                                     gpointer user_data);
 static gboolean set_mask_color                      (GwyRasterView *rasterview,
                                                      const GwyRGBA *color);
 static gboolean set_grain_number_color              (GwyRasterView *rasterview,
@@ -154,6 +167,8 @@ static void     mask_data_changed                   (GwyRasterView *rasterview,
                                                      GwyMaskField *mask);
 static void     gradient_data_changed               (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
+static void     shapes_updated                      (GwyRasterView *rasterview,
+                                                     GwyShapes *shapes);
 static gboolean set_hadjustment                     (GwyRasterView *rasterview,
                                                      GtkAdjustment *adjustment);
 static gboolean set_vadjustment                     (GwyRasterView *rasterview,
@@ -223,6 +238,13 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                               "Gradient",
                               "Gradient used for visualisation.",
                               GWY_TYPE_GRADIENT,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHAPES]
+        = g_param_spec_object("shapes",
+                              "Shapes",
+                              "Geometric shapes shown on top of the view.",
+                              GWY_TYPE_SHAPES,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_MASK_COLOR]
@@ -303,6 +325,7 @@ gwy_raster_view_dispose(GObject *object)
     set_field(rasterview, NULL);
     set_mask(rasterview, NULL);
     set_gradient(rasterview, NULL);
+    set_shapes(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
     destroy_field_surface(rasterview);
@@ -330,6 +353,10 @@ gwy_raster_view_set_property(GObject *object,
 
         case PROP_GRADIENT:
         set_gradient(rasterview, g_value_get_object(value));
+        break;
+
+        case PROP_SHAPES:
+        set_shapes(rasterview, g_value_get_object(value));
         break;
 
         case PROP_MASK_COLOR:
@@ -395,6 +422,10 @@ gwy_raster_view_get_property(GObject *object,
 
         case PROP_GRADIENT:
         g_value_set_object(value, priv->gradient);
+        break;
+
+        case PROP_SHAPES:
+        g_value_set_object(value, priv->shapes);
         break;
 
         case PROP_MASK_COLOR:
@@ -640,6 +671,25 @@ gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return &GWY_RASTER_VIEW(rasterview)->priv->grain_number_color;
+}
+
+
+void
+gwy_raster_view_set_shapes(GwyRasterView *rasterview,
+                           GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    if (!set_shapes(rasterview, shapes))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_SHAPES]);
+}
+
+GwyShapes*
+gwy_raster_view_get_shapes(GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return rasterview->priv->shapes;
 }
 
 static void
@@ -1153,6 +1203,12 @@ gwy_raster_view_draw(GtkWidget *widget,
         draw_grain_numbers(rasterview, cr);
     }
 
+    if (priv->shapes) {
+        cairo_save(cr);
+        gwy_shapes_draw(priv->shapes, cr);
+        cairo_restore(cr);
+    }
+
     return FALSE;
 }
 
@@ -1249,6 +1305,89 @@ set_gradient(GwyRasterView *rasterview,
 }
 
 static gboolean
+set_shapes(GwyRasterView *rasterview,
+           GwyShapes *shapes)
+{
+    RasterView *priv = rasterview->priv;
+    GwyShapes *oldshapes = NULL;
+
+    if (priv->shapes) {
+        oldshapes = priv->shapes;
+        g_object_ref(priv->shapes);
+    }
+
+    if (!gwy_set_member_object(rasterview, shapes, GWY_TYPE_SHAPES,
+                               &priv->shapes,
+                               "updated", &shapes_updated,
+                               &priv->shapes_updated_id,
+                               G_CONNECT_SWAPPED,
+                               NULL)) {
+        if (priv->shapes)
+            g_object_unref(priv->shapes);
+        return FALSE;
+    }
+
+    if (oldshapes) {
+        gwy_shapes_set_coords_to_view_transform(oldshapes, NULL, NULL, NULL);
+        gwy_shapes_set_view_to_coords_transform(oldshapes, NULL, NULL, NULL);
+    }
+    if (shapes)
+        set_shapes_transforms(rasterview);
+
+    GtkWidget *widget = GTK_WIDGET(rasterview);
+    if (gtk_widget_is_drawable(widget))
+        gtk_widget_queue_draw(widget);
+
+    return TRUE;
+}
+
+static void
+set_shapes_transforms(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    GwyShapes *shapes = priv->shapes;
+
+    // XXX: This is unmanageable.  We must make it generic.  Either by
+    // transforming individual xy pairs – assuming everything is finally
+    // expressed using xy pairs.  Or by adding some generic xy-scale + shift
+    // transform requirement to GwyCoords so that we can just invoke that.
+    gwy_shapes_set_coords_to_view_transform(shapes, &shapes_coords_to_view,
+                                            rasterview, NULL);
+    gwy_shapes_set_coords_to_view_transform(shapes, &shapes_view_to_coords,
+                                            rasterview, NULL);
+}
+
+static void
+shapes_coords_to_view(const gdouble *coords_from,
+                      gdouble *coords_to,
+                      gpointer user_data)
+{
+    GwyRasterView *rasterview = (GwyRasterView*)user_data;
+    RasterView *priv = rasterview->priv;
+
+    // XXX: For now.
+    g_assert(GWY_IS_SHAPES(priv->shapes));
+    field_coords_to_window(rasterview,
+                           (const GwyXY*)coords_from,
+                           (GwyXY*)coords_to);
+}
+
+static void
+shapes_view_to_coords(const gdouble *coords_from,
+                      gdouble *coords_to,
+                      gpointer user_data)
+{
+    GwyRasterView *rasterview = (GwyRasterView*)user_data;
+    RasterView *priv = rasterview->priv;
+
+    // XXX: For now.
+    g_assert(GWY_IS_SHAPES(priv->shapes));
+    window_coords_to_field(rasterview,
+                           (const GwyXY*)coords_from,
+                           (GwyXY*)coords_to);
+}
+
+static gboolean
 set_mask_color(GwyRasterView *rasterview,
                const GwyRGBA *color)
 {
@@ -1338,6 +1477,13 @@ gradient_data_changed(GwyRasterView *rasterview,
                       GwyGradient *gradient)
 {
     rasterview->priv->field_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+static void
+shapes_updated(GwyRasterView *rasterview,
+               GwyShapes *shapes)
+{
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
 }
 

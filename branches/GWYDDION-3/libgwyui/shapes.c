@@ -334,8 +334,9 @@ gwy_shapes_class_coords_type(const GwyShapesClass *klass)
 /**
  * gwy_shapes_set_coords_to_view_transform:
  * @shapes: A group of geometrical shapes.
- * @func: Function transforming @coords coordinates to view coordinates.
- * @user_data: Data passed to @func;
+ * @func: (allow-none):
+ *        Function transforming @coords coordinates to view coordinates.
+ * @user_data: Data passed to @func.
  * @destroy: Destroy notifier for @user_data.
  *
  * Sets the function for transformation of physical coordinates to view
@@ -364,8 +365,9 @@ gwy_shapes_set_coords_to_view_transform(GwyShapes *shapes,
 /**
  * gwy_shapes_set_view_to_coords_transform:
  * @shapes: A group of geometrical shapes.
- * @func: Function transforming view coordinates to @coords coordinates.
- * @user_data: Data passed to @func;
+ * @func: (allow-none):
+ *        Function transforming view coordinates to @coords coordinates.
+ * @user_data: Data passed to @func.
  * @destroy: Destroy notifier for @user_data.
  *
  * Sets the function for transformation of view coordinates to physical

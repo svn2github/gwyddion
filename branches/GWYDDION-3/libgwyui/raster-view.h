@@ -24,6 +24,7 @@
 #include <libgwy/mask-field.h>
 #include <libgwy/field.h>
 #include <libgwy/gradient.h>
+#include <libgwyui/shapes.h>
 
 G_BEGIN_DECLS
 
@@ -70,6 +71,9 @@ const GwyRGBA* gwy_raster_view_get_mask_color        (GwyRasterView *rasterview)
 void           gwy_raster_view_set_grain_number_color(GwyRasterView *rasterview,
                                                       const GwyRGBA *color);
 const GwyRGBA* gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview);
+void           gwy_raster_view_set_shapes            (GwyRasterView *rasterview,
+                                                      GwyShapes *shapes);
+GwyShapes*     gwy_raster_view_get_shapes            (GwyRasterView *rasterview);
 
 G_END_DECLS
 
