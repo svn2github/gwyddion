@@ -90,7 +90,7 @@ fi
 
 GWY_PROG_CC_OPTIONS([MATH],[-fexcess-precision=fast -fno-math-errno -fstrict-overflow])
 #GWY_PROG_CC_OPTIONS([OPTIMIZE],[-flto -O3])
-GWY_PROG_CC_OPTIONS([WARNINGS],[-Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wredundant-decls -Wlogical-op -Werror=implicit-function-declaration -Werror=implicit-int])
+GWY_PROG_CC_OPTIONS([WARNINGS],[-Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wredundant-decls -Wlogical-op -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type])
 
 GWY_CFLAGS="$GWY_PROG_CC_MATH $GWY_PROG_CC_WARNINGS $GWY_PROG_CC_OPTIMIZE"
 AC_SUBST([GWY_CFLAGS])
