@@ -90,4 +90,12 @@ gwy_cairo_cross(cairo_t *cr,
     cairo_line_to(cr, x, y + ticklen);
 }
 
+/**
+ * SECTION: utils
+ * @section_id: utils
+ * @title: Cairo drawing utils
+ * @short_description: Auxiliary and impedance matching functions for Cairo
+ *                     drawing
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
