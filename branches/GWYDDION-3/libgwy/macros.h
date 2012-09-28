@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -53,6 +53,12 @@
 
 #define gwy_assign(dest, source, n) \
     memcpy((dest), (source), (n)*sizeof((dest)[0]))
+
+// The -1 array trick causes error if sizes do not match.
+// FIXME: Improve using some gccism.
+#define gwy_equal(a, b) \
+    (!memcmp((a), (b), sizeof((a)[0]) \
+                       + (int[1 - 2*(sizeof((a)[0]) != sizeof((b)[0]))]){0}[0]))
 
 #endif
 

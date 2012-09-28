@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -201,6 +201,21 @@
  * This is a shorthand for memcpy(), with the number of bytes to fill
  * calculated from the type of the @dest pointer.  Consequently, the arrays
  * may not overlap.
+ **/
+
+/**
+ * gwy_equal:
+ * @a: Typed pointer to one struct to compare.
+ * @b: Types pointer to other struct of the same size to compare.
+ *
+ * Checks two structures for bit-wise equality.
+ *
+ * This is a shorthand for inverted memcmp(), with the number of bytes to
+ * compare calculated from the type of the @a pointer.  The sizes must match
+ * (the macro causes a compiler error otherwise).
+ *
+ * It evaluates to zero if @a and @b <emphasis>differ</emphasis> and to
+ * non-zero if they are identical.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
