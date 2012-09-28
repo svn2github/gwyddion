@@ -25,6 +25,7 @@
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-point.h>
 #include <libgwyui/types.h>
+#include <libgwyui/utils.h>
 
 #endif
 
