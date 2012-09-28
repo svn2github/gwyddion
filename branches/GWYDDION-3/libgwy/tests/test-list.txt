@@ -1,5 +1,7 @@
 # $Id$
 version
+macros/swap
+macros/order
 error-list
 str/memmem
 str/next-line

@@ -249,7 +249,7 @@ randomize_string(GString *str,
     n = ((n & 0xff) + ((n >> 8) & 0xff) + ((n >> 16) & 0xff) + (n >> 24))/100;
     g_string_set_size(str, n);
 
-    guint x, remaining = 0;
+    guint x = 0, remaining = 0;
     for (guint i = 0; i < n; i++) {
         guchar c;
         do {
