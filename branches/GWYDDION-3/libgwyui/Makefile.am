@@ -22,7 +22,8 @@ public_headers = \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/shapes.h \
-	$(srcdir)/shapes-point.h
+	$(srcdir)/shapes-point.h \
+	$(srcdir)/utils.h
 
 public_built_headers = \
 	$(mkenum_name).h
@@ -51,7 +52,8 @@ libgwyui3_la_SOURCES = \
 	field-render.c \
 	raster-view.c \
 	shapes.c \
-	shapes-point.c
+	shapes-point.c \
+	utils.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \
