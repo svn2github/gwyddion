@@ -644,7 +644,7 @@ gwy_gradient_set(GwyGradient *gradient,
     gwy_rgba_fix(&pt.color);
     pt.x = fix_position(points, n, pt.x);
     GwyGradientPoint *gradpt = &g_array_index(points, GwyGradientPoint, n);
-    if (memcmp(&pt, gradpt, sizeof(GwyGradientPoint)) != 0) {
+    if (!gwy_equal(&pt, gradpt)) {
         *gradpt = pt;
         gwy_gradient_changed(gradient);
     }
@@ -672,7 +672,7 @@ gwy_gradient_set_color(GwyGradient *gradient,
     GwyRGBA rgba = *color;
     gwy_rgba_fix(&rgba);
     GwyGradientPoint *gradpt = &g_array_index(points, GwyGradientPoint, n);
-    if (memcmp(&rgba, &gradpt->color, sizeof(GwyRGBA)) != 0) {
+    if (!gwy_equal(&rgba, &gradpt->color)) {
         gradpt->color = rgba;
         gwy_gradient_changed(gradient);
     }

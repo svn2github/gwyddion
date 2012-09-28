@@ -251,7 +251,7 @@ gwy_gl_material_assign_impl(GwySerializable *destination,
 
     g_object_freeze_notify(G_OBJECT(dest));
     parent_serializable->assign(destination, source);
-    if (memcmp(dest->priv, src->priv, sizeof(Material)) != 0) {
+    if (!gwy_equal(dest->priv, src->priv)) {
         dest->priv = src->priv;
         emit_changed = TRUE;
     }
@@ -285,7 +285,7 @@ gwy_gl_material_set_rgba(GwyRGBA *dest,
 {
     GwyRGBA color = *src;
     gwy_rgba_fix(&color);
-    if (memcmp(dest, &color, sizeof(GwyRGBA) == 0))
+    if (gwy_equal(dest, &color))
         return FALSE;
     *dest = color;
     return TRUE;

@@ -25,7 +25,8 @@
 
 /**
  * gwy_set_user_func:
- * @func: New function pointer.
+ * @func: (allow-none):
+ *        New function pointer.
  * @data: New user data for @func.
  * @destroy: New destroy notifier for @data.
  * @func_field: Pointer to location storing the current function to

@@ -488,7 +488,9 @@ gwy_coords_delete(GwyCoords *coords,
  * gwy_coords_size:
  * @coords: A group of coordinates of some geometrical objects.
  *
- * Obtains the number of objects in a coords.
+ * Obtains the number of objects in a group of coordinates.
+ *
+ * Returns: The number of objects in @coords.
  **/
 guint
 gwy_coords_size(const GwyCoords *coords)
@@ -503,7 +505,7 @@ gwy_coords_size(const GwyCoords *coords)
  * @data: Array of sufficient length to to store the complete coords data
  *        to.
  *
- * Obtains the data of an entire coords.
+ * Obtains the data of an entire group of coords.
  **/
 void
 gwy_coords_get_data(const GwyCoords *coords,

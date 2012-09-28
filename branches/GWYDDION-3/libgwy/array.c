@@ -111,23 +111,25 @@ gwy_array_class_init(GwyArrayClass *klass)
                                      g_cclosure_marshal_VOID__UINT,
                                      G_TYPE_NONE, 1, G_TYPE_UINT);
 
-//  /**
-//   * GwyArray::items-reordered:
-//   * @gwyarray: The #GwyArray which received the signal.
-//   * @arg1: New item order map as in #GtkTreeModel,
-//   *        @arg1[new_position] = old_position.
-//   *
-//   * The ::items-reordered signal is emitted when item in the array
-//   * are reordered.
-//   **/
-//  signals[ITEMS_REORDERED]
-//      = g_signal_new("items-reordered",
-//                     GWY_TYPE_ARRAY,
-//                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-//                     G_STRUCT_OFFSET(GwyArrayClass, items_reordered),
-//                     NULL, NULL,
-//                     g_cclosure_marshal_VOID__POINTER,
-//                     G_TYPE_NONE, 1, G_TYPE_POINTER);
+#if 0
+  /**
+   * GwyArray::items-reordered:
+   * @gwyarray: The #GwyArray which received the signal.
+   * @arg1: New item order map as in #GtkTreeModel,
+   *        @arg1[new_position] = old_position.
+   *
+   * The ::items-reordered signal is emitted when item in the array
+   * are reordered.
+   **/
+  signals[ITEMS_REORDERED]
+      = g_signal_new("items-reordered",
+                     GWY_TYPE_ARRAY,
+                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                     G_STRUCT_OFFSET(GwyArrayClass, items_reordered),
+                     NULL, NULL,
+                     g_cclosure_marshal_VOID__POINTER,
+                     G_TYPE_NONE, 1, G_TYPE_POINTER);
+#endif
 }
 
 static void
