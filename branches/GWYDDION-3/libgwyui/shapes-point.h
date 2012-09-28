@@ -50,7 +50,8 @@ struct _GwyShapesPointClass {
     GwyShapesClass shapes_class;
 };
 
-GType gwy_shapes_point_get_type(void) G_GNUC_CONST;
+GType      gwy_shapes_point_get_type(void) G_GNUC_CONST;
+GwyShapes* gwy_shapes_point_new     (void) G_GNUC_MALLOC;
 
 G_END_DECLS
 

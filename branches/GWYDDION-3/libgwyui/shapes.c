@@ -27,6 +27,8 @@ enum {
     PROP_0,
     PROP_COORDS,
     PROP_FOCUS,
+    PROP_MAX_SHAPES,
+    PROP_EDITABLE,
     N_PROPS
 };
 
@@ -38,51 +40,77 @@ enum {
 
 typedef struct _GwyShapesPrivate Shapes;
 
-typedef gboolean (*EventMethod)(GwyShapes *shapes, GdkEvent *event);
+typedef gboolean (*EventMethodMotion)(GwyShapes *shapes, GdkEventMotion *event);
+typedef gboolean (*EventMethodButton)(GwyShapes *shapes, GdkEventButton *event);
+typedef gboolean (*EventMethodKey)(GwyShapes *shapes, GdkEventKey *event);
+typedef void (*CancelEditingMethod)(GwyShapes *shapes, gint id);
 typedef void (*ItemMethod)(GwyShapes *shapes, guint id);
-
-typedef struct {
-    GwyShapesTransformFunc func;
-    gpointer data;
-    GDestroyNotify destroy;
-} CoordsTransform;
 
 struct _GwyShapesPrivate {
     gint focus;
+    guint max_shapes;
     gboolean is_updated;
+    gboolean editable;
 
     GwyCoords *coords;
     gulong coords_item_inserted_id;
     gulong coords_item_deleted_id;
-    gulong coords_item_changed_id;
+    gulong coords_item_updated_id;
 
-    CoordsTransform coords_to_view;
-    CoordsTransform view_to_coords;
+    // Selection object:
+    // (1) Who owns it? @shapes, probably.  Have set from foo/get as foo funcs.
+    // (2) How subclasses work with actual representation?
+    // (3) Items are selected/deselected/added/removed from both shapes and
+    //     programatically.  Must have two way updates:
+    //     @coords size changes → selection reflects this
+    //     selection is set from outside → ideally impossible to get wrong
+    //     item is deleted by @shapes due to user interaction – who is
+    //     responsible for deleting it in selection?
+    // (4) Representation: A list of selected intervals?  Represents well
+    //     all common cases (nothing, a few random, a few large blocks, all).
+    // (5) How it should interact with GtkTreeSelection if items are displayed
+    //     in a treeview?
+
+    cairo_rectangle_t bbox;
+    cairo_matrix_t coords_to_view;
+    cairo_matrix_t view_to_coords;
+    cairo_matrix_t pixel_to_view;
+    cairo_matrix_t view_to_pixel;
 };
 
-static void     gwy_shapes_finalize    (GObject *object);
-static void     gwy_shapes_dispose     (GObject *object);
-static void     gwy_shapes_set_property(GObject *object,
-                                        guint prop_id,
-                                        const GValue *value,
-                                        GParamSpec *pspec);
-static void     gwy_shapes_get_property(GObject *object,
-                                        guint prop_id,
-                                        GValue *value,
-                                        GParamSpec *pspec);
-static gboolean set_coords             (GwyShapes *shapes,
-                                        GwyCoords *coords);
-static gboolean set_focus              (GwyShapes *shapes,
-                                        gint id);
-static void     coords_item_inserted   (GwyShapes *shapes,
-                                        guint id,
-                                        GwyCoords *coords);
-static void     coords_item_deleted    (GwyShapes *shapes,
-                                        guint id,
-                                        GwyCoords *coords);
-static void     coords_item_changed    (GwyShapes *shapes,
-                                        guint id,
-                                        GwyCoords *coords);
+static void     gwy_shapes_finalize           (GObject *object);
+static void     gwy_shapes_dispose            (GObject *object);
+static void     gwy_shapes_set_property       (GObject *object,
+                                               guint prop_id,
+                                               const GValue *value,
+                                               GParamSpec *pspec);
+static void     gwy_shapes_get_property       (GObject *object,
+                                               guint prop_id,
+                                               GValue *value,
+                                               GParamSpec *pspec);
+static gboolean set_coords                    (GwyShapes *shapes,
+                                               GwyCoords *coords);
+static gboolean set_focus                     (GwyShapes *shapes,
+                                               gint id);
+static gboolean set_max_shapes                (GwyShapes *shapes,
+                                               guint max_shapes);
+static gboolean set_editable                  (GwyShapes *shapes,
+                                               gboolean editable);
+static void     cancel_editing                (GwyShapes *shapes,
+                                               gint id);
+static void     coords_item_inserted          (GwyShapes *shapes,
+                                               guint id,
+                                               GwyCoords *coords);
+static void     coords_item_deleted           (GwyShapes *shapes,
+                                               guint id,
+                                               GwyCoords *coords);
+static void     coords_item_updated           (GwyShapes *shapes,
+                                               guint id,
+                                               GwyCoords *coords);
+
+static const cairo_rectangle_t unrestricted_bbox = {
+    -G_MAXDOUBLE, -G_MAXDOUBLE, G_MAXDOUBLE, G_MAXDOUBLE
+};
 
 static guint signals[N_SIGNALS];
 static GParamSpec *properties[N_PROPS];
@@ -118,6 +146,22 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                            "all shapes can be edited.",
                            -1, G_MAXINT, -1,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_MAX_SHAPES]
+        = g_param_spec_uint("max-shapes",
+                            "Max shapes",
+                            "Maximum allowed number of shapes to select. "
+                            "Setting it will truncate the current coordinates "
+                            "if they contain more objets.",
+                            0, G_MAXUINT, 0,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_EDITABLE]
+        = g_param_spec_boolean("editable",
+                               "Editable",
+                               "Whether shapes can be modified by the user",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -164,6 +208,14 @@ static void
 gwy_shapes_init(GwyShapes *shapes)
 {
     shapes->priv = G_TYPE_INSTANCE_GET_PRIVATE(shapes, GWY_TYPE_SHAPES, Shapes);
+    Shapes *priv = shapes->priv;
+    cairo_matrix_init_identity(&priv->coords_to_view);
+    cairo_matrix_init_identity(&priv->view_to_coords);
+    cairo_matrix_init_identity(&priv->pixel_to_view);
+    cairo_matrix_init_identity(&priv->view_to_pixel);
+    priv->bbox = unrestricted_bbox;
+    priv->max_shapes = G_MAXUINT;
+    priv->editable = TRUE;
 }
 
 static void
@@ -176,15 +228,6 @@ static void
 gwy_shapes_dispose(GObject *object)
 {
     GwyShapes *shapes = GWY_SHAPES(object);
-    Shapes *priv = shapes->priv;
-
-    CoordsTransform *transform = &priv->view_to_coords;
-    gwy_set_user_func(NULL, NULL, NULL,
-                      &transform->func, &transform->data, &transform->destroy);
-    transform = &priv->coords_to_view;
-    gwy_set_user_func(NULL, NULL, NULL,
-                      &transform->func, &transform->data, &transform->destroy);
-
     set_coords(shapes, NULL);
     G_OBJECT_CLASS(gwy_shapes_parent_class)->dispose(object);
 }
@@ -204,6 +247,14 @@ gwy_shapes_set_property(GObject *object,
 
         case PROP_FOCUS:
         set_focus(shapes, g_value_get_int(value));
+        break;
+
+        case PROP_MAX_SHAPES:
+        set_max_shapes(shapes, g_value_get_uint(value));
+        break;
+
+        case PROP_EDITABLE:
+        set_editable(shapes, g_value_get_boolean(value));
         break;
 
         default:
@@ -229,6 +280,14 @@ gwy_shapes_get_property(GObject *object,
         g_value_set_int(value, priv->focus);
         break;
 
+        case PROP_MAX_SHAPES:
+        g_value_set_uint(value, priv->max_shapes);
+        break;
+
+        case PROP_EDITABLE:
+        g_value_set_boolean(value, priv->editable);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -250,12 +309,13 @@ set_coords(GwyShapes *shapes,
                                "item-inserted", &coords_item_inserted,
                                &priv->coords_item_inserted_id,
                                G_CONNECT_SWAPPED,
-                               "item-changed", &coords_item_changed,
-                               &priv->coords_item_changed_id,
+                               "item-updated", &coords_item_updated,
+                               &priv->coords_item_updated_id,
                                G_CONNECT_SWAPPED,
                                NULL))
         return FALSE;
 
+    // FIXME: We should cancel whatever manipulation the users performs now.
     gwy_shapes_update(shapes);
     return TRUE;
 }
@@ -331,66 +391,182 @@ gwy_shapes_class_coords_type(const GwyShapesClass *klass)
     return klass->coords_type;
 }
 
-/**
- * gwy_shapes_set_coords_to_view_transform:
- * @shapes: A group of geometrical shapes.
- * @func: (allow-none):
- *        Function transforming @coords coordinates to view coordinates.
- * @user_data: Data passed to @func.
- * @destroy: Destroy notifier for @user_data.
- *
- * Sets the function for transformation of physical coordinates to view
- * coordinates for a group of geometrical shapes.
- *
- * The sizes of the arrays the function works with must match the actual
- * number of coordinates for the specific shapes and coords classes.
- **/
-void
-gwy_shapes_set_coords_to_view_transform(GwyShapes *shapes,
-                                        GwyShapesTransformFunc func,
-                                        gpointer user_data,
-                                        GDestroyNotify destroy)
+static gboolean
+set_matrices(cairo_matrix_t *desta, cairo_matrix_t *destb,
+             const cairo_matrix_t *srca, const cairo_matrix_t *srcb)
 {
-    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    if (!srca && !srcb) {
+        cairo_matrix_t matrix;
+        cairo_matrix_init_identity(&matrix);
+        if (gwy_equal(&matrix, desta) && gwy_equal(&matrix, destb))
+            return FALSE;
 
-    CoordsTransform *transform = &shapes->priv->coords_to_view;
-    if (!gwy_set_user_func(func, user_data, destroy,
-                           &transform->func, &transform->data,
-                           &transform->destroy))
-        return;
+        *destb = matrix;
+        *desta = matrix;
+    }
+    else if (!srca) {
+        if (gwy_equal(srcb, destb))
+            return FALSE;
 
-    gwy_shapes_update(shapes);
+        *destb = *srcb;
+        *desta = *srcb;
+        cairo_matrix_invert(desta);
+    }
+    else if (!srcb) {
+        if (gwy_equal(srca, desta))
+            return FALSE;
+
+        *desta = *srca;
+        *destb = *srca;
+        cairo_matrix_invert(destb);
+    }
+    else {
+        if (gwy_equal(srca, desta) && gwy_equal(srcb, destb))
+            return FALSE;
+
+        *desta = *srca;
+        *destb = *srcb;
+    }
+    return TRUE;
 }
 
 /**
- * gwy_shapes_set_view_to_coords_transform:
+ * gwy_shapes_set_coords_matrices:
  * @shapes: A group of geometrical shapes.
- * @func: (allow-none):
- *        Function transforming view coordinates to @coords coordinates.
- * @user_data: Data passed to @func.
- * @destroy: Destroy notifier for @user_data.
+ * @coords_to_view: (allow-none):
+ *                  Affine transformation from @shapes' @coords coordinates to
+ *                  view coordinates.
+ * @view_to_coords: (allow-none):
+ *                  Affine transformation from @shapes' view coordinates to
+ *                  @coords coordinates.
  *
- * Sets the function for transformation of view coordinates to physical
+ * Sets the matrices for transformation between physical coordinates and view
  * coordinates for a group of geometrical shapes.
  *
- * The sizes of the arrays the function works with must match the actual
- * number of coordinates for the specific shapes and coords classes.
+ * If both matrix are given they must be invertible and inverses of each
+ * other.  It is possible to give only one matrix; the other is then created as
+ * its inverse.  They are copied by @shapes.
  **/
 void
-gwy_shapes_set_view_to_coords_transform(GwyShapes *shapes,
-                                        GwyShapesTransformFunc func,
-                                        gpointer user_data,
-                                        GDestroyNotify destroy)
+gwy_shapes_set_coords_matrices(GwyShapes *shapes,
+                               const cairo_matrix_t *coords_to_view,
+                               const cairo_matrix_t *view_to_coords)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    if (set_matrices(&priv->coords_to_view, &priv->view_to_coords,
+                     coords_to_view, view_to_coords))
+        gwy_shapes_update(shapes);
+}
 
-    CoordsTransform *transform = &shapes->priv->view_to_coords;
-    if (!gwy_set_user_func(func, user_data, destroy,
-                           &transform->func, &transform->data,
-                           &transform->destroy))
-        return;
+/**
+ * gwy_shapes_set_pixel_matrices:
+ * @shapes: A group of geometrical shapes.
+ * @pixel_to_view: (allow-none):
+ *                  Affine transformation from @shapes' pixel coordinates to
+ *                  view coordinates.
+ * @view_to_pixel: (allow-none):
+ *                  Affine transformation from @shapes' view coordinates to
+ *                  pixel coordinates.
+ *
+ * Sets the matrices for transformation between physical coordinates and view
+ * coordinates for a group of geometrical shapes.
+ *
+ * Shapes are defined using real coordinates, however, pixel dimensions are
+ * used to visualise for instance averaging radii or lengths.
+ *
+ * If both matrix are given they must be invertible and inverses of each
+ * other.  It is possible to give only one matrix; the other is then created as
+ * its inverse.  They are copied by @shapes.
+ **/
+void
+gwy_shapes_set_pixel_matrices(GwyShapes *shapes,
+                              const cairo_matrix_t *pixel_to_view,
+                              const cairo_matrix_t *view_to_pixel)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    if (set_matrices(&priv->pixel_to_view, &priv->view_to_pixel,
+                     pixel_to_view, view_to_pixel))
+        gwy_shapes_update(shapes);
+}
 
-    gwy_shapes_update(shapes);
+/**
+ * gwy_shapes_get_coords_to_view_matrix:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Gets the matrix for transformation of physical coordinates to view
+ * coordinates for a group of geometrical shapes.
+ *
+ * Returns: The transformation matrix, owned by @shapes.  The pointer remains
+ *          valid through the entire lifetime of @shapes and its contents
+ *          always reflects the current matrix.
+ **/
+const cairo_matrix_t*
+gwy_shapes_get_coords_to_view_matrix(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return &shapes->priv->coords_to_view;
+}
+
+/**
+ * gwy_shapes_get_view_to_coords_matrix:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Gets the matrix for transformation of view coordinates to physical
+ * coordinates for a group of geometrical shapes.
+ *
+ * Returns: The transformation matrix, owned by @shapes.  The pointer remains
+ *          valid through the entire lifetime of @shapes and its contents
+ *          always reflects the current matrix.
+ **/
+const cairo_matrix_t*
+gwy_shapes_get_view_to_coords_matrix(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return &shapes->priv->view_to_coords;
+}
+
+/**
+ * gwy_shapes_get_pixel_to_view_matrix:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Gets the matrix for transformation of pixel coordinates to view
+ * coordinates for a group of geometrical shapes.
+ *
+ * Shapes are defined using real coordinates, however, pixel dimensions are
+ * used to visualise for instance averaging radii or lengths.
+ *
+ * Returns: The transformation matrix, owned by @shapes.  The pointer remains
+ *          valid through the entire lifetime of @shapes and its contents
+ *          always reflects the current matrix.
+ **/
+const cairo_matrix_t*
+gwy_shapes_get_pixel_to_view_matrix(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return &shapes->priv->pixel_to_view;
+}
+
+/**
+ * gwy_shapes_get_view_to_pixel_matrix:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Gets the matrix for transformation of view coordinates to pixel
+ * coordinates for a group of geometrical shapes.
+ *
+ * Shapes are defined using real coordinates, however, pixel dimensions are
+ * used to visualise for instance averaging radii or lengths.
+ *
+ * Returns: The transformation matrix, owned by @shapes.  The pointer remains
+ *          valid through the entire lifetime of @shapes and its contents
+ *          always reflects the current matrix.
+ **/
+const cairo_matrix_t*
+gwy_shapes_get_view_to_pixel_matrix(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return &shapes->priv->view_to_pixel;
 }
 
 /**
@@ -406,7 +582,6 @@ gwy_shapes_draw(GwyShapes *shapes,
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     g_return_if_fail(cr);
-    g_return_if_fail(shapes->priv->coords_to_view.func);
 
     GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
     g_return_if_fail(klass->draw);
@@ -465,49 +640,119 @@ gwy_shapes_get_focus(const GwyShapes *shapes)
 }
 
 /**
- * gwy_shapes_coords_to_view:
+ * gwy_shapes_set_max_shapes:
  * @shapes: A group of geometrical shapes.
- * @coords: Physical coordinates of a single geometrical shape.
- * @view: Array to store the corresponding view coordinates to.
+ * @max_shapes: Maximum number of shapes that can be present.  If the
+ *              coordinates object already contains more shapes than that it
+ *              will be truncated.
  *
- * Transforms physical coordinates of a single shape of a geometrical shape
- * group to view coordinates.
+ * Sets the maximum number of geometrical shapes that can be present.
  **/
 void
-gwy_shapes_coords_to_view(const GwyShapes *shapes,
-                          const gdouble *coords,
-                          gdouble *view)
+gwy_shapes_set_max_shapes(GwyShapes *shapes,
+                          guint max_shapes)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    g_return_if_fail(coords);
-    g_return_if_fail(view);
-    const CoordsTransform *transform = &shapes->priv->coords_to_view;
-    g_return_if_fail(transform->func);
-    transform->func(coords, view, transform->data);
+    if (!set_max_shapes(shapes, max_shapes))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_MAX_SHAPES]);
+}
+
+static gboolean
+set_max_shapes(GwyShapes *shapes,
+               guint max_shapes)
+{
+    Shapes *priv = shapes->priv;
+    if (max_shapes == priv->max_shapes)
+        return FALSE;
+
+    priv->max_shapes = max_shapes;
+    if (!priv->coords)
+        return TRUE;
+
+    guint n = gwy_coords_size(priv->coords);
+    while (n > priv->max_shapes) {
+        gwy_coords_delete(priv->coords, n-1);
+        n--;
+    }
+    return TRUE;
 }
 
 /**
- * gwy_shapes_view_to_coords:
+ * gwy_shapes_get_max_shapes:
  * @shapes: A group of geometrical shapes.
- * @coords: Physical coordinates of a single geometrical shape.
- * @view: Array to store the corresponding view coordinates to.
  *
- * Transforms view coordinates of a single shape of a geometrical shape group
- * to physical coordinates.
+ * Obtains the maximum number of geometrical shapes that can be present.
  **/
-void
-gwy_shapes_view_to_coords(const GwyShapes *shapes,
-                          const gdouble *coords,
-                          gdouble *view)
+guint
+gwy_shapes_get_max_shapes(const GwyShapes *shapes)
 {
-    g_return_if_fail(GWY_IS_SHAPES(shapes));
-    g_return_if_fail(coords);
-    g_return_if_fail(view);
-    const CoordsTransform *transform = &shapes->priv->view_to_coords;
-    g_return_if_fail(transform->func);
-    transform->func(coords, view, transform->data);
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), 0);
+    return shapes->priv->max_shapes;
 }
 
+/**
+ * gwy_shapes_set_editable:
+ * @shapes: A group of geometrical shapes.
+ * @editable: %TRUE to permit modification of shapes by the user, %FALSE to
+ *            disallow it.
+ *
+ * Sets whether geometrical shapes can be modified by the user.
+ **/
+void
+gwy_shapes_set_editable(GwyShapes *shapes,
+                        gboolean editable)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    if (!set_editable(shapes, editable))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_EDITABLE]);
+}
+
+static gboolean
+set_editable(GwyShapes *shapes,
+             gboolean editable)
+{
+    Shapes *priv = shapes->priv;
+    editable = !!editable;
+    if (editable == priv->editable)
+        return FALSE;
+
+    priv->editable = editable;
+    if (!editable)
+        cancel_editing(shapes, -1);
+    return TRUE;
+}
+
+/**
+ * gwy_shapes_get_editable:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains whether geometrical shapes can be modified by the user.
+ *
+ * Returns: %TRUE if modification of shapes by the user is permitted, %FALSE if
+ *          it is disallowed.
+ **/
+gboolean
+gwy_shapes_get_editable(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    return shapes->priv->editable;
+}
+
+static void
+cancel_editing(GwyShapes *shapes, gint id)
+{
+    if (!shapes->priv->coords)
+        return;
+    CancelEditingMethod method = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
+    if (method)
+        method(shapes, id);
+}
+
+// FIXME: What is this good for?
 /**
  * gwy_shapes_gdk_event_mask:
  * @shapes: A group of geometrical shapes.
@@ -549,10 +794,12 @@ gwy_shapes_gdk_event_mask(const GwyShapes *shapes)
  **/
 gboolean
 gwy_shapes_button_press(GwyShapes *shapes,
-                        GdkEvent *event)
+                        GdkEventButton *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    EventMethod method = GWY_SHAPES_GET_CLASS(shapes)->button_press;
+    if (!shapes->priv->coords)
+        return FALSE;
+    EventMethodButton method = GWY_SHAPES_GET_CLASS(shapes)->button_press;
     return method ? method(shapes, event) : FALSE;
 }
 
@@ -567,10 +814,12 @@ gwy_shapes_button_press(GwyShapes *shapes,
  **/
 gboolean
 gwy_shapes_button_release(GwyShapes *shapes,
-                          GdkEvent *event)
+                          GdkEventButton *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    EventMethod method = GWY_SHAPES_GET_CLASS(shapes)->button_release;
+    if (!shapes->priv->coords)
+        return FALSE;
+    EventMethodButton method = GWY_SHAPES_GET_CLASS(shapes)->button_release;
     return method ? method(shapes, event) : FALSE;
 }
 
@@ -585,10 +834,12 @@ gwy_shapes_button_release(GwyShapes *shapes,
  **/
 gboolean
 gwy_shapes_motion_notify(GwyShapes *shapes,
-                         GdkEvent *event)
+                         GdkEventMotion *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    EventMethod method = GWY_SHAPES_GET_CLASS(shapes)->motion_notify;
+    if (!shapes->priv->coords)
+        return FALSE;
+    EventMethodMotion method = GWY_SHAPES_GET_CLASS(shapes)->motion_notify;
     return method ? method(shapes, event) : FALSE;
 }
 
@@ -603,10 +854,12 @@ gwy_shapes_motion_notify(GwyShapes *shapes,
  **/
 gboolean
 gwy_shapes_key_press(GwyShapes *shapes,
-                     GdkEvent *event)
+                     GdkEventKey *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    EventMethod method = GWY_SHAPES_GET_CLASS(shapes)->key_press;
+    if (!shapes->priv->coords)
+        return FALSE;
+    EventMethodKey method = GWY_SHAPES_GET_CLASS(shapes)->key_press;
     return method ? method(shapes, event) : FALSE;
 }
 
@@ -621,11 +874,57 @@ gwy_shapes_key_press(GwyShapes *shapes,
  **/
 gboolean
 gwy_shapes_key_release(GwyShapes *shapes,
-                       GdkEvent *event)
+                       GdkEventKey *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    EventMethod method = GWY_SHAPES_GET_CLASS(shapes)->key_release;
+    if (!shapes->priv->coords)
+        return FALSE;
+    EventMethodKey method = GWY_SHAPES_GET_CLASS(shapes)->key_release;
     return method ? method(shapes, event) : FALSE;
+}
+
+/**
+ * gwy_shapes_set_bounding_box:
+ * @shapes: A group of geometrical shapes.
+ * @bbox: (allow-none):
+ *        Bounding box in @coords coordinates that determines range of
+ *        permissible shape positions.  Passing %NULL resets the bounding box
+ *        to unlimited.
+ *
+ * Sets the bounding box for a group of geometrical shapes.
+ **/
+void
+gwy_shapes_set_bounding_box(GwyShapes *shapes,
+                            const cairo_rectangle_t *bbox)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    if (!bbox)
+        bbox = &unrestricted_bbox;
+
+    if (gwy_equal(bbox, &priv->bbox))
+        return;
+
+    priv->bbox = *bbox;
+    gwy_shapes_update(shapes);
+}
+
+/**
+ * gwy_shapes_get_bounding_box:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains the bounding box for a group of geometrical shapes.
+ *
+ * Returns: The bounding box that determines permissible shape positions, owned
+ *          by @shapes.  The pointer remains valid through the entire lifetime
+ *          of @shapes and its contents always reflects the current bounding
+ *          box.
+ **/
+const cairo_rectangle_t*
+gwy_shapes_get_bounding_box(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return &shapes->priv->bbox;
 }
 
 static void
@@ -649,16 +948,19 @@ coords_item_deleted(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_deleted;
     if (method)
         method(shapes, id);
+    CancelEditingMethod cmethod = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
+    if (cmethod)
+        cmethod(shapes, id);
     gwy_shapes_update(shapes);
 }
 
 static void
-coords_item_changed(GwyShapes *shapes,
+coords_item_updated(GwyShapes *shapes,
                     guint id,
                     GwyCoords *coords)
 {
     g_assert(shapes->priv->coords == coords);
-    ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_changed;
+    ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_updated;
     if (method)
         method(shapes, id);
     gwy_shapes_update(shapes);
@@ -732,8 +1034,8 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  *                        emits #GwyArray::item-inserted.
  * @coords_item_deleted: Virtual method called when the @coords object
  *                       emits #GwyArray::item-deleted.
- * @coords_item_changed: Virtual method called when the @coords object
- *                       emits #GwyArray::item-changed.
+ * @coords_item_updated: Virtual method called when the @coords object
+ *                       emits #GwyArray::item-updated.
  *
  * Class of groups of selectable geometrical shapes.
  *
@@ -742,28 +1044,14 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  * should implement only those actually needed (possibly none if the subclass
  * is intended only for passive visualisation).
  *
- * Drawing of the shapes with gwy_shapes_draw() requires providing a function
- * for the transformation of physical coordinates to view coordinates using
- * gwy_shapes_set_coords_to_view_transform().  User interaction requires also
- * the reverse function that can be set with
- * gwy_shapes_set_view_to_coords_transform().
- **/
-
-/**
- * GwyShapesTransformFunc:
- * @coords_from: Coordinates to transform.
- * @coords_to: Location to store the transformed coordinates.
- * @user_data: User data set with gwy_shapes_set_coords_to_view_transform()
- *             or gwy_shapes_set_view_to_coords_transform().
+ * The user interaction methods are never invoked if @shapes does not have any
+ * coordinates object set.
  *
- * Type of coordination transformation function.
- *
- * The number of items in @coords_from and @coords_to depends on the specific
- * subclass of #GwyShapes and #GwyCoords.  The view coordinates are normally
- * two per point because the screen is two-dimensional but the number of coords
- * coordinates may differ.  For instance, if horizontal profiles are selected
- * in two-dimensional data then @coords coordinates consists only the
- * y-coordinate.
+ * Drawing of the shapes with gwy_shapes_draw() requires providing a matrix for
+ * the transformation of physical coordinates to view coordinates using
+ * gwy_shapes_set_coords_to_view_matrix().  User interaction requires also the
+ * reverse transform that can be set with
+ * gwy_shapes_set_view_to_coords_matrix().
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
