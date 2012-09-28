@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -55,7 +55,8 @@ struct _GwyCoordsPointClass {
 #define gwy_coords_point_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType        gwy_coords_point_get_type  (void)                       G_GNUC_CONST;
+GType      gwy_coords_point_get_type(void) G_GNUC_CONST;
+GwyCoords* gwy_coords_point_new     (void) G_GNUC_MALLOC;
 
 G_END_DECLS
 

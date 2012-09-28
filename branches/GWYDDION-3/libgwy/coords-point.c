@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -101,6 +101,19 @@ gwy_coords_point_construct(GwySerializable *serializable,
                                               error_list);
     }
     return TRUE;
+}
+
+/**
+ * gwy_coords_point_new:
+ *
+ * Creates a new point coordinates object.
+ *
+ * Returns: A new point coordinates object.
+ **/
+GwyCoords*
+gwy_coords_point_new(void)
+{
+    return g_object_newv(GWY_TYPE_COORDS_POINT, 0, NULL);
 }
 
 /**
