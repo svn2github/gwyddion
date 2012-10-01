@@ -122,7 +122,7 @@ test_math_curvature(void)
 
     // Flat surfaces
     static const gdouble coeffs1[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    ndims = gwy_math_curvature(coeffs1, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs1, &curv);
     g_assert_cmpuint(ndims, ==, 0);
     g_assert_cmpfloat(curv.k1, ==, 0.0);
     g_assert_cmpfloat(curv.k2, ==, 0.0);
@@ -133,7 +133,7 @@ test_math_curvature(void)
     g_assert_cmpfloat(curv.zc, ==, 0.0);
 
     static const gdouble coeffs2[] = { 1.0, 2.0, 3.0, 0.0, 0.0, 0.0 };
-    ndims = gwy_math_curvature(coeffs2, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs2, &curv);
     g_assert_cmpuint(ndims, ==, 0);
     g_assert_cmpfloat(curv.k1, ==, 0.0);
     g_assert_cmpfloat(curv.k2, ==, 0.0);
@@ -145,7 +145,7 @@ test_math_curvature(void)
 
     // Centered surfaces
     static const gdouble coeffs3[] = { 0.0, 0.0, 0.0, 0.5, 0.0, 1.0 };
-    ndims = gwy_math_curvature(coeffs3, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs3, &curv);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(curv.k1, ==, 1.0);
     g_assert_cmpfloat(curv.k2, ==, 2.0);
@@ -168,7 +168,7 @@ test_math_curvature(void)
     g_assert_cmpfloat(curv.zc, ==, 0.0);
 
     static const gdouble coeffs4[] = { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 };
-    ndims = gwy_math_curvature(coeffs4, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs4, &curv);
     g_assert_cmpuint(ndims, ==, 2);
     // Left-handed system means positive κ corresponds to negative φ.
     g_assert_cmpfloat(fabs(curv.k1 + 1.0), <=, 1e-14);
@@ -180,7 +180,7 @@ test_math_curvature(void)
     g_assert_cmpfloat(curv.zc, ==, 0.0);
 
     static const gdouble coeffs5[] = { 0.0, 0.0, 0.0, 0.0, -1.0, 0.0 };
-    ndims = gwy_math_curvature(coeffs5, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs5, &curv);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(fabs(curv.k1 + 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(curv.k2 - 1.0), <=, 1e-14);
@@ -194,7 +194,7 @@ test_math_curvature(void)
         gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
         gdouble ca = cos(2.0*alpha), sa = sin(2.0*alpha);
         gdouble coeffs[] = { 0.0, 0.0, 0.0, ca/2.0, sa, -ca/2.0 };
-        ndims = gwy_math_curvature(coeffs, &curv);
+        ndims = gwy_math_curvature_at_centre(coeffs, &curv);
         g_assert_cmpuint(ndims, ==, 2);
         g_assert_cmpfloat(fabs(curv.k1 + 1.0), <=, 1e-14);
         g_assert_cmpfloat(fabs(curv.k2 - 1.0), <=, 1e-14);
@@ -219,7 +219,7 @@ test_math_curvature(void)
                 csa = cos(alpha)*sin(alpha);
         gdouble cxx = a*c2a + b*s2a, cyy = a*s2a + b*c2a, cxy = 2.0*(a - b)*csa;
         gdouble coeffs[] = { 0.0, 0.0, 0.0, cxx, cxy, cyy };
-        ndims = gwy_math_curvature(coeffs, &curv);
+        ndims = gwy_math_curvature_at_centre(coeffs, &curv);
         // XXX: If we are unlucky, a or b ≈ 0 and ndims is just 1.
         g_assert_cmpuint(ndims, ==, 2);
         g_assert_cmpfloat(fabs(curv.k1 - 2.0*fmin(a, b)), <=, 1e-14);
@@ -247,7 +247,7 @@ test_math_curvature(void)
 
     // Shifted surfaces
     static const gdouble coeffs6[] = { 2.0, -2.0, 2.0, 1.0, 0.0, 1.0 };
-    ndims = gwy_math_curvature(coeffs6, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs6, &curv);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(curv.k1, ==, 2.0);
     g_assert_cmpfloat(curv.k2, ==, 2.0);
@@ -270,7 +270,7 @@ test_math_curvature(void)
     g_assert_cmpfloat(fabs(curv.zc), <=, 1e-14);
 
     static const gdouble coeffs7[] = { 0.5, 2.0, 1.0, 1.0, 0.0, -0.5 };
-    ndims = gwy_math_curvature(coeffs7, &curv);
+    ndims = gwy_math_curvature_at_centre(coeffs7, &curv);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(curv.k1, ==, -1.0);
     g_assert_cmpfloat(curv.k2, ==, 2.0);
@@ -308,7 +308,7 @@ test_math_curvature(void)
             2.0*p*cxx + q*cxy, 2.0*q*cyy + p*cxy,
             cxx, cxy, cyy
         };
-        ndims = gwy_math_curvature(coeffs, &curv);
+        ndims = gwy_math_curvature_at_centre(coeffs, &curv);
         // XXX: If we are unlucky, a or b ≈ 0 and ndims is just 1.
         g_assert_cmpuint(ndims, ==, 2);
         g_assert_cmpfloat(fabs(curv.k1 - 2.0*fmin(a, b)), <=, 1e-14);

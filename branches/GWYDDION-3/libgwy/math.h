@@ -60,28 +60,30 @@ double gwy_powi(double x, int i) G_GNUC_CONST;
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
-gdouble  gwy_power_sum            (guint n,
-                                   guint p)                        G_GNUC_CONST;
-gdouble  gwy_standardize_direction(gdouble phi)                    G_GNUC_CONST;
-gboolean gwy_overlapping          (guint pos1,
-                                   guint len1,
-                                   guint pos2,
-                                   guint len2)                     G_GNUC_CONST;
-gboolean gwy_math_intersecting    (gdouble a,
-                                   gdouble b,
-                                   gdouble A,
-                                   gdouble B)                      G_GNUC_CONST;
-guint    gwy_math_curvature       (const gdouble *coeffs,
-                                   GwyCurvatureParams *curvature);
-gint     gwy_double_compare       (gconstpointer a,
-                                   gconstpointer b)                G_GNUC_PURE;
-gint     gwy_double_direct_compare(gconstpointer a,
-                                   gconstpointer b)                G_GNUC_CONST;
-void     gwy_math_sort            (gdouble *array,
-                                   guint *index_array,
-                                   gsize n);
-gdouble  gwy_math_median          (gdouble *array,
-                                   gsize n);
+gdouble  gwy_power_sum               (guint n,
+                                      guint p)                        G_GNUC_CONST;
+gdouble  gwy_standardize_direction   (gdouble phi)                    G_GNUC_CONST;
+gboolean gwy_overlapping             (guint pos1,
+                                      guint len1,
+                                      guint pos2,
+                                      guint len2)                     G_GNUC_CONST;
+gboolean gwy_math_intersecting       (gdouble a,
+                                      gdouble b,
+                                      gdouble A,
+                                      gdouble B)                      G_GNUC_CONST;
+guint    gwy_math_curvature_at_centre(const gdouble *coeffs,
+                                      GwyCurvatureParams *curvature);
+guint    gwy_math_curvature_at_origin(const gdouble *coeffs,
+                                      GwyCurvatureParams *curvature);
+gint     gwy_double_compare          (gconstpointer a,
+                                      gconstpointer b)                G_GNUC_PURE;
+gint     gwy_double_direct_compare   (gconstpointer a,
+                                      gconstpointer b)                G_GNUC_CONST;
+void     gwy_math_sort               (gdouble *array,
+                                      guint *index_array,
+                                      gsize n);
+gdouble  gwy_math_median             (gdouble *array,
+                                      gsize n);
 
 #define gwy_triangular_matrix_length(n) \
     (((n) + 1)*(n)/2)

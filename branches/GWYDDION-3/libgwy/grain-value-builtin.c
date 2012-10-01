@@ -2416,7 +2416,7 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
         }
 
         GwyCurvatureParams curvature;
-        gwy_math_curvature(b, &curvature);
+        gwy_math_curvature_at_centre(b, &curvature);
 
         if (c1values)
             c1values[gno] = curvature.k1/(s*s);

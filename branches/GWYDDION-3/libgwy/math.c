@@ -392,42 +392,11 @@ gwy_math_intersecting(gdouble a, gdouble b,
     return (a < A) ? b >= A : a <= B;
 }
 
-/**
- * gwy_math_curvature:
- * @coeffs: (array fixed-size=6):
- *          Array of the six polynomial coefficients of a quadratic surface in
- *          the following order: 1, x, y, x², xy, y².
- * @curvature: (out):
- *             Location to store the curvature parameters.
- *
- * Calculates curvature parameters from two-dimensional quadratic polynomial
- * coefficients.
- *
- * The coefficients should be scaled so that the lateral dimensions of the
- * relevant area (e.g. fitting area if the coefficients were obtained by
- * fitting a quadratic surface) do not differ from 1 by many orders.  Otherwise
- * recognition of flat surfaces will not work.
- *
- * Returns: The number of curved dimensions (0 to 2).
- **/
-guint
-gwy_math_curvature(const gdouble *coeffs,
-                   GwyCurvatureParams *curvature)
+static guint
+calc_quadratic_curvatue(GwyCurvatureParams *curvature,
+                        gdouble a, gdouble bx, gdouble by,
+                        gdouble cxx, gdouble cxy, gdouble cyy)
 {
-    g_return_val_if_fail(curvature, 0);
-
-    gdouble a = coeffs[0], bx = coeffs[1], by = coeffs[2],
-            cxx = coeffs[3], cxy = coeffs[4], cyy = coeffs[5];
-
-    /* Eliminate the mixed term */
-    if (fabs(cxx) + fabs(cxy) + fabs(cyy) <= 1e-10*(fabs(bx) + fabs(by))) {
-        /* Linear gradient */
-        gwy_clear(curvature, 1);
-        curvature->phi2 = G_PI/2.0;
-        curvature->zc = a;
-        return 0;
-    }
-
     /* At least one quadratic term */
     gdouble cm = cxx - cyy;
     gdouble cp = cxx + cyy;
@@ -469,8 +438,122 @@ gwy_math_curvature(const gdouble *coeffs,
 
     curvature->k1 = cx;
     curvature->k2 = cy;
-    curvature->phi1 = gwy_standardize_direction(phi);
-    curvature->phi2 = gwy_standardize_direction(phi + G_PI/2.0);
+    curvature->phi1 = phi;
+    curvature->phi2 = phi + G_PI/2.0;
+
+    return degree;
+}
+
+/**
+ * gwy_math_curvature_at_centre:
+ * @coeffs: (array fixed-size=6):
+ *          Array of the six polynomial coefficients of a quadratic surface in
+ *          the following order: 1, x, y, x², xy, y².
+ * @curvature: (out):
+ *             Location to store the curvature parameters.
+ *
+ * Calculates curvature parameters from two-dimensional quadratic polynomial
+ * coefficients.
+ *
+ * The coefficients should be scaled so that the lateral dimensions of the
+ * relevant area (e.g. fitting area if the coefficients were obtained by
+ * fitting a quadratic surface) do not differ from 1 by many orders.  Otherwise
+ * recognition of flat surfaces will not work.
+ *
+ * Returns: The number of curved dimensions (0 to 2).
+ **/
+guint
+gwy_math_curvature_at_centre(const gdouble *coeffs,
+                             GwyCurvatureParams *curvature)
+{
+    g_return_val_if_fail(curvature, 0);
+
+    gdouble a = coeffs[0], bx = coeffs[1], by = coeffs[2],
+            cxx = coeffs[3], cxy = coeffs[4], cyy = coeffs[5];
+
+    /* Eliminate the mixed term */
+    if (fabs(cxx) + fabs(cxy) + fabs(cyy) <= 1e-10*(fabs(bx) + fabs(by))) {
+        /* Linear gradient */
+        gwy_clear(curvature, 1);
+        curvature->phi2 = G_PI/2.0;
+        curvature->zc = a;
+        return 0;
+    }
+
+    guint degree = calc_quadratic_curvatue(curvature,
+                                           a, bx, by, cxx, cxy, cyy);
+
+    curvature->phi1 = gwy_standardize_direction(curvature->phi1);
+    curvature->phi2 = gwy_standardize_direction(curvature->phi2);
+
+    return degree;
+}
+
+/**
+ * gwy_math_curvature_at_origin:
+ * @coeffs: (array fixed-size=6):
+ *          Array of the six polynomial coefficients of a quadratic surface in
+ *          the following order: 1, x, y, x², xy, y².
+ * @curvature: (out):
+ *             Location to store the curvature parameters.
+ *
+ * Calculates curvature parameters at origin from two-dimensional quadratic
+ * polynomial coefficients.
+ *
+ * Unlike gwy_math_curvature_at_centre() which calculates parameters at the
+ * centre of cuvrature, this function calculates the curvature at origin.  This
+ * means the centre is also always set to the origin and the value at centre is
+ * simply equal to the constant term.
+ *
+ * See gwy_math_curvature_at_centre() for a coefficient normalisation note.
+ *
+ * Returns: The number of curved dimensions (0 to 2).
+ **/
+guint
+gwy_math_curvature_at_origin(const gdouble *coeffs,
+                             GwyCurvatureParams *curvature)
+{
+    g_return_val_if_fail(curvature, 0);
+
+    gdouble a = coeffs[0], bx = coeffs[1], by = coeffs[2],
+            cxx = coeffs[3], cxy = coeffs[4], cyy = coeffs[5];
+
+    /* Eliminate the mixed term */
+    if (fabs(cxx) + fabs(cxy) + fabs(cyy) <= 1e-10*(fabs(bx) + fabs(by))) {
+        /* Linear gradient */
+        gwy_clear(curvature, 1);
+        curvature->phi2 = G_PI/2.0;
+        curvature->zc = a;
+        return 0;
+    }
+
+    gdouble b = hypot(bx, by), beta = atan2(by, bx);
+    if (b > 1e-10) {
+        gdouble cosbeta = bx/b,
+                sinbeta = by/b,
+                cbeta2 = cosbeta*cosbeta,
+                sbeta2 = sinbeta*sinbeta,
+                csbeta = cosbeta*sinbeta,
+                qb = hypot(1.0, b);
+        gdouble cxx1 = (cxx*cbeta2 + cxy*csbeta + cyy*sbeta2)/(qb*qb*qb),
+                cxy1 = (2.0*(cyy - cxx)*csbeta + cxy*(cbeta2 - sbeta2))/(qb*qb),
+                cyy1 = (cyy*cbeta2 - cxy*csbeta + cxx*sbeta2)/qb;
+        cxx = cxx1;
+        cxy = cxy1;
+        cyy = cyy1;
+    }
+    else
+        beta = 0.0;
+
+    guint degree = calc_quadratic_curvatue(curvature,
+                                           a, 0, 0, cxx, cxy, cyy);
+
+    // FIXME: Or +beta.  Dunno.
+    curvature->phi1 = gwy_standardize_direction(curvature->phi1 - beta);
+    curvature->phi2 = gwy_standardize_direction(curvature->phi2 - beta);
+    // This should already hold approximately.  Enforce it exactly.
+    curvature->xc = curvature->yc = 0.0;
+    curvature->zc = a;
 
     return degree;
 }

@@ -5993,7 +5993,7 @@ test_field_read_curvature(void)
 
         GwyCurvatureParams curv, curvr, curve;
         gdouble coeffs[] = { a, bx, by, cxx, cxy, cyy };
-        gint ndims = gwy_math_curvature(coeffs, &curv);
+        gint ndims = gwy_math_curvature_at_centre(coeffs, &curv);
 
         for (guint iiter = 0; iiter < niiter; iiter++) {
             guint col = g_rand_int_range(rng, 2, xres-2);

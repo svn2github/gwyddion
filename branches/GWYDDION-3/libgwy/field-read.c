@@ -569,7 +569,7 @@ gwy_field_curvature(const GwyField *field,
     }
 
     // gwy_math_curvature() does The Right Thing if coeffs are all zeroes.
-    gint ndims = gwy_math_curvature(coeffs, curvature);
+    gint ndims = gwy_math_curvature_at_centre(coeffs, curvature);
     // Now the angles and z-values are correct, but curvatures and xy must be
     // transformed to real physical units.
     curvature->k1 /= s*s;
