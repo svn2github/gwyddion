@@ -184,7 +184,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__INT,
-                                     G_TYPE_NONE, 0);
+                                     G_TYPE_NONE, 1, G_TYPE_INT);
 
     /**
      * GwyShapes::updated:
@@ -377,7 +377,7 @@ gwy_shapes_coords_type(const GwyShapes *shapes)
 
 /**
  * gwy_shapes_class_coords_type:
- * @shapes: The class of a group of geometrical shapes.
+ * @klass: The class of a group of geometrical shapes.
  *
  * Obtains the type of coordinates object used by a group of shapes class.
  *
@@ -1030,6 +1030,9 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  * @motion_notify: Virtual method implementing gwy_shapes_motion_notify().
  * @key_press: Virtual method implementing gwy_shapes_key_press().
  * @key_release: Virtual method implementing gwy_shapes_key_release().
+ * @cancel_editing: Virtual method that stops user modification of shapes,
+ *                  namely because something has changed that makes continuing
+ *                  not meaningful.
  * @coords_item_inserted: Virtual method called when the @coords object
  *                        emits #GwyArray::item-inserted.
  * @coords_item_deleted: Virtual method called when the @coords object

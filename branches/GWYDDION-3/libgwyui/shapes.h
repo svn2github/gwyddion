@@ -97,7 +97,7 @@ void                     gwy_shapes_set_coords_matrices      (GwyShapes *shapes,
                                                               const cairo_matrix_t *view_to_coords);
 void                     gwy_shapes_set_pixel_matrices       (GwyShapes *shapes,
                                                               const cairo_matrix_t *pixel_to_view,
-                                                              const cairo_matrix_t *view_to_field);
+                                                              const cairo_matrix_t *view_to_pixel);
 const cairo_matrix_t*    gwy_shapes_get_coords_to_view_matrix(const GwyShapes *shapes)               G_GNUC_PURE;
 const cairo_matrix_t*    gwy_shapes_get_view_to_coords_matrix(const GwyShapes *shapes)               G_GNUC_PURE;
 const cairo_matrix_t*    gwy_shapes_get_pixel_to_view_matrix (const GwyShapes *shapes)               G_GNUC_PURE;
