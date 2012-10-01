@@ -115,6 +115,29 @@ function check_symbols() {
   done
 }
 
+function check_marshallers() {
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    make check-marshallers
+    popd >/dev/null
+  done
+}
+
+function check_doc_sections() {
+  for dir in $libdirs; do
+    pushd docs/$dir >/dev/null
+    ../../build/check-doc-sections.sh
+    popd >/dev/null
+  done
+}
+
+function check_deps_versions() {
+  # Keep the `GENERATED' string quoted to prevent match here
+  grep -r --include '*.[ch]' -L ' This is a 'GENERATED' file\>' . \
+    | xargs gtkdoc-depscan \
+    | ./build/check-dep-versions.py
+}
+
 function install() {
   make -k install && touch .ok-install
 }
@@ -187,6 +210,9 @@ else
   call check_debug
   call check_headers
   call check_symbols
+  call check_marshallers
+  call check_doc_sections
+  call check_deps_versions
   call install
   call make_dists
   call unit_test_valgrind

@@ -12,6 +12,7 @@ export LC_ALL=C
 PATH="$HOME/bin:$PATH"
 cd "$logdir" || exit 1
 
+
 cat >autogen.ignore <<':'
 ^aclocal: installing `m4/([-a-z0-9]+)\.m4' from `/usr/share/aclocal/\1\.m4'
 ^configure\.ac:[0-9]+: installing `build/[-a-z.]+'
@@ -21,10 +22,12 @@ cat >autogen.ignore <<':'
 ':'
 :
 
+
 cat >build.ignore <<':'
 ^/usr/include/bits/cmathcalls.h:[0-9]+: syntax error, unexpected identifier, expecting .* _Complex
 ':'
 :
+
 
 cat >build_documentation.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
@@ -32,6 +35,7 @@ cat >build_documentation.ignore <<':'
 ^.*: warning: no link for: 'gwy-[-a-z]*\<foo\>
 ^.*: warning: no link for: 'GwyFoo
 ^Use of uninitialized value within %DeclarationTypes in lc at /usr/bin/gtkdoc-mkdb line [0-9]+\.
+^WARNING: Malformed symbol name: "The Poke\(\) method" \(type=method\) in gio\.$
 ':'
 :
 
@@ -40,16 +44,19 @@ cat >build_introspection.ignore <<':'
 ':'
 :
 
+
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ':'
 :
 echo '^libtool: install: warning: remember to run `libtool --finish '"$projectdir"'/gwyddion-[0-9.]+/_inst/lib'"'"'$' >>distcheck.ignore
 
+
 cat >update_translations.ignore <<':'
 ^TRANSLATION
 ':'
 :
+
 
 cat >build_rpm.ignore <<':'
 ^\+
@@ -58,6 +65,13 @@ cat >build_rpm.ignore <<':'
 ':'
 :
 cat >>build_rpm.ignore <build_documentation.ignore
+
+
+cat >check_deps_versions.ignore <<':'
+^WARNING: Malformed symbol name: "The Poke\(\) method" \(type=method\) in gio\.$
+':'
+:
+
 
 function printerr() {
   f=$1
@@ -164,7 +178,7 @@ function extract_coverage_stats() {
 }
 
 cat build.err make_dists.err build_documentation.err install.err \
-  check_headers.err check_symbols.err >all.err
+  check_headers.err check_symbols.err check_doc_sections.err >all.err
 printerr set_extra_version
 printerr autogen
 printerr build
@@ -174,6 +188,9 @@ printerr update_translations
 printerr check_debug
 printerr check_headers
 printerr check_symbols
+printerr check_marshallers
+printerr check_doc_sections
+printerr check_deps_versions
 printerr install build.err
 printerr make_dists build.err
 printerr build_rpm build.err
