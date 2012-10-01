@@ -50,8 +50,9 @@ public_headers = \
 	$(srcdir)/gl-material.h \
 	$(srcdir)/gradient.h \
 	$(srcdir)/grain-value.h \
-	$(srcdir)/inventory.h \
+	$(srcdir)/int-set.h \
 	$(srcdir)/interpolation.h \
+	$(srcdir)/inventory.h \
 	$(srcdir)/line.h \
 	$(srcdir)/line-arithmetic.h \
 	$(srcdir)/line-distributions.h \
@@ -154,8 +155,9 @@ libgwy3_la_SOURCES = \
 	gradient.c \
 	grain-value.c \
 	grain-value-builtin.c \
-	inventory.c \
+	int-set.c \
 	interpolation.c \
+	inventory.c \
 	line.c \
 	line-arithmetic.c \
 	line-distributions.c \
@@ -228,8 +230,11 @@ distclean-local:
 
 check-local: check-serializable-types
 
-check-serializable-types:
+check-serializable-types: $(libgwy3_la_SOURCES)
 	$(AM_V_at)cd $(srcdir) \
 		&& $(PYTHON) ../build/check-serializable-types.py main.c $(libgwy3_la_SOURCES)
 
-.PHONY: check-serializable-types
+check-marshallers: $(libgwy3_la_SOURCES)
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwy3_la_SOURCES)
+
+.PHONY: check-serializable-types check-marshallers

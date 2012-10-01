@@ -51,8 +51,9 @@
 #include <libgwy/gl-material.h>
 #include <libgwy/gradient.h>
 #include <libgwy/grain-value.h>
-#include <libgwy/inventory.h>
+#include <libgwy/int-set.h>
 #include <libgwy/interpolation.h>
+#include <libgwy/inventory.h>
 #include <libgwy/line.h>
 #include <libgwy/line-arithmetic.h>
 #include <libgwy/line-distributions.h>
