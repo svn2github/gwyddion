@@ -1125,8 +1125,8 @@ gwy_field_get_unit_z(const GwyField *field)
  *
  * This function is typically used in functions that operate on a part of a
  * field but do not work with masks.  See gwy_field_check_mask() for checking
- * of part and mask together.  Example (note gwy_field_new_transposed()
- * creates a transposed field):
+ * of part and mask together.  Example (note gwy_field_new_congruent() can
+ * create transposed, rotated and flipped fields):
  * |[
  * GwyField*
  * transpose_field(const GwyField *field,

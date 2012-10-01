@@ -225,7 +225,7 @@ gwy_mask_field_itemize(GwySerializable *serializable,
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         MaskField *priv = field->priv;
-        priv->serialized_swapped = g_new(guint32, n);
+        priv->serialized_swapped = g_memdup(field->data, n*sizeof(guint32));
         swap_bits_uint32_array(priv->serialized_swapped, n);
         it->value.v_uint32_array = priv->serialized_swapped;
     }
@@ -453,8 +453,8 @@ gwy_mask_field_new_sized(guint xres,
  * %FALSE their values are undefined.
  *
  * This function is typically used in functions that operate on a part of a
- * field. Example (note gwy_mask_field_new_transposed() creates a transposed
- * mask field):
+ * field. Example (note gwy_mask_field_new_congruent() can create transposed,
+ * rotated and flipped mask fields):
  * |[
  * GwyMaskField*
  * transpose_mask_field(const GwyMaskField *field,
