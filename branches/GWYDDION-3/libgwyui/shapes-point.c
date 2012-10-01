@@ -17,6 +17,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Each shape can be ‘selected’ in the following independent ways:
+ * HOVER – mouse is near the shape so that clicking would select or deselect it
+ *         or start editing it
+ * SELECTED – shape is a part of GwyShapes selection so future actions would
+ *            apply to it
+ * EDITED – shape is being currently edited by the user using mouse
+ *
+ * Constraints:
+ * – At most one shape can have HOVER selection and it must be SELECTED or
+ *   nothing.
+ * – SELECTED and EDITED are two exclusing states applying usually to the same
+ *   set of shapes.
+ *
+ * So all possible states are only:
+ * NORMAL
+ * HOVER
+ * SELECTED
+ * SELECTED + HOVER
+ * EDITED
+ *
+ * ⇒ EDITED and SELECTED need not look differently.
+ * ⇒ HOVER visualisation must be possible to combine with SELECTED (EDITED).
+ * ⇒ HOVER can be an ‘expensive’ or ‘disruptive’ visualisation.
+ */
+
 #include <math.h>
 #include <glib.h>
 #include <glib/gi18n-lib.h>
