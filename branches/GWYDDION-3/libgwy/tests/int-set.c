@@ -1,0 +1,261 @@
+/*
+ *  $Id$
+ *  Copyright (C) 2012 David Nečas (Yeti).
+ *  E-mail: yeti@gwyddion.net.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "testlibgwy.h"
+
+/***************************************************************************
+ *
+ * Int Set
+ *
+ ***************************************************************************/
+
+static gint
+random_integer(GRand *rng)
+{
+    gdouble x = -5.0*log(g_rand_double(rng));
+    if (g_rand_boolean(rng))
+        x = -x;
+
+    return (gint)gwy_round(x);
+}
+
+static void
+int_set_randomize(GwyIntSet *intset,
+                  GRand *rng)
+{
+    guint size = g_rand_int_range(rng, 0, 20) + g_rand_int_range(rng, 0, 10);
+
+    for (guint i = 0; i < size; i++)
+        gwy_int_set_add(intset, random_integer(rng));
+}
+
+static void
+int_set_assert_equal(const GwyIntSet *result,
+                     const GwyIntSet *reference)
+{
+    g_assert(GWY_IS_INT_SET(result));
+    g_assert(GWY_IS_INT_SET(reference));
+    g_assert_cmpuint(gwy_int_set_size(result), ==, gwy_int_set_size(reference));
+    compare_properties(G_OBJECT(result), G_OBJECT(reference));
+
+    guint nres, nref;
+    gint *resvalues = gwy_int_set_values(result, &nres);
+    gint *refvalues = gwy_int_set_values(reference, &nref);
+    g_assert_cmpuint(nres, ==, nref);
+
+    for (guint i = 0; i < nref; i++) {
+        g_assert_cmpint(resvalues[i], ==, refvalues[i]);
+    }
+    g_free(refvalues);
+    g_free(resvalues);
+}
+
+static void
+int_set_assert_equal_object(GObject *object, GObject *reference)
+{
+    int_set_assert_equal(GWY_INT_SET(object), GWY_INT_SET(reference));
+}
+
+void
+test_int_set_serialize(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = g_test_slow() ? 200 : 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *original = gwy_int_set_new();
+        int_set_randomize(original, rng);
+        GwyIntSet *copy;
+
+        serializable_duplicate(GWY_SERIALIZABLE(original),
+                               int_set_assert_equal_object);
+        serializable_assign(GWY_SERIALIZABLE(original),
+                            int_set_assert_equal_object);
+        copy = GWY_INT_SET(serialize_and_back(G_OBJECT(original),
+                                              int_set_assert_equal_object));
+        g_object_unref(copy);
+
+        g_object_unref(original);
+    }
+    g_rand_free(rng);
+}
+
+static void
+check_add(GwyIntSet *intset,
+          GHashTable *reference,
+          gint value)
+{
+    guint acounter = 0, rcounter = 0, n = gwy_int_set_size(intset);
+    gboolean present = !!g_hash_table_lookup(reference, GINT_TO_POINTER(value));
+
+    gulong aid = g_signal_connect_swapped(intset, "added",
+                                          G_CALLBACK(record_signal), &acounter);
+    gulong rid = g_signal_connect_swapped(intset, "removed",
+                                          G_CALLBACK(record_signal), &rcounter);
+    gboolean changed = gwy_int_set_add(intset, value);
+    g_signal_handler_disconnect(intset, rid);
+    g_signal_handler_disconnect(intset, aid);
+
+    if (present) {
+        g_assert(!changed);
+        g_assert_cmpuint(gwy_int_set_size(intset), ==, n);
+        g_assert_cmpuint(acounter, ==, 0);
+        g_assert_cmpuint(rcounter, ==, 0);
+    }
+    else {
+        g_assert(changed);
+        g_assert_cmpuint(gwy_int_set_size(intset), ==, n+1);
+        g_assert_cmpuint(acounter, ==, 1);
+        g_assert_cmpuint(rcounter, ==, 0);
+        g_hash_table_insert(reference,
+                            GINT_TO_POINTER(value), GUINT_TO_POINTER(TRUE));
+    }
+    g_assert(gwy_int_set_contains(intset, value));
+    g_assert(g_hash_table_lookup(reference, GINT_TO_POINTER(value)));
+}
+
+static void
+check_remove(GwyIntSet *intset,
+             GHashTable *reference,
+             gint value)
+{
+    guint acounter = 0, rcounter = 0, n = gwy_int_set_size(intset);
+    gboolean present = !!g_hash_table_lookup(reference, GINT_TO_POINTER(value));
+
+    gulong aid = g_signal_connect_swapped(intset, "added",
+                                          G_CALLBACK(record_signal), &acounter);
+    gulong rid = g_signal_connect_swapped(intset, "removed",
+                                          G_CALLBACK(record_signal), &rcounter);
+    gboolean changed = gwy_int_set_remove(intset, value);
+    g_signal_handler_disconnect(intset, rid);
+    g_signal_handler_disconnect(intset, aid);
+
+    if (present) {
+        g_assert(changed);
+        g_assert_cmpuint(gwy_int_set_size(intset), ==, n-1);
+        g_assert_cmpuint(acounter, ==, 0);
+        g_assert_cmpuint(rcounter, ==, 1);
+        g_hash_table_remove(reference, GINT_TO_POINTER(value));
+    }
+    else {
+        g_assert(!changed);
+        g_assert_cmpuint(gwy_int_set_size(intset), ==, n);
+        g_assert_cmpuint(acounter, ==, 0);
+        g_assert_cmpuint(rcounter, ==, 0);
+    }
+    g_assert(!gwy_int_set_contains(intset, value));
+    g_assert(!g_hash_table_lookup(reference, GINT_TO_POINTER(value)));
+}
+
+void
+test_int_set_add_remove(void)
+{
+    enum { niter = 40, max_size = 1000 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *intset = gwy_int_set_new();
+        GHashTable *reference = g_hash_table_new(g_direct_hash, g_direct_equal);
+
+        for (guint k = 0; k < max_size; k++) {
+            if (g_rand_boolean(rng))
+                check_add(intset, reference, random_integer(rng));
+            else
+                check_remove(intset, reference, random_integer(rng));
+        }
+
+        g_hash_table_destroy(reference);
+        g_object_unref(intset);
+    }
+    g_rand_free(rng);
+}
+
+static gboolean
+is_present(const gint *values, guint n, gint value)
+{
+    while (n--) {
+        if (*values == value)
+            return TRUE;
+        values++;
+    }
+    return FALSE;
+}
+
+void
+test_int_set_values(void)
+{
+    enum { niter = 200, max_size = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint size = g_rand_int_range(rng, 0, max_size);
+        gint *values = g_new(gint, MAX(size, 1));
+        for (guint i = 0; i < size; i++)
+            values[i] = random_integer(rng);
+
+        GwyIntSet *intset = gwy_int_set_new_with_values(values, size);
+
+        guint len;
+        gint *isvalues = gwy_int_set_values(intset, &len);
+
+        for (guint i = 0; i < size; i++) {
+            g_assert(is_present(isvalues, len, values[i]));
+        }
+        for (guint i = 0; i < len; i++) {
+            g_assert(is_present(values, size, isvalues[i]));
+        }
+
+        g_free(isvalues);
+        g_free(values);
+        g_object_unref(intset);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_int_set_update(void)
+{
+    enum { niter = 500, max_size = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint size1 = g_rand_int_range(rng, 0, max_size);
+        gint *values1 = g_new(gint, MAX(size1, 1));
+        for (guint i = 0; i < size1; i++)
+            values1[i] = random_integer(rng);
+
+        guint size2 = g_rand_int_range(rng, 0, max_size);
+        gint *values2 = g_new(gint, MAX(size2, 1));
+        for (guint i = 0; i < size2; i++)
+            values2[i] = random_integer(rng);
+
+        GwyIntSet *intset1 = gwy_int_set_new_with_values(values1, size1);
+        GwyIntSet *intset2 = gwy_int_set_new_with_values(values2, size2);
+        gwy_int_set_update(intset1, values2, size2);
+        int_set_assert_equal(intset1, intset2);
+
+        g_free(values2);
+        g_free(values1);
+        g_object_unref(intset2);
+        g_object_unref(intset1);
+    }
+    g_rand_free(rng);
+}
+
+/* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -107,6 +107,10 @@ unit/serialize
 unit/garbage
 unit/format/power10
 value-format/simple
+int-set/serialize
+int-set/add-remove
+int-set/values
+int-set/update
 coords/point/finished
 coords/point/units
 coords/point/data

@@ -21,6 +21,7 @@ testlibgwy_SOURCES = \
 	gl-material.c \
 	gradient.c \
 	grain-value.c \
+	int-set.c \
 	interpolation.c \
 	inventory.c \
 	line-part.c \
