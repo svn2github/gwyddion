@@ -70,12 +70,6 @@ struct _GwyShapesPrivate {
     //     all common cases (nothing, a few random, a few large blocks, all).
     // (5) How it should interact with GtkTreeSelection if items are displayed
     //     in a treeview?
-
-    cairo_rectangle_t bbox;
-    cairo_matrix_t coords_to_view;
-    cairo_matrix_t view_to_coords;
-    cairo_matrix_t pixel_to_view;
-    cairo_matrix_t view_to_pixel;
 };
 
 static void     gwy_shapes_finalize           (GObject *object);
@@ -209,11 +203,11 @@ gwy_shapes_init(GwyShapes *shapes)
 {
     shapes->priv = G_TYPE_INSTANCE_GET_PRIVATE(shapes, GWY_TYPE_SHAPES, Shapes);
     Shapes *priv = shapes->priv;
-    cairo_matrix_init_identity(&priv->coords_to_view);
-    cairo_matrix_init_identity(&priv->view_to_coords);
-    cairo_matrix_init_identity(&priv->pixel_to_view);
-    cairo_matrix_init_identity(&priv->view_to_pixel);
-    priv->bbox = unrestricted_bbox;
+    cairo_matrix_init_identity(&shapes->coords_to_view);
+    cairo_matrix_init_identity(&shapes->view_to_coords);
+    cairo_matrix_init_identity(&shapes->pixel_to_view);
+    cairo_matrix_init_identity(&shapes->view_to_pixel);
+    shapes->bounding_box = unrestricted_bbox;
     priv->max_shapes = G_MAXUINT;
     priv->editable = TRUE;
 }
@@ -443,7 +437,7 @@ set_matrices(cairo_matrix_t *desta, cairo_matrix_t *destb,
  * Sets the matrices for transformation between physical coordinates and view
  * coordinates for a group of geometrical shapes.
  *
- * If both matrix are given they must be invertible and inverses of each
+ * If both matrices are given they must be invertible and inverses of each
  * other.  It is possible to give only one matrix; the other is then created as
  * its inverse.  They are copied by @shapes.
  **/
@@ -453,8 +447,7 @@ gwy_shapes_set_coords_matrices(GwyShapes *shapes,
                                const cairo_matrix_t *view_to_coords)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    Shapes *priv = shapes->priv;
-    if (set_matrices(&priv->coords_to_view, &priv->view_to_coords,
+    if (set_matrices(&shapes->coords_to_view, &shapes->view_to_coords,
                      coords_to_view, view_to_coords))
         gwy_shapes_update(shapes);
 }
@@ -475,7 +468,7 @@ gwy_shapes_set_coords_matrices(GwyShapes *shapes,
  * Shapes are defined using real coordinates, however, pixel dimensions are
  * used to visualise for instance averaging radii or lengths.
  *
- * If both matrix are given they must be invertible and inverses of each
+ * If both matrices are given they must be invertible and inverses of each
  * other.  It is possible to give only one matrix; the other is then created as
  * its inverse.  They are copied by @shapes.
  **/
@@ -485,88 +478,9 @@ gwy_shapes_set_pixel_matrices(GwyShapes *shapes,
                               const cairo_matrix_t *view_to_pixel)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    Shapes *priv = shapes->priv;
-    if (set_matrices(&priv->pixel_to_view, &priv->view_to_pixel,
+    if (set_matrices(&shapes->pixel_to_view, &shapes->view_to_pixel,
                      pixel_to_view, view_to_pixel))
         gwy_shapes_update(shapes);
-}
-
-/**
- * gwy_shapes_get_coords_to_view_matrix:
- * @shapes: A group of geometrical shapes.
- *
- * Gets the matrix for transformation of physical coordinates to view
- * coordinates for a group of geometrical shapes.
- *
- * Returns: The transformation matrix, owned by @shapes.  The pointer remains
- *          valid through the entire lifetime of @shapes and its contents
- *          always reflects the current matrix.
- **/
-const cairo_matrix_t*
-gwy_shapes_get_coords_to_view_matrix(const GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
-    return &shapes->priv->coords_to_view;
-}
-
-/**
- * gwy_shapes_get_view_to_coords_matrix:
- * @shapes: A group of geometrical shapes.
- *
- * Gets the matrix for transformation of view coordinates to physical
- * coordinates for a group of geometrical shapes.
- *
- * Returns: The transformation matrix, owned by @shapes.  The pointer remains
- *          valid through the entire lifetime of @shapes and its contents
- *          always reflects the current matrix.
- **/
-const cairo_matrix_t*
-gwy_shapes_get_view_to_coords_matrix(const GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
-    return &shapes->priv->view_to_coords;
-}
-
-/**
- * gwy_shapes_get_pixel_to_view_matrix:
- * @shapes: A group of geometrical shapes.
- *
- * Gets the matrix for transformation of pixel coordinates to view
- * coordinates for a group of geometrical shapes.
- *
- * Shapes are defined using real coordinates, however, pixel dimensions are
- * used to visualise for instance averaging radii or lengths.
- *
- * Returns: The transformation matrix, owned by @shapes.  The pointer remains
- *          valid through the entire lifetime of @shapes and its contents
- *          always reflects the current matrix.
- **/
-const cairo_matrix_t*
-gwy_shapes_get_pixel_to_view_matrix(const GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
-    return &shapes->priv->pixel_to_view;
-}
-
-/**
- * gwy_shapes_get_view_to_pixel_matrix:
- * @shapes: A group of geometrical shapes.
- *
- * Gets the matrix for transformation of view coordinates to pixel
- * coordinates for a group of geometrical shapes.
- *
- * Shapes are defined using real coordinates, however, pixel dimensions are
- * used to visualise for instance averaging radii or lengths.
- *
- * Returns: The transformation matrix, owned by @shapes.  The pointer remains
- *          valid through the entire lifetime of @shapes and its contents
- *          always reflects the current matrix.
- **/
-const cairo_matrix_t*
-gwy_shapes_get_view_to_pixel_matrix(const GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
-    return &shapes->priv->view_to_pixel;
 }
 
 /**
@@ -898,33 +812,14 @@ gwy_shapes_set_bounding_box(GwyShapes *shapes,
                             const cairo_rectangle_t *bbox)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    Shapes *priv = shapes->priv;
     if (!bbox)
         bbox = &unrestricted_bbox;
 
-    if (gwy_equal(bbox, &priv->bbox))
+    if (gwy_equal(bbox, &shapes->bounding_box))
         return;
 
-    priv->bbox = *bbox;
+    shapes->bounding_box = *bbox;
     gwy_shapes_update(shapes);
-}
-
-/**
- * gwy_shapes_get_bounding_box:
- * @shapes: A group of geometrical shapes.
- *
- * Obtains the bounding box for a group of geometrical shapes.
- *
- * Returns: The bounding box that determines permissible shape positions, owned
- *          by @shapes.  The pointer remains valid through the entire lifetime
- *          of @shapes and its contents always reflects the current bounding
- *          box.
- **/
-const cairo_rectangle_t*
-gwy_shapes_get_bounding_box(const GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
-    return &shapes->priv->bbox;
 }
 
 static void
@@ -1014,11 +909,22 @@ gwy_shapes_is_updated(GwyShapes *shapes)
 
 /**
  * GwyShapes:
+ * @bounding_box: Bounding box that determines permissible shape positions,
+ *                in @coords (physical) coordinates.
+ * @coords_to_view: Affine transformation from @shapes' @coords coordinates to
+ *                  view coordinates.
+ * @view_to_coords: Affine transformation from @shapes' view coordinates to
+ *                  @coords coordinates.
+ * @pixel_to_view: Affine transformation from @shapes' pixel coordinates to
+ *                 view coordinates.
+ * @view_to_pixel: Affine transformation from @shapes' view coordinates to
+ *                 pixel coordinates.
  *
  * Object representing a group of selectable geometrical shapes.
  *
- * The #GwyShapes struct contains private data only and should be accessed
- * using the functions below.
+ * The #GwyShapes struct contains some public fields that can be directly
+ * accessed for reading which is useful namely for subclassing.  To set them,
+ * you must always use the methods such as gwy_shapes_set_bounding_box().
  **/
 
 /**
@@ -1052,9 +958,9 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  *
  * Drawing of the shapes with gwy_shapes_draw() requires providing a matrix for
  * the transformation of physical coordinates to view coordinates using
- * gwy_shapes_set_coords_to_view_matrix().  User interaction requires also the
- * reverse transform that can be set with
- * gwy_shapes_set_view_to_coords_matrix().
+ * gwy_shapes_set_coords_matrices().  Drawing markers and other features with
+ * sizes in field pixels requires also setting the transform between real and
+ * pixel coordinates using gwy_shapes_set_pixel_matrices().
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

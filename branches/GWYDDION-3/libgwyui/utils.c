@@ -76,9 +76,9 @@ gwy_cairo_ellipse(cairo_t *cr,
  *
  * Adds a cross-shaped subpath to a cairo context.
  *
- * A new subpath is started, but it is not terminated.  Use cairo_new_subpath()
- * or other subpath-terminating primitive afterwards if necessary.  All
- * parameters are in user coordinates.
+ * A new subpath is started, but it is not terminated.  Use
+ * cairo_new_sub_path() or other subpath-terminating primitive afterwards if
+ * necessary.  All parameters are in user coordinates.
  **/
 void
 gwy_cairo_cross(cairo_t *cr,

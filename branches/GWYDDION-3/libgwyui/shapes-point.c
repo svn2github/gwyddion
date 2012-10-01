@@ -188,7 +188,7 @@ calculate_data(GwyShapesPoint *points)
     if (!priv->data)
         priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), 2*n);
     g_array_set_size(priv->data, 2*n);
-    const cairo_matrix_t *matrix = gwy_shapes_get_coords_to_view_matrix(shapes);
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
     gdouble *data = (gdouble*)priv->data->data;
     gwy_coords_get_data(coords, data);
     for (guint i = 0; i < n; i++)
@@ -236,7 +236,7 @@ draw_radii(GwyShapesPoint *points, cairo_t *cr)
 
     GwyShapes *shapes = GWY_SHAPES(points);
     gdouble xr = priv->radius, yr = priv->radius;
-    const cairo_matrix_t *matrix = gwy_shapes_get_pixel_to_view_matrix(shapes);
+    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
 
     cairo_matrix_transform_distance(matrix, &xr, &yr);
 
@@ -298,10 +298,10 @@ static void
 move_point(GwyShapes *shapes,
            gdouble x, gdouble y, GdkModifierType modif)
 {
-    const cairo_matrix_t *matrix = gwy_shapes_get_view_to_coords_matrix(shapes);
+    const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
 
-    const cairo_rectangle_t *bbox = gwy_shapes_get_bounding_box(shapes);
+    const cairo_rectangle_t *bbox = &shapes->bounding_box;
     x = CLAMP(x, bbox->x, bbox->x + bbox->width);
     y = CLAMP(y, bbox->y, bbox->y + bbox->height);
 
@@ -312,7 +312,7 @@ move_point(GwyShapes *shapes,
     if (modif & GDK_SHIFT_MASK) {
         const gdouble *xyorig = priv->xyorig;
         gdouble xd = xy[0] - xyorig[0], yd = xy[1] - xyorig[1];
-        matrix = gwy_shapes_get_coords_to_view_matrix(shapes);
+        matrix = &shapes->coords_to_view;
         cairo_matrix_transform_distance(matrix, &xd, &yd);
         if (fabs(xd) <= fabs(yd))
             xy[0] = xyorig[0];
@@ -335,10 +335,10 @@ add_point(GwyShapes *shapes,
     if (n >= gwy_shapes_get_max_shapes(shapes))
         return;
 
-    const cairo_matrix_t *matrix = gwy_shapes_get_view_to_coords_matrix(shapes);
+    const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
 
-    const cairo_rectangle_t *bbox = gwy_shapes_get_bounding_box(shapes);
+    const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
         return;

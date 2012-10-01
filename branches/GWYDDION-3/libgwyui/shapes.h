@@ -44,6 +44,13 @@ typedef struct _GwyShapesClass GwyShapesClass;
 struct _GwyShapes {
     GInitiallyUnowned unowned;
     struct _GwyShapesPrivate *priv;
+
+    /*<public>*/
+    cairo_rectangle_t bounding_box;
+    cairo_matrix_t coords_to_view;
+    cairo_matrix_t view_to_coords;
+    cairo_matrix_t pixel_to_view;
+    cairo_matrix_t view_to_pixel;
 };
 
 struct _GwyShapesClass {
@@ -98,13 +105,8 @@ void                     gwy_shapes_set_coords_matrices      (GwyShapes *shapes,
 void                     gwy_shapes_set_pixel_matrices       (GwyShapes *shapes,
                                                               const cairo_matrix_t *pixel_to_view,
                                                               const cairo_matrix_t *view_to_pixel);
-const cairo_matrix_t*    gwy_shapes_get_coords_to_view_matrix(const GwyShapes *shapes)               G_GNUC_PURE;
-const cairo_matrix_t*    gwy_shapes_get_view_to_coords_matrix(const GwyShapes *shapes)               G_GNUC_PURE;
-const cairo_matrix_t*    gwy_shapes_get_pixel_to_view_matrix (const GwyShapes *shapes)               G_GNUC_PURE;
-const cairo_matrix_t*    gwy_shapes_get_view_to_pixel_matrix (const GwyShapes *shapes)               G_GNUC_PURE;
 void                     gwy_shapes_set_bounding_box         (GwyShapes *shapes,
                                                               const cairo_rectangle_t *bbox);
-const cairo_rectangle_t* gwy_shapes_get_bounding_box         (const GwyShapes *shapes)               G_GNUC_PURE;
 void                     gwy_shapes_set_max_shapes           (GwyShapes *shapes,
                                                               guint max_shapes);
 guint                    gwy_shapes_get_max_shapes           (const GwyShapes *shapes)               G_GNUC_PURE;
