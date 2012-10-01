@@ -29,6 +29,7 @@ enum {
     PROP_FOCUS,
     PROP_MAX_SHAPES,
     PROP_EDITABLE,
+    PROP_SELECTION,
     N_PROPS
 };
 
@@ -43,8 +44,9 @@ typedef struct _GwyShapesPrivate Shapes;
 typedef gboolean (*EventMethodMotion)(GwyShapes *shapes, GdkEventMotion *event);
 typedef gboolean (*EventMethodButton)(GwyShapes *shapes, GdkEventButton *event);
 typedef gboolean (*EventMethodKey)(GwyShapes *shapes, GdkEventKey *event);
-typedef void (*CancelEditingMethod)(GwyShapes *shapes, gint id);
+typedef void (*ItemMethodInt)(GwyShapes *shapes, gint id);
 typedef void (*ItemMethod)(GwyShapes *shapes, guint id);
+typedef void (*VoidMethod)(GwyShapes *shapes);
 
 struct _GwyShapesPrivate {
     gint focus;
@@ -70,37 +72,49 @@ struct _GwyShapesPrivate {
     //     all common cases (nothing, a few random, a few large blocks, all).
     // (5) How it should interact with GtkTreeSelection if items are displayed
     //     in a treeview?
+    GwyIntSet *selection;
+    gulong selection_added_id;
+    gulong selection_removed_id;
+    gulong selection_assigned_id;
 };
 
-static void     gwy_shapes_finalize           (GObject *object);
-static void     gwy_shapes_dispose            (GObject *object);
-static void     gwy_shapes_set_property       (GObject *object,
-                                               guint prop_id,
-                                               const GValue *value,
-                                               GParamSpec *pspec);
-static void     gwy_shapes_get_property       (GObject *object,
-                                               guint prop_id,
-                                               GValue *value,
-                                               GParamSpec *pspec);
-static gboolean set_coords                    (GwyShapes *shapes,
-                                               GwyCoords *coords);
-static gboolean set_focus                     (GwyShapes *shapes,
-                                               gint id);
-static gboolean set_max_shapes                (GwyShapes *shapes,
-                                               guint max_shapes);
-static gboolean set_editable                  (GwyShapes *shapes,
-                                               gboolean editable);
-static void     cancel_editing                (GwyShapes *shapes,
-                                               gint id);
-static void     coords_item_inserted          (GwyShapes *shapes,
-                                               guint id,
-                                               GwyCoords *coords);
-static void     coords_item_deleted           (GwyShapes *shapes,
-                                               guint id,
-                                               GwyCoords *coords);
-static void     coords_item_updated           (GwyShapes *shapes,
-                                               guint id,
-                                               GwyCoords *coords);
+static void     gwy_shapes_finalize    (GObject *object);
+static void     gwy_shapes_dispose     (GObject *object);
+static void     gwy_shapes_set_property(GObject *object,
+                                        guint prop_id,
+                                        const GValue *value,
+                                        GParamSpec *pspec);
+static void     gwy_shapes_get_property(GObject *object,
+                                        guint prop_id,
+                                        GValue *value,
+                                        GParamSpec *pspec);
+static gboolean set_coords             (GwyShapes *shapes,
+                                        GwyCoords *coords);
+static gboolean set_focus              (GwyShapes *shapes,
+                                        gint id);
+static gboolean set_max_shapes         (GwyShapes *shapes,
+                                        guint max_shapes);
+static gboolean set_editable           (GwyShapes *shapes,
+                                        gboolean editable);
+static void     cancel_editing         (GwyShapes *shapes,
+                                        gint id);
+static void     coords_item_inserted   (GwyShapes *shapes,
+                                        guint id,
+                                        GwyCoords *coords);
+static void     coords_item_deleted    (GwyShapes *shapes,
+                                        guint id,
+                                        GwyCoords *coords);
+static void     coords_item_updated    (GwyShapes *shapes,
+                                        guint id,
+                                        GwyCoords *coords);
+static void     selection_added        (GwyShapes *shapes,
+                                        gint value,
+                                        GwyIntSet *selection);
+static void     selection_removed      (GwyShapes *shapes,
+                                        gint value,
+                                        GwyIntSet *selection);
+static void     selection_assigned     (GwyShapes *shapes,
+                                        GwyIntSet *selection);
 
 static const cairo_rectangle_t unrestricted_bbox = {
     -G_MAXDOUBLE, -G_MAXDOUBLE, G_MAXDOUBLE, G_MAXDOUBLE
@@ -153,9 +167,16 @@ gwy_shapes_class_init(GwyShapesClass *klass)
     properties[PROP_EDITABLE]
         = g_param_spec_boolean("editable",
                                "Editable",
-                               "Whether shapes can be modified by the user",
+                               "Whether shapes can be modified by the user.",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SELECTION]
+        = g_param_spec_object("selection",
+                              "Selection",
+                              "The set of currently selected shapes.",
+                               GWY_TYPE_INT_SET,
+                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -210,11 +231,27 @@ gwy_shapes_init(GwyShapes *shapes)
     shapes->bounding_box = unrestricted_bbox;
     priv->max_shapes = G_MAXUINT;
     priv->editable = TRUE;
+    GwyIntSet *selection = priv->selection = gwy_int_set_new();
+    priv->selection_added_id
+        = g_signal_connect_swapped(selection, "added",
+                                   G_CALLBACK(selection_added), shapes);
+    priv->selection_removed_id
+        = g_signal_connect_swapped(selection, "removed",
+                                   G_CALLBACK(selection_removed), shapes);
+    priv->selection_assigned_id
+        = g_signal_connect_swapped(selection, "assigned",
+                                   G_CALLBACK(selection_assigned), shapes);
 }
 
 static void
 gwy_shapes_finalize(GObject *object)
 {
+    GwyShapes *shapes = GWY_SHAPES(object);
+    Shapes *priv = shapes->priv;
+    g_signal_handler_disconnect(priv->selection, priv->selection_assigned_id);
+    g_signal_handler_disconnect(priv->selection, priv->selection_removed_id);
+    g_signal_handler_disconnect(priv->selection, priv->selection_added_id);
+    GWY_OBJECT_UNREF(priv->selection);
     G_OBJECT_CLASS(gwy_shapes_parent_class)->finalize(object);
 }
 
@@ -282,6 +319,10 @@ gwy_shapes_get_property(GObject *object,
         g_value_set_boolean(value, priv->editable);
         break;
 
+        case PROP_SELECTION:
+        g_value_set_object(value, priv->selection);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -309,7 +350,7 @@ set_coords(GwyShapes *shapes,
                                NULL))
         return FALSE;
 
-    // FIXME: We should cancel whatever manipulation the users performs now.
+    cancel_editing(shapes, -1);
     gwy_shapes_update(shapes);
     return TRUE;
 }
@@ -383,6 +424,22 @@ gwy_shapes_class_coords_type(const GwyShapesClass *klass)
 {
     g_return_val_if_fail(GWY_IS_SHAPES_CLASS(klass), 0);
     return klass->coords_type;
+}
+
+/**
+ * gwy_shapes_get_selection:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains the selection of a shapes object.
+ *
+ * Returns: (transfer none):
+ *          The integer set object representing the set of selected shapes.
+ **/
+GwyIntSet*
+gwy_shapes_get_selection(GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return shapes->priv->selection;
 }
 
 static gboolean
@@ -661,7 +718,7 @@ cancel_editing(GwyShapes *shapes, gint id)
 {
     if (!shapes->priv->coords)
         return;
-    CancelEditingMethod method = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
+    ItemMethodInt method = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
     if (method)
         method(shapes, id);
 }
@@ -843,7 +900,7 @@ coords_item_deleted(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_deleted;
     if (method)
         method(shapes, id);
-    CancelEditingMethod cmethod = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
+    ItemMethodInt cmethod = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
     if (cmethod)
         cmethod(shapes, id);
     gwy_shapes_update(shapes);
@@ -858,6 +915,41 @@ coords_item_updated(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_updated;
     if (method)
         method(shapes, id);
+    gwy_shapes_update(shapes);
+}
+
+static void
+selection_added(GwyShapes *shapes,
+                gint value,
+                GwyIntSet *selection)
+{
+    g_assert(shapes->priv->selection == selection);
+    ItemMethodInt method = GWY_SHAPES_GET_CLASS(shapes)->selection_added;
+    if (method)
+        method(shapes, value);
+    gwy_shapes_update(shapes);
+}
+
+static void
+selection_removed(GwyShapes *shapes,
+                  gint value,
+                  GwyIntSet *selection)
+{
+    g_assert(shapes->priv->selection == selection);
+    ItemMethodInt method = GWY_SHAPES_GET_CLASS(shapes)->selection_removed;
+    if (method)
+        method(shapes, value);
+    gwy_shapes_update(shapes);
+}
+
+static void
+selection_assigned(GwyShapes *shapes,
+                   GwyIntSet *selection)
+{
+    g_assert(shapes->priv->selection == selection);
+    VoidMethod method = GWY_SHAPES_GET_CLASS(shapes)->selection_assigned;
+    if (method)
+        method(shapes);
     gwy_shapes_update(shapes);
 }
 
@@ -945,6 +1037,12 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  *                       emits #GwyArray::item-deleted.
  * @coords_item_updated: Virtual method called when the @coords object
  *                       emits #GwyArray::item-updated.
+ * @selection_added: Virtual method called when the selection object
+ *                   emits #GwyIntSet::added.
+ * @selection_removed: Virtual method called when the selection object
+ *                     emits #GwyIntSet::removed.
+ * @selection_assigned: Virtual method called when the selection object
+ *                      emits #GwyIntSet::assigned.
  *
  * Class of groups of selectable geometrical shapes.
  *
