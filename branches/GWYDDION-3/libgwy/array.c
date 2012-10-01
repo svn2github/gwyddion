@@ -73,7 +73,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      **/
     signals[ITEM_INSERTED]
         = g_signal_new_class_handler("item-inserted",
-                                     GWY_TYPE_ARRAY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__UINT,
@@ -89,7 +89,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      **/
     signals[ITEM_DELETED]
         = g_signal_new_class_handler("item-deleted",
-                                     GWY_TYPE_ARRAY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__UINT,
@@ -105,7 +105,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      **/
     signals[ITEM_UPDATED]
         = g_signal_new_class_handler("item-updated",
-                                     GWY_TYPE_ARRAY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__UINT,
@@ -122,13 +122,12 @@ gwy_array_class_init(GwyArrayClass *klass)
    * are reordered.
    **/
   signals[ITEMS_REORDERED]
-      = g_signal_new("items-reordered",
-                     GWY_TYPE_ARRAY,
-                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                     G_STRUCT_OFFSET(GwyArrayClass, items_reordered),
-                     NULL, NULL,
-                     g_cclosure_marshal_VOID__POINTER,
-                     G_TYPE_NONE, 1, G_TYPE_POINTER);
+      = g_signal_new_class_handler("items-reordered",
+                                   G_OBJECT_CLASS_TYPE(klass),
+                                   G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                                   NULL, NULL, NULL,
+                                   g_cclosure_marshal_VOID__POINTER,
+                                   G_TYPE_NONE, 1, G_TYPE_POINTER);
 #endif
 }
 

@@ -92,7 +92,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      **/
     signals[ITEM_INSERTED]
         = g_signal_new_class_handler("item-inserted",
-                                     GWY_TYPE_INVENTORY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__UINT,
@@ -108,7 +108,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      **/
     signals[ITEM_DELETED]
         = g_signal_new_class_handler("item-deleted",
-                                     GWY_TYPE_INVENTORY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__UINT,
@@ -124,7 +124,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      **/
     signals[ITEM_UPDATED]
         = g_signal_new_class_handler("item-updated",
-                                     GWY_TYPE_INVENTORY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__UINT,
@@ -141,7 +141,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      **/
     signals[ITEMS_REORDERED]
         = g_signal_new_class_handler("items-reordered",
-                                     GWY_TYPE_INVENTORY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__POINTER,
@@ -157,7 +157,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      **/
     signals[DEFAULT_CHANGED]
         = g_signal_new_class_handler("default-changed",
-                                     GWY_TYPE_INVENTORY,
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__VOID,

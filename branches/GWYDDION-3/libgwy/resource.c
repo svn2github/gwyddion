@@ -404,7 +404,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
      */
     signals[DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
-                                     G_OBJECT_CLASS_TYPE(gobject_class),
+                                     G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      G_CALLBACK(data_changed),
                                      NULL, NULL,
