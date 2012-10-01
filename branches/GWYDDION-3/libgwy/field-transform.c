@@ -548,69 +548,16 @@ gwy_field_transform_offsets(const GwyField *source,
  * @title: GwyField transformations
  * @short_description: Geometrical transformations of fields
  *
- * FIXME: This is all wrong, even the inefficient operations are directly
- * possible now.
- *
- * Some field transformations are performed in place while others create new
- * fields.  This simply follows which transformations <emphasis>can</emphasis>
- * be performed in place.
- *
- * If the transformation can be performed in place, such as flipping, it is
- * performed in place.  Doing
- * |[
- * GwyField *newfield = gwy_field_duplicate(field);
- * gwy_field_flip(newfield, FALSE, TRUE, FALSE);
- * ]|
- * if you need a copy is reasonably efficient requiring one extra memcpy().
- *
- * On the other hand if the transformation cannot be performed in place and it
- * requires allocation of a data buffer then a new field is created and
- * returned.  You can replace the old field with the new one or, if the object
- * identity is important, use
- * |[
- * GwyField *newfield = gwy_field_new_rotated_simple(field, 90, FALSE);
- * gwy_field_assign(field, newfield);
- * g_object_unref(newfield);
- * ]|
- * which again costs one extra memcpy().
- *
- * The most low-level and performance-critical operation is transposition as it
- * does not permit a strictly linear memory access (rotations by odd multiples
- * of 90 degrees are essentially transpositions of combined with flipping).
- * An efficient implementation (which the Gwyddion's is) can be used to convert
- * otherwise slow column-wise operations on fields to row-wise operations.
- *
- * Several transposition functions are available, the simplest is
- * gwy_field_new_transposed() that creates a new field as the transposition of
- * another field or its rectangular part.
- *
- * If the columns can be processed separately or their interrelation is simple
- * you can avoid allocating entire transposed rectangular part and work by
- * blocks using gwy_field_part_transpose():
- * |[
- * enum { block_size = 64 };
- * GwyField *workspace = gwy_field_sized_new(height, block_size, FALSE);
- * guint i, remainder;
- *
- * for (i = 0; i < width/block_size; i++) {
- *     GwyFieldPart fpart = {
- *         col + i*block_size, row, block_size, height
- *     };
- *     gwy_field_part_transpose(field, &fpart, workspace, 0, 0);
- *     // Process block_size rows in workspace row-wise fashion, possibly put
- *     // back the processed data with another gwy_field_part_transpose.
- * }
- * remainder = width % block_size;
- * if (remainder) {
- *     GwyFieldPart fpart = {
- *         col + width/block_size*block_size, row, remainder, height
- *     };
- *     gwy_field_part_transpose(field, &fpart, workspace, 0, 0);
- *     // Process block_size rows in workspace row-wise fashion, possibly put
- *     // back the processed data with another gwy_field_part_transpose.
- * }
- * g_object_unref(workspace);
- * ]|
+ * Congruent transformations, i.e. those retaining pixels and not requiring
+ * interpolation, can be performed both in-place using
+ * gwy_field_transform_congruent() and into a new field using
+ * gwy_field_new_congruent().  However, some are efficient only out-of place
+ * because they require temporary buffers, while other are more efficient
+ * in-place.  The difference is whether the transformation is transposing,
+ * as reported by gwy_plane_congruence_is_transposition().  Transposing
+ * transformations are not efficient in-place and if the result is going to end
+ * up in another field it is usually better to create it right away with
+ * gwy_field_new_congruent().
  **/
 
 /**
