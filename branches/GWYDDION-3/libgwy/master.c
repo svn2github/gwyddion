@@ -520,7 +520,7 @@ gwy_master_destroy_data(GwyMaster *master,
  * #GThreadPool is intended for running jobs in the background, i.e. it has a
  * non-blocking interface, whereas #GwyMaster is intended for parallelisation
  * of an immediately performed work, i.e. it has a blocking interface.
- * #GwyMastter is not thread-safe in the sense the object could be meaningfully
+ * #GwyMaster is not thread-safe in the sense the object could be meaningfully
  * accessed from multiple threads apart from cancelling the work using the
  * #GCancellable passed to gwy_master_manage_tasks().
  *
