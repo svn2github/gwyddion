@@ -26,6 +26,12 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_SHAPES_STATE_NORMAL   = 0,
+    GWY_SHAPES_STATE_SELECTED = 1 << 0,
+    GWY_SHAPES_STATE_PRELIGHT = 1 << 1,
+} GwyShapesStateType;
+
 #define GWY_TYPE_SHAPES \
     (gwy_shapes_get_type())
 #define GWY_SHAPES(obj) \
@@ -141,6 +147,9 @@ gboolean     gwy_shapes_key_release        (GwyShapes *shapes,
                                             GdkEventKey *event);
 void         gwy_shapes_update             (GwyShapes *shapes);
 gboolean     gwy_shapes_is_updated         (GwyShapes *shapes);
+void         gwy_shapes_stroke             (GwyShapes *shapes,
+                                            cairo_t *cr,
+                                            GwyShapesStateType state);
 
 G_END_DECLS
 

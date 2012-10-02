@@ -20,7 +20,9 @@
 #include <glib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
+#include "libgwy/rgba.h"
 #include "libgwy/object-utils.h"
+#include "libgwyui/utils.h"
 #include "libgwyui/shapes.h"
 
 enum {
@@ -990,6 +992,81 @@ gwy_shapes_is_updated(GwyShapes *shapes)
     return shapes->priv->is_updated;
 }
 
+/* Each shape can be ‘selected’ in the following independent ways:
+ * HOVER – mouse is near the shape so that clicking would select or deselect it
+ *         or start editing it
+ * SELECTED – shape is a part of GwyShapes selection so future actions would
+ *            apply to it
+ * EDITED – shape is being currently edited by the user using mouse
+ *
+ * Constraints:
+ * – At most one shape can have HOVER selection and it must be SELECTED or
+ *   nothing.
+ * – SELECTED and EDITED are two exclusing states applying usually to the same
+ *   set of shapes.
+ *
+ * So all possible states are only:
+ * NORMAL
+ * HOVER
+ * SELECTED
+ * SELECTED + HOVER
+ * EDITED
+ *
+ * ⇒ EDITED and SELECTED need not look differently.
+ * ⇒ HOVER visualisation must be possible to combine with SELECTED (EDITED).
+ * ⇒ HOVER can be an ‘expensive’ or ‘disruptive’ visualisation.
+ */
+
+/**
+ * gwy_shapes_stroke:
+ * @shapes: A group of geometrical shapes.
+ * @cr: A cairo context to draw to.  Its current path should represent the
+ *      shapes in state @state or their markers.
+ * @state: State of the shapes, determining how they will be hightlighted.
+ *
+ * Performes a cairo stroke drawing a group of geometrical shapes in given
+ * state.
+ *
+ * This method behaves like cairo_stroke(), i.e. the current path is cleared
+ * after drawing it.
+ **/
+void
+gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
+                  cairo_t *cr,
+                  GwyShapesStateType state)
+{
+    static const GwyRGBA normal_color = { 1.0, 1.0, 1.0, 0.7 };
+    static const GwyRGBA selected_color = { 1.0, 1.0, 0.5, 0.7 };
+    static const GwyRGBA outline_color = { 0.0, 0.0, 0.0, 0.5 };
+    GwyShapesStateType basestate = state & ~GWY_SHAPES_STATE_PRELIGHT;
+    gboolean prelight = !!(state & GWY_SHAPES_STATE_PRELIGHT);
+    GwyRGBA color = outline_color;
+    gdouble width = cairo_get_line_width(cr);
+    gdouble outline_width = 1.1*width + 0.4;
+
+    if (prelight)
+        color.a = 1.0;
+
+    gwy_cairo_set_source_rgba(cr, &color);
+    cairo_set_line_width(cr, outline_width);
+    cairo_stroke_preserve(cr);
+
+    if (basestate == GWY_SHAPES_STATE_NORMAL)
+        color = normal_color;
+    else if (basestate == GWY_SHAPES_STATE_SELECTED)
+        color = selected_color;
+    else {
+        g_critical("Unknown base shapes state %u.\n", basestate);
+    }
+
+    if (prelight)
+        color.a = 1.0;
+
+    gwy_cairo_set_source_rgba(cr, &color);
+    cairo_set_line_width(cr, width);
+    cairo_stroke(cr);
+}
+
 /**
  * SECTION: shapes
  * @title: GwyShapes
@@ -1059,6 +1136,19 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  * gwy_shapes_set_coords_matrices().  Drawing markers and other features with
  * sizes in field pixels requires also setting the transform between real and
  * pixel coordinates using gwy_shapes_set_pixel_matrices().
+ **/
+
+/**
+ * GwyShapesStateType:
+ * @GWY_SHAPES_STATE_NORMAL: Normal state.
+ * @GWY_SHAPES_STATE_SELECTED: Shape is selected or just being moved.
+ * @GWY_SHAPES_STATE_PRELIGHT: Mouse is hovering over the shape so clicking
+ *                             would interact with it.
+ *
+ * Type of state a shape in a group of geometric shapes can be in.
+ *
+ * All states except %GWY_SHAPES_STATE_NORMAL are flags and can be combined
+ * together or with %GWY_SHAPES_STATE_NORMAL which is an alias for zero.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

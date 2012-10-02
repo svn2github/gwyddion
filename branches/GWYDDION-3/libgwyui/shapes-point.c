@@ -17,38 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Each shape can be ‘selected’ in the following independent ways:
- * HOVER – mouse is near the shape so that clicking would select or deselect it
- *         or start editing it
- * SELECTED – shape is a part of GwyShapes selection so future actions would
- *            apply to it
- * EDITED – shape is being currently edited by the user using mouse
- *
- * Constraints:
- * – At most one shape can have HOVER selection and it must be SELECTED or
- *   nothing.
- * – SELECTED and EDITED are two exclusing states applying usually to the same
- *   set of shapes.
- *
- * So all possible states are only:
- * NORMAL
- * HOVER
- * SELECTED
- * SELECTED + HOVER
- * EDITED
- *
- * ⇒ EDITED and SELECTED need not look differently.
- * ⇒ HOVER visualisation must be possible to combine with SELECTED (EDITED).
- * ⇒ HOVER can be an ‘expensive’ or ‘disruptive’ visualisation.
- */
-
 #include <math.h>
 #include <glib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/coords-point.h"
-#include "libgwy/rgba.h"
 #include "libgwyui/utils.h"
 #include "libgwyui/shapes-point.h"
 
@@ -66,11 +40,9 @@ struct _GwyShapesPointPrivate {
     // are changed simultaneously from more sources.
     GArray *data;
 
-    gint active;
+    gint hover;
     gint moving;
     gdouble xyorig[2];
-    GwyRGBA marker_color;
-    GwyRGBA marker_highlight;
 };
 
 static void     gwy_shapes_point_finalize      (GObject *object);
@@ -147,9 +119,7 @@ gwy_shapes_point_init(GwyShapesPoint *points)
     points->priv = G_TYPE_INSTANCE_GET_PRIVATE(points, GWY_TYPE_SHAPES_POINT,
                                                ShapesPoint);
     ShapesPoint *priv = points->priv;
-    priv->marker_color = (GwyRGBA){ 0.9, 0.8, 0.3, 0.5 };
-    priv->marker_highlight = (GwyRGBA){ 1.0, 0.9, 0.5, 0.8 };
-    priv->active = priv->moving = -1;
+    priv->hover = priv->moving = -1;
 }
 
 static void
@@ -231,21 +201,26 @@ draw_crosses(GwyShapesPoint *points, cairo_t *cr)
     if (!n)
         return;
 
+    GwyShapes *shapes = GWY_SHAPES(points);
+
     cairo_save(cr);
     cairo_set_line_width(cr, 1.683);
-    gwy_cairo_set_source_rgba(cr, &priv->marker_color);
     for (gint i = 0; i < n; i++) {
-        if (i != priv->active)
+        if (i != priv->hover)
             gwy_cairo_cross(cr, data[2*i], data[2*i + 1], ticklen);
     }
-    cairo_stroke(cr);
+    gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
 
-    if (priv->active != -1) {
-        gint i = priv->active;
-        gwy_cairo_set_source_rgba(cr, &priv->marker_highlight);
+    if (priv->moving != -1) {
+        gint i = priv->moving;
         gwy_cairo_cross(cr, data[2*i], data[2*i + 1], ticklen);
+        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
     }
-    cairo_stroke(cr);
+    else if (priv->hover != -1) {
+        gint i = priv->hover;
+        gwy_cairo_cross(cr, data[2*i], data[2*i + 1], ticklen);
+        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_PRELIGHT);
+    }
     cairo_restore(cr);
 }
 
@@ -266,20 +241,23 @@ draw_radii(GwyShapesPoint *points, cairo_t *cr)
     cairo_matrix_transform_distance(matrix, &xr, &yr);
 
     cairo_save(cr);
-    cairo_set_line_width(cr, 0.683);
-    gwy_cairo_set_source_rgba(cr, &priv->marker_color);
+    cairo_set_line_width(cr, 1.0);
     for (gint i = 0; i < n; i++) {
-        if (i != priv->active)
+        if (i != priv->hover && i != priv->moving)
             gwy_cairo_ellipse(cr, data[2*i], data[2*i + 1], xr, yr);
     }
-    cairo_stroke(cr);
+    gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
 
-    if (priv->active != -1) {
-        gint i = priv->active;
-        gwy_cairo_set_source_rgba(cr, &priv->marker_highlight);
+    if (priv->moving != -1) {
+        gint i = priv->moving;
         gwy_cairo_ellipse(cr, data[2*i], data[2*i + 1], xr, yr);
+        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
     }
-    cairo_stroke(cr);
+    else if (priv->hover != -1) {
+        gint i = priv->hover;
+        gwy_cairo_ellipse(cr, data[2*i], data[2*i + 1], xr, yr);
+        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_PRELIGHT);
+    }
     cairo_restore(cr);
 }
 
@@ -369,7 +347,7 @@ add_point(GwyShapes *shapes,
         return;
 
     gdouble xy[2] = { x, y };
-    priv->active = priv->moving = n;
+    priv->hover = priv->moving = n;
     gwy_coords_set(coords, priv->moving, xy);
 }
 
@@ -388,10 +366,10 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
     }
 
     gint i = find_near_point(points, event->x, event->y);
-    if (priv->active == i)
+    if (priv->hover == i)
         return FALSE;
 
-    priv->active = i;
+    priv->hover = i;
     gwy_shapes_update(shapes);
     return FALSE;
 }
@@ -402,10 +380,10 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
-    if (priv->active != -1) {
+    if (priv->hover != -1) {
         if (priv->moving != -1)
             g_warning("Button pressed while already moving a point.");
-        priv->moving = priv->active;
+        priv->moving = priv->hover;
         gwy_coords_get(gwy_shapes_get_coords(shapes),
                        priv->moving, priv->xyorig);
         gwy_shapes_set_focus(shapes, priv->moving);
@@ -428,7 +406,7 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
 
     move_point(shapes, event->x, event->y, event->state);
     priv->moving = -1;
-    priv->active = find_near_point(points, event->x, event->y);
+    priv->hover = find_near_point(points, event->x, event->y);
     gwy_shapes_set_focus(shapes, priv->moving);
     gwy_coords_finished(gwy_shapes_get_coords(shapes));
     return TRUE;

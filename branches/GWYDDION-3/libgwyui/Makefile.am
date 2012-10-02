@@ -53,6 +53,7 @@ libgwyui3_la_SOURCES = \
 	raster-view.c \
 	shapes.c \
 	shapes-point.c \
+	types.c \
 	utils.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
