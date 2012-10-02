@@ -380,16 +380,49 @@ test_math_curvature_at_origin_unsloped(void)
 
         GwyCurvatureParams curvc, curvo;
         guint ndimsc = gwy_math_curvature_at_centre(coeffs, &curvc);
-        guint ndimso = gwy_math_curvature_at_centre(coeffs, &curvo);
+        guint ndimso = gwy_math_curvature_at_origin(coeffs, &curvo);
 
         g_assert_cmpuint(ndimso, ==, ndimsc);
         g_assert_cmpfloat(fabs(curvo.k1 - curvc.k1), <=, 1e-12);
         g_assert_cmpfloat(fabs(curvo.k2 - curvc.k2), <=, 1e-12);
+        g_assert_cmpfloat(fabs(curvo.phi1 - curvc.phi1), <=, 1e-12);
+        g_assert_cmpfloat(fabs(curvo.phi2 - curvc.phi2), <=, 1e-12);
+        g_assert_cmpfloat(curvo.xc, ==, 0.0);
+        g_assert_cmpfloat(curvo.yc, ==, 0.0);
+        g_assert_cmpfloat(curvo.zc, ==, coeffs[0]);
     }
 
     g_rand_free(rng);
 }
 
+void
+test_math_curvature_at_origin_flat(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint i = 0; i < 30; i++) {
+        gdouble coeffs[6];
+        gwy_clear(coeffs, 6);
+
+        coeffs[0] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[1] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[2] = g_rand_double_range(rng, -5.0, 5.0);
+
+        GwyCurvatureParams curv;
+        guint ndims = gwy_math_curvature_at_centre(coeffs, &curv);
+
+        g_assert_cmpuint(ndims, ==, 0);
+        g_assert_cmpfloat(curv.k1, ==, 0.0);
+        g_assert_cmpfloat(curv.k2, ==, 0.0);
+        g_assert_cmpfloat(curv.phi1, ==, 0.0);
+        g_assert_cmpfloat(curv.phi2, ==, G_PI/2.0);
+        g_assert_cmpfloat(curv.xc, ==, 0.0);
+        g_assert_cmpfloat(curv.yc, ==, 0.0);
+        g_assert_cmpfloat(curv.zc, ==, coeffs[0]);
+    }
+
+    g_rand_free(rng);
+}
 
 /***************************************************************************
  *
