@@ -548,9 +548,8 @@ gwy_math_curvature_at_origin(const gdouble *coeffs,
     guint degree = calc_quadratic_curvatue(curvature,
                                            a, 0, 0, cxx, cxy, cyy);
 
-    // FIXME: Or +beta.  Dunno.
-    curvature->phi1 = gwy_standardize_direction(curvature->phi1 - beta);
-    curvature->phi2 = gwy_standardize_direction(curvature->phi2 - beta);
+    curvature->phi1 = gwy_standardize_direction(curvature->phi1 + beta);
+    curvature->phi2 = gwy_standardize_direction(curvature->phi2 + beta);
     // This should already hold approximately.  Enforce it exactly.
     curvature->xc = curvature->yc = 0.0;
     curvature->zc = a;
