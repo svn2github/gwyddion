@@ -23,6 +23,7 @@ math/curvature/at-centre/shifted
 math/curvature/at-centre/general
 math/curvature/at-origin/flat
 math/curvature/at-origin/unsloped
+math/curvature/at-origin/sloped
 math/sort
 math/median
 math/cholesky

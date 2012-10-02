@@ -424,6 +424,44 @@ test_math_curvature_at_origin_flat(void)
     g_rand_free(rng);
 }
 
+void
+test_math_curvature_at_origin_sloped(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint i = 0; i < 30; i++) {
+        gdouble coeffs[6];
+        gwy_clear(coeffs, 6);
+
+        // Add a really small slope; this should invoke the case where slope is
+        // non-zero but change the actual curvatures only very slightly (the
+        // effect is second-order).
+        coeffs[0] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[1] = g_rand_double_range(rng, -1.0e-4, 1.0e-4);
+        coeffs[2] = g_rand_double_range(rng, -1.0e-4, 1.0e-4);
+        coeffs[3] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[4] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[5] = g_rand_double_range(rng, -5.0, 5.0);
+
+        GwyCurvatureParams curvc, curvo;
+        guint ndimsc = gwy_math_curvature_at_centre(coeffs, &curvc);
+        guint ndimso = gwy_math_curvature_at_origin(coeffs, &curvo);
+
+        gdouble b2 = coeffs[1]*coeffs[1] + coeffs[2]*coeffs[2],
+                eps = MAX(100*b2, 1e-14);
+        g_assert_cmpuint(ndimso, ==, ndimsc);
+        g_assert_cmpfloat(fabs(curvo.k1 - curvc.k1), <=, eps);
+        g_assert_cmpfloat(fabs(curvo.k2 - curvc.k2), <=, eps);
+        g_assert_cmpfloat(fabs(curvo.phi1 - curvc.phi1), <=, eps);
+        g_assert_cmpfloat(fabs(curvo.phi2 - curvc.phi2), <=, eps);
+        g_assert_cmpfloat(curvo.xc, ==, 0.0);
+        g_assert_cmpfloat(curvo.yc, ==, 0.0);
+        g_assert_cmpfloat(curvo.zc, ==, coeffs[0]);
+    }
+
+    g_rand_free(rng);
+}
+
 /***************************************************************************
  *
  * Linear algebra
