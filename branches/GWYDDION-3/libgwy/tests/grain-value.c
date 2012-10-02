@@ -612,7 +612,7 @@ dumb_curvature_k1(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                        cx, cy, ax, ay, FALSE,
+                        cx, cy, ax, ay, FALSE, TRUE,
                         GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                         &curvature);
     return curvature.k1;
@@ -632,7 +632,7 @@ dumb_curvature_k2(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                        cx, cy, ax, ay, FALSE,
+                        cx, cy, ax, ay, FALSE, TRUE,
                         GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                         &curvature);
     return curvature.k2;
@@ -652,7 +652,7 @@ dumb_curvature_phi1(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                        cx, cy, ax, ay, FALSE,
+                        cx, cy, ax, ay, FALSE, TRUE,
                         GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                         &curvature);
     return curvature.phi1;
@@ -672,7 +672,7 @@ dumb_curvature_phi2(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                        cx, cy, ax, ay, FALSE,
+                        cx, cy, ax, ay, FALSE, TRUE,
                         GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                         &curvature);
     return curvature.phi2;
@@ -692,7 +692,7 @@ dumb_curvature_center_x(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     if (gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                            cx, cy, ax, ay, FALSE,
+                            cx, cy, ax, ay, FALSE, TRUE,
                             GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                             &curvature) >= 0)
         return curvature.xc;
@@ -714,7 +714,7 @@ dumb_curvature_center_y(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     if (gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                            cx, cy, ax, ay, FALSE,
+                            cx, cy, ax, ay, FALSE, TRUE,
                             GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                             &curvature) >= 0)
         return curvature.yc;
@@ -736,7 +736,7 @@ dumb_curvature_center_z(const GwyMaskField *mask, const GwyField *field)
     guint cy = field->yres/2, ay = (field->yres - 1)/2;
     GwyCurvatureParams curvature;
     gwy_field_curvature(field, mask, GWY_MASK_INCLUDE,
-                        cx, cy, ax, ay, FALSE,
+                        cx, cy, ax, ay, FALSE, TRUE,
                         GWY_EXTERIOR_MIRROR_EXTEND, NAN,
                         &curvature);
     return curvature.zc;

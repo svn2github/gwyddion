@@ -437,6 +437,8 @@ gwy_field_slope(const GwyField *field,
  *      and larger than 1 for elliptical areas.
  * @elliptical: %TRUE to process an elliptical area, %FALSE to process its
  *              bounding rectangle.
+ * @at_centre: %TRUE to calculate curvature parameters at the centre of
+ *             curvature, %FALSE to calculate curvature at (@col,@row).
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  * @curvature: (out):
@@ -447,17 +449,18 @@ gwy_field_slope(const GwyField *field,
  * This makes sense only if the field values are the same physical quantity
  * as the lateral dimensions.
  *
- * All calculated curvatures are in physical units.  See gwy_math_curvature()
- * for handling of degenerate cases; the natural centre is at physical
- * coordinates corresponding to (@col+½,@row+½) in this case.
+ * All calculated curvatures are in physical units.  See
+ * gwy_math_curvature_at_centre() for the handling of degenerate cases; the
+ * natural centre is at physical coordinates corresponding to (@col+½,@row+½)
+ * in this case.
  *
  * See gwy_field_value_averaged() for description of the neighbourhood shape
  * and size.  If the neighbourhood contains an insufficient number of pixels to
  * determine the slope (taking masking into account) the parameters are set to
  * values corresponding to a flat surface and a negative value is returned.
  *
- * Returns: The number of curved dimensions, simiarly to gwy_math_curvature().
- *          If the the 
+ * Returns: The number of curved dimensions, simiarly to
+ *          gwy_math_curvature_at_centre().
  **/
 gint
 gwy_field_curvature(const GwyField *field,
@@ -466,6 +469,7 @@ gwy_field_curvature(const GwyField *field,
                     gint col, gint row,
                     guint ax, guint ay,
                     gboolean elliptical,
+                    gboolean at_centre,
                     GwyExteriorType exterior,
                     gdouble fill_value,
                     GwyCurvatureParams *curvature)
@@ -568,8 +572,14 @@ gwy_field_curvature(const GwyField *field,
         }
     }
 
-    // gwy_math_curvature() does The Right Thing if coeffs are all zeroes.
-    gint ndims = gwy_math_curvature_at_centre(coeffs, curvature);
+    // gwy_math_curvature_at_centre() does The Right Thing if coeffs are all
+    // zeroes.
+    gint ndims;
+    if (at_centre)
+        ndims = gwy_math_curvature_at_centre(coeffs, curvature);
+    else
+        ndims = gwy_math_curvature_at_origin(coeffs, curvature);
+
     // Now the angles and z-values are correct, but curvatures and xy must be
     // transformed to real physical units.
     curvature->k1 /= s*s;

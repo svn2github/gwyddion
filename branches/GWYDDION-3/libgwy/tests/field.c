@@ -5956,7 +5956,7 @@ test_field_read_slope(void)
 }
 
 void
-test_field_read_curvature(void)
+test_field_read_curvature_at_centre(void)
 {
     enum { max_size = 54, niter = 40, niiter = 100 };
 
@@ -6009,7 +6009,8 @@ test_field_read_curvature(void)
             gint ndimsr = gwy_field_curvature
                                      (field, NULL, GWY_MASK_IGNORE,
                                       col, row, ax, ay,
-                                      FALSE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                      FALSE, TRUE,
+                                      GWY_EXTERIOR_BORDER_EXTEND, NAN,
                                       &curvr);
             g_assert_cmpint(ndimsr, ==, ndims);
             g_assert_cmpfloat(fabs(curvr.k1/curv.k1 - 1.0), <=, eps);
@@ -6023,7 +6024,8 @@ test_field_read_curvature(void)
             gint ndimse = gwy_field_curvature
                                      (field, NULL, GWY_MASK_IGNORE,
                                       col, row, ax, ay,
-                                      TRUE, GWY_EXTERIOR_BORDER_EXTEND, NAN,
+                                      TRUE, TRUE,
+                                      GWY_EXTERIOR_BORDER_EXTEND, NAN,
                                       &curve);
             g_assert_cmpint(ndimse, ==, ndims);
             g_assert_cmpfloat(fabs(curve.k1/curv.k1 - 1.0), <=, eps);

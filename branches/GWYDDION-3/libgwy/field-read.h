@@ -69,6 +69,7 @@ gint      gwy_field_curvature           (const GwyField *field,
                                          guint ax,
                                          guint ay,
                                          gboolean elliptical,
+                                         gboolean at_centre,
                                          GwyExteriorType exterior,
                                          gdouble fill_value,
                                          GwyCurvatureParams *curvature);
