@@ -275,7 +275,7 @@ gwy_int_set_new(void)
 }
 
 /**
- * gwy_int_set_new_with_data:
+ * gwy_int_set_new_with_values:
  * @values: Integers to fill the integer set with.  They may repeat and may be
  *          in non-ascending order, however, if they do the construction is
  *          somewhat more efficient.
