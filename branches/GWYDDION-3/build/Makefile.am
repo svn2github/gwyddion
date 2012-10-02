@@ -5,7 +5,7 @@ EXTRA_DIST = \
 	check-dep-versions.py \
 	check-doc-sections.sh \
 	check-library-symbols.py \
-	check-marshallers.sh \
+	check-marshallers.py \
 	check-serializable-types.py \
 	coverage-plot.py \
 	coverage-test.sh \
