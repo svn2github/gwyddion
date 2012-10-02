@@ -17,7 +17,11 @@ math/powi/our
 math/overlapping
 math/intersecting
 math/power_sum
-math/curvature
+math/curvature/at-centre/flat
+math/curvature/at-centre/centered
+math/curvature/at-centre/shifted
+math/curvature/at-centre/general
+math/curvature/at-origin/unsloped
 math/sort
 math/median
 math/cholesky

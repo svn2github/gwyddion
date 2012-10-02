@@ -114,11 +114,10 @@ test_math_power_sum(void)
 }
 
 void
-test_math_curvature(void)
+test_math_curvature_at_centre_flat(void)
 {
     GwyCurvatureParams curv;
     guint ndims;
-    GRand *rng = g_rand_new_with_seed(42);
 
     // Flat surfaces
     static const gdouble coeffs1[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -142,6 +141,14 @@ test_math_curvature(void)
     g_assert_cmpfloat(curv.xc, ==, 0.0);
     g_assert_cmpfloat(curv.yc, ==, 0.0);
     g_assert_cmpfloat(curv.zc, ==, 1.0);
+}
+
+void
+test_math_curvature_at_centre_centered(void)
+{
+    GwyCurvatureParams curv;
+    guint ndims;
+    GRand *rng = g_rand_new_with_seed(42);
 
     // Centered surfaces
     static const gdouble coeffs3[] = { 0.0, 0.0, 0.0, 0.5, 0.0, 1.0 };
@@ -245,6 +252,16 @@ test_math_curvature(void)
         g_assert_cmpfloat(curv.zc, ==, 0.0);
     }
 
+    g_rand_free(rng);
+}
+
+void
+test_math_curvature_at_centre_shifted(void)
+{
+    GwyCurvatureParams curv;
+    guint ndims;
+    GRand *rng = g_rand_new_with_seed(42);
+
     // Shifted surfaces
     static const gdouble coeffs6[] = { 2.0, -2.0, 2.0, 1.0, 0.0, 1.0 };
     ndims = gwy_math_curvature_at_centre(coeffs6, &curv);
@@ -292,6 +309,16 @@ test_math_curvature(void)
     g_assert_cmpfloat(fabs(curv.yc - 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(curv.zc), <=, 1e-14);
 
+    g_rand_free(rng);
+}
+
+void
+test_math_curvature_at_centre_general(void)
+{
+    GwyCurvatureParams curv;
+    guint ndims;
+    GRand *rng = g_rand_new_with_seed(42);
+
     // Rotated shifted surface
     for (guint i = 0; i < 30; i++) {
         gdouble alpha = g_rand_double_range(rng, -G_PI/4.0, G_PI/4.0);
@@ -336,6 +363,33 @@ test_math_curvature(void)
 
     g_rand_free(rng);
 }
+
+void
+test_math_curvature_at_origin_unsloped(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint i = 0; i < 30; i++) {
+        gdouble coeffs[6];
+        gwy_clear(coeffs, 6);
+
+        coeffs[0] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[3] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[4] = g_rand_double_range(rng, -5.0, 5.0);
+        coeffs[5] = g_rand_double_range(rng, -5.0, 5.0);
+
+        GwyCurvatureParams curvc, curvo;
+        guint ndimsc = gwy_math_curvature_at_centre(coeffs, &curvc);
+        guint ndimso = gwy_math_curvature_at_centre(coeffs, &curvo);
+
+        g_assert_cmpuint(ndimso, ==, ndimsc);
+        g_assert_cmpfloat(fabs(curvo.k1 - curvc.k1), <=, 1e-12);
+        g_assert_cmpfloat(fabs(curvo.k2 - curvc.k2), <=, 1e-12);
+    }
+
+    g_rand_free(rng);
+}
+
 
 /***************************************************************************
  *
