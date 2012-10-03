@@ -104,10 +104,6 @@ struct _GwyShapesClass {
     gboolean (*reservedevent2)(void);
 };
 
-typedef void (*GwyShapesTransformFunc)(const gdouble *coords_from,
-                                       gdouble *coords_to,
-                                       gpointer user_data);
-
 GType        gwy_shapes_get_type           (void)                                  G_GNUC_CONST;
 void         gwy_shapes_set_coords         (GwyShapes *shapes,
                                             GwyCoords *coords);
