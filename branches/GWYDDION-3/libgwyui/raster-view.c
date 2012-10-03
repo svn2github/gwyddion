@@ -671,7 +671,15 @@ gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview)
     return &GWY_RASTER_VIEW(rasterview)->priv->grain_number_color;
 }
 
-
+/**
+ * gwy_raster_view_set_shapes:
+ * @rasterview: A raster view.
+ * @shapes: (allow-none):
+ *          A group of geometrical shapes.
+ *
+ * Sets the group of geometrical shapes to be displayed on the top of a raster
+ * view.
+ **/
 void
 gwy_raster_view_set_shapes(GwyRasterView *rasterview,
                            GwyShapes *shapes)
@@ -683,6 +691,16 @@ gwy_raster_view_set_shapes(GwyRasterView *rasterview,
     g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_SHAPES]);
 }
 
+/**
+ * gwy_raster_view_get_shapes:
+ * @rasterview: A raster view.
+ *
+ * Obtains the group of geometrical shapes displayed on the top of a raster
+ * view.
+ *
+ * Returns: (transfer none):
+ *          The shapes displayed by @rasterview.
+ **/
 GwyShapes*
 gwy_raster_view_get_shapes(GwyRasterView *rasterview)
 {
