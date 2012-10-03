@@ -121,6 +121,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
     g_type_class_peek_static(GWY_TYPE_SURFACE);
     g_type_class_peek_static(GWY_TYPE_BRICK);
     g_type_class_peek_static(GWY_TYPE_CONTAINER);
+    g_type_class_peek_static(GWY_TYPE_INT_SET);
 
     // Selections
     g_type_class_peek_static(GWY_TYPE_COORDS);
