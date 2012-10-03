@@ -361,6 +361,8 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
         return FALSE;
 
     if (priv->moving != -1) {
+        // Remember that we moved at all.
+        // Move all selected points.
         move_point(shapes, event->x, event->y, event->state);
         return TRUE;
     }
@@ -380,6 +382,13 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
+    // HOVER → CLICKED; must remember original coordinates to avoid moving the
+    //                  point if mouse is not move between press and release!
+    //                  must remember modifiers as, again, selection can be
+    //                  reset; CLICKED is former MOVING because MOVING will
+    //                  now apply to all selected points
+    // NOTHING → ADD + what to do with the current selection?  Perhaps,
+    //           Shift+click adds + selects while plain click only adds.
     if (priv->hover != -1) {
         if (priv->moving != -1)
             g_warning("Button pressed while already moving a point.");
@@ -401,6 +410,11 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
+    // If not moved, do not move point here.
+    // Actually change the selected set, according to Shift pressed in
+    // button_press event.
+    // If moved, update all selected according to the difference between
+    // original and current position of CLICKED.
     if (priv->moving == -1)
         return FALSE;
 
