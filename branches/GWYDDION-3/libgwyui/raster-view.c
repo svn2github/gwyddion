@@ -1397,8 +1397,7 @@ set_shapes_transforms(GwyRasterView *rasterview)
 
     // FIXME: Moving shapes outside the viewport should invoke scrolling!
     cairo_rectangle_t bbox = {
-        field->xoff, field->yoff,
-        field->xoff + field->xreal, field->yoff + field->yreal,
+        field->xoff, field->yoff, field->xreal, field->yreal,
     };
     gwy_shapes_set_bounding_box(shapes, &bbox);
 }
