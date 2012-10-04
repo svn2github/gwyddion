@@ -72,6 +72,19 @@ int_set_assert_equal_object(GObject *object, GObject *reference)
     int_set_assert_equal(GWY_INT_SET(object), GWY_INT_SET(reference));
 }
 
+static void
+int_set_assert_order(GwyIntSet *intset)
+{
+    guint n;
+    gint *values = gwy_int_set_values(intset, &n);
+
+    for (guint i = 1; i < n; i++) {
+        g_assert_cmpint(values[i], >, values[i-1]);
+    }
+
+    g_free(values);
+}
+
 void
 test_int_set_serialize(void)
 {
@@ -89,8 +102,8 @@ test_int_set_serialize(void)
                             int_set_assert_equal_object);
         copy = GWY_INT_SET(serialize_and_back(G_OBJECT(original),
                                               int_set_assert_equal_object));
+        int_set_assert_order(copy);
         g_object_unref(copy);
-
         g_object_unref(original);
     }
     g_rand_free(rng);
@@ -166,7 +179,7 @@ check_remove(GwyIntSet *intset,
 void
 test_int_set_add_remove(void)
 {
-    enum { niter = 40, max_size = 1000 };
+    enum { niter = 50, max_size = 1000 };
     GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
@@ -179,6 +192,7 @@ test_int_set_add_remove(void)
             else
                 check_remove(intset, reference, random_integer(rng));
         }
+        int_set_assert_order(intset);
 
         g_hash_table_destroy(reference);
         g_object_unref(intset);
@@ -223,6 +237,8 @@ test_int_set_values(void)
 
         g_free(isvalues);
         g_free(values);
+
+        int_set_assert_order(intset);
         g_object_unref(intset);
     }
     g_rand_free(rng);
@@ -249,6 +265,7 @@ test_int_set_update(void)
         GwyIntSet *intset2 = gwy_int_set_new_with_values(values2, size2);
         gwy_int_set_update(intset1, values2, size2);
         int_set_assert_equal(intset1, intset2);
+        int_set_assert_order(intset1);
 
         g_free(values2);
         g_free(values1);
