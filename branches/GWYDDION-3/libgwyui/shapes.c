@@ -74,7 +74,6 @@ struct _GwyShapesPrivate {
     //     all common cases (nothing, a few random, a few large blocks, all).
     // (5) How it should interact with GtkTreeSelection if items are displayed
     //     in a treeview?
-    GwyIntSet *selection;
     gulong selection_added_id;
     gulong selection_removed_id;
     gulong selection_assigned_id;
@@ -233,7 +232,7 @@ gwy_shapes_init(GwyShapes *shapes)
     shapes->bounding_box = unrestricted_bbox;
     priv->max_shapes = G_MAXUINT;
     priv->editable = TRUE;
-    GwyIntSet *selection = priv->selection = gwy_int_set_new();
+    GwyIntSet *selection = shapes->selection = gwy_int_set_new();
     priv->selection_added_id
         = g_signal_connect_swapped(selection, "added",
                                    G_CALLBACK(selection_added), shapes);
@@ -250,10 +249,10 @@ gwy_shapes_finalize(GObject *object)
 {
     GwyShapes *shapes = GWY_SHAPES(object);
     Shapes *priv = shapes->priv;
-    g_signal_handler_disconnect(priv->selection, priv->selection_assigned_id);
-    g_signal_handler_disconnect(priv->selection, priv->selection_removed_id);
-    g_signal_handler_disconnect(priv->selection, priv->selection_added_id);
-    GWY_OBJECT_UNREF(priv->selection);
+    g_signal_handler_disconnect(shapes->selection, priv->selection_assigned_id);
+    g_signal_handler_disconnect(shapes->selection, priv->selection_removed_id);
+    g_signal_handler_disconnect(shapes->selection, priv->selection_added_id);
+    GWY_OBJECT_UNREF(shapes->selection);
     G_OBJECT_CLASS(gwy_shapes_parent_class)->finalize(object);
 }
 
@@ -302,7 +301,8 @@ gwy_shapes_get_property(GObject *object,
                         GValue *value,
                         GParamSpec *pspec)
 {
-    Shapes *priv = GWY_SHAPES(object)->priv;
+    GwyShapes *shapes = GWY_SHAPES(object);
+    Shapes *priv = shapes->priv;
 
     switch (prop_id) {
         case PROP_COORDS:
@@ -322,7 +322,7 @@ gwy_shapes_get_property(GObject *object,
         break;
 
         case PROP_SELECTION:
-        g_value_set_object(value, priv->selection);
+        g_value_set_object(value, shapes->selection);
         break;
 
         default:
@@ -426,22 +426,6 @@ gwy_shapes_class_coords_type(const GwyShapesClass *klass)
 {
     g_return_val_if_fail(GWY_IS_SHAPES_CLASS(klass), 0);
     return klass->coords_type;
-}
-
-/**
- * gwy_shapes_get_selection:
- * @shapes: A group of geometrical shapes.
- *
- * Obtains the selection of a shapes object.
- *
- * Returns: (transfer none):
- *          The integer set object representing the set of selected shapes.
- **/
-GwyIntSet*
-gwy_shapes_get_selection(GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
-    return shapes->priv->selection;
 }
 
 static gboolean
@@ -925,7 +909,7 @@ selection_added(GwyShapes *shapes,
                 gint value,
                 GwyIntSet *selection)
 {
-    g_assert(shapes->priv->selection == selection);
+    g_assert(shapes->selection == selection);
     ItemMethodInt method = GWY_SHAPES_GET_CLASS(shapes)->selection_added;
     if (method)
         method(shapes, value);
@@ -937,7 +921,7 @@ selection_removed(GwyShapes *shapes,
                   gint value,
                   GwyIntSet *selection)
 {
-    g_assert(shapes->priv->selection == selection);
+    g_assert(shapes->selection == selection);
     ItemMethodInt method = GWY_SHAPES_GET_CLASS(shapes)->selection_removed;
     if (method)
         method(shapes, value);
@@ -948,7 +932,7 @@ static void
 selection_assigned(GwyShapes *shapes,
                    GwyIntSet *selection)
 {
-    g_assert(shapes->priv->selection == selection);
+    g_assert(shapes->selection == selection);
     VoidMethod method = GWY_SHAPES_GET_CLASS(shapes)->selection_assigned;
     if (method)
         method(shapes);
@@ -1078,6 +1062,8 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
 
 /**
  * GwyShapes:
+ * @selection: Integer set object representing the set of currently selected
+ *             shapes.
  * @bounding_box: Bounding box that determines permissible shape positions,
  *                in @coords (physical) coordinates.
  * @coords_to_view: Affine transformation from @shapes' @coords coordinates to

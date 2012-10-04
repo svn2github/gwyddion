@@ -53,6 +53,7 @@ struct _GwyShapes {
     struct _GwyShapesPrivate *priv;
 
     /*<public>*/
+    GwyIntSet *selection;
     cairo_rectangle_t bounding_box;
     cairo_matrix_t coords_to_view;
     cairo_matrix_t view_to_coords;
@@ -110,7 +111,6 @@ void         gwy_shapes_set_coords         (GwyShapes *shapes,
 GwyCoords*   gwy_shapes_get_coords         (GwyShapes *shapes);
 GType        gwy_shapes_class_coords_type  (const GwyShapesClass *klass)           G_GNUC_PURE;
 GType        gwy_shapes_coords_type        (const GwyShapes *shapes)               G_GNUC_PURE;
-GwyIntSet*   gwy_shapes_get_selection      (GwyShapes *shapes)                     G_GNUC_PURE;
 void         gwy_shapes_set_coords_matrices(GwyShapes *shapes,
                                             const cairo_matrix_t *coords_to_view,
                                             const cairo_matrix_t *view_to_coords);

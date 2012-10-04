@@ -22,6 +22,7 @@
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
+#include "libgwy/math.h"
 #include "libgwy/coords-point.h"
 #include "libgwyui/utils.h"
 #include "libgwyui/shapes-point.h"
@@ -41,8 +42,11 @@ struct _GwyShapesPointPrivate {
     GArray *data;
 
     gint hover;
-    gint moving;
-    gdouble xyorig[2];
+    gint clicked;
+    gboolean has_moved;
+    GdkModifierType modif;
+    GwyXY xypress;    // Event (view) coordinates.
+    GwyXY xyorig;     // Coords coordinates.
 };
 
 static void     gwy_shapes_point_finalize      (GObject *object);
@@ -119,7 +123,7 @@ gwy_shapes_point_init(GwyShapesPoint *points)
     points->priv = G_TYPE_INSTANCE_GET_PRIVATE(points, GWY_TYPE_SHAPES_POINT,
                                                ShapesPoint);
     ShapesPoint *priv = points->priv;
-    priv->hover = priv->moving = -1;
+    priv->hover = priv->clicked = -1;
 }
 
 static void
@@ -202,24 +206,38 @@ draw_crosses(GwyShapesPoint *points, cairo_t *cr)
         return;
 
     GwyShapes *shapes = GWY_SHAPES(points);
+    GwyIntSet *selection = shapes->selection;
+    gboolean hoverselected = FALSE;
 
     cairo_save(cr);
     cairo_set_line_width(cr, 1.683);
     for (gint i = 0; i < n; i++) {
-        if (i != priv->hover)
+        if (i != priv->hover && !gwy_int_set_contains(selection, i))
             gwy_cairo_cross(cr, data[2*i], data[2*i + 1], ticklen);
     }
     gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
 
-    if (priv->moving != -1) {
-        gint i = priv->moving;
-        gwy_cairo_cross(cr, data[2*i], data[2*i + 1], ticklen);
+    if (gwy_int_set_size(selection)) {
+        guint nsel;
+        gint *selected = gwy_int_set_values(shapes->selection, &nsel);
+        for (guint i = 0; i < nsel; i++) {
+            gint j = selected[i];
+            if (j == priv->hover)
+                hoverselected = TRUE;
+            else
+                gwy_cairo_cross(cr, data[2*j], data[2*j + 1], ticklen);
+        }
+        g_free(selected);
         gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
     }
-    else if (priv->hover != -1) {
+
+    if (priv->hover != -1) {
+        GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
         gint i = priv->hover;
+        if (hoverselected)
+            state |= GWY_SHAPES_STATE_SELECTED;
         gwy_cairo_cross(cr, data[2*i], data[2*i + 1], ticklen);
-        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_PRELIGHT);
+        gwy_shapes_stroke(shapes, cr, state);
     }
     cairo_restore(cr);
 }
@@ -243,13 +261,13 @@ draw_radii(GwyShapesPoint *points, cairo_t *cr)
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
     for (gint i = 0; i < n; i++) {
-        if (i != priv->hover && i != priv->moving)
+        if (i != priv->hover && i != priv->clicked)
             gwy_cairo_ellipse(cr, data[2*i], data[2*i + 1], xr, yr);
     }
     gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
 
-    if (priv->moving != -1) {
-        gint i = priv->moving;
+    if (priv->clicked != -1) {
+        gint i = priv->clicked;
         gwy_cairo_ellipse(cr, data[2*i], data[2*i + 1], xr, yr);
         gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
     }
@@ -298,36 +316,66 @@ find_near_point(GwyShapesPoint *points,
 }
 
 static void
-move_point(GwyShapes *shapes,
-           gdouble x, gdouble y, GdkModifierType modif)
+constrain_movement(GwyShapes *shapes,
+                   gdouble eventx, gdouble eventy,
+                   GdkModifierType modif,
+                   GwyXY *dxy)
 {
-    const cairo_matrix_t *matrix = &shapes->view_to_coords;
-    cairo_matrix_transform_point(matrix, &x, &y);
-
-    const cairo_rectangle_t *bbox = &shapes->bounding_box;
-    x = CLAMP(x, bbox->x, bbox->x + bbox->width);
-    y = CLAMP(y, bbox->y, bbox->y + bbox->height);
-
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
-    gdouble xy[2] = { x, y };
 
-    if (modif & GDK_SHIFT_MASK) {
-        const gdouble *xyorig = priv->xyorig;
-        gdouble xd = xy[0] - xyorig[0], yd = xy[1] - xyorig[1];
-        matrix = &shapes->coords_to_view;
-        cairo_matrix_transform_distance(matrix, &xd, &yd);
+    // Constrain movement in view space, pressing Ctrl limits it to
+    // horizontal/vertical.
+    if (modif & GDK_CONTROL_MASK) {
+        const GwyXY *xypress = &priv->xypress;
+        gdouble xd = eventx - xypress->x, yd = eventy - xypress->y;
         if (fabs(xd) <= fabs(yd))
-            xy[0] = xyorig[0];
+            eventx = xypress->x;
         else
-            xy[1] = xyorig[1];
+            eventy = xypress->y;
     }
 
-    gwy_coords_set(gwy_shapes_get_coords(shapes), priv->moving, xy);
-    gwy_shapes_update(shapes);
+    // Constrain movement in coords space, cannot move anything outside the
+    // bounding box.
+    const cairo_matrix_t *matrix = &shapes->view_to_coords;
+    cairo_matrix_transform_point(matrix, &eventx, &eventy);
+    const GwyXY *xyorig = &priv->xyorig;
+    gdouble xd = eventx - xyorig->x, yd = eventy - xyorig->y;
+    guint nsel;
+    gint *selected = gwy_int_set_values(shapes->selection, &nsel);
+    const cairo_rectangle_t *bbox = &shapes->bounding_box;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    gdouble xysel[2];
+    for (guint i = 0; i < nsel; i++) {
+        gwy_coords_get(coords, selected[i], xysel);
+        xd = CLAMP(xd, bbox->x - xysel[0], bbox->x + bbox->width - xysel[0]);
+        yd = CLAMP(yd, bbox->y - xysel[1], bbox->y + bbox->height - xysel[1]);
+    }
+    g_free(selected);
+
+    gwy_coords_get(coords, priv->clicked, xysel);
+    dxy->x = (xysel[0] - xyorig->x) + xd;
+    dxy->y = (xysel[1] - xyorig->y) + yd;
 }
 
 static void
+move_points(GwyShapes *shapes, const GwyXY *dxy)
+{
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint nsel;
+    gint *selected = gwy_int_set_values(shapes->selection, &nsel);
+    for (guint i = 0; i < nsel; i++) {
+        gdouble xysel[2];
+        gwy_coords_get(coords, selected[i], xysel);
+        xysel[0] += dxy->x;
+        xysel[1] += dxy->y;
+        gwy_coords_set(gwy_shapes_get_coords(shapes), selected[i], xysel);
+    }
+    g_free(selected);
+    gwy_shapes_update(shapes);
+}
+
+static gboolean
 add_point(GwyShapes *shapes,
           gdouble x, gdouble y)
 {
@@ -336,7 +384,7 @@ add_point(GwyShapes *shapes,
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     if (n >= gwy_shapes_get_max_shapes(shapes))
-        return;
+        return FALSE;
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
@@ -344,11 +392,26 @@ add_point(GwyShapes *shapes,
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
-        return;
+        return FALSE;
 
     gdouble xy[2] = { x, y };
-    priv->hover = priv->moving = n;
-    gwy_coords_set(coords, priv->moving, xy);
+    priv->hover = priv->clicked = n;
+    gwy_coords_set(coords, priv->clicked, xy);
+    return TRUE;
+}
+
+static void
+update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
+{
+    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
+    ShapesPoint *priv = points->priv;
+
+    gint i = find_near_point(points, eventx, eventy);
+    if (priv->hover == i)
+        return;
+
+    priv->hover = i;
+    gwy_shapes_update(shapes);
 }
 
 static gboolean
@@ -360,20 +423,19 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
     if (!priv->data)
         return FALSE;
 
-    if (priv->moving != -1) {
-        // Remember that we moved at all.
-        // Move all selected points.
-        move_point(shapes, event->x, event->y, event->state);
-        return TRUE;
+    if (priv->clicked == -1) {
+        update_hover(shapes, event->x, event->y);
+        return FALSE;
     }
 
-    gint i = find_near_point(points, event->x, event->y);
-    if (priv->hover == i)
-        return FALSE;
+    if (event->x != priv->xypress.x || event->y != priv->xypress.y)
+        priv->has_moved = TRUE;
 
-    priv->hover = i;
-    gwy_shapes_update(shapes);
-    return FALSE;
+    GwyXY dxy;
+    constrain_movement(shapes, event->x, event->y, event->state, &dxy);
+    move_points(shapes, &dxy);
+
+    return TRUE;
 }
 
 static gboolean
@@ -382,25 +444,26 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
-    // HOVER → CLICKED; must remember original coordinates to avoid moving the
-    //                  point if mouse is not move between press and release!
-    //                  must remember modifiers as, again, selection can be
-    //                  reset; CLICKED is former MOVING because MOVING will
-    //                  now apply to all selected points
-    // NOTHING → ADD + what to do with the current selection?  Perhaps,
-    //           Shift+click adds + selects while plain click only adds.
+
+    priv->xypress = (GwyXY){ event->x, event->y };
     if (priv->hover != -1) {
-        if (priv->moving != -1)
+        if (priv->clicked != -1)
             g_warning("Button pressed while already moving a point.");
-        priv->moving = priv->hover;
-        gwy_coords_get(gwy_shapes_get_coords(shapes),
-                       priv->moving, priv->xyorig);
-        gwy_shapes_set_focus(shapes, priv->moving);
-        move_point(shapes, event->x, event->y, event->state);
+        priv->clicked = priv->hover;
     }
     else {
-        add_point(shapes, event->x, event->y);
+        if (!add_point(shapes, event->x, event->y)) {
+            priv->clicked = -1;
+            return FALSE;
+        }
     }
+    gwy_coords_get(gwy_shapes_get_coords(shapes),
+                   priv->clicked, (gdouble*)&priv->xyorig);
+    priv->has_moved = FALSE;
+    // FIXME: If shift is pressed, we might want to start rubber-band selection
+    // now.
+    priv->modif = event->state;
+
     return FALSE;
 }
 
@@ -410,19 +473,34 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
-    // If not moved, do not move point here.
-    // Actually change the selected set, according to Shift pressed in
-    // button_press event.
-    // If moved, update all selected according to the difference between
-    // original and current position of CLICKED.
-    if (priv->moving == -1)
+    if (priv->clicked == -1)
         return FALSE;
 
-    move_point(shapes, event->x, event->y, event->state);
-    priv->moving = -1;
-    priv->hover = find_near_point(points, event->x, event->y);
-    gwy_shapes_set_focus(shapes, priv->moving);
-    gwy_coords_finished(gwy_shapes_get_coords(shapes));
+    if (!priv->has_moved) {
+        GwyIntSet *selection = shapes->selection;
+
+        if (priv->modif & GDK_SHIFT_MASK) {
+            if (gwy_int_set_contains(selection, priv->clicked))
+                gwy_int_set_remove(selection, priv->clicked);
+            else
+                gwy_int_set_add(selection, priv->clicked);
+        }
+        else {
+            gwy_int_set_update(selection, &priv->clicked, 1);
+        }
+
+        // FIXME: May not be necessary if we respond to the selection signals.
+        gwy_shapes_update(shapes);
+    }
+    else {
+        GwyXY dxy;
+        constrain_movement(shapes, event->x, event->y, event->state, &dxy);
+        move_points(shapes, &dxy);
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
+    }
+    priv->clicked = -1;
+    update_hover(shapes, event->x, event->y);
+
     return TRUE;
 }
 
@@ -432,10 +510,10 @@ gwy_shapes_point_cancel_editing(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
-    if (priv->moving == -1 || id != priv->moving)
+    if (priv->clicked == -1 || id != priv->clicked)
         return;
 
-    priv->moving = -1;
+    priv->clicked = -1;
     gwy_shapes_update(shapes);
 }
 

@@ -1384,6 +1384,7 @@ set_shapes_transforms(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
     GwyShapes *shapes = priv->shapes;
+    GwyField *field = priv->field;
     if (!shapes)
         return;
 
@@ -1394,14 +1395,11 @@ set_shapes_transforms(GwyRasterView *rasterview)
                                   &priv->field_to_window_matrix,
                                   &priv->window_to_field_matrix);
 
-    const cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    // FIXME: Moving shapes outside the viewport should invoke scrolling!
     cairo_rectangle_t bbox = {
-        irect->x, irect->y, irect->width, irect->height
+        field->xoff, field->yoff,
+        field->xoff + field->xreal, field->yoff + field->yreal,
     };
-    cairo_matrix_transform_point(&priv->window_to_coords_matrix,
-                                 &bbox.x, &bbox.y);
-    cairo_matrix_transform_distance(&priv->window_to_coords_matrix,
-                                    &bbox.width, &bbox.height);
     gwy_shapes_set_bounding_box(shapes, &bbox);
 }
 
