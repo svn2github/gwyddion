@@ -468,28 +468,22 @@ find_range(const GArray *ranges,
     guint n = ranges->len;
 
     if (!n) {
-        GWY_MAYBE_SET(rid, 0);
+        *rid = 0;
         return FALSE;
     }
 
     for (guint j = 0; j < n; j++) {
         if (value < r[j].from) {
-            if (j && r[j-1].to + 1 == value)
-                GWY_MAYBE_SET(rid, j-1);
-            else
-                GWY_MAYBE_SET(rid, j);
+            *rid = (j && r[j-1].to + 1 == value) ? j-1 : j;
             return FALSE;
         }
         if (value <= r[j].to) {
-            GWY_MAYBE_SET(rid, j);
+            *rid = j;
             return TRUE;
         }
     }
 
-    if (r[n-1].to + 1 == value)
-        GWY_MAYBE_SET(rid, n-1);
-    else
-        GWY_MAYBE_SET(rid, n);
+    *rid = (r[n-1].to + 1 == value) ? n-1 : n;
     return FALSE;
 }
 
