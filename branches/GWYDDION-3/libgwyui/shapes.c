@@ -1019,17 +1019,17 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
                   cairo_t *cr,
                   GwyShapesStateType state)
 {
-    static const GwyRGBA normal_color = { 1.0, 1.0, 1.0, 0.7 };
-    static const GwyRGBA selected_color = { 1.0, 1.0, 0.5, 0.7 };
-    static const GwyRGBA outline_color = { 0.0, 0.0, 0.0, 0.5 };
+    static const GwyRGBA normal_color = { 1.0, 1.0, 1.0, 1.0 };
+    static const GwyRGBA selected_color = { 1.0, 1.0, 0.5, 1.0 };
+    static const GwyRGBA outline_color = { 0.0, 0.0, 0.0, 1.0 };
     GwyShapesStateType basestate = state & ~GWY_SHAPES_STATE_PRELIGHT;
     gboolean prelight = !!(state & GWY_SHAPES_STATE_PRELIGHT);
     GwyRGBA color = outline_color;
     gdouble width = cairo_get_line_width(cr);
     gdouble outline_width = 1.1*width + 0.4;
+    gdouble alpha = prelight ? 1.0 : 0.7;
 
-    if (prelight)
-        color.a = 1.0;
+    cairo_push_group(cr);
 
     gwy_cairo_set_source_rgba(cr, &color);
     cairo_set_line_width(cr, outline_width);
@@ -1043,12 +1043,12 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
         g_critical("Unknown base shapes state %u.\n", basestate);
     }
 
-    if (prelight)
-        color.a = 1.0;
-
     gwy_cairo_set_source_rgba(cr, &color);
     cairo_set_line_width(cr, width);
     cairo_stroke(cr);
+
+    cairo_pop_group_to_source(cr);
+    cairo_paint_with_alpha(cr, alpha);
 }
 
 /**
