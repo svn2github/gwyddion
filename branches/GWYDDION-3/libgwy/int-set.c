@@ -667,6 +667,36 @@ gwy_int_set_values(const GwyIntSet *intset,
     return values;
 }
 
+/**
+ * gwy_int_set_foreach:
+ * @intset: A set of integers.
+ * @function: (scope call):
+ *            The function called on the values.
+ * @user_data: User data passed to @function.
+ *
+ * Calls a function for each value in an integer set.
+ *
+ * It is guaranteed that @function will be called for the values in ascending
+ * order.  However, it must not modify @intset in any manner.
+ **/
+void
+gwy_int_set_foreach(GwyIntSet *intset,
+                    GwyIntSetForeachFunc function,
+                    gpointer user_data)
+{
+    g_return_if_fail(GWY_IS_INT_SET(intset));
+    g_return_if_fail(function);
+
+    const GArray *ranges = intset->priv->ranges;
+    const IntRange *r = (const IntRange*)ranges->data;
+    guint n = ranges->len;
+
+    for (guint i = 0; i < n; i++) {
+        for (gint j = r[i].from; j <= r[i].to; j++)
+            function(j, user_data);
+    }
+}
+
 static guint
 ranges_size(const GArray *ranges)
 {
@@ -711,12 +741,6 @@ ranges_are_canonical(const GArray *ranges)
     }
     return TRUE;
 }
-
-// TODO:
-// Toggle function (remove if present, add if missing)
-// Iteration; stack-allocated GwyIntSetIter struct that can be used with an
-//            explicit for-cycle.
-// Possibly: also a gwy_int_set_foreach() callback-style iteration.
 
 /**
  * SECTION: int-set
