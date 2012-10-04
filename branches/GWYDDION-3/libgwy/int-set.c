@@ -381,12 +381,10 @@ gwy_int_set_add(GwyIntSet *intset,
     guint n = ranges->len;
 
     if (rid < n && r[rid].from == value+1) {
-        // Attach to begining, possibly merge into previous.
+        // Attach to begining, possibly merge into previous.  Since
+        // find_range() prefers the first range if a value is adjacent to two
+        // we do not need to check for merging here.
         r[rid].from--;
-        if (rid && r[rid-1].to+1 == r[rid].from) {
-            r[rid-1].to = r[rid].to;
-            g_array_remove_index(ranges, rid);
-        }
     }
     else if (rid < n && r[rid].to+1 == value) {
         // Attach to end, possibly merge the next into this one.
@@ -433,16 +431,15 @@ gwy_int_set_remove(GwyIntSet *intset,
     IntRange *r = (IntRange*)ranges->data;
 
     if (r[rid].from == value) {
-        // Remove from the begining, possibly killing the range
+        // Remove from the begining, possibly killing the range.
         r[rid].from++;
         if (r[rid].from > r[rid].to)
             g_array_remove_index(ranges, rid);
     }
     else if (r[rid].to == value) {
-        // Remove from the end, possibly killing the range
+        // Remove from the end; since single-value ranges were already handled
+        // above we do not need to check for the removal of entire range.
         r[rid].to--;
-        if (r[rid].from > r[rid].to)
-            g_array_remove_index(ranges, rid);
     }
     else {
         // Must split.
