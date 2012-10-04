@@ -33,6 +33,17 @@ enum {
     N_PROPS
 };
 
+typedef enum {
+    MODE_MOVING,
+    MODE_SELECTING,
+} MovingMode;
+
+typedef struct {
+    const cairo_rectangle_t *bbox;
+    GwyCoords *coords;
+    GwyXY *dxy;
+} ConstrainData;
+
 typedef struct _GwyShapesPointPrivate ShapesPoint;
 
 struct _GwyShapesPointPrivate {
@@ -44,9 +55,8 @@ struct _GwyShapesPointPrivate {
     gint hover;
     gint clicked;
     gboolean has_moved;
-    GdkModifierType modif;
+    MovingMode mode;
     GwyXY xypress;    // Event (view) coordinates.
-    GwyXY xyorig;     // Coords coordinates.
 };
 
 static void     gwy_shapes_point_finalize      (GObject *object);
@@ -316,6 +326,23 @@ find_near_point(GwyShapesPoint *points,
 }
 
 static void
+constrain_func(gint value, gpointer user_data)
+{
+    ConstrainData *data = (ConstrainData*)user_data;
+    const cairo_rectangle_t *bbox = data->bbox;
+    GwyXY *dxy = data->dxy;
+    gdouble xysel[2];
+
+    gwy_coords_get(data->coords, value, xysel);
+    dxy->x = CLAMP(dxy->x,
+                   bbox->x - xysel[0],
+                   bbox->x + bbox->width - xysel[0]);
+    dxy->y = CLAMP(dxy->y,
+                   bbox->y - xysel[1],
+                   bbox->y + bbox->height - xysel[1]);
+}
+
+static void
 constrain_movement(GwyShapes *shapes,
                    gdouble eventx, gdouble eventy,
                    GdkModifierType modif,
@@ -339,23 +366,14 @@ constrain_movement(GwyShapes *shapes,
     // bounding box.
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &eventx, &eventy);
-    const GwyXY *xyorig = &priv->xyorig;
-    gdouble xd = eventx - xyorig->x, yd = eventy - xyorig->y;
-    guint nsel;
-    gint *selected = gwy_int_set_values(shapes->selection, &nsel);
-    const cairo_rectangle_t *bbox = &shapes->bounding_box;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    gdouble xysel[2];
-    for (guint i = 0; i < nsel; i++) {
-        gwy_coords_get(coords, selected[i], xysel);
-        xd = CLAMP(xd, bbox->x - xysel[0], bbox->x + bbox->width - xysel[0]);
-        yd = CLAMP(yd, bbox->y - xysel[1], bbox->y + bbox->height - xysel[1]);
-    }
-    g_free(selected);
 
+    gdouble xysel[2];
     gwy_coords_get(coords, priv->clicked, xysel);
-    dxy->x = (xysel[0] - xyorig->x) + xd;
-    dxy->y = (xysel[1] - xyorig->y) + yd;
+    dxy->x = eventx - xysel[0];
+    dxy->y = eventy - xysel[1];
+    ConstrainData data = { &shapes->bounding_box, coords, dxy };
+    gwy_int_set_foreach(shapes->selection, constrain_func, &data);
 }
 
 static void
@@ -369,7 +387,7 @@ move_points(GwyShapes *shapes, const GwyXY *dxy)
         gwy_coords_get(coords, selected[i], xysel);
         xysel[0] += dxy->x;
         xysel[1] += dxy->y;
-        gwy_coords_set(gwy_shapes_get_coords(shapes), selected[i], xysel);
+        gwy_coords_set(coords, selected[i], xysel);
     }
     g_free(selected);
     gwy_shapes_update(shapes);
@@ -428,6 +446,8 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
         return FALSE;
     }
 
+    // FIXME: If shift is pressed, we might want to start rubber-band selection
+    // now.
     if (event->x != priv->xypress.x || event->y != priv->xypress.y)
         priv->has_moved = TRUE;
 
@@ -444,25 +464,31 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
+    GwyIntSet *selection = shapes->selection;
 
     priv->xypress = (GwyXY){ event->x, event->y };
+    if (event->state & GDK_SHIFT_MASK)
+        priv->mode = MODE_SELECTING;
+    else
+        priv->mode = MODE_MOVING;
+
+    // XXX: All the selection updates must be done in motion_notify or
+    // button_release: only based on whether the pointer has moved we know
+    // whether the user wants to select things or move them.
     if (priv->hover != -1) {
-        if (priv->clicked != -1)
-            g_warning("Button pressed while already moving a point.");
         priv->clicked = priv->hover;
+        if (!gwy_int_set_contains(selection, priv->clicked))
+            gwy_int_set_update(selection, &priv->clicked, 1);
     }
     else {
+        // XXX: Not if shift is pressed! (MODE_SELECTING)
         if (!add_point(shapes, event->x, event->y)) {
             priv->clicked = -1;
             return FALSE;
         }
+        gwy_int_set_update(selection, &priv->clicked, 1);
     }
-    gwy_coords_get(gwy_shapes_get_coords(shapes),
-                   priv->clicked, (gdouble*)&priv->xyorig);
     priv->has_moved = FALSE;
-    // FIXME: If shift is pressed, we might want to start rubber-band selection
-    // now.
-    priv->modif = event->state;
 
     return FALSE;
 }
@@ -479,15 +505,10 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
     if (!priv->has_moved) {
         GwyIntSet *selection = shapes->selection;
 
-        if (priv->modif & GDK_SHIFT_MASK) {
-            if (gwy_int_set_contains(selection, priv->clicked))
-                gwy_int_set_remove(selection, priv->clicked);
-            else
-                gwy_int_set_add(selection, priv->clicked);
-        }
-        else {
+        if (priv->mode == MODE_SELECTING)
+            gwy_int_set_toggle(selection, priv->clicked);
+        else if (priv->mode == MODE_MOVING)
             gwy_int_set_update(selection, &priv->clicked, 1);
-        }
 
         // FIXME: May not be necessary if we respond to the selection signals.
         gwy_shapes_update(shapes);
