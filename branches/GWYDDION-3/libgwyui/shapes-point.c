@@ -39,10 +39,10 @@ typedef enum {
 } MovingMode;
 
 typedef struct {
-    const cairo_rectangle_t *bbox;
-    GwyCoords *coords;
     GwyXY *dxy;
-} ConstrainData;
+    GwyCoords *coords;
+    const cairo_rectangle_t *bbox;
+} SelectionFuncData;
 
 typedef struct _GwyShapesPointPrivate ShapesPoint;
 
@@ -328,12 +328,13 @@ find_near_point(GwyShapesPoint *points,
 static void
 constrain_func(gint value, gpointer user_data)
 {
-    ConstrainData *data = (ConstrainData*)user_data;
+    SelectionFuncData *data = (SelectionFuncData*)user_data;
     const cairo_rectangle_t *bbox = data->bbox;
+    GwyCoords *coords = data->coords;
     GwyXY *dxy = data->dxy;
     gdouble xysel[2];
 
-    gwy_coords_get(data->coords, value, xysel);
+    gwy_coords_get(coords, value, xysel);
     dxy->x = CLAMP(dxy->x,
                    bbox->x - xysel[0],
                    bbox->x + bbox->width - xysel[0]);
@@ -372,24 +373,29 @@ constrain_movement(GwyShapes *shapes,
     gwy_coords_get(coords, priv->clicked, xysel);
     dxy->x = eventx - xysel[0];
     dxy->y = eventy - xysel[1];
-    ConstrainData data = { &shapes->bounding_box, coords, dxy };
+    SelectionFuncData data = { dxy, coords, &shapes->bounding_box, };
     gwy_int_set_foreach(shapes->selection, constrain_func, &data);
 }
 
 static void
-move_points(GwyShapes *shapes, const GwyXY *dxy)
+move_func(gint value, gpointer user_data)
+{
+    SelectionFuncData *data = (SelectionFuncData*)user_data;
+    GwyCoords *coords = data->coords;
+    GwyXY *dxy = data->dxy;
+    gdouble xysel[2];
+    gwy_coords_get(coords, value, xysel);
+    xysel[0] += dxy->x;
+    xysel[1] += dxy->y;
+    gwy_coords_set(coords, value, xysel);
+}
+
+static void
+move_points(GwyShapes *shapes, GwyXY *dxy)
 {
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint nsel;
-    gint *selected = gwy_int_set_values(shapes->selection, &nsel);
-    for (guint i = 0; i < nsel; i++) {
-        gdouble xysel[2];
-        gwy_coords_get(coords, selected[i], xysel);
-        xysel[0] += dxy->x;
-        xysel[1] += dxy->y;
-        gwy_coords_set(coords, selected[i], xysel);
-    }
-    g_free(selected);
+    SelectionFuncData data = { dxy, coords, NULL };
+    gwy_int_set_foreach(shapes->selection, move_func, &data);
     gwy_shapes_update(shapes);
 }
 
