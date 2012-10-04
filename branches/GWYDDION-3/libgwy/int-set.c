@@ -59,6 +59,12 @@ static void     gwy_int_set_assign_impl      (GwySerializable *destination,
 static void     set_data_silent              (GwyIntSet *intset,
                                               const gint *values,
                                               guint n);
+static void     add_value                    (GwyIntSet *intset,
+                                              gint value,
+                                              guint rid);
+static void     remove_value                 (GwyIntSet *intset,
+                                              gint value,
+                                              guint rid);
 static int      int_compare                  (const void *pa,
                                               const void *pb);
 static guint    uniq                         (gint *values,
@@ -373,10 +379,41 @@ gwy_int_set_add(GwyIntSet *intset,
 {
     g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
     guint rid;
-    GArray *ranges = intset->priv->ranges;
-    if (find_range(ranges, value, &rid))
+    if (find_range(intset->priv->ranges, value, &rid))
         return FALSE;
+    add_value(intset, value, rid);
+    return TRUE;
+}
 
+/**
+ * gwy_int_set_remove:
+ * @intset: A set of integers.
+ * @value: Value to remove from the set.
+ *
+ * Removes a value from an integer set.
+ *
+ * The value may not be present in the set; you can test this by examining the
+ * return value.  Signal GwyIntSet::removed is emitted only if the value was
+ * actually removed.
+ *
+ * Returns: %TRUE if @value was removed, %FALSE if it was not in the set.
+ **/
+gboolean
+gwy_int_set_remove(GwyIntSet *intset,
+                   gint value)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
+    guint rid;
+    if (!find_range(intset->priv->ranges, value, &rid))
+        return FALSE;
+    remove_value(intset, value, rid);
+    return TRUE;
+}
+
+static void
+add_value(GwyIntSet *intset, gint value, guint rid)
+{
+    GArray *ranges = intset->priv->ranges;
     IntRange *r = (IntRange*)ranges->data;
     guint n = ranges->len;
 
@@ -401,35 +438,13 @@ gwy_int_set_add(GwyIntSet *intset,
     }
 
     g_signal_emit(intset, signals[ADDED], 0, value);
-
-    return TRUE;
 }
 
-/**
- * gwy_int_set_remove:
- * @intset: A set of integers.
- * @value: Value to remove from the set.
- *
- * Removes a value from an integer set.
- *
- * The value may not be present in the set; you can test this by examining the
- * return value.  Signal GwyIntSet::removed is emitted only if the value was
- * actually removed.
- *
- * Returns: %TRUE if @value was removed, %FALSE if it was not in the set.
- **/
-gboolean
-gwy_int_set_remove(GwyIntSet *intset,
-                   gint value)
+static void
+remove_value(GwyIntSet *intset, gint value, guint rid)
 {
-    g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
-    guint rid;
     GArray *ranges = intset->priv->ranges;
-    if (!find_range(ranges, value, &rid))
-        return FALSE;
-
     IntRange *r = (IntRange*)ranges->data;
-
     if (r[rid].from == value) {
         // Remove from the begining, possibly killing the range.
         r[rid].from++;
@@ -449,8 +464,6 @@ gwy_int_set_remove(GwyIntSet *intset,
     }
 
     g_signal_emit(intset, signals[REMOVED], 0, value);
-
-    return TRUE;
 }
 
 // Find the range containing @value and return TRUE or, failing that, the range
@@ -669,6 +682,12 @@ ranges_are_canonical(const GArray *ranges)
     }
     return TRUE;
 }
+
+// TODO:
+// Toggle function (remove if present, add if missing)
+// Iteration; stack-allocated GwyIntSetIter struct that can be used with an
+//            explicit for-cycle.
+// Possibly: also a gwy_int_set_foreach() callback-style iteration.
 
 /**
  * SECTION: int-set
