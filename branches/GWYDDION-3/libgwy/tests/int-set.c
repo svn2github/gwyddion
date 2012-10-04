@@ -314,4 +314,41 @@ test_int_set_update(void)
     g_rand_free(rng);
 }
 
+typedef struct {
+    GwyIntSet *reference;
+    gint last;
+} ForeachTestData;
+
+static void
+foreach_func(gint value,
+             gpointer user_data)
+{
+    ForeachTestData *data = (ForeachTestData*)user_data;
+
+    g_assert_cmpint(value, >, data->last);
+    g_assert(!gwy_int_set_contains(data->reference, value));
+    gwy_int_set_add(data->reference, value);
+    data->last = value;
+}
+
+void
+test_int_set_foreach(void)
+{
+    enum { niter = 500 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *intset = gwy_int_set_new();
+        int_set_randomize(intset, rng);
+
+        ForeachTestData data = { gwy_int_set_new(), G_MININT };
+        gwy_int_set_foreach(intset, foreach_func, &data);
+        int_set_assert_equal(intset, data.reference);
+
+        g_object_unref(data.reference);
+        g_object_unref(intset);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -117,6 +117,7 @@ int-set/serialize
 int-set/add-remove
 int-set/values
 int-set/update
+int-set/foreach
 coords/point/finished
 coords/point/units
 coords/point/data
