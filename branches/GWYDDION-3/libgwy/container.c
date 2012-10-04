@@ -403,7 +403,7 @@ gwy_container_size(GwyContainer *container)
  * @container: A container.
  * @key: Quark item key.
  *
- * Returns the type of value in @container identified by @key.
+ * Returns the type of value in a container identified by given quark key.
  *
  * Returns: The value type as #GType; 0 if there is no such value.
  **/
@@ -435,7 +435,7 @@ gwy_container_item_type(GwyContainer *container, GQuark key)
  * @container: A container.
  * @key: Quark item key.
  *
- * Returns %TRUE if @container contains a value identified by @key.
+ * Tests whether a @container contains the value identified by a quark key.
  *
  * Returns: Whether @container contains something identified by @key.
  **/
@@ -453,7 +453,7 @@ gwy_container_contains(GwyContainer *container, GQuark key)
  * @container: A container.
  * @name: String item key.
  *
- * Removes a value identified by name @n from container @c.
+ * Removes a value identified by string name from a container.
  *
  * Expands to %TRUE if there was such a value and was removed.
  **/
@@ -463,7 +463,7 @@ gwy_container_contains(GwyContainer *container, GQuark key)
  * @container: A container.
  * @key: Quark item key.
  *
- * Removes a value identified by @key from a container.
+ * Removes a value identified by quark key from a container.
  *
  * Returns: %TRUE if there was such a value and was removed.
  **/
@@ -491,9 +491,9 @@ gwy_container_remove(GwyContainer *container, GQuark key)
  * @container: A container.
  * @prefix: A nul-terminated id prefix.
  *
- * Removes a values whose key start with @prefix from container @container.
+ * Removes a values whose key start with given prefix from a container.
  *
- * @prefix can be %NULL, all values are then removed.
+ * Prefix @prefix can be also %NULL, all values are removed then.
  *
  * Returns: The number of values removed.
  **/
@@ -555,8 +555,8 @@ hash_remove_prefix(gpointer hkey,
  *            The function called on the items.
  * @user_data: User data passed to @function.
  *
- * Calls @function on each @container item whose identifier starts with
- * @prefix.
+ * Calls a function for each container item whose identifier starts with
+ * given prefix.
  *
  * Returns: The number of items @function was called on.
  **/
@@ -680,7 +680,8 @@ gwy_container_keys_n(GwyContainer *container)
  * @newkey: A new key for the value.
  * @force: Whether to replace existing value at @newkey.
  *
- * Makes a value in @container identified by @key to be identified by @newkey.
+ * Makes a value in a container identified by quark key to be identified by
+ * another key.
  *
  * When @force is %TRUE existing value at @newkey is removed from @container.
  * When it's %FALSE, an existing value @newkey inhibits the rename and %FALSE

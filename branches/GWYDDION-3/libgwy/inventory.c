@@ -475,7 +475,7 @@ gwy_inventory_position(GwyInventory *inventory,
  *            A function to call on each item.  It must not modify @inventory.
  * @user_data: Data passed to @function.
  *
- * Calls a function on each item of an inventory, in order.
+ * Calls a function for each item of an inventory, in order.
  **/
 void
 gwy_inventory_foreach(GwyInventory *inventory,
