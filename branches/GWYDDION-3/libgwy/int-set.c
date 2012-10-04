@@ -410,6 +410,35 @@ gwy_int_set_remove(GwyIntSet *intset,
     return TRUE;
 }
 
+/**
+ * gwy_int_set_toggle:
+ * @intset: A set of integers.
+ * @value: Value to add to/remove from the set.
+ *
+ * Toggles a value from an integer set.
+ *
+ * If the value is present it is removed and if it is not present it is added.
+ *
+ * Returns: %TRUE if @value is present in the set after the operation has
+ *          finished (i.e. was added), %FALSE if it is not in the set (i.e.
+ *          it was removed).
+ **/
+gboolean
+gwy_int_set_toggle(GwyIntSet *intset,
+                   gint value)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
+    guint rid;
+    if (find_range(intset->priv->ranges, value, &rid)) {
+        remove_value(intset, value, rid);
+        return FALSE;
+    }
+    else {
+        add_value(intset, value, rid);
+        return TRUE;
+    }
+}
+
 static void
 add_value(GwyIntSet *intset, gint value, guint rid)
 {

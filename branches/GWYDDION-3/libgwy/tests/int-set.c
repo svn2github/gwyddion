@@ -176,6 +176,42 @@ check_remove(GwyIntSet *intset,
     g_assert(!g_hash_table_lookup(reference, GINT_TO_POINTER(value)));
 }
 
+static void
+check_toggle(GwyIntSet *intset,
+             GHashTable *reference,
+             gint value)
+{
+    guint acounter = 0, rcounter = 0, n = gwy_int_set_size(intset);
+    gboolean present = !!g_hash_table_lookup(reference, GINT_TO_POINTER(value));
+
+    gulong aid = g_signal_connect_swapped(intset, "added",
+                                          G_CALLBACK(record_signal), &acounter);
+    gulong rid = g_signal_connect_swapped(intset, "removed",
+                                          G_CALLBACK(record_signal), &rcounter);
+    gboolean present_afterwards = gwy_int_set_toggle(intset, value);
+    g_signal_handler_disconnect(intset, rid);
+    g_signal_handler_disconnect(intset, aid);
+
+    g_assert_cmpint(present_afterwards, !=, present);
+    if (present) {
+        g_assert_cmpuint(gwy_int_set_size(intset), ==, n-1);
+        g_assert_cmpuint(acounter, ==, 0);
+        g_assert_cmpuint(rcounter, ==, 1);
+        g_hash_table_remove(reference, GINT_TO_POINTER(value));
+    }
+    else {
+        g_assert_cmpuint(gwy_int_set_size(intset), ==, n+1);
+        g_assert_cmpuint(acounter, ==, 1);
+        g_assert_cmpuint(rcounter, ==, 0);
+        g_hash_table_insert(reference,
+                            GINT_TO_POINTER(value), GUINT_TO_POINTER(TRUE));
+    }
+    g_assert_cmpint(gwy_int_set_contains(intset, value),
+                    ==, present_afterwards);
+    g_assert_cmpint(!!g_hash_table_lookup(reference, GINT_TO_POINTER(value)),
+                    ==, present_afterwards);
+}
+
 void
 test_int_set_add_remove(void)
 {
@@ -187,10 +223,13 @@ test_int_set_add_remove(void)
         GHashTable *reference = g_hash_table_new(g_direct_hash, g_direct_equal);
 
         for (guint k = 0; k < max_size; k++) {
-            if (g_rand_boolean(rng))
+            gint v = g_rand_int_range(rng, 0, 3);
+            if (v == 0)
                 check_add(intset, reference, random_integer(rng));
-            else
+            else if (v == 1)
                 check_remove(intset, reference, random_integer(rng));
+            else
+                check_toggle(intset, reference, random_integer(rng));
         }
         int_set_assert_order(intset);
 

@@ -60,6 +60,8 @@ gboolean   gwy_int_set_add            (GwyIntSet *intset,
                                        gint value);
 gboolean   gwy_int_set_remove         (GwyIntSet *intset,
                                        gint value);
+gboolean   gwy_int_set_toggle         (GwyIntSet *intset,
+                                       gint value);
 void       gwy_int_set_update         (GwyIntSet *intset,
                                        const gint *values,
                                        guint n);
