@@ -70,6 +70,8 @@ static gboolean ranges_are_canonical         (const GArray *ranges);
 static gboolean find_range                   (const GArray *ranges,
                                               gint i,
                                               guint *rid);
+static gboolean is_present                   (const GArray *ranges,
+                                              gint value);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "ranges",  .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
@@ -349,7 +351,7 @@ gwy_int_set_contains(const GwyIntSet *intset,
                      gint value)
 {
     g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
-    return find_range(intset->priv->ranges, value, NULL);
+    return is_present(intset->priv->ranges, value);
 }
 
 /**
@@ -491,6 +493,22 @@ find_range(const GArray *ranges,
     return FALSE;
 }
 
+static gboolean
+is_present(const GArray *ranges,
+           gint value)
+{
+    const IntRange *r = (const IntRange*)ranges->data;
+    guint n = ranges->len;
+
+    for (guint j = 0; j < n; j++) {
+        if (value < r[j].from)
+            return FALSE;
+        if (value <= r[j].to)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 static int
 int_compare(const void *pa, const void *pb)
 {
@@ -547,7 +565,7 @@ gwy_int_set_update(GwyIntSet *intset,
     IntRange *r = (IntRange*)g_slice_copy(n*sizeof(IntRange), ranges->data);
     for (guint i = 0; i < n; i++) {
         for (gint value = r[i].from; value <= r[i].to; value++) {
-            if (!find_range(tmpranges, value, NULL))
+            if (!is_present(tmpranges, value))
                 gwy_int_set_remove(intset, value);
         }
     }
