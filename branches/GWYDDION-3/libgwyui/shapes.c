@@ -51,7 +51,6 @@ typedef void (*ItemMethod)(GwyShapes *shapes, guint id);
 typedef void (*VoidMethod)(GwyShapes *shapes);
 
 struct _GwyShapesPrivate {
-    gint focus;
     guint max_shapes;
     gboolean is_updated;
     gboolean editable;
@@ -91,8 +90,6 @@ static void     gwy_shapes_get_property(GObject *object,
                                         GParamSpec *pspec);
 static gboolean set_coords             (GwyShapes *shapes,
                                         GwyCoords *coords);
-static gboolean set_focus              (GwyShapes *shapes,
-                                        gint id);
 static gboolean set_max_shapes         (GwyShapes *shapes,
                                         guint max_shapes);
 static gboolean set_editable           (GwyShapes *shapes,
@@ -146,15 +143,6 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                               // subclass with the correct type?
                               GWY_TYPE_COORDS,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_FOCUS]
-        = g_param_spec_int("focus",
-                           "Focus",
-                           "Index of focused shape that only can be "
-                           "edited by the user.  Negative value means "
-                           "all shapes can be edited.",
-                           -1, G_MAXINT, -1,
-                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_MAX_SHAPES]
         = g_param_spec_uint("max-shapes",
@@ -277,10 +265,6 @@ gwy_shapes_set_property(GObject *object,
         set_coords(shapes, g_value_get_object(value));
         break;
 
-        case PROP_FOCUS:
-        set_focus(shapes, g_value_get_int(value));
-        break;
-
         case PROP_MAX_SHAPES:
         set_max_shapes(shapes, g_value_get_uint(value));
         break;
@@ -307,10 +291,6 @@ gwy_shapes_get_property(GObject *object,
     switch (prop_id) {
         case PROP_COORDS:
         g_value_set_object(value, priv->coords);
-        break;
-
-        case PROP_FOCUS:
-        g_value_set_int(value, priv->focus);
         break;
 
         case PROP_MAX_SHAPES:
@@ -544,56 +524,6 @@ gwy_shapes_draw(GwyShapes *shapes,
     g_return_if_fail(klass->draw);
     klass->draw(shapes, cr);
     shapes->priv->is_updated = FALSE;
-}
-
-/**
- * gwy_shapes_set_focus:
- * @shapes: A group of geometrical shapes.
- * @id: Index of the shape to focus.  Pass -1 to permit interaction with all
- *      shapes.
- *
- * Limits user interaction with a group of geometrical shapes to a single
- * shape.
- **/
-void
-gwy_shapes_set_focus(GwyShapes *shapes,
-                     gint id)
-{
-    g_return_if_fail(GWY_IS_SHAPES(shapes));
-    if (!set_focus(shapes, id))
-        return;
-
-    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_FOCUS]);
-}
-
-static gboolean
-set_focus(GwyShapes *shapes,
-          gint id)
-{
-    Shapes *priv = shapes->priv;
-
-    // Map all negative values to -1.
-    id = MAX(id, -1);
-    if (priv->focus == id)
-        return FALSE;
-    priv->focus = id;
-    return TRUE;
-}
-
-/**
- * gwy_shapes_get_focus:
- * @shapes: A group of geometrical shapes.
- *
- * Obtains the index of the focused shape in a group of geometrical shapes.
- *
- * Returns: Index of the focused shape.  Value -1 is returned if no shape is
- *          focused.
- **/
-gint
-gwy_shapes_get_focus(const GwyShapes *shapes)
-{
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), -1);
-    return shapes->priv->focus;
 }
 
 /**
