@@ -850,7 +850,6 @@ ranges_are_canonical(const GArray *ranges)
 /**
  * GwyIntSetIter:
  * @value: Current value from the integer set.
- * @priv: Private data of the iterator; must not be modified.
  *
  * Integer set iterator.
  *
