@@ -143,6 +143,7 @@ gboolean     gwy_shapes_key_release        (GwyShapes *shapes,
                                             GdkEventKey *event);
 void         gwy_shapes_update             (GwyShapes *shapes);
 gboolean     gwy_shapes_is_updated         (GwyShapes *shapes);
+void         gwy_shapes_editing_started    (GwyShapes *shapes);
 void         gwy_shapes_stroke             (GwyShapes *shapes,
                                             cairo_t *cr,
                                             GwyShapesStateType state);

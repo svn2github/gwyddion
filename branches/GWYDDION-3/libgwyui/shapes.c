@@ -36,7 +36,7 @@ enum {
 };
 
 enum {
-    SHAPE_SELECTED,
+    EDITING_STARTED,
     UPDATED,
     N_SIGNALS
 };
@@ -60,19 +60,7 @@ struct _GwyShapesPrivate {
     gulong coords_item_deleted_id;
     gulong coords_item_updated_id;
 
-    // Selection object:
-    // (1) Who owns it? @shapes, probably.  Have set from foo/get as foo funcs.
-    // (2) How subclasses work with actual representation?
-    // (3) Items are selected/deselected/added/removed from both shapes and
-    //     programatically.  Must have two way updates:
-    //     @coords size changes → selection reflects this
-    //     selection is set from outside → ideally impossible to get wrong
-    //     item is deleted by @shapes due to user interaction – who is
-    //     responsible for deleting it in selection?
-    // (4) Representation: A list of selected intervals?  Represents well
-    //     all common cases (nothing, a few random, a few large blocks, all).
-    // (5) How it should interact with GtkTreeSelection if items are displayed
-    //     in a treeview?
+    // Selection itself is in the public struct.
     gulong selection_added_id;
     gulong selection_removed_id;
     gulong selection_assigned_id;
@@ -170,25 +158,25 @@ gwy_shapes_class_init(GwyShapesClass *klass)
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
-    // FIXME: This is too simplistic.  We may want multiple objects to be
-    // selected.  This can be implemented using a GwyMaskLine.
     /**
-     * GwyShapes::shape-selected:
+     * GwyShapes::editing-started:
      * @gwyshapes: The #GwyShapes which received the signal.
-     * @arg1: The number (index) of the chosen selection object.
      *
-     * The ::shape-selected signal is emitted when user starts interacting
-     * with a shape, even before modifying it.  It is emitted
-     * even if the layer is not editable, but it is not emitted when focus
-     * is set and the user attempts to choose a different object.
+     * The ::editing-started signal is emitted when user starts modifying the
+     * shapes.  It is not emitted when shapes are only selected or deselected,
+     * you can use signals of the shapes' selection for this.
+     *
+     * The end of the modification can be catched using the GwyCoords::finished
+     * signal.
+     * FIXME: This seems inconsistent.
      **/
-    signals[SHAPE_SELECTED]
-        = g_signal_new_class_handler("shape-selected",
+    signals[EDITING_STARTED]
+        = g_signal_new_class_handler("editing-started",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__INT,
-                                     G_TYPE_NONE, 1, G_TYPE_INT);
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 
     /**
      * GwyShapes::updated:
@@ -904,6 +892,21 @@ gwy_shapes_is_updated(GwyShapes *shapes)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
     return shapes->priv->is_updated;
+}
+
+/**
+ * gwy_shapes_editing_started:
+ * @coords: A group of coordinates of some geometrical shapes.
+ *
+ * Emits signal ::editing-started on a group of geometrical shapes.
+ *
+ * This method is namely intended for subclasses.
+ **/
+void
+gwy_shapes_editing_started(GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_signal_emit(shapes, signals[EDITING_STARTED], 0);
 }
 
 /* Each shape can be ‘selected’ in the following independent ways:
