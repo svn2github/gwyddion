@@ -4,7 +4,7 @@
 <!-- vim: set ts=2 sw=2 et: -->
 <book id='index' xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
-    <title>Gwyddion Library Reference Manual</title>
+    <title>Gwyddion3 Library Reference Manual</title>
   </bookinfo>
   <preface id='libgwy-preface'>
     <title>Introduction</title>

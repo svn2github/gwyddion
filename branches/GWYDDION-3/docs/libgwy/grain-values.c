@@ -23,6 +23,7 @@
 #include "libgwy/libgwy.h"
 
 #define id "libgwy-builtin-grain-value"
+#define title "Builtin grain values"
 #define generated "GENERATED"
 
 static const gchar file_prologue[] =
@@ -32,11 +33,12 @@ static const gchar file_prologue[] =
 "<!-- This is a %s file.  Created by docs/libgwy/grain-values.c. -->\n"
 "<refentry id='%s'>\n"
 "<refmeta>\n"
+"<refentrytitle role='top_of_page' id='%s.top_of_page'>%s</refentrytitle>\n"
 "<manvolnum>3</manvolnum>\n"
 "<refmiscinfo>LIBGWY Library</refmiscinfo>\n"
 "</refmeta>\n"
 "<refnamediv>\n"
-"<refname>Builtin grain values</refname>\n"
+"<refname>%s</refname>\n"
 "<refpurpose>List of built-in grain values</refpurpose>\n"
 "</refnamediv>\n";
 
@@ -159,7 +161,7 @@ main(void)
 {
     gwy_type_init();
 
-    printf(file_prologue, generated, id);
+    printf(file_prologue, generated, id, id, title, title);
 
     const gchar* const *names = gwy_grain_value_list_builtins();
     guint nvalues = g_strv_length((gchar**)names);
