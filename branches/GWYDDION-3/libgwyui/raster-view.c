@@ -128,6 +128,10 @@ static gboolean gwy_raster_view_button_press        (GtkWidget *widget,
                                                      GdkEventButton *event);
 static gboolean gwy_raster_view_button_release      (GtkWidget *widget,
                                                      GdkEventButton *event);
+static gboolean gwy_raster_view_key_press           (GtkWidget *widget,
+                                                     GdkEventKey *event);
+static gboolean gwy_raster_view_key_release         (GtkWidget *widget,
+                                                     GdkEventKey *event);
 static gboolean gwy_raster_view_leave_notify        (GtkWidget *widget,
                                                      GdkEventCrossing *event);
 static void     calculate_position_and_size         (GwyRasterView *rasterview);
@@ -212,6 +216,8 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     widget_class->motion_notify_event = gwy_raster_view_motion_notify;
     widget_class->button_press_event = gwy_raster_view_button_press;
     widget_class->button_release_event = gwy_raster_view_button_release;
+    widget_class->key_press_event = gwy_raster_view_key_press;
+    widget_class->key_release_event = gwy_raster_view_key_release;
     widget_class->leave_notify_event = gwy_raster_view_leave_notify;
     widget_class->draw = gwy_raster_view_draw;
 
@@ -306,7 +312,8 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     priv->mask_color = mask_color_default;
     priv->grain_number_color = grain_number_color_default;
     update_matrices(rasterview);
-    gtk_widget_set_has_window(GTK_WIDGET(rasterview), FALSE);
+    //gtk_widget_set_has_window(GTK_WIDGET(rasterview), FALSE); XXX: WTF?
+    gtk_widget_set_can_focus(GTK_WIDGET(rasterview), TRUE);
 }
 
 static void
@@ -733,6 +740,8 @@ create_window(GwyRasterView *rasterview)
                        | GDK_EXPOSURE_MASK
                        | GDK_BUTTON_PRESS_MASK
                        | GDK_BUTTON_RELEASE_MASK
+                       | GDK_KEY_PRESS_MASK
+                       | GDK_KEY_RELEASE_MASK
                        | GDK_POINTER_MOTION_MASK
                        | GDK_POINTER_MOTION_HINT_MASK),
         .visual = gtk_widget_get_visual(widget),
@@ -895,6 +904,30 @@ gwy_raster_view_button_release(GtkWidget *widget,
     RasterView *priv = rasterview->priv;
     if (priv->shapes)
         gwy_shapes_button_release(priv->shapes, event);
+
+    return FALSE;
+}
+
+static gboolean
+gwy_raster_view_key_press(GtkWidget *widget,
+                          GdkEventKey *event)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    RasterView *priv = rasterview->priv;
+    if (priv->shapes)
+        gwy_shapes_key_press(priv->shapes, event);
+
+    return FALSE;
+}
+
+static gboolean
+gwy_raster_view_key_release(GtkWidget *widget,
+                            GdkEventKey *event)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    RasterView *priv = rasterview->priv;
+    if (priv->shapes)
+        gwy_shapes_key_release(priv->shapes, event);
 
     return FALSE;
 }

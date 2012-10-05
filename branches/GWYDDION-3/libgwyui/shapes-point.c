@@ -20,6 +20,7 @@
 #include <math.h>
 #include <glib.h>
 #include <glib/gi18n-lib.h>
+#include <gdk/gdkkeysyms.h>
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/math.h"
@@ -52,13 +53,14 @@ typedef void (*MarkerDrawFunc)(cairo_t *cr,
 typedef struct _GwyShapesPointPrivate ShapesPoint;
 
 struct _GwyShapesPointPrivate {
-    gboolean radius;
+    gdouble radius;
     // Cached data in view coordinates.  May not correspond to @coords if they
     // are changed simultaneously from more sources.
     GArray *data;
 
     gint hover;
     gint clicked;
+    gboolean changing_selection;
     gboolean has_moved;
     InteractMode mode;
     GwyXY xypress;    // Event (view) coordinates.
@@ -84,8 +86,15 @@ static gboolean gwy_shapes_point_button_press  (GwyShapes *shapes,
                                                 GdkEventButton *event);
 static gboolean gwy_shapes_point_button_release(GwyShapes *shapes,
                                                 GdkEventButton *event);
+static gboolean gwy_shapes_point_key_press     (GwyShapes *shapes,
+                                                GdkEventKey *event);
 static void     gwy_shapes_point_cancel_editing(GwyShapes *shapes,
                                                 gint id);
+static void     gwy_shapes_selection_added     (GwyShapes *shapes,
+                                                gint value);
+static void     gwy_shapes_selection_removed   (GwyShapes *shapes,
+                                                gint value);
+static void     gwy_shapes_selection_assigned  (GwyShapes *shapes);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -108,7 +117,11 @@ gwy_shapes_point_class_init(GwyShapesPointClass *klass)
     shapes_class->motion_notify = gwy_shapes_point_motion_notify;
     shapes_class->button_press = gwy_shapes_point_button_press;
     shapes_class->button_release = gwy_shapes_point_button_release;
+    shapes_class->key_press = gwy_shapes_point_key_press;
     shapes_class->cancel_editing = gwy_shapes_point_cancel_editing;
+    shapes_class->selection_added = gwy_shapes_selection_added;
+    shapes_class->selection_removed = gwy_shapes_selection_removed;
+    shapes_class->selection_assigned = gwy_shapes_selection_assigned;
 
     properties[PROP_RADIUS]
         = g_param_spec_double("radius",
@@ -476,8 +489,11 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
         // If we clicked on an already selected shape, we will move the entire
         // group.  If we clicked on an unselected shape we will need to select
         // only this one.
-        if (!gwy_int_set_contains(shapes->selection, priv->clicked))
+        if (!gwy_int_set_contains(shapes->selection, priv->clicked)) {
+            priv->changing_selection = TRUE;
             gwy_int_set_update(shapes->selection, &priv->clicked, 1);
+            priv->changing_selection = FALSE;
+        }
     }
 
     GwyXY dxy;
@@ -511,7 +527,9 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
             priv->clicked = -1;
             return FALSE;
         }
+        priv->changing_selection = TRUE;
         gwy_int_set_update(selection, &priv->clicked, 1);
+        priv->changing_selection = FALSE;
     }
     priv->has_moved = FALSE;
 
@@ -531,10 +549,12 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
     if (!priv->has_moved) {
         GwyIntSet *selection = shapes->selection;
 
+        priv->changing_selection = TRUE;
         if (priv->mode == MODE_SELECTING)
             gwy_int_set_toggle(selection, priv->clicked);
         else if (priv->mode == MODE_MOVING)
             gwy_int_set_update(selection, &priv->clicked, 1);
+        priv->changing_selection = FALSE;
 
         // FIXME: May not be necessary if we respond to the selection signals.
         gwy_shapes_update(shapes);
@@ -551,6 +571,27 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
     return TRUE;
 }
 
+static gboolean
+gwy_shapes_point_key_press(GwyShapes *shapes,
+                           GdkEventKey *event)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+
+    if (event->keyval == GDK_KEY_Delete || event->keyval == GDK_KEY_BackSpace) {
+        gwy_shapes_point_cancel_editing(shapes, -1);
+        GwyCoords *coords = gwy_shapes_get_coords(shapes);
+        guint nsel;
+        gint *selected = gwy_int_set_values(shapes->selection, &nsel);
+        priv->changing_selection = TRUE;
+        gwy_int_set_update(shapes->selection, NULL, 0);
+        priv->changing_selection = FALSE;
+        for (guint i = 0; i < nsel; i++)
+            gwy_coords_delete(coords, selected[nsel-1 - i]);
+        g_free(selected);
+    }
+    return FALSE;
+}
+
 static void
 gwy_shapes_point_cancel_editing(GwyShapes *shapes,
                                 gint id)
@@ -559,7 +600,44 @@ gwy_shapes_point_cancel_editing(GwyShapes *shapes,
     if (priv->clicked == -1 || id != priv->clicked)
         return;
 
+    // FIXME: We might want to do something like the finishing touches at the
+    // end of button_released() here.
     priv->clicked = -1;
+    gwy_shapes_update(shapes);
+}
+
+static void
+gwy_shapes_selection_added(GwyShapes *shapes,
+                           G_GNUC_UNUSED gint value)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    if (priv->changing_selection)
+        return;
+    // TODO
+    gwy_shapes_point_cancel_editing(shapes, -1);
+    gwy_shapes_update(shapes);
+}
+
+static void
+gwy_shapes_selection_removed(GwyShapes *shapes,
+                             G_GNUC_UNUSED gint value)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    if (priv->changing_selection)
+        return;
+    // TODO
+    gwy_shapes_point_cancel_editing(shapes, -1);
+    gwy_shapes_update(shapes);
+}
+
+static void
+gwy_shapes_selection_assigned(GwyShapes *shapes)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    if (priv->changing_selection)
+        return;
+    // TODO
+    gwy_shapes_point_cancel_editing(shapes, -1);
     gwy_shapes_update(shapes);
 }
 
