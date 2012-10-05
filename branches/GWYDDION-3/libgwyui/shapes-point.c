@@ -234,19 +234,17 @@ draw_markers(GwyShapes *shapes, cairo_t *cr,
         count = 0;
     }
 
-    if (gwy_int_set_size(selection)) {
-        guint nsel;
-        gint *selected = gwy_int_set_values(shapes->selection, &nsel);
-        for (guint i = 0; i < nsel; i++) {
-            gint j = selected[i];
-            if (j == priv->hover)
+    GwyIntSetIter iter;
+    if (gwy_int_set_first(selection, &iter)) {
+        do {
+            if (iter.value == priv->hover)
                 hoverselected = TRUE;
             else {
-                function(cr, data + 2*j, user_data);
+                function(cr, data + 2*iter.value, user_data);
                 count++;
             }
-        }
-        g_free(selected);
+        } while (gwy_int_set_next(selection, &iter));
+
         if (count) {
             gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
             count = 0;
