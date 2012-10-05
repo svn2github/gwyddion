@@ -36,7 +36,8 @@ enum {
 typedef enum {
     MODE_MOVING,
     MODE_SELECTING,
-} MovingMode;
+    MODE_RUBBERBAND,
+} InteractMode;
 
 typedef struct {
     GwyXY *dxy;
@@ -59,7 +60,7 @@ struct _GwyShapesPointPrivate {
     gint hover;
     gint clicked;
     gboolean has_moved;
-    MovingMode mode;
+    InteractMode mode;
     GwyXY xypress;    // Event (view) coordinates.
 };
 
@@ -361,8 +362,7 @@ constrain_movement(GwyShapes *shapes,
                    GdkModifierType modif,
                    GwyXY *dxy)
 {
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
 
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
@@ -415,8 +415,7 @@ static gboolean
 add_point(GwyShapes *shapes,
           gdouble x, gdouble y)
 {
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     if (n >= gwy_shapes_get_max_shapes(shapes))
@@ -454,9 +453,9 @@ static gboolean
 gwy_shapes_point_motion_notify(GwyShapes *shapes,
                                GdkEventMotion *event)
 {
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
-    if (!priv->data)
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    // FIXME: Change once we implement MODE_RUBBERBAND
+    if (!priv->data || priv->mode == MODE_RUBBERBAND)
         return FALSE;
 
     if (priv->clicked == -1) {
@@ -464,10 +463,22 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
         return FALSE;
     }
 
-    // FIXME: If shift is pressed, we might want to start rubber-band selection
-    // now.
-    if (event->x != priv->xypress.x || event->y != priv->xypress.y)
+    if (priv->mode == MODE_SELECTING) {
+        priv->mode = MODE_RUBBERBAND;
+        g_warning("We should start rubberband selection.  Implement it...");
+        return FALSE;
+    }
+
+    g_assert(priv->mode == MODE_MOVING);
+    if (!priv->has_moved && (event->x != priv->xypress.x
+                             || event->y != priv->xypress.y)) {
         priv->has_moved = TRUE;
+        // If we clicked on an already selected shape, we will move the entire
+        // group.  If we clicked on an unselected shape we will need to select
+        // only this one.
+        if (!gwy_int_set_contains(shapes->selection, priv->clicked))
+            gwy_int_set_update(shapes->selection, &priv->clicked, 1);
+    }
 
     GwyXY dxy;
     constrain_movement(shapes, event->x, event->y, event->state, &dxy);
@@ -480,8 +491,7 @@ static gboolean
 gwy_shapes_point_button_press(GwyShapes *shapes,
                               GdkEventButton *event)
 {
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     GwyIntSet *selection = shapes->selection;
 
     priv->xypress = (GwyXY){ event->x, event->y };
@@ -495,11 +505,8 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
     // whether the user wants to select things or move them.
     if (priv->hover != -1) {
         priv->clicked = priv->hover;
-        if (!gwy_int_set_contains(selection, priv->clicked))
-            gwy_int_set_update(selection, &priv->clicked, 1);
     }
-    else {
-        // XXX: Not if shift is pressed! (MODE_SELECTING)
+    else if (priv->mode == MODE_MOVING) {
         if (!add_point(shapes, event->x, event->y)) {
             priv->clicked = -1;
             return FALSE;
@@ -515,10 +522,11 @@ static gboolean
 gwy_shapes_point_button_release(GwyShapes *shapes,
                                 GdkEventButton *event)
 {
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
-    if (priv->clicked == -1)
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    if (priv->clicked == -1) {
+        update_hover(shapes, event->x, event->y);
         return FALSE;
+    }
 
     if (!priv->has_moved) {
         GwyIntSet *selection = shapes->selection;
@@ -547,8 +555,7 @@ static void
 gwy_shapes_point_cancel_editing(GwyShapes *shapes,
                                 gint id)
 {
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     if (priv->clicked == -1 || id != priv->clicked)
         return;
 
