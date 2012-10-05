@@ -697,6 +697,75 @@ gwy_int_set_foreach(GwyIntSet *intset,
     }
 }
 
+/**
+ * gwy_int_set_first:
+ * @intset: A set of integers.
+ * @iter: Integer set iterator to initialise to the first value.
+ *
+ * Initialises an integer set iterator to the first value in the set.
+ *
+ * Returns: %TRUE if @iter was initialised; %FALSE if the set is empty.
+ **/
+gboolean
+gwy_int_set_first(GwyIntSet *intset,
+                  GwyIntSetIter *iter)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
+    g_return_val_if_fail(iter, FALSE);
+
+    const GArray *ranges = intset->priv->ranges;
+    const IntRange *r = (const IntRange*)ranges->data;
+    guint n = ranges->len;
+
+    if (!n)
+        return FALSE;
+
+    iter->priv = 0;
+    iter->value = r[0].from;
+    return TRUE;
+}
+
+/**
+ * gwy_int_set_next:
+ * @intset: A set of integers.
+ * @iter: Integer set iterator to advance to the next value.
+ *
+ * Advances an integer set iterator to the next value in the set.
+ *
+ * Integer sets must not be modified during the iteration.
+ *
+ * It is not an error to call this function repeatedly after it returned
+ * %FALSE (it will just continue returning %FALSE), though it is a bit
+ * pointless.
+ *
+ * Returns: %TRUE if @iter's value was set to the next value; %FALSE if the
+ *          set was exhausted.
+ **/
+gboolean
+gwy_int_set_next(GwyIntSet *intset,
+                 GwyIntSetIter *iter)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
+    g_return_val_if_fail(iter, FALSE);
+
+    const GArray *ranges = intset->priv->ranges;
+    const IntRange *r = (const IntRange*)ranges->data;
+    guint n = ranges->len;
+
+    if (iter->priv >= n)
+        return FALSE;
+
+    if (iter->value < r[iter->priv].to)
+        iter->value++;
+    else {
+        iter->priv++;
+        if (iter->priv >= n)
+            return FALSE;
+        iter->value = r[iter->priv].from;
+    }
+    return TRUE;
+}
+
 static guint
 ranges_size(const GArray *ranges)
 {
@@ -768,6 +837,27 @@ ranges_are_canonical(const GArray *ranges)
  * GwyIntSetClass:
  *
  * Class of integer sets.
+ **/
+
+/**
+ * GwyIntSetForeachFunc:
+ * @value: Value from the integer set.
+ * @user_data: User data passed to gwy_int_set_foreach().
+ *
+ * Type of function passed to gwy_container_foreach().
+ **/
+
+/**
+ * GwyIntSetIter:
+ * @value: Current value from the integer set.
+ * @priv: Private data of the iterator; must not be modified.
+ *
+ * Integer set iterator.
+ *
+ * The iterator would be typically allocated on-stack and initialised to the
+ * first value with gwy_int_set_first().  Subsequent values are obtained using
+ * gwy_int_set_next(), in strictly ascending order.  No specific destruction is
+ * necessary.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

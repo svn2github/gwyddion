@@ -53,6 +53,12 @@ struct _GwyIntSetClass {
 typedef void (*GwyIntSetForeachFunc)(gint value,
                                      gpointer user_data);
 
+typedef struct {
+    gint value;
+    /*<private>*/
+    guint priv;
+} GwyIntSetIter;
+
 GType      gwy_int_set_get_type       (void)                          G_GNUC_CONST;
 GwyIntSet* gwy_int_set_new            (void)                          G_GNUC_MALLOC;
 GwyIntSet* gwy_int_set_new_with_values(const gint *values,
@@ -74,6 +80,10 @@ gint*      gwy_int_set_values         (const GwyIntSet *intset,
 void       gwy_int_set_foreach        (GwyIntSet *intset,
                                        GwyIntSetForeachFunc function,
                                        gpointer user_data);
+gboolean   gwy_int_set_first          (GwyIntSet *intset,
+                                       GwyIntSetIter *iter);
+gboolean   gwy_int_set_next           (GwyIntSet *intset,
+                                       GwyIntSetIter *iter);
 /* TODO: Permit getting the ints by interval. */
 
 G_END_DECLS
