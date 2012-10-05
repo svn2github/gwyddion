@@ -351,4 +351,35 @@ test_int_set_foreach(void)
     g_rand_free(rng);
 }
 
+void
+test_int_set_iter(void)
+{
+    enum { niter = 500 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *intset = gwy_int_set_new();
+        int_set_randomize(intset, rng);
+
+        GwyIntSet *reference = gwy_int_set_new();
+        GwyIntSetIter iiter;
+        gint prev = G_MININT;
+
+        if (gwy_int_set_first(intset, &iiter)) {
+            do {
+                g_assert(gwy_int_set_contains(intset, iiter.value));
+                g_assert(!gwy_int_set_contains(reference, iiter.value));
+                g_assert_cmpint(iiter.value, >, prev);
+                gwy_int_set_add(reference, iiter.value);
+            } while (gwy_int_set_next(intset, &iiter));
+            g_assert(!gwy_int_set_next(intset, &iiter));
+        }
+        int_set_assert_equal(intset, reference);
+
+        g_object_unref(reference);
+        g_object_unref(intset);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

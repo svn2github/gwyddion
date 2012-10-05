@@ -118,6 +118,7 @@ int-set/add-remove
 int-set/values
 int-set/update
 int-set/foreach
+int-set/iter
 coords/point/finished
 coords/point/units
 coords/point/data
