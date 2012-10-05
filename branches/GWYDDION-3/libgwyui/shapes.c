@@ -28,7 +28,6 @@
 enum {
     PROP_0,
     PROP_COORDS,
-    PROP_FOCUS,
     PROP_MAX_SHAPES,
     PROP_EDITABLE,
     PROP_SELECTION,
