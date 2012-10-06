@@ -127,9 +127,6 @@ void         gwy_shapes_set_editable       (GwyShapes *shapes,
 gboolean     gwy_shapes_get_editable       (const GwyShapes *shapes)               G_GNUC_PURE;
 void         gwy_shapes_draw               (GwyShapes *shapes,
                                             cairo_t *cr);
-void         gwy_shapes_set_focus          (GwyShapes *shapes,
-                                            gint id);
-gint         gwy_shapes_get_focus          (const GwyShapes *shapes)               G_GNUC_PURE;
 GdkEventMask gwy_shapes_gdk_event_mask     (const GwyShapes *shapes)               G_GNUC_PURE;
 gboolean     gwy_shapes_button_press       (GwyShapes *shapes,
                                             GdkEventButton *event);
