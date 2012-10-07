@@ -50,6 +50,8 @@ static gboolean gwy_coords_construct        (GwySerializable *serializable,
 static GObject* gwy_coords_duplicate_impl   (GwySerializable *serializable);
 static void     gwy_coords_assign_impl      (GwySerializable *destination,
                                              GwySerializable *source);
+static gboolean class_supports_transforms   (GwyCoordsClass *klass,
+                                             GwyCoordsTransformFlags flags);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
@@ -446,7 +448,7 @@ gwy_coords_get(const GwyCoords *coords,
  * @i: Object index.  It must correspond to an existing coords object or
  *     it can point after the end of the coords.  In the second case the
  *     object will be appended to the end.
- * @data: Data of a single coords object size in an array of size 
+ * @data: Data of a single coords object size in an array of size
  *        gwy_coords_shape_size().
  *
  * Sets the data of a single coords object.
@@ -634,6 +636,141 @@ gwy_coords_finished(GwyCoords *coords)
 }
 
 /**
+ * gwy_coords_translate:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to transform.  Passing %NULL implies
+ *           all objects are to be transformed.
+ * @offsets: Array of GwyCoordsClass @dimension field specifying the
+ *           offsets in each dimension.
+ *
+ * Translates selected or all objects in a coords.
+ **/
+void
+gwy_coords_translate(GwyCoords *coords,
+                     GwyIntSet *indices,
+                     const gdouble *offsets)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(!indices || GWY_IS_INT_SET(indices));
+    g_return_if_fail(offsets);
+
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    g_return_if_fail(klass->translate);
+    klass->translate(coords, indices, offsets);
+}
+
+/**
+ * gwy_coords_flip:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to transform.  Passing %NULL implies
+ *           all objects are to be transformed.
+ * @axes: Bitmask of axes (dimensions) to flip, starting from the lowest bit.
+ *
+ * Flips selected or all objects in a coords.
+ **/
+void
+gwy_coords_flip(GwyCoords *coords,
+                GwyIntSet *indices,
+                guint axes)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(!indices || GWY_IS_INT_SET(indices));
+
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    g_return_if_fail(klass->flip);
+    if (!(axes & ((1 << klass->dimension) - 1)))
+        return;
+    klass->flip(coords, indices, axes);
+}
+
+/**
+ * gwy_coords_scale:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to transform.  Passing %NULL implies
+ *           all objects are to be transformed.
+ * @factors: Array of GwyCoordsClass @dimension field specifying the
+ *           scaling factors in each dimension.
+ *
+ * Scales selected or all objects in a coords.
+ **/
+void
+gwy_coords_scale(GwyCoords *coords,
+                 GwyIntSet *indices,
+                 const gdouble *factors)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(!indices || GWY_IS_INT_SET(indices));
+    g_return_if_fail(factors);
+
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    g_return_if_fail(klass->scale);
+    klass->scale(coords, indices, factors);
+}
+
+/**
+ * gwy_coords_can_transform:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @transforms: Bitmask from %GwyCoordsTransformFlags enum specifying which
+ *              transformatons are requested.
+ *
+ * Checks whether a group of coordinates of some geometrical objects can be
+ * transformed using given transformation.
+ *
+ * Not all coordinate types can be transformed using all transformations.  For
+ * instance, rectangles and ellipses cannot be rotated.
+ *
+ * Returns: %TRUE if @coords supports all transformations given in @transforms;
+ *          %FALSE if it does not support some.
+ **/
+gboolean
+gwy_coords_can_transform(GwyCoords *coords,
+                         GwyCoordsTransformFlags transforms)
+{
+    g_return_val_if_fail(GWY_IS_COORDS(coords), FALSE);
+    return class_supports_transforms(GWY_COORDS_GET_CLASS(coords), transforms);
+}
+
+/**
+ * gwy_coords_can_transform:
+ * @klass: Klass of group of coordinates of some geometrical objects.
+ * @transforms: Bitmask from %GwyCoordsTransformFlags enum specifying which
+ *              transformatons are requested.
+ *
+ * Checks whether given class of groups of coordinates of some geometrical
+ * objects can be transformed using given transformation.
+ *
+ * Not all coordinate types can be transformed using all transformations.  For
+ * instance, rectangles and ellipses cannot be rotated.
+ *
+ * Returns: %TRUE if coordinates of class @klass support all transformations
+ *          given in @transforms; %FALSE if it doe not support some.
+ **/
+gboolean
+gwy_coords_class_can_transform(GwyCoordsClass *klass,
+                               GwyCoordsTransformFlags transforms)
+{
+    g_return_val_if_fail(GWY_IS_COORDS_CLASS(klass), FALSE);
+    return class_supports_transforms(klass, transforms);
+}
+
+static gboolean
+class_supports_transforms(GwyCoordsClass *klass,
+                          GwyCoordsTransformFlags flags)
+{
+    if ((flags & GWY_COORDS_TRANSFORM_TRANSLATE) && !klass->translate)
+        return FALSE;
+    if ((flags & GWY_COORDS_TRANSFORM_FLIP) && !klass->flip)
+        return FALSE;
+    if ((flags & GWY_COORDS_TRANSFORM_SCALE) && !klass->scale)
+        return FALSE;
+    // TODO: Other transformations
+    return TRUE;
+}
+
+/**
  * SECTION: coords
  * @title: GwyCoords
  * @short_description: Base class for coordinates of geometrical objects.
@@ -668,6 +805,15 @@ gwy_coords_finished(GwyCoords *coords)
  * @dimension: Number of different coodinates in the coords.
  * @unit_map: Map assigning unit indices (used with gwy_coords_get_units())
  *            to individual numbers (coordinates) in the coords objects.
+ * @translate: Virtual method implementing gwy_coords_translate().  If it is
+ *             implemented the class will report
+ *             %GWY_COORDS_TRANSFORM_TRANSLATE capability.  In general, this
+ *             should be supported by all subclasses.
+ * @flip: Virtual method implementing gwy_coords_flip().  If it is implemented
+ *        the class will report %GWY_COORDS_TRANSFORM_FLIP capability.
+ * @scale: Virtual method implementing gwy_coords_scale().  If it is
+ *         implemented the class will report %GWY_COORDS_TRANSFORM_SCALE
+ *         capability.
  *
  * Class of groups coordinates of some geometrical objects.
  *
@@ -692,6 +838,28 @@ gwy_coords_finished(GwyCoords *coords)
  * Copies the value of a group of coordinates of some geometrical objects.
  *
  * This is a convenience wrapper of gwy_serializable_assign().
+ **/
+
+/**
+ * GwyCoordsTransformFlags:
+ * @GWY_COORDS_TRANSFORM_TRANSLATE: Translation is possible, this should be
+ *                                  possible with all coordinate types.
+ * @GWY_COORDS_TRANSFORM_FLIP: Flipping around horizontal and vertical axes
+ *                             is possible (this implies also rotation by π).
+ * @GWY_COORDS_TRANSFORM_TRANSPOSE: Transposing congruence transformations are
+ *                                  possible, see
+ *                                  gwy_plane_congruence_is_transposition().
+ *                             is possible (this implies also rotation by π).
+ * @GWY_COORDS_TRANSFORM_SCALE: General scaling is possible, non-uniform along
+ *                              different axes.
+ * @GWY_COORDS_TRANSFORM_ROTATE: Rotation around arbitrary points about
+ *                               arbitrary axes is possible.  This implies any
+ *                               congruence transformation is possible.
+ * @GWY_COORDS_TRANSFORM_FUNCTION: Arbitrary point-wise transformation is
+ *                                 possbile.
+ *
+ * Flags describing the types of transformation that various coordinates
+ * classes support.
  **/
 
 /**

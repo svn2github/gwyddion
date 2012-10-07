@@ -23,8 +23,18 @@
 #include <libgwy/serializable.h>
 #include <libgwy/unit.h>
 #include <libgwy/array.h>
+#include <libgwy/int-set.h>
 
 G_BEGIN_DECLS
+
+typedef enum {
+    GWY_COORDS_TRANSFORM_TRANSLATE = 1 << 0,
+    GWY_COORDS_TRANSFORM_FLIP      = 1 << 1,
+    GWY_COORDS_TRANSFORM_TRANSPOSE = 1 << 2,
+    GWY_COORDS_TRANSFORM_SCALE     = 1 << 3,
+    GWY_COORDS_TRANSFORM_ROTATE    = 1 << 4,
+    GWY_COORDS_TRANSFORM_FUNCTION  = 1 << 5,
+} GwyCoordsTransformFlags;
 
 #define GWY_TYPE_COORDS \
     (gwy_coords_get_type())
@@ -54,6 +64,17 @@ struct _GwyCoordsClass {
     guint shape_size;
     guint dimension;
     const guint *unit_map;
+
+    // TODO: Add more transformation types
+    void (*translate)(GwyCoords *coords,
+                      const GwyIntSet *indices,
+                      const gdouble *offsets);
+    void (*flip)(GwyCoords *coords,
+                 const GwyIntSet *indices,
+                 guint axes);
+    void (*scale)(GwyCoords *coords,
+                  const GwyIntSet *indices,
+                  const gdouble *factors);
 };
 
 typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
@@ -65,10 +86,12 @@ typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
 #define gwy_coords_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType        gwy_coords_get_type        (void)                       G_GNUC_CONST;
-guint        gwy_coords_shape_size      (const GwyCoords *coords)    G_GNUC_PURE;
-guint        gwy_coords_dimension       (const GwyCoords *coords)    G_GNUC_PURE;
-const guint* gwy_coords_unit_map        (const GwyCoords *coords)    G_GNUC_PURE;
+GType        gwy_coords_get_type        (void)                               G_GNUC_CONST;
+guint        gwy_coords_shape_size      (const GwyCoords *coords)            G_GNUC_PURE;
+guint        gwy_coords_dimension       (const GwyCoords *coords)            G_GNUC_PURE;
+const guint* gwy_coords_unit_map        (const GwyCoords *coords)            G_GNUC_PURE;
+gboolean     gwy_coords_can_transform   (GwyCoords *coords,
+                                         GwyCoordsTransformFlags transforms) G_GNUC_PURE;
 void         gwy_coords_clear           (GwyCoords *coords);
 gboolean     gwy_coords_get             (const GwyCoords *coords,
                                          guint i,
@@ -78,7 +101,7 @@ void         gwy_coords_set             (GwyCoords *coords,
                                          const gdouble *data);
 void         gwy_coords_delete          (GwyCoords *coords,
                                          guint i);
-guint        gwy_coords_size            (const GwyCoords *coords)    G_GNUC_PURE;
+guint        gwy_coords_size            (const GwyCoords *coords)            G_GNUC_PURE;
 void         gwy_coords_get_data        (const GwyCoords *coords,
                                          gdouble *data);
 void         gwy_coords_set_data        (GwyCoords *coords,
@@ -89,9 +112,20 @@ void         gwy_coords_filter          (GwyCoords *coords,
                                          gpointer user_data);
 void         gwy_coords_finished        (GwyCoords *coords);
 GwyUnit*     gwy_coords_get_units       (GwyCoords *coords,
-                                         guint i)                    G_GNUC_PURE;
+                                         guint i)                            G_GNUC_PURE;
 GwyUnit*     gwy_coords_get_mapped_units(GwyCoords *coords,
-                                         guint i)                    G_GNUC_PURE;
+                                         guint i)                            G_GNUC_PURE;
+void         gwy_coords_translate       (GwyCoords *coords,
+                                         GwyIntSet *indices,
+                                         const gdouble *offsets);
+void         gwy_coords_flip            (GwyCoords *coords,
+                                         GwyIntSet *indices,
+                                         guint axes);
+void         gwy_coords_scale           (GwyCoords *coords,
+                                         GwyIntSet *indices,
+                                         const gdouble *factors);
+gboolean     gwy_coords_class_can_transform(GwyCoordsClass *klass,
+                                            GwyCoordsTransformFlags transforms) G_GNUC_PURE;
 
 G_END_DECLS
 

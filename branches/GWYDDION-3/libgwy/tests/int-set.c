@@ -45,7 +45,21 @@ int_set_randomize(GwyIntSet *intset,
         gwy_int_set_add(intset, random_integer(rng));
 }
 
-static void
+void
+int_set_randomize_range(GwyIntSet *intset,
+                        GRand *rng,
+                        gint min,
+                        gint max)
+{
+    guint n = 2*(max - min);
+
+    while (n--) {
+        gint value = g_rand_int_range(rng, min, max+1);
+        gwy_int_set_add(intset, value);
+    }
+}
+
+void
 int_set_assert_equal(const GwyIntSet *result,
                      const GwyIntSet *reference)
 {

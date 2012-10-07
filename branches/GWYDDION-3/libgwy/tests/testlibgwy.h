@@ -53,6 +53,12 @@ void          record_item_change            (GObject *object,
                                              guint pos,
                                              guint64 *counter);
 void          record_signal                 (guint *counter);
+void          int_set_randomize_range       (GwyIntSet *intset,
+                                             GRand *rng,
+                                             gint min,
+                                             gint max);
+void          int_set_assert_equal          (const GwyIntSet *result,
+                                             const GwyIntSet *reference);
 void          mask_line_print               (const gchar *name,
                                              const GwyMaskLine *maskline);
 GwyMaskField* random_mask_field             (guint xres,
