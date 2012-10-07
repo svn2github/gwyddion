@@ -402,28 +402,6 @@ constrain_movement(GwyShapes *shapes,
     gwy_int_set_foreach(shapes->selection, constrain_func, &data);
 }
 
-static void
-move_func(gint value, gpointer user_data)
-{
-    SelectionFuncData *data = (SelectionFuncData*)user_data;
-    GwyCoords *coords = data->coords;
-    GwyXY *dxy = data->dxy;
-    gdouble xysel[2];
-    gwy_coords_get(coords, value, xysel);
-    xysel[0] += dxy->x;
-    xysel[1] += dxy->y;
-    gwy_coords_set(coords, value, xysel);
-}
-
-static void
-move_points(GwyShapes *shapes, GwyXY *dxy)
-{
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    SelectionFuncData data = { dxy, coords, NULL };
-    gwy_int_set_foreach(shapes->selection, move_func, &data);
-    gwy_shapes_update(shapes);
-}
-
 static gboolean
 add_point(GwyShapes *shapes,
           gdouble x, gdouble y)
@@ -498,7 +476,8 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
 
     GwyXY dxy;
     constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-    move_points(shapes, &dxy);
+    gwy_coords_translate(gwy_shapes_get_coords(shapes), shapes->selection,
+                         (const gdouble*)&dxy);
 
     return TRUE;
 }
@@ -562,7 +541,8 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
     else {
         GwyXY dxy;
         constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-        move_points(shapes, &dxy);
+        gwy_coords_translate(gwy_shapes_get_coords(shapes), shapes->selection,
+                             (const gdouble*)&dxy);
         gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
     priv->clicked = -1;
