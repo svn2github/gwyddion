@@ -59,6 +59,11 @@ typedef struct {
     guint priv;
 } GwyIntSetIter;
 
+#define gwy_int_set_duplicate(intset) \
+        (GWY_INT_SET(gwy_serializable_duplicate(GWY_SERIALIZABLE(intset))))
+#define gwy_int_set_assign(dest, src) \
+        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+
 GType      gwy_int_set_get_type       (void)                          G_GNUC_CONST;
 GwyIntSet* gwy_int_set_new            (void)                          G_GNUC_MALLOC;
 GwyIntSet* gwy_int_set_new_with_values(const gint *values,
@@ -77,12 +82,12 @@ void       gwy_int_set_update         (GwyIntSet *intset,
 guint      gwy_int_set_size           (const GwyIntSet *intset)       G_GNUC_PURE;
 gint*      gwy_int_set_values         (const GwyIntSet *intset,
                                        guint *len)                    G_GNUC_MALLOC;
-void       gwy_int_set_foreach        (GwyIntSet *intset,
+void       gwy_int_set_foreach        (const GwyIntSet *intset,
                                        GwyIntSetForeachFunc function,
                                        gpointer user_data);
-gboolean   gwy_int_set_first          (GwyIntSet *intset,
+gboolean   gwy_int_set_first          (const GwyIntSet *intset,
                                        GwyIntSetIter *iter);
-gboolean   gwy_int_set_next           (GwyIntSet *intset,
+gboolean   gwy_int_set_next           (const GwyIntSet *intset,
                                        GwyIntSetIter *iter);
 /* TODO: Permit getting the ints by interval. */
 

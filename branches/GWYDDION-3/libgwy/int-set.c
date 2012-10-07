@@ -680,7 +680,7 @@ gwy_int_set_values(const GwyIntSet *intset,
  * order.  However, it must not modify @intset in any manner.
  **/
 void
-gwy_int_set_foreach(GwyIntSet *intset,
+gwy_int_set_foreach(const GwyIntSet *intset,
                     GwyIntSetForeachFunc function,
                     gpointer user_data)
 {
@@ -707,7 +707,7 @@ gwy_int_set_foreach(GwyIntSet *intset,
  * Returns: %TRUE if @iter was initialised; %FALSE if the set is empty.
  **/
 gboolean
-gwy_int_set_first(GwyIntSet *intset,
+gwy_int_set_first(const GwyIntSet *intset,
                   GwyIntSetIter *iter)
 {
     g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
@@ -742,7 +742,7 @@ gwy_int_set_first(GwyIntSet *intset,
  *          set was exhausted.
  **/
 gboolean
-gwy_int_set_next(GwyIntSet *intset,
+gwy_int_set_next(const GwyIntSet *intset,
                  GwyIntSetIter *iter)
 {
     g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
@@ -837,6 +837,25 @@ ranges_are_canonical(const GArray *ranges)
  * GwyIntSetClass:
  *
  * Class of integer sets.
+ **/
+
+/**
+ * gwy_int_set_duplicate:
+ * @intset: A set of integers.
+ *
+ * Duplicates the contents of an integer set.
+ *
+ * This is a convenience wrapper of gwy_serializable_duplicate().
+ **/
+
+/**
+ * gwy_int_set_assign:
+ * @dest: Destination integer set.
+ * @src: Source integer set.
+ *
+ * Assigns the contents of an integer set to another set.
+ *
+ * This is a convenience wrapper of gwy_serializable_assign().
  **/
 
 /**
