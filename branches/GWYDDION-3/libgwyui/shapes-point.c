@@ -539,11 +539,11 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
         gwy_shapes_update(shapes);
     }
     else {
+        GwyCoords *coords = gwy_shapes_get_coords(shapes);
         GwyXY dxy;
         constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-        gwy_coords_translate(gwy_shapes_get_coords(shapes), shapes->selection,
-                             (const gdouble*)&dxy);
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
+        gwy_coords_translate(coords, shapes->selection, (const gdouble*)&dxy);
+        gwy_coords_finished(coords);
     }
     priv->clicked = -1;
     update_hover(shapes, event->x, event->y);
@@ -583,6 +583,7 @@ gwy_shapes_point_cancel_editing(GwyShapes *shapes,
     // FIXME: We might want to do something like the finishing touches at the
     // end of button_released() here.
     priv->clicked = -1;
+    gwy_coords_finished(gwy_shapes_get_coords(shapes));
     gwy_shapes_update(shapes);
 }
 

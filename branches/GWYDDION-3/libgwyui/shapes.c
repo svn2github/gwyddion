@@ -806,9 +806,7 @@ coords_item_deleted(GwyShapes *shapes,
     ItemMethod method = GWY_SHAPES_GET_CLASS(shapes)->coords_item_deleted;
     if (method)
         method(shapes, id);
-    ItemMethodInt cmethod = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
-    if (cmethod)
-        cmethod(shapes, id);
+    cancel_editing(shapes, id);
     gwy_shapes_update(shapes);
 }
 
