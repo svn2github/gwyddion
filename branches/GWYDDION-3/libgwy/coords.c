@@ -734,7 +734,7 @@ gwy_coords_can_transform(GwyCoords *coords,
 }
 
 /**
- * gwy_coords_can_transform:
+ * gwy_coords_class_can_transform:
  * @klass: Klass of group of coordinates of some geometrical objects.
  * @transforms: Bitmask from %GwyCoordsTransformFlags enum specifying which
  *              transformatons are requested.
