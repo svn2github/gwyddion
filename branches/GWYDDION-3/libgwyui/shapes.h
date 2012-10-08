@@ -60,8 +60,6 @@ struct _GwyShapes {
     cairo_matrix_t view_to_coords;
     cairo_matrix_t pixel_to_view;
     cairo_matrix_t view_to_pixel;
-    gboolean has_current_point;
-    GwyXY current_point;
 };
 
 struct _GwyShapesClass {
@@ -144,8 +142,11 @@ gboolean     gwy_shapes_key_release        (GwyShapes *shapes,
 void         gwy_shapes_update             (GwyShapes *shapes);
 gboolean     gwy_shapes_is_updated         (GwyShapes *shapes);
 void         gwy_shapes_editing_started    (GwyShapes *shapes);
-gboolean     gwy_shapes_current_point      (const GwyShapes *shapes,
+gboolean     gwy_shapes_get_current_point  (const GwyShapes *shapes,
                                             GwyXY *xy);
+void         gwy_shapes_set_current_point  (GwyShapes *shapes,
+                                            const GwyXY *xy);
+void         gwy_shapes_unset_current_point(GwyShapes *shapes);
 void         gwy_shapes_stroke             (GwyShapes *shapes,
                                             cairo_t *cr,
                                             GwyShapesStateType state);

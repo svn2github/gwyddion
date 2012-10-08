@@ -63,6 +63,9 @@ struct _GwyShapesPrivate {
     gulong selection_added_id;
     gulong selection_removed_id;
     gulong selection_assigned_id;
+
+    gboolean has_current_point;
+    GwyXY current_point;
 };
 
 static void     gwy_shapes_finalize    (GObject *object);
@@ -209,6 +212,7 @@ gwy_shapes_init(GwyShapes *shapes)
     shapes->bounding_box = unrestricted_bbox;
     priv->max_shapes = G_MAXUINT;
     priv->editable = TRUE;
+    priv->current_point = (GwyXY){ NAN, NAN };
     GwyIntSet *selection = shapes->selection = gwy_int_set_new();
     priv->selection_added_id
         = g_signal_connect_swapped(selection, "added",
@@ -912,7 +916,7 @@ gwy_shapes_editing_started(GwyShapes *shapes)
 }
 
 /**
- * gwy_shapes_current_point:
+ * gwy_shapes_get_current_point:
  * @shapes: A group of geometrical shapes.
  * @xy: (out) (allow-none):
  *      Location where to store the current point.  May be %NULL to just check
@@ -925,19 +929,59 @@ gwy_shapes_editing_started(GwyShapes *shapes)
  * somehow and the widget should always attempt to display an area containing
  * this point if possible.
  *
- * Returns: %TRUE if @xy was set to coordinates of the current point, %FALSE if
- *          it was not set.
+ * Subclasses should use gwy_shapes_set_current_point() to set the current
+ * point and gwy_shapes_unset_current_point() to unset it.
+ *
+ * Returns: %TRUE a current point exists; %FALSE it it does not exist.
+ *          Coordinates @xy are set in both cases (if non-%NULL), however,
+ *          if no current point exists they will be set to %NAN.
  **/
 gboolean
-gwy_shapes_current_point(const GwyShapes *shapes,
-                         GwyXY *xy)
+gwy_shapes_get_current_point(const GwyShapes *shapes,
+                             GwyXY *xy)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    if (!shapes->has_current_point)
+    Shapes *priv = shapes->priv;
+    if (!priv->has_current_point)
         return FALSE;
 
-    GWY_MAYBE_SET(xy, shapes->current_point);
+    GWY_MAYBE_SET(xy, priv->current_point);
     return TRUE;
+}
+
+/**
+ * gwy_shapes_set_current_point:
+ * @shapes: A group of geometrical shapes.
+ * @xy: Location of the current point in @coords coordinates.
+ *
+ * Sets the location of the current point in a group of geometrical shapes and
+ * makes it exist.
+ **/
+void
+gwy_shapes_set_current_point(GwyShapes *shapes,
+                             const GwyXY *xy)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(xy);
+    Shapes *priv = shapes->priv;
+    priv->has_current_point = TRUE;
+    priv->current_point = *xy;
+}
+
+/**
+ * gwy_shapes_set_current_point:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Makes the current point in a group of geometrical shapes non-existent.
+ **/
+void
+gwy_shapes_unset_current_point(GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    priv->has_current_point = FALSE;
+    // Make things fail badly if they somehow read non-existent current point.
+    priv->current_point = (GwyXY){ NAN, NAN };
 }
 
 /* Each shape can be ‘selected’ in the following independent ways:
