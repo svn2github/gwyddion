@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gdk/gdkkeysyms.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/strfuncs.h"
@@ -184,11 +185,32 @@ static gboolean set_number_grains                   (GwyRasterView *rasterview,
                                                      gboolean setting);
 static guint    calculate_full_width                (const GwyRasterView *rasterview);
 static guint    calculate_full_height               (const GwyRasterView *rasterview);
+static void     scroll                              (GwyRasterView *rasterview,
+                                                     GtkScrollType scrolltype);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
 
 static GParamSpec *properties[N_TOTAL_PROPS];
+
+static const struct {
+    guint keyval;
+    GtkScrollType scrolltype;
+}
+key_scroll_table[] = {
+    { GDK_KEY_Left,     GTK_SCROLL_STEP_LEFT,  },
+    { GDK_KEY_KP_Left,  GTK_SCROLL_STEP_LEFT,  },
+    { GDK_KEY_Right,    GTK_SCROLL_STEP_RIGHT, },
+    { GDK_KEY_KP_Right, GTK_SCROLL_STEP_RIGHT, },
+    { GDK_KEY_Up,       GTK_SCROLL_STEP_UP,    },
+    { GDK_KEY_KP_Up,    GTK_SCROLL_STEP_UP,    },
+    { GDK_KEY_Down,     GTK_SCROLL_STEP_DOWN,  },
+    { GDK_KEY_KP_Down,  GTK_SCROLL_STEP_DOWN,  },
+    { GDK_KEY_Home,     GTK_SCROLL_START,      },
+    { GDK_KEY_KP_Home,  GTK_SCROLL_START,      },
+    { GDK_KEY_End,      GTK_SCROLL_END,        },
+    { GDK_KEY_KP_End,   GTK_SCROLL_END,        },
+};
 
 G_DEFINE_TYPE_WITH_CODE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET,
                         G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, NULL));
@@ -742,6 +764,7 @@ create_window(GwyRasterView *rasterview)
                        | GDK_BUTTON_RELEASE_MASK
                        | GDK_KEY_PRESS_MASK
                        | GDK_KEY_RELEASE_MASK
+                       | GDK_SCROLL_MASK
                        | GDK_POINTER_MOTION_MASK
                        | GDK_POINTER_MOTION_HINT_MASK),
         .visual = gtk_widget_get_visual(widget),
@@ -914,8 +937,19 @@ gwy_raster_view_key_press(GtkWidget *widget,
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     RasterView *priv = rasterview->priv;
-    if (priv->shapes)
-        gwy_shapes_key_press(priv->shapes, event);
+    guint keyval = event->keyval;
+
+    for (guint i = 0; i < G_N_ELEMENTS(key_scroll_table); i++) {
+        if (keyval == key_scroll_table[i].keyval) {
+            scroll(rasterview, key_scroll_table[i].scrolltype);
+            return TRUE;
+        }
+    }
+
+    if (priv->shapes) {
+        if (gwy_shapes_key_press(priv->shapes, event))
+            return TRUE;
+    }
 
     return FALSE;
 }
@@ -926,8 +960,20 @@ gwy_raster_view_key_release(GtkWidget *widget,
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     RasterView *priv = rasterview->priv;
-    if (priv->shapes)
-        gwy_shapes_key_release(priv->shapes, event);
+    guint keyval = event->keyval;
+
+    for (guint i = 0; i < G_N_ELEMENTS(key_scroll_table); i++) {
+        if (keyval == key_scroll_table[i].keyval) {
+            // Do not scroll here but do not pass the corresponding keys to
+            // shapes either.
+            return TRUE;
+        }
+    }
+
+    if (priv->shapes) {
+        if (gwy_shapes_key_release(priv->shapes, event))
+            return TRUE;
+    }
 
     return FALSE;
 }
@@ -1699,6 +1745,75 @@ set_number_grains(GwyRasterView *rasterview,
 
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
     return TRUE;
+}
+
+static void
+scroll(GwyRasterView *rasterview,
+       GtkScrollType scrolltype)
+{
+    RasterView *priv = rasterview->priv;
+    GtkAdjustment *vadj = priv->vadjustment,
+                  *hadj = priv->hadjustment;
+
+    if (hadj) {
+        gdouble value = gtk_adjustment_get_value(hadj), newvalue = value;
+        gdouble lower = gtk_adjustment_get_lower(hadj),
+                upper = gtk_adjustment_get_upper(hadj);
+
+        if (scrolltype == GTK_SCROLL_START)
+            newvalue = lower;
+        else if (scrolltype == GTK_SCROLL_PAGE_LEFT) {
+            gdouble page = gtk_adjustment_get_page_increment(hadj);
+            newvalue = MAX(lower, value - page);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_LEFT) {
+            gdouble step = gtk_adjustment_get_step_increment(hadj);
+            newvalue = MAX(lower, value - step);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_RIGHT) {
+            gdouble step = gtk_adjustment_get_step_increment(hadj);
+            newvalue = MIN(upper, value + step);
+        }
+        else if (scrolltype == GTK_SCROLL_PAGE_RIGHT) {
+            gdouble page = gtk_adjustment_get_page_increment(hadj);
+            newvalue = MIN(lower, value + page);
+        }
+        else if (scrolltype == GTK_SCROLL_END)
+            newvalue = upper;
+
+        if (newvalue != value)
+            gtk_adjustment_set_value(hadj, newvalue);
+    }
+
+    if (vadj) {
+        gdouble value = gtk_adjustment_get_value(vadj), newvalue = value;
+        gdouble lower = gtk_adjustment_get_lower(vadj),
+                upper = gtk_adjustment_get_upper(vadj);
+
+        if (scrolltype == GTK_SCROLL_START)
+            newvalue = lower;
+        else if (scrolltype == GTK_SCROLL_PAGE_UP) {
+            gdouble page = gtk_adjustment_get_page_increment(vadj);
+            newvalue = MAX(lower, value - page);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_UP) {
+            gdouble step = gtk_adjustment_get_step_increment(vadj);
+            newvalue = MAX(lower, value - step);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_DOWN) {
+            gdouble step = gtk_adjustment_get_step_increment(vadj);
+            newvalue = MIN(upper, value + step);
+        }
+        else if (scrolltype == GTK_SCROLL_PAGE_DOWN) {
+            gdouble page = gtk_adjustment_get_page_increment(vadj);
+            newvalue = MIN(lower, value + page);
+        }
+        else if (scrolltype == GTK_SCROLL_END)
+            newvalue = upper;
+
+        if (newvalue != value)
+            gtk_adjustment_set_value(vadj, newvalue);
+    }
 }
 
 /**
