@@ -140,6 +140,8 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                             0, G_MAXUINT, 0,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    // FIXME: We must distinguish editable and selectable.  Selecting can be
+    // useful even if the user cannot move things around.
     properties[PROP_EDITABLE]
         = g_param_spec_boolean("editable",
                                "Editable",
@@ -909,6 +911,35 @@ gwy_shapes_editing_started(GwyShapes *shapes)
     g_signal_emit(shapes, signals[EDITING_STARTED], 0);
 }
 
+/**
+ * gwy_shapes_current_point:
+ * @shapes: A group of geometrical shapes.
+ * @xy: (out) (allow-none):
+ *      Location where to store the current point.  May be %NULL to just check
+ *      whether any current point exists.
+ *
+ * Tests whether a group of geometrical shapes has a current point and obtains
+ * its physical coordinates.
+ *
+ * The current point exists, in general, if user interacts with the shapes
+ * somehow and the widget should always attempt to display an area containing
+ * this point if possible.
+ *
+ * Returns: %TRUE if @xy was set to coordinates of the current point, %FALSE if
+ *          it was not set.
+ **/
+gboolean
+gwy_shapes_current_point(const GwyShapes *shapes,
+                         GwyXY *xy)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    if (!shapes->has_current_point)
+        return FALSE;
+
+    GWY_MAYBE_SET(xy, shapes->current_point);
+    return TRUE;
+}
+
 /* Each shape can be ‘selected’ in the following independent ways:
  * HOVER – mouse is near the shape so that clicking would select or deselect it
  *         or start editing it
@@ -1007,6 +1038,11 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
  *                 view coordinates.
  * @view_to_pixel: Affine transformation from @shapes' view coordinates to
  *                 pixel coordinates.
+ * @has_current_point: Subclasses should set this field to %TRUE if a current
+ *                     point exists, and to %FALSE if it does not exist.
+ *                     See gwy_shapes_current_point().
+ * @current_point: Subclasses should set this field to coordinates of the
+ *                 current point if @has_current_point is %TRUE.
  *
  * Object representing a group of selectable geometrical shapes.
  *

@@ -23,7 +23,6 @@
 #include <gdk/gdkkeysyms.h>
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
-#include "libgwy/math.h"
 #include "libgwy/coords-point.h"
 #include "libgwyui/utils.h"
 #include "libgwyui/shapes-point.h"
