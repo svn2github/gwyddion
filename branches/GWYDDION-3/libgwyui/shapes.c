@@ -902,11 +902,13 @@ gwy_shapes_is_updated(GwyShapes *shapes)
 
 /**
  * gwy_shapes_editing_started:
- * @coords: A group of coordinates of some geometrical shapes.
+ * @shapes: A group of geometrical shapes.
  *
  * Emits signal ::editing-started on a group of geometrical shapes.
  *
- * This method is namely intended for subclasses.
+ * This method is namely intended for subclasses.  If you emit this signal make
+ * sure you emit GwyCoords::finished on the corresponding coordinates object
+ * afterwards.
  **/
 void
 gwy_shapes_editing_started(GwyShapes *shapes)
