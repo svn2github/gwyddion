@@ -97,6 +97,8 @@ struct _GwyRasterViewPrivate {
 
     GwyRGBA mask_color;
     GwyRGBA grain_number_color;
+
+    gulong scroll_timer_hid;
 };
 
 typedef struct _GwyRasterViewPrivate RasterView;
@@ -170,6 +172,9 @@ static void     gradient_data_changed               (GwyRasterView *rasterview,
                                                      GwyGradient *gradient);
 static void     shapes_updated                      (GwyRasterView *rasterview,
                                                      GwyShapes *shapes);
+static gboolean enable_scrolling_again              (gpointer user_data);
+static gboolean scroll_to_current_point             (GwyRasterView *rasterview,
+                                                     GwyShapes *shapes);
 static gboolean set_hadjustment                     (GwyRasterView *rasterview,
                                                      GtkAdjustment *adjustment);
 static gboolean set_vadjustment                     (GwyRasterView *rasterview,
@@ -185,7 +190,7 @@ static gboolean set_number_grains                   (GwyRasterView *rasterview,
                                                      gboolean setting);
 static guint    calculate_full_width                (const GwyRasterView *rasterview);
 static guint    calculate_full_height               (const GwyRasterView *rasterview);
-static void     scroll                              (GwyRasterView *rasterview,
+static gboolean scroll                              (GwyRasterView *rasterview,
                                                      GtkScrollType scrolltype);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
@@ -816,7 +821,12 @@ static void
 gwy_raster_view_unmap(GtkWidget *widget)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    gdk_window_hide(rasterview->priv->window);
+    RasterView *priv = rasterview->priv;
+    gdk_window_hide(priv->window);
+    if (priv->scroll_timer_hid) {
+        g_source_remove(priv->scroll_timer_hid);
+        priv->scroll_timer_hid = 0;
+    }
     GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unmap(widget);
 }
 
@@ -1578,7 +1588,53 @@ static void
 shapes_updated(GwyRasterView *rasterview,
                GwyShapes *shapes)
 {
+    RasterView *priv = rasterview->priv;
+    if (!priv->scroll_timer_hid) {
+        if (scroll_to_current_point(rasterview, shapes)) {
+            priv->scroll_timer_hid = g_timeout_add(50, &enable_scrolling_again,
+                                                   rasterview);
+            return;
+        }
+    }
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+static gboolean
+enable_scrolling_again(gpointer user_data)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(user_data);
+    RasterView *priv = rasterview->priv;
+    if (priv->shapes && scroll_to_current_point(rasterview, priv->shapes))
+        return TRUE;
+    priv->scroll_timer_hid = 0;
+    return FALSE;
+}
+
+static gboolean
+scroll_to_current_point(GwyRasterView *rasterview,
+                        GwyShapes *shapes)
+{
+    RasterView *priv = rasterview->priv;
+    gboolean scrolling = FALSE;
+    GwyXY xy;
+
+    if (!gwy_shapes_get_current_point(shapes, &xy))
+        return scrolling;
+
+    cairo_matrix_transform_point(&shapes->coords_to_view, &xy.x, &xy.y);
+    const cairo_rectangle_int_t *irect = &priv->image_rectangle;
+
+    if (xy.x < irect->x)
+        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_LEFT);
+    else if (xy.x > irect->x + irect->width)
+        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_RIGHT);
+
+    if (xy.y < irect->y)
+        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_UP);
+    else if (xy.y > irect->y + irect->height)
+        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_DOWN);
+
+    return scrolling;
 }
 
 static gboolean
@@ -1747,13 +1803,14 @@ set_number_grains(GwyRasterView *rasterview,
     return TRUE;
 }
 
-static void
+static gboolean
 scroll(GwyRasterView *rasterview,
        GtkScrollType scrolltype)
 {
     RasterView *priv = rasterview->priv;
     GtkAdjustment *vadj = priv->vadjustment,
                   *hadj = priv->hadjustment;
+    gboolean scrolling = FALSE;
 
     if (hadj) {
         gdouble value = gtk_adjustment_get_value(hadj), newvalue = value;
@@ -1781,8 +1838,10 @@ scroll(GwyRasterView *rasterview,
         else if (scrolltype == GTK_SCROLL_END)
             newvalue = upper;
 
-        if (newvalue != value)
+        if (newvalue != value) {
             gtk_adjustment_set_value(hadj, newvalue);
+            scrolling = TRUE;
+        }
     }
 
     if (vadj) {
@@ -1811,9 +1870,13 @@ scroll(GwyRasterView *rasterview,
         else if (scrolltype == GTK_SCROLL_END)
             newvalue = upper;
 
-        if (newvalue != value)
+        if (newvalue != value) {
             gtk_adjustment_set_value(vadj, newvalue);
+            scrolling = TRUE;
+        }
     }
+
+    return scrolling;
 }
 
 /**
