@@ -971,7 +971,7 @@ gwy_shapes_set_current_point(GwyShapes *shapes,
 }
 
 /**
- * gwy_shapes_set_current_point:
+ * gwy_shapes_unset_current_point:
  * @shapes: A group of geometrical shapes.
  *
  * Makes the current point in a group of geometrical shapes non-existent.
