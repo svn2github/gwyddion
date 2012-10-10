@@ -123,6 +123,9 @@ void         gwy_shapes_set_bounding_box   (GwyShapes *shapes,
 void         gwy_shapes_set_max_shapes     (GwyShapes *shapes,
                                             guint max_shapes);
 guint        gwy_shapes_get_max_shapes     (const GwyShapes *shapes)               G_GNUC_PURE;
+void         gwy_shapes_set_selectable     (GwyShapes *shapes,
+                                            gboolean selectable);
+gboolean     gwy_shapes_get_selectable     (const GwyShapes *shapes)               G_GNUC_PURE;
 void         gwy_shapes_set_editable       (GwyShapes *shapes,
                                             gboolean editable);
 gboolean     gwy_shapes_get_editable       (const GwyShapes *shapes)               G_GNUC_PURE;

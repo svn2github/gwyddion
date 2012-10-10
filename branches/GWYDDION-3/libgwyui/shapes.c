@@ -29,6 +29,7 @@ enum {
     PROP_0,
     PROP_COORDS,
     PROP_MAX_SHAPES,
+    PROP_SELECTABLE,
     PROP_EDITABLE,
     PROP_SELECTION,
     N_PROPS
@@ -53,6 +54,7 @@ struct _GwyShapesPrivate {
     guint max_shapes;
     gboolean is_updated;
     gboolean editable;
+    gboolean selectable;
 
     GwyCoords *coords;
     gulong coords_item_inserted_id;
@@ -82,6 +84,8 @@ static gboolean set_coords             (GwyShapes *shapes,
                                         GwyCoords *coords);
 static gboolean set_max_shapes         (GwyShapes *shapes,
                                         guint max_shapes);
+static gboolean set_selectable         (GwyShapes *shapes,
+                                        gboolean selectable);
 static gboolean set_editable           (GwyShapes *shapes,
                                         gboolean editable);
 static void     cancel_editing         (GwyShapes *shapes,
@@ -137,14 +141,19 @@ gwy_shapes_class_init(GwyShapesClass *klass)
     properties[PROP_MAX_SHAPES]
         = g_param_spec_uint("max-shapes",
                             "Max shapes",
-                            "Maximum allowed number of shapes to select. "
+                            "Maximum allowed number of shapes to create. "
                             "Setting it will truncate the current coordinates "
                             "if they contain more objets.",
                             0, G_MAXUINT, 0,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    // FIXME: We must distinguish editable and selectable.  Selecting can be
-    // useful even if the user cannot move things around.
+    properties[PROP_SELECTABLE]
+        = g_param_spec_boolean("selectable",
+                               "Selectable",
+                               "Whether shapes can be selected by the user.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     properties[PROP_EDITABLE]
         = g_param_spec_boolean("editable",
                                "Editable",
@@ -211,6 +220,7 @@ gwy_shapes_init(GwyShapes *shapes)
     cairo_matrix_init_identity(&shapes->view_to_pixel);
     shapes->bounding_box = unrestricted_bbox;
     priv->max_shapes = G_MAXUINT;
+    priv->selectable = TRUE;
     priv->editable = TRUE;
     priv->current_point = (GwyXY){ NAN, NAN };
     GwyIntSet *selection = shapes->selection = gwy_int_set_new();
@@ -262,6 +272,10 @@ gwy_shapes_set_property(GObject *object,
         set_max_shapes(shapes, g_value_get_uint(value));
         break;
 
+        case PROP_SELECTABLE:
+        set_selectable(shapes, g_value_get_boolean(value));
+        break;
+
         case PROP_EDITABLE:
         set_editable(shapes, g_value_get_boolean(value));
         break;
@@ -288,6 +302,10 @@ gwy_shapes_get_property(GObject *object,
 
         case PROP_MAX_SHAPES:
         g_value_set_uint(value, priv->max_shapes);
+        break;
+
+        case PROP_SELECTABLE:
+        g_value_set_boolean(value, priv->selectable);
         break;
 
         case PROP_EDITABLE:
@@ -570,6 +588,64 @@ gwy_shapes_get_max_shapes(const GwyShapes *shapes)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), 0);
     return shapes->priv->max_shapes;
+}
+
+/**
+ * gwy_shapes_set_selectable:
+ * @shapes: A group of geometrical shapes.
+ * @selectable: %TRUE to permit selection of shapes by the user, %FALSE to
+ *              disallow it.
+ *
+ * Sets whether geometrical shapes can be selected by the user.
+ *
+ * If shapes cannot be selected they cannot be edited either.  So in order to
+ * permit modification by the user it is necessary for both
+ * GwyShapes:selectable and GwyShapes:editable to be %TRUE.  However,
+ * permitting only selection but no modification is meaningful.
+ **/
+void
+gwy_shapes_set_selectable(GwyShapes *shapes,
+                          gboolean selectable)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    if (!set_selectable(shapes, selectable))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_SELECTABLE]);
+
+    if (!selectable)
+        cancel_editing(shapes, -1);
+}
+
+static gboolean
+set_selectable(GwyShapes *shapes,
+               gboolean selectable)
+{
+    Shapes *priv = shapes->priv;
+    selectable = !!selectable;
+    if (selectable == priv->selectable)
+        return FALSE;
+
+    priv->selectable = selectable;
+    if (!selectable)
+        cancel_editing(shapes, -1);
+    return TRUE;
+}
+
+/**
+ * gwy_shapes_get_selectable:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains whether geometrical shapes can be selected by the user.
+ *
+ * Returns: %TRUE if selection of shapes by the user is permitted, %FALSE if
+ *          it is disallowed.
+ **/
+gboolean
+gwy_shapes_get_selectable(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    return shapes->priv->selectable;
 }
 
 /**
