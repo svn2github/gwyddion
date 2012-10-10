@@ -272,14 +272,14 @@ gwy_field_render_pixbuf(const GwyField *field,
 /**
  * gwy_field_render_cairo:
  * @field: A two-dimensional data field.
- * @surface: A cairo image surface of format %CAIRO_FORMAT_RGB24.
+ * @surface: A Cairo image surface of format %CAIRO_FORMAT_RGB24.
  * @gradient: A false colour gradient.
  * @rectangle: (allow-none):
  *             Area in @field to render, %NULL for entire field.
  * @min: Value to map to @gradient begining.
  * @max: Value to map to @gradient end.
  *
- * Renders a field to cairo image surface using false colour gradient.
+ * Renders a field to Cairo image surface using false colour gradient.
  *
  * Parameters defining the area to render are measured in pixels; the entire
  * area must line within @field.
@@ -391,11 +391,11 @@ scale_source_row(GwyMaskIter srciter, GwyMaskScalingSegment *seg,
 /**
  * gwy_mask_field_render_cairo:
  * @field: A two-dimensional data field.
- * @surface: A cairo image surface of format %CAIRO_FORMAT_A8.
+ * @surface: A Cairo image surface of format %CAIRO_FORMAT_A8.
  * @rectangle: (allow-none):
  *             Area in @field to render, %NULL for entire field.
  *
- * Renders a mask field to cairo image surface.
+ * Renders a mask field to Cairo image surface.
  *
  * Parameters defining the area to render are measured in pixels; the entire
  * area must line within @field.

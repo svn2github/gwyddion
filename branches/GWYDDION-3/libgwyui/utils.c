@@ -22,10 +22,10 @@
 
 /**
  * gwy_cairo_set_source_rgba:
- * @cr: A cairo drawing context.
+ * @cr: A Cairo drawing context.
  * @rgba: An RGBA colour.
  *
- * Sets the source patter of a cairo context to #GwyRGBA color.
+ * Sets the source patter of a Cairo context to #GwyRGBA color.
  *
  * This is a convenience function that is exactly equivalent to
  * |[
@@ -41,13 +41,13 @@ gwy_cairo_set_source_rgba(cairo_t *cr,
 
 /**
  * gwy_cairo_ellipse:
- * @cr: A cairo drawing context.
+ * @cr: A Cairo drawing context.
  * @x: Centre x-coordinate.
  * @y: Centre y-coordinate.
  * @xr: Horizontal half-axis length.
  * @yr: Vertical half-axis length.
  *
- * Adds a closed elliptical subpath to a cairo context.
+ * Adds a closed elliptical subpath to a Cairo context.
  *
  * A new subpath is started and closed.  The ellipse is approximated using
  * Bezier curves, on the other hand, it does not rely on transformations.  All
@@ -69,12 +69,12 @@ gwy_cairo_ellipse(cairo_t *cr,
 
 /**
  * gwy_cairo_cross:
- * @cr: A cairo drawing context.
+ * @cr: A Cairo drawing context.
  * @x: Centre x-coordinate.
  * @y: Centre y-coordinate.
  * @ticklen: Length of the cross arm (from centre to end).
  *
- * Adds a cross-shaped subpath to a cairo context.
+ * Adds a cross-shaped subpath to a Cairo context.
  *
  * A new subpath is started, but it is not terminated.  Use
  * cairo_new_sub_path() or other subpath-terminating primitive afterwards if

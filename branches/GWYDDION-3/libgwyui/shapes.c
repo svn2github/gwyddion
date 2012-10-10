@@ -520,7 +520,7 @@ gwy_shapes_set_pixel_matrices(GwyShapes *shapes,
 /**
  * gwy_shapes_draw:
  * @shapes: A group of geometrical shapes.
- * @cr: A cairo context to draw to.
+ * @cr: A Cairo context to draw to.
  *
  * Draws a group of geometrical shapes using a Cairo context.
  **/
@@ -1090,15 +1090,16 @@ gwy_shapes_unset_current_point(GwyShapes *shapes)
 /**
  * gwy_shapes_stroke:
  * @shapes: A group of geometrical shapes.
- * @cr: A cairo context to draw to.  Its current path should represent the
+ * @cr: A Cairo context to draw to.  Its current path should represent the
  *      shapes in state @state or their markers.
  * @state: State of the shapes, determining how they will be hightlighted.
  *
- * Performes a cairo stroke drawing a group of geometrical shapes in given
+ * Performes a Cairo stroke drawing a group of geometrical shapes in given
  * state.
  *
- * This method behaves like cairo_stroke(), i.e. the current path is cleared
- * after drawing it.
+ * The current path is will cleared after drawing it and, generally, the Cairo
+ * context will not be meaningful for the caller after stroking; use explicit
+ * cairo_save()/cairo_restore() if preservation is required.
  **/
 void
 gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
@@ -1111,7 +1112,7 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
     GwyShapesStateType basestate = state & ~GWY_SHAPES_STATE_PRELIGHT;
     gboolean prelight = !!(state & GWY_SHAPES_STATE_PRELIGHT);
     GwyRGBA color = outline_color;
-    gdouble width = cairo_get_line_width(cr);
+    gdouble width = cairo_get_line_width(cr) * (prelight ? 1.3 : 1.0);
     gdouble outline_width = 1.1*width + 0.4;
     gdouble alpha = prelight ? 1.0 : 0.7;
 
