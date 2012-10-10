@@ -493,7 +493,7 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
     GwyIntSet *selection = shapes->selection;
 
     priv->xypress = (GwyXY){ event->x, event->y };
-    if (event->state & GDK_SHIFT_MASK)
+    if (event->state & GDK_SHIFT_MASK || !gwy_shapes_get_editable(shapes))
         priv->mode = MODE_SELECTING;
     else
         priv->mode = MODE_MOVING;
@@ -560,6 +560,9 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
                            GdkEventKey *event)
 {
     ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+
+    if (!gwy_shapes_get_editable(shapes))
+        return FALSE;
 
     if (event->keyval == GDK_KEY_Delete || event->keyval == GDK_KEY_BackSpace) {
         gwy_shapes_point_cancel_editing(shapes, -1);

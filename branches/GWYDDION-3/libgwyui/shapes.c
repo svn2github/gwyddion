@@ -756,7 +756,7 @@ gwy_shapes_button_press(GwyShapes *shapes,
                         GdkEventButton *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    if (!shapes->priv->coords || !shapes->priv->editable)
+    if (!shapes->priv->coords || !shapes->priv->selectable)
         return FALSE;
     EventMethodButton method = GWY_SHAPES_GET_CLASS(shapes)->button_press;
     return method ? method(shapes, event) : FALSE;
@@ -776,7 +776,7 @@ gwy_shapes_button_release(GwyShapes *shapes,
                           GdkEventButton *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    if (!shapes->priv->coords || !shapes->priv->editable)
+    if (!shapes->priv->coords || !shapes->priv->selectable)
         return FALSE;
     EventMethodButton method = GWY_SHAPES_GET_CLASS(shapes)->button_release;
     return method ? method(shapes, event) : FALSE;
@@ -796,7 +796,7 @@ gwy_shapes_motion_notify(GwyShapes *shapes,
                          GdkEventMotion *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    if (!shapes->priv->coords || !shapes->priv->editable)
+    if (!shapes->priv->coords || !shapes->priv->selectable)
         return FALSE;
     EventMethodMotion method = GWY_SHAPES_GET_CLASS(shapes)->motion_notify;
     return method ? method(shapes, event) : FALSE;
@@ -816,7 +816,7 @@ gwy_shapes_key_press(GwyShapes *shapes,
                      GdkEventKey *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    if (!shapes->priv->coords || !shapes->priv->editable)
+    if (!shapes->priv->coords || !shapes->priv->selectable)
         return FALSE;
     EventMethodKey method = GWY_SHAPES_GET_CLASS(shapes)->key_press;
     return method ? method(shapes, event) : FALSE;
@@ -836,7 +836,7 @@ gwy_shapes_key_release(GwyShapes *shapes,
                        GdkEventKey *event)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
-    if (!shapes->priv->coords || !shapes->priv->editable)
+    if (!shapes->priv->coords || !shapes->priv->selectable)
         return FALSE;
     EventMethodKey method = GWY_SHAPES_GET_CLASS(shapes)->key_release;
     return method ? method(shapes, event) : FALSE;
@@ -1202,7 +1202,8 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
  * is intended only for passive visualisation).
  *
  * The user interaction methods are never invoked if @shapes does not have any
- * coordinates object set.
+ * coordinates object set.  Neither they are invoked if @shapes is not
+ * selectable (nevertheless, they are invoked if they are just not editable).
  *
  * Drawing of the shapes with gwy_shapes_draw() requires providing a matrix for
  * the transformation of physical coordinates to view coordinates using
