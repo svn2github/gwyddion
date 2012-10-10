@@ -41,41 +41,50 @@ typedef struct {
     gdouble *data;
     const guint *dimension_map;
     const gdouble *transparam;
+    const gdouble *transparam2;
     guint shape_size;
     guint bitmask;
+    gdouble *transoff;
 } TransformFuncData;
 
 typedef struct _GwyCoordsPrivate Coords;
 
-static void     gwy_coords_finalize         (GObject *object);
-static void     gwy_coords_dispose          (GObject *object);
-static void     gwy_coords_serializable_init(GwySerializableInterface *iface);
-static gsize    gwy_coords_n_items          (GwySerializable *serializable);
-static gsize    gwy_coords_itemize          (GwySerializable *serializable,
-                                             GwySerializableItems *items);
-static gboolean gwy_coords_construct        (GwySerializable *serializable,
-                                             GwySerializableItems *items,
-                                             GwyErrorList **error_list);
-static GObject* gwy_coords_duplicate_impl   (GwySerializable *serializable);
-static void     gwy_coords_assign_impl      (GwySerializable *destination,
-                                             GwySerializable *source);
-static gboolean class_supports_transforms   (GwyCoordsClass *klass,
-                                             GwyCoordsTransformFlags flags);
-static void     gwy_coords_translate_default(GwyCoords *coords,
-                                             const GwyIntSet *indices,
-                                             const gdouble *offsets);
-static void     gwy_coords_flip_default     (GwyCoords *coords,
-                                             const GwyIntSet *indices,
-                                             guint axes);
-static void     gwy_coords_scale_default    (GwyCoords *coords,
-                                             const GwyIntSet *indices,
-                                             const gdouble *factors);
-static void     translate_func              (gint value,
-                                             gpointer user_data);
-static void     flip_func                   (gint value,
-                                             gpointer user_data);
-static void     scale_func                  (gint value,
-                                             gpointer user_data);
+static void     gwy_coords_finalize                     (GObject *object);
+static void     gwy_coords_dispose                      (GObject *object);
+static void     gwy_coords_serializable_init            (GwySerializableInterface *iface);
+static gsize    gwy_coords_n_items                      (GwySerializable *serializable);
+static gsize    gwy_coords_itemize                      (GwySerializable *serializable,
+                                                         GwySerializableItems *items);
+static gboolean gwy_coords_construct                    (GwySerializable *serializable,
+                                                         GwySerializableItems *items,
+                                                         GwyErrorList **error_list);
+static GObject* gwy_coords_duplicate_impl               (GwySerializable *serializable);
+static void     gwy_coords_assign_impl                  (GwySerializable *destination,
+                                                         GwySerializable *source);
+static gboolean class_supports_transforms               (GwyCoordsClass *klass,
+                                                         GwyCoordsTransformFlags flags);
+static void     gwy_coords_translate_default            (GwyCoords *coords,
+                                                         const GwyIntSet *indices,
+                                                         const gdouble *offsets);
+static void     gwy_coords_flip_default                 (GwyCoords *coords,
+                                                         const GwyIntSet *indices,
+                                                         guint axes);
+static void     gwy_coords_scale_default                (GwyCoords *coords,
+                                                         const GwyIntSet *indices,
+                                                         const gdouble *factors);
+static void     gwy_coords_constrain_translation_default(const GwyCoords *coords,
+                                                         const GwyIntSet *indices,
+                                                         gdouble *offsets,
+                                                         const gdouble *lower,
+                                                         const gdouble *upper);
+static void     translate_func                          (gint value,
+                                                         gpointer user_data);
+static void     flip_func                               (gint value,
+                                                         gpointer user_data);
+static void     scale_func                              (gint value,
+                                                         gpointer user_data);
+static void     constrain_translation_func              (gint value,
+                                                         gpointer user_data);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
@@ -111,6 +120,7 @@ gwy_coords_class_init(GwyCoordsClass *klass)
     klass->translate = gwy_coords_translate_default;
     klass->flip = gwy_coords_flip_default;
     klass->scale = gwy_coords_scale_default;
+    klass->constrain_translation = gwy_coords_constrain_translation_default;
 
     /**
      * GwyCoords::finished:
@@ -669,7 +679,7 @@ gwy_coords_finished(GwyCoords *coords)
  * @indices: (allow-none):
  *           Set of indices of objects to transform.  Passing %NULL implies
  *           all objects are to be transformed.
- * @offsets: Array of GwyCoordsClass @dimension field specifying the
+ * @offsets: Array of GwyCoordsClass size @dimension specifying the
  *           offsets in each dimension.
  *
  * Translates selected or all objects in a coords.
@@ -719,7 +729,7 @@ gwy_coords_flip(GwyCoords *coords,
  * @indices: (allow-none):
  *           Set of indices of objects to transform.  Passing %NULL implies
  *           all objects are to be transformed.
- * @factors: Array of GwyCoordsClass @dimension field specifying the
+ * @factors: Array of GwyCoordsClass size @dimension specifying the
  *           scaling factors in each dimension.
  *
  * Scales selected or all objects in a coords.
@@ -736,6 +746,48 @@ gwy_coords_scale(GwyCoords *coords,
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     g_return_if_fail(klass->scale);
     klass->scale(coords, indices, factors);
+}
+
+/**
+ * gwy_coords_constrain_translation:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to consider.  Passing %NULL implies
+ *           all objects are to be considered.
+ * @offsets: Array of size @dimension containing the proposed translation
+ *           offsets.  Its contents will be possibly modified if the offsets
+ *           need to be constrained; they can only become smaller in absolute
+ *           value, never larger.
+ * @lower: Array of size @dimension containing the minimum values of invidual
+ *         coordinates (upper-left corner of the multi-dimensional bounding
+ *         box).  No coordinate may become smaller than the corresponding
+ *         value in @lower.
+ * @upper: Array of size @dimension containing the maximum values of invidual
+ *         coordinates (lower-right corner of the multi-dimensional bounding
+ *         box).  No coordinate may become larger than the corresponding
+ *         value in @upper.
+ *
+ * Constrains possible translations of coords objects so that they do stay
+ * within given bounding box.
+ **/
+void
+gwy_coords_constrain_translation(const GwyCoords *coords,
+                                 const GwyIntSet *indices,
+                                 gdouble *offsets,
+                                 const gdouble *lower,
+                                 const gdouble *upper)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(!indices || GWY_IS_INT_SET(indices));
+    g_return_if_fail(offsets);
+    // XXX: In principle, we could allow one-side limited translations.  Would
+    // it be good for anything?
+    g_return_if_fail(lower);
+    g_return_if_fail(upper);
+
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    g_return_if_fail(klass->constrain_translation);
+    klass->constrain_translation(coords, indices, offsets, lower, upper);
 }
 
 /**
@@ -899,6 +951,46 @@ gwy_coords_scale_default(GwyCoords *coords,
 }
 
 static void
+gwy_coords_constrain_translation_default(const GwyCoords *coords,
+                                         const GwyIntSet *indices,
+                                         gdouble *offsets,
+                                         const gdouble *lower,
+                                         const gdouble *upper)
+{
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    GwyArray *array = GWY_ARRAY(coords);
+    const guint *dimension_map = klass->dimension_map;
+    guint shape_size = klass->shape_size;
+    gdouble *data = (gdouble*)gwy_array_get_data(array);
+    g_assert(dimension_map);
+
+    if (!indices) {
+        guint n = gwy_array_size(array);
+        for (guint i = 0; i < n; i++) {
+            const guint *umap = dimension_map;
+            for (guint j = shape_size; j; j--, data++, umap++) {
+                guint k = *umap;
+                offsets[k] = CLAMP(offsets[k],
+                                   lower[k] - *data,
+                                   upper[k] - *data);
+            }
+        }
+        return;
+    }
+
+    TransformFuncData tfdata = {
+        .array = array,
+        .data = data,
+        .transparam = lower,
+        .transparam2 = upper,
+        .shape_size = shape_size,
+        .dimension_map = dimension_map,
+        .transoff = offsets,
+    };
+    gwy_int_set_foreach(indices, constrain_translation_func, &tfdata);
+}
+
+static void
 translate_func(gint value, gpointer user_data)
 {
     TransformFuncData *tfdata = (TransformFuncData*)user_data;
@@ -940,6 +1032,22 @@ scale_func(gint value, gpointer user_data)
     for (guint j = shape_size; j; j--, data++, umap++)
         *data *= factors[*umap];
     gwy_array_updated(tfdata->array, value);
+}
+
+static void
+constrain_translation_func(gint value, gpointer user_data)
+{
+    TransformFuncData *tfdata = (TransformFuncData*)user_data;
+    const gdouble *lower = tfdata->transparam, *upper = tfdata->transparam2;
+    const guint *umap = tfdata->dimension_map;
+    guint shape_size = tfdata->shape_size;
+    gdouble *data = tfdata->data + value*shape_size;
+    gdouble *offsets = tfdata->transoff;
+
+    for (guint j = shape_size; j; j--, data++, umap++) {
+        guint k = *umap;
+        offsets[k] = CLAMP(offsets[k], lower[k] - *data, upper[k] - *data);
+    }
 }
 
 /**
@@ -990,6 +1098,8 @@ scale_func(gint value, gpointer user_data)
  * @scale: Virtual method implementing gwy_coords_scale().  If it is
  *         implemented the class will report %GWY_COORDS_TRANSFORM_SCALE
  *         capability.
+ * @constrain_translation: Virtual method implementing
+ *                         gwy_coords_constrain_translation().
  *
  * Class of groups coordinates of some geometrical objects.
  *
