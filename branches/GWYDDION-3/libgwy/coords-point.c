@@ -33,14 +33,6 @@ enum {
 
 typedef struct _GwyCoordsPointPrivate CoordsPoint;
 
-typedef struct {
-    GwyArray *array;
-    GwyXY *xy;
-    const GwyXY *transxy;
-    gboolean flipx;
-    gboolean flipy;
-} TransformFuncData;
-
 static void     gwy_coords_point_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_coords_point_n_items          (GwySerializable *serializable);
 static gsize    gwy_coords_point_itemize          (GwySerializable *serializable,
@@ -48,15 +40,6 @@ static gsize    gwy_coords_point_itemize          (GwySerializable *serializable
 static gboolean gwy_coords_point_construct        (GwySerializable *serializable,
                                                    GwySerializableItems *items,
                                                    GwyErrorList **error_list);
-static void     gwy_coords_point_translate        (GwyCoords *coords,
-                                                   const GwyIntSet *indices,
-                                                   const gdouble *offsets);
-static void     gwy_coords_point_flip             (GwyCoords *coords,
-                                                   const GwyIntSet *indices,
-                                                   guint axes);
-static void     gwy_coords_point_scale            (GwyCoords *coords,
-                                                   const GwyIntSet *indices,
-                                                   const gdouble *factors);
 
 static const guint unit_map[DIMENSIONS] = { 0, 1 };
 
@@ -83,9 +66,6 @@ gwy_coords_point_class_init(GwyCoordsPointClass *klass)
     coords_class->shape_size = SHAPE_SIZE;
     coords_class->dimension = G_N_ELEMENTS(unit_map);
     coords_class->unit_map = unit_map;
-    coords_class->translate = gwy_coords_point_translate;
-    coords_class->flip = gwy_coords_point_flip;
-    coords_class->scale = gwy_coords_point_scale;
 }
 
 static void
@@ -122,125 +102,6 @@ gwy_coords_point_construct(GwySerializable *serializable,
                                               error_list);
     }
     return TRUE;
-}
-
-static void
-translate_func(gint value, gpointer user_data)
-{
-    TransformFuncData *data = (TransformFuncData*)user_data;
-    GwyXY *xy = data->xy + value;
-    const GwyXY *dxy = data->transxy;
-    xy->x += dxy->x;
-    xy->y += dxy->y;
-    gwy_array_updated(data->array, value);
-}
-
-static void
-gwy_coords_point_translate(GwyCoords *coords,
-                           const GwyIntSet *indices,
-                           const gdouble *offsets)
-{
-    GwyArray *array = GWY_ARRAY(coords);
-    guint n = gwy_array_size(array);
-    GwyXY *xy = (GwyXY*)gwy_array_get_data(array);
-
-    if (!indices) {
-        gdouble xd = offsets[0], yd = offsets[1];
-        for (guint i = 0; i < n; i++) {
-            xy[i].x += xd;
-            xy[i].y += yd;
-            gwy_array_updated(array, i);
-        }
-    }
-    else {
-        TransformFuncData data = {
-            .array = array,
-            .xy = xy,
-            .transxy = (const GwyXY*)offsets,
-        };
-        gwy_int_set_foreach(indices, translate_func, &data);
-    }
-}
-
-static void
-flip_func(gint value, gpointer user_data)
-{
-    TransformFuncData *data = (TransformFuncData*)user_data;
-    GwyXY *xy = data->xy + value;
-    if (data->flipx)
-        xy->x = -xy->x;
-    if (data->flipy)
-        xy->y = -xy->y;
-    gwy_array_updated(data->array, value);
-}
-
-static void
-gwy_coords_point_flip(GwyCoords *coords,
-                      const GwyIntSet *indices,
-                      guint axes)
-{
-    GwyArray *array = GWY_ARRAY(coords);
-    guint n = gwy_array_size(array);
-    GwyXY *xy = (GwyXY*)gwy_array_get_data(array);
-    gboolean flipx = axes & (1 << 0), flipy = axes & (1 << 1);
-
-    if (!indices) {
-        for (guint i = 0; i < n; i++) {
-            if (flipx)
-                xy[i].x = -xy[i].x;
-            if (flipy)
-                xy[i].y = -xy[i].y;
-            gwy_array_updated(array, i);
-        }
-    }
-    else {
-        TransformFuncData data = {
-            .array = array,
-            .xy = xy,
-            .flipx = flipx,
-            .flipy = flipy,
-        };
-        gwy_int_set_foreach(indices, flip_func, &data);
-    }
-}
-
-static void
-scale_func(gint value, gpointer user_data)
-{
-    TransformFuncData *data = (TransformFuncData*)user_data;
-    GwyXY *xy = data->xy + value;
-    const GwyXY *dxy = data->transxy;
-    xy->x *= dxy->x;
-    xy->y *= dxy->y;
-    gwy_array_updated(data->array, value);
-}
-
-
-static void
-gwy_coords_point_scale(GwyCoords *coords,
-                       const GwyIntSet *indices,
-                       const gdouble *factors)
-{
-    GwyArray *array = GWY_ARRAY(coords);
-    guint n = gwy_array_size(array);
-    GwyXY *xy = (GwyXY*)gwy_array_get_data(array);
-
-    if (!indices) {
-        gdouble xs = factors[0], ys = factors[1];
-        for (guint i = 0; i < n; i++) {
-            xy[i].x *= xs;
-            xy[i].y *= ys;
-            gwy_array_updated(array, i);
-        }
-    }
-    else {
-        TransformFuncData data = {
-            .array = array,
-            .xy = xy,
-            .transxy = (const GwyXY*)factors,
-        };
-        gwy_int_set_foreach(indices, scale_func, &data);
-    }
 }
 
 /**

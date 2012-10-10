@@ -36,6 +36,15 @@ struct _GwyCoordsPrivate {
     GwyUnit **units;
 };
 
+typedef struct {
+    GwyArray *array;
+    gdouble *data;
+    const guint *unit_map;
+    const gdouble *transparam;
+    guint shape_size;
+    guint bitmask;
+} TransformFuncData;
+
 typedef struct _GwyCoordsPrivate Coords;
 
 static void     gwy_coords_finalize         (GObject *object);
@@ -52,6 +61,21 @@ static void     gwy_coords_assign_impl      (GwySerializable *destination,
                                              GwySerializable *source);
 static gboolean class_supports_transforms   (GwyCoordsClass *klass,
                                              GwyCoordsTransformFlags flags);
+static void     gwy_coords_translate_default(GwyCoords *coords,
+                                             const GwyIntSet *indices,
+                                             const gdouble *offsets);
+static void     gwy_coords_flip_default     (GwyCoords *coords,
+                                             const GwyIntSet *indices,
+                                             guint axes);
+static void     gwy_coords_scale_default    (GwyCoords *coords,
+                                             const GwyIntSet *indices,
+                                             const gdouble *factors);
+static void     translate_func              (gint value,
+                                             gpointer user_data);
+static void     flip_func                   (gint value,
+                                             gpointer user_data);
+static void     scale_func                  (gint value,
+                                             gpointer user_data);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
@@ -83,6 +107,10 @@ gwy_coords_class_init(GwyCoordsClass *klass)
 
     gobject_class->dispose = gwy_coords_dispose;
     gobject_class->finalize = gwy_coords_finalize;
+
+    klass->translate = gwy_coords_translate_default;
+    klass->flip = gwy_coords_flip_default;
+    klass->scale = gwy_coords_scale_default;
 
     /**
      * GwyCoords::finished:
@@ -770,6 +798,150 @@ class_supports_transforms(GwyCoordsClass *klass,
     return TRUE;
 }
 
+static void
+gwy_coords_translate_default(GwyCoords *coords,
+                             const GwyIntSet *indices,
+                             const gdouble *offsets)
+{
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    GwyArray *array = GWY_ARRAY(coords);
+    const guint *unit_map = klass->unit_map;
+    guint shape_size = klass->shape_size;
+    gdouble *data = (gdouble*)gwy_array_get_data(array);
+    g_assert(unit_map);
+
+    if (!indices) {
+        guint n = gwy_array_size(array);
+        for (guint i = 0; i < n; i++) {
+            const guint *umap = unit_map;
+            for (guint j = shape_size; j; j--, data++, umap++)
+                *data += offsets[*umap];
+            gwy_array_updated(array, i);
+        }
+        return;
+    }
+
+    TransformFuncData tfdata = {
+        .array = array,
+        .data = data,
+        .transparam = offsets,
+        .shape_size = shape_size,
+        .unit_map = unit_map,
+    };
+    gwy_int_set_foreach(indices, translate_func, &tfdata);
+}
+
+static void
+gwy_coords_flip_default(GwyCoords *coords,
+                        const GwyIntSet *indices,
+                        const guint axes)
+{
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    GwyArray *array = GWY_ARRAY(coords);
+    const guint *unit_map = klass->unit_map;
+    guint shape_size = klass->shape_size;
+    gdouble *data = (gdouble*)gwy_array_get_data(array);
+    g_assert(unit_map);
+
+    if (!indices) {
+        guint n = gwy_array_size(array);
+        for (guint i = 0; i < n; i++) {
+            const guint *umap = unit_map;
+            for (guint j = shape_size; j; j--, data++, umap++)
+                if (axes & (1 << *umap))
+                    *data = -*data;
+            gwy_array_updated(array, i);
+        }
+        return;
+    }
+
+    TransformFuncData tfdata = {
+        .array = array,
+        .data = data,
+        .bitmask = axes,
+        .shape_size = shape_size,
+        .unit_map = unit_map,
+    };
+    gwy_int_set_foreach(indices, flip_func, &tfdata);
+}
+
+static void
+gwy_coords_scale_default(GwyCoords *coords,
+                         const GwyIntSet *indices,
+                         const gdouble *factors)
+{
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    GwyArray *array = GWY_ARRAY(coords);
+    const guint *unit_map = klass->unit_map;
+    guint shape_size = klass->shape_size;
+    gdouble *data = (gdouble*)gwy_array_get_data(array);
+    g_assert(unit_map);
+
+    if (!indices) {
+        guint n = gwy_array_size(array);
+        for (guint i = 0; i < n; i++) {
+            const guint *umap = unit_map;
+            for (guint j = shape_size; j; j--, data++, umap++)
+                *data *= factors[*umap];
+            gwy_array_updated(array, i);
+        }
+        return;
+    }
+
+    TransformFuncData tfdata = {
+        .array = array,
+        .data = data,
+        .transparam = factors,
+        .shape_size = shape_size,
+        .unit_map = unit_map,
+    };
+    gwy_int_set_foreach(indices, scale_func, &tfdata);
+}
+
+static void
+translate_func(gint value, gpointer user_data)
+{
+    TransformFuncData *tfdata = (TransformFuncData*)user_data;
+    const gdouble *offsets = tfdata->transparam;
+    const guint *umap = tfdata->unit_map;
+    guint shape_size = tfdata->shape_size;
+    gdouble *data = tfdata->data + value*shape_size;
+
+    for (guint j = shape_size; j; j--, data++, umap++)
+        *data += offsets[*umap];
+    gwy_array_updated(tfdata->array, value);
+}
+
+static void
+flip_func(gint value, gpointer user_data)
+{
+    TransformFuncData *tfdata = (TransformFuncData*)user_data;
+    guint axes = tfdata->bitmask;
+    const guint *umap = tfdata->unit_map;
+    guint shape_size = tfdata->shape_size;
+    gdouble *data = tfdata->data + value*shape_size;
+
+    for (guint j = shape_size; j; j--, data++, umap++) {
+        if (axes & (1 << *umap))
+            *data = -*data;
+    }
+    gwy_array_updated(tfdata->array, value);
+}
+
+static void
+scale_func(gint value, gpointer user_data)
+{
+    TransformFuncData *tfdata = (TransformFuncData*)user_data;
+    const gdouble *factors = tfdata->transparam;
+    const guint *umap = tfdata->unit_map;
+    guint shape_size = tfdata->shape_size;
+    gdouble *data = tfdata->data + value*shape_size;
+
+    for (guint j = shape_size; j; j--, data++, umap++)
+        *data *= factors[*umap];
+    gwy_array_updated(tfdata->array, value);
+}
+
 /**
  * SECTION: coords
  * @title: GwyCoords
@@ -819,6 +991,14 @@ class_supports_transforms(GwyCoordsClass *klass,
  *
  * Specific, i.e. instantiable, subclasses have to set the data members
  * @shape_size, @dimension and @unit_map.
+ *
+ * Transformation method often do not need to be implemented speficically.
+ * They have default generic implementations that work for coordinates that are
+ * plain bunches of point coordinates defining the convex hull of some shape.
+ * So they are fine for points, lines, boxes, ... in an arbitrary dimension.
+ * If a subclass does <emphasis>not</emphasis> support some transformation that
+ * has a default implementation it must set the method to %NULL explicitly to
+ * indicate this type of transformation is not possible.
  **/
 
 /**
