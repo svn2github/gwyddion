@@ -1161,11 +1161,6 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
  *                 view coordinates.
  * @view_to_pixel: Affine transformation from @shapes' view coordinates to
  *                 pixel coordinates.
- * @has_current_point: Subclasses should set this field to %TRUE if a current
- *                     point exists, and to %FALSE if it does not exist.
- *                     See gwy_shapes_current_point().
- * @current_point: Subclasses should set this field to coordinates of the
- *                 current point if @has_current_point is %TRUE.
  *
  * Object representing a group of selectable geometrical shapes.
  *
