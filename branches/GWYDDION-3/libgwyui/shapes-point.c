@@ -39,12 +39,6 @@ typedef enum {
     MODE_RUBBERBAND,
 } InteractMode;
 
-typedef struct {
-    GwyXY *dxy;
-    GwyCoords *coords;
-    const cairo_rectangle_t *bbox;
-} SelectionFuncData;
-
 typedef void (*MarkerDrawFunc)(cairo_t *cr,
                                const gdouble *xy,
                                gpointer user_data);
@@ -351,24 +345,6 @@ find_near_point(GwyShapesPoint *points,
 }
 
 static void
-constrain_func(gint value, gpointer user_data)
-{
-    SelectionFuncData *data = (SelectionFuncData*)user_data;
-    const cairo_rectangle_t *bbox = data->bbox;
-    GwyCoords *coords = data->coords;
-    GwyXY *dxy = data->dxy;
-    gdouble xysel[2];
-
-    gwy_coords_get(coords, value, xysel);
-    dxy->x = CLAMP(dxy->x,
-                   bbox->x - xysel[0],
-                   bbox->x + bbox->width - xysel[0]);
-    dxy->y = CLAMP(dxy->y,
-                   bbox->y - xysel[1],
-                   bbox->y + bbox->height - xysel[1]);
-}
-
-static void
 constrain_movement(GwyShapes *shapes,
                    gdouble eventx, gdouble eventy,
                    GdkModifierType modif,
@@ -393,12 +369,17 @@ constrain_movement(GwyShapes *shapes,
     cairo_matrix_transform_point(matrix, &eventx, &eventy);
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
 
-    gdouble xysel[2];
-    gwy_coords_get(coords, priv->clicked, xysel);
-    dxy->x = eventx - xysel[0];
-    dxy->y = eventy - xysel[1];
-    SelectionFuncData data = { dxy, coords, &shapes->bounding_box, };
-    gwy_int_set_foreach(shapes->selection, constrain_func, &data);
+    gdouble d[2];
+    gwy_coords_get(coords, priv->clicked, d);
+    d[0] = eventx - d[0];
+    d[1] = eventy - d[1];
+    const cairo_rectangle_t *bbox = &shapes->bounding_box;
+    gdouble lower[2] = { bbox->x, bbox->y };
+    gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
+    gwy_coords_constrain_translation(coords, shapes->selection,
+                                     d, lower, upper);
+    dxy->x = d[0];
+    dxy->y = d[1];
 }
 
 static gboolean
