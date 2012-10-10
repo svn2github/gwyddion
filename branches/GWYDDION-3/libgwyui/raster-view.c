@@ -25,7 +25,7 @@
 #include "libgwy/field-statistics.h"
 #include "libgwy/mask-field-grains.h"
 #include "libgwyui/field-render.h"
-#include "libgwyui/utils.h"
+#include "libgwyui/cairo-utils.h"
 #include "libgwyui/raster-view.h"
 
 #define IGNORE_ME N_("A translatable string.")

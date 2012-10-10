@@ -18,7 +18,7 @@
  */
 
 #include "libgwy/macros.h"
-#include "libgwyui/utils.h"
+#include "libgwyui/cairo-utils.h"
 
 /**
  * gwy_cairo_set_source_rgba:
@@ -91,8 +91,8 @@ gwy_cairo_cross(cairo_t *cr,
 }
 
 /**
- * SECTION: utils
- * @section_id: utils
+ * SECTION: cairo-utils
+ * @section_id: libgwyui-Cairo-utils
  * @title: Cairo drawing utils
  * @short_description: Auxiliary and impedance matching functions for Cairo
  *                     drawing

@@ -20,12 +20,12 @@
 #ifndef __LIBGWYUI_H__
 #define __LIBGWYUI_H__
 
+#include <libgwyui/cairo-utils.h>
 #include <libgwyui/field-render.h>
 #include <libgwyui/raster-view.h>
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-point.h>
 #include <libgwyui/types.h>
-#include <libgwyui/utils.h>
 
 #endif
 

@@ -19,11 +19,11 @@ GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
+	$(srcdir)/cairo-utils.h
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/shapes.h \
-	$(srcdir)/shapes-point.h \
-	$(srcdir)/utils.h
+	$(srcdir)/shapes-point.h
 
 public_built_headers = \
 	$(mkenum_name).h
@@ -49,12 +49,12 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
 
 libgwyui3_la_SOURCES = \
+	cairo-utils.c \
 	field-render.c \
 	raster-view.c \
 	shapes.c \
 	shapes-point.c \
-	types.c \
-	utils.c
+	types.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \

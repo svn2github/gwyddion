@@ -24,7 +24,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/coords-point.h"
-#include "libgwyui/utils.h"
+#include "libgwyui/cairo-utils.h"
 #include "libgwyui/shapes-point.h"
 
 enum {

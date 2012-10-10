@@ -22,7 +22,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/rgba.h"
 #include "libgwy/object-utils.h"
-#include "libgwyui/utils.h"
+#include "libgwyui/cairo-utils.h"
 #include "libgwyui/shapes.h"
 
 enum {
