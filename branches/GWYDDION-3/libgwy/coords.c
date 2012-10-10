@@ -39,7 +39,7 @@ struct _GwyCoordsPrivate {
 typedef struct {
     GwyArray *array;
     gdouble *data;
-    const guint *unit_map;
+    const guint *dimension_map;
     const gdouble *transparam;
     guint shape_size;
     guint bitmask;
@@ -400,7 +400,7 @@ gwy_coords_dimension(const GwyCoords *coords)
 }
 
 /**
- * gwy_coords_unit_map:
+ * gwy_coords_dimension_map:
  * @coords: A group of coordinates of some geometrical objects.
  *
  * Obtains the map between shape coordinates and their units.
@@ -420,11 +420,11 @@ gwy_coords_dimension(const GwyCoords *coords)
  *          class, containing the units map.
  **/
 const guint*
-gwy_coords_unit_map(const GwyCoords *coords)
+gwy_coords_dimension_map(const GwyCoords *coords)
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     g_return_val_if_fail(klass, 0);
-    return klass->unit_map;
+    return klass->dimension_map;
 }
 
 /**
@@ -640,8 +640,8 @@ gwy_coords_get_mapped_units(GwyCoords *coords,
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     guint shape_size = klass->shape_size;
     g_return_val_if_fail(i < shape_size, NULL);
-    g_return_val_if_fail(klass->unit_map, NULL);
-    guint mi = klass->unit_map[i];
+    g_return_val_if_fail(klass->dimension_map, NULL);
+    guint mi = klass->dimension_map[i];
     Coords *priv = coords->priv;
     guint dimension = klass->dimension;
     ensure_units(priv, dimension, FALSE);
@@ -805,15 +805,15 @@ gwy_coords_translate_default(GwyCoords *coords,
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     GwyArray *array = GWY_ARRAY(coords);
-    const guint *unit_map = klass->unit_map;
+    const guint *dimension_map = klass->dimension_map;
     guint shape_size = klass->shape_size;
     gdouble *data = (gdouble*)gwy_array_get_data(array);
-    g_assert(unit_map);
+    g_assert(dimension_map);
 
     if (!indices) {
         guint n = gwy_array_size(array);
         for (guint i = 0; i < n; i++) {
-            const guint *umap = unit_map;
+            const guint *umap = dimension_map;
             for (guint j = shape_size; j; j--, data++, umap++)
                 *data += offsets[*umap];
             gwy_array_updated(array, i);
@@ -826,7 +826,7 @@ gwy_coords_translate_default(GwyCoords *coords,
         .data = data,
         .transparam = offsets,
         .shape_size = shape_size,
-        .unit_map = unit_map,
+        .dimension_map = dimension_map,
     };
     gwy_int_set_foreach(indices, translate_func, &tfdata);
 }
@@ -838,15 +838,15 @@ gwy_coords_flip_default(GwyCoords *coords,
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     GwyArray *array = GWY_ARRAY(coords);
-    const guint *unit_map = klass->unit_map;
+    const guint *dimension_map = klass->dimension_map;
     guint shape_size = klass->shape_size;
     gdouble *data = (gdouble*)gwy_array_get_data(array);
-    g_assert(unit_map);
+    g_assert(dimension_map);
 
     if (!indices) {
         guint n = gwy_array_size(array);
         for (guint i = 0; i < n; i++) {
-            const guint *umap = unit_map;
+            const guint *umap = dimension_map;
             for (guint j = shape_size; j; j--, data++, umap++)
                 if (axes & (1 << *umap))
                     *data = -*data;
@@ -860,7 +860,7 @@ gwy_coords_flip_default(GwyCoords *coords,
         .data = data,
         .bitmask = axes,
         .shape_size = shape_size,
-        .unit_map = unit_map,
+        .dimension_map = dimension_map,
     };
     gwy_int_set_foreach(indices, flip_func, &tfdata);
 }
@@ -872,15 +872,15 @@ gwy_coords_scale_default(GwyCoords *coords,
 {
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
     GwyArray *array = GWY_ARRAY(coords);
-    const guint *unit_map = klass->unit_map;
+    const guint *dimension_map = klass->dimension_map;
     guint shape_size = klass->shape_size;
     gdouble *data = (gdouble*)gwy_array_get_data(array);
-    g_assert(unit_map);
+    g_assert(dimension_map);
 
     if (!indices) {
         guint n = gwy_array_size(array);
         for (guint i = 0; i < n; i++) {
-            const guint *umap = unit_map;
+            const guint *umap = dimension_map;
             for (guint j = shape_size; j; j--, data++, umap++)
                 *data *= factors[*umap];
             gwy_array_updated(array, i);
@@ -893,7 +893,7 @@ gwy_coords_scale_default(GwyCoords *coords,
         .data = data,
         .transparam = factors,
         .shape_size = shape_size,
-        .unit_map = unit_map,
+        .dimension_map = dimension_map,
     };
     gwy_int_set_foreach(indices, scale_func, &tfdata);
 }
@@ -903,7 +903,7 @@ translate_func(gint value, gpointer user_data)
 {
     TransformFuncData *tfdata = (TransformFuncData*)user_data;
     const gdouble *offsets = tfdata->transparam;
-    const guint *umap = tfdata->unit_map;
+    const guint *umap = tfdata->dimension_map;
     guint shape_size = tfdata->shape_size;
     gdouble *data = tfdata->data + value*shape_size;
 
@@ -917,7 +917,7 @@ flip_func(gint value, gpointer user_data)
 {
     TransformFuncData *tfdata = (TransformFuncData*)user_data;
     guint axes = tfdata->bitmask;
-    const guint *umap = tfdata->unit_map;
+    const guint *umap = tfdata->dimension_map;
     guint shape_size = tfdata->shape_size;
     gdouble *data = tfdata->data + value*shape_size;
 
@@ -933,7 +933,7 @@ scale_func(gint value, gpointer user_data)
 {
     TransformFuncData *tfdata = (TransformFuncData*)user_data;
     const gdouble *factors = tfdata->transparam;
-    const guint *umap = tfdata->unit_map;
+    const guint *umap = tfdata->dimension_map;
     guint shape_size = tfdata->shape_size;
     gdouble *data = tfdata->data + value*shape_size;
 
@@ -975,8 +975,12 @@ scale_func(gint value, gpointer user_data)
  * @shape_size: Number of double values used to described one geometrical
  *              object/shape.
  * @dimension: Number of different coodinates in the coords.
- * @unit_map: Map assigning unit indices (used with gwy_coords_get_units())
- *            to individual numbers (coordinates) in the coords objects.
+ * @dimension_map: Map assigning dimensios, corresponding also to indices
+ *                 and used with gwy_coords_get_units(), to individual numbers
+ *                 (coordinates) in the coords objects.  The generic
+ *                 implementations of transformation methods use this array to
+ *                 determine which coordinate corresponds to which offset,
+ *                 scale, etc.
  * @translate: Virtual method implementing gwy_coords_translate().  If it is
  *             implemented the class will report
  *             %GWY_COORDS_TRANSFORM_TRANSLATE capability.  In general, this
@@ -990,7 +994,7 @@ scale_func(gint value, gpointer user_data)
  * Class of groups coordinates of some geometrical objects.
  *
  * Specific, i.e. instantiable, subclasses have to set the data members
- * @shape_size, @dimension and @unit_map.
+ * @shape_size, @dimension and @dimension_map.
  *
  * Transformation method often do not need to be implemented speficically.
  * They have default generic implementations that work for coordinates that are

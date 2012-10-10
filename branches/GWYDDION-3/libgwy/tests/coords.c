@@ -105,10 +105,10 @@ coords_units_one(GType type)
     }
 
     guint shape_size = gwy_coords_shape_size(coords);
-    const guint *unit_map = gwy_coords_unit_map(coords);
+    const guint *dimension_map = gwy_coords_dimension_map(coords);
     g_assert_cmpuint(shape_size, >, 0);
     for (guint i = 0; i < shape_size; i++) {
-        guint mi = unit_map[i];
+        guint mi = dimension_map[i];
         g_assert_cmpuint(mi, <, dimension);
         g_assert(gwy_coords_get_mapped_units(coords, i)
                  == gwy_coords_get_units(coords, mi));

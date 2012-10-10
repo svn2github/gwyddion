@@ -63,7 +63,7 @@ struct _GwyCoordsClass {
     /*<public>*/
     guint shape_size;
     guint dimension;
-    const guint *unit_map;
+    const guint *dimension_map;
 
     // TODO: Add more transformation types
     void (*translate)(GwyCoords *coords,
@@ -89,7 +89,7 @@ typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
 GType        gwy_coords_get_type        (void)                               G_GNUC_CONST;
 guint        gwy_coords_shape_size      (const GwyCoords *coords)            G_GNUC_PURE;
 guint        gwy_coords_dimension       (const GwyCoords *coords)            G_GNUC_PURE;
-const guint* gwy_coords_unit_map        (const GwyCoords *coords)            G_GNUC_PURE;
+const guint* gwy_coords_dimension_map   (const GwyCoords *coords)            G_GNUC_PURE;
 gboolean     gwy_coords_can_transform   (GwyCoords *coords,
                                          GwyCoordsTransformFlags transforms) G_GNUC_PURE;
 void         gwy_coords_clear           (GwyCoords *coords);

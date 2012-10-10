@@ -41,7 +41,7 @@ static gboolean gwy_coords_point_construct        (GwySerializable *serializable
                                                    GwySerializableItems *items,
                                                    GwyErrorList **error_list);
 
-static const guint unit_map[DIMENSIONS] = { 0, 1 };
+static const guint dimension_map[DIMENSIONS] = { 0, 1 };
 
 static GwySerializableInterface *parent_serializable = NULL;
 
@@ -64,8 +64,8 @@ gwy_coords_point_class_init(GwyCoordsPointClass *klass)
     GwyCoordsClass *coords_class = GWY_COORDS_CLASS(klass);
 
     coords_class->shape_size = SHAPE_SIZE;
-    coords_class->dimension = G_N_ELEMENTS(unit_map);
-    coords_class->unit_map = unit_map;
+    coords_class->dimension = G_N_ELEMENTS(dimension_map);
+    coords_class->dimension_map = dimension_map;
 }
 
 static void
