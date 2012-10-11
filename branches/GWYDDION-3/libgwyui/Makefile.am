@@ -19,7 +19,7 @@ GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
-	$(srcdir)/cairo-utils.h
+	$(srcdir)/cairo-utils.h \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/shapes.h \
