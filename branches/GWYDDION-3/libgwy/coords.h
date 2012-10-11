@@ -33,7 +33,8 @@ typedef enum {
     GWY_COORDS_TRANSFORM_TRANSPOSE = 1 << 2,
     GWY_COORDS_TRANSFORM_SCALE     = 1 << 3,
     GWY_COORDS_TRANSFORM_ROTATE    = 1 << 4,
-    GWY_COORDS_TRANSFORM_FUNCTION  = 1 << 5,
+    GWY_COORDS_TRANSFORM_CROP      = 1 << 5,
+    GWY_COORDS_TRANSFORM_FUNCTION  = 1 << 6,
 } GwyCoordsTransformFlags;
 
 #define GWY_TYPE_COORDS \
@@ -75,6 +76,9 @@ struct _GwyCoordsClass {
     void (*scale)(GwyCoords *coords,
                   const GwyIntSet *indices,
                   const gdouble *factors);
+    void (*transpose)(GwyCoords *coords,
+                      const GwyIntSet *indices,
+                      const guint *permutation);
     void (*constrain_translation)(const GwyCoords *coords,
                                   const GwyIntSet *indices,
                                   gdouble *offsets,
@@ -129,6 +133,9 @@ void         gwy_coords_flip                 (GwyCoords *coords,
 void         gwy_coords_scale                (GwyCoords *coords,
                                               GwyIntSet *indices,
                                               const gdouble *factors);
+void         gwy_coords_transpose            (GwyCoords *coords,
+                                              GwyIntSet *indices,
+                                              const guint *permutation);
 void         gwy_coords_constrain_translation(const GwyCoords *coords,
                                               const GwyIntSet *indices,
                                               gdouble *offsets,

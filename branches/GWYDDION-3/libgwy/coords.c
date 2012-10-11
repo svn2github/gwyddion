@@ -42,9 +42,11 @@ typedef struct {
     const guint *dimension_map;
     const gdouble *transparam;
     const gdouble *transparam2;
+    const guint *intmap;
+    gdouble *transoff;
     guint shape_size;
     guint bitmask;
-    gdouble *transoff;
+    guint dimension;
 } TransformFuncData;
 
 typedef struct _GwyCoordsPrivate Coords;
@@ -72,6 +74,9 @@ static void     gwy_coords_flip_default                 (GwyCoords *coords,
 static void     gwy_coords_scale_default                (GwyCoords *coords,
                                                          const GwyIntSet *indices,
                                                          const gdouble *factors);
+static void     gwy_coords_transpose_default            (GwyCoords *coords,
+                                                         const GwyIntSet *indices,
+                                                         const guint *permutation);
 static void     gwy_coords_constrain_translation_default(const GwyCoords *coords,
                                                          const GwyIntSet *indices,
                                                          gdouble *offsets,
@@ -82,6 +87,8 @@ static void     translate_func                          (gint value,
 static void     flip_func                               (gint value,
                                                          gpointer user_data);
 static void     scale_func                              (gint value,
+                                                         gpointer user_data);
+static void     transpose_func                          (gint value,
                                                          gpointer user_data);
 static void     constrain_translation_func              (gint value,
                                                          gpointer user_data);
@@ -120,6 +127,7 @@ gwy_coords_class_init(GwyCoordsClass *klass)
     klass->translate = gwy_coords_translate_default;
     klass->flip = gwy_coords_flip_default;
     klass->scale = gwy_coords_scale_default;
+    klass->transpose = gwy_coords_transpose_default;
     klass->constrain_translation = gwy_coords_constrain_translation_default;
 
     /**
@@ -749,6 +757,36 @@ gwy_coords_scale(GwyCoords *coords,
 }
 
 /**
+ * gwy_coords_transpose:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to transform.  Passing %NULL implies
+ *           all objects are to be transformed.
+ * @permutation: Array of GwyCoordsClass size @dimension specifying the mapping
+ *               of old coordinate indices to new coordinate indices.
+ *
+ * Remaps dimensions in selected or all objects in a coords.
+ *
+ * Array @permutation must be a permutation of numbers 0, 1, …, @dimension-1.
+ * For instance, to change @x to @y, @y to @z, and @z to @x the array should
+ * be <literal>{1, 2, 0}</literal>.  Such permutation would correspond to
+ * a clock-wise rotation of right-handed Cartesian coordinates.
+ **/
+void
+gwy_coords_transpose(GwyCoords *coords,
+                     GwyIntSet *indices,
+                     const guint *permutation)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(!indices || GWY_IS_INT_SET(indices));
+    g_return_if_fail(permutation);
+
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    g_return_if_fail(klass->scale);
+    klass->transpose(coords, indices, permutation);
+}
+
+/**
  * gwy_coords_constrain_translation:
  * @coords: A group of coordinates of some geometrical objects.
  * @indices: (allow-none):
@@ -951,6 +989,49 @@ gwy_coords_scale_default(GwyCoords *coords,
 }
 
 static void
+gwy_coords_transpose_default(GwyCoords *coords,
+                             const GwyIntSet *indices,
+                             const guint *permutation)
+{
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    GwyArray *array = GWY_ARRAY(coords);
+    const guint *dimension_map = klass->dimension_map;
+    guint shape_size = klass->shape_size, dimension = klass->dimension;
+    gdouble *data = (gdouble*)gwy_array_get_data(array);
+    g_assert(dimension_map);
+    g_assert(shape_size % dimension == 0);
+    // XXX: We require much more: that dimension_map is the sequence
+    // 0, 1, ..., dimension; possibly repeated several times.
+    // If not and it is just permuted, we might fix it by constructing the
+    // inverse dimension map here.
+
+    if (!indices) {
+        guint n = gwy_array_size(array);
+        for (guint i = 0; i < n; i++) {
+            for (guint j = shape_size/dimension; j; j--) {
+                gdouble newcoords[dimension];
+                for (guint k = 0; k < dimension; k++)
+                    newcoords[permutation[k]] = data[k];
+                gwy_assign(data, newcoords, dimension);
+                data += dimension;
+            }
+            gwy_array_updated(array, i);
+        }
+        return;
+    }
+
+    TransformFuncData tfdata = {
+        .array = array,
+        .data = data,
+        .intmap = permutation,
+        .shape_size = shape_size,
+        .dimension_map = dimension_map,
+        .dimension = dimension,
+    };
+    gwy_int_set_foreach(indices, transpose_func, &tfdata);
+}
+
+static void
 gwy_coords_constrain_translation_default(const GwyCoords *coords,
                                          const GwyIntSet *indices,
                                          gdouble *offsets,
@@ -1035,6 +1116,25 @@ scale_func(gint value, gpointer user_data)
 }
 
 static void
+transpose_func(gint value, gpointer user_data)
+{
+    TransformFuncData *tfdata = (TransformFuncData*)user_data;
+    const guint *permutation = tfdata->intmap;
+    guint shape_size = tfdata->shape_size;
+    guint dimension = tfdata->dimension;
+    gdouble *data = tfdata->data + value*shape_size;
+
+    for (guint j = shape_size/dimension; j; j--) {
+        gdouble newcoords[dimension];
+        for (guint k = 0; k < dimension; k++)
+            newcoords[permutation[k]] = data[k];
+        gwy_assign(data, newcoords, dimension);
+        data += dimension;
+    }
+    gwy_array_updated(tfdata->array, value);
+}
+
+static void
 constrain_translation_func(gint value, gpointer user_data)
 {
     TransformFuncData *tfdata = (TransformFuncData*)user_data;
@@ -1106,8 +1206,8 @@ constrain_translation_func(gint value, gpointer user_data)
  * Specific, i.e. instantiable, subclasses have to set the data members
  * @shape_size, @dimension and @dimension_map.
  *
- * Transformation method often do not need to be implemented speficically.
- * They have default generic implementations that work for coordinates that are
+ * Transformation method often do not need to be implemented speficcally.
+ * All have default generic implementations that work for coordinates that are
  * plain bunches of point coordinates defining the convex hull of some shape.
  * So they are fine for points, lines, boxes, ... in an arbitrary dimension.
  * If a subclass does <emphasis>not</emphasis> support some transformation that
@@ -1149,6 +1249,16 @@ constrain_translation_func(gint value, gpointer user_data)
  * @GWY_COORDS_TRANSFORM_ROTATE: Rotation around arbitrary points about
  *                               arbitrary axes is possible.  This implies any
  *                               congruence transformation is possible.
+ *                               Rotation is namely used for two-dimensional
+ *                               coordinates as it does not exist for lower
+ *                               dimensions and becomes rather convoluted for
+ *                               higher dimensions.
+ * @GWY_COORDS_TRANSFORM_CROP: Restricting coordinates to certain
+ *                             multi-dimensional ranges, typically as the
+ *                             result of extraction of a part of the data.
+ *                             This ‘transformation’ may remove some objects
+ *                             altogether.  If rotation is possible, cropping
+ *                             should also be.
  * @GWY_COORDS_TRANSFORM_FUNCTION: Arbitrary point-wise transformation is
  *                                 possbile.
  *
