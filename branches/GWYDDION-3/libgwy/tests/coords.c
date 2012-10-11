@@ -401,6 +401,67 @@ coords_transform_one(GType type,
     g_rand_free(rng);
 }
 
+static void
+coords_constrain_translation_one(GType type)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 100;
+    GwyCoordsClass *klass = g_type_class_ref(type);
+    g_assert(gwy_coords_class_can_transform(klass,
+                                            GWY_COORDS_TRANSFORM_TRANSLATE));
+    g_type_class_unref(klass);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyCoords *coords = GWY_COORDS(g_object_newv(type, 0, NULL));
+        g_assert(gwy_coords_can_transform(coords,
+                                          GWY_COORDS_TRANSFORM_TRANSLATE));
+        guint dimension = gwy_coords_dimension(coords);
+        g_assert_cmpuint(dimension, >, 0);
+
+        coords_randomize(coords, rng);
+        guint shape_size = gwy_coords_shape_size(coords);
+        guint n = gwy_coords_size(coords);
+
+        GwyIntSet *indices = gwy_int_set_new();
+        for (guint i = 0; i < n; i++) {
+            if (g_rand_boolean(rng))
+                gwy_int_set_add(indices, i);
+        }
+        if (!gwy_int_set_size(indices)) {
+            GWY_OBJECT_UNREF(indices);
+        }
+
+        gdouble offsets[dimension], lower[dimension], upper[dimension];
+        for (guint i = 0; i < dimension; i++) {
+            offsets[i] = g_rand_double_range(rng, -2.0, 2.0);
+            lower[i] = g_rand_double_range(rng, -1.6, -1.0);
+            upper[i] = g_rand_double_range(rng, 1.0, 1.6);
+            GWY_ORDER(gdouble, lower[i], upper[i]);
+        }
+
+        gwy_coords_constrain_translation(coords, indices, offsets,
+                                         lower, upper);
+        gwy_coords_translate(coords, indices, offsets);
+
+        const guint *dimension_map = gwy_coords_dimension_map(coords);
+        for (guint i = 0; i < n; i++) {
+            if (indices && !gwy_int_set_contains(indices, i))
+                continue;
+
+            gdouble data[shape_size];
+            gwy_coords_get(coords, i, data);
+            for (guint j = 0; j < shape_size; j++) {
+                g_assert_cmpfloat(data[j], <=, upper[dimension_map[j]]);
+                g_assert_cmpfloat(data[j], >=, lower[dimension_map[j]]);
+            }
+        }
+
+        GWY_OBJECT_UNREF(indices);
+        g_object_unref(coords);
+    }
+    g_rand_free(rng);
+}
+
 /***************************************************************************
  *
  * CoordsPoint
@@ -474,6 +535,12 @@ test_coords_point_scale(void)
     coords_transform_one(GWY_TYPE_COORDS_POINT,
                          scale_point, NULL,
                          GWY_COORDS_TRANSFORM_SCALE);
+}
+
+void
+test_coords_point_constrain_translation(void)
+{
+    coords_constrain_translation_one(GWY_TYPE_COORDS_POINT);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

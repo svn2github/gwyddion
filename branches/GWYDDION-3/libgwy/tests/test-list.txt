@@ -126,6 +126,7 @@ coords/point/serialize
 coords/point/translate
 coords/point/flip
 coords/point/scale
+coords/point/constrain-translation
 line/props
 line/data-changed
 line/units
