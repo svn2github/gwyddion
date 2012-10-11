@@ -16,11 +16,17 @@
     These instructions describe compilation under
     <ulink url='http://fedoraproject.org/'>Fedora</ulink> using its
     <ulink url='http://fedoraproject.org/wiki/SIGs/MinGW'>MinGW cross-compilation
-      support</ulink> as this is what Gwyddion developers use.  Instructions for
-    <ulink url='http://opensuse.org/'>openSUSE</ulink> are also provided.
-    Compilation in other distributions or in native MinGW should be also
-    possible – reports of success (or failure) and additions to these
-    instructions for other systems are welcome.
+      support</ulink> as this is what Gwyddion developers use.  In general,
+    the instructions work on the current version of Fedora.  Compilation
+    on other versions and other RedHat-based distributions
+    (<ulink url='http://centos.org/'>CentOS</ulink>,
+    <ulink url='https://scientificlinux.org/'>Scientific Linux</ulink>, …)
+    should be similar and relatively straightforward, possibly with some
+    tweaks.  Building on, for instance,
+    <ulink url='http://opensuse.org/'>openSUSE</ulink> will require
+    modifications.  Reports of success (or failure) of cross-compilation of
+    Gwyddion in other distributions and environments and namely improvements to
+    these instructions are welcome.
   </para>
   <para>
     Full cross-compilation has the following steps:
@@ -44,27 +50,33 @@
     <sect3 id='installation-cross-mingw32-setup-base'>
       <title>Base MinGW32 Packages</title>
       <para>
-        On Fedora, everything is in the default <quote>Everything</quote>
-        repository.  On openSUSE, it is necessary to add additional package
-        repositories <filename>windows:mingw:win32/openSUSE_11.3</filename> and
-        <filename>devel:tools/openSUSE_11.3</filename>, where 11.3 is of course to
-        be replaced with the actual openSUSE version.  In unsure, you can also look
-        up the packages in the on-line
-        <ulink url='http://software.opensuse.org/'>openSUSE package search</ulink>.
-      </para>
-      <para>
         Run as root:
         <informalexample>
-          <literallayout><userinput># Fedora
-yum install mingw32-{gcc-c++,gtk2,libxml2}
-
-# openSUSE
-zypper install mingw32-cross-{gcc,gcc-c++,pkg-config} \
-               mingw32-{gtk2,expat,libxml2,fftw3,libjasper,libcairo2} \
-               mingw32-{gtk2,libxml2,fftw3,libjasper,libcairo2}-devel</userinput></literallayout>
+          <literallayout><userinput>yum install mingw32-{gcc-c++,gtk2,libxml2,minizip}</userinput></literallayout>
         </informalexample>
         to install the necessary mingw32 packages (several more packages will
         be installed as dependencies of those explicitly given here).
+      </para>
+    </sect3>
+    <sect3 id='installation-cross-mingw32-setup-repo'>
+      <title>Gwyddion.net repository</title>
+      <para>
+        MinGW versions of a few packages used by Gwyddion are not available in
+        Fedora yet.  You can build them using the patches and spec files at
+        <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/</ulink>,
+        however, it should be much easier to just install them using
+        <command>yum</command>.  For this, download and install the
+        gwyddion.net repository configuration package
+        <ulink url='http://gwyddion.net/download/fedora/17/x86_64/os/gwyddion-release-17-1.fc17.noarch.rpm'>gwyddion-release-17-1.fc17.noarch.rpm</ulink>.
+        The installation makes available all the additional MinGW packages.
+        After installing it you can run
+        <informalexample>
+          <literallayout><userinput>yum install mingw32-{fftw,gtkglext,gtksourceview2}</userinput></literallayout>
+        </informalexample>
+        Incidentally, the repository also contains a native Gwyddion package
+        that you can install to use Gwyddion on Fedora; and a package with
+        cross-compiled Gwyddion libraries that can be used to cross-compile
+        modules.
       </para>
     </sect3>
     <sect3 id='installation-cross-mingw32-setup-wine'>
@@ -79,11 +91,7 @@ zypper install mingw32-cross-{gcc,gcc-c++,pkg-config} \
       <para>
         Run
         <informalexample>
-          <literallayout><userinput># Fedora
-yum install wine
-
-# openSUSE
-zypper install wine</userinput></literallayout>
+          <literallayout><userinput>yum install wine</userinput></literallayout>
         </informalexample>
         to install Wine.
       </para>
@@ -94,6 +102,8 @@ zypper install wine</userinput></literallayout>
         <ulink url='http://nsis.sourceforge.net/'>Nullsoft scriptable install system</ulink>
         (NSIS) is used to create the Gwyddion installer.  This is a MS Windows
         program, therefore, it is installed <emphasis>under Wine</emphasis>.
+        A cross-compiled version of NSIS might be available in the distribution
+        but we have found the original more reliable.
       </para>
       <para>
         Download NSIS from its web page and run
@@ -104,60 +114,20 @@ zypper install wine</userinput></literallayout>
         oldest that has been tested.
       </para>
     </sect3>
-    <sect3 id='installation-cross-mingw32-setup-libraries'>
-      <title>Extra MinGW32 Packages</title>
+    <sect3 id='installation-cross-mingw32-setup-python'>
+      <title>Python</title>
       <para>
-        The official Gwyddion packages utilise additional libraries that are
-        not available in the Fedora and/or openSUSE MinGW environment, namely
-        GtkGLExt and FFTW.  They can be omitted though you will have to modify
-        some scripts if you do so.  At the time of writing this, Fedora lacks
-        both packages while openSuSE lacks only GtkGLExt.  In addition, the
-        default Bzip2 package is built to use the stdcall calling convention
-        and is not found by configure.
-      </para>
-      <para>
-        The source packages
-        <filename>mingw32-fftw</filename>,
-        <filename>mingw32-gtkglext</filename> and
-        <filename>mingw32-bzip2-cdecl</filename>
-        can be downloaded from
-        <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>Gwyddion SourceForge pages</ulink>.
-        Build binary packages using <command>rpmbuild</command>:
+        To compile pygwy you need to install Python into Wine.  The steps are
+        the same as if you just want to use pygwy, except that all packages
+        listed in <link linkend='installation-ms-windows-pygwy'>Enabling
+          pygwy</link> need to be installed using <command>msiexec</command>:
         <informalexample>
-          <literallayout><userinput>rpmbuild --rebuild mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout>
+          <literallayout><userinput>wine msiexec /i python-2.7.3.msi
+wine msiexec /i pygobject-2.28.3.win32-py2.7.msi
+wine msiexec /i pycairo-1.8.10.win32-py2.7.msi
+wine msiexec /i pygtk-2.24.0.win32-py2.7.msi</userinput></literallayout>
         </informalexample>
-        replacing the file name with the name of the downloaded file.  If the
-        <command>rpmbuild</command> command complains about missing dependencies install
-        them using <command>yum install</command> as before.  The created
-        package can then be installed as root:
-        <informalexample>
-          <literallayout><userinput>#Fedora
-yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm
-
-# openSUSE
-zypper install ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
-        </informalexample>
-        The same applies to the other source packages (all built
-        RPMs can be installed at once with a single <command>yum</command> or
-        <command>zypper</command> invocation).
-      </para>
-      <para>
-        If you have never built any RPM the package building support has to be
-        installed and initialised first.  Run as root:
-        <informalexample>
-          <literallayout><userinput># Fedora
-yum install rpm-build rpmdevtools
-
-# openSUSE
-zypper install rpmdevtools
-          </userinput></literallayout>
-        </informalexample>
-        and then as a normal user (who is going to build the RPMs):
-        <informalexample>
-          <literallayout><userinput>rpmdev-setuptree</userinput></literallayout>
-        </informalexample>
-        This creates a directory tree in <filename>~/rpmbuild</filename> where
-        the RPM package building will take place.
+        or similarly.
       </para>
     </sect3>
     <sect3 id='installation-cross-mingw32-scripts'>
@@ -181,6 +151,7 @@ zypper install rpmdevtools
           <programlisting>source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32
 mingw32_prefix=/usr/i686-pc-mingw32/sys-root/mingw
 target_prefix=$HOME/opt/gwyddion-mingw32
+python_dir=$HOME/.wine/drive_c/Python27
 nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
         </informalexample>
         Variable <varname>source_dir</varname> specifies the location of the
@@ -188,11 +159,12 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
         be adjusted.  Variable <varname>target_prefix</varname> specifies the
         installation directory (staging area) for the cross-compiled Gwyddion.
         The default value should be reasonable and you do not need to change it
-        unless you want to.  The remaining two variables,
-        <varname>mingw32_prefix</varname> and <varname>nsis_compiler</varname>,
-        specify the location of MinGW files and NSIS compiler, respectively.
-        They do not need to be changed from the default values under normal
-        circumstances although NSIS can be installed in either
+        unless you want to.  The remaining variables,
+        <varname>mingw32_prefix</varname>, <varname>nsis_compiler</varname>
+        and <varname>python_dir</varname>,
+        specify the location of MinGW files, NSIS compiler and Win32 Python,
+        respectively.  They do not need to be changed from the default values
+        under normal circumstances although NSIS can be installed in either
         <filename>Program Files (x86)</filename> or
         <filename>Program Files</filename> by default depending on Wine
         configuration. Note <filename>setup</filename> is read by shell so
@@ -245,67 +217,24 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
   <sect2 id='installation-cross-mingw32-modules'>
     <title>Cross-compilation of standalone modules</title>
     <para>
-      Cross-compilation of standalone modules requires only Gwyddion headers and
-      Win32 development libraries.  While they can be surely obtained by cross-compiling
-      entire Gwyddion is it not necessary to do so.  By compiling only the libraries
-      you can avoid the installation of various rarer Gwyddion dependencies.
+      Cross-compilation of standalone modules requires only Gwyddion headers
+      and Win32 development libraries.  While they can be surely obtained by
+      cross-compiling entire Gwyddion is it not necessary to do so.  By
+      compiling only the libraries you can avoid the installation of various
+      rarer Gwyddion dependencies.  This can be achieved using the patch
+      <filename>gwyddion-2.22-build-only-libs.patch</filename>
+      available among the build scripts.
     </para>
     <para>
-      The MinGW Gwyddion libraries can be built as a RPM package,
-      <filename>mingw32-gwyddion-libs</filename>, and then installed and used as any
-      other MinGW package.  To build it you need (of course, replace 2.28 with the
-      current version):
-    </para>
-    <variablelist>
-      <varlistentry>
-        <term>
-          <filename>gwyddion-2.28.tar.xz</filename>
-        </term>
-        <listitem>
-          <para>
-            Copy (or link) the source code tarball to
-            <filename>~/rpmbuild/RPM/SOURCES</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>
-          <filename>gwyddion-2.22-build-only-libs.patch</filename>
-        </term>
-        <listitem>
-          <para>
-            This patch can be found in among the other
-            <link linkend='installation-cross-mingw32-scripts'>build scripts</link> in
-            <filename>mingw32-cross-compile</filename> subversion module.  Put it
-            also to <filename>~/rpmbuild/RPM/SOURCES</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>
-          <filename>mingw32-gwyddion-libs.spec</filename>
-        </term>
-        <listitem>
-          <para>
-            The RPM spec file can be found in subdirectory <filename>data</filename> of
-            has to be placed to
-            <filename>~/rpmbuild/RPM/SPECS</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-    <para>
-      Then run
-      <informalexample>
-        <literallayout><userinput>rpmbuild -bb ~/rpmbuild/RPM/SOURCES/mingw32-gwyddion-libs.spec</userinput></literallayout>
-      </informalexample>
-      and install the created package.
+      But it gets even easier, the MinGW Gwyddion libraries are available as a
+      RPM package <filename>mingw32-gwyddion-libs</filename> in the
+      gwyddion.net repository.
     </para>
     <para>
-      Once you have it installed you can try cross-compilation of the sample standalone
-      module <filename>threshold-example</filename> that is available in the subversion
-      repository (or as a tarball).  See <filename>README</filename> therein for some
-      more details.
+      Once you have this package installed you can try cross-compilation of the
+      sample standalone module <filename>threshold-example</filename> that is
+      available in the subversion repository (or as a tarball).  See
+      <filename>README</filename> therein for some more details.
     </para>
   </sect2>
 </sect1>
