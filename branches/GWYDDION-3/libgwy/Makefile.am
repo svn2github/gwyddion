@@ -28,6 +28,7 @@ public_headers = \
 	$(srcdir)/container.h \
 	$(srcdir)/coords.h \
 	$(srcdir)/coords-point.h \
+	$(srcdir)/coords-rectangle.h \
 	$(srcdir)/curve.h \
 	$(srcdir)/curve-statistics.h \
 	$(srcdir)/error-list.h \
@@ -131,6 +132,7 @@ libgwy3_la_SOURCES = \
 	container.c \
 	coords.c \
 	coords-point.c \
+	coords-rectangle.c \
 	curve.c \
 	curve-statistics.c \
 	error-list.c \
