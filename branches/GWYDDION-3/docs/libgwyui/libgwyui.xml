@@ -24,6 +24,7 @@
     <xi:include href="xml/raster-view.xml"/>
     <xi:include href="xml/shapes.xml"/>
     <xi:include href="xml/shapes-point.xml"/>
+    <xi:include href="xml/axis.xml"/>
   </chapter>
   <index id='libgwyui-symbol-index'>
     <title>Index of all symbols</title>
