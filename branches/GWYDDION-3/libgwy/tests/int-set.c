@@ -123,6 +123,40 @@ test_int_set_serialize(void)
     g_rand_free(rng);
 }
 
+void
+test_int_set_assign(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 20;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *original = gwy_int_set_new(), *copy = gwy_int_set_new();
+        int_set_randomize(original, rng);
+
+        guint counter = 0, xcounter = 0;
+        g_signal_connect_swapped(copy, "assigned",
+                                 G_CALLBACK(record_signal), &counter);
+        g_signal_connect_swapped(copy, "added",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(copy, "removed",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(original, "added",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(original, "removed",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(original, "assigned",
+                                 G_CALLBACK(record_signal), &xcounter);
+        gwy_int_set_assign(copy, original);
+        int_set_assert_order(copy);
+        int_set_assert_equal(copy, original);
+        g_assert_cmpuint(counter, ==, 1);
+        g_assert_cmpuint(xcounter, ==, 0);
+
+        g_object_unref(copy);
+        g_object_unref(original);
+    }
+}
+
 static void
 check_add(GwyIntSet *intset,
           GHashTable *reference,
@@ -326,6 +360,46 @@ test_int_set_update(void)
         g_object_unref(intset1);
     }
     g_rand_free(rng);
+}
+
+void
+test_int_set_fill(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 20;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *original = gwy_int_set_new(),
+                  *copy = gwy_int_set_new();
+        int_set_randomize(original, rng);
+
+        guint counter = 0, xcounter = 0;
+        g_signal_connect_swapped(copy, "assigned",
+                                 G_CALLBACK(record_signal), &counter);
+        g_signal_connect_swapped(copy, "added",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(copy, "removed",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(original, "added",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(original, "removed",
+                                 G_CALLBACK(record_signal), &xcounter);
+        g_signal_connect_swapped(original, "assigned",
+                                 G_CALLBACK(record_signal), &xcounter);
+
+        guint len;
+        gint *isvalues = gwy_int_set_values(original, &len);
+        gwy_int_set_fill(copy, isvalues, len);
+        g_free(isvalues);
+
+        int_set_assert_order(copy);
+        int_set_assert_equal(copy, original);
+        g_assert_cmpuint(counter, ==, 1);
+        g_assert_cmpuint(xcounter, ==, 0);
+
+        g_object_unref(copy);
+        g_object_unref(original);
+    }
 }
 
 typedef struct {
