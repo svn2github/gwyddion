@@ -79,6 +79,9 @@ gboolean   gwy_int_set_toggle         (GwyIntSet *intset,
 void       gwy_int_set_update         (GwyIntSet *intset,
                                        const gint *values,
                                        guint n);
+void       gwy_int_set_fill           (GwyIntSet *intset,
+                                       const gint *values,
+                                       guint n);
 guint      gwy_int_set_size           (const GwyIntSet *intset)       G_GNUC_PURE;
 gint*      gwy_int_set_values         (const GwyIntSet *intset,
                                        guint *len)                    G_GNUC_MALLOC;
@@ -89,7 +92,7 @@ gboolean   gwy_int_set_first          (const GwyIntSet *intset,
                                        GwyIntSetIter *iter);
 gboolean   gwy_int_set_next           (const GwyIntSet *intset,
                                        GwyIntSetIter *iter);
-/* TODO: Permit getting the ints by interval. */
+/* TODO: Permit getting/setting by interval. */
 
 G_END_DECLS
 

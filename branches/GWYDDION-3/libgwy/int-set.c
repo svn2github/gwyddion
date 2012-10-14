@@ -266,7 +266,7 @@ gwy_int_set_assign_impl(GwySerializable *destination,
 
     g_array_set_size(dranges, 0);
     g_array_append_vals(dranges, sranges->data, sranges->len);
-    // TODO: g_signal_emit(dest, signals[???], 0);
+    g_signal_emit(dest, signals[ASSIGNED], 0);
 }
 
 /**
@@ -284,7 +284,8 @@ gwy_int_set_new(void)
 
 /**
  * gwy_int_set_new_with_values:
- * @values: Integers to fill the integer set with.  They may repeat and may be
+ * @values: (array length=@n):
+ *          Integers to fill the integer set with.  They may repeat and may be
  *          in non-ascending order, however, if they do the construction is
  *          somewhat more efficient.
  * @n: Number of items in @values.
@@ -315,6 +316,7 @@ set_data_silent(GwyIntSet *intset,
     GArray *ranges = intset->priv->ranges;
     g_array_set_size(ranges, 0);
 
+    g_return_if_fail(values || !n);
     if (!n)
         return;
 
@@ -569,7 +571,8 @@ uniq(gint *values, guint n)
 /**
  * gwy_int_set_update:
  * @intset: A set of integers.
- * @values: Integers to fill the integer set with.
+ * @values: (array length=@n):
+ *          Integers to fill the integer set with.
  * @n: Number of items in @values.
  *
  * Updates an integer set to contain the given list of values.
@@ -578,7 +581,7 @@ uniq(gint *values, guint n)
  * present in @values but missing in @intset are added.  Signals are emitted
  * for each addition or removal.  So this method is useful namely when it can
  * be expected that the set does not change much by the update.  Otherwise it
- * could be just rebuilt completely.
+ * can be just rebuilt completely with gwy_int_set_fill().
  **/
 void
 gwy_int_set_update(GwyIntSet *intset,
@@ -586,6 +589,7 @@ gwy_int_set_update(GwyIntSet *intset,
                    guint n_)
 {
     g_return_if_fail(GWY_IS_INT_SET(intset));
+    g_return_if_fail(values || !n_);
 
     GwyIntSet *tmp = gwy_int_set_new_with_values(values, n_);
     GArray *tmpranges = tmp->priv->ranges;
@@ -612,6 +616,39 @@ gwy_int_set_update(GwyIntSet *intset,
     }
 
     g_object_unref(tmp);
+}
+
+/**
+ * gwy_int_set_fill:
+ * @intset: A set of integers.
+ * @values: (array length=@n):
+ *          Integers to fill the integer set with.
+ * @n: Number of items in @values.
+ *
+ * Changes an integer set to contain the given list of values.
+ *
+ * This method emits only a single GwyIntSet::assigned signal and is equivalent
+ * to
+ * |[
+ * GwyIntSet *tmp = gwy_int_set_new_with_values(values, n);
+ * gwy_int_set_assign(intset, tmp);
+ * g_object_unref(tmp);
+ * ]|
+ * except that no temporary objects needs to be created.  See
+ * gwy_int_set_update() for a method that updates the set by adding and
+ * removing values by one.
+ *
+ * Despite the name, gwy_int_set_fill() can also be used to clear the integer
+ * set, by passing zero @n.
+ **/
+void
+gwy_int_set_fill(GwyIntSet *intset,
+                 const gint *values,
+                 guint n)
+{
+    g_return_if_fail(GWY_IS_INT_SET(intset));
+    set_data_silent(intset, values, n);
+    g_signal_emit(intset, signals[ASSIGNED], 0);
 }
 
 /**
