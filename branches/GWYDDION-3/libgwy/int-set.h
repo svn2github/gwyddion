@@ -82,6 +82,7 @@ void       gwy_int_set_update         (GwyIntSet *intset,
 void       gwy_int_set_fill           (GwyIntSet *intset,
                                        const gint *values,
                                        guint n);
+gboolean   gwy_int_set_is_nonempty    (const GwyIntSet *intset)       G_GNUC_PURE;
 guint      gwy_int_set_size           (const GwyIntSet *intset)       G_GNUC_PURE;
 gint*      gwy_int_set_values         (const GwyIntSet *intset,
                                        guint *len)                    G_GNUC_MALLOC;

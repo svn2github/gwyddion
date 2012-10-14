@@ -652,6 +652,21 @@ gwy_int_set_fill(GwyIntSet *intset,
 }
 
 /**
+ * gwy_int_set_is_nonempty:
+ * @intset: A set of integers.
+ *
+ * Checks whether an integer set contains any values at all.
+ *
+ * Returns: %TRUE if @intset is non-empty; %FALSE if it is empty.
+ **/
+gboolean
+gwy_int_set_is_nonempty(const GwyIntSet *intset)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), FALSE);
+    return !!intset->priv->ranges->len;
+}
+
+/**
  * gwy_int_set_size:
  * @intset: A set of integers.
  *

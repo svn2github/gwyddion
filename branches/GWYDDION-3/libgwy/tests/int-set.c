@@ -278,6 +278,9 @@ test_int_set_add_remove(void)
                 check_remove(intset, reference, random_integer(rng));
             else
                 check_toggle(intset, reference, random_integer(rng));
+
+            g_assert(!!gwy_int_set_size(intset)
+                     == gwy_int_set_is_nonempty(intset));
         }
         int_set_assert_order(intset);
 
