@@ -19,6 +19,7 @@ GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
+	$(srcdir)/axis.h \
 	$(srcdir)/cairo-utils.h \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
@@ -49,6 +50,7 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
 
 libgwyui3_la_SOURCES = \
+	axis.c \
 	cairo-utils.c \
 	field-render.c \
 	raster-view.c \
