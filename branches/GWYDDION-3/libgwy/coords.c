@@ -1414,14 +1414,17 @@ constrain_translation_func(gint value, gpointer user_data)
  *                 determine which coordinate corresponds to which offset,
  *                 scale, etc.
  * @translate: Virtual method implementing gwy_coords_translate().  If it is
- *             implemented the class will report
+ *             implemented the class will report the
  *             %GWY_COORDS_TRANSFORM_TRANSLATE capability.  In general, this
  *             should be supported by all subclasses.
  * @flip: Virtual method implementing gwy_coords_flip().  If it is implemented
- *        the class will report %GWY_COORDS_TRANSFORM_FLIP capability.
+ *        the class will report the %GWY_COORDS_TRANSFORM_FLIP capability.
  * @scale: Virtual method implementing gwy_coords_scale().  If it is
- *         implemented the class will report %GWY_COORDS_TRANSFORM_SCALE
+ *         implemented the class will report the %GWY_COORDS_TRANSFORM_SCALE
  *         capability.
+ * @transpose: Virtual method implementing gwy_coords_transpose().  If it is
+ *             implemented the class will report the
+ *             %GWY_COORDS_TRANSFORM_TRANSPOSE capability.
  * @constrain_translation: Virtual method implementing
  *                         gwy_coords_constrain_translation().
  *
