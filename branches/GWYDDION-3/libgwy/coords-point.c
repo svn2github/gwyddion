@@ -124,6 +124,8 @@ gwy_coords_point_new(void)
  * SECTION: coords-point
  * @title: GwyCoordsPoint
  * @short_description: Coordinates of points in plane.
+ *
+ * Coordinates of a point in plane are represented as the couple (@x,@y).
  **/
 
 /**

@@ -125,6 +125,12 @@ gwy_coords_line_new(void)
  * SECTION: coords-line
  * @title: GwyCoordsLine
  * @short_description: Coordinates of lines in plane.
+ *
+ * Coordinates of a line in plane are represented as the quadruple
+ * (@x₁,@y₁,@x₂,@y₂) where index 1 pertains to the begining of the line (if
+ * they are considered oriented) and 2 to its end.  If the lines are not
+ * considered oriented then the preferred ordering is that @x₁ is not larger
+ * than @x₂ and, if possible, the same for the @y-coordinates.
  **/
 
 /**

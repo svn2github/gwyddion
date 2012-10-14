@@ -125,6 +125,11 @@ gwy_coords_rectangle_new(void)
  * SECTION: coords-rectangle
  * @title: GwyCoordsRectangle
  * @short_description: Coordinates of rectangles in plane.
+ *
+ * Coordinates of a line in plane are represented as the quadruple
+ * (@x₁,@y₁,@x₂,@y₂) where index 1 pertains to the corner of the rectangle with
+ * smallest coordinates and 2 to the opposite corner.  This means it should
+ * hold @x₁ ≤ @x₂ and @y₁ ≤ @y₂.
  **/
 
 /**
