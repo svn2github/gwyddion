@@ -669,12 +669,13 @@ gwy_int_set_size(const GwyIntSet *intset)
 /**
  * gwy_int_set_values:
  * @intset: A set of integers.
- * @len: Location where to store the number of values in @intset and,
+ * @len: (out):
+ *       Location where to store the number of values in @intset and,
  *       consequently, in the returned array.
  *
  * Creates a plain array with the values from an integer set.
  *
- * Returns: (allow-none):
+ * Returns: (allow-none) (array length=@len):
  *          Newly created array with all the values in @intset.  %NULL is
  *          returned if the set is empty.
  **/
