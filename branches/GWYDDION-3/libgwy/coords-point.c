@@ -22,10 +22,9 @@
 #include "libgwy/coords-point.h"
 #include "libgwy/object-internal.h"
 
-#define SHAPE_SIZE G_N_ELEMENTS(dimension_map)
-
 enum {
     DIMENSIONS = 2,
+    SHAPE_SIZE = 2,
     N_ITEMS = 0
 };
 
@@ -39,7 +38,7 @@ static gboolean gwy_coords_point_construct        (GwySerializable *serializable
                                                    GwySerializableItems *items,
                                                    GwyErrorList **error_list);
 
-static const guint dimension_map[DIMENSIONS] = { 0, 1 };
+static const guint dimension_map[SHAPE_SIZE] = { 0, 1 };
 
 static GwySerializableInterface *parent_serializable = NULL;
 
@@ -74,7 +73,8 @@ gwy_coords_point_class_init(GwyCoordsPointClass *klass)
 static void
 gwy_coords_point_init(GwyCoordsPoint *coordspoint)
 {
-    gwy_array_set_item_type(GWY_ARRAY(coordspoint), SHAPE_SIZE*sizeof(gdouble),
+    gwy_array_set_item_type(GWY_ARRAY(coordspoint),
+                            SHAPE_SIZE*sizeof(gdouble),
                             NULL);
 }
 
