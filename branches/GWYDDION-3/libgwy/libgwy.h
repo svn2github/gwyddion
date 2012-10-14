@@ -28,6 +28,7 @@
 #include <libgwy/calc.h>
 #include <libgwy/container.h>
 #include <libgwy/coords.h>
+#include <libgwy/coords-line.h>
 #include <libgwy/coords-point.h>
 #include <libgwy/coords-rectangle.h>
 #include <libgwy/curve.h>
