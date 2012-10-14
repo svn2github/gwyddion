@@ -96,6 +96,8 @@ typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType        gwy_coords_get_type             (void)                               G_GNUC_CONST;
+GwyCoords*   gwy_coords_new_subset           (const GwyCoords *coords,
+                                              const GwyIntSet *indices)           G_GNUC_MALLOC;
 guint        gwy_coords_shape_size           (const GwyCoords *coords)            G_GNUC_PURE;
 guint        gwy_coords_dimension            (const GwyCoords *coords)            G_GNUC_PURE;
 const guint* gwy_coords_dimension_map        (const GwyCoords *coords)            G_GNUC_PURE;
@@ -110,6 +112,8 @@ void         gwy_coords_set                  (GwyCoords *coords,
                                               const gdouble *data);
 void         gwy_coords_delete               (GwyCoords *coords,
                                               guint i);
+void         gwy_coords_delete_subset        (GwyCoords *coords,
+                                              const GwyIntSet *indices);
 guint        gwy_coords_size                 (const GwyCoords *coords)            G_GNUC_PURE;
 void         gwy_coords_get_data             (const GwyCoords *coords,
                                               gdouble *data);

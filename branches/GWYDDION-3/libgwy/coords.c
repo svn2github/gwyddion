@@ -37,6 +37,13 @@ struct _GwyCoordsPrivate {
 };
 
 typedef struct {
+    const gdouble *origdata;
+    gdouble *data;
+    guint n;
+    guint shape_size;
+} ExtractFuncData;
+
+typedef struct {
     GwyArray *array;
     gdouble *data;
     const guint *dimension_map;
@@ -82,6 +89,8 @@ static void     gwy_coords_constrain_translation_default(const GwyCoords *coords
                                                          gdouble *offsets,
                                                          const gdouble *lower,
                                                          const gdouble *upper);
+static void     extract_func                            (gint value,
+                                                         gpointer user_data);
 static void     translate_func                          (gint value,
                                                          gpointer user_data);
 static void     flip_func                               (gint value,
@@ -376,6 +385,51 @@ gwy_coords_assign_impl(GwySerializable *destination,
 }
 
 /**
+ * gwy_coords_new_subset:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to extract to the new coords objects.
+ *           May be %NULL in which case this method behaves identically to
+ *           gwy_coords_duplicate().
+ *
+ * Creates a new set of coordinates of some geometrical objects as the subset
+ * of an existing set.
+ *
+ * Returns: A newly created group of coordinates.
+ **/
+GwyCoords*
+gwy_coords_new_subset(const GwyCoords *coords,
+                      const GwyIntSet *indices)
+{
+    g_return_val_if_fail(GWY_IS_COORDS(coords), NULL);
+    g_return_val_if_fail(!indices || GWY_IS_INT_SET(indices), NULL);
+
+    // XXX: Must use duplicate to ensure all properties beside data are
+    // duplicated.  This is not very efficient because the data are copied back
+    // and forth then.  Another possibility would be to require that everything
+    // beside the data is present as a property.
+    GwyCoords *duplicate = gwy_coords_duplicate(coords);
+    if (!indices)
+        return duplicate;
+
+    guint n = gwy_int_set_size(indices);
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    guint shape_size = klass->shape_size;
+    guint size = shape_size*n*sizeof(gdouble);
+    ExtractFuncData efdata = {
+        .origdata = (const gdouble*)gwy_array_get_data(GWY_ARRAY(coords)),
+        .data = g_slice_alloc(size),
+        .n = 0,
+        .shape_size = shape_size,
+    };
+    gwy_int_set_foreach(indices, extract_func, &efdata);
+    _gwy_array_set_data_silent(GWY_ARRAY(duplicate), efdata.data, n);
+    g_slice_free1(size, efdata.data);
+
+    return duplicate;
+}
+
+/**
  * gwy_coords_shape_size:
  * @coords: A group of coordinates of some geometrical objects.
  *
@@ -530,6 +584,39 @@ gwy_coords_delete(GwyCoords *coords,
 {
     g_return_if_fail(GWY_IS_COORDS(coords));
     gwy_array_delete1(GWY_ARRAY(coords), i);
+}
+
+/**
+ * gwy_coords_delete_subset:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @indices: (allow-none):
+ *           Set of indices of objects to delete from @coords.  It may be %NULL
+ *           but then this method becomes equivalent to gwy_coords_clear().
+ *
+ * Deletes a subset of coords objects.
+ **/
+void
+gwy_coords_delete_subset(GwyCoords *coords,
+                         const GwyIntSet *indices)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(!indices || GWY_IS_INT_SET(indices));
+
+    if (!indices) {
+        gwy_coords_clear(coords);
+        return;
+    }
+
+    // Copy the values to prevent funny things happening to @indices in
+    // "item-deleted" callbacks.
+    guint nsel;
+    gint *selected = gwy_int_set_values(indices, &nsel);
+    GwyArray *array = GWY_ARRAY(coords);
+    // FIXME: If we could get the selected values as ranges we would delete the
+    // items more efficiently using gwy_array_delete().
+    for (guint i = nsel; i; i--)
+        gwy_array_delete1(array, selected[i-1]);
+    g_free(selected);
 }
 
 /**
@@ -1069,6 +1156,17 @@ gwy_coords_constrain_translation_default(const GwyCoords *coords,
         .transoff = offsets,
     };
     gwy_int_set_foreach(indices, constrain_translation_func, &tfdata);
+}
+
+static void
+extract_func(gint value, gpointer user_data)
+{
+    ExtractFuncData *efdata = (ExtractFuncData*)user_data;
+    guint shape_size = efdata->shape_size;
+    gwy_assign(efdata->data + efdata->n*shape_size,
+               efdata->origdata + value*shape_size,
+               shape_size);
+    efdata->n++;
 }
 
 static void
