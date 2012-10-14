@@ -116,6 +116,7 @@
     <title>Selections</title>
     <xi:include href="xml/coords.xml"/>
     <xi:include href="xml/coords-point.xml"/>
+    <xi:include href="xml/coords-rectangle.xml"/>
     <xi:include href="xml/int-set.xml"/>
   </chapter>
   <chapter id='libgwy-utilities'>
