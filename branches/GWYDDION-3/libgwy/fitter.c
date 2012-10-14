@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-#include <glib.h>
 #include "libgwy/macros.h"
 #include "libgwy/serialize.h"
 #include "libgwy/math.h"

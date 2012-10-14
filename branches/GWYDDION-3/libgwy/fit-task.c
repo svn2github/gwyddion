@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-#include <glib.h>
 #include "libgwy/object-utils.h"
 #include "libgwy/fit-task.h"
 #include "libgwy/types.h"

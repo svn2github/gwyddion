@@ -17,13 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glib.h>
 #include "libgwy/macros.h"
-#include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/coords-point.h"
 #include "libgwy/object-internal.h"
-#include "libgwy/array-internal.h"
 
 #define SHAPE_SIZE G_N_ELEMENTS(dimension_map)
 

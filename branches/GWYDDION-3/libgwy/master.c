@@ -25,7 +25,6 @@
 
 #include "config.h"
 #include <string.h>
-#include <glib.h>
 #include "libgwy/macros.h"
 #include "libgwy/main.h"
 #include "libgwy/master.h"

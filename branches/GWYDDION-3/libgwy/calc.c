@@ -19,7 +19,6 @@
 
 #include "config.h"
 #include <string.h>
-#include <glib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/calc.h"
