@@ -125,6 +125,8 @@ coords/point/finished
 coords/point/units
 coords/point/data
 coords/point/serialize
+coords/point/new-subset
+coords/point/delete-subset
 coords/point/translate
 coords/point/flip
 coords/point/scale

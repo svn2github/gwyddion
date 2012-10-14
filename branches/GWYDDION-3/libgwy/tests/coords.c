@@ -208,6 +208,100 @@ assert_not_index(const gchar *signalname, gint value)
 }
 
 static void
+coords_new_subset_one(GType type)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 150;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyCoords *coords = GWY_COORDS(g_object_newv(type, 0, NULL));
+        coords_randomize(coords, rng);
+        guint n = gwy_coords_size(coords);
+        guint shape_size = gwy_coords_shape_size(coords);
+
+        GwyIntSet *indices = gwy_int_set_new();
+        if (n)
+            int_set_randomize_range(indices, rng, 0, n-1);
+        if (g_rand_int_range(rng, 0, 30) == 0)
+            GWY_OBJECT_UNREF(indices);
+
+        guint nsubset = indices ? gwy_int_set_size(indices) : n;
+
+        GwyCoords *extracted = gwy_coords_new_subset(coords, indices);
+        g_assert_cmpuint(gwy_coords_size(extracted), ==, nsubset);
+
+        gint *values = indices ? gwy_int_set_values(indices, NULL) : NULL;
+
+        for (guint i = 0; i < nsubset; i++) {
+            gdouble xy[shape_size], xyref[shape_size];
+            gwy_coords_get(extracted, i, xy);
+            gwy_coords_get(coords, values ? (guint)values[i] : i, xyref);
+            for (guint j = 0; j < shape_size; j++)
+                g_assert_cmpfloat(xy[j], ==, xyref[j]);
+        }
+
+        GWY_FREE(values);
+        GWY_OBJECT_UNREF(indices);
+        g_object_unref(extracted);
+        g_object_unref(coords);
+    }
+    g_rand_free(rng);
+}
+
+static void
+coords_delete_subset_one(GType type)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 150;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyCoords *coords = GWY_COORDS(g_object_newv(type, 0, NULL));
+        coords_randomize(coords, rng);
+        guint n = gwy_coords_size(coords);
+        guint shape_size = gwy_coords_shape_size(coords);
+
+        GwyIntSet *indices = gwy_int_set_new();
+        if (n)
+            int_set_randomize_range(indices, rng, 0, n-1);
+        if (g_rand_int_range(rng, 0, 30) == 0)
+            GWY_OBJECT_UNREF(indices);
+
+        GwyIntSet *complement = gwy_int_set_new();
+        if (indices) {
+            for (guint i = 0; i < n; i++) {
+                if (!gwy_int_set_contains(indices, i))
+                    gwy_int_set_add(complement, i);
+            }
+            g_assert_cmpuint(gwy_int_set_size(complement),
+                             ==,
+                             n - gwy_int_set_size(indices));
+        }
+        guint nsubset = gwy_int_set_size(complement);
+
+        GwyCoords *extracted = gwy_coords_duplicate(coords);
+        g_assert_cmpuint(gwy_coords_size(extracted), ==, n);
+        gwy_coords_delete_subset(extracted, indices);
+        g_assert_cmpuint(gwy_coords_size(extracted), ==, nsubset);
+
+        gint *values = gwy_int_set_values(complement, NULL);
+        for (guint i = 0; i < nsubset; i++) {
+            gdouble xy[shape_size], xyref[shape_size];
+            gwy_coords_get(extracted, i, xy);
+            gwy_coords_get(coords, values[i], xyref);
+            for (guint j = 0; j < shape_size; j++)
+                g_assert_cmpfloat(xy[j], ==, xyref[j]);
+        }
+
+        g_free(values);
+        GWY_OBJECT_UNREF(indices);
+        g_object_unref(complement);
+        g_object_unref(extracted);
+        g_object_unref(coords);
+    }
+    g_rand_free(rng);
+}
+
+static void
 coords_transform_one(GType type,
                      VectorTransformFunc vector_transform_func,
                      BitmaskTransformFunc bitmask_transform_func,
@@ -223,6 +317,7 @@ coords_transform_one(GType type,
         GwyCoords *coords = GWY_COORDS(g_object_newv(type, 0, NULL));
         g_assert(gwy_coords_can_transform(coords, transform));
         guint dimension = gwy_coords_dimension(coords);
+        guint shape_size = gwy_coords_shape_size(coords);
         g_assert_cmpuint(dimension, >, 0);
 
         coords_randomize(coords, rng);
@@ -308,13 +403,13 @@ coords_transform_one(GType type,
         g_assert_cmpuint(gwy_int_set_size(alltrans_updated), ==, n);
 
         for (guint i = 0; i < n; i++) {
-            gdouble xy[dimension], xyref[dimension], xyall[dimension],
-                    xytrans[dimension];
+            gdouble xy[shape_size], xyref[shape_size], xyall[shape_size],
+                    xytrans[shape_size];
 
             gwy_coords_get(coords, i, xy);
             gwy_coords_get(reference, i, xyref);
             gwy_coords_get(alltrans, i, xyall);
-            gwy_assign(xytrans, xyref, dimension);
+            gwy_assign(xytrans, xyref, shape_size);
             if (transform == GWY_COORDS_TRANSFORM_TRANSLATE
                 || transform == GWY_COORDS_TRANSFORM_SCALE)
                 vector_transform_func(xytrans, parameters);
@@ -324,7 +419,7 @@ coords_transform_one(GType type,
                 g_assert_not_reached();
             }
 
-            for (guint j = 0; j < dimension; j++) {
+            for (guint j = 0; j < shape_size; j++) {
                 if (gwy_int_set_contains(indices, i)) {
                     g_assert_cmpfloat(xy[j], ==, xyall[j]);
                     g_assert_cmpfloat(fabs(xy[j] - xytrans[j]), <=, 1e-15);
@@ -383,12 +478,12 @@ coords_transform_one(GType type,
         g_object_unref(coords_updated);
 
         for (guint i = 0; i < n; i++) {
-            gdouble xy[dimension], xyref[dimension], xyall[dimension];
+            gdouble xy[shape_size], xyref[shape_size], xyall[shape_size];
 
             gwy_coords_get(coords, i, xy);
             gwy_coords_get(reference, i, xyref);
             gwy_coords_get(alltrans, i, xyall);
-            for (guint j = 0; j < dimension; j++) {
+            for (guint j = 0; j < shape_size; j++) {
                 g_assert_cmpfloat(fabs(xy[j] - xyref[j]), <=, 1e-15);
                 g_assert_cmpfloat(fabs(xyall[j] - xyref[j]), <=, 1e-15);
             }
@@ -490,6 +585,18 @@ void
 test_coords_point_serialize(void)
 {
     coords_serialize_one(GWY_TYPE_COORDS_POINT);
+}
+
+void
+test_coords_point_new_subset(void)
+{
+    coords_new_subset_one(GWY_TYPE_COORDS_POINT);
+}
+
+void
+test_coords_point_delete_subset(void)
+{
+    coords_delete_subset_one(GWY_TYPE_COORDS_POINT);
 }
 
 static void
