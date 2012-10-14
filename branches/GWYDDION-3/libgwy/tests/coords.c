@@ -112,7 +112,7 @@ coords_units_one(GType type)
         g_assert_cmpuint(mi, <, dimension);
         g_assert(gwy_coords_get_mapped_units(coords, i)
                  == gwy_coords_get_units(coords, mi));
-        GwyUnit *unit = nth_unit(i);
+        GwyUnit *unit = nth_unit(mi);
         g_assert(gwy_unit_equal(gwy_coords_get_mapped_units(coords, i), unit));
         g_object_unref(unit);
     }
@@ -648,6 +648,105 @@ void
 test_coords_point_constrain_translation(void)
 {
     coords_constrain_translation_one(GWY_TYPE_COORDS_POINT);
+}
+
+/***************************************************************************
+ *
+ * CoordsRectangle
+ *
+ ***************************************************************************/
+
+void
+test_coords_rectangle_finished(void)
+{
+    coords_finished_one(GWY_TYPE_COORDS_RECTANGLE);
+}
+
+void
+test_coords_rectangle_units(void)
+{
+    coords_units_one(GWY_TYPE_COORDS_RECTANGLE);
+}
+
+void
+test_coords_rectangle_data(void)
+{
+    coords_data_one(GWY_TYPE_COORDS_RECTANGLE);
+}
+
+void
+test_coords_rectangle_serialize(void)
+{
+    coords_serialize_one(GWY_TYPE_COORDS_RECTANGLE);
+}
+
+void
+test_coords_rectangle_new_subset(void)
+{
+    coords_new_subset_one(GWY_TYPE_COORDS_RECTANGLE);
+}
+
+void
+test_coords_rectangle_delete_subset(void)
+{
+    coords_delete_subset_one(GWY_TYPE_COORDS_RECTANGLE);
+}
+
+static void
+translate_rectangle(gdouble *xy, const gdouble *dxy)
+{
+    xy[0] += dxy[0];
+    xy[1] += dxy[1];
+    xy[2] += dxy[0];
+    xy[3] += dxy[1];
+}
+
+void
+test_coords_rectangle_translate(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
+                         translate_rectangle, NULL,
+                         GWY_COORDS_TRANSFORM_TRANSLATE);
+}
+
+static void
+flip_rectangle(gdouble *xy, guint axes)
+{
+    xy[0] = (axes & 1) ? -xy[0] : xy[0];
+    xy[1] = (axes & 2) ? -xy[1] : xy[1];
+    xy[2] = (axes & 1) ? -xy[2] : xy[2];
+    xy[3] = (axes & 2) ? -xy[3] : xy[3];
+}
+
+void
+test_coords_rectangle_flip(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
+                         NULL, flip_rectangle,
+                         GWY_COORDS_TRANSFORM_FLIP);
+}
+
+static void
+scale_rectangle(gdouble *xy, const gdouble *sxy)
+{
+    xy[0] *= sxy[0];
+    xy[1] *= sxy[1];
+    xy[2] *= sxy[0];
+    xy[3] *= sxy[1];
+}
+
+void
+test_coords_rectangle_scale(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
+                         scale_rectangle, NULL,
+                         GWY_COORDS_TRANSFORM_SCALE);
+}
+
+void
+test_coords_rectangle_constrain_translation(void)
+{
+    coords_constrain_translation_one(GWY_TYPE_COORDS_RECTANGLE);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
