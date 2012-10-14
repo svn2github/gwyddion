@@ -25,8 +25,9 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/array-internal.h"
 
+#define SHAPE_SIZE G_N_ELEMENTS(dimension_map)
+
 enum {
-    SHAPE_SIZE = 2,
     DIMENSIONS = 2,
     N_ITEMS = 0
 };
@@ -66,6 +67,11 @@ gwy_coords_point_class_init(GwyCoordsPointClass *klass)
     coords_class->shape_size = SHAPE_SIZE;
     coords_class->dimension = G_N_ELEMENTS(dimension_map);
     coords_class->dimension_map = dimension_map;
+    gwy_coords_class_set_generic_transforms(coords_class,
+                                            GWY_COORDS_TRANSFORM_TRANSLATE
+                                            | GWY_COORDS_TRANSFORM_FLIP
+                                            | GWY_COORDS_TRANSFORM_TRANSPOSE
+                                            | GWY_COORDS_TRANSFORM_SCALE);
 }
 
 static void

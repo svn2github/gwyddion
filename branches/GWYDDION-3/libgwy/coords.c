@@ -70,7 +70,7 @@ static gboolean gwy_coords_construct                    (GwySerializable *serial
 static GObject* gwy_coords_duplicate_impl               (GwySerializable *serializable);
 static void     gwy_coords_assign_impl                  (GwySerializable *destination,
                                                          GwySerializable *source);
-static gboolean class_supports_transforms               (GwyCoordsClass *klass,
+static gboolean class_supports_transforms               (const GwyCoordsClass *klass,
                                                          GwyCoordsTransformFlags flags);
 static void     gwy_coords_translate_default            (GwyCoords *coords,
                                                          const GwyIntSet *indices,
@@ -132,12 +132,6 @@ gwy_coords_class_init(GwyCoordsClass *klass)
 
     gobject_class->dispose = gwy_coords_dispose;
     gobject_class->finalize = gwy_coords_finalize;
-
-    klass->translate = gwy_coords_translate_default;
-    klass->flip = gwy_coords_flip_default;
-    klass->scale = gwy_coords_scale_default;
-    klass->transpose = gwy_coords_transpose_default;
-    klass->constrain_translation = gwy_coords_constrain_translation_default;
 
     /**
      * GwyCoords::finished:
@@ -919,7 +913,7 @@ gwy_coords_constrain_translation(const GwyCoords *coords,
  * gwy_coords_can_transform:
  * @coords: A group of coordinates of some geometrical objects.
  * @transforms: Bitmask from %GwyCoordsTransformFlags enum specifying which
- *              transformatons are requested.
+ *              transformations are requested.
  *
  * Checks whether a group of coordinates of some geometrical objects can be
  * transformed using given transformation.
@@ -931,7 +925,7 @@ gwy_coords_constrain_translation(const GwyCoords *coords,
  *          %FALSE if it does not support some.
  **/
 gboolean
-gwy_coords_can_transform(GwyCoords *coords,
+gwy_coords_can_transform(const GwyCoords *coords,
                          GwyCoordsTransformFlags transforms)
 {
     g_return_val_if_fail(GWY_IS_COORDS(coords), FALSE);
@@ -942,27 +936,157 @@ gwy_coords_can_transform(GwyCoords *coords,
  * gwy_coords_class_can_transform:
  * @klass: Klass of group of coordinates of some geometrical objects.
  * @transforms: Bitmask from %GwyCoordsTransformFlags enum specifying which
- *              transformatons are requested.
+ *              transformations are requested.
  *
  * Checks whether given class of groups of coordinates of some geometrical
  * objects can be transformed using given transformation.
  *
  * Not all coordinate types can be transformed using all transformations.  For
- * instance, rectangles and ellipses cannot be rotated.
+ * instance, rectangles and ellipses may not be rotated.
  *
  * Returns: %TRUE if coordinates of class @klass support all transformations
  *          given in @transforms; %FALSE if it doe not support some.
  **/
 gboolean
-gwy_coords_class_can_transform(GwyCoordsClass *klass,
+gwy_coords_class_can_transform(const GwyCoordsClass *klass,
                                GwyCoordsTransformFlags transforms)
 {
     g_return_val_if_fail(GWY_IS_COORDS_CLASS(klass), FALSE);
     return class_supports_transforms(klass, transforms);
 }
 
+/**
+ * gwy_coords_class_set_generic_transforms:
+ * @klass: Klass of group of coordinates of some geometrical objects.
+ * @transforms: Bitmask from %GwyCoordsTransformFlags enum specifying
+ *              transformations that will use the generic implementations.
+ *
+ * Enables default transformation implementations for given class of groups of
+ * coordinates of some geometrical objects.
+ *
+ * This class method is intended for implementation of subclasses.  It sets the
+ * implementations of methods corresponding to flags set in @transforms to
+ * the generic implementations and all other transformation entries in the
+ * virtual table are set to %NULL.  Hence if you need to add or modify
+ * transformation methods you must to it afterwards.  Furthermore, this method
+ * performs some sanity checks of @dimension, @dimension_map and @shape_size
+ * to see whether they conform to what the generic implementations expect.  So
+ * these fields need to be filled beforehand:
+ * |[
+ * my_coords_foo_class_init(MyCoordsFooClass *klass)
+ * {
+ *     GwyCoordsClass *coords_class = GWY_COORDS_CLASS(klass);
+ *     // Fill the coordinates information fields.
+ *     coords_class->dimension = 2;
+ *     coords_class->dimension_map = dimension_map;
+ *     coords_class->shape_size = G_N_ELEMENTS(dimension_map);
+ *     // Set up the generic implementations.
+ *     gwy_coords_class_set_generic_transforms(coords_class,
+ *                                             GWY_COORDS_TRANSFORM_TRANSLATE
+ *                                             | GWY_COORDS_TRANSFORM_SCALE
+ *                                             | GWY_COORDS_TRANSFORM_FLIP);
+ *     // We like the generic translate() implementation but need a different
+ *     // implementation of @constrain_translation().  Change it.
+ *     coords_class->constrain_translation = my_coords_foo_constrain_translation;
+ *     // Make transposition possible with a specialised method.
+ *     coords_class->transpose = my_coords_foo_transpose;
+ *     // ...
+ * }
+ * ]|
+ * The requirements and behaviour of the generic transformations are
+ * enumerated below:
+ * <variablelist>
+ *   <varlistentry>
+ *     <term>%GWY_COORDS_TRANSFORM_TRANSLATE</term>
+ *     <listitem>
+ *       No specific requirements.  Each coordinate is shifted by the
+ *       corresponding offset in @offsets according to @dimension_map.
+ *       When constraining translations, the shifted coordinates are not
+ *       permitted to exceed the specified boundaries (which is a suitable
+ *       requirement if the coordinates represent vertices of the convex hull,
+ *       possibly with additional interior points).
+ *     </listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>%GWY_COORDS_TRANSFORM_FLIP</term>
+ *     <listitem>
+ *       No specific requirements.  The sign of each coordinate is inverted
+ *       if the corresponding bit is set in the @axes bit mask according to
+ *       @dimension_map.
+ *     </listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>%GWY_COORDS_TRANSFORM_TRANSPOSE</term>
+ *     <listitem>
+ *       Coordinates must be organised in one or more blocks of size
+ *       @dimension, each block containing all dimension once; they can be
+ *       permuted but identicially in each block.  Within each block, they are
+ *       then permuted according to @permutation and @dimension_map.
+ *     </listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>%GWY_COORDS_TRANSFORM_SCALE</term>
+ *     <listitem>
+ *       No specific requirements.  Each coordinate is multiplied by the
+ *       corresponding factor in @factors according to @dimension_map.
+ *     </listitem>
+ *   </varlistentry>
+ * </variablelist>
+ **/
+void
+gwy_coords_class_set_generic_transforms(GwyCoordsClass *klass,
+                                        GwyCoordsTransformFlags transforms)
+{
+    klass->translate = NULL;
+    klass->flip = NULL;
+    klass->scale = NULL;
+    klass->transpose = NULL;
+    klass->constrain_translation = NULL;
+
+    g_return_if_fail(klass->shape_size);
+    g_return_if_fail(klass->dimension);
+    g_return_if_fail(klass->dimension_map);
+    g_return_if_fail(klass->dimension <= klass->shape_size);
+
+    const guint *dimension_map = klass->dimension_map;
+    guint shape_size = klass->shape_size, dimension = klass->dimension;
+    for (guint i = 0; i < shape_size; i++) {
+        g_return_if_fail(dimension_map[i] < dimension);
+    }
+
+    if (transforms & GWY_COORDS_TRANSFORM_TRANSLATE) {
+        klass->translate = gwy_coords_translate_default;
+        klass->constrain_translation = gwy_coords_constrain_translation_default;
+    }
+
+    if (transforms & GWY_COORDS_TRANSFORM_SCALE) {
+        klass->scale = gwy_coords_scale_default;
+    }
+
+    if (transforms & GWY_COORDS_TRANSFORM_FLIP) {
+        klass->flip = gwy_coords_flip_default;
+    }
+
+    if (transforms & GWY_COORDS_TRANSFORM_TRANSPOSE) {
+        g_return_if_fail(shape_size % dimension == 0);
+        gboolean seen[dimension];
+        gwy_clear(seen, dimension);
+        for (guint i = 0; i < dimension; i++) {
+            g_assert(!seen[dimension_map[i]]);
+            seen[dimension_map[i]] = TRUE;
+        }
+        guint nblocks = shape_size/dimension;
+        for (guint j = 1; j < nblocks; j++) {
+            for (guint i = 0; i < dimension; i++) {
+                g_assert(dimension_map[j*dimension + i] == dimension_map[i]);
+            }
+        }
+        klass->transpose = gwy_coords_transpose_default;
+    }
+}
+
 static gboolean
-class_supports_transforms(GwyCoordsClass *klass,
+class_supports_transforms(const GwyCoordsClass *klass,
                           GwyCoordsTransformFlags flags)
 {
     if ((flags & GWY_COORDS_TRANSFORM_TRANSLATE) && !klass->translate)
@@ -970,6 +1094,8 @@ class_supports_transforms(GwyCoordsClass *klass,
     if ((flags & GWY_COORDS_TRANSFORM_FLIP) && !klass->flip)
         return FALSE;
     if ((flags & GWY_COORDS_TRANSFORM_SCALE) && !klass->scale)
+        return FALSE;
+    if ((flags & GWY_COORDS_TRANSFORM_TRANSPOSE) && !klass->transpose)
         return FALSE;
     // TODO: Other transformations
     return TRUE;
@@ -1304,13 +1430,10 @@ constrain_translation_func(gint value, gpointer user_data)
  * Specific, i.e. instantiable, subclasses have to set the data members
  * @shape_size, @dimension and @dimension_map.
  *
- * Transformation method often do not need to be implemented speficcally.
- * All have default generic implementations that work for coordinates that are
- * plain bunches of point coordinates defining the convex hull of some shape.
- * So they are fine for points, lines, boxes, ... in an arbitrary dimension.
- * If a subclass does <emphasis>not</emphasis> support some transformation that
- * has a default implementation it must set the method to %NULL explicitly to
- * indicate this type of transformation is not possible.
+ * Transformation method often do not need to be implemented specifically.
+ * If the coordinates follow certain conventions, generic implementations
+ * can be used.  See gwy_coords_class_set_generic_transforms() for a
+ * description of how they work and how they can be enabled for a subclass.
  **/
 
 /**
@@ -1336,6 +1459,10 @@ constrain_translation_func(gint value, gpointer user_data)
  * GwyCoordsTransformFlags:
  * @GWY_COORDS_TRANSFORM_TRANSLATE: Translation is possible, this should be
  *                                  possible with all coordinate types.
+ *                                  In general, requesting to find the possible
+ *                                  translation limits with
+ *                                  gwy_coords_constrain_translation() should
+ *                                  be also possible if this flag is present.
  * @GWY_COORDS_TRANSFORM_FLIP: Flipping around horizontal and vertical axes
  *                             is possible (this implies also rotation by π).
  * @GWY_COORDS_TRANSFORM_TRANSPOSE: Transposing congruence transformations are

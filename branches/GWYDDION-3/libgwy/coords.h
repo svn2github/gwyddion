@@ -101,7 +101,7 @@ GwyCoords*   gwy_coords_new_subset           (const GwyCoords *coords,
 guint        gwy_coords_shape_size           (const GwyCoords *coords)            G_GNUC_PURE;
 guint        gwy_coords_dimension            (const GwyCoords *coords)            G_GNUC_PURE;
 const guint* gwy_coords_dimension_map        (const GwyCoords *coords)            G_GNUC_PURE;
-gboolean     gwy_coords_can_transform        (GwyCoords *coords,
+gboolean     gwy_coords_can_transform        (const GwyCoords *coords,
                                               GwyCoordsTransformFlags transforms) G_GNUC_PURE;
 void         gwy_coords_clear                (GwyCoords *coords);
 gboolean     gwy_coords_get                  (const GwyCoords *coords,
@@ -145,8 +145,11 @@ void         gwy_coords_constrain_translation(const GwyCoords *coords,
                                               gdouble *offsets,
                                               const gdouble *lower,
                                               const gdouble *upper);
-gboolean     gwy_coords_class_can_transform  (GwyCoordsClass *klass,
-                                              GwyCoordsTransformFlags transforms) G_GNUC_PURE;
+
+gboolean gwy_coords_class_can_transform         (const GwyCoordsClass *klass,
+                                                 GwyCoordsTransformFlags transforms)  G_GNUC_PURE;
+void     gwy_coords_class_set_generic_transforms(GwyCoordsClass *klass,
+                                                 GwyCoordsTransformFlags transforms);
 
 G_END_DECLS
 
