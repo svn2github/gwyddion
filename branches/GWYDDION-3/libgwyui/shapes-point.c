@@ -546,16 +546,22 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
         return FALSE;
 
     if (event->keyval == GDK_KEY_Delete || event->keyval == GDK_KEY_BackSpace) {
-        gwy_shapes_point_cancel_editing(shapes, -1);
-        GwyCoords *coords = gwy_shapes_get_coords(shapes);
-        guint nsel;
-        gint *selected = gwy_int_set_values(shapes->selection, &nsel);
-        priv->changing_selection = TRUE;
-        gwy_int_set_update(shapes->selection, NULL, 0);
-        priv->changing_selection = FALSE;
-        for (guint i = 0; i < nsel; i++)
-            gwy_coords_delete(coords, selected[nsel-1 - i]);
-        g_free(selected);
+        if (gwy_int_set_is_nonempty(shapes->selection)) {
+            gwy_shapes_point_cancel_editing(shapes, -1);
+            GwyCoords *coords = gwy_shapes_get_coords(shapes);
+            guint nsel;
+            gint *selected = gwy_int_set_values(shapes->selection, &nsel);
+            priv->changing_selection = TRUE;
+            gwy_int_set_update(shapes->selection, NULL, 0);
+            priv->changing_selection = FALSE;
+            // FIXME: Can we use gwy_coords_delete_subset()?  Obviously not
+            // after clearing @selection.  But deleting items while they are
+            // in @selection can, obviously, lead to problems if anything is
+            // connected to "item-deleted".
+            for (guint i = 0; i < nsel; i++)
+                gwy_coords_delete(coords, selected[nsel-1 - i]);
+            g_free(selected);
+        }
     }
     return FALSE;
 }
