@@ -131,6 +131,16 @@ coords/point/translate
 coords/point/flip
 coords/point/scale
 coords/point/constrain-translation
+coords/line/finished
+coords/line/units
+coords/line/data
+coords/line/serialize
+coords/line/new-subset
+coords/line/delete-subset
+coords/line/translate
+coords/line/flip
+coords/line/scale
+coords/line/constrain-translation
 coords/rectangle/finished
 coords/rectangle/units
 coords/rectangle/data

@@ -652,6 +652,105 @@ test_coords_point_constrain_translation(void)
 
 /***************************************************************************
  *
+ * CoordsLine
+ *
+ ***************************************************************************/
+
+void
+test_coords_line_finished(void)
+{
+    coords_finished_one(GWY_TYPE_COORDS_LINE);
+}
+
+void
+test_coords_line_units(void)
+{
+    coords_units_one(GWY_TYPE_COORDS_LINE);
+}
+
+void
+test_coords_line_data(void)
+{
+    coords_data_one(GWY_TYPE_COORDS_LINE);
+}
+
+void
+test_coords_line_serialize(void)
+{
+    coords_serialize_one(GWY_TYPE_COORDS_LINE);
+}
+
+void
+test_coords_line_new_subset(void)
+{
+    coords_new_subset_one(GWY_TYPE_COORDS_LINE);
+}
+
+void
+test_coords_line_delete_subset(void)
+{
+    coords_delete_subset_one(GWY_TYPE_COORDS_LINE);
+}
+
+static void
+translate_line(gdouble *xy, const gdouble *dxy)
+{
+    xy[0] += dxy[0];
+    xy[1] += dxy[1];
+    xy[2] += dxy[0];
+    xy[3] += dxy[1];
+}
+
+void
+test_coords_line_translate(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_LINE,
+                         translate_line, NULL,
+                         GWY_COORDS_TRANSFORM_TRANSLATE);
+}
+
+static void
+flip_line(gdouble *xy, guint axes)
+{
+    xy[0] = (axes & 1) ? -xy[0] : xy[0];
+    xy[1] = (axes & 2) ? -xy[1] : xy[1];
+    xy[2] = (axes & 1) ? -xy[2] : xy[2];
+    xy[3] = (axes & 2) ? -xy[3] : xy[3];
+}
+
+void
+test_coords_line_flip(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_LINE,
+                         NULL, flip_line,
+                         GWY_COORDS_TRANSFORM_FLIP);
+}
+
+static void
+scale_line(gdouble *xy, const gdouble *sxy)
+{
+    xy[0] *= sxy[0];
+    xy[1] *= sxy[1];
+    xy[2] *= sxy[0];
+    xy[3] *= sxy[1];
+}
+
+void
+test_coords_line_scale(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_LINE,
+                         scale_line, NULL,
+                         GWY_COORDS_TRANSFORM_SCALE);
+}
+
+void
+test_coords_line_constrain_translation(void)
+{
+    coords_constrain_translation_one(GWY_TYPE_COORDS_LINE);
+}
+
+/***************************************************************************
+ *
  * CoordsRectangle
  *
  ***************************************************************************/
