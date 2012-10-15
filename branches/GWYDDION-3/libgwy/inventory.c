@@ -1234,7 +1234,7 @@ invent_item_name(Inventory *inventory,
  * @title: GwyInventory
  * @short_description: Ordered item inventory, indexed by both name and
  *                     position
- * @see_also: #GwyContainer, #GwyInventoryModel
+ * @see_also: #GwyContainer, #GwyInventoryStore
  *
  * #GwyInventory is a uniform container that offers both hash table and array
  * (sorted or unsorted) interfaces.  Both types of access are fast.  Inventory
