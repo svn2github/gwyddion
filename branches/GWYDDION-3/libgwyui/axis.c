@@ -28,9 +28,12 @@ enum {
     PROP_0,
     PROP_SNAP_TO_TICKS,
     N_PROPS,
+    PROP_ORIENTATION = N_PROPS,
+    N_TOTAL_PROPS,
 };
 
 struct _GwyAxisPrivate {
+    GtkOrientation orientation;
     gboolean snap_to_ticks;
 };
 
@@ -48,8 +51,10 @@ static void     gwy_axis_get_property(GObject *object,
                                       GParamSpec *pspec);
 static gboolean set_snap_to_ticks    (GwyAxis *axis,
                                       gboolean setting);
+static gboolean set_orientation      (GwyAxis *axis,
+                                      GtkOrientation orientation);
 
-static GParamSpec *properties[N_PROPS];
+static GParamSpec *properties[N_TOTAL_PROPS];
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE(GwyAxis, gwy_axis, GTK_TYPE_WIDGET,
                                  G_IMPLEMENT_INTERFACE(GTK_TYPE_ORIENTABLE,
@@ -78,6 +83,10 @@ gwy_axis_class_init(GwyAxisClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    gwy_override_class_properties(gobject_class, properties,
+                                  "orientation", PROP_ORIENTATION,
+                                  NULL);
 }
 
 static void
@@ -113,6 +122,10 @@ gwy_axis_set_property(GObject *object,
         set_snap_to_ticks(axis, g_value_get_boolean(value));
         break;
 
+        case PROP_ORIENTATION:
+        set_orientation(axis, g_value_get_enum(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -132,6 +145,10 @@ gwy_axis_get_property(GObject *object,
         g_value_set_boolean(value, priv->snap_to_ticks);
         break;
 
+        case PROP_ORIENTATION:
+        g_value_set_enum(value, priv->orientation);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -149,6 +166,43 @@ set_snap_to_ticks(GwyAxis *axis,
 
     priv->snap_to_ticks = setting;
     gtk_widget_queue_draw(GTK_WIDGET(axis));
+    return TRUE;
+}
+
+// Why isn't this public in Gtk+?
+static void
+orientable_set_style_classes(GtkOrientable *orientable)
+{
+    GtkStyleContext *context;
+    GtkOrientation orientation;
+
+    g_return_if_fail(GTK_IS_ORIENTABLE(orientable));
+    g_return_if_fail(GTK_IS_WIDGET(orientable));
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(orientable));
+    orientation = gtk_orientable_get_orientation(orientable);
+
+    if (orientation == GTK_ORIENTATION_HORIZONTAL) {
+        gtk_style_context_add_class(context, GTK_STYLE_CLASS_HORIZONTAL);
+        gtk_style_context_remove_class(context, GTK_STYLE_CLASS_VERTICAL);
+    }
+    else {
+        gtk_style_context_add_class(context, GTK_STYLE_CLASS_VERTICAL);
+        gtk_style_context_remove_class(context, GTK_STYLE_CLASS_HORIZONTAL);
+    }
+}
+
+static gboolean
+set_orientation(GwyAxis *axis,
+                GtkOrientation orientation)
+{
+    Axis *priv = axis->priv;
+    if (orientation == priv->orientation)
+        return FALSE;
+
+    priv->orientation = orientation;
+    gtk_widget_queue_resize(GTK_WIDGET(axis));
+    orientable_set_style_classes(GTK_ORIENTABLE(axis));
     return TRUE;
 }
 
