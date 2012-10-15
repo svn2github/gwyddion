@@ -284,7 +284,7 @@ gwy_int_set_new(void)
 
 /**
  * gwy_int_set_new_with_values:
- * @values: (array length=@n):
+ * @values: (array length=n):
  *          Integers to fill the integer set with.  They may repeat and may be
  *          in non-ascending order, however, if they do the construction is
  *          somewhat more efficient.
@@ -571,7 +571,7 @@ uniq(gint *values, guint n)
 /**
  * gwy_int_set_update:
  * @intset: A set of integers.
- * @values: (array length=@n):
+ * @values: (array length=n):
  *          Integers to fill the integer set with.
  * @n: Number of items in @values.
  *
@@ -621,7 +621,7 @@ gwy_int_set_update(GwyIntSet *intset,
 /**
  * gwy_int_set_fill:
  * @intset: A set of integers.
- * @values: (array length=@n):
+ * @values: (array length=n):
  *          Integers to fill the integer set with.
  * @n: Number of items in @values.
  *
