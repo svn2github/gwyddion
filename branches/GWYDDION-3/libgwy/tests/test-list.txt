@@ -121,6 +121,7 @@ int-set/update
 int-set/fill
 int-set/foreach
 int-set/iter
+coords/point/new
 coords/point/finished
 coords/point/units
 coords/point/data
@@ -131,6 +132,7 @@ coords/point/translate
 coords/point/flip
 coords/point/scale
 coords/point/constrain-translation
+coords/line/new
 coords/line/finished
 coords/line/units
 coords/line/data
@@ -141,6 +143,7 @@ coords/line/translate
 coords/line/flip
 coords/line/scale
 coords/line/constrain-translation
+coords/rectangle/new
 coords/rectangle/finished
 coords/rectangle/units
 coords/rectangle/data

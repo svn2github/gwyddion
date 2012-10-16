@@ -21,12 +21,25 @@
 
 typedef void (*VectorTransformFunc)(gdouble *xy, const gdouble *parameters);
 typedef void (*BitmaskTransformFunc)(gdouble *xy, guint bitmask);
+typedef GwyCoords* (*NewCoordsFunc)(void);
 
 /***************************************************************************
  *
  * Generic Coords functions
  *
  ***************************************************************************/
+
+static void
+coords_new_one(GType type,
+               NewCoordsFunc func)
+{
+    g_assert(g_type_is_a(type, GWY_TYPE_COORDS));
+    g_assert(G_TYPE_IS_INSTANTIATABLE(type));
+    GwyCoords *coords = func();
+    g_assert(coords);
+    g_assert_cmpuint(G_OBJECT_TYPE(coords), ==, type);
+    g_object_unref(coords);
+}
 
 void
 coords_assert_equal(const GwyCoords *result,
@@ -564,6 +577,12 @@ coords_constrain_translation_one(GType type)
  ***************************************************************************/
 
 void
+test_coords_point_new(void)
+{
+    coords_new_one(GWY_TYPE_COORDS_POINT, gwy_coords_point_new);
+}
+
+void
 test_coords_point_finished(void)
 {
     coords_finished_one(GWY_TYPE_COORDS_POINT);
@@ -655,6 +674,12 @@ test_coords_point_constrain_translation(void)
  * CoordsLine
  *
  ***************************************************************************/
+
+void
+test_coords_line_new(void)
+{
+    coords_new_one(GWY_TYPE_COORDS_LINE, gwy_coords_line_new);
+}
 
 void
 test_coords_line_finished(void)
@@ -754,6 +779,12 @@ test_coords_line_constrain_translation(void)
  * CoordsRectangle
  *
  ***************************************************************************/
+
+void
+test_coords_rectangle_new(void)
+{
+    coords_new_one(GWY_TYPE_COORDS_RECTANGLE, gwy_coords_rectangle_new);
+}
 
 void
 test_coords_rectangle_finished(void)
