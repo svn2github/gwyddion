@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2007,2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  The quicksort algorithm was copied from GNU C library,
@@ -36,25 +36,35 @@
 enum {
     N_ITEMS_XY = 2,
     N_ITEMS_XYZ = 3,
+    N_ITEMS_RANGE = 2,
 };
 
-static gsize    gwy_xy_itemize   (gpointer boxed,
-                                  GwySerializableItems *items);
-static gpointer gwy_xy_construct (GwySerializableItems *items,
-                                  GwyErrorList **error_list);
-static gsize    gwy_xyz_itemize  (gpointer boxed,
-                                  GwySerializableItems *items);
-static gpointer gwy_xyz_construct(GwySerializableItems *items,
-                                  GwyErrorList **error_list);
-static void     sort_plain       (gdouble *array,
-                                  gsize n);
-static void     sort_with_index  (gdouble *array,
-                                  guint *index_array,
-                                  gsize n);
+static gsize    gwy_xy_itemize     (gpointer boxed,
+                                    GwySerializableItems *items);
+static gpointer gwy_xy_construct   (GwySerializableItems *items,
+                                    GwyErrorList **error_list);
+static gsize    gwy_xyz_itemize    (gpointer boxed,
+                                    GwySerializableItems *items);
+static gpointer gwy_xyz_construct  (GwySerializableItems *items,
+                                    GwyErrorList **error_list);
+static gsize    gwy_range_itemize  (gpointer boxed,
+                                    GwySerializableItems *items);
+static gpointer gwy_range_construct(GwySerializableItems *items,
+                                    GwyErrorList **error_list);
+static void     sort_plain         (gdouble *array,
+                                    gsize n);
+static void     sort_with_index    (gdouble *array,
+                                    guint *index_array,
+                                    gsize n);
 
 static const GwySerializableItem serialize_items_xy[N_ITEMS_XY] = {
     /*0*/ { .name = "x", .ctype = GWY_SERIALIZABLE_DOUBLE, },
     /*1*/ { .name = "y", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+};
+
+static const GwySerializableItem serialize_items_range[N_ITEMS_RANGE] = {
+    /*0*/ { .name = "from", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*1*/ { .name = "to",   .ctype = GWY_SERIALIZABLE_DOUBLE, },
 };
 
 static const GwySerializableItem serialize_items_xyz[N_ITEMS_XYZ] = {
@@ -232,6 +242,91 @@ void
 gwy_xyz_free(GwyXYZ *xyz)
 {
     g_slice_free1(sizeof(GwyXYZ), xyz);
+}
+
+GType
+gwy_range_get_type(void)
+{
+    static GType range_type = 0;
+
+    if (G_UNLIKELY(!range_type)) {
+        range_type = g_boxed_type_register_static
+                                        ("GwyRange",
+                                         (GBoxedCopyFunc)gwy_range_copy,
+                                         (GBoxedFreeFunc)gwy_range_free);
+        static const GwySerializableBoxedInfo boxed_info = {
+            sizeof(GwyRange), N_ITEMS_RANGE,
+            gwy_range_itemize, gwy_range_construct,
+            NULL, NULL,
+        };
+        gwy_serializable_boxed_register_static(range_type, &boxed_info);
+    }
+
+    return range_type;
+}
+
+static gsize
+gwy_range_itemize(gpointer boxed,
+                  GwySerializableItems *items)
+{
+    GwyRange *range = (GwyRange*)boxed;
+
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS_RANGE, 0);
+
+    GwySerializableItem *it = items->items + items->n;
+
+    *it = serialize_items_range[0];
+    it->value.v_double = range->from;
+    it++, items->n++;
+
+    *it = serialize_items_range[1];
+    it->value.v_double = range->to;
+    it++, items->n++;
+
+    return N_ITEMS_RANGE;
+}
+
+static gpointer
+gwy_range_construct(GwySerializableItems *items,
+                    GwyErrorList **error_list)
+{
+    GwySerializableItem its[N_ITEMS_RANGE];
+    memcpy(its, serialize_items_range, sizeof(serialize_items_range));
+    gwy_deserialize_filter_items(its, N_ITEMS_RANGE, items, NULL,
+                                 "GwyRange", error_list);
+
+    GwyRange *range = g_slice_new(GwyRange);
+    range->from = NORMALIZE(its[0].value.v_double);
+    range->to = NORMALIZE(its[1].value.v_double);
+    return range;
+}
+
+/**
+ * gwy_range_copy:
+ * @range: Interval on the real axis.
+ *
+ * Copies interval on the real axis.
+ *
+ * Returns: A copy of @range. The result must be freed using gwy_range_free(),
+ *          not g_free().
+ **/
+GwyRange*
+gwy_range_copy(const GwyRange *range)
+{
+    g_return_val_if_fail(range, NULL);
+    return g_slice_copy(sizeof(GwyRange), range);
+}
+
+/**
+ * gwy_range_free:
+ * @range: Interval on the real axis.
+ *
+ * Frees interval on the real axis created with gwy_range_copy().
+ **/
+void
+gwy_range_free(GwyRange *range)
+{
+    g_slice_free1(sizeof(GwyRange), range);
 }
 
 /**
@@ -1597,6 +1692,23 @@ jump_over:
  * GWY_TYPE_XYZ:
  *
  * The #GType for a boxed type holding a #GwyXYZ.
+ **/
+
+/**
+ * GwyRange:
+ * @from: Begining of the interval.
+ * @to: End of the interval.
+ *
+ * Representation of an interval on the real axis.
+ *
+ * Usually it holds @from ≤ @to.  However, in some uses the interval is
+ * oriented and thus either value can be larger or smaller.
+ **/
+
+/**
+ * GWY_TYPE_RANGE:
+ *
+ * The #GType for a boxed type holding a #GwyRange.
  **/
 
 /**

@@ -95,6 +95,7 @@ master/cancel/16
 master/cancel/auto
 xy/boxed
 xyz/boxed
+range/boxed
 line-part/boxed
 field-part/boxed
 field-part/intersect

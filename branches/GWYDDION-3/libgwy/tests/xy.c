@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 
 /***************************************************************************
  *
- * XY and XYZ
+ * XY, XYZ and Range
  *
  ***************************************************************************/
 
@@ -44,6 +44,16 @@ test_xyz_boxed(void)
     g_assert_cmpfloat(xyz.y, ==, copy->y);
     g_assert_cmpfloat(xyz.z, ==, copy->z);
     g_boxed_free(GWY_TYPE_XYZ, copy);
+}
+
+void
+test_range_boxed(void)
+{
+    GwyRange range = { GWY_SQRT3, 1e14 };
+    GwyRange *copy = serialize_boxed_and_back(&range, GWY_TYPE_RANGE);
+    g_assert_cmpfloat(range.from, ==, copy->from);
+    g_assert_cmpfloat(range.to, ==, copy->to);
+    g_boxed_free(GWY_TYPE_RANGE, copy);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

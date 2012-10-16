@@ -40,6 +40,11 @@ typedef struct {
 } GwyXYZ;
 
 typedef struct {
+    gdouble from;
+    gdouble to;
+} GwyRange;
+
+typedef struct {
     gdouble k1;
     gdouble k2;
     gdouble phi1;
@@ -131,6 +136,12 @@ void   gwy_xy_free    (GwyXY *xy);
 GType   gwy_xyz_get_type(void)              G_GNUC_CONST;
 GwyXYZ* gwy_xyz_copy    (const GwyXYZ *xyz) G_GNUC_MALLOC;
 void    gwy_xyz_free    (GwyXYZ *xyz);
+
+#define GWY_TYPE_RANGE (gwy_range_get_type())
+
+GType     gwy_range_get_type(void)                  G_GNUC_CONST;
+GwyRange* gwy_range_copy    (const GwyRange *range) G_GNUC_MALLOC;
+void      gwy_range_free    (GwyRange *range);
 
 G_END_DECLS
 
