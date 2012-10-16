@@ -21,6 +21,7 @@
 #define __LIBGWYUI_AXIS_H__
 
 #include <gtk/gtk.h>
+#include <libgwy/math.h>
 #include <libgwy/unit.h>
 
 G_BEGIN_DECLS
@@ -51,7 +52,16 @@ struct _GwyAxisClass {
     GtkWidgetClass widget_class;
 };
 
-GType gwy_axis_get_type(void) G_GNUC_CONST;
+GType    gwy_axis_get_type           (void)                     G_GNUC_CONST;
+void     gwy_axis_get_range          (const GwyAxis *axis,
+                                      GwyRange *range);
+void     gwy_axis_request_range      (GwyAxis *axis,
+                                      const GwyRange *request);
+void     gwy_axis_get_requested_range(GwyAxis *axis,
+                                      GwyRange *range);
+gboolean gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
+void     gwy_axis_set_show_labels    (GwyAxis *axis,
+                                      gboolean showlabels);
 
 G_END_DECLS
 

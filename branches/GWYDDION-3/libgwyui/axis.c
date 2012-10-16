@@ -18,7 +18,6 @@
  */
 
 #include "libgwy/macros.h"
-#include "libgwy/math.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/axis.h"
 
@@ -28,6 +27,8 @@ enum {
     PROP_0,
     PROP_UNIT,
     PROP_EDGE,
+    PROP_RANGE_REQUEST,
+    PROP_RANGE,
     PROP_SNAP_TO_TICKS,
     PROP_SHOW_LABELS,
     PROP_SHOW_UNITS,
@@ -39,11 +40,17 @@ struct _GwyAxisPrivate {
     GwyUnit *unit;
     gulong unit_changed_id;
 
+    GwyRange request;
+    GwyRange range;
+
     GtkPositionType edge;
     gboolean snap_to_ticks : 1;
     gboolean show_labels : 1;
     gboolean show_units : 1;
     gboolean draw_minor : 1;
+
+    gboolean ticks_are_valid : 1;
+    // TODO: Here we will keep the precalculated ticks.
 };
 
 typedef struct _GwyAxisPrivate Axis;
@@ -68,8 +75,11 @@ static gboolean set_draw_minor            (GwyAxis *axis,
                                            gboolean setting);
 static gboolean set_edge                  (GwyAxis *axis,
                                            GtkPositionType edge);
+static gboolean request_range             (GwyAxis *axis,
+                                           const GwyRange *range);
 static void     unit_changed              (GwyAxis *axis,
                                            GwyUnit *unit);
+static void     invalidate_ticks          (GwyAxis *axis);
 static void     position_set_style_classes(GtkWidget *widget,
                                            GtkPositionType position);
 
@@ -107,6 +117,20 @@ gwy_axis_class_init(GwyAxisClass *klass)
                              GTK_TYPE_POSITION_TYPE,
                              GTK_POS_BOTTOM,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_RANGE_REQUEST]
+         = g_param_spec_boxed("range-request",
+                              "Range request",
+                              "Requested value range of the axis.",
+                              GWY_TYPE_RANGE,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_RANGE]
+         = g_param_spec_boxed("range",
+                              "Range",
+                              "Actual value range of the axis.",
+                              GWY_TYPE_RANGE,
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SNAP_TO_TICKS]
         = g_param_spec_boolean("snap-to-ticks",
@@ -157,6 +181,7 @@ gwy_axis_init(GwyAxis *axis)
     priv->show_units = TRUE;
     priv->draw_minor = TRUE;
     priv->edge = GTK_POS_BOTTOM;
+    priv->range.to = priv->request.to = 1.0;
 }
 
 static void
@@ -185,6 +210,10 @@ gwy_axis_set_property(GObject *object,
     switch (prop_id) {
         case PROP_EDGE:
         set_edge(axis, g_value_get_enum(value));
+        break;
+
+        case PROP_RANGE_REQUEST:
+        request_range(axis, (const GwyRange*)g_value_get_boxed(value));
         break;
 
         case PROP_SNAP_TO_TICKS:
@@ -226,6 +255,14 @@ gwy_axis_get_property(GObject *object,
         g_value_set_enum(value, priv->edge);
         break;
 
+        case PROP_RANGE_REQUEST:
+        g_value_set_boxed(value, &priv->request);
+        break;
+
+        case PROP_RANGE:
+        g_value_set_boxed(value, &priv->range);
+        break;
+
         case PROP_SNAP_TO_TICKS:
         g_value_set_boolean(value, priv->snap_to_ticks);
         break;
@@ -248,6 +285,99 @@ gwy_axis_get_property(GObject *object,
     }
 }
 
+/**
+ * gwy_axis_get_range:
+ * @axis: An axis.
+ * @range: (out):
+ *         Location to store the actual axis range.
+ *
+ * Obtains the actual range of an axis.
+ *
+ * The actual range may differ from the requested range namely when snapping
+ * to ticks is enabled.  Generally, it should contain the entire requested
+ * range but in less usual circumstances (e.g. logarithmic axes) it may not.
+ * Also the actual range may be unrelated to requested between the request and
+ * the recalculation of ticks.
+ **/
+void
+gwy_axis_get_range(const GwyAxis *axis,
+                   GwyRange *range)
+{
+    g_return_if_fail(range);
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    *range = axis->priv->range;
+}
+
+/**
+ * gwy_axis_request_range:
+ * @axis: An axis.
+ * @range: Requested range for the axis.
+ *
+ * Requests the range an axis should cover.
+ **/
+void
+gwy_axis_request_range(GwyAxis *axis,
+                       const GwyRange *request)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!request_range(axis, request))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE_REQUEST]);
+}
+
+/**
+ * gwy_axis_get_requested_range:
+ * @axis: An axis.
+ * @range: (out):
+ *         Location to store the requested axis range.
+ *
+ * Obtains the actual range of an axis.
+ *
+ * See gwy_axis_get_range() for discussion.
+ **/
+void
+gwy_axis_get_requested_range(GwyAxis *axis,
+                             GwyRange *range)
+{
+    g_return_if_fail(range);
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    *range = axis->priv->request;
+}
+
+/**
+ * gwy_axis_get_show_labels:
+ * @axis: An axis.
+ *
+ * Reports whether an axis shows tick labels.
+ *
+ * Returns: %TRUE if @axis shows tick labels; %FALSE if they are not shown.
+ **/
+gboolean
+gwy_axis_get_show_labels(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    return !!axis->priv->show_labels;
+}
+
+/**
+ * gwy_axis_set_show_labels:
+ * @axis: An axis.
+ * @showlabels: %TRUE to show tick labels; %FALSE to not show them.
+ *
+ * Sets whether an axis should show tick labels.
+ **/
+void
+gwy_axis_set_show_labels(GwyAxis *axis,
+                         gboolean showlabels)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!set_show_labels(axis, showlabels))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_LABELS]);
+}
+
 static gboolean
 set_edge(GwyAxis *axis,
          GtkPositionType edge)
@@ -257,8 +387,22 @@ set_edge(GwyAxis *axis,
         return FALSE;
 
     priv->edge = edge;
+    priv->ticks_are_valid = FALSE;
     gtk_widget_queue_resize(GTK_WIDGET(axis));
     position_set_style_classes(GTK_WIDGET(axis), edge);
+    return TRUE;
+}
+
+static gboolean
+request_range(GwyAxis *axis,
+              const GwyRange *request)
+{
+    Axis *priv = axis->priv;
+    if (request->from == priv->request.from && request->to == priv->request.to)
+        return FALSE;
+
+    priv->request = *request;
+    invalidate_ticks(axis);
     return TRUE;
 }
 
@@ -272,7 +416,7 @@ set_snap_to_ticks(GwyAxis *axis,
         return FALSE;
 
     priv->snap_to_ticks = setting;
-    gtk_widget_queue_draw(GTK_WIDGET(axis));
+    invalidate_ticks(axis);
     return TRUE;
 }
 
@@ -286,7 +430,8 @@ set_show_labels(GwyAxis *axis,
         return FALSE;
 
     priv->show_labels = setting;
-    gtk_widget_queue_draw(GTK_WIDGET(axis));
+    // TODO: Subclasses may want to queue resize here?
+    invalidate_ticks(axis);
     return TRUE;
 }
 
@@ -300,7 +445,7 @@ set_show_units(GwyAxis *axis,
         return FALSE;
 
     priv->show_units = setting;
-    gtk_widget_queue_draw(GTK_WIDGET(axis));
+    invalidate_ticks(axis);
     return TRUE;
 }
 
@@ -314,7 +459,7 @@ set_draw_minor(GwyAxis *axis,
         return FALSE;
 
     priv->draw_minor = setting;
-    gtk_widget_queue_draw(GTK_WIDGET(axis));
+    invalidate_ticks(axis);
     return TRUE;
 }
 
@@ -323,10 +468,20 @@ unit_changed(GwyAxis *axis,
              G_GNUC_UNUSED GwyUnit *unit)
 {
     Axis *priv = axis->priv;
-    if (!priv->show_units)
-        return;
+    if (priv->show_units)
+        invalidate_ticks(axis);
+}
 
-    gtk_widget_queue_draw(GTK_WIDGET(axis));
+static void
+invalidate_ticks(GwyAxis *axis)
+{
+    // FIXME: If the widget has no size allocated yet there is no way to
+    // calculate tics.  Is it OK to just set range to the request then?
+    Axis *priv = axis->priv;
+    if (priv->ticks_are_valid) {
+        priv->ticks_are_valid = FALSE;
+        gtk_widget_queue_draw(GTK_WIDGET(axis));
+    }
 }
 
 // FIXME: This should be called when the widget is initially created.
