@@ -26,39 +26,56 @@
 
 enum {
     PROP_0,
+    PROP_UNIT,
+    PROP_EDGE,
     PROP_SNAP_TO_TICKS,
+    PROP_SHOW_LABELS,
+    PROP_SHOW_UNITS,
+    PROP_DRAW_MINOR,
     N_PROPS,
-    PROP_ORIENTATION = N_PROPS,
-    N_TOTAL_PROPS,
 };
 
 struct _GwyAxisPrivate {
-    GtkOrientation orientation;
-    gboolean snap_to_ticks;
+    GwyUnit *unit;
+    gulong unit_changed_id;
+
+    GtkPositionType edge;
+    gboolean snap_to_ticks : 1;
+    gboolean show_labels : 1;
+    gboolean show_units : 1;
+    gboolean draw_minor : 1;
 };
 
 typedef struct _GwyAxisPrivate Axis;
 
-static void     gwy_axis_dispose     (GObject *object);
-static void     gwy_axis_finalize    (GObject *object);
-static void     gwy_axis_set_property(GObject *object,
-                                      guint prop_id,
-                                      const GValue *value,
-                                      GParamSpec *pspec);
-static void     gwy_axis_get_property(GObject *object,
-                                      guint prop_id,
-                                      GValue *value,
-                                      GParamSpec *pspec);
-static gboolean set_snap_to_ticks    (GwyAxis *axis,
-                                      gboolean setting);
-static gboolean set_orientation      (GwyAxis *axis,
-                                      GtkOrientation orientation);
+static void     gwy_axis_dispose          (GObject *object);
+static void     gwy_axis_finalize         (GObject *object);
+static void     gwy_axis_set_property     (GObject *object,
+                                           guint prop_id,
+                                           const GValue *value,
+                                           GParamSpec *pspec);
+static void     gwy_axis_get_property     (GObject *object,
+                                           guint prop_id,
+                                           GValue *value,
+                                           GParamSpec *pspec);
+static gboolean set_snap_to_ticks         (GwyAxis *axis,
+                                           gboolean setting);
+static gboolean set_show_labels           (GwyAxis *axis,
+                                           gboolean setting);
+static gboolean set_show_units            (GwyAxis *axis,
+                                           gboolean setting);
+static gboolean set_draw_minor            (GwyAxis *axis,
+                                           gboolean setting);
+static gboolean set_edge                  (GwyAxis *axis,
+                                           GtkPositionType edge);
+static void     unit_changed              (GwyAxis *axis,
+                                           GwyUnit *unit);
+static void     position_set_style_classes(GtkWidget *widget,
+                                           GtkPositionType position);
 
-static GParamSpec *properties[N_TOTAL_PROPS];
+static GParamSpec *properties[N_PROPS];
 
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE(GwyAxis, gwy_axis, GTK_TYPE_WIDGET,
-                                 G_IMPLEMENT_INTERFACE(GTK_TYPE_ORIENTABLE,
-                                                       NULL));
+G_DEFINE_ABSTRACT_TYPE(GwyAxis, gwy_axis, GTK_TYPE_WIDGET);
 
 static void
 gwy_axis_class_init(GwyAxisClass *klass)
@@ -73,20 +90,56 @@ gwy_axis_class_init(GwyAxisClass *klass)
     gobject_class->get_property = gwy_axis_get_property;
     gobject_class->set_property = gwy_axis_set_property;
 
+    properties[PROP_UNIT]
+         = g_param_spec_object("unit",
+                               "Unit",
+                               "Units of the quantity shown on the axis.",
+                               GWY_TYPE_UNIT,
+                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_EDGE]
+         = g_param_spec_enum("edge",
+                             "Edge",
+                             "Edge on which this axis is placed with "
+                             "respect to the data widget.  Ticks are "
+                             "drawn on the opposite edge of the axis "
+                             "so that they are adjacent to the data widget.",
+                             GTK_TYPE_POSITION_TYPE,
+                             GTK_POS_BOTTOM,
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     properties[PROP_SNAP_TO_TICKS]
         = g_param_spec_boolean("snap-to-ticks",
                                "Snap to ticks",
                                "Whether the range should start and end at "
-                               "a tick.",
+                               "a major tick.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHOW_LABELS]
+        = g_param_spec_boolean("show-labels",
+                               "Show labels",
+                               "Whether labels should be shown at major ticks.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHOW_UNITS]
+        = g_param_spec_boolean("show-units",
+                               "Show units",
+                               "Whether units should be shown next to a major "
+                               "tick.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_DRAW_MINOR]
+        = g_param_spec_boolean("draw-minor",
+                               "Draw-minor",
+                               "Whether minor ticks should be drawn.",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
-
-    gwy_override_class_properties(gobject_class, properties,
-                                  "orientation", PROP_ORIENTATION,
-                                  NULL);
 }
 
 static void
@@ -94,12 +147,24 @@ gwy_axis_init(GwyAxis *axis)
 {
     axis->priv = G_TYPE_INSTANCE_GET_PRIVATE(axis, GWY_TYPE_AXIS, Axis);
     Axis *priv = axis->priv;
+
+    priv->unit = gwy_unit_new();
+    priv->unit_changed_id = g_signal_connect_swapped(priv->unit, "changed",
+                                                     G_CALLBACK(unit_changed),
+                                                     axis);
     priv->snap_to_ticks = TRUE;
+    priv->show_labels = TRUE;
+    priv->show_units = TRUE;
+    priv->draw_minor = TRUE;
+    priv->edge = GTK_POS_BOTTOM;
 }
 
 static void
 gwy_axis_finalize(GObject *object)
 {
+    Axis *priv = GWY_AXIS(object)->priv;
+    g_signal_handler_disconnect(priv->unit, priv->unit_changed_id);
+    g_object_unref(priv->unit);
     G_OBJECT_CLASS(gwy_axis_parent_class)->finalize(object);
 }
 
@@ -118,12 +183,24 @@ gwy_axis_set_property(GObject *object,
     GwyAxis *axis = GWY_AXIS(object);
 
     switch (prop_id) {
+        case PROP_EDGE:
+        set_edge(axis, g_value_get_enum(value));
+        break;
+
         case PROP_SNAP_TO_TICKS:
         set_snap_to_ticks(axis, g_value_get_boolean(value));
         break;
 
-        case PROP_ORIENTATION:
-        set_orientation(axis, g_value_get_enum(value));
+        case PROP_SHOW_LABELS:
+        set_show_labels(axis, g_value_get_boolean(value));
+        break;
+
+        case PROP_SHOW_UNITS:
+        set_show_units(axis, g_value_get_boolean(value));
+        break;
+
+        case PROP_DRAW_MINOR:
+        set_draw_minor(axis, g_value_get_boolean(value));
         break;
 
         default:
@@ -134,25 +211,55 @@ gwy_axis_set_property(GObject *object,
 
 static void
 gwy_axis_get_property(GObject *object,
-                             guint prop_id,
-                             GValue *value,
-                             GParamSpec *pspec)
+                      guint prop_id,
+                      GValue *value,
+                      GParamSpec *pspec)
 {
     Axis *priv = GWY_AXIS(object)->priv;
 
     switch (prop_id) {
+        case PROP_UNIT:
+        g_value_set_object(value, priv->unit);
+        break;
+
+        case PROP_EDGE:
+        g_value_set_enum(value, priv->edge);
+        break;
+
         case PROP_SNAP_TO_TICKS:
         g_value_set_boolean(value, priv->snap_to_ticks);
         break;
 
-        case PROP_ORIENTATION:
-        g_value_set_enum(value, priv->orientation);
+        case PROP_SHOW_LABELS:
+        g_value_set_boolean(value, priv->show_labels);
+        break;
+
+        case PROP_SHOW_UNITS:
+        g_value_set_boolean(value, priv->show_units);
+        break;
+
+        case PROP_DRAW_MINOR:
+        g_value_set_boolean(value, priv->draw_minor);
         break;
 
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
     }
+}
+
+static gboolean
+set_edge(GwyAxis *axis,
+         GtkPositionType edge)
+{
+    Axis *priv = axis->priv;
+    if (edge == priv->edge)
+        return FALSE;
+
+    priv->edge = edge;
+    gtk_widget_queue_resize(GTK_WIDGET(axis));
+    position_set_style_classes(GTK_WIDGET(axis), edge);
+    return TRUE;
 }
 
 static gboolean
@@ -169,42 +276,98 @@ set_snap_to_ticks(GwyAxis *axis,
     return TRUE;
 }
 
-// Why isn't this public in Gtk+?
-static void
-orientable_set_style_classes(GtkOrientable *orientable)
+static gboolean
+set_show_labels(GwyAxis *axis,
+                gboolean setting)
 {
-    GtkStyleContext *context;
-    GtkOrientation orientation;
+    Axis *priv = axis->priv;
+    setting = !!setting;
+    if (setting == priv->show_labels)
+        return FALSE;
 
-    g_return_if_fail(GTK_IS_ORIENTABLE(orientable));
-    g_return_if_fail(GTK_IS_WIDGET(orientable));
-
-    context = gtk_widget_get_style_context(GTK_WIDGET(orientable));
-    orientation = gtk_orientable_get_orientation(orientable);
-
-    if (orientation == GTK_ORIENTATION_HORIZONTAL) {
-        gtk_style_context_add_class(context, GTK_STYLE_CLASS_HORIZONTAL);
-        gtk_style_context_remove_class(context, GTK_STYLE_CLASS_VERTICAL);
-    }
-    else {
-        gtk_style_context_add_class(context, GTK_STYLE_CLASS_VERTICAL);
-        gtk_style_context_remove_class(context, GTK_STYLE_CLASS_HORIZONTAL);
-    }
+    priv->show_labels = setting;
+    gtk_widget_queue_draw(GTK_WIDGET(axis));
+    return TRUE;
 }
 
 static gboolean
-set_orientation(GwyAxis *axis,
-                GtkOrientation orientation)
+set_show_units(GwyAxis *axis,
+               gboolean setting)
 {
     Axis *priv = axis->priv;
-    if (orientation == priv->orientation)
+    setting = !!setting;
+    if (setting == priv->show_units)
         return FALSE;
 
-    priv->orientation = orientation;
-    gtk_widget_queue_resize(GTK_WIDGET(axis));
-    orientable_set_style_classes(GTK_ORIENTABLE(axis));
+    priv->show_units = setting;
+    gtk_widget_queue_draw(GTK_WIDGET(axis));
     return TRUE;
 }
+
+static gboolean
+set_draw_minor(GwyAxis *axis,
+               gboolean setting)
+{
+    Axis *priv = axis->priv;
+    setting = !!setting;
+    if (setting == priv->draw_minor)
+        return FALSE;
+
+    priv->draw_minor = setting;
+    gtk_widget_queue_draw(GTK_WIDGET(axis));
+    return TRUE;
+}
+
+static void
+unit_changed(GwyAxis *axis,
+             G_GNUC_UNUSED GwyUnit *unit)
+{
+    Axis *priv = axis->priv;
+    if (!priv->show_units)
+        return;
+
+    gtk_widget_queue_draw(GTK_WIDGET(axis));
+}
+
+// FIXME: This should be called when the widget is initially created.
+// FIXME: This should go to general widget utils.
+static void
+position_set_style_classes(GtkWidget *widget,
+                           GtkPositionType position)
+{
+    g_return_if_fail(GTK_IS_WIDGET(widget));
+
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    if (position == GTK_POS_TOP || position == GTK_POS_BOTTOM) {
+        gtk_style_context_add_class(context, GTK_STYLE_CLASS_HORIZONTAL);
+        gtk_style_context_remove_class(context, GTK_STYLE_CLASS_VERTICAL);
+    }
+    else if (position == GTK_POS_LEFT || position == GTK_POS_RIGHT) {
+        gtk_style_context_add_class(context, GTK_STYLE_CLASS_VERTICAL);
+        gtk_style_context_remove_class(context, GTK_STYLE_CLASS_HORIZONTAL);
+    }
+    else {
+        g_assert_not_reached();
+    }
+}
+
+// Tick algorithm.
+// (1) Estimate minimum distance required between major ticks.  This is a
+//     handful of pixels for no-labels case; approx. the dimension of the
+//     label when tick labels are requested.
+// (2) Estimate the major step.
+// (3) If we cannot place even two major ticks, enter a fallback mode and just
+//     try to draw something (possibly disabling labels even if they are
+//     requested).  End here.
+// (4) Calculate the label precision necessary for given major step.  Can we
+//     do this exactly?
+// (5) Try to actually format ticks to see whether they fit. This includes
+//     sufficient spacing of minor ticks (if requested).
+// (6) Ticks fit: Remember this base as LAST_GOOD and decrease the major step
+//     to the next smaller, go to (4).
+// (7) Ticks do not fit: If we have LAST_GOOD use that.  Otherwise increase the
+//     majot step to the next larger.  Go to (3).
+// (8) Take minor step as the next smaller for obtained major step.
 
 /**
  * SECTION: axis

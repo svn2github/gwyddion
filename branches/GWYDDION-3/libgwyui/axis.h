@@ -21,6 +21,7 @@
 #define __LIBGWYUI_AXIS_H__
 
 #include <gtk/gtk.h>
+#include <libgwy/unit.h>
 
 G_BEGIN_DECLS
 
