@@ -23,6 +23,9 @@
 
 #define IGNORE_ME N_("A translatable string.")
 
+#define ALMOST_BLOODY_INFINITY (1e-3*G_MAXDOUBLE)
+#define ALMOST_BLOODY_NOTHING (1e3*G_MINDOUBLE)
+
 enum {
     PROP_0,
     PROP_UNIT,
@@ -41,6 +44,7 @@ struct _GwyAxisPrivate {
     gulong unit_changed_id;
 
     GwyRange request;
+    GwyRange ourrequest;    // Usually equal to request except when it silly.
     GwyRange range;
 
     GtkPositionType edge;
@@ -50,7 +54,9 @@ struct _GwyAxisPrivate {
     gboolean draw_minor : 1;
 
     gboolean ticks_are_valid : 1;
-    // TODO: Here we will keep the precalculated ticks.
+    // TODO: Here we will keep the precalculated ticks and stuff.
+    GwyValueFormat *vf;
+    PangoLayout *layout;
 };
 
 typedef struct _GwyAxisPrivate Axis;
@@ -65,6 +71,7 @@ static void     gwy_axis_get_property     (GObject *object,
                                            guint prop_id,
                                            GValue *value,
                                            GParamSpec *pspec);
+static void     gwy_axis_style_updated    (GtkWidget *widget);
 static gboolean set_snap_to_ticks         (GwyAxis *axis,
                                            gboolean setting);
 static gboolean set_show_labels           (GwyAxis *axis,
@@ -82,8 +89,14 @@ static void     unit_changed              (GwyAxis *axis,
 static void     invalidate_ticks          (GwyAxis *axis);
 static void     position_set_style_classes(GtkWidget *widget,
                                            GtkPositionType position);
+static void     calculate_ticks           (GwyAxis *axis);
+static gdouble  get_pixel_length          (const GwyAxis *axis);
+static gdouble  estimate_major_distance   (const GwyAxis *axis);
+static void     fix_request               (GwyAxis *axis);
 
 static GParamSpec *properties[N_PROPS];
+
+static const GwyRange default_range = { -1.0, 1.0 };
 
 G_DEFINE_ABSTRACT_TYPE(GwyAxis, gwy_axis, GTK_TYPE_WIDGET);
 
@@ -91,7 +104,7 @@ static void
 gwy_axis_class_init(GwyAxisClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-    //GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(Axis));
 
@@ -99,6 +112,8 @@ gwy_axis_class_init(GwyAxisClass *klass)
     gobject_class->finalize = gwy_axis_finalize;
     gobject_class->get_property = gwy_axis_get_property;
     gobject_class->set_property = gwy_axis_set_property;
+
+    widget_class->style_updated = gwy_axis_style_updated;
 
     properties[PROP_UNIT]
          = g_param_spec_object("unit",
@@ -181,7 +196,7 @@ gwy_axis_init(GwyAxis *axis)
     priv->show_units = TRUE;
     priv->draw_minor = TRUE;
     priv->edge = GTK_POS_BOTTOM;
-    priv->range.to = priv->request.to = 1.0;
+    priv->range = priv->request = default_range;
 }
 
 static void
@@ -196,6 +211,10 @@ gwy_axis_finalize(GObject *object)
 static void
 gwy_axis_dispose(GObject *object)
 {
+    Axis *priv = GWY_AXIS(object)->priv;
+    // Unref even our own member objects if they are of the may-not-exist kind.
+    GWY_OBJECT_UNREF(priv->vf);
+    GWY_OBJECT_UNREF(priv->layout);
     G_OBJECT_CLASS(gwy_axis_parent_class)->dispose(object);
 }
 
@@ -283,6 +302,14 @@ gwy_axis_get_property(GObject *object,
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
     }
+}
+
+static void
+gwy_axis_style_updated(GtkWidget *widget)
+{
+    Axis *priv = GWY_AXIS(widget)->priv;
+    if (priv->layout)
+        pango_layout_context_changed(priv->layout);
 }
 
 /**
@@ -523,6 +550,108 @@ position_set_style_classes(GtkWidget *widget,
 // (7) Ticks do not fit: If we have LAST_GOOD use that.  Otherwise increase the
 //     majot step to the next larger.  Go to (3).
 // (8) Take minor step as the next smaller for obtained major step.
+static void
+calculate_ticks(GwyAxis *axis)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    Axis *priv = axis->priv;
+
+    fix_request(axis);
+    if (!priv->layout)
+        priv->layout = gtk_widget_create_pango_layout(widget, NULL);
+
+    guint length = get_pixel_length(axis);
+    gdouble majdist = estimate_major_distance(axis);
+
+    priv->ticks_are_valid = TRUE;
+}
+
+static void
+fix_request(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    GwyRange *req = &priv->ourrequest;
+
+    *req = priv->request;
+
+    // Refuse to show anything that is not a normal number.  Also handle
+    // specially zero range around zero.
+    if (!isnormal(req->from) || !isnormal(req->to) || (req->from == 0.0
+                                                       && req->to == 0.0)) {
+        *req = default_range;
+        return;
+    }
+
+    // Refuse to go to almost infinity.
+    if (fabs(req->from) > ALMOST_BLOODY_INFINITY)
+        req->from = copysign(ALMOST_BLOODY_INFINITY, req->from);
+    if (fabs(req->to) > ALMOST_BLOODY_INFINITY)
+        req->to = copysign(ALMOST_BLOODY_INFINITY, req->to);
+
+    // Refuse to work with just a few last bits of precision (and show more
+    // than 12 digits).
+    gdouble s = 5e-13*(fabs(req->from) + fabs(req->to));
+    s = fmax(s, ALMOST_BLOODY_NOTHING);
+    if (fabs(req->from - req->to) <= s) {
+        gdouble m = 0.5*(req->from + req->to);
+        if (req->to < req->from)
+            s = -s;
+        req->from = m - s;
+        req->to = m + s;
+    }
+}
+
+static gdouble
+get_pixel_length(const GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    GtkPositionType edge = priv->edge;
+    GtkAllocation alloc;
+
+    gtk_widget_get_allocation(GTK_WIDGET(axis), &alloc);
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
+        return alloc.width;
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
+        return alloc.height;
+
+    g_return_val_if_reached(0);
+}
+
+static gdouble
+estimate_major_distance(const GwyAxis *axis)
+{
+    const gdouble min_dist = 20.0;
+
+    Axis *priv = axis->priv;
+
+    if (!priv->show_labels)
+        return min_dist;
+
+    // XXX: This is for labels *along* the axis.  The labels can be also
+    // perpendicular.
+    GWY_OBJECT_UNREF(priv->vf);
+    gdouble m = fmax(fabs(priv->ourrequest.from), fabs(priv->ourrequest.to));
+    priv->vf = gwy_unit_format_with_resolution(priv->unit,
+                                               GWY_VALUE_FORMAT_PANGO,
+                                               m, m/30.0);
+
+    const gchar *label;
+    // FIXME: With perpendicular labels the label + units may be actually
+    // two-line.  The label measurement probably needs to involve subclasses.
+    if (priv->show_units)
+        label = gwy_value_format_print(priv->vf, m);
+    else
+        label = gwy_value_format_print_number(priv->vf, m);
+
+    int width, height;
+    pango_layout_set_markup(priv->layout, label, -1);
+    pango_layout_get_size(priv->layout, &width, &height);
+
+    gint dimen = (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
+                  ? height
+                  : width);
+    return fmax((gdouble)dimen/PANGO_SCALE, min_dist);
+}
 
 /**
  * SECTION: axis

@@ -50,6 +50,8 @@ struct _GwyAxis {
 struct _GwyAxisClass {
     /*<private>*/
     GtkWidgetClass widget_class;
+    /*<public>*/
+    gboolean perpendicular_labels;
 };
 
 GType    gwy_axis_get_type           (void)                     G_GNUC_CONST;
