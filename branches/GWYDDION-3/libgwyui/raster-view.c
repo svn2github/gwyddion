@@ -98,6 +98,8 @@ struct _GwyRasterViewPrivate {
     GwyRGBA mask_color;
     GwyRGBA grain_number_color;
 
+    PangoLayout *layout;
+
     gulong scroll_timer_hid;
 };
 
@@ -113,6 +115,7 @@ static void     gwy_raster_view_get_property        (GObject *object,
                                                      guint prop_id,
                                                      GValue *value,
                                                      GParamSpec *pspec);
+static void     gwy_raster_view_style_updated       (GtkWidget *widget);
 static void     gwy_raster_view_realize             (GtkWidget *widget);
 static void     gwy_raster_view_unrealize           (GtkWidget *widget);
 static void     gwy_raster_view_map                 (GtkWidget *widget);
@@ -139,6 +142,7 @@ static gboolean gwy_raster_view_leave_notify        (GtkWidget *widget,
                                                      GdkEventCrossing *event);
 static void     calculate_position_and_size         (GwyRasterView *rasterview);
 static void     update_matrices                     (GwyRasterView *rasterview);
+static void     ensure_layout                       (GwyRasterView *rasterview);
 static gboolean gwy_raster_view_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
 static void     destroy_field_surface               (GwyRasterView *rasterview);
@@ -247,6 +251,7 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     widget_class->key_release_event = gwy_raster_view_key_release;
     widget_class->leave_notify_event = gwy_raster_view_leave_notify;
     widget_class->draw = gwy_raster_view_draw;
+    widget_class->style_updated = gwy_raster_view_style_updated;
 
     properties[PROP_FIELD]
         = g_param_spec_object("field",
@@ -354,6 +359,7 @@ gwy_raster_view_dispose(GObject *object)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
 
+    GWY_OBJECT_UNREF(rasterview->priv->layout);
     set_field(rasterview, NULL);
     set_mask(rasterview, NULL);
     set_gradient(rasterview, NULL);
@@ -1258,16 +1264,7 @@ draw_grain_numbers(GwyRasterView *rasterview,
     if (!priv->number_grains)
         return;
 
-    GtkWidget *widget = GTK_WIDGET(rasterview);
-    PangoLayout *layout = gtk_widget_create_pango_layout(widget, NULL);
-    pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
-
-    PangoAttrList *attrlist = pango_attr_list_new();
-    PangoAttribute *attr = pango_attr_scale_new(PANGO_SCALE_SMALL);
-    pango_attr_list_insert(attrlist, attr);
-    pango_layout_set_attributes(layout, attrlist);
-    pango_attr_list_unref(attrlist);
-
+    ensure_layout(rasterview);
     guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
@@ -1276,7 +1273,8 @@ draw_grain_numbers(GwyRasterView *rasterview,
     gwy_cairo_set_source_rgba(cr, color);
     for (guint gno = 1; gno <= ngrains; gno++) {
         if (gno != priv->active_grain)
-            draw_grain_number(rasterview, cr, layout, gno, positions + gno);
+            draw_grain_number(rasterview, cr, priv->layout, gno,
+                              positions + gno);
     }
     if (priv->active_grain) {
         guint gno = priv->active_grain;
@@ -1290,11 +1288,26 @@ draw_grain_numbers(GwyRasterView *rasterview,
         };
         gwy_rgba_fix(&acolor);
         gwy_cairo_set_source_rgba(cr, &acolor);
-        draw_grain_number(rasterview, cr, layout, gno, positions + gno);
+        draw_grain_number(rasterview, cr, priv->layout, gno, positions + gno);
     }
     cairo_restore(cr);
+}
 
-    g_object_unref(layout);
+static void
+ensure_layout(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (priv->layout)
+        return;
+
+    priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(rasterview), NULL);
+    pango_layout_set_alignment(priv->layout, PANGO_ALIGN_CENTER);
+
+    PangoAttrList *attrlist = pango_attr_list_new();
+    PangoAttribute *attr = pango_attr_scale_new(PANGO_SCALE_SMALL);
+    pango_attr_list_insert(attrlist, attr);
+    pango_layout_set_attributes(priv->layout, attrlist);
+    pango_attr_list_unref(attrlist);
 }
 
 static void
@@ -1347,6 +1360,14 @@ gwy_raster_view_draw(GtkWidget *widget,
     }
 
     return FALSE;
+}
+
+static void
+gwy_raster_view_style_updated(GtkWidget *widget)
+{
+    RasterView *priv = GWY_RASTER_VIEW(widget)->priv;
+    if (priv->layout)
+        pango_layout_context_changed(priv->layout);
 }
 
 static void
