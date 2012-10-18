@@ -25,6 +25,7 @@
 
 #define IGNORE_ME N_("A translatable string.")
 
+#define EPS 1e-12
 #define ALMOST_BLOODY_INFINITY (1e-3*G_MAXDOUBLE)
 #define ALMOST_BLOODY_NOTHING (1e3*G_MINDOUBLE)
 
@@ -118,6 +119,9 @@ static void            invalidate_ticks          (GwyAxis *axis);
 static void            position_set_style_classes(GtkWidget *widget,
                                                   GtkPositionType position);
 static void            calculate_ticks           (GwyAxis *axis);
+static gboolean        zero_is_inside            (gdouble start,
+                                                  guint n,
+                                                  gdouble bs);
 static gboolean        precision_is_sufficient   (GwyValueFormat *vf,
                                                   const GwyRange *range,
                                                   gdouble bs,
@@ -126,6 +130,10 @@ static void            snap_range_to_ticks       (GwyRange *range,
                                                   gdouble bs);
 static GwyAxisStepType choose_step_type          (gdouble *step,
                                                   gdouble *base);
+static GwyAxisStepType decrease_step_type        (GwyAxisStepType steptype,
+                                                  gdouble *base,
+                                                  gdouble measure,
+                                                  gdouble min_incr);
 static void            ensure_layout_and_ticks   (GwyAxis *axis);
 static void            clear_tick                (gpointer item);
 static gdouble         get_pixel_length          (const GwyAxis *axis);
@@ -581,6 +589,14 @@ position_set_style_classes(GtkWidget *widget,
     }
 }
 
+static inline gdouble
+if_zero_then_exactly(gdouble value, gdouble bs)
+{
+    if (G_UNLIKELY(fabs(value) < EPS*fabs(bs)))
+        return 0.0;
+    return value;
+}
+
 // Tick algorithm.
 // (1) Estimate minimum distance required between major ticks.  This is a
 //     handful of pixels for no-labels case; approx. the dimension of the
@@ -632,7 +648,7 @@ calculate_ticks(GwyAxis *axis)
 
     State state = FIRST_TRY;
     GwyAxisStepType steptype = GWY_AXIS_STEP_0;
-    gdouble base, step;
+    gdouble base, step, bs;
     do {
         g_printerr("ITERATION with state %u\n", state);
         priv->range = request;
@@ -647,7 +663,7 @@ calculate_ticks(GwyAxis *axis)
                        base, step, steptype);
         }
 
-        gdouble bs = descending ? -base*step : base*step;
+        bs = descending ? -base*step : base*step;
         if (priv->snap_to_ticks) {
             snap_range_to_ticks(&priv->range, bs);
             g_printerr("snapped to [%.13g,%.13g]\n", request.from, request.to);
@@ -679,8 +695,41 @@ calculate_ticks(GwyAxis *axis)
     } while (state != FINALLY_OK);
 
     // TODO: Now we need to actually create the ticks and labels.
+    gdouble from = priv->range.from, to = priv->range.to;
+    gdouble start = if_zero_then_exactly(descending
+                                         ? floor(from/bs + EPS)*bs
+                                         : ceil(from/bs - EPS)*bs,
+                                         bs);
+    guint n = (guint)floor((to - start)/bs + EPS);
+    gboolean units_at_zero = zero_is_inside(start, n, bs);
+    GArray *ticks = priv->major_ticks;
+    g_array_set_size(ticks, 0);
+    for (guint i = 0; i <= n; i++) {
+        GwyAxisTick tick;
+        const gchar *s;
+
+        tick.value = if_zero_then_exactly(n*bs + start, bs);
+        tick.position = (tick.value - from)/(to - from)*length;
+        if ((units_at_zero && tick.value == 0.0) || (!units_at_zero && !i))
+            s = gwy_value_format_print(priv->vf, tick.value);
+        else
+            s = gwy_value_format_print_number(priv->vf, tick.value);
+
+        tick.label = g_strdup(s);
+        g_array_append_val(ticks, tick);
+    }
 
     priv->ticks_are_valid = TRUE;
+}
+
+static gboolean
+zero_is_inside(gdouble start, guint n, gdouble bs)
+{
+    // Does not matter, we have only one label anyway.
+    if (n == 0)
+        return FALSE;
+
+    return start*if_zero_then_exactly((n-1)*bs + start, bs) <= 0.0;
 }
 
 static gboolean
@@ -693,10 +742,7 @@ precision_is_sufficient(GwyValueFormat *vf,
     guint n = gwy_round((to - from)/bs);
     g_string_set_size(str, 0);
     for (guint i = 0; i <= n; i++) {
-        gdouble value = from + i*bs;
-        // Fix negative zeroes.
-        if (G_UNLIKELY(fabs(value) < 1e-12*fabs(bs)))
-            value = 0.0;
+        gdouble value = if_zero_then_exactly(from + i*bs, bs);
         const gchar *repr = gwy_value_format_print_number(vf, value);
         if (gwy_strequal(str->str, repr))
             return FALSE;
@@ -722,7 +768,7 @@ snap_range_to_ticks(GwyRange *range,
 static GwyAxisStepType
 choose_step_type(gdouble *step, gdouble *base)
 {
-    *base = gwy_powi(10.0, (gint)floor(log10(*step) + 1e-12));
+    *base = gwy_powi(10.0, (gint)floor(log10(*step) + EPS));
     *step /= *base;
 
     while (*step <= 0.5) {
@@ -741,6 +787,51 @@ choose_step_type(gdouble *step, gdouble *base)
     if (*step <= 2.5)
         return GWY_AXIS_STEP_2_5;
     return GWY_AXIS_STEP_5;
+}
+
+static GwyAxisStepType
+decrease_step_type(GwyAxisStepType steptype,
+                   gdouble *base,
+                   gdouble measure,
+                   gdouble min_incr)
+{
+    GwyAxisStepType new_scale = GWY_AXIS_STEP_0;
+
+    switch (steptype) {
+        case GWY_AXIS_STEP_1:
+        *base /= 10.0;
+        if (*base*2.0/measure >= min_incr)
+            new_scale = GWY_AXIS_STEP_5;
+        else if (*base*2.5/measure >= min_incr)
+            new_scale = GWY_AXIS_STEP_2_5;
+        else if (*base*5.0/measure >= min_incr)
+            new_scale = GWY_AXIS_STEP_5;
+        break;
+
+        case GWY_AXIS_STEP_2:
+        if (*base/measure >= min_incr)
+            new_scale = GWY_AXIS_STEP_1;
+        break;
+
+        case GWY_AXIS_STEP_2_5:
+        *base /= 10.0;
+        if (*base*5.0/measure > min_incr)
+            new_scale = GWY_AXIS_STEP_5;
+        break;
+
+        case GWY_AXIS_STEP_5:
+        if (*base/measure >= min_incr)
+            new_scale = GWY_AXIS_STEP_1;
+        else if (*base*2.5/measure >= min_incr)
+            new_scale = GWY_AXIS_STEP_2_5;
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
+    }
+
+    return new_scale;
 }
 
 static void
