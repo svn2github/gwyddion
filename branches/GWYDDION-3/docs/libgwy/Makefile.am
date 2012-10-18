@@ -38,13 +38,15 @@ EXTRA_DIST +=
 
 # Specialised introspection programs
 AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
-AM_CFLAGS =  $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
+AM_CFLAGS =  $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS)
 AM_LDFLAGS = $(LIBGWY_DEPS_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy3.la
 CLEANFILES += builtin-fit-func.xml builtin-grain-value.xml
 
 noinst_PROGRAMS = fit-funcs grain-values
 fit_funcs_SOURCES = fit-funcs.c
+fit_funcs_CFLAGS = $(AM_CFLAGS) $(GWY_CFLAGS)
 grain_values_SOURCES = grain-values.c
+grain_values_CFLAGS = $(AM_CFLAGS) $(GWY_CFLAGS)
 
 builtin-fit-func.xml: fit-funcs$(EXEEXT)
 	$(AM_V_GEN)$(LIBTOOL) --mode=execute ./fit-funcs$(EXEEXT) >builtin-fit-func.xml
