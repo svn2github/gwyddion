@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -80,7 +80,9 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
         = g_param_spec_enum("style",
                             "Value format style",
                             "What output style is this format intended to be "
-                            "used with.",
+                            "used with.  This property is informative; "
+                            "setting it does not mean the format is "
+                            "automatically converted to another style.",
                             GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -252,6 +254,10 @@ gwy_value_format_new_set(GwyValueFormatStyle style,
 
     priv->style = style;
     priv->base = gwy_powi(10.0, power10);
+    if (G_UNLIKELY(precision > 1024)) {
+        g_critical("Precision larger than 1024.");
+        precision = MIN(precision, 1024);
+    }
     priv->precision = precision;
     priv->glue = g_strdup(glue);
     priv->units = g_strdup(units);
@@ -261,7 +267,7 @@ gwy_value_format_new_set(GwyValueFormatStyle style,
 
 /**
  * gwy_value_format_print:
- * @format: Value format.
+ * @format: A value format.
  * @value: Value to format using @format.
  *
  * Formats a value using given format, with units appended.
@@ -291,7 +297,7 @@ gwy_value_format_print(GwyValueFormat *format,
 
 /**
  * gwy_value_format_print_number:
- * @format: Value format.
+ * @format: A value format.
  * @value: Value to format using @format.
  *
  * Formats a value using given format.
@@ -322,7 +328,7 @@ gwy_value_format_print_number(GwyValueFormat *format,
 
 /**
  * gwy_value_format_get_units:
- * @format: Value format.
+ * @format: A value format.
  *
  * Gets the units of a value format.
  *
@@ -337,7 +343,7 @@ gwy_value_format_get_units(GwyValueFormat *format)
 
 /**
  * gwy_value_format_set_units:
- * @format: Value format.
+ * @format: A value format.
  * @units: New units.  Empty units can be represented as %NULL, in fact, this
  *         is preferable to empty string.
  *
@@ -355,7 +361,7 @@ gwy_value_format_set_units(GwyValueFormat *format,
 
 /**
  * gwy_value_format_get_glue:
- * @format: Value format.
+ * @format: A value format.
  *
  * Gets the string between number and units of a value format.
  *
@@ -370,7 +376,7 @@ gwy_value_format_get_glue(GwyValueFormat *format)
 
 /**
  * gwy_value_format_set_glue:
- * @format: Value format.
+ * @format: A value format.
  * @glue: New glue.  Empty glue can be represented as %NULL, in fact, this
  *        is preferable to empty string.
  *
@@ -384,6 +390,91 @@ gwy_value_format_set_glue(GwyValueFormat *format,
     ValueFormat *priv = format->priv;
     if (_gwy_assign_string(&priv->glue, glue))
         g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_GLUE]);
+}
+
+/**
+ * gwy_value_format_get_precision:
+ * @format: A value format.
+ *
+ * Gets the precision of a value format.
+ *
+ * Returns: The precision (number of digits after decimal separator).
+ **/
+guint
+gwy_value_format_get_precision(GwyValueFormat *format)
+{
+    g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), 0);
+    return format->priv->precision;
+}
+
+/**
+ * gwy_value_format_set_precision:
+ * @format: A value format.
+ * @precision: New precision.
+ *
+ * Sets the precision of a value format.
+ **/
+void
+gwy_value_format_set_precision(GwyValueFormat *format,
+                               guint precision)
+{
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_if_fail(precision < 1024);
+    if (precision != format->priv->precision) {
+        format->priv->precision = precision;
+            g_object_notify_by_pspec(G_OBJECT(format),
+                                     properties[PROP_PRECISION]);
+    }
+}
+
+/**
+ * gwy_value_format_get_base:
+ * @format: A value format.
+ *
+ * Gets the base of a value format.
+ *
+ * Returns: The base, i.e. factor that numbers are divided with.
+ **/
+gdouble
+gwy_value_format_get_base(GwyValueFormat *format)
+{
+    g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), 1.0);
+    return format->priv->base;
+}
+
+/**
+ * gwy_value_format_set_base:
+ * @format: A value format.
+ * @base: New base (factor that numbers are divided with).
+ *
+ * Sets the base of a value format.
+ **/
+void
+gwy_value_format_set_base(GwyValueFormat *format,
+                          gdouble base)
+{
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_if_fail(base >= G_MINDOUBLE && base <= G_MAXDOUBLE);
+    if (base != format->priv->base) {
+        format->priv->base = base;
+            g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_BASE]);
+    }
+}
+
+/**
+ * gwy_value_format_set_power10:
+ * @format: A value format.
+ * @power10: Power of 10 for the new base.
+ *
+ * Sets the base of a value format to an integral power of 10.
+ *
+ * This is a convenience wrapper for gwy_value_format_set_base().
+ **/
+void
+gwy_value_format_set_power10(GwyValueFormat *format,
+                             gint power10)
+{
+    gwy_value_format_set_base(format, gwy_powi(10.0, power10));
 }
 
 static void
@@ -442,7 +533,7 @@ fix_utf8_minus(GString *str)
  * |[
  * GwyValueFormat *format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PLAIN,
  *                                                   0, 3, " ", "deg");
- * g_object_set(format, "base", G_PI/180.0, NULL);
+ * gwy_value_format_set_base(format, G_PI/180.0);
  * g_print("The angle is: %s\n", gwy_value_format_print(format, G_PI/6));
  * g_object_unref(format);
  * ]|

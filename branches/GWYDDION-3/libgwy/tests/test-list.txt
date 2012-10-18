@@ -113,7 +113,8 @@ unit/arithmetic/commutativity
 unit/serialize
 unit/garbage
 unit/format/power10
-value-format/simple
+value-format/props
+value-format/unit
 int-set/serialize
 int-set/assign
 int-set/add-remove

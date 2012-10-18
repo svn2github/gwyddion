@@ -26,7 +26,7 @@
  ***************************************************************************/
 
 void
-test_value_format_simple(void)
+test_value_format_unit(void)
 {
     GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
     GwyValueFormat *format;
@@ -67,6 +67,14 @@ test_value_format_simple(void)
                     ==, "123.46 nm");
     g_object_unref(format);
 
+    g_object_unref(unit);
+}
+
+void
+test_value_format_props(void)
+{
+    GwyValueFormat *format;
+
     /* Fancy formatting with base not a power of 10 */
     format = gwy_value_format_new();
     g_object_set(format,
@@ -97,15 +105,43 @@ test_value_format_simple(void)
 
     g_free(glue);
     g_free(units);
+
     g_object_unref(format);
-    g_object_unref(unit);
 
     format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,
                                       -3, 3, " ", "ms");
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1e-3);
     g_assert_cmpstr(gwy_value_format_get_glue(format), ==, " ");
     g_assert_cmpstr(gwy_value_format_get_units(format), ==, "ms");
     g_assert_cmpstr(gwy_value_format_print(format, -1.2e-3),
                     ==, "−1.200 ms");
+    g_object_unref(format);
+
+
+    format = gwy_value_format_new();
+    gwy_value_format_set_precision(format, 5);
+    gwy_value_format_set_base(format, 1e2);
+    gwy_value_format_set_units(format, "A");
+    g_object_get(format,
+                 "base", &base,
+                 "precision", &precision,
+                 NULL);
+    g_assert_cmpfloat(base, ==, 1e2);
+    g_assert_cmpuint(precision, ==, 5);
+    g_assert_cmpstr(gwy_value_format_print(format, 1234.5),
+                    ==, "12.34500A");
+
+    gwy_value_format_set_precision(format, 1);
+    gwy_value_format_set_power10(format, 0);
+    g_object_get(format,
+                 "base", &base,
+                 "precision", &precision,
+                 NULL);
+    g_assert_cmpfloat(base, ==, 1.0);
+    g_assert_cmpuint(precision, ==, 1);
+    g_assert_cmpstr(gwy_value_format_print(format, 1234.5),
+                    ==, "1234.5A");
     g_object_unref(format);
 }
 
