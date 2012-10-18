@@ -39,6 +39,9 @@
 #define GWY_STRING_FREE(str) \
     do { if (str) { g_string_free((str), TRUE); (str) = NULL; } } while (0)
 
+#define GWY_ARRAY_FREE(array) \
+    do { if (array) { g_array_free(array, TRUE); (array) = NULL; } } while (0)
+
 #define GWY_SLICE_FREE(type, ptr) \
     do { if (ptr) { g_slice_free(type, ptr); (ptr) = NULL; } } while (0)
 

@@ -43,7 +43,8 @@
  * GWY_OBJECT_UNREF(object->member_object);
  * ]|
  * if they know @object and @handler have either valid values or they are
- * %NULL.  This code can be executed several times without errors from GLib.
+ * %NULL.  This code can be executed any number of times without errors from
+ * GLib.
  **/
 
 /**
@@ -123,6 +124,29 @@
  * ]|
  *
  * The string is freed completely and the return value of g_string_free() is
+ * not made accessible.  The use cases when the return value is needed rarely
+ * overlap with this clean-up use.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
+/**
+ * GWY_ARRAY_FREE:
+ * @array: A #GArray (must be an l-value).
+ *
+ * Frees a #GArray (including data) if it is allocated.
+ *
+ * This is an idempotent wrapper of g_array_free(): if @array is not %NULL
+ * g_array_free() is called on it and @array is set to %NULL.  Pseudocode:
+ * |[
+ * if (array) {
+ *     g_array_free(array, TRUE);
+ *     array = NULL;
+ * }
+ * ]|
+ *
+ * The array is freed completely and the return value of g_array_free() is
  * not made accessible.  The use cases when the return value is needed rarely
  * overlap with this clean-up use.
  *
