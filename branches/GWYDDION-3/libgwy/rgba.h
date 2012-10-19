@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,14 +33,18 @@ typedef struct {
     gdouble a;
 } GwyRGBA;
 
-GType    gwy_rgba_get_type   (void)                G_GNUC_CONST;
-GwyRGBA* gwy_rgba_copy       (const GwyRGBA *rgba) G_GNUC_MALLOC;
-void     gwy_rgba_free       (GwyRGBA *rgba);
-gboolean gwy_rgba_fix        (GwyRGBA *rgba);
-void     gwy_rgba_interpolate(const GwyRGBA *src1,
-                              const GwyRGBA *src2,
-                              gdouble x,
-                              GwyRGBA *rgba);
+GType          gwy_rgba_get_type        (void)                G_GNUC_CONST;
+GwyRGBA*       gwy_rgba_copy            (const GwyRGBA *rgba) G_GNUC_MALLOC;
+void           gwy_rgba_free            (GwyRGBA *rgba);
+gboolean       gwy_rgba_fix             (GwyRGBA *rgba);
+void           gwy_rgba_interpolate     (const GwyRGBA *src1,
+                                         const GwyRGBA *src2,
+                                         gdouble x,
+                                         GwyRGBA *rgba);
+void           gwy_rgba_preset_color    (GwyRGBA *rgba,
+                                         guint i);
+const GwyRGBA* gwy_rgba_get_preset_color(guint i)             G_GNUC_CONST;
+guint          gwy_rgba_n_preset_colors (void)                G_GNUC_CONST;
 
 G_END_DECLS
 

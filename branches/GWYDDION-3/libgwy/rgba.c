@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,35 @@ static gsize    gwy_rgba_itemize  (gpointer boxed,
                                    GwySerializableItems *items);
 static gpointer gwy_rgba_construct(GwySerializableItems *items,
                                    GwyErrorList **error_list);
+
+static const GwyRGBA preset_colours[] = {
+    { 0.000, 0.000, 0.000, 1.000 },
+    { 1.000, 0.000, 0.000, 1.000 },
+    { 0.000, 0.784, 0.000, 1.000 },
+    { 0.000, 0.000, 1.000, 1.000 },
+    { 1.000, 0.000, 1.000, 1.000 },
+    { 0.325, 0.851, 1.000, 1.000 },
+    { 1.000, 0.812, 0.122, 1.000 },
+    { 0.988, 0.502, 0.000, 1.000 },
+    { 0.620, 0.620, 0.620, 1.000 },
+    { 0.620, 0.000, 0.000, 1.000 },
+    { 0.000, 0.278, 0.000, 1.000 },
+    { 0.000, 0.000, 0.412, 1.000 },
+    { 0.424, 0.000, 0.424, 1.000 },
+    { 0.000, 0.467, 0.467, 1.000 },
+    { 0.843, 0.596, 0.000, 1.000 },
+    { 0.529, 0.216, 0.000, 1.000 },
+    { 1.000, 0.357, 0.255, 1.000 },
+    { 0.000, 0.886, 0.525, 1.000 },
+    { 0.024, 0.643, 1.000, 1.000 },
+    { 1.000, 0.443, 0.725, 1.000 },
+    { 0.604, 0.365, 0.094, 1.000 },
+    { 0.588, 0.588, 0.000, 1.000 },
+    { 0.369, 0.369, 0.369, 1.000 },
+    { 0.682, 0.000, 1.000, 1.000 },
+    { 0.129, 0.467, 0.000, 1.000 },
+    { 0.082, 0.306, 0.435, 1.000 },
+};
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "r", .ctype = GWY_SERIALIZABLE_DOUBLE, },
@@ -169,7 +198,7 @@ gwy_rgba_fix(GwyRGBA *rgba)
  * @src1: Colour at point @x = 0.0.
  * @src2: Colour at point @x = 1.0.
  * @x: Point in interval 0..1 to take colour from.
- * @rgba: A #GwyRGBA to store result to.
+ * @rgba: An RGBA colour to store result to.
  *
  * Linearly interpolates two colours, including alpha blending.
  *
@@ -215,6 +244,60 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
     rgba->b = (x*src2->a*src2->b + (1.0 - x)*src1->a*src1->b)/rgba->a;
 }
 
+/**
+ * gwy_rgba_preset_color:
+ * @rgba: (out):
+ *        An RGBA colour to set to preset color.
+ * @i: Index of preset color.
+ *
+ * Sets an RGBA colour to a preset colour.
+ *
+ * The index can be arbitrarily large, however, colours start to repeat after
+ * gwy_rgba_n_preset_colors().
+ *
+ * All presets are fully opaque and the zeroth colour is always black.  They
+ * are intended for drawing of curves or symbols on a white background.
+ **/
+void
+gwy_rgba_preset_color(GwyRGBA *rgba,
+                      guint i)
+{
+    g_return_if_fail(rgba);
+    i = i % G_N_ELEMENTS(preset_colours);
+    *rgba = preset_colours[i];
+}
+
+/**
+ * gwy_rgba_get_preset_color:
+ * @i: Index of preset color.
+ *
+ * Obtains a preset RGBA colour.
+ *
+ * The index can be arbitrarily large, however, colours start to repeat after
+ * gwy_rgba_n_preset_colors().
+ *
+ * @rgba: (transfer none):
+ *        Preset RGBA colour corresponding to the index @i.
+ **/
+const GwyRGBA*
+gwy_rgba_get_preset_color(guint i)
+{
+    return preset_colours + (i % G_N_ELEMENTS(preset_colours));
+}
+
+/**
+ * gwy_rgba_n_preset_colors:
+ *
+ * Obtains the number of preset colours.
+ *
+ * The colours returned by gwy_rgba_preset_color() and
+ * gwy_rgba_get_preset_color() start to repeat after this number of colours.
+ **/
+guint
+gwy_rgba_n_preset_colors(void)
+{
+    return G_N_ELEMENTS(preset_colours);
+}
 
 /************************** Documentation ****************************/
 
@@ -249,7 +332,7 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
 /**
  * GWY_TYPE_RGBA:
  *
- * The #GType for a boxed type holding a #GwyRGBA.
+ * The #GType for a boxed type holding an RGBA colour.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
