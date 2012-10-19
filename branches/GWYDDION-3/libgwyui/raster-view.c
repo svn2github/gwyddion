@@ -813,6 +813,7 @@ gwy_raster_view_unrealize(GtkWidget *widget)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     destroy_window(rasterview);
+    GWY_OBJECT_UNREF(rasterview->priv->layout);
 }
 
 static void
