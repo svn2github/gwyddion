@@ -146,4 +146,35 @@ test_rgba_interpolate(void)
                              (GwyRGBA){4.0/7.0, 0.5, 3.0/7.0, 0.56});
 }
 
+void
+test_rgba_preset(void)
+{
+    guint n = gwy_rgba_n_preset_colors();
+    g_assert_cmpuint(n, >, 1);
+
+    for (guint i = 0; i < n; i++) {
+        const GwyRGBA *prgba = gwy_rgba_get_preset_color(i);
+        GwyRGBA rgba;
+        gwy_rgba_preset_color(&rgba, i);
+        g_assert_cmpfloat(rgba.r, ==, prgba->r);
+        g_assert_cmpfloat(rgba.g, ==, prgba->g);
+        g_assert_cmpfloat(rgba.b, ==, prgba->b);
+        g_assert_cmpfloat(rgba.a, ==, 1.0);
+        g_assert_cmpfloat(prgba->a, ==, 1.0);
+
+        for (guint j = 0; j < i; j++) {
+            const GwyRGBA *cmp = gwy_rgba_get_preset_color(j);
+            g_assert(!gwy_equal(cmp, prgba));
+        }
+    }
+
+    GwyRGBA rgba0, rgban;
+    gwy_rgba_preset_color(&rgba0, 0);
+    g_assert_cmpfloat(rgba0.r, ==, 0.0);
+    g_assert_cmpfloat(rgba0.g, ==, 0.0);
+    g_assert_cmpfloat(rgba0.b, ==, 0.0);
+    gwy_rgba_preset_color(&rgban, n);
+    g_assert(gwy_equal(&rgba0, &rgban));
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

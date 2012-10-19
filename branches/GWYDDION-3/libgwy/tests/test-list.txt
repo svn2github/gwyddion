@@ -103,6 +103,7 @@ field-part/union
 brick-part/boxed
 rgba/boxed
 rgba/interpolate
+rgba/preset
 unit/parse
 unit/word-names
 unit/changed
