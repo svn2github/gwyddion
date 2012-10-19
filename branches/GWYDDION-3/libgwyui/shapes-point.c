@@ -443,6 +443,7 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
     g_assert(priv->mode == MODE_MOVING);
     if (!priv->has_moved && (event->x != priv->xypress.x
                              || event->y != priv->xypress.y)) {
+        gwy_shapes_editing_started(shapes);
         priv->has_moved = TRUE;
         // If we clicked on an already selected shape, we will move the entire
         // group.  If we clicked on an unselected shape we will need to select
@@ -551,6 +552,7 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
             GwyCoords *coords = gwy_shapes_get_coords(shapes);
             guint nsel;
             gint *selected = gwy_int_set_values(shapes->selection, &nsel);
+            gwy_shapes_editing_started(shapes);
             priv->changing_selection = TRUE;
             gwy_int_set_update(shapes->selection, NULL, 0);
             priv->changing_selection = FALSE;
@@ -561,6 +563,7 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
             for (guint i = 0; i < nsel; i++)
                 gwy_coords_delete(coords, selected[nsel-1 - i]);
             g_free(selected);
+            gwy_coords_finished(coords);
         }
     }
     return FALSE;
@@ -578,7 +581,10 @@ gwy_shapes_point_cancel_editing(GwyShapes *shapes,
     // end of button_released() here.
     priv->clicked = -1;
     gwy_shapes_unset_current_point(shapes);
-    gwy_coords_finished(gwy_shapes_get_coords(shapes));
+    if (priv->has_moved) {
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
+        priv->has_moved = FALSE;
+    }
     gwy_shapes_update(shapes);
 }
 

@@ -176,12 +176,13 @@ gwy_shapes_class_init(GwyShapesClass *klass)
      * @gwyshapes: The #GwyShapes which received the signal.
      *
      * The ::editing-started signal is emitted when user starts modifying the
-     * shapes.  It is not emitted when shapes are only selected or deselected,
-     * you can use signals of the shapes' selection for this.
+     * shapes.  More precisely, it is emitted immediately before so that the
+     * coordinate values have not changed yet.  It is not emitted when shapes
+     * are only selected or deselected, you can use signals of the shapes'
+     * selection for this.
      *
      * The end of the modification can be catched using the GwyCoords::finished
      * signal.
-     * FIXME: This seems inconsistent.
      **/
     signals[EDITING_STARTED]
         = g_signal_new_class_handler("editing-started",
@@ -985,6 +986,12 @@ gwy_shapes_is_updated(GwyShapes *shapes)
  * This method is namely intended for subclasses.  If you emit this signal make
  * sure you emit GwyCoords::finished on the corresponding coordinates object
  * afterwards.
+ *
+ * Generally, the two signals should be paired.  Users interested in
+ * continuous updates watch will all changes of the coordinates.  Users that
+ * want to perform some operation when the shapes stop moving will watch
+ * only GwyCoords::finished.  Users that need the ability to undo changes
+ * will watch also GwyShapes::editing-started.
  **/
 void
 gwy_shapes_editing_started(GwyShapes *shapes)
