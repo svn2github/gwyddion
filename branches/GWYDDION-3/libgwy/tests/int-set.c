@@ -155,6 +155,7 @@ test_int_set_assign(void)
         g_object_unref(copy);
         g_object_unref(original);
     }
+    g_rand_free(rng);
 }
 
 static void
@@ -403,6 +404,7 @@ test_int_set_fill(void)
         g_object_unref(copy);
         g_object_unref(original);
     }
+    g_rand_free(rng);
 }
 
 typedef struct {

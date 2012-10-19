@@ -505,6 +505,7 @@ coords_transform_one(GType type,
         g_object_unref(indices);
         g_object_unref(reference);
         g_object_unref(coords);
+        g_object_unref(alltrans);
     }
     g_rand_free(rng);
 }
