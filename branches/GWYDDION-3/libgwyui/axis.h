@@ -26,6 +26,21 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_AXIS_TICK_EDGE  = 0,
+    GWY_AXIS_TICK_MAJOR = 1,
+    GWY_AXIS_TICK_MINOR = 2,
+    GWY_AXIS_TICK_MICRO = 3,
+} GwyAxisTickLevel;
+
+typedef struct {
+    GwyAxisTickLevel level;
+    gdouble value;
+    gdouble position;
+    gdouble size;
+    gchar *label;
+} GwyAxisTick;
+
 #define GWY_TYPE_AXIS \
     (gwy_axis_get_type())
 #define GWY_AXIS(obj) \
@@ -54,16 +69,24 @@ struct _GwyAxisClass {
     gboolean perpendicular_labels;
 };
 
-GType    gwy_axis_get_type           (void)                     G_GNUC_CONST;
-void     gwy_axis_get_range          (const GwyAxis *axis,
-                                      GwyRange *range);
-void     gwy_axis_request_range      (GwyAxis *axis,
-                                      const GwyRange *request);
-void     gwy_axis_get_requested_range(GwyAxis *axis,
-                                      GwyRange *range);
-gboolean gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
-void     gwy_axis_set_show_labels    (GwyAxis *axis,
-                                      gboolean showlabels);
+#define GWY_TYPE_AXIS_TICK (gwy_axis_tick_get_type())
+
+GType        gwy_axis_tick_get_type(void)                    G_GNUC_CONST;
+GwyAxisTick* gwy_axis_tick_copy    (const GwyAxisTick *tick) G_GNUC_MALLOC;
+void         gwy_axis_tick_free    (GwyAxisTick *tick);
+
+GType              gwy_axis_get_type           (void)                     G_GNUC_CONST;
+void               gwy_axis_get_range          (const GwyAxis *axis,
+                                                GwyRange *range);
+void               gwy_axis_request_range      (GwyAxis *axis,
+                                                const GwyRange *request);
+void               gwy_axis_get_requested_range(GwyAxis *axis,
+                                                GwyRange *range);
+gboolean           gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
+void               gwy_axis_set_show_labels    (GwyAxis *axis,
+                                                gboolean showlabels);
+const GwyAxisTick* gwy_axis_get_ticks          (GwyAxis *axis,
+                                                guint *nticks);
 
 G_END_DECLS
 
