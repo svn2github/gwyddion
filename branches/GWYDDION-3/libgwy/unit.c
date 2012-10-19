@@ -1140,10 +1140,10 @@ gwy_unit_format_with_resolution(const GwyUnit *unit,
  * gwy_unit_format_with_digits:
  * @unit: A physical unit.
  * @style: Output format style.
- * @maximum: Maximum value to be represented.
+ * @value: Value to be represented.
  * @sdigits: Number of significant digits the value should have.
  *
- * Finds a format for representing a values with given number of significant
+ * Finds a format for representing a value with given number of significant
  * digits.
  *
  * Returns: (transfer full):
@@ -1152,17 +1152,17 @@ gwy_unit_format_with_resolution(const GwyUnit *unit,
 GwyValueFormat*
 gwy_unit_format_with_digits(const GwyUnit *unit,
                             GwyValueFormatStyle style,
-                            gdouble maximum,
-                            gint sdigits)
+                            gdouble value,
+                            guint sdigits)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
-    maximum = fabs(maximum);
+    value = fabs(value);
     guint precision = sdigits;
     gdouble base = 1.0;
-    if (maximum)
-        base = find_number_format(maximum/gwy_powi(10.0, sdigits), maximum,
-                                  &precision);
+    if (value)
+        base = find_number_format((10.0 + 1e-13)*value/gwy_powi(10.0, sdigits),
+                                  value, &precision);
 
     gchar *glue, *units;
     format_unit(unit->priv, find_style_spec(style), gwy_round(log10(base)),

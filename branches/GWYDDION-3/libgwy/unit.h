@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -93,8 +93,8 @@ GwyValueFormat* gwy_unit_format_with_resolution(const GwyUnit *unit,
                                                 gdouble resolution)        G_GNUC_MALLOC;
 GwyValueFormat* gwy_unit_format_with_digits    (const GwyUnit *unit,
                                                 GwyValueFormatStyle style,
-                                                gdouble maximum,
-                                                gint sdigits)              G_GNUC_MALLOC;
+                                                gdouble value,
+                                                guint sdigits)             G_GNUC_MALLOC;
 
 G_END_DECLS
 

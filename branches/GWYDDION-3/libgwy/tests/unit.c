@@ -529,4 +529,92 @@ test_unit_format_power10(void)
     g_object_unref(unit);
 }
 
+void
+test_unit_format_digits(void)
+{
+    GwyUnit *unit = gwy_unit_new();
+    GwyValueFormat *format;
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 0.11,
+                                         2);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 2);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 10.1,
+                                         2);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 0);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    // XXX: This is an exception.  The extra digit is probably less annoying
+    // than a power of 10 appended.
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 100.1,
+                                         2);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 0);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 1000.1,
+                                         2);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1000.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 1);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10^3");
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 10000.1,
+                                         2);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1000.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 0);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10^3");
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 0.11,
+                                         3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 3);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 1.1,
+                                         3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 2);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 10.1,
+                                         3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 1);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 100.1,
+                                         3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 0);
+    g_assert(!gwy_value_format_get_units(format));
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 1000.1,
+                                         3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1000.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 2);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10^3");
+    g_object_unref(format);
+
+    format = gwy_unit_format_with_digits(unit, GWY_VALUE_FORMAT_PLAIN, 10000.1,
+                                         3);
+    g_assert_cmpfloat(gwy_value_format_get_base(format), ==, 1000.0);
+    g_assert_cmpuint(gwy_value_format_get_precision(format), ==, 1);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10^3");
+    g_object_unref(format);
+
+    g_object_unref(unit);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
