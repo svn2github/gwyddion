@@ -83,6 +83,7 @@ struct _GwyAxisPrivate {
     gboolean show_units : 1;
 
     gboolean ticks_are_valid : 1;
+    guint length;
     // TODO: Here we will keep the precalculated ticks and stuff.
     GwyValueFormat *vf;
     GArray *ticks[MAX_TICK_LEVEL];
@@ -104,6 +105,8 @@ static void            gwy_axis_get_property     (GObject *object,
                                                   GValue *value,
                                                   GParamSpec *pspec);
 static void            gwy_axis_style_updated    (GtkWidget *widget);
+static void            gwy_axis_size_allocate    (GtkWidget *widget,
+                                                  GtkAllocation *allocation);
 static gboolean        set_snap_to_ticks         (GwyAxis *axis,
                                                   gboolean setting);
 static gboolean        set_ticks_at_ends         (GwyAxis *axis,
@@ -127,8 +130,7 @@ static void            calculate_ticks           (GwyAxis *axis);
 static void            fill_tick_arrays          (GwyAxis *axis,
                                                   GArray *ticks,
                                                   gdouble bs,
-                                                  gdouble largerbs,
-                                                  guint length);
+                                                  gdouble largerbs);
 static gdouble         measure_label             (GwyAxis *axis,
                                                   const gchar *markup);
 static gboolean        zero_is_inside            (gdouble start,
@@ -148,10 +150,8 @@ static GwyAxisStepType decrease_step_type        (GwyAxisStepType steptype,
                                                   gdouble min_incr);
 static void            ensure_layout_and_ticks   (GwyAxis *axis);
 static void            clear_tick                (gpointer item);
-static gdouble         get_pixel_length          (const GwyAxis *axis);
 static gdouble         estimate_major_distance   (GwyAxis *axis,
-                                                  const GwyRange *request,
-                                                  gdouble length);
+                                                  const GwyRange *request);
 static void            fix_request               (GwyRange *request);
 
 static GParamSpec *properties[N_PROPS];
@@ -178,6 +178,7 @@ gwy_axis_class_init(GwyAxisClass *klass)
     gobject_class->set_property = gwy_axis_set_property;
 
     widget_class->style_updated = gwy_axis_style_updated;
+    widget_class->size_allocate = gwy_axis_size_allocate;
 
     properties[PROP_UNIT]
          = g_param_spec_object("unit",
@@ -391,9 +392,27 @@ gwy_axis_get_property(GObject *object,
 static void
 gwy_axis_style_updated(GtkWidget *widget)
 {
-    Axis *priv = GWY_AXIS(widget)->priv;
+    GwyAxis *axis = GWY_AXIS(widget);
+    Axis *priv = axis->priv;
     if (priv->layout)
         pango_layout_context_changed(priv->layout);
+    invalidate_ticks(axis);
+}
+
+static void
+gwy_axis_size_allocate(GtkWidget *widget,
+                       GtkAllocation *allocation)
+{
+    GwyAxis *axis = GWY_AXIS(widget);
+    Axis *priv = axis->priv;
+    GtkPositionType edge = priv->edge;
+
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
+        priv->length = allocation->width;
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
+        priv->length = allocation->height;
+
+    invalidate_ticks(axis);
 }
 
 /**
@@ -671,8 +690,8 @@ calculate_ticks(GwyAxis *axis)
                                 fabs(request.to - request.from)/12.0);
 
     gboolean descending = (request.to < request.from);
-    guint length = get_pixel_length(axis);
-    gdouble majdist = estimate_major_distance(axis, &request, length);
+    guint length = priv->length;
+    gdouble majdist = estimate_major_distance(axis, &request);
     g_printerr("request [%.13g,%.13g]\n", priv->request.from, priv->request.to);
     g_printerr("fixed to [%.13g,%.13g]\n", request.from, request.to);
     g_printerr("descending: %d\n", descending);
@@ -698,7 +717,7 @@ calculate_ticks(GwyAxis *axis)
         g_printerr("ITERATION with state %u\n", state);
         priv->range = request;
         if (state != LESS_TICKS) {
-            majdist = estimate_major_distance(axis, &request, length);
+            majdist = estimate_major_distance(axis, &request);
             // TODO: Update majdist here?  Or at the end of the cycle?
             // Take step as positive here to simplify the conditionals.
             // Use @descending where direction is necessary.
@@ -740,7 +759,7 @@ calculate_ticks(GwyAxis *axis)
     } while (state != FINALLY_OK);
 
     gdouble dx = fabs(priv->range.to - priv->range.from)/length;
-    fill_tick_arrays(axis, priv->ticks[0], bs, 0.0, length);
+    fill_tick_arrays(axis, priv->ticks[0], bs, 0.0);
     for (guint i = 1; i < priv->max_tick_level; i++) {
         gdouble largerbs = bs;
         steptype = decrease_step_type(steptype, &base, dx, 5.0);
@@ -748,7 +767,7 @@ calculate_ticks(GwyAxis *axis)
             break;
         step = step_sizes[steptype];
         bs = base*step;
-        fill_tick_arrays(axis, priv->ticks[i], bs, largerbs, length);
+        fill_tick_arrays(axis, priv->ticks[i], bs, largerbs);
     }
 
     priv->ticks_are_valid = TRUE;
@@ -756,7 +775,7 @@ calculate_ticks(GwyAxis *axis)
 
 static void
 fill_tick_arrays(GwyAxis *axis, GArray *ticks,
-                 gdouble bs, gdouble largerbs, guint length)
+                 gdouble bs, gdouble largerbs)
 {
     Axis *priv = axis->priv;
     gdouble from = priv->range.from, to = priv->range.to;
@@ -766,6 +785,7 @@ fill_tick_arrays(GwyAxis *axis, GArray *ticks,
                                          bs);
     guint n = (guint)floor((to - start)/bs + EPS);
     GwyValueFormat *vf = priv->vf;
+    guint length = priv->length;
     enum { FIRST, LAST, AT_ZERO, NEVER } units_pos;
 
     // FIXME: This must be controlled by the class also.  Namely LAST is
@@ -1053,34 +1073,17 @@ fix_request(GwyRange *request)
     }
 }
 
-static gdouble
-get_pixel_length(const GwyAxis *axis)
-{
-    Axis *priv = axis->priv;
-    GtkPositionType edge = priv->edge;
-    GtkAllocation alloc;
-
-    gtk_widget_get_allocation(GTK_WIDGET(axis), &alloc);
-    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
-        return alloc.width;
-    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
-        return alloc.height;
-
-    g_return_val_if_reached(0);
-}
-
 // FIXME: How to support logarithmic (or possibly other) axes?
 static gdouble
 estimate_major_distance(GwyAxis *axis,
-                        const GwyRange *request,
-                        gdouble length)
+                        const GwyRange *request)
 {
     const gdouble min_dist = 50.0;
 
     Axis *priv = axis->priv;
 
     if (!priv->show_labels)
-        return fmin(min_dist, length);
+        return fmin(min_dist, priv->length);
 
     const gchar *label;
     // FIXME: With perpendicular labels the label + units may be actually
