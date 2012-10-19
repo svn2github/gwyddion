@@ -29,6 +29,8 @@
 #define ALMOST_BLOODY_INFINITY (1e-3*G_MAXDOUBLE)
 #define ALMOST_BLOODY_NOTHING (1e3*G_MINDOUBLE)
 
+#define MAX_TICK_LEVEL 3
+
 typedef enum {
     GWY_AXIS_STEP_0,
     GWY_AXIS_STEP_1,
@@ -52,15 +54,17 @@ enum {
     PROP_RANGE_REQUEST,
     PROP_RANGE,
     PROP_SNAP_TO_TICKS,
+    PROP_TICKS_AT_ENDS,
     PROP_SHOW_LABELS,
     PROP_SHOW_UNITS,
-    PROP_DRAW_MINOR,
+    PROP_MAX_TICK_LEVEL,
     N_PROPS,
 };
 
 typedef struct {
     gdouble value;
     gdouble position;
+    gdouble size;
     gchar *label;
 } GwyAxisTick;
 
@@ -72,17 +76,16 @@ struct _GwyAxisPrivate {
     GwyRange range;
 
     GtkPositionType edge;
+    guint max_tick_level;
     gboolean snap_to_ticks : 1;
+    gboolean ticks_at_ends : 1;
     gboolean show_labels : 1;
     gboolean show_units : 1;
-    gboolean draw_minor : 1;
 
     gboolean ticks_are_valid : 1;
     // TODO: Here we will keep the precalculated ticks and stuff.
     GwyValueFormat *vf;
-    GArray *major_ticks;
-    GArray *minor_ticks;
-    GArray *micro_ticks;
+    GArray *ticks[MAX_TICK_LEVEL];
     // Scratch space
     PangoLayout *layout;
     GString *str;
@@ -103,14 +106,16 @@ static void            gwy_axis_get_property     (GObject *object,
 static void            gwy_axis_style_updated    (GtkWidget *widget);
 static gboolean        set_snap_to_ticks         (GwyAxis *axis,
                                                   gboolean setting);
+static gboolean        set_ticks_at_ends         (GwyAxis *axis,
+                                                  gboolean setting);
 static gboolean        set_show_labels           (GwyAxis *axis,
                                                   gboolean setting);
 static gboolean        set_show_units            (GwyAxis *axis,
                                                   gboolean setting);
-static gboolean        set_draw_minor            (GwyAxis *axis,
-                                                  gboolean setting);
 static gboolean        set_edge                  (GwyAxis *axis,
                                                   GtkPositionType edge);
+static gboolean        set_max_tick_level        (GwyAxis *axis,
+                                                  guint max_tick_level);
 static gboolean        request_range             (GwyAxis *axis,
                                                   const GwyRange *range);
 static void            unit_changed              (GwyAxis *axis,
@@ -119,6 +124,13 @@ static void            invalidate_ticks          (GwyAxis *axis);
 static void            position_set_style_classes(GtkWidget *widget,
                                                   GtkPositionType position);
 static void            calculate_ticks           (GwyAxis *axis);
+static void            fill_tick_arrays          (GwyAxis *axis,
+                                                  GArray *ticks,
+                                                  gdouble bs,
+                                                  gdouble largerbs,
+                                                  guint length);
+static gdouble         measure_label             (GwyAxis *axis,
+                                                  const gchar *markup);
 static gboolean        zero_is_inside            (gdouble start,
                                                   guint n,
                                                   gdouble bs);
@@ -132,7 +144,7 @@ static GwyAxisStepType choose_step_type          (gdouble *step,
                                                   gdouble *base);
 static GwyAxisStepType decrease_step_type        (GwyAxisStepType steptype,
                                                   gdouble *base,
-                                                  gdouble measure,
+                                                  gdouble dx,
                                                   gdouble min_incr);
 static void            ensure_layout_and_ticks   (GwyAxis *axis);
 static void            clear_tick                (gpointer item);
@@ -204,7 +216,15 @@ gwy_axis_class_init(GwyAxisClass *klass)
                                "Snap to ticks",
                                "Whether the range should start and end at "
                                "a major tick.",
-                               TRUE,
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_TICKS_AT_ENDS]
+        = g_param_spec_boolean("ticks-at-ends",
+                               "Ticks at ends",
+                               "Whether ticks should be drawn at the "
+                               "axis edges even if no major ticks occur there.",
+                               FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SHOW_LABELS]
@@ -222,12 +242,14 @@ gwy_axis_class_init(GwyAxisClass *klass)
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_DRAW_MINOR]
-        = g_param_spec_boolean("draw-minor",
-                               "Draw-minor",
-                               "Whether minor ticks should be drawn.",
-                               TRUE,
-                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+    properties[PROP_MAX_TICK_LEVEL]
+        = g_param_spec_uint("max-tick-level",
+                            "Max tick level",
+                            "Maximum level of ticks to draw.  Zero means "
+                            "no ticks at all, except possibly end-point "
+                            "ticks.  One means major ticks, etc.",
+                            0, MAX_TICK_LEVEL, 2,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -243,11 +265,10 @@ gwy_axis_init(GwyAxis *axis)
     priv->unit_changed_id = g_signal_connect_swapped(priv->unit, "changed",
                                                      G_CALLBACK(unit_changed),
                                                      axis);
-    priv->snap_to_ticks = TRUE;
     priv->show_labels = TRUE;
     priv->show_units = TRUE;
-    priv->draw_minor = TRUE;
     priv->edge = GTK_POS_BOTTOM;
+    priv->max_tick_level = 2;
     priv->range = priv->request = default_range;
 }
 
@@ -258,9 +279,8 @@ gwy_axis_finalize(GObject *object)
     g_signal_handler_disconnect(priv->unit, priv->unit_changed_id);
     g_object_unref(priv->unit);
     GWY_STRING_FREE(priv->str);
-    GWY_ARRAY_FREE(priv->major_ticks);
-    GWY_ARRAY_FREE(priv->minor_ticks);
-    GWY_ARRAY_FREE(priv->micro_ticks);
+    for (guint i = 0; i < MAX_TICK_LEVEL; i++)
+        GWY_ARRAY_FREE(priv->ticks[i]);
     G_OBJECT_CLASS(gwy_axis_parent_class)->finalize(object);
 }
 
@@ -287,6 +307,10 @@ gwy_axis_set_property(GObject *object,
         set_edge(axis, g_value_get_enum(value));
         break;
 
+        case PROP_MAX_TICK_LEVEL:
+        set_max_tick_level(axis, g_value_get_uint(value));
+        break;
+
         case PROP_RANGE_REQUEST:
         request_range(axis, (const GwyRange*)g_value_get_boxed(value));
         break;
@@ -295,16 +319,16 @@ gwy_axis_set_property(GObject *object,
         set_snap_to_ticks(axis, g_value_get_boolean(value));
         break;
 
+        case PROP_TICKS_AT_ENDS:
+        set_ticks_at_ends(axis, g_value_get_boolean(value));
+        break;
+
         case PROP_SHOW_LABELS:
         set_show_labels(axis, g_value_get_boolean(value));
         break;
 
         case PROP_SHOW_UNITS:
         set_show_units(axis, g_value_get_boolean(value));
-        break;
-
-        case PROP_DRAW_MINOR:
-        set_draw_minor(axis, g_value_get_boolean(value));
         break;
 
         default:
@@ -330,6 +354,10 @@ gwy_axis_get_property(GObject *object,
         g_value_set_enum(value, priv->edge);
         break;
 
+        case PROP_MAX_TICK_LEVEL:
+        g_value_set_uint(value, priv->max_tick_level);
+        break;
+
         case PROP_RANGE_REQUEST:
         g_value_set_boxed(value, &priv->request);
         break;
@@ -342,16 +370,16 @@ gwy_axis_get_property(GObject *object,
         g_value_set_boolean(value, priv->snap_to_ticks);
         break;
 
+        case PROP_TICKS_AT_ENDS:
+        g_value_set_boolean(value, priv->ticks_at_ends);
+        break;
+
         case PROP_SHOW_LABELS:
         g_value_set_boolean(value, priv->show_labels);
         break;
 
         case PROP_SHOW_UNITS:
         g_value_set_boolean(value, priv->show_units);
-        break;
-
-        case PROP_DRAW_MINOR:
-        g_value_set_boolean(value, priv->draw_minor);
         break;
 
         default:
@@ -477,6 +505,19 @@ set_edge(GwyAxis *axis,
 }
 
 static gboolean
+set_max_tick_level(GwyAxis *axis,
+                   guint max_tick_level)
+{
+    Axis *priv = axis->priv;
+    if (max_tick_level == priv->max_tick_level)
+        return FALSE;
+
+    priv->max_tick_level = max_tick_level;
+    invalidate_ticks(axis);
+    return TRUE;
+}
+
+static gboolean
 request_range(GwyAxis *axis,
               const GwyRange *request)
 {
@@ -533,15 +574,15 @@ set_show_units(GwyAxis *axis,
 }
 
 static gboolean
-set_draw_minor(GwyAxis *axis,
-               gboolean setting)
+set_ticks_at_ends(GwyAxis *axis,
+                  gboolean setting)
 {
     Axis *priv = axis->priv;
     setting = !!setting;
-    if (setting == priv->draw_minor)
+    if (setting == priv->ticks_at_ends)
         return FALSE;
 
-    priv->draw_minor = setting;
+    priv->ticks_at_ends = setting;
     invalidate_ticks(axis);
     return TRUE;
 }
@@ -643,6 +684,10 @@ calculate_ticks(GwyAxis *axis)
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
         priv->range = request;
         priv->ticks_are_valid = TRUE;
+        // TODO: We could, more or less, simply continue, without any of the
+        // ugly iterative business below.  There will not be any labels or
+        // even ticks drawn at reasonable places, but what the fuck.  The
+        // only thing to prevent seriously is overlapping labels.
         return;
     }
 
@@ -694,32 +739,140 @@ calculate_ticks(GwyAxis *axis)
         }
     } while (state != FINALLY_OK);
 
-    // TODO: Now we need to actually create the ticks and labels.
-    gdouble from = priv->range.from, to = priv->range.to;
-    gdouble start = if_zero_then_exactly(descending
-                                         ? floor(from/bs + EPS)*bs
-                                         : ceil(from/bs - EPS)*bs,
-                                         bs);
-    guint n = (guint)floor((to - start)/bs + EPS);
-    gboolean units_at_zero = zero_is_inside(start, n, bs);
-    GArray *ticks = priv->major_ticks;
-    g_array_set_size(ticks, 0);
-    for (guint i = 0; i <= n; i++) {
-        GwyAxisTick tick;
-        const gchar *s;
-
-        tick.value = if_zero_then_exactly(n*bs + start, bs);
-        tick.position = (tick.value - from)/(to - from)*length;
-        if ((units_at_zero && tick.value == 0.0) || (!units_at_zero && !i))
-            s = gwy_value_format_print(priv->vf, tick.value);
-        else
-            s = gwy_value_format_print_number(priv->vf, tick.value);
-
-        tick.label = g_strdup(s);
-        g_array_append_val(ticks, tick);
+    gdouble dx = fabs(priv->range.to - priv->range.from)/length;
+    fill_tick_arrays(axis, priv->ticks[0], bs, 0.0, length);
+    for (guint i = 1; i < priv->max_tick_level; i++) {
+        gdouble largerbs = bs;
+        steptype = decrease_step_type(steptype, &base, dx, 5.0);
+        if (!steptype)
+            break;
+        step = step_sizes[steptype];
+        bs = base*step;
+        fill_tick_arrays(axis, priv->ticks[i], bs, largerbs, length);
     }
 
     priv->ticks_are_valid = TRUE;
+}
+
+static void
+fill_tick_arrays(GwyAxis *axis, GArray *ticks,
+                 gdouble bs, gdouble largerbs, guint length)
+{
+    Axis *priv = axis->priv;
+    gdouble from = priv->range.from, to = priv->range.to;
+    gdouble start = if_zero_then_exactly(bs > 0.0
+                                         ? ceil(from/bs - EPS)*bs
+                                         : floor(from/bs + EPS)*bs,
+                                         bs);
+    guint n = (guint)floor((to - start)/bs + EPS);
+    GwyValueFormat *vf = priv->vf;
+    enum { FIRST, LAST, AT_ZERO, NEVER } units_pos;
+
+    // FIXME: This must be controlled by the class also.  Namely LAST is
+    // unused here and NEVER may mean units are simply displayed elsewhere.
+    if (!priv->show_units)
+        units_pos = NEVER;
+    else if (zero_is_inside(start, n, bs))
+        units_pos = AT_ZERO;
+    else
+        units_pos = FIRST;
+
+    // Tick at the leading edge.
+    if (!largerbs && priv->ticks_at_ends) {
+        gdouble value = from, pos = 0.0, size = 0.0;
+        gchar *label = NULL;
+
+        if (priv->show_labels) {
+            const gchar *s;
+            if (units_pos == FIRST)
+                s = gwy_value_format_print(vf, value);
+            else
+                s = gwy_value_format_print_number(vf, value);
+
+            size = measure_label(axis, s);
+            label = g_strdup(s);
+        }
+        GwyAxisTick tick = { value, pos, size, label };
+        g_array_append_val(ticks, tick);
+    }
+
+    // Normal ticks between
+    guint ifrom = 0, ito = n;
+    if (!priv->max_tick_level) {
+        ifrom = 1;
+        ito = 0;
+    }
+    else if (priv->ticks_at_ends && priv->snap_to_ticks) {
+        ifrom++;
+        if (ito)
+            ito--;
+    }
+
+    for (guint i = ifrom; i <= ito; i++) {
+        gdouble value = if_zero_then_exactly(n*bs + start, bs);
+
+        // Skip ticks coinciding with more major ones.
+        if (largerbs > 0.0
+            && fabs(value/largerbs - gwy_round(value/largerbs)) < EPS)
+            continue;
+
+        gdouble pos = (value - from)/(to - from)*length;
+        gdouble size = 0.0;
+        gchar *label = NULL;
+
+        if (priv->show_labels && largerbs == 0.0) {
+            const gchar *s;
+            if (units_pos == AT_ZERO && value == 0.0)
+                s = gwy_value_format_print(vf, value);
+            else if (units_pos == FIRST && ticks->len == 0)
+                s = gwy_value_format_print(vf, value);
+            else if (units_pos == LAST && !priv->ticks_at_ends && i == n)
+                s = gwy_value_format_print(vf, value);
+            else
+                s = gwy_value_format_print_number(vf, value);
+
+            size = measure_label(axis, s);
+            label = g_strdup(s);
+        }
+        GwyAxisTick tick = { value, pos, size, label };
+        g_array_append_val(ticks, tick);
+    }
+
+    // Tick at the trailing edge.  Needs to be moved backward to fit within.
+    if (!largerbs && priv->ticks_at_ends) {
+        gdouble value = from, pos = 0.0, size = 0.0;
+        gchar *label = NULL;
+
+        if (priv->show_labels) {
+            const gchar *s;
+            if (units_pos == LAST)
+                s = gwy_value_format_print(vf, value);
+            else
+                s = gwy_value_format_print_number(vf, value);
+
+            size = measure_label(axis, s);
+            label = g_strdup(s);
+        }
+        GwyAxisTick tick = { value, pos-size, size, label };
+        g_array_append_val(ticks, tick);
+    }
+
+    // TODO: For level-0 tick some further pruning may be necessary as we
+    // do not want the edge ticks to overlap with inner ticks.  We have
+    // positions and sizes of all so it should not be difficult.
+}
+
+static gdouble
+measure_label(GwyAxis *axis, const gchar *markup)
+{
+    Axis *priv = axis->priv;
+    pango_layout_set_markup(priv->layout, markup, -1);
+
+    int width, height;
+    pango_layout_get_size(priv->layout, &width, &height);
+
+    return (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
+            ? height : width)/PANGO_SCALE;
 }
 
 static gboolean
@@ -792,7 +945,7 @@ choose_step_type(gdouble *step, gdouble *base)
 static GwyAxisStepType
 decrease_step_type(GwyAxisStepType steptype,
                    gdouble *base,
-                   gdouble measure,
+                   gdouble dx,
                    gdouble min_incr)
 {
     GwyAxisStepType new_scale = GWY_AXIS_STEP_0;
@@ -800,29 +953,29 @@ decrease_step_type(GwyAxisStepType steptype,
     switch (steptype) {
         case GWY_AXIS_STEP_1:
         *base /= 10.0;
-        if (*base*2.0/measure >= min_incr)
+        if (*base*2.0/dx >= min_incr)
             new_scale = GWY_AXIS_STEP_5;
-        else if (*base*2.5/measure >= min_incr)
+        else if (*base*2.5/dx >= min_incr)
             new_scale = GWY_AXIS_STEP_2_5;
-        else if (*base*5.0/measure >= min_incr)
+        else if (*base*5.0/dx >= min_incr)
             new_scale = GWY_AXIS_STEP_5;
         break;
 
         case GWY_AXIS_STEP_2:
-        if (*base/measure >= min_incr)
+        if (*base/dx >= min_incr)
             new_scale = GWY_AXIS_STEP_1;
         break;
 
         case GWY_AXIS_STEP_2_5:
         *base /= 10.0;
-        if (*base*5.0/measure > min_incr)
+        if (*base*5.0/dx > min_incr)
             new_scale = GWY_AXIS_STEP_5;
         break;
 
         case GWY_AXIS_STEP_5:
-        if (*base/measure >= min_incr)
+        if (*base/dx >= min_incr)
             new_scale = GWY_AXIS_STEP_1;
-        else if (*base*2.5/measure >= min_incr)
+        else if (*base*2.5/dx >= min_incr)
             new_scale = GWY_AXIS_STEP_2_5;
         break;
 
@@ -850,26 +1003,14 @@ ensure_layout_and_ticks(GwyAxis *axis)
         pango_attr_list_unref(attrlist);
     }
 
-    if (!priv->major_ticks) {
-        priv->major_ticks = g_array_new(FALSE, FALSE, sizeof(GwyAxisTick));
-        g_array_set_clear_func(priv->major_ticks, clear_tick);
+    for (guint i = 0; i < MAX_TICK_LEVEL; i++) {
+        if (!priv->ticks[i]) {
+            priv->ticks[i] = g_array_new(FALSE, FALSE, sizeof(GwyAxisTick));
+            g_array_set_clear_func(priv->ticks[i], clear_tick);
+        }
+        else
+            g_array_set_size(priv->ticks[i], 0);
     }
-    else
-        g_array_set_size(priv->major_ticks, 0);
-
-    if (!priv->minor_ticks) {
-        priv->minor_ticks = g_array_new(FALSE, FALSE, sizeof(GwyAxisTick));
-        g_array_set_clear_func(priv->minor_ticks, clear_tick);
-    }
-    else
-        g_array_set_size(priv->minor_ticks, 0);
-
-    if (!priv->micro_ticks) {
-        priv->micro_ticks = g_array_new(FALSE, FALSE, sizeof(GwyAxisTick));
-        g_array_set_clear_func(priv->micro_ticks, clear_tick);
-    }
-    else
-        g_array_set_size(priv->micro_ticks, 0);
 
     if (!priv->str)
         priv->str = g_string_new(NULL);
@@ -950,14 +1091,7 @@ estimate_major_distance(GwyAxis *axis,
     else
         label = gwy_value_format_print_number(priv->vf, request->to);
 
-    int width, height;
-    pango_layout_set_markup(priv->layout, label, -1);
-    pango_layout_get_size(priv->layout, &width, &height);
-
-    gint dimen = (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
-                  ? height
-                  : width);
-    return fmax((gdouble)dimen/PANGO_SCALE, min_dist);
+    return fmax(measure_label(axis, label), min_dist);
 }
 
 /**
