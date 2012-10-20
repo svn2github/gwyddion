@@ -224,11 +224,7 @@ test_curve_serialize_failure_odd(void)
                        "Curve data length is %lu which is not a multiple of 2.",
                        (gulong)len);
 
-    GMemoryOutputStream *mostream = G_MEMORY_OUTPUT_STREAM(stream);
-    gpointer data = g_memory_output_stream_get_data(mostream);
-    gsize datalen = g_memory_output_stream_get_data_size(mostream);
-    fix_object_size(mostream);
-    deserialize_assert_failure((const guchar*)data, datalen, error_list);
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
     g_object_unref(datastream);
     g_object_unref(stream);
