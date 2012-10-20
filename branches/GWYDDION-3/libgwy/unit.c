@@ -1256,7 +1256,7 @@ create_abnormal_format(const GwyUnit *unit,
     Unit *priv = unit->priv;
     gchar *glue, *units;
 
-    format_unit(unit, find_style_spec(style), 0, &glue, &units, FALSE);
+    format_unit(priv, find_style_spec(style), 0, &glue, &units, FALSE);
     GwyValueFormat *format = g_object_new(GWY_TYPE_VALUE_FORMAT,
                                           "style", style,
                                           "base", 1.0,

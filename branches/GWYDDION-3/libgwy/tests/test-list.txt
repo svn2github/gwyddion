@@ -115,8 +115,10 @@ unit/serialize
 unit/garbage
 unit/format/power10
 unit/format/digits
+unit/format/abnormal
 value-format/props
 value-format/unit
+value-format/abnormal
 int-set/serialize
 int-set/assign
 int-set/add-remove
