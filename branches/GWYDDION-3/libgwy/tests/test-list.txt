@@ -172,6 +172,7 @@ line/check-part/bad
 line/copy
 line/new-part
 line/serialize
+line/serialize/failure/nodata
 line/distribute/simple
 line/distribute/unbiased
 line/outer-product
@@ -187,6 +188,7 @@ curve/get
 curve/set
 curve/data-changed
 curve/serialize
+curve/serialize/failure/odd
 curve/regularize
 mask-line/props
 mask-line/get
@@ -211,7 +213,9 @@ mask-field/new-part
 mask-field/logical
 mask-field/logical-part
 mask-field/serialize
-mask-field/serialize/failure
+mask-field/serialize/failure/xres0
+mask-field/serialize/failure/yres0
+mask-field/serialize/failure/size
 mask-field/fill
 mask-field/count
 mask-field/count-rows
@@ -255,7 +259,9 @@ field/check-mask/bad
 field/copy
 field/new-part
 field/serialize
-field/serialize/failure
+field/serialize/failure/xres0
+field/serialize/failure/yres0
+field/serialize/failure/size
 field/set-size
 field/congruence/in-place/3x2
 field/congruence/in-place/2x3

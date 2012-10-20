@@ -226,6 +226,37 @@ test_line_serialize(void)
 }
 
 void
+test_line_serialize_failure_nodata(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyLine", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "real", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Line contains no data.");
+
+    GMemoryOutputStream *mostream = G_MEMORY_OUTPUT_STREAM(stream);
+    gpointer data = g_memory_output_stream_get_data(mostream);
+    gsize datalen = g_memory_output_stream_get_data_size(mostream);
+    fix_object_size(mostream);
+    deserialize_assert_failure((const guchar*)data, datalen, error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
 record_signal(guint *counter)
 {
     (*counter)++;

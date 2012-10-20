@@ -49,10 +49,18 @@ void          serializable_assign           (GwySerializable *serializable,
                                              CompareObjectDataFunc compare);
 gpointer      serialize_boxed_and_back      (gpointer boxed,
                                              GType type);
-void          deserialize_assert_failure    (GwySerializable *serializable,
-                                             void (*tweak)(guchar *buffer,
-                                                           gsize size),
-                                             const gchar *message);
+void          deserialize_assert_failure    (const guchar *buffer,
+                                             gsize size,
+                                             GwyErrorList *expected_errors);
+gboolean      data_stream_put_double        (GDataOutputStream *stream,
+                                             gdouble data,
+                                             GCancellable *cancellable,
+                                             GError **error);
+gboolean      data_stream_put_string0       (GDataOutputStream *stream,
+                                             const gchar *str,
+                                             GCancellable *cancellable,
+                                             GError **error);
+void          fix_object_size               (GMemoryOutputStream *stream);
 void          record_item_change            (GObject *object,
                                              guint pos,
                                              guint64 *counter);

@@ -811,37 +811,61 @@ serializable_assign(GwySerializable *serializable,
 }
 
 void
-deserialize_assert_failure(GwySerializable *serializable,
-                           void (*tweak)(guchar *buffer, gsize size),
-                           const gchar *message)
+deserialize_assert_failure(const guchar *buffer,
+                           gsize size,
+                           GwyErrorList *expected_errors)
 {
-    enum { buffer_size = 0x10000 };
-
-    g_assert(GWY_IS_SERIALIZABLE(serializable));
-    GOutputStream *stream = g_memory_output_stream_new(malloc(buffer_size),
-                                                       buffer_size, NULL,
-                                                       &free);
-    GMemoryOutputStream *memstream = G_MEMORY_OUTPUT_STREAM(stream);
-    GError *error = NULL;
-    gboolean ok = gwy_serialize_gio(serializable, stream, &error);
-    g_assert(ok);
-    g_assert_no_error(error);
-    gsize datalen = g_memory_output_stream_get_data_size(memstream);
-    gpointer data = g_memory_output_stream_get_data(memstream);
-
-    tweak((guchar*)data, datalen);
-
     GwyErrorList *error_list = NULL;
-    GObject *obj = gwy_deserialize_memory(data, datalen, NULL, &error_list);
-    g_object_unref(stream);
-
+    GObject *obj = gwy_deserialize_memory(buffer, size, NULL, &error_list);
     g_assert(obj == NULL);
-    g_assert_cmpuint(g_slist_length(error_list), ==, 1);
-    error = (GError*)error_list->data;
-    g_assert_cmpuint(error->code, ==, GWY_DESERIALIZE_ERROR_INVALID);
-    if (message)
-        g_assert_cmpstr(error->message, ==, message);
+    //dump_error_list(error_list);
+    g_assert_cmpuint(g_slist_length(error_list),
+                     ==,
+                     g_slist_length(expected_errors));
+    guint n = g_slist_length(expected_errors);
+    for (guint i = 0; i < n; i++) {
+        GError *expected_error = g_slist_nth_data(expected_errors, i);
+        GError *error = g_slist_nth_data(error_list, i);
+        g_assert_error(error, expected_error->domain, expected_error->code);
+        g_assert_cmpstr(error->message, ==, expected_error->message);
+    }
     gwy_error_list_clear(&error_list);
+}
+
+gboolean
+data_stream_put_double(GDataOutputStream *stream,
+                       gdouble data,
+                       GCancellable *cancellable,
+                       GError **error)
+{
+    union {
+        gdouble d;
+        guint64 i;
+    } x;
+    x.d = data;
+    return g_data_output_stream_put_uint64(stream, x.i, cancellable, error);
+}
+
+gboolean
+data_stream_put_string0(GDataOutputStream *stream,
+                        const gchar *str,
+                        GCancellable *cancellable,
+                        GError **error)
+{
+    if (!g_data_output_stream_put_string(stream, str, cancellable, error))
+        return FALSE;
+    return g_data_output_stream_put_byte(stream, 0, cancellable, error);
+}
+
+void
+fix_object_size(GMemoryOutputStream *stream)
+{
+    gpointer data = g_memory_output_stream_get_data(stream);
+    gsize datalen = g_memory_output_stream_get_data_size(stream);
+    guint namelen = strlen((const gchar*)data) + 1;
+    guint64 sz = datalen - namelen - sizeof(guint64);
+    sz = GUINT64_TO_LE(sz);
+    memcpy((guchar*)data + namelen, &sz, sizeof(guint64));
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
