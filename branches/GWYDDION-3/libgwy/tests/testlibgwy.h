@@ -49,6 +49,10 @@ void          serializable_assign           (GwySerializable *serializable,
                                              CompareObjectDataFunc compare);
 gpointer      serialize_boxed_and_back      (gpointer boxed,
                                              GType type);
+void          deserialize_assert_failure    (GwySerializable *serializable,
+                                             void (*tweak)(guchar *buffer,
+                                                           gsize size),
+                                             const gchar *message);
 void          record_item_change            (GObject *object,
                                              guint pos,
                                              guint64 *counter);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -808,6 +808,40 @@ serializable_assign(GwySerializable *serializable,
     if (compare)
         compare(G_OBJECT(copy), G_OBJECT(serializable));
     g_object_unref(copy);
+}
+
+void
+deserialize_assert_failure(GwySerializable *serializable,
+                           void (*tweak)(guchar *buffer, gsize size),
+                           const gchar *message)
+{
+    enum { buffer_size = 0x10000 };
+
+    g_assert(GWY_IS_SERIALIZABLE(serializable));
+    GOutputStream *stream = g_memory_output_stream_new(malloc(buffer_size),
+                                                       buffer_size, NULL,
+                                                       &free);
+    GMemoryOutputStream *memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    GError *error = NULL;
+    gboolean ok = gwy_serialize_gio(serializable, stream, &error);
+    g_assert(ok);
+    g_assert_no_error(error);
+    gsize datalen = g_memory_output_stream_get_data_size(memstream);
+    gpointer data = g_memory_output_stream_get_data(memstream);
+
+    tweak((guchar*)data, datalen);
+
+    GwyErrorList *error_list = NULL;
+    GObject *obj = gwy_deserialize_memory(data, datalen, NULL, &error_list);
+    g_object_unref(stream);
+
+    g_assert(obj == NULL);
+    g_assert_cmpuint(g_slist_length(error_list), ==, 1);
+    error = (GError*)error_list->data;
+    g_assert_cmpuint(error->code, ==, GWY_DESERIALIZE_ERROR_INVALID);
+    if (message)
+        g_assert_cmpstr(error->message, ==, message);
+    gwy_error_list_clear(&error_list);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
