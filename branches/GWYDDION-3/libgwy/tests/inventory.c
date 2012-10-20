@@ -130,6 +130,25 @@ test_inventory_data(void)
     g_assert_cmphex(delete_log, ==, 0);
     insert_log = 0;
 
+    gwy_inventory_updated(inventory, "Second");
+    gwy_inventory_updated(inventory, "First");
+    gwy_inventory_updated(inventory, "Second");
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 3);
+    g_assert_cmphex(insert_log, ==, 0);
+    // Inventory is sorted so "Second" comes after "Fixme".
+    g_assert_cmphex(update_log, ==, 0x313);
+    g_assert_cmphex(delete_log, ==, 0);
+    update_log = 0;
+
+    gwy_inventory_nth_updated(inventory, 0);
+    gwy_inventory_nth_updated(inventory, 1);
+    gwy_inventory_nth_updated(inventory, 2);
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 3);
+    g_assert_cmphex(insert_log, ==, 0);
+    g_assert_cmphex(update_log, ==, 0x123);
+    g_assert_cmphex(delete_log, ==, 0);
+    update_log = 0;
+
     GwyItemTest *itemtest;
     g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
     g_assert_cmpint(itemtest->value, ==, -1);
