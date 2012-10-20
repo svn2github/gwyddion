@@ -599,7 +599,7 @@ test_mask_field_serialize_failure_size(void)
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
                        "Mask field dimensions %u×%u do not match data size %lu.",
-                       3, 2, (gulong)3);
+                       3, 2, (gulong)len);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);

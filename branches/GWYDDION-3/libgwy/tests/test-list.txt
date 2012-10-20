@@ -120,6 +120,8 @@ value-format/props
 value-format/unit
 value-format/abnormal
 int-set/serialize
+int-set/serialize/failure/odd
+int-set/serialize/failure/noncanon
 int-set/assign
 int-set/add-remove
 int-set/values
@@ -197,6 +199,8 @@ mask-line/data-changed
 mask-line/copy
 mask-line/new-part
 mask-line/serialize
+mask-line/serialize/failure/res0
+mask-line/serialize/failure/size
 mask-line/count
 mask-line/set-size
 mask-line/resample
@@ -398,6 +402,10 @@ brick/units-assign
 brick/get
 brick/set
 brick/serialize
+brick/serialize/failure/xres0
+brick/serialize/failure/yres0
+brick/serialize/failure/zres0
+brick/serialize/failure/size
 brick/set-size
 brick/copy
 brick/new-part

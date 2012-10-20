@@ -385,6 +385,202 @@ test_brick_serialize(void)
 }
 
 void
+test_brick_serialize_failure_xres0(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyBrick", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "xres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "yres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 2, NULL, NULL);
+    data_stream_put_string0(datastream, "zres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 1, NULL, NULL);
+    data_stream_put_string0(datastream, "xreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "yreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "zreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Brick dimensions %u×%u×%u are invalid.", 0, 2, 1);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
+test_brick_serialize_failure_yres0(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyBrick", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "xres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 3, NULL, NULL);
+    data_stream_put_string0(datastream, "yres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "zres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 1, NULL, NULL);
+    data_stream_put_string0(datastream, "xreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "yreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "zreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Brick dimensions %u×%u×%u are invalid.", 3, 0, 1);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
+test_brick_serialize_failure_zres0(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyBrick", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "xres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 3, NULL, NULL);
+    data_stream_put_string0(datastream, "yres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 2, NULL, NULL);
+    data_stream_put_string0(datastream, "zres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "xreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "yreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "zreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Brick dimensions %u×%u×%u are invalid.", 3, 2, 0);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
+test_brick_serialize_failure_size(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyBrick", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "xres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 3, NULL, NULL);
+    data_stream_put_string0(datastream, "yres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 2, NULL, NULL);
+    data_stream_put_string0(datastream, "zres", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 1, NULL, NULL);
+    data_stream_put_string0(datastream, "xreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "yreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    data_stream_put_string0(datastream, "zreal", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE,
+                                  NULL, NULL);
+    data_stream_put_double(datastream, 1.0, NULL, NULL);
+    guint len = 5;
+    data_stream_put_string0(datastream, "data", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE_ARRAY,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, len, NULL, NULL);
+    for (guint i = 0; i < len; i++)
+        data_stream_put_double(datastream, i, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Brick dimensions %u×%u×%u do not match data size %lu.",
+                       3, 2, 1, (gulong)len);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
 test_brick_set_size(void)
 {
     GwyBrick *brick = gwy_brick_new_sized(13, 11, 8, TRUE);

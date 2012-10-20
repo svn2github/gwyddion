@@ -245,6 +245,68 @@ test_mask_line_serialize(void)
 }
 
 void
+test_mask_line_serialize_failure_res0(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyMaskLine", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "res", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 0, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Mask line dimension %u is invalid.", 0);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
+test_mask_line_serialize_failure_size(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    data_stream_put_string0(datastream, "GwyMaskLine", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "res", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint32(datastream, 3, NULL, NULL);
+    data_stream_put_string0(datastream, "data", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_INT32_ARRAY,
+                                  NULL, NULL);
+    guint len = 5;
+    g_data_output_stream_put_uint64(datastream, len, NULL, NULL);
+    for (guint i = 0; i < len; i++)
+        g_data_output_stream_put_uint32(datastream, i, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Mask line dimension %u does not match data size %lu.",
+                       3, (gulong)len);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
 test_mask_line_set_size(void)
 {
     GwyMaskLine *maskline = gwy_mask_line_new_sized(13, TRUE);
