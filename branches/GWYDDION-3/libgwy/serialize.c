@@ -1057,7 +1057,7 @@ unpack_boxed(const guchar *buffer,
  *
  * Deserialises an object in GWY format from plain memory buffer.
  *
- * Returns: (transfer full):
+ * Returns: (transfer full) (allow none):
  *          Newly created object on success, %NULL on failure.
  **/
 GObject*
