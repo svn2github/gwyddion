@@ -72,42 +72,43 @@ struct _GwyUnitPrivate {
 
 typedef struct _GwyUnitPrivate Unit;
 
-static void         gwy_unit_finalize         (GObject *object);
-static void         gwy_unit_serializable_init(GwySerializableInterface *iface);
-static gsize        gwy_unit_n_items          (GwySerializable *serializable);
-static gsize        gwy_unit_itemize          (GwySerializable *serializable,
-                                               GwySerializableItems *items);
-static void         gwy_unit_done             (GwySerializable *serializable);
-static gboolean     gwy_unit_construct        (GwySerializable *serializable,
-                                               GwySerializableItems *items,
-                                               GwyErrorList **error_list);
-static GObject*     gwy_unit_duplicate_impl   (GwySerializable *serializable);
-static void         gwy_unit_assign_impl      (GwySerializable *destination,
-                                               GwySerializable *source);
-
-static gdouble      find_number_format        (gdouble step,
-                                               gdouble maximum,
-                                               guint *precision);
-static gboolean     is_equal                  (const GArray *units,
-                                               const GArray *op);
-static gboolean     parse                     (GArray *units,
-                                               const gchar *string,
-                                               gint *power10);
-static gboolean     power_impl                (GArray *result,
-                                               const GArray *op,
-                                               gint power);
-static void         canonicalize              (GArray *units);
-static const gchar* get_prefix                (gint power);
-static void         append_power_plain        (GString *str,
-                                               gint power);
-static void         append_power_unicode      (GString *str,
-                                               gint power);
-static void         format_unit               (const Unit *unit,
-                                               const GwyUnitStyleSpec *fs,
-                                               gint power10,
-                                               gchar **glue_retval,
-                                               gchar **units_retval,
-                                               gboolean retain_empty_strings);
+static void            gwy_unit_finalize         (GObject *object);
+static void            gwy_unit_serializable_init(GwySerializableInterface *iface);
+static gsize           gwy_unit_n_items          (GwySerializable *serializable);
+static gsize           gwy_unit_itemize          (GwySerializable *serializable,
+                                                  GwySerializableItems *items);
+static void            gwy_unit_done             (GwySerializable *serializable);
+static gboolean        gwy_unit_construct        (GwySerializable *serializable,
+                                                  GwySerializableItems *items,
+                                                  GwyErrorList **error_list);
+static GObject*        gwy_unit_duplicate_impl   (GwySerializable *serializable);
+static void            gwy_unit_assign_impl      (GwySerializable *destination,
+                                                  GwySerializable *source);
+static gdouble         find_number_format        (gdouble step,
+                                                  gdouble maximum,
+                                                  guint *precision);
+static gboolean        is_equal                  (const GArray *units,
+                                                  const GArray *op);
+static gboolean        parse                     (GArray *units,
+                                                  const gchar *string,
+                                                  gint *power10);
+static gboolean        power_impl                (GArray *result,
+                                                  const GArray *op,
+                                                  gint power);
+static void            canonicalize              (GArray *units);
+static const gchar*    get_prefix                (gint power);
+static GwyValueFormat* create_abnormal_format    (const GwyUnit *unit,
+                                                  GwyValueFormatStyle style);
+static void            append_power_plain        (GString *str,
+                                                  gint power);
+static void            append_power_unicode      (GString *str,
+                                                  gint power);
+static void            format_unit               (const Unit *unit,
+                                                  const GwyUnitStyleSpec *fs,
+                                                  gint power10,
+                                                  gchar **glue_retval,
+                                                  gchar **units_retval,
+                                                  gboolean retain_empty_strings);
 
 static const struct {
     const gchar *prefix;
@@ -1075,6 +1076,10 @@ gwy_unit_format_for_power10(const GwyUnit *unit,
                             gint power10)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
+    /* XXX?
+    if (power10 < -315 || power10 > 300)
+        return create_abnormal_format(unit, style);
+        */
 
     gchar *glue, *units;
     format_unit(unit->priv, find_style_spec(style), power10,
@@ -1111,6 +1116,8 @@ gwy_unit_format_with_resolution(const GwyUnit *unit,
                                 gdouble resolution)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
+    if (!isfinite(maximum) || !isfinite(resolution))
+        return create_abnormal_format(unit, style);
 
     maximum = fabs(maximum);
     resolution = fabs(resolution);
@@ -1156,6 +1163,8 @@ gwy_unit_format_with_digits(const GwyUnit *unit,
                             guint sdigits)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
+    if (!isfinite(value))
+        return create_abnormal_format(unit, style);
 
     value = fabs(value);
     guint precision = sdigits;
@@ -1238,6 +1247,27 @@ find_number_format(gdouble step,
     }
 
     return gwy_powi(10.0, mag);
+}
+
+static GwyValueFormat*
+create_abnormal_format(const GwyUnit *unit,
+                       GwyValueFormatStyle style)
+{
+    Unit *priv = unit->priv;
+    gchar *glue, *units;
+
+    format_unit(unit, find_style_spec(style), 0, &glue, &units, FALSE);
+    GwyValueFormat *format = g_object_new(GWY_TYPE_VALUE_FORMAT,
+                                          "style", style,
+                                          "base", 1.0,
+                                          "precision", 0,
+                                          "glue", glue,
+                                          "units", units,
+                                          NULL);
+    g_free(glue);
+    g_free(units);
+
+    return format;
 }
 
 static void
@@ -1440,8 +1470,8 @@ get_prefix(gint power)
  * several methods available for constructing a value format with given
  * resolution -- gwy_unit_format_with_resolution(), or number of
  * significant digits -- gwy_unit_format_with_digits().  These methods
- * either create or update a #GwyValueFormat object that can be subsequently
- * used for the formatting.
+ * create #GwyValueFormat objects that can be subsequently used for the
+ * formatting.
  *
  * <refsect2 id='GwyUnit-ownership'>
  * <title>Units and Ownership</title>

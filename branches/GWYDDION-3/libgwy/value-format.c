@@ -58,6 +58,9 @@ static void gwy_value_format_get_property(GObject *object,
                                           guint prop_id,
                                           GValue *value,
                                           GParamSpec *pspec);
+static void format_abnormal              (GString *str,
+                                          gdouble value,
+                                          GwyValueFormatStyle style);
 static void ensure_value                 (ValueFormat *format);
 static void fix_utf8_minus               (GString *str);
 
@@ -284,13 +287,21 @@ gwy_value_format_print(GwyValueFormat *format,
     ValueFormat *priv = format->priv;
 
     ensure_value(priv);
-    g_string_printf(priv->value, "%.*f%s%s",
-                    priv->precision, value/priv->base,
-                    priv->glue ? priv->glue : "",
-                    priv->units ? priv->units : "");
-
-    if (priv->style == GWY_VALUE_FORMAT_PANGO)
-        fix_utf8_minus(priv->value);
+    if (isfinite(value)) {
+        g_string_printf(priv->value, "%.*f%s%s",
+                        priv->precision, value/priv->base,
+                        priv->glue ? priv->glue : "",
+                        priv->units ? priv->units : "");
+        if (priv->style == GWY_VALUE_FORMAT_PANGO)
+            fix_utf8_minus(priv->value);
+    }
+    else {
+        format_abnormal(priv->value, value, priv->style);
+        if (priv->glue)
+            g_string_append(priv->value, priv->glue);
+        if (priv->units)
+            g_string_append(priv->value, priv->units);
+    }
 
     return priv->value->str;
 }
@@ -317,11 +328,13 @@ gwy_value_format_print_number(GwyValueFormat *format,
     ValueFormat *priv = format->priv;
 
     ensure_value(priv);
-    g_string_printf(priv->value, "%.*f",
-                    priv->precision, value/priv->base);
-
-    if (priv->style == GWY_VALUE_FORMAT_PANGO)
-        fix_utf8_minus(priv->value);
+    if (isfinite(value)) {
+        g_string_printf(priv->value, "%.*f", priv->precision, value/priv->base);
+        if (priv->style == GWY_VALUE_FORMAT_PANGO)
+            fix_utf8_minus(priv->value);
+    }
+    else
+        format_abnormal(priv->value, value, priv->style);
 
     return priv->value->str;
 }
@@ -475,6 +488,26 @@ gwy_value_format_set_power10(GwyValueFormat *format,
                              gint power10)
 {
     gwy_value_format_set_base(format, gwy_powi(10.0, power10));
+}
+
+static void
+format_abnormal(GString *str,
+                gdouble value,
+                GwyValueFormatStyle style)
+{
+    static const gchar *plus_inf_values[] = {
+        "+Inf", "+Inf", "+∞", "+∞", "+\\infty"
+    };
+    static const gchar *minus_inf_values[] = {
+        "-Inf", "-Inf", "-∞", "−∞", "-\\infty"
+    };
+
+    if (isnan(value))
+        g_string_assign(str, "NaN");
+    else if (isinf(value) < 0)
+        g_string_assign(str, minus_inf_values[style]);
+    else
+        g_string_assign(str, plus_inf_values[style]);
 }
 
 static void
