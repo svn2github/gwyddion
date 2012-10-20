@@ -506,6 +506,75 @@ test_mask_field_serialize(void)
     g_rand_free(rng);
 }
 
+static void
+tweak_mask_field_xres0(guchar *buffer,
+                       gsize size)
+{
+    guint len = 6;
+    gpointer pos = gwy_memmem(buffer, size, "xres\x00i", len);
+    g_assert(pos);
+    guint32 xres = GUINT32_TO_LE(0);
+    memcpy((guchar*)pos + len, &xres, sizeof(xres));
+}
+
+static void
+tweak_mask_field_yres0(guchar *buffer,
+                       gsize size)
+{
+    guint len = 6;
+    gpointer pos = gwy_memmem(buffer, size, "yres\x00i", len);
+    g_assert(pos);
+    guint32 xres = GUINT32_TO_LE(0);
+    memcpy((guchar*)pos + len, &xres, sizeof(xres));
+}
+
+static void
+tweak_mask_field_size51(guchar *buffer,
+                        gsize size)
+{
+    guint len = 6;
+    gpointer pos = gwy_memmem(buffer, size, "xres\x00i", len);
+    g_assert(pos);
+    guint32 xres = GUINT32_TO_LE(5);
+    memcpy((guchar*)pos + len, &xres, sizeof(xres));
+    pos = gwy_memmem(buffer, size, "yres\x00i", len);
+    g_assert(pos);
+    guchar yres = GUINT32_TO_LE(1);
+    memcpy((guchar*)pos + len, &yres, sizeof(yres));
+}
+
+void
+test_mask_field_serialize_failure(void)
+{
+    GwyMaskField *field;
+    gchar *message;
+
+    field = gwy_mask_field_new_sized(3, 2, TRUE);
+    message = g_strdup_printf("Mask field dimensions %u×%u are invalid.", 0, 2);
+    deserialize_assert_failure(GWY_SERIALIZABLE(field), tweak_mask_field_xres0,
+                               message);
+    g_object_unref(field);
+    g_free(message);
+
+    field = gwy_mask_field_new_sized(3, 2, TRUE);
+    message = g_strdup_printf("Mask field dimensions %u×%u are invalid.", 3, 0);
+    deserialize_assert_failure(GWY_SERIALIZABLE(field), tweak_mask_field_yres0,
+                               message);
+    g_object_unref(field);
+    g_free(message);
+
+    // The strange value 4 is correct.  Rows start at 8-byte boundaries and
+    // there were two rows: 2 × 2 = 4.
+    field = gwy_mask_field_new_sized(3, 2, TRUE);
+    message = g_strdup_printf("Mask field dimensions %u×%u do not match "
+                              "data size %lu.",
+                              5, 1, (gulong)4);
+    deserialize_assert_failure(GWY_SERIALIZABLE(field), tweak_mask_field_size51,
+                               message);
+    g_object_unref(field);
+    g_free(message);
+}
+
 void
 test_mask_field_set_size(void)
 {

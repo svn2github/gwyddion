@@ -211,6 +211,7 @@ mask-field/new-part
 mask-field/logical
 mask-field/logical-part
 mask-field/serialize
+mask-field/serialize/failure
 mask-field/fill
 mask-field/count
 mask-field/count-rows
@@ -254,6 +255,7 @@ field/check-mask/bad
 field/copy
 field/new-part
 field/serialize
+field/serialize/failure
 field/set-size
 field/congruence/in-place/3x2
 field/congruence/in-place/2x3
