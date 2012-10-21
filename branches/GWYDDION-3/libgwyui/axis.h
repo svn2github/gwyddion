@@ -85,14 +85,14 @@ void               gwy_axis_get_requested_range(GwyAxis *axis,
 gboolean           gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_show_labels    (GwyAxis *axis,
                                                 gboolean showlabels);
-const GwyAxisTick* gwy_axis_get_ticks          (GwyAxis *axis,
-                                                guint *nticks);
 GtkPositionType    gwy_axis_get_edge           (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_edge           (GwyAxis *axis,
                                                 GtkPositionType edge);
 gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_snap_to_ticks  (GwyAxis *axis,
                                                 gboolean snaptoticks);
+const GwyAxisTick* gwy_axis_get_ticks          (GwyAxis *axis,
+                                                guint *nticks);
 
 G_END_DECLS
 
