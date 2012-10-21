@@ -936,7 +936,7 @@ calculate_ticks(GwyAxis *axis)
 
     State state = FIRST_TRY;
     GwyAxisStepType steptype = GWY_AXIS_STEP_0;
-    // Silence GCC.  And make any uninitaised use pretty obvious.
+    // Silence GCC.  And make any uninitialised use pretty obvious.
     gdouble base = NAN, step = NAN, bs = NAN;
     do {
         g_printerr("ITERATION with state %u\n", state);
@@ -948,9 +948,9 @@ calculate_ticks(GwyAxis *axis)
             // Use @descending where direction is necessary.
             step = fabs(priv->range.to - priv->range.from)/(length/majdist);
             steptype = choose_step_type(&step, &base);
-            g_printerr("base=%g, step=%g (steptype %u)\n",
-                       base, step, steptype);
         }
+        step = step_sizes[steptype];
+        g_printerr("base=%g, step=%g (steptype %u)\n", base, step, steptype);
 
         bs = descending ? -base*step : base*step;
         if (priv->snap_to_ticks) {
@@ -959,7 +959,6 @@ calculate_ticks(GwyAxis *axis)
         }
 
         guint precision = gwy_value_format_get_precision(priv->vf);
-        step = step_sizes[steptype];
         if (precision_is_sufficient(priv->vf, &priv->range, bs, priv->str)) {
             g_printerr("precision %u is sufficient\n", precision);
             if (state == FIRST_TRY && precision > 0)
@@ -1022,6 +1021,8 @@ fill_tick_arrays(GwyAxis *axis, guint level,
     guint length = priv->length;
     enum { FIRST, LAST, AT_ZERO, NEVER } units_pos;
 
+    g_printerr("LEVEL %u, bs=%g, largerbs=%g\n", level, bs, largerbs);
+
     // FIXME: This must be controlled by the class also.  Namely LAST is
     // unused here and NEVER may mean units are simply displayed elsewhere.
     if (!priv->show_units)
@@ -1063,11 +1064,10 @@ fill_tick_arrays(GwyAxis *axis, guint level,
     }
 
     for (guint i = ifrom; i <= ito; i++) {
-        gdouble value = if_zero_then_exactly(n*bs + start, bs);
+        gdouble value = if_zero_then_exactly(i*bs + start, bs);
 
         // Skip ticks coinciding with more major ones.
-        if (level == GWY_AXIS_TICK_MAJOR
-            && fabs(value/largerbs - gwy_round(value/largerbs)) < EPS)
+        if (largerbs && fabs(value/largerbs - gwy_round(value/largerbs)) < EPS)
             continue;
 
         gdouble pos = (value - from)/(to - from)*length;
@@ -1180,7 +1180,7 @@ choose_step_type(gdouble *step, gdouble *base)
 
     while (*step <= 0.5) {
         *base /= 10.0;
-        *step += 10.0;
+        *step *= 10.0;
     }
     while (*step > 5.0) {
         *base *= 10.0;
