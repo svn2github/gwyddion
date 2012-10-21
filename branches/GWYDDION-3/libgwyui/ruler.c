@@ -109,7 +109,6 @@ static void
 gwy_ruler_init(GwyRuler *ruler)
 {
     ruler->priv = G_TYPE_INSTANCE_GET_PRIVATE(ruler, GWY_TYPE_RULER, Ruler);
-    Ruler *priv = ruler->priv;
 }
 
 static void
@@ -123,7 +122,6 @@ gwy_ruler_finalize(GObject *object)
 static void
 gwy_ruler_dispose(GObject *object)
 {
-    Ruler *priv = GWY_RULER(object)->priv;
     G_OBJECT_CLASS(gwy_ruler_parent_class)->dispose(object);
 }
 
@@ -187,7 +185,7 @@ gwy_ruler_get_preferred_width(GtkWidget *widget,
     }
 
     // TODO
-    *minimum = *natural = 30;
+    *minimum = *natural = 24;
 }
 
 static void
@@ -204,14 +202,42 @@ gwy_ruler_get_preferred_height(GtkWidget *widget,
     }
 
     // TODO
-    *minimum = *natural = 30;
+    *minimum = *natural = 24;
+}
+
+static void
+set_up_transform(GtkPositionType edge,
+                 cairo_matrix_t *matrix,
+                 gdouble width, gdouble height)
+{
+    if (edge == GTK_POS_TOP)
+        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, height);
+    else if (edge == GTK_POS_LEFT)
+        cairo_matrix_init(matrix, 0.0, 1.0, -1.0, 0.0, width, 0.0);
+    else if (edge == GTK_POS_BOTTOM)
+        cairo_matrix_init_identity(matrix);
+    else if (edge == GTK_POS_RIGHT)
+        cairo_matrix_init(matrix, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+    else {
+        g_assert_not_reached();
+    }
+}
+
+static void
+draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
+                      gdouble xf, gdouble yf, gdouble xt, gdouble yt)
+{
+    cairo_matrix_transform_point(matrix, &xf, &yf);
+    cairo_move_to(cr, xf, yf);
+    cairo_matrix_transform_point(matrix, &xt, &yt);
+    cairo_line_to(cr, xt, yt);
 }
 
 static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
 {
-    static const gdouble tick_level_sizes[4] = { 1.0, 1.0, 0.618, 0.382 };
+    static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.5, 0.3 };
     g_printerr("RULER DRAW %p\n", widget);
 
     GwyAxis *axis = GWY_AXIS(widget);
@@ -219,44 +245,44 @@ gwy_ruler_draw(GtkWidget *widget,
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
+    cairo_matrix_t matrix;
+    gdouble length = width, breadth = height;
+
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
+        GWY_SWAP(gdouble, length, breadth);
+
+    set_up_transform(edge, &matrix, width, height);
 
     gtk_render_background(context, cr, 0, 0, width, height);
-
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    cairo_set_line_width(cr, 1.618);
 
     guint nticks;
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
 
-    if (edge == GTK_POS_TOP) {
-        cairo_move_to(cr, 0, height);
-        cairo_line_to(cr, width, height);
-
-        for (guint i = 0; i < nticks; i++) {
-            gdouble s = tick_level_sizes[ticks[i].level];
-            cairo_move_to(cr, ticks[i].position, height);
-            cairo_line_to(cr, ticks[i].position, height*(1.0 - 0.6*s));
-        }
-    }
-    else if (edge == GTK_POS_BOTTOM) {
-        cairo_move_to(cr, 0, 0);
-        cairo_line_to(cr, width, 0);
-    }
-    else if (edge == GTK_POS_LEFT) {
-        cairo_move_to(cr, width, 0);
-        cairo_line_to(cr, width, height);
-
-        for (guint i = 0; i < nticks; i++) {
-            gdouble s = tick_level_sizes[ticks[i].level];
-            cairo_move_to(cr, width, ticks[i].position);
-            cairo_line_to(cr, width*(1.0 - 0.6*s), ticks[i].position);
-        }
-    }
-    else {
-        cairo_move_to(cr, 0, 0);
-        cairo_line_to(cr, 0, height);
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_set_line_width(cr, 1.0);
+    draw_line_transformed(cr, &matrix, 0, 0, length, 0);
+    for (guint i = 0; i < nticks; i++) {
+        gdouble pos = ticks[i].position;
+        gdouble s = tick_level_sizes[ticks[i].level];
+        draw_line_transformed(cr, &matrix, pos, 0, pos, s*breadth);
     }
     cairo_stroke(cr);
+
+    PangoLayout *layout = gwy_axis_get_layout(axis);
+    for (guint i = 0; i < nticks; i++) {
+        if (!ticks[i].label)
+            continue;
+
+        gdouble x = ticks[i].position + 2.0, y = breadth;
+        gint w, h;
+        pango_layout_set_markup(layout, ticks[i].label, -1);
+        pango_layout_get_size(layout, &w, &h);
+        cairo_matrix_transform_point(&matrix, &x, &y);
+        // TODO: must measure the labels, then decide the shift
+        if (edge == GTK_POS_LEFT)
+            x += 0.5*breadth + 1;
+        gtk_render_layout(context, cr, x, y, layout);
+    }
 
     return FALSE;
 }
