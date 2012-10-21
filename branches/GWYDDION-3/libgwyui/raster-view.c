@@ -908,7 +908,8 @@ gwy_raster_view_motion_notify(GtkWidget *widget,
         || pos.y < 0.0 || pos.y >= field->yres) {
         if (priv->active_grain) {
             priv->active_grain = 0;
-            gtk_widget_queue_draw(widget);
+            if (priv->number_grains)
+                gtk_widget_queue_draw(widget);
         }
         return FALSE;
     }
@@ -919,7 +920,8 @@ gwy_raster_view_motion_notify(GtkWidget *widget,
 
     if (grains[i*field->xres + j] != priv->active_grain) {
         priv->active_grain = grains[i*field->xres + j];
-        gtk_widget_queue_draw(widget);
+        if (priv->number_grains)
+            gtk_widget_queue_draw(widget);
     }
 
     return FALSE;
