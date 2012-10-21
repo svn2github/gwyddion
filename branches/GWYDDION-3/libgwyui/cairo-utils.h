@@ -35,7 +35,39 @@ void gwy_cairo_ellipse        (cairo_t *cr,
 void gwy_cairo_cross          (cairo_t *cr,
                                gdouble x,
                                gdouble y,
-                               gdouble ticklen);
+                               gdouble halfside);
+void gwy_cairo_times          (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_asterisk       (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_square         (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_diamond        (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_trangle_up     (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_trangle_down   (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_trangle_left   (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+void gwy_cairo_trangle_right  (cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
 
 G_END_DECLS
 

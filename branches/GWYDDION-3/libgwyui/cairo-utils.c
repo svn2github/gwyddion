@@ -18,7 +18,16 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwyui/cairo-utils.h"
+
+// TODO: Create a table with factors describing how to scale various
+// geometrical shapes in order to get *visually* uniform sizes.  For instance,
+// times has √2 larger arms than cross while diamon has only half of the
+// area of a square.  The primitives should be kept as-is (unscaled) because
+// straightforward interpretation of parameters can also be useful.  The
+// hight level interface may just take a symbol name/enum and visual size and
+// draw it because all the functions look the same.
 
 /**
  * gwy_cairo_set_source_rgba:
@@ -72,7 +81,8 @@ gwy_cairo_ellipse(cairo_t *cr,
  * @cr: A Cairo drawing context.
  * @x: Centre x-coordinate.
  * @y: Centre y-coordinate.
- * @ticklen: Length of the cross arm (from centre to end).
+ * @halfside: Length of the cross arm (from centre to end), i.e. half of the
+ *            side of the smallest square containing the cross.
  *
  * Adds a cross-shaped subpath to a Cairo context.
  *
@@ -82,12 +92,195 @@ gwy_cairo_ellipse(cairo_t *cr,
  **/
 void
 gwy_cairo_cross(cairo_t *cr,
-                gdouble x, gdouble y, gdouble ticklen)
+                gdouble x, gdouble y, gdouble halfside)
 {
-    cairo_move_to(cr, x - ticklen, y);
-    cairo_line_to(cr, x + ticklen, y);
-    cairo_move_to(cr, x, y - ticklen);
-    cairo_line_to(cr, x, y + ticklen);
+    cairo_move_to(cr, x - halfside, y);
+    cairo_line_to(cr, x + halfside, y);
+    cairo_move_to(cr, x, y - halfside);
+    cairo_line_to(cr, x, y + halfside);
+}
+
+/**
+ * gwy_cairo_cross:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the smallest square containing the cross.
+ *
+ * Adds a times-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started, but it is not terminated.  Use
+ * cairo_new_sub_path() or other subpath-terminating primitive afterwards if
+ * necessary.  All parameters are in user coordinates.
+ **/
+void
+gwy_cairo_times(cairo_t *cr,
+                gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x - halfside, y - halfside);
+    cairo_line_to(cr, x + halfside, y + halfside);
+    cairo_move_to(cr, x + halfside, y - halfside);
+    cairo_line_to(cr, x - halfside, y + halfside);
+}
+
+/**
+ * gwy_cairo_square:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the square.
+ *
+ * Adds a square-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started and closed.  All parameters are in user
+ * coordinates.
+ **/
+void
+gwy_cairo_square(cairo_t *cr,
+                 gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x - halfside, y - halfside);
+    cairo_line_to(cr, x + halfside, y - halfside);
+    cairo_line_to(cr, x + halfside, y + halfside);
+    cairo_line_to(cr, x - halfside, y + halfside);
+    cairo_close_path(cr);
+}
+
+/**
+ * gwy_cairo_diamond:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the containing square.
+ *
+ * Adds a diamond-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started and closed.  All parameters are in user
+ * coordinates.
+ **/
+void
+gwy_cairo_diamond(cairo_t *cr,
+                  gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x, y - halfside);
+    cairo_line_to(cr, x + halfside, y);
+    cairo_line_to(cr, x, y + halfside);
+    cairo_line_to(cr, x - halfside, y);
+    cairo_close_path(cr);
+}
+
+/**
+ * gwy_cairo_triangle_up:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the containing square.
+ *
+ * Adds an upward pointing triangle-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started and closed.  All parameters are in user
+ * coordinates.
+ **/
+void
+gwy_cairo_triangle_up(cairo_t *cr,
+                      gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x, y - halfside);
+    cairo_line_to(cr, x - halfside, y + halfside);
+    cairo_line_to(cr, x + halfside, y + halfside);
+    cairo_close_path(cr);
+}
+
+/**
+ * gwy_cairo_triangle_down:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the containing square.
+ *
+ * Adds a downward pointing triangle-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started and closed.  All parameters are in user
+ * coordinates.
+ **/
+void
+gwy_cairo_triangle_down(cairo_t *cr,
+                        gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x, y + halfside);
+    cairo_line_to(cr, x + halfside, y - halfside);
+    cairo_line_to(cr, x - halfside, y - halfside);
+    cairo_close_path(cr);
+}
+
+/**
+ * gwy_cairo_triangle_left:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the containing square.
+ *
+ * Adds a leftward pointing triangle-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started and closed.  All parameters are in user
+ * coordinates.
+ **/
+void
+gwy_cairo_triangle_left(cairo_t *cr,
+                        gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x - halfside, y);
+    cairo_line_to(cr, x + halfside, y + halfside);
+    cairo_line_to(cr, x + halfside, y - halfside);
+    cairo_close_path(cr);
+}
+
+/**
+ * gwy_cairo_triangle_right:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the containing square.
+ *
+ * Adds a rightward pointing triangle-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started and closed.  All parameters are in user
+ * coordinates.
+ **/
+void
+gwy_cairo_triangle_right(cairo_t *cr,
+                         gdouble x, gdouble y, gdouble halfside)
+{
+    cairo_move_to(cr, x + halfside, y);
+    cairo_line_to(cr, x - halfside, y - halfside);
+    cairo_line_to(cr, x - halfside, y + halfside);
+    cairo_close_path(cr);
+}
+
+/**
+ * gwy_cairo_triangle_right:
+ * @cr: A Cairo drawing context.
+ * @x: Centre x-coordinate.
+ * @y: Centre y-coordinate.
+ * @halfside: Half of the side of the containing square.
+ *
+ * Adds a rightward pointing triangle-shaped subpath to a Cairo context.
+ *
+ * A new subpath is started, but it is not terminated.  Use
+ * cairo_new_sub_path() or other subpath-terminating primitive afterwards if
+ * necessary.  All parameters are in user coordinates.
+ **/
+void
+gwy_cairo_asterisk(cairo_t *cr,
+                   gdouble x, gdouble y, gdouble halfside)
+{
+    gdouble qside = 0.5*halfside, dside = GWY_SQRT3*qside;
+    cairo_move_to(cr, x, y - halfside);
+    cairo_line_to(cr, x, y + halfside);
+    cairo_move_to(cr, x + dside, y + qside);
+    cairo_line_to(cr, x - dside, y - qside);
+    cairo_move_to(cr, x - dside, y + qside);
+    cairo_line_to(cr, x + dside, y - qside);
 }
 
 /**
@@ -96,6 +289,10 @@ gwy_cairo_cross(cairo_t *cr,
  * @title: Cairo drawing utils
  * @short_description: Auxiliary and impedance matching functions for Cairo
  *                     drawing
+ *
+ * Drawing primitives for simple geometrical shapes such as gwy_cairo_cross()
+ * or gwy_cairo_trangle_up() are namely useful for drawing markes and symbols
+ * on graphs because they are visually centered on given coordinates.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
