@@ -52,19 +52,19 @@ void gwy_cairo_diamond        (cairo_t *cr,
                                gdouble x,
                                gdouble y,
                                gdouble halfside);
-void gwy_cairo_trangle_up     (cairo_t *cr,
+void gwy_cairo_triangle_up    (cairo_t *cr,
                                gdouble x,
                                gdouble y,
                                gdouble halfside);
-void gwy_cairo_trangle_down   (cairo_t *cr,
+void gwy_cairo_triangle_down  (cairo_t *cr,
                                gdouble x,
                                gdouble y,
                                gdouble halfside);
-void gwy_cairo_trangle_left   (cairo_t *cr,
+void gwy_cairo_triangle_left  (cairo_t *cr,
                                gdouble x,
                                gdouble y,
                                gdouble halfside);
-void gwy_cairo_trangle_right  (cairo_t *cr,
+void gwy_cairo_triangle_right (cairo_t *cr,
                                gdouble x,
                                gdouble y,
                                gdouble halfside);

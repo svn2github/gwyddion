@@ -101,7 +101,7 @@ gwy_cairo_cross(cairo_t *cr,
 }
 
 /**
- * gwy_cairo_cross:
+ * gwy_cairo_times:
  * @cr: A Cairo drawing context.
  * @x: Centre x-coordinate.
  * @y: Centre y-coordinate.
@@ -258,7 +258,7 @@ gwy_cairo_triangle_right(cairo_t *cr,
 }
 
 /**
- * gwy_cairo_triangle_right:
+ * gwy_cairo_asterisk:
  * @cr: A Cairo drawing context.
  * @x: Centre x-coordinate.
  * @y: Centre y-coordinate.
