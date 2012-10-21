@@ -211,18 +211,16 @@ static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
 {
+    static const gdouble tick_level_sizes[4] = { 1.0, 1.0, 0.618, 0.382 };
     g_printerr("RULER DRAW %p\n", widget);
 
     GwyAxis *axis = GWY_AXIS(widget);
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
 
-    cairo_save(cr);
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_rectangle(cr, 0, 0, width, height);
-    cairo_fill(cr);
-    cairo_restore(cr);
+    gtk_render_background(context, cr, 0, 0, width, height);
 
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
     cairo_set_line_width(cr, 1.618);
@@ -235,8 +233,9 @@ gwy_ruler_draw(GtkWidget *widget,
         cairo_line_to(cr, width, height);
 
         for (guint i = 0; i < nticks; i++) {
+            gdouble s = tick_level_sizes[ticks[i].level];
             cairo_move_to(cr, ticks[i].position, height);
-            cairo_line_to(cr, ticks[i].position, 0.5*height);
+            cairo_line_to(cr, ticks[i].position, height*(1.0 - 0.6*s));
         }
     }
     else if (edge == GTK_POS_BOTTOM) {
@@ -246,6 +245,12 @@ gwy_ruler_draw(GtkWidget *widget,
     else if (edge == GTK_POS_LEFT) {
         cairo_move_to(cr, width, 0);
         cairo_line_to(cr, width, height);
+
+        for (guint i = 0; i < nticks; i++) {
+            gdouble s = tick_level_sizes[ticks[i].level];
+            cairo_move_to(cr, width, ticks[i].position);
+            cairo_line_to(cr, width*(1.0 - 0.6*s), ticks[i].position);
+        }
     }
     else {
         cairo_move_to(cr, 0, 0);
