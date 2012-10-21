@@ -248,7 +248,7 @@ test_gradient_serialize_failure_odd(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Gradient data length is %lu which is not "
+                       "Data length of ‘GwyGradient’ is %lu which is not "
                        "a multiple of 5.",
                        (gulong)len);
 

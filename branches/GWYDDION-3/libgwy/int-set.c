@@ -218,9 +218,9 @@ gwy_int_set_construct(GwySerializable *serializable,
         if (len % 2 != 0) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
-                               _("IntSet data length is %lu which is not "
-                                 "a multiple of 2."),
-                               (gulong)its[0].array_size);
+                               _("Data length of ‘%s’ is %lu which is not "
+                                 "a multiple of %u."),
+                               "GwyIntSet", (gulong)its[0].array_size, 2);
             goto fail;
         }
         g_array_set_size(ranges, 0);

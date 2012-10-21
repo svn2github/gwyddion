@@ -258,11 +258,12 @@ gwy_curve_construct(GwySerializable *serializable,
     guint len = its[2].array_size;
     if (len && its[2].value.v_double_array) {
         if (len % 2 != 0) {
+            // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
-                               _("Curve data length is %lu which is not "
-                                 "a multiple of 2."),
-                               (gulong)its[2].array_size);
+                               _("Data length of ‘%s’ is %lu which is not "
+                                 "a multiple of %u."),
+                               "GwyCurve", (gulong)its[2].array_size, 2);
             goto fail;
         }
         curve->n = its[2].array_size/2;
