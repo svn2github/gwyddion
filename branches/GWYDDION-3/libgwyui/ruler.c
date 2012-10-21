@@ -237,7 +237,7 @@ static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
 {
-    static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.5, 0.3 };
+    static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.45, 0.25 };
     g_printerr("RULER DRAW %p\n", widget);
 
     GwyAxis *axis = GWY_AXIS(widget);
@@ -257,6 +257,7 @@ gwy_ruler_draw(GtkWidget *widget,
 
     guint nticks;
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
+    gint max_ascent = G_MININT, max_descent = G_MININT;
 
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
     cairo_set_line_width(cr, 1.0);
@@ -265,22 +266,39 @@ gwy_ruler_draw(GtkWidget *widget,
         gdouble pos = ticks[i].position;
         gdouble s = tick_level_sizes[ticks[i].level];
         draw_line_transformed(cr, &matrix, pos, 0, pos, s*breadth);
+        if (ticks[i].label) {
+            max_ascent = MAX(max_ascent, PANGO_ASCENT(ticks[i].extents));
+            max_descent = MAX(max_descent, PANGO_DESCENT(ticks[i].extents));
+        }
     }
     cairo_stroke(cr);
 
     PangoLayout *layout = gwy_axis_get_layout(axis);
+    gdouble a = max_ascent/(gdouble)PANGO_SCALE,
+            d = max_descent/(gdouble)PANGO_SCALE;
     for (guint i = 0; i < nticks; i++) {
         if (!ticks[i].label)
             continue;
 
-        gdouble x = ticks[i].position + 2.0, y = breadth;
-        gint w, h;
-        pango_layout_set_markup(layout, ticks[i].label, -1);
-        pango_layout_get_size(layout, &w, &h);
+        gdouble x = ticks[i].position, y = breadth;
         cairo_matrix_transform_point(&matrix, &x, &y);
-        // TODO: must measure the labels, then decide the shift
-        if (edge == GTK_POS_LEFT)
-            x += 0.5*breadth + 1;
+        pango_layout_set_markup(layout, ticks[i].label, -1);
+        if (edge == GTK_POS_BOTTOM) {
+            x += 2.0;
+            y = breadth - (a + d);
+        }
+        else if (edge == GTK_POS_LEFT) {
+            y += 2.0;
+            x += a + d;
+        }
+        else if (edge == GTK_POS_TOP) {
+            x += 2.0;
+            y = a;
+        }
+        else if (edge == GTK_POS_RIGHT) {
+            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/(gdouble)PANGO_SCALE;
+            x = breadth - (a + d);
+        }
         gtk_render_layout(context, cr, x, y, layout);
     }
 
