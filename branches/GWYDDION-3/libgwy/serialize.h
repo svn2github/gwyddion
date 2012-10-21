@@ -35,6 +35,7 @@ typedef enum {
     GWY_DESERIALIZE_ERROR_TRUNCATED = GWY_DESERIALIZE_ERROR_FATAL_MASK + GWY_DESERIALIZE_ERROR_ITEM + 1,
     GWY_DESERIALIZE_ERROR_SIZE_T,
     GWY_DESERIALIZE_ERROR_OBJECT,
+    GWY_DESERIALIZE_ERROR_PARENT,
     GWY_DESERIALIZE_ERROR_DATA,
     GWY_DESERIALIZE_ERROR_INVALID,
 } GwyDeserializeError;
@@ -47,7 +48,7 @@ GObject* gwy_deserialize_memory      (const guchar *buffer,
                                       gsize size,
                                       gsize *bytes_consumed,
                                       GwyErrorList **error_list)      G_GNUC_MALLOC;
-gsize    gwy_deserialize_filter_items(GwySerializableItem *template_,
+gboolean gwy_deserialize_filter_items(GwySerializableItem *template_,
                                       gsize n_items,
                                       GwySerializableItems *items,
                                       GwySerializableItems *parent_items,

@@ -1550,11 +1550,9 @@ free_items(GwySerializableItems *items)
  * @n_items: The number of items in the template.
  * @items: Item list passed to construct().
  * @parent_items: Location to store the list of parent class items to, or
- *                %NULL if no parent items are expected (note a non-fatal error
- *                is reported if you pass %NULL and there are some parent class
- *                items).  This list will be set up as a sublist of
- *                @items, i.e. no items will be physically copied and the
- *                sublist must not be freed.
+ *                %NULL iff no parent items are expected.  This list will be
+ *                set up as a sublist of @items, i.e. no items will be
+ *                physically copied and the sublist must not be freed.
  * @type_name: Name of the deserialised type for error messages.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *              Only non-fatal error %GWY_DESERIALIZE_ERROR_ITEM can occur.
@@ -1577,6 +1575,12 @@ free_items(GwySerializableItems *items)
  * %GWY_SERIALIZABLE_PARENT is encountered, whatever happens first.  This means
  * items belonging to parent objects are untouched.
  *
+ * A non-fatal error is reported if you pass %NULL @parent_items and some
+ * parent class items are present, following the common principle that extra
+ * data can be ignored.  A fatal error is reported if you request parent items
+ * but no %GWY_SERIALIZABLE_PARENT item is present because this item is
+ * obligatory if the class chains to parent.
+ *
  * An item template is identified by its name and type.  Multiple items of the
  * same name are permitted in @template as long as their types differ (this can
  * be useful e.g. to accept old serialised representations for compatibility).
@@ -1585,12 +1589,13 @@ free_items(GwySerializableItems *items)
  * only one boxed item of a specific name can be given in @template and the
  * type, if specified as @array_size, must match exactly.
  *
- * Returns: The number of parent class items.  This does not include the
- *          %GWY_SERIALIZABLE_PARENT item that marks the start of these items.
- *          If zero is returned there are no parent class items although there
- *          may be a %GWY_SERIALIZABLE_PARENT item not followed by anything.
+ * Returns: %TRUE if no fatal error occurred; %FALSE if there was a fatal
+ *          error.  Since the only possible fatal error is
+ *          %GWY_DESERIALIZE_ERROR_PARENT, classes that do not chain
+ *          serialisation to parents can safely ignore the return value if they
+ *          are not interested in non-fatal errors.
  **/
-gsize
+gboolean
 gwy_deserialize_filter_items(GwySerializableItem *template_,
                              gsize n_items,
                              GwySerializableItems *items,
@@ -1668,13 +1673,24 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
 
     // Count %GWY_SERIALIZABLE_PARENT when checking if there are any parent
     // items but do not include it in @parent_items list.
-    guint np = items->n - i;
     if (parent_items) {
+        if (i == items->n) {
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_PARENT,
+                               _("Object ‘%s’ has a serializable parent but "
+                                 "its representation does not contain any "
+                                 "parent class item."),
+                               type_name);
+            return FALSE;
+        }
+
+        g_assert(items->items[i].ctype == GWY_SERIALIZABLE_PARENT);
         parent_items->len = items->len - (i+1);
-        parent_items->n = np - 1;
+        parent_items->n = items->n-i - 1;
         parent_items->items = items->items + (i+1);
     }
-    else if (np) {
+    else if (i < items->n) {
+        g_assert(items->items[i].ctype == GWY_SERIALIZABLE_PARENT);
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_ITEM,
                            _("Object ‘%s’ does not expect to have any "
@@ -1683,7 +1699,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                              "They were ignored."),
                            type_name);
     }
-    return np - 1;
+    return TRUE;
 }
 
 
@@ -1768,6 +1784,9 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  * @GWY_DESERIALIZE_ERROR_OBJECT: Representation of an object of unknown or
  *                                deserialisation-incapable type was found.
  *                                This error is fatal.
+ * @GWY_DESERIALIZE_ERROR_PARENT: Representation of an object lacks mandatory
+ *                                %GWY_SERIALIZABLE_PARENT items for parent
+ *                                classes.  This error is fatal.
  * @GWY_DESERIALIZE_ERROR_ITEM: Unexpected item was encountered.  This error
  *                              is non-fatal: such item is just ignored.
  * @GWY_DESERIALIZE_ERROR_DATA: Uknown data type (#GwySerializableCType) was

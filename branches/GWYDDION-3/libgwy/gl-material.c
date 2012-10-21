@@ -194,12 +194,11 @@ gwy_gl_material_construct(GwySerializable *serializable,
 
     gboolean ok = FALSE;
     GwySerializableItems parent_items;
-    if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
-                                     "GwyGLMaterial", error_list)) {
-        if (!parent_serializable->construct(serializable, &parent_items,
-                                            error_list))
+    if (!gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
+                                     "GwyGLMaterial", error_list)
+        || !parent_serializable->construct(serializable, &parent_items,
+                                           error_list))
             goto fail;
-    }
 
     // Our own data
     GwyGLMaterial *gl_material = GWY_GL_MATERIAL(serializable);

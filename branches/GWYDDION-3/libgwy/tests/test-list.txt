@@ -436,6 +436,7 @@ resource/error/different-type
 gradient/load
 gradient/save
 gradient/serialize
+gradient/serialize/failure/noparent
 gradient/serialize/failure/odd
 gradient/inventory
 gradient/manipulate

@@ -230,12 +230,12 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
     GwySerializableItems parent_items;
-    if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
-                                     "GwyUserFitFunc", error_list)) {
-        if (!parent_serializable->construct(serializable, &parent_items,
-                                            error_list))
+    if (!gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
+                                      "GwyUserFitFunc", error_list)
+        || !parent_serializable->construct(serializable, &parent_items,
+                                           error_list))
             goto fail;
-    }
+
     gsize n = its[3].array_size;
 
     // Our own data

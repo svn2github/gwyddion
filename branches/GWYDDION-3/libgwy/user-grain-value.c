@@ -224,12 +224,11 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     memcpy(its, serialize_items, sizeof(serialize_items));
     GwySerializableItems parent_items;
 
-    if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
-                                     "GwyUserGrainValue", error_list)) {
-        if (!parent_serializable->construct(serializable, &parent_items,
-                                            error_list))
-            goto fail;
-    }
+    if (!gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
+                                      "GwyUserGrainValue", error_list)
+        || !parent_serializable->construct(serializable, &parent_items,
+                                           error_list))
+        goto fail;
 
     // Our own data
     GwyUserGrainValue *usergrainvalue = GWY_USER_GRAIN_VALUE(serializable);

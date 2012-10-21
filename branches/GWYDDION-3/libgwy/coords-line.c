@@ -87,7 +87,7 @@ gwy_coords_line_n_items(GwySerializable *serializable)
 
 static gsize
 gwy_coords_line_itemize(GwySerializable *serializable,
-                         GwySerializableItems *items)
+                        GwySerializableItems *items)
 {
     g_return_val_if_fail(items->len - items->n >= N_ITEMS+1, 0);
     return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_COORDS,
@@ -96,16 +96,15 @@ gwy_coords_line_itemize(GwySerializable *serializable,
 
 static gboolean
 gwy_coords_line_construct(GwySerializable *serializable,
-                           GwySerializableItems *items,
-                           GwyErrorList **error_list)
+                          GwySerializableItems *items,
+                          GwyErrorList **error_list)
 {
     GwySerializableItems parent_items;
-    if (gwy_deserialize_filter_items(NULL, N_ITEMS, items, &parent_items,
-                                     "GwyCoordsLine", error_list)) {
-        return parent_serializable->construct(serializable, &parent_items,
-                                              error_list);
-    }
-    return TRUE;
+    if (!gwy_deserialize_filter_items(NULL, N_ITEMS, items, &parent_items,
+                                     "GwyCoordsLine", error_list))
+        return FALSE;
+    return parent_serializable->construct(serializable, &parent_items,
+                                          error_list);
 }
 
 /**

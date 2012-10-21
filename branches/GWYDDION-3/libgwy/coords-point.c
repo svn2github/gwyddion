@@ -99,12 +99,11 @@ gwy_coords_point_construct(GwySerializable *serializable,
                            GwyErrorList **error_list)
 {
     GwySerializableItems parent_items;
-    if (gwy_deserialize_filter_items(NULL, N_ITEMS, items, &parent_items,
-                                     "GwyCoordsPoint", error_list)) {
-        return parent_serializable->construct(serializable, &parent_items,
-                                              error_list);
-    }
-    return TRUE;
+    if (!gwy_deserialize_filter_items(NULL, N_ITEMS, items, &parent_items,
+                                      "GwyCoordsPoint", error_list))
+        return FALSE;
+    return parent_serializable->construct(serializable, &parent_items,
+                                          error_list);
 }
 
 /**

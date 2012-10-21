@@ -332,12 +332,15 @@ gwy_serializable_assign(GwySerializable *destination,
  *                           items.
  * @GWY_SERIALIZABLE_PARENT: Denotes parent's data separator, used when
  *                           subclasses want to chain serialisation and
- *                           deserialisation to the parent class.  The items
- *                           has no data and its name is the parent type name.
- *                           For convenience, the value is set to the
- *                           corresponding #GType in deserialisation.  The most
- *                           derived child data comes first, then the parents'
- *                           in reverse order of deriving.
+ *                           deserialisation to the parent class.  If they do
+ *                           so then this item must be always included even if
+ *                           the parent data turn out to be empty for a
+ *                           speficif instance.  The item has no data and its
+ *                           name is the parent type name.  For convenience,
+ *                           the value is set to the corresponding #GType in
+ *                           deserialisation.  The most derived child data
+ *                           comes first, then the parents' in reverse order of
+ *                           deriving.
  * @GWY_SERIALIZABLE_INT8: Denotes a character (8bit integer).
  * @GWY_SERIALIZABLE_INT8_ARRAY: Denotes a character (8bit integer) array.
  * @GWY_SERIALIZABLE_BOOLEAN: Denotes a one-byte boolean.
