@@ -303,6 +303,7 @@ gwy_axis_init(GwyAxis *axis)
     priv->max_tick_level = GWY_AXIS_TICK_MINOR;
     priv->length = 1;
     priv->range = priv->request = default_range;
+    gtk_widget_set_has_window(GTK_WIDGET(axis), FALSE);
 }
 
 static void
@@ -423,6 +424,10 @@ gwy_axis_get_property(GObject *object,
 static void
 gwy_axis_realize(GtkWidget *widget)
 {
+    gtk_widget_set_realized(widget, TRUE);
+    GdkWindow *window = gtk_widget_get_parent_window(widget);
+    gtk_widget_set_window(widget, window);
+    g_object_ref(window);
     ensure_layout_and_ticks(GWY_AXIS(widget));
 }
 
@@ -432,6 +437,7 @@ gwy_axis_unrealize(GtkWidget *widget)
     Axis *priv = GWY_AXIS(widget)->priv;
     priv->ticks_are_valid = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->unrealize(widget);
 }
 
 static void
@@ -442,6 +448,7 @@ gwy_axis_style_updated(GtkWidget *widget)
     if (priv->layout)
         pango_layout_context_changed(priv->layout);
     invalidate_ticks(axis);
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->style_updated(widget);
 }
 
 static void
@@ -458,6 +465,7 @@ gwy_axis_size_allocate(GtkWidget *widget,
         priv->length = allocation->height;
 
     invalidate_ticks(axis);
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->size_allocate(widget, allocation);
 }
 
 /**
@@ -628,14 +636,37 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
 }
 
 /**
- * gwy_axis_get_ticks:
+ * gwy_axis_get_layout:
+ * @axis: An axis.
+ *
+ * Gets the Pango layout used for laying out tick of an axis.
+ *
+ * This method is namely intended for subclasses.
+ *
+ * The layout exists only if the widget is realized.  It is not recommend to
+ * cache it, however, if you do so make sure that you stop using it if @axis
+ * is unrealized.
+ *
+ * Returns: (allow-none):
+ *          The Pango layout @axis uses to calculate tick positions.  %NULL is
+ *          returned if @axis is not realized.
+ **/
+PangoLayout*
+gwy_axis_get_layout(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
+    return GWY_AXIS(axis)->priv->layout;
+}
+
+/**
+ * gwy_axis_ticks:
  * @axis: An axis.
  * @nticks: (out):
  *          Location where the number of returned ticks will be stored.
  *
  * Obtains the list of ticks for an axis.
  *
- * This method is namely intended for subclass implementation.
+ * This method is namely intended for subclasses.
  *
  * If tick positions and labels have not been calculated yet or they have to
  * be recalculated due to changes in widget size, axis range, properties,
@@ -651,8 +682,8 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
  *          recalculated.
  **/
 const GwyAxisTick*
-gwy_axis_get_ticks(GwyAxis *axis,
-                   guint *nticks)
+gwy_axis_ticks(GwyAxis *axis,
+               guint *nticks)
 {
     g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
     g_return_val_if_fail(nticks, NULL);

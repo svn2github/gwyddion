@@ -91,7 +91,8 @@ void               gwy_axis_set_edge           (GwyAxis *axis,
 gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_snap_to_ticks  (GwyAxis *axis,
                                                 gboolean snaptoticks);
-const GwyAxisTick* gwy_axis_get_ticks          (GwyAxis *axis,
+PangoLayout*       gwy_axis_get_layout         (const GwyAxis *axis)      G_GNUC_PURE;
+const GwyAxisTick* gwy_axis_ticks              (GwyAxis *axis,
                                                 guint *nticks);
 
 G_END_DECLS
