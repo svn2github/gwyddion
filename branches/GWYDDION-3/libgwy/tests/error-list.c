@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,23 @@
  * Error lists
  *
  ***************************************************************************/
+
+void
+assert_error_list(GwyErrorList *error_list,
+                  GwyErrorList *expected_errors)
+{
+    //dump_error_list(error_list);
+    g_assert_cmpuint(g_slist_length(error_list),
+                     ==,
+                     g_slist_length(expected_errors));
+    guint n = g_slist_length(expected_errors);
+    for (guint i = 0; i < n; i++) {
+        GError *expected_error = g_slist_nth_data(expected_errors, i);
+        GError *error = g_slist_nth_data(error_list, i);
+        g_assert_error(error, expected_error->domain, expected_error->code);
+        g_assert_cmpstr(error->message, ==, expected_error->message);
+    }
+}
 
 void
 test_error_list(void)

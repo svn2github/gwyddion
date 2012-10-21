@@ -1622,11 +1622,30 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         }
 
         if (j == n_items) {
-            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                               GWY_DESERIALIZE_ERROR_ITEM,
-                               _("Unexpected item ‘%s’ of type 0x%02x in the "
-                                 "representation of object ‘%s’ was ignored"),
-                               name ? name : "(nil)", ctype, type_name);
+            // Try again, with names only, to give a more meaningful error
+            // message if the name matches but the type is wrong.
+            for (j = 0; j < n_items; j++) {
+                if (gwy_strequal(template_[j].name, name))
+                    break;
+            }
+            if (j < n_items) {
+                gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                                   GWY_DESERIALIZE_ERROR_ITEM,
+                                   _("Item ‘%s’ in the representation of "
+                                     "object ‘%s’ has type 0x%02x "
+                                     "instead of expected 0x%02x. "
+                                     "It was ignored."),
+                                   name ? name : "(nil)", type_name,
+                                   ctype, template_[j].ctype);
+            }
+            else {
+                gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                                   GWY_DESERIALIZE_ERROR_ITEM,
+                                   _("Unexpected item ‘%s’ of type 0x%02x in "
+                                     "the representation of object ‘%s’ was "
+                                     "ignored"),
+                                   name ? name : "(nil)", ctype, type_name);
+            }
             continue;
         }
         if (G_UNLIKELY(seen[j] == 1)) {

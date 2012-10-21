@@ -26,6 +26,204 @@
  *
  ***************************************************************************/
 
+void
+test_deserialize_filter_items_unexpected(void)
+{
+    enum { N = 3 };
+    GwySerializableItem template_[N], items[N];
+
+    gwy_clear(template_, N);
+    template_[0].name = "flag";
+    template_[0].ctype = GWY_SERIALIZABLE_BOOLEAN;
+    template_[1].name = "value";
+    template_[1].ctype = GWY_SERIALIZABLE_INT32;
+    template_[2].name = "spam";
+    template_[2].ctype = GWY_SERIALIZABLE_DOUBLE;
+
+    gwy_assign(items, template_, N);
+    items[0].value.v_boolean = TRUE;
+    items[1].value.v_uint32 = 0xdeadbeef;
+    items[2].value.v_double = G_MINDOUBLE;
+    GwySerializableItems its = { 3, 3, items };
+
+    for (guint i = 0; i < N; i++) {
+        GwyErrorList *error_list = NULL, *expected_errors = NULL;
+        GwySerializableItem to_be_filled[1];
+        to_be_filled[0] = template_[i];
+        gboolean ok = gwy_deserialize_filter_items(to_be_filled, 1, &its, NULL,
+                                                   "Unexpected", &error_list);
+        g_assert(ok);
+
+        for (guint j = 0; j < N; j++) {
+            if (j == i)
+                continue;
+            gwy_error_list_add(&expected_errors, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_ITEM,
+                               "Unexpected item ‘%s’ of type 0x%02x in the "
+                               "representation of object ‘%s’ was ignored",
+                               template_[j].name, template_[j].ctype,
+                               "Unexpected");
+        }
+        assert_error_list(error_list, expected_errors);
+        gwy_error_list_clear(&error_list);
+        gwy_error_list_clear(&expected_errors);
+
+        if (i == 0)
+            g_assert_cmpuint(to_be_filled[0].value.v_boolean, ==, TRUE);
+        else if (i == 1)
+            g_assert_cmpuint(to_be_filled[0].value.v_uint32, ==, 0xdeadbeef);
+        else if (i == 2)
+            g_assert_cmpuint(to_be_filled[0].value.v_double, ==, G_MINDOUBLE);
+    }
+}
+
+void
+test_deserialize_filter_items_duplicit(void)
+{
+    enum { N = 2 };
+    GwySerializableItem template_[N];
+
+    gwy_clear(template_, N);
+    template_[0].name = "flag";
+    template_[0].ctype = GWY_SERIALIZABLE_BOOLEAN;
+    template_[1].name = "value";
+    template_[1].ctype = GWY_SERIALIZABLE_INT32;
+
+    for (guint i = 0; i < 8; i++) {
+        GwySerializableItem items[3];
+        guint s = 0;
+        for (guint j = 0; j < 3; j++) {
+            guint idx = !!(i & (1 << j));
+            items[j] = template_[idx];
+            s += idx;
+        }
+        GwySerializableItems its = { 3, 3, items };
+        GwyErrorList *error_list = NULL, *expected_errors = NULL;
+        GwySerializableItem to_be_filled[N];
+        gwy_assign(to_be_filled, template_, N);
+        gboolean ok = gwy_deserialize_filter_items(to_be_filled, N, &its, NULL,
+                                                   "Duplicit", &error_list);
+        g_assert(ok);
+
+        s = !!(s >= 2);
+        gwy_error_list_add(&expected_errors, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_ITEM,
+                           "Item ‘%s’ of type 0x%02x is present multiple "
+                           "times in the representation of object ‘%s’.  "
+                           "Values other than the first were ignored.",
+                           template_[s].name, template_[s].ctype,
+                           "Duplicit");
+        assert_error_list(error_list, expected_errors);
+        gwy_error_list_clear(&error_list);
+        gwy_error_list_clear(&expected_errors);
+
+        // FIXME: We should verify that the first value is used.  That would
+        // require differentiating among them.
+    }
+}
+
+void
+test_deserialize_filter_items_bad_type(void)
+{
+    enum { N = 1 };
+    GwySerializableItem template_[N], items[N], to_be_filled[N];
+
+    gwy_clear(template_, N);
+    template_[0].name = "value";
+    template_[0].ctype = GWY_SERIALIZABLE_INT32;
+
+    gwy_assign(items, template_, N);
+    items[0].value.v_uint32 = 0xdeadbeef;
+    GwySerializableItems its = { 1, 1, items };
+
+    gwy_assign(to_be_filled, template_, N);
+    to_be_filled[0].ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY;
+
+    GwyErrorList *error_list = NULL, *expected_errors = NULL;
+    gboolean ok = gwy_deserialize_filter_items(to_be_filled, 1, &its, NULL,
+                                               "BadType", &error_list);
+    g_assert(ok);
+
+    gwy_error_list_add(&expected_errors, GWY_DESERIALIZE_ERROR,
+                       GWY_DESERIALIZE_ERROR_ITEM,
+                       "Item ‘%s’ in the representation of object ‘%s’ "
+                       "has type 0x%02x instead of expected 0x%02x. "
+                       "It was ignored.",
+                       template_[0].name, "BadType",
+                       template_[0].ctype, to_be_filled[0].ctype);
+    assert_error_list(error_list, expected_errors);
+    gwy_error_list_clear(&error_list);
+    gwy_error_list_clear(&expected_errors);
+}
+
+void
+test_deserialize_filter_items_extra_parent(void)
+{
+    enum { N = 1 };
+    GwySerializableItem template_[N], items[N+1], to_be_filled[N];
+
+    gwy_clear(template_, N);
+    template_[0].name = "value";
+    template_[0].ctype = GWY_SERIALIZABLE_INT32;
+
+    gwy_assign(items, template_, N);
+    items[0].value.v_uint32 = 0xdeadbeef;
+    items[1].name = "ParentType";
+    items[1].ctype = GWY_SERIALIZABLE_PARENT;
+    GwySerializableItems its = { 2, 2, items };
+
+    gwy_assign(to_be_filled, template_, N);
+
+    GwyErrorList *error_list = NULL, *expected_errors = NULL;
+    gboolean ok = gwy_deserialize_filter_items(to_be_filled, 1, &its, NULL,
+                                               "ExtraParent", &error_list);
+    g_assert(ok);
+
+    gwy_error_list_add(&expected_errors, GWY_DESERIALIZE_ERROR,
+                       GWY_DESERIALIZE_ERROR_ITEM,
+                       "Object ‘%s’ does not expect to have any "
+                       "serializable parent but its representation "
+                       "contain parent class items. "
+                       "They were ignored.",
+                       "ExtraParent");
+    assert_error_list(error_list, expected_errors);
+    gwy_error_list_clear(&error_list);
+    gwy_error_list_clear(&expected_errors);
+}
+
+void
+test_deserialize_filter_items_no_parent(void)
+{
+    enum { N = 1 };
+    GwySerializableItem template_[N], items[N], to_be_filled[N];
+
+    gwy_clear(template_, N);
+    template_[0].name = "value";
+    template_[0].ctype = GWY_SERIALIZABLE_INT32;
+
+    gwy_assign(items, template_, N);
+    items[0].value.v_uint32 = 0xdeadbeef;
+    GwySerializableItems its = { 1, 1, items }, parent_items;
+
+    gwy_assign(to_be_filled, template_, N);
+
+    GwyErrorList *error_list = NULL, *expected_errors = NULL;
+    gboolean ok = gwy_deserialize_filter_items(to_be_filled, 1, &its,
+                                               &parent_items,
+                                               "NoParent", &error_list);
+    g_assert(!ok);
+
+    gwy_error_list_add(&expected_errors, GWY_DESERIALIZE_ERROR,
+                       GWY_DESERIALIZE_ERROR_PARENT,
+                       "Object ‘%s’ has a serializable parent but "
+                       "its representation does not contain any "
+                       "parent class item.",
+                       "NoParent");
+    assert_error_list(error_list, expected_errors);
+    gwy_error_list_clear(&error_list);
+    gwy_error_list_clear(&expected_errors);
+}
+
 #define gwy_ser_test_duplicate(ser_test) \
         (GWY_SER_TEST(gwy_serializable_duplicate(GWY_SERIALIZABLE(ser_test))))
 
@@ -826,17 +1024,7 @@ deserialize_assert_failure(GMemoryOutputStream *stream,
     GObject *obj = gwy_deserialize_memory((const guchar*)data, datalen,
                                           NULL, &error_list);
     g_assert(obj == NULL);
-    //dump_error_list(error_list);
-    g_assert_cmpuint(g_slist_length(error_list),
-                     ==,
-                     g_slist_length(expected_errors));
-    guint n = g_slist_length(expected_errors);
-    for (guint i = 0; i < n; i++) {
-        GError *expected_error = g_slist_nth_data(expected_errors, i);
-        GError *error = g_slist_nth_data(error_list, i);
-        g_assert_error(error, expected_error->domain, expected_error->code);
-        g_assert_cmpstr(error->message, ==, expected_error->message);
-    }
+    assert_error_list(error_list, expected_errors);
     gwy_error_list_clear(&error_list);
 }
 

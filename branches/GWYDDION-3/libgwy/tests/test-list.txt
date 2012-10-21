@@ -73,6 +73,11 @@ serialize/data
 serialize/nested
 serialize/error
 serialize/boxed
+deserialize/filter-items/unexpected
+deserialize/filter-items/duplicit
+deserialize/filter-items/bad-type
+deserialize/filter-items/extra-parent
+deserialize/filter-items/no-parent
 deserialize/simple
 deserialize/data
 deserialize/nested

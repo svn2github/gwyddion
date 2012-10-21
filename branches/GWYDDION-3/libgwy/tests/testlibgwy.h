@@ -36,6 +36,8 @@ typedef void (*CompareObjectDataFunc)(GObject *object, GObject *reference);
 void          base62_format                 (guint x,
                                              gchar *out,
                                              guint outsize);
+void          assert_error_list             (GwyErrorList *error_list,
+                                             GwyErrorList *expected_errors);
 void          dump_error_list               (GwyErrorList *error_list);
 gboolean      values_are_equal              (const GValue *value1,
                                              const GValue *value2);
