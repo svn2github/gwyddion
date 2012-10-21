@@ -55,7 +55,8 @@ enum {
     PROP_SNAP_TO_TICKS,
     PROP_TICKS_AT_EDGES,
     PROP_SHOW_LABELS,
-    PROP_SHOW_UNITS,
+    PROP_SHOW_UNITS,   // FIXME: Make this a class property?  Or handle graphs
+                       // specifically (they have units elsewhere, normally).
     PROP_MAX_TICK_LEVEL,
     N_PROPS,
 };
@@ -550,6 +551,80 @@ gwy_axis_set_show_labels(GwyAxis *axis,
         return;
 
     g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_LABELS]);
+}
+
+/**
+ * gwy_axis_get_edge:
+ * @axis: An axis.
+ *
+ * Gets the edge of some data visualisation area where the axis belongs.
+ *
+ * Returns: The axis edge.
+ **/
+GtkPositionType
+gwy_axis_get_edge(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), GTK_POS_BOTTOM);
+    return GWY_AXIS(axis)->priv->edge;
+}
+
+/**
+ * gwy_axis_set_edge:
+ * @axis: An axis.
+ * @edge: Edge the axis belongs to.
+ *
+ * Sets the edge of some data visualisation area where the axis belongs.
+ *
+ * The edge where the axis belongs means the edge of some other data
+ * visualisation area to which the axis is supposed to be attached.  So the
+ * main edge of the axis itself will be, generally, the oposite to @edge.
+ **/
+void
+gwy_axis_set_edge(GwyAxis *axis,
+                  GtkPositionType edge)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!set_edge(axis, edge))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_EDGE]);
+}
+
+/**
+ * gwy_axis_get_snap_to_ticks:
+ * @axis: An axis.
+ *
+ * Gets the range snapping behaviour of an axis.
+ *
+ * Returns: %TRUE if the axis range is rounded to contain the requested range
+ *          but start and end at a major tick.  %FALSE if the axis range is
+ *          always the requested range.
+ **/
+gboolean
+gwy_axis_get_snap_to_ticks(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    return GWY_AXIS(axis)->priv->snap_to_ticks;
+}
+
+/**
+ * gwy_axis_set_snap_to_ticks:
+ * @axis: An axis.
+ * @snaptoticks: %TRUE to round the axis range to contain the requested range
+ *               but start and end at a major tick.  %FALSE to start and end
+ *               the range at requested values.
+ *
+ * Sets the range snapping behaviour of an axis.
+ **/
+void
+gwy_axis_set_snap_to_ticks(GwyAxis *axis,
+                           gboolean snaptoticks)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!set_snap_to_ticks(axis, snaptoticks))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SNAP_TO_TICKS]);
 }
 
 /**
