@@ -1380,6 +1380,8 @@ estimate_major_distance(GwyAxis *axis,
 
 /**
  * GwyAxisClass:
+ * @perpendicular_labels: %TRUE if subclass displays labels on vertical axes
+ *                        horizontal, i.e. perpendicular_labels to the axis.
  *
  * Class of graphs and data view axes.
  **/
