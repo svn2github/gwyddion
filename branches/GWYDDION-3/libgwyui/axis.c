@@ -30,6 +30,8 @@
 #define ALMOST_BLOODY_INFINITY (1e-3*G_MAXDOUBLE)
 #define ALMOST_BLOODY_NOTHING (1e3*G_MINDOUBLE)
 
+#define MIN_TICK_DIST 5.0
+
 typedef enum {
     GWY_AXIS_STEP_0,
     GWY_AXIS_STEP_1,
@@ -144,6 +146,7 @@ static GwyAxisStepType decrease_step_type        (GwyAxisStepType steptype,
                                                   gdouble dx,
                                                   gdouble min_incr);
 static void            ensure_layout_and_ticks   (GwyAxis *axis);
+static void            rotate_pango_layout       (GwyAxis *axis);
 static void            clear_tick                (gpointer item);
 static gdouble         estimate_major_distance   (GwyAxis *axis,
                                                   const GwyRange *request);
@@ -675,6 +678,9 @@ gwy_axis_get_layout(const GwyAxis *axis)
  * The widget must be realised in order to calculate the ticks.  If it is
  * not realised this method just sets @nticks to 0 and returns %NULL.
  *
+ * Thisk labels are set to %NULL if labels are disabled so the caller does not
+ * to have handle this.  However it still has to handle overlapping labels.
+ *
  * Returns: (allow-none) (transfer none) (array length=nticks):
  *          Array of ticks for the axis.  The ticks are ordered by position
  *          on the axis, i.e. ticks of different levels are interleaved.
@@ -986,7 +992,7 @@ calculate_ticks(GwyAxis *axis)
     fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0);
     for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
         gdouble largerbs = bs;
-        steptype = decrease_step_type(steptype, &base, dx, 5.0);
+        steptype = decrease_step_type(steptype, &base, dx, MIN_TICK_DIST);
         if (!steptype)
             break;
         step = step_sizes[steptype];
@@ -1125,6 +1131,9 @@ measure_label(GwyAxis *axis, const gchar *markup)
     int width, height;
     pango_layout_get_size(priv->layout, &width, &height);
 
+    if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
+        return width/PANGO_SCALE;
+
     return (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
             ? height : width)/PANGO_SCALE;
 }
@@ -1255,6 +1264,8 @@ ensure_layout_and_ticks(GwyAxis *axis)
         pango_attr_list_insert(attrlist, attr);
         pango_layout_set_attributes(priv->layout, attrlist);
         pango_attr_list_unref(attrlist);
+
+        rotate_pango_layout(axis);
     }
 
     if (!priv->ticks) {
@@ -1264,6 +1275,30 @@ ensure_layout_and_ticks(GwyAxis *axis)
 
     if (!priv->str)
         priv->str = g_string_new(NULL);
+}
+
+static void
+rotate_pango_layout(GwyAxis *axis)
+{
+    gboolean perpendicular = GWY_AXIS_GET_CLASS(axis)->perpendicular_labels;
+    GtkPositionType edge = axis->priv->edge;
+    PangoLayout *layout = axis->priv->layout;
+    g_return_if_fail(layout);
+
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM || perpendicular)
+        return;
+
+    PangoMatrix matrix = PANGO_MATRIX_INIT;
+    const PangoMatrix *cmatrix;
+    PangoContext *context = pango_layout_get_context(layout);
+    if ((cmatrix = pango_context_get_matrix(context)))
+        matrix = *cmatrix;
+    if (edge == GTK_POS_LEFT)
+        pango_matrix_rotate(&matrix, -90.0);
+    else
+        pango_matrix_rotate(&matrix, 90.0);
+    pango_context_set_matrix(context, &matrix);
+    pango_layout_context_changed(layout);
 }
 
 static void
@@ -1324,7 +1359,7 @@ estimate_major_distance(GwyAxis *axis,
     else
         label = gwy_value_format_print_number(priv->vf, request->to);
 
-    return fmax(measure_label(axis, label), min_dist);
+    return fmax(measure_label(axis, label) + 0.5*MIN_TICK_DIST, min_dist);
 }
 
 /**
