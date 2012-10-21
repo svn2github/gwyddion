@@ -344,7 +344,6 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     priv->mask_color = mask_color_default;
     priv->grain_number_color = grain_number_color_default;
     update_matrices(rasterview);
-    //gtk_widget_set_has_window(GTK_WIDGET(rasterview), FALSE); XXX: WTF?
     gtk_widget_set_can_focus(GTK_WIDGET(rasterview), TRUE);
 }
 
@@ -785,6 +784,7 @@ create_window(GwyRasterView *rasterview)
                                   &attributes, attributes_mask);
     gtk_widget_set_window(widget, priv->window);
     gdk_window_set_user_data(priv->window, widget);
+    g_object_ref(priv->window);
 }
 
 static void
@@ -814,6 +814,7 @@ gwy_raster_view_unrealize(GtkWidget *widget)
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     destroy_window(rasterview);
     GWY_OBJECT_UNREF(rasterview->priv->layout);
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unrealize(widget);
 }
 
 static void
@@ -1369,6 +1370,8 @@ gwy_raster_view_style_updated(GtkWidget *widget)
     RasterView *priv = GWY_RASTER_VIEW(widget)->priv;
     if (priv->layout)
         pango_layout_context_changed(priv->layout);
+
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->style_updated(widget);
 }
 
 static void
