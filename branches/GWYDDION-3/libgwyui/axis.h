@@ -34,11 +34,11 @@ typedef enum {
 } GwyAxisTickLevel;
 
 typedef struct {
-    GwyAxisTickLevel level;
     gdouble value;
     gdouble position;
-    gdouble size;
     gchar *label;
+    PangoRectangle extents;
+    GwyAxisTickLevel level;
 } GwyAxisTick;
 
 #define GWY_TYPE_AXIS \

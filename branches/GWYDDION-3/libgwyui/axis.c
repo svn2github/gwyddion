@@ -31,6 +31,7 @@
 #define ALMOST_BLOODY_NOTHING (1e3*G_MINDOUBLE)
 
 #define MIN_TICK_DIST 5.0
+#define MIN_MAJOR_DIST 50.0
 
 typedef enum {
     GWY_AXIS_STEP_0,
@@ -128,8 +129,6 @@ static void            fill_tick_arrays          (GwyAxis *axis,
                                                   GwyAxisTickLevel level,
                                                   gdouble bs,
                                                   gdouble largerbs);
-static gdouble         measure_label             (GwyAxis *axis,
-                                                  const gchar *markup);
 static gboolean        zero_is_inside            (gdouble start,
                                                   guint n,
                                                   gdouble bs);
@@ -1015,6 +1014,7 @@ static void
 fill_tick_arrays(GwyAxis *axis, guint level,
                  gdouble bs, gdouble largerbs)
 {
+    const PangoRectangle no_extents = { 0, 0, 0, 0 };
     Axis *priv = axis->priv;
     gdouble from = priv->range.from, to = priv->range.to;
     gdouble start = if_zero_then_exactly(bs > 0.0
@@ -1040,20 +1040,23 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 
     // Tick at the leading edge.
     if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
-        gdouble value = from, pos = 0.0, size = 0.0;
-        gchar *label = NULL;
+        GwyAxisTick tick = {
+            .value = from, .position = 0.0,
+            .label = NULL, .extents = no_extents,
+            .level = GWY_AXIS_TICK_EDGE
+        };
 
         if (priv->show_labels) {
             const gchar *s;
             if (units_pos == FIRST)
-                s = gwy_value_format_print(vf, value);
+                s = gwy_value_format_print(vf, tick.value);
             else
-                s = gwy_value_format_print_number(vf, value);
+                s = gwy_value_format_print_number(vf, tick.value);
 
-            size = measure_label(axis, s);
-            label = g_strdup(s);
+            pango_layout_set_markup(priv->layout, s, -1);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(s);
         }
-        GwyAxisTick tick = { GWY_AXIS_TICK_EDGE, value, pos, size, label };
         g_array_append_val(ticks, tick);
     }
 
@@ -1070,72 +1073,60 @@ fill_tick_arrays(GwyAxis *axis, guint level,
     }
 
     for (guint i = ifrom; i <= ito; i++) {
-        gdouble value = if_zero_then_exactly(i*bs + start, bs);
+        GwyAxisTick tick = {
+            .value = if_zero_then_exactly(i*bs + start, bs), .position = 0.0,
+            .label = NULL, .extents = no_extents, .level = level
+        };
 
         // Skip ticks coinciding with more major ones.
-        if (largerbs && fabs(value/largerbs - gwy_round(value/largerbs)) < EPS)
+        if (largerbs
+            && fabs(tick.value/largerbs - gwy_round(tick.value/largerbs)) < EPS)
             continue;
 
-        gdouble pos = (value - from)/(to - from)*length;
-        gdouble size = 0.0;
-        gchar *label = NULL;
-
+        tick.position = (tick.value - from)/(to - from)*length;
         if (priv->show_labels && level == GWY_AXIS_TICK_MAJOR) {
             const gchar *s;
-            if (units_pos == AT_ZERO && value == 0.0)
-                s = gwy_value_format_print(vf, value);
+            if (units_pos == AT_ZERO && tick.value == 0.0)
+                s = gwy_value_format_print(vf, tick.value);
             else if (units_pos == FIRST && ticks->len == 0)
-                s = gwy_value_format_print(vf, value);
+                s = gwy_value_format_print(vf, tick.value);
             else if (units_pos == LAST && !priv->ticks_at_edges && i == n)
-                s = gwy_value_format_print(vf, value);
+                s = gwy_value_format_print(vf, tick.value);
             else
-                s = gwy_value_format_print_number(vf, value);
+                s = gwy_value_format_print_number(vf, tick.value);
 
-            size = measure_label(axis, s);
-            label = g_strdup(s);
+            pango_layout_set_markup(priv->layout, s, -1);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(s);
         }
-        GwyAxisTick tick = { level, value, pos, size, label };
         g_array_append_val(ticks, tick);
     }
 
     // Tick at the trailing edge.  Needs to be moved backward to fit within.
     if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
-        gdouble value = from, pos = 0.0, size = 0.0;
-        gchar *label = NULL;
+        GwyAxisTick tick = {
+            .value = from, .position = length,
+            .label = NULL, .extents = no_extents,
+            .level = GWY_AXIS_TICK_EDGE
+        };
 
         if (priv->show_labels) {
             const gchar *s;
             if (units_pos == LAST)
-                s = gwy_value_format_print(vf, value);
+                s = gwy_value_format_print(vf, tick.value);
             else
-                s = gwy_value_format_print_number(vf, value);
+                s = gwy_value_format_print_number(vf, tick.value);
 
-            size = measure_label(axis, s);
-            label = g_strdup(s);
+            pango_layout_set_markup(priv->layout, s, -1);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(s);
         }
-        GwyAxisTick tick = { GWY_AXIS_TICK_EDGE, value, pos-size, size, label };
         g_array_append_val(ticks, tick);
     }
 
     // TODO: For level-0 tick some further pruning may be necessary as we
     // do not want the edge ticks to overlap with inner ticks.  We have
     // positions and sizes of all so it should not be difficult.
-}
-
-static gdouble
-measure_label(GwyAxis *axis, const gchar *markup)
-{
-    Axis *priv = axis->priv;
-    pango_layout_set_markup(priv->layout, markup, -1);
-
-    int width, height;
-    pango_layout_get_size(priv->layout, &width, &height);
-
-    if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
-        return width/PANGO_SCALE;
-
-    return (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
-            ? height : width)/PANGO_SCALE;
 }
 
 static gboolean
@@ -1343,12 +1334,10 @@ static gdouble
 estimate_major_distance(GwyAxis *axis,
                         const GwyRange *request)
 {
-    const gdouble min_dist = 50.0;
-
     Axis *priv = axis->priv;
 
     if (!priv->show_labels)
-        return fmin(min_dist, priv->length);
+        return fmin(MIN_MAJOR_DIST, priv->length);
 
     const gchar *label;
     // FIXME: With perpendicular labels the label + units may be actually
@@ -1359,7 +1348,18 @@ estimate_major_distance(GwyAxis *axis,
     else
         label = gwy_value_format_print_number(priv->vf, request->to);
 
-    return fmax(measure_label(axis, label) + 0.5*MIN_TICK_DIST, min_dist);
+    gint width, height;
+    pango_layout_set_markup(priv->layout, label, -1);
+    pango_layout_get_size(priv->layout, &width, &height);
+
+    gdouble size;
+    if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
+        size = width;
+    else
+        size = (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
+                ? height : width);
+
+    return fmax(size/PANGO_SCALE + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
 }
 
 /**
@@ -1401,8 +1401,9 @@ estimate_major_distance(GwyAxis *axis,
  * @level: Tick level from #GwyAxisTickLevel enum.
  * @value: Real value at the tick.
  * @position: Pixel position of the tick in the axis.
- * @size: Pixel size of the tick label; zero if the tick has no label.
  * @label: Label as a Pango markup string; %NULL if the tick has no label.
+ * @extents: Logical layout extents of @label in Pango units.  Does not contain
+ *           any meaningful value if @label is %NULL.
  *
  * Representation of a single axis tick.
  **/
