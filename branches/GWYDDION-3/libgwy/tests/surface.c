@@ -179,6 +179,37 @@ test_surface_serialize(void)
 }
 
 void
+test_surface_serialize_failure_odd(void)
+{
+    GOutputStream *stream = g_memory_output_stream_new(NULL, 0,
+                                                       g_realloc, g_free);
+    GDataOutputStream *datastream = g_data_output_stream_new(stream);
+    g_data_output_stream_set_byte_order(datastream,
+                                        G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
+
+    guint len = 5;
+    data_stream_put_string0(datastream, "GwySurface", NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, 0, NULL, NULL);
+    data_stream_put_string0(datastream, "data", NULL, NULL);
+    g_data_output_stream_put_byte(datastream, GWY_SERIALIZABLE_DOUBLE_ARRAY,
+                                  NULL, NULL);
+    g_data_output_stream_put_uint64(datastream, len, NULL, NULL);
+    for (guint i = 0; i < len; i++)
+        data_stream_put_double(datastream, i, NULL, NULL);
+
+    GwyErrorList *error_list = NULL;
+    gwy_error_list_add(&error_list,
+                       GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
+                       "Surface data length is %lu which is not a multiple of 3.",
+                       (gulong)len);
+
+    deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
+    gwy_error_list_clear(&error_list);
+    g_object_unref(datastream);
+    g_object_unref(stream);
+}
+
+void
 test_surface_props(void)
 {
     static const GwyXYZ data[] = { { 1, 2, 3 }, { 4, 5, 6 } };

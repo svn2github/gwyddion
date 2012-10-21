@@ -387,6 +387,7 @@ field/distributions/minkowski/black
 field/distributions/minkowski/white
 field/distributions/minkowski/connectivity
 surface/serialize
+surface/serialize/failure/odd
 surface/props
 surface/units-assign
 surface/get
@@ -435,6 +436,7 @@ resource/error/different-type
 gradient/load
 gradient/save
 gradient/serialize
+gradient/serialize/failure/odd
 gradient/inventory
 gradient/manipulate
 gradient/error/bad-line
