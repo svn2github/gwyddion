@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 #include "libgwy/math.h"
 #include "libgwyui/field-render.h"
 
-#define NOT_QUITE_1 0.999999999999999
+#define NOT_QUITE_1 0.999999999
 
 #define COMPONENT_TO_PIXEL8(x) (guint)(256*CLAMP((x), 0.0, NOT_QUITE_1))
 
@@ -121,7 +121,7 @@ build_interpolation(guint n, gdouble from, gdouble to, guint res)
 {
     InterpolationPoint *intpoints = g_new(InterpolationPoint, n);
     gdouble q = (to - from)/n;
-    gdouble r = 0.5*MIN(q, NOT_QUITE_1);
+    gdouble r = 0.5*NOT_QUITE_1*MIN(q, 1.0);
     gdouble limit = NOT_QUITE_1*res;
 
     for (guint i = 0; i < n; i++) {
