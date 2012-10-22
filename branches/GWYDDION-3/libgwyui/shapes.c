@@ -66,6 +66,8 @@ struct _GwyShapesPrivate {
     gulong selection_removed_id;
     gulong selection_assigned_id;
 
+    gboolean updating_selection;
+
     gboolean has_current_point;
     GwyXY current_point;
 };
@@ -1143,6 +1145,82 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
 
     cairo_pop_group_to_source(cr);
     cairo_paint_with_alpha(cr, alpha);
+}
+
+/**
+ * gwy_shapes_start_updating_selection:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Declares that the user initiated a change of the selection of a group of
+ * geometrical shapes.
+ *
+ * This method is namely intended for subclasses that should wrap #GwyIntSet
+ * calls modifying the selection <emphasis>in response to user
+ * interaction</emphasis>:
+ * |[
+ * // User deselects all shapes.
+ * gwy_shapes_start_updating_selection(shapes);
+ * gwy_int_set_fill(shapes->selection, NULL, 0);
+ * gwy_shapes_stop_updating_selection(shapes);
+ * ]|
+ *
+ * The reason is resolution of conflicts of programmatic changes of the
+ * selection with user-initiated changes.  The standard resolution is that if
+ * the selection changes programmatically while the user is editing it, which
+ * should not be the normal course of action, the editing is cancelled to
+ * prevent all the possible strange consequences (using the cancel_editing()
+ * method).  This requires distinguishing user and programmatic changes which
+ * is done by wrapping it as described above.
+ *
+ * The state can be tested with gwy_shapes_is_updating_selection().
+ *
+ * It is an error to nest calls to this method; one user-initiated change must
+ * finish before another can start.
+ **/
+void
+gwy_shapes_start_updating_selection(GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    g_return_if_fail(!priv->updating_selection);
+    priv->updating_selection = TRUE;
+}
+
+/**
+ * gwy_shapes_stop_updating_selection:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Declares that the user finished a change of the selection of a group of
+ * geometrical shapes.
+ *
+ * See gwy_shapes_start_updating_selection() for a discussion.
+ **/
+void
+gwy_shapes_stop_updating_selection(GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    Shapes *priv = shapes->priv;
+    g_return_if_fail(priv->updating_selection);
+    priv->updating_selection = FALSE;
+}
+
+/**
+ * gwy_shapes_is_updating_selection:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Tests whether a user-initiated change of the selection of a group of
+ * geometrical shapes is underway.
+ *
+ * See gwy_shapes_start_updating_selection() for a discussion.
+ *
+ * Returns: %TRUE is a user-initiated selection change is underway.  %FALSE
+ *          otherwise.
+ **/
+gboolean
+gwy_shapes_is_updating_selection(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    return shapes->priv->updating_selection;
 }
 
 /**
