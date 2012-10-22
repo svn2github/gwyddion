@@ -53,7 +53,6 @@ struct _GwyShapesPointPrivate {
 
     gint hover;
     gint clicked;
-    gboolean changing_selection;
     gboolean has_moved;
     InteractMode mode;
     GwyXY xypress;    // Event (view) coordinates.
@@ -452,9 +451,9 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
         // group.  If we clicked on an unselected shape we will need to select
         // only this one.
         if (!gwy_int_set_contains(shapes->selection, priv->clicked)) {
-            priv->changing_selection = TRUE;
+            gwy_shapes_start_updating_selection(shapes);
             gwy_int_set_update(shapes->selection, &priv->clicked, 1);
-            priv->changing_selection = FALSE;
+            gwy_shapes_stop_updating_selection(shapes);
         }
     }
 
@@ -494,9 +493,9 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
             priv->clicked = -1;
             return FALSE;
         }
-        priv->changing_selection = TRUE;
+        gwy_shapes_start_updating_selection(shapes);
         gwy_int_set_update(selection, &priv->clicked, 1);
-        priv->changing_selection = FALSE;
+        gwy_shapes_stop_updating_selection(shapes);
     }
     priv->has_moved = FALSE;
 
@@ -516,12 +515,12 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
     if (!priv->has_moved) {
         GwyIntSet *selection = shapes->selection;
 
-        priv->changing_selection = TRUE;
+        gwy_shapes_start_updating_selection(shapes);
         if (priv->mode == MODE_SELECTING)
             gwy_int_set_toggle(selection, priv->clicked);
         else if (priv->mode == MODE_MOVING)
             gwy_int_set_update(selection, &priv->clicked, 1);
-        priv->changing_selection = FALSE;
+        gwy_shapes_stop_updating_selection(shapes);
 
         // FIXME: May not be necessary if we respond to the selection signals.
         gwy_shapes_update(shapes);
@@ -544,8 +543,6 @@ static gboolean
 gwy_shapes_point_key_press(GwyShapes *shapes,
                            GdkEventKey *event)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-
     if (!gwy_shapes_get_editable(shapes))
         return FALSE;
 
@@ -556,9 +553,9 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
             guint nsel;
             gint *selected = gwy_int_set_values(shapes->selection, &nsel);
             gwy_shapes_editing_started(shapes);
-            priv->changing_selection = TRUE;
+            gwy_shapes_start_updating_selection(shapes);
             gwy_int_set_update(shapes->selection, NULL, 0);
-            priv->changing_selection = FALSE;
+            gwy_shapes_stop_updating_selection(shapes);
             // FIXME: Can we use gwy_coords_delete_subset()?  Obviously not
             // after clearing @selection.  But deleting items while they are
             // in @selection can, obviously, lead to problems if anything is
@@ -598,8 +595,7 @@ static void
 gwy_shapes_selection_added(GwyShapes *shapes,
                            G_GNUC_UNUSED gint value)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    if (priv->changing_selection)
+    if (gwy_shapes_is_updating_selection(shapes))
         return;
     // TODO
     gwy_shapes_point_cancel_editing(shapes, -1);
@@ -610,8 +606,7 @@ static void
 gwy_shapes_selection_removed(GwyShapes *shapes,
                              G_GNUC_UNUSED gint value)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    if (priv->changing_selection)
+    if (gwy_shapes_is_updating_selection(shapes))
         return;
     // TODO
     gwy_shapes_point_cancel_editing(shapes, -1);
@@ -621,8 +616,7 @@ gwy_shapes_selection_removed(GwyShapes *shapes,
 static void
 gwy_shapes_selection_assigned(GwyShapes *shapes)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    if (priv->changing_selection)
+    if (gwy_shapes_is_updating_selection(shapes))
         return;
     // TODO
     gwy_shapes_point_cancel_editing(shapes, -1);
