@@ -411,10 +411,13 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 {
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     ShapesPoint *priv = points->priv;
+    gint i = -1;
 
-    gint i = find_near_point(points, eventx, eventy);
-    if (priv->hover == i)
-        return;
+    if (isfinite(eventx) && isfinite(eventy)) {
+        find_near_point(points, eventx, eventy);
+        if (priv->hover == i)
+            return;
+    }
 
     priv->hover = i;
     gwy_shapes_update(shapes);
@@ -564,10 +567,9 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
                 gwy_coords_delete(coords, selected[nsel-1 - i]);
             g_free(selected);
             gwy_coords_finished(coords);
-
-            gint x, y;
-            gdk_window_get_pointer(event->window, &x, &y, NULL);
-            update_hover(shapes, x, y);
+            // The pointer might actually be over another shape.  But highlight
+            // it only when the user moves the pointer.
+            update_hover(shapes, NAN, NAN);
         }
     }
     return FALSE;
