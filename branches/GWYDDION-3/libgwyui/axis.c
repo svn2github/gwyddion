@@ -531,6 +531,22 @@ gwy_axis_get_requested_range(GwyAxis *axis,
 }
 
 /**
+ * gwy_axis_get_unit:
+ * @axis: An axis.
+ *
+ * Obtains the unit object used by an axis to determine units.
+ *
+ * Returns: (transfer none):
+ *          The units of axis coordinates.
+ **/
+GwyUnit*
+gwy_axis_get_unit(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
+    return axis->priv->unit;
+}
+
+/**
  * gwy_axis_get_show_labels:
  * @axis: An axis.
  *
@@ -1304,7 +1320,7 @@ fix_request(GwyRange *request)
 {
     // Refuse to show anything that is not a normal number.  Also handle
     // specially zero range around zero.
-    if (!isnormal(request->from) || !isnormal(request->to)
+    if (!isfinite(request->from) || !isfinite(request->to)
         || (request->from == 0.0 && request->to == 0.0)) {
         *request = default_range;
         return;

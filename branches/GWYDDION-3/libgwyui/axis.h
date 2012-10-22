@@ -82,6 +82,7 @@ void               gwy_axis_request_range      (GwyAxis *axis,
                                                 const GwyRange *request);
 void               gwy_axis_get_requested_range(GwyAxis *axis,
                                                 GwyRange *range);
+GwyUnit*           gwy_axis_get_unit           (const GwyAxis *axis)      G_GNUC_PURE;
 gboolean           gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_show_labels    (GwyAxis *axis,
                                                 gboolean showlabels);
