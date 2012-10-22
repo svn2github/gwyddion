@@ -754,7 +754,14 @@ gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
     g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
     g_return_if_fail(area);
 
-    GtkWidget *widget = GTK_WIDGET(rasterview);
+    GtkWidget *widget = GTK_WIDGET(rasterview),
+              *parent = gtk_widget_get_parent(widget);
+    // XXX XXX XXX: This is completely botched!  Must figure out how to
+    // calculate ruler ranges without resorting to special-casing parent
+    // widgets...
+    if (GTK_IS_SCROLLED_WINDOW(parent))
+        widget = parent;
+
     RasterView *priv = rasterview->priv;
     area->x = area->y = 0.0;
     area->width = gtk_widget_get_allocated_width(widget);
