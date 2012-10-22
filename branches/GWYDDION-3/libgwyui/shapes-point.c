@@ -564,6 +564,10 @@ gwy_shapes_point_key_press(GwyShapes *shapes,
                 gwy_coords_delete(coords, selected[nsel-1 - i]);
             g_free(selected);
             gwy_coords_finished(coords);
+
+            gint x, y;
+            gdk_window_get_pointer(event->window, &x, &y, NULL);
+            update_hover(shapes, x, y);
         }
     }
     return FALSE;
