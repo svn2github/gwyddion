@@ -90,6 +90,8 @@ struct _GwyShapesClass {
     void (*reseved2)(void);
     void (*reseved3)(void);
     void (*reseved4)(void);
+    void (*reseved5)(void);
+    void (*reseved6)(void);
     /*<public>*/
     gboolean (*button_press)(GwyShapes *shapes,
                              GdkEventButton *event);
@@ -101,9 +103,14 @@ struct _GwyShapesClass {
                           GdkEventKey *event);
     gboolean (*key_release)(GwyShapes *shapes,
                             GdkEventKey *event);
+    gboolean (*delete_selection)(GwyShapes *shapes);
     /*<private>*/
     gboolean (*reservedevent1)(void);
     gboolean (*reservedevent2)(void);
+    gboolean (*reservedevent3)(void);
+    gboolean (*reservedevent4)(void);
+    gboolean (*reservedevent5)(void);
+    gboolean (*reservedevent6)(void);
 };
 
 GType        gwy_shapes_get_type                (void)                                  G_GNUC_CONST;
@@ -132,6 +139,7 @@ gboolean     gwy_shapes_get_editable            (const GwyShapes *shapes)       
 void         gwy_shapes_draw                    (GwyShapes *shapes,
                                                  cairo_t *cr);
 GdkEventMask gwy_shapes_gdk_event_mask          (const GwyShapes *shapes)               G_GNUC_PURE;
+gboolean     gwy_shapes_delete_selection        (GwyShapes *shapes);
 gboolean     gwy_shapes_button_press            (GwyShapes *shapes,
                                                  GdkEventButton *event);
 gboolean     gwy_shapes_button_release          (GwyShapes *shapes,

@@ -58,35 +58,34 @@ struct _GwyShapesPointPrivate {
     GwyXY xypress;    // Event (view) coordinates.
 };
 
-static void     gwy_shapes_point_finalize      (GObject *object);
-static void     gwy_shapes_point_set_property  (GObject *object,
-                                                guint prop_id,
-                                                const GValue *value,
-                                                GParamSpec *pspec);
-static void     gwy_shapes_point_get_property  (GObject *object,
-                                                guint prop_id,
-                                                GValue *value,
-                                                GParamSpec *pspec);
-static gboolean set_radius                     (GwyShapesPoint *points,
-                                                gdouble radius);
-static void     calculate_data                 (GwyShapesPoint *points);
-static void     gwy_shapes_point_draw          (GwyShapes *shapes,
-                                                cairo_t *cr);
-static gboolean gwy_shapes_point_motion_notify (GwyShapes *shapes,
-                                                GdkEventMotion *event);
-static gboolean gwy_shapes_point_button_press  (GwyShapes *shapes,
-                                                GdkEventButton *event);
-static gboolean gwy_shapes_point_button_release(GwyShapes *shapes,
-                                                GdkEventButton *event);
-static gboolean gwy_shapes_point_key_press     (GwyShapes *shapes,
-                                                GdkEventKey *event);
-static void     gwy_shapes_point_cancel_editing(GwyShapes *shapes,
-                                                gint id);
-static void     gwy_shapes_selection_added     (GwyShapes *shapes,
-                                                gint value);
-static void     gwy_shapes_selection_removed   (GwyShapes *shapes,
-                                                gint value);
-static void     gwy_shapes_selection_assigned  (GwyShapes *shapes);
+static void     gwy_shapes_point_finalize        (GObject *object);
+static void     gwy_shapes_point_set_property    (GObject *object,
+                                                  guint prop_id,
+                                                  const GValue *value,
+                                                  GParamSpec *pspec);
+static void     gwy_shapes_point_get_property    (GObject *object,
+                                                  guint prop_id,
+                                                  GValue *value,
+                                                  GParamSpec *pspec);
+static gboolean set_radius                       (GwyShapesPoint *points,
+                                                  gdouble radius);
+static void     calculate_data                   (GwyShapesPoint *points);
+static void     gwy_shapes_point_draw            (GwyShapes *shapes,
+                                                  cairo_t *cr);
+static gboolean gwy_shapes_point_motion_notify   (GwyShapes *shapes,
+                                                  GdkEventMotion *event);
+static gboolean gwy_shapes_point_button_press    (GwyShapes *shapes,
+                                                  GdkEventButton *event);
+static gboolean gwy_shapes_point_button_release  (GwyShapes *shapes,
+                                                  GdkEventButton *event);
+static gboolean gwy_shapes_point_delete_selection(GwyShapes *shapes);
+static void     gwy_shapes_point_cancel_editing  (GwyShapes *shapes,
+                                                  gint id);
+static void     gwy_shapes_selection_added       (GwyShapes *shapes,
+                                                  gint value);
+static void     gwy_shapes_selection_removed     (GwyShapes *shapes,
+                                                  gint value);
+static void     gwy_shapes_selection_assigned    (GwyShapes *shapes);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -106,10 +105,10 @@ gwy_shapes_point_class_init(GwyShapesPointClass *klass)
 
     shapes_class->coords_type = GWY_TYPE_COORDS_POINT;
     shapes_class->draw = gwy_shapes_point_draw;
+    shapes_class->delete_selection = gwy_shapes_point_delete_selection;
     shapes_class->motion_notify = gwy_shapes_point_motion_notify;
     shapes_class->button_press = gwy_shapes_point_button_press;
     shapes_class->button_release = gwy_shapes_point_button_release;
-    shapes_class->key_press = gwy_shapes_point_key_press;
     shapes_class->cancel_editing = gwy_shapes_point_cancel_editing;
     shapes_class->selection_added = gwy_shapes_selection_added;
     shapes_class->selection_removed = gwy_shapes_selection_removed;
@@ -412,11 +411,10 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     ShapesPoint *priv = points->priv;
     gint i = -1;
 
-    if (isfinite(eventx) && isfinite(eventy)) {
-        find_near_point(points, eventx, eventy);
-        if (priv->hover == i)
-            return;
-    }
+    if (isfinite(eventx) && isfinite(eventy))
+        i = find_near_point(points, eventx, eventy);
+    if (priv->hover == i)
+        return;
 
     priv->hover = i;
     gwy_shapes_update(shapes);
@@ -540,34 +538,12 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
 }
 
 static gboolean
-gwy_shapes_point_key_press(GwyShapes *shapes,
-                           GdkEventKey *event)
+gwy_shapes_point_delete_selection(GwyShapes *shapes)
 {
-    if (!gwy_shapes_get_editable(shapes))
-        return FALSE;
-
-    if (event->keyval == GDK_KEY_Delete || event->keyval == GDK_KEY_BackSpace) {
-        if (gwy_int_set_is_nonempty(shapes->selection)) {
-            gwy_shapes_point_cancel_editing(shapes, -1);
-            GwyCoords *coords = gwy_shapes_get_coords(shapes);
-            guint nsel;
-            gint *selected = gwy_int_set_values(shapes->selection, &nsel);
-            gwy_shapes_editing_started(shapes);
-            gwy_shapes_start_updating_selection(shapes);
-            gwy_int_set_update(shapes->selection, NULL, 0);
-            gwy_shapes_stop_updating_selection(shapes);
-            // FIXME: Can we use gwy_coords_delete_subset()?  Obviously not
-            // after clearing @selection.  But deleting items while they are
-            // in @selection can, obviously, lead to problems if anything is
-            // connected to "item-deleted".
-            for (guint i = 0; i < nsel; i++)
-                gwy_coords_delete(coords, selected[nsel-1 - i]);
-            g_free(selected);
-            gwy_coords_finished(coords);
-            // The pointer might actually be over another shape.  But highlight
-            // it only when the user moves the pointer.
-            update_hover(shapes, NAN, NAN);
-        }
+    if (GWY_SHAPES_CLASS
+                   (gwy_shapes_point_parent_class)->delete_selection(shapes)) {
+        update_hover(shapes, NAN, NAN);
+        return TRUE;
     }
     return FALSE;
 }
