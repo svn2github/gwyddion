@@ -368,6 +368,7 @@ gwy_raster_view_dispose(GObject *object)
     set_vadjustment(rasterview, NULL);
     destroy_field_surface(rasterview);
     destroy_mask_surface(rasterview);
+    rasterview->priv->area_widget = NULL;
 
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
 }
