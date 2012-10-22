@@ -54,8 +54,8 @@ struct _GwyRasterViewClass {
     GtkWidgetClass widget_class;
 };
 
-GType          gwy_raster_view_get_type              (void)                       G_GNUC_CONST;
-GtkWidget*     gwy_raster_view_new                   (void)                       G_GNUC_MALLOC;
+GType          gwy_raster_view_get_type              (void)                            G_GNUC_CONST;
+GtkWidget*     gwy_raster_view_new                   (void)                            G_GNUC_MALLOC;
 void           gwy_raster_view_set_field             (GwyRasterView *rasterview,
                                                       GwyField *field);
 GwyField*      gwy_raster_view_get_field             (GwyRasterView *rasterview);
@@ -74,6 +74,10 @@ const GwyRGBA* gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview)
 void           gwy_raster_view_set_shapes            (GwyRasterView *rasterview,
                                                       GwyShapes *shapes);
 GwyShapes*     gwy_raster_view_get_shapes            (GwyRasterView *rasterview);
+void           gwy_raster_view_get_widget_area       (const GwyRasterView *rasterview,
+                                                      cairo_rectangle_t *area);
+void           gwy_raster_view_get_field_area        (const GwyRasterView *rasterview,
+                                                      cairo_rectangle_t *area);
 
 G_END_DECLS
 

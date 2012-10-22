@@ -747,6 +747,33 @@ gwy_raster_view_get_shapes(GwyRasterView *rasterview)
     return rasterview->priv->shapes;
 }
 
+void
+gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
+                                cairo_rectangle_t *area)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(area);
+
+    GtkWidget *widget = GTK_WIDGET(rasterview);
+    RasterView *priv = rasterview->priv;
+    area->x = area->y = 0.0;
+    area->width = gtk_widget_get_allocated_width(widget);
+    area->height = gtk_widget_get_allocated_height(widget);
+    cairo_matrix_transform_point(&priv->window_to_field_matrix,
+                                 &area->x, &area->y);
+    cairo_matrix_transform_distance(&priv->window_to_field_matrix,
+                                    &area->width, &area->height);
+}
+
+void
+gwy_raster_view_get_field_area(const GwyRasterView *rasterview,
+                               cairo_rectangle_t *area)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(area);
+    *area = rasterview->priv->field_rectangle;
+}
+
 static void
 create_window(GwyRasterView *rasterview)
 {
