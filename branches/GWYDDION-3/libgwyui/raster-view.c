@@ -99,6 +99,7 @@ struct _GwyRasterViewPrivate {
     GwyRGBA grain_number_color;
 
     PangoLayout *layout;
+    GtkWidget *area_widget;
 
     gulong scroll_timer_hid;
 };
@@ -553,7 +554,7 @@ gwy_raster_view_set_field(GwyRasterView *rasterview,
  *          The field displayed by @rasterview.
  **/
 GwyField*
-gwy_raster_view_get_field(GwyRasterView *rasterview)
+gwy_raster_view_get_field(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return GWY_RASTER_VIEW(rasterview)->priv->field;
@@ -598,7 +599,7 @@ gwy_raster_view_set_mask(GwyRasterView *rasterview,
  *          The mask displayed by @rasterview over the field.
  **/
 GwyMaskField*
-gwy_raster_view_get_mask(GwyRasterView *rasterview)
+gwy_raster_view_get_mask(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return GWY_RASTER_VIEW(rasterview)->priv->mask;
@@ -633,7 +634,7 @@ gwy_raster_view_set_gradient(GwyRasterView *rasterview,
  *          The colour gradient used by @rasterview.
  **/
 GwyGradient*
-gwy_raster_view_get_gradient(GwyRasterView *rasterview)
+gwy_raster_view_get_gradient(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return GWY_RASTER_VIEW(rasterview)->priv->gradient;
@@ -668,7 +669,7 @@ gwy_raster_view_set_mask_color(GwyRasterView *rasterview,
  *          The colour used by @rasterview for mask visualisation.
  **/
 const GwyRGBA*
-gwy_raster_view_get_mask_color(GwyRasterView *rasterview)
+gwy_raster_view_get_mask_color(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return &GWY_RASTER_VIEW(rasterview)->priv->mask_color;
@@ -704,7 +705,7 @@ gwy_raster_view_set_grain_number_color(GwyRasterView *rasterview,
  *          The colour used by @rasterview for grain number visualisation.
  **/
 const GwyRGBA*
-gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview)
+gwy_raster_view_get_grain_number_color(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return &GWY_RASTER_VIEW(rasterview)->priv->grain_number_color;
@@ -741,12 +742,27 @@ gwy_raster_view_set_shapes(GwyRasterView *rasterview,
  *          The shapes displayed by @rasterview.
  **/
 GwyShapes*
-gwy_raster_view_get_shapes(GwyRasterView *rasterview)
+gwy_raster_view_get_shapes(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
     return rasterview->priv->shapes;
 }
 
+/**
+ * gwy_raster_view_get_widget_area:
+ * @rasterview: A raster view.
+ * @area: (out):
+ *        Location to store the widget area.
+ *
+ * Calculates the field pixel rectangle corresponding to the size of an entire
+ * raster view.
+ *
+ * The widget area is the same as the field area if the view shows only a part
+ * of the field.  However, if there is padding the widget area may correspond
+ * to coordinates that are outside the field.
+ *
+ * See also gwy_raster_view_set_area_widget().
+ **/
 void
 gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
                                 cairo_rectangle_t *area)
@@ -754,15 +770,10 @@ gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
     g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
     g_return_if_fail(area);
 
-    GtkWidget *widget = GTK_WIDGET(rasterview),
-              *parent = gtk_widget_get_parent(widget);
-    // XXX XXX XXX: This is completely botched!  Must figure out how to
-    // calculate ruler ranges without resorting to special-casing parent
-    // widgets...
-    if (GTK_IS_SCROLLED_WINDOW(parent))
-        widget = parent;
-
     RasterView *priv = rasterview->priv;
+    GtkWidget *widget = (priv->area_widget
+                         ? priv->area_widget
+                         : GTK_WIDGET(rasterview));
     area->x = area->y = 0.0;
     area->width = gtk_widget_get_allocated_width(widget);
     area->height = gtk_widget_get_allocated_height(widget);
@@ -772,6 +783,18 @@ gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
                                     &area->width, &area->height);
 }
 
+/**
+ * gwy_raster_view_get_field_area:
+ * @rasterview: A raster view.
+ * @area: (out):
+ *        Location to store the field area.
+ *
+ * Obtains the field pixel rectangle corresponding to the part currently
+ * displayed by a raster view.
+ *
+ * The field rectangle is never larger than the field.  It may be smaller if
+ * only a part of the field is shown and the coordinates may be non-integral.
+ **/
 void
 gwy_raster_view_get_field_area(const GwyRasterView *rasterview,
                                cairo_rectangle_t *area)
@@ -779,6 +802,60 @@ gwy_raster_view_get_field_area(const GwyRasterView *rasterview,
     g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
     g_return_if_fail(area);
     *area = rasterview->priv->field_rectangle;
+}
+
+/**
+ * gwy_raster_view_get_area_widget:
+ * @rasterview: A raster view.
+ *
+ * Obtains the area widget of a raster view.
+ *
+ * See gwy_raster_view_set_area_widget() for discussion.
+ *
+ * Returns: (transfer none) (allow-none):
+ *          The widget used for area calculation in
+ *          gwy_raster_view_get_widget_area(), %NULL if no widget is set and
+ *          @rasterview itself is used.
+ **/
+GtkWidget*
+gwy_raster_view_get_area_widget(const GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return rasterview->priv->area_widget;
+}
+
+/**
+ * gwy_raster_view_set_area_widget:
+ * @rasterview: A raster view.
+ * @widget: (transfer none) (allow-none):
+ *          Widget to use for determining the size of entire raster view
+ *          in gwy_raster_view_get_widget_area().  Pass %NULL to unset the
+ *          area widget and use @rasterview itself.
+ *
+ * Sets the area widget of a raster view.
+ *
+ * If the raster view is put into a #GtkScrolledWindow or a similar container
+ * that can ‘eat’ part of the child area, the meaning of entire widget as
+ * used by gwy_raster_view_get_widget_area() changes.  The correct dimensions
+ * that may be necessary to draw rulers right are those of the container, not
+ * the raster view.  To fix the calculation use this function to tell
+ * @rasterview to use the dimensions of another widget instead of self:
+ * |[
+ * GtkWidget *scwin = gtk_scrolled_window_new(NULL, NULL);
+ * gtk_container_add(GTK_CONTAINER(scwin), rasterview);
+ * gwy_raster_view_set_area_widget(GWY_RASTER_VIEW(rasterview), scwin);
+ * ]|
+ *
+ * Since the common use case is that @widget contains and thus owns
+ * @rasterview, no reference to @widget is taken by @rasterview.
+ **/
+void
+gwy_raster_view_set_area_widget(GwyRasterView *rasterview,
+                                GtkWidget *widget)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(!widget || GTK_IS_WIDGET(widget));
+    rasterview->priv->area_widget = widget;
 }
 
 static void

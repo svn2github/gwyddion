@@ -58,26 +58,29 @@ GType          gwy_raster_view_get_type              (void)                     
 GtkWidget*     gwy_raster_view_new                   (void)                            G_GNUC_MALLOC;
 void           gwy_raster_view_set_field             (GwyRasterView *rasterview,
                                                       GwyField *field);
-GwyField*      gwy_raster_view_get_field             (GwyRasterView *rasterview);
+GwyField*      gwy_raster_view_get_field             (const GwyRasterView *rasterview) G_GNUC_PURE;
 void           gwy_raster_view_set_mask              (GwyRasterView *rasterview,
                                                       GwyMaskField *mask);
-GwyMaskField*  gwy_raster_view_get_mask              (GwyRasterView *rasterview);
+GwyMaskField*  gwy_raster_view_get_mask              (const GwyRasterView *rasterview) G_GNUC_PURE;
 void           gwy_raster_view_set_gradient          (GwyRasterView *rasterview,
                                                       GwyGradient *gradient);
-GwyGradient*   gwy_raster_view_get_gradient          (GwyRasterView *rasterview);
+GwyGradient*   gwy_raster_view_get_gradient          (const GwyRasterView *rasterview) G_GNUC_PURE;
 void           gwy_raster_view_set_mask_color        (GwyRasterView *rasterview,
                                                       const GwyRGBA *color);
-const GwyRGBA* gwy_raster_view_get_mask_color        (GwyRasterView *rasterview);
+const GwyRGBA* gwy_raster_view_get_mask_color        (const GwyRasterView *rasterview) G_GNUC_PURE;
 void           gwy_raster_view_set_grain_number_color(GwyRasterView *rasterview,
                                                       const GwyRGBA *color);
-const GwyRGBA* gwy_raster_view_get_grain_number_color(GwyRasterView *rasterview);
+const GwyRGBA* gwy_raster_view_get_grain_number_color(const GwyRasterView *rasterview) G_GNUC_PURE;
 void           gwy_raster_view_set_shapes            (GwyRasterView *rasterview,
                                                       GwyShapes *shapes);
-GwyShapes*     gwy_raster_view_get_shapes            (GwyRasterView *rasterview);
+GwyShapes*     gwy_raster_view_get_shapes            (const GwyRasterView *rasterview) G_GNUC_PURE;
 void           gwy_raster_view_get_widget_area       (const GwyRasterView *rasterview,
                                                       cairo_rectangle_t *area);
 void           gwy_raster_view_get_field_area        (const GwyRasterView *rasterview,
                                                       cairo_rectangle_t *area);
+GtkWidget*     gwy_raster_view_get_area_widget       (const GwyRasterView *rasterview) G_GNUC_PURE;
+void           gwy_raster_view_set_area_widget       (GwyRasterView *rasterview,
+                                                      GtkWidget *widget);
 
 G_END_DECLS
 
