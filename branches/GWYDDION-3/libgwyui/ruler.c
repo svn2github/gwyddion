@@ -21,6 +21,7 @@
 #include "libgwy/math.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
+#include "libgwyui/cairo-utils.h"
 #include "libgwyui/ruler.h"
 
 #define IGNORE_ME N_("A translatable string.")
@@ -64,6 +65,10 @@ static gboolean set_show_mark                 (GwyRuler *ruler,
                                                gboolean setting);
 static gboolean set_mark                      (GwyRuler *ruler,
                                                gdouble value);
+static void     draw_mark                     (GwyRuler *ruler,
+                                               cairo_t *cr,
+                                               const cairo_matrix_t *matrix,
+                                               gdouble breadth);
 static void     invalidate_mark_area          (GwyRuler *ruler);
 
 static GParamSpec *properties[N_PROPS];
@@ -254,13 +259,16 @@ gwy_ruler_draw(GtkWidget *widget,
     set_up_transform(edge, &matrix, width, height);
 
     gtk_render_background(context, cr, 0, 0, width, height);
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_set_line_width(cr, 0.8);
+
+    GwyRuler *ruler = GWY_RULER(widget);
+    draw_mark(ruler, cr, &matrix, breadth);
 
     guint nticks;
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
     gint max_ascent = G_MININT, max_descent = G_MININT;
 
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    cairo_set_line_width(cr, 1.0);
     draw_line_transformed(cr, &matrix, 0, 0, length, 0);
     for (guint i = 0; i < nticks; i++) {
         gdouble pos = ticks[i].position;
@@ -344,6 +352,37 @@ set_mark(GwyRuler *ruler,
     priv->mark = value;
     invalidate_mark_area(ruler);
     return TRUE;
+}
+
+static void
+draw_mark(GwyRuler *ruler, cairo_t *cr,
+          const cairo_matrix_t *matrix, gdouble breadth)
+{
+    Ruler *priv = ruler->priv;
+    if (!priv->show_mark && !isfinite(priv->mark))
+        return;
+
+    GtkPositionType edge = gwy_axis_get_edge(GWY_AXIS(ruler));
+    gdouble x = priv->mark, hs = 0.2*breadth, y = hs;
+    cairo_matrix_transform_point(matrix, &x, &y);
+
+    cairo_save(cr);
+    if (edge == GTK_POS_TOP)
+        gwy_cairo_triangle_down(cr, x, y, hs);
+    else if (edge == GTK_POS_BOTTOM)
+        gwy_cairo_triangle_up(cr, x, y, hs);
+    else if (edge == GTK_POS_LEFT)
+        gwy_cairo_triangle_right(cr, x, y, hs);
+    else if (edge == GTK_POS_RIGHT)
+        gwy_cairo_triangle_left(cr, x, y, hs);
+    else {
+        g_assert_not_reached();
+    }
+    cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
+    cairo_fill_preserve(cr);
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_stroke(cr);
+    cairo_restore(cr);
 }
 
 static void
