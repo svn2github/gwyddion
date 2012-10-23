@@ -82,6 +82,11 @@ GtkWidget*     gwy_raster_view_get_area_widget       (const GwyRasterView *raste
 void           gwy_raster_view_set_area_widget       (GwyRasterView *rasterview,
                                                       GtkWidget *widget);
 
+const cairo_matrix_t* gwy_raster_view_get_widget_to_field_matrix (const GwyRasterView *rasterview) G_GNUC_PURE;
+const cairo_matrix_t* gwy_raster_view_get_widget_to_coords_matrix(const GwyRasterView *rasterview) G_GNUC_PURE;
+const cairo_matrix_t* gwy_raster_view_get_field_to_widget_matrix (const GwyRasterView *rasterview) G_GNUC_PURE;
+const cairo_matrix_t* gwy_raster_view_get_coords_to_widget_matrix(const GwyRasterView *rasterview) G_GNUC_PURE;
+
 G_END_DECLS
 
 #endif

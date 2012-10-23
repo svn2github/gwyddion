@@ -859,6 +859,82 @@ gwy_raster_view_set_area_widget(GwyRasterView *rasterview,
     rasterview->priv->area_widget = widget;
 }
 
+/**
+ * gwy_raster_view_get_widget_to_field_matrix:
+ * @rasterview: A raster view.
+ *
+ * Obtains the Cairo matrix representing transformation from widget coordinates
+ * to field pixel coordinates for a raster view.
+ *
+ * Returns: (transfer none):
+ *          Cairo matrix representing the coordinates.  The pointer remains
+ *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          will reflect the current transformation.
+ **/
+const cairo_matrix_t*
+gwy_raster_view_get_widget_to_field_matrix(const GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return &rasterview->priv->window_to_field_matrix;
+}
+
+/**
+ * gwy_raster_view_get_widget_to_coords_matrix:
+ * @rasterview: A raster view.
+ *
+ * Obtains the Cairo matrix representing transformation from widget coordinates
+ * to field real coordinates for a raster view.
+ *
+ * Returns: (transfer none):
+ *          Cairo matrix representing the coordinates.  The pointer remains
+ *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          will reflect the current transformation.
+ **/
+const cairo_matrix_t*
+gwy_raster_view_get_widget_to_coords_matrix(const GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return &rasterview->priv->window_to_coords_matrix;
+}
+
+/**
+ * gwy_raster_view_get_field_to_widget_matrix:
+ * @rasterview: A raster view.
+ *
+ * Obtains the Cairo matrix representing transformation from field pixel
+ * coodinates to widget coordinates for a raster view.
+ *
+ * Returns: (transfer none):
+ *          Cairo matrix representing the coordinates.  The pointer remains
+ *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          will reflect the current transformation.
+ **/
+const cairo_matrix_t*
+gwy_raster_view_get_field_to_widget_matrix(const GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return &rasterview->priv->field_to_window_matrix;
+}
+
+/**
+ * gwy_raster_view_get_coords_to_widget_matrix:
+ * @rasterview: A raster view.
+ *
+ * Obtains the Cairo matrix representing transformation from field real
+ * coodinates to widget coordinates for a raster view.
+ *
+ * Returns: (transfer none):
+ *          Cairo matrix representing the coordinates.  The pointer remains
+ *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          will reflect the current transformation.
+ **/
+const cairo_matrix_t*
+gwy_raster_view_get_coords_to_widget_matrix(const GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
+    return &rasterview->priv->coords_to_window_matrix;
+}
+
 static void
 create_window(GwyRasterView *rasterview)
 {
