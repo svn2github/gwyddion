@@ -291,7 +291,7 @@ gwy_cairo_asterisk(cairo_t *cr,
  *                     drawing
  *
  * Drawing primitives for simple geometrical shapes such as gwy_cairo_cross()
- * or gwy_cairo_trangle_up() are namely useful for drawing markes and symbols
+ * or gwy_cairo_triangle_up() are namely useful for drawing markes and symbols
  * on graphs because they are visually centered on given coordinates.
  **/
 
