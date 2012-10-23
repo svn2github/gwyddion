@@ -789,6 +789,7 @@ gwy_shapes_delete_selection(GwyShapes *shapes)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
     GwyShapesClass *klass = GWY_SHAPES_GET_CLASS(shapes);
+    g_return_val_if_fail(klass->delete_selection, FALSE);
     return klass->delete_selection(shapes);
 }
 
@@ -1319,6 +1320,10 @@ gwy_shapes_is_updating_selection(const GwyShapes *shapes)
  * @cancel_editing: Virtual method that stops user modification of shapes,
  *                  namely because something has changed that makes continuing
  *                  not meaningful.
+ * @delete_selection: Virtual method implementing
+ *                    gwy_shapes_delete_selection().  It has a default
+ *                    implementation, however, subclasses will likely want to
+ *                    extend it by updating visual clues such as hover.
  * @coords_item_inserted: Virtual method called when the @coords object
  *                        emits #GwyArray::item-inserted.
  * @coords_item_deleted: Virtual method called when the @coords object
