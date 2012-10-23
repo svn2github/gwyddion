@@ -68,6 +68,7 @@ static gboolean set_mark                      (GwyRuler *ruler,
 static void     draw_mark                     (GwyRuler *ruler,
                                                cairo_t *cr,
                                                const cairo_matrix_t *matrix,
+                                               gdouble length,
                                                gdouble breadth);
 static void     invalidate_mark_area          (GwyRuler *ruler);
 
@@ -263,7 +264,7 @@ gwy_ruler_draw(GtkWidget *widget,
     cairo_set_line_width(cr, 0.8);
 
     GwyRuler *ruler = GWY_RULER(widget);
-    draw_mark(ruler, cr, &matrix, breadth);
+    draw_mark(ruler, cr, &matrix, length, breadth);
 
     guint nticks;
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
@@ -356,14 +357,22 @@ set_mark(GwyRuler *ruler,
 
 static void
 draw_mark(GwyRuler *ruler, cairo_t *cr,
-          const cairo_matrix_t *matrix, gdouble breadth)
+          const cairo_matrix_t *matrix,
+          gdouble length, gdouble breadth)
 {
     Ruler *priv = ruler->priv;
     if (!priv->show_mark && !isfinite(priv->mark))
         return;
 
     GtkPositionType edge = gwy_axis_get_edge(GWY_AXIS(ruler));
-    gdouble x = priv->mark, hs = 0.2*breadth, y = hs;
+    GwyRange range;
+    gwy_axis_get_range(GWY_AXIS(ruler), &range);
+
+    gdouble x = (priv->mark - range.from)/(range.to - range.from)*length,
+            hs = 0.2*breadth, y = hs;
+    if (x < -hs || x > length + hs)
+        return;
+
     cairo_matrix_transform_point(matrix, &x, &y);
 
     cairo_save(cr);
