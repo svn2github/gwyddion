@@ -37,8 +37,7 @@ struct _GwyRulerPrivate {
     gdouble mark;
     gboolean show_mark;
 
-    // Scratch space
-    GString *str;
+    guint breadth_request;
 };
 
 typedef struct _GwyRulerPrivate Ruler;
@@ -115,13 +114,13 @@ static void
 gwy_ruler_init(GwyRuler *ruler)
 {
     ruler->priv = G_TYPE_INSTANCE_GET_PRIVATE(ruler, GWY_TYPE_RULER, Ruler);
+    Ruler *priv = ruler->priv;
+    priv->breadth_request = 24;
 }
 
 static void
 gwy_ruler_finalize(GObject *object)
 {
-    Ruler *priv = GWY_RULER(object)->priv;
-    GWY_STRING_FREE(priv->str);
     G_OBJECT_CLASS(gwy_ruler_parent_class)->finalize(object);
 }
 
@@ -189,9 +188,8 @@ gwy_ruler_get_preferred_width(GtkWidget *widget,
         *minimum = *natural = 1;
         return;
     }
-
-    // TODO
-    *minimum = *natural = 24;
+    Ruler *priv = GWY_RULER(axis)->priv;
+    *minimum = *natural = priv->breadth_request;
 }
 
 static void
@@ -206,9 +204,8 @@ gwy_ruler_get_preferred_height(GtkWidget *widget,
         *minimum = *natural = 1;
         return;
     }
-
-    // TODO
-    *minimum = *natural = 24;
+    Ruler *priv = GWY_RULER(axis)->priv;
+    *minimum = *natural = priv->breadth_request;
 }
 
 static void
