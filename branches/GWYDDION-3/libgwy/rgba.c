@@ -276,8 +276,8 @@ gwy_rgba_preset_color(GwyRGBA *rgba,
  * The index can be arbitrarily large, however, colours start to repeat after
  * gwy_rgba_n_preset_colors().
  *
- * @rgba: (transfer none):
- *        Preset RGBA colour corresponding to the index @i.
+ * Returns: (transfer none):
+ *          Preset RGBA colour corresponding to the index @i.
  **/
 const GwyRGBA*
 gwy_rgba_get_preset_color(guint i)
