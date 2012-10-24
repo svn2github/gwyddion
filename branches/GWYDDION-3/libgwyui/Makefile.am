@@ -21,6 +21,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 public_headers = \
 	$(srcdir)/axis.h \
 	$(srcdir)/cairo-utils.h \
+	$(srcdir)/color-axis.h \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/ruler.h \
@@ -53,6 +54,7 @@ noinst_HEADERS = $(private_headers)
 libgwyui3_la_SOURCES = \
 	axis.c \
 	cairo-utils.c \
+	color-axis.c \
 	field-render.c \
 	raster-view.c \
 	ruler.c \

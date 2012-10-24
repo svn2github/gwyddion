@@ -22,6 +22,7 @@
 
 #include <libgwyui/axis.h>
 #include <libgwyui/cairo-utils.h>
+#include <libgwyui/color-axis.h>
 #include <libgwyui/field-render.h>
 #include <libgwyui/raster-view.h>
 #include <libgwyui/ruler.h>
