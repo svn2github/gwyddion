@@ -76,22 +76,22 @@ GwyAxisTick* gwy_axis_tick_copy    (const GwyAxisTick *tick) G_GNUC_MALLOC;
 void         gwy_axis_tick_free    (GwyAxisTick *tick);
 
 GType              gwy_axis_get_type           (void)                     G_GNUC_CONST;
-void               gwy_axis_get_range          (const GwyAxis *axis,
-                                                GwyRange *range);
 void               gwy_axis_request_range      (GwyAxis *axis,
                                                 const GwyRange *request);
 void               gwy_axis_get_requested_range(GwyAxis *axis,
                                                 GwyRange *range);
+void               gwy_axis_get_range          (const GwyAxis *axis,
+                                                GwyRange *range);
 GwyUnit*           gwy_axis_get_unit           (const GwyAxis *axis)      G_GNUC_PURE;
-gboolean           gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_show_labels    (GwyAxis *axis,
                                                 gboolean showlabels);
-GtkPositionType    gwy_axis_get_edge           (const GwyAxis *axis)      G_GNUC_PURE;
+gboolean           gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_edge           (GwyAxis *axis,
                                                 GtkPositionType edge);
-gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC_PURE;
+GtkPositionType    gwy_axis_get_edge           (const GwyAxis *axis)      G_GNUC_PURE;
 void               gwy_axis_set_snap_to_ticks  (GwyAxis *axis,
                                                 gboolean snaptoticks);
+gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC_PURE;
 PangoLayout*       gwy_axis_get_layout         (const GwyAxis *axis)      G_GNUC_PURE;
 const GwyAxisTick* gwy_axis_ticks              (GwyAxis *axis,
                                                 guint *nticks);
