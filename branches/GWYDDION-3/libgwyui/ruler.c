@@ -320,7 +320,7 @@ gwy_ruler_new(void)
 
 /**
  * gwy_ruler_set_show_mark:
- * @rurler: A ruler.
+ * @ruler: A ruler.
  * @showmark: %TRUE to show a mark at GwyRuler::mark position, %FALSE to
  *            disable it.
  *
@@ -339,7 +339,7 @@ gwy_ruler_set_show_mark(GwyRuler *ruler,
 
 /**
  * gwy_ruler_get_show_mark:
- * @rurler: A ruler.
+ * @ruler: A ruler.
  *
  * Gets whether a mark should be drawn on a ruler.
  *
@@ -354,7 +354,7 @@ gwy_ruler_get_show_mark(const GwyRuler *ruler)
 
 /**
  * gwy_ruler_set_mark:
- * @rurler: A ruler.
+ * @ruler: A ruler.
  * @mark: Mark position, in real #GwyAxis coordinates.
  *
  * Sets the position of the mark drawn on a ruler.
@@ -372,7 +372,7 @@ gwy_ruler_set_mark(GwyRuler *ruler,
 
 /**
  * gwy_ruler_get_mark:
- * @rurler: A ruler.
+ * @ruler: A ruler.
  *
  * Gets the position of the mark drawn on a ruler.
  *
