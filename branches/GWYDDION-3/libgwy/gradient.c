@@ -560,7 +560,7 @@ gwy_gradient_sample_to_pixbuf(GwyGradient *gradient,
  * Returns: The number of points in @gradient.
  **/
 guint
-gwy_gradient_n_points(GwyGradient *gradient)
+gwy_gradient_n_points(const GwyGradient *gradient)
 {
     g_return_val_if_fail(GWY_IS_GRADIENT(gradient), 0);
     return gradient->priv->points->len;
@@ -576,7 +576,7 @@ gwy_gradient_n_points(GwyGradient *gradient)
  * Returns: Colour point at @n.
  **/
 GwyGradientPoint
-gwy_gradient_get(GwyGradient *gradient,
+gwy_gradient_get(const GwyGradient *gradient,
                  guint n)
 {
     g_return_val_if_fail(GWY_IS_GRADIENT(gradient), null_point);
@@ -786,7 +786,7 @@ gwy_gradient_delete(GwyGradient *gradient,
  *          owned by @gradient and must not be modified or freed.
  **/
 const GwyGradientPoint*
-gwy_gradient_get_data(GwyGradient *gradient,
+gwy_gradient_get_data(const GwyGradient *gradient,
                       guint *npoints)
 {
     g_return_val_if_fail(GWY_IS_GRADIENT(gradient), NULL);

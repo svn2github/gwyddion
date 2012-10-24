@@ -69,8 +69,8 @@ GwyGradient*            gwy_gradient_new             (void)                     
 void                    gwy_gradient_color           (GwyGradient *gradient,
                                                       gdouble x,
                                                       GwyRGBA *color);
-guint                   gwy_gradient_n_points        (GwyGradient *gradient)           G_GNUC_PURE;
-GwyGradientPoint        gwy_gradient_get             (GwyGradient *gradient,
+guint                   gwy_gradient_n_points        (const GwyGradient *gradient)     G_GNUC_PURE;
+GwyGradientPoint        gwy_gradient_get             (const GwyGradient *gradient,
                                                       guint n)                         G_GNUC_PURE;
 void                    gwy_gradient_set             (GwyGradient *gradient,
                                                       guint n,
@@ -85,7 +85,7 @@ guint                   gwy_gradient_insert_sorted   (GwyGradient *gradient,
                                                       const GwyGradientPoint *point);
 void                    gwy_gradient_delete          (GwyGradient *gradient,
                                                       guint n);
-const GwyGradientPoint* gwy_gradient_get_data        (GwyGradient *gradient,
+const GwyGradientPoint* gwy_gradient_get_data        (const GwyGradient *gradient,
                                                       guint *npoints);
 void                    gwy_gradient_set_data        (GwyGradient *gradient,
                                                       guint npoints,
@@ -94,6 +94,7 @@ void                    gwy_gradient_set_from_samples(GwyGradient *gradient,
                                                       guint nsamples,
                                                       const guchar *samples,
                                                       gdouble threshold);
+
 #define gwy_gradients() \
     (gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT))
 #define gwy_gradients_get(name) \
