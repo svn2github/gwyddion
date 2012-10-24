@@ -974,12 +974,12 @@ calculate_ticks(GwyAxis *axis)
                                (priv->unit, GWY_VALUE_FORMAT_PANGO,
                                 fmax(fabs(request.from), fabs(request.to)),
                                 fabs(request.to - request.from)/12.0);
+    ensure_layout_and_ticks(axis);
 
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
     gdouble majdist = estimate_major_distance(axis, &request);
 
-    ensure_layout_and_ticks(axis);
     g_array_set_size(priv->ticks, 0);
 
     if (majdist >= length) {
