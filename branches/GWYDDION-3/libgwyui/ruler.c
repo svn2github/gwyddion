@@ -24,7 +24,7 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/ruler.h"
 
-#define IGNORE_ME N_("A translatable string.")
+#define TESTMARKUP "(q<sub>2</sub><sup>10</sup>)"
 
 enum {
     PROP_0,
@@ -36,8 +36,6 @@ enum {
 struct _GwyRulerPrivate {
     gdouble mark;
     gboolean show_mark;
-
-    guint breadth_request;
 };
 
 typedef struct _GwyRulerPrivate Ruler;
@@ -70,6 +68,7 @@ static void     draw_mark                     (GwyRuler *ruler,
                                                gdouble length,
                                                gdouble breadth);
 static void     invalidate_mark_area          (GwyRuler *ruler);
+static gint     preferred_breadth             (GtkWidget *widget);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -114,8 +113,6 @@ static void
 gwy_ruler_init(GwyRuler *ruler)
 {
     ruler->priv = G_TYPE_INSTANCE_GET_PRIVATE(ruler, GWY_TYPE_RULER, Ruler);
-    Ruler *priv = ruler->priv;
-    priv->breadth_request = 24;
 }
 
 static void
@@ -184,12 +181,10 @@ gwy_ruler_get_preferred_width(GtkWidget *widget,
     GwyAxis *axis = GWY_AXIS(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
 
-    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM) {
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
         *minimum = *natural = 1;
-        return;
-    }
-    Ruler *priv = GWY_RULER(axis)->priv;
-    *minimum = *natural = priv->breadth_request;
+    else
+        *minimum = *natural = preferred_breadth(widget);
 }
 
 static void
@@ -200,12 +195,10 @@ gwy_ruler_get_preferred_height(GtkWidget *widget,
     GwyAxis *axis = GWY_AXIS(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
 
-    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
         *minimum = *natural = 1;
-        return;
-    }
-    Ruler *priv = GWY_RULER(axis)->priv;
-    *minimum = *natural = priv->breadth_request;
+    else
+        *minimum = *natural = preferred_breadth(widget);
 }
 
 static void
@@ -358,7 +351,7 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
           gdouble length, gdouble breadth)
 {
     Ruler *priv = ruler->priv;
-    if (!priv->show_mark && !isfinite(priv->mark))
+    if (!priv->show_mark || !isfinite(priv->mark))
         return;
 
     GtkPositionType edge = gwy_axis_get_edge(GWY_AXIS(ruler));
@@ -396,6 +389,17 @@ invalidate_mark_area(GwyRuler *ruler)
 {
     // TODO: Invalidate only the region around the mark.
     gtk_widget_queue_draw(GTK_WIDGET(ruler));
+}
+
+static gint
+preferred_breadth(GtkWidget *widget)
+{
+    PangoLayout *layout = gtk_widget_create_pango_layout(widget, TESTMARKUP);
+    gint height;
+    pango_layout_get_size(layout, NULL, &height);
+    height = 7*height/(5*PANGO_SCALE);
+    g_object_unref(layout);
+    return MAX(height, 4);
 }
 
 /**
