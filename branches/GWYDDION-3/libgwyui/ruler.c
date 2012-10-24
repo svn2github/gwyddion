@@ -242,16 +242,16 @@ gwy_ruler_draw(GtkWidget *widget,
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gdouble length = (vertical ? height : width),
+            breadth = (vertical ? width : height);
     cairo_matrix_t matrix;
-    gdouble length = width, breadth = height;
-
-    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
-        GWY_SWAP(gdouble, length, breadth);
-
     set_up_transform(edge, &matrix, width, height);
 
+    GdkRGBA rgba;
     gtk_render_background(context, cr, 0, 0, width, height);
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
+    gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_set_line_width(cr, 0.8);
 
     GwyRuler *ruler = GWY_RULER(widget);
@@ -443,9 +443,14 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
     else {
         g_assert_not_reached();
     }
+
+    GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(ruler));
+    GdkRGBA rgba;
+    // FIXME: Theming.
     cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
     cairo_fill_preserve(cr);
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
+    gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_stroke(cr);
     cairo_restore(cr);
 }
