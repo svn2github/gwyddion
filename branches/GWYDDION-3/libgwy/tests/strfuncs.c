@@ -260,7 +260,7 @@ randomize_string(GString *str,
             c = x & (asciionly ? 0x7f : 0xff);
             x >>= 8;
             remaining--;
-        } while (c);
+        } while (!c);
         str->str[i] = c;
     }
 }
