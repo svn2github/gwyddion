@@ -199,4 +199,42 @@ test_expr_garbage(void)
     g_object_unref(expr);
 }
 
+void
+test_expr_constant_errors(void)
+{
+    GwyExpr *expr = gwy_expr_new();
+    GError *error = NULL;
+    gboolean ok;
+
+    g_assert(!gwy_expr_undefine_constant(expr, "justtesting"));
+
+    ok = gwy_expr_define_constant(expr, "3", G_PI, &error);
+    g_assert(!ok);
+    g_assert_error(error, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME);
+    g_clear_error(&error);
+
+    ok = gwy_expr_define_constant(expr, "justtesting$", G_PI, &error);
+    g_assert(!ok);
+    g_assert_error(error, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME);
+    g_clear_error(&error);
+
+    ok = gwy_expr_define_constant(expr, "justtesting", G_PI, &error);
+    g_assert(ok);
+    g_assert_no_error(error);
+
+    ok = gwy_expr_define_constant(expr, "justtesting", 2.0, &error);
+    g_assert(ok);
+    g_assert_no_error(error);
+
+    ok = gwy_expr_define_constant(expr, "sqrt", 2.0, &error);
+    g_assert(!ok);
+    g_assert_error(error, GWY_EXPR_ERROR, GWY_EXPR_ERROR_NAME_CLASH);
+    g_clear_error(&error);
+
+    g_assert(!gwy_expr_undefine_constant(expr, "justtesting2"));
+    g_assert(gwy_expr_undefine_constant(expr, "justtesting"));
+
+    g_object_unref(expr);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

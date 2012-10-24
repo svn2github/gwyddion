@@ -1652,7 +1652,8 @@ gwy_expr_vector_execute(GwyExpr *expr,
 /**
  * gwy_expr_define_constant:
  * @expr: An expression evaluator.
- * @name: Name of constant to define.
+ * @name: Name of constant to define.  Any already existing constant of the
+ *        same name is replaced.
  * @value: Constant numeric value.
  * @err: Location to store error to, or %NULL.
  *       Only %GWY_EXPR_ERROR_IDENTIFIER_NAME error from #GwyExprError domain

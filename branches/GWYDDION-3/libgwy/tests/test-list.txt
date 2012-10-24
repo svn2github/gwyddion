@@ -38,6 +38,7 @@ object-utils/set-user-func
 expr/evaluate
 expr/vector
 expr/garbage
+expr/constant-errors
 rand/reproducibility/seed
 rand/reproducibility/static
 rand/difference/seed
