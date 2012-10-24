@@ -422,11 +422,9 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
     if (!priv->show_mark || !isfinite(priv->mark))
         return;
 
-    GtkPositionType edge = gwy_axis_get_edge(GWY_AXIS(ruler));
-    GwyRange range;
-    gwy_axis_get_range(GWY_AXIS(ruler), &range);
-
-    gdouble x = (priv->mark - range.from)/(range.to - range.from)*length,
+    GwyAxis *axis = GWY_AXIS(ruler);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gdouble x = gwy_axis_value_to_position(axis, priv->mark),
             hs = 0.2*breadth, y = hs;
     if (x < -hs || x > length + hs)
         return;

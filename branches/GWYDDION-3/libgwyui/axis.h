@@ -95,6 +95,10 @@ gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC
 PangoLayout*       gwy_axis_get_pango_layout   (GwyAxis *axis);
 const GwyAxisTick* gwy_axis_ticks              (GwyAxis *axis,
                                                 guint *nticks);
+gdouble            gwy_axis_position_to_value  (GwyAxis *axis,
+                                                gdouble position)         G_GNUC_PURE;
+gdouble            gwy_axis_value_to_position  (GwyAxis *axis,
+                                                gdouble value)            G_GNUC_PURE;
 
 G_END_DECLS
 

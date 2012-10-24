@@ -722,6 +722,44 @@ gwy_axis_ticks(GwyAxis *axis,
     return (const GwyAxisTick*)priv->ticks->data;
 }
 
+/**
+ * gwy_axis_position_to_value:
+ * @axis: An axis.
+ * @position: Pixel (widget) position on the axis.
+ *
+ * Converts pixel (widget) position on an axis to real value.
+ *
+ * Returns: Real value corresponding to @position.
+ **/
+gdouble
+gwy_axis_position_to_value(GwyAxis *axis,
+                           gdouble position)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NAN);
+    Axis *priv = axis->priv;
+    gdouble from = priv->range.from, to = priv->range.to, length = priv->length;
+    return position/length*(to - from) + from;
+}
+
+/**
+ * gwy_axis_value_to_position:
+ * @axis: An axis.
+ * @value: Real value on the axis.
+ *
+ * Converts real value on an axis to pixel (widget) position.
+ *
+ * Returns: Pixel position corresponding to @value.
+ **/
+gdouble
+gwy_axis_value_to_position(GwyAxis *axis,
+                           gdouble value)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NAN);
+    Axis *priv = axis->priv;
+    gdouble from = priv->range.from, to = priv->range.to, length = priv->length;
+    return (value - from)/(to - from)*length;
+}
+
 static gboolean
 set_edge(GwyAxis *axis,
          GtkPositionType edge)
@@ -940,11 +978,6 @@ calculate_ticks(GwyAxis *axis)
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
     gdouble majdist = estimate_major_distance(axis, &request);
-    g_printerr("request [%.13g,%.13g]\n", priv->request.from, priv->request.to);
-    g_printerr("fixed to [%.13g,%.13g]\n", request.from, request.to);
-    g_printerr("descending: %d\n", descending);
-    g_printerr("pixel length: %u\n", length);
-    g_printerr("majdist estimate: %g\n", majdist);
 
     ensure_layout_and_ticks(axis);
     g_array_set_size(priv->ticks, 0);
@@ -965,45 +998,33 @@ calculate_ticks(GwyAxis *axis)
     // Silence GCC.  And make any uninitialised use pretty obvious.
     gdouble base = NAN, step = NAN, bs = NAN;
     do {
-        g_printerr("ITERATION with state %u\n", state);
         priv->range = request;
         if (state != LESS_TICKS) {
             majdist = estimate_major_distance(axis, &request);
-            // TODO: Update majdist here?  Or at the end of the cycle?
-            // Take step as positive here to simplify the conditionals.
-            // Use @descending where direction is necessary.
             step = fabs(priv->range.to - priv->range.from)/(length/majdist);
             steptype = choose_step_type(&step, &base);
         }
         step = step_sizes[steptype];
-        g_printerr("base=%g, step=%g (steptype %u)\n", base, step, steptype);
-
         bs = descending ? -base*step : base*step;
-        if (priv->snap_to_ticks) {
+        if (priv->snap_to_ticks)
             snap_range_to_ticks(&priv->range, bs);
-            g_printerr("snapped to [%.13g,%.13g]\n", request.from, request.to);
-        }
 
         guint precision = gwy_value_format_get_precision(priv->vf);
         if (precision_is_sufficient(priv->vf, &priv->range, bs, priv->str)) {
-            g_printerr("precision %u is sufficient\n", precision);
             if (state == FIRST_TRY && precision > 0)
                 gwy_value_format_set_precision(priv->vf, precision-1);
             else
                 state = FINALLY_OK;
         }
         else {
-            g_printerr("precision %u is insufficient\n", precision);
             if (state == FIRST_TRY) {
                 state = ADD_DIGITS;
                 gwy_value_format_set_precision(priv->vf, precision+1);
-                g_printerr("increasing precision to %u\n", precision+1);
             }
             else {
                 state = LESS_TICKS;
                 base *= 10;
                 steptype = GWY_AXIS_STEP_1;
-                g_printerr("removing ticks\n");
             }
         }
     } while (state != FINALLY_OK);
@@ -1047,8 +1068,6 @@ fill_tick_arrays(GwyAxis *axis, guint level,
     GString *str = priv->str;
     guint length = priv->length;
     enum { FIRST, LAST, AT_ZERO, NEVER } units_pos;
-
-    g_printerr("LEVEL %u, bs=%g, largerbs=%g\n", level, bs, largerbs);
 
     // FIXME: This must be controlled by the class also.  Namely LAST is
     // unused here and NEVER may mean units are simply displayed elsewhere.
