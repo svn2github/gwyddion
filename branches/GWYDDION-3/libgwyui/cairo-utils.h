@@ -21,12 +21,17 @@
 #define __LIBGWYUI_UTILS_H__
 
 #include <libgwy/rgba.h>
+#include <libgwy/gradient.h>
 #include <cairo/cairo.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-void gwy_cairo_set_source_rgba(cairo_t *cr,
-                               const GwyRGBA *rgba);
+void             gwy_cairo_set_source_rgba        (cairo_t *cr,
+                                                   const GwyRGBA *rgba);
+cairo_pattern_t* gwy_cairo_pattern_create_gradient(const GwyGradient *gradient,
+                                                   GtkPositionType towards)     G_GNUC_MALLOC;
+
 void gwy_cairo_ellipse        (cairo_t *cr,
                                gdouble x,
                                gdouble y,

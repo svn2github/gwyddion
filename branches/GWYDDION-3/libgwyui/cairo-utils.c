@@ -49,6 +49,62 @@ gwy_cairo_set_source_rgba(cairo_t *cr,
 }
 
 /**
+ * gwy_cairo_pattern_create_gradient:
+ * @gradient: A false colour gradient.
+ * @towards: Gradient direction in the plane.
+ *
+ * Creates a linear Cairo pattern corresponding to a false colour gradient.
+ *
+ * The pattern is always along the interval [0,1] in either horizontal or
+ * vertical direction and either towards 1 or towards 0, depending on the value
+ * of @towards.
+ *
+ * Returns: (transfer full):
+ *          A newly created linear Cairo pattern.
+ **/
+cairo_pattern_t*
+gwy_cairo_pattern_create_gradient(const GwyGradient *gradient,
+                                  GtkPositionType towards)
+{
+    g_return_val_if_fail(GWY_IS_GRADIENT(gradient), NULL);
+
+    gdouble xf, yf, xt, yt;
+    if (towards == GTK_POS_RIGHT) {
+        xf = yf = yt = 0.0;
+        xt = 1.0;
+    }
+    else if (towards == GTK_POS_LEFT) {
+        xt = yf = yt = 0.0;
+        xf = 1.0;
+    }
+    else if (towards == GTK_POS_TOP) {
+        yf = xf = xt = 0.0;
+        yt = 1.0;
+    }
+    else if (towards == GTK_POS_BOTTOM) {
+        yt = xf = xt = 0.0;
+        yf = 1.0;
+    }
+    else {
+        g_return_val_if_reached(NULL);
+    }
+
+    cairo_pattern_t *pattern = cairo_pattern_create_linear(xf, yf, xt, yt);
+    guint npoints;
+    const GwyGradientPoint* points = gwy_gradient_get_data(gradient, &npoints);
+    for (guint i = 0; i < npoints; i++) {
+        const GwyGradientPoint *pt = points + i;
+        cairo_pattern_add_color_stop_rgba(pattern, pt->x,
+                                          pt->color.r,
+                                          pt->color.g,
+                                          pt->color.b,
+                                          pt->color.a);
+    }
+
+    return pattern;
+}
+
+/**
  * gwy_cairo_ellipse:
  * @cr: A Cairo drawing context.
  * @x: Centre x-coordinate.
