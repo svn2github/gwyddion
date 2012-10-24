@@ -50,8 +50,14 @@ struct _GwyRulerClass {
     GwyAxisClass axis_class;
 };
 
-GType      gwy_ruler_get_type(void) G_GNUC_CONST;
-GtkWidget* gwy_ruler_new     (void) G_GNUC_MALLOC;
+GType      gwy_ruler_get_type     (void)                  G_GNUC_CONST;
+GtkWidget* gwy_ruler_new          (void)                  G_GNUC_MALLOC;
+void       gwy_ruler_set_show_mark(GwyRuler *ruler,
+                                   gboolean showmark);
+gboolean   gwy_ruler_get_show_mark(const GwyRuler *ruler) G_GNUC_PURE;
+void       gwy_ruler_set_mark     (GwyRuler *ruler,
+                                   gdouble mark);
+gdouble    gwy_ruler_get_mark     (const GwyRuler *ruler) G_GNUC_PURE;
 
 G_END_DECLS
 
