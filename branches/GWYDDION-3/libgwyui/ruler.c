@@ -273,7 +273,7 @@ gwy_ruler_draw(GtkWidget *widget,
     }
     cairo_stroke(cr);
 
-    PangoLayout *layout = gwy_axis_get_layout(axis);
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
     gdouble a = max_ascent/(gdouble)PANGO_SCALE,
             d = max_descent/(gdouble)PANGO_SCALE;
     for (guint i = 0; i < nticks; i++) {
@@ -468,7 +468,7 @@ invalidate_mark_area(GwyRuler *ruler)
 static gint
 preferred_breadth(GtkWidget *widget)
 {
-    PangoLayout *layout = gwy_axis_get_layout(GWY_AXIS(widget));
+    PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
     g_return_val_if_fail(layout, 20);
 
     gint breadth;

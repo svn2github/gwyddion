@@ -656,7 +656,7 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
 }
 
 /**
- * gwy_axis_get_layout:
+ * gwy_axis_get_pango_layout:
  * @axis: An axis.
  *
  * Gets the Pango layout used for laying out tick of an axis.
@@ -672,7 +672,7 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
  *          returned if @axis is not realized.
  **/
 PangoLayout*
-gwy_axis_get_layout(GwyAxis *axis)
+gwy_axis_get_pango_layout(GwyAxis *axis)
 {
     g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
     Axis *priv = axis->priv;
