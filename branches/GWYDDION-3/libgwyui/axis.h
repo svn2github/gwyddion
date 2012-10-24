@@ -92,7 +92,7 @@ GtkPositionType    gwy_axis_get_edge           (const GwyAxis *axis)      G_GNUC
 void               gwy_axis_set_snap_to_ticks  (GwyAxis *axis,
                                                 gboolean snaptoticks);
 gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC_PURE;
-PangoLayout*       gwy_axis_get_layout         (const GwyAxis *axis)      G_GNUC_PURE;
+PangoLayout*       gwy_axis_get_layout         (GwyAxis *axis);
 const GwyAxisTick* gwy_axis_ticks              (GwyAxis *axis,
                                                 guint *nticks);
 

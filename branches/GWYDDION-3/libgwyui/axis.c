@@ -150,6 +150,9 @@ static void            clear_tick                (gpointer item);
 static gdouble         estimate_major_distance   (GwyAxis *axis,
                                                   const GwyRange *request);
 static void            fix_request               (GwyRange *request);
+static void            format_value_label        (GwyAxis *axis,
+                                                  gdouble value,
+                                                  gboolean with_units);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -430,7 +433,6 @@ gwy_axis_realize(GtkWidget *widget)
     GdkWindow *window = gtk_widget_get_parent_window(widget);
     gtk_widget_set_window(widget, window);
     g_object_ref(window);
-    ensure_layout_and_ticks(GWY_AXIS(widget));
 }
 
 static void
@@ -670,10 +672,13 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
  *          returned if @axis is not realized.
  **/
 PangoLayout*
-gwy_axis_get_layout(const GwyAxis *axis)
+gwy_axis_get_layout(GwyAxis *axis)
 {
     g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
-    return GWY_AXIS(axis)->priv->layout;
+    Axis *priv = axis->priv;
+    if (!priv->layout && gtk_widget_has_screen(GTK_WIDGET(axis)))
+        ensure_layout_and_ticks(axis);
+    return priv->layout;
 }
 
 /**
@@ -1039,7 +1044,7 @@ fill_tick_arrays(GwyAxis *axis, guint level,
                                          bs);
     guint n = (guint)floor((to - start)/bs + EPS);
     GArray *ticks = priv->ticks;
-    GwyValueFormat *vf = priv->vf;
+    GString *str = priv->str;
     guint length = priv->length;
     enum { FIRST, LAST, AT_ZERO, NEVER } units_pos;
 
@@ -1063,15 +1068,10 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
-            const gchar *s;
-            if (units_pos == FIRST)
-                s = gwy_value_format_print(vf, tick.value);
-            else
-                s = gwy_value_format_print_number(vf, tick.value);
-
-            pango_layout_set_markup(priv->layout, s, -1);
+            format_value_label(axis, tick.value, units_pos == FIRST);
+            pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(s);
+            tick.label = g_strdup(str->str);
         }
         g_array_append_val(ticks, tick);
     }
@@ -1101,19 +1101,16 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 
         tick.position = (tick.value - from)/(to - from)*length;
         if (priv->show_labels && level == GWY_AXIS_TICK_MAJOR) {
-            const gchar *s;
-            if (units_pos == AT_ZERO && tick.value == 0.0)
-                s = gwy_value_format_print(vf, tick.value);
-            else if (units_pos == FIRST && ticks->len == 0)
-                s = gwy_value_format_print(vf, tick.value);
-            else if (units_pos == LAST && !priv->ticks_at_edges && i == n)
-                s = gwy_value_format_print(vf, tick.value);
-            else
-                s = gwy_value_format_print_number(vf, tick.value);
-
-            pango_layout_set_markup(priv->layout, s, -1);
+            format_value_label(axis, tick.value,
+                               (units_pos == AT_ZERO && tick.value == 0.0)
+                               || (units_pos == FIRST
+                                   && ticks->len == 0)
+                               || (units_pos == LAST
+                                   && !priv->ticks_at_edges
+                                   && i == n));
+            pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(s);
+            tick.label = g_strdup(str->str);
         }
         g_array_append_val(ticks, tick);
     }
@@ -1127,15 +1124,10 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
-            const gchar *s;
-            if (units_pos == LAST)
-                s = gwy_value_format_print(vf, tick.value);
-            else
-                s = gwy_value_format_print_number(vf, tick.value);
-
-            pango_layout_set_markup(priv->layout, s, -1);
+            format_value_label(axis, tick.value, units_pos == LAST);
+            pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(s);
+            tick.label = g_strdup(str->str);
         }
         g_array_append_val(ticks, tick);
     }
@@ -1265,13 +1257,6 @@ ensure_layout_and_ticks(GwyAxis *axis)
     if (!priv->layout) {
         priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(axis), NULL);
         pango_layout_set_alignment(priv->layout, PANGO_ALIGN_LEFT);
-
-        PangoAttrList *attrlist = pango_attr_list_new();
-        PangoAttribute *attr = pango_attr_scale_new(PANGO_SCALE_SMALL);
-        pango_attr_list_insert(attrlist, attr);
-        pango_layout_set_attributes(priv->layout, attrlist);
-        pango_attr_list_unref(attrlist);
-
         rotate_pango_layout(axis);
     }
 
@@ -1351,22 +1336,24 @@ estimate_major_distance(GwyAxis *axis,
                         const GwyRange *request)
 {
     Axis *priv = axis->priv;
+    GString *str = priv->str;
 
     if (!priv->show_labels)
         return fmin(MIN_MAJOR_DIST, priv->length);
 
-    const gchar *label;
     // FIXME: With perpendicular labels the label + units may be actually
     // two-line.  The label measurement probably needs to involve subclasses.
-    // TODO: Must measure at least values at both ends.
-    if (priv->show_units)
-        label = gwy_value_format_print(priv->vf, request->to);
-    else
-        label = gwy_value_format_print_number(priv->vf, request->to);
 
-    gint width, height;
-    pango_layout_set_markup(priv->layout, label, -1);
+    gint width, height, w, h;
+    format_value_label(axis, request->from, priv->show_units);
+    pango_layout_set_markup(priv->layout, str->str, str->len);
     pango_layout_get_size(priv->layout, &width, &height);
+
+    format_value_label(axis, request->to, priv->show_units);
+    pango_layout_set_markup(priv->layout, str->str, str->len);
+    pango_layout_get_size(priv->layout, &w, &h);
+    width = MAX(width, w);
+    height = MAX(height, h);
 
     gdouble size;
     if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
@@ -1376,6 +1363,21 @@ estimate_major_distance(GwyAxis *axis,
                 ? height : width);
 
     return fmax(size/PANGO_SCALE + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
+}
+
+static void
+format_value_label(GwyAxis *axis,
+                   gdouble value,
+                   gboolean with_units)
+{
+    Axis *priv = axis->priv;
+    GString *str = priv->str;
+    g_string_assign(str, "<small>");
+    if (with_units)
+        g_string_append(str, gwy_value_format_print(priv->vf, value));
+    else
+        g_string_append(str, gwy_value_format_print_number(priv->vf, value));
+    g_string_append(str, "</small>");
 }
 
 /**

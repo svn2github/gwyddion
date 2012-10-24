@@ -24,7 +24,7 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/ruler.h"
 
-#define TESTMARKUP "(q<sub>2</sub><sup>10</sup>)"
+#define TESTMARKUP "<small>(q₁¹)</small>"
 
 enum {
     PROP_0,
@@ -468,12 +468,14 @@ invalidate_mark_area(GwyRuler *ruler)
 static gint
 preferred_breadth(GtkWidget *widget)
 {
-    PangoLayout *layout = gtk_widget_create_pango_layout(widget, TESTMARKUP);
-    gint height;
-    pango_layout_get_size(layout, NULL, &height);
-    height = 7*height/(5*PANGO_SCALE);
-    g_object_unref(layout);
-    return MAX(height, 4);
+    PangoLayout *layout = gwy_axis_get_layout(GWY_AXIS(widget));
+    g_return_val_if_fail(layout, 20);
+
+    gint breadth;
+    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
+    pango_layout_get_size(layout, NULL, &breadth);
+    breadth = 8*breadth/(5*PANGO_SCALE);
+    return MAX(breadth, 4);
 }
 
 /**
