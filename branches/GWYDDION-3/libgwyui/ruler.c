@@ -35,6 +35,7 @@ enum {
 
 struct _GwyRulerPrivate {
     gdouble mark;
+    gdouble mark_pos;
     gboolean show_mark;
 };
 
@@ -317,6 +318,73 @@ gwy_ruler_new(void)
     return g_object_newv(GWY_TYPE_RULER, 0, NULL);
 }
 
+/**
+ * gwy_ruler_set_show_mark:
+ * @rurler: A ruler.
+ * @showmark: %TRUE to show a mark at GwyRuler::mark position, %FALSE to
+ *            disable it.
+ *
+ * Sets whether a mark should be drawn on a ruler.
+ **/
+void
+gwy_ruler_set_show_mark(GwyRuler *ruler,
+                        gboolean showmark)
+{
+    g_return_if_fail(GWY_IS_RULER(ruler));
+    if (!set_show_mark(ruler, showmark))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(ruler), properties[PROP_SHOW_MARK]);
+}
+
+/**
+ * gwy_ruler_get_show_mark:
+ * @rurler: A ruler.
+ *
+ * Gets whether a mark should be drawn on a ruler.
+ *
+ * Returns: %TRUE if a mark is drawn, %FALSE if it is not.
+ **/
+gboolean
+gwy_ruler_get_show_mark(const GwyRuler *ruler)
+{
+    g_return_val_if_fail(GWY_IS_RULER(ruler), FALSE);
+    return ruler->priv->show_mark;
+}
+
+/**
+ * gwy_ruler_set_mark:
+ * @rurler: A ruler.
+ * @mark: Mark position, in real #GwyAxis coordinates.
+ *
+ * Sets the position of the mark drawn on a ruler.
+ **/
+void
+gwy_ruler_set_mark(GwyRuler *ruler,
+                   gdouble mark)
+{
+    g_return_if_fail(GWY_IS_RULER(ruler));
+    if (!set_mark(ruler, mark))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(ruler), properties[PROP_MARK]);
+}
+
+/**
+ * gwy_ruler_get_mark:
+ * @rurler: A ruler.
+ *
+ * Gets the position of the mark drawn on a ruler.
+ *
+ * Returns: The mark position, in real #GwyAxis coordinates.
+ **/
+gdouble
+gwy_ruler_get_mark(const GwyRuler *ruler)
+{
+    g_return_val_if_fail(GWY_IS_RULER(ruler), NAN);
+    return ruler->priv->mark;
+}
+
 static gboolean
 set_show_mark(GwyRuler *ruler,
               gboolean setting)
@@ -387,8 +455,14 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
 static void
 invalidate_mark_area(GwyRuler *ruler)
 {
+    GtkWidget *widget = GTK_WIDGET(ruler);
+    //Ruler *priv = ruler->priv;
+
     // TODO: Invalidate only the region around the mark.
-    gtk_widget_queue_draw(GTK_WIDGET(ruler));
+    if (!gtk_widget_is_drawable(widget))
+        return;
+
+    gtk_widget_queue_draw(widget);
 }
 
 static gint
