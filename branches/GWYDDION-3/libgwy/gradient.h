@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -63,6 +63,12 @@ struct _GwyGradientClass {
         (GWY_GRADIENT(gwy_serializable_duplicate(GWY_SERIALIZABLE(gradient))))
 #define gwy_gradient_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+
+#define GWY_TYPE_GRADIENT_POINT (gwy_gradient_point_get_type())
+
+GType             gwy_gradient_point_get_type(void)                          G_GNUC_CONST;
+GwyGradientPoint* gwy_gradient_point_copy    (const GwyGradientPoint *point) G_GNUC_MALLOC;
+void              gwy_gradient_point_free    (GwyGradientPoint *point);
 
 GType                   gwy_gradient_get_type        (void)                            G_GNUC_CONST;
 GwyGradient*            gwy_gradient_new             (void)                            G_GNUC_MALLOC;

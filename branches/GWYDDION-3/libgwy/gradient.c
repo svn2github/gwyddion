@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -90,6 +90,38 @@ static GwySerializableInterface *parent_serializable = NULL;
 G_DEFINE_TYPE_EXTENDED
     (GwyGradient, gwy_gradient, GWY_TYPE_RESOURCE, 0,
      GWY_IMPLEMENT_SERIALIZABLE(gwy_gradient_serializable_init));
+
+G_DEFINE_BOXED_TYPE(GwyGradientPoint, gwy_gradient_point,
+                    gwy_gradient_point_copy, gwy_gradient_point_free);
+
+/**
+ * gwy_gradient_point_copy:
+ * @point: Gradient point.
+ *
+ * Copies a gradient point.
+ *
+ * Returns: A copy of @point. The result must be freed using
+ *          gwy_gradient_point_free(), not g_free().
+ **/
+GwyGradientPoint*
+gwy_gradient_point_copy(const GwyGradientPoint *point)
+{
+    g_return_val_if_fail(point, NULL);
+    GwyGradientPoint *copy = g_slice_copy(sizeof(GwyGradientPoint), point);
+    return copy;
+}
+
+/**
+ * gwy_gradient_point_free:
+ * @point: Gradient point.
+ *
+ * Frees gradient point created with gwy_gradient_point_copy().
+ **/
+void
+gwy_gradient_point_free(GwyGradientPoint *point)
+{
+    g_slice_free1(sizeof(GwyGradientPoint), point);
+}
 
 static void
 gwy_gradient_serializable_init(GwySerializableInterface *iface)

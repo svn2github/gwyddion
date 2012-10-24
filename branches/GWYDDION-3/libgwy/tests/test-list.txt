@@ -450,6 +450,7 @@ gradient/error/bad-line
 gradient/error/no-name
 gradient/error/bad-name
 gradient/error/bad-data
+gradient/point/boxed
 gl-material/load
 gl-material/save
 gl-material/serialize

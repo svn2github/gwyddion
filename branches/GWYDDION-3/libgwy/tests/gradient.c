@@ -443,4 +443,16 @@ test_gradient_error_bad_data(void)
          GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA);
 }
 
+void
+test_gradient_point_boxed(void)
+{
+    GwyGradientPoint pt = { 0.5, { 0.25, 0.0, 1.0, 0.75 } };
+    GwyGradientPoint *copy = g_boxed_copy(GWY_TYPE_GRADIENT_POINT, &pt);
+    g_assert_cmpfloat(copy->x, ==, pt.x);
+    g_assert_cmpfloat(copy->color.r, ==, pt.color.r);
+    g_assert_cmpfloat(copy->color.g, ==, pt.color.g);
+    g_assert_cmpfloat(copy->color.b, ==, pt.color.b);
+    g_boxed_free(GWY_TYPE_GRADIENT_POINT, copy);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
