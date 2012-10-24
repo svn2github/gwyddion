@@ -178,6 +178,14 @@
       <filename>pygtk-2.24.0.win32-py2.7.msi</filename>
       or possibly newer versions (if available).
     </para>
+    <para>
+      Success has also been reported with the all-in-one installer
+      <filename>pygtk-all-in-one-2.24.2.win32-py2.7.msi</filename>
+      that contains everything.  However, using the all-in-one installer means
+      entire Gtk+ will be installed twice (into different locations).  Which
+      bits of which installation will be used in pygwy is difficult to tell.
+      Hence this method is not recommended.
+    </para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
