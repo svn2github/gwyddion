@@ -610,7 +610,8 @@ gwy_raster_view_get_mask(const GwyRasterView *rasterview)
  * gwy_raster_view_set_gradient:
  * @rasterview: A raster view.
  * @gradient: (allow-none):
- *            A colour gradient.
+ *            A colour gradient.  %NULL means the default gradient
+ *            will be used.
  *
  * Sets the false colour gradient a raster view will use for visualisation.
  **/
@@ -631,8 +632,9 @@ gwy_raster_view_set_gradient(GwyRasterView *rasterview,
  *
  * Obtains the false colour gradient used by a raster view for visualisation.
  *
- * Returns: (transfer none):
- *          The colour gradient used by @rasterview.
+ * Returns: (allow-none) (transfer none):
+ *          The colour gradient used by @rasterview.  If no gradient was set
+ *          and the default one is used, function returns %NULL.
  **/
 GwyGradient*
 gwy_raster_view_get_gradient(const GwyRasterView *rasterview)

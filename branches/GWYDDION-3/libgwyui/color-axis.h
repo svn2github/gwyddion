@@ -50,8 +50,11 @@ struct _GwyColorAxisClass {
     GwyAxisClass axis_class;
 };
 
-GType      gwy_color_axis_get_type(void) G_GNUC_CONST;
-GtkWidget* gwy_color_axis_new     (void) G_GNUC_MALLOC;
+GType        gwy_color_axis_get_type    (void)                          G_GNUC_CONST;
+GtkWidget*   gwy_color_axis_new         (void)                          G_GNUC_MALLOC;
+void         gwy_color_axis_set_gradient(GwyColorAxis *coloraxis,
+                                         GwyGradient *gradient);
+GwyGradient* gwy_color_axis_get_gradient(const GwyColorAxis *coloraxis) G_GNUC_PURE;
 
 G_END_DECLS
 

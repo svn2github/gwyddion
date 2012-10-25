@@ -333,13 +333,14 @@ gwy_color_axis_new(void)
  * gwy_color_axis_set_gradient:
  * @coloraxis: A color axis.
  * @gradient: (allow-none):
- *            A colour gradient.
+ *            A colour gradient.  %NULL means the default gradient
+ *            will be used.
  *
  * Sets the false colour gradient a color axis will visualise.
  **/
 void
 gwy_color_axis_set_gradient(GwyColorAxis *coloraxis,
-                             GwyGradient *gradient)
+                            GwyGradient *gradient)
 {
     g_return_if_fail(GWY_IS_COLOR_AXIS(coloraxis));
     if (!set_gradient(coloraxis, gradient))
@@ -354,8 +355,9 @@ gwy_color_axis_set_gradient(GwyColorAxis *coloraxis,
  *
  * Obtains the false colour gradient that a color axis visualises.
  *
- * Returns: (transfer none):
- *          The colour gradient used by @coloraxis.
+ * Returns: (allow-none) (transfer none):
+ *          The colour gradient used by @coloraxis.  If no gradient was set and
+ *          the default one is used, function returns %NULL.
  **/
 GwyGradient*
 gwy_color_axis_get_gradient(const GwyColorAxis *coloraxis)
