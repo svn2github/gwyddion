@@ -78,12 +78,12 @@ gwy_cairo_pattern_create_gradient(const GwyGradient *gradient,
         xf = 1.0;
     }
     else if (towards == GTK_POS_TOP) {
-        yf = xf = xt = 0.0;
-        yt = 1.0;
-    }
-    else if (towards == GTK_POS_BOTTOM) {
         yt = xf = xt = 0.0;
         yf = 1.0;
+    }
+    else if (towards == GTK_POS_BOTTOM) {
+        yf = xf = xt = 0.0;
+        yt = 1.0;
     }
     else {
         g_return_val_if_reached(NULL);
