@@ -252,7 +252,7 @@ gwy_ruler_draw(GtkWidget *widget,
     gtk_render_background(context, cr, 0, 0, width, height);
     gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
     gdk_cairo_set_source_rgba(cr, &rgba);
-    cairo_set_line_width(cr, 0.8);
+    cairo_set_line_width(cr, 1.0);
 
     GwyRuler *ruler = GWY_RULER(widget);
     draw_mark(ruler, cr, &matrix, length, breadth);

@@ -1095,19 +1095,28 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         g_array_append_val(ticks, tick);
     }
 
-    // Normal ticks between
-    guint ifrom = 0, ito = n;
-    if (priv->max_tick_level < GWY_AXIS_TICK_MAJOR) {
-        ifrom = 1;
-        ito = 0;
-    }
-    else if (priv->ticks_at_edges && priv->snap_to_ticks) {
-        ifrom++;
-        if (ito)
-            ito--;
+    // Tick at the trailing edge.  Needs to be moved backward to fit within.
+    if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
+        GwyAxisTick tick = {
+            .value = to, .position = length,
+            .label = NULL, .extents = no_extents,
+            .level = GWY_AXIS_TICK_EDGE
+        };
+
+        if (priv->show_labels) {
+            format_value_label(axis, tick.value, units_pos == LAST);
+            pango_layout_set_markup(priv->layout, str->str, str->len);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(str->str);
+        }
+        g_array_append_val(ticks, tick);
     }
 
-    for (guint i = ifrom; i <= ito; i++) {
+    if (priv->max_tick_level < GWY_AXIS_TICK_MAJOR)
+        return;
+
+    // Normal ticks between
+    for (guint i = 0; i <= n; i++) {
         GwyAxisTick tick = {
             .value = if_zero_then_exactly(i*bs + start, bs), .position = 0.0,
             .label = NULL, .extents = no_extents, .level = level
@@ -1116,6 +1125,9 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         // Skip ticks coinciding with more major ones.
         if (largerbs
             && fabs(tick.value/largerbs - gwy_round(tick.value/largerbs)) < EPS)
+            continue;
+        if (priv->ticks_at_edges && (fabs((tick.value - from)/bs) < EPS
+                                     || fabs((tick.value - to)/bs) < EPS))
             continue;
 
         tick.position = (tick.value - from)/(to - from)*length;
@@ -1127,23 +1139,6 @@ fill_tick_arrays(GwyAxis *axis, guint level,
                                || (units_pos == LAST
                                    && !priv->ticks_at_edges
                                    && i == n));
-            pango_layout_set_markup(priv->layout, str->str, str->len);
-            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(str->str);
-        }
-        g_array_append_val(ticks, tick);
-    }
-
-    // Tick at the trailing edge.  Needs to be moved backward to fit within.
-    if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
-        GwyAxisTick tick = {
-            .value = from, .position = length,
-            .label = NULL, .extents = no_extents,
-            .level = GWY_AXIS_TICK_EDGE
-        };
-
-        if (priv->show_labels) {
-            format_value_label(axis, tick.value, units_pos == LAST);
             pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
