@@ -33,6 +33,8 @@
 #define MIN_TICK_DIST 5.0
 #define MIN_MAJOR_DIST 50.0
 
+#define pangoscale ((gdouble)PANGO_SCALE)
+
 typedef enum {
     GWY_AXIS_STEP_0,
     GWY_AXIS_STEP_1,
@@ -1154,8 +1156,12 @@ remove_too_close_ticks(GwyAxis *axis)
     GwyAxisTick *tick1, *tick2;
     guint n;
 
+    if (!priv->ticks_at_edges)
+        return;
+
+    // Tick mark collisions.
     n = ticks->len;
-    if (n <= 2 || !priv->ticks_at_edges)
+    if (n <= 2)
         return;
 
     tick1 = &g_array_index(ticks, GwyAxisTick, n-1);
@@ -1174,6 +1180,58 @@ remove_too_close_ticks(GwyAxis *axis)
 
     if (!priv->show_labels)
         return;
+
+    // Tick label collisions.  This is a bit tricky as labels can have
+    // different orientations.
+    guint next_labelled = 1;
+    while (next_labelled < n-1
+           && !g_array_index(ticks, GwyAxisTick, next_labelled).label)
+        next_labelled++;
+
+    tick1 = &g_array_index(ticks, GwyAxisTick, 0);
+    tick2 = &g_array_index(ticks, GwyAxisTick, next_labelled);
+    if (next_labelled == n)
+        return;
+
+    GtkPositionType edge = priv->edge;
+    gboolean perpendicular = GWY_AXIS_GET_CLASS(axis)->perpendicular_labels;
+    gdouble beg2, end1;
+    if (perpendicular && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
+        end1 = tick1->position + tick1->extents.height/pangoscale;
+        beg2 = tick2->position;
+    }
+    else {
+        end1 = tick1->position + PANGO_RBEARING(tick1->extents)/pangoscale;
+        beg2 = tick2->position + PANGO_LBEARING(tick2->extents)/pangoscale;
+    }
+    if (beg2 - end1 < MIN_TICK_DIST)
+        GWY_FREE(tick2->label);
+
+    n = ticks->len;
+    if (n <= 2)
+        return;
+
+    next_labelled = n-2;
+    while (next_labelled
+           && !g_array_index(ticks, GwyAxisTick, next_labelled).label)
+        next_labelled--;
+
+    tick1 = &g_array_index(ticks, GwyAxisTick, n-1);
+    tick2 = &g_array_index(ticks, GwyAxisTick, next_labelled);
+    if (!next_labelled)
+        return;
+
+    gdouble end2, beg1;
+    if (perpendicular && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
+        beg1 = tick1->position - 2.0 - tick1->extents.height/pangoscale;
+        end2 = tick2->position + 2.0;
+    }
+    else {
+        beg1 = tick1->position - 2.0 - tick1->extents.width/pangoscale;
+        end2 = tick2->position + 2.0 + PANGO_RBEARING(tick2->extents)/pangoscale;
+    }
+    if (beg1 - end2 < MIN_TICK_DIST)
+        GWY_FREE(tick2->label);
 }
 
 static gboolean
@@ -1375,8 +1433,6 @@ estimate_major_distance(GwyAxis *axis,
                         const GwyRange *request)
 {
     Axis *priv = axis->priv;
-    GString *str = priv->str;
-
     if (!priv->show_labels)
         return fmin(MIN_MAJOR_DIST, priv->length);
 
@@ -1399,7 +1455,7 @@ estimate_major_distance(GwyAxis *axis,
         size = (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
                 ? height : width);
 
-    return fmax(size/PANGO_SCALE + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
+    return fmax(size/pangoscale + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
 }
 
 static void

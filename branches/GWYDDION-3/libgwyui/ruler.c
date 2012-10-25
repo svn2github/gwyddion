@@ -26,6 +26,8 @@
 
 #define TESTMARKUP "<small>(q₁¹)</small>"
 
+#define pangoscale ((gdouble)PANGO_SCALE)
+
 enum {
     PROP_0,
     PROP_SHOW_MARK,
@@ -274,8 +276,7 @@ gwy_ruler_draw(GtkWidget *widget,
     cairo_stroke(cr);
 
     PangoLayout *layout = gwy_axis_get_pango_layout(axis);
-    gdouble a = max_ascent/(gdouble)PANGO_SCALE,
-            d = max_descent/(gdouble)PANGO_SCALE;
+    gdouble a = max_ascent/pangoscale, d = max_descent/pangoscale;
     for (guint i = 0; i < nticks; i++) {
         if (!ticks[i].label)
             continue;
@@ -284,7 +285,10 @@ gwy_ruler_draw(GtkWidget *widget,
         cairo_matrix_transform_point(&matrix, &x, &y);
         pango_layout_set_markup(layout, ticks[i].label, -1);
         if (edge == GTK_POS_BOTTOM) {
-            x += 2.0;
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                x -= 2.0 + ticks[i].extents.width/pangoscale;
+            else
+                x += 2.0;
             y = breadth - (a + d);
         }
         else if (edge == GTK_POS_LEFT) {
@@ -292,11 +296,14 @@ gwy_ruler_draw(GtkWidget *widget,
             x += a + d;
         }
         else if (edge == GTK_POS_TOP) {
-            x += 2.0;
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                x -= 2.0 + ticks[i].extents.width/pangoscale;
+            else
+                x += 2.0;
             y = a;
         }
         else if (edge == GTK_POS_RIGHT) {
-            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/(gdouble)PANGO_SCALE;
+            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
             x = breadth - (a + d);
         }
         gtk_render_layout(context, cr, x, y, layout);

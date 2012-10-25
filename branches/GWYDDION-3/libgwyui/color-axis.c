@@ -26,6 +26,8 @@
 
 #define TESTMARKUP "<small>(q₁¹)</small>"
 
+#define pangoscale ((gdouble)PANGO_SCALE)
+
 enum {
     PROP_0,
     PROP_GRADIENT,
@@ -220,7 +222,7 @@ static gboolean
 gwy_color_axis_draw(GtkWidget *widget,
                     cairo_t *cr)
 {
-    static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.45, 0.25 };
+    static const gdouble tick_level_sizes[4] = { 1.0, 0.5, 0.3, 0.2 };
     g_printerr("COLORAXIS DRAW %p\n", widget);
 
     GwyAxis *axis = GWY_AXIS(widget);
@@ -285,8 +287,7 @@ gwy_color_axis_draw(GtkWidget *widget,
     cairo_stroke(cr);
 
     PangoLayout *layout = gwy_axis_get_pango_layout(axis);
-    gdouble a = max_ascent/(gdouble)PANGO_SCALE,
-            d = max_descent/(gdouble)PANGO_SCALE;
+    gdouble a = max_ascent/pangoscale, d = max_descent/pangoscale;
     for (guint i = 0; i < nticks; i++) {
         if (!ticks[i].label)
             continue;
@@ -295,7 +296,10 @@ gwy_color_axis_draw(GtkWidget *widget,
         cairo_matrix_transform_point(&matrix, &x, &y);
         pango_layout_set_markup(layout, ticks[i].label, -1);
         if (edge == GTK_POS_BOTTOM) {
-            x += 2.0;
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                x -= 2.0 + ticks[i].extents.width/pangoscale;
+            else
+                x += 2.0;
             y = breadth - (a + d);
         }
         else if (edge == GTK_POS_LEFT) {
@@ -303,11 +307,14 @@ gwy_color_axis_draw(GtkWidget *widget,
             x += a + d;
         }
         else if (edge == GTK_POS_TOP) {
-            x += 2.0;
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                x -= 2.0 + ticks[i].extents.width/pangoscale;
+            else
+                x += 2.0;
             y = a;
         }
         else if (edge == GTK_POS_RIGHT) {
-            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/(gdouble)PANGO_SCALE;
+            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
             x = breadth - (a + d);
         }
         gtk_render_layout(context, cr, x, y, layout);
