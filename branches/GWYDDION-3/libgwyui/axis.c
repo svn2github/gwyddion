@@ -1037,7 +1037,7 @@ calculate_ticks(GwyAxis *axis)
         if (!steptype)
             break;
         step = step_sizes[steptype];
-        bs = base*step;
+        bs = descending ? -base*step : base*step;
         fill_tick_arrays(axis, i, bs, largerbs);
     }
 
