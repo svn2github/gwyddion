@@ -129,6 +129,7 @@ static void            fill_tick_arrays          (GwyAxis *axis,
                                                   GwyAxisTickLevel level,
                                                   gdouble bs,
                                                   gdouble largerbs);
+static void            remove_too_close_ticks    (GwyAxis *axis);
 static gboolean        zero_is_inside            (gdouble start,
                                                   guint n,
                                                   gdouble bs);
@@ -982,7 +983,7 @@ calculate_ticks(GwyAxis *axis)
 
     g_array_set_size(priv->ticks, 0);
 
-    if (majdist >= length) {
+    if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
         priv->range = request;
         priv->ticks_are_valid = TRUE;
@@ -1045,6 +1046,7 @@ calculate_ticks(GwyAxis *axis)
                  descending
                  ? compare_ticks_descending
                  : compare_ticks_ascending);
+    remove_too_close_ticks(axis);
 
     priv->ticks_are_valid = TRUE;
 }
@@ -1088,7 +1090,6 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 
         if (priv->show_labels) {
             format_value_label(axis, tick.value, units_pos == FIRST);
-            pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1105,7 +1106,6 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 
         if (priv->show_labels) {
             format_value_label(axis, tick.value, units_pos == LAST);
-            pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1139,16 +1139,41 @@ fill_tick_arrays(GwyAxis *axis, guint level,
                                || (units_pos == LAST
                                    && !priv->ticks_at_edges
                                    && i == n));
-            pango_layout_set_markup(priv->layout, str->str, str->len);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
         g_array_append_val(ticks, tick);
     }
+}
 
-    // TODO: For level-0 tick some further pruning may be necessary as we
-    // do not want the edge ticks to overlap with inner ticks.  We have
-    // positions and sizes of all so it should not be difficult.
+static void
+remove_too_close_ticks(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    GArray *ticks = priv->ticks;
+    GwyAxisTick *tick1, *tick2;
+    guint n;
+
+    n = ticks->len;
+    if (n <= 2 || !priv->ticks_at_edges)
+        return;
+
+    tick1 = &g_array_index(ticks, GwyAxisTick, n-1);
+    tick2 = &g_array_index(ticks, GwyAxisTick, n-2);
+    if (tick1->position - tick2->position < 0.85*MIN_TICK_DIST)
+        g_array_remove_index(ticks, n-2);
+
+    n = ticks->len;
+    if (n <= 2)
+        return;
+
+    tick1 = &g_array_index(ticks, GwyAxisTick, 0);
+    tick2 = &g_array_index(ticks, GwyAxisTick, 1);
+    if (tick2->position - tick1->position < 0.85*MIN_TICK_DIST)
+        g_array_remove_index(ticks, 1);
+
+    if (!priv->show_labels)
+        return;
 }
 
 static gboolean
@@ -1360,11 +1385,9 @@ estimate_major_distance(GwyAxis *axis,
 
     gint width, height, w, h;
     format_value_label(axis, request->from, priv->show_units);
-    pango_layout_set_markup(priv->layout, str->str, str->len);
     pango_layout_get_size(priv->layout, &width, &height);
 
     format_value_label(axis, request->to, priv->show_units);
-    pango_layout_set_markup(priv->layout, str->str, str->len);
     pango_layout_get_size(priv->layout, &w, &h);
     width = MAX(width, w);
     height = MAX(height, h);
@@ -1392,6 +1415,7 @@ format_value_label(GwyAxis *axis,
     else
         g_string_append(str, gwy_value_format_print_number(priv->vf, value));
     g_string_append(str, "</small>");
+    pango_layout_set_markup(priv->layout, str->str, str->len);
 }
 
 /**
