@@ -1179,8 +1179,8 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
     gdouble outline_width = 1.1*width + 0.4;
     gdouble alpha = prelight ? 1.0 : 0.7;
 
-    cairo_push_group(cr);
-
+    color.a = alpha;
+    // or: cairo_push_group(cr);
     gwy_cairo_set_source_rgba(cr, &color);
     cairo_set_line_width(cr, outline_width);
     cairo_stroke_preserve(cr);
@@ -1193,12 +1193,14 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
         g_critical("Unknown base shapes state %u.\n", basestate);
     }
 
+    color.a = alpha;
+    // or: dont't do this
     gwy_cairo_set_source_rgba(cr, &color);
     cairo_set_line_width(cr, width);
     cairo_stroke(cr);
-
-    cairo_pop_group_to_source(cr);
-    cairo_paint_with_alpha(cr, alpha);
+    // or:
+    // cairo_pop_group_to_source(cr);
+    // cairo_paint_with_alpha(cr, alpha);
 }
 
 /**
