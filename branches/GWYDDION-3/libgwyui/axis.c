@@ -24,8 +24,6 @@
 #include "libgwyui/types.h"
 #include "libgwyui/axis.h"
 
-#define IGNORE_ME N_("A translatable string.")
-
 #define EPS 1e-12
 #define ALMOST_BLOODY_INFINITY (1e-3*G_MAXDOUBLE)
 #define ALMOST_BLOODY_NOTHING (1e3*G_MINDOUBLE)
@@ -34,6 +32,8 @@
 #define MIN_MAJOR_DIST 50.0
 
 #define pangoscale ((gdouble)PANGO_SCALE)
+
+#define tick_index(a, i) g_array_index((a), GwyAxisTick, (i))
 
 typedef enum {
     GWY_AXIS_STEP_0,
@@ -81,6 +81,7 @@ struct _GwyAxisPrivate {
     gboolean show_units : 1;
 
     gboolean ticks_are_valid : 1;
+    gboolean must_fix_units : 1;
     guint length;
     GwyValueFormat *vf;
     GArray *ticks;
@@ -88,6 +89,7 @@ struct _GwyAxisPrivate {
     // Scratch space
     PangoLayout *layout;
     GString *str;
+    gdouble units_at;
 };
 
 typedef struct _GwyAxisPrivate Axis;
@@ -971,7 +973,8 @@ calculate_ticks(GwyAxis *axis)
     fix_request(&request);
 
     // XXX: This is for labels *along* the axis.  The labels can be also
-    // perpendicular.
+    // perpendicular.  OTOH for consistent interlabel distance this might be
+    // good, in fact.
     GWY_OBJECT_UNREF(priv->vf);
     priv->vf = gwy_unit_format_with_resolution
                                (priv->unit, GWY_VALUE_FORMAT_PANGO,
@@ -982,8 +985,9 @@ calculate_ticks(GwyAxis *axis)
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
     gdouble majdist = estimate_major_distance(axis, &request);
+    GArray *ticks = priv->ticks;
 
-    g_array_set_size(priv->ticks, 0);
+    g_array_set_size(ticks, 0);
 
     if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
@@ -1033,6 +1037,7 @@ calculate_ticks(GwyAxis *axis)
     } while (state != FINALLY_OK);
 
     gdouble dx = fabs(priv->range.to - priv->range.from)/length;
+    priv->units_at = NAN;
     fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0);
     for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
         gdouble largerbs = bs;
@@ -1044,11 +1049,25 @@ calculate_ticks(GwyAxis *axis)
         fill_tick_arrays(axis, i, bs, largerbs);
     }
 
-    g_array_sort(priv->ticks,
-                 descending
+    g_array_sort(ticks, descending
                  ? compare_ticks_descending
                  : compare_ticks_ascending);
+    priv->must_fix_units = FALSE;
     remove_too_close_ticks(axis);
+
+    if (priv->must_fix_units) {
+        g_assert(isfinite(priv->units_at));
+        for (guint i = 0; i < ticks->len; i++) {
+            GwyAxisTick *tick = &tick_index(ticks, i);
+            if (tick->value == priv->units_at) {
+                format_value_label(axis, tick->value, TRUE);
+                pango_layout_get_extents(priv->layout, NULL, &tick->extents);
+                g_free(tick->label);
+                tick->label = g_strdup(priv->str->str);
+                break;
+            }
+        }
+    }
 
     priv->ticks_are_valid = TRUE;
 }
@@ -1091,7 +1110,9 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
-            format_value_label(axis, tick.value, units_pos == FIRST);
+            format_value_label(axis, tick.value,
+                               units_pos == FIRST
+                               || (units_pos == AT_ZERO && tick.value == 0.0));
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1107,7 +1128,9 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
-            format_value_label(axis, tick.value, units_pos == LAST);
+            format_value_label(axis, tick.value,
+                               units_pos == LAST
+                               || (units_pos == AT_ZERO && tick.value == 0.0));
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1164,32 +1187,43 @@ remove_too_close_ticks(GwyAxis *axis)
     if (n <= 2)
         return;
 
-    tick1 = &g_array_index(ticks, GwyAxisTick, n-1);
-    tick2 = &g_array_index(ticks, GwyAxisTick, n-2);
-    if (tick1->position - tick2->position < 0.85*MIN_TICK_DIST)
+    tick1 = &tick_index(ticks, n-1);
+    tick2 = &tick_index(ticks, n-2);
+    if (tick1->position - tick2->position < 0.85*MIN_TICK_DIST) {
+        if (tick2->value == priv->units_at) {
+            priv->must_fix_units = TRUE;
+            priv->units_at = tick1->value;
+        }
         g_array_remove_index(ticks, n-2);
+    }
 
     n = ticks->len;
     if (n <= 2)
         return;
 
-    tick1 = &g_array_index(ticks, GwyAxisTick, 0);
-    tick2 = &g_array_index(ticks, GwyAxisTick, 1);
-    if (tick2->position - tick1->position < 0.85*MIN_TICK_DIST)
+    tick1 = &tick_index(ticks, 0);
+    tick2 = &tick_index(ticks, 1);
+    if (tick2->position - tick1->position < 0.85*MIN_TICK_DIST) {
+        if (tick2->value == priv->units_at) {
+            priv->must_fix_units = TRUE;
+            priv->units_at = tick1->value;
+        }
         g_array_remove_index(ticks, 1);
+    }
 
     if (!priv->show_labels)
         return;
 
     // Tick label collisions.  This is a bit tricky as labels can have
-    // different orientations.
+    // different orientations.  Also, some of the removed labels may carry
+    // units.
     guint next_labelled = 1;
     while (next_labelled < n-1
-           && !g_array_index(ticks, GwyAxisTick, next_labelled).label)
+           && !tick_index(ticks, next_labelled).label)
         next_labelled++;
 
-    tick1 = &g_array_index(ticks, GwyAxisTick, 0);
-    tick2 = &g_array_index(ticks, GwyAxisTick, next_labelled);
+    tick1 = &tick_index(ticks, 0);
+    tick2 = &tick_index(ticks, next_labelled);
     if (next_labelled == n)
         return;
 
@@ -1198,14 +1232,19 @@ remove_too_close_ticks(GwyAxis *axis)
     gdouble beg2, end1;
     if (perpendicular && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
         end1 = tick1->position + tick1->extents.height/pangoscale;
-        beg2 = tick2->position;
+        beg2 = tick2->position - tick1->extents.height/pangoscale;
     }
     else {
         end1 = tick1->position + PANGO_RBEARING(tick1->extents)/pangoscale;
         beg2 = tick2->position + PANGO_LBEARING(tick2->extents)/pangoscale;
     }
-    if (beg2 - end1 < MIN_TICK_DIST)
+    if (beg2 - end1 < MIN_TICK_DIST) {
+        if (tick2->value == priv->units_at) {
+            priv->must_fix_units = TRUE;
+            priv->units_at = tick1->value;
+        }
         GWY_FREE(tick2->label);
+    }
 
     n = ticks->len;
     if (n <= 2)
@@ -1213,11 +1252,11 @@ remove_too_close_ticks(GwyAxis *axis)
 
     next_labelled = n-2;
     while (next_labelled
-           && !g_array_index(ticks, GwyAxisTick, next_labelled).label)
+           && !tick_index(ticks, next_labelled).label)
         next_labelled--;
 
-    tick1 = &g_array_index(ticks, GwyAxisTick, n-1);
-    tick2 = &g_array_index(ticks, GwyAxisTick, next_labelled);
+    tick1 = &tick_index(ticks, n-1);
+    tick2 = &tick_index(ticks, next_labelled);
     if (!next_labelled)
         return;
 
@@ -1230,8 +1269,13 @@ remove_too_close_ticks(GwyAxis *axis)
         beg1 = tick1->position - 2.0 - tick1->extents.width/pangoscale;
         end2 = tick2->position + 2.0 + PANGO_RBEARING(tick2->extents)/pangoscale;
     }
-    if (beg1 - end2 < MIN_TICK_DIST)
+    if (beg1 - end2 < MIN_TICK_DIST) {
+        if (tick2->value == priv->units_at) {
+            priv->must_fix_units = TRUE;
+            priv->units_at = tick1->value;
+        }
         GWY_FREE(tick2->label);
+    }
 }
 
 static gboolean
@@ -1466,8 +1510,10 @@ format_value_label(GwyAxis *axis,
     Axis *priv = axis->priv;
     GString *str = priv->str;
     g_string_assign(str, "<small>");
-    if (with_units)
+    if (with_units) {
+        priv->units_at = value;
         g_string_append(str, gwy_value_format_print(priv->vf, value));
+    }
     else
         g_string_append(str, gwy_value_format_print_number(priv->vf, value));
     g_string_append(str, "</small>");

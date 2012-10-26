@@ -24,7 +24,7 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/color-axis.h"
 
-#define TESTMARKUP "<small>9.99 (μm₁¹)</small>"
+#define TESTMARKUP "<small>9.9 (μm₁¹)</small>"
 
 #define pangoscale ((gdouble)PANGO_SCALE)
 
