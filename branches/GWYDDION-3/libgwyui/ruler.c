@@ -75,6 +75,8 @@ static gint     preferred_breadth             (GtkWidget *widget);
 
 static GParamSpec *properties[N_PROPS];
 
+static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.45, 0.25 };
+
 G_DEFINE_TYPE(GwyRuler, gwy_ruler, GWY_TYPE_AXIS);
 
 static void
@@ -236,7 +238,6 @@ static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
 {
-    static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.45, 0.25 };
     g_printerr("RULER DRAW %p\n", widget);
 
     GwyAxis *axis = GWY_AXIS(widget);

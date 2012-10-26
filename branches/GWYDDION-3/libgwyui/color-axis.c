@@ -24,7 +24,7 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/color-axis.h"
 
-#define TESTMARKUP "<small>(q₁¹)</small>"
+#define TESTMARKUP "<small>9.99 (μm₁¹)</small>"
 
 #define pangoscale ((gdouble)PANGO_SCALE)
 
@@ -37,6 +37,7 @@ enum {
 struct _GwyColorAxisPrivate {
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
+    gdouble stripewidth;     // Relative to total.
 };
 
 typedef struct _GwyColorAxisPrivate ColorAxis;
@@ -66,6 +67,8 @@ static void     gradient_data_changed              (GwyColorAxis *coloraxis,
 
 static GParamSpec *properties[N_PROPS];
 
+static const gdouble tick_level_sizes[4] = { 1.0, 0.65, 0.4, 0.25 };
+
 G_DEFINE_TYPE(GwyColorAxis, gwy_color_axis, GWY_TYPE_AXIS);
 
 static void
@@ -73,6 +76,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+    GwyAxisClass *axis_class = GWY_AXIS_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(ColorAxis));
 
@@ -84,6 +88,8 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     widget_class->get_preferred_width = gwy_color_axis_get_preferred_width;
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
     widget_class->draw = gwy_color_axis_draw;
+
+    axis_class->perpendicular_labels = TRUE;
 
     properties[PROP_GRADIENT]
         = g_param_spec_object("gradient",
@@ -170,8 +176,21 @@ gwy_color_axis_get_preferred_width(GtkWidget *widget,
         *minimum = *natural = 1;
         return;
     }
+    *minimum = *natural = 40;
 
-    *minimum = *natural = 40; //TODO
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
+    g_return_if_fail(layout);
+
+    // Stripe width should be consistent with horizontal orientation.
+    // So make it equal to the *height* of the test text while the rest of
+    // the request is based on its width.
+    ColorAxis *priv = GWY_COLOR_AXIS(widget)->priv;
+    gint breadth, height;
+    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
+    pango_layout_get_size(layout, &breadth, &height);
+    priv->stripewidth = (gdouble)height/(breadth + height);
+    breadth = (breadth + height)/(PANGO_SCALE);
+    *minimum = *natural = MAX(breadth, 6);
 }
 
 static void
@@ -186,8 +205,18 @@ gwy_color_axis_get_preferred_height(GtkWidget *widget,
         *minimum = *natural = 1;
         return;
     }
+    *minimum = *natural = 20;
 
-    *minimum = *natural = 40; //TODO
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
+    g_return_if_fail(layout);
+
+    ColorAxis *priv = GWY_COLOR_AXIS(widget)->priv;
+    gint breadth;
+    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
+    pango_layout_get_size(layout, NULL, &breadth);
+    priv->stripewidth = 5.0/13.0;
+    breadth = 13*breadth/(5*PANGO_SCALE);
+    *minimum = *natural = MAX(breadth, 4);
 }
 
 static void
@@ -222,9 +251,8 @@ static gboolean
 gwy_color_axis_draw(GtkWidget *widget,
                     cairo_t *cr)
 {
-    static const gdouble tick_level_sizes[4] = { 1.0, 0.5, 0.3, 0.2 };
-    g_printerr("COLORAXIS DRAW %p\n", widget);
-
+    GwyColorAxis *coloraxis = GWY_COLOR_AXIS(widget);
+    ColorAxis *priv = coloraxis->priv;
     GwyAxis *axis = GWY_AXIS(widget);
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     gdouble width = gtk_widget_get_allocated_width(widget),
@@ -233,12 +261,11 @@ gwy_color_axis_draw(GtkWidget *widget,
     gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
     gdouble length = (vertical ? height : width),
             breadth = (vertical ? width : height),
-            stripebreadth = 0.4*breadth;
+            stripebreadth = priv->stripewidth*breadth;
     GtkPositionType towards = (vertical ? GTK_POS_TOP : GTK_POS_RIGHT);
     cairo_matrix_t matrix;
     set_up_transform(edge, &matrix, width, height);
 
-    GwyColorAxis *coloraxis = GWY_COLOR_AXIS(widget);
     GdkRGBA rgba;
     gtk_render_background(context, cr, 0, 0, width, height);
     gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
@@ -254,7 +281,7 @@ gwy_color_axis_draw(GtkWidget *widget,
         gdouble s = tick_level_sizes[ticks[i].level];
         draw_line_transformed(cr, &matrix,
                               pos, stripebreadth,
-                              pos, stripebreadth + s*(breadth - stripebreadth));
+                              pos, (1.0 + s)*stripebreadth);
         if (ticks[i].label) {
             max_ascent = MAX(max_ascent, PANGO_ASCENT(ticks[i].extents));
             max_descent = MAX(max_descent, PANGO_DESCENT(ticks[i].extents));
@@ -262,7 +289,6 @@ gwy_color_axis_draw(GtkWidget *widget,
     }
     cairo_stroke(cr);
 
-    ColorAxis *priv = coloraxis->priv;
     GwyGradient *gradient = (priv->gradient
                              ? priv->gradient
                              : gwy_gradients_get(NULL));
@@ -303,8 +329,12 @@ gwy_color_axis_draw(GtkWidget *widget,
             y = breadth - (a + d);
         }
         else if (edge == GTK_POS_LEFT) {
-            y += 2.0;
-            x += a + d;
+            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                y -= 2.0 + ticks[i].extents.height/pangoscale;
+            else
+                y += 2.0;
+            x = breadth - stripebreadth - 2.0 - 2.0
+                - ticks[i].extents.width/pangoscale;
         }
         else if (edge == GTK_POS_TOP) {
             if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
@@ -314,8 +344,11 @@ gwy_color_axis_draw(GtkWidget *widget,
             y = a;
         }
         else if (edge == GTK_POS_RIGHT) {
-            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
-            x = breadth - (a + d);
+            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                y -= 2.0 + ticks[i].extents.height/pangoscale;
+            else
+                y += 2.0;
+            x = stripebreadth + 2.0 + 2.0;
         }
         gtk_render_layout(context, cr, x, y, layout);
     }
