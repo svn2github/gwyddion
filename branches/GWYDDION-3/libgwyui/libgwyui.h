@@ -26,6 +26,7 @@
 #include <libgwyui/field-render.h>
 #include <libgwyui/raster-view.h>
 #include <libgwyui/ruler.h>
+#include <libgwyui/scroller.h>
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-point.h>
 #include <libgwyui/types.h>

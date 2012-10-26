@@ -25,6 +25,7 @@ public_headers = \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/ruler.h \
+	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
 	$(srcdir)/shapes-point.h
 
@@ -58,6 +59,7 @@ libgwyui3_la_SOURCES = \
 	field-render.c \
 	raster-view.c \
 	ruler.c \
+	scroller.c \
 	shapes.c \
 	shapes-point.c \
 	types.c
