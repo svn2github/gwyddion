@@ -238,8 +238,6 @@ static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
 {
-    g_printerr("RULER DRAW %p\n", widget);
-
     GwyAxis *axis = GWY_AXIS(widget);
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     gdouble width = gtk_widget_get_allocated_width(widget),
