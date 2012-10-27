@@ -10,8 +10,8 @@ libgwyuiincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 #test_default_suppressions = libgwyui-default.supp
 mkenum_name = types
 mkenum_id = LIBGWYUI_TYPES
-#genmarshal_name = marshal
-#genmarshal_prefix = _gwy_
+genmarshal_name = marshal
+genmarshal_prefix = gwy_cclosure_marshal
 main_header = $(srcdir)/libgwyui.h
 GwyUI3_3_0_gir_INCLUDES = Gtk-3.0
 GwyUI3_3_0_gir_PACKAGES = gtk+-3.0
@@ -30,6 +30,7 @@ public_headers = \
 	$(srcdir)/shapes-point.h
 
 public_built_headers = \
+	$(genmarshal_name).h \
 	$(mkenum_name).h
 
 private_headers =
@@ -57,6 +58,7 @@ libgwyui3_la_SOURCES = \
 	cairo-utils.c \
 	color-axis.c \
 	field-render.c \
+	marshal.c \
 	raster-view.c \
 	ruler.c \
 	scroller.c \
@@ -93,6 +95,7 @@ libgwyui3_la_LDFLAGS = \
 #include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
+include $(top_srcdir)/build/genmarshal.make
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*

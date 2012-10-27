@@ -19,6 +19,7 @@
 
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
+#include "libgwyui/marshal.h"
 #include "libgwyui/scroller.h"
 
 enum {
@@ -26,6 +27,11 @@ enum {
     PROP_HADJUSTMENT,
     PROP_VADJUSTMENT,
     N_PROPS,
+};
+
+enum {
+    SCROLL_CHILD,
+    N_SIGNALS
 };
 
 struct _GwyScrollerPrivate {
@@ -51,12 +57,21 @@ static void     gwy_scroller_get_preferred_width (GtkWidget *widget,
 static void     gwy_scroller_get_preferred_height(GtkWidget *widget,
                                                   gint *minimum,
                                                   gint *natural);
+static GType    gwy_scroller_child_type          (GtkContainer *container);
+static void     gwy_scroller_add                 (GtkContainer *container,
+                                                  GtkWidget *child);
+static void     gwy_scroller_remove              (GtkContainer *container,
+                                                  GtkWidget *child);
+static gboolean gwy_scroller_scroll_child        (GwyScroller *scroller,
+                                                  GtkScrollType scroll,
+                                                  gboolean horizontal);
 static gboolean set_hadjustment                  (GwyScroller *scroller,
                                                   GtkAdjustment *adjustment);
 static gboolean set_vadjustment                  (GwyScroller *scroller,
                                                   GtkAdjustment *adjustment);
 
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 G_DEFINE_TYPE(GwyScroller, gwy_scroller, GTK_TYPE_BIN);
 
@@ -65,6 +80,7 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+    GtkContainerClass *container_class = GTK_CONTAINER_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(Scroller));
 
@@ -75,6 +91,11 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
 
     widget_class->get_preferred_width = gwy_scroller_get_preferred_width;
     widget_class->get_preferred_height = gwy_scroller_get_preferred_height;
+
+    container_class->add = gwy_scroller_add;
+    container_class->remove = gwy_scroller_remove;
+    container_class->child_type = gwy_scroller_child_type;
+    gtk_container_class_handle_border_width(container_class);
 
     properties[PROP_HADJUSTMENT]
         = g_param_spec_object("hadjustment",
@@ -92,6 +113,28 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    /**
+     * GwyScroller::scroll-child:
+     * @gwyscroller: The #GwyScroller which received the signal.
+     * @arg1: #GtkScrollType describing how much to scroll.
+     * @arg2: %TRUE to scroll horizontally, %FALSE to scroll vertically.
+     *
+     * The ::scroll-child signal is a
+     * <link linkend="keybinding-signals">keybinding signal</link>
+     * which gets emitted when a keybinding that scrolls is pressed.
+     * The horizontal or vertical adjustment is updated which triggers a
+     * signal that the scrolled windows child may listen to and scroll itself.
+     */
+    signals[SCROLL_CHILD]
+        = g_signal_new_class_handler("scroll-child",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+                                     G_CALLBACK(gwy_scroller_scroll_child),
+                                     NULL, NULL,
+                                     gwy_cclosure_marshal_BOOLEAN__ENUM_BOOLEAN,
+                                     G_TYPE_BOOLEAN, 2,
+                                     GTK_TYPE_SCROLL_TYPE, G_TYPE_BOOLEAN);
 }
 
 static void
@@ -179,6 +222,153 @@ gwy_scroller_get_preferred_height(G_GNUC_UNUSED GtkWidget *widget,
                                   gint *natural)
 {
     *minimum = *natural = 1;
+}
+
+static GType
+gwy_scroller_child_type(GtkContainer *container)
+{
+    GtkWidget *child = gtk_bin_get_child(GTK_BIN(container));
+
+    if (!child)
+        return GTK_TYPE_SCROLLABLE;
+    else
+        return G_TYPE_NONE;
+}
+
+static void
+gwy_scroller_add(GtkContainer *container,
+                 GtkWidget *child)
+{
+    if (!GTK_IS_SCROLLABLE(child)) {
+        g_warning("gwy_scroller_add(): cannot add non scrollable widget "
+                  "use gwy_scroller_add_with_viewport() instead");
+        return;
+    }
+
+    GtkBin *bin = GTK_BIN(container);
+    GtkWidget *current_child = gtk_bin_get_child(bin);
+    g_return_if_fail(!current_child);
+
+    GTK_CONTAINER_CLASS(gwy_scroller_parent_class)->add(container, child);
+
+    GwyScroller *scroller = GWY_SCROLLER(container);
+    Scroller *priv = scroller->priv;
+    g_object_set(child,
+                 "hadjustment", priv->hadjustment,
+                 "vadjustment", priv->vadjustment,
+                 NULL);
+}
+
+static void
+gwy_scroller_remove(GtkContainer *container,
+                    GtkWidget *child)
+{
+    g_return_if_fail(child);
+    g_return_if_fail(gtk_bin_get_child(GTK_BIN(container)) == child);
+    g_object_set(child, "hadjustment", NULL, "vadjustment", NULL, NULL);
+    GTK_CONTAINER_CLASS(gwy_scroller_parent_class)->remove(container, child);
+}
+
+static gboolean
+gwy_scroller_scroll_child(GwyScroller *scroller,
+                          GtkScrollType scroll,
+                          gboolean horizontal)
+{
+    Scroller *priv = scroller->priv;
+
+    switch (scroll) {
+        case GTK_SCROLL_STEP_UP:
+        scroll = GTK_SCROLL_STEP_BACKWARD;
+        horizontal = FALSE;
+        break;
+
+        case GTK_SCROLL_STEP_DOWN:
+        scroll = GTK_SCROLL_STEP_FORWARD;
+        horizontal = FALSE;
+        break;
+
+        case GTK_SCROLL_STEP_LEFT:
+        scroll = GTK_SCROLL_STEP_BACKWARD;
+        horizontal = TRUE;
+        break;
+
+        case GTK_SCROLL_STEP_RIGHT:
+        scroll = GTK_SCROLL_STEP_FORWARD;
+        horizontal = TRUE;
+        break;
+
+        case GTK_SCROLL_PAGE_UP:
+        scroll = GTK_SCROLL_PAGE_BACKWARD;
+        horizontal = FALSE;
+        break;
+
+        case GTK_SCROLL_PAGE_DOWN:
+        scroll = GTK_SCROLL_PAGE_FORWARD;
+        horizontal = FALSE;
+        break;
+
+        case GTK_SCROLL_PAGE_LEFT:
+        scroll = GTK_SCROLL_STEP_BACKWARD;
+        horizontal = TRUE;
+        break;
+
+        case GTK_SCROLL_PAGE_RIGHT:
+        scroll = GTK_SCROLL_STEP_FORWARD;
+        horizontal = TRUE;
+        break;
+
+        case GTK_SCROLL_STEP_BACKWARD:
+        case GTK_SCROLL_STEP_FORWARD:
+        case GTK_SCROLL_PAGE_BACKWARD:
+        case GTK_SCROLL_PAGE_FORWARD:
+        case GTK_SCROLL_START:
+        case GTK_SCROLL_END:
+        break;
+
+        default:
+        g_warning("Invalid scroll type %u for "
+                  "GtkScrolledWindow::scroll-child", scroll);
+        return FALSE;
+    }
+
+    GtkAdjustment *adjustment = (horizontal
+                                 ? priv->hadjustment
+                                 : priv->vadjustment);
+    gdouble value = gtk_adjustment_get_value(adjustment);
+
+    switch (scroll) {
+        case GTK_SCROLL_STEP_FORWARD:
+        value += gtk_adjustment_get_step_increment(adjustment);
+        break;
+
+        case GTK_SCROLL_STEP_BACKWARD:
+        value -= gtk_adjustment_get_step_increment(adjustment);
+        break;
+
+        case GTK_SCROLL_PAGE_FORWARD:
+        value += gtk_adjustment_get_page_increment(adjustment);
+        break;
+
+        case GTK_SCROLL_PAGE_BACKWARD:
+        value -= gtk_adjustment_get_page_increment(adjustment);
+        break;
+
+        case GTK_SCROLL_START:
+        value = gtk_adjustment_get_lower(adjustment);
+        break;
+
+        case GTK_SCROLL_END:
+        value = gtk_adjustment_get_upper(adjustment);
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
+    }
+
+    gtk_adjustment_set_value(adjustment, value);
+
+    return TRUE;
 }
 
 /**
