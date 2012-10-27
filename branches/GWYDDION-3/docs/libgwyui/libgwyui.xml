@@ -28,6 +28,7 @@
     <xi:include href="xml/ruler.xml"/>
     <xi:include href="xml/color-axis.xml"/>
     <xi:include href="xml/scroller.xml"/>
+    <xi:include href="xml/widget-utils.xml"/>
   </chapter>
   <index id='libgwyui-symbol-index'>
     <title>Index of all symbols</title>
