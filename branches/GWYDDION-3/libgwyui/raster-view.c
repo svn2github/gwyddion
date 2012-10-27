@@ -1054,8 +1054,9 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
 {
     GtkAllocation prev_allocation;
     gtk_widget_get_allocation(widget, &prev_allocation);
-    gtk_widget_set_allocation(widget, allocation);
 
+    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->size_allocate(widget,
+                                                                  allocation);
     if (gwy_equal(allocation, &prev_allocation))
         return;
 

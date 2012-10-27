@@ -183,9 +183,8 @@ gwy_scroller_init(GwyScroller *scroller)
 {
     scroller->priv = G_TYPE_INSTANCE_GET_PRIVATE(scroller,
                                                  GWY_TYPE_SCROLLER, Scroller);
-    Scroller *priv = scroller->priv;
-    priv->hadjustment = g_object_newv(GTK_TYPE_ADJUSTMENT, 0, NULL);
-    priv->vadjustment = g_object_newv(GTK_TYPE_ADJUSTMENT, 0, NULL);
+    set_hadjustment(scroller, g_object_newv(GTK_TYPE_ADJUSTMENT, 0, NULL));
+    set_vadjustment(scroller, g_object_newv(GTK_TYPE_ADJUSTMENT, 0, NULL));
 }
 
 static void
@@ -271,8 +270,12 @@ gwy_scroller_size_allocate(GtkWidget *widget,
 {
     GtkBin *bin = GTK_BIN(widget);
     GtkWidget *child = gtk_bin_get_child(bin);
+
     if (child && gtk_widget_get_visible(child))
         gtk_widget_size_allocate(child, allocation);
+
+    GTK_WIDGET_CLASS(gwy_scroller_parent_class)->size_allocate(widget,
+                                                               allocation);
 }
 
 static gboolean
