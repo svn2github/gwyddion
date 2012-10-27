@@ -187,6 +187,12 @@ static gboolean set_vadjustment                     (GwyRasterView *rasterview,
 static void     set_hadjustment_values              (GwyRasterView *rasterview);
 static void     set_vadjustment_values              (GwyRasterView *rasterview);
 static void     adjustment_value_changed            (GwyRasterView *rasterview);
+static void     freeze_adjustments_notify           (GwyRasterView *rasterview,
+                                                     gboolean horizontal,
+                                                     gboolean vertical);
+static void     thaw_adjustments_notify             (GwyRasterView *rasterview,
+                                                     gboolean horizontal,
+                                                     gboolean vertical);
 static gboolean set_zoom                            (GwyRasterView *rasterview,
                                                      gdouble zoom);
 static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
@@ -1072,9 +1078,11 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
 
+    freeze_adjustments_notify(rasterview, TRUE, TRUE);
     set_hadjustment_values(rasterview);
     set_vadjustment_values(rasterview);
     calculate_position_and_size(rasterview);
+    thaw_adjustments_notify(rasterview, TRUE, TRUE);
 }
 
 static gboolean
@@ -1547,7 +1555,6 @@ gwy_raster_view_draw(GtkWidget *widget,
 
     draw_mask(rasterview, cr);
 
-    g_printerr("DRAW %p\n", priv->shapes);
     if (priv->shapes) {
         cairo_save(cr);
         gwy_shapes_draw(priv->shapes, cr);
@@ -1870,8 +1877,10 @@ set_hadjustment(GwyRasterView *rasterview,
 
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
+    freeze_adjustments_notify(rasterview, TRUE, FALSE);
     set_hadjustment_values(rasterview);
     calculate_position_and_size(rasterview);
+    thaw_adjustments_notify(rasterview, TRUE, FALSE);
     return TRUE;
 }
 
@@ -1890,8 +1899,10 @@ set_vadjustment(GwyRasterView *rasterview,
 
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
+    freeze_adjustments_notify(rasterview, FALSE, TRUE);
     set_vadjustment_values(rasterview);
     calculate_position_and_size(rasterview);
+    thaw_adjustments_notify(rasterview, FALSE, TRUE);
     return TRUE;
 }
 
@@ -1946,6 +1957,33 @@ adjustment_value_changed(GwyRasterView *rasterview)
     rasterview->priv->mask_surface_valid = FALSE;
     calculate_position_and_size(rasterview);
     gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+}
+
+// When we set adjustments we need to emit notifications after
+// calculate_position_and_size() because whoever watches the adjustments will
+// likely query the dimensions.
+static void
+freeze_adjustments_notify(GwyRasterView *rasterview,
+                          gboolean horizontal,
+                          gboolean vertical)
+{
+    RasterView *priv = rasterview->priv;
+    if (horizontal && priv->hadjustment)
+        g_object_freeze_notify(G_OBJECT(priv->hadjustment));
+    if (vertical && priv->vadjustment)
+        g_object_freeze_notify(G_OBJECT(priv->vadjustment));
+}
+
+static void
+thaw_adjustments_notify(GwyRasterView *rasterview,
+                        gboolean horizontal,
+                        gboolean vertical)
+{
+    RasterView *priv = rasterview->priv;
+    if (horizontal && priv->hadjustment)
+        g_object_thaw_notify(G_OBJECT(priv->hadjustment));
+    if (vertical && priv->vadjustment)
+        g_object_thaw_notify(G_OBJECT(priv->vadjustment));
 }
 
 static gboolean
