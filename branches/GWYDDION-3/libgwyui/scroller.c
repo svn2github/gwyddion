@@ -132,7 +132,7 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
                                      G_CALLBACK(gwy_scroller_scroll_child),
                                      NULL, NULL,
-                                     gwy_cclosure_marshal_BOOLEAN__ENUM_BOOLEAN,
+                                     _gwy_cclosure_marshal_BOOLEAN__ENUM_BOOLEAN,
                                      G_TYPE_BOOLEAN, 2,
                                      GTK_TYPE_SCROLL_TYPE, G_TYPE_BOOLEAN);
 }

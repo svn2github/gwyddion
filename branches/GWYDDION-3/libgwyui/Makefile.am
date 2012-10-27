@@ -11,7 +11,7 @@ libgwyuiincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 mkenum_name = types
 mkenum_id = LIBGWYUI_TYPES
 genmarshal_name = marshal
-genmarshal_prefix = gwy_cclosure_marshal
+genmarshal_prefix = _gwy_cclosure_marshal
 main_header = $(srcdir)/libgwyui.h
 GwyUI3_3_0_gir_INCLUDES = Gtk-3.0
 GwyUI3_3_0_gir_PACKAGES = gtk+-3.0
@@ -35,6 +35,9 @@ public_built_headers = \
 
 private_headers =
 
+private_built_headers = \
+	$(genmarshal_name).h
+
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
 
@@ -51,7 +54,7 @@ lib_LTLIBRARIES = libgwyui3.la
 nodist_libgwyuiinclude_HEADERS = $(public_built_headers)
 libgwyuiinclude_HEADERS = $(public_headers)
 toplevelinclude_HEADERS = $(main_header)
-noinst_HEADERS = $(private_headers)
+noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyui3_la_SOURCES = \
 	axis.c \
