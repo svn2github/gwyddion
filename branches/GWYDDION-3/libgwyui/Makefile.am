@@ -27,7 +27,8 @@ public_headers = \
 	$(srcdir)/ruler.h \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
-	$(srcdir)/shapes-point.h
+	$(srcdir)/shapes-point.h \
+	$(srcdir)/widget-utils.h
 
 public_built_headers = \
 	$(genmarshal_name).h \
@@ -67,7 +68,8 @@ libgwyui3_la_SOURCES = \
 	scroller.c \
 	shapes.c \
 	shapes-point.c \
-	types.c
+	types.c \
+	widget-utils.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \

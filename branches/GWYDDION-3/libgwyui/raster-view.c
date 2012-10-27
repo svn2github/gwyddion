@@ -1908,7 +1908,7 @@ set_adjustment_values(GtkAdjustment *adjustment,
     g_object_set(adjustment,
                  "lower", 0.0,
                  "upper", new_upper,
-                 "page-size", (gdouble)size,
+                 "page-size", 1.0*size,
                  "step-increment", 0.1*size,
                  "page-increment", 0.9*size,
                  NULL);

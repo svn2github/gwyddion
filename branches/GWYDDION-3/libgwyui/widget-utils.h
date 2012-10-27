@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,20 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWYUI_H__
-#define __LIBGWYUI_H__
+#ifndef __LIBGWYUI_WIDGET_UTILS_H__
+#define __LIBGWYUI_WIDGET_UTILS_H__ 1
 
-#include <libgwyui/axis.h>
-#include <libgwyui/cairo-utils.h>
-#include <libgwyui/color-axis.h>
-#include <libgwyui/field-render.h>
-#include <libgwyui/raster-view.h>
-#include <libgwyui/ruler.h>
-#include <libgwyui/scroller.h>
-#include <libgwyui/shapes.h>
-#include <libgwyui/shapes-point.h>
-#include <libgwyui/types.h>
-#include <libgwyui/widget-utils.h>
+#include <gtk/gtk.h>
+
+G_BEGIN_DECLS
+
+gdouble gwy_scroll_wheel_delta(GtkAdjustment *adjustment,
+                               GdkEventScroll *event,
+                               GtkOrientation orientation);
+
+G_END_DECLS
 
 #endif
 

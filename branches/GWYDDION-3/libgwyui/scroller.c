@@ -20,6 +20,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/marshal.h"
+#include "libgwyui/widget-utils.h"
 #include "libgwyui/scroller.h"
 
 enum {
@@ -57,12 +58,21 @@ static void     gwy_scroller_get_preferred_width (GtkWidget *widget,
 static void     gwy_scroller_get_preferred_height(GtkWidget *widget,
                                                   gint *minimum,
                                                   gint *natural);
+static void     gwy_scroller_size_allocate       (GtkWidget *widget,
+                                                  GtkAllocation *allocation);
+static gboolean gwy_scroller_scroll_event        (GtkWidget *widget,
+                                                  GdkEventScroll *event);
 static GType    gwy_scroller_child_type          (GtkContainer *container);
 static void     gwy_scroller_add                 (GtkContainer *container,
                                                   GtkWidget *child);
 static void     gwy_scroller_remove              (GtkContainer *container,
                                                   GtkWidget *child);
 static gboolean gwy_scroller_scroll_child        (GwyScroller *scroller,
+                                                  GtkScrollType scroll,
+                                                  gboolean horizontal);
+static void     add_scroll_binding               (GtkBindingSet *binding_set,
+                                                  guint keyval,
+                                                  GdkModifierType mask,
                                                   GtkScrollType scroll,
                                                   gboolean horizontal);
 static gboolean set_hadjustment                  (GwyScroller *scroller,
@@ -91,6 +101,8 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
 
     widget_class->get_preferred_width = gwy_scroller_get_preferred_width;
     widget_class->get_preferred_height = gwy_scroller_get_preferred_height;
+    widget_class->size_allocate = gwy_scroller_size_allocate;
+    widget_class->scroll_event = gwy_scroller_scroll_event;
 
     container_class->add = gwy_scroller_add;
     container_class->remove = gwy_scroller_remove;
@@ -135,6 +147,35 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
                                      _gwy_cclosure_marshal_BOOLEAN__ENUM_BOOLEAN,
                                      G_TYPE_BOOLEAN, 2,
                                      GTK_TYPE_SCROLL_TYPE, G_TYPE_BOOLEAN);
+
+    GtkBindingSet *binding_set = gtk_binding_set_by_class(klass);
+
+    add_scroll_binding(binding_set, GDK_KEY_Left, GDK_CONTROL_MASK,
+                       GTK_SCROLL_STEP_BACKWARD, TRUE);
+    add_scroll_binding(binding_set, GDK_KEY_Right, GDK_CONTROL_MASK,
+                       GTK_SCROLL_STEP_FORWARD, TRUE);
+    add_scroll_binding(binding_set, GDK_KEY_Up, GDK_CONTROL_MASK,
+                       GTK_SCROLL_STEP_BACKWARD, FALSE);
+    add_scroll_binding(binding_set, GDK_KEY_Down, GDK_CONTROL_MASK,
+                       GTK_SCROLL_STEP_FORWARD, FALSE);
+
+    add_scroll_binding(binding_set, GDK_KEY_Page_Up, GDK_CONTROL_MASK,
+                       GTK_SCROLL_PAGE_BACKWARD, TRUE);
+    add_scroll_binding(binding_set, GDK_KEY_Page_Down, GDK_CONTROL_MASK,
+                       GTK_SCROLL_PAGE_FORWARD, TRUE);
+    add_scroll_binding(binding_set, GDK_KEY_Page_Up, 0,
+                       GTK_SCROLL_PAGE_BACKWARD, FALSE);
+    add_scroll_binding(binding_set, GDK_KEY_Page_Down, 0,
+                       GTK_SCROLL_PAGE_FORWARD, FALSE);
+
+    add_scroll_binding(binding_set, GDK_KEY_Home, GDK_CONTROL_MASK,
+                       GTK_SCROLL_START, TRUE);
+    add_scroll_binding(binding_set, GDK_KEY_End, GDK_CONTROL_MASK,
+                       GTK_SCROLL_END, TRUE);
+    add_scroll_binding(binding_set, GDK_KEY_Home, 0,
+                       GTK_SCROLL_START, FALSE);
+    add_scroll_binding(binding_set, GDK_KEY_End, 0,
+                       GTK_SCROLL_END, FALSE);
 }
 
 static void
@@ -222,6 +263,48 @@ gwy_scroller_get_preferred_height(G_GNUC_UNUSED GtkWidget *widget,
                                   gint *natural)
 {
     *minimum = *natural = 1;
+}
+
+static void
+gwy_scroller_size_allocate(GtkWidget *widget,
+                           GtkAllocation *allocation)
+{
+    GtkBin *bin = GTK_BIN(widget);
+    GtkWidget *child = gtk_bin_get_child(bin);
+    if (child && gtk_widget_get_visible(child))
+        gtk_widget_size_allocate(child, allocation);
+}
+
+static gboolean
+gwy_scroller_scroll_event(GtkWidget *widget,
+                          GdkEventScroll *event)
+{
+    Scroller *priv = GWY_SCROLLER(widget)->priv;
+    GtkOrientation orientation;
+    GtkAdjustment *adj;
+
+    if (event->direction == GDK_SCROLL_UP
+        || event->direction == GDK_SCROLL_DOWN) {
+        adj = priv->vadjustment;
+        orientation = GTK_ORIENTATION_VERTICAL;
+    }
+    else {
+        adj = priv->hadjustment;
+        orientation = GTK_ORIENTATION_HORIZONTAL;
+    }
+
+    gdouble delta = gwy_scroll_wheel_delta(adj, event, orientation);
+    gdouble value = gtk_adjustment_get_value(adj),
+            lower = gtk_adjustment_get_lower(adj),
+            upper = gtk_adjustment_get_upper(adj),
+            page_size = gtk_adjustment_get_page_size(adj);
+
+    // Try to mimic scrollbars.  Or, if scrollbars are present elsewhere and
+    // also connected, be consisten with them.
+    value = CLAMP(value + delta, lower, upper - page_size);
+    gtk_adjustment_set_value(adj, value);
+
+    return TRUE;
 }
 
 static GType
@@ -456,6 +539,25 @@ gwy_scroller_get_vadjustment(const GwyScroller *scroller)
 {
     g_return_val_if_fail(GWY_IS_SCROLLER(scroller), NULL);
     return scroller->priv->vadjustment;
+}
+
+static void
+add_scroll_binding(GtkBindingSet *binding_set,
+                   guint keyval,
+                   GdkModifierType mask,
+                   GtkScrollType scroll,
+                   gboolean horizontal)
+{
+    guint keypad_keyval = keyval - GDK_KEY_Left + GDK_KEY_KP_Left;
+
+    gtk_binding_entry_add_signal(binding_set, keyval, mask,
+                                 "scroll-child", 2,
+                                 GTK_TYPE_SCROLL_TYPE, scroll,
+                                 G_TYPE_BOOLEAN, horizontal);
+    gtk_binding_entry_add_signal(binding_set, keypad_keyval, mask,
+                                 "scroll-child", 2,
+                                 GTK_TYPE_SCROLL_TYPE, scroll,
+                                 G_TYPE_BOOLEAN, horizontal);
 }
 
 static gboolean
