@@ -271,11 +271,11 @@ gwy_scroller_size_allocate(GtkWidget *widget,
     GtkBin *bin = GTK_BIN(widget);
     GtkWidget *child = gtk_bin_get_child(bin);
 
-    if (child && gtk_widget_get_visible(child))
-        gtk_widget_size_allocate(child, allocation);
-
     GTK_WIDGET_CLASS(gwy_scroller_parent_class)->size_allocate(widget,
                                                                allocation);
+
+    if (child && gtk_widget_get_visible(child))
+        gtk_widget_size_allocate(child, allocation);
 }
 
 static gboolean
