@@ -68,7 +68,7 @@
 enum { N_ITEMS = 1 };
 
 enum {
-    DATA_CHANGED,
+    SGN_DATA_CHANGED,
     N_SIGNALS
 };
 
@@ -402,7 +402,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
      *
      * The ::data-changed signal is emitted when resource data changes.
      */
-    signals[DATA_CHANGED]
+    signals[SGN_DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -1415,7 +1415,7 @@ void
 gwy_resource_data_changed(GwyResource *resource)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    g_signal_emit(resource, signals[DATA_CHANGED], 0);
+    g_signal_emit(resource, signals[SGN_DATA_CHANGED], 0);
 }
 
 static void

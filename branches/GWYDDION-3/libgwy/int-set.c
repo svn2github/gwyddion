@@ -28,9 +28,9 @@ enum {
 };
 
 enum {
-    ADDED,
-    REMOVED,
-    ASSIGNED,
+    SGN_ADDED,
+    SGN_REMOVED,
+    SGN_ASSIGNED,
     N_SIGNALS
 };
 
@@ -106,7 +106,7 @@ gwy_int_set_class_init(GwyIntSetClass *klass)
      * The ::item-inserted signal is emitted when an integer is added into
      * the integer set.
      **/
-    signals[ADDED]
+    signals[SGN_ADDED]
         = g_signal_new_class_handler("added",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -122,7 +122,7 @@ gwy_int_set_class_init(GwyIntSetClass *klass)
      * The ::item-deleted signal is emitted when an integer is removed from
      * the integer set.
      **/
-    signals[REMOVED]
+    signals[SGN_REMOVED]
         = g_signal_new_class_handler("removed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -136,7 +136,7 @@ gwy_int_set_class_init(GwyIntSetClass *klass)
      * The ::assigned signal is emitted when the entire contents of the set
      * changes, e.g. by assignment.
      **/
-    signals[ASSIGNED]
+    signals[SGN_ASSIGNED]
         = g_signal_new_class_handler("assigned",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -266,7 +266,7 @@ gwy_int_set_assign_impl(GwySerializable *destination,
 
     g_array_set_size(dranges, 0);
     g_array_append_vals(dranges, sranges->data, sranges->len);
-    g_signal_emit(dest, signals[ASSIGNED], 0);
+    g_signal_emit(dest, signals[SGN_ASSIGNED], 0);
 }
 
 /**
@@ -468,7 +468,7 @@ add_value(GwyIntSet *intset, gint value, guint rid)
         g_array_insert_val(ranges, rid, range);
     }
 
-    g_signal_emit(intset, signals[ADDED], 0, value);
+    g_signal_emit(intset, signals[SGN_ADDED], 0, value);
 }
 
 static void
@@ -494,7 +494,7 @@ remove_value(GwyIntSet *intset, gint value, guint rid)
         g_array_insert_val(ranges, rid, range);
     }
 
-    g_signal_emit(intset, signals[REMOVED], 0, value);
+    g_signal_emit(intset, signals[SGN_REMOVED], 0, value);
 }
 
 // Find the range containing @value and return TRUE or, failing that, the range
@@ -648,7 +648,7 @@ gwy_int_set_fill(GwyIntSet *intset,
 {
     g_return_if_fail(GWY_IS_INT_SET(intset));
     set_data_silent(intset, values, n);
-    g_signal_emit(intset, signals[ASSIGNED], 0);
+    g_signal_emit(intset, signals[SGN_ASSIGNED], 0);
 }
 
 /**

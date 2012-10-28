@@ -32,7 +32,7 @@
 enum { N_ITEMS = 3 };
 
 enum {
-    DATA_CHANGED,
+    SGN_DATA_CHANGED,
     N_SIGNALS
 };
 
@@ -130,7 +130,7 @@ gwy_curve_class_init(GwyCurveClass *klass)
      *
      * The ::data-changed signal is emitted whenever curve data changes.
      **/
-    signals[DATA_CHANGED]
+    signals[SGN_DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -555,7 +555,7 @@ void
 gwy_curve_data_changed(GwyCurve *curve)
 {
     g_return_if_fail(GWY_IS_CURVE(curve));
-    g_signal_emit(curve, signals[DATA_CHANGED], 0);
+    g_signal_emit(curve, signals[SGN_DATA_CHANGED], 0);
 }
 
 /**

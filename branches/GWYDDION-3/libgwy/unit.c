@@ -37,7 +37,7 @@
 enum { N_ITEMS = 1 };
 
 enum {
-    CHANGED,
+    SGN_CHANGED,
     N_SIGNALS
 };
 
@@ -233,7 +233,7 @@ gwy_unit_class_init(GwyUnitClass *klass)
      *
      * The ::changed signal is emitted whenever unit changes.
      **/
-    signals[CHANGED]
+    signals[SGN_CHANGED]
         = g_signal_new_class_handler("changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -335,7 +335,7 @@ gwy_unit_assign_impl(GwySerializable *destination,
     g_array_set_size(dest->priv->units, 0);
     g_array_append_vals(dest->priv->units,
                         src->priv->units->data, src->priv->units->len);
-    g_signal_emit(dest, signals[CHANGED], 0);
+    g_signal_emit(dest, signals[SGN_CHANGED], 0);
 }
 
 /**
@@ -407,7 +407,7 @@ gwy_unit_set_from_string(GwyUnit *unit,
 
     g_array_free(unit->priv->units, TRUE);
     unit->priv->units = units;
-    g_signal_emit(unit, signals[CHANGED], 0);
+    g_signal_emit(unit, signals[SGN_CHANGED], 0);
 }
 
 static inline const GwyUnitStyleSpec*
@@ -830,7 +830,7 @@ gwy_unit_power(GwyUnit *unit,
     g_return_if_fail(GWY_IS_UNIT(op));
 
     if (power_impl(unit->priv->units, op->priv->units, power))
-        g_signal_emit(unit, signals[CHANGED], 0);
+        g_signal_emit(unit, signals[SGN_CHANGED], 0);
 }
 
 // Returns TRUE if @unit has actually changed.
@@ -963,7 +963,7 @@ gwy_unit_nth_root(GwyUnit *unit,
     g_array_set_size(priv->units, 0);
     g_array_append_vals(priv->units, units->data, units->len);
     g_array_free(units, TRUE);
-    g_signal_emit(unit, signals[CHANGED], 0);
+    g_signal_emit(unit, signals[SGN_CHANGED], 0);
 
     return TRUE;
 }
@@ -1021,7 +1021,7 @@ gwy_unit_power_multiply(GwyUnit *unit,
     g_array_set_size(unit->priv->units, 0);
     g_array_append_vals(unit->priv->units, units->data, units->len);
     g_array_free(units, TRUE);
-    g_signal_emit(unit, signals[CHANGED], 0);
+    g_signal_emit(unit, signals[SGN_CHANGED], 0);
 }
 
 static void

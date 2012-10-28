@@ -29,7 +29,7 @@
 enum { N_ITEMS = 2 };
 
 enum {
-    DATA_CHANGED,
+    SGN_DATA_CHANGED,
     N_SIGNALS
 };
 
@@ -116,7 +116,7 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
      * emit it explicitly with gwy_mask_line_data_changed() to notify anything
      * that displays (or otherwise uses) the mask line.
      **/
-    signals[DATA_CHANGED]
+    signals[SGN_DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -671,7 +671,7 @@ gwy_mask_line_data_changed(GwyMaskLine *line,
                            GwyLinePart *lpart)
 {
     g_return_if_fail(GWY_IS_MASK_LINE(line));
-    g_signal_emit(line, signals[DATA_CHANGED], 0, lpart);
+    g_signal_emit(line, signals[SGN_DATA_CHANGED], 0, lpart);
 }
 
 /**
