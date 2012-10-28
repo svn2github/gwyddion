@@ -24,6 +24,8 @@
 #include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/mask-field-grains.h"
+#include "libgwyui/types.h"
+#include "libgwyui/marshal.h"
 #include "libgwyui/field-render.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/raster-view.h"
@@ -51,9 +53,16 @@ enum {
     N_TOTAL_PROPS
 };
 
+enum {
+    SGN_SCROLL,
+    SGN_ZOOM,
+    N_SIGNALS
+};
+
 struct _GwyRasterViewPrivate {
     GdkWindow *window;
 
+    // Implementation of GtkScrollable
     GtkAdjustment *hadjustment;
     gulong hadjustment_value_changed_id;
 
@@ -63,9 +72,13 @@ struct _GwyRasterViewPrivate {
     guint hscroll_policy;
     guint vscroll_policy;
 
+    // Coordinate ranges and transforms
     gdouble zoom;
     gboolean real_aspect_ratio;
+    // Position of the field image within the widget.  Unless we zoom out too
+    // much (so that borders appear) x and y is zero.
     cairo_rectangle_int_t image_rectangle;
+    // Field part, in pixel coordinates, shown in the visible area.
     cairo_rectangle_t field_rectangle;
 
     cairo_matrix_t window_to_field_matrix;
@@ -73,8 +86,7 @@ struct _GwyRasterViewPrivate {
     cairo_matrix_t field_to_window_matrix;
     cairo_matrix_t coords_to_window_matrix;
 
-    gboolean number_grains;
-
+    // Field
     GwyField *field;
     gulong field_notify_id;
     gulong field_data_changed_id;
@@ -82,6 +94,7 @@ struct _GwyRasterViewPrivate {
     cairo_surface_t *field_surface;
     gboolean field_surface_valid;
 
+    // Mask
     GwyMaskField *mask;
     gulong mask_notify_id;
     gulong mask_data_changed_id;
@@ -89,6 +102,7 @@ struct _GwyRasterViewPrivate {
     gboolean mask_surface_valid;
     guint active_grain;
 
+    // Visualisation
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
 
@@ -97,6 +111,7 @@ struct _GwyRasterViewPrivate {
 
     GwyRGBA mask_color;
     GwyRGBA grain_number_color;
+    gboolean number_grains;
 
     PangoLayout *layout;
     GtkWidget *area_widget;
@@ -141,6 +156,10 @@ static gboolean gwy_raster_view_key_release         (GtkWidget *widget,
                                                      GdkEventKey *event);
 static gboolean gwy_raster_view_leave_notify        (GtkWidget *widget,
                                                      GdkEventCrossing *event);
+static gboolean gwy_raster_view_scroll              (GwyRasterView *rasterview,
+                                                     GtkScrollType scrolltype);
+static gboolean gwy_raster_view_zoom                (GwyRasterView *rasterview,
+                                                     GwyZoomType zoomtype);
 static void     calculate_position_and_size         (GwyRasterView *rasterview);
 static void     update_matrices                     (GwyRasterView *rasterview);
 static void     ensure_layout                       (GwyRasterView *rasterview);
@@ -201,31 +220,49 @@ static gboolean set_number_grains                   (GwyRasterView *rasterview,
                                                      gboolean setting);
 static guint    calculate_full_width                (const GwyRasterView *rasterview);
 static guint    calculate_full_height               (const GwyRasterView *rasterview);
-static gboolean scroll                              (GwyRasterView *rasterview,
-                                                     GtkScrollType scrolltype);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
 
 static GParamSpec *properties[N_TOTAL_PROPS];
+static guint signals[N_SIGNALS];
 
 static const struct {
     guint keyval;
     GtkScrollType scrolltype;
+    GdkModifierType mask;
 }
 key_scroll_table[] = {
-    { GDK_KEY_Left,     GTK_SCROLL_STEP_LEFT,  },
-    { GDK_KEY_KP_Left,  GTK_SCROLL_STEP_LEFT,  },
-    { GDK_KEY_Right,    GTK_SCROLL_STEP_RIGHT, },
-    { GDK_KEY_KP_Right, GTK_SCROLL_STEP_RIGHT, },
-    { GDK_KEY_Up,       GTK_SCROLL_STEP_UP,    },
-    { GDK_KEY_KP_Up,    GTK_SCROLL_STEP_UP,    },
-    { GDK_KEY_Down,     GTK_SCROLL_STEP_DOWN,  },
-    { GDK_KEY_KP_Down,  GTK_SCROLL_STEP_DOWN,  },
-    { GDK_KEY_Home,     GTK_SCROLL_START,      },
-    { GDK_KEY_KP_Home,  GTK_SCROLL_START,      },
-    { GDK_KEY_End,      GTK_SCROLL_END,        },
-    { GDK_KEY_KP_End,   GTK_SCROLL_END,        },
+    { GDK_KEY_Left,     GTK_SCROLL_STEP_LEFT,  0, },
+    { GDK_KEY_KP_Left,  GTK_SCROLL_STEP_LEFT,  0, },
+    { GDK_KEY_Right,    GTK_SCROLL_STEP_RIGHT, 0, },
+    { GDK_KEY_KP_Right, GTK_SCROLL_STEP_RIGHT, 0, },
+    { GDK_KEY_Up,       GTK_SCROLL_STEP_UP,    0, },
+    { GDK_KEY_KP_Up,    GTK_SCROLL_STEP_UP,    0, },
+    { GDK_KEY_Down,     GTK_SCROLL_STEP_DOWN,  0, },
+    { GDK_KEY_KP_Down,  GTK_SCROLL_STEP_DOWN,  0, },
+    { GDK_KEY_Home,     GTK_SCROLL_START,      0, },
+    { GDK_KEY_KP_Home,  GTK_SCROLL_START,      0, },
+    { GDK_KEY_End,      GTK_SCROLL_END,        0, },
+    { GDK_KEY_KP_End,   GTK_SCROLL_END,        0, },
+};
+
+static const struct {
+    guint keyval;
+    GwyZoomType zoomtype;
+    GdkModifierType mask;
+}
+key_zoom_table[] = {
+    { GDK_KEY_plus,        GWY_ZOOM_IN,  0, },
+    { GDK_KEY_KP_Add,      GWY_ZOOM_IN,  0, },
+    { GDK_KEY_equal,       GWY_ZOOM_IN,  0, },
+    { GDK_KEY_KP_Equal,    GWY_ZOOM_IN,  0, },
+    { GDK_KEY_minus,       GWY_ZOOM_OUT, 0, },
+    { GDK_KEY_KP_Subtract, GWY_ZOOM_OUT, 0, },
+    { GDK_KEY_z,           GWY_ZOOM_1_1, 0, },
+    { GDK_KEY_Z,           GWY_ZOOM_1_1, 0, },
+    { GDK_KEY_x,           GWY_ZOOM_FIT, 0, },
+    { GDK_KEY_X,           GWY_ZOOM_FIT, 0, },
 };
 
 G_DEFINE_TYPE_WITH_CODE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET,
@@ -338,6 +375,70 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                                   "hscroll-policy", PROP_HSCROLL_POLICY,
                                   "vscroll-policy", PROP_VSCROLL_POLICY,
                                   NULL);
+
+    /**
+     * GwyRasterView::scroll:
+     * @gwyrasterview: The #GwyRasterView which received the signal.
+     * @arg1: #GtkScrollType describing where and how much to scroll.
+     *
+     * The ::scroll signal is a
+     * <link linkend="keybinding-signals">keybinding signal</link>
+     * which gets emitted when a keybinding that scrolls is pressed.
+     * The raster view then scrolls itself as requested.
+     *
+     * #GwyRasterView view respons only to two-dimensional scrolling types such
+     * as %GTK_SCROLL_STEP_LEFT since one-dimensional scrolling types such as
+     * %GTK_SCROLL_PAGE_BACKWARD are meaningless.
+     */
+    signals[SGN_SCROLL]
+        = g_signal_new_class_handler("scroll",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+                                     G_CALLBACK(gwy_raster_view_scroll),
+                                     NULL, NULL,
+                                     _gwy_cclosure_marshal_BOOLEAN__ENUM,
+                                     G_TYPE_BOOLEAN, 1,
+                                     GTK_TYPE_SCROLL_TYPE);
+
+    /**
+     * GwyRasterView::zoom:
+     * @gwyrasterview: The #GwyRasterView which received the signal.
+     * @arg1: #GwyZoomType describing the requested zoom change.
+     *
+     * The ::zoom signal is a
+     * <link linkend="keybinding-signals">keybinding signal</link>
+     * which gets emitted when a keybinding that scrolls is pressed.
+     * The raster view then zooms itself as requested.
+     */
+    signals[SGN_ZOOM]
+        = g_signal_new_class_handler("zoom",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+                                     G_CALLBACK(gwy_raster_view_zoom),
+                                     NULL, NULL,
+                                     _gwy_cclosure_marshal_BOOLEAN__ENUM,
+                                     G_TYPE_BOOLEAN, 1,
+                                     GWY_TYPE_ZOOM_TYPE);
+
+    GtkBindingSet *binding_set = gtk_binding_set_by_class(klass);
+
+    for (guint i = 0; i < G_N_ELEMENTS(key_scroll_table); i++) {
+        GtkScrollType scrolltype = key_scroll_table[i].scrolltype;
+        guint keyval = key_scroll_table[i].keyval;
+        GdkModifierType mask = key_scroll_table[i].mask;
+        gtk_binding_entry_add_signal(binding_set, keyval, mask,
+                                     "scroll", 1,
+                                     GTK_TYPE_SCROLL_TYPE, scrolltype);
+    }
+
+    for (guint i = 0; i < G_N_ELEMENTS(key_zoom_table); i++) {
+        GtkScrollType zoomtype = key_zoom_table[i].zoomtype;
+        guint keyval = key_zoom_table[i].keyval;
+        GdkModifierType mask = key_zoom_table[i].mask;
+        gtk_binding_entry_add_signal(binding_set, keyval, mask,
+                                     "zoom", 1,
+                                     GWY_TYPE_ZOOM_TYPE, zoomtype);
+    }
 }
 
 static void
@@ -1156,21 +1257,13 @@ gwy_raster_view_key_press(GtkWidget *widget,
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     RasterView *priv = rasterview->priv;
-    guint keyval = event->keyval;
-
-    for (guint i = 0; i < G_N_ELEMENTS(key_scroll_table); i++) {
-        if (keyval == key_scroll_table[i].keyval) {
-            scroll(rasterview, key_scroll_table[i].scrolltype);
-            return TRUE;
-        }
-    }
 
     if (priv->shapes) {
         if (gwy_shapes_key_press(priv->shapes, event))
             return TRUE;
     }
 
-    return FALSE;
+    return GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->key_press_event(widget, event);
 }
 
 static gboolean
@@ -1179,22 +1272,13 @@ gwy_raster_view_key_release(GtkWidget *widget,
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
     RasterView *priv = rasterview->priv;
-    guint keyval = event->keyval;
-
-    for (guint i = 0; i < G_N_ELEMENTS(key_scroll_table); i++) {
-        if (keyval == key_scroll_table[i].keyval) {
-            // Do not scroll here but do not pass the corresponding keys to
-            // shapes either.
-            return TRUE;
-        }
-    }
 
     if (priv->shapes) {
         if (gwy_shapes_key_release(priv->shapes, event))
             return TRUE;
     }
 
-    return FALSE;
+    return GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->key_release_event(widget, event);
 }
 
 static gboolean
@@ -1210,6 +1294,131 @@ gwy_raster_view_leave_notify(GtkWidget *widget,
 
     priv->active_grain = 0;
     gtk_widget_queue_draw(widget);
+
+    return GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->leave_notify_event(widget, event);
+}
+
+static gboolean
+gwy_raster_view_scroll(GwyRasterView *rasterview,
+                       GtkScrollType scrolltype)
+{
+    RasterView *priv = rasterview->priv;
+    GtkAdjustment *vadj = priv->vadjustment,
+                  *hadj = priv->hadjustment;
+    gboolean scrolling = FALSE;
+
+    if (hadj) {
+        gdouble value = gtk_adjustment_get_value(hadj), newvalue = value;
+        gdouble lower = gtk_adjustment_get_lower(hadj),
+                upper = gtk_adjustment_get_upper(hadj);
+
+        if (scrolltype == GTK_SCROLL_START)
+            newvalue = lower;
+        else if (scrolltype == GTK_SCROLL_PAGE_LEFT) {
+            gdouble page = gtk_adjustment_get_page_increment(hadj);
+            newvalue = MAX(lower, value - page);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_LEFT) {
+            gdouble step = gtk_adjustment_get_step_increment(hadj);
+            newvalue = MAX(lower, value - step);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_RIGHT) {
+            gdouble step = gtk_adjustment_get_step_increment(hadj);
+            newvalue = MIN(upper, value + step);
+        }
+        else if (scrolltype == GTK_SCROLL_PAGE_RIGHT) {
+            gdouble page = gtk_adjustment_get_page_increment(hadj);
+            newvalue = MIN(lower, value + page);
+        }
+        else if (scrolltype == GTK_SCROLL_END)
+            newvalue = upper;
+
+        if (newvalue != value) {
+            gtk_adjustment_set_value(hadj, newvalue);
+            scrolling = TRUE;
+        }
+    }
+
+    if (vadj) {
+        gdouble value = gtk_adjustment_get_value(vadj), newvalue = value;
+        gdouble lower = gtk_adjustment_get_lower(vadj),
+                upper = gtk_adjustment_get_upper(vadj);
+
+        if (scrolltype == GTK_SCROLL_START)
+            newvalue = lower;
+        else if (scrolltype == GTK_SCROLL_PAGE_UP) {
+            gdouble page = gtk_adjustment_get_page_increment(vadj);
+            newvalue = MAX(lower, value - page);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_UP) {
+            gdouble step = gtk_adjustment_get_step_increment(vadj);
+            newvalue = MAX(lower, value - step);
+        }
+        else if (scrolltype == GTK_SCROLL_STEP_DOWN) {
+            gdouble step = gtk_adjustment_get_step_increment(vadj);
+            newvalue = MIN(upper, value + step);
+        }
+        else if (scrolltype == GTK_SCROLL_PAGE_DOWN) {
+            gdouble page = gtk_adjustment_get_page_increment(vadj);
+            newvalue = MIN(lower, value + page);
+        }
+        else if (scrolltype == GTK_SCROLL_END)
+            newvalue = upper;
+
+        if (newvalue != value) {
+            gtk_adjustment_set_value(vadj, newvalue);
+            scrolling = TRUE;
+        }
+    }
+
+    return scrolling;
+}
+
+static gboolean
+gwy_raster_view_zoom(GwyRasterView *rasterview,
+                     GwyZoomType zoomtype)
+{
+    static const gdouble zoom_values[] = {
+        0.0625, 0.0833333333333333, 0.1, 0.125, 0.166666666666667, 0.25,
+        0.333333333333333, 0.5, 0.666666666666667, 1.0, 1.5, 2.0, 3.0,
+        4.0, 6.0, 8.0, 10.0, 12.0, 16.0
+    };
+
+    RasterView *priv = rasterview->priv;
+    gdouble zoom = priv->zoom;
+    if (!zoom)
+        return FALSE;
+
+    if (zoomtype == GWY_ZOOM_IN) {
+        for (guint i = 0; i < G_N_ELEMENTS(zoom_values); i++) {
+            if (zoom_values[i] > zoom)
+                return set_zoom(rasterview, zoom_values[i]);
+        }
+    }
+    else if (zoomtype == GWY_ZOOM_OUT) {
+        for (guint i = G_N_ELEMENTS(zoom_values); i; i--) {
+            if (zoom_values[i-1] < zoom)
+                return set_zoom(rasterview, zoom_values[i-1]);
+        }
+    }
+    else if (zoomtype == GWY_ZOOM_1_1) {
+        return set_zoom(rasterview, 1.0);
+    }
+    else if (zoomtype == GWY_ZOOM_FIT) {
+        if (!priv->field)
+            return FALSE;
+
+        GwyField *field = priv->field;
+        GtkWidget *widget = GTK_WIDGET(rasterview);
+        GtkAllocation alloc;
+        gtk_widget_get_allocation(widget, &alloc);
+        gdouble xscale = (gdouble)alloc.width/field->xres;
+        gdouble yscale = (gdouble)alloc.height/field->yres;
+        if (priv->real_aspect_ratio)
+            yscale = gwy_field_dx(field)/gwy_field_dy(field);
+
+        return set_zoom(rasterview, MIN(xscale, yscale));
+    }
 
     return FALSE;
 }
@@ -1850,14 +2059,14 @@ scroll_to_current_point(GwyRasterView *rasterview,
     const cairo_rectangle_int_t *irect = &priv->image_rectangle;
 
     if (xy.x < irect->x)
-        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_LEFT);
+        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_LEFT);
     else if (xy.x > irect->x + irect->width)
-        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_RIGHT);
+        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_RIGHT);
 
     if (xy.y < irect->y)
-        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_UP);
+        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_UP);
     else if (xy.y > irect->y + irect->height)
-        scrolling |= scroll(rasterview, GTK_SCROLL_STEP_DOWN);
+        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_DOWN);
 
     return scrolling;
 }
@@ -1994,8 +2203,39 @@ set_zoom(GwyRasterView *rasterview,
     if (zoom == priv->zoom)
         return FALSE;
 
+    GtkWidget *widget = GTK_WIDGET(rasterview);
+    if (!priv->hadjustment || !priv->vadjustment || !priv->field) {
+        priv->zoom = zoom;
+        gtk_widget_queue_resize(widget);
+        return TRUE;
+    }
+
+    guint xres = priv->field->xres, yres = priv->field->yres;
+    gdouble x = 0.5*gtk_widget_get_allocated_width(widget);
+    gdouble y = 0.5*gtk_widget_get_allocated_height(widget);
+    cairo_matrix_transform_point(&priv->window_to_field_matrix, &x, &y);
+    // In case of zooming in we want to preserve the centre.  In case of
+    // zooming out we want to avoid showing borders.  The latter should be
+    // ensured by calculate_position_and_size() so ensure the former.
     priv->zoom = zoom;
-    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    calculate_position_and_size(rasterview);
+    set_hadjustment_values(rasterview);
+    set_vadjustment_values(rasterview);
+    if (priv->field_rectangle.width < xres) {
+        x *= gtk_adjustment_get_upper(priv->hadjustment)/xres;
+        x -= 0.5*gtk_adjustment_get_page_size(priv->hadjustment);
+        gtk_adjustment_set_value(priv->hadjustment, x);
+    }
+    if (priv->field_rectangle.height < yres) {
+        y *= gtk_adjustment_get_upper(priv->vadjustment)/yres;
+        y -= 0.5*gtk_adjustment_get_page_size(priv->vadjustment);
+        gtk_adjustment_set_value(priv->vadjustment, y);
+    }
+
+    priv->field_surface_valid = FALSE;
+    priv->mask_surface_valid = FALSE;
+    gtk_widget_queue_draw(widget);
+
     return TRUE;
 }
 
@@ -2059,82 +2299,6 @@ set_number_grains(GwyRasterView *rasterview,
     return TRUE;
 }
 
-static gboolean
-scroll(GwyRasterView *rasterview,
-       GtkScrollType scrolltype)
-{
-    RasterView *priv = rasterview->priv;
-    GtkAdjustment *vadj = priv->vadjustment,
-                  *hadj = priv->hadjustment;
-    gboolean scrolling = FALSE;
-
-    if (hadj) {
-        gdouble value = gtk_adjustment_get_value(hadj), newvalue = value;
-        gdouble lower = gtk_adjustment_get_lower(hadj),
-                upper = gtk_adjustment_get_upper(hadj);
-
-        if (scrolltype == GTK_SCROLL_START)
-            newvalue = lower;
-        else if (scrolltype == GTK_SCROLL_PAGE_LEFT) {
-            gdouble page = gtk_adjustment_get_page_increment(hadj);
-            newvalue = MAX(lower, value - page);
-        }
-        else if (scrolltype == GTK_SCROLL_STEP_LEFT) {
-            gdouble step = gtk_adjustment_get_step_increment(hadj);
-            newvalue = MAX(lower, value - step);
-        }
-        else if (scrolltype == GTK_SCROLL_STEP_RIGHT) {
-            gdouble step = gtk_adjustment_get_step_increment(hadj);
-            newvalue = MIN(upper, value + step);
-        }
-        else if (scrolltype == GTK_SCROLL_PAGE_RIGHT) {
-            gdouble page = gtk_adjustment_get_page_increment(hadj);
-            newvalue = MIN(lower, value + page);
-        }
-        else if (scrolltype == GTK_SCROLL_END)
-            newvalue = upper;
-
-        if (newvalue != value) {
-            gtk_adjustment_set_value(hadj, newvalue);
-            scrolling = TRUE;
-        }
-    }
-
-    if (vadj) {
-        gdouble value = gtk_adjustment_get_value(vadj), newvalue = value;
-        gdouble lower = gtk_adjustment_get_lower(vadj),
-                upper = gtk_adjustment_get_upper(vadj);
-
-        if (scrolltype == GTK_SCROLL_START)
-            newvalue = lower;
-        else if (scrolltype == GTK_SCROLL_PAGE_UP) {
-            gdouble page = gtk_adjustment_get_page_increment(vadj);
-            newvalue = MAX(lower, value - page);
-        }
-        else if (scrolltype == GTK_SCROLL_STEP_UP) {
-            gdouble step = gtk_adjustment_get_step_increment(vadj);
-            newvalue = MAX(lower, value - step);
-        }
-        else if (scrolltype == GTK_SCROLL_STEP_DOWN) {
-            gdouble step = gtk_adjustment_get_step_increment(vadj);
-            newvalue = MIN(upper, value + step);
-        }
-        else if (scrolltype == GTK_SCROLL_PAGE_DOWN) {
-            gdouble page = gtk_adjustment_get_page_increment(vadj);
-            newvalue = MIN(lower, value + page);
-        }
-        else if (scrolltype == GTK_SCROLL_END)
-            newvalue = upper;
-
-        if (newvalue != value) {
-            gtk_adjustment_set_value(vadj, newvalue);
-            scrolling = TRUE;
-        }
-    }
-
-    return scrolling;
-}
-
 /**
  * SECTION: raster-view
  * @section_id: GwyRasterView
@@ -2155,6 +2319,18 @@ scroll(GwyRasterView *rasterview,
  * GwyRasterViewClass:
  *
  * Class of two-dimensional raster views.
+ **/
+
+/**
+ * GwyZoomType:
+ * @GWY_ZOOM_1_1: Zoom 1:1, also called 100%, display the object in native
+ *                size.
+ * @GWY_ZOOM_IN: Zoom in, make the displayed object seem larger.
+ * @GWY_ZOOM_OUT: Zoom out, make the displayed object seem smaller.
+ * @GWY_ZOOM_FIT: Set zoom so that the object fits fully within the alloted
+ *                area.
+ *
+ * Type of zoom.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

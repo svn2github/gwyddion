@@ -28,6 +28,13 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_ZOOM_1_1,
+    GWY_ZOOM_IN,
+    GWY_ZOOM_OUT,
+    GWY_ZOOM_FIT,
+} GwyZoomType;
+
 #define GWY_TYPE_RASTER_VIEW \
     (gwy_raster_view_get_type())
 #define GWY_RASTER_VIEW(obj) \

@@ -115,8 +115,8 @@ static const cairo_rectangle_t unrestricted_bbox = {
     -G_MAXDOUBLE, -G_MAXDOUBLE, G_MAXDOUBLE, G_MAXDOUBLE
 };
 
-static guint signals[N_SIGNALS];
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 G_DEFINE_ABSTRACT_TYPE(GwyShapes, gwy_shapes, G_TYPE_INITIALLY_UNOWNED);
 
