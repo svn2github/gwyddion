@@ -126,6 +126,7 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwy3_la_SOURCES = \
+	$(mkenum_name).c \
 	array.c \
 	brick.c \
 	brick-arithmetic.c \
@@ -192,7 +193,6 @@ libgwy3_la_SOURCES = \
 	strfuncs.c \
 	surface.c \
 	surface-statistics.c \
-	types.c \
 	unit.c \
 	user-fit-func.c \
 	user-grain-value.c \

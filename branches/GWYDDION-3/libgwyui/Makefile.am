@@ -57,17 +57,17 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyui3_la_SOURCES = \
+	$(genmarshal_name).c \
+	$(mkenum_name).c \
 	axis.c \
 	cairo-utils.c \
 	color-axis.c \
 	field-render.c \
-	marshal.c \
 	raster-view.c \
 	ruler.c \
 	scroller.c \
 	shapes.c \
 	shapes-point.c \
-	types.c \
 	widget-utils.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
