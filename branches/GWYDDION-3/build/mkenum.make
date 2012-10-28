@@ -1,6 +1,6 @@
 # Generic glib-mkenum rules.
 # $Id$
-# Variables: mkenum_name mkenum_id mkenum_headers library
+# Variables: mkenum_name mkenum_headers library
 # Adds to: BUILT_SOURCES CLEANFILES DISTCLEANFILES
 
 mkenum_built_sources = $(mkenum_name).h $(mkenum_name).c
@@ -11,7 +11,7 @@ mkenum_c_template = $(top_srcdir)/build/mkenum.c.template
 mkenum_h_template = $(top_srcdir)/build/mkenum.h.template
 # Keep the `GENERATED' string quoted to prevent match here
 mkenum_fix_output = \
-	| $(SED) -e 's/@'ID'@/$(mkenum_id)/g' \
+	| $(SED) -e 's/@'ID'@/'"$$id"'/g' \
 	      -e 's/@'SELF'@/$(mkenum_name)/g' \
 	      -e 's/@'LIBRARY'@/$(library)/g' \
 	      -e '1s:.*:/* This is a 'GENERATED' file. */:'
@@ -25,7 +25,8 @@ $(mkenum_name).h: $(mkenum_name).h.stamp
 	@true
 
 $(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template) $(mkenum_self)
-	$(AM_V_at)$(GLIB_MKENUMS) --template $(mkenum_h_template) $(mkenum_headers) \
+	$(AM_V_at) id=$$(echo '$(library)_$(mkenum_name)' | tr a-z A-Z) \
+	&& $(GLIB_MKENUMS) --template $(mkenum_h_template) $(mkenum_headers) \
 		$(mkenum_fix_output) \
 		>$(mkenum_name).h.tmp \
 	&& ( cmp -s $(mkenum_name).h.tmp $(mkenum_name).h \
@@ -35,7 +36,8 @@ $(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template) $(mkenum_self)
 	&& touch $(mkenum_name).h
 
 $(mkenum_name).c: $(mkenum_headers) $(mkenum_c_template) $(mkenum_self)
-	$(AM_V_GEN)$(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
+	$(AM_V_GEN) id=$$(echo '$(library)_$(mkenum_name)' | tr a-z A-Z) \
+	&& $(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
 		$(mkenum_fix_output) \
 		>$(mkenum_name).c.tmp \
 	&& cp $(mkenum_name).c.tmp $(mkenum_name).c  \

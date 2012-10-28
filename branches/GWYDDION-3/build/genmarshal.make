@@ -20,8 +20,11 @@ $(genmarshal_name).h: $(genmarshal_name).h.stamp
 
 # Keep the `GENERATED' string quoted to prevent match here
 $(genmarshal_name).h.stamp: $(genmarshal_name).list $(genmarshal_self)
-	$(AM_V_at)echo '/* This is a 'GENERATED' file */' >$(genmarshal_name).h.tmp \
+	$(AM_V_at) id=$$(echo '$(library)_$(genmarshal_name)' | tr a-z A-Z) \
+	&& echo '/* This is a 'GENERATED' file */' >$(genmarshal_name).h.tmp \
 	&& $(genmarshal_cmd) --header $(srcdir)/$(genmarshal_name).list \
+		| $(SED) -e 's/\<__[a-zA-Z_]*_H__\>/__'"$$id"'_H__/' \
+			     -e $$'1a\\\n/*< private_header >*/' \
 		>>$(genmarshal_name).h.tmp \
 	&& ( cmp -s $(genmarshal_name).h.tmp $(genmarshal_name).h \
 		|| cp $(genmarshal_name).h.tmp $(genmarshal_name).h ) \
@@ -31,7 +34,8 @@ $(genmarshal_name).h.stamp: $(genmarshal_name).list $(genmarshal_self)
 
 # Keep the `GENERATED' string quoted to prevent match here
 $(genmarshal_name).c: $(genmarshal_name).list $(genmarshal_self)
-	$(AM_V_GEN)echo '/* This is a 'GENERATED' file */' >$(genmarshal_name).c.tmp \
+	$(AM_V_GEN) id=$$(echo '$(library)_$(genmarshal_name)' | tr a-z A-Z) \
+	&& echo '/* This is a 'GENERATED' file */' >$(genmarshal_name).c.tmp \
 	&& echo '#include "$(genmarshal_name).h"' >>$(genmarshal_name).c.tmp \
 	&& $(genmarshal_cmd) --body $(srcdir)/$(genmarshal_name).list \
 		| $(SED) -e 's/^\( *\)\(GValue *\* *return_value,\)/\1G_GNUC_UNUSED \2/' \
