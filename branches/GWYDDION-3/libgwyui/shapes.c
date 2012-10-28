@@ -36,8 +36,8 @@ enum {
 };
 
 enum {
-    EDITING_STARTED,
-    UPDATED,
+    SGN_EDITING_STARTED,
+    SGN_UPDATED,
     N_SIGNALS
 };
 
@@ -189,7 +189,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
      * The end of the modification can be catched using the GwyCoords::finished
      * signal.
      **/
-    signals[EDITING_STARTED]
+    signals[SGN_EDITING_STARTED]
         = g_signal_new_class_handler("editing-started",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -206,7 +206,7 @@ gwy_shapes_class_init(GwyShapesClass *klass)
      * The signal is emitted only once between invocations of the draw()
      * method.
      **/
-    signals[UPDATED]
+    signals[SGN_UPDATED]
         = g_signal_new_class_handler("updated",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -1014,7 +1014,7 @@ gwy_shapes_update(GwyShapes *shapes)
         return;
 
     priv->is_updated = TRUE;
-    g_signal_emit(shapes, signals[UPDATED], 0);
+    g_signal_emit(shapes, signals[SGN_UPDATED], 0);
 }
 
 /**
@@ -1053,7 +1053,7 @@ void
 gwy_shapes_editing_started(GwyShapes *shapes)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    g_signal_emit(shapes, signals[EDITING_STARTED], 0);
+    g_signal_emit(shapes, signals[SGN_EDITING_STARTED], 0);
 }
 
 /**

@@ -31,7 +31,7 @@ enum {
 };
 
 enum {
-    SCROLL_CHILD,
+    SGN_SCROLL_CHILD,
     N_SIGNALS
 };
 
@@ -136,9 +136,9 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
      * <link linkend="keybinding-signals">keybinding signal</link>
      * which gets emitted when a keybinding that scrolls is pressed.
      * The horizontal or vertical adjustment is updated which triggers a
-     * signal that the scrolled windows child may listen to and scroll itself.
+     * signal that the scroller child may listen to and scroll itself.
      */
-    signals[SCROLL_CHILD]
+    signals[SGN_SCROLL_CHILD]
         = g_signal_new_class_handler("scroll-child",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
