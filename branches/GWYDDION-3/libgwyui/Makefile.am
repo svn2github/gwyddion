@@ -9,7 +9,6 @@ libgwyuiincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 #test_program = ./tests/testlibgwyui
 #test_default_suppressions = libgwyui-default.supp
 mkenum_name = types
-mkenum_id = LIBGWYUI_TYPES
 genmarshal_name = marshal
 genmarshal_prefix = _gwy_cclosure_marshal
 main_header = $(srcdir)/libgwyui.h
