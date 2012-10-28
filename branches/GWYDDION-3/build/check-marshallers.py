@@ -56,7 +56,7 @@ for filename in sys.argv[1:]:
         marshaller, rettype, nargs = args[6:9]
         nargs = int(nargs)
 
-        mt = re.sub(r'^g_cclosure_marshal_', '', marshaller)
+        mt = re.sub(r'^[a-z_]+_cclosure_marshal_', '', marshaller)
         mt_ret, mt_args = mt.split('__')
         mt_args = mt_args.split('_')
         if mt_args == ['VOID']:
@@ -89,6 +89,9 @@ for filename in sys.argv[1:]:
         for i in range(nargs):
             # Some manual tweaks necessary...
             if mt_args[i] == 'BOXED' and re.match(r'^[A-Z]+_PART$', argtypes[i]):
+                continue
+            if mt_args[i] == 'ENUM':
+                # Anything can be an enum, unfortunately
                 continue
             if argtypes[i] != mt_args[i]:
                 sys.stderr.write('%s:%s: Marshaller argument #%u type %s '
