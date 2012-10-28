@@ -22,7 +22,7 @@ public_headers = \
 	$(srcdir)/cairo-utils.h \
 	$(srcdir)/color-axis.h \
 	$(srcdir)/field-render.h \
-	$(srcdir)/raster-view.h \
+	$(srcdir)/raster-area.h \
 	$(srcdir)/ruler.h \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
@@ -62,7 +62,7 @@ libgwyui3_la_SOURCES = \
 	cairo-utils.c \
 	color-axis.c \
 	field-render.c \
-	raster-view.c \
+	raster-area.c \
 	ruler.c \
 	scroller.c \
 	shapes.c \

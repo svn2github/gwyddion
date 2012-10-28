@@ -592,7 +592,7 @@ set_vadjustment(GwyScroller *scroller,
 /**
  * SECTION: scroller
  * @section_id: GwyScroller
- * @title: Scrollable area
+ * @title: GwyScroller
  * @short_description: Simple scrollable area without any scrollbars
  *
  * #GwyScroller is somewhat similar to #GtkScrolledWindow.  However, it does

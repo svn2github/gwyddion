@@ -24,7 +24,7 @@
 #include <libgwyui/cairo-utils.h>
 #include <libgwyui/color-axis.h>
 #include <libgwyui/field-render.h>
-#include <libgwyui/raster-view.h>
+#include <libgwyui/raster-area.h>
 #include <libgwyui/ruler.h>
 #include <libgwyui/scroller.h>
 #include <libgwyui/shapes.h>

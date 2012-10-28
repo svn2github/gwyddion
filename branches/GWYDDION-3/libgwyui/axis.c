@@ -1523,7 +1523,7 @@ format_value_label(GwyAxis *axis,
 /**
  * SECTION: axis
  * @section_id: GwyAxis
- * @title: Axis
+ * @title: GwyAxis
  * @short_description: Base class for widgets displaying axes
  **/
 

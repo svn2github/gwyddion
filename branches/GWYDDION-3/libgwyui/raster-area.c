@@ -28,7 +28,7 @@
 #include "libgwyui/marshal.h"
 #include "libgwyui/field-render.h"
 #include "libgwyui/cairo-utils.h"
-#include "libgwyui/raster-view.h"
+#include "libgwyui/raster-area.h"
 
 #define IGNORE_ME N_("A translatable string.")
 
@@ -59,7 +59,7 @@ enum {
     N_SIGNALS
 };
 
-struct _GwyRasterViewPrivate {
+struct _GwyRasterAreaPrivate {
     GdkWindow *window;
 
     // Implementation of GtkScrollable
@@ -119,107 +119,107 @@ struct _GwyRasterViewPrivate {
     gulong scroll_timer_hid;
 };
 
-typedef struct _GwyRasterViewPrivate RasterView;
+typedef struct _GwyRasterAreaPrivate RasterArea;
 
-static void     gwy_raster_view_finalize            (GObject *object);
-static void     gwy_raster_view_dispose             (GObject *object);
-static void     gwy_raster_view_set_property        (GObject *object,
+static void     gwy_raster_area_finalize            (GObject *object);
+static void     gwy_raster_area_dispose             (GObject *object);
+static void     gwy_raster_area_set_property        (GObject *object,
                                                      guint prop_id,
                                                      const GValue *value,
                                                      GParamSpec *pspec);
-static void     gwy_raster_view_get_property        (GObject *object,
+static void     gwy_raster_area_get_property        (GObject *object,
                                                      guint prop_id,
                                                      GValue *value,
                                                      GParamSpec *pspec);
-static void     gwy_raster_view_style_updated       (GtkWidget *widget);
-static void     gwy_raster_view_realize             (GtkWidget *widget);
-static void     gwy_raster_view_unrealize           (GtkWidget *widget);
-static void     gwy_raster_view_map                 (GtkWidget *widget);
-static void     gwy_raster_view_unmap               (GtkWidget *widget);
-static void     gwy_raster_view_get_preferred_width (GtkWidget *widget,
+static void     gwy_raster_area_style_updated       (GtkWidget *widget);
+static void     gwy_raster_area_realize             (GtkWidget *widget);
+static void     gwy_raster_area_unrealize           (GtkWidget *widget);
+static void     gwy_raster_area_map                 (GtkWidget *widget);
+static void     gwy_raster_area_unmap               (GtkWidget *widget);
+static void     gwy_raster_area_get_preferred_width (GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
-static void     gwy_raster_view_get_preferred_height(GtkWidget *widget,
+static void     gwy_raster_area_get_preferred_height(GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
-static void     gwy_raster_view_size_allocate       (GtkWidget *widget,
+static void     gwy_raster_area_size_allocate       (GtkWidget *widget,
                                                      GtkAllocation *allocation);
-static gboolean gwy_raster_view_motion_notify       (GtkWidget *widget,
+static gboolean gwy_raster_area_motion_notify       (GtkWidget *widget,
                                                      GdkEventMotion *event);
-static gboolean gwy_raster_view_button_press        (GtkWidget *widget,
+static gboolean gwy_raster_area_button_press        (GtkWidget *widget,
                                                      GdkEventButton *event);
-static gboolean gwy_raster_view_button_release      (GtkWidget *widget,
+static gboolean gwy_raster_area_button_release      (GtkWidget *widget,
                                                      GdkEventButton *event);
-static gboolean gwy_raster_view_key_press           (GtkWidget *widget,
+static gboolean gwy_raster_area_key_press           (GtkWidget *widget,
                                                      GdkEventKey *event);
-static gboolean gwy_raster_view_key_release         (GtkWidget *widget,
+static gboolean gwy_raster_area_key_release         (GtkWidget *widget,
                                                      GdkEventKey *event);
-static gboolean gwy_raster_view_leave_notify        (GtkWidget *widget,
+static gboolean gwy_raster_area_leave_notify        (GtkWidget *widget,
                                                      GdkEventCrossing *event);
-static gboolean gwy_raster_view_scroll              (GwyRasterView *rasterview,
+static gboolean gwy_raster_area_scroll              (GwyRasterArea *rasterarea,
                                                      GtkScrollType scrolltype);
-static gboolean gwy_raster_view_zoom                (GwyRasterView *rasterview,
+static gboolean gwy_raster_area_zoom                (GwyRasterArea *rasterarea,
                                                      GwyZoomType zoomtype);
-static void     calculate_position_and_size         (GwyRasterView *rasterview);
-static void     update_matrices                     (GwyRasterView *rasterview);
-static void     ensure_layout                       (GwyRasterView *rasterview);
-static gboolean gwy_raster_view_draw                (GtkWidget *widget,
+static void     calculate_position_and_size         (GwyRasterArea *rasterarea);
+static void     update_matrices                     (GwyRasterArea *rasterarea);
+static void     ensure_layout                       (GwyRasterArea *rasterarea);
+static gboolean gwy_raster_area_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
-static void     destroy_field_surface               (GwyRasterView *rasterview);
-static void     destroy_mask_surface                (GwyRasterView *rasterview);
-static gboolean set_field                           (GwyRasterView *rasterview,
+static void     destroy_field_surface               (GwyRasterArea *rasterarea);
+static void     destroy_mask_surface                (GwyRasterArea *rasterarea);
+static gboolean set_field                           (GwyRasterArea *rasterarea,
                                                      GwyField *field);
-static gboolean set_mask                            (GwyRasterView *rasterview,
+static gboolean set_mask                            (GwyRasterArea *rasterarea,
                                                      GwyMaskField *mask);
-static gboolean set_gradient                        (GwyRasterView *rasterview,
+static gboolean set_gradient                        (GwyRasterArea *rasterarea,
                                                      GwyGradient *gradient);
-static gboolean set_shapes                          (GwyRasterView *rasterview,
+static gboolean set_shapes                          (GwyRasterArea *rasterarea,
                                                      GwyShapes *shapes);
-static void     set_shapes_transforms               (GwyRasterView *rasterview);
-static gboolean set_mask_color                      (GwyRasterView *rasterview,
+static void     set_shapes_transforms               (GwyRasterArea *rasterarea);
+static gboolean set_mask_color                      (GwyRasterArea *rasterarea,
                                                      const GwyRGBA *color);
-static gboolean set_grain_number_color              (GwyRasterView *rasterview,
+static gboolean set_grain_number_color              (GwyRasterArea *rasterarea,
                                                      const GwyRGBA *color);
-static void     field_notify                        (GwyRasterView *rasterview,
+static void     field_notify                        (GwyRasterArea *rasterarea,
                                                      GParamSpec *pspec,
                                                      GwyField *field);
-static void     mask_notify                         (GwyRasterView *rasterview,
+static void     mask_notify                         (GwyRasterArea *rasterarea,
                                                      GParamSpec *pspec,
                                                      GwyMaskField *mask);
-static void     field_data_changed                  (GwyRasterView *rasterview,
+static void     field_data_changed                  (GwyRasterArea *rasterarea,
                                                      GwyFieldPart *fpart,
                                                      GwyField *field);
-static void     mask_data_changed                   (GwyRasterView *rasterview,
+static void     mask_data_changed                   (GwyRasterArea *rasterarea,
                                                      GwyFieldPart *fpart,
                                                      GwyMaskField *mask);
-static void     gradient_data_changed               (GwyRasterView *rasterview,
+static void     gradient_data_changed               (GwyRasterArea *rasterarea,
                                                      GwyGradient *gradient);
-static void     shapes_updated                      (GwyRasterView *rasterview,
+static void     shapes_updated                      (GwyRasterArea *rasterarea,
                                                      GwyShapes *shapes);
 static gboolean enable_scrolling_again              (gpointer user_data);
-static gboolean scroll_to_current_point             (GwyRasterView *rasterview,
+static gboolean scroll_to_current_point             (GwyRasterArea *rasterarea,
                                                      GwyShapes *shapes);
-static gboolean set_hadjustment                     (GwyRasterView *rasterview,
+static gboolean set_hadjustment                     (GwyRasterArea *rasterarea,
                                                      GtkAdjustment *adjustment);
-static gboolean set_vadjustment                     (GwyRasterView *rasterview,
+static gboolean set_vadjustment                     (GwyRasterArea *rasterarea,
                                                      GtkAdjustment *adjustment);
-static void     set_hadjustment_values              (GwyRasterView *rasterview);
-static void     set_vadjustment_values              (GwyRasterView *rasterview);
-static void     adjustment_value_changed            (GwyRasterView *rasterview);
-static void     freeze_adjustments_notify           (GwyRasterView *rasterview,
+static void     set_hadjustment_values              (GwyRasterArea *rasterarea);
+static void     set_vadjustment_values              (GwyRasterArea *rasterarea);
+static void     adjustment_value_changed            (GwyRasterArea *rasterarea);
+static void     freeze_adjustments_notify           (GwyRasterArea *rasterarea,
                                                      gboolean horizontal,
                                                      gboolean vertical);
-static void     thaw_adjustments_notify             (GwyRasterView *rasterview,
+static void     thaw_adjustments_notify             (GwyRasterArea *rasterarea,
                                                      gboolean horizontal,
                                                      gboolean vertical);
-static gboolean set_zoom                            (GwyRasterView *rasterview,
+static gboolean set_zoom                            (GwyRasterArea *rasterarea,
                                                      gdouble zoom);
-static gboolean set_real_aspect_ratio               (GwyRasterView *rasterview,
+static gboolean set_real_aspect_ratio               (GwyRasterArea *rasterarea,
                                                      gboolean setting);
-static gboolean set_number_grains                   (GwyRasterView *rasterview,
+static gboolean set_number_grains                   (GwyRasterArea *rasterarea,
                                                      gboolean setting);
-static guint    calculate_full_width                (const GwyRasterView *rasterview);
-static guint    calculate_full_height               (const GwyRasterView *rasterview);
+static guint    calculate_full_width                (const GwyRasterArea *rasterarea);
+static guint    calculate_full_height               (const GwyRasterArea *rasterarea);
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
@@ -265,37 +265,37 @@ key_zoom_table[] = {
     { GDK_KEY_X,           GWY_ZOOM_FIT, 0, },
 };
 
-G_DEFINE_TYPE_WITH_CODE(GwyRasterView, gwy_raster_view, GTK_TYPE_WIDGET,
+G_DEFINE_TYPE_WITH_CODE(GwyRasterArea, gwy_raster_area, GTK_TYPE_WIDGET,
                         G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, NULL));
 
 static void
-gwy_raster_view_class_init(GwyRasterViewClass *klass)
+gwy_raster_area_class_init(GwyRasterAreaClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
-    g_type_class_add_private(klass, sizeof(RasterView));
+    g_type_class_add_private(klass, sizeof(RasterArea));
 
-    gobject_class->dispose = gwy_raster_view_dispose;
-    gobject_class->finalize = gwy_raster_view_finalize;
-    gobject_class->get_property = gwy_raster_view_get_property;
-    gobject_class->set_property = gwy_raster_view_set_property;
+    gobject_class->dispose = gwy_raster_area_dispose;
+    gobject_class->finalize = gwy_raster_area_finalize;
+    gobject_class->get_property = gwy_raster_area_get_property;
+    gobject_class->set_property = gwy_raster_area_set_property;
 
-    widget_class->realize = gwy_raster_view_realize;
-    widget_class->unrealize = gwy_raster_view_unrealize;
-    widget_class->map = gwy_raster_view_map;
-    widget_class->unmap = gwy_raster_view_unmap;
-    widget_class->get_preferred_width = gwy_raster_view_get_preferred_width;
-    widget_class->get_preferred_height = gwy_raster_view_get_preferred_height;
-    widget_class->size_allocate = gwy_raster_view_size_allocate;
-    widget_class->motion_notify_event = gwy_raster_view_motion_notify;
-    widget_class->button_press_event = gwy_raster_view_button_press;
-    widget_class->button_release_event = gwy_raster_view_button_release;
-    widget_class->key_press_event = gwy_raster_view_key_press;
-    widget_class->key_release_event = gwy_raster_view_key_release;
-    widget_class->leave_notify_event = gwy_raster_view_leave_notify;
-    widget_class->draw = gwy_raster_view_draw;
-    widget_class->style_updated = gwy_raster_view_style_updated;
+    widget_class->realize = gwy_raster_area_realize;
+    widget_class->unrealize = gwy_raster_area_unrealize;
+    widget_class->map = gwy_raster_area_map;
+    widget_class->unmap = gwy_raster_area_unmap;
+    widget_class->get_preferred_width = gwy_raster_area_get_preferred_width;
+    widget_class->get_preferred_height = gwy_raster_area_get_preferred_height;
+    widget_class->size_allocate = gwy_raster_area_size_allocate;
+    widget_class->motion_notify_event = gwy_raster_area_motion_notify;
+    widget_class->button_press_event = gwy_raster_area_button_press;
+    widget_class->button_release_event = gwy_raster_area_button_release;
+    widget_class->key_press_event = gwy_raster_area_key_press;
+    widget_class->key_release_event = gwy_raster_area_key_release;
+    widget_class->leave_notify_event = gwy_raster_area_leave_notify;
+    widget_class->draw = gwy_raster_area_draw;
+    widget_class->style_updated = gwy_raster_area_style_updated;
 
     properties[PROP_FIELD]
         = g_param_spec_object("field",
@@ -321,7 +321,7 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     properties[PROP_SHAPES]
         = g_param_spec_object("shapes",
                               "Shapes",
-                              "Geometric shapes shown on top of the view.",
+                              "Geometric shapes shown on top of the area.",
                               GWY_TYPE_SHAPES,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -377,16 +377,16 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
                                   NULL);
 
     /**
-     * GwyRasterView::scroll:
-     * @gwyrasterview: The #GwyRasterView which received the signal.
+     * GwyRasterArea::scroll:
+     * @gwyrasterarea: The #GwyRasterArea which received the signal.
      * @arg1: #GtkScrollType describing where and how much to scroll.
      *
      * The ::scroll signal is a
      * <link linkend="keybinding-signals">keybinding signal</link>
      * which gets emitted when a keybinding that scrolls is pressed.
-     * The raster view then scrolls itself as requested.
+     * The raster area then scrolls itself as requested.
      *
-     * #GwyRasterView view respons only to two-dimensional scrolling types such
+     * #GwyRasterArea respons only to two-dimensional scrolling types such
      * as %GTK_SCROLL_STEP_LEFT since one-dimensional scrolling types such as
      * %GTK_SCROLL_PAGE_BACKWARD are meaningless.
      */
@@ -394,27 +394,27 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
         = g_signal_new_class_handler("scroll",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-                                     G_CALLBACK(gwy_raster_view_scroll),
+                                     G_CALLBACK(gwy_raster_area_scroll),
                                      NULL, NULL,
                                      _gwy_cclosure_marshal_BOOLEAN__ENUM,
                                      G_TYPE_BOOLEAN, 1,
                                      GTK_TYPE_SCROLL_TYPE);
 
     /**
-     * GwyRasterView::zoom:
-     * @gwyrasterview: The #GwyRasterView which received the signal.
+     * GwyRasterArea::zoom:
+     * @gwyrasterarea: The #GwyRasterArea which received the signal.
      * @arg1: #GwyZoomType describing the requested zoom change.
      *
      * The ::zoom signal is a
      * <link linkend="keybinding-signals">keybinding signal</link>
      * which gets emitted when a keybinding that scrolls is pressed.
-     * The raster view then zooms itself as requested.
+     * The raster area then zooms itself as requested.
      */
     signals[SGN_ZOOM]
         = g_signal_new_class_handler("zoom",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-                                     G_CALLBACK(gwy_raster_view_zoom),
+                                     G_CALLBACK(gwy_raster_area_zoom),
                                      NULL, NULL,
                                      _gwy_cclosure_marshal_BOOLEAN__ENUM,
                                      G_TYPE_BOOLEAN, 1,
@@ -442,105 +442,105 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
 }
 
 static void
-gwy_raster_view_init(GwyRasterView *rasterview)
+gwy_raster_area_init(GwyRasterArea *rasterarea)
 {
-    rasterview->priv = G_TYPE_INSTANCE_GET_PRIVATE(rasterview,
-                                                   GWY_TYPE_RASTER_VIEW,
-                                                   RasterView);
-    RasterView *priv = rasterview->priv;
+    rasterarea->priv = G_TYPE_INSTANCE_GET_PRIVATE(rasterarea,
+                                                   GWY_TYPE_RASTER_AREA,
+                                                   RasterArea);
+    RasterArea *priv = rasterarea->priv;
     priv->field_aspect_ratio = 1.0;
     priv->mask_color = mask_color_default;
     priv->grain_number_color = grain_number_color_default;
-    update_matrices(rasterview);
-    gtk_widget_set_can_focus(GTK_WIDGET(rasterview), TRUE);
+    update_matrices(rasterarea);
+    gtk_widget_set_can_focus(GTK_WIDGET(rasterarea), TRUE);
 }
 
 static void
-gwy_raster_view_finalize(GObject *object)
+gwy_raster_area_finalize(GObject *object)
 {
-    G_OBJECT_CLASS(gwy_raster_view_parent_class)->finalize(object);
+    G_OBJECT_CLASS(gwy_raster_area_parent_class)->finalize(object);
 }
 
 static void
-gwy_raster_view_dispose(GObject *object)
+gwy_raster_area_dispose(GObject *object)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(object);
 
-    GWY_OBJECT_UNREF(rasterview->priv->layout);
-    set_field(rasterview, NULL);
-    set_mask(rasterview, NULL);
-    set_gradient(rasterview, NULL);
-    set_shapes(rasterview, NULL);
-    set_hadjustment(rasterview, NULL);
-    set_vadjustment(rasterview, NULL);
-    destroy_field_surface(rasterview);
-    destroy_mask_surface(rasterview);
-    rasterview->priv->area_widget = NULL;
+    GWY_OBJECT_UNREF(rasterarea->priv->layout);
+    set_field(rasterarea, NULL);
+    set_mask(rasterarea, NULL);
+    set_gradient(rasterarea, NULL);
+    set_shapes(rasterarea, NULL);
+    set_hadjustment(rasterarea, NULL);
+    set_vadjustment(rasterarea, NULL);
+    destroy_field_surface(rasterarea);
+    destroy_mask_surface(rasterarea);
+    rasterarea->priv->area_widget = NULL;
 
-    G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
+    G_OBJECT_CLASS(gwy_raster_area_parent_class)->dispose(object);
 }
 
 static void
-gwy_raster_view_set_property(GObject *object,
+gwy_raster_area_set_property(GObject *object,
                              guint prop_id,
                              const GValue *value,
                              GParamSpec *pspec)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(object);
 
     switch (prop_id) {
         case PROP_FIELD:
-        set_field(rasterview, g_value_get_object(value));
+        set_field(rasterarea, g_value_get_object(value));
         break;
 
         case PROP_MASK:
-        set_mask(rasterview, g_value_get_object(value));
+        set_mask(rasterarea, g_value_get_object(value));
         break;
 
         case PROP_GRADIENT:
-        set_gradient(rasterview, g_value_get_object(value));
+        set_gradient(rasterarea, g_value_get_object(value));
         break;
 
         case PROP_SHAPES:
-        set_shapes(rasterview, g_value_get_object(value));
+        set_shapes(rasterarea, g_value_get_object(value));
         break;
 
         case PROP_MASK_COLOR:
-        set_mask_color(rasterview, g_value_get_boxed(value));
+        set_mask_color(rasterarea, g_value_get_boxed(value));
         break;
 
         case PROP_ZOOM:
-        set_zoom(rasterview, g_value_get_double(value));
+        set_zoom(rasterarea, g_value_get_double(value));
         break;
 
         case PROP_REAL_ASPECT_RATIO:
-        set_real_aspect_ratio(rasterview, g_value_get_boolean(value));
+        set_real_aspect_ratio(rasterarea, g_value_get_boolean(value));
         break;
 
         case PROP_NUMBER_GRAINS:
-        set_number_grains(rasterview, g_value_get_boolean(value));
+        set_number_grains(rasterarea, g_value_get_boolean(value));
         break;
 
         case PROP_GRAIN_NUMBER_COLOR:
-        set_grain_number_color(rasterview, g_value_get_boxed(value));
+        set_grain_number_color(rasterarea, g_value_get_boxed(value));
         break;
 
         case PROP_HADJUSTMENT:
-        set_hadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
+        set_hadjustment(rasterarea, (GtkAdjustment*)g_value_get_object(value));
         break;
 
         case PROP_VADJUSTMENT:
-        set_vadjustment(rasterview, (GtkAdjustment*)g_value_get_object(value));
+        set_vadjustment(rasterarea, (GtkAdjustment*)g_value_get_object(value));
         break;
 
         case PROP_HSCROLL_POLICY:
-        rasterview->priv->hscroll_policy = g_value_get_enum(value);
-        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+        rasterarea->priv->hscroll_policy = g_value_get_enum(value);
+        gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
         break;
 
         case PROP_VSCROLL_POLICY:
-        rasterview->priv->vscroll_policy = g_value_get_enum(value);
-        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+        rasterarea->priv->vscroll_policy = g_value_get_enum(value);
+        gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
         break;
 
         default:
@@ -550,12 +550,12 @@ gwy_raster_view_set_property(GObject *object,
 }
 
 static void
-gwy_raster_view_get_property(GObject *object,
+gwy_raster_area_get_property(GObject *object,
                              guint prop_id,
                              GValue *value,
                              GParamSpec *pspec)
 {
-    RasterView *priv = GWY_RASTER_VIEW(object)->priv;
+    RasterArea *priv = GWY_RASTER_AREA(object)->priv;
 
     switch (prop_id) {
         case PROP_FIELD:
@@ -617,273 +617,273 @@ gwy_raster_view_get_property(GObject *object,
 }
 
 /**
- * gwy_raster_view_new:
+ * gwy_raster_area_new:
  *
- * Creates a new raster view.
+ * Creates a new raster area.
  *
- * Returns: A new raster view.
+ * Returns: A new raster area.
  **/
 GtkWidget*
-gwy_raster_view_new(void)
+gwy_raster_area_new(void)
 {
-    return g_object_newv(GWY_TYPE_RASTER_VIEW, 0, NULL);
+    return g_object_newv(GWY_TYPE_RASTER_AREA, 0, NULL);
 }
 
 /**
- * gwy_raster_view_set_field:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_field:
+ * @rasterarea: A raster area.
  * @field: (allow-none):
  *         A two-dimensional data field.
  *
- * Sets the field a raster view will display.
+ * Sets the field a raster area will display.
  *
- * The raster view conntects to #GwyField::data-changed which is not emitted
- * automatically so you have to emit it to update the view.  Normally this is
+ * The raster area conntects to #GwyField::data-changed which is not emitted
+ * automatically so you have to emit it to update the area.  Normally this is
  * done once after all the modifications of the field data are finished.
  **/
 void
-gwy_raster_view_set_field(GwyRasterView *rasterview,
+gwy_raster_area_set_field(GwyRasterArea *rasterarea,
                           GwyField *field)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
-    if (!set_field(rasterview, field))
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_field(rasterarea, field))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_FIELD]);
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_FIELD]);
 }
 
 /**
- * gwy_raster_view_get_field:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_field:
+ * @rasterarea: A raster area.
  *
- * Obtains the field a raster view displays.
+ * Obtains the field a raster area displays.
  *
  * Returns: (transfer none):
- *          The field displayed by @rasterview.
+ *          The field displayed by @rasterarea.
  **/
 GwyField*
-gwy_raster_view_get_field(const GwyRasterView *rasterview)
+gwy_raster_area_get_field(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return GWY_RASTER_VIEW(rasterview)->priv->field;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return GWY_RASTER_AREA(rasterarea)->priv->field;
 }
 
 /**
- * gwy_raster_view_set_mask:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_mask:
+ * @rasterarea: A raster area.
  * @mask: (allow-none):
  *         A two-dimensional mask field.
  *
- * Sets the mask a raster view will display over the field.
+ * Sets the mask a raster area will display over the field.
  *
  * The mask dimensions must match the field dimensions.  More precisely, the
- * dimensions must match at the time the raster view is actually drawn so you
+ * dimensions must match at the time the raster area is actually drawn so you
  * can set the field and mask independently if the dimensions will be all right
  * at the end.
  *
- * The raster view conntects to #GwyMaskField::data-changed which is not
- * emitted automatically so you have to emit it to update the view.  Normally
+ * The raster area conntects to #GwyMaskField::data-changed which is not
+ * emitted automatically so you have to emit it to update the area.  Normally
  * this is done once after all the modifications of the mask data are
  * finished.
  **/
 void
-gwy_raster_view_set_mask(GwyRasterView *rasterview,
+gwy_raster_area_set_mask(GwyRasterArea *rasterarea,
                          GwyMaskField *mask)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
-    if (!set_mask(rasterview, mask))
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_mask(rasterarea, mask))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_MASK]);
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_MASK]);
 }
 
 /**
- * gwy_raster_view_get_mask:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_mask:
+ * @rasterarea: A raster area.
  *
- * Obtains the mask a raster view displays over the field.
+ * Obtains the mask a raster area displays over the field.
  *
  * Returns: (transfer none):
- *          The mask displayed by @rasterview over the field.
+ *          The mask displayed by @rasterarea over the field.
  **/
 GwyMaskField*
-gwy_raster_view_get_mask(const GwyRasterView *rasterview)
+gwy_raster_area_get_mask(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return GWY_RASTER_VIEW(rasterview)->priv->mask;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return GWY_RASTER_AREA(rasterarea)->priv->mask;
 }
 
 /**
- * gwy_raster_view_set_gradient:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_gradient:
+ * @rasterarea: A raster area.
  * @gradient: (allow-none):
  *            A colour gradient.  %NULL means the default gradient
  *            will be used.
  *
- * Sets the false colour gradient a raster view will use for visualisation.
+ * Sets the false colour gradient a raster area will use for visualisation.
  **/
 void
-gwy_raster_view_set_gradient(GwyRasterView *rasterview,
+gwy_raster_area_set_gradient(GwyRasterArea *rasterarea,
                              GwyGradient *gradient)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
-    if (!set_gradient(rasterview, gradient))
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_gradient(rasterarea, gradient))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_GRADIENT]);
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_GRADIENT]);
 }
 
 /**
- * gwy_raster_view_get_gradient:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_gradient:
+ * @rasterarea: A raster area.
  *
- * Obtains the false colour gradient used by a raster view for visualisation.
+ * Obtains the false colour gradient used by a raster area for visualisation.
  *
  * Returns: (allow-none) (transfer none):
- *          The colour gradient used by @rasterview.  If no gradient was set
+ *          The colour gradient used by @rasterarea.  If no gradient was set
  *          and the default one is used, function returns %NULL.
  **/
 GwyGradient*
-gwy_raster_view_get_gradient(const GwyRasterView *rasterview)
+gwy_raster_area_get_gradient(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return GWY_RASTER_VIEW(rasterview)->priv->gradient;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return GWY_RASTER_AREA(rasterarea)->priv->gradient;
 }
 
 /**
- * gwy_raster_view_set_mask_color:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_mask_color:
+ * @rasterarea: A raster area.
  * @color: A colour.
  *
- * Sets the colour a raster view will use for mask visualisation.
+ * Sets the colour a raster area will use for mask visualisation.
  **/
 void
-gwy_raster_view_set_mask_color(GwyRasterView *rasterview,
+gwy_raster_area_set_mask_color(GwyRasterArea *rasterarea,
                                const GwyRGBA *color)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(color);
-    if (!set_mask_color(rasterview, color))
+    if (!set_mask_color(rasterarea, color))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_MASK_COLOR]);
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_MASK_COLOR]);
 }
 
 /**
- * gwy_raster_view_get_mask_color:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_mask_color:
+ * @rasterarea: A raster area.
  *
- * Obtains the colour used by a raster view for mask visualisation.
+ * Obtains the colour used by a raster area for mask visualisation.
  *
  * Returns: (transfer none):
- *          The colour used by @rasterview for mask visualisation.
+ *          The colour used by @rasterarea for mask visualisation.
  **/
 const GwyRGBA*
-gwy_raster_view_get_mask_color(const GwyRasterView *rasterview)
+gwy_raster_area_get_mask_color(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return &GWY_RASTER_VIEW(rasterview)->priv->mask_color;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return &GWY_RASTER_AREA(rasterarea)->priv->mask_color;
 }
 
 /**
- * gwy_raster_view_set_grain_number_color:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_grain_number_color:
+ * @rasterarea: A raster area.
  * @color: A colour.
  *
- * Sets the colour a raster view will use for grain number visualisation.
+ * Sets the colour a raster area will use for grain number visualisation.
  **/
 void
-gwy_raster_view_set_grain_number_color(GwyRasterView *rasterview,
+gwy_raster_area_set_grain_number_color(GwyRasterArea *rasterarea,
                                        const GwyRGBA *color)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(color);
-    if (!set_grain_number_color(rasterview, color))
+    if (!set_grain_number_color(rasterarea, color))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview),
+    g_object_notify_by_pspec(G_OBJECT(rasterarea),
                              properties[PROP_GRAIN_NUMBER_COLOR]);
 }
 
 /**
- * gwy_raster_view_get_grain_number_color:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_grain_number_color:
+ * @rasterarea: A raster area.
  *
- * Obtains the colour used by a raster view for grain number visualisation.
+ * Obtains the colour used by a raster area for grain number visualisation.
  *
  * Returns: (transfer none):
- *          The colour used by @rasterview for grain number visualisation.
+ *          The colour used by @rasterarea for grain number visualisation.
  **/
 const GwyRGBA*
-gwy_raster_view_get_grain_number_color(const GwyRasterView *rasterview)
+gwy_raster_area_get_grain_number_color(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return &GWY_RASTER_VIEW(rasterview)->priv->grain_number_color;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return &GWY_RASTER_AREA(rasterarea)->priv->grain_number_color;
 }
 
 /**
- * gwy_raster_view_set_shapes:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_shapes:
+ * @rasterarea: A raster area.
  * @shapes: (allow-none):
  *          A group of geometrical shapes.
  *
  * Sets the group of geometrical shapes to be displayed on the top of a raster
- * view.
+ * area.
  **/
 void
-gwy_raster_view_set_shapes(GwyRasterView *rasterview,
+gwy_raster_area_set_shapes(GwyRasterArea *rasterarea,
                            GwyShapes *shapes)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
-    if (!set_shapes(rasterview, shapes))
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_shapes(rasterarea, shapes))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_SHAPES]);
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_SHAPES]);
 }
 
 /**
- * gwy_raster_view_get_shapes:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_shapes:
+ * @rasterarea: A raster area.
  *
  * Obtains the group of geometrical shapes displayed on the top of a raster
- * view.
+ * area.
  *
  * Returns: (transfer none):
- *          The shapes displayed by @rasterview.
+ *          The shapes displayed by @rasterarea.
  **/
 GwyShapes*
-gwy_raster_view_get_shapes(const GwyRasterView *rasterview)
+gwy_raster_area_get_shapes(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return rasterview->priv->shapes;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return rasterarea->priv->shapes;
 }
 
 /**
- * gwy_raster_view_get_widget_area:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_widget_area:
+ * @rasterarea: A raster area.
  * @area: (out):
  *        Location to store the widget area.
  *
  * Calculates the field pixel rectangle corresponding to the size of an entire
- * raster view.
+ * raster area.
  *
- * The widget area is the same as the field area if the view shows only a part
+ * The widget area is the same as the field area if the area shows only a part
  * of the field.  However, if there is padding the widget area may correspond
  * to coordinates that are outside the field.
  *
- * See also gwy_raster_view_set_area_widget().
+ * See also gwy_raster_area_set_area_widget().
  **/
 void
-gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
+gwy_raster_area_get_widget_area(const GwyRasterArea *rasterarea,
                                 cairo_rectangle_t *area)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(area);
 
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     GtkWidget *widget = (priv->area_widget
                          ? priv->area_widget
-                         : GTK_WIDGET(rasterview));
+                         : GTK_WIDGET(rasterarea));
     area->x = area->y = 0.0;
     area->width = gtk_widget_get_allocated_width(widget);
     area->height = gtk_widget_get_allocated_height(widget);
@@ -894,161 +894,161 @@ gwy_raster_view_get_widget_area(const GwyRasterView *rasterview,
 }
 
 /**
- * gwy_raster_view_get_field_area:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_field_area:
+ * @rasterarea: A raster area.
  * @area: (out):
  *        Location to store the field area.
  *
  * Obtains the field pixel rectangle corresponding to the part currently
- * displayed by a raster view.
+ * displayed by a raster area.
  *
  * The field rectangle is never larger than the field.  It may be smaller if
  * only a part of the field is shown and the coordinates may be non-integral.
  **/
 void
-gwy_raster_view_get_field_area(const GwyRasterView *rasterview,
+gwy_raster_area_get_field_area(const GwyRasterArea *rasterarea,
                                cairo_rectangle_t *area)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(area);
-    *area = rasterview->priv->field_rectangle;
+    *area = rasterarea->priv->field_rectangle;
 }
 
 /**
- * gwy_raster_view_get_area_widget:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_area_widget:
+ * @rasterarea: A raster area.
  *
- * Obtains the area widget of a raster view.
+ * Obtains the area widget of a raster area.
  *
- * See gwy_raster_view_set_area_widget() for discussion.
+ * See gwy_raster_area_set_area_widget() for discussion.
  *
  * Returns: (transfer none) (allow-none):
  *          The widget used for area calculation in
- *          gwy_raster_view_get_widget_area(), %NULL if no widget is set and
- *          @rasterview itself is used.
+ *          gwy_raster_area_get_widget_area(), %NULL if no widget is set and
+ *          @rasterarea itself is used.
  **/
 GtkWidget*
-gwy_raster_view_get_area_widget(const GwyRasterView *rasterview)
+gwy_raster_area_get_area_widget(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return rasterview->priv->area_widget;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return rasterarea->priv->area_widget;
 }
 
 /**
- * gwy_raster_view_set_area_widget:
- * @rasterview: A raster view.
+ * gwy_raster_area_set_area_widget:
+ * @rasterarea: A raster area.
  * @widget: (transfer none) (allow-none):
- *          Widget to use for determining the size of entire raster view
- *          in gwy_raster_view_get_widget_area().  Pass %NULL to unset the
- *          area widget and use @rasterview itself.
+ *          Widget to use for determining the size of entire raster area
+ *          in gwy_raster_area_get_widget_area().  Pass %NULL to unset the
+ *          area widget and use @rasterarea itself.
  *
- * Sets the area widget of a raster view.
+ * Sets the area widget of a raster area.
  *
- * If the raster view is put into a #GtkScrolledWindow or a similar container
+ * If the raster area is put into a #GtkScrolledWindow or a similar container
  * that can ‘eat’ part of the child area, the meaning of entire widget as
- * used by gwy_raster_view_get_widget_area() changes.  The correct dimensions
+ * used by gwy_raster_area_get_widget_area() changes.  The correct dimensions
  * that may be necessary to draw rulers right are those of the container, not
- * the raster view.  To fix the calculation use this function to tell
- * @rasterview to use the dimensions of another widget instead of self:
+ * the raster area.  To fix the calculation use this function to tell
+ * @rasterarea to use the dimensions of another widget instead of self:
  * |[
  * GtkWidget *scwin = gtk_scrolled_window_new(NULL, NULL);
- * gtk_container_add(GTK_CONTAINER(scwin), rasterview);
- * gwy_raster_view_set_area_widget(GWY_RASTER_VIEW(rasterview), scwin);
+ * gtk_container_add(GTK_CONTAINER(scwin), rasterarea);
+ * gwy_raster_area_set_area_widget(GWY_RASTER_AREA(rasterarea), scwin);
  * ]|
  *
  * Since the common use case is that @widget contains and thus owns
- * @rasterview, no reference to @widget is taken by @rasterview.
+ * @rasterarea, no reference to @widget is taken by @rasterarea.
  **/
 void
-gwy_raster_view_set_area_widget(GwyRasterView *rasterview,
+gwy_raster_area_set_area_widget(GwyRasterArea *rasterarea,
                                 GtkWidget *widget)
 {
-    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(!widget || GTK_IS_WIDGET(widget));
-    rasterview->priv->area_widget = widget;
+    rasterarea->priv->area_widget = widget;
 }
 
 /**
- * gwy_raster_view_get_widget_to_field_matrix:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_widget_to_field_matrix:
+ * @rasterarea: A raster area.
  *
  * Obtains the Cairo matrix representing transformation from widget coordinates
- * to field pixel coordinates for a raster view.
+ * to field pixel coordinates for a raster area.
  *
  * Returns: (transfer none):
  *          Cairo matrix representing the coordinates.  The pointer remains
- *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          valid through entire @rasterarea lifetime and the pointed-to matrix
  *          will reflect the current transformation.
  **/
 const cairo_matrix_t*
-gwy_raster_view_get_widget_to_field_matrix(const GwyRasterView *rasterview)
+gwy_raster_area_get_widget_to_field_matrix(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return &rasterview->priv->window_to_field_matrix;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return &rasterarea->priv->window_to_field_matrix;
 }
 
 /**
- * gwy_raster_view_get_widget_to_coords_matrix:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_widget_to_coords_matrix:
+ * @rasterarea: A raster area.
  *
  * Obtains the Cairo matrix representing transformation from widget coordinates
- * to field real coordinates for a raster view.
+ * to field real coordinates for a raster area.
  *
  * Returns: (transfer none):
  *          Cairo matrix representing the coordinates.  The pointer remains
- *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          valid through entire @rasterarea lifetime and the pointed-to matrix
  *          will reflect the current transformation.
  **/
 const cairo_matrix_t*
-gwy_raster_view_get_widget_to_coords_matrix(const GwyRasterView *rasterview)
+gwy_raster_area_get_widget_to_coords_matrix(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return &rasterview->priv->window_to_coords_matrix;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return &rasterarea->priv->window_to_coords_matrix;
 }
 
 /**
- * gwy_raster_view_get_field_to_widget_matrix:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_field_to_widget_matrix:
+ * @rasterarea: A raster area.
  *
  * Obtains the Cairo matrix representing transformation from field pixel
- * coodinates to widget coordinates for a raster view.
+ * coodinates to widget coordinates for a raster area.
  *
  * Returns: (transfer none):
  *          Cairo matrix representing the coordinates.  The pointer remains
- *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          valid through entire @rasterarea lifetime and the pointed-to matrix
  *          will reflect the current transformation.
  **/
 const cairo_matrix_t*
-gwy_raster_view_get_field_to_widget_matrix(const GwyRasterView *rasterview)
+gwy_raster_area_get_field_to_widget_matrix(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return &rasterview->priv->field_to_window_matrix;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return &rasterarea->priv->field_to_window_matrix;
 }
 
 /**
- * gwy_raster_view_get_coords_to_widget_matrix:
- * @rasterview: A raster view.
+ * gwy_raster_area_get_coords_to_widget_matrix:
+ * @rasterarea: A raster area.
  *
  * Obtains the Cairo matrix representing transformation from field real
- * coodinates to widget coordinates for a raster view.
+ * coodinates to widget coordinates for a raster area.
  *
  * Returns: (transfer none):
  *          Cairo matrix representing the coordinates.  The pointer remains
- *          valid through entire @rasterview lifetime and the pointed-to matrix
+ *          valid through entire @rasterarea lifetime and the pointed-to matrix
  *          will reflect the current transformation.
  **/
 const cairo_matrix_t*
-gwy_raster_view_get_coords_to_widget_matrix(const GwyRasterView *rasterview)
+gwy_raster_area_get_coords_to_widget_matrix(const GwyRasterArea *rasterarea)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return &rasterview->priv->coords_to_window_matrix;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return &rasterarea->priv->coords_to_window_matrix;
 }
 
 static void
-create_window(GwyRasterView *rasterview)
+create_window(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
-    GtkWidget *widget = GTK_WIDGET(rasterview);
+    RasterArea *priv = rasterarea->priv;
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
 
     g_assert(gtk_widget_get_realized(widget));
 
@@ -1085,9 +1085,9 @@ create_window(GwyRasterView *rasterview)
 }
 
 static void
-destroy_window(GwyRasterView *rasterview)
+destroy_window(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
 
     if (!priv->window)
         return;
@@ -1098,77 +1098,77 @@ destroy_window(GwyRasterView *rasterview)
 }
 
 static void
-gwy_raster_view_realize(GtkWidget *widget)
+gwy_raster_area_realize(GtkWidget *widget)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     gtk_widget_set_realized(widget, TRUE);
-    create_window(rasterview);
+    create_window(rasterarea);
 }
 
 static void
-gwy_raster_view_unrealize(GtkWidget *widget)
+gwy_raster_area_unrealize(GtkWidget *widget)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    destroy_window(rasterview);
-    GWY_OBJECT_UNREF(rasterview->priv->layout);
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unrealize(widget);
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    destroy_window(rasterarea);
+    GWY_OBJECT_UNREF(rasterarea->priv->layout);
+    GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->unrealize(widget);
 }
 
 static void
-gwy_raster_view_map(GtkWidget *widget)
+gwy_raster_area_map(GtkWidget *widget)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->map(widget);
-    gdk_window_show(rasterview->priv->window);
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->map(widget);
+    gdk_window_show(rasterarea->priv->window);
 }
 
 static void
-gwy_raster_view_unmap(GtkWidget *widget)
+gwy_raster_area_unmap(GtkWidget *widget)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
     gdk_window_hide(priv->window);
     if (priv->scroll_timer_hid) {
         g_source_remove(priv->scroll_timer_hid);
         priv->scroll_timer_hid = 0;
     }
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->unmap(widget);
+    GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->unmap(widget);
 }
 
 static void
-gwy_raster_view_get_preferred_width(GtkWidget *widget,
+gwy_raster_area_get_preferred_width(GtkWidget *widget,
                                     gint *minimum,
                                     gint *natural)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    *natural = calculate_full_width(rasterview);
-    *minimum = rasterview->priv->zoom ? *natural : 1;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    *natural = calculate_full_width(rasterarea);
+    *minimum = rasterarea->priv->zoom ? *natural : 1;
 }
 
 static void
-gwy_raster_view_get_preferred_height(GtkWidget *widget,
+gwy_raster_area_get_preferred_height(GtkWidget *widget,
                                      gint *minimum,
                                      gint *natural)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    *natural = calculate_full_height(rasterview);
-    *minimum = rasterview->priv->zoom ? *natural : 1;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    *natural = calculate_full_height(rasterarea);
+    *minimum = rasterarea->priv->zoom ? *natural : 1;
 }
 
 static void
-gwy_raster_view_size_allocate(GtkWidget *widget,
+gwy_raster_area_size_allocate(GtkWidget *widget,
                               GtkAllocation *allocation)
 {
     GtkAllocation prev_allocation;
     gtk_widget_get_allocation(widget, &prev_allocation);
 
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->size_allocate(widget,
+    GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->size_allocate(widget,
                                                                   allocation);
     if (gwy_equal(allocation, &prev_allocation))
         return;
 
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
 
     // XXX: The input window can be smaller.  Does it matter?
     if (priv->window)
@@ -1179,19 +1179,19 @@ gwy_raster_view_size_allocate(GtkWidget *widget,
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
 
-    freeze_adjustments_notify(rasterview, TRUE, TRUE);
-    set_hadjustment_values(rasterview);
-    set_vadjustment_values(rasterview);
-    calculate_position_and_size(rasterview);
-    thaw_adjustments_notify(rasterview, TRUE, TRUE);
+    freeze_adjustments_notify(rasterarea, TRUE, TRUE);
+    set_hadjustment_values(rasterarea);
+    set_vadjustment_values(rasterarea);
+    calculate_position_and_size(rasterarea);
+    thaw_adjustments_notify(rasterarea, TRUE, TRUE);
 }
 
 static gboolean
-gwy_raster_view_motion_notify(GtkWidget *widget,
+gwy_raster_area_motion_notify(GtkWidget *widget,
                               GdkEventMotion *event)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
     GwyField *field = priv->field;
     GwyMaskField *mask = priv->mask;
 
@@ -1228,11 +1228,11 @@ gwy_raster_view_motion_notify(GtkWidget *widget,
 }
 
 static gboolean
-gwy_raster_view_button_press(GtkWidget *widget,
+gwy_raster_area_button_press(GtkWidget *widget,
                              GdkEventButton *event)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
     if (priv->shapes)
         gwy_shapes_button_press(priv->shapes, event);
 
@@ -1240,11 +1240,11 @@ gwy_raster_view_button_press(GtkWidget *widget,
 }
 
 static gboolean
-gwy_raster_view_button_release(GtkWidget *widget,
+gwy_raster_area_button_release(GtkWidget *widget,
                                GdkEventButton *event)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
     if (priv->shapes)
         gwy_shapes_button_release(priv->shapes, event);
 
@@ -1252,41 +1252,41 @@ gwy_raster_view_button_release(GtkWidget *widget,
 }
 
 static gboolean
-gwy_raster_view_key_press(GtkWidget *widget,
+gwy_raster_area_key_press(GtkWidget *widget,
                           GdkEventKey *event)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
 
     if (priv->shapes) {
         if (gwy_shapes_key_press(priv->shapes, event))
             return TRUE;
     }
 
-    return GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->key_press_event(widget, event);
+    return GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->key_press_event(widget, event);
 }
 
 static gboolean
-gwy_raster_view_key_release(GtkWidget *widget,
+gwy_raster_area_key_release(GtkWidget *widget,
                             GdkEventKey *event)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
 
     if (priv->shapes) {
         if (gwy_shapes_key_release(priv->shapes, event))
             return TRUE;
     }
 
-    return GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->key_release_event(widget, event);
+    return GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->key_release_event(widget, event);
 }
 
 static gboolean
-gwy_raster_view_leave_notify(GtkWidget *widget,
+gwy_raster_area_leave_notify(GtkWidget *widget,
                              GdkEventCrossing *event)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
 
     g_assert(event->type == GDK_LEAVE_NOTIFY);
     if (!priv->field || !priv->mask || !priv->active_grain)
@@ -1295,14 +1295,14 @@ gwy_raster_view_leave_notify(GtkWidget *widget,
     priv->active_grain = 0;
     gtk_widget_queue_draw(widget);
 
-    return GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->leave_notify_event(widget, event);
+    return GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->leave_notify_event(widget, event);
 }
 
 static gboolean
-gwy_raster_view_scroll(GwyRasterView *rasterview,
+gwy_raster_area_scroll(GwyRasterArea *rasterarea,
                        GtkScrollType scrolltype)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     GtkAdjustment *vadj = priv->vadjustment,
                   *hadj = priv->hadjustment;
     gboolean scrolling = FALSE;
@@ -1375,7 +1375,7 @@ gwy_raster_view_scroll(GwyRasterView *rasterview,
 }
 
 static gboolean
-gwy_raster_view_zoom(GwyRasterView *rasterview,
+gwy_raster_area_zoom(GwyRasterArea *rasterarea,
                      GwyZoomType zoomtype)
 {
     static const gdouble zoom_values[] = {
@@ -1384,7 +1384,7 @@ gwy_raster_view_zoom(GwyRasterView *rasterview,
         4.0, 6.0, 8.0, 10.0, 12.0, 16.0
     };
 
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     gdouble zoom = priv->zoom;
     if (!zoom)
         return FALSE;
@@ -1392,24 +1392,24 @@ gwy_raster_view_zoom(GwyRasterView *rasterview,
     if (zoomtype == GWY_ZOOM_IN) {
         for (guint i = 0; i < G_N_ELEMENTS(zoom_values); i++) {
             if (zoom_values[i] > zoom)
-                return set_zoom(rasterview, zoom_values[i]);
+                return set_zoom(rasterarea, zoom_values[i]);
         }
     }
     else if (zoomtype == GWY_ZOOM_OUT) {
         for (guint i = G_N_ELEMENTS(zoom_values); i; i--) {
             if (zoom_values[i-1] < zoom)
-                return set_zoom(rasterview, zoom_values[i-1]);
+                return set_zoom(rasterarea, zoom_values[i-1]);
         }
     }
     else if (zoomtype == GWY_ZOOM_1_1) {
-        return set_zoom(rasterview, 1.0);
+        return set_zoom(rasterarea, 1.0);
     }
     else if (zoomtype == GWY_ZOOM_FIT) {
         if (!priv->field)
             return FALSE;
 
         GwyField *field = priv->field;
-        GtkWidget *widget = GTK_WIDGET(rasterview);
+        GtkWidget *widget = GTK_WIDGET(rasterarea);
         GtkAllocation alloc;
         gtk_widget_get_allocation(widget, &alloc);
         gdouble xscale = (gdouble)alloc.width/field->xres;
@@ -1417,23 +1417,23 @@ gwy_raster_view_zoom(GwyRasterView *rasterview,
         if (priv->real_aspect_ratio)
             yscale = gwy_field_dx(field)/gwy_field_dy(field);
 
-        return set_zoom(rasterview, MIN(xscale, yscale));
+        return set_zoom(rasterarea, MIN(xscale, yscale));
     }
 
     return FALSE;
 }
 
 static void
-calculate_position_and_size(GwyRasterView *rasterview)
+calculate_position_and_size(GwyRasterArea *rasterarea)
 {
-    GtkWidget *widget = GTK_WIDGET(rasterview);
-    RasterView *priv = rasterview->priv;
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
+    RasterArea *priv = rasterarea->priv;
     cairo_rectangle_int_t *irect = &priv->image_rectangle;
     cairo_rectangle_t *frect = &priv->field_rectangle;
     gint width = gtk_widget_get_allocated_width(widget);
     gint height = gtk_widget_get_allocated_height(widget);
-    gint full_width = calculate_full_width(rasterview);
-    gint full_height = calculate_full_height(rasterview);
+    gint full_width = calculate_full_width(rasterarea);
+    gint full_height = calculate_full_height(rasterarea);
     gint xres = priv->field ? priv->field->xres : 1;
     gint yres = priv->field ? priv->field->yres : 1;
     gdouble hoffset = priv->hadjustment
@@ -1498,15 +1498,15 @@ calculate_position_and_size(GwyRasterView *rasterview)
         }
     }
 
-    update_matrices(rasterview);
+    update_matrices(rasterarea);
 }
 
 // FIXME: Window coordinates are somewhat strange here.  Should we take pixel
 // centres?
 static void
-update_matrices(GwyRasterView *rasterview)
+update_matrices(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     GwyField *field = priv->field;
     if (!field) {
         cairo_matrix_init_identity(&priv->window_to_field_matrix);
@@ -1561,13 +1561,13 @@ update_matrices(GwyRasterView *rasterview)
     cairo_matrix_translate(matrix, -field->xoff, -field->yoff);
     cairo_matrix_multiply(matrix, matrix, &priv->field_to_window_matrix);
 
-    set_shapes_transforms(rasterview);
+    set_shapes_transforms(rasterarea);
 }
 
 static void
-ensure_field_surface(GwyRasterView *rasterview)
+ensure_field_surface(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     cairo_rectangle_int_t *irect = &priv->image_rectangle;
     cairo_rectangle_t *frect = &priv->field_rectangle;
 
@@ -1581,7 +1581,7 @@ ensure_field_surface(GwyRasterView *rasterview)
     if (!surface
         || cairo_image_surface_get_width(surface) != irect->width
         || cairo_image_surface_get_height(surface) != irect->height) {
-        destroy_field_surface(rasterview);
+        destroy_field_surface(rasterarea);
         guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,
                                                      irect->width);
         guchar *data = g_new(guchar, stride*irect->height);
@@ -1604,9 +1604,9 @@ ensure_field_surface(GwyRasterView *rasterview)
 }
 
 static void
-ensure_mask_surface(GwyRasterView *rasterview)
+ensure_mask_surface(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     cairo_rectangle_int_t *irect = &priv->image_rectangle;
     cairo_rectangle_t *frect = &priv->field_rectangle;
 
@@ -1624,7 +1624,7 @@ ensure_mask_surface(GwyRasterView *rasterview)
     if (mask->xres != field->xres || mask->yres != field->yres) {
         g_warning("Mask dimensions %ux%u differ from field dimensions %ux%u.",
                   mask->xres, mask->yres, field->xres, field->yres);
-        destroy_mask_surface(rasterview);
+        destroy_mask_surface(rasterarea);
         return;
     }
 
@@ -1632,7 +1632,7 @@ ensure_mask_surface(GwyRasterView *rasterview)
     if (!surface
         || cairo_image_surface_get_width(surface) != irect->width
         || cairo_image_surface_get_height(surface) != irect->height) {
-        destroy_mask_surface(rasterview);
+        destroy_mask_surface(rasterarea);
         guint stride = cairo_format_stride_for_width(CAIRO_FORMAT_A8,
                                                      irect->width);
         guchar *data = g_new(guchar, stride*irect->height);
@@ -1648,7 +1648,7 @@ ensure_mask_surface(GwyRasterView *rasterview)
 }
 
 static void
-draw_grain_number(GwyRasterView *rasterview,
+draw_grain_number(GwyRasterArea *rasterarea,
                   cairo_t *cr, PangoLayout *layout,
                   guint gno, const GwyXY *pos)
 {
@@ -1660,7 +1660,7 @@ draw_grain_number(GwyRasterView *rasterview,
     pango_layout_get_size(layout, &w, &h);
 
     GwyXY windowxy = *pos;
-    cairo_matrix_transform_point(&rasterview->priv->field_to_window_matrix,
+    cairo_matrix_transform_point(&rasterarea->priv->field_to_window_matrix,
                                  &windowxy.x, &windowxy.y);
     cairo_move_to(cr,
                   windowxy.x - 0.5*w/PANGO_SCALE,
@@ -1669,14 +1669,14 @@ draw_grain_number(GwyRasterView *rasterview,
 }
 
 static void
-draw_grain_numbers(GwyRasterView *rasterview,
+draw_grain_numbers(GwyRasterArea *rasterarea,
                    cairo_t *cr)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (!priv->number_grains)
         return;
 
-    ensure_layout(rasterview);
+    ensure_layout(rasterarea);
     guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
@@ -1685,7 +1685,7 @@ draw_grain_numbers(GwyRasterView *rasterview,
     gwy_cairo_set_source_rgba(cr, color);
     for (guint gno = 1; gno <= ngrains; gno++) {
         if (gno != priv->active_grain)
-            draw_grain_number(rasterview, cr, priv->layout, gno,
+            draw_grain_number(rasterarea, cr, priv->layout, gno,
                               positions + gno);
     }
     if (priv->active_grain) {
@@ -1700,19 +1700,19 @@ draw_grain_numbers(GwyRasterView *rasterview,
         };
         gwy_rgba_fix(&acolor);
         gwy_cairo_set_source_rgba(cr, &acolor);
-        draw_grain_number(rasterview, cr, priv->layout, gno, positions + gno);
+        draw_grain_number(rasterarea, cr, priv->layout, gno, positions + gno);
     }
     cairo_restore(cr);
 }
 
 static void
-ensure_layout(GwyRasterView *rasterview)
+ensure_layout(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (priv->layout)
         return;
 
-    priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(rasterview), NULL);
+    priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(rasterarea), NULL);
     pango_layout_set_alignment(priv->layout, PANGO_ALIGN_CENTER);
 
     PangoAttrList *attrlist = pango_attr_list_new();
@@ -1723,15 +1723,15 @@ ensure_layout(GwyRasterView *rasterview)
 }
 
 static void
-draw_mask(GwyRasterView *rasterview,
+draw_mask(GwyRasterArea *rasterarea,
           cairo_t *cr)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
 
     if (!priv->mask)
         return;
 
-    ensure_mask_surface(rasterview);
+    ensure_mask_surface(rasterarea);
     if (!priv->mask_surface)
         return;
 
@@ -1740,21 +1740,21 @@ draw_mask(GwyRasterView *rasterview,
     cairo_mask_surface(cr, priv->mask_surface,
                        priv->image_rectangle.x, priv->image_rectangle.y);
     cairo_restore(cr);
-    draw_grain_numbers(rasterview, cr);
+    draw_grain_numbers(rasterarea, cr);
 }
 
 static gboolean
-gwy_raster_view_draw(GtkWidget *widget,
+gwy_raster_area_draw(GtkWidget *widget,
                      cairo_t *cr)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(widget);
-    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
 
     if (!priv->field)
         return FALSE;
 
     //GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    ensure_field_surface(rasterview);
+    ensure_field_surface(rasterarea);
 
     cairo_save(cr);
     cairo_set_source_surface(cr, priv->field_surface,
@@ -1762,7 +1762,7 @@ gwy_raster_view_draw(GtkWidget *widget,
     cairo_paint(cr);
     cairo_restore(cr);
 
-    draw_mask(rasterview, cr);
+    draw_mask(rasterarea, cr);
 
     if (priv->shapes) {
         cairo_save(cr);
@@ -1774,19 +1774,19 @@ gwy_raster_view_draw(GtkWidget *widget,
 }
 
 static void
-gwy_raster_view_style_updated(GtkWidget *widget)
+gwy_raster_area_style_updated(GtkWidget *widget)
 {
-    RasterView *priv = GWY_RASTER_VIEW(widget)->priv;
+    RasterArea *priv = GWY_RASTER_AREA(widget)->priv;
     if (priv->layout)
         pango_layout_context_changed(priv->layout);
 
-    GTK_WIDGET_CLASS(gwy_raster_view_parent_class)->style_updated(widget);
+    GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->style_updated(widget);
 }
 
 static void
-destroy_field_surface(GwyRasterView *rasterview)
+destroy_field_surface(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (priv->field_surface) {
         guchar *data = cairo_image_surface_get_data(priv->field_surface);
         cairo_surface_destroy(priv->field_surface);
@@ -1797,9 +1797,9 @@ destroy_field_surface(GwyRasterView *rasterview)
 }
 
 static void
-destroy_mask_surface(GwyRasterView *rasterview)
+destroy_mask_surface(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (priv->mask_surface) {
         guchar *data = cairo_image_surface_get_data(priv->mask_surface);
         cairo_surface_destroy(priv->mask_surface);
@@ -1810,11 +1810,11 @@ destroy_mask_surface(GwyRasterView *rasterview)
 }
 
 static gboolean
-set_field(GwyRasterView *rasterview,
+set_field(GwyRasterArea *rasterarea,
           GwyField *field)
 {
-    RasterView *priv = rasterview->priv;
-    if (!gwy_set_member_object(rasterview, field, GWY_TYPE_FIELD,
+    RasterArea *priv = rasterarea->priv;
+    if (!gwy_set_member_object(rasterarea, field, GWY_TYPE_FIELD,
                                &priv->field,
                                "notify", &field_notify,
                                &priv->field_notify_id,
@@ -1831,17 +1831,17 @@ set_field(GwyRasterView *rasterview,
 
     priv->field_surface_valid = FALSE;
     // TODO: Queue either resize or draw, depending on the dimensions.
-    calculate_position_and_size(rasterview);
-    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    calculate_position_and_size(rasterarea);
+    gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 static gboolean
-set_mask(GwyRasterView *rasterview,
+set_mask(GwyRasterArea *rasterarea,
          GwyMaskField *mask)
 {
-    RasterView *priv = rasterview->priv;
-    if (!gwy_set_member_object(rasterview, mask, GWY_TYPE_MASK_FIELD,
+    RasterArea *priv = rasterarea->priv;
+    if (!gwy_set_member_object(rasterarea, mask, GWY_TYPE_MASK_FIELD,
                                &priv->mask,
                                "notify", &mask_notify,
                                &priv->mask_notify_id,
@@ -1854,16 +1854,16 @@ set_mask(GwyRasterView *rasterview,
 
     priv->mask_surface_valid = FALSE;
     priv->active_grain = 0;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 static gboolean
-set_gradient(GwyRasterView *rasterview,
+set_gradient(GwyRasterArea *rasterarea,
              GwyGradient *gradient)
 {
-    RasterView *priv = rasterview->priv;
-    if (!gwy_set_member_object(rasterview, gradient, GWY_TYPE_GRADIENT,
+    RasterArea *priv = rasterarea->priv;
+    if (!gwy_set_member_object(rasterarea, gradient, GWY_TYPE_GRADIENT,
                                &priv->gradient,
                                "data-changed", &gradient_data_changed,
                                &priv->gradient_data_changed_id,
@@ -1872,17 +1872,17 @@ set_gradient(GwyRasterView *rasterview,
         return FALSE;
 
     priv->field_surface_valid = FALSE;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 static gboolean
-set_shapes(GwyRasterView *rasterview,
+set_shapes(GwyRasterArea *rasterarea,
            GwyShapes *shapes)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
 
-    if (!gwy_set_member_object(rasterview, shapes, GWY_TYPE_SHAPES,
+    if (!gwy_set_member_object(rasterarea, shapes, GWY_TYPE_SHAPES,
                                &priv->shapes,
                                "updated", &shapes_updated,
                                &priv->shapes_updated_id,
@@ -1890,9 +1890,9 @@ set_shapes(GwyRasterView *rasterview,
                                NULL))
         return FALSE;
 
-    set_shapes_transforms(rasterview);
+    set_shapes_transforms(rasterarea);
 
-    GtkWidget *widget = GTK_WIDGET(rasterview);
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
     if (gtk_widget_is_drawable(widget))
         gtk_widget_queue_draw(widget);
 
@@ -1903,9 +1903,9 @@ set_shapes(GwyRasterView *rasterview,
 // This means sizes must be recalculated upon resize but adjustment and stuff
 // *before* draw, immediately.
 static void
-set_shapes_transforms(GwyRasterView *rasterview)
+set_shapes_transforms(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     GwyShapes *shapes = priv->shapes;
     GwyField *field = priv->field;
     if (!shapes)
@@ -1926,10 +1926,10 @@ set_shapes_transforms(GwyRasterView *rasterview)
 }
 
 static gboolean
-set_mask_color(GwyRasterView *rasterview,
+set_mask_color(GwyRasterArea *rasterarea,
                const GwyRGBA *color)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (color->r == priv->mask_color.r
         && color->g == priv->mask_color.g
         && color->b == priv->mask_color.b
@@ -1938,15 +1938,15 @@ set_mask_color(GwyRasterView *rasterview,
 
     priv->mask_color = *color;
     if (priv->mask)
-        gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 static gboolean
-set_grain_number_color(GwyRasterView *rasterview,
+set_grain_number_color(GwyRasterArea *rasterarea,
                        const GwyRGBA *color)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (color->r == priv->mask_color.r
         && color->g == priv->mask_color.g
         && color->b == priv->mask_color.b
@@ -1955,100 +1955,100 @@ set_grain_number_color(GwyRasterView *rasterview,
 
     priv->grain_number_color = *color;
     if (priv->mask && priv->number_grains)
-        gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 static void
-field_notify(GwyRasterView *rasterview,
+field_notify(GwyRasterArea *rasterarea,
              GParamSpec *pspec,
              GwyField *field)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     priv->field_aspect_ratio = gwy_field_dy(field)/gwy_field_dx(field);
 
     if (gwy_strequal(pspec->name, "x-res")
         || gwy_strequal(pspec->name, "y-res")) {
-        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+        gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
     }
     if (priv->real_aspect_ratio
              && (gwy_strequal(pspec->name, "x-real")
                  || gwy_strequal(pspec->name, "y-real"))) {
-        gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+        gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
     }
 }
 
 static void
-mask_notify(GwyRasterView *rasterview,
+mask_notify(GwyRasterArea *rasterarea,
             GParamSpec *pspec,
             GwyMaskField *mask)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
 
     if (gwy_strequal(pspec->name, "x-res")
         || gwy_strequal(pspec->name, "y-res")) {
         priv->mask_surface_valid = FALSE;
-        gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     }
 }
 
 static void
-field_data_changed(GwyRasterView *rasterview,
+field_data_changed(GwyRasterArea *rasterarea,
                    GwyFieldPart *fpart,
                    GwyField *field)
 {
-    rasterview->priv->field_surface_valid = FALSE;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    rasterarea->priv->field_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
 static void
-mask_data_changed(GwyRasterView *rasterview,
+mask_data_changed(GwyRasterArea *rasterarea,
                   GwyFieldPart *fpart,
                   GwyMaskField *mask)
 {
-    rasterview->priv->mask_surface_valid = FALSE;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    rasterarea->priv->mask_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
 static void
-gradient_data_changed(GwyRasterView *rasterview,
+gradient_data_changed(GwyRasterArea *rasterarea,
                       GwyGradient *gradient)
 {
-    rasterview->priv->field_surface_valid = FALSE;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    rasterarea->priv->field_surface_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
 static void
-shapes_updated(GwyRasterView *rasterview,
+shapes_updated(GwyRasterArea *rasterarea,
                GwyShapes *shapes)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (!priv->scroll_timer_hid) {
-        if (scroll_to_current_point(rasterview, shapes)) {
+        if (scroll_to_current_point(rasterarea, shapes)) {
             priv->scroll_timer_hid = g_timeout_add(50, &enable_scrolling_again,
-                                                   rasterview);
+                                                   rasterarea);
             return;
         }
     }
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
 static gboolean
 enable_scrolling_again(gpointer user_data)
 {
-    GwyRasterView *rasterview = GWY_RASTER_VIEW(user_data);
-    RasterView *priv = rasterview->priv;
-    if (priv->shapes && scroll_to_current_point(rasterview, priv->shapes))
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(user_data);
+    RasterArea *priv = rasterarea->priv;
+    if (priv->shapes && scroll_to_current_point(rasterarea, priv->shapes))
         return TRUE;
     priv->scroll_timer_hid = 0;
     return FALSE;
 }
 
 static gboolean
-scroll_to_current_point(GwyRasterView *rasterview,
+scroll_to_current_point(GwyRasterArea *rasterarea,
                         GwyShapes *shapes)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     gboolean scrolling = FALSE;
     GwyXY xy;
 
@@ -2059,24 +2059,24 @@ scroll_to_current_point(GwyRasterView *rasterview,
     const cairo_rectangle_int_t *irect = &priv->image_rectangle;
 
     if (xy.x < irect->x)
-        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_LEFT);
+        scrolling |= gwy_raster_area_scroll(rasterarea, GTK_SCROLL_STEP_LEFT);
     else if (xy.x > irect->x + irect->width)
-        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_RIGHT);
+        scrolling |= gwy_raster_area_scroll(rasterarea, GTK_SCROLL_STEP_RIGHT);
 
     if (xy.y < irect->y)
-        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_UP);
+        scrolling |= gwy_raster_area_scroll(rasterarea, GTK_SCROLL_STEP_UP);
     else if (xy.y > irect->y + irect->height)
-        scrolling |= gwy_raster_view_scroll(rasterview, GTK_SCROLL_STEP_DOWN);
+        scrolling |= gwy_raster_area_scroll(rasterarea, GTK_SCROLL_STEP_DOWN);
 
     return scrolling;
 }
 
 static gboolean
-set_hadjustment(GwyRasterView *rasterview,
+set_hadjustment(GwyRasterArea *rasterarea,
                 GtkAdjustment *adjustment)
 {
-    RasterView *priv = rasterview->priv;
-    if (!gwy_set_member_object(rasterview, adjustment, GTK_TYPE_ADJUSTMENT,
+    RasterArea *priv = rasterarea->priv;
+    if (!gwy_set_member_object(rasterarea, adjustment, GTK_TYPE_ADJUSTMENT,
                                &priv->hadjustment,
                                "value-changed", &adjustment_value_changed,
                                &priv->hadjustment_value_changed_id,
@@ -2086,19 +2086,19 @@ set_hadjustment(GwyRasterView *rasterview,
 
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
-    freeze_adjustments_notify(rasterview, TRUE, FALSE);
-    set_hadjustment_values(rasterview);
-    calculate_position_and_size(rasterview);
-    thaw_adjustments_notify(rasterview, TRUE, FALSE);
+    freeze_adjustments_notify(rasterarea, TRUE, FALSE);
+    set_hadjustment_values(rasterarea);
+    calculate_position_and_size(rasterarea);
+    thaw_adjustments_notify(rasterarea, TRUE, FALSE);
     return TRUE;
 }
 
 static gboolean
-set_vadjustment(GwyRasterView *rasterview,
+set_vadjustment(GwyRasterArea *rasterarea,
                 GtkAdjustment *adjustment)
 {
-    RasterView *priv = rasterview->priv;
-    if (!gwy_set_member_object(rasterview, adjustment, GTK_TYPE_ADJUSTMENT,
+    RasterArea *priv = rasterarea->priv;
+    if (!gwy_set_member_object(rasterarea, adjustment, GTK_TYPE_ADJUSTMENT,
                                &priv->vadjustment,
                                "value-changed", &adjustment_value_changed,
                                &priv->vadjustment_value_changed_id,
@@ -2108,10 +2108,10 @@ set_vadjustment(GwyRasterView *rasterview,
 
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
-    freeze_adjustments_notify(rasterview, FALSE, TRUE);
-    set_vadjustment_values(rasterview);
-    calculate_position_and_size(rasterview);
-    thaw_adjustments_notify(rasterview, FALSE, TRUE);
+    freeze_adjustments_notify(rasterarea, FALSE, TRUE);
+    set_vadjustment_values(rasterarea);
+    calculate_position_and_size(rasterarea);
+    thaw_adjustments_notify(rasterarea, FALSE, TRUE);
     return TRUE;
 }
 
@@ -2140,43 +2140,43 @@ set_adjustment_values(GtkAdjustment *adjustment,
 }
 
 static void
-set_hadjustment_values(GwyRasterView *rasterview)
+set_hadjustment_values(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(rasterview), &allocation);
+    gtk_widget_get_allocation(GTK_WIDGET(rasterarea), &allocation);
     set_adjustment_values(priv->hadjustment,
-                          allocation.width, calculate_full_width(rasterview));
+                          allocation.width, calculate_full_width(rasterarea));
 }
 
 static void
-set_vadjustment_values(GwyRasterView *rasterview)
+set_vadjustment_values(GwyRasterArea *rasterarea)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(rasterview), &allocation);
+    gtk_widget_get_allocation(GTK_WIDGET(rasterarea), &allocation);
     set_adjustment_values(priv->vadjustment,
-                          allocation.height, calculate_full_height(rasterview));
+                          allocation.height, calculate_full_height(rasterarea));
 }
 
 static void
-adjustment_value_changed(GwyRasterView *rasterview)
+adjustment_value_changed(GwyRasterArea *rasterarea)
 {
-    rasterview->priv->field_surface_valid = FALSE;
-    rasterview->priv->mask_surface_valid = FALSE;
-    calculate_position_and_size(rasterview);
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    rasterarea->priv->field_surface_valid = FALSE;
+    rasterarea->priv->mask_surface_valid = FALSE;
+    calculate_position_and_size(rasterarea);
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
 // When we set adjustments we need to emit notifications after
 // calculate_position_and_size() because whoever watches the adjustments will
 // likely query the dimensions.
 static void
-freeze_adjustments_notify(GwyRasterView *rasterview,
+freeze_adjustments_notify(GwyRasterArea *rasterarea,
                           gboolean horizontal,
                           gboolean vertical)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (horizontal && priv->hadjustment)
         g_object_freeze_notify(G_OBJECT(priv->hadjustment));
     if (vertical && priv->vadjustment)
@@ -2184,11 +2184,11 @@ freeze_adjustments_notify(GwyRasterView *rasterview,
 }
 
 static void
-thaw_adjustments_notify(GwyRasterView *rasterview,
+thaw_adjustments_notify(GwyRasterArea *rasterarea,
                         gboolean horizontal,
                         gboolean vertical)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (horizontal && priv->hadjustment)
         g_object_thaw_notify(G_OBJECT(priv->hadjustment));
     if (vertical && priv->vadjustment)
@@ -2196,14 +2196,14 @@ thaw_adjustments_notify(GwyRasterView *rasterview,
 }
 
 static gboolean
-set_zoom(GwyRasterView *rasterview,
+set_zoom(GwyRasterArea *rasterarea,
          gdouble zoom)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     if (zoom == priv->zoom)
         return FALSE;
 
-    GtkWidget *widget = GTK_WIDGET(rasterview);
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
     if (!priv->hadjustment || !priv->vadjustment || !priv->field) {
         priv->zoom = zoom;
         gtk_widget_queue_resize(widget);
@@ -2218,9 +2218,9 @@ set_zoom(GwyRasterView *rasterview,
     // zooming out we want to avoid showing borders.  The latter should be
     // ensured by calculate_position_and_size() so ensure the former.
     priv->zoom = zoom;
-    calculate_position_and_size(rasterview);
-    set_hadjustment_values(rasterview);
-    set_vadjustment_values(rasterview);
+    calculate_position_and_size(rasterarea);
+    set_hadjustment_values(rasterarea);
+    set_vadjustment_values(rasterarea);
     if (priv->field_rectangle.width < xres) {
         x *= gtk_adjustment_get_upper(priv->hadjustment)/xres;
         x -= 0.5*gtk_adjustment_get_page_size(priv->hadjustment);
@@ -2240,10 +2240,10 @@ set_zoom(GwyRasterView *rasterview,
 }
 
 static gboolean
-set_real_aspect_ratio(GwyRasterView *rasterview,
+set_real_aspect_ratio(GwyRasterArea *rasterarea,
                       gboolean setting)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     setting = !!setting;
     if (setting == priv->real_aspect_ratio)
         return FALSE;
@@ -2253,14 +2253,14 @@ set_real_aspect_ratio(GwyRasterView *rasterview,
     if (priv->field_aspect_ratio == 1.0)
         return TRUE;
 
-    gtk_widget_queue_resize(GTK_WIDGET(rasterview));
+    gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 static guint
-calculate_full_width(const GwyRasterView *rasterview)
+calculate_full_width(const GwyRasterArea *rasterarea)
 {
-    const RasterView *priv = rasterview->priv;
+    const RasterArea *priv = rasterarea->priv;
     if (!priv->field)
         return 1;
 
@@ -2269,9 +2269,9 @@ calculate_full_width(const GwyRasterView *rasterview)
 }
 
 static guint
-calculate_full_height(const GwyRasterView *rasterview)
+calculate_full_height(const GwyRasterArea *rasterarea)
 {
-    const RasterView *priv = rasterview->priv;
+    const RasterArea *priv = rasterarea->priv;
     if (!priv->field)
         return 1;
 
@@ -2282,10 +2282,10 @@ calculate_full_height(const GwyRasterView *rasterview)
 }
 
 static gboolean
-set_number_grains(GwyRasterView *rasterview,
+set_number_grains(GwyRasterArea *rasterarea,
                   gboolean setting)
 {
-    RasterView *priv = rasterview->priv;
+    RasterArea *priv = rasterarea->priv;
     setting = !!setting;
     if (setting == priv->number_grains)
         return FALSE;
@@ -2295,30 +2295,30 @@ set_number_grains(GwyRasterView *rasterview,
     if (!priv->mask)
         return TRUE;
 
-    gtk_widget_queue_draw(GTK_WIDGET(rasterview));
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
 /**
- * SECTION: raster-view
- * @section_id: GwyRasterView
- * @title: Raster view
+ * SECTION: raster-area
+ * @section_id: GwyRasterArea
+ * @title: GwyRasterArea
  * @short_description: Display fields using false colour maps
  **/
 
 /**
- * GwyRasterView:
+ * GwyRasterArea:
  *
  * Widget for raster display of two-dimensional data using false colour maps.
  *
- * The #GwyRasterView struct contains private data only and should be accessed
+ * The #GwyRasterArea struct contains private data only and should be accessed
  * using the functions below.
  **/
 
 /**
- * GwyRasterViewClass:
+ * GwyRasterAreaClass:
  *
- * Class of two-dimensional raster views.
+ * Class of two-dimensional raster areas.
  **/
 
 /**
