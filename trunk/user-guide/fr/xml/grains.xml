@@ -33,8 +33,14 @@
     </menuchoice>.
     Les seuillages par hauteur maximale et/ou surface peuvent être utilisés pour
     éliminer de faux grains provoqués par exemple par du bruit ou des particules
-    de poussière. Vous pouvez aussi utiliser l'outil interactif de suppression
-    de grain pour faire réaliser cette tâche manuellement.
+    de poussière. Vous pouvez aussi utiliser l'outil interactif de
+    <link linkend='tool-remove-grains'>suppression des grains</link> pour
+    réaliser cette tâche manuellement.
+  </para>
+  <para>
+    Cette fonction peut aussi supprimer tous les grains en contact avec les
+    bords de l'image, ce qui peut s'avérer utile si l'on considère que ces
+    grains sont incomplets et que l'on souhaite les exclure de l'analyse.
   </para>
   <sect2 id='grain-watershed'>
     <title>Segmentation</title>
@@ -329,6 +335,13 @@
               <link linkend='surface-area-calculation'>quantités statistiques</link>
               pour une description de la méthode d'estimation de la surface.
             </listitem>
+            <listitem>
+              <guilabel>Aire de l'enveloppe convexe</guilabel>, aire projetée
+              de l'enveloppe convexe du grain. Celle-ci est légèrement plus
+              grande que la surface du grain, même pour les grains visiblement
+              convexe, à cause de la pixellisation du masque. Seuls les grains
+              parfaitement rectangulaires ont la même surface.
+            </listitem>
           </itemizedlist>
         </listitem>
       </varlistentry>
@@ -365,6 +378,45 @@
               orientation de l'écart décrit précédemment. Si le grain présente
               une symétrie lui conférant plusieurs directions possibles,
               celle-ci est choisie arbitrairement.
+            </listitem>
+            <listitem>
+              <guilabel>Rayon maximal du disque inscrit</guilabel>, rayon du
+              disque le plus grand pouvant s'inscrire dans le grain. Le disque
+              entier doit s'incrire, pas seulement le cercle extérieur, ce qui
+              a son importance dans le cas des grains présentant des vides.
+              Vous pouvez utiliser
+              <link linkend='tool-mask-editor'>l'éditeur de masque</link> pour
+              remplir les vides présents dans les grains.
+            </listitem>
+            <listitem>
+              <guilabel>Position x du centre du disque inscrit maximal</guilabel>,
+              coordonnée horizontale du centre du disque inscrit maximal. Plus
+              précisément, une des coordonnées si le disque n'est pas unique.
+            </listitem>
+            <listitem>
+              <guilabel>Position y du centre du disque inscrit maximal</guilabel>,
+              coordonnée verticale du centre du disque inscrit maximal. Plus
+              précisément, une des coordonnées si le disque n'est pas unique,
+              mais elle correspond au même disque que celui de la donnée
+              précédente.
+            </listitem>
+            <listitem>
+              <guilabel>Rayon minimal du disque circonscrit</guilabel>, rayon du
+              plus petit cercle pouvant contenir le grain.
+            </listitem>
+            <listitem>
+              <guilabel>Position x du centre du disque circonscrit</guilabel>,
+              coordonnée horizontale du centre du cercle circonscrit.
+            </listitem>
+            <listitem>
+              <guilabel>Position y du centre du disque circonscrit</guilabel>,
+              coordonnée horizontale du centre du cercle circonscrit.
+            </listitem>
+            <listitem>
+              <guilabel>Rayon moyen</guilabel>, distance moyenne entre le
+              barycentre du grain et le bord de celui-ci. Cette quantité n'est
+              en général utile que dans le cas des grains convexes ou
+              quasi-convexes.
             </listitem>
           </itemizedlist>
         </listitem>
@@ -569,6 +621,38 @@
       manière identique à la courbure globale donnée par la fonction
       <link linkend='curvature'>courbure</link>.  Référez-vous à sa description
       pour plus de détails.
+    </para>
+    <informalfigure id='fig-grain-inscribed-exscribed'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='grain-inscribed-exscribed.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='grain-inscribed-exscribed.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Disque inscrit maximal et cercle circonscrit minimal d'un grain.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Les disques inscrits et les cercles circonscrits aux grains peuvent être
+      visualisés en utilisant
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Sélectionner les disques inscrits</guimenuitem>
+      </menuchoice>
+      et
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Sélectionner les cercles ciconscrits</guimenuitem>
+      </menuchoice>.
+      Ces fonctions créent des sélections circulaires représentant les disques
+      et cercles correspondants pour chaque grain, celles-ci pouvant être
+      affichées par la suite avec le
+      <link linkend='tool-selection-manager'>gestionnaire de sélections</link>.
     </para>
   </sect2>
   <sect2 id='grain-level'>
