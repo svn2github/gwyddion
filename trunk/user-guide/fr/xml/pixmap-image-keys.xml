@@ -18,9 +18,9 @@
     spécifier manuellement les dimensions et l'échelle. Vous pouvez
     aussi rendre vos images directement chargeables dans Gwyddion avec
     les dimensions et échelle correctes en ajoutant ces informations
-    lors de leur création. Les informations sont organisées par paires
-    clé-valeur, enregistrées selon des méthodes propres à chaque format,
-    telles que décrites dans la table suivante.
+    lors de leur création dans d'autres logiciels. Les informations sont
+    organisées par paires clé-valeur, enregistrées selon des méthodes propres à
+    chaque format, telles que décrites dans la table suivante.
   </para>
   <para>
     <informaltable id='table-pixmap-image-metadata'>
