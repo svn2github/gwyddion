@@ -31,7 +31,6 @@ public_headers = \
 	$(srcdir)/widget-utils.h
 
 public_built_headers = \
-	$(genmarshal_name).h \
 	$(mkenum_name).h
 
 private_headers =
