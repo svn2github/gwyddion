@@ -123,24 +123,22 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwy3_la_SOURCES = \
-	$(mkenum_name).c \
 	array.c \
-	brick.c \
 	brick-arithmetic.c \
 	brick-part.c \
 	brick-statistics.c \
+	brick.c \
 	calc.c \
 	container.c \
-	coords.c \
 	coords-line.c \
 	coords-point.c \
 	coords-rectangle.c \
-	curve.c \
+	coords.c \
 	curve-statistics.c \
+	curve.c \
 	error-list.c \
 	expr.c \
 	fft.c \
-	field.c \
 	field-arithmetic.c \
 	field-correlate.c \
 	field-distributions.c \
@@ -150,32 +148,33 @@ libgwy3_la_SOURCES = \
 	field-read.c \
 	field-statistics.c \
 	field-transform.c \
-	fitter.c \
-	fit-func.c \
+	field.c \
 	fit-func-builtin.c \
+	fit-func.c \
 	fit-param.c \
 	fit-task.c \
+	fitter.c \
 	gl-material.c \
 	gradient.c \
-	grain-value.c \
 	grain-value-builtin.c \
+	grain-value.c \
 	int-set.c \
 	interpolation.c \
 	inventory.c \
-	line.c \
 	line-arithmetic.c \
 	line-distributions.c \
 	line-part.c \
 	line-statistics.c \
+	line.c \
 	macros.c \
 	main.c \
-	mask-field.c \
 	mask-field-arithmetic.c \
 	mask-field-grains.c \
 	mask-field-transform.c \
+	mask-field.c \
 	mask-iter.c \
-	mask-line.c \
 	mask-line-arithmetic.c \
+	mask-line.c \
 	master.c \
 	math.c \
 	object-internal.c \
@@ -184,12 +183,13 @@ libgwy3_la_SOURCES = \
 	rand.c \
 	resource.c \
 	rgba.c \
-	serializable.c \
 	serializable-boxed.c \
+	serializable.c \
 	serialize.c \
 	strfuncs.c \
-	surface.c \
 	surface-statistics.c \
+	surface.c \
+	types.c \
 	unit.c \
 	user-fit-func.c \
 	user-grain-value.c \
