@@ -28,6 +28,11 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_RULER_SCALE_REAL,
+    GWY_RULER_SCALE_PIXEL,
+} GwyRulerScaleType;
+
 #define GWY_TYPE_RASTER_VIEW \
     (gwy_raster_view_get_type())
 #define GWY_RASTER_VIEW(obj) \

@@ -19,10 +19,13 @@
 
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
+#include "libgwy/field-statistics.h"
+#include "libgwyui/types.h"
 #include "libgwyui/raster-view.h"
 
 enum {
     PROP_0,
+    PROP_SCALE_TYPE,
     PROP_SCROLLER,
     PROP_AREA,
     PROP_HRULER,
@@ -34,25 +37,61 @@ enum {
 };
 
 struct _GwyRasterViewPrivate {
+    GwyRulerScaleType scale_type;
+
     GwyScroller *scroller;
     GwyRasterArea *area;
+    gulong area_notify_id;
+    gulong area_motion_notify_id;
+
+    GtkAdjustment *hadjustment;
+    GtkAdjustment *vadjustment;
+    gulong hadjustment_changed_id;
+    gulong hadjustment_value_changed_id;
+    gulong vadjustment_changed_id;
+    gulong vadjustment_value_changed_id;
+
     GwyRuler *hruler;
     GtkScrollbar *hscrollbar;
     GwyRuler *vruler;
     GtkScrollbar *vscrollbar;
     GwyColorAxis *coloraxis;
+
+    GwyField *field;
+    gulong field_notify_id;
+    gulong field_data_changed_id;
 };
 
 typedef struct _GwyRasterViewPrivate RasterView;
 
-static void     gwy_raster_view_set_property        (GObject *object,
-                                                     guint prop_id,
-                                                     const GValue *value,
-                                                     GParamSpec *pspec);
-static void     gwy_raster_view_get_property        (GObject *object,
-                                                     guint prop_id,
-                                                     GValue *value,
-                                                     GParamSpec *pspec);
+static void     gwy_raster_view_dispose     (GObject *object);
+static void     gwy_raster_view_finalize    (GObject *object);
+static void     gwy_raster_view_set_property(GObject *object,
+                                             guint prop_id,
+                                             const GValue *value,
+                                             GParamSpec *pspec);
+static void     gwy_raster_view_get_property(GObject *object,
+                                             guint prop_id,
+                                             GValue *value,
+                                             GParamSpec *pspec);
+static void     area_notify                 (GwyRasterView *rasterview,
+                                             GParamSpec *pspec,
+                                             GwyRasterArea *area);
+static void     field_notify                (GwyRasterView *rasterview,
+                                             GParamSpec *pspec,
+                                             GwyField *field);
+static gboolean set_scale_type              (GwyRasterView *rasterview,
+                                             GwyRulerScaleType scale_type);
+static gboolean set_hadjustment             (GwyRasterView *rasterview,
+                                             GtkAdjustment *adjustment);
+static gboolean set_vadjustment             (GwyRasterView *rasterview,
+                                             GtkAdjustment *adjustment);
+static gboolean set_field                   (GwyRasterView *rasterview,
+                                             GwyField *field);
+static void     update_ruler_ranges         (GwyRasterView *rasterview);
+static gboolean area_motion_notify          (GwyRasterView *rasterview,
+                                             GdkEventMotion *event,
+                                             GwyRasterArea *area);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -66,8 +105,18 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
 
     g_type_class_add_private(klass, sizeof(RasterView));
 
+    gobject_class->dispose = gwy_raster_view_dispose;
+    gobject_class->finalize = gwy_raster_view_finalize;
     gobject_class->get_property = gwy_raster_view_get_property;
     gobject_class->set_property = gwy_raster_view_set_property;
+
+    properties[PROP_SCALE_TYPE]
+        = g_param_spec_enum("scale-type",
+                            "Scale type",
+                            "Scale type of rulers.",
+                            GWY_TYPE_RULER_SCALE_TYPE,
+                            GWY_RULER_SCALE_REAL,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SCROLLER]
         = g_param_spec_object("scroller",
@@ -129,12 +178,15 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                                                    GWY_TYPE_RASTER_VIEW,
                                                    RasterView);
     RasterView *priv = rasterview->priv;
+    priv->scale_type = GWY_RULER_SCALE_REAL;
 
     GtkGrid *grid = GTK_GRID(rasterview);
 
     GtkWidget *scroller = gwy_scroller_new();
     priv->scroller = GWY_SCROLLER(scroller);
     gtk_grid_attach(grid, scroller, 2, 2, 1, 1);
+    gtk_widget_set_hexpand(scroller, 1.0);
+    gtk_widget_set_vexpand(scroller, 1.0);
     gtk_widget_show(scroller);
 
     GtkWidget *area = gwy_raster_area_new();
@@ -158,44 +210,73 @@ gwy_raster_view_init(GwyRasterView *rasterview)
 
     GtkWidget *hruler = gwy_ruler_new();
     priv->hruler = GWY_RULER(hruler);
-    g_object_set(hruler,
-                 "edge", GTK_POS_TOP,
-                 "max-tick-level", 3,
-                 "show-mark", TRUE,
-                 NULL);
+    gwy_axis_set_edge(GWY_AXIS(hruler), GTK_POS_TOP);
+    gwy_ruler_set_show_mark(priv->hruler, TRUE);
+    g_object_set(hruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, hruler, 2, 1, 1, 1);
     gtk_widget_show(hruler);
 
     GtkWidget *vruler = gwy_ruler_new();
     priv->vruler = GWY_RULER(vruler);
-    g_object_set(vruler,
-                 "edge", GTK_POS_BOTTOM,
-                 "max-tick-level", 3,
-                 "show-mark", TRUE,
-                 NULL);
+    gwy_axis_set_edge(GWY_AXIS(vruler), GTK_POS_LEFT);
+    gwy_ruler_set_show_mark(priv->vruler, TRUE);
+    g_object_set(vruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, vruler, 1, 2, 1, 1);
     gtk_widget_show(vruler);
 
     GtkWidget *coloraxis = gwy_color_axis_new();
     priv->coloraxis = GWY_COLOR_AXIS(coloraxis);
+    gwy_axis_set_edge(GWY_AXIS(coloraxis), GTK_POS_RIGHT);
     g_object_set(coloraxis,
-                 "edge", GTK_POS_RIGHT,
                  "max-tick-level", 2,
                  "ticks-at-edges", TRUE,
                  NULL);
     gtk_grid_attach(grid, coloraxis, 3, 2, 1, 1);
     gtk_widget_show(coloraxis);
+
+    priv->area_notify_id
+        = g_signal_connect_swapped(area, "notify",
+                                   G_CALLBACK(area_notify), rasterview);
+    set_hadjustment(rasterview, hadj);
+    set_vadjustment(rasterview, vadj);
+    priv->area_motion_notify_id
+        = g_signal_connect_swapped(area, "motion-notify-event",
+                                   G_CALLBACK(area_motion_notify), rasterview);
 }
 
 static void
-gwy_raster_view_set_property(G_GNUC_UNUSED GObject *object,
+gwy_raster_view_dispose(GObject *object)
+{
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
+    RasterView *priv = rasterview->priv;
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_motion_notify_id);
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_notify_id);
+    set_field(rasterview, NULL);
+    set_hadjustment(rasterview, NULL);
+    set_vadjustment(rasterview, NULL);
+    G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
+}
+
+
+static void
+gwy_raster_view_finalize(GObject *object)
+{
+    G_OBJECT_CLASS(gwy_raster_view_parent_class)->finalize(object);
+}
+
+static void
+gwy_raster_view_set_property(GObject *object,
                              guint prop_id,
-                             G_GNUC_UNUSED const GValue *value,
+                             const GValue *value,
                              GParamSpec *pspec)
 {
-    //GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
 
     switch (prop_id) {
+        case PROP_SCALE_TYPE:
+        set_scale_type(rasterview, g_value_get_enum(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -211,6 +292,10 @@ gwy_raster_view_get_property(GObject *object,
     RasterView *priv = GWY_RASTER_VIEW(object)->priv;
 
     switch (prop_id) {
+        case PROP_SCALE_TYPE:
+        g_value_set_enum(value, priv->scale_type);
+        break;
+
         case PROP_SCROLLER:
         g_value_set_object(value, priv->scroller);
         break;
@@ -372,6 +457,173 @@ gwy_raster_view_get_color_axis(const GwyRasterView *rasterview)
     return rasterview->priv->coloraxis;
 }
 
+static void
+area_notify(GwyRasterView *rasterview,
+            GParamSpec *pspec,
+            GwyRasterArea *area)
+{
+    RasterView *priv = rasterview->priv;
+    if (gwy_strequal(pspec->name, "hadjustment")) {
+        GtkScrollable *scrollable = GTK_SCROLLABLE(area);
+        set_hadjustment(rasterview, gtk_scrollable_get_hadjustment(scrollable));
+    }
+    else if (gwy_strequal(pspec->name, "vadjustment")) {
+        GtkScrollable *scrollable = GTK_SCROLLABLE(area);
+        set_vadjustment(rasterview, gtk_scrollable_get_vadjustment(scrollable));
+    }
+    else if (gwy_strequal(pspec->name, "field")) {
+        set_field(rasterview, gwy_raster_area_get_field(area));
+    }
+    else if (gwy_strequal(pspec->name, "gradient")) {
+        gwy_color_axis_set_gradient(priv->coloraxis,
+                                    gwy_raster_area_get_gradient(area));
+    }
+}
+
+static void
+field_notify(GwyRasterView *rasterview,
+             GParamSpec *pspec,
+             GwyField *field)
+{
+    RasterView *priv = rasterview->priv;
+    if (gwy_stramong(pspec->name,
+                     "xres", "yres", "xreal", "yreal", "xoff", "yoff", NULL)) {
+        update_ruler_ranges(rasterview);
+    }
+    else if (gwy_strequal(pspec->name, "unit-xy")) {
+        GwyUnit *hunit = gwy_axis_get_unit(GWY_AXIS(priv->hruler));
+        GwyUnit *vunit = gwy_axis_get_unit(GWY_AXIS(priv->vruler));
+        GwyUnit *xyunit = gwy_field_get_unit_xy(field);
+        gwy_unit_assign(hunit, xyunit);
+        gwy_unit_assign(vunit, xyunit);
+    }
+    else if (gwy_strequal(pspec->name, "unit-z")) {
+        GwyUnit *colorunit = gwy_axis_get_unit(GWY_AXIS(priv->coloraxis));
+        GwyUnit *zunit = gwy_field_get_unit_z(field);
+        gwy_unit_assign(colorunit, zunit);
+    }
+}
+
+static void
+field_data_changed(GwyRasterView *rasterview,
+                   G_GNUC_UNUSED const GwyFieldPart *fpart,
+                   GwyField *field)
+{
+    // TODO: This needs elaboration depending on the color mapping type...
+    RasterView *priv = rasterview->priv;
+    GwyRange range;
+    gwy_field_min_max_full(field, &range.from, &range.to);
+    gwy_axis_request_range(GWY_AXIS(priv->coloraxis), &range);
+}
+
+static gboolean
+set_scale_type(GwyRasterView *rasterview,
+               GwyRulerScaleType scale_type)
+{
+    RasterView *priv = rasterview->priv;
+    if (scale_type == priv->scale_type)
+        return FALSE;
+
+    priv->scale_type = scale_type;
+    update_ruler_ranges(rasterview);
+    return TRUE;
+}
+
+static gboolean
+set_hadjustment(GwyRasterView *rasterview,
+                GtkAdjustment *adjustment)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, adjustment, GTK_TYPE_ADJUSTMENT,
+                               &priv->hadjustment,
+                               "changed", &update_ruler_ranges,
+                               &priv->hadjustment_changed_id,
+                               G_CONNECT_SWAPPED,
+                               "value-changed", &update_ruler_ranges,
+                               &priv->hadjustment_value_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    update_ruler_ranges(rasterview);
+    return TRUE;
+}
+
+static gboolean
+set_vadjustment(GwyRasterView *rasterview,
+                GtkAdjustment *adjustment)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, adjustment, GTK_TYPE_ADJUSTMENT,
+                               &priv->vadjustment,
+                               "changed", &update_ruler_ranges,
+                               &priv->vadjustment_changed_id,
+                               G_CONNECT_SWAPPED,
+                               "value-changed", &update_ruler_ranges,
+                               &priv->vadjustment_value_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    update_ruler_ranges(rasterview);
+    return TRUE;
+}
+
+static gboolean
+set_field(GwyRasterView *rasterview,
+          GwyField *field)
+{
+    RasterView *priv = rasterview->priv;
+    if (!gwy_set_member_object(rasterview, field, GWY_TYPE_FIELD,
+                               &priv->field,
+                               "notify", &field_notify,
+                               &priv->field_notify_id,
+                               G_CONNECT_SWAPPED,
+                               "data-changed", &field_data_changed,
+                               &priv->field_data_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    update_ruler_ranges(rasterview);
+    return TRUE;
+}
+
+static void
+update_ruler_ranges(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->area);
+    cairo_rectangle_t area;
+    gwy_raster_area_get_widget_area(rasterarea, &area);
+    GwyRange hrange = { area.x, area.x + area.width };
+    GwyRange vrange = { area.y, area.y + area.height };
+    if (priv->scale_type == GWY_RULER_SCALE_REAL) {
+        const cairo_matrix_t *matrix
+            = gwy_raster_area_get_widget_to_coords_matrix(rasterarea);
+        cairo_matrix_transform_point(matrix, &hrange.from, &vrange.from);
+        cairo_matrix_transform_point(matrix, &hrange.to, &vrange.to);
+    }
+    gwy_axis_request_range(GWY_AXIS(priv->hruler), &hrange);
+    gwy_axis_request_range(GWY_AXIS(priv->vruler), &vrange);
+}
+
+static gboolean
+area_motion_notify(GwyRasterView *rasterview,
+                   GdkEventMotion *event,
+                   GwyRasterArea *area)
+{
+    RasterView *priv = rasterview->priv;
+    gdouble x = event->x, y = event->y;
+    const cairo_matrix_t *matrix;
+    matrix = gwy_raster_area_get_widget_to_field_matrix(area);
+    cairo_matrix_transform_point(matrix, &x, &y);
+    // TODO: Real coordinates
+    gwy_ruler_set_mark(priv->hruler, x);
+    gwy_ruler_set_mark(priv->vruler, y);
+    return FALSE;
+}
+
 /**
  * SECTION: raster-view
  * @section_id: GwyRasterView
@@ -392,6 +644,14 @@ gwy_raster_view_get_color_axis(const GwyRasterView *rasterview)
  * GwyRasterViewClass:
  *
  * Class of two-dimensional raster views.
+ **/
+
+/**
+ * GwyRulerScaleType:
+ * @GWY_RULER_SCALE_REAL: Rulers display real coordinates in physical units.
+ * @GWY_RULER_SCALE_PIXEL: Rulers display pixel coordinates.
+ *
+ * Type of rules scales (coordinates).
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
