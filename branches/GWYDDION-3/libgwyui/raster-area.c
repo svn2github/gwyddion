@@ -1073,7 +1073,9 @@ create_window(GwyRasterArea *rasterarea)
                        | GDK_KEY_RELEASE_MASK
                        | GDK_SCROLL_MASK
                        | GDK_POINTER_MOTION_MASK
-                       | GDK_POINTER_MOTION_HINT_MASK),
+                       | GDK_POINTER_MOTION_HINT_MASK
+                       | GDK_ENTER_NOTIFY_MASK
+                       | GDK_LEAVE_NOTIFY_MASK),
         .visual = gtk_widget_get_visual(widget),
     };
     gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
@@ -1295,7 +1297,10 @@ gwy_raster_area_leave_notify(GtkWidget *widget,
     priv->active_grain = 0;
     gtk_widget_queue_draw(widget);
 
-    return GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->leave_notify_event(widget, event);
+    GtkWidgetClass *klass = GTK_WIDGET_CLASS(gwy_raster_area_parent_class);
+    if (klass->leave_notify_event)
+        return klass->leave_notify_event(widget, event);
+    return FALSE;
 }
 
 static gboolean

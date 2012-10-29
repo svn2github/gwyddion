@@ -43,6 +43,8 @@ struct _GwyRasterViewPrivate {
     GwyRasterArea *area;
     gulong area_notify_id;
     gulong area_motion_notify_id;
+    gulong area_enter_notify_id;
+    gulong area_leave_notify_id;
 
     GtkAdjustment *hadjustment;
     GtkAdjustment *vadjustment;
@@ -91,6 +93,12 @@ static gboolean set_field                   (GwyRasterView *rasterview,
 static void     update_ruler_ranges         (GwyRasterView *rasterview);
 static gboolean area_motion_notify          (GwyRasterView *rasterview,
                                              GdkEventMotion *event,
+                                             GwyRasterArea *area);
+static gboolean area_enter_notify           (GwyRasterView *rasterview,
+                                             GdkEventCrossing *event,
+                                             GwyRasterArea *area);
+static gboolean area_leave_notify           (GwyRasterView *rasterview,
+                                             GdkEventCrossing *event,
                                              GwyRasterArea *area);
 
 static GParamSpec *properties[N_PROPS];
@@ -242,6 +250,12 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     priv->area_motion_notify_id
         = g_signal_connect_swapped(area, "motion-notify-event",
                                    G_CALLBACK(area_motion_notify), rasterview);
+    priv->area_enter_notify_id
+        = g_signal_connect_swapped(area, "enter-notify-event",
+                                   G_CALLBACK(area_enter_notify), rasterview);
+    priv->area_leave_notify_id
+        = g_signal_connect_swapped(area, "leave-notify-event",
+                                   G_CALLBACK(area_leave_notify), rasterview);
 }
 
 static void
@@ -250,6 +264,8 @@ gwy_raster_view_dispose(GObject *object)
     GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
     RasterView *priv = rasterview->priv;
     GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_motion_notify_id);
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_enter_notify_id);
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_leave_notify_id);
     GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_notify_id);
     set_field(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
@@ -599,10 +615,16 @@ update_ruler_ranges(GwyRasterView *rasterview)
     GwyRange hrange = { area.x, area.x + area.width };
     GwyRange vrange = { area.y, area.y + area.height };
     if (priv->scale_type == GWY_RULER_SCALE_REAL) {
-        const cairo_matrix_t *matrix
-            = gwy_raster_area_get_widget_to_coords_matrix(rasterarea);
-        cairo_matrix_transform_point(matrix, &hrange.from, &vrange.from);
-        cairo_matrix_transform_point(matrix, &hrange.to, &vrange.to);
+        if (priv->field) {
+            GwyField *field = priv->field;
+            hrange.from = hrange.from/field->xres*field->xreal + field->xoff;
+            hrange.to = hrange.to/field->xres*field->xreal + field->xoff;
+            vrange.from = vrange.from/field->yres*field->yreal + field->yoff;
+            vrange.to = vrange.to/field->yres*field->yreal + field->yoff;
+        }
+        else {
+            // XXX: Whatever.
+        }
     }
     gwy_axis_request_range(GWY_AXIS(priv->hruler), &hrange);
     gwy_axis_request_range(GWY_AXIS(priv->vruler), &vrange);
@@ -616,11 +638,38 @@ area_motion_notify(GwyRasterView *rasterview,
     RasterView *priv = rasterview->priv;
     gdouble x = event->x, y = event->y;
     const cairo_matrix_t *matrix;
-    matrix = gwy_raster_area_get_widget_to_field_matrix(area);
-    cairo_matrix_transform_point(matrix, &x, &y);
-    // TODO: Real coordinates
+    if (priv->scale_type == GWY_RULER_SCALE_REAL) {
+        matrix = gwy_raster_area_get_widget_to_coords_matrix(area);
+        cairo_matrix_transform_point(matrix, &x, &y);
+    }
+    else {
+        matrix = gwy_raster_area_get_widget_to_field_matrix(area);
+        cairo_matrix_transform_point(matrix, &x, &y);
+    }
     gwy_ruler_set_mark(priv->hruler, x);
     gwy_ruler_set_mark(priv->vruler, y);
+    return FALSE;
+}
+
+static gboolean
+area_enter_notify(GwyRasterView *rasterview,
+                  G_GNUC_UNUSED GdkEventCrossing *event,
+                  G_GNUC_UNUSED GwyRasterArea *area)
+{
+    RasterView *priv = rasterview->priv;
+    gwy_ruler_set_show_mark(priv->hruler, TRUE);
+    gwy_ruler_set_show_mark(priv->vruler, TRUE);
+    return FALSE;
+}
+
+static gboolean
+area_leave_notify(GwyRasterView *rasterview,
+                  G_GNUC_UNUSED GdkEventCrossing *event,
+                  G_GNUC_UNUSED GwyRasterArea *area)
+{
+    RasterView *priv = rasterview->priv;
+    gwy_ruler_set_show_mark(priv->hruler, FALSE);
+    gwy_ruler_set_show_mark(priv->vruler, FALSE);
     return FALSE;
 }
 
