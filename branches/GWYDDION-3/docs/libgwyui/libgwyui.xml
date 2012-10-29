@@ -19,15 +19,19 @@
   </chapter>
   <chapter id='libgwyui-field'>
     <title>Field Views</title>
-    <xi:include href="xml/cairo-utils.xml"/>
     <xi:include href="xml/field-render.xml"/>
     <xi:include href="xml/raster-area.xml"/>
+    <xi:include href="xml/raster-view.xml"/>
     <xi:include href="xml/shapes.xml"/>
     <xi:include href="xml/shapes-point.xml"/>
     <xi:include href="xml/axis.xml"/>
     <xi:include href="xml/ruler.xml"/>
     <xi:include href="xml/color-axis.xml"/>
     <xi:include href="xml/scroller.xml"/>
+  </chapter>
+  <chapter id='libgwyui-utils'>
+    <title>Utilities and auxiliary widgets</title>
+    <xi:include href="xml/cairo-utils.xml"/>
     <xi:include href="xml/widget-utils.xml"/>
   </chapter>
   <index id='libgwyui-symbol-index'>

@@ -23,6 +23,7 @@ public_headers = \
 	$(srcdir)/color-axis.h \
 	$(srcdir)/field-render.h \
 	$(srcdir)/raster-area.h \
+	$(srcdir)/raster-view.h \
 	$(srcdir)/ruler.h \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
@@ -63,6 +64,7 @@ libgwyui3_la_SOURCES = \
 	color-axis.c \
 	field-render.c \
 	raster-area.c \
+	raster-view.c \
 	ruler.c \
 	scroller.c \
 	shapes.c \
