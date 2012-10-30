@@ -490,18 +490,21 @@ field_notify(GwyRasterView *rasterview,
              GwyField *field)
 {
     RasterView *priv = rasterview->priv;
-    if (gwy_stramong(pspec->name,
-                     "xres", "yres", "xreal", "yreal", "xoff", "yoff", NULL)) {
+    if (!pspec || gwy_stramong(pspec->name,
+                               "xres", "yres",
+                               "xreal", "yreal",
+                               "xoff", "yoff",
+                               NULL)) {
         update_ruler_ranges(rasterview);
     }
-    else if (gwy_strequal(pspec->name, "unit-xy")) {
+    if (!pspec || gwy_strequal(pspec->name, "unit-xy")) {
         GwyUnit *hunit = gwy_axis_get_unit(GWY_AXIS(priv->hruler));
         GwyUnit *vunit = gwy_axis_get_unit(GWY_AXIS(priv->vruler));
         GwyUnit *xyunit = gwy_field_get_unit_xy(field);
         gwy_unit_assign(hunit, xyunit);
         gwy_unit_assign(vunit, xyunit);
     }
-    else if (gwy_strequal(pspec->name, "unit-z")) {
+    if (!pspec || gwy_strequal(pspec->name, "unit-z")) {
         GwyUnit *colorunit = gwy_axis_get_unit(GWY_AXIS(priv->coloraxis));
         GwyUnit *zunit = gwy_field_get_unit_z(field);
         gwy_unit_assign(colorunit, zunit);
@@ -588,6 +591,11 @@ set_field(GwyRasterView *rasterview,
                                G_CONNECT_SWAPPED,
                                NULL))
         return FALSE;
+
+    if (field) {
+        field_notify(rasterview, NULL, field);
+        field_data_changed(rasterview, NULL, field);
+    }
 
     update_ruler_ranges(rasterview);
     return TRUE;
