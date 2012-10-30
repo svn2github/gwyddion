@@ -25,6 +25,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
 #include "libgwy/gradient.h"
+#include "libgwy/gradients.h"
 #include "libgwy/object-internal.h"
 
 #define gwy_debug(fmt...)  /* FIXME */
@@ -148,7 +149,9 @@ gwy_gradient_class_init(GwyGradientClass *klass)
     res_class->copy = gwy_gradient_copy;
     res_class->dump = gwy_gradient_dump;
     res_class->parse = gwy_gradient_parse;
+    res_class->get_gresource = _gwy_gradients_get_resource;
 
+    _gwy_gradients_register_resource();
     gwy_resource_class_register(res_class, "gradients", NULL);
 }
 

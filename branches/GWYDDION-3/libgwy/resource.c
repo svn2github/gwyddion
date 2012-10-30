@@ -1637,6 +1637,8 @@ gwy_resource_type_load(GType type)
     ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_if_fail(cpriv);
 
+    gwy_resource_type_load_gresource(type, NULL);
+
     gchar *userdir = gwy_user_directory(cpriv->name);
     gchar **dirs = gwy_data_search_path(cpriv->name);
     for (gchar **d = dirs; *d; d++) {
@@ -1745,6 +1747,57 @@ gwy_resource_type_load_directory(GType type,
         g_object_unref(fileinfo);
     }
     g_object_unref(dir);
+}
+
+/**
+ * gwy_resource_type_load_gresource:
+ * @type: Resource type of the resources.
+ * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *
+ * Loads all resources of given class from the built-in #GResource.
+ *
+ * The loaded resources are created as managed and fixed.
+ **/
+void
+gwy_resource_type_load_gresource(GType type,
+                                 GwyErrorList **error_list)
+{
+    g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
+    ResourceClass *cpriv = ensure_class_inventory(type);
+    g_return_if_fail(cpriv);
+
+    GwyResourceClass *klass = g_type_class_ref(type);
+    g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
+    if (!klass->get_gresource) {
+        g_type_class_unref(klass);
+        return;
+    }
+
+    GResource *gresource = klass->get_gresource();
+    if (!gresource) {
+        g_type_class_unref(klass);
+        return;
+    }
+
+    GError *error = NULL;
+    gchar *path = g_strconcat("/net/gwyddion/", cpriv->name, NULL);
+    char **filenames = g_resource_enumerate_children(gresource, path, 0,
+                                                     &error);
+    g_free(path);
+    if (!filenames) {
+        gwy_error_list_propagate(error_list, error);
+        g_resource_unref(gresource);
+        g_type_class_unref(klass);
+        return;
+    }
+
+    for (gchar **filename = filenames; *filename; filename++) {
+        g_printerr("GRESOURCE %s\n", *filename);
+    }
+
+    g_strfreev(filenames);
+    g_resource_unref(gresource);
+    g_type_class_unref(klass);
 }
 
 /* Check if the name does not conflict with an existing resource. */
@@ -2241,6 +2294,10 @@ gwy_resource_dump_data_line(const gdouble *data,
 
 /**
  * GwyResourceClass:
+ * @get_gresource: Returns #GResource from which built-in resources can be
+ *                 loaded.  The resources are sought under the path
+ *                 "/net/gwyddion/@name" where @name is the name passed to
+ *                 gwy_resource_class_register().
  * @setup_inventory: Sets up the class inventory after its creation.  This
  *                   may involve for example setting the default item name and
  *                   inserting the built-in system items to the inventory.

@@ -455,4 +455,12 @@ test_gradient_point_boxed(void)
     g_boxed_free(GWY_TYPE_GRADIENT_POINT, copy);
 }
 
+void
+test_gradient_gresource(void)
+{
+    GwyErrorList *error_list = NULL;
+    gwy_resource_type_load_gresource(GWY_TYPE_GRADIENT, &error_list);
+    assert_error_list(error_list, NULL);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

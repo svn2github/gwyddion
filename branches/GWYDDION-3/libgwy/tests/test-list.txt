@@ -451,6 +451,7 @@ gradient/error/no-name
 gradient/error/bad-name
 gradient/error/bad-data
 gradient/point/boxed
+gradient/gresource
 gl-material/load
 gl-material/save
 gl-material/serialize

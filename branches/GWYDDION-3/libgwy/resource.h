@@ -20,7 +20,7 @@
 #ifndef __LIBGWY_RESOURCE_H__
 #define __LIBGWY_RESOURCE_H__
 
-#include <glib-object.h>
+#include <gio/gio.h>
 #include <libgwy/strfuncs.h>
 #include <libgwy/inventory.h>
 #include <libgwy/error-list.h>
@@ -78,6 +78,7 @@ struct _GwyResourceClass {
     struct _GwyResourceClassPrivate *priv;
 
     /*<public>*/
+    GResource*   (*get_gresource)(void);
     void         (*setup_inventory)(GwyInventory *inventory);
     GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
@@ -121,6 +122,8 @@ void                        gwy_resource_type_load_directory       (GType type,
                                                                     const gchar *dirname,
                                                                     gboolean modifiable,
                                                                     GwyErrorList **error_list);
+void gwy_resource_type_load_gresource(GType type,
+                                 GwyErrorList **error_list);
 void                        gwy_resource_type_set_managed          (GType type,
                                                                     gboolean managed);
 gchar*                      gwy_resource_type_get_managed_directory(GType type);
