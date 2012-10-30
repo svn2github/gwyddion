@@ -19,6 +19,8 @@ AC_CONFIG_FILES([
   Makefile
   m4/Makefile
   build/Makefile
+  resources/Makefile
+  resources/gradients/Makefile
   libgwy/Makefile
   libgwy/version.h
   libgwy/libgwy3.pc
@@ -183,6 +185,10 @@ AC_MSG_CHECKING([for glib-mkenums])
 GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
 AC_MSG_RESULT([$GLIB_MKENUMS])
 AC_SUBST(GLIB_MKENUMS)
+
+# FIXME
+GLIB_COMPILE_RESOURCES=`echo "$GLIB_MKENUMS" | sed 's/glib-mkenums/glib-compile-resources/g'`
+AC_SUBST(GLIB_COMPILE_RESOURCES)
 
 AC_CHECK_PROGS([GTESTER],[gtester],[false])
 

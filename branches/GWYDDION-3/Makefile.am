@@ -3,6 +3,7 @@
 SUBDIRS = \
 	m4 \
 	build \
+	resources \
 	libgwy \
 	libgwyui \
 	po \
