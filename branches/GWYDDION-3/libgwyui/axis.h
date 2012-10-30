@@ -66,7 +66,8 @@ struct _GwyAxisClass {
     /*<private>*/
     GtkWidgetClass widget_class;
     /*<public>*/
-    gboolean perpendicular_labels;
+    gboolean horizontal_labels;
+    guint (*get_split_width)(const GwyAxis *axis);
 };
 
 #define GWY_TYPE_AXIS_TICK (gwy_axis_tick_get_type())

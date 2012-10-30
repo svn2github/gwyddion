@@ -90,6 +90,7 @@ struct _GwyAxisPrivate {
     PangoLayout *layout;
     GString *str;
     gdouble units_at;
+    guint split_width;
 };
 
 typedef struct _GwyAxisPrivate Axis;
@@ -978,6 +979,11 @@ calculate_ticks(GwyAxis *axis)
                                 fabs(request.to - request.from)/12.0);
     ensure_layout_and_ticks(axis);
 
+    if (GWY_AXIS_GET_CLASS(axis)->get_split_width)
+        priv->split_width = GWY_AXIS_GET_CLASS(axis)->get_split_width(axis);
+    else
+        priv->split_width = G_MAXUINT;
+
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
     gdouble majdist = estimate_major_distance(axis, &request);
@@ -1224,9 +1230,9 @@ remove_too_close_ticks(GwyAxis *axis)
         return;
 
     GtkPositionType edge = priv->edge;
-    gboolean perpendicular = GWY_AXIS_GET_CLASS(axis)->perpendicular_labels;
+    gboolean horizontal = GWY_AXIS_GET_CLASS(axis)->horizontal_labels;
     gdouble beg2, end1;
-    if (perpendicular && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
+    if (horizontal && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
         end1 = tick1->position + tick1->extents.height/pangoscale;
         beg2 = tick2->position - tick1->extents.height/pangoscale;
     }
@@ -1257,7 +1263,7 @@ remove_too_close_ticks(GwyAxis *axis)
         return;
 
     gdouble end2, beg1;
-    if (perpendicular && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
+    if (horizontal && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
         beg1 = tick1->position - 2.0 - tick1->extents.height/pangoscale;
         end2 = tick2->position + 2.0;
     }
@@ -1409,12 +1415,12 @@ ensure_layout_and_ticks(GwyAxis *axis)
 static void
 rotate_pango_layout(GwyAxis *axis)
 {
-    gboolean perpendicular = GWY_AXIS_GET_CLASS(axis)->perpendicular_labels;
+    gboolean horizontal = GWY_AXIS_GET_CLASS(axis)->horizontal_labels;
     GtkPositionType edge = axis->priv->edge;
     PangoLayout *layout = axis->priv->layout;
     g_return_if_fail(layout);
 
-    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM || perpendicular)
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM || horizontal)
         return;
 
     PangoMatrix matrix = PANGO_MATRIX_INIT;
@@ -1492,8 +1498,7 @@ estimate_major_distance(GwyAxis *axis,
     if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
         size = width;
     else
-        size = (GWY_AXIS_GET_CLASS(axis)->perpendicular_labels
-                ? height : width);
+        size = (GWY_AXIS_GET_CLASS(axis)->horizontal_labels ? height : width);
 
     return fmax(size/pangoscale + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
 }
@@ -1513,7 +1518,34 @@ format_value_label(GwyAxis *axis,
     else
         g_string_append(str, gwy_value_format_print_number(priv->vf, value));
     g_string_append(str, "</small>");
+
     pango_layout_set_markup(priv->layout, str->str, str->len);
+    if (!with_units || priv->split_width == G_MAXUINT)
+        return;
+
+    gint width, height;
+    pango_layout_get_size(priv->layout, &width, &height);
+    if ((guint)(width + PANGO_SCALE-1)/PANGO_SCALE <= priv->split_width)
+        return;
+
+    // Remove any leading whitespace from glue and put a newline there.
+    gchar *oldglue = g_strdup(gwy_value_format_get_glue(priv->vf));
+    gchar *glue = oldglue;
+    for (gunichar u = g_utf8_get_char(glue);
+         u && g_unichar_isspace(u);
+         glue = g_utf8_next_char(glue), u = g_utf8_get_char(glue))
+        ;
+    glue = g_strconcat("\n", glue, NULL);
+    gwy_value_format_set_glue(priv->vf, glue);
+
+    g_string_assign(str, "<small>");
+    g_string_append(str, gwy_value_format_print(priv->vf, value));
+    g_string_append(str, "</small>");
+    pango_layout_set_markup(priv->layout, str->str, str->len);
+
+    gwy_value_format_set_glue(priv->vf, oldglue);
+    g_free(glue);
+    g_free(oldglue);
 }
 
 /**
@@ -1534,8 +1566,11 @@ format_value_label(GwyAxis *axis,
 
 /**
  * GwyAxisClass:
- * @perpendicular_labels: %TRUE if subclass displays labels on vertical axes
- *                        horizontal, i.e. perpendicular_labels to the axis.
+ * @horizontal_labels: %TRUE if subclass displays horizontal labels even on
+ *                     on vertical axes.
+ * @get_split_width: If non-%NULL then labels with units widger than the
+ *                   return value of this method will be split to two lines,
+ *                   value and units.
  *
  * Class of graphs and data view axes.
  **/
