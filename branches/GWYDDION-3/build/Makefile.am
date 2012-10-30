@@ -11,6 +11,7 @@ EXTRA_DIST = \
 	coverage-test.sh \
 	documentation-stats.py \
 	expand-test-list.py \
+	generate-gresources.sh \
 	generate-library-def.py \
 	genmarshal.make \
 	gtester.make \
@@ -21,6 +22,7 @@ EXTRA_DIST = \
 	mkenum.h.template \
 	mkenum.make \
 	Makevars.in \
+	resource-2to3.sh \
 	test-report.xsl \
 	test-report-brief.xsl \
 	translation-stats.py \
