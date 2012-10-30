@@ -219,7 +219,6 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     GtkWidget *hruler = gwy_ruler_new();
     priv->hruler = GWY_RULER(hruler);
     gwy_axis_set_edge(GWY_AXIS(hruler), GTK_POS_TOP);
-    gwy_ruler_set_show_mark(priv->hruler, TRUE);
     g_object_set(hruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, hruler, 2, 1, 1, 1);
     gtk_widget_show(hruler);
@@ -227,7 +226,6 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     GtkWidget *vruler = gwy_ruler_new();
     priv->vruler = GWY_RULER(vruler);
     gwy_axis_set_edge(GWY_AXIS(vruler), GTK_POS_LEFT);
-    gwy_ruler_set_show_mark(priv->vruler, TRUE);
     g_object_set(vruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, vruler, 1, 2, 1, 1);
     gtk_widget_show(vruler);

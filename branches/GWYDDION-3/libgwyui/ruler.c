@@ -207,24 +207,6 @@ gwy_ruler_get_preferred_height(GtkWidget *widget,
 }
 
 static void
-set_up_transform(GtkPositionType edge,
-                 cairo_matrix_t *matrix,
-                 gdouble width, gdouble height)
-{
-    if (edge == GTK_POS_TOP)
-        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, height);
-    else if (edge == GTK_POS_LEFT)
-        cairo_matrix_init(matrix, 0.0, 1.0, -1.0, 0.0, width, 0.0);
-    else if (edge == GTK_POS_BOTTOM)
-        cairo_matrix_init_identity(matrix);
-    else if (edge == GTK_POS_RIGHT)
-        cairo_matrix_init(matrix, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0);
-    else {
-        g_assert_not_reached();
-    }
-}
-
-static void
 draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
                       gdouble xf, gdouble yf, gdouble xt, gdouble yt)
 {
@@ -234,23 +216,50 @@ draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
     cairo_line_to(cr, xt, yt);
 }
 
+static GtkPositionType
+calculate_scaling(GwyAxis *axis,
+                  GtkAllocation *allocation,
+                  gdouble *length, gdouble *breadth,
+                  cairo_matrix_t *matrix)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gtk_widget_get_allocation(widget, allocation);
+    *length = (vertical ? allocation->height : allocation->width),
+    *breadth = (vertical ? allocation->width : allocation->height);
+
+    if (edge == GTK_POS_TOP)
+        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, allocation->height);
+    else if (edge == GTK_POS_LEFT)
+        cairo_matrix_init(matrix, 0.0, 1.0, -1.0, 0.0, allocation->width, 0.0);
+    else if (edge == GTK_POS_BOTTOM)
+        cairo_matrix_init_identity(matrix);
+    else if (edge == GTK_POS_RIGHT)
+        cairo_matrix_init(matrix, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+    else {
+        g_assert_not_reached();
+    }
+
+    return edge;
+}
+
 static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
 {
     GwyAxis *axis = GWY_AXIS(widget);
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    gdouble width = gtk_widget_get_allocated_width(widget),
-            height = gtk_widget_get_allocated_height(widget);
-    GtkPositionType edge = gwy_axis_get_edge(axis);
-    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
-    gdouble length = (vertical ? height : width),
-            breadth = (vertical ? width : height);
+    GtkAllocation allocation;
+    gdouble length, breadth;
     cairo_matrix_t matrix;
-    set_up_transform(edge, &matrix, width, height);
+    GtkPositionType edge = calculate_scaling(axis,
+                                             &allocation, &length, &breadth,
+                                             &matrix);
 
     GdkRGBA rgba;
-    gtk_render_background(context, cr, 0, 0, width, height);
+    gtk_render_background(context, cr,
+                          0, 0, allocation.width, allocation.height);
     gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_set_line_width(cr, 1.0);
@@ -465,13 +474,32 @@ static void
 invalidate_mark_area(GwyRuler *ruler)
 {
     GtkWidget *widget = GTK_WIDGET(ruler);
-    //Ruler *priv = ruler->priv;
-
-    // TODO: Invalidate only the region around the mark.
-    if (!gtk_widget_is_drawable(widget))
+    Ruler *priv = ruler->priv;
+    if (!gtk_widget_is_drawable(widget) || !isfinite(priv->mark))
         return;
 
-    gtk_widget_queue_draw(widget);
+    GwyAxis *axis = GWY_AXIS(widget);
+    GtkAllocation allocation;
+    gdouble length, breadth;
+    cairo_matrix_t matrix;
+    calculate_scaling(axis, &allocation, &length, &breadth, &matrix);
+
+    gdouble x = gwy_axis_value_to_position(axis, priv->mark),
+            hs = 0.2*breadth, y = hs;
+    if (x < -hs || x > length + hs)
+        return;
+
+    cairo_matrix_transform_point(&matrix, &x, &y);
+
+    cairo_rectangle_int_t rect = {
+        (gint)floor(x - hs - 1.0 + allocation.x),
+        (gint)floor(y - hs - 1.0 + allocation.y),
+        (gint)ceil(2.0*hs + 1.6),
+        (gint)ceil(2.0*hs + 1.6),
+    };
+    cairo_region_t *region = cairo_region_create_rectangle(&rect);
+    gtk_widget_queue_draw_region(widget, region);
+    cairo_region_destroy(region);
 }
 
 static gint
