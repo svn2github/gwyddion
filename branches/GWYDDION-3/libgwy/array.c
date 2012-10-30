@@ -32,7 +32,7 @@ enum {
     SGN_ITEM_INSERTED,
     SGN_ITEM_DELETED,
     SGN_ITEM_UPDATED,
-    //ITEMS_REORDERED,  maybe, if/when we add sort()
+    //SGN_ITEMS_REORDERED,  maybe, if/when we add sort()
     N_SIGNALS
 };
 
@@ -121,7 +121,7 @@ gwy_array_class_init(GwyArrayClass *klass)
    * The ::items-reordered signal is emitted when item in the array
    * are reordered.
    **/
-  signals[ITEMS_REORDERED]
+  signals[SGN_ITEMS_REORDERED]
       = g_signal_new_class_handler("items-reordered",
                                    G_OBJECT_CLASS_TYPE(klass),
                                    G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
