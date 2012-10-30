@@ -67,6 +67,8 @@ enum {
 };
 
 struct _GwyAxisPrivate {
+    GdkWindow *input_window;
+
     GwyUnit *unit;
     gulong unit_changed_id;
 
@@ -110,6 +112,8 @@ static void            gwy_axis_unrealize        (GtkWidget *widget);
 static void            gwy_axis_style_updated    (GtkWidget *widget);
 static void            gwy_axis_size_allocate    (GtkWidget *widget,
                                                   GtkAllocation *allocation);
+static void            create_input_window       (GwyAxis *axis);
+static void            destroy_input_window      (GwyAxis *axis);
 static gboolean        set_snap_to_ticks         (GwyAxis *axis,
                                                   gboolean setting);
 static gboolean        set_ticks_at_edges        (GwyAxis *axis,
@@ -435,16 +439,17 @@ gwy_axis_get_property(GObject *object,
 static void
 gwy_axis_realize(GtkWidget *widget)
 {
-    gtk_widget_set_realized(widget, TRUE);
-    GdkWindow *window = gtk_widget_get_parent_window(widget);
-    gtk_widget_set_window(widget, window);
-    g_object_ref(window);
+    GwyAxis *axis = GWY_AXIS(widget);
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->realize(widget);
+    create_input_window(axis);
 }
 
 static void
 gwy_axis_unrealize(GtkWidget *widget)
 {
-    Axis *priv = GWY_AXIS(widget)->priv;
+    GwyAxis *axis = GWY_AXIS(widget);
+    Axis *priv = axis->priv;
+    destroy_input_window(axis);
     priv->ticks_are_valid = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
     GTK_WIDGET_CLASS(gwy_axis_parent_class)->unrealize(widget);
@@ -469,13 +474,19 @@ gwy_axis_size_allocate(GtkWidget *widget,
     Axis *priv = axis->priv;
     GtkPositionType edge = priv->edge;
 
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->size_allocate(widget, allocation);
+
     if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
         priv->length = allocation->width;
     if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
         priv->length = allocation->height;
 
     invalidate_ticks(axis);
-    GTK_WIDGET_CLASS(gwy_axis_parent_class)->size_allocate(widget, allocation);
+
+    if (priv->input_window)
+        gdk_window_move_resize(priv->input_window,
+                               allocation->x, allocation->y,
+                               allocation->width, allocation->height);
 }
 
 /**
@@ -764,6 +775,44 @@ gwy_axis_value_to_position(GwyAxis *axis,
     Axis *priv = axis->priv;
     gdouble from = priv->range.from, to = priv->range.to, length = priv->length;
     return (value - from)/(to - from)*length;
+}
+
+static void
+create_input_window(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    GtkWidget *widget = GTK_WIDGET(axis);
+    g_assert(gtk_widget_get_realized(widget));
+    if (priv->input_window)
+        return;
+
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+    GdkWindowAttr attributes = {
+        .x = allocation.x,
+        .y = allocation.y,
+        .width = allocation.width,
+        .height = allocation.height,
+        .window_type = GDK_WINDOW_CHILD,
+        .wclass = GDK_INPUT_ONLY,
+        .override_redirect = TRUE,
+        .event_mask = 0,    // Users are expected to set required mask.
+    };
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR | GDK_WA_CURSOR;
+    priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
+                                        &attributes, attributes_mask);
+    gdk_window_set_user_data(priv->input_window, widget);
+}
+
+static void
+destroy_input_window(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    if (!priv->input_window)
+        return;
+    gdk_window_set_user_data(priv->input_window, NULL);
+    gdk_window_destroy(priv->input_window);
+    priv->input_window = NULL;
 }
 
 static gboolean
