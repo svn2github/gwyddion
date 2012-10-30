@@ -811,8 +811,7 @@ set_snap_to_ticks(GwyAxis *axis,
                   gboolean setting)
 {
     Axis *priv = axis->priv;
-    setting = !!setting;
-    if (setting == priv->snap_to_ticks)
+    if (!setting == !priv->snap_to_ticks)
         return FALSE;
 
     priv->snap_to_ticks = setting;
@@ -825,8 +824,7 @@ set_show_labels(GwyAxis *axis,
                 gboolean setting)
 {
     Axis *priv = axis->priv;
-    setting = !!setting;
-    if (setting == priv->show_labels)
+    if (!setting == !priv->show_labels)
         return FALSE;
 
     priv->show_labels = setting;
@@ -840,8 +838,7 @@ set_show_units(GwyAxis *axis,
                gboolean setting)
 {
     Axis *priv = axis->priv;
-    setting = !!setting;
-    if (setting == priv->show_units)
+    if (!setting == !priv->show_units)
         return FALSE;
 
     priv->show_units = setting;
@@ -854,8 +851,7 @@ set_ticks_at_edges(GwyAxis *axis,
                    gboolean setting)
 {
     Axis *priv = axis->priv;
-    setting = !!setting;
-    if (setting == priv->ticks_at_edges)
+    if (!setting == !priv->ticks_at_edges)
         return FALSE;
 
     priv->ticks_at_edges = setting;

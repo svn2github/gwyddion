@@ -199,6 +199,8 @@ gwy_raster_view_init(GwyRasterView *rasterview)
 
     GtkWidget *area = gwy_raster_area_new();
     priv->area = GWY_RASTER_AREA(area);
+    gwy_raster_area_set_scrollable(priv->area, TRUE);
+    gwy_raster_area_set_zoomable(priv->area, TRUE);
     gtk_container_add(GTK_CONTAINER(scroller), area);
     gtk_widget_show(area);
 

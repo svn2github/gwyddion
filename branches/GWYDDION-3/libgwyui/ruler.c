@@ -405,8 +405,7 @@ set_show_mark(GwyRuler *ruler,
               gboolean setting)
 {
     Ruler *priv = ruler->priv;
-    setting = !!setting;
-    if (setting == priv->show_mark)
+    if (!setting == !priv->show_mark)
         return FALSE;
 
     priv->show_mark = setting;

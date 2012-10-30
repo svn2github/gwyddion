@@ -35,6 +35,8 @@
 enum {
     // Own.
     PROP_0,
+    PROP_SCROLLABLE,
+    PROP_ZOOMABLE,
     PROP_FIELD,
     PROP_MASK,
     PROP_GRADIENT,
@@ -61,6 +63,9 @@ enum {
 
 struct _GwyRasterAreaPrivate {
     GdkWindow *window;
+
+    gboolean scrollable : 1;
+    gboolean zoomable : 1;
 
     // Implementation of GtkScrollable
     GtkAdjustment *hadjustment;
@@ -180,6 +185,10 @@ static gboolean set_mask_color                      (GwyRasterArea *rasterarea,
                                                      const GwyRGBA *color);
 static gboolean set_grain_number_color              (GwyRasterArea *rasterarea,
                                                      const GwyRGBA *color);
+static gboolean set_scrollable                      (GwyRasterArea *rasterarea,
+                                                     gboolean setting);
+static gboolean set_zoomable                        (GwyRasterArea *rasterarea,
+                                                     gboolean setting);
 static void     field_notify                        (GwyRasterArea *rasterarea,
                                                      GParamSpec *pspec,
                                                      GwyField *field);
@@ -296,6 +305,22 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
     widget_class->leave_notify_event = gwy_raster_area_leave_notify;
     widget_class->draw = gwy_raster_area_draw;
     widget_class->style_updated = gwy_raster_area_style_updated;
+
+    properties[PROP_SCROLLABLE]
+        = g_param_spec_boolean("scrollable",
+                               "Scrollable",
+                               "Whether the raster area responds to scrolling "
+                               "keybindings.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_ZOOMABLE]
+        = g_param_spec_boolean("zoomable",
+                               "Zoomable",
+                               "Whether the raster area responds to zooming "
+                               "keybindings.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_FIELD]
         = g_param_spec_object("field",
@@ -489,6 +514,14 @@ gwy_raster_area_set_property(GObject *object,
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(object);
 
     switch (prop_id) {
+        case PROP_SCROLLABLE:
+        set_scrollable(rasterarea, g_value_get_boolean(value));
+        break;
+
+        case PROP_ZOOMABLE:
+        set_zoomable(rasterarea, g_value_get_boolean(value));
+        break;
+
         case PROP_FIELD:
         set_field(rasterarea, g_value_get_object(value));
         break;
@@ -558,6 +591,14 @@ gwy_raster_area_get_property(GObject *object,
     RasterArea *priv = GWY_RASTER_AREA(object)->priv;
 
     switch (prop_id) {
+        case PROP_SCROLLABLE:
+        g_value_set_boolean(value, priv->scrollable);
+        break;
+
+        case PROP_ZOOMABLE:
+        g_value_set_boolean(value, priv->zoomable);
+        break;
+
         case PROP_FIELD:
         g_value_set_object(value, priv->field);
         break;
@@ -856,6 +897,79 @@ gwy_raster_area_get_shapes(const GwyRasterArea *rasterarea)
 {
     g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
     return rasterarea->priv->shapes;
+}
+
+/**
+ * gwy_raster_area_set_scrollable:
+ * @rasterarea: A raster area.
+ * @scrollable: %TRUE to enable user-invoked scrolling, %FALSE to disable it.
+ *
+ * Sets whether a raster area can scroll itself in response to user actions.
+ *
+ * User-invoked scrolling includes both scrolling keybindings and moving shapes
+ * outside the currently displayed area.
+ **/
+void
+gwy_raster_area_set_scrollable(GwyRasterArea *rasterarea,
+                               gboolean scrollable)
+{
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_scrollable(rasterarea, scrollable))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_SCROLLABLE]);
+}
+
+/**
+ * gwy_raster_area_get_scrollable:
+ * @rasterarea: A raster area.
+ *
+ * Gets whether a raster area can scroll itself in response to user actions.
+ *
+ * Returns: %TRUE if user-invoked scrolling is enabled, %FALSE if it is
+ *          disabled.
+ **/
+gboolean
+gwy_raster_area_get_scrollable(GwyRasterArea *rasterarea)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), FALSE);
+    return rasterarea->priv->scrollable;
+}
+
+/**
+ * gwy_raster_area_set_zoomable:
+ * @rasterarea: A raster area.
+ * @zoomable: %TRUE to enable user-invoked zooming, %FALSE to disable it.
+ *
+ * Sets whether a raster area can zoom itself in response to user actions.
+ *
+ * User-invoked zooming includes both zooming keybindings.
+ **/
+void
+gwy_raster_area_set_zoomable(GwyRasterArea *rasterarea,
+                             gboolean zoomable)
+{
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_zoomable(rasterarea, zoomable))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_ZOOMABLE]);
+}
+
+/**
+ * gwy_raster_area_get_zoomable:
+ * @rasterarea: A raster area.
+ *
+ * Gets whether a raster area can zoom itself in response to user actions.
+ *
+ * Returns: %TRUE if user-invoked zooming is enabled, %FALSE if it is
+ *          disabled.
+ **/
+gboolean
+gwy_raster_area_get_zoomable(GwyRasterArea *rasterarea)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), FALSE);
+    return rasterarea->priv->zoomable;
 }
 
 /**
@@ -1308,6 +1422,9 @@ gwy_raster_area_scroll(GwyRasterArea *rasterarea,
                        GtkScrollType scrolltype)
 {
     RasterArea *priv = rasterarea->priv;
+    if (!priv->scrollable)
+        return FALSE;
+
     GtkAdjustment *vadj = priv->vadjustment,
                   *hadj = priv->hadjustment;
     gboolean scrolling = FALSE;
@@ -1390,6 +1507,9 @@ gwy_raster_area_zoom(GwyRasterArea *rasterarea,
     };
 
     RasterArea *priv = rasterarea->priv;
+    if (!priv->zoomable)
+        return FALSE;
+
     gdouble zoom = priv->zoom;
     if (!zoom)
         return FALSE;
@@ -1964,6 +2084,30 @@ set_grain_number_color(GwyRasterArea *rasterarea,
     return TRUE;
 }
 
+static gboolean
+set_scrollable(GwyRasterArea *rasterarea,
+               gboolean setting)
+{
+    RasterArea *priv = rasterarea->priv;
+    if (!setting == !priv->scrollable)
+        return FALSE;
+
+    priv->scrollable = setting;
+    return TRUE;
+}
+
+static gboolean
+set_zoomable(GwyRasterArea *rasterarea,
+             gboolean setting)
+{
+    RasterArea *priv = rasterarea->priv;
+    if (!setting == !priv->zoomable)
+        return FALSE;
+
+    priv->zoomable = setting;
+    return TRUE;
+}
+
 static void
 field_notify(GwyRasterArea *rasterarea,
              GParamSpec *pspec,
@@ -2249,8 +2393,7 @@ set_real_aspect_ratio(GwyRasterArea *rasterarea,
                       gboolean setting)
 {
     RasterArea *priv = rasterarea->priv;
-    setting = !!setting;
-    if (setting == priv->real_aspect_ratio)
+    if (!setting == !priv->real_aspect_ratio)
         return FALSE;
 
     priv->real_aspect_ratio = setting;
@@ -2291,8 +2434,7 @@ set_number_grains(GwyRasterArea *rasterarea,
                   gboolean setting)
 {
     RasterArea *priv = rasterarea->priv;
-    setting = !!setting;
-    if (setting == priv->number_grains)
+    if (!setting == !priv->number_grains)
         return FALSE;
 
     priv->number_grains = setting;

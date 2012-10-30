@@ -655,8 +655,7 @@ set_selectable(GwyShapes *shapes,
                gboolean selectable)
 {
     Shapes *priv = shapes->priv;
-    selectable = !!selectable;
-    if (selectable == priv->selectable)
+    if (!selectable == !priv->selectable)
         return FALSE;
 
     priv->selectable = selectable;
@@ -708,8 +707,7 @@ set_editable(GwyShapes *shapes,
              gboolean editable)
 {
     Shapes *priv = shapes->priv;
-    editable = !!editable;
-    if (editable == priv->editable)
+    if (!editable == !priv->editable)
         return FALSE;
 
     priv->editable = editable;

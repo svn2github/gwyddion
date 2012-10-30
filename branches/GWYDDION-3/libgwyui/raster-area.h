@@ -81,6 +81,12 @@ const GwyRGBA* gwy_raster_area_get_grain_number_color(const GwyRasterArea *raste
 void           gwy_raster_area_set_shapes            (GwyRasterArea *rasterarea,
                                                       GwyShapes *shapes);
 GwyShapes*     gwy_raster_area_get_shapes            (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void           gwy_raster_area_set_scrollable        (GwyRasterArea *rasterarea,
+                                                      gboolean scrollable);
+gboolean       gwy_raster_area_get_scrollable        (GwyRasterArea *rasterarea)       G_GNUC_PURE;
+void           gwy_raster_area_set_zoomable          (GwyRasterArea *rasterarea,
+                                                      gboolean zoomable);
+gboolean       gwy_raster_area_get_zoomable          (GwyRasterArea *rasterarea)       G_GNUC_PURE;
 void           gwy_raster_area_get_widget_area       (const GwyRasterArea *rasterarea,
                                                       cairo_rectangle_t *area);
 void           gwy_raster_area_get_field_area        (const GwyRasterArea *rasterarea,
