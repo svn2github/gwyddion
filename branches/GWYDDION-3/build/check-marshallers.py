@@ -27,7 +27,7 @@ for filename in sys.argv[1:]:
         lineno = code.count('\n', 0, m.start()) + 1
         nameuc = m.group('nameuc')
         if not nameuc.startswith('SGN_'):
-            sys.stdout.write('%s:%s: Checking signal identifier %s does not '
+            sys.stdout.write('%s:%s: Signal identifier %s does not '
                              'start with SGN_.\n'
                              % (filename, lineno, nameuc))
             status = max(status, 1)
