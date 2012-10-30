@@ -41,10 +41,6 @@ struct _GwyRasterViewPrivate {
 
     GwyScroller *scroller;
     GwyRasterArea *area;
-    gulong area_notify_id;
-    gulong area_motion_notify_id;
-    gulong area_enter_notify_id;
-    gulong area_leave_notify_id;
 
     GtkAdjustment *hadjustment;
     GtkAdjustment *vadjustment;
@@ -242,31 +238,23 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     gtk_grid_attach(grid, coloraxis, 3, 2, 1, 1);
     gtk_widget_show(coloraxis);
 
-    priv->area_notify_id
-        = g_signal_connect_swapped(area, "notify",
-                                   G_CALLBACK(area_notify), rasterview);
+    g_signal_connect_swapped(area, "notify",
+                             G_CALLBACK(area_notify), rasterview);
     set_hadjustment(rasterview, hadj);
     set_vadjustment(rasterview, vadj);
-    priv->area_motion_notify_id
-        = g_signal_connect_swapped(area, "motion-notify-event",
-                                   G_CALLBACK(area_motion_notify), rasterview);
-    priv->area_enter_notify_id
-        = g_signal_connect_swapped(area, "enter-notify-event",
-                                   G_CALLBACK(area_enter_notify), rasterview);
-    priv->area_leave_notify_id
-        = g_signal_connect_swapped(area, "leave-notify-event",
-                                   G_CALLBACK(area_leave_notify), rasterview);
+    g_signal_connect_swapped(area, "motion-notify-event",
+                             G_CALLBACK(area_motion_notify), rasterview);
+    g_signal_connect_swapped(area, "enter-notify-event",
+                             G_CALLBACK(area_enter_notify), rasterview);
+    g_signal_connect_swapped(area, "leave-notify-event",
+                             G_CALLBACK(area_leave_notify), rasterview);
 }
 
 static void
 gwy_raster_view_dispose(GObject *object)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
-    RasterView *priv = rasterview->priv;
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_motion_notify_id);
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_enter_notify_id);
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_leave_notify_id);
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->area, priv->area_notify_id);
+    //RasterView *priv = rasterview->priv;
     set_field(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
