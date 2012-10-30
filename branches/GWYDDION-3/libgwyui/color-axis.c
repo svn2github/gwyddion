@@ -60,6 +60,7 @@ static void     gwy_color_axis_get_preferred_height(GtkWidget *widget,
                                                     gint *natural);
 static gboolean gwy_color_axis_draw                (GtkWidget *widget,
                                                     cairo_t *cr);
+static guint    gwy_color_axis_get_split_width     (const GwyAxis *axis);
 static gboolean set_gradient                       (GwyColorAxis *color_axis,
                                                     GwyGradient *gradient);
 static void     gradient_data_changed              (GwyColorAxis *coloraxis,
@@ -89,7 +90,8 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
     widget_class->draw = gwy_color_axis_draw;
 
-    axis_class->perpendicular_labels = TRUE;
+    axis_class->horizontal_labels = TRUE;
+    axis_class->get_split_width = gwy_color_axis_get_split_width;
 
     properties[PROP_GRADIENT]
         = g_param_spec_object("gradient",
@@ -354,6 +356,19 @@ gwy_color_axis_draw(GtkWidget *widget,
     }
 
     return FALSE;
+}
+
+static guint
+gwy_color_axis_get_split_width(const GwyAxis *axis)
+{
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
+        return G_MAXUINT;
+
+    GwyColorAxis *coloraxis = GWY_COLOR_AXIS(axis);
+    guint width = gtk_widget_get_allocated_width(GTK_WIDGET(axis));
+    gdouble w = fmax(width*(1.0 - coloraxis->priv->stripewidth) - 2.0, 1.0);
+    return (guint)ceil(w);
 }
 
 /**
