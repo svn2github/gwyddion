@@ -33,6 +33,13 @@ typedef enum {
     GWY_AXIS_TICK_MICRO = 3,
 } GwyAxisTickLevel;
 
+typedef enum {
+    GWY_AXIS_UNITS_NEVER,
+    GWY_AXIS_UNITS_START,
+    GWY_AXIS_UNITS_END,
+    GWY_AXIS_UNITS_AT_ZERO,
+} GwyAxisUnitPlacement;
+
 typedef struct {
     gdouble value;
     gdouble position;
@@ -66,8 +73,11 @@ struct _GwyAxisClass {
     /*<private>*/
     GtkWidgetClass widget_class;
     /*<public>*/
-    gboolean horizontal_labels;
+    gboolean (*get_horizontal_labels)(const GwyAxis *axis);
     guint (*get_split_width)(const GwyAxis *axis);
+    void (*get_units_affinity)(const GwyAxis *axis,
+                               GwyAxisUnitPlacement *primary,
+                               GwyAxisUnitPlacement *secondary);
 };
 
 #define GWY_TYPE_AXIS_TICK (gwy_axis_tick_get_type())
@@ -76,30 +86,35 @@ GType        gwy_axis_tick_get_type(void)                    G_GNUC_CONST;
 GwyAxisTick* gwy_axis_tick_copy    (const GwyAxisTick *tick) G_GNUC_MALLOC;
 void         gwy_axis_tick_free    (GwyAxisTick *tick);
 
-GType              gwy_axis_get_type           (void)                     G_GNUC_CONST;
-void               gwy_axis_request_range      (GwyAxis *axis,
-                                                const GwyRange *request);
-void               gwy_axis_get_requested_range(GwyAxis *axis,
-                                                GwyRange *range);
-void               gwy_axis_get_range          (const GwyAxis *axis,
-                                                GwyRange *range);
-GwyUnit*           gwy_axis_get_unit           (const GwyAxis *axis)      G_GNUC_PURE;
-void               gwy_axis_set_show_labels    (GwyAxis *axis,
-                                                gboolean showlabels);
-gboolean           gwy_axis_get_show_labels    (const GwyAxis *axis)      G_GNUC_PURE;
-void               gwy_axis_set_edge           (GwyAxis *axis,
-                                                GtkPositionType edge);
-GtkPositionType    gwy_axis_get_edge           (const GwyAxis *axis)      G_GNUC_PURE;
-void               gwy_axis_set_snap_to_ticks  (GwyAxis *axis,
-                                                gboolean snaptoticks);
-gboolean           gwy_axis_get_snap_to_ticks  (const GwyAxis *axis)      G_GNUC_PURE;
-PangoLayout*       gwy_axis_get_pango_layout   (GwyAxis *axis);
-const GwyAxisTick* gwy_axis_ticks              (GwyAxis *axis,
-                                                guint *nticks);
-gdouble            gwy_axis_position_to_value  (GwyAxis *axis,
-                                                gdouble position)         G_GNUC_PURE;
-gdouble            gwy_axis_value_to_position  (GwyAxis *axis,
-                                                gdouble value)            G_GNUC_PURE;
+GType              gwy_axis_get_type             (void)                             G_GNUC_CONST;
+void               gwy_axis_request_range        (GwyAxis *axis,
+                                                  const GwyRange *request);
+void               gwy_axis_get_requested_range  (GwyAxis *axis,
+                                                  GwyRange *range);
+void               gwy_axis_get_range            (const GwyAxis *axis,
+                                                  GwyRange *range);
+GwyUnit*           gwy_axis_get_unit             (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_set_show_labels      (GwyAxis *axis,
+                                                  gboolean showlabels);
+gboolean           gwy_axis_get_show_labels      (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_set_edge             (GwyAxis *axis,
+                                                  GtkPositionType edge);
+GtkPositionType    gwy_axis_get_edge             (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_set_snap_to_ticks    (GwyAxis *axis,
+                                                  gboolean snaptoticks);
+gboolean           gwy_axis_get_snap_to_ticks    (const GwyAxis *axis)              G_GNUC_PURE;
+PangoLayout*       gwy_axis_get_pango_layout     (GwyAxis *axis);
+const GwyAxisTick* gwy_axis_ticks                (GwyAxis *axis,
+                                                  guint *nticks);
+gdouble            gwy_axis_position_to_value    (GwyAxis *axis,
+                                                  gdouble position)                 G_GNUC_PURE;
+gdouble            gwy_axis_value_to_position    (GwyAxis *axis,
+                                                  gdouble value)                    G_GNUC_PURE;
+gboolean           gwy_axis_get_horizontal_labels(const GwyAxis *axis)              G_GNUC_PURE;
+guint              gwy_axis_get_split_width      (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_get_units_affinity   (const GwyAxis *axis,
+                                                  GwyAxisUnitPlacement *primary,
+                                                  GwyAxisUnitPlacement *secondary);
 
 G_END_DECLS
 

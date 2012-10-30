@@ -42,29 +42,30 @@ struct _GwyColorAxisPrivate {
 
 typedef struct _GwyColorAxisPrivate ColorAxis;
 
-static void     gwy_color_axis_dispose             (GObject *object);
-static void     gwy_color_axis_finalize            (GObject *object);
-static void     gwy_color_axis_set_property        (GObject *object,
-                                                    guint prop_id,
-                                                    const GValue *value,
-                                                    GParamSpec *pspec);
-static void     gwy_color_axis_get_property        (GObject *object,
-                                                    guint prop_id,
-                                                    GValue *value,
-                                                    GParamSpec *pspec);
-static void     gwy_color_axis_get_preferred_width (GtkWidget *widget,
-                                                    gint *minimum,
-                                                    gint *natural);
-static void     gwy_color_axis_get_preferred_height(GtkWidget *widget,
-                                                    gint *minimum,
-                                                    gint *natural);
-static gboolean gwy_color_axis_draw                (GtkWidget *widget,
-                                                    cairo_t *cr);
-static guint    gwy_color_axis_get_split_width     (const GwyAxis *axis);
-static gboolean set_gradient                       (GwyColorAxis *color_axis,
-                                                    GwyGradient *gradient);
-static void     gradient_data_changed              (GwyColorAxis *coloraxis,
-                                                    GwyGradient *gradient);
+static void     gwy_color_axis_dispose              (GObject *object);
+static void     gwy_color_axis_finalize             (GObject *object);
+static void     gwy_color_axis_set_property         (GObject *object,
+                                                     guint prop_id,
+                                                     const GValue *value,
+                                                     GParamSpec *pspec);
+static void     gwy_color_axis_get_property         (GObject *object,
+                                                     guint prop_id,
+                                                     GValue *value,
+                                                     GParamSpec *pspec);
+static void     gwy_color_axis_get_preferred_width  (GtkWidget *widget,
+                                                     gint *minimum,
+                                                     gint *natural);
+static void     gwy_color_axis_get_preferred_height (GtkWidget *widget,
+                                                     gint *minimum,
+                                                     gint *natural);
+static gboolean gwy_color_axis_draw                 (GtkWidget *widget,
+                                                     cairo_t *cr);
+static gboolean gwy_color_axis_get_horizontal_labels(const GwyAxis *axis);
+static guint    gwy_color_axis_get_split_width      (const GwyAxis *axis);
+static gboolean set_gradient                        (GwyColorAxis *color_axis,
+                                                     GwyGradient *gradient);
+static void     gradient_data_changed               (GwyColorAxis *coloraxis,
+                                                     GwyGradient *gradient);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -90,7 +91,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
     widget_class->draw = gwy_color_axis_draw;
 
-    axis_class->horizontal_labels = TRUE;
+    axis_class->get_horizontal_labels = gwy_color_axis_get_horizontal_labels;
     axis_class->get_split_width = gwy_color_axis_get_split_width;
 
     properties[PROP_GRADIENT]
@@ -369,6 +370,12 @@ gwy_color_axis_get_split_width(const GwyAxis *axis)
     guint width = gtk_widget_get_allocated_width(GTK_WIDGET(axis));
     gdouble w = fmax(width*(1.0 - coloraxis->priv->stripewidth) - 2.0, 1.0);
     return (guint)ceil(w);
+}
+
+static gboolean
+gwy_color_axis_get_horizontal_labels(G_GNUC_UNUSED const GwyAxis *axis)
+{
+    return TRUE;
 }
 
 /**

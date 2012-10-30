@@ -978,11 +978,7 @@ calculate_ticks(GwyAxis *axis)
                                 fmax(fabs(request.from), fabs(request.to)),
                                 fabs(request.to - request.from)/12.0);
     ensure_layout_and_ticks(axis);
-
-    if (GWY_AXIS_GET_CLASS(axis)->get_split_width)
-        priv->split_width = GWY_AXIS_GET_CLASS(axis)->get_split_width(axis);
-    else
-        priv->split_width = G_MAXUINT;
+    priv->split_width = gwy_axis_get_split_width(axis);
 
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
@@ -1230,7 +1226,7 @@ remove_too_close_ticks(GwyAxis *axis)
         return;
 
     GtkPositionType edge = priv->edge;
-    gboolean horizontal = GWY_AXIS_GET_CLASS(axis)->horizontal_labels;
+    gboolean horizontal = gwy_axis_get_horizontal_labels(axis);
     gdouble beg2, end1;
     if (horizontal && (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)) {
         end1 = tick1->position + tick1->extents.height/pangoscale;
@@ -1415,7 +1411,7 @@ ensure_layout_and_ticks(GwyAxis *axis)
 static void
 rotate_pango_layout(GwyAxis *axis)
 {
-    gboolean horizontal = GWY_AXIS_GET_CLASS(axis)->horizontal_labels;
+    gboolean horizontal = gwy_axis_get_horizontal_labels(axis);
     GtkPositionType edge = axis->priv->edge;
     PangoLayout *layout = axis->priv->layout;
     g_return_if_fail(layout);
@@ -1498,7 +1494,7 @@ estimate_major_distance(GwyAxis *axis,
     if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
         size = width;
     else
-        size = (GWY_AXIS_GET_CLASS(axis)->horizontal_labels ? height : width);
+        size = (gwy_axis_get_horizontal_labels(axis) ? height : width);
 
     return fmax(size/pangoscale + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
 }
@@ -1549,6 +1545,68 @@ format_value_label(GwyAxis *axis,
 }
 
 /**
+ * gwy_axis_get_horizontal_labels:
+ * @axis: An axis.
+ *
+ * Obtains the request of an axis subclass how labels on vertical axes should
+ * be placed.
+ *
+ * Returns: %TRUE to display labels on vertical axes horizontally, %FALSE to
+ *          display labels along axes.
+ **/
+gboolean
+gwy_axis_get_horizontal_labels(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    GwyAxisClass *klass = GWY_AXIS_GET_CLASS(axis);
+    if (klass->get_horizontal_labels)
+        return klass->get_horizontal_labels(axis);
+    return FALSE;
+}
+
+/**
+ * gwy_axis_get_split_width:
+ * @axis: An axis.
+ *
+ * Obtains the request of an axis subclass how labels with units should be
+ * split.
+ *
+ * Returns: Width, in pixels, which causes the label to be split to two lines
+ *          if exceeded.
+ **/
+guint
+gwy_axis_get_split_width(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), G_MAXUINT);
+    GwyAxisClass *klass = GWY_AXIS_GET_CLASS(axis);
+    if (klass->get_split_width)
+        return klass->get_split_width(axis);
+    return G_MAXUINT;
+}
+
+/**
+ * gwy_axis_get_units_affinity:
+ * @axis: An axis.
+ * @primary: Location to fill with the primary units placement affinity.
+ * @secondary: Location to fill with the primary units placement affinity.
+ *
+ * Obtains the request of an axis subclass where units are to be placed.
+ **/
+void
+gwy_axis_get_units_affinity(const GwyAxis *axis,
+                            GwyAxisUnitPlacement *primary,
+                            GwyAxisUnitPlacement *secondary)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    GwyAxisUnitPlacement p = GWY_AXIS_UNITS_AT_ZERO, s = GWY_AXIS_UNITS_START;
+    GwyAxisClass *klass = GWY_AXIS_GET_CLASS(axis);
+    if (klass->get_units_affinity)
+        klass->get_units_affinity(axis, &p, &s);
+    GWY_MAYBE_SET(primary, p);
+    GWY_MAYBE_SET(secondary, s);
+}
+
+/**
  * SECTION: axis
  * @section_id: GwyAxis
  * @title: GwyAxis
@@ -1566,11 +1624,21 @@ format_value_label(GwyAxis *axis,
 
 /**
  * GwyAxisClass:
- * @horizontal_labels: %TRUE if subclass displays horizontal labels even on
- *                     on vertical axes.
+ * @get_horizontal_labels: If non-%NULL then return value of %TRUE means to
+ *                         display horizontal labels even on vertical axes,
+ *                         %FALSE to display labels along axes.  If %NULL,
+ *                         %FALSE is assumed.
  * @get_split_width: If non-%NULL then labels with units widger than the
  *                   return value of this method will be split to two lines,
- *                   value and units.
+ *                   value and units.  If %NULL, value of %G_MAXUINT is
+ *                   assumed which corresponds to no splitting.
+ * @get_units_affinity: If non-%NULL then units are preferrably placed at
+ *                      specified locations.  Some primary location types,
+ *                      such as %GWY_AXIS_UNITS_NEVER, are definite and the
+ *                      secondary affinity does not matter; it should be still
+ *                      filled though, identical as the primary affinity.
+ *                      If %NULL, the default placement at zero and then, if
+ *                      zero is not possible, at the start is assumed.
  *
  * Class of graphs and data view axes.
  **/
