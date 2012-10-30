@@ -62,6 +62,9 @@ static gboolean gwy_color_axis_draw                 (GtkWidget *widget,
                                                      cairo_t *cr);
 static gboolean gwy_color_axis_get_horizontal_labels(const GwyAxis *axis);
 static guint    gwy_color_axis_get_split_width      (const GwyAxis *axis);
+static void     gwy_color_axis_get_units_affinity   (const GwyAxis *axis,
+                                                     GwyAxisUnitPlacement *primary,
+                                                     GwyAxisUnitPlacement *secondary);
 static gboolean set_gradient                        (GwyColorAxis *color_axis,
                                                      GwyGradient *gradient);
 static void     gradient_data_changed               (GwyColorAxis *coloraxis,
@@ -93,6 +96,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
 
     axis_class->get_horizontal_labels = gwy_color_axis_get_horizontal_labels;
     axis_class->get_split_width = gwy_color_axis_get_split_width;
+    axis_class->get_units_affinity = gwy_color_axis_get_units_affinity;
 
     properties[PROP_GRADIENT]
         = g_param_spec_object("gradient",
@@ -336,8 +340,8 @@ gwy_color_axis_draw(GtkWidget *widget,
                 y -= 2.0 + ticks[i].extents.height/pangoscale;
             else
                 y += 2.0;
-            x = breadth - stripebreadth - 2.0 - 2.0
-                - ticks[i].extents.width/pangoscale;
+            x = breadth - ticks[i].extents.width/pangoscale - 2.0 - 2.0
+                - (1.0 + tick_level_sizes[GWY_AXIS_TICK_MINOR])*stripebreadth;
         }
         else if (edge == GTK_POS_TOP) {
             if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
@@ -351,12 +355,19 @@ gwy_color_axis_draw(GtkWidget *widget,
                 y -= 2.0 + ticks[i].extents.height/pangoscale;
             else
                 y += 2.0;
-            x = stripebreadth + 2.0 + 2.0;
+            x = (1.0 + tick_level_sizes[GWY_AXIS_TICK_MINOR])*stripebreadth
+                + 2.0 + 2.0;
         }
         gtk_render_layout(context, cr, x, y, layout);
     }
 
     return FALSE;
+}
+
+static gboolean
+gwy_color_axis_get_horizontal_labels(G_GNUC_UNUSED const GwyAxis *axis)
+{
+    return TRUE;
 }
 
 static guint
@@ -372,10 +383,16 @@ gwy_color_axis_get_split_width(const GwyAxis *axis)
     return (guint)ceil(w);
 }
 
-static gboolean
-gwy_color_axis_get_horizontal_labels(G_GNUC_UNUSED const GwyAxis *axis)
+static void
+gwy_color_axis_get_units_affinity(const GwyAxis *axis,
+                                  GwyAxisUnitPlacement *primary,
+                                  GwyAxisUnitPlacement *secondary)
 {
-    return TRUE;
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    if (edge == GTK_POS_RIGHT)
+       *primary = *secondary = GWY_AXIS_UNITS_LAST;
+    else
+       *primary = *secondary = GWY_AXIS_UNITS_FIRST;
 }
 
 /**

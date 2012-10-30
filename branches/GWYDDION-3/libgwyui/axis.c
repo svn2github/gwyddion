@@ -1088,16 +1088,22 @@ fill_tick_arrays(GwyAxis *axis, guint level,
     GArray *ticks = priv->ticks;
     GString *str = priv->str;
     guint length = priv->length;
-    enum { FIRST, LAST, AT_ZERO, NEVER } units_pos;
+    GwyAxisUnitPlacement units_pos = GWY_AXIS_UNITS_NEVER;
 
-    // FIXME: This must be controlled by the class also.  Namely LAST is
-    // unused here and NEVER may mean units are simply displayed elsewhere.
-    if (!priv->show_units)
-        units_pos = NEVER;
-    else if (zero_is_inside(start, n, bs))
-        units_pos = AT_ZERO;
-    else
-        units_pos = FIRST;
+    if (priv->show_units) {
+        GwyAxisUnitPlacement units_pos_secondary;
+        gwy_axis_get_units_affinity(axis, &units_pos, &units_pos_secondary);
+        if (units_pos == GWY_AXIS_UNITS_ZERO) {
+            if (!zero_is_inside(start, n, bs)) {
+                units_pos = units_pos_secondary;
+                if (units_pos == GWY_AXIS_UNITS_ZERO) {
+                    g_warning("Secondary units affinity should not be "
+                              "GWY_AXIS_UNITS_ZERO again.");
+                    units_pos = GWY_AXIS_UNITS_FIRST;
+                }
+            }
+        }
+    }
 
     // Tick at the leading edge.
     if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
@@ -1109,8 +1115,9 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 
         if (priv->show_labels) {
             format_value_label(axis, tick.value,
-                               units_pos == FIRST
-                               || (units_pos == AT_ZERO && tick.value == 0.0));
+                               units_pos == GWY_AXIS_UNITS_FIRST
+                               || (units_pos == GWY_AXIS_UNITS_ZERO
+                                   && tick.value == 0.0));
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1127,8 +1134,9 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 
         if (priv->show_labels) {
             format_value_label(axis, tick.value,
-                               units_pos == LAST
-                               || (units_pos == AT_ZERO && tick.value == 0.0));
+                               units_pos == GWY_AXIS_UNITS_LAST
+                               || (units_pos == GWY_AXIS_UNITS_ZERO
+                                   && tick.value == 0.0));
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1156,10 +1164,11 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         tick.position = (tick.value - from)/(to - from)*length;
         if (priv->show_labels && level == GWY_AXIS_TICK_MAJOR) {
             format_value_label(axis, tick.value,
-                               (units_pos == AT_ZERO && tick.value == 0.0)
-                               || (units_pos == FIRST
+                               (units_pos == GWY_AXIS_UNITS_ZERO
+                                && tick.value == 0.0)
+                               || (units_pos == GWY_AXIS_UNITS_FIRST
                                    && ticks->len == 0)
-                               || (units_pos == LAST
+                               || (units_pos == GWY_AXIS_UNITS_LAST
                                    && !priv->ticks_at_edges
                                    && i == n));
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
@@ -1480,7 +1489,6 @@ estimate_major_distance(GwyAxis *axis,
 
     // FIXME: With perpendicular labels the label + units may be actually
     // two-line.  The label measurement probably needs to involve subclasses.
-
     gint width, height, w, h;
     format_value_label(axis, request->from, priv->show_units);
     pango_layout_get_size(priv->layout, &width, &height);
@@ -1598,7 +1606,7 @@ gwy_axis_get_units_affinity(const GwyAxis *axis,
                             GwyAxisUnitPlacement *secondary)
 {
     g_return_if_fail(GWY_IS_AXIS(axis));
-    GwyAxisUnitPlacement p = GWY_AXIS_UNITS_AT_ZERO, s = GWY_AXIS_UNITS_START;
+    GwyAxisUnitPlacement p = GWY_AXIS_UNITS_ZERO, s = GWY_AXIS_UNITS_FIRST;
     GwyAxisClass *klass = GWY_AXIS_GET_CLASS(axis);
     if (klass->get_units_affinity)
         klass->get_units_affinity(axis, &p, &s);
@@ -1636,9 +1644,10 @@ gwy_axis_get_units_affinity(const GwyAxis *axis,
  *                      specified locations.  Some primary location types,
  *                      such as %GWY_AXIS_UNITS_NEVER, are definite and the
  *                      secondary affinity does not matter; it should be still
- *                      filled though, identical as the primary affinity.
- *                      If %NULL, the default placement at zero and then, if
- *                      zero is not possible, at the start is assumed.
+ *                      filled though, identical to the primary affinity.
+ *                      If %NULL, the default placement is assumed which is
+ *                      at zero and then, if zero is not possible, at the first
+ *                      tick.
  *
  * Class of graphs and data view axes.
  **/
@@ -1653,6 +1662,18 @@ gwy_axis_get_units_affinity(const GwyAxis *axis,
  *                       unlabelled.
  *
  * Level of axis ticks.
+ **/
+
+/**
+ * GwyAxisUnitPlacement:
+ * @GWY_AXIS_UNITS_NEVER: Do not show units at any ticks.  This is namely
+ *                        useful if units are displayed elsewhere.
+ * @GWY_AXIS_UNITS_FIRST: Show units at the first edge or major tick.
+ * @GWY_AXIS_UNITS_LAST: Show units at the last edge or major tick.
+ * @GWY_AXIS_UNITS_ZERO: If zero is present within the displayed range show
+ *                       units there.
+ *
+ * Type of units placement affinity for axes.
  **/
 
 /**

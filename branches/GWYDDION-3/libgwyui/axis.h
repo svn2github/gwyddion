@@ -35,9 +35,9 @@ typedef enum {
 
 typedef enum {
     GWY_AXIS_UNITS_NEVER,
-    GWY_AXIS_UNITS_START,
-    GWY_AXIS_UNITS_END,
-    GWY_AXIS_UNITS_AT_ZERO,
+    GWY_AXIS_UNITS_FIRST,
+    GWY_AXIS_UNITS_LAST,
+    GWY_AXIS_UNITS_ZERO,
 } GwyAxisUnitPlacement;
 
 typedef struct {
