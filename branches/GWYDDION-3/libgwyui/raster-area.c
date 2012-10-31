@@ -80,6 +80,7 @@ struct _GwyRasterAreaPrivate {
     // Coordinate ranges and transforms
     gdouble zoom;
     gboolean real_aspect_ratio;
+    gboolean pos_and_size_valid;
     // Position of the field image within the widget.  Unless we zoom out too
     // much (so that borders appear) x and y is zero.
     cairo_rectangle_int_t image_rectangle;
@@ -1280,17 +1281,15 @@ gwy_raster_area_size_allocate(GtkWidget *widget,
 
     GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->size_allocate(widget,
                                                                   allocation);
-    if (gwy_equal(allocation, &prev_allocation))
-        return;
-
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     RasterArea *priv = rasterarea->priv;
 
     // XXX: The input window can be smaller.  Does it matter?
-    if (priv->window)
+    if (!gwy_equal(allocation, &prev_allocation) && priv->window) {
         gdk_window_move_resize(priv->window,
                                allocation->x, allocation->y,
                                allocation->width, allocation->height);
+    }
 
     priv->field_surface_valid = FALSE;
     priv->mask_surface_valid = FALSE;
@@ -1540,7 +1539,7 @@ gwy_raster_area_zoom(GwyRasterArea *rasterarea,
         gdouble xscale = (gdouble)alloc.width/field->xres;
         gdouble yscale = (gdouble)alloc.height/field->yres;
         if (priv->real_aspect_ratio)
-            yscale = gwy_field_dx(field)/gwy_field_dy(field);
+            yscale *= gwy_field_dx(field)/gwy_field_dy(field);
 
         return set_zoom(rasterarea, MIN(xscale, yscale));
     }
@@ -1624,6 +1623,7 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
     }
 
     update_matrices(rasterarea);
+    priv->pos_and_size_valid = TRUE;
 }
 
 // FIXME: Window coordinates are somewhat strange here.  Should we take pixel
@@ -1878,6 +1878,9 @@ gwy_raster_area_draw(GtkWidget *widget,
     if (!priv->field)
         return FALSE;
 
+    if (!priv->pos_and_size_valid)
+        calculate_position_and_size(rasterarea);
+
     //GtkStyleContext *context = gtk_widget_get_style_context(widget);
     ensure_field_surface(rasterarea);
 
@@ -1955,9 +1958,10 @@ set_field(GwyRasterArea *rasterarea,
                                : 1.0;
 
     priv->field_surface_valid = FALSE;
+    priv->pos_and_size_valid = FALSE;
     // TODO: Queue either resize or draw, depending on the dimensions.
-    calculate_position_and_size(rasterarea);
     gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
@@ -2118,12 +2122,16 @@ field_notify(GwyRasterArea *rasterarea,
 
     if (gwy_strequal(pspec->name, "x-res")
         || gwy_strequal(pspec->name, "y-res")) {
+        priv->pos_and_size_valid = FALSE;
         gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     }
     if (priv->real_aspect_ratio
              && (gwy_strequal(pspec->name, "x-real")
                  || gwy_strequal(pspec->name, "y-real"))) {
+        priv->pos_and_size_valid = FALSE;
         gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     }
 }
 
@@ -2401,7 +2409,9 @@ set_real_aspect_ratio(GwyRasterArea *rasterarea,
     if (priv->field_aspect_ratio == 1.0)
         return TRUE;
 
+    priv->pos_and_size_valid = FALSE;
     gtk_widget_queue_resize(GTK_WIDGET(rasterarea));
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
 
