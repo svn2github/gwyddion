@@ -456,11 +456,16 @@ test_gradient_point_boxed(void)
 }
 
 void
-test_gradient_gresource(void)
+test_gradient_load_builtins(void)
 {
     GwyErrorList *error_list = NULL;
-    gwy_resource_type_load_gresource(GWY_TYPE_GRADIENT, &error_list);
+    GwyInventory *inventory = gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT);
+    guint nbefore = gwy_inventory_size(inventory);
+    gwy_resource_type_load_builtins(GWY_TYPE_GRADIENT, &error_list);
     assert_error_list(error_list, NULL);
+    guint nafter = gwy_inventory_size(inventory);
+    // We assert there are some builtin gradients
+    g_assert_cmpuint(nafter, >, nbefore);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

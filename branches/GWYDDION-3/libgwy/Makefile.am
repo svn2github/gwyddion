@@ -103,8 +103,7 @@ private_headers = \
 	object-internal.h \
 	surface-internal.h
 
-private_built_headers = \
-	gradients.h
+private_built_headers =
 
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
@@ -158,7 +157,6 @@ libgwy3_la_SOURCES = \
 	fitter.c \
 	gl-material.c \
 	gradient.c \
-	gradients.c \
 	grain-value-builtin.c \
 	grain-value.c \
 	int-set.c \
@@ -227,27 +225,6 @@ libgwy3_la_LDFLAGS = \
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
-
-# Gradient resources
-gradientsresxml = $(top_builddir)/resources/gradients/gradients.gresource.xml
-BUILT_SOURCES += gradients.h gradients.c
-DISTCLEANFILES += gradients.h gradients.c
-
-gradients.c: $(gradientsresxml)
-	$(AM_V_GEN)$(gcres) --c-name=_gwy_gradients --target=gradients.c \
-	    --sourcedir=$(top_builddir)/resources/gradients $(gradientsresxml)
-	$(AM_V_at)$(SED) -i -e 's/^extern /G_GNUC_INTERNAL /' \
-	    -e 's/) };/), NULL, NULL, NULL };/' \
-	    -e '1i/* This is a 'GENERATED' file. */' \
-	    gradients.c
-
-gradients.h: $(gradientsresxml)
-	$(AM_V_GEN)$(gcres) --c-name=_gwy_gradients --target=gradients.h \
-	    --sourcedir=$(top_builddir)/resources/gradients $(gradientsresxml)
-	$(AM_V_at)$(SED) -i -e 's/^extern /G_GNUC_INTERNAL /' \
-	    -e '1i/* This is a 'GENERATED' file. */' \
-	    -e '1i/*<private_header>*/' \
-	    gradients.h
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*

@@ -660,7 +660,7 @@ gwy_resource_delete(gpointer item)
 
 static void
 set_is_managed(GwyResource *resource,
-                            gboolean is_managed)
+               gboolean is_managed)
 {
     g_return_if_fail(!resource->priv->is_managed != !is_managed);
     resource->priv->is_managed = is_managed;
@@ -1627,8 +1627,8 @@ manage_flush_check_queue(GType type,
  *
  * Loads resources of a given type from disk.
  *
- * Resources are loaded from system directory (and marked constant) and from
- * user directory (marked modifiable).
+ * Resources are loaded from the library itself and from system directory (both
+ * marked constant), then from the user directory (marked modifiable).
  **/
 void
 gwy_resource_type_load(GType type)
@@ -1637,7 +1637,7 @@ gwy_resource_type_load(GType type)
     ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_if_fail(cpriv);
 
-    gwy_resource_type_load_gresource(type, NULL);
+    gwy_resource_type_load_builtins(type, NULL);
 
     gchar *userdir = gwy_user_directory(cpriv->name);
     gchar **dirs = gwy_data_search_path(cpriv->name);
@@ -1750,17 +1750,19 @@ gwy_resource_type_load_directory(GType type,
 }
 
 /**
- * gwy_resource_type_load_gresource:
+ * gwy_resource_type_load_builtins:
  * @type: Resource type of the resources.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
- * Loads all resources of given class from the built-in #GResource.
+ * Loads all built-in resources of given class.
  *
- * The loaded resources are created as managed and fixed.
+ * Built-in resources are those compiles to the library; using #GResource or
+ * some specific mechanism.  The loaded resources are created as managed and
+ * fixed.
  **/
 void
-gwy_resource_type_load_gresource(GType type,
-                                 GwyErrorList **error_list)
+gwy_resource_type_load_builtins(GType type,
+                                GwyErrorList **error_list)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
     ResourceClass *cpriv = ensure_class_inventory(type);
@@ -1768,35 +1770,9 @@ gwy_resource_type_load_gresource(GType type,
 
     GwyResourceClass *klass = g_type_class_ref(type);
     g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
-    if (!klass->get_gresource) {
-        g_type_class_unref(klass);
-        return;
-    }
+    if (klass->load_builtins)
+        klass->load_builtins(error_list);
 
-    GResource *gresource = klass->get_gresource();
-    if (!gresource) {
-        g_type_class_unref(klass);
-        return;
-    }
-
-    GError *error = NULL;
-    gchar *path = g_strconcat("/net/gwyddion/", cpriv->name, NULL);
-    char **filenames = g_resource_enumerate_children(gresource, path, 0,
-                                                     &error);
-    g_free(path);
-    if (!filenames) {
-        gwy_error_list_propagate(error_list, error);
-        g_resource_unref(gresource);
-        g_type_class_unref(klass);
-        return;
-    }
-
-    for (gchar **filename = filenames; *filename; filename++) {
-        g_printerr("GRESOURCE %s\n", *filename);
-    }
-
-    g_strfreev(filenames);
-    g_resource_unref(gresource);
     g_type_class_unref(klass);
 }
 
@@ -1817,9 +1793,9 @@ name_is_unique(GwyResource *resource,
 
     gchar *filename = g_file_get_parse_name(priv->file);
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
-                _("Resource named ‘%s’ from file ‘%s’ "
+                _("Resource ‘%s’ named ‘%s’ from file ‘%s’ "
                   "conflicts with an existing resource."),
-                G_OBJECT_TYPE_NAME(resource), filename);
+                G_OBJECT_TYPE_NAME(resource), priv->name, filename);
     g_free(filename);
 
     return FALSE;

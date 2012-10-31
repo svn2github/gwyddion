@@ -78,7 +78,7 @@ struct _GwyResourceClass {
     struct _GwyResourceClassPrivate *priv;
 
     /*<public>*/
-    GResource*   (*get_gresource)(void);
+    void         (*load_builtins)(GwyErrorList **error_list);
     void         (*setup_inventory)(GwyInventory *inventory);
     GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
@@ -122,8 +122,8 @@ void                        gwy_resource_type_load_directory       (GType type,
                                                                     const gchar *dirname,
                                                                     gboolean modifiable,
                                                                     GwyErrorList **error_list);
-void gwy_resource_type_load_gresource(GType type,
-                                 GwyErrorList **error_list);
+void                        gwy_resource_type_load_builtins        (GType type,
+                                                                    GwyErrorList **error_list);
 void                        gwy_resource_type_set_managed          (GType type,
                                                                     gboolean managed);
 gchar*                      gwy_resource_type_get_managed_directory(GType type);

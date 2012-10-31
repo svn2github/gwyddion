@@ -25,8 +25,8 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
 #include "libgwy/gradient.h"
-#include "libgwy/gradients.h"
 #include "libgwy/object-internal.h"
+#include "resources/gradients/gradients.h"
 
 #define gwy_debug(fmt...)  /* FIXME */
 
@@ -69,6 +69,7 @@ static gchar*       gwy_gradient_dump             (GwyResource *resource);
 static gboolean     gwy_gradient_parse            (GwyResource *resource,
                                                    GwyStrLineIter *iter,
                                                    GError **error);
+static void         gwy_gradient_load_builtins    (GwyErrorList **error_list);
 static void         refine_interval               (GList *points,
                                                    gint n,
                                                    const GwyGradientPoint *samples,
@@ -149,9 +150,8 @@ gwy_gradient_class_init(GwyGradientClass *klass)
     res_class->copy = gwy_gradient_copy;
     res_class->dump = gwy_gradient_dump;
     res_class->parse = gwy_gradient_parse;
-    res_class->get_gresource = _gwy_gradients_get_resource;
+    res_class->load_builtins = gwy_gradient_load_builtins;
 
-    _gwy_gradients_register_resource();
     gwy_resource_class_register(res_class, "gradients", NULL);
 }
 
@@ -363,6 +363,39 @@ gwy_gradient_parse(GwyResource *resource,
     }
     gwy_gradient_sanitize(gradient);
     return TRUE;
+}
+
+static void
+gwy_gradient_load_builtins(GwyErrorList **error_list)
+{
+    guint n = gwy_gradients_builtin_nitems;
+    const GwyGradientPoint *points = gwy_gradients_builtin_data;
+    const gchar *name = gwy_gradients_builtin_names;
+    GwyInventory *inventory = gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT);
+
+    for (guint i = 0; i < n; i++) {
+        guint len = gwy_gradients_builtin_lengths[i];
+        if (gwy_inventory_get(inventory, name)) {
+            gwy_error_list_add(error_list, GWY_RESOURCE_ERROR,
+                               GWY_RESOURCE_ERROR_DUPLICIT,
+                               _("Builtin resource ‘%s’ named ‘%s’ "
+                                 "conflicts with an existing resource."),
+                               "GwyGradient", name);
+        }
+        else {
+            GwyGradient *gradient = g_object_new(GWY_TYPE_GRADIENT,
+                                                 "name", name,
+                                                 "is-modifiable", FALSE,
+                                                 NULL);
+            Gradient *priv = gradient->priv;
+            g_array_set_size(priv->points, 0);
+            g_array_append_vals(priv->points, points, len);
+            gwy_inventory_insert(inventory, gradient);
+            g_object_unref(gradient);
+        }
+        points += len;
+        name += strlen(name) + 1;
+    }
 }
 
 /**
