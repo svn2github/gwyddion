@@ -22,6 +22,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/cairo-utils.h"
+#include "libgwyui/widget-utils.h"
 #include "libgwyui/color-axis.h"
 
 #define TESTMARKUP "<small>9.9 (μm₁¹)</small>"
@@ -31,12 +32,15 @@
 enum {
     PROP_0,
     PROP_GRADIENT,
+    PROP_EDITABLE_RANGE,
     N_PROPS,
 };
 
 struct _GwyColorAxisPrivate {
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
+    gboolean editable_range;
+
     gdouble stripewidth;     // Relative to total.
 };
 
@@ -60,13 +64,17 @@ static void     gwy_color_axis_get_preferred_height (GtkWidget *widget,
                                                      gint *natural);
 static gboolean gwy_color_axis_draw                 (GtkWidget *widget,
                                                      cairo_t *cr);
+static gboolean gwy_color_axis_scroll               (GtkWidget *widget,
+                                                     GdkEventScroll *event);
 static gboolean gwy_color_axis_get_horizontal_labels(const GwyAxis *axis);
 static guint    gwy_color_axis_get_split_width      (const GwyAxis *axis);
 static void     gwy_color_axis_get_units_affinity   (const GwyAxis *axis,
                                                      GwyAxisUnitPlacement *primary,
                                                      GwyAxisUnitPlacement *secondary);
-static gboolean set_gradient                        (GwyColorAxis *color_axis,
+static gboolean set_gradient                        (GwyColorAxis *coloraxis,
                                                      GwyGradient *gradient);
+static gboolean set_editable_range                  (GwyColorAxis *coloraxis,
+                                                     gboolean setting);
 static void     gradient_data_changed               (GwyColorAxis *coloraxis,
                                                      GwyGradient *gradient);
 
@@ -93,6 +101,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     widget_class->get_preferred_width = gwy_color_axis_get_preferred_width;
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
     widget_class->draw = gwy_color_axis_draw;
+    widget_class->scroll_event = gwy_color_axis_scroll;
 
     axis_class->get_horizontal_labels = gwy_color_axis_get_horizontal_labels;
     axis_class->get_split_width = gwy_color_axis_get_split_width;
@@ -104,6 +113,14 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
                               "Gradient used for visualisation.",
                               GWY_TYPE_GRADIENT,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_EDITABLE_RANGE]
+        = g_param_spec_boolean("editable-range",
+                               "Editable range",
+                               "Whether the colour axis range can be edited "
+                               "by theu ser.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -139,11 +156,15 @@ gwy_color_axis_set_property(GObject *object,
                             const GValue *value,
                             GParamSpec *pspec)
 {
-    GwyColorAxis *color_axis = GWY_COLOR_AXIS(object);
+    GwyColorAxis *coloraxis = GWY_COLOR_AXIS(object);
 
     switch (prop_id) {
         case PROP_GRADIENT:
-        set_gradient(color_axis, g_value_get_object(value));
+        set_gradient(coloraxis, g_value_get_object(value));
+        break;
+
+        case PROP_EDITABLE_RANGE:
+        set_editable_range(coloraxis, g_value_get_boolean(value));
         break;
 
         default:
@@ -163,6 +184,10 @@ gwy_color_axis_get_property(GObject *object,
     switch (prop_id) {
         case PROP_GRADIENT:
         g_value_set_object(value, priv->gradient);
+        break;
+
+        case PROP_EDITABLE_RANGE:
+        g_value_set_boolean(value, priv->editable_range);
         break;
 
         default:
@@ -365,6 +390,54 @@ gwy_color_axis_draw(GtkWidget *widget,
 }
 
 static gboolean
+gwy_color_axis_scroll(GtkWidget *widget,
+                      GdkEventScroll *event)
+{
+    if (!(event->direction == GDK_SCROLL_UP
+          || event->direction == GDK_SCROLL_DOWN))
+        return FALSE;
+
+    ColorAxis *priv = GWY_COLOR_AXIS(widget)->priv;
+    if (!priv->editable_range)
+        return FALSE;
+
+    GwyAxis *axis = GWY_AXIS(widget);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gdouble width = gtk_widget_get_allocated_width(widget),
+            height = gtk_widget_get_allocated_height(widget);
+    gdouble length = (vertical ? height : width),
+            pos = (vertical ? height - event->y : event->x);
+    gint boundary = 0;
+    if (pos >= 2.0*length/3.0)
+        boundary = 1;
+    else if (pos <= length/3.0)
+        boundary = -1;
+    else
+        return FALSE;
+
+    GwyRange range;
+    gwy_axis_get_range(axis, &range);
+    gdouble len = fabs(range.to - range.from);
+    GtkAdjustment *adj = gtk_adjustment_new(0.5*(range.from + range.to),
+                                            range.from, range.to,
+                                            0.01*len, 0.1*len, 0.0);
+    gdouble dz = -gwy_scroll_wheel_delta(adj, event, GTK_ORIENTATION_VERTICAL);
+    g_object_unref(adj);
+
+    if (boundary == -1)
+        range.from += dz;
+    else
+        range.to += dz;
+
+    // TODO: Nice toy but be have to implement false colour mapping types in
+    // RasterArea to make use of it.
+    gwy_axis_request_range(axis, &range);
+
+    return TRUE;
+}
+
+static gboolean
 gwy_color_axis_get_horizontal_labels(G_GNUC_UNUSED const GwyAxis *axis)
 {
     return TRUE;
@@ -410,12 +483,12 @@ gwy_color_axis_new(void)
 
 /**
  * gwy_color_axis_set_gradient:
- * @coloraxis: A color axis.
+ * @coloraxis: A colour axis.
  * @gradient: (allow-none):
  *            A colour gradient.  %NULL means the default gradient
  *            will be used.
  *
- * Sets the false colour gradient a color axis will visualise.
+ * Sets the false colour gradient a colour axis will visualise.
  **/
 void
 gwy_color_axis_set_gradient(GwyColorAxis *coloraxis,
@@ -430,9 +503,9 @@ gwy_color_axis_set_gradient(GwyColorAxis *coloraxis,
 
 /**
  * gwy_color_axis_get_gradient:
- * @coloraxis: A color axis.
+ * @coloraxis: A colour axis.
  *
- * Obtains the false colour gradient that a color axis visualises.
+ * Obtains the false colour gradient that a colour axis visualises.
  *
  * Returns: (allow-none) (transfer none):
  *          The colour gradient used by @coloraxis.  If no gradient was set and
@@ -443,6 +516,41 @@ gwy_color_axis_get_gradient(const GwyColorAxis *coloraxis)
 {
     g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), NULL);
     return GWY_COLOR_AXIS(coloraxis)->priv->gradient;
+}
+
+/**
+ * gwy_color_axis_set_editable_range:
+ * @coloraxis: A color_axis.
+ * @editablerange: %TRUE to enable editing of the range by user, %FALSE to
+ *                 disable it.
+ *
+ * Sets whether the range of a colour axis can be edited by the user.
+ **/
+void
+gwy_color_axis_set_editable_range(GwyColorAxis *coloraxis,
+                                  gboolean editablerange)
+{
+    g_return_if_fail(GWY_IS_COLOR_AXIS(coloraxis));
+    if (!set_editable_range(coloraxis, editablerange))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(coloraxis),
+                             properties[PROP_EDITABLE_RANGE]);
+}
+
+/**
+ * gwy_color_axis_get_editable_range:
+ * @coloraxis: A color_axis.
+ *
+ * Gets whether the range of a colour axis can be edited by the user.
+ *
+ * Returns: %TRUE if the range is user-editable, %FALSE if it is not.
+ **/
+gboolean
+gwy_color_axis_get_editable_range(const GwyColorAxis *coloraxis)
+{
+    g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), FALSE);
+    return coloraxis->priv->editable_range;
 }
 
 static gboolean
@@ -459,6 +567,18 @@ set_gradient(GwyColorAxis *coloraxis,
         return FALSE;
 
     gtk_widget_queue_draw(GTK_WIDGET(coloraxis));
+    return TRUE;
+}
+
+static gboolean
+set_editable_range(GwyColorAxis *coloraxis,
+                   gboolean setting)
+{
+    ColorAxis *priv = coloraxis->priv;
+    if (!setting == !priv->editable_range)
+        return FALSE;
+
+    priv->editable_range = setting;
     return TRUE;
 }
 

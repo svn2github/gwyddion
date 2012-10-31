@@ -820,6 +820,7 @@ create_input_window(GwyAxis *axis)
         .wclass = GDK_INPUT_ONLY,
         .override_redirect = TRUE,
         .event_mask = (gtk_widget_get_events(widget)
+                       | GDK_SCROLL_MASK
                        | GDK_BUTTON_PRESS_MASK
                        | GDK_BUTTON_RELEASE_MASK),
     };
