@@ -60,8 +60,7 @@ enum {
     PROP_SNAP_TO_TICKS,
     PROP_TICKS_AT_EDGES,
     PROP_SHOW_LABELS,
-    PROP_SHOW_UNITS,   // FIXME: Make this a class property?  Or handle graphs
-                       // specifically (they have units elsewhere, normally).
+    PROP_SHOW_UNITS,
     PROP_MAX_TICK_LEVEL,
     N_PROPS,
 };
@@ -481,12 +480,12 @@ gwy_axis_size_allocate(GtkWidget *widget,
     if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
         priv->length = allocation->height;
 
-    invalidate_ticks(axis);
-
     if (priv->input_window)
         gdk_window_move_resize(priv->input_window,
                                allocation->x, allocation->y,
                                allocation->width, allocation->height);
+
+    invalidate_ticks(axis);
 }
 
 /**
@@ -796,9 +795,10 @@ create_input_window(GwyAxis *axis)
         .window_type = GDK_WINDOW_CHILD,
         .wclass = GDK_INPUT_ONLY,
         .override_redirect = TRUE,
-        .event_mask = 0,    // Users are expected to set required mask.
+        // XXX: Cannot get any events working.
+        .event_mask = (gtk_widget_get_events(widget) | GDK_ALL_EVENTS_MASK),
     };
-    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR | GDK_WA_CURSOR;
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR;
     priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
                                         &attributes, attributes_mask);
     gdk_window_set_user_data(priv->input_window, widget);

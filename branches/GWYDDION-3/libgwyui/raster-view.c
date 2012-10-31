@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
@@ -58,44 +59,59 @@ struct _GwyRasterViewPrivate {
     GwyField *field;
     gulong field_notify_id;
     gulong field_data_changed_id;
+
+    GtkMenu *ruler_popup;
+    GtkCheckMenuItem *pixel_distances;
+    GtkCheckMenuItem *real_distances;
+    GtkCheckMenuItem *square_pixels;
+    GtkCheckMenuItem *real_aspect_ratio;
 };
 
 typedef struct _GwyRasterViewPrivate RasterView;
 
-static void     gwy_raster_view_dispose     (GObject *object);
-static void     gwy_raster_view_finalize    (GObject *object);
-static void     gwy_raster_view_set_property(GObject *object,
-                                             guint prop_id,
-                                             const GValue *value,
-                                             GParamSpec *pspec);
-static void     gwy_raster_view_get_property(GObject *object,
-                                             guint prop_id,
-                                             GValue *value,
-                                             GParamSpec *pspec);
-static void     area_notify                 (GwyRasterView *rasterview,
-                                             GParamSpec *pspec,
-                                             GwyRasterArea *area);
-static void     field_notify                (GwyRasterView *rasterview,
-                                             GParamSpec *pspec,
-                                             GwyField *field);
-static gboolean set_scale_type              (GwyRasterView *rasterview,
-                                             GwyRulerScaleType scale_type);
-static gboolean set_hadjustment             (GwyRasterView *rasterview,
-                                             GtkAdjustment *adjustment);
-static gboolean set_vadjustment             (GwyRasterView *rasterview,
-                                             GtkAdjustment *adjustment);
-static gboolean set_field                   (GwyRasterView *rasterview,
-                                             GwyField *field);
-static void     update_ruler_ranges         (GwyRasterView *rasterview);
-static gboolean area_motion_notify          (GwyRasterView *rasterview,
-                                             GdkEventMotion *event,
-                                             GwyRasterArea *area);
-static gboolean area_enter_notify           (GwyRasterView *rasterview,
-                                             GdkEventCrossing *event,
-                                             GwyRasterArea *area);
-static gboolean area_leave_notify           (GwyRasterView *rasterview,
-                                             GdkEventCrossing *event,
-                                             GwyRasterArea *area);
+static void       gwy_raster_view_dispose     (GObject *object);
+static void       gwy_raster_view_finalize    (GObject *object);
+static void       gwy_raster_view_set_property(GObject *object,
+                                               guint prop_id,
+                                               const GValue *value,
+                                               GParamSpec *pspec);
+static void       gwy_raster_view_get_property(GObject *object,
+                                               guint prop_id,
+                                               GValue *value,
+                                               GParamSpec *pspec);
+static void       area_notify                 (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyRasterArea *area);
+static void       field_notify                (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyField *field);
+static gboolean   set_scale_type              (GwyRasterView *rasterview,
+                                               GwyRulerScaleType scale_type);
+static gboolean   set_hadjustment             (GwyRasterView *rasterview,
+                                               GtkAdjustment *adjustment);
+static gboolean   set_vadjustment             (GwyRasterView *rasterview,
+                                               GtkAdjustment *adjustment);
+static gboolean   set_field                   (GwyRasterView *rasterview,
+                                               GwyField *field);
+static void       update_ruler_ranges         (GwyRasterView *rasterview);
+static gboolean   area_motion_notify          (GwyRasterView *rasterview,
+                                               GdkEventMotion *event,
+                                               GwyRasterArea *area);
+static gboolean   area_enter_notify           (GwyRasterView *rasterview,
+                                               GdkEventCrossing *event,
+                                               GwyRasterArea *area);
+static gboolean   area_leave_notify           (GwyRasterView *rasterview,
+                                               GdkEventCrossing *event,
+                                               GwyRasterArea *area);
+static gboolean   ruler_button_press          (GwyRasterView *rasterview,
+                                               GdkEventButton *event,
+                                               GwyRuler*ruler);
+static void       pop_up_ruler_menu           (GwyRasterView *rasterview,
+                                               GtkWidget *widget,
+                                               GdkEventButton *event);
+static GtkMenu*   create_ruler_popup          (GwyRasterView *rasterview);
+static void       ruler_popup_item_toggled    (GwyRasterView *rasterview,
+                                               GtkCheckMenuItem *menuitem);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -217,6 +233,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     GtkWidget *hruler = gwy_ruler_new();
     priv->hruler = GWY_RULER(hruler);
     gwy_axis_set_edge(GWY_AXIS(hruler), GTK_POS_TOP);
+    gtk_widget_add_events(hruler, GDK_BUTTON_PRESS_MASK);
     g_object_set(hruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, hruler, 2, 1, 1, 1);
     gtk_widget_show(hruler);
@@ -224,6 +241,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     GtkWidget *vruler = gwy_ruler_new();
     priv->vruler = GWY_RULER(vruler);
     gwy_axis_set_edge(GWY_AXIS(vruler), GTK_POS_LEFT);
+    gtk_widget_add_events(vruler, GDK_BUTTON_PRESS_MASK);
     g_object_set(vruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, vruler, 1, 2, 1, 1);
     gtk_widget_show(vruler);
@@ -248,16 +266,24 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(area_enter_notify), rasterview);
     g_signal_connect_swapped(area, "leave-notify-event",
                              G_CALLBACK(area_leave_notify), rasterview);
+    g_signal_connect_swapped(hruler, "button-press-event",
+                             G_CALLBACK(ruler_button_press), rasterview);
+    g_signal_connect_swapped(vruler, "button-press-event",
+                             G_CALLBACK(ruler_button_press), rasterview);
 }
 
 static void
 gwy_raster_view_dispose(GObject *object)
 {
     GwyRasterView *rasterview = GWY_RASTER_VIEW(object);
-    //RasterView *priv = rasterview->priv;
+    RasterView *priv = rasterview->priv;
     set_field(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
+    if (priv->ruler_popup) {
+        gtk_widget_destroy(GTK_WIDGET(priv->ruler_popup));
+        priv->ruler_popup = NULL;
+    }
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
 }
 
@@ -461,6 +487,40 @@ gwy_raster_view_get_color_axis(const GwyRasterView *rasterview)
     return rasterview->priv->coloraxis;
 }
 
+/**
+ * gwy_raster_view_set_scale_type:
+ * @rasterview: A raster view.
+ * @scaletype: New scale type for rulers.
+ *
+ * Sets the scale type of raster view rulers.
+ **/
+void
+gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
+                               GwyRulerScaleType scaletype)
+{
+    g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
+    if (!set_scale_type(rasterview, scaletype))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_SCALE_TYPE]);
+}
+
+/**
+ * gwy_raster_view_get_scale_type:
+ * @rasterview: A raster view.
+ *
+ * Gets the scale type of raster view rulers.
+ *
+ * Returns: The scale type used by rulers.
+ **/
+GwyRulerScaleType
+gwy_raster_view_get_scale_type(const GwyRasterView *rasterview)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), GWY_RULER_SCALE_PIXEL);
+    return rasterview->priv->scale_type;
+}
+
+
 static void
 area_notify(GwyRasterView *rasterview,
             GParamSpec *pspec,
@@ -481,6 +541,19 @@ area_notify(GwyRasterView *rasterview,
     else if (gwy_strequal(pspec->name, "gradient")) {
         gwy_color_axis_set_gradient(priv->coloraxis,
                                     gwy_raster_area_get_gradient(area));
+    }
+    else if (gwy_strequal(pspec->name, "real-aspect-ratio")) {
+        if (priv->ruler_popup) {
+            gboolean real_aspect_ratio;
+            g_object_get(priv->area,
+                         "real-aspect-ratio", &real_aspect_ratio,
+                         NULL);
+            GtkCheckMenuItem *item = (real_aspect_ratio
+                                      ? priv->real_aspect_ratio
+                                      : priv->square_pixels);
+            if (!gtk_check_menu_item_get_active(item))
+                gtk_check_menu_item_set_active(item, TRUE);
+        }
     }
 }
 
@@ -667,6 +740,107 @@ area_leave_notify(GwyRasterView *rasterview,
     gwy_ruler_set_show_mark(priv->hruler, FALSE);
     gwy_ruler_set_show_mark(priv->vruler, FALSE);
     return FALSE;
+}
+
+static gboolean
+ruler_button_press(GwyRasterView *rasterview,
+                   GdkEventButton *event,
+                   GwyRuler*ruler)
+{
+    g_printerr("!!!\n");
+    if (!gdk_event_triggers_context_menu((GdkEvent*)event)
+        || event->type != GDK_BUTTON_PRESS)
+        return FALSE;
+
+    pop_up_ruler_menu(rasterview, GTK_WIDGET(ruler), event);
+    return TRUE;
+}
+
+static void
+pop_up_ruler_menu(GwyRasterView *rasterview,
+                  GtkWidget *widget,
+                  GdkEventButton *event)
+{
+    RasterView *priv = rasterview->priv;
+    gint button = event ? event->button : 0;
+    gint event_time = event ? event->time : gtk_get_current_event_time();
+
+    if (!priv->ruler_popup)
+        priv->ruler_popup = create_ruler_popup(rasterview);
+
+    gtk_menu_attach_to_widget(priv->ruler_popup, widget, NULL);
+    gtk_menu_popup(priv->ruler_popup, NULL, NULL, NULL, NULL,
+                   button, event_time);
+}
+
+static GtkMenu*
+create_ruler_popup(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    GtkWidget *menu = gtk_menu_new();
+    GtkMenuShell *shell = GTK_MENU_SHELL(menu);
+    GtkWidget *item;
+
+    item = gtk_radio_menu_item_new_with_label(NULL, _("Pixel Distances"));
+    gtk_menu_shell_append(shell, item);
+    priv->pixel_distances = GTK_CHECK_MENU_ITEM(item);
+    if (priv->scale_type == GWY_RULER_SCALE_PIXEL)
+        gtk_check_menu_item_set_active(priv->pixel_distances, TRUE);
+
+    item = gtk_radio_menu_item_new_with_label_from_widget
+                            (GTK_RADIO_MENU_ITEM(item), _("Real Distances"));
+    gtk_menu_shell_append(shell, item);
+    priv->real_distances = GTK_CHECK_MENU_ITEM(item);
+    if (priv->scale_type == GWY_RULER_SCALE_REAL)
+        gtk_check_menu_item_set_active(priv->real_distances, TRUE);
+
+    item = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(shell, item);
+
+    gboolean real_aspect_ratio;
+    g_object_get(priv->area, "real-aspect-ratio", &real_aspect_ratio, NULL);
+
+    item = gtk_radio_menu_item_new_with_label(NULL, _("Square Pixels"));
+    gtk_menu_shell_append(shell, item);
+    priv->square_pixels = GTK_CHECK_MENU_ITEM(item);
+    if (!real_aspect_ratio)
+        gtk_check_menu_item_set_active(priv->square_pixels, TRUE);
+
+    item = gtk_radio_menu_item_new_with_label_from_widget
+                            (GTK_RADIO_MENU_ITEM(item), _("Real Aspect Ratio"));
+    gtk_menu_shell_append(shell, item);
+    priv->real_aspect_ratio = GTK_CHECK_MENU_ITEM(item);
+    if (real_aspect_ratio)
+        gtk_check_menu_item_set_active(priv->real_aspect_ratio, TRUE);
+
+    g_signal_connect_swapped(priv->pixel_distances, "toggled",
+                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
+    g_signal_connect_swapped(priv->real_distances, "toggled",
+                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
+    g_signal_connect_swapped(priv->square_pixels, "toggled",
+                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
+    g_signal_connect_swapped(priv->real_aspect_ratio, "toggled",
+                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
+
+    return GTK_MENU(menu);
+}
+
+static void
+ruler_popup_item_toggled(GwyRasterView *rasterview,
+                         GtkCheckMenuItem *menuitem)
+{
+    if (!gtk_check_menu_item_get_active(menuitem))
+        return;
+
+    RasterView *priv = rasterview->priv;
+    if (menuitem == priv->pixel_distances)
+        gwy_raster_view_set_scale_type(rasterview, GWY_RULER_SCALE_PIXEL);
+    else if (menuitem == priv->real_distances)
+        gwy_raster_view_set_scale_type(rasterview, GWY_RULER_SCALE_REAL);
+    else if (menuitem == priv->square_pixels)
+        g_object_set(priv->area, "real-aspect-ratio", FALSE, NULL);
+    else if (menuitem == priv->real_aspect_ratio)
+        g_object_set(priv->area, "real-aspect-ratio", TRUE, NULL);
 }
 
 /**

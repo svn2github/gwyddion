@@ -59,15 +59,18 @@ struct _GwyRasterViewClass {
     GtkGridClass grid_class;
 };
 
-GType          gwy_raster_view_get_type      (void)                            G_GNUC_CONST;
-GtkWidget*     gwy_raster_view_new           (void)                            G_GNUC_MALLOC;
-GwyRasterArea* gwy_raster_view_get_area      (const GwyRasterView *rasterview) G_GNUC_PURE;
-GwyScroller*   gwy_raster_view_get_scroller  (const GwyRasterView *rasterview) G_GNUC_PURE;
-GwyRuler*      gwy_raster_view_get_hruler    (const GwyRasterView *rasterview) G_GNUC_PURE;
-GwyRuler*      gwy_raster_view_get_vruler    (const GwyRasterView *rasterview) G_GNUC_PURE;
-GtkScrollbar*  gwy_raster_view_get_hscrollbar(const GwyRasterView *rasterview) G_GNUC_PURE;
-GtkScrollbar*  gwy_raster_view_get_vscrollbar(const GwyRasterView *rasterview) G_GNUC_PURE;
-GwyColorAxis*  gwy_raster_view_get_color_axis(const GwyRasterView *rasterview) G_GNUC_PURE;
+GType             gwy_raster_view_get_type      (void)                            G_GNUC_CONST;
+GtkWidget*        gwy_raster_view_new           (void)                            G_GNUC_MALLOC;
+GwyRasterArea*    gwy_raster_view_get_area      (const GwyRasterView *rasterview) G_GNUC_PURE;
+GwyScroller*      gwy_raster_view_get_scroller  (const GwyRasterView *rasterview) G_GNUC_PURE;
+GwyRuler*         gwy_raster_view_get_hruler    (const GwyRasterView *rasterview) G_GNUC_PURE;
+GwyRuler*         gwy_raster_view_get_vruler    (const GwyRasterView *rasterview) G_GNUC_PURE;
+GtkScrollbar*     gwy_raster_view_get_hscrollbar(const GwyRasterView *rasterview) G_GNUC_PURE;
+GtkScrollbar*     gwy_raster_view_get_vscrollbar(const GwyRasterView *rasterview) G_GNUC_PURE;
+GwyColorAxis*     gwy_raster_view_get_color_axis(const GwyRasterView *rasterview) G_GNUC_PURE;
+void              gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
+                                                 GwyRulerScaleType scaletype);
+GwyRulerScaleType gwy_raster_view_get_scale_type(const GwyRasterView *rasterview) G_GNUC_PURE;
 
 G_END_DECLS
 

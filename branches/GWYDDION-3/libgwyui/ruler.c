@@ -493,8 +493,8 @@ invalidate_mark_area(GwyRuler *ruler)
     cairo_rectangle_int_t rect = {
         (gint)floor(x - hs - 1.0 + allocation.x),
         (gint)floor(y - hs - 1.0 + allocation.y),
-        (gint)ceil(2.0*hs + 1.6),
-        (gint)ceil(2.0*hs + 1.6),
+        (gint)ceil(2.0*hs + 2.01),
+        (gint)ceil(2.0*hs + 2.01),
     };
     cairo_region_t *region = cairo_region_create_rectangle(&rect);
     gtk_widget_queue_draw_region(widget, region);
