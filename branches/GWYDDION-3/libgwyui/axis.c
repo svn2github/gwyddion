@@ -108,6 +108,8 @@ static void            gwy_axis_get_property     (GObject *object,
                                                   GParamSpec *pspec);
 static void            gwy_axis_realize          (GtkWidget *widget);
 static void            gwy_axis_unrealize        (GtkWidget *widget);
+static void            gwy_axis_map              (GtkWidget *widget);
+static void            gwy_axis_unmap            (GtkWidget *widget);
 static void            gwy_axis_style_updated    (GtkWidget *widget);
 static void            gwy_axis_size_allocate    (GtkWidget *widget,
                                                   GtkAllocation *allocation);
@@ -221,6 +223,8 @@ gwy_axis_class_init(GwyAxisClass *klass)
 
     widget_class->realize = gwy_axis_realize;
     widget_class->unrealize = gwy_axis_unrealize;
+    widget_class->map = gwy_axis_map;
+    widget_class->unmap = gwy_axis_unmap;
     widget_class->style_updated = gwy_axis_style_updated;
     widget_class->size_allocate = gwy_axis_size_allocate;
 
@@ -452,6 +456,26 @@ gwy_axis_unrealize(GtkWidget *widget)
     priv->ticks_are_valid = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
     GTK_WIDGET_CLASS(gwy_axis_parent_class)->unrealize(widget);
+}
+
+static void
+gwy_axis_map(GtkWidget *widget)
+{
+    GwyAxis *axis = GWY_AXIS(widget);
+    Axis *priv = axis->priv;
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->map(widget);
+    if (priv->input_window)
+        gdk_window_show(priv->input_window);
+}
+
+static void
+gwy_axis_unmap(GtkWidget *widget)
+{
+    GwyAxis *axis = GWY_AXIS(widget);
+    Axis *priv = axis->priv;
+    if (priv->input_window)
+        gdk_window_hide(priv->input_window);
+    GTK_WIDGET_CLASS(gwy_axis_parent_class)->unmap(widget);
 }
 
 static void
@@ -795,8 +819,9 @@ create_input_window(GwyAxis *axis)
         .window_type = GDK_WINDOW_CHILD,
         .wclass = GDK_INPUT_ONLY,
         .override_redirect = TRUE,
-        // XXX: Cannot get any events working.
-        .event_mask = (gtk_widget_get_events(widget) | GDK_ALL_EVENTS_MASK),
+        .event_mask = (gtk_widget_get_events(widget)
+                       | GDK_BUTTON_PRESS_MASK
+                       | GDK_BUTTON_RELEASE_MASK),
     };
     gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR;
     priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
