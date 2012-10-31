@@ -530,14 +530,14 @@ gwy_gl_material_setup_inventory(GwyInventory *inventory)
     GwyGLMaterial *gl_material;
     // OpenGL-Default
     gl_material = g_object_new(GWY_TYPE_GL_MATERIAL,
-                               "is-modifiable", FALSE,
+                               "modifiable", FALSE,
                                "name", GWY_GL_MATERIAL_DEFAULT,
                                NULL);
     gwy_inventory_insert(inventory, gl_material);
     g_object_unref(gl_material);
     // None
     gl_material = g_object_new(GWY_TYPE_GL_MATERIAL,
-                               "is-modifiable", FALSE,
+                               "modifiable", FALSE,
                                "name", GWY_GL_MATERIAL_NONE,
                                NULL);
     *gl_material->priv = null_material;

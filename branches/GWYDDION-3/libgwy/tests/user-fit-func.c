@@ -282,11 +282,11 @@ test_user_fit_func_inventory(void)
     userfitfunc = gwy_inventory_get(userfitfuncs, "Another");
     resource = GWY_RESOURCE(userfitfunc);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
-    gboolean is_modified;
-    g_object_get(userfitfunc, "is-modified", &is_modified, NULL);
+    gboolean modified;
+    g_object_get(userfitfunc, "modified", &modified, NULL);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
-    g_assert(is_modified);
+    g_assert(modified);
 
     g_object_ref(userfitfunc);
     gwy_inventory_delete(userfitfuncs, "Another");

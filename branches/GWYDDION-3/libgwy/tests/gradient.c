@@ -301,11 +301,11 @@ test_gradient_inventory(void)
     gradient = gwy_inventory_get(gradients, "Another");
     resource = GWY_RESOURCE(gradient);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
-    gboolean is_modified;
-    g_object_get(gradient, "is-modified", &is_modified, NULL);
+    gboolean modified;
+    g_object_get(gradient, "modified", &modified, NULL);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
-    g_assert(is_modified);
+    g_assert(modified);
     gwy_gradient_insert_sorted(gradient, &gradient_point_red);
     g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 3);
 

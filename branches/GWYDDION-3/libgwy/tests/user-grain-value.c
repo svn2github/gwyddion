@@ -249,11 +249,11 @@ test_user_grain_value_inventory(void)
     usergrainvalue = gwy_inventory_get(usergrainvalues, "Another");
     resource = GWY_RESOURCE(usergrainvalue);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
-    gboolean is_modified;
-    g_object_get(usergrainvalue, "is-modified", &is_modified, NULL);
+    gboolean modified;
+    g_object_get(usergrainvalue, "modified", &modified, NULL);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
-    g_assert(is_modified);
+    g_assert(modified);
 
     g_object_ref(usergrainvalue);
     gwy_inventory_delete(usergrainvalues, "Another");

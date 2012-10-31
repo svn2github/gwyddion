@@ -250,11 +250,11 @@ test_gl_material_inventory(void)
     gl_material = gwy_inventory_get(gl_materials, "Another");
     resource = GWY_RESOURCE(gl_material);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
-    gboolean is_modified;
-    g_object_get(gl_material, "is-modified", &is_modified, NULL);
+    gboolean modified;
+    g_object_get(gl_material, "modified", &modified, NULL);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
-    g_assert(is_modified);
+    g_assert(modified);
 
     g_object_ref(gl_material);
     gwy_inventory_delete(gl_materials, "Another");

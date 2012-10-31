@@ -30,7 +30,7 @@
  *
  * As they become managed we must also ensure they are present on disk but we
  * do not want to save resources just loaded from disk.  So gwy_resource_load()
- * remembers in is_on_disk whether we the resource has an on-disk
+ * remembers in on_disk whether we the resource has an on-disk
  * representation.
  *
  * Then we only only have to save resources after modifications.  There are
@@ -45,7 +45,7 @@
  *
  * Removal is pretty simple.  A managed resource is removed from disk the
  * instant it is removed from the inventory and becomes free-standing; and its
- * is_on_disk flag is cleared.
+ * on_disk flag is cleared.
  */
 
 #include <string.h>
@@ -76,10 +76,10 @@ enum {
     PROP_0,
     PROP_NAME,
     PROP_FILE_NAME,
-    PROP_IS_PREFERRED,
-    PROP_IS_MODIFIABLE,
-    PROP_IS_MODIFIED,
-    PROP_IS_MANAGED,
+    PROP_PREFERRED,
+    PROP_MODIFIABLE,
+    PROP_MODIFIED,
+    PROP_MANAGED,
     N_PROPS
 };
 
@@ -88,11 +88,11 @@ struct _GwyResourcePrivate {
     gchar *collation_key;
     GFile *file;
 
-    gboolean is_modifiable : 1;
-    gboolean is_modified : 1;
-    gboolean is_preferred : 1;
-    gboolean is_managed : 1;
-    gboolean is_on_disk : 1;
+    gboolean modifiable : 1;
+    gboolean modified : 1;
+    gboolean preferred : 1;
+    gboolean managed : 1;
+    gboolean on_disk : 1;
 
     gdouble mtime;
 };
@@ -104,7 +104,7 @@ struct _GwyResourceClassPrivate {
     GwyInventoryItemType item_type;
     gulong item_inserted_id;
 
-    gboolean is_managed;
+    gboolean managed;
 };
 
 typedef struct _GwyResourcePrivate      Resource;
@@ -148,7 +148,7 @@ static void               gwy_resource_get_trait_value    (gconstpointer item,
                                                            GValue *value);
 static void               gwy_resource_delete             (gpointer item);
 static void               set_is_managed                  (GwyResource *resource,
-                                                           gboolean is_managed);
+                                                           gboolean managed);
 static void               inventory_item_inserted         (GwyInventory *inventory,
                                                            guint i,
                                                            GwyResourceClass *klass);
@@ -303,7 +303,7 @@ gwy_resource_class_base_init(GwyResourceClass *klass)
 {
     klass->priv = G_TYPE_CLASS_GET_PRIVATE(klass, GWY_TYPE_RESOURCE,
                                            ResourceClass);
-    klass->priv->is_managed = TRUE;
+    klass->priv->managed = TRUE;
     klass->priv->item_type = resource_item_type;
     klass->priv->item_type.type = G_TYPE_FROM_CLASS(klass);
 }
@@ -355,9 +355,9 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = properties[PROP_IS_PREFERRED]
-        = g_param_spec_boolean("is-preferred",
-                               "Is preferred",
+    pspec = properties[PROP_PREFERRED]
+        = g_param_spec_boolean("preferred",
+                               "Preferred",
                                "Whether a resource is preferred",
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -365,9 +365,9 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = properties[PROP_IS_MODIFIABLE]
-        = g_param_spec_boolean("is-modifiable",
-                               "Is modifiable",
+    pspec = properties[PROP_MODIFIABLE]
+        = g_param_spec_boolean("modifiable",
+                               "Modifiable",
                                "Whether a resource is modifiable",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
@@ -376,17 +376,17 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    properties[PROP_IS_MODIFIED]
-        = g_param_spec_boolean("is-modified",
-                               "Is modified",
+    properties[PROP_MODIFIED]
+        = g_param_spec_boolean("modified",
+                               "Modified",
                                "Whether a resource was modified, this is "
                                "set when data-changed signal is emitted",
                                FALSE,
                                G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_IS_MANAGED]
-        = g_param_spec_boolean("is-managed",
-                               "Is managed",
+    properties[PROP_MANAGED]
+        = g_param_spec_boolean("managed",
+                               "Managed",
                                "Whether a resource is managed by the class "
                                "inventory.  False for free-standing "
                                "resources.",
@@ -492,8 +492,8 @@ gwy_resource_assign_impl(GwySerializable *destination,
     GwyResource *dest = GWY_RESOURCE(destination);
     GwyResource *src = GWY_RESOURCE(source);
 
-    g_return_if_fail(dest->priv->is_modifiable);
-    if (!dest->priv->is_managed)
+    g_return_if_fail(dest->priv->modifiable);
+    if (!dest->priv->managed)
         gwy_resource_rename(dest, src->priv->name);
 
     // XXX: The rest are management properties, not value.  Do not assign them.
@@ -515,13 +515,13 @@ gwy_resource_set_property(GObject *object,
         priv->name = g_value_dup_string(value);
         break;
 
-        case PROP_IS_MODIFIABLE:
+        case PROP_MODIFIABLE:
         // FIXME: This is a bit weird for managed resources.  Should it really
         // create them on-disk and remove them?
-        priv->is_modifiable = g_value_get_boolean(value);
+        priv->modifiable = g_value_get_boolean(value);
         break;
 
-        case PROP_IS_PREFERRED:
+        case PROP_PREFERRED:
         gwy_resource_set_is_preferred(resource, g_value_get_boolean(value));
         break;
 
@@ -552,20 +552,20 @@ gwy_resource_get_property(GObject *object,
             g_value_set_string(value, NULL);
         break;
 
-        case PROP_IS_PREFERRED:
-        g_value_set_boolean(value, priv->is_preferred);
+        case PROP_PREFERRED:
+        g_value_set_boolean(value, priv->preferred);
         break;
 
-        case PROP_IS_MODIFIABLE:
-        g_value_set_boolean(value, priv->is_modifiable);
+        case PROP_MODIFIABLE:
+        g_value_set_boolean(value, priv->modifiable);
         break;
 
-        case PROP_IS_MODIFIED:
-        g_value_set_boolean(value, priv->is_modified);
+        case PROP_MODIFIED:
+        g_value_set_boolean(value, priv->modified);
         break;
 
-        case PROP_IS_MANAGED:
-        g_value_set_boolean(value, priv->is_managed);
+        case PROP_MANAGED:
+        g_value_set_boolean(value, priv->managed);
         break;
 
         default:
@@ -585,7 +585,7 @@ static gboolean
 gwy_resource_is_modifiable_impl(gconstpointer item)
 {
     GwyResource *resource = (GwyResource*)item;
-    return resource->priv->is_modifiable;
+    return resource->priv->modifiable;
 }
 
 static gboolean
@@ -610,7 +610,7 @@ gwy_resource_rename(gpointer item,
     GwyResource *resource = (GwyResource*)item;
     Resource *priv = resource->priv;
 
-    g_return_if_fail(priv->is_modifiable);
+    g_return_if_fail(priv->modifiable);
     g_return_if_fail(new_name);
     if (_gwy_assign_string(&priv->name, new_name))
         g_object_notify_by_pspec(G_OBJECT(item), properties[PROP_NAME]);
@@ -660,11 +660,11 @@ gwy_resource_delete(gpointer item)
 
 static void
 set_is_managed(GwyResource *resource,
-               gboolean is_managed)
+               gboolean managed)
 {
-    g_return_if_fail(!resource->priv->is_managed != !is_managed);
-    resource->priv->is_managed = is_managed;
-    g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_IS_MANAGED]);
+    g_return_if_fail(!resource->priv->managed != !managed);
+    resource->priv->managed = managed;
+    g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_MANAGED]);
 }
 
 static void
@@ -678,7 +678,7 @@ inventory_item_inserted(GwyInventory *inventory,
     GObject *object = G_OBJECT(resource);
     g_object_freeze_notify(object);
     set_is_managed(resource, TRUE);
-    if (priv->is_modifiable)
+    if (priv->modifiable)
         manage_create(resource);
     g_object_thaw_notify(object);
 }
@@ -715,7 +715,7 @@ gwy_resource_set_name(GwyResource *resource,
                       const gchar *name)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    g_return_if_fail(!resource->priv->is_managed);
+    g_return_if_fail(!resource->priv->managed);
     gwy_resource_rename(resource, name);
 }
 
@@ -758,7 +758,7 @@ gwy_resource_set_filename(GwyResource *resource,
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
     Resource *priv = resource->priv;
-    g_return_if_fail(!priv->is_managed);
+    g_return_if_fail(!priv->managed);
     // FIXME: Maybe we should absolutize and canonicalize the file names.
     gboolean emit_filename_changed = FALSE;
     if (filename) {
@@ -800,7 +800,7 @@ gboolean
 gwy_resource_is_managed(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->priv->is_managed;
+    return resource->priv->managed;
 }
 
 /**
@@ -816,7 +816,7 @@ gboolean
 gwy_resource_is_modifiable(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->priv->is_modifiable;
+    return resource->priv->modifiable;
 }
 
 /**
@@ -831,27 +831,27 @@ gboolean
 gwy_resource_get_is_preferred(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->priv->is_preferred;
+    return resource->priv->preferred;
 }
 
 /**
  * gwy_resource_set_is_preferred:
  * @resource: A resource.
- * @is_preferred: %TRUE to make @resource preferred, %FALSE to make it not
+ * @preferred: %TRUE to make @resource preferred, %FALSE to make it not
  *                preferred.
  *
  * Sets the preferability of a resource.
  **/
 void
 gwy_resource_set_is_preferred(GwyResource *resource,
-                              gboolean is_preferred)
+                              gboolean preferred)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    is_preferred = !!is_preferred;
-    if (is_preferred == resource->priv->is_preferred)
+    preferred = !!preferred;
+    if (preferred == resource->priv->preferred)
         return;
-    resource->priv->is_preferred = is_preferred;
-    g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_IS_PREFERRED]);
+    resource->priv->preferred = preferred;
+    g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_PREFERRED]);
 }
 
 /**
@@ -1002,11 +1002,11 @@ gwy_resource_save(GwyResource *resource,
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
     Resource *priv = resource->priv;
     g_return_val_if_fail(priv->name, FALSE);
-    g_return_val_if_fail(priv->is_modifiable, FALSE);
-    g_return_val_if_fail(priv->is_managed || priv->file, FALSE);
+    g_return_val_if_fail(priv->modifiable, FALSE);
+    g_return_val_if_fail(priv->managed || priv->file, FALSE);
 
     priv->mtime = 0;
-    if (!priv->is_modified)
+    if (!priv->modified)
         return TRUE;
 
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
@@ -1039,10 +1039,10 @@ gwy_resource_save(GwyResource *resource,
     g_free(buffer);
     g_object_unref(ostream);
 
-    priv->is_modified = FALSE;
-    if (priv->is_managed)
-        priv->is_on_disk = TRUE;
-    g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_IS_MODIFIED]);
+    priv->modified = FALSE;
+    if (priv->managed)
+        priv->on_disk = TRUE;
+    g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_MODIFIED]);
     g_object_thaw_notify(G_OBJECT(resource));
 
     return ok;
@@ -1059,7 +1059,7 @@ output_stream_for_save(GwyResource *resource,
         return g_file_replace(priv->file, NULL, FALSE, 0, NULL, error);
 
     ResourceClass *cpriv = GWY_RESOURCE_GET_CLASS(resource)->priv;
-    if (!priv->is_managed || !cpriv->managed_directory) {
+    if (!priv->managed || !cpriv->managed_directory) {
         g_warning("Cannot save non-managed resource %s with no file name.",
                   priv->name);
         return NULL;
@@ -1202,8 +1202,8 @@ gwy_resource_load(const gchar *filename_sys,
                                                           G_FILE_ATTRIBUTE_ACCESS_CAN_WRITE))
                 mod_on_disk = TRUE;
             g_object_unref(info);
-            priv->is_modifiable = !!modifiable && mod_on_disk;
-            // Do not set is_on_disk as we really care only about managed
+            priv->modifiable = !!modifiable && mod_on_disk;
+            // Do not set on_disk as we really care only about managed
             // resources so it's set in gwy_resource_type_load_directory().
         }
         gwy_str_line_iter_free(iter);
@@ -1422,13 +1422,12 @@ static void
 data_changed(GwyResource *resource)
 {
     Resource *priv = resource->priv;
-    if (!priv->is_modifiable)
+    if (!priv->modifiable)
         g_warning("Constant resource ‘%s’ of type %s was modified",
                   priv->name, G_OBJECT_TYPE_NAME(resource));
-    if (!priv->is_modified) {
-        priv->is_modified = TRUE;
-        g_object_notify_by_pspec(G_OBJECT(resource),
-                                 properties[PROP_IS_MODIFIED]);
+    if (!priv->modified) {
+        priv->modified = TRUE;
+        g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_MODIFIED]);
     }
     manage_update(resource);
 }
@@ -1444,10 +1443,9 @@ gwy_resource_notify(GObject *object,
     GwyResource *resource = GWY_RESOURCE(object);
     Resource *priv = resource->priv;
     // FIXME: Recursion.
-    if (!priv->is_modified) {
-        priv->is_modified = TRUE;
-        g_object_notify_by_pspec(G_OBJECT(resource),
-                                 properties[PROP_IS_MODIFIED]);
+    if (!priv->modified) {
+        priv->modified = TRUE;
+        g_object_notify_by_pspec(G_OBJECT(resource), properties[PROP_MODIFIED]);
     }
     manage_update(resource);
 
@@ -1473,12 +1471,12 @@ static void
 manage_create(GwyResource *resource)
 {
     if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
-        || !resource->priv->is_managed)
+        || !resource->priv->managed)
         return;
 
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
     ResourceClass *cpriv = klass->priv;
-    if (!cpriv->is_managed)
+    if (!cpriv->managed)
         return;
 
     Resource *priv = resource->priv;
@@ -1502,12 +1500,12 @@ static void
 manage_delete(GwyResource *resource)
 {
     if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
-        || !resource->priv->is_managed)
+        || !resource->priv->managed)
         return;
 
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
     ResourceClass *cpriv = klass->priv;
-    if (!cpriv->is_managed)
+    if (!cpriv->managed)
         return;
 
     Resource *priv = resource->priv;
@@ -1521,7 +1519,7 @@ manage_delete(GwyResource *resource)
     }
 
     manage_unqueue(resource);
-    priv->is_on_disk = FALSE;
+    priv->on_disk = FALSE;
     GError *err = NULL;
     if (!g_file_delete(priv->file, NULL, &err)) {
         g_warning("Cannot remove resource from disk: %s", err->message);
@@ -1533,12 +1531,12 @@ static void
 manage_update(GwyResource *resource)
 {
     if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
-        || !resource->priv->is_managed)
+        || !resource->priv->managed)
         return;
 
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
     ResourceClass *cpriv = klass->priv;
-    if (!cpriv->is_managed)
+    if (!cpriv->managed)
         return;
 
     Resource *priv = resource->priv;
@@ -1736,7 +1734,7 @@ gwy_resource_type_load_directory(GType type,
 
         if (G_LIKELY(resource) && name_is_unique(resource, cpriv, &error)) {
             Resource *priv = resource->priv;
-            priv->is_on_disk = TRUE;
+            priv->on_disk = TRUE;
             gwy_inventory_insert(cpriv->inventory, resource);
             g_object_unref(resource);
         }
@@ -1870,7 +1868,7 @@ gwy_resource_type_set_managed(GType type,
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
     GwyResourceClass *klass = g_type_class_peek(type);
     g_return_if_fail(klass);
-    klass->priv->is_managed = managed;
+    klass->priv->managed = managed;
 }
 
 /**
@@ -2329,7 +2327,7 @@ gwy_resource_dump_data_line(const gdouble *data,
 /**
  * GwyResourceManagementType:
  * @GWY_RESOURCE_MANAGEMENT_NONE: Changed resources are not tracked apart from
- *                                setting GwyResource:is-modified and no
+ *                                setting GwyResource:modified and no
  *                                changes are written to disk automatically.
  *                                No queue of resources to save is maintained.
  * @GWY_RESOURCE_MANAGEMENT_MANUAL: A queue of resources to update on disk is

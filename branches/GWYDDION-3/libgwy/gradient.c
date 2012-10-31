@@ -385,7 +385,7 @@ gwy_gradient_load_builtins(GwyErrorList **error_list)
         else {
             GwyGradient *gradient = g_object_new(GWY_TYPE_GRADIENT,
                                                  "name", name,
-                                                 "is-modifiable", FALSE,
+                                                 "modifiable", FALSE,
                                                  NULL);
             Gradient *priv = gradient->priv;
             g_array_set_size(priv->points, 0);
@@ -1041,7 +1041,7 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
 {
     gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
     GwyGradient *gradient = g_object_new(GWY_TYPE_GRADIENT,
-                                         "is-modifiable", FALSE,
+                                         "modifiable", FALSE,
                                          "name", GWY_GRADIENT_DEFAULT,
                                          NULL);
     gwy_inventory_insert(inventory, gradient);
