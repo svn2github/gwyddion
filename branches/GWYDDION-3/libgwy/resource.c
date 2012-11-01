@@ -838,7 +838,7 @@ gwy_resource_get_is_preferred(GwyResource *resource)
  * gwy_resource_set_is_preferred:
  * @resource: A resource.
  * @preferred: %TRUE to make @resource preferred, %FALSE to make it not
- *                preferred.
+ *             preferred.
  *
  * Sets the preferability of a resource.
  **/
@@ -2268,10 +2268,12 @@ gwy_resource_dump_data_line(const gdouble *data,
 
 /**
  * GwyResourceClass:
- * @get_gresource: Returns #GResource from which built-in resources can be
- *                 loaded.  The resources are sought under the path
- *                 "/net/gwyddion/@name" where @name is the name passed to
- *                 gwy_resource_class_register().
+ * @load_builtins: Loads built-in resources, i.e. those compiled into the
+ *                 library either using #GResource or some specific means.
+ *                 The class inventory must be set up beforehand.  Also note
+ *                 creation of some default item usually occurs during the
+ *                 inventory setup; this method loads additional built-in
+ *                 resources.
  * @setup_inventory: Sets up the class inventory after its creation.  This
  *                   may involve for example setting the default item name and
  *                   inserting the built-in system items to the inventory.

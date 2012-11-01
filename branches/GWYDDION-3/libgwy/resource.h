@@ -103,7 +103,7 @@ gboolean                    gwy_resource_is_modifiable             (GwyResource 
 gboolean                    gwy_resource_is_managed                (GwyResource *resource)                  G_GNUC_PURE;
 gboolean                    gwy_resource_get_is_preferred          (GwyResource *resource)                  G_GNUC_PURE;
 void                        gwy_resource_set_is_preferred          (GwyResource *resource,
-                                                                    gboolean is_preferred);
+                                                                    gboolean preferred);
 void                        gwy_resource_data_changed              (GwyResource *resource);
 GwyResource*                gwy_resource_load                      (const gchar *filename,
                                                                     GType expected_type,
