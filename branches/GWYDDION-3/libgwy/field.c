@@ -213,15 +213,13 @@ _gwy_field_set_cache_for_flat(GwyField *field,
 {
     Field *priv = field->priv;
     priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS) | CBIT(MSQ)
-                    | CBIT(MED) | CBIT(ARF) | CBIT(ART) | CBIT(ARE));
+                    | CBIT(MED) | CBIT(ARE));
     CVAL(priv, MIN) = value;
     CVAL(priv, MAX) = value;
     CVAL(priv, AVG) = value;
     CVAL(priv, RMS) = 0.0;
     CVAL(priv, MSQ) = value*value;
     CVAL(priv, MED) = value;
-    CVAL(priv, ARF) = value;
-    CVAL(priv, ART) = value;
     CVAL(priv, ARE) = field->xreal * field->yreal;
 }
 

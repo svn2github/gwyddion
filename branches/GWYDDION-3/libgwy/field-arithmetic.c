@@ -276,14 +276,12 @@ gwy_field_add(GwyField *field,
         if (width == field->xres && height == field->yres) {
             Field *priv = field->priv;
             priv->cached &= (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
-                             | CBIT(MED) | CBIT(ARF) | CBIT(ART) | CBIT(ARE));
+                             | CBIT(MED) | CBIT(ARE));
             CVAL(priv, MIN) += value;
             CVAL(priv, MAX) += value;
             CVAL(priv, AVG) += value;
             // RMS does not change
             CVAL(priv, MED) += value;
-            CVAL(priv, ARF) += value;
-            CVAL(priv, ART) += value;
             // ARE does not change
         }
         else
@@ -338,7 +336,7 @@ gwy_field_multiply(GwyField *field,
         if (width == field->xres && height == field->yres) {
             Field *priv = field->priv;
             priv->cached &= (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
-                             | CBIT(MSQ) | CBIT(MED) | CBIT(ARF) | CBIT(ART));
+                             | CBIT(MSQ) | CBIT(MED));
             CVAL(priv, MIN) *= value;
             CVAL(priv, MAX) *= value;
             if (value < 0.0)
@@ -347,10 +345,6 @@ gwy_field_multiply(GwyField *field,
             CVAL(priv, RMS) *= fabs(value);
             CVAL(priv, MSQ) *= value*value;
             CVAL(priv, MED) *= value;
-            CVAL(priv, ARF) *= value;
-            CVAL(priv, ART) *= value;
-            if (value < 0.0)
-                DSWAP(CVAL(priv, ARF), CVAL(priv, ART));
         }
         else
             gwy_field_invalidate(field);

@@ -39,8 +39,6 @@ typedef enum {
     GWY_FIELD_CACHE_RMS,
     GWY_FIELD_CACHE_MSQ,
     GWY_FIELD_CACHE_MED,
-    GWY_FIELD_CACHE_ARF,  // Not implemented yet
-    GWY_FIELD_CACHE_ART,  // Not implemented yet
     GWY_FIELD_CACHE_ARE,
     GWY_FIELD_CACHE_SIZE
 } GwyFieldCached;
