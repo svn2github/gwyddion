@@ -31,6 +31,7 @@
   </chapter>
   <chapter id='libgwyui-utils'>
     <title>Utilities and auxiliary widgets</title>
+    <xi:include href="xml/inventory-store.xml"/>
     <xi:include href="xml/cairo-utils.xml"/>
     <xi:include href="xml/widget-utils.xml"/>
   </chapter>
