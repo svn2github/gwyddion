@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/rgba.h"
@@ -1222,9 +1221,9 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
  * selection with user-initiated changes.  The standard resolution is that if
  * the selection changes programmatically while the user is editing it, which
  * should not be the normal course of action, the editing is cancelled to
- * prevent all the possible strange consequences (using the cancel_editing()
- * method).  This requires distinguishing user and programmatic changes which
- * is done by wrapping it as described above.
+ * prevent all the possible strange consequences (using
+ * GwyShapesClass.cancel_editing()).  This requires distinguishing user and
+ * programmatic changes which is done by wrapping it as described above.
  *
  * The state can be tested with gwy_shapes_is_updating_selection().
  *
