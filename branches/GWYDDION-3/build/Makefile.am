@@ -11,7 +11,7 @@ EXTRA_DIST = \
 	coverage-test.sh \
 	documentation-stats.py \
 	expand-test-list.py \
-	generate-gresources-xml.sh \
+	generate-gresource-xml.sh \
 	generate-library-def.py \
 	genmarshal.make \
 	gtester.make \
