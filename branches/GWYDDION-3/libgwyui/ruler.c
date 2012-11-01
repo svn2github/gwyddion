@@ -519,6 +519,7 @@ preferred_breadth(GtkWidget *widget)
  * @section_id: GwyRuler
  * @title: Ruler
  * @short_description: Ruler showing dimensions of raster data
+ * @image: GwyRuler.png
  **/
 
 /**

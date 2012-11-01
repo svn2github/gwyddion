@@ -594,6 +594,7 @@ gradient_data_changed(GwyColorAxis *coloraxis,
  * @section_id: GwyColorAxis
  * @title: ColorAxis
  * @short_description: ColorAxis showing a false colour map
+ * @image: GwyColorAxis.png
  **/
 
 /**
