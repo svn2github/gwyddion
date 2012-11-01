@@ -144,9 +144,7 @@ static gboolean        zero_is_inside            (gdouble start,
                                                   guint n,
                                                   gdouble bs);
 static gboolean        precision_is_sufficient   (GwyValueFormat *vf,
-                                                  const GwyRange *range,
-                                                  gdouble bs,
-                                                  GString *str);
+                                                  gdouble bs);
 static void            snap_range_to_ticks       (GwyRange *range,
                                                   gdouble bs);
 static GwyAxisStepType choose_step_type          (gdouble *step,
@@ -1090,7 +1088,7 @@ calculate_ticks(GwyAxis *axis)
             snap_range_to_ticks(&priv->range, bs);
 
         guint precision = gwy_value_format_get_precision(priv->vf);
-        if (precision_is_sufficient(priv->vf, &priv->range, bs, priv->str)) {
+        if (precision_is_sufficient(priv->vf, bs)) {
             if (state == FIRST_TRY && precision > 0)
                 gwy_value_format_set_precision(priv->vf, precision-1);
             else
@@ -1371,22 +1369,13 @@ zero_is_inside(gdouble start, guint n, gdouble bs)
 }
 
 static gboolean
-precision_is_sufficient(GwyValueFormat *vf,
-                        const GwyRange *range,
-                        gdouble bs,
-                        GString *str)
+precision_is_sufficient(GwyValueFormat *vf, gdouble bs)
 {
-    gdouble from = range->from, to = range->to;
-    guint n = gwy_round((to - from)/bs);
-    g_string_set_size(str, 0);
-    for (guint i = 0; i <= n; i++) {
-        gdouble value = if_zero_then_exactly(from + i*bs, bs);
-        const gchar *repr = gwy_value_format_print_number(vf, value);
-        if (gwy_strequal(str->str, repr))
-            return FALSE;
-        g_string_assign(str, repr);
-    }
-    return TRUE;
+    gdouble p10 = gwy_powi(10.0, gwy_value_format_get_precision(vf));
+    // @v is one step as it will be shown on the axis, shifted left by
+    // precision; so if precision is sufficient it must be an integer
+    gdouble v = fabs(bs)/gwy_value_format_get_base(vf)*p10;
+    return fabs(v - gwy_round(v)) <= EPS;
 }
 
 static void
