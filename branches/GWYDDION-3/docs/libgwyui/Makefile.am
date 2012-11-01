@@ -17,7 +17,9 @@ FIXXREF_OPTIONS = --extra-dir=../libgwy/html
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
-HTML_IMAGES =
+HTML_IMAGES = \
+	$(srcdir)/images/GwyColorAxis.png \
+	$(srcdir)/images/GwyRuler.png
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
@@ -33,4 +35,13 @@ include $(top_srcdir)/build/gwy-doc.make
 
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
-EXTRA_DIST +=
+EXTRA_DIST += README.images
+
+# Specialised introspection programs
+AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
+AM_CFLAGS =  $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS)
+AM_LDFLAGS = $(LIBGWYUI_DEPS_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy3.la  $(top_builddir)/libgwyui/libgwyui3.la
+
+noinst_PROGRAMS = render-widgets
+render_widgets_SOURCES = render-widgets.c
+render_widgets_CFLAGS = $(AM_CFLAGS) $(GWY_CFLAGS)
