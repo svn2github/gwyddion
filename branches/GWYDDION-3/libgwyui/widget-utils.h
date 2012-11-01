@@ -24,6 +24,16 @@
 
 G_BEGIN_DECLS
 
+#define GWY_IMPLEMENT_TREE_MODEL(iface_init) \
+    { \
+        static const GInterfaceInfo gwy_tree_model_interface_info = { \
+            (GInterfaceInitFunc)iface_init, NULL, NULL \
+        }; \
+        g_type_add_interface_static(g_define_type_id, \
+                                    GTK_TYPE_TREE_MODEL, \
+                                    &gwy_tree_model_interface_info); \
+    }
+
 gdouble gwy_scroll_wheel_delta(GtkAdjustment *adjustment,
                                GdkEventScroll *event,
                                GtkOrientation orientation);

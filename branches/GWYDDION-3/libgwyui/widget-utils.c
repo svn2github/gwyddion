@@ -55,8 +55,8 @@ gwy_scroll_wheel_delta(GtkAdjustment *adjustment,
           delta = dy*scroll_unit;
     }
     else {
-      if (event->direction == GDK_SCROLL_UP ||
-          event->direction == GDK_SCROLL_LEFT)
+      if (event->direction == GDK_SCROLL_UP
+          || event->direction == GDK_SCROLL_LEFT)
           delta = -scroll_unit;
       else
           delta = scroll_unit;
@@ -70,6 +70,22 @@ gwy_scroll_wheel_delta(GtkAdjustment *adjustment,
  * @section_id: libgwyui-widget-utils
  * @title: Widget utils
  * @short_description: Utility widget functions missing from Gtk+
+ **/
+
+/**
+ * GWY_IMPLEMENT_TREE_MODEL:
+ * @interface_init: The interface init function.
+ *
+ * Declares that a type implements #GtkTreeModel.
+ *
+ * This is a specialization of G_IMPLEMENT_INTERFACE() for
+ * #GtkTreeModelIface.  It is intended to be used in last
+ * G_DEFINE_TYPE_EXTENDED() argument:
+ * |[
+ * G_DEFINE_TYPE_EXTENDED
+ *     (GwyFoo, gwy_foo, G_TYPE_OBJECT, 0,
+ *      GWY_IMPLEMENT_TREE_MODEL(gwy_foo_tree_model_init));
+ * ]|
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
