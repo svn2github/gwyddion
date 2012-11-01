@@ -24,10 +24,10 @@
 
 G_BEGIN_DECLS
 
-#define GWY_IMPLEMENT_TREE_MODEL(iface_init) \
+#define GWY_IMPLEMENT_TREE_MODEL(interface_init) \
     { \
         static const GInterfaceInfo gwy_tree_model_interface_info = { \
-            (GInterfaceInitFunc)iface_init, NULL, NULL \
+            (GInterfaceInitFunc)interface_init, NULL, NULL \
         }; \
         g_type_add_interface_static(g_define_type_id, \
                                     GTK_TYPE_TREE_MODEL, \

@@ -1072,7 +1072,8 @@ gwy_shapes_editing_started(GwyShapes *shapes)
  *
  * Returns: %TRUE a current point exists; %FALSE it it does not exist.
  *          Coordinates @xy are set in both cases (if non-%NULL), however,
- *          if no current point exists they will be set to %NAN.
+ *          if no current point exists they will be set to
+ *          <constant>NAN</constant>.
  **/
 gboolean
 gwy_shapes_get_current_point(const GwyShapes *shapes,

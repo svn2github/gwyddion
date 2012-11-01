@@ -28,7 +28,8 @@
  *
  * Calculates a suitable step for mouse wheel scrolling.
  *
- * This is a similar function to an _gtk_range_get_wheel_delta() which,
+ * This is a similar function to
+ * <function>_gtk_range_get_wheel_delta<!-- -->()</function> which,
  * however, is not public.
  *
  * Returns: A suitable step value for mouse wheel.
