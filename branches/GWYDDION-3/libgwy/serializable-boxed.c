@@ -80,9 +80,9 @@ gwy_boxed_type_is_serializable(GType type)
  * Registers a serialisable boxed type.
  *
  * A boxed type must be registered before it can be deserialised.  Usually this
- * function is called in gwy_foo_get_type() for the type although it is
- * possible to register foreign boxed types as serialisable.  They must be
- * registered <quote>soon enough</quote> then.
+ * function is called in <function>gwy_foo_get_type<!-- -->()</function> for
+ * the type although it is possible to register foreign boxed types as
+ * serialisable.  They must be registered <quote>soon enough</quote> then.
  *
  * Standard Gwyddion boxed serialisable types are registered by
  * gwy_type_init(), i.e. at the very latest when deserialization is attempted.

@@ -98,8 +98,8 @@ gwy_set_user_func(gpointer func,
  * disconnects signals it must be always called with the same set of signals,
  * including callbacks and flags, for a specific member object.
  *
- * Example for a #GwyFoo class owning a #GwyGradient member object, assuming
- * the usual conventions:
+ * Example for a <type>GwyFoo</type> class owning a #GwyGradient member object,
+ * assuming the usual conventions:
  * |[
  * typedef struct _GwyFooPrivate GwyFooPrivate;
  *

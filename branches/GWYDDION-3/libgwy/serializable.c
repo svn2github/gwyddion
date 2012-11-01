@@ -190,7 +190,8 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * Most classes that implement #GwySerializable define convenience macros
  * for the copy-constructor and assignment operator, called
- * gwy_foo_duplicate() and gwy_foo_assign(), respectively, where
+ * <function>gwy_foo_duplicate<!-- -->()</function> and
+ * <function>gwy_foo_assign<!-- -->()</function>, respectively, where
  * <literal>foo</literal> is the lowercase class name.
  *
  * <refsect2 id='libgwy-serializable-implementing'>

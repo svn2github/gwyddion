@@ -871,8 +871,8 @@ symetrical_norm2(const gdouble *a, guint n)
  * the L₂ norms of the matrix and its inverse.  If the inversion fails the
  * matrix is considered to be singular.
  *
- * Returns: The estimated conditon number, %HUGE_VAL if the matrix appears to
- *          be singular.
+ * Returns: The estimated conditon number, <constant>HUGE_VAL</constant> if the
+ *          matrix appears to be singular.
  **/
 gdouble
 gwy_cholesky_condition(const gdouble *a, guint n)

@@ -506,7 +506,7 @@ gwy_str_line_iter_lineno(const GwyStrLineIter *iter)
  * Text line iterator.
  *
  * The #GwyStrLineIter struct is opaque and can only be accessed through the
- * gwy_str_line_iter_foo() functions.
+ * <function>gwy_str_line_iter_foo<!-- -->()</function> functions.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
