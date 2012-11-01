@@ -28,6 +28,15 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_COLOR_RANGE_USER,
+    GWY_COLOR_RANGE_FULL,
+    GWY_COLOR_RANGE_MASKED,
+    GWY_COLOR_RANGE_UNMASKED,
+    GWY_COLOR_RANGE_VISIBLE,
+    GWY_COLOR_RANGE_AUTO,
+} GwyColorRangeType;
+
 void gwy_field_render_pixbuf    (const GwyField *field,
                                  GdkPixbuf *pixbuf,
                                  GwyGradient *gradient,
@@ -43,6 +52,12 @@ void gwy_field_render_cairo     (const GwyField *field,
 void gwy_mask_field_render_cairo(const GwyMaskField *field,
                                  cairo_surface_t *surface,
                                  const cairo_rectangle_t *rectangle);
+void gwy_field_find_color_range (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyColorRangeType from,
+                                 GwyColorRangeType to,
+                                 GwyRange *range);
 
 G_END_DECLS
 

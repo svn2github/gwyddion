@@ -20,11 +20,16 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/field-statistics.h"
 #include "libgwyui/field-render.h"
 
 #define NOT_QUITE_1 0.999999999
 
 #define COMPONENT_TO_PIXEL8(x) (guint)(256*CLAMP((x), 0.0, NOT_QUITE_1))
+
+static void autorange(const GwyField *field,
+                      gdouble *from,
+                      gdouble *to);
 
 typedef struct {
     guint prev, next;
@@ -462,10 +467,182 @@ gwy_mask_field_render_cairo(const GwyMaskField *field,
 }
 
 /**
+ * gwy_field_find_color_range:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Part of @field that is visible.  It is used only if any requested
+ *         range is %GWY_COLOR_RANGE_VISIBLE.
+ * @mask: (allow-none):
+ *        Mask representing the value values to take into account/exclude.
+ *        It is used only if any range is %GWY_COLOR_RANGE_MASKED or
+ *        %GWY_COLOR_RANGE_UNMASKED.
+ * @from: Type requested for the start of the false colour map.
+ * @to: Type requested for the end of the false colour map.
+ * @range: (out):
+ *         Location where the range is to be stored.
+ *
+ * Finds appropriate start and end value for false colour mapping.
+ *
+ * The stard and end values can determined using different methods though you
+ * should rarely need this.  If a method is %GWY_COLOR_RANGE_USER the
+ * corresponding field in @range is left untouched.
+ **/
+void
+gwy_field_find_color_range(const GwyField *field,
+                           const GwyFieldPart *fpart,
+                           const GwyMaskField *mask,
+                           GwyColorRangeType from,
+                           GwyColorRangeType to,
+                           GwyRange *range)
+{
+    g_return_if_fail(range);
+
+    GwyMaskingType masking = GWY_MASK_IGNORE;
+    // This is not a real setting because @from and @to can require different
+    // masking.  Just request something if masking should be checked.
+    if (from == GWY_COLOR_RANGE_MASKED || to == GWY_COLOR_RANGE_MASKED)
+        masking = GWY_MASK_INCLUDE;
+    else if (from == GWY_COLOR_RANGE_UNMASKED || to == GWY_COLOR_RANGE_UNMASKED)
+        masking = GWY_MASK_EXCLUDE;
+
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height,
+                              &maskcol, &maskrow)) {
+        range->from = range->to = 0.0;
+        return;
+    }
+
+    if (masking == GWY_MASK_IGNORE) {
+        if (from == GWY_COLOR_RANGE_MASKED || from == GWY_COLOR_RANGE_UNMASKED)
+            from = GWY_COLOR_RANGE_FULL;
+        if (to == GWY_COLOR_RANGE_MASKED || to == GWY_COLOR_RANGE_UNMASKED)
+            to = GWY_COLOR_RANGE_FULL;
+    }
+    if (!fpart) {
+        if (from == GWY_COLOR_RANGE_VISIBLE)
+            from = GWY_COLOR_RANGE_FULL;
+        if (to == GWY_COLOR_RANGE_VISIBLE)
+            to = GWY_COLOR_RANGE_FULL;
+    }
+
+    if (from == GWY_COLOR_RANGE_VISIBLE || to == GWY_COLOR_RANGE_VISIBLE) {
+        gdouble min, max;
+        gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
+                          NULL, GWY_MASK_IGNORE, &min, &max);
+        if (from == GWY_COLOR_RANGE_VISIBLE)
+            range->from = min;
+        if (to == GWY_COLOR_RANGE_VISIBLE)
+            range->to = min;
+    }
+
+    if (from == GWY_COLOR_RANGE_MASKED || to == GWY_COLOR_RANGE_MASKED) {
+        gdouble min, max;
+        gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &min, &max);
+        if (from == GWY_COLOR_RANGE_MASKED)
+            range->from = min;
+        if (to == GWY_COLOR_RANGE_MASKED)
+            range->to = min;
+    }
+
+    if (from == GWY_COLOR_RANGE_UNMASKED || to == GWY_COLOR_RANGE_UNMASKED) {
+        gdouble min, max;
+        gwy_field_min_max(field, NULL, mask, GWY_MASK_EXCLUDE, &min, &max);
+        if (from == GWY_COLOR_RANGE_UNMASKED)
+            range->from = min;
+        if (to == GWY_COLOR_RANGE_UNMASKED)
+            range->to = min;
+    }
+
+    if (from == GWY_COLOR_RANGE_AUTO || to == GWY_COLOR_RANGE_AUTO) {
+        gdouble min, max;
+        autorange(field, &min, &max);
+        if (from == GWY_COLOR_RANGE_AUTO)
+            range->from = min;
+        if (to == GWY_COLOR_RANGE_AUTO)
+            range->to = min;
+    }
+
+    if (from == GWY_COLOR_RANGE_AUTO || to == GWY_COLOR_RANGE_AUTO) {
+        gdouble min, max;
+        gwy_field_min_max_full(field, &min, &max);
+        if (from == GWY_COLOR_RANGE_FULL)
+            range->from = min;
+        if (to == GWY_COLOR_RANGE_FULL)
+            range->to = min;
+    }
+}
+
+// FIXME: This is Gwyddion2 algorithm and leaves something to be desired.
+// Also, make it public once it is improved.
+static void
+autorange(const GwyField *field,
+          gdouble *from,
+          gdouble *to)
+{
+    gdouble min, max;
+    gwy_field_min_max_full(field, &min, &max);
+    if (min == max) {
+        GWY_MAYBE_SET(from, min);
+        GWY_MAYBE_SET(to, max);
+        return;
+    }
+
+    max += 1e-6*(max - min);
+
+    enum { AR_NDH = 512 };
+    guint dh[AR_NDH];
+    gdouble q = AR_NDH/(max - min);
+    const gdouble *p;
+    guint i, j;
+
+    guint n = field->xres*field->yres;
+    gwy_clear(dh, AR_NDH);
+    for (i = n, p = field->data; i; i--, p++) {
+        j = (*p - min)*q;
+        dh[MIN(j, AR_NDH-1)]++;
+    }
+
+    for (i = 0, j = 0; dh[i] < 5e-2*n/AR_NDH && j < 2e-2*n; i++)
+        j += dh[i];
+    GWY_MAYBE_SET(from, min + i/q);
+
+    for (i = AR_NDH-1, j = 0; dh[i] < 5e-2*n/AR_NDH && j < 2e-2*n; i--)
+        j += dh[i];
+
+    GWY_MAYBE_SET(to, min + (i + 1)/q);
+}
+
+/**
  * SECTION: field-render
  * @section_id: GwyField-render
  * @title: GwyField rendering
  * @short_description: Rendering of fields to raster images
+ **/
+
+/**
+ * GwyColorRangeType:
+ * @GWY_COLOR_RANGE_FULL: Total minimum or maximum value within the entire
+ *                        data.
+ * @GWY_COLOR_RANGE_MASKED: Minimum or maximum value within the data
+ *                          under mask.
+ *                          It reduces to %GWY_COLOR_RANGE_FULL if no mask is
+ *                          present.
+ * @GWY_COLOR_RANGE_UNMASKED: Minimum or maximum within the data
+ *                            outside the mask.
+ *                            It reduces to %GWY_COLOR_RANGE_FULL if no mask is
+ *                            present.
+ * @GWY_COLOR_RANGE_VISIBLE: Minimum or maximum value within the visible
+ *                           part.
+ *                           It reduces to %GWY_COLOR_RANGE_FULL if no part is
+ *                           specified.
+ * @GWY_COLOR_RANGE_AUTO: Minimum or maximum of entire data with outliers
+ *                        removed.
+ * @GWY_COLOR_RANGE_USER: User-set value.  Obviously, it can be used by
+ *                        visualisation widgets but cannot be calculated
+ *                        automatically.
+ *
+ * Type of color range boundary determination method.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
