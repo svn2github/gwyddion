@@ -1139,7 +1139,7 @@ register_item(GwyInventory *inventory,
                             (gpointer)priv->item_type.get_name(item), iter);
 
     if (priv->is_object) {
-        g_object_ref(item);
+        g_object_ref_sink(item);
         if (priv->is_watchable)
             g_signal_connect_swapped(item,
                                      priv->item_type.watchable_signal,
