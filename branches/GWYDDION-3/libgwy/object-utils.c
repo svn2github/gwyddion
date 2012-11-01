@@ -89,8 +89,9 @@ gwy_set_user_func(gpointer func,
  * Replaces a member object of another object, handling signal connection and
  * disconnection.
  *
- * If @member_object is not %NULL a reference is taken (and conversely, the
- * reference to the previous member object is released).
+ * If @member_object is not %NULL a reference is taken, sinking any floating
+ * objects (and conversely, the reference to the previous member object is
+ * released).
  *
  * The purpose is to simplify bookkeeping in classes that have settable
  * member objects and (usually but not necessarily) need to connect to some
@@ -152,7 +153,7 @@ gwy_set_member_object(gpointer instance,
                          FALSE);
 
     if (member_object)
-        g_object_ref(member_object);
+        g_object_ref_sink(member_object);
 
     if (old_member) {
         va_list ap;
