@@ -87,9 +87,9 @@ gboolean       gwy_raster_area_get_scrollable        (GwyRasterArea *rasterarea)
 void           gwy_raster_area_set_zoomable          (GwyRasterArea *rasterarea,
                                                       gboolean zoomable);
 gboolean       gwy_raster_area_get_zoomable          (GwyRasterArea *rasterarea)       G_GNUC_PURE;
-void           gwy_raster_area_get_widget_area       (const GwyRasterArea *rasterarea,
+void           gwy_raster_area_widget_area           (const GwyRasterArea *rasterarea,
                                                       cairo_rectangle_t *area);
-void           gwy_raster_area_get_field_area        (const GwyRasterArea *rasterarea,
+void           gwy_raster_area_field_area            (const GwyRasterArea *rasterarea,
                                                       cairo_rectangle_t *area);
 GtkWidget*     gwy_raster_area_get_area_widget       (const GwyRasterArea *rasterarea) G_GNUC_PURE;
 void           gwy_raster_area_set_area_widget       (GwyRasterArea *rasterarea,

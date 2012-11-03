@@ -705,7 +705,7 @@ update_ruler_ranges(GwyRasterView *rasterview)
     RasterView *priv = rasterview->priv;
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->area);
     cairo_rectangle_t area;
-    gwy_raster_area_get_widget_area(rasterarea, &area);
+    gwy_raster_area_widget_area(rasterarea, &area);
     GwyRange hrange = { area.x, area.x + area.width };
     GwyRange vrange = { area.y, area.y + area.height };
     if (priv->scale_type == GWY_RULER_SCALE_REAL) {

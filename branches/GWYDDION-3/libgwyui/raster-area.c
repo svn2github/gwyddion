@@ -974,7 +974,7 @@ gwy_raster_area_get_zoomable(GwyRasterArea *rasterarea)
 }
 
 /**
- * gwy_raster_area_get_widget_area:
+ * gwy_raster_area_widget_area:
  * @rasterarea: A raster area.
  * @area: (out):
  *        Location to store the widget area.
@@ -989,8 +989,8 @@ gwy_raster_area_get_zoomable(GwyRasterArea *rasterarea)
  * See also gwy_raster_area_set_area_widget().
  **/
 void
-gwy_raster_area_get_widget_area(const GwyRasterArea *rasterarea,
-                                cairo_rectangle_t *area)
+gwy_raster_area_widget_area(const GwyRasterArea *rasterarea,
+                            cairo_rectangle_t *area)
 {
     g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(area);
@@ -1009,7 +1009,7 @@ gwy_raster_area_get_widget_area(const GwyRasterArea *rasterarea,
 }
 
 /**
- * gwy_raster_area_get_field_area:
+ * gwy_raster_area_field_area:
  * @rasterarea: A raster area.
  * @area: (out):
  *        Location to store the field area.
@@ -1021,8 +1021,8 @@ gwy_raster_area_get_widget_area(const GwyRasterArea *rasterarea,
  * only a part of the field is shown and the coordinates may be non-integral.
  **/
 void
-gwy_raster_area_get_field_area(const GwyRasterArea *rasterarea,
-                               cairo_rectangle_t *area)
+gwy_raster_area_field_area(const GwyRasterArea *rasterarea,
+                           cairo_rectangle_t *area)
 {
     g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
     g_return_if_fail(area);
@@ -1039,7 +1039,7 @@ gwy_raster_area_get_field_area(const GwyRasterArea *rasterarea,
  *
  * Returns: (transfer none) (allow-none):
  *          The widget used for area calculation in
- *          gwy_raster_area_get_widget_area(), %NULL if no widget is set and
+ *          gwy_raster_area_widget_area(), %NULL if no widget is set and
  *          @rasterarea itself is used.
  **/
 GtkWidget*
@@ -1054,14 +1054,14 @@ gwy_raster_area_get_area_widget(const GwyRasterArea *rasterarea)
  * @rasterarea: A raster area.
  * @widget: (transfer none) (allow-none):
  *          Widget to use for determining the size of entire raster area
- *          in gwy_raster_area_get_widget_area().  Pass %NULL to unset the
+ *          in gwy_raster_area_widget_area().  Pass %NULL to unset the
  *          area widget and use @rasterarea itself.
  *
  * Sets the area widget of a raster area.
  *
  * If the raster area is put into a #GtkScrolledWindow or a similar container
  * that can ‘eat’ part of the child area, the meaning of entire widget as
- * used by gwy_raster_area_get_widget_area() changes.  The correct dimensions
+ * used by gwy_raster_area_widget_area() changes.  The correct dimensions
  * that may be necessary to draw rulers right are those of the container, not
  * the raster area.  To fix the calculation use this function to tell
  * @rasterarea to use the dimensions of another widget instead of self:
