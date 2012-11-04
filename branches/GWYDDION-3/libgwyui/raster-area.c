@@ -914,7 +914,7 @@ gwy_raster_area_get_range_from_method(const GwyRasterArea *rasterarea)
 
 /**
  * gwy_raster_area_set_range_to_method:
- * @rasterarea: 
+ * @rasterarea: A raster area.
  * @method: Method how to determine the end of false colour range.
  *
  * Sets the method how a raster area determines the end of false colour
