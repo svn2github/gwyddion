@@ -325,11 +325,13 @@ validate(GwyUserGrainValue *usergrainvalue,
     // Group physical sanity
     if (!priv->group || !*priv->group) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value has no group."));
         return FALSE;
     }
     if (!g_utf8_validate(priv->group, -1, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value group is not valid UTF-8."));
         return FALSE;
     }
@@ -337,11 +339,13 @@ validate(GwyUserGrainValue *usergrainvalue,
     // Identifier and symbol physical sanity.
     if (!priv->ident || !*priv->ident) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value has no identifier."));
         return FALSE;
     }
     if (!gwy_ascii_strisident(priv->ident, "_", NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value identifier is not a valid identifier."));
         return FALSE;
     }
@@ -349,6 +353,7 @@ validate(GwyUserGrainValue *usergrainvalue,
         // XXX: In principle, we should validate the possible Pango markup.
         // But it would induce a weird Pango dependence here.
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value symbol is not valid UTF-8."));
         return FALSE;
     }
@@ -356,11 +361,13 @@ validate(GwyUserGrainValue *usergrainvalue,
     // Formula physical sanity
     if (!priv->formula || !*priv->formula) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value has no formula."));
         return FALSE;
     }
     if (!g_utf8_validate(priv->formula, -1, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value formula is not valid UTF-8."));
         return FALSE;
     }
@@ -371,6 +378,7 @@ validate(GwyUserGrainValue *usergrainvalue,
     ensure_test_expr();
     if (ok && !gwy_expr_compile(test_expr, priv->formula, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Grain value formula is invalid."));
         ok = FALSE;
     }
@@ -478,6 +486,7 @@ resolve_deps(GError **error, guint domain, guint code)
         return TRUE;
 
     g_set_error(error, domain, code,
+                // TRANSLATORS: Error message.
                 _("Grain value formula contains unknown variables."));
     return FALSE;
 }

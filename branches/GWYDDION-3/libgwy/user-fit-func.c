@@ -332,11 +332,13 @@ validate(GwyUserFitFunc *userfitfunc,
     // Group physical sanity
     if (!priv->group || !*priv->group) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function has no group."));
         return FALSE;
     }
     if (!g_utf8_validate(priv->group, -1, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function group is not valid UTF-8."));
         return FALSE;
     }
@@ -344,11 +346,13 @@ validate(GwyUserFitFunc *userfitfunc,
     // Formula physical sanity
     if (!priv->formula) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function has no formula."));
         return FALSE;
     }
     if (!g_utf8_validate(priv->formula, -1, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function formula is not valid UTF-8."));
         return FALSE;
     }
@@ -356,6 +360,7 @@ validate(GwyUserFitFunc *userfitfunc,
     // Filter physical sanity
     if (priv->filter && !g_utf8_validate(priv->filter, -1, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function filter is not valid UTF-8."));
         return FALSE;
     }
@@ -363,6 +368,7 @@ validate(GwyUserFitFunc *userfitfunc,
     // Params physical sanity
     if (!priv->nparams) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function has no parameters."));
         return FALSE;
     }
@@ -370,6 +376,7 @@ validate(GwyUserFitFunc *userfitfunc,
     for (guint i = 0; i < n; i++) {
         if (!priv->param[i]) {
             g_set_error(error, domain, code,
+                        // TRANSLATORS: Error message.
                         _("Fitting function parameter %u is missing."),
                         i+1);
             return FALSE;
@@ -383,6 +390,7 @@ validate(GwyUserFitFunc *userfitfunc,
             const gchar *namej = gwy_fit_param_get_name(priv->param[j]);
             if (gwy_strequal(namei, namej)) {
                 g_set_error(error, domain, code,
+                            // TRANSLATORS: Error message.
                             _("Fitting function has duplicate parameters."));
                 return FALSE;
             }
@@ -397,11 +405,13 @@ validate(GwyUserFitFunc *userfitfunc,
         test_expr = _gwy_fit_func_new_expr_with_constants();
     if (!gwy_expr_compile(test_expr, priv->formula, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function formula is invalid."));
         goto fail;
     }
     if (gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL)) {
         g_set_error(error, domain, code,
+                    // TRANSLATORS: Error message.
                     _("Fitting function parameters do not match the formula."));
         goto fail;
     }
@@ -410,6 +420,7 @@ validate(GwyUserFitFunc *userfitfunc,
     if (priv->filter && strlen(priv->filter)) {
         if (!gwy_expr_compile(test_expr, priv->filter, NULL)) {
             g_set_error(error, domain, code,
+                        // TRANSLATORS: Error message.
                         _("Fitting function filter is invalid."));
             goto fail;
         }

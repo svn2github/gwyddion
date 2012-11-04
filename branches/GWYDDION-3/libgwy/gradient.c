@@ -378,6 +378,7 @@ gwy_gradient_load_builtins(GwyErrorList **error_list)
         if (gwy_inventory_get(inventory, name)) {
             gwy_error_list_add(error_list, GWY_RESOURCE_ERROR,
                                GWY_RESOURCE_ERROR_DUPLICIT,
+                               // TRANSLATORS: Error message.
                                _("Builtin resource ‘%s’ named ‘%s’ "
                                  "conflicts with an existing resource."),
                                "GwyGradient", name);

@@ -297,7 +297,8 @@ gwy_line_construct(GwySerializable *serializable,
     if (G_UNLIKELY(!its[4].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Line contains no data."));
+                           // TRANSLATORS: Error message.
+                           _("GwyLine contains no data."));
         goto fail;
     }
 

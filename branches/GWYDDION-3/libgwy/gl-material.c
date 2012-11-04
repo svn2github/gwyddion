@@ -595,7 +595,8 @@ parse_one(GwyStrLineIter *iter, guint n, gdouble *target,
         return FALSE;
 
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
-                _("Component ‘%s’ is missing."), name);
+                // TRANSLATORS: Error message.
+                _("GL material component ‘%s’ is missing."), name);
     return FALSE;
 }
 

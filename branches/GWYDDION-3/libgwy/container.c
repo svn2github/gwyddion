@@ -317,6 +317,7 @@ gwy_container_construct(GwySerializable *serializable,
             default:
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
+                               // TRANSLATORS: Error message.
                                _("GwyContainer cannot store data of type "
                                  "0x%02x."), it->ctype);
             break;

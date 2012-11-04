@@ -1246,6 +1246,7 @@ parse(GwyStrLineIter *iter,
     if (!line) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
                      &filename_disp,
+                     // TRANSLATORS: Error message.
                      _("Wrong or missing resource magic header in file ‘%s’."),
                      (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
@@ -1277,6 +1278,7 @@ parse(GwyStrLineIter *iter,
     if (G_UNLIKELY(!line)) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
                      &filename_disp,
+                     // TRANSLATORS: Error message.
                      _("Resource header of file ‘%s’ is truncated."),
                      (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
@@ -1291,6 +1293,8 @@ parse(GwyStrLineIter *iter,
         if (type != GWY_RESOURCE_LINE_OK) {
             err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
                          &filename_disp,
+                         // TRANSLATORS: Error message.
+                         // TRANSLATORS: %s after colon is a detailed error.
                          _("Resource name line in file ‘%s’ is malformed: %s"),
                          (filename_disp = g_filename_display_name(filename_sys)),
                          err->message);
@@ -1300,6 +1304,7 @@ parse(GwyStrLineIter *iter,
         if (!gwy_strequal(key, "name")) {
             err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
                          &filename_disp,
+                         // TRANSLATORS: Error message.
                         _("First line in version 3 resource ‘%s’ in file ‘%s’ "
                           "does not contain the name."),
                         typename,
@@ -1309,6 +1314,7 @@ parse(GwyStrLineIter *iter,
         if (!strlen(name)) {
             err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
                          &filename_disp,
+                         // TRANSLATORS: Error message.
                         _("Resource name is empty in "
                           "version 3 resource ‘%s’ in file ‘%s’."),
                         typename,
@@ -1339,6 +1345,8 @@ parse(GwyStrLineIter *iter,
     else {
         err_filename(error, GWY_RESOURCE_ERROR, err->code,
                      &filename_disp,
+                     // TRANSLATORS: Error message.
+                     // TRANSLATORS: %s after colon is a detailed error.
                      _("Resource ‘%s’ in file ‘%s’ is malformed: %s"),
                      typename,
                      (filename_disp = g_filename_display_name(filename_sys)),
@@ -1363,6 +1371,7 @@ get_resource_class(const gchar *typename,
     if (G_UNLIKELY(!type)) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
                      &filename_disp,
+                     // TRANSLATORS: Error message.
                      _("Resource type ‘%s’ of file ‘%s’ is invalid."),
                      typename,
                      (filename_disp = g_filename_display_name(filename_sys)));
@@ -1373,6 +1382,7 @@ get_resource_class(const gchar *typename,
     if (G_UNLIKELY(!g_type_is_a(type, expected_type))) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
                      &filename_disp,
+                     // TRANSLATORS: Error message.
                      _("Resource type ‘%s’ of file ‘%s’ does not match "
                        "the expected type ‘%s’."),
                      typename,
@@ -1790,7 +1800,9 @@ name_is_unique(GwyResource *resource,
         return FALSE;
 
     gchar *filename = g_file_get_parse_name(priv->file);
+    // TRANSLATORS: Error message.
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
+                // TRANSLATORS: Error message.
                 _("Resource ‘%s’ named ‘%s’ from file ‘%s’ "
                   "conflicts with an existing resource."),
                 G_OBJECT_TYPE_NAME(resource), priv->name, filename);
@@ -2024,6 +2036,7 @@ err_identifier(GError **error,
                GwyStrLineIter *iter)
 {
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                // TRANSLATORS: Error message.
                 _("Key at line %u is not a valid identifier."),
                 gwy_str_line_iter_lineno(iter));
     return GWY_RESOURCE_LINE_INVALID;
@@ -2034,6 +2047,7 @@ err_utf8(GError **error,
          GwyStrLineIter *iter)
 {
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                // TRANSLATORS: Error message.
                 _("Value at line %u is not valid UTF-8."),
                 gwy_str_line_iter_lineno(iter));
     return GWY_RESOURCE_LINE_INVALID;
@@ -2046,6 +2060,7 @@ err_too_few_values(GError **error,
                    guint expected)
 {
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                // TRANSLATORS: Error message.
                 _("Data at line %u consists of too few values "
                   "(%u instead of %u)."),
                 gwy_str_line_iter_lineno(iter), nvals, expected);
@@ -2058,6 +2073,7 @@ err_invalid_value(GError **error,
                   guint nvals)
 {
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DATA,
+                // TRANSLATORS: Error message.
                 _("Data at line %u contain invalid/unexpected text after "
                   "value %u."),
                 gwy_str_line_iter_lineno(iter), nvals);

@@ -292,11 +292,10 @@ gwy_coords_construct(GwySerializable *serializable,
     if (its[0].array_size % shape_size) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Coords data length is %lu which is not "
-                             "a multiple of %u as is expected for coords "
-                             "type ‘%s’."),
-                           (gulong)its[0].array_size, shape_size,
-                           G_OBJECT_TYPE_NAME(coords));
+                           _("Data length of ‘%s’ is %lu which is not "
+                             "a multiple of %u."),
+                           G_OBJECT_TYPE_NAME(coords),
+                           (gulong)its[0].array_size, shape_size);
         goto fail;
     }
     if (its[0].array_size) {
@@ -311,7 +310,8 @@ gwy_coords_construct(GwySerializable *serializable,
         if (its[1].array_size != dimension) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
-                               _("Coords of type type ‘%s’ "
+                               // TRANSLATORS: Error message.
+                               _("GwyCoords of type ‘%s’ "
                                  "contains %lu dimension units that do not "
                                  "correspond to its dimension %u."),
                                G_OBJECT_TYPE_NAME(coords),

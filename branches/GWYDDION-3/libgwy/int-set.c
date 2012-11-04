@@ -228,7 +228,9 @@ gwy_int_set_construct(GwySerializable *serializable,
         if (!ranges_are_canonical(ranges)) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
-                               _("IntSet ranges are not in canonical form."));
+                               // TRANSLATORS: Error message.
+                               _("GwyIntSet ranges are not "
+                                 "in canonical form."));
             goto fail;
         }
 

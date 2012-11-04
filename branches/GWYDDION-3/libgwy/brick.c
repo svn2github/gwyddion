@@ -422,7 +422,8 @@ gwy_brick_construct(GwySerializable *serializable,
                    || !its[2].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Brick dimensions %u×%u×%u are invalid."),
+                           // TRANSLATORS: Error message.
+                           _("GwyBrick dimensions %u×%u×%u are invalid."),
                            its[0].value.v_uint32,
                            its[1].value.v_uint32,
                            its[2].value.v_uint32);
@@ -434,7 +435,8 @@ gwy_brick_construct(GwySerializable *serializable,
                    != its[12].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Brick dimensions %u×%u×%u do not match data "
+                           // TRANSLATORS: Error message.
+                           _("GwyBrick dimensions %u×%u×%u do not match data "
                              "size %lu."),
                            its[0].value.v_uint32,
                            its[1].value.v_uint32,

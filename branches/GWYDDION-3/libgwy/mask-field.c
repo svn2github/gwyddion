@@ -257,7 +257,8 @@ gwy_mask_field_construct(GwySerializable *serializable,
     if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Mask field dimensions %u×%u are invalid."),
+                           // TRANSLATORS: Error message.
+                           _("GwyMaskField dimensions %u×%u are invalid."),
                            its[0].value.v_uint32, its[1].value.v_uint32);
         goto fail;
     }
@@ -266,7 +267,8 @@ gwy_mask_field_construct(GwySerializable *serializable,
     if (G_UNLIKELY(n != its[2].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Mask field dimensions %u×%u do not match "
+                           // TRANSLATORS: Error message.
+                           _("GwyMaskField dimensions %u×%u do not match "
                              "data size %lu."),
                            its[0].value.v_uint32, its[1].value.v_uint32,
                            (gulong)its[2].array_size);

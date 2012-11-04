@@ -289,6 +289,7 @@ gwy_fit_param_construct(GwySerializable *serializable,
         || !gwy_utf8_strisident(its[0].value.v_string, more, NULL)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
+                           // TRANSLATORS: Error message.
                            _("Fiting parameter name is missing or not valid "
                              "UTF-8."));
         return FALSE;
@@ -302,6 +303,7 @@ gwy_fit_param_construct(GwySerializable *serializable,
     if (!gwy_fit_param_check_estimate(priv->estimate, NULL)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
+                           // TRANSLATORS: Error message.
                            _("Fiting parameter %s estimate expression is "
                              "invalid."),
                            priv->name);
@@ -574,8 +576,9 @@ gwy_fit_param_check_estimate(const gchar *estimate,
             gchar *list = g_strjoinv(", ", (gchar**)vars + 1);
             g_set_error(error, GWY_FIT_PARAM_ERROR,
                         GWY_FIT_PARAM_ERROR_VARIABLE,
-                        _("Estimate expression contains unknown variables: "
-                          "%s."),
+                        // TRANSLATORS: Error message.
+                        _("Fitting parameter estimate expression contains "
+                          "unknown variables: %s."),
                         list);
             g_free(list);
             ok = FALSE;

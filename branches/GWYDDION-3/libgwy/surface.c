@@ -256,6 +256,7 @@ gwy_surface_construct(GwySerializable *serializable,
         if (len % 3 != 0) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
+                               // TRANSLATORS: Error message.
                                _("Data length of ‘%s’ is %lu which is not "
                                  "a multiple of %u."),
                                "GwySurface", (gulong)its[2].array_size, 3);

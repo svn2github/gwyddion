@@ -591,6 +591,7 @@ check_size(gsize size,
 
     gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                        GWY_DESERIALIZE_ERROR_TRUNCATED,
+                       // TRANSLATORS: Error message.
                        _("End of data was reached while reading value of type "
                          "‘%s’. It requires %" G_GSIZE_FORMAT " bytes but only "
                          "%" G_GSIZE_FORMAT " bytes remain."),
@@ -623,6 +624,7 @@ unpack_size(const guchar *buffer,
                    || *array_size >= G_MAXSIZE/item_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_SIZE_T,
+                           // TRANSLATORS: Error message.
                            _("Data of size larger than what can be "
                              "represented on this machine was encountered."));
         return 0;
@@ -868,6 +870,7 @@ unpack_name(const guchar *buffer,
     if (G_UNLIKELY(!s)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_TRUNCATED,
+                           // TRANSLATORS: Error message.
                            _("End of data was reached while looking for the "
                              "end of a string."));
         return 0;
@@ -887,6 +890,7 @@ unpack_string(const guchar *buffer,
     if (G_UNLIKELY(!s)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_TRUNCATED,
+                           // TRANSLATORS: Error message.
                            _("End of data was reached while looking for the "
                              "end of a string."));
         return 0;
@@ -1108,6 +1112,7 @@ deserialize_memory(const guchar *buffer,
         if (G_UNLIKELY(size - pos != object_size)) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_PADDING,
+                               // TRANSLATORS: Error message.
                                _("Object ‘%s’ data is smaller than the space "
                                  "alloted for it.  The padding was ignored."),
                                typename);
@@ -1159,8 +1164,9 @@ get_parent(const gchar *typename,
     if (G_UNLIKELY(!type)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
-                           _("Object type ‘%s’ is not known. "
-                             "It was ignored."),
+                           // TRANSLATORS: Error message.
+                           // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
+                           _("Object type ‘%s’ is not known. It was ignored."),
                            typename);
         return 0;
     }
@@ -1170,6 +1176,8 @@ get_parent(const gchar *typename,
     if (G_UNLIKELY(!g_type_is_a(type, GWY_TYPE_SERIALIZABLE))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
+                           // TRANSLATORS: Error message.
+                           // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
                            _("Object type ‘%s’ is not serializable. "
                              "It was ignored."),
                            typename);
@@ -1178,6 +1186,8 @@ get_parent(const gchar *typename,
     if (G_UNLIKELY(type == child_type || !g_type_is_a(child_type, type))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
+                           // TRANSLATORS: Error message.
+                           // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
                            _("Object type ‘%s’ is not a parent type of ‘%s’. "
                              "It was ignored."),
                            typename, g_type_name(child_type));
@@ -1213,8 +1223,7 @@ get_serializable(const gchar *typename,
     if (G_UNLIKELY(!type)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
-                           _("Object type ‘%s’ is not known. "
-                             "It was ignored."),
+                           _("Object type ‘%s’ is not known. It was ignored."),
                            typename);
         return 0;
     }
@@ -1224,6 +1233,8 @@ get_serializable(const gchar *typename,
     if (G_UNLIKELY(!G_TYPE_IS_INSTANTIATABLE(type))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
+                           // TRANSLATORS: Error message.
+                           // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
                            _("Object type ‘%s’ is not instantiable. "
                              "It was ignored."),
                            typename);
@@ -1242,6 +1253,7 @@ get_serializable(const gchar *typename,
     if (G_UNLIKELY(!*iface || !(*iface)->construct)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
+                           // TRANSLATORS: Error message.
                            _("Object type ‘%s’ does not implement "
                              "deserialization. It was ignored."),
                            typename);
@@ -1273,8 +1285,8 @@ get_serializable_boxed(const gchar *typename,
     if (G_UNLIKELY(!type)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
-                           _("Boxed type ‘%s’ is not known. "
-                             "It was ignored."),
+                           // TRANSLATORS: Error message.
+                           _("Boxed type ‘%s’ is not known. It was ignored."),
                            typename);
         return 0;
     }
@@ -1282,6 +1294,7 @@ get_serializable_boxed(const gchar *typename,
     if (G_UNLIKELY(!gwy_boxed_type_is_serializable(type))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
+                           // TRANSLATORS: Error message.
                            _("Boxed type ‘%s’ is not serializable. "
                              "It was ignored."),
                            typename);
@@ -1436,8 +1449,9 @@ unpack_items(const guchar *buffer,
         else {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_DATA,
+                               // TRANSLATORS: Error message.
                                _("Data type 0x%02x is unknown. "
-                                 "It could not be just skipped, complete "
+                                 "Since it could not be just skipped, complete "
                                  "object ‘%s’ was ignored."),
                                ctype, item->name);
             goto fail;
@@ -1631,6 +1645,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
             if (j < n_items) {
                 gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                    GWY_DESERIALIZE_ERROR_ITEM,
+                                   // TRANSLATORS: Error message.
                                    _("Item ‘%s’ in the representation of "
                                      "object ‘%s’ has type 0x%02x "
                                      "instead of expected 0x%02x. "
@@ -1641,6 +1656,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
             else {
                 gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                    GWY_DESERIALIZE_ERROR_ITEM,
+                                   // TRANSLATORS: Error message.
                                    _("Unexpected item ‘%s’ of type 0x%02x in "
                                      "the representation of object ‘%s’ was "
                                      "ignored"),
@@ -1651,6 +1667,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         if (G_UNLIKELY(seen[j] == 1)) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_ITEM,
+                               // TRANSLATORS: Error message.
                                _("Item ‘%s’ of type 0x%02x is present multiple "
                                  "times in the representation of object ‘%s’.  "
                                  "Values other than the first were ignored."),
@@ -1696,6 +1713,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         if (i == items->n) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_PARENT,
+                               // TRANSLATORS: Error message.
                                _("Object ‘%s’ has a serializable parent but "
                                  "its representation does not contain any "
                                  "parent class item."),
@@ -1712,6 +1730,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         g_assert(items->items[i].ctype == GWY_SERIALIZABLE_PARENT);
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_ITEM,
+                           // TRANSLATORS: Error message.
                            _("Object ‘%s’ does not expect to have any "
                              "serializable parent but its representation "
                              "contain parent class items. "

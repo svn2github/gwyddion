@@ -126,6 +126,7 @@ _gwy_check_object_component(const GwySerializableItem *item,
                                                       component_type))) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
+                               // TRANSLATORS: Error message.
                                _("Component ‘%s’ of object %s is of type %s "
                                  "instead of %s."),
                                item->name,
@@ -143,6 +144,7 @@ _gwy_check_object_component(const GwySerializableItem *item,
                                                        component_type))) {
                 gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                    GWY_DESERIALIZE_ERROR_INVALID,
+                                   // TRANSLATORS: Error message.
                                    _("Object %lu in component ‘%s’ of object "
                                      "%s is of type %s instead of %s."),
                                    (gulong)i,
