@@ -30,13 +30,15 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/raster-area.h"
 
-#define IGNORE_ME N_("A translatable string.")
-
 enum {
     // Own.
     PROP_0,
     PROP_SCROLLABLE,
     PROP_ZOOMABLE,
+    PROP_RANGE_FROM_METHOD,
+    PROP_RANGE_TO_METHOD,
+    PROP_RANGE,
+    PROP_USER_RANGE,
     PROP_FIELD,
     PROP_MASK,
     PROP_GRADIENT,
@@ -111,6 +113,12 @@ struct _GwyRasterAreaPrivate {
     // Visualisation
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
+
+    GwyColorRangeType range_from_method;
+    GwyColorRangeType range_to_method;
+    GwyRange user_range;
+    GwyRange range;
+    gboolean range_valid;
 
     GwyShapes *shapes;
     gulong shapes_updated_id;
@@ -190,6 +198,12 @@ static gboolean set_scrollable                      (GwyRasterArea *rasterarea,
                                                      gboolean setting);
 static gboolean set_zoomable                        (GwyRasterArea *rasterarea,
                                                      gboolean setting);
+static gboolean set_range_from_method               (GwyRasterArea *rasterarea,
+                                                     GwyColorRangeType method);
+static gboolean set_range_to_method                 (GwyRasterArea *rasterarea,
+                                                     GwyColorRangeType method);
+static gboolean set_user_range                      (GwyRasterArea *rasterarea,
+                                                     const GwyRange *range);
 static void     field_notify                        (GwyRasterArea *rasterarea,
                                                      GParamSpec *pspec,
                                                      GwyField *field);
@@ -322,6 +336,39 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
                                "keybindings.",
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_RANGE_FROM_METHOD]
+        = g_param_spec_enum("range-from-method",
+                            "Range from-method",
+                            "Method to determine the start of false colour "
+                            "mapping.",
+                            GWY_TYPE_COLOR_RANGE_TYPE,
+                            GWY_COLOR_RANGE_FULL,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_RANGE_TO_METHOD]
+        = g_param_spec_enum("range-to-method",
+                            "Range to-method",
+                            "Method to determine the end of false colour "
+                            "mapping.",
+                            GWY_TYPE_COLOR_RANGE_TYPE,
+                            GWY_COLOR_RANGE_FULL,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_RANGE]
+         = g_param_spec_boxed("range",
+                              "Range",
+                              "Actual false colour mapping range.",
+                              GWY_TYPE_RANGE,
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_USER_RANGE]
+         = g_param_spec_boxed("user-range",
+                              "User range",
+                              "False colour mapping range used with method "
+                              "GWY_COLOR_RANGE_USER.",
+                              GWY_TYPE_RANGE,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_FIELD]
         = g_param_spec_object("field",
@@ -523,6 +570,18 @@ gwy_raster_area_set_property(GObject *object,
         set_zoomable(rasterarea, g_value_get_boolean(value));
         break;
 
+        case PROP_RANGE_FROM_METHOD:
+        set_range_from_method(rasterarea, g_value_get_enum(value));
+        break;
+
+        case PROP_RANGE_TO_METHOD:
+        set_range_to_method(rasterarea, g_value_get_enum(value));
+        break;
+
+        case PROP_USER_RANGE:
+        set_user_range(rasterarea, (const GwyRange*)g_value_get_boxed(value));
+        break;
+
         case PROP_FIELD:
         set_field(rasterarea, g_value_get_object(value));
         break;
@@ -598,6 +657,22 @@ gwy_raster_area_get_property(GObject *object,
 
         case PROP_ZOOMABLE:
         g_value_set_boolean(value, priv->zoomable);
+        break;
+
+        case PROP_RANGE_FROM_METHOD:
+        g_value_set_enum(value, priv->range_from_method);
+        break;
+
+        case PROP_RANGE_TO_METHOD:
+        g_value_set_enum(value, priv->range_from_method);
+        break;
+
+        case PROP_RANGE:
+        g_value_set_boxed(value, &priv->range);
+        break;
+
+        case PROP_USER_RANGE:
+        g_value_set_boxed(value, &priv->user_range);
         break;
 
         case PROP_FIELD:
@@ -1624,6 +1699,10 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
 
     update_matrices(rasterarea);
     priv->pos_and_size_valid = TRUE;
+
+    if (priv->range_from_method == GWY_COLOR_RANGE_VISIBLE
+        || priv->range_to_method == GWY_COLOR_RANGE_VISIBLE)
+        priv->range_valid = FALSE;
 }
 
 // FIXME: Window coordinates are somewhat strange here.  Should we take pixel
@@ -1983,6 +2062,11 @@ set_mask(GwyRasterArea *rasterarea,
 
     priv->mask_surface_valid = FALSE;
     priv->active_grain = 0;
+    if (priv->range_from_method == GWY_COLOR_RANGE_MASKED
+        || priv->range_from_method == GWY_COLOR_RANGE_UNMASKED
+        || priv->range_to_method == GWY_COLOR_RANGE_MASKED
+        || priv->range_to_method == GWY_COLOR_RANGE_UNMASKED)
+        priv->range_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
 }
@@ -2112,6 +2196,55 @@ set_zoomable(GwyRasterArea *rasterarea,
     return TRUE;
 }
 
+static gboolean
+set_range_from_method(GwyRasterArea *rasterarea,
+                      GwyColorRangeType method)
+{
+    RasterArea *priv = rasterarea->priv;
+    if (method == priv->range_from_method)
+        return FALSE;
+
+    priv->range_from_method = method;
+    priv->field_surface_valid = FALSE;
+    priv->range_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+    return TRUE;
+}
+
+static gboolean
+set_range_to_method(GwyRasterArea *rasterarea,
+                    GwyColorRangeType method)
+{
+    RasterArea *priv = rasterarea->priv;
+    if (method == priv->range_to_method)
+        return FALSE;
+
+    priv->range_to_method = method;
+    priv->field_surface_valid = FALSE;
+    priv->range_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+    return TRUE;
+}
+
+static gboolean
+set_user_range(GwyRasterArea *rasterarea,
+               const GwyRange *range)
+{
+    RasterArea *priv = rasterarea->priv;
+    if (gwy_equal(range, &priv->user_range))
+        return FALSE;
+
+    priv->user_range = *range;
+    if (priv->range_from_method != GWY_COLOR_RANGE_USER
+        && priv->range_to_method != GWY_COLOR_RANGE_USER)
+        return TRUE;
+
+    priv->field_surface_valid = FALSE;
+    priv->range_valid = FALSE;
+    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+    return TRUE;
+}
+
 static void
 field_notify(GwyRasterArea *rasterarea,
              GParamSpec *pspec,
@@ -2154,7 +2287,13 @@ field_data_changed(GwyRasterArea *rasterarea,
                    GwyFieldPart *fpart,
                    GwyField *field)
 {
-    rasterarea->priv->field_surface_valid = FALSE;
+    RasterArea *priv = rasterarea->priv;
+
+    if (priv->range_from_method != GWY_COLOR_RANGE_USER
+        || priv->range_to_method != GWY_COLOR_RANGE_USER)
+        priv->range_valid = FALSE;
+
+    priv->field_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
@@ -2163,7 +2302,14 @@ mask_data_changed(GwyRasterArea *rasterarea,
                   GwyFieldPart *fpart,
                   GwyMaskField *mask)
 {
-    rasterarea->priv->mask_surface_valid = FALSE;
+    RasterArea *priv = rasterarea->priv;
+
+    priv->mask_surface_valid = FALSE;
+    if (priv->range_from_method == GWY_COLOR_RANGE_MASKED
+        || priv->range_from_method == GWY_COLOR_RANGE_UNMASKED
+        || priv->range_to_method == GWY_COLOR_RANGE_MASKED
+        || priv->range_to_method == GWY_COLOR_RANGE_UNMASKED)
+        priv->range_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
 }
 
