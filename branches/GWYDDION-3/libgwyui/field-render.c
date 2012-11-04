@@ -21,22 +21,23 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-statistics.h"
+#include "libgwyui/cairo-utils.h"
 #include "libgwyui/field-render.h"
 
 #define NOT_QUITE_1 0.999999999
 
 #define COMPONENT_TO_PIXEL8(x) (guint)(256*CLAMP((x), 0.0, NOT_QUITE_1))
 
+typedef struct {
+    guint prev, next;
+    gdouble wprev, wnext;
+} InterpolationPoint;
+
 static void autorange(const GwyField *field,
                       gdouble min,
                       gdouble max,
                       gdouble *from,
                       gdouble *to);
-
-typedef struct {
-    guint prev, next;
-    gdouble wprev, wnext;
-} InterpolationPoint;
 
 static inline void
 gwy_rgba_to_rgb8_pixel(const GwyRGBA *rgba,
@@ -159,13 +160,25 @@ build_interpolation(guint n, gdouble from, gdouble to, guint res)
 }
 
 static void
-field_render_empty_range(GdkPixbuf *pixbuf,
-                         GwyGradient *gradient)
+field_render_empty_range_pixbuf(GdkPixbuf *pixbuf,
+                                const GwyGradient *gradient)
 {
     GwyRGBA rgba;
     gwy_gradient_color(gradient, 0.5, &rgba);
     guint32 color = gwy_rgba_to_rgb8_color(&rgba);
     gdk_pixbuf_fill(pixbuf, color);
+}
+
+static void
+field_render_empty_range_surface(cairo_surface_t *surface,
+                                 const GwyGradient *gradient)
+{
+    GwyRGBA rgba;
+    gwy_gradient_color(gradient, 0.5, &rgba);
+    cairo_t *cr = cairo_create(surface);
+    gwy_cairo_set_source_rgba(cr, &rgba);
+    cairo_paint(cr);
+    cairo_destroy(cr);
 }
 
 static gboolean
@@ -241,7 +254,7 @@ gwy_field_render_pixbuf(const GwyField *field,
         gwy_field_min_max_full(field, &from, &to);
 
     if (from == to || isnan(from) || isnan(to)) {
-        field_render_empty_range(pixbuf, gradient);
+        field_render_empty_range_pixbuf(pixbuf, gradient);
         return;
     }
 
@@ -337,8 +350,7 @@ gwy_field_render_cairo(const GwyField *field,
         gwy_field_min_max_full(field, &from, &to);
 
     if (from == to || isnan(from) || isnan(to)) {
-        // TODO
-        // field_render_empty_range(pixbuf, gradient);
+        field_render_empty_range_surface(surface, gradient);
         return;
     }
 
