@@ -415,12 +415,13 @@ gwy_gradient_new(void)
  * gwy_gradient_color:
  * @gradient: A colour gradient.
  * @x: Position in gradient, in interval [0,1].
- * @color: Colour to fill with interpolated colour at position @x.
+ * @color: (out):
+ *         Colour to fill with interpolated colour at position @x.
  *
  * Computes the colour at a given position of a colour gradient.
  **/
 void
-gwy_gradient_color(GwyGradient *gradient,
+gwy_gradient_color(const GwyGradient *gradient,
                    gdouble x,
                    GwyRGBA *color)
 {
