@@ -216,6 +216,8 @@ static void     field_data_changed                  (GwyRasterArea *rasterarea,
 static void     mask_data_changed                   (GwyRasterArea *rasterarea,
                                                      GwyFieldPart *fpart,
                                                      GwyMaskField *mask);
+static void     queue_draw_field_part               (GwyRasterArea *rasterarea,
+                                                     const GwyFieldPart *fpart);
 static void     gradient_data_changed               (GwyRasterArea *rasterarea,
                                                      GwyGradient *gradient);
 static void     shapes_updated                      (GwyRasterArea *rasterarea,
@@ -2491,6 +2493,44 @@ field_data_changed(GwyRasterArea *rasterarea,
         return;
     }
 
+    queue_draw_field_part(rasterarea, fpart);
+}
+
+static void
+mask_data_changed(GwyRasterArea *rasterarea,
+                  GwyFieldPart *fpart,
+                  G_GNUC_UNUSED GwyMaskField *mask)
+{
+    RasterArea *priv = rasterarea->priv;
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
+
+    priv->mask_surface_valid = FALSE;
+    if (priv->range_from_method == GWY_COLOR_RANGE_MASKED
+        || priv->range_from_method == GWY_COLOR_RANGE_UNMASKED
+        || priv->range_to_method == GWY_COLOR_RANGE_MASKED
+        || priv->range_to_method == GWY_COLOR_RANGE_UNMASKED) {
+        priv->field_surface_valid = FALSE;
+        priv->range_valid = FALSE;
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+        return;
+    }
+
+    if (!fpart) {
+        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+        return;
+    }
+
+    // XXX: We assume mask::data-changed is emitted after we recalculate sizes.
+    // If mask dimensions differ from field dimensions, weird things abound.
+    queue_draw_field_part(rasterarea, fpart);
+}
+
+static void
+queue_draw_field_part(GwyRasterArea *rasterarea,
+                      const GwyFieldPart *fpart)
+{
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
+    RasterArea *priv = rasterarea->priv;
     gdouble xf = fpart->col, yf = fpart->row,
             xt = fpart->col + fpart->width, yt = fpart->row + fpart->height;
     cairo_matrix_transform_point(&priv->field_to_window_matrix, &xf, &yf);
@@ -2504,24 +2544,8 @@ field_data_changed(GwyRasterArea *rasterarea,
 }
 
 static void
-mask_data_changed(GwyRasterArea *rasterarea,
-                  GwyFieldPart *fpart,
-                  GwyMaskField *mask)
-{
-    RasterArea *priv = rasterarea->priv;
-
-    priv->mask_surface_valid = FALSE;
-    if (priv->range_from_method == GWY_COLOR_RANGE_MASKED
-        || priv->range_from_method == GWY_COLOR_RANGE_UNMASKED
-        || priv->range_to_method == GWY_COLOR_RANGE_MASKED
-        || priv->range_to_method == GWY_COLOR_RANGE_UNMASKED)
-        priv->range_valid = FALSE;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
-}
-
-static void
 gradient_data_changed(GwyRasterArea *rasterarea,
-                      GwyGradient *gradient)
+                      G_GNUC_UNUSED GwyGradient *gradient)
 {
     rasterarea->priv->field_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
