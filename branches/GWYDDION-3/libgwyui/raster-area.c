@@ -176,6 +176,7 @@ static gboolean gwy_raster_area_zoom                (GwyRasterArea *rasterarea,
                                                      GwyZoomType zoomtype);
 static void     calculate_position_and_size         (GwyRasterArea *rasterarea);
 static void     update_matrices                     (GwyRasterArea *rasterarea);
+static void     ensure_range                        (GwyRasterArea *rasterarea);
 static void     ensure_layout                       (GwyRasterArea *rasterarea);
 static gboolean gwy_raster_area_draw                (GtkWidget *widget,
                                                      cairo_t *cr);
@@ -358,7 +359,8 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
     properties[PROP_RANGE]
          = g_param_spec_boxed("range",
                               "Range",
-                              "Actual false colour mapping range.",
+                              "Actual false colour mapping range.  See "
+                              "gwy_raster_area_get_range() for discussion.",
                               GWY_TYPE_RANGE,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -524,6 +526,8 @@ gwy_raster_area_init(GwyRasterArea *rasterarea)
     priv->field_aspect_ratio = 1.0;
     priv->mask_color = mask_color_default;
     priv->grain_number_color = grain_number_color_default;
+    priv->range_from_method = GWY_COLOR_RANGE_FULL;
+    priv->range_to_method = GWY_COLOR_RANGE_FULL;
     update_matrices(rasterarea);
     gtk_widget_set_can_focus(GTK_WIDGET(rasterarea), TRUE);
 }
@@ -865,6 +869,34 @@ gwy_raster_area_get_gradient(const GwyRasterArea *rasterarea)
 {
     g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
     return GWY_RASTER_AREA(rasterarea)->priv->gradient;
+}
+
+/**
+ * gwy_raster_area_get_range:
+ * @rasterarea: A raster area.
+ * @range: (out) (allow-none):
+ *         Actual false colour mapping range.  It is set, even if the function
+ *         returns %FALSE.  The utility of a stale range is limited though.
+ *
+ * Obtains the actual false colour mapping range of a raster area.
+ *
+ * The false colour mapping range is not recalculated immediately after the
+ * properties that might influence it change.  In general, it is only updated
+ * only for drawing.  If you want to bind another actions to range changes it
+ * is recommended to connect to signal "notify:range" of @rasterarea.
+ * Normally, such callback will be invoked immediately after the widget redraws
+ * itself.
+ *
+ * Returns: %TRUE if the range is valid, i.e. there is no redraw accompanied
+ *          with range recalculation queued.  %FALSE if the range is stale.
+ **/
+gboolean
+gwy_raster_area_get_range(const GwyRasterArea *rasterarea,
+                          GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), FALSE);
+    GWY_MAYBE_SET(range, rasterarea->priv->range);
+    return rasterarea->priv->range_valid;
 }
 
 /**
@@ -1697,6 +1729,11 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
         }
     }
 
+    g_assert(frect->x >= 0.0);
+    g_assert(frect->y >= 0.0);
+    g_assert(frect->x + frect->width <= xres);
+    g_assert(frect->y + frect->height <= yres);
+
     update_matrices(rasterarea);
     priv->pos_and_size_valid = TRUE;
 
@@ -1769,6 +1806,35 @@ update_matrices(GwyRasterArea *rasterarea)
 }
 
 static void
+ensure_range(GwyRasterArea *rasterarea)
+{
+    RasterArea *priv = rasterarea->priv;
+
+    if (priv->range_valid)
+        return;
+
+    if (!priv->field) {
+        gwy_clear1(priv->range);
+        priv->range_valid = TRUE;
+        return;
+    }
+
+    g_return_if_fail(priv->pos_and_size_valid);
+    const cairo_rectangle_t *frect = &priv->field_rectangle;
+    GwyFieldPart fpart = {
+        (guint)floor(frect->x),
+        (guint)floor(frect->y),
+        (guint)ceil(frect->x + frect->width) - (guint)floor(frect->x),
+        (guint)ceil(frect->y + frect->height) - (guint)floor(frect->y),
+    };
+    priv->range = priv->user_range;
+    gwy_field_find_color_range(priv->field, &fpart, priv->mask,
+                               priv->range_from_method, priv->range_to_method,
+                               &priv->range);
+    priv->range_valid = TRUE;
+}
+
+static void
 ensure_field_surface(GwyRasterArea *rasterarea)
 {
     RasterArea *priv = rasterarea->priv;
@@ -1780,6 +1846,7 @@ ensure_field_surface(GwyRasterArea *rasterarea)
 
     GwyField *field = priv->field;
     g_return_if_fail(field);
+    g_return_if_fail(priv->range_valid);
 
     cairo_surface_t *surface = priv->field_surface;
     if (!surface
@@ -1796,14 +1863,11 @@ ensure_field_surface(GwyRasterArea *rasterarea)
         priv->field_surface = surface;
     }
 
-    gdouble min, max;
-    gwy_field_min_max_full(field, &min, &max);
-
     GwyGradient *gradient = (priv->gradient
                              ? priv->gradient
                              : gwy_gradients_get(NULL));
 
-    gwy_field_render_cairo(field, surface, gradient, frect, min, max);
+    gwy_field_render_cairo(field, surface, gradient, frect, &priv->range);
     priv->field_surface_valid = TRUE;
 }
 
@@ -1961,6 +2025,7 @@ gwy_raster_area_draw(GtkWidget *widget,
         calculate_position_and_size(rasterarea);
 
     //GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    ensure_range(rasterarea);
     ensure_field_surface(rasterarea);
 
     cairo_save(cr);

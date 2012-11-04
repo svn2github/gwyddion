@@ -197,38 +197,50 @@ check_field_rectangle(const cairo_rectangle_t *rectangle,
 /**
  * gwy_field_render_pixbuf:
  * @field: A two-dimensional data field.
- * @pixbuf: A pixbuf.
+ * @pixbuf: A pixbuf in %GDK_COLORSPACE_RGB colorspace without alpha channel.
  * @gradient: A false colour gradient.
  * @rectangle: (allow-none):
  *             Area in @field to render, %NULL for entire field.
- * @min: Value to map to @gradient begining.
- * @max: Value to map to @gradient end.
+ * @range: (allow-none):
+ *         False colour mapping range corresponding to full @gradient range.
+ *         As a shorthand, you can pass %NULL to map the full data range.
  *
  * Renders a field to pixbuf using false colour gradient.
  *
  * Parameters defining the area to render are measured in pixels; the entire
  * area must line within @field.
  *
- * The value range, determined by @min and @max, can be arbitrary.  Passing
- * @max smaller than @min renders the gradient inversely.
+ * The false colour mapping range can be arbitrary with respect to the data
+ * range.  Passing @range.to smaller than @range.from just renders the gradient
+ * inversely.
  **/
 void
 gwy_field_render_pixbuf(const GwyField *field,
                         GdkPixbuf *pixbuf,
                         GwyGradient *gradient,
                         const cairo_rectangle_t *rectangle,
-                        gdouble min, gdouble max)
+                        const GwyRange *range)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(GDK_IS_PIXBUF(pixbuf));
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
+    g_return_if_fail(gdk_pixbuf_get_colorspace(pixbuf) == GDK_COLORSPACE_RGB);
+    g_return_if_fail(gdk_pixbuf_get_n_channels(pixbuf) == 3);
 
     gdouble xfrom, xto, yfrom, yto;
     if (!check_field_rectangle(rectangle, field->xres, field->yres,
                                &xfrom, &yfrom, &xto, &yto))
         return;
 
-    if (min == max) {
+    gdouble from, to;
+    if (range) {
+        from = range->from;
+        to = range->to;
+    }
+    else
+        gwy_field_min_max_full(field, &from, &to);
+
+    if (from == to || isnan(from) || isnan(to)) {
         field_render_empty_range(pixbuf, gradient);
         return;
     }
@@ -241,7 +253,7 @@ gwy_field_render_pixbuf(const GwyField *field,
     guint xres = field->xres, yres = field->yres;
     const gdouble *data = field->data;
 
-    gdouble qc = 1.0/(max - min);
+    gdouble qc = 1.0/(to - from);
     guint gradlen;
     const GwyGradientPoint *gradpts = gwy_gradient_get_data(gradient, &gradlen);
 
@@ -263,7 +275,7 @@ gwy_field_render_pixbuf(const GwyField *field,
             gdouble z = ((rowprev[iprev]*wxp + rowprev[inext]*wxn)*wyp
                          + (rownext[iprev]*wxp + rownext[inext]*wxn)*wyn);
 
-            z = qc*(z - min);
+            z = qc*(z - from);
             // TODO: Support pixmaps with alpha
             GwyRGBA rgba;
             interpolate_color(gradpts, gradlen, CLAMP(z, 0.0, 1.0), &rgba);
@@ -283,23 +295,25 @@ gwy_field_render_pixbuf(const GwyField *field,
  * @gradient: A false colour gradient.
  * @rectangle: (allow-none):
  *             Area in @field to render, %NULL for entire field.
- * @min: Value to map to @gradient begining.
- * @max: Value to map to @gradient end.
+ * @range: (allow-none):
+ *         False colour mapping range corresponding to full @gradient range.
+ *         As a shorthand, you can pass %NULL to map the full data range.
  *
  * Renders a field to Cairo image surface using false colour gradient.
  *
  * Parameters defining the area to render are measured in pixels; the entire
  * area must line within @field.
  *
- * The value range, determined by @min and @max, can be arbitrary.  Passing
- * @max smaller than @min renders the gradient inversely.
+ * The false colour mapping range can be arbitrary with respect to the data
+ * range.  Passing @range.to smaller than @range.from just renders the gradient
+ * inversely.
  **/
 void
 gwy_field_render_cairo(const GwyField *field,
                        cairo_surface_t *surface,
                        GwyGradient *gradient,
                        const cairo_rectangle_t *rectangle,
-                       gdouble min, gdouble max)
+                       const GwyRange *range)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(surface);
@@ -314,7 +328,15 @@ gwy_field_render_cairo(const GwyField *field,
                                &xfrom, &yfrom, &xto, &yto))
         return;
 
-    if (min == max) {
+    gdouble from, to;
+    if (range) {
+        from = range->from;
+        to = range->to;
+    }
+    else
+        gwy_field_min_max_full(field, &from, &to);
+
+    if (from == to || isnan(from) || isnan(to)) {
         // TODO
         // field_render_empty_range(pixbuf, gradient);
         return;
@@ -329,7 +351,7 @@ gwy_field_render_cairo(const GwyField *field,
     guint xres = field->xres, yres = field->yres;
     const gdouble *data = field->data;
 
-    gdouble qc = 1.0/(max - min);
+    gdouble qc = 1.0/(to - from);
     guint gradlen;
     const GwyGradientPoint *gradpts = gwy_gradient_get_data(gradient, &gradlen);
 
@@ -351,7 +373,7 @@ gwy_field_render_cairo(const GwyField *field,
             gdouble z = ((rowprev[iprev]*wxp + rowprev[inext]*wxn)*wyp
                          + (rownext[iprev]*wxp + rownext[inext]*wxn)*wyn);
 
-            z = qc*(z - min);
+            z = qc*(z - from);
             // TODO: Support pixmaps with alpha
             GwyRGBA rgba;
             interpolate_color(gradpts, gradlen, CLAMP(z, 0.0, 1.0), &rgba);
@@ -478,8 +500,8 @@ gwy_mask_field_render_cairo(const GwyMaskField *field,
  *        Mask representing the value values to take into account/exclude.
  *        It is used only if any range is %GWY_COLOR_RANGE_MASKED or
  *        %GWY_COLOR_RANGE_UNMASKED.
- * @from: Type requested for the start of the false colour map.
- * @to: Type requested for the end of the false colour map.
+ * @from_method: Method to use for the start of the false colour map.
+ * @to_method: Method to use for the end of the false colour map.
  * @range: (out):
  *         Location where the range is to be stored.
  *
@@ -487,7 +509,14 @@ gwy_mask_field_render_cairo(const GwyMaskField *field,
  *
  * The stard and end values can determined using different methods though you
  * should rarely need this.  If a method is %GWY_COLOR_RANGE_USER the
- * corresponding field in @range is left untouched.
+ * corresponding field in @range is left untouched.  So combining this function
+ * with user-set ranges is easiest by initialising the range to the user range
+ * beforehand:
+ * |[
+ * GwyRange range = user_set_range;
+ * gwy_field_find_color_range(field, fpart, mask, from_method, to_method,
+ *                            &range);
+ * ]|
  **/
 void
 gwy_field_find_color_range(const GwyField *field,
@@ -627,6 +656,12 @@ autorange(const GwyField *field,
  * @section_id: GwyField-render
  * @title: GwyField rendering
  * @short_description: Rendering of fields to raster images
+ *
+ * Data fields are usually displayed using false colour mapping in
+ * #GwyRasterArea widgets, often embedded in #GwyRasterView.  Occassionally, a
+ * straightoward rendering of a field directly to a Cairo surface or a pixbuf
+ * can be also useful.  The functions described here are the same that are used
+ * by #GwyRasterArea internally.
  **/
 
 /**

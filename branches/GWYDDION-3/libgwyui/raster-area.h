@@ -72,6 +72,8 @@ GwyMaskField*  gwy_raster_area_get_mask              (const GwyRasterArea *raste
 void           gwy_raster_area_set_gradient          (GwyRasterArea *rasterarea,
                                                       GwyGradient *gradient);
 GwyGradient*   gwy_raster_area_get_gradient          (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+gboolean       gwy_raster_area_get_range             (const GwyRasterArea *rasterarea,
+                                                      GwyRange *range);
 void           gwy_raster_area_set_mask_color        (GwyRasterArea *rasterarea,
                                                       const GwyRGBA *color);
 const GwyRGBA* gwy_raster_area_get_mask_color        (const GwyRasterArea *rasterarea) G_GNUC_PURE;
