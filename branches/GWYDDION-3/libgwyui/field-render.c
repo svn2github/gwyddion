@@ -28,6 +28,8 @@
 #define COMPONENT_TO_PIXEL8(x) (guint)(256*CLAMP((x), 0.0, NOT_QUITE_1))
 
 static void autorange(const GwyField *field,
+                      gdouble min,
+                      gdouble max,
                       gdouble *from,
                       gdouble *to);
 
@@ -526,6 +528,9 @@ gwy_field_find_color_range(const GwyField *field,
             to = GWY_COLOR_RANGE_FULL;
     }
 
+    gdouble fullmin, fullmax;
+    gwy_field_min_max_full(field, &fullmin, &fullmax);
+
     if (from == GWY_COLOR_RANGE_VISIBLE || to == GWY_COLOR_RANGE_VISIBLE) {
         gdouble min, max;
         gwy_field_min_max(field, &(GwyFieldPart){ col, row, width, height },
@@ -533,43 +538,49 @@ gwy_field_find_color_range(const GwyField *field,
         if (from == GWY_COLOR_RANGE_VISIBLE)
             range->from = min;
         if (to == GWY_COLOR_RANGE_VISIBLE)
-            range->to = min;
+            range->to = max;
     }
 
     if (from == GWY_COLOR_RANGE_MASKED || to == GWY_COLOR_RANGE_MASKED) {
         gdouble min, max;
         gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &min, &max);
+        if (max < min) {
+            min = fullmin;
+            max = fullmax;
+        }
         if (from == GWY_COLOR_RANGE_MASKED)
             range->from = min;
         if (to == GWY_COLOR_RANGE_MASKED)
-            range->to = min;
+            range->to = max;
     }
 
     if (from == GWY_COLOR_RANGE_UNMASKED || to == GWY_COLOR_RANGE_UNMASKED) {
         gdouble min, max;
         gwy_field_min_max(field, NULL, mask, GWY_MASK_EXCLUDE, &min, &max);
+        if (max < min) {
+            min = fullmin;
+            max = fullmax;
+        }
         if (from == GWY_COLOR_RANGE_UNMASKED)
             range->from = min;
         if (to == GWY_COLOR_RANGE_UNMASKED)
-            range->to = min;
+            range->to = max;
     }
 
     if (from == GWY_COLOR_RANGE_AUTO || to == GWY_COLOR_RANGE_AUTO) {
         gdouble min, max;
-        autorange(field, &min, &max);
+        autorange(field, fullmin, fullmax, &min, &max);
         if (from == GWY_COLOR_RANGE_AUTO)
             range->from = min;
         if (to == GWY_COLOR_RANGE_AUTO)
-            range->to = min;
+            range->to = max;
     }
 
-    if (from == GWY_COLOR_RANGE_AUTO || to == GWY_COLOR_RANGE_AUTO) {
-        gdouble min, max;
-        gwy_field_min_max_full(field, &min, &max);
+    if (from == GWY_COLOR_RANGE_FULL || to == GWY_COLOR_RANGE_FULL) {
         if (from == GWY_COLOR_RANGE_FULL)
-            range->from = min;
+            range->from = fullmin;
         if (to == GWY_COLOR_RANGE_FULL)
-            range->to = min;
+            range->to = fullmax;
     }
 }
 
@@ -577,11 +588,9 @@ gwy_field_find_color_range(const GwyField *field,
 // Also, make it public once it is improved.
 static void
 autorange(const GwyField *field,
-          gdouble *from,
-          gdouble *to)
+          gdouble min, gdouble max,
+          gdouble *from, gdouble *to)
 {
-    gdouble min, max;
-    gwy_field_min_max_full(field, &min, &max);
     if (min == max) {
         GWY_MAYBE_SET(from, min);
         GWY_MAYBE_SET(to, max);
