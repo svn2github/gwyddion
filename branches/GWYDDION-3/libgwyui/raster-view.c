@@ -37,6 +37,12 @@ enum {
     N_PROPS,
 };
 
+enum {
+    AXIS_TAB_AXIS,
+    AXIS_TAB_GRADIENTS,
+    AXIS_TAB_RANGES,
+};
+
 struct _GwyRasterViewPrivate {
     GwyRulerScaleType scale_type;
 
@@ -56,6 +62,9 @@ struct _GwyRasterViewPrivate {
     GtkScrollbar *vscrollbar;
     GwyColorAxis *coloraxis;
 
+    GtkWidget *gradients;
+    GtkWidget *ranges;
+
     GwyField *field;
     gulong field_notify_id;
     gulong field_data_changed_id;
@@ -73,57 +82,65 @@ struct _GwyRasterViewPrivate {
 
 typedef struct _GwyRasterViewPrivate RasterView;
 
-static void     gwy_raster_view_dispose     (GObject *object);
-static void     gwy_raster_view_finalize    (GObject *object);
-static void     gwy_raster_view_set_property(GObject *object,
-                                             guint prop_id,
-                                             const GValue *value,
-                                             GParamSpec *pspec);
-static void     gwy_raster_view_get_property(GObject *object,
-                                             guint prop_id,
-                                             GValue *value,
-                                             GParamSpec *pspec);
-static void     area_notify                 (GwyRasterView *rasterview,
-                                             GParamSpec *pspec,
-                                             GwyRasterArea *area);
-static void     field_notify                (GwyRasterView *rasterview,
-                                             GParamSpec *pspec,
-                                             GwyField *field);
-static void     set_ruler_units_to_field    (GwyRasterView *rasterview);
-static void     field_data_changed          (GwyRasterView *rasterview,
-                                             const GwyFieldPart *fpart,
-                                             GwyField *field);
-static gboolean set_scale_type              (GwyRasterView *rasterview,
-                                             GwyRulerScaleType scale_type);
-static gboolean set_hadjustment             (GwyRasterView *rasterview,
-                                             GtkAdjustment *adjustment);
-static gboolean set_vadjustment             (GwyRasterView *rasterview,
-                                             GtkAdjustment *adjustment);
-static gboolean set_field                   (GwyRasterView *rasterview,
-                                             GwyField *field);
-static void     update_ruler_ranges         (GwyRasterView *rasterview);
-static gboolean area_motion_notify          (GwyRasterView *rasterview,
-                                             GdkEventMotion *event,
-                                             GwyRasterArea *area);
-static gboolean area_enter_notify           (GwyRasterView *rasterview,
-                                             GdkEventCrossing *event,
-                                             GwyRasterArea *area);
-static gboolean area_leave_notify           (GwyRasterView *rasterview,
-                                             GdkEventCrossing *event,
-                                             GwyRasterArea *area);
-static gboolean ruler_button_press          (GwyRasterView *rasterview,
-                                             GdkEventButton *event,
-                                             GwyRuler *ruler);
-static void     axis_range_notify           (GwyRasterView *rasterview,
-                                             GParamSpec *pspec,
-                                             GwyColorAxis *coloraxis);
-static void     pop_up_ruler_menu           (GwyRasterView *rasterview,
-                                             GtkWidget *widget,
-                                             GdkEventButton *event);
-static GtkMenu* create_ruler_popup          (GwyRasterView *rasterview);
-static void     ruler_popup_item_toggled    (GwyRasterView *rasterview,
-                                             GtkCheckMenuItem *menuitem);
-static void     ruler_popup_deleted         (GtkWidget *menu);
+static void       gwy_raster_view_dispose     (GObject *object);
+static void       gwy_raster_view_finalize    (GObject *object);
+static void       gwy_raster_view_set_property(GObject *object,
+                                               guint prop_id,
+                                               const GValue *value,
+                                               GParamSpec *pspec);
+static void       gwy_raster_view_get_property(GObject *object,
+                                               guint prop_id,
+                                               GValue *value,
+                                               GParamSpec *pspec);
+static void       area_notify                 (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyRasterArea *area);
+static void       field_notify                (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyField *field);
+static void       set_ruler_units_to_field    (GwyRasterView *rasterview);
+static void       field_data_changed          (GwyRasterView *rasterview,
+                                               const GwyFieldPart *fpart,
+                                               GwyField *field);
+static gboolean   set_scale_type              (GwyRasterView *rasterview,
+                                               GwyRulerScaleType scale_type);
+static gboolean   set_hadjustment             (GwyRasterView *rasterview,
+                                               GtkAdjustment *adjustment);
+static gboolean   set_vadjustment             (GwyRasterView *rasterview,
+                                               GtkAdjustment *adjustment);
+static gboolean   set_field                   (GwyRasterView *rasterview,
+                                               GwyField *field);
+static void       update_ruler_ranges         (GwyRasterView *rasterview);
+static gboolean   area_motion_notify          (GwyRasterView *rasterview,
+                                               GdkEventMotion *event,
+                                               GwyRasterArea *area);
+static gboolean   area_enter_notify           (GwyRasterView *rasterview,
+                                               GdkEventCrossing *event,
+                                               GwyRasterArea *area);
+static gboolean   area_leave_notify           (GwyRasterView *rasterview,
+                                               GdkEventCrossing *event,
+                                               GwyRasterArea *area);
+static gboolean   ruler_button_press          (GwyRasterView *rasterview,
+                                               GdkEventButton *event,
+                                               GwyRuler *ruler);
+static void       axis_range_notify           (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyColorAxis *coloraxis);
+static GtkWidget* create_axis_button_box      (GwyRasterView *rasterview);
+static GtkWidget* create_axis_button          (GtkRadioButton *groupwidget,
+                                               guint id,
+                                               const gchar *content);
+static void       axis_button_clicked         (GwyRasterView *rasterview,
+                                               GtkToggleButton *button);
+static GtkWidget* create_range_controls       (GwyRasterView *rasterview);
+static GtkWidget* create_gradient_list        (GwyRasterView *rasterview);
+static void       pop_up_ruler_menu           (GwyRasterView *rasterview,
+                                               GtkWidget *widget,
+                                               GdkEventButton *event);
+static GtkMenu*   create_ruler_popup          (GwyRasterView *rasterview);
+static void       ruler_popup_item_toggled    (GwyRasterView *rasterview,
+                                               GtkCheckMenuItem *menuitem);
+static void       ruler_popup_deleted         (GtkWidget *menu);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -260,6 +277,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
 
     GtkWidget *coloraxis = gwy_color_axis_new();
     priv->coloraxis = GWY_COLOR_AXIS(coloraxis);
+    g_object_ref(priv->coloraxis);
     gwy_axis_set_edge(GWY_AXIS(coloraxis), GTK_POS_RIGHT);
     g_object_set(coloraxis,
                  "max-tick-level", 2,
@@ -268,36 +286,6 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                  NULL);
     gtk_grid_attach(grid, coloraxis, 3, 2, 1, 1);
     gtk_widget_show(coloraxis);
-
-    GtkWidget *buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_grid_attach(grid, buttonbox, 3, 0, 1, 2);
-
-    GtkWidget *axisbutton = gtk_radio_button_new(NULL);
-    GtkRadioButton *groupwidget = GTK_RADIO_BUTTON(axisbutton);
-    priv->axisbutton = GTK_TOGGLE_BUTTON(axisbutton);
-    gtk_toggle_button_set_mode(priv->axisbutton, FALSE);
-    gtk_widget_set_can_focus(axisbutton, FALSE);
-    gtk_button_set_relief(GTK_BUTTON(axisbutton), GTK_RELIEF_NONE);
-    gtk_container_add(GTK_CONTAINER(axisbutton), gtk_label_new("A"));
-    gtk_box_pack_start(GTK_BOX(buttonbox), axisbutton, TRUE, TRUE, 0);
-
-    GtkWidget *gradbutton = gtk_radio_button_new_from_widget(groupwidget);
-    priv->gradbutton = GTK_TOGGLE_BUTTON(gradbutton);
-    gtk_toggle_button_set_mode(priv->gradbutton, FALSE);
-    gtk_widget_set_can_focus(gradbutton, FALSE);
-    gtk_button_set_relief(GTK_BUTTON(gradbutton), GTK_RELIEF_NONE);
-    gtk_container_add(GTK_CONTAINER(gradbutton), gtk_label_new("G"));
-    gtk_box_pack_start(GTK_BOX(buttonbox), gradbutton, TRUE, TRUE, 0);
-
-    GtkWidget *rangebutton = gtk_radio_button_new_from_widget(groupwidget);
-    priv->rangebutton = GTK_TOGGLE_BUTTON(rangebutton);
-    gtk_toggle_button_set_mode(priv->rangebutton, FALSE);
-    gtk_widget_set_can_focus(rangebutton, FALSE);
-    gtk_button_set_relief(GTK_BUTTON(rangebutton), GTK_RELIEF_NONE);
-    gtk_container_add(GTK_CONTAINER(rangebutton), gtk_label_new("R"));
-    gtk_box_pack_start(GTK_BOX(buttonbox), rangebutton, TRUE, TRUE, 0);
-
-    gtk_widget_show_all(buttonbox);
 
     g_signal_connect_swapped(area, "notify",
                              G_CALLBACK(area_notify), rasterview);
@@ -315,6 +303,10 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(ruler_button_press), rasterview);
     g_signal_connect_swapped(coloraxis, "notify::range",
                              G_CALLBACK(axis_range_notify), rasterview);
+
+    GtkWidget *buttonbox = create_axis_button_box(rasterview);
+    gtk_grid_attach(grid, buttonbox, 3, 0, 1, 2);
+    gtk_widget_show_all(buttonbox);
 }
 
 static void
@@ -325,6 +317,9 @@ gwy_raster_view_dispose(GObject *object)
     set_field(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
+    GWY_OBJECT_UNREF(priv->coloraxis);
+    GWY_OBJECT_UNREF(priv->ranges);
+    GWY_OBJECT_UNREF(priv->gradients);
     if (priv->ruler_popup) {
         gtk_widget_destroy(GTK_WIDGET(priv->ruler_popup));
         priv->ruler_popup = NULL;
@@ -827,6 +822,104 @@ axis_range_notify(GwyRasterView *rasterview,
 {
     g_printerr("Color axis range changed.  If not initiaed by us then we "
                "should update mapping!.\n");
+}
+
+static GtkWidget*
+create_axis_button_box(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+
+    GtkWidget *buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+    GtkWidget *axisbutton = create_axis_button(NULL, AXIS_TAB_AXIS, "A");
+    GtkRadioButton *groupwidget = GTK_RADIO_BUTTON(axisbutton);
+    priv->axisbutton = GTK_TOGGLE_BUTTON(axisbutton);
+    gtk_box_pack_start(GTK_BOX(buttonbox), axisbutton, TRUE, TRUE, 0);
+
+    GtkWidget *gradbutton = create_axis_button(groupwidget, AXIS_TAB_GRADIENTS,
+                                               "G");
+    priv->gradbutton = GTK_TOGGLE_BUTTON(gradbutton);
+    gtk_box_pack_start(GTK_BOX(buttonbox), gradbutton, TRUE, TRUE, 0);
+
+    GtkWidget *rangebutton = create_axis_button(groupwidget, AXIS_TAB_RANGES,
+                                                "R");
+    priv->rangebutton = GTK_TOGGLE_BUTTON(rangebutton);
+    gtk_box_pack_start(GTK_BOX(buttonbox), rangebutton, TRUE, TRUE, 0);
+
+    g_signal_connect_swapped(axisbutton, "toggled",
+                             G_CALLBACK(axis_button_clicked), rasterview);
+    g_signal_connect_swapped(gradbutton, "toggled",
+                             G_CALLBACK(axis_button_clicked), rasterview);
+    g_signal_connect_swapped(rangebutton, "toggled",
+                             G_CALLBACK(axis_button_clicked), rasterview);
+
+    return buttonbox;
+}
+
+static GtkWidget*
+create_axis_button(GtkRadioButton *groupwidget,
+                   guint id,
+                   const gchar *content)
+{
+    GtkWidget *button = gtk_radio_button_new_from_widget(groupwidget);
+    g_object_set_data(G_OBJECT(button), "id", GUINT_TO_POINTER(id));
+    gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(button), FALSE);
+    gtk_widget_set_can_focus(button, FALSE);
+    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+    gtk_container_add(GTK_CONTAINER(button), gtk_label_new(content));
+    return button;
+}
+
+static void
+axis_button_clicked(GwyRasterView *rasterview,
+                    GtkToggleButton *button)
+{
+    if (!gtk_toggle_button_get_active(button))
+        return;
+
+    guint id = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button), "id"));
+    GtkGrid *grid = GTK_GRID(rasterview);
+    GtkWidget *child = gtk_grid_get_child_at(grid, 3, 2);
+    gtk_container_remove(GTK_CONTAINER(rasterview), child);
+
+    RasterView *priv = rasterview->priv;
+    if (id == AXIS_TAB_AXIS)
+        child = GTK_WIDGET(priv->coloraxis);
+    else if (id == AXIS_TAB_RANGES) {
+        if (!priv->ranges) {
+            priv->ranges = create_range_controls(rasterview);
+            g_object_ref(priv->ranges);
+        }
+        child = priv->ranges;
+    }
+    else if (id == AXIS_TAB_GRADIENTS) {
+        if (!priv->gradients) {
+            priv->gradients = create_gradient_list(rasterview);
+            g_object_ref(priv->gradients);
+        }
+        child = priv->gradients;
+    }
+    else {
+        g_assert_not_reached();
+    }
+    gtk_widget_show_all(child);
+    gtk_grid_attach(grid, child, 3, 2, 1, 1);
+}
+
+static GtkWidget*
+create_range_controls(G_GNUC_UNUSED GwyRasterView *rasterview)
+{
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_add(GTK_CONTAINER(vbox), gtk_label_new("Ranges..."));
+    return vbox;
+}
+
+static GtkWidget*
+create_gradient_list(G_GNUC_UNUSED GwyRasterView *rasterview)
+{
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_add(GTK_CONTAINER(vbox), gtk_label_new("Gradients..."));
+    return vbox;
 }
 
 static void
