@@ -421,7 +421,7 @@ gwy_color_axis_scroll(GtkWidget *widget,
     gdouble len = fabs(range.to - range.from);
     GtkAdjustment *adj = gtk_adjustment_new(0.5*(range.from + range.to),
                                             range.from, range.to,
-                                            0.01*len, 0.1*len, 0.0);
+                                            0.002*len, 0.02*len, 0.0);
     gdouble dz = -gwy_scroll_wheel_delta(adj, event, GTK_ORIENTATION_VERTICAL);
     g_object_unref(adj);
 
