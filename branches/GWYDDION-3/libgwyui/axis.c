@@ -524,6 +524,7 @@ gwy_axis_size_allocate(GtkWidget *widget,
  * Also the actual range may be unrelated to requested between the request and
  * the recalculation of ticks.
  **/
+// TODO: Return a value indicating whether a recalculation is queued?
 void
 gwy_axis_get_range(const GwyAxis *axis,
                    GwyRange *range)
@@ -1068,6 +1069,7 @@ calculate_ticks(GwyAxis *axis)
         // ugly iterative business below.  There will not be any labels or
         // even ticks drawn at reasonable places, but what the fuck.  The
         // only thing to prevent seriously is overlapping labels.
+        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
         return;
     }
 
@@ -1131,7 +1133,10 @@ calculate_ticks(GwyAxis *axis)
         for (guint i = 0; i < ticks->len; i++) {
             GwyAxisTick *tick = &tick_index(ticks, i);
             if (tick->value == priv->units_at) {
+                guint prec = gwy_value_format_get_precision(priv->vf);
+                gwy_value_format_set_precision(priv->vf, prec+1);
                 format_value_label(axis, tick->value, TRUE);
+                gwy_value_format_set_precision(priv->vf, prec);
                 pango_layout_get_extents(priv->layout, NULL, &tick->extents);
                 g_free(tick->label);
                 tick->label = g_strdup(priv->str->str);
@@ -1141,6 +1146,7 @@ calculate_ticks(GwyAxis *axis)
     }
 
     priv->ticks_are_valid = TRUE;
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
 }
 
 // NB: If level is GWY_AXIS_TICK_MAJOR it creates also EDGE-level ticks.
@@ -1187,10 +1193,13 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
+            guint prec = gwy_value_format_get_precision(priv->vf);
+            gwy_value_format_set_precision(priv->vf, prec+1);
             format_value_label(axis, tick.value,
                                units_pos == GWY_AXIS_UNITS_FIRST
                                || (units_pos == GWY_AXIS_UNITS_ZERO
                                    && tick.value == 0.0));
+            gwy_value_format_set_precision(priv->vf, prec);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1206,10 +1215,13 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
+            guint prec = gwy_value_format_get_precision(priv->vf);
+            gwy_value_format_set_precision(priv->vf, prec+1);
             format_value_label(axis, tick.value,
                                units_pos == GWY_AXIS_UNITS_LAST
                                || (units_pos == GWY_AXIS_UNITS_ZERO
                                    && tick.value == 0.0));
+            gwy_value_format_set_precision(priv->vf, prec);
             pango_layout_get_extents(priv->layout, NULL, &tick.extents);
             tick.label = g_strdup(str->str);
         }
@@ -1593,7 +1605,7 @@ format_value_label(GwyAxis *axis,
 
     gint width, height;
     pango_layout_get_size(priv->layout, &width, &height);
-    if ((guint)(width + PANGO_SCALE-1)/PANGO_SCALE <= priv->split_width)
+    if ((guint)(width + PANGO_SCALE-1)/PANGO_SCALE + 2 + 2 < priv->split_width)
         return;
 
     // Remove any leading whitespace from glue and put a newline there.
