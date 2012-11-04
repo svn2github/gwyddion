@@ -25,7 +25,7 @@
 #include "libgwyui/widget-utils.h"
 #include "libgwyui/color-axis.h"
 
-#define TESTMARKUP "<small>9.9 (μm₁¹)</small>"
+#define TESTMARKUP "<small>99.9 (μm₁¹)</small>"
 
 #define pangoscale ((gdouble)PANGO_SCALE)
 
@@ -41,7 +41,7 @@ struct _GwyColorAxisPrivate {
     gulong gradient_data_changed_id;
     gboolean editable_range;
 
-    gdouble stripewidth;     // Relative to total.
+    gdouble stripewidth;
 };
 
 typedef struct _GwyColorAxisPrivate ColorAxis;
@@ -430,8 +430,6 @@ gwy_color_axis_scroll(GtkWidget *widget,
     else
         range.to += dz;
 
-    // TODO: Nice toy but be have to implement false colour mapping types in
-    // RasterArea to make use of it.
     gwy_axis_request_range(axis, &range);
 
     return TRUE;

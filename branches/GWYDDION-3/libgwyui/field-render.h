@@ -20,6 +20,7 @@
 #ifndef __LIBGWYUI_FIELD_RENDER_H__
 #define __LIBGWYUI_FIELD_RENDER_H__
 
+#include <libgwy/math.h>
 #include <libgwy/field.h>
 #include <libgwy/mask-field.h>
 #include <libgwy/gradient.h>

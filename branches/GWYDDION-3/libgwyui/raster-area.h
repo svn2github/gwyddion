@@ -24,6 +24,7 @@
 #include <libgwy/mask-field.h>
 #include <libgwy/field.h>
 #include <libgwy/gradient.h>
+#include <libgwyui/field-render.h>
 #include <libgwyui/shapes.h>
 
 G_BEGIN_DECLS
@@ -61,41 +62,51 @@ struct _GwyRasterAreaClass {
     GtkWidgetClass widget_class;
 };
 
-GType          gwy_raster_area_get_type              (void)                            G_GNUC_CONST;
-GtkWidget*     gwy_raster_area_new                   (void)                            G_GNUC_MALLOC;
-void           gwy_raster_area_set_field             (GwyRasterArea *rasterarea,
-                                                      GwyField *field);
-GwyField*      gwy_raster_area_get_field             (const GwyRasterArea *rasterarea) G_GNUC_PURE;
-void           gwy_raster_area_set_mask              (GwyRasterArea *rasterarea,
-                                                      GwyMaskField *mask);
-GwyMaskField*  gwy_raster_area_get_mask              (const GwyRasterArea *rasterarea) G_GNUC_PURE;
-void           gwy_raster_area_set_gradient          (GwyRasterArea *rasterarea,
-                                                      GwyGradient *gradient);
-GwyGradient*   gwy_raster_area_get_gradient          (const GwyRasterArea *rasterarea) G_GNUC_PURE;
-gboolean       gwy_raster_area_get_range             (const GwyRasterArea *rasterarea,
-                                                      GwyRange *range);
-void           gwy_raster_area_set_mask_color        (GwyRasterArea *rasterarea,
-                                                      const GwyRGBA *color);
-const GwyRGBA* gwy_raster_area_get_mask_color        (const GwyRasterArea *rasterarea) G_GNUC_PURE;
-void           gwy_raster_area_set_grain_number_color(GwyRasterArea *rasterarea,
-                                                      const GwyRGBA *color);
-const GwyRGBA* gwy_raster_area_get_grain_number_color(const GwyRasterArea *rasterarea) G_GNUC_PURE;
-void           gwy_raster_area_set_shapes            (GwyRasterArea *rasterarea,
-                                                      GwyShapes *shapes);
-GwyShapes*     gwy_raster_area_get_shapes            (const GwyRasterArea *rasterarea) G_GNUC_PURE;
-void           gwy_raster_area_set_scrollable        (GwyRasterArea *rasterarea,
-                                                      gboolean scrollable);
-gboolean       gwy_raster_area_get_scrollable        (GwyRasterArea *rasterarea)       G_GNUC_PURE;
-void           gwy_raster_area_set_zoomable          (GwyRasterArea *rasterarea,
-                                                      gboolean zoomable);
-gboolean       gwy_raster_area_get_zoomable          (GwyRasterArea *rasterarea)       G_GNUC_PURE;
-void           gwy_raster_area_widget_area           (const GwyRasterArea *rasterarea,
-                                                      cairo_rectangle_t *area);
-void           gwy_raster_area_field_area            (const GwyRasterArea *rasterarea,
-                                                      cairo_rectangle_t *area);
-GtkWidget*     gwy_raster_area_get_area_widget       (const GwyRasterArea *rasterarea) G_GNUC_PURE;
-void           gwy_raster_area_set_area_widget       (GwyRasterArea *rasterarea,
-                                                      GtkWidget *widget);
+GType             gwy_raster_area_get_type              (void)                            G_GNUC_CONST;
+GtkWidget*        gwy_raster_area_new                   (void)                            G_GNUC_MALLOC;
+void              gwy_raster_area_set_field             (GwyRasterArea *rasterarea,
+                                                         GwyField *field);
+GwyField*         gwy_raster_area_get_field             (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_mask              (GwyRasterArea *rasterarea,
+                                                         GwyMaskField *mask);
+GwyMaskField*     gwy_raster_area_get_mask              (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_gradient          (GwyRasterArea *rasterarea,
+                                                         GwyGradient *gradient);
+GwyGradient*      gwy_raster_area_get_gradient          (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_range_from_method (GwyRasterArea *rasterarea,
+                                                         GwyColorRangeType method);
+GwyColorRangeType gwy_raster_area_get_range_from_method (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_range_to_method   (GwyRasterArea *rasterarea,
+                                                         GwyColorRangeType method);
+GwyColorRangeType gwy_raster_area_get_range_to_method   (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_user_range        (GwyRasterArea *rasterarea,
+                                                         const GwyRange *range);
+void              gwy_raster_area_get_user_range        (const GwyRasterArea *rasterarea,
+                                                         GwyRange *range);
+gboolean          gwy_raster_area_get_range             (const GwyRasterArea *rasterarea,
+                                                         GwyRange *range);
+void              gwy_raster_area_set_mask_color        (GwyRasterArea *rasterarea,
+                                                         const GwyRGBA *color);
+const GwyRGBA*    gwy_raster_area_get_mask_color        (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_grain_number_color(GwyRasterArea *rasterarea,
+                                                         const GwyRGBA *color);
+const GwyRGBA*    gwy_raster_area_get_grain_number_color(const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_shapes            (GwyRasterArea *rasterarea,
+                                                         GwyShapes *shapes);
+GwyShapes*        gwy_raster_area_get_shapes            (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_scrollable        (GwyRasterArea *rasterarea,
+                                                         gboolean scrollable);
+gboolean          gwy_raster_area_get_scrollable        (GwyRasterArea *rasterarea)       G_GNUC_PURE;
+void              gwy_raster_area_set_zoomable          (GwyRasterArea *rasterarea,
+                                                         gboolean zoomable);
+gboolean          gwy_raster_area_get_zoomable          (GwyRasterArea *rasterarea)       G_GNUC_PURE;
+void              gwy_raster_area_widget_area           (const GwyRasterArea *rasterarea,
+                                                         cairo_rectangle_t *area);
+void              gwy_raster_area_field_area            (const GwyRasterArea *rasterarea,
+                                                         cairo_rectangle_t *area);
+GtkWidget*        gwy_raster_area_get_area_widget       (const GwyRasterArea *rasterarea) G_GNUC_PURE;
+void              gwy_raster_area_set_area_widget       (GwyRasterArea *rasterarea,
+                                                         GtkWidget *widget);
 
 const cairo_matrix_t* gwy_raster_area_get_widget_to_field_matrix (const GwyRasterArea *rasterarea) G_GNUC_PURE;
 const cairo_matrix_t* gwy_raster_area_get_widget_to_coords_matrix(const GwyRasterArea *rasterarea) G_GNUC_PURE;

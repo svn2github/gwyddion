@@ -26,7 +26,6 @@
 #include "libgwy/mask-field-grains.h"
 #include "libgwyui/types.h"
 #include "libgwyui/marshal.h"
-#include "libgwyui/field-render.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/raster-area.h"
 
@@ -248,6 +247,7 @@ static guint    calculate_full_height               (const GwyRasterArea *raster
 
 static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
 static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
+static const GwyRange void_range = { 0.0, 0.0 };
 
 static GParamSpec *properties[N_TOTAL_PROPS];
 static guint signals[N_SIGNALS];
@@ -528,6 +528,7 @@ gwy_raster_area_init(GwyRasterArea *rasterarea)
     priv->grain_number_color = grain_number_color_default;
     priv->range_from_method = GWY_COLOR_RANGE_FULL;
     priv->range_to_method = GWY_COLOR_RANGE_FULL;
+    priv->user_range = void_range;
     update_matrices(rasterarea);
     gtk_widget_set_can_focus(GTK_WIDGET(rasterarea), TRUE);
 }
@@ -872,6 +873,122 @@ gwy_raster_area_get_gradient(const GwyRasterArea *rasterarea)
 }
 
 /**
+ * gwy_raster_area_set_range_from_method:
+ * @rasterarea: A raster area.
+ * @method: Method how to determine the start of false colour range.
+ *
+ * Sets the method how a raster area determines the start of false colour
+ * mapping.
+ **/
+void
+gwy_raster_area_set_range_from_method(GwyRasterArea *rasterarea,
+                                      GwyColorRangeType method)
+{
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_range_from_method(rasterarea, method))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterarea),
+                             properties[PROP_RANGE_FROM_METHOD]);
+}
+
+/**
+ * gwy_raster_area_get_range_from_method:
+ * @rasterarea: A raster area.
+ *
+ * Gets the method how a raster area determines the start of false colour
+ * mapping.
+ *
+ * Returns: The method how the start of false colour range mapping is
+ *          determined.
+ **/
+GwyColorRangeType
+gwy_raster_area_get_range_from_method(const GwyRasterArea *rasterarea)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea),
+                         GWY_COLOR_RANGE_FULL);
+    return rasterarea->priv->range_from_method;
+}
+
+/**
+ * gwy_raster_area_set_range_to_method:
+ * @rasterarea: 
+ * @method: Method how to determine the end of false colour range.
+ *
+ * Sets the method how a raster area determines the end of false colour
+ * mapping.
+ **/
+void
+gwy_raster_area_set_range_to_method(GwyRasterArea *rasterarea,
+                                    GwyColorRangeType method)
+{
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!set_range_to_method(rasterarea, method))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterarea),
+                             properties[PROP_RANGE_TO_METHOD]);
+}
+
+/**
+ * gwy_raster_area_get_range_to_method:
+ * @rasterarea: A raster area.
+ *
+ * Gets the method how a raster area determines the end of false colour
+ * mapping.
+ *
+ * Returns: The method how the end of false colour range mapping is
+ *          determined.
+ **/
+GwyColorRangeType
+gwy_raster_area_get_range_to_method(const GwyRasterArea *rasterarea)
+{
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea),
+                         GWY_COLOR_RANGE_FULL);
+    return rasterarea->priv->range_to_method;
+}
+
+/**
+ * gwy_raster_area_set_user_range:
+ * @rasterarea: A raster area.
+ * @range: (allow-none):
+ *         The user false colour mapping range.  It has effect only on
+ *         range endpoints with %GWY_COLOR_RANGE_USER mapping type.  Passing
+ *         %NULL resets it to default (0,0).
+ *
+ * Sets the user false colour mapping range of a raster area.
+ **/
+void
+gwy_raster_area_set_user_range(GwyRasterArea *rasterarea,
+                               const GwyRange *range)
+{
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    if (!range)
+        range = &void_range;
+    if (!set_user_range(rasterarea, range))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_USER_RANGE]);
+}
+
+/**
+ * gwy_raster_area_get_user_range:
+ * @rasterarea: A raster area.
+ * @range: (out):
+ *         Return location for the user false colour mapping range.
+ *
+ * Gets the user false colour mapping range of a raster area.
+ **/
+void
+gwy_raster_area_get_user_range(const GwyRasterArea *rasterarea,
+                               GwyRange *range)
+{
+    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+    g_return_if_fail(range);
+    *range = rasterarea->priv->user_range;
+}
+
+/**
  * gwy_raster_area_get_range:
  * @rasterarea: A raster area.
  * @range: (out) (allow-none):
@@ -883,7 +1000,7 @@ gwy_raster_area_get_gradient(const GwyRasterArea *rasterarea)
  * The false colour mapping range is not recalculated immediately after the
  * properties that might influence it change.  In general, it is only updated
  * only for drawing.  If you want to bind another actions to range changes it
- * is recommended to connect to signal "notify:range" of @rasterarea.
+ * is recommended to connect to signal "notify::range" of @rasterarea.
  * Normally, such callback will be invoked immediately after the widget redraws
  * itself.
  *
@@ -1816,6 +1933,7 @@ ensure_range(GwyRasterArea *rasterarea)
     if (!priv->field) {
         gwy_clear1(priv->range);
         priv->range_valid = TRUE;
+        g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_RANGE]);
         return;
     }
 
@@ -1832,6 +1950,7 @@ ensure_range(GwyRasterArea *rasterarea)
                                priv->range_from_method, priv->range_to_method,
                                &priv->range);
     priv->range_valid = TRUE;
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_RANGE]);
 }
 
 static void
@@ -2021,6 +2140,9 @@ gwy_raster_area_draw(GtkWidget *widget,
     if (!priv->field)
         return FALSE;
 
+    // Postpone emission of notify::range until after we finished drawing.
+    g_object_freeze_notify(G_OBJECT(rasterarea));
+
     if (!priv->pos_and_size_valid)
         calculate_position_and_size(rasterarea);
 
@@ -2041,6 +2163,8 @@ gwy_raster_area_draw(GtkWidget *widget,
         gwy_shapes_draw(priv->shapes, cr);
         cairo_restore(cr);
     }
+
+    g_object_thaw_notify(G_OBJECT(rasterarea));
 
     return FALSE;
 }
