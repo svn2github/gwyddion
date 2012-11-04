@@ -65,6 +65,10 @@ struct _GwyRasterViewPrivate {
     GtkCheckMenuItem *real_distances;
     GtkCheckMenuItem *square_pixels;
     GtkCheckMenuItem *real_aspect_ratio;
+
+    GtkToggleButton *axisbutton;
+    GtkToggleButton *gradbutton;
+    GtkToggleButton *rangebutton;
 };
 
 typedef struct _GwyRasterViewPrivate RasterView;
@@ -109,7 +113,10 @@ static gboolean area_leave_notify           (GwyRasterView *rasterview,
                                              GwyRasterArea *area);
 static gboolean ruler_button_press          (GwyRasterView *rasterview,
                                              GdkEventButton *event,
-                                             GwyRuler*ruler);
+                                             GwyRuler *ruler);
+static void     axis_range_notify           (GwyRasterView *rasterview,
+                                             GParamSpec *pspec,
+                                             GwyColorAxis *coloraxis);
 static void     pop_up_ruler_menu           (GwyRasterView *rasterview,
                                              GtkWidget *widget,
                                              GdkEventButton *event);
@@ -257,9 +264,40 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     g_object_set(coloraxis,
                  "max-tick-level", 2,
                  "ticks-at-edges", TRUE,
+                 "editable-range", TRUE,
                  NULL);
     gtk_grid_attach(grid, coloraxis, 3, 2, 1, 1);
     gtk_widget_show(coloraxis);
+
+    GtkWidget *buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_grid_attach(grid, buttonbox, 3, 0, 1, 2);
+
+    GtkWidget *axisbutton = gtk_radio_button_new(NULL);
+    GtkRadioButton *groupwidget = GTK_RADIO_BUTTON(axisbutton);
+    priv->axisbutton = GTK_TOGGLE_BUTTON(axisbutton);
+    gtk_toggle_button_set_mode(priv->axisbutton, FALSE);
+    gtk_widget_set_can_focus(axisbutton, FALSE);
+    gtk_button_set_relief(GTK_BUTTON(axisbutton), GTK_RELIEF_NONE);
+    gtk_container_add(GTK_CONTAINER(axisbutton), gtk_label_new("A"));
+    gtk_box_pack_start(GTK_BOX(buttonbox), axisbutton, TRUE, TRUE, 0);
+
+    GtkWidget *gradbutton = gtk_radio_button_new_from_widget(groupwidget);
+    priv->gradbutton = GTK_TOGGLE_BUTTON(gradbutton);
+    gtk_toggle_button_set_mode(priv->gradbutton, FALSE);
+    gtk_widget_set_can_focus(gradbutton, FALSE);
+    gtk_button_set_relief(GTK_BUTTON(gradbutton), GTK_RELIEF_NONE);
+    gtk_container_add(GTK_CONTAINER(gradbutton), gtk_label_new("G"));
+    gtk_box_pack_start(GTK_BOX(buttonbox), gradbutton, TRUE, TRUE, 0);
+
+    GtkWidget *rangebutton = gtk_radio_button_new_from_widget(groupwidget);
+    priv->rangebutton = GTK_TOGGLE_BUTTON(rangebutton);
+    gtk_toggle_button_set_mode(priv->rangebutton, FALSE);
+    gtk_widget_set_can_focus(rangebutton, FALSE);
+    gtk_button_set_relief(GTK_BUTTON(rangebutton), GTK_RELIEF_NONE);
+    gtk_container_add(GTK_CONTAINER(rangebutton), gtk_label_new("R"));
+    gtk_box_pack_start(GTK_BOX(buttonbox), rangebutton, TRUE, TRUE, 0);
+
+    gtk_widget_show_all(buttonbox);
 
     g_signal_connect_swapped(area, "notify",
                              G_CALLBACK(area_notify), rasterview);
@@ -275,6 +313,8 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(ruler_button_press), rasterview);
     g_signal_connect_swapped(vruler, "button-press-event",
                              G_CALLBACK(ruler_button_press), rasterview);
+    g_signal_connect_swapped(coloraxis, "notify::range",
+                             G_CALLBACK(axis_range_notify), rasterview);
 }
 
 static void
@@ -770,7 +810,7 @@ area_leave_notify(GwyRasterView *rasterview,
 static gboolean
 ruler_button_press(GwyRasterView *rasterview,
                    GdkEventButton *event,
-                   GwyRuler*ruler)
+                   GwyRuler *ruler)
 {
     if (!gdk_event_triggers_context_menu((GdkEvent*)event)
         || event->type != GDK_BUTTON_PRESS)
@@ -778,6 +818,15 @@ ruler_button_press(GwyRasterView *rasterview,
 
     pop_up_ruler_menu(rasterview, GTK_WIDGET(ruler), event);
     return TRUE;
+}
+
+static void
+axis_range_notify(GwyRasterView *rasterview,
+                  G_GNUC_UNUSED GParamSpec *pspec,
+                  G_GNUC_UNUSED GwyColorAxis *coloraxis)
+{
+    g_printerr("Color axis range changed.  If not initiaed by us then we "
+               "should update mapping!.\n");
 }
 
 static void
