@@ -92,7 +92,7 @@ def process_funcs(text):
         ret = re.sub(r'\<static\>|\<inline\>', '', ret).strip()
         if '_get_' in name:
             hint = 'Gets the '
-        if '_set_' in name:
+        elif '_set_' in name:
             hint = 'Sets the '
         else:
             hint = ''
