@@ -25,7 +25,7 @@
 #include "libgwyui/widget-utils.h"
 #include "libgwyui/color-axis.h"
 
-#define TESTMARKUP "<small>99.9 (μm₁¹)</small>"
+#define TESTMARKUP "<small>199.9 (μm₁¹)</small>"
 
 #define pangoscale ((gdouble)PANGO_SCALE)
 
@@ -449,9 +449,11 @@ gwy_color_axis_get_split_width(const GwyAxis *axis)
         return G_MAXUINT;
 
     GwyColorAxis *coloraxis = GWY_COLOR_AXIS(axis);
-    guint width = gtk_widget_get_allocated_width(GTK_WIDGET(axis));
-    gdouble w = fmax(width*(1.0 - coloraxis->priv->stripewidth) - 2.0, 1.0);
-    return (guint)ceil(w);
+    ColorAxis *priv = coloraxis->priv;
+    guint breadth = gtk_widget_get_allocated_width(GTK_WIDGET(axis));
+    gdouble stripebreadth = priv->stripewidth*breadth;
+    gdouble w = fmax(breadth*(1.0 - priv->stripewidth) - 2.0, 1.0);
+    return (guint)ceil(w - tick_level_sizes[GWY_AXIS_TICK_MINOR]*stripebreadth);
 }
 
 static void

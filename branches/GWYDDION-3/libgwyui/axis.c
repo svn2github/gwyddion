@@ -1605,7 +1605,7 @@ format_value_label(GwyAxis *axis,
 
     gint width, height;
     pango_layout_get_size(priv->layout, &width, &height);
-    if ((guint)(width + PANGO_SCALE-1)/PANGO_SCALE + 2 + 2 < priv->split_width)
+    if ((guint)(width + PANGO_SCALE-1)/PANGO_SCALE <= priv->split_width)
         return;
 
     // Remove any leading whitespace from glue and put a newline there.
