@@ -1758,10 +1758,10 @@ gwy_raster_area_zoom(GwyRasterArea *rasterarea,
 
         GwyField *field = priv->field;
         GtkWidget *widget = GTK_WIDGET(rasterarea);
-        GtkAllocation alloc;
-        gtk_widget_get_allocation(widget, &alloc);
-        gdouble xscale = (gdouble)alloc.width/field->xres;
-        gdouble yscale = (gdouble)alloc.height/field->yres;
+        GtkAllocation allocation;
+        gtk_widget_get_allocation(widget, &allocation);
+        gdouble xscale = (gdouble)allocation.width/field->xres;
+        gdouble yscale = (gdouble)allocation.height/field->yres;
         if (priv->real_aspect_ratio)
             yscale *= gwy_field_dx(field)/gwy_field_dy(field);
 
@@ -2474,16 +2474,33 @@ mask_notify(GwyRasterArea *rasterarea,
 static void
 field_data_changed(GwyRasterArea *rasterarea,
                    GwyFieldPart *fpart,
-                   GwyField *field)
+                   G_GNUC_UNUSED GwyField *field)
 {
     RasterArea *priv = rasterarea->priv;
 
-    if (priv->range_from_method != GWY_COLOR_RANGE_USER
-        || priv->range_to_method != GWY_COLOR_RANGE_USER)
-        priv->range_valid = FALSE;
+    gboolean fixed_range = (priv->range_from_method == GWY_COLOR_RANGE_USER
+                            && priv->range_to_method != GWY_COLOR_RANGE_USER);
 
     priv->field_surface_valid = FALSE;
-    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+    if (!fixed_range)
+        priv->range_valid = FALSE;
+
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
+    if (!fixed_range || !fpart) {
+        gtk_widget_queue_draw(widget);
+        return;
+    }
+
+    gdouble xf = fpart->col, yf = fpart->row,
+            xt = fpart->col + fpart->width, yt = fpart->row + fpart->height;
+    cairo_matrix_transform_point(&priv->field_to_window_matrix, &xf, &yf);
+    cairo_matrix_transform_point(&priv->field_to_window_matrix, &xt, &yt);
+    const cairo_rectangle_int_t *irect = &priv->image_rectangle;
+    gint ixf = CLAMP((gint)floor(xf), irect->x, irect->x + irect->width);
+    gint iyf = CLAMP((gint)floor(yf), irect->y, irect->y + irect->height);
+    gint ixt = CLAMP((gint)ceil(xt), irect->x, irect->x + irect->width);
+    gint iyt = CLAMP((gint)ceil(yt), irect->y, irect->y + irect->height);
+    gtk_widget_queue_draw_area(widget, ixf, iyf, ixt+1 - ixf, iyt+1 - iyf);
 }
 
 static void
