@@ -84,10 +84,10 @@ enum {
     PROP_NUMERIC,
     PROP_WRAP,
     PROP_UPDATE_POLICY,
-    PROP_VALUE
+    PROP_VALUE,
+    N_PROPS
 };
 
-/* Signals */
 enum {
     SGNL_INPUT,
     SGNL_OUTPUT,
@@ -97,6 +97,10 @@ enum {
     N_SIGNALS
 };
 
+static void     add_spin_binding                   (GtkBindingSet *binding_set,
+                                                    guint keyval,
+                                                    GdkModifierType mask,
+                                                    GtkScrollType scroll);
 static void     gwy_spin_button_editable_init      (GtkEditableInterface *iface);
 static void     gwy_spin_button_finalize           (GObject *object);
 static void     gwy_spin_button_set_property       (GObject *object,
@@ -168,24 +172,19 @@ static gint     gwy_spin_button_default_input      (GwySpinButton *spinbutton,
                                                     gdouble *new_val);
 static gint     gwy_spin_button_default_output     (GwySpinButton *spinbutton);
 static gint     spin_button_get_arrow_size         (GwySpinButton *spinbutton);
+static gboolean boolean_handled_accumulator        (GSignalInvocationHint *ihint,
+                                                    GValue *return_accu,
+                                                    const GValue *handler_return,
+                                                    gpointer dummy);
+static void     entry_get_borders                  (GtkEntry *entry,
+                                                    GtkBorder *border_out);
 
-static gboolean boolean_handled_accumulator(GSignalInvocationHint *ihint,
-                                            GValue *return_accu,
-                                            const GValue *handler_return,
-                                            gpointer dummy);
-static void entry_get_borders(GtkEntry *entry,
-                              GtkBorder *border_out);
-
+static GParamSpec *properties[N_PROPS];
 static guint spinbutton_signals[N_SIGNALS];
 
 G_DEFINE_TYPE_WITH_CODE(GwySpinButton, gwy_spin_button, GTK_TYPE_ENTRY,
                         G_IMPLEMENT_INTERFACE(GTK_TYPE_EDITABLE,
                                               gwy_spin_button_editable_init));
-
-#define add_spin_binding(binding_set, keyval, mask, scroll)                 \
-        gtk_binding_entry_add_signal(binding_set, keyval, mask,             \
-                                     "change_value", 1,                     \
-                                     GTK_TYPE_SCROLL_TYPE, scroll)
 
 static void
 gwy_spin_button_class_init(GwySpinButtonClass *class)
@@ -193,6 +192,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     GObjectClass *gobject_class = G_OBJECT_CLASS(class);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(class);
     GtkEntryClass *entry_class = GTK_ENTRY_CLASS(class);
+    GParamSpec *pspec;
 
     gobject_class->finalize = gwy_spin_button_finalize;
     gobject_class->set_property = gwy_spin_button_set_property;
@@ -225,84 +225,80 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     class->output = NULL;
     class->change_value = gwy_spin_button_real_change_value;
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_ADJUSTMENT,
-                                    g_param_spec_object("adjustment",
-                                                        "Adjustment",
-                                                        "The adjustment that holds the value of the spin button",
-                                                        GTK_TYPE_ADJUSTMENT,
-                                                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_ADJUSTMENT]
+        = g_param_spec_object("adjustment",
+                              "Adjustment",
+                              "The adjustment that holds the value of the "
+                              "spin button",
+                              GTK_TYPE_ADJUSTMENT,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_CLIMB_RATE,
-                                    g_param_spec_double("climb-rate",
-                                                        "Climb Rate",
-                                                        "The acceleration rate when you hold down a button",
-                                                        0.0,
-                                                        G_MAXDOUBLE,
-                                                        0.0,
-                                                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_CLIMB_RATE]
+        = g_param_spec_double("climb-rate",
+                              "Climb Rate",
+                              "The acceleration rate when you hold down "
+                              "a button",
+                              0.0, G_MAXDOUBLE, 0.0,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_DIGITS,
-                                    g_param_spec_uint("digits",
-                                                      "Digits",
-                                                      "The number of decimal places to display",
-                                                      0,
-                                                      MAX_DIGITS,
-                                                      0,
-                                                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_DIGITS]
+        = g_param_spec_uint("digits",
+                            "Digits",
+                            "The number of decimal places to display",
+                            0, MAX_DIGITS, 0,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_SNAP_TO_TICKS,
-                                    g_param_spec_boolean("snap-to-ticks",
-                                                         "Snap to Ticks",
-                                                         "Whether erroneous values are automatically changed to a spin button's nearest step increment",
-                                                         FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_SNAP_TO_TICKS]
+        = g_param_spec_boolean("snap-to-ticks",
+                               "Snap to Ticks",
+                               "Whether erroneous values are automatically "
+                               "changed to a spin button's nearest step "
+                               "increment",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_NUMERIC,
-                                    g_param_spec_boolean("numeric",
-                                                         "Numeric",
-                                                         "Whether non-numeric characters should be ignored",
-                                                         FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_NUMERIC]
+        = g_param_spec_boolean("numeric",
+                               "Numeric",
+                               "Whether non-numeric characters should be "
+                               "ignored",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_WRAP,
-                                    g_param_spec_boolean("wrap",
-                                                         "Wrap",
-                                                         "Whether a spin button should wrap upon reaching its limits",
-                                                         FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_WRAP]
+        = g_param_spec_boolean("wrap",
+                               "Wrap",
+                               "Whether a spin button should wrap upon "
+                               "reaching its limits",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_UPDATE_POLICY,
-                                    g_param_spec_enum("update-policy",
-                                                      "Update Policy",
-                                                      "Whether the spin button should update always, or only when the value is legal",
-                                                      GTK_TYPE_SPIN_BUTTON_UPDATE_POLICY,
-                                                      GTK_UPDATE_ALWAYS,
-                                                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_UPDATE_POLICY]
+        = g_param_spec_enum("update-policy",
+                            "Update Policy",
+                            "Whether the spin button should update always, "
+                            "or only when the value is legal.",
+                            GTK_TYPE_SPIN_BUTTON_UPDATE_POLICY,
+                            GTK_UPDATE_ALWAYS,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_VALUE,
-                                    g_param_spec_double("value",
-                                                        "Value",
-                                                        "Reads the current value, or sets a new value",
-                                                        -G_MAXDOUBLE,
-                                                        G_MAXDOUBLE,
-                                                        0.0,
-                                                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    properties[PROP_VALUE]
+        = g_param_spec_double("value",
+                              "Value",
+                              "Reads the current value, or sets a new value",
+                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    gtk_widget_class_install_style_property_parser(widget_class,
-                                                   g_param_spec_enum("shadow-type",
-                                                                     "Shadow Type",
-                                                                     "Style of bevel around the spin button",
-                                                                     GTK_TYPE_SHADOW_TYPE,
-                                                                     GTK_SHADOW_IN,
-                                                                     G_PARAM_READABLE | G_PARAM_STATIC_STRINGS),
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, properties[i]);
+
+    pspec = g_param_spec_enum("shadow-type",
+                              "Shadow Type",
+                              "Style of bevel around the spin button",
+                              GTK_TYPE_SHADOW_TYPE,
+                              GTK_SHADOW_IN,
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+    gtk_widget_class_install_style_property_parser(widget_class, pspec,
                                                    gtk_rc_property_parse_enum);
 
     /**
@@ -419,6 +415,16 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     add_spin_binding(binding_set, GDK_KEY_Page_Down, GDK_CONTROL_MASK, GTK_SCROLL_START);
 
     g_type_class_add_private(class, sizeof(GwySpinButtonPrivate));
+}
+
+static void
+add_spin_binding(GtkBindingSet *binding_set,
+                 guint keyval, GdkModifierType mask,
+                 GtkScrollType scroll)
+{
+    gtk_binding_entry_add_signal(binding_set, keyval, mask,
+                                 "change-value", 1,
+                                 GTK_TYPE_SCROLL_TYPE, scroll);
 }
 
 static void
@@ -1895,7 +1901,7 @@ gwy_spin_button_set_adjustment(GwySpinButton *spinbutton,
  *
  * Get the adjustment associated with a spin button.
  *
- * Return value: (transfer none): 
+ * Return value: (transfer none):
  *               The adjustment used by @spinbutton.
  **/
 GtkAdjustment *
