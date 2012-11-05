@@ -31,6 +31,7 @@
 #include <libgwyui/scroller.h>
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-point.h>
+#include <libgwyui/spin-button.h>
 #include <libgwyui/types.h>
 #include <libgwyui/widget-utils.h>
 

@@ -29,6 +29,7 @@ public_headers = \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
 	$(srcdir)/shapes-point.h \
+	$(srcdir)/spin-button.h \
 	$(srcdir)/widget-utils.h
 
 public_built_headers = \
@@ -68,8 +69,9 @@ libgwyui3_la_SOURCES = \
 	raster-view.c \
 	ruler.c \
 	scroller.c \
-	shapes-point.c \
 	shapes.c \
+	shapes-point.c \
+	spin-button.c \
 	types.c \
 	widget-utils.c
 
