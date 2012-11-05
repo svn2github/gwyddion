@@ -244,7 +244,7 @@ test_line_serialize_failure_nodata(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Line contains no data.");
+                       "GwyLine contains no data.");
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);

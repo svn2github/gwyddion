@@ -529,7 +529,7 @@ test_mask_field_serialize_failure_xres0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Mask field dimensions %u×%u are invalid.", 0, 2);
+                       "GwyMaskField dimensions %u×%u are invalid.", 0, 2);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
@@ -560,7 +560,7 @@ test_mask_field_serialize_failure_yres0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Mask field dimensions %u×%u are invalid.", 3, 0);
+                       "GwyMaskField dimensions %u×%u are invalid.", 3, 0);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
@@ -598,7 +598,8 @@ test_mask_field_serialize_failure_size(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Mask field dimensions %u×%u do not match data size %lu.",
+                       "GwyMaskField dimensions %u×%u do not match "
+                       "data size %lu.",
                        3, 2, (gulong)len);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);

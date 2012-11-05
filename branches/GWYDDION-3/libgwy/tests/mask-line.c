@@ -263,7 +263,7 @@ test_mask_line_serialize_failure_res0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Mask line dimension %u is invalid.", 0);
+                       "GwyMaskLine dimension %u is invalid.", 0);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
@@ -297,7 +297,7 @@ test_mask_line_serialize_failure_size(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Mask line dimension %u does not match data size %lu.",
+                       "GwyMaskLine dimension %u does not match data size %lu.",
                        3, (gulong)len);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);

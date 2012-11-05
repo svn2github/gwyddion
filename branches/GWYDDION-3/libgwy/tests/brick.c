@@ -423,7 +423,7 @@ test_brick_serialize_failure_xres0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Brick dimensions %u×%u×%u are invalid.", 0, 2, 1);
+                       "GwyBrick dimensions %u×%u×%u are invalid.", 0, 2, 1);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
@@ -470,7 +470,7 @@ test_brick_serialize_failure_yres0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Brick dimensions %u×%u×%u are invalid.", 3, 0, 1);
+                       "GwyBrick dimensions %u×%u×%u are invalid.", 3, 0, 1);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
@@ -517,7 +517,7 @@ test_brick_serialize_failure_zres0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Brick dimensions %u×%u×%u are invalid.", 3, 2, 0);
+                       "GwyBrick dimensions %u×%u×%u are invalid.", 3, 2, 0);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);
@@ -571,7 +571,8 @@ test_brick_serialize_failure_size(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "Brick dimensions %u×%u×%u do not match data size %lu.",
+                       "GwyBrick dimensions %u×%u×%u do not match "
+                       "data size %lu.",
                        3, 2, 1, (gulong)len);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
