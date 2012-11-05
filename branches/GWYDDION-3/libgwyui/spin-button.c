@@ -89,12 +89,12 @@ enum {
 
 /* Signals */
 enum {
-    INPUT,
-    OUTPUT,
-    VALUE_CHANGED,
-    CHANGE_VALUE,
-    WRAPPED,
-    LAST_SIGNAL
+    SGNL_INPUT,
+    SGNL_OUTPUT,
+    SGNL_VALUE_CHANGED,
+    SGNL_CHANGE_VALUE,
+    SGNL_WRAPPED,
+    N_SIGNALS
 };
 
 static void     gwy_spin_button_editable_init      (GtkEditableInterface *iface);
@@ -176,7 +176,7 @@ static gboolean boolean_handled_accumulator(GSignalInvocationHint *ihint,
 static void entry_get_borders(GtkEntry *entry,
                               GtkBorder *border_out);
 
-static guint spinbutton_signals[LAST_SIGNAL];
+static guint spinbutton_signals[N_SIGNALS];
 
 G_DEFINE_TYPE_WITH_CODE(GwySpinButton, gwy_spin_button, GTK_TYPE_ENTRY,
                         G_IMPLEMENT_INTERFACE(GTK_TYPE_EDITABLE,
@@ -322,7 +322,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
      *     was not handled, and %GTK_INPUT_ERROR if the conversion failed.
      */
 
-    spinbutton_signals[INPUT]
+    spinbutton_signals[SGNL_INPUT]
         = g_signal_new("input",
                        G_TYPE_FROM_CLASS(gobject_class),
                        G_SIGNAL_RUN_LAST,
@@ -360,7 +360,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
      *
      * Returns: %TRUE if the value has been displayed
      */
-    spinbutton_signals[OUTPUT]
+    spinbutton_signals[SGNL_OUTPUT]
         = g_signal_new("output",
                        G_TYPE_FROM_CLASS(gobject_class),
                        G_SIGNAL_RUN_LAST,
@@ -369,7 +369,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
                        _gwy_cclosure_marshal_BOOLEAN__VOID,
                        G_TYPE_BOOLEAN, 0);
 
-    spinbutton_signals[VALUE_CHANGED]
+    spinbutton_signals[SGNL_VALUE_CHANGED]
         = g_signal_new("value-changed",
                        G_TYPE_FROM_CLASS(gobject_class),
                        G_SIGNAL_RUN_LAST,
@@ -387,7 +387,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
      *
      * Since: 2.10
      */
-    spinbutton_signals[WRAPPED] =
+    spinbutton_signals[SGNL_WRAPPED] =
         g_signal_new("wrapped",
                      G_TYPE_FROM_CLASS(gobject_class),
                      G_SIGNAL_RUN_LAST,
@@ -397,7 +397,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
                      G_TYPE_NONE, 0);
 
     /* Action signals */
-    spinbutton_signals[CHANGE_VALUE] =
+    spinbutton_signals[SGNL_CHANGE_VALUE] =
         g_signal_new("change-value",
                      G_TYPE_FROM_CLASS(gobject_class),
                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
@@ -664,7 +664,7 @@ gwy_spin_button_realize(GtkWidget *widget)
     gdk_window_set_user_data(priv->panel, widget);
 
     return_val = FALSE;
-    g_signal_emit(spinbutton, spinbutton_signals[OUTPUT], 0, &return_val);
+    g_signal_emit(spinbutton, spinbutton_signals[SGNL_OUTPUT], 0, &return_val);
     if (return_val == FALSE)
         gwy_spin_button_default_output(spinbutton);
 
@@ -1350,11 +1350,11 @@ gwy_spin_button_value_changed(GtkAdjustment *adjustment,
     g_return_if_fail(GTK_IS_ADJUSTMENT(adjustment));
 
     return_val = FALSE;
-    g_signal_emit(spinbutton, spinbutton_signals[OUTPUT], 0, &return_val);
+    g_signal_emit(spinbutton, spinbutton_signals[SGNL_OUTPUT], 0, &return_val);
     if (return_val == FALSE)
         gwy_spin_button_default_output(spinbutton);
 
-    g_signal_emit(spinbutton, spinbutton_signals[VALUE_CHANGED], 0);
+    g_signal_emit(spinbutton, spinbutton_signals[SGNL_VALUE_CHANGED], 0);
 
     gtk_widget_queue_draw(GTK_WIDGET(spinbutton));
 
@@ -1674,7 +1674,7 @@ gwy_spin_button_real_spin(GwySpinButton *spinbutton,
         gtk_adjustment_set_value(adjustment, new_value);
 
     if (wrapped)
-        g_signal_emit(spinbutton, spinbutton_signals[WRAPPED], 0);
+        g_signal_emit(spinbutton, spinbutton_signals[SGNL_WRAPPED], 0);
 
     gtk_widget_queue_draw(GTK_WIDGET(spinbutton));
 }
@@ -2129,7 +2129,8 @@ gwy_spin_button_set_value(GwySpinButton *spinbutton,
         gtk_adjustment_set_value(priv->adjustment, value);
     else {
         gint return_val = FALSE;
-        g_signal_emit(spinbutton, spinbutton_signals[OUTPUT], 0, &return_val);
+        g_signal_emit(spinbutton, spinbutton_signals[SGNL_OUTPUT], 0,
+                      &return_val);
         if (return_val == FALSE)
             gwy_spin_button_default_output(spinbutton);
     }
@@ -2432,7 +2433,8 @@ gwy_spin_button_update(GwySpinButton *spinbutton)
     priv = spinbutton->priv;
 
     return_val = FALSE;
-    g_signal_emit(spinbutton, spinbutton_signals[INPUT], 0, &val, &return_val);
+    g_signal_emit(spinbutton, spinbutton_signals[SGNL_INPUT], 0, &val,
+                  &return_val);
     if (return_val == FALSE) {
         return_val = gwy_spin_button_default_input(spinbutton, &val);
         error = (return_val == GTK_INPUT_ERROR);

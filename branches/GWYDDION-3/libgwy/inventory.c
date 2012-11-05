@@ -27,11 +27,11 @@
 #include "libgwy/object-internal.h"
 
 enum {
-    SGN_ITEM_INSERTED,
-    SGN_ITEM_DELETED,
-    SGN_ITEM_UPDATED,
-    SGN_ITEMS_REORDERED,
-    SGN_DEFAULT_CHANGED,
+    SGNL_ITEM_INSERTED,
+    SGNL_ITEM_DELETED,
+    SGNL_ITEM_UPDATED,
+    SGNL_ITEMS_REORDERED,
+    SGNL_DEFAULT_CHANGED,
     N_SIGNALS
 };
 
@@ -90,7 +90,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * The ::item-inserted signal is emitted when an item is inserted into
      * the inventory.
      **/
-    signals[SGN_ITEM_INSERTED]
+    signals[SGNL_ITEM_INSERTED]
         = g_signal_new_class_handler("item-inserted",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -106,7 +106,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * The ::item-deleted signal is emitted when an item is deleted from
      * the inventory.
      **/
-    signals[SGN_ITEM_DELETED]
+    signals[SGNL_ITEM_DELETED]
         = g_signal_new_class_handler("item-deleted",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -122,7 +122,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * The ::item-updated signal is emitted when an item in the inventory
      * is updated.
      **/
-    signals[SGN_ITEM_UPDATED]
+    signals[SGNL_ITEM_UPDATED]
         = g_signal_new_class_handler("item-updated",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -139,7 +139,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * The ::items-reordered signal is emitted when item in the inventory
      * are reordered.
      **/
-    signals[SGN_ITEMS_REORDERED]
+    signals[SGNL_ITEMS_REORDERED]
         = g_signal_new_class_handler("items-reordered",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -155,7 +155,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * default inventory item name changes or the presence of such an item
      * in the inventory changes.
      **/
-    signals[SGN_DEFAULT_CHANGED]
+    signals[SGNL_DEFAULT_CHANGED]
         = g_signal_new_class_handler("default-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -593,7 +593,7 @@ gwy_inventory_set_default_name(GwyInventory *inventory,
     Inventory *priv = inventory->priv;
     g_return_if_fail(priv->has_item_type);
     if (_gwy_assign_string(&priv->default_key, name))
-        g_signal_emit(inventory, signals[SGN_DEFAULT_CHANGED], 0);
+        g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 }
 
 /**
@@ -640,7 +640,7 @@ gwy_inventory_nth_updated(GwyInventory *inventory,
     g_return_if_fail(priv->has_item_type);
     g_return_if_fail(n < (guint)g_sequence_get_length(priv->items));
 
-    g_signal_emit(inventory, signals[SGN_ITEM_UPDATED], 0, n);
+    g_signal_emit(inventory, signals[SGNL_ITEM_UPDATED], 0, n);
 }
 
 /**
@@ -683,11 +683,11 @@ gwy_inventory_insert(GwyInventory *inventory,
 
     register_item(inventory, iter, item);
 
-    g_signal_emit(inventory, signals[SGN_ITEM_INSERTED], 0,
+    g_signal_emit(inventory, signals[SGNL_ITEM_INSERTED], 0,
                   g_sequence_iter_get_position(iter));
     if (priv->default_key
         && gwy_strequal(name, priv->default_key))
-        g_signal_emit(inventory, signals[SGN_DEFAULT_CHANGED], 0);
+        g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 
     return item;
 }
@@ -736,10 +736,10 @@ gwy_inventory_insert_nth(GwyInventory *inventory,
     priv->is_sorted = item_is_in_order(priv, iter, item);
     register_item(inventory, iter, item);
 
-    g_signal_emit(inventory, signals[SGN_ITEM_INSERTED], 0, n);
+    g_signal_emit(inventory, signals[SGNL_ITEM_INSERTED], 0, n);
     if (priv->default_key
         && gwy_strequal(name, priv->default_key))
-        g_signal_emit(inventory, signals[SGN_DEFAULT_CHANGED], 0);
+        g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 
     return item;
 }
@@ -765,7 +765,7 @@ gwy_inventory_restore_order(GwyInventory *inventory)
     // Remember old positions if we have to.
     guint nitems = (guint)g_sequence_get_length(priv->items);
     GSequenceIter **positions = NULL;
-    if (g_signal_has_handler_pending(inventory, signals[SGN_ITEMS_REORDERED],
+    if (g_signal_has_handler_pending(inventory, signals[SGNL_ITEMS_REORDERED],
                                      0, FALSE)) {
         positions = g_slice_alloc(sizeof(GSequenceIter*)*nitems);
         GSequenceIter *iter = g_sequence_get_begin_iter(priv->items);
@@ -788,7 +788,7 @@ gwy_inventory_restore_order(GwyInventory *inventory)
         new_order[g_sequence_iter_get_position(positions[i])] = i;
 
     g_slice_free1(sizeof(GSequenceIter*)*nitems, positions);
-    g_signal_emit(inventory, signals[SGN_ITEMS_REORDERED], 0, new_order);
+    g_signal_emit(inventory, signals[SGNL_ITEMS_REORDERED], 0, new_order);
     g_slice_free1(sizeof(guint)*nitems, new_order);
 }
 
@@ -838,9 +838,9 @@ delete_item(GwyInventory *inventory,
                             && gwy_strequal(name, priv->default_key));
     discard_item(inventory, iter);
 
-    g_signal_emit(inventory, signals[SGN_ITEM_DELETED], 0, n);
+    g_signal_emit(inventory, signals[SGNL_ITEM_DELETED], 0, n);
     if (emit_change)
-        g_signal_emit(inventory, signals[SGN_DEFAULT_CHANGED], 0);
+        g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 }
 
 /**
@@ -896,7 +896,7 @@ emit_reordered_for_move(GwyInventory *inventory,
                         guint nnew)
 {
     if (nold == nnew
-        || !g_signal_has_handler_pending(inventory, signals[SGN_ITEMS_REORDERED],
+        || !g_signal_has_handler_pending(inventory, signals[SGNL_ITEMS_REORDERED],
                                          0, FALSE))
         return;
 
@@ -922,7 +922,7 @@ emit_reordered_for_move(GwyInventory *inventory,
             new_order[i] = i;
     }
 
-    g_signal_emit(inventory, signals[SGN_ITEMS_REORDERED], 0, new_order);
+    g_signal_emit(inventory, signals[SGNL_ITEMS_REORDERED], 0, new_order);
     g_slice_free1(sizeof(guint)*nitems, new_order);
 }
 
@@ -1003,11 +1003,11 @@ gwy_inventory_rename(GwyInventory *inventory,
         n = nnew;
     }
 
-    g_signal_emit(inventory, signals[SGN_ITEM_UPDATED], 0, n);
+    g_signal_emit(inventory, signals[SGNL_ITEM_UPDATED], 0, n);
     if (priv->default_key
         && (gwy_strequal(name, priv->default_key)
             || gwy_strequal(newname, priv->default_key)))
-        g_signal_emit(inventory, signals[SGN_DEFAULT_CHANGED], 0);
+        g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 
     return iter;
 }
@@ -1088,7 +1088,7 @@ static void
 emit_item_updated(GwyInventory *inventory,
                   GSequenceIter *iter)
 {
-    g_signal_emit(inventory, signals[SGN_ITEM_UPDATED], 0,
+    g_signal_emit(inventory, signals[SGNL_ITEM_UPDATED], 0,
                   g_sequence_iter_get_position(iter));
 }
 

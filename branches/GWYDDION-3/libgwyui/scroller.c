@@ -31,7 +31,7 @@ enum {
 };
 
 enum {
-    SGN_SCROLL_CHILD,
+    SGNL_SCROLL_CHILD,
     N_SIGNALS
 };
 
@@ -138,7 +138,7 @@ gwy_scroller_class_init(GwyScrollerClass *klass)
      * The horizontal or vertical adjustment is updated which triggers a
      * signal that the scroller child may listen to and scroll itself.
      */
-    signals[SGN_SCROLL_CHILD]
+    signals[SGNL_SCROLL_CHILD]
         = g_signal_new_class_handler("scroll-child",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,

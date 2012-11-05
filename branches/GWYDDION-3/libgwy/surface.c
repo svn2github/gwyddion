@@ -32,7 +32,7 @@
 enum { N_ITEMS = 3 };
 
 enum {
-    SGN_DATA_CHANGED,
+    SGNL_DATA_CHANGED,
     N_SIGNALS
 };
 
@@ -131,7 +131,7 @@ gwy_surface_class_init(GwySurfaceClass *klass)
      *
      * The ::data-changed signal is emitted whenever surface data changes.
      **/
-    signals[SGN_DATA_CHANGED]
+    signals[SGNL_DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -582,7 +582,7 @@ void
 gwy_surface_data_changed(GwySurface *surface)
 {
     g_return_if_fail(GWY_IS_SURFACE(surface));
-    g_signal_emit(surface, signals[SGN_DATA_CHANGED], 0);
+    g_signal_emit(surface, signals[SGNL_DATA_CHANGED], 0);
 }
 
 /**

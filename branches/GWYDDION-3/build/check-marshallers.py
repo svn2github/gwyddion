@@ -26,12 +26,12 @@ for filename in sys.argv[1:]:
     for m in signal_re.finditer(code):
         lineno = code.count('\n', 0, m.start()) + 1
         nameuc = m.group('nameuc')
-        if not nameuc.startswith('SGN_'):
+        if not nameuc.startswith('SGNL_'):
             sys.stderr.write('%s:%s: Signal identifier %s does not '
-                             'start with SGN_.\n'
+                             'start with SGNL_.\n'
                              % (filename, lineno, nameuc))
             status = max(status, 1)
-        nameuc = re.sub(r'^SGN_', '', nameuc)
+        nameuc = re.sub(r'^SGNL_', '', nameuc)
 
         args = [x.strip() for x in m.group('args').split(',')]
 

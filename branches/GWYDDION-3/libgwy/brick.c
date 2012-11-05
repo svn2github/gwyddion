@@ -33,7 +33,7 @@
 enum { N_ITEMS = 13 };
 
 enum {
-    SGN_DATA_CHANGED,
+    SGNL_DATA_CHANGED,
     N_SIGNALS
 };
 
@@ -223,7 +223,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
      * it explicitly with gwy_brick_data_changed() to notify anything that
      * displays (or otherwise uses) the brick.
      **/
-    signals[SGN_DATA_CHANGED]
+    signals[SGNL_DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -876,7 +876,7 @@ gwy_brick_data_changed(GwyBrick *brick,
                        GwyBrickPart *bpart)
 {
     g_return_if_fail(GWY_IS_BRICK(brick));
-    g_signal_emit(brick, signals[SGN_DATA_CHANGED], 0, bpart);
+    g_signal_emit(brick, signals[SGNL_DATA_CHANGED], 0, bpart);
 }
 
 /**

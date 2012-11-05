@@ -31,7 +31,7 @@
 enum { N_ITEMS = 5 };
 
 enum {
-    SGN_DATA_CHANGED,
+    SGNL_DATA_CHANGED,
     N_SIGNALS
 };
 
@@ -154,7 +154,7 @@ gwy_line_class_init(GwyLineClass *klass)
      * it explicitly with gwy_line_data_changed() to notify anything that
      * displays (or otherwise uses) the line.
      **/
-    signals[SGN_DATA_CHANGED]
+    signals[SGNL_DATA_CHANGED]
         = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -863,7 +863,7 @@ gwy_line_data_changed(GwyLine *line,
                       GwyLinePart *lpart)
 {
     g_return_if_fail(GWY_IS_LINE(line));
-    g_signal_emit(line, signals[SGN_DATA_CHANGED], 0, lpart);
+    g_signal_emit(line, signals[SGNL_DATA_CHANGED], 0, lpart);
 }
 
 /**

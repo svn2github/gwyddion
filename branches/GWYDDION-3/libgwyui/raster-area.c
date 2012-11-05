@@ -57,8 +57,8 @@ enum {
 };
 
 enum {
-    SGN_SCROLL,
-    SGN_ZOOM,
+    SGNL_SCROLL,
+    SGNL_ZOOM,
     N_SIGNALS
 };
 
@@ -467,7 +467,7 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
      * as %GTK_SCROLL_STEP_LEFT since one-dimensional scrolling types such as
      * %GTK_SCROLL_PAGE_BACKWARD are meaningless.
      */
-    signals[SGN_SCROLL]
+    signals[SGNL_SCROLL]
         = g_signal_new_class_handler("scroll",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
@@ -487,7 +487,7 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
      * which gets emitted when a keybinding that scrolls is pressed.
      * The raster area then zooms itself as requested.
      */
-    signals[SGN_ZOOM]
+    signals[SGNL_ZOOM]
         = g_signal_new_class_handler("zoom",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,

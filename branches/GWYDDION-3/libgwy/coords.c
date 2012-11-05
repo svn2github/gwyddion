@@ -28,7 +28,7 @@
 enum { N_ITEMS = 2 };
 
 enum {
-    SGN_FINISHED,
+    SGNL_FINISHED,
     N_SIGNALS
 };
 
@@ -142,7 +142,7 @@ gwy_coords_class_init(GwyCoordsClass *klass)
      * when it is done with the modifications and the coords are in the final
      * state.
      **/
-    signals[SGN_FINISHED]
+    signals[SGNL_FINISHED]
         = g_signal_new_class_handler("finished",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
@@ -759,7 +759,7 @@ void
 gwy_coords_finished(GwyCoords *coords)
 {
     g_return_if_fail(GWY_IS_COORDS(coords));
-    g_signal_emit(coords, signals[SGN_FINISHED], 0);
+    g_signal_emit(coords, signals[SGNL_FINISHED], 0);
 }
 
 /**

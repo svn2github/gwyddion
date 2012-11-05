@@ -29,10 +29,10 @@
     ((gpointer)((guchar*)(p) + (i)*((a)->size)))
 
 enum {
-    SGN_ITEM_INSERTED,
-    SGN_ITEM_DELETED,
-    SGN_ITEM_UPDATED,
-    //SGN_ITEMS_REORDERED,  maybe, if/when we add sort()
+    SGNL_ITEM_INSERTED,
+    SGNL_ITEM_DELETED,
+    SGNL_ITEM_UPDATED,
+    //SGNL_ITEMS_REORDERED,  maybe, if/when we add sort()
     N_SIGNALS
 };
 
@@ -71,7 +71,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      * The ::item-inserted signal is emitted when an item is inserted into
      * the array.
      **/
-    signals[SGN_ITEM_INSERTED]
+    signals[SGNL_ITEM_INSERTED]
         = g_signal_new_class_handler("item-inserted",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -87,7 +87,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      * The ::item-deleted signal is emitted when an item is deleted from
      * the array.
      **/
-    signals[SGN_ITEM_DELETED]
+    signals[SGNL_ITEM_DELETED]
         = g_signal_new_class_handler("item-deleted",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -103,7 +103,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      * The ::item-updated signal is emitted when an item in the array
      * is updated.
      **/
-    signals[SGN_ITEM_UPDATED]
+    signals[SGNL_ITEM_UPDATED]
         = g_signal_new_class_handler("item-updated",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -121,7 +121,7 @@ gwy_array_class_init(GwyArrayClass *klass)
    * The ::items-reordered signal is emitted when item in the array
    * are reordered.
    **/
-  signals[SGN_ITEMS_REORDERED]
+  signals[SGNL_ITEMS_REORDERED]
       = g_signal_new_class_handler("items-reordered",
                                    G_OBJECT_CLASS_TYPE(klass),
                                    G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -296,7 +296,7 @@ gwy_array_updated(GwyArray *array,
     g_return_if_fail(priv->items);
     g_return_if_fail(n < priv->items->len);
 
-    g_signal_emit(array, signals[SGN_ITEM_UPDATED], 0, n);
+    g_signal_emit(array, signals[SGNL_ITEM_UPDATED], 0, n);
 }
 
 /**
@@ -342,7 +342,7 @@ gwy_array_insert(GwyArray *array,
     for (guint i = 0; i < nitems; i++) {
         g_array_insert_vals(priv->items, n + i,
                             gwy_data_index(priv, items, i), 1);
-        g_signal_emit(array, signals[SGN_ITEM_INSERTED], 0, n + i);
+        g_signal_emit(array, signals[SGNL_ITEM_INSERTED], 0, n + i);
     }
 
     return gwy_array_index(priv, n);
@@ -383,7 +383,7 @@ gwy_array_append(GwyArray *array,
     ensure_items(priv);
     for (guint i = 0; i < nitems; i++) {
         g_array_append_vals(priv->items, gwy_data_index(priv, items, i), 1);
-        g_signal_emit(array, signals[SGN_ITEM_INSERTED], 0,
+        g_signal_emit(array, signals[SGNL_ITEM_INSERTED], 0,
                       priv->items->len - 1);
     }
 
@@ -422,7 +422,7 @@ gwy_array_delete(GwyArray *array,
         if (priv->destroy)
             priv->destroy(gwy_array_index(priv, j));
         g_array_remove_index(priv->items, j);
-        g_signal_emit(array, signals[SGN_ITEM_DELETED], 0, j);
+        g_signal_emit(array, signals[SGNL_ITEM_DELETED], 0, j);
     }
 }
 
@@ -462,7 +462,7 @@ gwy_array_replace(GwyArray *array,
             priv->destroy(gwy_array_index(priv, j));
         memcpy(gwy_array_index(priv, j), gwy_data_index(priv, items, i),
                priv->size);
-        g_signal_emit(array, signals[SGN_ITEM_UPDATED], 0, j);
+        g_signal_emit(array, signals[SGNL_ITEM_UPDATED], 0, j);
     }
 }
 
