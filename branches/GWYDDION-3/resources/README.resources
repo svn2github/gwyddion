@@ -1,0 +1,8 @@
+We have resources/ and data/.
+
+The former is built before everything because it contains things we want to
+embed into the libraries/application.
+
+The latter, on the other hand, contains data not needed for compilation, in
+fact, the data there may require compiling the beast first.
+
