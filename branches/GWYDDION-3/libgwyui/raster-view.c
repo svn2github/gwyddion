@@ -144,6 +144,17 @@ static void       ruler_popup_deleted         (GtkWidget *menu);
 
 static GParamSpec *properties[N_PROPS];
 
+// FIXME: Place the CSS to resources.  Use a libgwyui-level style provider.
+static GtkCssProvider *cssprovider = NULL;
+static const gchar css[] =
+"GtkButton#gwy-raster-view-axis-button {\n"
+"    border-style: none;\n"
+"    border-width: 0;\n"
+"    padding: 0;\n"
+"    margin: 0;\n"
+"}\n"
+;
+
 G_DEFINE_TYPE(GwyRasterView, gwy_raster_view, GTK_TYPE_GRID);
 
 static void
@@ -218,6 +229,17 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    // FIXME
+    if (!cssprovider) {
+        GError *error = NULL;
+        cssprovider = gtk_css_provider_new();
+        if (!gtk_css_provider_load_from_data(cssprovider, css, sizeof(css),
+                                             &error)) {
+            g_printerr("ERROR: %s\n", error->message);
+            g_clear_error(&error);
+        }
+    }
 }
 
 static void
@@ -831,18 +853,19 @@ create_axis_button_box(GwyRasterView *rasterview)
 
     GtkWidget *buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-    GtkWidget *axisbutton = create_axis_button(NULL, AXIS_TAB_AXIS, "A");
+    GtkWidget *axisbutton = create_axis_button(NULL, AXIS_TAB_AXIS,
+                                               GTK_STOCK_YES);
     GtkRadioButton *groupwidget = GTK_RADIO_BUTTON(axisbutton);
     priv->axisbutton = GTK_TOGGLE_BUTTON(axisbutton);
     gtk_box_pack_start(GTK_BOX(buttonbox), axisbutton, TRUE, TRUE, 0);
 
     GtkWidget *gradbutton = create_axis_button(groupwidget, AXIS_TAB_GRADIENTS,
-                                               "G");
+                                               GTK_STOCK_NO);
     priv->gradbutton = GTK_TOGGLE_BUTTON(gradbutton);
     gtk_box_pack_start(GTK_BOX(buttonbox), gradbutton, TRUE, TRUE, 0);
 
     GtkWidget *rangebutton = create_axis_button(groupwidget, AXIS_TAB_RANGES,
-                                                "R");
+                                                GTK_STOCK_CANCEL);
     priv->rangebutton = GTK_TOGGLE_BUTTON(rangebutton);
     gtk_box_pack_start(GTK_BOX(buttonbox), rangebutton, TRUE, TRUE, 0);
 
@@ -863,10 +886,16 @@ create_axis_button(GtkRadioButton *groupwidget,
 {
     GtkWidget *button = gtk_radio_button_new_from_widget(groupwidget);
     g_object_set_data(G_OBJECT(button), "id", GUINT_TO_POINTER(id));
+    gtk_widget_set_name(button, "gwy-raster-view-axis-button");
     gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(button), FALSE);
     gtk_widget_set_can_focus(button, FALSE);
     gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
-    gtk_container_add(GTK_CONTAINER(button), gtk_label_new(content));
+    gtk_button_set_alignment(GTK_BUTTON(button), 0.5, 0.5);
+    GtkWidget *child = gtk_image_new_from_stock(content, GTK_ICON_SIZE_MENU);
+    gtk_container_add(GTK_CONTAINER(button), child);
+    GtkStyleContext *context = gtk_widget_get_style_context(button);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(cssprovider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_USER);
     return button;
 }
 
