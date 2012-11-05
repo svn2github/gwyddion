@@ -10,3 +10,7 @@ Interpolation is partially based on code originally written by Petr Klapetek
 Kuwahara filter is based on implementation by Rok Zitko for Gwyddion 1, see
     libgwy/field-filter.c for more.
 
+GwySpinButton is a fork of old vertical GtkSpinButton from Gtk+ by Peter
+    Mattis, Spencer Kimball, Josh MacDonald, Lars Hamann, Stefan Jeske and
+    the GTK+ Team.  Essentially it was only renamed and Gtk+-private stuff
+    removed/reimplemented/approximated as needed.
