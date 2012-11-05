@@ -14,7 +14,6 @@ mkenum_name = types
 main_header = $(srcdir)/libgwy.h
 Gwy3_3_0_gir_INCLUDES = Gio-2.0
 Gwy3_3_0_gir_PACKAGES = gio-2.0
-gcres = $(GLIB_COMPILE_RESOURCES) --generate --manual-register
 
 public_headers = \
 	$(srcdir)/array.h \
