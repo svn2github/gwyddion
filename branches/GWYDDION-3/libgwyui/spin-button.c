@@ -308,7 +308,8 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     /**
      * GwySpinButton::input:
      * @spinbutton: the object on which the signal was emitted
-     * @new_value:(out)(type double): return location for the new value
+     * @new_value: (out) (type double):
+     *             Return location for the new value.
      *
      * The ::input signal can be used to influence the conversion of
      * the users input into a double value. The signal handler is
@@ -348,7 +349,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
      *    int value;
      *
      *    adjustment = gwy_spin_button_get_adjustment(spin);
-     *    value =(int)gtk_adjustment_get_value(adjustment);
+     *    value = (int)gtk_adjustment_get_value(adjustment);
      *    text = g_strdup_printf("%02d", value);
      *    gtk_entry_set_text(GTK_ENTRY(spin), text);
      *    g_free(text);
@@ -653,8 +654,8 @@ gwy_spin_button_realize(GtkWidget *widget)
     context = gtk_widget_get_style_context(widget);
     gtk_style_context_get_padding(context, state, &padding);
 
-    attributes.x = allocation.x + allocation.width - arrow_size -(padding.left + padding.right);
-    attributes.y = allocation.y +(allocation.height - req_height)/2;
+    attributes.x = allocation.x + allocation.width - arrow_size - (padding.left + padding.right);
+    attributes.y = allocation.y + (allocation.height - req_height)/2;
     attributes.width = arrow_size + padding.left + padding.right;
     attributes.height = req_height;
 
@@ -847,7 +848,7 @@ gwy_spin_button_draw(GtkWidget      *widget,
     GtkStateFlags state = 0;
     gboolean is_rtl;
 
-    is_rtl =(gtk_widget_get_direction(widget) == GTK_TEXT_DIR_RTL);
+    is_rtl = (gtk_widget_get_direction(widget) == GTK_TEXT_DIR_RTL);
     context = gtk_widget_get_style_context(widget);
 
     cairo_save(cr);
@@ -1576,7 +1577,7 @@ gwy_spin_button_insert_text(GtkEditable *editable,
          *
          * I don't know if the positive sign always gets bogusly set to
          * a digit when the above Registry value is corrupted as
-         * described.(In my test case, it got set to "8", and in the
+         * described. (In my test case, it got set to "8", and in the
          * bug report above it presumably was set ot "0".) Probably it
          * might get set to almost anything? So how to distinguish a
          * bogus value from some correct one for some locale? That is
@@ -1611,14 +1612,14 @@ gwy_spin_button_insert_text(GtkEditable *editable,
         for (i = 0; i < new_text_length; i++) {
             if ((guint)new_text[i] == neg_sign
                 || (guint)new_text[i] == pos_sign) {
-                if (sign ||(*position) || i)
+                if (sign || (*position) || i)
                     return;
                 sign = TRUE;
             }
             else if (new_text[i] == *(lc->decimal_point)) {
                 if (!priv->digits || dotpos > -1 ||
                     (new_text_length - 1 - i + entry_length
-                     - *position >(gint)priv->digits))
+                     - *position > (gint)priv->digits))
                     return;
                 dotpos = *position + i;
             }
@@ -1758,30 +1759,24 @@ gwy_spin_button_configure(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_new:
- * @adjustment:(allow-none): the #GtkAdjustment object that this spin
- *     button should use, or %NULL
- * @climb_rate: specifies how much the spin button changes when an arrow
- *     is clicked on
+ * @adjustment: (allow-none):
+ *              The adjustment object that this spin button should use, or
+ *              %NULL.
+ * @climb_rate: How much the spin button changes when an arrow is clicked on.
  * @digits: the number of decimal places to display
  *
- * Creates a new #GwySpinButton.
+ * Creates a new spin button.
  *
- * Returns: The new spin button as a #GtkWidget
+ * Returns: A newly created spin button.
  **/
 GtkWidget*
 gwy_spin_button_new(GtkAdjustment *adjustment,
-                    gdouble        climb_rate,
-                    guint          digits)
+                    gdouble climb_rate,
+                    guint digits)
 {
-    GwySpinButton *spin;
-
-    if (adjustment)
-        g_return_val_if_fail(GTK_IS_ADJUSTMENT(adjustment), NULL);
-
-    spin = g_object_new(GTK_TYPE_SPIN_BUTTON, NULL);
-
+    g_return_val_if_fail(!adjustment || GTK_IS_ADJUSTMENT(adjustment), NULL);
+    GwySpinButton *spin = g_object_new(GTK_TYPE_SPIN_BUTTON, NULL);
     gwy_spin_button_configure(spin, adjustment, climb_rate, digits);
-
     return GTK_WIDGET(spin);
 }
 
@@ -1851,7 +1846,7 @@ adjustment_changed_cb(G_GNUC_UNUSED GtkAdjustment *adjustment,
 
 /**
  * gwy_spin_button_set_adjustment:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @adjustment: a #GtkAdjustment to replace the existing adjustment
  *
  * Replaces the #GtkAdjustment associated with @spinbutton.
@@ -1896,11 +1891,12 @@ gwy_spin_button_set_adjustment(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_get_adjustment:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
- * Get the adjustment associated with a #GwySpinButton
+ * Get the adjustment associated with a spin button.
  *
- * Return value:(transfer none): the #GtkAdjustment of @spinbutton
+ * Return value: (transfer none): 
+ *               The adjustment used by @spinbutton.
  **/
 GtkAdjustment *
                gwy_spin_button_get_adjustment(GwySpinButton *spinbutton)
@@ -1912,7 +1908,7 @@ GtkAdjustment *
 
 /**
  * gwy_spin_button_set_digits:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @digits: the number of digits after the decimal point to be displayed for the spin button's value
  *
  * Set the precision to be displayed by @spinbutton. Up to 20 digit precision
@@ -1940,7 +1936,7 @@ gwy_spin_button_set_digits(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_get_digits:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
  * Fetches the precision of @spinbutton. See gwy_spin_button_set_digits().
  *
@@ -1956,7 +1952,7 @@ gwy_spin_button_get_digits(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_set_increments:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @step: increment applied for a button 1 press.
  * @page: increment applied for a button 2 press.
  *
@@ -1985,9 +1981,11 @@ gwy_spin_button_set_increments(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_get_increments:
- * @spinbutton: a #GwySpinButton
- * @step:(out)(allow-none): location to store step increment, or %NULL
- * @page:(out)(allow-none): location to store page increment, or %NULL
+ * @spinbutton: A spin button.
+ * @step: (out) (allow-none):
+ *        Location to store step increment, or %NULL.
+ * @page: (out) (allow-none):
+ *        Location to store page increment, or %NULL.
  *
  * Gets the current step and page the increments used by @spinbutton. See
  * gwy_spin_button_set_increments().
@@ -2011,11 +2009,11 @@ gwy_spin_button_get_increments(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_set_range:
- * @spinbutton: a #GwySpinButton
- * @min: minimum allowable value
- * @max: maximum allowable value
+ * @spinbutton: A spin button.
+ * @min: Minimum allowable value.
+ * @max: Maximum allowable value.
  *
- * Sets the minimum and maximum allowable values for @spinbutton.
+ * Sets the minimum and maximum allowable values for a spin button.
  *
  * If the current value is outside this range, it will be adjusted
  * to fit within the range, otherwise it will remain unchanged.
@@ -2042,11 +2040,14 @@ gwy_spin_button_set_range(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_get_range:
- * @spinbutton: a #GwySpinButton
- * @min:(out)(allow-none): location to store minimum allowed value, or %NULL
- * @max:(out)(allow-none): location to store maximum allowed value, or %NULL
+ * @spinbutton: A spin button.
+ * @min: (out) (allow-none):
+ *       Location to store minimum allowed value, or %NULL.
+ * @max: (out) (allow-none):
+ *       Location to store maximum allowed value, or %NULL.
  *
- * Gets the range allowed for @spinbutton.
+ * Gets the range allowed for a spin button.
+ *
  * See gwy_spin_button_set_range().
  */
 void
@@ -2068,9 +2069,9 @@ void
 
 /**
  * gwy_spin_button_get_value:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
- * Get the value in the @spinbutton.
+ * Get the value in the spin button.
  *
  * Return value: the value of @spinbutton
  **/
@@ -2084,9 +2085,9 @@ gwy_spin_button_get_value(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_get_value_as_int:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
- * Get the value @spinbutton represented as an integer.
+ * Get the value spin button represented as an integer.
  *
  * Return value: the value of @spinbutton
  **/
@@ -2109,10 +2110,10 @@ gwy_spin_button_get_value_as_int(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_set_value:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @value: the new value
  *
- * Sets the value of @spinbutton.
+ * Sets the value of spin button.
  **/
 void
 gwy_spin_button_set_value(GwySpinButton *spinbutton,
@@ -2136,10 +2137,11 @@ gwy_spin_button_set_value(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_set_update_policy:
- * @spinbutton: a #GwySpinButton
- * @policy: a #GtkSpinButtonUpdatePolicy value
+ * @spinbutton: A spin button.
+ * @policy: New update behaviour.
  *
- * Sets the update behavior of a spin button.
+ * Sets the update behaviour of a spin button.
+ *
  * This determines wether the spin button is always updated
  * or only when a valid value is set.
  **/
@@ -2161,9 +2163,10 @@ gwy_spin_button_set_update_policy(GwySpinButton             *spinbutton,
 
 /**
  * gwy_spin_button_get_update_policy:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
- * Gets the update behavior of a spin button.
+ * Gets the update behaviour of a spin button.
+ *
  * See gwy_spin_button_set_update_policy().
  *
  * Return value: the current update policy
@@ -2178,7 +2181,7 @@ gwy_spin_button_get_update_policy(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_set_numeric:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @numeric: flag indicating if only numeric entry is allowed
  *
  * Sets the flag that determines if non-numeric text can be typed
@@ -2204,7 +2207,7 @@ gwy_spin_button_set_numeric(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_get_numeric:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
  * Returns whether non-numeric text can be typed into the spin button.
  * See gwy_spin_button_set_numeric().
@@ -2221,8 +2224,8 @@ gwy_spin_button_get_numeric(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_set_wrap:
- * @spinbutton: a #GwySpinButton
- * @wrap: a flag indicating if wrapping behavior is performed
+ * @spinbutton: A spin button.
+ * @wrap: a flag indicating if wrapping behaviour is performed
  *
  * Sets the flag that determines if a spin button value wraps
  * around to the opposite limit when the upper or lower limit
@@ -2249,7 +2252,7 @@ gwy_spin_button_set_wrap(GwySpinButton  *spinbutton,
 
 /**
  * gwy_spin_button_get_wrap:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
  * Returns whether the spin button's value wraps around to the
  * opposite limit when the upper or lower limit of the range is
@@ -2285,7 +2288,7 @@ spin_button_get_arrow_size(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_set_snap_to_ticks:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @snap_to_ticks: a flag indicating if invalid values should be corrected
  *
  * Sets the policy as to whether values are corrected to the
@@ -2303,7 +2306,7 @@ gwy_spin_button_set_snap_to_ticks(GwySpinButton *spinbutton,
 
     priv = spinbutton->priv;
 
-    new_val =(snap_to_ticks != 0);
+    new_val = (snap_to_ticks != 0);
 
     if (new_val != priv->snap_to_ticks) {
         priv->snap_to_ticks = new_val;
@@ -2316,7 +2319,7 @@ gwy_spin_button_set_snap_to_ticks(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_get_snap_to_ticks:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
  * Returns whether the values are corrected to the nearest step.
  * See gwy_spin_button_set_snap_to_ticks().
@@ -2333,7 +2336,7 @@ gwy_spin_button_get_snap_to_ticks(GwySpinButton *spinbutton)
 
 /**
  * gwy_spin_button_spin:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  * @direction: a #GtkSpinType indicating the direction to spin
  * @increment: step increment to apply in the specified direction
  *
@@ -2412,7 +2415,7 @@ gwy_spin_button_spin(GwySpinButton *spinbutton,
 
 /**
  * gwy_spin_button_update:
- * @spinbutton: a #GwySpinButton
+ * @spinbutton: A spin button.
  *
  * Manually force an update of the spin button.
  **/
@@ -2432,7 +2435,7 @@ gwy_spin_button_update(GwySpinButton *spinbutton)
     g_signal_emit(spinbutton, spinbutton_signals[INPUT], 0, &val, &return_val);
     if (return_val == FALSE) {
         return_val = gwy_spin_button_default_input(spinbutton, &val);
-        error =(return_val == GTK_INPUT_ERROR);
+        error = (return_val == GTK_INPUT_ERROR);
     }
     else if (return_val == GTK_INPUT_ERROR)
         error = 1;
@@ -2532,35 +2535,33 @@ entry_get_borders(GtkEntry *entry,
  * <example>
  * <title>Using a GwySpinButton to get an integer</title>
  * <programlisting>
- * /&ast; Provides a function to retrieve an integer value from a
- *  &ast; GwySpinButton and creates a spin button to model percentage
- *  &ast; values.
- *  &ast;/
+ * // Provides a function to retrieve an integer value from a
+ * // GwySpinButton and creates a spin button to model percentage
+ * // values.
  *
  * gint
  * grab_int_value(GwySpinButton *button,
- *                 gpointer       user_data)
+ *                gpointer       user_data)
  * {
- *   return gwy_spin_button_get_value_as_int(button);
+ *     return gwy_spin_button_get_value_as_int(button);
  * }
  *
  * void
  * create_integer_spin_button(void)
  * {
+ *     GtkWidget *window, *button;
+ *     GtkAdjustment *adjustment;
  *
- *   GtkWidget *window, *button;
- *   GtkAdjustment *adjustment;
+ *     adjustment = gtk_adjustment_new(50.0, 0.0, 100.0, 1.0, 5.0, 0.0);
  *
- *   adjustment = gtk_adjustment_new(50.0, 0.0, 100.0, 1.0, 5.0, 0.0);
+ *     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+ *     gtk_container_set_border_width(GTK_CONTAINER(window), 5);
  *
- *   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
- *   gtk_container_set_border_width(GTK_CONTAINER(window), 5);
+ *     // Create the spinbutton, with no decimal places.
+ *     button = gwy_spin_button_new(adjustment, 1.0, 0);
+ *     gtk_container_add(GTK_CONTAINER(window), button);
  *
- *   /&ast; creates the spinbutton, with no decimal places &ast;/
- *   button = gwy_spin_button_new(adjustment, 1.0, 0);
- *   gtk_container_add(GTK_CONTAINER(window), button);
- *
- *   gtk_widget_show_all(window);
+ *     gtk_widget_show_all(window);
  * }
  * </programlisting>
  * </example>
@@ -2568,33 +2569,32 @@ entry_get_borders(GtkEntry *entry,
  * <example>
  * <title>Using a GwySpinButton to get a floating point value</title>
  * <programlisting>
- * /&ast; Provides a function to retrieve a floating point value from a
- *  &ast; GwySpinButton, and creates a high precision spin button.
- *  &ast;/
+ * // Provides a function to retrieve a floating point value from a
+ * // GwySpinButton, and creates a high precision spin button.
  *
  * gfloat
  * grab_float_value(GwySpinButton *button,
- *                   gpointer       user_data)
+ *                  gpointer       user_data)
  * {
- *   return gwy_spin_button_get_value(button);
+ *     return gwy_spin_button_get_value(button);
  * }
  *
  * void
  * create_floating_spin_button(void)
  * {
- *   GtkWidget *window, *button;
- *   GtkAdjustment *adjustment;
+ *     GtkWidget *window, *button;
+ *     GtkAdjustment *adjustment;
  *
- *   adjustment = gtk_adjustment_new(2.500, 0.0, 5.0, 0.001, 0.1, 0.0);
+ *     adjustment = gtk_adjustment_new(2.500, 0.0, 5.0, 0.001, 0.1, 0.0);
  *
- *   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
- *   gtk_container_set_border_width(GTK_CONTAINER(window), 5);
+ *     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+ *     gtk_container_set_border_width(GTK_CONTAINER(window), 5);
  *
- *   /&ast; creates the spinbutton, with three decimal places &ast;/
- *   button = gwy_spin_button_new(adjustment, 0.001, 3);
- *   gtk_container_add(GTK_CONTAINER(window), button);
+ *     // Create the spinbutton, with three decimal places.
+ *     button = gwy_spin_button_new(adjustment, 0.001, 3);
+ *     gtk_container_add(GTK_CONTAINER(window), button);
  *
- *   gtk_widget_show_all(window);
+ *     gtk_widget_show_all(window);
  * }
  * </programlisting>
  * </example>

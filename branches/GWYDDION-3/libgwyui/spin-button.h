@@ -94,10 +94,10 @@ void                      gwy_spin_button_configure        (GwySpinButton *spinb
                                                             guint digits);
 GtkWidget*                gwy_spin_button_new              (GtkAdjustment *adjustment,
                                                             gdouble climb_rate,
-                                                            guint digits);
+                                                            guint digits)                      G_GNUC_MALLOC;
 GtkWidget*                gwy_spin_button_new_with_range   (gdouble min,
                                                             gdouble max,
-                                                            gdouble step);
+                                                            gdouble step)                      G_GNUC_MALLOC;
 void                      gwy_spin_button_set_adjustment   (GwySpinButton *spinbutton,
                                                             GtkAdjustment *adjustment);
 GtkAdjustment*            gwy_spin_button_get_adjustment   (GwySpinButton *spinbutton);
