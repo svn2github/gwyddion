@@ -5,5 +5,5 @@ s/ (/(/
 1{s#^#/* This is a @@GENERATED@@ file. */\n#
 s/@@GENERATED@@/GENERATED/
 }
-2i\
+3i\
 /*<private_header>*/
