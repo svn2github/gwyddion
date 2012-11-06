@@ -2,6 +2,6 @@
 s/^extern /G_GNUC_INTERNAL /
 s/ (/(/
 s/) };/), NULL, NULL, NULL };/
-1i\
-/* This is a FOO file. */
-1s/FOO/GENERATED/
+1{s#^#/* This is a @@GENERATED@@ file. */\n#
+s/@@GENERATED@@/GENERATED/
+}

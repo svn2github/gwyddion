@@ -2,8 +2,8 @@
 s/^extern /G_GNUC_INTERNAL /
 s/__RESOURCE_\(.*__\)/__GWY_RESOURCE\U\1/
 s/ (/(/
-1i\
-/* This is a FOO file. */
-1s/FOO/GENERATED/
-1i\
+1{s#^#/* This is a @@GENERATED@@ file. */\n#
+s/@@GENERATED@@/GENERATED/
+}
+2i\
 /*<private_header>*/
