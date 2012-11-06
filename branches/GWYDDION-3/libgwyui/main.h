@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,25 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWYUI_H__
-#define __LIBGWYUI_H__
+#ifndef __LIBGWYUI_MAIN_H__
+#define __LIBGWYUI_MAIN_H__
 
-#include <libgwyui/axis.h>
-#include <libgwyui/cairo-utils.h>
-#include <libgwyui/color-axis.h>
-#include <libgwyui/field-render.h>
-#include <libgwyui/inventory-store.h>
-#include <libgwyui/main.h>
-#include <libgwyui/raster-area.h>
-#include <libgwyui/raster-view.h>
-#include <libgwyui/ruler.h>
-#include <libgwyui/scroller.h>
-#include <libgwyui/shapes.h>
-#include <libgwyui/shapes-point.h>
-#include <libgwyui/spin-button.h>
-#include <libgwyui/types.h>
-#include <libgwyui/widget-utils.h>
+#include <gtk/gtk.h>
+
+G_BEGIN_DECLS
+
+GtkStyleProvider* gwy_get_style_provider(void) G_GNUC_CONST;
+
+G_END_DECLS
 
 #endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
+
