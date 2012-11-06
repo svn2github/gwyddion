@@ -25,6 +25,14 @@ static gpointer process_ui_gresource(gpointer arg);
 static GtkStyleProvider *provider = NULL;
 static GOnce ui_gresource_processed = G_ONCE_INIT;
 
+/**
+ * gwy_get_style_provider:
+ *
+ * Obtains style provider with libgwyui specific styling of widgets.
+ *
+ * Returns: (transfer none):
+ *          The style provider, owned by libgwyui.
+ **/
 GtkStyleProvider*
 gwy_get_style_provider(void)
 {

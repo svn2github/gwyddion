@@ -21,6 +21,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
+#include "libgwyui/main.h"
 #include "libgwyui/types.h"
 #include "libgwyui/raster-view.h"
 
@@ -144,17 +145,6 @@ static void       ruler_popup_deleted         (GtkWidget *menu);
 
 static GParamSpec *properties[N_PROPS];
 
-// FIXME: Place the CSS to resources.  Use a libgwyui-level style provider.
-static GtkCssProvider *cssprovider = NULL;
-static const gchar css[] =
-"GtkButton#gwy-raster-view-axis-button {\n"
-"    border-style: none;\n"
-"    border-width: 0;\n"
-"    padding: 0;\n"
-"    margin: 0;\n"
-"}\n"
-;
-
 G_DEFINE_TYPE(GwyRasterView, gwy_raster_view, GTK_TYPE_GRID);
 
 static void
@@ -229,17 +219,6 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
-
-    // FIXME
-    if (!cssprovider) {
-        GError *error = NULL;
-        cssprovider = gtk_css_provider_new();
-        if (!gtk_css_provider_load_from_data(cssprovider, css, sizeof(css),
-                                             &error)) {
-            g_printerr("ERROR: %s\n", error->message);
-            g_clear_error(&error);
-        }
-    }
 }
 
 static void
@@ -894,8 +873,9 @@ create_axis_button(GtkRadioButton *groupwidget,
     GtkWidget *child = gtk_image_new_from_stock(content, GTK_ICON_SIZE_MENU);
     gtk_container_add(GTK_CONTAINER(button), child);
     GtkStyleContext *context = gtk_widget_get_style_context(button);
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(cssprovider),
-                                   GTK_STYLE_PROVIDER_PRIORITY_USER);
+    GtkStyleProvider *provider = gwy_get_style_provider();
+    gtk_style_context_add_provider(context, provider,
+                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     return button;
 }
 
