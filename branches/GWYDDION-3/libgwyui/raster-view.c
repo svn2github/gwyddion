@@ -818,11 +818,22 @@ ruler_button_press(GwyRasterView *rasterview,
 
 static void
 axis_range_notify(GwyRasterView *rasterview,
-                  G_GNUC_UNUSED GParamSpec *pspec,
-                  G_GNUC_UNUSED GwyColorAxis *coloraxis)
+                  GParamSpec *pspec,
+                  GwyColorAxis *coloraxis)
 {
-    g_printerr("Color axis range changed.  If not initiaed by us then we "
-               "should update mapping!.\n");
+    g_return_if_fail(gwy_strequal(pspec->name, "range"));
+    GwyRasterArea *area = rasterview->priv->area;
+    GwyRange axisrange, arearange;
+    gwy_axis_get_range(GWY_AXIS(coloraxis), &axisrange);
+    gwy_raster_area_get_user_range(area, &arearange);
+    if (gwy_equal(&axisrange, &arearange))
+        return;
+
+    gwy_raster_area_set_user_range(area, &axisrange);
+    if (arearange.from != axisrange.from)
+        gwy_raster_area_set_range_from_method(area, GWY_COLOR_RANGE_USER);
+    if (arearange.to != axisrange.to)
+        gwy_raster_area_set_range_to_method(area, GWY_COLOR_RANGE_USER);
 }
 
 static GtkWidget*
