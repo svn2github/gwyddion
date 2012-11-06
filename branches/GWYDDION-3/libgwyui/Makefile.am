@@ -38,7 +38,8 @@ public_built_headers = \
 private_headers =
 
 private_built_headers = \
-	$(genmarshal_name).h
+	$(genmarshal_name).h \
+	ui-gresource.h
 
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
@@ -49,7 +50,7 @@ CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers)
 MAINTAINERCLEANFILES =
 libgwyui3_la_DEPENDENCIES =
-BUILT_SOURCES =
+BUILT_SOURCES = ui-gresource.c ui-gresource.h
 
 # lib_LTLIBRARIES must be a literal, no variables
 lib_LTLIBRARIES = libgwyui3.la
@@ -73,6 +74,7 @@ libgwyui3_la_SOURCES = \
 	shapes-point.c \
 	spin-button.c \
 	types.c \
+	ui-gresource.c \
 	widget-utils.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
@@ -105,6 +107,12 @@ libgwyui3_la_LDFLAGS = \
 include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
 include $(top_srcdir)/build/genmarshal.make
+
+ui-gresource.c: $(top_builddir)/resources/ui-gresource.c
+	$(AM_V_GEN)cp -f $(top_builddir)/resources/ui-gresource.c ui-gresource.c
+
+ui-gresource.h: $(top_builddir)/resources/ui-gresource.h
+	$(AM_V_GEN)cp -f $(top_builddir)/resources/ui-gresource.h ui-gresource.h
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*
