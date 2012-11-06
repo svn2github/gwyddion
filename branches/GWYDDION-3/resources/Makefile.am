@@ -5,7 +5,7 @@ SUBDIRS = gradients
 
 uifiles = gwy.css
 uixml = ui.gresource.xml
-uicode = ui.c ui.h
+uicode = ui-gresource.c ui-gresource.h
 
 noinst_DATA = $(uicode)
 
@@ -20,13 +20,13 @@ ui.gresource.xml: Makefile.am
 	$(AM_V_GEN)$(top_srcdir)/build/generate-gresource-xml.sh /net/gwyddion/ui \
 	    $(uifiles) >ui.gresource.xml
 
-ui.c: ui.gresource.xml $(fixcgres) $(uifiles)
-	$(AM_V_GEN)$(gcres) --c-name=_gwy_ui --target=ui.c \
+ui-gresource.c: ui.gresource.xml $(fixcgres) $(uifiles)
+	$(AM_V_GEN)$(gcres) --c-name=_gwy_ui --target=ui-gresource.c \
 	    --sourcedir=$(srcdir) $(uixml)
-	$(AM_V_at)$(SED) -f $(fixcgres) -i ui.c
+	$(AM_V_at)$(SED) -f $(fixcgres) -i ui-gresource.c
 
-ui.h: ui.gresource.xml $(fixhgres) $(uifiles)
-	$(AM_V_GEN)$(gcres) --c-name=_gwy_ui --target=ui.h \
+ui-gresource.h: ui.gresource.xml $(fixhgres) $(uifiles)
+	$(AM_V_GEN)$(gcres) --c-name=_gwy_ui --target=ui-gresource.h \
 	    --sourcedir=$(srcdir) $(uixml)
-	$(AM_V_at)$(SED) -f $(fixhgres) -i ui.h
+	$(AM_V_at)$(SED) -f $(fixhgres) -i ui-gresource.h
 
