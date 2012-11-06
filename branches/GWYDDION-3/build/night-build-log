@@ -5,7 +5,7 @@ projectdir=$PWD
 logdir="$projectdir/_logs"
 tmplog="$logdir/tmplog"
 libdirs="libgwy libgwyui"
-podirs="po po-libgwy libgwyui"
+podirs="po po-libgwy po-libgwyui"
 
 source $HOME/.bashrc
 export LC_ALL=C
