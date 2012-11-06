@@ -61,7 +61,9 @@ struct _GwyRasterViewPrivate {
     GtkScrollbar *hscrollbar;
     GwyRuler *vruler;
     GtkScrollbar *vscrollbar;
+
     GwyColorAxis *coloraxis;
+    gboolean requesting_axis_range;
 
     GtkWidget *gradients;
     GtkWidget *ranges;
@@ -608,6 +610,17 @@ area_notify(GwyRasterView *rasterview,
                 gtk_check_menu_item_set_active(item, TRUE);
         }
     }
+    else if (gwy_strequal(pspec->name, "range")) {
+        GwyAxis *axis = GWY_AXIS(priv->coloraxis);
+        GwyRange axisrange, arearange;
+        gwy_raster_area_get_range(priv->area, &arearange);
+        gwy_axis_get_range(axis, &axisrange);
+        if (!gwy_equal(&axisrange, &arearange)) {
+            priv->requesting_axis_range = TRUE;
+            gwy_axis_request_range(axis, &arearange);
+            priv->requesting_axis_range = FALSE;
+        }
+    }
 }
 
 static void
@@ -646,15 +659,12 @@ set_ruler_units_to_field(GwyRasterView *rasterview)
 }
 
 static void
-field_data_changed(GwyRasterView *rasterview,
+field_data_changed(G_GNUC_UNUSED GwyRasterView *rasterview,
                    G_GNUC_UNUSED const GwyFieldPart *fpart,
-                   GwyField *field)
+                   G_GNUC_UNUSED GwyField *field)
 {
-    // TODO: This needs elaboration depending on the color mapping type...
-    RasterView *priv = rasterview->priv;
-    GwyRange range;
-    gwy_field_min_max_full(field, &range.from, &range.to);
-    gwy_axis_request_range(GWY_AXIS(priv->coloraxis), &range);
+    // RasterView *priv = rasterview->priv;
+    // XXX: Do we want to do anything here?
 }
 
 static gboolean
@@ -828,6 +838,11 @@ axis_range_notify(GwyRasterView *rasterview,
     gwy_raster_area_get_user_range(area, &arearange);
     if (gwy_equal(&axisrange, &arearange))
         return;
+
+    if (rasterview->priv->requesting_axis_range) {
+        g_warning("Recursion in false colour mapping range area/axis sync?!");
+        return;
+    }
 
     gwy_raster_area_set_user_range(area, &axisrange);
     if (arearange.from != axisrange.from)
