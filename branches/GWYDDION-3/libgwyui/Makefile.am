@@ -44,14 +44,15 @@ private_built_headers = \
 
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
+resource_files = ui-gresource.c ui-gresource.h
 
 # Must init
 EXTRA_DIST = $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
-DISTCLEANFILES = $(public_built_headers)
+DISTCLEANFILES = $(public_built_headers) $(private_built_headers) $(resource_files)
 MAINTAINERCLEANFILES =
 libgwyui3_la_DEPENDENCIES =
-BUILT_SOURCES = ui-gresource.c ui-gresource.h
+BUILT_SOURCES = $(resource_files)
 
 # lib_LTLIBRARIES must be a literal, no variables
 lib_LTLIBRARIES = libgwyui3.la

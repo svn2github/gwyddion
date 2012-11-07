@@ -110,7 +110,7 @@ mkenum_headers = $(public_headers)
 # Must init
 EXTRA_DIST = version.h.in $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
-DISTCLEANFILES = $(public_built_headers)
+DISTCLEANFILES = $(public_built_headers) $(private_built_headers)
 MAINTAINERCLEANFILES =
 libgwy3_la_DEPENDENCIES =
 BUILT_SOURCES =
