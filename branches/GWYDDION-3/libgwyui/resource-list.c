@@ -432,8 +432,9 @@ set_only_preferred(GwyResourceList *rasterarea,
 
 /**
  * GwyResourceListClass:
- * @type: Resource type.  It must be filled by instantiatable subclasses as
- *        it is used to obtain the right resource inventory.
+ * @resource_type: Resource type.  It must be filled by instantiatable
+ *                 subclasses as it is used to obtain the right resource
+ *                 inventory for the model.
  *
  * Class of resource list views.
  **/
