@@ -36,6 +36,7 @@ struct _GwyResourceListPrivate {
     GwyResource *active_resource;
     gulong resource_notify_id;
     gboolean only_preferred;
+    guint height;
 };
 
 typedef struct _GwyResourceListPrivate ResourceList;
@@ -51,6 +52,11 @@ static void     gwy_resource_list_get_property(GObject *object,
                                                guint prop_id,
                                                GValue *value,
                                                GParamSpec *pspec);
+static void     render_name                   (GtkTreeViewColumn *column,
+                                               GtkCellRenderer *renderer,
+                                               GtkTreeModel *model,
+                                               GtkTreeIter *iter,
+                                               gpointer user_data);
 static void     selection_changed             (GwyResourceList *list,
                                                GtkTreeSelection *selection);
 static void     set_active_resource           (GwyResourceList *list,
@@ -60,6 +66,8 @@ static void     resource_notify               (GwyResourceList *list,
                                                GwyResource *resource);
 static gboolean set_only_preferred            (GwyResourceList *rasterarea,
                                                gboolean setting);
+static void     preferred_toggled             (GwyResourceList *list,
+                                               const gchar *stringpath);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -116,7 +124,11 @@ gwy_resource_list_init(GwyResourceList *list)
 {
     list->priv = G_TYPE_INSTANCE_GET_PRIVATE(list, GWY_TYPE_RESOURCE_LIST,
                                              ResourceList);
-    //ResourceList *priv = list->priv;
+    ResourceList *priv = list->priv;
+    gint w, h;
+    gtk_icon_size_lookup(GTK_ICON_SIZE_SMALL_TOOLBAR, &w, &h);
+    priv->height = h;
+    gtk_tree_view_set_fixed_height_mode(GTK_TREE_VIEW(list), TRUE);
 }
 
 static void
@@ -136,11 +148,9 @@ gwy_resource_list_constructed(GObject *object)
     GtkTreeView *treeview = GTK_TREE_VIEW(object);
     gtk_tree_view_set_model(treeview, model);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
-    gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
-    // TODO: Select the default resource.
-
     g_signal_connect_swapped(selection, "changed",
                              G_CALLBACK(selection_changed), list);
+    gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
 }
 
 static void
@@ -296,7 +306,26 @@ gwy_resource_list_get_active(const GwyResourceList *list)
 void
 gwy_resource_list_append_column_name(GwyResourceList *list)
 {
-    // TODO
+    g_return_if_fail(GWY_IS_RESOURCE_LIST(list));
+    ResourceList *priv = list->priv;
+
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
+    gint i = gwy_inventory_store_find_column(priv->store, "name");
+    g_assert(i > 0);
+    GtkTreeViewColumn *column
+        = gtk_tree_view_column_new_with_attributes(_("Name"), renderer,
+                                                   "text", i,
+                                                   NULL);
+    GwyInventory *inventory = gwy_inventory_store_get_inventory(priv->store);
+    gtk_tree_view_column_set_cell_data_func(column, renderer, render_name,
+                                            inventory, NULL);
+    g_object_set(renderer, "weight-set", TRUE, NULL);
+    GtkTreeView *treeview = GTK_TREE_VIEW(list);
+    gtk_tree_view_append_column(treeview, column);
+
+    gtk_tree_view_set_search_column(treeview, i);
+    gtk_tree_view_set_enable_search(treeview, TRUE);
 }
 
 /**
@@ -308,7 +337,22 @@ gwy_resource_list_append_column_name(GwyResourceList *list)
 void
 gwy_resource_list_append_column_preferred(GwyResourceList *list)
 {
-    // TODO
+    g_return_if_fail(GWY_IS_RESOURCE_LIST(list));
+    ResourceList *priv = list->priv;
+
+    GtkCellRenderer *renderer = gtk_cell_renderer_toggle_new();
+    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
+    gint i = gwy_inventory_store_find_column(priv->store, "preferred");
+    g_assert(i > 0);
+    const gchar *title = C_("resource-property", "Preferred");
+    GtkTreeViewColumn *column
+        = gtk_tree_view_column_new_with_attributes(title, renderer,
+                                                   "active", i,
+                                                   NULL);
+    g_object_set(renderer, "activatable", TRUE, NULL);
+    g_signal_connect_swapped(renderer, "toggled",
+                             G_CALLBACK(preferred_toggled), list);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 }
 
 /**
@@ -344,6 +388,21 @@ gwy_resource_list_get_only_preferred(GwyResourceList *list)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE_LIST(list), FALSE);
     return list->priv->only_preferred;
+}
+
+static void
+render_name(G_GNUC_UNUSED GtkTreeViewColumn *column,
+            GtkCellRenderer *renderer,
+            GtkTreeModel *model,
+            GtkTreeIter *iter,
+            gpointer user_data)
+{
+    GwyInventory *inventory = (GwyInventory*)user_data;
+    gpointer item;
+    gtk_tree_model_get(model, iter, 0, &item, -1);
+    gpointer defitem = gwy_inventory_get_default(inventory);
+    PangoWeight w = (item == defitem) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL;
+    g_object_set(renderer, "weight", w, NULL);
 }
 
 static void
@@ -412,6 +471,25 @@ set_only_preferred(GwyResourceList *rasterarea,
     priv->only_preferred = setting;
     // TODO: Set model filter function.
     return TRUE;
+}
+
+static void
+preferred_toggled(GwyResourceList *list,
+                  const gchar *stringpath)
+{
+    ResourceList *priv = list->priv;
+    GwyInventory *inventory = gwy_inventory_store_get_inventory(priv->store);
+    GtkTreePath *path = gtk_tree_path_new_from_string(stringpath);
+    GtkTreeModel *model = GTK_TREE_MODEL(priv->filter);
+    GwyResource *resource;
+    GtkTreeIter iter;
+    gtk_tree_model_get_iter(model, &iter, path);
+    gtk_tree_model_get(model, &iter, 0, &resource, -1);
+    gboolean preferred = gwy_resource_get_preferred(resource);
+    gwy_resource_set_preferred(resource, !preferred);
+    gint i = gtk_tree_path_get_indices(path)[0];
+    gtk_tree_path_free(path);
+    gwy_inventory_nth_updated(inventory, i);
 }
 
 /**
