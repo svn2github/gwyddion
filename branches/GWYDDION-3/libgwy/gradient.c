@@ -152,7 +152,8 @@ gwy_gradient_class_init(GwyGradientClass *klass)
     res_class->parse = gwy_gradient_parse;
     res_class->load_builtins = gwy_gradient_load_builtins;
 
-    gwy_resource_class_register(res_class, "gradients", NULL);
+    gwy_resource_class_register(res_class, "gradients",
+                                N_("Gradient"), NULL);
 }
 
 static void

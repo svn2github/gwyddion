@@ -100,6 +100,7 @@ struct _GwyResourcePrivate {
 struct _GwyResourceClassPrivate {
     GwyInventory *inventory;
     const gchar *name;
+    const gchar *description;
     GFile *managed_directory;
     GwyInventoryItemType item_type;
     gulong item_inserted_id;
@@ -860,7 +861,9 @@ gwy_resource_set_is_preferred(GwyResource *resource,
  *
  * Gets the name of a resource type.
  *
- * This is an simple identifier usable for example as directory name.
+ * This is an simple identifier usable for example as directory name.  See
+ * gwy_resource_type_get_description() for a descriptive and translatable name
+ * intended for humans.
  *
  * Returns: Resource class name, as a constant string that must not be modified
  *          nor freed.
@@ -871,6 +874,27 @@ gwy_resource_type_get_name(GType type)
     GwyResourceClass *klass = g_type_class_peek(type);
     g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
     return klass->priv->name;
+}
+
+/**
+ * gwy_resource_type_get_description:
+ * @type: A resource type.
+ *
+ * Gets the description of a resource type.
+ *
+ * See gwy_resource_type_get_name() for a name that is better suited as an
+ * identifier.
+ *
+ * Returns: Resource class description, as a constant string that must not be
+ *          modified nor freed.  It is not translated; translation is up to
+ *          the caller.
+ **/
+const gchar*
+gwy_resource_type_get_description(GType type)
+{
+    GwyResourceClass *klass = g_type_class_peek(type);
+    g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
+    return klass->priv->description;
 }
 
 static ResourceClass*
@@ -935,6 +959,8 @@ gwy_resource_type_get_item_type(GType type)
  * @name: Resource class name, usable as resource directory name for on-disk
  *        resources.  It must be a valid identifier.  Normally, a lower-case
  *        plain name in plural is used, e.g. "gradients".
+ * @description: Descriptive and translatable (but untranslated) name intended
+ *               to be displayed to humans, e.g. "Fitting function".
  * @item_type: Inventory item type.  Usually pass %NULL, to use the parent's
  *             item type.  Modification might be useful for instance if you
  *             want to add traits, in this case acquire parent's item type with
@@ -945,10 +971,13 @@ gwy_resource_type_get_item_type(GType type)
  *
  * Calling this class method is necessary to set up the class inventory.  This
  * is normally done in the class init function of a resource class.
+ *
+ * The strings are assumed to be static, no copies are made.
  **/
 void
 gwy_resource_class_register(GwyResourceClass *klass,
                             const gchar *name,
+                            const gchar *description,
                             const GwyInventoryItemType *item_type)
 {
     g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
@@ -963,6 +992,7 @@ gwy_resource_class_register(GwyResourceClass *klass,
     if (!gwy_ascii_strisident(name, "-_", NULL))
         g_warning("Resource class name %s is not a valid identifier.", name);
     priv->name = name;
+    priv->description = description;
 
     // This reference is released only in gwy_resources_finalize().
     GType type = G_TYPE_FROM_CLASS(klass);

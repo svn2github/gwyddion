@@ -105,7 +105,8 @@ gwy_user_fit_func_class_init(GwyUserFitFuncClass *klass)
     res_class->dump = gwy_user_fit_func_dump;
     res_class->parse = gwy_user_fit_func_parse;
 
-    gwy_resource_class_register(res_class, "userfitfuncs", NULL);
+    gwy_resource_class_register(res_class, "userfitfuncs",
+                                N_("Fitting function"), NULL);
 }
 
 static void

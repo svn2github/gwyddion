@@ -122,7 +122,8 @@ gwy_user_grain_value_class_init(GwyUserGrainValueClass *klass)
     res_class->dump = gwy_user_grain_value_dump;
     res_class->parse = gwy_user_grain_value_parse;
 
-    gwy_resource_class_register(res_class, "usergrainvalues", NULL);
+    gwy_resource_class_register(res_class, "usergrainvalues",
+                                N_("Grain value"), NULL);
 }
 
 static void

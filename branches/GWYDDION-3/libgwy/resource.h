@@ -78,13 +78,13 @@ struct _GwyResourceClass {
     struct _GwyResourceClassPrivate *priv;
 
     /*<public>*/
-    void         (*load_builtins)(GwyErrorList **error_list);
+    void         (*load_builtins)  (GwyErrorList **error_list);
     void         (*setup_inventory)(GwyInventory *inventory);
-    GwyResource* (*copy)   (GwyResource *resource);
-    gchar*       (*dump)   (GwyResource *resource);
-    gboolean     (*parse)  (GwyResource *resource,
-                            GwyStrLineIter *iter,
-                            GError **error);
+    GwyResource* (*copy)           (GwyResource *resource);
+    gchar*       (*dump)           (GwyResource *resource);
+    gboolean     (*parse)          (GwyResource *resource,
+                                    GwyStrLineIter *iter,
+                                    GError **error);
 
     /*<private>*/
     void (*reserved1)(void);
@@ -113,10 +113,12 @@ gboolean                    gwy_resource_save                      (GwyResource 
                                                                     GError **error);
 void                        gwy_resource_class_register            (GwyResourceClass *klass,
                                                                     const gchar *name,
+                                                                    const gchar *description,
                                                                     const GwyInventoryItemType *item_type);
 const gchar*                gwy_resource_type_get_name             (GType type)                             G_GNUC_PURE;
 const GwyInventoryItemType* gwy_resource_type_get_item_type        (GType type)                             G_GNUC_PURE;
 GwyInventory*               gwy_resource_type_get_inventory        (GType type)                             G_GNUC_PURE;
+const gchar*                gwy_resource_type_get_description      (GType type)                             G_GNUC_PURE;
 void                        gwy_resource_type_load                 (GType type);
 void                        gwy_resource_type_load_directory       (GType type,
                                                                     const gchar *dirname,

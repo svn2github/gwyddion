@@ -120,7 +120,8 @@ gwy_gl_material_class_init(GwyGLMaterialClass *klass)
     res_class->dump = gwy_gl_material_dump;
     res_class->parse = gwy_gl_material_parse;
 
-    gwy_resource_class_register(res_class, "glmaterials", NULL);
+    gwy_resource_class_register(res_class, "glmaterials",
+                                N_("OpenGL material"), NULL);
 }
 
 static void
