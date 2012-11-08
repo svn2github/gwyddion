@@ -101,8 +101,8 @@ void                        gwy_resource_set_filename              (GwyResource 
                                                                     const gchar *filename);
 gboolean                    gwy_resource_is_modifiable             (GwyResource *resource)                  G_GNUC_PURE;
 gboolean                    gwy_resource_is_managed                (GwyResource *resource)                  G_GNUC_PURE;
-gboolean                    gwy_resource_get_is_preferred          (GwyResource *resource)                  G_GNUC_PURE;
-void                        gwy_resource_set_is_preferred          (GwyResource *resource,
+gboolean                    gwy_resource_get_preferred             (GwyResource *resource)                  G_GNUC_PURE;
+void                        gwy_resource_set_preferred             (GwyResource *resource,
                                                                     gboolean preferred);
 void                        gwy_resource_data_changed              (GwyResource *resource);
 GwyResource*                gwy_resource_load                      (const gchar *filename,

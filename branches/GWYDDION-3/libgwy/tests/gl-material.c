@@ -241,9 +241,9 @@ test_gl_material_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
 
-    g_assert(!gwy_resource_get_is_preferred(resource));
-    gwy_resource_set_is_preferred(resource, TRUE);
-    g_assert(gwy_resource_get_is_preferred(resource));
+    g_assert(!gwy_resource_get_preferred(resource));
+    gwy_resource_set_preferred(resource, TRUE);
+    g_assert(gwy_resource_get_preferred(resource));
 
     gwy_inventory_copy(gl_materials, GWY_GL_MATERIAL_DEFAULT, "Another");
     g_assert_cmpuint(gwy_inventory_size(gl_materials), ==, 3);

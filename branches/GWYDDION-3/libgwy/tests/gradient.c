@@ -292,9 +292,9 @@ test_gradient_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
 
-    g_assert(!gwy_resource_get_is_preferred(resource));
-    gwy_resource_set_is_preferred(resource, TRUE);
-    g_assert(gwy_resource_get_is_preferred(resource));
+    g_assert(!gwy_resource_get_preferred(resource));
+    gwy_resource_set_preferred(resource, TRUE);
+    g_assert(gwy_resource_get_preferred(resource));
 
     gwy_inventory_copy(gradients, GWY_GRADIENT_DEFAULT, "Another");
     g_assert_cmpuint(gwy_inventory_size(gradients), ==, 2);

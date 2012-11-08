@@ -523,7 +523,7 @@ gwy_resource_set_property(GObject *object,
         break;
 
         case PROP_PREFERRED:
-        gwy_resource_set_is_preferred(resource, g_value_get_boolean(value));
+        gwy_resource_set_preferred(resource, g_value_get_boolean(value));
         break;
 
         default:
@@ -821,7 +821,7 @@ gwy_resource_is_modifiable(GwyResource *resource)
 }
 
 /**
- * gwy_resource_get_is_preferred:
+ * gwy_resource_get_preferred:
  * @resource: A resource.
  *
  * Determines whether a resource is preferred.
@@ -829,14 +829,14 @@ gwy_resource_is_modifiable(GwyResource *resource)
  * Returns: %TRUE if resource is preferred, %FALSE otherwise.
  **/
 gboolean
-gwy_resource_get_is_preferred(GwyResource *resource)
+gwy_resource_get_preferred(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
     return resource->priv->preferred;
 }
 
 /**
- * gwy_resource_set_is_preferred:
+ * gwy_resource_set_preferred:
  * @resource: A resource.
  * @preferred: %TRUE to make @resource preferred, %FALSE to make it not
  *             preferred.
@@ -844,8 +844,8 @@ gwy_resource_get_is_preferred(GwyResource *resource)
  * Sets the preferability of a resource.
  **/
 void
-gwy_resource_set_is_preferred(GwyResource *resource,
-                              gboolean preferred)
+gwy_resource_set_preferred(GwyResource *resource,
+                           gboolean preferred)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
     preferred = !!preferred;
