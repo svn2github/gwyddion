@@ -18,7 +18,6 @@
  */
 
 #include <glib/gi18n-lib.h>
-#include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/resource-list.h"
 
@@ -64,8 +63,11 @@ static void     set_active_resource           (GwyResourceList *list,
 static void     resource_notify               (GwyResourceList *list,
                                                GParamSpec *param,
                                                GwyResource *resource);
-static gboolean set_only_preferred            (GwyResourceList *rasterarea,
+static gboolean set_only_preferred            (GwyResourceList *list,
                                                gboolean setting);
+static gboolean resource_is_visible           (GtkTreeModel *model,
+                                               GtkTreeIter *iter,
+                                               gpointer user_data);
 static void     preferred_toggled             (GwyResourceList *list,
                                                const gchar *stringpath);
 
@@ -145,6 +147,8 @@ gwy_resource_list_constructed(GObject *object)
     GtkTreeModel *model = GTK_TREE_MODEL(priv->store);
     priv->filter = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(model,
                                                                    NULL));
+    gtk_tree_model_filter_set_visible_func(priv->filter,
+                                           resource_is_visible, list, NULL);
     GtkTreeView *treeview = GTK_TREE_VIEW(object);
     gtk_tree_view_set_model(treeview, model);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
@@ -461,16 +465,31 @@ resource_notify(GwyResourceList *list,
 }
 
 static gboolean
-set_only_preferred(GwyResourceList *rasterarea,
+set_only_preferred(GwyResourceList *list,
                    gboolean setting)
 {
-    ResourceList *priv = rasterarea->priv;
+    ResourceList *priv = list->priv;
     if (!setting == !priv->only_preferred)
         return FALSE;
 
     priv->only_preferred = setting;
-    // TODO: Set model filter function.
+    gtk_tree_model_filter_refilter(priv->filter);
     return TRUE;
+}
+
+static gboolean
+resource_is_visible(GtkTreeModel *model,
+                    GtkTreeIter *iter,
+                    gpointer user_data)
+{
+    GwyResourceList *list = (GwyResourceList*)user_data;
+    ResourceList *priv = list->priv;
+    if (!priv->only_preferred)
+        return TRUE;
+
+    GwyResource *resource;
+    gtk_tree_model_get(model, iter, 0, &resource, -1);
+    return gwy_resource_get_preferred(resource);
 }
 
 static void
@@ -494,7 +513,6 @@ preferred_toggled(GwyResourceList *list,
 
 /**
  * SECTION: resource-list
- * @section_id: GwyResourceList
  * @title: GwyResourceList
  * @short_description: Base class for resource list views
  **/
