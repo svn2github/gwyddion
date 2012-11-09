@@ -125,7 +125,7 @@ gwy_cell_renderer_gradient_init(GwyCellRendererGradient *renderer)
     CellRendererGradient *priv = renderer->priv;
 
     gint w, h;
-    gtk_icon_size_lookup(GTK_ICON_SIZE_SMALL_TOOLBAR, &w, &h);
+    gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &w, &h);
     priv->height = h;
 }
 
@@ -188,8 +188,8 @@ gwy_cell_renderer_gradient_get_preferred_width(GtkCellRenderer *cell,
     CellRendererGradient *priv = GWY_CELL_RENDERER_GRADIENT(cell)->priv;
     gint xpad;
     gtk_cell_renderer_get_padding(cell, &xpad, NULL);
-    *minimum_size = 2 + 2*xpad;
-    *natural_size = ASPECT_RATIO*priv->height + 2*xpad;
+    GWY_MAYBE_SET(minimum_size, ASPECT_RATIO*priv->height + 2*xpad);
+    GWY_MAYBE_SET(natural_size, ASPECT_RATIO*priv->height + 2*xpad);
 }
 
 static void
@@ -201,8 +201,8 @@ gwy_cell_renderer_gradient_get_preferred_height(GtkCellRenderer *cell,
     CellRendererGradient *priv = GWY_CELL_RENDERER_GRADIENT(cell)->priv;
     gint ypad;
     gtk_cell_renderer_get_padding(cell, &ypad, NULL);
-    *minimum_size = 2 + 2*ypad;
-    *natural_size = priv->height + 2*ypad;
+    GWY_MAYBE_SET(minimum_size, priv->height + 2*ypad);
+    GWY_MAYBE_SET(natural_size, priv->height + 2*ypad);
 }
 
 // FIXME: Do we want some fancy style dependencies or rather faithful rendering
@@ -235,10 +235,14 @@ gwy_cell_renderer_gradient_render(GtkCellRenderer *cell,
     if (!priv->pattern)
         return;
 
+    cairo_matrix_t patmatrix;
+    cairo_matrix_init_scale(&patmatrix, 1.0/rect.width, 1.0/rect.height);
+    cairo_matrix_translate(&patmatrix, -rect.x, -rect.y);
+    cairo_pattern_set_matrix(priv->pattern, &patmatrix);
+
     cairo_save(cr);
     cairo_rectangle(cr, rect.x, rect.y, rect.width, rect.height);
     cairo_set_source(cr, priv->pattern);
-    // TODO: Set up pattern scaling!
     cairo_fill(cr);
     cairo_restore(cr);
 }
