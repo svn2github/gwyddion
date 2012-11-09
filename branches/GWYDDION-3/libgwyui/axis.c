@@ -140,6 +140,7 @@ static void            fill_tick_arrays          (GwyAxis *axis,
                                                   gdouble bs,
                                                   gdouble largerbs);
 static void            remove_too_close_ticks    (GwyAxis *axis);
+static void            improve_hinting           (GwyAxis *axis);
 static gboolean        zero_is_inside            (gdouble start,
                                                   guint n,
                                                   gdouble bs);
@@ -1127,6 +1128,7 @@ calculate_ticks(GwyAxis *axis)
                  : compare_ticks_ascending);
     priv->must_fix_units = FALSE;
     remove_too_close_ticks(axis);
+    improve_hinting(axis);
 
     if (priv->must_fix_units) {
         g_assert(isfinite(priv->units_at));
@@ -1367,6 +1369,28 @@ remove_too_close_ticks(GwyAxis *axis)
             priv->units_at = tick1->value;
         }
         GWY_FREE(tick2->label);
+    }
+}
+
+static void
+improve_hinting(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    GArray *ticks = priv->ticks;
+    guint n = ticks->len;
+    guint length = priv->length;
+
+    for (guint i = 0; i < n; i++) {
+        GwyAxisTick *tick = &tick_index(ticks, i);
+        gdouble pos = tick->position;
+        gdouble cpos = floor(pos + 1.0) - 0.5;
+        // Round edge ticks towards the interior.
+        if (G_UNLIKELY(cpos < 0.0))
+            cpos += 1.0;
+        else if (G_UNLIKELY(cpos > length))
+            cpos -= 1.0;
+
+        tick->position += copysign(fmin(fabs(cpos - pos), 0.3), cpos - pos);
     }
 }
 
