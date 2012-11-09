@@ -54,7 +54,7 @@ struct _GwyResourceListClass {
 };
 
 GType              gwy_resource_list_get_type          (void)                        G_GNUC_CONST;
-GwyResourceList*   gwy_resource_list_new               (GType resource_type)         G_GNUC_MALLOC;
+GtkWidget*         gwy_resource_list_new               (GType resource_type)         G_GNUC_MALLOC;
 GwyInventoryStore* gwy_resource_list_get_store         (const GwyResourceList *list) G_GNUC_PURE;
 gboolean           gwy_resource_list_set_active        (GwyResourceList *list,
                                                         const gchar *name);

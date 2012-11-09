@@ -263,7 +263,7 @@ gwy_resource_list_get_property(GObject *object,
  *
  * Returns: A newly created resource list (with no columns).
  **/
-GwyResourceList*
+GtkWidget*
 gwy_resource_list_new(GType resource_type)
 {
     return g_object_new(GWY_TYPE_RESOURCE_LIST,
