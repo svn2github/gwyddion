@@ -186,9 +186,10 @@ GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
 AC_MSG_RESULT([$GLIB_MKENUMS])
 AC_SUBST(GLIB_MKENUMS)
 
-# FIXME
-GLIB_COMPILE_RESOURCES=`echo "$GLIB_MKENUMS" | sed 's/glib-mkenums/glib-compile-resources/g'`
-AC_SUBST(GLIB_COMPILE_RESOURCES)
+AC_CHECK_PROGS([GLIB_COMPILE_RESOURCES],[glib-compile-resources],[false])
+if test "x$GLIB_COMPILE_RESOURCES" = xfalse; then
+  AC_MSG_ERROR([glib-compile-resources is required to compile Gwyddion])
+fi
 
 AC_CHECK_PROGS([GTESTER],[gtester],[false])
 
@@ -203,6 +204,7 @@ GOBJECT_INTROSPECTION_CHECK([0.10.0])
 #############################################################################
 # Other tools
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
+AC_CHECK_PROGS([GIMP_CONSOLE],[gimp-console],[false])
 
 #############################################################################
 # Valgrind
