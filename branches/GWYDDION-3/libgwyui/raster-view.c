@@ -299,6 +299,11 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     gtk_grid_attach(grid, coloraxis, 3, 2, 1, 1);
     gtk_widget_show(coloraxis);
 
+    // Avoid setting range methods to USER because ranges differ now.
+    GwyRange range;
+    gwy_axis_get_range(GWY_AXIS(coloraxis), &range);
+    gwy_raster_area_set_user_range(priv->area, &range);
+
     g_signal_connect_swapped(area, "notify",
                              G_CALLBACK(area_notify), rasterview);
     set_hadjustment(rasterview, hadj);
@@ -948,6 +953,9 @@ axis_button_clicked(GwyRasterView *rasterview,
     }
     gtk_widget_show_all(child);
     gtk_grid_attach(grid, child, 3, 2, 1, 1);
+
+    if (id == AXIS_TAB_AXIS)
+        gtk_widget_grab_focus(GTK_WIDGET(priv->area));
 }
 
 static GtkWidget*
@@ -1120,7 +1128,6 @@ gradient_activated(GwyRasterView *rasterview,
     gwy_raster_area_set_gradient(priv->area, gradient);
 
     gtk_toggle_button_set_active(priv->axisbutton, TRUE);
-    gtk_widget_grab_focus(GTK_WIDGET(priv->area));
 }
 
 /**
