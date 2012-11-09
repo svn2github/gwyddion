@@ -2481,7 +2481,7 @@ field_data_changed(GwyRasterArea *rasterarea,
     RasterArea *priv = rasterarea->priv;
 
     gboolean fixed_range = (priv->range_from_method == GWY_COLOR_RANGE_USER
-                            && priv->range_to_method != GWY_COLOR_RANGE_USER);
+                            && priv->range_to_method == GWY_COLOR_RANGE_USER);
 
     priv->field_surface_valid = FALSE;
     if (!fixed_range)
