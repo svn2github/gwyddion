@@ -647,7 +647,7 @@ check_item(guint n,
  **/
 
 /**
- * GwyRasterAreaClass:
+ * GwyInventoryStoreClass:
  *
  * Class of inventory tree model wrappers.
  **/

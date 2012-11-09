@@ -1716,7 +1716,6 @@ gwy_axis_get_units_affinity(const GwyAxis *axis,
 
 /**
  * SECTION: axis
- * @section_id: GwyAxis
  * @title: GwyAxis
  * @short_description: Base class for widgets displaying axes
  **/

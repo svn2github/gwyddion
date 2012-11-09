@@ -1059,7 +1059,6 @@ ruler_popup_item_toggled(GwyRasterView *rasterview,
 
 /**
  * SECTION: raster-view
- * @section_id: GwyRasterView
  * @title: GwyRasterView
  * @short_description: Display fields with rulers and color axes
  **/

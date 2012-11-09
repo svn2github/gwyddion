@@ -338,7 +338,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
      * /&ast; show leading zeros &ast;/
      * static gboolean
      * on_output(GwySpinButton *spin,
-     *            gpointer       data)
+     *            gpointer user_data)
      * {
      *    GtkAdjustment *adjustment;
      *    gchar *text;
@@ -1841,9 +1841,9 @@ gwy_spin_button_new_with_range(gdouble min,
  */
 static void
 adjustment_changed_cb(G_GNUC_UNUSED GtkAdjustment *adjustment,
-                      gpointer data)
+                      gpointer user_data)
 {
-    GwySpinButton *spinbutton = GWY_SPIN_BUTTON(data);
+    GwySpinButton *spinbutton = GWY_SPIN_BUTTON(user_data);
     GwySpinButtonPrivate *priv = spinbutton->priv;
 
     priv->timer_step = gtk_adjustment_get_step_increment(priv->adjustment);
@@ -2524,10 +2524,10 @@ entry_get_borders(GtkEntry *entry,
 
 /**
  * SECTION:spin-button
- * @Title: GwySpinButton
- * @Short_description: Retrieve an integer or floating-point number from
+ * @title: GwySpinButton
+ * @short_description: Retrieve an integer or floating-point number from
  *     the user
- * @See_also: #GtkEntry
+ * @see_also: #GtkEntry
  *
  * A #GwySpinButton is an ideal way to allow the user to set the value of
  * some attribute. Rather than having to directly type a number into a

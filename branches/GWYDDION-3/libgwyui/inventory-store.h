@@ -49,6 +49,8 @@ struct _GwyInventoryStore {
 struct _GwyInventoryStoreClass {
     /*<private>*/
     GInitiallyUnownedClass unowned_class;
+    void (*reserved1)(void);
+    void (*reserved2)(void);
     /*<public>*/
 };
 
