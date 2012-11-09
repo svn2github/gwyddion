@@ -594,10 +594,15 @@ set_vadjustment(GwyScroller *scroller,
  * @title: GwyScroller
  * @short_description: Simple scrollable area without any scrollbars
  *
- * #GwyScroller is somewhat similar to #GtkScrolledWindow.  However, it does
- * not show any scrollbars inside; the entire widget area is occupied by the
- * child.  The adjustments can be used to add scrollbars and other
- * #GtkRange<!-- -->-like widgets elsewhere, for instance on the outside.
+ * #GwyScroller is a scrolling widget somewhat similar to #GtkScrolledWindow,
+ * i.e. its purpose is to show only a part of the child widget if it does not
+ * fit and permit scrolling.  However, it does not show any scrollbars inside;
+ * the entire widget area is occupied by the child.  The adjustments can be
+ * used to add scrollbars and other #GtkRange<!-- -->-like widgets elsewhere,
+ * for instance on the outside.
+ *
+ * Only #GtkScrollable widgets can be added to a #GwyScroller directly.  If you
+ * need to add other widgets you must wrap them in a #GtkViewPort.
  **/
 
 /**
