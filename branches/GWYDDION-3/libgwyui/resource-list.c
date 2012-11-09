@@ -118,9 +118,7 @@ gwy_resource_list_class_init(GwyResourceListClass *klass)
         = g_param_spec_string("active",
                               "Active",
                               "Name of the currently active (selected) "
-                              "resource.  An attempt to set this property "
-                              "to a name not corresponding to any resource "
-                              "leaves it unchanged.",
+                              "resource.",
                               NULL,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -147,7 +145,6 @@ gwy_resource_list_init(GwyResourceList *list)
     gint w, h;
     gtk_icon_size_lookup(GTK_ICON_SIZE_SMALL_TOOLBAR, &w, &h);
     priv->height = h;
-    gtk_tree_view_set_fixed_height_mode(GTK_TREE_VIEW(list), TRUE);
 }
 
 static void
@@ -323,6 +320,12 @@ gwy_resource_list_set_active(GwyResourceList *list,
                                                      &filter_iter, &iter);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     gtk_tree_selection_select_iter(selection, &filter_iter);
+
+    GtkTreePath *path = gtk_tree_model_get_path(GTK_TREE_MODEL(priv->filter),
+                                                &filter_iter);
+    gtk_tree_view_scroll_to_cell(treeview, path, NULL, FALSE, 0.0, 0.5);
+    gtk_tree_path_free(path);
+
     return TRUE;
 }
 
@@ -332,8 +335,12 @@ gwy_resource_list_set_active(GwyResourceList *list,
  *
  * Gets the name of resource currently selected in a resource list.
  *
- * If you change the selection mode to %GTK_SELECTION_MULTIPLE this function
- * attempts to do something meaningful by returning the resource under cursor.
+ * Resource lists try to always keep a meaningful concept of currently active
+ * resource.  You can help it greatly by initialising it at the begining.
+ * If the tree view selection reports that nothing is selected, e.g. because
+ * searching is performed at that moment, the last actually selected resource
+ * is considered active.  If you change the selection mode to
+ * %GTK_SELECTION_MULTIPLE the resource under cursor is considered active.
  *
  * Returns: (allow-none):
  *          Name of the currently selected resource.  On rare occassions, it
@@ -530,8 +537,9 @@ selection_changed(GwyResourceList *list,
             gtk_tree_path_free(path);
         }
     }
-    g_printerr("SELECTION CHANGED to %s\n", gwy_resource_get_name(resource));
-    set_active_resource(list, resource);
+
+    if (resource)
+        set_active_resource(list, resource);
 }
 
 static void
