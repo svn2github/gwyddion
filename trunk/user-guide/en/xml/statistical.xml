@@ -338,8 +338,9 @@
         </mediaobject>
       </informalfigure>
       <para>
-        We can also introduce the radially averaged ACF
-        <xi:include href="eqi-G_r-of-tau.xml"/> which of course contains the same
+        We can also introduce the radial ACF
+        <xi:include href="eqi-G_r-of-tau.xml"/>, i.e. angularly averaged
+        two-dimensional ACF, which of course contains the same
         information as the one-dimensional ACF for isotropic surfaces:
         <xi:include href="eq-autocorrelation-radial.xml"/>
       </para>
@@ -474,7 +475,8 @@
           <secondary>radial</secondary>
         </indexterm>
         We can also introduce the radial PSDF
-        <xi:include href="eqi-W_r-of-K.xml"/> which of course contains the same
+        <xi:include href="eqi-W_r-of-K.xml"/>, i.e. angularly integrated
+        two-dimensional PSDF, which of course contains the same
         information as the one-dimensional PSDF for isotropic rough surfaces:
         <xi:include href="eq-power-spectral-density-radial.xml"/>
       </para>
