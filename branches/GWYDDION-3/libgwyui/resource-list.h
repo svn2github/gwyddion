@@ -20,7 +20,6 @@
 #ifndef __LIBGWYUI_RESOURCE_LIST_H__
 #define __LIBGWYUI_RESOURCE_LIST_H__
 
-#include <gtk/gtk.h>
 #include <libgwy/resource.h>
 #include <libgwyui/inventory-store.h>
 
@@ -50,20 +49,23 @@ struct _GwyResourceList {
 struct _GwyResourceListClass {
     /*<private>*/
     GtkTreeViewClass tree_view_class;
-    /*<public>*/
-    GType resource_type;
+    void (*reserved1)(void);
+    void (*reserved2)(void);
 };
 
-GType              gwy_resource_list_get_type               (void)                        G_GNUC_CONST;
-GwyInventoryStore* gwy_resource_list_get_store              (const GwyResourceList *list) G_GNUC_PURE;
-gboolean           gwy_resource_list_set_active             (GwyResourceList *list,
-                                                             const gchar *name);
-const gchar*       gwy_resource_list_get_active             (const GwyResourceList *list) G_GNUC_PURE;
-void               gwy_resource_list_append_column_name     (GwyResourceList *list);
-void               gwy_resource_list_append_column_preferred(GwyResourceList *list);
-void               gwy_resource_list_set_only_preferred     (GwyResourceList *list,
-                                                             gboolean onlypreferred);
-gboolean           gwy_resource_list_get_only_preferred     (GwyResourceList *list)       G_GNUC_PURE;
+GType              gwy_resource_list_get_type          (void)                        G_GNUC_CONST;
+GwyResourceList*   gwy_resource_list_new               (GType resource_type)         G_GNUC_MALLOC;
+GwyInventoryStore* gwy_resource_list_get_store         (const GwyResourceList *list) G_GNUC_PURE;
+gboolean           gwy_resource_list_set_active        (GwyResourceList *list,
+                                                        const gchar *name);
+const gchar*       gwy_resource_list_get_active        (const GwyResourceList *list) G_GNUC_PURE;
+void               gwy_resource_list_set_only_preferred(GwyResourceList *list,
+                                                        gboolean onlypreferred);
+gboolean           gwy_resource_list_get_only_preferred(GwyResourceList *list)       G_GNUC_PURE;
+
+GtkTreeViewColumn* gwy_resource_list_create_column_name     (GwyResourceList *list) G_GNUC_MALLOC;
+GtkTreeViewColumn* gwy_resource_list_create_column_preferred(GwyResourceList *list) G_GNUC_MALLOC;
+GtkTreeViewColumn* gwy_resource_list_create_column_gradient (GwyResourceList *list) G_GNUC_MALLOC;
 
 G_END_DECLS
 

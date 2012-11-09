@@ -19,10 +19,13 @@
 
 #include <glib/gi18n-lib.h>
 #include "libgwy/object-utils.h"
+#include "libgwy/gradient.h"
+#include "libgwyui/cell-renderer-gradient.h"
 #include "libgwyui/resource-list.h"
 
 enum {
     PROP_0,
+    PROP_RESOURCE_TYPE,
     PROP_STORE,
     PROP_ACTIVE,
     PROP_ONLY_PREFERRED,
@@ -30,6 +33,7 @@ enum {
 };
 
 struct _GwyResourceListPrivate {
+    GType resource_type;
     GwyInventoryStore *store;
     GtkTreeModelFilter *filter;
     GwyResource *active_resource;
@@ -52,6 +56,11 @@ static void     gwy_resource_list_get_property(GObject *object,
                                                GValue *value,
                                                GParamSpec *pspec);
 static void     render_name                   (GtkTreeViewColumn *column,
+                                               GtkCellRenderer *renderer,
+                                               GtkTreeModel *model,
+                                               GtkTreeIter *iter,
+                                               gpointer user_data);
+static void     render_gradient               (GtkTreeViewColumn *column,
                                                GtkCellRenderer *renderer,
                                                GtkTreeModel *model,
                                                GtkTreeIter *iter,
@@ -82,18 +91,26 @@ gwy_resource_list_class_init(GwyResourceListClass *klass)
 
     g_type_class_add_private(klass, sizeof(ResourceList));
 
+    gobject_class->constructed = gwy_resource_list_constructed;
     gobject_class->dispose = gwy_resource_list_dispose;
     gobject_class->finalize = gwy_resource_list_finalize;
-    gobject_class->constructed = gwy_resource_list_constructed;
     gobject_class->get_property = gwy_resource_list_get_property;
     gobject_class->set_property = gwy_resource_list_set_property;
+
+    properties[PROP_RESOURCE_TYPE]
+        = g_param_spec_gtype("resource-type",
+                             "Resource type",
+                             "Type of resource this list displays.",
+                             GWY_TYPE_RESOURCE,
+                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
+                             | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_STORE]
         = g_param_spec_object("store",
                               "Store",
-                              "Inventory store of the resource list.  It may "
-                              "differ from the tree model because of "
-                              "filtering.",
+                              "Inventory store that ultimately backs the "
+                              "resource list. It may differ from the tree "
+                              "model because of filtering.",
                               GWY_TYPE_INVENTORY_STORE,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -140,20 +157,25 @@ gwy_resource_list_constructed(GObject *object)
 
     GwyResourceList *list = GWY_RESOURCE_LIST(object);
     ResourceList *priv = list->priv;
-    GType type = GWY_RESOURCE_LIST_GET_CLASS(object)->resource_type;
-    g_assert(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    GwyInventory *inventory = gwy_resource_type_get_inventory(type);
+    GType resource_type = priv->resource_type;
+    g_return_if_fail(g_type_is_a(resource_type, GWY_TYPE_RESOURCE));
+    GwyInventory *inventory = gwy_resource_type_get_inventory(resource_type);
+    g_return_if_fail(GWY_IS_INVENTORY(inventory));
+
     priv->store = gwy_inventory_store_new(inventory);
     GtkTreeModel *model = GTK_TREE_MODEL(priv->store);
-    priv->filter = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(model,
-                                                                   NULL));
+    GtkTreeModel *filtermodel = gtk_tree_model_filter_new(model, NULL);
+    priv->filter = GTK_TREE_MODEL_FILTER(filtermodel);
     gtk_tree_model_filter_set_visible_func(priv->filter,
                                            resource_is_visible, list, NULL);
+
     GtkTreeView *treeview = GTK_TREE_VIEW(object);
     gtk_tree_view_set_model(treeview, model);
+
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     g_signal_connect_swapped(selection, "changed",
                              G_CALLBACK(selection_changed), list);
+    // XXX: The user should ensure it's something meaningful is selected.
     gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
 }
 
@@ -181,6 +203,11 @@ gwy_resource_list_set_property(GObject *object,
     GwyResourceList *list = GWY_RESOURCE_LIST(object);
 
     switch (prop_id) {
+        case PROP_RESOURCE_TYPE:
+        // This will be acted upon in constructed().
+        list->priv->resource_type = g_value_get_gtype(value);
+        break;
+
         case PROP_ONLY_PREFERRED:
         set_only_preferred(list, g_value_get_boolean(value));
         break;
@@ -205,6 +232,10 @@ gwy_resource_list_get_property(GObject *object,
     ResourceList *priv = list->priv;
 
     switch (prop_id) {
+        case PROP_RESOURCE_TYPE:
+        g_value_set_gtype(value, priv->resource_type);
+        break;
+
         case PROP_STORE:
         g_value_set_object(value, priv->store);
         break;
@@ -221,6 +252,23 @@ gwy_resource_list_get_property(GObject *object,
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
     }
+}
+
+/**
+ * gwy_resource_list_new:
+ * @resource_type: Type of resource to create the list for.  It must be
+ *                 an instantiatable subclass of #GwyResource.
+ *
+ * Creates a new resource list.
+ *
+ * Returns: A newly created resource list (with no columns).
+ **/
+GwyResourceList*
+gwy_resource_list_new(GType resource_type)
+{
+    return g_object_new(GWY_TYPE_RESOURCE_LIST,
+                        "resource-type", resource_type,
+                        NULL);
 }
 
 /**
@@ -302,64 +350,6 @@ gwy_resource_list_get_active(const GwyResourceList *list)
 }
 
 /**
- * gwy_resource_list_append_column_name:
- * @list: A resource list.
- *
- * Appends a standard column with resource names to a resource list.
- **/
-void
-gwy_resource_list_append_column_name(GwyResourceList *list)
-{
-    g_return_if_fail(GWY_IS_RESOURCE_LIST(list));
-    ResourceList *priv = list->priv;
-
-    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
-    gint i = gwy_inventory_store_find_column(priv->store, "name");
-    g_assert(i > 0);
-    GtkTreeViewColumn *column
-        = gtk_tree_view_column_new_with_attributes(_("Name"), renderer,
-                                                   "text", i,
-                                                   NULL);
-    GwyInventory *inventory = gwy_inventory_store_get_inventory(priv->store);
-    gtk_tree_view_column_set_cell_data_func(column, renderer, render_name,
-                                            inventory, NULL);
-    g_object_set(renderer, "weight-set", TRUE, NULL);
-    GtkTreeView *treeview = GTK_TREE_VIEW(list);
-    gtk_tree_view_append_column(treeview, column);
-
-    gtk_tree_view_set_search_column(treeview, i);
-    gtk_tree_view_set_enable_search(treeview, TRUE);
-}
-
-/**
- * gwy_resource_list_append_column_preferred:
- * @list: A resource list.
- *
- * Appends a standard column with ‘preferred’ checkboxes to a resource list.
- **/
-void
-gwy_resource_list_append_column_preferred(GwyResourceList *list)
-{
-    g_return_if_fail(GWY_IS_RESOURCE_LIST(list));
-    ResourceList *priv = list->priv;
-
-    GtkCellRenderer *renderer = gtk_cell_renderer_toggle_new();
-    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
-    gint i = gwy_inventory_store_find_column(priv->store, "preferred");
-    g_assert(i > 0);
-    const gchar *title = C_("resource-property", "Preferred");
-    GtkTreeViewColumn *column
-        = gtk_tree_view_column_new_with_attributes(title, renderer,
-                                                   "active", i,
-                                                   NULL);
-    g_object_set(renderer, "activatable", TRUE, NULL);
-    g_signal_connect_swapped(renderer, "toggled",
-                             G_CALLBACK(preferred_toggled), list);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-}
-
-/**
  * gwy_resource_list_set_only_preferred:
  * @list: A resource list.
  * @onlypreferred: %TRUE to display only preferred resources, %FALSE to display
@@ -394,19 +384,125 @@ gwy_resource_list_get_only_preferred(GwyResourceList *list)
     return list->priv->only_preferred;
 }
 
+/**
+ * gwy_resource_list_create_column_name:
+ * @list: A resource list.
+ *
+ * Creates a standard column with resource names for a resource list.
+ *
+ * This method may be used with resource lists displaying any #GwyResource
+ * subclasses.
+ **/
+GtkTreeViewColumn*
+gwy_resource_list_create_column_name(GwyResourceList *list)
+{
+    g_return_val_if_fail(GWY_IS_RESOURCE_LIST(list), NULL);
+    ResourceList *priv = list->priv;
+
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
+    gint i = gwy_inventory_store_find_column(priv->store, "name");
+    g_assert(i > 0);
+    GtkTreeViewColumn *column
+        = gtk_tree_view_column_new_with_attributes(_("Name"), renderer,
+                                                   "text", i,
+                                                   NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer, render_name,
+                                            NULL, NULL);
+    g_object_set(renderer, "weight-set", TRUE, NULL);
+    GtkTreeView *treeview = GTK_TREE_VIEW(list);
+
+    gtk_tree_view_set_search_column(treeview, i);
+    gtk_tree_view_set_enable_search(treeview, TRUE);
+
+    return column;
+}
+
+/**
+ * gwy_resource_list_create_column_preferred:
+ * @list: A resource list.
+ *
+ * Creates a standard column with ‘preferred’ checkboxes for a resource list.
+ *
+ * This method may be used with resource lists displaying any #GwyResource
+ * subclasses.
+ **/
+GtkTreeViewColumn*
+gwy_resource_list_create_column_preferred(GwyResourceList *list)
+{
+    g_return_val_if_fail(GWY_IS_RESOURCE_LIST(list), NULL);
+    ResourceList *priv = list->priv;
+
+    GtkCellRenderer *renderer = gtk_cell_renderer_toggle_new();
+    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
+    gint i = gwy_inventory_store_find_column(priv->store, "preferred");
+    g_assert(i > 0);
+    const gchar *title = C_("resource-property", "Preferred");
+    GtkTreeViewColumn *column
+        = gtk_tree_view_column_new_with_attributes(title, renderer,
+                                                   "active", i,
+                                                   NULL);
+    g_object_set(renderer, "activatable", TRUE, NULL);
+    g_signal_connect_swapped(renderer, "toggled",
+                             G_CALLBACK(preferred_toggled), list);
+    return column;
+}
+
+/**
+ * gwy_resource_list_create_column_gradient:
+ * @list: A resource list.
+ *
+ * Creates a standard column with gradient graphical representations for a
+ * resource list.
+ *
+ * This method may be used only with resource list displaying
+ * #GwyGradient<!-- -->s or its subclasses.
+ **/
+GtkTreeViewColumn*
+gwy_resource_list_create_column_gradient(GwyResourceList *list)
+{
+    g_return_val_if_fail(GWY_IS_RESOURCE_LIST(list), NULL);
+    ResourceList *priv = list->priv;
+    g_return_val_if_fail(g_type_is_a(priv->resource_type, GWY_TYPE_GRADIENT),
+                         NULL);
+
+    GtkCellRenderer *renderer = gwy_cell_renderer_gradient_new();
+    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
+    GtkTreeViewColumn *column
+        = gtk_tree_view_column_new_with_attributes(_("Gradient"), renderer,
+                                                   NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer, render_gradient,
+                                            NULL, NULL);
+    return column;
+}
+
 static void
-render_name(G_GNUC_UNUSED GtkTreeViewColumn *column,
+render_name(GtkTreeViewColumn *column,
             GtkCellRenderer *renderer,
             GtkTreeModel *model,
             GtkTreeIter *iter,
-            gpointer user_data)
+            G_GNUC_UNUSED gpointer user_data)
 {
-    GwyInventory *inventory = (GwyInventory*)user_data;
+    GtkWidget *parent = gtk_tree_view_column_get_tree_view(column);
+    ResourceList *priv = GWY_RESOURCE_LIST(parent)->priv;
+    GwyInventory *inventory = gwy_inventory_store_get_inventory(priv->store);
     gpointer item;
     gtk_tree_model_get(model, iter, 0, &item, -1);
     gpointer defitem = gwy_inventory_get_default(inventory);
     PangoWeight w = (item == defitem) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL;
     g_object_set(renderer, "weight", w, NULL);
+}
+
+static void
+render_gradient(G_GNUC_UNUSED GtkTreeViewColumn *column,
+                GtkCellRenderer *renderer,
+                GtkTreeModel *model,
+                GtkTreeIter *iter,
+                G_GNUC_UNUSED gpointer user_data)
+{
+    gpointer item;
+    gtk_tree_model_get(model, iter, 0, &item, -1);
+    g_object_set(renderer, "gradient", item, NULL);
 }
 
 static void
@@ -434,6 +530,7 @@ selection_changed(GwyResourceList *list,
             gtk_tree_path_free(path);
         }
     }
+    g_printerr("SELECTION CHANGED to %s\n", gwy_resource_get_name(resource));
     set_active_resource(list, resource);
 }
 
@@ -441,9 +538,8 @@ static void
 set_active_resource(GwyResourceList *list,
                     GwyResource *resource)
 {
-    GType type = GWY_RESOURCE_LIST_GET_CLASS(list)->resource_type;
     ResourceList *priv = list->priv;
-    if (!gwy_set_member_object(list, resource, type,
+    if (!gwy_set_member_object(list, resource, priv->resource_type,
                                &priv->active_resource,
                                "notify::name", &resource_notify,
                                &priv->resource_notify_id,
@@ -514,13 +610,25 @@ preferred_toggled(GwyResourceList *list,
 /**
  * SECTION: resource-list
  * @title: GwyResourceList
- * @short_description: Base class for resource list views
+ * @short_description: List view displaying resources of certain type
+ *
+ * #GwyResourceList represents a list #GtkTreeView of resources of certain type
+ * specified upon construction.  A newly created tree view has no columns; they
+ * must be added as required.
+ *
+ * Column setup methods are provided both for common resource properties, e.g.
+ * gwy_resource_list_create_column_name() or
+ * gwy_resource_list_create_column_preferred(), and also for some specific
+ * resource types such as gwy_resource_list_create_column_gradient().  The
+ * documentation of each column setup method speficies which resource type it
+ * permits.  The #GtkTreeViewColumn<!-- -->s created by these methods may be
+ * used only with the widget they were set up for.
  **/
 
 /**
  * GwyResourceList:
  *
- * Base class for list views displaing lists of resources.
+ * List view displaying resources of certain type.
  *
  * The #GwyResourceList struct contains private data only and should be
  * accessed using the functions below.
@@ -528,9 +636,6 @@ preferred_toggled(GwyResourceList *list,
 
 /**
  * GwyResourceListClass:
- * @resource_type: Resource type.  It must be filled by instantiatable
- *                 subclasses as it is used to obtain the right resource
- *                 inventory for the model.
  *
  * Class of resource list views.
  **/
