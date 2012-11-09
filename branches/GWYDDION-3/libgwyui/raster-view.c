@@ -1120,6 +1120,7 @@ gradient_activated(GwyRasterView *rasterview,
     gwy_raster_area_set_gradient(priv->area, gradient);
 
     gtk_toggle_button_set_active(priv->axisbutton, TRUE);
+    gtk_widget_grab_focus(GTK_WIDGET(priv->area));
 }
 
 /**
