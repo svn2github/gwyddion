@@ -83,7 +83,7 @@ gwy_rgba_to_rgb8_cairo(const GwyRGBA *rgba)
     guint red = COMPONENT_TO_PIXEL8(rgba->r),
           green = COMPONENT_TO_PIXEL8(rgba->g),
           blue = COMPONENT_TO_PIXEL8(rgba->b);
-    return (blue << 16) | (green << 8) | red;
+    return (red << 16) | (green << 8) | blue;
 }
 
 static inline guint32
@@ -93,7 +93,7 @@ gwy_rgba_to_rgba8_cairo(const GwyRGBA *rgba)
           green = COMPONENT_TO_PIXEL8(rgba->g),
           blue = COMPONENT_TO_PIXEL8(rgba->b),
           alpha = COMPONENT_TO_PIXEL8(rgba->a);
-    return (alpha << 24) | (blue << 16) | (green << 8) | red;
+    return (alpha << 24) | (red << 16) | (green << 8) | blue;
 }
 
 static inline void
