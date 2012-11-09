@@ -6,6 +6,7 @@ self = gradients
 noinst_DATA = gradients.h
 
 resources = \
+	Test-Red Test-Green Test-Blue Test-Yellow Test-Magenta Test-Cyan \
 	DFit \
 	Gwyddion.net \
 	Sky \
