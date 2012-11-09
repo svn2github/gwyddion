@@ -23,6 +23,7 @@
 #include "libgwy/field-statistics.h"
 #include "libgwyui/main.h"
 #include "libgwyui/types.h"
+#include "libgwyui/resource-list.h"
 #include "libgwyui/raster-view.h"
 
 enum {
@@ -65,8 +66,10 @@ struct _GwyRasterViewPrivate {
     GwyColorAxis *coloraxis;
     gboolean requesting_axis_range;
 
-    GtkWidget *gradients;
-    GtkWidget *ranges;
+    GtkWidget *gradients_tab;
+    GwyResourceList *gradient_list;
+
+    GtkWidget *ranges_tab;
 
     GwyField *field;
     gulong field_notify_id;
@@ -135,8 +138,8 @@ static GtkWidget* create_axis_button          (GtkRadioButton *groupwidget,
                                                const gchar *content);
 static void       axis_button_clicked         (GwyRasterView *rasterview,
                                                GtkToggleButton *button);
-static GtkWidget* create_range_controls       (GwyRasterView *rasterview);
-static GtkWidget* create_gradient_list        (GwyRasterView *rasterview);
+static GtkWidget* create_range_controls_tab   (GwyRasterView *rasterview);
+static GtkWidget* create_gradients_tab        (GwyRasterView *rasterview);
 static void       pop_up_ruler_menu           (GwyRasterView *rasterview,
                                                GtkWidget *widget,
                                                GdkEventButton *event);
@@ -144,6 +147,12 @@ static GtkMenu*   create_ruler_popup          (GwyRasterView *rasterview);
 static void       ruler_popup_item_toggled    (GwyRasterView *rasterview,
                                                GtkCheckMenuItem *menuitem);
 static void       ruler_popup_deleted         (GtkWidget *menu);
+static void       gradient_selected           (GwyRasterView *rasterview,
+                                               GwyResourceList *list);
+static void       gradient_activated          (GwyRasterView *rasterview,
+                                               GtkTreePath *path,
+                                               GtkTreeViewColumn *column,
+                                               GwyResourceList *list);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -321,8 +330,8 @@ gwy_raster_view_dispose(GObject *object)
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
     GWY_OBJECT_UNREF(priv->coloraxis);
-    GWY_OBJECT_UNREF(priv->ranges);
-    GWY_OBJECT_UNREF(priv->gradients);
+    GWY_OBJECT_UNREF(priv->ranges_tab);
+    GWY_OBJECT_UNREF(priv->gradients_tab);
     if (priv->ruler_popup) {
         gtk_widget_destroy(GTK_WIDGET(priv->ruler_popup));
         priv->ruler_popup = NULL;
@@ -862,17 +871,17 @@ create_axis_button_box(GwyRasterView *rasterview)
                                                GTK_STOCK_YES);
     GtkRadioButton *groupwidget = GTK_RADIO_BUTTON(axisbutton);
     priv->axisbutton = GTK_TOGGLE_BUTTON(axisbutton);
-    gtk_box_pack_start(GTK_BOX(buttonbox), axisbutton, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(buttonbox), axisbutton, FALSE, FALSE, 0);
 
     GtkWidget *gradbutton = create_axis_button(groupwidget, AXIS_TAB_GRADIENTS,
                                                GTK_STOCK_NO);
     priv->gradbutton = GTK_TOGGLE_BUTTON(gradbutton);
-    gtk_box_pack_start(GTK_BOX(buttonbox), gradbutton, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(buttonbox), gradbutton, FALSE, FALSE, 0);
 
     GtkWidget *rangebutton = create_axis_button(groupwidget, AXIS_TAB_RANGES,
                                                 GTK_STOCK_CANCEL);
     priv->rangebutton = GTK_TOGGLE_BUTTON(rangebutton);
-    gtk_box_pack_start(GTK_BOX(buttonbox), rangebutton, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(buttonbox), rangebutton, FALSE, FALSE, 0);
 
     g_signal_connect_swapped(axisbutton, "toggled",
                              G_CALLBACK(axis_button_clicked), rasterview);
@@ -921,18 +930,18 @@ axis_button_clicked(GwyRasterView *rasterview,
     if (id == AXIS_TAB_AXIS)
         child = GTK_WIDGET(priv->coloraxis);
     else if (id == AXIS_TAB_RANGES) {
-        if (!priv->ranges) {
-            priv->ranges = create_range_controls(rasterview);
-            g_object_ref(priv->ranges);
+        if (!priv->ranges_tab) {
+            priv->ranges_tab = create_range_controls_tab(rasterview);
+            g_object_ref(priv->ranges_tab);
         }
-        child = priv->ranges;
+        child = priv->ranges_tab;
     }
     else if (id == AXIS_TAB_GRADIENTS) {
-        if (!priv->gradients) {
-            priv->gradients = create_gradient_list(rasterview);
-            g_object_ref(priv->gradients);
+        if (!priv->gradients_tab) {
+            priv->gradients_tab = create_gradients_tab(rasterview);
+            g_object_ref(priv->gradients_tab);
         }
-        child = priv->gradients;
+        child = priv->gradients_tab;
     }
     else {
         g_assert_not_reached();
@@ -942,7 +951,7 @@ axis_button_clicked(GwyRasterView *rasterview,
 }
 
 static GtkWidget*
-create_range_controls(G_GNUC_UNUSED GwyRasterView *rasterview)
+create_range_controls_tab(G_GNUC_UNUSED GwyRasterView *rasterview)
 {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(vbox), gtk_label_new("Ranges..."));
@@ -950,10 +959,42 @@ create_range_controls(G_GNUC_UNUSED GwyRasterView *rasterview)
 }
 
 static GtkWidget*
-create_gradient_list(G_GNUC_UNUSED GwyRasterView *rasterview)
+create_gradients_tab(GwyRasterView *rasterview)
 {
+    RasterView *priv = rasterview->priv;
+
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(vbox), gtk_label_new("Gradients..."));
+    GtkWidget *scroller = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
+                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_box_pack_start(GTK_BOX(vbox), scroller, TRUE, TRUE, 0);
+
+    GtkWidget *list = gwy_resource_list_new(GWY_TYPE_GRADIENT);
+    GtkTreeView *treeview = GTK_TREE_VIEW(list);
+    priv->gradient_list = GWY_RESOURCE_LIST(list);
+    gtk_container_add(GTK_CONTAINER(scroller), list);
+    gtk_tree_view_set_headers_visible(treeview, FALSE);
+    GwyGradient *gradient = gwy_raster_area_get_gradient(priv->area);
+    if (gradient) {
+        const gchar *name = gwy_resource_get_name(GWY_RESOURCE(gradient));
+        gwy_resource_list_set_active(priv->gradient_list, name);
+    }
+    else {
+        // FIXME: What is the right initialisation if nothing specific is
+        // selected?
+    }
+
+    GtkTreeViewColumn *column;
+    column = gwy_resource_list_create_column_gradient(priv->gradient_list);
+    gtk_tree_view_append_column(treeview, column);
+    column = gwy_resource_list_create_column_name(priv->gradient_list);
+    gtk_tree_view_append_column(treeview, column);
+
+    g_signal_connect_swapped(priv->gradient_list, "notify::active",
+                             G_CALLBACK(gradient_selected), rasterview);
+    g_signal_connect_swapped(priv->gradient_list, "row-activated",
+                             G_CALLBACK(gradient_activated), rasterview);
+
     return vbox;
 }
 
@@ -1055,6 +1096,30 @@ ruler_popup_item_toggled(GwyRasterView *rasterview,
         g_object_set(priv->area, "real-aspect-ratio", FALSE, NULL);
     else if (menuitem == priv->real_aspect_ratio)
         g_object_set(priv->area, "real-aspect-ratio", TRUE, NULL);
+}
+
+static void
+gradient_selected(GwyRasterView *rasterview,
+                  G_GNUC_UNUSED GwyResourceList *list)
+{
+    RasterView *priv = rasterview->priv;
+    const gchar *name = gwy_resource_list_get_active(priv->gradient_list);
+    GwyGradient *gradient = gwy_gradients_get(name);
+    gwy_raster_area_set_gradient(priv->area, gradient);
+}
+
+static void
+gradient_activated(GwyRasterView *rasterview,
+                   G_GNUC_UNUSED GtkTreePath *path,
+                   G_GNUC_UNUSED GtkTreeViewColumn *column,
+                   G_GNUC_UNUSED GwyResourceList *list)
+{
+    RasterView *priv = rasterview->priv;
+    const gchar *name = gwy_resource_list_get_active(priv->gradient_list);
+    GwyGradient *gradient = gwy_gradients_get(name);
+    gwy_raster_area_set_gradient(priv->area, gradient);
+
+    gtk_toggle_button_set_active(priv->axisbutton, TRUE);
 }
 
 /**
