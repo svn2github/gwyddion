@@ -40,6 +40,10 @@ struct _GwyColorAxisPrivate {
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
     gboolean editable_range;
+    gint last_boundary;
+
+    GdkCursor *cursor_from;
+    GdkCursor *cursor_to;
 
     gdouble stripewidth;
 };
@@ -56,27 +60,47 @@ static void     gwy_color_axis_get_property         (GObject *object,
                                                      guint prop_id,
                                                      GValue *value,
                                                      GParamSpec *pspec);
+static void     gwy_color_axis_notify               (GObject *object,
+                                                     GParamSpec *pspec);
 static void     gwy_color_axis_get_preferred_width  (GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
 static void     gwy_color_axis_get_preferred_height (GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
+static void     gwy_color_axis_unrealize            (GtkWidget *widget);
 static gboolean gwy_color_axis_draw                 (GtkWidget *widget,
                                                      cairo_t *cr);
 static gboolean gwy_color_axis_scroll               (GtkWidget *widget,
                                                      GdkEventScroll *event);
+static gboolean gwy_color_axis_motion_notify        (GtkWidget *widget,
+                                                     GdkEventMotion *event);
 static gboolean gwy_color_axis_get_horizontal_labels(const GwyAxis *axis);
 static guint    gwy_color_axis_get_split_width      (const GwyAxis *axis);
 static void     gwy_color_axis_get_units_affinity   (const GwyAxis *axis,
                                                      GwyAxisUnitPlacement *primary,
                                                      GwyAxisUnitPlacement *secondary);
+static void     set_up_transform                    (GtkPositionType edge,
+                                                     cairo_matrix_t *matrix,
+                                                     gdouble width,
+                                                     gdouble height);
+static void     draw_line_transformed               (cairo_t *cr,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble xf,
+                                                     gdouble yf,
+                                                     gdouble xt,
+                                                     gdouble yt);
 static gboolean set_gradient                        (GwyColorAxis *coloraxis,
                                                      GwyGradient *gradient);
 static gboolean set_editable_range                  (GwyColorAxis *coloraxis,
                                                      gboolean setting);
 static void     gradient_data_changed               (GwyColorAxis *coloraxis,
                                                      GwyGradient *gradient);
+static void     ensure_cursors                      (GwyColorAxis *coloraxis);
+static void     discard_cursors                     (GwyColorAxis *coloraxis);
+static gint     find_boundary                       (GwyAxis *axis,
+                                                     gdouble x,
+                                                     gdouble y);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -97,11 +121,14 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     gobject_class->finalize = gwy_color_axis_finalize;
     gobject_class->get_property = gwy_color_axis_get_property;
     gobject_class->set_property = gwy_color_axis_set_property;
+    gobject_class->notify = gwy_color_axis_notify;
 
     widget_class->get_preferred_width = gwy_color_axis_get_preferred_width;
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
+    widget_class->unrealize = gwy_color_axis_unrealize;
     widget_class->draw = gwy_color_axis_draw;
     widget_class->scroll_event = gwy_color_axis_scroll;
+    widget_class->motion_notify_event = gwy_color_axis_motion_notify;
 
     axis_class->get_horizontal_labels = gwy_color_axis_get_horizontal_labels;
     axis_class->get_split_width = gwy_color_axis_get_split_width;
@@ -197,6 +224,14 @@ gwy_color_axis_get_property(GObject *object,
 }
 
 static void
+gwy_color_axis_notify(GObject *object,
+                      GParamSpec *pspec)
+{
+    if (gwy_strequal(pspec->name, "edge"))
+        discard_cursors(GWY_COLOR_AXIS(object));
+}
+
+static void
 gwy_color_axis_get_preferred_width(GtkWidget *widget,
                                    gint *minimum,
                                    gint *natural)
@@ -252,31 +287,10 @@ gwy_color_axis_get_preferred_height(GtkWidget *widget,
 }
 
 static void
-set_up_transform(GtkPositionType edge,
-                 cairo_matrix_t *matrix,
-                 gdouble width, gdouble height)
+gwy_color_axis_unrealize(GtkWidget *widget)
 {
-    if (edge == GTK_POS_TOP)
-        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, height);
-    else if (edge == GTK_POS_LEFT)
-        cairo_matrix_init(matrix, 0.0, -1.0, -1.0, 0.0, width, height);
-    else if (edge == GTK_POS_BOTTOM)
-        cairo_matrix_init_identity(matrix);
-    else if (edge == GTK_POS_RIGHT)
-        cairo_matrix_init(matrix, 0.0, -1.0, 1.0, 0.0, 0.0, height);
-    else {
-        g_assert_not_reached();
-    }
-}
-
-static void
-draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
-                      gdouble xf, gdouble yf, gdouble xt, gdouble yt)
-{
-    cairo_matrix_transform_point(matrix, &xf, &yf);
-    cairo_move_to(cr, xf, yf);
-    cairo_matrix_transform_point(matrix, &xt, &yt);
-    cairo_line_to(cr, xt, yt);
+    discard_cursors(GWY_COLOR_AXIS(widget));
+    GTK_WIDGET_CLASS(gwy_color_axis_parent_class)->unrealize(widget);
 }
 
 static gboolean
@@ -402,18 +416,9 @@ gwy_color_axis_scroll(GtkWidget *widget,
         return FALSE;
 
     GwyAxis *axis = GWY_AXIS(widget);
-    GtkPositionType edge = gwy_axis_get_edge(axis);
-    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
-    gdouble width = gtk_widget_get_allocated_width(widget),
-            height = gtk_widget_get_allocated_height(widget);
-    gdouble length = (vertical ? height : width),
-            pos = (vertical ? height - event->y : event->x);
-    gint boundary = 0;
-    if (pos >= 2.0*length/3.0)
-        boundary = 1;
-    else if (pos <= length/3.0)
-        boundary = -1;
-    else
+    gint boundary = find_boundary(axis, event->x, event->y);
+    priv->last_boundary = boundary;
+    if (!boundary)
         return FALSE;
 
     GwyRange range;
@@ -433,6 +438,32 @@ gwy_color_axis_scroll(GtkWidget *widget,
     gwy_axis_request_range(axis, &range);
 
     return TRUE;
+}
+
+static gboolean
+gwy_color_axis_motion_notify(GtkWidget *widget,
+                             GdkEventMotion *event)
+{
+    ColorAxis *priv = GWY_COLOR_AXIS(widget)->priv;
+    if (!priv->editable_range)
+        return FALSE;
+
+    GwyAxis *axis = GWY_AXIS(widget);
+    gint boundary = find_boundary(axis, event->x, event->y);
+    if (boundary == priv->last_boundary)
+        return FALSE;
+
+    priv->last_boundary = boundary;
+    ensure_cursors(GWY_COLOR_AXIS(widget));
+    GdkWindow *window = axis->input_window;
+    if (boundary == 1)
+        gdk_window_set_cursor(window, priv->cursor_to);
+    else if (boundary == -1)
+        gdk_window_set_cursor(window, priv->cursor_from);
+    else
+        gdk_window_set_cursor(window, NULL);
+
+    return FALSE;
 }
 
 static gboolean
@@ -553,6 +584,34 @@ gwy_color_axis_get_editable_range(const GwyColorAxis *coloraxis)
     return coloraxis->priv->editable_range;
 }
 
+static void
+set_up_transform(GtkPositionType edge,
+                 cairo_matrix_t *matrix,
+                 gdouble width, gdouble height)
+{
+    if (edge == GTK_POS_TOP)
+        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, height);
+    else if (edge == GTK_POS_LEFT)
+        cairo_matrix_init(matrix, 0.0, -1.0, -1.0, 0.0, width, height);
+    else if (edge == GTK_POS_BOTTOM)
+        cairo_matrix_init_identity(matrix);
+    else if (edge == GTK_POS_RIGHT)
+        cairo_matrix_init(matrix, 0.0, -1.0, 1.0, 0.0, 0.0, height);
+    else {
+        g_assert_not_reached();
+    }
+}
+
+static void
+draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
+                      gdouble xf, gdouble yf, gdouble xt, gdouble yt)
+{
+    cairo_matrix_transform_point(matrix, &xf, &yf);
+    cairo_move_to(cr, xf, yf);
+    cairo_matrix_transform_point(matrix, &xt, &yt);
+    cairo_line_to(cr, xt, yt);
+}
+
 static gboolean
 set_gradient(GwyColorAxis *coloraxis,
              GwyGradient *gradient)
@@ -587,6 +646,56 @@ gradient_data_changed(GwyColorAxis *coloraxis,
                       G_GNUC_UNUSED GwyGradient *gradient)
 {
     gtk_widget_queue_draw(GTK_WIDGET(coloraxis));
+}
+
+static void
+ensure_cursors(GwyColorAxis *coloraxis)
+{
+    ColorAxis *priv = coloraxis->priv;
+    if (priv->cursor_from && priv->cursor_to)
+        return;
+
+    GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(coloraxis));
+    GwyAxis *axis = GWY_AXIS(coloraxis);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
+        priv->cursor_from = gdk_cursor_new_for_display(display,
+                                                       GDK_SB_DOWN_ARROW);
+        priv->cursor_to = gdk_cursor_new_for_display(display,
+                                                     GDK_SB_UP_ARROW);
+    }
+    else {
+        priv->cursor_from = gdk_cursor_new_for_display(display,
+                                                       GDK_SB_LEFT_ARROW);
+        priv->cursor_to = gdk_cursor_new_for_display(display,
+                                                     GDK_SB_RIGHT_ARROW);
+    }
+}
+
+static void
+discard_cursors(GwyColorAxis *coloraxis)
+{
+    ColorAxis *priv = coloraxis->priv;
+    GWY_OBJECT_UNREF(priv->cursor_from);
+    GWY_OBJECT_UNREF(priv->cursor_to);
+}
+
+static gint
+find_boundary(GwyAxis *axis, gdouble x, gdouble y)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gdouble width = gtk_widget_get_allocated_width(widget),
+            height = gtk_widget_get_allocated_height(widget);
+    gdouble length = (vertical ? height : width),
+            pos = (vertical ? height - y : x);
+
+    if (pos >= 2.0*length/3.0)
+        return 1;
+    if (pos <= length/3.0)
+        return -1;
+    return 0;
 }
 
 /**

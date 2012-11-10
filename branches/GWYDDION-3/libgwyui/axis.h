@@ -67,6 +67,7 @@ typedef struct _GwyAxisClass GwyAxisClass;
 struct _GwyAxis {
     GtkWidget widget;
     struct _GwyAxisPrivate *priv;
+    GdkWindow *input_window;
 };
 
 struct _GwyAxisClass {

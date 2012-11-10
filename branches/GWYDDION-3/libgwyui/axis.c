@@ -822,12 +822,15 @@ create_input_window(GwyAxis *axis)
         .event_mask = (gtk_widget_get_events(widget)
                        | GDK_SCROLL_MASK
                        | GDK_BUTTON_PRESS_MASK
-                       | GDK_BUTTON_RELEASE_MASK),
+                       | GDK_BUTTON_RELEASE_MASK
+                       | GDK_POINTER_MOTION_MASK
+                       | GDK_POINTER_MOTION_HINT_MASK),
     };
     gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR;
     priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
                                         &attributes, attributes_mask);
     gdk_window_set_user_data(priv->input_window, widget);
+    axis->input_window = priv->input_window;
 }
 
 static void
