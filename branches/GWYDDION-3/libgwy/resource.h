@@ -119,7 +119,8 @@ const gchar*                gwy_resource_type_get_name             (GType type) 
 const GwyInventoryItemType* gwy_resource_type_get_item_type        (GType type)                             G_GNUC_PURE;
 GwyInventory*               gwy_resource_type_get_inventory        (GType type)                             G_GNUC_PURE;
 const gchar*                gwy_resource_type_get_description      (GType type)                             G_GNUC_PURE;
-void                        gwy_resource_type_load                 (GType type);
+void                        gwy_resource_type_load                 (GType type,
+                                                                    GwyErrorList **error_list);
 void                        gwy_resource_type_load_directory       (GType type,
                                                                     const gchar *dirname,
                                                                     gboolean modifiable,

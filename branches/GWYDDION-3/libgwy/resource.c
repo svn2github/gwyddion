@@ -1662,6 +1662,7 @@ manage_flush_check_queue(GType type,
 /**
  * gwy_resource_type_load:
  * @type: A resource type.
+ * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
  * Loads resources of a given type from disk.
  *
@@ -1669,19 +1670,20 @@ manage_flush_check_queue(GType type,
  * marked constant), then from the user directory (marked modifiable).
  **/
 void
-gwy_resource_type_load(GType type)
+gwy_resource_type_load(GType type,
+                       GwyErrorList **error_list)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
     ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_if_fail(cpriv);
 
-    gwy_resource_type_load_builtins(type, NULL);
+    gwy_resource_type_load_builtins(type, error_list);
 
     gchar *userdir = gwy_user_directory(cpriv->name);
     gchar **dirs = gwy_data_search_path(cpriv->name);
     for (gchar **d = dirs; *d; d++) {
         gboolean writable = userdir && gwy_strequal(*d, userdir);
-        gwy_resource_type_load_directory(type, *d, writable, NULL);
+        gwy_resource_type_load_directory(type, *d, writable, error_list);
     }
     if (!g_file_test(userdir, G_FILE_TEST_IS_DIR))
         g_mkdir_with_parents(userdir, 0700);
