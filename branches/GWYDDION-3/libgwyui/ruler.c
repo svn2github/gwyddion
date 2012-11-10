@@ -43,35 +43,46 @@ struct _GwyRulerPrivate {
 
 typedef struct _GwyRulerPrivate Ruler;
 
-static void     gwy_ruler_dispose             (GObject *object);
-static void     gwy_ruler_finalize            (GObject *object);
-static void     gwy_ruler_set_property        (GObject *object,
-                                               guint prop_id,
-                                               const GValue *value,
-                                               GParamSpec *pspec);
-static void     gwy_ruler_get_property        (GObject *object,
-                                               guint prop_id,
-                                               GValue *value,
-                                               GParamSpec *pspec);
-static void     gwy_ruler_get_preferred_width (GtkWidget *widget,
-                                               gint *minimum,
-                                               gint *natural);
-static void     gwy_ruler_get_preferred_height(GtkWidget *widget,
-                                               gint *minimum,
-                                               gint *natural);
-static gboolean gwy_ruler_draw                (GtkWidget *widget,
-                                               cairo_t *cr);
-static gboolean set_show_mark                 (GwyRuler *ruler,
-                                               gboolean setting);
-static gboolean set_mark                      (GwyRuler *ruler,
-                                               gdouble value);
-static void     draw_mark                     (GwyRuler *ruler,
-                                               cairo_t *cr,
-                                               const cairo_matrix_t *matrix,
-                                               gdouble length,
-                                               gdouble breadth);
-static void     invalidate_mark_area          (GwyRuler *ruler);
-static gint     preferred_breadth             (GtkWidget *widget);
+static void            gwy_ruler_dispose             (GObject *object);
+static void            gwy_ruler_finalize            (GObject *object);
+static void            gwy_ruler_set_property        (GObject *object,
+                                                      guint prop_id,
+                                                      const GValue *value,
+                                                      GParamSpec *pspec);
+static void            gwy_ruler_get_property        (GObject *object,
+                                                      guint prop_id,
+                                                      GValue *value,
+                                                      GParamSpec *pspec);
+static void            gwy_ruler_get_preferred_width (GtkWidget *widget,
+                                                      gint *minimum,
+                                                      gint *natural);
+static void            gwy_ruler_get_preferred_height(GtkWidget *widget,
+                                                      gint *minimum,
+                                                      gint *natural);
+static gboolean        gwy_ruler_draw                (GtkWidget *widget,
+                                                      cairo_t *cr);
+static gboolean        set_show_mark                 (GwyRuler *ruler,
+                                                      gboolean setting);
+static gboolean        set_mark                      (GwyRuler *ruler,
+                                                      gdouble value);
+static void            draw_mark                     (GwyRuler *ruler,
+                                                      cairo_t *cr,
+                                                      const cairo_matrix_t *matrix,
+                                                      gdouble length,
+                                                      gdouble breadth);
+static void            invalidate_mark_area          (GwyRuler *ruler);
+static gint            preferred_breadth             (GtkWidget *widget);
+static void            draw_line_transformed         (cairo_t *cr,
+                                                      const cairo_matrix_t *matrix,
+                                                      gdouble xf,
+                                                      gdouble yf,
+                                                      gdouble xt,
+                                                      gdouble yt);
+static GtkPositionType calculate_scaling             (GwyAxis *axis,
+                                                      GtkAllocation *allocation,
+                                                      gdouble *length,
+                                                      gdouble *breadth,
+                                                      cairo_matrix_t *matrix);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -206,44 +217,6 @@ gwy_ruler_get_preferred_height(GtkWidget *widget,
         *minimum = *natural = preferred_breadth(widget);
 }
 
-static void
-draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
-                      gdouble xf, gdouble yf, gdouble xt, gdouble yt)
-{
-    cairo_matrix_transform_point(matrix, &xf, &yf);
-    cairo_move_to(cr, xf, yf);
-    cairo_matrix_transform_point(matrix, &xt, &yt);
-    cairo_line_to(cr, xt, yt);
-}
-
-static GtkPositionType
-calculate_scaling(GwyAxis *axis,
-                  GtkAllocation *allocation,
-                  gdouble *length, gdouble *breadth,
-                  cairo_matrix_t *matrix)
-{
-    GtkWidget *widget = GTK_WIDGET(axis);
-    GtkPositionType edge = gwy_axis_get_edge(axis);
-    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
-    gtk_widget_get_allocation(widget, allocation);
-    *length = (vertical ? allocation->height : allocation->width),
-    *breadth = (vertical ? allocation->width : allocation->height);
-
-    if (edge == GTK_POS_TOP)
-        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, allocation->height);
-    else if (edge == GTK_POS_LEFT)
-        cairo_matrix_init(matrix, 0.0, 1.0, -1.0, 0.0, allocation->width, 0.0);
-    else if (edge == GTK_POS_BOTTOM)
-        cairo_matrix_init_identity(matrix);
-    else if (edge == GTK_POS_RIGHT)
-        cairo_matrix_init(matrix, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0);
-    else {
-        g_assert_not_reached();
-    }
-
-    return edge;
-}
-
 static gboolean
 gwy_ruler_draw(GtkWidget *widget,
                cairo_t *cr)
@@ -271,7 +244,7 @@ gwy_ruler_draw(GtkWidget *widget,
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
     gint max_ascent = G_MININT, max_descent = G_MININT;
 
-    draw_line_transformed(cr, &matrix, 0, 0, length, 0);
+    draw_line_transformed(cr, &matrix, 0, 0.5, length, 0.5);
     for (guint i = 0; i < nticks; i++) {
         gdouble pos = ticks[i].position;
         gdouble s = tick_level_sizes[ticks[i].level];
@@ -512,6 +485,44 @@ preferred_breadth(GtkWidget *widget)
     pango_layout_get_size(layout, NULL, &breadth);
     breadth = 8*breadth/(5*PANGO_SCALE);
     return MAX(breadth, 4);
+}
+
+static void
+draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
+                      gdouble xf, gdouble yf, gdouble xt, gdouble yt)
+{
+    cairo_matrix_transform_point(matrix, &xf, &yf);
+    cairo_move_to(cr, xf, yf);
+    cairo_matrix_transform_point(matrix, &xt, &yt);
+    cairo_line_to(cr, xt, yt);
+}
+
+static GtkPositionType
+calculate_scaling(GwyAxis *axis,
+                  GtkAllocation *allocation,
+                  gdouble *length, gdouble *breadth,
+                  cairo_matrix_t *matrix)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gtk_widget_get_allocation(widget, allocation);
+    *length = (vertical ? allocation->height : allocation->width),
+    *breadth = (vertical ? allocation->width : allocation->height);
+
+    if (edge == GTK_POS_TOP)
+        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, allocation->height);
+    else if (edge == GTK_POS_LEFT)
+        cairo_matrix_init(matrix, 0.0, 1.0, -1.0, 0.0, allocation->width, 0.0);
+    else if (edge == GTK_POS_BOTTOM)
+        cairo_matrix_init_identity(matrix);
+    else if (edge == GTK_POS_RIGHT)
+        cairo_matrix_init(matrix, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+    else {
+        g_assert_not_reached();
+    }
+
+    return edge;
 }
 
 /**

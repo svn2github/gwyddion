@@ -1386,7 +1386,7 @@ improve_hinting(GwyAxis *axis)
     for (guint i = 0; i < n; i++) {
         GwyAxisTick *tick = &tick_index(ticks, i);
         gdouble pos = tick->position;
-        gdouble cpos = floor(pos + 1.0) - 0.5;
+        gdouble cpos = gwy_round_to_half(pos);
         // Round edge ticks towards the interior.
         if (G_UNLIKELY(cpos < 0.0))
             cpos += 1.0;

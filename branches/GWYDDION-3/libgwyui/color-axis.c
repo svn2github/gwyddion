@@ -307,7 +307,7 @@ gwy_color_axis_draw(GtkWidget *widget,
     gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
     gdouble length = (vertical ? height : width),
             breadth = (vertical ? width : height),
-            stripebreadth = priv->stripewidth*breadth;
+            stripebreadth = gwy_round(priv->stripewidth*breadth);
     GtkPositionType towards = (vertical ? GTK_POS_TOP : GTK_POS_RIGHT);
     cairo_matrix_t matrix;
     set_up_transform(edge, &matrix, width, height);
@@ -341,7 +341,7 @@ gwy_color_axis_draw(GtkWidget *widget,
     cairo_pattern_t *pattern = gwy_cairo_pattern_create_gradient(gradient,
                                                                  towards);
     cairo_matrix_t patmatrix;
-    gdouble xo = 0, yo = 0, xe = length, ye = stripebreadth;
+    gdouble xo = 0.5, yo = 0.5, xe = length - 0.5, ye = stripebreadth - 0.5;
     cairo_matrix_transform_point(&matrix, &xo, &yo);
     cairo_matrix_transform_point(&matrix, &xe, &ye);
     GWY_ORDER(gdouble, xo, xe);
@@ -691,9 +691,9 @@ find_boundary(GwyAxis *axis, gdouble x, gdouble y)
     gdouble length = (vertical ? height : width),
             pos = (vertical ? height - y : x);
 
-    if (pos >= 2.0*length/3.0)
+    if (pos >= 3.0*length/4.0)
         return 1;
-    if (pos <= length/3.0)
+    if (pos <= length/4.0)
         return -1;
     return 0;
 }
