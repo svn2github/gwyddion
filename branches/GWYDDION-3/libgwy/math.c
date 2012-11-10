@@ -1755,6 +1755,24 @@ jump_over:
  *
  * Rounds a number to nearest integer.
  *
+ * It expands to a #glong so the result is of an integral type.  Half-integers
+ * are rounded up, as usual.
+ *
+ * This macro evaluates its argument only once.
+ **/
+
+/**
+ * gwy_round_to_half:
+ * @x: Double value.
+ *
+ * Rounds a number to nearest half-integer.
+ *
+ * The result the nearest number of form @n+½ which is closest to @x.  Integers
+ * are rounded up.
+ *
+ * This function may be useful for Cairo drawing if you want sharp instead
+ * precisely positioned lines of an odd width.
+ *
  * This macro evaluates its argument only once.
  **/
 
