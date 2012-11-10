@@ -67,7 +67,6 @@ typedef struct _GwyAxisClass GwyAxisClass;
 struct _GwyAxis {
     GtkWidget widget;
     struct _GwyAxisPrivate *priv;
-    GdkWindow *input_window;
 };
 
 struct _GwyAxisClass {
@@ -116,6 +115,7 @@ guint              gwy_axis_get_split_width      (const GwyAxis *axis)          
 void               gwy_axis_get_units_affinity   (const GwyAxis *axis,
                                                   GwyAxisUnitPlacement *primary,
                                                   GwyAxisUnitPlacement *secondary);
+GdkWindow*         gwy_axis_get_input_window     (const GwyAxis *axis)              G_GNUC_PURE;
 
 G_END_DECLS
 

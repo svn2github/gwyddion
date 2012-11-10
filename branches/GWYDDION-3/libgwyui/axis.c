@@ -818,18 +818,13 @@ create_input_window(GwyAxis *axis)
         .height = allocation.height,
         .window_type = GDK_WINDOW_CHILD,
         .wclass = GDK_INPUT_ONLY,
-        .event_mask = (gtk_widget_get_events(widget)
-                       | GDK_SCROLL_MASK
-                       | GDK_BUTTON_PRESS_MASK
-                       | GDK_BUTTON_RELEASE_MASK
-                       | GDK_POINTER_MOTION_MASK
-                       | GDK_POINTER_MOTION_HINT_MASK),
+        // Events are added by subclasses/users.
+        .event_mask = gtk_widget_get_events(widget),
     };
     gint attributes_mask = GDK_WA_X | GDK_WA_Y;
     priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
                                         &attributes, attributes_mask);
     gdk_window_set_user_data(priv->input_window, widget);
-    axis->input_window = priv->input_window;
 }
 
 static void
@@ -1714,6 +1709,28 @@ gwy_axis_get_units_affinity(const GwyAxis *axis,
         klass->get_units_affinity(axis, &p, &s);
     GWY_MAYBE_SET(primary, p);
     GWY_MAYBE_SET(secondary, s);
+}
+
+/**
+ * gwy_axis_get_input_window:
+ * @axis: An axis.
+ *
+ * Retrieves the input window of an axis.
+ *
+ * #GwyAxis is a no-window widget, drawing on the parent window.  However,
+ * individual axis subclasses need to respond to Gdk events.  These events are
+ * delivered to an input-only #GdkWindow returned by this functions.  You can
+ * use it to add more events either in subclasses or in user code.  In any
+ * case, the events must be added in response to GtkWidget::realize signal.
+ *
+ * Returns: (transfer none):
+ *          The input window that receives Gdk events.
+ **/
+GdkWindow*
+gwy_axis_get_input_window(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
+    return axis->priv->input_window;
 }
 
 /**

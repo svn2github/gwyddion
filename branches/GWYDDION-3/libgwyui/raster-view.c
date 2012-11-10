@@ -126,6 +126,7 @@ static gboolean   area_enter_notify           (GwyRasterView *rasterview,
 static gboolean   area_leave_notify           (GwyRasterView *rasterview,
                                                GdkEventCrossing *event,
                                                GwyRasterArea *area);
+static void       axis_add_button_press_event (GwyAxis *axis);
 static gboolean   ruler_button_press          (GwyRasterView *rasterview,
                                                GdkEventButton *event,
                                                GwyRuler *ruler);
@@ -314,6 +315,10 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(area_enter_notify), rasterview);
     g_signal_connect_swapped(area, "leave-notify-event",
                              G_CALLBACK(area_leave_notify), rasterview);
+    g_signal_connect_after(hruler, "realize",
+                           G_CALLBACK(axis_add_button_press_event), NULL);
+    g_signal_connect_after(vruler, "realize",
+                           G_CALLBACK(axis_add_button_press_event), NULL);
     g_signal_connect_swapped(hruler, "button-press-event",
                              G_CALLBACK(ruler_button_press), rasterview);
     g_signal_connect_swapped(vruler, "button-press-event",
@@ -825,6 +830,15 @@ area_leave_notify(GwyRasterView *rasterview,
     gwy_ruler_set_show_mark(priv->hruler, FALSE);
     gwy_ruler_set_show_mark(priv->vruler, FALSE);
     return FALSE;
+}
+
+static void
+axis_add_button_press_event(GwyAxis *axis)
+{
+    GdkWindow *input_window = gwy_axis_get_input_window(axis);
+    gdk_window_set_events(input_window,
+                          gdk_window_get_events(input_window)
+                          | GDK_BUTTON_PRESS_MASK);
 }
 
 static gboolean

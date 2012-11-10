@@ -68,6 +68,7 @@ static void     gwy_color_axis_get_preferred_width  (GtkWidget *widget,
 static void     gwy_color_axis_get_preferred_height (GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
+static void     gwy_color_axis_realize              (GtkWidget *widget);
 static void     gwy_color_axis_unrealize            (GtkWidget *widget);
 static gboolean gwy_color_axis_draw                 (GtkWidget *widget,
                                                      cairo_t *cr);
@@ -125,6 +126,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
 
     widget_class->get_preferred_width = gwy_color_axis_get_preferred_width;
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
+    widget_class->realize = gwy_color_axis_realize;
     widget_class->unrealize = gwy_color_axis_unrealize;
     widget_class->draw = gwy_color_axis_draw;
     widget_class->scroll_event = gwy_color_axis_scroll;
@@ -287,6 +289,18 @@ gwy_color_axis_get_preferred_height(GtkWidget *widget,
 }
 
 static void
+gwy_color_axis_realize(GtkWidget *widget)
+{
+    GTK_WIDGET_CLASS(gwy_color_axis_parent_class)->realize(widget);
+    GdkWindow *input_window = gwy_axis_get_input_window(GWY_AXIS(widget));
+    gdk_window_set_events(input_window,
+                          gdk_window_get_events(input_window)
+                          | GDK_SCROLL_MASK
+                          | GDK_POINTER_MOTION_MASK
+                          | GDK_POINTER_MOTION_HINT_MASK);
+}
+
+static void
 gwy_color_axis_unrealize(GtkWidget *widget)
 {
     discard_cursors(GWY_COLOR_AXIS(widget));
@@ -444,7 +458,8 @@ static gboolean
 gwy_color_axis_motion_notify(GtkWidget *widget,
                              GdkEventMotion *event)
 {
-    ColorAxis *priv = GWY_COLOR_AXIS(widget)->priv;
+    GwyColorAxis *coloraxis = GWY_COLOR_AXIS(widget);
+    ColorAxis *priv = coloraxis->priv;
     if (!priv->editable_range)
         return FALSE;
 
@@ -454,14 +469,14 @@ gwy_color_axis_motion_notify(GtkWidget *widget,
         return FALSE;
 
     priv->last_boundary = boundary;
-    ensure_cursors(GWY_COLOR_AXIS(widget));
-    GdkWindow *window = axis->input_window;
+    ensure_cursors(coloraxis);
+    GdkWindow *input_window = gwy_axis_get_input_window(axis);
     if (boundary == 1)
-        gdk_window_set_cursor(window, priv->cursor_to);
+        gdk_window_set_cursor(input_window, priv->cursor_to);
     else if (boundary == -1)
-        gdk_window_set_cursor(window, priv->cursor_from);
+        gdk_window_set_cursor(input_window, priv->cursor_from);
     else
-        gdk_window_set_cursor(window, NULL);
+        gdk_window_set_cursor(input_window, NULL);
 
     return FALSE;
 }
