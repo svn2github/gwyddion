@@ -818,7 +818,6 @@ create_input_window(GwyAxis *axis)
         .height = allocation.height,
         .window_type = GDK_WINDOW_CHILD,
         .wclass = GDK_INPUT_ONLY,
-        .override_redirect = TRUE,
         .event_mask = (gtk_widget_get_events(widget)
                        | GDK_SCROLL_MASK
                        | GDK_BUTTON_PRESS_MASK
@@ -826,7 +825,7 @@ create_input_window(GwyAxis *axis)
                        | GDK_POINTER_MOTION_MASK
                        | GDK_POINTER_MOTION_HINT_MASK),
     };
-    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_NOREDIR;
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y;
     priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
                                         &attributes, attributes_mask);
     gdk_window_set_user_data(priv->input_window, widget);
