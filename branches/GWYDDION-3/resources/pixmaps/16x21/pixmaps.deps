@@ -1,0 +1,6 @@
+[axis-buttons]
+color-axis=Color Axis desaturated
+gradients=Gradients desaturated
+axis-range=Settings desaturated
+
+; vim: set ts=4 sw=4 et autoindent syn=dosini :

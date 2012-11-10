@@ -9,7 +9,7 @@ uicode = ui-gresource.c ui-gresource.h
 
 noinst_DATA = $(uicode)
 
-EXTRA_DIST = $(uifiles)
+EXTRA_DIST = $(uifiles) $(STOCK_ICONS) $(STOCK_ICON_XCFSOURCES) $(icondeps)
 CLEANFILES = $(uicode) $(uixml)
 
 gcres = $(GLIB_COMPILE_RESOURCES) --generate --manual-register
@@ -30,3 +30,24 @@ ui-gresource.h: ui.gresource.xml $(fixhgres) $(uifiles)
 	    --sourcedir=$(srcdir) $(uixml)
 	$(AM_V_at)$(SED) -f $(fixhgres) -i ui-gresource.h
 
+STOCK_ICONS_16x21 = \
+	pixmaps/16x21/color-axis.png \
+	pixmaps/16x21/gradients.png \
+	pixmaps/16x21/axis-range.png
+
+STOCK_ICON_XCFSOURCES = \
+	pixmaps/16x21/axis-buttons.xcf
+
+STOCK_ICONS = $(STOCK_ICONS_16x21)
+icondeps = pixmaps/16x21/pixmaps.deps
+
+# This rule re-exports all PNG icons from their XCF sources.  Only to be done
+# manually because we do not want GIMP as a regular build tool.  Hence we put
+# the output to *srcdir*.
+icons: icons-16x21
+
+icons-16x21:
+	@rm -f pixmaps/16x21/*.png
+	GIMP_CONSOLE=$(GIMP_CONSOLE) srcdir=$(srcdir)/pixmaps/16x21 destdir=$(srcdir)/pixmaps/16x21 $(top_srcdir)/build/export-xcf-layers.sh $(srcdir)/pixmaps/16x21/pixmaps.deps
+
+.PHONY: icons icons-16x21
