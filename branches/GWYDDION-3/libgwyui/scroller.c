@@ -602,7 +602,7 @@ set_vadjustment(GwyScroller *scroller,
  * for instance on the outside.
  *
  * Only #GtkScrollable widgets can be added to a #GwyScroller directly.  If you
- * need to add other widgets you must wrap them in a #GtkViewPort.
+ * need to add other widgets you must wrap them in a #GtkViewport.
  **/
 
 /**
