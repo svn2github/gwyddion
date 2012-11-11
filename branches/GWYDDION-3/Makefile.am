@@ -6,6 +6,7 @@ SUBDIRS = \
 	resources \
 	libgwy \
 	libgwyui \
+	gwyddion \
 	po \
 	po-libgwy \
 	po-libgwyui \
