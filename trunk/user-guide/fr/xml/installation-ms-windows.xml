@@ -153,7 +153,7 @@
     </informaltable>
   </sect2>
   <sect2 id='installation-ms-windows-pygwy'>
-    <title>Installation de pygwy</title>
+    <title>Activation de pygwy</title>
     <para>
       L'interface de script Python, pygwy, est inclue dans l'installeur,
       toutefois il vous faudra installer Python et PyGTK2 afin d'activer les
@@ -177,6 +177,13 @@
       <filename>pycairo-1.8.10.win32-py2.7.msi</filename>, et
       <filename>pygtk-2.24.0.win32-py2.7.msi</filename> ou plus récents (si
       disponibles).
+    </para>
+    <para>
+      L'utilisation de l'installeur tout-en-un
+      <filename>pygtk-all-in-one-2.24.2.win32-py2.7.msi</filename> a été testée
+      avec succès. Toutefois, cette méthode implique que Gtk+ sera installé
+      deux fois (à deux endroits différents). Il est difficile d'affirmer quelle
+      installation sera utilisée par pygwy, cette méthode est donc déconseillée.
     </para>
   </sect2>
 </sect1>
