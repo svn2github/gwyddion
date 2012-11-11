@@ -3,6 +3,9 @@ version
 macros/swap
 macros/order
 error-list
+str/among
+str/remove-prefix
+str/remove-suffix
 str/memmem
 str/next-line
 str/line-iter

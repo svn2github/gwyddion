@@ -240,6 +240,114 @@ test_str_isident_utf8(void)
     g_assert(!gwy_utf8_strisident("×Γ_α_", times, underscore));
 }
 
+void
+test_str_among(void)
+{
+    g_assert_cmpuint(gwy_stramong("test", NULL), ==, 0);
+    g_assert_cmpuint(gwy_stramong("", NULL), ==, 0);
+    g_assert_cmpuint(gwy_stramong("a", NULL, "a", NULL), ==, 0);
+
+    g_assert_cmpuint(gwy_stramong("", "", NULL), ==, 1);
+    g_assert_cmpuint(gwy_stramong("", "a", "b", "", NULL), ==, 3);
+    g_assert_cmpuint(gwy_stramong("a", "", "b", "a", NULL), ==, 3);
+    g_assert_cmpuint(gwy_stramong("a", "a ", "ahoy", "a", NULL), ==, 3);
+    g_assert_cmpuint(gwy_stramong("ahoy", "a ", "ahoy ", "ahoy", NULL), ==, 3);
+    g_assert_cmpuint(gwy_stramong("ahoy", "ahoy", "ahoy", "ahoy", NULL), ==, 1);
+}
+
+void
+test_str_remove_prefix(void)
+{
+    gchar *str = g_new0(gchar, 20);
+
+    strcpy(str, "");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "a", "b", "c", NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "testing", NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "test test", NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "t", "tes", "test", NULL),
+                     ==, 1);
+    g_assert_cmpstr(str, ==, "est");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "test", "tes", "t", NULL),
+                     ==, 1);
+    g_assert_cmpstr(str, ==, "");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "tes", "t", NULL), ==, 1);
+    g_assert_cmpstr(str, ==, "t");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_prefix(str, "x", "te", NULL), ==, 2);
+    g_assert_cmpstr(str, ==, "st");
+
+    g_free(str);
+}
+
+void
+test_str_remove_suffix(void)
+{
+    gchar *str = g_new0(gchar, 20);
+
+    strcpy(str, "");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "a", "b", "c", NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "detest", NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "test test", NULL), ==, 0);
+    g_assert_cmpstr(str, ==, "test");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "t", "est", "test", NULL),
+                     ==, 1);
+    g_assert_cmpstr(str, ==, "tes");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "test", "est", "t", NULL),
+                     ==, 1);
+    g_assert_cmpstr(str, ==, "");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "est", "t", NULL), ==, 1);
+    g_assert_cmpstr(str, ==, "t");
+
+    strcpy(str, "test");
+    g_assert_cmpuint(gwy_str_remove_suffix(str, "x", "st", NULL), ==, 2);
+    g_assert_cmpstr(str, ==, "te");
+
+    g_free(str);
+}
+
+
 static void
 randomize_string(GString *str,
                  GRand *rng,
