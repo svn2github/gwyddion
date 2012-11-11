@@ -61,10 +61,12 @@ const state_letters[] = {
     { 'p', GTK_STATE_PRELIGHT },
     { 's', GTK_STATE_SELECTED },
     { 'i', GTK_STATE_INSENSITIVE },
+    { 'x', GTK_STATE_INCONSISTENT },
+    { 'f', GTK_STATE_FOCUSED },
 };
 
-/* FIXME: Of course, this is conceptually wrong.  However some estimate is
- * better than nothing when we have more than one size of the same icon. */
+/* Of course, this is conceptually wrong.  However some estimate is better than
+ * nothing when we have more than one size of the same icon. */
 static struct {
     guint width;
     guint height;
