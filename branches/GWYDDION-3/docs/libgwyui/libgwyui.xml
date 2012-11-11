@@ -32,6 +32,7 @@
   <chapter id='libgwyui-utils'>
     <title>Utilities and auxiliary widgets</title>
     <xi:include href="xml/main.xml"/>
+    <xi:include href="xml/stock.xml"/>
     <xi:include href="xml/inventory-store.xml"/>
     <xi:include href="xml/resource-list.xml"/>
     <xi:include href="xml/cell-renderer-gradient.xml"/>

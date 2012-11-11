@@ -83,12 +83,38 @@ icon_sizes[] = {
 
 static GtkIconFactory *the_icon_factory = NULL;
 
+/**
+ * gwy_icon_size_about:
+ *
+ * Provides icon size for about dialogs.
+ *
+ * Use %GWY_ICON_SIZE_ABOUT macro instead for formal consistency with
+ * #GtkIconSize enumerated values.
+ *
+ * This function returns %GTK_ICON_SIZE_INVALID until Gwyddion stock items are
+ * registered.
+ *
+ * Returns: Icon size for about dialogs.
+ **/
 GtkIconSize
 gwy_icon_size_about(void)
 {
     return icon_sizes[ICON_SIZE_IDX_ABOUT].gtksize;
 }
 
+/**
+ * gwy_icon_size_color_axis:
+ *
+ * Provides icon size for raster view colour axis buttons.
+ *
+ * Use %GWY_ICON_SIZE_COLOR_AXIS macro instead for formal consistency with
+ * #GtkIconSize enumerated values.
+ *
+ * This function returns %GTK_ICON_SIZE_INVALID until Gwyddion stock items are
+ * registered.
+ *
+ * Returns: Icon size for raster view colour axis buttons.
+ **/
 GtkIconSize
 gwy_icon_size_color_axis(void)
 {
@@ -100,7 +126,7 @@ gwy_icon_size_color_axis(void)
  *
  * Registers stock items.
  *
- * This function must be called before any stock items are used.
+ * This function must be called before any Gwyddion stock items are used.
  **/
 void
 gwy_register_stock_items(void)
@@ -357,7 +383,28 @@ register_icon_size(const gchar *name, guint i)
  * SECTION: stock
  * @section_id: libgwyui-stock
  * @title: stock
- * @short_description: Stock icons
+ * @short_description: Stock items
+ *
+ * Gwyddion registers a number of stock icons and also some new icon sizes.
+ * They must be registered explicitly with gwy_register_stock_items().
+ **/
+
+/**
+ * GWY_ICON_SIZE_ABOUT:
+ *
+ * Icon size for about dialogs.
+ *
+ * Note this macro does not resolve to a constant expression and cannot be used
+ * in constant initialisers.
+ **/
+
+/**
+ * GWY_ICON_SIZE_COLOR_AXIS:
+ *
+ * Icon size for raster view colour axis buttons.
+ *
+ * Note this macro does not resolve to a constant expression and cannot be used
+ * in constant initialisers.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
