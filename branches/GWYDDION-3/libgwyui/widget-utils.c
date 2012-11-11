@@ -21,13 +21,13 @@
 #include "libgwyui/widget-utils.h"
 
 static gboolean activate_on_unfocus          (GtkWidget *widget);
-static void     sync_sensitivity             (GtkWidget *master,
+static void     sync_sensitivity             (GtkWidget *leader,
                                               GtkStateType state,
-                                              GtkWidget *slave);
-static void     disconnect_sensitivity_slave (GtkWidget *slave,
-                                              GtkWidget *master);
-static void     disconnect_sensitivity_master(GtkWidget *master,
-                                              GtkWidget *slave);
+                                              GtkWidget *follower);
+static void     disconnect_sensitivity_follower (GtkWidget *follower,
+                                              GtkWidget *leader);
+static void     disconnect_sensitivity_leader(GtkWidget *leader,
+                                              GtkWidget *follower);
 
 /**
  * gwy_scroll_wheel_delta:
@@ -185,108 +185,111 @@ activate_on_unfocus(GtkWidget *widget)
 }
 
 /**
- * gwy_widget_add_sensitivity_slave:
- * @master: Master widget which will determine sensitvity of @slave.
- * @slave: Slave widget which will follow sensitvity of @master.
+ * gwy_widget_add_sensitivity_follower:
+ * @leader: Leader widget which will determine sensitvity of @follower.
+ * @follower: Follower widget which will follow sensitvity of @leader.
  *
  * Make a widget's sensitivity follow the sensitivity of another widget.
  *
- * The sensitivity of @slave is set according to @master's effective
+ * The sensitivity of @follower is set according to @leader's effective
  * sensitivity (as returned by GTK_WIDGET_IS_SENSITIVE()), i.e. it does not
  * just synchronize GtkWidget:sensitive property.
  *
- * Obviously, it does not make sense for one slave widget to follow more than
- * one master widget.  So if @slave already has a master widget it will stop
- * following it and start following @master. The number of slave wigets that
- * can follow one master is unlimited.
+ * Obviously, it does not make sense for one follower widget to follow more than
+ * one leader widget.  So if @follower already has a leader widget it will stop
+ * following it and start following @leader. The number of follower wigets that
+ * can follow one leader is unlimited.
  *
  * The connection between the widgets ceases when either widget is destroyed.
  * They can also be disconnected explicitly with
- * gwy_widget_remove_sensitivity_slave().
+ * gwy_widget_remove_sensitivity_follower().
  **/
 void
-gwy_widget_add_sensitivity_slave(GtkWidget *master,
-                                 GtkWidget *slave)
+gwy_widget_add_sensitivity_follower(GtkWidget *leader,
+                                    GtkWidget *follower)
 {
-    GtkWidget *oldmaster = g_object_get_data(G_OBJECT(slave),
-                                             "gwy-follow-sensitivity-master");
-    if (oldmaster) {
-        disconnect_sensitivity_slave(slave, oldmaster);
-        disconnect_sensitivity_master(oldmaster, slave);
+    GtkWidget *oldleader = g_object_get_data(G_OBJECT(follower),
+                                             "gwy-follow-sensitivity-leader");
+    if (oldleader) {
+        disconnect_sensitivity_follower(follower, oldleader);
+        disconnect_sensitivity_leader(oldleader, follower);
     }
-    g_object_set_data(G_OBJECT(slave), "gwy-follow-sensitivity-master", master);
-    g_signal_connect(master, "state-changed",
-                     G_CALLBACK(sync_sensitivity), slave);
-    g_signal_connect(slave, "destroy",
-                     G_CALLBACK(disconnect_sensitivity_slave), master);
-    g_signal_connect(master, "destroy",
-                     G_CALLBACK(disconnect_sensitivity_master), slave);
-    gtk_widget_set_sensitive(slave, gtk_widget_get_sensitive(master));
+    g_object_set_data(G_OBJECT(follower), "gwy-follow-sensitivity-leader",
+                      leader);
+    g_signal_connect(leader, "state-changed",
+                     G_CALLBACK(sync_sensitivity), follower);
+    g_signal_connect(follower, "destroy",
+                     G_CALLBACK(disconnect_sensitivity_follower), leader);
+    g_signal_connect(leader, "destroy",
+                     G_CALLBACK(disconnect_sensitivity_leader), follower);
+    gtk_widget_set_sensitive(follower, gtk_widget_get_sensitive(leader));
 }
 
 /**
- * gwy_widget_remove_sensitivity_slave:
- * @master: Master widget which determines sensitvity of @slave.
- * @slave: Slave widget which follows sensitvity of @master.
+ * gwy_widget_remove_sensitivity_follower:
+ * @leader: Leader widget which determines sensitvity of @follower.
+ * @follower: Follower widget which follows sensitvity of @leader.
  *
  * Stops a widget's sensitivity following the sensitivity of another widget.
  *
- * The slave widget is set to be sensitive.
+ * The follower widget is set to be sensitive.
  *
- * Widgets @slave and @master must have been connected with
+ * Widgets @follower and @leader must have been connected with
  * gwy_widget_follow_sensitivity(); otherwise, the results are undefined.
  *
  **/
 void
-gwy_widget_remove_sensitivity_slave(GtkWidget *master,
-                                    GtkWidget *slave)
+gwy_widget_remove_sensitivity_follower(GtkWidget *leader,
+                                       GtkWidget *follower)
 {
-    disconnect_sensitivity_master(master, slave);
-    disconnect_sensitivity_slave(slave, master);
-    gtk_widget_set_sensitive(slave, TRUE);
+    disconnect_sensitivity_leader(leader, follower);
+    disconnect_sensitivity_follower(follower, leader);
+    gtk_widget_set_sensitive(follower, TRUE);
 }
 
 /**
- * gwy_widget_get_sensitivity_master:
- * @slave: Widget currently following the sensitivity of another widget.
+ * gwy_widget_get_sensitivity_leader:
+ * @follower: Widget currently following the sensitivity of another widget.
  *
- * Gets the master widget the sensitivity of a widget follows.
+ * Gets the leader widget the sensitivity of a widget follows.
  *
  * Returns: (allow-none) (transfer none):
- *          The master widget of @slave, or %NULL if its sensitivity does not
+ *          The leader widget of @follower, or %NULL if its sensitivity does not
  *          follow any other widget.
  **/
 GtkWidget*
-gwy_widget_get_sensitivity_master(GtkWidget *slave)
+gwy_widget_get_sensitivity_leader(GtkWidget *follower)
 {
-    return (GtkWidget*)g_object_get_data(G_OBJECT(slave),
-                                         "gwy-follow-sensitivity-master");
+    return (GtkWidget*)g_object_get_data(G_OBJECT(follower),
+                                         "gwy-follow-sensitivity-leader");
 }
 
 static void
-sync_sensitivity(GtkWidget *master,
+sync_sensitivity(GtkWidget *leader,
                  G_GNUC_UNUSED GtkStateType state,
-                 GtkWidget *slave)
+                 GtkWidget *follower)
 {
-    gtk_widget_set_sensitive(slave, gtk_widget_get_sensitive(master));
+    gtk_widget_set_sensitive(follower, gtk_widget_get_sensitive(leader));
 }
 
 static void
-disconnect_sensitivity_slave(GtkWidget *slave,
-                             GtkWidget *master)
+disconnect_sensitivity_follower(GtkWidget *follower,
+                                GtkWidget *leader)
 {
-    g_signal_handlers_disconnect_by_func(master, sync_sensitivity, slave);
-    g_signal_handlers_disconnect_by_func(master, disconnect_sensitivity_master,
-                                         slave);
-    g_object_set_data(G_OBJECT(slave), "gwy-follow-sensitivity-master", NULL);
+    g_signal_handlers_disconnect_by_func(leader, sync_sensitivity, follower);
+    g_signal_handlers_disconnect_by_func(leader, disconnect_sensitivity_leader,
+                                         follower);
+    g_object_set_data(G_OBJECT(follower), "gwy-follow-sensitivity-leader",
+                      NULL);
 }
 
 static void
-disconnect_sensitivity_master(GtkWidget *master,
-                              GtkWidget *slave)
+disconnect_sensitivity_leader(GtkWidget *leader,
+                              GtkWidget *follower)
 {
-    g_signal_handlers_disconnect_by_func(master, disconnect_sensitivity_slave,
-                                         slave);
+    g_signal_handlers_disconnect_by_func(leader,
+                                         disconnect_sensitivity_follower,
+                                         follower);
 }
 
 /**
