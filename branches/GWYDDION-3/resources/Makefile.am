@@ -49,8 +49,11 @@ icons-gresource.h: icons.gresource.xml $(fixhgres) $(STOCK_ICONS)
 
 STOCK_ICONS_16x21 = \
 	pixmaps/16x21/color-axis.png \
+	pixmaps/16x21/color-axis.p.png \
 	pixmaps/16x21/gradients.png \
-	pixmaps/16x21/axis-range.png
+	pixmaps/16x21/gradients.p.png \
+	pixmaps/16x21/axis-range.png \
+	pixmaps/16x21/axis-range.p.png
 
 STOCK_ICON_XCFSOURCES = \
 	pixmaps/16x21/axis-buttons.xcf

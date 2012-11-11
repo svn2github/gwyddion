@@ -2,5 +2,8 @@
 color-axis=Color Axis desaturated
 gradients=Gradients desaturated
 axis-range=Settings desaturated
+color-axis.p=Color Axis
+gradients.p=Gradients
+axis-range.p=Settings
 
 ; vim: set ts=4 sw=4 et autoindent syn=dosini :
