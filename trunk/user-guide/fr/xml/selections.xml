@@ -98,6 +98,9 @@
       </mediaobject>
     </informalfigure>
     <para>
+      La séelection choisie dans la liste est affichée dans la fenêtre de données.
+    </para>
+    <para>
       Il est possible de supprimer des sélections en les choisissant parmi la
       liste puis en pressant la touche <keycode>Suppr</keycode> – ceci équivaut
       à remettre à zéro la sélection de l'outil correspondant. Le bouton

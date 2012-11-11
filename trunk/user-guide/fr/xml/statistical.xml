@@ -344,10 +344,11 @@
         </mediaobject>
       </informalfigure>
       <para>
-        On peut aussi présenter la fonction d'aucorrélation moyennée radialement
-        <xi:include href="eqi-G_r-of-tau.xml"/> qui contient évidemment la même
-        information que la fonction d'autocorrélation uni-dimensionnelle pour
-        les surfaces isotropes :
+        On peut aussi présenter la fonction d'aucorrélation radiale
+        <xi:include href="eqi-G_r-of-tau.xml"/>, c'est-à-dire la fonction
+        d'autocorrélation bi-dimensionnelle moyennée angulairement, qui contient
+        évidemment la même information que la fonction d'autocorrélation
+        uni-dimensionnelle pour les surfaces isotropes :
         <xi:include href="eq-autocorrelation-radial.xml"/>
       </para>
       <note>
@@ -485,7 +486,8 @@
           <secondary>radiale</secondary>
         </indexterm>
         On peut de même appliquer la PSD radiale
-        <xi:include href="eqi-W_r-of-K.xml"/> qui contient les mêmes
+        <xi:include href="eqi-W_r-of-K.xml"/>, c'est-à-dire la PSD
+        bi-dimensionnelle intégrée angulairement, qui contient les mêmes
         informations que la PSD uni-dimensionnelle pour les surfaces isotropes :
         <xi:include href="eq-power-spectral-density-radial.xml"/>
       </para>

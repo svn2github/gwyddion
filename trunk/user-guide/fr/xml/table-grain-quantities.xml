@@ -79,6 +79,11 @@
         <entry>Surface au-dessus de la mi-hauteur</entry>
       </row>
       <row>
+        <entry><varname>A_c</varname></entry>
+        <entry>Surface</entry>
+        <entry>Surface de l'enveloppe convexe</entry>
+      </row>
+      <row>
         <entry><varname>V_0</varname></entry>
         <entry>Volume</entry>
         <entry>Volume (base : zéro)</entry>
@@ -117,6 +122,41 @@
         <entry><varname>phi_max</varname></entry>
         <entry>Limite</entry>
         <entry>Orientation de la longueur</entry>
+      </row>
+      <row>
+        <entry><varname>R_i</varname></entry>
+        <entry>Limite</entry>
+        <entry>Rayon du disque inscrit</entry>
+      </row>
+      <row>
+        <entry><varname>x_i</varname></entry>
+        <entry>Limite</entry>
+        <entry>Position x du centre du disque inscrit</entry>
+      </row>
+      <row>
+        <entry><varname>y_i</varname></entry>
+        <entry>Limite</entry>
+        <entry>Position y du centre du disque inscrit</entry>
+      </row>
+      <row>
+        <entry><varname>R_e</varname></entry>
+        <entry>Limite</entry>
+        <entry>Rayon du cercle circonscrit</entry>
+      </row>
+      <row>
+        <entry><varname>x_e</varname></entry>
+        <entry>Limite</entry>
+        <entry>Position x du centre du cercle circonscrit</entry>
+      </row>
+      <row>
+        <entry><varname>y_e</varname></entry>
+        <entry>Limite</entry>
+        <entry>Position x du centre du cercle circonscrit</entry>
+      </row>
+      <row>
+        <entry><varname>R_m</varname></entry>
+        <entry>Limite</entry>
+        <entry>Rayon moyen</entry>
       </row>
       <row>
         <entry><varname>theta</varname></entry>
