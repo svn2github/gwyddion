@@ -34,17 +34,17 @@ G_BEGIN_DECLS
                                     &gwy_tree_model_interface_info); \
     }
 
-gdouble    gwy_scroll_wheel_delta            (GtkAdjustment *adjustment,
-                                              GdkEventScroll *event,
-                                              GtkOrientation orientation);
-gboolean   gwy_widget_get_activate_on_unfocus(GtkWidget *widget);
-void       gwy_widget_set_activate_on_unfocus(GtkWidget *widget,
-                                              gboolean activate);
-void       gwy_widget_follow_sensitivity     (GtkWidget *slave,
-                                              GtkWidget *master);
-void       gwy_widget_unfollow_sensitivity   (GtkWidget *slave,
-                                              GtkWidget *master);
-GtkWidget* gwy_widget_get_sensitivity_master (GtkWidget *slave);
+gdouble    gwy_scroll_wheel_delta             (GtkAdjustment *adjustment,
+                                               GdkEventScroll *event,
+                                               GtkOrientation orientation);
+gboolean   gwy_widget_get_activate_on_unfocus (GtkWidget *widget);
+void       gwy_widget_set_activate_on_unfocus (GtkWidget *widget,
+                                               gboolean activate);
+void       gwy_widget_add_sensitivity_slave   (GtkWidget *master,
+                                               GtkWidget *slave);
+void       gwy_widget_remove_sensitivity_slave(GtkWidget *slave,
+                                               GtkWidget *master);
+GtkWidget* gwy_widget_get_sensitivity_master  (GtkWidget *slave);
 
 G_END_DECLS
 

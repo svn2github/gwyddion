@@ -185,9 +185,9 @@ activate_on_unfocus(GtkWidget *widget)
 }
 
 /**
- * gwy_widget_follow_sensitivity:
- * @slave: Slave widget which will follow sensitvity of @master.
+ * gwy_widget_add_sensitivity_slave:
  * @master: Master widget which will determine sensitvity of @slave.
+ * @slave: Slave widget which will follow sensitvity of @master.
  *
  * Make a widget's sensitivity follow the sensitivity of another widget.
  *
@@ -196,16 +196,17 @@ activate_on_unfocus(GtkWidget *widget)
  * just synchronize GtkWidget:sensitive property.
  *
  * Obviously, it does not make sense for one slave widget to follow more than
- * one master widget.  The number of slave wigets that follow one master is
- * unlimited though.
+ * one master widget.  So if @slave already has a master widget it will stop
+ * following it and start following @master. The number of slave wigets that
+ * can follow one master is unlimited.
  *
  * The connection between the widgets ceases when either widget is destroyed.
  * They can also be disconnected explicitly with
- * gwy_widget_unfollow_sensitivity().
+ * gwy_widget_remove_sensitivity_slave().
  **/
 void
-gwy_widget_follow_sensitivity(GtkWidget *slave,
-                              GtkWidget *master)
+gwy_widget_add_sensitivity_slave(GtkWidget *master,
+                                 GtkWidget *slave)
 {
     g_object_set_data(G_OBJECT(slave), "gwy-follow-sensitivity-master", master);
     g_signal_connect(master, "state-changed",
@@ -214,24 +215,29 @@ gwy_widget_follow_sensitivity(GtkWidget *slave,
                      G_CALLBACK(disconnect_slave), master);
     g_signal_connect(master, "destroy",
                      G_CALLBACK(disconnect_master), slave);
+    gtk_widget_set_sensitive(slave, gtk_widget_get_sensitive(master));
 }
 
 /**
- * gwy_widget_unfollow_sensitivity:
- * @slave: Slave widget which follows sensitvity of @master.
+ * gwy_widget_remove_sensitivity_slave:
  * @master: Master widget which determines sensitvity of @slave.
+ * @slave: Slave widget which follows sensitvity of @master.
  *
  * Stops a widget's sensitivity following the sensitivity of another widget.
  *
+ * The slave widget is set to be sensitive.
+ *
  * Widgets @slave and @master must have been connected with
  * gwy_widget_follow_sensitivity(); otherwise, the results are undefined.
+ *
  **/
 void
-gwy_widget_unfollow_sensitivity(GtkWidget *slave,
-                                GtkWidget *master)
+gwy_widget_remove_sensitivity_slave(GtkWidget *master,
+                                    GtkWidget *slave)
 {
     disconnect_master(master, slave);
     disconnect_slave(slave, master);
+    gtk_widget_set_sensitive(slave, TRUE);
 }
 
 /**
