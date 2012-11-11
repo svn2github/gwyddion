@@ -33,6 +33,7 @@ public_headers = \
 	$(srcdir)/shapes.h \
 	$(srcdir)/shapes-point.h \
 	$(srcdir)/spin-button.h \
+	$(srcdir)/stock.h \
 	$(srcdir)/widget-utils.h
 
 public_built_headers = \
@@ -42,11 +43,16 @@ private_headers =
 
 private_built_headers = \
 	$(genmarshal_name).h \
+	icons-gresource.h \
 	ui-gresource.h
 
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
-resource_files = ui-gresource.c ui-gresource.h
+resource_files = \
+	icons-gresource.c \
+	icons-gresource.h \
+	ui-gresource.c \
+	ui-gresource.h
 
 # Must init
 EXTRA_DIST = $(test_default_suppressions)
@@ -69,6 +75,7 @@ libgwyui3_la_SOURCES = \
 	cell-renderer-gradient.c \
 	color-axis.c \
 	field-render.c \
+	icons-gresource.c \
 	inventory-store.c \
 	main.c \
 	marshal.c \
@@ -80,6 +87,7 @@ libgwyui3_la_SOURCES = \
 	shapes.c \
 	shapes-point.c \
 	spin-button.c \
+	stock.c \
 	types.c \
 	ui-gresource.c \
 	widget-utils.c
@@ -120,6 +128,12 @@ ui-gresource.c: $(top_builddir)/resources/ui-gresource.c
 
 ui-gresource.h: $(top_builddir)/resources/ui-gresource.h
 	$(AM_V_GEN)cp -f $(top_builddir)/resources/ui-gresource.h ui-gresource.h
+
+icons-gresource.c: $(top_builddir)/resources/icons-gresource.c
+	$(AM_V_GEN)cp -f $(top_builddir)/resources/icons-gresource.c icons-gresource.c
+
+icons-gresource.h: $(top_builddir)/resources/icons-gresource.h
+	$(AM_V_GEN)cp -f $(top_builddir)/resources/icons-gresource.h icons-gresource.h
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*

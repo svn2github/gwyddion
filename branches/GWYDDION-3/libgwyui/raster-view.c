@@ -23,6 +23,7 @@
 #include "libgwy/field-statistics.h"
 #include "libgwyui/main.h"
 #include "libgwyui/types.h"
+#include "libgwyui/stock.h"
 #include "libgwyui/resource-list.h"
 #include "libgwyui/raster-view.h"
 
@@ -887,18 +888,18 @@ create_axis_button_box(GwyRasterView *rasterview)
     GtkWidget *buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
     GtkWidget *axisbutton = create_axis_button(NULL, AXIS_TAB_AXIS,
-                                               GTK_STOCK_YES);
+                                               GWY_STOCK_COLOR_AXIS);
     GtkRadioButton *groupwidget = GTK_RADIO_BUTTON(axisbutton);
     priv->axisbutton = GTK_TOGGLE_BUTTON(axisbutton);
     gtk_box_pack_end(GTK_BOX(buttonbox), axisbutton, FALSE, FALSE, 0);
 
     GtkWidget *gradbutton = create_axis_button(groupwidget, AXIS_TAB_GRADIENTS,
-                                               GTK_STOCK_NO);
+                                               GWY_STOCK_GRADIENTS);
     priv->gradbutton = GTK_TOGGLE_BUTTON(gradbutton);
     gtk_box_pack_end(GTK_BOX(buttonbox), gradbutton, FALSE, FALSE, 0);
 
     GtkWidget *rangebutton = create_axis_button(groupwidget, AXIS_TAB_RANGES,
-                                                GTK_STOCK_CANCEL);
+                                                GWY_STOCK_AXIS_RANGE);
     priv->rangebutton = GTK_TOGGLE_BUTTON(rangebutton);
     gtk_box_pack_end(GTK_BOX(buttonbox), rangebutton, FALSE, FALSE, 0);
 
@@ -924,7 +925,8 @@ create_axis_button(GtkRadioButton *groupwidget,
     gtk_widget_set_can_focus(button, FALSE);
     gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
     gtk_button_set_alignment(GTK_BUTTON(button), 0.5, 0.5);
-    GtkWidget *child = gtk_image_new_from_stock(content, GTK_ICON_SIZE_MENU);
+    GtkWidget *child = gtk_image_new_from_stock(content,
+                                                GWY_ICON_SIZE_COLOR_AXIS);
     gtk_container_add(GTK_CONTAINER(button), child);
     GtkStyleContext *context = gtk_widget_get_style_context(button);
     GtkStyleProvider *provider = gwy_get_style_provider();
