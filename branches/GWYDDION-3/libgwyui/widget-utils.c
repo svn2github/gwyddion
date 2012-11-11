@@ -20,14 +20,21 @@
 #include "libgwy/math.h"
 #include "libgwyui/widget-utils.h"
 
-static gboolean activate_on_unfocus          (GtkWidget *widget);
-static void     sync_sensitivity             (GtkWidget *leader,
-                                              GtkStateType state,
-                                              GtkWidget *follower);
-static void     disconnect_sensitivity_follower (GtkWidget *follower,
-                                              GtkWidget *leader);
-static void     disconnect_sensitivity_leader(GtkWidget *leader,
-                                              GtkWidget *follower);
+static gboolean activate_on_unfocus            (GtkWidget *widget);
+static void     sync_sensitivity               (GtkWidget *leader,
+                                                GtkStateType state,
+                                                GtkWidget *follower);
+static void     disconnect_sensitivity_follower(GtkWidget *follower,
+                                                GtkWidget *leader);
+static void     disconnect_sensitivity_leader  (GtkWidget *leader,
+                                                GtkWidget *follower);
+static void     sync_visibility                (GObject *toggle,
+                                                GParamSpec *pspec,
+                                                GtkWidget *follower);
+static void     disconnect_visibility_follower (GtkWidget *follower,
+                                                GObject *toggle);
+static void     disconnect_visibility_toggle   (GObject *toggle,
+                                                GtkWidget *follower);
 
 /**
  * gwy_scroll_wheel_delta:
@@ -186,8 +193,8 @@ activate_on_unfocus(GtkWidget *widget)
 
 /**
  * gwy_widget_add_sensitivity_follower:
- * @leader: Leader widget which will determine sensitvity of @follower.
- * @follower: Follower widget which will follow sensitvity of @leader.
+ * @leader: Leader widget which will determine sensitivity of @follower.
+ * @follower: Follower widget which will follow sensitivity of @leader.
  *
  * Make a widget's sensitivity follow the sensitivity of another widget.
  *
@@ -222,20 +229,20 @@ gwy_widget_add_sensitivity_follower(GtkWidget *leader,
                      G_CALLBACK(disconnect_sensitivity_follower), leader);
     g_signal_connect(leader, "destroy",
                      G_CALLBACK(disconnect_sensitivity_leader), follower);
-    gtk_widget_set_sensitive(follower, gtk_widget_get_sensitive(leader));
+    sync_sensitivity(leader, 0, follower);
 }
 
 /**
  * gwy_widget_remove_sensitivity_follower:
- * @leader: Leader widget which determines sensitvity of @follower.
- * @follower: Follower widget which follows sensitvity of @leader.
+ * @leader: Leader widget which determines sensitivity of @follower.
+ * @follower: Follower widget which follows sensitivity of @leader.
  *
  * Stops a widget's sensitivity following the sensitivity of another widget.
  *
  * The follower widget is set to be sensitive.
  *
  * Widgets @follower and @leader must have been connected with
- * gwy_widget_follow_sensitivity(); otherwise, the results are undefined.
+ * gwy_widget_add_sensitivity_follower(); otherwise, the results are undefined.
  *
  **/
 void
@@ -289,6 +296,118 @@ disconnect_sensitivity_leader(GtkWidget *leader,
 {
     g_signal_handlers_disconnect_by_func(leader,
                                          disconnect_sensitivity_follower,
+                                         follower);
+}
+
+/**
+ * gwy_toggle_add_visibility_follower:
+ * @toggle: Leader toggle object which will determine visibility of @follower.
+ * @follower: Follower widget whose visibility will follow @toggle state.
+ *
+ * Make a widget's visibility follow a toggle object active state.
+ *
+ * The visibility of @follower is set according to @toggle's "active" property.
+ * So it can be a #GtkToggleButton instance but also a #GtkToggleToolButton or
+ * any other object that has the "active" property.
+ *
+ * Obviously, it does not make sense for one follower widget to follow more
+ * than toggle.  So if @follower already follows a toggle it will stop
+ * following it and start following @toggle. The number of follower wigets that
+ * can follow one toggle is unlimited.
+ *
+ * The connection between the widgets ceases when either widget is destroyed.
+ * They can also be disconnected explicitly with
+ * gwy_toggle_remove_visibility_follower().
+ **/
+void
+gwy_toggle_add_visibility_follower(GObject *toggle,
+                                   GtkWidget *follower)
+{
+    GObject *oldtoggle = g_object_get_data(G_OBJECT(follower),
+                                           "gwy-follow-visibility-toggle");
+    if (oldtoggle) {
+        disconnect_visibility_follower(follower, oldtoggle);
+        disconnect_visibility_toggle(oldtoggle, follower);
+    }
+    g_object_set_data(G_OBJECT(follower), "gwy-follow-visibility-toggle",
+                      toggle);
+    g_signal_connect(toggle, "notify::active",
+                     G_CALLBACK(sync_visibility), follower);
+    g_signal_connect(follower, "destroy",
+                     G_CALLBACK(disconnect_visibility_follower), toggle);
+    g_signal_connect(toggle, "destroy",
+                     G_CALLBACK(disconnect_visibility_toggle), follower);
+    sync_visibility(toggle, NULL, follower);
+}
+
+/**
+ * gwy_widget_remove_visibility_follower:
+ * @toggle: Toggle object which determines visibility of @follower.
+ * @follower: Follower widget whose visibility follows active state of @toggle.
+ *
+ * Stops a widget's visibility following the active state of another object.
+ *
+ * The follower widget is hidden.
+ *
+ * Widget @follower and object @toggle must have been connected with
+ * gwy_toggle_add_visibility_follower(); otherwise, the results are undefined.
+ *
+ **/
+void
+gwy_widget_remove_visibility_follower(GObject *toggle,
+                                      GtkWidget *follower)
+{
+    disconnect_visibility_toggle(toggle, follower);
+    disconnect_visibility_follower(follower, toggle);
+    gtk_widget_hide(follower);
+}
+
+/**
+ * gwy_widget_get_visibility_toggle:
+ * @follower: Widget currently following the visibility of another widget's
+ *            active state.
+ *
+ * Gets the toggle object whose active state is followed by the visibility of
+ * a widget.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          The toggle object of @follower, or %NULL if its visibility does not
+ *          follow any object.
+ **/
+GObject*
+gwy_widget_get_visibility_toggle(GtkWidget *follower)
+{
+    return (GObject*)g_object_get_data(G_OBJECT(follower),
+                                       "gwy-follow-visibility-toggle");
+}
+
+static void
+sync_visibility(GObject *toggle,
+                G_GNUC_UNUSED GParamSpec *pspec,
+                GtkWidget *follower)
+{
+    gboolean active;
+    g_object_get(toggle, "active", &active, NULL);
+    gtk_widget_set_visible(follower, active);
+}
+
+static void
+disconnect_visibility_follower(GtkWidget *follower,
+                               GObject *toggle)
+{
+    g_signal_handlers_disconnect_by_func(toggle, sync_visibility, follower);
+    g_signal_handlers_disconnect_by_func(toggle, disconnect_visibility_toggle,
+                                         follower);
+    g_object_set_data(G_OBJECT(follower), "gwy-follow-visibility-toggle",
+                      NULL);
+}
+
+static void
+disconnect_visibility_toggle(GObject *toggle,
+                             GtkWidget *follower)
+{
+    g_signal_handlers_disconnect_by_func(toggle,
+                                         disconnect_visibility_follower,
                                          follower);
 }
 
