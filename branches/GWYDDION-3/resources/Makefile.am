@@ -15,7 +15,7 @@ noinst_DATA = $(uicode) $(iconscode)
 EXTRA_DIST = $(uifiles) $(STOCK_ICONS) $(STOCK_ICON_XCFSOURCES) $(icondeps)
 CLEANFILES = $(uicode) $(uixml) $(iconscode) $(iconsxml)
 
-gcres = $(GLIB_COMPILE_RESOURCES) --generate --manual-register
+gcres = GDK_PIXBUF_PIXDATA=$(GDK_PIXBUF_PIXDATA) $(GLIB_COMPILE_RESOURCES) --generate --manual-register
 fixcgres = $(top_srcdir)/build/fix-gresource-c.sed
 fixhgres = $(top_srcdir)/build/fix-gresource-h.sed
 

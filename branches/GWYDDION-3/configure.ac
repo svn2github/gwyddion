@@ -203,6 +203,8 @@ AC_CHECK_PROGS([GTESTER],[gtester],[false])
 #AC_MSG_RESULT([$GOBJECT_QUERY])
 #AC_SUBST(GOBJECT_QUERY)
 
+AC_PATH_PROG([GDK_PIXBUF_PIXDATA],[gdk-pixbuf-pixdata],[`which cp`])
+
 # FIXME: Once G-IR supports boxed types change this to the required version.
 GOBJECT_INTROSPECTION_CHECK([0.10.0])
 
