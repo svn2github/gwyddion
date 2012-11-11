@@ -20,14 +20,14 @@
 #include "libgwy/math.h"
 #include "libgwyui/widget-utils.h"
 
-static gboolean activate_on_unfocus(GtkWidget *widget);
-static void     sync_sensitivity   (GtkWidget *master,
-                                    GtkStateType state,
-                                    GtkWidget *slave);
-static void     disconnect_slave   (GtkWidget *slave,
-                                    GtkWidget *master);
-static void     disconnect_master  (GtkWidget *master,
-                                    GtkWidget *slave);
+static gboolean activate_on_unfocus          (GtkWidget *widget);
+static void     sync_sensitivity             (GtkWidget *master,
+                                              GtkStateType state,
+                                              GtkWidget *slave);
+static void     disconnect_sensitivity_slave (GtkWidget *slave,
+                                              GtkWidget *master);
+static void     disconnect_sensitivity_master(GtkWidget *master,
+                                              GtkWidget *slave);
 
 /**
  * gwy_scroll_wheel_delta:
@@ -208,13 +208,19 @@ void
 gwy_widget_add_sensitivity_slave(GtkWidget *master,
                                  GtkWidget *slave)
 {
+    GtkWidget *oldmaster = g_object_get_data(G_OBJECT(slave),
+                                             "gwy-follow-sensitivity-master");
+    if (oldmaster) {
+        disconnect_sensitivity_slave(slave, oldmaster);
+        disconnect_sensitivity_master(oldmaster, slave);
+    }
     g_object_set_data(G_OBJECT(slave), "gwy-follow-sensitivity-master", master);
     g_signal_connect(master, "state-changed",
                      G_CALLBACK(sync_sensitivity), slave);
     g_signal_connect(slave, "destroy",
-                     G_CALLBACK(disconnect_slave), master);
+                     G_CALLBACK(disconnect_sensitivity_slave), master);
     g_signal_connect(master, "destroy",
-                     G_CALLBACK(disconnect_master), slave);
+                     G_CALLBACK(disconnect_sensitivity_master), slave);
     gtk_widget_set_sensitive(slave, gtk_widget_get_sensitive(master));
 }
 
@@ -235,8 +241,8 @@ void
 gwy_widget_remove_sensitivity_slave(GtkWidget *master,
                                     GtkWidget *slave)
 {
-    disconnect_master(master, slave);
-    disconnect_slave(slave, master);
+    disconnect_sensitivity_master(master, slave);
+    disconnect_sensitivity_slave(slave, master);
     gtk_widget_set_sensitive(slave, TRUE);
 }
 
@@ -266,19 +272,21 @@ sync_sensitivity(GtkWidget *master,
 }
 
 static void
-disconnect_slave(GtkWidget *slave,
-                 GtkWidget *master)
+disconnect_sensitivity_slave(GtkWidget *slave,
+                             GtkWidget *master)
 {
     g_signal_handlers_disconnect_by_func(master, sync_sensitivity, slave);
-    g_signal_handlers_disconnect_by_func(master, disconnect_master, slave);
+    g_signal_handlers_disconnect_by_func(master, disconnect_sensitivity_master,
+                                         slave);
     g_object_set_data(G_OBJECT(slave), "gwy-follow-sensitivity-master", NULL);
 }
 
 static void
-disconnect_master(GtkWidget *master,
-                  GtkWidget *slave)
+disconnect_sensitivity_master(GtkWidget *master,
+                              GtkWidget *slave)
 {
-    g_signal_handlers_disconnect_by_func(master, disconnect_slave, slave);
+    g_signal_handlers_disconnect_by_func(master, disconnect_sensitivity_slave,
+                                         slave);
 }
 
 /**
