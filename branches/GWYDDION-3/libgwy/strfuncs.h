@@ -39,6 +39,10 @@ gboolean gwy_ascii_strcase_equal(gconstpointer v1,
 guint    gwy_ascii_strcase_hash (gconstpointer v)           G_GNUC_PURE;
 guint    gwy_stramong           (const gchar *str,
                                  ...)                       G_GNUC_NULL_TERMINATED G_GNUC_PURE;
+guint    gwy_str_remove_prefix  (gchar *str,
+                                 ...)                       G_GNUC_NULL_TERMINATED;
+guint    gwy_str_remove_suffix  (gchar *str,
+                                 ...)                       G_GNUC_NULL_TERMINATED;
 gchar*   gwy_str_next_line      (gchar **buffer);
 gpointer gwy_memmem             (gconstpointer haystack,
                                  gsize haystack_len,
