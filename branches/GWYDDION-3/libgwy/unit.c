@@ -574,7 +574,7 @@ parse(GArray *units,
 
     if (string[0] == '*')
         string++;
-    else if (strncmp(string, "×", sizeof("×")-1) == 0)
+    else if (g_str_has_prefix(string, "×"))
         string += sizeof("×")-1;
 
     q = g_ascii_strtod(string, (gchar**)&end);

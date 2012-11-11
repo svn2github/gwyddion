@@ -1285,22 +1285,16 @@ parse(GwyStrLineIter *iter,
     g_strstrip(line);
 
     /* Magic header */
-    guint version;
-    if (g_str_has_prefix(line, MAGIC_HEADER3)) {
-        line += sizeof(MAGIC_HEADER3) - 1;
-        version = 3;
-    }
-    else if (g_str_has_prefix(line, MAGIC_HEADER2)) {
-        line += sizeof(MAGIC_HEADER2) - 1;
-        version = 2;
-    }
-    else {
+    guint version = gwy_str_remove_prefix(line,
+                                          MAGIC_HEADER3, MAGIC_HEADER2, NULL);
+    if (!version) {
         err_filename(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
                      &filename_disp,
                      _("Wrong or missing resource magic header in file ‘%s’."),
                      (filename_disp = g_filename_display_name(filename_sys)));
         return NULL;
     }
+    version = 4 - version;
 
     /* Resource type */
     line += strspn(line, " \t");
