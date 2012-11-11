@@ -15,7 +15,7 @@
       avec autotools et vous connaissez donc la manière de procéder. Cette
       section décrit toutefois la procédure de compilation en détail pour les
       non initiés.
-      Le fichier <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL'><filename>INSTALL</filename></ulink>
+      Le fichier <ulink url='https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/INSTALL?force=True'><filename>INSTALL</filename></ulink>
       dans le répertoire racine de archives sources contient les instructions
       génériques d'installation pour GNU autotools.
   </para>
