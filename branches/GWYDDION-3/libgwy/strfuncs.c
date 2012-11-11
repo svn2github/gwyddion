@@ -201,7 +201,7 @@ gwy_ascii_strcase_hash(gconstpointer v)
 /**
  * gwy_stramong:
  * @str: String to find.
- * @...: %NULL-terminated list of string to compare @str with.
+ * @...: %NULL-terminated list of strings to compare @str with.
  *
  * Checks whether a string is equal to any from given list.
  *
@@ -213,6 +213,8 @@ guint
 gwy_stramong(const gchar *str,
              ...)
 {
+    g_return_val_if_fail(str, 0);
+
     va_list ap;
     const gchar *s;
     guint i = 1;
@@ -221,6 +223,86 @@ gwy_stramong(const gchar *str,
     while ((s = va_arg(ap, const gchar*))) {
         if (gwy_strequal(str, s)) {
             va_end(ap);
+            return i;
+        }
+        i++;
+    }
+    va_end(ap);
+
+    return 0;
+}
+
+/**
+ * gwy_str_remove_prefix:
+ * @str: String to remove a prefix from.
+ * @...: %NULL-terminated list of string prefixes to removed from @str.
+ *
+ * Removes any of given list of prefixes from a string.
+ *
+ * Only the first matching prefix is removed.  The string is modified in place
+ * by moving the rest of characters towards the begining.  An empty prefix is
+ * considered to match any string (but, of course, nothing is removed then).
+ *
+ * Returns: A non-zero value if a prefix was removed, specifically the index of
+ *          the removed prefix in the list, 1-based.  Zero is returned if no
+ *          prefix matched.
+ **/
+guint
+gwy_str_remove_prefix(gchar *str,
+                      ...)
+{
+    g_return_val_if_fail(str, 0);
+
+    va_list ap;
+    const gchar *prefix;
+    guint i = 1, len = strlen(str);
+
+    va_start(ap, str);
+    while ((prefix = va_arg(ap, const gchar*))) {
+        guint plen = strlen(prefix);
+        if (plen <= len && memcmp(str, prefix, plen) == 0) {
+            va_end(ap);
+            memmove(str, str+plen, len+1-plen);
+            return i;
+        }
+        i++;
+    }
+    va_end(ap);
+
+    return 0;
+}
+
+/**
+ * gwy_str_remove_suffix:
+ * @str: String to remove a suffix from.
+ * @...: %NULL-terminated list of string suffixes to removed from @str.
+ *
+ * Removes any of given list of suffixes from a string.
+ *
+ * Only the first matching suffix is removed.  The string is modified in place
+ * by placing a terminating '\0' as needed.  An empty suffix is considered to
+ * match any string (but, of course, nothing is removed then).
+ *
+ * Returns: A non-zero value if a suffix was removed, specifically the index of
+ *          the removed suffix in the list, 1-based.  Zero is returned if no
+ *          suffix matched.
+ **/
+guint
+gwy_str_remove_suffix(gchar *str,
+                      ...)
+{
+    g_return_val_if_fail(str, 0);
+
+    va_list ap;
+    const gchar *suffix;
+    guint i = 1, len = strlen(str);
+
+    va_start(ap, str);
+    while ((suffix = va_arg(ap, const gchar*))) {
+        guint slen = strlen(suffix);
+        if (slen <= len && memcmp(str + len-slen, suffix, slen) == 0) {
+            va_end(ap);
+            str[len-slen] = '\0';
             return i;
         }
         i++;
@@ -245,7 +327,8 @@ gwy_stramong(const gchar *str,
  * If @needle_len is zero, @haystack is always returned.
  *
  * On GNU systems with glibc at least 2.1 this is a just a trivial memmem()
- * wrapper.  On other systems it emulates memmem() behaviour.
+ * wrapper.  On other systems it emulates memmem() behaviour, including the
+ * obscure cases when @haystack or @needle is %NULL.
  *
  * Returns: (transfer none):
  *          Pointer to the first byte of memory block in @haystack that matches
