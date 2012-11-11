@@ -7,10 +7,13 @@ uifiles = gwy.css
 uixml = ui.gresource.xml
 uicode = ui-gresource.c ui-gresource.h
 
-noinst_DATA = $(uicode)
+iconsxml = icons.gresource.xml
+iconscode = icons-gresource.c icons-gresource.h
+
+noinst_DATA = $(uicode) $(iconscode)
 
 EXTRA_DIST = $(uifiles) $(STOCK_ICONS) $(STOCK_ICON_XCFSOURCES) $(icondeps)
-CLEANFILES = $(uicode) $(uixml)
+CLEANFILES = $(uicode) $(uixml) $(iconscode) $(iconsxml)
 
 gcres = $(GLIB_COMPILE_RESOURCES) --generate --manual-register
 fixcgres = $(top_srcdir)/build/fix-gresource-c.sed
@@ -29,6 +32,20 @@ ui-gresource.h: ui.gresource.xml $(fixhgres) $(uifiles)
 	$(AM_V_GEN)$(gcres) --c-name=_gwy_ui --target=ui-gresource.h \
 	    --sourcedir=$(srcdir) $(uixml)
 	$(AM_V_at)$(SED) -f $(fixhgres) -i ui-gresource.h
+
+icons.gresource.xml: Makefile.am
+	$(AM_V_GEN)$(top_srcdir)/build/generate-gresource-xml.sh -p /net/gwyddion \
+	    $(STOCK_ICONS) >icons.gresource.xml
+
+icons-gresource.c: icons.gresource.xml $(fixcgres) $(STOCK_ICONS)
+	$(AM_V_GEN)$(gcres) --c-name=_gwy_icons --target=icons-gresource.c \
+	    --sourcedir=$(srcdir) $(iconsxml)
+	$(AM_V_at)$(SED) -f $(fixcgres) -i icons-gresource.c
+
+icons-gresource.h: icons.gresource.xml $(fixhgres) $(STOCK_ICONS)
+	$(AM_V_GEN)$(gcres) --c-name=_gwy_icons --target=icons-gresource.h \
+	    --sourcedir=$(srcdir) $(iconsxml)
+	$(AM_V_at)$(SED) -f $(fixhgres) -i icons-gresource.h
 
 STOCK_ICONS_16x21 = \
 	pixmaps/16x21/color-axis.png \
