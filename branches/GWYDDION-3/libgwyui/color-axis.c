@@ -196,11 +196,11 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
 }
 
 static void
-gwy_color_axis_init(GwyColorAxis *color_axis)
+gwy_color_axis_init(GwyColorAxis *coloraxis)
 {
-    color_axis->priv = G_TYPE_INSTANCE_GET_PRIVATE(color_axis,
-                                                   GWY_TYPE_COLOR_AXIS,
-                                                   ColorAxis);
+    coloraxis->priv = G_TYPE_INSTANCE_GET_PRIVATE(coloraxis,
+                                                  GWY_TYPE_COLOR_AXIS,
+                                                  ColorAxis);
 }
 
 static void
@@ -480,9 +480,9 @@ gwy_color_axis_get_units_affinity(const GwyAxis *axis,
 /**
  * gwy_color_axis_new:
  *
- * Creates a new color_axis.
+ * Creates a new colour axis.
  *
- * Returns: A new color_axis.
+ * Returns: A new colour axis.
  **/
 GtkWidget*
 gwy_color_axis_new(void)
@@ -529,7 +529,7 @@ gwy_color_axis_get_gradient(const GwyColorAxis *coloraxis)
 
 /**
  * gwy_color_axis_set_editable_range:
- * @coloraxis: A color_axis.
+ * @coloraxis: A colour axis.
  * @editablerange: %TRUE to enable editing of the range by user, %FALSE to
  *                 disable it.
  *
@@ -549,7 +549,7 @@ gwy_color_axis_set_editable_range(GwyColorAxis *coloraxis,
 
 /**
  * gwy_color_axis_get_editable_range:
- * @coloraxis: A color_axis.
+ * @coloraxis: A colour axis.
  *
  * Gets whether the range of a colour axis can be edited by the user.
  *
@@ -560,6 +560,30 @@ gwy_color_axis_get_editable_range(const GwyColorAxis *coloraxis)
 {
     g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), FALSE);
     return coloraxis->priv->editable_range;
+}
+
+/**
+ * gwy_color_axis_get_stripe_breadth:
+ * @coloraxis: A colour axis.
+ *
+ * Gets the breadth of the colour stripe of a colour axis.
+ *
+ * Breadth is the dimension in direction orthogonal to the axis range.
+ *
+ * Returns: Colour stripe breadth.
+ **/
+guint
+gwy_color_axis_get_stripe_breadth(const GwyColorAxis *coloraxis)
+{
+    g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), 0);
+    GwyAxis *axis = GWY_AXIS(coloraxis);
+    GtkWidget *widget = GTK_WIDGET(axis);
+    gdouble width = gtk_widget_get_allocated_width(widget),
+            height = gtk_widget_get_allocated_height(widget);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gdouble breadth = (vertical ? width : height);
+    return gwy_round(coloraxis->priv->stripewidth*breadth);
 }
 
 /**

@@ -132,8 +132,11 @@ static void       axis_add_button_press_event (GwyAxis *axis);
 static gboolean   ruler_button_press          (GwyRasterView *rasterview,
                                                GdkEventButton *event,
                                                GwyRuler *ruler);
-static void       axis_range_notify           (GwyRasterView *rasterview,
+static void       coloraxis_range_notify      (GwyRasterView *rasterview,
                                                GParamSpec *pspec,
+                                               GwyColorAxis *coloraxis);
+static gboolean   coloraxis_button_press      (GwyRasterView *rasterview,
+                                               GdkEventButton *event,
                                                GwyColorAxis *coloraxis);
 static GtkWidget* create_axis_button_box      (GwyRasterView *rasterview);
 static GtkWidget* create_axis_button          (GtkRadioButton *groupwidget,
@@ -327,8 +330,12 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(ruler_button_press), rasterview);
     g_signal_connect_swapped(vruler, "button-press-event",
                              G_CALLBACK(ruler_button_press), rasterview);
+    g_signal_connect_after(coloraxis, "realize",
+                           G_CALLBACK(axis_add_button_press_event), NULL);
     g_signal_connect_swapped(coloraxis, "notify::range",
-                             G_CALLBACK(axis_range_notify), rasterview);
+                             G_CALLBACK(coloraxis_range_notify), rasterview);
+    g_signal_connect_swapped(coloraxis, "button-press-event",
+                             G_CALLBACK(coloraxis_button_press), rasterview);
 
     GtkWidget *buttonbox = create_axis_button_box(rasterview);
     gtk_grid_attach(grid, buttonbox, 3, 0, 1, 2);
@@ -859,9 +866,9 @@ ruler_button_press(GwyRasterView *rasterview,
 }
 
 static void
-axis_range_notify(GwyRasterView *rasterview,
-                  GParamSpec *pspec,
-                  GwyColorAxis *coloraxis)
+coloraxis_range_notify(GwyRasterView *rasterview,
+                       GParamSpec *pspec,
+                       GwyColorAxis *coloraxis)
 {
     g_return_if_fail(gwy_strequal(pspec->name, "range"));
     GwyRasterArea *area = rasterview->priv->area;
@@ -881,6 +888,24 @@ axis_range_notify(GwyRasterView *rasterview,
         gwy_raster_area_set_range_from_method(area, GWY_COLOR_RANGE_USER);
     if (arearange.to != axisrange.to)
         gwy_raster_area_set_range_to_method(area, GWY_COLOR_RANGE_USER);
+}
+
+static gboolean
+coloraxis_button_press(GwyRasterView *rasterview,
+                       GdkEventButton *event,
+                       GwyColorAxis *coloraxis)
+{
+    if (event->type != GDK_2BUTTON_PRESS)
+        return FALSE;
+
+    guint breadth = gwy_color_axis_get_stripe_breadth(coloraxis);
+    RasterView *priv = rasterview->priv;
+    if (event->x <= breadth)
+        gtk_toggle_button_set_active(priv->gradbutton, TRUE);
+    else
+        gtk_toggle_button_set_active(priv->rangebutton, TRUE);
+
+    return TRUE;
 }
 
 static GtkWidget*
