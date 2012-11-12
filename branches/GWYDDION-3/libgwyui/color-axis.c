@@ -85,6 +85,31 @@ static guint    gwy_color_axis_get_split_width      (const GwyAxis *axis);
 static void     gwy_color_axis_get_units_affinity   (const GwyAxis *axis,
                                                      GwyAxisUnitPlacement *primary,
                                                      GwyAxisUnitPlacement *secondary);
+static void     draw_ticks                          (const GwyAxisTick *ticks,
+                                                     guint nticks,
+                                                     cairo_t *cr,
+                                                     GtkStyleContext *context,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble stripebreadth,
+                                                     gint *max_ascent,
+                                                     gint *max_descent);
+static void     draw_stripe                         (GwyGradient *gradient,
+                                                     cairo_t *cr,
+                                                     GtkPositionType edge,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble length,
+                                                     gdouble stripebreadth);
+static void     draw_labels                         (const GwyAxisTick *ticks,
+                                                     guint nticks,
+                                                     cairo_t *cr,
+                                                     GtkPositionType edge,
+                                                     GtkStyleContext *context,
+                                                     PangoLayout *layout,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble breadth,
+                                                     gdouble stripebreadth,
+                                                     gint max_ascent,
+                                                     gint max_descent);
 static void     set_up_transform                    (GtkPositionType edge,
                                                      cairo_matrix_t *matrix,
                                                      gdouble width,
@@ -155,7 +180,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
         = g_param_spec_boolean("editable-range",
                                "Editable range",
                                "Whether the colour axis range can be edited "
-                               "by theu ser.",
+                               "by the user.",
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -337,97 +362,20 @@ gwy_color_axis_draw(GtkWidget *widget,
     gdouble length = (vertical ? height : width),
             breadth = (vertical ? width : height),
             stripebreadth = gwy_round(priv->stripewidth*breadth);
-    GtkPositionType towards = (vertical ? GTK_POS_TOP : GTK_POS_RIGHT);
     cairo_matrix_t matrix;
     set_up_transform(edge, &matrix, width, height);
 
-    GdkRGBA rgba;
-    gtk_render_background(context, cr, 0, 0, width, height);
-    gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
-    gdk_cairo_set_source_rgba(cr, &rgba);
-    cairo_set_line_width(cr, 1.0);
-
     guint nticks;
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
     gint max_ascent = G_MININT, max_descent = G_MININT;
 
-    for (guint i = 0; i < nticks; i++) {
-        gdouble pos = ticks[i].position;
-        gdouble s = tick_level_sizes[ticks[i].level];
-        draw_line_transformed(cr, &matrix,
-                              pos, stripebreadth,
-                              pos, (1.0 + s)*stripebreadth);
-        if (ticks[i].label) {
-            max_ascent = MAX(max_ascent, PANGO_ASCENT(ticks[i].extents));
-            max_descent = MAX(max_descent, PANGO_DESCENT(ticks[i].extents));
-        }
-    }
-    cairo_stroke(cr);
-
-    GwyGradient *gradient = (priv->gradient
-                             ? priv->gradient
-                             : gwy_gradients_get(NULL));
-    cairo_pattern_t *pattern = gwy_cairo_pattern_create_gradient(gradient,
-                                                                 towards);
-    cairo_matrix_t patmatrix;
-    gdouble xo = 0.5, yo = 0.5, xe = length - 0.5, ye = stripebreadth - 0.5;
-    cairo_matrix_transform_point(&matrix, &xo, &yo);
-    cairo_matrix_transform_point(&matrix, &xe, &ye);
-    GWY_ORDER(gdouble, xo, xe);
-    GWY_ORDER(gdouble, yo, ye);
-    cairo_matrix_init_scale(&patmatrix,
-                            (vertical ? 1.0 : 1.0/length),
-                            (vertical ? 1.0/length : 1.0));
-    cairo_pattern_set_matrix(pattern, &patmatrix);
-    cairo_rectangle(cr, xo, yo, xe - xo, ye - yo);
-    cairo_save(cr);
-    cairo_set_source(cr, pattern);
-    cairo_fill_preserve(cr);
-    cairo_restore(cr);
-    cairo_pattern_destroy(pattern);
-    cairo_stroke(cr);
-
-    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
-    gdouble a = max_ascent/pangoscale, d = max_descent/pangoscale;
-    for (guint i = 0; i < nticks; i++) {
-        if (!ticks[i].label)
-            continue;
-
-        gdouble x = ticks[i].position, y = breadth;
-        cairo_matrix_transform_point(&matrix, &x, &y);
-        pango_layout_set_markup(layout, ticks[i].label, -1);
-        if (edge == GTK_POS_BOTTOM) {
-            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                x -= 2.0 + ticks[i].extents.width/pangoscale;
-            else
-                x += 2.0;
-            y = breadth - (a + d);
-        }
-        else if (edge == GTK_POS_LEFT) {
-            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                y -= 2.0 + ticks[i].extents.height/pangoscale;
-            else
-                y += 2.0;
-            x = breadth - ticks[i].extents.width/pangoscale - 2.0 - 2.0
-                - (1.0 + tick_level_sizes[GWY_AXIS_TICK_MINOR])*stripebreadth;
-        }
-        else if (edge == GTK_POS_TOP) {
-            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                x -= 2.0 + ticks[i].extents.width/pangoscale;
-            else
-                x += 2.0;
-            y = a;
-        }
-        else if (edge == GTK_POS_RIGHT) {
-            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                y -= 2.0 + ticks[i].extents.height/pangoscale;
-            else
-                y += 2.0;
-            x = (1.0 + tick_level_sizes[GWY_AXIS_TICK_MINOR])*stripebreadth
-                + 2.0 + 2.0;
-        }
-        gtk_render_layout(context, cr, x, y, layout);
-    }
+    gtk_render_background(context, cr, 0, 0, width, height);
+    draw_ticks(ticks, nticks, cr, context, &matrix, stripebreadth,
+               &max_ascent, &max_descent);
+    draw_stripe(priv->gradient, cr, edge, &matrix, length, stripebreadth);
+    draw_labels(ticks, nticks, cr, edge, context, layout, &matrix,
+                breadth, stripebreadth, max_ascent, max_descent);
 
     return FALSE;
 }
@@ -649,6 +597,119 @@ gwy_color_axis_get_distribution(const GwyColorAxis *coloraxis)
 {
     g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), NULL);
     return coloraxis->priv->distribution;
+}
+
+static void
+draw_ticks(const GwyAxisTick *ticks,
+           guint nticks,
+           cairo_t *cr,
+           GtkStyleContext *context,
+           const cairo_matrix_t *matrix,
+           gdouble stripebreadth,
+           gint *max_ascent, gint *max_descent)
+{
+    GdkRGBA rgba;
+    gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
+    gdk_cairo_set_source_rgba(cr, &rgba);
+    cairo_set_line_width(cr, 1.0);
+
+    for (guint i = 0; i < nticks; i++) {
+        gdouble pos = ticks[i].position;
+        gdouble s = tick_level_sizes[ticks[i].level];
+        draw_line_transformed(cr, matrix,
+                              pos, stripebreadth,
+                              pos, (1.0 + s)*stripebreadth);
+        if (ticks[i].label) {
+            *max_ascent = MAX(*max_ascent, PANGO_ASCENT(ticks[i].extents));
+            *max_descent = MAX(*max_descent, PANGO_DESCENT(ticks[i].extents));
+        }
+    }
+    cairo_stroke(cr);
+}
+
+static void
+draw_stripe(GwyGradient *gradient,
+            cairo_t *cr,
+            GtkPositionType edge,
+            const cairo_matrix_t *matrix,
+            gdouble length, gdouble stripebreadth)
+{
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    GtkPositionType towards = (vertical ? GTK_POS_TOP : GTK_POS_RIGHT);
+    if (!gradient)
+        gradient = gwy_gradients_get(NULL);
+    cairo_pattern_t *pattern = gwy_cairo_pattern_create_gradient(gradient,
+                                                                 towards);
+    cairo_matrix_t patmatrix;
+    gdouble xo = 0.5, yo = 0.5, xe = length - 0.5, ye = stripebreadth - 0.5;
+    cairo_matrix_transform_point(matrix, &xo, &yo);
+    cairo_matrix_transform_point(matrix, &xe, &ye);
+    GWY_ORDER(gdouble, xo, xe);
+    GWY_ORDER(gdouble, yo, ye);
+    cairo_matrix_init_scale(&patmatrix,
+                            (vertical ? 1.0 : 1.0/length),
+                            (vertical ? 1.0/length : 1.0));
+    cairo_pattern_set_matrix(pattern, &patmatrix);
+    cairo_rectangle(cr, xo, yo, xe - xo, ye - yo);
+    cairo_save(cr);
+    cairo_set_source(cr, pattern);
+    cairo_fill_preserve(cr);
+    cairo_restore(cr);
+    cairo_pattern_destroy(pattern);
+    cairo_stroke(cr);
+}
+
+static void
+draw_labels(const GwyAxisTick *ticks,
+            guint nticks,
+            cairo_t *cr,
+            GtkPositionType edge,
+            GtkStyleContext *context,
+            PangoLayout *layout,
+            const cairo_matrix_t *matrix,
+            gdouble breadth, gdouble stripebreadth,
+            gint max_ascent, gint max_descent)
+{
+    gdouble a = max_ascent/pangoscale, d = max_descent/pangoscale;
+    for (guint i = 0; i < nticks; i++) {
+        if (!ticks[i].label)
+            continue;
+
+        gdouble x = ticks[i].position, y = breadth;
+        cairo_matrix_transform_point(matrix, &x, &y);
+        pango_layout_set_markup(layout, ticks[i].label, -1);
+        if (edge == GTK_POS_BOTTOM) {
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                x -= 2.0 + ticks[i].extents.width/pangoscale;
+            else
+                x += 2.0;
+            y = breadth - (a + d);
+        }
+        else if (edge == GTK_POS_LEFT) {
+            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                y -= 2.0 + ticks[i].extents.height/pangoscale;
+            else
+                y += 2.0;
+            x = breadth - ticks[i].extents.width/pangoscale - 2.0 - 2.0
+                - (1.0 + tick_level_sizes[GWY_AXIS_TICK_MINOR])*stripebreadth;
+        }
+        else if (edge == GTK_POS_TOP) {
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                x -= 2.0 + ticks[i].extents.width/pangoscale;
+            else
+                x += 2.0;
+            y = a;
+        }
+        else if (edge == GTK_POS_RIGHT) {
+            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                y -= 2.0 + ticks[i].extents.height/pangoscale;
+            else
+                y += 2.0;
+            x = (1.0 + tick_level_sizes[GWY_AXIS_TICK_MINOR])*stripebreadth
+                + 2.0 + 2.0;
+        }
+        gtk_render_layout(context, cr, x, y, layout);
+    }
 }
 
 static void
