@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_FIELD_DISTRIBUTIONS_H__
 #define __LIBGWY_FIELD_DISTRIBUTIONS_H__
 
+#include <libgwy/fft.h>
 #include <libgwy/line.h>
 #include <libgwy/field.h>
 #include <libgwy/mask-field.h>
