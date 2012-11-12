@@ -33,6 +33,7 @@ enum {
     PROP_0,
     PROP_GRADIENT,
     PROP_EDITABLE_RANGE,
+    PROP_DISTRIBUTION,
     N_PROPS,
 };
 
@@ -41,6 +42,9 @@ struct _GwyColorAxisPrivate {
     gulong gradient_data_changed_id;
     gboolean editable_range;
     gint last_boundary;
+
+    GwyCurve *distribution;
+    gulong distribution_data_changed_id;
 
     GdkCursor *cursor_from;
     GdkCursor *cursor_to;
@@ -95,8 +99,12 @@ static gboolean set_gradient                        (GwyColorAxis *coloraxis,
                                                      GwyGradient *gradient);
 static gboolean set_editable_range                  (GwyColorAxis *coloraxis,
                                                      gboolean setting);
+static gboolean set_distribution                    (GwyColorAxis *coloraxis,
+                                                     GwyCurve *distribution);
 static void     gradient_data_changed               (GwyColorAxis *coloraxis,
                                                      GwyGradient *gradient);
+static void     distribution_data_changed           (GwyColorAxis *coloraxis,
+                                                     GwyCurve *distribution);
 static void     ensure_cursors                      (GwyColorAxis *coloraxis);
 static void     discard_cursors                     (GwyColorAxis *coloraxis);
 static gint     find_boundary                       (GwyAxis *axis,
@@ -150,6 +158,13 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
                                "by theu ser.",
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_DISTRIBUTION]
+        = g_param_spec_object("distribution",
+                              "Distribution",
+                              "Distribution displayed along the axis.",
+                              GWY_TYPE_CURVE,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -599,6 +614,43 @@ gwy_color_axis_get_editable_range(const GwyColorAxis *coloraxis)
     return coloraxis->priv->editable_range;
 }
 
+/**
+ * gwy_color_axis_set_distribution:
+ * @coloraxis: A color_axis.
+ * @distribution: (allow-none):
+ *                Curve to display along the colour axis a visualisation of
+ *                distribution of the corresponding quantity.
+ *
+ * Sets the curve displayed along a colour axis.
+ **/
+void
+gwy_color_axis_set_distribution(GwyColorAxis *coloraxis,
+                                GwyCurve *distribution)
+{
+    g_return_if_fail(GWY_IS_COLOR_AXIS(coloraxis));
+    if (!set_distribution(coloraxis, distribution))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(coloraxis),
+                             properties[PROP_DISTRIBUTION]);
+}
+
+/**
+ * gwy_color_axis_get_distribution:
+ * @coloraxis: A color_axis.
+ *
+ * Gets the curve displayed along the colour axis.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          The curve displayed along the colour axis, or %NULL.
+ **/
+GwyCurve*
+gwy_color_axis_get_distribution(const GwyColorAxis *coloraxis)
+{
+    g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), NULL);
+    return coloraxis->priv->distribution;
+}
+
 static void
 set_up_transform(GtkPositionType edge,
                  cairo_matrix_t *matrix,
@@ -656,9 +708,33 @@ set_editable_range(GwyColorAxis *coloraxis,
     return TRUE;
 }
 
+static gboolean
+set_distribution(GwyColorAxis *coloraxis,
+                 GwyCurve *distribution)
+{
+    ColorAxis *priv = coloraxis->priv;
+    if (!gwy_set_member_object(coloraxis, distribution, GWY_TYPE_CURVE,
+                               &priv->distribution,
+                               "data-changed", &distribution_data_changed,
+                               &priv->distribution_data_changed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    gtk_widget_queue_draw(GTK_WIDGET(coloraxis));
+    return TRUE;
+}
+
 static void
 gradient_data_changed(GwyColorAxis *coloraxis,
                       G_GNUC_UNUSED GwyGradient *gradient)
+{
+    gtk_widget_queue_draw(GTK_WIDGET(coloraxis));
+}
+
+static void
+distribution_data_changed(GwyColorAxis *coloraxis,
+                          G_GNUC_UNUSED GwyCurve *distribution)
 {
     gtk_widget_queue_draw(GTK_WIDGET(coloraxis));
 }

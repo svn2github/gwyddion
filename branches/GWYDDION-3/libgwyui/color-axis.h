@@ -20,6 +20,7 @@
 #ifndef __LIBGWYUI_COLOR_AXIS_H__
 #define __LIBGWYUI_COLOR_AXIS_H__
 
+#include <libgwy/curve.h>
 #include <libgwyui/axis.h>
 
 G_BEGIN_DECLS
@@ -58,6 +59,9 @@ GwyGradient* gwy_color_axis_get_gradient      (const GwyColorAxis *coloraxis) G_
 void         gwy_color_axis_set_editable_range(GwyColorAxis *coloraxis,
                                                gboolean editablerange);
 gboolean     gwy_color_axis_get_editable_range(const GwyColorAxis *coloraxis) G_GNUC_PURE;
+void         gwy_color_axis_set_distribution  (GwyColorAxis *coloraxis,
+                                               GwyCurve *distribution);
+GwyCurve*    gwy_color_axis_get_distribution  (const GwyColorAxis *coloraxis) G_GNUC_PURE;
 
 G_END_DECLS
 
