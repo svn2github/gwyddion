@@ -2426,13 +2426,22 @@ set_user_range(GwyRasterArea *rasterarea,
         return FALSE;
 
     priv->user_range = *range;
-    if (priv->range_from_method != GWY_COLOR_RANGE_USER
-        && priv->range_to_method != GWY_COLOR_RANGE_USER)
+    gboolean fromisuser = (priv->range_from_method == GWY_COLOR_RANGE_USER);
+    gboolean toisuser = (priv->range_to_method == GWY_COLOR_RANGE_USER);
+    if (!fromisuser && !toisuser)
         return TRUE;
 
+    if (fromisuser)
+        priv->range.from = priv->user_range.from;
+    if (toisuser)
+        priv->range.to = priv->user_range.to;
+
     priv->field_surface_valid = FALSE;
-    priv->range_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+    // FIXME: If only one endpoint is USER we will emit "notify::range" with
+    // possibly not-yet-valid other endpoint.  But what can we do?  Force
+    // full range recalculation here?
+    g_object_notify_by_pspec(G_OBJECT(rasterarea), properties[PROP_RANGE]);
     return TRUE;
 }
 
