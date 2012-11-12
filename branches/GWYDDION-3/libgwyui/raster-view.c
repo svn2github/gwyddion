@@ -21,6 +21,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
+#include "libgwy/field-distributions.h"
 #include "libgwyui/main.h"
 #include "libgwyui/types.h"
 #include "libgwyui/stock.h"
@@ -119,6 +120,7 @@ static gboolean   set_vadjustment             (GwyRasterView *rasterview,
 static gboolean   set_field                   (GwyRasterView *rasterview,
                                                GwyField *field);
 static void       update_ruler_ranges         (GwyRasterView *rasterview);
+static void       update_color_axis_distrib   (GwyRasterView *rasterview);
 static gboolean   area_motion_notify          (GwyRasterView *rasterview,
                                                GdkEventMotion *event,
                                                GwyRasterArea *area);
@@ -689,12 +691,11 @@ set_ruler_units_to_field(GwyRasterView *rasterview)
 }
 
 static void
-field_data_changed(G_GNUC_UNUSED GwyRasterView *rasterview,
+field_data_changed(GwyRasterView *rasterview,
                    G_GNUC_UNUSED const GwyFieldPart *fpart,
                    G_GNUC_UNUSED GwyField *field)
 {
-    // RasterView *priv = rasterview->priv;
-    // XXX: Do we want to do anything here?
+    update_color_axis_distrib(rasterview);
 }
 
 static gboolean
@@ -768,6 +769,7 @@ set_field(GwyRasterView *rasterview,
 
     if (field) {
         field_notify(rasterview, NULL, field);
+        // This also causes update_color_axis_distrib().  Do not do it twice.
         field_data_changed(rasterview, NULL, field);
     }
 
@@ -798,6 +800,30 @@ update_ruler_ranges(GwyRasterView *rasterview)
     }
     gwy_axis_request_range(GWY_AXIS(priv->hruler), &hrange);
     gwy_axis_request_range(GWY_AXIS(priv->vruler), &vrange);
+}
+
+static void
+update_color_axis_distrib(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (!priv->field) {
+        gwy_color_axis_set_distribution(priv->coloraxis, NULL);
+        return;
+    }
+
+    GwyLine *line = gwy_field_value_dist(priv->field, NULL, NULL, 0,
+                                         FALSE, FALSE, 0, 0.0, 0.0);
+    GwyCurve *distribution = gwy_color_axis_get_distribution(priv->coloraxis);
+    if (distribution) {
+        gwy_curve_set_from_line(distribution, line);
+        gwy_curve_data_changed(distribution);
+    }
+    else {
+        distribution = gwy_curve_new_from_line(line);
+        gwy_color_axis_set_distribution(priv->coloraxis, distribution);
+        g_object_unref(distribution);
+    }
+    g_object_unref(line);
 }
 
 static gboolean

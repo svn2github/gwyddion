@@ -20,6 +20,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/curve-statistics.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/widget-utils.h"
@@ -45,6 +46,8 @@ struct _GwyColorAxisPrivate {
 
     GwyCurve *distribution;
     gulong distribution_data_changed_id;
+    gdouble distribution_max;
+    gboolean distribution_max_valid;
 
     GdkCursor *cursor_from;
     GdkCursor *cursor_to;
@@ -110,6 +113,12 @@ static void     draw_labels                         (const GwyAxisTick *ticks,
                                                      gdouble stripebreadth,
                                                      gint max_ascent,
                                                      gint max_descent);
+static void     draw_distribution                   (GwyColorAxis *coloraxis,
+                                                     cairo_t *cr,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble breadth,
+                                                     gdouble stripebreadth,
+                                                     gdouble length);
 static void     set_up_transform                    (GtkPositionType edge,
                                                      cairo_matrix_t *matrix,
                                                      gdouble width,
@@ -371,6 +380,7 @@ gwy_color_axis_draw(GtkWidget *widget,
     gint max_ascent = G_MININT, max_descent = G_MININT;
 
     gtk_render_background(context, cr, 0, 0, width, height);
+    draw_distribution(coloraxis, cr, &matrix, breadth, stripebreadth, length);
     draw_ticks(ticks, nticks, cr, context, &matrix, stripebreadth,
                &max_ascent, &max_descent);
     draw_stripe(priv->gradient, cr, edge, &matrix, length, stripebreadth);
@@ -737,6 +747,63 @@ draw_labels(const GwyAxisTick *ticks,
 }
 
 static void
+draw_distribution(GwyColorAxis *coloraxis,
+                  cairo_t *cr,
+                  const cairo_matrix_t *matrix,
+                  gdouble breadth, gdouble stripebreadth, gdouble length)
+{
+    ColorAxis *priv = coloraxis->priv;
+    GwyCurve *curve = priv->distribution;
+
+    if (!curve)
+        return;
+
+    GwyRange range;
+    gwy_axis_get_range(GWY_AXIS(coloraxis), &range);
+
+    gdouble from = range.from, to = range.to;
+    guint n = curve->n;
+    const GwyXY *xy = curve->data;
+
+    // TODO: Backward ranges!
+    if (!n || xy[0].x >= to || xy[n-1].x <= from)
+        return;
+
+    if (!priv->distribution_max_valid) {
+        gwy_curve_min_max_full(curve, NULL, &priv->distribution_max);
+        priv->distribution_max_valid = TRUE;
+    }
+
+    gdouble m = priv->distribution_max;
+    if (!m)
+        return;
+
+    cairo_save(cr);
+    gdouble x = 0, y = stripebreadth;
+    cairo_matrix_transform_point(matrix, &x, &y);
+    cairo_move_to(cr, x, y);
+    for (guint i = 0; i < n; i++) {
+        // TODO: Handle edges more precisely, i.e. using interpolation, for
+        // very zoomed in ranges.
+        if (xy[i].x >= from && xy[i].x <= to) {
+            x = length*(xy[i].x - from)/(to - from);
+            y = stripebreadth + xy[i].y/m*(breadth - stripebreadth);
+            cairo_matrix_transform_point(matrix, &x, &y);
+            cairo_line_to(cr, x, y);
+        }
+    }
+    x = length;
+    y = 0;
+    cairo_matrix_transform_point(matrix, &x, &y);
+    cairo_line_to(cr, x, y);
+    cairo_close_path(cr);
+    // FIXME: Theming.
+    cairo_set_source_rgba(cr, 0.6, 0.6, 1.0, 0.4);
+    cairo_fill(cr);
+    cairo_restore(cr);
+}
+
+static void
 set_up_transform(GtkPositionType edge,
                  cairo_matrix_t *matrix,
                  gdouble width, gdouble height)
@@ -821,6 +888,7 @@ static void
 distribution_data_changed(GwyColorAxis *coloraxis,
                           G_GNUC_UNUSED GwyCurve *distribution)
 {
+    coloraxis->priv->distribution_max_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(coloraxis));
 }
 
