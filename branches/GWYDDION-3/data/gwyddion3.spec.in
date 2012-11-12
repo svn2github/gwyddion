@@ -14,12 +14,11 @@ Source0:       http://downloads.sourceforge.net/@PACKAGE_TARNAME@/@PACKAGE_TARNA
 Requires(pre):    /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
-BuildRequires: glib2-devel >= 2.26
+BuildRequires: glib2-devel >= 2.32
 BuildRequires: gdk-pixbuf2-devel >= 2.22
 BuildRequires: gtk3-devel >= 3.0
 BuildRequires: intltool >= 0.40
-# XXX: In fact, we need a yet-unreleased fixed to get plain old data docs right.
-BuildRequires: gtk-doc >= 1.17
+BuildRequires: gtk-doc >= 1.18
 BuildRequires: gettext >= 0.17
 BuildRequires: gobject-introspection-devel >= 0.10.0
 BuildRequires: pkgconfig >= 0.22
@@ -76,8 +75,6 @@ Requires:      gtk3-devel >= 3.0
 Gwyddion is a modular SPM (Scanning Probe Microsopy) data visualization and
 analysis tool written with Gtk+.
 
-This is a dummy package as no Gwyddion 3 application actually exists yet.
-
 
 %description libs
 Gwyddion3 data processing and visualisation libraries.
@@ -116,6 +113,7 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 
 %files
 %defattr(644,root,root)
+%{_bindir}/gwyddion3
 %doc AUTHORS COPYING INSTALL.gwyddion NEWS README
 
 
