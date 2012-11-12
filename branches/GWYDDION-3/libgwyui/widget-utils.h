@@ -37,6 +37,10 @@ G_BEGIN_DECLS
 gdouble    gwy_scroll_wheel_delta                (GtkAdjustment *adjustment,
                                                   GdkEventScroll *event,
                                                   GtkOrientation orientation);
+void       gwy_list_store_row_changed            (GtkListStore *store,
+                                                  GtkTreeIter *iter,
+                                                  GtkTreePath *path,
+                                                  gint row);
 gboolean   gwy_widget_get_activate_on_unfocus    (GtkWidget *widget);
 void       gwy_widget_set_activate_on_unfocus    (GtkWidget *widget,
                                                   gboolean activate);
