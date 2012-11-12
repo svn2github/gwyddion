@@ -69,6 +69,7 @@ struct _GwyRasterViewPrivate {
 
     GtkWidget *gradients_tab;
     GwyResourceList *gradient_list;
+    GtkToggleButton *favorite_only;
 
     GtkWidget *ranges_tab;
 
@@ -155,6 +156,8 @@ static void       gradient_activated          (GwyRasterView *rasterview,
                                                GtkTreePath *path,
                                                GtkTreeViewColumn *column,
                                                GwyResourceList *list);
+static void       favorite_only_toggled       (GwyRasterView *rasterview,
+                                               GtkToggleButton *toggle);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -1014,10 +1017,20 @@ create_gradients_tab(GwyRasterView *rasterview)
     column = gwy_resource_list_create_column_name(priv->gradient_list);
     gtk_tree_view_append_column(treeview, column);
 
+    gwy_resource_list_set_only_preferred(priv->gradient_list, TRUE);
+
+    GtkWidget *favorite_only
+        = gtk_check_button_new_with_mnemonic(_("_Favorite only"));
+    priv->favorite_only = GTK_TOGGLE_BUTTON(favorite_only);
+    gtk_toggle_button_set_active(priv->favorite_only, TRUE);
+    gtk_box_pack_end(GTK_BOX(vbox), favorite_only, FALSE, FALSE, 0);
+
     g_signal_connect_swapped(priv->gradient_list, "notify::active",
                              G_CALLBACK(gradient_selected), rasterview);
     g_signal_connect_swapped(priv->gradient_list, "row-activated",
                              G_CALLBACK(gradient_activated), rasterview);
+    g_signal_connect_swapped(priv->favorite_only, "toggled",
+                             G_CALLBACK(favorite_only_toggled), rasterview);
 
     return vbox;
 }
@@ -1144,6 +1157,15 @@ gradient_activated(GwyRasterView *rasterview,
     gwy_raster_area_set_gradient(priv->area, gradient);
 
     gtk_toggle_button_set_active(priv->axisbutton, TRUE);
+}
+
+static void
+favorite_only_toggled(GwyRasterView *rasterview,
+                      GtkToggleButton *toggle)
+{
+    gboolean active = gtk_toggle_button_get_active(toggle);
+    gwy_resource_list_set_only_preferred(rasterview->priv->gradient_list,
+                                         active);
 }
 
 /**
