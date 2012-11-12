@@ -141,7 +141,7 @@ field_value_dist_cont(const GwyField *field,
     // is given by caller, this serves as a somewhat inefficient masked pixel
     // counting method.
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               value_dist_cont, &ddata);
+                               value_dist_cont, ddata);
 
     if (!npoints)
         npoints = dist_points_for_n_points(ddata->n_in_range/4.0);
@@ -156,7 +156,7 @@ field_value_dist_cont(const GwyField *field,
 
     ddata->analyse = ddata->count = FALSE;
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               value_dist_cont, &ddata);
+                               value_dist_cont, ddata);
 }
 
 static void
