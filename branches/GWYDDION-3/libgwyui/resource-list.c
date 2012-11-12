@@ -167,7 +167,7 @@ gwy_resource_list_constructed(GObject *object)
                                            resource_is_visible, list, NULL);
 
     GtkTreeView *treeview = GTK_TREE_VIEW(object);
-    gtk_tree_view_set_model(treeview, model);
+    gtk_tree_view_set_model(treeview, filtermodel);
 
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     g_signal_connect_swapped(selection, "changed",
@@ -593,7 +593,8 @@ resource_is_visible(GtkTreeModel *model,
 
     GwyResource *resource;
     gtk_tree_model_get(model, iter, 0, &resource, -1);
-    return gwy_resource_get_preferred(resource);
+    return (resource == priv->active_resource
+            || gwy_resource_get_preferred(resource));
 }
 
 static void
