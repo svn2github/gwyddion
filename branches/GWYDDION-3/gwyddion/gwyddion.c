@@ -72,6 +72,11 @@ main(int argc, char *argv[])
     gwy_resource_type_load(GWY_TYPE_GRADIENT, NULL);
     gwy_register_stock_items();
 
+    g_object_set(gwy_gradients_get("Gray"), "preferred", TRUE, NULL);
+    g_object_set(gwy_gradients_get("Sky"), "preferred", TRUE, NULL);
+    g_object_set(gwy_gradients_get("Gwyddion.net"), "preferred", TRUE, NULL);
+    g_object_set(gwy_gradients_get("Spectral"), "preferred", TRUE, NULL);
+
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Gwy3 UI Test");
     gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
