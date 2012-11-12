@@ -766,7 +766,9 @@ draw_distribution(GwyColorAxis *coloraxis,
     const GwyXY *xy = curve->data;
 
     // TODO: Backward ranges!
-    if (!n || xy[0].x >= to || xy[n-1].x <= from)
+    gboolean descending = (to < from);
+    gdouble min = fmin(from, to), max = fmax(from, to);
+    if (!n || xy[0].x > max || xy[n-1].x < min)
         return;
 
     if (!priv->distribution_max_valid) {
@@ -779,21 +781,21 @@ draw_distribution(GwyColorAxis *coloraxis,
         return;
 
     cairo_save(cr);
-    gdouble x = 0, y = stripebreadth;
+    gdouble x = descending ? length : 0, y = stripebreadth;
     cairo_matrix_transform_point(matrix, &x, &y);
     cairo_move_to(cr, x, y);
     for (guint i = 0; i < n; i++) {
         // TODO: Handle edges more precisely, i.e. using interpolation, for
-        // very zoomed in ranges.
-        if (xy[i].x >= from && xy[i].x <= to) {
+        // highly zoomed-in ranges.
+        if (xy[i].x >= min && xy[i].x <= max) {
             x = length*(xy[i].x - from)/(to - from);
             y = stripebreadth + xy[i].y/m*(breadth - stripebreadth);
             cairo_matrix_transform_point(matrix, &x, &y);
             cairo_line_to(cr, x, y);
         }
     }
-    x = length;
-    y = 0;
+    x = descending ? 0 : length;
+    y = stripebreadth;
     cairo_matrix_transform_point(matrix, &x, &y);
     cairo_line_to(cr, x, y);
     cairo_close_path(cr);
