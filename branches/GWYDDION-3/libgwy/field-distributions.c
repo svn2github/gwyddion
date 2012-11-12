@@ -201,7 +201,7 @@ value_dist_discr_process(const GwyField *field,
     const gdouble *base = field->data + row*field->xres + col;
     gdouble min = ddata->min, max = ddata->max;
     guint npoints = line->res;
-    gdouble q = (max - min)*npoints;
+    gdouble q = npoints/(max - min);
 
     if (masking == GWY_MASK_IGNORE) {
         for (guint i = 0; i < height; i++) {
@@ -210,7 +210,7 @@ value_dist_discr_process(const GwyField *field,
                 if (*d < min)
                     ddata->left_sum++;
                 else if (*d <= max) {
-                    guint k = (guint)((*d - min)/q);
+                    guint k = (guint)((*d - min)*q);
                     // Fix rounding errors.
                     if (G_UNLIKELY(k >= npoints))
                         line->data[npoints-1] += 1;
