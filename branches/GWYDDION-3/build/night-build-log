@@ -61,6 +61,8 @@ cat >update_translations.ignore <<':'
 cat >build_rpm.ignore <<':'
 ^\+
 ^libtool: install: warning: remember to run `libtool --finish /usr/lib64'$
+^libtool: install: warning: relinking `libgwy(ui|)3\.la'$
+^libtool: install: warning: `[^ ]+/libgwy(ui|)3.la' has not been installed in `/usr/lib64'$
 ^[0-9]+ blocks
 ':'
 :
