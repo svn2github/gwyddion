@@ -126,6 +126,25 @@ gboolean gwy_linear_fit        (GwyLinearFitFunc function,
                                 gdouble *residuum,
                                 gpointer user_data);
 
+// Use negated condition in if to catch NaNs.
+#define gwy_assert_floatval(val,ref,tol) \
+    do { \
+        long double __n1 = (val), __n2 = (ref), __n3 = (tol); \
+        if (!(fabsl(__n1 - __n2) <= __n3)) \
+            gwy_assertion_message_floatval(G_LOG_DOMAIN, __FILE__, __LINE__, G_STRFUNC, \
+                                           "|(" #val ") - (" #ref ")| <= " #tol, \
+                                           __n1, __n2, __n3); \
+    } while (0)
+
+void gwy_assertion_message_floatval(const char *domain,
+                                    const char *file,
+                                    int line,
+                                    const char *func,
+                                    const char *expr,
+                                    long double val,
+                                    long double ref,
+                                    long double tol) G_GNUC_NORETURN;
+
 #define GWY_TYPE_XY (gwy_xy_get_type())
 
 GType  gwy_xy_get_type(void)            G_GNUC_CONST;

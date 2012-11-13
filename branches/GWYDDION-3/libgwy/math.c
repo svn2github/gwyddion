@@ -1103,6 +1103,53 @@ gwy_linear_fit(GwyLinearFitFunc function,
 }
 
 /**
+ * gwy_assert_floatval:
+ * @val: Floating point value to check.
+ * @ref: Reference value for @val.
+ * @tol: Tolerance for @val.
+ *
+ * Debugging macro to terminate the application with a warning message if a
+ * floating point value fails to fall into given tolerance from reference
+ * value.
+ *
+ * The effect of gwy_assert_floatval(@val, @ref, @tol) is the same as
+ * g_assert(fabsl(@val - @ref) &lt;= @tol). The advantage of this macro is that
+ * it can produce a message that includes the actual values entering the
+ * tolerance check.
+ **/
+
+/**
+ * gwy_assertion_message_floatval:
+ * @domain: Log domain.
+ * @file: File in which the assertion failed.
+ * @line: Line at which the assertion failed.
+ * @func: Function in which the assertion failed.
+ * @expr: Expression representing the failed comparison.
+ * @val: Value that was found to be out of tolerance.
+ * @ref: Reference value for @val.
+ * @tol: Tolerance for @val.
+ *
+ * Logs a failed assertion for numerical comparison and aborts the program.
+ *
+ * This function is used to implement gwy_assert_floatval().
+ **/
+void
+gwy_assertion_message_floatval(const char *domain,
+                               const char *file,
+                               int line,
+                               const char *func,
+                               const char *expr,
+                               long double val,
+                               long double ref,
+                               long double tol)
+{
+    gchar *s = g_strdup_printf("assertion failed (%s): |%.17Lg - %.17Lg| < %Lg",
+                               expr, val, ref, tol);
+    g_assertion_message(domain, file, line, func, s);
+    g_free(s);
+}
+
+/**
  * gwy_double_compare:
  * @a: Pointer to the first double value.
  * @b: Pointer to the second double value.
