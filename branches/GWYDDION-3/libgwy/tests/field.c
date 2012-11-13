@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -3251,6 +3251,81 @@ test_field_distributions_value_discr_full(void)
         g_object_unref(vdist1);
         g_object_unref(vdist0);
         g_object_unref(mask);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_value_discr_range(void)
+{
+    enum { max_size = 134, niter = 200 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 5, max_size);
+        guint yres = g_rand_int_range(rng, 5, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+        field_randomize(field, rng);
+
+        gdouble min, max;
+        gwy_field_min_max_full(field, &min, &max);
+        GwyLine *vdist = gwy_field_value_dist(field,
+                                              NULL, NULL, GWY_MASK_IGNORE,
+                                              FALSE, FALSE, 0, min, max);
+        g_assert_cmpfloat(vdist->off, <=, min);
+        g_assert_cmpfloat(vdist->off + vdist->real, >=, max);
+        g_assert_cmpfloat(vdist->data[0], >, 0.0);
+        g_assert_cmpfloat(vdist->data[vdist->res-1], >, 0.0);
+        gdouble m = gwy_line_mean_full(vdist);
+        gdouble s = gwy_line_sum_full(vdist);
+        gdouble integral = gwy_line_dx(vdist)*s;
+        // This is 5σ error bar.  Quite large, but we do not want to ever get
+        // outside of it.
+        gdouble eps = 5.0*s*sqrt(m/(xres*yres*vdist->res)*(1.0 - m/vdist->res));
+        g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-12);
+        for (guint i = 0; i < vdist->res; i++) {
+            g_assert_cmpfloat(vdist->data[i], >=, 0.0);
+            g_assert_cmpfloat(fabs(vdist->data[i] - m), <=, eps);
+        }
+
+        guint ncut1 = vdist->res/3, ncut2 = 2*vdist->res/3;
+        gdouble cutoff1 = vdist->off + gwy_line_dx(vdist)*ncut1,
+                cutoff2 = vdist->off + gwy_line_dx(vdist)*ncut2;
+        // XXX: If a value coincides *exactly* (at least within rounding
+        // errors) with a cut-off it can end up in either part of the
+        // distribution.
+        GwyLine *pvdist0 = gwy_field_value_dist(field, NULL, NULL, 0,
+                                                FALSE, FALSE,
+                                                ncut1, min, cutoff1);
+        GwyLine *pvdist1 = gwy_field_value_dist(field, NULL, NULL, 0,
+                                                FALSE, FALSE,
+                                                ncut2-ncut1, cutoff1, cutoff2);
+        GwyLine *pvdist2 = gwy_field_value_dist(field, NULL, NULL, 0,
+                                                FALSE, FALSE,
+                                                vdist->res-ncut2, cutoff2, max);
+
+        gwy_assert_floatval(gwy_line_dx(pvdist0), gwy_line_dx(vdist), 1e-15);
+        gwy_assert_floatval(gwy_line_dx(pvdist1), gwy_line_dx(vdist), 1e-15);
+        gwy_assert_floatval(gwy_line_dx(pvdist2), gwy_line_dx(vdist), 1e-15);
+        g_assert_cmpfloat(pvdist0->off, ==, min);
+        gwy_assert_floatval(pvdist0->off + pvdist0->real, cutoff1, 1e-15);
+        g_assert_cmpfloat(pvdist1->off, ==, cutoff1);
+        gwy_assert_floatval(pvdist1->off + pvdist1->real, cutoff2, 1e-15);
+        g_assert_cmpfloat(pvdist2->off, ==, cutoff2);
+        gwy_assert_floatval(pvdist2->off + pvdist2->real, max, 1e-15);
+        gdouble ps0 = gwy_line_sum_full(pvdist0),
+                ps1 = gwy_line_sum_full(pvdist1),
+                ps2 = gwy_line_sum_full(pvdist2);
+        gdouble pintegral = (ps0 + ps1 + ps2)*gwy_line_dx(vdist);
+        gwy_assert_floatval(pintegral, 1.0, 1e-12);
+
+        g_object_unref(pvdist2);
+        g_object_unref(pvdist1);
+        g_object_unref(pvdist0);
+        g_object_unref(vdist);
         g_object_unref(field);
     }
 

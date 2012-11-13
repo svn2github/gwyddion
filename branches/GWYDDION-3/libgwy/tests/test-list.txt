@@ -378,6 +378,7 @@ field/correlate/scale-rms
 field/correlate/normalize
 field/correlate/crosscorrelate
 field/distributions/value/discr/full
+field/distributions/value/discr/range
 field/distributions/acf/full
 field/distributions/acf/masked
 field/distributions/acf/partial
