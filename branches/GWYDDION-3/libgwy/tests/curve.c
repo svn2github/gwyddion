@@ -78,8 +78,8 @@ curve_assert_similar(const GwyCurve *result,
     for (guint i = 0; i < result->n; i++) {
         GwyXY resxy = result->data[i];
         GwyXY refxy = reference->data[i];
-        g_assert_cmpfloat(fabs(resxy.x - refxy.x), <=, tolx);
-        g_assert_cmpfloat(fabs(resxy.y - refxy.y), <=, toly);
+        gwy_assert_floatval(resxy.x, refxy.x, tolx);
+        gwy_assert_floatval(resxy.y, refxy.y, toly);
     }
 }
 */

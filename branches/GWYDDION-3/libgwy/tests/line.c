@@ -75,7 +75,7 @@ line_assert_numerically_equal(const GwyLine *result,
     for (guint j = 0; j < result->res; j++) {
         gdouble value = result->data[j], ref = reference->data[j];
         //g_printerr("[%u] %g %g\n", j, value, ref);
-        g_assert_cmpfloat(fabs(value - ref), <=, eps);
+        gwy_assert_floatval(value, ref, eps);
     }
 }
 

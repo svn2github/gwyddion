@@ -109,7 +109,7 @@ brick_assert_numerically_equal(const GwyBrick *result,
             for (guint j = 0; j < xres; j++) {
                 gdouble value = result_row[j], ref = reference_row[j];
                 //g_printerr("[%u,%u,%u] %g %g\n", j, i, l, value, ref);
-                g_assert_cmpfloat(fabs(value - ref), <=, eps);
+                gwy_assert_floatval(value, ref, eps);
             }
         }
     }

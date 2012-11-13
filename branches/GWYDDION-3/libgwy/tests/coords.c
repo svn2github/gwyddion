@@ -435,12 +435,12 @@ coords_transform_one(GType type,
             for (guint j = 0; j < shape_size; j++) {
                 if (gwy_int_set_contains(indices, i)) {
                     g_assert_cmpfloat(xy[j], ==, xyall[j]);
-                    g_assert_cmpfloat(fabs(xy[j] - xytrans[j]), <=, 1e-15);
+                    gwy_assert_floatval(xy[j], xytrans[j], 1e-15);
                 }
                 else {
                     g_assert_cmpfloat(xy[j], ==, xyref[j]);
                 }
-                g_assert_cmpfloat(fabs(xyall[j] - xytrans[j]), <=, 1e-15);
+                gwy_assert_floatval(xyall[j], xytrans[j], 1e-15);
                 if (transform != GWY_COORDS_TRANSFORM_FLIP) {
                     g_assert_cmpfloat(xyall[j], !=, xyref[j]);
                 }
@@ -497,8 +497,8 @@ coords_transform_one(GType type,
             gwy_coords_get(reference, i, xyref);
             gwy_coords_get(alltrans, i, xyall);
             for (guint j = 0; j < shape_size; j++) {
-                g_assert_cmpfloat(fabs(xy[j] - xyref[j]), <=, 1e-15);
-                g_assert_cmpfloat(fabs(xyall[j] - xyref[j]), <=, 1e-15);
+                gwy_assert_floatval(xy[j], xyref[j], 1e-15);
+                gwy_assert_floatval(xyall[j], xyref[j], 1e-15);
             }
         }
 

@@ -447,7 +447,7 @@ test_surface_regularize_interpolation(void)
             for (guint j = 0; j < xres; j++) {
                 gdouble value = nfd[2*i*(2*xres - 1) + 2*j];
                 gdouble reference = fd[i*xres + j];
-                g_assert_cmpfloat(fabs(value - reference), <=, 2e-14);
+                gwy_assert_floatval(value, reference, 2e-14);
             }
         }
 
@@ -456,7 +456,7 @@ test_surface_regularize_interpolation(void)
             for (guint j = 0; j < xres-1; j++) {
                 gdouble value = nfd[2*i*(2*xres - 1) + 2*j + 1];
                 gdouble reference = 0.5*(fd[i*xres + j] + fd[i*xres + j+1]);
-                g_assert_cmpfloat(fabs(value - reference), <=, 2e-14);
+                gwy_assert_floatval(value, reference, 2e-14);
             }
         }
 
@@ -465,7 +465,7 @@ test_surface_regularize_interpolation(void)
             for (guint j = 0; j < xres; j++) {
                 gdouble value = nfd[(2*i + 1)*(2*xres - 1) + 2*j];
                 gdouble reference = 0.5*(fd[i*xres + j] + fd[(i+1)*xres + j]);
-                g_assert_cmpfloat(fabs(value - reference), <=, 2e-14);
+                gwy_assert_floatval(value, reference, 2e-14);
             }
         }
 
@@ -477,7 +477,7 @@ test_surface_regularize_interpolation(void)
                                           + fd[i*xres + j+1]
                                           + fd[(i+1)*xres + j]
                                           + fd[(i+1)*xres + j+1]);
-                g_assert_cmpfloat(fabs(value - reference), <=, 2e-14);
+                gwy_assert_floatval(value, reference, 2e-14);
             }
         }
 

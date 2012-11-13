@@ -48,14 +48,14 @@ check_rgba_interpolation(GwyRGBA c0,
     GwyRGBA result;
 
     gwy_rgba_interpolate(&c0, &c1, x, &result);
-    g_assert_cmpfloat(fabs(result.a - expected_result.a), <=, 1e-15);
+    gwy_assert_floatval(result.a, expected_result.a, 1e-15);
     // Compare premultiplied values.  This means if alpha == 0 anything goes.
-    g_assert_cmpfloat(fabs(result.a*result.r
-                           - expected_result.a*expected_result.r), <=, 1e-15);
-    g_assert_cmpfloat(fabs(result.a*result.g
-                           - expected_result.a*expected_result.g), <=, 1e-15);
-    g_assert_cmpfloat(fabs(result.a*result.b
-                           - expected_result.a*expected_result.b), <=, 1e-15);
+    gwy_assert_floatval(result.a*result.r, expected_result.a*expected_result.r,
+                        1e-15);
+    gwy_assert_floatval(result.a*result.g, expected_result.a*expected_result.g,
+                        1e-15);
+    gwy_assert_floatval(result.a*result.b, expected_result.a*expected_result.b,
+                        1e-15);
 }
 
 void

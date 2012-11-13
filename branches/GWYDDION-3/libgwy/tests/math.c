@@ -160,7 +160,7 @@ test_math_curvature_at_centre_centered(void)
     // rounding errors.  Accept both but check the interval.
     if (curv.phi2 > G_PI/4) {
         g_assert_cmpfloat(fabs(curv.phi1), <=, 1e-14);
-        g_assert_cmpfloat(fabs(curv.phi2 - G_PI/2), <=, 1e-14);
+        gwy_assert_floatval(curv.phi2, G_PI/2, 1e-14);
     }
     else {
         g_assert_cmpfloat(fabs(curv.phi1 + G_PI/2), <=, 1e-14);
@@ -179,9 +179,9 @@ test_math_curvature_at_centre_centered(void)
     g_assert_cmpuint(ndims, ==, 2);
     // Left-handed system means positive κ corresponds to negative φ.
     g_assert_cmpfloat(fabs(curv.k1 + 1.0), <=, 1e-14);
-    g_assert_cmpfloat(fabs(curv.k2 - 1.0), <=, 1e-14);
+    gwy_assert_floatval(curv.k2, 1.0, 1e-14);
     g_assert_cmpfloat(fabs(curv.phi1 + G_PI/4), <=, 1e-14);
-    g_assert_cmpfloat(fabs(curv.phi2 - G_PI/4), <=, 1e-14);
+    gwy_assert_floatval(curv.phi2, G_PI/4, 1e-14);
     g_assert_cmpfloat(curv.xc, ==, 0.0);
     g_assert_cmpfloat(curv.yc, ==, 0.0);
     g_assert_cmpfloat(curv.zc, ==, 0.0);
@@ -190,8 +190,8 @@ test_math_curvature_at_centre_centered(void)
     ndims = gwy_math_curvature_at_centre(coeffs5, &curv);
     g_assert_cmpuint(ndims, ==, 2);
     g_assert_cmpfloat(fabs(curv.k1 + 1.0), <=, 1e-14);
-    g_assert_cmpfloat(fabs(curv.k2 - 1.0), <=, 1e-14);
-    g_assert_cmpfloat(fabs(curv.phi1 - G_PI/4), <=, 1e-14);
+    gwy_assert_floatval(curv.k2, 1.0, 1e-14);
+    gwy_assert_floatval(curv.phi1, G_PI/4, 1e-14);
     g_assert_cmpfloat(fabs(curv.phi2 + G_PI/4), <=, 1e-14);
     g_assert_cmpfloat(curv.xc, ==, 0.0);
     g_assert_cmpfloat(curv.yc, ==, 0.0);
@@ -204,14 +204,14 @@ test_math_curvature_at_centre_centered(void)
         ndims = gwy_math_curvature_at_centre(coeffs, &curv);
         g_assert_cmpuint(ndims, ==, 2);
         g_assert_cmpfloat(fabs(curv.k1 + 1.0), <=, 1e-14);
-        g_assert_cmpfloat(fabs(curv.k2 - 1.0), <=, 1e-14);
+        gwy_assert_floatval(curv.k2, 1.0, 1e-14);
         g_assert_cmpfloat(curv.phi1, >=, -G_PI/2);
         g_assert_cmpfloat(curv.phi1, <=, G_PI/2);
         g_assert_cmpfloat(curv.phi2, >=, -G_PI/2);
         g_assert_cmpfloat(curv.phi2, <=, G_PI/2);
         g_assert_cmpfloat(fmin(fabs(curv.phi1 - alpha + G_PI/2.0),
                                fabs(curv.phi1 - alpha - G_PI/2.0)), <=, 1e-14);
-        g_assert_cmpfloat(fabs(curv.phi2 - alpha), <=, 1e-14);
+        gwy_assert_floatval(curv.phi2, alpha, 1e-14);
         g_assert_cmpfloat(curv.xc, ==, 0.0);
         g_assert_cmpfloat(curv.yc, ==, 0.0);
         g_assert_cmpfloat(curv.zc, ==, 0.0);
@@ -239,13 +239,13 @@ test_math_curvature_at_centre_centered(void)
             g_assert_cmpfloat(fmin(fabs(curv.phi2 - alpha + G_PI/2.0),
                                    fabs(curv.phi2 - alpha - G_PI/2.0)),
                               <=, 1e-14);
-            g_assert_cmpfloat(fabs(curv.phi1 - alpha), <=, 1e-14);
+            gwy_assert_floatval(curv.phi1, alpha, 1e-14);
         }
         else {
             g_assert_cmpfloat(fmin(fabs(curv.phi1 - alpha + G_PI/2.0),
                                    fabs(curv.phi1 - alpha - G_PI/2.0)),
                               <=, 1e-14);
-            g_assert_cmpfloat(fabs(curv.phi2 - alpha), <=, 1e-14);
+            gwy_assert_floatval(curv.phi2, alpha, 1e-14);
         }
         g_assert_cmpfloat(curv.xc, ==, 0.0);
         g_assert_cmpfloat(curv.yc, ==, 0.0);
@@ -272,7 +272,7 @@ test_math_curvature_at_centre_shifted(void)
     // rounding errors.  Accept both but check the interval.
     if (curv.phi2 > G_PI/4) {
         g_assert_cmpfloat(fabs(curv.phi1), <=, 1e-14);
-        g_assert_cmpfloat(fabs(curv.phi2 - G_PI/2), <=, 1e-14);
+        gwy_assert_floatval(curv.phi2, G_PI/2, 1e-14);
     }
     else {
         g_assert_cmpfloat(fabs(curv.phi1 + G_PI/2), <=, 1e-14);
@@ -282,7 +282,7 @@ test_math_curvature_at_centre_shifted(void)
     g_assert_cmpfloat(curv.phi1, <=, G_PI/2);
     g_assert_cmpfloat(curv.phi2, >=, -G_PI/2);
     g_assert_cmpfloat(curv.phi2, <=, G_PI/2);
-    g_assert_cmpfloat(fabs(curv.xc - 1.0), <=, 1e-14);
+    gwy_assert_floatval(curv.xc, 1.0, 1e-14);
     g_assert_cmpfloat(fabs(curv.yc + 1.0), <=, 1e-14);
     g_assert_cmpfloat(fabs(curv.zc), <=, 1e-14);
 
@@ -295,7 +295,7 @@ test_math_curvature_at_centre_shifted(void)
     // rounding errors.  Accept both but check the interval.
     if (curv.phi1 > G_PI/4) {
         g_assert_cmpfloat(fabs(curv.phi2), <=, 1e-14);
-        g_assert_cmpfloat(fabs(curv.phi1 - G_PI/2), <=, 1e-14);
+        gwy_assert_floatval(curv.phi1, G_PI/2, 1e-14);
     }
     else {
         g_assert_cmpfloat(fabs(curv.phi1), <=, 1e-14);
@@ -306,7 +306,7 @@ test_math_curvature_at_centre_shifted(void)
     g_assert_cmpfloat(curv.phi2, >=, -G_PI/2);
     g_assert_cmpfloat(curv.phi2, <=, G_PI/2);
     g_assert_cmpfloat(fabs(curv.xc + 1.0), <=, 1e-14);
-    g_assert_cmpfloat(fabs(curv.yc - 1.0), <=, 1e-14);
+    gwy_assert_floatval(curv.yc, 1.0, 1e-14);
     g_assert_cmpfloat(fabs(curv.zc), <=, 1e-14);
 
     g_rand_free(rng);
@@ -348,13 +348,13 @@ test_math_curvature_at_centre_general(void)
             g_assert_cmpfloat(fmin(fabs(curv.phi2 - alpha + G_PI/2.0),
                                    fabs(curv.phi2 - alpha - G_PI/2.0)),
                               <=, 1e-14);
-            g_assert_cmpfloat(fabs(curv.phi1 - alpha), <=, 1e-14);
+            gwy_assert_floatval(curv.phi1, alpha, 1e-14);
         }
         else {
             g_assert_cmpfloat(fmin(fabs(curv.phi1 - alpha + G_PI/2.0),
                                    fabs(curv.phi1 - alpha - G_PI/2.0)),
                               <=, 1e-14);
-            g_assert_cmpfloat(fabs(curv.phi2 - alpha), <=, 1e-14);
+            gwy_assert_floatval(curv.phi2, alpha, 1e-14);
         }
         g_assert_cmpfloat(fabs(curv.xc + p), <=, 1e-14);
         g_assert_cmpfloat(fabs(curv.yc + q), <=, 1e-14);
@@ -383,10 +383,10 @@ test_math_curvature_at_origin_unsloped(void)
         guint ndimso = gwy_math_curvature_at_origin(coeffs, &curvo);
 
         g_assert_cmpuint(ndimso, ==, ndimsc);
-        g_assert_cmpfloat(fabs(curvo.k1 - curvc.k1), <=, 1e-12);
-        g_assert_cmpfloat(fabs(curvo.k2 - curvc.k2), <=, 1e-12);
-        g_assert_cmpfloat(fabs(curvo.phi1 - curvc.phi1), <=, 1e-12);
-        g_assert_cmpfloat(fabs(curvo.phi2 - curvc.phi2), <=, 1e-12);
+        gwy_assert_floatval(curvo.k1, curvc.k1, 1e-12);
+        gwy_assert_floatval(curvo.k2, curvc.k2, 1e-12);
+        gwy_assert_floatval(curvo.phi1, curvc.phi1, 1e-12);
+        gwy_assert_floatval(curvo.phi2, curvc.phi2, 1e-12);
         g_assert_cmpfloat(curvo.xc, ==, 0.0);
         g_assert_cmpfloat(curvo.yc, ==, 0.0);
         g_assert_cmpfloat(curvo.zc, ==, coeffs[0]);
@@ -450,10 +450,10 @@ test_math_curvature_at_origin_sloped(void)
         gdouble b2 = coeffs[1]*coeffs[1] + coeffs[2]*coeffs[2],
                 eps = MAX(100*b2, 1e-14);
         g_assert_cmpuint(ndimso, ==, ndimsc);
-        g_assert_cmpfloat(fabs(curvo.k1 - curvc.k1), <=, eps);
-        g_assert_cmpfloat(fabs(curvo.k2 - curvc.k2), <=, eps);
-        g_assert_cmpfloat(fabs(curvo.phi1 - curvc.phi1), <=, eps);
-        g_assert_cmpfloat(fabs(curvo.phi2 - curvc.phi2), <=, eps);
+        gwy_assert_floatval(curvo.k1, curvc.k1, eps);
+        gwy_assert_floatval(curvo.k2, curvc.k2, eps);
+        gwy_assert_floatval(curvo.phi1, curvc.phi1, eps);
+        gwy_assert_floatval(curvo.phi2, curvc.phi2, eps);
         g_assert_cmpfloat(curvo.xc, ==, 0.0);
         g_assert_cmpfloat(curvo.yc, ==, 0.0);
         g_assert_cmpfloat(curvo.zc, ==, coeffs[0]);
@@ -541,7 +541,7 @@ test_math_linalg(void)
             /* Multiplication with inverted must give unity */
             linalg_matmul(unity, matrix, decomp, n);
             for (guint j = 0; j < n; j++) {
-                g_assert_cmpfloat(fabs(unity[j*n + j] - 1.0), <=, eps);
+                gwy_assert_floatval(unity[j*n + j], 1.0, eps);
                 for (guint i = 0; i < n; i++) {
                     if (i == j)
                         continue;
