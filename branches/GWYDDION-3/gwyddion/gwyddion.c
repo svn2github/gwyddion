@@ -1,6 +1,7 @@
+#include <stdlib.h>
+#include <gtk/gtk.h>
 #include "libgwy/libgwy.h"
 #include "libgwyui/libgwyui.h"
-#include <gtk/gtk.h>
 
 typedef struct {
     GwyField *field1;
@@ -54,6 +55,7 @@ create_mix(gdouble xres, gdouble yres)
     return mix;
 }
 
+G_GNUC_UNUSED
 static gboolean
 update(gpointer user_data)
 {
@@ -65,10 +67,35 @@ update(gpointer user_data)
     return TRUE;
 }
 
+G_GNUC_NORETURN
+static gboolean
+print_version(G_GNUC_UNUSED const gchar *name,
+              G_GNUC_UNUSED const gchar *value,
+              G_GNUC_UNUSED gpointer data,
+              G_GNUC_UNUSED GError **error)
+{
+    g_print("Gwyddion %s (running with libgwy %s).\n",
+            GWY_VERSION_STRING, gwy_version_string());
+    exit(EXIT_SUCCESS);
+}
+
 int
 main(int argc, char *argv[])
 {
-    gtk_init(&argc, &argv);
+    static GOptionEntry entries[] = {
+        { "version", 0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, &print_version, "Print version", NULL },
+        { NULL, 0, 0, 0, NULL, NULL, NULL }
+    };
+    GOptionContext *context = g_option_context_new("");
+    g_option_context_add_main_entries(context, entries, GETTEXT_PACKAGE);
+    g_option_context_add_group(context, gtk_get_option_group(TRUE));
+    GError *error = NULL;
+    if (!g_option_context_parse(context, &argc, &argv, &error)) {
+        g_printerr("%s\n", error->message);
+        g_clear_error(&error);
+        exit(EXIT_FAILURE);
+    }
+
     gwy_resource_type_load(GWY_TYPE_GRADIENT, NULL);
     gwy_register_stock_items();
 
@@ -97,8 +124,8 @@ main(int argc, char *argv[])
                  NULL);
 
     Mix *mix = create_mix(400, 300);
-    GwyMaskField *mask = gwy_mask_field_new_from_field(mix->result, NULL,
-                                                       0.52, G_MAXDOUBLE, FALSE);
+    //GwyMaskField *mask = gwy_mask_field_new_from_field(mix->result, NULL,
+    //                                                   0.52, G_MAXDOUBLE, FALSE);
     gwy_raster_area_set_field(rasterarea, mix->result);
     //gwy_raster_area_set_mask(rasterarea, mask);
 
