@@ -231,7 +231,7 @@ value_dist_discr_process(const GwyField *field,
                     if (*d < min)
                         ddata->left_sum++;
                     else if (*d <= max) {
-                        guint k = (guint)((*d - min)/q);
+                        guint k = (guint)((*d - min)*q);
                         // Fix rounding errors.
                         if (G_UNLIKELY(k >= npoints))
                             line->data[npoints-1] += 1;
