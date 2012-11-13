@@ -3202,6 +3202,61 @@ test_field_arithmetic_apply_func(void)
     g_rand_free(rng);
 }
 
+void
+test_field_distributions_value_discr_full(void)
+{
+    enum { max_size = 134, niter = 200 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 5, max_size);
+        guint yres = g_rand_int_range(rng, 5, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+        field_randomize(field, rng);
+
+        gdouble min, max;
+        gwy_field_min_max_full(field, &min, &max);
+        GwyLine *vdist = gwy_field_value_dist(field,
+                                              NULL, NULL, GWY_MASK_IGNORE,
+                                              FALSE, FALSE, 0, 0.0, 0.0);
+        g_assert_cmpfloat(vdist->off, <=, min);
+        g_assert_cmpfloat(vdist->off + vdist->real, >=, max);
+        g_assert_cmpfloat(vdist->data[0], >, 0.0);
+        g_assert_cmpfloat(vdist->data[vdist->res-1], >, 0.0);
+        gdouble m = gwy_line_mean_full(vdist);
+        gdouble s = gwy_line_sum_full(vdist);
+        gdouble integral = gwy_line_dx(vdist)*s;
+        // This is 5σ error bar.  Quite large, but we do not want to ever get
+        // outside of it.
+        gdouble eps = 5.0*s*sqrt(m/(xres*yres*vdist->res)*(1.0 - m/vdist->res));
+        g_assert_cmpfloat(fabs(integral - 1.0), <=, 1e-12);
+        for (guint i = 0; i < vdist->res; i++) {
+            g_assert_cmpfloat(vdist->data[i], >=, 0.0);
+            g_assert_cmpfloat(fabs(vdist->data[i] - m), <=, eps);
+        }
+
+        GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
+        GwyLine *vdist0 = gwy_field_value_dist(field,
+                                               NULL, mask, GWY_MASK_EXCLUDE,
+                                               FALSE, FALSE, 0, 0.0, 0.0);
+        gwy_mask_field_fill(mask, NULL, TRUE);
+        GwyLine *vdist1 = gwy_field_value_dist(field,
+                                               NULL, mask, GWY_MASK_INCLUDE,
+                                               FALSE, FALSE, 0, 0.0, 0.0);
+        line_assert_equal(vdist0, vdist);
+        line_assert_equal(vdist1, vdist);
+
+        g_object_unref(vdist);
+        g_object_unref(vdist1);
+        g_object_unref(vdist0);
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
 static void
 level_for_cf(GwyField *field,
              const GwyMaskField *mask,
