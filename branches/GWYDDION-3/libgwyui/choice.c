@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdarg.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/rgba.h"
@@ -299,7 +300,7 @@ gwy_choice_get_sensitive(const GwyChoice *choice)
  * to all sorts of trouble.
  **/
 void
-gwy_choice_add_actions(GwyChoice *choice,
+gwy_choice_add_options(GwyChoice *choice,
                        const GwyChoiceOption *options,
                        guint n)
 {
@@ -327,6 +328,58 @@ gwy_choice_size(const GwyChoice *choice)
 }
 
 /**
+ * gwy_choice_create_menu_items:
+ * @choice: A choice.
+ *
+ * Creates radio menu item realisation of a choice.
+ *
+ * Usually, using gwy_choice_append_to_menu_shell() is more convenient.  Use
+ * this function if you need to pack the menu items in an uncommon manner.
+ *
+ * Returns: (array zero-terminated=1) (element-type GtkWidget*) (transfer full):
+ *          A %NULL terminated array of newly created #GtkRadioMenuItem
+ *          widgets.
+ **/
+GtkWidget**
+gwy_choice_create_menu_items(GwyChoice *choice)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), NULL);
+    Choice *priv = choice->priv;
+    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
+    guint n = priv->options->len;
+    GtkWidget **retval = g_new(GtkWidget*, n+1);
+    GSList *group = NULL;
+
+    for (guint i = 0; i < n; i++) {
+        GwyChoiceOption *option = options + i;
+        GtkStockItem stock_item;
+        gwy_clear1(stock_item);
+        if (option->stock_id)
+            gtk_stock_lookup(option->stock_id, &stock_item);
+
+        const gchar *label = NULL;
+        if (option->label && *option->label)
+            label = gwy_choice_translate_string(choice, option->label);
+        else if (stock_item.label && *stock_item.label)
+            label = dgettext_swapped(stock_item.label,
+                                     stock_item.translation_domain);
+
+        GtkWidget *widget;
+        if (label)
+           widget = gtk_radio_menu_item_new_with_mnemonic(group, label);
+        else
+           widget = gtk_radio_menu_item_new(group);
+
+        register_toggle_proxy(choice, G_OBJECT(widget), option->value);
+        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(widget));
+        retval[i] = widget;
+    }
+
+    retval[n] = NULL;
+    return retval;
+}
+
+/**
  * gwy_choice_append_to_menu_shell:
  * @choice: A choice.
  * @shell: A menu shell.
@@ -342,10 +395,44 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
 {
     g_return_val_if_fail(GWY_IS_CHOICE(choice), 0);
     g_return_val_if_fail(GTK_IS_MENU_SHELL(shell), 0);
-    GtkMenuShell *menushell = GTK_MENU_SHELL(shell);
+    GtkWidget **menuitems = gwy_choice_create_menu_items(choice);
+    guint n = 0;
+
+    while (menuitems[n]) {
+        gtk_menu_shell_append(shell, menuitems[n]);
+        n++;
+    }
+    g_free(menuitems);
+
+    return n;
+}
+
+/**
+ * gwy_choice_create_buttons:
+ * @choice: A choice.
+ * @icon_size: Icon size to use if buttons have stock images.
+ * @first_property_name: Name of the first property to set on all created
+ *                       widgets.
+ * @...: %NULL-terminated list of name-value pairs representing the properties
+ *       to set, as in g_object_set().
+ *
+ * Creates radio button realisation of a choice.
+ *
+ * Returns: (array zero-terminated=1) (element-type GtkWidget*) (transfer full):
+ *          A %NULL terminated array of newly created #GtkRadioButton
+ *          widgets.
+ **/
+GtkWidget**
+gwy_choice_create_buttons(GwyChoice *choice,
+                          GtkIconSize icon_size,
+                          const gchar *first_property_name,
+                          ...)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), NULL);
     Choice *priv = choice->priv;
     GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
     guint n = priv->options->len;
+    GtkWidget **retval = g_new(GtkWidget*, n+1);
     GSList *group = NULL;
 
     for (guint i = 0; i < n; i++) {
@@ -355,25 +442,76 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
         if (option->stock_id)
             gtk_stock_lookup(option->stock_id, &stock_item);
 
-        const gchar *label = option->label;
+        const gchar *label = NULL;
         if (option->label && *option->label)
             label = gwy_choice_translate_string(choice, option->label);
         else if (stock_item.label && *stock_item.label)
             label = dgettext_swapped(stock_item.label,
                                      stock_item.translation_domain);
 
-        GtkWidget *widget;
-        if (label)
-           widget = gtk_radio_menu_item_new_with_mnemonic(group, label);
-        else
-           widget = gtk_radio_menu_item_new(group);
+        GtkWidget *image = NULL;
+        if (stock_item.stock_id)
+            image = gtk_image_new_from_stock(stock_item.stock_id, icon_size);
 
+        GtkWidget *widget;
+        if (label) {
+            widget = gtk_radio_button_new_with_mnemonic(group, label);
+            if (image)
+                gtk_button_set_image(GTK_BUTTON(widget), image);
+        }
+        else {
+           widget = gtk_radio_button_new(group);
+           if (image)
+               gtk_container_add(GTK_CONTAINER(widget), image);
+        }
+
+        // XXX: ISO C forbids recycling of @ap so we must always start again.
+        if (first_property_name) {
+            va_list ap;
+            va_start(ap, first_property_name);
+            g_object_set_valist(G_OBJECT(widget), first_property_name, ap);
+            va_end(ap);
+        }
 
         register_toggle_proxy(choice, G_OBJECT(widget), option->value);
-
-        gtk_menu_shell_append(menushell, widget);
         group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(widget));
+        retval[i] = widget;
     }
+
+    retval[n] = NULL;
+    return retval;
+}
+
+/**
+ * gwy_choice_attach_to_grid:
+ * @choice: A choice.
+ * @grid: A grid to attach the created buttons to.
+ * @left: Column at which the left edge of all buttons will be attached.
+ * @top: Row at which the first button top edge will be attached.
+ * @width: Column span (width) of all buttons.
+ *
+ * Creates a group of radio buttons representing a choice and attaches them to
+ * a grid.
+ *
+ * Returns: The number of items attached.
+ **/
+guint
+gwy_choice_append_to_grid(GwyChoice *choice,
+                          GtkGrid *grid,
+                          gint top,
+                          gint left,
+                          guint width)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), 0);
+    g_return_val_if_fail(GTK_IS_GRID(grid), 0);
+    GtkWidget **buttons = gwy_choice_create_buttons(choice, 0, NULL);
+    guint n = 0;
+
+    while (buttons[n]) {
+        gtk_grid_attach(grid, buttons[n], left, top+n, width, 1);
+        n++;
+    }
+    g_free(buttons);
 
     return n;
 }
@@ -387,7 +525,7 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
  *          translation function is changed.
  *
  * Sets the function to be used for translating labels and tootips of
- * options added by gwy_choice_add_actions().
+ * options added by gwy_choice_add_options().
  *
  * If you use gettext() it is sufficient to set the translation domain
  * with gwy_choice_set_translation_domain().  Setting the translation function

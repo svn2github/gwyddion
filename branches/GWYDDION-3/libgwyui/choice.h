@@ -57,20 +57,30 @@ struct _GwyChoiceClass {
     GInitiallyUnownedClass unowned_class;
 };
 
-GType        gwy_choice_get_type              (void)                               G_GNUC_CONST;
-GwyChoice*   gwy_choice_new                   (void)                               G_GNUC_MALLOC;
+GType        gwy_choice_get_type              (void)                             G_GNUC_CONST;
+GwyChoice*   gwy_choice_new                   (void)                             G_GNUC_MALLOC;
 void         gwy_choice_set_active            (GwyChoice *choice,
                                                int active);
-gint         gwy_choice_get_active            (const GwyChoice *choice)            G_GNUC_PURE;
+gint         gwy_choice_get_active            (const GwyChoice *choice)          G_GNUC_PURE;
 void         gwy_choice_set_sensitive         (GwyChoice *choice,
                                                gboolean sensitive);
-gboolean     gwy_choice_get_sensitive         (const GwyChoice *choice)            G_GNUC_PURE;
+gboolean     gwy_choice_get_sensitive         (const GwyChoice *choice)          G_GNUC_PURE;
 void         gwy_choice_add_options           (GwyChoice *choice,
                                                const GwyChoiceOption *options,
                                                guint n);
-guint        gwy_choice_size                  (const GwyChoice *choice)            G_GNUC_PURE;
+guint        gwy_choice_size                  (const GwyChoice *choice)          G_GNUC_PURE;
+GtkWidget**  gwy_choice_create_menu_items     (GwyChoice *choice)                G_GNUC_MALLOC;
 guint        gwy_choice_append_to_menu_shell  (GwyChoice *choice,
                                                GtkMenuShell *shell);
+GtkWidget**  gwy_choice_create_buttons        (GwyChoice *choice,
+                                               GtkIconSize icon_size,
+                                               const gchar *first_property_name,
+                                               ...)                              G_GNUC_MALLOC;
+guint        gwy_choice_attach_to_grid        (GwyChoice *choice,
+                                               GtkGrid *grid,
+                                               gint left,
+                                               gint top,
+                                               gint width);
 void         gwy_choice_set_translate_func    (GwyChoice *choice,
                                                GtkTranslateFunc func,
                                                gpointer data,
@@ -78,7 +88,7 @@ void         gwy_choice_set_translate_func    (GwyChoice *choice,
 void         gwy_choice_set_translation_domain(GwyChoice *choice,
                                                const gchar *domain);
 const gchar* gwy_choice_translate_string      (const GwyChoice *choice,
-                                               const gchar *string)                G_GNUC_PURE;
+                                               const gchar *string)              G_GNUC_PURE;
 
 G_END_DECLS
 
