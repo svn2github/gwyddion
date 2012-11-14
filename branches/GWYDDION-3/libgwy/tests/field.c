@@ -1710,7 +1710,7 @@ planar_field_volume(const GwyField *field)
                    + gwy_field_index(field, xres-1, yres-2)
                    + gwy_field_index(field, xres-2, yres-1)
                    + gwy_field_index(field, xres-1, yres-1))/4.0;
-    g_assert(fabs(zmm - (z00 + (zm0 - z00) + (z0m - z00))) < 1e-9);
+    gwy_assert_floatval(zmm, z00 + (zm0 - z00) + (z0m - z00), 1e-9);
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     return (xres - 2)*(yres - 2)*dx*dy*(z00 + zm0 + z0m + zmm)/4.0;
 }
@@ -1734,13 +1734,13 @@ field_volume_planar_one(GwyFieldVolumeMethod method)
         gwy_field_set_yreal(field, yres/sqrt(xres*yres));
         volume = gwy_field_volume(field, &fpart, NULL, GWY_MASK_IGNORE, method);
         volume_expected = planar_field_volume(field);
-        gwy_assert_floatval(volume, volume_expected, 1e-9*volume_expected);
+        gwy_assert_floatval(volume, volume_expected, 1e-9*fabs(volume_expected));
 
         gwy_field_set_xreal(field, 1.0);
         gwy_field_set_yreal(field, 1.0);
         volume = gwy_field_volume(field, &fpart, NULL, GWY_MASK_IGNORE, method);
         volume_expected = planar_field_volume(field);
-        gwy_assert_floatval(volume, volume_expected, 1e-9*volume_expected);
+        gwy_assert_floatval(volume, volume_expected, 1e-9*fabs(volume_expected));
 
         g_object_unref(field);
     }
@@ -1801,8 +1801,8 @@ field_volume_masked_one(GwyFieldVolumeMethod method)
                                           mask, GWY_MASK_EXCLUDE, method);
         volume_ignore = gwy_field_volume(field, &fpart,
                                          mask, GWY_MASK_IGNORE, method);
-        g_assert_cmpfloat(fabs(volume_include + volume_exclude
-                               - volume_ignore)/volume_ignore, <=, 1e-9);
+        gwy_assert_floatval(volume_include + volume_exclude, volume_ignore,
+                            1e-9*volume_ignore);
 
         gwy_field_set_xreal(field, 1.0);
         gwy_field_set_yreal(field, 1.0);
@@ -1861,7 +1861,7 @@ test_field_mean(void)
         gdouble mean, mean_expected;
         mean = gwy_field_mean_full(field);
         mean_expected = 0.5*(alpha + beta);
-        g_assert_cmpfloat(fabs(mean - mean_expected)/mean_expected, <=, 1e-9);
+        gwy_assert_floatval(mean, mean_expected, 1e-9*fabs(mean_expected));
 
         field_randomize(field, rng);
         guint width = g_rand_int_range(rng, 1, xres+1);
@@ -1882,18 +1882,18 @@ test_field_mean(void)
 
         if (isnan(mean_include)) {
             g_assert_cmpuint(m, ==, 0);
-            g_assert_cmpfloat(fabs(mean_exclude
-                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+            gwy_assert_floatval(mean_exclude, mean_ignore,
+                                1e-9*fabs(mean_ignore));
         }
         else if (isnan(mean_exclude)) {
             g_assert_cmpuint(n, ==, 0);
-            g_assert_cmpfloat(fabs(mean_include
-                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+            gwy_assert_floatval(mean_include, mean_ignore,
+                                1e-9*fabs(mean_ignore));
         }
         else {
             // μ = (Mμ₁ + Nμ₂)/(M+N)
-            g_assert_cmpfloat(fabs((m*mean_include + n*mean_exclude)/(m+n)
-                                   - mean_ignore)/mean_ignore, <=, 1e-9);
+            gwy_assert_floatval((m*mean_include + n*mean_exclude)/(m+n),
+                                mean_ignore, 1e-9*fabs(mean_ignore));
         }
 
         g_object_unref(mask);
@@ -1920,7 +1920,7 @@ test_field_rms(void)
         rms = gwy_field_rms_full(field);
         rms_expected = 0.5*sqrt((alpha*alpha*(1.0 - 1.0/yres/yres)
                                  + beta*beta*(1.0 - 1.0/xres/xres))/3.0);
-        g_assert_cmpfloat(fabs(rms - rms_expected)/rms_expected, <=, 1e-9);
+        gwy_assert_floatval(rms, rms_expected, 1e-9*rms_expected);
 
         field_randomize(field, rng);
         guint width = g_rand_int_range(rng, 1, xres+1);
@@ -1945,21 +1945,19 @@ test_field_rms(void)
 
         if (isnan(mean_include)) {
             g_assert_cmpuint(m, ==, 0);
-            g_assert_cmpfloat(fabs(rms_exclude
-                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+            gwy_assert_floatval(rms_exclude, rms_ignore, 1e-9*rms_ignore);
         }
         else if (isnan(mean_exclude)) {
             g_assert_cmpuint(n, ==, 0);
-            g_assert_cmpfloat(fabs(rms_include
-                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+            gwy_assert_floatval(rms_include, rms_ignore, 1e-9*rms_ignore);
         }
         else {
             // σ² = [Mσ₁² + Nσ₂² + MN/(M+N)*(μ₁-μ₂)²]/(M+N)
             gdouble mean_diff = mean_include - mean_exclude;
-            g_assert_cmpfloat(fabs(sqrt((m*rms_include*rms_include
-                                         + n*rms_exclude*rms_exclude
-                                         + m*n*mean_diff*mean_diff/(m+n))/(m+n))
-                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+            gwy_assert_floatval(sqrt((m*rms_include*rms_include
+                                      + n*rms_exclude*rms_exclude
+                                      + m*n*mean_diff*mean_diff/(m+n))/(m+n)),
+                                rms_ignore, 1e-9*rms_ignore);
         }
 
         g_object_unref(mask);
@@ -1989,8 +1987,8 @@ test_field_statistics(void)
         mean_expected = 0.5*(alpha + beta);
         rms_expected = 0.5*sqrt((alpha*alpha*(1.0 - 1.0/yres/yres)
                                  + beta*beta*(1.0 - 1.0/xres/xres))/3.0);
-        g_assert_cmpfloat(fabs(mean - mean_expected)/mean_expected, <=, 1e-9);
-        g_assert_cmpfloat(fabs(rms - rms_expected)/rms_expected, <=, 1e-9);
+        gwy_assert_floatval(mean, mean_expected, 1e-9*fabs(mean_expected));
+        gwy_assert_floatval(rms, rms_expected, 1e-9*rms_expected);
 
         field_randomize(field, rng);
         guint width = g_rand_int_range(rng, 1, xres+1);
@@ -2017,28 +2015,26 @@ test_field_statistics(void)
 
         if (isnan(mean_include)) {
             g_assert_cmpuint(m, ==, 0);
-            g_assert_cmpfloat(fabs(rms_exclude
-                                   - rms_ignore)/rms_ignore, <=, 1e-9);
-            g_assert_cmpfloat(fabs(mean_exclude
-                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+            gwy_assert_floatval(mean_exclude, mean_ignore,
+                                1e-9*fabs(mean_ignore));
+            gwy_assert_floatval(rms_exclude, rms_ignore, 1e-9*rms_ignore);
         }
         else if (isnan(mean_exclude)) {
             g_assert_cmpuint(n, ==, 0);
-            g_assert_cmpfloat(fabs(rms_include
-                                   - rms_ignore)/rms_ignore, <=, 1e-9);
-            g_assert_cmpfloat(fabs(mean_include
-                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+            gwy_assert_floatval(mean_include, mean_ignore,
+                                1e-9*fabs(mean_ignore));
+            gwy_assert_floatval(rms_include, rms_ignore, 1e-9*rms_ignore);
         }
         else {
             // μ = (Mμ₁ + Nμ₂)/(M+N)
-            g_assert_cmpfloat(fabs((m*mean_include + n*mean_exclude)/(m+n)
-                                   - mean_ignore)/mean_ignore, <=, 1e-9);
+            gwy_assert_floatval((m*mean_include + n*mean_exclude)/(m+n),
+                                mean_ignore, 1e-9*fabs(mean_ignore));
             // σ² = [Mσ₁² + Nσ₂² + MN/(M+N)*(μ₁-μ₂)²]/(M+N)
             gdouble mean_diff = mean_include - mean_exclude;
-            g_assert_cmpfloat(fabs(sqrt((m*rms_include*rms_include
-                                         + n*rms_exclude*rms_exclude
-                                         + m*n*mean_diff*mean_diff/(m+n))/(m+n))
-                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+            gwy_assert_floatval(sqrt((m*rms_include*rms_include
+                                      + n*rms_exclude*rms_exclude
+                                      + m*n*mean_diff*mean_diff/(m+n))/(m+n)),
+                                rms_ignore, 1e-9*rms_ignore);
         }
 
         g_object_unref(mask);
@@ -2141,17 +2137,17 @@ test_field_level_plane(void)
         g_assert(gwy_field_fit_plane(field, NULL, mask, GWY_MASK_INCLUDE,
                                      &m1a, &m1bx, &m1by));
 
-        g_assert_cmpfloat(fabs((fa - a_expected)/a_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((fbx - bx_expected)/bx_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((fby - by_expected)/by_expected), <=, 1e-13);
+        gwy_assert_floatval(fa, a_expected, 1e-13*fabs(a_expected));
+        gwy_assert_floatval(fbx, bx_expected, 1e-13*fabs(bx_expected));
+        gwy_assert_floatval(fby, by_expected, 1e-13*fabs(by_expected));
 
-        g_assert_cmpfloat(fabs((m0a - a_expected)/a_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m0bx - bx_expected)/bx_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m0by - by_expected)/by_expected), <=, 1e-13);
+        gwy_assert_floatval(m0a, a_expected, 1e-13*fabs(a_expected));
+        gwy_assert_floatval(m0bx, bx_expected, 1e-13*fabs(bx_expected));
+        gwy_assert_floatval(m0by, by_expected, 1e-13*fabs(by_expected));
 
-        g_assert_cmpfloat(fabs((m1a - a_expected)/a_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m1bx - bx_expected)/bx_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m1by - by_expected)/by_expected), <=, 1e-13);
+        gwy_assert_floatval(m1a, a_expected, 1e-13*fabs(a_expected));
+        gwy_assert_floatval(m1bx, bx_expected, 1e-13*fabs(bx_expected));
+        gwy_assert_floatval(m1by, by_expected, 1e-13*fabs(by_expected));
 
         gwy_field_subtract_plane(field, a_expected, bx_expected, by_expected);
         g_assert(gwy_field_fit_plane(field, NULL, NULL, GWY_MASK_IGNORE,
@@ -2197,17 +2193,17 @@ test_field_level_poly(void)
         g_assert(gwy_field_fit_poly(field, NULL, mask, GWY_MASK_INCLUDE,
                                     x_powers, y_powers, 3, m1));
 
-        g_assert_cmpfloat(fabs((fc[0] - a_expected)/a_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((fc[1] - bx_expected)/bx_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((fc[2] - by_expected)/by_expected), <=, 1e-13);
+        gwy_assert_floatval(fc[0], a_expected, 1e-13*fabs(a_expected));
+        gwy_assert_floatval(fc[1], bx_expected, 1e-13*fabs(bx_expected));
+        gwy_assert_floatval(fc[2], by_expected, 1e-13*fabs(by_expected));
 
-        g_assert_cmpfloat(fabs((m0[0] - a_expected)/a_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m0[1] - bx_expected)/bx_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m0[2] - by_expected)/by_expected), <=, 1e-13);
+        gwy_assert_floatval(m0[0], a_expected, 1e-13*fabs(a_expected));
+        gwy_assert_floatval(m0[1], bx_expected, 1e-13*fabs(bx_expected));
+        gwy_assert_floatval(m0[2], by_expected, 1e-13*fabs(by_expected));
 
-        g_assert_cmpfloat(fabs((m1[0] - a_expected)/a_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m1[1] - bx_expected)/bx_expected), <=, 1e-13);
-        g_assert_cmpfloat(fabs((m1[2] - by_expected)/by_expected), <=, 1e-13);
+        gwy_assert_floatval(m1[0], a_expected, 1e-13*fabs(a_expected));
+        gwy_assert_floatval(m1[1], bx_expected, 1e-13*fabs(bx_expected));
+        gwy_assert_floatval(m1[2], by_expected, 1e-13*fabs(by_expected));
 
         gdouble c[3] = { a_expected, bx_expected, by_expected };
         gwy_field_subtract_poly(field, x_powers, y_powers, 3, c);
@@ -2271,12 +2267,12 @@ test_field_level_inclination(void)
                                        20, &m1bx, &m1by));
         // The required precision is quite low as the method is supposed to
         // recover the plane only approximately.
-        g_assert_cmpfloat(fabs((fbx - bx_expected)/bx_expected), <=, 0.02);
-        g_assert_cmpfloat(fabs((fby - by_expected)/by_expected), <=, 0.02);
-        g_assert_cmpfloat(fabs((m0bx - bx_expected)/bx_expected), <=, 0.02);
-        g_assert_cmpfloat(fabs((m0by - by_expected)/by_expected), <=, 0.02);
-        g_assert_cmpfloat(fabs((m1bx - bx_expected)/bx_expected), <=, 0.02);
-        g_assert_cmpfloat(fabs((m1by - by_expected)/by_expected), <=, 0.02);
+        gwy_assert_floatval(fbx, bx_expected, 0.02*fabs(bx_expected));
+        gwy_assert_floatval(fby, by_expected, 0.02*fabs(by_expected));
+        gwy_assert_floatval(m0bx, bx_expected, 0.02*fabs(bx_expected));
+        gwy_assert_floatval(m0by, by_expected, 0.02*fabs(by_expected));
+        gwy_assert_floatval(m1bx, bx_expected, 0.02*fabs(bx_expected));
+        gwy_assert_floatval(m1by, by_expected, 0.02*fabs(by_expected));
 
         gwy_field_subtract_plane(field, a_expected, fbx, fby);
         g_assert(gwy_field_inclination(field, NULL, NULL, GWY_MASK_IGNORE,
@@ -3090,19 +3086,17 @@ test_field_arithmetic_normalize(void)
                             wantmean, wantrms,
                             GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
         gwy_field_invalidate(field);
-        g_assert_cmpfloat(fabs(gwy_field_mean(field, NULL, mask, masking)
-                               - wantmean), <=, 1e-13);
-        g_assert_cmpfloat(fabs(gwy_field_rms(field, NULL, mask, masking)
-                               - wantrms), <=, 1e-12);
+        gwy_assert_floatval(gwy_field_mean(field, NULL, mask, masking),
+                            wantmean, 1e-13);
+        gwy_assert_floatval(gwy_field_rms(field, NULL, mask, masking),
+                            wantrms, 1e-12);
 
         gwy_field_normalize(field, NULL, NULL, GWY_MASK_IGNORE,
                             wantmean, wantrms,
                             GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
         gwy_field_invalidate(field);
-        g_assert_cmpfloat(fabs(gwy_field_mean_full(field) - wantmean),
-                          <=, 1e-13);
-        g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - wantrms),
-                          <=, 1e-12);
+        gwy_assert_floatval(gwy_field_mean_full(field), wantmean, 1e-13);
+        gwy_assert_floatval(gwy_field_rms_full(field), wantrms, 1e-12);
 
         g_object_unref(mask);
         g_object_unref(field);
@@ -4243,7 +4237,7 @@ test_field_distributions_minkowski_connectivity(void)
             guint ngw = gwy_mask_field_n_grains(wgrains);
             guint ngb = gwy_mask_field_n_grains(bgrains);
             gdouble fraction = (gdouble)ngw/n - (gdouble)ngb/n;
-            g_assert_cmpfloat(fabs(conndist->data[i] - fraction), <=, 1e-14);
+            gwy_assert_floatval(conndist->data[i], fraction, 1e-14);
             g_object_unref(wgrains);
             g_object_unref(bgrains);
         }
@@ -4551,7 +4545,7 @@ field_convolve_row_exterior_one(GwyExteriorType exterior)
                         gdouble refval = exterior_value_dumb(srow, res, 1,
                                                              (gint)j + shift,
                                                              exterior, G_E);
-                        g_assert_cmpfloat(fabs(drow[j] - refval), <, 1e-14);
+                        gwy_assert_floatval(drow[j], refval, 1e-14);
                     }
                 }
             }
@@ -5049,7 +5043,7 @@ field_convolve_field_one(GwyExteriorType exterior)
                                                             (gint)j + xshift,
                                                             (gint)i + yshift,
                                                             exterior, G_E);
-                    g_assert_cmpfloat(fabs(drow[j] - refval), <, 1e-14);
+                    gwy_assert_floatval(drow[j], refval, 1e-14);
                 }
             }
         }
@@ -5355,8 +5349,8 @@ test_field_distributions_psdf_full(void)
     // check if we find reasonable surface roughness parameters.
     gdouble sigma_fit, T_fit;
     fit_gaussian_psdf(psdf, &sigma_fit, &T_fit);
-    g_assert_cmpfloat(fabs(sigma_fit - sigma)/sigma, <=, 0.1);
-    g_assert_cmpfloat(fabs(T_fit - T)/T, <=, 0.1);
+    gwy_assert_floatval(sigma_fit, sigma, 0.1*sigma);
+    gwy_assert_floatval(T_fit, T, 0.1*T);
 
     g_object_unref(psdf);
     g_object_unref(field);
@@ -5392,8 +5386,8 @@ test_field_distributions_psdf_masked(void)
     // check if we find reasonable surface roughness parameters.
     gdouble sigma_fit, T_fit;
     fit_gaussian_psdf(psdf, &sigma_fit, &T_fit);
-    g_assert_cmpfloat(fabs(sigma_fit - sigma)/sigma, <=, 0.1);
-    g_assert_cmpfloat(fabs(T_fit - T)/T, <=, 0.1);
+    gwy_assert_floatval(sigma_fit, sigma, 0.1*sigma);
+    gwy_assert_floatval(T_fit, T, 0.1*T);
 
     g_object_unref(psdf);
     g_object_unref(mask);
@@ -5770,7 +5764,7 @@ test_field_correlate_crosscorrelate(void)
                                  GWY_EXTERIOR_PERIODIC, 0.0);
 
         for (guint i = 0; i < xres*yres; i++) {
-            g_assert_cmpfloat(fabs(score->data[i] - 1.0), <, 0.001);
+            gwy_assert_floatval(score->data[i], 1.0, 0.001);
             // This should be safe to require exactly, integeres are preserved.
             g_assert_cmpfloat(xoff->data[i], ==, xmove);
             g_assert_cmpfloat(yoff->data[i], ==, ymove);
@@ -5827,7 +5821,7 @@ test_field_distributions_slope_simple_x(void)
     line_assert_numerically_equal(cdist, ddist, 1e-14);
 
     for (guint i = 1; i < cdist->res; i++) {
-        g_assert_cmpfloat(fabs(cdist->data[i-1] - cdist->data[i]), <=, 1e-14);
+        gwy_assert_floatval(cdist->data[i-1], cdist->data[i], 1e-14);
     }
 
     g_object_unref(cdist);
@@ -5876,7 +5870,7 @@ test_field_distributions_slope_simple_y(void)
     line_assert_numerically_equal(cdist, ddist, 1e-14);
 
     for (guint i = 1; i < cdist->res; i++) {
-        g_assert_cmpfloat(fabs(cdist->data[i-1] - cdist->data[i]), <=, 1e-14);
+        gwy_assert_floatval(cdist->data[i-1], cdist->data[i], 1e-14);
     }
 
     g_object_unref(cdist);
@@ -5944,7 +5938,7 @@ test_field_distributions_slope_nonsquare(void)
     integral = gwy_line_sum_full(dist_wide) * gwy_line_dx(dist_wide);
     gwy_assert_floatval(integral, 1.0, 1e-14);
     g_assert_cmpfloat(fabs(dist_wide->off), <=, 1e-14);
-    g_assert_cmpfloat(fabs(dist_wide->real - expected_max), <=, 1e-14);
+    gwy_assert_floatval(dist_wide->real, expected_max, 1e-14);
 
     gwy_field_set_xreal(field, 1.0);
     gwy_field_set_yreal(field, aspect);
@@ -5954,7 +5948,7 @@ test_field_distributions_slope_nonsquare(void)
     integral = gwy_line_sum_full(dist_tall) * gwy_line_dx(dist_tall);
     gwy_assert_floatval(integral, 1.0, 1e-14);
     g_assert_cmpfloat(fabs(dist_tall->off), <=, 1e-14);
-    g_assert_cmpfloat(fabs(dist_tall->real - expected_max), <=, 1e-14);
+    gwy_assert_floatval(dist_tall->real, expected_max, 1e-14);
 
     line_assert_numerically_equal(dist_wide, dist_tall, 1e-14);
 
