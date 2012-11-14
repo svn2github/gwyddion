@@ -85,7 +85,8 @@ def process_funcs(text):
             f = re.sub(r'\([^)]+\)$', '', f)
             f = re.sub(r'\[[^]]+\]$', '', f)
             f = re.findall(r'(\w+|\.\.\.)', f)[-1]
-            fields.append(f)
+            if f != 'void':
+                fields.append(f)
         if definition.endswith(',\n'):
             definition = definition[:-2]
         definition += ')\n{\n\n}\n'
