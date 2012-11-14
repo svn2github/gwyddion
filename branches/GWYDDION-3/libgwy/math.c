@@ -1143,8 +1143,9 @@ gwy_assertion_message_floatval(const char *domain,
                                long double ref,
                                long double tol)
 {
-    gchar *s = g_strdup_printf("assertion failed (%s): |%.17Lg - %.17Lg| < %Lg",
-                               expr, val, ref, tol);
+    gchar *s = g_strdup_printf("assertion failed (%s): "
+                               "|%.17Lg - %.17Lg| = |%Lg| <= %Lg",
+                               expr, val, ref, val-ref, tol);
     g_assertion_message(domain, file, line, func, s);
     g_free(s);
 }
