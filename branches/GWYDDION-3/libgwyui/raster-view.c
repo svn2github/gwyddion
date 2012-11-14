@@ -1105,13 +1105,13 @@ pop_up_ruler_menu(GwyRasterView *rasterview,
 static GtkMenu*
 create_ruler_popup(GwyRasterView *rasterview)
 {
-    static const GtkRadioActionEntry distance_entries[] = {
-        { NULL, NULL, N_("Pixel Distances"), NULL, NULL, GWY_RULER_SCALE_PIXEL },
-        { NULL, NULL, N_("Real Distances"), NULL, NULL, GWY_RULER_SCALE_REAL },
+    static const GwyChoiceOption distance_options[] = {
+        { NULL, N_("Pixel Distances"), NULL, GWY_RULER_SCALE_PIXEL, },
+        { NULL, N_("Real Distances"),  NULL, GWY_RULER_SCALE_REAL,  },
     };
-    static const GtkRadioActionEntry aspect_entries[] = {
-        { NULL, NULL, N_("Square Pixels"), NULL, NULL, FALSE },
-        { NULL, NULL, N_("Real Aspect Ratio"), NULL, NULL, TRUE },
+    static const GwyChoiceOption aspect_options[] = {
+        { NULL, N_("Square Pixels"),     NULL, FALSE, },
+        { NULL, N_("Real Aspect Ratio"), NULL, TRUE,  },
     };
 
     RasterView *priv = rasterview->priv;
@@ -1122,8 +1122,8 @@ create_ruler_popup(GwyRasterView *rasterview)
     g_object_get(priv->area, "real-aspect-ratio", &real_aspect_ratio, NULL);
 
     choice = priv->distance_choice = gwy_choice_new();
-    gwy_choice_add_actions(choice,
-                           distance_entries, G_N_ELEMENTS(distance_entries));
+    gwy_choice_add_options(choice,
+                           distance_options, G_N_ELEMENTS(distance_options));
     gwy_choice_set_active(choice, priv->scale_type);
     gwy_choice_append_to_menu_shell(choice, shell);
     g_signal_connect_swapped(choice, "notify::active",
@@ -1133,8 +1133,8 @@ create_ruler_popup(GwyRasterView *rasterview)
     gtk_menu_shell_append(shell, gtk_separator_menu_item_new());
 
     choice = priv->aspect_choice = gwy_choice_new();
-    gwy_choice_add_actions(choice,
-                           aspect_entries, G_N_ELEMENTS(aspect_entries));
+    gwy_choice_add_options(choice,
+                           aspect_options, G_N_ELEMENTS(aspect_options));
     gwy_choice_set_active(choice, real_aspect_ratio);
     gwy_choice_append_to_menu_shell(choice, shell);
     g_signal_connect_swapped(choice, "notify::active",

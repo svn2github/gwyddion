@@ -24,6 +24,13 @@
 
 G_BEGIN_DECLS
 
+typedef struct {
+    const gchar *stock_id;
+    const gchar *label;
+    const gchar *tooltip;
+    gint value;
+} GwyChoiceOption;
+
 #define GWY_TYPE_CHOICE \
     (gwy_choice_get_type())
 #define GWY_CHOICE(obj) \
@@ -58,8 +65,8 @@ gint         gwy_choice_get_active            (const GwyChoice *choice)         
 void         gwy_choice_set_sensitive         (GwyChoice *choice,
                                                gboolean sensitive);
 gboolean     gwy_choice_get_sensitive         (const GwyChoice *choice)            G_GNUC_PURE;
-void         gwy_choice_add_actions           (GwyChoice *choice,
-                                               const GtkRadioActionEntry *entries,
+void         gwy_choice_add_options           (GwyChoice *choice,
+                                               const GwyChoiceOption *options,
                                                guint n);
 guint        gwy_choice_size                  (const GwyChoice *choice)            G_GNUC_PURE;
 guint        gwy_choice_append_to_menu_shell  (GwyChoice *choice,

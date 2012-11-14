@@ -47,7 +47,7 @@ typedef struct {
 } ChoiceProxy;
 
 struct _GwyChoicePrivate {
-    GArray *entries;
+    GArray *options;
     GSList *proxies;
     gint active;
     gint list_index;
@@ -80,8 +80,8 @@ static gboolean set_active             (GwyChoice *choice,
 static void     update_proxies         (GwyChoice *choice);
 static gint     find_list_index        (const GwyChoice *choice,
                                         gint value);
-static void     add_entry_if_unique    (GwyChoice *choice,
-                                        const GtkRadioActionEntry *entry);
+static void     add_option_if_unique   (GwyChoice *choice,
+                                        const GwyChoiceOption *option);
 static void     register_toggle_proxy  (GwyChoice *choice,
                                         GObject *object,
                                         gint value);
@@ -130,7 +130,7 @@ gwy_choice_init(GwyChoice *choice)
 {
     choice->priv = G_TYPE_INSTANCE_GET_PRIVATE(choice, GWY_TYPE_CHOICE, Choice);
     Choice *priv = choice->priv;
-    priv->entries = g_array_new(FALSE, FALSE, sizeof(GtkRadioActionEntry));
+    priv->options = g_array_new(FALSE, FALSE, sizeof(GwyChoiceOption));
     priv->list_index = -1;
     priv->sensitive = TRUE;
 }
@@ -144,7 +144,7 @@ gwy_choice_finalize(GObject *object)
     gwy_set_user_func(NULL, NULL, NULL,
                       &priv->translate_func, &priv->translate_data,
                       &priv->translate_notify);
-    g_array_free(priv->entries, TRUE);
+    g_array_free(priv->options, TRUE);
     GWY_OBJECT_UNREF(priv->accel_group);
     G_OBJECT_CLASS(gwy_choice_parent_class)->finalize(object);
 }
@@ -282,19 +282,16 @@ gwy_choice_get_sensitive(const GwyChoice *choice)
     return choice->priv->sensitive;
 }
 
-// FIXME: Is it reasonable to take action entries if we completely ignore
-// @name?  (At present, more is ignored, but that may be implemented.)   Also,
-// do we *ever* want to use accelerators paths with this kind of choices?
 /**
- * gwy_choice_add_actions:
+ * gwy_choice_add_options:
  * @choice: A choice.
- * @entries: (array length=n):
- *           Array of entries describing the items to add.  The array contents
- *           is shallowly copied, i.e. ownership is not taken, however, the
- *           strings within are assumed to be static.
- * @n: Number of items in @entries.
+ * @options: (array length=n):
+ *           Array of options describing the options to add.  The array
+ *           contents is shallowly copied, i.e. ownership is not taken,
+ *           however, the strings within are assumed to be static.
+ * @n: Number of items in @options.
  *
- * Adds items specified using #GtkRadioActionEntry structs to a choice.
+ * Adds options specified using #GwyChoiceOption structs to a choice.
  *
  * This method can be called several times during construction to build the
  * options piecemeal.  Adding choices once widgets have been created does
@@ -303,13 +300,13 @@ gwy_choice_get_sensitive(const GwyChoice *choice)
  **/
 void
 gwy_choice_add_actions(GwyChoice *choice,
-                       const GtkRadioActionEntry *entries,
+                       const GwyChoiceOption *options,
                        guint n)
 {
     g_return_if_fail(GWY_IS_CHOICE(choice));
-    g_return_if_fail(!n || entries);
+    g_return_if_fail(!n || options);
     for (guint i = 0; i < n; i++)
-        add_entry_if_unique(choice, entries + i);
+        add_option_if_unique(choice, options + i);
 }
 
 /**
@@ -326,7 +323,7 @@ guint
 gwy_choice_size(const GwyChoice *choice)
 {
     g_return_val_if_fail(GWY_IS_CHOICE(choice), 0);
-    return choice->priv->entries->len;
+    return choice->priv->options->len;
 }
 
 /**
@@ -347,20 +344,20 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
     g_return_val_if_fail(GTK_IS_MENU_SHELL(shell), 0);
     GtkMenuShell *menushell = GTK_MENU_SHELL(shell);
     Choice *priv = choice->priv;
-    GtkRadioActionEntry *entries = (GtkRadioActionEntry*)priv->entries->data;
-    guint n = priv->entries->len;
+    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
+    guint n = priv->options->len;
     GSList *group = NULL;
 
     for (guint i = 0; i < n; i++) {
-        GtkRadioActionEntry *entry = entries + i;
+        GwyChoiceOption *option = options + i;
         GtkStockItem stock_item;
         gwy_clear1(stock_item);
-        if (entry->stock_id)
-            gtk_stock_lookup(entry->stock_id, &stock_item);
+        if (option->stock_id)
+            gtk_stock_lookup(option->stock_id, &stock_item);
 
-        const gchar *label = entry->label;
-        if (entry->label && *entry->label)
-            label = gwy_choice_translate_string(choice, entry->label);
+        const gchar *label = option->label;
+        if (option->label && *option->label)
+            label = gwy_choice_translate_string(choice, option->label);
         else if (stock_item.label && *stock_item.label)
             label = dgettext_swapped(stock_item.label,
                                      stock_item.translation_domain);
@@ -372,7 +369,7 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
            widget = gtk_radio_menu_item_new(group);
 
 
-        register_toggle_proxy(choice, G_OBJECT(widget), entry->value);
+        register_toggle_proxy(choice, G_OBJECT(widget), option->value);
 
         gtk_menu_shell_append(menushell, widget);
         group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(widget));
@@ -390,7 +387,7 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
  *          translation function is changed.
  *
  * Sets the function to be used for translating labels and tootips of
- * entries added by gwy_choice_add_actions().
+ * options added by gwy_choice_add_actions().
  *
  * If you use gettext() it is sufficient to set the translation domain
  * with gwy_choice_set_translation_domain().  Setting the translation function
@@ -543,28 +540,28 @@ find_list_index(const GwyChoice *choice,
                 gint value)
 {
     Choice *priv = choice->priv;
-    GArray *array = priv->entries;
+    GArray *array = priv->options;
     for (guint i = 0; i < array->len; i++) {
-        if (g_array_index(array, GtkRadioActionEntry, i).value == value)
+        if (g_array_index(array, GwyChoiceOption, i).value == value)
             return i;
     }
     return -1;
 }
 
 static void
-add_entry_if_unique(GwyChoice *choice,
-                    const GtkRadioActionEntry *entry)
+add_option_if_unique(GwyChoice *choice,
+                     const GwyChoiceOption *option)
 {
     Choice *priv = choice->priv;
-    GtkRadioActionEntry *entries = (GtkRadioActionEntry*)priv->entries->data;
-    guint n = priv->entries->len;
+    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
+    guint n = priv->options->len;
     for (guint i = 0; i < n; i++) {
-        if (entry->value == entries[i].value) {
-            g_warning("Non-unique choice value %d, ignoring it.", entry->value);
+        if (option->value == options[i].value) {
+            g_warning("Non-unique choice value %d, ignoring it.", option->value);
             return;
         }
     }
-    g_array_append_vals(priv->entries, entry, 1);
+    g_array_append_vals(priv->options, option, 1);
 }
 
 static void
@@ -650,13 +647,12 @@ find_proxy(const GwyChoice *choice,
  * parsing involved.  Furthermore, #GwyChoice can also abstract combo boxes and
  * similar widgets that do not map 1:1 to #GtkAction<!-- -->s.
  *
- * Note, however, the ownership semantics of pretty much everything in
- * #GwyChoice differs from the Gtk+ action objects.  Namely, for almost all
- * practical purposes, a #GwyChoice is born with a floating reference and any
- * widgets it creates take references to the choice object (possibly sinking it
- * first).  Once the last widget is destroyed the choice object is finalised
- * too.  If you want to reuse the choice object you need to take a reference
- * yourself.
+ * The ownership semantics of pretty much everything in #GwyChoice differs from
+ * the Gtk+ action objects.  Namely, for almost all practical purposes, a
+ * #GwyChoice is born with a floating reference and any widgets it creates take
+ * references to the choice object (possibly sinking it first).  Once the last
+ * widget is destroyed the choice object is finalised too.  If you want to
+ * reuse the choice object you need to take a reference yourself.
  **/
 
 /**
@@ -672,6 +668,21 @@ find_proxy(const GwyChoice *choice,
  * GwyChoiceClass:
  *
  * Class of abstractions of widgets representing a choice.
+ **/
+
+/**
+ * GwyChoiceOption:
+ * @stock_id: Stock id for the option or name of an icon from the icon theme.
+ * @label: Label for the option.
+ * @tooltip: Tooltip for the option.
+ * @value: Integer value of the option.
+ *
+ * Type of option specification for #GwyChoice.
+ *
+ * Any of @stock_id, @label (and, of course, @tooltip) can be %NULL.  Some
+ * fields are used only by some particular widget representations.  If both
+ * @stock_id and @label are filled then @label takes precedence for the option
+ * label while @stock_id may still define the icon.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
