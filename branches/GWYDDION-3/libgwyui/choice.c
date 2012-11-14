@@ -94,7 +94,7 @@ static GSList*  find_proxy             (const GwyChoice *choice,
 
 static GParamSpec *properties[N_PROPS];
 
-G_DEFINE_ABSTRACT_TYPE(GwyChoice, gwy_choice, G_TYPE_INITIALLY_UNOWNED);
+G_DEFINE_TYPE(GwyChoice, gwy_choice, G_TYPE_INITIALLY_UNOWNED);
 
 static void
 gwy_choice_class_init(GwyChoiceClass *klass)
@@ -282,6 +282,9 @@ gwy_choice_get_sensitive(const GwyChoice *choice)
     return choice->priv->sensitive;
 }
 
+// FIXME: Is it reasonable to take action entries if we completely ignore
+// @name?  (At present, more is ignored, but that may be implemented.)   Also,
+// do we *ever* want to use accelerators paths with this kind of choices?
 /**
  * gwy_choice_add_actions:
  * @choice: A choice.
@@ -355,7 +358,7 @@ gwy_choice_append_to_menu_shell(GwyChoice *choice,
         if (entry->stock_id)
             gtk_stock_lookup(entry->stock_id, &stock_item);
 
-        const gchar *label = NULL;
+        const gchar *label = entry->label;
         if (entry->label && *entry->label)
             label = gwy_choice_translate_string(choice, entry->label);
         else if (stock_item.label && *stock_item.label)
@@ -450,7 +453,7 @@ gwy_choice_translate_string(const GwyChoice *choice,
     Choice *priv = choice->priv;
     if (string && priv->translate_func)
         return priv->translate_func(string, priv->translate_data);
-    return NULL;
+    return string;
 }
 
 // The same as Gtk+ uses.
@@ -488,6 +491,7 @@ set_active(GwyChoice *choice,
     if (active == priv->active)
         return FALSE;
 
+    priv->active = active;
     priv->list_index = find_list_index(choice, active);
     if (priv->proxies)
         update_proxies(choice);
