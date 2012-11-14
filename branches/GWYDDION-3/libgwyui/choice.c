@@ -1,6 +1,6 @@
 /*
- *  $Id: choice.c 14176 2012-11-05 20:34:18Z yeti-dn $
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  $Id$
+ *  Copyright (C) 2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
