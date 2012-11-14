@@ -25,6 +25,7 @@
 #include "libgwyui/main.h"
 #include "libgwyui/types.h"
 #include "libgwyui/stock.h"
+#include "libgwyui/choice.h"
 #include "libgwyui/resource-list.h"
 #include "libgwyui/raster-view.h"
 
@@ -79,10 +80,8 @@ struct _GwyRasterViewPrivate {
     gulong field_data_changed_id;
 
     GtkMenu *ruler_popup;
-    GtkCheckMenuItem *pixel_distances;
-    GtkCheckMenuItem *real_distances;
-    GtkCheckMenuItem *square_pixels;
-    GtkCheckMenuItem *real_aspect_ratio;
+    GwyChoice *distance_choice;
+    GwyChoice *aspect_choice;
 
     GtkToggleButton *axisbutton;
     GtkToggleButton *gradbutton;
@@ -152,8 +151,12 @@ static void       pop_up_ruler_menu           (GwyRasterView *rasterview,
                                                GtkWidget *widget,
                                                GdkEventButton *event);
 static GtkMenu*   create_ruler_popup          (GwyRasterView *rasterview);
-static void       ruler_popup_item_toggled    (GwyRasterView *rasterview,
-                                               GtkCheckMenuItem *menuitem);
+static void       ruler_popup_distance_changed(GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyChoice *choice);
+static void       ruler_popup_aspect_changed  (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyChoice *choice);
 static void       ruler_popup_deleted         (GtkWidget *menu);
 static void       gradient_selected           (GwyRasterView *rasterview,
                                                GwyResourceList *list);
@@ -635,11 +638,7 @@ area_notify(GwyRasterView *rasterview,
             g_object_get(priv->area,
                          "real-aspect-ratio", &real_aspect_ratio,
                          NULL);
-            GtkCheckMenuItem *item = (real_aspect_ratio
-                                      ? priv->real_aspect_ratio
-                                      : priv->square_pixels);
-            if (!gtk_check_menu_item_get_active(item))
-                gtk_check_menu_item_set_active(item, TRUE);
+            gwy_choice_set_active(priv->aspect_choice, real_aspect_ratio);
         }
     }
     else if (gwy_strequal(pspec->name, "range")) {
@@ -1106,53 +1105,44 @@ pop_up_ruler_menu(GwyRasterView *rasterview,
 static GtkMenu*
 create_ruler_popup(GwyRasterView *rasterview)
 {
+    static const GtkRadioActionEntry distance_entries[] = {
+        { NULL, NULL, N_("Pixel Distances"), NULL, NULL, GWY_RULER_SCALE_PIXEL },
+        { NULL, NULL, N_("Real Distances"), NULL, NULL, GWY_RULER_SCALE_REAL },
+    };
+    static const GtkRadioActionEntry aspect_entries[] = {
+        { NULL, NULL, N_("Square Pixels"), NULL, NULL, FALSE },
+        { NULL, NULL, N_("Real Aspect Ratio"), NULL, NULL, TRUE },
+    };
+
     RasterView *priv = rasterview->priv;
     GtkWidget *menu = gtk_menu_new();
     GtkMenuShell *shell = GTK_MENU_SHELL(menu);
-    GtkWidget *item;
-
-    item = gtk_radio_menu_item_new_with_label(NULL, _("Pixel Distances"));
-    gtk_menu_shell_append(shell, item);
-    priv->pixel_distances = GTK_CHECK_MENU_ITEM(item);
-    if (priv->scale_type == GWY_RULER_SCALE_PIXEL)
-        gtk_check_menu_item_set_active(priv->pixel_distances, TRUE);
-
-    item = gtk_radio_menu_item_new_with_label_from_widget
-                            (GTK_RADIO_MENU_ITEM(item), _("Real Distances"));
-    gtk_menu_shell_append(shell, item);
-    priv->real_distances = GTK_CHECK_MENU_ITEM(item);
-    if (priv->scale_type == GWY_RULER_SCALE_REAL)
-        gtk_check_menu_item_set_active(priv->real_distances, TRUE);
-
-    item = gtk_separator_menu_item_new();
-    gtk_menu_shell_append(shell, item);
-
+    GwyChoice *choice;
     gboolean real_aspect_ratio;
     g_object_get(priv->area, "real-aspect-ratio", &real_aspect_ratio, NULL);
 
-    item = gtk_radio_menu_item_new_with_label(NULL, _("Square Pixels"));
-    gtk_menu_shell_append(shell, item);
-    priv->square_pixels = GTK_CHECK_MENU_ITEM(item);
-    if (!real_aspect_ratio)
-        gtk_check_menu_item_set_active(priv->square_pixels, TRUE);
+    choice = priv->distance_choice = gwy_choice_new();
+    gwy_choice_add_actions(choice,
+                           distance_entries, G_N_ELEMENTS(distance_entries));
+    gwy_choice_set_active(choice, priv->scale_type);
+    gwy_choice_append_to_menu_shell(choice, shell);
+    g_signal_connect_swapped(choice, "notify::active",
+                             G_CALLBACK(ruler_popup_distance_changed),
+                             rasterview);
 
-    item = gtk_radio_menu_item_new_with_label_from_widget
-                            (GTK_RADIO_MENU_ITEM(item), _("Real Aspect Ratio"));
-    gtk_menu_shell_append(shell, item);
-    priv->real_aspect_ratio = GTK_CHECK_MENU_ITEM(item);
-    if (real_aspect_ratio)
-        gtk_check_menu_item_set_active(priv->real_aspect_ratio, TRUE);
+    gtk_menu_shell_append(shell, gtk_separator_menu_item_new());
+
+    choice = priv->aspect_choice = gwy_choice_new();
+    gwy_choice_add_actions(choice,
+                           aspect_entries, G_N_ELEMENTS(aspect_entries));
+    gwy_choice_set_active(choice, real_aspect_ratio);
+    gwy_choice_append_to_menu_shell(choice, shell);
+    g_signal_connect_swapped(choice, "notify::active",
+                             G_CALLBACK(ruler_popup_aspect_changed),
+                             rasterview);
 
     gtk_widget_show_all(menu);
 
-    g_signal_connect_swapped(priv->pixel_distances, "toggled",
-                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
-    g_signal_connect_swapped(priv->real_distances, "toggled",
-                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
-    g_signal_connect_swapped(priv->square_pixels, "toggled",
-                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
-    g_signal_connect_swapped(priv->real_aspect_ratio, "toggled",
-                             G_CALLBACK(ruler_popup_item_toggled), rasterview);
     g_signal_connect(menu, "deactivate",
                      G_CALLBACK(ruler_popup_deleted), NULL);
     // Prevent the menu from being destroyed on deactivation.
@@ -1169,21 +1159,22 @@ ruler_popup_deleted(GtkWidget *menu)
 }
 
 static void
-ruler_popup_item_toggled(GwyRasterView *rasterview,
-                         GtkCheckMenuItem *menuitem)
+ruler_popup_distance_changed(GwyRasterView *rasterview,
+                             G_GNUC_UNUSED GParamSpec *pspec,
+                             GwyChoice *choice)
 {
-    if (!gtk_check_menu_item_get_active(menuitem))
-        return;
+    gwy_raster_view_set_scale_type(rasterview,
+                                   gwy_choice_get_active(choice));
+}
 
-    RasterView *priv = rasterview->priv;
-    if (menuitem == priv->pixel_distances)
-        gwy_raster_view_set_scale_type(rasterview, GWY_RULER_SCALE_PIXEL);
-    else if (menuitem == priv->real_distances)
-        gwy_raster_view_set_scale_type(rasterview, GWY_RULER_SCALE_REAL);
-    else if (menuitem == priv->square_pixels)
-        g_object_set(priv->area, "real-aspect-ratio", FALSE, NULL);
-    else if (menuitem == priv->real_aspect_ratio)
-        g_object_set(priv->area, "real-aspect-ratio", TRUE, NULL);
+static void
+ruler_popup_aspect_changed(GwyRasterView *rasterview,
+                           G_GNUC_UNUSED GParamSpec *pspec,
+                           GwyChoice *choice)
+{
+    g_object_set(rasterview->priv->area,
+                 "real-aspect-ratio", (gboolean)gwy_choice_get_active(choice),
+                 NULL);
 }
 
 static void
