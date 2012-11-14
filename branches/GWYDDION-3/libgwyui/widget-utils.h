@@ -51,7 +51,7 @@ void       gwy_widget_remove_sensitivity_follower(GtkWidget *follower,
 GtkWidget* gwy_widget_get_sensitivity_leader     (GtkWidget *follower);
 void       gwy_toggle_add_visibility_follower    (GObject *toggle,
                                                   GtkWidget *follower);
-void       gwy_widget_remove_visibility_follower (GObject *toggle,
+void       gwy_toggle_remove_visibility_follower (GObject *toggle,
                                                   GtkWidget *follower);
 GObject*   gwy_widget_get_visibility_toggle      (GtkWidget *follower);
 

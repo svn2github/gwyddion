@@ -341,7 +341,7 @@ gwy_toggle_add_visibility_follower(GObject *toggle,
 }
 
 /**
- * gwy_widget_remove_visibility_follower:
+ * gwy_toggle_remove_visibility_follower:
  * @toggle: Toggle object which determines visibility of @follower.
  * @follower: Follower widget whose visibility follows active state of @toggle.
  *
@@ -354,7 +354,7 @@ gwy_toggle_add_visibility_follower(GObject *toggle,
  *
  **/
 void
-gwy_widget_remove_visibility_follower(GObject *toggle,
+gwy_toggle_remove_visibility_follower(GObject *toggle,
                                       GtkWidget *follower)
 {
     disconnect_visibility_toggle(toggle, follower);

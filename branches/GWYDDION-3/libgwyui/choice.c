@@ -288,8 +288,6 @@ gwy_choice_set_translate_func(GwyChoice *choice,
  * @domain: (allow-none):
  *          The translation domain to use for g_dgettext() calls, or %NULL to
  *          use the domain set with textdomain().
- * @coords: (allow-none):
- *          A group of coordinates.
  *
  * Sets the translation domain for translation and sets up label and tooltip
  * translations to be made with g_dgettext().
