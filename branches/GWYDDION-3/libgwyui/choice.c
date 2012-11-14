@@ -31,26 +31,24 @@ enum {
     N_PROPS
 };
 
-enum {
-    SGNL_CHANGED,
-    N_SIGNALS
-};
+typedef enum {
+    CHOICE_PROXY_TOGGLE,
+    CHOICE_PROXY_LIST,
+} ChoiceProxyStyle;
 
 typedef struct _GwyChoicePrivate Choice;
 
 typedef struct {
-    GtkWidget *widget;
-    gulong handler_id;
+    GObject *object;
     gint value;
     // use_boolean is a radio-boolean, i.e. we only set things "on" and expect
     // the other things to set "off" themselves in reaction.
-    gboolean use_boolean : 1;
-    gboolean use_list_index : 1;
+    ChoiceProxyStyle style;
 } ChoiceProxy;
 
 struct _GwyChoicePrivate {
     GArray *entries;
-    GList *proxies;
+    GSList *proxies;
     gint active;
     gint list_index;
 
@@ -80,13 +78,21 @@ static gboolean set_sensitive          (GwyChoice *choice,
 static gboolean set_active             (GwyChoice *choice,
                                         gint active);
 static void     update_proxies         (GwyChoice *choice);
-static gint     find_list_index        (GwyChoice *choice,
+static gint     find_list_index        (const GwyChoice *choice,
                                         gint value);
 static void     add_entry_if_unique    (GwyChoice *choice,
                                         const GtkRadioActionEntry *entry);
+static void     register_toggle_proxy  (GwyChoice *choice,
+                                        GObject *object,
+                                        gint value);
+static void     proxy_toggled          (GwyChoice *choice,
+                                        GObject *toggle);
+static void     proxy_gone             (gpointer user_data,
+                                        GObject *where_the_object_was);
+static GSList*  find_proxy             (const GwyChoice *choice,
+                                        const GObject *object);
 
 static GParamSpec *properties[N_PROPS];
-static guint signals[N_SIGNALS];
 
 G_DEFINE_ABSTRACT_TYPE(GwyChoice, gwy_choice, G_TYPE_INITIALLY_UNOWNED);
 
@@ -117,21 +123,6 @@ gwy_choice_class_init(GwyChoiceClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
-
-    /**
-     * GwyChoice::changed:
-     * @gwychoice: The #GwyChoice which received the signal.
-     *
-     * The ::changed signal is emitted when the active item is changed, both
-     * by the user and programatically.
-     **/
-    signals[SGNL_CHANGED]
-        = g_signal_new_class_handler("changed",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
 }
 
 static void
@@ -336,6 +327,58 @@ gwy_choice_size(const GwyChoice *choice)
 }
 
 /**
+ * gwy_choice_append_to_menu_shell:
+ * @choice: A choice.
+ * @shell: A menu shell.
+ *
+ * Creates a group of radio menu items representing a choice and appends them
+ * to a menu shell.
+ *
+ * Returns: The number of items appended.
+ **/
+guint
+gwy_choice_append_to_menu_shell(GwyChoice *choice,
+                                GtkMenuShell *shell)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), 0);
+    g_return_val_if_fail(GTK_IS_MENU_SHELL(shell), 0);
+    GtkMenuShell *menushell = GTK_MENU_SHELL(shell);
+    Choice *priv = choice->priv;
+    GtkRadioActionEntry *entries = (GtkRadioActionEntry*)priv->entries->data;
+    guint n = priv->entries->len;
+    GSList *group = NULL;
+
+    for (guint i = 0; i < n; i++) {
+        GtkRadioActionEntry *entry = entries + i;
+        GtkStockItem stock_item;
+        gwy_clear1(stock_item);
+        if (entry->stock_id)
+            gtk_stock_lookup(entry->stock_id, &stock_item);
+
+        const gchar *label = NULL;
+        if (entry->label && *entry->label)
+            label = gwy_choice_translate_string(choice, entry->label);
+        else if (stock_item.label && *stock_item.label)
+            label = dgettext_swapped(stock_item.label,
+                                     stock_item.translation_domain);
+
+        GtkWidget *widget;
+        if (label)
+           widget = gtk_radio_menu_item_new_with_mnemonic(group, label);
+        else
+           widget = gtk_radio_menu_item_new(group);
+
+
+        register_toggle_proxy(choice, G_OBJECT(widget), entry->value);
+
+        gtk_menu_shell_append(menushell, widget);
+        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(widget));
+    }
+
+    return n;
+}
+
+/**
  * gwy_choice_set_translate_func:
  * @choice: A choice.
  * @func: Label and tooltip translation function.
@@ -430,9 +473,9 @@ set_sensitive(GwyChoice *choice,
     if (sensitive == priv->sensitive)
         return FALSE;
 
-    for (GList *l = priv->proxies; l; l = g_list_next(l)) {
+    for (GSList *l = priv->proxies; l; l = g_slist_next(l)) {
         ChoiceProxy *proxy = (ChoiceProxy*)l->data;
-        gtk_widget_set_sensitive(proxy->widget, sensitive);
+        g_object_set(proxy->object, "sensitive", FALSE, NULL);
     }
     return TRUE;
 }
@@ -463,36 +506,36 @@ update_proxies(GwyChoice *choice)
         return;
 
     priv->in_update = TRUE;
-    for (GList *l = priv->proxies; l; l = g_list_next(l)) {
+    for (GSList *l = priv->proxies; l; l = g_slist_next(l)) {
         ChoiceProxy *proxy = (ChoiceProxy*)l->data;
-        GtkWidget *widget = proxy->widget;
+        GObject *object = proxy->object;
 
-        if (proxy->use_list_index) {
+        if (proxy->style == CHOICE_PROXY_LIST) {
             // XXX: Someday, with properties in Gtk+ implemented with
             // GProperty, we may be able to just set the new value.
             gint current;
-            g_object_get(widget, "active", &current, NULL);
+            g_object_get(object, "active", &current, NULL);
             if (current != list_index)
-                g_object_set(widget, "active", list_index, NULL);
+                g_object_set(object, "active", list_index, NULL);
         }
-        else if (proxy->use_boolean) {
+        else if (proxy->style == CHOICE_PROXY_TOGGLE) {
             if (proxy->value == active) {
                 gboolean state;
-                g_object_get(widget, "active", &state, NULL);
+                g_object_get(object, "active", &state, NULL);
                 if (!state)
-                    g_object_set(widget, "active", TRUE, NULL);
+                    g_object_set(object, "active", TRUE, NULL);
             }
         }
         else {
-            g_warning("Unhandled widget of type %s.",
-                      G_OBJECT_TYPE_NAME(widget));
+            g_warning("Unhandled object of type %s.",
+                      G_OBJECT_TYPE_NAME(object));
         }
     }
     priv->in_update = FALSE;
 }
 
 static gint
-find_list_index(GwyChoice *choice,
+find_list_index(const GwyChoice *choice,
                 gint value)
 {
     Choice *priv = choice->priv;
@@ -520,6 +563,72 @@ add_entry_if_unique(GwyChoice *choice,
     g_array_append_vals(priv->entries, entry, 1);
 }
 
+static void
+register_toggle_proxy(GwyChoice *choice,
+                      GObject *object,
+                      gint value)
+{
+    Choice *priv = choice->priv;
+    ChoiceProxy *proxy = g_slice_new(ChoiceProxy);
+    proxy->value = value;
+    proxy->object = object;
+    proxy->style = CHOICE_PROXY_TOGGLE;
+
+    if (!priv->sensitive)
+        g_object_set(object, "sensitive", FALSE, NULL);
+    if (value == priv->active)
+        g_object_set(object, "active", TRUE, NULL);
+
+    priv->proxies = g_slist_prepend(priv->proxies, proxy);
+    // Simulate @object taking a reference to @choice.
+    g_object_ref_sink(choice);
+    g_signal_connect_swapped(object, "toggled",
+                             G_CALLBACK(proxy_toggled), choice);
+    g_object_weak_ref(object, proxy_gone, choice);
+}
+
+static void
+proxy_toggled(GwyChoice *choice,
+              GObject *toggle)
+{
+    Choice *priv = choice->priv;
+    if (priv->in_update)
+        return;
+
+    gboolean state;
+    g_object_get(toggle, "active", &state, NULL);
+    if (!state)
+        return;
+
+    GSList *l = find_proxy(choice, toggle);
+    g_return_if_fail(l);
+    ChoiceProxy *proxy = (ChoiceProxy*)l->data;
+    gwy_choice_set_active(choice, proxy->value);
+}
+
+static void
+proxy_gone(gpointer user_data,
+           GObject *where_the_object_was)
+{
+    // When the last proxy object goes poof we destroy ourselves.
+    GwyChoice *choice = (GwyChoice*)user_data;
+    GSList *l = find_proxy(choice, where_the_object_was);
+    g_assert(l);
+    choice->priv->proxies = g_slist_delete_link(choice->priv->proxies, l);
+    g_object_unref(choice);
+}
+
+static GSList*
+find_proxy(const GwyChoice *choice,
+           const GObject *object)
+{
+    const Choice *priv = choice->priv;
+    GSList *l = priv->proxies;
+    while (l && ((ChoiceProxy*)l->data)->object != object)
+        l = g_slist_next(l);
+    return l;
+}
+
 /**
  * SECTION: choice
  * @title: GwyChoice
@@ -538,7 +647,12 @@ add_entry_if_unique(GwyChoice *choice,
  * similar widgets that do not map 1:1 to #GtkAction<!-- -->s.
  *
  * Note, however, the ownership semantics of pretty much everything in
- * #GwyChoice differs from the Gtk+ action objects.
+ * #GwyChoice differs from the Gtk+ action objects.  Namely, for almost all
+ * practical purposes, a #GwyChoice is born with a floating reference and any
+ * widgets it creates take references to the choice object (possibly sinking it
+ * first).  Once the last widget is destroyed the choice object is finalised
+ * too.  If you want to reuse the choice object you need to take a reference
+ * yourself.
  **/
 
 /**

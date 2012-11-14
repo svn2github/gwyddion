@@ -62,6 +62,8 @@ void         gwy_choice_add_actions           (GwyChoice *choice,
                                                const GtkRadioActionEntry *entries,
                                                guint n);
 guint        gwy_choice_size                  (const GwyChoice *choice)            G_GNUC_PURE;
+guint        gwy_choice_append_to_menu_shell  (GwyChoice *choice,
+                                               GtkMenuShell *shell);
 void         gwy_choice_set_translate_func    (GwyChoice *choice,
                                                GtkTranslateFunc func,
                                                gpointer data,
