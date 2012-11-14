@@ -23,6 +23,7 @@
 #include <libgwyui/axis.h>
 #include <libgwyui/cairo-utils.h>
 #include <libgwyui/cell-renderer-gradient.h>
+#include <libgwyui/choice.h>
 #include <libgwyui/color-axis.h>
 #include <libgwyui/field-render.h>
 #include <libgwyui/inventory-store.h>

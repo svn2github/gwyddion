@@ -21,6 +21,7 @@ public_headers = \
 	$(srcdir)/axis.h \
 	$(srcdir)/cairo-utils.h \
 	$(srcdir)/cell-renderer-gradient.h \
+	$(srcdir)/choice.h \
 	$(srcdir)/color-axis.h \
 	$(srcdir)/field-render.h \
 	$(srcdir)/inventory-store.h \
@@ -73,6 +74,7 @@ libgwyui3_la_SOURCES = \
 	axis.c \
 	cairo-utils.c \
 	cell-renderer-gradient.c \
+	choice.c \
 	color-axis.c \
 	field-render.c \
 	icons-gresource.c \
