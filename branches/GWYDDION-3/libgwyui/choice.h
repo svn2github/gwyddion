@@ -55,9 +55,13 @@ GwyChoice*   gwy_choice_new                   (void)                            
 void         gwy_choice_set_active            (GwyChoice *choice,
                                                int active);
 gint         gwy_choice_get_active            (const GwyChoice *choice)            G_GNUC_PURE;
+void         gwy_choice_set_sensitive         (GwyChoice *choice,
+                                               gboolean sensitive);
+gboolean     gwy_choice_get_sensitive         (const GwyChoice *choice)            G_GNUC_PURE;
 void         gwy_choice_add_actions           (GwyChoice *choice,
                                                const GtkRadioActionEntry *entries,
                                                guint n);
+guint        gwy_choice_size                  (const GwyChoice *choice)            G_GNUC_PURE;
 void         gwy_choice_set_translate_func    (GwyChoice *choice,
                                                GtkTranslateFunc func,
                                                gpointer data,

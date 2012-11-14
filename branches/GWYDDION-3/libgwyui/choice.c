@@ -26,6 +26,7 @@
 
 enum {
     PROP_0,
+    PROP_SENSITIVE,
     PROP_ACTIVE,
     N_PROPS
 };
@@ -40,13 +41,20 @@ typedef struct _GwyChoicePrivate Choice;
 typedef struct {
     GtkWidget *widget;
     gulong handler_id;
+    gint value;
+    // use_boolean is a radio-boolean, i.e. we only set things "on" and expect
+    // the other things to set "off" themselves in reaction.
+    gboolean use_boolean : 1;
+    gboolean use_list_index : 1;
 } ChoiceProxy;
 
 struct _GwyChoicePrivate {
     GArray *entries;
     GList *proxies;
     gint active;
+    gint list_index;
 
+    gboolean sensitive;
     gboolean in_update;
 
     GtkAccelGroup *accel_group;
@@ -67,8 +75,15 @@ static void     gwy_choice_get_property(GObject *object,
                                         GParamSpec *pspec);
 static gchar*   dgettext_swapped       (const gchar *msgid,
                                         const gchar *domainname);
+static gboolean set_sensitive          (GwyChoice *choice,
+                                        gboolean sensitive);
 static gboolean set_active             (GwyChoice *choice,
                                         gint active);
+static void     update_proxies         (GwyChoice *choice);
+static gint     find_list_index        (GwyChoice *choice,
+                                        gint value);
+static void     add_entry_if_unique    (GwyChoice *choice,
+                                        const GtkRadioActionEntry *entry);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -92,6 +107,13 @@ gwy_choice_class_init(GwyChoiceClass *klass)
                            "Integer value of the currently active choice.",
                            G_MININT, G_MAXINT, 0,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SENSITIVE]
+        = g_param_spec_boolean("sensitive",
+                               "Sensitive",
+                               "Whether the widgets respond to user actions.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -118,6 +140,8 @@ gwy_choice_init(GwyChoice *choice)
     choice->priv = G_TYPE_INSTANCE_GET_PRIVATE(choice, GWY_TYPE_CHOICE, Choice);
     Choice *priv = choice->priv;
     priv->entries = g_array_new(FALSE, FALSE, sizeof(GtkRadioActionEntry));
+    priv->list_index = -1;
+    priv->sensitive = TRUE;
 }
 
 static void
@@ -143,6 +167,10 @@ gwy_choice_set_property(GObject *object,
     GwyChoice *choice = GWY_CHOICE(object);
 
     switch (prop_id) {
+        case PROP_SENSITIVE:
+        set_sensitive(choice, g_value_get_boolean(value));
+        break;
+
         case PROP_ACTIVE:
         set_active(choice, g_value_get_int(value));
         break;
@@ -163,6 +191,10 @@ gwy_choice_get_property(GObject *object,
     Choice *priv = choice->priv;
 
     switch (prop_id) {
+        case PROP_SENSITIVE:
+        g_value_set_boolean(value, priv->sensitive);
+        break;
+
         case PROP_ACTIVE:
         g_value_set_int(value, priv->active);
         break;
@@ -225,6 +257,41 @@ gwy_choice_get_active(const GwyChoice *choice)
 }
 
 /**
+ * gwy_choice_set_sensitive:
+ * @choice: A choice.
+ * @sensitive: %TRUE to make @choice sensitive, %FALSE to make it insensitive.
+ *
+ * Sets the sensitivity of a choice.
+ **/
+void
+gwy_choice_set_sensitive(GwyChoice *choice,
+                         gboolean sensitive)
+{
+    g_return_if_fail(GWY_IS_CHOICE(choice));
+    if (!set_sensitive(choice, sensitive))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(choice), properties[PROP_SENSITIVE]);
+}
+
+/**
+ * gwy_choice_get_sensitive:
+ * @choice: A choice.
+ *
+ * Gets whether a choice is sensitive.
+ *
+ * This means that the choice as a whole is sensitive.
+ *
+ * Returns: %TRUE if @choice is sensitive, %FALSE if it is insensitive.
+ **/
+gboolean
+gwy_choice_get_sensitive(const GwyChoice *choice)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), FALSE);
+    return choice->priv->sensitive;
+}
+
+/**
  * gwy_choice_add_actions:
  * @choice: A choice.
  * @entries: (array length=n):
@@ -236,7 +303,7 @@ gwy_choice_get_active(const GwyChoice *choice)
  * Adds items specified using #GtkRadioActionEntry structs to a choice.
  *
  * This method can be called several times during construction to build the
- * choice piecewise.  Adding choices once widgets have been created does
+ * options piecemeal.  Adding choices once widgets have been created does
  * <emphasis>not</emphasis> affect these widgets and, consequently, can lead
  * to all sorts of trouble.
  **/
@@ -247,9 +314,25 @@ gwy_choice_add_actions(GwyChoice *choice,
 {
     g_return_if_fail(GWY_IS_CHOICE(choice));
     g_return_if_fail(!n || entries);
-    Choice *priv = choice->priv;
-    // TODO: Validate that values are unique.  
-    g_array_append_vals(priv->entries, entries, n);
+    for (guint i = 0; i < n; i++)
+        add_entry_if_unique(choice, entries + i);
+}
+
+/**
+ * gwy_choice_size:
+ * @choice: A choice.
+ *
+ * Obtains the number of items in a choice.
+ *
+ * Returns: The number of items in @choice.  For multi-widget representations
+ *          of choices this is typically the number of widget that would be
+ *          created.
+ **/
+guint
+gwy_choice_size(const GwyChoice *choice)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), 0);
+    return choice->priv->entries->len;
 }
 
 /**
@@ -340,6 +423,21 @@ dgettext_swapped(const gchar *msgid,
 }
 
 static gboolean
+set_sensitive(GwyChoice *choice,
+              gboolean sensitive)
+{
+    Choice *priv = choice->priv;
+    if (sensitive == priv->sensitive)
+        return FALSE;
+
+    for (GList *l = priv->proxies; l; l = g_list_next(l)) {
+        ChoiceProxy *proxy = (ChoiceProxy*)l->data;
+        gtk_widget_set_sensitive(proxy->widget, sensitive);
+    }
+    return TRUE;
+}
+
+static gboolean
 set_active(GwyChoice *choice,
            gint active)
 {
@@ -347,8 +445,79 @@ set_active(GwyChoice *choice,
     if (active == priv->active)
         return FALSE;
 
-    g_printerr("Implement me! (set_active())\n");
+    priv->list_index = find_list_index(choice, active);
+    if (priv->proxies)
+        update_proxies(choice);
+
     return TRUE;
+}
+
+static void
+update_proxies(GwyChoice *choice)
+{
+    Choice *priv = choice->priv;
+    g_return_if_fail(!priv->in_update);
+    gint active = priv->active, list_index = priv->list_index;
+    // FIXME: Can we do anything better?
+    if (list_index < 0)
+        return;
+
+    priv->in_update = TRUE;
+    for (GList *l = priv->proxies; l; l = g_list_next(l)) {
+        ChoiceProxy *proxy = (ChoiceProxy*)l->data;
+        GtkWidget *widget = proxy->widget;
+
+        if (proxy->use_list_index) {
+            // XXX: Someday, with properties in Gtk+ implemented with
+            // GProperty, we may be able to just set the new value.
+            gint current;
+            g_object_get(widget, "active", &current, NULL);
+            if (current != list_index)
+                g_object_set(widget, "active", list_index, NULL);
+        }
+        else if (proxy->use_boolean) {
+            if (proxy->value == active) {
+                gboolean state;
+                g_object_get(widget, "active", &state, NULL);
+                if (!state)
+                    g_object_set(widget, "active", TRUE, NULL);
+            }
+        }
+        else {
+            g_warning("Unhandled widget of type %s.",
+                      G_OBJECT_TYPE_NAME(widget));
+        }
+    }
+    priv->in_update = FALSE;
+}
+
+static gint
+find_list_index(GwyChoice *choice,
+                gint value)
+{
+    Choice *priv = choice->priv;
+    GArray *array = priv->entries;
+    for (guint i = 0; i < array->len; i++) {
+        if (g_array_index(array, GtkRadioActionEntry, i).value == value)
+            return i;
+    }
+    return -1;
+}
+
+static void
+add_entry_if_unique(GwyChoice *choice,
+                    const GtkRadioActionEntry *entry)
+{
+    Choice *priv = choice->priv;
+    GtkRadioActionEntry *entries = (GtkRadioActionEntry*)priv->entries->data;
+    guint n = priv->entries->len;
+    for (guint i = 0; i < n; i++) {
+        if (entry->value == entries[i].value) {
+            g_warning("Non-unique choice value %d, ignoring it.", entry->value);
+            return;
+        }
+    }
+    g_array_append_vals(priv->entries, entry, 1);
 }
 
 /**
