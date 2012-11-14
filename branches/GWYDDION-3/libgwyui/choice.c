@@ -660,9 +660,8 @@ find_proxy(const GwyChoice *choice,
  *
  * Object representing an abstraction of widgets representing a choice.
  *
- * The #GwyChoice struct contains some public fields that can be directly
- * accessed for reading which is useful namely for subclassing.  To set them,
- * you must always use the methods such as gwy_choice_set_bounding_box().
+ * The #GwyChoice struct contains private data only and should be accessed
+ * using the functions below.
  **/
 
 /**
