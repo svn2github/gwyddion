@@ -820,7 +820,7 @@ update_color_axis_distrib(GwyRasterView *rasterview)
     }
 
     GwyLine *line = gwy_field_value_dist(priv->field, NULL, NULL, 0,
-                                         FALSE, TRUE, 0, 0.0, 0.0);
+                                         FALSE, FALSE, 0, 0.0, 0.0);
     GwyCurve *distribution = gwy_color_axis_get_distribution(priv->coloraxis);
     if (distribution) {
         gwy_curve_set_from_line(distribution, line);
