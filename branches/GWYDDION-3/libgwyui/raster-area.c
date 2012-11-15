@@ -2471,7 +2471,7 @@ field_notify(GwyRasterArea *rasterarea,
 static void
 mask_notify(GwyRasterArea *rasterarea,
             GParamSpec *pspec,
-            GwyMaskField *mask)
+            G_GNUC_UNUSED GwyMaskField *mask)
 {
     RasterArea *priv = rasterarea->priv;
 

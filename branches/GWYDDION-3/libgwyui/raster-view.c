@@ -74,6 +74,10 @@ struct _GwyRasterViewPrivate {
     GtkToggleButton *favorite_only;
 
     GtkWidget *ranges_tab;
+    GwyChoice *from_method_choice;
+    GtkEntry *range_from_entry;
+    GwyChoice *to_method_choice;
+    GtkEntry *range_to_entry;
 
     GwyField *field;
     gulong field_notify_id;
@@ -133,9 +137,8 @@ static void       axis_add_button_press_event (GwyAxis *axis);
 static gboolean   ruler_button_press          (GwyRasterView *rasterview,
                                                GdkEventButton *event,
                                                GwyRuler *ruler);
-static void       coloraxis_range_notify      (GwyRasterView *rasterview,
-                                               GParamSpec *pspec,
-                                               GwyColorAxis *coloraxis);
+static void       coloraxis_range_modified    (GwyRasterView *rasterview,
+                                               GwyAxis *axis);
 static gboolean   coloraxis_button_press      (GwyRasterView *rasterview,
                                                GdkEventButton *event,
                                                GwyColorAxis *coloraxis);
@@ -166,6 +169,12 @@ static void       gradient_activated          (GwyRasterView *rasterview,
                                                GwyResourceList *list);
 static void       favorite_only_toggled       (GwyRasterView *rasterview,
                                                GtkToggleButton *toggle);
+static void       range_from_method_changed   (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyChoice *choice);
+static void       range_to_method_changed     (GwyRasterView *rasterview,
+                                               GParamSpec *pspec,
+                                               GwyChoice *choice);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -337,8 +346,8 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(ruler_button_press), rasterview);
     g_signal_connect_after(coloraxis, "realize",
                            G_CALLBACK(axis_add_button_press_event), NULL);
-    g_signal_connect_swapped(coloraxis, "notify::range",
-                             G_CALLBACK(coloraxis_range_notify), rasterview);
+    g_signal_connect_swapped(coloraxis, "range-modified",
+                             G_CALLBACK(coloraxis_range_modified), rasterview);
     g_signal_connect_swapped(coloraxis, "button-press-event",
                              G_CALLBACK(coloraxis_button_press), rasterview);
 
@@ -891,28 +900,39 @@ ruler_button_press(GwyRasterView *rasterview,
 }
 
 static void
-coloraxis_range_notify(GwyRasterView *rasterview,
-                       GParamSpec *pspec,
-                       GwyColorAxis *coloraxis)
+coloraxis_range_modified(GwyRasterView *rasterview,
+                         GwyAxis *axis)
 {
-    g_return_if_fail(gwy_strequal(pspec->name, "range"));
     GwyRasterArea *area = rasterview->priv->area;
+    RasterView *priv = rasterview->priv;
     GwyRange axisrange, arearange;
-    gwy_axis_get_range(GWY_AXIS(coloraxis), &axisrange);
     gwy_raster_area_get_user_range(area, &arearange);
+    gwy_axis_get_requested_range(axis, &axisrange);
     if (gwy_equal(&axisrange, &arearange))
         return;
 
-    if (rasterview->priv->requesting_axis_range) {
+    if (priv->requesting_axis_range) {
         g_warning("Recursion in false colour mapping range area/axis sync?!");
         return;
     }
 
     gwy_raster_area_set_user_range(area, &axisrange);
-    if (arearange.from != axisrange.from)
-        gwy_raster_area_set_range_from_method(area, GWY_COLOR_RANGE_USER);
-    if (arearange.to != axisrange.to)
-        gwy_raster_area_set_range_to_method(area, GWY_COLOR_RANGE_USER);
+    if (arearange.from != axisrange.from) {
+        if (priv->from_method_choice)
+            gwy_choice_set_active(priv->from_method_choice,
+                                  GWY_COLOR_RANGE_USER);
+        else
+            gwy_raster_area_set_range_from_method(priv->area,
+                                                  GWY_COLOR_RANGE_USER);
+    }
+    if (arearange.to != axisrange.to) {
+        if (priv->to_method_choice)
+            gwy_choice_set_active(priv->to_method_choice,
+                                  GWY_COLOR_RANGE_USER);
+        else
+            gwy_raster_area_set_range_to_method(priv->area,
+                                                GWY_COLOR_RANGE_USER);
+    }
 }
 
 static gboolean
@@ -1028,11 +1048,70 @@ axis_button_clicked(GwyRasterView *rasterview,
 }
 
 static GtkWidget*
-create_range_controls_tab(G_GNUC_UNUSED GwyRasterView *rasterview)
+create_range_controls_tab(GwyRasterView *rasterview)
 {
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(vbox), gtk_label_new("Ranges..."));
-    return vbox;
+    static const GwyChoiceOption range_options[] = {
+        { NULL, N_("Entire data"),   NULL, GWY_COLOR_RANGE_FULL,     },
+        { NULL, N_("Masked area"),   NULL, GWY_COLOR_RANGE_MASKED,   },
+        { NULL, N_("Unmasked area"), NULL, GWY_COLOR_RANGE_UNMASKED, },
+        { NULL, N_("Visible part"),  NULL, GWY_COLOR_RANGE_VISIBLE,  },
+        { NULL, N_("Auto cut-off"),  NULL, GWY_COLOR_RANGE_AUTO,     },
+        { NULL, N_("Fixed value"),   NULL, GWY_COLOR_RANGE_USER,     },
+    };
+    RasterView *priv = rasterview->priv;
+    GtkGrid *grid = GTK_GRID(gtk_grid_new());
+    GtkWidget *label, *entry;
+    GwyChoice *choice;
+    guint row = 0, ncols = 3;
+
+    label = gtk_label_new(_("Upper limit from:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_grid_attach(grid, label, 0, row, ncols, 1);
+    row++;
+
+    choice = priv->from_method_choice = gwy_choice_new();
+    gwy_choice_add_options(choice, range_options, G_N_ELEMENTS(range_options));
+    gwy_choice_set_active(choice,
+                          gwy_raster_area_get_range_from_method(priv->area));
+    row += gwy_choice_attach_to_grid(choice, grid, 0, row, ncols);
+    g_signal_connect_swapped(choice, "notify::active",
+                             G_CALLBACK(range_from_method_changed), rasterview);
+
+    label = gtk_label_new(_("Value:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_grid_attach(grid, label, 0, row, 1, 1);
+
+    entry = gtk_entry_new();
+    priv->range_from_entry = GTK_ENTRY(entry);
+    gtk_entry_set_width_chars(priv->range_from_entry, 6);
+    gtk_grid_attach(grid, entry, 1, row, 1, 1);
+    row++;
+
+    label = gtk_label_new(_("Lower limit from:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_widget_set_margin_top(label, 8);
+    gtk_grid_attach(grid, label, 0, row, ncols, 1);
+    row++;
+
+    choice = priv->to_method_choice = gwy_choice_new();
+    gwy_choice_add_options(choice, range_options, G_N_ELEMENTS(range_options));
+    gwy_choice_set_active(choice,
+                          gwy_raster_area_get_range_to_method(priv->area));
+    row += gwy_choice_attach_to_grid(choice, grid, 0, row, ncols);
+    g_signal_connect_swapped(choice, "notify::active",
+                             G_CALLBACK(range_to_method_changed), rasterview);
+
+    label = gtk_label_new(_("Value:"));
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_grid_attach(grid, label, 0, row, 1, 1);
+
+    entry = gtk_entry_new();
+    priv->range_to_entry = GTK_ENTRY(entry);
+    gtk_entry_set_width_chars(priv->range_to_entry, 6);
+    gtk_grid_attach(grid, entry, 1, row, 1, 1);
+    row++;
+
+    return GTK_WIDGET(grid);
 }
 
 static GtkWidget*
@@ -1208,6 +1287,24 @@ favorite_only_toggled(GwyRasterView *rasterview,
     gboolean active = gtk_toggle_button_get_active(toggle);
     gwy_resource_list_set_only_preferred(rasterview->priv->gradient_list,
                                          active);
+}
+
+static void
+range_from_method_changed(GwyRasterView *rasterview,
+                          G_GNUC_UNUSED GParamSpec *pspec,
+                          GwyChoice *choice)
+{
+    gwy_raster_area_set_range_from_method(rasterview->priv->area,
+                                          gwy_choice_get_active(choice));
+}
+
+static void
+range_to_method_changed(GwyRasterView *rasterview,
+                        G_GNUC_UNUSED GParamSpec *pspec,
+                        GwyChoice *choice)
+{
+    gwy_raster_area_set_range_to_method(rasterview->priv->area,
+                                        gwy_choice_get_active(choice));
 }
 
 /**
