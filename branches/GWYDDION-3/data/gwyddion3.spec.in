@@ -101,7 +101,7 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 install -D data/%{name}.vim $RPM_BUILD_ROOT/%{vimdir}/syntax/%{name}.vim
 # TODO: Once we have more translations, add them
-%find_lang %{name}-libgwy
+%find_lang %{name}-libgwy %{name}-libgwyui
 find $RPM_BUILD_ROOT -name '*.la' -delete
 
 
