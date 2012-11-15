@@ -38,6 +38,11 @@ enum {
     N_PROPS,
 };
 
+enum {
+    SGNL_RANGE_MODIFIED,
+    N_SIGNALS
+};
+
 struct _GwyColorAxisPrivate {
     GwyGradient *gradient;
     gulong gradient_data_changed_id;
@@ -146,6 +151,7 @@ static gint     find_boundary                       (GwyAxis *axis,
                                                      gdouble y);
 
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 static const gdouble tick_level_sizes[4] = { 1.0, 0.65, 0.4, 0.25 };
 
@@ -202,6 +208,22 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    /**
+     * GwyColorAxis::range-modified:
+     * @gwycoloraxis: The #GwyColorAxis which received the signal.
+     *
+     * The ::range-modified signal is emitted when user interactively modifies
+     * the axis range (if enabled with gwy_color_axis_set_editable_range()).
+     * The new range is only <emphasis>requested</emphasis> at that time.
+     **/
+    signals[SGNL_RANGE_MODIFIED]
+        = g_signal_new_class_handler("range-modified",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
@@ -423,6 +445,7 @@ gwy_color_axis_scroll(GtkWidget *widget,
         range.to += dz;
 
     gwy_axis_request_range(axis, &range);
+    g_signal_emit(axis, signals[SGNL_RANGE_MODIFIED], 0);
 
     return TRUE;
 }
