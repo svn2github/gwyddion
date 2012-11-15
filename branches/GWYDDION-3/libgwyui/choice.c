@@ -474,7 +474,7 @@ gwy_choice_create_buttons(GwyChoice *choice,
         }
 
         register_toggle_proxy(choice, G_OBJECT(widget), option->value);
-        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(widget));
+        group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(widget));
         retval[i] = widget;
     }
 
@@ -496,10 +496,10 @@ gwy_choice_create_buttons(GwyChoice *choice,
  * Returns: The number of items attached.
  **/
 guint
-gwy_choice_append_to_grid(GwyChoice *choice,
+gwy_choice_attach_to_grid(GwyChoice *choice,
                           GtkGrid *grid,
-                          gint top,
                           gint left,
+                          gint top,
                           guint width)
 {
     g_return_val_if_fail(GWY_IS_CHOICE(choice), 0);

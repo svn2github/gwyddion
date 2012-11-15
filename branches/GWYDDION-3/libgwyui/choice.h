@@ -80,7 +80,7 @@ guint        gwy_choice_attach_to_grid        (GwyChoice *choice,
                                                GtkGrid *grid,
                                                gint left,
                                                gint top,
-                                               gint width);
+                                               guint width);
 void         gwy_choice_set_translate_func    (GwyChoice *choice,
                                                GtkTranslateFunc func,
                                                gpointer data,
