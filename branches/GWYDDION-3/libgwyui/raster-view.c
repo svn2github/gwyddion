@@ -353,7 +353,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                              G_CALLBACK(ruler_button_press), rasterview);
     g_signal_connect_after(coloraxis, "realize",
                            G_CALLBACK(axis_add_button_press_event), NULL);
-    g_signal_connect_swapped(coloraxis, "range-modified",
+    g_signal_connect_swapped(coloraxis, "modify-range",
                              G_CALLBACK(coloraxis_range_modified), rasterview);
     g_signal_connect_swapped(coloraxis, "button-press-event",
                              G_CALLBACK(coloraxis_button_press), rasterview);

@@ -39,7 +39,7 @@ enum {
 };
 
 enum {
-    SGNL_RANGE_MODIFIED,
+    SGNL_MODIFY_RANGE,
     N_SIGNALS
 };
 
@@ -210,17 +210,23 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
-     * GwyColorAxis::range-modified:
+     * GwyColorAxis::modify-range:
      * @gwycoloraxis: The #GwyColorAxis which received the signal.
      *
-     * The ::range-modified signal is emitted when user interactively modifies
+     * The ::modify-range signal is emitted when user interactively modifies
      * the axis range (if enabled with gwy_color_axis_set_editable_range()).
      * The new range is only <emphasis>requested</emphasis> at that time.
+     *
+     * It is an action signal.  So you may want to emit it programmatically
+     * after calling gwy_axis_request_range(), however, this should be done
+     * only if the colour axis is ‘authoritative’ for this range.  If the axis
+     * range follows some other object you usually want to just call
+     * gwy_axis_request_range() and be done with it.
      **/
-    signals[SGNL_RANGE_MODIFIED]
-        = g_signal_new_class_handler("range-modified",
+    signals[SGNL_MODIFY_RANGE]
+        = g_signal_new_class_handler("modify-range",
                                      G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST,
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__VOID,
                                      G_TYPE_NONE, 0);
@@ -445,7 +451,7 @@ gwy_color_axis_scroll(GtkWidget *widget,
         range.to += dz;
 
     gwy_axis_request_range(axis, &range);
-    g_signal_emit(axis, signals[SGNL_RANGE_MODIFIED], 0);
+    g_signal_emit(axis, signals[SGNL_MODIFY_RANGE], 0);
 
     return TRUE;
 }
