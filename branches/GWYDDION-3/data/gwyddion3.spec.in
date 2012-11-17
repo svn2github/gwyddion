@@ -101,7 +101,8 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 install -D data/%{name}.vim $RPM_BUILD_ROOT/%{vimdir}/syntax/%{name}.vim
 # TODO: Once we have more translations, add them
-%find_lang %{name}-libgwy %{name}-libgwyui
+%find_lang %{name}-libgwy
+%find_lang %{name}-libgwyui
 find $RPM_BUILD_ROOT -name '*.la' -delete
 
 
@@ -117,7 +118,7 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %doc AUTHORS COPYING INSTALL.gwyddion NEWS README
 
 
-%files libs -f %{name}-libgwy.lang
+%files libs -f %{name}-libgwy.lang -f %{name}-libgwyui.lang
 %defattr(-,root,root)
 # For unstable releases
 %{_libdir}/libgwy3-@PACKAGE_VERSION@.so
