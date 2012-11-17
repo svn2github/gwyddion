@@ -389,6 +389,7 @@ sync_visibility(GObject *toggle,
     gboolean active;
     g_object_get(toggle, "active", &active, NULL);
     gtk_widget_set_visible(follower, active);
+    gtk_widget_set_no_show_all(follower, !active);
 }
 
 static void
