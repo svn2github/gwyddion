@@ -328,6 +328,39 @@ gwy_choice_size(const GwyChoice *choice)
 }
 
 /**
+ * gwy_choice_find_widget:
+ * @choice: A choice.
+ * @value: Integer value of an option.
+ *
+ * Finds the last created object that corresponds to given value in a choice.
+ *
+ * The last created object means, precisely, the last created object that has
+ * not been destroyed yet.  A list-like widget matches all values so if a
+ * list-like widget has been created last it will be returned no matter what.
+ *
+ * While the behaviour of this function is defined for all cases, it is really
+ * useful only during setup, more-or-less immediately after a call that
+ * constructed some widget set.  This is because this is the only situation the
+ * function is intended to be used.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          The last object (usually a widget) corresponding to @value.
+ *          %NULL if there is no such object.
+ **/
+GObject*
+gwy_choice_find_widget(const GwyChoice *choice,
+                       gint value)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), NULL);
+    for (GSList *l = choice->priv->proxies; l; l = g_slist_next(l)) {
+        ChoiceProxy *proxy = (ChoiceProxy*)l->data;
+        if (proxy->value == value || proxy->style == CHOICE_PROXY_LIST)
+            return proxy->object;
+    }
+    return NULL;
+}
+
+/**
  * gwy_choice_create_menu_items:
  * @choice: A choice.
  *
@@ -790,7 +823,9 @@ find_proxy(const GwyChoice *choice,
  * #GwyChoice is born with a floating reference and any widgets it creates take
  * references to the choice object (possibly sinking it first).  Once the last
  * widget is destroyed the choice object is finalised too.  If you want to
- * reuse the choice object you need to take a reference yourself.
+ * reuse the choice object you need to take a reference yourself.  The widgets
+ * created by #GwyChoice should be only accesses using the abstract means of
+ * the choice object.  Manual manipulation may lead to undefined behaviour.
  **/
 
 /**

@@ -69,6 +69,8 @@ void         gwy_choice_add_options           (GwyChoice *choice,
                                                const GwyChoiceOption *options,
                                                guint n);
 guint        gwy_choice_size                  (const GwyChoice *choice)          G_GNUC_PURE;
+GObject*     gwy_choice_find_widget           (const GwyChoice *choice,
+                                               gint value)                       G_GNUC_PURE;
 GtkWidget**  gwy_choice_create_menu_items     (GwyChoice *choice)                G_GNUC_MALLOC;
 guint        gwy_choice_append_to_menu_shell  (GwyChoice *choice,
                                                GtkMenuShell *shell);
