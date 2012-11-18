@@ -2520,12 +2520,12 @@ mask_data_changed(GwyRasterArea *rasterarea,
         || priv->range_to_method == GWY_COLOR_RANGE_UNMASKED) {
         priv->field_surface_valid = FALSE;
         priv->range_valid = FALSE;
-        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+        gtk_widget_queue_draw(widget);
         return;
     }
 
     if (!fpart) {
-        gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+        gtk_widget_queue_draw(widget);
         return;
     }
 
