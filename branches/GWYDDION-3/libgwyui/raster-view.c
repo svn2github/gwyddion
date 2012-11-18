@@ -84,7 +84,7 @@ struct _GwyRasterViewPrivate {
     GtkWidget *ranges_tab;
     RangeControl range_from;
     RangeControl range_to;
-    gdouble range_base;
+    GwyValueFormat *range_vf;
 
     GwyField *field;
     gulong field_notify_id;
@@ -131,6 +131,7 @@ static gboolean   set_field                   (GwyRasterView *rasterview,
                                                GwyField *field);
 static void       update_ruler_ranges         (GwyRasterView *rasterview);
 static void       update_color_axis_distrib   (GwyRasterView *rasterview);
+static void       update_range_entry_units    (GwyRasterView *rasterview);
 static gboolean   area_motion_notify          (GwyRasterView *rasterview,
                                                GdkEventMotion *event,
                                                GwyRasterArea *area);
@@ -268,7 +269,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                                                    RasterView);
     RasterView *priv = rasterview->priv;
     priv->scale_type = GWY_RULER_SCALE_REAL;
-    priv->range_base = 1.0;
+    priv->range_vf = gwy_value_format_new();
 
     GtkGrid *grid = GTK_GRID(rasterview);
 
@@ -385,6 +386,8 @@ gwy_raster_view_dispose(GObject *object)
 static void
 gwy_raster_view_finalize(GObject *object)
 {
+    RasterView *priv = GWY_RASTER_VIEW(object)->priv;
+    g_object_unref(priv->range_vf);
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->finalize(object);
 }
 
@@ -691,6 +694,7 @@ field_notify(GwyRasterView *rasterview,
         GwyUnit *colorunit = gwy_axis_get_unit(GWY_AXIS(priv->coloraxis));
         GwyUnit *zunit = gwy_field_get_unit_z(field);
         gwy_unit_assign(colorunit, zunit);
+        update_range_entry_units(rasterview);
     }
 }
 
@@ -711,6 +715,7 @@ field_data_changed(GwyRasterView *rasterview,
                    G_GNUC_UNUSED GwyField *field)
 {
     update_color_axis_distrib(rasterview);
+    update_range_entry_units(rasterview);
 }
 
 static gboolean
@@ -841,6 +846,42 @@ update_color_axis_distrib(GwyRasterView *rasterview)
     g_object_unref(line);
 }
 
+static void
+update_range_entry_units(GwyRasterView *rasterview)
+{
+    RasterView *priv = rasterview->priv;
+    if (!priv->range_from.value)
+        return;
+
+    g_object_unref(priv->range_vf);
+    if (!priv->field) {
+        priv->range_vf = gwy_value_format_new();
+        gtk_entry_set_text(priv->range_from.value, "");
+        gtk_entry_set_text(priv->range_to.value, "");
+        gtk_label_set_text(priv->range_from.units, NULL);
+        gtk_label_set_text(priv->range_to.units, NULL);
+        return;
+    }
+
+    gdouble min, max;
+    gwy_field_min_max_full(priv->field, &min, &max);
+    gdouble m = fmax(fabs(min), fabs(max));
+    GwyUnit *zunit = gwy_field_get_unit_z(priv->field);
+    priv->range_vf = gwy_unit_format_with_digits(zunit,
+                                                 GWY_VALUE_FORMAT_PANGO, m, 4);
+    const gchar *u = gwy_value_format_get_units(priv->range_vf);
+    gtk_label_set_markup(priv->range_from.units, u);
+    gtk_label_set_markup(priv->range_to.units, u);
+    GwyRange arearange;
+    gwy_raster_area_get_range(priv->area, &arearange);
+    gtk_entry_set_text(priv->range_from.value,
+                       gwy_value_format_print_number(priv->range_vf,
+                                                     arearange.from));
+    gtk_entry_set_text(priv->range_to.value,
+                       gwy_value_format_print_number(priv->range_vf,
+                                                     arearange.to));
+}
+
 static gboolean
 area_motion_notify(GwyRasterView *rasterview,
                    GdkEventMotion *event,
@@ -924,11 +965,14 @@ coloraxis_range_modified(GwyRasterView *rasterview,
     }
 
     gwy_raster_area_set_user_range(area, &axisrange);
+    // TODO: Set both range method if they are joint.
     if (arearange.from != axisrange.from) {
         if (priv->range_from.method) {
             gwy_choice_set_active(priv->range_from.method,
                                   GWY_COLOR_RANGE_USER);
-            // TODO: update value entry
+            const gchar *s = gwy_value_format_print_number(priv->range_vf,
+                                                           axisrange.from);
+            gtk_entry_set_text(priv->range_from.value, s);
         }
         else
             gwy_raster_area_set_range_from_method(priv->area,
@@ -938,7 +982,9 @@ coloraxis_range_modified(GwyRasterView *rasterview,
         if (priv->range_to.method) {
             gwy_choice_set_active(priv->range_to.method,
                                   GWY_COLOR_RANGE_USER);
-            // TODO: update value entry
+            const gchar *s = gwy_value_format_print_number(priv->range_vf,
+                                                           axisrange.to);
+            gtk_entry_set_text(priv->range_to.value, s);
         }
         else
             gwy_raster_area_set_range_to_method(priv->area,
@@ -1341,7 +1387,7 @@ range_value_set(GwyRasterView *rasterview,
         return;
     }
 
-    newvalue *= priv->range_base;
+    newvalue *= gwy_value_format_get_base(priv->range_vf);
     if (entry == priv->range_from.value)
         arearange.from = newvalue;
     else
