@@ -65,6 +65,9 @@ gint         gwy_choice_get_active            (const GwyChoice *choice)         
 void         gwy_choice_set_sensitive         (GwyChoice *choice,
                                                gboolean sensitive);
 gboolean     gwy_choice_get_sensitive         (const GwyChoice *choice)          G_GNUC_PURE;
+void         gwy_choice_set_visible           (GwyChoice *choice,
+                                               gboolean visible);
+gboolean     gwy_choice_get_visible           (const GwyChoice *choice)          G_GNUC_PURE;
 void         gwy_choice_add_options           (GwyChoice *choice,
                                                const GwyChoiceOption *options,
                                                guint n);

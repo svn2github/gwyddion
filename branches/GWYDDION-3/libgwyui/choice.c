@@ -28,6 +28,7 @@
 enum {
     PROP_0,
     PROP_SENSITIVE,
+    PROP_VISIBLE,
     PROP_ACTIVE,
     N_PROPS
 };
@@ -53,8 +54,9 @@ struct _GwyChoicePrivate {
     gint active;
     gint list_index;
 
-    gboolean sensitive;
-    gboolean in_update;
+    gboolean sensitive : 1;
+    gboolean visible : 1;
+    gboolean in_update : 1;
 
     GtkAccelGroup *accel_group;
 
@@ -76,6 +78,8 @@ static gchar*   dgettext_swapped       (const gchar *msgid,
                                         const gchar *domainname);
 static gboolean set_sensitive          (GwyChoice *choice,
                                         gboolean sensitive);
+static gboolean set_visible            (GwyChoice *choice,
+                                        gboolean visible);
 static gboolean set_active             (GwyChoice *choice,
                                         gint active);
 static void     update_proxies         (GwyChoice *choice);
@@ -108,19 +112,26 @@ gwy_choice_class_init(GwyChoiceClass *klass)
     gobject_class->get_property = gwy_choice_get_property;
     gobject_class->set_property = gwy_choice_set_property;
 
-    properties[PROP_ACTIVE]
-        = g_param_spec_int("active",
-                           "Active",
-                           "Integer value of the currently active choice.",
-                           G_MININT, G_MAXINT, 0,
-                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
     properties[PROP_SENSITIVE]
         = g_param_spec_boolean("sensitive",
                                "Sensitive",
                                "Whether the widgets respond to user actions.",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_VISIBLE]
+        = g_param_spec_boolean("visible",
+                               "Visible",
+                               "Whether the widgets are visible.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_ACTIVE]
+        = g_param_spec_int("active",
+                           "Active",
+                           "Integer value of the currently active choice.",
+                           G_MININT, G_MAXINT, 0,
+                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -163,6 +174,10 @@ gwy_choice_set_property(GObject *object,
         set_sensitive(choice, g_value_get_boolean(value));
         break;
 
+        case PROP_VISIBLE:
+        set_visible(choice, g_value_get_boolean(value));
+        break;
+
         case PROP_ACTIVE:
         set_active(choice, g_value_get_int(value));
         break;
@@ -185,6 +200,10 @@ gwy_choice_get_property(GObject *object,
     switch (prop_id) {
         case PROP_SENSITIVE:
         g_value_set_boolean(value, priv->sensitive);
+        break;
+
+        case PROP_VISIBLE:
+        g_value_set_boolean(value, priv->visible);
         break;
 
         case PROP_ACTIVE:
@@ -281,6 +300,41 @@ gwy_choice_get_sensitive(const GwyChoice *choice)
 {
     g_return_val_if_fail(GWY_IS_CHOICE(choice), FALSE);
     return choice->priv->sensitive;
+}
+
+/**
+ * gwy_choice_set_visible:
+ * @choice: A choice.
+ * @visible: %TRUE to make @choice visible, %FALSE to make it hidden.
+ *
+ * Sets the sensitivity of a choice.
+ **/
+void
+gwy_choice_set_visible(GwyChoice *choice,
+                         gboolean visible)
+{
+    g_return_if_fail(GWY_IS_CHOICE(choice));
+    if (!set_visible(choice, visible))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(choice), properties[PROP_VISIBLE]);
+}
+
+/**
+ * gwy_choice_get_visible:
+ * @choice: A choice.
+ *
+ * Gets whether a choice is visible.
+ *
+ * This means that the choice as a whole is visible.
+ *
+ * Returns: %TRUE if @choice is visible, %FALSE if it is hidden.
+ **/
+gboolean
+gwy_choice_get_visible(const GwyChoice *choice)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), FALSE);
+    return choice->priv->visible;
 }
 
 /**
@@ -641,12 +695,30 @@ set_sensitive(GwyChoice *choice,
               gboolean sensitive)
 {
     Choice *priv = choice->priv;
-    if (sensitive == priv->sensitive)
+    if (!sensitive == !priv->sensitive)
         return FALSE;
 
     for (GSList *l = priv->proxies; l; l = g_slist_next(l)) {
         ChoiceProxy *proxy = (ChoiceProxy*)l->data;
-        g_object_set(proxy->object, "sensitive", FALSE, NULL);
+        g_object_set(proxy->object, "sensitive", sensitive, NULL);
+    }
+    return TRUE;
+}
+
+static gboolean
+set_visible(GwyChoice *choice,
+            gboolean visible)
+{
+    Choice *priv = choice->priv;
+    if (!visible == !priv->visible)
+        return FALSE;
+
+    for (GSList *l = priv->proxies; l; l = g_slist_next(l)) {
+        ChoiceProxy *proxy = (ChoiceProxy*)l->data;
+        g_object_set(proxy->object,
+                     "visible", visible,
+                     "no-show-all", !visible,
+                     NULL);
     }
     return TRUE;
 }
