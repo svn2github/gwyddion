@@ -38,8 +38,13 @@ EXTRA_DIST = \
 	$(DOC_MAIN_SGML_FILE) \
 	$(DOC_MODULE)-overrides.txt
 
-DOC_STAMPS = scan-build.stamp sgml-build.stamp html-build.stamp \
-	sgml.stamp html.stamp
+DOC_STAMPS = \
+	scan-build.stamp \
+	sgml-build.stamp \
+	html-build.stamp \
+	xref-build.stamp \
+	sgml.stamp \
+	html.stamp
 
 SCAN_FILES = \
 	$(DOC_MODULE)-sections.txt \
@@ -67,12 +72,19 @@ HFILE_GLOB = \
 CFILE_GLOB = $(top_srcdir)/$(DOC_SOURCE_DIR)/*.c
 
 if ENABLE_GTK_DOC
-all-local: html-build.stamp
+all-local: xref-build.stamp
 else
 all-local:
 endif
 
-docs: html-build.stamp
+# In order to get forward cross-references right, we must build HTML of all
+# modules first then run fixxref in all modules.  So by making docs-prepare
+# then making docs things can be generated all right even from a fresh
+# checkout.
+
+docs: xref-build.stamp
+
+docs-prepare: html-build.stamp
 
 #### scan ####
 
@@ -130,9 +142,17 @@ html-build.stamp: sgml.stamp $(srcdir)/$(DOC_MAIN_SGML_FILE) $(content_files)
 	                 ../$(DOC_MAIN_SGML_FILE)
 	$(AM_V_at)test "x$(HTML_IMAGES)" == x || cp -f $(HTML_IMAGES) html/
 	$(AM_V_at)cp $(top_srcdir)/docs/style.css html/
-	$(AM_V_at)gtkdoc-fixxref --module-dir=html --html-dir=$(HTML_DIR) \
-	       --module=$(DOC_MODULE) $(FIXXREF_OPTIONS)
 	$(AM_V_at)touch html-build.stamp
+
+html.stamp: html-build.stamp
+	@true
+
+#### xref ####
+
+xref-build.stamp: html.stamp
+	$(AM_V_GEN)gtkdoc-fixxref --module-dir=html --html-dir=$(HTML_DIR) \
+	       --module=$(DOC_MODULE) $(FIXXREF_OPTIONS)
+	$(AM_V_at)touch xref-build.stamp
 
 ##############
 
