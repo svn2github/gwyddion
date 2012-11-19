@@ -986,11 +986,11 @@ gwy_spin_button_draw_arrow(GwySpinButton *spinbutton,
     x = (width - size)/2.0;
 
     if (arrow_type == GTK_ARROW_UP) {
-        y = (height - size/2.0)/2.0;
+        y = height/2.0 - size/2.0;
         angle = 0;
     }
     else {
-        y = height + ((height - size/2.0)/2.0) - size/2.0;
+        y = height/2.0 + size/2.0;
         angle = G_PI;
     }
 
@@ -2305,7 +2305,7 @@ spin_button_get_arrow_size(GwySpinButton *spinbutton)
     font_desc = gtk_style_context_get_font(context, 0);
 
     size = pango_font_description_get_size(font_desc);
-    arrow_size = MAX(PANGO_PIXELS(size), MIN_ARROW_WIDTH);
+    arrow_size = MAX(PANGO_PIXELS(3*size/2), MIN_ARROW_WIDTH);
 
     return arrow_size - arrow_size % 2; /* force even */
 }
