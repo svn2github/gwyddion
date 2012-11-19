@@ -547,7 +547,7 @@ gwy_spin_button_init(GwySpinButton *spinbutton)
     GtkStyleContext *context;
 
     spinbutton->priv = G_TYPE_INSTANCE_GET_PRIVATE(spinbutton,
-                                                    GTK_TYPE_SPIN_BUTTON,
+                                                    GWY_TYPE_SPIN_BUTTON,
                                                     GwySpinButtonPrivate);
     priv = spinbutton->priv;
 
@@ -1739,7 +1739,7 @@ gwy_spin_button_configure(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -1781,7 +1781,7 @@ gwy_spin_button_new(GtkAdjustment *adjustment,
                     guint digits)
 {
     g_return_val_if_fail(!adjustment || GTK_IS_ADJUSTMENT(adjustment), NULL);
-    GwySpinButton *spin = g_object_new(GTK_TYPE_SPIN_BUTTON, NULL);
+    GwySpinButton *spin = g_object_new(GWY_TYPE_SPIN_BUTTON, NULL);
     gwy_spin_button_configure(spin, adjustment, climb_rate, digits);
     return GTK_WIDGET(spin);
 }
@@ -1816,7 +1816,7 @@ gwy_spin_button_new_with_range(gdouble min,
     g_return_val_if_fail(min <= max, NULL);
     g_return_val_if_fail(step != 0.0, NULL);
 
-    spin = g_object_new(GTK_TYPE_SPIN_BUTTON, NULL);
+    spin = g_object_new(GWY_TYPE_SPIN_BUTTON, NULL);
 
     adjustment = gtk_adjustment_new(min, min, max, step, 10 * step, 0);
 
@@ -1863,7 +1863,7 @@ gwy_spin_button_set_adjustment(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -1907,7 +1907,7 @@ gwy_spin_button_set_adjustment(GwySpinButton *spinbutton,
 GtkAdjustment *
                gwy_spin_button_get_adjustment(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), NULL);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), NULL);
 
     return spinbutton->priv->adjustment;
 }
@@ -1926,7 +1926,7 @@ gwy_spin_button_set_digits(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -1951,7 +1951,7 @@ gwy_spin_button_set_digits(GwySpinButton *spinbutton,
 guint
 gwy_spin_button_get_digits(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), 0);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), 0);
 
     return spinbutton->priv->digits;
 }
@@ -1972,7 +1972,7 @@ gwy_spin_button_set_increments(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2003,7 +2003,7 @@ gwy_spin_button_get_increments(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2031,7 +2031,7 @@ gwy_spin_button_set_range(GwySpinButton *spinbutton,
 {
     GtkAdjustment *adjustment;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     adjustment = spinbutton->priv->adjustment;
 
@@ -2063,7 +2063,7 @@ void
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2084,7 +2084,7 @@ void
 gdouble
 gwy_spin_button_get_value(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), 0.0);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), 0.0);
 
     return gtk_adjustment_get_value(spinbutton->priv->adjustment);
 }
@@ -2103,7 +2103,7 @@ gwy_spin_button_get_value_as_int(GwySpinButton *spinbutton)
     GwySpinButtonPrivate *priv;
     gdouble val;
 
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), 0);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), 0);
 
     priv = spinbutton->priv;
 
@@ -2127,7 +2127,7 @@ gwy_spin_button_set_value(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2158,7 +2158,7 @@ gwy_spin_button_set_update_policy(GwySpinButton             *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2181,7 +2181,7 @@ gwy_spin_button_set_update_policy(GwySpinButton             *spinbutton,
 GtkSpinButtonUpdatePolicy
 gwy_spin_button_get_update_policy(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), GTK_UPDATE_ALWAYS);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), GTK_UPDATE_ALWAYS);
 
     return spinbutton->priv->update_policy;
 }
@@ -2200,7 +2200,7 @@ gwy_spin_button_set_numeric(GwySpinButton *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2224,7 +2224,7 @@ gwy_spin_button_set_numeric(GwySpinButton *spinbutton,
 gboolean
 gwy_spin_button_get_numeric(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), FALSE);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), FALSE);
 
     return spinbutton->priv->numeric;
 }
@@ -2244,7 +2244,7 @@ gwy_spin_button_set_wrap(GwySpinButton  *spinbutton,
 {
     GwySpinButtonPrivate *priv;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2270,7 +2270,7 @@ gwy_spin_button_set_wrap(GwySpinButton  *spinbutton,
 gboolean
 gwy_spin_button_get_wrap(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), FALSE);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), FALSE);
 
     return spinbutton->priv->wrap;
 }
@@ -2309,7 +2309,7 @@ gwy_spin_button_set_snap_to_ticks(GwySpinButton *spinbutton,
     GwySpinButtonPrivate *priv;
     guint new_val;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2336,7 +2336,7 @@ gwy_spin_button_set_snap_to_ticks(GwySpinButton *spinbutton,
 gboolean
 gwy_spin_button_get_snap_to_ticks(GwySpinButton *spinbutton)
 {
-    g_return_val_if_fail(GTK_IS_SPIN_BUTTON(spinbutton), FALSE);
+    g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), FALSE);
 
     return spinbutton->priv->snap_to_ticks;
 }
@@ -2359,7 +2359,7 @@ gwy_spin_button_spin(GwySpinButton *spinbutton,
     GtkAdjustment *adjustment;
     gdouble diff;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
@@ -2434,7 +2434,7 @@ gwy_spin_button_update(GwySpinButton *spinbutton)
     gint error = 0;
     gint return_val;
 
-    g_return_if_fail(GTK_IS_SPIN_BUTTON(spinbutton));
+    g_return_if_fail(GWY_IS_SPIN_BUTTON(spinbutton));
 
     priv = spinbutton->priv;
 
