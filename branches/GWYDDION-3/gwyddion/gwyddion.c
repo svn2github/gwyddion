@@ -83,7 +83,7 @@ static GtkWidget*
 create_raster_window(guint xres, guint yres)
 {
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 UI Test");
+    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Raster View Test");
     gtk_window_set_default_size(GTK_WINDOW(window), xres, yres);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -129,6 +129,28 @@ create_raster_window(guint xres, guint yres)
     return window;
 }
 
+static GtkWidget*
+create_widget_test(void)
+{
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Widget Test");
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    GtkGrid *grid = GTK_GRID(gtk_grid_new());
+    gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
+
+    GtkWidget *label = gtk_label_new("Value:");
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_grid_attach(grid, label, 0, 0, 1, 1);
+
+    GtkAdjustment *adj = gtk_adjustment_new(1.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
+    GtkWidget *spin = gwy_spin_button_new(adj, 0.0, 1);
+    gtk_grid_attach(grid, spin, 1, 0, 1, 1);
+
+    return window;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -155,8 +177,11 @@ main(int argc, char *argv[])
     g_object_set(gwy_gradients_get("Spectral"), "preferred", TRUE, NULL);
 
 
-    GtkWidget *window = create_raster_window(600, 400);
-    gtk_widget_show_all(window);
+    GtkWidget *rwindow = create_raster_window(600, 400);
+    gtk_widget_show_all(rwindow);
+
+    GtkWidget *twindow = create_widget_test();
+    gtk_widget_show_all(twindow);
     //g_timeout_add(100, update, mix);
 
     gtk_main();
