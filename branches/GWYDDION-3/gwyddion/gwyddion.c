@@ -79,6 +79,56 @@ print_version(G_GNUC_UNUSED const gchar *name,
     exit(EXIT_SUCCESS);
 }
 
+static GtkWidget*
+create_raster_window(guint xres, guint yres)
+{
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 UI Test");
+    gtk_window_set_default_size(GTK_WINDOW(window), xres, yres);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    GtkWidget *rasterview = gwy_raster_view_new();
+    gtk_container_add(GTK_CONTAINER(window), rasterview);
+
+    GwyRasterArea *rasterarea = gwy_raster_view_get_area(GWY_RASTER_VIEW(rasterview));
+    g_object_set(rasterarea,
+                 "zoom", 3.0,
+                 "real-aspect-ratio", FALSE,
+                 "mask-color", &(GwyRGBA){ 0.4, 0.7, 0.1, 0.4 },
+                 "number-grains", FALSE,
+                 "range-from-method", GWY_COLOR_RANGE_FULL,
+                 "range-to-method", GWY_COLOR_RANGE_FULL,
+                 //"user-range", &(GwyRange){ 0.2, 0.8 },
+                 NULL);
+
+    Mix *mix = create_mix(3*xres/2, 3*yres/2);
+    GwyMaskField *mask = gwy_mask_field_new_from_field(mix->result, NULL,
+                                                       0.52, G_MAXDOUBLE, FALSE);
+    gwy_raster_area_set_field(rasterarea, mix->result);
+    gwy_raster_area_set_mask(rasterarea, mask);
+
+    GwyCoords *coords = gwy_coords_point_new();
+    gdouble xy[] = { 0.5, 0.5 };
+    gwy_coords_set(coords, 0, xy);
+    xy[0] = 0.4;
+    gwy_coords_set(coords, 1, xy);
+    xy[1] = 0.25;
+    gwy_coords_set(coords, 2, xy);
+
+    GwyShapes *shapes = gwy_shapes_point_new();
+    g_object_set(shapes,
+                 "radius", 8.0,
+                 "max-shapes", 5,
+                 //"editable", FALSE,
+                 NULL);
+    gwy_shapes_set_coords(shapes, coords);
+    g_object_unref(coords);
+
+    gwy_raster_area_set_shapes(rasterarea, shapes);
+
+    return window;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -104,51 +154,9 @@ main(int argc, char *argv[])
     g_object_set(gwy_gradients_get("Gwyddion.net"), "preferred", TRUE, NULL);
     g_object_set(gwy_gradients_get("Spectral"), "preferred", TRUE, NULL);
 
-    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 UI Test");
-    gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    GtkWidget *rasterview = gwy_raster_view_new();
-    gtk_container_add(GTK_CONTAINER(window), rasterview);
-
-    GwyRasterArea *rasterarea = gwy_raster_view_get_area(GWY_RASTER_VIEW(rasterview));
-    g_object_set(rasterarea,
-                 "zoom", 3.0,
-                 "real-aspect-ratio", FALSE,
-                 "mask-color", &(GwyRGBA){ 0.4, 0.7, 0.1, 0.4 },
-                 "number-grains", FALSE,
-                 "range-from-method", GWY_COLOR_RANGE_FULL,
-                 "range-to-method", GWY_COLOR_RANGE_FULL,
-                 //"user-range", &(GwyRange){ 0.2, 0.8 },
-                 NULL);
-
-    Mix *mix = create_mix(400, 300);
-    //GwyMaskField *mask = gwy_mask_field_new_from_field(mix->result, NULL,
-    //                                                   0.52, G_MAXDOUBLE, FALSE);
-    gwy_raster_area_set_field(rasterarea, mix->result);
-    //gwy_raster_area_set_mask(rasterarea, mask);
-
-    GwyCoords *coords = gwy_coords_point_new();
-    gdouble xy[] = { 0.5, 0.5 };
-    gwy_coords_set(coords, 0, xy);
-    xy[0] = 0.4;
-    gwy_coords_set(coords, 1, xy);
-    xy[1] = 0.25;
-    gwy_coords_set(coords, 2, xy);
-
-    GwyShapes *shapes = gwy_shapes_point_new();
-    g_object_set(shapes,
-                 "radius", 8.0,
-                 "max-shapes", 5,
-                 //"editable", FALSE,
-                 NULL);
-    gwy_shapes_set_coords(shapes, coords);
-    g_object_unref(coords);
-
-    gwy_raster_area_set_shapes(rasterarea, shapes);
-
-    gtk_widget_show_all(GTK_WIDGET(window));
+    GtkWidget *window = create_raster_window(600, 400);
+    gtk_widget_show_all(window);
     //g_timeout_add(100, update, mix);
 
     gtk_main();
