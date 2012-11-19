@@ -819,7 +819,9 @@ gwy_spin_button_size_allocate(GtkWidget *widget,
     panel_width = arrow_size + padding.left + padding.right;
 
     gtk_widget_get_preferred_size(widget, &requisition, NULL);
-    req_height = requisition.height - gtk_widget_get_margin_top(widget) - gtk_widget_get_margin_bottom(widget);
+    req_height = (requisition.height
+                  - gtk_widget_get_margin_top(widget)
+                  - gtk_widget_get_margin_bottom(widget));
 
     gtk_widget_set_allocation(widget, allocation);
 
@@ -1015,7 +1017,9 @@ gwy_spin_button_enter_notify(GtkWidget *widget,
         gdk_window_get_device_position(priv->panel, device, &x, &y, NULL);
 
         gtk_widget_get_preferred_size(widget, &requisition, NULL);
-        req_height = requisition.height - gtk_widget_get_margin_top(widget) - gtk_widget_get_margin_bottom(widget);
+        req_height = (requisition.height
+                      - gtk_widget_get_margin_top(widget)
+                      - gtk_widget_get_margin_bottom(widget));
 
         if (y <= req_height/2)
             priv->in_child = GTK_ARROW_UP;
@@ -2286,6 +2290,8 @@ gwy_spin_button_get_wrap(GwySpinButton *spinbutton)
     return spinbutton->priv->wrap;
 }
 
+// XXX: The default arrows are somewhat flat because they are inscribed into
+// a square.  Make difference between width and height?
 static gint
 spin_button_get_arrow_size(GwySpinButton *spinbutton)
 {
