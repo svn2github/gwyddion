@@ -138,6 +138,7 @@ void                        gwy_resource_type_flush                (GType type);
 void                        gwy_resources_flush                    (void);
 void                        gwy_resources_lock                     (void);
 void                        gwy_resources_unlock                   (void);
+void                        gwy_resources_load                     (GwyErrorList **error_list);
 void                        gwy_resources_finalize                 (void);
 GwyResourceLineType         gwy_resource_parse_param_line          (GwyStrLineIter *iter,
                                                                     gchar **key,

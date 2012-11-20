@@ -1656,7 +1656,8 @@ manage_flush_check_queue(GType type,
 /**
  * gwy_resource_type_load:
  * @type: A resource type.
- * @error_list: Location to store the errors occuring, %NULL to ignore.
+ * @error_list: (allow-none):
+ *              Location to store the errors occuring, %NULL to ignore.
  *
  * Loads resources of a given type from disk.
  *
@@ -1712,7 +1713,8 @@ set_managed_directory(ResourceClass *cpriv,
  *              as fixed.  At most one directory can be loaded with @modifiable
  *              as %TRUE.  Newly created and modified resources will be saved
  *              to this directory.
- * @error_list: Location to store the errors occuring, %NULL to ignore.
+ * @error_list: (allow-none):
+ *              Location to store the errors occuring, %NULL to ignore.
  *
  * Loads all resources of given class from a directory.
  *
@@ -1786,7 +1788,8 @@ gwy_resource_type_load_directory(GType type,
 /**
  * gwy_resource_type_load_builtins:
  * @type: Resource type of the resources.
- * @error_list: Location to store the errors occuring, %NULL to ignore.
+ * @error_list: (allow-none):
+ *              Location to store the errors occuring, %NULL to ignore.
  *
  * Loads all built-in resources of given class.
  *
@@ -2025,6 +2028,28 @@ gwy_resources_unlock(void)
 
 /**
  * gwy_resources_finalize:
+ * @error_list: (allow-none):
+ *              Location to store the errors occuring, %NULL to ignore.
+ *
+ * Loads resources of all registered classes.
+ *
+ * This functions initialises the built-in types with gwy_type_init() and runs
+ * gwy_resource_type_load() for all built-in resource classes and all other
+ * resource classes that have been registered. Non-built-in resources would,
+ * however, usually be loaded explicitly.
+ **/
+void
+gwy_resources_load(GwyErrorList **error_list)
+{
+    gwy_type_init();
+    for (GSList *l = resource_classes; l; l = g_slist_next(l)) {
+        GType type = (GType)GPOINTER_TO_SIZE(l->data);
+        gwy_resource_type_load(type, error_list);
+    }
+}
+
+/**
+ * gwy_resources_finalize:
  *
  * Destroys the inventories of all resource classes.
  *
@@ -2040,9 +2065,7 @@ gwy_resources_unlock(void)
 void
 gwy_resources_finalize(void)
 {
-    GSList *l;
-
-    for (l = resource_classes; l; l = g_slist_next(l)) {
+    for (GSList *l = resource_classes; l; l = g_slist_next(l)) {
         GType type = (GType)GPOINTER_TO_SIZE(l->data);
         GwyResourceClass *klass = g_type_class_peek(type);
         ResourceClass *priv = klass->priv;
