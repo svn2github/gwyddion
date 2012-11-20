@@ -129,12 +129,12 @@ init_types(G_GNUC_UNUSED gpointer arg)
     g_type_class_peek_static(GWY_TYPE_COORDS_POINT);
     g_type_class_peek_static(GWY_TYPE_COORDS_RECTANGLE);
 
-    // Resources
-    g_type_class_peek_static(GWY_TYPE_RESOURCE);
-    g_type_class_peek_static(GWY_TYPE_GRADIENT);
-    g_type_class_peek_static(GWY_TYPE_GL_MATERIAL);
-    g_type_class_peek_static(GWY_TYPE_USER_FIT_FUNC);
-    g_type_class_peek_static(GWY_TYPE_USER_GRAIN_VALUE);
+    // Resources must be forced to call gwy_resource_class_register().
+    g_type_class_ref(GWY_TYPE_RESOURCE);
+    g_type_class_ref(GWY_TYPE_GRADIENT);
+    g_type_class_ref(GWY_TYPE_GL_MATERIAL);
+    g_type_class_ref(GWY_TYPE_USER_FIT_FUNC);
+    g_type_class_ref(GWY_TYPE_USER_GRAIN_VALUE);
 
     // Serialisable boxed
     g_type_class_peek_static(GWY_TYPE_RGBA);
