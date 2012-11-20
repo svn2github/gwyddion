@@ -30,6 +30,7 @@ public_headers = \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/resource-list.h \
 	$(srcdir)/ruler.h \
+	$(srcdir)/scale-bar.h \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
 	$(srcdir)/shapes-point.h \
@@ -85,6 +86,7 @@ libgwyui3_la_SOURCES = \
 	raster-view.c \
 	resource-list.c \
 	ruler.c \
+	scale-bar.c \
 	scroller.c \
 	shapes.c \
 	shapes-point.c \

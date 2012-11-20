@@ -563,7 +563,7 @@ GwyGradient*
 gwy_color_axis_get_gradient(const GwyColorAxis *coloraxis)
 {
     g_return_val_if_fail(GWY_IS_COLOR_AXIS(coloraxis), NULL);
-    return GWY_COLOR_AXIS(coloraxis)->priv->gradient;
+    return coloraxis->priv->gradient;
 }
 
 /**
@@ -976,14 +976,14 @@ find_boundary(GwyAxis *axis, gdouble x, gdouble y)
 /**
  * SECTION: color-axis
  * @title: GwyColorAxis
- * @short_description: ColorAxis showing a false colour map
+ * @short_description: Axis showing a false colour map
  * @image: GwyColorAxis.png
  **/
 
 /**
  * GwyColorAxis:
  *
- * ColorAxis widget showing a false colour rmap.
+ * Axis widget showing a false colour rmap.
  *
  * The #GwyColorAxis struct contains private data only and should be accessed
  * using the functions below.

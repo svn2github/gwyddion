@@ -32,6 +32,7 @@
 #include <libgwyui/raster-view.h>
 #include <libgwyui/resource-list.h>
 #include <libgwyui/ruler.h>
+#include <libgwyui/scale-bar.h>
 #include <libgwyui/scroller.h>
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-point.h>
