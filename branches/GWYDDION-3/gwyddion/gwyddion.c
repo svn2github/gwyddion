@@ -168,14 +168,12 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    gwy_resource_type_load(GWY_TYPE_GRADIENT, NULL);
-    gwy_register_stock_items();
-
+    gwy_resources_load(NULL);
     g_object_set(gwy_gradients_get("Gray"), "preferred", TRUE, NULL);
     g_object_set(gwy_gradients_get("Sky"), "preferred", TRUE, NULL);
     g_object_set(gwy_gradients_get("Gwyddion.net"), "preferred", TRUE, NULL);
     g_object_set(gwy_gradients_get("Spectral"), "preferred", TRUE, NULL);
-
+    gwy_register_stock_items();
 
     GtkWidget *rwindow = create_raster_window(600, 400);
     gtk_widget_show_all(rwindow);
