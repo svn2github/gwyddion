@@ -38,6 +38,7 @@
     <xi:include href="xml/resource-list.xml"/>
     <xi:include href="xml/cell-renderer-gradient.xml"/>
     <xi:include href="xml/spin-button.xml"/>
+    <xi:include href="xml/scale-bar.xml"/>
     <xi:include href="xml/cairo-utils.xml"/>
     <xi:include href="xml/widget-utils.xml"/>
   </chapter>
