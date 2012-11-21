@@ -38,10 +38,6 @@ G_BEGIN_DECLS
     } while (0)
 
 G_GNUC_INTERNAL
-gboolean _gwy_assign_string(gchar **p,
-                            const gchar *q);
-
-G_GNUC_INTERNAL
 void _gwy_assign_units(GwyUnit **dest,
                        const GwyUnit *source);
 

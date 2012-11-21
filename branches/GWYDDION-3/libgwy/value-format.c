@@ -368,7 +368,7 @@ gwy_value_format_set_units(GwyValueFormat *format,
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
-    if (_gwy_assign_string(&priv->units, units))
+    if (gwy_assign_string(&priv->units, units))
         g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_UNITS]);
 }
 
@@ -401,7 +401,7 @@ gwy_value_format_set_glue(GwyValueFormat *format,
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
-    if (_gwy_assign_string(&priv->glue, glue))
+    if (gwy_assign_string(&priv->glue, glue))
         g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_GLUE]);
 }
 

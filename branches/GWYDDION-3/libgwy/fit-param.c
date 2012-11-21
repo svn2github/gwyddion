@@ -343,7 +343,7 @@ gwy_fit_param_assign_impl(GwySerializable *destination,
         notify[nn++] = properties[PROP_POWER_Y];
         dpriv->power_y = spriv->power_y;
     }
-    if (_gwy_assign_string(&dpriv->estimate, spriv->estimate))
+    if (gwy_assign_string(&dpriv->estimate, spriv->estimate))
         notify[nn++] = properties[PROP_ESTIMATE];
 
     _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
@@ -525,7 +525,7 @@ gwy_fit_param_set_estimate(GwyFitParam *fitparam,
         return;
     }
     FitParam *priv = fitparam->priv;
-    if (_gwy_assign_string(&priv->estimate, estimate))
+    if (gwy_assign_string(&priv->estimate, estimate))
         g_object_notify_by_pspec(G_OBJECT(fitparam), properties[PROP_ESTIMATE]);
 }
 

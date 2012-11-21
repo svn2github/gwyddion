@@ -24,29 +24,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/object-internal.h"
 
-gboolean
-_gwy_assign_string(gchar **p, const gchar *q)
-{
-    if (*p && q) {
-        if (!gwy_strequal(*p, q)) {
-            gchar *old = *p;
-            *p = g_strdup(q);
-            g_free(old);
-            return TRUE;
-        }
-    }
-    else if (*p) {
-        g_free(*p);
-        *p = NULL;
-        return TRUE;
-    }
-    else if (q) {
-        *p = g_strdup(q);
-        return TRUE;
-    }
-    return FALSE;
-}
-
 void
 _gwy_assign_units(GwyUnit **dest,
                   const GwyUnit *source)

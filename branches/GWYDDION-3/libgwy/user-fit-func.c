@@ -271,9 +271,9 @@ static void
 assign_info(UserFitFunc *dpriv,
             const UserFitFunc *spriv)
 {
-    _gwy_assign_string(&dpriv->group, spriv->group);
-    _gwy_assign_string(&dpriv->formula, spriv->formula);
-    _gwy_assign_string(&dpriv->filter, spriv->filter);
+    gwy_assign_string(&dpriv->group, spriv->group);
+    gwy_assign_string(&dpriv->formula, spriv->formula);
+    gwy_assign_string(&dpriv->filter, spriv->filter);
 }
 
 static GObject*
@@ -545,7 +545,7 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
     free_params(priv);
     priv->param = newparam;
     priv->nparams = np;
-    _gwy_assign_string(&priv->formula, formula);
+    gwy_assign_string(&priv->formula, formula);
     gwy_user_fit_func_changed(userfitfunc);
 
     return TRUE;
@@ -581,7 +581,7 @@ gwy_user_fit_func_set_group(GwyUserFitFunc *userfitfunc,
     g_return_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc));
     g_return_if_fail(group);
     UserFitFunc *priv = userfitfunc->priv;
-    if (_gwy_assign_string(&priv->group, group))
+    if (gwy_assign_string(&priv->group, group))
         gwy_user_fit_func_changed(userfitfunc);
 }
 
@@ -782,11 +782,11 @@ gwy_user_fit_func_parse(GwyResource *resource,
         }
         else {
             if (gwy_strequal(key, "group"))
-                _gwy_assign_string(&priv->group, value);
+                gwy_assign_string(&priv->group, value);
             else if (gwy_strequal(key, "formula"))
-                _gwy_assign_string(&priv->formula, value);
+                gwy_assign_string(&priv->formula, value);
             else if (gwy_strequal(key, "filter"))
-                _gwy_assign_string(&priv->filter, value);
+                gwy_assign_string(&priv->filter, value);
             else
                 g_warning("Ignoring unknown GwyUserFitFunc key ‘%s’.", key);
         }

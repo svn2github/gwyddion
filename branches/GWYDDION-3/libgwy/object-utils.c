@@ -195,6 +195,46 @@ gwy_set_member_object(gpointer instance,
 }
 
 /**
+ * gwy_assign_string:
+ * @target: Pointer to target string, typically a struct field.
+ * @newvalue: New value of the string, may be %NULL.
+ *
+ * Assigns a string, checking for equality and handling %NULL<!-- -->s.
+ *
+ * This function simplifies handling of string value setters.
+ *
+ * The new value is duplicated and the old string is freed in a safe manner
+ * (it is possible to pass a pointer somewhere within the old value as the
+ * new value, for instance).  Any of the old and new value can be %NULL.  If
+ * both values are equal (including both unset), the function returns %FALSE.
+ *
+ * Returns: %TRUE if the target string has changed.
+ **/
+gboolean
+gwy_assign_string(gchar **target,
+                  const gchar *newvalue)
+{
+    if (*target && newvalue) {
+        if (!gwy_strequal(*target, newvalue)) {
+            gchar *old = *target;
+            *target = g_strdup(newvalue);
+            g_free(old);
+            return TRUE;
+        }
+    }
+    else if (*target) {
+        g_free(*target);
+        *target = NULL;
+        return TRUE;
+    }
+    else if (newvalue) {
+        *target = g_strdup(newvalue);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/**
  * gwy_override_class_properties:
  * @oclass: An object class.
  * @properties: Array of properties, indexed by the property id, to store

@@ -613,7 +613,7 @@ gwy_resource_rename(gpointer item,
 
     g_return_if_fail(priv->modifiable);
     g_return_if_fail(new_name);
-    if (_gwy_assign_string(&priv->name, new_name))
+    if (gwy_assign_string(&priv->name, new_name))
         g_object_notify_by_pspec(G_OBJECT(item), properties[PROP_NAME]);
 }
 

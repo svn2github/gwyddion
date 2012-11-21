@@ -39,6 +39,7 @@ fft/nice-size
 fft/load-wisdom
 object-utils/set-member
 object-utils/set-user-func
+object-utils/assign-string
 expr/evaluate
 expr/vector
 expr/garbage

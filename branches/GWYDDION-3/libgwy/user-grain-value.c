@@ -261,10 +261,10 @@ static void
 assign_info(UserGrainValue *dpriv,
             const UserGrainValue *spriv)
 {
-    _gwy_assign_string(&dpriv->formula, spriv->formula);
-    _gwy_assign_string(&dpriv->group, spriv->group);
-    _gwy_assign_string(&dpriv->ident, spriv->ident);
-    _gwy_assign_string(&dpriv->symbol, spriv->symbol);
+    gwy_assign_string(&dpriv->formula, spriv->formula);
+    gwy_assign_string(&dpriv->group, spriv->group);
+    gwy_assign_string(&dpriv->ident, spriv->ident);
+    gwy_assign_string(&dpriv->symbol, spriv->symbol);
     dpriv->power_xy = spriv->power_xy;
     dpriv->power_z = spriv->power_z;
     dpriv->same_units = spriv->same_units;
@@ -457,7 +457,7 @@ gwy_user_grain_value_set_formula(GwyUserGrainValue *usergrainvalue,
     G_UNLOCK(test_expr);
 
     if (ok) {
-        _gwy_assign_string(&priv->formula, formula);
+        gwy_assign_string(&priv->formula, formula);
         gwy_user_grain_value_changed(usergrainvalue);
     }
 
@@ -521,7 +521,7 @@ gwy_user_grain_value_set_group(GwyUserGrainValue *usergrainvalue,
     g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
     g_return_if_fail(group);
     UserGrainValue *priv = usergrainvalue->priv;
-    if (_gwy_assign_string(&priv->group, group))
+    if (gwy_assign_string(&priv->group, group))
         gwy_user_grain_value_changed(usergrainvalue);
 }
 
@@ -557,7 +557,7 @@ gwy_user_grain_value_set_symbol(GwyUserGrainValue *usergrainvalue,
     g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
     g_return_if_fail(symbol);
     UserGrainValue *priv = usergrainvalue->priv;
-    if (_gwy_assign_string(&priv->symbol, symbol))
+    if (gwy_assign_string(&priv->symbol, symbol))
         gwy_user_grain_value_changed(usergrainvalue);
 }
 
@@ -591,7 +591,7 @@ gwy_user_grain_value_set_ident(GwyUserGrainValue *usergrainvalue,
     g_return_if_fail(ident && gwy_utf8_strisident(ident, more, NULL));
     // XXX: Uniqueness?  Or maybe not here?
     UserGrainValue *priv = usergrainvalue->priv;
-    if (_gwy_assign_string(&priv->ident, ident))
+    if (gwy_assign_string(&priv->ident, ident))
         gwy_user_grain_value_changed(usergrainvalue);
 }
 
@@ -797,13 +797,13 @@ gwy_user_grain_value_parse(GwyResource *resource,
         else if (gwy_strequal(key, "is_angle"))
             priv->is_angle = !!strtol(value, NULL, 10);
         else if (gwy_strequal(key, "formula"))
-            _gwy_assign_string(&priv->formula, value);
+            gwy_assign_string(&priv->formula, value);
         else if (gwy_strequal(key, "group"))
-            _gwy_assign_string(&priv->group, value);
+            gwy_assign_string(&priv->group, value);
         else if (gwy_strequal(key, "ident"))
-            _gwy_assign_string(&priv->ident, value);
+            gwy_assign_string(&priv->ident, value);
         else if (gwy_strequal(key, "symbol"))
-            _gwy_assign_string(&priv->symbol, value);
+            gwy_assign_string(&priv->symbol, value);
         else
             g_warning("Ignoring unknown GwyUserGrainValue key ‘%s’.", key);
     }

@@ -45,6 +45,8 @@ gboolean gwy_set_member_object        (gpointer instance,
                                        GType expected_type,
                                        gpointer member_field,
                                        ...)                     G_GNUC_NULL_TERMINATED;
+gboolean gwy_assign_string            (gchar **target,
+                                       const gchar *newvalue);
 void     gwy_override_class_properties(GObjectClass *oclass,
                                        GParamSpec **properties,
                                        ...)                     G_GNUC_NULL_TERMINATED;

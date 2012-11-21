@@ -592,7 +592,7 @@ gwy_inventory_set_default_name(GwyInventory *inventory,
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     Inventory *priv = inventory->priv;
     g_return_if_fail(priv->has_item_type);
-    if (_gwy_assign_string(&priv->default_key, name))
+    if (gwy_assign_string(&priv->default_key, name))
         g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 }
 

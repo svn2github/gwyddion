@@ -233,6 +233,36 @@ test_object_utils_set_member(void)
     g_object_unref(field2);
 }
 
+void
+test_object_utils_assign_string(void)
+{
+    gchar *p = NULL, *porig;
+
+    g_assert(!gwy_assign_string(&p, NULL));
+    g_assert(p == NULL);
+
+    porig = p;
+    g_assert(gwy_assign_string(&p, "test"));
+    g_assert(p != porig);
+    g_assert_cmpstr(p, ==, "test");
+
+    porig = p;
+    g_assert(!gwy_assign_string(&p, "test"));
+    g_assert(p == porig);
+    g_assert_cmpstr(p, ==, "test");
+
+    porig = p;
+    g_assert(gwy_assign_string(&p, p + 2));
+    g_assert(p != porig);
+    g_assert_cmpstr(p, ==, "st");
+
+    g_assert(gwy_assign_string(&p, NULL));
+    g_assert(p == NULL);
+
+    // FIXME: We would like to check that there are no leaks etc.  Probably
+    // can only be done in valgrind...
+}
+
 static guint destroy1_called = 0, destroy2_called = 0;
 
 static void
