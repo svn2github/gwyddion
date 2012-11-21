@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -58,6 +58,23 @@ test_math_powi_our(void)
         pp *= x;
         pm /= x;
     }
+}
+
+void
+test_math_spow(void)
+{
+    g_assert_cmpfloat(gwy_spow(1.0, 1.0), ==, 1.0);
+    g_assert_cmpfloat(gwy_spow(-1.0, 1.0), ==, -1.0);
+    g_assert_cmpfloat(gwy_spow(1e42, 1.0), ==, 1e42);
+    g_assert_cmpfloat(gwy_spow(-1e42, 1.0), ==, -1e42);
+    g_assert_cmpfloat(gwy_spow(0.0, 1.0), ==, 0.0);
+
+    g_assert_cmpfloat(gwy_spow(3.0, 2.0), ==, 9.0);
+    g_assert_cmpfloat(gwy_spow(-3.0, 2.0), ==, -9.0);
+    g_assert_cmpfloat(gwy_spow(2.0, -2.0), ==, 0.25);
+    g_assert_cmpfloat(gwy_spow(-2.0, -2.0), ==, -0.25);
+    g_assert_cmpfloat(gwy_spow(9.0, 0.5), ==, 3.0);
+    g_assert_cmpfloat(gwy_spow(-9.0, 0.5), ==, -3.0);
 }
 
 void

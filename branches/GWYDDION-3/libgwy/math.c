@@ -366,6 +366,27 @@ gwy_powi(double x, int i)
 }
 
 /**
+ * gwy_spow:
+ * @x: Value to raise to some power.
+ * @p: Power.
+ *
+ * Calculates signed power function.
+ *
+ * Signed power means value that has the same sign as @x and magnitude of
+ * |@x|<sup>@p</sup>.  This function is equivalent to
+ * <literal>copysign(pow(fabs(x), p), x)</literal>
+ * which defines the precise semantics concerning infinities and undefined
+ * values.
+ *
+ * Returns: Value of @x raised to power @p, with sign of @x.
+ **/
+gdouble
+gwy_spow(gdouble x, gdouble p)
+{
+    return copysign(pow(fabs(x), p), x);
+}
+
+/**
  * gwy_power_sum:
  * @n: Number of terms in the sum.
  * @p: Power.

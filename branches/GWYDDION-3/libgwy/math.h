@@ -66,6 +66,8 @@ double gwy_powi(double x, int i) G_GNUC_CONST;
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 #define gwy_round_to_half(x) (floor((x) + 1.0) - 0.5)
 
+gdouble  gwy_spow                    (gdouble x,
+                                      gdouble p)                      G_GNUC_CONST;
 gdouble  gwy_power_sum               (guint n,
                                       guint p)                        G_GNUC_CONST;
 gdouble  gwy_standardize_direction   (gdouble phi)                    G_GNUC_CONST;
