@@ -717,4 +717,23 @@ adjustment_value_changed(GwyScaleBar *scalebar,
  * Class of scale bars visualising adjustments.
  **/
 
+/**
+ * GwyScaleMappingType:
+ * @GWY_SCALE_MAPPING_LINEAR: Linear mapping between values and screen
+ *                            positions.  This recommended for signed additive
+ *                            quantities of a limited range.
+ * @GWY_SCALE_MAPPING_SQRT: Screen positions correspond to ‘signed square
+ *                          roots’ of the value, see gwy_spow().  This is the
+ *                          recommended general-purpose default mapping type as
+ *                          it works with both signed and usigned quantities
+ *                          and offers good sensitivity for both large and
+ *                          small values.
+ * @GWY_SCALE_MAPPING_LOG: Screen positions correspond to logarithms of values.
+ *                         The adjustment range must contain only positive
+ *                         values.  For quantities of extreme ranges this
+ *                         mapping may be preferred to %GWY_SCALE_MAPPING_SQRT.
+ *
+ * Type of scale bar mapping functions.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
