@@ -2027,7 +2027,7 @@ gwy_resources_unlock(void)
 }
 
 /**
- * gwy_resources_finalize:
+ * gwy_resources_load:
  * @error_list: (allow-none):
  *              Location to store the errors occuring, %NULL to ignore.
  *
