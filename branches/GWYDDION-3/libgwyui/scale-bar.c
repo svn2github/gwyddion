@@ -173,7 +173,7 @@ gwy_scale_bar_class_init(GwyScaleBarClass *klass)
         = g_param_spec_uint("mnemonic-keyval",
                             "Mnemonic keyval",
                             "Mnemonic accelerator key for this label.",
-                            G_MAXUINT, 0, G_MAXUINT,
+                            0, G_MAXUINT, G_MAXUINT,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
