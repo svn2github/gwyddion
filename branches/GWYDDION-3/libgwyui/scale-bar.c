@@ -96,12 +96,12 @@ static gboolean set_label                         (GwyScaleBar *scalebar,
                                                    const gchar *label);
 static gboolean set_mnemonic_widget               (GwyScaleBar *scalebar,
                                                    GtkWidget *widget);
-static void create_window(GwyScaleBar *scalebar);
-static void destroy_window(GwyScaleBar *scalebar);
-static void adjustment_changed(GwyScaleBar *scalebar,
-                   GtkAdjustment *adjustment);
-static void adjustment_value_changed(GwyScaleBar *scalebar,
-                   GtkAdjustment *adjustment);
+static void     create_window                     (GwyScaleBar *scalebar);
+static void     destroy_window                    (GwyScaleBar *scalebar);
+static void     adjustment_changed                (GwyScaleBar *scalebar,
+                                                   GtkAdjustment *adjustment);
+static void     adjustment_value_changed          (GwyScaleBar *scalebar,
+                                                   GtkAdjustment *adjustment);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -143,6 +143,13 @@ gwy_scale_bar_class_init(GwyScaleBarClass *klass)
                             GWY_TYPE_SCALE_MAPPING_TYPE,
                             GWY_SCALE_MAPPING_SQRT,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_LABEL]
+        = g_param_spec_string("label",
+                              "Label",
+                              "Label, including any markup and underline.",
+                              "",
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_USE_MARKUP]
         = g_param_spec_boolean("use-markup",
