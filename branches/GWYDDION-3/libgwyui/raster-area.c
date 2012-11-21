@@ -2395,6 +2395,11 @@ set_range_from_method(GwyRasterArea *rasterarea,
     if (method == priv->range_from_method)
         return FALSE;
 
+    if (method > GWY_COLOR_RANGE_USER) {
+        g_warning("Wrong range-from-method %u.\n", method);
+        return FALSE;
+    }
+
     priv->range_from_method = method;
     priv->field_surface_valid = FALSE;
     priv->range_valid = FALSE;
@@ -2409,6 +2414,11 @@ set_range_to_method(GwyRasterArea *rasterarea,
     RasterArea *priv = rasterarea->priv;
     if (method == priv->range_to_method)
         return FALSE;
+
+    if (method > GWY_COLOR_RANGE_USER) {
+        g_warning("Wrong range-to-method %u.\n", method);
+        return FALSE;
+    }
 
     priv->range_to_method = method;
     priv->field_surface_valid = FALSE;

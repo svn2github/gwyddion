@@ -720,13 +720,18 @@ field_data_changed(GwyRasterView *rasterview,
 
 static gboolean
 set_scale_type(GwyRasterView *rasterview,
-               GwyRulerScaleType scale_type)
+               GwyRulerScaleType scaletype)
 {
     RasterView *priv = rasterview->priv;
-    if (scale_type == priv->scale_type)
+    if (scaletype == priv->scale_type)
         return FALSE;
 
-    priv->scale_type = scale_type;
+    if (scaletype > GWY_RULER_SCALE_PIXEL) {
+        g_warning("Wrong scale type %u.", scaletype);
+        return FALSE;
+    }
+
+    priv->scale_type = scaletype;
     update_ruler_ranges(rasterview);
     return TRUE;
 }

@@ -846,6 +846,11 @@ set_edge(GwyAxis *axis,
     if (edge == priv->edge)
         return FALSE;
 
+    if (edge > GTK_POS_BOTTOM) {
+        g_warning("Wrong edge %u.", edge);
+        return FALSE;
+    }
+
     priv->edge = edge;
     priv->ticks_are_valid = FALSE;
     gtk_widget_queue_resize(GTK_WIDGET(axis));
