@@ -50,6 +50,7 @@ struct _GwyScaleBarPrivate {
     GtkAdjustment *adjustment;
     gulong adjustment_value_changed_id;
     gulong adjustment_changed_id;
+    gboolean adjustment_ok;
 
     GwyScaleMappingType mapping;
 
@@ -102,6 +103,7 @@ static void     adjustment_changed                (GwyScaleBar *scalebar,
                                                    GtkAdjustment *adjustment);
 static void     adjustment_value_changed          (GwyScaleBar *scalebar,
                                                    GtkAdjustment *adjustment);
+static void     check_adjustment                  (GwyScaleBar *scalebar);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -212,11 +214,15 @@ gwy_scale_bar_init(GwyScaleBar *scalebar)
     scalebar->priv = G_TYPE_INSTANCE_GET_PRIVATE(scalebar,
                                                   GWY_TYPE_SCALE_BAR,
                                                   ScaleBar);
+    ScaleBar *priv = scalebar->priv;
+    priv->mapping = GWY_SCALE_MAPPING_SQRT;
 }
 
 static void
 gwy_scale_bar_finalize(GObject *object)
 {
+    ScaleBar *priv = GWY_SCALE_BAR(object)->priv;
+    GWY_FREE(priv->label);
     G_OBJECT_CLASS(gwy_scale_bar_parent_class)->finalize(object);
 }
 
@@ -224,9 +230,8 @@ static void
 gwy_scale_bar_dispose(GObject *object)
 {
     GwyScaleBar *scalebar = GWY_SCALE_BAR(object);
-
     set_adjustment(scalebar, NULL);
-
+    set_mnemonic_widget(scalebar, NULL);
     G_OBJECT_CLASS(gwy_scale_bar_parent_class)->dispose(object);
 }
 
@@ -589,6 +594,7 @@ set_adjustment(GwyScaleBar *scalebar,
                                NULL))
         return FALSE;
 
+    check_adjustment(scalebar);
     gtk_widget_queue_draw(GTK_WIDGET(scalebar));
     return TRUE;
 }
@@ -597,7 +603,18 @@ static gboolean
 set_mapping(GwyScaleBar *scalebar,
             GwyScaleMappingType mapping)
 {
+    ScaleBar *priv = scalebar->priv;
+    if (mapping == priv->mapping)
+        return FALSE;
 
+    if (mapping > GWY_SCALE_MAPPING_LOG) {
+        g_warning("Wrong scale mapping %u.", mapping);
+        return FALSE;
+    }
+
+    // TODO: Cancel editting.
+    check_adjustment(scalebar);
+    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
     return TRUE;
 }
 
@@ -605,7 +622,12 @@ static gboolean
 set_use_markup(GwyScaleBar *scalebar,
                gboolean use_markup)
 {
+    ScaleBar *priv = scalebar->priv;
+    if (!use_markup == !priv->use_markup)
+        return FALSE;
 
+    priv->use_markup = use_markup;
+    // TODO: invalidate label, emit size request
     return TRUE;
 }
 
@@ -613,7 +635,12 @@ static gboolean
 set_use_underline(GwyScaleBar *scalebar,
                   gboolean use_underline)
 {
+    ScaleBar *priv = scalebar->priv;
+    if (!use_underline == !priv->use_underline)
+        return FALSE;
 
+    priv->use_underline = use_underline;
+    // TODO: invalidate label, emit size request
     return TRUE;
 }
 
@@ -621,7 +648,11 @@ static gboolean
 set_label(GwyScaleBar *scalebar,
           const gchar *label)
 {
+    ScaleBar *priv = scalebar->priv;
+    if (!gwy_assign_string(&priv->label, label))
+        return FALSE;
 
+    // TODO: invalidate label, emit size request
     return TRUE;
 }
 
@@ -629,7 +660,12 @@ static gboolean
 set_mnemonic_widget(GwyScaleBar *scalebar,
                     GtkWidget *widget)
 {
+    ScaleBar *priv = scalebar->priv;
+    if (!gwy_set_member_object(scalebar, widget, GTK_TYPE_WIDGET,
+                               &priv->mnemonic_widget, NULL))
+        return FALSE;
 
+    // TODO: ???
     return TRUE;
 }
 
@@ -686,14 +722,40 @@ destroy_window(GwyScaleBar *scalebar)
 
 static void
 adjustment_changed(GwyScaleBar *scalebar,
-                   GtkAdjustment *adjustment)
+                   G_GNUC_UNUSED GtkAdjustment *adjustment)
 {
+    // TODO: Cancel editting.
+    check_adjustment(scalebar);
+    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
 }
 
 static void
 adjustment_value_changed(GwyScaleBar *scalebar,
-                         GtkAdjustment *adjustment)
+                         G_GNUC_UNUSED GtkAdjustment *adjustment)
 {
+    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
+}
+
+static void
+check_adjustment(GwyScaleBar *scalebar)
+{
+    ScaleBar *priv = scalebar->priv;
+    priv->adjustment_ok = FALSE;
+    if (!priv->adjustment)
+        return;
+
+    gdouble lower = gtk_adjustment_get_lower(priv->adjustment);
+    gdouble upper = gtk_adjustment_get_upper(priv->adjustment);
+
+    if (!isfinite(lower) || !isfinite(upper))
+        return;
+
+    if (priv->mapping == GWY_SCALE_MAPPING_LOG) {
+        if (lower <= 0.0 || upper <= 0.0)
+            return;
+    }
+
+    priv->adjustment_ok = TRUE;
 }
 
 /**
