@@ -373,7 +373,7 @@ gwy_powi(double x, int i)
  * Calculates signed power function.
  *
  * Signed power means value that has the same sign as @x and magnitude of
- * |@x|<sup>@p</sup>.  This function is equivalent to
+ * |@x|<superscript>@p</superscript>.  This function is equivalent to
  * <literal>copysign(pow(fabs(x), p), x)</literal>
  * which defines the precise semantics concerning infinities and undefined
  * values.
