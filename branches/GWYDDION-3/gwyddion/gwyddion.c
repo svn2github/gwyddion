@@ -140,13 +140,14 @@ create_widget_test(void)
     GtkGrid *grid = GTK_GRID(gtk_grid_new());
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
-    GtkWidget *label = gtk_label_new("Value:");
-    gtk_widget_set_halign(label, GTK_ALIGN_START);
-    gtk_grid_attach(grid, label, 0, 0, 1, 1);
-
     GtkAdjustment *adj = gtk_adjustment_new(1.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
     GtkWidget *spin = gwy_spin_button_new(adj, 0.0, 1);
     gtk_grid_attach(grid, spin, 1, 0, 1, 1);
+
+    GtkWidget *scale = gwy_scale_bar_new();
+    gwy_scale_bar_set_adjustment(GWY_SCALE_BAR(scale), adj);
+    gwy_scale_bar_set_label(GWY_SCALE_BAR(scale), "Value:");
+    gtk_grid_attach(grid, scale, 0, 0, 1, 1);
 
     return window;
 }
