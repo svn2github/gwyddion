@@ -90,15 +90,21 @@ static void     gwy_scale_bar_get_preferred_height(GtkWidget *widget,
                                                    gint *natural);
 static void     gwy_scale_bar_realize             (GtkWidget *widget);
 static void     gwy_scale_bar_unrealize           (GtkWidget *widget);
-static void     gwy_scale_bar_map             (GtkWidget *widget);
-static void     gwy_scale_bar_unmap           (GtkWidget *widget);
-static void gwy_scale_bar_size_allocate(GtkWidget *widget,
-                            GtkAllocation *allocation);
+static void     gwy_scale_bar_map                 (GtkWidget *widget);
+static void     gwy_scale_bar_unmap               (GtkWidget *widget);
+static void     gwy_scale_bar_size_allocate       (GtkWidget *widget,
+                                                   GtkAllocation *allocation);
 static void     gwy_scale_bar_style_updated       (GtkWidget *widget);
 static gboolean gwy_scale_bar_draw                (GtkWidget *widget,
                                                    cairo_t *cr);
 static gboolean gwy_scale_bar_scroll              (GtkWidget *widget,
                                                    GdkEventScroll *event);
+static gboolean gwy_scale_bar_button_press        (GtkWidget *widget,
+                                                   GdkEventButton *event);
+static gboolean gwy_scale_bar_button_release      (GtkWidget *widget,
+                                                   GdkEventButton *event);
+static gboolean gwy_scale_bar_motion_notify       (GtkWidget *widget,
+                                                   GdkEventMotion *event);
 static gboolean set_adjustment                    (GwyScaleBar *scalebar,
                                                    GtkAdjustment *adjustment);
 static gboolean set_mapping                       (GwyScaleBar *scalebar,
@@ -117,6 +123,8 @@ static void     adjustment_changed                (GwyScaleBar *scalebar,
                                                    GtkAdjustment *adjustment);
 static void     adjustment_value_changed          (GwyScaleBar *scalebar,
                                                    GtkAdjustment *adjustment);
+static void     move_to_position                  (GwyScaleBar *scalebar,
+                                                   gdouble x);
 static void     update_mapping                    (GwyScaleBar *scalebar);
 static void     ensure_layout                     (GwyScaleBar *scalebar);
 static void     draw_bar                          (GwyScaleBar *scalebar,
@@ -161,6 +169,9 @@ gwy_scale_bar_class_init(GwyScaleBarClass *klass)
     widget_class->style_updated = gwy_scale_bar_style_updated;
     widget_class->draw = gwy_scale_bar_draw;
     widget_class->scroll_event = gwy_scale_bar_scroll;
+    widget_class->button_press_event = gwy_scale_bar_button_press;
+    widget_class->button_release_event = gwy_scale_bar_button_release;
+    widget_class->motion_notify_event = gwy_scale_bar_motion_notify;
 
     properties[PROP_ADJUSTMENT]
         = g_param_spec_object("adjustment",
@@ -488,6 +499,39 @@ gwy_scale_bar_scroll(GtkWidget *widget,
         gdouble newvalue = map_position_to_value(scalebar, length, newposition);
         gtk_adjustment_set_value(priv->adjustment, newvalue);
     }
+    return TRUE;
+}
+
+static gboolean
+gwy_scale_bar_button_press(GtkWidget *widget,
+                           GdkEventButton *event)
+{
+    if (event->button != 1)
+        return FALSE;
+
+    move_to_position(GWY_SCALE_BAR(widget), event->x);
+    return TRUE;
+}
+
+static gboolean
+gwy_scale_bar_button_release(GtkWidget *widget,
+                             GdkEventButton *event)
+{
+    if (event->button != 1)
+        return FALSE;
+
+    move_to_position(GWY_SCALE_BAR(widget), event->x);
+    return TRUE;
+}
+
+static gboolean
+gwy_scale_bar_motion_notify(GtkWidget *widget,
+                            GdkEventMotion *event)
+{
+    if (!(event->state & GDK_BUTTON1_MASK))
+        return FALSE;
+
+    move_to_position(GWY_SCALE_BAR(widget), event->x);
     return TRUE;
 }
 
@@ -854,6 +898,23 @@ adjustment_value_changed(GwyScaleBar *scalebar,
 }
 
 static void
+move_to_position(GwyScaleBar *scalebar,
+                 gdouble x)
+{
+    ScaleBar *priv = scalebar->priv;
+    if (!priv->adjustment_ok)
+        return;
+
+    GtkAllocation alloc;
+    gtk_widget_get_allocation(GTK_WIDGET(scalebar), &alloc);
+    gdouble value = gtk_adjustment_get_value(priv->adjustment);
+    gdouble pos = CLAMP(x - alloc.x, 0, alloc.width);
+    gdouble newvalue = map_position_to_value(scalebar, alloc.width, pos);
+    if (newvalue != value)
+        gtk_adjustment_set_value(priv->adjustment, newvalue);
+}
+
+static void
 update_mapping(GwyScaleBar *scalebar)
 {
     ScaleBar *priv = scalebar->priv;
@@ -951,7 +1012,7 @@ draw_bar(GwyScaleBar *scalebar,
         cairo_fill(cr);
 
         cairo_set_line_width(cr, 1.0);
-        cairo_rectangle(cr, 0.5, 0.5, barlength-0.5, height-0.5);
+        cairo_rectangle(cr, 0.5, 0.5, barlength-1.0, height-1.0);
         cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
         cairo_stroke(cr);
     }
