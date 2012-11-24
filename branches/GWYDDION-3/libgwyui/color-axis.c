@@ -93,6 +93,8 @@ static guint    gwy_color_axis_get_split_width      (const GwyAxis *axis);
 static void     gwy_color_axis_get_units_affinity   (const GwyAxis *axis,
                                                      GwyAxisUnitPlacement *primary,
                                                      GwyAxisUnitPlacement *secondary);
+static void     gwy_color_axis_modify_range         (GwyColorAxis *coloraxis,
+                                                     const GwyRange *range);
 static void     draw_ticks                          (const GwyAxisTick *ticks,
                                                      guint nticks,
                                                      cairo_t *cr,
@@ -212,13 +214,14 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     /**
      * GwyColorAxis::modify-range:
      * @gwycoloraxis: The #GwyColorAxis which received the signal.
+     * @arg1: The new range as #GwyRange.
      *
      * The ::modify-range signal is emitted when user interactively modifies
      * the axis range (if enabled with gwy_color_axis_set_editable_range()).
      * The new range is only <emphasis>requested</emphasis> at that time.
      *
      * It is an action signal.  So you may want to emit it programmatically
-     * after calling gwy_axis_request_range(), however, this should be done
+     * instead of gwy_axis_request_range(), however, this should be done
      * only if the colour axis is ‘authoritative’ for this range.  If the axis
      * range follows some other object you usually want to just call
      * gwy_axis_request_range() and be done with it.
@@ -227,9 +230,10 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
         = g_signal_new_class_handler("modify-range",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__VOID,
-                                     G_TYPE_NONE, 0);
+                                     G_CALLBACK(gwy_color_axis_modify_range),
+                                     NULL, NULL,
+                                     g_cclosure_marshal_VOID__BOXED,
+                                     G_TYPE_NONE, 1, GWY_TYPE_RANGE);
 }
 
 static void
@@ -450,9 +454,7 @@ gwy_color_axis_scroll(GtkWidget *widget,
     else
         range.to += dz;
 
-    gwy_axis_request_range(axis, &range);
-    g_signal_emit(axis, signals[SGNL_MODIFY_RANGE], 0);
-
+    g_signal_emit(axis, signals[SGNL_MODIFY_RANGE], 0, &range);
     return TRUE;
 }
 
@@ -514,6 +516,13 @@ gwy_color_axis_get_units_affinity(const GwyAxis *axis,
        *primary = *secondary = GWY_AXIS_UNITS_LAST;
     else
        *primary = *secondary = GWY_AXIS_UNITS_FIRST;
+}
+
+static void
+gwy_color_axis_modify_range(GwyColorAxis *coloraxis,
+                            const GwyRange *range)
+{
+    gwy_axis_request_range(GWY_AXIS(coloraxis), range);
 }
 
 /**
