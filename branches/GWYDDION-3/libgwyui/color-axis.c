@@ -836,8 +836,11 @@ draw_distribution(GwyColorAxis *coloraxis,
     y = stripebreadth;
     cairo_matrix_transform_point(matrix, &x, &y);
     cairo_line_to(cr, x, y);
-    cairo_close_path(cr);
     // FIXME: Theming.
+    cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
+    cairo_set_line_width(cr, 1.0);
+    cairo_stroke_preserve(cr);
+    cairo_close_path(cr);
     cairo_set_source_rgba(cr, 0.6, 0.6, 1.0, 0.4);
     cairo_fill(cr);
     cairo_restore(cr);
