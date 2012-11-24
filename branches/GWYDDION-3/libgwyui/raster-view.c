@@ -145,7 +145,8 @@ static void       axis_add_button_press_event (GwyAxis *axis);
 static gboolean   ruler_button_press          (GwyRasterView *rasterview,
                                                GdkEventButton *event,
                                                GwyRuler *ruler);
-static void       coloraxis_range_modified    (GwyRasterView *rasterview,
+static void       coloraxis_modify_range      (GwyRasterView *rasterview,
+                                               const GwyRange *reqrange,
                                                GwyAxis *axis);
 static gboolean   coloraxis_button_press      (GwyRasterView *rasterview,
                                                GdkEventButton *event,
@@ -355,7 +356,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     g_signal_connect_after(coloraxis, "realize",
                            G_CALLBACK(axis_add_button_press_event), NULL);
     g_signal_connect_swapped(coloraxis, "modify-range",
-                             G_CALLBACK(coloraxis_range_modified), rasterview);
+                             G_CALLBACK(coloraxis_modify_range), rasterview);
     g_signal_connect_swapped(coloraxis, "button-press-event",
                              G_CALLBACK(coloraxis_button_press), rasterview);
 
@@ -953,15 +954,15 @@ ruler_button_press(GwyRasterView *rasterview,
 }
 
 static void
-coloraxis_range_modified(GwyRasterView *rasterview,
-                         GwyAxis *axis)
+coloraxis_modify_range(GwyRasterView *rasterview,
+                       const GwyRange *reqrange,
+                       G_GNUC_UNUSED GwyAxis *axis)
 {
     GwyRasterArea *area = rasterview->priv->area;
     RasterView *priv = rasterview->priv;
-    GwyRange axisrange, arearange;
+    GwyRange arearange;
     gwy_raster_area_get_user_range(area, &arearange);
-    gwy_axis_get_requested_range(axis, &axisrange);
-    if (gwy_equal(&axisrange, &arearange))
+    if (gwy_equal(reqrange, &arearange))
         return;
 
     if (priv->requesting_axis_range) {
@@ -969,26 +970,26 @@ coloraxis_range_modified(GwyRasterView *rasterview,
         return;
     }
 
-    gwy_raster_area_set_user_range(area, &axisrange);
+    gwy_raster_area_set_user_range(area, reqrange);
     // TODO: Set both range method if they are joint.
-    if (arearange.from != axisrange.from) {
+    if (arearange.from != reqrange->from) {
         if (priv->range_from.method) {
             gwy_choice_set_active(priv->range_from.method,
                                   GWY_COLOR_RANGE_USER);
             const gchar *s = gwy_value_format_print_number(priv->range_vf,
-                                                           axisrange.from);
+                                                           reqrange->from);
             gtk_entry_set_text(priv->range_from.value, s);
         }
         else
             gwy_raster_area_set_range_from_method(priv->area,
                                                   GWY_COLOR_RANGE_USER);
     }
-    if (arearange.to != axisrange.to) {
+    if (arearange.to != reqrange->to) {
         if (priv->range_to.method) {
             gwy_choice_set_active(priv->range_to.method,
                                   GWY_COLOR_RANGE_USER);
             const gchar *s = gwy_value_format_print_number(priv->range_vf,
-                                                           axisrange.to);
+                                                           reqrange->to);
             gtk_entry_set_text(priv->range_to.value, s);
         }
         else
