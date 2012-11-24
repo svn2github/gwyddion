@@ -53,6 +53,7 @@ struct _GwyScaleBarPrivate {
     gulong adjustment_value_changed_id;
     gulong adjustment_changed_id;
     gboolean adjustment_ok;
+    gdouble oldvalue;    // This is to avoid acting on no-change notifications.
 
     GwyScaleMappingType mapping;
     MappingFunc map_value;
@@ -128,6 +129,8 @@ static void     move_to_position                  (GwyScaleBar *scalebar,
 static void     update_mapping                    (GwyScaleBar *scalebar);
 static void     ensure_layout                     (GwyScaleBar *scalebar);
 static void     draw_bar                          (GwyScaleBar *scalebar,
+                                                   cairo_t *cr);
+static void     draw_label                        (GwyScaleBar *scalebar,
                                                    cairo_t *cr);
 static gdouble  map_value_to_position             (GwyScaleBar *scalebar,
                                                    gdouble length,
@@ -469,6 +472,7 @@ gwy_scale_bar_draw(GtkWidget *widget,
     GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
 
     draw_bar(scalebar, cr);
+    draw_label(scalebar, cr);
 
     g_printerr("IMPLEMENT ME!\n");
 
@@ -885,15 +889,22 @@ static void
 adjustment_changed(GwyScaleBar *scalebar,
                    G_GNUC_UNUSED GtkAdjustment *adjustment)
 {
-    // TODO: Cancel editting.
     update_mapping(scalebar);
     gtk_widget_queue_draw(GTK_WIDGET(scalebar));
 }
 
 static void
 adjustment_value_changed(GwyScaleBar *scalebar,
-                         G_GNUC_UNUSED GtkAdjustment *adjustment)
+                         GtkAdjustment *adjustment)
 {
+    ScaleBar *priv = scalebar->priv;
+    if (!priv->adjustment_ok)
+        return;
+    gdouble newvalue = gtk_adjustment_get_value(adjustment);
+    if (newvalue == priv->oldvalue)
+        return;
+
+    priv->oldvalue = newvalue;
     gtk_widget_queue_draw(GTK_WIDGET(scalebar));
 }
 
@@ -905,11 +916,11 @@ move_to_position(GwyScaleBar *scalebar,
     if (!priv->adjustment_ok)
         return;
 
-    GtkAllocation alloc;
-    gtk_widget_get_allocation(GTK_WIDGET(scalebar), &alloc);
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(scalebar), &allocation);
     gdouble value = gtk_adjustment_get_value(priv->adjustment);
-    gdouble pos = CLAMP(x - alloc.x, 0, alloc.width);
-    gdouble newvalue = map_position_to_value(scalebar, alloc.width, pos);
+    gdouble pos = CLAMP(x - allocation.x, 0, allocation.width);
+    gdouble newvalue = map_position_to_value(scalebar, allocation.width, pos);
     if (newvalue != value)
         gtk_adjustment_set_value(priv->adjustment, newvalue);
 }
@@ -1024,6 +1035,55 @@ draw_bar(GwyScaleBar *scalebar,
         cairo_fill(cr);
     }
 
+    cairo_restore(cr);
+}
+
+static gint
+calc_layout_yposition(GwyScaleBar *scalebar)
+{
+    ScaleBar *priv = scalebar->priv;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(scalebar), &allocation);
+    // TODO: handle borders.
+    gint area_height = PANGO_SCALE*allocation.height;
+    PangoLayoutLine *line = pango_layout_get_lines_readonly(priv->layout)->data;
+    PangoRectangle logical_rect;
+    pango_layout_line_get_extents(line, NULL, &logical_rect);
+
+    // Align primarily for locale's ascent/descent.
+    gint y_pos = ((area_height - priv->ascent - priv->descent)/2
+                  + priv->ascent + logical_rect.y);
+
+    // Now see if we need to adjust to fit in actual drawn string.
+    if (logical_rect.height > area_height)
+        y_pos = (area_height - logical_rect.height)/2;
+    else if (y_pos < 0)
+        y_pos = 0;
+    else if (y_pos + logical_rect.height > area_height)
+        y_pos = area_height - logical_rect.height;
+
+    return y_pos/PANGO_SCALE;
+}
+
+static void
+draw_label(GwyScaleBar *scalebar,
+           cairo_t *cr)
+{
+    ScaleBar *priv = scalebar->priv;
+    if (!priv->label || !*priv->label)
+        return;
+
+    GtkWidget *widget = GTK_WIDGET(scalebar);
+    GtkStateFlags state = gtk_widget_get_state_flags(widget);
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    GdkRGBA text_color;
+    gtk_style_context_get_color(context, state, &text_color);
+
+    cairo_save(cr);
+    gint y = calc_layout_yposition(scalebar);
+    cairo_move_to(cr, 2.0, y);
+    gdk_cairo_set_source_rgba(cr, &text_color);
+    pango_cairo_show_layout(cr, priv->layout);
     cairo_restore(cr);
 }
 
