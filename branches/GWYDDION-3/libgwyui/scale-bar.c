@@ -47,7 +47,7 @@ enum {
 typedef gdouble (*MappingFunc)(gdouble value);
 
 struct _GwyScaleBarPrivate {
-    GdkWindow *window;
+    GdkWindow *input_window;
 
     GtkAdjustment *adjustment;
     gulong adjustment_value_changed_id;
@@ -90,6 +90,10 @@ static void     gwy_scale_bar_get_preferred_height(GtkWidget *widget,
                                                    gint *natural);
 static void     gwy_scale_bar_realize             (GtkWidget *widget);
 static void     gwy_scale_bar_unrealize           (GtkWidget *widget);
+static void     gwy_scale_bar_map             (GtkWidget *widget);
+static void     gwy_scale_bar_unmap           (GtkWidget *widget);
+static void gwy_scale_bar_size_allocate(GtkWidget *widget,
+                            GtkAllocation *allocation);
 static void     gwy_scale_bar_style_updated       (GtkWidget *widget);
 static gboolean gwy_scale_bar_draw                (GtkWidget *widget,
                                                    cairo_t *cr);
@@ -107,8 +111,8 @@ static gboolean set_label                         (GwyScaleBar *scalebar,
                                                    const gchar *label);
 static gboolean set_mnemonic_widget               (GwyScaleBar *scalebar,
                                                    GtkWidget *widget);
-static void     create_window                     (GwyScaleBar *scalebar);
-static void     destroy_window                    (GwyScaleBar *scalebar);
+static void     create_input_window               (GwyScaleBar *scalebar);
+static void     destroy_input_window              (GwyScaleBar *scalebar);
 static void     adjustment_changed                (GwyScaleBar *scalebar,
                                                    GtkAdjustment *adjustment);
 static void     adjustment_value_changed          (GwyScaleBar *scalebar,
@@ -151,6 +155,9 @@ gwy_scale_bar_class_init(GwyScaleBarClass *klass)
     widget_class->get_preferred_height = gwy_scale_bar_get_preferred_height;
     widget_class->realize = gwy_scale_bar_realize;
     widget_class->unrealize = gwy_scale_bar_unrealize;
+    widget_class->map = gwy_scale_bar_map;
+    widget_class->unmap = gwy_scale_bar_unmap;
+    widget_class->size_allocate = gwy_scale_bar_size_allocate;
     widget_class->style_updated = gwy_scale_bar_style_updated;
     widget_class->draw = gwy_scale_bar_draw;
     widget_class->scroll_event = gwy_scale_bar_scroll;
@@ -242,6 +249,7 @@ gwy_scale_bar_init(GwyScaleBar *scalebar)
                                                   ScaleBar);
     ScaleBar *priv = scalebar->priv;
     priv->mapping = GWY_SCALE_MAPPING_SQRT;
+    gtk_widget_set_has_window(GTK_WIDGET(scalebar), FALSE);
 }
 
 static void
@@ -380,9 +388,8 @@ static void
 gwy_scale_bar_realize(GtkWidget *widget)
 {
     GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
-    gtk_widget_set_realized(widget, TRUE);
-    create_window(scalebar);
-    ensure_layout(scalebar);
+    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->realize(widget);
+    create_input_window(scalebar);
 }
 
 static void
@@ -390,9 +397,48 @@ gwy_scale_bar_unrealize(GtkWidget *widget)
 {
     GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
     ScaleBar *priv = scalebar->priv;
-    destroy_window(scalebar);
+    destroy_input_window(scalebar);
+    priv->adjustment_ok = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
     GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->unrealize(widget);
+}
+
+static void
+gwy_scale_bar_map(GtkWidget *widget)
+{
+    GwyScaleBar *scale_bar = GWY_SCALE_BAR(widget);
+    ScaleBar *priv = scale_bar->priv;
+    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->map(widget);
+    if (priv->input_window)
+        gdk_window_show(priv->input_window);
+}
+
+static void
+gwy_scale_bar_unmap(GtkWidget *widget)
+{
+    GwyScaleBar *scale_bar = GWY_SCALE_BAR(widget);
+    ScaleBar *priv = scale_bar->priv;
+    if (priv->input_window)
+        gdk_window_hide(priv->input_window);
+    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->unmap(widget);
+}
+
+static void
+gwy_scale_bar_size_allocate(GtkWidget *widget,
+                            GtkAllocation *allocation)
+{
+    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
+    ScaleBar *priv = scalebar->priv;
+
+    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->size_allocate(widget,
+                                                                allocation);
+
+    if (priv->input_window)
+        gdk_window_move_resize(priv->input_window,
+                               allocation->x, allocation->y,
+                               allocation->width, allocation->height);
+
+    ensure_layout(scalebar);
 }
 
 static void
@@ -750,54 +796,45 @@ set_mnemonic_widget(GwyScaleBar *scalebar,
 }
 
 static void
-create_window(GwyScaleBar *scalebar)
+create_input_window(GwyScaleBar *scalebar)
 {
     ScaleBar *priv = scalebar->priv;
     GtkWidget *widget = GTK_WIDGET(scalebar);
-
     g_assert(gtk_widget_get_realized(widget));
-
-    if (priv->window)
+    if (priv->input_window)
         return;
 
     GtkAllocation allocation;
     gtk_widget_get_allocation(widget, &allocation);
-
     GdkWindowAttr attributes = {
         .x = allocation.x,
         .y = allocation.y,
         .width = allocation.width,
         .height = allocation.height,
         .window_type = GDK_WINDOW_CHILD,
-        .wclass = GDK_INPUT_OUTPUT,
+        .wclass = GDK_INPUT_ONLY,
         .event_mask = (gtk_widget_get_events(widget)
-                       | GDK_EXPOSURE_MASK
                        | GDK_BUTTON_PRESS_MASK
                        | GDK_BUTTON_RELEASE_MASK
                        | GDK_SCROLL_MASK
                        | GDK_POINTER_MOTION_MASK
                        | GDK_POINTER_MOTION_HINT_MASK),
-        .visual = gtk_widget_get_visual(widget),
     };
-    gint attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
-    priv->window = gdk_window_new(gtk_widget_get_parent_window(widget),
-                                  &attributes, attributes_mask);
-    gtk_widget_set_window(widget, priv->window);
-    gdk_window_set_user_data(priv->window, widget);
-    g_object_ref(priv->window);
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y;
+    priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
+                                        &attributes, attributes_mask);
+    gdk_window_set_user_data(priv->input_window, widget);
 }
 
 static void
-destroy_window(GwyScaleBar *scalebar)
+destroy_input_window(GwyScaleBar *scalebar)
 {
     ScaleBar *priv = scalebar->priv;
-
-    if (!priv->window)
+    if (!priv->input_window)
         return;
-
-    gdk_window_set_user_data(priv->window, NULL);
-    gdk_window_destroy(priv->window);
-    priv->window = NULL;
+    gdk_window_set_user_data(priv->input_window, NULL);
+    gdk_window_destroy(priv->input_window);
+    priv->input_window = NULL;
 }
 
 static void
