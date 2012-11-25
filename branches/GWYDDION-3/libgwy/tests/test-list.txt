@@ -34,7 +34,9 @@ math/cholesky
 math/linalg
 math/linalg/fail
 math/fit/poly
-interpolation
+interpolation/constant
+interpolation/linear/interpolating
+interpolation/linear/non-interpolating
 fft/nice-size
 fft/load-wisdom
 object-utils/set-member

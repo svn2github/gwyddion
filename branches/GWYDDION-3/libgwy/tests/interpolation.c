@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@
  ***************************************************************************/
 
 void
-test_interpolation_constant(GwyInterpolationType interpolation,
-                            gdouble value)
+interpolation_constant_one(GwyInterpolationType interpolation,
+                           gdouble value)
 {
     guint support_len = gwy_interpolation_get_support_size(interpolation);
     g_assert_cmpint(support_len, >, 0);
@@ -48,9 +48,8 @@ test_interpolation_constant(GwyInterpolationType interpolation,
 }
 
 static void
-test_interpolation_linear(GwyInterpolationType interpolation,
-                          gdouble a,
-                          gdouble b)
+interpolation_linear_one(GwyInterpolationType interpolation,
+                         gdouble a, gdouble b)
 {
     guint support_len = gwy_interpolation_get_support_size(interpolation);
     g_assert_cmpint(support_len, >, 0);
@@ -73,9 +72,8 @@ test_interpolation_linear(GwyInterpolationType interpolation,
 }
 
 static void
-test_interpolation_linear_long(GwyInterpolationType interpolation,
-                               gdouble a,
-                               gdouble b)
+interpolation_linear_long_one(GwyInterpolationType interpolation,
+                              gdouble a, gdouble b)
 {
     guint support_len = gwy_interpolation_get_support_size(interpolation);
     g_assert_cmpint(support_len, >, 0);
@@ -104,37 +102,45 @@ test_interpolation_linear_long(GwyInterpolationType interpolation,
 }
 
 void
-test_interpolation(void)
+test_interpolation_constant(void)
 {
     GwyInterpolationType first_const = GWY_INTERPOLATION_ROUND;
     GwyInterpolationType last = GWY_INTERPOLATION_BSPLINE6;
 
     for (GwyInterpolationType interp = first_const; interp <= last; interp++) {
-        test_interpolation_constant(interp, 1.0);
-        test_interpolation_constant(interp, 0.0);
-        test_interpolation_constant(interp, -1.0);
+        interpolation_constant_one(interp, 1.0);
+        interpolation_constant_one(interp, 0.0);
+        interpolation_constant_one(interp, -1.0);
     }
+}
 
-    /* Interpolating basis. */
+void
+test_interpolation_linear_interpolating(void)
+{
+    // Interpolating basis.
     GwyInterpolationType reproducing_linear1[] = {
         GWY_INTERPOLATION_LINEAR,
         GWY_INTERPOLATION_KEYS,
         GWY_INTERPOLATION_SCHAUM,
     };
     for (guint i = 0; i < G_N_ELEMENTS(reproducing_linear1); i++) {
-        test_interpolation_linear(reproducing_linear1[i], 1.0, 2.0);
-        test_interpolation_linear(reproducing_linear1[i], 1.0, -1.0);
+        interpolation_linear_one(reproducing_linear1[i], 1.0, 2.0);
+        interpolation_linear_one(reproducing_linear1[i], 1.0, -1.0);
     }
+}
 
-    /* Non-interpolating basis. */
+void
+test_interpolation_linear_non_interpolating(void)
+{
+    // Non-interpolating basis.
     GwyInterpolationType reproducing_linear2[] = {
         GWY_INTERPOLATION_BSPLINE4,
         GWY_INTERPOLATION_OMOMS4,
         GWY_INTERPOLATION_BSPLINE6,
     };
     for (guint i = 0; i < G_N_ELEMENTS(reproducing_linear2); i++) {
-        test_interpolation_linear_long(reproducing_linear2[i], 1.0, 2.0);
-        test_interpolation_linear_long(reproducing_linear2[i], 1.0, -1.0);
+        interpolation_linear_long_one(reproducing_linear2[i], 1.0, 2.0);
+        interpolation_linear_long_one(reproducing_linear2[i], 1.0, -1.0);
     }
 }
 
