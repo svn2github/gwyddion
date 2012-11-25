@@ -1114,6 +1114,14 @@ test_mask_field_grow(void)
         "#####             #####     #   #         ######                 #\n"
         " ###             #######                                          \n";
     test_mask_field_grow_one(orig2_str, grow2_str, keep2_str);
+
+    const gchar *orig3_str =
+        "## #  #   #    #  \n";
+    const gchar *grow3_str =
+        "######## ###  ### \n";
+    const gchar *keep3_str =
+        "## ## ## ###  ### \n";
+    test_mask_field_grow_one(orig3_str, grow3_str, keep3_str);
 }
 
 void
@@ -1190,6 +1198,14 @@ test_mask_field_shrink(void)
         " ###                                                              \n"
         "                                                                  \n";
     test_mask_field_shrink_one(orig2_str, shrink2_str, bord2_str);
+
+    const gchar *orig3_str =
+        "## #  #   # ######\n";
+    const gchar *shrink3_str =
+        "#            #####\n";
+    const gchar *bord3_str =
+        "                  \n";
+    test_mask_field_shrink_one(orig3_str, shrink3_str, bord3_str);
 }
 
 static void
