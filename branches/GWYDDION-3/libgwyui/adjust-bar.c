@@ -48,6 +48,7 @@ typedef gdouble (*MappingFunc)(gdouble value);
 
 struct _GwyAdjustBarPrivate {
     GdkWindow *input_window;
+    GdkCursor *cursor_move;
 
     GtkAdjustment *adjustment;
     gulong adjustment_value_changed_id;
@@ -98,6 +99,10 @@ static void     gwy_adjust_bar_size_allocate       (GtkWidget *widget,
 static void     gwy_adjust_bar_style_updated       (GtkWidget *widget);
 static gboolean gwy_adjust_bar_draw                (GtkWidget *widget,
                                                     cairo_t *cr);
+static gboolean gwy_adjust_bar_enter_notify        (GtkWidget *widget,
+                                                    GdkEventCrossing *event);
+static gboolean gwy_adjust_bar_leave_notify        (GtkWidget *widget,
+                                                    GdkEventCrossing *event);
 static gboolean gwy_adjust_bar_scroll              (GtkWidget *widget,
                                                     GdkEventScroll *event);
 static gboolean gwy_adjust_bar_button_press        (GtkWidget *widget,
@@ -143,6 +148,8 @@ static gdouble  map_value_sqrt                     (gdouble value);
 static gdouble  map_position_sqrt                  (gdouble position);
 static gdouble  map_value_log                      (gdouble value);
 static gdouble  map_position_log                   (gdouble position);
+static void     ensure_cursors                     (GwyAdjustBar *adjbar);
+static void     discard_cursors                    (GwyAdjustBar *adjbar);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -171,6 +178,8 @@ gwy_adjust_bar_class_init(GwyAdjustBarClass *klass)
     widget_class->size_allocate = gwy_adjust_bar_size_allocate;
     widget_class->style_updated = gwy_adjust_bar_style_updated;
     widget_class->draw = gwy_adjust_bar_draw;
+    widget_class->enter_notify_event = gwy_adjust_bar_enter_notify;
+    widget_class->leave_notify_event = gwy_adjust_bar_leave_notify;
     widget_class->scroll_event = gwy_adjust_bar_scroll;
     widget_class->button_press_event = gwy_adjust_bar_button_press;
     widget_class->button_release_event = gwy_adjust_bar_button_release;
@@ -411,6 +420,7 @@ gwy_adjust_bar_unrealize(GtkWidget *widget)
 {
     GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
     AdjustBar *priv = adjbar->priv;
+    discard_cursors(adjbar);
     destroy_input_window(adjbar);
     priv->adjustment_ok = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
@@ -476,6 +486,30 @@ gwy_adjust_bar_draw(GtkWidget *widget,
 
     g_printerr("IMPLEMENT ME!\n");
 
+    return FALSE;
+}
+
+static gboolean
+gwy_adjust_bar_enter_notify(GtkWidget *widget,
+                            G_GNUC_UNUSED GdkEventCrossing *event)
+{
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    ensure_cursors(adjbar);
+    GtkStateFlags state = gtk_widget_get_state_flags(widget);
+    if (!(state & GTK_STATE_FLAG_PRELIGHT))
+        gtk_widget_set_state_flags(widget, state | GTK_STATE_FLAG_PRELIGHT,
+                                   TRUE);
+    return FALSE;
+}
+
+static gboolean
+gwy_adjust_bar_leave_notify(GtkWidget *widget,
+                            G_GNUC_UNUSED GdkEventCrossing *event)
+{
+    GtkStateFlags state = gtk_widget_get_state_flags(widget);
+    if (state & GTK_STATE_FLAG_PRELIGHT)
+        gtk_widget_set_state_flags(widget, state & ~GTK_STATE_FLAG_PRELIGHT,
+                                   TRUE);
     return FALSE;
 }
 
@@ -864,6 +898,8 @@ create_input_window(GwyAdjustBar *adjbar)
         .event_mask = (gtk_widget_get_events(widget)
                        | GDK_BUTTON_PRESS_MASK
                        | GDK_BUTTON_RELEASE_MASK
+                       | GDK_ENTER_NOTIFY_MASK
+                       | GDK_LEAVE_NOTIFY_MASK
                        | GDK_SCROLL_MASK
                        | GDK_POINTER_MOTION_MASK
                        | GDK_POINTER_MOTION_HINT_MASK),
@@ -1010,6 +1046,7 @@ draw_bar(GwyAdjustBar *adjbar,
         return;
 
     GtkWidget *widget = GTK_WIDGET(adjbar);
+    GtkStateFlags state = gtk_widget_get_state_flags(widget);
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     gdouble val = gtk_adjustment_get_value(priv->adjustment);
@@ -1017,21 +1054,30 @@ draw_bar(GwyAdjustBar *adjbar,
 
     cairo_save(cr);
 
+    GwyRGBA color = { 0.6, 0.6, 1.0, 1.0 };
+    if (state & GTK_STATE_FLAG_INSENSITIVE)
+        color.a *= 0.5;
+
     if (barlength > 2.0) {
         cairo_rectangle(cr, 0, 0, barlength, height);
-        cairo_set_source_rgba(cr, 0.6, 0.6, 1.0, 0.4);
+        GwyRGBA fill_color = color;
+        if (state & GTK_STATE_FLAG_PRELIGHT)
+            fill_color.a *= 0.5;
+        else
+            fill_color.a *= 0.4;
+        gwy_cairo_set_source_rgba(cr, &fill_color);
         cairo_fill(cr);
 
         cairo_set_line_width(cr, 1.0);
         cairo_rectangle(cr, 0.5, 0.5, barlength-1.0, height-1.0);
-        cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
+        gwy_cairo_set_source_rgba(cr, &color);
         cairo_stroke(cr);
     }
     else {
         // Do not stroke bars thinner than twice the ourline, draw the entire
         // bar using the border color instead.
         cairo_rectangle(cr, 0, 0, barlength, height);
-        cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
+        gwy_cairo_set_source_rgba(cr, &color);
         cairo_fill(cr);
     }
 
@@ -1133,6 +1179,26 @@ static gdouble
 map_position_log(gdouble position)
 {
     return exp(position);
+}
+
+static void
+ensure_cursors(GwyAdjustBar *adjbar)
+{
+    AdjustBar *priv = adjbar->priv;
+    if (priv->cursor_move)
+        return;
+
+    GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(adjbar));
+    priv->cursor_move = gdk_cursor_new_for_display(display,
+                                                   GDK_SB_H_DOUBLE_ARROW);
+    gdk_window_set_cursor(priv->input_window, priv->cursor_move);
+}
+
+static void
+discard_cursors(GwyAdjustBar *adjbar)
+{
+    AdjustBar *priv = adjbar->priv;
+    GWY_OBJECT_UNREF(priv->cursor_move);
 }
 
 /**
