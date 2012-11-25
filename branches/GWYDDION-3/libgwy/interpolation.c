@@ -601,7 +601,7 @@ gwy_interpolation_resample_block_1d(guint length,
     for (guint newi = 0; newi < newlength; newi++) {
         gdouble w[suplen];
         gdouble x = q*newi + x0;
-        guint oldi = (guint)floor(x);
+        gint oldi = (gint)floor(x);
         x -= oldi;
         gwy_interpolation_get_weights(x, interpolation, w);
         gdouble v = 0.0;
@@ -621,7 +621,7 @@ gwy_interpolation_resample_block_1d(guint length,
 static void
 calculate_weights_for_rescale(guint oldn,
                               guint newn,
-                              guint *positions,
+                              gint *positions,
                               gdouble *weights,
                               GwyInterpolationType interpolation)
 {
@@ -630,7 +630,7 @@ calculate_weights_for_rescale(guint oldn,
     gdouble x0 = (q - 1.0)/2.0;
     for (guint i = 0; i < newn; i++) {
         gdouble x = q*i + x0;
-        positions[i] = (guint)floor(x);
+        positions[i] = (gint)floor(x);
         x -= positions[i];
         gwy_interpolation_get_weights(x, interpolation, weights + suplen*i);
     }
@@ -696,14 +696,14 @@ gwy_interpolation_resample_block_2d(guint width,
 
     gdouble *xw = g_slice_alloc(sizeof(gdouble)*suplen*newwidth);
     gdouble *yw = g_slice_alloc(sizeof(gdouble)*suplen*newheight);
-    guint *xp = g_slice_alloc(sizeof(guint)*newwidth);
-    guint *yp = g_slice_alloc(sizeof(guint)*newheight);
+    gint *xp = g_slice_alloc(sizeof(gint)*newwidth);
+    gint *yp = g_slice_alloc(sizeof(gint)*newheight);
     calculate_weights_for_rescale(width, newwidth, xp, xw, interpolation);
     calculate_weights_for_rescale(height, newheight, yp, yw, interpolation);
     for (guint newi = 0; newi < newheight; newi++) {
-        guint oldi = yp[newi];
+        gint oldi = yp[newi];
         for (guint newj = 0; newj < newwidth; newj++) {
-            guint oldj = xp[newj];
+            gint oldj = xp[newj];
             gdouble v = 0.0;
             for (gint i = sf; i <= st; i++) {
                 guint ii = (oldi + i + 2*st*height) % (2*height);
@@ -723,8 +723,8 @@ gwy_interpolation_resample_block_2d(guint width,
     }
     g_slice_free1(sizeof(gdouble)*suplen*newwidth, xw);
     g_slice_free1(sizeof(gdouble)*suplen*newheight, yw);
-    g_slice_free1(sizeof(guint)*newwidth, xp);
-    g_slice_free1(sizeof(guint)*newheight, yp);
+    g_slice_free1(sizeof(gint)*newwidth, xp);
+    g_slice_free1(sizeof(gint)*newheight, yp);
 
     if (coeffs)
         g_slice_free1(sizeof(gdouble)*width*height, coeffs);
