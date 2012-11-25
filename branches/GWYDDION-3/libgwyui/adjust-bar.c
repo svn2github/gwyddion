@@ -25,8 +25,6 @@
 #include "libgwyui/types.h"
 #include "libgwyui/adjust-bar.h"
 
-#define pangoscale ((gdouble)PANGO_SCALE)
-
 enum {
     PROP_0,
     PROP_ADJUSTMENT,
@@ -111,6 +109,8 @@ static gboolean gwy_adjust_bar_button_release      (GtkWidget *widget,
                                                     GdkEventButton *event);
 static gboolean gwy_adjust_bar_motion_notify       (GtkWidget *widget,
                                                     GdkEventMotion *event);
+static void     gwy_adjust_bar_change_value        (GwyAdjustBar *adjbar,
+                                                    gdouble newvalue);
 static gboolean set_adjustment                     (GwyAdjustBar *adjbar,
                                                     GtkAdjustment *adjustment);
 static gboolean set_mapping                        (GwyAdjustBar *adjbar,
@@ -129,14 +129,15 @@ static void     adjustment_changed                 (GwyAdjustBar *adjbar,
                                                     GtkAdjustment *adjustment);
 static void     adjustment_value_changed           (GwyAdjustBar *adjbar,
                                                     GtkAdjustment *adjustment);
-static void     move_to_position                   (GwyAdjustBar *adjbar,
-                                                    gdouble x);
 static void     update_mapping                     (GwyAdjustBar *adjbar);
 static void     ensure_layout                      (GwyAdjustBar *adjbar);
 static void     draw_bar                           (GwyAdjustBar *adjbar,
                                                     cairo_t *cr);
 static void     draw_label                         (GwyAdjustBar *adjbar,
                                                     cairo_t *cr);
+static void     calc_layout_position               (GwyAdjustBar *adjbar,
+                                                    gint *x,
+                                                    gint *y);
 static gdouble  map_value_to_position              (GwyAdjustBar *adjbar,
                                                     gdouble length,
                                                     gdouble value);
@@ -246,22 +247,21 @@ gwy_adjust_bar_class_init(GwyAdjustBarClass *klass)
     /**
      * GwyAdjustBar::change-value:
      * @gwyadjbar: The #GwyAdjustBar which received the signal.
-     * @arg1: Scroll type determing the value change.
+     * @arg1: New value for @gwyadjbar.
      *
-     * The ::modify-range signal is emitted when the user interactively
+     * The ::change-value signal is emitted when the user interactively
      * changes the value.
      *
      * It is an action signal.
      **/
-    // TODO: This is an action signal.  We must implement it.
     signals[SGNL_CHANGE_VALUE]
         = g_signal_new_class_handler("change-value",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__ENUM,
-                                     G_TYPE_NONE, 1,
-                                     GWY_TYPE_SCALE_MAPPING_TYPE);
+                                     G_CALLBACK(gwy_adjust_bar_change_value),
+                                     NULL, NULL,
+                                     g_cclosure_marshal_VOID__DOUBLE,
+                                     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 }
 
 static void
@@ -379,7 +379,17 @@ gwy_adjust_bar_get_preferred_width(GtkWidget *widget,
                                    gint *minimum,
                                    gint *natural)
 {
-    *minimum = *natural = 200;
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    GtkBorder borders;
+    gtk_style_context_get_padding(context, 0, &borders);
+    ensure_layout(adjbar);
+    gint width;
+    pango_layout_get_size(priv->layout, &width, NULL);
+    width = width/PANGO_SCALE + borders.top + borders.bottom;
+    *minimum = width;
+    *natural = width;
 }
 
 static void
@@ -402,7 +412,8 @@ gwy_adjust_bar_get_preferred_height(GtkWidget *widget,
     GtkBorder borders;
     gtk_style_context_get_padding(context, 0, &borders);
     ensure_layout(adjbar);
-    guint height = (priv->ascent + priv->descent)/pangoscale;
+    guint height = ((priv->ascent + priv->descent)/PANGO_SCALE
+                    + borders.top + borders.bottom);
     *minimum = height;
     *natural = height;
 }
@@ -430,8 +441,8 @@ gwy_adjust_bar_unrealize(GtkWidget *widget)
 static void
 gwy_adjust_bar_map(GtkWidget *widget)
 {
-    GwyAdjustBar *adjust_bar = GWY_ADJUST_BAR(widget);
-    AdjustBar *priv = adjust_bar->priv;
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
     GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->map(widget);
     if (priv->input_window)
         gdk_window_show(priv->input_window);
@@ -440,8 +451,8 @@ gwy_adjust_bar_map(GtkWidget *widget)
 static void
 gwy_adjust_bar_unmap(GtkWidget *widget)
 {
-    GwyAdjustBar *adjust_bar = GWY_ADJUST_BAR(widget);
-    AdjustBar *priv = adjust_bar->priv;
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
     if (priv->input_window)
         gdk_window_hide(priv->input_window);
     GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->unmap(widget);
@@ -484,8 +495,6 @@ gwy_adjust_bar_draw(GtkWidget *widget,
     draw_bar(adjbar, cr);
     draw_label(adjbar, cr);
 
-    g_printerr("IMPLEMENT ME!\n");
-
     return FALSE;
 }
 
@@ -513,6 +522,23 @@ gwy_adjust_bar_leave_notify(GtkWidget *widget,
     return FALSE;
 }
 
+static void
+change_value(GtkWidget *widget,
+             gdouble newposition)
+{
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
+    if (!priv->adjustment_ok)
+        return;
+
+    gdouble length = gtk_widget_get_allocated_width(widget);
+    gdouble value = gtk_adjustment_get_value(priv->adjustment);
+    newposition = CLAMP(newposition, 0.0, length);
+    gdouble newvalue = map_position_to_value(adjbar, length, newposition);
+    if (newvalue != value)
+        g_signal_emit(adjbar, signals[SGNL_CHANGE_VALUE], 0, newvalue);
+}
+
 static gboolean
 gwy_adjust_bar_scroll(GtkWidget *widget,
                       GdkEventScroll *event)
@@ -532,11 +558,7 @@ gwy_adjust_bar_scroll(GtkWidget *widget,
     else
         newposition -= 1.0;
 
-    newposition = CLAMP(newposition, 0.0, length);
-    if (newposition != position) {
-        gdouble newvalue = map_position_to_value(adjbar, length, newposition);
-        gtk_adjustment_set_value(priv->adjustment, newvalue);
-    }
+    change_value(widget, CLAMP(newposition, 0.0, length));
     return TRUE;
 }
 
@@ -547,7 +569,7 @@ gwy_adjust_bar_button_press(GtkWidget *widget,
     if (event->button != 1)
         return FALSE;
 
-    move_to_position(GWY_ADJUST_BAR(widget), event->x);
+    change_value(widget, event->x);
     return TRUE;
 }
 
@@ -558,7 +580,7 @@ gwy_adjust_bar_button_release(GtkWidget *widget,
     if (event->button != 1)
         return FALSE;
 
-    move_to_position(GWY_ADJUST_BAR(widget), event->x);
+    change_value(widget, event->x);
     return TRUE;
 }
 
@@ -569,8 +591,24 @@ gwy_adjust_bar_motion_notify(GtkWidget *widget,
     if (!(event->state & GDK_BUTTON1_MASK))
         return FALSE;
 
-    move_to_position(GWY_ADJUST_BAR(widget), event->x);
+    change_value(widget, event->x);
     return TRUE;
+}
+
+static void
+gwy_adjust_bar_change_value(GwyAdjustBar *adjbar,
+                            gdouble newvalue)
+{
+    AdjustBar *priv = adjbar->priv;
+    g_return_if_fail(priv->adjustment);
+    if (!priv->adjustment_ok)
+        return;
+
+    gdouble value = gtk_adjustment_get_value(priv->adjustment);
+    if (newvalue == value)
+        return;
+
+    gtk_adjustment_set_value(priv->adjustment, newvalue);
 }
 
 /**
@@ -945,23 +983,6 @@ adjustment_value_changed(GwyAdjustBar *adjbar,
 }
 
 static void
-move_to_position(GwyAdjustBar *adjbar,
-                 gdouble x)
-{
-    AdjustBar *priv = adjbar->priv;
-    if (!priv->adjustment_ok)
-        return;
-
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(adjbar), &allocation);
-    gdouble value = gtk_adjustment_get_value(priv->adjustment);
-    gdouble pos = CLAMP(x - allocation.x, 0, allocation.width);
-    gdouble newvalue = map_position_to_value(adjbar, allocation.width, pos);
-    if (newvalue != value)
-        gtk_adjustment_set_value(priv->adjustment, newvalue);
-}
-
-static void
 update_mapping(GwyAdjustBar *adjbar)
 {
     AdjustBar *priv = adjbar->priv;
@@ -1085,14 +1106,42 @@ draw_bar(GwyAdjustBar *adjbar,
     cairo_restore(cr);
 }
 
-static gint
-calc_layout_yposition(GwyAdjustBar *adjbar)
+static void
+draw_label(GwyAdjustBar *adjbar,
+           cairo_t *cr)
 {
     AdjustBar *priv = adjbar->priv;
+    if (!priv->label || !*priv->label)
+        return;
+
+    GtkWidget *widget = GTK_WIDGET(adjbar);
+    GtkStateFlags state = gtk_widget_get_state_flags(widget);
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    GdkRGBA text_color;
+    gtk_style_context_get_color(context, state, &text_color);
+
+    cairo_save(cr);
+    gint x, y;
+    calc_layout_position(adjbar, &x, &y);
+    cairo_move_to(cr, x, y);
+    gdk_cairo_set_source_rgba(cr, &text_color);
+    pango_cairo_show_layout(cr, priv->layout);
+    cairo_restore(cr);
+}
+
+static void
+calc_layout_position(GwyAdjustBar *adjbar,
+                     gint *x, gint *y)
+{
+    GtkWidget *widget = GTK_WIDGET(adjbar);
+    AdjustBar *priv = adjbar->priv;
     GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(adjbar), &allocation);
-    // TODO: handle borders.
-    gint area_height = PANGO_SCALE*allocation.height;
+    gtk_widget_get_allocation(widget, &allocation);
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    GtkBorder borders;
+    gtk_style_context_get_padding(context, 0, &borders);
+    gint area_height = PANGO_SCALE*(allocation.height
+                                    - borders.top - borders.bottom);
     PangoLayoutLine *line = pango_layout_get_lines_readonly(priv->layout)->data;
     PangoRectangle logical_rect;
     pango_layout_line_get_extents(line, NULL, &logical_rect);
@@ -1109,29 +1158,8 @@ calc_layout_yposition(GwyAdjustBar *adjbar)
     else if (y_pos + logical_rect.height > area_height)
         y_pos = area_height - logical_rect.height;
 
-    return y_pos/PANGO_SCALE;
-}
-
-static void
-draw_label(GwyAdjustBar *adjbar,
-           cairo_t *cr)
-{
-    AdjustBar *priv = adjbar->priv;
-    if (!priv->label || !*priv->label)
-        return;
-
-    GtkWidget *widget = GTK_WIDGET(adjbar);
-    GtkStateFlags state = gtk_widget_get_state_flags(widget);
-    GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    GdkRGBA text_color;
-    gtk_style_context_get_color(context, state, &text_color);
-
-    cairo_save(cr);
-    gint y = calc_layout_yposition(adjbar);
-    cairo_move_to(cr, 2.0, y);
-    gdk_cairo_set_source_rgba(cr, &text_color);
-    pango_cairo_show_layout(cr, priv->layout);
-    cairo_restore(cr);
+    *y = y_pos/PANGO_SCALE + borders.top;
+    *x = borders.left;
 }
 
 static gdouble
