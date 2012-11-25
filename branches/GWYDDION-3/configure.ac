@@ -179,6 +179,10 @@ AC_SUBST([LIBGWYAPP_COMPAT_CPPFLAGS],["$LIBGWYUI_COMPAT_CPPFLAGS"])
 AC_SUBST([LIBGWYAPP_DEPS_CFLAGS],["$GTK_CFLAGS $GDKPIXBUF_CFLAGS"])
 AC_SUBST([LIBGWYAPP_DEPS_LIBS],["$GTK_LIBS $GDKPIXBUF_LIBS"])
 
+PKG_CHECK_MODULES([CAIRO_XLIB],[cairo-xlib],
+                  [gwy_enable_cairo_xlib=yes],[gwy_enable_cairo_xlib=no])
+AM_CONDITIONAL([HAVE_CAIRO_XLIB],[test "x$gwy_enable_cairo_xlib" = xyes])
+
 #############################################################################
 # GLib tools
 AC_MSG_CHECKING([for glib-genmarshal])
