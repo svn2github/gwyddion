@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@ typedef struct {
 } GwyItemTest;
 
 static int item_destroy_count;
+static gboolean sort_by_name;
 
 static GwyItemTest*
 item_new(const gchar *name, gint value)
@@ -62,6 +63,18 @@ item_compare(gconstpointer a,
     const GwyItemTest *itemtesta = (const GwyItemTest*)a;
     const GwyItemTest *itemtestb = (const GwyItemTest*)b;
     return strcmp(itemtesta->name, itemtestb->name);
+}
+
+static gint
+item_compare_tricky(gconstpointer a,
+                    gconstpointer b)
+{
+    if (sort_by_name)
+        return item_compare(a, b);
+
+    const GwyItemTest *itemtesta = (const GwyItemTest*)a;
+    const GwyItemTest *itemtestb = (const GwyItemTest*)b;
+    return itemtesta->value - itemtestb->value;
 }
 
 static void
@@ -207,6 +220,190 @@ test_inventory_data(void)
 
     g_object_unref(inventory);
     g_assert_cmpuint(item_destroy_count, ==, 5);
+}
+
+void
+test_inventory_sorting(void)
+{
+    GwyInventoryItemType item_type = {
+        0,
+        NULL,
+        item_get_name,
+        item_is_modifiable,
+        item_compare_tricky,
+        item_rename,
+        item_destroy,
+        item_copy,
+        NULL,
+        NULL,
+        NULL,
+    };
+
+    GwyInventory *inventory = gwy_inventory_new();
+    g_assert(GWY_IS_INVENTORY(inventory));
+    gwy_inventory_set_item_type(inventory, &item_type);
+    item_destroy_count = 0;
+    sort_by_name = TRUE;
+
+    guint64 insert_log = 0, update_log = 0, delete_log = 0;
+    g_signal_connect(inventory, "item-inserted",
+                     G_CALLBACK(record_item_change), &insert_log);
+    g_signal_connect(inventory, "item-updated",
+                     G_CALLBACK(record_item_change), &update_log);
+    g_signal_connect(inventory, "item-deleted",
+                     G_CALLBACK(record_item_change), &delete_log);
+
+    gwy_inventory_insert(inventory, item_new("Bananna", 2));
+    gwy_inventory_insert(inventory, item_new("Apple", 8));
+    gwy_inventory_insert(inventory, item_new("Date", 4));
+    gwy_inventory_insert(inventory, item_new("Citrus", 1));
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 4);
+    g_assert_cmphex(insert_log, ==, 0x1133);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+    insert_log = 0;
+
+    // Break the sorting order so that followig items are just appended.
+    gwy_inventory_insert_nth(inventory, item_new("Turd", 0), 2);
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 5);
+    g_assert_cmphex(insert_log, ==, 0x3);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+    insert_log = 0;
+
+    gwy_inventory_insert(inventory, item_new("Bogus", 3));
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 6);
+    g_assert_cmphex(insert_log, ==, 0x6);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+    insert_log = 0;
+
+    sort_by_name = FALSE;
+    gwy_inventory_restore_order(inventory);
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 6);
+    g_assert_cmphex(insert_log, ==, 0);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Turd"), ==, 0);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Citrus"), ==, 1);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Bananna"), ==, 2);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Bogus"), ==, 3);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Date"), ==, 4);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Apple"), ==, 5);
+
+    g_object_unref(inventory);
+    g_assert_cmpuint(item_destroy_count, ==, 6);
+}
+
+static gboolean
+predicate1(G_GNUC_UNUSED guint n,
+           G_GNUC_UNUSED gpointer item,
+           G_GNUC_UNUSED gpointer user_data)
+{
+    return FALSE;
+}
+
+static gboolean
+predicate2(G_GNUC_UNUSED guint n,
+           G_GNUC_UNUSED gpointer item,
+           G_GNUC_UNUSED gpointer user_data)
+{
+    return TRUE;
+}
+
+static gboolean
+predicate3(guint n,
+           G_GNUC_UNUSED gpointer item,
+           G_GNUC_UNUSED gpointer user_data)
+{
+    return n % 2;
+}
+
+static gboolean
+predicate4(G_GNUC_UNUSED guint n,
+           gpointer item,
+           G_GNUC_UNUSED gpointer user_data)
+{
+    GwyItemTest *itemtest = (GwyItemTest*)item;
+    return strlen(itemtest->name) == (guint)itemtest->value;
+}
+
+static void
+sum_values(G_GNUC_UNUSED guint n,
+           gpointer item,
+           gpointer user_data)
+{
+    GwyItemTest *itemtest = (GwyItemTest*)item;
+    gint *psum = (gint*)user_data;
+    *psum += itemtest->value;
+}
+
+void
+test_inventory_functional(void)
+{
+    GwyInventoryItemType item_type = {
+        0,
+        NULL,
+        item_get_name,
+        item_is_modifiable,
+        item_compare,
+        item_rename,
+        item_destroy,
+        item_copy,
+        NULL,
+        NULL,
+        NULL,
+    };
+
+    GwyInventory *inventory = gwy_inventory_new();
+    g_assert(GWY_IS_INVENTORY(inventory));
+    gwy_inventory_set_item_type(inventory, &item_type);
+    item_destroy_count = 0;
+    sort_by_name = TRUE;
+
+    guint64 insert_log = 0, update_log = 0, delete_log = 0;
+    g_signal_connect(inventory, "item-inserted",
+                     G_CALLBACK(record_item_change), &insert_log);
+    g_signal_connect(inventory, "item-updated",
+                     G_CALLBACK(record_item_change), &update_log);
+    g_signal_connect(inventory, "item-deleted",
+                     G_CALLBACK(record_item_change), &delete_log);
+
+    gwy_inventory_insert(inventory, item_new("Bananna", 2));
+    gwy_inventory_insert(inventory, item_new("Apple", 8));
+    gwy_inventory_insert(inventory, item_new("Date", 4));
+    gwy_inventory_insert(inventory, item_new("Citrus", 1));
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 4);
+    g_assert_cmphex(insert_log, ==, 0x1133);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+    insert_log = 0;
+
+    GwyItemTest *itemtest = gwy_inventory_find(inventory, predicate1, NULL);
+    g_assert(!itemtest);
+
+    itemtest = gwy_inventory_find(inventory, predicate2, NULL);
+    g_assert(itemtest);
+    g_assert_cmpstr(itemtest->name, ==, "Apple");
+    g_assert_cmpint(itemtest->value, ==, 8);
+
+    itemtest = gwy_inventory_find(inventory, predicate3, NULL);
+    g_assert(itemtest);
+    g_assert_cmpstr(itemtest->name, ==, "Bananna");
+    g_assert_cmpint(itemtest->value, ==, 2);
+
+    itemtest = gwy_inventory_find(inventory, predicate4, NULL);
+    g_assert(itemtest);
+    g_assert_cmpstr(itemtest->name, ==, "Date");
+    g_assert_cmpint(itemtest->value, ==, 4);
+
+    gint sum = 0;
+    gwy_inventory_foreach(inventory, sum_values, &sum);
+    g_assert_cmpint(sum, ==, 15);
+
+    g_object_unref(inventory);
+    g_assert_cmpuint(item_destroy_count, ==, 4);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

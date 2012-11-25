@@ -446,6 +446,8 @@ container/text
 container/boxed
 array/data
 inventory/data
+inventory/sorting
+inventory/functional
 resource/error/unknown-type
 resource/error/different-type
 gradient/load

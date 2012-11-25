@@ -509,7 +509,7 @@ gwy_inventory_foreach(GwyInventory *inventory,
  * %TRUE.
  *
  * Returns: (transfer none):
- *          The item for which @predicate returned %TRUE.  If there is no
+ *          The first item for which @predicate returned %TRUE.  If there is no
  *          such item in the inventory, %NULL is returned.
  **/
 gpointer
