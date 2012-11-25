@@ -1010,11 +1010,11 @@ ensure_layout(GwyAdjustBar *adjbar)
     }
 
     gchar *escaped = NULL;
-    if (!priv->use_markup)
+    if (priv->label && !priv->use_markup)
         escaped = g_markup_escape_text(priv->label, -1);
 
     gchar *text = escaped ? escaped : priv->label;
-    if (priv->use_underline) {
+    if (text && priv->use_underline) {
         // FIXME: Accelerators may be disabled globally, they can appear and
         // disappear dynamically and also we should not show them if we do not
         // have any mnemonic widget.  See GtkLabel for some of the convoluted
@@ -1022,7 +1022,6 @@ ensure_layout(GwyAdjustBar *adjbar)
         gunichar accel_char = 0;
         pango_layout_set_markup_with_accel(priv->layout, text, -1,
                                            '_', &accel_char);
-        // FIXME: Needs to emit signal if changes.
         if (accel_char) {
             guint keyval = gdk_unicode_to_keyval(accel_char);
             priv->mnemonic_keyval = gdk_keyval_to_lower(keyval);
@@ -1031,8 +1030,10 @@ ensure_layout(GwyAdjustBar *adjbar)
             priv->mnemonic_keyval = GDK_KEY_VoidSymbol;
     }
     else {
-        pango_layout_set_markup(priv->layout, text, -1);
+        pango_layout_set_markup(priv->layout, text ? text : "", -1);
     }
+
+    // FIXME: Needs to emit signal if accel key changes.
 
     GWY_FREE(escaped);
 }
@@ -1205,6 +1206,7 @@ discard_cursors(GwyAdjustBar *adjbar)
  * SECTION: adjust-bar
  * @title: GwyAdjustBar
  * @short_description: Compact adjustment visualisation and modification
+ * @image: GwyAdjustBar.png
  **/
 
 /**
