@@ -1,18 +1,22 @@
 #!/usr/bin/python
 import sys, re
 
+known_boxed = frozenset(
+    ('FIELD_PART', 'LINE_PART', 'BRICK_PART', 'RANGE', 'RGBA', 'XY', 'XYZ')
+)
+
 signal_re = re.compile(r'(?ms)'
     r'signals\[(?P<nameuc>\w+)\]\s*'
     r'=\s*g_signal_new_class_handler\s*\((?P<args>[^;]+?)\);')
+
+if len(sys.argv) < 2:
+  print "Usage: check-marshallers.py [--verbose] SOURCE.c..."
+  sys.exit(1)
 
 verbose = False
 if sys.argv[1] in ('-v', '--verbose'):
     verbose = True
     del sys.argv[1]
-
-if len(sys.argv) < 2:
-  print "Usage: check-marshallers.py [--verbose] SOURCE.c..."
-  sys.exit(1)
 
 status = 0
 for filename in sys.argv[1:]:
@@ -95,7 +99,7 @@ for filename in sys.argv[1:]:
 
         for i in range(nargs):
             # Some manual tweaks necessary...
-            if mt_args[i] == 'BOXED' and re.match(r'^[A-Z]+_PART$', argtypes[i]):
+            if mt_args[i] == 'BOXED' and argtypes[i] in known_boxed:
                 continue
             if mt_args[i] == 'ENUM':
                 # Anything can be an enum, unfortunately
