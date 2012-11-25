@@ -732,10 +732,10 @@ gwy_field_new_resampled(const GwyField *field,
     copy_info(dest, field);
     dest->xres = xres;  // Undo
     dest->yres = yres;  // Undo
-    gwy_interpolation_resample_block_2d(field->xres, field->yres, field->xres,
-                                        field->data,
-                                        dest->xres, dest->yres, dest->xres,
+    gwy_interpolation_resample_block_2d(field->data,
+                                        field->xres, field->yres, field->xres,
                                         dest->data,
+                                        dest->xres, dest->yres, dest->xres,
                                         interpolation, TRUE);
 
     return dest;

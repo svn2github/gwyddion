@@ -617,9 +617,9 @@ gwy_field_interpolation_coeffs(GwyField *field,
         return g_object_ref(field);
 
     GwyField *result = gwy_field_duplicate(field);
-    gwy_interpolation_resolve_coeffs_2d(result->xres, result->yres,
-                                        result->xres, result->data,
-                                        interpolation);
+    gwy_interpolation_resolve_coeffs_2d(result->data,
+                                        result->xres, result->yres,
+                                        result->xres, interpolation);
     return result;
 }
 

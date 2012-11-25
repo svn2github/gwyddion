@@ -806,8 +806,8 @@ gwy_line_new_resampled(const GwyLine *line,
     dest = gwy_line_new_sized(res, FALSE);
     copy_info(dest, line);
     dest->res = res;  // Undo
-    gwy_interpolation_resample_block_1d(line->res, line->data,
-                                        dest->res, dest->data,
+    gwy_interpolation_resample_block_1d(line->data, line->res,
+                                        dest->data, dest->res,
                                         interpolation, TRUE);
 
     return dest;

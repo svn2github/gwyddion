@@ -37,7 +37,7 @@ interpolation_constant_one(GwyInterpolationType interpolation,
         data[i] = value;
 
     if (!gwy_interpolation_has_interpolating_basis(interpolation))
-        gwy_interpolation_resolve_coeffs_1d(support_len, data, interpolation);
+        gwy_interpolation_resolve_coeffs_1d(data, support_len, interpolation);
 
     for (gdouble x = 0.0; x < 1.0; x += 0.0618) {
         gdouble ivalue = gwy_interpolate_1d(x, data, interpolation);
@@ -89,7 +89,7 @@ interpolation_linear_long_one(GwyInterpolationType interpolation,
         data[i] = (i - origin)*(b - a) + a;
     }
 
-    gwy_interpolation_resolve_coeffs_1d(len, data, interpolation);
+    gwy_interpolation_resolve_coeffs_1d(data, len, interpolation);
 
     for (gdouble x = 0.0; x < 1.0; x += 0.0618) {
         gdouble value = x*b + (1.0 - x)*a;
@@ -167,7 +167,7 @@ interpolation_resample_linear_one(GwyInterpolationType interpolation,
     }
 
     gdouble *newdata = g_new(gdouble, newlen);
-    gwy_interpolation_resample_block_1d(len, data, newlen, newdata,
+    gwy_interpolation_resample_block_1d(data, len, newdata, newlen,
                                         interpolation, TRUE);
 
     for (guint i = 0; i < len; i++) {

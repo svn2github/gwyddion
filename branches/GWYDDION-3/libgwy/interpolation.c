@@ -457,8 +457,9 @@ gwy_interpolation_get_support_size(GwyInterpolationType interpolation)
 
 /**
  * gwy_interpolation_resolve_coeffs_1d:
+ * @data: (array length=n) (inout):
+ *        An array of data values.  It will be rewritten with the coefficients.
  * @n: Number of points in @data.
- * @data: An array of data values.  It will be rewritten with the coefficients.
  * @interpolation: Interpolation type to prepare @data for.
  *
  * Transforms data values in a one-dimensional array to interpolation
@@ -469,8 +470,8 @@ gwy_interpolation_get_support_size(GwyInterpolationType interpolation)
  * array directly for these interpolation types.
  **/
 void
-gwy_interpolation_resolve_coeffs_1d(guint n,
-                                    gdouble *data,
+gwy_interpolation_resolve_coeffs_1d(gdouble *data,
+                                    guint n,
                                     GwyInterpolationType interpolation)
 {
     if (gwy_interpolation_has_interpolating_basis(interpolation))
@@ -503,24 +504,25 @@ gwy_interpolation_resolve_coeffs_1d(guint n,
 
 /**
  * gwy_interpolation_resolve_coeffs_2d:
+ * @data: (inout):
+ *        An array of data values.  It will be rewritten with the coefficients.
  * @width: Number of columns in @data.
  * @height: Number of rows in @data.
  * @rowstride: Total row length (including @width).
- * @data: An array of data values.  It will be rewritten with the coefficients.
  * @interpolation: Interpolation type to prepare @data for.
  *
  * Transforms data values in a two-dimensional array to interpolation
  * coefficients.
  *
- * This function is no-op for interpolation types with finite-support
+ * This function is no-op for interpolation types with interpolating-basis
  * interpolating function.  Therefore you can also omit it and use the data
  * array directly for these interpolation types.
  **/
 void
-gwy_interpolation_resolve_coeffs_2d(guint width,
+gwy_interpolation_resolve_coeffs_2d(gdouble *data,
+                                    guint width,
                                     guint height,
                                     guint rowstride,
-                                    gdouble *data,
                                     GwyInterpolationType interpolation)
 {
     if (interpolation == GWY_INTERPOLATION_BSPLINE1
@@ -562,10 +564,12 @@ gwy_interpolation_resolve_coeffs_2d(guint width,
 
 /**
  * gwy_interpolation_resample_block_1d:
+ * @data: (array length=length) (inout):
+ *        Data block to resample.
  * @length: Data block length.
- * @data: Data block to resample.
+ * @newdata: (array length=newlength) (out):
+ *           Array to put the resampled data to.
  * @newlength: Requested length after resampling.
- * @newdata: Array to put the resampled data to.
  * @interpolation: Interpolation type to use.
  * @preserve: %TRUE to preserve the content of @data, %FALSE to permit its
  *            overwriting with temporary data.
@@ -576,10 +580,10 @@ gwy_interpolation_resolve_coeffs_2d(guint width,
  * gwy_line_new_resampled() provide more convenient interface.
  **/
 void
-gwy_interpolation_resample_block_1d(guint length,
-                                    gdouble *data,
-                                    guint newlength,
+gwy_interpolation_resample_block_1d(gdouble *data,
+                                    guint length,
                                     gdouble *newdata,
+                                    guint newlength,
                                     GwyInterpolationType interpolation,
                                     gboolean preserve)
 {
@@ -593,7 +597,7 @@ gwy_interpolation_resample_block_1d(guint length,
     if (!gwy_interpolation_has_interpolating_basis(interpolation)) {
         if (preserve)
             data = coeffs = g_slice_copy(sizeof(gdouble)*length, data);
-        gwy_interpolation_resolve_coeffs_1d(length, data, interpolation);
+        gwy_interpolation_resolve_coeffs_1d(data, length, interpolation);
     }
 
     gdouble q = (gdouble)length/newlength;
@@ -638,15 +642,15 @@ calculate_weights_for_rescale(guint oldn,
 
 /**
  * gwy_interpolation_resample_block_2d:
+ * @data: Data block to resample.
  * @width: Number of columns in @data.
  * @height: Number of rows in @data.
  * @rowstride: Total row length (including @width).
- * @data: Data block to resample.
+ * @newdata: Array to put the resampled data to.
  * @newwidth: Requested number of columns after resampling.
  * @newheight: Requested number of rows after resampling.
  * @newrowstride: Requested total row length after resampling (including
  *                @newwidth).
- * @newdata: Array to put the resampled data to.
  * @interpolation: Interpolation type to use.
  * @preserve: %TRUE to preserve the content of @data, %FALSE to permit its
  *            overwriting with temporary data.
@@ -657,14 +661,14 @@ calculate_weights_for_rescale(guint oldn,
  * gwy_field_new_resampled() provide more convenient interface.
  **/
 void
-gwy_interpolation_resample_block_2d(guint width,
+gwy_interpolation_resample_block_2d(gdouble *data,
+                                    guint width,
                                     guint height,
                                     guint rowstride,
-                                    gdouble *data,
+                                    gdouble *newdata,
                                     guint newwidth,
                                     guint newheight,
                                     guint newrowstride,
-                                    gdouble *newdata,
                                     GwyInterpolationType interpolation,
                                     gboolean preserve)
 {
@@ -690,8 +694,8 @@ gwy_interpolation_resample_block_2d(guint width,
                 rowstride = width;
             }
         }
-        gwy_interpolation_resolve_coeffs_2d(width, height, rowstride,
-                                            data, interpolation);
+        gwy_interpolation_resolve_coeffs_2d(data, width, height, rowstride,
+                                            interpolation);
     }
 
     gdouble *xw = g_slice_alloc(sizeof(gdouble)*suplen*newwidth);
@@ -732,11 +736,13 @@ gwy_interpolation_resample_block_2d(guint width,
 
 /**
  * gwy_interpolation_shift_block_1d:
+ * @data: (array length=length) (inout):
+ *         Data block to shift.
+ * @newdata: (array length=length) (inout):
+ *           Array to put the shifted data to.
  * @length: Data block length.
- * @data: Data block to shift.
  * @offset: The shift, in corrective sense.  Shift value of 1.0 means the
  *          zeroth value of @newdata will be set to the first value of @data.
- * @newdata: Array to put the shifted data to.
  * @interpolation: Interpolation type to use.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with @GWY_EXTERIOR_FIXED_VALUE.
@@ -746,10 +752,10 @@ gwy_interpolation_resample_block_2d(guint width,
  * Shifts a one-dimensional data block by a possibly non-integer offset.
  **/
 void
-gwy_interpolation_shift_block_1d(guint length,
-                                 gdouble *data,
-                                 gdouble offset,
+gwy_interpolation_shift_block_1d(gdouble *data,
                                  gdouble *newdata,
+                                 guint length,
+                                 gdouble offset,
                                  GwyInterpolationType interpolation,
                                  GwyExteriorType exterior,
                                  gdouble fill_value,
@@ -769,7 +775,7 @@ gwy_interpolation_shift_block_1d(guint length,
     if (!gwy_interpolation_has_interpolating_basis(interpolation)) {
         if (preserve)
             data = coeffs = g_slice_copy(sizeof(gdouble)*length, data);
-        gwy_interpolation_resolve_coeffs_1d(length, data, interpolation);
+        gwy_interpolation_resolve_coeffs_1d(data, length, interpolation);
     }
 
     gint off = (gint)floor(offset);
