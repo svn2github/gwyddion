@@ -117,16 +117,31 @@ next(gpointer user_data)
 static GtkWidget*
 create_color_axis(void)
 {
+    GwyRand *rng = gwy_rand_new_with_seed(42);
+    GwyRange range = { 0.0, 53e-9 };
+    GwyCurve *dist = gwy_curve_new_sized(50);
+    GwyXY *data = dist->data;
+    guint n = dist->n;
+    for (guint i = 0; i < n; i++) {
+        gdouble xi = (i + 0.5)/n;
+        gdouble t = (xi - 0.5)/0.2;
+        gdouble x = xi*(range.to - range.from) + range.from;
+        gdouble y = exp(-t*t - 0.1*t*t*t) + 0.025*gwy_rand_normal(rng);
+        data[i] = (GwyXY){ x, y };
+    }
+    gwy_rand_free(rng);
     GtkWidget *widget = g_object_new(GWY_TYPE_COLOR_AXIS,
                                      "edge", GTK_POS_RIGHT,
                                      "snap-to-ticks", FALSE,
                                      "ticks-at-edges", TRUE,
                                      "max-tick-level", GWY_AXIS_TICK_MINOR,
                                      "gradient", gwy_gradients_get("Sky"),
+                                     "distribution", dist,
                                      NULL);
+    g_object_unref(dist);
     GwyAxis *axis = GWY_AXIS(widget);
     gwy_unit_set_from_string(gwy_axis_get_unit(axis), "A", NULL);
-    gwy_axis_request_range(axis, &(GwyRange){ 0.0, 53e-9 });
+    gwy_axis_request_range(axis, &range);
     gtk_widget_set_size_request(widget, -1, MEDIUM_HEIGHT);
     return widget;
 }
@@ -147,6 +162,57 @@ create_ruler(void)
     return widget;
 }
 
+static GtkWidget*
+create_spin_button(void)
+{
+    GtkAdjustment *adj = gtk_adjustment_new(15.0, 0.0, 999.0, 0.1, 1.0, 0.0);
+    GtkWidget *widget = g_object_new(GWY_TYPE_SPIN_BUTTON,
+                                     "adjustment", adj,
+                                     "digits", 1,
+                                     NULL);
+    return widget;
+}
+
+static GtkWidget*
+create_raster_area(void)
+{
+    GwyField *field = gwy_field_new_sized(80, 50, FALSE);
+    GwyRand *rng = gwy_rand_new_with_seed(44);
+    gdouble *d = field->data;
+    for (guint i = field->xres*field->yres; i; i--, d++)
+        *d = gwy_rand_double(rng);
+    gwy_field_invalidate(field);
+    gwy_field_filter_gaussian(field, NULL, field, 3.0, 1.0,
+                              GWY_EXTERIOR_PERIODIC, 0.0);
+    gwy_rand_free(rng);
+    GwyMaskField *mask = gwy_mask_field_new_from_field(field, NULL,
+                                                       0.52, G_MAXDOUBLE,
+                                                       FALSE);
+    GtkWidget *widget = g_object_new(GWY_TYPE_RASTER_AREA,
+                                     "field", field,
+                                     "mask", mask,
+                                     "zoom", 2.0,
+                                     "real-aspect-ratio", TRUE,
+                                     "mask-color", &(GwyRGBA){ 0.4, 0.7, 0.1, 0.4 },
+                                     "number-grains", TRUE,
+                                     NULL);
+    g_object_unref(field);
+    g_object_unref(mask);
+    return widget;
+}
+
+static GtkWidget*
+create_adjust_bar(void)
+{
+    GtkAdjustment *adj = gtk_adjustment_new(55.0, 0.0, 99.0, 0.1, 1.0, 0.0);
+    GtkWidget *widget = g_object_new(GWY_TYPE_ADJUST_BAR,
+                                     "adjustment", adj,
+                                     "use-underline", TRUE,
+                                     "label", "Adjustment value",
+                                     NULL);
+    return widget;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -155,6 +221,9 @@ main(int argc, char *argv[])
 
     ctors = g_slist_prepend(ctors, create_color_axis);
     ctors = g_slist_prepend(ctors, create_ruler);
+    ctors = g_slist_prepend(ctors, create_spin_button);
+    ctors = g_slist_prepend(ctors, create_adjust_bar);
+    ctors = g_slist_prepend(ctors, create_raster_area);
 
     dummywindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_widget_show(dummywindow);
