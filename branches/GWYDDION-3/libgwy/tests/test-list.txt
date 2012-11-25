@@ -37,6 +37,7 @@ math/fit/poly
 interpolation/constant
 interpolation/linear/interpolating
 interpolation/linear/non-interpolating
+interpolation/resample/1d/linear
 fft/nice-size
 fft/load-wisdom
 object-utils/set-member
