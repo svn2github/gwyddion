@@ -20,6 +20,7 @@
 #ifndef __LIBGWYUI_H__
 #define __LIBGWYUI_H__
 
+#include <libgwyui/adjust-bar.h>
 #include <libgwyui/axis.h>
 #include <libgwyui/cairo-utils.h>
 #include <libgwyui/cell-renderer-gradient.h>
@@ -32,7 +33,6 @@
 #include <libgwyui/raster-view.h>
 #include <libgwyui/resource-list.h>
 #include <libgwyui/ruler.h>
-#include <libgwyui/scale-bar.h>
 #include <libgwyui/scroller.h>
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-point.h>

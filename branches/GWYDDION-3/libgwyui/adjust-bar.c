@@ -23,7 +23,7 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/widget-utils.h"
 #include "libgwyui/types.h"
-#include "libgwyui/scale-bar.h"
+#include "libgwyui/adjust-bar.h"
 
 #define pangoscale ((gdouble)PANGO_SCALE)
 
@@ -46,7 +46,7 @@ enum {
 
 typedef gdouble (*MappingFunc)(gdouble value);
 
-struct _GwyScaleBarPrivate {
+struct _GwyAdjustBarPrivate {
     GdkWindow *input_window;
 
     GtkAdjustment *adjustment;
@@ -71,110 +71,110 @@ struct _GwyScaleBarPrivate {
     gint descent;
 };
 
-typedef struct _GwyScaleBarPrivate ScaleBar;
+typedef struct _GwyAdjustBarPrivate AdjustBar;
 
-static void     gwy_scale_bar_dispose             (GObject *object);
-static void     gwy_scale_bar_finalize            (GObject *object);
-static void     gwy_scale_bar_set_property        (GObject *object,
-                                                   guint prop_id,
-                                                   const GValue *value,
-                                                   GParamSpec *pspec);
-static void     gwy_scale_bar_get_property        (GObject *object,
-                                                   guint prop_id,
-                                                   GValue *value,
-                                                   GParamSpec *pspec);
-static void     gwy_scale_bar_get_preferred_width (GtkWidget *widget,
-                                                   gint *minimum,
-                                                   gint *natural);
-static void     gwy_scale_bar_get_preferred_height(GtkWidget *widget,
-                                                   gint *minimum,
-                                                   gint *natural);
-static void     gwy_scale_bar_realize             (GtkWidget *widget);
-static void     gwy_scale_bar_unrealize           (GtkWidget *widget);
-static void     gwy_scale_bar_map                 (GtkWidget *widget);
-static void     gwy_scale_bar_unmap               (GtkWidget *widget);
-static void     gwy_scale_bar_size_allocate       (GtkWidget *widget,
-                                                   GtkAllocation *allocation);
-static void     gwy_scale_bar_style_updated       (GtkWidget *widget);
-static gboolean gwy_scale_bar_draw                (GtkWidget *widget,
-                                                   cairo_t *cr);
-static gboolean gwy_scale_bar_scroll              (GtkWidget *widget,
-                                                   GdkEventScroll *event);
-static gboolean gwy_scale_bar_button_press        (GtkWidget *widget,
-                                                   GdkEventButton *event);
-static gboolean gwy_scale_bar_button_release      (GtkWidget *widget,
-                                                   GdkEventButton *event);
-static gboolean gwy_scale_bar_motion_notify       (GtkWidget *widget,
-                                                   GdkEventMotion *event);
-static gboolean set_adjustment                    (GwyScaleBar *scalebar,
-                                                   GtkAdjustment *adjustment);
-static gboolean set_mapping                       (GwyScaleBar *scalebar,
-                                                   GwyScaleMappingType mapping);
-static gboolean set_use_markup                    (GwyScaleBar *scalebar,
-                                                   gboolean use_markup);
-static gboolean set_use_underline                 (GwyScaleBar *scalebar,
-                                                   gboolean use_underline);
-static gboolean set_label                         (GwyScaleBar *scalebar,
-                                                   const gchar *label);
-static gboolean set_mnemonic_widget               (GwyScaleBar *scalebar,
-                                                   GtkWidget *widget);
-static void     create_input_window               (GwyScaleBar *scalebar);
-static void     destroy_input_window              (GwyScaleBar *scalebar);
-static void     adjustment_changed                (GwyScaleBar *scalebar,
-                                                   GtkAdjustment *adjustment);
-static void     adjustment_value_changed          (GwyScaleBar *scalebar,
-                                                   GtkAdjustment *adjustment);
-static void     move_to_position                  (GwyScaleBar *scalebar,
-                                                   gdouble x);
-static void     update_mapping                    (GwyScaleBar *scalebar);
-static void     ensure_layout                     (GwyScaleBar *scalebar);
-static void     draw_bar                          (GwyScaleBar *scalebar,
-                                                   cairo_t *cr);
-static void     draw_label                        (GwyScaleBar *scalebar,
-                                                   cairo_t *cr);
-static gdouble  map_value_to_position             (GwyScaleBar *scalebar,
-                                                   gdouble length,
-                                                   gdouble value);
-static gdouble  map_position_to_value             (GwyScaleBar *scalebar,
-                                                   gdouble length,
-                                                   gdouble position);
-static gdouble  map_both_linear                   (gdouble value);
-static gdouble  map_value_sqrt                    (gdouble value);
-static gdouble  map_position_sqrt                 (gdouble position);
-static gdouble  map_value_log                     (gdouble value);
-static gdouble  map_position_log                  (gdouble position);
+static void     gwy_adjust_bar_dispose             (GObject *object);
+static void     gwy_adjust_bar_finalize            (GObject *object);
+static void     gwy_adjust_bar_set_property        (GObject *object,
+                                                    guint prop_id,
+                                                    const GValue *value,
+                                                    GParamSpec *pspec);
+static void     gwy_adjust_bar_get_property        (GObject *object,
+                                                    guint prop_id,
+                                                    GValue *value,
+                                                    GParamSpec *pspec);
+static void     gwy_adjust_bar_get_preferred_width (GtkWidget *widget,
+                                                    gint *minimum,
+                                                    gint *natural);
+static void     gwy_adjust_bar_get_preferred_height(GtkWidget *widget,
+                                                    gint *minimum,
+                                                    gint *natural);
+static void     gwy_adjust_bar_realize             (GtkWidget *widget);
+static void     gwy_adjust_bar_unrealize           (GtkWidget *widget);
+static void     gwy_adjust_bar_map                 (GtkWidget *widget);
+static void     gwy_adjust_bar_unmap               (GtkWidget *widget);
+static void     gwy_adjust_bar_size_allocate       (GtkWidget *widget,
+                                                    GtkAllocation *allocation);
+static void     gwy_adjust_bar_style_updated       (GtkWidget *widget);
+static gboolean gwy_adjust_bar_draw                (GtkWidget *widget,
+                                                    cairo_t *cr);
+static gboolean gwy_adjust_bar_scroll              (GtkWidget *widget,
+                                                    GdkEventScroll *event);
+static gboolean gwy_adjust_bar_button_press        (GtkWidget *widget,
+                                                    GdkEventButton *event);
+static gboolean gwy_adjust_bar_button_release      (GtkWidget *widget,
+                                                    GdkEventButton *event);
+static gboolean gwy_adjust_bar_motion_notify       (GtkWidget *widget,
+                                                    GdkEventMotion *event);
+static gboolean set_adjustment                     (GwyAdjustBar *adjbar,
+                                                    GtkAdjustment *adjustment);
+static gboolean set_mapping                        (GwyAdjustBar *adjbar,
+                                                    GwyScaleMappingType mapping);
+static gboolean set_use_markup                     (GwyAdjustBar *adjbar,
+                                                    gboolean use_markup);
+static gboolean set_use_underline                  (GwyAdjustBar *adjbar,
+                                                    gboolean use_underline);
+static gboolean set_label                          (GwyAdjustBar *adjbar,
+                                                    const gchar *label);
+static gboolean set_mnemonic_widget                (GwyAdjustBar *adjbar,
+                                                    GtkWidget *widget);
+static void     create_input_window                (GwyAdjustBar *adjbar);
+static void     destroy_input_window               (GwyAdjustBar *adjbar);
+static void     adjustment_changed                 (GwyAdjustBar *adjbar,
+                                                    GtkAdjustment *adjustment);
+static void     adjustment_value_changed           (GwyAdjustBar *adjbar,
+                                                    GtkAdjustment *adjustment);
+static void     move_to_position                   (GwyAdjustBar *adjbar,
+                                                    gdouble x);
+static void     update_mapping                     (GwyAdjustBar *adjbar);
+static void     ensure_layout                      (GwyAdjustBar *adjbar);
+static void     draw_bar                           (GwyAdjustBar *adjbar,
+                                                    cairo_t *cr);
+static void     draw_label                         (GwyAdjustBar *adjbar,
+                                                    cairo_t *cr);
+static gdouble  map_value_to_position              (GwyAdjustBar *adjbar,
+                                                    gdouble length,
+                                                    gdouble value);
+static gdouble  map_position_to_value              (GwyAdjustBar *adjbar,
+                                                    gdouble length,
+                                                    gdouble position);
+static gdouble  map_both_linear                    (gdouble value);
+static gdouble  map_value_sqrt                     (gdouble value);
+static gdouble  map_position_sqrt                  (gdouble position);
+static gdouble  map_value_log                      (gdouble value);
+static gdouble  map_position_log                   (gdouble position);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
 
-G_DEFINE_TYPE(GwyScaleBar, gwy_scale_bar, GTK_TYPE_WIDGET);
+G_DEFINE_TYPE(GwyAdjustBar, gwy_adjust_bar, GTK_TYPE_WIDGET);
 
 static void
-gwy_scale_bar_class_init(GwyScaleBarClass *klass)
+gwy_adjust_bar_class_init(GwyAdjustBarClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
-    g_type_class_add_private(klass, sizeof(ScaleBar));
+    g_type_class_add_private(klass, sizeof(AdjustBar));
 
-    gobject_class->dispose = gwy_scale_bar_dispose;
-    gobject_class->finalize = gwy_scale_bar_finalize;
-    gobject_class->get_property = gwy_scale_bar_get_property;
-    gobject_class->set_property = gwy_scale_bar_set_property;
+    gobject_class->dispose = gwy_adjust_bar_dispose;
+    gobject_class->finalize = gwy_adjust_bar_finalize;
+    gobject_class->get_property = gwy_adjust_bar_get_property;
+    gobject_class->set_property = gwy_adjust_bar_set_property;
 
-    widget_class->get_preferred_width = gwy_scale_bar_get_preferred_width;
-    widget_class->get_preferred_height = gwy_scale_bar_get_preferred_height;
-    widget_class->realize = gwy_scale_bar_realize;
-    widget_class->unrealize = gwy_scale_bar_unrealize;
-    widget_class->map = gwy_scale_bar_map;
-    widget_class->unmap = gwy_scale_bar_unmap;
-    widget_class->size_allocate = gwy_scale_bar_size_allocate;
-    widget_class->style_updated = gwy_scale_bar_style_updated;
-    widget_class->draw = gwy_scale_bar_draw;
-    widget_class->scroll_event = gwy_scale_bar_scroll;
-    widget_class->button_press_event = gwy_scale_bar_button_press;
-    widget_class->button_release_event = gwy_scale_bar_button_release;
-    widget_class->motion_notify_event = gwy_scale_bar_motion_notify;
+    widget_class->get_preferred_width = gwy_adjust_bar_get_preferred_width;
+    widget_class->get_preferred_height = gwy_adjust_bar_get_preferred_height;
+    widget_class->realize = gwy_adjust_bar_realize;
+    widget_class->unrealize = gwy_adjust_bar_unrealize;
+    widget_class->map = gwy_adjust_bar_map;
+    widget_class->unmap = gwy_adjust_bar_unmap;
+    widget_class->size_allocate = gwy_adjust_bar_size_allocate;
+    widget_class->style_updated = gwy_adjust_bar_style_updated;
+    widget_class->draw = gwy_adjust_bar_draw;
+    widget_class->scroll_event = gwy_adjust_bar_scroll;
+    widget_class->button_press_event = gwy_adjust_bar_button_press;
+    widget_class->button_release_event = gwy_adjust_bar_button_release;
+    widget_class->motion_notify_event = gwy_adjust_bar_motion_notify;
 
     properties[PROP_ADJUSTMENT]
         = g_param_spec_object("adjustment",
@@ -235,8 +235,8 @@ gwy_scale_bar_class_init(GwyScaleBarClass *klass)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
-     * GwyScaleBar::change-value:
-     * @gwyscalebar: The #GwyScaleBar which received the signal.
+     * GwyAdjustBar::change-value:
+     * @gwyadjbar: The #GwyAdjustBar which received the signal.
      * @arg1: Scroll type determing the value change.
      *
      * The ::modify-range signal is emitted when the user interactively
@@ -256,64 +256,64 @@ gwy_scale_bar_class_init(GwyScaleBarClass *klass)
 }
 
 static void
-gwy_scale_bar_init(GwyScaleBar *scalebar)
+gwy_adjust_bar_init(GwyAdjustBar *adjbar)
 {
-    scalebar->priv = G_TYPE_INSTANCE_GET_PRIVATE(scalebar,
-                                                  GWY_TYPE_SCALE_BAR,
-                                                  ScaleBar);
-    ScaleBar *priv = scalebar->priv;
+    adjbar->priv = G_TYPE_INSTANCE_GET_PRIVATE(adjbar,
+                                                  GWY_TYPE_ADJUST_BAR,
+                                                  AdjustBar);
+    AdjustBar *priv = adjbar->priv;
     priv->mapping = GWY_SCALE_MAPPING_SQRT;
-    gtk_widget_set_has_window(GTK_WIDGET(scalebar), FALSE);
+    gtk_widget_set_has_window(GTK_WIDGET(adjbar), FALSE);
 }
 
 static void
-gwy_scale_bar_finalize(GObject *object)
+gwy_adjust_bar_finalize(GObject *object)
 {
-    ScaleBar *priv = GWY_SCALE_BAR(object)->priv;
+    AdjustBar *priv = GWY_ADJUST_BAR(object)->priv;
     GWY_FREE(priv->label);
-    G_OBJECT_CLASS(gwy_scale_bar_parent_class)->finalize(object);
+    G_OBJECT_CLASS(gwy_adjust_bar_parent_class)->finalize(object);
 }
 
 static void
-gwy_scale_bar_dispose(GObject *object)
+gwy_adjust_bar_dispose(GObject *object)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(object);
-    set_adjustment(scalebar, NULL);
-    set_mnemonic_widget(scalebar, NULL);
-    G_OBJECT_CLASS(gwy_scale_bar_parent_class)->dispose(object);
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(object);
+    set_adjustment(adjbar, NULL);
+    set_mnemonic_widget(adjbar, NULL);
+    G_OBJECT_CLASS(gwy_adjust_bar_parent_class)->dispose(object);
 }
 
 static void
-gwy_scale_bar_set_property(GObject *object,
+gwy_adjust_bar_set_property(GObject *object,
                             guint prop_id,
                             const GValue *value,
                             GParamSpec *pspec)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(object);
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(object);
 
     switch (prop_id) {
         case PROP_ADJUSTMENT:
-        set_adjustment(scalebar, g_value_get_object(value));
+        set_adjustment(adjbar, g_value_get_object(value));
         break;
 
         case PROP_MAPPING:
-        set_mapping(scalebar, g_value_get_enum(value));
+        set_mapping(adjbar, g_value_get_enum(value));
         break;
 
         case PROP_LABEL:
-        set_label(scalebar, g_value_get_string(value));
+        set_label(adjbar, g_value_get_string(value));
         break;
 
         case PROP_USE_MARKUP:
-        set_use_markup(scalebar, g_value_get_boolean(value));
+        set_use_markup(adjbar, g_value_get_boolean(value));
         break;
 
         case PROP_USE_UNDERLINE:
-        set_use_underline(scalebar, g_value_get_boolean(value));
+        set_use_underline(adjbar, g_value_get_boolean(value));
         break;
 
         case PROP_MNEMONIC_WIDGET:
-        set_mnemonic_widget(scalebar, g_value_get_object(value));
+        set_mnemonic_widget(adjbar, g_value_get_object(value));
         break;
 
         default:
@@ -323,12 +323,12 @@ gwy_scale_bar_set_property(GObject *object,
 }
 
 static void
-gwy_scale_bar_get_property(GObject *object,
+gwy_adjust_bar_get_property(GObject *object,
                             guint prop_id,
                             GValue *value,
                             GParamSpec *pspec)
 {
-    ScaleBar *priv = GWY_SCALE_BAR(object)->priv;
+    AdjustBar *priv = GWY_ADJUST_BAR(object)->priv;
 
     switch (prop_id) {
         case PROP_ADJUSTMENT:
@@ -366,20 +366,20 @@ gwy_scale_bar_get_property(GObject *object,
 }
 
 static void
-gwy_scale_bar_get_preferred_width(GtkWidget *widget,
-                                  gint *minimum,
-                                  gint *natural)
+gwy_adjust_bar_get_preferred_width(GtkWidget *widget,
+                                   gint *minimum,
+                                   gint *natural)
 {
     *minimum = *natural = 200;
 }
 
 static void
-gwy_scale_bar_get_preferred_height(GtkWidget *widget,
-                                   gint *minimum,
-                                   gint *natural)
+gwy_adjust_bar_get_preferred_height(GtkWidget *widget,
+                                    gint *minimum,
+                                    gint *natural)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
-    ScaleBar *priv = scalebar->priv;
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
     PangoContext *pangocontext = gtk_widget_get_pango_context(widget);
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     GtkStateFlags state = gtk_widget_get_state_flags(widget);
@@ -392,59 +392,59 @@ gwy_scale_bar_get_preferred_height(GtkWidget *widget,
     pango_font_metrics_unref(metrics);
     GtkBorder borders;
     gtk_style_context_get_padding(context, 0, &borders);
-    ensure_layout(scalebar);
+    ensure_layout(adjbar);
     guint height = (priv->ascent + priv->descent)/pangoscale;
     *minimum = height;
     *natural = height;
 }
 
 static void
-gwy_scale_bar_realize(GtkWidget *widget)
+gwy_adjust_bar_realize(GtkWidget *widget)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
-    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->realize(widget);
-    create_input_window(scalebar);
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->realize(widget);
+    create_input_window(adjbar);
 }
 
 static void
-gwy_scale_bar_unrealize(GtkWidget *widget)
+gwy_adjust_bar_unrealize(GtkWidget *widget)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
-    ScaleBar *priv = scalebar->priv;
-    destroy_input_window(scalebar);
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
+    destroy_input_window(adjbar);
     priv->adjustment_ok = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
-    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->unrealize(widget);
+    GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->unrealize(widget);
 }
 
 static void
-gwy_scale_bar_map(GtkWidget *widget)
+gwy_adjust_bar_map(GtkWidget *widget)
 {
-    GwyScaleBar *scale_bar = GWY_SCALE_BAR(widget);
-    ScaleBar *priv = scale_bar->priv;
-    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->map(widget);
+    GwyAdjustBar *adjust_bar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjust_bar->priv;
+    GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->map(widget);
     if (priv->input_window)
         gdk_window_show(priv->input_window);
 }
 
 static void
-gwy_scale_bar_unmap(GtkWidget *widget)
+gwy_adjust_bar_unmap(GtkWidget *widget)
 {
-    GwyScaleBar *scale_bar = GWY_SCALE_BAR(widget);
-    ScaleBar *priv = scale_bar->priv;
+    GwyAdjustBar *adjust_bar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjust_bar->priv;
     if (priv->input_window)
         gdk_window_hide(priv->input_window);
-    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->unmap(widget);
+    GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->unmap(widget);
 }
 
 static void
-gwy_scale_bar_size_allocate(GtkWidget *widget,
-                            GtkAllocation *allocation)
+gwy_adjust_bar_size_allocate(GtkWidget *widget,
+                             GtkAllocation *allocation)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
-    ScaleBar *priv = scalebar->priv;
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
 
-    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->size_allocate(widget,
+    GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->size_allocate(widget,
                                                                 allocation);
 
     if (priv->input_window)
@@ -452,27 +452,27 @@ gwy_scale_bar_size_allocate(GtkWidget *widget,
                                allocation->x, allocation->y,
                                allocation->width, allocation->height);
 
-    ensure_layout(scalebar);
+    ensure_layout(adjbar);
 }
 
 static void
-gwy_scale_bar_style_updated(GtkWidget *widget)
+gwy_adjust_bar_style_updated(GtkWidget *widget)
 {
-    ScaleBar *priv = GWY_SCALE_BAR(widget)->priv;
+    AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
     if (priv->layout)
         pango_layout_context_changed(priv->layout);
 
-    GTK_WIDGET_CLASS(gwy_scale_bar_parent_class)->style_updated(widget);
+    GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->style_updated(widget);
 }
 
 static gboolean
-gwy_scale_bar_draw(GtkWidget *widget,
-                   cairo_t *cr)
+gwy_adjust_bar_draw(GtkWidget *widget,
+                    cairo_t *cr)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
 
-    draw_bar(scalebar, cr);
-    draw_label(scalebar, cr);
+    draw_bar(adjbar, cr);
+    draw_label(adjbar, cr);
 
     g_printerr("IMPLEMENT ME!\n");
 
@@ -480,18 +480,18 @@ gwy_scale_bar_draw(GtkWidget *widget,
 }
 
 static gboolean
-gwy_scale_bar_scroll(GtkWidget *widget,
-                     GdkEventScroll *event)
+gwy_adjust_bar_scroll(GtkWidget *widget,
+                      GdkEventScroll *event)
 {
-    GwyScaleBar *scalebar = GWY_SCALE_BAR(widget);
-    ScaleBar *priv = scalebar->priv;
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
     if (!priv->adjustment_ok)
         return TRUE;
 
     GdkScrollDirection dir = event->direction;
     gdouble length = gtk_widget_get_allocated_width(widget);
     gdouble value = gtk_adjustment_get_value(priv->adjustment),
-            position = map_value_to_position(scalebar, length, value),
+            position = map_value_to_position(adjbar, length, value),
             newposition = position;
     if (dir == GDK_SCROLL_UP || dir == GDK_SCROLL_RIGHT)
         newposition += 1.0;
@@ -500,121 +500,121 @@ gwy_scale_bar_scroll(GtkWidget *widget,
 
     newposition = CLAMP(newposition, 0.0, length);
     if (newposition != position) {
-        gdouble newvalue = map_position_to_value(scalebar, length, newposition);
+        gdouble newvalue = map_position_to_value(adjbar, length, newposition);
         gtk_adjustment_set_value(priv->adjustment, newvalue);
     }
     return TRUE;
 }
 
 static gboolean
-gwy_scale_bar_button_press(GtkWidget *widget,
-                           GdkEventButton *event)
+gwy_adjust_bar_button_press(GtkWidget *widget,
+                            GdkEventButton *event)
 {
     if (event->button != 1)
         return FALSE;
 
-    move_to_position(GWY_SCALE_BAR(widget), event->x);
+    move_to_position(GWY_ADJUST_BAR(widget), event->x);
     return TRUE;
 }
 
 static gboolean
-gwy_scale_bar_button_release(GtkWidget *widget,
-                             GdkEventButton *event)
+gwy_adjust_bar_button_release(GtkWidget *widget,
+                              GdkEventButton *event)
 {
     if (event->button != 1)
         return FALSE;
 
-    move_to_position(GWY_SCALE_BAR(widget), event->x);
+    move_to_position(GWY_ADJUST_BAR(widget), event->x);
     return TRUE;
 }
 
 static gboolean
-gwy_scale_bar_motion_notify(GtkWidget *widget,
-                            GdkEventMotion *event)
+gwy_adjust_bar_motion_notify(GtkWidget *widget,
+                             GdkEventMotion *event)
 {
     if (!(event->state & GDK_BUTTON1_MASK))
         return FALSE;
 
-    move_to_position(GWY_SCALE_BAR(widget), event->x);
+    move_to_position(GWY_ADJUST_BAR(widget), event->x);
     return TRUE;
 }
 
 /**
- * gwy_scale_bar_new:
+ * gwy_adjust_bar_new:
  *
- * Creates a new scale bar.
+ * Creates a new adjustment bar.
  *
- * Returns: A new scale bar.
+ * Returns: A new adjustment bar.
  **/
 GtkWidget*
-gwy_scale_bar_new(void)
+gwy_adjust_bar_new(void)
 {
-    return g_object_newv(GWY_TYPE_SCALE_BAR, 0, NULL);
+    return g_object_newv(GWY_TYPE_ADJUST_BAR, 0, NULL);
 }
 
 /**
- * gwy_scale_bar_set_adjustment:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_set_adjustment:
+ * @adjbar: A adjustment bar.
  * @adjustment: (allow-none):
  *              Adjustment to use for the value.
  *
- * Sets the adjustment that a scale bar visualises.
+ * Sets the adjustment that a adjustment bar visualises.
  **/
 void
-gwy_scale_bar_set_adjustment(GwyScaleBar *scalebar,
+gwy_adjust_bar_set_adjustment(GwyAdjustBar *adjbar,
                              GtkAdjustment *adjustment)
 {
-    g_return_if_fail(GWY_IS_SCALE_BAR(scalebar));
-    if (!set_adjustment(scalebar, adjustment))
+    g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    if (!set_adjustment(adjbar, adjustment))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(scalebar), properties[PROP_ADJUSTMENT]);
+    g_object_notify_by_pspec(G_OBJECT(adjbar), properties[PROP_ADJUSTMENT]);
 }
 
 /**
- * gwy_scale_bar_get_adjustment:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_get_adjustment:
+ * @adjbar: A adjustment bar.
  *
- * Obtains the adjustment that a scale bar visualises.
+ * Obtains the adjustment that a adjustment bar visualises.
  *
  * Returns: (allow-none) (transfer none):
- *          The colour adjustment used by @scalebar.  If no adjustment was set and
+ *          The colour adjustment used by @adjbar.  If no adjustment was set and
  *          the default one is used, function returns %NULL.
  **/
 GtkAdjustment*
-gwy_scale_bar_get_adjustment(const GwyScaleBar *scalebar)
+gwy_adjust_bar_get_adjustment(const GwyAdjustBar *adjbar)
 {
-    g_return_val_if_fail(GWY_IS_SCALE_BAR(scalebar), NULL);
-    return scalebar->priv->adjustment;
+    g_return_val_if_fail(GWY_IS_ADJUST_BAR(adjbar), NULL);
+    return adjbar->priv->adjustment;
 }
 
 /**
- * gwy_scale_bar_set_label:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_set_label:
+ * @adjbar: A adjustment bar.
  * @text: (allow-none):
  *        Label text.
  *
- * Sets the label text of a scale bar.
+ * Sets the label text of a adjustment bar.
  *
  * The interpretation of @text with respect to Pango markup and mnemonics is
- * unchanged.  See gwy_scale_bar_set_label_full() for a method to set the label
+ * unchanged.  See gwy_adjust_bar_set_label_full() for a method to set the label
  * together with markup and underline properties.
  **/
 void
-gwy_scale_bar_set_label(GwyScaleBar *scalebar,
-                        const gchar *text)
+gwy_adjust_bar_set_label(GwyAdjustBar *adjbar,
+                         const gchar *text)
 {
-    g_return_if_fail(GWY_IS_SCALE_BAR(scalebar));
-    if (!set_label(scalebar, text))
+    g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    if (!set_label(adjbar, text))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(scalebar), properties[PROP_LABEL]);
+    g_object_notify_by_pspec(G_OBJECT(adjbar), properties[PROP_LABEL]);
     // TODO: What about mnemonic keyval?
 }
 
 /**
- * gwy_scale_bar_set_label_full:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_set_label_full:
+ * @adjbar: A adjustment bar.
  * @text: (allow-none):
  *        Label text.
  * @use_markup: %TRUE to interpret Pango markup in @text, %FALSE to take it
@@ -622,26 +622,26 @@ gwy_scale_bar_set_label(GwyScaleBar *scalebar,
  * @use_underline: %TRUE to interpret underlines in @text, %FALSE to take them
  *                 literally.
  *
- * Sets the label text and its interpretation in a scale bar.
+ * Sets the label text and its interpretation in a adjustment bar.
  *
  * It is possible, though somewhat eccentric, to only change the markup and
  * underline properties (thus reintepreting the text) by passing the same @text
  * that is already set but different values of @use_markup and @use_underline.
  **/
 void
-gwy_scale_bar_set_label_full(GwyScaleBar *scalebar,
+gwy_adjust_bar_set_label_full(GwyAdjustBar *adjbar,
                              const gchar *text,
                              gboolean use_markup,
                              gboolean use_underline)
 {
-    g_return_if_fail(GWY_IS_SCALE_BAR(scalebar));
+    g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
     GParamSpec *notify[3];
     guint nn = 0;
-    if (set_use_markup(scalebar, use_markup))
+    if (set_use_markup(adjbar, use_markup))
         notify[nn++] = properties[PROP_USE_MARKUP];
-    if (set_use_underline(scalebar, use_underline))
+    if (set_use_underline(adjbar, use_underline))
         notify[nn++] = properties[PROP_USE_UNDERLINE];
-    if (set_label(scalebar, text))
+    if (set_label(adjbar, text))
         notify[nn++] = properties[PROP_LABEL];
 
     if (!nn)
@@ -649,71 +649,71 @@ gwy_scale_bar_set_label_full(GwyScaleBar *scalebar,
 
     // TODO: What about mnemonic keyval?
     for (guint i = 0; i < nn; i++)
-        g_object_notify_by_pspec(G_OBJECT(scalebar), notify[i]);
+        g_object_notify_by_pspec(G_OBJECT(adjbar), notify[i]);
 }
 
 /**
- * gwy_scale_bar_get_label:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_get_label:
+ * @adjbar: A adjustment bar.
  *
- * Gets the label of a scale bar.
+ * Gets the label of a adjustment bar.
  *
  * Returns: (allow-none):
- *          The label of a scale bar, as it was set, including any Pango markup
+ *          The label of a adjustment bar, as it was set, including any Pango markup
  *          and mnemonic underlines.
  **/
 const gchar*
-gwy_scale_bar_get_label(const GwyScaleBar *scalebar)
+gwy_adjust_bar_get_label(const GwyAdjustBar *adjbar)
 {
-    g_return_val_if_fail(GWY_IS_SCALE_BAR(scalebar), NULL);
-    return scalebar->priv->label;
+    g_return_val_if_fail(GWY_IS_ADJUST_BAR(adjbar), NULL);
+    return adjbar->priv->label;
 }
 
 /**
- * gwy_scale_bar_set_mapping:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_set_mapping:
+ * @adjbar: A adjustment bar.
  * @mapping: Mapping function type between values and screen positions in the
- *           scale bar.
+ *           adjustment bar.
  *
- * Sets the mapping function type for a scale bar.
+ * Sets the mapping function type for a adjustment bar.
  **/
 void
-gwy_scale_bar_set_mapping(GwyScaleBar *scalebar,
-                          GwyScaleMappingType mapping)
+gwy_adjust_bar_set_mapping(GwyAdjustBar *adjbar,
+                           GwyScaleMappingType mapping)
 {
-    g_return_if_fail(GWY_IS_SCALE_BAR(scalebar));
-    if (!set_mapping(scalebar, mapping))
+    g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    if (!set_mapping(adjbar, mapping))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(scalebar), properties[PROP_MAPPING]);
+    g_object_notify_by_pspec(G_OBJECT(adjbar), properties[PROP_MAPPING]);
 }
 
 /**
- * gwy_scale_bar_get_mapping:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_get_mapping:
+ * @adjbar: A adjustment bar.
  *
- * Gets the mapping function type of a scale bar.
+ * Gets the mapping function type of a adjustment bar.
  *
  * Returns: The type of mapping function between values and screen positions.
  **/
 GwyScaleMappingType
-gwy_scale_bar_get_mapping(const GwyScaleBar *scalebar)
+gwy_adjust_bar_get_mapping(const GwyAdjustBar *adjbar)
 {
-    g_return_val_if_fail(GWY_IS_SCALE_BAR(scalebar), GWY_SCALE_MAPPING_LINEAR);
-    return scalebar->priv->mapping;
+    g_return_val_if_fail(GWY_IS_ADJUST_BAR(adjbar), GWY_SCALE_MAPPING_LINEAR);
+    return adjbar->priv->mapping;
 }
 
 /**
- * gwy_scale_bar_set_mnemonic_widget:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_set_mnemonic_widget:
+ * @adjbar: A adjustment bar.
  * @widget: (allow-none):
  *          Target mnemonic widget.
  *
- * Sets the target mnemonic widget of a scale bar.
+ * Sets the target mnemonic widget of a adjustment bar.
  *
- * If the scale bar has been set so that it has an mnemonic key the scale bar
+ * If the adjustment bar has been set so that it has an mnemonic key the adjustment bar
  * can be associated with a widget that is the target of the mnemonic.
- * Typically, you may want to associate a scale bar with a #GwySpinButton.
+ * Typically, you may want to associate a adjustment bar with a #GwySpinButton.
  *
  * The target widget will be accelerated by emitting the
  * GtkWidget::mnemonic-activate signal on it. The default handler for this
@@ -721,38 +721,38 @@ gwy_scale_bar_get_mapping(const GwyScaleBar *scalebar)
  * toggle focus between the colliding widgets otherwise.
  **/
 void
-gwy_scale_bar_set_mnemonic_widget(GwyScaleBar *scalebar,
+gwy_adjust_bar_set_mnemonic_widget(GwyAdjustBar *adjbar,
                                   GtkWidget *widget)
 {
-    g_return_if_fail(GWY_IS_SCALE_BAR(scalebar));
-    if (!set_mnemonic_widget(scalebar, widget))
+    g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    if (!set_mnemonic_widget(adjbar, widget))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(scalebar),
+    g_object_notify_by_pspec(G_OBJECT(adjbar),
                              properties[PROP_MNEMONIC_WIDGET]);
 }
 
 /**
- * gwy_scale_bar_get_mnemonic_widget:
- * @scalebar: A scale bar.
+ * gwy_adjust_bar_get_mnemonic_widget:
+ * @adjbar: A adjustment bar.
  *
- * Gets the mnemonic widget associated with a scale bar.
+ * Gets the mnemonic widget associated with a adjustment bar.
  *
- * Returns: The target of @scalebar's mnemonic.
+ * Returns: The target of @adjbar's mnemonic.
  **/
 GtkWidget*
-gwy_scale_bar_get_mnemonic_widget(const GwyScaleBar *scalebar)
+gwy_adjust_bar_get_mnemonic_widget(const GwyAdjustBar *adjbar)
 {
-    g_return_val_if_fail(GWY_IS_SCALE_BAR(scalebar), NULL);
-    return scalebar->priv->mnemonic_widget;
+    g_return_val_if_fail(GWY_IS_ADJUST_BAR(adjbar), NULL);
+    return adjbar->priv->mnemonic_widget;
 }
 
 static gboolean
-set_adjustment(GwyScaleBar *scalebar,
+set_adjustment(GwyAdjustBar *adjbar,
                GtkAdjustment *adjustment)
 {
-    ScaleBar *priv = scalebar->priv;
-    if (!gwy_set_member_object(scalebar, adjustment, GTK_TYPE_ADJUSTMENT,
+    AdjustBar *priv = adjbar->priv;
+    if (!gwy_set_member_object(adjbar, adjustment, GTK_TYPE_ADJUSTMENT,
                                &priv->adjustment,
                                "changed", &adjustment_changed,
                                &priv->adjustment_changed_id,
@@ -763,16 +763,16 @@ set_adjustment(GwyScaleBar *scalebar,
                                NULL))
         return FALSE;
 
-    update_mapping(scalebar);
-    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
+    update_mapping(adjbar);
+    gtk_widget_queue_draw(GTK_WIDGET(adjbar));
     return TRUE;
 }
 
 static gboolean
-set_mapping(GwyScaleBar *scalebar,
+set_mapping(GwyAdjustBar *adjbar,
             GwyScaleMappingType mapping)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (mapping == priv->mapping)
         return FALSE;
 
@@ -782,72 +782,72 @@ set_mapping(GwyScaleBar *scalebar,
     }
 
     // TODO: Cancel editting.
-    update_mapping(scalebar);
-    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
+    update_mapping(adjbar);
+    gtk_widget_queue_draw(GTK_WIDGET(adjbar));
     return TRUE;
 }
 
 static gboolean
-set_use_markup(GwyScaleBar *scalebar,
+set_use_markup(GwyAdjustBar *adjbar,
                gboolean use_markup)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!use_markup == !priv->use_markup)
         return FALSE;
 
     priv->use_markup = use_markup;
-    ensure_layout(scalebar);
+    ensure_layout(adjbar);
     // TODO: invalidate label, emit size request
     return TRUE;
 }
 
 static gboolean
-set_use_underline(GwyScaleBar *scalebar,
+set_use_underline(GwyAdjustBar *adjbar,
                   gboolean use_underline)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!use_underline == !priv->use_underline)
         return FALSE;
 
     priv->use_underline = use_underline;
-    ensure_layout(scalebar);
+    ensure_layout(adjbar);
     // TODO: invalidate label, emit size request
     return TRUE;
 }
 
 static gboolean
-set_label(GwyScaleBar *scalebar,
+set_label(GwyAdjustBar *adjbar,
           const gchar *label)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!gwy_assign_string(&priv->label, label))
         return FALSE;
 
     // TODO: invalidate label, emit size request
-    ensure_layout(scalebar);
+    ensure_layout(adjbar);
     return TRUE;
 }
 
 static gboolean
-set_mnemonic_widget(GwyScaleBar *scalebar,
+set_mnemonic_widget(GwyAdjustBar *adjbar,
                     GtkWidget *widget)
 {
-    ScaleBar *priv = scalebar->priv;
-    if (!gwy_set_member_object(scalebar, widget, GTK_TYPE_WIDGET,
+    AdjustBar *priv = adjbar->priv;
+    if (!gwy_set_member_object(adjbar, widget, GTK_TYPE_WIDGET,
                                &priv->mnemonic_widget, NULL))
         return FALSE;
 
     // TODO: ???
     if (priv->use_underline)
-        ensure_layout(scalebar);
+        ensure_layout(adjbar);
     return TRUE;
 }
 
 static void
-create_input_window(GwyScaleBar *scalebar)
+create_input_window(GwyAdjustBar *adjbar)
 {
-    ScaleBar *priv = scalebar->priv;
-    GtkWidget *widget = GTK_WIDGET(scalebar);
+    AdjustBar *priv = adjbar->priv;
+    GtkWidget *widget = GTK_WIDGET(adjbar);
     g_assert(gtk_widget_get_realized(widget));
     if (priv->input_window)
         return;
@@ -875,9 +875,9 @@ create_input_window(GwyScaleBar *scalebar)
 }
 
 static void
-destroy_input_window(GwyScaleBar *scalebar)
+destroy_input_window(GwyAdjustBar *adjbar)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!priv->input_window)
         return;
     gdk_window_set_user_data(priv->input_window, NULL);
@@ -886,18 +886,18 @@ destroy_input_window(GwyScaleBar *scalebar)
 }
 
 static void
-adjustment_changed(GwyScaleBar *scalebar,
+adjustment_changed(GwyAdjustBar *adjbar,
                    G_GNUC_UNUSED GtkAdjustment *adjustment)
 {
-    update_mapping(scalebar);
-    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
+    update_mapping(adjbar);
+    gtk_widget_queue_draw(GTK_WIDGET(adjbar));
 }
 
 static void
-adjustment_value_changed(GwyScaleBar *scalebar,
+adjustment_value_changed(GwyAdjustBar *adjbar,
                          GtkAdjustment *adjustment)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!priv->adjustment_ok)
         return;
     gdouble newvalue = gtk_adjustment_get_value(adjustment);
@@ -905,30 +905,30 @@ adjustment_value_changed(GwyScaleBar *scalebar,
         return;
 
     priv->oldvalue = newvalue;
-    gtk_widget_queue_draw(GTK_WIDGET(scalebar));
+    gtk_widget_queue_draw(GTK_WIDGET(adjbar));
 }
 
 static void
-move_to_position(GwyScaleBar *scalebar,
+move_to_position(GwyAdjustBar *adjbar,
                  gdouble x)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!priv->adjustment_ok)
         return;
 
     GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(scalebar), &allocation);
+    gtk_widget_get_allocation(GTK_WIDGET(adjbar), &allocation);
     gdouble value = gtk_adjustment_get_value(priv->adjustment);
     gdouble pos = CLAMP(x - allocation.x, 0, allocation.width);
-    gdouble newvalue = map_position_to_value(scalebar, allocation.width, pos);
+    gdouble newvalue = map_position_to_value(adjbar, allocation.width, pos);
     if (newvalue != value)
         gtk_adjustment_set_value(priv->adjustment, newvalue);
 }
 
 static void
-update_mapping(GwyScaleBar *scalebar)
+update_mapping(GwyAdjustBar *adjbar)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     priv->adjustment_ok = FALSE;
     if (!priv->adjustment)
         return;
@@ -944,7 +944,7 @@ update_mapping(GwyScaleBar *scalebar)
             return;
     }
 
-    gdouble length = gtk_widget_get_allocated_width(GTK_WIDGET(scalebar));
+    gdouble length = gtk_widget_get_allocated_width(GTK_WIDGET(adjbar));
     if (priv->mapping == GWY_SCALE_MAPPING_LINEAR)
         priv->map_value = priv->map_position = map_both_linear;
     else if (priv->mapping == GWY_SCALE_MAPPING_SQRT) {
@@ -964,11 +964,11 @@ update_mapping(GwyScaleBar *scalebar)
 }
 
 static void
-ensure_layout(GwyScaleBar *scalebar)
+ensure_layout(GwyAdjustBar *adjbar)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!priv->layout) {
-        priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(scalebar),
+        priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(adjbar),
                                                       NULL);
         pango_layout_set_alignment(priv->layout, PANGO_ALIGN_LEFT);
     }
@@ -1002,18 +1002,18 @@ ensure_layout(GwyScaleBar *scalebar)
 }
 
 static void
-draw_bar(GwyScaleBar *scalebar,
+draw_bar(GwyAdjustBar *adjbar,
          cairo_t *cr)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!priv->adjustment_ok)
         return;
 
-    GtkWidget *widget = GTK_WIDGET(scalebar);
+    GtkWidget *widget = GTK_WIDGET(adjbar);
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     gdouble val = gtk_adjustment_get_value(priv->adjustment);
-    gdouble barlength = map_value_to_position(scalebar, width, val);
+    gdouble barlength = map_value_to_position(adjbar, width, val);
 
     cairo_save(cr);
 
@@ -1039,11 +1039,11 @@ draw_bar(GwyScaleBar *scalebar,
 }
 
 static gint
-calc_layout_yposition(GwyScaleBar *scalebar)
+calc_layout_yposition(GwyAdjustBar *adjbar)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(scalebar), &allocation);
+    gtk_widget_get_allocation(GTK_WIDGET(adjbar), &allocation);
     // TODO: handle borders.
     gint area_height = PANGO_SCALE*allocation.height;
     PangoLayoutLine *line = pango_layout_get_lines_readonly(priv->layout)->data;
@@ -1066,21 +1066,21 @@ calc_layout_yposition(GwyScaleBar *scalebar)
 }
 
 static void
-draw_label(GwyScaleBar *scalebar,
+draw_label(GwyAdjustBar *adjbar,
            cairo_t *cr)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     if (!priv->label || !*priv->label)
         return;
 
-    GtkWidget *widget = GTK_WIDGET(scalebar);
+    GtkWidget *widget = GTK_WIDGET(adjbar);
     GtkStateFlags state = gtk_widget_get_state_flags(widget);
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     GdkRGBA text_color;
     gtk_style_context_get_color(context, state, &text_color);
 
     cairo_save(cr);
-    gint y = calc_layout_yposition(scalebar);
+    gint y = calc_layout_yposition(adjbar);
     cairo_move_to(cr, 2.0, y);
     gdk_cairo_set_source_rgba(cr, &text_color);
     pango_cairo_show_layout(cr, priv->layout);
@@ -1088,20 +1088,20 @@ draw_label(GwyScaleBar *scalebar,
 }
 
 static gdouble
-map_value_to_position(GwyScaleBar *scalebar,
+map_value_to_position(GwyAdjustBar *adjbar,
                       gdouble length,
                       gdouble value)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     return (priv->map_value(value) - priv->b)/priv->a*length;
 }
 
 static gdouble
-map_position_to_value(GwyScaleBar *scalebar,
+map_position_to_value(GwyAdjustBar *adjbar,
                       gdouble length,
                       gdouble position)
 {
-    ScaleBar *priv = scalebar->priv;
+    AdjustBar *priv = adjbar->priv;
     return priv->map_position(priv->a*position/length + priv->b);
 }
 
@@ -1136,24 +1136,24 @@ map_position_log(gdouble position)
 }
 
 /**
- * SECTION: scale-bar
- * @title: GwyScaleBar
- * @short_description: Compact adjustment visualisation
+ * SECTION: adjust-bar
+ * @title: GwyAdjustBar
+ * @short_description: Compact adjustment visualisation and modification
  **/
 
 /**
- * GwyScaleBar:
+ * GwyAdjustBar:
  *
- * Scale bar widget visualising an adjustment.
+ * Adjustment bar widget visualising an adjustment.
  *
- * The #GwyScaleBar struct contains private data only and should be accessed
+ * The #GwyAdjustBar struct contains private data only and should be accessed
  * using the functions below.
  **/
 
 /**
- * GwyScaleBarClass:
+ * GwyAdjustBarClass:
  *
- * Class of scale bars visualising adjustments.
+ * Class of adjustment bars visualising adjustments.
  **/
 
 /**
@@ -1172,7 +1172,7 @@ map_position_log(gdouble position)
  *                         values.  For quantities of extreme ranges this
  *                         mapping may be preferred to %GWY_SCALE_MAPPING_SQRT.
  *
- * Type of scale bar mapping functions.
+ * Type of adjustment bar mapping functions.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

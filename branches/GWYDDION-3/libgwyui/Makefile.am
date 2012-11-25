@@ -18,6 +18,7 @@ GwyUI3_3_0_gir_SCANNERFLAGS = --include-uninstalled=$(top_builddir)/libgwy/Gwy3-
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
+	$(srcdir)/adjust-bar.h \
 	$(srcdir)/axis.h \
 	$(srcdir)/cairo-utils.h \
 	$(srcdir)/cell-renderer-gradient.h \
@@ -30,7 +31,6 @@ public_headers = \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/resource-list.h \
 	$(srcdir)/ruler.h \
-	$(srcdir)/scale-bar.h \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
 	$(srcdir)/shapes-point.h \
@@ -72,6 +72,7 @@ toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyui3_la_SOURCES = \
+	adjust-bar.c \
 	axis.c \
 	cairo-utils.c \
 	cell-renderer-gradient.c \
@@ -86,7 +87,6 @@ libgwyui3_la_SOURCES = \
 	raster-view.c \
 	resource-list.c \
 	ruler.c \
-	scale-bar.c \
 	scroller.c \
 	shapes.c \
 	shapes-point.c \
