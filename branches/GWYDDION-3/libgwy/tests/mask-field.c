@@ -1617,6 +1617,43 @@ test_mask_field_congruence_new_group(void)
 }
 
 void
+test_mask_field_congruence_new_unaligned(void)
+{
+    enum { max_size = 97 };
+    GRand *rng = g_rand_new_with_seed(42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = 500;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+        mask_field_randomize(field, pool, max_size, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyMaskField *part = gwy_mask_field_new_part(field, &fpart);
+        GwyPlaneCongruenceType trans = g_rand_int_range(rng, 0, 8);
+        // We assume here that aligned transformations were tested and work.
+        GwyMaskField *reference = gwy_mask_field_new_congruent(part, NULL,
+                                                               trans);
+        GwyMaskField *result = gwy_mask_field_new_congruent(field, &fpart,
+                                                            trans);
+        mask_field_assert_equal(result, reference);
+
+        g_object_unref(result);
+        g_object_unref(reference);
+        g_object_unref(part);
+        g_object_unref(field);
+    }
+
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+void
 test_mask_field_fill_ellipse(void)
 {
     enum { max_size = 214 };
