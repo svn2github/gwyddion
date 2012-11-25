@@ -129,6 +129,40 @@ create_raster_window(guint xres, guint yres)
     return window;
 }
 
+static void
+attach_adjustment(GtkGrid *grid,
+                  guint row,
+                  GtkAdjustment *adj,
+                  const gchar *name,
+                  const gchar *units,
+                  GFunc function,
+                  gpointer user_data)
+{
+    GtkWidget *bar = gwy_adjust_bar_new();
+    gwy_adjust_bar_set_adjustment(GWY_ADJUST_BAR(bar), adj);
+    gwy_adjust_bar_set_label(GWY_ADJUST_BAR(bar), name);
+    gtk_grid_attach(grid, bar, 0, row, 1, 1);
+
+    GtkWidget *spin = gwy_spin_button_new(adj, 0.0, 1);
+    gtk_grid_attach(grid, spin, 1, row, 1, 1);
+
+    GtkWidget *unitlabel = gtk_label_new(units);
+    gtk_widget_set_halign(unitlabel, GTK_ALIGN_START);
+    gtk_grid_attach(grid, unitlabel, 2, row, 1, 1);
+
+    if (function) {
+        function(bar, user_data);
+        function(spin, user_data);
+        function(unitlabel, user_data);
+    }
+}
+
+static void
+set_sensitive(gpointer widget, gpointer user_data)
+{
+    gtk_widget_set_sensitive(widget, GPOINTER_TO_INT(user_data));
+}
+
 static GtkWidget*
 create_widget_test(void)
 {
@@ -140,17 +174,13 @@ create_widget_test(void)
     GtkGrid *grid = GTK_GRID(gtk_grid_new());
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
-    GtkAdjustment *adj = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
-    GtkWidget *bar = gwy_adjust_bar_new();
-    gwy_adjust_bar_set_adjustment(GWY_ADJUST_BAR(bar), adj);
-    gwy_adjust_bar_set_label(GWY_ADJUST_BAR(bar), "Value with a long name:");
-    gtk_grid_attach(grid, bar, 0, 0, 1, 1);
+    GtkAdjustment *adj1 = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
+    attach_adjustment(grid, 0, adj1, "Value with a long name:", "µm",
+                      NULL, NULL);
 
-    GtkWidget *spin = gwy_spin_button_new(adj, 0.0, 1);
-    gtk_grid_attach(grid, spin, 1, 0, 1, 1);
-
-    GtkWidget *units = gtk_label_new("µm");
-    gtk_grid_attach(grid, units, 2, 0, 1, 1);
+    GtkAdjustment *adj2 = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
+    attach_adjustment(grid, 1, adj2, "Short value:", "px",
+                      set_sensitive, GINT_TO_POINTER(FALSE));
 
     return window;
 }
