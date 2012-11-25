@@ -277,6 +277,10 @@ gwy_color_axis_set_property(GObject *object,
         set_editable_range(coloraxis, g_value_get_boolean(value));
         break;
 
+        case PROP_DISTRIBUTION:
+        set_distribution(coloraxis, g_value_get_object(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -298,6 +302,10 @@ gwy_color_axis_get_property(GObject *object,
 
         case PROP_EDITABLE_RANGE:
         g_value_set_boolean(value, priv->editable_range);
+        break;
+
+        case PROP_DISTRIBUTION:
+        g_value_set_object(value, priv->distribution);
         break;
 
         default:
