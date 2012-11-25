@@ -990,6 +990,22 @@ find_boundary(GwyAxis *axis, gdouble x, gdouble y)
  * @title: GwyColorAxis
  * @short_description: Axis showing a false colour map
  * @image: GwyColorAxis.png
+ *
+ * #GwyColorAxis is a specific type of #GwyAxis that shows how values map to
+ * colours.  Instead being attached to certain area and providing a coordinate
+ * clue for it, #GwyColorAxis includes a stripe representing the false colour
+ * map within.  The map can be set with gwy_color_axis_set_gradient().
+ *
+ * #GwyColorAxis also lets the use modify the range by scrolling mouse wheel
+ * near the start and end of the axis if enabled with
+ * gwy_color_axis_set_editable_range().  Such user modification then leads to
+ * emission of GwyColorAxis::modify-range a signal.
+ *
+ * To support the use in #GwyRasterView, it can also show a distribution of
+ * the value as a shaded area on the axis.  Since #GwyColorAxis does not deal
+ * with the underlying data, the distribution must be calculated and set
+ * explicitly.  On the other hand, this permits displaying whatever curve is
+ * useful as the ‘distribution’.
  **/
 
 /**
