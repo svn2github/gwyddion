@@ -18,8 +18,11 @@ FIXXREF_OPTIONS = --extra-dir=../libgwy/html
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
 HTML_IMAGES = \
+	$(srcdir)/images/GwyAdjustBar.png \
 	$(srcdir)/images/GwyColorAxis.png \
-	$(srcdir)/images/GwyRuler.png
+	$(srcdir)/images/GwyRasterArea.png \
+	$(srcdir)/images/GwyRuler.png \
+	$(srcdir)/images/GwySpinButton.png
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
