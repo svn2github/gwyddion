@@ -140,14 +140,17 @@ create_widget_test(void)
     GtkGrid *grid = GTK_GRID(gtk_grid_new());
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
-    GtkAdjustment *adj = gtk_adjustment_new(1.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
+    GtkAdjustment *adj = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
+    GtkWidget *bar = gwy_adjust_bar_new();
+    gwy_adjust_bar_set_adjustment(GWY_ADJUST_BAR(bar), adj);
+    gwy_adjust_bar_set_label(GWY_ADJUST_BAR(bar), "Value with a long name:");
+    gtk_grid_attach(grid, bar, 0, 0, 1, 1);
+
     GtkWidget *spin = gwy_spin_button_new(adj, 0.0, 1);
     gtk_grid_attach(grid, spin, 1, 0, 1, 1);
 
-    GtkWidget *scale = gwy_scale_bar_new();
-    gwy_scale_bar_set_adjustment(GWY_SCALE_BAR(scale), adj);
-    gwy_scale_bar_set_label(GWY_SCALE_BAR(scale), "Value:");
-    gtk_grid_attach(grid, scale, 0, 0, 1, 1);
+    GtkWidget *units = gtk_label_new("µm");
+    gtk_grid_attach(grid, units, 2, 0, 1, 1);
 
     return window;
 }
