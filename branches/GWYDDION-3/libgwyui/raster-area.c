@@ -2855,6 +2855,7 @@ set_number_grains(GwyRasterArea *rasterarea,
  * SECTION: raster-area
  * @title: GwyRasterArea
  * @short_description: Display fields using false colour maps
+ * @image: GwyRasterArea.png
  **/
 
 /**

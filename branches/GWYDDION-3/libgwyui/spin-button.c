@@ -2543,6 +2543,7 @@ entry_get_borders(GtkEntry *entry,
  * @short_description: Retrieve an integer or floating-point number from
  *     the user
  * @see_also: #GtkEntry
+ * @image: GwySpinButton.png
  *
  * A #GwySpinButton is an ideal way to allow the user to set the value of
  * some attribute. Rather than having to directly type a number into a
