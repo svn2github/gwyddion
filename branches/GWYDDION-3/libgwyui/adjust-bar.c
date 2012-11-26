@@ -1360,6 +1360,20 @@ setup_mnemonic(GwyAdjustBar *adjbar,
  * @title: GwyAdjustBar
  * @short_description: Compact adjustment visualisation and modification
  * @image: GwyAdjustBar.png
+ *
+ * #GwyAdjustBar is a compact widget for visualisation and modification of the
+ * value of an #GtkAdjustment.  Essentially, it resembles a label (note the
+ * widget is not derived from #GtkLabel though) but with an overlaid bar that
+ * can be clicked, dragged or modified by the scroll-wheel by the user.  For
+ * parameters without any meaningful numeric value this may be sufficient
+ * alone.  However, usually a #GwyAdjustBar would be paired with a
+ * #GwySpinButton, sharing the same adjustment.  Such spin button would also be
+ * the typical mnemonic widget for the adjustment bar.
+ *
+ * #GwyAdjustBar supports several different types of mapping between screen
+ * positions and values of the underlying adjustment.  Nevertheless, the
+ * default mapping (signed square root, %GWY_SCALE_MAPPING_SQRT) should fit
+ * most situations.
  **/
 
 /**
