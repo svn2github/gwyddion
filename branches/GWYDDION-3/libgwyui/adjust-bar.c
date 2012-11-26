@@ -37,6 +37,13 @@ enum {
     N_SIGNALS
 };
 
+// Padding to get the label inside the bar and avoid conciding edges.  Should
+// be likely themeable...
+enum {
+    HPADDING = 4,
+    VPADDING = 1,
+};
+
 typedef gdouble (*MappingFunc)(gdouble value);
 
 struct _GwyAdjustBarPrivate {
@@ -314,8 +321,8 @@ gwy_adjust_bar_unmap(GtkWidget *widget)
     GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->unmap(widget);
 }
 
-// FIXME FIXME FIXME: These method are *exact* reproductions of GtkBin's.  But
-// if we do not override them the child is completely mis-allocated.
+// FIXME: These method are *exact* reproductions of GtkBin's.  But if we do not
+// override them the child is completely mis-allocated.
 static void
 gwy_adjust_bar_get_preferred_width(GtkWidget *widget,
                                    gint *minimum,
@@ -325,8 +332,8 @@ gwy_adjust_bar_get_preferred_width(GtkWidget *widget,
     gint child_min, child_nat;
     gtk_widget_get_preferred_width(label, &child_min, &child_nat);
     gint border = gtk_container_get_border_width(GTK_CONTAINER(widget));
-    *minimum = child_min + 2*border;
-    *natural = child_nat + 2*border;
+    *minimum = child_min + 2*(border + HPADDING);
+    *natural = child_nat + 2*(border + HPADDING);
 }
 
 static void
@@ -338,8 +345,8 @@ gwy_adjust_bar_get_preferred_height(GtkWidget *widget,
     gint child_min, child_nat;
     gtk_widget_get_preferred_height(label, &child_min, &child_nat);
     gint border = gtk_container_get_border_width(GTK_CONTAINER(widget));
-    *minimum = child_min + 2*border;
-    *natural = child_nat + 2*border;
+    *minimum = child_min + 2*(border + VPADDING);
+    *natural = child_nat + 2*(border + VPADDING);
 }
 
 static void
@@ -353,10 +360,12 @@ gwy_adjust_bar_size_allocate(GtkWidget *widget,
     if (child && gtk_widget_get_visible(child)) {
         GtkAllocation child_allocation;
         gint border_width = gtk_container_get_border_width(GTK_CONTAINER(bin));
-        child_allocation.x = allocation->x + border_width;
-        child_allocation.y = allocation->y + border_width;
-        child_allocation.width = allocation->width - 2 * border_width;
-        child_allocation.height = allocation->height - 2 * border_width;
+        child_allocation.x = allocation->x + border_width + HPADDING;
+        child_allocation.y = allocation->y + border_width + VPADDING;
+        child_allocation.width = allocation->width - 2*(border_width
+                                                        + HPADDING);
+        child_allocation.height = allocation->height - 2*(border_width
+                                                          + VPADDING);
         gtk_widget_size_allocate(child, &child_allocation);
     }
 
