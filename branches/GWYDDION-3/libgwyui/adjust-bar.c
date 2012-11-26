@@ -42,6 +42,10 @@ enum {
     N_SIGNALS
 };
 
+enum {
+    HPADDING = 4
+};
+
 typedef gdouble (*MappingFunc)(gdouble value);
 
 struct _GwyAdjustBarPrivate {
@@ -408,7 +412,7 @@ gwy_adjust_bar_get_preferred_width(GtkWidget *widget,
     ensure_layout(adjbar);
     gint width;
     pango_layout_get_size(priv->layout, &width, NULL);
-    width = width/PANGO_SCALE + borders.top + borders.bottom;
+    width = width/PANGO_SCALE + borders.top + borders.bottom + 2*HPADDING;
     *minimum = width;
     *natural = width;
 }
@@ -1225,7 +1229,7 @@ calc_layout_position(GwyAdjustBar *adjbar,
         y_pos = area_height - logical_rect.height;
 
     *y = y_pos/PANGO_SCALE + borders.top;
-    *x = borders.left;
+    *x = borders.left + HPADDING;
 }
 
 static gdouble
