@@ -51,7 +51,6 @@ struct _GwyAdjustBarPrivate {
     GtkAdjustment *adjustment;
     gulong adjustment_value_changed_id;
     gulong adjustment_changed_id;
-    gboolean adjustment_ok;
     gdouble oldvalue;    // This is to avoid acting on no-change notifications.
 
     GwyScaleMappingType mapping;
@@ -61,13 +60,18 @@ struct _GwyAdjustBarPrivate {
     gdouble b;
 
     GtkWidget *mnemonic_widget;
-    guint mnemonic_keyval;
-    gchar *label;
-    gboolean use_markup;
-    gboolean use_underline;
+    GtkWindow *mnemonic_window;
     PangoLayout *layout;
+    gchar *label;
+    guint mnemonic_keyval;
     gint ascent;
     gint descent;
+    gboolean use_markup : 1;
+    gboolean use_underline : 1;
+    gboolean layout_valid : 1;
+    gboolean has_markup : 1;
+    gboolean has_underline : 1;
+    gboolean adjustment_ok : 1;
 };
 
 typedef struct _GwyAdjustBarPrivate AdjustBar;
@@ -95,6 +99,10 @@ static void     gwy_adjust_bar_unmap               (GtkWidget *widget);
 static void     gwy_adjust_bar_size_allocate       (GtkWidget *widget,
                                                     GtkAllocation *allocation);
 static void     gwy_adjust_bar_style_updated       (GtkWidget *widget);
+static void     gwy_adjust_bar_hierarchy_changed   (GtkWidget *widget,
+                                                    GtkWidget *old_toplevel);
+static gboolean gwy_adjust_bar_mnemonic_activate   (GtkWidget *widget,
+                                                    gboolean group_cycling);
 static gboolean gwy_adjust_bar_draw                (GtkWidget *widget,
                                                     cairo_t *cr);
 static gboolean gwy_adjust_bar_enter_notify        (GtkWidget *widget,
@@ -149,8 +157,14 @@ static gdouble  map_value_sqrt                     (gdouble value);
 static gdouble  map_position_sqrt                  (gdouble position);
 static gdouble  map_value_log                      (gdouble value);
 static gdouble  map_position_log                   (gdouble position);
+static void     change_value                       (GtkWidget *widget,
+                                                    gdouble newposition);
 static void     ensure_cursors                     (GwyAdjustBar *adjbar);
 static void     discard_cursors                    (GwyAdjustBar *adjbar);
+static void     mnemonic_widget_gone               (gpointer data,
+                                                    GObject *where_the_object_was);
+static void     setup_mnemonic                     (GwyAdjustBar *adjbar,
+                                                    guint newkey);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -178,6 +192,8 @@ gwy_adjust_bar_class_init(GwyAdjustBarClass *klass)
     widget_class->unmap = gwy_adjust_bar_unmap;
     widget_class->size_allocate = gwy_adjust_bar_size_allocate;
     widget_class->style_updated = gwy_adjust_bar_style_updated;
+    widget_class->hierarchy_changed = gwy_adjust_bar_hierarchy_changed;
+    widget_class->mnemonic_activate = gwy_adjust_bar_mnemonic_activate;
     widget_class->draw = gwy_adjust_bar_draw;
     widget_class->enter_notify_event = gwy_adjust_bar_enter_notify;
     widget_class->leave_notify_event = gwy_adjust_bar_leave_notify;
@@ -287,8 +303,13 @@ static void
 gwy_adjust_bar_dispose(GObject *object)
 {
     GwyAdjustBar *adjbar = GWY_ADJUST_BAR(object);
+    AdjustBar *priv = GWY_ADJUST_BAR(object)->priv;
     set_adjustment(adjbar, NULL);
-    set_mnemonic_widget(adjbar, NULL);
+    if (priv->mnemonic_widget) {
+        g_object_weak_unref(G_OBJECT(priv->mnemonic_widget),
+                            mnemonic_widget_gone, adjbar);
+        priv->mnemonic_widget = NULL;
+    }
     G_OBJECT_CLASS(gwy_adjust_bar_parent_class)->dispose(object);
 }
 
@@ -434,6 +455,7 @@ gwy_adjust_bar_unrealize(GtkWidget *widget)
     discard_cursors(adjbar);
     destroy_input_window(adjbar);
     priv->adjustment_ok = FALSE;
+    priv->layout_valid = FALSE;
     GWY_OBJECT_UNREF(priv->layout);
     GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->unrealize(widget);
 }
@@ -472,8 +494,6 @@ gwy_adjust_bar_size_allocate(GtkWidget *widget,
         gdk_window_move_resize(priv->input_window,
                                allocation->x, allocation->y,
                                allocation->width, allocation->height);
-
-    ensure_layout(adjbar);
 }
 
 static void
@@ -484,6 +504,25 @@ gwy_adjust_bar_style_updated(GtkWidget *widget)
         pango_layout_context_changed(priv->layout);
 
     GTK_WIDGET_CLASS(gwy_adjust_bar_parent_class)->style_updated(widget);
+}
+
+static void
+gwy_adjust_bar_hierarchy_changed(GtkWidget *widget,
+                                 G_GNUC_UNUSED GtkWidget *prevtoplevel)
+{
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    setup_mnemonic(adjbar, adjbar->priv->mnemonic_keyval);
+}
+
+static gboolean
+gwy_adjust_bar_mnemonic_activate(GtkWidget *widget,
+                                 gboolean group_cycling)
+{
+    AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
+    if (priv->mnemonic_widget)
+        return gtk_widget_mnemonic_activate(priv->mnemonic_widget,
+                                            group_cycling);
+    return FALSE;
 }
 
 static gboolean
@@ -520,23 +559,6 @@ gwy_adjust_bar_leave_notify(GtkWidget *widget,
         gtk_widget_set_state_flags(widget, state & ~GTK_STATE_FLAG_PRELIGHT,
                                    TRUE);
     return FALSE;
-}
-
-static void
-change_value(GtkWidget *widget,
-             gdouble newposition)
-{
-    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
-    AdjustBar *priv = adjbar->priv;
-    if (!priv->adjustment_ok)
-        return;
-
-    gdouble length = gtk_widget_get_allocated_width(widget);
-    gdouble value = gtk_adjustment_get_value(priv->adjustment);
-    newposition = CLAMP(newposition, 0.0, length);
-    gdouble newvalue = map_position_to_value(adjbar, length, newposition);
-    if (newvalue != value)
-        g_signal_emit(adjbar, signals[SGNL_CHANGE_VALUE], 0, newvalue);
 }
 
 static gboolean
@@ -634,9 +656,10 @@ gwy_adjust_bar_new(void)
  **/
 void
 gwy_adjust_bar_set_adjustment(GwyAdjustBar *adjbar,
-                             GtkAdjustment *adjustment)
+                              GtkAdjustment *adjustment)
 {
     g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    g_return_if_fail(GTK_IS_ADJUSTMENT(adjustment));
     if (!set_adjustment(adjbar, adjustment))
         return;
 
@@ -677,11 +700,15 @@ gwy_adjust_bar_set_label(GwyAdjustBar *adjbar,
                          const gchar *text)
 {
     g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
-    if (!set_label(adjbar, text))
-        return;
-
-    g_object_notify_by_pspec(G_OBJECT(adjbar), properties[PROP_LABEL]);
-    // TODO: What about mnemonic keyval?
+    GObject *object = G_OBJECT(adjbar);
+    g_object_freeze_notify(object);
+    AdjustBar *priv = adjbar->priv;
+    guint oldkeyval = priv->mnemonic_keyval;
+    if (set_label(adjbar, text))
+        g_object_notify_by_pspec(object, properties[PROP_LABEL]);
+    if (priv->mnemonic_keyval != oldkeyval)
+        g_object_notify_by_pspec(object, properties[PROP_MNEMONIC_KEYVAL]);
+    g_object_thaw_notify(object);
 }
 
 /**
@@ -702,26 +729,24 @@ gwy_adjust_bar_set_label(GwyAdjustBar *adjbar,
  **/
 void
 gwy_adjust_bar_set_label_full(GwyAdjustBar *adjbar,
-                             const gchar *text,
-                             gboolean use_markup,
-                             gboolean use_underline)
+                              const gchar *text,
+                              gboolean use_markup,
+                              gboolean use_underline)
 {
     g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
-    GParamSpec *notify[3];
-    guint nn = 0;
+    GObject *object = G_OBJECT(adjbar);
+    g_object_freeze_notify(object);
+    AdjustBar *priv = adjbar->priv;
+    guint oldkeyval = priv->mnemonic_keyval;
     if (set_use_markup(adjbar, use_markup))
-        notify[nn++] = properties[PROP_USE_MARKUP];
+        g_object_notify_by_pspec(object, properties[PROP_USE_MARKUP]);
     if (set_use_underline(adjbar, use_underline))
-        notify[nn++] = properties[PROP_USE_UNDERLINE];
+        g_object_notify_by_pspec(object, properties[PROP_USE_UNDERLINE]);
     if (set_label(adjbar, text))
-        notify[nn++] = properties[PROP_LABEL];
-
-    if (!nn)
-        return;
-
-    // TODO: What about mnemonic keyval?
-    for (guint i = 0; i < nn; i++)
-        g_object_notify_by_pspec(G_OBJECT(adjbar), notify[i]);
+        g_object_notify_by_pspec(object, properties[PROP_LABEL]);
+    if (priv->mnemonic_keyval != oldkeyval)
+        g_object_notify_by_pspec(object, properties[PROP_MNEMONIC_KEYVAL]);
+    g_object_thaw_notify(object);
 }
 
 /**
@@ -783,9 +808,10 @@ gwy_adjust_bar_get_mapping(const GwyAdjustBar *adjbar)
  *
  * Sets the target mnemonic widget of a adjustment bar.
  *
- * If the adjustment bar has been set so that it has an mnemonic key the adjustment bar
- * can be associated with a widget that is the target of the mnemonic.
- * Typically, you may want to associate a adjustment bar with a #GwySpinButton.
+ * If the adjustment bar has been set so that it has an mnemonic key the
+ * adjustment bar can be associated with a widget that is the target of the
+ * mnemonic.  Typically, you may want to associate a adjustment bar with a
+ * #GwySpinButton.
  *
  * The target widget will be accelerated by emitting the
  * GtkWidget::mnemonic-activate signal on it. The default handler for this
@@ -794,9 +820,10 @@ gwy_adjust_bar_get_mapping(const GwyAdjustBar *adjbar)
  **/
 void
 gwy_adjust_bar_set_mnemonic_widget(GwyAdjustBar *adjbar,
-                                  GtkWidget *widget)
+                                   GtkWidget *widget)
 {
     g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    g_return_if_fail(GTK_IS_WIDGET(widget));
     if (!set_mnemonic_widget(adjbar, widget))
         return;
 
@@ -853,7 +880,7 @@ set_mapping(GwyAdjustBar *adjbar,
         return FALSE;
     }
 
-    // TODO: Cancel editting.
+    // FIXME: Cancel editting?  At present it's stateles...
     update_mapping(adjbar);
     gtk_widget_queue_draw(GTK_WIDGET(adjbar));
     return TRUE;
@@ -868,8 +895,11 @@ set_use_markup(GwyAdjustBar *adjbar,
         return FALSE;
 
     priv->use_markup = use_markup;
-    ensure_layout(adjbar);
-    // TODO: invalidate label, emit size request
+    if (priv->has_markup) {
+        priv->layout_valid = FALSE;
+        ensure_layout(adjbar);
+        gtk_widget_queue_resize(GTK_WIDGET(adjbar));
+    }
     return TRUE;
 }
 
@@ -882,8 +912,11 @@ set_use_underline(GwyAdjustBar *adjbar,
         return FALSE;
 
     priv->use_underline = use_underline;
-    ensure_layout(adjbar);
-    // TODO: invalidate label, emit size request
+    if (priv->has_underline) {
+        priv->layout_valid = FALSE;
+        ensure_layout(adjbar);
+        gtk_widget_queue_resize(GTK_WIDGET(adjbar));
+    }
     return TRUE;
 }
 
@@ -895,23 +928,39 @@ set_label(GwyAdjustBar *adjbar,
     if (!gwy_assign_string(&priv->label, label))
         return FALSE;
 
-    // TODO: invalidate label, emit size request
+    priv->has_markup = label && (strchr(label, '<') || strchr(label, '>')
+                                 || strchr(label, '&'));
+    priv->has_underline = label && strchr(label, '_');
+    priv->layout_valid = FALSE;
     ensure_layout(adjbar);
+    gtk_widget_queue_resize(GTK_WIDGET(adjbar));
     return TRUE;
 }
 
 static gboolean
 set_mnemonic_widget(GwyAdjustBar *adjbar,
-                    GtkWidget *widget)
+                    GtkWidget *mnemonic_widget)
 {
     AdjustBar *priv = adjbar->priv;
-    if (!gwy_set_member_object(adjbar, widget, GTK_TYPE_WIDGET,
-                               &priv->mnemonic_widget, NULL))
+    if (mnemonic_widget == priv->mnemonic_widget)
         return FALSE;
 
-    // TODO: ???
-    if (priv->use_underline)
-        ensure_layout(adjbar);
+    GtkWidget *widget = GTK_WIDGET(adjbar);
+    if (priv->mnemonic_widget) {
+        gtk_widget_remove_mnemonic_label(priv->mnemonic_widget, widget);
+        g_object_weak_unref(G_OBJECT(priv->mnemonic_widget),
+                            mnemonic_widget_gone, adjbar);
+    }
+    if ((priv->mnemonic_widget = mnemonic_widget)) {
+        g_object_weak_ref(G_OBJECT(priv->mnemonic_widget),
+                          mnemonic_widget_gone, adjbar);
+        gtk_widget_add_mnemonic_label(priv->mnemonic_widget, widget);
+    }
+
+    ensure_layout(adjbar);
+    if (priv->use_underline && priv->has_underline) {
+        setup_mnemonic(adjbar, priv->mnemonic_keyval);
+    }
     return TRUE;
 }
 
@@ -1024,6 +1073,11 @@ static void
 ensure_layout(GwyAdjustBar *adjbar)
 {
     AdjustBar *priv = adjbar->priv;
+    if (priv->layout_valid) {
+        g_assert(priv->layout);
+        return;
+    }
+
     if (!priv->layout) {
         priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(adjbar),
                                                       NULL);
@@ -1035,6 +1089,7 @@ ensure_layout(GwyAdjustBar *adjbar)
         escaped = g_markup_escape_text(priv->label, -1);
 
     gchar *text = escaped ? escaped : priv->label;
+    gboolean mnemonic_changed = FALSE;
     if (text && priv->use_underline) {
         // FIXME: Accelerators may be disabled globally, they can appear and
         // disappear dynamically and also we should not show them if we do not
@@ -1043,20 +1098,31 @@ ensure_layout(GwyAdjustBar *adjbar)
         gunichar accel_char = 0;
         pango_layout_set_markup_with_accel(priv->layout, text, -1,
                                            '_', &accel_char);
+        guint newkeyval = GDK_KEY_VoidSymbol;
         if (accel_char) {
-            guint keyval = gdk_unicode_to_keyval(accel_char);
-            priv->mnemonic_keyval = gdk_keyval_to_lower(keyval);
+            newkeyval = gdk_unicode_to_keyval(accel_char);
+            newkeyval = gdk_keyval_to_lower(newkeyval);
         }
-        else
-            priv->mnemonic_keyval = GDK_KEY_VoidSymbol;
+        if (newkeyval != priv->mnemonic_keyval) {
+            setup_mnemonic(adjbar, newkeyval);
+            mnemonic_changed = TRUE;
+        }
     }
     else {
         pango_layout_set_markup(priv->layout, text ? text : "", -1);
+        if (priv->mnemonic_keyval != GDK_KEY_VoidSymbol) {
+            setup_mnemonic(adjbar, GDK_KEY_VoidSymbol);
+            mnemonic_changed = TRUE;
+        }
     }
 
-    // FIXME: Needs to emit signal if accel key changes.
-
     GWY_FREE(escaped);
+
+    if (mnemonic_changed)
+        g_object_notify_by_pspec(G_OBJECT(adjbar),
+                                 properties[PROP_MNEMONIC_KEYVAL]);
+
+    priv->layout_valid = TRUE;
 }
 
 static void
@@ -1211,6 +1277,23 @@ map_position_log(gdouble position)
 }
 
 static void
+change_value(GtkWidget *widget,
+             gdouble newposition)
+{
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    AdjustBar *priv = adjbar->priv;
+    if (!priv->adjustment_ok)
+        return;
+
+    gdouble length = gtk_widget_get_allocated_width(widget);
+    gdouble value = gtk_adjustment_get_value(priv->adjustment);
+    newposition = CLAMP(newposition, 0.0, length);
+    gdouble newvalue = map_position_to_value(adjbar, length, newposition);
+    if (newvalue != value)
+        g_signal_emit(adjbar, signals[SGNL_CHANGE_VALUE], 0, newvalue);
+}
+
+static void
 ensure_cursors(GwyAdjustBar *adjbar)
 {
     AdjustBar *priv = adjbar->priv;
@@ -1228,6 +1311,48 @@ discard_cursors(GwyAdjustBar *adjbar)
 {
     AdjustBar *priv = adjbar->priv;
     GWY_OBJECT_UNREF(priv->cursor_move);
+}
+
+static void
+mnemonic_widget_gone(gpointer data,
+                     G_GNUC_UNUSED GObject *where_the_object_was)
+{
+    GwyAdjustBar *adjbar = (GwyAdjustBar*)data;
+    AdjustBar *priv = adjbar->priv;
+    priv->mnemonic_widget = NULL;
+    setup_mnemonic(adjbar, priv->mnemonic_keyval);
+    g_object_notify_by_pspec(G_OBJECT(adjbar),
+                             properties[PROP_MNEMONIC_WIDGET]);
+}
+
+// This function must not check whether the mnemonic has changed because it's
+// called also from hierarchy_changed() handler.
+static void
+setup_mnemonic(GwyAdjustBar *adjbar,
+               guint newkey)
+{
+    AdjustBar *priv = adjbar->priv;
+    GtkWidget *widget = GTK_WIDGET(adjbar);
+
+    if (priv->mnemonic_keyval != GDK_KEY_VoidSymbol) {
+        if (priv->mnemonic_window && priv->mnemonic_widget) {
+            gtk_window_remove_mnemonic(priv->mnemonic_window,
+                                       priv->mnemonic_keyval, widget);
+            priv->mnemonic_window = NULL;
+        }
+    }
+
+    priv->mnemonic_keyval = newkey;
+    if (newkey == GDK_KEY_VoidSymbol || !priv->mnemonic_widget)
+        return;
+
+    // TODO: Connect to mnemonic visible notify...
+
+    GtkWidget *toplevel = gtk_widget_get_toplevel(widget);
+    if (gtk_widget_is_toplevel(toplevel)) {
+        priv->mnemonic_window = GTK_WINDOW(toplevel);
+        gtk_window_add_mnemonic(priv->mnemonic_window, newkey, widget);
+    }
 }
 
 /**
