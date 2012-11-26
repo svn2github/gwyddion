@@ -54,7 +54,8 @@ struct _GwyAdjustBarPrivate {
     gulong adjustment_value_changed_id;
     gulong adjustment_changed_id;
     gdouble oldvalue;    // This is to avoid acting on no-change notifications.
-    gboolean adjustment_ok;
+    gboolean adjustment_ok : 1;
+    gboolean dragging : 1;
 
     GwyScaleMappingType mapping;
     MappingFunc map_value;
@@ -404,6 +405,9 @@ gwy_adjust_bar_leave_notify(GtkWidget *widget,
                             G_GNUC_UNUSED GdkEventCrossing *event)
 {
     GtkStateFlags state = gtk_widget_get_state_flags(widget);
+    GwyAdjustBar *adjbar = GWY_ADJUST_BAR(widget);
+    if (adjbar->priv->dragging)
+        return FALSE;
     if (state & GTK_STATE_FLAG_PRELIGHT)
         gtk_widget_set_state_flags(widget, state & ~GTK_STATE_FLAG_PRELIGHT,
                                    TRUE);
@@ -440,6 +444,8 @@ gwy_adjust_bar_button_press(GtkWidget *widget,
     if (event->button != 1)
         return FALSE;
 
+    AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
+    priv->dragging = TRUE;
     change_value(widget, event->x);
     return TRUE;
 }
@@ -451,7 +457,9 @@ gwy_adjust_bar_button_release(GtkWidget *widget,
     if (event->button != 1)
         return FALSE;
 
+    AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
     change_value(widget, event->x);
+    priv->dragging = FALSE;
     return TRUE;
 }
 
@@ -666,15 +674,15 @@ draw_bar(GwyAdjustBar *adjbar,
          cairo_t *cr)
 {
     AdjustBar *priv = adjbar->priv;
-    if (!priv->adjustment_ok)
-        return;
-
     GtkWidget *widget = GTK_WIDGET(adjbar);
     GtkStateFlags state = gtk_widget_get_state_flags(widget);
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     gdouble val = gtk_adjustment_get_value(priv->adjustment);
-    gdouble barlength = map_value_to_position(adjbar, width, val);
+    gdouble barlength = 0.0;
+
+    if (priv->adjustment_ok)
+        barlength = map_value_to_position(adjbar, width, val);
 
     cairo_save(cr);
 
@@ -692,18 +700,22 @@ draw_bar(GwyAdjustBar *adjbar,
         gwy_cairo_set_source_rgba(cr, &fill_color);
         cairo_fill(cr);
 
-        cairo_set_line_width(cr, 1.0);
-        cairo_rectangle(cr, 0.5, 0.5, barlength-1.0, height-1.0);
-        gwy_cairo_set_source_rgba(cr, &color);
-        cairo_stroke(cr);
     }
-    else {
+    else if (barlength > 1.0) {
         // Do not stroke bars thinner than twice the ourline, draw the entire
         // bar using the border color instead.
-        cairo_rectangle(cr, 0, 0, barlength, height);
+        cairo_rectangle(cr, 1.0, 1.0, barlength-1.0, height-2.0);
         gwy_cairo_set_source_rgba(cr, &color);
         cairo_fill(cr);
     }
+
+    cairo_set_line_width(cr, 1.0);
+    cairo_rectangle(cr, 0.5, 0.5, width-1.0, height-1.0);
+    gwy_cairo_set_source_rgba(cr, &color);
+    cairo_move_to(cr, barlength-0.5, 1.0);
+    cairo_line_to(cr, barlength-0.5, height-1.0);
+    cairo_stroke(cr);
+
     cairo_restore(cr);
 }
 
