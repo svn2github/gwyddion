@@ -174,15 +174,24 @@ create_widget_test(void)
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     GtkGrid *grid = GTK_GRID(gtk_grid_new());
+    gtk_grid_set_column_spacing(grid, 2);
+    gtk_grid_set_row_spacing(grid, 2);
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
     GtkAdjustment *adj1 = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
-    attach_adjustment(grid, 0, adj1, "Value with a long name:", "µm",
+    attach_adjustment(grid, 0, adj1, "_Value with a long name:", "µm",
                       NULL, NULL);
 
     GtkAdjustment *adj2 = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
-    attach_adjustment(grid, 1, adj2, "Short value:", "px",
+    attach_adjustment(grid, 1, adj2, "_Short value:", "px",
                       set_sensitive, GINT_TO_POINTER(FALSE));
+
+    GtkWidget *entry = gtk_entry_new();
+    gtk_grid_attach(grid, entry, 1, 2, 2, 1);
+    GtkWidget *label = gtk_label_new_with_mnemonic("_Entry:");
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_grid_attach(grid, label, 0, 2, 1, 1);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), entry);
 
     return window;
 }
