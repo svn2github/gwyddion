@@ -48,13 +48,13 @@ typedef struct _GwyAdjustBar      GwyAdjustBar;
 typedef struct _GwyAdjustBarClass GwyAdjustBarClass;
 
 struct _GwyAdjustBar {
-    GtkWidget widget;
+    GtkBin bin;
     struct _GwyAdjustBarPrivate *priv;
 };
 
 struct _GwyAdjustBarClass {
     /*<private>*/
-    GtkWidgetClass widget_class;
+    GtkBinClass bin_class;
 };
 
 GType               gwy_adjust_bar_get_type           (void)                         G_GNUC_CONST;
@@ -62,19 +62,9 @@ GtkWidget*          gwy_adjust_bar_new                (void)                    
 void                gwy_adjust_bar_set_adjustment     (GwyAdjustBar *adjbar,
                                                        GtkAdjustment *adjustment);
 GtkAdjustment*      gwy_adjust_bar_get_adjustment     (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
-void                gwy_adjust_bar_set_label          (GwyAdjustBar *adjbar,
-                                                       const gchar *text);
-void                gwy_adjust_bar_set_label_full     (GwyAdjustBar *adjbar,
-                                                       const gchar *text,
-                                                       gboolean use_markup,
-                                                       gboolean use_underline);
-const gchar*        gwy_adjust_bar_get_label          (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
 void                gwy_adjust_bar_set_mapping        (GwyAdjustBar *adjbar,
                                                        GwyScaleMappingType mapping);
 GwyScaleMappingType gwy_adjust_bar_get_mapping        (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
-void                gwy_adjust_bar_set_mnemonic_widget(GwyAdjustBar *adjbar,
-                                                       GtkWidget *widget);
-GtkWidget*          gwy_adjust_bar_get_mnemonic_widget(const GwyAdjustBar *adjbar)   G_GNUC_PURE;
 
 G_END_DECLS
 

@@ -140,10 +140,12 @@ attach_adjustment(GtkGrid *grid,
 {
     GtkWidget *bar = gwy_adjust_bar_new();
     gwy_adjust_bar_set_adjustment(GWY_ADJUST_BAR(bar), adj);
-    gwy_adjust_bar_set_label(GWY_ADJUST_BAR(bar), name);
+    GtkWidget *namelabel = gtk_bin_get_child(GTK_BIN(bar));
+    gtk_label_set_text_with_mnemonic(GTK_LABEL(namelabel), name);
     gtk_grid_attach(grid, bar, 0, row, 1, 1);
 
     GtkWidget *spin = gwy_spin_button_new(adj, 0.0, 1);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(namelabel), spin);
     gtk_grid_attach(grid, spin, 1, row, 1, 1);
 
     GtkWidget *unitlabel = gtk_label_new(units);
