@@ -234,13 +234,19 @@ gwy_axis_class_init(GwyAxisClass *klass)
                                GWY_TYPE_UNIT,
                                G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * GwyAxis:edge:
+     *
+     * Edge on which this axis is placed with respect to the data widget.
+     *
+     * Ticks are drawn on the <emphasis>opposite</emphasis> edge of the axis
+     * so that they are adjacent to the data widget.
+     **/
     properties[PROP_EDGE]
          = g_param_spec_enum("edge",
                              "Edge",
                              "Edge on which this axis is placed with "
-                             "respect to the data widget.  Ticks are "
-                             "drawn on the opposite edge of the axis "
-                             "so that they are adjacent to the data widget.",
+                             "respect to the data widget.",
                              GTK_TYPE_POSITION_TYPE,
                              GTK_POS_BOTTOM,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -290,12 +296,18 @@ gwy_axis_class_init(GwyAxisClass *klass)
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * GwyAxis:max-tick-level:
+     *
+     * Maximum level of ticks to draw.
+     *
+     * Zero means no ticks at all, except possibly end-point ticks (if
+     * enabled). One means major ticks, etc.
+     **/
     properties[PROP_MAX_TICK_LEVEL]
         = g_param_spec_enum("max-tick-level",
                             "Max tick level",
-                            "Maximum level of ticks to draw.  Zero means "
-                            "no ticks at all, except possibly end-point "
-                            "ticks.  One means major ticks, etc.",
+                            "Maximum level of ticks to draw.",
                             GWY_TYPE_AXIS_TICK_LEVEL,
                             GWY_AXIS_TICK_MINOR,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);

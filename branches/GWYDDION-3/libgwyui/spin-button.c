@@ -277,7 +277,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
         = g_param_spec_enum("update-policy",
                             "Update Policy",
                             "Whether the spin button should update always, "
-                            "or only when the value is legal.",
+                            "or only when the value is valid.",
                             GTK_TYPE_SPIN_BUTTON_UPDATE_POLICY,
                             GTK_UPDATE_ALWAYS,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);

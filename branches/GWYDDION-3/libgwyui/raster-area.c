@@ -409,23 +409,39 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
                              GWY_TYPE_RGBA,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * GwyRasterArea:zoom:
+     *
+     * Scaling of the field.
+     *
+     * More precisely, this property determines scaling in the horizontal
+     * direction. Vertical scaling depends on GwyRasterArea:real-aspect-ratio.
+     *
+     * Zoom value of 0 means the widget requests the minimum size 1×1 and
+     * scales to whatever size is given to it.
+     **/
     properties[PROP_ZOOM]
         = g_param_spec_double("zoom",
                               "Zoom",
-                              "Scaling of the field in the horizontal "
-                              "direction.  Vertical scaling depends on "
-                              "real-aspect-ratio.  Zoom of 0 means the widget "
-                              "requests the minimum size 1×1 and scales to "
-                              "whatever size is given to it.",
+                              "Scaling of the field.",
                               0.0, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * GwyRasterArea:real-aspect-ratio:
+     *
+     * Whether the dimension follow the real aspect ratio.
+     *
+     * Since #GwyField real pixel sizes in @x and y@ direction may differ, two
+     * natual aspect ratios are possible.  Square pixels that correspond to
+     * %FALSE value of this property and faitfhul reproduction of the physical
+     * aspect ratio that correspond to %TRUE.
+     **/
     properties[PROP_REAL_ASPECT_RATIO]
         = g_param_spec_boolean("real-aspect-ratio",
                                "Real aspect ratio",
-                               "Whether the real dimensions of the field "
-                               "determine the sizes (as opposed to pixel "
-                               "dimensions).",
+                               "Whether dimensions follow the real aspect "
+                               "ratio.",
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 

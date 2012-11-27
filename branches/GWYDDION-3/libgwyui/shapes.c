@@ -142,12 +142,19 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                               GWY_TYPE_COORDS,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * GwyShapes:max-shapes:
+     *
+     * Maximum allowed number of shapes.
+     *
+     * This property not only limits the number of shapes the user can add
+     * interactively but setting it will also truncate the current coordinates
+     * if they contain more objets.
+     **/
     properties[PROP_MAX_SHAPES]
         = g_param_spec_uint("max-shapes",
                             "Max shapes",
-                            "Maximum allowed number of shapes to create. "
-                            "Setting it will truncate the current coordinates "
-                            "if they contain more objets.",
+                            "Maximum allowed number of shapes.",
                             0, G_MAXUINT, 0,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -169,8 +176,8 @@ gwy_shapes_class_init(GwyShapesClass *klass)
         = g_param_spec_object("selection",
                               "Selection",
                               "The set of currently selected shapes.",
-                               GWY_TYPE_INT_SET,
-                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+                              GWY_TYPE_INT_SET,
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);

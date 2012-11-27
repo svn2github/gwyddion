@@ -105,12 +105,18 @@ gwy_resource_list_class_init(GwyResourceListClass *klass)
                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
                              | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * ResourceList:store:
+     *
+     * Inventory store that backs the resource list.
+     *
+     * This inventory store is not the tree model you would obtain using
+     * gtk_tree_view_get_model() because of filtering.
+     **/
     properties[PROP_STORE]
         = g_param_spec_object("store",
                               "Store",
-                              "Inventory store that ultimately backs the "
-                              "resource list. It may differ from the tree "
-                              "model because of filtering.",
+                              "Inventory store that backs the resource list.",
                               GWY_TYPE_INVENTORY_STORE,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -122,13 +128,18 @@ gwy_resource_list_class_init(GwyResourceListClass *klass)
                               NULL,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * ResourceList:only-preferred:
+     *
+     * Whether to show only preferred resources.
+     *
+     * Settings this property to %TRUE is usually meaningful only for lists
+     * that do not have the ‘preferred’ column.
+     **/
     properties[PROP_ONLY_PREFERRED]
         = g_param_spec_boolean("only-preferred",
                                "Only preferred",
-                               "Whether to show only preferred resources. "
-                               "Settings this to %TRUE is usually meaningful "
-                               "only for lists that do not have the "
-                               "‘preferred’ column.",
+                               "Whether to show only preferred resources.",
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
