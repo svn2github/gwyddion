@@ -77,6 +77,8 @@ fit-task/weight/func
 fit-task/weight/data/point
 fit-task/weight/data/vector
 fit-task/weight/data/vfunc
+fit-task/chi/data/point
+fit-task/correlations/data/point
 serialize/simple
 serialize/data
 serialize/nested

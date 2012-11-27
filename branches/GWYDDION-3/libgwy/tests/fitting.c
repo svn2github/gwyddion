@@ -104,18 +104,16 @@ check_fit(GwyFitTask *fittask,
     /* Conservative result check */
     gdouble eps = 0.2;
     for (guint i = 0; i < nparam; i++) {
-        g_assert_cmpfloat(fabs(param_final[i] - param_good[i]),
-                          <=,
-                          eps*fabs(param_good[i]));
+        gwy_assert_floatval(param_final[i], param_good[i],
+                            eps*fabs(param_good[i]));
     }
     /* Error estimate check */
     gdouble error[nparam];
     eps = 1.0;
     g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
     for (guint i = 0; i < nparam; i++) {
-        g_assert_cmpfloat(fabs((param_final[i] - param_good[i])/error[i]),
-                          <=,
-                          1.0 + eps);
+        gwy_assert_floatval(param_final[i], param_good[i],
+                            error[i]*(1.0 + eps));
     }
 }
 
@@ -491,6 +489,68 @@ test_fit_task_weight_data_vfunc(void)
     check_fit(fittask, param);
     g_free(weight2);
 
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+void
+test_fit_task_chi_data_point(void)
+{
+    enum { nparam = 4, ndata = 100 };
+    const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 2e5 };
+    const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyXY *data = make_gaussian_data(param[0], param[1], param[2], param[3],
+                                     ndata, 42);
+    gdouble point_sigma = 0.15/GWY_SQRT3*param[3];
+    gwy_fit_task_set_point_func(fittask, nparam,
+                                (GwyFitTaskPointFunc)gaussian_point);
+    gwy_fit_task_set_point_data(fittask, data, ndata);
+    gdouble *weight = g_new(gdouble, ndata);
+    for (guint i = 0; i < ndata; i++)
+        weight[i] = 1.0/point_sigma;   // Fitter uses unsquared 1/σ!
+    gwy_fit_task_set_weight_data(fittask, weight);
+    gwy_fitter_set_params(fitter, param_init);
+    check_fit(fittask, param);
+    gdouble chi = gwy_fit_task_chi(fittask);
+    gwy_assert_floatval(chi, 1.0, 0.1);
+    g_free(weight);
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+void
+test_fit_task_correlations_data_point(void)
+{
+    // Parameter order is x₀, y₀, b, a:
+    enum { PX0, PY0, PB, PA };
+    enum { nparam = 4, ndata = 100 };
+    const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 2e5 };
+    const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyXY *data = make_gaussian_data(param[0], param[1], param[2], param[3],
+                                     ndata, 42);
+    gwy_fit_task_set_point_func(fittask, nparam,
+                                (GwyFitTaskPointFunc)gaussian_point);
+    gwy_fit_task_set_point_data(fittask, data, ndata);
+    gwy_fitter_set_params(fitter, param_init);
+    check_fit(fittask, param);
+    gdouble corr_matrix[gwy_triangular_matrix_length(nparam)];
+    g_assert(gwy_fit_task_correlations(fittask, corr_matrix));
+    for (guint i = 0; i < nparam; i++) {
+        for (guint j = 0; j <= i; j++) {
+            gdouble c = gwy_lower_triangular_matrix_index(corr_matrix, i, j);
+            if (j == i)
+                g_assert_cmpfloat(c, ==, 1.0);
+            else if ((j == PA && i == PB) || (j == PB && i == PA)
+                     || (j == PA && i == PY0) || (j == PY0 && i == PA)
+                     || (j == PB && i == PY0) || (j == PY0 && i == PB)) {
+                g_assert_cmpfloat(c, <, 0.0);
+            }
+        }
+    }
     g_free(data);
     g_object_unref(fittask);
 }
