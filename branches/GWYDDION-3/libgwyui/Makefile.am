@@ -27,6 +27,7 @@ public_headers = \
 	$(srcdir)/field-render.h \
 	$(srcdir)/inventory-store.h \
 	$(srcdir)/main.h \
+	$(srcdir)/menu-button.h \
 	$(srcdir)/raster-area.h \
 	$(srcdir)/raster-view.h \
 	$(srcdir)/resource-list.h \
@@ -83,6 +84,7 @@ libgwyui3_la_SOURCES = \
 	inventory-store.c \
 	main.c \
 	marshal.c \
+	menu-button.c \
 	raster-area.c \
 	raster-view.c \
 	resource-list.c \
