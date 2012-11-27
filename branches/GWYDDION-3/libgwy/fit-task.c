@@ -995,7 +995,7 @@ gwy_fit_task_correlations(GwyFitTask *fittask,
     for (guint i = 0; i < nparam; i++)
         h[i] = sqrt(SLi(matrix, i, i));
     for (guint i = 0; i < nparam; i++) {
-        for (guint j = 0; j < i; i++)
+        for (guint j = 0; j < i; j++)
             SLi(corr_matrix, i, j) = SLi(matrix, i, j)/(h[i]*h[j]);
         SLi(corr_matrix, i, i) = 1.0;
     }
