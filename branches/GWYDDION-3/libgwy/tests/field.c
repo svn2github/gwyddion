@@ -975,6 +975,45 @@ test_field_set(void)
     g_rand_free(rng);
 }
 
+void
+test_field_clear_offsets(void)
+{
+    GwyField *field = gwy_field_new_sized(4, 4, TRUE);
+    guint xoff_counter = 0, yoff_counter = 0;
+    g_signal_connect_swapped(field, "notify::x-offset",
+                             G_CALLBACK(record_signal), &xoff_counter);
+    g_signal_connect_swapped(field, "notify::y-offset",
+                             G_CALLBACK(record_signal), &yoff_counter);
+
+    gwy_field_clear_offsets(field);
+    g_assert_cmpuint(xoff_counter, ==, 0);
+    g_assert_cmpuint(yoff_counter, ==, 0);
+
+    gwy_field_set_xoffset(field, -0.5);
+    g_assert_cmpuint(xoff_counter, ==, 1);
+    g_assert_cmpuint(yoff_counter, ==, 0);
+    gwy_field_clear_offsets(field);
+    g_assert_cmpuint(xoff_counter, ==, 2);
+    g_assert_cmpuint(yoff_counter, ==, 0);
+
+    gwy_field_set_yoffset(field, 0.5);
+    g_assert_cmpuint(xoff_counter, ==, 2);
+    g_assert_cmpuint(yoff_counter, ==, 1);
+    gwy_field_clear_offsets(field);
+    g_assert_cmpuint(xoff_counter, ==, 2);
+    g_assert_cmpuint(yoff_counter, ==, 2);
+
+    gwy_field_set_xoffset(field, 1.0);
+    gwy_field_set_yoffset(field, 1.0);
+    g_assert_cmpuint(xoff_counter, ==, 3);
+    g_assert_cmpuint(yoff_counter, ==, 3);
+    gwy_field_clear_offsets(field);
+    g_assert_cmpuint(xoff_counter, ==, 4);
+    g_assert_cmpuint(yoff_counter, ==, 4);
+
+    g_object_unref(field);
+}
+
 static void
 field_part_copy_dumb(const GwyField *src,
                      guint col,

@@ -263,6 +263,7 @@ field/units
 field/units-assign
 field/get
 field/set
+field/clear-offsets
 field/check-part/good
 field/check-part/empty
 field/check-part/bad
