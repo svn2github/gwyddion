@@ -200,6 +200,7 @@ test_fit_task_fixed(void)
         // Fix parameter i.
         gwy_fitter_set_params(fitter, param_init);
         gwy_fit_task_set_fixed_param(fittask, i, TRUE);
+        g_assert(gwy_fit_task_get_fixed_param(fittask, i));
         gdouble res_init = gwy_fit_task_eval_residuum(fittask);
         g_assert_cmpfloat(res_init, >, 0.0);
         g_assert(gwy_fit_task_fit(fittask));
@@ -215,12 +216,17 @@ test_fit_task_fixed(void)
         g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
         g_assert_cmpfloat(error[i], ==, 0);
         gwy_fit_task_set_fixed_param(fittask, i, FALSE);
+        g_assert(!gwy_fit_task_get_fixed_param(fittask, i));
 
         // The same using array interface for fixed params.
         gwy_fitter_set_params(fitter, param_init);
         gwy_clear(fixed_params, nparam);
         fixed_params[i] = TRUE;
         gwy_fit_task_set_fixed_params(fittask, fixed_params);
+        for (guint j = 0; j < nparam; j++) {
+            g_assert(!gwy_fit_task_get_fixed_param(fittask, i)
+                     == !fixed_params[i]);
+        }
         res_init = gwy_fit_task_eval_residuum(fittask);
         g_assert_cmpfloat(res_init, >, 0.0);
         g_assert(gwy_fit_task_fit(fittask));
@@ -239,6 +245,10 @@ test_fit_task_fixed(void)
         }
         gwy_clear(fixed_params, nparam);
         gwy_fit_task_set_fixed_params(fittask, fixed_params);
+        for (guint j = 0; j < nparam; j++) {
+            g_assert(!gwy_fit_task_get_fixed_param(fittask, i)
+                     == !fixed_params[i]);
+        }
     }
     g_free(data);
     g_object_unref(fittask);
