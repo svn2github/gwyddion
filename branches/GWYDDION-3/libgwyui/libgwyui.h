@@ -29,7 +29,6 @@
 #include <libgwyui/field-render.h>
 #include <libgwyui/inventory-store.h>
 #include <libgwyui/main.h>
-#include <libgwyui/menu-button.h>
 #include <libgwyui/raster-area.h>
 #include <libgwyui/raster-view.h>
 #include <libgwyui/resource-list.h>
