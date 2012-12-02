@@ -126,6 +126,7 @@ unit/changed
 unit/changed/arithmetic
 unit/assign
 unit/arithmetic/simple
+unit/arithmetic/null
 unit/arithmetic/commutativity
 unit/serialize
 unit/garbage
