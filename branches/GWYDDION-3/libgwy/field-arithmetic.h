@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -27,20 +27,22 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_FIELD_COMPATIBLE_XRES    = 1 << 0,
-    GWY_FIELD_COMPATIBLE_YRES    = 1 << 1,
-    GWY_FIELD_COMPATIBLE_RES     = GWY_FIELD_COMPATIBLE_XRES | GWY_FIELD_COMPATIBLE_YRES,
-    GWY_FIELD_COMPATIBLE_XREAL   = 1 << 2,
-    GWY_FIELD_COMPATIBLE_YREAL   = 1 << 3,
-    GWY_FIELD_COMPATIBLE_REAL    = GWY_FIELD_COMPATIBLE_XREAL | GWY_FIELD_COMPATIBLE_YREAL,
-    GWY_FIELD_COMPATIBLE_DX      = 1 << 4,
-    GWY_FIELD_COMPATIBLE_DY      = 1 << 5,
-    GWY_FIELD_COMPATIBLE_DXDY    = GWY_FIELD_COMPATIBLE_DX | GWY_FIELD_COMPATIBLE_DY,
-    GWY_FIELD_COMPATIBLE_LATERAL = 1 << 6,
-    GWY_FIELD_COMPATIBLE_VALUE   = 1 << 7,
-    GWY_FIELD_COMPATIBLE_UNITS   = GWY_FIELD_COMPATIBLE_LATERAL | GWY_FIELD_COMPATIBLE_VALUE,
-    GWY_FIELD_COMPATIBLE_ALL     = 0x007fu
-} GwyFieldCompatibilityFlags;
+    GWY_FIELD_COMPAT_XRES    = 1 << 0,
+    GWY_FIELD_COMPAT_YRES    = 1 << 1,
+    GWY_FIELD_COMPAT_RES     = GWY_FIELD_COMPAT_XRES | GWY_FIELD_COMPAT_YRES,
+    GWY_FIELD_COMPAT_XREAL   = 1 << 2,
+    GWY_FIELD_COMPAT_YREAL   = 1 << 3,
+    GWY_FIELD_COMPAT_REAL    = GWY_FIELD_COMPAT_XREAL | GWY_FIELD_COMPAT_YREAL,
+    GWY_FIELD_COMPAT_DX      = 1 << 4,
+    GWY_FIELD_COMPAT_DY      = 1 << 5,
+    GWY_FIELD_COMPAT_DXDY    = GWY_FIELD_COMPAT_DX | GWY_FIELD_COMPAT_DY,
+    GWY_FIELD_COMPAT_X       = 1 << 6,
+    GWY_FIELD_COMPAT_Y       = 1 << 7,
+    GWY_FIELD_COMPAT_LATERAL = GWY_FIELD_COMPAT_X | GWY_FIELD_COMPAT_Y,
+    GWY_FIELD_COMPAT_VALUE   = 1 << 8,
+    GWY_FIELD_COMPAT_UNITS   = GWY_FIELD_COMPAT_LATERAL | GWY_FIELD_COMPAT_VALUE,
+    GWY_FIELD_COMPAT_ALL     = 0x01ffu
+} GwyFieldCompatFlags;
 
 typedef enum {
     GWY_NORMALIZE_MEAN        = 1 << 0,
@@ -48,9 +50,9 @@ typedef enum {
     GWY_NORMALIZE_ENTIRE_DATA = 1 << 2
 } GwyNormalizeFlags;
 
-GwyFieldCompatibilityFlags gwy_field_is_incompatible(const GwyField *field1,
-                                                     const GwyField *field2,
-                                                     GwyFieldCompatibilityFlags check);
+GwyFieldCompatFlags gwy_field_is_incompatible(const GwyField *field1,
+                                              const GwyField *field2,
+                                              GwyFieldCompatFlags check);
 
 void     gwy_field_clear      (GwyField *field,
                                const GwyFieldPart *fpart,

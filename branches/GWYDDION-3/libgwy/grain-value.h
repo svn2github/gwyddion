@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -53,27 +53,27 @@ struct _GwyGrainValueClass {
     GObjectClass g_object_class;
 };
 
-GType               gwy_grain_value_get_type        (void)                            G_GNUC_CONST;
-GwyGrainValue*      gwy_grain_value_new             (const gchar *name)               G_GNUC_MALLOC;
-const GwyUnit*      gwy_grain_value_unit            (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gdouble*      gwy_grain_value_data            (const GwyGrainValue *grainvalue,
-                                                     guint *ngrains)                  G_GNUC_PURE;
-const gchar*        gwy_grain_value_get_name        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gchar*        gwy_grain_value_get_group       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gchar*        gwy_grain_value_get_ident       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-const gchar*        gwy_grain_value_get_symbol      (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-GwyUserGrainValue*  gwy_grain_value_get_resource    (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-gboolean            gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue) G_GNUC_PURE;
-gboolean            gwy_grain_value_is_angle        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-gboolean            gwy_grain_value_is_valid        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
-void                gwy_field_evaluate_grains       (const GwyField *field,
-                                                     const GwyMaskField *mask,
-                                                     GwyGrainValue **grainvalues,
-                                                     guint nvalues);
-void                gwy_grain_value_evaluate        (GwyGrainValue *grainvalue,
-                                                     const GwyField *field,
-                                                     const GwyMaskField *mask);
-const gchar* const* gwy_grain_value_list_builtins   (void);
+GType                  gwy_grain_value_get_type        (void)                            G_GNUC_CONST;
+GwyGrainValue*         gwy_grain_value_new             (const gchar *name)               G_GNUC_MALLOC;
+const GwyUnit*         gwy_grain_value_unit            (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gdouble*         gwy_grain_value_data            (const GwyGrainValue *grainvalue,
+                                                        guint *ngrains)                  G_GNUC_PURE;
+const gchar*           gwy_grain_value_get_name        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gchar*           gwy_grain_value_get_group       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gchar*           gwy_grain_value_get_ident       (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+const gchar*           gwy_grain_value_get_symbol      (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+GwyUserGrainValue*     gwy_grain_value_get_resource    (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+GwyGrainValueSameUnits gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue) G_GNUC_PURE;
+gboolean               gwy_grain_value_is_angle        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+gboolean               gwy_grain_value_is_valid        (const GwyGrainValue *grainvalue) G_GNUC_PURE;
+void                   gwy_field_evaluate_grains       (const GwyField *field,
+                                                        const GwyMaskField *mask,
+                                                        GwyGrainValue **grainvalues,
+                                                        guint nvalues);
+void                   gwy_grain_value_evaluate        (GwyGrainValue *grainvalue,
+                                                        const GwyField *field,
+                                                        const GwyMaskField *mask);
+const gchar* const*    gwy_grain_value_list_builtins   (void);
 
 G_END_DECLS
 

@@ -44,8 +44,8 @@ typedef enum {
 } GwyFieldCached;
 
 struct _GwyFieldPrivate {
-    /* FIXME: Consider permitting x-units != y-units. */
-    GwyUnit *unit_xy;
+    GwyUnit *unit_x;
+    GwyUnit *unit_y;
     GwyUnit *unit_z;
     guint32 cached;
     gboolean allocated;

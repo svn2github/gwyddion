@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 #define CBIT GWY_FIELD_CBIT
 #define CTEST GWY_FIELD_CTEST
 
-enum { N_ITEMS = 9 };
+enum { N_ITEMS = 10 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -47,7 +47,8 @@ enum {
     PROP_YREAL,
     PROP_XOFFSET,
     PROP_YOFFSET,
-    PROP_UNIT_XY,
+    PROP_UNIT_X,
+    PROP_UNIT_Y,
     PROP_UNIT_Z,
     N_PROPS
 };
@@ -74,15 +75,16 @@ static void     gwy_field_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "xres",    .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*1*/ { .name = "yres",    .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*2*/ { .name = "xreal",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*3*/ { .name = "yreal",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*4*/ { .name = "xoff",    .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*5*/ { .name = "yoff",    .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*6*/ { .name = "unit-xy", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*7*/ { .name = "unit-z",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*8*/ { .name = "data",    .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*0*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        },
+    /*1*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        },
+    /*2*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*3*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*4*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*5*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*6*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*7*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*8*/ { .name = "unit-z", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*9*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -158,11 +160,19 @@ gwy_field_class_init(GwyFieldClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_XY]
-        = g_param_spec_object("unit-xy",
-                              "XY unit",
-                              "Physical units of lateral dimensions of the "
-                              "field.",
+    properties[PROP_UNIT_X]
+        = g_param_spec_object("unit-x",
+                              "X unit",
+                              "Physical units of horizontal lateral dimensions "
+                              "of the field.",
+                              GWY_TYPE_UNIT,
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_UNIT_Y]
+        = g_param_spec_object("unit-y",
+                              "Y unit",
+                              "Physical units of vertical lateral dimensions "
+                              "of the field.",
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -259,7 +269,8 @@ static void
 gwy_field_dispose(GObject *object)
 {
     GwyField *field = GWY_FIELD(object);
-    GWY_OBJECT_UNREF(field->priv->unit_xy);
+    GWY_OBJECT_UNREF(field->priv->unit_y);
+    GWY_OBJECT_UNREF(field->priv->unit_x);
     GWY_OBJECT_UNREF(field->priv->unit_z);
     G_OBJECT_CLASS(gwy_field_parent_class)->dispose(object);
 }
@@ -270,8 +281,10 @@ gwy_field_n_items(GwySerializable *serializable)
     GwyField *field = GWY_FIELD(serializable);
     Field *priv = field->priv;
     gsize n = N_ITEMS;
-    if (priv->unit_xy)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_xy));
+    if (priv->unit_x)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_x));
+    if (priv->unit_y)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_y));
     if (priv->unit_z)
        n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_z));
     return n;
@@ -322,18 +335,27 @@ gwy_field_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (priv->unit_xy) {
+    if (!gwy_unit_is_empty(priv->unit_x)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[6];
-        it.value.v_object = (GObject*)priv->unit_xy;
+        it.value.v_object = (GObject*)priv->unit_x;
         items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_xy), items);
+        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_x), items);
         n++;
     }
 
-    if (priv->unit_z) {
+    if (!gwy_unit_is_empty(priv->unit_y)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[7];
+        it.value.v_object = (GObject*)priv->unit_y;
+        items->items[items->n++] = it;
+        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_y), items);
+        n++;
+    }
+
+    if (!gwy_unit_is_empty(priv->unit_z)) {
+        g_return_val_if_fail(items->len - items->n, 0);
+        it = serialize_items[8];
         it.value.v_object = (GObject*)priv->unit_z;
         items->items[items->n++] = it;
         gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_z), items);
@@ -341,7 +363,7 @@ gwy_field_itemize(GwySerializable *serializable,
     }
 
     g_return_val_if_fail(items->len - items->n, 0);
-    it = serialize_items[8];
+    it = serialize_items[9];
     it.value.v_double_array = field->data;
     it.array_size = field->xres * field->yres;
     items->items[items->n++] = it;
@@ -392,6 +414,8 @@ gwy_field_construct(GwySerializable *serializable,
         goto fail;
     if (!_gwy_check_object_component(its + 7, field, GWY_TYPE_UNIT, error_list))
         goto fail;
+    if (!_gwy_check_object_component(its + 8, field, GWY_TYPE_UNIT, error_list))
+        goto fail;
 
     field->xres = its[0].value.v_uint32;
     field->yres = its[1].value.v_uint32;
@@ -400,10 +424,11 @@ gwy_field_construct(GwySerializable *serializable,
     field->yreal = CLAMP(its[3].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
     field->xoff = CLAMP(its[4].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     field->yoff = CLAMP(its[5].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
-    priv->unit_xy = (GwyUnit*)its[6].value.v_object;
-    priv->unit_z = (GwyUnit*)its[7].value.v_object;
+    priv->unit_x = (GwyUnit*)its[6].value.v_object;
+    priv->unit_y = (GwyUnit*)its[7].value.v_object;
+    priv->unit_z = (GwyUnit*)its[8].value.v_object;
     free_data(field);
-    field->data = its[8].value.v_double_array;
+    field->data = its[9].value.v_double_array;
     priv->allocated = TRUE;
 
     return TRUE;
@@ -411,7 +436,8 @@ gwy_field_construct(GwySerializable *serializable,
 fail:
     GWY_OBJECT_UNREF(its[6].value.v_object);
     GWY_OBJECT_UNREF(its[7].value.v_object);
-    GWY_FREE(its[8].value.v_double_array);
+    GWY_OBJECT_UNREF(its[8].value.v_object);
+    GWY_FREE(its[9].value.v_double_array);
     return FALSE;
 }
 
@@ -442,7 +468,8 @@ copy_info(GwyField *dest,
     dest->xoff = src->xoff;
     dest->yoff = src->yoff;
     Field *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
     _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
 }
 
@@ -555,17 +582,21 @@ gwy_field_get_property(GObject *object,
         g_value_set_double(value, field->yoff);
         break;
 
-        case PROP_UNIT_XY:
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
-        if (!priv->unit_xy)
-            priv->unit_xy = gwy_unit_new();
-        g_value_set_object(value, priv->unit_xy);
+        case PROP_UNIT_X:
+        if (!priv->unit_x)
+            priv->unit_x = gwy_unit_new();
+        g_value_set_object(value, priv->unit_x);
+        break;
+
+        case PROP_UNIT_Y:
+        if (!priv->unit_y)
+            priv->unit_y = gwy_unit_new();
+        g_value_set_object(value, priv->unit_y);
         break;
 
         case PROP_UNIT_Z:
-        // Instantiate the units to be consistent with the direct interface
-        // that never admits the units are NULL.
         if (!priv->unit_z)
             priv->unit_z = gwy_unit_new();
         g_value_set_object(value, priv->unit_z);
@@ -694,7 +725,8 @@ gwy_field_new_part(const GwyField *field,
     part->yreal = height*gwy_field_dy(field);
 
     Field *spriv = field->priv, *dpriv = part->priv;
-    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
     _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
     if (keep_offsets) {
         part->xoff = field->xoff + col*gwy_field_dx(field);
@@ -1063,22 +1095,41 @@ gwy_field_clear_offsets(GwyField *field)
 }
 
 /**
- * gwy_field_get_unit_xy:
+ * gwy_field_get_unit_x:
  * @field: A two-dimensional data field.
  *
- * Obtains the lateral units of a two-dimensional data field.
+ * Obtains the horizontal lateral units of a two-dimensional data field.
  *
  * Returns: (transfer none):
- *          The lateral units of @field.
+ *          The horizontal lateral units of @field.
  **/
 GwyUnit*
-gwy_field_get_unit_xy(const GwyField *field)
+gwy_field_get_unit_x(const GwyField *field)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     Field *priv = field->priv;
-    if (!priv->unit_xy)
-        priv->unit_xy = gwy_unit_new();
-    return priv->unit_xy;
+    if (!priv->unit_x)
+        priv->unit_x = gwy_unit_new();
+    return priv->unit_x;
+}
+
+/**
+ * gwy_field_get_unit_y:
+ * @field: A two-dimensional data field.
+ *
+ * Obtains the vertical lateral units of a two-dimensional data field.
+ *
+ * Returns: (transfer none):
+ *          The vertical lateral units of @field.
+ **/
+GwyUnit*
+gwy_field_get_unit_y(const GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    Field *priv = field->priv;
+    if (!priv->unit_y)
+        priv->unit_y = gwy_unit_new();
+    return priv->unit_y;
 }
 
 /**
@@ -1098,6 +1149,43 @@ gwy_field_get_unit_z(const GwyField *field)
     if (!priv->unit_z)
         priv->unit_z = gwy_unit_new();
     return priv->unit_z;
+}
+
+/**
+ * gwy_field_xy_units_match:
+ * @field: A two-dimensional data field.
+ *
+ * Checks whether a two-dimensional data field has the same lateral units in
+ * both coordinates.
+ *
+ * Returns: %TRUE if @x and @y units of @field are equal, %FALSE if they
+ *          differ.
+ **/
+gboolean
+gwy_field_xy_units_match(const GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
+    Field *priv = field->priv;
+    return gwy_unit_equal(priv->unit_x, priv->unit_y);
+}
+
+/**
+ * gwy_field_xyz_units_match:
+ * @field: A two-dimensional data field.
+ *
+ * Checks whether a two-dimensional data field has the same both lateral units
+ * and value units.
+ *
+ * Returns: %TRUE if @x, @y and @z units of @field are equal, %FALSE if any
+ *          two differ.
+ **/
+gboolean
+gwy_field_xyz_units_match(const GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
+    Field *priv = field->priv;
+    return (gwy_unit_equal(priv->unit_x, priv->unit_y)
+            && gwy_unit_equal(priv->unit_x, priv->unit_z));
 }
 
 /**
@@ -1582,6 +1670,13 @@ gwy_field_check_mask(const GwyField *field,
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
  *
+ * This function can be used only if units of @x and @y are identical which is
+ * common but does not hold universally.  If it holds this function is usually
+ * preferable to separate gwy_field_format_x() and gwy_field_format_y() because
+ * the same format is then used for both coordinates. The separate functions do
+ * not guarantee this for non-square fields even if @x and @y units are the
+ * same.
+ *
  * Returns: (transfer full):
  *          A newly created value format.
  **/
@@ -1590,12 +1685,68 @@ gwy_field_format_xy(const GwyField *field,
                     GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    gdouble max0 = MAX(field->xreal, field->yreal);
-    gdouble maxoff = MAX(fabs(field->xreal + field->xoff),
+    if (!gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)) {
+        g_warning("X and Y units of field do not match.");
+        return gwy_field_format_x(field, style);
+    }
+    gdouble max0 = fmax(field->xreal, field->yreal);
+    gdouble maxoff = fmax(fabs(field->xreal + field->xoff),
                          fabs(field->yreal + field->yoff));
-    gdouble max = MAX(max0, maxoff);
-    gdouble unit = MIN(gwy_field_dx(field), gwy_field_dy(field));
-    return gwy_unit_format_with_resolution(gwy_field_get_unit_xy(field),
+    gdouble max = fmax(max0, maxoff);
+    gdouble unit = fmin(gwy_field_dx(field), gwy_field_dy(field));
+    return gwy_unit_format_with_resolution(gwy_field_get_unit_x(field),
+                                           style, max, unit);
+}
+
+/**
+ * gwy_field_format_x:
+ * @field: A two-dimensional data field.
+ * @style: Output format style.
+ *
+ * Finds a suitable format for displaying horizontal coordinates in a data
+ * field.
+ *
+ * The created format has a sufficient precision to represent coordinates
+ * of neighbour pixels as different values.  See gwy_field_format_xy() if
+ * you prefer a common format for @x and @y coordinates.
+ *
+ * Returns: (transfer full):
+ *          A newly created value format.
+ **/
+GwyValueFormat*
+gwy_field_format_x(const GwyField *field,
+                   GwyValueFormatStyle style)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    gdouble max = fmax(field->xreal, fabs(field->xreal + field->xoff));
+    gdouble unit = gwy_field_dx(field);
+    return gwy_unit_format_with_resolution(gwy_field_get_unit_x(field),
+                                           style, max, unit);
+}
+
+/**
+ * gwy_field_format_y:
+ * @field: A two-dimensional data field.
+ * @style: Output format style.
+ *
+ * Finds a suitable format for displaying horizontal coordinates in a data
+ * field.
+ *
+ * The created format has a sufficient precision to represent coordinates
+ * of neighbour pixels as different values.  See gwy_field_format_xy() if
+ * you prefer a common format for @x and @y coordinates.
+ *
+ * Returns: (transfer full):
+ *          A newly created value format.
+ **/
+GwyValueFormat*
+gwy_field_format_y(const GwyField *field,
+                   GwyValueFormatStyle style)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    gdouble max = fmax(field->yreal, fabs(field->yreal + field->yoff));
+    gdouble unit = gwy_field_dy(field);
+    return gwy_unit_format_with_resolution(gwy_field_get_unit_y(field),
                                            style, max, unit);
 }
 
@@ -1617,7 +1768,7 @@ gwy_field_format_z(const GwyField *field,
     gdouble min, max;
     gwy_field_min_max(field, NULL, NULL, GWY_MASK_IGNORE, &min, &max);
     if (max == min) {
-        max = ABS(max);
+        max = fabs(max);
         min = 0.0;
     }
     return gwy_unit_format_with_digits(gwy_field_get_unit_z(field),

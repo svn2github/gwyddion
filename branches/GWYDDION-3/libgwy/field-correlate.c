@@ -253,8 +253,10 @@ gwy_field_correlate(const GwyField *field,
     fftw_free(extdata);
     g_object_unref(maskedkernel);
 
-    if (score != field)
-        _gwy_assign_units(&score->priv->unit_xy, field->priv->unit_xy);
+    if (score != field) {
+        _gwy_assign_units(&score->priv->unit_x, field->priv->unit_x);
+        _gwy_assign_units(&score->priv->unit_y, field->priv->unit_y);
+    }
 
     if (normalise) {
         _gwy_assign_units(&score->priv->unit_z, kernel->priv->unit_z);

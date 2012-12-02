@@ -27,8 +27,8 @@
 G_BEGIN_DECLS
 
 struct _GwyBrickPrivate {
-    /* FIXME: Consider permitting x-units != y-units. */
-    GwyUnit *unit_xy;
+    GwyUnit *unit_x;
+    GwyUnit *unit_y;
     GwyUnit *unit_z;
     GwyUnit *unit_w;
     gboolean allocated;

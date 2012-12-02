@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,8 @@
 #include "libgwy/math.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
+#include "libgwy/field-internal.h"
 #include "libgwy/line-internal.h"
 
 /**
@@ -35,10 +37,10 @@
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if lines are not compatible.
  **/
-GwyLineCompatibilityFlags
+GwyLineCompatFlags
 gwy_line_is_incompatible(const GwyLine *line1,
                          const GwyLine *line2,
-                         GwyLineCompatibilityFlags check)
+                         GwyLineCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_LINE(line1), check);
     g_return_val_if_fail(GWY_IS_LINE(line2), check);
@@ -47,44 +49,40 @@ gwy_line_is_incompatible(const GwyLine *line1,
     guint res2 = line2->res;
     gdouble real1 = line1->real;
     gdouble real2 = line2->real;
-    GwyLineCompatibilityFlags result = 0;
+    GwyLineCompatFlags result = 0;
 
     /* Resolution */
-    if (check & GWY_LINE_COMPATIBLE_RES) {
+    if (check & GWY_LINE_COMPAT_RES) {
         if (res1 != res2)
-            result |= GWY_LINE_COMPATIBLE_RES;
+            result |= GWY_LINE_COMPAT_RES;
     }
 
     /* Real size */
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
-    if (check & GWY_LINE_COMPATIBLE_REAL) {
+    if (check & GWY_LINE_COMPAT_REAL) {
         if (!(fabs(log(real1/real2)) <= COMPAT_EPSILON))
-            result |= GWY_LINE_COMPATIBLE_REAL;
+            result |= GWY_LINE_COMPAT_REAL;
     }
 
     /* Measure */
-    if (check & GWY_LINE_COMPATIBLE_DX) {
+    if (check & GWY_LINE_COMPAT_DX) {
         if (!(fabs(log(real1/res1*res2/real2)) <= COMPAT_EPSILON))
-            result |= GWY_LINE_COMPATIBLE_DX;
+            result |= GWY_LINE_COMPAT_DX;
     }
 
+    const Line *priv1 = line1->priv, *priv2 = line2->priv;
+
     /* Lateral units */
-    if (check & GWY_LINE_COMPATIBLE_LATERAL) {
-        /* This can cause instantiation of line units as a side effect */
-        GwyUnit *unit1 = gwy_line_get_unit_x(line1);
-        GwyUnit *unit2 = gwy_line_get_unit_x(line2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_LINE_COMPATIBLE_LATERAL;
+    if (check & GWY_LINE_COMPAT_X) {
+        if (!gwy_unit_equal(priv1->unit_x, priv2->unit_x))
+            result |= GWY_LINE_COMPAT_X;
     }
 
     /* Value units */
-    if (check & GWY_LINE_COMPATIBLE_VALUE) {
-        /* This can cause instantiation of line units as a side effect */
-        GwyUnit *unit1 = gwy_line_get_unit_y(line1);
-        GwyUnit *unit2 = gwy_line_get_unit_y(line2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_LINE_COMPATIBLE_VALUE;
+    if (check & GWY_LINE_COMPAT_VALUE) {
+        if (!gwy_unit_equal(priv1->unit_y, priv2->unit_y))
+            result |= GWY_LINE_COMPAT_VALUE;
     }
 
     return result;
@@ -236,23 +234,12 @@ gwy_line_outer_product(const GwyLine *column,
     field->xoff = row->off;
     field->yoff = column->off;
 
-    if (row->priv->unit_x || column->priv->unit_x) {
-        if (!row->priv->unit_x
-            || !column->priv->unit_x
-            || !gwy_unit_equal(row->priv->unit_x, column->priv->unit_x)) {
-            g_warning("Multiplied lines have different x-units.");
-        }
-        gwy_unit_assign(gwy_field_get_unit_xy(field), row->priv->unit_x);
-    }
-    if (row->priv->unit_y || column->priv->unit_y) {
-        GwyUnit *zunit = gwy_field_get_unit_z(field);
-        if (!row->priv->unit_y)
-            gwy_unit_assign(zunit, column->priv->unit_y);
-        else if (!column->priv->unit_y)
-            gwy_unit_assign(zunit, row->priv->unit_y);
-        else
-            gwy_unit_multiply(zunit, column->priv->unit_x, row->priv->unit_y);
-    }
+    _gwy_assign_units(&field->priv->unit_x, row->priv->unit_x);
+    _gwy_assign_units(&field->priv->unit_y, column->priv->unit_x);
+    if (!gwy_unit_is_empty(row->priv->unit_y)
+        || !gwy_unit_is_empty(column->priv->unit_y))
+        gwy_unit_multiply(gwy_field_get_unit_z(field),
+                          row->priv->unit_y, column->priv->unit_y);
 
     return field;
 }
@@ -265,14 +252,15 @@ gwy_line_outer_product(const GwyLine *column,
  **/
 
 /**
- * GwyLineCompatibilityFlags:
- * @GWY_LINE_COMPATIBLE_RES: Resolution (size).
- * @GWY_LINE_COMPATIBLE_REAL: Physical dimension.
- * @GWY_LINE_COMPATIBLE_DX: Pixel size.
- * @GWY_LINE_COMPATIBLE_LATERAL: Lateral units.
- * @GWY_LINE_COMPATIBLE_VALUE: Value units.
- * @GWY_LINE_COMPATIBLE_UNITS: All units.
- * @GWY_LINE_COMPATIBLE_ALL: All defined properties.
+ * GwyLineCompatFlags:
+ * @GWY_LINE_COMPAT_RES: Resolution (size).
+ * @GWY_LINE_COMPAT_REAL: Physical dimension.
+ * @GWY_LINE_COMPAT_DX: Pixel size.
+ * @GWY_LINE_COMPAT_X: Lateral (@x) units.
+ * @GWY_LINE_COMPAT_LATERAL: Alias for %GWY_LINE_COMPAT_X.
+ * @GWY_LINE_COMPAT_VALUE: Value units.
+ * @GWY_LINE_COMPAT_UNITS: All units.
+ * @GWY_LINE_COMPAT_ALL: All defined properties.
  *
  * Line properties that can be checked for compatibility.
  **/

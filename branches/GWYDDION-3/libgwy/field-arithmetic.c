@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -43,10 +43,10 @@ enum { NORMALIZE_ALL = 0x07 };
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if fields are not compatible.
  **/
-GwyFieldCompatibilityFlags
+GwyFieldCompatFlags
 gwy_field_is_incompatible(const GwyField *field1,
                           const GwyField *field2,
-                          GwyFieldCompatibilityFlags check)
+                          GwyFieldCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field1), check);
     g_return_val_if_fail(GWY_IS_FIELD(field2), check);
@@ -59,56 +59,58 @@ gwy_field_is_incompatible(const GwyField *field1,
     gdouble xreal2 = field2->xreal;
     gdouble yreal1 = field1->yreal;
     gdouble yreal2 = field2->yreal;
-    GwyFieldCompatibilityFlags result = 0;
+    GwyFieldCompatFlags result = 0;
 
     /* Resolution */
-    if (check & GWY_FIELD_COMPATIBLE_XRES) {
+    if (check & GWY_FIELD_COMPAT_XRES) {
         if (xres1 != xres2)
-            result |= GWY_FIELD_COMPATIBLE_XRES;
+            result |= GWY_FIELD_COMPAT_XRES;
     }
-    if (check & GWY_FIELD_COMPATIBLE_YRES) {
+    if (check & GWY_FIELD_COMPAT_YRES) {
         if (yres1 != yres2)
-            result |= GWY_FIELD_COMPATIBLE_YRES;
+            result |= GWY_FIELD_COMPAT_YRES;
     }
 
     /* Real size */
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
-    if (check & GWY_FIELD_COMPATIBLE_XREAL) {
+    if (check & GWY_FIELD_COMPAT_XREAL) {
         if (!(fabs(log(xreal1/xreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_XREAL;
+            result |= GWY_FIELD_COMPAT_XREAL;
     }
-    if (check & GWY_FIELD_COMPATIBLE_YREAL) {
+    if (check & GWY_FIELD_COMPAT_YREAL) {
         if (!(fabs(log(yreal1/yreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_YREAL;
+            result |= GWY_FIELD_COMPAT_YREAL;
     }
 
     /* Measure */
-    if (check & GWY_FIELD_COMPATIBLE_DX) {
+    if (check & GWY_FIELD_COMPAT_DX) {
         if (!(fabs(log(xreal1/xres1*xres2/xreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_DX;
+            result |= GWY_FIELD_COMPAT_DX;
     }
-    if (check & GWY_FIELD_COMPATIBLE_DY) {
+    if (check & GWY_FIELD_COMPAT_DY) {
         if (!(fabs(log(yreal1/yres1*yres2/yreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_DY;
+            result |= GWY_FIELD_COMPAT_DY;
     }
 
-    /* Lateral units */
-    if (check & GWY_FIELD_COMPATIBLE_LATERAL) {
-        /* This can cause instantiation of field units as a side effect */
-        GwyUnit *unit1 = gwy_field_get_unit_xy(field1);
-        GwyUnit *unit2 = gwy_field_get_unit_xy(field2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_FIELD_COMPATIBLE_LATERAL;
+    const Field *priv1 = field1->priv, *priv2 = field2->priv;
+
+    /* X units */
+    if (check & GWY_FIELD_COMPAT_X) {
+        if (!gwy_unit_equal(priv1->unit_x, priv2->unit_x))
+            result |= GWY_FIELD_COMPAT_X;
+    }
+
+    /* Y units */
+    if (check & GWY_FIELD_COMPAT_Y) {
+        if (!gwy_unit_equal(priv1->unit_y, priv2->unit_y))
+            result |= GWY_FIELD_COMPAT_Y;
     }
 
     /* Value units */
-    if (check & GWY_FIELD_COMPATIBLE_VALUE) {
-        /* This can cause instantiation of field units as a side effect */
-        GwyUnit *unit1 = gwy_field_get_unit_z(field1);
-        GwyUnit *unit2 = gwy_field_get_unit_z(field2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_FIELD_COMPATIBLE_VALUE;
+    if (check & GWY_FIELD_COMPAT_VALUE) {
+        if (!gwy_unit_equal(priv1->unit_z, priv2->unit_z))
+            result |= GWY_FIELD_COMPAT_VALUE;
     }
 
     return result;
@@ -645,20 +647,22 @@ gwy_field_clamp(GwyField *field,
  **/
 
 /**
- * GwyFieldCompatibilityFlags:
- * @GWY_FIELD_COMPATIBLE_XRES: X-resolution (width).
- * @GWY_FIELD_COMPATIBLE_YRES: Y-resolution (height)
- * @GWY_FIELD_COMPATIBLE_RES: Both resolutions.
- * @GWY_FIELD_COMPATIBLE_XREAL: Physical x-dimension.
- * @GWY_FIELD_COMPATIBLE_YREAL: Physical y-dimension.
- * @GWY_FIELD_COMPATIBLE_REAL: Both physical dimensions.
- * @GWY_FIELD_COMPATIBLE_DX: Pixel size in x-direction.
- * @GWY_FIELD_COMPATIBLE_DY: Pixel size in y-direction.
- * @GWY_FIELD_COMPATIBLE_DXDY: Pixel dimensions.
- * @GWY_FIELD_COMPATIBLE_LATERAL: Lateral units.
- * @GWY_FIELD_COMPATIBLE_VALUE: Value units.
- * @GWY_FIELD_COMPATIBLE_UNITS: All units.
- * @GWY_FIELD_COMPATIBLE_ALL: All defined properties.
+ * GwyFieldCompatFlags:
+ * @GWY_FIELD_COMPAT_XRES: @X-resolution (width).
+ * @GWY_FIELD_COMPAT_YRES: @Y-resolution (height)
+ * @GWY_FIELD_COMPAT_RES: Both resolutions.
+ * @GWY_FIELD_COMPAT_XREAL: Physical @x-dimension.
+ * @GWY_FIELD_COMPAT_YREAL: Physical @y-dimension.
+ * @GWY_FIELD_COMPAT_REAL: Both physical dimensions.
+ * @GWY_FIELD_COMPAT_DX: Pixel size in @x-direction.
+ * @GWY_FIELD_COMPAT_DY: Pixel size in @y-direction.
+ * @GWY_FIELD_COMPAT_DXDY: Pixel dimensions.
+ * @GWY_FIELD_COMPAT_X: Horizontal (@x) lateral units.
+ * @GWY_FIELD_COMPAT_Y: Vertical (@y) lateral units.
+ * @GWY_FIELD_COMPAT_LATERAL: Both lateral units.
+ * @GWY_FIELD_COMPAT_VALUE: Value units.
+ * @GWY_FIELD_COMPAT_UNITS: All units.
+ * @GWY_FIELD_COMPAT_ALL: All defined properties.
  *
  * Field properties that can be checked for compatibility.
  **/

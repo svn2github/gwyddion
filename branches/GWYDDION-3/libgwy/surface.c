@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -203,7 +203,7 @@ gwy_surface_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    if (priv->unit_xy) {
+    if (!gwy_unit_is_empty(priv->unit_xy)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[0];
         it.value.v_object = (GObject*)priv->unit_xy;
@@ -212,7 +212,7 @@ gwy_surface_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (priv->unit_z) {
+    if (!gwy_unit_is_empty(priv->unit_z)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[1];
         it.value.v_object = (GObject*)priv->unit_z;
@@ -357,17 +357,15 @@ gwy_surface_get_property(GObject *object,
         g_value_set_uint(value, surface->n);
         break;
 
-        case PROP_UNIT_XY:
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
+        case PROP_UNIT_XY:
         if (!priv->unit_xy)
             priv->unit_xy = gwy_unit_new();
         g_value_set_object(value, priv->unit_xy);
         break;
 
         case PROP_UNIT_Z:
-        // Instantiate the units to be consistent with the direct interface
-        // that never admits the units are NULL.
         if (!priv->unit_z)
             priv->unit_z = gwy_unit_new();
         g_value_set_object(value, priv->unit_z);
@@ -532,7 +530,10 @@ copy_field_to_surface(const GwyField *field,
             k++;
         }
     }
-    _gwy_assign_units(&surface->priv->unit_xy, field->priv->unit_xy);
+    if (!gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)) {
+        g_warning("X and Y units of field do not match.");
+    }
+    _gwy_assign_units(&surface->priv->unit_xy, field->priv->unit_x);
     _gwy_assign_units(&surface->priv->unit_z, field->priv->unit_z);
 
     gwy_surface_invalidate(surface);
@@ -554,7 +555,8 @@ copy_field_to_surface(const GwyField *field,
  * @field coordinates; values will be created in regular grid according to
  * @field's physical size and offset.
  *
- * Lateral and value units will correspond to @field's units.
+ * Lateral and value units will correspond to @field's units.  This means
+ * the field needs to have identical @x and @y units.
  *
  * Returns: (transfer full):
  *          A new surface.
@@ -855,7 +857,8 @@ regularise(const GwySurface *surface,
     else
         g_assert_not_reached();
 
-    _gwy_assign_units(&field->priv->unit_xy, surface->priv->unit_xy);
+    _gwy_assign_units(&field->priv->unit_x, surface->priv->unit_xy);
+    _gwy_assign_units(&field->priv->unit_y, surface->priv->unit_xy);
     _gwy_assign_units(&field->priv->unit_z, surface->priv->unit_z);
 
     return field;
@@ -997,7 +1000,7 @@ gwy_surface_format_xy(GwySurface *surface,
                                                style, 1.0, 0.1);
     // XXX: If we have the triangulation a better estimate can be made.  Maybe.
     if (surface->n == 1) {
-        gdouble m = MAX(fabs(surface->data[0].x), fabs(surface->data[0].y));
+        gdouble m = fmax(fabs(surface->data[0].x), fabs(surface->data[0].y));
         if (!m)
             m = 1.0;
         return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
@@ -1006,7 +1009,8 @@ gwy_surface_format_xy(GwySurface *surface,
     gdouble xmin, xmax, ymin, ymax;
     gwy_surface_xrange_full(surface, &xmin, &xmax);
     gwy_surface_yrange_full(surface, &ymin, &ymax);
-    gdouble max = MAX(MAX(fabs(xmax), fabs(xmin)), MAX(fabs(ymax), fabs(ymin)));
+    gdouble max = fmax(fmax(fabs(xmax), fabs(xmin)),
+                       fmax(fabs(ymax), fabs(ymin)));
     if (!max)
         max = 1.0;
     gdouble unit = hypot(ymax - ymin, xmax - xmin)/sqrt(surface->n);

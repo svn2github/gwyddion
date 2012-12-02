@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ _gwy_assign_units(GwyUnit **dest,
     if (*dest && source)
         gwy_unit_assign(*dest, source);
     else if (*dest)
-        gwy_unit_set_from_string(*dest, NULL, NULL);
+        gwy_unit_clear(*dest);
     else if (source)
         *dest = gwy_unit_duplicate(source);
 }

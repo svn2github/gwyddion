@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -27,35 +27,38 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_BRICK_COMPATIBLE_XRES    = 1 << 0,
-    GWY_BRICK_COMPATIBLE_YRES    = 1 << 1,
-    GWY_BRICK_COMPATIBLE_ZRES    = 1 << 2,
-    GWY_BRICK_COMPATIBLE_RES     = GWY_BRICK_COMPATIBLE_XRES | GWY_BRICK_COMPATIBLE_YRES | GWY_BRICK_COMPATIBLE_ZRES,
-    GWY_BRICK_COMPATIBLE_XREAL   = 1 << 3,
-    GWY_BRICK_COMPATIBLE_YREAL   = 1 << 4,
-    GWY_BRICK_COMPATIBLE_ZREAL   = 1 << 5,
-    GWY_BRICK_COMPATIBLE_REAL    = GWY_BRICK_COMPATIBLE_XREAL | GWY_BRICK_COMPATIBLE_YREAL | GWY_BRICK_COMPATIBLE_ZREAL,
-    GWY_BRICK_COMPATIBLE_DX      = 1 << 6,
-    GWY_BRICK_COMPATIBLE_DY      = 1 << 7,
-    GWY_BRICK_COMPATIBLE_DZ      = 1 << 8,
-    GWY_BRICK_COMPATIBLE_DXDY    = GWY_BRICK_COMPATIBLE_DX | GWY_BRICK_COMPATIBLE_DY,
-    GWY_BRICK_COMPATIBLE_DXDYDZ  = GWY_BRICK_COMPATIBLE_DXDY | GWY_BRICK_COMPATIBLE_DZ,
-    GWY_BRICK_COMPATIBLE_LATERAL = 1 << 9,
-    GWY_BRICK_COMPATIBLE_DEPTH   = 1 << 10,
-    GWY_BRICK_COMPATIBLE_VALUE   = 1 << 11,
-    GWY_BRICK_COMPATIBLE_UNITS   = GWY_BRICK_COMPATIBLE_LATERAL | GWY_BRICK_COMPATIBLE_DEPTH | GWY_BRICK_COMPATIBLE_VALUE,
-    GWY_BRICK_COMPATIBLE_ALL     = 0x0fffu
-} GwyBrickCompatibilityFlags;
+    GWY_BRICK_COMPAT_XRES    = 1 << 0,
+    GWY_BRICK_COMPAT_YRES    = 1 << 1,
+    GWY_BRICK_COMPAT_ZRES    = 1 << 2,
+    GWY_BRICK_COMPAT_RES     = GWY_BRICK_COMPAT_XRES | GWY_BRICK_COMPAT_YRES | GWY_BRICK_COMPAT_ZRES,
+    GWY_BRICK_COMPAT_XREAL   = 1 << 3,
+    GWY_BRICK_COMPAT_YREAL   = 1 << 4,
+    GWY_BRICK_COMPAT_ZREAL   = 1 << 5,
+    GWY_BRICK_COMPAT_REAL    = GWY_BRICK_COMPAT_XREAL | GWY_BRICK_COMPAT_YREAL | GWY_BRICK_COMPAT_ZREAL,
+    GWY_BRICK_COMPAT_DX      = 1 << 6,
+    GWY_BRICK_COMPAT_DY      = 1 << 7,
+    GWY_BRICK_COMPAT_DZ      = 1 << 8,
+    GWY_BRICK_COMPAT_DXDY    = GWY_BRICK_COMPAT_DX | GWY_BRICK_COMPAT_DY,
+    GWY_BRICK_COMPAT_DXDYDZ  = GWY_BRICK_COMPAT_DXDY | GWY_BRICK_COMPAT_DZ,
+    GWY_BRICK_COMPAT_X       = 1 << 9,
+    GWY_BRICK_COMPAT_Y       = 1 << 10,
+    GWY_BRICK_COMPAT_LATERAL = GWY_BRICK_COMPAT_X | GWY_BRICK_COMPAT_Y,
+    GWY_BRICK_COMPAT_Z       = 1 << 10,
+    GWY_BRICK_COMPAT_SPACE   = GWY_BRICK_COMPAT_LATERAL | GWY_BRICK_COMPAT_Z,
+    GWY_BRICK_COMPAT_VALUE   = 1 << 11,
+    GWY_BRICK_COMPAT_UNITS   = GWY_BRICK_COMPAT_SPACE | GWY_BRICK_COMPAT_VALUE,
+    GWY_BRICK_COMPAT_ALL     = 0x0fffu
+} GwyBrickCompatFlags;
 
-GwyBrickCompatibilityFlags gwy_brick_is_incompatible(const GwyBrick *brick1,
-                                                     const GwyBrick *brick2,
-                                                     GwyBrickCompatibilityFlags check);
-GwyFieldCompatibilityFlags gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
-                                                                const GwyField *field,
-                                                                GwyFieldCompatibilityFlags check);
-GwyLineCompatibilityFlags gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
-                                                              const GwyLine *line,
-                                                              GwyLineCompatibilityFlags check);
+GwyBrickCompatFlags gwy_brick_is_incompatible(const GwyBrick *brick1,
+                                              const GwyBrick *brick2,
+                                              GwyBrickCompatFlags check);
+GwyFieldCompatFlags gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
+                                                         const GwyField *field,
+                                                         GwyFieldCompatFlags check);
+GwyLineCompatFlags gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
+                                                       const GwyLine *line,
+                                                       GwyLineCompatFlags check);
 
 void gwy_brick_extract_plane(const GwyBrick *brick,
                              GwyField *target,

@@ -443,23 +443,79 @@ gwy_unit_to_string(const GwyUnit *unit,
 
 /**
  * gwy_unit_equal:
- * @unit: Physical units.
- * @op: Physical units to compare @unit to.
+ * @unit: (allow-none):
+ *        Physical units.
+ *        %NULL can be passed for a dimensionless (empty) unit.
+ * @op: (allow-none):
+ *      Physical units to compare @unit to.
+ *      %NULL can be passed for a dimensionless (empty) unit.
  *
  * Tests whether two physical units are equal.
+ *
+ * An empty unit is considered equal to %NULL (and, of course, two
+ * %NULL<!-- -->s are also equal).
  *
  * Returns: %TRUE iff units are equal.
  **/
 gboolean
 gwy_unit_equal(const GwyUnit *unit, const GwyUnit *op)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(unit), FALSE);
-    g_return_val_if_fail(GWY_IS_UNIT(op), FALSE);
+    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), FALSE);
+    g_return_val_if_fail(!op || GWY_IS_UNIT(op), FALSE);
 
     if (op == unit)
         return TRUE;
 
+    gboolean emptyunit = !unit || gwy_unit_is_empty(unit);
+    gboolean emptyop = !op || gwy_unit_is_empty(op);
+    if (emptyunit && emptyop)
+        return TRUE;
+    if (emptyunit || emptyop)
+        return FALSE;
+
     return is_equal(unit->priv->units, op->priv->units);
+}
+
+/**
+ * gwy_unit_is_empty:
+ * @unit: (allow-none):
+ *        Physical units.
+ *        %NULL can be passed for a dimensionless (empty) unit (the function
+ *        returns %TRUE then).
+ *
+ * Checks whether a physical unit is non-empty.
+ *
+ * Empty means that @unit corresponds to mere numbers, it has no physical
+ * dimension.  The result of this function is exactly the same as comparing
+ * @unit with a newly created #GwyUnit.
+ *
+ * Returns: %TRUE if @unit is empty (dimensionless).
+ **/
+gboolean
+gwy_unit_is_empty(const GwyUnit *unit)
+{
+    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), TRUE);
+    return !unit || !unit->priv->units->len;
+}
+
+/**
+ * gwy_unit_clear:
+ * @unit: (allow-none):
+ *        Physical units.
+ *        %NULL can be also passed (the function is no-op then).
+ *
+ * Makes a physical unit empty (dimensionless).
+ **/
+void
+gwy_unit_clear(GwyUnit *unit)
+{
+    if (!unit)
+        return;
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    if (unit->priv->units->len) {
+        g_array_set_size(unit->priv->units, 0);
+        g_signal_emit(unit, signals[SGNL_CHANGED], 0);
+    }
 }
 
 static gboolean
@@ -780,10 +836,18 @@ parse(GArray *units,
  * @unit: A physical unit.
  *        It is set to the product of units @op1 and @op2.
  *        It may be one of @op1, @op2.
- * @op1: One multiplication operand.
- * @op2: Other multiplication operand.
+ * @op1: (allow-none):
+ *       One multiplication operand.
+ *       %NULL can be passed for a dimensionless (empty) unit.
+ * @op2: (allow-none):
+ *       Other multiplication operand.
+ *       %NULL can be passed for a dimensionless (empty) unit.
  *
  * Multiplies two physical units.
+ *
+ * Although multplication is commutative the result of gwy_unit_multiply() may
+ * depend on the order.  While the units will be always equal they order of
+ * primitive units in the result may differ depending on the order of operands.
  **/
 void
 gwy_unit_multiply(GwyUnit *unit,
@@ -798,8 +862,12 @@ gwy_unit_multiply(GwyUnit *unit,
  * @unit: A physical unit.
  *        It is set to the ratio of units @op1 and @op2.
  *        It may be one of @op1, @op2.
- * @op1: Numerator operand.
- * @op2: Denominator operand.
+ * @op1: (allow-none):
+ *       Numerator operand.
+ *       %NULL can be passed for a dimensionless (empty) unit.
+ * @op2: (allow-none):
+ *       Denominator operand.
+ *       %NULL can be passed for a dimensionless (empty) unit.
  *
  * Divides two physical units.
  **/
@@ -816,7 +884,9 @@ gwy_unit_divide(GwyUnit *unit,
  * @unit: A physical unit.
  *        It is set to unit @op raised to power @power.
  *        It may be @op itself.
- * @op: Base operand.
+ * @op: (allow-none):
+ *      Base operand. 
+ *      %NULL can be passed for a dimensionless (empty) unit.
  * @power: Power to raise @op to.
  *
  * Computes the power of a physical unit.
@@ -827,8 +897,12 @@ gwy_unit_power(GwyUnit *unit,
                gint power)
 {
     g_return_if_fail(GWY_IS_UNIT(unit));
-    g_return_if_fail(GWY_IS_UNIT(op));
+    g_return_if_fail(!op || GWY_IS_UNIT(op));
 
+    if (!op) {
+        gwy_unit_clear(unit);
+        return;
+    }
     if (power_impl(unit->priv->units, op->priv->units, power))
         g_signal_emit(unit, signals[SGNL_CHANGED], 0);
 }
@@ -858,7 +932,7 @@ power_impl(GArray *result,
     // Out of place power.
     if (power == 1 && is_equal(result, op))
         return FALSE;
-    if (power == 0) {
+    if (power == 0 || !op->len) {
         if (!result->len)
             return FALSE;
         g_array_set_size(result, 0);
@@ -914,7 +988,9 @@ multiply_impl(GArray *result, const GArray *op, gint power)
  * @unit: A physical unit.
  *        It is set to unit @op raised to power 1/@ipower or kept intact.
  *        It may be @op itself.
- * @op: Base operand.
+ * @op: (allow-none):
+ *      Base operand.
+ *      %NULL can be passed for a dimensionless (empty) unit.
  * @ipower: Root to take (a non-zero integer); 2 means a quadratic root, 3
  *          means cubic root, etc.
  *
@@ -932,11 +1008,16 @@ gwy_unit_nth_root(GwyUnit *unit,
                   gint ipower)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), FALSE);
-    g_return_val_if_fail(GWY_IS_UNIT(op), FALSE);
+    g_return_val_if_fail(!op || GWY_IS_UNIT(op), FALSE);
     g_return_val_if_fail(ipower, FALSE);
 
-    Unit *privop = op->priv;
     Unit *priv = unit->priv;
+    if (!op) {
+        gwy_unit_clear(unit);
+        return TRUE;
+    }
+
+    Unit *privop = op->priv;
     if (ipower == 1 || (!priv->units->len && !privop->units->len))
         return TRUE;
 
@@ -974,9 +1055,13 @@ gwy_unit_nth_root(GwyUnit *unit,
  *        It is set to the product of units @op1 and @op2 raised to powers
  *        @power1 and @power2, respectively.
  *        It may be one of @op1, @op2.
- * @op1: First operand.
+ * @op1: (allow-none):
+ *       First operand.
+ *       %NULL can be passed for a dimensionless (empty) unit.
  * @power1: Power to raise @op1 to.
- * @op2: Second operand.
+ * @op2: (allow-none):
+ *       Second operand.
+ *       %NULL can be passed for a dimensionless (empty) unit.
  * @power2: Power to raise @op2 to.
  *
  * Computes the product of two physical units raised to arbitrary powers.
@@ -991,18 +1076,18 @@ gwy_unit_power_multiply(GwyUnit *unit,
                         gint power2)
 {
     g_return_if_fail(GWY_IS_UNIT(unit));
-    g_return_if_fail(GWY_IS_UNIT(op1));
-    g_return_if_fail(GWY_IS_UNIT(op2));
+    g_return_if_fail(!op1 || GWY_IS_UNIT(op1));
+    g_return_if_fail(!op2 || GWY_IS_UNIT(op2));
 
     if (op1 == op2) {
         gwy_unit_power(unit, op1, power1 + power2);
         return;
     }
-    if (!power1 || !op1->priv->units->len) {
+    if (!power1 || !op1 || gwy_unit_is_empty(op1)) {
         gwy_unit_power(unit, op2, power2);
         return;
     }
-    if (!power2 || !op2->priv->units->len) {
+    if (!power2 || !op2 || gwy_unit_is_empty(op2)) {
         gwy_unit_power(unit, op1, power1);
         return;
     }
@@ -1242,7 +1327,7 @@ find_number_format(gdouble step,
 
     if (precision) {
         /* eps was good for mag, but here it gives us one digit too much */
-        *precision = MAX(0, ceil(mag - lu - 2*eps));
+        *precision = fmax(0, ceil(mag - lu - 2*eps));
         *precision = MIN(*precision, 16);
     }
 
@@ -1466,12 +1551,16 @@ get_prefix(gint power)
  * #GwyUnit represents physical units.  Units can be compared and also divided,
  * multiplied, etc. to give new units.
  *
- * It provides also methods for formatting of physical quantities.  There are
- * several methods available for constructing a value format with given
- * resolution -- gwy_unit_format_with_resolution(), or number of
- * significant digits -- gwy_unit_format_with_digits().  These methods
- * create #GwyValueFormat objects that can be subsequently used for the
- * formatting.
+ * All functions performing arithmetic operations on units accept %NULL as
+ * operand arguments, considering it an empty (dimensionless) unit.  While this
+ * generally reduces the operations to trivial it can be useful for objects
+ * representing unset units with %NULL internally.
+ *
+ * #GwyUnit provides also methods for formatting of physical quantities.  There
+ * are several methods available for constructing a value format with given
+ * resolution -- gwy_unit_format_with_resolution(), or number of significant
+ * digits -- gwy_unit_format_with_digits().  These methods create
+ * #GwyValueFormat objects that can be subsequently used for the formatting.
  *
  * <refsect2 id='GwyUnit-ownership'>
  * <title>Units and Ownership</title>

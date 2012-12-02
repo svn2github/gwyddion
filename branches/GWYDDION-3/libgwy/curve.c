@@ -209,7 +209,7 @@ gwy_curve_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    if (priv->unit_x) {
+    if (!gwy_unit_is_empty(priv->unit_x)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[0];
         it.value.v_object = (GObject*)priv->unit_x;
@@ -218,7 +218,7 @@ gwy_curve_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (priv->unit_y) {
+    if (!gwy_unit_is_empty(priv->unit_y)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[1];
         it.value.v_object = (GObject*)priv->unit_y;
@@ -347,17 +347,15 @@ gwy_curve_get_property(GObject *object,
         g_value_set_uint(value, curve->n);
         break;
 
-        case PROP_UNIT_X:
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
+        case PROP_UNIT_X:
         if (!priv->unit_x)
             priv->unit_x = gwy_unit_new();
         g_value_set_object(value, priv->unit_x);
         break;
 
         case PROP_UNIT_Y:
-        // Instantiate the units to be consistent with the direct interface
-        // that never admits the units are NULL.
         if (!priv->unit_y)
             priv->unit_y = gwy_unit_new();
         g_value_set_object(value, priv->unit_y);
@@ -833,7 +831,7 @@ gwy_curve_format_x(GwyCurve *curve,
         return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
                                                style, m, m/10.0);
     }
-    gdouble max = MAX(fabs(curve->data[0].x), fabs(curve->data[curve->n-1].x));
+    gdouble max = fmax(fabs(curve->data[0].x), fabs(curve->data[curve->n-1].x));
     gdouble unit = 0.0;
     const GwyXY *p = curve->data;
     // Give more weight to the smaller differences but do not let the precision
@@ -864,7 +862,7 @@ gwy_curve_format_y(GwyCurve *curve,
     if (curve->n) {
         gwy_curve_min_max_full(curve, &min, &max);
         if (max == min) {
-            max = ABS(max);
+            max = fabs(max);
             min = 0.0;
         }
     }

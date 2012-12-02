@@ -172,14 +172,14 @@ make_function_2_1(pow)
 make_function_2_1(hypot)
 make_function_2_1(atan2)
 make_function_2_1(fmod)
+make_function_2_1(fmin)
+make_function_2_1(fmax)
 
 static void gwy_expr_negate(gdouble **s) { **s = -(**s); }
 static void gwy_expr_add(gdouble **s) { --*s; **s = *(*s+1) + **s; }
 static void gwy_expr_subtract(gdouble **s) { --*s; **s = *(*s+1) - **s; }
 static void gwy_expr_multiply(gdouble **s) { --*s; **s = *(*s+1) * **s; }
 static void gwy_expr_divide(gdouble **s) { --*s; **s = *(*s+1) / **s; }
-static void gwy_expr_max(gdouble **s) { --*s; **s = MAX(*(*s+1), **s); }
-static void gwy_expr_min(gdouble **s) { --*s; **s = MIN(*(*s+1), **s); }
 static void gwy_expr_step(gdouble **s) { **s = **s > 0.0; }
 
 static const GwyExprFunction call_table[] = {
@@ -192,8 +192,8 @@ static const GwyExprFunction call_table[] = {
     { gwy_expr_fmod,       "%",      2,  1,  GWY_EXPR_CODE_MODULO,   },
     { gwy_expr_pow,        "^",      2,  1,  GWY_EXPR_CODE_POWER,    },
     { gwy_expr_pow,        "pow",    2,  1,  GWY_EXPR_CODE_POW,      },
-    { gwy_expr_min,        "min",    2,  1,  GWY_EXPR_CODE_MIN,      },
-    { gwy_expr_max,        "max",    2,  1,  GWY_EXPR_CODE_MAX,      },
+    { gwy_expr_fmin,       "min",    2,  1,  GWY_EXPR_CODE_MIN,      },
+    { gwy_expr_fmax,       "max",    2,  1,  GWY_EXPR_CODE_MAX,      },
     { gwy_expr_fmod,       "mod",    2,  1,  GWY_EXPR_CODE_FMOD,     },
     { gwy_expr_hypot,      "hypot",  2,  1,  GWY_EXPR_CODE_HYPOT,    },
     { gwy_expr_atan2,      "atan2",  2,  1,  GWY_EXPR_CODE_ATAN2,    },

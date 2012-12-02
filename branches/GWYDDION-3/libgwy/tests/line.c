@@ -536,50 +536,50 @@ test_line_compatibility_res(void)
     GwyLine *line3 = gwy_line_new_sized(3, FALSE);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                              GWY_LINE_COMPATIBLE_RES),
-                     ==, GWY_LINE_COMPATIBLE_RES);
+                                              GWY_LINE_COMPAT_RES),
+                     ==, GWY_LINE_COMPAT_RES);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                              GWY_LINE_COMPATIBLE_RES),
-                     ==, GWY_LINE_COMPATIBLE_RES);
+                                              GWY_LINE_COMPAT_RES),
+                     ==, GWY_LINE_COMPAT_RES);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                              GWY_LINE_COMPATIBLE_RES),
+                                              GWY_LINE_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                              GWY_LINE_COMPATIBLE_RES),
+                                              GWY_LINE_COMPAT_RES),
                      ==, 0);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                              GWY_LINE_COMPATIBLE_DX),
-                     ==, GWY_LINE_COMPATIBLE_DX);
+                                              GWY_LINE_COMPAT_DX),
+                     ==, GWY_LINE_COMPAT_DX);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                              GWY_LINE_COMPATIBLE_DX),
-                     ==, GWY_LINE_COMPATIBLE_DX);
+                                              GWY_LINE_COMPAT_DX),
+                     ==, GWY_LINE_COMPAT_DX);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                              GWY_LINE_COMPATIBLE_DX),
+                                              GWY_LINE_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                              GWY_LINE_COMPATIBLE_DX),
+                                              GWY_LINE_COMPAT_DX),
                      ==, 0);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                              GWY_LINE_COMPATIBLE_REAL),
+                                              GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                              GWY_LINE_COMPATIBLE_REAL),
+                                              GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line3,
-                                              GWY_LINE_COMPATIBLE_REAL),
+                                              GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line1,
-                                              GWY_LINE_COMPATIBLE_REAL),
+                                              GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                              GWY_LINE_COMPATIBLE_REAL),
+                                              GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                              GWY_LINE_COMPATIBLE_REAL),
+                                              GWY_LINE_COMPAT_REAL),
                      ==, 0);
 
     g_object_unref(line1);
@@ -597,45 +597,45 @@ test_line_compatibility_real(void)
     gwy_line_set_real(line3, 1.5);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                               GWY_LINE_COMPATIBLE_REAL),
+                                               GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                               GWY_LINE_COMPATIBLE_REAL),
+                                               GWY_LINE_COMPAT_REAL),
                      ==, 0);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                               GWY_LINE_COMPATIBLE_REAL),
-                     ==, GWY_LINE_COMPATIBLE_REAL);
+                                               GWY_LINE_COMPAT_REAL),
+                     ==, GWY_LINE_COMPAT_REAL);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                               GWY_LINE_COMPATIBLE_REAL),
-                     ==, GWY_LINE_COMPATIBLE_REAL);
+                                               GWY_LINE_COMPAT_REAL),
+                     ==, GWY_LINE_COMPAT_REAL);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line3,
-                                               GWY_LINE_COMPATIBLE_REAL),
-                     ==, GWY_LINE_COMPATIBLE_REAL);
+                                               GWY_LINE_COMPAT_REAL),
+                     ==, GWY_LINE_COMPAT_REAL);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line1,
-                                               GWY_LINE_COMPATIBLE_REAL),
-                     ==, GWY_LINE_COMPATIBLE_REAL);
+                                               GWY_LINE_COMPAT_REAL),
+                     ==, GWY_LINE_COMPAT_REAL);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                              GWY_LINE_COMPATIBLE_DX),
-                     ==, GWY_LINE_COMPATIBLE_DX);
+                                              GWY_LINE_COMPAT_DX),
+                     ==, GWY_LINE_COMPAT_DX);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                              GWY_LINE_COMPATIBLE_DX),
-                     ==, GWY_LINE_COMPATIBLE_DX);
+                                              GWY_LINE_COMPAT_DX),
+                     ==, GWY_LINE_COMPAT_DX);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                              GWY_LINE_COMPATIBLE_DX),
-                     ==, GWY_LINE_COMPATIBLE_DX);
+                                              GWY_LINE_COMPAT_DX),
+                     ==, GWY_LINE_COMPAT_DX);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                              GWY_LINE_COMPATIBLE_DX),
-                     ==, GWY_LINE_COMPATIBLE_DX);
+                                              GWY_LINE_COMPAT_DX),
+                     ==, GWY_LINE_COMPAT_DX);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line3,
-                                              GWY_LINE_COMPATIBLE_DX),
+                                              GWY_LINE_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line1,
-                                              GWY_LINE_COMPATIBLE_DX),
+                                              GWY_LINE_COMPAT_DX),
                      ==, 0);
 
     g_object_unref(line1);
@@ -654,46 +654,46 @@ test_line_compatibility_units(void)
     gwy_unit_set_from_string(gwy_line_get_unit_y(line3), "m", NULL);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                              GWY_LINE_COMPATIBLE_LATERAL),
-                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+                                              GWY_LINE_COMPAT_LATERAL),
+                     ==, GWY_LINE_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                              GWY_LINE_COMPATIBLE_LATERAL),
-                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+                                              GWY_LINE_COMPAT_LATERAL),
+                     ==, GWY_LINE_COMPAT_LATERAL);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                              GWY_LINE_COMPATIBLE_LATERAL),
+                                              GWY_LINE_COMPAT_LATERAL),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                              GWY_LINE_COMPATIBLE_LATERAL),
+                                              GWY_LINE_COMPAT_LATERAL),
                      ==, 0);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line3,
-                                              GWY_LINE_COMPATIBLE_LATERAL),
-                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+                                              GWY_LINE_COMPAT_LATERAL),
+                     ==, GWY_LINE_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line1,
-                                              GWY_LINE_COMPATIBLE_LATERAL),
-                     ==, GWY_LINE_COMPATIBLE_LATERAL);
+                                              GWY_LINE_COMPAT_LATERAL),
+                     ==, GWY_LINE_COMPAT_LATERAL);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
-                                              GWY_LINE_COMPATIBLE_VALUE),
+                                              GWY_LINE_COMPAT_VALUE),
                      ==, 0);
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line1,
-                                              GWY_LINE_COMPATIBLE_VALUE),
+                                              GWY_LINE_COMPAT_VALUE),
                      ==, 0);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line2, line3,
-                                              GWY_LINE_COMPATIBLE_VALUE),
-                     ==, GWY_LINE_COMPATIBLE_VALUE);
+                                              GWY_LINE_COMPAT_VALUE),
+                     ==, GWY_LINE_COMPAT_VALUE);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line2,
-                                              GWY_LINE_COMPATIBLE_VALUE),
-                     ==, GWY_LINE_COMPATIBLE_VALUE);
+                                              GWY_LINE_COMPAT_VALUE),
+                     ==, GWY_LINE_COMPAT_VALUE);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line3,
-                                              GWY_LINE_COMPATIBLE_VALUE),
-                     ==, GWY_LINE_COMPATIBLE_VALUE);
+                                              GWY_LINE_COMPAT_VALUE),
+                     ==, GWY_LINE_COMPAT_VALUE);
     g_assert_cmpuint(gwy_line_is_incompatible(line3, line1,
-                                              GWY_LINE_COMPATIBLE_VALUE),
-                     ==, GWY_LINE_COMPATIBLE_VALUE);
+                                              GWY_LINE_COMPAT_VALUE),
+                     ==, GWY_LINE_COMPAT_VALUE);
 
     g_object_unref(line1);
     g_object_unref(line2);

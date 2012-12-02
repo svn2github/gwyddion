@@ -533,7 +533,7 @@ gwy_gradient_sample_real(GwyGradient *gradient,
     q = 1.0/(nsamples - 1.0);
     pt = &g_array_index(gradient->points, GwyGradientPoint, 0);
     for (i = j = k = 0; i < nsamples; i++) {
-        x = MIN(i*q, 1.0);
+        x = fmin(i*q, 1.0);
         while (G_UNLIKELY(x > pt->x)) {
             j++;
             pt2 = pt;
@@ -990,13 +990,13 @@ refine_interval(GList *points,
     for (i = 1; i < n-1; i++) {
         gwy_rgba_interpolate(first, last, i/(n - 1.0), &color);
         /* Maximum distance is the crucial metric */
-        s = ABS(color.r - samples[i].color.r);
-        d = ABS(color.g - samples[i].color.g);
-        s = MAX(s, d);
-        d = ABS(color.b - samples[i].color.b);
-        s = MAX(s, d);
-        d = ABS(color.a - samples[i].color.a);
-        s = MAX(s, d);
+        s = fabs(color.r - samples[i].color.r);
+        d = fabs(color.g - samples[i].color.g);
+        s = fmax(s, d);
+        d = fabs(color.b - samples[i].color.b);
+        s = fmax(s, d);
+        d = fabs(color.a - samples[i].color.a);
+        s = fmax(s, d);
 
         if (s > max) {
             max = s;

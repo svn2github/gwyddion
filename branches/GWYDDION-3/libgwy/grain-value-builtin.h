@@ -31,8 +31,8 @@ G_BEGIN_DECLS
 // TODO: per-grain-RMS, RMS wrt global mean, RMS wrt mask mean, surface
 // boundary length, grain-minimum-based volume, convex hull properties,
 // bounding box (in real coordinates)
-// XXX: Two quantities are derived: r_eq and V_min.  But they seem too useful to leave
-// their definitions to the users.
+// XXX: Two quantities are derived: r_eq and V_min.  But they seem too useful
+// to leave their definitions to the users.
 // If this changes then the arrays in _gwy_grain_value_evaluate_builtins()
 // that are indexed by this enum must be updates (and providing this the
 // values can be reordered freely).
@@ -92,9 +92,11 @@ typedef struct {
     const gchar *group;
     const gchar *ident;
     const gchar *symbol;
-    gboolean same_units;
-    gboolean is_angle;
-    gint powerxy;
+    // 0 = none, 1 = lateral, 2 = all
+    guint same_units : 2;
+    gboolean is_angle : 1;
+    gint powerx;
+    gint powery;
     gint powerz;
     gdouble fillvalue;
     // TODO: Some functions?

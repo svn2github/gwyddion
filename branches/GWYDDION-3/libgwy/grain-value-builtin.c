@@ -26,6 +26,7 @@
 #include "libgwy/grain-value.h"
 #include "libgwy/field-level.h"
 #include "libgwy/mask-field-grains.h"
+#include "libgwy/field-internal.h"
 #include "libgwy/grain-value-builtin.h"
 
 // There are several possible choices for the volume quadrature coefficients:
@@ -129,7 +130,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Position"),
         .ident = "x_0",
         .symbol = "<i>x</i>₀",
-        .powerxy = 1,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CENTER_Y,
@@ -138,7 +139,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Position"),
         .ident = "y_0",
         .symbol = "<i>y</i>₀",
-        .powerxy = 1,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_PROJECTED_AREA,
@@ -147,7 +148,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Area"),
         .ident = "A_0",
         .symbol = "<i>A</i>₀",
-        .powerxy = 2,
+        .powerx = 1,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_EQUIV_DISC_RADIUS,
@@ -156,7 +158,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Area"),
         .ident = "r_eq",
         .symbol = "<i>r</i><sub>eq</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_SURFACE_AREA,
@@ -164,8 +167,9 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Area"),
         .ident = "A_s",
         .symbol = "<i>A</i><sub>s</sub>",
-        .same_units = TRUE,
-        .powerxy = 2,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_ALL,
+        .powerx = 1,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_HALF_HEIGHT_AREA,
@@ -174,7 +178,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Area"),
         .ident = "A_h",
         .symbol = "<i>A</i><sub>h</sub>",
-        .powerxy = 2,
+        .powerx = 1,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CONVEX_HULL_AREA,
@@ -183,7 +188,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Area"),
         .ident = "A_c",
         .symbol = "<i>A</i><sub>c</sub>",
-        .powerxy = 2,
+        .powerx = 1,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_MINIMUM,
@@ -238,7 +244,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "L_b0",
         .symbol = "<i>L</i><sub>b0</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE,
@@ -247,7 +254,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "D_min",
         .symbol = "<i>D</i><sub>min</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
         .fillvalue = G_MAXDOUBLE,
     },
     {
@@ -257,6 +265,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "phi_min",
         .symbol = "<i>φ</i><sub>min</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .is_angle = TRUE,
     },
     {
@@ -266,7 +275,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "D_max",
         .symbol = "<i>D</i><sub>max</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
         .fillvalue = -G_MAXDOUBLE,
     },
     {
@@ -276,6 +286,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "phi_max",
         .symbol = "<i>φ</i><sub>max</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .is_angle = TRUE,
     },
     {
@@ -303,7 +314,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "R_i",
         .symbol = "<i>R</i><sub>i</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_X,
@@ -312,7 +324,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "x_i",
         .symbol = "<i>x</i><sub>i</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_Y,
@@ -321,7 +334,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "y_i",
         .symbol = "<i>y</i><sub>i</sub>",
-        .powerxy = 1,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CIRCUMCIRCLE_R,
@@ -330,7 +343,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "R_e",
         .symbol = "<i>R</i><sub>e</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CIRCUMCIRCLE_X,
@@ -339,7 +353,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "x_e",
         .symbol = "<i>x</i><sub>e</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y,
@@ -348,7 +363,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "y_e",
         .symbol = "<i>y</i><sub>e</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_MEAN_RADIUS,
@@ -357,7 +373,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Boundary"),
         .ident = "R_m",
         .symbol = "<i>R</i><sub>m</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_VOLUME_0,
@@ -366,7 +383,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Volume"),
         .ident = "V_0",
         .symbol = "<i>V</i>₀",
-        .powerxy = 2,
+        .powerx = 1,
+        .powery = 1,
         .powerz = 1,
     },
     {
@@ -376,7 +394,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Volume"),
         .ident = "V_min",
         .symbol = "<i>V</i><sub>min</sub>",
-        .powerxy = 2,
+        .powerx = 1,
+        .powery = 1,
         .powerz = 1,
     },
     {
@@ -386,7 +405,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Volume"),
         .ident = "V_L",
         .symbol = "<i>V</i><sub>L</sub>",
-        .powerxy = 2,
+        .powerx = 1,
+        .powery = 1,
         .powerz = 1,
     },
     {
@@ -396,7 +416,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Slope"),
         .ident = "theta",
         .symbol = "<i>ϑ</i>",
-        .same_units = TRUE,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_ALL,
         .is_angle = TRUE,
     },
     {
@@ -406,6 +426,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Slope"),
         .ident = "phi",
         .symbol = "<i>ϑ</i>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .is_angle = TRUE,
     },
     {
@@ -415,7 +436,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "x_c",
         .symbol = "<i>x</i><sub>c</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CURVATURE_CENTER_Y,
@@ -424,7 +446,8 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "y_c",
         .symbol = "<i>y</i><sub>c</sub>",
-        .powerxy = 1,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powery = 1,
     },
     {
         .id = GWY_GRAIN_VALUE_CURVATURE_CENTER_Z,
@@ -433,6 +456,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "z_c",
         .symbol = "<i>z</i><sub>c</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .powerz = 1,
     },
     {
@@ -442,7 +466,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "kappa_1",
         .symbol = "<i>κ</i>₁",
-        .same_units = TRUE,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_ALL,
         .powerz = -1,
     },
     {
@@ -452,7 +476,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "kappa_2",
         .symbol = "<i>κ</i>₂",
-        .same_units = TRUE,
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_ALL,
         .powerz = -1,
     },
     {
@@ -462,6 +486,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "phi_1",
         .symbol = "<i>φ</i>₁",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .is_angle = TRUE,
     },
     {
@@ -471,6 +496,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .group = NC_("grain value group", "Curvature"),
         .ident = "phi_2",
         .symbol = "<i>φ</i>₂",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .is_angle = TRUE,
     },
 };
@@ -2598,8 +2624,9 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                      dy, 0.5*dy + field->yoff);
 
     // Copy data to all other instances of the same grain value and set units.
-    GwyUnit *unitxy = gwy_field_get_unit_xy(field);
-    GwyUnit *unitz = gwy_field_get_unit_z(field);
+    const GwyUnit *unitx = field->priv->unit_x;
+    const GwyUnit *unity = field->priv->unit_y;
+    const GwyUnit *unitz = field->priv->unit_z;
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
         GrainValue *priv = grainvalue->priv;
@@ -2610,7 +2637,10 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
             if (!priv->unit)
                 priv->unit = gwy_unit_new();
             gwy_unit_power_multiply(priv->unit,
-                                    unitxy, builtin->powerxy,
+                                    unitx, builtin->powerx,
+                                    unity, builtin->powery);
+            gwy_unit_power_multiply(priv->unit,
+                                    priv->unit, 1,
                                     unitz, builtin->powerz);
         }
         else

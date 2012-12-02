@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,18 +26,19 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_LINE_COMPATIBLE_RES     = 1 << 0,
-    GWY_LINE_COMPATIBLE_REAL    = 1 << 1,
-    GWY_LINE_COMPATIBLE_DX      = 1 << 2,
-    GWY_LINE_COMPATIBLE_LATERAL = 1 << 3,
-    GWY_LINE_COMPATIBLE_VALUE   = 1 << 4,
-    GWY_LINE_COMPATIBLE_UNITS   = GWY_LINE_COMPATIBLE_LATERAL | GWY_LINE_COMPATIBLE_VALUE,
-    GWY_LINE_COMPATIBLE_ALL     = 0x001fu
-} GwyLineCompatibilityFlags;
+    GWY_LINE_COMPAT_RES     = 1 << 0,
+    GWY_LINE_COMPAT_REAL    = 1 << 1,
+    GWY_LINE_COMPAT_DX      = 1 << 2,
+    GWY_LINE_COMPAT_X       = 1 << 3,
+    GWY_LINE_COMPAT_LATERAL = GWY_LINE_COMPAT_X,
+    GWY_LINE_COMPAT_VALUE   = 1 << 4,
+    GWY_LINE_COMPAT_UNITS   = GWY_LINE_COMPAT_LATERAL | GWY_LINE_COMPAT_VALUE,
+    GWY_LINE_COMPAT_ALL     = 0x001fu
+} GwyLineCompatFlags;
 
-GwyLineCompatibilityFlags gwy_line_is_incompatible(const GwyLine *line1,
-                                                   const GwyLine *line2,
-                                                   GwyLineCompatibilityFlags check);
+GwyLineCompatFlags gwy_line_is_incompatible(const GwyLine *line1,
+                                            const GwyLine *line2,
+                                            GwyLineCompatFlags check);
 
 void      gwy_line_add          (GwyLine *line,
                                  gdouble value);

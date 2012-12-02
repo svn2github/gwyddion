@@ -446,8 +446,8 @@ gwy_field_slope(const GwyField *field,
  *
  * Calculates local curvature in a field.
  *
- * This makes sense only if the field values are the same physical quantity
- * as the lateral dimensions.
+ * This makes sense only if the field values and both lateral dimensions are
+ * the same physical quantity.
  *
  * All calculated curvatures are in physical units.  See
  * gwy_math_curvature_at_centre() for the handling of degenerate cases; the
@@ -649,6 +649,8 @@ gwy_field_interpolation_coeffs(GwyField *field,
  *
  * Extracts a profile from a field.
  *
+ * Profile extraction is meaningful only if @x and @y units of @field match.
+ *
  * See gwy_field_value_interpolated() for a discussion of precise meaning of
  * the coordinates arguments.
  *
@@ -712,7 +714,13 @@ gwy_field_profile(GwyField *field,
 
     Field *fpriv = field->priv;
     Curve *cpriv = curve->priv;
-    _gwy_assign_units(&cpriv->unit_x, fpriv->unit_xy);
+    if (gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)) {
+        _gwy_assign_units(&cpriv->unit_x, fpriv->unit_x);
+    }
+    else {
+        g_warning("X and Y units of field do not match.");
+        _gwy_assign_units(&cpriv->unit_x, NULL);
+    }
     _gwy_assign_units(&cpriv->unit_y, fpriv->unit_z);
 
     return curve;

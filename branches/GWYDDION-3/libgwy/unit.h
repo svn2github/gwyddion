@@ -84,6 +84,8 @@ void            gwy_unit_power_multiply        (GwyUnit *unit,
                                                 gint power2);
 gboolean        gwy_unit_equal                 (const GwyUnit *unit,
                                                 const GwyUnit *op)         G_GNUC_PURE;
+gboolean        gwy_unit_is_empty              (const GwyUnit *unit)       G_GNUC_PURE;
+void            gwy_unit_clear                 (GwyUnit *unit);
 GwyValueFormat* gwy_unit_format_for_power10    (const GwyUnit *unit,
                                                 GwyValueFormatStyle style,
                                                 gint power10)              G_GNUC_MALLOC;

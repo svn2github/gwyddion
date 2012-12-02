@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/grain-value.h"
 #include "libgwy/object-internal.h"
+#include "libgwy/field-internal.h"
 #include "libgwy/grain-value-builtin.h"
 
 enum {
@@ -454,15 +455,14 @@ gwy_grain_value_get_resource(const GwyGrainValue *grainvalue)
  * gwy_grain_value_needs_same_units:
  * @grainvalue: A grain value.
  *
- * Reports whether a grain value needs the same lateral and value units.
+ * Reports whether a grain value needs the same lateral and/or value units.
  *
- * Some grain values, such as surface area, are meaningful only if height is
- * the same physical quantity as lateral dimensions.  For these grain values
- * this function returns %TRUE.
+ * See #GwyGrainValueSameUnits for a discussion of what grain quantities
+ * require which unit combinations.
  *
- * Returns: %TRUE if the grain value needs the same lateral and value units.
+ * Returns: Combination of units the grain value requires to be the same.
  **/
-gboolean
+GwyGrainValueSameUnits
 gwy_grain_value_needs_same_units(const GwyGrainValue *grainvalue)
 {
     g_return_val_if_fail(GWY_IS_GRAIN_VALUE(grainvalue), FALSE);
@@ -639,8 +639,9 @@ gwy_field_evaluate_grains(const GwyField *field,
     }
     _gwy_grain_value_evaluate_builtins(field, mask, compact_builtins, bcount);
 
-    GwyUnit *unitxy = gwy_field_get_unit_xy(field);
-    GwyUnit *unitz = gwy_field_get_unit_z(field);
+    const GwyUnit *unitx = field->priv->unit_x;
+    const GwyUnit *unity = field->priv->unit_y;
+    const GwyUnit *unitz = field->priv->unit_z;
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
         GrainValue *priv = grainvalue->priv;
@@ -654,11 +655,13 @@ gwy_field_evaluate_grains(const GwyField *field,
             calc_derived(grainvalue, expr, builtins, indices, vectors, ngrains);
 
             GwyUserGrainValue *usergrainvalue = grainvalue->priv->resource;
-            gint powerxy = gwy_user_grain_value_get_power_xy(usergrainvalue);
+            gint powerx = gwy_user_grain_value_get_power_x(usergrainvalue);
+            gint powery = gwy_user_grain_value_get_power_y(usergrainvalue);
             gint powerz = gwy_user_grain_value_get_power_z(usergrainvalue);
             if (!priv->unit)
                 priv->unit = gwy_unit_new();
-            gwy_unit_power_multiply(priv->unit, unitxy, powerxy, unitz, powerz);
+            gwy_unit_power_multiply(priv->unit, unitx, powerx, unity, powery);
+            gwy_unit_power_multiply(priv->unit, priv->unit, 1, unitz, powerz);
         }
     }
 

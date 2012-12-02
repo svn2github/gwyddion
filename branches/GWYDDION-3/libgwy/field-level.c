@@ -951,7 +951,8 @@ gwy_field_find_row_shifts(const GwyField *field,
 fail:
     shifts->res = field->yres;
     shifts->off = field->yoff;
-    _gwy_assign_units(&shifts->priv->unit_x, field->priv->unit_xy);
+    _gwy_assign_units(&shifts->priv->unit_x, field->priv->unit_x);
+    _gwy_assign_units(&shifts->priv->unit_x, field->priv->unit_y);
     _gwy_assign_units(&shifts->priv->unit_y, field->priv->unit_z);
 
     return shifts;

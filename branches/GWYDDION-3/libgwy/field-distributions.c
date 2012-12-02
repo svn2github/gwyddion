@@ -494,6 +494,9 @@ slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  *
  * Calculates the distribution of slopes in a field.
  *
+ * For angles that are not multiples of π/2, slope distribution is meaningful
+ * only if @x and @y units of @field match.
+ *
  * Slopes are calculated as horizontal or vertical derivatives of the value,
  * i.e. dz/dx or dz/dy.
  *
@@ -567,11 +570,23 @@ fail:
     if (!line)
         line = gwy_line_new();
 
-    gwy_unit_divide(gwy_line_get_unit_x(line),
-                    gwy_field_get_unit_z(field), gwy_field_get_unit_xy(field));
-    if (!cumulative)
-        gwy_unit_power(gwy_line_get_unit_y(line),
-                       gwy_field_get_unit_z(field), -1);
+    if (gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)
+        || fabs(ddata.sin_alpha) < 1e-14) {
+        gwy_unit_divide(gwy_line_get_unit_x(line),
+                        field->priv->unit_z, field->priv->unit_x);
+        if (!cumulative)
+            gwy_unit_power(gwy_line_get_unit_y(line), field->priv->unit_x, -1);
+    }
+    else if (fabs(ddata.cos_alpha) < 1e-14) {
+        gwy_unit_divide(gwy_line_get_unit_x(line),
+                        field->priv->unit_z, field->priv->unit_y);
+        if (!cumulative)
+            gwy_unit_power(gwy_line_get_unit_y(line), field->priv->unit_y, -1);
+    }
+    else {
+        g_warning("X and Y units of field do not match.");
+        // Do not set any units then.
+    }
 
     return line;
 }
@@ -857,15 +872,15 @@ set_cf_units(const GwyField *field,
              GwyLine *line,
              GwyLine *weights)
 {
-    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_assign(gwy_line_get_unit_x(line), field->priv->unit_x);
     gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            gwy_field_get_unit_xy(field), 1,
-                            gwy_field_get_unit_z(field), 2);
+                            field->priv->unit_x, 1,
+                            field->priv->unit_z, 2);
     if (!weights)
         return;
 
     gwy_unit_assign(gwy_line_get_unit_x(weights), gwy_line_get_unit_x(line));
-    gwy_unit_set_from_string(gwy_line_get_unit_y(weights), NULL, NULL);
+    gwy_unit_clear(gwy_line_get_unit_y(weights));
 }
 
 /**
@@ -1326,9 +1341,9 @@ fail:
     if (!line)
         line = gwy_line_new();
 
-    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_x(field), -1);
     gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            gwy_field_get_unit_xy(field), 1,
+                            gwy_field_get_unit_x(field), 1,
                             gwy_field_get_unit_z(field), 2);
     return line;
 }
@@ -1504,16 +1519,7 @@ fail:
     if (!line)
         line = gwy_line_new();
 
-    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
-    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            gwy_field_get_unit_xy(field), 1,
-                            gwy_field_get_unit_z(field), 2);
-    if (weights) {
-        gwy_unit_assign(gwy_line_get_unit_x(weights),
-                        gwy_line_get_unit_x(line));
-        gwy_unit_assign(gwy_line_get_unit_y(weights),
-                        gwy_line_get_unit_y(line));
-    }
+    set_cf_units(field, line, weights);
     return line;
 }
 

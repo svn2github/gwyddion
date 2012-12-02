@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -246,7 +246,7 @@ gwy_line_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (priv->unit_x) {
+    if (!gwy_unit_is_empty(priv->unit_x)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[2];
         it.value.v_object = (GObject*)priv->unit_x;
@@ -255,7 +255,7 @@ gwy_line_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (priv->unit_y) {
+    if (!gwy_unit_is_empty(priv->unit_y)) {
         g_return_val_if_fail(items->len - items->n, 0);
         it = serialize_items[3];
         it.value.v_object = (GObject*)priv->unit_y;
@@ -413,17 +413,15 @@ gwy_line_get_property(GObject *object,
         g_value_set_double(value, line->off);
         break;
 
-        case PROP_UNIT_X:
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
+        case PROP_UNIT_X:
         if (!priv->unit_x)
             priv->unit_x = gwy_unit_new();
         g_value_set_object(value, priv->unit_x);
         break;
 
         case PROP_UNIT_Y:
-        // Instantiate the units to be consistent with the direct interface
-        // that never admits the units are NULL.
         if (!priv->unit_y)
             priv->unit_y = gwy_unit_new();
         g_value_set_object(value, priv->unit_y);
@@ -996,6 +994,24 @@ gwy_line_get_unit_y(const GwyLine *line)
 }
 
 /**
+ * gwy_line_xy_units_match:
+ * @line: A one-dimensional data line.
+ *
+ * Checks whether a one-dimensional data line has the same lateral and value
+ * units.
+ *
+ * Returns: %TRUE if value and lateral units of @line are equal, %FALSE if they
+ *          differ.
+ **/
+gboolean
+gwy_line_xy_units_match(const GwyLine *line)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
+    Line *priv = line->priv;
+    return gwy_unit_equal(priv->unit_x, priv->unit_y);
+}
+
+/**
  * gwy_line_format_x:
  * @line: A one-dimensional data line.
  * @style: Output format style.
@@ -1013,7 +1029,7 @@ gwy_line_format_x(const GwyLine *line,
                   GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
-    gdouble max = MAX(line->real, fabs(line->real + line->off));
+    gdouble max = fmax(line->real, fabs(line->real + line->off));
     gdouble unit = gwy_line_dx(line);
     return gwy_unit_format_with_resolution(gwy_line_get_unit_x(line),
                                            style, max, unit);
@@ -1037,7 +1053,7 @@ gwy_line_format_y(const GwyLine *line,
     gdouble min, max;
     gwy_line_min_max_full(line, &min, &max);
     if (max == min) {
-        max = ABS(max);
+        max = fabs(max);
         min = 0.0;
     }
     return gwy_unit_format_with_digits(gwy_line_get_unit_y(line),

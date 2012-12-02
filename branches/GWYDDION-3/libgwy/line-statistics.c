@@ -131,7 +131,7 @@ gwy_line_rms_full(const GwyLine *line)
     rms /= line->res;
     avg /= line->res;
     rms -= avg*avg;
-    rms = sqrt(MAX(rms, 0.0));
+    rms = sqrt(fmax(rms, 0.0));
     return rms;
 }
 

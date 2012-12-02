@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -39,10 +39,10 @@
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if bricks are not compatible.
  **/
-GwyBrickCompatibilityFlags
+GwyBrickCompatFlags
 gwy_brick_is_incompatible(const GwyBrick *brick1,
                           const GwyBrick *brick2,
-                          GwyBrickCompatibilityFlags check)
+                          GwyBrickCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick1), check);
     g_return_val_if_fail(GWY_IS_BRICK(brick2), check);
@@ -59,77 +59,76 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
     gdouble yreal2 = brick2->yreal;
     gdouble zreal1 = brick1->zreal;
     gdouble zreal2 = brick2->zreal;
-    GwyBrickCompatibilityFlags result = 0;
+    GwyBrickCompatFlags result = 0;
 
     /* Resolution */
-    if (check & GWY_BRICK_COMPATIBLE_XRES) {
+    if (check & GWY_BRICK_COMPAT_XRES) {
         if (xres1 != xres2)
-            result |= GWY_BRICK_COMPATIBLE_XRES;
+            result |= GWY_BRICK_COMPAT_XRES;
     }
-    if (check & GWY_BRICK_COMPATIBLE_YRES) {
+    if (check & GWY_BRICK_COMPAT_YRES) {
         if (yres1 != yres2)
-            result |= GWY_BRICK_COMPATIBLE_YRES;
+            result |= GWY_BRICK_COMPAT_YRES;
     }
-    if (check & GWY_BRICK_COMPATIBLE_ZRES) {
+    if (check & GWY_BRICK_COMPAT_ZRES) {
         if (zres1 != zres2)
-            result |= GWY_BRICK_COMPATIBLE_ZRES;
+            result |= GWY_BRICK_COMPAT_ZRES;
     }
 
     /* Real size */
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
-    if (check & GWY_BRICK_COMPATIBLE_XREAL) {
+    if (check & GWY_BRICK_COMPAT_XREAL) {
         if (!(fabs(log(xreal1/xreal2)) <= COMPAT_EPSILON))
-            result |= GWY_BRICK_COMPATIBLE_XREAL;
+            result |= GWY_BRICK_COMPAT_XREAL;
     }
-    if (check & GWY_BRICK_COMPATIBLE_YREAL) {
+    if (check & GWY_BRICK_COMPAT_YREAL) {
         if (!(fabs(log(yreal1/yreal2)) <= COMPAT_EPSILON))
-            result |= GWY_BRICK_COMPATIBLE_YREAL;
+            result |= GWY_BRICK_COMPAT_YREAL;
     }
-    if (check & GWY_BRICK_COMPATIBLE_ZREAL) {
+    if (check & GWY_BRICK_COMPAT_ZREAL) {
         if (!(fabs(log(zreal1/zreal2)) <= COMPAT_EPSILON))
-            result |= GWY_BRICK_COMPATIBLE_ZREAL;
+            result |= GWY_BRICK_COMPAT_ZREAL;
     }
 
     /* Measure */
-    if (check & GWY_BRICK_COMPATIBLE_DX) {
+    if (check & GWY_BRICK_COMPAT_DX) {
         if (!(fabs(log(xreal1/xres1*xres2/xreal2)) <= COMPAT_EPSILON))
-            result |= GWY_BRICK_COMPATIBLE_DX;
+            result |= GWY_BRICK_COMPAT_DX;
     }
-    if (check & GWY_BRICK_COMPATIBLE_DY) {
+    if (check & GWY_BRICK_COMPAT_DY) {
         if (!(fabs(log(yreal1/yres1*yres2/yreal2)) <= COMPAT_EPSILON))
-            result |= GWY_BRICK_COMPATIBLE_DY;
+            result |= GWY_BRICK_COMPAT_DY;
     }
-    if (check & GWY_BRICK_COMPATIBLE_DZ) {
+    if (check & GWY_BRICK_COMPAT_DZ) {
         if (!(fabs(log(zreal1/zres1*zres2/zreal2)) <= COMPAT_EPSILON))
-            result |= GWY_BRICK_COMPATIBLE_DZ;
+            result |= GWY_BRICK_COMPAT_DZ;
     }
 
-    /* Lateral units */
-    if (check & GWY_BRICK_COMPATIBLE_LATERAL) {
-        /* This can cause instantiation of brick units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_xy(brick1);
-        GwyUnit *unit2 = gwy_brick_get_unit_xy(brick2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_BRICK_COMPATIBLE_LATERAL;
+    const Brick *priv1 = brick1->priv, *priv2 = brick2->priv;
+
+    /* X units */
+    if (check & GWY_BRICK_COMPAT_X) {
+        if (!gwy_unit_equal(priv1->unit_x, priv2->unit_x))
+            result |= GWY_BRICK_COMPAT_X;
     }
 
-    /* Depth units */
-    if (check & GWY_BRICK_COMPATIBLE_DEPTH) {
-        /* This can cause instantiation of brick units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_z(brick1);
-        GwyUnit *unit2 = gwy_brick_get_unit_z(brick2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_BRICK_COMPATIBLE_DEPTH;
+    /* Y units */
+    if (check & GWY_BRICK_COMPAT_Y) {
+        if (!gwy_unit_equal(priv1->unit_y, priv2->unit_y))
+            result |= GWY_BRICK_COMPAT_Y;
+    }
+
+    /* Z units */
+    if (check & GWY_BRICK_COMPAT_Z) {
+        if (!gwy_unit_equal(priv1->unit_z, priv2->unit_z))
+            result |= GWY_BRICK_COMPAT_Z;
     }
 
     /* Value units */
-    if (check & GWY_BRICK_COMPATIBLE_VALUE) {
-        /* This can cause instantiation of brick units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_w(brick1);
-        GwyUnit *unit2 = gwy_brick_get_unit_w(brick2);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_BRICK_COMPATIBLE_VALUE;
+    if (check & GWY_BRICK_COMPAT_VALUE) {
+        if (!gwy_unit_equal(priv1->unit_z, priv2->unit_z))
+            result |= GWY_BRICK_COMPAT_VALUE;
     }
 
     return result;
@@ -140,7 +139,7 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
  * @brick: A data brick.
  * @field: A data field.
  * @check: Properties to check for compatibility.  The properties are from
- *         the #GwyFieldCompatibilityFlags enum as the field cannot be
+ *         the #GwyFieldCompatFlags enum as the field cannot be
  *         incompatible in dimensions it does not have.
  *
  * Checks whether a brick and a field are compatible.
@@ -153,10 +152,10 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if fields are not compatible.
  **/
-GwyFieldCompatibilityFlags
+GwyFieldCompatFlags
 gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
                                      const GwyField *field,
-                                     GwyFieldCompatibilityFlags check)
+                                     GwyFieldCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), check);
     g_return_val_if_fail(GWY_IS_FIELD(field), check);
@@ -169,56 +168,59 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
     gdouble xreal2 = field->xreal;
     gdouble yreal1 = brick->yreal;
     gdouble yreal2 = field->yreal;
-    GwyFieldCompatibilityFlags result = 0;
+    GwyFieldCompatFlags result = 0;
 
     /* Resolution */
-    if (check & GWY_FIELD_COMPATIBLE_XRES) {
+    if (check & GWY_FIELD_COMPAT_XRES) {
         if (xres1 != xres2)
-            result |= GWY_FIELD_COMPATIBLE_XRES;
+            result |= GWY_FIELD_COMPAT_XRES;
     }
-    if (check & GWY_FIELD_COMPATIBLE_YRES) {
+    if (check & GWY_FIELD_COMPAT_YRES) {
         if (yres1 != yres2)
-            result |= GWY_FIELD_COMPATIBLE_YRES;
+            result |= GWY_FIELD_COMPAT_YRES;
     }
 
     /* Real size */
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
-    if (check & GWY_FIELD_COMPATIBLE_XREAL) {
+    if (check & GWY_FIELD_COMPAT_XREAL) {
         if (!(fabs(log(xreal1/xreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_XREAL;
+            result |= GWY_FIELD_COMPAT_XREAL;
     }
-    if (check & GWY_FIELD_COMPATIBLE_YREAL) {
+    if (check & GWY_FIELD_COMPAT_YREAL) {
         if (!(fabs(log(yreal1/yreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_YREAL;
+            result |= GWY_FIELD_COMPAT_YREAL;
     }
 
     /* Measure */
-    if (check & GWY_FIELD_COMPATIBLE_DX) {
+    if (check & GWY_FIELD_COMPAT_DX) {
         if (!(fabs(log(xreal1/xres1*xres2/xreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_DX;
+            result |= GWY_FIELD_COMPAT_DX;
     }
-    if (check & GWY_FIELD_COMPATIBLE_DY) {
+    if (check & GWY_FIELD_COMPAT_DY) {
         if (!(fabs(log(yreal1/yres1*yres2/yreal2)) <= COMPAT_EPSILON))
-            result |= GWY_FIELD_COMPATIBLE_DY;
+            result |= GWY_FIELD_COMPAT_DY;
     }
 
-    /* Lateral units */
-    if (check & GWY_FIELD_COMPATIBLE_LATERAL) {
-        /* This can cause instantiation of field units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_xy(brick);
-        GwyUnit *unit2 = gwy_field_get_unit_xy(field);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_FIELD_COMPATIBLE_LATERAL;
+    const Field *fpriv = field->priv;
+    const Brick *bpriv = brick->priv;
+
+    /* X units */
+    if (check & GWY_FIELD_COMPAT_X) {
+        if (!gwy_unit_equal(fpriv->unit_x, bpriv->unit_x))
+            result |= GWY_FIELD_COMPAT_X;
+    }
+
+    /* Y units */
+    if (check & GWY_FIELD_COMPAT_Y) {
+        if (!gwy_unit_equal(fpriv->unit_y, bpriv->unit_y))
+            result |= GWY_FIELD_COMPAT_Y;
     }
 
     /* Value units */
-    if (check & GWY_FIELD_COMPATIBLE_VALUE) {
-        /* This can cause instantiation of field units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_w(brick);
-        GwyUnit *unit2 = gwy_field_get_unit_z(field);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_FIELD_COMPATIBLE_VALUE;
+    if (check & GWY_FIELD_COMPAT_VALUE) {
+        if (!gwy_unit_equal(fpriv->unit_z, bpriv->unit_w))
+            result |= GWY_FIELD_COMPAT_VALUE;
     }
 
     return result;
@@ -229,7 +231,7 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
  * @brick: A data brick.
  * @line: A data line.
  * @check: Properties to check for compatibility.  The properties are from
- *         the #GwyLineCompatibilityFlags enum as the line cannot be
+ *         the #GwyLineCompatFlags enum as the line cannot be
  *         incompatible in dimensions it does not have.
  *
  * Checks whether a brick and a line are compatible.
@@ -242,10 +244,10 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if lines are not compatible.
  **/
-GwyLineCompatibilityFlags
+GwyLineCompatFlags
 gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
                                     const GwyLine *line,
-                                    GwyLineCompatibilityFlags check)
+                                    GwyLineCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), check);
     g_return_val_if_fail(GWY_IS_LINE(line), check);
@@ -254,44 +256,41 @@ gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
     guint res2 = line->res;
     gdouble real1 = brick->zreal;
     gdouble real2 = line->real;
-    GwyLineCompatibilityFlags result = 0;
+    GwyLineCompatFlags result = 0;
 
     /* Resolution */
-    if (check & GWY_LINE_COMPATIBLE_RES) {
+    if (check & GWY_LINE_COMPAT_RES) {
         if (res1 != res2)
-            result |= GWY_LINE_COMPATIBLE_RES;
+            result |= GWY_LINE_COMPAT_RES;
     }
 
     /* Real size */
     /* Keeps the conditions for real numbers in negative form to catch NaNs and
      * odd values as incompatible. */
-    if (check & GWY_LINE_COMPATIBLE_REAL) {
+    if (check & GWY_LINE_COMPAT_REAL) {
         if (!(fabs(log(real1/real2)) <= COMPAT_EPSILON))
-            result |= GWY_LINE_COMPATIBLE_REAL;
+            result |= GWY_LINE_COMPAT_REAL;
     }
 
     /* Measure */
-    if (check & GWY_LINE_COMPATIBLE_DX) {
+    if (check & GWY_LINE_COMPAT_DX) {
         if (!(fabs(log(real1/res1*res2/real2)) <= COMPAT_EPSILON))
-            result |= GWY_LINE_COMPATIBLE_DX;
+            result |= GWY_LINE_COMPAT_DX;
     }
 
+    const Line *lpriv = line->priv;
+    const Brick *bpriv = brick->priv;
+
     /* Lateral units */
-    if (check & GWY_LINE_COMPATIBLE_LATERAL) {
-        /* This can cause instantiation of line units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_z(brick);
-        GwyUnit *unit2 = gwy_line_get_unit_x(line);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_LINE_COMPATIBLE_LATERAL;
+    if (check & GWY_LINE_COMPAT_X) {
+        if (!gwy_unit_equal(lpriv->unit_x, bpriv->unit_z))
+            result |= GWY_LINE_COMPAT_X;
     }
 
     /* Value units */
-    if (check & GWY_LINE_COMPATIBLE_VALUE) {
-        /* This can cause instantiation of line units as a side effect */
-        GwyUnit *unit1 = gwy_brick_get_unit_w(brick);
-        GwyUnit *unit2 = gwy_line_get_unit_y(line);
-        if (!gwy_unit_equal(unit1, unit2))
-            result |= GWY_LINE_COMPATIBLE_VALUE;
+    if (check & GWY_LINE_COMPAT_VALUE) {
+        if (!gwy_unit_equal(lpriv->unit_y, bpriv->unit_w))
+            result |= GWY_LINE_COMPAT_VALUE;
     }
 
     return result;
@@ -358,7 +357,8 @@ gwy_brick_extract_plane(const GwyBrick *brick,
         gwy_field_set_xoffset(target, 0.0);
         gwy_field_set_yoffset(target, 0.0);
     }
-    _gwy_assign_units(&target->priv->unit_xy, brick->priv->unit_xy);
+    _gwy_assign_units(&target->priv->unit_x, brick->priv->unit_x);
+    _gwy_assign_units(&target->priv->unit_y, brick->priv->unit_y);
     _gwy_assign_units(&target->priv->unit_z, brick->priv->unit_w);
     gwy_field_invalidate(target);
 }
@@ -443,25 +443,28 @@ gwy_brick_clear_full(GwyBrick *brick)
  **/
 
 /**
- * GwyBrickCompatibilityFlags:
- * @GWY_BRICK_COMPATIBLE_XRES: X-resolution (width).
- * @GWY_BRICK_COMPATIBLE_YRES: Y-resolution (height)
- * @GWY_BRICK_COMPATIBLE_ZRES: Z-resolution (depth)
- * @GWY_BRICK_COMPATIBLE_RES: All resolutions.
- * @GWY_BRICK_COMPATIBLE_XREAL: Physical x-dimension.
- * @GWY_BRICK_COMPATIBLE_YREAL: Physical y-dimension.
- * @GWY_BRICK_COMPATIBLE_ZREAL: Physical z-dimension.
- * @GWY_BRICK_COMPATIBLE_REAL: All physical dimensions.
- * @GWY_BRICK_COMPATIBLE_DX: Pixel size in x-direction.
- * @GWY_BRICK_COMPATIBLE_DY: Pixel size in y-direction.
- * @GWY_BRICK_COMPATIBLE_DXDY: Lateral pixel dimensions.
- * @GWY_BRICK_COMPATIBLE_DZ: Pixel size in z-direction.
- * @GWY_BRICK_COMPATIBLE_DXDYDZ: All pixel dimensions.
- * @GWY_BRICK_COMPATIBLE_LATERAL: Lateral units.
- * @GWY_BRICK_COMPATIBLE_DEPTH: Depth units.
- * @GWY_BRICK_COMPATIBLE_VALUE: Value units.
- * @GWY_BRICK_COMPATIBLE_UNITS: All units.
- * @GWY_BRICK_COMPATIBLE_ALL: All defined properties.
+ * GwyBrickCompatFlags:
+ * @GWY_BRICK_COMPAT_XRES: @X-resolution (width).
+ * @GWY_BRICK_COMPAT_YRES: @Y-resolution (height)
+ * @GWY_BRICK_COMPAT_ZRES: @Z-resolution (depth)
+ * @GWY_BRICK_COMPAT_RES: All resolutions.
+ * @GWY_BRICK_COMPAT_XREAL: Physical @x-dimension.
+ * @GWY_BRICK_COMPAT_YREAL: Physical @y-dimension.
+ * @GWY_BRICK_COMPAT_ZREAL: Physical @z-dimension.
+ * @GWY_BRICK_COMPAT_REAL: All physical dimensions.
+ * @GWY_BRICK_COMPAT_DX: Pixel size in @x-direction.
+ * @GWY_BRICK_COMPAT_DY: Pixel size in @y-direction.
+ * @GWY_BRICK_COMPAT_DXDY: Lateral pixel dimensions.
+ * @GWY_BRICK_COMPAT_DZ: Pixel size in @z-direction.
+ * @GWY_BRICK_COMPAT_DXDYDZ: All pixel dimensions.
+ * @GWY_BRICK_COMPAT_X: Horizontal (@x) lateral units.
+ * @GWY_BRICK_COMPAT_Y: Vertical (@y) lateral units.
+ * @GWY_BRICK_COMPAT_LATERAL: Both lateral units.
+ * @GWY_BRICK_COMPAT_Z: Depth (@z) units.
+ * @GWY_BRICK_COMPAT_SPACE: All three coordinate units.
+ * @GWY_BRICK_COMPAT_VALUE: Value units.
+ * @GWY_BRICK_COMPAT_UNITS: All units.
+ * @GWY_BRICK_COMPAT_ALL: All defined properties.
  *
  * Brick properties that can be checked for compatibility.
  **/

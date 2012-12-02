@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -32,16 +32,17 @@
 
 enum { POWER_MIN = -12, POWER_MAX = 12 };
 
-enum { N_ITEMS = 8 };
+enum { N_ITEMS = 9 };
 
 struct _GwyUserGrainValuePrivate {
     gchar *group;
     gchar *formula;
     gchar *ident;
     gchar *symbol;
-    gint power_xy;
+    gint power_x;
+    gint power_y;
     gint power_z;
-    gboolean same_units;
+    GwyGrainValueSameUnits same_units;
     gboolean is_angle;
 };
 
@@ -80,10 +81,11 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*1*/ { .name = "formula",    .ctype = GWY_SERIALIZABLE_STRING,  },
     /*2*/ { .name = "ident",      .ctype = GWY_SERIALIZABLE_STRING,  },
     /*3*/ { .name = "symbol",     .ctype = GWY_SERIALIZABLE_STRING,  },
-    /*4*/ { .name = "xy-power",   .ctype = GWY_SERIALIZABLE_INT32,   },
-    /*5*/ { .name = "z-power",    .ctype = GWY_SERIALIZABLE_INT32,   },
-    /*6*/ { .name = "same-units", .ctype = GWY_SERIALIZABLE_BOOLEAN, },
-    /*7*/ { .name = "is-angle",   .ctype = GWY_SERIALIZABLE_BOOLEAN, },
+    /*4*/ { .name = "x-power",    .ctype = GWY_SERIALIZABLE_INT8,    },
+    /*5*/ { .name = "y-power",    .ctype = GWY_SERIALIZABLE_INT8,    },
+    /*6*/ { .name = "z-power",    .ctype = GWY_SERIALIZABLE_INT8,    },
+    /*7*/ { .name = "same-units", .ctype = GWY_SERIALIZABLE_INT8,    },
+    /*8*/ { .name = "is-angle",   .ctype = GWY_SERIALIZABLE_BOOLEAN, },
 };
 
 static guint test_expr_nidents = 0;
@@ -188,26 +190,32 @@ gwy_user_grain_value_itemize(GwySerializable *serializable,
         it++, items->n++, nn++;
     }
 
-    if (priv->power_xy) {
+    if (priv->power_x) {
         *it = serialize_items[4];
-        it->value.v_int32 = priv->power_xy;
+        it->value.v_int8 = priv->power_x;
+        it++, items->n++, nn++;
+    }
+
+    if (priv->power_y) {
+        *it = serialize_items[5];
+        it->value.v_int8 = priv->power_y;
         it++, items->n++, nn++;
     }
 
     if (priv->power_z) {
-        *it = serialize_items[5];
-        it->value.v_int32 = priv->power_z;
+        *it = serialize_items[6];
+        it->value.v_int8 = priv->power_z;
         it++, items->n++, nn++;
     }
 
     if (priv->same_units) {
-        *it = serialize_items[6];
-        it->value.v_boolean = priv->same_units;
+        *it = serialize_items[7];
+        it->value.v_uint8 = priv->same_units;
         it++, items->n++, nn++;
     }
 
     if (priv->is_angle) {
-        *it = serialize_items[7];
+        *it = serialize_items[8];
         it->value.v_boolean = priv->is_angle;
         it++, items->n++, nn++;
     }
@@ -241,10 +249,11 @@ gwy_user_grain_value_construct(GwySerializable *serializable,
     GWY_TAKE_STRING(priv->symbol, its[3].value.v_string);
 
     // FIXME
-    priv->power_xy = CLAMP(its[4].value.v_int32, POWER_MIN, POWER_MAX);
-    priv->power_z = CLAMP(its[5].value.v_int32, POWER_MIN, POWER_MAX);
-    priv->same_units = !!its[6].value.v_boolean;
-    priv->is_angle = !!its[7].value.v_boolean;
+    priv->power_x = CLAMP(its[4].value.v_int8, POWER_MIN, POWER_MAX);
+    priv->power_y = CLAMP(its[5].value.v_int8, POWER_MIN, POWER_MAX);
+    priv->power_z = CLAMP(its[6].value.v_int8, POWER_MIN, POWER_MAX);
+    priv->same_units = MIN(its[7].value.v_uint8, GWY_GRAIN_VALUE_SAME_UNITS_ALL);
+    priv->is_angle = !!its[8].value.v_boolean;
 
     GError *err = NULL;
     if (validate(usergrainvalue,
@@ -265,7 +274,8 @@ assign_info(UserGrainValue *dpriv,
     gwy_assign_string(&dpriv->group, spriv->group);
     gwy_assign_string(&dpriv->ident, spriv->ident);
     gwy_assign_string(&dpriv->symbol, spriv->symbol);
-    dpriv->power_xy = spriv->power_xy;
+    dpriv->power_x = spriv->power_x;
+    dpriv->power_y = spriv->power_y;
     dpriv->power_z = spriv->power_z;
     dpriv->same_units = spriv->same_units;
     dpriv->is_angle = spriv->is_angle;
@@ -596,36 +606,71 @@ gwy_user_grain_value_set_ident(GwyUserGrainValue *usergrainvalue,
 }
 
 /**
- * gwy_user_grain_value_get_power_xy:
+ * gwy_user_grain_value_get_power_x:
  * @usergrainvalue: A user grain value resource.
  *
- * Gets the power of field lateral units entering a grain value.
+ * Gets the power of field horizontal lateral units entering a grain value.
  *
- * Returns: The power of lateral units.
+ * Returns: The power of horizontal lateral units.
  **/
 gint
-gwy_user_grain_value_get_power_xy(const GwyUserGrainValue *usergrainvalue)
+gwy_user_grain_value_get_power_x(const GwyUserGrainValue *usergrainvalue)
 {
     g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), 0);
-    return usergrainvalue->priv->power_xy;
+    return usergrainvalue->priv->power_x;
 }
 
 /**
- * gwy_user_grain_value_set_power_xy:
+ * gwy_user_grain_value_set_power_x:
  * @usergrainvalue: A user grain value resource.
- * @power_xy: Power of lateral units which must be between -12 and 12.
+ * @power_x: Power of horizontal lateral units which must be between -12 and 12.
  *
- * Sets the power of field lateral units entering a grain value.
+ * Sets the power of field horizontal lateral units entering a grain value.
  **/
 void
-gwy_user_grain_value_set_power_xy(GwyUserGrainValue *usergrainvalue,
-                                  gint power_xy)
+gwy_user_grain_value_set_power_x(GwyUserGrainValue *usergrainvalue,
+                                 gint power_x)
 {
     g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
-    g_return_if_fail(ABS(power_xy) <= 12);
+    g_return_if_fail(ABS(power_x) <= 12);
     UserGrainValue *priv = usergrainvalue->priv;
-    if (power_xy != priv->power_xy) {
-        priv->power_xy = power_xy;
+    if (power_x != priv->power_x) {
+        priv->power_x = power_x;
+        gwy_user_grain_value_changed(usergrainvalue);
+    }
+}
+
+/**
+ * gwy_user_grain_value_get_power_y:
+ * @usergrainvalue: A user grain value resource.
+ *
+ * Gets the power of field vertical lateral units entering a grain value.
+ *
+ * Returns: The power of vertical lateral units.
+ **/
+gint
+gwy_user_grain_value_get_power_y(const GwyUserGrainValue *usergrainvalue)
+{
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), 0);
+    return usergrainvalue->priv->power_y;
+}
+
+/**
+ * gwy_user_grain_value_set_power_y:
+ * @usergrainvalue: A user grain value resource.
+ * @power_y: Power of vertical lateral units which must be between -12 and 12.
+ *
+ * Sets the power of field vertical lateral units entering a grain value.
+ **/
+void
+gwy_user_grain_value_set_power_y(GwyUserGrainValue *usergrainvalue,
+                                 gint power_y)
+{
+    g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(ABS(power_y) <= 12);
+    UserGrainValue *priv = usergrainvalue->priv;
+    if (power_y != priv->power_y) {
+        priv->power_y = power_y;
         gwy_user_grain_value_changed(usergrainvalue);
     }
 }
@@ -669,36 +714,35 @@ gwy_user_grain_value_set_power_z(GwyUserGrainValue *usergrainvalue,
  * gwy_user_grain_value_get_same_units:
  * @usergrainvalue: A user grain value resource.
  *
- * Gets whether a user grain value needs the same lateral and value units.
+ * Gets what units a user grain value needs to be the same.
  *
- * Returns: %TRUE if the grain value needs the same lateral and value units.
+ * Returns: Combination of units @usergrainvalue requires to be the same.
  **/
-gboolean
+GwyGrainValueSameUnits
 gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue)
 {
-    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), FALSE);
+    g_return_val_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue), 0);
     return usergrainvalue->priv->same_units;
 }
 
 /**
  * gwy_user_grain_value_set_same_units:
  * @usergrainvalue: A user grain value resource.
- * @same_units: %TRUE if the grain value should require same lateral and value
- *              units, %FALSE if it should not.
+ * @same_units: Combination of units @usergrainvalue should require to be the
+ *              same.
  *
- * Sets whether a user grain value needs the same lateral and value units.
+ * Sets whether a user grain value needs the same lateral and/or value units.
  *
- * Some grain values, such as surface area, are meaningful only if height is
- * the same physical quantity as lateral dimensions.  These grain values
- * should have @same_units set to %TRUE.
+ * See #GwyGrainValueSameUnits for a discussion of what grain quantities should
+ * require which unit combinations.
  **/
 void
 gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
-                                    gboolean same_units)
+                                    GwyGrainValueSameUnits same_units)
 {
     g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
+    g_return_if_fail(same_units <= GWY_GRAIN_VALUE_SAME_UNITS_ALL);
     UserGrainValue *priv = usergrainvalue->priv;
-    same_units = !!same_units;
     if (same_units != priv->same_units) {
         priv->same_units = same_units;
         gwy_user_grain_value_changed(usergrainvalue);
@@ -758,12 +802,14 @@ gwy_user_grain_value_dump(GwyResource *resource)
     g_string_append_printf(text, "ident %s\n", priv->ident);
     if (priv->symbol)
         g_string_append_printf(text, "symbol %s\n", priv->symbol);
-    if (priv->power_xy)
-        g_string_append_printf(text, "power_xy %d\n", priv->power_xy);
+    if (priv->power_x)
+        g_string_append_printf(text, "power_x %d\n", priv->power_x);
+    if (priv->power_y)
+        g_string_append_printf(text, "power_y %d\n", priv->power_y);
     if (priv->power_z)
         g_string_append_printf(text, "power_z %d\n", priv->power_z);
     if (priv->same_units)
-        g_string_append(text, "same_units 1\n");
+        g_string_append_printf(text, "same_units %u\n", (guint)priv->same_units);
     if (priv->is_angle)
         g_string_append(text, "is_angle 1\n");
 
@@ -788,12 +834,14 @@ gwy_user_grain_value_parse(GwyResource *resource,
         if (line != GWY_RESOURCE_LINE_OK)
             return FALSE;
 
-        if (gwy_strequal(key, "power_xy"))
-            priv->power_xy = strtol(value, NULL, 10);
+        if (gwy_strequal(key, "power_x"))
+            priv->power_x = strtol(value, NULL, 10);
+        else if (gwy_strequal(key, "power_y"))
+            priv->power_y = strtol(value, NULL, 10);
         else if (gwy_strequal(key, "power_z"))
             priv->power_z = strtol(value, NULL, 10);
         else if (gwy_strequal(key, "same_units"))
-            priv->same_units = !!strtol(value, NULL, 10);
+            priv->same_units = strtol(value, NULL, 10);
         else if (gwy_strequal(key, "is_angle"))
             priv->is_angle = !!strtol(value, NULL, 10);
         else if (gwy_strequal(key, "formula"))
@@ -914,6 +962,36 @@ gwy_user_grain_value_error_quark(void)
  *                                      dependences on other values.
  *
  * Error codes returned by user-defined grain value manipulation.
+ **/
+
+/**
+ * GwyGrainValueSameUnits:
+ * @GWY_GRAIN_VALUE_SAME_UNITS_NONE: No requirements.
+ * @GWY_GRAIN_VALUE_SAME_UNITS_LATERAL: Both lateral coordinates must be the
+ *                                      same physical quantity.
+ * @GWY_GRAIN_VALUE_SAME_UNITS_ALL: Both lateral coordinates and the value must
+ *                                  be the same physical quantity.
+ *
+ * Type of grain value units requirement.
+ *
+ * Grain values that represent a single coordinate, for instance mean value or
+ * @x-position of the centre, or are plain products of coordinates, such as
+ * volume, are meaningful for all combinations of field units.  Hence they do
+ * note have any special requirements which corresponds to
+ * %GWY_GRAIN_VALUE_SAME_UNITS_NONE.
+ *
+ * However, some grain values, such as radii or angles in the plane, are
+ * meaningful only if both lateral coordinates are the same physical quantity.
+ * These grain values require %GWY_GRAIN_VALUE_SAME_UNITS_LATERAL.
+ *
+ * Other grain values, such as surface area, are meaningful only if height is
+ * also the same physical quantity as lateral dimensions.  These grain values
+ * require %GWY_GRAIN_VALUE_SAME_UNITS_ALL.
+ *
+ * Note a value may represent a single coordinate but cannot be meaningfully
+ * calculated for arbitrary unit combinations, for instance @x-coordinate of
+ * inscribed disc centre.  Such value requires whatever is necessary for the
+ * <emphasis>calculation</emphasis>.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

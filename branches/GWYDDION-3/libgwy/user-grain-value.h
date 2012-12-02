@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,12 @@ G_BEGIN_DECLS
 typedef enum {
     GWY_USER_GRAIN_VALUE_ERROR_DEPENDS = 1,
 } GwyUserGrainValueError;
+
+typedef enum {
+    GWY_GRAIN_VALUE_SAME_UNITS_NONE    = 0,
+    GWY_GRAIN_VALUE_SAME_UNITS_LATERAL = 1,
+    GWY_GRAIN_VALUE_SAME_UNITS_ALL     = 2,
+} GwyGrainValueSameUnits;
 
 GQuark gwy_user_grain_value_error_quark(void) G_GNUC_CONST;
 
@@ -65,33 +71,36 @@ struct _GwyUserGrainValueClass {
 #define gwy_user_grain_value_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType              gwy_user_grain_value_get_type      (void)                                    G_GNUC_CONST;
-GwyUserGrainValue* gwy_user_grain_value_new           (void)                                    G_GNUC_MALLOC;
-const gchar*       gwy_user_grain_value_get_formula   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-gboolean           gwy_user_grain_value_set_formula   (GwyUserGrainValue *usergrainvalue,
-                                                       const gchar *formula,
-                                                       GError **error);
-const gchar*       gwy_user_grain_value_get_group     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_group     (GwyUserGrainValue *usergrainvalue,
-                                                       const gchar *group);
-const gchar*       gwy_user_grain_value_get_symbol    (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_symbol    (GwyUserGrainValue *usergrainvalue,
-                                                       const gchar *symbol);
-const gchar*       gwy_user_grain_value_get_ident     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_ident     (GwyUserGrainValue *usergrainvalue,
-                                                       const gchar *ident);
-gint               gwy_user_grain_value_get_power_xy  (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_power_xy  (GwyUserGrainValue *usergrainvalue,
-                                                       gint power_xy);
-gint               gwy_user_grain_value_get_power_z   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_power_z   (GwyUserGrainValue *usergrainvalue,
-                                                       gint power_z);
-gboolean           gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
-                                                       gboolean same_units);
-gboolean           gwy_user_grain_value_get_is_angle  (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
-void               gwy_user_grain_value_set_is_angle  (GwyUserGrainValue *usergrainvalue,
-                                                       gboolean is_angle);
+GType                  gwy_user_grain_value_get_type      (void)                                    G_GNUC_CONST;
+GwyUserGrainValue*     gwy_user_grain_value_new           (void)                                    G_GNUC_MALLOC;
+const gchar*           gwy_user_grain_value_get_formula   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+gboolean               gwy_user_grain_value_set_formula   (GwyUserGrainValue *usergrainvalue,
+                                                           const gchar *formula,
+                                                           GError **error);
+const gchar*           gwy_user_grain_value_get_group     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_group     (GwyUserGrainValue *usergrainvalue,
+                                                           const gchar *group);
+const gchar*           gwy_user_grain_value_get_symbol    (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_symbol    (GwyUserGrainValue *usergrainvalue,
+                                                           const gchar *symbol);
+const gchar*           gwy_user_grain_value_get_ident     (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_ident     (GwyUserGrainValue *usergrainvalue,
+                                                           const gchar *ident);
+gint                   gwy_user_grain_value_get_power_x   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_power_x   (GwyUserGrainValue *usergrainvalue,
+                                                           gint power_x);
+gint                   gwy_user_grain_value_get_power_y   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_power_y   (GwyUserGrainValue *usergrainvalue,
+                                                           gint power_y);
+gint                   gwy_user_grain_value_get_power_z   (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_power_z   (GwyUserGrainValue *usergrainvalue,
+                                                           gint power_z);
+GwyGrainValueSameUnits gwy_user_grain_value_get_same_units(const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
+                                                           GwyGrainValueSameUnits same_units);
+gboolean               gwy_user_grain_value_get_is_angle  (const GwyUserGrainValue *usergrainvalue) G_GNUC_PURE;
+void                   gwy_user_grain_value_set_is_angle  (GwyUserGrainValue *usergrainvalue,
+                                                           gboolean is_angle);
 
 #define gwy_user_grain_values() \
     (gwy_resource_type_get_inventory(GWY_TYPE_USER_GRAIN_VALUE))

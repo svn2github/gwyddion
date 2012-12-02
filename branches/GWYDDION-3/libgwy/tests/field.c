@@ -2670,136 +2670,136 @@ test_field_compatibility_res(void)
     GwyField *field3 = gwy_field_new_sized(3, 2, FALSE);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_XRES),
+                                               GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_YRES),
-                     ==, GWY_FIELD_COMPATIBLE_YRES);
+                                               GWY_FIELD_COMPAT_YRES),
+                     ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, GWY_FIELD_COMPATIBLE_YRES);
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_XRES),
+                                               GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_YRES),
-                     ==, GWY_FIELD_COMPATIBLE_YRES);
+                                               GWY_FIELD_COMPAT_YRES),
+                     ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, GWY_FIELD_COMPATIBLE_YRES);
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, GWY_FIELD_COMPAT_YRES);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_XRES),
-                     ==, GWY_FIELD_COMPATIBLE_XRES);
+                                               GWY_FIELD_COMPAT_XRES),
+                     ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_YRES),
+                                               GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, GWY_FIELD_COMPATIBLE_XRES);
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_XRES),
-                     ==, GWY_FIELD_COMPATIBLE_XRES);
+                                               GWY_FIELD_COMPAT_XRES),
+                     ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_YRES),
+                                               GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, GWY_FIELD_COMPATIBLE_XRES);
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, GWY_FIELD_COMPAT_XRES);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_XRES),
-                     ==, GWY_FIELD_COMPATIBLE_XRES);
+                                               GWY_FIELD_COMPAT_XRES),
+                     ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_YRES),
-                     ==, GWY_FIELD_COMPATIBLE_YRES);
+                                               GWY_FIELD_COMPAT_YRES),
+                     ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, GWY_FIELD_COMPATIBLE_RES);
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, GWY_FIELD_COMPAT_RES);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_XRES),
-                     ==, GWY_FIELD_COMPATIBLE_XRES);
+                                               GWY_FIELD_COMPAT_XRES),
+                     ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_YRES),
-                     ==, GWY_FIELD_COMPATIBLE_YRES);
+                                               GWY_FIELD_COMPAT_YRES),
+                     ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, GWY_FIELD_COMPATIBLE_RES);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DXDY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, GWY_FIELD_COMPAT_RES);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_REAL),
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_REAL),
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_REAL),
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_REAL),
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DX);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DXDY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DXDY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPAT_REAL),
                      ==, 0);
 
     g_object_unref(field1);
@@ -2818,136 +2818,136 @@ test_field_compatibility_real(void)
     gwy_field_set_xreal(field3, 1.5);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_XREAL),
+                                               GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_YREAL),
-                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+                                               GWY_FIELD_COMPAT_YREAL),
+                     ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_XREAL),
+                                               GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_YREAL),
-                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+                                               GWY_FIELD_COMPAT_YREAL),
+                     ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, GWY_FIELD_COMPAT_YREAL);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_XREAL),
-                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+                                               GWY_FIELD_COMPAT_XREAL),
+                     ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_YREAL),
+                                               GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_XREAL),
-                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+                                               GWY_FIELD_COMPAT_XREAL),
+                     ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_YREAL),
+                                               GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, GWY_FIELD_COMPAT_XREAL);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_XREAL),
-                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+                                               GWY_FIELD_COMPAT_XREAL),
+                     ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_YREAL),
-                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+                                               GWY_FIELD_COMPAT_YREAL),
+                     ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, GWY_FIELD_COMPATIBLE_REAL);
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, GWY_FIELD_COMPAT_REAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_XREAL),
-                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+                                               GWY_FIELD_COMPAT_XREAL),
+                     ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_YREAL),
-                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+                                               GWY_FIELD_COMPAT_YREAL),
+                     ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_REAL),
-                     ==, GWY_FIELD_COMPATIBLE_REAL);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DXDY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_DX),
-                     ==, GWY_FIELD_COMPATIBLE_DX);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_DY),
-                     ==, GWY_FIELD_COMPATIBLE_DY);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_DXDY),
-                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+                                               GWY_FIELD_COMPAT_REAL),
+                     ==, GWY_FIELD_COMPAT_REAL);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_RES),
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_RES),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_RES),
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_RES),
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_RES),
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DX);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DXDY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_DX),
+                     ==, GWY_FIELD_COMPAT_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_DY),
+                     ==, GWY_FIELD_COMPAT_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_DXDY),
+                     ==, GWY_FIELD_COMPAT_DXDY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPAT_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPAT_RES),
                      ==, 0);
 
     g_object_unref(field1);
@@ -2966,46 +2966,46 @@ test_field_compatibility_units(void)
     gwy_unit_set_from_string(gwy_field_get_unit_z(field3), "m", NULL);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_LATERAL),
-                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+                                               GWY_FIELD_COMPAT_LATERAL),
+                     ==, GWY_FIELD_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_LATERAL),
-                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+                                               GWY_FIELD_COMPAT_LATERAL),
+                     ==, GWY_FIELD_COMPAT_LATERAL);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                                               GWY_FIELD_COMPAT_LATERAL),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                                               GWY_FIELD_COMPAT_LATERAL),
                      ==, 0);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_LATERAL),
-                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+                                               GWY_FIELD_COMPAT_LATERAL),
+                     ==, GWY_FIELD_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_LATERAL),
-                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+                                               GWY_FIELD_COMPAT_LATERAL),
+                     ==, GWY_FIELD_COMPAT_LATERAL);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPATIBLE_VALUE),
+                                               GWY_FIELD_COMPAT_VALUE),
                      ==, 0);
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPATIBLE_VALUE),
+                                               GWY_FIELD_COMPAT_VALUE),
                      ==, 0);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPATIBLE_VALUE),
-                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+                                               GWY_FIELD_COMPAT_VALUE),
+                     ==, GWY_FIELD_COMPAT_VALUE);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPATIBLE_VALUE),
-                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+                                               GWY_FIELD_COMPAT_VALUE),
+                     ==, GWY_FIELD_COMPAT_VALUE);
 
     g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPATIBLE_VALUE),
-                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+                                               GWY_FIELD_COMPAT_VALUE),
+                     ==, GWY_FIELD_COMPAT_VALUE);
     g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPATIBLE_VALUE),
-                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+                                               GWY_FIELD_COMPAT_VALUE),
+                     ==, GWY_FIELD_COMPAT_VALUE);
 
     g_object_unref(field1);
     g_object_unref(field2);
