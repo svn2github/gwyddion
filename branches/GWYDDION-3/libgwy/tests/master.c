@@ -259,6 +259,9 @@ master_cancel_one(guint nproc)
     }
 }
 
+// FIXME: This test occasionally (rarely) fails.  Apparently on the timeout?
+// Things are being cancelled before... before what exactly?  Funny thing if
+// it passes the multi-thread cancellation tests happily pass too.
 void
 test_master_cancel_1(void)
 {

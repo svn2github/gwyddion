@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -260,7 +260,9 @@ test_surface_regularize_full(void)
         GwySurface *surface = gwy_surface_new_from_field(field);
         g_assert_cmpuint(surface->n, ==, field->xres*field->yres);
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(field)));
+                                gwy_field_get_unit_x(field)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(field)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(field)));
 
@@ -280,7 +282,9 @@ test_surface_regularize_full(void)
                           <=,
                           2e-14*fabs(field->yoff));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(newfield)));
+                                gwy_field_get_unit_x(newfield)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(newfield)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(newfield)));
         field_assert_numerically_equal(newfield, field, 1e-14);
@@ -292,7 +296,9 @@ test_surface_regularize_full(void)
         gwy_surface_set_from_field(surface, field);
         g_assert_cmpuint(surface->n, ==, field->xres*field->yres);
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(field)));
+                                gwy_field_get_unit_x(field)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(field)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(field)));
 
@@ -312,7 +318,9 @@ test_surface_regularize_full(void)
                           <=,
                           2e-14*fabs(field->yoff));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(newfield)));
+                                gwy_field_get_unit_x(newfield)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(newfield)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(newfield)));
         field_assert_numerically_equal(newfield, field, 1e-14);
@@ -354,7 +362,9 @@ test_surface_regularize_part(void)
         GwySurface *surface = gwy_surface_new_from_field(field);
         g_assert_cmpuint(surface->n, ==, field->xres*field->yres);
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(field)));
+                                gwy_field_get_unit_x(field)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(field)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(field)));
 
@@ -382,7 +392,9 @@ test_surface_regularize_part(void)
                           <=,
                           2e-14*fabs(part->yoff));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(newfield)));
+                                gwy_field_get_unit_x(newfield)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(newfield)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(newfield)));
         field_assert_numerically_equal(newfield, part, 1e-14);
@@ -415,7 +427,9 @@ test_surface_regularize_interpolation(void)
         GwySurface *surface = gwy_surface_new_from_field(field);
         g_assert_cmpuint(surface->n, ==, field->xres*field->yres);
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(field)));
+                                gwy_field_get_unit_x(field)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(field)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(field)));
 
@@ -436,7 +450,9 @@ test_surface_regularize_interpolation(void)
         g_assert_cmpfloat(fabs(newfield->xoff - 0.25), <=, 2e-14);
         g_assert_cmpfloat(fabs(newfield->yoff - 0.25), <=, 2e-14);
         g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
-                                gwy_field_get_unit_xy(newfield)));
+                                gwy_field_get_unit_x(newfield)));
+        g_assert(gwy_unit_equal(gwy_surface_get_unit_xy(surface),
+                                gwy_field_get_unit_y(newfield)));
         g_assert(gwy_unit_equal(gwy_surface_get_unit_z(surface),
                                 gwy_field_get_unit_z(newfield)));
 

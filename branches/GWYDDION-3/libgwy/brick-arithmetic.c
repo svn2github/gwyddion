@@ -127,7 +127,7 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
 
     /* Value units */
     if (check & GWY_BRICK_COMPAT_VALUE) {
-        if (!gwy_unit_equal(priv1->unit_z, priv2->unit_z))
+        if (!gwy_unit_equal(priv1->unit_w, priv2->unit_w))
             result |= GWY_BRICK_COMPAT_VALUE;
     }
 

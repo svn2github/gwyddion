@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -32,9 +32,10 @@ user_grain_value_load_check(const gchar *filename,
                             const gchar *expected_name,
                             const gchar *expected_group,
                             const gchar *expected_formula,
-                            gint expected_power_xy,
+                            gint expected_power_x,
+                            gint expected_power_y,
                             gint expected_power_z,
-                            gboolean expected_same_units,
+                            GwyGrainValueSameUnits expected_same_units,
                             gboolean expected_is_angle)
 {
     GError *error = NULL;
@@ -54,12 +55,14 @@ user_grain_value_load_check(const gchar *filename,
 
     g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue),
                     ==, expected_formula);
-    g_assert_cmpint(gwy_user_grain_value_get_power_xy(usergrainvalue),
-                    ==, expected_power_xy);
+    g_assert_cmpint(gwy_user_grain_value_get_power_x(usergrainvalue),
+                    ==, expected_power_x);
+    g_assert_cmpint(gwy_user_grain_value_get_power_y(usergrainvalue),
+                    ==, expected_power_y);
     g_assert_cmpint(gwy_user_grain_value_get_power_z(usergrainvalue),
                     ==, expected_power_z);
-    g_assert_cmpint(gwy_user_grain_value_get_same_units(usergrainvalue),
-                    ==, expected_same_units);
+    g_assert_cmpuint(gwy_user_grain_value_get_same_units(usergrainvalue),
+                     ==, expected_same_units);
     g_assert_cmpint(gwy_user_grain_value_get_is_angle(usergrainvalue),
                     ==, expected_is_angle);
     GWY_OBJECT_UNREF(usergrainvalue);
@@ -72,7 +75,8 @@ test_user_grain_value_load(void)
         "Gwyddion resource GwyUserGrainValue\n"
         "formula atan((z_max - z_min)/D_max)\n"
         "ident sloppiness_2\n"
-        "power_xy 0\n"
+        "power_x 0\n"
+        "power_y 0\n"
         "power_z 0\n"
         "is_angle 1\n"
         "same_units 1\n";
@@ -83,7 +87,8 @@ test_user_grain_value_load(void)
         "group Group that hopefully does not exist\n"
         "formula atan((z_max - z_min)/D_max)\n"
         "ident sloppiness_2\n"
-        "power_xy 0\n"
+        "power_x 0\n"
+        "power_y 0\n"
         "power_z 0\n"
         "is_angle 1\n"
         "same_units 1\n";
@@ -105,7 +110,8 @@ test_user_grain_value_load(void)
     g_assert_no_error(error);
     user_grain_value_load_check("Sloppiness", "Sloppiness", "User",
                                 "atan((z_max - z_min)/D_max)",
-                                0, 0, TRUE, TRUE);
+                                0, 0, 0,
+                                GWY_GRAIN_VALUE_SAME_UNITS_LATERAL, TRUE);
 
     // Version3 resource
     g_assert(g_file_set_contents("Sloppiness3", usergrainvalue_v3, -1, &error));
@@ -114,7 +120,8 @@ test_user_grain_value_load(void)
     user_grain_value_load_check("Sloppiness3", "Sloppiness v3",
                                 "Group that hopefully does not exist",
                                 "atan((z_max - z_min)/D_max)",
-                                0, 0, TRUE, TRUE);
+                                0, 0, 0,
+                                GWY_GRAIN_VALUE_SAME_UNITS_LATERAL, TRUE);
 
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Slop", usergrainvalue_v3_ugly, -1,
@@ -123,7 +130,8 @@ test_user_grain_value_load(void)
     g_assert_no_error(error);
     user_grain_value_load_check("Ugly-Slop", "Sloppiness³", "User",
                                 "atan((z_max - z_min)/D_max)",
-                                0, 0, TRUE, TRUE);
+                                0, 0, 0,
+                                GWY_GRAIN_VALUE_SAME_UNITS_LATERAL, TRUE);
 }
 
 static GwyUserGrainValue*
@@ -151,14 +159,21 @@ make_test_grain_value(void)
     g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue),
                     ==, "V_0/L_b0^3");
 
-    gwy_user_grain_value_set_power_xy(usergrainvalue, -1);
-    g_assert_cmpint(gwy_user_grain_value_get_power_xy(usergrainvalue), ==, -1);
+    gwy_user_grain_value_set_power_x(usergrainvalue, -1);
+    g_assert_cmpint(gwy_user_grain_value_get_power_x(usergrainvalue), ==, -1);
+
+    gwy_user_grain_value_set_power_y(usergrainvalue, 0);
+    g_assert_cmpint(gwy_user_grain_value_get_power_y(usergrainvalue), ==, 0);
 
     gwy_user_grain_value_set_power_z(usergrainvalue, 1);
     g_assert_cmpint(gwy_user_grain_value_get_power_z(usergrainvalue), ==, 1);
 
+    gwy_user_grain_value_set_same_units(usergrainvalue,
+                                        GWY_GRAIN_VALUE_SAME_UNITS_LATERAL);
+    g_assert_cmpuint(gwy_user_grain_value_get_same_units(usergrainvalue),
+                     ==, GWY_GRAIN_VALUE_SAME_UNITS_LATERAL);
+
     g_assert(!gwy_user_grain_value_get_is_angle(usergrainvalue));
-    g_assert(!gwy_user_grain_value_get_same_units(usergrainvalue));
 
     return usergrainvalue;
 }
@@ -178,7 +193,8 @@ test_user_grain_value_save(void)
     GWY_OBJECT_UNREF(usergrainvalue);
     user_grain_value_load_check("Bloat3", "Bloat", "The Bloat Group",
                                 "V_0/L_b0^3",
-                                -1, 1, FALSE, FALSE);
+                                -1, 0, 1,
+                                GWY_GRAIN_VALUE_SAME_UNITS_LATERAL, FALSE);
 }
 
 void
@@ -198,9 +214,11 @@ test_user_grain_value_serialize(void)
                     ==, "The Bloat Group");
     g_assert_cmpstr(gwy_user_grain_value_get_formula(usergrainvalue),
                     ==, "V_0/L_b0^3");
-    g_assert_cmpint(gwy_user_grain_value_get_power_xy(usergrainvalue), ==, -1);
+    g_assert_cmpint(gwy_user_grain_value_get_power_x(usergrainvalue), ==, -1);
+    g_assert_cmpint(gwy_user_grain_value_get_power_y(usergrainvalue), ==, 0);
     g_assert_cmpint(gwy_user_grain_value_get_power_z(usergrainvalue), ==, 1);
-    g_assert(!gwy_user_grain_value_get_same_units(usergrainvalue));
+    g_assert_cmpuint(gwy_user_grain_value_get_same_units(usergrainvalue),
+                     ==, GWY_GRAIN_VALUE_SAME_UNITS_LATERAL);
     g_assert(!gwy_user_grain_value_get_is_angle(usergrainvalue));
 
     g_object_unref(usergrainvalue);

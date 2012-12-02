@@ -872,7 +872,10 @@ set_cf_units(const GwyField *field,
              GwyLine *line,
              GwyLine *weights)
 {
-    gwy_unit_assign(gwy_line_get_unit_x(line), field->priv->unit_x);
+    // XXX: This assumes line is newly allocated and does not ever need to
+    // clear previously set units.
+    if (field->priv->unit_x)
+        gwy_unit_assign(gwy_line_get_unit_x(line), field->priv->unit_x);
     gwy_unit_power_multiply(gwy_line_get_unit_y(line),
                             field->priv->unit_x, 1,
                             field->priv->unit_z, 2);

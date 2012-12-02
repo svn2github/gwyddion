@@ -287,35 +287,50 @@ void
 test_field_units_assign(void)
 {
     GwyField *field = gwy_field_new(), *field2 = gwy_field_new();
-    GwyUnit *unit_xy = gwy_field_get_unit_xy(field);
+    GwyUnit *unit_x = gwy_field_get_unit_x(field);
+    GwyUnit *unit_y = gwy_field_get_unit_y(field);
     GwyUnit *unit_z = gwy_field_get_unit_z(field);
-    guint count_xy = 0;
+    guint count_x = 0;
+    guint count_y = 0;
     guint count_z = 0;
 
-    g_signal_connect_swapped(unit_xy, "changed",
-                             G_CALLBACK(record_signal), &count_xy);
+    g_signal_connect_swapped(unit_x, "changed",
+                             G_CALLBACK(record_signal), &count_x);
+    g_signal_connect_swapped(unit_y, "changed",
+                             G_CALLBACK(record_signal), &count_y);
     g_signal_connect_swapped(unit_z, "changed",
                              G_CALLBACK(record_signal), &count_z);
 
-    gwy_unit_set_from_string(gwy_field_get_unit_xy(field), "m", NULL);
-    g_assert_cmpuint(count_xy, ==, 1);
+    gwy_unit_set_from_string(gwy_field_get_unit_x(field), "m", NULL);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 0);
+    g_assert_cmpuint(count_z, ==, 0);
+
+    gwy_unit_set_from_string(gwy_field_get_unit_y(field), "m", NULL);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 0);
 
     gwy_unit_set_from_string(gwy_field_get_unit_z(field), "s", NULL);
-    g_assert_cmpuint(count_xy, ==, 1);
+    g_assert_cmpuint(count_x, ==, 1);
+    g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 1);
 
     gwy_field_assign(field, field2);
-    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_x, ==, 2);
+    g_assert_cmpuint(count_y, ==, 2);
     g_assert_cmpuint(count_z, ==, 2);
-    g_assert(gwy_field_get_unit_xy(field) == unit_xy);
+    g_assert(gwy_field_get_unit_x(field) == unit_x);
+    g_assert(gwy_field_get_unit_y(field) == unit_y);
     g_assert(gwy_field_get_unit_z(field) == unit_z);
 
     // Try again to see if the signal counts change.
     gwy_field_assign(field, field2);
-    g_assert_cmpuint(count_xy, ==, 2);
+    g_assert_cmpuint(count_x, ==, 2);
+    g_assert_cmpuint(count_y, ==, 2);
     g_assert_cmpuint(count_z, ==, 2);
-    g_assert(gwy_field_get_unit_xy(field) == unit_xy);
+    g_assert(gwy_field_get_unit_x(field) == unit_x);
+    g_assert(gwy_field_get_unit_y(field) == unit_y);
     g_assert(gwy_field_get_unit_z(field) == unit_z);
 
     g_object_unref(field2);
@@ -2958,58 +2973,35 @@ test_field_compatibility_real(void)
 void
 test_field_compatibility_units(void)
 {
-    GwyField *field1 = gwy_field_new();
-    GwyField *field2 = gwy_field_new();
-    GwyField *field3 = gwy_field_new();
+    enum { N = 4 };
+    static const GwyFieldCompatFlags incompat[N] = {
+        0,
+        GWY_FIELD_COMPAT_X,
+        GWY_FIELD_COMPAT_Y,
+        GWY_FIELD_COMPAT_VALUE,
+    };
+    GwyField *fields[N];
+    for (guint i = 0; i < N; i++)
+        fields[i] = gwy_field_new();
 
-    gwy_unit_set_from_string(gwy_field_get_unit_xy(field1), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_z(field3), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_x(fields[1]), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_y(fields[2]), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_z(fields[3]), "m", NULL);
 
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPAT_LATERAL),
-                     ==, GWY_FIELD_COMPAT_LATERAL);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPAT_LATERAL),
-                     ==, GWY_FIELD_COMPAT_LATERAL);
+    for (guint tocheck = 0; tocheck <= GWY_FIELD_COMPAT_ALL; tocheck++) {
+        for (guint i = 0; i < N; i++) {
+            for (guint j = 0; j < N; j++) {
+                GwyFieldCompatFlags expected = ((i == j) ? 0
+                                                : incompat[i] | incompat[j]);
+                g_assert_cmpuint(gwy_field_is_incompatible(fields[i], fields[j],
+                                                           tocheck),
+                                 ==, expected & tocheck);
+            }
+        }
+    }
 
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPAT_LATERAL),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPAT_LATERAL),
-                     ==, 0);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPAT_LATERAL),
-                     ==, GWY_FIELD_COMPAT_LATERAL);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPAT_LATERAL),
-                     ==, GWY_FIELD_COMPAT_LATERAL);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
-                                               GWY_FIELD_COMPAT_VALUE),
-                     ==, 0);
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
-                                               GWY_FIELD_COMPAT_VALUE),
-                     ==, 0);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
-                                               GWY_FIELD_COMPAT_VALUE),
-                     ==, GWY_FIELD_COMPAT_VALUE);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
-                                               GWY_FIELD_COMPAT_VALUE),
-                     ==, GWY_FIELD_COMPAT_VALUE);
-
-    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
-                                               GWY_FIELD_COMPAT_VALUE),
-                     ==, GWY_FIELD_COMPAT_VALUE);
-    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
-                                               GWY_FIELD_COMPAT_VALUE),
-                     ==, GWY_FIELD_COMPAT_VALUE);
-
-    g_object_unref(field1);
-    g_object_unref(field2);
-    g_object_unref(field3);
+    for (guint i = 0; i < N; i++)
+        g_object_unref(fields[i]);
 }
 
 void

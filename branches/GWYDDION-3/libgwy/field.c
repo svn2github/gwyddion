@@ -399,14 +399,14 @@ gwy_field_construct(GwySerializable *serializable,
     }
 
     if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
-                   != its[8].array_size)) {
+                   != its[9].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            // TRANSLATORS: Error message.
                            _("GwyField dimensions %u×%u do not match data size "
                              "%lu."),
                            its[0].value.v_uint32, its[1].value.v_uint32,
-                           (gulong)its[8].array_size);
+                           (gulong)its[9].array_size);
         goto fail;
     }
 

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -975,7 +975,8 @@ test_grain_value_user(void)
     gwy_user_grain_value_set_group(height, "User");
     gwy_user_grain_value_set_ident(height, "h_testlibgwy");
     gwy_user_grain_value_set_symbol(height, "h<sub>testlibwgy</sub>");
-    gwy_user_grain_value_set_power_xy(height, 0);
+    gwy_user_grain_value_set_power_x(height, 0);
+    gwy_user_grain_value_set_power_y(height, 0);
     gwy_user_grain_value_set_power_z(height, 1);
     gwy_user_grain_value_set_is_angle(height, FALSE);
     gwy_user_grain_value_set_same_units(height, FALSE);
