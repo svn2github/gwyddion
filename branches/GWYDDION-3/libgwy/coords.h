@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -139,6 +139,8 @@ void         gwy_coords_scale                (GwyCoords *coords,
                                               const gdouble *factors);
 void         gwy_coords_transpose            (GwyCoords *coords,
                                               GwyIntSet *indices,
+                                              const guint *permutation);
+void         gwy_coords_transpose_units      (GwyCoords *coords,
                                               const guint *permutation);
 void         gwy_coords_constrain_translation(const GwyCoords *coords,
                                               const GwyIntSet *indices,

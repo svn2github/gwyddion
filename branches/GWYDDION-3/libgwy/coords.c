@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -852,6 +852,10 @@ gwy_coords_scale(GwyCoords *coords,
  * For instance, to change @x to @y, @y to @z, and @z to @x the array should
  * be <literal>{1, 2, 0}</literal>.  Such permutation would correspond to
  * a clock-wise rotation of right-handed Cartesian coordinates.
+ *
+ * If you transpose all objects, e.g. because they refer to a #GwyField that
+ * is being transposed, you will probably want to also transpose the units
+ * with gwy_coords_transpose_units().
  **/
 void
 gwy_coords_transpose(GwyCoords *coords,
@@ -863,8 +867,69 @@ gwy_coords_transpose(GwyCoords *coords,
     g_return_if_fail(permutation);
 
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
-    g_return_if_fail(klass->scale);
+    g_return_if_fail(klass->transpose);
     klass->transpose(coords, indices, permutation);
+}
+
+/**
+ * gwy_coords_transpose_units:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @permutation: Array of GwyCoordsClass size @dimension specifying the mapping
+ *               of old coordinate indices to new coordinate indices.
+ *
+ * Remaps units for individual dimensions of a coords.
+ *
+ * See gwy_coords_transpose() for description of @permutation meaning.
+ **/
+void
+gwy_coords_transpose_units(GwyCoords *coords,
+                           const guint *permutation)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    g_return_if_fail(permutation);
+    Coords *priv = coords->priv;
+    if (!priv->units)
+        return;
+
+    GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
+    guint dimension = klass->dimension;
+
+    guint ndifferent = 0, diff[2];
+    for (guint i = 0; i < dimension; i++) {
+        if (permutation[i] != i) {
+            g_return_if_fail(permutation[i] < dimension);
+            if (ndifferent < 2)
+                diff[ndifferent] = i;
+            ndifferent++;
+        }
+    }
+
+    if (!ndifferent)
+        return;
+
+    g_return_if_fail(dimension > 1);
+    g_return_if_fail(ndifferent > 1);
+
+    // Handle the sane case of two swapped units first.
+    if (ndifferent == 2) {
+        guint i = diff[0], j = diff[1];
+        g_return_if_fail(permutation[j] == i && permutation[i] == j);
+        if (gwy_unit_equal(priv->units[i], priv->units[j]))
+            return;
+
+        ensure_units(priv, dimension, TRUE);
+        gwy_unit_swap(priv->units[i], priv->units[j]);
+        return;
+    }
+
+    GwyUnit *units[dimension];
+    ensure_units(priv, dimension, TRUE);
+    for (guint i = 0; i < dimension; i++)
+        units[i] = gwy_unit_duplicate(priv->units[i]);
+    for (guint i = 0; i < dimension; i++)
+        gwy_unit_assign(priv->units[permutation[i]], units[i]);
+    for (guint i = 0; i < dimension; i++)
+        g_object_unref(units[i]);
 }
 
 /**
@@ -1213,10 +1278,9 @@ gwy_coords_transpose_default(GwyCoords *coords,
     gdouble *data = (gdouble*)gwy_array_get_data(array);
     g_assert(dimension_map);
     g_assert(shape_size % dimension == 0);
-    // XXX: We require much more: that dimension_map is the sequence
-    // 0, 1, ..., dimension; possibly repeated several times.
-    // If not and it is just permuted, we might fix it by constructing the
-    // inverse dimension map here.
+    // We that dimension_map is the sequence 0, 1, ..., dimension; possibly
+    // repeated several times. If not and it is just permuted, we might fix it
+    // by constructing the inverse dimension map here.
 
     if (!indices) {
         guint n = gwy_array_size(array);
