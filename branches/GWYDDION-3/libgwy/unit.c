@@ -1612,6 +1612,10 @@ get_prefix(gint power)
  * |[
  * gwy_unit_set_from_string(gwy_field_get_unit_z(field), "nm", NULL);
  * ]|
+ * <para>Furthermore, the unit object returned by gwy_field_get_unit_z() (for
+ * instance) must be the same during the entire lifetime of the field.  This
+ * means objects owning units should never destroy them or replace with other
+ * unit objects; they can only change the value.</para>
  * </refsect2>
  **/
 
