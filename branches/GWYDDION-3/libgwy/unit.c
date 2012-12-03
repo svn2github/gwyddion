@@ -1039,7 +1039,7 @@ gwy_unit_nth_root(GwyUnit *unit,
     g_return_val_if_fail(ipower, FALSE);
 
     Unit *priv = unit->priv;
-    if (!op) {
+    if (gwy_unit_is_empty(op)) {
         gwy_unit_clear(unit);
         return TRUE;
     }
@@ -1110,11 +1110,11 @@ gwy_unit_power_multiply(GwyUnit *unit,
         gwy_unit_power(unit, op1, power1 + power2);
         return;
     }
-    if (!power1 || !op1 || gwy_unit_is_empty(op1)) {
+    if (!power1 || gwy_unit_is_empty(op1)) {
         gwy_unit_power(unit, op2, power2);
         return;
     }
-    if (!power2 || !op2 || gwy_unit_is_empty(op2)) {
+    if (!power2 || gwy_unit_is_empty(op2)) {
         gwy_unit_power(unit, op1, power1);
         return;
     }
