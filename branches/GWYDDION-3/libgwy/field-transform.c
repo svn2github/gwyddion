@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -371,6 +371,17 @@ gwy_field_transform_congruent(GwyField *field,
         propnames[n++] = "x-real";
         propnames[n++] = "y-real";
     }
+
+    Field *priv = field->priv;
+    if (!gwy_unit_equal(priv->unit_x, priv->unit_y)) {
+        if (!priv->unit_x)
+            priv->unit_x = gwy_unit_new();
+        if (!priv->unit_y)
+            priv->unit_y = gwy_unit_new();
+        gwy_unit_swap(priv->unit_x, priv->unit_y);
+    }
+    // In this order any notifications are emitted when everything is already
+    // in the final state.
     _gwy_notify_properties(G_OBJECT(field), propnames, n);
 }
 
@@ -406,10 +417,17 @@ gwy_field_new_congruent(const GwyField *field,
     guint dwidth = is_trans ? height : width;
     guint dheight = is_trans ? width : height;
     GwyField *part = gwy_field_new_sized(dwidth, dheight, FALSE);
+    const Field *priv = field->priv;
+    Field *ppriv = part->priv;
 
+    if (!gwy_unit_is_empty(priv->unit_x))
+        ppriv->unit_x = gwy_unit_duplicate(priv->unit_x);
+    if (!gwy_unit_is_empty(priv->unit_y))
+        ppriv->unit_y = gwy_unit_duplicate(priv->unit_y);
     if (is_trans) {
         part->xreal = height*gwy_field_dy(field);
         part->yreal = width*gwy_field_dx(field);
+        GWY_SWAP(GwyUnit*, ppriv->unit_x, ppriv->unit_y);
     }
     else {
         part->xreal = width*gwy_field_dx(field);
