@@ -128,6 +128,7 @@ unit/assign
 unit/arithmetic/simple
 unit/arithmetic/null
 unit/arithmetic/commutativity
+unit/swap
 unit/serialize
 unit/garbage
 unit/format/power10

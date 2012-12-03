@@ -397,6 +397,50 @@ test_unit_arithmetic_commutativity(void)
 }
 
 static void
+unit_assert_equal(const GwyUnit *unit, const GwyUnit *otherunit)
+{
+    g_assert(gwy_unit_equal(unit, otherunit));
+}
+
+void
+test_unit_swap(void)
+{
+    GwyUnit *u1 = gwy_unit_new_from_string("µm", NULL);
+    GwyUnit *u2 = gwy_unit_new_from_string("A/s", NULL);
+    GwyUnit *ref1 = gwy_unit_duplicate(u1);
+    GwyUnit *ref2 = gwy_unit_duplicate(u2);
+    guint changed1 = 0, changed2 = 0, changedref1 = 0, changedref2 = 0;
+
+    g_signal_connect_swapped(u1, "changed",
+                             G_CALLBACK(record_signal), &changed1);
+    g_signal_connect_swapped(u2, "changed",
+                             G_CALLBACK(record_signal), &changed2);
+    g_signal_connect_swapped(ref1, "changed",
+                             G_CALLBACK(record_signal), &changedref1);
+    g_signal_connect_swapped(ref2, "changed",
+                             G_CALLBACK(record_signal), &changedref2);
+    g_signal_connect(u1, "changed", G_CALLBACK(unit_assert_equal), ref2);
+    g_signal_connect(u2, "changed", G_CALLBACK(unit_assert_equal), ref1);
+
+    gwy_unit_swap(u1, u2);
+    g_assert_cmpuint(changed1, ==, 1);
+    g_assert_cmpuint(changed2, ==, 1);
+
+    gwy_unit_swap(u1, ref2);
+    g_assert_cmpuint(changed1, ==, 1);
+    g_assert_cmpuint(changedref2, ==, 0);
+
+    gwy_unit_swap(u2, ref1);
+    g_assert_cmpuint(changed2, ==, 1);
+    g_assert_cmpuint(changedref1, ==, 0);
+
+    g_object_unref(ref2);
+    g_object_unref(ref1);
+    g_object_unref(u2);
+    g_object_unref(u1);
+}
+
+static void
 test_unit_serialize_one(GwyUnit *unit1)
 {
     GwyUnit *unit2;

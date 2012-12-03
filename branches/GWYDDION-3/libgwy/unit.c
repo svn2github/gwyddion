@@ -518,6 +518,33 @@ gwy_unit_clear(GwyUnit *unit)
     }
 }
 
+/**
+ * gwy_unit_swap:
+ * @unit: A physical unit.
+ * @otherunit: Another physical unit.
+ *
+ * Swaps the contents of two physical units.
+ *
+ * The units are swapped atomically with respect to GwyUnit::changed
+ * signals emission: signals are emitted after both units have the new value.
+ *
+ * If the units are equal this functions reduces to no-op and no signals are
+ * emitted.
+ **/
+void
+gwy_unit_swap(GwyUnit *unit,
+              GwyUnit *otherunit)
+{
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(GWY_IS_UNIT(otherunit));
+    if (gwy_unit_equal(unit, otherunit))
+        return;
+
+    GWY_SWAP(GArray*, unit->priv->units, otherunit->priv->units);
+    g_signal_emit(unit, signals[SGNL_CHANGED], 0);
+    g_signal_emit(otherunit, signals[SGNL_CHANGED], 0);
+}
+
 static gboolean
 is_equal(const GArray *units, const GArray *op)
 {
