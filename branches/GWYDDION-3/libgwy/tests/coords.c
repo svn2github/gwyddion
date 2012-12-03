@@ -21,6 +21,7 @@
 
 typedef void (*VectorTransformFunc)(gdouble *xy, const gdouble *parameters);
 typedef void (*BitmaskTransformFunc)(gdouble *xy, guint bitmask);
+typedef void (*PermutationTransformFunc)(gdouble *xy, const guint *permutation);
 typedef GwyCoords* (*NewCoordsFunc)(void);
 
 /***************************************************************************
@@ -318,6 +319,7 @@ static void
 coords_transform_one(GType type,
                      VectorTransformFunc vector_transform_func,
                      BitmaskTransformFunc bitmask_transform_func,
+                     PermutationTransformFunc permutation_transform_func,
                      GwyCoordsTransformFlags transform)
 {
     GRand *rng = g_rand_new_with_seed(42);
@@ -347,6 +349,7 @@ coords_transform_one(GType type,
 
         gdouble parameters[dimension];
         gwy_clear(parameters, dimension);
+        guint permutation[dimension];
         guint bitmask = 0;
         if (transform == GWY_COORDS_TRANSFORM_TRANSLATE) {
             for (guint i = 0; i < dimension; i++)
@@ -360,6 +363,15 @@ coords_transform_one(GType type,
             do {
                 bitmask = g_rand_int_range(rng, 0, 1 << dimension);
             } while (!bitmask);
+        }
+        else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE) {
+            for (guint i = 0; i < dimension; i++)
+                permutation[i] = i;
+            for (guint i = 0; i < 30; i++) {
+                guint i1 = g_rand_int_range(rng, 0, dimension);
+                guint i2 = g_rand_int_range(rng, 0, dimension);
+                GWY_SWAP(guint, permutation[i1], permutation[i2]);
+            }
         }
         else {
             g_assert_not_reached();
@@ -399,6 +411,8 @@ coords_transform_one(GType type,
             gwy_coords_flip(coords, indices, bitmask);
         else if (transform == GWY_COORDS_TRANSFORM_SCALE)
             gwy_coords_scale(coords, indices, parameters);
+        else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE)
+            gwy_coords_transpose(coords, indices, permutation);
         else {
             g_assert_not_reached();
         }
@@ -410,6 +424,8 @@ coords_transform_one(GType type,
             gwy_coords_flip(alltrans, NULL, bitmask);
         else if (transform == GWY_COORDS_TRANSFORM_SCALE)
             gwy_coords_scale(alltrans, NULL, parameters);
+        else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE)
+            gwy_coords_transpose(alltrans, NULL, permutation);
         else {
             g_assert_not_reached();
         }
@@ -428,6 +444,8 @@ coords_transform_one(GType type,
                 vector_transform_func(xytrans, parameters);
             else if (transform == GWY_COORDS_TRANSFORM_FLIP)
                 bitmask_transform_func(xytrans, bitmask);
+            else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE)
+                permutation_transform_func(xytrans, permutation);
             else {
                 g_assert_not_reached();
             }
@@ -441,7 +459,8 @@ coords_transform_one(GType type,
                     g_assert_cmpfloat(xy[j], ==, xyref[j]);
                 }
                 gwy_assert_floatval(xyall[j], xytrans[j], 1e-15);
-                if (transform != GWY_COORDS_TRANSFORM_FLIP) {
+                if (transform != GWY_COORDS_TRANSFORM_FLIP
+                    && transform != GWY_COORDS_TRANSFORM_TRANSPOSE) {
                     g_assert_cmpfloat(xyall[j], !=, xyref[j]);
                 }
             }
@@ -458,6 +477,12 @@ coords_transform_one(GType type,
             for (guint i = 0; i < dimension; i++)
                 parameters[i] = 1.0/parameters[i];
         }
+        else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE) {
+            guint ipermutation[dimension];
+            for (guint i = 0; i < dimension; i++)
+                ipermutation[permutation[i]] = i;
+            gwy_assign(permutation, ipermutation, dimension);
+        }
         else {
             g_assert_not_reached();
         }
@@ -471,6 +496,8 @@ coords_transform_one(GType type,
             gwy_coords_flip(coords, indices, bitmask);
         else if (transform == GWY_COORDS_TRANSFORM_SCALE)
             gwy_coords_scale(coords, indices, parameters);
+        else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE)
+            gwy_coords_transpose(coords, indices, permutation);
         else {
             g_assert_not_reached();
         }
@@ -482,6 +509,8 @@ coords_transform_one(GType type,
             gwy_coords_flip(alltrans, NULL, bitmask);
         else if (transform == GWY_COORDS_TRANSFORM_SCALE)
             gwy_coords_scale(alltrans, NULL, parameters);
+        else if (transform == GWY_COORDS_TRANSFORM_TRANSPOSE)
+            gwy_coords_transpose(alltrans, NULL, permutation);
         else {
             g_assert_not_reached();
         }
@@ -630,7 +659,7 @@ void
 test_coords_point_translate(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_POINT,
-                         translate_point, NULL,
+                         translate_point, NULL, NULL,
                          GWY_COORDS_TRANSFORM_TRANSLATE);
 }
 
@@ -645,7 +674,7 @@ void
 test_coords_point_flip(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_POINT,
-                         NULL, flip_point,
+                         NULL, flip_point, NULL,
                          GWY_COORDS_TRANSFORM_FLIP);
 }
 
@@ -660,8 +689,25 @@ void
 test_coords_point_scale(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_POINT,
-                         scale_point, NULL,
+                         scale_point, NULL, NULL,
                          GWY_COORDS_TRANSFORM_SCALE);
+}
+
+static void
+transpose_point(gdouble *xy, const guint *permutation)
+{
+    if (permutation[0] == 0 && permutation[1] == 1)
+        return;
+    g_assert(permutation[0] == 1 && permutation[1] == 0);
+    GWY_SWAP(gdouble, xy[0], xy[1]);
+}
+
+void
+test_coords_point_transpose(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_POINT,
+                         NULL, NULL, transpose_point,
+                         GWY_COORDS_TRANSFORM_TRANSPOSE);
 }
 
 void
@@ -731,7 +777,7 @@ void
 test_coords_line_translate(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_LINE,
-                         translate_line, NULL,
+                         translate_line, NULL, NULL,
                          GWY_COORDS_TRANSFORM_TRANSLATE);
 }
 
@@ -748,7 +794,7 @@ void
 test_coords_line_flip(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_LINE,
-                         NULL, flip_line,
+                         NULL, flip_line, NULL,
                          GWY_COORDS_TRANSFORM_FLIP);
 }
 
@@ -765,8 +811,26 @@ void
 test_coords_line_scale(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_LINE,
-                         scale_line, NULL,
+                         scale_line, NULL, NULL,
                          GWY_COORDS_TRANSFORM_SCALE);
+}
+
+static void
+transpose_line(gdouble *xy, const guint *permutation)
+{
+    if (permutation[0] == 0 && permutation[1] == 1)
+        return;
+    g_assert(permutation[0] == 1 && permutation[1] == 0);
+    GWY_SWAP(gdouble, xy[0], xy[1]);
+    GWY_SWAP(gdouble, xy[2], xy[3]);
+}
+
+void
+test_coords_line_transpose(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_LINE,
+                         NULL, NULL, transpose_line,
+                         GWY_COORDS_TRANSFORM_TRANSPOSE);
 }
 
 void
@@ -836,7 +900,7 @@ void
 test_coords_rectangle_translate(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
-                         translate_rectangle, NULL,
+                         translate_rectangle, NULL, NULL,
                          GWY_COORDS_TRANSFORM_TRANSLATE);
 }
 
@@ -853,7 +917,7 @@ void
 test_coords_rectangle_flip(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
-                         NULL, flip_rectangle,
+                         NULL, flip_rectangle, NULL,
                          GWY_COORDS_TRANSFORM_FLIP);
 }
 
@@ -870,8 +934,26 @@ void
 test_coords_rectangle_scale(void)
 {
     coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
-                         scale_rectangle, NULL,
+                         scale_rectangle, NULL, NULL,
                          GWY_COORDS_TRANSFORM_SCALE);
+}
+
+static void
+transpose_rectangle(gdouble *xy, const guint *permutation)
+{
+    if (permutation[0] == 0 && permutation[1] == 1)
+        return;
+    g_assert(permutation[0] == 1 && permutation[1] == 0);
+    GWY_SWAP(gdouble, xy[0], xy[1]);
+    GWY_SWAP(gdouble, xy[2], xy[3]);
+}
+
+void
+test_coords_rectangle_transpose(void)
+{
+    coords_transform_one(GWY_TYPE_COORDS_RECTANGLE,
+                         NULL, NULL, transpose_rectangle,
+                         GWY_COORDS_TRANSFORM_TRANSPOSE);
 }
 
 void

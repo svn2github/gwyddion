@@ -127,6 +127,7 @@ unit/changed/arithmetic
 unit/assign
 unit/arithmetic/simple
 unit/arithmetic/null
+unit/arithmetic/nth-root
 unit/arithmetic/commutativity
 unit/swap
 unit/serialize
@@ -157,6 +158,7 @@ coords/point/delete-subset
 coords/point/translate
 coords/point/flip
 coords/point/scale
+coords/point/transpose
 coords/point/constrain-translation
 coords/line/new
 coords/line/finished
@@ -168,6 +170,7 @@ coords/line/delete-subset
 coords/line/translate
 coords/line/flip
 coords/line/scale
+coords/line/transpose
 coords/line/constrain-translation
 coords/rectangle/new
 coords/rectangle/finished
@@ -179,6 +182,7 @@ coords/rectangle/delete-subset
 coords/rectangle/translate
 coords/rectangle/flip
 coords/rectangle/scale
+coords/rectangle/transpose
 coords/rectangle/constrain-translation
 line/props
 line/data-changed

@@ -274,6 +274,8 @@ test_unit_arithmetic_null(void)
     gwy_unit_clear(u8);
     g_assert(gwy_unit_is_empty(u8));
 
+    gwy_unit_clear(NULL);
+
     g_object_unref(u1);
     g_object_unref(u2);
     g_object_unref(u3);
@@ -282,6 +284,50 @@ test_unit_arithmetic_null(void)
     g_object_unref(u6);
     g_object_unref(u7);
     g_object_unref(u8);
+}
+
+void
+test_unit_arithmetic_nth_root(void)
+{
+    GwyUnit *u1, *u2, *u3, *u4, *u5, *u6;
+
+    u1 = gwy_unit_new_from_string("m^6/s^3", NULL);
+    u2 = gwy_unit_new();
+    g_assert(gwy_unit_nth_root(u2, u1, 3));
+    u3 = gwy_unit_new_from_string("m^2/s", NULL);
+    g_assert(gwy_unit_equal(u2, u3));
+
+    g_assert(gwy_unit_nth_root(u2, u1, -3));
+    u4 = gwy_unit_new_from_string("s/m^2", NULL);
+    g_assert(gwy_unit_equal(u2, u4));
+
+    u5 = gwy_unit_duplicate(u2);
+    g_assert(!gwy_unit_nth_root(u2, u1, 2));
+    g_assert(gwy_unit_equal(u2, u5));
+
+    g_assert(gwy_unit_nth_root(u2, u1, 1));
+    g_assert(gwy_unit_equal(u2, u5));
+
+    g_assert(gwy_unit_nth_root(u2, u1, -1));
+    gwy_unit_power(u5, u1, -1);
+    g_assert(gwy_unit_equal(u2, u5));
+
+    u6 = gwy_unit_new();
+    g_assert(gwy_unit_nth_root(u2, u6, 1));
+    g_assert(gwy_unit_equal(u2, u6));
+    g_assert(gwy_unit_nth_root(u2, u6, -2));
+    g_assert(gwy_unit_equal(u2, u6));
+    g_assert(gwy_unit_nth_root(u2, u6, 17));
+    g_assert(gwy_unit_equal(u2, u6));
+    g_assert(gwy_unit_nth_root(u2, NULL, -5));
+    g_assert(gwy_unit_equal(u2, u6));
+
+    g_object_unref(u1);
+    g_object_unref(u2);
+    g_object_unref(u3);
+    g_object_unref(u4);
+    g_object_unref(u5);
+    g_object_unref(u6);
 }
 
 void
