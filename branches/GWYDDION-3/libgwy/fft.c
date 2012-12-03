@@ -3,10 +3,6 @@
  *  Copyright (C) 2009 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
- *  The quicksort algorithm was copied from GNU C library,
- *  Copyright (C) 1991, 1992, 1996, 1997, 1999 Free Software Foundation, Inc.
- *  See below.
- *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
