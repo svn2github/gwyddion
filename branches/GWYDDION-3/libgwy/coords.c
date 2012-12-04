@@ -473,12 +473,12 @@ gwy_coords_dimension(const GwyCoords *coords)
  *
  * The unit map assigns physical units to each of the number describing a
  * single shape/object (i.e. the coordinate).  The units can be obtained with
- * gwy_coords_get_units().
+ * gwy_coords_get_unit().
  *
  * For example, if the 2nd item in the returned item is 0 then the units
  * of the second number in the coords object can be obtained by
- * <literal>gwy_coords_get_units(coords, 0);</literal> which is the same
- * as <literal>gwy_coords_get_mapped_units(coords, 2);</literal>.
+ * <literal>gwy_coords_get_unit(coords, 0);</literal> which is the same
+ * as <literal>gwy_coords_get_mapped_unit(coords, 2);</literal>.
  *
  * This map is the same for all coords of a specific type.
  *
@@ -698,7 +698,7 @@ gwy_coords_filter(GwyCoords *coords,
 }
 
 /**
- * gwy_coords_get_units:
+ * gwy_coords_get_unit:
  * @coords: A group of coordinates of some geometrical objects.
  * @i: Dimension index.
  *
@@ -708,8 +708,8 @@ gwy_coords_filter(GwyCoords *coords,
  *          The units of the @i-th dimension.
  **/
 GwyUnit*
-gwy_coords_get_units(GwyCoords *coords,
-                     guint i)
+gwy_coords_get_unit(GwyCoords *coords,
+                    guint i)
 {
     g_return_val_if_fail(GWY_IS_COORDS(coords), NULL);
     guint dimension = GWY_COORDS_GET_CLASS(coords)->dimension;
@@ -722,7 +722,7 @@ gwy_coords_get_units(GwyCoords *coords,
 }
 
 /**
- * gwy_coords_get_mapped_units:
+ * gwy_coords_get_mapped_unit:
  * @coords: A group of coordinates of some geometrical objects.
  * @i: Coordinate index.
  *
@@ -732,8 +732,8 @@ gwy_coords_get_units(GwyCoords *coords,
  *          The units of the @i-th coordinate.
  **/
 GwyUnit*
-gwy_coords_get_mapped_units(GwyCoords *coords,
-                            guint i)
+gwy_coords_get_mapped_unit(GwyCoords *coords,
+                           guint i)
 {
     g_return_val_if_fail(GWY_IS_COORDS(coords), NULL);
     GwyCoordsClass *klass = GWY_COORDS_GET_CLASS(coords);
@@ -1472,7 +1472,7 @@ constrain_translation_func(gint value, gpointer user_data)
  *              object/shape.
  * @dimension: Number of different coodinates in the coords.
  * @dimension_map: Map assigning dimensios, corresponding also to indices
- *                 and used with gwy_coords_get_units(), to individual numbers
+ *                 and used with gwy_coords_get_unit(), to individual numbers
  *                 (coordinates) in the coords objects.  The generic
  *                 implementations of transformation methods use this array to
  *                 determine which coordinate corresponds to which offset,

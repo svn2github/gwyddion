@@ -124,9 +124,9 @@ void         gwy_coords_filter               (GwyCoords *coords,
                                               GwyCoordsFilterFunc filter,
                                               gpointer user_data);
 void         gwy_coords_finished             (GwyCoords *coords);
-GwyUnit*     gwy_coords_get_units            (GwyCoords *coords,
+GwyUnit*     gwy_coords_get_unit             (GwyCoords *coords,
                                               guint i)                            G_GNUC_PURE;
-GwyUnit*     gwy_coords_get_mapped_units     (GwyCoords *coords,
+GwyUnit*     gwy_coords_get_mapped_unit      (GwyCoords *coords,
                                               guint i)                            G_GNUC_PURE;
 void         gwy_coords_translate            (GwyCoords *coords,
                                               GwyIntSet *indices,

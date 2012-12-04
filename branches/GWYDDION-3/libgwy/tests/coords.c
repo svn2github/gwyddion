@@ -111,7 +111,7 @@ coords_units_one(GType type)
     g_assert_cmpuint(dimension, >, 0);
 
     for (guint i = 0; i < dimension; i++) {
-        GwyUnit *coord_unit = gwy_coords_get_units(coords, i);
+        GwyUnit *coord_unit = gwy_coords_get_unit(coords, i);
         g_assert(GWY_IS_UNIT(coord_unit));
         GwyUnit *unit = nth_unit(i);
         gwy_unit_assign(coord_unit, unit);
@@ -124,10 +124,10 @@ coords_units_one(GType type)
     for (guint i = 0; i < shape_size; i++) {
         guint mi = dimension_map[i];
         g_assert_cmpuint(mi, <, dimension);
-        g_assert(gwy_coords_get_mapped_units(coords, i)
-                 == gwy_coords_get_units(coords, mi));
+        g_assert(gwy_coords_get_mapped_unit(coords, i)
+                 == gwy_coords_get_unit(coords, mi));
         GwyUnit *unit = nth_unit(mi);
-        g_assert(gwy_unit_equal(gwy_coords_get_mapped_units(coords, i), unit));
+        g_assert(gwy_unit_equal(gwy_coords_get_mapped_unit(coords, i), unit));
         g_object_unref(unit);
     }
 
