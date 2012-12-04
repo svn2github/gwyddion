@@ -600,6 +600,57 @@ coords_constrain_translation_one(GType type)
     g_rand_free(rng);
 }
 
+// We have only two-dimensional coords at this moment.  So nothing else can be
+// tested.
+void
+test_coords_transpose_units_2(void)
+{
+    GwyCoords *coords;
+    GwyUnit *unit1, *unit2;
+    guint permutation[2];
+
+    coords = gwy_coords_point_new();
+    permutation[0] = 0;
+    permutation[1] = 1;
+    gwy_coords_transpose_units(coords, permutation);
+    permutation[0] = 1;
+    permutation[1] = 0;
+    gwy_coords_transpose_units(coords, permutation);
+    g_assert(gwy_unit_is_empty(gwy_coords_get_unit(coords, 0)));
+    g_assert(gwy_unit_is_empty(gwy_coords_get_unit(coords, 1)));
+    g_object_unref(coords);
+
+    coords = gwy_coords_point_new();
+    unit1 = gwy_unit_new_from_string("m", NULL);
+    gwy_unit_assign(gwy_coords_get_unit(coords, 0), unit1);
+    permutation[0] = 1;
+    permutation[1] = 0;
+    gwy_coords_transpose_units(coords, permutation);
+    g_assert(gwy_unit_is_empty(gwy_coords_get_unit(coords, 0)));
+    g_assert(gwy_unit_equal(gwy_coords_get_unit(coords, 1), unit1));
+    g_object_unref(unit1);
+    g_object_unref(coords);
+
+    coords = gwy_coords_point_new();
+    unit1 = gwy_unit_new_from_string("m", NULL);
+    unit2 = gwy_unit_new_from_string("A", NULL);
+    gwy_unit_assign(gwy_coords_get_unit(coords, 0), unit1);
+    gwy_unit_assign(gwy_coords_get_unit(coords, 1), unit2);
+    permutation[0] = 0;
+    permutation[1] = 1;
+    gwy_coords_transpose_units(coords, permutation);
+    g_assert(gwy_unit_equal(gwy_coords_get_unit(coords, 0), unit1));
+    g_assert(gwy_unit_equal(gwy_coords_get_unit(coords, 1), unit2));
+    permutation[0] = 1;
+    permutation[1] = 0;
+    gwy_coords_transpose_units(coords, permutation);
+    g_assert(gwy_unit_equal(gwy_coords_get_unit(coords, 0), unit2));
+    g_assert(gwy_unit_equal(gwy_coords_get_unit(coords, 1), unit1));
+    g_object_unref(unit2);
+    g_object_unref(unit1);
+    g_object_unref(coords);
+}
+
 /***************************************************************************
  *
  * CoordsPoint

@@ -184,6 +184,7 @@ coords/rectangle/flip
 coords/rectangle/scale
 coords/rectangle/transpose
 coords/rectangle/constrain-translation
+coords/transpose-units/2
 line/props
 line/data-changed
 line/units
