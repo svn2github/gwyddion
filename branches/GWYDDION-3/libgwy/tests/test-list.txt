@@ -305,6 +305,7 @@ field/process-quarters/masked/border
 field/process-quarters/masked/noborder
 field/mean
 field/rms
+field/meansq
 field/statistics
 field/median/include
 field/median/exclude

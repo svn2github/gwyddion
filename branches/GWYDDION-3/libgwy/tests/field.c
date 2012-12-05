@@ -2021,6 +2021,64 @@ test_field_rms(void)
 }
 
 void
+test_field_meansq(void)
+{
+    enum { max_size = 76 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble alpha = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble beta = g_rand_double_range(rng, -5.0, 5.0);
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
+
+        gdouble meansq, meansq_expected;
+        meansq = gwy_field_meansq(field, NULL, NULL, 0);
+        meansq_expected = (alpha*alpha/3.0 + beta*beta/3.0 + alpha*beta/2.0
+                           - alpha*alpha/(12.0*yres*yres)
+                           - beta*beta/(12.0*xres*xres));
+        gwy_assert_floatval(meansq, meansq_expected, 1e-9*meansq_expected);
+
+        field_randomize(field, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint m = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &fpart, FALSE);
+        gdouble meansq_include = gwy_field_meansq(field, &fpart,
+                                                  mask, GWY_MASK_INCLUDE);
+        gdouble meansq_exclude = gwy_field_meansq(field, &fpart,
+                                                  mask, GWY_MASK_EXCLUDE);
+        gdouble meansq_ignore = gwy_field_meansq(field, &fpart,
+                                                 mask, GWY_MASK_IGNORE);
+
+        if (m == 0) {
+            gwy_assert_floatval(meansq_exclude, meansq_ignore,
+                                1e-9*meansq_ignore);
+        }
+        else if (n == 0) {
+            gwy_assert_floatval(meansq_include, meansq_ignore,
+                                1e-9*meansq_ignore);
+        }
+        else {
+            // s = [Ms₁ + Ns₂]/(M+N)
+            gwy_assert_floatval((m*meansq_include + n*meansq_exclude)/(m+n),
+                                meansq_ignore, 1e-9*fabs(meansq_ignore));
+        }
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_field_statistics(void)
 {
     enum { max_size = 67 };
