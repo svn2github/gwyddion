@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -178,13 +178,18 @@ test_curve_serialize(void)
 {
     enum { max_size = 55 };
     GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = g_test_slow() ? 50 : 10;
+    gsize niter = g_test_slow() ? 50 : 20;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint res = g_rand_int_range(rng, 1, max_size);
         GwyCurve *original = gwy_curve_new_sized(res);
         curve_randomize(original, rng);
         GwyCurve *copy;
+
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_curve_get_unit_x(original), rng);
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_curve_get_unit_y(original), rng);
 
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                curve_assert_equal_object);

@@ -34,15 +34,16 @@ unit_randomize(GwyUnit *unit, GRand *rng)
     };
 
     gwy_unit_clear(unit);
-    while (g_rand_int_range(rng, 0, 10) > 3) {
+    GwyUnit *op = gwy_unit_new();
+    while (g_rand_int(rng) % 4) {
         guint i = g_rand_int_range(rng, 0, G_N_ELEMENTS(some_units));
-        GwyUnit *op = gwy_unit_new_from_string(some_units[i], NULL);
+        gwy_unit_set_from_string(op, some_units[i], NULL);
         if (g_rand_boolean(rng))
             gwy_unit_multiply(unit, unit, op);
         else
             gwy_unit_divide(unit, unit, op);
-        g_object_unref(op);
     }
+    g_object_unref(op);
 }
 
 void

@@ -379,7 +379,7 @@ test_brick_serialize(void)
 {
     enum { max_size = 25 };
     GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = g_test_slow() ? 50 : 10;
+    gsize niter = g_test_slow() ? 50 : 20;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint width = g_rand_int_range(rng, 1, max_size);
@@ -388,6 +388,15 @@ test_brick_serialize(void)
         GwyBrick *original = gwy_brick_new_sized(width, height, depth, FALSE);
         brick_randomize(original, rng);
         GwyBrick *copy;
+
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_brick_get_unit_x(original), rng);
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_brick_get_unit_y(original), rng);
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_brick_get_unit_z(original), rng);
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_brick_get_unit_w(original), rng);
 
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                brick_assert_equal_object);

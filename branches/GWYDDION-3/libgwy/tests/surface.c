@@ -157,13 +157,18 @@ test_surface_serialize(void)
 {
     enum { max_size = 55 };
     GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = g_test_slow() ? 50 : 10;
+    gsize niter = g_test_slow() ? 50 : 20;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint res = g_rand_int_range(rng, 1, max_size);
         GwySurface *original = gwy_surface_new_sized(res);
         surface_randomize(original, rng);
         GwySurface *copy;
+
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_surface_get_unit_xy(original), rng);
+        if (g_rand_int(rng) % 5)
+            unit_randomize(gwy_surface_get_unit_z(original), rng);
 
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                surface_assert_equal_object);

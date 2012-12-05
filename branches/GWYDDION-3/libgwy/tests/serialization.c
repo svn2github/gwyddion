@@ -896,8 +896,6 @@ values_are_equal(const GValue *value1,
     if (g_type_is_a(type, GWY_TYPE_UNIT)) {
         GObject *obj1 = g_value_get_object(value1),
                 *obj2 = g_value_get_object(value2);
-        if (!obj1 || !obj2)
-            return !obj1 && !obj2;
         return gwy_unit_equal(GWY_UNIT(obj1), GWY_UNIT(obj2));
     }
 
