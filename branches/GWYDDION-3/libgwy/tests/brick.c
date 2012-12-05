@@ -398,6 +398,13 @@ test_brick_serialize(void)
         if (g_rand_int(rng) % 5)
             unit_randomize(gwy_brick_get_unit_w(original), rng);
 
+        if (g_rand_int(rng) % 3 == 0)
+            gwy_brick_set_xoffset(original, g_rand_double(rng));
+        if (g_rand_int(rng) % 3 == 0)
+            gwy_brick_set_yoffset(original, g_rand_double(rng));
+        if (g_rand_int(rng) % 3 == 0)
+            gwy_brick_set_zoffset(original, g_rand_double(rng));
+
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                brick_assert_equal_object);
         serializable_assign(GWY_SERIALIZABLE(original),

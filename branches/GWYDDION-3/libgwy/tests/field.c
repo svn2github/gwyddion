@@ -358,6 +358,11 @@ test_field_serialize(void)
         if (g_rand_int(rng) % 5)
             unit_randomize(gwy_field_get_unit_z(original), rng);
 
+        if (g_rand_int(rng) % 3 == 0)
+            gwy_field_set_xoffset(original, g_rand_double(rng));
+        if (g_rand_int(rng) % 3 == 0)
+            gwy_field_set_yoffset(original, g_rand_double(rng));
+
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                field_assert_equal_object);
         serializable_assign(GWY_SERIALIZABLE(original),
