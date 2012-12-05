@@ -27,6 +27,25 @@
  ***************************************************************************/
 
 void
+unit_randomize(GwyUnit *unit, GRand *rng)
+{
+    static const gchar const *some_units[] = {
+        "m", "s", "A", "nN", "mV", "deg", "kg", "Hz"
+    };
+
+    gwy_unit_clear(unit);
+    while (g_rand_int_range(rng, 0, 10) > 3) {
+        guint i = g_rand_int_range(rng, 0, G_N_ELEMENTS(some_units));
+        GwyUnit *op = gwy_unit_new_from_string(some_units[i], NULL);
+        if (g_rand_boolean(rng))
+            gwy_unit_multiply(unit, unit, op);
+        else
+            gwy_unit_divide(unit, unit, op);
+        g_object_unref(op);
+    }
+}
+
+void
 test_unit_parse(void)
 {
     gint pw1, pw2, pw3, pw4, pw5, pw6, pw7, pw8, pw9;
@@ -487,7 +506,7 @@ test_unit_swap(void)
 }
 
 static void
-test_unit_serialize_one(GwyUnit *unit1)
+unit_serialize_one(GwyUnit *unit1)
 {
     GwyUnit *unit2;
     GOutputStream *stream;
@@ -523,12 +542,12 @@ test_unit_serialize(void)
 
     /* Trivial unit */
     unit = gwy_unit_new();
-    test_unit_serialize_one(unit);
+    unit_serialize_one(unit);
     g_object_unref(unit);
 
     /* Less trivial unit */
     unit = gwy_unit_new_from_string("kg m s^-2/nA", NULL);
-    test_unit_serialize_one(unit);
+    unit_serialize_one(unit);
     g_object_unref(unit);
 }
 
@@ -553,18 +572,18 @@ test_unit_assign(void)
 void
 test_unit_garbage(void)
 {
+    enum { niter = 10000 };
     static const gchar *tokens[] = {
         "^", "+", "-", "/", "*", "<sup>", "</sup>", "10",
     };
     static const gchar characters[] = G_CSET_a_2_z G_CSET_A_2_Z G_CSET_DIGITS;
     GwyUnit *unit = gwy_unit_new();
 
-    gsize n = 10000;
     GString *garbage = g_string_new(NULL);
     GRand *rng = g_rand_new_with_seed(42);
 
     /* No checks.  The goal is not to crash... */
-    for (gsize i = 0; i < n; i++) {
+    for (gsize i = 0; i < niter; i++) {
         gsize ntoks = g_rand_int_range(rng, 0, 5) + g_rand_int_range(rng, 0, 7);
 
         g_string_truncate(garbage, 0);
@@ -589,6 +608,21 @@ test_unit_garbage(void)
     g_string_free(garbage, TRUE);
     g_rand_free(rng);
     g_object_unref(unit);
+}
+
+void
+test_unit_serialize_complex(void)
+{
+    enum { niter = 1000 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint i = 0; i < niter; i++) {
+        GwyUnit *unit = gwy_unit_new();
+        unit_randomize(unit, rng);
+        unit_serialize_one(unit);
+    }
+
+    g_rand_free(rng);
 }
 
 void

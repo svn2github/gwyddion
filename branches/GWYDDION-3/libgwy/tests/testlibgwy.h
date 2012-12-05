@@ -71,6 +71,8 @@ void          int_set_randomize_range       (GwyIntSet *intset,
                                              gint max);
 void          int_set_assert_equal          (const GwyIntSet *result,
                                              const GwyIntSet *reference);
+void          unit_randomize                (GwyUnit *unit,
+                                             GRand *rng);
 void          mask_line_print               (const gchar *name,
                                              const GwyMaskLine *maskline);
 GwyMaskField* random_mask_field             (guint xres,

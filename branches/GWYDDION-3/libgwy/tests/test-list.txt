@@ -131,6 +131,7 @@ unit/arithmetic/nth-root
 unit/arithmetic/commutativity
 unit/swap
 unit/serialize
+unit/serialize/complex
 unit/garbage
 unit/format/power10
 unit/format/digits
