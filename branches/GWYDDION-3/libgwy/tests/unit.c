@@ -621,6 +621,7 @@ test_unit_serialize_complex(void)
         GwyUnit *unit = gwy_unit_new();
         unit_randomize(unit, rng);
         unit_serialize_one(unit);
+        g_object_unref(unit);
     }
 
     g_rand_free(rng);
