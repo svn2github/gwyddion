@@ -259,9 +259,26 @@ master_cancel_one(guint nproc)
     }
 }
 
-// FIXME: This test occasionally (rarely) fails.  Apparently on the timeout?
-// Things are being cancelled before... before what exactly?  Funny thing if
-// it passes the multi-thread cancellation tests happily pass too.
+// FIXME: This test occasionally (rarely) fails.  Fun facts:
+//
+// - A method to reproduce within a reasonable time seems to be
+//   while ./tests/testlibgwy -p /testlibgwy/master; do :; done
+//
+// - It fails due to a deadlock in g_system_thread_new(), the call
+//   thread = g_slice_new0(GThreadPosix);
+//   never returns.
+//
+// - If it passes then the multi-thread cancellation tests always pass too.
+//   So perhaps this test is just unlucky because it's run first.
+//
+// - It does not deadlock with G_SLICE=always-malloc.
+//
+// - It does not deadlock if the test is run in the main test program, without
+//   forking.
+//
+// - It does not deadlock if just cancel/1 is run, it needs the other tests,
+//   possibly because they allocate and free data and get the slice allocator
+//   to some non-trivial (or broken) state.
 void
 test_master_cancel_1(void)
 {
