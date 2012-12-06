@@ -3119,6 +3119,107 @@ test_field_arithmetic_cache(void)
 }
 
 void
+test_field_arithmetic_fill(void)
+{
+    enum { max_size = 18, niter = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+    const gdouble x = GWY_SQRT3, y = -M_PI;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, TRUE);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyMaskField *mask = random_mask_field(width, height, rng);
+        guint n = gwy_mask_field_count(mask, NULL, TRUE);
+        gboolean empty = !n, full = (n == width*height);
+
+        gwy_field_fill(field, &fpart, mask, GWY_MASK_INCLUDE, x);
+        if (!empty)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_INCLUDE),
+                                x, 2e-15);
+        if (!full)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_EXCLUDE),
+                                0.0, 2e-15);
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                if (i < fpart.row || i >= fpart.row + fpart.height
+                    || j < fpart.col || j >= fpart.col + fpart.width)
+                    g_assert_cmpfloat(field->data[i*xres + j], ==, 0.0);
+            }
+        }
+
+        gwy_field_fill(field, &fpart, mask, GWY_MASK_EXCLUDE, x);
+        if (!empty)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_INCLUDE),
+                                x, 2e-15);
+        if (!full)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_EXCLUDE),
+                                x, 2e-15);
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                if (i < fpart.row || i >= fpart.row + fpart.height
+                    || j < fpart.col || j >= fpart.col + fpart.width)
+                    g_assert_cmpfloat(field->data[i*xres + j], ==, 0.0);
+            }
+        }
+
+        gwy_field_fill_full(field, y);
+        gwy_assert_floatval(gwy_field_mean_full(field), y, 1e-15);
+
+        gwy_field_clear(field, &fpart, mask, GWY_MASK_INCLUDE);
+        if (!empty)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_INCLUDE),
+                                0.0, 3e-15);
+        if (!full)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_EXCLUDE),
+                                y, 3e-15);
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                if (i < fpart.row || i >= fpart.row + fpart.height
+                    || j < fpart.col || j >= fpart.col + fpart.width)
+                    g_assert_cmpfloat(field->data[i*xres + j], ==, y);
+            }
+        }
+
+        gwy_field_clear(field, &fpart, mask, GWY_MASK_EXCLUDE);
+        if (!empty)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_INCLUDE),
+                                0.0, 3e-15);
+        if (!full)
+            gwy_assert_floatval(gwy_field_mean(field, &fpart,
+                                               mask, GWY_MASK_EXCLUDE),
+                                0.0, 3e-15);
+        for (guint i = 0; i < yres; i++) {
+            for (guint j = 0; j < xres; j++) {
+                if (i < fpart.row || i >= fpart.row + fpart.height
+                    || j < fpart.col || j >= fpart.col + fpart.width)
+                    g_assert_cmpfloat(field->data[i*xres + j], ==, y);
+            }
+        }
+
+        gwy_field_clear_full(field);
+        g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.0);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_field_arithmetic_clamp(void)
 {
     enum { max_size = 70 };
