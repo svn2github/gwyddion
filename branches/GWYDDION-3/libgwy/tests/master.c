@@ -259,26 +259,10 @@ master_cancel_one(guint nproc)
     }
 }
 
-// FIXME: This test occasionally (rarely) fails.  Fun facts:
-//
-// - A method to reproduce within a reasonable time seems to be
-//   while ./tests/testlibgwy -p /testlibgwy/master; do :; done
-//
-// - It fails due to a deadlock in g_system_thread_new(), the call
-//   thread = g_slice_new0(GThreadPosix);
-//   never returns.
-//
-// - If it passes then the multi-thread cancellation tests always pass too.
-//   So perhaps this test is just unlucky because it's run first.
-//
-// - It does not deadlock with G_SLICE=always-malloc.
-//
-// - It does not deadlock if the test is run in the main test program, without
-//   forking.
-//
-// - It does not deadlock if just cancel/1 is run, it needs the other tests,
-//   possibly because they allocate and free data and get the slice allocator
-//   to some non-trivial (or broken) state.
+// XXX: The cancellation tests occasionally (rarely) fail.  This is because
+// g_test_trap_fork() interacts badly with threads and should be avoided, see
+// https://bugzilla.gnome.org/show_bug.cgi?id=679683
+// It must rewritten once something better is available.
 void
 test_master_cancel_1(void)
 {
