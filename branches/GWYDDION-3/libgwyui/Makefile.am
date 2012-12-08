@@ -19,6 +19,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(top_builddir)/libgwy
 
 public_headers = \
 	$(srcdir)/adjust-bar.h \
+	$(srcdir)/array-store.h \
 	$(srcdir)/axis.h \
 	$(srcdir)/cairo-utils.h \
 	$(srcdir)/cell-renderer-gradient.h \
@@ -73,6 +74,7 @@ noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyui3_la_SOURCES = \
 	adjust-bar.c \
+	array-store.c \
 	axis.c \
 	cairo-utils.c \
 	cell-renderer-gradient.c \
