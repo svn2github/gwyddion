@@ -494,7 +494,7 @@ set_inventory(GwyInventoryStore *store,
  * gwy_inventory_store_get_inventory:
  * @store: An inventory store.
  *
- * Gets the inventory a inventory store wraps.
+ * Gets the inventory an inventory store wraps.
  *
  * Returns: (transfer none):
  *          The underlying inventory (its reference count is not increased).
@@ -511,8 +511,8 @@ gwy_inventory_store_get_inventory(const GwyInventoryStore *store)
  * @store: An inventory store.
  * @name: Trait (column) name.
  *
- * Finds the tree model column corresponding to given trait name in a inventory
- * store.
+ * Finds the tree model column corresponding to given trait name in an
+ * inventory store.
  *
  * The underlying inventory must support trait names, except for @name
  * <literal>"item"</literal> which always works (and always maps to 0).
@@ -548,7 +548,7 @@ gwy_inventory_store_find_column(const GwyInventoryStore *store,
  * @name: Item name.
  * @iter: Tree iterator to set to point to item named @name.
  *
- * Initializes a tree iterator to row the corresponding to a inventory item.
+ * Initializes a tree iterator to row the corresponding to an inventory item.
  *
  * Returns: %TRUE if @iter is valid, that is the item exists, %FALSE if @iter
  *          was not set.
