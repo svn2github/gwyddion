@@ -59,6 +59,8 @@ struct _GwyChoiceClass {
 
 GType        gwy_choice_get_type              (void)                             G_GNUC_CONST;
 GwyChoice*   gwy_choice_new                   (void)                             G_GNUC_MALLOC;
+GwyChoice*   gwy_choice_new_with_options      (const GwyChoiceOption *options,
+                                               guint n)                          G_GNUC_MALLOC;
 void         gwy_choice_set_active            (GwyChoice *choice,
                                                int active);
 gint         gwy_choice_get_active            (const GwyChoice *choice)          G_GNUC_PURE;
@@ -86,6 +88,7 @@ guint        gwy_choice_attach_to_grid        (GwyChoice *choice,
                                                gint left,
                                                gint top,
                                                guint width);
+GtkWidget*   gwy_choice_create_combo          (GwyChoice *choice)                G_GNUC_MALLOC;
 void         gwy_choice_set_translate_func    (GwyChoice *choice,
                                                GtkTranslateFunc func,
                                                gpointer data,

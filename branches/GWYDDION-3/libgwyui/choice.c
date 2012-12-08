@@ -82,6 +82,9 @@ static gboolean set_visible            (GwyChoice *choice,
                                         gboolean visible);
 static gboolean set_active             (GwyChoice *choice,
                                         gint active);
+static gboolean next_option            (GwyChoice *choice,
+                                        guint *i,
+                                        GwyChoiceOption *option);
 static void     update_proxies         (GwyChoice *choice);
 static gint     find_list_index        (const GwyChoice *choice,
                                         gint value);
@@ -92,6 +95,8 @@ static void     register_toggle_proxy  (GwyChoice *choice,
                                         gint value);
 static void     proxy_toggled          (GwyChoice *choice,
                                         GObject *toggle);
+static void     proxy_list_changed     (GwyChoice *choice,
+                                        GObject *list);
 static void     proxy_gone             (gpointer user_data,
                                         GObject *where_the_object_was);
 static GSList*  find_proxy             (const GwyChoice *choice,
@@ -227,6 +232,27 @@ GwyChoice*
 gwy_choice_new(void)
 {
     return g_object_newv(GWY_TYPE_CHOICE, 0, NULL);
+}
+
+/**
+ * gwy_choice_new_with_options:
+ * @options: (array length=n):
+ *           Array of options describing the options to add.  The array
+ *           contents is shallowly copied, i.e. ownership is not taken,
+ *           however, the strings within are assumed to be static.
+ * @n: Number of items in @options.
+ *
+ * Creates a new choice abstraction filled with options.
+ *
+ * Returns: A newly created choice abstraction.
+ **/
+GwyChoice*
+gwy_choice_new_with_options(const GwyChoiceOption *options,
+                            guint n)
+{
+    GwyChoice *choice = g_object_newv(GWY_TYPE_CHOICE, 0, NULL);
+    gwy_choice_add_options(choice, options, n);
+    return choice;
 }
 
 /**
@@ -431,35 +457,22 @@ GtkWidget**
 gwy_choice_create_menu_items(GwyChoice *choice)
 {
     g_return_val_if_fail(GWY_IS_CHOICE(choice), NULL);
-    Choice *priv = choice->priv;
-    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
-    guint n = priv->options->len;
+    guint n = choice->priv->options->len;
     GtkWidget **retval = g_new(GtkWidget*, n+1);
     GSList *group = NULL;
+    GwyChoiceOption option;
+    guint i = 0;
 
-    for (guint i = 0; i < n; i++) {
-        GwyChoiceOption *option = options + i;
-        GtkStockItem stock_item;
-        gwy_clear1(stock_item);
-        if (option->stock_id)
-            gtk_stock_lookup(option->stock_id, &stock_item);
-
-        const gchar *label = NULL;
-        if (option->label && *option->label)
-            label = gwy_choice_translate_string(choice, option->label);
-        else if (stock_item.label && *stock_item.label)
-            label = dgettext_swapped(stock_item.label,
-                                     stock_item.translation_domain);
-
+    while (next_option(choice, &i, &option)) {
         GtkWidget *widget;
-        if (label)
-           widget = gtk_radio_menu_item_new_with_mnemonic(group, label);
+        if (option.label)
+           widget = gtk_radio_menu_item_new_with_mnemonic(group, option.label);
         else
            widget = gtk_radio_menu_item_new(group);
 
-        register_toggle_proxy(choice, G_OBJECT(widget), option->value);
+        register_toggle_proxy(choice, G_OBJECT(widget), option.value);
         group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(widget));
-        retval[i] = widget;
+        retval[i-1] = widget;
     }
 
     retval[n] = NULL;
@@ -516,33 +529,20 @@ gwy_choice_create_buttons(GwyChoice *choice,
                           ...)
 {
     g_return_val_if_fail(GWY_IS_CHOICE(choice), NULL);
-    Choice *priv = choice->priv;
-    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
-    guint n = priv->options->len;
+    guint n = choice->priv->options->len;
     GtkWidget **retval = g_new(GtkWidget*, n+1);
     GSList *group = NULL;
+    GwyChoiceOption option;
+    guint i = 0;
 
-    for (guint i = 0; i < n; i++) {
-        GwyChoiceOption *option = options + i;
-        GtkStockItem stock_item;
-        gwy_clear1(stock_item);
-        if (option->stock_id)
-            gtk_stock_lookup(option->stock_id, &stock_item);
-
-        const gchar *label = NULL;
-        if (option->label && *option->label)
-            label = gwy_choice_translate_string(choice, option->label);
-        else if (stock_item.label && *stock_item.label)
-            label = dgettext_swapped(stock_item.label,
-                                     stock_item.translation_domain);
-
+    while (next_option(choice, &i, &option)) {
         GtkWidget *image = NULL;
-        if (stock_item.stock_id)
-            image = gtk_image_new_from_stock(stock_item.stock_id, icon_size);
+        if (option.stock_id)
+            image = gtk_image_new_from_stock(option.stock_id, icon_size);
 
         GtkWidget *widget;
-        if (label) {
-            widget = gtk_radio_button_new_with_mnemonic(group, label);
+        if (option.label) {
+            widget = gtk_radio_button_new_with_mnemonic(group, option.label);
             if (image)
                 gtk_button_set_image(GTK_BUTTON(widget), image);
         }
@@ -560,9 +560,9 @@ gwy_choice_create_buttons(GwyChoice *choice,
             va_end(ap);
         }
 
-        register_toggle_proxy(choice, G_OBJECT(widget), option->value);
+        register_toggle_proxy(choice, G_OBJECT(widget), option.value);
         group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(widget));
-        retval[i] = widget;
+        retval[i-1] = widget;
     }
 
     retval[n] = NULL;
@@ -601,6 +601,51 @@ gwy_choice_attach_to_grid(GwyChoice *choice,
     g_free(buttons);
 
     return n;
+}
+
+/**
+ * gwy_choice_create_combo:
+ * @choice: A choice.
+ *
+ * Creates combo box realisation of a choice.
+ *
+ * This realisation consists of a single widget.
+ *
+ * Returns: (transfer full):
+ *          A newly created #GtkComboBox widget.
+ **/
+GtkWidget*
+gwy_choice_create_combo(GwyChoice *choice)
+{
+    g_return_val_if_fail(GWY_IS_CHOICE(choice), NULL);
+    Choice *priv = choice->priv;
+    GtkWidget *retval = gtk_combo_box_text_new();
+    GtkComboBoxText *combo = GTK_COMBO_BOX_TEXT(retval);
+    GwyChoiceOption option;
+    guint i = 0;
+
+    while (next_option(choice, &i, &option))
+        gtk_combo_box_text_append(combo, NULL, option.label);
+
+    if (priv->list_index >= 0)
+        gtk_combo_box_set_active(GTK_COMBO_BOX(combo), priv->list_index);
+
+    if (!priv->sensitive)
+        gtk_widget_set_sensitive(retval, FALSE);
+
+    ChoiceProxy *proxy = g_slice_new(ChoiceProxy);
+    proxy->value = 0;
+    proxy->object = G_OBJECT(combo);
+    proxy->style = CHOICE_PROXY_LIST;
+
+    priv->proxies = g_slist_prepend(priv->proxies, proxy);
+    // Simulate @object taking a reference to @choice.
+    g_object_ref_sink(choice);
+    g_signal_connect_swapped(combo, "changed",
+                             G_CALLBACK(proxy_list_changed), choice);
+    g_object_weak_ref(proxy->object, proxy_gone, choice);
+
+    return retval;
 }
 
 /**
@@ -739,6 +784,39 @@ set_active(GwyChoice *choice,
     return TRUE;
 }
 
+static gboolean
+next_option(GwyChoice *choice, guint *i, GwyChoiceOption *option)
+{
+    Choice *priv = choice->priv;
+    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
+    guint n = priv->options->len;
+    gwy_clear(option, 1);
+    if (*i >= n)
+        return FALSE;
+
+    const GwyChoiceOption *opt = options + *i;
+    GtkStockItem stock_item;
+    gwy_clear1(stock_item);
+    if (opt->stock_id) {
+        gtk_stock_lookup(opt->stock_id, &stock_item);
+        options->stock_id = stock_item.stock_id;
+    }
+
+    if (opt->label && *opt->label)
+        option->label = gwy_choice_translate_string(choice, opt->label);
+    else if (stock_item.label && *stock_item.label)
+        option->label = dgettext_swapped(stock_item.label,
+                                         stock_item.translation_domain);
+
+    if (opt->tooltip && *opt->tooltip)
+        option->tooltip = gwy_choice_translate_string(choice, opt->tooltip);
+
+    option->value = opt->value;
+
+    (*i)++;
+    return TRUE;
+}
+
 static void
 update_proxies(GwyChoice *choice)
 {
@@ -783,9 +861,10 @@ find_list_index(const GwyChoice *choice,
                 gint value)
 {
     Choice *priv = choice->priv;
-    GArray *array = priv->options;
-    for (guint i = 0; i < array->len; i++) {
-        if (g_array_index(array, GwyChoiceOption, i).value == value)
+    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
+    guint n = priv->options->len;
+    for (guint i = 0; i < n; i++) {
+        if (options[i].value == value)
             return i;
     }
     return -1;
@@ -796,13 +875,9 @@ add_option_if_unique(GwyChoice *choice,
                      const GwyChoiceOption *option)
 {
     Choice *priv = choice->priv;
-    GwyChoiceOption *options = (GwyChoiceOption*)priv->options->data;
-    guint n = priv->options->len;
-    for (guint i = 0; i < n; i++) {
-        if (option->value == options[i].value) {
-            g_warning("Non-unique choice value %d, ignoring it.", option->value);
-            return;
-        }
+    if (find_list_index(choice, option->value) >= 0) {
+        g_warning("Non-unique choice value %d, ignoring it.", option->value);
+        return;
     }
     g_array_append_vals(priv->options, option, 1);
 }
@@ -848,6 +923,25 @@ proxy_toggled(GwyChoice *choice,
     g_return_if_fail(l);
     ChoiceProxy *proxy = (ChoiceProxy*)l->data;
     gwy_choice_set_active(choice, proxy->value);
+}
+
+static void
+proxy_list_changed(GwyChoice *choice,
+                   GObject *list)
+{
+    Choice *priv = choice->priv;
+    if (priv->in_update)
+        return;
+
+    gint state;
+    g_object_get(list, "active", &state, NULL);
+    // FIXME: Can this happen?
+    if (state < 0)
+        return;
+
+    g_return_if_fail((guint)state < priv->options->len);
+    gint value = g_array_index(priv->options, GwyChoiceOption, state).value;
+    gwy_choice_set_active(choice, value);
 }
 
 static void
