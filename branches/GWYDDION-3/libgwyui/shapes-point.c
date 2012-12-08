@@ -364,6 +364,10 @@ constrain_movement(GwyShapes *shapes,
     // bounding box.
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &eventx, &eventy);
+    GwyXY xy = { eventx, eventy };
+    gwy_shapes_snap(shapes, &xy);
+    eventx = xy.x;
+    eventy = xy.y;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
 
     gdouble d[2];
@@ -391,15 +395,19 @@ add_point(GwyShapes *shapes,
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
+    GwyXY xy = { x, y };
+    gwy_shapes_snap(shapes, &xy);
+    x = xy.x;
+    y = xy.y;
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
         return FALSE;
 
-    gdouble xy[2] = { x, y };
+    gdouble xy2[2] = { x, y };
     priv->hover = priv->clicked = n;
-    gwy_coords_set(coords, priv->clicked, xy);
+    gwy_coords_set(coords, priv->clicked, xy2);
     return TRUE;
 }
 
