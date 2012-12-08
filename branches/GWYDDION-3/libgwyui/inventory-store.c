@@ -94,8 +94,8 @@ static void              inventory_item_deleted             (GwyInventoryStore *
                                                              guint i);
 static void              inventory_items_reordered          (GwyInventoryStore *store,
                                                              gint *new_order);
-static void set_inventory(GwyInventoryStore *store,
-              GwyInventory *inventory);
+static void              set_inventory                      (GwyInventoryStore *store,
+                                                             GwyInventory *inventory);
 static gboolean          check_item                         (guint n,
                                                              gpointer item,
                                                              gpointer user_data);
