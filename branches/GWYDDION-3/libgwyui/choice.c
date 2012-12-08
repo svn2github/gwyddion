@@ -627,11 +627,12 @@ gwy_choice_create_combo(GwyChoice *choice)
     while (next_option(choice, &i, &option))
         gtk_combo_box_text_append(combo, NULL, option.label);
 
-    if (priv->list_index >= 0)
-        gtk_combo_box_set_active(GTK_COMBO_BOX(combo), priv->list_index);
-
     if (!priv->sensitive)
         gtk_widget_set_sensitive(retval, FALSE);
+    if (!priv->visible)
+        g_object_set(combo, "visible", FALSE, "no-show-all", TRUE, NULL);
+    if (priv->list_index >= 0)
+        gtk_combo_box_set_active(GTK_COMBO_BOX(combo), priv->list_index);
 
     ChoiceProxy *proxy = g_slice_new(ChoiceProxy);
     proxy->value = 0;
@@ -895,6 +896,8 @@ register_toggle_proxy(GwyChoice *choice,
 
     if (!priv->sensitive)
         g_object_set(object, "sensitive", FALSE, NULL);
+    if (!priv->visible)
+        g_object_set(object, "visible", FALSE, "no-show-all", TRUE, NULL);
     if (value == priv->active)
         g_object_set(object, "active", TRUE, NULL);
 
