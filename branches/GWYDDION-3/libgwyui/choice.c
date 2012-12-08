@@ -149,6 +149,7 @@ gwy_choice_init(GwyChoice *choice)
     Choice *priv = choice->priv;
     priv->options = g_array_new(FALSE, FALSE, sizeof(GwyChoiceOption));
     priv->list_index = -1;
+    priv->visible = TRUE;
     priv->sensitive = TRUE;
 }
 
