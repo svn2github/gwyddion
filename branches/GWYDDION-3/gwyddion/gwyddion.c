@@ -194,6 +194,21 @@ create_widget_test(void)
     gtk_grid_attach(grid, label, 0, 2, 1, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), entry);
 
+    GwyChoiceOption options[] = {
+        { NULL, "First", "First option", 1 },
+        { NULL, "Second", "Yes, another option", 2 },
+        { NULL, "Third", "You have so many choices!", 3 },
+    };
+    GwyChoice *choice = gwy_choice_new_with_options(options,
+                                                    G_N_ELEMENTS(options));
+    gwy_choice_set_active(choice, 2);
+    GtkWidget *combo = gwy_choice_create_combo(choice);
+    gtk_grid_attach(grid, combo, 1, 3, 2, 1);
+    label = gtk_label_new_with_mnemonic("_Choice:");
+    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    gtk_grid_attach(grid, label, 0, 3, 1, 1);
+    gtk_label_set_mnemonic_widget(GTK_LABEL(label), combo);
+
     return window;
 }
 
