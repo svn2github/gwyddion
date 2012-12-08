@@ -1819,6 +1819,10 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
         frect->width = width/xscale;
         frect->y = voffset/yscale;
         frect->height = height/yscale;
+        g_printerr("frect->x = %.16g\n", frect->x);
+        g_printerr("frect->y = %.16g\n", frect->y);
+        g_printerr("frect->width = %.16g\n", frect->width);
+        g_printerr("frect->height = %.16g\n", frect->height);
         // If we got outside the data first try to fix the adjustments and if
         // this does not help add padding.
         if (frect->x + frect->width > xres) {
@@ -1834,11 +1838,16 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
             }
         }
         if (frect->y + frect->height > yres) {
-            if (frect->y + frect->height - yres < 1e-6)
+            if (frect->y + frect->height - yres < 1e-6) {
+                g_printerr("Trying to fix rounding errors.\n");
                 frect->height = yres - frect->y;
-            else if (frect->height <= yres)
+            }
+            else if (frect->height <= yres) {
+                g_printerr("Trying to fix the adjustment.\n");
                 frect->y = yres - frect->height;
+            }
             else {
+                g_printerr("Adding padding.\n");
                 irect->height = full_height;
                 irect->y = (height - irect->height)/2;
                 frect->height = yres;
@@ -1864,6 +1873,10 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
         }
     }
 
+    g_printerr("frect->x = %.16g\n", frect->x);
+    g_printerr("frect->y = %.16g\n", frect->y);
+    g_printerr("frect->width = %.16g\n", frect->width);
+    g_printerr("frect->height = %.16g\n", frect->height);
     g_assert(frect->x >= 0.0);
     g_assert(frect->y >= 0.0);
     g_assert(frect->x + frect->width <= xres);
