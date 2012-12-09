@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #define __LIBGWYUI_H__
 
 #include <libgwyui/adjust-bar.h>
+#include <libgwyui/array-store.h>
 #include <libgwyui/axis.h>
 #include <libgwyui/cairo-utils.h>
 #include <libgwyui/cell-renderer-gradient.h>
