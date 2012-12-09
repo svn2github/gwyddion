@@ -1808,6 +1808,7 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
     gdouble voffset = priv->vadjustment
                       ? gtk_adjustment_get_value(priv->vadjustment)
                       : 0.0;
+    gdouble xeps = 1e-12*xres, yeps = 1e-12*yres;
 
     *irect = (cairo_rectangle_int_t){ 0, 0, width, height };
 
@@ -1821,11 +1822,13 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
         frect->height = height/yscale;
         // If we got outside the data first try to fix the adjustments and if
         // this does not help add padding.
-        if (frect->x + frect->width > xres) {
-            if (frect->x + frect->width - xres < 1e-6)
-                frect->width = xres - frect->x;
-            else if (frect->width <= xres)
-                frect->x = xres - frect->width;
+        if (frect->x + frect->width > xres - xeps) {
+            if (frect->x + frect->width - xres < 2.0*xeps)
+                frect->width = xres - frect->x - xeps;
+            else if (frect->width <= xres + xeps) {
+                frect->x = MAX(xres - frect->width, 0.0);
+                frect->width = xres - frect->x - xeps;
+            }
             else {
                 irect->width = full_width;
                 irect->x = (width - irect->width)/2;
@@ -1833,11 +1836,13 @@ calculate_position_and_size(GwyRasterArea *rasterarea)
                 frect->x = 0.0;
             }
         }
-        if (frect->y + frect->height > yres) {
-            if (frect->y + frect->height - yres < 1e-6)
-                frect->height = yres - frect->y;
-            else if (frect->height <= yres)
-                frect->y = yres - frect->height;
+        if (frect->y + frect->height > yres - yeps) {
+            if (frect->y + frect->height - yres < 2.0*yeps)
+                frect->height = yres - frect->y - yeps;
+            else if (frect->height <= yres + yeps) {
+                frect->y = MAX(yres - frect->height, 0.0);
+                frect->height = yres - frect->y - yeps;
+            }
             else {
                 irect->height = full_height;
                 irect->y = (height - irect->height)/2;
