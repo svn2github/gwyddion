@@ -38,6 +38,20 @@
         top left corner of the selection, otherwise the top left corner
         coordinates are set to <xi:include href="eqi-coords-0-0.xml"/>.
       </listitem>
+      <listitem id='extend'>
+        <indexterm><primary>extending</primary></indexterm>
+        Extend the data with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Extend</guimenuitem>
+        </menuchoice>.
+        Extending is essentially the opposite of cropping.  Of course, adding
+        more real data around the image borders is only possible by measuring
+        more data.  So this function offers, instead, several simple artificial
+        extension methods such as mirrored and unmirrored periodic continuation
+        or repetition of boundary values.
+      </listitem>
       <listitem id='rotate'>
         <indexterm>
           <primary>rotation</primary>
