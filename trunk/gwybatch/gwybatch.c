@@ -32,9 +32,9 @@
 /*
  * Load the necessary file modules.
  *
- * We need to register all "line" modules too as they define new objects that
+ * We need to register all "layer" modules too as they define new objects that
  * can be present in gwy files.  For non-gwy files it does not matter but there
- * is only a handful of "line" modules so just load them.
+ * is only a handful of "layer" modules so just load them.
  *
  * It would be nice to use gwy_app_init_common(), unfortunately, the GUI and
  * non-GUI stuff is not well-separated in Gwyddion 2.x, so this function does
