@@ -62,10 +62,10 @@ void               gwy_coords_view_set_coords_type     (GwyCoordsView *view,
                                                         GType type);
 GType              gwy_coords_view_get_coords_type     (const GwyCoordsView *view) G_GNUC_PURE;
 void               gwy_coords_view_set_dimension_format(GwyCoordsView *view,
-                                                        guint i,
+                                                        guint d,
                                                         GwyValueFormat *format);
 GwyValueFormat*    gwy_coords_view_get_dimension_format(const GwyCoordsView *view,
-                                                        guint i)                   G_GNUC_PURE;
+                                                        guint d)                   G_GNUC_PURE;
 GtkTreeViewColumn* gwy_coords_view_create_column_coord (GwyCoordsView *view,
                                                         guint i)                   G_GNUC_MALLOC;
 
