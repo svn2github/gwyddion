@@ -480,14 +480,14 @@ set_inventory(GwyInventoryStore *store,
         = g_signal_connect_swapped(inventory, "item-updated",
                                    G_CALLBACK(inventory_item_updated), store);
     priv->item_inserted_id
-        = g_signal_connect(inventory, "item-inserted",
-                           G_CALLBACK(inventory_item_inserted), store);
+        = g_signal_connect_swapped(inventory, "item-inserted",
+                                   G_CALLBACK(inventory_item_inserted), store);
     priv->item_deleted_id
-        = g_signal_connect(inventory, "item-deleted",
-                           G_CALLBACK(inventory_item_deleted), store);
+        = g_signal_connect_swapped(inventory, "item-deleted",
+                                   G_CALLBACK(inventory_item_deleted), store);
     priv->items_reordered_id
-        = g_signal_connect(inventory, "items-reordered",
-                         G_CALLBACK(inventory_items_reordered), store);
+        = g_signal_connect_swapped(inventory, "items-reordered",
+                                   G_CALLBACK(inventory_items_reordered), store);
 }
 
 /**

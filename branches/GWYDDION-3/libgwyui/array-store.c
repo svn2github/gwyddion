@@ -435,11 +435,11 @@ set_array(GwyArrayStore *store,
         = g_signal_connect_swapped(array, "item-updated",
                                    G_CALLBACK(array_item_updated), store);
     priv->item_inserted_id
-        = g_signal_connect(array, "item-inserted",
-                           G_CALLBACK(array_item_inserted), store);
+        = g_signal_connect_swapped(array, "item-inserted",
+                                   G_CALLBACK(array_item_inserted), store);
     priv->item_deleted_id
-        = g_signal_connect(array, "item-deleted",
-                           G_CALLBACK(array_item_deleted), store);
+        = g_signal_connect_swapped(array, "item-deleted",
+                                   G_CALLBACK(array_item_deleted), store);
 }
 
 /**
