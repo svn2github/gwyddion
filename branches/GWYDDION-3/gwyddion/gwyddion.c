@@ -120,6 +120,7 @@ create_raster_window(guint xres, guint yres)
     g_object_set(shapes,
                  "radius", 8.0,
                  "max-shapes", 5,
+                 "snapping", GWY_SHAPES_SNAP_CENTERS,
                  //"editable", FALSE,
                  NULL);
     gwy_shapes_set_coords(shapes, coords);
@@ -212,6 +213,35 @@ create_widget_test(void)
     return window;
 }
 
+static GtkWidget*
+create_coords_view_test(GwyRasterView *rasterview)
+{
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Coords View Test");
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    GwyRasterArea *area = gwy_raster_view_get_area(rasterview);
+    GwyField *field = gwy_raster_area_get_field(area);
+    GwyShapes *shapes = gwy_raster_area_get_shapes(area);
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    GtkWidget *widget = gwy_coords_view_new();
+    GwyCoordsView *view = GWY_COORDS_VIEW(widget);
+    gtk_container_add(GTK_CONTAINER(window), widget);
+    gwy_coords_view_set_coords_type(view, G_OBJECT_TYPE(coords));
+    GwyValueFormat *vf = gwy_field_format_xy(field, GWY_VALUE_FORMAT_PANGO);
+    gwy_coords_view_set_dimension_format(view, 0, vf);
+    gwy_coords_view_set_dimension_format(view, 1, vf);
+    for (guint i = 0; i < 2; i++) {
+        GtkTreeViewColumn *column = gwy_coords_view_create_column_coord(view,
+                                                                        i);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+    }
+    gwy_coords_view_set_coords(view, coords);
+
+    return window;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -241,6 +271,10 @@ main(int argc, char *argv[])
 
     GtkWidget *twindow = create_widget_test();
     gtk_widget_show_all(twindow);
+
+    GwyRasterView *view = GWY_RASTER_VIEW(gtk_bin_get_child(GTK_BIN(rwindow)));
+    GtkWidget *cwindow = create_coords_view_test(view);
+    gtk_widget_show_all(cwindow);
     //g_timeout_add(100, update, mix);
 
     gtk_main();
