@@ -151,7 +151,6 @@ gwy_array_store_init(GwyArrayStore *store)
 {
     store->priv = G_TYPE_INSTANCE_GET_PRIVATE(store, GWY_TYPE_ARRAY_STORE,
                                               ArrayStore);
-    store->priv->stamp = g_random_int();
 }
 
 static void
@@ -302,7 +301,6 @@ gwy_array_store_iter_children(GtkTreeModel *model,
         return FALSE;
 
     ArrayStore *priv = GWY_ARRAY_STORE(model)->priv;
-    g_assert((guint)parent->stamp == priv->stamp);
     if (!priv->cached_size)
         return FALSE;
 
@@ -340,7 +338,6 @@ gwy_array_store_iter_nth_child(GtkTreeModel *model,
         return FALSE;
 
     ArrayStore *priv = GWY_ARRAY_STORE(model)->priv;
-    g_assert((guint)parent->stamp == priv->stamp);
     if ((guint)n >= priv->cached_size)
         return FALSE;
 

@@ -152,7 +152,6 @@ gwy_inventory_store_init(GwyInventoryStore *store)
 {
     store->priv = G_TYPE_INSTANCE_GET_PRIVATE(store, GWY_TYPE_INVENTORY_STORE,
                                               InventoryStore);
-    store->priv->stamp = g_random_int();
 }
 
 static void
