@@ -237,7 +237,7 @@ create_coords_view_test(GwyRasterView *rasterview)
                                                                         i);
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     }
-    gwy_coords_view_set_coords(view, coords);
+    gwy_coords_view_set_shapes(view, shapes);
 
     return window;
 }
