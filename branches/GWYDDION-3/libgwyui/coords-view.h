@@ -73,7 +73,10 @@ void               gwy_coords_view_set_dimension_format(GwyCoordsView *view,
 GwyValueFormat*    gwy_coords_view_get_dimension_format(const GwyCoordsView *view,
                                                         guint d)                      G_GNUC_PURE;
 GtkTreeViewColumn* gwy_coords_view_create_column_coord (GwyCoordsView *view,
+                                                        const gchar *title,
                                                         guint i)                      G_GNUC_MALLOC;
+GtkTreeViewColumn* gwy_coords_view_create_column_index (GwyCoordsView *view,
+                                                        const gchar *title)           G_GNUC_MALLOC;
 
 G_END_DECLS
 

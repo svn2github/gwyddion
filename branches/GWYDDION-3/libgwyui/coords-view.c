@@ -20,6 +20,7 @@
 #include <glib/gi18n-lib.h>
 #include "libgwy/object-utils.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/rgba.h"
 #include "libgwyui/types.h"
 #include "libgwyui/coords-view.h"
 
@@ -28,6 +29,7 @@ enum {
     PROP_COORDS,
     PROP_SHAPES,
     PROP_SCALE_TYPE,
+    PROP_SPLIT_UNITS,
     N_PROPS,
 };
 
@@ -35,6 +37,7 @@ typedef struct {
     GtkTreeViewColumn *column;
     gchar *title;
     gint i;
+    gboolean is_index : 1;
 } ColumnInfo;
 
 typedef struct {
@@ -51,8 +54,10 @@ struct _GwyCoordsViewPrivate {
     DimInfo *dim_info;
     GSList *column_info;
     GwyCoordsClass *coords_class;
+    GwyValueFormat *pixel_format;
     GwyCoordScaleType scale_type;
     guint height;
+    gboolean split_units : 1;
     gboolean sync_view_to_shapes : 1;
     gboolean sync_shapes_to_view : 1;
 };
@@ -74,6 +79,11 @@ static void     render_value                (GtkTreeViewColumn *column,
                                              GtkTreeModel *model,
                                              GtkTreeIter *iter,
                                              gpointer user_data);
+static void     render_index                (GtkTreeViewColumn *column,
+                                             GtkCellRenderer *renderer,
+                                             GtkTreeModel *model,
+                                             GtkTreeIter *iter,
+                                             gpointer user_data);
 static gboolean set_shapes                  (GwyCoordsView *view,
                                              GwyShapes *shapes);
 static gboolean set_coords                  (GwyCoordsView *view,
@@ -82,6 +92,8 @@ static gboolean set_coords_type             (GwyCoordsView *view,
                                              GType type);
 static gboolean set_scale_type              (GwyCoordsView *view,
                                              GwyCoordScaleType scaletype);
+static gboolean set_split_units             (GwyCoordsView *view,
+                                             gboolean splitunits);
 static void     free_dim_info               (GwyCoordsView *view);
 static void     selection_changed           (GwyCoordsView *view,
                                              GtkTreeSelection *selection);
@@ -91,7 +103,8 @@ static void     shapes_coords_notify        (GwyCoordsView *view,
 static void     format_notify               (GwyCoordsView *view,
                                              GParamSpec *pspec,
                                              GwyValueFormat *vf);
-static void     recalc_column_titles        (GwyCoordsView *view,
+static void     recalc_column_titles        (GwyCoordsView *view);
+static void     recalc_column_titles_for_dim(GwyCoordsView *view,
                                              guint d);
 static void     update_column_title         (GwyCoordsView *view,
                                              ColumnInfo *column_info);
@@ -140,6 +153,13 @@ gwy_coords_view_class_init(GwyCoordsViewClass *klass)
                             GWY_COORD_SCALE_REAL,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_SPLIT_UNITS]
+        = g_param_spec_boolean("split-units",
+                               "Split units",
+                               "Whether units are split to the second line.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -150,6 +170,8 @@ gwy_coords_view_init(GwyCoordsView *view)
     view->priv = G_TYPE_INSTANCE_GET_PRIVATE(view, GWY_TYPE_COORDS_VIEW,
                                              CoordsView);
     CoordsView *priv = view->priv;
+    priv->split_units = TRUE;
+
     gint w, h;
     gtk_icon_size_lookup(GTK_ICON_SIZE_SMALL_TOOLBAR, &w, &h);
     priv->height = h;
@@ -179,6 +201,7 @@ gwy_coords_view_finalize(GObject *object)
     GwyCoordsView *view = GWY_COORDS_VIEW(object);
     CoordsView *priv = view->priv;
     free_dim_info(view);
+    GWY_OBJECT_UNREF(priv->pixel_format);
     // The columns should be already destroyed.
     g_assert(!priv->column_info);
     G_OBJECT_CLASS(gwy_coords_view_parent_class)->finalize(object);
@@ -203,6 +226,10 @@ gwy_coords_view_set_property(GObject *object,
 
         case PROP_SCALE_TYPE:
         set_scale_type(view, g_value_get_enum(value));
+        break;
+
+        case PROP_SPLIT_UNITS:
+        set_split_units(view, g_value_get_boolean(value));
         break;
 
         default:
@@ -231,6 +258,10 @@ gwy_coords_view_get_property(GObject *object,
 
         case PROP_SCALE_TYPE:
         g_value_set_enum(value, priv->scale_type);
+        break;
+
+        case PROP_SPLIT_UNITS:
+        g_value_set_boolean(value, priv->split_units);
         break;
 
         default:
@@ -300,7 +331,8 @@ gwy_coords_view_get_coords(const GwyCoordsView *view)
  * automatically.  Units and formats of columns managed by @view are
  * constructed to be useful for coordinates within @shapes bounding box.  They
  * also follow the real versus pixel scale setting.  Furthermore, @shapes
- * selection and @view selection becomes synchronised.
+ * selection and @view selection becomes synchronised and the selectability
+ * and editability of items in the list follows the shapes.
  **/
 void
 gwy_coords_view_set_shapes(GwyCoordsView *view,
@@ -421,6 +453,9 @@ gwy_coords_view_get_coords_type(const GwyCoordsView *view)
  * existing or created in the future.
  *
  * This method requires the coords type to be set.
+ *
+ * If @view displays shapes the coordinate value format is updated
+ * automatically.  A pixel format is used to display pixel values.
  **/
 void
 gwy_coords_view_set_dimension_format(GwyCoordsView *view,
@@ -459,7 +494,7 @@ gwy_coords_view_set_dimension_format(GwyCoordsView *view,
     }
 
     if (title_changed)
-        recalc_column_titles(view, d);
+        recalc_column_titles_for_dim(view, d);
 
     // Is this sufficient to re-render the cells?
     gtk_widget_queue_draw(GTK_WIDGET(view));
@@ -492,17 +527,19 @@ gwy_coords_view_get_dimension_format(const GwyCoordsView *view,
 /**
  * gwy_coords_view_create_column_coord:
  * @view: A coords view.
+ * @title: (allow-none):
+ *         Column title.  Passing %NULL means a column title will be
+ *         constructed automatically, containing something like "y₂".  If you
+ *         want an empty title pass the empty string.
  * @i: Coordinate index.
  *
- * Creates a standard column with coords names for a coords view.
- *
- * This method may be used with coords lists displaying any #GwyCoords
- * subclasses.
+ * Creates a standard column with coordinate values for a coords view.
  *
  * This method requires the coords type to be set.
  **/
 GtkTreeViewColumn*
 gwy_coords_view_create_column_coord(GwyCoordsView *view,
+                                    const gchar *title,
                                     guint i)
 {
     g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), NULL);
@@ -517,13 +554,56 @@ gwy_coords_view_create_column_coord(GwyCoordsView *view,
                                             GUINT_TO_POINTER(i), NULL);
 
     GtkWidget *header = gtk_label_new(NULL);
+    gtk_label_set_justify(GTK_LABEL(header), GTK_JUSTIFY_CENTER);
     gtk_widget_show(header);
     gtk_tree_view_column_set_widget(column, header);
 
     ColumnInfo *column_info = g_slice_new(ColumnInfo);
     column_info->column = column;
     column_info->i = i;
-    column_info->title = auto_column_title(priv, i);
+    column_info->title = title ? g_strdup(title) : auto_column_title(priv, i);
+    priv->column_info = g_slist_prepend(priv->column_info, column_info);
+    g_object_weak_ref(G_OBJECT(column), column_gone, view);
+    update_column_title(view, column_info);
+
+    return column;
+}
+
+/**
+ * gwy_coords_view_create_column_index:
+ * @view: A coords view.
+ * @title: (allow-none):
+ *         Column title.  Passing %NULL means a column title will be
+ *         constructed automatically, containing something like "n".  If you
+ *         want an empty title pass the empty string.
+ *
+ * Creates a standard column with item index for a coords view.
+ **/
+GtkTreeViewColumn*
+gwy_coords_view_create_column_index(GwyCoordsView *view,
+                                    const gchar *title)
+{
+    g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), NULL);
+    CoordsView *priv = view->priv;
+
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_fixed_size(renderer, -1, priv->height);
+    g_object_set(renderer, "foreground-set", TRUE, NULL);
+    GtkTreeViewColumn *column = gtk_tree_view_column_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(column), renderer, TRUE);
+    gtk_tree_view_column_set_cell_data_func(column, renderer, render_index,
+                                            NULL, NULL);
+
+    GtkWidget *header = gtk_label_new(NULL);
+    gtk_label_set_justify(GTK_LABEL(header), GTK_JUSTIFY_CENTER);
+    gtk_widget_show(header);
+    gtk_tree_view_column_set_widget(column, header);
+
+    ColumnInfo *column_info = g_slice_new(ColumnInfo);
+    column_info->column = column;
+    column_info->i = G_MAXUINT;
+    column_info->is_index = TRUE;
+    column_info->title = g_strdup(title ? title : "n");
     priv->column_info = g_slist_prepend(priv->column_info, column_info);
     g_object_weak_ref(G_OBJECT(column), column_gone, view);
     update_column_title(view, column_info);
@@ -610,7 +690,27 @@ set_scale_type(GwyCoordsView *view,
     if (!priv->shapes)
         return TRUE;
 
+    if (scaletype == GWY_COORD_SCALE_PIXEL) {
+        if (!priv->pixel_format)
+            priv->pixel_format
+                = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,
+                                           0, 1, " ", "px");
+    }
+
     // TODO: Update formats and headers.
+    return TRUE;
+}
+
+static gboolean
+set_split_units(GwyCoordsView *view,
+                gboolean splitunits)
+{
+    CoordsView *priv = view->priv;
+    if (!splitunits == !priv->split_units)
+        return FALSE;
+
+    priv->split_units = splitunits;
+    recalc_column_titles(view);
     return TRUE;
 }
 
@@ -644,10 +744,23 @@ render_value(GtkTreeViewColumn *column,
     CoordsView *priv = GWY_COORDS_VIEW(parent)->priv;
     guint i = GPOINTER_TO_UINT(user_data);
     guint d = priv->coords_class->dimension_map[i];
-    GwyValueFormat *vf = priv->dim_info[d].vf;
     gdouble *data = NULL;
     gtk_tree_model_get(model, iter, 1, &data, -1);
     gdouble value = data[i];
+    GwyValueFormat *vf = NULL;
+    const GwyShapes *shapes = priv->shapes;
+
+    if (priv->scale_type == GWY_COORD_SCALE_PIXEL && shapes) {
+        gdouble x = (d == 0) ? value : 0.0,
+                y = (d == 1) ? value : 0.0;
+        cairo_matrix_transform_point(&shapes->coords_to_view, &x, &y);
+        cairo_matrix_transform_point(&shapes->view_to_pixel, &x, &y);
+        value = (d == 0) ? x : y;
+        vf = priv->pixel_format;
+    }
+    else
+        vf = priv->dim_info[d].vf;
+
     if (vf) {
         const gchar *s = gwy_value_format_print_number(vf, value);
         g_object_set(renderer, "text", s, NULL);
@@ -657,6 +770,21 @@ render_value(GtkTreeViewColumn *column,
         g_snprintf(buf, sizeof(buf), "%g", value);
         g_object_set(renderer, "text", buf, NULL);
     }
+}
+
+static void
+render_index(G_GNUC_UNUSED GtkTreeViewColumn *column,
+             GtkCellRenderer *renderer,
+             GtkTreeModel *model,
+             GtkTreeIter *iter,
+             G_GNUC_UNUSED gpointer user_data)
+{
+    guint i;
+    gtk_tree_model_get(model, iter, 0, &i, -1);
+    gchar buf[16];
+    g_snprintf(buf, sizeof(buf), "%u", i+1);
+    const GwyRGBA *rgba = gwy_rgba_get_preset_color(i);
+    g_object_set(renderer, "text", buf, "foreground-rgba", rgba, NULL);
 }
 
 static void
@@ -689,8 +817,17 @@ format_notify(GwyCoordsView *view,
 }
 
 static void
-recalc_column_titles(GwyCoordsView *view,
-                     guint d)
+recalc_column_titles(GwyCoordsView *view)
+{
+    for (GSList *l = view->priv->column_info; l; l = g_slist_next(l)) {
+        ColumnInfo *column_info = (ColumnInfo*)l->data;
+        update_column_title(view, column_info);
+    }
+}
+
+static void
+recalc_column_titles_for_dim(GwyCoordsView *view,
+                             guint d)
 {
     CoordsView *priv = view->priv;
     const guint *dimension_map = priv->coords_class->dimension_map;
@@ -709,26 +846,33 @@ update_column_title(GwyCoordsView *view,
 {
     CoordsView *priv = view->priv;
     const gchar *title = column_info->title;
-    guint i = column_info->i;
-    guint d = priv->coords_class->dimension_map[i];
-    const gchar *units = priv->dim_info[d].units;
+    const gchar *units = NULL;
+
+    if (!column_info->is_index) {
+        guint i = column_info->i;
+        guint d = priv->coords_class->dimension_map[i];
+        units = priv->dim_info[d].units;
+    }
 
     gboolean has_title = title && *title;
     gboolean has_units = units && *units;
 
-    const gchar *s = "";
-    gchar *to_free = NULL;
+    const gchar *separ = priv->split_units ? "\n" : " ";
+    const gchar *nosepar = priv->split_units ? "\n" : "";
+    gchar *s = NULL;
 
     if (has_title && has_units)
-        s = to_free = g_strdup_printf("%s [%s]", title, units);
+        s = g_strconcat("<b>", title, "</b>", separ, "[", units, "]", NULL);
     else if (has_title)
-        s = title;
+        s = g_strconcat("<b>", title, "</b>", nosepar, NULL);
     else if (has_units)
-        s = to_free = g_strdup_printf("[%s]", units);
+        s = g_strconcat(nosepar, "[", units, "]", NULL);
+    else
+        s = g_strdup(nosepar);
 
     GtkWidget *header = gtk_tree_view_column_get_widget(column_info->column);
     gtk_label_set_markup(GTK_LABEL(header), s);
-    GWY_FREE(to_free);
+    g_free(s);
 }
 
 static gchar*
@@ -736,12 +880,16 @@ auto_column_title(const CoordsView *priv,
                   guint i)
 {
     static const gchar *const names[] = {
-        "X", "Y", "Z", "W", "V", "U"
+        "x", "y", "z", "w", "v", "u"
     };
 
-    const guint *dimension_map = priv->coords_class->dimension_map;
+    const GwyCoordsClass *coords_class = priv->coords_class;
+    const guint *dimension_map = coords_class->dimension_map;
     guint n = 0, d = dimension_map[i];
-    const gchar *var = (d < G_N_ELEMENTS(names)) ? names[d] : "T";
+    const gchar *var = (d < G_N_ELEMENTS(names)) ? names[d] : "t";
+
+    if (coords_class->dimension == coords_class->shape_size)
+        return g_strdup(var);
 
     for (guint k = 0; k <= i; k++) {
         if (dimension_map[k] == d)
@@ -786,7 +934,7 @@ find_column_info(const GwyCoordsView *view,
  * @short_description: List view displaying coordinates of shapes
  *
  * #GwyCoordsView displays a list of coordinates of some geometrical shapes
- * represented by a #GwyCoords object.  The underlying #GtkTreeViewModel is
+ * represented by a #GwyCoords object.  The underlying #GtkTreeModel is
  * a #GwyArrayStore created automatically for given coords object.  This array
  * store is destroyed and created anew whenever a different coords object is
  * set.  So if you show different #GwyCoords objects in a single #GwyCoordsView
@@ -797,7 +945,8 @@ find_column_info(const GwyCoordsView *view,
  * two-way synchronisation of the tree selection with shapes' selection.
  * Setting shapes with gwy_coords_view_set_shapes() automatically displays its
  * coords.  So do not use gwy_coords_view_set_coords() afterwards because it
- * would cause a switch back to plain #GwyCoords view.
+ * would cause a switch back to plain #GwyCoords view.  In this case, the
+ * coordinates must obviously be two-dimensional.
  *
  * Column setup methods such as gwy_coords_view_create_column_coord() create
  * tree view columns that are intended to be used only in the single widget
