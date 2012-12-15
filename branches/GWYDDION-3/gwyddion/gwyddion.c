@@ -232,9 +232,10 @@ create_coords_view_test(GwyRasterView *rasterview)
     GwyValueFormat *vf = gwy_field_format_xy(field, GWY_VALUE_FORMAT_PANGO);
     gwy_coords_view_set_dimension_format(view, 0, vf);
     gwy_coords_view_set_dimension_format(view, 1, vf);
+    GtkTreeViewColumn *column = gwy_coords_view_create_column_index(view, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     for (guint i = 0; i < 2; i++) {
-        GtkTreeViewColumn *column = gwy_coords_view_create_column_coord(view,
-                                                                        i);
+        column = gwy_coords_view_create_column_coord(view, NULL, i);
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     }
     gwy_coords_view_set_shapes(view, shapes);
