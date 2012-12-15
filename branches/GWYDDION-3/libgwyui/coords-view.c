@@ -19,13 +19,14 @@
 
 #include <glib/gi18n-lib.h>
 #include "libgwy/object-utils.h"
-#include "libgwy/gradient.h"
-#include "libgwyui/cell-renderer-gradient.h"
+#include "libgwyui/types.h"
 #include "libgwyui/coords-view.h"
 
 enum {
     PROP_0,
     PROP_COORDS,
+    PROP_SHAPES,
+    PROP_SCALE_TYPE,
     N_PROPS,
 };
 
@@ -43,11 +44,16 @@ typedef struct {
 
 struct _GwyCoordsViewPrivate {
     GwyArrayStore *store;
+    GwyShapes *shapes;
+    gulong shapes_coords_notify_id;
     GwyCoords *coords;
     DimInfo *dim_info;
     GSList *column_info;
     GwyCoordsClass *coords_class;
+    GwyRulerScaleType scale_type;
     guint height;
+    gboolean sync_view_to_shapes : 1;
+    gboolean sync_shapes_to_view : 1;
 };
 
 typedef struct _GwyCoordsViewPrivate CoordsView;
@@ -67,13 +73,20 @@ static void     render_value                (GtkTreeViewColumn *column,
                                              GtkTreeModel *model,
                                              GtkTreeIter *iter,
                                              gpointer user_data);
+static gboolean set_shapes                  (GwyCoordsView *view,
+                                             GwyShapes *shapes);
 static gboolean set_coords                  (GwyCoordsView *view,
                                              GwyCoords *coords);
 static gboolean set_coords_type             (GwyCoordsView *view,
                                              GType type);
+static gboolean set_scale_type              (GwyCoordsView *view,
+                                             GwyRulerScaleType scaletype);
 static void     free_dim_info               (GwyCoordsView *view);
 static void     selection_changed           (GwyCoordsView *view,
                                              GtkTreeSelection *selection);
+static void     shapes_coords_notify        (GwyCoordsView *view,
+                                             GParamSpec *pspec,
+                                             GwyShapes *shapes);
 static void     format_notify               (GwyCoordsView *view,
                                              GParamSpec *pspec,
                                              GwyValueFormat *vf);
@@ -109,7 +122,22 @@ gwy_coords_view_class_init(GwyCoordsViewClass *klass)
                               "Coords",
                               "Coords shown by the view.",
                               GWY_TYPE_COORDS,
-                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHAPES]
+        = g_param_spec_object("shapes",
+                              "Shapes",
+                              "Shapes shown by the view.",
+                              GWY_TYPE_SHAPES,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SCALE_TYPE]
+        = g_param_spec_enum("scale-type",
+                            "Scale type",
+                            "Type of coordinates scale.",
+                            GWY_TYPE_RULER_SCALE_TYPE,
+                            GWY_RULER_SCALE_REAL,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -135,7 +163,12 @@ gwy_coords_view_init(GwyCoordsView *view)
 static void
 gwy_coords_view_dispose(GObject *object)
 {
-    set_coords(GWY_COORDS_VIEW(object), NULL);
+    GwyCoordsView *view = GWY_COORDS_VIEW(object);
+    CoordsView *priv = view->priv;
+    if (priv->shapes)
+        set_shapes(view, NULL);
+    else
+        set_coords(view, NULL);
     G_OBJECT_CLASS(gwy_coords_view_parent_class)->dispose(object);
 }
 
@@ -163,6 +196,14 @@ gwy_coords_view_set_property(GObject *object,
         set_coords(view, g_value_get_object(value));
         break;
 
+        case PROP_SHAPES:
+        set_shapes(view, g_value_get_object(value));
+        break;
+
+        case PROP_SCALE_TYPE:
+        set_scale_type(view, g_value_get_enum(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -181,6 +222,14 @@ gwy_coords_view_get_property(GObject *object,
     switch (prop_id) {
         case PROP_COORDS:
         g_value_set_object(value, priv->coords);
+        break;
+
+        case PROP_SHAPES:
+        g_value_set_object(value, priv->shapes);
+        break;
+
+        case PROP_SCALE_TYPE:
+        g_value_set_enum(value, priv->scale_type);
         break;
 
         default:
@@ -205,7 +254,8 @@ gwy_coords_view_new(void)
 /**
  * gwy_coords_view_set_coords:
  * @view: A coords view.
- * @coords: Coordinates to display.
+ * @coords: (allow-none) (transfer full):
+ *          Coordinates to display.
  *
  * Sets the coordinates that a coords view displays.
  **/
@@ -226,14 +276,91 @@ gwy_coords_view_set_coords(GwyCoordsView *view,
  *
  * Gets the coordinates that a coords view displays.
  *
- * Returns: (transfer none):
- *          Coordinates displayed by @view.
+ * Returns: (allow-none) (transfer none):
+ *          Coordinates displayed by @view, either set explicitly with
+ *          gwy_coords_view_get_coords() or coming from a shapes object.
  **/
 GwyCoords*
 gwy_coords_view_get_coords(const GwyCoordsView *view)
 {
     g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), NULL);
     return view->priv->coords;
+}
+
+/**
+ * gwy_coords_view_set_shapes:
+ * @view: A coords view.
+ * @shapes: (allow-none) (transfer full):
+ *          Shapes to display coordinates of.
+ *
+ * Sets the shapes object whose coordinates a coords view will display.
+ *
+ * Setting the shapes causes several things to happen/start working
+ * automatically.  Units and formats of columns managed by @view are
+ * constructed to be useful for coordinates within @shapes bounding box.  They
+ * also follow the real versus pixel scale setting.  Furthermore, @shapes
+ * selection and @view selection becomes synchronised.
+ **/
+void
+gwy_coords_view_set_shapes(GwyCoordsView *view,
+                           GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_COORDS_VIEW(view));
+    if (!set_shapes(view, shapes))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(view), properties[PROP_SHAPES]);
+    // In principle, coords may remain the same.
+    g_object_notify_by_pspec(G_OBJECT(view), properties[PROP_COORDS]);
+}
+
+/**
+ * gwy_coords_view_get_shapes:
+ * @view: A coords view.
+ *
+ * Gets the shapes object whose coordinates a coords view displays.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          Shapes object displayed by @view, if any.
+ **/
+GwyShapes*
+gwy_coords_view_get_shapes(const GwyCoordsView *view)
+{
+    g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), NULL);
+    return view->priv->shapes;
+}
+
+/**
+ * gwy_coords_view_set_scale_type:
+ * @view: A coords view.
+ * @scaletype: New scale type for rulers.
+ *
+ * Sets the scale type of a coords view coordinates.
+ **/
+void
+gwy_coords_view_set_scale_type(GwyCoordsView *view,
+                               GwyRulerScaleType scaletype)
+{
+    g_return_if_fail(GWY_IS_COORDS_VIEW(view));
+    if (!set_scale_type(view, scaletype))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(view), properties[PROP_SCALE_TYPE]);
+}
+
+/**
+ * gwy_coords_view_get_scale_type:
+ * @view: A coords view.
+ *
+ * Gets the scale type of a coords view coordinates.
+ *
+ * Returns: The scale type of coords view coordinates.
+ **/
+GwyRulerScaleType
+gwy_coords_view_get_scale_type(const GwyCoordsView *view)
+{
+    g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), GWY_RULER_SCALE_PIXEL);
+    return view->priv->scale_type;
 }
 
 /**
@@ -404,12 +531,28 @@ gwy_coords_view_create_column_coord(GwyCoordsView *view,
 }
 
 static gboolean
+set_shapes(GwyCoordsView *view,
+           GwyShapes *shapes)
+{
+    CoordsView *priv = view->priv;
+    if (!gwy_set_member_object(view, shapes, GWY_TYPE_SHAPES, &priv->shapes,
+                               "notify::coords", shapes_coords_notify,
+                               &priv->shapes_coords_notify_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    set_coords(view, shapes ? gwy_shapes_get_coords(shapes) : NULL);
+    // TODO: Selection, ...
+    return TRUE;
+}
+
+static gboolean
 set_coords(GwyCoordsView *view,
            GwyCoords *coords)
 {
     CoordsView *priv = view->priv;
-    if (!gwy_set_member_object(view, coords, GWY_TYPE_COORDS,
-                               &priv->coords,
+    if (!gwy_set_member_object(view, coords, GWY_TYPE_COORDS, &priv->coords,
                                NULL))
         return FALSE;
 
@@ -446,6 +589,27 @@ set_coords_type(GwyCoordsView *view,
     guint dimension = priv->coords_class->dimension;
     priv->dim_info = g_slice_alloc0(dimension*sizeof(DimInfo));
 
+    return TRUE;
+}
+
+static gboolean
+set_scale_type(GwyCoordsView *view,
+               GwyRulerScaleType scaletype)
+{
+    CoordsView *priv = view->priv;
+    if (scaletype == priv->scale_type)
+        return FALSE;
+
+    if (scaletype > GWY_RULER_SCALE_PIXEL) {
+        g_warning("Wrong scale type %u.", scaletype);
+        return FALSE;
+    }
+
+    priv->scale_type = scaletype;
+    if (!priv->shapes)
+        return TRUE;
+
+    // TODO: Update formats and headers.
     return TRUE;
 }
 
@@ -501,6 +665,14 @@ selection_changed(GwyCoordsView *view,
     GtkTreeView *treeview = GTK_TREE_VIEW(view);
     GtkSelectionMode mode = gtk_tree_selection_get_mode(selection);
     GtkTreeIter iter;
+}
+
+static void
+shapes_coords_notify(GwyCoordsView *view,
+                     G_GNUC_UNUSED GParamSpec *pspec,
+                     GwyShapes *shapes)
+{
+    set_coords(view, gwy_shapes_get_coords(shapes));
 }
 
 static void
@@ -608,6 +780,20 @@ find_column_info(const GwyCoordsView *view,
  * SECTION: coords-view
  * @title: GwyCoordsView
  * @short_description: List view displaying coordinates of shapes
+ *
+ * #GwyCoordsView displays a list of coordinates of some geometrical shapes
+ * represented by a #GwyCoords object.  The underlying #GtkTreeViewModel is
+ * a #GwyArrayStore created automatically for given coords object.  This array
+ * store is destroyed and created anew whenever a different coords object is
+ * set.  So if you show different #GwyCoords objects in a single #GwyCoordsView
+ * remember that you cannot assume that its tree view model stays the same.
+ *
+ * Instead of displaying mere #GwyCoords, #GwyCoordsView can also display
+ * #GwyShapes which enables switching between real and pixel coordinates and
+ * two-way synchronisation of the tree selection with shapes' selection.
+ * Setting shapes with gwy_coords_view_set_shapes() automatically displays its
+ * coords.  So do not use gwy_coords_view_set_coords() afterwards because it
+ * would cause a switch back to plain #GwyCoords view.
  *
  * Column setup methods such as gwy_coords_view_create_column_coord() create
  * tree view columns that are intended to be used only in the single widget

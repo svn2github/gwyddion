@@ -20,8 +20,9 @@
 #ifndef __LIBGWYUI_COORDS_VIEW_H__
 #define __LIBGWYUI_COORDS_VIEW_H__
 
-#include <libgwy/coords.h>
 #include <libgwyui/array-store.h>
+#include <libgwyui/shapes.h>
+#include <libgwyui/raster-view.h>
 
 G_BEGIN_DECLS
 
@@ -58,6 +59,9 @@ GtkWidget*         gwy_coords_view_new                 (void)                   
 void               gwy_coords_view_set_coords          (GwyCoordsView *view,
                                                         GwyCoords *coords);
 GwyCoords*         gwy_coords_view_get_coords          (const GwyCoordsView *view) G_GNUC_PURE;
+void               gwy_coords_view_set_shapes          (GwyCoordsView *view,
+                                                        GwyShapes *shapes);
+GwyShapes*         gwy_coords_view_get_shapes          (const GwyCoordsView *view) G_GNUC_PURE;
 void               gwy_coords_view_set_coords_type     (GwyCoordsView *view,
                                                         GType type);
 GType              gwy_coords_view_get_coords_type     (const GwyCoordsView *view) G_GNUC_PURE;
