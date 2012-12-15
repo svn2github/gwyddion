@@ -10,11 +10,12 @@
     <itemizedlist>
       <listitem id="scale"><indexterm><primary>изменение масштаба</primary></indexterm><indexterm><primary>изменение числа точек</primary></indexterm> Изменить шаг точек данных к выбранным размерам или масштабировать используя выбранный метод интерполяции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Масштабировать</guimenuitem></menuchoice></listitem>
       <listitem id="crop"><indexterm><primary>кадрирование</primary></indexterm> Кадрировать данные используя <link linkend="tool-crop">Инструмент кадрирования</link> или на месте, или помещая результат в новый канал (с опцией <guilabel>Создать новый канал</guilabel>). С включенной опцией <guilabel>Сохранять пространственные смещения</guilabel>, координаты верхнего левого угла результирующего изображения соответствуют верхнему левому углу выбранной области, в противном случае, координаты верхнего левого угла устанавливаются в <xi:include href="eqi-coords-0-0.xml"/>.</listitem>
+      <listitem id="extend"><indexterm><primary>расширение</primary></indexterm> Расширить данные с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Расширить</guimenuitem></menuchoice>. Расширение фактически обратная операция к обрезке. Разумеется, добавить новые данные вокруг границы изображения можно только путём их измерения. Поэтому данная функция предлагает вместо этого несколько простых методов искусственного расширения, такие как зеркальное и незеркальное периодическое продолжение или повтор граничных значений.</listitem>
       <listitem id="rotate"><indexterm><primary>поворот</primary><secondary>на угол, кратный прямому</secondary></indexterm><indexterm><primary>поворот</primary><secondary>на заданный угол</secondary></indexterm> Повернуть данные на угол, кратный прямому или на произвольно заданный можно с помощью одной из функций поворота: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Повернуть по часовой</guimenuitem></menuchoice>, <guimenuitem>Повернуть против часовой</guimenuitem> или <guimenuitem>Поворот</guimenuitem>.</listitem>
       <listitem id="flip"><indexterm><primary>переворот</primary><secondary>горизонтально</secondary></indexterm><indexterm><primary>переворот</primary><secondary>вертикально</secondary></indexterm> Переворот данных горизонтально (т.е. относительно вертикальной оси) или вертикально (т.е. относительно горизонтальной оси) осуществляется с помощью функций <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть горизонтально</guimenuitem></menuchoice> и <guimenuitem>Перевернуть вертикально</guimenuitem>, соответственно.</listitem>
       <listitem id="flip-both">Отражение данных относительно центра (т.е. относительно обеих осей) осуществляется с помощью функции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть оба</guimenuitem></menuchoice>.</listitem>
       <listitem id="invert-value"><indexterm><primary>инверсия значений</primary></indexterm> Инверсию данных с помощью функции <guimenuitem>Инвертировать значение</guimenuitem>: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Инвертировать значение</guimenuitem></menuchoice>. Данные инвертируются относительно среднего, в результате среднее значение остаётся неизменным.</listitem>
-      <listitem id="limit-range">Ограничить диапазон данных обрезая данные вне заданного диапазона с помощью функции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Ограничить диапазон</guimenuitem></menuchoice>. Диапазон может быть задан численно или взят из диапазона псевдоцвета, заданного ранее используя <link linkend="color-range">инструмент <quote>Диапазон цвета</quote></link>. Также возможно отсечь части изображения, выступающие дальше, чем умноженное на заданое число среднеквадратичное отклонение от среднего.</listitem>
+      <listitem id="limit-range">Ограничить диапазон данных обрезая данные вне заданного диапазона с помощью функции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Ограничить диапазон</guimenuitem></menuchoice>. Диапазон может быть задан численно или взят из диапазона псевдоцвета, заданного ранее используя <link linkend="color-range">инструмент <quote>Диапазон цвета</quote></link>. Также возможно отсечь части изображения, выступающие дальше, чем умноженное на заданное число среднеквадратичное отклонение от среднего значения.</listitem>
       <listitem id="square-samples"><indexterm><primary>соотношение сторон</primary><secondary>пересчёт в квадратные пиксели</secondary></indexterm> Увеличить разрешение данных, чтобы сделать пиксели квадратными можно с помощью функции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Квадратный образец</guimenuitem></menuchoice>. В большинстве сканов пиксели имеют соотношение сторон 1:1, следовательно эта функция не действует на них.</listitem>
       <listitem id="tilt"><indexterm><primary>наклон</primary></indexterm> Наклонить данные на заданный градиент или угол используя функцию  <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Наклон</guimenuitem></menuchoice>.</listitem>
       <listitem id="dimensions-and-units">Можно изменить физические размеры, единицы измерения или масштабы значений, а также горизонтальные смещения используя функцию <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Размеры и единицы измерения</guimenuitem></menuchoice>. Это может быть полезно для исправления необработанных данных, которые были импортированы с неправильными физическими масштабами, или в качестве простой ручной перекалибровки размеров и значений.</listitem>
@@ -22,16 +23,25 @@
   </sect2>
   <sect2 id="basic-value-reading">
     <title>Считывание значений</title>
-    <para>Простейший способ чтения данных это поместить мышиный курсор поверх точки. в которой необходимо считать значение. Координаты при этом показываются в строке состояния <link linkend="data-windows">окна данных</link> или <link linkend="graph-windows">окна графика</link>.</para>
+    <para>Простейший способ чтения данных это поместить курсор мыши поверх точки, в которой необходимо считать значение. Координаты при этом показываются в строке состояния <link linkend="data-windows">окна данных</link> или <link linkend="graph-windows">окна графика</link>.</para>
     <sect3 id="read-value">
-      <title>Инструмент считать значение <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <title>
+        Read Value Tool
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
       <indexterm><primary>Инструмент чтения значения</primary></indexterm>
       <indexterm><primary>измерение уклона</primary></indexterm>
       <indexterm>
         <primary>наклон</primary>
         <secondary>чтение данных</secondary>
       </indexterm>
-      <para>Инструмент <guilabel>Считать значение</guilabel> предлагает больше вариантов чтения данных. Он показывает координаты и значения в последней точке окна данных, где была нажата кнопка мыши. Он может усреднить значение в круговой окрестности выбранной точки, это управляется опцией <guilabel>Радиус усреднения</guilabel>. Если этот радиус равен 1, показывается значение в единичной точке (как делает простейший метод). Кнопка <guibutton>Установить ноль</guibutton> сдвигает поверхность таким образом, чтобы сделать текущее <xi:include href="eqi-z.xml"/> новым нулевым уровнем.</para>
+      <para>Инструмент <guilabel>Считать значение</guilabel> предлагает больше вариантов считывания данных: он показывает координаты и значения в последней точке окна данных, где была нажата кнопка мыши. Он может усреднить значение в круговой окрестности выбранной точки, это управляется опцией <guilabel>Радиус усреднения</guilabel>. Если этот радиус равен 1, показывается значение в единичной точке (как делает простейший метод). Кнопка <guibutton>Установить ноль</guibutton> сдвигает поверхность таким образом, чтобы сделать текущее <include href="eqi-z.xml"/> новым нулевым уровнем.</para>
       <para><guilabel>Считать значение</guilabel> также может показывать наклон локальной грани. <guilabel>Радиус усреднения</guilabel> снова определяет радиус области, используемой для аппроксимации плоскостью.</para>
     </sect3>
     <sect3 id="inclinations-coordinates">
@@ -59,7 +69,16 @@
       </informalfigure>
     </sect3>
     <sect3 id="distance">
-      <title>Инструмент измерения расстояний <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_distance-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <title>
+        Distance Tool
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref="gwy_distance-24.png" format="PNG"/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
       <indexterm><primary>инструмент Расстояние</primary></indexterm>
       <indexterm><primary>измерение расстояний </primary></indexterm>
       <indexterm><primary>измерение углов</primary></indexterm>
@@ -79,7 +98,16 @@
     </sect3>
   </sect2>
   <sect2 id="profile">
-    <title>Извлечение профиля <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_profile-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <title>
+      Profile Extraction
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="gwy_profile-24.png" format="PNG"/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
     <indexterm><primary>извлечение профиля</primary></indexterm>
     <para>Инструмент извлечения профиля доступен с панели инструментов. Можно использовать мышь для рисования нескольких профилей на изображении, которые впоследствии могут быть перемещены и выровнены. Диалоговое окно включает в себя мгновенный предпросмотр графика. Профили могут быть различной <quote>толщины</quote>, что означает использование большего числа точек данных в направлении поперёк направления профиля для расчёта точки профиля для более широких профилей. Это может быть весьма полезно для уменьшения шума при измерении объектов правильной формы.</para>
     <para>После того, как профили выбраны, они могут быть извлечены в графики (как отдельные, так и сгруппированные в одном окне графика), которые в свою очередь могут быть проанализированы соответствующими функциями.</para>
