@@ -204,7 +204,7 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
     properties[PROP_SCALE_TYPE]
         = g_param_spec_enum("scale-type",
                             "Scale type",
-                            "Scale type of rulers.",
+                            "Type of rulers scale.",
                             GWY_TYPE_RULER_SCALE_TYPE,
                             GWY_RULER_SCALE_REAL,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -590,7 +590,7 @@ gwy_raster_view_get_color_axis(const GwyRasterView *rasterview)
  * @rasterview: A raster view.
  * @scaletype: New scale type for rulers.
  *
- * Sets the scale type of raster view rulers.
+ * Sets the scale type of a raster view rulers.
  **/
 void
 gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
@@ -600,18 +600,6 @@ gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
     if (!set_scale_type(rasterview, scaletype))
         return;
 
-    RasterView *priv = rasterview->priv;
-    if (scaletype == GWY_RULER_SCALE_PIXEL) {
-        gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->hruler)),
-                                 "px", NULL);
-        gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->vruler)),
-                                 "px", NULL);
-    }
-    else {
-        if (priv->field)
-            set_ruler_units_to_field(rasterview);
-    }
-
     g_object_notify_by_pspec(G_OBJECT(rasterview), properties[PROP_SCALE_TYPE]);
 }
 
@@ -619,7 +607,7 @@ gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
  * gwy_raster_view_get_scale_type:
  * @rasterview: A raster view.
  *
- * Gets the scale type of raster view rulers.
+ * Gets the scale type of a raster view rulers.
  *
  * Returns: The scale type used by rulers.
  **/
@@ -629,7 +617,6 @@ gwy_raster_view_get_scale_type(const GwyRasterView *rasterview)
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), GWY_RULER_SCALE_PIXEL);
     return rasterview->priv->scale_type;
 }
-
 
 static void
 area_notify(GwyRasterView *rasterview,
@@ -735,6 +722,17 @@ set_scale_type(GwyRasterView *rasterview,
 
     priv->scale_type = scaletype;
     update_ruler_ranges(rasterview);
+    if (scaletype == GWY_RULER_SCALE_PIXEL) {
+        gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->hruler)),
+                                 "px", NULL);
+        gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->vruler)),
+                                 "px", NULL);
+    }
+    else {
+        if (priv->field)
+            set_ruler_units_to_field(rasterview);
+    }
+
     return TRUE;
 }
 
@@ -823,6 +821,8 @@ update_ruler_ranges(GwyRasterView *rasterview)
         }
         else {
             // XXX: Whatever.
+            hrange.from = vrange.from = 0.0;
+            hrange.to = vrange.to = 1.0;
         }
     }
     gwy_axis_request_range(GWY_AXIS(priv->hruler), &hrange);
