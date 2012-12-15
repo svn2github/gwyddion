@@ -19,6 +19,7 @@
 
 #include <glib/gi18n-lib.h>
 #include "libgwy/object-utils.h"
+#include "libgwy/strfuncs.h"
 #include "libgwyui/types.h"
 #include "libgwyui/coords-view.h"
 
@@ -50,7 +51,7 @@ struct _GwyCoordsViewPrivate {
     DimInfo *dim_info;
     GSList *column_info;
     GwyCoordsClass *coords_class;
-    GwyRulerScaleType scale_type;
+    GwyCoordScaleType scale_type;
     guint height;
     gboolean sync_view_to_shapes : 1;
     gboolean sync_shapes_to_view : 1;
@@ -80,7 +81,7 @@ static gboolean set_coords                  (GwyCoordsView *view,
 static gboolean set_coords_type             (GwyCoordsView *view,
                                              GType type);
 static gboolean set_scale_type              (GwyCoordsView *view,
-                                             GwyRulerScaleType scaletype);
+                                             GwyCoordScaleType scaletype);
 static void     free_dim_info               (GwyCoordsView *view);
 static void     selection_changed           (GwyCoordsView *view,
                                              GtkTreeSelection *selection);
@@ -135,8 +136,8 @@ gwy_coords_view_class_init(GwyCoordsViewClass *klass)
         = g_param_spec_enum("scale-type",
                             "Scale type",
                             "Type of coordinates scale.",
-                            GWY_TYPE_RULER_SCALE_TYPE,
-                            GWY_RULER_SCALE_REAL,
+                            GWY_TYPE_COORD_SCALE_TYPE,
+                            GWY_COORD_SCALE_REAL,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
@@ -339,7 +340,7 @@ gwy_coords_view_get_shapes(const GwyCoordsView *view)
  **/
 void
 gwy_coords_view_set_scale_type(GwyCoordsView *view,
-                               GwyRulerScaleType scaletype)
+                               GwyCoordScaleType scaletype)
 {
     g_return_if_fail(GWY_IS_COORDS_VIEW(view));
     if (!set_scale_type(view, scaletype))
@@ -356,10 +357,10 @@ gwy_coords_view_set_scale_type(GwyCoordsView *view,
  *
  * Returns: The scale type of coords view coordinates.
  **/
-GwyRulerScaleType
+GwyCoordScaleType
 gwy_coords_view_get_scale_type(const GwyCoordsView *view)
 {
-    g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), GWY_RULER_SCALE_PIXEL);
+    g_return_val_if_fail(GWY_IS_COORDS_VIEW(view), GWY_COORD_SCALE_PIXEL);
     return view->priv->scale_type;
 }
 
@@ -594,13 +595,13 @@ set_coords_type(GwyCoordsView *view,
 
 static gboolean
 set_scale_type(GwyCoordsView *view,
-               GwyRulerScaleType scaletype)
+               GwyCoordScaleType scaletype)
 {
     CoordsView *priv = view->priv;
     if (scaletype == priv->scale_type)
         return FALSE;
 
-    if (scaletype > GWY_RULER_SCALE_PIXEL) {
+    if (scaletype > GWY_COORD_SCALE_PIXEL) {
         g_warning("Wrong scale type %u.", scaletype);
         return FALSE;
     }
@@ -665,6 +666,9 @@ selection_changed(GwyCoordsView *view,
     GtkTreeView *treeview = GTK_TREE_VIEW(view);
     GtkSelectionMode mode = gtk_tree_selection_get_mode(selection);
     GtkTreeIter iter;
+    CoordsView *priv = view->priv;
+    if (!priv->shapes)
+        return;
 }
 
 static void

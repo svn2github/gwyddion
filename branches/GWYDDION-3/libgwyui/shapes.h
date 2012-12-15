@@ -34,6 +34,11 @@ typedef enum {
 } GwyShapesStateType;
 
 typedef enum {
+    GWY_COORD_SCALE_REAL,
+    GWY_COORD_SCALE_PIXEL,
+} GwyCoordScaleType;
+
+typedef enum {
     GWY_SHAPES_SNAP_NONE    = 0,
     GWY_SHAPES_SNAP_CORNERS = 1,
     GWY_SHAPES_SNAP_CENTERS = 2,

@@ -22,7 +22,6 @@
 
 #include <libgwyui/array-store.h>
 #include <libgwyui/shapes.h>
-#include <libgwyui/raster-view.h>
 
 G_BEGIN_DECLS
 

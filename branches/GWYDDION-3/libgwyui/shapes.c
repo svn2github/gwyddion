@@ -1489,6 +1489,14 @@ selection_assigned(GwyShapes *shapes,
  **/
 
 /**
+ * GwyCoordScaleType:
+ * @GWY_COORD_SCALE_REAL: Rulers display real coordinates in physical units.
+ * @GWY_COORD_SCALE_PIXEL: Rulers display pixel coordinates.
+ *
+ * Type of rules scales (coordinates).
+ **/
+
+/**
  * GwyShapesSnappingType:
  * @GWY_SHAPES_SNAP_NONE: No snapping.
  * @GWY_SHAPES_SNAP_CORNERS: Coordinates are restricted to corners of pixels

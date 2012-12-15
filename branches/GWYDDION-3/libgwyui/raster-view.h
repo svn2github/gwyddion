@@ -28,11 +28,6 @@
 
 G_BEGIN_DECLS
 
-typedef enum {
-    GWY_RULER_SCALE_REAL,
-    GWY_RULER_SCALE_PIXEL,
-} GwyRulerScaleType;
-
 #define GWY_TYPE_RASTER_VIEW \
     (gwy_raster_view_get_type())
 #define GWY_RASTER_VIEW(obj) \
@@ -69,8 +64,8 @@ GtkScrollbar*     gwy_raster_view_get_hscrollbar(const GwyRasterView *rasterview
 GtkScrollbar*     gwy_raster_view_get_vscrollbar(const GwyRasterView *rasterview) G_GNUC_PURE;
 GwyColorAxis*     gwy_raster_view_get_color_axis(const GwyRasterView *rasterview) G_GNUC_PURE;
 void              gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
-                                                 GwyRulerScaleType scaletype);
-GwyRulerScaleType gwy_raster_view_get_scale_type(const GwyRasterView *rasterview) G_GNUC_PURE;
+                                                 GwyCoordScaleType scaletype);
+GwyCoordScaleType gwy_raster_view_get_scale_type(const GwyRasterView *rasterview) G_GNUC_PURE;
 
 G_END_DECLS
 

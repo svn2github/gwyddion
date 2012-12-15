@@ -57,7 +57,7 @@ typedef struct {
 } RangeControl;
 
 struct _GwyRasterViewPrivate {
-    GwyRulerScaleType scale_type;
+    GwyCoordScaleType scale_type;
 
     GwyScroller *scroller;
     GwyRasterArea *area;
@@ -122,7 +122,7 @@ static void       field_data_changed          (GwyRasterView *rasterview,
                                                const GwyFieldPart *fpart,
                                                GwyField *field);
 static gboolean   set_scale_type              (GwyRasterView *rasterview,
-                                               GwyRulerScaleType scale_type);
+                                               GwyCoordScaleType scale_type);
 static gboolean   set_hadjustment             (GwyRasterView *rasterview,
                                                GtkAdjustment *adjustment);
 static gboolean   set_vadjustment             (GwyRasterView *rasterview,
@@ -205,8 +205,8 @@ gwy_raster_view_class_init(GwyRasterViewClass *klass)
         = g_param_spec_enum("scale-type",
                             "Scale type",
                             "Type of rulers scale.",
-                            GWY_TYPE_RULER_SCALE_TYPE,
-                            GWY_RULER_SCALE_REAL,
+                            GWY_TYPE_COORD_SCALE_TYPE,
+                            GWY_COORD_SCALE_REAL,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SCROLLER]
@@ -269,7 +269,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
                                                    GWY_TYPE_RASTER_VIEW,
                                                    RasterView);
     RasterView *priv = rasterview->priv;
-    priv->scale_type = GWY_RULER_SCALE_REAL;
+    priv->scale_type = GWY_COORD_SCALE_REAL;
     priv->range_vf = gwy_value_format_new();
 
     GtkGrid *grid = GTK_GRID(rasterview);
@@ -594,7 +594,7 @@ gwy_raster_view_get_color_axis(const GwyRasterView *rasterview)
  **/
 void
 gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
-                               GwyRulerScaleType scaletype)
+                               GwyCoordScaleType scaletype)
 {
     g_return_if_fail(GWY_IS_RASTER_VIEW(rasterview));
     if (!set_scale_type(rasterview, scaletype))
@@ -611,10 +611,10 @@ gwy_raster_view_set_scale_type(GwyRasterView *rasterview,
  *
  * Returns: The scale type used by rulers.
  **/
-GwyRulerScaleType
+GwyCoordScaleType
 gwy_raster_view_get_scale_type(const GwyRasterView *rasterview)
 {
-    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), GWY_RULER_SCALE_PIXEL);
+    g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), GWY_COORD_SCALE_PIXEL);
     return rasterview->priv->scale_type;
 }
 
@@ -675,7 +675,7 @@ field_notify(GwyRasterView *rasterview,
         update_ruler_ranges(rasterview);
     }
     if (!pspec || gwy_stramong(pspec->name, "unit-x", "unit-y", NULL)) {
-        if (priv->scale_type == GWY_RULER_SCALE_REAL)
+        if (priv->scale_type == GWY_COORD_SCALE_REAL)
             set_ruler_units_to_field(rasterview);
     }
     if (!pspec || gwy_strequal(pspec->name, "unit-z")) {
@@ -709,20 +709,20 @@ field_data_changed(GwyRasterView *rasterview,
 
 static gboolean
 set_scale_type(GwyRasterView *rasterview,
-               GwyRulerScaleType scaletype)
+               GwyCoordScaleType scaletype)
 {
     RasterView *priv = rasterview->priv;
     if (scaletype == priv->scale_type)
         return FALSE;
 
-    if (scaletype > GWY_RULER_SCALE_PIXEL) {
+    if (scaletype > GWY_COORD_SCALE_PIXEL) {
         g_warning("Wrong scale type %u.", scaletype);
         return FALSE;
     }
 
     priv->scale_type = scaletype;
     update_ruler_ranges(rasterview);
-    if (scaletype == GWY_RULER_SCALE_PIXEL) {
+    if (scaletype == GWY_COORD_SCALE_PIXEL) {
         gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->hruler)),
                                  "px", NULL);
         gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->vruler)),
@@ -811,7 +811,7 @@ update_ruler_ranges(GwyRasterView *rasterview)
     gwy_raster_area_widget_area(rasterarea, &area);
     GwyRange hrange = { area.x, area.x + area.width };
     GwyRange vrange = { area.y, area.y + area.height };
-    if (priv->scale_type == GWY_RULER_SCALE_REAL) {
+    if (priv->scale_type == GWY_COORD_SCALE_REAL) {
         if (priv->field) {
             GwyField *field = priv->field;
             hrange.from = hrange.from/field->xres*field->xreal + field->xoff;
@@ -897,7 +897,7 @@ area_motion_notify(GwyRasterView *rasterview,
     RasterView *priv = rasterview->priv;
     gdouble x = event->x, y = event->y;
     const cairo_matrix_t *matrix;
-    if (priv->scale_type == GWY_RULER_SCALE_REAL) {
+    if (priv->scale_type == GWY_COORD_SCALE_REAL) {
         matrix = gwy_raster_area_get_widget_to_coords_matrix(area);
         cairo_matrix_transform_point(matrix, &x, &y);
     }
@@ -1261,8 +1261,8 @@ static GtkMenu*
 create_ruler_popup(GwyRasterView *rasterview)
 {
     static const GwyChoiceOption distance_options[] = {
-        { NULL, N_("Pixel Distances"), NULL, GWY_RULER_SCALE_PIXEL, },
-        { NULL, N_("Real Distances"),  NULL, GWY_RULER_SCALE_REAL,  },
+        { NULL, N_("Pixel Distances"), NULL, GWY_COORD_SCALE_PIXEL, },
+        { NULL, N_("Real Distances"),  NULL, GWY_COORD_SCALE_REAL,  },
     };
     static const GwyChoiceOption aspect_options[] = {
         { NULL, N_("Square Pixels"),     NULL, FALSE, },
@@ -1422,14 +1422,6 @@ range_value_set(GwyRasterView *rasterview,
  * GwyRasterViewClass:
  *
  * Class of two-dimensional raster views.
- **/
-
-/**
- * GwyRulerScaleType:
- * @GWY_RULER_SCALE_REAL: Rulers display real coordinates in physical units.
- * @GWY_RULER_SCALE_PIXEL: Rulers display pixel coordinates.
- *
- * Type of rules scales (coordinates).
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
