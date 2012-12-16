@@ -49,7 +49,11 @@ typedef struct {
 struct _GwyCoordsViewPrivate {
     GwyArrayStore *store;
     GwyShapes *shapes;
-    gulong shapes_coords_notify_id;
+    gulong shapes_notify_id;
+    GwyIntSet *shapes_selection;
+    gulong shapes_selection_added_id;
+    gulong shapes_selection_removed_id;
+    gulong shapes_selection_assigned_id;
     GwyCoords *coords;
     DimInfo *dim_info;
     GSList *column_info;
@@ -57,6 +61,7 @@ struct _GwyCoordsViewPrivate {
     GwyValueFormat *pixel_format;
     GwyCoordScaleType scale_type;
     guint height;
+    gboolean editable : 1;  // TODO: Make it a property
     gboolean split_units : 1;
     gboolean sync_view_to_shapes : 1;
     gboolean sync_shapes_to_view : 1;
@@ -64,56 +69,70 @@ struct _GwyCoordsViewPrivate {
 
 typedef struct _GwyCoordsViewPrivate CoordsView;
 
-static void     gwy_coords_view_dispose     (GObject *object);
-static void     gwy_coords_view_finalize    (GObject *object);
-static void     gwy_coords_view_set_property(GObject *object,
-                                             guint prop_id,
-                                             const GValue *value,
-                                             GParamSpec *pspec);
-static void     gwy_coords_view_get_property(GObject *object,
-                                             guint prop_id,
-                                             GValue *value,
-                                             GParamSpec *pspec);
-static void     render_value                (GtkTreeViewColumn *column,
-                                             GtkCellRenderer *renderer,
-                                             GtkTreeModel *model,
-                                             GtkTreeIter *iter,
-                                             gpointer user_data);
-static void     render_index                (GtkTreeViewColumn *column,
-                                             GtkCellRenderer *renderer,
-                                             GtkTreeModel *model,
-                                             GtkTreeIter *iter,
-                                             gpointer user_data);
-static gboolean set_shapes                  (GwyCoordsView *view,
-                                             GwyShapes *shapes);
-static gboolean set_coords                  (GwyCoordsView *view,
-                                             GwyCoords *coords);
-static gboolean set_coords_type             (GwyCoordsView *view,
-                                             GType type);
-static gboolean set_scale_type              (GwyCoordsView *view,
-                                             GwyCoordScaleType scaletype);
-static gboolean set_split_units             (GwyCoordsView *view,
-                                             gboolean splitunits);
-static void     free_dim_info               (GwyCoordsView *view);
-static void     selection_changed           (GwyCoordsView *view,
-                                             GtkTreeSelection *selection);
-static void     shapes_coords_notify        (GwyCoordsView *view,
-                                             GParamSpec *pspec,
-                                             GwyShapes *shapes);
-static void     format_notify               (GwyCoordsView *view,
-                                             GParamSpec *pspec,
-                                             GwyValueFormat *vf);
-static void     recalc_column_titles        (GwyCoordsView *view);
-static void     recalc_column_titles_for_dim(GwyCoordsView *view,
-                                             guint d);
-static void     update_column_title         (GwyCoordsView *view,
-                                             ColumnInfo *column_info);
-static gchar*   auto_column_title           (const CoordsView *priv,
-                                             guint i);
-static void     column_gone                 (gpointer data,
-                                             GObject *where_the_object_was);
-static GSList*  find_column_info            (const GwyCoordsView *view,
-                                             GtkTreeViewColumn *column);
+static void     gwy_coords_view_dispose      (GObject *object);
+static void     gwy_coords_view_finalize     (GObject *object);
+static void     gwy_coords_view_set_property (GObject *object,
+                                              guint prop_id,
+                                              const GValue *value,
+                                              GParamSpec *pspec);
+static void     gwy_coords_view_get_property (GObject *object,
+                                              guint prop_id,
+                                              GValue *value,
+                                              GParamSpec *pspec);
+static void     render_value                 (GtkTreeViewColumn *column,
+                                              GtkCellRenderer *renderer,
+                                              GtkTreeModel *model,
+                                              GtkTreeIter *iter,
+                                              gpointer user_data);
+static void     render_index                 (GtkTreeViewColumn *column,
+                                              GtkCellRenderer *renderer,
+                                              GtkTreeModel *model,
+                                              GtkTreeIter *iter,
+                                              gpointer user_data);
+static gboolean set_shapes                   (GwyCoordsView *view,
+                                              GwyShapes *shapes);
+static gboolean set_coords                   (GwyCoordsView *view,
+                                              GwyCoords *coords);
+static gboolean set_coords_type              (GwyCoordsView *view,
+                                              GType type);
+static gboolean set_scale_type               (GwyCoordsView *view,
+                                              GwyCoordScaleType scaletype);
+static gboolean set_split_units              (GwyCoordsView *view,
+                                              gboolean splitunits);
+static void     free_dim_info                (GwyCoordsView *view);
+static void     selection_changed            (GwyCoordsView *view,
+                                              GtkTreeSelection *selection);
+static void     shapes_notify                (GwyCoordsView *view,
+                                              GParamSpec *pspec,
+                                              GwyShapes *shapes);
+static void     format_notify                (GwyCoordsView *view,
+                                              GParamSpec *pspec,
+                                              GwyValueFormat *vf);
+static void     recalc_column_titles         (GwyCoordsView *view);
+static void     recalc_column_titles_for_dim (GwyCoordsView *view,
+                                              guint d);
+static void     update_column_title          (GwyCoordsView *view,
+                                              ColumnInfo *column_info);
+static gchar*   auto_column_title            (const CoordsView *priv,
+                                              guint i);
+static void     column_gone                  (gpointer data,
+                                              GObject *where_the_object_was);
+static GSList*  find_column_info             (const GwyCoordsView *view,
+                                              GtkTreeViewColumn *column);
+static void     shapes_selection_added       (GwyCoordsView *view,
+                                              gint n,
+                                              GwyIntSet *intset);
+static void     shapes_selection_removed     (GwyCoordsView *view,
+                                              gint n,
+                                              GwyIntSet *intset);
+static void     shapes_selection_assigned    (GwyCoordsView *view,
+                                              GwyIntSet *intset);
+static void     sync_selection_shapes_to_view(GwyCoordsView *view);
+static void     clear_selection              (GwyCoordsView *view);
+static void     select_or_unselect_range     (GtkTreeSelection *selection,
+                                              guint from,
+                                              guint to,
+                                              gboolean select);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -217,6 +236,7 @@ gwy_coords_view_set_property(GObject *object,
 
     switch (prop_id) {
         case PROP_COORDS:
+        set_shapes(view, NULL);
         set_coords(view, g_value_get_object(value));
         break;
 
@@ -296,6 +316,7 @@ gwy_coords_view_set_coords(GwyCoordsView *view,
                            GwyCoords *coords)
 {
     g_return_if_fail(GWY_IS_COORDS_VIEW(view));
+    set_shapes(view, NULL);
     if (!set_coords(view, coords))
         return;
 
@@ -617,14 +638,27 @@ set_shapes(GwyCoordsView *view,
 {
     CoordsView *priv = view->priv;
     if (!gwy_set_member_object(view, shapes, GWY_TYPE_SHAPES, &priv->shapes,
-                               "notify::coords", shapes_coords_notify,
-                               &priv->shapes_coords_notify_id,
+                               "notify", shapes_notify, &priv->shapes_notify_id,
                                G_CONNECT_SWAPPED,
                                NULL))
         return FALSE;
 
     set_coords(view, shapes ? gwy_shapes_get_coords(shapes) : NULL);
-    // TODO: Selection, ...
+
+    gwy_set_member_object(view, shapes ? shapes->selection : NULL,
+                          GWY_TYPE_INT_SET, &priv->shapes_selection,
+                          "added", shapes_selection_added,
+                          &priv->shapes_selection_added_id,
+                          G_CONNECT_SWAPPED,
+                          "removed", shapes_selection_removed,
+                          &priv->shapes_selection_removed_id,
+                          G_CONNECT_SWAPPED,
+                          "assigned", shapes_selection_assigned,
+                          &priv->shapes_selection_assigned_id,
+                          G_CONNECT_SWAPPED,
+                          NULL);
+    sync_selection_shapes_to_view(view);
+
     return TRUE;
 }
 
@@ -791,20 +825,38 @@ static void
 selection_changed(GwyCoordsView *view,
                   GtkTreeSelection *selection)
 {
+    CoordsView *priv = view->priv;
+    if (priv->sync_view_to_shapes || !priv->shapes)
+        return;
+
     GtkTreeView *treeview = GTK_TREE_VIEW(view);
     GtkSelectionMode mode = gtk_tree_selection_get_mode(selection);
     GtkTreeIter iter;
-    CoordsView *priv = view->priv;
-    if (!priv->shapes)
-        return;
 }
 
 static void
-shapes_coords_notify(GwyCoordsView *view,
-                     G_GNUC_UNUSED GParamSpec *pspec,
-                     GwyShapes *shapes)
+shapes_notify(GwyCoordsView *view,
+              GParamSpec *pspec,
+              GwyShapes *shapes)
 {
-    set_coords(view, gwy_shapes_get_coords(shapes));
+    CoordsView *priv = view->priv;
+
+    if (gwy_strequal(pspec->name, "coords"))
+        set_coords(view, gwy_shapes_get_coords(shapes));
+    else if (gwy_strequal(pspec->name, "editable"))
+        priv->editable = gwy_shapes_get_editable(shapes);
+    else if (gwy_strequal(pspec->name, "selectable")) {
+        GtkTreeView *treeview = GTK_TREE_VIEW(view);
+        GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+        if (gwy_shapes_get_selectable(shapes)) {
+            gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
+            sync_selection_shapes_to_view(view);
+        }
+        else {
+            clear_selection(view);
+            gtk_tree_selection_set_mode(selection, GTK_SELECTION_NONE);
+        }
+    }
 }
 
 static void
@@ -926,6 +978,133 @@ find_column_info(const GwyCoordsView *view,
             return l;
     }
     return NULL;
+}
+
+static void
+shapes_selection_added(GwyCoordsView *view,
+                       gint n,
+                       G_GNUC_UNUSED GwyIntSet *intset)
+{
+    CoordsView *priv = view->priv;
+    if (priv->sync_view_to_shapes)
+        return;
+
+    g_assert(n >= 0);
+    GtkTreeView *treeview = GTK_TREE_VIEW(view);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+    GtkTreeIter iter;
+    if (gwy_array_store_get_iter(priv->store, n, &iter)) {
+        priv->sync_shapes_to_view = TRUE;
+        gtk_tree_selection_select_iter(selection, &iter);
+        priv->sync_shapes_to_view = FALSE;
+    }
+    else
+        g_critical("Cannot get iter for item #%d", n);
+}
+
+static void
+shapes_selection_removed(GwyCoordsView *view,
+                         gint n,
+                         G_GNUC_UNUSED GwyIntSet *intset)
+{
+    CoordsView *priv = view->priv;
+    if (priv->sync_view_to_shapes)
+        return;
+
+    g_assert(n >= 0);
+    GtkTreeView *treeview = GTK_TREE_VIEW(view);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+    GtkTreeIter iter;
+    if (gwy_array_store_get_iter(priv->store, n, &iter)) {
+        priv->sync_shapes_to_view = TRUE;
+        gtk_tree_selection_unselect_iter(selection, &iter);
+        priv->sync_shapes_to_view = FALSE;
+    }
+    else
+        g_critical("Cannot get iter for item #%d", n);
+}
+
+static void
+shapes_selection_assigned(GwyCoordsView *view,
+                          G_GNUC_UNUSED GwyIntSet *intset)
+{
+    CoordsView *priv = view->priv;
+    if (priv->sync_view_to_shapes)
+        return;
+
+    sync_selection_shapes_to_view(view);
+}
+
+static void
+sync_selection_shapes_to_view(GwyCoordsView *view)
+{
+    CoordsView *priv = view->priv;
+
+    GwyShapes *shapes = priv->shapes;
+    if (!shapes) {
+        clear_selection(view);
+        return;
+    }
+
+    guint n = 0, len = gwy_coords_size(priv->coords);
+    const GwyIntRange *ranges = gwy_int_set_ranges(priv->shapes_selection, &n);
+    if (!n) {
+        clear_selection(view);
+        return;
+    }
+
+    GtkTreeView *treeview = GTK_TREE_VIEW(view);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+    priv->sync_shapes_to_view = TRUE;
+    select_or_unselect_range(selection, 0, ranges[0].from, FALSE);
+    for (guint i = 0; ; i++) {
+        select_or_unselect_range(selection, ranges[i].from, ranges[i].to, TRUE);
+        if (i == n-1)
+            break;
+        select_or_unselect_range(selection, ranges[i].to, ranges[i+1].from,
+                                 FALSE);
+    }
+    select_or_unselect_range(selection, ranges[n-1].to, len, FALSE);
+    priv->sync_shapes_to_view = FALSE;
+}
+
+static void
+clear_selection(GwyCoordsView *view)
+{
+    GtkTreeView *treeview = GTK_TREE_VIEW(view);
+    CoordsView *priv = view->priv;
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+    priv->sync_shapes_to_view = TRUE;
+    gtk_tree_selection_unselect_all(selection);
+    priv->sync_shapes_to_view = FALSE;
+}
+
+static void
+select_or_unselect_range(GtkTreeSelection *selection,
+                         guint from, guint to,
+                         gboolean select)
+{
+    if (from == to)
+        return;
+
+    GtkTreePath *pathfrom = gtk_tree_path_new();
+    gtk_tree_path_append_index(pathfrom, from);
+    if (from+1 == to) {
+        if (select)
+            gtk_tree_selection_select_path(selection, pathfrom);
+        else
+            gtk_tree_selection_unselect_path(selection, pathfrom);
+    }
+    else {
+        GtkTreePath *pathto = gtk_tree_path_new();
+        gtk_tree_path_append_index(pathto, to);
+        if (select)
+            gtk_tree_selection_select_range(selection, pathfrom, pathto);
+        else
+            gtk_tree_selection_unselect_range(selection, pathfrom, pathto);
+        gtk_tree_path_free(pathto);
+    }
+    gtk_tree_path_free(pathfrom);
 }
 
 /**
