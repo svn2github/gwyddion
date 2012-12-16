@@ -32,7 +32,7 @@
 #define CBIT GWY_FIELD_CBIT
 #define CTEST GWY_FIELD_CTEST
 
-enum { N_ITEMS = 10 };
+enum { N_ITEMS = 11 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -50,6 +50,7 @@ enum {
     PROP_UNIT_X,
     PROP_UNIT_Y,
     PROP_UNIT_Z,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -75,16 +76,17 @@ static void     gwy_field_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*1*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*2*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*3*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*4*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*5*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*6*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*7*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*8*/ { .name = "unit-z", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*9*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*00*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        },
+    /*01*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        },
+    /*02*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*03*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*04*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*05*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*06*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*07*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*08*/ { .name = "unit-z", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*09*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*10*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -183,6 +185,13 @@ gwy_field_class_init(GwyFieldClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the field.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -261,6 +270,7 @@ static void
 gwy_field_finalize(GObject *object)
 {
     GwyField *field = GWY_FIELD(object);
+    GWY_FREE(field->priv->name);
     free_data(field);
     G_OBJECT_CLASS(gwy_field_parent_class)->finalize(object);
 }
@@ -362,8 +372,16 @@ gwy_field_itemize(GwySerializable *serializable,
         n++;
     }
 
+    if (priv->name) {
+        g_return_val_if_fail(items->len - items->n, 0);
+        it = serialize_items[9];
+        it.value.v_string = priv->name;
+        items->items[items->n++] = it;
+        n++;
+    }
+
     g_return_val_if_fail(items->len - items->n, 0);
-    it = serialize_items[9];
+    it = serialize_items[10];
     it.value.v_double_array = field->data;
     it.array_size = field->xres * field->yres;
     items->items[items->n++] = it;
@@ -399,14 +417,14 @@ gwy_field_construct(GwySerializable *serializable,
     }
 
     if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
-                   != its[9].array_size)) {
+                   != its[10].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            // TRANSLATORS: Error message.
                            _("GwyField dimensions %u×%u do not match data size "
                              "%lu."),
                            its[0].value.v_uint32, its[1].value.v_uint32,
-                           (gulong)its[9].array_size);
+                           (gulong)its[10].array_size);
         goto fail;
     }
 
@@ -428,7 +446,8 @@ gwy_field_construct(GwySerializable *serializable,
     priv->unit_y = (GwyUnit*)its[7].value.v_object;
     priv->unit_z = (GwyUnit*)its[8].value.v_object;
     free_data(field);
-    field->data = its[9].value.v_double_array;
+    priv->name = its[9].value.v_string;
+    field->data = its[10].value.v_double_array;
     priv->allocated = TRUE;
 
     return TRUE;
@@ -437,7 +456,8 @@ fail:
     GWY_OBJECT_UNREF(its[6].value.v_object);
     GWY_OBJECT_UNREF(its[7].value.v_object);
     GWY_OBJECT_UNREF(its[8].value.v_object);
-    GWY_FREE(its[9].value.v_double_array);
+    GWY_FREE(its[9].value.v_string);
+    GWY_FREE(its[10].value.v_double_array);
     return FALSE;
 }
 
@@ -452,11 +472,13 @@ gwy_field_duplicate_impl(GwySerializable *serializable)
 
     gwy_assign(duplicate->data, field->data, field->xres*field->yres);
     gwy_assign(dpriv->cache, priv->cache, GWY_FIELD_CACHE_SIZE);
+    gwy_assign_string(&dpriv->name, priv->name);
     dpriv->cached = priv->cached;
 
     return G_OBJECT(duplicate);
 }
 
+// Does NOT copy name for use in new-alike-type functions.
 static void
 copy_info(GwyField *dest,
           const GwyField *src)
@@ -495,6 +517,8 @@ gwy_field_assign_impl(GwySerializable *destination,
         notify[nn++] = properties[PROP_XOFFSET];
     if (dest->yoff != src->yoff)
         notify[nn++] = properties[PROP_YOFFSET];
+    if (gwy_assign_string(&dpriv->name, spriv->name))
+        notify[nn++] = properties[PROP_NAME];
 
     if (dest->xres * dest->yres != src->xres * src->yres) {
         free_data(dest);
@@ -540,6 +564,10 @@ gwy_field_set_property(GObject *object,
 
         case PROP_YOFFSET:
         field->yoff = g_value_get_double(value);
+        break;
+
+        case PROP_NAME:
+        gwy_assign_string(&field->priv->name, g_value_get_string(value));
         break;
 
         default:
@@ -602,6 +630,10 @@ gwy_field_get_property(GObject *object,
         g_value_set_object(value, priv->unit_z);
         break;
 
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -662,8 +694,9 @@ gwy_field_new_sized(guint xres,
  * Creates a new two-dimensional data field similar to another field.
  *
  * All properties of the newly created field will be identical to @model,
- * except the data that will be either zeroes or uninitialised.  Use
- * gwy_field_duplicate() to completely duplicate a field including data.
+ * except the data that will be either zeroes or uninitialised, and name which
+ * will be unset.  Use gwy_field_duplicate() to completely duplicate a field
+ * including data.
  *
  * Returns: (transfer full):
  *          A new two-dimensional data field.
@@ -1776,6 +1809,41 @@ gwy_field_format_z(const GwyField *field,
 }
 
 /**
+ * gwy_field_set_name:
+ * @field: A two-dimensional data field.
+ * @name: (allow-none):
+ *        New field name.
+ *
+ * Sets the name of a two-dimensional data field.
+ **/
+void
+gwy_field_set_name(GwyField *field,
+                   const gchar *name)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    if (!gwy_assign_string(&field->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(field), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_field_get_name:
+ * @field: A two-dimensional data field.
+ *
+ * Gets the name of a two-dimensional data field.
+ *
+ * Returns: (allow-none):
+ *          Field name, owned by @field.
+ **/
+const gchar*
+gwy_field_get_name(const GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    return field->priv->name;
+}
+
+/**
  * gwy_field_get:
  * @field: A two-dimensional data field.
  * @col: Column index in @field.
@@ -1847,7 +1915,8 @@ gwy_field_set(const GwyField *field,
  *   read-only.</listitem>
  *   <listitem>For reading, access @data in #GwyField-struct
  *   directly.</listitem>
- *   <listitem>For writing, you can write to @data <emphasis>content</emphasis>
+ *   <listitem>For writing, you can write to @data array
+ *   <emphasis>content</emphasis>
  *   but you must not change the field itself.  Use methods such as
  *   gwy_field_set_xreal() to change the field properties.</listitem>
  *   <listitem>If you mix direct changes of data with functions that obtain

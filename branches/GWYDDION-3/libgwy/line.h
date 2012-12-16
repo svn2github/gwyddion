@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -97,6 +97,9 @@ GwyValueFormat* gwy_line_format_x      (const GwyLine *line,
                                         GwyValueFormatStyle style)          G_GNUC_MALLOC;
 GwyValueFormat* gwy_line_format_y      (const GwyLine *line,
                                         GwyValueFormatStyle style)          G_GNUC_MALLOC;
+void            gwy_line_set_name      (GwyLine *line,
+                                        const gchar *name);
+const gchar*    gwy_line_get_name      (const GwyLine *line)                G_GNUC_PURE;
 
 #define gwy_line_index(line, pos) \
     ((line)->data[pos])

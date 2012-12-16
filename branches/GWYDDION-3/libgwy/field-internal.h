@@ -47,6 +47,7 @@ struct _GwyFieldPrivate {
     GwyUnit *unit_x;
     GwyUnit *unit_y;
     GwyUnit *unit_z;
+    gchar *name;
     guint32 cached;
     gboolean allocated;
     gdouble storage;

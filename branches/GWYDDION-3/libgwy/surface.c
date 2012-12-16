@@ -29,7 +29,7 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/surface-internal.h"
 
-enum { N_ITEMS = 3 };
+enum { N_ITEMS = 4 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -41,6 +41,7 @@ enum {
     PROP_N_POINTS,
     PROP_UNIT_XY,
     PROP_UNIT_Z,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -68,7 +69,8 @@ static void     gwy_surface_get_property     (GObject *object,
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "unit-xy", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*1*/ { .name = "unit-z",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*2*/ { .name = "data",    .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*2*/ { .name = "name",    .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*3*/ { .name = "data",    .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -122,6 +124,13 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the surface.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -166,6 +175,7 @@ static void
 gwy_surface_finalize(GObject *object)
 {
     GwySurface *surface = GWY_SURFACE(object);
+    GWY_FREE(surface->priv->name);
     free_data(surface);
     G_OBJECT_CLASS(gwy_surface_parent_class)->finalize(object);
 }
@@ -221,8 +231,16 @@ gwy_surface_itemize(GwySerializable *serializable,
         n++;
     }
 
+    if (priv->name) {
+        g_return_val_if_fail(items->len - items->n, 0);
+        it = serialize_items[2];
+        it.value.v_string = priv->name;
+        items->items[items->n++] = it;
+        n++;
+    }
+
     g_return_val_if_fail(items->len - items->n, 0);
-    it = serialize_items[2];
+    it = serialize_items[3];
     it.value.v_double_array = (gdouble*)surface->data;
     it.array_size = 3*surface->n;
     items->items[items->n++] = it;
@@ -251,29 +269,31 @@ gwy_surface_construct(GwySerializable *serializable,
                                      error_list))
         goto fail;
 
-    guint len = its[2].array_size;
-    if (len && its[2].value.v_double_array) {
+    guint len = its[3].array_size;
+    if (len && its[3].value.v_double_array) {
         if (len % 3 != 0) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
                                // TRANSLATORS: Error message.
                                _("Data length of ‘%s’ is %lu which is not "
                                  "a multiple of %u."),
-                               "GwySurface", (gulong)its[2].array_size, 3);
+                               "GwySurface", (gulong)its[3].array_size, 3);
             goto fail;
         }
-        surface->n = its[2].array_size/3;
-        surface->data = (GwyXYZ*)its[2].value.v_double_array;
+        surface->n = its[3].array_size/3;
+        surface->data = (GwyXYZ*)its[3].value.v_double_array;
     }
     priv->unit_xy = (GwyUnit*)its[0].value.v_object;
     priv->unit_z = (GwyUnit*)its[1].value.v_object;
+    priv->name = its[2].value.v_string;
 
     return TRUE;
 
 fail:
     GWY_OBJECT_UNREF(its[0].value.v_object);
     GWY_OBJECT_UNREF(its[1].value.v_object);
-    GWY_FREE(its[2].value.v_double_array);
+    GWY_FREE(its[2].value.v_string);
+    GWY_FREE(its[3].value.v_double_array);
     return FALSE;
 }
 
@@ -307,6 +327,7 @@ gwy_surface_duplicate_impl(GwySerializable *serializable)
     GwySurface *duplicate = gwy_surface_new_from_data(surface->data,
                                                       surface->n);
     copy_info(duplicate, surface);
+    gwy_assign_string(&duplicate->priv->name, surface->priv->name);
     return G_OBJECT(duplicate);
 }
 
@@ -317,26 +338,34 @@ gwy_surface_assign_impl(GwySerializable *destination,
     GwySurface *dest = GWY_SURFACE(destination);
     GwySurface *src = GWY_SURFACE(source);
 
-    gboolean notify = FALSE;
+    GParamSpec *notify[N_PROPS];
+    guint nn = 0;
+    if (gwy_assign_string(&dest->priv->name, src->priv->name))
+        notify[nn++] = properties[PROP_NAME];
     if (dest->n != src->n) {
         dest->n = src->n;
         alloc_data(dest);
-        notify = TRUE;
+        notify[nn++] = properties[PROP_N_POINTS];
     }
     gwy_assign(dest->data, src->data, src->n);
     copy_info(dest, src);
     copy_cache(dest, src);
-    if (notify)
-        g_object_notify_by_pspec(G_OBJECT(dest), properties[PROP_N_POINTS]);
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
 
 static void
 gwy_surface_set_property(GObject *object,
-                       guint prop_id,
-                       G_GNUC_UNUSED const GValue *value,
-                       GParamSpec *pspec)
+                         guint prop_id,
+                         const GValue *value,
+                         GParamSpec *pspec)
 {
+    GwySurface *surface = GWY_SURFACE(object);
+
     switch (prop_id) {
+        case PROP_NAME:
+        gwy_assign_string(&surface->priv->name, g_value_get_string(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -345,9 +374,9 @@ gwy_surface_set_property(GObject *object,
 
 static void
 gwy_surface_get_property(GObject *object,
-                      guint prop_id,
-                      GValue *value,
-                      GParamSpec *pspec)
+                         guint prop_id,
+                         GValue *value,
+                         GParamSpec *pspec)
 {
     GwySurface *surface = GWY_SURFACE(object);
     Surface *priv = surface->priv;
@@ -369,6 +398,10 @@ gwy_surface_get_property(GObject *object,
         if (!priv->unit_z)
             priv->unit_z = gwy_unit_new();
         g_value_set_object(value, priv->unit_z);
+        break;
+
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
         break;
 
         default:
@@ -1025,7 +1058,7 @@ gwy_surface_format_xy(GwySurface *surface,
  * @surface: A surface.
  * @style: Value format style.
  *
- * Finds a suitable format for displaying values in a data surface.
+ * Finds a suitable format for displaying values in a surface.
  *
  * Returns: (transfer full):
  *          A newly created value format.
@@ -1049,6 +1082,41 @@ gwy_surface_format_z(GwySurface *surface,
     }
     return gwy_unit_format_with_digits(gwy_surface_get_unit_z(surface),
                                        style, max - min, 3);
+}
+
+/**
+ * gwy_surface_set_name:
+ * @surface: A surface.
+ * @name: (allow-none):
+ *        New surface name.
+ *
+ * Sets the name of a surface.
+ **/
+void
+gwy_surface_set_name(GwySurface *surface,
+                     const gchar *name)
+{
+    g_return_if_fail(GWY_IS_SURFACE(surface));
+    if (!gwy_assign_string(&surface->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(surface), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_surface_get_name:
+ * @surface: A surface.
+ *
+ * Gets the name of a surface.
+ *
+ * Returns: (allow-none):
+ *          Surface name, owned by @surface.
+ **/
+const gchar*
+gwy_surface_get_name(const GwySurface *surface)
+{
+    g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
+    return surface->priv->name;
 }
 
 /**

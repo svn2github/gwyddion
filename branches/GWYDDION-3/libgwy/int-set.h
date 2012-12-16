@@ -24,6 +24,11 @@
 
 G_BEGIN_DECLS
 
+typedef struct {
+    gint32 from;
+    gint32 to;
+} GwyIntRange;
+
 #define GWY_TYPE_INT_SET \
     (gwy_int_set_get_type())
 #define GWY_INT_SET(obj) \
@@ -64,35 +69,37 @@ typedef struct {
 #define gwy_int_set_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType      gwy_int_set_get_type       (void)                          G_GNUC_CONST;
-GwyIntSet* gwy_int_set_new            (void)                          G_GNUC_MALLOC;
-GwyIntSet* gwy_int_set_new_with_values(const gint *values,
-                                       guint n)                       G_GNUC_MALLOC;
-gboolean   gwy_int_set_contains       (const GwyIntSet *intset,
-                                       gint value)                    G_GNUC_PURE;
-gboolean   gwy_int_set_add            (GwyIntSet *intset,
-                                       gint value);
-gboolean   gwy_int_set_remove         (GwyIntSet *intset,
-                                       gint value);
-gboolean   gwy_int_set_toggle         (GwyIntSet *intset,
-                                       gint value);
-void       gwy_int_set_update         (GwyIntSet *intset,
-                                       const gint *values,
-                                       guint n);
-void       gwy_int_set_fill           (GwyIntSet *intset,
-                                       const gint *values,
-                                       guint n);
-gboolean   gwy_int_set_is_nonempty    (const GwyIntSet *intset)       G_GNUC_PURE;
-guint      gwy_int_set_size           (const GwyIntSet *intset)       G_GNUC_PURE;
-gint*      gwy_int_set_values         (const GwyIntSet *intset,
-                                       guint *len)                    G_GNUC_MALLOC;
-void       gwy_int_set_foreach        (const GwyIntSet *intset,
-                                       GwyIntSetForeachFunc function,
-                                       gpointer user_data);
-gboolean   gwy_int_set_first          (const GwyIntSet *intset,
-                                       GwyIntSetIter *iter);
-gboolean   gwy_int_set_next           (const GwyIntSet *intset,
-                                       GwyIntSetIter *iter);
+GType              gwy_int_set_get_type       (void)                          G_GNUC_CONST;
+GwyIntSet*         gwy_int_set_new            (void)                          G_GNUC_MALLOC;
+GwyIntSet*         gwy_int_set_new_with_values(const gint *values,
+                                               guint n)                       G_GNUC_MALLOC;
+gboolean           gwy_int_set_contains       (const GwyIntSet *intset,
+                                               gint value)                    G_GNUC_PURE;
+gboolean           gwy_int_set_add            (GwyIntSet *intset,
+                                               gint value);
+gboolean           gwy_int_set_remove         (GwyIntSet *intset,
+                                               gint value);
+gboolean           gwy_int_set_toggle         (GwyIntSet *intset,
+                                               gint value);
+void               gwy_int_set_update         (GwyIntSet *intset,
+                                               const gint *values,
+                                               guint n);
+void               gwy_int_set_fill           (GwyIntSet *intset,
+                                               const gint *values,
+                                               guint n);
+gboolean           gwy_int_set_is_nonempty    (const GwyIntSet *intset)       G_GNUC_PURE;
+guint              gwy_int_set_size           (const GwyIntSet *intset)       G_GNUC_PURE;
+gint*              gwy_int_set_values         (const GwyIntSet *intset,
+                                               guint *len)                    G_GNUC_MALLOC;
+const GwyIntRange* gwy_int_set_ranges         (const GwyIntSet *intset,
+                                               guint *n)                      G_GNUC_PURE;
+void               gwy_int_set_foreach        (const GwyIntSet *intset,
+                                               GwyIntSetForeachFunc function,
+                                               gpointer user_data);
+gboolean           gwy_int_set_first          (const GwyIntSet *intset,
+                                               GwyIntSetIter *iter);
+gboolean           gwy_int_set_next           (const GwyIntSet *intset,
+                                               GwyIntSetIter *iter);
 /* TODO: Permit getting/setting by interval. */
 
 G_END_DECLS

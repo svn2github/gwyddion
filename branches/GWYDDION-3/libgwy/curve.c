@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/curve-internal.h"
 
-enum { N_ITEMS = 3 };
+enum { N_ITEMS = 4 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -41,6 +41,7 @@ enum {
     PROP_N_POINTS,
     PROP_UNIT_X,
     PROP_UNIT_Y,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -68,7 +69,8 @@ static void     gwy_curve_get_property     (GObject *object,
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*1*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*2*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*2*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*3*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -121,6 +123,13 @@ gwy_curve_class_init(GwyCurveClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the curve.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -172,6 +181,7 @@ static void
 gwy_curve_finalize(GObject *object)
 {
     GwyCurve *curve = GWY_CURVE(object);
+    GWY_FREE(curve->priv->name);
     free_data(curve);
     G_OBJECT_CLASS(gwy_curve_parent_class)->finalize(object);
 }
@@ -227,8 +237,16 @@ gwy_curve_itemize(GwySerializable *serializable,
         n++;
     }
 
+    if (priv->name) {
+        g_return_val_if_fail(items->len - items->n, 0);
+        it = serialize_items[2];
+        it.value.v_string = priv->name;
+        items->items[items->n++] = it;
+        n++;
+    }
+
     g_return_val_if_fail(items->len - items->n, 0);
-    it = serialize_items[2];
+    it = serialize_items[3];
     it.value.v_double_array = (gdouble*)curve->data;
     it.array_size = 2*curve->n;
     items->items[items->n++] = it;
@@ -255,8 +273,8 @@ gwy_curve_construct(GwySerializable *serializable,
     if (!_gwy_check_object_component(its + 1, curve, GWY_TYPE_UNIT, error_list))
         goto fail;
 
-    guint len = its[2].array_size;
-    if (len && its[2].value.v_double_array) {
+    guint len = its[3].array_size;
+    if (len && its[3].value.v_double_array) {
         if (len % 2 != 0) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
@@ -264,22 +282,24 @@ gwy_curve_construct(GwySerializable *serializable,
                                // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
                                _("Data length of ‘%s’ is %lu which is not "
                                  "a multiple of %u."),
-                               "GwyCurve", (gulong)its[2].array_size, 2);
+                               "GwyCurve", (gulong)its[3].array_size, 2);
             goto fail;
         }
-        curve->n = its[2].array_size/2;
-        curve->data = (GwyXY*)its[2].value.v_double_array;
+        curve->n = its[3].array_size/2;
+        curve->data = (GwyXY*)its[3].value.v_double_array;
         sort_data(curve);
     }
     priv->unit_x = (GwyUnit*)its[0].value.v_object;
     priv->unit_y = (GwyUnit*)its[1].value.v_object;
+    priv->name = its[2].value.v_string;
 
     return TRUE;
 
 fail:
     GWY_OBJECT_UNREF(its[0].value.v_object);
     GWY_OBJECT_UNREF(its[1].value.v_object);
-    GWY_FREE(its[2].value.v_double_array);
+    GWY_FREE(its[2].value.v_string);
+    GWY_FREE(its[3].value.v_double_array);
     return FALSE;
 }
 
@@ -298,6 +318,7 @@ gwy_curve_duplicate_impl(GwySerializable *serializable)
     GwyCurve *curve = GWY_CURVE(serializable);
     GwyCurve *duplicate = gwy_curve_new_from_data(curve->data, curve->n);
     copy_info(duplicate, curve);
+    gwy_assign_string(&duplicate->priv->name, curve->priv->name);
     return G_OBJECT(duplicate);
 }
 
@@ -308,16 +329,18 @@ gwy_curve_assign_impl(GwySerializable *destination,
     GwyCurve *dest = GWY_CURVE(destination);
     GwyCurve *src = GWY_CURVE(source);
 
-    gboolean notify = FALSE;
+    GParamSpec *notify[N_PROPS];
+    guint nn = 0;
+    if (gwy_assign_string(&dest->priv->name, src->priv->name))
+        notify[nn++] = properties[PROP_NAME];
     if (dest->n != src->n) {
         dest->n = src->n;
         alloc_data(dest);
-        notify = TRUE;
+        notify[nn++] = properties[PROP_N_POINTS];
     }
     gwy_assign(dest->data, src->data, src->n);
     copy_info(dest, src);
-    if (notify)
-        g_object_notify_by_pspec(G_OBJECT(dest), properties[PROP_N_POINTS]);
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -326,7 +349,13 @@ gwy_curve_set_property(GObject *object,
                        G_GNUC_UNUSED const GValue *value,
                        GParamSpec *pspec)
 {
+    GwyCurve *curve = GWY_CURVE(object);
+
     switch (prop_id) {
+        case PROP_NAME:
+        gwy_assign_string(&curve->priv->name, g_value_get_string(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -335,9 +364,9 @@ gwy_curve_set_property(GObject *object,
 
 static void
 gwy_curve_get_property(GObject *object,
-                      guint prop_id,
-                      GValue *value,
-                      GParamSpec *pspec)
+                       guint prop_id,
+                       GValue *value,
+                       GParamSpec *pspec)
 {
     GwyCurve *curve = GWY_CURVE(object);
     Curve *priv = curve->priv;
@@ -359,6 +388,10 @@ gwy_curve_get_property(GObject *object,
         if (!priv->unit_y)
             priv->unit_y = gwy_unit_new();
         g_value_set_object(value, priv->unit_y);
+        break;
+
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
         break;
 
         default:
@@ -441,8 +474,8 @@ gwy_curve_new_from_data(const GwyXY *points,
  * Creates a new empty curve similar to another curve.
  *
  * The units of the new curve will be identical to those of @model but the new
- * curve will not contain any points. Use gwy_curve_duplicate() to completely
- * duplicate a curve including data.
+ * curve will not contain any points and its name will be unset. Use
+ * gwy_curve_duplicate() to completely duplicate a curve including data.
  *
  * Returns: (transfer full):
  *          A new empty curve.
@@ -872,6 +905,41 @@ gwy_curve_format_y(GwyCurve *curve,
     }
     return gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
                                        style, max - min, 3);
+}
+
+/**
+ * gwy_curve_set_name:
+ * @curve: A curve.
+ * @name: (allow-none):
+ *        New curve name.
+ *
+ * Sets the name of a curve.
+ **/
+void
+gwy_curve_set_name(GwyCurve *curve,
+                   const gchar *name)
+{
+    g_return_if_fail(GWY_IS_CURVE(curve));
+    if (!gwy_assign_string(&curve->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(curve), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_curve_get_name:
+ * @curve: A curve.
+ *
+ * Gets the name of a curve.
+ *
+ * Returns: (allow-none):
+ *          Curve name, owned by @curve.
+ **/
+const gchar*
+gwy_curve_get_name(const GwyCurve *curve)
+{
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    return curve->priv->name;
 }
 
 /**

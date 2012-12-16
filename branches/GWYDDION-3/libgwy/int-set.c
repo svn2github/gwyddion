@@ -34,11 +34,6 @@ enum {
     N_SIGNALS
 };
 
-typedef struct {
-    gint32 from;
-    gint32 to;
-} IntRange;
-
 struct _GwyIntSetPrivate {
     GArray *ranges;
 };
@@ -151,7 +146,7 @@ gwy_int_set_init(GwyIntSet *intset)
     intset->priv = G_TYPE_INSTANCE_GET_PRIVATE(intset, GWY_TYPE_INT_SET,
                                                IntSet);
     IntSet *priv = intset->priv;
-    priv->ranges = g_array_new(FALSE, FALSE, sizeof(IntRange));
+    priv->ranges = g_array_new(FALSE, FALSE, sizeof(GwyIntRange));
 }
 
 static void
@@ -330,7 +325,7 @@ set_data_silent(GwyIntSet *intset,
         n = uniq(myvalues, n);
         values = myvalues;
     }
-    IntRange r = { .from = values[0] };
+    GwyIntRange r = { .from = values[0] };
     guint ifrom = 0;
 
     for (guint i = 1; i < n; i++) {
@@ -447,7 +442,7 @@ static void
 add_value(GwyIntSet *intset, gint value, guint rid)
 {
     GArray *ranges = intset->priv->ranges;
-    IntRange *r = (IntRange*)ranges->data;
+    GwyIntRange *r = (GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     if (rid < n && r[rid].from == value+1) {
@@ -466,7 +461,7 @@ add_value(GwyIntSet *intset, gint value, guint rid)
     }
     else {
         // Cannot attach, insert a new one-item range.
-        IntRange range = { .from = value, .to = value };
+        GwyIntRange range = { .from = value, .to = value };
         g_array_insert_val(ranges, rid, range);
     }
 
@@ -477,7 +472,7 @@ static void
 remove_value(GwyIntSet *intset, gint value, guint rid)
 {
     GArray *ranges = intset->priv->ranges;
-    IntRange *r = (IntRange*)ranges->data;
+    GwyIntRange *r = (GwyIntRange*)ranges->data;
     if (r[rid].from == value) {
         // Remove from the begining, possibly killing the range.
         r[rid].from++;
@@ -491,7 +486,7 @@ remove_value(GwyIntSet *intset, gint value, guint rid)
     }
     else {
         // Must split.
-        IntRange range = { .from = r[rid].from, .to = value-1 };
+        GwyIntRange range = { .from = r[rid].from, .to = value-1 };
         r[rid].from = value+1;
         g_array_insert_val(ranges, rid, range);
     }
@@ -507,7 +502,7 @@ find_range(const GArray *ranges,
            gint value,
            guint *rid)
 {
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     if (!n) {
@@ -534,7 +529,7 @@ static gboolean
 is_present(const GArray *ranges,
            gint value)
 {
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     for (guint j = 0; j < n; j++) {
@@ -601,16 +596,16 @@ gwy_int_set_update(GwyIntSet *intset,
     /* Best not to try to iterate over @ranges while we change it by
      * gwy_int_set_remove().  Use a temporary copy to see what values were
      * there originally. */
-    IntRange *r = (IntRange*)g_slice_copy(n*sizeof(IntRange), ranges->data);
+    GwyIntRange *r = (GwyIntRange*)g_slice_copy(n*sizeof(GwyIntRange), ranges->data);
     for (guint i = 0; i < n; i++) {
         for (gint value = r[i].from; value <= r[i].to; value++) {
             if (!is_present(tmpranges, value))
                 gwy_int_set_remove(intset, value);
         }
     }
-    g_slice_free1(n*sizeof(IntRange), r);
+    g_slice_free1(n*sizeof(GwyIntRange), r);
 
-    r = (IntRange*)tmpranges->data;
+    r = (GwyIntRange*)tmpranges->data;
     n = tmpranges->len;
     for (guint i = 0; i < n; i++) {
         for (gint value = r[i].from; value <= r[i].to; value++)
@@ -702,7 +697,7 @@ gwy_int_set_values(const GwyIntSet *intset,
 {
     g_return_val_if_fail(GWY_IS_INT_SET(intset), NULL);
     const GArray *ranges = intset->priv->ranges;
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     if (!n) {
@@ -720,6 +715,29 @@ gwy_int_set_values(const GwyIntSet *intset,
     GWY_MAYBE_SET(len, s);
 
     return values;
+}
+
+/**
+ * gwy_int_set_ranges:
+ * @intset: A set of integers.
+ * @n: (out):
+ *     Location where to store the number of ranges returned.
+ *
+ * Obtains the values from an integer set as the list of ranges.
+ *
+ * Returns: (array length=n):
+ *          Array with all the values in @intset represented as ranges.  It is
+ *          owned by @intset and valid only until @intset changes or is
+ *          destroyed.
+ **/
+const GwyIntRange*
+gwy_int_set_ranges(const GwyIntSet *intset,
+                   guint *n)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), NULL);
+    const GArray *ranges = intset->priv->ranges;
+    *n = ranges->len;
+    return (const GwyIntRange*)ranges->data;
 }
 
 /**
@@ -743,7 +761,7 @@ gwy_int_set_foreach(const GwyIntSet *intset,
     g_return_if_fail(function);
 
     const GArray *ranges = intset->priv->ranges;
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     for (guint i = 0; i < n; i++) {
@@ -769,7 +787,7 @@ gwy_int_set_first(const GwyIntSet *intset,
     g_return_val_if_fail(iter, FALSE);
 
     const GArray *ranges = intset->priv->ranges;
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     if (!n)
@@ -804,7 +822,7 @@ gwy_int_set_next(const GwyIntSet *intset,
     g_return_val_if_fail(iter, FALSE);
 
     const GArray *ranges = intset->priv->ranges;
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
 
     if (iter->priv >= n)
@@ -824,7 +842,7 @@ gwy_int_set_next(const GwyIntSet *intset,
 static guint
 ranges_size(const GArray *ranges)
 {
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
     guint s = 0;
 
@@ -850,7 +868,7 @@ is_strictly_ascending(const gint *values,
 static gboolean
 ranges_are_canonical(const GArray *ranges)
 {
-    const IntRange *r = (const IntRange*)ranges->data;
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
     guint n = ranges->len;
     if (!n)
         return TRUE;

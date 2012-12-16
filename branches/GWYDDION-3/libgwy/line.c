@@ -28,7 +28,7 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 
-enum { N_ITEMS = 5 };
+enum { N_ITEMS = 6 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -42,6 +42,7 @@ enum {
     PROP_OFFSET,
     PROP_UNIT_X,
     PROP_UNIT_Y,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -71,7 +72,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*1*/ { .name = "off",    .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*2*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*3*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*4*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*4*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*5*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -139,6 +141,13 @@ gwy_line_class_init(GwyLineClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the line.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -197,6 +206,7 @@ static void
 gwy_line_finalize(GObject *object)
 {
     GwyLine *line = GWY_LINE(object);
+    GWY_FREE(line->priv->name);
     free_data(line);
     G_OBJECT_CLASS(gwy_line_parent_class)->finalize(object);
 }
@@ -264,8 +274,16 @@ gwy_line_itemize(GwySerializable *serializable,
         n++;
     }
 
+    if (priv->name) {
+        g_return_val_if_fail(items->len - items->n, 0);
+        it = serialize_items[4];
+        it.value.v_string = priv->name;
+        items->items[items->n++] = it;
+        n++;
+    }
+
     g_return_val_if_fail(items->len - items->n, 0);
-    it = serialize_items[4];
+    it = serialize_items[5];
     it.value.v_double_array = line->data;
     it.array_size = line->res;
     items->items[items->n++] = it;
@@ -294,7 +312,7 @@ gwy_line_construct(GwySerializable *serializable,
     if (!_gwy_check_object_component(its + 3, line, GWY_TYPE_UNIT, error_list))
         goto fail;
 
-    if (G_UNLIKELY(!its[4].array_size)) {
+    if (G_UNLIKELY(!its[5].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            // TRANSLATORS: Error message.
@@ -302,14 +320,15 @@ gwy_line_construct(GwySerializable *serializable,
         goto fail;
     }
 
-    line->res = its[4].array_size;
+    line->res = its[5].array_size;
     // FIXME: Catch near-zero and near-infinity values.
     line->real = CLAMP(its[0].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
     line->off = CLAMP(its[1].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     priv->unit_x = (GwyUnit*)its[2].value.v_object;
     priv->unit_y = (GwyUnit*)its[3].value.v_object;
     free_data(line);
-    line->data = its[4].value.v_double_array;
+    priv->name = its[4].value.v_string;
+    line->data = its[5].value.v_double_array;
     priv->allocated = TRUE;
 
     return TRUE;
@@ -317,7 +336,8 @@ gwy_line_construct(GwySerializable *serializable,
 fail:
     GWY_OBJECT_UNREF(its[2].value.v_object);
     GWY_OBJECT_UNREF(its[3].value.v_object);
-    GWY_FREE(its[4].value.v_double_array);
+    GWY_FREE(its[4].value.v_string);
+    GWY_FREE(its[5].value.v_double_array);
     return FALSE;
 }
 
@@ -326,10 +346,14 @@ gwy_line_duplicate_impl(GwySerializable *serializable)
 {
     GwyLine *line = GWY_LINE(serializable);
     GwyLine *duplicate = gwy_line_new_alike(line, FALSE);
+    Line *dpriv = duplicate->priv, *priv = line->priv;
+
     gwy_assign(duplicate->data, line->data, line->res);
+    gwy_assign_string(&dpriv->name, priv->name);
     return G_OBJECT(duplicate);
 }
 
+// Does NOT copy name for use in new-alike-type functions.
 static void
 copy_info(GwyLine *dest,
           const GwyLine *src)
@@ -348,6 +372,7 @@ gwy_line_assign_impl(GwySerializable *destination,
 {
     GwyLine *dest = GWY_LINE(destination);
     GwyLine *src = GWY_LINE(source);
+    Line *spriv = src->priv, *dpriv = dest->priv;
 
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
@@ -357,11 +382,13 @@ gwy_line_assign_impl(GwySerializable *destination,
         notify[nn++] = properties[PROP_RES];
     if (dest->off != src->off)
         notify[nn++] = properties[PROP_OFFSET];
+    if (gwy_assign_string(&dpriv->name, spriv->name))
+        notify[nn++] = properties[PROP_NAME];
 
     if (dest->res != src->res) {
         free_data(dest);
         dest->data = g_new(gdouble, src->res);
-        dest->priv->allocated = TRUE;
+        dpriv->allocated = TRUE;
     }
     gwy_assign(dest->data, src->data, src->res);
     copy_info(dest, src);
@@ -383,6 +410,10 @@ gwy_line_set_property(GObject *object,
 
         case PROP_OFFSET:
         line->off = g_value_get_double(value);
+        break;
+
+        case PROP_NAME:
+        gwy_assign_string(&line->priv->name, g_value_get_string(value));
         break;
 
         default:
@@ -425,6 +456,10 @@ gwy_line_get_property(GObject *object,
         if (!priv->unit_y)
             priv->unit_y = gwy_unit_new();
         g_value_set_object(value, priv->unit_y);
+        break;
+
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
         break;
 
         default:
@@ -484,8 +519,9 @@ gwy_line_new_sized(guint res,
  * Creates a new one-dimensional data line similar to another line.
  *
  * All properties of the newly created line will be identical to @model,
- * except the data that will be either zeroes or uninitialised.  Use
- * gwy_line_duplicate() to completely duplicate a line including data.
+ * except the data that will be either zeroes or uninitialised, and name which
+ * will be unset.  Use gwy_line_duplicate() to completely duplicate a line
+ * including data.
  *
  * Returns: (transfer full):
  *          A new one-dimensional data line.
@@ -1058,6 +1094,41 @@ gwy_line_format_y(const GwyLine *line,
     }
     return gwy_unit_format_with_digits(gwy_line_get_unit_y(line),
                                        style, max - min, 3);
+}
+
+/**
+ * gwy_line_set_name:
+ * @line: A one-dimensional data line.
+ * @name: (allow-none):
+ *        New line name.
+ *
+ * Sets the name of a one-dimensional data line.
+ **/
+void
+gwy_line_set_name(GwyLine *line,
+                  const gchar *name)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+    if (!gwy_assign_string(&line->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(line), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_line_get_name:
+ * @line: A one-dimensional data line.
+ *
+ * Gets the name of a one-dimensional data line.
+ *
+ * Returns: (allow-none):
+ *          Line name, owned by @line.
+ **/
+const gchar*
+gwy_line_get_name(const GwyLine *line)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
+    return line->priv->name;
 }
 
 /**

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010 David Nečas (Yeti).
+ *  Copyright (C) 2010,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -89,6 +89,9 @@ GwyValueFormat* gwy_curve_format_x       (GwyCurve *curve,
                                           GwyValueFormatStyle style) G_GNUC_MALLOC;
 GwyValueFormat* gwy_curve_format_y       (GwyCurve *curve,
                                           GwyValueFormatStyle style) G_GNUC_MALLOC;
+void            gwy_curve_set_name       (GwyCurve *curve,
+                                          const gchar *name);
+const gchar*    gwy_curve_get_name       (const GwyCurve *curve)              G_GNUC_PURE;
 
 #define gwy_curve_index(curve, pos) \
     ((curve)->data[pos])
