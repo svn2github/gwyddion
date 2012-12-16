@@ -1277,8 +1277,10 @@ set_selectable(GwyShapes *shapes,
         return FALSE;
 
     priv->selectable = selectable;
-    if (!selectable)
+    if (!selectable) {
         cancel_editing(shapes, -1);
+        gwy_int_set_update(shapes->selection, NULL, 0);
+    }
     return TRUE;
 }
 
