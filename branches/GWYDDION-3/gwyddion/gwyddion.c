@@ -213,6 +213,41 @@ create_widget_test(void)
     return window;
 }
 
+static void
+get_boolean_property(GObject *toggle,
+                     GObject *target)
+{
+    const gchar *name = g_object_get_data(toggle, "target");
+    g_return_if_fail(name);
+    gboolean active;
+    g_object_get(target, name, &active, NULL);
+    g_object_set(toggle, "active", active, NULL);
+}
+
+static void
+set_boolean_property(GObject *toggle,
+                     GObject *target)
+{
+    const gchar *name = g_object_get_data(toggle, "target");
+    g_return_if_fail(name);
+    gboolean active;
+    g_object_get(toggle, "active", &active, NULL);
+    g_object_set(target, name, active, NULL);
+}
+
+static GtkWidget*
+create_checkbox(gpointer target,
+                const gchar *label,
+                const gchar *propname)
+{
+    GtkWidget *check = gtk_check_button_new_with_label(label);
+    g_object_set_data(G_OBJECT(check), "target", (gpointer)propname);
+    get_boolean_property(G_OBJECT(check), G_OBJECT(target));
+    g_signal_connect(check, "toggled",
+                     G_CALLBACK(set_boolean_property), target);
+    return check;
+}
+
 static GtkWidget*
 create_coords_view_test(GwyRasterView *rasterview)
 {
@@ -221,13 +256,16 @@ create_coords_view_test(GwyRasterView *rasterview)
     gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+    gtk_container_add(GTK_CONTAINER(window), vbox);
+
     GwyRasterArea *area = gwy_raster_view_get_area(rasterview);
     GwyField *field = gwy_raster_area_get_field(area);
     GwyShapes *shapes = gwy_raster_area_get_shapes(area);
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     GtkWidget *widget = gwy_coords_view_new();
     GwyCoordsView *view = GWY_COORDS_VIEW(widget);
-    gtk_container_add(GTK_CONTAINER(window), widget);
+    gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
     gwy_coords_view_set_coords_type(view, G_OBJECT_TYPE(coords));
     GwyValueFormat *vf = gwy_field_format_xy(field, GWY_VALUE_FORMAT_PANGO);
     gwy_coords_view_set_dimension_format(view, 0, vf);
@@ -239,6 +277,22 @@ create_coords_view_test(GwyRasterView *rasterview)
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     }
     gwy_coords_view_set_shapes(view, shapes);
+
+    GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
+    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+
+    gtk_box_pack_start(GTK_BOX(hbox),
+                       create_checkbox(view, "Pixel", "scale-type"),
+                       FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox),
+                       create_checkbox(view, "Split", "split-units"),
+                       FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox),
+                       create_checkbox(shapes, "Editable", "editable"),
+                       FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox),
+                       create_checkbox(shapes, "Selectable", "selectable"),
+                       FALSE, FALSE, 0);
 
     return window;
 }
