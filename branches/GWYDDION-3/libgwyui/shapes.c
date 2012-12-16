@@ -1094,7 +1094,6 @@ gwy_shapes_snap(const GwyShapes *shapes,
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     Shapes *priv = shapes->priv;
-    g_printerr("%u\n", priv->snap);
     if (priv->snap == GWY_SHAPES_SNAP_NONE)
         return;
 

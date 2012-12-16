@@ -826,12 +826,24 @@ selection_changed(GwyCoordsView *view,
                   GtkTreeSelection *selection)
 {
     CoordsView *priv = view->priv;
-    if (priv->sync_view_to_shapes || !priv->shapes)
+    // Not having coords can occur during destruction.
+    if (priv->sync_shapes_to_view || !priv->shapes_selection || !priv->coords)
         return;
 
-    GtkTreeView *treeview = GTK_TREE_VIEW(view);
-    GtkSelectionMode mode = gtk_tree_selection_get_mode(selection);
-    GtkTreeIter iter;
+    guint n = gwy_coords_size(priv->coords);
+    gint *indices = g_slice_alloc(sizeof(gint)*n);
+    guint len = 0;
+    for (guint i = 0; i < n; i++) {
+        GtkTreeIter iter;
+        // We know that this is actually very efficient.
+        gwy_array_store_get_iter(priv->store, i, &iter);
+        if (gtk_tree_selection_iter_is_selected(selection, &iter))
+            indices[len++] =  i;
+    }
+    priv->sync_view_to_shapes = TRUE;
+    gwy_int_set_update(priv->shapes_selection, indices, len);
+    priv->sync_view_to_shapes = FALSE;
+    g_slice_free1(sizeof(gint)*n, indices);
 }
 
 static void
