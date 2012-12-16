@@ -349,11 +349,10 @@ gwy_coords_view_get_coords(const GwyCoordsView *view)
  * Sets the shapes object whose coordinates a coords view will display.
  *
  * Setting the shapes causes several things to happen/start working
- * automatically.  Units and formats of columns managed by @view are
- * constructed to be useful for coordinates within @shapes bounding box.  They
- * also follow the real versus pixel scale setting.  Furthermore, @shapes
- * selection and @view selection becomes synchronised and the selectability
- * and editability of items in the list follows the shapes.
+ * automatically.  The units and formats follow the real versus pixel scale
+ * setting.  Furthermore, @shapes selection and @view selection becomes
+ * synchronised and the selectability and editability of items in the list
+ * follows the shapes.
  **/
 void
 gwy_coords_view_set_shapes(GwyCoordsView *view,
@@ -475,8 +474,8 @@ gwy_coords_view_get_coords_type(const GwyCoordsView *view)
  *
  * This method requires the coords type to be set.
  *
- * If @view displays shapes the coordinate value format is updated
- * automatically.  A pixel format is used to display pixel values.
+ * If @view displays shapes the format set by this function is in effect only
+ * for real coordinates, a pixel format is used to display pixel values.
  **/
 void
 gwy_coords_view_set_dimension_format(GwyCoordsView *view,
@@ -731,7 +730,8 @@ set_scale_type(GwyCoordsView *view,
                                            0, 1, " ", "px");
     }
 
-    // TODO: Update formats and headers.
+    recalc_column_titles(view);
+    gtk_widget_queue_draw(GTK_WIDGET(view));
     return TRUE;
 }
 
@@ -913,9 +913,14 @@ update_column_title(GwyCoordsView *view,
     const gchar *units = NULL;
 
     if (!column_info->is_index) {
-        guint i = column_info->i;
-        guint d = priv->coords_class->dimension_map[i];
-        units = priv->dim_info[d].units;
+        if (priv->scale_type == GWY_COORD_SCALE_PIXEL) {
+            units = "px";
+        }
+        else {
+            guint i = column_info->i;
+            guint d = priv->coords_class->dimension_map[i];
+            units = priv->dim_info[d].units;
+        }
     }
 
     gboolean has_title = title && *title;
