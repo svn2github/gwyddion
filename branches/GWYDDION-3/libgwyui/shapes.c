@@ -1166,7 +1166,7 @@ gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
     GwyRGBA color = outline_color;
     gdouble width = cairo_get_line_width(cr) * (prelight ? 1.3 : 1.0);
     gdouble outline_width = 1.1*width + 0.4;
-    gdouble alpha = prelight ? 1.0 : 0.7;
+    gdouble alpha = prelight ? 1.0 : 0.87;
 
     color.a = alpha;
     // or: cairo_push_group(cr);
