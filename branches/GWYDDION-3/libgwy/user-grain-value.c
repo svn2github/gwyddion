@@ -162,7 +162,7 @@ gwy_user_grain_value_n_items(GwySerializable *serializable)
 
 static gsize
 gwy_user_grain_value_itemize(GwySerializable *serializable,
-                          GwySerializableItems *items)
+                             GwySerializableItems *items)
 {
     g_return_val_if_fail(items->len - items->n >= N_ITEMS+1, 0);
 

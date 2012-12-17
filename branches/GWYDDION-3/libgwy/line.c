@@ -68,7 +68,7 @@ static void     gwy_line_get_property     (GObject *object,
                                            GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "real",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*0*/ { .name = "real",   .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
     /*1*/ { .name = "off",    .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*2*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*3*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
@@ -244,18 +244,8 @@ gwy_line_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    it = serialize_items[0];
-    it.value.v_double = line->real;
-    items->items[items->n++] = it;
-    n++;
-
-    if (line->off) {
-        it = serialize_items[1];
-        it.value.v_double = line->off;
-        items->items[items->n++] = it;
-        n++;
-    }
-
+    _gwy_serialize_double(line->real, serialize_items + 0, items, &n);
+    _gwy_serialize_double(line->off, serialize_items + 1, items, &n);
     _gwy_serialize_unit(priv->unit_x, serialize_items + 2, items, &n);
     _gwy_serialize_unit(priv->unit_y, serialize_items + 3, items, &n);
     _gwy_serialize_string(priv->name, serialize_items + 4, items, &n);
@@ -280,8 +270,6 @@ gwy_line_construct(GwySerializable *serializable,
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    its[0].value.v_double = line->real;
-    its[1].value.v_double = line->off;
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyLine", error_list);
 

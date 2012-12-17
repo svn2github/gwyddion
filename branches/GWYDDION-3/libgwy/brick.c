@@ -30,7 +30,7 @@
 #define BASE(brick, col, row, level) \
     (brick->data + ((level)*brick->yres + (row))*brick->xres + (col))
 
-enum { N_ITEMS = 14 };
+enum { N_ITEMS = 15 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -52,6 +52,7 @@ enum {
     PROP_UNIT_Y,
     PROP_UNIT_Z,
     PROP_UNIT_W,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -77,12 +78,12 @@ static void     gwy_brick_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*00*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*01*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*02*/ { .name = "zres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*03*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*04*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*05*/ { .name = "zreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*00*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        .value.v_uint32 = 1   },
+    /*01*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        .value.v_uint32 = 1   },
+    /*02*/ { .name = "zres",   .ctype = GWY_SERIALIZABLE_INT32,        .value.v_uint32 = 1   },
+    /*03*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
+    /*04*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
+    /*05*/ { .name = "zreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
     /*06*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*07*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*08*/ { .name = "zoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
@@ -90,7 +91,8 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*10*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*11*/ { .name = "unit-z", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*12*/ { .name = "unit-w", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*13*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*13*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*14*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -218,6 +220,13 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the brick.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -279,6 +288,7 @@ static void
 gwy_brick_finalize(GObject *object)
 {
     GwyBrick *brick = GWY_BRICK(object);
+    GWY_FREE(brick->priv->name);
     free_data(brick);
     G_OBJECT_CLASS(gwy_brick_parent_class)->finalize(object);
 }
@@ -337,49 +347,20 @@ gwy_brick_itemize(GwySerializable *serializable,
     items->items[items->n++] = it;
     n++;
 
-    it = serialize_items[3];
-    it.value.v_double = brick->xreal;
-    items->items[items->n++] = it;
-    n++;
-
-    it = serialize_items[4];
-    it.value.v_double = brick->yreal;
-    items->items[items->n++] = it;
-    n++;
-
-    it = serialize_items[5];
-    it.value.v_double = brick->zreal;
-    items->items[items->n++] = it;
-    n++;
-
-    if (brick->xoff) {
-        it = serialize_items[6];
-        it.value.v_double = brick->xoff;
-        items->items[items->n++] = it;
-        n++;
-    }
-
-    if (brick->yoff) {
-        it = serialize_items[7];
-        it.value.v_double = brick->yoff;
-        items->items[items->n++] = it;
-        n++;
-    }
-
-    if (brick->zoff) {
-        it = serialize_items[8];
-        it.value.v_double = brick->zoff;
-        items->items[items->n++] = it;
-        n++;
-    }
-
+    _gwy_serialize_double(brick->xreal, serialize_items + 3, items, &n);
+    _gwy_serialize_double(brick->yreal, serialize_items + 4, items, &n);
+    _gwy_serialize_double(brick->zreal, serialize_items + 5, items, &n);
+    _gwy_serialize_double(brick->xoff, serialize_items + 6, items, &n);
+    _gwy_serialize_double(brick->yoff, serialize_items + 7, items, &n);
+    _gwy_serialize_double(brick->zoff, serialize_items + 8, items, &n);
     _gwy_serialize_unit(priv->unit_x, serialize_items + 9, items, &n);
     _gwy_serialize_unit(priv->unit_y, serialize_items + 10, items, &n);
     _gwy_serialize_unit(priv->unit_z, serialize_items + 11, items, &n);
     _gwy_serialize_unit(priv->unit_w, serialize_items + 12, items, &n);
+    _gwy_serialize_string(priv->name, serialize_items + 13, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
-    it = serialize_items[13];
+    it = serialize_items[14];
     it.value.v_double_array = brick->data;
     it.array_size = brick->xres * brick->yres * brick->zres;
     items->items[items->n++] = it;
@@ -398,13 +379,6 @@ gwy_brick_construct(GwySerializable *serializable,
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    // Set defaults
-    its[3].value.v_double = brick->xreal;
-    its[4].value.v_double = brick->yreal;
-    its[5].value.v_double = brick->zreal;
-    its[6].value.v_double = brick->xoff;
-    its[7].value.v_double = brick->yoff;
-    its[8].value.v_double = brick->zoff;
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyBrick", error_list);
 
@@ -423,7 +397,7 @@ gwy_brick_construct(GwySerializable *serializable,
 
     if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
                    * its[2].value.v_uint32
-                   != its[13].array_size)) {
+                   != its[14].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            // TRANSLATORS: Error message.
@@ -432,7 +406,7 @@ gwy_brick_construct(GwySerializable *serializable,
                            its[0].value.v_uint32,
                            its[1].value.v_uint32,
                            its[2].value.v_uint32,
-                           (gulong)its[13].array_size);
+                           (gulong)its[14].array_size);
         goto fail;
     }
 
@@ -460,7 +434,8 @@ gwy_brick_construct(GwySerializable *serializable,
     priv->unit_z = (GwyUnit*)its[11].value.v_object;
     priv->unit_w = (GwyUnit*)its[12].value.v_object;
     free_data(brick);
-    brick->data = its[13].value.v_double_array;
+    priv->name = its[13].value.v_string;
+    brick->data = its[14].value.v_double_array;
     priv->allocated = TRUE;
 
     return TRUE;
@@ -470,7 +445,8 @@ fail:
     GWY_OBJECT_UNREF(its[10].value.v_object);
     GWY_OBJECT_UNREF(its[11].value.v_object);
     GWY_OBJECT_UNREF(its[12].value.v_object);
-    GWY_FREE(its[13].value.v_double_array);
+    GWY_FREE(its[13].value.v_string);
+    GWY_FREE(its[14].value.v_double_array);
     return FALSE;
 }
 
@@ -482,6 +458,7 @@ gwy_brick_duplicate_impl(GwySerializable *serializable)
 
     gwy_assign(duplicate->data, brick->data,
                brick->xres*brick->yres*brick->zres);
+    gwy_assign_string(&duplicate->priv->name, brick->priv->name);
     // TODO: Caches, if any
 
     return G_OBJECT(duplicate);
@@ -513,7 +490,7 @@ gwy_brick_assign_impl(GwySerializable *destination,
 {
     GwyBrick *dest = GWY_BRICK(destination);
     GwyBrick *src = GWY_BRICK(source);
-    Brick *dpriv = dest->priv;
+    Brick *dpriv = dest->priv, *spriv = src->priv;
 
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
@@ -535,6 +512,8 @@ gwy_brick_assign_impl(GwySerializable *destination,
         notify[nn++] = properties[PROP_YOFFSET];
     if (dest->zoff != src->zoff)
         notify[nn++] = properties[PROP_ZOFFSET];
+    if (gwy_assign_string(&dpriv->name, spriv->name))
+        notify[nn++] = properties[PROP_NAME];
 
     if (dest->xres * dest->yres * dest->zres
         != src->xres * src->yres * src->zres) {
@@ -579,6 +558,10 @@ gwy_brick_set_property(GObject *object,
 
         case PROP_ZOFFSET:
         brick->zoff = g_value_get_double(value);
+        break;
+
+        case PROP_NAME:
+        gwy_assign_string(&brick->priv->name, g_value_get_string(value));
         break;
 
         default:
@@ -659,6 +642,10 @@ gwy_brick_get_property(GObject *object,
         g_value_set_object(value, priv->unit_w);
         break;
 
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -722,8 +709,9 @@ gwy_brick_new_sized(guint xres,
  * Creates a new three-dimensional data brick similar to another brick.
  *
  * All properties of the newly created brick will be identical to @model,
- * except the data that will be either zeroes or uninitialised.  Use
- * gwy_brick_duplicate() to completely duplicate a brick including data.
+ * except the data that will be either zeroes or uninitialised, and name which
+ * will be unset.  Use gwy_brick_duplicate() to completely duplicate a brick
+ * including data.
  *
  * Returns: (transfer full):
  *          A new three-dimensional data brick.
@@ -1685,6 +1673,41 @@ gwy_brick_format_z(const GwyBrick *brick,
     gdouble unit = gwy_brick_dz(brick);
     return gwy_unit_format_with_resolution(gwy_brick_get_unit_z(brick),
                                            style, max, unit);
+}
+
+/**
+ * gwy_brick_set_name:
+ * @brick: A two-dimensional data brick.
+ * @name: (allow-none):
+ *        New brick name.
+ *
+ * Sets the name of a two-dimensional data brick.
+ **/
+void
+gwy_brick_set_name(GwyBrick *brick,
+                   const gchar *name)
+{
+    g_return_if_fail(GWY_IS_BRICK(brick));
+    if (!gwy_assign_string(&brick->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(brick), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_brick_get_name:
+ * @brick: A two-dimensional data brick.
+ *
+ * Gets the name of a two-dimensional data brick.
+ *
+ * Returns: (allow-none):
+ *          Brick name, owned by @brick.
+ **/
+const gchar*
+gwy_brick_get_name(const GwyBrick *brick)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
+    return brick->priv->name;
 }
 
 /**

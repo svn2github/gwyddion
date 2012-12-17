@@ -243,10 +243,7 @@ gwy_fit_param_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    it = serialize_items[0];
-    it.value.v_string = priv->name;
-    items->items[items->n++] = it;
-    n++;
+    _gwy_serialize_string(priv->name, serialize_items + 0, items, &n);
 
     if (priv->power_x) {
         it = serialize_items[1];
@@ -262,12 +259,7 @@ gwy_fit_param_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (priv->estimate) {
-        it = serialize_items[3];
-        it.value.v_string = priv->estimate;
-        items->items[items->n++] = it;
-        n++;
-    }
+    _gwy_serialize_string(priv->estimate, serialize_items + 3, items, &n);
 
     return n;
 }

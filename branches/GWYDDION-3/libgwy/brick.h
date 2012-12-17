@@ -123,6 +123,9 @@ GwyValueFormat* gwy_brick_format_xy      (const GwyBrick *brick,
                                           GwyValueFormatStyle style)   G_GNUC_MALLOC;
 GwyValueFormat* gwy_brick_format_z       (const GwyBrick *brick,
                                           GwyValueFormatStyle style)   G_GNUC_MALLOC;
+void            gwy_brick_set_name       (GwyBrick *brick,
+                                          const gchar *name);
+const gchar*    gwy_brick_get_name       (const GwyBrick *brick)       G_GNUC_PURE;
 
 #define gwy_brick_index(brick, col, row, level) \
     ((brick)->data[(brick)->xres*((brick)->yres*(level) + (row)) + (col)])

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@ struct _GwyBrickPrivate {
     GwyUnit *unit_y;
     GwyUnit *unit_z;
     GwyUnit *unit_w;
+    gchar *name;
     gboolean allocated;
     gdouble storage;
 };

@@ -43,13 +43,19 @@ void _gwy_assign_unit(GwyUnit **dest,
 
 G_GNUC_INTERNAL
 void _gwy_serialize_unit(GwyUnit *unit,
-                         const GwySerializableItem *template,
+                         const GwySerializableItem *template_,
                          GwySerializableItems *items,
                          guint *n);
 
 G_GNUC_INTERNAL
 void _gwy_serialize_string(gchar *string,
-                           const GwySerializableItem *template,
+                           const GwySerializableItem *template_,
+                           GwySerializableItems *items,
+                           guint *n);
+
+G_GNUC_INTERNAL
+void _gwy_serialize_double(gdouble value,
+                           const GwySerializableItem *template_,
                            GwySerializableItems *items,
                            guint *n);
 

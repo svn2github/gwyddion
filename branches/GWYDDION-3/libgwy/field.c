@@ -76,10 +76,10 @@ static void     gwy_field_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*00*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*01*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    /*02*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*03*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*00*/ { .name = "xres",   .ctype = GWY_SERIALIZABLE_INT32,        .value.v_uint32 = 1   },
+    /*01*/ { .name = "yres",   .ctype = GWY_SERIALIZABLE_INT32,        .value.v_uint32 = 1   },
+    /*02*/ { .name = "xreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
+    /*03*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
     /*04*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*05*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*06*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
@@ -321,30 +321,10 @@ gwy_field_itemize(GwySerializable *serializable,
     items->items[items->n++] = it;
     n++;
 
-    it = serialize_items[2];
-    it.value.v_double = field->xreal;
-    items->items[items->n++] = it;
-    n++;
-
-    it = serialize_items[3];
-    it.value.v_double = field->yreal;
-    items->items[items->n++] = it;
-    n++;
-
-    if (field->xoff) {
-        it = serialize_items[4];
-        it.value.v_double = field->xoff;
-        items->items[items->n++] = it;
-        n++;
-    }
-
-    if (field->yoff) {
-        it = serialize_items[5];
-        it.value.v_double = field->yoff;
-        items->items[items->n++] = it;
-        n++;
-    }
-
+    _gwy_serialize_double(field->xreal, serialize_items + 2, items, &n);
+    _gwy_serialize_double(field->yreal, serialize_items + 3, items, &n);
+    _gwy_serialize_double(field->xoff, serialize_items + 4, items, &n);
+    _gwy_serialize_double(field->yoff, serialize_items + 5, items, &n);
     _gwy_serialize_unit(priv->unit_x, serialize_items + 6, items, &n);
     _gwy_serialize_unit(priv->unit_y, serialize_items + 7, items, &n);
     _gwy_serialize_unit(priv->unit_z, serialize_items + 8, items, &n);
@@ -370,10 +350,6 @@ gwy_field_construct(GwySerializable *serializable,
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    its[2].value.v_double = field->xreal;
-    its[3].value.v_double = field->yreal;
-    its[4].value.v_double = field->xoff;
-    its[5].value.v_double = field->yoff;
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyField", error_list);
 

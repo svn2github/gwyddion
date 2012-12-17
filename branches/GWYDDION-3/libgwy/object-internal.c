@@ -38,7 +38,7 @@ _gwy_assign_unit(GwyUnit **dest,
 
 void
 _gwy_serialize_unit(GwyUnit *unit,
-                    const GwySerializableItem *template,
+                    const GwySerializableItem *template_,
                     GwySerializableItems *items,
                     guint *n)
 {
@@ -46,8 +46,8 @@ _gwy_serialize_unit(GwyUnit *unit,
         return;
 
     g_return_if_fail(items->len - items->n > 0);
-    g_warn_if_fail(template->ctype == GWY_SERIALIZABLE_OBJECT);
-    GwySerializableItem it = *template;
+    g_warn_if_fail(template_->ctype == GWY_SERIALIZABLE_OBJECT);
+    GwySerializableItem it = *template_;
     it.value.v_object = (GObject*)unit;
     items->items[items->n++] = it;
     gwy_serializable_itemize(GWY_SERIALIZABLE(unit), items);
@@ -56,7 +56,7 @@ _gwy_serialize_unit(GwyUnit *unit,
 
 void
 _gwy_serialize_string(gchar *string,
-                      const GwySerializableItem *template,
+                      const GwySerializableItem *template_,
                       GwySerializableItems *items,
                       guint *n)
 {
@@ -64,9 +64,26 @@ _gwy_serialize_string(gchar *string,
         return;
 
     g_return_if_fail(items->len - items->n > 0);
-    g_warn_if_fail(template->ctype == GWY_SERIALIZABLE_STRING);
-    GwySerializableItem it = *template;
+    g_warn_if_fail(template_->ctype == GWY_SERIALIZABLE_STRING);
+    GwySerializableItem it = *template_;
     it.value.v_string = string;
+    items->items[items->n++] = it;
+    (*n)++;
+}
+
+void
+_gwy_serialize_double(gdouble value,
+                      const GwySerializableItem *template_,
+                      GwySerializableItems *items,
+                      guint *n)
+{
+    if (value == template_->value.v_double)
+        return;
+
+    g_return_if_fail(items->len - items->n > 0);
+    g_warn_if_fail(template_->ctype == GWY_SERIALIZABLE_DOUBLE);
+    GwySerializableItem it = *template_;
+    it.value.v_double = value;
     items->items[items->n++] = it;
     (*n)++;
 }
