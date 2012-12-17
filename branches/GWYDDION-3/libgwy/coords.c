@@ -285,7 +285,6 @@ gwy_coords_itemize(GwySerializable *serializable,
         for (guint i = 0; i < dimension; i++) {
             g_return_val_if_fail(items->len - items->n, 0);
             gwy_serializable_itemize(GWY_SERIALIZABLE(priv->units[i]), items);
-            n++;
         }
     }
 
