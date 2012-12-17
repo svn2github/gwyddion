@@ -19,6 +19,10 @@
 
 /*< private_header >*/
 
+/* All functions here are potential candidates for moving to object-utils.
+ * They are generally useful only for serialisable data-like objects though.
+ */
+
 #ifndef __LIBGWY_OBJECT_INTERNAL_H__
 #define __LIBGWY_OBJECT_INTERNAL_H__
 
@@ -74,6 +78,12 @@ gboolean _gwy_check_object_component(const GwySerializableItem *item,
                                      gpointer object,
                                      GType component_type,
                                      GwyErrorList **error_list);
+
+G_GNUC_INTERNAL
+gboolean _gwy_check_data_length_multiple(GwyErrorList **error_list,
+                                         const gchar *type_name,
+                                         gsize len,
+                                         guint multiple);
 
 G_GNUC_INTERNAL
 guint _gwy_itemize_chain_to_parent(GwySerializable *serializable,

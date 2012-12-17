@@ -21,6 +21,7 @@
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/serialize.h"
+#include "libgwy/object-internal.h"
 #include "libgwy/int-set.h"
 
 enum {
@@ -208,16 +209,11 @@ gwy_int_set_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyIntSet", error_list);
 
-    guint len = its[0].array_size;
-    if (len && its[0].value.v_int32_array) {
-        if (len % 2 != 0) {
-            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                               GWY_DESERIALIZE_ERROR_INVALID,
-                               _("Data length of ‘%s’ is %lu which is not "
-                                 "a multiple of %u."),
-                               "GwyIntSet", (gulong)its[0].array_size, 2);
+    gsize len = its[0].array_size;
+    if (len) {
+        g_assert(its[0].value.v_int32_array);
+        if (!_gwy_check_data_length_multiple(error_list, "GwyIntSet", len, 2))
             goto fail;
-        }
         g_array_set_size(ranges, 0);
         g_array_append_vals(ranges, its[0].value.v_int32_array, len/2);
         if (!ranges_are_canonical(ranges)) {

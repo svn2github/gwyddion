@@ -321,15 +321,9 @@ gwy_coords_construct(GwySerializable *serializable,
         goto fail;
     }
 
-    if (its[0].array_size % shape_size) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Data length of ‘%s’ is %lu which is not "
-                             "a multiple of %u."),
-                           G_OBJECT_TYPE_NAME(coords),
-                           (gulong)its[0].array_size, shape_size);
+    if (!_gwy_check_data_length_multiple(error_list, G_OBJECT_TYPE_NAME(coords),
+                                         its[0].array_size, shape_size))
         goto fail;
-    }
     if (its[0].array_size) {
         GwyArray *array = GWY_ARRAY(coords);
         _gwy_array_set_data_silent(array,

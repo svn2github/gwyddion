@@ -247,17 +247,11 @@ gwy_surface_construct(GwySerializable *serializable,
                                      error_list))
         goto fail;
 
-    guint len = its[3].array_size;
-    if (len && its[3].value.v_double_array) {
-        if (len % 3 != 0) {
-            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                               GWY_DESERIALIZE_ERROR_INVALID,
-                               // TRANSLATORS: Error message.
-                               _("Data length of ‘%s’ is %lu which is not "
-                                 "a multiple of %u."),
-                               "GwySurface", (gulong)its[3].array_size, 3);
+    gsize len = its[3].array_size;
+    if (len) {
+        g_assert(its[3].value.v_double_array);
+        if (!_gwy_check_data_length_multiple(error_list, "GwySurface", len, 3))
             goto fail;
-        }
         surface->n = its[3].array_size/3;
         surface->data = (GwyXYZ*)its[3].value.v_double_array;
     }

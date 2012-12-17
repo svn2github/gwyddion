@@ -218,16 +218,11 @@ gwy_gradient_construct(GwySerializable *serializable,
     GwyGradient *gradient = GWY_GRADIENT(serializable);
     GArray *points = gradient->priv->points;
 
-    guint len = its[0].array_size;
-    if (len && its[0].value.v_double_array) {
-        if (len % 5 != 0) {
-            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                               GWY_DESERIALIZE_ERROR_INVALID,
-                               _("Data length of ‘%s’ is %lu which is not "
-                                 "a multiple of %u."),
-                               "GwyGradient", (gulong)its[0].array_size, 5);
+    gsize len = its[0].array_size;
+    if (len) {
+        g_assert(its[0].value.v_double_array);
+        if (!_gwy_check_data_length_multiple(error_list, "GwyGradient", len, 5))
             goto fail;
-        }
         g_array_set_size(points, 0);
         g_array_append_vals(points, its[0].value.v_double_array, len/5);
         if (len == 5)

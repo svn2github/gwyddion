@@ -189,6 +189,25 @@ _gwy_check_object_component(const GwySerializableItem *item,
     g_return_val_if_reached(FALSE);
 }
 
+gboolean
+_gwy_check_data_length_multiple(GwyErrorList **error_list,
+                                const gchar *type_name,
+                                gsize len,
+                                guint multiple)
+{
+    if (len % multiple == 0)
+        return TRUE;
+
+    gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                       GWY_DESERIALIZE_ERROR_INVALID,
+                       // TRANSLATORS: Error message.
+                       // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
+                       _("Data length of ‘%s’ is %lu which is not "
+                         "a multiple of %u."),
+                       type_name, (gulong)len, multiple);
+    return FALSE;
+}
+
 gpointer
 _gwy_hash_table_keys(GHashTable *table)
 {

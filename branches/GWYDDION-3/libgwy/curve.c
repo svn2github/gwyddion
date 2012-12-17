@@ -251,18 +251,11 @@ gwy_curve_construct(GwySerializable *serializable,
     if (!_gwy_check_object_component(its + 1, curve, GWY_TYPE_UNIT, error_list))
         goto fail;
 
-    guint len = its[3].array_size;
-    if (len && its[3].value.v_double_array) {
-        if (len % 2 != 0) {
-            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                               GWY_DESERIALIZE_ERROR_INVALID,
-                               // TRANSLATORS: Error message.
-                               // TRANSLATORS: %s is a data type name, e.g. GwyCurve, GwyGradient.
-                               _("Data length of ‘%s’ is %lu which is not "
-                                 "a multiple of %u."),
-                               "GwyCurve", (gulong)its[3].array_size, 2);
+    gsize len = its[3].array_size;
+    if (len) {
+        g_assert(its[3].value.v_double_array);
+        if (!_gwy_check_data_length_multiple(error_list, "GwyCurve", len, 2))
             goto fail;
-        }
         curve->n = its[3].array_size/2;
         curve->data = (GwyXY*)its[3].value.v_double_array;
         sort_data(curve);
