@@ -1677,11 +1677,11 @@ gwy_brick_format_z(const GwyBrick *brick,
 
 /**
  * gwy_brick_set_name:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  * @name: (allow-none):
  *        New brick name.
  *
- * Sets the name of a two-dimensional data brick.
+ * Sets the name of a three-dimensional data brick.
  **/
 void
 gwy_brick_set_name(GwyBrick *brick,
@@ -1696,9 +1696,9 @@ gwy_brick_set_name(GwyBrick *brick,
 
 /**
  * gwy_brick_get_name:
- * @brick: A two-dimensional data brick.
+ * @brick: A three-dimensional data brick.
  *
- * Gets the name of a two-dimensional data brick.
+ * Gets the name of a three-dimensional data brick.
  *
  * Returns: (allow-none):
  *          Brick name, owned by @brick.
