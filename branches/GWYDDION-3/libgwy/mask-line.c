@@ -238,14 +238,9 @@ gwy_mask_line_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyMaskLine", error_list);
 
-    if (G_UNLIKELY(!its[0].value.v_uint32)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           // TRANSLATORS: Error message.
-                           _("GwyMaskLine dimension %u is invalid."),
-                           its[0].value.v_uint32);
+    if (_gwy_check_data_dimension(error_list, "GwyMaskLine", 1,
+                                  its[0].value.v_uint32))
         goto fail;
-    }
 
     gsize n = stride_for_width(its[0].value.v_uint32);
     if (G_UNLIKELY(n != its[2].array_size)) {

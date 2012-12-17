@@ -353,14 +353,10 @@ gwy_field_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyField", error_list);
 
-    if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           // TRANSLATORS: Error message.
-                           _("GwyField dimensions %u×%u are invalid."),
-                           its[0].value.v_uint32, its[1].value.v_uint32);
+    if (_gwy_check_data_dimension(error_list, "GwyField", 2,
+                                  its[0].value.v_uint32,
+                                  its[1].value.v_uint32))
         goto fail;
-    }
 
     if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
                    != its[10].array_size)) {

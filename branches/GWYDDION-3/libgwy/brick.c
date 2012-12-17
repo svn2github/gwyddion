@@ -382,18 +382,11 @@ gwy_brick_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyBrick", error_list);
 
-    if (G_UNLIKELY(!its[0].value.v_uint32
-                   || !its[1].value.v_uint32
-                   || !its[2].value.v_uint32)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           // TRANSLATORS: Error message.
-                           _("GwyBrick dimensions %u×%u×%u are invalid."),
-                           its[0].value.v_uint32,
-                           its[1].value.v_uint32,
-                           its[2].value.v_uint32);
+    if (_gwy_check_data_dimension(error_list, "GwyBrick", 3,
+                                  its[0].value.v_uint32,
+                                  its[1].value.v_uint32,
+                                  its[2].value.v_uint32))
         goto fail;
-    }
 
     if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
                    * its[2].value.v_uint32

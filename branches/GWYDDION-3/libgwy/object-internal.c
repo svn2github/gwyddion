@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <stdarg.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
@@ -206,6 +207,44 @@ _gwy_check_data_length_multiple(GwyErrorList **error_list,
                          "a multiple of %u."),
                        type_name, (gulong)len, multiple);
     return FALSE;
+}
+
+gboolean
+_gwy_check_data_dimension(GwyErrorList **error_list,
+                          const gchar *type_name,
+                          guint n,
+                          ...)
+{
+    va_list ap;
+    va_start(ap, n);
+
+    for (guint i = 0; i < n; i++) {
+        guint size = va_arg(ap, guint);
+        if (G_LIKELY(size))
+            continue;
+
+        va_end(ap);
+
+        GString *str = g_string_new(NULL);
+        va_start(ap, n);
+        for (guint j = 0; j < n; j++) {
+            if (j)
+                g_string_append(str, "×");
+            g_string_append_printf(str, "%u", va_arg(ap, guint));
+        }
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
+                           // TRANSLATORS: Error message.
+                           // TRANSLATORS: Second %s is a data type name, e.g. GwyField.
+                           _("Dimension %s of ‘%s’ is invalid."),
+                           str->str, type_name);
+        g_string_free(str, TRUE);
+        va_end(ap);
+        return FALSE;
+    }
+
+    va_end(ap);
+    return TRUE;
 }
 
 gpointer

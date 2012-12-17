@@ -86,6 +86,12 @@ gboolean _gwy_check_data_length_multiple(GwyErrorList **error_list,
                                          guint multiple);
 
 G_GNUC_INTERNAL
+gboolean _gwy_check_data_dimension(GwyErrorList **error_list,
+                                   const gchar *type_name,
+                                   guint n,
+                                   ...);
+
+G_GNUC_INTERNAL
 guint _gwy_itemize_chain_to_parent(GwySerializable *serializable,
                                    GType parent_type,
                                    GwySerializableInterface *parent_iface,
