@@ -263,7 +263,7 @@ test_mask_line_serialize_failure_res0(void)
     GwyErrorList *error_list = NULL;
     gwy_error_list_add(&error_list,
                        GWY_DESERIALIZE_ERROR, GWY_DESERIALIZE_ERROR_INVALID,
-                       "GwyMaskLine dimension %u is invalid.", 0);
+                       "Dimension %u of ‘GwyMaskLine’ is invalid.", 0);
 
     deserialize_assert_failure(G_MEMORY_OUTPUT_STREAM(stream), error_list);
     gwy_error_list_clear(&error_list);

@@ -277,8 +277,7 @@ gwy_line_construct(GwySerializable *serializable,
         goto fail;
     if (!_gwy_check_object_component(its + 3, line, GWY_TYPE_UNIT, error_list))
         goto fail;
-
-    if (_gwy_check_data_dimension(error_list, "GwyLine", 1, its[5].array_size))
+    if (!_gwy_check_data_dimension(error_list, "GwyLine", 1, its[5].array_size))
         goto fail;
 
     line->res = its[5].array_size;

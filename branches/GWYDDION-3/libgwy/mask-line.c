@@ -238,8 +238,8 @@ gwy_mask_line_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyMaskLine", error_list);
 
-    if (_gwy_check_data_dimension(error_list, "GwyMaskLine", 1,
-                                  its[0].value.v_uint32))
+    if (!_gwy_check_data_dimension(error_list, "GwyMaskLine", 1,
+                                   its[0].value.v_uint32))
         goto fail;
 
     gsize n = stride_for_width(its[0].value.v_uint32);
