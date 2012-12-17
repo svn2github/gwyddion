@@ -875,6 +875,14 @@ unpack_name(const guchar *buffer,
                              "end of a string."));
         return 0;
     }
+    const gchar *end;
+    if (G_UNLIKELY(!g_utf8_validate((const gchar*)buffer, s - buffer, &end))) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_UTF8,
+                           // TRANSLATORS: Error message.
+                           _("String is not valid UTF-8."));
+        return 0;
+    }
     *value = (const gchar*)buffer;
     return s-buffer + 1;
 }
@@ -893,6 +901,14 @@ unpack_string(const guchar *buffer,
                            // TRANSLATORS: Error message.
                            _("End of data was reached while looking for the "
                              "end of a string."));
+        return 0;
+    }
+    const gchar *end;
+    if (G_UNLIKELY(!g_utf8_validate((const gchar*)buffer, s - buffer, &end))) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_UTF8,
+                           // TRANSLATORS: Error message.
+                           _("String is not valid UTF-8."));
         return 0;
     }
     *value = g_memdup(buffer, s-buffer + 1);
@@ -1829,6 +1845,8 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  *                              is non-fatal: such item is just ignored.
  * @GWY_DESERIALIZE_ERROR_DATA: Uknown data type (#GwySerializableCType) was
  *                              encountered.  This error is fatal.
+ * @GWY_DESERIALIZE_ERROR_UTF8: Serialised string is not valid UTF-8.
+ *                              This error is fatal.
  * @GWY_DESERIALIZE_ERROR_INVALID: Object representation is logicaly
  *                                 inconsistent or otherwise invalid.
  *                                 Reserved for classes to indicate data errors

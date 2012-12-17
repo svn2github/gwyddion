@@ -353,8 +353,10 @@ gwy_serializable_assign(GwySerializable *destination,
  * @GWY_SERIALIZABLE_INT64_ARRAY: Denotes an array of 64bit integers.
  * @GWY_SERIALIZABLE_DOUBLE: Denotes a IEEE double.
  * @GWY_SERIALIZABLE_DOUBLE_ARRAY: Denotes an array of IEEE doubles.
- * @GWY_SERIALIZABLE_STRING: Denotes a C string.
- * @GWY_SERIALIZABLE_STRING_ARRAY: Denotes an array of C strings.
+ * @GWY_SERIALIZABLE_STRING: Denotes a UTF-8-encoded C string.  If you need a
+ *                           raw sequence of bytes, use
+ *                           %GWY_SERIALIZABLE_INT8_ARRAY instead.
+ * @GWY_SERIALIZABLE_STRING_ARRAY: Denotes an array of UTF-8 encoded C strings.
  * @GWY_SERIALIZABLE_OBJECT: Denotes an object.
  * @GWY_SERIALIZABLE_OBJECT_ARRAY: Denotes an array of objects.
  * @GWY_SERIALIZABLE_BOXED: Denotes a serialisable boxed type.
@@ -363,6 +365,9 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * The type is a single byte, i.e. a value smaller than 256.  It is equal to
  * the character used in GWY files to denote the corresponding type.
+ *
+ * Signed and usinged types are not distinguished here as their byte order is
+ * handled the same way.
  **/
 
 /**
@@ -403,6 +408,9 @@ gwy_serializable_assign(GwySerializable *destination,
  * Member @v_size has no use in interface implementations (it corresponds to
  * %GWY_SERIALIZABLE_HEADER), it is used only in object header items in the
  * flattened object tree.
+ *
+ * All string values must be valid UTF-8.  If you need raw byte sequences use
+ * arrays of #guint8.
  *
  * Signed and unsigned integer members are provided for convenience, the
  * serialisation does not distinguish between signed and unsigned integers.
