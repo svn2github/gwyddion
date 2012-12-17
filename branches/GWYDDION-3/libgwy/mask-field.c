@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #include "libgwy/mask-field-internal.h"
 #include "libgwy/field-internal.h"
 
-enum { N_ITEMS = 3 };
+enum { N_ITEMS = 4 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -38,6 +38,7 @@ enum {
     PROP_XRES,
     PROP_YRES,
     PROP_STRIDE,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -63,9 +64,10 @@ static void     gwy_mask_field_get_property     (GObject *object,
                                                  GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "xres", .ctype = GWY_SERIALIZABLE_INT32,       },
-    /*1*/ { .name = "yres", .ctype = GWY_SERIALIZABLE_INT32,       },
-    /*2*/ { .name = "data", .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
+    /*0*/ { .name = "xres", .ctype = GWY_SERIALIZABLE_INT32,       .value.v_uint32 = 1 },
+    /*1*/ { .name = "yres", .ctype = GWY_SERIALIZABLE_INT32,       .value.v_uint32 = 1 },
+    /*2*/ { .name = "name", .ctype = GWY_SERIALIZABLE_STRING,      },
+    /*3*/ { .name = "data", .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -118,6 +120,13 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                             "guint32s.",
                             1, G_MAXUINT, 2,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the field.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -190,6 +199,7 @@ static void
 gwy_mask_field_finalize(GObject *object)
 {
     GwyMaskField *field = GWY_MASK_FIELD(object);
+    GWY_FREE(field->priv->name);
     free_data(field);
     free_caches(field);
     G_OBJECT_CLASS(gwy_mask_field_parent_class)->finalize(object);
@@ -208,31 +218,37 @@ gwy_mask_field_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
     GwyMaskField *field = GWY_MASK_FIELD(serializable);
-    GwySerializableItem *it = items->items + items->n;
-    gsize n = field->stride * field->yres;
+    MaskField *priv = field->priv;
+    GwySerializableItem it;
+    gsize n32 = field->stride * field->yres;
+    guint n = 0;
 
-    *it = serialize_items[0];
-    it->value.v_uint32 = field->xres;
-    it++, items->n++;
+    it = serialize_items[0];
+    it.value.v_uint32 = field->xres;
+    items->items[items->n++] = it;
+    n++;
 
-    *it = serialize_items[1];
-    it->value.v_uint32 = field->yres;
-    it++, items->n++;
+    it = serialize_items[1];
+    it.value.v_uint32 = field->yres;
+    items->items[items->n++] = it;
+    n++;
 
-    *it = serialize_items[2];
+    _gwy_serialize_string(priv->name, serialize_items + 2, items, &n);
+
+    it = serialize_items[3];
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
-        it->value.v_uint32_array = field->data;
+        it.value.v_uint32_array = field->data;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        MaskField *priv = field->priv;
-        priv->serialized_swapped = g_memdup(field->data, n*sizeof(guint32));
-        swap_bits_uint32_array(priv->serialized_swapped, n);
-        it->value.v_uint32_array = priv->serialized_swapped;
+        priv->serialized_swapped = g_memdup(field->data, n32*sizeof(guint32));
+        swap_bits_uint32_array(priv->serialized_swapped, n32);
+        it.value.v_uint32_array = priv->serialized_swapped;
     }
-    it->array_size = n;
-    it++, items->n++;
+    it.array_size = n32;
+    items->items[items->n++] = it;
+    n++;
 
-    return N_ITEMS;
+    return n;
 }
 
 static void
@@ -248,6 +264,7 @@ gwy_mask_field_construct(GwySerializable *serializable,
                          GwyErrorList **error_list)
 {
     GwyMaskField *field = GWY_MASK_FIELD(serializable);
+    MaskField *priv = field->priv;
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
@@ -264,36 +281,38 @@ gwy_mask_field_construct(GwySerializable *serializable,
     }
 
     gsize n = stride_for_width(its[0].value.v_uint32) * its[1].value.v_uint32;
-    if (G_UNLIKELY(n != its[2].array_size)) {
+    if (G_UNLIKELY(n != its[3].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            // TRANSLATORS: Error message.
                            _("GwyMaskField dimensions %u×%u do not match "
                              "data size %lu."),
                            its[0].value.v_uint32, its[1].value.v_uint32,
-                           (gulong)its[2].array_size);
+                           (gulong)its[3].array_size);
         goto fail;
     }
 
     free_data(field);
     field->xres = its[0].value.v_uint32;
     field->yres = its[1].value.v_uint32;
+    priv->name = its[2].value.v_string;
     field->stride = stride_for_width(field->xres);
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
-        field->data = its[2].value.v_uint32_array;
-        its[2].value.v_uint32_array = NULL;
-        its[2].array_size = 0;
+        field->data = its[3].value.v_uint32_array;
+        its[3].value.v_uint32_array = NULL;
+        its[3].array_size = 0;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        field->data = g_memdup(its[2].value.v_uint32_array, n*sizeof(guint32));
+        field->data = g_memdup(its[3].value.v_uint32_array, n*sizeof(guint32));
         swap_bits_uint32_array(field->data, n);
     }
-    field->priv->allocated = TRUE;
+    priv->allocated = TRUE;
 
     return TRUE;
 
 fail:
-    GWY_FREE(its[2].value.v_uint32_array);
+    GWY_FREE(its[2].value.v_string);
+    GWY_FREE(its[3].value.v_uint32_array);
     return FALSE;
 }
 
@@ -310,6 +329,7 @@ gwy_mask_field_duplicate_impl(GwySerializable *serializable)
 
     gsize n = field->stride * field->yres;
     gwy_assign(duplicate->data, field->data, n);
+    gwy_assign_string(&duplicate->priv->name, field->priv->name);
     // TODO: Duplicate precalculated grain data too.
 
     return G_OBJECT(duplicate);
@@ -321,7 +341,7 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
 {
     GwyMaskField *dest = GWY_MASK_FIELD(destination);
     GwyMaskField *src = GWY_MASK_FIELD(source);
-    //MaskField *spriv = src->priv, *dpriv = dest->priv;
+    MaskField *spriv = src->priv, *dpriv = dest->priv;
 
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
@@ -331,6 +351,8 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
         notify[nn++] = properties[PROP_YRES];
     if (dest->stride != src->stride)
         notify[nn++] = properties[PROP_STRIDE];
+    if (gwy_assign_string(&dpriv->name, spriv->name))
+        notify[nn++] = properties[PROP_NAME];
 
     gsize n = src->stride * src->yres;
     if (dest->stride * dest->yres != n) {
@@ -349,10 +371,16 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
 static void
 gwy_mask_field_set_property(GObject *object,
                             guint prop_id,
-                            G_GNUC_UNUSED const GValue *value,
+                            const GValue *value,
                             GParamSpec *pspec)
 {
+    GwyMaskField *field = GWY_MASK_FIELD(object);
+
     switch (prop_id) {
+        case PROP_NAME:
+        gwy_assign_string(&field->priv->name, g_value_get_string(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -378,6 +406,10 @@ gwy_mask_field_get_property(GObject *object,
 
         case PROP_STRIDE:
         g_value_set_uint(value, field->stride);
+        break;
+
+        case PROP_NAME:
+        g_value_set_string(value, field->priv->name);
         break;
 
         default:
@@ -1083,6 +1115,41 @@ gwy_mask_field_count_rows(const GwyMaskField *field,
         }
     }
     return count;
+}
+
+/**
+ * gwy_mask_field_set_name:
+ * @field: A two-dimensional mask field.
+ * @name: (allow-none):
+ *        New field name.
+ *
+ * Sets the name of a two-dimensional mask field.
+ **/
+void
+gwy_mask_field_set_name(GwyMaskField *field,
+                        const gchar *name)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    if (!gwy_assign_string(&field->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(field), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_mask_field_get_name:
+ * @field: A two-dimensional mask field.
+ *
+ * Gets the name of a two-dimensional mask field.
+ *
+ * Returns: (allow-none):
+ *          Field name, owned by @field.
+ **/
+const gchar*
+gwy_mask_field_get_name(const GwyMaskField *field)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    return field->priv->name;
 }
 
 /**

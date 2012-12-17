@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,14 +28,15 @@
 G_BEGIN_DECLS
 
 struct _GwyMaskFieldPrivate {
-    guint ngrains;
     guint *grains;
     guint *grain_sizes;
     GwyFieldPart *grain_bounding_boxes;
     GwyXY *grain_positions;
+    guint ngrains;
 
     gboolean allocated;
     guint32 storage;
+    gchar *name;
     guint32 *serialized_swapped;    // serialisation-only
 };
 

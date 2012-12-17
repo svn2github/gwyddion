@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -71,6 +71,9 @@ GwyMaskLine* gwy_mask_line_new_resampled(const GwyMaskLine *line,
 void         gwy_mask_line_set_size     (GwyMaskLine *line,
                                          guint res,
                                          gboolean clear);
+void         gwy_mask_line_set_name     (GwyMaskLine *line,
+                                         const gchar *name);
+const gchar* gwy_mask_line_get_name     (const GwyMaskLine *line)  G_GNUC_PURE;
 
 // For bindings; C users will see the macros.
 gboolean gwy_mask_line_get(const GwyMaskLine *line,

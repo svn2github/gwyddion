@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/mask-line-internal.h"
 
-enum { N_ITEMS = 2 };
+enum { N_ITEMS = 3 };
 
 enum {
     SGNL_DATA_CHANGED,
@@ -36,6 +36,7 @@ enum {
 enum {
     PROP_0,
     PROP_RES,
+    PROP_NAME,
     N_PROPS
 };
 
@@ -43,26 +44,27 @@ static void     gwy_mask_line_finalize         (GObject *object);
 static void     gwy_mask_line_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_mask_line_n_items          (GwySerializable *serializable);
 static gsize    gwy_mask_line_itemize          (GwySerializable *serializable,
-                                                 GwySerializableItems *items);
+                                                GwySerializableItems *items);
 static void     gwy_mask_line_done             (GwySerializable *serializable);
 static gboolean gwy_mask_line_construct        (GwySerializable *serializable,
-                                                 GwySerializableItems *items,
-                                                 GwyErrorList **error_list);
+                                                GwySerializableItems *items,
+                                                GwyErrorList **error_list);
 static GObject* gwy_mask_line_duplicate_impl   (GwySerializable *serializable);
 static void     gwy_mask_line_assign_impl      (GwySerializable *destination,
-                                                 GwySerializable *source);
+                                                GwySerializable *source);
 static void     gwy_mask_line_set_property     (GObject *object,
-                                                 guint prop_id,
-                                                 const GValue *value,
-                                                 GParamSpec *pspec);
+                                                guint prop_id,
+                                                const GValue *value,
+                                                GParamSpec *pspec);
 static void     gwy_mask_line_get_property     (GObject *object,
-                                                 guint prop_id,
-                                                 GValue *value,
-                                                 GParamSpec *pspec);
+                                                guint prop_id,
+                                                GValue *value,
+                                                GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "res",  .ctype = GWY_SERIALIZABLE_INT32,       },
-    /*1*/ { .name = "data", .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
+    /*0*/ { .name = "res",  .ctype = GWY_SERIALIZABLE_INT32,       .value.v_uint32 = 1 },
+    /*1*/ { .name = "name", .ctype = GWY_SERIALIZABLE_STRING,      },
+    /*2*/ { .name = "data", .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
 };
 
 static guint signals[N_SIGNALS];
@@ -100,6 +102,13 @@ gwy_mask_line_class_init(GwyMaskLineClass *klass)
                             "Pixel length of the line.",
                             1, G_MAXUINT, 1,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the line.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -163,6 +172,7 @@ static void
 gwy_mask_line_finalize(GObject *object)
 {
     GwyMaskLine *line = GWY_MASK_LINE(object);
+    GWY_FREE(line->priv->name);
     free_data(line);
     G_OBJECT_CLASS(gwy_mask_line_parent_class)->finalize(object);
 }
@@ -175,32 +185,37 @@ gwy_mask_line_n_items(G_GNUC_UNUSED GwySerializable *serializable)
 
 static gsize
 gwy_mask_line_itemize(GwySerializable *serializable,
-                       GwySerializableItems *items)
+                      GwySerializableItems *items)
 {
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
     GwyMaskLine *line = GWY_MASK_LINE(serializable);
-    GwySerializableItem *it = items->items + items->n;
-    gsize n = line->priv->stride;
+    MaskLine *priv = line->priv;
+    GwySerializableItem it;
+    gsize n32 = priv->stride;
+    guint n = 0;
 
-    *it = serialize_items[0];
-    it->value.v_uint32 = line->res;
-    it++, items->n++;
+    it = serialize_items[0];
+    it.value.v_uint32 = line->res;
+    items->items[items->n++] = it;
+    n++;
 
-    *it = serialize_items[1];
+    _gwy_serialize_string(priv->name, serialize_items + 1, items, &n);
+
+    it = serialize_items[2];
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
-        it->value.v_uint32_array = line->data;
+        it.value.v_uint32_array = line->data;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        MaskLine *priv = line->priv;
-        priv->serialized_swapped = g_new(guint32, n);
-        swap_bits_uint32_array(priv->serialized_swapped, n);
-        it->value.v_uint32_array = priv->serialized_swapped;
+        priv->serialized_swapped = g_new(guint32, n32);
+        swap_bits_uint32_array(priv->serialized_swapped, n32);
+        it.value.v_uint32_array = priv->serialized_swapped;
     }
-    it->array_size = n;
-    it++, items->n++;
+    it.array_size = n32;
+    items->items[items->n++] = it;
+    n++;
 
-    return N_ITEMS;
+    return n;
 }
 
 static void
@@ -216,6 +231,7 @@ gwy_mask_line_construct(GwySerializable *serializable,
                          GwyErrorList **error_list)
 {
     GwyMaskLine *line = GWY_MASK_LINE(serializable);
+    MaskLine *priv = line->priv;
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
@@ -232,34 +248,36 @@ gwy_mask_line_construct(GwySerializable *serializable,
     }
 
     gsize n = stride_for_width(its[0].value.v_uint32);
-    if (G_UNLIKELY(n != its[1].array_size)) {
+    if (G_UNLIKELY(n != its[2].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            // TRANSLATORS: Error message.
                            _("GwyMaskLine dimension %u does not match "
                              "data size %lu."),
-                           its[0].value.v_uint32, (gulong)its[1].array_size);
+                           its[0].value.v_uint32, (gulong)its[2].array_size);
         goto fail;
     }
 
     free_data(line);
     line->res = its[0].value.v_uint32;
-    line->priv->stride = stride_for_width(line->res);
+    priv->name = its[1].value.v_string;
+    priv->stride = stride_for_width(line->res);
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
-        line->data = its[1].value.v_uint32_array;
-        its[1].value.v_uint32_array = NULL;
-        its[1].array_size = 0;
+        line->data = its[2].value.v_uint32_array;
+        its[2].value.v_uint32_array = NULL;
+        its[2].array_size = 0;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        line->data = g_memdup(its[1].value.v_uint32_array, n*sizeof(guint32));
+        line->data = g_memdup(its[2].value.v_uint32_array, n*sizeof(guint32));
         swap_bits_uint32_array(line->data, n);
     }
-    line->priv->allocated = TRUE;
+    priv->allocated = TRUE;
 
     return TRUE;
 
 fail:
-    GWY_FREE(its[1].value.v_uint32_array);
+    GWY_FREE(its[1].value.v_string);
+    GWY_FREE(its[2].value.v_uint32_array);
     return FALSE;
 }
 
@@ -269,6 +287,7 @@ gwy_mask_line_duplicate_impl(GwySerializable *serializable)
     GwyMaskLine *line = GWY_MASK_LINE(serializable);
     GwyMaskLine *duplicate = gwy_mask_line_new_sized(line->res, FALSE);
     gwy_assign(duplicate->data, line->data, line->priv->stride);
+    gwy_assign_string(&duplicate->priv->name, line->priv->name);
     return G_OBJECT(duplicate);
 }
 
@@ -278,11 +297,14 @@ gwy_mask_line_assign_impl(GwySerializable *destination,
 {
     GwyMaskLine *dest = GWY_MASK_LINE(destination);
     GwyMaskLine *src = GWY_MASK_LINE(source);
+    MaskLine *spriv = src->priv, *dpriv = dest->priv;
 
     GParamSpec *notify[N_PROPS];
     guint nn = 0;
     if (dest->res != src->res)
         notify[nn++] = properties[PROP_RES];
+    if (gwy_assign_string(&dpriv->name, spriv->name))
+        notify[nn++] = properties[PROP_NAME];
 
     gsize n = src->priv->stride;
     if (dest->priv->stride != n) {
@@ -299,10 +321,16 @@ gwy_mask_line_assign_impl(GwySerializable *destination,
 static void
 gwy_mask_line_set_property(GObject *object,
                            guint prop_id,
-                           G_GNUC_UNUSED const GValue *value,
+                           const GValue *value,
                            GParamSpec *pspec)
 {
+    GwyMaskLine *line = GWY_MASK_LINE(object);
+
     switch (prop_id) {
+        case PROP_NAME:
+        gwy_assign_string(&line->priv->name, g_value_get_string(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -320,6 +348,10 @@ gwy_mask_line_get_property(GObject *object,
     switch (prop_id) {
         case PROP_RES:
         g_value_set_uint(value, line->res);
+        break;
+
+        case PROP_NAME:
+        g_value_set_string(value, line->priv->name);
         break;
 
         default:
@@ -771,6 +803,41 @@ gwy_mask_line_part_count(const GwyMaskLine *line,
         count = count_row(base, len, off, end, m0, m1, value);
     }
     return count;
+}
+
+/**
+ * gwy_mask_line_set_name:
+ * @line: A one-dimensional mask line.
+ * @name: (allow-none):
+ *        New line name.
+ *
+ * Sets the name of a one-dimensional mask line.
+ **/
+void
+gwy_mask_line_set_name(GwyMaskLine *line,
+                       const gchar *name)
+{
+    g_return_if_fail(GWY_IS_MASK_LINE(line));
+    if (!gwy_assign_string(&line->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(line), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_mask_line_get_name:
+ * @line: A one-dimensional mask line.
+ *
+ * Gets the name of a one-dimensional mask line.
+ *
+ * Returns: (allow-none):
+ *          Line name, owned by @line.
+ **/
+const gchar*
+gwy_mask_line_get_name(const GwyMaskLine *line)
+{
+    g_return_val_if_fail(GWY_IS_MASK_LINE(line), NULL);
+    return line->priv->name;
 }
 
 /**

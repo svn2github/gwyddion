@@ -324,7 +324,7 @@ gwy_curve_assign_impl(GwySerializable *destination,
 static void
 gwy_curve_set_property(GObject *object,
                        guint prop_id,
-                       G_GNUC_UNUSED const GValue *value,
+                       const GValue *value,
                        GParamSpec *pspec)
 {
     GwyCurve *curve = GWY_CURVE(object);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -83,6 +83,9 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
                                             guint xres,
                                             guint yres,
                                             gboolean clear);
+void          gwy_mask_field_set_name      (GwyMaskField *field,
+                                            const gchar *name);
+const gchar*  gwy_mask_field_get_name      (const GwyMaskField *field) G_GNUC_PURE;
 
 // For bindings; C users will see the macros.
 gboolean gwy_mask_field_get(const GwyMaskField *field,

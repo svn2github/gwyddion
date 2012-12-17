@@ -25,15 +25,22 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/array-internal.h"
 
-enum { N_ITEMS = 2 };
+enum { N_ITEMS = 3 };
 
 enum {
     SGNL_FINISHED,
     N_SIGNALS
 };
 
+enum {
+    PROP_0,
+    PROP_NAME,
+    N_PROPS
+};
+
 struct _GwyCoordsPrivate {
     GwyUnit **units;
+    gchar *name;
 };
 
 typedef struct {
@@ -70,6 +77,14 @@ static gboolean gwy_coords_construct                    (GwySerializable *serial
 static GObject* gwy_coords_duplicate_impl               (GwySerializable *serializable);
 static void     gwy_coords_assign_impl                  (GwySerializable *destination,
                                                          GwySerializable *source);
+static void     gwy_coords_set_property                 (GObject *object,
+                                                         guint prop_id,
+                                                         const GValue *value,
+                                                         GParamSpec *pspec);
+static void     gwy_coords_get_property                 (GObject *object,
+                                                         guint prop_id,
+                                                         GValue *value,
+                                                         GParamSpec *pspec);
 static gboolean class_supports_transforms               (const GwyCoordsClass *klass,
                                                          GwyCoordsTransformFlags flags);
 static void     gwy_coords_translate_default            (GwyCoords *coords,
@@ -105,9 +120,11 @@ static void     constrain_translation_func              (gint value,
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
     { .name = "units", .ctype = GWY_SERIALIZABLE_OBJECT_ARRAY, },
+    { .name = "name",  .ctype = GWY_SERIALIZABLE_STRING,       },
 };
 
 static guint signals[N_SIGNALS];
+static GParamSpec *properties[N_PROPS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyCoords, gwy_coords, GWY_TYPE_ARRAY, G_TYPE_FLAG_ABSTRACT,
@@ -132,6 +149,18 @@ gwy_coords_class_init(GwyCoordsClass *klass)
 
     gobject_class->dispose = gwy_coords_dispose;
     gobject_class->finalize = gwy_coords_finalize;
+    gobject_class->get_property = gwy_coords_get_property;
+    gobject_class->set_property = gwy_coords_set_property;
+
+    properties[PROP_NAME]
+        = g_param_spec_string("name",
+                              "Name",
+                              "Name of the coords.",
+                              NULL,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    for (guint i = 1; i < N_PROPS; i++)
+        g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
      * GwyCoords::finished:
@@ -167,6 +196,7 @@ gwy_coords_finalize(GObject *object)
         g_slice_free1(dimension*sizeof(GwyUnit*), priv->units);
         priv->units = NULL;
     }
+    GWY_FREE(priv->name);
     G_OBJECT_CLASS(gwy_coords_parent_class)->finalize(object);
 }
 
@@ -259,6 +289,8 @@ gwy_coords_itemize(GwySerializable *serializable,
         }
     }
 
+    _gwy_serialize_string(priv->name, serialize_items + 2, items, &n);
+
     return n;
 }
 
@@ -275,6 +307,7 @@ gwy_coords_construct(GwySerializable *serializable,
     gboolean ok = FALSE;
 
     GwyCoords *coords = GWY_COORDS(serializable);
+    Coords *priv = coords->priv;
     // XXX: This is a bit tricky.  We know what the real class is, it's the
     // class of @serializable because the object is already fully constructed
     // as far as GObject is concerned.  So we can check the number of items.
@@ -322,7 +355,6 @@ gwy_coords_construct(GwySerializable *serializable,
                                          GWY_TYPE_UNIT, error_list))
             goto fail;
 
-        Coords *priv = coords->priv;
         ensure_units(priv, dimension, FALSE);
         for (guint i = 0; i < dimension; i++) {
             GWY_OBJECT_UNREF(priv->units[i]);
@@ -332,6 +364,9 @@ gwy_coords_construct(GwySerializable *serializable,
         its[1].value.v_object_array = NULL;
     }
 
+    priv->name = its[2].value.v_string;
+    its[2].value.v_string = NULL;
+
     ok = TRUE;
 
 fail:
@@ -339,6 +374,7 @@ fail:
     for (guint i = 0; i < its[1].array_size; i++)
         GWY_OBJECT_UNREF(its[1].value.v_object_array);
     GWY_FREE(its[1].value.v_object_array);
+    GWY_FREE(its[2].value.v_string);
     return ok;
 }
 
@@ -355,6 +391,17 @@ gwy_coords_duplicate_impl(GwySerializable *serializable)
     GObject *duplicate = g_object_newv(type, 0, NULL);
     _gwy_array_set_data_silent(GWY_ARRAY(duplicate), array_data, size);
 
+    GwyCoords *coords = GWY_COORDS(serializable);
+    GwyCoords *dcoords = GWY_COORDS(duplicate);
+    Coords *dpriv = dcoords->priv, *priv = coords->priv;
+    gwy_assign_string(&dpriv->name, priv->name);
+    if (priv->units) {
+        guint dimension = GWY_COORDS_GET_CLASS(duplicate)->dimension;
+        ensure_units(dpriv, dimension, FALSE);
+        for (guint i = 0; i < dimension; i++)
+            _gwy_assign_unit(dpriv->units + i, priv->units[i]);
+    }
+
     return duplicate;
 }
 
@@ -369,13 +416,59 @@ gwy_coords_assign_impl(GwySerializable *destination,
     Coords *spriv = GWY_COORDS(source)->priv,
            *dpriv = GWY_COORDS(destination)->priv;
 
-    if (!spriv->units && !dpriv->units)
+    GParamSpec *notify[N_PROPS];
+    guint nn = 0;
+    if (gwy_assign_string(&dpriv->name, spriv->name))
+        notify[nn++] = properties[PROP_NAME];
+
+    if (!nn && !spriv->units && !dpriv->units)
         return;
 
     guint dimension = GWY_COORDS_GET_CLASS(destination)->dimension;
     ensure_units(dpriv, dimension, FALSE);
     for (guint i = 0; i < dimension; i++)
         _gwy_assign_unit(dpriv->units + i, spriv->units[i]);
+
+    _gwy_notify_properties_by_pspec(G_OBJECT(dest), notify, nn);
+}
+
+static void
+gwy_coords_set_property(GObject *object,
+                       guint prop_id,
+                       const GValue *value,
+                       GParamSpec *pspec)
+{
+    GwyCoords *coords = GWY_COORDS(object);
+
+    switch (prop_id) {
+        case PROP_NAME:
+        gwy_assign_string(&coords->priv->name, g_value_get_string(value));
+        break;
+
+        default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+        break;
+    }
+}
+
+static void
+gwy_coords_get_property(GObject *object,
+                       guint prop_id,
+                       GValue *value,
+                       GParamSpec *pspec)
+{
+    GwyCoords *coords = GWY_COORDS(object);
+    Coords *priv = coords->priv;
+
+    switch (prop_id) {
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
+        break;
+
+        default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+        break;
+    }
 }
 
 /**
@@ -695,6 +788,41 @@ gwy_coords_filter(GwyCoords *coords,
         if (!filter(coords, i-1, user_data))
             gwy_array_delete1(array, i-1);
     }
+}
+
+/**
+ * gwy_coords_set_name:
+ * @coords: A group of coordinates of some geometrical objects.
+ * @name: (allow-none):
+ *        New coords name.
+ *
+ * Sets the name of a coords.
+ **/
+void
+gwy_coords_set_name(GwyCoords *coords,
+                    const gchar *name)
+{
+    g_return_if_fail(GWY_IS_COORDS(coords));
+    if (!gwy_assign_string(&coords->priv->name, name))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(coords), properties[PROP_NAME]);
+}
+
+/**
+ * gwy_coords_get_name:
+ * @coords: A group of coordinates of some geometrical objects.
+ *
+ * Gets the name of a coords.
+ *
+ * Returns: (allow-none):
+ *          Coords name, owned by @coords.
+ **/
+const gchar*
+gwy_coords_get_name(const GwyCoords *coords)
+{
+    g_return_val_if_fail(GWY_IS_COORDS(coords), NULL);
+    return coords->priv->name;
 }
 
 /**

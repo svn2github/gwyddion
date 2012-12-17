@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@ struct _GwyMaskLinePrivate {
     guint stride;  // this actually mean alocated size as we have only one row
     gboolean allocated;
     guint32 storage;
+    gchar *name;
     guint32 *serialized_swapped;    // serialisation-only
 };
 
