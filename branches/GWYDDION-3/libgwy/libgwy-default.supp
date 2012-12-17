@@ -10,6 +10,7 @@
    libgwy3-init-types
    Memcheck:Leak
    fun:calloc
+   fun:g_malloc0
    fun:g_closure_new_simple
    fun:g_cclosure_new
    fun:g_signal_new_class_handler
