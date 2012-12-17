@@ -373,41 +373,10 @@ gwy_brick_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (!gwy_unit_is_empty(priv->unit_x)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[9];
-        it.value.v_object = (GObject*)priv->unit_x;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_x), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_y)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[10];
-        it.value.v_object = (GObject*)priv->unit_y;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_y), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_z)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[11];
-        it.value.v_object = (GObject*)priv->unit_z;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_z), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_w)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[12];
-        it.value.v_object = (GObject*)priv->unit_w;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_w), items);
-        n++;
-    }
+    _gwy_serialize_unit(priv->unit_x, serialize_items + 9, items, &n);
+    _gwy_serialize_unit(priv->unit_y, serialize_items + 10, items, &n);
+    _gwy_serialize_unit(priv->unit_z, serialize_items + 11, items, &n);
+    _gwy_serialize_unit(priv->unit_w, serialize_items + 12, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[13];
@@ -532,10 +501,10 @@ copy_info(GwyBrick *dest,
     dest->yoff = src->yoff;
     dest->zoff = src->zoff;
     Brick *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
-    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
-    _gwy_assign_units(&dpriv->unit_w, spriv->unit_w);
+    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_unit(&dpriv->unit_w, spriv->unit_w);
 }
 
 static void
@@ -820,10 +789,10 @@ gwy_brick_new_part(const GwyBrick *brick,
     part->zreal = depth*gwy_brick_dz(brick);
 
     Brick *spriv = brick->priv, *dpriv = part->priv;
-    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
-    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
-    _gwy_assign_units(&dpriv->unit_w, spriv->unit_w);
+    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_unit(&dpriv->unit_w, spriv->unit_w);
     if (keep_offsets) {
         part->xoff = brick->xoff + col*gwy_brick_dx(brick);
         part->yoff = brick->yoff + row*gwy_brick_dy(brick);

@@ -345,40 +345,10 @@ gwy_field_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (!gwy_unit_is_empty(priv->unit_x)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[6];
-        it.value.v_object = (GObject*)priv->unit_x;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_x), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_y)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[7];
-        it.value.v_object = (GObject*)priv->unit_y;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_y), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_z)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[8];
-        it.value.v_object = (GObject*)priv->unit_z;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_z), items);
-        n++;
-    }
-
-    if (priv->name) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[9];
-        it.value.v_string = priv->name;
-        items->items[items->n++] = it;
-        n++;
-    }
+    _gwy_serialize_unit(priv->unit_x, serialize_items + 6, items, &n);
+    _gwy_serialize_unit(priv->unit_y, serialize_items + 7, items, &n);
+    _gwy_serialize_unit(priv->unit_z, serialize_items + 8, items, &n);
+    _gwy_serialize_string(priv->name, serialize_items + 9, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[10];
@@ -490,9 +460,9 @@ copy_info(GwyField *dest,
     dest->xoff = src->xoff;
     dest->yoff = src->yoff;
     Field *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
-    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
 }
 
 static void
@@ -758,9 +728,9 @@ gwy_field_new_part(const GwyField *field,
     part->yreal = height*gwy_field_dy(field);
 
     Field *spriv = field->priv, *dpriv = part->priv;
-    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
-    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
     if (keep_offsets) {
         part->xoff = field->xoff + col*gwy_field_dx(field);
         part->yoff = field->yoff + row*gwy_field_dy(field);

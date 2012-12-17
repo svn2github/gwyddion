@@ -742,7 +742,7 @@ _gwy_grain_value_assign(GwyGrainValue *dest,
 
     _gwy_grain_value_set_size(dest, spriv->ngrains);
     gwy_assign(dpriv->values, spriv->values, spriv->ngrains+1);
-    _gwy_assign_units(&dpriv->unit, spriv->unit);
+    _gwy_assign_unit(&dpriv->unit, spriv->unit);
 }
 
 /**

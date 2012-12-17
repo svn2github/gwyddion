@@ -375,7 +375,7 @@ gwy_coords_assign_impl(GwySerializable *destination,
     guint dimension = GWY_COORDS_GET_CLASS(destination)->dimension;
     ensure_units(dpriv, dimension, FALSE);
     for (guint i = 0; i < dimension; i++)
-        _gwy_assign_units(dpriv->units + i, spriv->units[i]);
+        _gwy_assign_unit(dpriv->units + i, spriv->units[i]);
 }
 
 /**

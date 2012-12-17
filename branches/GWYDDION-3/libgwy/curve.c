@@ -219,31 +219,9 @@ gwy_curve_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    if (!gwy_unit_is_empty(priv->unit_x)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[0];
-        it.value.v_object = (GObject*)priv->unit_x;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_x), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_y)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[1];
-        it.value.v_object = (GObject*)priv->unit_y;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_y), items);
-        n++;
-    }
-
-    if (priv->name) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[2];
-        it.value.v_string = priv->name;
-        items->items[items->n++] = it;
-        n++;
-    }
+    _gwy_serialize_unit(priv->unit_x, serialize_items + 0, items, &n);
+    _gwy_serialize_unit(priv->unit_y, serialize_items + 1, items, &n);
+    _gwy_serialize_string(priv->name, serialize_items + 2, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[3];
@@ -308,8 +286,8 @@ copy_info(GwyCurve *dest,
           const GwyCurve *src)
 {
     Curve *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
 }
 
 static GObject*
@@ -544,8 +522,8 @@ copy_line_to_curve(const GwyLine *line,
         curve->data[i].x = q*i + off;
         curve->data[i].y = line->data[i];
     }
-    _gwy_assign_units(&curve->priv->unit_x, line->priv->unit_x);
-    _gwy_assign_units(&curve->priv->unit_y, line->priv->unit_y);
+    _gwy_assign_unit(&curve->priv->unit_x, line->priv->unit_x);
+    _gwy_assign_unit(&curve->priv->unit_y, line->priv->unit_y);
 }
 
 /**
@@ -714,8 +692,8 @@ regularise(const GwyCurve *curve,
             *(ldata++) = interpolate_linear(curve, i*dx + from, &j);
     }
 
-    _gwy_assign_units(&line->priv->unit_x, curve->priv->unit_x);
-    _gwy_assign_units(&line->priv->unit_y, curve->priv->unit_y);
+    _gwy_assign_unit(&line->priv->unit_x, curve->priv->unit_x);
+    _gwy_assign_unit(&line->priv->unit_y, curve->priv->unit_y);
 
     return line;
 }

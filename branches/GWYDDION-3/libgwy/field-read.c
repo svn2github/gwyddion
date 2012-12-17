@@ -715,13 +715,13 @@ gwy_field_profile(GwyField *field,
     Field *fpriv = field->priv;
     Curve *cpriv = curve->priv;
     if (gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)) {
-        _gwy_assign_units(&cpriv->unit_x, fpriv->unit_x);
+        _gwy_assign_unit(&cpriv->unit_x, fpriv->unit_x);
     }
     else {
         g_warning("X and Y units of field do not match.");
-        _gwy_assign_units(&cpriv->unit_x, NULL);
+        _gwy_assign_unit(&cpriv->unit_x, NULL);
     }
-    _gwy_assign_units(&cpriv->unit_y, fpriv->unit_z);
+    _gwy_assign_unit(&cpriv->unit_y, fpriv->unit_z);
 
     return curve;
 }

@@ -131,9 +131,9 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         g_object_unref(tmp);
     }
 
-    _gwy_assign_units(&target->priv->unit_x, brick->priv->unit_x);
-    _gwy_assign_units(&target->priv->unit_y, brick->priv->unit_y);
-    _gwy_assign_units(&target->priv->unit_z, brick->priv->unit_w);
+    _gwy_assign_unit(&target->priv->unit_x, brick->priv->unit_x);
+    _gwy_assign_unit(&target->priv->unit_y, brick->priv->unit_y);
+    _gwy_assign_unit(&target->priv->unit_z, brick->priv->unit_w);
     gwy_field_invalidate(target);
 }
 

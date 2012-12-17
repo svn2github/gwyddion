@@ -38,8 +38,20 @@ G_BEGIN_DECLS
     } while (0)
 
 G_GNUC_INTERNAL
-void _gwy_assign_units(GwyUnit **dest,
-                       const GwyUnit *source);
+void _gwy_assign_unit(GwyUnit **dest,
+                      const GwyUnit *source);
+
+G_GNUC_INTERNAL
+void _gwy_serialize_unit(GwyUnit *unit,
+                         const GwySerializableItem *template,
+                         GwySerializableItems *items,
+                         guint *n);
+
+G_GNUC_INTERNAL
+void _gwy_serialize_string(gchar *string,
+                           const GwySerializableItem *template,
+                           GwySerializableItems *items,
+                           guint *n);
 
 G_GNUC_INTERNAL
 void _gwy_notify_properties(GObject *object,

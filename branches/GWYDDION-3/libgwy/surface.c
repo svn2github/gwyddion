@@ -213,31 +213,9 @@ gwy_surface_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    if (!gwy_unit_is_empty(priv->unit_xy)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[0];
-        it.value.v_object = (GObject*)priv->unit_xy;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_xy), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_z)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[1];
-        it.value.v_object = (GObject*)priv->unit_z;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_z), items);
-        n++;
-    }
-
-    if (priv->name) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[2];
-        it.value.v_string = priv->name;
-        items->items[items->n++] = it;
-        n++;
-    }
+    _gwy_serialize_unit(priv->unit_xy, serialize_items + 0, items, &n);
+    _gwy_serialize_unit(priv->unit_z, serialize_items + 1, items, &n);
+    _gwy_serialize_string(priv->name, serialize_items + 2, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[3];
@@ -302,8 +280,8 @@ copy_info(GwySurface *dest,
           const GwySurface *src)
 {
     Surface *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_units(&dpriv->unit_xy, spriv->unit_xy);
-    _gwy_assign_units(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_unit(&dpriv->unit_xy, spriv->unit_xy);
+    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
 }
 
 static void
@@ -566,8 +544,8 @@ copy_field_to_surface(const GwyField *field,
     if (!gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)) {
         g_warning("X and Y units of field do not match.");
     }
-    _gwy_assign_units(&surface->priv->unit_xy, field->priv->unit_x);
-    _gwy_assign_units(&surface->priv->unit_z, field->priv->unit_z);
+    _gwy_assign_unit(&surface->priv->unit_xy, field->priv->unit_x);
+    _gwy_assign_unit(&surface->priv->unit_z, field->priv->unit_z);
 
     gwy_surface_invalidate(surface);
     surface->priv->cached_range = TRUE;
@@ -890,9 +868,9 @@ regularise(const GwySurface *surface,
     else
         g_assert_not_reached();
 
-    _gwy_assign_units(&field->priv->unit_x, surface->priv->unit_xy);
-    _gwy_assign_units(&field->priv->unit_y, surface->priv->unit_xy);
-    _gwy_assign_units(&field->priv->unit_z, surface->priv->unit_z);
+    _gwy_assign_unit(&field->priv->unit_x, surface->priv->unit_xy);
+    _gwy_assign_unit(&field->priv->unit_y, surface->priv->unit_xy);
+    _gwy_assign_unit(&field->priv->unit_z, surface->priv->unit_z);
 
     return field;
 }

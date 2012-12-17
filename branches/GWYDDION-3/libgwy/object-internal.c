@@ -25,8 +25,8 @@
 #include "libgwy/object-internal.h"
 
 void
-_gwy_assign_units(GwyUnit **dest,
-                  const GwyUnit *source)
+_gwy_assign_unit(GwyUnit **dest,
+                 const GwyUnit *source)
 {
     if (*dest && source)
         gwy_unit_assign(*dest, source);
@@ -34,6 +34,41 @@ _gwy_assign_units(GwyUnit **dest,
         gwy_unit_clear(*dest);
     else if (source)
         *dest = gwy_unit_duplicate(source);
+}
+
+void
+_gwy_serialize_unit(GwyUnit *unit,
+                    const GwySerializableItem *template,
+                    GwySerializableItems *items,
+                    guint *n)
+{
+    if (gwy_unit_is_empty(unit))
+        return;
+
+    g_return_if_fail(items->len - items->n > 0);
+    g_warn_if_fail(template->ctype == GWY_SERIALIZABLE_OBJECT);
+    GwySerializableItem it = *template;
+    it.value.v_object = (GObject*)unit;
+    items->items[items->n++] = it;
+    gwy_serializable_itemize(GWY_SERIALIZABLE(unit), items);
+    (*n)++;
+}
+
+void
+_gwy_serialize_string(gchar *string,
+                      const GwySerializableItem *template,
+                      GwySerializableItems *items,
+                      guint *n)
+{
+    if (!string || !*string)
+        return;
+
+    g_return_if_fail(items->len - items->n > 0);
+    g_warn_if_fail(template->ctype == GWY_SERIALIZABLE_STRING);
+    GwySerializableItem it = *template;
+    it.value.v_string = string;
+    items->items[items->n++] = it;
+    (*n)++;
 }
 
 void

@@ -234,8 +234,8 @@ gwy_line_outer_product(const GwyLine *column,
     field->xoff = row->off;
     field->yoff = column->off;
 
-    _gwy_assign_units(&field->priv->unit_x, row->priv->unit_x);
-    _gwy_assign_units(&field->priv->unit_y, column->priv->unit_x);
+    _gwy_assign_unit(&field->priv->unit_x, row->priv->unit_x);
+    _gwy_assign_unit(&field->priv->unit_y, column->priv->unit_x);
     if (!gwy_unit_is_empty(row->priv->unit_y)
         || !gwy_unit_is_empty(column->priv->unit_y))
         gwy_unit_multiply(gwy_field_get_unit_z(field),

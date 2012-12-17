@@ -256,31 +256,9 @@ gwy_line_itemize(GwySerializable *serializable,
         n++;
     }
 
-    if (!gwy_unit_is_empty(priv->unit_x)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[2];
-        it.value.v_object = (GObject*)priv->unit_x;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_x), items);
-        n++;
-    }
-
-    if (!gwy_unit_is_empty(priv->unit_y)) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[3];
-        it.value.v_object = (GObject*)priv->unit_y;
-        items->items[items->n++] = it;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(priv->unit_y), items);
-        n++;
-    }
-
-    if (priv->name) {
-        g_return_val_if_fail(items->len - items->n, 0);
-        it = serialize_items[4];
-        it.value.v_string = priv->name;
-        items->items[items->n++] = it;
-        n++;
-    }
+    _gwy_serialize_unit(priv->unit_x, serialize_items + 2, items, &n);
+    _gwy_serialize_unit(priv->unit_y, serialize_items + 3, items, &n);
+    _gwy_serialize_string(priv->name, serialize_items + 4, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[5];
@@ -362,8 +340,8 @@ copy_info(GwyLine *dest,
     dest->real = src->real;
     dest->off = src->off;
     Line *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_units(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_units(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
+    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
 }
 
 static void
@@ -808,8 +786,8 @@ gwy_line_new_part(const GwyLine *line,
     part = gwy_line_new_sized(len, FALSE);
     gwy_line_copy(line, lpart, part, 0);
     part->real = line->real*len/line->res;
-    _gwy_assign_units(&part->priv->unit_x, line->priv->unit_x);
-    _gwy_assign_units(&part->priv->unit_y, line->priv->unit_y);
+    _gwy_assign_unit(&part->priv->unit_x, line->priv->unit_x);
+    _gwy_assign_unit(&part->priv->unit_y, line->priv->unit_y);
     if (keep_offset)
         part->off = line->off + line->real*pos/line->res;
     return part;
