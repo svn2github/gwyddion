@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -43,8 +43,8 @@ coords_new_one(GType type,
 }
 
 void
-coords_assert_equal(const GwyCoords *result,
-                    const GwyCoords *reference)
+coords_assert_equal(GwyCoords *result,
+                    GwyCoords *reference)
 {
     g_assert(GWY_IS_COORDS(result));
     g_assert(GWY_IS_COORDS(reference));
@@ -62,6 +62,13 @@ coords_assert_equal(const GwyCoords *result,
         gwy_coords_get(result, i, result_shape);
         for (guint j = 0; j < shape_size; j++)
             g_assert_cmpfloat(result_shape[j], ==, reference_shape[j]);
+    }
+
+    guint dim = gwy_coords_dimension(reference);
+    for (guint i = 0; i < dim; i++) {
+        GwyUnit *unit = gwy_coords_get_unit(result, i);
+        GwyUnit *refunit = gwy_coords_get_unit(reference, i);
+        g_assert(gwy_unit_equal(unit, refunit));
     }
 }
 
@@ -173,6 +180,7 @@ coords_randomize(GwyCoords *coords,
                  GRand *rng)
 {
     guint shape_size = gwy_coords_shape_size(coords);
+    guint dim = gwy_coords_dimension(coords);
     guint n = g_rand_int_range(rng, 0, 13);
 
     gdouble *data = g_new(gdouble, n*shape_size);
@@ -182,6 +190,22 @@ coords_randomize(GwyCoords *coords,
     gwy_coords_set_data(coords, n, data);
     g_assert_cmpuint(gwy_coords_size(coords), ==, n);
     g_free(data);
+
+    while (g_rand_int_range(rng, 0, 3) == 0) {
+        guint d = g_rand_int_range(rng, 0, dim);
+        GwyUnit *unit = gwy_coords_get_unit(coords, d);
+        unit_randomize(unit, rng);
+    }
+
+    if (g_rand_boolean(rng)) {
+        gchar buf[16];
+        g_snprintf(buf, sizeof(buf), "%u", g_rand_int(rng));
+        if (g_rand_boolean(rng))
+            gwy_coords_set_name(coords, buf);
+        else
+            g_object_set(coords, "name", buf, NULL);
+        g_assert_cmpstr(gwy_coords_get_name(coords), ==, buf);
+    }
 }
 
 static void
@@ -200,7 +224,7 @@ coords_serialize_one(GType type)
         serializable_assign(GWY_SERIALIZABLE(original),
                             coords_assert_equal_object);
         copy = GWY_COORDS(serialize_and_back(G_OBJECT(original),
-                                            coords_assert_equal_object));
+                                             coords_assert_equal_object));
         g_object_unref(copy);
         g_object_unref(original);
     }
@@ -589,8 +613,8 @@ coords_constrain_translation_one(GType type)
             gdouble data[shape_size];
             gwy_coords_get(coords, i, data);
             for (guint j = 0; j < shape_size; j++) {
-                g_assert_cmpfloat(data[j], <=, upper[dimension_map[j]]);
-                g_assert_cmpfloat(data[j], >=, lower[dimension_map[j]]);
+                g_assert_cmpfloat(data[j] - 1e-15, <=, upper[dimension_map[j]]);
+                g_assert_cmpfloat(data[j] + 1e-15, >=, lower[dimension_map[j]]);
             }
         }
 
