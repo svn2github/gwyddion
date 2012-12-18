@@ -241,12 +241,36 @@ test_curve_props(void)
 {
     static const GwyXY data[] = { { 1, 2 }, { 3, 4 } };
     GwyCurve *curve = gwy_curve_new_from_data(data, G_N_ELEMENTS(data));
+    guint name_changed = 0;
+    g_signal_connect_swapped(curve, "notify::name",
+                             G_CALLBACK(record_signal), &name_changed);
+
     guint n = 0;
+    gchar *name;
     g_object_get(curve,
                  "n-points", &n,
+                 "name", &name,
                  NULL);
     g_assert_cmpuint(n, ==, curve->n);
     g_assert_cmpuint(n, ==, G_N_ELEMENTS(data));
+    g_assert(!name);
+    g_assert_cmpuint(name_changed, ==, 0);
+
+    gwy_curve_set_name(curve, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpstr(gwy_curve_get_name(curve), ==, "First");
+
+    // Do it twice to excersise no-change behaviour.
+    gwy_curve_set_name(curve, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpstr(gwy_curve_get_name(curve), ==, "First");
+
+    g_object_set(curve,
+                 "name", "Second",
+                 NULL);
+    g_assert_cmpuint(name_changed, ==, 2);
+    g_assert_cmpstr(gwy_curve_get_name(curve), ==, "Second");
+
     g_object_unref(curve);
 }
 
