@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -579,8 +579,8 @@ items_done(const GwySerializableItems *items)
             gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
         else if (item->ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
             GObject **objects = item->value.v_object_array;
-            for (gsize j = 0; j < item->array_size; j++)
-                gwy_serializable_done(GWY_SERIALIZABLE(objects[j]));
+            for (gsize j = item->array_size; j; j--)
+                gwy_serializable_done(GWY_SERIALIZABLE(objects[j-1]));
         }
     }
 }
