@@ -577,6 +577,11 @@ items_done(const GwySerializableItems *items)
         const GwySerializableItem *item = items->items + i;
         if (item->ctype == GWY_SERIALIZABLE_OBJECT)
             gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
+        else if (item->ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
+            GObject **objects = item->value.v_object_array;
+            for (gsize j = 0; j < item->array_size; j++)
+                gwy_serializable_done(GWY_SERIALIZABLE(objects[j]));
+        }
     }
 }
 
