@@ -354,7 +354,6 @@ gwy_coords_construct(GwySerializable *serializable,
             priv->units[i] = (GwyUnit*)its[1].value.v_object_array[i];
             its[1].value.v_object_array[i] = NULL;
         }
-        its[1].value.v_object_array = NULL;
     }
 
     priv->name = its[2].value.v_string;
@@ -365,7 +364,7 @@ gwy_coords_construct(GwySerializable *serializable,
 fail:
     GWY_FREE(its[0].value.v_double_array);
     for (guint i = 0; i < its[1].array_size; i++)
-        GWY_OBJECT_UNREF(its[1].value.v_object_array);
+        GWY_OBJECT_UNREF(its[1].value.v_object_array[i]);
     GWY_FREE(its[1].value.v_object_array);
     GWY_FREE(its[2].value.v_string);
     return ok;
