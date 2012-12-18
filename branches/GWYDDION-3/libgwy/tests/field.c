@@ -5579,6 +5579,8 @@ fit_gaussian_psdf(const GwyLine *psdf,
     ok = gwy_fit_task_fit(fittask);
     g_assert(ok);
     gwy_fitter_get_params(fitter, params);
+    // XXX: This seems to fail occasionally.  Which is especially suspicios
+    // because we use stable random generators.
     ok = gwy_fit_task_param_errors(fittask, TRUE, errors);
     g_assert(ok);
 
