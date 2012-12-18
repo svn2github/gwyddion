@@ -398,6 +398,39 @@ test_int_set_values(void)
 }
 
 void
+test_int_set_ranges(void)
+{
+    enum { niter = 200, max_size = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint size = g_rand_int_range(rng, 0, max_size);
+        gint *values = g_new(gint, MAX(size, 1));
+        for (guint i = 0; i < size; i++)
+            values[i] = random_integer(rng);
+
+        GwyIntSet *intset = gwy_int_set_new_with_values(values, size);
+        g_free(values);
+
+        guint len;
+        const GwyIntRange *ranges = gwy_int_set_ranges(intset, &len);
+
+        GwyIntSet *copy = gwy_int_set_new();
+        for (guint i = 0; i < len; i++) {
+            g_assert_cmpint(ranges[i].from, <=, ranges[i].to);
+            for (gint j = ranges[i].from; j <= ranges[i].to; j++)
+                gwy_int_set_add(copy, j);
+        }
+
+        int_set_assert_equal(copy, intset);
+
+        g_object_unref(copy);
+        g_object_unref(intset);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_int_set_update(void)
 {
     enum { niter = 500, max_size = 50 };

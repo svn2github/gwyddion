@@ -145,6 +145,7 @@ int-set/serialize/failure/noncanon
 int-set/assign
 int-set/add-remove
 int-set/values
+int-set/ranges
 int-set/update
 int-set/fill
 int-set/foreach
