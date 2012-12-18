@@ -248,8 +248,34 @@ void
 test_brick_props(void)
 {
     GwyBrick *brick = gwy_brick_new_sized(21, 17, 14, FALSE);
+    guint xres_changed = 0, yres_changed = 0, zres_changed = 0,
+          xreal_changed = 0, yreal_changed = 0, zreal_changed = 0,
+          xoff_changed = 0, yoff_changed = 0, zoff_changed = 0,
+          name_changed = 0;
+    g_signal_connect_swapped(brick, "notify::x-res",
+                             G_CALLBACK(record_signal), &xres_changed);
+    g_signal_connect_swapped(brick, "notify::y-res",
+                             G_CALLBACK(record_signal), &yres_changed);
+    g_signal_connect_swapped(brick, "notify::z-res",
+                             G_CALLBACK(record_signal), &zres_changed);
+    g_signal_connect_swapped(brick, "notify::x-real",
+                             G_CALLBACK(record_signal), &xreal_changed);
+    g_signal_connect_swapped(brick, "notify::y-real",
+                             G_CALLBACK(record_signal), &yreal_changed);
+    g_signal_connect_swapped(brick, "notify::z-real",
+                             G_CALLBACK(record_signal), &zreal_changed);
+    g_signal_connect_swapped(brick, "notify::x-offset",
+                             G_CALLBACK(record_signal), &xoff_changed);
+    g_signal_connect_swapped(brick, "notify::y-offset",
+                             G_CALLBACK(record_signal), &yoff_changed);
+    g_signal_connect_swapped(brick, "notify::z-offset",
+                             G_CALLBACK(record_signal), &zoff_changed);
+    g_signal_connect_swapped(brick, "notify::name",
+                             G_CALLBACK(record_signal), &name_changed);
+
     guint xres, yres, zres;
     gdouble xreal, yreal, zreal, xoff, yoff, zoff;
+    gchar *name;
     g_object_get(brick,
                  "x-res", &xres,
                  "y-res", &yres,
@@ -260,6 +286,7 @@ test_brick_props(void)
                  "x-offset", &xoff,
                  "y-offset", &yoff,
                  "z-offset", &zoff,
+                 "name", &name,
                  NULL);
     g_assert_cmpuint(xres, ==, brick->xres);
     g_assert_cmpuint(yres, ==, brick->yres);
@@ -270,6 +297,18 @@ test_brick_props(void)
     g_assert_cmpfloat(xoff, ==, brick->xoff);
     g_assert_cmpfloat(yoff, ==, brick->yoff);
     g_assert_cmpfloat(zoff, ==, brick->zoff);
+    g_assert(!name);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(zres_changed, ==, 0);
+    g_assert_cmpuint(xreal_changed, ==, 0);
+    g_assert_cmpuint(yreal_changed, ==, 0);
+    g_assert_cmpuint(zreal_changed, ==, 0);
+    g_assert_cmpuint(xoff_changed, ==, 0);
+    g_assert_cmpuint(yoff_changed, ==, 0);
+    g_assert_cmpuint(zoff_changed, ==, 0);
+    g_assert_cmpuint(name_changed, ==, 0);
+
     xreal = 5.0;
     yreal = 7.0e-14;
     zreal = 4.44e8;
@@ -277,17 +316,89 @@ test_brick_props(void)
     yoff = 1e-15;
     zoff = -2e7;
     gwy_brick_set_xreal(brick, xreal);
+    g_assert_cmpuint(xreal_changed, ==, 1);
     gwy_brick_set_yreal(brick, yreal);
+    g_assert_cmpuint(yreal_changed, ==, 1);
     gwy_brick_set_zreal(brick, zreal);
+    g_assert_cmpuint(zreal_changed, ==, 1);
     gwy_brick_set_xoffset(brick, xoff);
+    g_assert_cmpuint(xoff_changed, ==, 1);
     gwy_brick_set_yoffset(brick, yoff);
+    g_assert_cmpuint(yoff_changed, ==, 1);
     gwy_brick_set_zoffset(brick, zoff);
+    g_assert_cmpuint(zoff_changed, ==, 1);
+    gwy_brick_set_name(brick, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(zres_changed, ==, 0);
     g_assert_cmpfloat(xreal, ==, brick->xreal);
     g_assert_cmpfloat(yreal, ==, brick->yreal);
     g_assert_cmpfloat(zreal, ==, brick->zreal);
     g_assert_cmpfloat(xoff, ==, brick->xoff);
     g_assert_cmpfloat(yoff, ==, brick->yoff);
     g_assert_cmpfloat(zoff, ==, brick->zoff);
+    g_assert_cmpstr(gwy_brick_get_name(brick), ==, "First");
+
+    // Do it twice to excersise no-change behaviour.
+    gwy_brick_set_xreal(brick, xreal);
+    gwy_brick_set_yreal(brick, yreal);
+    gwy_brick_set_zreal(brick, zreal);
+    gwy_brick_set_xoffset(brick, xoff);
+    gwy_brick_set_yoffset(brick, yoff);
+    gwy_brick_set_zoffset(brick, zoff);
+    gwy_brick_set_name(brick, "First");
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(zres_changed, ==, 0);
+    g_assert_cmpuint(xreal_changed, ==, 1);
+    g_assert_cmpuint(yreal_changed, ==, 1);
+    g_assert_cmpuint(zreal_changed, ==, 1);
+    g_assert_cmpuint(xoff_changed, ==, 1);
+    g_assert_cmpuint(yoff_changed, ==, 1);
+    g_assert_cmpuint(zoff_changed, ==, 1);
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpfloat(xreal, ==, brick->xreal);
+    g_assert_cmpfloat(yreal, ==, brick->yreal);
+    g_assert_cmpfloat(zreal, ==, brick->zreal);
+    g_assert_cmpfloat(xoff, ==, brick->xoff);
+    g_assert_cmpfloat(yoff, ==, brick->yoff);
+    g_assert_cmpfloat(zoff, ==, brick->zoff);
+    g_assert_cmpstr(gwy_brick_get_name(brick), ==, "First");
+
+    xreal = 1e16;
+    yreal = 0.6;
+    zreal = 1e-5;
+    xoff = 0.0;
+    yoff = 1e-5;
+    zoff = -2.0;
+    g_object_set(brick,
+                 "x-real", xreal,
+                 "y-real", yreal,
+                 "z-real", zreal,
+                 "x-offset", xoff,
+                 "y-offset", yoff,
+                 "z-offset", zoff,
+                 "name", "Second",
+                 NULL);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(zres_changed, ==, 0);
+    g_assert_cmpuint(xreal_changed, ==, 2);
+    g_assert_cmpuint(yreal_changed, ==, 2);
+    g_assert_cmpuint(zreal_changed, ==, 2);
+    g_assert_cmpuint(xoff_changed, ==, 2);
+    g_assert_cmpuint(yoff_changed, ==, 2);
+    g_assert_cmpuint(zoff_changed, ==, 2);
+    g_assert_cmpuint(name_changed, ==, 2);
+    g_assert_cmpfloat(xreal, ==, brick->xreal);
+    g_assert_cmpfloat(yreal, ==, brick->yreal);
+    g_assert_cmpfloat(zreal, ==, brick->zreal);
+    g_assert_cmpfloat(xoff, ==, brick->xoff);
+    g_assert_cmpfloat(yoff, ==, brick->yoff);
+    g_assert_cmpfloat(zoff, ==, brick->zoff);
+    g_assert_cmpstr(gwy_brick_get_name(brick), ==, "Second");
+
     g_object_unref(brick);
 }
 
