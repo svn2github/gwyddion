@@ -79,17 +79,41 @@ test_mask_field_stride(void)
 void
 test_mask_field_props(void)
 {
-    GwyMaskField *maskfield = gwy_mask_field_new_sized(41, 37, FALSE);
+    GwyMaskField *field = gwy_mask_field_new_sized(41, 37, FALSE);
+    guint name_changed = 0;
+    g_signal_connect_swapped(field, "notify::name",
+                             G_CALLBACK(record_signal), &name_changed);
+
     guint xres, yres, stride;
-    g_object_get(maskfield,
+    gchar *name;
+    g_object_get(field,
                  "x-res", &xres,
                  "y-res", &yres,
                  "stride", &stride,
+                 "name", &name,
                  NULL);
-    g_assert_cmpuint(xres, ==, maskfield->xres);
-    g_assert_cmpuint(yres, ==, maskfield->yres);
-    g_assert_cmpuint(stride, ==, maskfield->stride);
-    g_object_unref(maskfield);
+    g_assert_cmpuint(xres, ==, field->xres);
+    g_assert_cmpuint(yres, ==, field->yres);
+    g_assert_cmpuint(stride, ==, field->stride);
+    g_assert(!name);
+    g_assert_cmpuint(name_changed, ==, 0);
+
+    gwy_mask_field_set_name(field, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpstr(gwy_mask_field_get_name(field), ==, "First");
+
+    // Do it twice to excersise no-change behaviour.
+    gwy_mask_field_set_name(field, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpstr(gwy_mask_field_get_name(field), ==, "First");
+
+    g_object_set(field,
+                 "name", "Second",
+                 NULL);
+    g_assert_cmpuint(name_changed, ==, 2);
+    g_assert_cmpstr(gwy_mask_field_get_name(field), ==, "Second");
+
+    g_object_unref(field);
 }
 
 void

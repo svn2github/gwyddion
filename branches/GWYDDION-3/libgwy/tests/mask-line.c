@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,13 +40,37 @@ mask_line_print(const gchar *name, const GwyMaskLine *maskline)
 void
 test_mask_line_props(void)
 {
-    GwyMaskLine *maskline = gwy_mask_line_new_sized(41, FALSE);
+    GwyMaskLine *line = gwy_mask_line_new_sized(41, FALSE);
+    guint name_changed = 0;
+    g_signal_connect_swapped(line, "notify::name",
+                             G_CALLBACK(record_signal), &name_changed);
+
     guint res;
-    g_object_get(maskline,
+    gchar *name;
+    g_object_get(line,
                  "res", &res,
+                 "name", &name,
                  NULL);
-    g_assert_cmpuint(res, ==, maskline->res);
-    g_object_unref(maskline);
+    g_assert_cmpuint(res, ==, line->res);
+    g_assert(!name);
+    g_assert_cmpuint(name_changed, ==, 0);
+
+    gwy_mask_line_set_name(line, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpstr(gwy_mask_line_get_name(line), ==, "First");
+
+    // Do it twice to excersise no-change behaviour.
+    gwy_mask_line_set_name(line, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpstr(gwy_mask_line_get_name(line), ==, "First");
+
+    g_object_set(line,
+                 "name", "Second",
+                 NULL);
+    g_assert_cmpuint(name_changed, ==, 2);
+    g_assert_cmpstr(gwy_mask_line_get_name(line), ==, "Second");
+
+    g_object_unref(line);
 }
 
 void
