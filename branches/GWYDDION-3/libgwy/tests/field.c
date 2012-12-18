@@ -182,8 +182,28 @@ void
 test_field_props(void)
 {
     GwyField *field = gwy_field_new_sized(41, 37, FALSE);
+    guint xres_changed = 0, yres_changed = 0,
+          xreal_changed = 0, yreal_changed = 0,
+          xoff_changed = 0, yoff_changed = 0,
+          name_changed = 0;
+    g_signal_connect_swapped(field, "notify::x-res",
+                             G_CALLBACK(record_signal), &xres_changed);
+    g_signal_connect_swapped(field, "notify::y-res",
+                             G_CALLBACK(record_signal), &yres_changed);
+    g_signal_connect_swapped(field, "notify::x-real",
+                             G_CALLBACK(record_signal), &xreal_changed);
+    g_signal_connect_swapped(field, "notify::y-real",
+                             G_CALLBACK(record_signal), &yreal_changed);
+    g_signal_connect_swapped(field, "notify::x-offset",
+                             G_CALLBACK(record_signal), &xoff_changed);
+    g_signal_connect_swapped(field, "notify::y-offset",
+                             G_CALLBACK(record_signal), &yoff_changed);
+    g_signal_connect_swapped(field, "notify::name",
+                             G_CALLBACK(record_signal), &name_changed);
+
     guint xres, yres;
     gdouble xreal, yreal, xoff, yoff;
+    gchar *name;
     g_object_get(field,
                  "x-res", &xres,
                  "y-res", &yres,
@@ -191,6 +211,7 @@ test_field_props(void)
                  "y-real", &yreal,
                  "x-offset", &xoff,
                  "y-offset", &yoff,
+                 "name", &name,
                  NULL);
     g_assert_cmpuint(xres, ==, field->xres);
     g_assert_cmpuint(yres, ==, field->yres);
@@ -198,18 +219,80 @@ test_field_props(void)
     g_assert_cmpfloat(yreal, ==, field->yreal);
     g_assert_cmpfloat(xoff, ==, field->xoff);
     g_assert_cmpfloat(yoff, ==, field->yoff);
+    g_assert(!name);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(xreal_changed, ==, 0);
+    g_assert_cmpuint(yreal_changed, ==, 0);
+    g_assert_cmpuint(xoff_changed, ==, 0);
+    g_assert_cmpuint(yoff_changed, ==, 0);
+    g_assert_cmpuint(name_changed, ==, 0);
+
     xreal = 5.0;
     yreal = 7.0e-14;
     xoff = -3;
     yoff = 1e-15;
     gwy_field_set_xreal(field, xreal);
+    g_assert_cmpuint(xreal_changed, ==, 1);
     gwy_field_set_yreal(field, yreal);
+    g_assert_cmpuint(yreal_changed, ==, 1);
     gwy_field_set_xoffset(field, xoff);
+    g_assert_cmpuint(xoff_changed, ==, 1);
     gwy_field_set_yoffset(field, yoff);
+    g_assert_cmpuint(yoff_changed, ==, 1);
+    gwy_field_set_name(field, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
     g_assert_cmpfloat(xreal, ==, field->xreal);
     g_assert_cmpfloat(yreal, ==, field->yreal);
     g_assert_cmpfloat(xoff, ==, field->xoff);
     g_assert_cmpfloat(yoff, ==, field->yoff);
+    g_assert_cmpstr(gwy_field_get_name(field), ==, "First");
+
+    // Do it twice to excersise no-change behaviour.
+    gwy_field_set_xreal(field, xreal);
+    gwy_field_set_yreal(field, yreal);
+    gwy_field_set_xoffset(field, xoff);
+    gwy_field_set_yoffset(field, yoff);
+    gwy_field_set_name(field, "First");
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(xreal_changed, ==, 1);
+    g_assert_cmpuint(yreal_changed, ==, 1);
+    g_assert_cmpuint(xoff_changed, ==, 1);
+    g_assert_cmpuint(yoff_changed, ==, 1);
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpfloat(xreal, ==, field->xreal);
+    g_assert_cmpfloat(yreal, ==, field->yreal);
+    g_assert_cmpfloat(xoff, ==, field->xoff);
+    g_assert_cmpfloat(yoff, ==, field->yoff);
+    g_assert_cmpstr(gwy_field_get_name(field), ==, "First");
+
+    xreal = 0.1;
+    yreal = 6.0;
+    xoff = 1e20;
+    yoff = 2e17;
+    g_object_set(field,
+                 "x-real", xreal,
+                 "y-real", yreal,
+                 "x-offset", xoff,
+                 "y-offset", yoff,
+                 "name", "Second",
+                 NULL);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+    g_assert_cmpuint(xreal_changed, ==, 2);
+    g_assert_cmpuint(yreal_changed, ==, 2);
+    g_assert_cmpuint(xoff_changed, ==, 2);
+    g_assert_cmpuint(yoff_changed, ==, 2);
+    g_assert_cmpuint(name_changed, ==, 2);
+    g_assert_cmpfloat(xreal, ==, field->xreal);
+    g_assert_cmpfloat(yreal, ==, field->yreal);
+    g_assert_cmpfloat(xoff, ==, field->xoff);
+    g_assert_cmpfloat(yoff, ==, field->yoff);
+    g_assert_cmpstr(gwy_field_get_name(field), ==, "Second");
+
     g_object_unref(field);
 }
 
@@ -5579,7 +5662,7 @@ fit_gaussian_psdf(const GwyLine *psdf,
     ok = gwy_fit_task_fit(fittask);
     g_assert(ok);
     gwy_fitter_get_params(fitter, params);
-    // XXX: This seems to fail occasionally.  Which is especially suspicios
+    // XXX: This seems to fail occasionally.  Which is especially suspicious
     // because we use stable random generators.
     ok = gwy_fit_task_param_errors(fittask, TRUE, errors);
     g_assert(ok);

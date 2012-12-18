@@ -83,22 +83,77 @@ void
 test_line_props(void)
 {
     GwyLine *line = gwy_line_new_sized(41, FALSE);
+    guint res_changed = 0,
+          real_changed = 0,
+          off_changed = 0,
+          name_changed = 0;
+    g_signal_connect_swapped(line, "notify::res",
+                             G_CALLBACK(record_signal), &res_changed);
+    g_signal_connect_swapped(line, "notify::real",
+                             G_CALLBACK(record_signal), &real_changed);
+    g_signal_connect_swapped(line, "notify::offset",
+                             G_CALLBACK(record_signal), &off_changed);
+    g_signal_connect_swapped(line, "notify::name",
+                             G_CALLBACK(record_signal), &name_changed);
+
     guint res;
     gdouble real, off;
+    gchar *name;
     g_object_get(line,
                  "res", &res,
                  "real", &real,
                  "offset", &off,
+                 "name", &name,
                  NULL);
     g_assert_cmpuint(res, ==, line->res);
     g_assert_cmpfloat(real, ==, line->real);
     g_assert_cmpfloat(off, ==, line->off);
+    g_assert(!name);
+    g_assert_cmpuint(res_changed, ==, 0);
+    g_assert_cmpuint(real_changed, ==, 0);
+    g_assert_cmpuint(off_changed, ==, 0);
+    g_assert_cmpuint(name_changed, ==, 0);
+
     real = 5.0;
     off = -3;
     gwy_line_set_real(line, real);
+    g_assert_cmpuint(real_changed, ==, 1);
     gwy_line_set_offset(line, off);
+    g_assert_cmpuint(off_changed, ==, 1);
+    gwy_line_set_name(line, "First");
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpuint(res_changed, ==, 0);
     g_assert_cmpfloat(real, ==, line->real);
     g_assert_cmpfloat(off, ==, line->off);
+    g_assert_cmpstr(gwy_line_get_name(line), ==, "First");
+
+    // Do it twice to excersise no-change behaviour.
+    gwy_line_set_real(line, real);
+    gwy_line_set_offset(line, off);
+    gwy_line_set_name(line, "First");
+    g_assert_cmpuint(res_changed, ==, 0);
+    g_assert_cmpuint(real_changed, ==, 1);
+    g_assert_cmpuint(off_changed, ==, 1);
+    g_assert_cmpuint(name_changed, ==, 1);
+    g_assert_cmpfloat(real, ==, line->real);
+    g_assert_cmpfloat(off, ==, line->off);
+    g_assert_cmpstr(gwy_line_get_name(line), ==, "First");
+
+    real = 7.2;
+    off = 1.3;
+    g_object_set(line,
+                 "real", real,
+                 "offset", off,
+                 "name", "Second",
+                 NULL);
+    g_assert_cmpuint(res_changed, ==, 0);
+    g_assert_cmpuint(real_changed, ==, 2);
+    g_assert_cmpuint(off_changed, ==, 2);
+    g_assert_cmpuint(name_changed, ==, 2);
+    g_assert_cmpfloat(real, ==, line->real);
+    g_assert_cmpfloat(off, ==, line->off);
+    g_assert_cmpstr(gwy_line_get_name(line), ==, "Second");
+
     g_object_unref(line);
 }
 
