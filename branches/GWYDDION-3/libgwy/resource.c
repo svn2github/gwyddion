@@ -1830,7 +1830,7 @@ name_is_unique(GwyResource *resource,
 
     gchar *filename = g_file_get_parse_name(priv->file);
     // TRANSLATORS: Error message.
-    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICATE,
                 // TRANSLATORS: Error message.
                 _("Resource ‘%s’ named ‘%s’ from file ‘%s’ "
                   "conflicts with an existing resource."),
@@ -2368,11 +2368,11 @@ gwy_resource_dump_data_line(const gdouble *data,
  * @GWY_RESOURCE_ERROR_HEADER: Resource file has wrong or missing magic header.
  * @GWY_RESOURCE_ERROR_TYPE: Resource type is invalid.
  * @GWY_RESOURCE_ERROR_NAME: Resource name is invalid or missing.
- * @GWY_RESOURCE_ERROR_DUPLICIT: Resource conflicts with an already existing
- *                               resource of the same name.  Note
- *                               gwy_resource_load() does not return this
- *                               error because it does not put the resource to
- *                               the inventory.
+ * @GWY_RESOURCE_ERROR_DUPLICATE: Resource conflicts with an already existing
+ *                                resource of the same name.  Note
+ *                                gwy_resource_load() does not return this
+ *                                error because it does not put the resource to
+ *                                the inventory.
  * @GWY_RESOURCE_ERROR_DATA: Resource data is invalid.  This error code is
  *                           only set by resource line parsers and otherwise it
  *                           is intended to be used for specific resource data

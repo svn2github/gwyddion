@@ -985,7 +985,7 @@ gwy_inventory_rename(GwyInventory *inventory,
         g_warning("Item ‘%s’ was asked to rename to ‘%s’ but it renamed self "
                   "to ‘%s’.", name, newname, realnewname);
         if (lookup_item(priv, realnewname))
-            g_critical("Failed rename led to duplicite items ‘%s’.",
+            g_critical("Failed rename led to duplicate items ‘%s’.",
                        realnewname);
     }
 
