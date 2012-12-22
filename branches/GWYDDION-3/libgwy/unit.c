@@ -151,7 +151,7 @@ static const gchar *known_units[] = {
 /* Long names.  Keep the list sorted by length so that we can give up quickly
  * and only attempt to translate long names. */
 static const GwyUnitLongName long_names[] = {
-    { 3, "Ω", "Ohm", },
+    { 3, "Ω", "Ohm", },
     { 4, "V", "Volt", },
     { 4, "W", "Watt", },
     { 5, "Hz", "Hertz", },
@@ -160,7 +160,7 @@ static const GwyUnitLongName long_names[] = {
     { 5, "m", "metre", },
     { 6, "A", "Ampere", },
     { 6, "deg", "degree", },
-    { 6, "K", "Kelvin", },
+    { 6, "K", "Kelvin", },
     { 6, "N", "Newton", },
     { 6, "Pa", "Pascal", },
     { 6, "s", "second", },
@@ -576,6 +576,21 @@ fix_unit_name(GString *str)
     const gchar *s = str->str;
     guint l = str->len;
 
+    // FIXME: Unicode 6.2 defines the following unit symbols:
+    // handled by transforming plain letters to symbols:
+    // U+212B Å (Angstrom, differs from U+00c5 Å)
+    // U+2126 Ω (Ohm, differs from U+03a9 Ω)
+    // U+212a K (Kelvin, difers from U+004b K)
+    // unhandled:
+    // U+2103 ℃ (deree of Celsius)
+    // U+2109 ℉ (deree of Farenheit)
+    //
+    // And then there is the entire ZOO of square-foo symbols in CJK in the
+    // range U+3371 to U+33df that includes a random selection of units, some
+    // of them prefixed (U+3382 ㎂), some of them compound (U+33a7 ㎧), some
+    // of them powers (U+33a4 ㎤), ...  The powers and compound ones are the
+    // biggest trouble because they do not expand to simple units so a simple
+    // ‘fix the name’ approach does not work.
     if (s[0] == '\272') {
         if (!s[1])
             g_string_assign(str, "deg");
@@ -589,12 +604,16 @@ fix_unit_name(GString *str)
     else if ((s[0] == '\305' && !s[1])
              || gwy_stramong(s, "Å", "AA", "ang", "Ang", NULL))
         g_string_assign(str, "Å");
-    else if (gwy_strequal(s, "micro m"))
+    else if (gwy_stramong(s, "micro m", "microm", NULL))
         g_string_assign(str, "µm");
     else if (l >= 4 && gwy_stramong(s, "a.u.", "a. u.", "counts", NULL))
         g_string_assign(str, "");
     else if (gwy_strequal(s, "sec"))
         g_string_assign(str, "s");
+    else if (gwy_strequal(s, "K"))
+        g_string_assign(str, "K");
+    else if (gwy_strequal(s, "Ω"))
+        g_string_assign(str, "Ω");
     else {
         const GwyUnitLongName *long_name = long_names;
         guint i;
