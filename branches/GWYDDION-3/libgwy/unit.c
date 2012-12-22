@@ -118,7 +118,9 @@ static const struct {
  * mapping too */
 SI_prefixes[] = {
     { "k",     3  },
+    { "d",    -1  },
     { "c",    -2  },
+    { "h",    -2  },
     { "m",    -3  },
     { "M",     6  },
     /* People are extremely creative when it comes to \mu replacements...
@@ -686,6 +688,62 @@ decode_unicode_power(const gchar **s,
     return TRUE;
 }
 
+static gchar*
+find_unicode_exponent(gchar *s)
+{
+    do {
+        gunichar c = g_utf8_get_char(s);
+        if (c == 0x2070 || c == 0xb9 || c == 0xb2 || c == 0xb3
+            || (c >= 0x2074 && c <= 0x2079)
+            || (c == 0x207b) || (c == 0x207a))
+            return s;
+        s = g_utf8_next_char(s);
+    } while (*s);
+    return NULL;
+}
+
+static const gchar*
+next_separator(const gchar *s,
+               guint *len,
+               gboolean *dividing)
+{
+    const gchar *separ = NULL, *p;
+
+    *dividing = FALSE;
+    *len = 0;
+
+    if ((p = strpbrk(s, " \t\r\n"))) {
+        if (p && (!separ || p < separ)) {
+            *len = 1;
+            separ = p;
+        }
+    }
+
+    if ((p = strstr(s, " "))) {
+        if (p && (!separ || p < separ)) {
+            *len = strlen(" ");
+            separ = p;
+        }
+    }
+
+    p = s;
+    do {
+        p = strchr(p, '/');
+        if (!p)
+            break;
+        if (p == s || (p > s && *(p-1) != '<'))
+            break;
+        p++;
+    } while (TRUE);
+    if (p && (!separ || p < separ)) {
+        *dividing = TRUE;
+        *len = 1;
+        separ = p;
+    }
+
+    return separ ? separ : (s ? s + strlen(s) : NULL);
+}
+
 static gboolean
 parse(GArray *units,
       const gchar *string,
@@ -694,11 +752,9 @@ parse(GArray *units,
     gdouble q;
     const gchar *end;
     gchar *p, *e, *utf8string = NULL;
-    guint n, i;
-    gint power10, m;
-    gboolean dividing = FALSE;
+    guint i;
+    gint power10 = 0;
 
-    power10 = 0;
     GWY_MAYBE_SET(ppower10, power10);
 
     if (!string || !*string)
@@ -733,6 +789,7 @@ parse(GArray *units,
 
     q = g_ascii_strtod(string, (gchar**)&end);
     if (end != string) {
+        gint m;
         string = end;
         power10 = gwy_round(log10(q));
         if (q <= 0 || fabs(log(q/gwy_powi(10.0, power10))) > 1e-13) {
@@ -767,21 +824,14 @@ parse(GArray *units,
         string++;
 
     GString *buf = g_string_new(NULL);
+    gboolean dividing = FALSE, will_be_dividing = FALSE;
 
     /* the rest are units */
     while (*string) {
         /* units are separated with whitespace and maybe a division sign */
-        end = string;
-        do {
-            end = strpbrk(end, " /");
-            if (!end || end == string || *end != '/' || *(end-1) != '<')
-                break;
-            end++;
-        } while (TRUE);
+        guint separ_len = 0;
+        end = next_separator(string, &separ_len, &will_be_dividing);
         if (!end)
-            end = string + strlen(string);
-
-        if (end == string)
             break;
 
         g_string_set_size(buf, 0);
@@ -826,11 +876,7 @@ parse(GArray *units,
         /* get unit power */
         GwySimpleUnit u;
         u.power = 1;
-        if ((p = strstr(buf->str + 1, "²"))) {
-            u.power = 2;
-            g_string_truncate(buf, p - buf->str);
-        }
-        else if ((p = strstr(buf->str + 1, "<sup>"))) {
+        if ((p = strstr(buf->str + 1, "<sup>"))) {
             u.power = strtol(p + strlen("<sup>"), &e, 10);
             if (e == p + strlen("<sup>")
                 || !g_str_has_prefix(e, "</sup>")) {
@@ -852,6 +898,20 @@ parse(GArray *units,
             else if (!u.power || abs(u.power) > 12) {
                 gwy_unit_warning("Bad power %d", u.power);
                 u.power = 1;
+            }
+            g_string_truncate(buf, p - buf->str);
+        }
+        else if ((p = find_unicode_exponent(buf->str + 1))) {
+            const gchar *t = p;
+            gint up = 0;
+            if (!decode_unicode_power(&t, &up)) {
+                gwy_unit_warning("Bad power %s", p);
+            }
+            else if (!u.power || abs(u.power) > 12) {
+                gwy_unit_warning("Bad power %d", u.power);
+            }
+            else {
+                u.power = up;
             }
             g_string_truncate(buf, p - buf->str);
         }
@@ -886,10 +946,6 @@ parse(GArray *units,
         }
 
         /* elementary sanity */
-        if (!g_utf8_validate(buf->str, -1, (const gchar**)&p)) {
-            gwy_unit_warning("Unit string is not valid UTF-8");
-            g_string_truncate(buf, p - buf->str);
-        }
         if (!buf->len) {
             /* maybe it's just percentage.  cross fingers and proceed. */
             if (dividing)
@@ -909,18 +965,16 @@ parse(GArray *units,
 
         /* TODO: scan known obscure units, implement traits */
 
-        /* get to the next token, looking for division */
-        while (g_ascii_isspace(*end))
-            end++;
-        if (*end == '/') {
+        /* get to the next unit, possibly start dividing */
+        if (will_be_dividing) {
             if (dividing) {
                 gwy_unit_warning("Cannot group multiple divisions");
             }
             dividing = TRUE;
-            end++;
-            while (g_ascii_isspace(*end))
-                end++;
         }
+        end = end + separ_len;
+        while (g_ascii_isspace(*end))
+            end++;
         string = end;
     }
 
