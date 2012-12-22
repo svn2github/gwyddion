@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,12 @@
  *
  ***************************************************************************/
 
+typedef struct {
+    const gchar *string;
+    const gchar *reference;
+    gint power10;
+} UnitTestCase;
+
 void
 unit_randomize(GwyUnit *unit, GRand *rng)
 {
@@ -44,6 +50,43 @@ unit_randomize(GwyUnit *unit, GRand *rng)
             gwy_unit_divide(unit, unit, op);
     }
     g_object_unref(op);
+}
+
+void
+test_unit_parse_power10(void)
+{
+    UnitTestCase cases[] = {
+        { "",                NULL, 0,   },
+        { "1",               NULL, 0,   },
+        { "10",              NULL, 1,   },
+        { "0.01",            NULL, -2,  },
+        { "%",               NULL, -2,  },
+        { "10^4",            NULL, 4,   },
+        { "10^-6",           NULL, -6,  },
+        { "10<sup>3</sup>",  NULL, 3,   },
+        { "10<sup>-3</sup>", NULL, -3,  },
+        { "10⁵",             NULL, 5,   },
+        { "10⁻¹²",           NULL, -12, },
+        { "×10^2",           NULL, 2,   },
+        { "×10^-2",          NULL, -2,  },
+        { "*10^2",           NULL, 2,   },
+        { "*10^-2",          NULL, -2,  },
+        { "×10^11",          NULL, 11,  },
+        { "×10^-11",         NULL, -11, },
+        { "*10^12",          NULL, 12,  },
+        { "*10^-12",         NULL, -12, },
+    };
+
+    for (guint i = 0; i < G_N_ELEMENTS(cases); i++) {
+        gint power10;
+        GwyUnit *unit = gwy_unit_new_from_string(cases[i].string, &power10);
+        g_assert(GWY_IS_UNIT(unit));
+        g_assert_cmpint(power10, ==, cases[i].power10);
+        GwyUnit *ref = gwy_unit_new_from_string(cases[i].reference, NULL);
+        g_assert(gwy_unit_equal(unit, ref));
+        g_object_unref(ref);
+        g_object_unref(unit);
+    }
 }
 
 void
