@@ -121,6 +121,7 @@ rgba/boxed
 rgba/interpolate
 rgba/preset
 unit/parse
+unit/parse/power10
 unit/word-names
 unit/changed
 unit/changed/arithmetic
