@@ -52,6 +52,21 @@ unit_randomize(GwyUnit *unit, GRand *rng)
     g_object_unref(op);
 }
 
+static void
+unit_check_cases(const UnitTestCase *cases, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        gint power10;
+        GwyUnit *unit = gwy_unit_new_from_string(cases[i].string, &power10);
+        g_assert(GWY_IS_UNIT(unit));
+        g_assert_cmpint(power10, ==, cases[i].power10);
+        GwyUnit *ref = gwy_unit_new_from_string(cases[i].reference, NULL);
+        g_assert(gwy_unit_equal(unit, ref));
+        g_object_unref(ref);
+        g_object_unref(unit);
+    }
+}
+
 void
 test_unit_parse_power10(void)
 {
@@ -61,6 +76,9 @@ test_unit_parse_power10(void)
         { "10",              NULL, 1,   },
         { "0.01",            NULL, -2,  },
         { "%",               NULL, -2,  },
+        { "10%",             NULL, -1,  },
+        { "‰",               NULL, -3,  },
+        { "10‰",             NULL, -2,  },
         { "10^4",            NULL, 4,   },
         { "10^-6",           NULL, -6,  },
         { "10<sup>3</sup>",  NULL, 3,   },
@@ -76,112 +94,79 @@ test_unit_parse_power10(void)
         { "*10^12",          NULL, 12,  },
         { "*10^-12",         NULL, -12, },
     };
-
-    for (guint i = 0; i < G_N_ELEMENTS(cases); i++) {
-        gint power10;
-        GwyUnit *unit = gwy_unit_new_from_string(cases[i].string, &power10);
-        g_assert(GWY_IS_UNIT(unit));
-        g_assert_cmpint(power10, ==, cases[i].power10);
-        GwyUnit *ref = gwy_unit_new_from_string(cases[i].reference, NULL);
-        g_assert(gwy_unit_equal(unit, ref));
-        g_object_unref(ref);
-        g_object_unref(unit);
-    }
+    unit_check_cases(cases, G_N_ELEMENTS(cases));
 }
 
 void
-test_unit_parse(void)
+test_unit_parse_meter(void)
 {
-    gint pw1, pw2, pw3, pw4, pw5, pw6, pw7, pw8, pw9;
-    gint pw11, pw12, pw13, pw14, pw15, pw16, pw17, pw18;
+    UnitTestCase cases[] = {
+        { "m",   "m", 0,   },
+        { "km",  "m", 3,   },
+        { "mm",  "m", -3,  },
+        { "cm",  "m", -2,  },
+        { "dm",  "m", -1,  },
+        { "Å",   "m", -10, },
+        { "Å",   "m", -10, },
+        { "nm",  "m", -9,  },
+    };
+    unit_check_cases(cases, G_N_ELEMENTS(cases));
+}
 
-    /* Simple notations */
-    GwyUnit *u1 = gwy_unit_new_from_string("m", &pw1);
-    GwyUnit *u2 = gwy_unit_new_from_string("km", &pw2);
-    GwyUnit *u3 = gwy_unit_new_from_string("Å", &pw3);
+void
+test_unit_parse_micro(void)
+{
+    UnitTestCase cases[] = {
+        { "µs",    "s", -6, },
+        { "μs",    "s", -6, },
+        { "us",    "s", -6, },
+        { "~s",    "s", -6, },
+        { "\265s", "s", -6, },
+    };
+    unit_check_cases(cases, G_N_ELEMENTS(cases));
+}
 
-    g_assert(gwy_unit_equal(u1, u2));
-    g_assert(gwy_unit_equal(u2, u3));
-    g_assert(gwy_unit_equal(u3, u1));
-    g_assert_cmpint(pw1, ==, 0);
-    g_assert_cmpint(pw2, ==, 3);
-    g_assert_cmpint(pw3, ==, -10);
+void
+test_unit_parse_power(void)
+{
+    UnitTestCase cases[] = {
+        { "mA¹",             "A",    -3,  },
+        { "mA<sup>1</sup>",  "A",    -3,  },
+        { "mA1",             "A^1",  -3,  },
+        { "mA²",             "A^2",  -6,  },
+        { "mA<sup>2</sup>",  "A^2",  -6,  },
+        { "mA2",             "A^2",  -6,  },
+        { "mA\262",          "A^2",  -6,  },
+        { "mA³",             "A^3",  -9,  },
+        { "mA3",             "A^3",  -9,  },
+        { "mA<sup>3</sup>",  "A^3",  -9,  },
+        { "mA⁴",             "A^4",  -12, },
+        { "mA<sup>4</sup>",  "A^4",  -12, },
+        { "mA⁻¹",            "A^-1", 3,   },
+        { "mA<sup>-1</sup>", "A^-1", 3,   },
+        { "mA-1",            "A^-1", 3,   },
+        { "mA⁻²",            "A^-2", 6,   },
+        { "mA<sup>-2</sup>", "A^-2", 6,   },
+        { "mA-2",            "A^-2", 6,   },
+        { "mA⁻³",            "A^-3", 9,   },
+        { "mA<sup>-3</sup>", "A^-3", 9,   },
+        { "mA-3",            "A^-3", 9,   },
+        { "mA⁻⁴",            "A^-4", 12,  },
+        { "mA<sup>-4</sup>", "A^-4", 12,  },
+    };
+    unit_check_cases(cases, G_N_ELEMENTS(cases));
+}
 
-    g_object_unref(u1);
-    g_object_unref(u2);
-    g_object_unref(u3);
-
-    /* Powers and comparison */
-    GwyUnit *u4 = gwy_unit_new_from_string("um s^-1", &pw4);
-    GwyUnit *u5 = gwy_unit_new_from_string("mm/ps", &pw5);
-    GwyUnit *u6 = gwy_unit_new_from_string("μs<sup>-1</sup> cm", &pw6);
-
-    g_assert(gwy_unit_equal(u4, u5));
-    g_assert(gwy_unit_equal(u5, u6));
-    g_assert(gwy_unit_equal(u6, u4));
-    g_assert_cmpint(pw4, ==, -6);
-    g_assert_cmpint(pw5, ==, 9);
-    g_assert_cmpint(pw6, ==, 4);
-
-    g_object_unref(u4);
-    g_object_unref(u5);
-    g_object_unref(u6);
-
-    /* Cancellation */
-    GwyUnit *u7 = gwy_unit_new_from_string(NULL, &pw7);
-    GwyUnit *u8 = gwy_unit_new_from_string("10%", &pw8);
-    GwyUnit *u9 = gwy_unit_new_from_string("m^3 cm^-2/km", &pw9);
-
-    g_assert(gwy_unit_equal(u7, u8));
-    g_assert(gwy_unit_equal(u8, u9));
-    g_assert(gwy_unit_equal(u9, u7));
-    g_assert_cmpint(pw7, ==, 0);
-    g_assert_cmpint(pw8, ==, -1);
-    g_assert_cmpint(pw9, ==, 1);
-
-    g_object_unref(u7);
-    g_object_unref(u8);
-    g_object_unref(u9);
-
-    /* Silly notations: micron */
-    GwyUnit *u11 = gwy_unit_new_from_string("μs", &pw11);
-    GwyUnit *u12 = gwy_unit_new_from_string("µs", &pw12);
-    GwyUnit *u13 = gwy_unit_new_from_string("us", &pw13);
-    GwyUnit *u14 = gwy_unit_new_from_string("~s", &pw14);
-    GwyUnit *u15 = gwy_unit_new_from_string("\265s", &pw15);
-
-    g_assert(gwy_unit_equal(u11, u12));
-    g_assert(gwy_unit_equal(u12, u13));
-    g_assert(gwy_unit_equal(u13, u14));
-    g_assert(gwy_unit_equal(u14, u15));
-    g_assert(gwy_unit_equal(u15, u11));
-    g_assert_cmpint(pw11, ==, -6);
-    g_assert_cmpint(pw12, ==, -6);
-    g_assert_cmpint(pw13, ==, -6);
-    g_assert_cmpint(pw14, ==, -6);
-    g_assert_cmpint(pw15, ==, -6);
-
-    g_object_unref(u11);
-    g_object_unref(u12);
-    g_object_unref(u13);
-    g_object_unref(u14);
-    g_object_unref(u15);
-
-    /* Silly notations: squares */
-    GwyUnit *u16 = gwy_unit_new_from_string("m²", &pw16);
-    GwyUnit *u17 = gwy_unit_new_from_string("m m", &pw17);
-    GwyUnit *u18 = gwy_unit_new_from_string("m\262", &pw18);
-
-    g_assert(gwy_unit_equal(u16, u17));
-    g_assert(gwy_unit_equal(u17, u18));
-    g_assert(gwy_unit_equal(u18, u16));
-    g_assert_cmpint(pw16, ==, 0);
-    g_assert_cmpint(pw17, ==, 0);
-    g_assert_cmpint(pw18, ==, 0);
-
-    g_object_unref(u16);
-    g_object_unref(u17);
-    g_object_unref(u18);
+void
+test_unit_parse_combine(void)
+{
+    UnitTestCase cases[] = {
+        { "um s^-1",            "mm/ps",              -6, },
+        { "mm/ps",              "μs<sup>-1</sup> cm", 9,  },
+        { "μs<sup>-1</sup> cm", "um s^-1",            4,  },
+        { "m^3 cm^-2/km",       NULL,                 1,  },
+    };
+    unit_check_cases(cases, G_N_ELEMENTS(cases));
 }
 
 void

@@ -120,8 +120,11 @@ brick-part/boxed
 rgba/boxed
 rgba/interpolate
 rgba/preset
-unit/parse
 unit/parse/power10
+unit/parse/meter
+unit/parse/micro
+unit/parse/power
+unit/parse/combine
 unit/word-names
 unit/changed
 unit/changed/arithmetic
