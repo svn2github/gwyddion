@@ -23,6 +23,7 @@
 #undef G_DISABLE_ASSERT
 #include "config.h"
 #include "libgwy/libgwy.h"
+#include <stdio.h>
 
 #ifndef HAVE_EXP10
 #define exp10(x) pow(10.0, (x))

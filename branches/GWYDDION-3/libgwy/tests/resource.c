@@ -19,7 +19,6 @@
 
 #include "testlibgwy.h"
 #include <glib/gstdio.h>
-#include <stdio.h>
 
 /***************************************************************************
  *
