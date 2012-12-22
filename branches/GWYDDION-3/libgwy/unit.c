@@ -635,6 +635,58 @@ fix_unit_name(GString *str)
 }
 
 static gboolean
+decode_unicode_power(const gchar **s,
+                     gint *power)
+{
+    const gchar *str = *s;
+    guint i = 0;
+    gint p = 0, sign = 1;
+    gboolean seen_digits = FALSE;
+
+    *power = 0;
+    do {
+        gunichar c = g_utf8_get_char(str);
+        if (c == 0x2070) {
+            seen_digits = TRUE;
+            p = 10*p;
+        }
+        else if (c == 0xb9) {
+            seen_digits = TRUE;
+            p = 10*p + 1;
+        }
+        else if (c == 0xb2 || c == 0xb3) {
+            seen_digits = TRUE;
+            p = 10*p + (c - 0xb0);
+        }
+        else if (c >= 0x2074 && c <= 0x2079) {
+            seen_digits = TRUE;
+            p = 10*p + (c - 0x2070);
+        }
+        else if (!i && c == 0x207b)
+            sign = -1;
+        else if (!i && c == 0x207a)
+            ;
+        else
+            break;
+
+        i++;
+        str = g_utf8_next_char(str);
+    } while (*str);
+
+    if (!i)
+        return FALSE;
+
+    if (seen_digits)
+        *power = sign*p;
+    else {
+        gwy_unit_warning("Bad exponent %s", *s);
+    }
+
+    *s = str;
+    return TRUE;
+}
+
+static gboolean
 parse(GArray *units,
       const gchar *string,
       gint *ppower10)
@@ -643,7 +695,7 @@ parse(GArray *units,
     const gchar *end;
     gchar *p, *e, *utf8string = NULL;
     guint n, i;
-    gint power10;
+    gint power10, m;
     gboolean dividing = FALSE;
 
     power10 = 0;
@@ -658,7 +710,7 @@ parse(GArray *units,
                   "\010\011\012\013\014\015\016\017"
                   "\020\021\022\023\024\025\026\027"
                   "\030\031\032\033\034\035\036\037"
-                  "!#$&()*,:;=?@\\[]_`|{}");
+                  "!#$&(),:;=?@\\[]_`|{}");
     if (end) {
         gwy_unit_warning("Invalid character 0x%02x", *end);
         return FALSE;
@@ -689,23 +741,26 @@ parse(GArray *units,
         }
         else if (g_str_has_prefix(string, "<sup>")) {
             string += strlen("<sup>");
-            n = strtol(string, (gchar**)&end, 10);
+            m = strtol(string, (gchar**)&end, 10);
             if (end == string)
                 gwy_unit_warning("Bad exponent %s", string);
             else if (!g_str_has_prefix(end, "</sup>"))
                 gwy_unit_warning("Expected </sup> after exponent");
             else
-                power10 *= n;
+                power10 *= m;
             string = end;
         }
         else if (string[0] == '^') {
             string++;
-            n = strtol(string, (gchar**)&end, 10);
+            m = strtol(string, (gchar**)&end, 10);
             if (end == string)
                 gwy_unit_warning("Bad exponent %s", string);
             else
-                power10 *= n;
+                power10 *= m;
             string = end;
+        }
+        else if (decode_unicode_power(&string, &m)) {
+            power10 *= m;
         }
     }
     while (g_ascii_isspace(*string))
