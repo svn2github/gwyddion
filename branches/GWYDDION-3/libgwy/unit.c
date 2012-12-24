@@ -801,11 +801,14 @@ parse(GArray *units,
             m = strtol(string, (gchar**)&end, 10);
             if (end == string)
                 gwy_unit_warning("Bad exponent %s", string);
-            else if (!g_str_has_prefix(end, "</sup>"))
+            else if (!g_str_has_prefix(end, "</sup>")) {
                 gwy_unit_warning("Expected </sup> after exponent");
-            else
+                string = end;
+            }
+            else {
                 power10 *= m;
-            string = end;
+                string = end + sizeof("</sup>")-1;
+            }
         }
         else if (string[0] == '^') {
             string++;
@@ -876,7 +879,7 @@ parse(GArray *units,
         /* get unit power */
         GwySimpleUnit u;
         u.power = 1;
-        if ((p = strstr(buf->str + 1, "<sup>"))) {
+        if (buf->len > 12 && (p = strstr(buf->str + 1, "<sup>"))) {
             u.power = strtol(p + strlen("<sup>"), &e, 10);
             if (e == p + strlen("<sup>")
                 || !g_str_has_prefix(e, "</sup>")) {
@@ -889,7 +892,7 @@ parse(GArray *units,
             }
             g_string_truncate(buf, p - buf->str);
         }
-        else if ((p = strchr(buf->str + 1, '^'))) {
+        else if (buf->len > 2 && (p = strchr(buf->str + 1, '^'))) {
             u.power = strtol(p + 1, &e, 10);
             if (e == p + 1 || *e) {
                 gwy_unit_warning("Bad power %s", p);
@@ -901,7 +904,7 @@ parse(GArray *units,
             }
             g_string_truncate(buf, p - buf->str);
         }
-        else if ((p = find_unicode_exponent(buf->str + 1))) {
+        else if (buf->len > 1 && (p = find_unicode_exponent(buf->str + 1))) {
             const gchar *t = p;
             gint up = 0;
             if (!decode_unicode_power(&t, &up)) {
@@ -944,6 +947,7 @@ parse(GArray *units,
             pfpower -= 3;
             g_string_assign(buf, "");
         }
+
 
         /* elementary sanity */
         if (!buf->len) {
