@@ -91,6 +91,8 @@ static void         gwy_color_axis_get_preferred_width  (GtkWidget *widget,
 static void         gwy_color_axis_get_preferred_height (GtkWidget *widget,
                                                          gint *minimum,
                                                          gint *natural);
+static void         gwy_color_axis_size_allocate        (GtkWidget *widget,
+                                                         GtkAllocation *allocation);
 static void         gwy_color_axis_realize              (GtkWidget *widget);
 static void         gwy_color_axis_unrealize            (GtkWidget *widget);
 static gboolean     gwy_color_axis_draw                 (GtkWidget *widget,
@@ -166,7 +168,16 @@ static void         discard_cursors                     (GwyColorAxis *coloraxis
 static BoundaryType find_boundary                       (GwyAxis *axis,
                                                          gdouble x,
                                                          gdouble y);
+static void         calc_length_and_pos                 (GwyAxis *axis,
+                                                         gdouble x,
+                                                         gdouble y,
+                                                         gdouble *length,
+                                                         gdouble *pos);
 static void         update_cursor                       (GwyColorAxis *coloraxis,
+                                                         BoundaryType boundary);
+static void         drag_boundary                       (GwyColorAxis *coloraxis,
+                                                         gdouble x,
+                                                         gdouble y,
                                                          BoundaryType boundary);
 
 static GParamSpec *properties[N_PROPS];
@@ -193,6 +204,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
 
     widget_class->get_preferred_width = gwy_color_axis_get_preferred_width;
     widget_class->get_preferred_height = gwy_color_axis_get_preferred_height;
+    widget_class->size_allocate = gwy_color_axis_size_allocate;
     widget_class->realize = gwy_color_axis_realize;
     widget_class->unrealize = gwy_color_axis_unrealize;
     widget_class->draw = gwy_color_axis_draw;
@@ -261,6 +273,8 @@ gwy_color_axis_init(GwyColorAxis *coloraxis)
     coloraxis->priv = G_TYPE_INSTANCE_GET_PRIVATE(coloraxis,
                                                   GWY_TYPE_COLOR_AXIS,
                                                   ColorAxis);
+    ColorAxis *priv = coloraxis->priv;
+    priv->boundary = BOUNDARY_NONE;
 }
 
 static void
@@ -397,6 +411,16 @@ gwy_color_axis_get_preferred_height(GtkWidget *widget,
 }
 
 static void
+gwy_color_axis_size_allocate(GtkWidget *widget,
+                             GtkAllocation *allocation)
+{
+    GTK_WIDGET_CLASS(gwy_color_axis_parent_class)->size_allocate(widget,
+                                                                 allocation);
+    GwyColorAxis *axis = GWY_COLOR_AXIS(widget);
+    axis->priv->dragging = FALSE;
+}
+
+static void
 gwy_color_axis_realize(GtkWidget *widget)
 {
     GTK_WIDGET_CLASS(gwy_color_axis_parent_class)->realize(widget);
@@ -504,12 +528,8 @@ gwy_color_axis_button_press(GtkWidget *widget,
     if (boundary == BOUNDARY_NONE)
         return FALSE;
 
-    gdouble width = gtk_widget_get_allocated_width(widget),
-            height = gtk_widget_get_allocated_height(widget);
-    GtkPositionType edge = gwy_axis_get_edge(axis);
-    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
-    gdouble length = (vertical ? height : width),
-            pos = (vertical ? height - event->y : event->x);
+    gdouble length, pos;
+    calc_length_and_pos(axis, event->x, event->y, &length, &pos);
     priv->drag_start_pos = pos;
     GwyRange range;
     gwy_axis_get_range(axis, &range);
@@ -534,10 +554,9 @@ gwy_color_axis_button_release(GtkWidget *widget,
 
     GwyAxis *axis = GWY_AXIS(widget);
     BoundaryType boundary = find_boundary(axis, event->x, event->y);
+    drag_boundary(coloraxis, event->x, event->y, boundary);
     update_cursor(coloraxis, boundary);
-
     priv->dragging = FALSE;
-    // TODO: Update the request too.
 
     return FALSE;
 }
@@ -551,39 +570,19 @@ gwy_color_axis_motion_notify(GtkWidget *widget,
     if (!priv->editable_range)
         return FALSE;
 
-    gdouble width = gtk_widget_get_allocated_width(widget),
-            height = gtk_widget_get_allocated_height(widget);
     GwyAxis *axis = GWY_AXIS(widget);
-    GtkPositionType edge = gwy_axis_get_edge(axis);
-    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
-    gdouble length = (vertical ? height : width),
-            pos = (vertical ? height - event->y : event->x);
+    gdouble length, pos;
+    calc_length_and_pos(axis, event->x, event->y, &length, &pos);
     BoundaryType boundary = find_boundary(axis, event->x, event->y);
-
     if (event->state & GDK_BUTTON1_MASK) {
         if (!priv->dragging
             && fabs(pos - priv->drag_start_pos) >= DRAG_MIN_DIST) {
             priv->dragging = TRUE;
         }
     }
+
     if (priv->dragging) {
-        g_assert(priv->boundary != BOUNDARY_NONE);
-        GwyRange range, newrange;
-        gwy_axis_get_range(axis, &range);
-        newrange = range;
-        if (priv->boundary == BOUNDARY_TO) {
-            if (boundary != BOUNDARY_FROM) {
-                newrange.to = range.from + priv->drag_q/pos;
-            }
-        }
-        else {
-            if (boundary != BOUNDARY_TO) {
-                newrange.from = (priv->drag_q - pos*range.to)/(length - pos);
-            }
-        }
-        if (!gwy_equal(&newrange, &range))
-            g_signal_emit(axis, signals[SGNL_MODIFY_RANGE], 0, &newrange);
-        // We do NOT do update_cursor() in dragging mode.
+        drag_boundary(coloraxis, event->x, event->y, boundary);
         return TRUE;
     }
 
@@ -1076,19 +1075,31 @@ discard_cursors(GwyColorAxis *coloraxis)
 static BoundaryType
 find_boundary(GwyAxis *axis, gdouble x, gdouble y)
 {
-    GtkWidget *widget = GTK_WIDGET(axis);
-    GtkPositionType edge = gwy_axis_get_edge(axis);
-    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
-    gdouble width = gtk_widget_get_allocated_width(widget),
-            height = gtk_widget_get_allocated_height(widget);
-    gdouble length = (vertical ? height : width),
-            pos = (vertical ? height - y : x);
+    gdouble length, pos;
+    calc_length_and_pos(axis, x, y, &length, &pos);
 
     if (pos >= 2.0*length/3.0)
         return BOUNDARY_TO;
     if (pos <= length/3.0)
         return BOUNDARY_FROM;
     return BOUNDARY_NONE;
+}
+
+static void
+calc_length_and_pos(GwyAxis *axis,
+                    gdouble x, gdouble y,
+                    gdouble *length, gdouble *pos)
+{
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    if (vertical) {
+        *length = gtk_widget_get_allocated_height(GTK_WIDGET(axis));
+        *pos = *length - y;
+    }
+    else {
+        *length = gtk_widget_get_allocated_width(GTK_WIDGET(axis));
+        *pos = x;
+    }
 }
 
 static void
@@ -1108,6 +1119,34 @@ update_cursor(GwyColorAxis *coloraxis,
         gdk_window_set_cursor(input_window, priv->cursor_from);
     else
         gdk_window_set_cursor(input_window, NULL);
+}
+
+static void
+drag_boundary(GwyColorAxis *coloraxis,
+              gdouble x, gdouble y, BoundaryType boundary)
+{
+    GwyRange range, newrange;
+    GwyAxis *axis = GWY_AXIS(coloraxis);
+    gwy_axis_get_range(axis, &range);
+    newrange = range;
+
+    gdouble length, pos;
+    calc_length_and_pos(axis, x, y, &length, &pos);
+    ColorAxis *priv = coloraxis->priv;
+    if (priv->boundary == BOUNDARY_TO) {
+        if (boundary != BOUNDARY_FROM)
+            newrange.to = range.from + priv->drag_q/pos;
+    }
+    else if (priv->boundary == BOUNDARY_FROM) {
+        if (boundary != BOUNDARY_TO)
+            newrange.from = (priv->drag_q - pos*range.to)/(length - pos);
+    }
+    else {
+        g_return_if_reached();
+    }
+
+    if (!gwy_equal(&newrange, &range))
+        g_signal_emit(axis, signals[SGNL_MODIFY_RANGE], 0, &newrange);
 }
 
 /**
