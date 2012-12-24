@@ -674,15 +674,15 @@ draw_bar(GwyAdjustBar *adjbar,
          cairo_t *cr)
 {
     AdjustBar *priv = adjbar->priv;
+    if (!priv->adjustment_ok)
+        return;
+
     GtkWidget *widget = GTK_WIDGET(adjbar);
     GtkStateFlags state = gtk_widget_get_state_flags(widget);
     gdouble width = gtk_widget_get_allocated_width(widget),
             height = gtk_widget_get_allocated_height(widget);
     gdouble val = gtk_adjustment_get_value(priv->adjustment);
-    gdouble barlength = 0.0;
-
-    if (priv->adjustment_ok)
-        barlength = map_value_to_position(adjbar, width, val);
+    gdouble barlength = map_value_to_position(adjbar, width, val);
 
     cairo_save(cr);
 
@@ -700,22 +700,18 @@ draw_bar(GwyAdjustBar *adjbar,
         gwy_cairo_set_source_rgba(cr, &fill_color);
         cairo_fill(cr);
 
+        cairo_set_line_width(cr, 1.0);
+        cairo_rectangle(cr, 0.5, 0.5, barlength-1.0, height-1.0);
+        gwy_cairo_set_source_rgba(cr, &color);
+        cairo_stroke(cr);
     }
-    else if (barlength > 1.0) {
+    else {
         // Do not stroke bars thinner than twice the ourline, draw the entire
         // bar using the border color instead.
-        cairo_rectangle(cr, 1.0, 1.0, barlength-1.0, height-2.0);
+        cairo_rectangle(cr, 0, 0, barlength, height);
         gwy_cairo_set_source_rgba(cr, &color);
         cairo_fill(cr);
     }
-
-    cairo_set_line_width(cr, 1.0);
-    cairo_rectangle(cr, 0.5, 0.5, width-1.0, height-1.0);
-    gwy_cairo_set_source_rgba(cr, &color);
-    cairo_move_to(cr, barlength-0.5, 1.0);
-    cairo_line_to(cr, barlength-0.5, height-1.0);
-    cairo_stroke(cr);
-
     cairo_restore(cr);
 }
 
