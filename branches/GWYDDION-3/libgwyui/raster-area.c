@@ -432,7 +432,7 @@ gwy_raster_area_class_init(GwyRasterAreaClass *klass)
      *
      * Whether the dimension follow the real aspect ratio.
      *
-     * Since #GwyField real pixel sizes in @x and y@ direction may differ, two
+     * Since #GwyField real pixel sizes in @x and @y direction may differ, two
      * natual aspect ratios are possible.  Square pixels that correspond to
      * %FALSE value of this property and faitfhul reproduction of the physical
      * aspect ratio that correspond to %TRUE.
