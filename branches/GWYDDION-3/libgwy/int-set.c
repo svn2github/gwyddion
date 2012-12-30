@@ -545,7 +545,7 @@ int_compare(const void *pa, const void *pb)
         return -1;
     if (*ia > *ib)
         return 1;
-    return 0.0;
+    return 0;
 }
 
 static guint
