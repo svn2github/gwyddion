@@ -1947,6 +1947,30 @@ uniq_array(guint *x, guint n)
     return n;
 }
 
+static guint
+compress_grain_numbers(guint *grains, guint n, guint *m, guint ngrains)
+{
+    // Build a fully resolved renumbering.
+    guint count = 1;
+    for (guint i = 1; i < ngrains; i++) {
+        if (m[i] == i)
+            m[i] = count++;
+        else
+            m[i] = m[m[i]];
+    }
+
+    // Apply the renumbering to grains.
+    for (guint k = n; k; k--, grains++)
+        *grains = m[*grains];
+
+    // Apply the renumbering to the map.  This is trivial because the result
+    // must be the sequence 1..count-1.
+    for (guint i = 1; i < count; i++)
+        m[i] = i;
+
+    return count;
+}
+
 /**
  * grain_number_dist:
  * @data_field: A data field.
@@ -2002,6 +2026,7 @@ grain_number_dist(const GwyField *field,
     guint *grains = heights;     // No longer needed.
     gwy_clear(grains, width*height);
     guint *m = g_new(guint, n+1);
+    m[0] = 0;
 
     // Main iteration
     guint ngrains = 1;
@@ -2059,8 +2084,12 @@ grain_number_dist(const GwyField *field,
         }
 
         line->data[h] = (gdouble)count/n;
+
+        if (3*count/2 + 4 < ngrains)
+            ngrains = compress_grain_numbers(grains, width*height, m, ngrains);
+
 #if 0
-        g_printerr("GRAINS %u :: %u\n", h, count);
+        g_printerr("GRAINS1 %u :: %u\n", h, count);
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
                 if (grains[i*width + j])
@@ -2070,7 +2099,7 @@ grain_number_dist(const GwyField *field,
                 g_printerr("%c", j == width-1 ? '\n' : ' ');
             }
         }
-        g_printerr("MAPPED %u\n", h);
+        g_printerr("MAPPED1 %u\n", h);
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
                 if (grains[i*width + j])
