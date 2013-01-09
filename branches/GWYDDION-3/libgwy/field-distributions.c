@@ -2085,11 +2085,11 @@ grain_number_dist(const GwyField *field,
 
         line->data[h] = (gdouble)count/n;
 
-        if (3*count/2 + 4 < ngrains)
+        if (7*count/5 + 4 < ngrains)
             ngrains = compress_grain_numbers(grains, width*height, m, ngrains);
 
 #if 0
-        g_printerr("GRAINS1 %u :: %u\n", h, count);
+        g_printerr("GRAINS %u :: %u\n", h, count);
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
                 if (grains[i*width + j])
@@ -2099,7 +2099,7 @@ grain_number_dist(const GwyField *field,
                 g_printerr("%c", j == width-1 ? '\n' : ' ');
             }
         }
-        g_printerr("MAPPED1 %u\n", h);
+        g_printerr("MAPPED %u\n", h);
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
                 if (grains[i*width + j])
