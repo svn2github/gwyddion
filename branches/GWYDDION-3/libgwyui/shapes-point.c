@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -66,9 +66,6 @@ static void     gwy_shapes_point_get_property    (GObject *object,
                                                   guint prop_id,
                                                   GValue *value,
                                                   GParamSpec *pspec);
-static gboolean set_radius                       (GwyShapesPoint *points,
-                                                  gdouble radius);
-static void     calculate_data                   (GwyShapesPoint *points);
 static void     gwy_shapes_point_draw            (GwyShapes *shapes,
                                                   cairo_t *cr);
 static gboolean gwy_shapes_point_motion_notify   (GwyShapes *shapes,
@@ -85,6 +82,40 @@ static void     gwy_shapes_selection_added       (GwyShapes *shapes,
 static void     gwy_shapes_selection_removed     (GwyShapes *shapes,
                                                   gint value);
 static void     gwy_shapes_selection_assigned    (GwyShapes *shapes);
+static gboolean set_radius                       (GwyShapesPoint *points,
+                                                  gdouble radius);
+static void     calculate_data                   (GwyShapesPoint *points);
+static void     draw_crosses                     (GwyShapes *shapes,
+                                                  cairo_t *cr);
+static void     draw_cross                       (cairo_t *cr,
+                                                  const gdouble *xy,
+                                                  gpointer user_data);
+static void     draw_radii                       (GwyShapes *shapes,
+                                                  cairo_t *cr);
+static void     draw_radius                      (cairo_t *cr,
+                                                  const gdouble *xy,
+                                                  gpointer user_data);
+static void     draw_markers                     (GwyShapes *shapes,
+                                                  cairo_t *cr,
+                                                  MarkerDrawFunc function,
+                                                  gpointer user_data);
+static gint     find_near_point                  (GwyShapesPoint *points,
+                                                  gdouble x,
+                                                  gdouble y);
+static void     constrain_movement               (GwyShapes *shapes,
+                                                  gdouble eventx,
+                                                  gdouble eventy,
+                                                  GdkModifierType modif,
+                                                  GwyXY *dxy);
+static gboolean add_point                        (GwyShapes *shapes,
+                                                  gdouble x,
+                                                  gdouble y);
+static void     update_hover                     (GwyShapes *shapes,
+                                                  gdouble eventx,
+                                                  gdouble eventy);
+static gboolean snap_point                       (GwyShapes *shapes,
+                                                  gdouble *x,
+                                                  gdouble *y);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -182,129 +213,6 @@ gwy_shapes_point_get_property(GObject *object,
     }
 }
 
-static gboolean
-set_radius(GwyShapesPoint *points,
-           gdouble radius)
-{
-    ShapesPoint *priv = points->priv;
-    if (radius == priv->radius)
-        return FALSE;
-
-    priv->radius = radius;
-    gwy_shapes_update(GWY_SHAPES(points));
-    return TRUE;
-}
-
-static void
-calculate_data(GwyShapesPoint *points)
-{
-    ShapesPoint *priv = points->priv;
-    GwyShapes *shapes = GWY_SHAPES(points);
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint n = gwy_coords_size(coords);
-    if (!priv->data)
-        priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), 2*n);
-    g_array_set_size(priv->data, 2*n);
-    const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    gdouble *data = (gdouble*)priv->data->data;
-    gwy_coords_get_data(coords, data);
-    for (guint i = 0; i < n; i++)
-        cairo_matrix_transform_point(matrix, data + 2*i, data + 2*i + 1);
-}
-
-static void
-draw_markers(GwyShapes *shapes, cairo_t *cr,
-             MarkerDrawFunc function, gpointer user_data)
-{
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    const gdouble *data = (const gdouble*)priv->data->data;
-    gint n = priv->data->len/2;
-
-    if (!n)
-        return;
-
-    GwyIntSet *selection = shapes->selection;
-    gboolean hoverselected = FALSE;
-    guint count = 0;
-
-    for (gint i = 0; i < n; i++) {
-        if (i != priv->hover && !gwy_int_set_contains(selection, i)) {
-            function(cr, data + 2*i, user_data);
-            count++;
-        }
-    }
-    if (count) {
-        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
-        count = 0;
-    }
-
-    GwyIntSetIter iter;
-    if (gwy_int_set_first(selection, &iter)) {
-        do {
-            if (iter.value == priv->hover)
-                hoverselected = TRUE;
-            else {
-                function(cr, data + 2*iter.value, user_data);
-                count++;
-            }
-        } while (gwy_int_set_next(selection, &iter));
-
-        if (count) {
-            gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
-            count = 0;
-        }
-    }
-
-    if (priv->hover != -1) {
-        GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
-        if (hoverselected)
-            state |= GWY_SHAPES_STATE_SELECTED;
-        function(cr, data + 2*priv->hover, user_data);
-        gwy_shapes_stroke(shapes, cr, state);
-    }
-}
-
-static void
-draw_cross(cairo_t *cr,
-           const gdouble *xy,
-           gpointer user_data)
-{
-    const gdouble *pticklen = (const gdouble*)user_data;
-    gwy_cairo_cross(cr, xy[0], xy[1], *pticklen);
-}
-
-static void
-draw_crosses(GwyShapes *shapes, cairo_t *cr)
-{
-    gdouble ticklen = 5.0;
-    cairo_save(cr);
-    cairo_set_line_width(cr, 1.683);
-    draw_markers(shapes, cr, &draw_cross, &ticklen);
-    cairo_restore(cr);
-}
-
-static void
-draw_radius(cairo_t *cr,
-            const gdouble *xy,
-            gpointer user_data)
-{
-    const gdouble *radii = (const gdouble*)user_data;
-    gwy_cairo_ellipse(cr, xy[0], xy[1], radii[0], radii[1]);
-}
-
-static void
-draw_radii(GwyShapes *shapes, cairo_t *cr)
-{
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    gdouble radii[2] = { priv->radius, priv->radius };
-    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
-    cairo_matrix_transform_distance(matrix, radii+0, radii+1);
-    cairo_save(cr);
-    cairo_set_line_width(cr, 1.0);
-    draw_markers(shapes, cr, &draw_radius, radii);
-    cairo_restore(cr);
-}
-
 static void
 gwy_shapes_point_draw(GwyShapes *shapes,
                       cairo_t *cr)
@@ -317,114 +225,6 @@ gwy_shapes_point_draw(GwyShapes *shapes,
     calculate_data(points);
     draw_crosses(shapes, cr);
     draw_radii(shapes, cr);
-}
-
-static gint
-find_near_point(GwyShapesPoint *points,
-                gdouble x, gdouble y)
-{
-    ShapesPoint *priv = points->priv;
-    guint n = priv->data->len/2;
-    const gdouble *data = (const gdouble*)priv->data->data;
-    gdouble mindist2 = G_MAXDOUBLE;
-    gint mini = -1;
-
-    for (guint i = 0; i < n; i++) {
-        gdouble xd = x - data[2*i], yd = y - data[2*i + 1];
-        gdouble dist2 = xd*xd + yd*yd;
-        if (dist2 <= 30.0 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = i;
-        }
-    }
-
-    return mini;
-}
-
-static void
-constrain_movement(GwyShapes *shapes,
-                   gdouble eventx, gdouble eventy,
-                   GdkModifierType modif,
-                   GwyXY *dxy)
-{
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-
-    // Constrain movement in view space, pressing Ctrl limits it to
-    // horizontal/vertical.
-    if (modif & GDK_CONTROL_MASK) {
-        const GwyXY *xypress = &priv->xypress;
-        gdouble xd = eventx - xypress->x, yd = eventy - xypress->y;
-        if (fabs(xd) <= fabs(yd))
-            eventx = xypress->x;
-        else
-            eventy = xypress->y;
-    }
-
-    // Constrain movement in coords space, cannot move anything outside the
-    // bounding box.
-    const cairo_matrix_t *matrix = &shapes->view_to_coords;
-    cairo_matrix_transform_point(matrix, &eventx, &eventy);
-    GwyXY xy = { eventx, eventy };
-    gwy_shapes_snap(shapes, &xy);
-    eventx = xy.x;
-    eventy = xy.y;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-
-    gdouble d[2];
-    gwy_coords_get(coords, priv->clicked, d);
-    d[0] = eventx - d[0];
-    d[1] = eventy - d[1];
-    const cairo_rectangle_t *bbox = &shapes->bounding_box;
-    gdouble lower[2] = { bbox->x, bbox->y };
-    gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
-    gwy_coords_constrain_translation(coords, shapes->selection,
-                                     d, lower, upper);
-    dxy->x = d[0];
-    dxy->y = d[1];
-}
-
-static gboolean
-add_point(GwyShapes *shapes,
-          gdouble x, gdouble y)
-{
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint n = gwy_coords_size(coords);
-    if (n >= gwy_shapes_get_max_shapes(shapes))
-        return FALSE;
-
-    const cairo_matrix_t *matrix = &shapes->view_to_coords;
-    cairo_matrix_transform_point(matrix, &x, &y);
-    GwyXY xy = { x, y };
-    gwy_shapes_snap(shapes, &xy);
-    x = xy.x;
-    y = xy.y;
-
-    const cairo_rectangle_t *bbox = &shapes->bounding_box;
-    if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
-        || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
-        return FALSE;
-
-    gdouble xy2[2] = { x, y };
-    priv->hover = priv->clicked = n;
-    gwy_coords_set(coords, priv->clicked, xy2);
-    return TRUE;
-}
-
-static void
-update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
-{
-    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
-    ShapesPoint *priv = points->priv;
-    gint i = -1;
-
-    if (isfinite(eventx) && isfinite(eventy))
-        i = find_near_point(points, eventx, eventy);
-    if (priv->hover == i)
-        return;
-
-    priv->hover = i;
-    gwy_shapes_update(shapes);
 }
 
 static gboolean
@@ -617,6 +417,248 @@ GwyShapes*
 gwy_shapes_point_new(void)
 {
     return g_object_new(GWY_TYPE_SHAPES_POINT, 0, NULL);
+}
+
+static gboolean
+set_radius(GwyShapesPoint *points,
+           gdouble radius)
+{
+    ShapesPoint *priv = points->priv;
+    if (radius == priv->radius)
+        return FALSE;
+
+    priv->radius = radius;
+    gwy_shapes_update(GWY_SHAPES(points));
+    return TRUE;
+}
+
+static void
+calculate_data(GwyShapesPoint *points)
+{
+    ShapesPoint *priv = points->priv;
+    GwyShapes *shapes = GWY_SHAPES(points);
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = gwy_coords_size(coords);
+    if (!priv->data)
+        priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), 2*n);
+    g_array_set_size(priv->data, 2*n);
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    gdouble *data = (gdouble*)priv->data->data;
+    gwy_coords_get_data(coords, data);
+    for (guint i = 0; i < n; i++)
+        cairo_matrix_transform_point(matrix, data + 2*i, data + 2*i + 1);
+}
+
+static void
+draw_crosses(GwyShapes *shapes, cairo_t *cr)
+{
+    gdouble ticklen = 5.0;
+    cairo_save(cr);
+    cairo_set_line_width(cr, 1.683);
+    draw_markers(shapes, cr, &draw_cross, &ticklen);
+    cairo_restore(cr);
+}
+
+static void
+draw_cross(cairo_t *cr,
+           const gdouble *xy,
+           gpointer user_data)
+{
+    const gdouble *pticklen = (const gdouble*)user_data;
+    gwy_cairo_cross(cr, xy[0], xy[1], *pticklen);
+}
+
+static void
+draw_radii(GwyShapes *shapes, cairo_t *cr)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    gdouble radii[2] = { priv->radius, priv->radius };
+    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
+    cairo_matrix_transform_distance(matrix, radii+0, radii+1);
+    cairo_save(cr);
+    cairo_set_line_width(cr, 1.0);
+    draw_markers(shapes, cr, &draw_radius, radii);
+    cairo_restore(cr);
+}
+
+static void
+draw_radius(cairo_t *cr,
+            const gdouble *xy,
+            gpointer user_data)
+{
+    const gdouble *radii = (const gdouble*)user_data;
+    gwy_cairo_ellipse(cr, xy[0], xy[1], radii[0], radii[1]);
+}
+
+static void
+draw_markers(GwyShapes *shapes, cairo_t *cr,
+             MarkerDrawFunc function, gpointer user_data)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    const gdouble *data = (const gdouble*)priv->data->data;
+    gint n = priv->data->len/2;
+
+    if (!n)
+        return;
+
+    GwyIntSet *selection = shapes->selection;
+    gboolean hoverselected = FALSE;
+    guint count = 0;
+
+    for (gint i = 0; i < n; i++) {
+        if (i != priv->hover && !gwy_int_set_contains(selection, i)) {
+            function(cr, data + 2*i, user_data);
+            count++;
+        }
+    }
+    if (count) {
+        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
+        count = 0;
+    }
+
+    GwyIntSetIter iter;
+    if (gwy_int_set_first(selection, &iter)) {
+        do {
+            if (iter.value == priv->hover)
+                hoverselected = TRUE;
+            else {
+                function(cr, data + 2*iter.value, user_data);
+                count++;
+            }
+        } while (gwy_int_set_next(selection, &iter));
+
+        if (count) {
+            gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
+            count = 0;
+        }
+    }
+
+    if (priv->hover != -1) {
+        GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
+        if (hoverselected)
+            state |= GWY_SHAPES_STATE_SELECTED;
+        function(cr, data + 2*priv->hover, user_data);
+        gwy_shapes_stroke(shapes, cr, state);
+    }
+}
+
+static gint
+find_near_point(GwyShapesPoint *points,
+                gdouble x, gdouble y)
+{
+    ShapesPoint *priv = points->priv;
+    guint n = priv->data->len/2;
+    const gdouble *data = (const gdouble*)priv->data->data;
+    gdouble mindist2 = G_MAXDOUBLE;
+    gint mini = -1;
+
+    for (guint i = 0; i < n; i++) {
+        gdouble xd = x - data[2*i], yd = y - data[2*i + 1];
+        gdouble dist2 = xd*xd + yd*yd;
+        if (dist2 <= 30.0 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = i;
+        }
+    }
+
+    return mini;
+}
+
+static void
+constrain_movement(GwyShapes *shapes,
+                   gdouble eventx, gdouble eventy,
+                   GdkModifierType modif,
+                   GwyXY *dxy)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+
+    // Constrain movement in view space, pressing Ctrl limits it to
+    // horizontal/vertical.
+    if (modif & GDK_CONTROL_MASK) {
+        const GwyXY *xypress = &priv->xypress;
+        gdouble xd = eventx - xypress->x, yd = eventy - xypress->y;
+        if (fabs(xd) <= fabs(yd))
+            eventx = xypress->x;
+        else
+            eventy = xypress->y;
+    }
+
+    // Constrain movement in coords space, cannot move anything outside the
+    // bounding box.
+    const cairo_matrix_t *matrix = &shapes->view_to_coords;
+    cairo_matrix_transform_point(matrix, &eventx, &eventy);
+    snap_point(shapes, &eventx, &eventy);
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+
+    gdouble d[2];
+    gwy_coords_get(coords, priv->clicked, d);
+    d[0] = eventx - d[0];
+    d[1] = eventy - d[1];
+    const cairo_rectangle_t *bbox = &shapes->bounding_box;
+    gdouble lower[2] = { bbox->x, bbox->y };
+    gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
+    gwy_coords_constrain_translation(coords, shapes->selection,
+                                     d, lower, upper);
+    dxy->x = d[0];
+    dxy->y = d[1];
+}
+
+static gboolean
+add_point(GwyShapes *shapes, gdouble x, gdouble y)
+{
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = gwy_coords_size(coords);
+    if (n >= gwy_shapes_get_max_shapes(shapes))
+        return FALSE;
+
+    const cairo_matrix_t *matrix = &shapes->view_to_coords;
+    cairo_matrix_transform_point(matrix, &x, &y);
+    snap_point(shapes, &x, &y);
+
+    const cairo_rectangle_t *bbox = &shapes->bounding_box;
+    if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
+        || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
+        return FALSE;
+
+    gdouble xy2[2] = { x, y };
+    priv->hover = priv->clicked = n;
+    gwy_coords_set(coords, priv->clicked, xy2);
+    return TRUE;
+}
+
+static void
+update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
+{
+    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
+    ShapesPoint *priv = points->priv;
+    gint i = -1;
+
+    if (isfinite(eventx) && isfinite(eventy))
+        i = find_near_point(points, eventx, eventy);
+    if (priv->hover == i)
+        return;
+
+    priv->hover = i;
+    gwy_shapes_update(shapes);
+}
+
+static gboolean
+snap_point(GwyShapes *shapes,
+           gdouble *x, gdouble *y)
+{
+    /*
+    if (!gwy_shapes_get_snap(shapes))
+        return FALSE;
+        */
+
+    cairo_matrix_transform_point(&shapes->coords_to_view, x, y);
+    cairo_matrix_transform_point(&shapes->view_to_pixel, x, y);
+    *x = gwy_round_to_half(*x);
+    *y = gwy_round_to_half(*y);
+    cairo_matrix_transform_point(&shapes->pixel_to_view, x, y);
+    cairo_matrix_transform_point(&shapes->view_to_coords, x, y);
+    return TRUE;
 }
 
 /**
