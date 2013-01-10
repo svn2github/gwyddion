@@ -120,7 +120,6 @@ create_raster_window(guint xres, guint yres)
     g_object_set(shapes,
                  "radius", 8.0,
                  "max-shapes", 5,
-                 "snapping", GWY_SHAPES_SNAP_CENTERS,
                  //"editable", FALSE,
                  NULL);
     gwy_shapes_set_coords(shapes, coords);
@@ -292,6 +291,9 @@ create_coords_view_test(GwyRasterView *rasterview)
                        FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(hbox),
                        create_checkbox(shapes, "Selectable", "selectable"),
+                       FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox),
+                       create_checkbox(shapes, "Snap", "snapping"),
                        FALSE, FALSE, 0);
 
     return window;
