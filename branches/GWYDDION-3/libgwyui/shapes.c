@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -53,7 +53,7 @@ typedef void (*VoidMethod)(GwyShapes *shapes);
 
 struct _GwyShapesPrivate {
     guint max_shapes;
-    GwyShapesSnappingType snap;
+    gboolean snapping : 1;
     gboolean is_updated : 1;
     gboolean editable : 1;
     gboolean selectable : 1;
@@ -94,7 +94,7 @@ static gboolean set_selectable                  (GwyShapes *shapes,
 static gboolean set_editable                    (GwyShapes *shapes,
                                                  gboolean editable);
 static gboolean set_snapping                    (GwyShapes *shapes,
-                                                 GwyShapesSnappingType snap);
+                                                 gboolean snapping);
 static void     cancel_editing                  (GwyShapes *shapes,
                                                  gint id);
 static void     coords_item_inserted            (GwyShapes *shapes,
@@ -178,12 +178,11 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SNAPPING]
-        = g_param_spec_enum("snapping",
-                            "Snapping",
-                            "Snapping mode.",
-                            GWY_TYPE_SHAPES_SNAPPING_TYPE,
-                            GWY_SHAPES_SNAP_NONE,
-                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+        = g_param_spec_boolean("snapping",
+                               "Snapping",
+                               "Whether coordinates are snapped to grid.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_SELECTION]
         = g_param_spec_object("selection",
@@ -247,7 +246,6 @@ gwy_shapes_init(GwyShapes *shapes)
     priv->max_shapes = G_MAXUINT;
     priv->selectable = TRUE;
     priv->editable = TRUE;
-    priv->snap = GWY_SHAPES_SNAP_NONE;
     priv->current_point = (GwyXY){ NAN, NAN };
     GwyIntSet *selection = shapes->selection = gwy_int_set_new();
     priv->selection_added_id
@@ -307,7 +305,7 @@ gwy_shapes_set_property(GObject *object,
         break;
 
         case PROP_SNAPPING:
-        set_snapping(shapes, g_value_get_enum(value));
+        set_snapping(shapes, g_value_get_boolean(value));
         break;
 
         default:
@@ -347,7 +345,7 @@ gwy_shapes_get_property(GObject *object,
         break;
 
         case PROP_SNAPPING:
-        g_value_set_enum(value, priv->snap);
+        g_value_set_boolean(value, priv->snapping);
         break;
 
         default:
@@ -735,19 +733,23 @@ gwy_shapes_get_editable(const GwyShapes *shapes)
 /**
  * gwy_shapes_set_snapping:
  * @shapes: A group of geometrical shapes.
- * @snap: Snapping mode.
+ * @snapped: %TRUE to enable snapping to grid, %FALSE to disable it.
  *
  * Sets the snapping mode of a group of geometrical shapes.
  *
- * Changing the snapping mode does not cause re-snapping of existing shape
- * coodrdinates.  Only future shape editing is affected.
+ * Changing the snapping mode does not influence existing shape coodrdinates.
+ * Only future shape editing is affected.
+ *
+ * Snapping to grid has somewhat different meaning for different subclasses.
+ * Point-like coordinates are, in general, snapped to pixel centres while
+ * box-like coordinates are snapped to pixel edges.
  **/
 void
 gwy_shapes_set_snapping(GwyShapes *shapes,
-                        GwyShapesSnappingType snap)
+                        gboolean snapping)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    if (!set_snapping(shapes, snap))
+    if (!set_snapping(shapes, snapping))
         return;
 
     g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_SNAPPING]);
@@ -761,11 +763,11 @@ gwy_shapes_set_snapping(GwyShapes *shapes,
  *
  * Returns: The snapping mode in effect.
  **/
-GwyShapesSnappingType
+gboolean
 gwy_shapes_get_snapping(const GwyShapes *shapes)
 {
-    g_return_val_if_fail(GWY_IS_SHAPES(shapes), GWY_SHAPES_SNAP_NONE);
-    return shapes->priv->snap;
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    return shapes->priv->snapping;
 }
 
 // FIXME: What is this good for?
@@ -1078,42 +1080,6 @@ gwy_shapes_unset_current_point(GwyShapes *shapes)
     priv->current_point = (GwyXY){ NAN, NAN };
 }
 
-/**
- * gwy_shapes_snap:
- * @shapes: A group of geometrical shapes.
- * @xy: Location of a shape point, in @coords coordinates.
- *
- * Snaps point coordinates according to the current snapping mode.
- *
- * It is necessary to set the pixel coordinates transformations with
- * gwy_shapes_set_pixel_matrices() for snapping.
- **/
-void
-gwy_shapes_snap(const GwyShapes *shapes,
-                GwyXY *xy)
-{
-    g_return_if_fail(GWY_IS_SHAPES(shapes));
-    Shapes *priv = shapes->priv;
-    if (priv->snap == GWY_SHAPES_SNAP_NONE)
-        return;
-
-    cairo_matrix_transform_point(&shapes->coords_to_view, &xy->x, &xy->y);
-    cairo_matrix_transform_point(&shapes->view_to_pixel, &xy->x, &xy->y);
-    if (priv->snap == GWY_SHAPES_SNAP_CORNERS) {
-        xy->x = gwy_round(xy->x);
-        xy->y = gwy_round(xy->y);
-    }
-    else if (priv->snap == GWY_SHAPES_SNAP_CENTERS) {
-        xy->x = gwy_round_to_half(xy->x);
-        xy->y = gwy_round_to_half(xy->y);
-    }
-    else {
-        g_warning("Wrong snapping type %u.\n", priv->snap);
-    }
-    cairo_matrix_transform_point(&shapes->pixel_to_view, &xy->x, &xy->y);
-    cairo_matrix_transform_point(&shapes->view_to_coords, &xy->x, &xy->y);
-}
-
 /* Each shape can be ‘selected’ in the following independent ways:
  * HOVER – mouse is near the shape so that clicking would select or deselect it
  *         or start editing it
@@ -1300,19 +1266,13 @@ set_editable(GwyShapes *shapes,
 
 static gboolean
 set_snapping(GwyShapes *shapes,
-             GwyShapesSnappingType snap)
+             gboolean snapping)
 {
     Shapes *priv = shapes->priv;
-    if (snap == priv->snap)
+    if (!snapping == priv->snapping)
         return FALSE;
 
-    if (snap > GWY_SHAPES_SNAP_CENTERS) {
-        g_warning("Wrong snapping type %u.\n", snap);
-        return FALSE;
-    }
-
-    priv->snap = snap;
-    // XXX: Should we do anything with existing coords?  Probably not.
+    priv->snapping = snapping;
     return TRUE;
 }
 
