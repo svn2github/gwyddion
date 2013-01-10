@@ -1269,7 +1269,7 @@ set_snapping(GwyShapes *shapes,
              gboolean snapping)
 {
     Shapes *priv = shapes->priv;
-    if (!snapping == priv->snapping)
+    if (!snapping == !priv->snapping)
         return FALSE;
 
     priv->snapping = snapping;

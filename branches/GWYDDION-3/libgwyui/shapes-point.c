@@ -647,10 +647,8 @@ static gboolean
 snap_point(GwyShapes *shapes,
            gdouble *x, gdouble *y)
 {
-    /*
-    if (!gwy_shapes_get_snap(shapes))
+    if (!gwy_shapes_get_snapping(shapes))
         return FALSE;
-        */
 
     cairo_matrix_transform_point(&shapes->coords_to_view, x, y);
     cairo_matrix_transform_point(&shapes->view_to_pixel, x, y);
