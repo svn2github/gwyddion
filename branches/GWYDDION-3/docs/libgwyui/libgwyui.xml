@@ -24,6 +24,7 @@
     <xi:include href="xml/raster-view.xml"/>
     <xi:include href="xml/shapes.xml"/>
     <xi:include href="xml/shapes-point.xml"/>
+    <xi:include href="xml/shapes-line.xml"/>
     <xi:include href="xml/axis.xml"/>
     <xi:include href="xml/ruler.xml"/>
     <xi:include href="xml/color-axis.xml"/>
