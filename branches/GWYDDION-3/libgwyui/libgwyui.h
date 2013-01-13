@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@
 #include <libgwyui/ruler.h>
 #include <libgwyui/scroller.h>
 #include <libgwyui/shapes.h>
+#include <libgwyui/shapes-line.h>
 #include <libgwyui/shapes-point.h>
 #include <libgwyui/spin-button.h>
 #include <libgwyui/stock.h>

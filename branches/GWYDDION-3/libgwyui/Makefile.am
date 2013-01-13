@@ -35,6 +35,7 @@ public_headers = \
 	$(srcdir)/ruler.h \
 	$(srcdir)/scroller.h \
 	$(srcdir)/shapes.h \
+	$(srcdir)/shapes-line.h \
 	$(srcdir)/shapes-point.h \
 	$(srcdir)/spin-button.h \
 	$(srcdir)/stock.h \
@@ -93,6 +94,7 @@ libgwyui3_la_SOURCES = \
 	ruler.c \
 	scroller.c \
 	shapes.c \
+	shapes-line.c \
 	shapes-point.c \
 	spin-button.c \
 	stock.c \
