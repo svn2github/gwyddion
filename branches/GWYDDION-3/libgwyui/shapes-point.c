@@ -57,65 +57,65 @@ struct _GwyShapesPointPrivate {
     GwyXY xypress;    // Event (view) coordinates.
 };
 
-static void     gwy_shapes_point_finalize        (GObject *object);
-static void     gwy_shapes_point_set_property    (GObject *object,
-                                                  guint prop_id,
-                                                  const GValue *value,
-                                                  GParamSpec *pspec);
-static void     gwy_shapes_point_get_property    (GObject *object,
-                                                  guint prop_id,
-                                                  GValue *value,
-                                                  GParamSpec *pspec);
-static void     gwy_shapes_point_draw            (GwyShapes *shapes,
-                                                  cairo_t *cr);
-static gboolean gwy_shapes_point_motion_notify   (GwyShapes *shapes,
-                                                  GdkEventMotion *event);
-static gboolean gwy_shapes_point_button_press    (GwyShapes *shapes,
-                                                  GdkEventButton *event);
-static gboolean gwy_shapes_point_button_release  (GwyShapes *shapes,
-                                                  GdkEventButton *event);
-static gboolean gwy_shapes_point_delete_selection(GwyShapes *shapes);
-static void     gwy_shapes_point_cancel_editing  (GwyShapes *shapes,
-                                                  gint id);
-static void     gwy_shapes_selection_added       (GwyShapes *shapes,
-                                                  gint value);
-static void     gwy_shapes_selection_removed     (GwyShapes *shapes,
-                                                  gint value);
-static void     gwy_shapes_selection_assigned    (GwyShapes *shapes);
-static gboolean set_radius                       (GwyShapesPoint *points,
-                                                  gdouble radius);
-static void     calculate_data                   (GwyShapesPoint *points);
-static void     draw_crosses                     (GwyShapes *shapes,
-                                                  cairo_t *cr);
-static void     draw_cross                       (cairo_t *cr,
-                                                  const gdouble *xy,
-                                                  gpointer user_data);
-static void     draw_radii                       (GwyShapes *shapes,
-                                                  cairo_t *cr);
-static void     draw_radius                      (cairo_t *cr,
-                                                  const gdouble *xy,
-                                                  gpointer user_data);
-static void     draw_markers                     (GwyShapes *shapes,
-                                                  cairo_t *cr,
-                                                  MarkerDrawFunc function,
-                                                  gpointer user_data);
-static gint     find_near_point                  (GwyShapesPoint *points,
-                                                  gdouble x,
-                                                  gdouble y);
-static void     constrain_movement               (GwyShapes *shapes,
-                                                  gdouble eventx,
-                                                  gdouble eventy,
-                                                  GdkModifierType modif,
-                                                  GwyXY *dxy);
-static gboolean add_point                        (GwyShapes *shapes,
-                                                  gdouble x,
-                                                  gdouble y);
-static void     update_hover                     (GwyShapes *shapes,
-                                                  gdouble eventx,
-                                                  gdouble eventy);
-static gboolean snap_point                       (GwyShapes *shapes,
-                                                  gdouble *x,
-                                                  gdouble *y);
+static void     gwy_shapes_point_finalize          (GObject *object);
+static void     gwy_shapes_point_set_property      (GObject *object,
+                                                    guint prop_id,
+                                                    const GValue *value,
+                                                    GParamSpec *pspec);
+static void     gwy_shapes_point_get_property      (GObject *object,
+                                                    guint prop_id,
+                                                    GValue *value,
+                                                    GParamSpec *pspec);
+static void     gwy_shapes_point_draw              (GwyShapes *shapes,
+                                                    cairo_t *cr);
+static gboolean gwy_shapes_point_motion_notify     (GwyShapes *shapes,
+                                                    GdkEventMotion *event);
+static gboolean gwy_shapes_point_button_press      (GwyShapes *shapes,
+                                                    GdkEventButton *event);
+static gboolean gwy_shapes_point_button_release    (GwyShapes *shapes,
+                                                    GdkEventButton *event);
+static gboolean gwy_shapes_point_delete_selection  (GwyShapes *shapes);
+static void     gwy_shapes_point_cancel_editing    (GwyShapes *shapes,
+                                                    gint id);
+static void     gwy_shapes_point_selection_added   (GwyShapes *shapes,
+                                                    gint value);
+static void     gwy_shapes_point_selection_removed (GwyShapes *shapes,
+                                                    gint value);
+static void     gwy_shapes_point_selection_assigned(GwyShapes *shapes);
+static gboolean set_radius                         (GwyShapesPoint *points,
+                                                    gdouble radius);
+static void     calculate_data                     (GwyShapesPoint *points);
+static void     draw_crosses                       (GwyShapes *shapes,
+                                                    cairo_t *cr);
+static void     draw_cross                         (cairo_t *cr,
+                                                    const gdouble *xy,
+                                                    gpointer user_data);
+static void     draw_radii                         (GwyShapes *shapes,
+                                                    cairo_t *cr);
+static void     draw_radius                        (cairo_t *cr,
+                                                    const gdouble *xy,
+                                                    gpointer user_data);
+static void     draw_markers                       (GwyShapes *shapes,
+                                                    cairo_t *cr,
+                                                    MarkerDrawFunc function,
+                                                    gpointer user_data);
+static gint     find_near_point                    (GwyShapesPoint *points,
+                                                    gdouble x,
+                                                    gdouble y);
+static void     constrain_movement                 (GwyShapes *shapes,
+                                                    gdouble eventx,
+                                                    gdouble eventy,
+                                                    GdkModifierType modif,
+                                                    GwyXY *dxy);
+static gboolean add_point                          (GwyShapes *shapes,
+                                                    gdouble x,
+                                                    gdouble y);
+static void     update_hover                       (GwyShapes *shapes,
+                                                    gdouble eventx,
+                                                    gdouble eventy);
+static gboolean snap_point                         (GwyShapes *shapes,
+                                                    gdouble *x,
+                                                    gdouble *y);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -140,9 +140,9 @@ gwy_shapes_point_class_init(GwyShapesPointClass *klass)
     shapes_class->button_press = gwy_shapes_point_button_press;
     shapes_class->button_release = gwy_shapes_point_button_release;
     shapes_class->cancel_editing = gwy_shapes_point_cancel_editing;
-    shapes_class->selection_added = gwy_shapes_selection_added;
-    shapes_class->selection_removed = gwy_shapes_selection_removed;
-    shapes_class->selection_assigned = gwy_shapes_selection_assigned;
+    shapes_class->selection_added = gwy_shapes_point_selection_added;
+    shapes_class->selection_removed = gwy_shapes_point_selection_removed;
+    shapes_class->selection_assigned = gwy_shapes_point_selection_assigned;
 
     properties[PROP_RADIUS]
         = g_param_spec_double("radius",
@@ -374,9 +374,10 @@ gwy_shapes_point_cancel_editing(GwyShapes *shapes,
     gwy_shapes_update(shapes);
 }
 
+// FIXME: May be common.
 static void
-gwy_shapes_selection_added(GwyShapes *shapes,
-                           G_GNUC_UNUSED gint value)
+gwy_shapes_point_selection_added(GwyShapes *shapes,
+                                 G_GNUC_UNUSED gint value)
 {
     if (gwy_shapes_is_updating_selection(shapes))
         return;
@@ -386,8 +387,8 @@ gwy_shapes_selection_added(GwyShapes *shapes,
 }
 
 static void
-gwy_shapes_selection_removed(GwyShapes *shapes,
-                             G_GNUC_UNUSED gint value)
+gwy_shapes_point_selection_removed(GwyShapes *shapes,
+                                   G_GNUC_UNUSED gint value)
 {
     if (gwy_shapes_is_updating_selection(shapes))
         return;
@@ -397,7 +398,7 @@ gwy_shapes_selection_removed(GwyShapes *shapes,
 }
 
 static void
-gwy_shapes_selection_assigned(GwyShapes *shapes)
+gwy_shapes_point_selection_assigned(GwyShapes *shapes)
 {
     if (gwy_shapes_is_updating_selection(shapes))
         return;
@@ -432,20 +433,23 @@ set_radius(GwyShapesPoint *points,
     return TRUE;
 }
 
+// FIXME: May be common.
 static void
 calculate_data(GwyShapesPoint *points)
 {
     ShapesPoint *priv = points->priv;
     GwyShapes *shapes = GWY_SHAPES(points);
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint shape_size = gwy_coords_shape_size(coords);
     guint n = gwy_coords_size(coords);
+    guint ncoord = n*shape_size;
     if (!priv->data)
-        priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), 2*n);
-    g_array_set_size(priv->data, 2*n);
+        priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), ncoord);
+    g_array_set_size(priv->data, ncoord);
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
     gdouble *data = (gdouble*)priv->data->data;
     gwy_coords_get_data(coords, data);
-    for (guint i = 0; i < n; i++)
+    for (guint i = 0; i < ncoord/2; i++)
         cairo_matrix_transform_point(matrix, data + 2*i, data + 2*i + 1);
 }
 
@@ -490,13 +494,16 @@ draw_radius(cairo_t *cr,
     gwy_cairo_ellipse(cr, xy[0], xy[1], radii[0], radii[1]);
 }
 
+// FIXME: May be common.
 static void
 draw_markers(GwyShapes *shapes, cairo_t *cr,
              MarkerDrawFunc function, gpointer user_data)
 {
     ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     const gdouble *data = (const gdouble*)priv->data->data;
-    gint n = priv->data->len/2;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint shape_size = gwy_coords_shape_size(coords);
+    gint n = priv->data->len/shape_size;
 
     if (!n)
         return;
@@ -507,7 +514,7 @@ draw_markers(GwyShapes *shapes, cairo_t *cr,
 
     for (gint i = 0; i < n; i++) {
         if (i != priv->hover && !gwy_int_set_contains(selection, i)) {
-            function(cr, data + 2*i, user_data);
+            function(cr, data + shape_size*i, user_data);
             count++;
         }
     }
@@ -522,7 +529,7 @@ draw_markers(GwyShapes *shapes, cairo_t *cr,
             if (iter.value == priv->hover)
                 hoverselected = TRUE;
             else {
-                function(cr, data + 2*iter.value, user_data);
+                function(cr, data + shape_size*iter.value, user_data);
                 count++;
             }
         } while (gwy_int_set_next(selection, &iter));
@@ -537,7 +544,7 @@ draw_markers(GwyShapes *shapes, cairo_t *cr,
         GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
         if (hoverselected)
             state |= GWY_SHAPES_STATE_SELECTED;
-        function(cr, data + 2*priv->hover, user_data);
+        function(cr, data + shape_size*priv->hover, user_data);
         gwy_shapes_stroke(shapes, cr, state);
     }
 }
