@@ -733,7 +733,7 @@ gwy_shapes_get_editable(const GwyShapes *shapes)
 /**
  * gwy_shapes_set_snapping:
  * @shapes: A group of geometrical shapes.
- * @snapped: %TRUE to enable snapping to grid, %FALSE to disable it.
+ * @snapping: %TRUE to enable snapping to grid, %FALSE to disable it.
  *
  * Sets the snapping mode of a group of geometrical shapes.
  *
