@@ -57,6 +57,7 @@
           <literallayout>
             <userinput>yum install mingw32-{gcc-c++,gtk2,libxml2,minizip}</userinput>
           </literallayout>
+        </informalexample>
         pour installer les paquets mingw32 nécessaire (plusieurs autres paquets
         seront installés en tant que dépendances de ceux donnés donnés ici).
       </para>
