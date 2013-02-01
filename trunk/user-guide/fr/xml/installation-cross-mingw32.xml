@@ -97,6 +97,7 @@
         Lancez
         <informalexample>
           <literallayout><userinput>yum install wine</userinput></literallayout>
+        </informalexample>
         pour installer Wine.
       </para>
     </sect3>
