@@ -534,7 +534,7 @@
           <varlistentry>
             <term><guibutton>Reinitialize</guibutton></term>
             <listitem>
-              Reinitialises the neural network to an untrained state.
+              Reinitializes the neural network to an untrained state.
               More precisely, this means neuron weights are set to random
               numbers.
             </listitem>
@@ -551,15 +551,15 @@
       </para>
       <para>
         Neural network parameters can be modified in tab
-        <guilabel>Parameters</guilabel>.  Chaning either the window
+        <guilabel>Parameters</guilabel>.  Changing either the window
         dimensions or the number of hidden nodes means the network is
-        reinitialised (as if you pressed <guibutton>Reinitialize</guibutton>).
+        reinitialized (as if you pressed <guibutton>Reinitialize</guibutton>).
         <variablelist>
           <varlistentry>
             <term><guilabel>Window width</guilabel></term>
             <listitem>
               Horizontal size of the window.  The input data for the network
-              consits of an area around the model pixel, called window.
+              consists of an area around the model pixel, called window.
               The window is centered on the pixel so, odd sizes are usually
               preferred.
             </listitem>
@@ -614,7 +614,7 @@
       </para>
       <para>
         In addition to the networks in the list, there is one more unnamed
-        network and that the network currently in training.  When you load
+        network and that of the network currently in training.  When you load
         a network the network in training becomes a copy of the loaded
         network.  Training then does not change the named networks; to save
         the network after training (under existing or new name) you must
@@ -642,7 +642,7 @@
       </para>
       <para>
         Since neural networks process and produce normalised data, it
-        does not perserve porportionality well, especially if the scale of
+        does not perserve proportionality well, especially if the scale of
         training model differs considerably from the scale of real inputs.  If
         the output is expected to scale with input you can enable option
         <guilabel>Scale proportionally to input</guilabel> that scales the
