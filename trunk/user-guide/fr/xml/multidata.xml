@@ -484,5 +484,206 @@
       </varlistentry>
     </variablelist>
   </sect2>
+  <sect2 id='neural-network'>
+    <title>Traitement par réseau neuronal</title>
+    <indexterm><primary>réseau neuronal</primary></indexterm>
+    <para>
+      Le traitement par réseau neuronal peut être utilisé pour calculer un type
+      de données à partir d'un autre, même si la relation entre les deux n'est
+      pas connue de manière explicite. La relation est construite implicitement
+      dans le réseau au travers d'un processus appelé entraînement, qui utilise
+      des données d'entrée et de sortie connues, généralement dénommées modèle
+      et signal. Dans ce processus, le réseau est optimisé de manière à
+      reproduire le plus fidèlement possible le signal à partir du modèle. Un
+      réseau ainsi préparé peut ensuite être utilisé pour traiter les données
+      modèle pour lesquelles le signal n'est pas disponible, et obtenir – de
+      manière approximative – l'allure du signal.  Une autre application
+      possible est l'approximation de méthodes de traitement parfaitement
+      définies mais gourmandes en temps de calcul. Dans ce cas le signal est la
+      sortie de la méthode exacte et le réseau neuronal est préparé de manière
+      à la reproduire.
+    </para>
+    <para>
+      L'apprentissage et l'application étant deux étapes séparées, celles-ci
+      sont disponibles sous deux fonctions différentes dans Gwyddion.
+    </para>
+    <sect3 id='neural-network-training'>
+      <title>Apprentissage</title>
+      <indexterm>
+        <primary>réseau neuronal</primary>
+        <secondary>apprentissage</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitements des données</guimenu>
+          <guisubmenu>Multidonnées</guisubmenu>
+          <guimenuitem>Apprentissage d'un réseau neuronal</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Les fonctions principales permettant de contrôler le processus
+        d'apprentissage sont présentes dans l'onglet
+        <guilabel>Apprentissage</guilabel> :
+        <variablelist>
+          <varlistentry>
+            <term><guilabel>Modèle</guilabel></term>
+            <listitem>
+              Données modèle, c'est-à-dire l'entrée pour l'apprentissage. Des
+              modèles multiples peuvent être choisis de manière séquentielle
+              pour l'apprentissage (avec les données signal correspondantes).
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Signal</guilabel></term>
+            <listitem>
+              Données signal, c'est-à-dure la sortie que le réseau doit pouvoir
+              reproduire après apprentissage. Les données signal doivent être
+              compatibles avec les données modèles, c'est-à-dire que le nombre
+              de pixels et les dimensions physiques doivent être identiques.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Étapes d'apprentissage</guilabel></term>
+            <listitem>
+              Nombre d'étapes d'apprentissage à réaliser après avoir appuyé sur
+              <guibutton>Lancer l'apprentissage</guibutton>. Chaque étape
+              consiste en une passe sur la totalité des données signal. Il est
+              possible de définir un nombre d'étapes nul ; aucune passe
+              d'apprentissage ne sera réalisée mais le modèle sera évalué avec
+              le réseau et vous pourrez oberver le résultat.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guibutton>Lancer l'apprentissage</guibutton></term>
+            <listitem>
+              Démarre la phase d'apprentissage. Le processus est relativement
+              long, surtout si les données et/ou la taille de fenêtre sont
+              grands.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guibutton>Ré-initialiser</guibutton></term>
+            <listitem>
+              Initialise le réseau neuronal dans un état sans apprentissage.
+              Plus précisément, cette fonction affecte des poids aléatoires aux
+              neurones.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Mode du masque</guilabel></term>
+            <listitem>
+              Il est possible de réaliser l'apprentissage sur un sous-ensemble
+              du signal, défini par un masque sur les données signal (le
+              masquage du modèle n'aurait pas de sens à cause de la taille de
+              fenêtre).
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+      <para>
+        Les paramètres du réseau de neurones peuvent être modifiés dans l'onglet
+        <guilabel>Paramètres</guilabel>. Le fait de changer la taille de fenêtre
+        ou le nombre de nœuds ré-initialise le réseau (de la même manièr que le
+        bouton <guibutton>Ré-initialiser</guibutton>).
+        <variablelist>
+          <varlistentry>
+            <term><guilabel>Largeur de fenêtre</guilabel></term>
+            <listitem>
+              Taille horizontale de la fenêtre. Les données d'entrée du réseau
+              consistent en une zone autour du pixel modèle, appelée fenêtre. La
+              fenêtre est centrée sur le pixel, il est donc préférable
+              d'utiliser une taille impaire.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Hauteur de fenêtre</guilabel></term>
+            <listitem>
+              Taille verticale de la fenêtre.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Nœuds cachés</guilabel></term>
+            <listitem>
+              Nombre de nœuds dans la couche <quote>cachée</quote> du réseau de
+              neurones. Un nombre élevé peut aboutir à un réseau plus efficace,
+              par contre l'apprentissage et l'application seront plus longs. Ce
+              nombre est typiquement petit par rapport au nombre de pixels de la
+              fenêtre.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Puissance XY de la source</guilabel></term>
+            <listitem>
+              Puissance selon laquelle les unités des dimensions latérales
+              doivent apparaître dans le signal. Ceci n'est utilisé que lors de
+              l'application du réseau.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Puissance Z de la source</guilabel></term>
+            <listitem>
+              Puissance selon laquelle les unités de <quote>hauteur</quote> du
+              modèle doivent apparaître dans le signal. Ceci n'est utilisé que
+              lors de l'application du réseau.
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><guilabel>Unités fixées</guilabel></term>
+            <listitem>
+              Unités fixées du résultat. Celles-ci sont combinées avec les
+              autres paramètres d'unités, pour obtenir des unités indépendantes
+              unités d'entrée il faudra donc mettre les deux puissances à 0.
+              Ceci n'est utilisé que lors de l'application du réseau.
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+      <para>
+        Un réseau neuronal peut être sauvé après l'apprentissage, ou rechargé
+        pour subir un nouvel apprentissage sur des données différentes, etc. La
+        liste des réseaux est semblable aux
+        <link linkend='raw-file-import'>pré-réglages d'import de fichiers bruts</link>.
+      </para>
+      <para>
+        En plus des réseaux de la liste, un réseau supplémentaire sans nom est
+        disponible ainsi que le réseau en cours d'apprentissage. Lors du
+        chargement d'un réseau, celui en cours d'apprentissage devient une copie
+        du réseau chargé. Un nouvel apprentissage ne modifie pas les réseaux
+        nommés ; pour sauvegarder un réseau après apprentissage (sous un nom
+        existant ou nouveau) vous devez utiliser le bouton
+        <guibutton>Enregistrer</guibutton>.
+      </para>
+    </sect3>
+    <sect3>
+      <title>Application</title>
+      <indexterm>
+        <primary>réseau neuronal</primary>
+        <secondary>application</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Traitement des données</guimenu>
+          <guisubmenu>Multidonnées</guisubmenu>
+          <guimenuitem>Appliquer un réseau neuronal</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        L'application d'un réseau neuronal est simple : il suffit d'en choisir
+        un dans la liste et presser <guibutton>OK</guibutton>. Le réseau sans
+        nom en cours d'apprentissage est aussi présent dans la liste sous le
+        nom <quote>Apprentissage en cours</quote>.
+      </para>
+      <para>
+        Comme les réseaux de neurones traitent et produisent des données
+        normalisées, ceux-ci ne préservent pas correctement les proportions,
+        en particulier si l'échelle du modèle d'entraînement diffère
+        sensiblement de celle des données réelles. Si la sortie est censée être
+        à l'échelle par rapport à l'entrée, vous pouvez activer l'option
+        <guilabel>Mettre à l'échelle proportionnellement à l'entrée</guilabel>
+        qui met la sortie à l'échelle en considérant le rapport inverse entre la
+        plage de donnée actuelle et celle de l'apprentissage.
+      </para>
+    </sect3>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
