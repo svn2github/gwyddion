@@ -109,8 +109,8 @@
         s'agit d'un programme MS Windows, il est donc installé
         <emphasis>sous Wine</emphasis>.
         Une version obtenue par compilation croisée de NSIS peut être
-        disponible dans la distriution, mais il s'avère que la version originale
-        est plus fiables.
+        disponible dans la distribution, mais il s'avère que la version originale
+        est plus fiable.
       </para>
       <para>
         Téléchargez NSIS à partir de son site internet et lancez
