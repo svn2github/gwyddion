@@ -40,6 +40,21 @@
         du coin en haut à gauche de la sélection, dans le cas contraire les
         coordonnées seront mises à <xi:include href="eqi-coords-0-0.xml"/>.
       </listitem>
+      <listitem id='extend'>
+        <indexterm><primary>extension</primary></indexterm>
+        Étendre les données avec
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Étendre</guimenuitem>
+        </menuchoice>.
+        L'extension correspond à l'opération inverse du rognage. Bien
+        évidemment, il n'est possible d'ajouter des données réelles sur les
+        bords qu'en mesurant des données supplémentaires. Cette fonction propose
+        donc à la place des méthodes d'extension artificielles telles que la
+        prolongation périodique ou la répétition des valeurs des bords de
+        l'image.
+      </listitem>
       <listitem id='rotate'>
         <indexterm>
           <primary>rotation</primary>
