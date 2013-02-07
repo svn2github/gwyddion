@@ -277,8 +277,8 @@ Title = ADC2</programlisting>
       The physical units of these values are <literal>ZUnits</literal>.
     </para>
     <para>
-      The size of the image data is exactly <literal>4*XRes*YRes</literal> and
-      there is no data after it in the file.
+      The size of the image data is exactly <literal>4*XRes*YRes</literal>
+      bytes and there is no data after it in the file.
     </para>
   </sect2>
 </sect1>

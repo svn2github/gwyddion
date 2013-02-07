@@ -1,0 +1,284 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                      'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='gxyzf'>
+  <title>Simple XYZ Files</title>
+  <para>
+    Although Gwyddion does work with general XYZ data and
+    <link linkend='raw-xyz-import'>raw XYZ data</link> are interpolated to
+    a grid upon import, need has arisen for a file format similar in spirit to
+    <link linkend='gxyzf'>Gwyddion simple fields (gxyzf)</link> but representing
+    the data in XYZ format.  Such file format, called Gwyddion XYZ Field
+    (<filename>.gxyzf</filename>), is described in this section.
+  </para>
+  <para>
+    It should be noted that Z simply stands for the ordinate here.  Z values
+    in the file may be actual Z coordinates (heights) but they may also be
+    currents, voltages, etc.
+  </para>
+  <para>
+    GXYZF can be written by Gwyddion version 2.31 or later.  They can also be
+    read since this version, although the regularisation to a grid may be
+    somewhat crude.
+  </para>
+  <sect2 id='gxyzf-overall-structure'>
+    <title>Overall structure</title>
+    <para>
+      A GXYZF file consists of four parts, in the following order:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-magic-line'>magic line</link>
+        </term>
+        <listitem>
+          <para>
+            Files begin with a <quote>magic line</quote> identifying the file
+            type.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-text-header'>text header</link>
+        </term>
+        <listitem>
+          <para>
+            The header consists of lines of the form
+            <informalexample>
+              <programlisting><replaceable>name</replaceable> = <replaceable>value</replaceable></programlisting>
+            </informalexample>
+            defining individual parameters.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-zero-padding'>NUL padding</link>
+        </term>
+        <listitem>
+          <para>
+            The header is terminated by one to eight NUL bytes, aligning the
+            data start to a multiple of 8.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-binary-data'>binary data</link>
+        </term>
+        <listitem>
+          <para>
+            Binary data is in 64bit floating-point format.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='gxyzf-magic-line'>
+    <title>Magic line</title>
+    <para>
+      gxyzf files start with the line
+      <informalexample>
+        <programlisting>Gwyddion XYZ Field 1.0</programlisting>
+      </informalexample>
+      terminated by a linefeed character (<literal>\n</literal>, ASCII 0x0a).
+    </para>
+  </sect2>
+  <sect2 id='gxyzf-text-header'>
+    <title>Text header</title>
+    <para>
+      Each header line has the form
+      <programlisting><replaceable>name</replaceable> = <replaceable>value</replaceable></programlisting>
+      where any whitespace before the name, around the equal sign and at the
+      end of value is ignored.  Field names are case-sensitive and follow the
+      usual rules for identifiers in programming languages.
+    </para>
+    <para>
+      Similarly to the magic line, the lines in the text header are terminated
+      by a linefeed character as is usual on Unix.  This means the header must
+      be read and written in binary mode to ensure preservation of end-of-line
+      characters on other systems (and not changing the header size e.g. by
+      LF → CRLF transformation).
+    </para>
+    <para>
+      Any non-ASCII characters, that can occur for example in channel titles,
+      are represented in UTF-8 encoding.  The NUL character may not occur in
+      the header.
+    </para>
+    <para>
+      Header fields:
+    </para>
+    <informaltable frame='none' id='gxyzf-mandatory-header-fields'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Name</entry>
+            <entry>Type</entry>
+            <entry>Value</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>NChannels</literal></entry>
+            <entry>Mandatory</entry>
+            <entry>
+              Number of value (Z) channels, a positive integer.  The values
+              stored for each point include also coordinates X and Y but they
+              are not counted into <literal>NChannels</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>NPoints</literal></entry>
+            <entry>Mandatory</entry>
+            <entry>
+              Number data points in the file.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XYUnits</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Lateral units, i.e. units of X and Y values.  They must be
+              given as base units, that is <literal>m</literal> or
+              <literal>A</literal> with no power-of-10 prefix (Gwyddion could
+              deal with it but it might present a problem for other
+              software). The default is no units. This means in SPM data, you
+              normally wish to specify <literal>XYUnits</literal> as
+              <literal>m</literal> because the lateral dimensions are in
+              metres.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>ZUnits1</literal>, <literal>ZUnits2</literal>, …
+            </entry>
+            <entry>Optional</entry>
+            <entry>
+              Value units, i.e. units of data values for individual channels.
+              Channels are numbered from 1 to <literal>NChannels</literal>.
+              See <literal>XYUnits</literal> above for details.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>Title1</literal>, <literal>Title2</literal>, …
+            </entry>
+            <entry>Optional</entry>
+            <entry>
+              Titles of individual channels.  Channels are numbered from 1 to
+              <literal>NChannels</literal>.  Titles have no default,
+              applications might display ‘Unknown’ or something similar if
+              not given.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XRes</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Hint specifying the preferred horizontal size in pixels if the
+              data are regularised to a grid, a positive integer.  Readers
+              are not required to honour it and may interpolate data to
+              grids of different dimensions.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YRes</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Hint specifying the preferred horizontal size in pixels if the
+              data are regularised to a grid, a positive integer.  Readers
+              are not required to honour it and may interpolate data to
+              grids of different dimensions.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      The header may contain other fields beside those listed above.  Gwyddion
+      will load them into <link linkend='metadata'>metadata</link>.
+      Common informational fields can include <literal>Comment</literal>,
+      <literal>Date</literal> or <literal>Direction</literal>.
+    </para>
+    <para>
+      Fields may occur in any order, nevertheless, it is recommended to start
+      with mandatory fields, continue with optional fields and put custom
+      fields last.
+    </para>
+    <para>
+      A simple header example of a two-channel file (also including the magic
+      line):
+    </para>
+    <informalexample>
+      <programlisting>Gwyddion XYZ Field 1.0
+NChannels = 2
+NPoints = 457884
+XYUnits = m
+ZUnits1 = m
+ZUnits2 = V
+Title1 = Height
+Title2 = ADC2</programlisting>
+    </informalexample>
+  </sect2>
+  <sect2 id='gxyzf-zero-padding'>
+    <title>NUL padding</title>
+    <para>
+      The text header is followed by one to eight NUL (<literal>\0</literal>,
+      ASCII 0x00) bytes that (a) terminate it and (b) align the data start to
+      an offset from the begining of file that is a multiple of 8.  More
+      precisely, denoting <xi:include href='eqi-N.xml'/> the total length of
+      the magic line and the text header, the data starts at the nearest
+      multiple of 8 larger than <xi:include href='eqi-N.xml'/>.
+    </para>
+    <para>This padding to a multiple of 8 ensures aligned memory access when
+      mapping the file directly to memory.  The number of NUL bytes is
+      uniquely determined by the remainder of the length modulo eight
+      (<xi:include href='eqi-N-mod-8.xml'/>):
+    </para>
+    <informaltable frame='none' id='gxyzf-zero-padding-table'>
+      <tgroup cols='2' align='left'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Remainder</entry>
+            <entry>Number of padding NULs</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row><entry>0</entry><entry>8</entry></row>
+          <row><entry>1</entry><entry>7</entry></row>
+          <row><entry>2</entry><entry>6</entry></row>
+          <row><entry>3</entry><entry>5</entry></row>
+          <row><entry>4</entry><entry>4</entry></row>
+          <row><entry>5</entry><entry>3</entry></row>
+          <row><entry>6</entry><entry>2</entry></row>
+          <row><entry>7</entry><entry>1</entry></row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id='gxyzf-binary-data'>
+    <title>Binary data</title>
+    <para>
+      Data values are stored as IEEE 64bit double-precision floating point
+      numbers, in little-endian (LSB, or Intel) byte order.  Points are stored
+      in arbitrary order.  Each point is stored as a block of
+      <literal>NChannels+2</literal> values: X, Y and then all ordinate
+      values, in the channel order.
+    </para>
+    <para>
+      The physical units of the values are given by <literal>XYUnits</literal>
+      for X and Y and then <literal>ZUnits1</literal>,
+      <literal>ZUnits2</literal>, … for the ordinate values.
+    </para>
+    <para>
+      The size of the data is exactly
+      <literal>8*NPoints*(NChannels+2)</literal> bytes and there is no data
+      after it in the file.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
