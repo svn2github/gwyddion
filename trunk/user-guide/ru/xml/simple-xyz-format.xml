@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="gxyzf">
+  <title>Простые файлы XYZ</title>
+  <para>Хотя Gwyddion не работает с произвольными данными в формате XYZ и <link linkend="raw-xyz-import">необработанные данные XYZ </link> при импорте интерполируются на регулярную сетку, возникла необходимость создать файловый формат подобный по духу <link linkend="gsf">формату простого поля Gwyddion (.gsf)</link>, но представляющий данные в формате XYZ. Такой файловый формат, названный Gwyddion XYZ Field (<filename>.gxyzf</filename>), описывается в данном разделе.</para>
+  <para>Следует отметить, что Z просто оболзначает в данном случае ординату. Значения Z в файле могут быть в действительности реальными координатами по Z (высотами), но также могут быть токами, напряжениеями и т.п.</para>
+  <para>Файлы GXYZF могут быть записаны Gwyddion версии 2.31 или более поздней. Они также могут читаться начиная с этой версии, хотя выравнивание по сетке может быть достаточно грубым.</para>
+  <sect2 id="gxyzf-overall-structure">
+    <title>Общая структура</title>
+    <para>Файл GXYZF состоит из четырёх частей в следующем порядке:</para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <link linkend="gxyzf-magic-line">магическая строка</link>
+        </term>
+        <listitem>
+          <para>Файлы начинаются с <quote>магической строки</quote>, определяющей тип файла.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend="gxyzf-text-header">текстовый заголовок</link>
+        </term>
+        <listitem>
+          <para>Заголовок состоит из строк в формате <informalexample><programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting></informalexample>, определяющих отдельные параметры.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend="gxyzf-zero-padding">выравнивание с помощью NUL</link>
+        </term>
+        <listitem>
+          <para>Заголовок заканчивается NUL-байтами от одного до восьми, выравнивающими начало данных на смещение, кратное 8.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend="gxyzf-binary-data">двоичные данные</link>
+        </term>
+        <listitem>
+          <para>Двоичные данные записываются в 64битном формате с плавающей точкой.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id="gxyzf-magic-line">
+    <title>Магическая строка</title>
+    <para>Файлы gxyzf начинаются со строки <informalexample><programlisting>Gwyddion XYZ Field 1.0</programlisting></informalexample>которая заканчивается символом перевода строки (<literal>\n</literal>, ASCII 0x0a).</para>
+  </sect2>
+  <sect2 id="gxyzf-text-header">
+    <title>Текстовый заголовок</title>
+    <para>Каждая строка заголовка имеет формат <programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting>, где любой пробельный символ перед именем, вокруг знака равенства и в конце значения игнорируется. Имена полей чувствительны к регистру и следуют обычным правилам для идентификаторов в языках программирования.</para>
+    <para>Подобно магической строке, строки в текстовом заголовке заканчиваются символом перевода строки, как принято в Unix. Это означает, что заголовок должен читаться и писаться в двоичном режиме для сохранения символов перевода строки на других системах (и неизменности размера заголовка, например при преобразовании LF → CRLF).</para>
+    <para>Любые символы, не входящие в ASCII, которые могут встречаться, например, в названиях каналов, представлены в кодировке UTF-8. Символ NUL не может встречаться в заголовке.</para>
+    <para>Поля заголовка:</para>
+    <informaltable frame="none" id="gxyzf-mandatory-header-fields">
+      <tgroup cols="3" align="left">
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Название</entry>
+            <entry>Тип</entry>
+            <entry>Значение</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>NChannels</literal></entry>
+            <entry>Обязательно</entry>
+            <entry>Число каналов значений (Z), положительное целое. Данные, сохраняемые для каждой точки также включают в себя координаты X и Y, но они не учитываются в <literal>NChannels</literal>.</entry>
+          </row>
+          <row>
+            <entry><literal>NPoints</literal></entry>
+            <entry>Обязательно</entry>
+            <entry>Число точек данных в файле.</entry>
+          </row>
+          <row>
+            <entry><literal>XYUnits</literal></entry>
+            <entry>Опционально</entry>
+            <entry>Пространственные единицы измерения, т.е. единицы для значений X и Y. Должны быть заданы как основные единицы измерения, такие  как <literal>m</literal> или <literal>A</literal> без десятичных префиксов (Gwyddion может разрешить эту ситуацию, но это может вызывать проблемы с другим программным обеспечением). По умолчанию единиц измерения нет. Это означает, что для данных СЗМ вы наверное захотите задать <literal>XYUnits</literal> как <literal>m</literal> поскольку латеральные размеры измеряются в метрах.</entry>
+          </row>
+          <row>
+            <entry><literal>ZUnits1</literal>, <literal>ZUnits2</literal>, …</entry>
+            <entry>Опционально</entry>
+            <entry>Единицы измерения значений, т.е. единицы значений данных для индивидуальных каналов. Каналы нумеруются от 1 до <literal>NChannels</literal>. См. <literal>XYUnits</literal> выше для дополнительной информации.</entry>
+          </row>
+          <row>
+            <entry><literal>Title1</literal>, <literal>Title2</literal>, …</entry>
+            <entry>Опционально</entry>
+            <entry>Названия отдельных каналов. Каналы нумеруются от 1 до <literal>NChannels</literal>. У названий нет значения по умолчанию, пприложения могут показывать ‘Unknown’ или что-то подобное если название не задано.</entry>
+          </row>
+          <row>
+            <entry><literal>XRes</literal></entry>
+            <entry>Опционально</entry>
+            <entry>Подсказка, указывающая предпочитаемый горизонтальный размер в пикселях если данные интерполируются на сетку, положительное целое. Программы чтения данных могут не учитывать её и интерполировать данные на сетку иного разрешения.</entry>
+          </row>
+          <row>
+            <entry><literal>YRes</literal></entry>
+            <entry>Опционально</entry>
+            <entry>Подсказка, указывающая предпочитаемый горизонтальный размер в пикселях если данные интерполируются на сетку, положительное целое. Программы чтения данных могут не учитывать её и интерполировать данные на сетку иного разрешения.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>Заголовок может содержать другие поля помимо описанных выше. Gwyddion загрузит их в <link linkend="metadata">метаданные</link>. Общие информационные поля могут включать <literal>Комментарий</literal>, <literal>Дату</literal> или <literal>Направление</literal>.</para>
+    <para>Поля могут идти в любом порядке, тем не менее, рекомендуется начинать с обязательных полей, затем привести опциональные и закончить нестандартными.</para>
+    <para>Простой образец заголовка файла с двумя каналами (также включает в себя магисческую строку):</para>
+    <informalexample>
+      <programlisting>Gwyddion XYZ Field 1.0
+NChannels = 2
+NPoints = 457884
+XYUnits = m
+ZUnits1 = m
+ZUnits2 = V
+Title1 = Height
+Title2 = ADC2</programlisting>
+    </informalexample>
+  </sect2>
+  <sect2 id="gxyzf-zero-padding">
+    <title>выравнивание с помощью NUL</title>
+    <para>Текстовый заголовок заканчивается NUL-байтами (<literal>\0</literal>, ASCII 0x00) в количестве от одного до восьми, которые (a) завершают его и (b) выравнивают смещение начала данных в файле на величину, кратную 8. Точнее, обозначив <xi:include href="eqi-N.xml"/> общую длину магической строки и текстового заголовка, данные начинаются с ближайшего числа, кратного 8, которое больше чем <xi:include href="eqi-N.xml"/>.</para>
+    <para>Дополнение до кратного 8 обеспечивает выравнивание данных при доступе к памяти при прямом отображении файла в память. Число нулевых байтов однозначно определяется остатком после деления длины заголовка на 8  (<xi:include href="eqi-N-mod-8.xml"/>):</para>
+    <informaltable frame="none" id="gxyzf-zero-padding-table">
+      <tgroup cols="2" align="left">
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Остаток</entry>
+            <entry>Число выравнивающих символов NUL</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row><entry>0</entry><entry>8</entry></row>
+          <row><entry>1</entry><entry>7</entry></row>
+          <row><entry>2</entry><entry>6</entry></row>
+          <row><entry>3</entry><entry>5</entry></row>
+          <row><entry>4</entry><entry>4</entry></row>
+          <row><entry>5</entry><entry>3</entry></row>
+          <row><entry>6</entry><entry>2</entry></row>
+          <row><entry>7</entry><entry>1</entry></row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id="gxyzf-binary-data">
+    <title>Двоичные данные</title>
+    <para>Значения данных хранятся как 64битные числа с плавающей точкой двойной точности стандарта IEEE, порядок байтов от младшего к старшему (little-endian, LSB или Intel). Точки хранятся в произвольном порядке. Каждая точка хранится как блок  <literal>NChannels+2</literal> значений: X, Y и затем все значения ординат в порядке следования каналов.</para>
+    <para>Физические единицы измерения значений задаются <literal>XYUnits</literal> для X и Y и затем <literal>ZUnits1</literal>, <literal>ZUnits2</literal>, … для значений ординат.</para>
+    <para>Размер данных ровно <literal>8*NPoints*(NChannels+2)</literal> байт и после них в файле не должно быть данных.</para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

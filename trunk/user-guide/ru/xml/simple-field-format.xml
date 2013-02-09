@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: simple-field-format.xml 11263 2010-03-30 13:03:25Z yeti-dn $ -->
+<!-- @(#) $Id: simple-field-format.xml 14610 2013-02-07 14:07:35Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gsf">
   <title>Файлы с простым полем</title>
@@ -23,7 +23,7 @@
           <link linkend="gsf-text-header">текстовый заголовок</link>
         </term>
         <listitem>
-          <para>Заголовок состоит из строк в формате <informalexample><programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting></informalexample>, определяющих отдельные параметры.</para>
+          <para>Заголовок состоит из строк в формате <informalexample><programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting></informalexample>определяющих отдельные параметры.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -46,11 +46,11 @@
   </sect2>
   <sect2 id="gsf-magic-line">
     <title>Магическая строка</title>
-    <para>Файлы GSF начинаются со строки  <informalexample><programlisting>Gwyddion Simple Field 1.0</programlisting></informalexample>, завершенной символом перевода строки (<literal>\n</literal>, ASCII 0x0a).</para>
+    <para>Файлы GSF начинаются со строки <informalexample><programlisting>Gwyddion Simple Field 1.0</programlisting></informalexample>завершенной символом перевода строки (<literal>\n</literal>, ASCII 0x0a).</para>
   </sect2>
   <sect2 id="gsf-text-header">
     <title>Текстовый заголовок</title>
-    <para>Каждая строка заголовка имеет формат <programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting>, где любой пробельный символ перед именем, вокруг знака равенства и в конце значения игнорируется. Имена полей чувствительны к регистру и следуют обычным правилам для идентификаторов в языках программирования.</para>
+    <para>Каждая строка заголовка имеет формат <programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting>где любой пробельный символ перед именем, вокруг знака равенства и в конце значения игнорируется. Имена полей чувствительны к регистру и следуют обычным правилам для идентификаторов в языках программирования.</para>
     <para>Подобно магической строке, строки в текстовом заголовке заканчиваются символом перевода строки, как принято в Unix. Это означает, что заголовок должен читаться и писаться в двоичном режиме для сохранения символов перевода строки на других системах (и неизменности размера заголовка, например при преобразовании LF → CRLF).</para>
     <para>Любые символы не из алфавита ASCII, которые могут попасться, например, в имени канала, представлены в кодировке UTF-8. Символ NUL не может встречаться в заголовке.</para>
     <para>Поля заголовка:</para>
@@ -118,13 +118,20 @@
     <para>Поля могут идти в любом порядке, тем не менее, рекомендуется начинать с обязательных полей, затем привести опциональные и закончить нестандартными.</para>
     <para>Пример простого заголовка (также включает магическую строку):</para>
     <informalexample>
-      <programlisting>Gwyddion Simple Field 1.0 XRes = 400 YRes = 400 XReal = 5e-05 YReal = 5e-05 XYUnits = m ZUnits = V Title = ADC2</programlisting>
+      <programlisting>Gwyddion Simple Field 1.0
+XRes = 400
+YRes = 400
+XReal = 5e-05
+YReal = 5e-05
+XYUnits = m
+ZUnits = V
+Title = ADC2</programlisting>
     </informalexample>
   </sect2>
   <sect2 id="gsf-zero-padding">
     <title>Выравнивание с помощью NUL</title>
     <para>За текстовым заголовком идёт от одного до четырёх байтов NUL (<literal>\0</literal>, ASCII 0x00), которые (a) завершают его и (b) выравнивают начало двоичных данных от начала файла на величину, кратную 4. Точнее, обозначив <xi:include href="eqi-N.xml"/> общую длину магической строки и текстового заголовка, данные начинаются в ближайшем числе, кратном 4 и большем, чем <xi:include href="eqi-N.xml"/>.</para>
-    <para>Это выравнивание по кратному 4 гарантирует выровненный доступ к памяти при отображении файла непосредственно в память. Количество байтов NUL однозначно определяется остатком от деления длины на 4(<xi:include href="eqi-N-mod-4.xml"/>):</para>
+    <para>Это кратное 4 выравнивание гарантирует выровненный доступ к памяти при отображении файла непосредственно в память. Количество байтов NUL однозначно определяется остатком от деления длины на 4 (<xi:include href="eqi-N-mod-4.xml"/>):</para>
     <informaltable frame="none" id="gsf-zero-padding-table">
       <tgroup cols="2" align="left">
         <?dblatex ll?>
