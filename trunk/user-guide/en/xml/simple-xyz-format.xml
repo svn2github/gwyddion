@@ -8,7 +8,7 @@
     Although Gwyddion does work with general XYZ data and
     <link linkend='raw-xyz-import'>raw XYZ data</link> are interpolated to
     a grid upon import, need has arisen for a file format similar in spirit to
-    <link linkend='gxyzf'>Gwyddion simple fields (gxyzf)</link> but representing
+    <link linkend='gsf'>Gwyddion simple field (.gsf)</link> but representing
     the data in XYZ format.  Such file format, called Gwyddion XYZ Field
     (<filename>.gxyzf</filename>), is described in this section.
   </para>
