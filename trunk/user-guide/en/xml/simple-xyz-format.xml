@@ -188,7 +188,7 @@
             <entry><literal>YRes</literal></entry>
             <entry>Optional</entry>
             <entry>
-              Hint specifying the preferred horizontal size in pixels if the
+              Hint specifying the preferred vertical size in pixels if the
               data are regularised to a grid, a positive integer.  Readers
               are not required to honour it and may interpolate data to
               grids of different dimensions.
