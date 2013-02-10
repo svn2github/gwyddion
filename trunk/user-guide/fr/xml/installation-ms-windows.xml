@@ -13,7 +13,7 @@
   </note>
   <para>
     Si vous avez déjà installé <application>Gwyddion</application> l'installeur
-    vous demanderas si vous souhaitez remplacer la version prédédente.
+    vous demandera si vous souhaitez remplacer la version prédédente.
   </para>
   <informalfigure id='fig-win32-installer-upgrade-screenshot'>
     <mediaobject>

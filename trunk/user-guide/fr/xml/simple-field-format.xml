@@ -61,7 +61,7 @@
         <listitem>
           <para>
             L'en-tête se termine par un à quatre octets NUL, permettant
-            d'aligner le début des données sur un multiples de 4.
+            d'aligner le début des données sur un multiple de 4.
           </para>
         </listitem>
       </varlistentry>
@@ -85,13 +85,13 @@
       <informalexample>
         <programlisting>Gwyddion Simple Field 1.0</programlisting>
       </informalexample>
-      terminé par le caractère saut de ligne (<literal>\n</literal>, ASCII 0x0a).
+      terminée par le caractère saut de ligne (<literal>\n</literal>, ASCII 0x0a).
     </para>
   </sect2>
   <sect2 id='gsf-text-header'>
     <title>Texte d'en-tête</title>
     <para>
-      Chaque ligne d'en-tête est données sous la forme
+      Chaque ligne d'en-tête est donnée sous la forme
       <programlisting><replaceable>nom</replaceable> = <replaceable>valeur</replaceable></programlisting>
       dans laquelle tout espace avant le nom, autour du signe égal, et en fin de
       ligne est ignoré. Les noms des champs sont sensibles à la casse et suivent
@@ -100,7 +100,7 @@
     </para>
     <para>
       De la même manière que pour la ligne magique, les lignes d'en-tête se
-      terminent par le caractère saut de ligne, comme utilisé sur les système
+      terminent par le caractère saut de ligne, tel qu'utilisé sur les système
       Unix. Cela signifie que l'en-tête doit être lu et écrit en mode binaire
       pour garantir la préservation des caractères de fin de ligne sur d'autres
       systèmes d'exploitation (et ne pas changer la taille de l'en-tête, par
@@ -264,7 +264,7 @@ Title = ADC2</programlisting>
         <?dblatex ll?>
         <thead>
           <row>
-            <entry>Rest</entry>
+            <entry>Reste</entry>
             <entry>Nombre d'octets NUL</entry>
           </row>
         </thead>
@@ -281,16 +281,17 @@ Title = ADC2</programlisting>
     <title>Données binaires</title>
     <para>
       Les valeurs des données sont enregistrées en virgule flottante simple
-      précision IEEE 32bit, avec un arrangement des octets petit-boutiste
-      (LSB ou Intel). Les valeurs sont enreigistrées par ligne, en allant du
-      haut vers le bas, chanque ligne allant de gauche à droite.
+      précision IEEE 32 bits, avec un arrangement des octets petit-boutiste
+      (LSB ou Intel). Les valeurs sont enregistrées par ligne, en allant du
+      haut vers le bas, chaque ligne allant de gauche à droite.
     </para>
     <para>
       L'unité physique de ces valeurs est donnée par <literal>ZUnits</literal>.
     </para>
     <para>
       La tailles des données de l'image vaut exactement
-      <literal>4*XRes*YRes</literal> et il n'y a aucune données après celles-ci.
+      <literal>4*XRes*YRes</literal> octets et plus aucune donnée n'est présente
+      ensuite.
     </para>
   </sect2>
 </sect1>

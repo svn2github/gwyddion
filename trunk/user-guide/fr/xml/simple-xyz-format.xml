@@ -1,0 +1,295 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: simple-xyz-format.xml 14610 2013-02-07 14:07:35Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                      'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='gxyzf'>
+  <title>Fichier de données XYZ</title>
+  <para>
+    Bien que Gwyddion fonctionne avec des donnée XYZ et que les
+    <link linkend='raw-xyz-import'>données XYZ brutes</link> soient interpolées
+    selon une grille régulière lors de l'import, il s'est avéré nécessaire de
+    développer un format de fichier dans le même esprit que le
+    <link linkend='gsf'>fichier à champ simple (.gsf)</link> mais représentant
+    les données au format XYZ. Ce format, appelé Gwyddion XYZ
+    (<filename>.gxyzf</filename>), est décrit dans cette section.
+  </para>
+  <para>
+    On notera que le Z correspond ici à une valeur quelconque. Les valeurs Z
+    peuvent être effectivement des coordonnées (hauteurs) ou bien des courants,
+    des tensions, etc.
+  </para>
+  <para>
+    Les fichiers GXYZF peuvent être écrit avec la version 2.31 ou supérieure de
+    Gwyddion. Ils peuvent aussi être lus à partir de cette version, bien que la
+    régularisation de la grille puisse être assez grossière.
+  </para>
+  <sect2 id='gxyzf-overall-structure'>
+    <title>Structure globale</title>
+    <para>
+      Un fichier GXYZF consiste en quatre partie, dans l'ordre suivant :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-magic-line'>ligne magique</link>
+        </term>
+        <listitem>
+          <para>
+            Les fichiers commencent par une <quote>ligne magique</quote>
+            permettant d'identifier le type de fichier.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-text-header'>texte d'en-tête</link>
+        </term>
+        <listitem>
+          <para>
+            L'en-tête consiste en plusieurs lignes de la forme
+            <informalexample>
+              <programlisting><replaceable>nom</replaceable> = <replaceable>valeur</replaceable></programlisting>
+            </informalexample>
+            définissant les différents paramètres.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-zero-padding'>remplissage par octets NUL</link>
+        </term>
+        <listitem>
+          <para>
+            L'en-tête se termine par un à huit octets NUL, permettant
+            d'aligner le début des données sur un multiple de 8.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gxyzf-binary-data'>données binaires</link>
+        </term>
+        <listitem>
+          <para>
+            Les données binaires sont données au format 64 bits à virgule
+            flottante.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='gxyzf-magic-line'>
+    <title>Ligne magique</title>
+    <para>
+      Les fichiers GXYZF démarrent avec la ligne
+      <informalexample>
+        <programlisting>Gwyddion XYZ Field 1.0</programlisting>
+      </informalexample>
+      terminée par le caractère saut de ligne (<literal>\n</literal>, ASCII 0x0a).
+    </para>
+  </sect2>
+  <sect2 id='gxyzf-text-header'>
+    <title>Texte d'en-tête</title>
+    <para>
+      Chaque ligne d'en-tête est donnée sous la forme
+      <programlisting><replaceable>nom</replaceable> = <replaceable>valeur</replaceable></programlisting>
+      dans laquelle tout espace avant le nom, autour du signe égal, et en fin de
+      ligne est ignoré. Les noms des champs sont sensibles à la casse et suivent
+      les règles usuelles des langages de programmation concernant les
+      identifiants.
+    </para>
+    <para>
+      De la même manière que pour la ligne magique, les lignes d'en-tête se
+      terminent par le caractère saut de ligne, tel qu'utilisé sur les système
+      Unix. Cela signifie que l'en-tête doit être lu et écrit en mode binaire
+      pour garantir la préservation des caractères de fin de ligne sur d'autres
+      systèmes d'exploitation (et ne pas changer la taille de l'en-tête, par
+      exemple par une transformation LF → CRLF).
+    </para>
+    <para>
+      Tous les caractères non ASCII pouvant apparaître par exemple dans le nom des
+      canaux sont encodés au format UTF-8. Le caractère NUL ne peut apparaître
+      dans l'en-tête.
+    </para>
+    <para>
+      Champs d'en-tête :
+    </para>
+    <informaltable frame='none' id='gxyzf-mandatory-header-fields'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Nom</entry>
+            <entry>Type</entry>
+            <entry>Valeur</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>NChannels</literal></entry>
+            <entry>Obligatoire</entry>
+            <entry>
+              Nombre de canaux de valeurs (Z), sous forme d'entier positif. Les
+              valeurs enregistrées pour chaque point incluent les coordonnées X
+              et Y, mais elles ne sont pas comptées dans
+              <literal>NChannels</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>NPoints</literal></entry>
+            <entry>Obligatoire</entry>
+            <entry>
+              Nombre de points dans le fichier.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XYUnits</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Unité latérale, c'est-à-dire l'unité des coordonnées X et Y.
+              Elle doit être donnée en unité de base, c'est-à-dire
+              <literal>m</literal> ou <literal>A</literal>, sans préfixe en
+              puissance de 10 (Gwyddion pourrait le gérer, mais cela poerait
+              certainement problème pour d'autres logiciels). Il n'y a par
+              défaut aucune unité. Cela signifie que dans le cas de données SPM
+              on spécifiera <literal>XYUnits</literal> avec <literal>m</literal>
+              car les dimensions latérales sont en mètre.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>ZUnits1</literal>, <literal>ZUnits2</literal>, …
+            </entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Unité de valeur, c'est-à-dire l'unité des données pour chaque
+              canal. Les cannaux sont numérotés de 1 à
+              <literal>NChannels</literal>. Voir <literal>XYUnits</literal> pour
+              plus de détails.
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <literal>Title1</literal>, <literal>Title2</literal>, …
+            </entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Titres de différents canaux. Ceux-ci sont numérotés de 1 à
+              <literal>NChannels</literal>.  Les titres n'ont pas de valeur par
+              défaut, les applications pourront afficher “Inconnu” ou quelque
+              chose de semblable si rien n'est spécifié.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XRes</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Indication spécifiant la taille horizontale préférée en pixels si
+              les données sont régularisées en une grille, il s'agit d'une
+              valeur entière positive. Un logiciel pouvant lire le fichier
+              pourra ne pas tenir compte de cette valeur et interpoler les
+              donner selon une grille de dimensions différentes.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YRes</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Indication spécifiant la taille verticale préférée en pixels si
+              les données sont régularisées en une grille, il s'agit d'une
+              valeur entière positive. Un logiciel pouvant lire le fichier
+              pourra ne pas tenir compte de cette valeur et interpoler les
+              donner selon une grille de dimensions différentes.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      L'en-tête peut contenir d'autres champs, en plus de ceux listés
+      précédemment. Gwyddion les chargera dans les
+      <link linkend='metadata'>metadonnées</link>.
+      Les champs les plus communs peuvent être par exemple
+       <literal>Commentaire</literal>,
+      <literal>Date</literal> ou <literal>Direction</literal>.
+    </para>
+    <para>
+      Les champs peuvent être donnés dans n'importe quel ordre, il est toutefois
+      recommandé de démarrer avec les champs oligatoires, puis continuer avec
+      champs optionnels et enfin terminer avec les champs utilisateur.
+    </para>
+    <para>
+      Voici un exemple d'en-tête basique pour un fichiers contenant deux canaux
+      (incluant aussi la ligne magique) :
+    </para>
+    <informalexample>
+      <programlisting>Gwyddion XYZ Field 1.0
+NChannels = 2
+NPoints = 457884
+XYUnits = m
+ZUnits1 = m
+ZUnits2 = V
+Title1 = Height
+Title2 = ADC2</programlisting>
+    </informalexample>
+  </sect2>
+  <sect2 id='gxyzf-zero-padding'>
+    <title>Remplissage par octets NUL</title>
+    <para>
+      Le texte d'en-tête est suivi de un à huit octets NUL (<literal>\0</literal>,
+      ASCII 0x00) qui (a) le termine et (b) aligne le début des données avec
+      un décalage par rapport au début de fichier égal à un multiple de 8. Plus
+      précisément, soit <xi:include href='eqi-N.xml'/> la longueur totale de la
+      ligne magique et du texte d'en-tête, les données débutent au multiple de
+      8 supérieur à <xi:include href='eqi-N.xml'/> le plus proche.
+    </para>
+    <para>
+      Ce remplissage au multiple de 8 garantit un alignement de l'accès mémoire
+      lorsque le fichier est mis en mémoire. Le nombre d'octets NUL est
+      uniquement déterminé par le reste de la longueur modulo huit
+      (<xi:include href='eqi-N-mod-8.xml'/>) :
+    </para>
+    <informaltable frame='none' id='gxyzf-zero-padding-table'>
+      <tgroup cols='2' align='left'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Reste</entry>
+            <entry>Nombre d'octets NUL</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row><entry>0</entry><entry>8</entry></row>
+          <row><entry>1</entry><entry>7</entry></row>
+          <row><entry>2</entry><entry>6</entry></row>
+          <row><entry>3</entry><entry>5</entry></row>
+          <row><entry>4</entry><entry>4</entry></row>
+          <row><entry>5</entry><entry>3</entry></row>
+          <row><entry>6</entry><entry>2</entry></row>
+          <row><entry>7</entry><entry>1</entry></row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id='gxyzf-binary-data'>
+    <title>Données binaires</title>
+    <para>
+      Les valeurs des données sont enregistrées en virgule flottante double
+      précision IEEE 64 bits, avec un arrangement des octets petit-boutiste
+      (LSB ou Intel). Les points sont enregistrés selon un ordre quelconque.
+      Chaque point est consitué d'un bloc de <literal>NChannels+2</literal>
+      valeurs : X, Y puis toutes les valeurs, dans l'ordre des canaux.
+    </para>
+    <para>
+      Les unités sont données par <literal>XYUnits</literal> pour X et Y,
+      <literal>ZUnits1</literal>, <literal>ZUnits2</literal>, … pour les valeurs
+      de chaque canal.
+    </para>
+    <para>
+      La taille des données de l'image vaut exactement
+      <literal>8*NPoints*(NChannels+2)</literal> octets et plus aucune donnée
+      n'est présente ensuite.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
