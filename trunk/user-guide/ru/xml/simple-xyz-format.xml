@@ -23,7 +23,7 @@
           <link linkend="gxyzf-text-header">текстовый заголовок</link>
         </term>
         <listitem>
-          <para>Заголовок состоит из строк в формате <informalexample><programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting></informalexample>, определяющих отдельные параметры.</para>
+          <para>Заголовок состоит из строк в формате <informalexample><programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting></informalexample>определяющих отдельные параметры.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -50,7 +50,7 @@
   </sect2>
   <sect2 id="gxyzf-text-header">
     <title>Текстовый заголовок</title>
-    <para>Каждая строка заголовка имеет формат <programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting>, где любой пробельный символ перед именем, вокруг знака равенства и в конце значения игнорируется. Имена полей чувствительны к регистру и следуют обычным правилам для идентификаторов в языках программирования.</para>
+    <para>Каждая строка заголовка имеет формат <programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting>где любой пробельный символ перед именем, вокруг знака равенства и в конце значения игнорируется. Имена полей чувствительны к регистру и следуют обычным правилам для идентификаторов в языках программирования.</para>
     <para>Подобно магической строке, строки в текстовом заголовке заканчиваются символом перевода строки, как принято в Unix. Это означает, что заголовок должен читаться и писаться в двоичном режиме для сохранения символов перевода строки на других системах (и неизменности размера заголовка, например при преобразовании LF → CRLF).</para>
     <para>Любые символы, не входящие в ASCII, которые могут встречаться, например, в названиях каналов, представлены в кодировке UTF-8. Символ NUL не может встречаться в заголовке.</para>
     <para>Поля заголовка:</para>
