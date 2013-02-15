@@ -219,7 +219,7 @@ hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
 
         case G_TYPE_CHAR:
         it->ctype = GWY_SERIALIZABLE_INT8;
-        it->value.v_int8 = g_value_get_char(value);
+        it->value.v_int8 = g_value_get_schar(value);
         return;
 
         case G_TYPE_INT:
@@ -925,7 +925,7 @@ gwy_container_get_char(GwyContainer *container, GQuark key)
     GValue *p;
 
     p = get_value_of_type(container, key, G_TYPE_CHAR);
-    return G_LIKELY(p) ? g_value_get_char(p) : 0;
+    return G_LIKELY(p) ? g_value_get_schar(p) : 0;
 }
 
 /**
@@ -960,7 +960,7 @@ gwy_container_gis_char(GwyContainer *container,
     GValue *p;
 
     if ((p = gis_value_of_type(container, key, G_TYPE_CHAR))) {
-        *value = g_value_get_char(p);
+        *value = g_value_get_schar(p);
         return TRUE;
     }
     return FALSE;
@@ -1506,7 +1506,7 @@ values_are_equal(const GValue *value1,
         return !g_value_get_boolean(value1) == !g_value_get_boolean(value2);
 
         case G_TYPE_CHAR:
-        return g_value_get_char(value1) == g_value_get_char(value2);
+        return g_value_get_schar(value1) == g_value_get_schar(value2);
 
         case G_TYPE_INT:
         return g_value_get_int(value1) == g_value_get_int(value2);
@@ -2159,7 +2159,7 @@ hash_text_serialize(gpointer hkey, gpointer hvalue, gpointer hdata)
         break;
 
         case G_TYPE_CHAR:
-        c = (guchar)g_value_get_char(value);
+        c = (guchar)g_value_get_schar(value);
         if (g_ascii_isprint(c) && !g_ascii_isspace(c))
             v = g_strdup_printf("\"%s\" char %c", k, c);
         else

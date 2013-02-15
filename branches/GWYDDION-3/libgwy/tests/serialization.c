@@ -865,7 +865,7 @@ values_are_equal(const GValue *value1,
         return !g_value_get_boolean(value1) == !g_value_get_boolean(value2);
 
         case G_TYPE_CHAR:
-        return g_value_get_char(value1) == g_value_get_char(value2);
+        return g_value_get_schar(value1) == g_value_get_schar(value2);
 
         case G_TYPE_INT:
         return g_value_get_int(value1) == g_value_get_int(value2);
