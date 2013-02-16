@@ -412,8 +412,8 @@ gwy_scroller_scroll_child(GwyScroller *scroller,
         break;
 
         default:
-        g_warning("Invalid scroll type %u for "
-                  "GtkScrolledWindow::scroll-child", scroll);
+        g_warning("Invalid scroll type %u for GwyScroller::scroll-child",
+                  scroll);
         return FALSE;
     }
 
