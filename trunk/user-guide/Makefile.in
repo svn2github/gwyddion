@@ -28,6 +28,7 @@ COMMONDISTFILES =  \
 	fixpngres.c \
 	gwydefs.tex \
 	inkscape-export.sh.in \
+	ltablex.sty \
 	Makefile.in \
 	man.xsl \
 	pngsize.c \
