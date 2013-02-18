@@ -95,6 +95,14 @@ GWY_MISSING(XML2PO,[HTML PDF SVG],[xml2po, get gnome-doc-utils from http://www.g
 AC_CHECK_PROGS([MSGMERGE],[msgmerge],[no])
 GWY_MISSING(MSGMERGE,[HTML PDF SVG],[msgmerge, get gettext from http://www.gnu.org/software/gettext/])
 
+AC_MSG_CHECKING([for cyrillic TeX encoding support])
+if kpsewhich t2aenc.def >/dev/null; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  GWY_MISSING(T2AENC,[HTML PDF],[t2aenc.def, get LaTeX cyrillic package from CTAN])
+fi
+
 # Here we assume if someone has xhtml he has manpages too.
 JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl],
                      [DocBook XSL Stylesheets],
