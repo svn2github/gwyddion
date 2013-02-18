@@ -36,9 +36,9 @@ for name in ('target_prefix', 'mingw_prefix'):
         sys.stderr.write('Cannot find %s in %s.\n' % (name, setupfile))
         sys.exit(1)
 
-if mingw_prefix.find('mingw32'):
+if mingw_prefix.find('i686'):
     mingw='mingw32'
-elif mingw_prefix.find('mingw64'):
+elif mingw_prefix.find('x86_64'):
     mingw='mingw64'
 else:
     sys.stderr.write('Cannot guess 32/64bit from %s.\n' % mingw_prefix)
