@@ -103,6 +103,14 @@ else
   GWY_MISSING(T2AENC,[HTML PDF],[t2aenc.def, get LaTeX cyrillic package from CTAN])
 fi
 
+AC_MSG_CHECKING([for TeX package lh cyrillic])
+if kpsewhich lh-lcy.sty >/dev/null; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  GWY_MISSING(LHCY,[PDF],[lh-lcy.sty, get LaTeX lh package from CTAN])
+fi
+
 AC_MSG_CHECKING([for TeX package multirow.sty])
 if kpsewhich multirow.sty >/dev/null; then
   AC_MSG_RESULT([yes])
