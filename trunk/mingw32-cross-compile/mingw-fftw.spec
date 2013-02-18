@@ -1,8 +1,8 @@
 %{?mingw_package_header}
 
 Name:           mingw-fftw
-Version:        3.3.2
-Release:        2%{?dist}
+Version:        3.3.3
+Release:        1%{?dist}
 Summary:        MinGW Windows FFTW library
 
 License:        GPLv2+
@@ -102,6 +102,9 @@ rm -f ${RPM_BUILD_ROOT}%{mingw64_includedir}/fftw3{l,q,}.f03
 
 
 %changelog
+* Mon Feb 18 2013 Yeti <yeti@gwyddion.net> - 3.3.3-1
+- Updated to upstream version 3.3.3
+
 * Sun Aug  5 2012 Yeti <yeti@gwyddion.net> - 3.3.2-2
 - Duplicated all system dependences to include mingw64 variants
 - Update to F17 mingw-w64 toolchain and RPM macros

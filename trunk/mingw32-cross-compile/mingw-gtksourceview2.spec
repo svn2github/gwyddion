@@ -4,7 +4,7 @@
 
 Name:           mingw-gtksourceview2
 Version:        2.11.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        MinGW Windows library for viewing source files
 
 # the library itself is LGPL, some .lang files are GPL
@@ -132,6 +132,9 @@ rm -rf $RPM_BUILD_ROOT%{mingw64_datadir}/gtk-doc
 
 
 %changelog
+* Mon Feb 18 2013 Yeti <yeti@gwyddion.net> - 2.11.2-4
+- Rebuilt for F18
+
 * Sat Aug  4 2012 Yeti <yeti@gwyddion.net> - 2.11.2-3
 - Duplicated all system dependences to include mingw64 variants
 - Made build quiet

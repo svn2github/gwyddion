@@ -2,7 +2,7 @@
 
 Name:           mingw-gtkglext
 Version:        1.2.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -135,6 +135,9 @@ rm -rf $RPM_BUILD_ROOT%{mingw64_datadir}/gtk-doc
 
 
 %changelog
+* Mon Feb 18 2013 Yeti <yeti@gwyddion.net> - 1.2.0-8
+- Rebuilt for F18
+
 * Mon Aug  6 2012 Yeti <yeti@gwyddion.net> - 1.2.0-7
 - Duplicated all system dependences to include mingw64 variants
 - Update to F17 mingw-w64 toolchain and RPM macros
