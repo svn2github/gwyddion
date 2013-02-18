@@ -31,11 +31,20 @@ for name in ('target_prefix',):
         sys.stderr.write('Cannot find %s in %s.\n' % (name, setupfile))
         sys.exit(1)
 
+if target_prefix.find('mingw32') >= 0:
+    mingw='32'
+elif target_prefix.find('mingw64') >= 0:
+    mingw='64'
+else:
+    sys.stderr.write('Cannot guess 32/64bit from %s.\n' % target_prefix)
+    sys.exit(1)
+
 indent = r'^(?P<indent>\s*)'
 delimited = r'(?P<delim>["\'])(?P<value>.*)(?P=delim)'
 define_re = re.compile(indent + r'!define\s+(?P<name>\w+)\s+' + delimited + r'\s*$').match
 expand_files_re = re.compile(indent + r'GwyExpandFiles\s+' + delimited + r'\s*$').match
 expand_delete_all = re.compile(indent + r'GwyExpandDeleteAll\s*$').match
+replace_arch = re.compile(r'%ARCH%').sub
 
 defines = {}
 content = []
@@ -54,6 +63,7 @@ def expand(string):
     return re.sub(r'\$\{(\w+)\}', expand_one, string)
 
 for lineno, line in enumerate(sys.stdin):
+    line = replace_arch('win' + mingw, line)
     m = expand_files_re(line)
     if m:
         fileglob = expand(m.group('value'))

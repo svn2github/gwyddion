@@ -36,15 +36,15 @@ for name in ('target_prefix', 'mingw_prefix'):
         sys.stderr.write('Cannot find %s in %s.\n' % (name, setupfile))
         sys.exit(1)
 
-if mingw_prefix.find('i686'):
-    mingw='mingw32'
-elif mingw_prefix.find('x86_64'):
-    mingw='mingw64'
+if target_prefix.find('mingw32') >= 0:
+    mingw='32'
+elif target_prefix.find('mingw64') >= 0:
+    mingw='64'
 else:
-    sys.stderr.write('Cannot guess 32/64bit from %s.\n' % mingw_prefix)
+    sys.stderr.write('Cannot guess 32/64bit from %s.\n' % target_prefix)
     sys.exit(1)
 
-pkglist = ['%s-%s' % (mingw, x) for x in packages.split()]
+pkglist = ['mingw%s-%s' % (mingw, x) for x in packages.split()]
 p = subprocess.Popen(['rpm', '-q', '--qf='] + pkglist,
                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 p.wait()
