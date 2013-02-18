@@ -56,7 +56,7 @@ if test "$GSED" == no; then
 fi
 
 # FIXME: Text processing probably does not actually work with Python3.
-AC_CHECK_PROGS([PYTHON],[python python2.6 python2.5 python2.4 python2 python3 python3.1 python3.2],[no])
+AC_CHECK_PROGS([PYTHON],[python python2.7 python2.6 python2.5 python2.4 python2 python3 python3.1 python3.2],[no])
 if test "$PYTHON" == no; then
   AC_MSG_ERROR([Python is required to build the user guide.
                 Get it at http://www.python.org/])
@@ -95,12 +95,20 @@ GWY_MISSING(XML2PO,[HTML PDF SVG],[xml2po, get gnome-doc-utils from http://www.g
 AC_CHECK_PROGS([MSGMERGE],[msgmerge],[no])
 GWY_MISSING(MSGMERGE,[HTML PDF SVG],[msgmerge, get gettext from http://www.gnu.org/software/gettext/])
 
-AC_MSG_CHECKING([for cyrillic TeX encoding support])
+AC_MSG_CHECKING([for TeX cyrillic T2A encoding support])
 if kpsewhich t2aenc.def >/dev/null; then
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
   GWY_MISSING(T2AENC,[HTML PDF],[t2aenc.def, get LaTeX cyrillic package from CTAN])
+fi
+
+AC_MSG_CHECKING([for TeX package multirow.sty])
+if kpsewhich multirow.sty >/dev/null; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  GWY_MISSING(MULTIROW,[PDF],[multirow.sty, get LaTeX multirow package from CTAN])
 fi
 
 # Here we assume if someone has xhtml he has manpages too.
