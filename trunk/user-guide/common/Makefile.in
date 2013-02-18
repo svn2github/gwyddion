@@ -19,7 +19,7 @@ GSED = @GSED@
 PYTHON = @PYTHON@
 XML2PO = @XML2PO@
 MSGMERGE = @MSGMERGE@
-DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
+DBLATEX_CMD = @DBLATEX@ --input-format=xml -P 'filename.as.url=0' --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
 INKSCAPE_EXPORT = $(BASH) $(COMMON)/inkscape-export.sh
 XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
 XML_UNFOLD = $(PYTHON) $(COMMON)/xmlunfold.py
