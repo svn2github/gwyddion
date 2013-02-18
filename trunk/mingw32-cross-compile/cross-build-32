@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-. ./setup
+setup=setup32
+. ./$setup
 rm -rf "$target_prefix"
 pushd "$source_dir"
 build=$(/usr/share/libtool/config/config.guess)
@@ -25,9 +26,9 @@ make
 make -C po update-gmo
 make install
 popd
-./copysysfiles
+./copysysfiles $setup
 cp -v Licenses/*.txt $target_prefix
-./expandnsi <"$source_dir/data/gwyddion.nsit" >"$target_prefix/gwyddion.nsi"
+./expandnsi $setup <"$source_dir/data/gwyddion.nsit" >"$target_prefix/gwyddion.nsi"
 pushd "$target_prefix"
 wine "$nsis_compiler" gwyddion.nsi
 popd

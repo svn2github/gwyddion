@@ -31,12 +31,20 @@ for line in file(setupfile):
     if m:
         locals()[m.group('name')] = os.path.expandvars(m.group('value'))
 
-for name in ('target_prefix', 'mingw32_prefix'):
+for name in ('target_prefix', 'mingw_prefix'):
     if name not in locals():
         sys.stderr.write('Cannot find %s in %s.\n' % (name, setupfile))
         sys.exit(1)
 
-pkglist = ['mingw32-%s' % x for x in packages.split()]
+if mingw_prefix.find('mingw32'):
+    mingw='mingw32'
+elif mingw_prefix.find('mingw64'):
+    mingw='mingw64'
+else:
+    sys.stderr.write('Cannot guess 32/64bit from %s.\n' % mingw_prefix)
+    sys.exit(1)
+
+pkglist = ['%s-%s' % (mingw, x) for x in packages.split()]
 p = subprocess.Popen(['rpm', '-q', '--qf='] + pkglist,
                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 p.wait()
@@ -49,13 +57,13 @@ filelist = subprocess.Popen(['rpm', '-ql'] + pkglist,
                             stdout=subprocess.PIPE).communicate()[0]
 
 for filename in sorted(set(filelist.split())):
-    if not filename.startswith(mingw32_prefix):
+    if not filename.startswith(mingw_prefix):
         continue
     if not os.path.isfile(filename):
         continue
     if filename.endswith('.a') or filename.endswith('.la'):
         continue
-    basefile = filename[len(mingw32_prefix)+1:]
+    basefile = filename[len(mingw_prefix)+1:]
     dirname = os.path.join(target_prefix, os.path.dirname(basefile))
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
