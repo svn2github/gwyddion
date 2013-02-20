@@ -56,6 +56,7 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- Module apedaxfile.c contains no magic. -->
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -227,6 +228,15 @@
       <entry>Yes</entry>
       <entry>Yes</entry>
     </row>
+    <!-- From module gxyzffile.c -->
+    <row>
+      <entry>Gwyddion XYZ data</entry>
+      <entry>.gxyzf</entry>
+      <entry>gxyzffile</entry>
+      <entry>Yes<footnote id="table-file-formats-fn1" label="a"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module hdf4file.c -->
     <row>
       <entry>Psi HDF4</entry>
@@ -279,7 +289,7 @@
       <entry>iso28600</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>Limited<footnote id="table-file-formats-fn1" label="a"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
+      <entry>Limited<footnote id="table-file-formats-fn2" label="b"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -304,6 +314,15 @@
       <entry>Olympus LEXT 4000</entry>
       <entry>.lext</entry>
       <entry>lextfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module magellan.c -->
+    <row>
+      <entry>FEI Magellan SEM images</entry>
+      <entry>.tif</entry>
+      <entry>magellan</entry>
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -360,7 +379,7 @@
       <entry>mifile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -379,6 +398,15 @@
       <entry>Yes</entry>
       <entry>No</entry>
       <entry>Yes</entry>
+    </row>
+    <!-- From module nanomagnetics.c -->
+    <row>
+      <entry>Nanomagnetics NMI</entry>
+      <entry>.nmi</entry>
+      <entry>nanomagnetics</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -441,7 +469,7 @@
       <entry>nanoscope</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -466,8 +494,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Yes<footnote id="table-file-formats-fn2" label="b"><para>Not all variants are implemented.</para></footnote></entry>
-      <entry>Yes<footnote id="table-file-formats-fn3" label="c"><para>Data are exported in a fixed attached native-endian float point format.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn3" label="c"><para>Not all variants are implemented.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn4" label="d"><para>Data are exported in a fixed attached native-endian float point format.</para></footnote></entry>
       <entry>No</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -546,8 +574,8 @@
       <entry>Pixmap images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Yes<footnote id="table-file-formats-fn4" label="d"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.</para></footnote></entry>
-      <entry>Yes<footnote id="table-file-formats-fn5" label="e"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
+      <entry>Yes<footnote id="table-file-formats-fn5" label="e"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn6" label="f"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
 export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>No</entry>
     </row>
@@ -618,7 +646,7 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>Graph text data (raw)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Yes<footnote id="table-file-formats-fn6" label="f"><para>At present, only simple two-column data, imported as graph curves, are
+      <entry>Yes<footnote id="table-file-formats-fn7" label="g"><para>At present, only simple two-column data, imported as graph curves, are
 supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
@@ -628,7 +656,7 @@ supported.</para></footnote></entry>
       <entry>XYZ data</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Yes<footnote id="table-file-formats-fn7" label="g"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
+      <entry>Yes<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
       <entry>No</entry>
       <entry>No</entry>
     </row>
@@ -639,7 +667,7 @@ supported.</para></footnote></entry>
       <entry>rhk-sm3</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -648,7 +676,7 @@ supported.</para></footnote></entry>
       <entry>rhk-sm4</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -657,7 +685,7 @@ supported.</para></footnote></entry>
       <entry>rhk-spm32</entry>
       <entry>Yes</entry>
       <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -688,7 +716,7 @@ supported.</para></footnote></entry>
     <!-- From module seiko.c -->
     <row>
       <entry>Seiko SII</entry>
-      <entry>.xqb, .xqd, .xqt</entry>
+      <entry>.xqb, .xqd, .xqt, .xqp</entry>
       <entry>seiko</entry>
       <entry>Yes</entry>
       <entry>No</entry>
@@ -715,7 +743,15 @@ supported.</para></footnote></entry>
     <!-- From module shimadzu.c -->
     <row>
       <entry>Shimadzu</entry>
-      <entry><!--FIXME--></entry>
+      <entry>.sph, .spp, .001, .002, etc.</entry>
+      <entry>shimadzu</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <row>
+      <entry>Shimadzu ASCII</entry>
+      <entry>.txt</entry>
       <entry>shimadzu</entry>
       <entry>Yes</entry>
       <entry>No</entry>
@@ -820,9 +856,18 @@ supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module vtkfile.c -->
+    <row>
+      <entry>VTK structured grid file</entry>
+      <entry>.vtk</entry>
+      <entry>vtkfile</entry>
+      <entry>No</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module wipfile.c -->
     <row>
-      <entry>WIPfile</entry>
+      <entry>WITec Project data</entry>
       <entry>.wip</entry>
       <entry>wipfile</entry>
       <entry>Yes</entry>
