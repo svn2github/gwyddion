@@ -1,0 +1,70 @@
+The Czech Metrology Insititute (http://www.cmi.cz/?lang=2)
+    for development and domain funding and further support.
+
+Jochen Puchalla <mail@puchalla-online.de>
+    for SIS format specifications.
+
+Tomas Mates <mates@fzu.cz>
+    for help with Nanoscope file import improvement.
+
+NT-MDT Co.
+    for MDT format specifications.
+
+Jernej Simoncic
+    for help with win32 libintl linking problems.
+
+MV <kasigra@seznam.cz>
+    for SPMLab format reverse-engineering.
+
+Livia Della Seta <livia.dellaseta@casaccia.enea.it>
+    for help with Assing AFM file import implementation.
+
+Alessandro Ustione <alessandro.ustione@ism.cnr.it>
+    for further Assing AFM file format information.
+
+Paolo Messina <paolo.messina@unifi.it>
+    for APE Research file format specifications.
+
+Marc Tobias Wenzel <mtwenzel@iapp.de>
+Nick Hatch <nicholas.hatch@gmail.com>
+    for BCR and RHK SPM32 file format specifications and samples.
+
+Sungjun Lee <lsjun@phya.snu.ac.kr>
+Ignacio Horcas <ignacio.horcas@nanotec.es>
+    for Nanotec WSxM file format specifications and samples.
+
+Marcelo Nakamura <marnak@usp.br>
+Peter Eaton <peter.eaton@fc.up.pt>
+    for Molecular Imaging data file samples.
+
+Christopher Anderson <sidewinder.asu@gmail.com>
+Ken Egan <kegan@molec.com>
+    for Molecular Imaging format specification.
+
+Simone Pisana <sp406@eng.cam.ac.uk>
+    for SPMLab R6 data file samples.
+
+Ranjan Grover <rgrover@optics.arizona.edu>
+    for Nanosurf EZD file information and samples.
+
+Hiroyuki Aoki <aoki@photo.polym.kyoto-u.ac.jp>
+    for Unisoku and WITec file samples and format specification.
+
+Franck Senequier <f.senequier@elexience.fr>
+    for sample Hitachi AFM files.
+
+Dominik Brändlin <braendlin@nanosurf.com>
+    for Nanosurf format specifications and implementation help.
+
+RHK Technology
+    for SM3 file format specifications.
+
+Markus <nocheinbier@gmx.de>
+    for Nanonis file format description and samples.
+
+Hans-Peter Doerr <doerr@cip.physik.uni-freiburg.de>
+    for Burleigh 2.1 file format description.
+
+Ale <abernardi@icmab.es>
+    for JEOL file information and samples.
+
