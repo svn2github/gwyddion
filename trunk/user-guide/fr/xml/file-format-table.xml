@@ -56,6 +56,7 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- Module apedaxfile.c contains no magic. -->
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -227,6 +228,15 @@
       <entry>Oui</entry>
       <entry>Oui</entry>
     </row>
+    <!-- From module gxyzffile.c -->
+    <row>
+      <entry>Gwyddion XYZ</entry>
+      <entry>.gxyzf</entry>
+      <entry>gxyzffile</entry>
+      <entry>Oui<footnote id="table-file-formats-fn1" label="a"><para>Les données XYZ sont interpolées selon une grille régulière lors de l'import.</para></footnote></entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module hdf4file.c -->
     <row>
       <entry>Psi HDF4</entry>
@@ -279,7 +289,7 @@
       <entry>iso28600</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Limité<footnote id="table-file-formats-fn1" label="a"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
+      <entry>Limité<footnote id="table-file-formats-fn2" label="b"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -304,6 +314,15 @@
       <entry>Olympus LEXT 4000</entry>
       <entry>.lext</entry>
       <entry>lextfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module magellan.c -->
+    <row>
+      <entry>FEI Magellan SEM</entry>
+      <entry>.tif</entry>
+      <entry>magellan</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -360,7 +379,7 @@
       <entry>mifile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -379,6 +398,15 @@
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Oui</entry>
+    </row>
+    <!-- From module nanomagnetics.c -->
+    <row>
+      <entry>Nanomagnetics NMI</entry>
+      <entry>.nmi</entry>
+      <entry>nanomagnetics</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -441,7 +469,7 @@
       <entry>nanoscope</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -466,8 +494,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Oui<footnote id="table-file-formats-fn2" label="b"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn3" label="c"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn3" label="c"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>Non</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -546,9 +574,9 @@
       <entry>Images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
+      <entry>Oui<footnote id="table-file-formats-fn5" label="e"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
 Le format 16bit n'est  pas supporté.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn5" label="e"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
+      <entry>Oui<footnote id="table-file-formats-fn6" label="f"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
       en niveaux de gris 16bit est possible vers les formats PNG, TIFF et PNM.</para></footnote></entry>
       <entry>Non</entry>
     </row>
@@ -619,7 +647,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Graphe au format texte (brut)</entry>
       <entry>-</entry>
       <entry>rawgraph</entry>
-      <entry>Oui<footnote id="table-file-formats-fn6" label="f"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
+      <entry>Oui<footnote id="table-file-formats-fn7" label="g"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -629,7 +657,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Coordonnées XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Oui<footnote id="table-file-formats-fn7" label="g"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
+      <entry>Oui<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
@@ -640,7 +668,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-sm3</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -649,7 +677,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-sm4</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -658,7 +686,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-spm32</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -689,7 +717,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     <!-- From module seiko.c -->
     <row>
       <entry>Seiko SII</entry>
-      <entry>.xqb, .xqd, .xqt</entry>
+      <entry>.xqb, .xqd, .xqp, .xqt</entry>
       <entry>seiko</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
@@ -716,7 +744,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     <!-- From module shimadzu.c -->
     <row>
       <entry>Shimadzu</entry>
-      <entry><!--FIXME--></entry>
+      <entry>.sph, .spp, .001, .002, etc.</entry>
+      <entry>shimadzu</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <row>
+      <entry>Shimadzu ASCII</entry>
+      <entry>.txt</entry>
       <entry>shimadzu</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
@@ -821,9 +857,18 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module vtkfile.c -->
+    <row>
+      <entry>Grille structurée VTK</entry>
+      <entry>.vtk</entry>
+      <entry>vtkfile</entry>
+      <entry>Non</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module wipfile.c -->
     <row>
-      <entry>WIPfile</entry>
+      <entry>WITec Project</entry>
       <entry>.wip</entry>
       <entry>wipfile</entry>
       <entry>Oui</entry>
