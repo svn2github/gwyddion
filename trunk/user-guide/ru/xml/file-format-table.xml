@@ -55,6 +55,7 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- Module apedaxfile.c contains no magic. -->
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -226,6 +227,15 @@
       <entry>Да</entry>
       <entry>Да</entry>
     </row>
+    <!-- From module gxyzffile.c -->
+    <row>
+      <entry>Данные Gwyddion XYZ</entry>
+      <entry>.gxyzf</entry>
+      <entry>gxyzffile</entry>
+      <entry>Да<footnote id="table-file-formats-fn1" label="a"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module hdf4file.c -->
     <row>
       <entry>Psi HDF4</entry>
@@ -278,7 +288,7 @@
       <entry>iso28600</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Ограничена<footnote id="table-file-formats-fn1" label="a"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
+      <entry>Ограничена<footnote id="table-file-formats-fn2" label="b"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -303,6 +313,15 @@
       <entry>Olympus LEXT 4000</entry>
       <entry>.lext</entry>
       <entry>lextfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module magellan.c -->
+    <row>
+      <entry>Изображения СЭМ FEI Magellan</entry>
+      <entry>.tif</entry>
+      <entry>magellan</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -359,7 +378,7 @@
       <entry>mifile</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -378,6 +397,15 @@
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Да</entry>
+    </row>
+    <!-- From module nanomagnetics.c -->
+    <row>
+      <entry>Nanomagnetics NMI</entry>
+      <entry>.nmi</entry>
+      <entry>nanomagnetics</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -440,7 +468,7 @@
       <entry>nanoscope</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -465,8 +493,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Да<footnote id="table-file-formats-fn2" label="b"><para>Не все варианты реализованы.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn3" label="c"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn3" label="c"><para>Не все варианты реализованы.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn4" label="d"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
       <entry>Нет</entry>
     </row>
     <!-- From module nt-mdt.c -->
@@ -545,8 +573,8 @@
       <entry>Изображения</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Да<footnote id="table-file-formats-fn4" label="d"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn5" label="e"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn5" label="e"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn6" label="f"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
       <entry>Нет</entry>
     </row>
     <!-- From module pltfile.c -->
@@ -616,7 +644,7 @@
       <entry>Текстовые данные графиков (необработанные)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Да<footnote id="table-file-formats-fn6" label="f"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn7" label="g"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
@@ -625,7 +653,7 @@
       <entry>Данные XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Да<footnote id="table-file-formats-fn7" label="g"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
+      <entry>Да<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
@@ -636,7 +664,7 @@
       <entry>rhk-sm3</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -645,7 +673,7 @@
       <entry>rhk-sm4</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -654,7 +682,7 @@
       <entry>rhk-spm32</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -685,7 +713,7 @@
     <!-- From module seiko.c -->
     <row>
       <entry>Seiko SII</entry>
-      <entry>.xqb, .xqd, .xqt</entry>
+      <entry>.xqb, .xqd, .xqt, .xqp</entry>
       <entry>seiko</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
@@ -712,7 +740,15 @@
     <!-- From module shimadzu.c -->
     <row>
       <entry>Shimadzu</entry>
-      <entry><!--FIXME--></entry>
+      <entry>.sph, .spp, .001, .002, etc.</entry>
+      <entry>shimadzu</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <row>
+      <entry>Shimadzu ASCII</entry>
+      <entry>.txt</entry>
       <entry>shimadzu</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
@@ -817,9 +853,18 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module vtkfile.c -->
+    <row>
+      <entry>файл структурной сетки VTK</entry>
+      <entry>.vtk</entry>
+      <entry>vtkfile</entry>
+      <entry>Нет</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module wipfile.c -->
     <row>
-      <entry>WIPfile</entry>
+      <entry>Данные WITec Project</entry>
       <entry>.wip</entry>
       <entry>wipfile</entry>
       <entry>Да</entry>
