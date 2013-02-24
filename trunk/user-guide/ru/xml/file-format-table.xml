@@ -319,7 +319,7 @@
     </row>
     <!-- From module magellan.c -->
     <row>
-      <entry>Изображения СЭМ FEI Magellan</entry>
+      <entry>Изображения РЭМ FEI Magellan</entry>
       <entry>.tif</entry>
       <entry>magellan</entry>
       <entry>Да</entry>
@@ -855,7 +855,7 @@
     </row>
     <!-- From module vtkfile.c -->
     <row>
-      <entry>файл структурной сетки VTK</entry>
+      <entry>Файл структурной сетки VTK</entry>
       <entry>.vtk</entry>
       <entry>vtkfile</entry>
       <entry>Нет</entry>
@@ -918,7 +918,7 @@
     </row>
     <!-- From module hdrimage.cc -->
     <row>
-      <entry>изображения OpenEXR</entry>
+      <entry>Изображения OpenEXR</entry>
       <entry>.exr</entry>
       <entry>hdrimage.cc</entry>
       <entry>Да</entry>
