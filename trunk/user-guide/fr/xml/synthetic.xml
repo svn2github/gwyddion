@@ -211,12 +211,33 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>Activer le multiplicateur lorentzien</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Active la multiplication des coefficients de Fourier par une
+            fonction proportionnelle à
+            <xi:include href="eqi-1-over-1-plus-K2T2-to-3t4.xml"/>, où
+            <xi:include href="eqi-T.xml"/> est la longueur d'auto-corrélation.
+            Aussi, le facteur en lui-même n'est pas lorentzien, mais il
+            correspond à une densité spectrale de puissance uni-dimensionnelle
+            lorentizienne, et donnant par ailleurs une fonction
+            d'auto-corrélation exponentielle (voir la section
+            <link linkend='autocorrelation-1d'>analyse statistique</link> for
+            pour une discussion sur les fonctions d'auto-corrélation). Ce
+            facteur décroît relativement lentement, une résolution finie jouera
+            donc un rôle plus important que dans le cas d'une gaussienne.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Longueur d'auto-corrélation</guilabel>
         </term>
         <listitem>
           <para>
-            Longueur d'auto-corrélation de la gaussienne (voir la section
-            <link linkend='autocorrelation-1d'>analyse statistical</link>
+            Longueur d'auto-corrélation du facteur gaussienne ou lorentzien
+            (voir la section <link linkend='autocorrelation-1d'>analyse statistique</link>
             pour une discussion sur les fonctions d'auto-corrélation).
           </para>
         </listitem>
@@ -227,12 +248,11 @@
         </term>
         <listitem>
           <para>
-            Active la multiplication par un facteur proportionnel à
-            <xi:include href="eqi-1-over-k-to-p.xml"/>, où
-            <xi:include href="eqi-k.xml"/>
-            est la fréquence spatiale et <xi:include href="eqi-p.xml"/> est la
-            puissance. Cette option permet de générer différentes surfaces
-            fractales.
+            Active la multiplication des coefficients de Fourier par un facteur
+            proportionnel à <xi:include href="eqi-1-over-k-to-p.xml"/>, où
+            <xi:include href="eqi-k.xml"/> est la fréquence spatiale et
+            <xi:include href="eqi-p.xml"/> est la puissance. Cette option permet
+            de générer différentes surfaces fractales.
           </para>
         </listitem>
       </varlistentry>
