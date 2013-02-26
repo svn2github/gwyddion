@@ -56,10 +56,18 @@
       <entry>No</entry>
       <entry>No</entry>
     </row>
-    <!-- Module apedaxfile.c contains no magic. -->
+    <!-- From module apedaxfile.c -->
+    <row>
+      <entry>A.P.E. Research DAX</entry>
+      <entry>.dax</entry>
+      <entry>apedaxfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module apefile.c -->
     <row>
-      <entry>APE Research DAT</entry>
+      <entry>A.P.E. Research DAT</entry>
       <entry>.dat</entry>
       <entry>apefile</entry>
       <entry>Yes</entry>
