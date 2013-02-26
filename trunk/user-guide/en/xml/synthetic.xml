@@ -210,11 +210,33 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>Enable Lorentzian multiplier</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Enables the multiplication of the Fourier coefficients by a
+            function proportional to
+            <xi:include href="eqi-1-over-1-plus-K2T2-to-3t4.xml"/>, where
+            <xi:include href="eqi-T.xml"/> is the autocorrelation length.
+            So, the factor itself is not actually Lorentzian but it
+            corresponds to Lorentzian one-dimensional power spectrum density
+            which in turn corresponds to exponential autocorrelation function
+            (see section
+            <link linkend='autocorrelation-1d'>Statistical Analysis</link> for
+            the discussion of autocorrelation functions).  This factor
+            decreases relatively slowly so the finite resolution plays
+            usually a larger role than in the case of Gaussian.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Autocorrelation length</guilabel>
         </term>
         <listitem>
           <para>
-            The autocorrelation length of the Gaussian (see section
+            The autocorrelation length of the Gaussian or Lorentzian factors
+            (see section
             <link linkend='autocorrelation-1d'>Statistical Analysis</link> for
             the discussion of autocorrelation functions).
           </para>
@@ -226,7 +248,8 @@
         </term>
         <listitem>
           <para>
-            Enables multiplication by factor proportional to
+            Enables multiplication of Fourier coefficients by factor
+            proportional to
             <xi:include href="eqi-1-over-k-to-p.xml"/>, where
             <xi:include href="eqi-k.xml"/>
             is the spatial frequency and <xi:include href="eqi-p.xml"/> is the
