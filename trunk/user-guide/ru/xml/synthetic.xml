@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: synthetic.xml 12135 2011-02-28 09:19:53Z yeti-dn $ -->
+<!-- @(#) $Id: synthetic.xml 14709 2013-02-26 09:19:15Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="synthetic">
   <title>Синтетические поверхности</title>
@@ -123,10 +123,18 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>Разрешить лоренцев множитель</guilabel>
+        </term>
+        <listitem>
+          <para>Включает умножение коэффициентов в разложении Фурье на функцию, пропорциональную <xi:include href="eqi-1-over-1-plus-K2T2-to-3t4.xml"/>, где <xi:include href="eqi-T.xml"/> — длина автокорреляции. Таким образом, сам множитель фактически не является лоренцевым, но он соответствует лоренцевой одномерной плотности спектра мощности, которая в свою очередь соответствует экспоненциальной функции автокорреляции (подробное обсуждение функций автокорреляции приведено в разделе <link linkend="autocorrelation-1d">Статистический анализ</link>). Этот множитель убывает сравнительно медленно, таким образом, ограниченное разрешение играет обычно большую роль, чем в случае с гауссовым.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Длина автокорреляции</guilabel>
         </term>
         <listitem>
-          <para>Длина автокорреляции гауссиана (см. раздел <link linkend="autocorrelation-1d">Статистический анализ</link> для подробного обсуждения функций автокорреляции).</para>
+          <para>Длина автокорреляции гауссова или лоренцева множителя (подробное обсуждение функций автокорреляции приведено в разделе <link linkend="autocorrelation-1d">Статистический анализ</link>).</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -134,7 +142,7 @@
           <guilabel>Разрешить степенной множитель</guilabel>
         </term>
         <listitem>
-          <para>Включает умножение на множитель, пропорциональный <xi:include href="eqi-1-over-k-to-p.xml"/>, где <xi:include href="eqi-k.xml"/> - пространственная частота и <xi:include href="eqi-p.xml"/> - степень. Это позволяет создавать различные фрактальные поверхности.</para>
+          <para>Включает умножение коэффициентов в разложении Фурье на множитель, пропорциональный <xi:include href="eqi-1-over-k-to-p.xml"/>, где <xi:include href="eqi-k.xml"/> - пространственная частота и <xi:include href="eqi-p.xml"/> - степень. Это позволяет создавать различные фрактальные поверхности.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

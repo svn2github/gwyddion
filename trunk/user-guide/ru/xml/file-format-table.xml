@@ -55,10 +55,18 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
-    <!-- Module apedaxfile.c contains no magic. -->
+    <!-- From module apedaxfile.c -->
+    <row>
+      <entry>A.P.E. Research DAX</entry>
+      <entry>.dax</entry>
+      <entry>apedaxfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module apefile.c -->
     <row>
-      <entry>APE Research DAT</entry>
+      <entry>A.P.E. Research DAT</entry>
       <entry>.dat</entry>
       <entry>apefile</entry>
       <entry>Да</entry>
@@ -256,7 +264,7 @@
     </row>
     <!-- From module hitachi-sem.c -->
     <row>
-      <entry>Данные РЭМ Hitachi S-3700 и S-4800</entry>
+      <entry>Данные SEM Hitachi S-3700 и S-4800</entry>
       <entry>.txt, +, image</entry>
       <entry>hitachi-sem</entry>
       <entry>Да</entry>
@@ -319,7 +327,7 @@
     </row>
     <!-- From module magellan.c -->
     <row>
-      <entry>Изображения РЭМ FEI Magellan</entry>
+      <entry>Изображения SEM FEI Magellan</entry>
       <entry>.tif</entry>
       <entry>magellan</entry>
       <entry>Да</entry>
@@ -909,7 +917,7 @@
     </row>
     <!-- From module zeiss.c -->
     <row>
-      <entry>Сканы РЭМ Carl Zeiss</entry>
+      <entry>Сканы SEM Carl Zeiss</entry>
       <entry>.tif</entry>
       <entry>zeiss</entry>
       <entry>Да</entry>
