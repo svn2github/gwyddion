@@ -17,7 +17,7 @@
     <para>
       <ulink url='http://gwyddion.net/'><application>Gwyddion</application></ulink>
       est un logiciel modulaire pour l'analyse de données SPM. Son but premier
-      est d'être utilisé pour l'analyse de donnés de obtenues par les
+      est d'être utilisé pour l'analyse de données obtenues par les
       techniques de microscopie à sonde (AFM, MFM, STM, NSOM), mais il
       peut être utilisé de manière plus générale pour tout autre champ de
       données ou pour l'analyse d'images.
@@ -36,7 +36,7 @@
     <para>
       Gwyddion peut être utilisé sur les plateformes Linux/Unix (incluant
       Mac OS X) et Microsoft Windows. Les deux types de système peuvent être
-      utilisées pour le développement. Concernant l'interface graphique, l'outil
+      utilisés pour le développement. Concernant l'interface graphique, l'outil
       <ulink url='http://www.gtk.org/'>Gtk+</ulink> est utilisé, Gwyddion peut
       ainsi être facilement porté vers tout autre système supporté par Gtk+.
     </para>
