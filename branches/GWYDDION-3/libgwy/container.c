@@ -1667,7 +1667,7 @@ gwy_container_set_char(GwyContainer *container,
                        GQuark key,
                        gchar value)
 {
-    container_set_template(container, key, value, char, CHAR);
+    container_set_template(container, key, value, schar, CHAR);
 }
 
 /**
