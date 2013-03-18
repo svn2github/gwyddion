@@ -29,6 +29,20 @@
         </para>
       </listitem>
     </varlistentry>
+    <varlistentry id='dependency-glib'>
+      <term>
+        <ulink url='http://www.gtk.org/'>GLib</ulink>
+        ≥ 2.14.0
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Required.</emphasis>
+        </para>
+        <para>
+          A bit newer version than strictly required by Gtk+ 2.8.
+        </para>
+      </listitem>
+    </varlistentry>
     <varlistentry id='dependency-pkg-config'>
       <term>
         <ulink url='http://pkgconfig.freedesktop.org/'>pkg-config</ulink>
