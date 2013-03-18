@@ -15,6 +15,15 @@
         <para>Включает в себя зависимости GTK+, такие как GLib, Pango или Cairo.</para>
       </listitem>
     </varlistentry>
+    <varlistentry id="dependency-glib">
+      <term><ulink url="http://www.gtk.org/">GLib</ulink> ≥ 2.14.0</term>
+      <listitem>
+        <para>
+          <emphasis>Необходимо.</emphasis>
+        </para>
+        <para>Чуть более новая версия, чем строго требуемая Gtk+ 2.8.</para>
+      </listitem>
+    </varlistentry>
     <varlistentry id="dependency-pkg-config">
       <term><ulink url="http://pkgconfig.freedesktop.org/">pkg-config</ulink> ≥ 0.16</term>
       <listitem>
