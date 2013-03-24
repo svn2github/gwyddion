@@ -164,7 +164,7 @@ fi
 PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.32])
 PKG_CHECK_MODULES([FFTW],[fftw3 >= 3.3])
 PKG_CHECK_MODULES([GDKPIXBUF],[gdk-pixbuf-2.0 >= 2.22])
-PKG_CHECK_MODULES([GTK],[gtk+-3.0 >= 3.0])
+PKG_CHECK_MODULES([GTK],[gtk+-3.0 >= 3.6])
 
 # Needs to be configured out in stable versions.  Deprecations come and go.
 AC_SUBST([LIBGWY_COMPAT_CPPFLAGS],["-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE"])
