@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2007,2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  The quicksort algorithm was copied from GNU C library,
@@ -1721,6 +1721,19 @@ jump_over:
  * GWY_SQRT_PI:
  *
  * The square root of π.
+ **/
+
+/**
+ * GwyDimenType:
+ * @GWY_DIMEN_X: First dimension (@x).
+ * @GWY_DIMEN_Y: Second dimension (@y).
+ * @GWY_DIMEN_Z: Third dimension (@z).
+ * @GWY_DIMEN_W: Fourth dimension (@w).
+ *
+ * Type of dimension axes.
+ *
+ * This enumeration is defined for code readability.  Dimensions can usually
+ * be just indexed numerically.
  **/
 
 /**

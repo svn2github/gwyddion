@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_BRICK_H__
 #define __LIBGWY_BRICK_H__
 
+#include <libgwy/math.h>
 #include <libgwy/serializable.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/line.h>
@@ -156,6 +157,8 @@ gboolean gwy_brick_check_part      (const GwyBrick *brick,
                                     guint *depth);
 gboolean gwy_brick_check_plane_part(const GwyBrick *brick,
                                     const GwyFieldPart *fpart,
+                                    GwyDimenType coldim,
+                                    GwyDimenType rowdim,
                                     guint *col,
                                     guint *row,
                                     guint level,
@@ -163,6 +166,8 @@ gboolean gwy_brick_check_plane_part(const GwyBrick *brick,
                                     guint *height);
 gboolean gwy_brick_check_line_part (const GwyBrick *brick,
                                     const GwyLinePart *lpart,
+                                    GwyDimenType coldim,
+                                    GwyDimenType rowdim,
                                     guint col,
                                     guint row,
                                     guint *level,

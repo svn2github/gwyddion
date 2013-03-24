@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -306,60 +306,126 @@ gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
  * @fpart: (allow-none):
  *         Area in the @brick plane to extract to the field.  Passing %NULL
  *         extracts the full plane.
- * @level: Level index in @brick.
+ * @coldim: Dimension (axis) in @brick which will form columns in the extracted
+ *          field.
+ * @rowdim: Dimension (axis) in @brick which will form rows in the extracted
+ *          field.
+ * @level: Level index in @brick.  More precisely, index along the remaining
+ *         dimension.
  * @keep_offsets: %TRUE to set the X and Y offsets of the field
  *                using @fpart and @brick offsets.  %FALSE to set offsets
  *                of the field to zeroes.
  *
  * Extracts a brick plane to a field.
+ *
+ * Since the brick is organised in memory by planes this method may have to
+ * access memory in a scattered manner if @coldim and @rowdim differ from the
+ * column and row dimensions of the brick.
+ *
+ * Dimensions @coldim and @rowdim must be different and belong to the set
+ * { %GWY_DIMEN_X, %GWY_DIMEN_Y, %GWY_DIMEN_Z }.
  **/
 void
 gwy_brick_extract_plane(const GwyBrick *brick,
                         GwyField *target,
                         const GwyFieldPart *fpart,
+                        GwyDimenType coldim, GwyDimenType rowdim,
                         guint level,
                         gboolean keep_offsets)
 {
     guint fcol, frow, fwidth, fheight, bcol, brow, bwidth, bheight;
-    if (!gwy_brick_check_plane_part(brick, fpart,
-                                    &bcol, &brow, level, &bwidth, &bheight)
-        || !gwy_field_check_target_part(target, fpart,
-                                        brick->xres, brick->yres,
-                                        &fcol, &frow, &fwidth, &fheight))
+    if (!gwy_brick_check_plane_part(brick, fpart, coldim, rowdim,
+                                    &bcol, &brow, level, &bwidth, &bheight))
+        return;
+
+    // Now the indices are good but along coldim and rowdim.
+    const guint res[] = { brick->xres, brick->yres, brick->zres };
+    if (!gwy_field_check_target_part(target, fpart, res[coldim], res[rowdim],
+                                     &fcol, &frow, &fwidth, &fheight))
         return;
 
     // Can happen with NULL @fpart and incompatible objects.
     g_return_if_fail(fwidth == bwidth && fheight == bheight);
 
-    const gdouble *bbase = brick->data + (level*brick->yres + brow)*brick->xres
-                           + bcol;
     gdouble *fbase = target->data + frow*target->xres + fcol;
+    const gdouble *bbase;
+    guint stride, stride2;
 
-    if (bwidth == brick->xres && fwidth == target->xres) {
+    if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y) {
+        bbase = brick->data + (level*brick->yres + brow)*brick->xres + bcol;
+        stride = 1;
+        stride2 = brick->xres;
+    }
+    else if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Z) {
+        bbase = brick->data + (brow*brick->yres + level)*brick->xres + bcol;
+        stride = 1;
+        stride2 = brick->xres*brick->yres;
+    }
+    else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
+        bbase = brick->data + (brow*brick->yres + bcol)*brick->xres + level;
+        stride = brick->xres;
+        stride2 = brick->xres*brick->yres;
+    }
+    else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_X) {
+        bbase = brick->data + (level*brick->yres + bcol)*brick->xres + brow;
+        stride = brick->xres;
+        stride2 = 1;
+    }
+    else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_X) {
+        bbase = brick->data + (bcol*brick->yres + level)*brick->xres + brow;
+        stride = brick->xres*brick->yres;
+        stride2 = 1;
+    }
+    else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_Y) {
+        bbase = brick->data + (bcol*brick->yres + brow)*brick->xres + level;
+        stride = brick->xres*brick->yres;
+        stride2 = brick->xres;
+    }
+    else {
+        g_return_if_reached();
+    }
+
+    if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y
+        && bwidth == brick->xres && fwidth == target->xres) {
         g_assert(bcol == 0 && fcol == 0);
         gwy_assign(fbase, bbase, fwidth*fheight);
     }
+    else if (stride == 1) {
+        for (guint i = 0; i < fheight; i++) {
+            gdouble *f = fbase + i*target->xres;
+            const gdouble *b = bbase + i*stride2;
+            gwy_assign(f, b, fwidth);
+        }
+    }
     else {
-        for (guint i = 0; i < fheight; i++)
-            gwy_assign(fbase + i*target->xres, bbase + i*brick->xres, fwidth);
+        for (guint i = 0; i < fheight; i++) {
+            gdouble *f = fbase + i*target->xres;
+            const gdouble *b = bbase + i*stride2;
+            for (guint j = fwidth; j; j--, f++, b += stride)
+                *f = *b;
+        }
     }
 
-    gwy_field_set_xreal(target, target->xres*gwy_brick_dx(brick));
-    gwy_field_set_yreal(target, target->yres*gwy_brick_dy(brick));
+    const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
+    const gdouble off[] = { brick->xoff, brick->yoff, brick->zoff };
+    Brick *priv = brick->priv;
+    const GwyUnit *unit[] = { priv->unit_x, priv->unit_y, priv->unit_z };
+    gdouble dx = real[coldim]/res[coldim], dy = real[rowdim]/res[rowdim];
+
+    gwy_field_set_xreal(target, target->xres*dx);
+    gwy_field_set_yreal(target, target->yres*dy);
     if (keep_offsets) {
         // XXX: unsigned arithmetic would break if bcol < fcol, brow < frow.
-        gwy_field_set_xoffset(target,
-                              brick->xoff + (bcol - fcol)*gwy_brick_dx(brick));
-        gwy_field_set_yoffset(target,
-                              brick->yoff + (brow - frow)*gwy_brick_dy(brick));
+        gwy_field_set_xoffset(target, off[coldim] + (bcol - fcol)*dx);
+        gwy_field_set_yoffset(target, off[rowdim] + (brow - frow)*dy);
     }
     else {
         gwy_field_set_xoffset(target, 0.0);
         gwy_field_set_yoffset(target, 0.0);
     }
-    _gwy_assign_unit(&target->priv->unit_x, brick->priv->unit_x);
-    _gwy_assign_unit(&target->priv->unit_y, brick->priv->unit_y);
-    _gwy_assign_unit(&target->priv->unit_z, brick->priv->unit_w);
+    _gwy_assign_unit(&target->priv->unit_x, unit[coldim]);
+    _gwy_assign_unit(&target->priv->unit_y, unit[rowdim]);
+    _gwy_assign_unit(&target->priv->unit_z, priv->unit_w);
     gwy_field_invalidate(target);
 }
 
@@ -373,6 +439,10 @@ gwy_brick_extract_plane(const GwyBrick *brick,
  * @lpart: (allow-none):
  *         Part of the @brick line to extract to the line.  Passing %NULL
  *         extracts the full line.
+ * @coldim: Dimension (axis) in @brick which will form columns in the extracted
+ *          field.
+ * @rowdim: Dimension (axis) in @brick which will form rows in the extracted
+ *          field.
  * @col: Column index in @brick.
  * @row: Row index in @brick.
  * @keep_offsets: %TRUE to set the X offset of the line using @lpart and @brick
@@ -380,45 +450,89 @@ gwy_brick_extract_plane(const GwyBrick *brick,
  *
  * Extracts a vertical profile in a brick to a line.
  *
- * Since the brick is organised in memory by planes this method has to access
- * memory in a scattered manner.  Hence it is suitable for the extraction of
- * a single line, however, if you process many lines at once it is better to
- * process the data by plane.
+ * Since the brick is organised in memory by planes this method may have to
+ * access memory in a scattered manner.  Hence it is suitable for the
+ * extraction of a single line, however, if you process many lines at once it
+ * is better to process the data by plane.
+ *
+ * Dimensions @coldim and @rowdim must be different and belong to the set
+ * { %GWY_DIMEN_X, %GWY_DIMEN_Y, %GWY_DIMEN_Z }.
  **/
 void
 gwy_brick_extract_line(const GwyBrick *brick,
                        GwyLine *target,
                        const GwyLinePart *lpart,
+                       GwyDimenType coldim, GwyDimenType rowdim,
                        guint col, guint row,
                        gboolean keep_offsets)
 {
     guint pos, len, level, depth;
-    if (!gwy_brick_check_line_part(brick, lpart, col, row, &level, &depth)
-        || !gwy_line_check_target_part(target, lpart, brick->zres, &pos, &len))
+
+    // @col and @row only say where to read the line, order does not matter.
+    // Defined order reduces the number of cases to consider in actual copying.
+    if (coldim > rowdim) {
+        GWY_SWAP(GwyDimenType, coldim, rowdim);
+        GWY_SWAP(guint, col, row);
+    }
+    if (!gwy_brick_check_line_part(brick, lpart, coldim, rowdim,
+                                   col, row, &level, &depth))
+        return;
+
+    // Now the indices are good but along coldim and rowdim.
+    const guint res[] = { brick->xres, brick->yres, brick->zres };
+    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+                             - coldim - rowdim);
+    if (!gwy_line_check_target_part(target, lpart, res[leveldim], &pos, &len))
         return;
 
     // Can happen with NULL @lpart and incompatible objects.
     g_return_if_fail(len == depth);
 
-    const gdouble *bbase = brick->data + (level*brick->yres + row)*brick->xres
-                           + col;
     gdouble *lbase = target->data + pos;
-    guint stride = brick->xres * brick->yres;
+    const gdouble *bbase;
+    guint stride;
+    if (leveldim == GWY_DIMEN_Z) {
+        // @col is column, @row is row, @level is level
+        bbase = brick->data + (level*brick->yres + row)*brick->xres + col;
+        stride = brick->xres * brick->yres;
+    }
+    else if (leveldim == GWY_DIMEN_Y) {
+        // @col is column, @row is level, @level is row
+        bbase = brick->data + (row*brick->yres + level)*brick->xres + col;
+        stride = brick->xres;
+    }
+    else if (leveldim == GWY_DIMEN_X) {
+        // @col is row, @row is level, @level is column
+        bbase = brick->data + (row*brick->yres + col)*brick->xres + level;
+        stride = 1;
+    }
+    else {
+        g_return_if_reached();
+    }
 
-    for (guint i = 0; i < len; i++)
-        lbase[i] = bbase[i*stride];
+    if (stride == 1)
+        gwy_assign(lbase, bbase, len);
+    else {
+        for (guint i = len; i; i--, lbase++, bbase += stride)
+            *lbase = *bbase;
+    }
 
-    gwy_line_set_real(target, target->res*gwy_brick_dz(brick));
+    const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
+    const gdouble off[] = { brick->xoff, brick->yoff, brick->zoff };
+    Brick *priv = brick->priv;
+    const GwyUnit *unit[] = { priv->unit_x, priv->unit_y, priv->unit_z };
+    gdouble d = real[leveldim]/res[leveldim];
+
+    gwy_line_set_real(target, target->res*d);
     if (keep_offsets) {
         // XXX: unsigned arithmetic would break if level < pos.
-        gwy_line_set_offset(target,
-                            brick->zoff + (level - pos)*gwy_brick_dz(brick));
+        gwy_line_set_offset(target, off[leveldim] + (level - pos)*d);
     }
     else {
         gwy_line_set_offset(target, 0.0);
     }
-    _gwy_assign_unit(&target->priv->unit_x, brick->priv->unit_z);
-    _gwy_assign_unit(&target->priv->unit_y, brick->priv->unit_w);
+    _gwy_assign_unit(&target->priv->unit_x, unit[leveldim]);
+    _gwy_assign_unit(&target->priv->unit_y, priv->unit_w);
     //gwy_line_invalidate(target);
 }
 

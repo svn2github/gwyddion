@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -27,25 +27,25 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_BRICK_COMPAT_XRES    = 1 << 0,
-    GWY_BRICK_COMPAT_YRES    = 1 << 1,
-    GWY_BRICK_COMPAT_ZRES    = 1 << 2,
+    GWY_BRICK_COMPAT_XRES    = 1 << (0 + GWY_DIMEN_X),
+    GWY_BRICK_COMPAT_YRES    = 1 << (0 + GWY_DIMEN_Y),
+    GWY_BRICK_COMPAT_ZRES    = 1 << (0 + GWY_DIMEN_Z),
     GWY_BRICK_COMPAT_RES     = GWY_BRICK_COMPAT_XRES | GWY_BRICK_COMPAT_YRES | GWY_BRICK_COMPAT_ZRES,
-    GWY_BRICK_COMPAT_XREAL   = 1 << 3,
-    GWY_BRICK_COMPAT_YREAL   = 1 << 4,
-    GWY_BRICK_COMPAT_ZREAL   = 1 << 5,
+    GWY_BRICK_COMPAT_XREAL   = 1 << (3 + GWY_DIMEN_X),
+    GWY_BRICK_COMPAT_YREAL   = 1 << (3 + GWY_DIMEN_Y),
+    GWY_BRICK_COMPAT_ZREAL   = 1 << (3 + GWY_DIMEN_Z),
     GWY_BRICK_COMPAT_REAL    = GWY_BRICK_COMPAT_XREAL | GWY_BRICK_COMPAT_YREAL | GWY_BRICK_COMPAT_ZREAL,
-    GWY_BRICK_COMPAT_DX      = 1 << 6,
-    GWY_BRICK_COMPAT_DY      = 1 << 7,
-    GWY_BRICK_COMPAT_DZ      = 1 << 8,
+    GWY_BRICK_COMPAT_DX      = 1 << (6 + GWY_DIMEN_X),
+    GWY_BRICK_COMPAT_DY      = 1 << (6 + GWY_DIMEN_Y),
+    GWY_BRICK_COMPAT_DZ      = 1 << (6 + GWY_DIMEN_Z),
     GWY_BRICK_COMPAT_DXDY    = GWY_BRICK_COMPAT_DX | GWY_BRICK_COMPAT_DY,
     GWY_BRICK_COMPAT_DXDYDZ  = GWY_BRICK_COMPAT_DXDY | GWY_BRICK_COMPAT_DZ,
-    GWY_BRICK_COMPAT_X       = 1 << 9,
-    GWY_BRICK_COMPAT_Y       = 1 << 10,
+    GWY_BRICK_COMPAT_X       = 1 << (9 + GWY_DIMEN_X),
+    GWY_BRICK_COMPAT_Y       = 1 << (9 + GWY_DIMEN_Y),
     GWY_BRICK_COMPAT_LATERAL = GWY_BRICK_COMPAT_X | GWY_BRICK_COMPAT_Y,
-    GWY_BRICK_COMPAT_Z       = 1 << 10,
+    GWY_BRICK_COMPAT_Z       = 1 << (9 + GWY_DIMEN_Z),
     GWY_BRICK_COMPAT_SPACE   = GWY_BRICK_COMPAT_LATERAL | GWY_BRICK_COMPAT_Z,
-    GWY_BRICK_COMPAT_VALUE   = 1 << 11,
+    GWY_BRICK_COMPAT_VALUE   = 1 << (9 + GWY_DIMEN_W),
     GWY_BRICK_COMPAT_UNITS   = GWY_BRICK_COMPAT_SPACE | GWY_BRICK_COMPAT_VALUE,
     GWY_BRICK_COMPAT_ALL     = 0x0fffu
 } GwyBrickCompatFlags;
@@ -63,11 +63,15 @@ GwyLineCompatFlags gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
 void gwy_brick_extract_plane(const GwyBrick *brick,
                              GwyField *target,
                              const GwyFieldPart *fpart,
+                             GwyDimenType coldim,
+                             GwyDimenType rowdim,
                              guint level,
                              gboolean keep_offsets);
 void gwy_brick_extract_line (const GwyBrick *brick,
                              GwyLine *target,
                              const GwyLinePart *lpart,
+                             GwyDimenType coldim,
+                             GwyDimenType rowdim,
                              guint col,
                              guint row,
                              gboolean keep_offsets);

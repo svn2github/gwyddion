@@ -1279,11 +1279,14 @@ gwy_brick_check_part(const GwyBrick *brick,
  * @brick: A three-dimensional data brick.
  * @fpart: (allow-none):
  *         Part of @brick plane, possibly %NULL.
- * @col: Location to store the actual column index of the top upper-left corner
- *       of the part.
- * @row: Location to store the actual row index of the top upper-left corner
- *       of the part.
- * @level: Level index in @brick.
+ * @coldim: Dimension (axis) in @brick which corresponds to @col.
+ * @rowdim: Dimension (axis) in @brick which corresponds to @row.
+ * @col: Location to store the actual index along @coldim of the top upper-left
+ *       corner of the part.
+ * @row: Location to store the actual index along @rowdim of the top upper-left
+ *       corner of the part.
+ * @level: Level index in @brick, i.e. the remaining index which is neither
+ *         along column nor row dimension.
  * @width: Location to store the actual width (number of columns)
  *         of the part.
  * @height: Location to store the actual height (number of rows)
@@ -1311,19 +1314,27 @@ gwy_brick_check_part(const GwyBrick *brick,
 gboolean
 gwy_brick_check_plane_part(const GwyBrick *brick,
                            const GwyFieldPart *fpart,
+                           GwyDimenType coldim, GwyDimenType rowdim,
                            guint *col, guint *row, guint level,
                            guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
-    g_return_val_if_fail(level < brick->zres, FALSE);
+    g_return_val_if_fail(coldim <= GWY_DIMEN_Z, FALSE);
+    g_return_val_if_fail(rowdim <= GWY_DIMEN_Z, FALSE);
+    g_return_val_if_fail(coldim != rowdim, FALSE);
+
+    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+                             - coldim - rowdim);
+    const guint res[] = { brick->xres, brick->yres, brick->zres };
+    g_return_val_if_fail(level < res[leveldim], FALSE);
     if (fpart) {
         if (!fpart->width || !fpart->height)
             return FALSE;
         // The two separate conditions are to catch integer overflows.
-        g_return_val_if_fail(fpart->col < brick->xres, FALSE);
-        g_return_val_if_fail(fpart->width <= brick->xres - fpart->col, FALSE);
-        g_return_val_if_fail(fpart->row < brick->yres, FALSE);
-        g_return_val_if_fail(fpart->height <= brick->yres - fpart->row, FALSE);
+        g_return_val_if_fail(fpart->col < res[coldim], FALSE);
+        g_return_val_if_fail(fpart->width <= res[coldim] - fpart->col, FALSE);
+        g_return_val_if_fail(fpart->row < res[rowdim], FALSE);
+        g_return_val_if_fail(fpart->height <= res[rowdim] - fpart->row, FALSE);
         *col = fpart->col;
         *row = fpart->row;
         *width = fpart->width;
@@ -1331,8 +1342,8 @@ gwy_brick_check_plane_part(const GwyBrick *brick,
     }
     else {
         *col = *row = 0;
-        *width = brick->xres;
-        *height = brick->yres;
+        *width = res[coldim];
+        *height = res[rowdim];
     }
 
     return TRUE;
@@ -1343,12 +1354,14 @@ gwy_brick_check_plane_part(const GwyBrick *brick,
  * @brick: A three-dimensional data brick.
  * @lpart: (allow-none):
  *         Part of @brick section, possibly %NULL.
- * @col: Column index in @brick.
- * @row: Row index in @brick.
- * @level: Location to store the actual level index of the top upper-left
+ * @coldim: Dimension (axis) in @brick which corresponds to @col.
+ * @rowdim: Dimension (axis) in @brick which corresponds to @row.
+ * @col: Column index in @brick, as indicated by @coldim.
+ * @row: Row index in @brick, as indicated by @rowdim.
+ * @level: Location to store the actual remaining index of the top upper-left
  *         corner of the part.
- * @depth: Location to store the actual depth (number of levels)
- *         of the part.
+ * @depth: Location to store the actual depth (number of levels in the
+ *         remaining dimension) of the part.
  *
  * Validates the position and dimensions of a line brick part.
  *
@@ -1372,24 +1385,32 @@ gwy_brick_check_plane_part(const GwyBrick *brick,
 gboolean
 gwy_brick_check_line_part(const GwyBrick *brick,
                           const GwyLinePart *lpart,
+                          GwyDimenType coldim, GwyDimenType rowdim,
                           guint col, guint row,
                           guint *level, guint *depth)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
-    g_return_val_if_fail(col < brick->xres, FALSE);
-    g_return_val_if_fail(row < brick->yres, FALSE);
+    g_return_val_if_fail(coldim <= GWY_DIMEN_Z, FALSE);
+    g_return_val_if_fail(rowdim <= GWY_DIMEN_Z, FALSE);
+    g_return_val_if_fail(coldim != rowdim, FALSE);
+
+    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+                             - coldim - rowdim);
+    const guint res[] = { brick->xres, brick->yres, brick->zres };
+    g_return_val_if_fail(col < res[coldim], FALSE);
+    g_return_val_if_fail(row < res[rowdim], FALSE);
     if (lpart) {
         if (!lpart->len)
             return FALSE;
         // The two separate conditions are to catch integer overflows.
-        g_return_val_if_fail(lpart->pos < brick->zres, FALSE);
-        g_return_val_if_fail(lpart->len <= brick->zres - lpart->pos, FALSE);
+        g_return_val_if_fail(lpart->pos < res[leveldim], FALSE);
+        g_return_val_if_fail(lpart->len <= res[leveldim] - lpart->pos, FALSE);
         *level = lpart->pos;
         *depth = lpart->len;
     }
     else {
         *level = 0;
-        *depth = brick->zres;
+        *depth = res[leveldim];
     }
 
     return TRUE;

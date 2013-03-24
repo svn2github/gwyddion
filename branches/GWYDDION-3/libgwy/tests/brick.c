@@ -1790,6 +1790,7 @@ summarize_lines_one(GwyBrickLineSummary quantity,
                         vpart = partfield->data[(i + row)*xres + (j + col)];
                 g_assert_cmpfloat(vpart, ==, vfull);
                 gwy_brick_extract_line(brick, line, &lpart,
+                                       GWY_DIMEN_X, GWY_DIMEN_Y,
                                        j + col, i + row, FALSE);
                 gdouble vline = line_stat_function(line);
                 g_assert_cmpfloat(fabs(vfull - vline), <, 1e-14);

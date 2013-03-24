@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2007,2009-2011,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,13 @@ G_BEGIN_DECLS
 
 #define GWY_SQRT3 1.73205080756887729352744634150587236694280525381038
 #define GWY_SQRT_PI 1.77245385090551602729816748334114518279754945612237
+
+typedef enum {
+    GWY_DIMEN_X = 0,
+    GWY_DIMEN_Y = 1,
+    GWY_DIMEN_Z = 2,
+    GWY_DIMEN_W = 3,
+} GwyDimenType;
 
 typedef struct {
     gdouble x;
