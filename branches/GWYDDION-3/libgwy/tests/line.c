@@ -219,36 +219,36 @@ void
 test_line_units_assign(void)
 {
     GwyLine *line = gwy_line_new(), *line2 = gwy_line_new();
-    GwyUnit *unit_x = gwy_line_get_unit_x(line);
-    GwyUnit *unit_y = gwy_line_get_unit_y(line);
+    GwyUnit *xunit = gwy_line_get_xunit(line);
+    GwyUnit *yunit = gwy_line_get_yunit(line);
     guint count_x = 0;
     guint count_y = 0;
 
-    g_signal_connect_swapped(unit_x, "changed",
+    g_signal_connect_swapped(xunit, "changed",
                              G_CALLBACK(record_signal), &count_x);
-    g_signal_connect_swapped(unit_y, "changed",
+    g_signal_connect_swapped(yunit, "changed",
                              G_CALLBACK(record_signal), &count_y);
 
-    gwy_unit_set_from_string(gwy_line_get_unit_x(line), "m", NULL);
+    gwy_unit_set_from_string(gwy_line_get_xunit(line), "m", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 0);
 
-    gwy_unit_set_from_string(gwy_line_get_unit_y(line), "s", NULL);
+    gwy_unit_set_from_string(gwy_line_get_yunit(line), "s", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
 
     gwy_line_assign(line, line2);
     g_assert_cmpuint(count_x, ==, 2);
     g_assert_cmpuint(count_y, ==, 2);
-    g_assert(gwy_line_get_unit_x(line) == unit_x);
-    g_assert(gwy_line_get_unit_y(line) == unit_y);
+    g_assert(gwy_line_get_xunit(line) == xunit);
+    g_assert(gwy_line_get_yunit(line) == yunit);
 
     // Try again to see if the signal counts change.
     gwy_line_assign(line, line2);
     g_assert_cmpuint(count_x, ==, 2);
     g_assert_cmpuint(count_y, ==, 2);
-    g_assert(gwy_line_get_unit_x(line) == unit_x);
-    g_assert(gwy_line_get_unit_y(line) == unit_y);
+    g_assert(gwy_line_get_xunit(line) == xunit);
+    g_assert(gwy_line_get_yunit(line) == yunit);
 
     g_object_unref(line2);
     g_object_unref(line);
@@ -268,9 +268,9 @@ test_line_serialize(void)
         GwyLine *copy;
 
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_line_get_unit_x(original), rng);
+            unit_randomize(gwy_line_get_xunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_line_get_unit_y(original), rng);
+            unit_randomize(gwy_line_get_yunit(original), rng);
 
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                line_assert_equal_object);
@@ -710,8 +710,8 @@ test_line_compatibility_units(void)
     GwyLine *line2 = gwy_line_new();
     GwyLine *line3 = gwy_line_new();
 
-    gwy_unit_set_from_string(gwy_line_get_unit_x(line1), "m", NULL);
-    gwy_unit_set_from_string(gwy_line_get_unit_y(line3), "m", NULL);
+    gwy_unit_set_from_string(gwy_line_get_xunit(line1), "m", NULL);
+    gwy_unit_set_from_string(gwy_line_get_yunit(line3), "m", NULL);
 
     g_assert_cmpuint(gwy_line_is_incompatible(line1, line2,
                                               GWY_LINE_COMPAT_LATERAL),

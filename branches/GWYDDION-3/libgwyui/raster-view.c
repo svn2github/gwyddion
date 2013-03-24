@@ -674,13 +674,13 @@ field_notify(GwyRasterView *rasterview,
                                NULL)) {
         update_ruler_ranges(rasterview);
     }
-    if (!pspec || gwy_stramong(pspec->name, "unit-x", "unit-y", NULL)) {
+    if (!pspec || gwy_stramong(pspec->name, "xunit", "unit-y", NULL)) {
         if (priv->scale_type == GWY_COORD_SCALE_REAL)
             set_ruler_units_to_field(rasterview);
     }
-    if (!pspec || gwy_strequal(pspec->name, "unit-z")) {
+    if (!pspec || gwy_strequal(pspec->name, "zunit")) {
         GwyUnit *colorunit = gwy_axis_get_unit(GWY_AXIS(priv->coloraxis));
-        GwyUnit *zunit = gwy_field_get_unit_z(field);
+        GwyUnit *zunit = gwy_field_get_zunit(field);
         gwy_unit_assign(colorunit, zunit);
         update_range_entry_units(rasterview);
     }
@@ -692,8 +692,8 @@ set_ruler_units_to_field(GwyRasterView *rasterview)
     RasterView *priv = rasterview->priv;
     GwyUnit *hunit = gwy_axis_get_unit(GWY_AXIS(priv->hruler));
     GwyUnit *vunit = gwy_axis_get_unit(GWY_AXIS(priv->vruler));
-    GwyUnit *xunit = gwy_field_get_unit_x(priv->field);
-    GwyUnit *yunit = gwy_field_get_unit_y(priv->field);
+    GwyUnit *xunit = gwy_field_get_xunit(priv->field);
+    GwyUnit *yunit = gwy_field_get_yunit(priv->field);
     gwy_unit_assign(hunit, xunit);
     gwy_unit_assign(vunit, yunit);
 }
@@ -873,7 +873,7 @@ update_range_entry_units(GwyRasterView *rasterview)
     gdouble min, max;
     gwy_field_min_max_full(priv->field, &min, &max);
     gdouble m = fmax(fabs(min), fabs(max));
-    GwyUnit *zunit = gwy_field_get_unit_z(priv->field);
+    GwyUnit *zunit = gwy_field_get_zunit(priv->field);
     priv->range_vf = gwy_unit_format_with_digits(zunit,
                                                  GWY_VALUE_FORMAT_PANGO, m, 4);
     const gchar *u = gwy_value_format_get_units(priv->range_vf);

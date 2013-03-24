@@ -119,43 +119,43 @@ void
 test_brick_units_assign(void)
 {
     GwyBrick *brick = gwy_brick_new(), *brick2 = gwy_brick_new();
-    GwyUnit *unit_x = gwy_brick_get_unit_x(brick);
-    GwyUnit *unit_y = gwy_brick_get_unit_y(brick);
-    GwyUnit *unit_z = gwy_brick_get_unit_z(brick);
-    GwyUnit *unit_w = gwy_brick_get_unit_w(brick);
+    GwyUnit *xunit = gwy_brick_get_xunit(brick);
+    GwyUnit *yunit = gwy_brick_get_yunit(brick);
+    GwyUnit *zunit = gwy_brick_get_zunit(brick);
+    GwyUnit *wunit = gwy_brick_get_wunit(brick);
     guint count_x = 0;
     guint count_y = 0;
     guint count_z = 0;
     guint count_w = 0;
 
-    g_signal_connect_swapped(unit_x, "changed",
+    g_signal_connect_swapped(xunit, "changed",
                              G_CALLBACK(record_signal), &count_x);
-    g_signal_connect_swapped(unit_y, "changed",
+    g_signal_connect_swapped(yunit, "changed",
                              G_CALLBACK(record_signal), &count_y);
-    g_signal_connect_swapped(unit_z, "changed",
+    g_signal_connect_swapped(zunit, "changed",
                              G_CALLBACK(record_signal), &count_z);
-    g_signal_connect_swapped(unit_w, "changed",
+    g_signal_connect_swapped(wunit, "changed",
                              G_CALLBACK(record_signal), &count_w);
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_x(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_xunit(brick), "m", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 0);
     g_assert_cmpuint(count_z, ==, 0);
     g_assert_cmpuint(count_w, ==, 0);
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_y(brick), "A", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_yunit(brick), "A", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 0);
     g_assert_cmpuint(count_w, ==, 0);
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick), "s", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_zunit(brick), "s", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 1);
     g_assert_cmpuint(count_w, ==, 0);
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "kg", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_wunit(brick), "kg", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 1);
@@ -166,10 +166,10 @@ test_brick_units_assign(void)
     g_assert_cmpuint(count_y, ==, 2);
     g_assert_cmpuint(count_z, ==, 2);
     g_assert_cmpuint(count_w, ==, 2);
-    g_assert(gwy_brick_get_unit_x(brick) == unit_x);
-    g_assert(gwy_brick_get_unit_y(brick) == unit_y);
-    g_assert(gwy_brick_get_unit_z(brick) == unit_z);
-    g_assert(gwy_brick_get_unit_w(brick) == unit_w);
+    g_assert(gwy_brick_get_xunit(brick) == xunit);
+    g_assert(gwy_brick_get_yunit(brick) == yunit);
+    g_assert(gwy_brick_get_zunit(brick) == zunit);
+    g_assert(gwy_brick_get_wunit(brick) == wunit);
 
     // Try again to see if the signal counts change.
     gwy_brick_assign(brick, brick2);
@@ -177,10 +177,10 @@ test_brick_units_assign(void)
     g_assert_cmpuint(count_y, ==, 2);
     g_assert_cmpuint(count_z, ==, 2);
     g_assert_cmpuint(count_w, ==, 2);
-    g_assert(gwy_brick_get_unit_x(brick) == unit_x);
-    g_assert(gwy_brick_get_unit_y(brick) == unit_y);
-    g_assert(gwy_brick_get_unit_z(brick) == unit_z);
-    g_assert(gwy_brick_get_unit_w(brick) == unit_w);
+    g_assert(gwy_brick_get_xunit(brick) == xunit);
+    g_assert(gwy_brick_get_yunit(brick) == yunit);
+    g_assert(gwy_brick_get_zunit(brick) == zunit);
+    g_assert(gwy_brick_get_wunit(brick) == wunit);
 
     g_object_unref(brick2);
     g_object_unref(brick);
@@ -501,13 +501,13 @@ test_brick_serialize(void)
         GwyBrick *copy;
 
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_brick_get_unit_x(original), rng);
+            unit_randomize(gwy_brick_get_xunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_brick_get_unit_y(original), rng);
+            unit_randomize(gwy_brick_get_yunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_brick_get_unit_z(original), rng);
+            unit_randomize(gwy_brick_get_zunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_brick_get_unit_w(original), rng);
+            unit_randomize(gwy_brick_get_wunit(original), rng);
 
         if (g_rand_int(rng) % 3 == 0)
             gwy_brick_set_xoffset(original, g_rand_double(rng));
@@ -1280,10 +1280,10 @@ test_brick_compatibility_units(void)
     for (guint i = 0; i < N; i++)
         bricks[i] = gwy_brick_new();
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_x(bricks[1]), "m", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_y(bricks[2]), "m", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_z(bricks[3]), "m", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_w(bricks[4]), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_xunit(bricks[1]), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_yunit(bricks[2]), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_zunit(bricks[3]), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_wunit(bricks[4]), "m", NULL);
 
     for (guint tocheck = 0; tocheck <= GWY_BRICK_COMPAT_ALL; tocheck++) {
         for (guint i = 0; i < N; i++) {
@@ -1565,16 +1565,16 @@ test_brick_compatibility_field_units(void)
     GwyField *field3 = gwy_field_new_sized(2, 2, FALSE);
     GwyField *field4 = gwy_field_new_sized(2, 2, FALSE);
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_x(brick), "m", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_y(brick), "N", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick), "s", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "A", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_x(field1), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_y(field1), "N", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_z(field1), "A", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_x(field3), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_y(field3), "N", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_z(field4), "A", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_xunit(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_yunit(brick), "N", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_zunit(brick), "s", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_wunit(brick), "A", NULL);
+    gwy_unit_set_from_string(gwy_field_get_xunit(field1), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_yunit(field1), "N", NULL);
+    gwy_unit_set_from_string(gwy_field_get_zunit(field1), "A", NULL);
+    gwy_unit_set_from_string(gwy_field_get_xunit(field3), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_yunit(field3), "N", NULL);
+    gwy_unit_set_from_string(gwy_field_get_zunit(field4), "A", NULL);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
                                   (brick, field1, GWY_FIELD_COMPAT_LATERAL),
@@ -1693,14 +1693,14 @@ test_brick_compatibility_line_units(void)
     GwyLine *line3 = gwy_line_new_sized(4, FALSE);
     GwyLine *line4 = gwy_line_new_sized(4, FALSE);
 
-    gwy_unit_set_from_string(gwy_brick_get_unit_x(brick), "m", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_y(brick), "m", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_z(brick), "s", NULL);
-    gwy_unit_set_from_string(gwy_brick_get_unit_w(brick), "A", NULL);
-    gwy_unit_set_from_string(gwy_line_get_unit_x(line1), "s", NULL);
-    gwy_unit_set_from_string(gwy_line_get_unit_y(line1), "A", NULL);
-    gwy_unit_set_from_string(gwy_line_get_unit_x(line3), "s", NULL);
-    gwy_unit_set_from_string(gwy_line_get_unit_y(line4), "A", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_xunit(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_yunit(brick), "m", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_zunit(brick), "s", NULL);
+    gwy_unit_set_from_string(gwy_brick_get_wunit(brick), "A", NULL);
+    gwy_unit_set_from_string(gwy_line_get_xunit(line1), "s", NULL);
+    gwy_unit_set_from_string(gwy_line_get_yunit(line1), "A", NULL);
+    gwy_unit_set_from_string(gwy_line_get_xunit(line3), "s", NULL);
+    gwy_unit_set_from_string(gwy_line_get_yunit(line4), "A", NULL);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
                                   (brick, line1, GWY_LINE_COMPAT_LATERAL),

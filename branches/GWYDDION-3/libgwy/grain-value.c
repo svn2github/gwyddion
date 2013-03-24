@@ -639,9 +639,9 @@ gwy_field_evaluate_grains(const GwyField *field,
     }
     _gwy_grain_value_evaluate_builtins(field, mask, compact_builtins, bcount);
 
-    const GwyUnit *unitx = field->priv->unit_x;
-    const GwyUnit *unity = field->priv->unit_y;
-    const GwyUnit *unitz = field->priv->unit_z;
+    const GwyUnit *unitx = field->priv->xunit;
+    const GwyUnit *unity = field->priv->yunit;
+    const GwyUnit *unitz = field->priv->zunit;
     for (guint i = 0; i < nvalues; i++) {
         GwyGrainValue *grainvalue = grainvalues[i];
         GrainValue *priv = grainvalue->priv;

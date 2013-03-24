@@ -254,18 +254,18 @@ gwy_field_correlate(const GwyField *field,
     g_object_unref(maskedkernel);
 
     if (score != field) {
-        _gwy_assign_unit(&score->priv->unit_x, field->priv->unit_x);
-        _gwy_assign_unit(&score->priv->unit_y, field->priv->unit_y);
+        _gwy_assign_unit(&score->priv->xunit, field->priv->xunit);
+        _gwy_assign_unit(&score->priv->yunit, field->priv->yunit);
     }
 
     if (normalise) {
-        _gwy_assign_unit(&score->priv->unit_z, kernel->priv->unit_z);
+        _gwy_assign_unit(&score->priv->zunit, kernel->priv->zunit);
     }
-    else if (score->priv->unit_z || field->priv->unit_z) {
+    else if (score->priv->zunit || field->priv->zunit) {
         // Force instantiation of units
-        gwy_unit_multiply(gwy_field_get_unit_z(score),
-                          gwy_field_get_unit_z(kernel),
-                          gwy_field_get_unit_z(field));
+        gwy_unit_multiply(gwy_field_get_zunit(score),
+                          gwy_field_get_zunit(kernel),
+                          gwy_field_get_zunit(field));
     }
 
     gwy_field_invalidate(score);

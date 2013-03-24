@@ -109,25 +109,25 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
 
     /* X units */
     if (check & GWY_BRICK_COMPAT_X) {
-        if (!gwy_unit_equal(priv1->unit_x, priv2->unit_x))
+        if (!gwy_unit_equal(priv1->xunit, priv2->xunit))
             result |= GWY_BRICK_COMPAT_X;
     }
 
     /* Y units */
     if (check & GWY_BRICK_COMPAT_Y) {
-        if (!gwy_unit_equal(priv1->unit_y, priv2->unit_y))
+        if (!gwy_unit_equal(priv1->yunit, priv2->yunit))
             result |= GWY_BRICK_COMPAT_Y;
     }
 
     /* Z units */
     if (check & GWY_BRICK_COMPAT_Z) {
-        if (!gwy_unit_equal(priv1->unit_z, priv2->unit_z))
+        if (!gwy_unit_equal(priv1->zunit, priv2->zunit))
             result |= GWY_BRICK_COMPAT_Z;
     }
 
     /* Value units */
     if (check & GWY_BRICK_COMPAT_VALUE) {
-        if (!gwy_unit_equal(priv1->unit_w, priv2->unit_w))
+        if (!gwy_unit_equal(priv1->wunit, priv2->wunit))
             result |= GWY_BRICK_COMPAT_VALUE;
     }
 
@@ -207,19 +207,19 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
 
     /* X units */
     if (check & GWY_FIELD_COMPAT_X) {
-        if (!gwy_unit_equal(fpriv->unit_x, bpriv->unit_x))
+        if (!gwy_unit_equal(fpriv->xunit, bpriv->xunit))
             result |= GWY_FIELD_COMPAT_X;
     }
 
     /* Y units */
     if (check & GWY_FIELD_COMPAT_Y) {
-        if (!gwy_unit_equal(fpriv->unit_y, bpriv->unit_y))
+        if (!gwy_unit_equal(fpriv->yunit, bpriv->yunit))
             result |= GWY_FIELD_COMPAT_Y;
     }
 
     /* Value units */
     if (check & GWY_FIELD_COMPAT_VALUE) {
-        if (!gwy_unit_equal(fpriv->unit_z, bpriv->unit_w))
+        if (!gwy_unit_equal(fpriv->zunit, bpriv->wunit))
             result |= GWY_FIELD_COMPAT_VALUE;
     }
 
@@ -283,13 +283,13 @@ gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
 
     /* Lateral units */
     if (check & GWY_LINE_COMPAT_X) {
-        if (!gwy_unit_equal(lpriv->unit_x, bpriv->unit_z))
+        if (!gwy_unit_equal(lpriv->xunit, bpriv->zunit))
             result |= GWY_LINE_COMPAT_X;
     }
 
     /* Value units */
     if (check & GWY_LINE_COMPAT_VALUE) {
-        if (!gwy_unit_equal(lpriv->unit_y, bpriv->unit_w))
+        if (!gwy_unit_equal(lpriv->yunit, bpriv->wunit))
             result |= GWY_LINE_COMPAT_VALUE;
     }
 
@@ -409,7 +409,7 @@ gwy_brick_extract_plane(const GwyBrick *brick,
     const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
     const gdouble off[] = { brick->xoff, brick->yoff, brick->zoff };
     Brick *priv = brick->priv;
-    const GwyUnit *unit[] = { priv->unit_x, priv->unit_y, priv->unit_z };
+    const GwyUnit *unit[] = { priv->xunit, priv->yunit, priv->zunit };
     gdouble dx = real[coldim]/res[coldim], dy = real[rowdim]/res[rowdim];
 
     gwy_field_set_xreal(target, target->xres*dx);
@@ -423,9 +423,9 @@ gwy_brick_extract_plane(const GwyBrick *brick,
         gwy_field_set_xoffset(target, 0.0);
         gwy_field_set_yoffset(target, 0.0);
     }
-    _gwy_assign_unit(&target->priv->unit_x, unit[coldim]);
-    _gwy_assign_unit(&target->priv->unit_y, unit[rowdim]);
-    _gwy_assign_unit(&target->priv->unit_z, priv->unit_w);
+    _gwy_assign_unit(&target->priv->xunit, unit[coldim]);
+    _gwy_assign_unit(&target->priv->yunit, unit[rowdim]);
+    _gwy_assign_unit(&target->priv->zunit, priv->wunit);
     gwy_field_invalidate(target);
 }
 
@@ -520,7 +520,7 @@ gwy_brick_extract_line(const GwyBrick *brick,
     const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
     const gdouble off[] = { brick->xoff, brick->yoff, brick->zoff };
     Brick *priv = brick->priv;
-    const GwyUnit *unit[] = { priv->unit_x, priv->unit_y, priv->unit_z };
+    const GwyUnit *unit[] = { priv->xunit, priv->yunit, priv->zunit };
     gdouble d = real[leveldim]/res[leveldim];
 
     gwy_line_set_real(target, target->res*d);
@@ -531,8 +531,8 @@ gwy_brick_extract_line(const GwyBrick *brick,
     else {
         gwy_line_set_offset(target, 0.0);
     }
-    _gwy_assign_unit(&target->priv->unit_x, unit[leveldim]);
-    _gwy_assign_unit(&target->priv->unit_y, priv->unit_w);
+    _gwy_assign_unit(&target->priv->xunit, unit[leveldim]);
+    _gwy_assign_unit(&target->priv->yunit, priv->wunit);
     //gwy_line_invalidate(target);
 }
 

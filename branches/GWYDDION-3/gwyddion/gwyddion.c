@@ -44,9 +44,9 @@ create_mix(gdouble xres, gdouble yres)
 
     mix->phase = 0.0;
     mix->result = gwy_field_new_sized(xres, yres, FALSE);
-    gwy_unit_set_from_string(gwy_field_get_unit_x(mix->result), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_y(mix->result), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_z(mix->result), "N A^3/s", NULL);
+    gwy_unit_set_from_string(gwy_field_get_xunit(mix->result), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_yunit(mix->result), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_zunit(mix->result), "N A^3/s", NULL);
     mix->field1 = gwy_field_new_alike(mix->result, FALSE);
     mix->field2 = gwy_field_new_alike(mix->result, FALSE);
     set_data(mix->field1);

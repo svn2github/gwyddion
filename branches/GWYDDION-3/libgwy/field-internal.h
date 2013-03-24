@@ -44,9 +44,9 @@ typedef enum {
 } GwyFieldCached;
 
 struct _GwyFieldPrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
-    GwyUnit *unit_z;
+    GwyUnit *xunit;
+    GwyUnit *yunit;
+    GwyUnit *zunit;
     gchar *name;
     guint32 cached;
     gboolean allocated;

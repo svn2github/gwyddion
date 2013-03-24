@@ -83,8 +83,8 @@ GwyLine*        gwy_curve_regularize     (const GwyCurve *curve,
                                           gdouble from,
                                           gdouble to,
                                           guint res)                 G_GNUC_MALLOC;
-GwyUnit*        gwy_curve_get_unit_x     (GwyCurve *curve)           G_GNUC_PURE;
-GwyUnit*        gwy_curve_get_unit_y     (GwyCurve *curve)           G_GNUC_PURE;
+GwyUnit*        gwy_curve_get_xunit      (GwyCurve *curve)           G_GNUC_PURE;
+GwyUnit*        gwy_curve_get_yunit      (GwyCurve *curve)           G_GNUC_PURE;
 GwyValueFormat* gwy_curve_format_x       (GwyCurve *curve,
                                           GwyValueFormatStyle style) G_GNUC_MALLOC;
 GwyValueFormat* gwy_curve_format_y       (GwyCurve *curve,

@@ -67,8 +67,8 @@ static void     gwy_curve_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*1*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*0*/ { .name = "xunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*1*/ { .name = "yunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*2*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
     /*3*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -110,14 +110,14 @@ gwy_curve_class_init(GwyCurveClass *klass)
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_X]
-        = g_param_spec_object("unit-x",
+        = g_param_spec_object("xunit",
                               "X unit",
                               "Physical units of the abscissa values.",
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_Y]
-        = g_param_spec_object("unit-y",
+        = g_param_spec_object("yunit",
                               "Y unit",
                               "Physical units of the ordinate values.",
                               GWY_TYPE_UNIT,
@@ -190,8 +190,8 @@ static void
 gwy_curve_dispose(GObject *object)
 {
     GwyCurve *curve = GWY_CURVE(object);
-    GWY_OBJECT_UNREF(curve->priv->unit_x);
-    GWY_OBJECT_UNREF(curve->priv->unit_y);
+    GWY_OBJECT_UNREF(curve->priv->xunit);
+    GWY_OBJECT_UNREF(curve->priv->yunit);
     G_OBJECT_CLASS(gwy_curve_parent_class)->dispose(object);
 }
 
@@ -201,10 +201,10 @@ gwy_curve_n_items(GwySerializable *serializable)
     GwyCurve *curve = GWY_CURVE(serializable);
     Curve *priv = curve->priv;
     gsize n = N_ITEMS;
-    if (priv->unit_x)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_x));
-    if (priv->unit_y)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_y));
+    if (priv->xunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->xunit));
+    if (priv->yunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->yunit));
     return n;
 }
 
@@ -219,8 +219,8 @@ gwy_curve_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    _gwy_serialize_unit(priv->unit_x, serialize_items + 0, items, &n);
-    _gwy_serialize_unit(priv->unit_y, serialize_items + 1, items, &n);
+    _gwy_serialize_unit(priv->xunit, serialize_items + 0, items, &n);
+    _gwy_serialize_unit(priv->yunit, serialize_items + 1, items, &n);
     _gwy_serialize_string(priv->name, serialize_items + 2, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
@@ -260,8 +260,8 @@ gwy_curve_construct(GwySerializable *serializable,
         curve->data = (GwyXY*)its[3].value.v_double_array;
         sort_data(curve);
     }
-    priv->unit_x = (GwyUnit*)its[0].value.v_object;
-    priv->unit_y = (GwyUnit*)its[1].value.v_object;
+    priv->xunit = (GwyUnit*)its[0].value.v_object;
+    priv->yunit = (GwyUnit*)its[1].value.v_object;
     priv->name = its[2].value.v_string;
 
     return TRUE;
@@ -279,8 +279,8 @@ copy_info(GwyCurve *dest,
           const GwyCurve *src)
 {
     Curve *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->xunit, spriv->xunit);
+    _gwy_assign_unit(&dpriv->yunit, spriv->yunit);
 }
 
 static GObject*
@@ -350,15 +350,15 @@ gwy_curve_get_property(GObject *object,
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
         case PROP_UNIT_X:
-        if (!priv->unit_x)
-            priv->unit_x = gwy_unit_new();
-        g_value_set_object(value, priv->unit_x);
+        if (!priv->xunit)
+            priv->xunit = gwy_unit_new();
+        g_value_set_object(value, priv->xunit);
         break;
 
         case PROP_UNIT_Y:
-        if (!priv->unit_y)
-            priv->unit_y = gwy_unit_new();
-        g_value_set_object(value, priv->unit_y);
+        if (!priv->yunit)
+            priv->yunit = gwy_unit_new();
+        g_value_set_object(value, priv->yunit);
         break;
 
         case PROP_NAME:
@@ -515,8 +515,8 @@ copy_line_to_curve(const GwyLine *line,
         curve->data[i].x = q*i + off;
         curve->data[i].y = line->data[i];
     }
-    _gwy_assign_unit(&curve->priv->unit_x, line->priv->unit_x);
-    _gwy_assign_unit(&curve->priv->unit_y, line->priv->unit_y);
+    _gwy_assign_unit(&curve->priv->xunit, line->priv->xunit);
+    _gwy_assign_unit(&curve->priv->yunit, line->priv->yunit);
 }
 
 /**
@@ -685,8 +685,8 @@ regularise(const GwyCurve *curve,
             *(ldata++) = interpolate_linear(curve, i*dx + from, &j);
     }
 
-    _gwy_assign_unit(&line->priv->unit_x, curve->priv->unit_x);
-    _gwy_assign_unit(&line->priv->unit_y, curve->priv->unit_y);
+    _gwy_assign_unit(&line->priv->xunit, curve->priv->xunit);
+    _gwy_assign_unit(&line->priv->yunit, curve->priv->yunit);
 
     return line;
 }
@@ -771,7 +771,7 @@ gwy_curve_sort(GwyCurve *curve)
 }
 
 /**
- * gwy_curve_get_unit_x:
+ * gwy_curve_get_xunit:
  * @curve: A curve.
  *
  * Obtains the abscissa units of a curve.
@@ -780,17 +780,17 @@ gwy_curve_sort(GwyCurve *curve)
  *          The abscissa units of @curve.
  **/
 GwyUnit*
-gwy_curve_get_unit_x(GwyCurve *curve)
+gwy_curve_get_xunit(GwyCurve *curve)
 {
     g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     Curve *priv = curve->priv;
-    if (!priv->unit_x)
-        priv->unit_x = gwy_unit_new();
-    return priv->unit_x;
+    if (!priv->xunit)
+        priv->xunit = gwy_unit_new();
+    return priv->xunit;
 }
 
 /**
- * gwy_curve_get_unit_y:
+ * gwy_curve_get_yunit:
  * @curve: A curve.
  *
  * Obtains the ordinate units of a curve.
@@ -799,13 +799,13 @@ gwy_curve_get_unit_x(GwyCurve *curve)
  *          The ordinate units of @curve.
  **/
 GwyUnit*
-gwy_curve_get_unit_y(GwyCurve *curve)
+gwy_curve_get_yunit(GwyCurve *curve)
 {
     g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     Curve *priv = curve->priv;
-    if (!priv->unit_y)
-        priv->unit_y = gwy_unit_new();
-    return priv->unit_y;
+    if (!priv->yunit)
+        priv->yunit = gwy_unit_new();
+    return priv->yunit;
 }
 
 /**
@@ -828,11 +828,11 @@ gwy_curve_format_x(GwyCurve *curve,
 {
     g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     if (!curve->n)
-        return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
+        return gwy_unit_format_with_resolution(gwy_curve_get_xunit(curve),
                                                style, 1.0, 0.1);
     if (curve->n == 1) {
         gdouble m = curve->data[0].x ? fabs(curve->data[0].x) : 1.0;
-        return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
+        return gwy_unit_format_with_resolution(gwy_curve_get_xunit(curve),
                                                style, m, m/10.0);
     }
     gdouble max = fmax(fabs(curve->data[0].x), fabs(curve->data[curve->n-1].x));
@@ -843,7 +843,7 @@ gwy_curve_format_x(GwyCurve *curve,
     for (guint i = curve->n; i; i--, p++)
         unit += sqrt(p[1].x - p[0].x);
     unit /= curve->n - 1;
-    return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
+    return gwy_unit_format_with_resolution(gwy_curve_get_xunit(curve),
                                            style, max, unit*unit);
 }
 
@@ -874,7 +874,7 @@ gwy_curve_format_y(GwyCurve *curve,
         min = 0.0;
         max = 1.0;
     }
-    return gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
+    return gwy_unit_format_with_digits(gwy_curve_get_yunit(curve),
                                        style, max - min, 3);
 }
 

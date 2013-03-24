@@ -75,13 +75,13 @@ gwy_line_is_incompatible(const GwyLine *line1,
 
     /* Lateral units */
     if (check & GWY_LINE_COMPAT_X) {
-        if (!gwy_unit_equal(priv1->unit_x, priv2->unit_x))
+        if (!gwy_unit_equal(priv1->xunit, priv2->xunit))
             result |= GWY_LINE_COMPAT_X;
     }
 
     /* Value units */
     if (check & GWY_LINE_COMPAT_VALUE) {
-        if (!gwy_unit_equal(priv1->unit_y, priv2->unit_y))
+        if (!gwy_unit_equal(priv1->yunit, priv2->yunit))
             result |= GWY_LINE_COMPAT_VALUE;
     }
 
@@ -234,12 +234,12 @@ gwy_line_outer_product(const GwyLine *column,
     field->xoff = row->off;
     field->yoff = column->off;
 
-    _gwy_assign_unit(&field->priv->unit_x, row->priv->unit_x);
-    _gwy_assign_unit(&field->priv->unit_y, column->priv->unit_x);
-    if (!gwy_unit_is_empty(row->priv->unit_y)
-        || !gwy_unit_is_empty(column->priv->unit_y))
-        gwy_unit_multiply(gwy_field_get_unit_z(field),
-                          row->priv->unit_y, column->priv->unit_y);
+    _gwy_assign_unit(&field->priv->xunit, row->priv->xunit);
+    _gwy_assign_unit(&field->priv->yunit, column->priv->xunit);
+    if (!gwy_unit_is_empty(row->priv->yunit)
+        || !gwy_unit_is_empty(column->priv->yunit))
+        gwy_unit_multiply(gwy_field_get_zunit(field),
+                          row->priv->yunit, column->priv->yunit);
 
     return field;
 }

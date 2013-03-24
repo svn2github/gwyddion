@@ -97,19 +97,19 @@ gwy_field_is_incompatible(const GwyField *field1,
 
     /* X units */
     if (check & GWY_FIELD_COMPAT_X) {
-        if (!gwy_unit_equal(priv1->unit_x, priv2->unit_x))
+        if (!gwy_unit_equal(priv1->xunit, priv2->xunit))
             result |= GWY_FIELD_COMPAT_X;
     }
 
     /* Y units */
     if (check & GWY_FIELD_COMPAT_Y) {
-        if (!gwy_unit_equal(priv1->unit_y, priv2->unit_y))
+        if (!gwy_unit_equal(priv1->yunit, priv2->yunit))
             result |= GWY_FIELD_COMPAT_Y;
     }
 
     /* Value units */
     if (check & GWY_FIELD_COMPAT_VALUE) {
-        if (!gwy_unit_equal(priv1->unit_z, priv2->unit_z))
+        if (!gwy_unit_equal(priv1->zunit, priv2->zunit))
             result |= GWY_FIELD_COMPAT_VALUE;
     }
 

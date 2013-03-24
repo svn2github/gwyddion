@@ -170,7 +170,7 @@ test_unit_parse_combine(void)
 }
 
 void
-test_unit_word_names(void)
+test_wunitord_names(void)
 {
     gint pw1, pw2, pw3, pw4;
     GwyUnit *u1 = gwy_unit_new_from_string("m", &pw1);

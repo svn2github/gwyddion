@@ -373,12 +373,12 @@ gwy_field_transform_congruent(GwyField *field,
     }
 
     Field *priv = field->priv;
-    if (!gwy_unit_equal(priv->unit_x, priv->unit_y)) {
-        if (!priv->unit_x)
-            priv->unit_x = gwy_unit_new();
-        if (!priv->unit_y)
-            priv->unit_y = gwy_unit_new();
-        gwy_unit_swap(priv->unit_x, priv->unit_y);
+    if (!gwy_unit_equal(priv->xunit, priv->yunit)) {
+        if (!priv->xunit)
+            priv->xunit = gwy_unit_new();
+        if (!priv->yunit)
+            priv->yunit = gwy_unit_new();
+        gwy_unit_swap(priv->xunit, priv->yunit);
     }
     // In this order any notifications are emitted when everything is already
     // in the final state.
@@ -420,14 +420,14 @@ gwy_field_new_congruent(const GwyField *field,
     const Field *priv = field->priv;
     Field *ppriv = part->priv;
 
-    if (!gwy_unit_is_empty(priv->unit_x))
-        ppriv->unit_x = gwy_unit_duplicate(priv->unit_x);
-    if (!gwy_unit_is_empty(priv->unit_y))
-        ppriv->unit_y = gwy_unit_duplicate(priv->unit_y);
+    if (!gwy_unit_is_empty(priv->xunit))
+        ppriv->xunit = gwy_unit_duplicate(priv->xunit);
+    if (!gwy_unit_is_empty(priv->yunit))
+        ppriv->yunit = gwy_unit_duplicate(priv->yunit);
     if (is_trans) {
         part->xreal = height*gwy_field_dy(field);
         part->yreal = width*gwy_field_dx(field);
-        GWY_SWAP(GwyUnit*, ppriv->unit_x, ppriv->unit_y);
+        GWY_SWAP(GwyUnit*, ppriv->xunit, ppriv->yunit);
     }
     else {
         part->xreal = width*gwy_field_dx(field);

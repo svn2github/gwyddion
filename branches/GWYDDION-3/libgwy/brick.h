@@ -110,10 +110,10 @@ void            gwy_brick_set_yoffset    (GwyBrick *brick,
                                           gdouble yoffset);
 void            gwy_brick_set_zoffset    (GwyBrick *brick,
                                           gdouble zoffset);
-GwyUnit*        gwy_brick_get_unit_x     (const GwyBrick *brick)       G_GNUC_PURE;
-GwyUnit*        gwy_brick_get_unit_y     (const GwyBrick *brick)       G_GNUC_PURE;
-GwyUnit*        gwy_brick_get_unit_z     (const GwyBrick *brick)       G_GNUC_PURE;
-GwyUnit*        gwy_brick_get_unit_w     (const GwyBrick *brick)       G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_xunit      (const GwyBrick *brick)       G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_yunit      (const GwyBrick *brick)       G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_zunit      (const GwyBrick *brick)       G_GNUC_PURE;
+GwyUnit*        gwy_brick_get_wunit      (const GwyBrick *brick)       G_GNUC_PURE;
 gboolean        gwy_brick_xy_units_match (const GwyBrick *brick)       G_GNUC_PURE;
 gboolean        gwy_brick_xyz_units_match(const GwyBrick *brick)       G_GNUC_PURE;
 GwyValueFormat* gwy_brick_format_x       (const GwyBrick *brick,

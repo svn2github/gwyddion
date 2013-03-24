@@ -370,31 +370,31 @@ void
 test_field_units_assign(void)
 {
     GwyField *field = gwy_field_new(), *field2 = gwy_field_new();
-    GwyUnit *unit_x = gwy_field_get_unit_x(field);
-    GwyUnit *unit_y = gwy_field_get_unit_y(field);
-    GwyUnit *unit_z = gwy_field_get_unit_z(field);
+    GwyUnit *xunit = gwy_field_get_xunit(field);
+    GwyUnit *yunit = gwy_field_get_yunit(field);
+    GwyUnit *zunit = gwy_field_get_zunit(field);
     guint count_x = 0;
     guint count_y = 0;
     guint count_z = 0;
 
-    g_signal_connect_swapped(unit_x, "changed",
+    g_signal_connect_swapped(xunit, "changed",
                              G_CALLBACK(record_signal), &count_x);
-    g_signal_connect_swapped(unit_y, "changed",
+    g_signal_connect_swapped(yunit, "changed",
                              G_CALLBACK(record_signal), &count_y);
-    g_signal_connect_swapped(unit_z, "changed",
+    g_signal_connect_swapped(zunit, "changed",
                              G_CALLBACK(record_signal), &count_z);
 
-    gwy_unit_set_from_string(gwy_field_get_unit_x(field), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_xunit(field), "m", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 0);
     g_assert_cmpuint(count_z, ==, 0);
 
-    gwy_unit_set_from_string(gwy_field_get_unit_y(field), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_yunit(field), "m", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 0);
 
-    gwy_unit_set_from_string(gwy_field_get_unit_z(field), "s", NULL);
+    gwy_unit_set_from_string(gwy_field_get_zunit(field), "s", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
     g_assert_cmpuint(count_z, ==, 1);
@@ -403,18 +403,18 @@ test_field_units_assign(void)
     g_assert_cmpuint(count_x, ==, 2);
     g_assert_cmpuint(count_y, ==, 2);
     g_assert_cmpuint(count_z, ==, 2);
-    g_assert(gwy_field_get_unit_x(field) == unit_x);
-    g_assert(gwy_field_get_unit_y(field) == unit_y);
-    g_assert(gwy_field_get_unit_z(field) == unit_z);
+    g_assert(gwy_field_get_xunit(field) == xunit);
+    g_assert(gwy_field_get_yunit(field) == yunit);
+    g_assert(gwy_field_get_zunit(field) == zunit);
 
     // Try again to see if the signal counts change.
     gwy_field_assign(field, field2);
     g_assert_cmpuint(count_x, ==, 2);
     g_assert_cmpuint(count_y, ==, 2);
     g_assert_cmpuint(count_z, ==, 2);
-    g_assert(gwy_field_get_unit_x(field) == unit_x);
-    g_assert(gwy_field_get_unit_y(field) == unit_y);
-    g_assert(gwy_field_get_unit_z(field) == unit_z);
+    g_assert(gwy_field_get_xunit(field) == xunit);
+    g_assert(gwy_field_get_yunit(field) == yunit);
+    g_assert(gwy_field_get_zunit(field) == zunit);
 
     g_object_unref(field2);
     g_object_unref(field);
@@ -435,11 +435,11 @@ test_field_serialize(void)
         GwyField *copy;
 
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_field_get_unit_x(original), rng);
+            unit_randomize(gwy_field_get_xunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_field_get_unit_y(original), rng);
+            unit_randomize(gwy_field_get_yunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_field_get_unit_z(original), rng);
+            unit_randomize(gwy_field_get_zunit(original), rng);
 
         if (g_rand_int(rng) % 3 == 0)
             gwy_field_set_xoffset(original, g_rand_double(rng));
@@ -3137,9 +3137,9 @@ test_field_compatibility_units(void)
     for (guint i = 0; i < N; i++)
         fields[i] = gwy_field_new();
 
-    gwy_unit_set_from_string(gwy_field_get_unit_x(fields[1]), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_y(fields[2]), "m", NULL);
-    gwy_unit_set_from_string(gwy_field_get_unit_z(fields[3]), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_xunit(fields[1]), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_yunit(fields[2]), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_zunit(fields[3]), "m", NULL);
 
     for (guint tocheck = 0; tocheck <= GWY_FIELD_COMPAT_ALL; tocheck++) {
         for (guint i = 0; i < N; i++) {

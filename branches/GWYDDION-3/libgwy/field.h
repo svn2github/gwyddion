@@ -108,9 +108,9 @@ void            gwy_field_set_xoffset    (GwyField *field,
 void            gwy_field_set_yoffset    (GwyField *field,
                                           gdouble yoffset);
 void            gwy_field_clear_offsets  (GwyField *field);
-GwyUnit*        gwy_field_get_unit_x     (const GwyField *field)              G_GNUC_PURE;
-GwyUnit*        gwy_field_get_unit_y     (const GwyField *field)              G_GNUC_PURE;
-GwyUnit*        gwy_field_get_unit_z     (const GwyField *field)              G_GNUC_PURE;
+GwyUnit*        gwy_field_get_xunit      (const GwyField *field)              G_GNUC_PURE;
+GwyUnit*        gwy_field_get_yunit      (const GwyField *field)              G_GNUC_PURE;
+GwyUnit*        gwy_field_get_zunit      (const GwyField *field)              G_GNUC_PURE;
 gboolean        gwy_field_xy_units_match (const GwyField *field)              G_GNUC_PURE;
 gboolean        gwy_field_xyz_units_match(const GwyField *field)              G_GNUC_PURE;
 GwyValueFormat* gwy_field_format_x       (const GwyField *field,

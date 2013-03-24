@@ -27,10 +27,10 @@
 G_BEGIN_DECLS
 
 struct _GwyBrickPrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
-    GwyUnit *unit_z;
-    GwyUnit *unit_w;
+    GwyUnit *xunit;
+    GwyUnit *yunit;
+    GwyUnit *zunit;
+    GwyUnit *wunit;
     gchar *name;
     gboolean allocated;
     gdouble storage;

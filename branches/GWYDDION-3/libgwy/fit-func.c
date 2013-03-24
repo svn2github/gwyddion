@@ -457,8 +457,8 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
  * gwy_fit_func_param_unit:
  * @fitfunc: A fitting function.
  * @i: Parameter number.
- * @unit_x: Unit of abscissa.
- * @unit_y: Unit of ordinate.
+ * @xunit: Unit of abscissa.
+ * @yunit: Unit of ordinate.
  *
  * Derives the unit of a fitting parameter from the units of the fitted data.
  *
@@ -481,8 +481,8 @@ gwy_fit_func_param_number(const GwyFitFunc *fitfunc,
 GwyUnit*
 gwy_fit_func_param_unit(GwyFitFunc *fitfunc,
                         guint i,
-                        const GwyUnit *unit_x,
-                        const GwyUnit *unit_y)
+                        const GwyUnit *xunit,
+                        const GwyUnit *yunit)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -493,7 +493,7 @@ gwy_fit_func_param_unit(GwyFitFunc *fitfunc,
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         if (builtin->derive_units)
-            return builtin->derive_units(i, unit_x, unit_y);
+            return builtin->derive_units(i, xunit, yunit);
         power_x = builtin->param[i].power_x;
         power_y = builtin->param[i].power_y;
     }
@@ -504,7 +504,7 @@ gwy_fit_func_param_unit(GwyFitFunc *fitfunc,
         power_y = gwy_fit_param_get_power_y(p);
     }
     GwyUnit *unit = gwy_unit_new();
-    gwy_unit_power_multiply(unit, unit_x, power_x, unit_y, power_y);
+    gwy_unit_power_multiply(unit, xunit, power_x, yunit, power_y);
     return unit;
 }
 

@@ -88,36 +88,36 @@ void
 test_curve_units_assign(void)
 {
     GwyCurve *curve = gwy_curve_new(), *curve2 = gwy_curve_new();
-    GwyUnit *unit_x = gwy_curve_get_unit_x(curve);
-    GwyUnit *unit_y = gwy_curve_get_unit_y(curve);
+    GwyUnit *xunit = gwy_curve_get_xunit(curve);
+    GwyUnit *yunit = gwy_curve_get_yunit(curve);
     guint count_x = 0;
     guint count_y = 0;
 
-    g_signal_connect_swapped(unit_x, "changed",
+    g_signal_connect_swapped(xunit, "changed",
                              G_CALLBACK(record_signal), &count_x);
-    g_signal_connect_swapped(unit_y, "changed",
+    g_signal_connect_swapped(yunit, "changed",
                              G_CALLBACK(record_signal), &count_y);
 
-    gwy_unit_set_from_string(gwy_curve_get_unit_x(curve), "m", NULL);
+    gwy_unit_set_from_string(gwy_curve_get_xunit(curve), "m", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 0);
 
-    gwy_unit_set_from_string(gwy_curve_get_unit_y(curve), "s", NULL);
+    gwy_unit_set_from_string(gwy_curve_get_yunit(curve), "s", NULL);
     g_assert_cmpuint(count_x, ==, 1);
     g_assert_cmpuint(count_y, ==, 1);
 
     gwy_curve_assign(curve, curve2);
     g_assert_cmpuint(count_x, ==, 2);
     g_assert_cmpuint(count_y, ==, 2);
-    g_assert(gwy_curve_get_unit_x(curve) == unit_x);
-    g_assert(gwy_curve_get_unit_y(curve) == unit_y);
+    g_assert(gwy_curve_get_xunit(curve) == xunit);
+    g_assert(gwy_curve_get_yunit(curve) == yunit);
 
     // Try again to see if the signal counts change.
     gwy_curve_assign(curve, curve2);
     g_assert_cmpuint(count_x, ==, 2);
     g_assert_cmpuint(count_y, ==, 2);
-    g_assert(gwy_curve_get_unit_x(curve) == unit_x);
-    g_assert(gwy_curve_get_unit_y(curve) == unit_y);
+    g_assert(gwy_curve_get_xunit(curve) == xunit);
+    g_assert(gwy_curve_get_yunit(curve) == yunit);
 
     g_object_unref(curve2);
     g_object_unref(curve);
@@ -187,9 +187,9 @@ test_curve_serialize(void)
         GwyCurve *copy;
 
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_curve_get_unit_x(original), rng);
+            unit_randomize(gwy_curve_get_xunit(original), rng);
         if (g_rand_int(rng) % 5)
-            unit_randomize(gwy_curve_get_unit_y(original), rng);
+            unit_randomize(gwy_curve_get_yunit(original), rng);
 
         serializable_duplicate(GWY_SERIALIZABLE(original),
                                curve_assert_equal_object);
@@ -305,10 +305,10 @@ test_curve_regularize(void)
 
         GwyCurve *curve = gwy_curve_new_from_line(line);
         g_assert_cmpuint(curve->n, ==, line->res);
-        g_assert(gwy_unit_equal(gwy_curve_get_unit_x(curve),
-                                gwy_line_get_unit_x(line)));
-        g_assert(gwy_unit_equal(gwy_curve_get_unit_y(curve),
-                                gwy_line_get_unit_y(line)));
+        g_assert(gwy_unit_equal(gwy_curve_get_xunit(curve),
+                                gwy_line_get_xunit(line)));
+        g_assert(gwy_unit_equal(gwy_curve_get_yunit(curve),
+                                gwy_line_get_yunit(line)));
 
         GwyLine *newline = gwy_curve_regularize_full(curve, 0);
         g_assert_cmpuint(newline->res, ==, curve->n);
@@ -318,10 +318,10 @@ test_curve_regularize(void)
         g_assert_cmpfloat(fabs(newline->off - line->off),
                           <=,
                           1e-14*fabs(line->off));
-        g_assert(gwy_unit_equal(gwy_line_get_unit_x(newline),
-                                gwy_curve_get_unit_x(curve)));
-        g_assert(gwy_unit_equal(gwy_line_get_unit_y(newline),
-                                gwy_curve_get_unit_y(curve)));
+        g_assert(gwy_unit_equal(gwy_line_get_xunit(newline),
+                                gwy_curve_get_xunit(curve)));
+        g_assert(gwy_unit_equal(gwy_line_get_yunit(newline),
+                                gwy_curve_get_yunit(curve)));
         line_assert_numerically_equal(newline, line, 1e-14);
 
         g_object_unref(newline);
@@ -330,10 +330,10 @@ test_curve_regularize(void)
         curve = gwy_curve_new();
         gwy_curve_set_from_line(curve, line);
         g_assert_cmpuint(curve->n, ==, line->res);
-        g_assert(gwy_unit_equal(gwy_curve_get_unit_x(curve),
-                                gwy_line_get_unit_x(line)));
-        g_assert(gwy_unit_equal(gwy_curve_get_unit_y(curve),
-                                gwy_line_get_unit_y(line)));
+        g_assert(gwy_unit_equal(gwy_curve_get_xunit(curve),
+                                gwy_line_get_xunit(line)));
+        g_assert(gwy_unit_equal(gwy_curve_get_yunit(curve),
+                                gwy_line_get_yunit(line)));
 
         newline = gwy_curve_regularize_full(curve, 0);
         g_assert_cmpuint(newline->res, ==, curve->n);
@@ -343,10 +343,10 @@ test_curve_regularize(void)
         g_assert_cmpfloat(fabs(newline->off - line->off),
                           <=,
                           1e-14*fabs(line->off));
-        g_assert(gwy_unit_equal(gwy_line_get_unit_x(newline),
-                                gwy_curve_get_unit_x(curve)));
-        g_assert(gwy_unit_equal(gwy_line_get_unit_y(newline),
-                                gwy_curve_get_unit_y(curve)));
+        g_assert(gwy_unit_equal(gwy_line_get_xunit(newline),
+                                gwy_curve_get_xunit(curve)));
+        g_assert(gwy_unit_equal(gwy_line_get_yunit(newline),
+                                gwy_curve_get_yunit(curve)));
         line_assert_numerically_equal(newline, line, 1e-14);
 
         g_object_unref(newline);

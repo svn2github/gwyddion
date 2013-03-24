@@ -95,8 +95,8 @@ GwyField*       gwy_surface_regularize     (const GwySurface *surface,
                                             gdouble yto,
                                             guint xres,
                                             guint yres)                      G_GNUC_MALLOC;
-GwyUnit*        gwy_surface_get_unit_xy    (GwySurface *surface)             G_GNUC_PURE;
-GwyUnit*        gwy_surface_get_unit_z     (GwySurface *surface)             G_GNUC_PURE;
+GwyUnit*        gwy_surface_get_xyunit     (GwySurface *surface)             G_GNUC_PURE;
+GwyUnit*        gwy_surface_get_zunit      (GwySurface *surface)             G_GNUC_PURE;
 GwyValueFormat* gwy_surface_format_xy      (GwySurface *surface,
                                             GwyValueFormatStyle style)       G_GNUC_MALLOC;
 GwyValueFormat* gwy_surface_format_z       (GwySurface *surface,

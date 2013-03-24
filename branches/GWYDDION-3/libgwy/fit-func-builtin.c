@@ -295,15 +295,15 @@ static const BuiltinFitFunc lorentz_builtin = {
 
 static GwyUnit*
 acf_derive_units(guint param,
-                 const GwyUnit *unit_x,
-                 const GwyUnit *unit_y)
+                 const GwyUnit *xunit,
+                 const GwyUnit *yunit)
 {
     GwyUnit *unit = gwy_unit_new();
 
     if (param == 0)
-        gwy_unit_nth_root(unit, unit_y, 2);
+        gwy_unit_nth_root(unit, yunit, 2);
     else if (param == 1)
-        gwy_unit_assign(unit, unit_x);
+        gwy_unit_assign(unit, xunit);
     else {
         g_assert_not_reached();
     }
@@ -403,17 +403,17 @@ static const BuiltinFitFunc acf_gauss_builtin = {
 
 static GwyUnit*
 psdf_derive_units(guint param,
-                  const GwyUnit *unit_x,
-                  const GwyUnit *unit_y)
+                  const GwyUnit *xunit,
+                  const GwyUnit *yunit)
 {
     GwyUnit *unit = gwy_unit_new();
 
     if (param == 0) {
-        gwy_unit_multiply(unit, unit_x, unit_y);
+        gwy_unit_multiply(unit, xunit, yunit);
         gwy_unit_nth_root(unit, unit, 2);
     }
     else if (param == 1)
-        gwy_unit_power(unit, unit_x, -1);
+        gwy_unit_power(unit, xunit, -1);
     else {
         g_assert_not_reached();
     }

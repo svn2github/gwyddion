@@ -856,15 +856,15 @@ gwy_field_convolve(const GwyField *field,
     }
 
     if (target != field) {
-        _gwy_assign_unit(&target->priv->unit_x, field->priv->unit_x);
-        _gwy_assign_unit(&target->priv->unit_y, field->priv->unit_y);
+        _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
+        _gwy_assign_unit(&target->priv->yunit, field->priv->yunit);
     }
 
-    if (target->priv->unit_z || field->priv->unit_z) {
+    if (target->priv->zunit || field->priv->zunit) {
         // Force instantiation of units
-        gwy_unit_multiply(gwy_field_get_unit_z(target),
-                          gwy_field_get_unit_z(kernel),
-                          gwy_field_get_unit_z(field));
+        gwy_unit_multiply(gwy_field_get_zunit(target),
+                          gwy_field_get_zunit(kernel),
+                          gwy_field_get_zunit(field));
     }
 
     gwy_field_invalidate(target);
@@ -934,9 +934,9 @@ gwy_field_new_extended(const GwyField *field,
         result->xoff = field->xoff + col*dx - left*dx;
         result->yoff = field->yoff + row*dy - up*dy;
     }
-    _gwy_assign_unit(&result->priv->unit_x, field->priv->unit_x);
-    _gwy_assign_unit(&result->priv->unit_y, field->priv->unit_y);
-    _gwy_assign_unit(&result->priv->unit_z, field->priv->unit_z);
+    _gwy_assign_unit(&result->priv->xunit, field->priv->xunit);
+    _gwy_assign_unit(&result->priv->yunit, field->priv->yunit);
+    _gwy_assign_unit(&result->priv->zunit, field->priv->zunit);
 
     return result;
 }
@@ -1004,9 +1004,9 @@ gwy_field_extend(const GwyField *field,
         gwy_field_set_xoffset(target, 0.0);
         gwy_field_set_yoffset(target, 0.0);
     }
-    _gwy_assign_unit(&target->priv->unit_x, field->priv->unit_x);
-    _gwy_assign_unit(&target->priv->unit_y, field->priv->unit_y);
-    _gwy_assign_unit(&target->priv->unit_z, field->priv->unit_z);
+    _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
+    _gwy_assign_unit(&target->priv->yunit, field->priv->yunit);
+    _gwy_assign_unit(&target->priv->zunit, field->priv->zunit);
 }
 
 static gboolean
@@ -1800,9 +1800,9 @@ gwy_field_filter_median(const GwyField *field,
                              extend_rect, fill_value);
 
     if (target != field) {
-        _gwy_assign_unit(&target->priv->unit_x, field->priv->unit_x);
-        _gwy_assign_unit(&target->priv->unit_y, field->priv->unit_y);
-        _gwy_assign_unit(&target->priv->unit_z, field->priv->unit_z);
+        _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
+        _gwy_assign_unit(&target->priv->yunit, field->priv->yunit);
+        _gwy_assign_unit(&target->priv->zunit, field->priv->zunit);
     }
 
     gwy_field_invalidate(target);

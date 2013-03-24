@@ -27,9 +27,9 @@
 #include "libgwy/unit.h"
 
 #ifdef ENABLE_PARSE_WARNINGS
-#define gwy_unit_warning g_warning
+#define gwy_wunitarning g_warning
 #else
-#define gwy_unit_warning(...) /* */
+#define gwy_wunitarning(...) /* */
 #endif
 
 #define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
@@ -681,7 +681,7 @@ decode_unicode_power(const gchar **s,
     if (seen_digits)
         *power = sign*p;
     else {
-        gwy_unit_warning("Bad exponent %s", *s);
+        gwy_wunitarning("Bad exponent %s", *s);
     }
 
     *s = str;
@@ -768,7 +768,7 @@ parse(GArray *units,
                   "\030\031\032\033\034\035\036\037"
                   "!#$&(),:;=?@\\[]_`|{}");
     if (end) {
-        gwy_unit_warning("Invalid character 0x%02x", *end);
+        gwy_wunitarning("Invalid character 0x%02x", *end);
         return FALSE;
     }
 
@@ -793,16 +793,16 @@ parse(GArray *units,
         string = end;
         power10 = gwy_round(log10(q));
         if (q <= 0 || fabs(log(q/gwy_powi(10.0, power10))) > 1e-13) {
-            gwy_unit_warning("Bad multiplier %g", q);
+            gwy_wunitarning("Bad multiplier %g", q);
             power10 = 0;
         }
         else if (g_str_has_prefix(string, "<sup>")) {
             string += strlen("<sup>");
             m = strtol(string, (gchar**)&end, 10);
             if (end == string)
-                gwy_unit_warning("Bad exponent %s", string);
+                gwy_wunitarning("Bad exponent %s", string);
             else if (!g_str_has_prefix(end, "</sup>")) {
-                gwy_unit_warning("Expected </sup> after exponent");
+                gwy_wunitarning("Expected </sup> after exponent");
                 string = end;
             }
             else {
@@ -814,7 +814,7 @@ parse(GArray *units,
             string++;
             m = strtol(string, (gchar**)&end, 10);
             if (end == string)
-                gwy_unit_warning("Bad exponent %s", string);
+                gwy_wunitarning("Bad exponent %s", string);
             else
                 power10 *= m;
             string = end;
@@ -883,11 +883,11 @@ parse(GArray *units,
             u.power = strtol(p + strlen("<sup>"), &e, 10);
             if (e == p + strlen("<sup>")
                 || !g_str_has_prefix(e, "</sup>")) {
-                gwy_unit_warning("Bad power %s", p);
+                gwy_wunitarning("Bad power %s", p);
                 u.power = 1;
             }
             else if (!u.power || abs(u.power) > 12) {
-                gwy_unit_warning("Bad power %d", u.power);
+                gwy_wunitarning("Bad power %d", u.power);
                 u.power = 1;
             }
             g_string_truncate(buf, p - buf->str);
@@ -895,11 +895,11 @@ parse(GArray *units,
         else if (buf->len > 2 && (p = strchr(buf->str + 1, '^'))) {
             u.power = strtol(p + 1, &e, 10);
             if (e == p + 1 || *e) {
-                gwy_unit_warning("Bad power %s", p);
+                gwy_wunitarning("Bad power %s", p);
                 u.power = 1;
             }
             else if (!u.power || abs(u.power) > 12) {
-                gwy_unit_warning("Bad power %d", u.power);
+                gwy_wunitarning("Bad power %d", u.power);
                 u.power = 1;
             }
             g_string_truncate(buf, p - buf->str);
@@ -908,10 +908,10 @@ parse(GArray *units,
             const gchar *t = p;
             gint up = 0;
             if (!decode_unicode_power(&t, &up)) {
-                gwy_unit_warning("Bad power %s", p);
+                gwy_wunitarning("Bad power %s", p);
             }
             else if (!u.power || abs(u.power) > 12) {
-                gwy_unit_warning("Bad power %d", u.power);
+                gwy_wunitarning("Bad power %d", u.power);
             }
             else {
                 u.power = up;
@@ -927,7 +927,7 @@ parse(GArray *units,
             if (i != buf->len) {
                 u.power = strtol(buf->str + i, NULL, 10);
                 if (!u.power || abs(u.power) > 12) {
-                    gwy_unit_warning("Bad power %d", u.power);
+                    gwy_wunitarning("Bad power %d", u.power);
                     u.power = 1;
                 }
                 g_string_truncate(buf, i);
@@ -957,7 +957,7 @@ parse(GArray *units,
             power10 += u.power * pfpower;
         }
         else if (!g_ascii_isalpha(buf->str[0]) && (guchar)buf->str[0] < 128)
-            gwy_unit_warning("Invalid base unit: %s", buf->str);
+            gwy_wunitarning("Invalid base unit: %s", buf->str);
         else {
             /* append it */
             u.unit = g_quark_from_string(buf->str);
@@ -972,7 +972,7 @@ parse(GArray *units,
         /* get to the next unit, possibly start dividing */
         if (will_be_dividing) {
             if (dividing) {
-                gwy_unit_warning("Cannot group multiple divisions");
+                gwy_wunitarning("Cannot group multiple divisions");
             }
             dividing = TRUE;
         }
@@ -1734,17 +1734,17 @@ get_prefix(gint power)
  * typically own #GwyUnits, such as #GwyField or #GwyLine, do not provide
  * methods to set the units objects.  Instead of</para>
  * |[
- * gwy_field_set_unit_z(field, unit);
+ * gwy_field_set_zunit(field, unit);
  * ]|
  * <para>you can modify the unit object with assignment:</para>
  * |[
- * gwy_unit_assign(gwy_field_get_unit_z(field), unit);
+ * gwy_unit_assign(gwy_field_get_zunit(field), unit);
  * ]|
  * <para>or other operations, e.g. if you have a string, using:</para>
  * |[
- * gwy_unit_set_from_string(gwy_field_get_unit_z(field), "nm", NULL);
+ * gwy_unit_set_from_string(gwy_field_get_zunit(field), "nm", NULL);
  * ]|
- * <para>Furthermore, the unit object returned by gwy_field_get_unit_z() (for
+ * <para>Furthermore, the unit object returned by gwy_field_get_zunit() (for
  * instance) must be the same during the entire lifetime of the field.  This
  * means objects owning units should never destroy them or replace with other
  * unit objects; they can only change the value.</para>

@@ -45,8 +45,8 @@ typedef enum {
 } GwySurfaceCached;
 
 struct _GwySurfacePrivate {
-    GwyUnit *unit_xy;
-    GwyUnit *unit_z;
+    GwyUnit *xyunit;
+    GwyUnit *zunit;
     gchar *name;
     gdouble xmin;
     gdouble xmax;

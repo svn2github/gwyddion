@@ -70,8 +70,8 @@ static void     gwy_line_get_property     (GObject *object,
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "real",   .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
     /*1*/ { .name = "off",    .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*2*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*3*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*2*/ { .name = "xunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*3*/ { .name = "yunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*4*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
     /*5*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -127,7 +127,7 @@ gwy_line_class_init(GwyLineClass *klass)
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_X]
-         = g_param_spec_object("unit-x",
+         = g_param_spec_object("xunit",
                                "X unit",
                                "Physical units of lateral dimension of the "
                                "line.",
@@ -135,7 +135,7 @@ gwy_line_class_init(GwyLineClass *klass)
                                G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_Y]
-        = g_param_spec_object("unit-y",
+        = g_param_spec_object("yunit",
                               "Y unit",
                               "Physical units of line values.",
                               GWY_TYPE_UNIT,
@@ -215,8 +215,8 @@ static void
 gwy_line_dispose(GObject *object)
 {
     GwyLine *line = GWY_LINE(object);
-    GWY_OBJECT_UNREF(line->priv->unit_x);
-    GWY_OBJECT_UNREF(line->priv->unit_y);
+    GWY_OBJECT_UNREF(line->priv->xunit);
+    GWY_OBJECT_UNREF(line->priv->yunit);
     G_OBJECT_CLASS(gwy_line_parent_class)->dispose(object);
 }
 
@@ -226,10 +226,10 @@ gwy_line_n_items(GwySerializable *serializable)
     GwyLine *line = GWY_LINE(serializable);
     Line *priv = line->priv;
     gsize n = N_ITEMS;
-    if (priv->unit_x)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_x));
-    if (priv->unit_y)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_y));
+    if (priv->xunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->xunit));
+    if (priv->yunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->yunit));
     return n;
 }
 
@@ -246,8 +246,8 @@ gwy_line_itemize(GwySerializable *serializable,
 
     _gwy_serialize_double(line->real, serialize_items + 0, items, &n);
     _gwy_serialize_double(line->off, serialize_items + 1, items, &n);
-    _gwy_serialize_unit(priv->unit_x, serialize_items + 2, items, &n);
-    _gwy_serialize_unit(priv->unit_y, serialize_items + 3, items, &n);
+    _gwy_serialize_unit(priv->xunit, serialize_items + 2, items, &n);
+    _gwy_serialize_unit(priv->yunit, serialize_items + 3, items, &n);
     _gwy_serialize_string(priv->name, serialize_items + 4, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
@@ -284,8 +284,8 @@ gwy_line_construct(GwySerializable *serializable,
     // FIXME: Catch near-zero and near-infinity values.
     line->real = CLAMP(its[0].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
     line->off = CLAMP(its[1].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
-    priv->unit_x = (GwyUnit*)its[2].value.v_object;
-    priv->unit_y = (GwyUnit*)its[3].value.v_object;
+    priv->xunit = (GwyUnit*)its[2].value.v_object;
+    priv->yunit = (GwyUnit*)its[3].value.v_object;
     free_data(line);
     priv->name = its[4].value.v_string;
     line->data = its[5].value.v_double_array;
@@ -322,8 +322,8 @@ copy_info(GwyLine *dest,
     dest->real = src->real;
     dest->off = src->off;
     Line *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
+    _gwy_assign_unit(&dpriv->xunit, spriv->xunit);
+    _gwy_assign_unit(&dpriv->yunit, spriv->yunit);
 }
 
 static void
@@ -407,15 +407,15 @@ gwy_line_get_property(GObject *object,
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
         case PROP_UNIT_X:
-        if (!priv->unit_x)
-            priv->unit_x = gwy_unit_new();
-        g_value_set_object(value, priv->unit_x);
+        if (!priv->xunit)
+            priv->xunit = gwy_unit_new();
+        g_value_set_object(value, priv->xunit);
         break;
 
         case PROP_UNIT_Y:
-        if (!priv->unit_y)
-            priv->unit_y = gwy_unit_new();
-        g_value_set_object(value, priv->unit_y);
+        if (!priv->yunit)
+            priv->yunit = gwy_unit_new();
+        g_value_set_object(value, priv->yunit);
         break;
 
         case PROP_NAME:
@@ -768,8 +768,8 @@ gwy_line_new_part(const GwyLine *line,
     part = gwy_line_new_sized(len, FALSE);
     gwy_line_copy(line, lpart, part, 0);
     part->real = line->real*len/line->res;
-    _gwy_assign_unit(&part->priv->unit_x, line->priv->unit_x);
-    _gwy_assign_unit(&part->priv->unit_y, line->priv->unit_y);
+    _gwy_assign_unit(&part->priv->xunit, line->priv->xunit);
+    _gwy_assign_unit(&part->priv->yunit, line->priv->yunit);
     if (keep_offset)
         part->off = line->off + line->real*pos/line->res;
     return part;
@@ -952,7 +952,7 @@ gwy_line_set_offset(GwyLine *line,
 }
 
 /**
- * gwy_line_get_unit_x:
+ * gwy_line_get_xunit:
  * @line: A one-dimensional data line.
  *
  * Obtains the lateral units of a one-dimensional data line.
@@ -961,17 +961,17 @@ gwy_line_set_offset(GwyLine *line,
  *          The lateral units of @line.
  **/
 GwyUnit*
-gwy_line_get_unit_x(const GwyLine *line)
+gwy_line_get_xunit(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     Line *priv = line->priv;
-    if (!priv->unit_x)
-        priv->unit_x = gwy_unit_new();
-    return priv->unit_x;
+    if (!priv->xunit)
+        priv->xunit = gwy_unit_new();
+    return priv->xunit;
 }
 
 /**
- * gwy_line_get_unit_y:
+ * gwy_line_get_yunit:
  * @line: A one-dimensional data line.
  *
  * Obtains the value units of a one-dimensional data line.
@@ -980,13 +980,13 @@ gwy_line_get_unit_x(const GwyLine *line)
  *          The value units of @line.
  **/
 GwyUnit*
-gwy_line_get_unit_y(const GwyLine *line)
+gwy_line_get_yunit(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     Line *priv = line->priv;
-    if (!priv->unit_y)
-        priv->unit_y = gwy_unit_new();
-    return priv->unit_y;
+    if (!priv->yunit)
+        priv->yunit = gwy_unit_new();
+    return priv->yunit;
 }
 
 /**
@@ -1004,7 +1004,7 @@ gwy_line_xy_units_match(const GwyLine *line)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), FALSE);
     Line *priv = line->priv;
-    return gwy_unit_equal(priv->unit_x, priv->unit_y);
+    return gwy_unit_equal(priv->xunit, priv->yunit);
 }
 
 /**
@@ -1027,7 +1027,7 @@ gwy_line_format_x(const GwyLine *line,
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     gdouble max = fmax(line->real, fabs(line->real + line->off));
     gdouble unit = gwy_line_dx(line);
-    return gwy_unit_format_with_resolution(gwy_line_get_unit_x(line),
+    return gwy_unit_format_with_resolution(gwy_line_get_xunit(line),
                                            style, max, unit);
 }
 
@@ -1052,7 +1052,7 @@ gwy_line_format_y(const GwyLine *line,
         max = fabs(max);
         min = 0.0;
     }
-    return gwy_unit_format_with_digits(gwy_line_get_unit_y(line),
+    return gwy_unit_format_with_digits(gwy_line_get_yunit(line),
                                        style, max - min, 3);
 }
 

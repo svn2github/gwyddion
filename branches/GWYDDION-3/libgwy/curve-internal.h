@@ -27,8 +27,8 @@
 G_BEGIN_DECLS
 
 struct _GwyCurvePrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
+    GwyUnit *xunit;
+    GwyUnit *yunit;
     gchar *name;
 };
 

@@ -167,21 +167,21 @@ fit_func_one(const gchar *name,
     }
 
     /* Units */
-    GwyUnit *unit_x = gwy_unit_new_from_string("m", NULL);
-    GwyUnit *unit_y = gwy_unit_new_from_string("s", NULL);
-    gwy_unit_power_multiply(unit_y, unit_y, ypower, unit_x, yxpower);
+    GwyUnit *xunit = gwy_unit_new_from_string("m", NULL);
+    GwyUnit *yunit = gwy_unit_new_from_string("s", NULL);
+    gwy_unit_power_multiply(yunit, yunit, ypower, xunit, yxpower);
 
     for (guint i = 0; i < nparams; i++) {
         guint j = param_map[i];
-        GwyUnit *units = gwy_fit_func_param_unit(fitfunc, j, unit_x, unit_y);
+        GwyUnit *units = gwy_fit_func_param_unit(fitfunc, j, xunit, yunit);
         GwyUnit *expected_units = gwy_unit_new_from_string(param_units[i],
                                                            NULL);
         g_assert(gwy_unit_equal(units, expected_units));
         g_object_unref(expected_units);
         g_object_unref(units);
     }
-    g_object_unref(unit_y);
-    g_object_unref(unit_x);
+    g_object_unref(yunit);
+    g_object_unref(xunit);
 
     g_object_unref(curve);
     g_object_unref(curve0);

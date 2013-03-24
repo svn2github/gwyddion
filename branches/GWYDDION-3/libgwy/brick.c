@@ -87,10 +87,10 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*06*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*07*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*08*/ { .name = "zoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*09*/ { .name = "unit-x", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*10*/ { .name = "unit-y", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*11*/ { .name = "unit-z", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*12*/ { .name = "unit-w", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*09*/ { .name = "xunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*10*/ { .name = "yunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*11*/ { .name = "zunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*12*/ { .name = "wunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*13*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
     /*14*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -191,7 +191,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_X]
-        = g_param_spec_object("unit-x",
+        = g_param_spec_object("xunit",
                               "X unit",
                               "Physical units of horizontal lateral dimensions "
                               "of the brick layers.",
@@ -199,7 +199,7 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_Y]
-        = g_param_spec_object("unit-y",
+        = g_param_spec_object("yunit",
                               "Y unit",
                               "Physical units of vertical lateral dimensions "
                               "of the brick layers.",
@@ -207,14 +207,14 @@ gwy_brick_class_init(GwyBrickClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_Z]
-        = g_param_spec_object("unit-z",
+        = g_param_spec_object("zunit",
                               "Z unit",
                               "Physical units of brick depth.",
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_W]
-        = g_param_spec_object("unit-w",
+        = g_param_spec_object("wunit",
                               "W unit",
                               "Physical units of brick values.",
                               GWY_TYPE_UNIT,
@@ -297,10 +297,10 @@ static void
 gwy_brick_dispose(GObject *object)
 {
     GwyBrick *brick = GWY_BRICK(object);
-    GWY_OBJECT_UNREF(brick->priv->unit_x);
-    GWY_OBJECT_UNREF(brick->priv->unit_y);
-    GWY_OBJECT_UNREF(brick->priv->unit_z);
-    GWY_OBJECT_UNREF(brick->priv->unit_w);
+    GWY_OBJECT_UNREF(brick->priv->xunit);
+    GWY_OBJECT_UNREF(brick->priv->yunit);
+    GWY_OBJECT_UNREF(brick->priv->zunit);
+    GWY_OBJECT_UNREF(brick->priv->wunit);
     G_OBJECT_CLASS(gwy_brick_parent_class)->dispose(object);
 }
 
@@ -310,14 +310,14 @@ gwy_brick_n_items(GwySerializable *serializable)
     GwyBrick *brick = GWY_BRICK(serializable);
     Brick *priv = brick->priv;
     gsize n = N_ITEMS;
-    if (priv->unit_x)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_x));
-    if (priv->unit_y)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_y));
-    if (priv->unit_z)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_z));
-    if (priv->unit_w)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_w));
+    if (priv->xunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->xunit));
+    if (priv->yunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->yunit));
+    if (priv->zunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->zunit));
+    if (priv->wunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->wunit));
     return n;
 }
 
@@ -353,10 +353,10 @@ gwy_brick_itemize(GwySerializable *serializable,
     _gwy_serialize_double(brick->xoff, serialize_items + 6, items, &n);
     _gwy_serialize_double(brick->yoff, serialize_items + 7, items, &n);
     _gwy_serialize_double(brick->zoff, serialize_items + 8, items, &n);
-    _gwy_serialize_unit(priv->unit_x, serialize_items + 9, items, &n);
-    _gwy_serialize_unit(priv->unit_y, serialize_items + 10, items, &n);
-    _gwy_serialize_unit(priv->unit_z, serialize_items + 11, items, &n);
-    _gwy_serialize_unit(priv->unit_w, serialize_items + 12, items, &n);
+    _gwy_serialize_unit(priv->xunit, serialize_items + 9, items, &n);
+    _gwy_serialize_unit(priv->yunit, serialize_items + 10, items, &n);
+    _gwy_serialize_unit(priv->zunit, serialize_items + 11, items, &n);
+    _gwy_serialize_unit(priv->wunit, serialize_items + 12, items, &n);
     _gwy_serialize_string(priv->name, serialize_items + 13, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
@@ -422,10 +422,10 @@ gwy_brick_construct(GwySerializable *serializable,
     brick->xoff = CLAMP(its[6].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     brick->yoff = CLAMP(its[7].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     brick->zoff = CLAMP(its[8].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
-    priv->unit_x = (GwyUnit*)its[9].value.v_object;
-    priv->unit_y = (GwyUnit*)its[10].value.v_object;
-    priv->unit_z = (GwyUnit*)its[11].value.v_object;
-    priv->unit_w = (GwyUnit*)its[12].value.v_object;
+    priv->xunit = (GwyUnit*)its[9].value.v_object;
+    priv->yunit = (GwyUnit*)its[10].value.v_object;
+    priv->zunit = (GwyUnit*)its[11].value.v_object;
+    priv->wunit = (GwyUnit*)its[12].value.v_object;
     free_data(brick);
     priv->name = its[13].value.v_string;
     brick->data = its[14].value.v_double_array;
@@ -471,10 +471,10 @@ copy_info(GwyBrick *dest,
     dest->yoff = src->yoff;
     dest->zoff = src->zoff;
     Brick *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
-    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
-    _gwy_assign_unit(&dpriv->unit_w, spriv->unit_w);
+    _gwy_assign_unit(&dpriv->xunit, spriv->xunit);
+    _gwy_assign_unit(&dpriv->yunit, spriv->yunit);
+    _gwy_assign_unit(&dpriv->zunit, spriv->zunit);
+    _gwy_assign_unit(&dpriv->wunit, spriv->wunit);
 }
 
 static void
@@ -612,27 +612,27 @@ gwy_brick_get_property(GObject *object,
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
         case PROP_UNIT_X:
-        if (!priv->unit_x)
-            priv->unit_x = gwy_unit_new();
-        g_value_set_object(value, priv->unit_x);
+        if (!priv->xunit)
+            priv->xunit = gwy_unit_new();
+        g_value_set_object(value, priv->xunit);
         break;
 
         case PROP_UNIT_Y:
-        if (!priv->unit_y)
-            priv->unit_y = gwy_unit_new();
-        g_value_set_object(value, priv->unit_y);
+        if (!priv->yunit)
+            priv->yunit = gwy_unit_new();
+        g_value_set_object(value, priv->yunit);
         break;
 
         case PROP_UNIT_Z:
-        if (!priv->unit_z)
-            priv->unit_z = gwy_unit_new();
-        g_value_set_object(value, priv->unit_z);
+        if (!priv->zunit)
+            priv->zunit = gwy_unit_new();
+        g_value_set_object(value, priv->zunit);
         break;
 
         case PROP_UNIT_W:
-        if (!priv->unit_w)
-            priv->unit_w = gwy_unit_new();
-        g_value_set_object(value, priv->unit_w);
+        if (!priv->wunit)
+            priv->wunit = gwy_unit_new();
+        g_value_set_object(value, priv->wunit);
         break;
 
         case PROP_NAME:
@@ -770,10 +770,10 @@ gwy_brick_new_part(const GwyBrick *brick,
     part->zreal = depth*gwy_brick_dz(brick);
 
     Brick *spriv = brick->priv, *dpriv = part->priv;
-    _gwy_assign_unit(&dpriv->unit_x, spriv->unit_x);
-    _gwy_assign_unit(&dpriv->unit_y, spriv->unit_y);
-    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
-    _gwy_assign_unit(&dpriv->unit_w, spriv->unit_w);
+    _gwy_assign_unit(&dpriv->xunit, spriv->xunit);
+    _gwy_assign_unit(&dpriv->yunit, spriv->yunit);
+    _gwy_assign_unit(&dpriv->zunit, spriv->zunit);
+    _gwy_assign_unit(&dpriv->wunit, spriv->wunit);
     if (keep_offsets) {
         part->xoff = brick->xoff + col*gwy_brick_dx(brick);
         part->yoff = brick->yoff + row*gwy_brick_dy(brick);
@@ -1092,7 +1092,7 @@ gwy_brick_set_zoffset(GwyBrick *brick,
 }
 
 /**
- * gwy_brick_get_unit_x:
+ * gwy_brick_get_xunit:
  * @brick: A three-dimensional data brick.
  *
  * Obtains the horizotnal lateral units of a three-dimensional data brick.
@@ -1101,17 +1101,17 @@ gwy_brick_set_zoffset(GwyBrick *brick,
  *          The horizotnal lateral units of @brick.
  **/
 GwyUnit*
-gwy_brick_get_unit_x(const GwyBrick *brick)
+gwy_brick_get_xunit(const GwyBrick *brick)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     Brick *priv = brick->priv;
-    if (!priv->unit_x)
-        priv->unit_x = gwy_unit_new();
-    return priv->unit_x;
+    if (!priv->xunit)
+        priv->xunit = gwy_unit_new();
+    return priv->xunit;
 }
 
 /**
- * gwy_brick_get_unit_y:
+ * gwy_brick_get_yunit:
  * @brick: A three-dimensional data brick.
  *
  * Obtains the vertical lateral units of a three-dimensional data brick.
@@ -1120,17 +1120,17 @@ gwy_brick_get_unit_x(const GwyBrick *brick)
  *          The vertical lateral units of @brick.
  **/
 GwyUnit*
-gwy_brick_get_unit_y(const GwyBrick *brick)
+gwy_brick_get_yunit(const GwyBrick *brick)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     Brick *priv = brick->priv;
-    if (!priv->unit_y)
-        priv->unit_y = gwy_unit_new();
-    return priv->unit_y;
+    if (!priv->yunit)
+        priv->yunit = gwy_unit_new();
+    return priv->yunit;
 }
 
 /**
- * gwy_brick_get_unit_z:
+ * gwy_brick_get_zunit:
  * @brick: A three-dimensional data brick.
  *
  * Obtains the depth units of a three-dimensional data brick.
@@ -1139,17 +1139,17 @@ gwy_brick_get_unit_y(const GwyBrick *brick)
  *          The depth units of @brick.
  **/
 GwyUnit*
-gwy_brick_get_unit_z(const GwyBrick *brick)
+gwy_brick_get_zunit(const GwyBrick *brick)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     Brick *priv = brick->priv;
-    if (!priv->unit_z)
-        priv->unit_z = gwy_unit_new();
-    return priv->unit_z;
+    if (!priv->zunit)
+        priv->zunit = gwy_unit_new();
+    return priv->zunit;
 }
 
 /**
- * gwy_brick_get_unit_w:
+ * gwy_brick_get_wunit:
  * @brick: A three-dimensional data brick.
  *
  * Obtains the value units of a three-dimensional data brick.
@@ -1158,13 +1158,13 @@ gwy_brick_get_unit_z(const GwyBrick *brick)
  *          The value units of @brick.
  **/
 GwyUnit*
-gwy_brick_get_unit_w(const GwyBrick *brick)
+gwy_brick_get_wunit(const GwyBrick *brick)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     Brick *priv = brick->priv;
-    if (!priv->unit_w)
-        priv->unit_w = gwy_unit_new();
-    return priv->unit_w;
+    if (!priv->wunit)
+        priv->wunit = gwy_unit_new();
+    return priv->wunit;
 }
 
 /**
@@ -1182,7 +1182,7 @@ gwy_brick_xy_units_match(const GwyBrick *brick)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
     Brick *priv = brick->priv;
-    return gwy_unit_equal(priv->unit_x, priv->unit_y);
+    return gwy_unit_equal(priv->xunit, priv->yunit);
 }
 
 /**
@@ -1200,8 +1200,8 @@ gwy_brick_xyz_units_match(const GwyBrick *brick)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
     Brick *priv = brick->priv;
-    return (gwy_unit_equal(priv->unit_x, priv->unit_y)
-            && gwy_unit_equal(priv->unit_x, priv->unit_z));
+    return (gwy_unit_equal(priv->xunit, priv->yunit)
+            && gwy_unit_equal(priv->xunit, priv->zunit));
 }
 
 /**
@@ -1598,7 +1598,7 @@ gwy_brick_format_x(const GwyBrick *brick,
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     gdouble max = fmax(brick->xreal, fabs(brick->xreal + brick->xoff));
     gdouble unit = gwy_brick_dx(brick);
-    return gwy_unit_format_with_resolution(gwy_brick_get_unit_x(brick),
+    return gwy_unit_format_with_resolution(gwy_brick_get_xunit(brick),
                                            style, max, unit);
 }
 
@@ -1623,7 +1623,7 @@ gwy_brick_format_y(const GwyBrick *brick,
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     gdouble max = fmax(brick->yreal, fabs(brick->yreal + brick->yoff));
     gdouble unit = gwy_brick_dy(brick);
-    return gwy_unit_format_with_resolution(gwy_brick_get_unit_y(brick),
+    return gwy_unit_format_with_resolution(gwy_brick_get_yunit(brick),
                                            style, max, unit);
 }
 
@@ -1652,7 +1652,7 @@ gwy_brick_format_xy(const GwyBrick *brick,
                     GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
-    if (!gwy_unit_equal(brick->priv->unit_x, brick->priv->unit_y)) {
+    if (!gwy_unit_equal(brick->priv->xunit, brick->priv->yunit)) {
         g_warning("X and Y units of brick do not match.");
         return gwy_brick_format_x(brick, style);
     }
@@ -1661,7 +1661,7 @@ gwy_brick_format_xy(const GwyBrick *brick,
                           fabs(brick->yreal + brick->yoff));
     gdouble max = fmax(max0, maxoff);
     gdouble unit = fmin(gwy_brick_dx(brick), gwy_brick_dy(brick));
-    return gwy_unit_format_with_resolution(gwy_brick_get_unit_x(brick),
+    return gwy_unit_format_with_resolution(gwy_brick_get_xunit(brick),
                                            style, max, unit);
 }
 
@@ -1685,7 +1685,7 @@ gwy_brick_format_z(const GwyBrick *brick,
     g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
     gdouble max = fmax(brick->zreal, fabs(brick->zreal + brick->zoff));
     gdouble unit = gwy_brick_dz(brick);
-    return gwy_unit_format_with_resolution(gwy_brick_get_unit_z(brick),
+    return gwy_unit_format_with_resolution(gwy_brick_get_zunit(brick),
                                            style, max, unit);
 }
 

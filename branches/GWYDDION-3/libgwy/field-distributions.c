@@ -343,10 +343,10 @@ gwy_field_value_dist(const GwyField *field,
     else
         line = gwy_line_new();
 
-    gwy_unit_assign(gwy_line_get_unit_x(line), gwy_field_get_unit_z(field));
+    gwy_unit_assign(gwy_line_get_xunit(line), gwy_field_get_zunit(field));
     if (!cumulative)
-        gwy_unit_power(gwy_line_get_unit_y(line),
-                       gwy_field_get_unit_z(field), -1);
+        gwy_unit_power(gwy_line_get_yunit(line),
+                       gwy_field_get_zunit(field), -1);
 
     return line;
 }
@@ -570,18 +570,18 @@ fail:
     if (!line)
         line = gwy_line_new();
 
-    if (gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)
+    if (gwy_unit_equal(field->priv->xunit, field->priv->yunit)
         || fabs(ddata.sin_alpha) < 1e-14) {
-        gwy_unit_divide(gwy_line_get_unit_x(line),
-                        field->priv->unit_z, field->priv->unit_x);
+        gwy_unit_divide(gwy_line_get_xunit(line),
+                        field->priv->zunit, field->priv->xunit);
         if (!cumulative)
-            gwy_unit_power(gwy_line_get_unit_y(line), field->priv->unit_x, -1);
+            gwy_unit_power(gwy_line_get_yunit(line), field->priv->xunit, -1);
     }
     else if (fabs(ddata.cos_alpha) < 1e-14) {
-        gwy_unit_divide(gwy_line_get_unit_x(line),
-                        field->priv->unit_z, field->priv->unit_y);
+        gwy_unit_divide(gwy_line_get_xunit(line),
+                        field->priv->zunit, field->priv->yunit);
         if (!cumulative)
-            gwy_unit_power(gwy_line_get_unit_y(line), field->priv->unit_y, -1);
+            gwy_unit_power(gwy_line_get_yunit(line), field->priv->yunit, -1);
     }
     else {
         g_warning("X and Y units of field do not match.");
@@ -874,16 +874,16 @@ set_cf_units(const GwyField *field,
 {
     // XXX: This assumes line is newly allocated and does not ever need to
     // clear previously set units.
-    if (field->priv->unit_x)
-        gwy_unit_assign(gwy_line_get_unit_x(line), field->priv->unit_x);
-    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            field->priv->unit_x, 1,
-                            field->priv->unit_z, 2);
+    if (field->priv->xunit)
+        gwy_unit_assign(gwy_line_get_xunit(line), field->priv->xunit);
+    gwy_unit_power_multiply(gwy_line_get_yunit(line),
+                            field->priv->xunit, 1,
+                            field->priv->zunit, 2);
     if (!weights)
         return;
 
-    gwy_unit_assign(gwy_line_get_unit_x(weights), gwy_line_get_unit_x(line));
-    gwy_unit_clear(gwy_line_get_unit_y(weights));
+    gwy_unit_assign(gwy_line_get_xunit(weights), gwy_line_get_xunit(line));
+    gwy_unit_clear(gwy_line_get_yunit(weights));
 }
 
 /**
@@ -1344,10 +1344,10 @@ fail:
     if (!line)
         line = gwy_line_new();
 
-    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_x(field), -1);
-    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
-                            gwy_field_get_unit_x(field), 1,
-                            gwy_field_get_unit_z(field), 2);
+    gwy_unit_power(gwy_line_get_xunit(line), gwy_field_get_xunit(field), -1);
+    gwy_unit_power_multiply(gwy_line_get_yunit(line),
+                            gwy_field_get_xunit(field), 1,
+                            gwy_field_get_zunit(field), 2);
     return line;
 }
 
@@ -2251,7 +2251,7 @@ fail:
     if (!line)
         line = gwy_line_new();
 
-    gwy_unit_assign(gwy_line_get_unit_x(line), gwy_field_get_unit_z(field));
+    gwy_unit_assign(gwy_line_get_xunit(line), gwy_field_get_zunit(field));
 
     return line;
 }

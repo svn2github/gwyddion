@@ -27,8 +27,8 @@
 G_BEGIN_DECLS
 
 struct _GwyLinePrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
+    GwyUnit *xunit;
+    GwyUnit *yunit;
     gchar *name;
     gboolean allocated;
     gdouble storage;

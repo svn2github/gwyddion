@@ -65,8 +65,8 @@ typedef gboolean (*BuiltinEstimate)(const GwyXY *points,
                                     const gdouble *estim,
                                     gdouble *param);
 typedef GwyUnit* (*BuiltinDeriveUnits)(guint param,
-                                       const GwyUnit *unit_x,
-                                       const GwyUnit *unit_y);
+                                       const GwyUnit *xunit,
+                                       const GwyUnit *yunit);
 
 typedef struct {
     const gchar *group;

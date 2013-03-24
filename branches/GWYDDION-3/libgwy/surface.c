@@ -67,8 +67,8 @@ static void     gwy_surface_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "unit-xy", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*1*/ { .name = "unit-z",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*0*/ { .name = "xyunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*1*/ { .name = "zunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*2*/ { .name = "name",    .ctype = GWY_SERIALIZABLE_STRING,       },
     /*3*/ { .name = "data",    .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -110,7 +110,7 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_XY]
-        = g_param_spec_object("unit-xy",
+        = g_param_spec_object("xyunit",
                               "XY unit",
                               "Physical units of the lateral dimensions, this "
                               "means x and y values.",
@@ -118,7 +118,7 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_UNIT_Z]
-        = g_param_spec_object("unit-z",
+        = g_param_spec_object("zunit",
                               "Z unit",
                               "Physical units of the ordinate values.",
                               GWY_TYPE_UNIT,
@@ -184,8 +184,8 @@ static void
 gwy_surface_dispose(GObject *object)
 {
     GwySurface *surface = GWY_SURFACE(object);
-    GWY_OBJECT_UNREF(surface->priv->unit_xy);
-    GWY_OBJECT_UNREF(surface->priv->unit_z);
+    GWY_OBJECT_UNREF(surface->priv->xyunit);
+    GWY_OBJECT_UNREF(surface->priv->zunit);
     G_OBJECT_CLASS(gwy_surface_parent_class)->dispose(object);
 }
 
@@ -195,10 +195,10 @@ gwy_surface_n_items(GwySerializable *serializable)
     GwySurface *surface = GWY_SURFACE(serializable);
     Surface *priv = surface->priv;
     gsize n = N_ITEMS;
-    if (priv->unit_xy)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_xy));
-    if (priv->unit_z)
-       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->unit_z));
+    if (priv->xyunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->xyunit));
+    if (priv->zunit)
+       n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->zunit));
     return n;
 }
 
@@ -213,8 +213,8 @@ gwy_surface_itemize(GwySerializable *serializable,
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    _gwy_serialize_unit(priv->unit_xy, serialize_items + 0, items, &n);
-    _gwy_serialize_unit(priv->unit_z, serialize_items + 1, items, &n);
+    _gwy_serialize_unit(priv->xyunit, serialize_items + 0, items, &n);
+    _gwy_serialize_unit(priv->zunit, serialize_items + 1, items, &n);
     _gwy_serialize_string(priv->name, serialize_items + 2, items, &n);
 
     g_return_val_if_fail(items->len - items->n, 0);
@@ -255,8 +255,8 @@ gwy_surface_construct(GwySerializable *serializable,
         surface->n = its[3].array_size/3;
         surface->data = (GwyXYZ*)its[3].value.v_double_array;
     }
-    priv->unit_xy = (GwyUnit*)its[0].value.v_object;
-    priv->unit_z = (GwyUnit*)its[1].value.v_object;
+    priv->xyunit = (GwyUnit*)its[0].value.v_object;
+    priv->zunit = (GwyUnit*)its[1].value.v_object;
     priv->name = its[2].value.v_string;
 
     return TRUE;
@@ -274,8 +274,8 @@ copy_info(GwySurface *dest,
           const GwySurface *src)
 {
     Surface *dpriv = dest->priv, *spriv = src->priv;
-    _gwy_assign_unit(&dpriv->unit_xy, spriv->unit_xy);
-    _gwy_assign_unit(&dpriv->unit_z, spriv->unit_z);
+    _gwy_assign_unit(&dpriv->xyunit, spriv->xyunit);
+    _gwy_assign_unit(&dpriv->zunit, spriv->zunit);
 }
 
 static void
@@ -361,15 +361,15 @@ gwy_surface_get_property(GObject *object,
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
         case PROP_UNIT_XY:
-        if (!priv->unit_xy)
-            priv->unit_xy = gwy_unit_new();
-        g_value_set_object(value, priv->unit_xy);
+        if (!priv->xyunit)
+            priv->xyunit = gwy_unit_new();
+        g_value_set_object(value, priv->xyunit);
         break;
 
         case PROP_UNIT_Z:
-        if (!priv->unit_z)
-            priv->unit_z = gwy_unit_new();
-        g_value_set_object(value, priv->unit_z);
+        if (!priv->zunit)
+            priv->zunit = gwy_unit_new();
+        g_value_set_object(value, priv->zunit);
         break;
 
         case PROP_NAME:
@@ -535,11 +535,11 @@ copy_field_to_surface(const GwyField *field,
             k++;
         }
     }
-    if (!gwy_unit_equal(field->priv->unit_x, field->priv->unit_y)) {
+    if (!gwy_unit_equal(field->priv->xunit, field->priv->yunit)) {
         g_warning("X and Y units of field do not match.");
     }
-    _gwy_assign_unit(&surface->priv->unit_xy, field->priv->unit_x);
-    _gwy_assign_unit(&surface->priv->unit_z, field->priv->unit_z);
+    _gwy_assign_unit(&surface->priv->xyunit, field->priv->xunit);
+    _gwy_assign_unit(&surface->priv->zunit, field->priv->zunit);
 
     gwy_surface_invalidate(surface);
     surface->priv->cached_range = TRUE;
@@ -862,9 +862,9 @@ regularise(const GwySurface *surface,
     else
         g_assert_not_reached();
 
-    _gwy_assign_unit(&field->priv->unit_x, surface->priv->unit_xy);
-    _gwy_assign_unit(&field->priv->unit_y, surface->priv->unit_xy);
-    _gwy_assign_unit(&field->priv->unit_z, surface->priv->unit_z);
+    _gwy_assign_unit(&field->priv->xunit, surface->priv->xyunit);
+    _gwy_assign_unit(&field->priv->yunit, surface->priv->xyunit);
+    _gwy_assign_unit(&field->priv->zunit, surface->priv->zunit);
 
     return field;
 }
@@ -944,7 +944,7 @@ gwy_surface_regularize(const GwySurface *surface,
 }
 
 /**
- * gwy_surface_get_unit_xy:
+ * gwy_surface_get_xyunit:
  * @surface: A surface.
  *
  * Obtains the lateral units of a surface.
@@ -953,17 +953,17 @@ gwy_surface_regularize(const GwySurface *surface,
  *          The lateral units of @surface.
  **/
 GwyUnit*
-gwy_surface_get_unit_xy(GwySurface *surface)
+gwy_surface_get_xyunit(GwySurface *surface)
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
     Surface *priv = surface->priv;
-    if (!priv->unit_xy)
-        priv->unit_xy = gwy_unit_new();
-    return priv->unit_xy;
+    if (!priv->xyunit)
+        priv->xyunit = gwy_unit_new();
+    return priv->xyunit;
 }
 
 /**
- * gwy_surface_get_unit_z:
+ * gwy_surface_get_zunit:
  * @surface: A surface.
  *
  * Obtains the value units of a surface.
@@ -972,13 +972,13 @@ gwy_surface_get_unit_xy(GwySurface *surface)
  *          The value units of @surface.
  **/
 GwyUnit*
-gwy_surface_get_unit_z(GwySurface *surface)
+gwy_surface_get_zunit(GwySurface *surface)
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
     Surface *priv = surface->priv;
-    if (!priv->unit_z)
-        priv->unit_z = gwy_unit_new();
-    return priv->unit_z;
+    if (!priv->zunit)
+        priv->zunit = gwy_unit_new();
+    return priv->zunit;
 }
 
 /**
@@ -1001,14 +1001,14 @@ gwy_surface_format_xy(GwySurface *surface,
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
     if (!surface->n)
-        return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
+        return gwy_unit_format_with_resolution(gwy_surface_get_xyunit(surface),
                                                style, 1.0, 0.1);
     // XXX: If we have the triangulation a better estimate can be made.  Maybe.
     if (surface->n == 1) {
         gdouble m = fmax(fabs(surface->data[0].x), fabs(surface->data[0].y));
         if (!m)
             m = 1.0;
-        return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
+        return gwy_unit_format_with_resolution(gwy_surface_get_xyunit(surface),
                                                style, m, m/10.0);
     }
     gdouble xmin, xmax, ymin, ymax;
@@ -1021,7 +1021,7 @@ gwy_surface_format_xy(GwySurface *surface,
     gdouble unit = hypot(ymax - ymin, xmax - xmin)/sqrt(surface->n);
     if (!unit)
         unit = max/10.0;
-    return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
+    return gwy_unit_format_with_resolution(gwy_surface_get_xyunit(surface),
                                            style, max, 0.3*unit);
 }
 
@@ -1052,7 +1052,7 @@ gwy_surface_format_z(GwySurface *surface,
         min = 0.0;
         max = 1.0;
     }
-    return gwy_unit_format_with_digits(gwy_surface_get_unit_z(surface),
+    return gwy_unit_format_with_digits(gwy_surface_get_zunit(surface),
                                        style, max - min, 3);
 }
 

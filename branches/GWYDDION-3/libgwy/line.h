@@ -90,8 +90,8 @@ void            gwy_line_set_real      (GwyLine *line,
                                         gdouble real);
 void            gwy_line_set_offset    (GwyLine *line,
                                         gdouble offset);
-GwyUnit*        gwy_line_get_unit_x    (const GwyLine *line)                G_GNUC_PURE;
-GwyUnit*        gwy_line_get_unit_y    (const GwyLine *line)                G_GNUC_PURE;
+GwyUnit*        gwy_line_get_xunit     (const GwyLine *line)                G_GNUC_PURE;
+GwyUnit*        gwy_line_get_yunit     (const GwyLine *line)                G_GNUC_PURE;
 gboolean        gwy_line_xy_units_match(const GwyLine *line)                G_GNUC_PURE;
 GwyValueFormat* gwy_line_format_x      (const GwyLine *line,
                                         GwyValueFormatStyle style)          G_GNUC_MALLOC;

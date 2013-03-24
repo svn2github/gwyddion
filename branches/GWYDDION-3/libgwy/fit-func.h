@@ -62,8 +62,8 @@ guint               gwy_fit_func_param_number (const GwyFitFunc *fitfunc,
                                                const gchar *name)         G_GNUC_PURE;
 GwyUnit*            gwy_fit_func_param_unit   (GwyFitFunc *fitfunc,
                                                guint i,
-                                               const GwyUnit *unit_x,
-                                               const GwyUnit *unit_y)     G_GNUC_MALLOC;
+                                               const GwyUnit *xunit,
+                                               const GwyUnit *yunit)     G_GNUC_MALLOC;
 gboolean            gwy_fit_func_evaluate     (GwyFitFunc *fitfunc,
                                                gdouble x,
                                                const gdouble *params,
