@@ -55,9 +55,12 @@ GwyBrickCompatFlags gwy_brick_is_incompatible(const GwyBrick *brick1,
                                               GwyBrickCompatFlags check);
 GwyFieldCompatFlags gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
                                                          const GwyField *field,
+                                                         GwyDimenType coldim,
+                                                         GwyDimenType rowdim,
                                                          GwyFieldCompatFlags check);
 GwyLineCompatFlags gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
                                                        const GwyLine *line,
+                                                       GwyDimenType dim,
                                                        GwyLineCompatFlags check);
 
 void gwy_brick_extract_plane(const GwyBrick *brick,

@@ -138,16 +138,21 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
  * gwy_brick_is_incompatible_with_field:
  * @brick: A data brick.
  * @field: A data field.
+ * @coldim: Dimension (axis) in @brick which corresponds to columns in @field.
+ * @rowdim: Dimension (axis) in @brick which corresponds to rows in @field.
  * @check: Properties to check for compatibility.  The properties are from
- *         the #GwyFieldCompatFlags enum as the field cannot be
- *         incompatible in dimensions it does not have.
+ *         the #GwyFieldCompatFlags enum (not #GwyBrickCompatFlags) since the
+ *         field cannot be incompatible in dimensions it does not have.
  *
  * Checks whether a brick and a field are compatible.
  *
- * The field is checked for compatibility with planes in the brick.  This means
- * X- and Y-quantities in both objects correspond, while Z of @field
- * corresponds to W of @brick.  Z of @brick does not correspond to anything
- * in @field and is not compared.
+ * The field is checked for compatibility with planes in the brick, specified
+ * by @coldim and @rowdim.
+ *
+ * For instance, in the basic case when @coldim is %GWY_DIMEN_X and @rowdim
+ * is %GWY_DIMEN_Y, X- and Y-quantities in both objects correspond, while Z of
+ * @field corresponds to W of @brick.  Z of @brick does not correspond to
+ * anything in @field and is not compared.
  *
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if fields are not compatible.
@@ -155,18 +160,26 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
 GwyFieldCompatFlags
 gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
                                      const GwyField *field,
+                                     GwyDimenType coldim,
+                                     GwyDimenType rowdim,
                                      GwyFieldCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), check);
     g_return_val_if_fail(GWY_IS_FIELD(field), check);
+    g_return_val_if_fail(coldim <= GWY_DIMEN_Z, check);
+    g_return_val_if_fail(rowdim <= GWY_DIMEN_Z, check);
+    g_return_val_if_fail(coldim != rowdim, check);
 
-    guint xres1 = brick->xres;
+    const guint res[] = { brick->xres, brick->yres, brick->zres };
+    const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
+
+    guint xres1 = res[coldim];
     guint xres2 = field->xres;
-    guint yres1 = brick->yres;
+    guint yres1 = res[rowdim];
     guint yres2 = field->yres;
-    gdouble xreal1 = brick->xreal;
+    gdouble xreal1 = real[coldim];
     gdouble xreal2 = field->xreal;
-    gdouble yreal1 = brick->yreal;
+    gdouble yreal1 = real[rowdim];
     gdouble yreal2 = field->yreal;
     GwyFieldCompatFlags result = 0;
 
@@ -204,16 +217,18 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
 
     const Field *fpriv = field->priv;
     const Brick *bpriv = brick->priv;
+    const GwyUnit *unit[] = { bpriv->xunit, bpriv->yunit, bpriv->zunit };
+    const GwyUnit *xunit = unit[coldim], *yunit = unit[rowdim];
 
     /* X units */
     if (check & GWY_FIELD_COMPAT_X) {
-        if (!gwy_unit_equal(fpriv->xunit, bpriv->xunit))
+        if (!gwy_unit_equal(fpriv->xunit, xunit))
             result |= GWY_FIELD_COMPAT_X;
     }
 
     /* Y units */
     if (check & GWY_FIELD_COMPAT_Y) {
-        if (!gwy_unit_equal(fpriv->yunit, bpriv->yunit))
+        if (!gwy_unit_equal(fpriv->yunit, yunit))
             result |= GWY_FIELD_COMPAT_Y;
     }
 
@@ -230,16 +245,19 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
  * gwy_brick_is_incompatible_with_line:
  * @brick: A data brick.
  * @line: A data line.
+ * @dim: Dimension (axis) in @brick along which @line is supposed to lie.
  * @check: Properties to check for compatibility.  The properties are from
- *         the #GwyLineCompatFlags enum as the line cannot be
- *         incompatible in dimensions it does not have.
+ *         the #GwyLineCompatFlags enum (not #GwyBrickCompatFlags) since the
+ *         line cannot be incompatible in dimensions it does not have.
  *
  * Checks whether a brick and a line are compatible.
  *
- * The line is checked for compatibility with lines along Z in the brick.  This
- * means X of @line corresponds to Z of @brick while Y of @line corresponds to
- * W of @brick.  X and Y of @brick do not correspond to anything in @line and
- * are not compared.
+ * The line is checked for compatibility with lines along @dim axis in the
+ * brick.
+ *
+ * For instance, in the basic case when @dim is %GWY_DIMEN_Z, X of @line
+ * corresponds to Z of @brick while Y of @line corresponds to W of @brick.  X
+ * and Y of @brick do not correspond to anything in @line and are not compared.
  *
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
  *          to failed tests if lines are not compatible.
@@ -247,14 +265,19 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
 GwyLineCompatFlags
 gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
                                     const GwyLine *line,
+                                    GwyDimenType dim,
                                     GwyLineCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), check);
     g_return_val_if_fail(GWY_IS_LINE(line), check);
+    g_return_val_if_fail(dim <= GWY_DIMEN_Z, check);
 
-    guint res1 = brick->zres;
+    const guint res[] = { brick->xres, brick->yres, brick->zres };
+    const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
+
+    guint res1 = res[dim];
     guint res2 = line->res;
-    gdouble real1 = brick->zreal;
+    gdouble real1 = real[dim];
     gdouble real2 = line->real;
     GwyLineCompatFlags result = 0;
 
@@ -280,10 +303,12 @@ gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
 
     const Line *lpriv = line->priv;
     const Brick *bpriv = brick->priv;
+    const GwyUnit *unit[] = { bpriv->xunit, bpriv->yunit, bpriv->zunit };
+    const GwyUnit *zunit = unit[dim];
 
     /* Lateral units */
     if (check & GWY_LINE_COMPAT_X) {
-        if (!gwy_unit_equal(lpriv->xunit, bpriv->zunit))
+        if (!gwy_unit_equal(lpriv->xunit, zunit))
             result |= GWY_LINE_COMPAT_X;
     }
 
