@@ -576,6 +576,7 @@ gwy_color_axis_motion_notify(GtkWidget *widget,
     BoundaryType boundary = find_boundary(axis, event->x, event->y);
     if (event->state & GDK_BUTTON1_MASK) {
         if (!priv->dragging
+            && boundary != BOUNDARY_NONE
             && fabs(pos - priv->drag_start_pos) >= DRAG_MIN_DIST) {
             priv->dragging = TRUE;
         }
