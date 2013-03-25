@@ -174,7 +174,7 @@ static void
 gwy_shapes_line_init(GwyShapesLine *lines)
 {
     lines->priv = G_TYPE_INSTANCE_GET_PRIVATE(lines, GWY_TYPE_SHAPES_LINE,
-                                               ShapesLine);
+                                              ShapesLine);
     ShapesLine *priv = lines->priv;
     priv->hover = priv->clicked = -1;
 }
@@ -613,11 +613,12 @@ find_near_line(GwyShapesLine *lines,
         gdouble xf = data[4*i], yf = data[4*i + 1],
                 xt = data[4*i + 2], yt = data[4*i + 3];
         gdouble vx = xt - xf, vy = yt - yf, v2 = vx*vx + vy*vy;
-        if (v2
-            || vx*(y - yf) < vy*(y - yf)
-            || vx*(yt - y) < vy*(xt - x))
+        if (!v2
+            || vx*(x - xt) > vy*(yt - y)
+            || vx*(x - xf) < vy*(yf - y))
             continue;
-        gdouble dist2 = (vx*(x - xf) + vy*(y - yt))/v2;
+        gdouble dist2 = x*vy - y*vx + xt*yf - xf*yt;
+        dist2 *= dist2/v2;
         if (dist2 <= 30.0 && dist2 < mindist2) {
             mindist2 = dist2;
             mini = i;
@@ -700,13 +701,13 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     gint i = -1;
 
     if (isfinite(eventx) && isfinite(eventy)) {
-        if ((i == find_near_point(lines, eventx, eventy)) >= 0) {
+        if ((i = find_near_point(lines, eventx, eventy)) >= 0) {
             endpoint = 1 << (i % 2);
             i /= 2;
         }
         else {
             i = find_near_line(lines, eventx, eventy);
-            if (i > 0)
+            if (i >= 0)
                 endpoint = 3;
         }
     }
