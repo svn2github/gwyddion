@@ -80,6 +80,53 @@ print_version(G_GNUC_UNUSED const gchar *name,
     exit(EXIT_SUCCESS);
 }
 
+G_GNUC_UNUSED
+static GwyShapes*
+create_test_points(void)
+{
+    GwyCoords *coords = gwy_coords_point_new();
+    gdouble xy[] = { 0.5, 0.5 };
+    gwy_coords_set(coords, 0, xy);
+    xy[0] = 0.4;
+    gwy_coords_set(coords, 1, xy);
+    xy[1] = 0.25;
+    gwy_coords_set(coords, 2, xy);
+
+    GwyShapes *shapes = gwy_shapes_point_new();
+    g_object_set(shapes,
+                 "radius", 8.0,
+                 "max-shapes", 5,
+                 NULL);
+    gwy_shapes_set_coords(shapes, coords);
+    g_object_unref(coords);
+
+    return shapes;
+}
+
+G_GNUC_UNUSED
+static GwyShapes*
+create_test_lines(void)
+{
+    GwyCoords *coords = gwy_coords_line_new();
+    gdouble xy[] = { 0.5, 0.5, 0.6, 0.8 };
+    gwy_coords_set(coords, 0, xy);
+    xy[0] = 0.4;
+    xy[2] = 0.3;
+    gwy_coords_set(coords, 1, xy);
+    xy[1] = 0.25;
+    xy[3] = 0.2;
+    gwy_coords_set(coords, 2, xy);
+
+    GwyShapes *shapes = gwy_shapes_line_new();
+    g_object_set(shapes,
+                 "max-shapes", 5,
+                 NULL);
+    gwy_shapes_set_coords(shapes, coords);
+    g_object_unref(coords);
+
+    return shapes;
+}
+
 static GtkWidget*
 create_raster_window(guint xres, guint yres)
 {
@@ -108,23 +155,7 @@ create_raster_window(guint xres, guint yres)
     gwy_raster_area_set_field(rasterarea, mix->result);
     gwy_raster_area_set_mask(rasterarea, mask);
 
-    GwyCoords *coords = gwy_coords_point_new();
-    gdouble xy[] = { 0.5, 0.5 };
-    gwy_coords_set(coords, 0, xy);
-    xy[0] = 0.4;
-    gwy_coords_set(coords, 1, xy);
-    xy[1] = 0.25;
-    gwy_coords_set(coords, 2, xy);
-
-    GwyShapes *shapes = gwy_shapes_point_new();
-    g_object_set(shapes,
-                 "radius", 8.0,
-                 "max-shapes", 5,
-                 //"editable", FALSE,
-                 NULL);
-    gwy_shapes_set_coords(shapes, coords);
-    g_object_unref(coords);
-
+    GwyShapes *shapes = create_test_lines();
     gwy_raster_area_set_shapes(rasterarea, shapes);
 
     return window;
@@ -271,7 +302,8 @@ create_coords_view_test(GwyRasterView *rasterview)
     gwy_coords_view_set_dimension_format(view, 1, vf);
     GtkTreeViewColumn *column = gwy_coords_view_create_column_index(view, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-    for (guint i = 0; i < 2; i++) {
+    guint n = gwy_coords_shape_size(coords);
+    for (guint i = 0; i < n; i++) {
         column = gwy_coords_view_create_column_coord(view, NULL, i);
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
     }
