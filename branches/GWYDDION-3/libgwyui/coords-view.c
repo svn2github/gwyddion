@@ -581,6 +581,7 @@ gwy_coords_view_create_column_coord(GwyCoordsView *view,
     ColumnInfo *column_info = g_slice_new(ColumnInfo);
     column_info->column = column;
     column_info->i = i;
+    column_info->is_index = FALSE;
     column_info->title = title ? g_strdup(title) : auto_column_title(priv, i);
     priv->column_info = g_slist_prepend(priv->column_info, column_info);
     g_object_weak_ref(G_OBJECT(column), column_gone, view);
