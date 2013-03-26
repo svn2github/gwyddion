@@ -118,72 +118,72 @@ struct _GwyShapesClass {
     gboolean (*reservedevent6)(void);
 };
 
-GType        gwy_shapes_get_type                (void)                                  G_GNUC_CONST;
-void         gwy_shapes_set_coords              (GwyShapes *shapes,
-                                                 GwyCoords *coords);
-GwyCoords*   gwy_shapes_get_coords              (GwyShapes *shapes);
-GType        gwy_shapes_class_coords_type       (const GwyShapesClass *klass)           G_GNUC_PURE;
-GType        gwy_shapes_coords_type             (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_set_coords_matrices     (GwyShapes *shapes,
-                                                 const cairo_matrix_t *coords_to_view,
-                                                 const cairo_matrix_t *view_to_coords);
-void         gwy_shapes_set_pixel_matrices      (GwyShapes *shapes,
-                                                 const cairo_matrix_t *pixel_to_view,
-                                                 const cairo_matrix_t *view_to_pixel);
-void         gwy_shapes_set_bounding_box        (GwyShapes *shapes,
-                                                 const cairo_rectangle_t *bbox);
-void         gwy_shapes_set_max_shapes          (GwyShapes *shapes,
-                                                 guint max_shapes);
-guint        gwy_shapes_get_max_shapes          (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_set_selectable          (GwyShapes *shapes,
-                                                 gboolean selectable);
-gboolean     gwy_shapes_get_selectable          (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_set_editable            (GwyShapes *shapes,
-                                                 gboolean editable);
-gboolean     gwy_shapes_get_editable            (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_set_snapping            (GwyShapes *shapes,
-                                                 gboolean snapping);
-gboolean     gwy_shapes_get_snapping            (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_draw                    (GwyShapes *shapes,
-                                                 cairo_t *cr);
-GdkEventMask gwy_shapes_gdk_event_mask          (const GwyShapes *shapes)               G_GNUC_PURE;
-gboolean     gwy_shapes_delete_selection        (GwyShapes *shapes);
-gboolean     gwy_shapes_button_press            (GwyShapes *shapes,
-                                                 GdkEventButton *event);
-gboolean     gwy_shapes_button_release          (GwyShapes *shapes,
-                                                 GdkEventButton *event);
-gboolean     gwy_shapes_motion_notify           (GwyShapes *shapes,
-                                                 GdkEventMotion *event);
-gboolean     gwy_shapes_key_press               (GwyShapes *shapes,
-                                                 GdkEventKey *event);
-gboolean     gwy_shapes_key_release             (GwyShapes *shapes,
-                                                 GdkEventKey *event);
-void         gwy_shapes_update                  (GwyShapes *shapes);
-gboolean     gwy_shapes_is_updated              (GwyShapes *shapes);
-void         gwy_shapes_editing_started         (GwyShapes *shapes);
-gboolean     gwy_shapes_get_current_point       (const GwyShapes *shapes,
-                                                 GwyXY *xy);
-void         gwy_shapes_set_current_point       (GwyShapes *shapes,
-                                                 const GwyXY *xy);
-void         gwy_shapes_unset_current_point     (GwyShapes *shapes);
-void         gwy_shapes_set_origin              (GwyShapes *shapes,
-                                                 const GwyXY *xy);
-void         gwy_shapes_get_origin              (const GwyShapes *shapes,
-                                                 GwyXY *xy);
-gboolean     gwy_shapes_check_movement          (GwyShapes *shapes,
-                                                 const GwyXY *xy,
-                                                 GwyXY *dxy);
-gboolean     gwy_shapes_has_moved               (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_set_moved               (GwyShapes *shapes);
-void         gwy_shapes_move                    (GwyShapes *shapes,
-                                                 const GwyXY *dxy);
-GwyCoords*   gwy_shapes_get_starting_coords     (const GwyShapes *shapes)               G_GNUC_PURE;
-void         gwy_shapes_stroke                  (GwyShapes *shapes,
-                                                 cairo_t *cr,
-                                                 GwyShapesStateType state);
-void         gwy_shapes_start_updating_selection(GwyShapes *shapes);
-void         gwy_shapes_stop_updating_selection (GwyShapes *shapes);
-gboolean     gwy_shapes_is_updating_selection   (const GwyShapes *shapes)               G_GNUC_PURE;
+GType            gwy_shapes_get_type                (void)                                  G_GNUC_CONST;
+void             gwy_shapes_set_coords              (GwyShapes *shapes,
+                                                     GwyCoords *coords);
+GwyCoords*       gwy_shapes_get_coords              (GwyShapes *shapes);
+GType            gwy_shapes_class_coords_type       (const GwyShapesClass *klass)           G_GNUC_PURE;
+GType            gwy_shapes_coords_type             (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_set_coords_matrices     (GwyShapes *shapes,
+                                                     const cairo_matrix_t *coords_to_view,
+                                                     const cairo_matrix_t *view_to_coords);
+void             gwy_shapes_set_pixel_matrices      (GwyShapes *shapes,
+                                                     const cairo_matrix_t *pixel_to_view,
+                                                     const cairo_matrix_t *view_to_pixel);
+void             gwy_shapes_set_bounding_box        (GwyShapes *shapes,
+                                                     const cairo_rectangle_t *bbox);
+void             gwy_shapes_set_max_shapes          (GwyShapes *shapes,
+                                                     guint max_shapes);
+guint            gwy_shapes_get_max_shapes          (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_set_selectable          (GwyShapes *shapes,
+                                                     gboolean selectable);
+gboolean         gwy_shapes_get_selectable          (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_set_editable            (GwyShapes *shapes,
+                                                     gboolean editable);
+gboolean         gwy_shapes_get_editable            (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_set_snapping            (GwyShapes *shapes,
+                                                     gboolean snapping);
+gboolean         gwy_shapes_get_snapping            (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_draw                    (GwyShapes *shapes,
+                                                     cairo_t *cr);
+GdkEventMask     gwy_shapes_gdk_event_mask          (const GwyShapes *shapes)               G_GNUC_PURE;
+gboolean         gwy_shapes_delete_selection        (GwyShapes *shapes);
+gboolean         gwy_shapes_button_press            (GwyShapes *shapes,
+                                                     GdkEventButton *event);
+gboolean         gwy_shapes_button_release          (GwyShapes *shapes,
+                                                     GdkEventButton *event);
+gboolean         gwy_shapes_motion_notify           (GwyShapes *shapes,
+                                                     GdkEventMotion *event);
+gboolean         gwy_shapes_key_press               (GwyShapes *shapes,
+                                                     GdkEventKey *event);
+gboolean         gwy_shapes_key_release             (GwyShapes *shapes,
+                                                     GdkEventKey *event);
+void             gwy_shapes_update                  (GwyShapes *shapes);
+gboolean         gwy_shapes_is_updated              (GwyShapes *shapes);
+void             gwy_shapes_editing_started         (GwyShapes *shapes);
+gboolean         gwy_shapes_get_current_point       (const GwyShapes *shapes,
+                                                     GwyXY *xy);
+void             gwy_shapes_set_current_point       (GwyShapes *shapes,
+                                                     const GwyXY *xy);
+void             gwy_shapes_unset_current_point     (GwyShapes *shapes);
+void             gwy_shapes_set_origin              (GwyShapes *shapes,
+                                                     const GwyXY *xy);
+void             gwy_shapes_get_origin              (const GwyShapes *shapes,
+                                                     GwyXY *xy);
+gboolean         gwy_shapes_check_movement          (GwyShapes *shapes,
+                                                     const GwyXY *xy,
+                                                     GwyXY *dxy);
+gboolean         gwy_shapes_has_moved               (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_set_moved               (GwyShapes *shapes);
+void             gwy_shapes_move                    (GwyShapes *shapes,
+                                                     const GwyXY *dxy);
+const GwyCoords* gwy_shapes_get_starting_coords     (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_stroke                  (GwyShapes *shapes,
+                                                     cairo_t *cr,
+                                                     GwyShapesStateType state);
+void             gwy_shapes_start_updating_selection(GwyShapes *shapes);
+void             gwy_shapes_stop_updating_selection (GwyShapes *shapes);
+gboolean         gwy_shapes_is_updating_selection   (const GwyShapes *shapes)               G_GNUC_PURE;
 
 G_END_DECLS
 

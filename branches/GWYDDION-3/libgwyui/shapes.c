@@ -1269,6 +1269,18 @@ gwy_shapes_set_origin(GwyShapes *shapes,
     priv->snapshot = gwy_coords_new_subset(priv->coords, shapes->selection);
 }
 
+/**
+ * gwy_shapes_get_origin:
+ * @shapes: A group of geometrical shapes.
+ * @xy: (out):
+ *      Location to fill with origin @coords coordinates.
+ *
+ * Gets the origin coordinates of a group of geometrical shapes.
+ *
+ * The returned coordinates are the same as set by gwy_shapes_set_origin(),
+ * <emphasis>except</emphasis> they are @coords coordinates, not view
+ * coordinates.
+ **/
 void
 gwy_shapes_get_origin(const GwyShapes *shapes,
                       GwyXY *xy)
@@ -1349,6 +1361,17 @@ gwy_shapes_has_moved(const GwyShapes *shapes)
     return shapes->priv->has_moved;
 }
 
+/**
+ * gwy_shapes_set_moved:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Makes a group of geometrical shapes report it has moved.
+ *
+ * This function is namely useful if you do not want
+ * gwy_shapes_check_movement() to emit GwyShapes::editing-started signal
+ * because you have already done it, for instance beause a new shape was added
+ * and started to being edited.
+ **/
 void
 gwy_shapes_set_moved(GwyShapes *shapes)
 {
@@ -1407,7 +1430,21 @@ gwy_shapes_move(GwyShapes *shapes,
     gwy_shapes_set_current_point(shapes, &curr);
 }
 
-GwyCoords*
+/**
+ * gwy_shapes_get_starting_coords:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Obtains the remembered starting coordinates.
+ *
+ * The starting coordinates are remembered when gwy_shapes_set_origin() is
+ * called.
+ *
+ * Returns: (transfer none):
+ *          The starting coordinates of the movement.  They are compactified,
+ *          i.e. the returned object contains only as many shape coordinates
+ *          as there are selected shapes.
+ **/
+const GwyCoords*
 gwy_shapes_get_starting_coords(const GwyShapes *shapes)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
