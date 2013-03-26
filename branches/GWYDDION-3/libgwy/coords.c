@@ -1062,11 +1062,11 @@ gwy_coords_transpose_units(GwyCoords *coords,
  *           offsets.  Its contents will be possibly modified if the offsets
  *           need to be constrained; they can only become smaller in absolute
  *           value, never larger.
- * @lower: Array of size @dimension containing the minimum values of invidual
+ * @lower: Array of size @dimension containing the minimum values of individual
  *         coordinates (upper-left corner of the multi-dimensional bounding
  *         box).  No coordinate may become smaller than the corresponding
  *         value in @lower.
- * @upper: Array of size @dimension containing the maximum values of invidual
+ * @upper: Array of size @dimension containing the maximum values of individual
  *         coordinates (lower-right corner of the multi-dimensional bounding
  *         box).  No coordinate may become larger than the corresponding
  *         value in @upper.
