@@ -166,12 +166,23 @@ gboolean     gwy_shapes_get_current_point       (const GwyShapes *shapes,
 void         gwy_shapes_set_current_point       (GwyShapes *shapes,
                                                  const GwyXY *xy);
 void         gwy_shapes_unset_current_point     (GwyShapes *shapes);
+void         gwy_shapes_set_origin              (GwyShapes *shapes,
+                                                 const GwyXY *xy);
+void         gwy_shapes_get_origin              (const GwyShapes *shapes,
+                                                 GwyXY *xy);
+gboolean     gwy_shapes_check_movement          (GwyShapes *shapes,
+                                                 const GwyXY *xy,
+                                                 GwyXY *dxy);
+gboolean     gwy_shapes_has_moved               (const GwyShapes *shapes)               G_GNUC_PURE;
+void         gwy_shapes_set_moved               (GwyShapes *shapes);
+void         gwy_shapes_move_wrt_origin         (GwyShapes *shapes,
+                                                 const GwyXY *dxy);
 void         gwy_shapes_stroke                  (GwyShapes *shapes,
                                                  cairo_t *cr,
                                                  GwyShapesStateType state);
 void         gwy_shapes_start_updating_selection(GwyShapes *shapes);
 void         gwy_shapes_stop_updating_selection (GwyShapes *shapes);
-gboolean     gwy_shapes_is_updating_selection   (const GwyShapes *shapes);
+gboolean     gwy_shapes_is_updating_selection   (const GwyShapes *shapes)               G_GNUC_PURE;
 
 G_END_DECLS
 

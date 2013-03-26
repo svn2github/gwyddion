@@ -52,9 +52,7 @@ struct _GwyShapesPointPrivate {
 
     gint hover;
     gint clicked;
-    gboolean has_moved;
     InteractMode mode;
-    GwyXY xypress;    // Event (view) coordinates.
 };
 
 static void     gwy_shapes_point_finalize          (GObject *object);
@@ -248,28 +246,12 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
     }
 
     g_assert(priv->mode == MODE_MOVING);
-    if (!priv->has_moved && (event->x != priv->xypress.x
-                             || event->y != priv->xypress.y)) {
-        gwy_shapes_editing_started(shapes);
-        priv->has_moved = TRUE;
-        // If we clicked on an already selected shape, we will move the entire
-        // group.  If we clicked on an unselected shape we will need to select
-        // only this one.
-        if (!gwy_int_set_contains(shapes->selection, priv->clicked)) {
-            gwy_shapes_start_updating_selection(shapes);
-            gwy_int_set_update(shapes->selection, &priv->clicked, 1);
-            gwy_shapes_stop_updating_selection(shapes);
-        }
-    }
+    GwyXY xy = { event->x, event->y }, dxy;
+    if (!gwy_shapes_check_movement(shapes, &xy, &dxy))
+        return FALSE;
 
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    GwyXY dxy;
-    constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-    gwy_coords_translate(coords, shapes->selection, (const gdouble*)&dxy);
-
-    GwyXY xy;
-    gwy_coords_get(coords, priv->clicked, (gdouble*)&xy);
-    gwy_shapes_set_current_point(shapes, &xy);
+    constrain_movement(shapes, xy.x, xy.y, event->state, &dxy);
+    gwy_shapes_move_wrt_origin(shapes, &dxy);
 
     return TRUE;
 }
@@ -280,8 +262,8 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
 {
     ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     GwyIntSet *selection = shapes->selection;
+    gdouble x = event->x, y = event->y;
 
-    priv->xypress = (GwyXY){ event->x, event->y };
     if (event->state & GDK_SHIFT_MASK || !gwy_shapes_get_editable(shapes))
         priv->mode = MODE_SELECTING;
     else
@@ -290,11 +272,21 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
     // XXX: All the selection updates must be done in motion_notify or
     // button_release: only based on whether the pointer has moved we know
     // whether the user wants to select things or move them.
+    update_hover(shapes, x, y);
     if (priv->hover != -1) {
         priv->clicked = priv->hover;
+        // If we clicked on an already selected shape, we will move the entire
+        // group.  If we clicked on an unselected shape we will need to select
+        // only this one.
+        if (priv->mode == MODE_MOVING
+            && !gwy_int_set_contains(shapes->selection, priv->clicked)) {
+            gwy_shapes_start_updating_selection(shapes);
+            gwy_int_set_update(shapes->selection, &priv->clicked, 1);
+            gwy_shapes_stop_updating_selection(shapes);
+        }
     }
     else if (priv->mode == MODE_MOVING) {
-        if (!add_point(shapes, event->x, event->y)) {
+        if (!add_point(shapes, x, y)) {
             priv->clicked = -1;
             return FALSE;
         }
@@ -302,7 +294,7 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
         gwy_int_set_update(selection, &priv->clicked, 1);
         gwy_shapes_stop_updating_selection(shapes);
     }
-    priv->has_moved = FALSE;
+    gwy_shapes_set_origin(shapes, &(GwyXY){ x, y });
 
     return FALSE;
 }
@@ -317,7 +309,7 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
         return FALSE;
     }
 
-    if (!priv->has_moved) {
+    if (!gwy_shapes_has_moved(shapes)) {
         GwyIntSet *selection = shapes->selection;
 
         gwy_shapes_start_updating_selection(shapes);
@@ -331,11 +323,11 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
         gwy_shapes_update(shapes);
     }
     else {
-        GwyCoords *coords = gwy_shapes_get_coords(shapes);
-        GwyXY dxy;
-        constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-        gwy_coords_translate(coords, shapes->selection, (const gdouble*)&dxy);
-        gwy_coords_finished(coords);
+        GwyXY xy = { event->x, event->y }, dxy;
+        gwy_shapes_check_movement(shapes, &xy, &dxy);
+        constrain_movement(shapes, xy.x, xy.y, event->state, &dxy);
+        gwy_shapes_move_wrt_origin(shapes, &dxy);
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
     gwy_shapes_unset_current_point(shapes);
     priv->clicked = -1;
@@ -347,8 +339,8 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
 static gboolean
 gwy_shapes_point_delete_selection(GwyShapes *shapes)
 {
-    if (GWY_SHAPES_CLASS
-                   (gwy_shapes_point_parent_class)->delete_selection(shapes)) {
+    GwyShapesClass *klass = GWY_SHAPES_CLASS(gwy_shapes_point_parent_class);
+    if (klass->delete_selection(shapes)) {
         update_hover(shapes, NAN, NAN);
         return TRUE;
     }
@@ -360,18 +352,9 @@ gwy_shapes_point_cancel_editing(GwyShapes *shapes,
                                 gint id)
 {
     ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    if (priv->clicked == -1 || id != priv->clicked)
-        return;
-
     // FIXME: We might want to do something like the finishing touches at the
     // end of button_released() here.
     priv->clicked = -1;
-    gwy_shapes_unset_current_point(shapes);
-    if (priv->has_moved) {
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
-        priv->has_moved = FALSE;
-    }
-    gwy_shapes_update(shapes);
 }
 
 // FIXME: May be common.
@@ -582,12 +565,15 @@ constrain_movement(GwyShapes *shapes,
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
     if (modif & GDK_CONTROL_MASK) {
-        const GwyXY *xypress = &priv->xypress;
-        gdouble xd = eventx - xypress->x, yd = eventy - xypress->y;
+        GwyXY origin;
+        gwy_shapes_get_origin(shapes, &origin);
+        const cairo_matrix_t *matrix = &shapes->coords_to_view;
+        cairo_matrix_transform_point(matrix, &origin.x, &origin.y);
+        gdouble xd = eventx - origin.x, yd = eventy - origin.y;
         if (fabs(xd) <= fabs(yd))
-            eventx = xypress->x;
+            eventx = origin.x;
         else
-            eventy = xypress->y;
+            eventy = origin.y;
     }
 
     // Constrain movement in coords space, cannot move anything outside the
@@ -627,6 +613,9 @@ add_point(GwyShapes *shapes, gdouble x, gdouble y)
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
         return FALSE;
+
+    gwy_shapes_set_moved(shapes);
+    gwy_shapes_editing_started(shapes);
 
     gdouble xy2[2] = { x, y };
     priv->hover = priv->clicked = n;

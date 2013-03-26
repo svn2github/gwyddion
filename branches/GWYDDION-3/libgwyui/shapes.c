@@ -60,8 +60,10 @@ struct _GwyShapesPrivate {
 
     gboolean updating_selection : 1;
     gboolean has_current_point : 1;
+    gboolean has_moved : 1;
 
     GwyCoords *coords;
+    GwyCoords *snapshot;
     gulong coords_item_inserted_id;
     gulong coords_item_deleted_id;
     gulong coords_item_updated_id;
@@ -72,6 +74,7 @@ struct _GwyShapesPrivate {
     gulong selection_assigned_id;
 
     GwyXY current_point;
+    GwyXY origin;
 };
 
 static void     gwy_shapes_finalize             (GObject *object);
@@ -275,7 +278,9 @@ static void
 gwy_shapes_dispose(GObject *object)
 {
     GwyShapes *shapes = GWY_SHAPES(object);
+    Shapes *priv = shapes->priv;
     set_coords(shapes, NULL);
+    GWY_OBJECT_UNREF(priv->snapshot);
     G_OBJECT_CLASS(gwy_shapes_parent_class)->dispose(object);
 }
 
@@ -1234,6 +1239,174 @@ gwy_shapes_is_updating_selection(const GwyShapes *shapes)
     return shapes->priv->updating_selection;
 }
 
+/**
+ * gwy_shapes_set_origin:
+ * @shapes: A group of geometrical shapes.
+ * @xy: New origin in view coordinates.
+ *
+ * Sets the origin point of a group of geometrical shapes.
+ *
+ * The origin is the point which defines movement.  It should be usually set
+ * by subclasses in button press handlers.
+ *
+ * This function also remembers the coordinates of all selected shapes so that
+ * any future movements can be done non-icrementally, based on the origin and
+ * original coordinates.
+ **/
+void
+gwy_shapes_set_origin(GwyShapes *shapes,
+                      const GwyXY *xy)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(xy);
+    Shapes *priv = shapes->priv;
+    GwyXY *origin = &priv->origin;
+    *origin = *xy;
+    cairo_matrix_transform_point(&shapes->view_to_coords,
+                                 &origin->x, &origin->y);
+    priv->has_moved = FALSE;
+
+    GWY_OBJECT_UNREF(priv->snapshot);
+    priv->snapshot = gwy_coords_new_subset(priv->coords, shapes->selection);
+}
+
+void
+gwy_shapes_get_origin(const GwyShapes *shapes,
+                      GwyXY *xy)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(xy);
+    *xy = shapes->priv->origin;
+}
+
+/**
+ * gwy_shapes_check_movement:
+ * @shapes: A group of geometrical shapes.
+ * @xy: View coordinates of the current event.
+ * @dxy: (out) (allow-none):
+ *       Location to fill with coordinate differences with respect to the
+ *       origin, in @coords coordinates.
+ *
+ * Checks whether a group of geometrical shapes has moved and calculates the
+ * movement vector.
+ *
+ * Since the comparison is done by transforming to @coords coordinates first
+ * and then back, the movement can occur either by moving the mouse pointer or
+ * by changing the view.
+ *
+ * When movement occurs the first time, gwy_shapes_editing_started() is
+ * invoked.  If you need to invoke gwy_shapes_editing_started() another time,
+ * just do it and call also gwy_shapes_set_moved().
+ *
+ * Returns: %TRUE if the user interaction with the shapes should be considered
+ *          a movement.  This means that any time since the last
+ *          gwy_shapes_set_origin() the event coordinates passed to this method
+ *          were sufficiently appart from the origin.
+ **/
+gboolean
+gwy_shapes_check_movement(GwyShapes *shapes,
+                          const GwyXY *xy,
+                          GwyXY *dxy)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    g_return_val_if_fail(xy, FALSE);
+    Shapes *priv = shapes->priv;
+    if (!priv->has_moved || dxy) {
+        GwyXY *origin = &priv->origin;
+        gdouble x = xy->x, y = xy->y;
+        cairo_matrix_transform_point(&shapes->view_to_coords, &x, &y);
+        x -= origin->x;
+        y -= origin->y;
+        if (dxy) {
+            dxy->x = x;
+            dxy->y = y;
+        }
+        cairo_matrix_transform_distance(&shapes->coords_to_view, &x, &y);
+        // Somewhat more than half a pixel means movement.
+        if (x*x + y*y > 0.3) {
+            priv->has_moved = TRUE;
+            gwy_shapes_editing_started(shapes);
+        }
+    }
+    return priv->has_moved;
+}
+
+/**
+ * gwy_shapes_has_moved:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Checks whether a group of geometrical shapes has moved.
+ *
+ * More precisely, it means whether it has moved since the last
+ * gwy_shapes_set_origin(), i.e. gwy_shapes_check_movement() returned %TRUE
+ * at least once since.
+ *
+ * Returns: %TRUE if the shapes have moved, %FALSE if it has not moved.
+ **/
+gboolean
+gwy_shapes_has_moved(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), FALSE);
+    return shapes->priv->has_moved;
+}
+
+void
+gwy_shapes_set_moved(GwyShapes *shapes)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    shapes->priv->has_moved = TRUE;
+}
+
+/**
+ * gwy_shapes_move_wrt_origin:
+ * @shapes: A group of geometrical shapes.
+ * @dxy: Translation with respect to origin, in @coords coordinates.
+ *
+ * Moves the selection within a group of geometrical shapes with respect to
+ * the origin.
+ *
+ * The origin is set with gwy_shapes_set_origin().
+ **/
+void
+gwy_shapes_move_wrt_origin(GwyShapes *shapes,
+                           const GwyXY *dxy)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(dxy);
+
+    Shapes *priv = shapes->priv;
+    GwyCoords *coords = priv->coords;
+    guint n = gwy_coords_shape_size(coords);
+    const guint *dimension_map = gwy_coords_dimension_map(coords);
+    GwyIntSet *selection = shapes->selection;
+    GwyIntSetIter iter;
+
+    // FIXME: It might be more straightforward to just bloody recalculate the
+    // coordinates wrt the origin directly using @snapshot (which is not used
+    // now at all).
+    g_return_if_fail(selection && gwy_int_set_is_nonempty(selection));
+    gwy_int_set_first(selection, &iter);
+    const gdouble origin[2] = { priv->origin.x, priv->origin.y };
+    gdouble diff[2] = { 0.0, 0.0 };
+    guint count[2] = { 0, 0 };
+    do {
+        gdouble xy[n];
+        gwy_coords_get(coords, iter.value, xy);
+        for (guint j = 0; j < n; j++) {
+            guint d = dimension_map[j];
+            diff[d] += xy[j] - origin[d];
+            count[d]++;
+        }
+    } while (gwy_int_set_next(selection, &iter));
+
+    diff[0] = dxy->x - diff[0]/count[0];
+    diff[1] = dxy->y - diff[1]/count[1];
+    gwy_coords_translate(coords, selection, diff);
+
+    GwyXY curr = { priv->origin.x + diff[0], priv->origin.y + diff[1] };
+    gwy_shapes_set_current_point(shapes, &curr);
+}
+
 static gboolean
 set_selectable(GwyShapes *shapes,
                gboolean selectable)
@@ -1279,11 +1452,18 @@ set_snapping(GwyShapes *shapes,
 static void
 cancel_editing(GwyShapes *shapes, gint id)
 {
-    if (!shapes->priv->coords)
+    Shapes *priv = shapes->priv;
+    if (!priv->coords)
         return;
+    if (priv->has_moved) {
+        gwy_coords_finished(priv->coords);
+        priv->has_moved = FALSE;
+    }
+    gwy_shapes_unset_current_point(shapes);
     ItemMethodInt method = GWY_SHAPES_GET_CLASS(shapes)->cancel_editing;
     if (method)
         method(shapes, id);
+    gwy_shapes_update(shapes);
 }
 
 static void

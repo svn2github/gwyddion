@@ -303,6 +303,7 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
     // XXX: All the selection updates must be done in motion_notify or
     // button_release: only based on whether the pointer has moved we know
     // whether the user wants to select things or move them.
+    update_hover(shapes, event->x, event->y);
     if (priv->hover != -1) {
         priv->clicked = priv->hover;
     }
