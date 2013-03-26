@@ -175,8 +175,9 @@ gboolean     gwy_shapes_check_movement          (GwyShapes *shapes,
                                                  GwyXY *dxy);
 gboolean     gwy_shapes_has_moved               (const GwyShapes *shapes)               G_GNUC_PURE;
 void         gwy_shapes_set_moved               (GwyShapes *shapes);
-void         gwy_shapes_move_wrt_origin         (GwyShapes *shapes,
+void         gwy_shapes_move                    (GwyShapes *shapes,
                                                  const GwyXY *dxy);
+GwyCoords*   gwy_shapes_get_starting_coords     (const GwyShapes *shapes)               G_GNUC_PURE;
 void         gwy_shapes_stroke                  (GwyShapes *shapes,
                                                  cairo_t *cr,
                                                  GwyShapesStateType state);

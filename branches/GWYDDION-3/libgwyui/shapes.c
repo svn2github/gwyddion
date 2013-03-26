@@ -1265,7 +1265,6 @@ gwy_shapes_set_origin(GwyShapes *shapes,
     cairo_matrix_transform_point(&shapes->view_to_coords,
                                  &origin->x, &origin->y);
     priv->has_moved = FALSE;
-
     GWY_OBJECT_UNREF(priv->snapshot);
     priv->snapshot = gwy_coords_new_subset(priv->coords, shapes->selection);
 }
@@ -1323,7 +1322,7 @@ gwy_shapes_check_movement(GwyShapes *shapes,
         }
         cairo_matrix_transform_distance(&shapes->coords_to_view, &x, &y);
         // Somewhat more than half a pixel means movement.
-        if (x*x + y*y > 0.3) {
+        if (!priv->has_moved && x*x + y*y > 0.3) {
             priv->has_moved = TRUE;
             gwy_shapes_editing_started(shapes);
         }
@@ -1358,7 +1357,7 @@ gwy_shapes_set_moved(GwyShapes *shapes)
 }
 
 /**
- * gwy_shapes_move_wrt_origin:
+ * gwy_shapes_move:
  * @shapes: A group of geometrical shapes.
  * @dxy: Translation with respect to origin, in @coords coordinates.
  *
@@ -1368,8 +1367,8 @@ gwy_shapes_set_moved(GwyShapes *shapes)
  * The origin is set with gwy_shapes_set_origin().
  **/
 void
-gwy_shapes_move_wrt_origin(GwyShapes *shapes,
-                           const GwyXY *dxy)
+gwy_shapes_move(GwyShapes *shapes,
+                const GwyXY *dxy)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     g_return_if_fail(dxy);
@@ -1382,29 +1381,37 @@ gwy_shapes_move_wrt_origin(GwyShapes *shapes,
     GwyIntSetIter iter;
 
     // FIXME: It might be more straightforward to just bloody recalculate the
-    // coordinates wrt the origin directly using @snapshot (which is not used
-    // now at all).
+    // coordinates wrt the origin directly using @snapshot.
     g_return_if_fail(selection && gwy_int_set_is_nonempty(selection));
     gwy_int_set_first(selection, &iter);
-    const gdouble origin[2] = { priv->origin.x, priv->origin.y };
     gdouble diff[2] = { 0.0, 0.0 };
     guint count[2] = { 0, 0 };
+    guint i = 0;
     do {
-        gdouble xy[n];
+        gdouble xy[n], xys[n];
         gwy_coords_get(coords, iter.value, xy);
+        gwy_coords_get(priv->snapshot, i, xys);
         for (guint j = 0; j < n; j++) {
             guint d = dimension_map[j];
-            diff[d] += xy[j] - origin[d];
+            diff[d] += xy[j] - xys[j];
             count[d]++;
         }
+        i++;
     } while (gwy_int_set_next(selection, &iter));
 
     diff[0] = dxy->x - diff[0]/count[0];
     diff[1] = dxy->y - diff[1]/count[1];
     gwy_coords_translate(coords, selection, diff);
 
-    GwyXY curr = { priv->origin.x + diff[0], priv->origin.y + diff[1] };
+    GwyXY curr = { priv->origin.x + dxy->x, priv->origin.y + dxy->y };
     gwy_shapes_set_current_point(shapes, &curr);
+}
+
+GwyCoords*
+gwy_shapes_get_starting_coords(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
+    return shapes->priv->snapshot;
 }
 
 static gboolean

@@ -101,8 +101,6 @@ static gint     find_near_point                    (GwyShapesPoint *points,
                                                     gdouble x,
                                                     gdouble y);
 static void     constrain_movement                 (GwyShapes *shapes,
-                                                    gdouble eventx,
-                                                    gdouble eventy,
                                                     GdkModifierType modif,
                                                     GwyXY *dxy);
 static gboolean add_point                          (GwyShapes *shapes,
@@ -250,8 +248,8 @@ gwy_shapes_point_motion_notify(GwyShapes *shapes,
     if (!gwy_shapes_check_movement(shapes, &xy, &dxy))
         return FALSE;
 
-    constrain_movement(shapes, xy.x, xy.y, event->state, &dxy);
-    gwy_shapes_move_wrt_origin(shapes, &dxy);
+    constrain_movement(shapes, event->state, &dxy);
+    gwy_shapes_move(shapes, &dxy);
 
     return TRUE;
 }
@@ -325,8 +323,8 @@ gwy_shapes_point_button_release(GwyShapes *shapes,
     else {
         GwyXY xy = { event->x, event->y }, dxy;
         gwy_shapes_check_movement(shapes, &xy, &dxy);
-        constrain_movement(shapes, xy.x, xy.y, event->state, &dxy);
-        gwy_shapes_move_wrt_origin(shapes, &dxy);
+        constrain_movement(shapes, event->state, &dxy);
+        gwy_shapes_move(shapes, &dxy);
         gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
     gwy_shapes_unset_current_point(shapes);
@@ -556,44 +554,31 @@ find_near_point(GwyShapesPoint *points,
 
 static void
 constrain_movement(GwyShapes *shapes,
-                   gdouble eventx, gdouble eventy,
                    GdkModifierType modif,
                    GwyXY *dxy)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
     if (modif & GDK_CONTROL_MASK) {
-        GwyXY origin;
-        gwy_shapes_get_origin(shapes, &origin);
         const cairo_matrix_t *matrix = &shapes->coords_to_view;
-        cairo_matrix_transform_point(matrix, &origin.x, &origin.y);
-        gdouble xd = eventx - origin.x, yd = eventy - origin.y;
-        if (fabs(xd) <= fabs(yd))
-            eventx = origin.x;
+        gdouble x = dxy->x, y = dxy->y;
+        cairo_matrix_transform_distance(matrix, &x, &y);
+        if (fabs(x) <= fabs(y))
+            dxy->y = 0.0;
         else
-            eventy = origin.y;
+            dxy->x = 0.0;
     }
 
-    // Constrain movement in coords space, cannot move anything outside the
-    // bounding box.
-    const cairo_matrix_t *matrix = &shapes->view_to_coords;
-    cairo_matrix_transform_point(matrix, &eventx, &eventy);
-    snap_point(shapes, &eventx, &eventy);
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-
-    gdouble d[2];
-    gwy_coords_get(coords, priv->clicked, d);
-    d[0] = eventx - d[0];
-    d[1] = eventy - d[1];
+    // Constrain final position in coords space, cannot move anything outside
+    // the bounding box.
+    gdouble diff[] = { dxy->x, dxy->y };
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     gdouble lower[2] = { bbox->x, bbox->y };
     gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
-    gwy_coords_constrain_translation(coords, shapes->selection,
-                                     d, lower, upper);
-    dxy->x = d[0];
-    dxy->y = d[1];
+    gwy_coords_constrain_translation(gwy_shapes_get_starting_coords(shapes),
+                                     NULL, diff, lower, upper);
+    dxy->x = diff[0];
+    dxy->y = diff[1];
 }
 
 static gboolean
