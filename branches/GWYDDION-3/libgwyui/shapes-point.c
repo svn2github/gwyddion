@@ -564,9 +564,9 @@ constrain_movement(GwyShapes *shapes,
         gdouble x = dxy->x, y = dxy->y;
         cairo_matrix_transform_distance(matrix, &x, &y);
         if (fabs(x) <= fabs(y))
-            dxy->y = 0.0;
-        else
             dxy->x = 0.0;
+        else
+            dxy->y = 0.0;
     }
 
     // Constrain final position in coords space, cannot move anything outside
