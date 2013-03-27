@@ -103,13 +103,13 @@ static gint     find_near_point                    (GwyShapesPoint *points,
 static void     constrain_movement                 (GwyShapes *shapes,
                                                     GdkModifierType modif,
                                                     GwyXY *dxy);
-static gboolean add_point                          (GwyShapes *shapes,
+static gboolean add_shape                          (GwyShapes *shapes,
                                                     gdouble x,
                                                     gdouble y);
 static void     update_hover                       (GwyShapes *shapes,
                                                     gdouble eventx,
                                                     gdouble eventy);
-static gboolean snap_point                         (GwyShapes *shapes,
+static gboolean snap_shape                         (GwyShapes *shapes,
                                                     gdouble *x,
                                                     gdouble *y);
 
@@ -284,7 +284,7 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
         }
     }
     else if (priv->mode == MODE_MOVING) {
-        if (!add_point(shapes, x, y)) {
+        if (!add_shape(shapes, x, y)) {
             priv->clicked = -1;
             return FALSE;
         }
@@ -582,7 +582,7 @@ constrain_movement(GwyShapes *shapes,
 }
 
 static gboolean
-add_point(GwyShapes *shapes, gdouble x, gdouble y)
+add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 {
     ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
@@ -592,7 +592,7 @@ add_point(GwyShapes *shapes, gdouble x, gdouble y)
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
-    snap_point(shapes, &x, &y);
+    snap_shape(shapes, &x, &y);
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
@@ -625,7 +625,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 }
 
 static gboolean
-snap_point(GwyShapes *shapes,
+snap_shape(GwyShapes *shapes,
            gdouble *x, gdouble *y)
 {
     if (!gwy_shapes_get_snapping(shapes))

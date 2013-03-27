@@ -53,9 +53,8 @@ struct _GwyShapesLinePrivate {
     gint hover;
     gint clicked;
     guint endpoint;  // endpoint being moved 1 == first, 2 == second, 3 == both
-    gboolean has_moved;
+    gboolean new_shape;
     InteractMode mode;
-    GwyXY xypress;    // Event (view) coordinates.
 };
 
 static void     gwy_shapes_line_finalize          (GObject *object);
@@ -107,17 +106,15 @@ static gint     find_near_line                    (GwyShapesLine *lines,
                                                    gdouble x,
                                                    gdouble y);
 static void     constrain_movement                (GwyShapes *shapes,
-                                                   gdouble eventx,
-                                                   gdouble eventy,
                                                    GdkModifierType modif,
                                                    GwyXY *dxy);
-static gboolean add_line                          (GwyShapes *shapes,
+static gboolean add_shape                         (GwyShapes *shapes,
                                                    gdouble x,
                                                    gdouble y);
 static void     update_hover                      (GwyShapes *shapes,
                                                    gdouble eventx,
                                                    gdouble eventy);
-static gboolean snap_line                         (GwyShapes *shapes,
+static gboolean snap_shape                        (GwyShapes *shapes,
                                                    gdouble *x,
                                                    gdouble *y);
 
@@ -252,30 +249,14 @@ gwy_shapes_line_motion_notify(GwyShapes *shapes,
     }
 
     g_assert(priv->mode == MODE_MOVING);
-    if (!priv->has_moved && (event->x != priv->xypress.x
-                             || event->y != priv->xypress.y)) {
-        gwy_shapes_editing_started(shapes);
-        priv->has_moved = TRUE;
-        // If we clicked on an already selected shape, we will move the entire
-        // group.  If we clicked on an unselected shape we will need to select
-        // only this one.
-        if (!gwy_int_set_contains(shapes->selection, priv->clicked)) {
-            gwy_shapes_start_updating_selection(shapes);
-            gwy_int_set_update(shapes->selection, &priv->clicked, 1);
-            gwy_shapes_stop_updating_selection(shapes);
-        }
-    }
+    GwyXY xy = { event->x, event->y }, dxy;
+    if (!gwy_shapes_check_movement(shapes, &xy, &dxy))
+        return FALSE;
 
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    GwyXY dxy;
     if (priv->endpoint == 3) {
         // Moving the entire line.
-        constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-        gwy_coords_translate(coords, shapes->selection, (const gdouble*)&dxy);
-
-        GwyXY xy;
-        gwy_coords_get(coords, priv->clicked, (gdouble*)&xy);
-        gwy_shapes_set_current_point(shapes, &xy);
+        constrain_movement(shapes, event->state, &dxy);
+        gwy_shapes_move(shapes, &dxy);
     }
     else {
         // TODO: Move a single endpoint.  Makes no sense if more shapes are
@@ -293,8 +274,8 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
 {
     ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     GwyIntSet *selection = shapes->selection;
+    gdouble x = event->x, y = event->y;
 
-    priv->xypress = (GwyXY){ event->x, event->y };
     if (event->state & GDK_SHIFT_MASK || !gwy_shapes_get_editable(shapes))
         priv->mode = MODE_SELECTING;
     else
@@ -303,12 +284,23 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
     // XXX: All the selection updates must be done in motion_notify or
     // button_release: only based on whether the pointer has moved we know
     // whether the user wants to select things or move them.
-    update_hover(shapes, event->x, event->y);
+    update_hover(shapes, x, y);
+    priv->new_shape = FALSE;
     if (priv->hover != -1) {
         priv->clicked = priv->hover;
+        // If we clicked on an already selected shape, we will move the entire
+        // group.  If we clicked on an unselected shape we will need to select
+        // only this one.
+        if (priv->mode == MODE_MOVING
+            && !gwy_int_set_contains(shapes->selection, priv->clicked)) {
+            gwy_shapes_start_updating_selection(shapes);
+            gwy_int_set_update(shapes->selection, &priv->clicked, 1);
+            gwy_shapes_stop_updating_selection(shapes);
+        }
     }
     else if (priv->mode == MODE_MOVING) {
-        if (!add_line(shapes, event->x, event->y)) {
+        if (!add_shape(shapes, x, y)) {
+            priv->new_shape = TRUE;
             priv->clicked = -1;
             return FALSE;
         }
@@ -316,7 +308,7 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
         gwy_int_set_update(selection, &priv->clicked, 1);
         gwy_shapes_stop_updating_selection(shapes);
     }
-    priv->has_moved = FALSE;
+    gwy_shapes_set_origin(shapes, &(GwyXY){ x, y });
 
     return FALSE;
 }
@@ -331,7 +323,7 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         return FALSE;
     }
 
-    if (!priv->has_moved) {
+    if (!gwy_shapes_has_moved(shapes)) {
         GwyIntSet *selection = shapes->selection;
 
         gwy_shapes_start_updating_selection(shapes);
@@ -348,11 +340,12 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         // TODO: Also needs to differentiate between endpoint/entire line
         // movement.  The logic should be factored out of motion-notify and
         // this function to a common subroutine.
-        GwyCoords *coords = gwy_shapes_get_coords(shapes);
-        GwyXY dxy;
-        constrain_movement(shapes, event->x, event->y, event->state, &dxy);
-        gwy_coords_translate(coords, shapes->selection, (const gdouble*)&dxy);
-        gwy_coords_finished(coords);
+        // TODO: Check if the line length is non-zero and discard it otherwise.
+        GwyXY xy = { event->x, event->y }, dxy;
+        gwy_shapes_check_movement(shapes, &xy, &dxy);
+        constrain_movement(shapes, event->state, &dxy);
+        gwy_shapes_move(shapes, &dxy);
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
     gwy_shapes_unset_current_point(shapes);
     priv->clicked = -1;
@@ -364,8 +357,8 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
 static gboolean
 gwy_shapes_line_delete_selection(GwyShapes *shapes)
 {
-    if (GWY_SHAPES_CLASS
-                   (gwy_shapes_line_parent_class)->delete_selection(shapes)) {
+    GwyShapesClass *klass = GWY_SHAPES_CLASS(gwy_shapes_line_parent_class);
+    if (klass->delete_selection(shapes)) {
         update_hover(shapes, NAN, NAN);
         return TRUE;
     }
@@ -377,18 +370,9 @@ gwy_shapes_line_cancel_editing(GwyShapes *shapes,
                                gint id)
 {
     ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
-    if (priv->clicked == -1 || id != priv->clicked)
-        return;
-
     // FIXME: We might want to do something like the finishing touches at the
     // end of button_released() here.
     priv->clicked = -1;
-    gwy_shapes_unset_current_point(shapes);
-    if (priv->has_moved) {
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
-        priv->has_moved = FALSE;
-    }
-    gwy_shapes_update(shapes);
 }
 
 // FIXME: May be common.
@@ -631,45 +615,38 @@ find_near_line(GwyShapesLine *lines,
 
 static void
 constrain_movement(GwyShapes *shapes,
-                   gdouble eventx, gdouble eventy,
                    GdkModifierType modif,
                    GwyXY *dxy)
 {
-    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
-
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
     if (modif & GDK_CONTROL_MASK) {
-        const GwyXY *xypress = &priv->xypress;
-        gdouble xd = eventx - xypress->x, yd = eventy - xypress->y;
-        if (fabs(xd) <= fabs(yd))
-            eventx = xypress->x;
+        const cairo_matrix_t *matrix = &shapes->coords_to_view;
+        gdouble x = dxy->x, y = dxy->y;
+        cairo_matrix_transform_distance(matrix, &x, &y);
+        if (fabs(x) <= fabs(y))
+            dxy->y = 0.0;
         else
-            eventy = xypress->y;
+            dxy->x = 0.0;
     }
 
-    // Constrain movement in coords space, cannot move anything outside the
-    // bounding box.
-    const cairo_matrix_t *matrix = &shapes->view_to_coords;
-    cairo_matrix_transform_point(matrix, &eventx, &eventy);
-    snap_line(shapes, &eventx, &eventy);
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    // TODO: Constrain endpoint final position in ??? space (probably view
+    // space), pressing Shift limits line angles to multiples of 15 deg.
 
-    gdouble d[2];
-    gwy_coords_get(coords, priv->clicked, d);
-    d[0] = eventx - d[0];
-    d[1] = eventy - d[1];
+    // Constrain final position in coords space, cannot move anything outside
+    // the bounding box.
+    gdouble diff[] = { dxy->x, dxy->y };
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     gdouble lower[2] = { bbox->x, bbox->y };
     gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
-    gwy_coords_constrain_translation(coords, shapes->selection,
-                                     d, lower, upper);
-    dxy->x = d[0];
-    dxy->y = d[1];
+    gwy_coords_constrain_translation(gwy_shapes_get_starting_coords(shapes),
+                                     NULL, diff, lower, upper);
+    dxy->x = diff[0];
+    dxy->y = diff[1];
 }
 
 static gboolean
-add_line(GwyShapes *shapes, gdouble x, gdouble y)
+add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 {
     ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
@@ -679,7 +656,7 @@ add_line(GwyShapes *shapes, gdouble x, gdouble y)
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
-    snap_line(shapes, &x, &y);
+    snap_shape(shapes, &x, &y);
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
@@ -721,8 +698,8 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 }
 
 static gboolean
-snap_line(GwyShapes *shapes,
-          gdouble *x, gdouble *y)
+snap_shape(GwyShapes *shapes,
+           gdouble *x, gdouble *y)
 {
     if (!gwy_shapes_get_snapping(shapes))
         return FALSE;
