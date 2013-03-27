@@ -119,6 +119,7 @@ create_test_lines(void)
 
     GwyShapes *shapes = gwy_shapes_line_new();
     g_object_set(shapes,
+                 "thickness", 8.0,
                  "max-shapes", 5,
                  NULL);
     gwy_shapes_set_coords(shapes, coords);
