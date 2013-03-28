@@ -26,6 +26,8 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/shapes-point.h"
 
+#define NEAR_DIST2 30.0
+
 enum {
     PROP_0,
     PROP_RADIUS,
@@ -543,7 +545,7 @@ find_near_point(GwyShapesPoint *points,
     for (guint i = 0; i < n; i++) {
         gdouble xd = x - data[2*i], yd = y - data[2*i + 1];
         gdouble dist2 = xd*xd + yd*yd;
-        if (dist2 <= 30.0 && dist2 < mindist2) {
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
             mini = i;
         }
@@ -619,6 +621,11 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
         i = find_near_point(points, eventx, eventy);
     if (priv->hover == i)
         return;
+
+    GdkCursorType cursor_type = GDK_ARROW;
+    if (i != -1 && gwy_shapes_get_selectable(shapes))
+        cursor_type = GDK_FLEUR;
+    gwy_shapes_set_cursor(shapes, cursor_type);
 
     priv->hover = i;
     gwy_shapes_update(shapes);

@@ -26,6 +26,8 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/shapes-line.h"
 
+#define NEAR_DIST2 30.0
+
 enum {
     PROP_0,
     PROP_THICKNESS,
@@ -34,6 +36,7 @@ enum {
 
 typedef enum {
     MODE_MOVING,
+    MODE_ENDPOINT,
     MODE_SELECTING,
     MODE_RUBBERBAND,
 } InteractMode;
@@ -52,9 +55,10 @@ struct _GwyShapesLinePrivate {
 
     gint hover;
     gint clicked;
-    guint endpoint;  // endpoint being moved 1 == first, 2 == second, 3 == both
-    gboolean new_shape;
-    InteractMode mode;
+    InteractMode mode : 4;
+    guint endpoint : 1;  // for ENDPOINT; also determines snapping for MOVING
+    gboolean entire_shape : 1;
+    gboolean new_shape : 1;
 };
 
 static void     gwy_shapes_line_finalize          (GObject *object);
@@ -248,21 +252,21 @@ gwy_shapes_line_motion_notify(GwyShapes *shapes,
         return FALSE;
     }
 
-    g_assert(priv->mode == MODE_MOVING);
     GwyXY xy = { event->x, event->y }, dxy;
     if (!gwy_shapes_check_movement(shapes, &xy, &dxy))
         return FALSE;
 
-    if (priv->endpoint == 3) {
+    if (priv->mode == MODE_MOVING) {
         // Moving the entire line.
         constrain_movement(shapes, event->state, &dxy);
         gwy_shapes_move(shapes, &dxy);
     }
+    else if (priv->mode == MODE_ENDPOINT) {
+        // TODO: Move just one endpoint.  This can only be done for
+        // single-shape selection.
+    }
     else {
-        // TODO: Move a single endpoint.  Makes no sense if more shapes are
-        // selected.  We can
-        // (a) Always move entire lines if more than one is selected.
-        // (b) Do not move other selected lines if an endpoint it moved.
+        g_assert_not_reached();
     }
 
     return TRUE;
@@ -278,8 +282,10 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
 
     if (event->state & GDK_SHIFT_MASK || !gwy_shapes_get_editable(shapes))
         priv->mode = MODE_SELECTING;
-    else
+    else if (priv->entire_shape)
         priv->mode = MODE_MOVING;
+    else
+        priv->mode = MODE_ENDPOINT;
 
     // XXX: All the selection updates must be done in motion_notify or
     // button_release: only based on whether the pointer has moved we know
@@ -337,9 +343,9 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         gwy_shapes_update(shapes);
     }
     else {
-        // TODO: Also needs to differentiate between endpoint/entire line
-        // movement.  The logic should be factored out of motion-notify and
-        // this function to a common subroutine.
+        // TODO: Must differentiate between endpoint/entire line movement.  The
+        // logic should be factored out of motion-notify and this function to a
+        // common subroutine.
         // TODO: Check if the line length is non-zero and discard it otherwise.
         GwyXY xy = { event->x, event->y }, dxy;
         gwy_shapes_check_movement(shapes, &xy, &dxy);
@@ -561,7 +567,8 @@ draw_markers(GwyShapes *shapes, cairo_t *cr,
     }
 }
 
-// FIXME: The same as in ShapesLine, just for both endlines.
+// FIXME: The same as in ShapesLine, just for both endpoints.
+/* returns the index of endpoint, not line */
 static gint
 find_near_point(GwyShapesLine *lines,
                 gdouble x, gdouble y)
@@ -575,7 +582,7 @@ find_near_point(GwyShapesLine *lines,
     for (guint i = 0; i < n; i++) {
         gdouble xd = x - data[2*i], yd = y - data[2*i + 1];
         gdouble dist2 = xd*xd + yd*yd;
-        if (dist2 <= 30.0 && dist2 < mindist2) {
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
             mini = i;
         }
@@ -584,6 +591,7 @@ find_near_point(GwyShapesLine *lines,
     return mini;
 }
 
+/* returns the index of endpoint, not line */
 static gint
 find_near_line(GwyShapesLine *lines,
                gdouble x, gdouble y)
@@ -604,10 +612,19 @@ find_near_line(GwyShapesLine *lines,
             continue;
         gdouble dist2 = x*vy - y*vx + xt*yf - xf*yt;
         dist2 *= dist2/v2;
-        if (dist2 <= 30.0 && dist2 < mindist2) {
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
             mini = i;
         }
+    }
+
+    /* we always have our favourite endpoint, even when moving the entire
+     * line, it determines snapping */
+    if (mini >= 0) {
+        guint i = mini;
+        gdouble dxf = data[4*i] - x, dyf = data[4*i + 1] - y,
+                dxt = data[4*i + 2] - x, dyt = data[4*i + 3] - y;
+        mini = 2*mini + (dxf*dxf + dyf*dyf > dxt*dxt + dyt*dyt);
     }
 
     return mini;
@@ -664,7 +681,9 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
         return FALSE;
 
     gdouble xy2[4] = { x, y, x, y };
-    priv->endpoint = 2;
+    priv->mode = MODE_ENDPOINT;
+    priv->endpoint = 0;
+    priv->entire_shape = FALSE;
     priv->hover = priv->clicked = n;
     gwy_coords_set(coords, priv->clicked, xy2);
     return TRUE;
@@ -675,26 +694,43 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 {
     GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
     ShapesLine *priv = lines->priv;
-    guint endpoint = 0;
+    guint endpoint = G_MAXUINT;
+    gboolean entire_shape = TRUE;
     gint i = -1;
 
     if (isfinite(eventx) && isfinite(eventy)) {
         if ((i = find_near_point(lines, eventx, eventy)) >= 0) {
-            endpoint = 1 << (i % 2);
+            endpoint = i % 2;
+            entire_shape = FALSE;
             i /= 2;
         }
-        else {
-            i = find_near_line(lines, eventx, eventy);
-            if (i >= 0)
-                endpoint = 3;
+        else if ((i = find_near_line(lines, eventx, eventy)) >= 0) {
+            endpoint = i % 2;
+            entire_shape = TRUE;
+            i /= 2;
         }
     }
-    if (priv->hover == i && priv->endpoint == endpoint)
+    if (priv->hover == i && priv->entire_shape == entire_shape)
         return;
 
-    priv->hover = i;
+    gboolean do_update = priv->hover != i;
+    priv->entire_shape = entire_shape;
     priv->endpoint = endpoint;
-    gwy_shapes_update(shapes);
+    priv->hover = i;
+
+    GdkCursorType cursor_type = GDK_ARROW;
+    if (i != -1 && gwy_shapes_get_selectable(shapes)) {
+        if (!entire_shape
+            && gwy_shapes_get_editable(shapes)
+            && gwy_int_set_size(shapes->selection) == 1)
+            cursor_type = GDK_CROSS;
+        else
+            cursor_type = GDK_FLEUR;
+    }
+    gwy_shapes_set_cursor(shapes, cursor_type);
+
+    if (do_update)
+        gwy_shapes_update(shapes);
 }
 
 static gboolean

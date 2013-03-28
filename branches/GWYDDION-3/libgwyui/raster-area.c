@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -121,6 +121,7 @@ struct _GwyRasterAreaPrivate {
 
     GwyShapes *shapes;
     gulong shapes_updated_id;
+    gulong shapes_cursor_type_id;
 
     GwyRGBA mask_color;
     GwyRGBA grain_number_color;
@@ -190,6 +191,7 @@ static gboolean set_gradient                        (GwyRasterArea *rasterarea,
 static gboolean set_shapes                          (GwyRasterArea *rasterarea,
                                                      GwyShapes *shapes);
 static void     set_shapes_transforms               (GwyRasterArea *rasterarea);
+static void     shapes_cursor_type                  (GwyRasterArea *rasterarea);
 static gboolean set_mask_color                      (GwyRasterArea *rasterarea,
                                                      const GwyRGBA *color);
 static gboolean set_grain_number_color              (GwyRasterArea *rasterarea,
@@ -1462,14 +1464,16 @@ gwy_raster_area_realize(GtkWidget *widget)
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     gtk_widget_set_realized(widget, TRUE);
     create_window(rasterarea);
+    shapes_cursor_type(rasterarea);
 }
 
 static void
 gwy_raster_area_unrealize(GtkWidget *widget)
 {
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
+    RasterArea *priv = rasterarea->priv;
     destroy_window(rasterarea);
-    GWY_OBJECT_UNREF(rasterarea->priv->layout);
+    GWY_OBJECT_UNREF(priv->layout);
     GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->unrealize(widget);
 }
 
@@ -2312,10 +2316,14 @@ set_shapes(GwyRasterArea *rasterarea,
                                "updated", &shapes_updated,
                                &priv->shapes_updated_id,
                                G_CONNECT_SWAPPED,
+                               "notify::cursor-type", &shapes_cursor_type,
+                               &priv->shapes_cursor_type_id,
+                               G_CONNECT_SWAPPED,
                                NULL))
         return FALSE;
 
     set_shapes_transforms(rasterarea);
+    shapes_cursor_type(rasterarea);
 
     GtkWidget *widget = GTK_WIDGET(rasterarea);
     if (gtk_widget_is_drawable(widget))
@@ -2348,6 +2356,23 @@ set_shapes_transforms(GwyRasterArea *rasterarea)
         field->xoff, field->yoff, field->xreal, field->yreal,
     };
     gwy_shapes_set_bounding_box(shapes, &bbox);
+}
+
+static void
+shapes_cursor_type(GwyRasterArea *rasterarea)
+{
+    RasterArea *priv = rasterarea->priv;
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
+    if (!gtk_widget_get_realized(widget))
+        return;
+
+    GdkCursorType cursor_type = GDK_ARROW;
+    if (priv->shapes)
+        cursor_type = gwy_shapes_get_cursor(priv->shapes);
+    GdkDisplay *display = gtk_widget_get_display(widget);
+    GdkCursor *cursor = gdk_cursor_new_for_display(display, cursor_type);
+    gdk_window_set_cursor(priv->window, cursor);
+    g_object_unref(cursor);
 }
 
 static gboolean

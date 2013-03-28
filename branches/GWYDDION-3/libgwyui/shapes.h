@@ -178,6 +178,9 @@ void             gwy_shapes_set_moved               (GwyShapes *shapes);
 void             gwy_shapes_move                    (GwyShapes *shapes,
                                                      const GwyXY *dxy);
 const GwyCoords* gwy_shapes_get_starting_coords     (const GwyShapes *shapes)               G_GNUC_PURE;
+void             gwy_shapes_set_cursor              (GwyShapes *shapes,
+                                                     GdkCursorType cursor_type);
+GdkCursorType    gwy_shapes_get_cursor              (const GwyShapes *shapes)               G_GNUC_PURE;
 void             gwy_shapes_stroke                  (GwyShapes *shapes,
                                                      cairo_t *cr,
                                                      GwyShapesStateType state);

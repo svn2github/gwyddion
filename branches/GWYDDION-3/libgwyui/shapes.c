@@ -33,6 +33,7 @@ enum {
     PROP_EDITABLE,
     PROP_SNAPPING,
     PROP_SELECTION,
+    PROP_CURSOR_TYPE,
     N_PROPS
 };
 
@@ -73,6 +74,8 @@ struct _GwyShapesPrivate {
     gulong selection_removed_id;
     gulong selection_assigned_id;
 
+    GdkCursorType cursor_type;
+
     GwyXY current_point;
     GwyXY origin;
 };
@@ -98,6 +101,8 @@ static gboolean set_editable                    (GwyShapes *shapes,
                                                  gboolean editable);
 static gboolean set_snapping                    (GwyShapes *shapes,
                                                  gboolean snapping);
+static gboolean set_cursor_type                 (GwyShapes *shapes,
+                                                 GdkCursorType cursor_type);
 static void     cancel_editing                  (GwyShapes *shapes,
                                                  gint id);
 static void     coords_item_inserted            (GwyShapes *shapes,
@@ -194,6 +199,14 @@ gwy_shapes_class_init(GwyShapesClass *klass)
                               GWY_TYPE_INT_SET,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_CURSOR_TYPE]
+        = g_param_spec_enum("cursor-type",
+                            "Cursor type",
+                            "Preferred cursor type.",
+                            GDK_TYPE_CURSOR_TYPE,
+                            GDK_ARROW,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -250,6 +263,7 @@ gwy_shapes_init(GwyShapes *shapes)
     priv->selectable = TRUE;
     priv->editable = TRUE;
     priv->current_point = (GwyXY){ NAN, NAN };
+    priv->cursor_type = GDK_ARROW;
     GwyIntSet *selection = shapes->selection = gwy_int_set_new();
     priv->selection_added_id
         = g_signal_connect_swapped(selection, "added",
@@ -313,6 +327,10 @@ gwy_shapes_set_property(GObject *object,
         set_snapping(shapes, g_value_get_boolean(value));
         break;
 
+        case PROP_CURSOR_TYPE:
+        set_cursor_type(shapes, g_value_get_enum(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -351,6 +369,10 @@ gwy_shapes_get_property(GObject *object,
 
         case PROP_SNAPPING:
         g_value_set_boolean(value, priv->snapping);
+        break;
+
+        case PROP_CURSOR_TYPE:
+        g_value_set_enum(value, priv->cursor_type);
         break;
 
         default:
@@ -1085,6 +1107,43 @@ gwy_shapes_unset_current_point(GwyShapes *shapes)
     priv->current_point = (GwyXY){ NAN, NAN };
 }
 
+/**
+ * gwy_shapes_set_cursor:
+ * @shapes: A group of geometrical shapes.
+ * @cursor_type: Requested cursor type.
+ *
+ * Sets the requested cursor type.
+ *
+ * Since #GwyShapes is not a widget it does not set the pointer cursor itself.
+ * Its parent may watch the property notification and actually change the
+ * cursor.  Or it may not; it is only a suggestion.
+ **/
+void
+gwy_shapes_set_cursor(GwyShapes *shapes,
+                      GdkCursorType cursor_type)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    if (!set_cursor_type(shapes, cursor_type))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_CURSOR_TYPE]);
+}
+
+/**
+ * gwy_shapes_get_cursor:
+ * @shapes: A group of geometrical shapes.
+ *
+ * Gets the requested cursor type.
+ *
+ * Returns: The requested cursor type, see gwy_shapes_set_cursor().
+ **/
+GdkCursorType
+gwy_shapes_get_cursor(const GwyShapes *shapes)
+{
+    g_return_val_if_fail(GWY_IS_SHAPES(shapes), GDK_X_CURSOR);
+    return shapes->priv->cursor_type;
+}
+
 /* Each shape can be ‘selected’ in the following independent ways:
  * HOVER – mouse is near the shape so that clicking would select or deselect it
  *         or start editing it
@@ -1490,6 +1549,18 @@ set_snapping(GwyShapes *shapes,
         return FALSE;
 
     priv->snapping = snapping;
+    return TRUE;
+}
+
+static gboolean
+set_cursor_type(GwyShapes *shapes,
+                GdkCursorType cursor_type)
+{
+    Shapes *priv = shapes->priv;
+    if (cursor_type == priv->cursor_type)
+        return FALSE;
+
+    priv->cursor_type = cursor_type;
     return TRUE;
 }
 
