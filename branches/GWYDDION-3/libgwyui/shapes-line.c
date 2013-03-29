@@ -55,6 +55,7 @@ struct _GwyShapesLinePrivate {
 
     gint hover;
     gint clicked;
+    guint selection_index;  // within the reduced set of orig coordinates
     InteractMode mode : 4;
     guint endpoint : 1;  // for ENDPOINT; also determines snapping for MOVING
     gboolean entire_shape : 1;

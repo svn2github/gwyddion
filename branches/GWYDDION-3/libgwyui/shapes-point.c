@@ -54,7 +54,8 @@ struct _GwyShapesPointPrivate {
 
     gint hover;
     gint clicked;
-    InteractMode mode;
+    guint selection_index;  // within the reduced set of orig coordinates
+    InteractMode mode : 4;
 };
 
 static void     gwy_shapes_point_finalize          (GObject *object);
@@ -111,7 +112,7 @@ static gboolean add_shape                          (GwyShapes *shapes,
 static void     update_hover                       (GwyShapes *shapes,
                                                     gdouble eventx,
                                                     gdouble eventy);
-static gboolean snap_shape                         (GwyShapes *shapes,
+static gboolean snap_point                         (GwyShapes *shapes,
                                                     gdouble *x,
                                                     gdouble *y);
 
@@ -294,6 +295,8 @@ gwy_shapes_point_button_press(GwyShapes *shapes,
         gwy_int_set_update(selection, &priv->clicked, 1);
         gwy_shapes_stop_updating_selection(shapes);
     }
+    // Cache the position of the snapping point within the selected subset.
+    priv->selection_index = gwy_int_set_index(selection, priv->clicked);
     gwy_shapes_set_origin(shapes, &(GwyXY){ x, y });
 
     return FALSE;
@@ -573,12 +576,20 @@ constrain_movement(GwyShapes *shapes,
 
     // Constrain final position in coords space, cannot move anything outside
     // the bounding box.
-    gdouble diff[] = { dxy->x, dxy->y };
+    GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
+    const GwyCoords *orig_coords = gwy_shapes_get_starting_coords(shapes);
+    gdouble xy[2], diff[2];
+    gwy_coords_get(orig_coords, points->priv->selection_index, xy);
+    diff[0] = xy[0] + dxy->x;
+    diff[1] = xy[1] + dxy->y;
+    snap_point(shapes, diff+0, diff+1);
+    diff[0] -= xy[0];
+    diff[1] -= xy[1];
+
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     gdouble lower[2] = { bbox->x, bbox->y };
     gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
-    gwy_coords_constrain_translation(gwy_shapes_get_starting_coords(shapes),
-                                     NULL, diff, lower, upper);
+    gwy_coords_constrain_translation(orig_coords, NULL, diff, lower, upper);
     dxy->x = diff[0];
     dxy->y = diff[1];
 }
@@ -594,7 +605,7 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
-    snap_shape(shapes, &x, &y);
+    snap_point(shapes, &x, &y);
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
@@ -632,7 +643,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 }
 
 static gboolean
-snap_shape(GwyShapes *shapes,
+snap_point(GwyShapes *shapes,
            gdouble *x, gdouble *y)
 {
     if (!gwy_shapes_get_snapping(shapes))
