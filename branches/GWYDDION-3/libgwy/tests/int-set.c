@@ -462,6 +462,44 @@ test_int_set_update(void)
 }
 
 void
+test_int_set_index(void)
+{
+    enum { niter = 200, niiter = 50, max_size = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint size = g_rand_int_range(rng, 0, max_size);
+        gint *values = g_new(gint, MAX(size, 1));
+        for (guint i = 0; i < size; i++)
+            values[i] = random_integer(rng);
+
+        GwyIntSet *intset = gwy_int_set_new_with_values(values, size);
+
+        guint len;
+        gint *isvalues = gwy_int_set_values(intset, &len);
+
+        for (guint i = 0; i < len; i++) {
+            g_assert_cmpint((guint)gwy_int_set_index(intset, isvalues[i]),
+                            ==, i);
+        }
+        for (guint j = 0; j < niiter; j++) {
+            gint value = random_integer(rng);
+            if (gwy_int_set_contains(intset, value))
+                g_assert_cmpint(gwy_int_set_index(intset, value), >=, 0);
+            else
+                g_assert_cmpint(gwy_int_set_index(intset, value), ==, -1);
+        }
+
+        g_free(isvalues);
+        g_free(values);
+
+        int_set_assert_order(intset);
+        g_object_unref(intset);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_int_set_fill(void)
 {
     GRand *rng = g_rand_new_with_seed(42);

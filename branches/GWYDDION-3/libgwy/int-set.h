@@ -75,6 +75,8 @@ GwyIntSet*         gwy_int_set_new_with_values(const gint *values,
                                                guint n)                       G_GNUC_MALLOC;
 gboolean           gwy_int_set_contains       (const GwyIntSet *intset,
                                                gint value)                    G_GNUC_PURE;
+gint               gwy_int_set_index          (const GwyIntSet *intset,
+                                               gint value)                    G_GNUC_PURE;
 gboolean           gwy_int_set_add            (GwyIntSet *intset,
                                                gint value);
 gboolean           gwy_int_set_remove         (GwyIntSet *intset,

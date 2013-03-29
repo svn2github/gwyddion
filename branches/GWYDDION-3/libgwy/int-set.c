@@ -74,6 +74,8 @@ static gboolean find_range                   (const GArray *ranges,
                                               guint *rid);
 static gboolean is_present                   (const GArray *ranges,
                                               gint value);
+static gint     find_index                   (const GArray *ranges,
+                                              gint value);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "ranges",  .ctype = GWY_SERIALIZABLE_INT32_ARRAY, },
@@ -356,6 +358,25 @@ gwy_int_set_contains(const GwyIntSet *intset,
 }
 
 /**
+ * gwy_int_set_index:
+ * @intset: A set of integers.
+ * @value: Value to find in the set.
+ *
+ * Finds the index of a value in an integer set.
+ *
+ * Returns: Position of the value in @intset, i.e. 0 for the smallest value,
+ *          1 for the second smallest, etc.  If the value is not present,
+ *          -1 is returned.
+ **/
+gint
+gwy_int_set_index(const GwyIntSet *intset,
+                  gint value)
+{
+    g_return_val_if_fail(GWY_IS_INT_SET(intset), -1);
+    return find_index(intset->priv->ranges, value);
+}
+
+/**
  * gwy_int_set_add:
  * @intset: A set of integers.
  * @value: Value to add to the set.
@@ -535,6 +556,25 @@ is_present(const GArray *ranges,
             return TRUE;
     }
     return FALSE;
+}
+
+static gint
+find_index(const GArray *ranges,
+           gint value)
+{
+    const GwyIntRange *r = (const GwyIntRange*)ranges->data;
+    guint n = ranges->len;
+    gint count = 0;
+
+    for (guint j = 0; j < n; j++) {
+        if (value < r[j].from)
+            return -1;
+        if (value <= r[j].to)
+            return count + (value - r[j].from);
+
+        count += r[j].to - r[j].from + 1;
+    }
+    return -1;
 }
 
 static int
