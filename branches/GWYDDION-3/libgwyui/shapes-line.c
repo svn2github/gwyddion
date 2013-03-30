@@ -662,6 +662,8 @@ move_endpoint(GwyShapes *shapes,
     limit_into_bbox(&bbox, endpoint, xy);
     snap_point(shapes, xy + 2*endpoint + 0, xy + 2*endpoint + 1);
     gwy_coords_set(coords, priv->clicked, xy);
+    GwyXY curr = { xy[2*endpoint + 0], xy[2*endpoint + 1] };
+    gwy_shapes_set_current_point(shapes, &curr);
 }
 
 // FIXME: Common
