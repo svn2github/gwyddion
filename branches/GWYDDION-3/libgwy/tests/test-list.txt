@@ -461,6 +461,7 @@ brick/summarize/lines/maximum
 brick/summarize/lines/mean
 brick/summarize/lines/rms
 brick/extract/line
+brick/extract/plane
 container/data
 container/refcount
 container/keys

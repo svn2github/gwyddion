@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -2028,7 +2028,7 @@ choose_line_sizes(GwyLine *line1, GwyLine *line2,
 void
 test_brick_extract_line(void)
 {
-    enum { max_size = 19, niter = 400 };
+    enum { max_size = 13, niter = 500 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 114);
 
@@ -2093,6 +2093,177 @@ test_brick_extract_line(void)
                                row, col,
                                FALSE);
         line_assert_equal(target, reference);
+
+        g_object_unref(brick);
+        g_object_unref(target);
+        g_object_unref(reference);
+    }
+}
+
+static void
+extract_col_row_field(const GwyBrick *brick,
+                      GwyField *target,
+                      guint col, guint row, guint level,
+                      guint width, guint height)
+{
+    g_assert(target->xres == width || col + width <= target->xres);
+    g_assert(target->yres == height || row + height <= target->yres);
+    guint fieldcol = (target->xres == width ? 0 : col);
+    guint fieldrow = (target->yres == height ? 0 : row);
+
+    for (guint i = 0; i < height; i++) {
+        for (guint j = 0; j < width; j++)
+            gwy_field_set(target,
+                          fieldcol + j, fieldrow + i,
+                          gwy_brick_get(brick, col + j, row + i, level));
+    }
+
+    gwy_field_set_xreal(target, gwy_brick_dx(brick)*target->xres);
+    gwy_field_set_yreal(target, gwy_brick_dy(brick)*target->yres);
+    gwy_unit_assign(gwy_field_get_xunit(target), gwy_brick_get_xunit(brick));
+    gwy_unit_assign(gwy_field_get_yunit(target), gwy_brick_get_yunit(brick));
+    gwy_unit_assign(gwy_field_get_zunit(target), gwy_brick_get_wunit(brick));
+}
+
+static void
+extract_col_level_field(const GwyBrick *brick,
+                        GwyField *target,
+                        guint col, guint row, guint level,
+                        guint width, guint height)
+{
+    g_assert(target->xres == width || col + width <= target->xres);
+    g_assert(target->yres == height || level + height <= target->yres);
+    guint fieldcol = (target->xres == width ? 0 : col);
+    guint fieldrow = (target->yres == height ? 0 : level);
+
+    for (guint i = 0; i < height; i++) {
+        for (guint j = 0; j < width; j++)
+            gwy_field_set(target,
+                          fieldcol + j, fieldrow + i,
+                          gwy_brick_get(brick, col + j, row, level + i));
+    }
+
+    gwy_field_set_xreal(target, gwy_brick_dx(brick)*target->xres);
+    gwy_field_set_yreal(target, gwy_brick_dz(brick)*target->yres);
+    gwy_unit_assign(gwy_field_get_xunit(target), gwy_brick_get_xunit(brick));
+    gwy_unit_assign(gwy_field_get_yunit(target), gwy_brick_get_zunit(brick));
+    gwy_unit_assign(gwy_field_get_zunit(target), gwy_brick_get_wunit(brick));
+}
+
+static void
+extract_row_level_field(const GwyBrick *brick,
+                        GwyField *target,
+                        guint col, guint row, guint level,
+                        guint width, guint height)
+{
+    g_assert(target->xres == width || row + width <= target->xres);
+    g_assert(target->yres == height || level + height <= target->yres);
+    guint fieldcol = (target->xres == width ? 0 : row);
+    guint fieldrow = (target->yres == height ? 0 : level);
+
+    for (guint i = 0; i < height; i++) {
+        for (guint j = 0; j < width; j++)
+            gwy_field_set(target,
+                          fieldcol + j, fieldrow + i,
+                          gwy_brick_get(brick, col, row + j, level + i));
+    }
+
+    gwy_field_set_xreal(target, gwy_brick_dy(brick)*target->xres);
+    gwy_field_set_yreal(target, gwy_brick_dz(brick)*target->yres);
+    gwy_unit_assign(gwy_field_get_xunit(target), gwy_brick_get_yunit(brick));
+    gwy_unit_assign(gwy_field_get_yunit(target), gwy_brick_get_zunit(brick));
+    gwy_unit_assign(gwy_field_get_zunit(target), gwy_brick_get_wunit(brick));
+}
+
+static void
+choose_field_sizes(GwyField *field1, GwyField *field2,
+                   guint width, guint height, guint xres, guint yres,
+                   GRand *rng)
+{
+    if (g_rand_boolean(rng)) {
+        gwy_field_set_size(field1, width, height, FALSE);
+        gwy_field_set_size(field2, width, height, FALSE);
+    }
+    else {
+        gwy_field_set_size(field1, xres, yres, TRUE);
+        gwy_field_set_size(field2, xres, yres, TRUE);
+    }
+}
+
+void
+test_brick_extract_plane(void)
+{
+    enum { max_size = 13, niter = 500 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 114);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint zres = g_rand_int_range(rng, 1, max_size);
+        GwyBrick *brick = gwy_brick_new_sized(xres, yres, zres, FALSE);
+        brick_randomize(brick, rng);
+        guint col = g_rand_int_range(rng, 0, xres);
+        guint row = g_rand_int_range(rng, 0, yres);
+        guint level = g_rand_int_range(rng, 0, zres);
+        guint width = g_rand_int_range(rng, 1, xres+1 - col);
+        guint height = g_rand_int_range(rng, 1, yres+1 - row);
+        guint depth = g_rand_int_range(rng, 1, zres+1 - level);
+        GwyField *target = gwy_field_new(), *reference = gwy_field_new();
+
+        /* Level plane extraction */
+        choose_field_sizes(target, reference, width, height, xres, yres, rng);
+        extract_col_row_field(brick, reference, col, row, level, width, height);
+        gwy_brick_extract_plane(brick, target,
+                                &(GwyFieldPart){ col, row, width, height },
+                                GWY_DIMEN_X, GWY_DIMEN_Y,
+                                level,
+                                FALSE);
+        field_assert_equal(target, reference);
+        gwy_field_transform_congruent(reference, GWY_PLANE_MIRROR_DIAGONALLY);
+        gwy_field_set_size(target, reference->xres, reference->yres, TRUE);
+        gwy_brick_extract_plane(brick, target,
+                                &(GwyFieldPart){ row, col, height, width },
+                                GWY_DIMEN_Y, GWY_DIMEN_X,
+                                level,
+                                FALSE);
+        field_assert_equal(target, reference);
+
+        /* Row plane extraction */
+        choose_field_sizes(target, reference, width, depth, xres, zres, rng);
+        extract_col_level_field(brick, reference, col, row, level, width, depth);
+        gwy_brick_extract_plane(brick, target,
+                                &(GwyFieldPart){ col, level, width, depth },
+                                GWY_DIMEN_X, GWY_DIMEN_Z,
+                                row,
+                                FALSE);
+        field_assert_equal(target, reference);
+        gwy_field_transform_congruent(reference, GWY_PLANE_MIRROR_DIAGONALLY);
+        gwy_field_set_size(target, reference->xres, reference->yres, TRUE);
+        gwy_brick_extract_plane(brick, target,
+                                &(GwyFieldPart){ level, col, depth, width },
+                                GWY_DIMEN_Z, GWY_DIMEN_X,
+                                row,
+                                FALSE);
+        field_assert_equal(target, reference);
+
+        /* Column plane extraction */
+        choose_field_sizes(target, reference, height, depth, yres, zres, rng);
+        extract_row_level_field(brick, reference, col, row, level, height, depth);
+        gwy_brick_extract_plane(brick, target,
+                                &(GwyFieldPart){ row, level, height, depth },
+                                GWY_DIMEN_Y, GWY_DIMEN_Z,
+                                col,
+                                FALSE);
+        field_assert_equal(target, reference);
+        gwy_field_transform_congruent(reference, GWY_PLANE_MIRROR_DIAGONALLY);
+        gwy_field_set_size(target, reference->xres, reference->yres, TRUE);
+        gwy_brick_extract_plane(brick, target,
+                                &(GwyFieldPart){ level, row, depth, height },
+                                GWY_DIMEN_Z, GWY_DIMEN_Y,
+                                col,
+                                FALSE);
+        field_assert_equal(target, reference);
 
         g_object_unref(brick);
         g_object_unref(target);
