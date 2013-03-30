@@ -1510,6 +1510,19 @@ gwy_shapes_get_starting_coords(const GwyShapes *shapes)
     return shapes->priv->snapshot;
 }
 
+/**
+ * gwy_shapes_draw_markers:
+ * @shapes: A group of geometrical shapes.
+ * @cr: A Cairo context to draw to.
+ * @data: Coordinate data, it is assumed to consists of @shape_size-sized
+ *        chunks.  The number of chunks is the same as the number of shapes
+ *        in @shapes.
+ * @hover: Index of shape to draw with hover highlighting, pass -1 for none.
+ * @function: Marker drawing function.
+ * @user_data: User data passed to @function.
+ *
+ * Helper method for drawing simple markers for a group of geometrical shapes.
+ **/
 void
 gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
                         const gdouble *data, gint hover,
@@ -1529,7 +1542,7 @@ gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
     gboolean hoverselected = FALSE;
     guint count = 0;
 
-    for (gint i = 0; i < n; i++) {
+    for (gint i = 0; (guint)i < n; i++) {
         if (i != hover && !gwy_int_set_contains(selection, i)) {
             function(cr, data + shape_size*i, user_data);
             count++;
@@ -1817,6 +1830,15 @@ selection_assigned(GwyShapes *shapes,
  *                           in two-dimensional data.
  *
  * Type of snapping used in editing of shapes.
+ **/
+
+/**
+ * GwyShapesMarkerFunc:
+ * @cr: A Cairo context to draw to.
+ * @xy: Chunk of coordinates of @shape_size size.
+ * @user_data: User data given in gwy_shapes_draw_markers().
+ *
+ * Type of shape marker drawing function.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
