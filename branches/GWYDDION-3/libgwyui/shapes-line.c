@@ -784,13 +784,13 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
     ShapesLine *priv = lines->priv;
     guint endpoint = G_MAXUINT;
-    gboolean entire_shape = TRUE;
+    gboolean entire_shape = (gwy_int_set_size(shapes->selection) > 1);
     gint i = -1;
 
     if (isfinite(eventx) && isfinite(eventy)) {
-        if ((i = find_near_point(lines, eventx, eventy)) >= 0) {
+        if (!entire_shape
+            && (i = find_near_point(lines, eventx, eventy)) >= 0) {
             endpoint = i % 2;
-            entire_shape = FALSE;
             i /= 2;
         }
         else if ((i = find_near_line(lines, eventx, eventy)) >= 0) {
@@ -809,9 +809,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 
     GdkCursorType cursor_type = GDK_ARROW;
     if (i != -1 && gwy_shapes_get_selectable(shapes)) {
-        if (!entire_shape
-            && gwy_shapes_get_editable(shapes)
-            && gwy_int_set_size(shapes->selection) == 1)
+        if (!entire_shape && gwy_shapes_get_editable(shapes))
             cursor_type = GDK_CROSS;
         else
             cursor_type = GDK_FLEUR;
