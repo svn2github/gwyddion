@@ -307,7 +307,7 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
         // If we clicked on an already selected shape, we will move the entire
         // group.  If we clicked on an unselected shape we will need to select
         // only this one.
-        if (priv->mode == MODE_MOVING
+        if ((priv->mode == MODE_MOVING || priv->mode == MODE_ENDPOINT)
             && !gwy_int_set_contains(shapes->selection, priv->clicked)) {
             gwy_shapes_start_updating_selection(shapes);
             gwy_int_set_update(shapes->selection, &priv->clicked, 1);
