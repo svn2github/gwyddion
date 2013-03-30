@@ -460,6 +460,7 @@ brick/summarize/lines/minimum
 brick/summarize/lines/maximum
 brick/summarize/lines/mean
 brick/summarize/lines/rms
+brick/extract/line
 container/data
 container/refcount
 container/keys

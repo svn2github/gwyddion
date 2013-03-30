@@ -1953,4 +1953,151 @@ test_brick_summarize_lines_rms(void)
     summarize_lines_one(GWY_BRICK_LINE_RMS, &gwy_line_rms_full);
 }
 
+static void
+extract_col_line(const GwyBrick *brick,
+                 GwyLine *target,
+                 guint col, guint row, guint level,
+                 guint len)
+{
+    g_assert(target->res == len || col + len <= target->res);
+    guint linepos = (target->res == len ? 0 : col);
+
+    for (guint i = 0; i < len; i++)
+        gwy_line_set(target,
+                     linepos + i,
+                     gwy_brick_get(brick, col + i, row, level));
+
+    gwy_line_set_real(target, gwy_brick_dx(brick)*target->res);
+    gwy_unit_assign(gwy_line_get_xunit(target), gwy_brick_get_xunit(brick));
+    gwy_unit_assign(gwy_line_get_yunit(target), gwy_brick_get_wunit(brick));
+}
+
+static void
+extract_row_line(const GwyBrick *brick,
+                 GwyLine *target,
+                 guint col, guint row, guint level,
+                 guint len)
+{
+    g_assert(target->res == len || row + len <= target->res);
+    guint linepos = (target->res == len ? 0 : row);
+
+    for (guint i = 0; i < len; i++)
+        gwy_line_set(target,
+                     linepos + i,
+                     gwy_brick_get(brick, col, row + i, level));
+
+    gwy_line_set_real(target, gwy_brick_dy(brick)*target->res);
+    gwy_unit_assign(gwy_line_get_xunit(target), gwy_brick_get_yunit(brick));
+    gwy_unit_assign(gwy_line_get_yunit(target), gwy_brick_get_wunit(brick));
+}
+
+static void
+extract_level_line(const GwyBrick *brick,
+                   GwyLine *target,
+                   guint col, guint row, guint level,
+                   guint len)
+{
+    g_assert(target->res == len || level + len <= target->res);
+    guint linepos = (target->res == len ? 0 : level);
+
+    for (guint i = 0; i < len; i++)
+        gwy_line_set(target,
+                     linepos + i,
+                     gwy_brick_get(brick, col, row, level + i));
+
+    gwy_line_set_real(target, gwy_brick_dz(brick)*target->res);
+    gwy_unit_assign(gwy_line_get_xunit(target), gwy_brick_get_zunit(brick));
+    gwy_unit_assign(gwy_line_get_yunit(target), gwy_brick_get_wunit(brick));
+}
+
+static void
+choose_line_sizes(GwyLine *line1, GwyLine *line2,
+                  guint len, guint res,
+                  GRand *rng)
+{
+    if (g_rand_boolean(rng)) {
+        gwy_line_set_size(line1, len, FALSE);
+        gwy_line_set_size(line2, len, FALSE);
+    }
+    else {
+        gwy_line_set_size(line1, res, TRUE);
+        gwy_line_set_size(line2, res, TRUE);
+    }
+}
+
+void
+test_brick_extract_line(void)
+{
+    enum { max_size = 19, niter = 400 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 114);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint zres = g_rand_int_range(rng, 1, max_size);
+        GwyBrick *brick = gwy_brick_new_sized(xres, yres, zres, FALSE);
+        brick_randomize(brick, rng);
+        guint col = g_rand_int_range(rng, 0, xres);
+        guint row = g_rand_int_range(rng, 0, yres);
+        guint level = g_rand_int_range(rng, 0, zres);
+        guint width = g_rand_int_range(rng, 1, xres+1 - col);
+        guint height = g_rand_int_range(rng, 1, yres+1 - row);
+        guint depth = g_rand_int_range(rng, 1, zres+1 - level);
+        GwyLine *target = gwy_line_new(), *reference = gwy_line_new();
+
+        /* Column-wise extraction */
+        choose_line_sizes(target, reference, width, xres, rng);
+        extract_col_line(brick, reference, col, row, level, width);
+        gwy_brick_extract_line(brick, target,
+                               &(GwyLinePart){ col, width },
+                               GWY_DIMEN_Y, GWY_DIMEN_Z,
+                               row, level,
+                               FALSE);
+        line_assert_equal(target, reference);
+        gwy_brick_extract_line(brick, target,
+                               &(GwyLinePart){ col, width },
+                               GWY_DIMEN_Z, GWY_DIMEN_Y,
+                               level, row,
+                               FALSE);
+        line_assert_equal(target, reference);
+
+        /* Row-wise extraction */
+        choose_line_sizes(target, reference, height, yres, rng);
+        extract_row_line(brick, reference, col, row, level, height);
+        gwy_brick_extract_line(brick, target,
+                               &(GwyLinePart){ row, height },
+                               GWY_DIMEN_X, GWY_DIMEN_Z,
+                               col, level,
+                               FALSE);
+        line_assert_equal(target, reference);
+        gwy_brick_extract_line(brick, target,
+                               &(GwyLinePart){ row, height },
+                               GWY_DIMEN_Z, GWY_DIMEN_X,
+                               level, col,
+                               FALSE);
+        line_assert_equal(target, reference);
+
+        /* Level-wise extraction */
+        choose_line_sizes(target, reference, depth, zres, rng);
+        extract_level_line(brick, reference, col, row, level, depth);
+        gwy_brick_extract_line(brick, target,
+                               &(GwyLinePart){ level, depth },
+                               GWY_DIMEN_X, GWY_DIMEN_Y,
+                               col, row,
+                               FALSE);
+        line_assert_equal(target, reference);
+        gwy_brick_extract_line(brick, target,
+                               &(GwyLinePart){ level, depth },
+                               GWY_DIMEN_Y, GWY_DIMEN_X,
+                               row, col,
+                               FALSE);
+        line_assert_equal(target, reference);
+
+        g_object_unref(brick);
+        g_object_unref(target);
+        g_object_unref(reference);
+    }
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
