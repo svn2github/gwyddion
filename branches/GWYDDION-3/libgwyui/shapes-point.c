@@ -636,7 +636,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     GdkCursorType cursor_type = GDK_ARROW;
     if (i != -1 && gwy_shapes_get_selectable(shapes))
         cursor_type = GDK_FLEUR;
-    gwy_shapes_set_cursor(shapes, cursor_type);
+    gwy_shapes_set_cursor_type(shapes, cursor_type);
 
     priv->hover = i;
     gwy_shapes_update(shapes);

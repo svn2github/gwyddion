@@ -728,7 +728,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
         else
             cursor_type = GDK_FLEUR;
     }
-    gwy_shapes_set_cursor(shapes, cursor_type);
+    gwy_shapes_set_cursor_type(shapes, cursor_type);
 
     if (do_update)
         gwy_shapes_update(shapes);

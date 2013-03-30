@@ -2368,7 +2368,7 @@ shapes_cursor_type(GwyRasterArea *rasterarea)
 
     GdkCursorType cursor_type = GDK_ARROW;
     if (priv->shapes)
-        cursor_type = gwy_shapes_get_cursor(priv->shapes);
+        cursor_type = gwy_shapes_get_cursor_type(priv->shapes);
     GdkDisplay *display = gtk_widget_get_display(widget);
     GdkCursor *cursor = gdk_cursor_new_for_display(display, cursor_type);
     gdk_window_set_cursor(priv->window, cursor);

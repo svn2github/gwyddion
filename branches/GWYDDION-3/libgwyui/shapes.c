@@ -102,7 +102,7 @@ static gboolean set_editable                    (GwyShapes *shapes,
 static gboolean set_snapping                    (GwyShapes *shapes,
                                                  gboolean snapping);
 static gboolean set_cursor_type                 (GwyShapes *shapes,
-                                                 GdkCursorType cursor_type);
+                                                 GdkCursorType cursortype);
 static void     cancel_editing                  (GwyShapes *shapes,
                                                  gint id);
 static void     coords_item_inserted            (GwyShapes *shapes,
@@ -1108,9 +1108,9 @@ gwy_shapes_unset_current_point(GwyShapes *shapes)
 }
 
 /**
- * gwy_shapes_set_cursor:
+ * gwy_shapes_set_cursor_type:
  * @shapes: A group of geometrical shapes.
- * @cursor_type: Requested cursor type.
+ * @cursortype: Requested cursor type.
  *
  * Sets the requested cursor type.
  *
@@ -1119,11 +1119,11 @@ gwy_shapes_unset_current_point(GwyShapes *shapes)
  * cursor.  Or it may not; it is only a suggestion.
  **/
 void
-gwy_shapes_set_cursor(GwyShapes *shapes,
-                      GdkCursorType cursor_type)
+gwy_shapes_set_cursor_type(GwyShapes *shapes,
+                           GdkCursorType cursortype)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
-    if (!set_cursor_type(shapes, cursor_type))
+    if (!set_cursor_type(shapes, cursortype))
         return;
 
     g_object_notify_by_pspec(G_OBJECT(shapes), properties[PROP_CURSOR_TYPE]);
@@ -1135,10 +1135,10 @@ gwy_shapes_set_cursor(GwyShapes *shapes,
  *
  * Gets the requested cursor type.
  *
- * Returns: The requested cursor type, see gwy_shapes_set_cursor().
+ * Returns: The requested cursor type, see gwy_shapes_set_cursor_type().
  **/
 GdkCursorType
-gwy_shapes_get_cursor(const GwyShapes *shapes)
+gwy_shapes_get_cursor_type(const GwyShapes *shapes)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), GDK_X_CURSOR);
     return shapes->priv->cursor_type;
@@ -1554,13 +1554,13 @@ set_snapping(GwyShapes *shapes,
 
 static gboolean
 set_cursor_type(GwyShapes *shapes,
-                GdkCursorType cursor_type)
+                GdkCursorType cursortype)
 {
     Shapes *priv = shapes->priv;
-    if (cursor_type == priv->cursor_type)
+    if (cursortype == priv->cursor_type)
         return FALSE;
 
-    priv->cursor_type = cursor_type;
+    priv->cursor_type = cursortype;
     return TRUE;
 }
 
