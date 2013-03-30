@@ -91,19 +91,15 @@ static void     gwy_shapes_line_selection_assigned(GwyShapes *shapes);
 static gboolean set_thickness                     (GwyShapesLine *lines,
                                                    gdouble thickness);
 static void     calculate_data                    (GwyShapesLine *lines);
-static void     draw_lines                        (GwyShapes *shapes,
+static void     draw_lines                        (GwyShapesLine *lines,
                                                    cairo_t *cr);
 static void     draw_line                         (cairo_t *cr,
                                                    const gdouble *xy,
                                                    gpointer user_data);
-static void     draw_thicknesses                  (GwyShapes *shapes,
+static void     draw_thicknesses                  (GwyShapesLine *lines,
                                                    cairo_t *cr);
 static void     draw_thickness                    (cairo_t *cr,
                                                    const gdouble *xy,
-                                                   gpointer user_data);
-static void     draw_markers                      (GwyShapes *shapes,
-                                                   cairo_t *cr,
-                                                   MarkerDrawFunc function,
                                                    gpointer user_data);
 static gint     find_near_point                   (GwyShapesLine *lines,
                                                    gdouble x,
@@ -242,8 +238,8 @@ gwy_shapes_line_draw(GwyShapes *shapes,
 
     GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
     calculate_data(lines);
-    draw_lines(shapes, cr);
-    draw_thicknesses(shapes, cr);
+    draw_lines(lines, cr);
+    draw_thicknesses(lines, cr);
 }
 
 static gboolean
@@ -483,11 +479,14 @@ calculate_data(GwyShapesLine *lines)
 }
 
 static void
-draw_lines(GwyShapes *shapes, cairo_t *cr)
+draw_lines(GwyShapesLine *lines, cairo_t *cr)
 {
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
-    draw_markers(shapes, cr, &draw_line, NULL);
+    ShapesLine *priv = lines->priv;
+    gwy_shapes_draw_markers(GWY_SHAPES(lines), cr,
+                            (const gdouble*)priv->data->data, priv->hover,
+                            &draw_line, NULL);
     cairo_restore(cr);
 }
 
@@ -501,15 +500,17 @@ draw_line(cairo_t *cr,
 }
 
 static void
-draw_thicknesses(GwyShapes *shapes, cairo_t *cr)
+draw_thicknesses(GwyShapesLine *lines, cairo_t *cr)
 {
-    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
+    ShapesLine *priv = lines->priv;
     gdouble thicknesses[2] = { priv->thickness, priv->thickness };
-    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
+    const cairo_matrix_t *matrix = &GWY_SHAPES(lines)->pixel_to_view;
     cairo_matrix_transform_distance(matrix, thicknesses+0, thicknesses+1);
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
-    draw_markers(shapes, cr, &draw_thickness, thicknesses);
+    gwy_shapes_draw_markers(GWY_SHAPES(lines), cr,
+                            (const gdouble*)priv->data->data, priv->hover,
+                            &draw_thickness, thicknesses);
     cairo_restore(cr);
 }
 
@@ -532,61 +533,6 @@ draw_thickness(cairo_t *cr,
                   xy[2] - sinphi*thicknesses[0], xy[3] + cosphi*thicknesses[1]);
     cairo_line_to(cr,
                   xy[2] + sinphi*thicknesses[0], xy[3] - cosphi*thicknesses[1]);
-}
-
-// FIXME: May be common.
-static void
-draw_markers(GwyShapes *shapes, cairo_t *cr,
-             MarkerDrawFunc function, gpointer user_data)
-{
-    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
-    const gdouble *data = (const gdouble*)priv->data->data;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint shape_size = gwy_coords_shape_size(coords);
-    gint n = priv->data->len/shape_size;
-
-    if (!n)
-        return;
-
-    GwyIntSet *selection = shapes->selection;
-    gboolean hoverselected = FALSE;
-    guint count = 0;
-
-    for (gint i = 0; i < n; i++) {
-        if (i != priv->hover && !gwy_int_set_contains(selection, i)) {
-            function(cr, data + shape_size*i, user_data);
-            count++;
-        }
-    }
-    if (count) {
-        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
-        count = 0;
-    }
-
-    GwyIntSetIter iter;
-    if (gwy_int_set_first(selection, &iter)) {
-        do {
-            if (iter.value == priv->hover)
-                hoverselected = TRUE;
-            else {
-                function(cr, data + shape_size*iter.value, user_data);
-                count++;
-            }
-        } while (gwy_int_set_next(selection, &iter));
-
-        if (count) {
-            gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
-            count = 0;
-        }
-    }
-
-    if (priv->hover != -1) {
-        GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
-        if (hoverselected)
-            state |= GWY_SHAPES_STATE_SELECTED;
-        function(cr, data + shape_size*priv->hover, user_data);
-        gwy_shapes_stroke(shapes, cr, state);
-    }
 }
 
 // FIXME: The same as in ShapesLine, just for both endpoints.

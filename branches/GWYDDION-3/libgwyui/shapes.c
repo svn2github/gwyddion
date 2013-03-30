@@ -1510,6 +1510,62 @@ gwy_shapes_get_starting_coords(const GwyShapes *shapes)
     return shapes->priv->snapshot;
 }
 
+void
+gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
+                        const gdouble *data, gint hover,
+                        GwyShapesMarkerFunc function, gpointer user_data)
+{
+    g_return_if_fail(GWY_IS_SHAPES(shapes));
+    g_return_if_fail(cr);
+
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = (coords ? gwy_coords_size(coords) : 0);
+    g_return_if_fail(!n || data);
+    if (!n || !function)
+        return;
+
+    guint shape_size = gwy_coords_shape_size(coords);
+    GwyIntSet *selection = shapes->selection;
+    gboolean hoverselected = FALSE;
+    guint count = 0;
+
+    for (gint i = 0; i < n; i++) {
+        if (i != hover && !gwy_int_set_contains(selection, i)) {
+            function(cr, data + shape_size*i, user_data);
+            count++;
+        }
+    }
+    if (count) {
+        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
+        count = 0;
+    }
+
+    GwyIntSetIter iter;
+    if (gwy_int_set_first(selection, &iter)) {
+        do {
+            if (iter.value == hover)
+                hoverselected = TRUE;
+            else {
+                function(cr, data + shape_size*iter.value, user_data);
+                count++;
+            }
+        } while (gwy_int_set_next(selection, &iter));
+
+        if (count) {
+            gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
+            count = 0;
+        }
+    }
+
+    if (hover != -1) {
+        GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
+        if (hoverselected)
+            state |= GWY_SHAPES_STATE_SELECTED;
+        function(cr, data + shape_size*hover, user_data);
+        gwy_shapes_stroke(shapes, cr, state);
+    }
+}
+
 static gboolean
 set_selectable(GwyShapes *shapes,
                gboolean selectable)

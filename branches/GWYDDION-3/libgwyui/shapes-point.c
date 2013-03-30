@@ -86,19 +86,15 @@ static void     gwy_shapes_point_selection_assigned(GwyShapes *shapes);
 static gboolean set_radius                         (GwyShapesPoint *points,
                                                     gdouble radius);
 static void     calculate_data                     (GwyShapesPoint *points);
-static void     draw_crosses                       (GwyShapes *shapes,
+static void     draw_crosses                       (GwyShapesPoint *points,
                                                     cairo_t *cr);
 static void     draw_cross                         (cairo_t *cr,
                                                     const gdouble *xy,
                                                     gpointer user_data);
-static void     draw_radii                         (GwyShapes *shapes,
+static void     draw_radii                         (GwyShapesPoint *points,
                                                     cairo_t *cr);
 static void     draw_radius                        (cairo_t *cr,
                                                     const gdouble *xy,
-                                                    gpointer user_data);
-static void     draw_markers                       (GwyShapes *shapes,
-                                                    cairo_t *cr,
-                                                    MarkerDrawFunc function,
                                                     gpointer user_data);
 static gint     find_near_point                    (GwyShapesPoint *points,
                                                     gdouble x,
@@ -224,8 +220,8 @@ gwy_shapes_point_draw(GwyShapes *shapes,
 
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     calculate_data(points);
-    draw_crosses(shapes, cr);
-    draw_radii(shapes, cr);
+    draw_crosses(points, cr);
+    draw_radii(points, cr);
 }
 
 static gboolean
@@ -442,12 +438,15 @@ calculate_data(GwyShapesPoint *points)
 }
 
 static void
-draw_crosses(GwyShapes *shapes, cairo_t *cr)
+draw_crosses(GwyShapesPoint *points, cairo_t *cr)
 {
     gdouble ticklen = 5.0;
     cairo_save(cr);
     cairo_set_line_width(cr, 1.683);
-    draw_markers(shapes, cr, &draw_cross, &ticklen);
+    ShapesPoint *priv = points->priv;
+    gwy_shapes_draw_markers(GWY_SHAPES(points), cr,
+                            (const gdouble*)priv->data->data, priv->hover,
+                            &draw_cross, &ticklen);
     cairo_restore(cr);
 }
 
@@ -461,15 +460,17 @@ draw_cross(cairo_t *cr,
 }
 
 static void
-draw_radii(GwyShapes *shapes, cairo_t *cr)
+draw_radii(GwyShapesPoint *points, cairo_t *cr)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
+    ShapesPoint *priv = points->priv;
     gdouble radii[2] = { priv->radius, priv->radius };
-    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
+    const cairo_matrix_t *matrix = &GWY_SHAPES(points)->pixel_to_view;
     cairo_matrix_transform_distance(matrix, radii+0, radii+1);
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
-    draw_markers(shapes, cr, &draw_radius, radii);
+    gwy_shapes_draw_markers(GWY_SHAPES(points), cr,
+                            (const gdouble*)priv->data->data, priv->hover,
+                            &draw_radius, radii);
     cairo_restore(cr);
 }
 
@@ -480,61 +481,6 @@ draw_radius(cairo_t *cr,
 {
     const gdouble *radii = (const gdouble*)user_data;
     gwy_cairo_ellipse(cr, xy[0], xy[1], radii[0], radii[1]);
-}
-
-// FIXME: May be common.
-static void
-draw_markers(GwyShapes *shapes, cairo_t *cr,
-             MarkerDrawFunc function, gpointer user_data)
-{
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
-    const gdouble *data = (const gdouble*)priv->data->data;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint shape_size = gwy_coords_shape_size(coords);
-    gint n = priv->data->len/shape_size;
-
-    if (!n)
-        return;
-
-    GwyIntSet *selection = shapes->selection;
-    gboolean hoverselected = FALSE;
-    guint count = 0;
-
-    for (gint i = 0; i < n; i++) {
-        if (i != priv->hover && !gwy_int_set_contains(selection, i)) {
-            function(cr, data + shape_size*i, user_data);
-            count++;
-        }
-    }
-    if (count) {
-        gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_NORMAL);
-        count = 0;
-    }
-
-    GwyIntSetIter iter;
-    if (gwy_int_set_first(selection, &iter)) {
-        do {
-            if (iter.value == priv->hover)
-                hoverselected = TRUE;
-            else {
-                function(cr, data + shape_size*iter.value, user_data);
-                count++;
-            }
-        } while (gwy_int_set_next(selection, &iter));
-
-        if (count) {
-            gwy_shapes_stroke(shapes, cr, GWY_SHAPES_STATE_SELECTED);
-            count = 0;
-        }
-    }
-
-    if (priv->hover != -1) {
-        GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
-        if (hoverselected)
-            state |= GWY_SHAPES_STATE_SELECTED;
-        function(cr, data + shape_size*priv->hover, user_data);
-        gwy_shapes_stroke(shapes, cr, state);
-    }
 }
 
 static gint
