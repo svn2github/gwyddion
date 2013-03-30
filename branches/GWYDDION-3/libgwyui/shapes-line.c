@@ -681,8 +681,9 @@ static void
 constrain_angle(guint endpoint, gdouble *xy)
 {
     guint other = (endpoint + 1) % 2;
-    gdouble lx = xy[2*endpoint + 0] - xy[2*other + 0],
-            ly = xy[2*endpoint + 1] - xy[2*other + 1];
+    gdouble xt = xy[2*endpoint + 0], yt = xy[2*endpoint + 1],
+            xf = xy[2*other + 0], yf = xy[2*other + 1];
+    gdouble lx = xt - xf, ly = yt - yf;
 
     if (!lx && !ly)
         return;
@@ -691,8 +692,8 @@ constrain_angle(guint endpoint, gdouble *xy)
     theta = gwy_round(theta/ANGLE_STEP)*ANGLE_STEP;
     lx = r*cos(theta);
     ly = r*sin(theta);
-    xy[2*endpoint + 0] = xy[2*other + 0] + lx;
-    xy[2*endpoint + 1] = xy[2*other + 1] + ly;
+    xy[2*endpoint + 0] = xf + lx;
+    xy[2*endpoint + 1] = yf + ly;
 }
 
 static void
@@ -700,33 +701,34 @@ limit_into_bbox(const cairo_rectangle_t *bbox, guint endpoint, gdouble *xy)
 {
     guint other = (endpoint + 1) % 2;
 
-    gdouble lx = xy[2*endpoint + 0] - xy[2*other + 0],
-            ly = xy[2*endpoint + 1] - xy[2*other + 1];
+    gdouble xt = xy[2*endpoint + 0], yt = xy[2*endpoint + 1],
+            xf = xy[2*other + 0], yf = xy[2*other + 1];
+    gdouble lx = xt - xf, ly = yt - yf;
 
-    if (xy[2*endpoint + 0] < bbox->x) {
-        gdouble x = bbox->x;
-        xy[2*endpoint + 1] = xy[2*other + 1] + ly/lx*(x - xy[2*other + 0]);
-        if (!isnormal(xy[2*endpoint + 1]))
-            xy[2*endpoint + 1] = xy[2*other + 1];
+    if (xt < bbox->x) {
+        xt = bbox->x;
+        yt = yf + ly/lx*(xt - xf);
     }
-    if (xy[2*endpoint + 1] < bbox->y) {
-        gdouble y = bbox->y;
-        xy[2*endpoint + 0] = xy[2*other + 0] + lx/ly*(y - xy[2*other + 1]);
-        if (!isnormal(xy[2*endpoint + 0]))
-            xy[2*endpoint + 0] = xy[2*other + 0];
+    if (yt < bbox->y) {
+        yt = bbox->y;
+        xt = xf + lx/ly*(yt - yf);
     }
-    if (xy[2*endpoint + 0] > bbox->x + bbox->width) {
-        gdouble x = bbox->x + bbox->width;
-        xy[2*endpoint + 1] = xy[2*other + 1] + ly/lx*(x - xy[2*other + 0]);
-        if (!isnormal(xy[2*endpoint + 1]))
-            xy[2*endpoint + 1] = xy[2*other + 1];
+    if (xt > bbox->x + bbox->width) {
+        xt = bbox->x + bbox->width;
+        yt = yf + ly/lx*(xt - xf);
     }
-    if (xy[2*endpoint + 1] > bbox->y + bbox->height) {
-        gdouble y = bbox->y + bbox->height;
-        xy[2*endpoint + 0] = xy[2*other + 0] + lx/ly*(y - xy[2*other + 1]);
-        if (!isnormal(xy[2*endpoint + 0]))
-            xy[2*endpoint + 0] = xy[2*other + 0];
+    if (yt > bbox->y + bbox->height) {
+        yt = bbox->y + bbox->height;
+        xt = xf + lx/ly*(yt - yf);
     }
+
+    if (!isfinite(yt))
+        yt = yf;
+    if (!isfinite(xt))
+        xt = xf;
+
+    xy[2*endpoint + 0] = xt;
+    xy[2*endpoint + 1] = yt;
 }
 
 static void
