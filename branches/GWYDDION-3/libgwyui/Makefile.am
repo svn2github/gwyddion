@@ -37,6 +37,7 @@ public_headers = \
 	$(srcdir)/shapes.h \
 	$(srcdir)/shapes-line.h \
 	$(srcdir)/shapes-point.h \
+	$(srcdir)/shapes-rectangle.h \
 	$(srcdir)/spin-button.h \
 	$(srcdir)/stock.h \
 	$(srcdir)/widget-utils.h
@@ -96,6 +97,7 @@ libgwyui3_la_SOURCES = \
 	shapes.c \
 	shapes-line.c \
 	shapes-point.c \
+	shapes-rectangle.c \
 	spin-button.c \
 	stock.c \
 	types.c \

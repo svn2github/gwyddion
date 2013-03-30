@@ -39,6 +39,7 @@
 #include <libgwyui/shapes.h>
 #include <libgwyui/shapes-line.h>
 #include <libgwyui/shapes-point.h>
+#include <libgwyui/shapes-rectangle.h>
 #include <libgwyui/spin-button.h>
 #include <libgwyui/stock.h>
 #include <libgwyui/types.h>
