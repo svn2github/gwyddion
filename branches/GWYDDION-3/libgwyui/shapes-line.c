@@ -27,6 +27,7 @@
 #include "libgwyui/shapes-line.h"
 
 #define NEAR_DIST2 30.0
+#define ANGLE_STEP (G_PI/12.0)
 
 enum {
     PROP_0,
@@ -113,13 +114,25 @@ static gint     find_near_line                    (GwyShapesLine *lines,
 static void     constrain_movement                (GwyShapes *shapes,
                                                    GdkModifierType modif,
                                                    GwyXY *dxy);
+static void     move_endpoint                     (GwyShapes *shapes,
+                                                   GdkModifierType modif,
+                                                   GwyXY *dxy);
+static void     constrain_horiz_vert              (GwyShapes *shapes,
+                                                   GwyXY *dxy);
+static void     constrain_angle                   (guint endpoint,
+                                                   gdouble *xy);
+static void     limit_into_bbox                   (const cairo_rectangle_t *bbox,
+                                                   guint endpoint,
+                                                   gdouble *xy);
+static void     calc_constrained_bbox             (GwyShapes *shapes,
+                                                   cairo_rectangle_t *bbox);
 static gboolean add_shape                         (GwyShapes *shapes,
                                                    gdouble x,
                                                    gdouble y);
 static void     update_hover                      (GwyShapes *shapes,
                                                    gdouble eventx,
                                                    gdouble eventy);
-static gboolean snap_shape                        (GwyShapes *shapes,
+static gboolean snap_point                        (GwyShapes *shapes,
                                                    gdouble *x,
                                                    gdouble *y);
 
@@ -263,8 +276,8 @@ gwy_shapes_line_motion_notify(GwyShapes *shapes,
         gwy_shapes_move(shapes, &dxy);
     }
     else if (priv->mode == MODE_ENDPOINT) {
-        // TODO: Move just one endpoint.  This can only be done for
-        // single-shape selection.
+        // Moving a single endpoint.
+        move_endpoint(shapes, event->state, &dxy);
     }
     else {
         g_assert_not_reached();
@@ -343,17 +356,25 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         // FIXME: May not be necessary if we respond to the selection signals.
         gwy_shapes_update(shapes);
     }
-    else {
-        // TODO: Must differentiate between endpoint/entire line movement.  The
-        // logic should be factored out of motion-notify and this function to a
-        // common subroutine.
-        // TODO: Check if the line length is non-zero and discard it otherwise.
+    else if (priv->mode == MODE_MOVING) {
         GwyXY xy = { event->x, event->y }, dxy;
         gwy_shapes_check_movement(shapes, &xy, &dxy);
         constrain_movement(shapes, event->state, &dxy);
         gwy_shapes_move(shapes, &dxy);
         gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
+    else if (priv->mode == MODE_ENDPOINT) {
+        GwyXY xy = { event->x, event->y }, dxy;
+        gwy_shapes_check_movement(shapes, &xy, &dxy);
+        move_endpoint(shapes, event->state, &dxy);
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
+    }
+
+    // TODO: in MODE_ENDPOINT, if we created a zero-length line (either by
+    // editing or by not moving at all), discard it.  There will be some
+    // convoluted logic whether to call gwy_coords_finished() -- we need to
+    // avoid it only if the line is not new and has not moved at all.
+
     gwy_shapes_unset_current_point(shapes);
     priv->clicked = -1;
     update_hover(shapes, event->x, event->y);
@@ -374,7 +395,7 @@ gwy_shapes_line_delete_selection(GwyShapes *shapes)
 
 static void
 gwy_shapes_line_cancel_editing(GwyShapes *shapes,
-                               gint id)
+                               G_GNUC_UNUSED gint id)
 {
     ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     // FIXME: We might want to do something like the finishing touches at the
@@ -631,6 +652,8 @@ find_near_line(GwyShapesLine *lines,
     return mini;
 }
 
+// FIXME: This is suboptimal.  We should snap @clicked line as the last thing
+// as long as it does not make other selected lies fall outside the bbox.
 static void
 constrain_movement(GwyShapes *shapes,
                    GdkModifierType modif,
@@ -638,29 +661,143 @@ constrain_movement(GwyShapes *shapes,
 {
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
-    if (modif & GDK_CONTROL_MASK) {
-        const cairo_matrix_t *matrix = &shapes->coords_to_view;
-        gdouble x = dxy->x, y = dxy->y;
-        cairo_matrix_transform_distance(matrix, &x, &y);
-        if (fabs(x) <= fabs(y))
-            dxy->x = 0.0;
-        else
-            dxy->y = 0.0;
-    }
+    if (modif & GDK_CONTROL_MASK)
+        constrain_horiz_vert(shapes, dxy);
 
-    // TODO: Constrain endpoint final position in ??? space (probably view
-    // space), pressing Shift limits line angles to multiples of 15 deg.
+    // Constrain final position in coords space, perform snapping and ensure
+    // it does not move anything outside the bounding box.
+    GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
+    ShapesLine *priv = lines->priv;
+    guint endpoint = priv->endpoint;
+    const GwyCoords *orig_coords = gwy_shapes_get_starting_coords(shapes);
+    gdouble xy[4], diff[2];
+    gwy_coords_get(orig_coords, priv->selection_index, xy);
+    diff[0] = xy[2*endpoint + 0] + dxy->x;
+    diff[1] = xy[2*endpoint + 1] + dxy->y;
+    snap_point(shapes, diff+0, diff+1);
+    diff[0] -= xy[2*endpoint + 0];
+    diff[1] -= xy[2*endpoint + 1];
 
-    // Constrain final position in coords space, cannot move anything outside
-    // the bounding box.
-    gdouble diff[] = { dxy->x, dxy->y };
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     gdouble lower[2] = { bbox->x, bbox->y };
     gdouble upper[2] = { bbox->x + bbox->width, bbox->y + bbox->height };
-    gwy_coords_constrain_translation(gwy_shapes_get_starting_coords(shapes),
-                                     NULL, diff, lower, upper);
+    gwy_coords_constrain_translation(orig_coords, NULL, diff, lower, upper);
     dxy->x = diff[0];
     dxy->y = diff[1];
+}
+
+static void
+move_endpoint(GwyShapes *shapes,
+              GdkModifierType modif,
+              GwyXY *dxy)
+{
+    // Constrain movement in view space, pressing Ctrl limits it to
+    // horizontal/vertical.
+    if (modif & GDK_CONTROL_MASK)
+        constrain_horiz_vert(shapes, dxy);
+
+    // Constrain final position in coords space, perform positional and angular
+    // snapping and ensure it does not move anything outside the bounding box.
+    const GwyCoords *orig_coords = gwy_shapes_get_starting_coords(shapes);
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
+    ShapesLine *priv = lines->priv;
+    guint endpoint = priv->endpoint;
+    gdouble xy[4];
+    cairo_rectangle_t bbox;
+
+    gwy_coords_get(orig_coords, priv->selection_index, xy);
+    xy[2*endpoint + 0] += dxy->x;
+    xy[2*endpoint + 1] += dxy->y;
+
+    if (modif & GDK_SHIFT_MASK)
+        constrain_angle(endpoint, xy);
+    calc_constrained_bbox(shapes, &bbox);
+    limit_into_bbox(&bbox, endpoint, xy);
+    snap_point(shapes, xy + 2*endpoint + 0, xy + 2*endpoint + 1);
+    gwy_coords_set(coords, priv->clicked, xy);
+}
+
+// FIXME: Common
+static void
+constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
+{
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    gdouble x = dxy->x, y = dxy->y;
+    cairo_matrix_transform_distance(matrix, &x, &y);
+    if (fabs(x) <= fabs(y))
+        dxy->x = 0.0;
+    else
+        dxy->y = 0.0;
+}
+
+static void
+constrain_angle(guint endpoint, gdouble *xy)
+{
+    guint other = (endpoint + 1) % 2;
+    gdouble lx = xy[2*endpoint + 0] - xy[2*other + 0],
+            ly = xy[2*endpoint + 1] - xy[2*other + 1];
+
+    if (!lx && !ly)
+        return;
+
+    gdouble theta = atan2(ly, lx), r = hypot(lx, ly);
+    theta = gwy_round(theta/ANGLE_STEP)*ANGLE_STEP;
+    lx = r*cos(theta);
+    ly = r*sin(theta);
+    xy[2*endpoint + 0] = xy[2*other + 0] + lx;
+    xy[2*endpoint + 1] = xy[2*other + 1] + ly;
+}
+
+static void
+limit_into_bbox(const cairo_rectangle_t *bbox, guint endpoint, gdouble *xy)
+{
+    guint other = (endpoint + 1) % 2;
+
+    gdouble lx = xy[2*endpoint + 0] - xy[2*other + 0],
+            ly = xy[2*endpoint + 1] - xy[2*other + 1];
+
+    if (xy[2*endpoint + 0] < bbox->x) {
+        gdouble x = bbox->x;
+        xy[2*endpoint + 1] = xy[2*other + 1] + ly/lx*(x - xy[2*other + 0]);
+        if (!isnormal(xy[2*endpoint + 1]))
+            xy[2*endpoint + 1] = xy[2*other + 1];
+    }
+    if (xy[2*endpoint + 1] < bbox->y) {
+        gdouble y = bbox->y;
+        xy[2*endpoint + 0] = xy[2*other + 0] + lx/ly*(y - xy[2*other + 1]);
+        if (!isnormal(xy[2*endpoint + 0]))
+            xy[2*endpoint + 0] = xy[2*other + 0];
+    }
+    if (xy[2*endpoint + 0] > bbox->x + bbox->width) {
+        gdouble x = bbox->x + bbox->width;
+        xy[2*endpoint + 1] = xy[2*other + 1] + ly/lx*(x - xy[2*other + 0]);
+        if (!isnormal(xy[2*endpoint + 1]))
+            xy[2*endpoint + 1] = xy[2*other + 1];
+    }
+    if (xy[2*endpoint + 1] > bbox->y + bbox->height) {
+        gdouble y = bbox->y + bbox->height;
+        xy[2*endpoint + 0] = xy[2*other + 0] + lx/ly*(y - xy[2*other + 1]);
+        if (!isnormal(xy[2*endpoint + 0]))
+            xy[2*endpoint + 0] = xy[2*other + 0];
+    }
+}
+
+static void
+calc_constrained_bbox(GwyShapes *shapes,
+                      cairo_rectangle_t *bbox)
+{
+    *bbox = shapes->bounding_box;
+    if (!gwy_shapes_get_snapping(shapes))
+        return;
+
+    gdouble hx = 0.999999, hy = 0.999999;
+    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
+    cairo_matrix_transform_distance(matrix, &hx, &hy);
+    bbox->x += 0.5*hx;
+    bbox->y += 0.5*hy;
+    bbox->width -= hx;
+    bbox->height -= hy;
 }
 
 static gboolean
@@ -674,19 +811,20 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
-    snap_shape(shapes, &x, &y);
+    snap_point(shapes, &x, &y);
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
         return FALSE;
 
-    gdouble xy2[4] = { x, y, x, y };
+    gdouble xy[4] = { x, y, x, y };
     priv->mode = MODE_ENDPOINT;
-    priv->endpoint = 0;
+    priv->endpoint = 1;
     priv->entire_shape = FALSE;
     priv->hover = priv->clicked = n;
-    gwy_coords_set(coords, priv->clicked, xy2);
+    priv->selection_index = 0;
+    gwy_coords_set(coords, priv->clicked, xy);
     return TRUE;
 }
 
@@ -735,7 +873,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 }
 
 static gboolean
-snap_shape(GwyShapes *shapes,
+snap_point(GwyShapes *shapes,
            gdouble *x, gdouble *y)
 {
     if (!gwy_shapes_get_snapping(shapes))

@@ -106,6 +106,8 @@ static gint     find_near_point                    (GwyShapesPoint *points,
 static void     constrain_movement                 (GwyShapes *shapes,
                                                     GdkModifierType modif,
                                                     GwyXY *dxy);
+static void     constrain_horiz_vert               (GwyShapes *shapes,
+                                                    GwyXY *dxy);
 static gboolean add_shape                          (GwyShapes *shapes,
                                                     gdouble x,
                                                     gdouble y);
@@ -352,7 +354,7 @@ gwy_shapes_point_delete_selection(GwyShapes *shapes)
 
 static void
 gwy_shapes_point_cancel_editing(GwyShapes *shapes,
-                                gint id)
+                                G_GNUC_UNUSED gint id)
 {
     ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     // FIXME: We might want to do something like the finishing touches at the
@@ -564,18 +566,11 @@ constrain_movement(GwyShapes *shapes,
 {
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
-    if (modif & GDK_CONTROL_MASK) {
-        const cairo_matrix_t *matrix = &shapes->coords_to_view;
-        gdouble x = dxy->x, y = dxy->y;
-        cairo_matrix_transform_distance(matrix, &x, &y);
-        if (fabs(x) <= fabs(y))
-            dxy->x = 0.0;
-        else
-            dxy->y = 0.0;
-    }
+    if (modif & GDK_CONTROL_MASK)
+        constrain_horiz_vert(shapes, dxy);
 
-    // Constrain final position in coords space, cannot move anything outside
-    // the bounding box.
+    // Constrain final position in coords space, perform snapping and ensure
+    // it does not move anything outside the bounding box.
     GwyShapesPoint *points = GWY_SHAPES_POINT(shapes);
     const GwyCoords *orig_coords = gwy_shapes_get_starting_coords(shapes);
     gdouble xy[2], diff[2];
@@ -592,6 +587,19 @@ constrain_movement(GwyShapes *shapes,
     gwy_coords_constrain_translation(orig_coords, NULL, diff, lower, upper);
     dxy->x = diff[0];
     dxy->y = diff[1];
+}
+
+// FIXME: Common
+static void
+constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
+{
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    gdouble x = dxy->x, y = dxy->y;
+    cairo_matrix_transform_distance(matrix, &x, &y);
+    if (fabs(x) <= fabs(y))
+        dxy->x = 0.0;
+    else
+        dxy->y = 0.0;
 }
 
 static gboolean
