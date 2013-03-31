@@ -469,18 +469,9 @@ invalidate_mark_area(GwyRuler *ruler)
         (gint)ceil(2.0*hs + 2.01),
         (gint)ceil(2.0*hs + 2.01),
     };
-    rect.x = CLAMP(rect.x,
-                   allocation.x, allocation.x + allocation.width);
-    rect.y = CLAMP(rect.y,
-                   allocation.y, allocation.y + allocation.height);
-    rect.width = CLAMP(rect.width,
-                       0, allocation.x + allocation.width - rect.x);
-    rect.height = CLAMP(rect.height,
-                        0, allocation.y + allocation.height - rect.y);
-    if (!rect.width || !rect.height)
-        return;
 
     cairo_region_t *region = cairo_region_create_rectangle(&rect);
+    cairo_region_intersect_rectangle(region, &allocation);
     gtk_widget_queue_draw_region(widget, region);
     cairo_region_destroy(region);
 }
