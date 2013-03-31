@@ -314,7 +314,7 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
             gwy_shapes_stop_updating_selection(shapes);
         }
     }
-    else if (priv->mode == MODE_MOVING) {
+    else if ((priv->mode == MODE_MOVING || priv->mode == MODE_ENDPOINT)) {
         if (!add_shape(shapes, x, y)) {
             priv->new_shape = TRUE;
             priv->clicked = -1;
