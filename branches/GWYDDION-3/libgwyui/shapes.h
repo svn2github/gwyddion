@@ -54,7 +54,7 @@ typedef enum {
 typedef struct _GwyShapes      GwyShapes;
 typedef struct _GwyShapesClass GwyShapesClass;
 
-typedef void (*GwyShapesMarkerFunc)(GwyShapes *shapes,
+typedef void (*GwyShapesMarkerFunc)(const GwyShapes *shapes,
                                     cairo_t *cr,
                                     const gdouble *xy);
 
@@ -127,7 +127,7 @@ struct _GwyShapesClass {
 GType            gwy_shapes_get_type                (void)                                  G_GNUC_CONST;
 void             gwy_shapes_set_coords              (GwyShapes *shapes,
                                                      GwyCoords *coords);
-GwyCoords*       gwy_shapes_get_coords              (GwyShapes *shapes);
+GwyCoords*       gwy_shapes_get_coords              (const GwyShapes *shapes)               G_GNUC_PURE;
 GType            gwy_shapes_class_coords_type       (const GwyShapesClass *klass)           G_GNUC_PURE;
 GType            gwy_shapes_coords_type             (const GwyShapes *shapes)               G_GNUC_PURE;
 void             gwy_shapes_set_coords_matrices     (GwyShapes *shapes,
@@ -187,13 +187,13 @@ const GwyCoords* gwy_shapes_get_starting_coords     (const GwyShapes *shapes)   
 void             gwy_shapes_set_cursor_type         (GwyShapes *shapes,
                                                      GdkCursorType cursortype);
 GdkCursorType    gwy_shapes_get_cursor_type         (const GwyShapes *shapes)               G_GNUC_PURE;
-void             gwy_shapes_stroke                  (GwyShapes *shapes,
+void             gwy_shapes_stroke                  (const GwyShapes *shapes,
                                                      cairo_t *cr,
                                                      GwyShapesStateType state);
 void             gwy_shapes_start_updating_selection(GwyShapes *shapes);
 void             gwy_shapes_stop_updating_selection (GwyShapes *shapes);
 gboolean         gwy_shapes_is_updating_selection   (const GwyShapes *shapes)               G_GNUC_PURE;
-void             gwy_shapes_draw_markers            (GwyShapes *shapes,
+void             gwy_shapes_draw_markers            (const GwyShapes *shapes,
                                                      cairo_t *cr,
                                                      gint hover,
                                                      GwyShapesMarkerFunc function);

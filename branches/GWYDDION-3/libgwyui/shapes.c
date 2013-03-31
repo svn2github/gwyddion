@@ -40,8 +40,6 @@ enum {
 enum {
     SGNL_EDITING_STARTED,
     SGNL_UPDATED,
-    SGNL_COORDS_MATRIX_CHANGED,
-    SGNL_PIXEL_MATRIX_CHANGED,
     N_SIGNALS
 };
 
@@ -468,7 +466,7 @@ gwy_shapes_set_coords(GwyShapes *shapes,
  *          The coordinates object being visualised.
  **/
 GwyCoords*
-gwy_shapes_get_coords(GwyShapes *shapes)
+gwy_shapes_get_coords(const GwyShapes *shapes)
 {
     g_return_val_if_fail(GWY_IS_SHAPES(shapes), NULL);
     return shapes->priv->coords;
@@ -601,10 +599,8 @@ gwy_shapes_set_pixel_matrices(GwyShapes *shapes,
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     if (set_matrices(&shapes->pixel_to_view, &shapes->view_to_pixel,
-                     pixel_to_view, view_to_pixel)) {
-        g_signal_emit(shapes, signals[SGNL_PIXEL_MATRIX_CHANGED], 0);
+                     pixel_to_view, view_to_pixel))
         gwy_shapes_update(shapes);
-    }
 }
 
 /**
@@ -1189,7 +1185,7 @@ gwy_shapes_get_cursor_type(const GwyShapes *shapes)
  * cairo_save()/cairo_restore() if preservation is required.
  **/
 void
-gwy_shapes_stroke(G_GNUC_UNUSED GwyShapes *shapes,
+gwy_shapes_stroke(G_GNUC_UNUSED const GwyShapes *shapes,
                   cairo_t *cr,
                   GwyShapesStateType state)
 {
@@ -1525,7 +1521,8 @@ gwy_shapes_get_starting_coords(const GwyShapes *shapes)
  * Helper method for drawing simple markers for a group of geometrical shapes.
  **/
 void
-gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
+gwy_shapes_draw_markers(const GwyShapes *shapes,
+                        cairo_t *cr,
                         gint hover,
                         GwyShapesMarkerFunc function)
 {
@@ -1533,7 +1530,7 @@ gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
     g_return_if_fail(cr);
     g_return_if_fail(function);
 
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = (coords ? gwy_coords_size(coords) : 0);
     if (!n)
         return;

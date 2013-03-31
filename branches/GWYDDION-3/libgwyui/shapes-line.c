@@ -85,12 +85,12 @@ static gboolean set_thickness                     (GwyShapesLine *lines,
                                                    gdouble thickness);
 static void     draw_lines                        (GwyShapes *shapes,
                                                    cairo_t *cr);
-static void     draw_line                         (GwyShapes *shapes,
+static void     draw_line                         (const GwyShapes *shapes,
                                                    cairo_t *cr,
                                                    const gdouble *xy);
 static void     draw_thicknesses                  (GwyShapes *shapes,
                                                    cairo_t *cr);
-static void     draw_thickness                    (GwyShapes *shapes,
+static void     draw_thickness                    (const GwyShapes *shapes,
                                                    cairo_t *cr,
                                                    const gdouble *xy);
 static gint     find_near_point                   (GwyShapes *shapes,
@@ -213,7 +213,7 @@ static void
 gwy_shapes_line_draw(GwyShapes *shapes,
                      cairo_t *cr)
 {
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     if (!coords || !gwy_coords_size(coords))
         return;
 
@@ -454,7 +454,7 @@ draw_lines(GwyShapes *shapes, cairo_t *cr)
 }
 
 static void
-draw_line(GwyShapes *shapes,
+draw_line(const GwyShapes *shapes,
           cairo_t *cr,
           const gdouble *xy)
 {
@@ -485,7 +485,7 @@ draw_thicknesses(GwyShapes *shapes, cairo_t *cr)
 }
 
 static void
-draw_thickness(GwyShapes *shapes,
+draw_thickness(const GwyShapes *shapes,
                cairo_t *cr,
                const gdouble *xy)
 {
@@ -512,13 +512,13 @@ find_near_point(GwyShapes *shapes,
                 gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
-    gdouble xy[4];
 
     for (guint i = 0; i < n; i++) {
+        gdouble xy[4];
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
@@ -547,13 +547,13 @@ find_near_line(GwyShapes *shapes,
                gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
-    gdouble xy[4];
 
     for (guint i = 0; i < n; i++) {
+        gdouble xy[4];
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
@@ -573,7 +573,10 @@ find_near_line(GwyShapes *shapes,
     /* we always have our favourite endpoint, even when moving the entire
      * line, it determines snapping */
     if (mini >= 0) {
-        guint i = mini;
+        gdouble xy[4];
+        gwy_coords_get(coords, mini, xy);
+        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
+        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
         gdouble dxf = xy[0] - x, dyf = xy[1] - y,
                 dxt = xy[2] - x, dyt = xy[3] - y;
         mini = 2*mini + (dxf*dxf + dyf*dyf > dxt*dxt + dyt*dyt);

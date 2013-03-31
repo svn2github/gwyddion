@@ -81,12 +81,12 @@ static gboolean set_radius                         (GwyShapesPoint *points,
                                                     gdouble radius);
 static void     draw_crosses                       (GwyShapes *shapes,
                                                     cairo_t *cr);
-static void     draw_cross                         (GwyShapes *shapes,
+static void     draw_cross                         (const GwyShapes *shapes,
                                                     cairo_t *cr,
                                                     const gdouble *xy);
 static void     draw_radii                         (GwyShapes *shapes,
                                                     cairo_t *cr);
-static void     draw_radius                        (GwyShapes *shapes,
+static void     draw_radius                        (const GwyShapes *shapes,
                                                     cairo_t *cr,
                                                     const gdouble *xy);
 static gint     find_near_point                    (GwyShapes *shapes,
@@ -196,7 +196,7 @@ static void
 gwy_shapes_point_draw(GwyShapes *shapes,
                       cairo_t *cr)
 {
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     if (!coords || !gwy_coords_size(coords))
         return;
 
@@ -410,7 +410,7 @@ draw_crosses(GwyShapes *shapes, cairo_t *cr)
 }
 
 static void
-draw_cross(GwyShapes *shapes,
+draw_cross(const GwyShapes *shapes,
            cairo_t *cr,
            const gdouble *xy)
 {
@@ -436,7 +436,7 @@ draw_radii(GwyShapes *shapes, cairo_t *cr)
 }
 
 static void
-draw_radius(GwyShapes *shapes,
+draw_radius(const GwyShapes *shapes,
             cairo_t *cr,
             const gdouble *xy)
 {
@@ -451,13 +451,13 @@ find_near_point(GwyShapes *shapes,
                 gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
-    gdouble xy[2];
 
     for (guint i = 0; i < n; i++) {
+        gdouble xy[2];
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         gdouble xd = x - xy[0];
