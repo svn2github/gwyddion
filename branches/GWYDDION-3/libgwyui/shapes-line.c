@@ -554,29 +554,13 @@ find_near_line(GwyShapes *shapes,
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
-
-        gdouble xf = xy[0], yf = xy[1], xt = xy[2], yt = xy[3];
-        gdouble lx = xt - xf, ly = yt - yf, l2 = lx*lx + ly*ly;
-        if (!l2 || lx*(x - xt) > ly*(yt - y) || lx*(x - xf) < ly*(yf - y))
-            continue;
-        gdouble dist2 = x*ly - y*lx + xt*yf - xf*yt;
-        dist2 *= dist2/l2;
+        guint endpoint;
+        gdouble dist2 = gwy_line_point_distance2(xy[0], xy[1], xy[2], xy[3],
+                                                 x, y, &endpoint);
         if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
-            mini = i;
+            mini = 2*i + endpoint;
         }
-    }
-
-    /* we always have our favourite endpoint, even when moving the entire
-     * line, it determines snapping */
-    if (mini >= 0) {
-        gdouble xy[4];
-        gwy_coords_get(coords, mini, xy);
-        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
-        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
-        gdouble dxf = xy[0] - x, dyf = xy[1] - y,
-                dxt = xy[2] - x, dyt = xy[3] - y;
-        mini = 2*mini + (dxf*dxf + dyf*dyf > dxt*dxt + dyt*dyt);
     }
 
     return mini;
