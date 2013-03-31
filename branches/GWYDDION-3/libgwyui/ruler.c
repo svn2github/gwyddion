@@ -411,6 +411,8 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
 
     GwyAxis *axis = GWY_AXIS(ruler);
     GtkPositionType edge = gwy_axis_get_edge(axis);
+    guint nticks;
+    gwy_axis_ticks(axis, &nticks);
     gdouble x = gwy_axis_value_to_position(axis, priv->mark),
             hs = 0.2*breadth, y = hs;
     if (x < -hs || x > length + hs)

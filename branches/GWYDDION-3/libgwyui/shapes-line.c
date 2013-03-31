@@ -217,7 +217,6 @@ gwy_shapes_line_draw(GwyShapes *shapes,
     if (!coords || !gwy_coords_size(coords))
         return;
 
-    g_printerr("DRAW %u\n", gwy_coords_size(coords));
     draw_lines(shapes, cr);
     draw_thicknesses(shapes, cr);
 }
@@ -232,11 +231,9 @@ gwy_shapes_line_motion_notify(GwyShapes *shapes,
         return FALSE;
 
     if (priv->clicked == -1) {
-        g_printerr("UPDATE HOVER %g %g\n", event->x, event->y);
         update_hover(shapes, event->x, event->y);
         return FALSE;
     }
-    g_printerr("!!!\n");
 
     if (priv->mode == MODE_SELECTING) {
         priv->mode = MODE_RUBBERBAND;
@@ -774,10 +771,8 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     gboolean entire_shape = (gwy_int_set_size(shapes->selection) > 1);
     gint i = -1;
 
-    g_printerr("HOVER %g %g\n", eventx, eventy);
     gdouble x = eventx, y = eventy;
     cairo_matrix_transform_point(&shapes->view_to_coords, &x, &y);
-    g_printerr("HOVER COORDS %g %g\n", x, y);
 
     if (isfinite(eventx) && isfinite(eventy)) {
         if (!entire_shape
@@ -794,7 +789,6 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     if (priv->hover == i && priv->entire_shape == entire_shape)
         return;
 
-    g_printerr("!!!\n");
     gboolean do_update = priv->hover != i;
     priv->entire_shape = entire_shape;
     priv->endpoint = endpoint;

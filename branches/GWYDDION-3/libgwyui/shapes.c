@@ -991,7 +991,6 @@ gwy_shapes_update(GwyShapes *shapes)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     Shapes *priv = shapes->priv;
-    g_printerr("??? %d\n", priv->is_updated);
     if (priv->is_updated)
         return;
 

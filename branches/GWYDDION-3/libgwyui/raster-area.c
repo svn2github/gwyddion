@@ -1536,8 +1536,11 @@ gwy_raster_area_size_allocate(GtkWidget *widget,
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     RasterArea *priv = rasterarea->priv;
 
+    if (gwy_equal(allocation, &prev_allocation))
+        return;
+
     // XXX: The input window can be smaller.  Does it matter?
-    if (!gwy_equal(allocation, &prev_allocation) && priv->window) {
+    if (priv->window) {
         gdk_window_move_resize(priv->window,
                                allocation->x, allocation->y,
                                allocation->width, allocation->height);
@@ -2178,7 +2181,6 @@ gwy_raster_area_draw(GtkWidget *widget,
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     RasterArea *priv = rasterarea->priv;
 
-    g_printerr("###\n");
     if (!priv->field)
         return FALSE;
 
@@ -2636,7 +2638,6 @@ shapes_updated(GwyRasterArea *rasterarea,
                GwyShapes *shapes)
 {
     RasterArea *priv = rasterarea->priv;
-    g_printerr("SHAPES UPDATED (%u)\n", gwy_coords_size(gwy_shapes_get_coords(shapes)));
     if (!priv->scroll_timer_hid) {
         if (scroll_to_current_point(rasterarea, shapes)) {
             priv->scroll_timer_hid = g_timeout_add(50, &enable_scrolling_again,
