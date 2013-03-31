@@ -40,6 +40,8 @@ enum {
 enum {
     SGNL_EDITING_STARTED,
     SGNL_UPDATED,
+    SGNL_COORDS_MATRIX_CHANGED,
+    SGNL_PIXEL_MATRIX_CHANGED,
     N_SIGNALS
 };
 
@@ -599,8 +601,10 @@ gwy_shapes_set_pixel_matrices(GwyShapes *shapes,
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     if (set_matrices(&shapes->pixel_to_view, &shapes->view_to_pixel,
-                     pixel_to_view, view_to_pixel))
+                     pixel_to_view, view_to_pixel)) {
+        g_signal_emit(shapes, signals[SGNL_PIXEL_MATRIX_CHANGED], 0);
         gwy_shapes_update(shapes);
+    }
 }
 
 /**
@@ -991,6 +995,7 @@ gwy_shapes_update(GwyShapes *shapes)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     Shapes *priv = shapes->priv;
+    g_printerr("??? %d\n", priv->is_updated);
     if (priv->is_updated)
         return;
 
@@ -1514,27 +1519,23 @@ gwy_shapes_get_starting_coords(const GwyShapes *shapes)
  * gwy_shapes_draw_markers:
  * @shapes: A group of geometrical shapes.
  * @cr: A Cairo context to draw to.
- * @data: Coordinate data, it is assumed to consists of @shape_size-sized
- *        chunks.  The number of chunks is the same as the number of shapes
- *        in @shapes.
  * @hover: Index of shape to draw with hover highlighting, pass -1 for none.
  * @function: Marker drawing function.
- * @user_data: User data passed to @function.
  *
  * Helper method for drawing simple markers for a group of geometrical shapes.
  **/
 void
 gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
-                        const gdouble *data, gint hover,
-                        GwyShapesMarkerFunc function, gpointer user_data)
+                        gint hover,
+                        GwyShapesMarkerFunc function)
 {
     g_return_if_fail(GWY_IS_SHAPES(shapes));
     g_return_if_fail(cr);
+    g_return_if_fail(function);
 
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = (coords ? gwy_coords_size(coords) : 0);
-    g_return_if_fail(!n || data);
-    if (!n || !function)
+    if (!n)
         return;
 
     guint shape_size = gwy_coords_shape_size(coords);
@@ -1544,7 +1545,9 @@ gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
 
     for (gint i = 0; (guint)i < n; i++) {
         if (i != hover && !gwy_int_set_contains(selection, i)) {
-            function(cr, data + shape_size*i, user_data);
+            gdouble xy[shape_size];
+            gwy_coords_get(coords, i, xy);
+            function(shapes, cr, xy);
             count++;
         }
     }
@@ -1559,7 +1562,9 @@ gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
             if (iter.value == hover)
                 hoverselected = TRUE;
             else {
-                function(cr, data + shape_size*iter.value, user_data);
+                gdouble xy[shape_size];
+                gwy_coords_get(coords, iter.value, xy);
+                function(shapes, cr, xy);
                 count++;
             }
         } while (gwy_int_set_next(selection, &iter));
@@ -1574,7 +1579,9 @@ gwy_shapes_draw_markers(GwyShapes *shapes, cairo_t *cr,
         GwyShapesStateType state = GWY_SHAPES_STATE_PRELIGHT;
         if (hoverselected)
             state |= GWY_SHAPES_STATE_SELECTED;
-        function(cr, data + shape_size*hover, user_data);
+        gdouble xy[shape_size];
+        gwy_coords_get(coords, hover, xy);
+        function(shapes, cr, xy);
         gwy_shapes_stroke(shapes, cr, state);
     }
 }
@@ -1834,11 +1841,14 @@ selection_assigned(GwyShapes *shapes,
 
 /**
  * GwyShapesMarkerFunc:
+ * @shapes: A group of geometrical shapes.
  * @cr: A Cairo context to draw to.
  * @xy: Chunk of coordinates of @shape_size size.
- * @user_data: User data given in gwy_shapes_draw_markers().
  *
  * Type of shape marker drawing function.
+ *
+ * It gets passed the @coords coordinates of individual shapes, as appropriate
+ * for the selection and hover.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -42,17 +42,11 @@ typedef enum {
     MODE_RUBBERBAND,
 } InteractMode;
 
-typedef void (*MarkerDrawFunc)(cairo_t *cr,
-                               const gdouble *xy,
-                               gpointer user_data);
-
 typedef struct _GwyShapesLinePrivate ShapesLine;
 
 struct _GwyShapesLinePrivate {
     gdouble thickness;
-    // Cached data in view coordinates.  May not correspond to @coords if they
-    // are changed simultaneously from more sources.
-    GArray *data;
+    gdouble tx, ty;
 
     gint hover;
     gint clicked;
@@ -63,7 +57,6 @@ struct _GwyShapesLinePrivate {
     gboolean new_shape : 1;
 };
 
-static void     gwy_shapes_line_finalize          (GObject *object);
 static void     gwy_shapes_line_set_property      (GObject *object,
                                                    guint prop_id,
                                                    const GValue *value,
@@ -90,21 +83,20 @@ static void     gwy_shapes_line_selection_removed (GwyShapes *shapes,
 static void     gwy_shapes_line_selection_assigned(GwyShapes *shapes);
 static gboolean set_thickness                     (GwyShapesLine *lines,
                                                    gdouble thickness);
-static void     calculate_data                    (GwyShapesLine *lines);
-static void     draw_lines                        (GwyShapesLine *lines,
+static void     draw_lines                        (GwyShapes *shapes,
                                                    cairo_t *cr);
-static void     draw_line                         (cairo_t *cr,
-                                                   const gdouble *xy,
-                                                   gpointer user_data);
-static void     draw_thicknesses                  (GwyShapesLine *lines,
+static void     draw_line                         (GwyShapes *shapes,
+                                                   cairo_t *cr,
+                                                   const gdouble *xy);
+static void     draw_thicknesses                  (GwyShapes *shapes,
                                                    cairo_t *cr);
-static void     draw_thickness                    (cairo_t *cr,
-                                                   const gdouble *xy,
-                                                   gpointer user_data);
-static gint     find_near_point                   (GwyShapesLine *lines,
+static void     draw_thickness                    (GwyShapes *shapes,
+                                                   cairo_t *cr,
+                                                   const gdouble *xy);
+static gint     find_near_point                   (GwyShapes *shapes,
                                                    gdouble x,
                                                    gdouble y);
-static gint     find_near_line                    (GwyShapesLine *lines,
+static gint     find_near_line                    (GwyShapes *shapes,
                                                    gdouble x,
                                                    gdouble y);
 static void     constrain_movement                (GwyShapes *shapes,
@@ -131,6 +123,7 @@ static void     update_hover                      (GwyShapes *shapes,
 static gboolean snap_point                        (GwyShapes *shapes,
                                                    gdouble *x,
                                                    gdouble *y);
+static void     remove_null_shape                 (GwyShapes *shapes);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -144,7 +137,6 @@ gwy_shapes_line_class_init(GwyShapesLineClass *klass)
 
     g_type_class_add_private(klass, sizeof(ShapesLine));
 
-    gobject_class->finalize = gwy_shapes_line_finalize;
     gobject_class->get_property = gwy_shapes_line_get_property;
     gobject_class->set_property = gwy_shapes_line_set_property;
 
@@ -168,17 +160,6 @@ gwy_shapes_line_class_init(GwyShapesLineClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
-}
-
-static void
-gwy_shapes_line_finalize(GObject *object)
-{
-    GwyShapesLine *lines = GWY_SHAPES_LINE(object);
-    ShapesLine *priv = lines->priv;
-    if (priv->data) {
-        g_array_free(priv->data, TRUE);
-        priv->data = NULL;
-    }
 }
 
 static void
@@ -236,10 +217,9 @@ gwy_shapes_line_draw(GwyShapes *shapes,
     if (!coords || !gwy_coords_size(coords))
         return;
 
-    GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
-    calculate_data(lines);
-    draw_lines(lines, cr);
-    draw_thicknesses(lines, cr);
+    g_printerr("DRAW %u\n", gwy_coords_size(coords));
+    draw_lines(shapes, cr);
+    draw_thicknesses(shapes, cr);
 }
 
 static gboolean
@@ -248,13 +228,15 @@ gwy_shapes_line_motion_notify(GwyShapes *shapes,
 {
     ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     // FIXME: Change once we implement MODE_RUBBERBAND
-    if (!priv->data || priv->mode == MODE_RUBBERBAND)
+    if (priv->mode == MODE_RUBBERBAND)
         return FALSE;
 
     if (priv->clicked == -1) {
+        g_printerr("UPDATE HOVER %g %g\n", event->x, event->y);
         update_hover(shapes, event->x, event->y);
         return FALSE;
     }
+    g_printerr("!!!\n");
 
     if (priv->mode == MODE_SELECTING) {
         priv->mode = MODE_RUBBERBAND;
@@ -316,7 +298,6 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
     }
     else if ((priv->mode == MODE_MOVING || priv->mode == MODE_ENDPOINT)) {
         if (!add_shape(shapes, x, y)) {
-            priv->new_shape = TRUE;
             priv->clicked = -1;
             return FALSE;
         }
@@ -339,15 +320,22 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         return FALSE;
     }
 
+    gboolean emit_finished = TRUE;
     if (!gwy_shapes_has_moved(shapes)) {
         GwyIntSet *selection = shapes->selection;
 
+        emit_finished = priv->new_shape;
         gwy_shapes_start_updating_selection(shapes);
         if (priv->mode == MODE_SELECTING)
             gwy_int_set_toggle(selection, priv->clicked);
         else if (priv->mode == MODE_MOVING)
             gwy_int_set_update(selection, &priv->clicked, 1);
+        else if (priv->mode == MODE_ENDPOINT && !priv->new_shape)
+            gwy_int_set_update(selection, &priv->clicked, 1);
         gwy_shapes_stop_updating_selection(shapes);
+
+        if (priv->mode == MODE_ENDPOINT && priv->new_shape)
+            gwy_coords_delete(gwy_shapes_get_coords(shapes), priv->clicked);
 
         // FIXME: May not be necessary if we respond to the selection signals.
         gwy_shapes_update(shapes);
@@ -357,19 +345,16 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         gwy_shapes_check_movement(shapes, &xy, &dxy);
         constrain_movement(shapes, event->state, &dxy);
         gwy_shapes_move(shapes, &dxy);
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
     else if (priv->mode == MODE_ENDPOINT) {
         GwyXY xy = { event->x, event->y }, dxy;
         gwy_shapes_check_movement(shapes, &xy, &dxy);
         move_endpoint(shapes, event->state, &dxy);
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
+        remove_null_shape(shapes);
     }
 
-    // TODO: in MODE_ENDPOINT, if we created a zero-length line (either by
-    // editing or by not moving at all), discard it.  There will be some
-    // convoluted logic whether to call gwy_coords_finished() -- we need to
-    // avoid it only if the line is not new and has not moved at all.
+    if (emit_finished)
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
 
     gwy_shapes_unset_current_point(shapes);
     priv->clicked = -1;
@@ -447,7 +432,7 @@ gwy_shapes_line_new(void)
 
 static gboolean
 set_thickness(GwyShapesLine *lines,
-           gdouble thickness)
+              gdouble thickness)
 {
     ShapesLine *priv = lines->priv;
     if (thickness == priv->thickness)
@@ -458,101 +443,98 @@ set_thickness(GwyShapesLine *lines,
     return TRUE;
 }
 
-// FIXME: May be common.
 static void
-calculate_data(GwyShapesLine *lines)
+draw_lines(GwyShapes *shapes, cairo_t *cr)
 {
-    ShapesLine *priv = lines->priv;
-    GwyShapes *shapes = GWY_SHAPES(lines);
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint shape_size = gwy_coords_shape_size(coords);
-    guint n = gwy_coords_size(coords);
-    guint ncoord = n*shape_size;
-    if (!priv->data)
-        priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), ncoord);
-    g_array_set_size(priv->data, ncoord);
+    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
+    cairo_save(cr);
+    cairo_set_line_width(cr, 1.0);
+    gwy_shapes_draw_markers(shapes, cr, priv->hover, &draw_line);
+    cairo_restore(cr);
+}
+
+static void
+draw_line(GwyShapes *shapes,
+          cairo_t *cr,
+          const gdouble *xy)
+{
+    gdouble x = xy[0], y = xy[1];
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    gdouble *data = (gdouble*)priv->data->data;
-    gwy_coords_get_data(coords, data);
-    for (guint i = 0; i < ncoord/2; i++)
-        cairo_matrix_transform_point(matrix, data + 2*i, data + 2*i + 1);
+    cairo_matrix_transform_point(matrix, &x, &y);
+    cairo_move_to(cr, x, y);
+    x = xy[2];
+    y = xy[3];
+    cairo_matrix_transform_point(matrix, &x, &y);
+    cairo_line_to(cr, x, y);
 }
 
 static void
-draw_lines(GwyShapesLine *lines, cairo_t *cr)
+draw_thicknesses(GwyShapes *shapes, cairo_t *cr)
 {
-    cairo_save(cr);
-    cairo_set_line_width(cr, 1.0);
-    ShapesLine *priv = lines->priv;
-    gwy_shapes_draw_markers(GWY_SHAPES(lines), cr,
-                            (const gdouble*)priv->data->data, priv->hover,
-                            &draw_line, NULL);
-    cairo_restore(cr);
-}
-
-static void
-draw_line(cairo_t *cr,
-          const gdouble *xy,
-          G_GNUC_UNUSED gpointer user_data)
-{
-    cairo_move_to(cr, xy[0], xy[1]);
-    cairo_line_to(cr, xy[2], xy[3]);
-}
-
-static void
-draw_thicknesses(GwyShapesLine *lines, cairo_t *cr)
-{
-    ShapesLine *priv = lines->priv;
-    gdouble thicknesses[2] = { priv->thickness, priv->thickness };
-    const cairo_matrix_t *matrix = &GWY_SHAPES(lines)->pixel_to_view;
-    cairo_matrix_transform_distance(matrix, thicknesses+0, thicknesses+1);
-    cairo_save(cr);
-    cairo_set_line_width(cr, 1.0);
-    gwy_shapes_draw_markers(GWY_SHAPES(lines), cr,
-                            (const gdouble*)priv->data->data, priv->hover,
-                            &draw_thickness, thicknesses);
-    cairo_restore(cr);
-}
-
-static void
-draw_thickness(cairo_t *cr,
-               const gdouble *xy,
-               gpointer user_data)
-{
-    const gdouble *thicknesses = (const gdouble*)user_data;
-    gdouble vx = xy[2] - xy[0], vy = xy[3] - xy[1];
-    if (!vx && !vy)
+    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
+    if (!priv->thickness)
         return;
 
-    gdouble v = hypot(vx, vy), cosphi = vx/v, sinphi = vy/v;
-    cairo_move_to(cr,
-                  xy[0] - sinphi*thicknesses[0], xy[1] + cosphi*thicknesses[1]);
-    cairo_line_to(cr,
-                  xy[0] + sinphi*thicknesses[0], xy[1] - cosphi*thicknesses[1]);
-    cairo_move_to(cr,
-                  xy[2] - sinphi*thicknesses[0], xy[3] + cosphi*thicknesses[1]);
-    cairo_line_to(cr,
-                  xy[2] + sinphi*thicknesses[0], xy[3] - cosphi*thicknesses[1]);
+    priv->tx = priv->ty = priv->thickness;
+    cairo_matrix_transform_distance(&shapes->pixel_to_view,
+                                    &priv->tx, &priv->ty);
+    cairo_save(cr);
+    cairo_set_line_width(cr, 1.0);
+    gwy_shapes_draw_markers(shapes, cr, priv->hover, &draw_thickness);
+    cairo_restore(cr);
+}
+
+static void
+draw_thickness(GwyShapes *shapes,
+               cairo_t *cr,
+               const gdouble *xy)
+{
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    gdouble xf = xy[0], yf = xy[1], xt = xy[2], yt = xy[3];
+    cairo_matrix_transform_point(matrix, &xf, &yf);
+    cairo_matrix_transform_point(matrix, &xt, &yt);
+    gdouble lx = xt - xf, ly = yt - yf;
+    if (!lx && !ly)
+        return;
+
+    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
+    gdouble l = hypot(lx, ly), cosphi = lx/l, sinphi = ly/l;
+    cairo_move_to(cr, xf - sinphi*priv->tx, yf + cosphi*priv->ty);
+    cairo_line_to(cr, xf + sinphi*priv->tx, yf - cosphi*priv->ty);
+    cairo_move_to(cr, xt - sinphi*priv->tx, yt + cosphi*priv->ty);
+    cairo_line_to(cr, xt + sinphi*priv->tx, yt - cosphi*priv->ty);
 }
 
 // FIXME: The same as in ShapesLine, just for both endpoints.
 /* returns the index of endpoint, not line */
 static gint
-find_near_point(GwyShapesLine *lines,
+find_near_point(GwyShapes *shapes,
                 gdouble x, gdouble y)
 {
-    ShapesLine *priv = lines->priv;
-    guint n = priv->data->len/2;
-    const gdouble *data = (const gdouble*)priv->data->data;
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
+    gdouble xy[4];
 
     for (guint i = 0; i < n; i++) {
-        gdouble xd = x - data[2*i], yd = y - data[2*i + 1];
+        gwy_coords_get(coords, i, xy);
+        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
+        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
+        gdouble xd = x - xy[0];
+        gdouble yd = y - xy[1];
         gdouble dist2 = xd*xd + yd*yd;
         if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
-            mini = i;
+            mini = 2*i;
+        }
+        xd = x - xy[2];
+        yd = y - xy[3];
+        dist2 = xd*xd + yd*yd;
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 2*i + 1;
         }
     }
 
@@ -561,25 +543,27 @@ find_near_point(GwyShapesLine *lines,
 
 /* returns the index of endpoint, not line */
 static gint
-find_near_line(GwyShapesLine *lines,
+find_near_line(GwyShapes *shapes,
                gdouble x, gdouble y)
 {
-    ShapesLine *priv = lines->priv;
-    guint n = priv->data->len/4;
-    const gdouble *data = (const gdouble*)priv->data->data;
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
+    gdouble xy[4];
 
     for (guint i = 0; i < n; i++) {
-        gdouble xf = data[4*i], yf = data[4*i + 1],
-                xt = data[4*i + 2], yt = data[4*i + 3];
-        gdouble vx = xt - xf, vy = yt - yf, v2 = vx*vx + vy*vy;
-        if (!v2
-            || vx*(x - xt) > vy*(yt - y)
-            || vx*(x - xf) < vy*(yf - y))
+        gwy_coords_get(coords, i, xy);
+        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
+        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
+
+        gdouble xf = xy[0], yf = xy[1], xt = xy[2], yt = xy[3];
+        gdouble lx = xt - xf, ly = yt - yf, l2 = lx*lx + ly*ly;
+        if (!l2 || lx*(x - xt) > ly*(yt - y) || lx*(x - xf) < ly*(yf - y))
             continue;
-        gdouble dist2 = x*vy - y*vx + xt*yf - xf*yt;
-        dist2 *= dist2/v2;
+        gdouble dist2 = x*ly - y*lx + xt*yf - xf*yt;
+        dist2 *= dist2/l2;
         if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
             mini = i;
@@ -590,8 +574,8 @@ find_near_line(GwyShapesLine *lines,
      * line, it determines snapping */
     if (mini >= 0) {
         guint i = mini;
-        gdouble dxf = data[4*i] - x, dyf = data[4*i + 1] - y,
-                dxt = data[4*i + 2] - x, dyt = data[4*i + 3] - y;
+        gdouble dxf = xy[0] - x, dyf = xy[1] - y,
+                dxt = xy[2] - x, dyt = xy[3] - y;
         mini = 2*mini + (dxf*dxf + dyf*dyf > dxt*dxt + dyt*dyt);
     }
 
@@ -742,8 +726,8 @@ calc_constrained_bbox(GwyShapes *shapes,
         return;
 
     gdouble hx = 0.999999, hy = 0.999999;
-    const cairo_matrix_t *matrix = &shapes->pixel_to_view;
-    cairo_matrix_transform_distance(matrix, &hx, &hy);
+    cairo_matrix_transform_distance(&shapes->pixel_to_view, &hx, &hy);
+    cairo_matrix_transform_distance(&shapes->view_to_coords, &hx, &hy);
     bbox->x += 0.5*hx;
     bbox->y += 0.5*hy;
     bbox->width -= hx;
@@ -772,6 +756,7 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
     priv->mode = MODE_ENDPOINT;
     priv->endpoint = 1;
     priv->entire_shape = FALSE;
+    priv->new_shape = TRUE;
     priv->hover = priv->clicked = n;
     priv->selection_index = 0;
     gwy_coords_set(coords, priv->clicked, xy);
@@ -781,19 +766,23 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 static void
 update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 {
-    GwyShapesLine *lines = GWY_SHAPES_LINE(shapes);
-    ShapesLine *priv = lines->priv;
+    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     guint endpoint = G_MAXUINT;
     gboolean entire_shape = (gwy_int_set_size(shapes->selection) > 1);
     gint i = -1;
 
+    g_printerr("HOVER %g %g\n", eventx, eventy);
+    gdouble x = eventx, y = eventy;
+    cairo_matrix_transform_point(&shapes->view_to_coords, &x, &y);
+    g_printerr("HOVER COORDS %g %g\n", x, y);
+
     if (isfinite(eventx) && isfinite(eventy)) {
         if (!entire_shape
-            && (i = find_near_point(lines, eventx, eventy)) >= 0) {
+            && (i = find_near_point(shapes, eventx, eventy)) >= 0) {
             endpoint = i % 2;
             i /= 2;
         }
-        else if ((i = find_near_line(lines, eventx, eventy)) >= 0) {
+        else if ((i = find_near_line(shapes, eventx, eventy)) >= 0) {
             endpoint = i % 2;
             entire_shape = TRUE;
             i /= 2;
@@ -802,6 +791,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     if (priv->hover == i && priv->entire_shape == entire_shape)
         return;
 
+    g_printerr("!!!\n");
     gboolean do_update = priv->hover != i;
     priv->entire_shape = entire_shape;
     priv->endpoint = endpoint;
@@ -834,6 +824,24 @@ snap_point(GwyShapes *shapes,
     cairo_matrix_transform_point(&shapes->pixel_to_view, x, y);
     cairo_matrix_transform_point(&shapes->view_to_coords, x, y);
     return TRUE;
+}
+
+static void
+remove_null_shape(GwyShapes *shapes)
+{
+    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    gdouble xy[4];
+    guint clicked = priv->clicked;
+    gwy_coords_get(coords, clicked, xy);
+    gdouble lx = xy[2] - xy[0], ly = xy[3] - xy[1];
+    cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
+    cairo_matrix_transform_distance(&shapes->view_to_pixel, &lx, &ly);
+    if (lx*lx + ly*ly >= 0.2)
+        return;
+
+    gwy_coords_delete(coords, clicked);
+    gwy_shapes_update(shapes);
 }
 
 /**

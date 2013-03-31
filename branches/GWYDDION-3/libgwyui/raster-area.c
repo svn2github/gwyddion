@@ -78,6 +78,8 @@ struct _GwyRasterAreaPrivate {
     guint hscroll_policy;
     guint vscroll_policy;
 
+    GdkEventMotion *motion_event;
+
     // Coordinate ranges and transforms
     gdouble zoom;
     gboolean real_aspect_ratio;
@@ -1495,6 +1497,10 @@ gwy_raster_area_unmap(GtkWidget *widget)
         g_source_remove(priv->scroll_timer_hid);
         priv->scroll_timer_hid = 0;
     }
+    if (priv->motion_event) {
+        gdk_event_free((GdkEvent*)priv->motion_event);
+        priv->motion_event = NULL;
+    }
     GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->unmap(widget);
 }
 
@@ -1555,6 +1561,14 @@ gwy_raster_area_motion_notify(GtkWidget *widget,
     RasterArea *priv = rasterarea->priv;
     GwyField *field = priv->field;
     GwyMaskField *mask = priv->mask;
+
+    if (!event->send_event) {
+        if (priv->motion_event)
+            gdk_event_free((GdkEvent*)priv->motion_event);
+        priv->motion_event = (GdkEventMotion*)gdk_event_copy((GdkEvent*)event);
+        priv->motion_event->time = GDK_CURRENT_TIME;
+        priv->motion_event->send_event = TRUE;
+    }
 
     if (priv->shapes)
         gwy_shapes_motion_notify(priv->shapes, event);
@@ -1746,9 +1760,9 @@ gwy_raster_area_zoom(GwyRasterArea *rasterarea,
                      GwyZoomType zoomtype)
 {
     static const gdouble zoom_values[] = {
-        0.0625, 0.0833333333333333, 0.1, 0.125, 0.166666666666667, 0.25,
-        0.333333333333333, 0.5, 0.666666666666667, 1.0, 1.5, 2.0, 3.0,
-        4.0, 6.0, 8.0, 10.0, 12.0, 16.0
+        0.03125, 1.0/24.0, 0.0625, 1.0/12.0, 0.1, 0.125, 1.0/6.0, 0.25,
+        1.0/3.0, 0.5, 2.0/3.0, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0,
+        16.0, 24.0, 32.0,
     };
 
     RasterArea *priv = rasterarea->priv;
@@ -2164,6 +2178,7 @@ gwy_raster_area_draw(GtkWidget *widget,
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     RasterArea *priv = rasterarea->priv;
 
+    g_printerr("###\n");
     if (!priv->field)
         return FALSE;
 
@@ -2621,6 +2636,7 @@ shapes_updated(GwyRasterArea *rasterarea,
                GwyShapes *shapes)
 {
     RasterArea *priv = rasterarea->priv;
+    g_printerr("SHAPES UPDATED (%u)\n", gwy_coords_size(gwy_shapes_get_coords(shapes)));
     if (!priv->scroll_timer_hid) {
         if (scroll_to_current_point(rasterarea, shapes)) {
             priv->scroll_timer_hid = g_timeout_add(50, &enable_scrolling_again,
@@ -2763,7 +2779,13 @@ adjustment_value_changed(GwyRasterArea *rasterarea)
     rasterarea->priv->field_surface_valid = FALSE;
     rasterarea->priv->mask_surface_valid = FALSE;
     calculate_position_and_size(rasterarea);
-    gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
+    GtkWidget *widget = GTK_WIDGET(rasterarea);
+    RasterArea *priv = rasterarea->priv;
+    if (priv->motion_event) {
+        gdk_display_put_event(gtk_widget_get_display(widget),
+                              (GdkEvent*)priv->motion_event);
+    }
+    gtk_widget_queue_draw(widget);
 }
 
 // When we set adjustments we need to emit notifications after

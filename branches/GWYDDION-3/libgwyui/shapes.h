@@ -38,10 +38,6 @@ typedef enum {
     GWY_COORD_SCALE_PIXEL,
 } GwyCoordScaleType;
 
-typedef void (*GwyShapesMarkerFunc)(cairo_t *cr,
-                                    const gdouble *xy,
-                                    gpointer user_data);
-
 #define GWY_TYPE_SHAPES \
     (gwy_shapes_get_type())
 #define GWY_SHAPES(obj) \
@@ -57,6 +53,10 @@ typedef void (*GwyShapesMarkerFunc)(cairo_t *cr,
 
 typedef struct _GwyShapes      GwyShapes;
 typedef struct _GwyShapesClass GwyShapesClass;
+
+typedef void (*GwyShapesMarkerFunc)(GwyShapes *shapes,
+                                    cairo_t *cr,
+                                    const gdouble *xy);
 
 struct _GwyShapes {
     GInitiallyUnowned unowned;
@@ -101,6 +101,8 @@ struct _GwyShapesClass {
     void (*reseved4)(void);
     void (*reseved5)(void);
     void (*reseved6)(void);
+    void (*reseved7)(void);
+    void (*reseved8)(void);
     /*<public>*/
     gboolean (*button_press)(GwyShapes *shapes,
                              GdkEventButton *event);
@@ -193,10 +195,8 @@ void             gwy_shapes_stop_updating_selection (GwyShapes *shapes);
 gboolean         gwy_shapes_is_updating_selection   (const GwyShapes *shapes)               G_GNUC_PURE;
 void             gwy_shapes_draw_markers            (GwyShapes *shapes,
                                                      cairo_t *cr,
-                                                     const gdouble *data,
                                                      gint hover,
-                                                     GwyShapesMarkerFunc function,
-                                                     gpointer user_data);
+                                                     GwyShapesMarkerFunc function);
 
 G_END_DECLS
 

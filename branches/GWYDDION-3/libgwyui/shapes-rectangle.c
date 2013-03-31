@@ -53,10 +53,6 @@ typedef struct _GwyShapesRectanglePrivate ShapesRectangle;
  * so the high bit chooses vertical line, the low bit horizontal line.
  */
 struct _GwyShapesRectanglePrivate {
-    // Cached data in view coordinates.  May not correspond to @coords if they
-    // are changed simultaneously from more sources.
-    GArray *data;
-
     gint hover;
     gint clicked;
     guint selection_index;  // within the reduced set of orig coordinates
@@ -66,7 +62,6 @@ struct _GwyShapesRectanglePrivate {
     gboolean new_shape : 1;
 };
 
-static void     gwy_shapes_rectangle_finalize          (GObject *object);
 static void     gwy_shapes_rectangle_set_property      (GObject *object,
                                                         guint prop_id,
                                                         const GValue *value,
@@ -91,16 +86,15 @@ static void     gwy_shapes_rectangle_selection_added   (GwyShapes *shapes,
 static void     gwy_shapes_rectangle_selection_removed (GwyShapes *shapes,
                                                         gint value);
 static void     gwy_shapes_rectangle_selection_assigned(GwyShapes *shapes);
-static void     calculate_data                         (GwyShapesRectangle *rectangles);
-static void     draw_rectangles                        (GwyShapesRectangle *rectangles,
+static void     draw_rectangles                        (GwyShapes *shapes,
                                                         cairo_t *cr);
-static void     draw_rectangle                         (cairo_t *cr,
-                                                        const gdouble *xy,
-                                                        gpointer user_data);
-static gint     find_near_point                        (GwyShapesRectangle *rectangles,
+static void     draw_rectangle                         (GwyShapes *shapes,
+                                                        cairo_t *cr,
+                                                        const gdouble *xy);
+static gint     find_near_corner                       (GwyShapes *shapes,
                                                         gdouble x,
                                                         gdouble y);
-static gint     find_near_rectangle                    (GwyShapesRectangle *rectangles,
+static gint     find_near_rectangle                    (GwyShapes *shapes,
                                                         gdouble x,
                                                         gdouble y);
 static void     constrain_movement                     (GwyShapes *shapes,
@@ -136,7 +130,6 @@ gwy_shapes_rectangle_class_init(GwyShapesRectangleClass *klass)
 
     g_type_class_add_private(klass, sizeof(ShapesRectangle));
 
-    gobject_class->finalize = gwy_shapes_rectangle_finalize;
     gobject_class->get_property = gwy_shapes_rectangle_get_property;
     gobject_class->set_property = gwy_shapes_rectangle_set_property;
 
@@ -156,21 +149,11 @@ gwy_shapes_rectangle_class_init(GwyShapesRectangleClass *klass)
 }
 
 static void
-gwy_shapes_rectangle_finalize(GObject *object)
-{
-    GwyShapesRectangle *rectangles = GWY_SHAPES_RECTANGLE(object);
-    ShapesRectangle *priv = rectangles->priv;
-    if (priv->data) {
-        g_array_free(priv->data, TRUE);
-        priv->data = NULL;
-    }
-}
-
-static void
 gwy_shapes_rectangle_init(GwyShapesRectangle *rectangles)
 {
-    rectangles->priv = G_TYPE_INSTANCE_GET_PRIVATE(rectangles, GWY_TYPE_SHAPES_RECTANGLE,
-                                              ShapesRectangle);
+    rectangles->priv = G_TYPE_INSTANCE_GET_PRIVATE(rectangles,
+                                                   GWY_TYPE_SHAPES_RECTANGLE,
+                                                   ShapesRectangle);
     ShapesRectangle *priv = rectangles->priv;
     priv->hover = priv->clicked = -1;
 }
@@ -213,9 +196,7 @@ gwy_shapes_rectangle_draw(GwyShapes *shapes,
     if (!coords || !gwy_coords_size(coords))
         return;
 
-    GwyShapesRectangle *rectangles = GWY_SHAPES_RECTANGLE(shapes);
-    calculate_data(rectangles);
-    draw_rectangles(rectangles, cr);
+    draw_rectangles(shapes, cr);
 }
 
 static gboolean
@@ -224,7 +205,7 @@ gwy_shapes_rectangle_motion_notify(GwyShapes *shapes,
 {
     ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
     // FIXME: Change once we implement MODE_RUBBERBAND
-    if (!priv->data || priv->mode == MODE_RUBBERBAND)
+    if (priv->mode == MODE_RUBBERBAND)
         return FALSE;
 
     if (priv->clicked == -1) {
@@ -421,69 +402,78 @@ gwy_shapes_rectangle_new(void)
     return g_object_new(GWY_TYPE_SHAPES_RECTANGLE, 0, NULL);
 }
 
-// FIXME: May be common.
 static void
-calculate_data(GwyShapesRectangle *rectangles)
-{
-    ShapesRectangle *priv = rectangles->priv;
-    GwyShapes *shapes = GWY_SHAPES(rectangles);
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    guint shape_size = gwy_coords_shape_size(coords);
-    guint n = gwy_coords_size(coords);
-    guint ncoord = n*shape_size;
-    if (!priv->data)
-        priv->data = g_array_sized_new(FALSE, FALSE, sizeof(gdouble), ncoord);
-    g_array_set_size(priv->data, ncoord);
-    const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    gdouble *data = (gdouble*)priv->data->data;
-    gwy_coords_get_data(coords, data);
-    for (guint i = 0; i < ncoord/2; i++)
-        cairo_matrix_transform_point(matrix, data + 2*i, data + 2*i + 1);
-}
-
-static void
-draw_rectangles(GwyShapesRectangle *rectangles, cairo_t *cr)
+draw_rectangles(GwyShapes *shapes, cairo_t *cr)
 {
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
-    ShapesRectangle *priv = rectangles->priv;
-    gwy_shapes_draw_markers(GWY_SHAPES(rectangles), cr,
-                            (const gdouble*)priv->data->data, priv->hover,
-                            &draw_rectangle, NULL);
+    ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
+    gwy_shapes_draw_markers(shapes, cr, priv->hover, &draw_rectangle);
     cairo_restore(cr);
 }
 
 static void
-draw_rectangle(cairo_t *cr,
-               const gdouble *xy,
-               G_GNUC_UNUSED gpointer user_data)
+draw_rectangle(GwyShapes *shapes,
+               cairo_t *cr,
+               const gdouble *xy)
 {
-    cairo_move_to(cr, xy[0], xy[1]);
-    cairo_line_to(cr, xy[0], xy[3]);
-    cairo_line_to(cr, xy[2], xy[3]);
-    cairo_line_to(cr, xy[2], xy[1]);
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    gdouble xf = xy[0], yf = xy[1], xt = xy[2], yt = xy[3];
+    cairo_matrix_transform_point(matrix, &xf, &yf);
+    cairo_matrix_transform_point(matrix, &xt, &yt);
+    cairo_move_to(cr, xf, yf);
+    cairo_line_to(cr, xf, yt);
+    cairo_line_to(cr, xt, yt);
+    cairo_line_to(cr, xt, yf);
     cairo_close_path(cr);
 }
 
 // FIXME: May be common.
-// FIXME: The same as in ShapesPoint, just for both primary corners.
+// FIXME: The same as in ShapesPoint, just for both all corners.
 /* returns the index of corner, not rectangle */
 static gint
-find_near_point(GwyShapesRectangle *rectangles,
-                gdouble x, gdouble y)
+find_near_corner(GwyShapes *shapes,
+                 gdouble x, gdouble y)
 {
-    ShapesRectangle *priv = rectangles->priv;
-    guint n = priv->data->len/2;
-    const gdouble *data = (const gdouble*)priv->data->data;
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
+    gdouble xy[4];
 
     for (guint i = 0; i < n; i++) {
-        gdouble xd = x - data[2*i], yd = y - data[2*i + 1];
+        gwy_coords_get(coords, i, xy);
+        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
+        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
+        gdouble xd = x - xy[0];
+        gdouble yd = y - xy[1];
         gdouble dist2 = xd*xd + yd*yd;
+        // Primary corners first to prefer them in case of equality.
         if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
-            mini = i;
+            mini = 4*i;
+        }
+        xd = x - xy[2];
+        yd = y - xy[3];
+        dist2 = xd*xd + yd*yd;
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 4*i + 3;
+        }
+        xd = x - xy[2];
+        yd = y - xy[1];
+        dist2 = xd*xd + yd*yd;
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 2*i + 1;
+        }
+        xd = x - xy[0];
+        yd = y - xy[3];
+        dist2 = xd*xd + yd*yd;
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 2*i + 2;
         }
     }
 
@@ -492,38 +482,30 @@ find_near_point(GwyShapesRectangle *rectangles,
 
 /* returns the index of corner, not rectangle */
 static gint
-find_near_rectangle(GwyShapesRectangle *rectangles,
-               gdouble x, gdouble y)
+find_near_rectangle(GwyShapes *shapes,
+                    gdouble x, gdouble y)
 {
-    ShapesRectangle *priv = rectangles->priv;
-    guint n = priv->data->len/4;
-    const gdouble *data = (const gdouble*)priv->data->data;
+    const cairo_matrix_t *matrix = &shapes->coords_to_view;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    guint n = gwy_coords_size(coords);
     gdouble mindist2 = G_MAXDOUBLE;
     gint mini = -1;
+    gdouble xy[4];
 
     for (guint i = 0; i < n; i++) {
-        gdouble xf = data[4*i], yf = data[4*i + 1],
-                xt = data[4*i + 2], yt = data[4*i + 3];
-        gdouble vx = xt - xf, vy = yt - yf, v2 = vx*vx + vy*vy;
-        if (!v2
-            || vx*(x - xt) > vy*(yt - y)
-            || vx*(x - xf) < vy*(yf - y))
-            continue;
-        gdouble dist2 = x*vy - y*vx + xt*yf - xf*yt;
-        dist2 *= dist2/v2;
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = i;
-        }
+        gwy_coords_get(coords, i, xy);
+        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
+        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
+        // TODO
     }
 
     /* we always have our favourite corner, even when moving the entire
      * rectangle, it determines snapping */
     if (mini >= 0) {
         guint i = mini;
-        gdouble dxf = data[4*i] - x, dyf = data[4*i + 1] - y,
-                dxt = data[4*i + 2] - x, dyt = data[4*i + 3] - y;
-        mini = 2*mini + (dxf*dxf + dyf*dyf > dxt*dxt + dyt*dyt);
+        gdouble dxf = xy[0] - x, dyf = xy[1] - y,
+                dxt = xy[2] - x, dyt = xy[3] - y;
+        mini = -1; // TODO
     }
 
     return mini;
@@ -670,19 +652,18 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 static void
 update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 {
-    GwyShapesRectangle *rectangles = GWY_SHAPES_RECTANGLE(shapes);
-    ShapesRectangle *priv = rectangles->priv;
+    ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
     guint corner = G_MAXUINT;
     gboolean entire_shape = TRUE;
     gint i = -1;
 
     if (isfinite(eventx) && isfinite(eventy)) {
-        if ((i = find_near_point(rectangles, eventx, eventy)) >= 0) {
+        if ((i = find_near_corner(shapes, eventx, eventy)) >= 0) {
             corner = i % 2;
             entire_shape = FALSE;
             i /= 2;
         }
-        else if ((i = find_near_rectangle(rectangles, eventx, eventy)) >= 0) {
+        else if ((i = find_near_rectangle(shapes, eventx, eventy)) >= 0) {
             corner = i % 2;
             entire_shape = TRUE;
             i /= 2;
