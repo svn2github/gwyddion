@@ -673,6 +673,51 @@ gwy_math_curvature_at_origin(const gdouble *coeffs,
     return degree;
 }
 
+/**
+ * gwy_line_point_distance2:
+ * @lx0: X-coordinate of first line endpoint.
+ * @ly0: Y-coordinate of first line endpoint.
+ * @lx1: X-coordinate of second line endpoint.
+ * @ly1: Y-coordinate of second line endpoint.
+ * @x: X-coordinate of the point.
+ * @y: Y-coordinate of the point.
+ * @endpoint: (out) (allow-none):
+ *            Location to store which endpoint was closed, or %NULL.
+ *
+ * Calculates the distance from a point to a line segment.
+ *
+ * Returns: Squared distance from point (@x,@y) to the line between points
+ *          (@lx0,@ly) and (@lx1,@ly1).
+ **/
+gdouble
+gwy_line_point_distance2(gdouble lx0, gdouble ly0, gdouble lx1, gdouble ly1,
+                         gdouble x, gdouble y,
+                         guint *endpoint)
+{
+    gdouble lx = lx1 - lx0, ly = ly1 - ly0, l2 = lx*lx + ly*ly;
+    gdouble dx0 = x - lx0, dy0 = y - ly0,
+            dx1 = x - lx1, dy1 = y - ly1;
+    gdouble d02 = dx0*dx0 + dy0*dy0, d12 = dx1*dx1 + dy1*dy1;
+
+    GWY_MAYBE_SET(endpoint, d12 <= d02);
+
+    // Degenerated line
+    if (!l2)
+        return 0.5*(d02 + d12);
+
+    // Point is before (lx0, ly0)
+    if ((lx1 - x)*lx + (ly1 - y)*ly > l2)
+        return d02;
+
+    // Point is beyond (lx1, ly1)
+    if ((x - lx0)*lx + (y - ly0)*ly > l2)
+        return d12;
+
+    gdouble mx = 0.5*(lx0 + lx1), my = 0.5*(ly0 + ly1);
+    gdouble dmx = x - mx, dmy = y - my, dm2 = dmx*lx + dmy*ly;
+    return dmx*dmx + dmy*dmy - dm2*dm2/l2;
+}
+
 /* Quickly find median value in an array
  * based on public domain code by Nicolas Devillard */
 /**

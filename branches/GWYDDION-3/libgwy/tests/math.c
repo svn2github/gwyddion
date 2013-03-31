@@ -479,6 +479,153 @@ test_math_curvature_at_origin_sloped(void)
     g_rand_free(rng);
 }
 
+static void
+scale(gdouble s, gdouble *x, gdouble *y)
+{
+    *x *= s;
+    *y *= s;
+}
+
+static void
+rotate(gdouble phi, gdouble *x, gdouble *y)
+{
+    gdouble cphi = cos(phi), sphi = sin(phi);
+    gdouble t = (*x)*cphi - (*y)*sphi;
+    *y = (*x)*sphi + (*y)*cphi;
+    *x = t;
+}
+
+static void
+translate(gdouble dx, gdouble dy, gdouble *x, gdouble *y)
+{
+    *x += dx;
+    *y += dy;
+}
+
+void
+test_math_line_point_distance_before(void)
+{
+    enum { niter = 300 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        gdouble lx0 = -0.5, ly0 = 0.0, lx1 = 0.5, ly1 = 0.0;
+        gdouble x = g_rand_double_range(rng, -10.0, -0.5);
+        gdouble y = g_rand_double_range(rng, -10.0, 10.0);
+        gdouble expected_dist2 = (x + 0.5)*(x + 0.5) + y*y;
+
+        gdouble s = exp(g_rand_double_range(rng, -5.0, 5.0));
+        scale(s, &x, &y);
+        scale(s, &lx0, &ly0);
+        scale(s, &lx1, &ly1);
+        expected_dist2 *= s*s;
+
+        gdouble phi = g_rand_double_range(rng, 0.0, 2.0*G_PI);
+        rotate(phi, &x, &y);
+        rotate(phi, &lx0, &ly0);
+        rotate(phi, &lx1, &ly1);
+
+        gdouble dx = g_rand_double_range(rng, -10.0, 10.0);
+        gdouble dy = g_rand_double_range(rng, -10.0, 10.0);
+        translate(dx, dy, &x, &y);
+        translate(dx, dy, &lx0, &ly0);
+        translate(dx, dy, &lx1, &ly1);
+
+        guint endpoint = G_MAXUINT;
+        gdouble dist2 = gwy_line_point_distance2(lx0, ly0, lx1, ly1, x, y,
+                                                 &endpoint);
+
+        g_assert_cmpint(endpoint, ==, 0);
+        gwy_assert_floatval(dist2, expected_dist2, 1e-12*expected_dist2);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_math_line_point_distance_after(void)
+{
+    enum { niter = 300 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        gdouble lx0 = -0.5, ly0 = 0.0, lx1 = 0.5, ly1 = 0.0;
+        gdouble x = g_rand_double_range(rng, 0.5, 10.0);
+        gdouble y = g_rand_double_range(rng, -10.0, 10.0);
+        gdouble expected_dist2 = (x - 0.5)*(x - 0.5) + y*y;
+
+        gdouble s = exp(g_rand_double_range(rng, -5.0, 5.0));
+        scale(s, &x, &y);
+        scale(s, &lx0, &ly0);
+        scale(s, &lx1, &ly1);
+        expected_dist2 *= s*s;
+
+        gdouble phi = g_rand_double_range(rng, 0.0, 2.0*G_PI);
+        rotate(phi, &x, &y);
+        rotate(phi, &lx0, &ly0);
+        rotate(phi, &lx1, &ly1);
+
+        gdouble dx = g_rand_double_range(rng, -10.0, 10.0);
+        gdouble dy = g_rand_double_range(rng, -10.0, 10.0);
+        translate(dx, dy, &x, &y);
+        translate(dx, dy, &lx0, &ly0);
+        translate(dx, dy, &lx1, &ly1);
+
+        guint endpoint = G_MAXUINT;
+        gdouble dist2 = gwy_line_point_distance2(lx0, ly0, lx1, ly1, x, y,
+                                                 &endpoint);
+
+        g_assert_cmpint(endpoint, ==, 1);
+        gwy_assert_floatval(dist2, expected_dist2, 1e-12*expected_dist2);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_math_line_point_distance_inside(void)
+{
+    enum { niter = 300 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        gdouble lx0 = -0.5, ly0 = 0.0, lx1 = 0.5, ly1 = 0.0;
+        gdouble x = g_rand_double_range(rng, -0.5, 0.5);
+        gdouble y = g_rand_double_range(rng, -10.0, 10.0);
+        gdouble expected_dist2 = y*y;
+        guint expected_endpoint = (x > 0.0);
+        gboolean test_endpoint = (fabs(x) > 1e-14);
+
+        gdouble s = exp(g_rand_double_range(rng, -5.0, 5.0));
+        scale(s, &x, &y);
+        scale(s, &lx0, &ly0);
+        scale(s, &lx1, &ly1);
+        expected_dist2 *= s*s;
+
+        gdouble phi = g_rand_double_range(rng, 0.0, 2.0*G_PI);
+        rotate(phi, &x, &y);
+        rotate(phi, &lx0, &ly0);
+        rotate(phi, &lx1, &ly1);
+
+        gdouble dx = g_rand_double_range(rng, -10.0, 10.0);
+        gdouble dy = g_rand_double_range(rng, -10.0, 10.0);
+        translate(dx, dy, &x, &y);
+        translate(dx, dy, &lx0, &ly0);
+        translate(dx, dy, &lx1, &ly1);
+
+        guint endpoint = G_MAXUINT;
+        gdouble dist2 = gwy_line_point_distance2(lx0, ly0, lx1, ly1, x, y,
+                                                 &endpoint);
+
+        if (test_endpoint) {
+            g_assert_cmpint(endpoint, ==, expected_endpoint);
+        }
+        gwy_assert_floatval(dist2, expected_dist2, 1e-12*expected_dist2);
+    }
+
+    g_rand_free(rng);
+}
+
 /***************************************************************************
  *
  * Linear algebra

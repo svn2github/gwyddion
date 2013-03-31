@@ -28,6 +28,9 @@ math/curvature/at-centre/general
 math/curvature/at-origin/flat
 math/curvature/at-origin/unsloped
 math/curvature/at-origin/sloped
+math/line-point-distance/before
+math/line-point-distance/after
+math/line-point-distance/inside
 math/sort
 math/median
 math/cholesky

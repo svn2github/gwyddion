@@ -90,6 +90,13 @@ guint    gwy_math_curvature_at_centre(const gdouble *coeffs,
                                       GwyCurvatureParams *curvature);
 guint    gwy_math_curvature_at_origin(const gdouble *coeffs,
                                       GwyCurvatureParams *curvature);
+gdouble  gwy_line_point_distance2    (gdouble lx0,
+                                      gdouble ly0,
+                                      gdouble lx1,
+                                      gdouble ly1,
+                                      gdouble x,
+                                      gdouble y,
+                                      guint *endpoint);
 gint     gwy_double_compare          (gconstpointer a,
                                       gconstpointer b)                G_GNUC_PURE;
 gint     gwy_double_direct_compare   (gconstpointer a,
