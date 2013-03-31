@@ -496,19 +496,36 @@ find_near_rectangle(GwyShapes *shapes,
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
-        // TODO
-    }
+        guint endpoint;
+        gdouble dist2;
 
-    /* we always have our favourite corner, even when moving the entire
-     * rectangle, it determines snapping */
-    if (mini >= 0) {
-        gdouble xy[4];
-        gwy_coords_get(coords, mini, xy);
-        cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
-        cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
-        gdouble dxf = xy[0] - x, dyf = xy[1] - y,
-                dxt = xy[2] - x, dyt = xy[3] - y;
-        mini = -1; // TODO
+        dist2 = gwy_line_point_distance2(xy[0], xy[1], xy[2], xy[1], x, y,
+                                         &endpoint);
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 4*i + (endpoint ? 1 : 0);
+        }
+
+        dist2 = gwy_line_point_distance2(xy[2], xy[1], xy[2], xy[3], x, y,
+                                         &endpoint);
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 4*i + (endpoint ? 3 : 1);
+        }
+
+        dist2 = gwy_line_point_distance2(xy[0], xy[1], xy[0], xy[3], x, y,
+                                         &endpoint);
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 4*i + (endpoint ? 2 : 0);
+        }
+
+        dist2 = gwy_line_point_distance2(xy[0], xy[3], xy[2], xy[3], x, y,
+                                         &endpoint);
+        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+            mindist2 = dist2;
+            mini = 4*i + (endpoint ? 3 : 2);
+        }
     }
 
     return mini;
@@ -662,14 +679,14 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 
     if (isfinite(eventx) && isfinite(eventy)) {
         if ((i = find_near_corner(shapes, eventx, eventy)) >= 0) {
-            corner = i % 2;
+            corner = i % 4;
             entire_shape = FALSE;
-            i /= 2;
+            i /= 4;
         }
         else if ((i = find_near_rectangle(shapes, eventx, eventy)) >= 0) {
-            corner = i % 2;
+            corner = i % 4;
             entire_shape = TRUE;
-            i /= 2;
+            i /= 4;
         }
     }
     if (priv->hover == i && priv->entire_shape == entire_shape)
