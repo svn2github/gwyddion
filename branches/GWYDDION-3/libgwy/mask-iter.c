@@ -63,11 +63,16 @@ gwy_mask_prepare_scaling(gdouble pos, gdouble step, guint nsteps,
         }
     }
 
-    // Try to avoid reading a slightly after the last bit.
+    // Try to avoid reading a slightly after the last bit.  But ensure the
+    // invariant that if step > 1 move is never zero.
     seg--;
     if (seg->move && seg->w1 < 1e-6) {
-        seg->move--;
-        seg->w1 = seg->move ? 1.0/step : 0.0;
+        if (seg->move == 1)
+            seg->w1 = 0.0;
+        else {
+            seg->move--;
+            seg->w1 = 1.0/step;
+        }
         end--;
     }
 
