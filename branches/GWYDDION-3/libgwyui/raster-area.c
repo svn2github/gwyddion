@@ -1536,7 +1536,7 @@ gwy_raster_area_size_allocate(GtkWidget *widget,
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(widget);
     RasterArea *priv = rasterarea->priv;
 
-    if (gwy_equal(allocation, &prev_allocation))
+    if (gwy_equal(allocation, &prev_allocation) && priv->pos_and_size_valid)
         return;
 
     // XXX: The input window can be smaller.  Does it matter?
