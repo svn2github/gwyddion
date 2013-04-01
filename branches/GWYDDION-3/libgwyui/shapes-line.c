@@ -18,8 +18,6 @@
  */
 
 #include <math.h>
-#include <glib/gi18n-lib.h>
-#include <gdk/gdkkeysyms.h>
 #include "libgwy/macros.h"
 #include "libgwy/coords-line.h"
 #include "libgwyui/cairo-utils.h"

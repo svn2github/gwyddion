@@ -18,10 +18,7 @@
  */
 
 #include <math.h>
-#include <glib/gi18n-lib.h>
-#include <gdk/gdkkeysyms.h>
 #include "libgwy/macros.h"
-#include "libgwy/object-utils.h"
 #include "libgwy/coords-rectangle.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/shapes-rectangle.h"
