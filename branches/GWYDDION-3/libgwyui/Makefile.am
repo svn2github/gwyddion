@@ -45,7 +45,8 @@ public_headers = \
 public_built_headers = \
 	$(mkenum_name).h
 
-private_headers =
+private_headers = \
+	shapes-internal.h
 
 private_built_headers = \
 	$(genmarshal_name).h \

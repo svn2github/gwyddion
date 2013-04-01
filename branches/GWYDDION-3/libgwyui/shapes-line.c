@@ -21,13 +21,10 @@
 #include <glib/gi18n-lib.h>
 #include <gdk/gdkkeysyms.h>
 #include "libgwy/macros.h"
-#include "libgwy/object-utils.h"
 #include "libgwy/coords-line.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/shapes-line.h"
-
-#define NEAR_DIST2 30.0
-#define ANGLE_STEP (G_PI/12.0)
+#include "libgwyui/shapes-internal.h"
 
 enum {
     PROP_0,
@@ -105,8 +102,6 @@ static void     constrain_movement                (GwyShapes *shapes,
 static void     move_endpoint                     (GwyShapes *shapes,
                                                    GdkModifierType modif,
                                                    GwyXY *dxy);
-static void     constrain_horiz_vert              (const GwyShapes *shapes,
-                                                   GwyXY *dxy);
 static void     constrain_angle                   (const GwyShapes *shapes,
                                                    guint endpoint,
                                                    gdouble *xy);
@@ -121,10 +116,6 @@ static gboolean add_shape                         (GwyShapes *shapes,
 static void     update_hover                      (GwyShapes *shapes,
                                                    gdouble eventx,
                                                    gdouble eventy);
-static gboolean snap_point                        (const GwyShapes *shapes,
-                                                   gdouble *x,
-                                                   gdouble *y);
-static void     remove_null_shape                 (GwyShapes *shapes);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -348,7 +339,7 @@ gwy_shapes_line_button_release(GwyShapes *shapes,
         GwyXY xy = { event->x, event->y }, dxy;
         gwy_shapes_check_movement(shapes, &xy, &dxy);
         move_endpoint(shapes, event->state, &dxy);
-        remove_null_shape(shapes);
+        _gwy_shapes_remove_null_box(shapes, priv->clicked);
     }
 
     if (emit_finished)
@@ -577,7 +568,7 @@ constrain_movement(GwyShapes *shapes,
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
     if (modif & GDK_CONTROL_MASK)
-        constrain_horiz_vert(shapes, dxy);
+        _gwy_shapes_constrain_horiz_vert(shapes, dxy);
 
     // Constrain final position in coords space, perform snapping and ensure
     // it does not move anything outside the bounding box.
@@ -589,7 +580,7 @@ constrain_movement(GwyShapes *shapes,
     gwy_coords_get(orig_coords, priv->selection_index, xy);
     diff[0] = xy[2*endpoint + 0] + dxy->x;
     diff[1] = xy[2*endpoint + 1] + dxy->y;
-    snap_point(shapes, diff+0, diff+1);
+    _gwy_shapes_snap_to_pixel_centre(shapes, diff+0, diff+1);
     diff[0] -= xy[2*endpoint + 0];
     diff[1] -= xy[2*endpoint + 1];
 
@@ -609,7 +600,7 @@ move_endpoint(GwyShapes *shapes,
     // Constrain movement in view space, pressing Ctrl limits it to
     // horizontal/vertical.
     if (modif & GDK_CONTROL_MASK)
-        constrain_horiz_vert(shapes, dxy);
+        _gwy_shapes_constrain_horiz_vert(shapes, dxy);
 
     // Constrain final position in coords space, perform positional and angular
     // snapping and ensure it does not move anything outside the bounding box.
@@ -629,23 +620,11 @@ move_endpoint(GwyShapes *shapes,
         constrain_angle(shapes, endpoint, xy);
     calc_constrained_bbox(shapes, &bbox);
     limit_into_bbox(&bbox, endpoint, xy);
-    snap_point(shapes, xy + 2*endpoint + 0, xy + 2*endpoint + 1);
+    _gwy_shapes_snap_to_pixel_centre(shapes,
+                                     xy + 2*endpoint + 0, xy + 2*endpoint + 1);
     gwy_coords_set(coords, priv->clicked, xy);
     GwyXY curr = { xy[2*endpoint + 0], xy[2*endpoint + 1] };
     gwy_shapes_set_current_point(shapes, &curr);
-}
-
-// FIXME: Common
-static void
-constrain_horiz_vert(const GwyShapes *shapes, GwyXY *dxy)
-{
-    const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    gdouble x = dxy->x, y = dxy->y;
-    cairo_matrix_transform_distance(matrix, &x, &y);
-    if (fabs(x) <= fabs(y))
-        dxy->x = 0.0;
-    else
-        dxy->y = 0.0;
 }
 
 // Constrain the angle in view coordinates.  This seems natural as the user
@@ -736,7 +715,7 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 
     const cairo_matrix_t *matrix = &shapes->view_to_coords;
     cairo_matrix_transform_point(matrix, &x, &y);
-    snap_point(shapes, &x, &y);
+    _gwy_shapes_snap_to_pixel_centre(shapes, &x, &y);
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     if (CLAMP(x, bbox->x, bbox->x + bbox->width) != x
@@ -794,40 +773,6 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 
     if (do_update)
         gwy_shapes_update(shapes);
-}
-
-static gboolean
-snap_point(const GwyShapes *shapes,
-           gdouble *x, gdouble *y)
-{
-    if (!gwy_shapes_get_snapping(shapes))
-        return FALSE;
-
-    cairo_matrix_transform_point(&shapes->coords_to_view, x, y);
-    cairo_matrix_transform_point(&shapes->view_to_pixel, x, y);
-    *x = gwy_round_to_half(*x);
-    *y = gwy_round_to_half(*y);
-    cairo_matrix_transform_point(&shapes->pixel_to_view, x, y);
-    cairo_matrix_transform_point(&shapes->view_to_coords, x, y);
-    return TRUE;
-}
-
-static void
-remove_null_shape(GwyShapes *shapes)
-{
-    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    gdouble xy[4];
-    guint clicked = priv->clicked;
-    gwy_coords_get(coords, clicked, xy);
-    gdouble lx = xy[2] - xy[0], ly = xy[3] - xy[1];
-    cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
-    cairo_matrix_transform_distance(&shapes->view_to_pixel, &lx, &ly);
-    if (lx*lx + ly*ly >= 0.2)
-        return;
-
-    gwy_coords_delete(coords, clicked);
-    gwy_shapes_update(shapes);
 }
 
 /**
