@@ -128,6 +128,30 @@ create_test_lines(void)
     return shapes;
 }
 
+G_GNUC_UNUSED
+static GwyShapes*
+create_test_rectangles(void)
+{
+    GwyCoords *coords = gwy_coords_rectangle_new();
+    gdouble xy[] = { 0.5, 0.5, 0.6, 0.8 };
+    gwy_coords_set(coords, 0, xy);
+    xy[0] = 0.4;
+    xy[2] = 0.3;
+    gwy_coords_set(coords, 1, xy);
+    xy[1] = 0.25;
+    xy[3] = 0.2;
+    gwy_coords_set(coords, 2, xy);
+
+    GwyShapes *shapes = gwy_shapes_rectangle_new();
+    g_object_set(shapes,
+                 "max-shapes", 5,
+                 NULL);
+    gwy_shapes_set_coords(shapes, coords);
+    g_object_unref(coords);
+
+    return shapes;
+}
+
 static GtkWidget*
 create_raster_window(guint xres, guint yres)
 {
@@ -156,7 +180,7 @@ create_raster_window(guint xres, guint yres)
     gwy_raster_area_set_field(rasterarea, mix->result);
     gwy_raster_area_set_mask(rasterarea, mask);
 
-    GwyShapes *shapes = create_test_lines();
+    GwyShapes *shapes = create_test_rectangles();
     gwy_raster_area_set_shapes(rasterarea, shapes);
 
     return window;
