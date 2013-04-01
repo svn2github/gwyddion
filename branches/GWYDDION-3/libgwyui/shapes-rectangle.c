@@ -124,7 +124,7 @@ static gboolean add_shape                              (GwyShapes *shapes,
 static void     update_hover                           (GwyShapes *shapes,
                                                         gdouble eventx,
                                                         gdouble eventy);
-static gboolean snap_point                             (GwyShapes *shapes,
+static gboolean snap_point                             (const GwyShapes *shapes,
                                                         gdouble *x,
                                                         gdouble *y);
 static void     remove_null_shape                      (GwyShapes *shapes);
@@ -728,7 +728,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 
 // FIXME: Common, there are only two kinds of snapping: round and halfround
 static gboolean
-snap_point(GwyShapes *shapes,
+snap_point(const GwyShapes *shapes,
            gdouble *x, gdouble *y)
 {
     if (!gwy_shapes_get_snapping(shapes))

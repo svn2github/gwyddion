@@ -89,13 +89,13 @@ static void     draw_radii                         (GwyShapes *shapes,
 static void     draw_radius                        (const GwyShapes *shapes,
                                                     cairo_t *cr,
                                                     const gdouble *xy);
-static gint     find_near_point                    (GwyShapes *shapes,
+static gint     find_near_point                    (const GwyShapes *shapes,
                                                     gdouble x,
                                                     gdouble y);
 static void     constrain_movement                 (GwyShapes *shapes,
                                                     GdkModifierType modif,
                                                     GwyXY *dxy);
-static void     constrain_horiz_vert               (GwyShapes *shapes,
+static void     constrain_horiz_vert               (const GwyShapes *shapes,
                                                     GwyXY *dxy);
 static gboolean add_shape                          (GwyShapes *shapes,
                                                     gdouble x,
@@ -103,7 +103,7 @@ static gboolean add_shape                          (GwyShapes *shapes,
 static void     update_hover                       (GwyShapes *shapes,
                                                     gdouble eventx,
                                                     gdouble eventy);
-static gboolean snap_point                         (GwyShapes *shapes,
+static gboolean snap_point                         (const GwyShapes *shapes,
                                                     gdouble *x,
                                                     gdouble *y);
 
@@ -447,7 +447,7 @@ draw_radius(const GwyShapes *shapes,
 }
 
 static gint
-find_near_point(GwyShapes *shapes,
+find_near_point(const GwyShapes *shapes,
                 gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
@@ -504,7 +504,7 @@ constrain_movement(GwyShapes *shapes,
 
 // FIXME: Common
 static void
-constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
+constrain_horiz_vert(const GwyShapes *shapes, GwyXY *dxy)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
     gdouble x = dxy->x, y = dxy->y;
@@ -564,7 +564,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 }
 
 static gboolean
-snap_point(GwyShapes *shapes,
+snap_point(const GwyShapes *shapes,
            gdouble *x, gdouble *y)
 {
     if (!gwy_shapes_get_snapping(shapes))
