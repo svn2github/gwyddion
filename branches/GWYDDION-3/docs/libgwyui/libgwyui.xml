@@ -31,6 +31,11 @@
     <xi:include href="xml/color-axis.xml"/>
     <xi:include href="xml/scroller.xml"/>
   </chapter>
+  <chapter id='libgwyui-graphs'>
+    <title>Graphs</title>
+    <xi:include href="xml/graph-area.xml"/>
+    <xi:include href="xml/graph-curve.xml"/>
+  </chapter>
   <chapter id='libgwyui-utils'>
     <title>Utilities and auxiliary widgets</title>
     <xi:include href="xml/main.xml"/>
