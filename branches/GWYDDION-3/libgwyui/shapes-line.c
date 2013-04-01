@@ -93,10 +93,10 @@ static void     draw_thicknesses                  (GwyShapes *shapes,
 static void     draw_thickness                    (const GwyShapes *shapes,
                                                    cairo_t *cr,
                                                    const gdouble *xy);
-static gint     find_near_point                   (GwyShapes *shapes,
+static gint     find_near_point                   (const GwyShapes *shapes,
                                                    gdouble x,
                                                    gdouble y);
-static gint     find_near_line                    (GwyShapes *shapes,
+static gint     find_near_line                    (const GwyShapes *shapes,
                                                    gdouble x,
                                                    gdouble y);
 static void     constrain_movement                (GwyShapes *shapes,
@@ -105,9 +105,10 @@ static void     constrain_movement                (GwyShapes *shapes,
 static void     move_endpoint                     (GwyShapes *shapes,
                                                    GdkModifierType modif,
                                                    GwyXY *dxy);
-static void     constrain_horiz_vert              (GwyShapes *shapes,
+static void     constrain_horiz_vert              (const GwyShapes *shapes,
                                                    GwyXY *dxy);
-static void     constrain_angle                   (guint endpoint,
+static void     constrain_angle                   (const GwyShapes *shapes,
+                                                   guint endpoint,
                                                    gdouble *xy);
 static void     limit_into_bbox                   (const cairo_rectangle_t *bbox,
                                                    guint endpoint,
@@ -505,7 +506,7 @@ draw_thickness(const GwyShapes *shapes,
 // FIXME: The same as in ShapesLine, just for both endpoints.
 /* returns the index of endpoint, not line */
 static gint
-find_near_point(GwyShapes *shapes,
+find_near_point(const GwyShapes *shapes,
                 gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
@@ -540,7 +541,7 @@ find_near_point(GwyShapes *shapes,
 
 /* returns the index of endpoint, not line */
 static gint
-find_near_line(GwyShapes *shapes,
+find_near_line(const GwyShapes *shapes,
                gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
@@ -625,7 +626,7 @@ move_endpoint(GwyShapes *shapes,
     xy[2*endpoint + 1] += dxy->y;
 
     if (modif & GDK_SHIFT_MASK)
-        constrain_angle(endpoint, xy);
+        constrain_angle(shapes, endpoint, xy);
     calc_constrained_bbox(shapes, &bbox);
     limit_into_bbox(&bbox, endpoint, xy);
     snap_point(shapes, xy + 2*endpoint + 0, xy + 2*endpoint + 1);
@@ -636,7 +637,7 @@ move_endpoint(GwyShapes *shapes,
 
 // FIXME: Common
 static void
-constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
+constrain_horiz_vert(const GwyShapes *shapes, GwyXY *dxy)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
     gdouble x = dxy->x, y = dxy->y;
@@ -647,21 +648,27 @@ constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
         dxy->y = 0.0;
 }
 
+// Constrain the angle in view coordinates.  This seems natural as the user
+// gets pixel diagonals in pixel view and physical diagonals in physical view.
 static void
-constrain_angle(guint endpoint, gdouble *xy)
+constrain_angle(const GwyShapes *shapes,
+                guint endpoint, gdouble *xy)
 {
     guint other = (endpoint + 1) % 2;
     gdouble xt = xy[2*endpoint + 0], yt = xy[2*endpoint + 1],
             xf = xy[2*other + 0], yf = xy[2*other + 1];
     gdouble lx = xt - xf, ly = yt - yf;
-
-    if (!lx && !ly)
+    cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
+    if (fabs(lx) < 1e-3 && fabs(ly) < 1e-3)
         return;
 
-    gdouble theta = atan2(ly, lx), r = hypot(lx, ly);
-    theta = gwy_round(theta/ANGLE_STEP)*ANGLE_STEP;
-    lx = r*cos(theta);
-    ly = r*sin(theta);
+    gdouble theta = gwy_round(atan2(ly, lx)/ANGLE_STEP)*ANGLE_STEP;
+    gdouble nx = cos(theta), ny = sin(theta);
+    gdouble p = lx*nx + ly*ny;
+    lx = p*nx;
+    ly = p*ny;
+
+    cairo_matrix_transform_distance(&shapes->view_to_coords, &lx, &ly);
     xy[2*endpoint + 0] = xf + lx;
     xy[2*endpoint + 1] = yf + ly;
 }
