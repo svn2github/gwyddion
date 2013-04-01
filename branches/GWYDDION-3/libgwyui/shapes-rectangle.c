@@ -27,6 +27,7 @@
 #include "libgwyui/shapes-rectangle.h"
 
 #define NEAR_DIST2 30.0
+#define NULL_DIST2 0.2
 
 #define XCOORD(corner) (2*((corner) & 1))
 #define YCOORD(corner) (((corner) & 2) + 1)
@@ -96,10 +97,10 @@ static void     draw_rectangles                        (GwyShapes *shapes,
 static void     draw_rectangle                         (const GwyShapes *shapes,
                                                         cairo_t *cr,
                                                         const gdouble *xy);
-static gint     find_near_corner                       (GwyShapes *shapes,
+static gint     find_near_corner                       (const GwyShapes *shapes,
                                                         gdouble x,
                                                         gdouble y);
-static gint     find_near_rectangle                    (GwyShapes *shapes,
+static gint     find_near_rectangle                    (const GwyShapes *shapes,
                                                         gdouble x,
                                                         gdouble y);
 static void     constrain_movement                     (GwyShapes *shapes,
@@ -108,8 +109,11 @@ static void     constrain_movement                     (GwyShapes *shapes,
 static void     move_corner                            (GwyShapes *shapes,
                                                         GdkModifierType modif,
                                                         GwyXY *dxy);
-static void     constrain_horiz_vert                   (GwyShapes *shapes,
+static void     constrain_horiz_vert                   (const GwyShapes *shapes,
                                                         GwyXY *dxy);
+static void     constrain_aspect_ratio                 (const GwyShapes *shapes,
+                                                        guint corner,
+                                                        gdouble *xy);
 static void     limit_into_bbox                        (const cairo_rectangle_t *bbox,
                                                         guint corner,
                                                         gdouble *xy);
@@ -442,7 +446,7 @@ draw_rectangle(const GwyShapes *shapes,
 // FIXME: The same as in ShapesPoint, just for both all corners.
 /* returns the index of corner, not rectangle */
 static gint
-find_near_corner(GwyShapes *shapes,
+find_near_corner(const GwyShapes *shapes,
                  gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
@@ -492,7 +496,7 @@ find_near_corner(GwyShapes *shapes,
 
 /* returns the index of corner, not rectangle */
 static gint
-find_near_rectangle(GwyShapes *shapes,
+find_near_rectangle(const GwyShapes *shapes,
                     gdouble x, gdouble y)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
@@ -599,8 +603,8 @@ move_corner(GwyShapes *shapes,
     xy[YCOORD(corner)] += dxy->y;
 
     limit_into_bbox(&shapes->bounding_box, corner, xy);
-    //if (modif & GDK_SHIFT_MASK)
-    //   constrain_ratio();
+    if (modif & GDK_SHIFT_MASK)
+       constrain_aspect_ratio(shapes, corner, xy);
     snap_point(shapes, xy + XCOORD(corner), xy + YCOORD(corner));
     sort_corners(xy);
     gwy_coords_set(coords, priv->clicked, xy);
@@ -608,7 +612,7 @@ move_corner(GwyShapes *shapes,
 
 // FIXME: Common
 static void
-constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
+constrain_horiz_vert(const GwyShapes *shapes, GwyXY *dxy)
 {
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
     gdouble x = dxy->x, y = dxy->y;
@@ -617,6 +621,55 @@ constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
         dxy->x = 0.0;
     else
         dxy->y = 0.0;
+}
+
+// Constrain the aspect ratio in view coordinates.  This seems natural as the
+// user gets pixel squares in pixel view and physical squares in physical view.
+static void
+constrain_aspect_ratio(const GwyShapes *shapes,
+                       guint corner,
+                       gdouble *xy)
+{
+    gdouble lx = xy[2] - xy[0], ly = xy[3] - xy[1];
+    cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
+    gdouble alx = fabs(lx), aly = fabs(ly);
+    if (alx < 1e-3 || aly < 1e-3 || alx/aly < 1e-2 || aly/alx < 1e-2)
+        return;
+
+    if (alx < aly) {
+        guint ratio = gwy_round(aly/alx);
+        if (ratio >= aly/alx) {
+            // Shorten the short side.
+            lx = copysign(aly/ratio, lx);
+        }
+        else {
+            // Shorten the long side.
+            ly = copysign(alx*ratio, ly);
+        }
+    }
+    else {
+        guint ratio = gwy_round(alx/aly);
+        if (ratio >= alx/aly) {
+            // Shorten the short side.
+            ly = copysign(alx/ratio, ly);
+        }
+        else {
+            // Shorten the long side.
+            lx = copysign(aly*ratio, lx);
+        }
+    }
+
+    cairo_matrix_transform_distance(&shapes->view_to_coords, &lx, &ly);
+
+    if (corner & 1)
+        xy[2] = xy[0] + lx;
+    else
+        xy[0] = xy[2] - lx;
+
+    if (corner & 2)
+        xy[3] = xy[1] + ly;
+    else
+        xy[1] = xy[3] - ly;
 }
 
 static void
@@ -733,7 +786,7 @@ remove_null_shape(GwyShapes *shapes)
     gdouble lx = xy[2] - xy[0], ly = xy[3] - xy[1];
     cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
     cairo_matrix_transform_distance(&shapes->view_to_pixel, &lx, &ly);
-    if (lx*lx + ly*ly >= 0.2)
+    if (lx*lx + ly*ly >= NULL_DIST2)
         return;
 
     gwy_coords_delete(coords, clicked);
