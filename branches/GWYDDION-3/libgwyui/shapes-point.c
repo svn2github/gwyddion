@@ -515,10 +515,10 @@ constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
         dxy->y = 0.0;
 }
 
+// FIXME: The top part is common
 static gboolean
 add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 {
-    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     if (n >= gwy_shapes_get_max_shapes(shapes))
@@ -536,8 +536,9 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
     gwy_shapes_set_moved(shapes);
     gwy_shapes_editing_started(shapes);
 
-    gdouble xy2[2] = { x, y };
+    ShapesPoint *priv = GWY_SHAPES_POINT(shapes)->priv;
     priv->hover = priv->clicked = n;
+    gdouble xy2[2] = { x, y };
     gwy_coords_set(coords, priv->clicked, xy2);
     return TRUE;
 }

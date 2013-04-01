@@ -28,6 +28,9 @@
 
 #define NEAR_DIST2 30.0
 
+#define XCOORD(corner) (2*((corner) & 1))
+#define YCOORD(corner) (((corner) & 2) + 1)
+
 enum {
     PROP_0,
     N_PROPS
@@ -47,10 +50,12 @@ typedef struct _GwyShapesRectanglePrivate ShapesRectangle;
  * 0  1
  * 2  3
  *
- * This makes even more sense in binary:
+ * This makes more sense in binary:
  * 00 01
  * 11 10
- * so the high bit chooses vertical line, the low bit horizontal line.
+ * so the high bit chooses vertical line, the low bit horizontal line.  Use
+ * XCOORD(corner), YCOORD(corner) to get the index in xy[] for X and Y
+ * coordinate of aspecific corner.
  */
 struct _GwyShapesRectanglePrivate {
     gint hover;
@@ -108,6 +113,7 @@ static void     constrain_horiz_vert                   (GwyShapes *shapes,
 static void     limit_into_bbox                        (const cairo_rectangle_t *bbox,
                                                         guint corner,
                                                         gdouble *xy);
+static void     sort_corners                           (gdouble *xy);
 static gboolean add_shape                              (GwyShapes *shapes,
                                                         gdouble x,
                                                         gdouble y);
@@ -117,6 +123,7 @@ static void     update_hover                           (GwyShapes *shapes,
 static gboolean snap_point                             (GwyShapes *shapes,
                                                         gdouble *x,
                                                         gdouble *y);
+static void     remove_null_shape                      (GwyShapes *shapes);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -264,16 +271,15 @@ gwy_shapes_rectangle_button_press(GwyShapes *shapes,
         // If we clicked on an already selected shape, we will move the entire
         // group.  If we clicked on an unselected shape we will need to select
         // only this one.
-        if (priv->mode == MODE_MOVING
+        if ((priv->mode == MODE_MOVING || priv->mode == MODE_CORNER)
             && !gwy_int_set_contains(shapes->selection, priv->clicked)) {
             gwy_shapes_start_updating_selection(shapes);
             gwy_int_set_update(shapes->selection, &priv->clicked, 1);
             gwy_shapes_stop_updating_selection(shapes);
         }
     }
-    else if (priv->mode == MODE_MOVING) {
+    else if (priv->mode == MODE_MOVING || priv->mode == MODE_CORNER) {
         if (!add_shape(shapes, x, y)) {
-            priv->new_shape = TRUE;
             priv->clicked = -1;
             return FALSE;
         }
@@ -296,15 +302,22 @@ gwy_shapes_rectangle_button_release(GwyShapes *shapes,
         return FALSE;
     }
 
+    gboolean emit_finished = TRUE;
     if (!gwy_shapes_has_moved(shapes)) {
         GwyIntSet *selection = shapes->selection;
 
+        emit_finished = priv->new_shape;
         gwy_shapes_start_updating_selection(shapes);
         if (priv->mode == MODE_SELECTING)
             gwy_int_set_toggle(selection, priv->clicked);
         else if (priv->mode == MODE_MOVING)
             gwy_int_set_update(selection, &priv->clicked, 1);
+        else if (priv->mode == MODE_CORNER && !priv->new_shape)
+            gwy_int_set_update(selection, &priv->clicked, 1);
         gwy_shapes_stop_updating_selection(shapes);
+
+        if (priv->mode == MODE_CORNER && priv->new_shape)
+            gwy_coords_delete(gwy_shapes_get_coords(shapes), priv->clicked);
 
         // FIXME: May not be necessary if we respond to the selection signals.
         gwy_shapes_update(shapes);
@@ -314,19 +327,16 @@ gwy_shapes_rectangle_button_release(GwyShapes *shapes,
         gwy_shapes_check_movement(shapes, &xy, &dxy);
         constrain_movement(shapes, event->state, &dxy);
         gwy_shapes_move(shapes, &dxy);
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
     }
     else if (priv->mode == MODE_CORNER) {
         GwyXY xy = { event->x, event->y }, dxy;
         gwy_shapes_check_movement(shapes, &xy, &dxy);
         move_corner(shapes, event->state, &dxy);
-        gwy_coords_finished(gwy_shapes_get_coords(shapes));
+        remove_null_shape(shapes);
     }
 
-    // TODO: in MODE_CORNER, if we created a zero-length rectangle (either by
-    // editing or by not moving at all), discard it.  There will be some
-    // convoluted logic whether to call gwy_coords_finished() -- we need to
-    // avoid it only if the rectangle is not new and has not moved at all.
+    if (emit_finished)
+        gwy_coords_finished(gwy_shapes_get_coords(shapes));
 
     gwy_shapes_unset_current_point(shapes);
     priv->clicked = -1;
@@ -466,14 +476,14 @@ find_near_corner(GwyShapes *shapes,
         dist2 = xd*xd + yd*yd;
         if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
-            mini = 2*i + 1;
+            mini = 4*i + 1;
         }
         xd = x - xy[0];
         yd = y - xy[3];
         dist2 = xd*xd + yd*yd;
         if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
             mindist2 = dist2;
-            mini = 2*i + 2;
+            mini = 4*i + 2;
         }
     }
 
@@ -531,8 +541,8 @@ find_near_rectangle(GwyShapes *shapes,
     return mini;
 }
 
-// FIXME: This is suboptimal.  We should snap @clicked rectangle as the last thing
-// as long as it does not make other selected lies fall outside the bbox.
+// FIXME: This is suboptimal.  We should snap @clicked rectangle as the last
+// thing as long as it does not make other selected lies fall outside the bbox.
 static void
 constrain_movement(GwyShapes *shapes,
                    GdkModifierType modif,
@@ -551,11 +561,11 @@ constrain_movement(GwyShapes *shapes,
     const GwyCoords *orig_coords = gwy_shapes_get_starting_coords(shapes);
     gdouble xy[4], diff[2];
     gwy_coords_get(orig_coords, priv->selection_index, xy);
-    diff[0] = xy[2*corner + 0] + dxy->x;
-    diff[1] = xy[2*corner + 1] + dxy->y;
+    diff[0] = xy[XCOORD(corner)] + dxy->x;
+    diff[1] = xy[YCOORD(corner)] + dxy->y;
     snap_point(shapes, diff+0, diff+1);
-    diff[0] -= xy[2*corner + 0];
-    diff[1] -= xy[2*corner + 1];
+    diff[0] -= xy[XCOORD(corner)];
+    diff[1] -= xy[YCOORD(corner)];
 
     const cairo_rectangle_t *bbox = &shapes->bounding_box;
     gdouble lower[2] = { bbox->x, bbox->y };
@@ -585,12 +595,14 @@ move_corner(GwyShapes *shapes,
     gdouble xy[4];
 
     gwy_coords_get(orig_coords, priv->selection_index, xy);
-    xy[2*corner + 0] += dxy->x;
-    xy[2*corner + 1] += dxy->y;
+    xy[XCOORD(corner)] += dxy->x;
+    xy[YCOORD(corner)] += dxy->y;
 
-    //if (modif & GDK_SHIFT_MASK)
     limit_into_bbox(&shapes->bounding_box, corner, xy);
-    snap_point(shapes, xy + 2*corner + 0, xy + 2*corner + 1);
+    //if (modif & GDK_SHIFT_MASK)
+    //   constrain_ratio();
+    snap_point(shapes, xy + XCOORD(corner), xy + YCOORD(corner));
+    sort_corners(xy);
     gwy_coords_set(coords, priv->clicked, xy);
 }
 
@@ -610,41 +622,23 @@ constrain_horiz_vert(GwyShapes *shapes, GwyXY *dxy)
 static void
 limit_into_bbox(const cairo_rectangle_t *bbox, guint corner, gdouble *xy)
 {
-    guint other = (corner + 1) % 2;
-
-    gdouble lx = xy[2*corner + 0] - xy[2*other + 0],
-            ly = xy[2*corner + 1] - xy[2*other + 1];
-
-    if (xy[2*corner + 0] < bbox->x) {
-        gdouble x = bbox->x;
-        xy[2*corner + 1] = xy[2*other + 1] + ly/lx*(x - xy[2*other + 0]);
-        if (!isnormal(xy[2*corner + 1]))
-            xy[2*corner + 1] = xy[2*other + 1];
-    }
-    if (xy[2*corner + 1] < bbox->y) {
-        gdouble y = bbox->y;
-        xy[2*corner + 0] = xy[2*other + 0] + lx/ly*(y - xy[2*other + 1]);
-        if (!isnormal(xy[2*corner + 0]))
-            xy[2*corner + 0] = xy[2*other + 0];
-    }
-    if (xy[2*corner + 0] > bbox->x + bbox->width) {
-        gdouble x = bbox->x + bbox->width;
-        xy[2*corner + 1] = xy[2*other + 1] + ly/lx*(x - xy[2*other + 0]);
-        if (!isnormal(xy[2*corner + 1]))
-            xy[2*corner + 1] = xy[2*other + 1];
-    }
-    if (xy[2*corner + 1] > bbox->y + bbox->height) {
-        gdouble y = bbox->y + bbox->height;
-        xy[2*corner + 0] = xy[2*other + 0] + lx/ly*(y - xy[2*other + 1]);
-        if (!isnormal(xy[2*corner + 0]))
-            xy[2*corner + 0] = xy[2*other + 0];
-    }
+    xy[XCOORD(corner)] = CLAMP(xy[XCOORD(corner)],
+                               bbox->x, bbox->x + bbox->width);
+    xy[YCOORD(corner)] = CLAMP(xy[YCOORD(corner)],
+                               bbox->y, bbox->y + bbox->height);
 }
 
+static void
+sort_corners(gdouble *xy)
+{
+    GWY_ORDER(gdouble, xy[0], xy[2]);
+    GWY_ORDER(gdouble, xy[1], xy[3]);
+}
+
+// FIXME: The top part is common
 static gboolean
 add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 {
-    ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     if (n >= gwy_shapes_get_max_shapes(shapes))
@@ -659,12 +653,14 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
         return FALSE;
 
-    gdouble xy[4] = { x, y, x, y };
+    ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
     priv->mode = MODE_CORNER;
-    priv->corner = 1;
+    priv->corner = 3;
     priv->entire_shape = FALSE;
+    priv->new_shape = TRUE;
     priv->hover = priv->clicked = n;
     priv->selection_index = 0;
+    gdouble xy[4] = { x, y, x, y };
     gwy_coords_set(coords, priv->clicked, xy);
     return TRUE;
 }
@@ -674,13 +670,13 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 {
     ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
     guint corner = G_MAXUINT;
-    gboolean entire_shape = TRUE;
+    gboolean entire_shape = (gwy_int_set_size(shapes->selection) > 1);
     gint i = -1;
 
     if (isfinite(eventx) && isfinite(eventy)) {
-        if ((i = find_near_corner(shapes, eventx, eventy)) >= 0) {
+        if (!entire_shape
+            && (i = find_near_corner(shapes, eventx, eventy)) >= 0) {
             corner = i % 4;
-            entire_shape = FALSE;
             i /= 4;
         }
         else if ((i = find_near_rectangle(shapes, eventx, eventy)) >= 0) {
@@ -699,9 +695,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
 
     GdkCursorType cursor_type = GDK_ARROW;
     if (i != -1 && gwy_shapes_get_selectable(shapes)) {
-        if (!entire_shape
-            && gwy_shapes_get_editable(shapes)
-            && gwy_int_set_size(shapes->selection) == 1)
+        if (!entire_shape && gwy_shapes_get_editable(shapes))
             cursor_type = GDK_CROSS;
         else
             cursor_type = GDK_FLEUR;
@@ -726,6 +720,24 @@ snap_point(GwyShapes *shapes,
     cairo_matrix_transform_point(&shapes->pixel_to_view, x, y);
     cairo_matrix_transform_point(&shapes->view_to_coords, x, y);
     return TRUE;
+}
+
+static void
+remove_null_shape(GwyShapes *shapes)
+{
+    ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(shapes)->priv;
+    GwyCoords *coords = gwy_shapes_get_coords(shapes);
+    gdouble xy[4];
+    guint clicked = priv->clicked;
+    gwy_coords_get(coords, clicked, xy);
+    gdouble lx = xy[2] - xy[0], ly = xy[3] - xy[1];
+    cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
+    cairo_matrix_transform_distance(&shapes->view_to_pixel, &lx, &ly);
+    if (lx*lx + ly*ly >= 0.2)
+        return;
+
+    gwy_coords_delete(coords, clicked);
+    gwy_shapes_update(shapes);
 }
 
 /**

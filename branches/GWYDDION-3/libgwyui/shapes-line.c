@@ -293,7 +293,7 @@ gwy_shapes_line_button_press(GwyShapes *shapes,
             gwy_shapes_stop_updating_selection(shapes);
         }
     }
-    else if ((priv->mode == MODE_MOVING || priv->mode == MODE_ENDPOINT)) {
+    else if (priv->mode == MODE_MOVING || priv->mode == MODE_ENDPOINT) {
         if (!add_shape(shapes, x, y)) {
             priv->clicked = -1;
             return FALSE;
@@ -718,10 +718,10 @@ calc_constrained_bbox(GwyShapes *shapes,
     bbox->height -= hy;
 }
 
+// FIXME: The top part is common
 static gboolean
 add_shape(GwyShapes *shapes, gdouble x, gdouble y)
 {
-    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
     if (n >= gwy_shapes_get_max_shapes(shapes))
@@ -736,13 +736,14 @@ add_shape(GwyShapes *shapes, gdouble x, gdouble y)
         || CLAMP(y, bbox->y, bbox->y + bbox->height) != y)
         return FALSE;
 
-    gdouble xy[4] = { x, y, x, y };
+    ShapesLine *priv = GWY_SHAPES_LINE(shapes)->priv;
     priv->mode = MODE_ENDPOINT;
     priv->endpoint = 1;
     priv->entire_shape = FALSE;
     priv->new_shape = TRUE;
     priv->hover = priv->clicked = n;
     priv->selection_index = 0;
+    gdouble xy[4] = { x, y, x, y };
     gwy_coords_set(coords, priv->clicked, xy);
     return TRUE;
 }
@@ -754,9 +755,6 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
     guint endpoint = G_MAXUINT;
     gboolean entire_shape = (gwy_int_set_size(shapes->selection) > 1);
     gint i = -1;
-
-    gdouble x = eventx, y = eventy;
-    cairo_matrix_transform_point(&shapes->view_to_coords, &x, &y);
 
     if (isfinite(eventx) && isfinite(eventy)) {
         if (!entire_shape
