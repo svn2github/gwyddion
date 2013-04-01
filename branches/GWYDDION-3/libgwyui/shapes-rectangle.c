@@ -32,6 +32,7 @@
 
 enum {
     PROP_0,
+    PROP_MIRROR,
     N_PROPS
 };
 
@@ -64,6 +65,7 @@ struct _GwyShapesRectanglePrivate {
     guint corner : 2;  // for CORNER; also determines snapping for MOVING
     gboolean entire_shape : 1;
     gboolean new_shape : 1;
+    gboolean mirror : 1;
 };
 
 static void     gwy_shapes_rectangle_set_property      (GObject *object,
@@ -90,6 +92,8 @@ static void     gwy_shapes_rectangle_selection_added   (GwyShapes *shapes,
 static void     gwy_shapes_rectangle_selection_removed (GwyShapes *shapes,
                                                         gint value);
 static void     gwy_shapes_rectangle_selection_assigned(GwyShapes *shapes);
+static gboolean set_mirror                             (GwyShapesRectangle *rectangles,
+                                                        gboolean mirror);
 static void     draw_rectangles                        (GwyShapes *shapes,
                                                         cairo_t *cr);
 static void     draw_rectangle                         (const GwyShapes *shapes,
@@ -147,6 +151,14 @@ gwy_shapes_rectangle_class_init(GwyShapesRectangleClass *klass)
     shapes_class->selection_removed = gwy_shapes_rectangle_selection_removed;
     shapes_class->selection_assigned = gwy_shapes_rectangle_selection_assigned;
 
+    properties[PROP_MIRROR]
+        = g_param_spec_boolean("mirror",
+                               "Mirror",
+                               "Whether to draw each rectangle also mirrored "
+                               "with respect to the origin.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -170,6 +182,10 @@ gwy_shapes_rectangle_set_property(GObject *object,
     GwyShapesRectangle *rectangles = GWY_SHAPES_RECTANGLE(object);
 
     switch (prop_id) {
+        case PROP_MIRROR:
+        set_mirror(rectangles, g_value_get_boolean(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -185,6 +201,10 @@ gwy_shapes_rectangle_get_property(GObject *object,
     ShapesRectangle *priv = GWY_SHAPES_RECTANGLE(object)->priv;
 
     switch (prop_id) {
+        case PROP_MIRROR:
+        g_value_set_boolean(value, priv->mirror);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -408,6 +428,19 @@ gwy_shapes_rectangle_new(void)
     return g_object_new(GWY_TYPE_SHAPES_RECTANGLE, 0, NULL);
 }
 
+static gboolean
+set_mirror(GwyShapesRectangle *rectangles,
+           gboolean mirror)
+{
+    ShapesRectangle *priv = rectangles->priv;
+    if (!mirror == !priv->mirror)
+        return FALSE;
+
+    priv->mirror = !!mirror;
+    gwy_shapes_update(GWY_SHAPES(rectangles));
+    return TRUE;
+}
+
 static void
 draw_rectangles(GwyShapes *shapes, cairo_t *cr)
 {
@@ -432,6 +465,20 @@ draw_rectangle(const GwyShapes *shapes,
     cairo_line_to(cr, xt, yt);
     cairo_line_to(cr, xt, yf);
     cairo_close_path(cr);
+
+    if (GWY_SHAPES_RECTANGLE(shapes)->priv->mirror) {
+        xf = -xy[0];
+        yf = -xy[1];
+        xt = -xy[2];
+        yt = -xy[3];
+        cairo_matrix_transform_point(matrix, &xf, &yf);
+        cairo_matrix_transform_point(matrix, &xt, &yt);
+        cairo_move_to(cr, xf, yf);
+        cairo_line_to(cr, xf, yt);
+        cairo_line_to(cr, xt, yt);
+        cairo_line_to(cr, xt, yf);
+        cairo_close_path(cr);
+    }
 }
 
 // FIXME: May be common.
