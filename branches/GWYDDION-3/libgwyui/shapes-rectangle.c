@@ -449,6 +449,8 @@ static gint
 find_near_corner(const GwyShapes *shapes,
                  gdouble x, gdouble y)
 {
+    // Primary corners first to prefer them in case of equality.
+    static const guint corners[] = { 0, 3, 1, 2 };
     const cairo_matrix_t *matrix = &shapes->coords_to_view;
     const GwyCoords *coords = gwy_shapes_get_coords(shapes);
     guint n = gwy_coords_size(coords);
@@ -460,34 +462,15 @@ find_near_corner(const GwyShapes *shapes,
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
-        gdouble xd = x - xy[0];
-        gdouble yd = y - xy[1];
-        gdouble dist2 = xd*xd + yd*yd;
-        // Primary corners first to prefer them in case of equality.
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i;
-        }
-        xd = x - xy[2];
-        yd = y - xy[3];
-        dist2 = xd*xd + yd*yd;
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + 3;
-        }
-        xd = x - xy[2];
-        yd = y - xy[1];
-        dist2 = xd*xd + yd*yd;
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + 1;
-        }
-        xd = x - xy[0];
-        yd = y - xy[3];
-        dist2 = xd*xd + yd*yd;
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + 2;
+        for (guint j = 0; j < G_N_ELEMENTS(corners); j++) {
+            guint corner = corners[j];
+            gdouble xd = x - xy[XCOORD(corner)];
+            gdouble yd = y - xy[YCOORD(corner)];
+            gdouble dist2 = xd*xd + yd*yd;
+            if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+                mindist2 = dist2;
+                mini = 4*i + corner;
+            }
         }
     }
 
@@ -510,35 +493,19 @@ find_near_rectangle(const GwyShapes *shapes,
         gwy_coords_get(coords, i, xy);
         cairo_matrix_transform_point(matrix, xy + 0, xy + 1);
         cairo_matrix_transform_point(matrix, xy + 2, xy + 3);
-        guint endpoint;
-        gdouble dist2;
-
-        dist2 = gwy_line_point_distance2(xy[0], xy[1], xy[2], xy[1], x, y,
-                                         &endpoint);
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + (endpoint ? 1 : 0);
-        }
-
-        dist2 = gwy_line_point_distance2(xy[2], xy[1], xy[2], xy[3], x, y,
-                                         &endpoint);
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + (endpoint ? 3 : 1);
-        }
-
-        dist2 = gwy_line_point_distance2(xy[0], xy[1], xy[0], xy[3], x, y,
-                                         &endpoint);
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + (endpoint ? 2 : 0);
-        }
-
-        dist2 = gwy_line_point_distance2(xy[0], xy[3], xy[2], xy[3], x, y,
-                                         &endpoint);
-        if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
-            mindist2 = dist2;
-            mini = 4*i + (endpoint ? 3 : 2);
+        guint other;
+        for (guint j = 0, corner = 0; j < 4; corner = other, j++) {
+            guint endpoint;
+            other = corner ^ (1 << (j % 2));
+            gdouble dist2 = gwy_line_point_distance2(xy[XCOORD(corner)],
+                                                     xy[YCOORD(corner)],
+                                                     xy[XCOORD(other)],
+                                                     xy[YCOORD(other)],
+                                                     x, y, &endpoint);
+            if (dist2 <= NEAR_DIST2 && dist2 < mindist2) {
+                mindist2 = dist2;
+                mini = 4*i + (endpoint ? other : corner);
+            }
         }
     }
 
@@ -759,6 +726,7 @@ update_hover(GwyShapes *shapes, gdouble eventx, gdouble eventy)
         gwy_shapes_update(shapes);
 }
 
+// FIXME: Common, there are only two kinds of snapping: round and halfround
 static gboolean
 snap_point(GwyShapes *shapes,
            gdouble *x, gdouble *y)
@@ -775,6 +743,7 @@ snap_point(GwyShapes *shapes,
     return TRUE;
 }
 
+// FIXME: Common with lines
 static void
 remove_null_shape(GwyShapes *shapes)
 {
