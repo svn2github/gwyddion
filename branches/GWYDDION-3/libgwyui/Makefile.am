@@ -27,6 +27,8 @@ public_headers = \
 	$(srcdir)/color-axis.h \
 	$(srcdir)/coords-view.h \
 	$(srcdir)/field-render.h \
+	$(srcdir)/graph-area.h \
+	$(srcdir)/graph-curve.h \
 	$(srcdir)/inventory-store.h \
 	$(srcdir)/main.h \
 	$(srcdir)/raster-area.h \
@@ -86,6 +88,8 @@ libgwyui3_la_SOURCES = \
 	color-axis.c \
 	coords-view.c \
 	field-render.c \
+	graph-area.c \
+	graph-curve.c \
 	icons-gresource.c \
 	inventory-store.c \
 	main.c \

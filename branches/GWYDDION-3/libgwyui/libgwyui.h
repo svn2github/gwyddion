@@ -29,6 +29,8 @@
 #include <libgwyui/color-axis.h>
 #include <libgwyui/coords-view.h>
 #include <libgwyui/field-render.h>
+#include <libgwyui/graph-area.h>
+#include <libgwyui/graph-curve.h>
 #include <libgwyui/inventory-store.h>
 #include <libgwyui/main.h>
 #include <libgwyui/raster-area.h>
