@@ -40,8 +40,8 @@ enum {
     PROP_RES,
     PROP_REAL,
     PROP_OFFSET,
-    PROP_UNIT_X,
-    PROP_UNIT_Y,
+    PROP_XUNIT,
+    PROP_YUNIT,
     PROP_NAME,
     N_PROPS
 };
@@ -70,8 +70,8 @@ static void     gwy_line_get_property     (GObject *object,
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "real",   .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
     /*1*/ { .name = "off",    .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*2*/ { .name = "xunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*3*/ { .name = "yunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*2*/ { .name = "xunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*3*/ { .name = "yunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*4*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
     /*5*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -126,7 +126,7 @@ gwy_line_class_init(GwyLineClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_X]
+    properties[PROP_XUNIT]
          = g_param_spec_object("xunit",
                                "X unit",
                                "Physical units of lateral dimension of the "
@@ -134,7 +134,7 @@ gwy_line_class_init(GwyLineClass *klass)
                                GWY_TYPE_UNIT,
                                G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_Y]
+    properties[PROP_YUNIT]
         = g_param_spec_object("yunit",
                               "Y unit",
                               "Physical units of line values.",
@@ -406,13 +406,13 @@ gwy_line_get_property(GObject *object,
 
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
-        case PROP_UNIT_X:
+        case PROP_XUNIT:
         if (!priv->xunit)
             priv->xunit = gwy_unit_new();
         g_value_set_object(value, priv->xunit);
         break;
 
-        case PROP_UNIT_Y:
+        case PROP_YUNIT:
         if (!priv->yunit)
             priv->yunit = gwy_unit_new();
         g_value_set_object(value, priv->yunit);

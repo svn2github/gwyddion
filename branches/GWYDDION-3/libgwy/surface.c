@@ -39,8 +39,8 @@ enum {
 enum {
     PROP_0,
     PROP_N_POINTS,
-    PROP_UNIT_XY,
-    PROP_UNIT_Z,
+    PROP_XYUNIT,
+    PROP_ZUNIT,
     PROP_NAME,
     N_PROPS
 };
@@ -50,25 +50,25 @@ static void     gwy_surface_dispose          (GObject *object);
 static void     gwy_surface_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_surface_n_items          (GwySerializable *serializable);
 static gsize    gwy_surface_itemize          (GwySerializable *serializable,
-                                            GwySerializableItems *items);
+                                              GwySerializableItems *items);
 static gboolean gwy_surface_construct        (GwySerializable *serializable,
-                                            GwySerializableItems *items,
-                                            GwyErrorList **error_list);
+                                              GwySerializableItems *items,
+                                              GwyErrorList **error_list);
 static GObject* gwy_surface_duplicate_impl   (GwySerializable *serializable);
 static void     gwy_surface_assign_impl      (GwySerializable *destination,
-                                            GwySerializable *source);
+                                              GwySerializable *source);
 static void     gwy_surface_set_property     (GObject *object,
-                                            guint prop_id,
-                                            const GValue *value,
-                                            GParamSpec *pspec);
+                                              guint prop_id,
+                                              const GValue *value,
+                                              GParamSpec *pspec);
 static void     gwy_surface_get_property     (GObject *object,
-                                            guint prop_id,
-                                            GValue *value,
-                                            GParamSpec *pspec);
+                                              guint prop_id,
+                                              GValue *value,
+                                              GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "xyunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*1*/ { .name = "zunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*0*/ { .name = "xyunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*1*/ { .name = "zunit",   .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*2*/ { .name = "name",    .ctype = GWY_SERIALIZABLE_STRING,       },
     /*3*/ { .name = "data",    .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -109,7 +109,7 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                             0, G_MAXUINT, 0,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_XY]
+    properties[PROP_XYUNIT]
         = g_param_spec_object("xyunit",
                               "XY unit",
                               "Physical units of the lateral dimensions, this "
@@ -117,7 +117,7 @@ gwy_surface_class_init(GwySurfaceClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_Z]
+    properties[PROP_ZUNIT]
         = g_param_spec_object("zunit",
                               "Z unit",
                               "Physical units of the ordinate values.",
@@ -360,13 +360,13 @@ gwy_surface_get_property(GObject *object,
 
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
-        case PROP_UNIT_XY:
+        case PROP_XYUNIT:
         if (!priv->xyunit)
             priv->xyunit = gwy_unit_new();
         g_value_set_object(value, priv->xyunit);
         break;
 
-        case PROP_UNIT_Z:
+        case PROP_ZUNIT:
         if (!priv->zunit)
             priv->zunit = gwy_unit_new();
         g_value_set_object(value, priv->zunit);

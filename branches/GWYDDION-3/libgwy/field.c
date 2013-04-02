@@ -47,9 +47,9 @@ enum {
     PROP_YREAL,
     PROP_XOFFSET,
     PROP_YOFFSET,
-    PROP_UNIT_X,
-    PROP_UNIT_Y,
-    PROP_UNIT_Z,
+    PROP_XUNIT,
+    PROP_YUNIT,
+    PROP_ZUNIT,
     PROP_NAME,
     N_PROPS
 };
@@ -82,9 +82,9 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*03*/ { .name = "yreal",  .ctype = GWY_SERIALIZABLE_DOUBLE,       .value.v_double = 1.0 },
     /*04*/ { .name = "xoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
     /*05*/ { .name = "yoff",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    /*06*/ { .name = "xunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*07*/ { .name = "yunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*08*/ { .name = "zunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*06*/ { .name = "xunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*07*/ { .name = "yunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*08*/ { .name = "zunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*09*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
     /*10*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -162,7 +162,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_X]
+    properties[PROP_XUNIT]
         = g_param_spec_object("xunit",
                               "X unit",
                               "Physical units of horizontal lateral dimensions "
@@ -170,7 +170,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_Y]
+    properties[PROP_YUNIT]
         = g_param_spec_object("yunit",
                               "Y unit",
                               "Physical units of vertical lateral dimensions "
@@ -178,7 +178,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_Z]
+    properties[PROP_ZUNIT]
         = g_param_spec_object("zunit",
                               "Z unit",
                               "Physical units of field values.",
@@ -554,19 +554,19 @@ gwy_field_get_property(GObject *object,
 
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
-        case PROP_UNIT_X:
+        case PROP_XUNIT:
         if (!priv->xunit)
             priv->xunit = gwy_unit_new();
         g_value_set_object(value, priv->xunit);
         break;
 
-        case PROP_UNIT_Y:
+        case PROP_YUNIT:
         if (!priv->yunit)
             priv->yunit = gwy_unit_new();
         g_value_set_object(value, priv->yunit);
         break;
 
-        case PROP_UNIT_Z:
+        case PROP_ZUNIT:
         if (!priv->zunit)
             priv->zunit = gwy_unit_new();
         g_value_set_object(value, priv->zunit);

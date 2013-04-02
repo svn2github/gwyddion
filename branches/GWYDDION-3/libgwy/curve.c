@@ -39,8 +39,8 @@ enum {
 enum {
     PROP_0,
     PROP_N_POINTS,
-    PROP_UNIT_X,
-    PROP_UNIT_Y,
+    PROP_XUNIT,
+    PROP_YUNIT,
     PROP_NAME,
     N_PROPS
 };
@@ -67,8 +67,8 @@ static void     gwy_curve_get_property     (GObject *object,
                                             GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "xunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    /*1*/ { .name = "yunit", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*0*/ { .name = "xunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*1*/ { .name = "yunit",  .ctype = GWY_SERIALIZABLE_OBJECT,       },
     /*2*/ { .name = "name",   .ctype = GWY_SERIALIZABLE_STRING,       },
     /*3*/ { .name = "data",   .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
@@ -109,14 +109,14 @@ gwy_curve_class_init(GwyCurveClass *klass)
                             0, G_MAXUINT, 0,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_X]
+    properties[PROP_XUNIT]
         = g_param_spec_object("xunit",
                               "X unit",
                               "Physical units of the abscissa values.",
                               GWY_TYPE_UNIT,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_UNIT_Y]
+    properties[PROP_YUNIT]
         = g_param_spec_object("yunit",
                               "Y unit",
                               "Physical units of the ordinate values.",
@@ -349,13 +349,13 @@ gwy_curve_get_property(GObject *object,
 
         // Instantiate the units to be consistent with the direct interface
         // that never admits the units are NULL.
-        case PROP_UNIT_X:
+        case PROP_XUNIT:
         if (!priv->xunit)
             priv->xunit = gwy_unit_new();
         g_value_set_object(value, priv->xunit);
         break;
 
-        case PROP_UNIT_Y:
+        case PROP_YUNIT:
         if (!priv->yunit)
             priv->yunit = gwy_unit_new();
         g_value_set_object(value, priv->yunit);
