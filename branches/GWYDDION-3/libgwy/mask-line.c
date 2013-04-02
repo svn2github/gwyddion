@@ -605,39 +605,17 @@ gwy_mask_line_new_resampled(const GwyMaskLine *line,
                                                                &req_bits);
     g_assert(req_bits == line->res);
 
-    GwyMaskScalingSegment *seg = segments;
-    GwyMaskIter srciter, destiter;
-    gwy_mask_line_iter_init(line, srciter, 0);
-    gwy_mask_line_iter_init(dest, destiter, 0);
-    if (step > 1.0) {
-        // seg->move is always nonzero.
-        for (guint i = res; i; i--, seg++) {
-            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
-            guint c = 0;
-            for (guint k = seg->move-1; k; k--) {
-                gwy_mask_iter_next(srciter);
-                c += !!gwy_mask_iter_get(srciter);
-            }
-            gwy_mask_iter_next(srciter);
-            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
-            gwy_mask_iter_set(destiter, s >= MASK_ROUND_THRESHOLD);
-            gwy_mask_iter_next(destiter);
-        }
-    }
-    else {
-        // seg->move is at most 1.
-        for (guint i = res; i; i--, seg++) {
-            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
-            if (seg->move) {
-                gwy_mask_iter_next(srciter);
-                s += seg->w1 * !!gwy_mask_iter_get(srciter);
-            }
-            gwy_mask_iter_set(destiter, s >= MASK_ROUND_THRESHOLD);
-            gwy_mask_iter_next(destiter);
-        }
-    }
-
+    GwyMaskIter iter;
+    gwy_mask_line_iter_init(line, iter, 0);
+    gdouble *scaled = g_new0(gdouble, res);
+    gwy_mask_scale_row_weighted(iter, segments, scaled, res, step, 1.0);
     g_free(segments);
+    gwy_mask_line_iter_init(dest, iter, 0);
+    for (guint i = 0; i < res; i++) {
+        gwy_mask_iter_set(iter, scaled[i] >= MASK_ROUND_THRESHOLD);
+        gwy_mask_iter_next(iter);
+    }
+    g_free(scaled);
 
     return dest;
 }

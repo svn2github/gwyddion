@@ -679,37 +679,6 @@ gwy_mask_field_new_part(const GwyMaskField *field,
     return part;
 }
 
-static void
-scale_source_row(GwyMaskIter srciter, GwyMaskScalingSegment *seg,
-                 gdouble *target, guint res, gdouble step, gdouble weight)
-{
-    if (step > 1.0) {
-        // seg->move is always nonzero.
-        for (guint i = res; i; i--, seg++) {
-            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
-            guint c = 0;
-            for (guint k = seg->move-1; k; k--) {
-                gwy_mask_iter_next(srciter);
-                c += !!gwy_mask_iter_get(srciter);
-            }
-            gwy_mask_iter_next(srciter);
-            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
-            *(target++) += weight*s;
-        }
-    }
-    else {
-        // seg->move is at most 1.
-        for (guint i = res; i; i--, seg++) {
-            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
-            if (seg->move) {
-                gwy_mask_iter_next(srciter);
-                s += seg->w1 * !!gwy_mask_iter_get(srciter);
-            }
-            *(target++) += weight*s;
-        }
-    }
-}
-
 /**
  * gwy_mask_field_new_resampled:
  * @field: A two-dimensional mask field.
@@ -752,16 +721,19 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
         GwyMaskIter iter;
         gwy_clear(row, xres);
         gwy_mask_field_iter_init(field, iter, 0, isrc);
-        scale_source_row(iter, xsegments, row, xres, xstep, yseg->w0);
+        gwy_mask_scale_row_weighted(iter, xsegments, row, xres,
+                                    xstep, yseg->w0);
         if (yseg->move) {
             for (guint k = yseg->move-1; k; k--) {
                 isrc++;
                 gwy_mask_field_iter_init(field, iter, 0, isrc);
-                scale_source_row(iter, xsegments, row, xres, xstep, 1.0/ystep);
+                gwy_mask_scale_row_weighted(iter, xsegments, row, xres,
+                                            xstep, 1.0/ystep);
             }
             isrc++;
             gwy_mask_field_iter_init(field, iter, 0, isrc);
-            scale_source_row(iter, xsegments, row, xres, xstep, yseg->w1);
+            gwy_mask_scale_row_weighted(iter, xsegments, row, xres,
+                                        xstep, yseg->w1);
         }
         gwy_mask_field_iter_init(dest, iter, 0, i);
         for (guint j = 0; j < xres; j++) {

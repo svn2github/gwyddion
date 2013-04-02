@@ -63,10 +63,16 @@ typedef struct {
     guint move;
 } GwyMaskScalingSegment;
 
-GwyMaskScalingSegment* gwy_mask_prepare_scaling(gdouble pos,
-                                                gdouble step,
-                                                guint nsteps,
-                                                guint *required_bits) G_GNUC_MALLOC;
+GwyMaskScalingSegment* gwy_mask_prepare_scaling   (gdouble pos,
+                                                   gdouble step,
+                                                   guint nsteps,
+                                                   guint *required_bits)             G_GNUC_MALLOC;
+void                   gwy_mask_scale_row_weighted(GwyMaskIter srciter,
+                                                   const GwyMaskScalingSegment *seg,
+                                                   gdouble *dest,
+                                                   guint res,
+                                                   gdouble step,
+                                                   gdouble weight);
 
 G_END_DECLS
 

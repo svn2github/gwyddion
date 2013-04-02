@@ -25,9 +25,11 @@
  * gwy_mask_prepare_scaling:
  * @pos: Initial position in the mask.  Can be non-integral to start within a
  *       pixel.
- * @step: The size of one target pixel in the source (the inverse of zoom).
- * @nsteps: The number of pixels wanted for the target.
- * @required_bits: How many input bits it will consume.  This can be used for
+ * @step: The size of one destination pixel in the source (the inverse of
+ *        zoom).
+ * @nsteps: The number of pixels wanted for the destination.
+ * @required_bits: (out):
+ *                 How many input bits it will consume.  This can be used for
  *                 verifying that the source is large enough.  All bits that
  *                 are used with nonzero weight are counted as consumed.
  *
@@ -74,6 +76,73 @@ gwy_mask_prepare_scaling(gdouble pos, gdouble step, guint nsteps,
     GWY_MAYBE_SET(required_bits, end+1 - first);
 
     return segments;
+}
+
+/**
+ * gwy_mask_scale_row_weighted:
+ * @srciter: Mask iterator set to the first bit in the source row.
+ * @seg: (array length=res):
+ *       Precalculated scaling segments determining the scaling.
+ * @dest: (inout) (array length=res):
+ *        Destination array.  Its contents is not plainly overwritten, the
+ *        weights are added.  If you want to start from scratch clear it
+ *        beforehand.
+ * @res: Destination resolution, i.e. the number of items in @seg and @dest.
+ * @step: The size of one destination pixel in the source (the inverse of
+ *        zoom).
+ * @weight: Factor to multiply all values with.  It is useful for
+ *          multi-dimensional interpolation where it can represent the weight
+ *          of the entire source row.
+ *
+ * Resamples one bit mask row to doubles with weighting.
+ *
+ * This is an auxiliary function chiefly used for mask resampling.
+ **/
+void
+gwy_mask_scale_row_weighted(GwyMaskIter srciter,
+                            const GwyMaskScalingSegment *seg,
+                            gdouble *dest,
+                            guint res, gdouble step, gdouble weight)
+{
+    if (step > 1.0) {
+        // seg->move is always nonzero, except perhaps the last one.
+        for (guint i = res-1; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            guint c = 0;
+            for (guint k = seg->move-1; k; k--) {
+                gwy_mask_iter_next(srciter);
+                c += !!gwy_mask_iter_get(srciter);
+            }
+            gwy_mask_iter_next(srciter);
+            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
+            *(dest++) += weight*s;
+        }
+
+        // The last iteration, seg->move may be zero.  Avoid accessing the w1
+        // bit in such case.
+        gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+        if (seg->move) {
+            guint c = 0;
+            for (guint k = seg->move-1; k; k--) {
+                gwy_mask_iter_next(srciter);
+                c += !!gwy_mask_iter_get(srciter);
+            }
+            gwy_mask_iter_next(srciter);
+            s += c/step + seg->w1 * !!gwy_mask_iter_get(srciter);
+        }
+        *(dest++) += weight*s;
+    }
+    else {
+        // seg->move is at most 1.
+        for (guint i = res; i; i--, seg++) {
+            gdouble s = seg->w0 * !!gwy_mask_iter_get(srciter);
+            if (seg->move) {
+                gwy_mask_iter_next(srciter);
+                s += seg->w1 * !!gwy_mask_iter_get(srciter);
+            }
+            *(dest++) += weight*s;
+        }
+    }
 }
 
 /**
@@ -196,16 +265,27 @@ gwy_mask_prepare_scaling(gdouble pos, gdouble step, guint nsteps,
  * GwyMaskScalingSegment:
  * @w0: Contribution of the first bit.
  * @w1: Contribution of the last bit.
- * @move: How many bits to move forward.
+ * @move: How many bits to move forward to the last bit.  If it is zero @w1 is
+ *        always zero too; the entire weight is consolidated to @w0.
  *
  * Precomputed auxiliary data for mask scaling.
  *
- * If scaling up @move is always at least 1; @w0 and @w1 then refer to
- * different bits and there may be some pixels between to include completely.
+ * If scaling up, @move is at least 1 and @w0 and @w1 then refer to different
+ * bits and there may be some pixels between to include completely.  There is
+ * one exception: the very last pixel may have @w0=1, @w1=0, @move=0.
  *
- * If, on the other hand, scaling down @move is at most 1 there are never any
- * pixels between to include completely.  In this case @move can be also 0
+ * If, on the other hand, scaling down, @move is at most 1 and there are never
+ * any pixels between to include completely.  In this case @move can be also 0
  * which means the entire contribution is within one pixel.
+ *
+ * The bit weights can be visualised as follows:
+ * <programlisting>
+ * ┌────┬───┬───┬───┬────┐      ┌────┬────┐      ┌────┐
+ * │ w₀ │ 1 │ 1 │ 1 │ w₁ │      │ w₀ │ w₁ │      │ w₀ │
+ * └────┴───┴───┴───┴────┘      └────┴────┘      └────┘
+ * │───────────────→│           │───→│           │
+ *      move ≥ 2                move = 1         move = 0
+ * </programlisting>
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
