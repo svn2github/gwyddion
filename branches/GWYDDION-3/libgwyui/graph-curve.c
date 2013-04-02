@@ -18,6 +18,8 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/curve-statistics.h"
+#include "libgwy/line-statistics.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/types.h"
 #include "libgwyui/cairo-utils.h"
@@ -35,6 +37,12 @@ enum {
     PROP_LINE_TYPE,
     PROP_LINE_WIDTH,
     N_PROPS
+};
+
+enum {
+    SGNL_DATA_UPDATED,
+    SGNL_UPDATED,
+    N_SIGNALS
 };
 
 typedef struct _GwyGraphCurvePrivate GraphCurve;
@@ -99,8 +107,14 @@ static void     line_notify                 (GwyGraphCurve *graphcurve,
                                              GwyLine *line);
 static void     line_data_changed           (GwyGraphCurve *graphcurve,
                                              GwyLine *line);
+static void     updated                     (GwyGraphCurve *graphcurve,
+                                             const gchar *name);
+static void     data_updated                (GwyGraphCurve *graphcurve);
+static void     all_updated                 (GwyGraphCurve *graphcurve);
+static void     ensure_ranges               (GraphCurve *priv);
 
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 G_DEFINE_TYPE(GwyGraphCurve, gwy_graph_curve, G_TYPE_INITIALLY_UNOWNED);
 
@@ -184,6 +198,37 @@ gwy_graph_curve_class_init(GwyGraphCurveClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    /**
+     * GwyGraphCurve::updated:
+     * @gwygraphcurve: The #GwyGraphCurve which received the signal.
+     * @arg1: Name of the updated property of the data backend.
+     *
+     * The ::updated signal is emitted when properties of the curve data
+     * backend change.
+     **/
+    signals[SGNL_UPDATED]
+        = g_signal_new_class_handler("updated",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_DETAILED,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__STRING,
+                                     G_TYPE_NONE, 1,
+                                     G_TYPE_STRING);
+
+    /**
+     * GwyGraphCurve::data-updated:
+     * @gwygraphcurve: The #GwyGraphCurve which received the signal.
+     *
+     * The ::data-updated signal is emitted when the curve data change.
+     **/
+    signals[SGNL_DATA_UPDATED]
+        = g_signal_new_class_handler("data-updated",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
@@ -423,15 +468,9 @@ gwy_graph_curve_xrange(const GwyGraphCurve *graphcurve,
     g_return_val_if_fail(GWY_IS_GRAPH_CURVE(graphcurve), FALSE);
     g_return_val_if_fail(range, FALSE);
     GraphCurve *priv = graphcurve->priv;
-    if (!priv->curve && !priv->line) {
-        *range = (GwyRange){ 0.0, 0.0 };
-        return FALSE;
-    }
-    if (!priv->cached_range) {
-        // TODO: must calculate ranges now
-    }
+    ensure_ranges(priv);
     *range = priv->xrange;
-    return TRUE;
+    return priv->curve || priv->line;
 }
 
 /**
@@ -452,15 +491,9 @@ gwy_graph_curve_yrange(const GwyGraphCurve *graphcurve,
     g_return_val_if_fail(GWY_IS_GRAPH_CURVE(graphcurve), FALSE);
     g_return_val_if_fail(range, FALSE);
     GraphCurve *priv = graphcurve->priv;
-    if (!priv->curve && !priv->line) {
-        *range = (GwyRange){ 0.0, 0.0 };
-        return FALSE;
-    }
-    if (!priv->cached_range) {
-        // TODO: must calculate ranges now
-    }
+    ensure_ranges(priv);
     *range = priv->yrange;
-    return TRUE;
+    return priv->curve || priv->line;
 }
 
 /**
@@ -469,7 +502,17 @@ gwy_graph_curve_yrange(const GwyGraphCurve *graphcurve,
  * @cr: 
  * @grapharea: 
  *
- * .
+ * Draws a graph curve to a graph area.
+ *
+ * This function is namely useful for graph area implementation.  It should not
+ * be requred that @cr is a Cairo context created for @grapharea.
+ *
+ * FIXME: This may be a bad idea. Drawing the curve requires some ranges,
+ * scales (linear/log) and similar stuff.  To make future extensions possible
+ * we must pass SOMETHING that can be queried to obtain this information.
+ * The graph area can provide it but what if we want to render to PDF instead?
+ * We must be able to get at least the bounding box that corresponds to the
+ * area ranges -- this one might be passes as the function argument.
  **/
 void
 gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
@@ -478,6 +521,7 @@ gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
 {
     g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(cr);
     // TODO:
 }
 
@@ -501,8 +545,7 @@ set_curve(GwyGraphCurve *graphcurve,
                                NULL))
         return FALSE;
 
-    // TODO: emit some kind of signal?
-    priv->cached_range = FALSE;
+    all_updated(graphcurve);
     return TRUE;
 }
 
@@ -526,8 +569,7 @@ set_line(GwyGraphCurve *graphcurve,
                                NULL))
         return FALSE;
 
-    // TODO: emit some kind of signal?
-    priv->cached_range = FALSE;
+    all_updated(graphcurve);
     return TRUE;
 }
 
@@ -626,12 +668,19 @@ curve_notify(GwyGraphCurve *graphcurve,
              GParamSpec *pspec,
              GwyCurve *curve)
 {
+    g_assert(curve == graphcurve->priv->curve);
+    if (gwy_strequal(pspec->name, "n-points"))
+        data_updated(graphcurve);
+    else
+        updated(graphcurve, pspec->name);
 }
 
 static void
 curve_data_changed(GwyGraphCurve *graphcurve,
                    GwyCurve *curve)
 {
+    g_assert(curve == graphcurve->priv->curve);
+    data_updated(graphcurve);
 }
 
 static void
@@ -639,12 +688,71 @@ line_notify(GwyGraphCurve *graphcurve,
             GParamSpec *pspec,
             GwyLine *line)
 {
+    g_assert(line == graphcurve->priv->line);
+    if (gwy_stramong(pspec->name, "res", "real", "offset", NULL))
+        data_updated(graphcurve);
+    else
+        updated(graphcurve, pspec->name);
 }
 
 static void
 line_data_changed(GwyGraphCurve *graphcurve,
                   GwyLine *line)
 {
+    g_assert(line == graphcurve->priv->line);
+    data_updated(graphcurve);
+}
+
+static void
+updated(GwyGraphCurve *graphcurve, const gchar *name)
+{
+    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+                  g_quark_from_string(name), name);
+}
+
+static void
+data_updated(GwyGraphCurve *graphcurve)
+{
+    graphcurve->priv->cached_range = FALSE;
+    g_signal_emit(graphcurve, signals[SGNL_DATA_UPDATED], 0);
+}
+
+static void
+all_updated(GwyGraphCurve *graphcurve)
+{
+    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+                  g_quark_from_static_string("xunit"), "xunit");
+    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+                  g_quark_from_static_string("yunit"), "yunit");
+    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+                  g_quark_from_static_string("name"), "name");
+    data_updated(graphcurve);
+}
+
+static void
+ensure_ranges(GraphCurve *priv)
+{
+    if (priv->cached_range)
+        return;
+
+    if (priv->curve) {
+        gwy_curve_range_full(priv->curve,
+                             &priv->xrange.from, &priv->xrange.to);
+        gwy_curve_min_max_full(priv->curve,
+                               &priv->yrange.from, &priv->yrange.to);
+    }
+    else if (priv->line) {
+        const GwyLine *line = priv->line;
+        gdouble dx = gwy_line_dx(line);
+        priv->xrange.from = line->off + 0.5*dx;
+        priv->xrange.to = priv->xrange.from + dx*(line->res - 1);
+        gwy_line_min_max_full(line, &priv->yrange.from, &priv->yrange.to);
+    }
+    else {
+        priv->xrange = (GwyRange){ 0.0, 0.0 };
+        priv->yrange = (GwyRange){ 0.0, 0.0 };
+    }
+    priv->cached_range = TRUE;
 }
 
 /**
