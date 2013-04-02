@@ -104,6 +104,11 @@ gboolean       gwy_graph_curve_xrange   (const GwyGraphCurve *graphcurve,
                                          GwyRange *range);
 gboolean       gwy_graph_curve_yrange   (const GwyGraphCurve *graphcurve,
                                          GwyRange *range);
+gchar*         gwy_graph_curve_name     (const GwyGraphCurve *graphcurve) G_GNUC_PURE;
+void           gwy_graph_curve_xunit    (const GwyGraphCurve *graphcurve,
+                                         GwyUnit *unit);
+void           gwy_graph_curve_yunit    (const GwyGraphCurve *graphcurve,
+                                         GwyUnit *unit);
 void           gwy_graph_curve_draw     (const GwyGraphCurve *graphcurve,
                                          cairo_t *cr,
                                          const GwyGraphArea *grapharea);

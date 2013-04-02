@@ -250,7 +250,7 @@ gwy_graph_curve_init(GwyGraphCurve *graphcurve)
 static void
 gwy_graph_curve_finalize(GObject *object)
 {
-    GraphCurve *priv = GWY_GRAPH_CURVE(object)->priv;
+    //GraphCurve *priv = GWY_GRAPH_CURVE(object)->priv;
     G_OBJECT_CLASS(gwy_graph_curve_parent_class)->finalize(object);
 }
 
@@ -494,6 +494,87 @@ gwy_graph_curve_yrange(const GwyGraphCurve *graphcurve,
     ensure_ranges(priv);
     *range = priv->yrange;
     return priv->curve || priv->line;
+}
+
+/**
+ * gwy_graph_curve_name:
+ * @graphcurve: A graph curve.
+ *
+ * Obtains the name of the backend data object.
+ *
+ * This is a convenience function.  The same information can be obtained by
+ * querying the data backend directly.  Note, however, that this function
+ * copies the name.
+ *
+ * Returns: (transfer full) (allow-none):
+ *          A newly allocated string with the name, or %NULL.
+ **/
+gchar*
+gwy_graph_curve_name(const GwyGraphCurve *graphcurve)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_CURVE(graphcurve), NULL);
+    GraphCurve *priv = graphcurve->priv;
+    if (priv->curve)
+        return g_strdup(gwy_curve_get_name(priv->curve));
+    if (priv->line)
+        return g_strdup(gwy_line_get_name(priv->line));
+    return NULL;
+}
+
+/**
+ * gwy_graph_curve_xunit:
+ * @graphcurve: A graph curve.
+ * @unit: (transfer none):
+ *        Unit to set to graph backend x units.  If there is no backend the
+ *        unit is cleared.
+ *
+ * Obtains the abscissa unit of graph curve data backend.
+ *
+ * This is a convenience function.  The same information can be obtained by
+ * querying the data backend directly.  Note, however, that this function
+ * copies the unit.
+ **/
+void
+gwy_graph_curve_xunit(const GwyGraphCurve *graphcurve,
+                      GwyUnit *unit)
+{
+    g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    GraphCurve *priv = graphcurve->priv;
+    if (priv->curve)
+        gwy_unit_assign(unit, gwy_curve_get_xunit(priv->curve));
+    else if (priv->line)
+        gwy_unit_assign(unit, gwy_line_get_xunit(priv->line));
+    else
+        gwy_unit_clear(unit);
+}
+
+/**
+ * gwy_graph_curve_yunit:
+ * @graphcurve: A graph curve.
+ * @unit: (transfer none):
+ *        Unit to set to graph backend x units.  If there is no backend the
+ *        unit is cleared.
+ *
+ * Obtains the ordinate unit of graph curve data backend.
+ *
+ * This is a convenience function.  The same information can be obtained by
+ * querying the data backend directly.  Note, however, that this function
+ * copies the unit.
+ **/
+void
+gwy_graph_curve_yunit(const GwyGraphCurve *graphcurve,
+                      GwyUnit *unit)
+{
+    g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    GraphCurve *priv = graphcurve->priv;
+    if (priv->curve)
+        gwy_unit_assign(unit, gwy_curve_get_yunit(priv->curve));
+    else if (priv->line)
+        gwy_unit_assign(unit, gwy_line_get_yunit(priv->line));
+    else
+        gwy_unit_clear(unit);
 }
 
 /**
