@@ -256,6 +256,9 @@ G_DEFINE_TYPE(GwyExpr, gwy_expr, G_TYPE_OBJECT);
 static void
 gwy_expr_class_init(GwyExprClass *klass)
 {
+    static GOnce table_sanity_checked = G_ONCE_INIT;
+    g_once(&table_sanity_checked, check_call_table_sanity, NULL);
+
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(Expr));
@@ -266,9 +269,6 @@ gwy_expr_class_init(GwyExprClass *klass)
 static void
 gwy_expr_init(GwyExpr *expr)
 {
-    static GOnce table_sanity_checked = G_ONCE_INIT;
-    g_once(&table_sanity_checked, check_call_table_sanity, NULL);
-
     expr->priv = G_TYPE_INSTANCE_GET_PRIVATE(expr, GWY_TYPE_EXPR, Expr);
     expr->priv->expr = g_string_new(NULL);
 }
