@@ -123,6 +123,15 @@
    fun:g_quark_from_string
 }
 
+{
+   glib-static-quark-4
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_quark_from_static_string
+   fun:g_type_init_with_debug_flags
+}
+
 ###########################################################################
 # GObject type registration ‘leaks’.  The types are registered forever and
 # the corresponding data not intended to be freed.
