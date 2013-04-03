@@ -26,6 +26,10 @@
 #include "libgwyui/graph-curve.h"
 
 #define GGP(x) GWY_GRAPH_POINT_##x
+#define within_range(from,len,x,tol) \
+    (fabs((x) - (from) - 0.5*(len)) <= 0.5*(len) + (tol))
+#define range_type(from,len,x,tol) \
+    (((x) + (tol) < (from) ? -1 : ((x) - (tol) > (from) + (len) ? 1 : 0)))
 
 enum {
     PROP_0,
@@ -128,7 +132,16 @@ static void     data_updated                (GwyGraphCurve *graphcurve);
 static void     all_updated                 (GwyGraphCurve *graphcurve);
 static void     ensure_ranges               (GraphCurve *priv);
 static void     setup_line_type             (cairo_t *cr,
+                                             gdouble linewidth,
                                              GwyGraphLineType type);
+static void     draw_points                 (const GwyGraphCurve *graphcurve,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect,
+                                             const GwyGraphArea *grapharea);
+static void     draw_lines                  (const GwyGraphCurve *graphcurve,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect,
+                                             const GwyGraphArea *grapharea);
 static void     draw_star                   (cairo_t *cr,
                                              gdouble x,
                                              gdouble y,
@@ -138,29 +151,35 @@ static void     draw_circle                 (cairo_t *cr,
                                              gdouble y,
                                              gdouble halfside);
 static gpointer check_symbol_table_sanity   (gpointer arg);
+static void     calculate_scaling           (gdouble srcfrom,
+                                             gdouble srclen,
+                                             gdouble destfrom,
+                                             gdouble destlen,
+                                             gdouble *q,
+                                             gdouble *off);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
 
-static const CurveSymbolInfo symbol_info[] = {
-    { gwy_cairo_cross,          1.0, GGP(CROSS),                 TRUE,  FALSE, },
-    { gwy_cairo_times,          1.0, GGP(TIMES),                 TRUE,  FALSE, },
-    { draw_star,                1.0, GGP(STAR),                  TRUE,  FALSE, },
-    { gwy_cairo_square,         1.0, GGP(SQUARE),                TRUE,  FALSE, },
-    { draw_circle,              1.0, GGP(CIRCLE),                TRUE,  FALSE, },
-    { gwy_cairo_diamond,        1.0, GGP(DIAMOND),               TRUE,  FALSE, },
-    { gwy_cairo_triangle_up,    1.0, GGP(TRIANGLE_UP),           TRUE,  FALSE, },
-    { gwy_cairo_triangle_down,  1.0, GGP(TRIANGLE_DOWN),         TRUE,  FALSE, },
-    { gwy_cairo_triangle_left,  1.0, GGP(TRIANGLE_LEFT),         TRUE,  FALSE, },
-    { gwy_cairo_triangle_right, 1.0, GGP(TRIANGLE_RIGHT),        TRUE,  FALSE, },
-    { gwy_cairo_square,         1.0, GGP(FILLED_SQUARE),         FALSE, TRUE,  },
-    { draw_circle,              1.0, GGP(DISC),                  FALSE, TRUE,  },
-    { gwy_cairo_diamond,        1.0, GGP(FILLED_DIAMOND),        FALSE, TRUE,  },
-    { gwy_cairo_triangle_up,    1.0, GGP(FILLED_TRIANGLE_UP),    FALSE, TRUE,  },
-    { gwy_cairo_triangle_down,  1.0, GGP(FILLED_TRIANGLE_DOWN),  FALSE, TRUE,  },
-    { gwy_cairo_triangle_left,  1.0, GGP(FILLED_TRIANGLE_LEFT),  FALSE, TRUE,  },
-    { gwy_cairo_triangle_right, 1.0, GGP(FILLED_TRIANGLE_RIGHT), FALSE, TRUE,  },
-    { gwy_cairo_asterisk,       1.0, GGP(ASTERISK),              TRUE,  FALSE, },
+static const CurveSymbolInfo symbol_table[] = {
+    { gwy_cairo_cross,          1.2,  GGP(CROSS),                 TRUE,  FALSE, },
+    { gwy_cairo_times,          0.84, GGP(TIMES),                 TRUE,  FALSE, },
+    { draw_star,                1.0,  GGP(STAR),                  TRUE,  FALSE, },
+    { gwy_cairo_square,         0.84, GGP(SQUARE),                TRUE,  FALSE, },
+    { draw_circle,              1.0,  GGP(CIRCLE),                TRUE,  FALSE, },
+    { gwy_cairo_diamond,        1.2,  GGP(DIAMOND),               TRUE,  FALSE, },
+    { gwy_cairo_triangle_up,    1.0,  GGP(TRIANGLE_UP),           TRUE,  FALSE, },
+    { gwy_cairo_triangle_down,  1.0,  GGP(TRIANGLE_DOWN),         TRUE,  FALSE, },
+    { gwy_cairo_triangle_left,  1.0,  GGP(TRIANGLE_LEFT),         TRUE,  FALSE, },
+    { gwy_cairo_triangle_right, 1.0,  GGP(TRIANGLE_RIGHT),        TRUE,  FALSE, },
+    { gwy_cairo_square,         0.84, GGP(FILLED_SQUARE),         FALSE, TRUE,  },
+    { draw_circle,              1.0,  GGP(DISC),                  FALSE, TRUE,  },
+    { gwy_cairo_diamond,        1.2,  GGP(FILLED_DIAMOND),        FALSE, TRUE,  },
+    { gwy_cairo_triangle_up,    1.0,  GGP(FILLED_TRIANGLE_UP),    FALSE, TRUE,  },
+    { gwy_cairo_triangle_down,  1.0,  GGP(FILLED_TRIANGLE_DOWN),  FALSE, TRUE,  },
+    { gwy_cairo_triangle_left,  1.0,  GGP(FILLED_TRIANGLE_LEFT),  FALSE, TRUE,  },
+    { gwy_cairo_triangle_right, 1.0,  GGP(FILLED_TRIANGLE_RIGHT), FALSE, TRUE,  },
+    { gwy_cairo_asterisk,       1.1,  GGP(ASTERISK),              TRUE,  FALSE, },
 };
 
 G_DEFINE_TYPE(GwyGraphCurve, gwy_graph_curve, G_TYPE_INITIALLY_UNOWNED);
@@ -644,7 +663,7 @@ gwy_graph_curve_yunit(const GwyGraphCurve *graphcurve,
 void
 gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
                      cairo_t *cr,
-                     const cairo_rectangle_t *rect,
+                     const cairo_rectangle_int_t *rect,
                      const GwyGraphArea *grapharea)
 {
     g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
@@ -652,52 +671,16 @@ gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
     g_return_if_fail(cr);
 
     GraphCurve *priv = graphcurve->priv;
-    // XXX: For now, ignore @grapharea and just draw the full data.
-    GwyRange xrange = priv->xrange, yrange = priv->yrange;
+    if (!priv->line && !priv->curve)
+        return;
+
     // For logscale just replace range values with their logarithms and then
     // use log(x) in place of x everywhwere.
-    gdouble qx = rect->width/(xrange.to - xrange.from),
-            xoff = rect->x - rect->width*xrange.from/(xrange.to - xrange.from);
-    gdouble qy = rect->height/(yrange.to - yrange.from),
-            yoff = rect->y - rect->height*yrange.from/(yrange.to - yrange.from);
-
-    const CurveSymbolInfo *syminfo = symbol_info + priv->point_type;
-    gdouble halfside = priv->point_size * syminfo->size_factor;
-    SymbolDrawFunc draw = syminfo->draw;
-
-    if (priv->curve) {
-        const GwyCurve *curve = priv->curve;
-        const GwyXY *data = curve->data;
-        guint n = curve->n;
-        for (guint i = 0; i < n; i++) {
-            gdouble x = qx*data[i].x + xoff, y = qy*data[i].y + yoff;
-            draw(cr, x, y, halfside);
-        }
-    }
-    if (priv->line) {
-        const GwyLine *line = priv->line;
-        const gdouble *data = line->data;
-        guint n = line->res;
-        gdouble dx = gwy_line_dx(line), off = 0.5*dx + line->off;
-        for (guint i = 0; i < n; i++) {
-            gdouble x = qx*(off + dx*i) + xoff, y = qy*data[i] + yoff;
-            draw(cr, x, y, halfside);
-        }
-    }
-
-    if (syminfo->do_fill) {
-        if (syminfo->do_stroke)
-            cairo_fill_preserve(cr);
-        else
-            cairo_fill(cr);
-    }
-    if (syminfo->do_stroke)
-        cairo_stroke(cr);
+    if (priv->type == GWY_PLOT_POINTS || priv->type == GWY_PLOT_LINE_POINTS)
+        draw_points(graphcurve, cr, rect, grapharea);
+    if (priv->type == GWY_PLOT_LINE || priv->type == GWY_PLOT_LINE_POINTS)
+        draw_lines(graphcurve, cr, rect, grapharea);
 }
-
-// TODO: We also want a function that just draws a single symbol/line segment
-// to given Cairo context.  This is useful for keys, symbol/line type
-// selectors, etc.
 
 static gboolean
 set_curve(GwyGraphCurve *graphcurve,
@@ -931,16 +914,17 @@ ensure_ranges(GraphCurve *priv)
 
 static void
 setup_line_type(cairo_t *cr,
+                gdouble linewidth,
                 GwyGraphLineType type)
 {
     if (type == GWY_GRAPH_LINE_SOLID)
         cairo_set_dash(cr, NULL, 0, 0.0);
     else if (type == GWY_GRAPH_LINE_DASHED) {
-        gdouble dash[1] = { 5.0 };
-        cairo_set_dash(cr, dash, 1, 2.5);
+        gdouble dash[1] = { 5.0*linewidth };
+        cairo_set_dash(cr, dash, 1, 2.5*linewidth);
     }
     else if (type == GWY_GRAPH_LINE_DOTTED) {
-        gdouble dash[1] = { 1.0 };
+        gdouble dash[1] = { 2.0*linewidth };
         cairo_set_dash(cr, dash, 1, 0.0);
     }
     else {
@@ -949,13 +933,136 @@ setup_line_type(cairo_t *cr,
 }
 
 static void
+draw_points(const GwyGraphCurve *graphcurve,
+            cairo_t *cr,
+            const cairo_rectangle_int_t *rect,
+            const GwyGraphArea *grapharea)
+{
+    GraphCurve *priv = graphcurve->priv;
+    const CurveSymbolInfo *syminfo = symbol_table + priv->point_type;
+    gdouble halfside = priv->point_size * syminfo->size_factor;
+    SymbolDrawFunc draw = syminfo->draw;
+
+    gdouble xq, xoff, yq, yoff;
+    // XXX: For now, ignore @grapharea and just draw the full data.
+    calculate_scaling(priv->xrange.from, priv->xrange.to - priv->xrange.from,
+                      rect->x, rect->width,
+                      &xq, &xoff);
+    calculate_scaling(priv->yrange.from, priv->yrange.to - priv->yrange.from,
+                      rect->y, rect->height,
+                      &yq, &yoff);
+
+    cairo_save(cr);
+    cairo_set_line_width(cr, 1.0);
+    gwy_cairo_set_source_rgba(cr, &priv->point_color);
+
+    const GwyCurve *curve = priv->curve;
+    const GwyLine *line = priv->line;
+    g_return_if_fail(!curve ^ !line);
+
+    // FIXME: We should define an iterator instead, it could also handle
+    // indicating bad values for logscale.
+    const GwyXY *xydata = curve ? curve->data : NULL;
+    const gdouble *ldata = line ? line->data : NULL;
+    guint n = curve ? curve->n : line->res;
+    gdouble ldx = line ? gwy_line_dx(line) : 0.0;
+    gdouble lxoff = line ? 0.5*ldx + line->off : 0.0;
+    for (guint i = 0; i < n; i++) {
+        gdouble x = curve ? xydata[i].x : ldx*i + lxoff;
+        gdouble y = curve ? xydata[i].y : ldata[i];
+        x = xq*x + xoff;
+        y = yq*y + yoff;
+        if (within_range(rect->x, rect->width, x, halfside)
+            && within_range(rect->y, rect->height, y, halfside))
+            draw(cr, x, y, halfside);
+    }
+
+    if (syminfo->do_fill) {
+        if (syminfo->do_stroke)
+            cairo_fill_preserve(cr);
+        else
+            cairo_fill(cr);
+    }
+    if (syminfo->do_stroke)
+        cairo_stroke(cr);
+
+    cairo_restore(cr);
+}
+
+static void
+draw_lines(const GwyGraphCurve *graphcurve,
+           cairo_t *cr,
+           const cairo_rectangle_int_t *rect,
+           const GwyGraphArea *grapharea)
+{
+    GraphCurve *priv = graphcurve->priv;
+
+    gdouble xq, xoff, yq, yoff;
+    // XXX: For now, ignore @grapharea and just draw the full data.
+    calculate_scaling(priv->xrange.from, priv->xrange.to - priv->xrange.from,
+                      rect->x, rect->width,
+                      &xq, &xoff);
+    calculate_scaling(priv->yrange.from, priv->yrange.to - priv->yrange.from,
+                      rect->y, rect->height,
+                      &yq, &yoff);
+
+    cairo_save(cr);
+    cairo_set_line_width(cr, priv->line_width);
+    gwy_cairo_set_source_rgba(cr, &priv->line_color);
+    setup_line_type(cr, priv->line_width, priv->line_type);
+
+    const GwyCurve *curve = priv->curve;
+    const GwyLine *line = priv->line;
+    g_return_if_fail(!curve ^ !line);
+
+    // FIXME: We should define an iterator instead, it could also handle
+    // indicating bad values for logscale.
+    const GwyXY *xydata = curve ? curve->data : NULL;
+    const gdouble *ldata = line ? line->data : NULL;
+    guint n = curve ? curve->n : line->res;
+    gdouble ldx = line ? gwy_line_dx(line) : 0.0;
+    gdouble lxoff = line ? 0.5*ldx + line->off : 0.0;
+    gdouble x = curve ? xydata[0].x : lxoff;
+    gdouble y = curve ? xydata[0].y : ldata[0];
+    x = xq*x + xoff;
+    y = yq*y + yoff;
+    gint xtype = range_type(rect->x, rect->width, x, 1.0);
+    gint ytype = range_type(rect->y, rect->height, y, 1.0);
+    gboolean skipping = TRUE;
+    for (guint i = 1; i < n; i++) {
+        gdouble xprev = x, yprev = y;
+        gint xprevtype = xtype, yprevtype = ytype;
+        x = curve ? xydata[i].x : ldx*i + lxoff;
+        y = curve ? xydata[i].y : ldata[i];
+        x = xq*x + xoff;
+        y = yq*y + yoff;
+        xtype = range_type(rect->x, rect->width, x, 1.0);
+        ytype = range_type(rect->y, rect->height, y, 1.0);
+        if ((xtype && xtype == xprevtype) || (ytype && ytype == yprevtype)) {
+            skipping = TRUE;
+            continue;
+        }
+
+        if (skipping) {
+            cairo_move_to(cr, xprev, yprev);
+            skipping = FALSE;
+        }
+        cairo_line_to(cr, x, y);
+    }
+
+    cairo_stroke(cr);
+
+    cairo_restore(cr);
+}
+
+static void
 draw_star(cairo_t *cr,
           gdouble x,
           gdouble y,
           gdouble halfside)
 {
-    gwy_cairo_cross(cr, x, y, halfside);
-    gwy_cairo_times(cr, x, y, halfside);
+    gwy_cairo_cross(cr, x, y, 1.2*halfside);
+    gwy_cairo_times(cr, x, y, 0.84*halfside);
 }
 
 static void
@@ -975,15 +1082,24 @@ check_symbol_table_sanity(G_GNUC_UNUSED gpointer arg)
     gboolean ok = TRUE;
     guint i;
 
-    for (i = 0; i < G_N_ELEMENTS(symbol_info); i++) {
-        if (symbol_info[i].type != i) {
+    for (i = 0; i < G_N_ELEMENTS(symbol_table); i++) {
+        if (symbol_table[i].type != i) {
             g_critical("Inconsistent symbol table: %u at pos %u\n",
-                       symbol_info[i].type, i);
+                       symbol_table[i].type, i);
             ok = FALSE;
         }
     }
 
     return GINT_TO_POINTER(ok);
+}
+
+static void
+calculate_scaling(gdouble srcfrom, gdouble srclen,
+                  gdouble destfrom, gdouble destlen,
+                  gdouble *q, gdouble *off)
+{
+    *q = destlen/srclen;
+    *off = destfrom - srcfrom*(*q);
 }
 
 /**

@@ -111,8 +111,12 @@ void           gwy_graph_curve_yunit    (const GwyGraphCurve *graphcurve,
                                          GwyUnit *unit);
 void           gwy_graph_curve_draw     (const GwyGraphCurve *graphcurve,
                                          cairo_t *cr,
-                                         const cairo_rectangle_t *rect,
+                                         const cairo_rectangle_int_t *rect,
                                          const GwyGraphArea *grapharea);
+// TODO: We also want functions that:
+// - draw a single symbol/line segment to given Cairo context for graph keys,
+//   choosers, etc.
+// - searche (in screen coordinates) for nearest point/curve
 
 G_END_DECLS
 
