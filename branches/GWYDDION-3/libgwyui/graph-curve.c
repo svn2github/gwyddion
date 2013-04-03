@@ -868,4 +868,48 @@ ensure_ranges(GraphCurve *priv)
  * Class of graph curves.
  **/
 
+/**
+ * GwyPlotType:
+ * @GWY_PLOT_HIDDEN: Data are invisible.
+ * @GWY_PLOT_POINTS: Data are plotted with symbols.
+ * @GWY_PLOT_LINE: Data are plotted with a line.
+ * @GWY_PLOT_LINE_POINTS: Data are plotted with both symbols and a line.
+ *
+ * Graph plotting type.
+ **/
+
+/**
+ * GwyGraphPointType:
+ * @GWY_GRAPH_POINT_CROSS: Crossed horizontal and vertical line.
+ * @GWY_GRAPH_POINT_TIMES: Crossed diagonal lines.
+ * @GWY_GRAPH_POINT_STAR: Crossed horizontal, vertical and diagonal lines.
+ * @GWY_GRAPH_POINT_SQUARE: Open square.
+ * @GWY_GRAPH_POINT_CIRCLE: Open circle.
+ * @GWY_GRAPH_POINT_DIAMOND: Open diagonal square.
+ * @GWY_GRAPH_POINT_TRIANGLE_UP: Open upward pointing triangle.
+ * @GWY_GRAPH_POINT_TRIANGLE_DOWN: Open downward pointing triangle.
+ * @GWY_GRAPH_POINT_TRIANGLE_LEFT: Open leftward pointing triangle.
+ * @GWY_GRAPH_POINT_TRIANGLE_RIGHT: Open rightward pointing triangle.
+ * @GWY_GRAPH_POINT_FILLED_SQUARE: Filled square.
+ * @GWY_GRAPH_POINT_DISC: Filled circle.
+ * @GWY_GRAPH_POINT_FILLED_CIRCLE: Another name for %GWY_GRAPH_POINT_DISC.
+ * @GWY_GRAPH_POINT_FILLED_DIAMOND: Filled diagonal square.
+ * @GWY_GRAPH_POINT_FILLED_TRIANGLE_UP: Filled upward pointing triangle.
+ * @GWY_GRAPH_POINT_FILLED_TRIANGLE_DOWN: Filled downward pointing triangle.
+ * @GWY_GRAPH_POINT_FILLED_TRIANGLE_LEFT: Filled leftward pointing triangle.
+ * @GWY_GRAPH_POINT_FILLED_TRIANGLE_RIGHT: Filled rightward pointing triangle.
+ * @GWY_GRAPH_POINT_ASTERISK: Six-armed asterisk.
+ *
+ * Type of graph symbols for point plotting mode.
+ **/
+
+/**
+ * GwyGraphLineType:
+ * @GWY_GRAPH_LINE_SOLID: Solid line.
+ * @GWY_GRAPH_LINE_DASHED: Medium long dashes.
+ * @GWY_GRAPH_LINE_DOTTED: Very short dashes (dots).
+ *
+ * Type of graph lines.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
