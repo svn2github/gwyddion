@@ -25,6 +25,8 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/graph-curve.h"
 
+#define GGP(x) GWY_GRAPH_POINT_##x
+
 enum {
     PROP_0,
     PROP_LINE,
@@ -44,6 +46,19 @@ enum {
     SGNL_UPDATED,
     N_SIGNALS
 };
+
+typedef void (*SymbolDrawFunc)(cairo_t *cr,
+                               gdouble x,
+                               gdouble y,
+                               gdouble halfside);
+
+typedef struct {
+    SymbolDrawFunc draw;
+    gdouble size_factor;
+    GwyGraphPointType type;
+    gboolean do_stroke : 1;
+    gboolean do_fill : 1;
+} CurveSymbolInfo;
 
 typedef struct _GwyGraphCurvePrivate GraphCurve;
 
@@ -112,15 +127,50 @@ static void     updated                     (GwyGraphCurve *graphcurve,
 static void     data_updated                (GwyGraphCurve *graphcurve);
 static void     all_updated                 (GwyGraphCurve *graphcurve);
 static void     ensure_ranges               (GraphCurve *priv);
+static void     setup_line_type             (cairo_t *cr,
+                                             GwyGraphLineType type);
+static void     draw_star                   (cairo_t *cr,
+                                             gdouble x,
+                                             gdouble y,
+                                             gdouble halfside);
+static void     draw_circle                 (cairo_t *cr,
+                                             gdouble x,
+                                             gdouble y,
+                                             gdouble halfside);
+static gpointer check_symbol_table_sanity   (gpointer arg);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
+
+static const CurveSymbolInfo symbol_info[] = {
+    { gwy_cairo_cross,          1.0, GGP(CROSS),                 TRUE,  FALSE, },
+    { gwy_cairo_times,          1.0, GGP(TIMES),                 TRUE,  FALSE, },
+    { draw_star,                1.0, GGP(STAR),                  TRUE,  FALSE, },
+    { gwy_cairo_square,         1.0, GGP(SQUARE),                TRUE,  FALSE, },
+    { draw_circle,              1.0, GGP(CIRCLE),                TRUE,  FALSE, },
+    { gwy_cairo_diamond,        1.0, GGP(DIAMOND),               TRUE,  FALSE, },
+    { gwy_cairo_triangle_up,    1.0, GGP(TRIANGLE_UP),           TRUE,  FALSE, },
+    { gwy_cairo_triangle_down,  1.0, GGP(TRIANGLE_DOWN),         TRUE,  FALSE, },
+    { gwy_cairo_triangle_left,  1.0, GGP(TRIANGLE_LEFT),         TRUE,  FALSE, },
+    { gwy_cairo_triangle_right, 1.0, GGP(TRIANGLE_RIGHT),        TRUE,  FALSE, },
+    { gwy_cairo_square,         1.0, GGP(FILLED_SQUARE),         FALSE, TRUE,  },
+    { draw_circle,              1.0, GGP(DISC),                  FALSE, TRUE,  },
+    { gwy_cairo_diamond,        1.0, GGP(FILLED_DIAMOND),        FALSE, TRUE,  },
+    { gwy_cairo_triangle_up,    1.0, GGP(FILLED_TRIANGLE_UP),    FALSE, TRUE,  },
+    { gwy_cairo_triangle_down,  1.0, GGP(FILLED_TRIANGLE_DOWN),  FALSE, TRUE,  },
+    { gwy_cairo_triangle_left,  1.0, GGP(FILLED_TRIANGLE_LEFT),  FALSE, TRUE,  },
+    { gwy_cairo_triangle_right, 1.0, GGP(FILLED_TRIANGLE_RIGHT), FALSE, TRUE,  },
+    { gwy_cairo_asterisk,       1.0, GGP(ASTERISK),              TRUE,  FALSE, },
+};
 
 G_DEFINE_TYPE(GwyGraphCurve, gwy_graph_curve, G_TYPE_INITIALLY_UNOWNED);
 
 static void
 gwy_graph_curve_class_init(GwyGraphCurveClass *klass)
 {
+    static GOnce table_sanity_checked = G_ONCE_INIT;
+    g_once(&table_sanity_checked, check_symbol_table_sanity, NULL);
+
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(GraphCurve));
@@ -580,31 +630,74 @@ gwy_graph_curve_yunit(const GwyGraphCurve *graphcurve,
 /**
  * gwy_graph_curve_draw:
  * @graphcurve: A graph curve.
- * @cr: 
- * @grapharea: 
+ * @cr: Cairo context to draw to.  Often it is the @grapharea's context but
+ *      it does not have to be.
+ * @rect: Rectangle in Cairo user units representing the entire graph area.
+ *        The current clip rectangle must lie entirely within.
+ * @grapharea: Graph area determing the ranges, linear/logaritimic scale types
+ *             and similar global graph properties.
  *
  * Draws a graph curve to a graph area.
  *
- * This function is namely useful for graph area implementation.  It should not
- * be requred that @cr is a Cairo context created for @grapharea.
- *
- * FIXME: This may be a bad idea. Drawing the curve requires some ranges,
- * scales (linear/log) and similar stuff.  To make future extensions possible
- * we must pass SOMETHING that can be queried to obtain this information.
- * The graph area can provide it but what if we want to render to PDF instead?
- * We must be able to get at least the bounding box that corresponds to the
- * area ranges -- this one might be passes as the function argument.
+ * This function is namely useful for graph area implementation.
  **/
 void
 gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
                      cairo_t *cr,
+                     const cairo_rectangle_t *rect,
                      const GwyGraphArea *grapharea)
 {
     g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
     g_return_if_fail(cr);
-    // TODO:
+
+    GraphCurve *priv = graphcurve->priv;
+    // XXX: For now, ignore @grapharea and just draw the full data.
+    GwyRange xrange = priv->xrange, yrange = priv->yrange;
+    // For logscale just replace range values with their logarithms and then
+    // use log(x) in place of x everywhwere.
+    gdouble qx = rect->width/(xrange.to - xrange.from),
+            xoff = rect->x - rect->width*xrange.from/(xrange.to - xrange.from);
+    gdouble qy = rect->height/(yrange.to - yrange.from),
+            yoff = rect->y - rect->height*yrange.from/(yrange.to - yrange.from);
+
+    const CurveSymbolInfo *syminfo = symbol_info + priv->point_type;
+    gdouble halfside = priv->point_size * syminfo->size_factor;
+    SymbolDrawFunc draw = syminfo->draw;
+
+    if (priv->curve) {
+        const GwyCurve *curve = priv->curve;
+        const GwyXY *data = curve->data;
+        guint n = curve->n;
+        for (guint i = 0; i < n; i++) {
+            gdouble x = qx*data[i].x + xoff, y = qy*data[i].y + yoff;
+            draw(cr, x, y, halfside);
+        }
+    }
+    if (priv->line) {
+        const GwyLine *line = priv->line;
+        const gdouble *data = line->data;
+        guint n = line->res;
+        gdouble dx = gwy_line_dx(line), off = 0.5*dx + line->off;
+        for (guint i = 0; i < n; i++) {
+            gdouble x = qx*(off + dx*i) + xoff, y = qy*data[i] + yoff;
+            draw(cr, x, y, halfside);
+        }
+    }
+
+    if (syminfo->do_fill) {
+        if (syminfo->do_stroke)
+            cairo_fill_preserve(cr);
+        else
+            cairo_fill(cr);
+    }
+    if (syminfo->do_stroke)
+        cairo_stroke(cr);
 }
+
+// TODO: We also want a function that just draws a single symbol/line segment
+// to given Cairo context.  This is useful for keys, symbol/line type
+// selectors, etc.
 
 static gboolean
 set_curve(GwyGraphCurve *graphcurve,
@@ -834,6 +927,63 @@ ensure_ranges(GraphCurve *priv)
         priv->yrange = (GwyRange){ 0.0, 0.0 };
     }
     priv->cached_range = TRUE;
+}
+
+static void
+setup_line_type(cairo_t *cr,
+                GwyGraphLineType type)
+{
+    if (type == GWY_GRAPH_LINE_SOLID)
+        cairo_set_dash(cr, NULL, 0, 0.0);
+    else if (type == GWY_GRAPH_LINE_DASHED) {
+        gdouble dash[1] = { 5.0 };
+        cairo_set_dash(cr, dash, 1, 2.5);
+    }
+    else if (type == GWY_GRAPH_LINE_DOTTED) {
+        gdouble dash[1] = { 1.0 };
+        cairo_set_dash(cr, dash, 1, 0.0);
+    }
+    else {
+        g_assert_not_reached();
+    }
+}
+
+static void
+draw_star(cairo_t *cr,
+          gdouble x,
+          gdouble y,
+          gdouble halfside)
+{
+    gwy_cairo_cross(cr, x, y, halfside);
+    gwy_cairo_times(cr, x, y, halfside);
+}
+
+static void
+draw_circle(cairo_t *cr,
+            gdouble x,
+            gdouble y,
+            gdouble halfside)
+{
+    cairo_new_sub_path(cr);
+    cairo_arc(cr, x, y, halfside, 0.0, 2.0*G_PI);
+    cairo_close_path(cr);
+}
+
+static gpointer
+check_symbol_table_sanity(G_GNUC_UNUSED gpointer arg)
+{
+    gboolean ok = TRUE;
+    guint i;
+
+    for (i = 0; i < G_N_ELEMENTS(symbol_info); i++) {
+        if (symbol_info[i].type != i) {
+            g_critical("Inconsistent symbol table: %u at pos %u\n",
+                       symbol_info[i].type, i);
+            ok = FALSE;
+        }
+    }
+
+    return GINT_TO_POINTER(ok);
 }
 
 /**

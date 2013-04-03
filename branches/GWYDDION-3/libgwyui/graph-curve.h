@@ -111,6 +111,7 @@ void           gwy_graph_curve_yunit    (const GwyGraphCurve *graphcurve,
                                          GwyUnit *unit);
 void           gwy_graph_curve_draw     (const GwyGraphCurve *graphcurve,
                                          cairo_t *cr,
+                                         const cairo_rectangle_t *rect,
                                          const GwyGraphArea *grapharea);
 
 G_END_DECLS
