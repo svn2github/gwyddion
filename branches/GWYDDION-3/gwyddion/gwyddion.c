@@ -356,6 +356,67 @@ create_coords_view_test(GwyRasterView *rasterview)
     return window;
 }
 
+static gboolean
+draw_curve(GtkWidget *widget, cairo_t *cr, GwyGraphArea *area)
+{
+    cairo_rectangle_int_t rect;
+    gtk_widget_get_allocation(widget, &rect);
+    GObject *object = G_OBJECT(widget);
+    GwyGraphCurve *graphcurve = GWY_GRAPH_CURVE(g_object_get_data(object,
+                                                                  "curve"));
+    cairo_save(cr);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_paint(cr);
+    cairo_restore(cr);
+    gwy_graph_curve_draw(graphcurve, cr, &rect, area);
+    return FALSE;
+}
+
+static GtkWidget*
+create_graph_window(void)
+{
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size(GTK_WINDOW(window), 640, 360);
+    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Graphing Test");
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    GwyGraphArea *area = gwy_graph_area_new();
+
+    guint n = 60;
+    GwyCurve *curve = gwy_curve_new_sized(n);
+    GwyRand *rng = gwy_rand_new();
+    gdouble x = 0.0, y = gwy_rand_double(rng), vy = 0.0;
+    for (guint i = 0; i < n; i++) {
+        curve->data[i].x = x;
+        curve->data[i].y = y;
+        x += 0.05 + 0.01*gwy_rand_double(rng);
+        y += vy;
+        vy += 0.1*gwy_rand_normal(rng);
+    }
+
+    GwyGraphCurve *graphcurve = gwy_graph_curve_new();
+    gwy_graph_curve_set_curve(graphcurve, curve);
+    g_object_unref(curve);
+    g_object_set(graphcurve,
+                 "point-color", gwy_rgba_get_preset_color(2),
+                 "line-color", gwy_rgba_get_preset_color(3),
+                 "point-size", 8.0,
+                 "plot-type", GWY_PLOT_LINE_POINTS,
+                 "line-type", GWY_GRAPH_LINE_DOTTED,
+                 NULL);
+
+    // Enforce calculation of value ranges. This is not necessary once we
+    // actuall have a real graph widget.
+    GwyRange range;
+    gwy_graph_curve_xrange(graphcurve, &range);
+    gwy_graph_curve_yrange(graphcurve, &range);
+
+    g_object_set_data(G_OBJECT(window), "curve", graphcurve);
+    g_signal_connect_after(window, "draw", G_CALLBACK(draw_curve), area);
+
+    return window;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -390,6 +451,9 @@ main(int argc, char *argv[])
     GtkWidget *cwindow = create_coords_view_test(view);
     gtk_widget_show_all(cwindow);
     //g_timeout_add(100, update, mix);
+
+    GtkWidget *gwindow = create_graph_window();
+    gtk_widget_show_all(gwindow);
 
     gtk_main();
 
