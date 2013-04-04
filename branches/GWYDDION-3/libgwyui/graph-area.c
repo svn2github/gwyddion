@@ -23,29 +23,74 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/graph-area.h"
 
+#define curve_proxy_index(a, i) g_array_index((a), CurveProxy, (i))
+
 enum {
     PROP_0,
+    PROP_XSCALE,
+    PROP_YSCALE,
     N_PROPS
 };
+
+typedef struct {
+    GwyGraphCurve *curve;
+    gulong notify_id;
+    gulong data_updated_id;
+} CurveProxy;
 
 typedef struct _GwyGraphAreaPrivate GraphArea;
 
 struct _GwyGraphAreaPrivate {
-    gchar dummy;
+    GdkWindow *input_window;
+    GArray *curves;  // of CurveProxy
+    GArray *xgrid;   // of gdouble
+    GArray *ygrid;
+    GwyRange xrange;
+    GwyRange yrange;
+    GwyGraphScaleType xscale;
+    GwyGraphScaleType yscale;
 };
 
-static void gwy_graph_area_finalize    (GObject *object);
-static void gwy_graph_area_dispose     (GObject *object);
-static void gwy_graph_area_set_property(GObject *object,
-                                        guint prop_id,
-                                        const GValue *value,
-                                        GParamSpec *pspec);
-static void gwy_graph_area_get_property(GObject *object,
-                                        guint prop_id,
-                                        GValue *value,
-                                        GParamSpec *pspec);
+static void     gwy_graph_area_finalize     (GObject *object);
+static void     gwy_graph_area_dispose      (GObject *object);
+static void     gwy_graph_area_set_property (GObject *object,
+                                             guint prop_id,
+                                             const GValue *value,
+                                             GParamSpec *pspec);
+static void     gwy_graph_area_get_property (GObject *object,
+                                             guint prop_id,
+                                             GValue *value,
+                                             GParamSpec *pspec);
+static void     gwy_graph_area_realize      (GtkWidget *widget);
+static void     gwy_graph_area_unrealize    (GtkWidget *widget);
+static void     gwy_graph_area_map          (GtkWidget *widget);
+static void     gwy_graph_area_unmap        (GtkWidget *widget);
+static void     gwy_graph_area_size_allocate(GtkWidget *widget,
+                                             GtkAllocation *allocation);
+static gboolean gwy_graph_area_draw         (GtkWidget *widget,
+                                             cairo_t *cr);
+static void     create_input_window         (GwyGraphArea *grapharea);
+static void     destroy_input_window        (GwyGraphArea *grapharea);
+static gboolean set_xscale                  (GwyGraphArea *grapharea,
+                                             GwyGraphScaleType scale);
+static gboolean set_yscale                  (GwyGraphArea *grapharea,
+                                             GwyGraphScaleType scale);
+static gboolean set_xrange                  (GwyGraphArea *grapharea,
+                                             const GwyRange *range);
+static gboolean set_yrange                  (GwyGraphArea *grapharea,
+                                             const GwyRange *range);
+static void     clear_curves                (GwyGraphArea *grapharea);
+static gboolean set_curve                   (GwyGraphArea *grapharea,
+                                             GwyGraphCurve *graphcurve,
+                                             guint pos);
+static void     curve_notify                (GwyGraphArea *grapharea,
+                                             GParamSpec *pspec,
+                                             GwyGraphCurve *graphcurve);
+static void     curve_data_updated          (GwyGraphArea *grapharea,
+                                             GwyGraphCurve *graphcurve);
 
 static GParamSpec *properties[N_PROPS];
+static const GwyRange default_range = { -1.0, 1.0 };
 
 G_DEFINE_TYPE(GwyGraphArea, gwy_graph_area, GTK_TYPE_WIDGET);
 
@@ -62,6 +107,29 @@ gwy_graph_area_class_init(GwyGraphAreaClass *klass)
     gobject_class->get_property = gwy_graph_area_get_property;
     gobject_class->set_property = gwy_graph_area_set_property;
 
+    widget_class->realize = gwy_graph_area_realize;
+    widget_class->unrealize = gwy_graph_area_unrealize;
+    widget_class->map = gwy_graph_area_map;
+    widget_class->unmap = gwy_graph_area_unmap;
+    widget_class->size_allocate = gwy_graph_area_size_allocate;
+    widget_class->draw = gwy_graph_area_draw;
+
+    properties[PROP_XSCALE]
+        = g_param_spec_enum("xscale",
+                            "X scale",
+                            "Scale type (linear, logarithmic) of the abscissa.",
+                            GWY_TYPE_GRAPH_SCALE_TYPE,
+                            GWY_GRAPH_SCALE_LINEAR,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_YSCALE]
+        = g_param_spec_enum("yscale",
+                            "Y scale",
+                            "Scale type (linear, logarithmic) of the ordinate.",
+                            GWY_TYPE_GRAPH_SCALE_TYPE,
+                            GWY_GRAPH_SCALE_LINEAR,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -72,12 +140,18 @@ gwy_graph_area_init(GwyGraphArea *grapharea)
     grapharea->priv = G_TYPE_INSTANCE_GET_PRIVATE(grapharea,
                                                   GWY_TYPE_GRAPH_AREA,
                                                   GraphArea);
+    GraphArea *priv = grapharea->priv;
+    priv->curves = g_array_new(FALSE, TRUE, sizeof(CurveProxy));
+    priv->xrange = default_range;
+    priv->yrange = default_range;
 }
 
 static void
 gwy_graph_area_finalize(GObject *object)
 {
     GraphArea *priv = GWY_GRAPH_AREA(object)->priv;
+    GWY_ARRAY_FREE(priv->xgrid);
+    GWY_ARRAY_FREE(priv->ygrid);
     G_OBJECT_CLASS(gwy_graph_area_parent_class)->finalize(object);
 }
 
@@ -85,18 +159,27 @@ static void
 gwy_graph_area_dispose(GObject *object)
 {
     GwyGraphArea *grapharea = GWY_GRAPH_AREA(object);
+    clear_curves(grapharea);
     G_OBJECT_CLASS(gwy_graph_area_parent_class)->dispose(object);
 }
 
 static void
 gwy_graph_area_set_property(GObject *object,
-                             guint prop_id,
-                             const GValue *value,
-                             GParamSpec *pspec)
+                            guint prop_id,
+                            const GValue *value,
+                            GParamSpec *pspec)
 {
     GwyGraphArea *grapharea = GWY_GRAPH_AREA(object);
 
     switch (prop_id) {
+        case PROP_XSCALE:
+        set_xscale(grapharea, g_value_get_enum(value));
+        break;
+
+        case PROP_YSCALE:
+        set_yscale(grapharea, g_value_get_enum(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -105,17 +188,83 @@ gwy_graph_area_set_property(GObject *object,
 
 static void
 gwy_graph_area_get_property(GObject *object,
-                             guint prop_id,
-                             GValue *value,
-                             GParamSpec *pspec)
+                            guint prop_id,
+                            GValue *value,
+                            GParamSpec *pspec)
 {
     GraphArea *priv = GWY_GRAPH_AREA(object)->priv;
 
     switch (prop_id) {
+        case PROP_XSCALE:
+        g_value_set_enum(value, priv->xscale);
+        break;
+
+        case PROP_YSCALE:
+        g_value_set_enum(value, priv->yscale);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
     }
+}
+
+static void
+gwy_graph_area_realize(GtkWidget *widget)
+{
+    GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
+    GTK_WIDGET_CLASS(gwy_graph_area_parent_class)->realize(widget);
+    create_input_window(grapharea);
+}
+
+static void
+gwy_graph_area_unrealize(GtkWidget *widget)
+{
+    GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
+    destroy_input_window(grapharea);
+    GTK_WIDGET_CLASS(gwy_graph_area_parent_class)->unrealize(widget);
+}
+
+static void
+gwy_graph_area_map(GtkWidget *widget)
+{
+    GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
+    GraphArea *priv = grapharea->priv;
+    GTK_WIDGET_CLASS(gwy_graph_area_parent_class)->map(widget);
+    if (priv->input_window)
+        gdk_window_show(priv->input_window);
+}
+
+static void
+gwy_graph_area_unmap(GtkWidget *widget)
+{
+    GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
+    GraphArea *priv = grapharea->priv;
+    if (priv->input_window)
+        gdk_window_hide(priv->input_window);
+    GTK_WIDGET_CLASS(gwy_graph_area_parent_class)->unmap(widget);
+}
+
+static void
+gwy_graph_area_size_allocate(GtkWidget *widget,
+                             GtkAllocation *allocation)
+{
+    GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
+    GraphArea *priv = grapharea->priv;
+
+    GTK_WIDGET_CLASS(gwy_graph_area_parent_class)->size_allocate(widget,
+                                                                 allocation);
+    if (priv->input_window)
+        gdk_window_move_resize(priv->input_window,
+                               allocation->x, allocation->y,
+                               allocation->width, allocation->height);
+}
+
+static gboolean
+gwy_graph_area_draw(GtkWidget *widget,
+                    cairo_t *cr)
+{
+    return FALSE;
 }
 
 /**
@@ -129,6 +278,466 @@ GwyGraphArea*
 gwy_graph_area_new(void)
 {
     return (GwyGraphArea*)g_object_newv(GWY_TYPE_GRAPH_AREA, 0, NULL);
+}
+
+/**
+ * gwy_graph_area_add_curve:
+ * @grapharea: A graph area.
+ * @graphcurve: A graph curve to add (after all already present curves).
+ *
+ * .
+ **/
+void
+gwy_graph_area_add_curve(GwyGraphArea *grapharea,
+                         GwyGraphCurve *graphcurve)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    gwy_graph_area_insert_curve(grapharea, graphcurve,
+                                grapharea->priv->curves->len);
+}
+
+/**
+ * gwy_graph_area_insert_curve:
+ * @grapharea: A graph area.
+ * @graphcurve: A graph curve to insert.
+ * @pos: Position to insert @graphcurve at.
+ *
+ * .
+ **/
+void
+gwy_graph_area_insert_curve(GwyGraphArea *grapharea,
+                            GwyGraphCurve *graphcurve,
+                            guint pos)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
+    GraphArea *priv = grapharea->priv;
+    if (pos > priv->curves->len) {
+        g_warning("Insertion position %u is beyond the number of curves.", pos);
+        pos = priv->curves->len;
+    }
+    // TODO
+}
+
+/**
+ * gwy_graph_area_remove_curve:
+ * @grapharea: A graph area.
+ * @pos: Position to remove the curve from.
+ *
+ * .
+ **/
+void
+gwy_graph_area_remove_curve(GwyGraphArea *grapharea,
+                            guint pos)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    GraphArea *priv = grapharea->priv;
+    g_return_if_fail(pos < priv->curves->len);
+    // TODO
+}
+
+/**
+ * gwy_graph_area_get_curve:
+ * @grapharea: A graph area.
+ * @pos: Position of the curve.
+ *
+ * Gets a curve from graph area by position.
+ *
+ * Returns: Curve at position @pos.
+ **/
+GwyGraphCurve*
+gwy_graph_area_get_curve(const GwyGraphArea *grapharea,
+                         guint pos)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), NULL);
+    GraphArea *priv = grapharea->priv;
+    g_return_val_if_fail(pos < priv->curves->len, NULL);
+    return curve_proxy_index(priv->curves, pos).curve;
+}
+
+/**
+ * gwy_graph_area_n_curves:
+ * @grapharea: A graph area.
+ *
+ * Obtains the number of curves in a graph area.
+ *
+ * Returns: The number of curves.
+ **/
+guint
+gwy_graph_area_n_curves(const GwyGraphArea *grapharea)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), 0);
+    return grapharea->priv->curves->len;
+}
+
+/**
+ * gwy_graph_area_set_xrange:
+ * @grapharea: A graph area.
+ * @range: New abscissa range.
+ *
+ * Sets the .
+ **/
+void
+gwy_graph_area_set_xrange(GwyGraphArea *grapharea,
+                          const GwyRange *range)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(range);
+    if (!set_xrange(grapharea, range))
+        return;
+
+    // TODO: Emit notification?
+}
+
+/**
+ * gwy_graph_area_get_xrange:
+ * @grapharea: A graph area.
+ * @range: (out):
+ *         Location to store the abscissa range.
+ *
+ * Gets the .
+ **/
+void
+gwy_graph_area_get_xrange(const GwyGraphArea *grapharea,
+                          GwyRange *range)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(range);
+    *range = grapharea->priv->xrange;
+}
+
+/**
+ * gwy_graph_area_set_yrange:
+ * @grapharea: A graph area.
+ * @range: 
+ *
+ * Sets the .
+ **/
+void
+gwy_graph_area_set_yrange(GwyGraphArea *grapharea,
+                          const GwyRange *range)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(range);
+    if (!set_yrange(grapharea, range))
+        return;
+
+    // TODO: Emit notification?
+}
+
+/**
+ * gwy_graph_area_get_yrange:
+ * @grapharea: A graph area.
+ * @range: (out):
+ *         Location to store the ordinate range.
+ *
+ * Gets the .
+ **/
+void
+gwy_graph_area_get_yrange(const GwyGraphArea *grapharea,
+                          GwyRange *range)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(range);
+    *range = grapharea->priv->xrange;
+}
+
+/**
+ * gwy_graph_area_set_xgrid:
+ * @grapharea: A graph area.
+ * @ticks: (array length=n):
+ *         Abscissa values at which vertical lines should be drawn.
+ * @n: Number of tick positions in @ticks.
+ *
+ * Sets the abscissa positions of vertical grid lines in a graph area.
+ *
+ * The usual convention is to draw grid lines at positions of major ticks of
+ * the corresponding axis.  Ticks that are closer than half of line width from
+ * the graph area edge will not be drawn.
+ **/
+void
+gwy_graph_area_set_xgrid(GwyGraphArea *grapharea,
+                         const gdouble *ticks,
+                         guint n)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(ticks || !n);
+    // TODO
+}
+
+/**
+ * gwy_graph_area_set_ygrid:
+ * @grapharea: A graph area.
+ * @ticks: (array length=n):
+ *         Ordinate values at which horizontal lines should be drawn.
+ * @n: Number of tick positions in @ticks.
+ *
+ * Sets the ordinate positions of horizontal grid lines in a graph area.
+ *
+ * The usual convention is to draw grid lines at positions of major ticks of
+ * the corresponding axis.  Ticks that are closer than half of line width from
+ * the graph area edge will not be drawn.
+ **/
+void
+gwy_graph_area_set_ygrid(GwyGraphArea *grapharea,
+                         const gdouble *ticks,
+                         guint n)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(ticks || !n);
+    // TODO
+}
+
+/**
+ * gwy_graph_area_get_xgrid:
+ * @grapharea: A graph area.
+ * @n: (out):
+ *     Location where to store the number of returned ticks.
+ *
+ * Gets the abscissa positions of vertical grid lines in a graph area.
+ *
+ * Returns: (allow-none) (array length=n):
+ *          Abscissa positions of vertical grid lines.  The returned array is
+ *          owned by @grapharea and valid only until the ticks change.  If
+ *          there are no ticks, %NULL is returned.
+ **/
+const gdouble*
+gwy_graph_area_get_xgrid(GwyGraphArea *grapharea,
+                         guint *n)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), NULL);
+    GArray *ticks = grapharea->priv->xgrid;
+    GWY_MAYBE_SET(n, ticks ? ticks->len : 0);
+    return ticks ? (const gdouble*)ticks->data : NULL;
+}
+
+/**
+ * gwy_graph_area_get_ygrid:
+ * @grapharea: A graph area.
+ * @n: (out):
+ *     Location where to store the number of returned ticks.
+ *
+ * Gets the ordinate positions of horizontal grid lines in a graph area.
+ *
+ * Returns: (allow-none) (array length=n):
+ *          Abscissa positions of vertical grid lines.  The returned array is
+ *          owned by @grapharea and valid only until the ticks change.  If
+ *          there are no ticks, %NULL is returned.
+ **/
+const gdouble*
+gwy_graph_area_get_ygrid(GwyGraphArea *grapharea,
+                         guint *n)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), NULL);
+    GArray *ticks = grapharea->priv->ygrid;
+    GWY_MAYBE_SET(n, ticks ? ticks->len : 0);
+    return ticks ? (const gdouble*)ticks->data : NULL;
+}
+
+/**
+ * gwy_graph_area_set_xscale:
+ * @grapharea: A graph area.
+ * @scale: Scale type for the abscissa.
+ *
+ * Sets the scale type for the abscissa of a graph area.
+ **/
+void
+gwy_graph_area_set_xscale(GwyGraphArea *grapharea,
+                          GwyGraphScaleType scale)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(scale <= GWY_GRAPH_SCALE_LOG);
+    if (!set_xscale(grapharea, scale))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(grapharea), properties[PROP_XSCALE]);
+}
+
+/**
+ * gwy_graph_area_get_xscale:
+ * @grapharea: A graph area.
+ *
+ * Gets the scale type for the abscissa of a graph area.
+ *
+ * Returns: The current abscissa scale type.
+ **/
+GwyGraphScaleType
+gwy_graph_area_get_xscale(const GwyGraphArea *grapharea)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), GWY_GRAPH_SCALE_LINEAR);
+    return grapharea->priv->xscale;
+}
+
+/**
+ * gwy_graph_area_set_yscale:
+ * @grapharea: A graph area.
+ * @scale: Scale type for the ordinate.
+ *
+ * Sets the scale type for the ordinate of a graph area.
+ **/
+void
+gwy_graph_area_set_yscale(GwyGraphArea *grapharea,
+                          GwyGraphScaleType scale)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(scale <= GWY_GRAPH_SCALE_LOG);
+    if (!set_yscale(grapharea, scale))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(grapharea), properties[PROP_YSCALE]);
+}
+
+/**
+ * gwy_graph_area_get_yscale:
+ * @grapharea: A graph area.
+ *
+ * Gets the scale type for the ordinate of a graph area.
+ *
+ * Returns: The current ordinate scale type.
+ **/
+GwyGraphScaleType
+gwy_graph_area_get_yscale(const GwyGraphArea *grapharea)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), GWY_GRAPH_SCALE_LINEAR);
+    return grapharea->priv->yscale;
+}
+
+static void
+create_input_window(GwyGraphArea *grapharea)
+{
+    GraphArea *priv = grapharea->priv;
+    GtkWidget *widget = GTK_WIDGET(grapharea);
+    g_assert(gtk_widget_get_realized(widget));
+    if (priv->input_window)
+        return;
+
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+    GdkWindowAttr attributes = {
+        .x = allocation.x,
+        .y = allocation.y,
+        .width = allocation.width,
+        .height = allocation.height,
+        .window_type = GDK_WINDOW_CHILD,
+        .wclass = GDK_INPUT_ONLY,
+        // TODO: Add events here?
+        .event_mask = gtk_widget_get_events(widget),
+    };
+    gint attributes_mask = GDK_WA_X | GDK_WA_Y;
+    priv->input_window = gdk_window_new(gtk_widget_get_window(widget),
+                                        &attributes, attributes_mask);
+    gdk_window_set_user_data(priv->input_window, widget);
+}
+
+static void
+destroy_input_window(GwyGraphArea *grapharea)
+{
+    GraphArea *priv = grapharea->priv;
+    if (!priv->input_window)
+        return;
+    gdk_window_set_user_data(priv->input_window, NULL);
+    gdk_window_destroy(priv->input_window);
+    priv->input_window = NULL;
+}
+
+static gboolean
+set_xscale(GwyGraphArea *grapharea,
+           GwyGraphScaleType scale)
+{
+    GraphArea *priv = grapharea->priv;
+    if (priv->xscale == scale)
+        return FALSE;
+
+    priv->xscale = scale;
+    return TRUE;
+}
+
+static gboolean
+set_yscale(GwyGraphArea *grapharea,
+           GwyGraphScaleType scale)
+{
+    GraphArea *priv = grapharea->priv;
+    if (priv->yscale == scale)
+        return FALSE;
+
+    priv->yscale = scale;
+    return TRUE;
+}
+
+static gboolean
+set_xrange(GwyGraphArea *grapharea,
+           const GwyRange *range)
+{
+    if (!range)
+        range = &default_range;
+
+    GraphArea *priv = grapharea->priv;
+    if (gwy_equal(&priv->xrange, range))
+        return FALSE;
+
+    priv->xrange = *range;
+    return TRUE;
+}
+
+static gboolean
+set_yrange(GwyGraphArea *grapharea,
+           const GwyRange *range)
+{
+    if (!range)
+        range = &default_range;
+
+    GraphArea *priv = grapharea->priv;
+    if (gwy_equal(&priv->yrange, range))
+        return FALSE;
+
+    priv->yrange = *range;
+    return TRUE;
+}
+
+static void
+clear_curves(GwyGraphArea *grapharea)
+{
+    GraphArea *priv = grapharea->priv;
+    GArray *curves = priv->curves;
+    while (curves->len) {
+        set_curve(grapharea, NULL, curves->len-1);
+    }
+    // TODO: Emit some signal, invoke redraw if applicable, etc.
+}
+
+static gboolean
+set_curve(GwyGraphArea *grapharea,
+          GwyGraphCurve *graphcurve,
+          guint pos)
+{
+    GraphArea *priv = grapharea->priv;
+    CurveProxy *proxy = &curve_proxy_index(priv->curves, pos);
+    if (!gwy_set_member_object(grapharea, graphcurve, GWY_TYPE_GRAPH_CURVE,
+                               &proxy->curve,
+                               "notify", &curve_notify,
+                               &proxy->notify_id,
+                               G_CONNECT_SWAPPED,
+                               "data-updated", &curve_data_updated,
+                               &proxy->data_updated_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+    return TRUE;
+}
+
+static void
+curve_notify(GwyGraphArea *grapharea,
+             GParamSpec *pspec,
+             GwyGraphCurve *graphcurve)
+{
+
+}
+
+static void
+curve_data_updated(GwyGraphArea *grapharea,
+                   GwyGraphCurve *graphcurve)
+{
+
 }
 
 /**
