@@ -18,7 +18,7 @@
  */
 
 #ifndef __LIBGWYUI_WIDGET_UTILS_H__
-#define __LIBGWYUI_WIDGET_UTILS_H__ 1
+#define __LIBGWYUI_WIDGET_UTILS_H__
 
 #include <gtk/gtk.h>
 

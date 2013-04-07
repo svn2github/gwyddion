@@ -556,6 +556,9 @@ gwy_coords_view_get_dimension_format(const GwyCoordsView *view,
  * Creates a standard column with coordinate values for a coords view.
  *
  * This method requires the coords type to be set.
+ *
+ * Returns: (transfer full):
+ *          Newly created tree view column.
  **/
 GtkTreeViewColumn*
 gwy_coords_view_create_column_coord(GwyCoordsView *view,
@@ -599,6 +602,9 @@ gwy_coords_view_create_column_coord(GwyCoordsView *view,
  *         want an empty title pass the empty string.
  *
  * Creates a standard column with item index for a coords view.
+ *
+ * Returns: (transfer full):
+ *          Newly created tree view column.
  **/
 GtkTreeViewColumn*
 gwy_coords_view_create_column_index(GwyCoordsView *view,

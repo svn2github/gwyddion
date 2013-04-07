@@ -410,6 +410,9 @@ gwy_resource_list_get_only_preferred(GwyResourceList *list)
  *
  * This method may be used with resource lists displaying any #GwyResource
  * subclasses.
+ *
+ * Returns: (transfer full):
+ *          Newly created tree view column.
  **/
 GtkTreeViewColumn*
 gwy_resource_list_create_column_name(GwyResourceList *list)
@@ -444,6 +447,9 @@ gwy_resource_list_create_column_name(GwyResourceList *list)
  *
  * This method may be used with resource lists displaying any #GwyResource
  * subclasses.
+ *
+ * Returns: (transfer full):
+ *          Newly created tree view column.
  **/
 GtkTreeViewColumn*
 gwy_resource_list_create_column_preferred(GwyResourceList *list)
@@ -474,7 +480,10 @@ gwy_resource_list_create_column_preferred(GwyResourceList *list)
  * resource list.
  *
  * This method may be used only with resource list displaying
- * #GwyGradient<!-- -->s or its subclasses.
+ * #GwyGradient<!-- -->s (or subclasses).
+ *
+ * Returns: (transfer full):
+ *          Newly created tree view column.
  **/
 GtkTreeViewColumn*
 gwy_resource_list_create_column_gradient(GwyResourceList *list)

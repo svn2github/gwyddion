@@ -719,7 +719,7 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
  * cache it, however, if you do so make sure that you stop using it if @axis
  * is unrealized.
  *
- * Returns: (allow-none):
+ * Returns: (allow-none) (transfer none):
  *          The Pango layout @axis uses to calculate tick positions.  %NULL is
  *          returned if @axis is not realized.
  **/

@@ -471,7 +471,8 @@ gwy_graph_area_remove_curve(GwyGraphArea *grapharea,
  *
  * Gets the curve at given position from a graph area.
  *
- * Returns: Curve at position @pos.
+ * Returns: (transfer none):
+ *          Curve at position @pos.
  **/
 GwyGraphCurve*
 gwy_graph_area_get(const GwyGraphArea *grapharea,

@@ -469,7 +469,7 @@ gwy_graph_curve_new(void)
  *
  * Gets the curve providing the data for a graph curve.
  *
- * Returns: (allow-none):
+ * Returns: (allow-none) (transfer none):
  *          The curve object backing @graphcurve, or %NULL.
  **/
 GwyCurve*
@@ -505,7 +505,7 @@ gwy_graph_curve_set_curve(GwyGraphCurve *graphcurve,
  *
  * Gets the line providing the data for a graph curve.
  *
- * Returns: (allow-none):
+ * Returns: (allow-none) (transfer none):
  *          The line object backing @graphcurve, or %NULL.
  **/
 GwyLine*

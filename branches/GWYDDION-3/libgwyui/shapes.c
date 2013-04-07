@@ -1515,7 +1515,8 @@ gwy_shapes_get_starting_coords(const GwyShapes *shapes)
  * @shapes: A group of geometrical shapes.
  * @cr: A Cairo context to draw to.
  * @hover: Index of shape to draw with hover highlighting, pass -1 for none.
- * @function: Marker drawing function.
+ * @function: (scope call):
+ *            Marker drawing function.
  *
  * Helper method for drawing simple markers for a group of geometrical shapes.
  **/
