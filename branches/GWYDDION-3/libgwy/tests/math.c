@@ -78,6 +78,30 @@ test_math_spow(void)
 }
 
 void
+test_math_ssqrt(void)
+{
+    g_assert_cmpfloat(gwy_ssqrt(0.0), ==, 0.0);
+    g_assert_cmpfloat(gwy_ssqrt(1.0), ==, 1.0);
+    g_assert_cmpfloat(gwy_ssqrt(-1.0), ==, -1.0);
+    g_assert_cmpfloat(gwy_ssqrt(9.0), ==, 3.0);
+    g_assert_cmpfloat(gwy_ssqrt(-9.0), ==, -3.0);
+    g_assert_cmpfloat(gwy_ssqrt(INFINITY), ==, INFINITY);
+    g_assert_cmpfloat(gwy_ssqrt(-INFINITY), ==, -INFINITY);
+}
+
+void
+test_math_ssqr(void)
+{
+    g_assert_cmpfloat(gwy_ssqr(0.0), ==, 0.0);
+    g_assert_cmpfloat(gwy_ssqr(1.0), ==, 1.0);
+    g_assert_cmpfloat(gwy_ssqr(-1.0), ==, -1.0);
+    g_assert_cmpfloat(gwy_ssqr(3.0), ==, 9.0);
+    g_assert_cmpfloat(gwy_ssqr(-3.0), ==, -9.0);
+    g_assert_cmpfloat(gwy_ssqr(INFINITY), ==, INFINITY);
+    g_assert_cmpfloat(gwy_ssqr(-INFINITY), ==, -INFINITY);
+}
+
+void
 test_math_overlapping(void)
 {
     g_assert(gwy_overlapping(0, 1, 0, 1));

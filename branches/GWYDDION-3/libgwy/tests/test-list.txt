@@ -18,6 +18,8 @@ pack
 math/powi/actual
 math/powi/our
 math/spow
+math/ssqrt
+math/ssqr
 math/overlapping
 math/intersecting
 math/power_sum

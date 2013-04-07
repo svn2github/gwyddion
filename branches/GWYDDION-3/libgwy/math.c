@@ -378,12 +378,46 @@ gwy_powi(double x, int i)
  * which defines the precise semantics concerning infinities and undefined
  * values.
  *
- * Returns: Value of @x raised to power @p, with sign of @x.
+ * Returns: Value of absolute value of @x raised to power @p, with sign of @x.
  **/
 gdouble
 gwy_spow(gdouble x, gdouble p)
 {
     return copysign(pow(fabs(x), p), x);
+}
+
+/**
+ * gwy_ssqrt:
+ * @x: Value to take square root of.
+ *
+ * Calculates signed square root function.
+ *
+ * See gwy_spow() for details.  This is just a specialisation which uses sqrt()
+ * instead of the slow pow() function.
+ *
+ * Returns: Value of square root of absolute value of @x, with sign of @x.
+ **/
+gdouble
+gwy_ssqrt(gdouble x)
+{
+    return copysign(sqrt(fabs(x)), x);
+}
+
+/**
+ * gwy_ssqr:
+ * @x: Value to calculate square of.
+ *
+ * Calculates signed square function.
+ *
+ * See gwy_spow() for details.  This is just a specialisation which uses
+ * multiplication instead of the slow pow() function.
+ *
+ * Returns: Value of square of @x, with sign of @x.
+ **/
+gdouble
+gwy_ssqr(gdouble x)
+{
+    return x*fabs(x);
 }
 
 /**

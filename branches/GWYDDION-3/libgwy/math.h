@@ -75,6 +75,8 @@ double gwy_powi(double x, int i) G_GNUC_CONST;
 
 gdouble  gwy_spow                    (gdouble x,
                                       gdouble p)                      G_GNUC_CONST;
+gdouble  gwy_ssqrt                   (gdouble x)                      G_GNUC_CONST;
+gdouble  gwy_ssqr                    (gdouble x)                      G_GNUC_CONST;
 gdouble  gwy_power_sum               (guint n,
                                       guint p)                        G_GNUC_CONST;
 gdouble  gwy_standardize_direction   (gdouble phi)                    G_GNUC_CONST;
