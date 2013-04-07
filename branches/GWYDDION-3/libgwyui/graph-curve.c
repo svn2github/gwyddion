@@ -153,6 +153,8 @@ static void     draw_points                 (const GwyGraphCurve *graphcurve,
                                              cairo_t *cr,
                                              const cairo_rectangle_int_t *rect,
                                              const GwyGraphArea *grapharea);
+static void     stroke_fill_point           (const CurveSymbolInfo *syminfo,
+                                             cairo_t *cr);
 static void     draw_lines                  (const GwyGraphCurve *graphcurve,
                                              cairo_t *cr,
                                              const cairo_rectangle_int_t *rect,
@@ -1088,6 +1090,8 @@ draw_points(const GwyGraphCurve *graphcurve,
     cairo_set_line_width(cr, 1.0);
     gwy_cairo_set_source_rgba(cr, &priv->point_color);
 
+    gboolean stroke_each_point = priv->point_color.a < 1.0;
+
     do {
         gdouble x, y;
         if (!graph_curve_iter_get(&iter, &x, &y))
@@ -1095,10 +1099,23 @@ draw_points(const GwyGraphCurve *graphcurve,
         x = xq*x + xoff;
         y = yq*y + yoff;
         if (within_range(rect->x, rect->width, x, halfside)
-            && within_range(rect->y, rect->height, y, halfside))
+            && within_range(rect->y, rect->height, y, halfside)) {
             draw(cr, x, y, halfside);
+            if (stroke_each_point)
+                stroke_fill_point(syminfo, cr);
+        }
     } while (graph_curve_iter_next(&iter));
 
+    if (!stroke_each_point)
+        stroke_fill_point(syminfo, cr);
+
+    cairo_restore(cr);
+}
+
+static void
+stroke_fill_point(const CurveSymbolInfo *syminfo,
+                  cairo_t *cr)
+{
     if (syminfo->do_fill) {
         if (syminfo->do_stroke)
             cairo_fill_preserve(cr);
@@ -1107,8 +1124,6 @@ draw_points(const GwyGraphCurve *graphcurve,
     }
     if (syminfo->do_stroke)
         cairo_stroke(cr);
-
-    cairo_restore(cr);
 }
 
 static void
