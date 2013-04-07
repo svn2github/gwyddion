@@ -655,7 +655,8 @@ gwy_inventory_nth_updated(GwyInventory *inventory,
  * If the inventory is sorted, item is inserted to keep order.  If the
  * inventory is unsorted, item is simply added to the end.
  *
- * Returns: @item, for convenience.
+ * Returns: (transfer none):
+ *          @item, for convenience.
  **/
 gpointer
 gwy_inventory_insert(GwyInventory *inventory,
@@ -705,7 +706,8 @@ gwy_inventory_insert(GwyInventory *inventory,
  * If the item is sorted in a position where it does not belong according to
  * the item comparation function, the inventory becomes unsorted.
  *
- * Returns: @item, for convenience.
+ * Returns: (transfer none):
+ *          @item, for convenience.
  **/
 gpointer
 gwy_inventory_insert_nth(GwyInventory *inventory,
@@ -943,7 +945,8 @@ emit_reordered_for_move(GwyInventory *inventory,
  * possibly GwyInventory::default-changed will be emitted subsequently, when
  * the item is already in the final position.
  *
- * Returns: The item, for convenience.
+ * Returns: (transfer none):
+ *          The item, for convenience.
  **/
 gpointer
 gwy_inventory_rename(GwyInventory *inventory,
@@ -1025,7 +1028,8 @@ gwy_inventory_rename(GwyInventory *inventory,
  * The newly created item can be called differently than @newname if that
  * already exists.
  *
- * Returns: The newly added item.
+ * Returns: (transfer none):
+ *          The newly added item.
  **/
 gpointer
 gwy_inventory_copy(GwyInventory *inventory,

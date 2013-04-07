@@ -472,7 +472,8 @@ gwy_array_replace(GwyArray *array,
  *
  * Returns pointer to array data.
  *
- * Returns: The complete array data, owned by the array.  It must not be
+ * Returns: (transfer none):
+ *          The complete array data, owned by the array.  It must not be
  *          freed.  The returned pointer remains valid only as long as the
  *          array do not change.  If the array is empty, %NULL is returned.
  **/

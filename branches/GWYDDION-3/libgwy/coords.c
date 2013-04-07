@@ -474,7 +474,8 @@ gwy_coords_get_property(GObject *object,
  * Creates a new set of coordinates of some geometrical objects as the subset
  * of an existing set.
  *
- * Returns: A newly created group of coordinates.
+ * Returns: (transfer full):
+ *          A newly created group of coordinates.
  **/
 GwyCoords*
 gwy_coords_new_subset(const GwyCoords *coords,

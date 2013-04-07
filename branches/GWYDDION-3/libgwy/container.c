@@ -1418,11 +1418,11 @@ gwy_container_gis_object(GwyContainer *container,
  * The returned boxed type is owned by @container.  Use g_boxed_copy() to
  * create a private copy if you need a modifiable/long-lasting data.
  * |[
- * GwyRGBA *color;
- * color = gwy_container_get_boxed(container, key);
+ * GwyRGBA *color = gwy_container_get_boxed(container, key);
  * ]|
  *
- * Returns: Boxed type pointer.
+ * Returns: (transfer none):
+ *          Boxed type pointer.
  **/
 gconstpointer
 gwy_container_get_boxed(GwyContainer *container, GQuark key, GType type)
