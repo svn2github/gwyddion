@@ -26,6 +26,7 @@ G_BEGIN_DECLS
 
 typedef enum {
     GWY_GRAPH_SCALE_LINEAR,
+    GWY_GRAPH_SCALE_SQRT,
     GWY_GRAPH_SCALE_LOG,
 } GwyGraphScaleType;
 

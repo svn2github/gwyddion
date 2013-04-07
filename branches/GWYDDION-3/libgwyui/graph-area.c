@@ -730,6 +730,8 @@ curve_notify(GwyGraphArea *grapharea,
              GParamSpec *pspec,
              GwyGraphCurve *graphcurve)
 {
+    if (gwy_strequal(pspec->name, "plot-type"))
+        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
 
 }
 
@@ -759,6 +761,26 @@ curve_data_updated(GwyGraphArea *grapharea,
  * GwyGraphAreaClass:
  *
  * Class of graph areas.
+ **/
+
+/**
+ * GwyGraphScaleType:
+ * @GWY_GRAPH_SCALE_LINEAR: Linear mapping between values and screen
+ *                          positions.  This gives equally sized error bars if
+ *                          errors are independent on the value.
+ * @GWY_GRAPH_SCALE_SQRT: Screen positions correspond to ‘signed square
+ *                        roots’ of the value, see gwy_spow().  This gives
+ *                        equally sized error bars if errors are proportional
+ *                        to the square root of the value – like for most
+ *                        histogram-like plots.
+ * @GWY_GRAPH_SCALE_LOG: Screen positions correspond to logarithms of values.
+ *                       This gives equally sized errors bars if errors are
+ *                       proportional to the value.  Only positive values can
+ *                       be plotted.
+ *
+ * Type of graph axis scaling functions.
+ *
+ * FIXME: This is exactly the same as #GwyScaleMappingType.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

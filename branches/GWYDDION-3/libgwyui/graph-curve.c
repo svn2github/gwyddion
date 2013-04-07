@@ -57,6 +57,17 @@ typedef void (*SymbolDrawFunc)(cairo_t *cr,
                                gdouble halfside);
 
 typedef struct {
+    const GwyXY *xy;
+    const gdouble *y;
+    gdouble xoff;
+    gdouble dx;
+    guint n;
+    guint i;
+    GwyGraphScaleType xscale;
+    GwyGraphScaleType yscale;
+} GraphCurveIter;
+
+typedef struct {
     SymbolDrawFunc draw;
     gdouble size_factor;
     GwyGraphPointType type;
@@ -157,6 +168,13 @@ static void     calculate_scaling           (gdouble srcfrom,
                                              gdouble destlen,
                                              gdouble *q,
                                              gdouble *off);
+static gboolean graph_curve_iter_init       (const GwyGraphCurve *graphcurve,
+                                             GraphCurveIter *iter,
+                                             GwyGraphScaleType xscale,
+                                             GwyGraphScaleType yscale);
+static gboolean graph_curve_iter_get        (const GraphCurveIter *iter,
+                                             gdouble *x, gdouble *y);
+static gboolean graph_curve_iter_next       (GraphCurveIter *iter);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -943,6 +961,12 @@ draw_points(const GwyGraphCurve *graphcurve,
     gdouble halfside = priv->point_size * syminfo->size_factor;
     SymbolDrawFunc draw = syminfo->draw;
 
+    GraphCurveIter iter;
+    if (!graph_curve_iter_init(graphcurve, &iter,
+                               gwy_graph_area_get_xscale(grapharea),
+                               gwy_graph_area_get_yscale(grapharea)))
+        return;
+
     gdouble xq, xoff, yq, yoff;
     // XXX: For now, ignore @grapharea and just draw the full data.
     calculate_scaling(priv->xrange.from, priv->xrange.to - priv->xrange.from,
@@ -956,26 +980,16 @@ draw_points(const GwyGraphCurve *graphcurve,
     cairo_set_line_width(cr, 1.0);
     gwy_cairo_set_source_rgba(cr, &priv->point_color);
 
-    const GwyCurve *curve = priv->curve;
-    const GwyLine *line = priv->line;
-    g_return_if_fail(!curve ^ !line);
-
-    // FIXME: We should define an iterator instead, it could also handle
-    // indicating bad values for logscale.
-    const GwyXY *xydata = curve ? curve->data : NULL;
-    const gdouble *ldata = line ? line->data : NULL;
-    guint n = curve ? curve->n : line->res;
-    gdouble ldx = line ? gwy_line_dx(line) : 0.0;
-    gdouble lxoff = line ? 0.5*ldx + line->off : 0.0;
-    for (guint i = 0; i < n; i++) {
-        gdouble x = curve ? xydata[i].x : ldx*i + lxoff;
-        gdouble y = curve ? xydata[i].y : ldata[i];
+    do {
+        gdouble x, y;
+        if (!graph_curve_iter_get(&iter, &x, &y))
+            continue;
         x = xq*x + xoff;
         y = yq*y + yoff;
         if (within_range(rect->x, rect->width, x, halfside)
             && within_range(rect->y, rect->height, y, halfside))
             draw(cr, x, y, halfside);
-    }
+    } while (graph_curve_iter_next(&iter));
 
     if (syminfo->do_fill) {
         if (syminfo->do_stroke)
@@ -997,6 +1011,12 @@ draw_lines(const GwyGraphCurve *graphcurve,
 {
     GraphCurve *priv = graphcurve->priv;
 
+    GraphCurveIter iter;
+    if (!graph_curve_iter_init(graphcurve, &iter,
+                               gwy_graph_area_get_xscale(grapharea),
+                               gwy_graph_area_get_yscale(grapharea)))
+        return;
+
     gdouble xq, xoff, yq, yoff;
     // XXX: For now, ignore @grapharea and just draw the full data.
     calculate_scaling(priv->xrange.from, priv->xrange.to - priv->xrange.from,
@@ -1011,33 +1031,36 @@ draw_lines(const GwyGraphCurve *graphcurve,
     gwy_cairo_set_source_rgba(cr, &priv->line_color);
     setup_line_type(cr, priv->line_width, priv->line_type);
 
-    const GwyCurve *curve = priv->curve;
-    const GwyLine *line = priv->line;
-    g_return_if_fail(!curve ^ !line);
-
-    // FIXME: We should define an iterator instead, it could also handle
-    // indicating bad values for logscale.
-    const GwyXY *xydata = curve ? curve->data : NULL;
-    const gdouble *ldata = line ? line->data : NULL;
-    guint n = curve ? curve->n : line->res;
-    gdouble ldx = line ? gwy_line_dx(line) : 0.0;
-    gdouble lxoff = line ? 0.5*ldx + line->off : 0.0;
-    gdouble x = curve ? xydata[0].x : lxoff;
-    gdouble y = curve ? xydata[0].y : ldata[0];
-    x = xq*x + xoff;
-    y = yq*y + yoff;
-    gint xtype = range_type(rect->x, rect->width, x, 1.0);
-    gint ytype = range_type(rect->y, rect->height, y, 1.0);
-    gboolean skipping = TRUE;
-    for (guint i = 1; i < n; i++) {
-        gdouble xprev = x, yprev = y;
-        gint xprevtype = xtype, yprevtype = ytype;
-        x = curve ? xydata[i].x : ldx*i + lxoff;
-        y = curve ? xydata[i].y : ldata[i];
+    gdouble x, y;
+    gint xtype, ytype;
+    if (graph_curve_iter_get(&iter, &x, &y)) {
         x = xq*x + xoff;
         y = yq*y + yoff;
         xtype = range_type(rect->x, rect->width, x, 1.0);
         ytype = range_type(rect->y, rect->height, y, 1.0);
+    }
+    else
+        xtype = ytype = 42;
+
+    gboolean skipping = TRUE;
+    while (graph_curve_iter_next(&iter)) {
+        gdouble xprev = x, yprev = y;
+        gint xprevtype = xtype, yprevtype = ytype;
+        if (graph_curve_iter_get(&iter, &x, &y)) {
+            x = xq*x + xoff;
+            y = yq*y + yoff;
+            xtype = range_type(rect->x, rect->width, x, 1.0);
+            ytype = range_type(rect->y, rect->height, y, 1.0);
+        }
+        else
+            xtype = ytype = 42;
+
+        // This means any of them is 42.
+        if (xtype + ytype + xprevtype + yprevtype > 30) {
+            skipping = TRUE;
+            continue;
+        }
+
         if ((xtype && xtype == xprevtype) || (ytype && ytype == yprevtype)) {
             skipping = TRUE;
             continue;
@@ -1100,6 +1123,74 @@ calculate_scaling(gdouble srcfrom, gdouble srclen,
 {
     *q = destlen/srclen;
     *off = destfrom - srcfrom*(*q);
+}
+
+static gboolean
+graph_curve_iter_init(const GwyGraphCurve *graphcurve,
+                      GraphCurveIter *iter,
+                      GwyGraphScaleType xscale,
+                      GwyGraphScaleType yscale)
+{
+    GraphCurve *priv = graphcurve->priv;
+    const GwyCurve *curve = priv->curve;
+    const GwyLine *line = priv->line;
+    gwy_clear(iter, 1);
+    g_return_val_if_fail(!curve ^ !line, FALSE);
+
+    if (curve) {
+        iter->xy = curve->data;
+        iter->n = curve->n;
+    }
+    if (line) {
+        iter->y = line->data;
+        iter->n = line->res;
+        iter->dx = gwy_line_dx(line);
+        iter->xoff = line->off + 0.5*iter->dx;
+    }
+    iter->xscale = xscale;
+    iter->yscale = yscale;
+    return iter->n > 0;
+}
+
+static gboolean
+graph_curve_iter_get(const GraphCurveIter *iter,
+                     gdouble *x, gdouble *y)
+{
+    if (iter->xy) {
+        *x = iter->xy[iter->i].x;
+        *y = iter->xy[iter->i].y;
+    }
+    if (iter->y) {
+        *x = iter->xoff + iter->i*iter->dx;
+        *y = iter->y[iter->i];
+    }
+
+    if (iter->xscale == GWY_GRAPH_SCALE_SQRT)
+        *x = gwy_ssqrt(*x);
+    else if (iter->xscale == GWY_GRAPH_SCALE_LOG)
+        *x = log(*x);
+
+    if (iter->yscale == GWY_GRAPH_SCALE_SQRT)
+        *y = gwy_ssqrt(*y);
+    else if (iter->yscale == GWY_GRAPH_SCALE_LOG)
+        *y = log(*y);
+
+    if (!isfinite(*x) || !isfinite(*y))
+        return FALSE;
+
+    return TRUE;
+}
+
+static gboolean
+graph_curve_iter_next(GraphCurveIter *iter)
+{
+    iter->i++;
+    if (iter->i < iter->n)
+        return TRUE;
+
+    if (G_UNLIKELY(iter->i > iter->n))
+        iter->i--;
+    return FALSE;
 }
 
 /**
