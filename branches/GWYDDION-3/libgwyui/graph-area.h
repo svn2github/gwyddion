@@ -61,42 +61,52 @@ struct _GwyGraphAreaClass {
     /*<public>*/
 };
 
-GType             gwy_graph_area_get_type    (void)                          G_GNUC_CONST;
-GwyGraphArea*     gwy_graph_area_new         (void);
-void              gwy_graph_area_add_curve   (GwyGraphArea *grapharea,
-                                              GwyGraphCurve *graphcurve);
-void              gwy_graph_area_insert_curve(GwyGraphArea *grapharea,
-                                              GwyGraphCurve *graphcurve,
-                                              guint pos);
-void              gwy_graph_area_remove_curve(GwyGraphArea *grapharea,
-                                              guint pos);
-GwyGraphCurve*    gwy_graph_area_get_curve   (const GwyGraphArea *grapharea,
-                                              guint pos)                     G_GNUC_PURE;
-guint             gwy_graph_area_n_curves    (const GwyGraphArea *grapharea) G_GNUC_PURE;
-void              gwy_graph_area_set_xrange  (GwyGraphArea *grapharea,
-                                              const GwyRange *range);
-void              gwy_graph_area_get_xrange  (const GwyGraphArea *grapharea,
-                                              GwyRange *range);
-void              gwy_graph_area_set_yrange  (GwyGraphArea *grapharea,
-                                              const GwyRange *range);
-void              gwy_graph_area_get_yrange  (const GwyGraphArea *grapharea,
-                                              GwyRange *range);
-void              gwy_graph_area_set_xgrid   (GwyGraphArea *grapharea,
-                                              const gdouble *ticks,
-                                              guint n);
-void              gwy_graph_area_set_ygrid   (GwyGraphArea *grapharea,
-                                              const gdouble *ticks,
-                                              guint n);
-const gdouble*    gwy_graph_area_get_xgrid   (GwyGraphArea *grapharea,
-                                              guint *n);
-const gdouble*    gwy_graph_area_get_ygrid   (GwyGraphArea *grapharea,
-                                              guint *n);
-void              gwy_graph_area_set_xscale  (GwyGraphArea *grapharea,
-                                              GwyGraphScaleType scale);
-GwyGraphScaleType gwy_graph_area_get_xscale  (const GwyGraphArea *grapharea) G_GNUC_PURE;
-void              gwy_graph_area_set_yscale  (GwyGraphArea *grapharea,
-                                              GwyGraphScaleType scale);
-GwyGraphScaleType gwy_graph_area_get_yscale  (const GwyGraphArea *grapharea) G_GNUC_PURE;
+GType             gwy_graph_area_get_type      (void)                            G_GNUC_CONST;
+GtkWidget*        gwy_graph_area_new           (void);
+void              gwy_graph_area_add           (GwyGraphArea *grapharea,
+                                                GwyGraphCurve *graphcurve);
+void              gwy_graph_area_insert        (GwyGraphArea *grapharea,
+                                                GwyGraphCurve *graphcurve,
+                                                guint pos);
+void              gwy_graph_area_remove        (GwyGraphArea *grapharea,
+                                                guint pos);
+void              gwy_graph_area_remove_curve  (GwyGraphArea *grapharea,
+                                                GwyGraphCurve *graphcurve);
+GwyGraphCurve*    gwy_graph_area_get           (const GwyGraphArea *grapharea,
+                                                guint pos)                       G_GNUC_PURE;
+gint              gwy_graph_area_find          (const GwyGraphArea *grapharea,
+                                                const GwyGraphCurve *graphcurve) G_GNUC_PURE;
+guint             gwy_graph_area_n_curves      (const GwyGraphArea *grapharea)   G_GNUC_PURE;
+void              gwy_graph_area_set_xrange    (GwyGraphArea *grapharea,
+                                                const GwyRange *range);
+void              gwy_graph_area_get_xrange    (const GwyGraphArea *grapharea,
+                                                GwyRange *range);
+void              gwy_graph_area_set_yrange    (GwyGraphArea *grapharea,
+                                                const GwyRange *range);
+void              gwy_graph_area_get_yrange    (const GwyGraphArea *grapharea,
+                                                GwyRange *range);
+void              gwy_graph_area_set_xgrid     (GwyGraphArea *grapharea,
+                                                const gdouble *ticks,
+                                                guint n);
+void              gwy_graph_area_set_ygrid     (GwyGraphArea *grapharea,
+                                                const gdouble *ticks,
+                                                guint n);
+const gdouble*    gwy_graph_area_get_xgrid     (GwyGraphArea *grapharea,
+                                                guint *n);
+const gdouble*    gwy_graph_area_get_ygrid     (GwyGraphArea *grapharea,
+                                                guint *n);
+void              gwy_graph_area_set_xscale    (GwyGraphArea *grapharea,
+                                                GwyGraphScaleType scale);
+GwyGraphScaleType gwy_graph_area_get_xscale    (const GwyGraphArea *grapharea)   G_GNUC_PURE;
+void              gwy_graph_area_set_yscale    (GwyGraphArea *grapharea,
+                                                GwyGraphScaleType scale);
+GwyGraphScaleType gwy_graph_area_get_yscale    (const GwyGraphArea *grapharea)   G_GNUC_PURE;
+void              gwy_graph_area_set_show_xgrid(GwyGraphArea *grapharea,
+                                                gboolean show);
+gboolean          gwy_graph_area_get_show_xgrid(const GwyGraphArea *grapharea)   G_GNUC_PURE;
+void              gwy_graph_area_set_show_ygrid(GwyGraphArea *grapharea,
+                                                gboolean show);
+gboolean          gwy_graph_area_get_show_ygrid(const GwyGraphArea *grapharea)   G_GNUC_PURE;
 
 G_END_DECLS
 

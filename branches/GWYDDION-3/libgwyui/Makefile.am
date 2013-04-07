@@ -48,6 +48,7 @@ public_built_headers = \
 	$(mkenum_name).h
 
 private_headers = \
+	graph-internal.h \
 	shapes-internal.h
 
 private_built_headers = \
@@ -90,6 +91,7 @@ libgwyui3_la_SOURCES = \
 	field-render.c \
 	graph-area.c \
 	graph-curve.c \
+	graph-internal.c \
 	icons-gresource.c \
 	inventory-store.c \
 	main.c \

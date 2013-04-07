@@ -22,6 +22,7 @@
 #include "libgwyui/types.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/graph-area.h"
+#include "libgwyui/graph-internal.h"
 
 #define curve_proxy_index(a, i) g_array_index((a), CurveProxy, (i))
 
@@ -29,6 +30,10 @@ enum {
     PROP_0,
     PROP_XSCALE,
     PROP_YSCALE,
+    PROP_XRANGE,
+    PROP_YRANGE,
+    PROP_SHOW_XGRID,
+    PROP_SHOW_YGRID,
     N_PROPS
 };
 
@@ -49,6 +54,8 @@ struct _GwyGraphAreaPrivate {
     GwyRange yrange;
     GwyGraphScaleType xscale;
     GwyGraphScaleType yscale;
+    gboolean show_xgrid;
+    gboolean show_ygrid;
 };
 
 static void     gwy_graph_area_finalize     (GObject *object);
@@ -79,6 +86,13 @@ static gboolean set_xrange                  (GwyGraphArea *grapharea,
                                              const GwyRange *range);
 static gboolean set_yrange                  (GwyGraphArea *grapharea,
                                              const GwyRange *range);
+static gboolean set_show_xgrid              (GwyGraphArea *grapharea,
+                                             gboolean show);
+static gboolean set_show_ygrid              (GwyGraphArea *grapharea,
+                                             gboolean show);
+static gboolean set_grid                    (GArray **pgrid,
+                                             const gdouble *ticks,
+                                             guint n);
 static void     clear_curves                (GwyGraphArea *grapharea);
 static gboolean set_curve                   (GwyGraphArea *grapharea,
                                              GwyGraphCurve *graphcurve,
@@ -88,9 +102,20 @@ static void     curve_notify                (GwyGraphArea *grapharea,
                                              GwyGraphCurve *graphcurve);
 static void     curve_data_updated          (GwyGraphArea *grapharea,
                                              GwyGraphCurve *graphcurve);
+static void     draw_xgrid                  (const GwyGraphArea *grapharea,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect);
+static void     draw_ygrid                  (const GwyGraphArea *grapharea,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect);
+static void     draw_curves                 (const GwyGraphArea *grapharea,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect);
+static void     setup_grid_style            (cairo_t *cr);
 
 static GParamSpec *properties[N_PROPS];
-static const GwyRange default_range = { -1.0, 1.0 };
+static const GwyRange default_range = { 0.1, 1.0 };
+static const CurveProxy null_proxy = { NULL, 0L, 0L };
 
 G_DEFINE_TYPE(GwyGraphArea, gwy_graph_area, GTK_TYPE_WIDGET);
 
@@ -130,6 +155,34 @@ gwy_graph_area_class_init(GwyGraphAreaClass *klass)
                             GWY_GRAPH_SCALE_LINEAR,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_XRANGE]
+        = g_param_spec_boxed("xrange",
+                             "X range",
+                             "Range of the abscissa.",
+                             GWY_TYPE_RANGE,
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_YRANGE]
+        = g_param_spec_boxed("yrange",
+                             "Y range",
+                             "Range of the ordinate.",
+                             GWY_TYPE_RANGE,
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHOW_XGRID]
+        = g_param_spec_boolean("show-xgrid",
+                               "Show X grid",
+                               "Whether to draw vertical grid lines.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHOW_YGRID]
+        = g_param_spec_boolean("show-ygrid",
+                               "Show Y grid",
+                               "Whether to draw horizontal grid lines.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -142,8 +195,9 @@ gwy_graph_area_init(GwyGraphArea *grapharea)
                                                   GraphArea);
     GraphArea *priv = grapharea->priv;
     priv->curves = g_array_new(FALSE, TRUE, sizeof(CurveProxy));
-    priv->xrange = default_range;
-    priv->yrange = default_range;
+    priv->xrange = priv->yrange = default_range;
+    priv->show_xgrid = priv->show_ygrid = TRUE;
+    gtk_widget_set_has_window(GTK_WIDGET(grapharea), FALSE);
 }
 
 static void
@@ -152,6 +206,7 @@ gwy_graph_area_finalize(GObject *object)
     GraphArea *priv = GWY_GRAPH_AREA(object)->priv;
     GWY_ARRAY_FREE(priv->xgrid);
     GWY_ARRAY_FREE(priv->ygrid);
+    g_array_free(priv->curves, TRUE);
     G_OBJECT_CLASS(gwy_graph_area_parent_class)->finalize(object);
 }
 
@@ -180,6 +235,22 @@ gwy_graph_area_set_property(GObject *object,
         set_yscale(grapharea, g_value_get_enum(value));
         break;
 
+        case PROP_XRANGE:
+        set_xrange(grapharea, g_value_get_boxed(value));
+        break;
+
+        case PROP_YRANGE:
+        set_yrange(grapharea, g_value_get_boxed(value));
+        break;
+
+        case PROP_SHOW_XGRID:
+        set_show_xgrid(grapharea, g_value_get_boolean(value));
+        break;
+
+        case PROP_SHOW_YGRID:
+        set_show_ygrid(grapharea, g_value_get_boolean(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -201,6 +272,22 @@ gwy_graph_area_get_property(GObject *object,
 
         case PROP_YSCALE:
         g_value_set_enum(value, priv->yscale);
+        break;
+
+        case PROP_XRANGE:
+        g_value_set_boxed(value, &priv->xrange);
+        break;
+
+        case PROP_YRANGE:
+        g_value_set_boxed(value, &priv->yrange);
+        break;
+
+        case PROP_SHOW_XGRID:
+        g_value_set_boolean(value, priv->show_xgrid);
+        break;
+
+        case PROP_SHOW_YGRID:
+        g_value_set_boolean(value, priv->show_ygrid);
         break;
 
         default:
@@ -264,6 +351,16 @@ static gboolean
 gwy_graph_area_draw(GtkWidget *widget,
                     cairo_t *cr)
 {
+    GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
+    cairo_rectangle_int_t rect;
+    gtk_widget_get_allocation(widget, &rect);
+    cairo_save(cr);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_paint(cr);
+    cairo_restore(cr);
+    draw_xgrid(grapharea, cr, &rect);
+    draw_ygrid(grapharea, cr, &rect);
+    draw_curves(grapharea, cr, &rect);
     return FALSE;
 }
 
@@ -274,85 +371,142 @@ gwy_graph_area_draw(GtkWidget *widget,
  *
  * Returns: The newly created graph curve.
  **/
-GwyGraphArea*
+GtkWidget*
 gwy_graph_area_new(void)
 {
-    return (GwyGraphArea*)g_object_newv(GWY_TYPE_GRAPH_AREA, 0, NULL);
+    return (GtkWidget*)g_object_newv(GWY_TYPE_GRAPH_AREA, 0, NULL);
 }
 
 /**
- * gwy_graph_area_add_curve:
+ * gwy_graph_area_add:
  * @grapharea: A graph area.
  * @graphcurve: A graph curve to add (after all already present curves).
  *
- * .
+ * Adds a curve to a graph area.
  **/
 void
-gwy_graph_area_add_curve(GwyGraphArea *grapharea,
-                         GwyGraphCurve *graphcurve)
-{
-    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
-    gwy_graph_area_insert_curve(grapharea, graphcurve,
-                                grapharea->priv->curves->len);
-}
-
-/**
- * gwy_graph_area_insert_curve:
- * @grapharea: A graph area.
- * @graphcurve: A graph curve to insert.
- * @pos: Position to insert @graphcurve at.
- *
- * .
- **/
-void
-gwy_graph_area_insert_curve(GwyGraphArea *grapharea,
-                            GwyGraphCurve *graphcurve,
-                            guint pos)
+gwy_graph_area_add(GwyGraphArea *grapharea,
+                   GwyGraphCurve *graphcurve)
 {
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
     g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
     GraphArea *priv = grapharea->priv;
-    if (pos > priv->curves->len) {
+    GArray *curves = priv->curves;
+    g_array_append_val(curves, null_proxy);
+    set_curve(grapharea, graphcurve, priv->curves->len-1);
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+    // TODO: emit some signal, autorange may have changed
+}
+
+/**
+ * gwy_graph_area_insert:
+ * @grapharea: A graph area.
+ * @graphcurve: A graph curve to insert.
+ * @pos: Position to insert @graphcurve at.
+ *
+ * Inserts a curve to a graph area at given position.
+ **/
+void
+gwy_graph_area_insert(GwyGraphArea *grapharea,
+                      GwyGraphCurve *graphcurve,
+                      guint pos)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
+    GraphArea *priv = grapharea->priv;
+    GArray *curves = priv->curves;
+    if (pos > curves->len) {
         g_warning("Insertion position %u is beyond the number of curves.", pos);
-        pos = priv->curves->len;
+        pos = curves->len;
     }
-    // TODO
+    g_array_insert_val(curves, pos, null_proxy);
+    set_curve(grapharea, graphcurve, pos);
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+    // TODO: emit some signal, autorange may have changed
+}
+
+/**
+ * gwy_graph_area_remove:
+ * @grapharea: A graph area.
+ * @pos: Position to remove the curve from.
+ *
+ * Removes graph curve at given position from a graph area.
+ **/
+void
+gwy_graph_area_remove(GwyGraphArea *grapharea,
+                      guint pos)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    GraphArea *priv = grapharea->priv;
+    g_return_if_fail(pos < priv->curves->len);
+    set_curve(grapharea, NULL, pos);
+    g_array_remove_index(priv->curves, pos);
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+    // TODO: emit some signal, autorange may have changed
 }
 
 /**
  * gwy_graph_area_remove_curve:
  * @grapharea: A graph area.
- * @pos: Position to remove the curve from.
+ * @graphcurve: A graph curve to remove.
  *
- * .
+ * Removes given graph curve object from a graph area.
  **/
 void
 gwy_graph_area_remove_curve(GwyGraphArea *grapharea,
-                            guint pos)
+                            GwyGraphCurve *graphcurve)
 {
-    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
-    GraphArea *priv = grapharea->priv;
-    g_return_if_fail(pos < priv->curves->len);
-    // TODO
+    gint i = gwy_graph_area_find(grapharea, graphcurve);
+    if (i == -1) {
+        g_warning("Graph curve %p not present in the graph area.", graphcurve);
+        return;
+    }
+    gwy_graph_area_remove(grapharea, i);
 }
 
 /**
- * gwy_graph_area_get_curve:
+ * gwy_graph_area_get:
  * @grapharea: A graph area.
  * @pos: Position of the curve.
  *
- * Gets a curve from graph area by position.
+ * Gets the curve at given position from a graph area.
  *
  * Returns: Curve at position @pos.
  **/
 GwyGraphCurve*
-gwy_graph_area_get_curve(const GwyGraphArea *grapharea,
-                         guint pos)
+gwy_graph_area_get(const GwyGraphArea *grapharea,
+                   guint pos)
 {
     g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), NULL);
     GraphArea *priv = grapharea->priv;
     g_return_val_if_fail(pos < priv->curves->len, NULL);
     return curve_proxy_index(priv->curves, pos).curve;
+}
+
+/**
+ * gwy_graph_area_find:
+ * @grapharea: A graph area.
+ * @graphcurve: A graph curve to find.
+ *
+ * Finds a graph curve object in a graph area.
+ *
+ * Returns: Position of curve @graphcurve, -1 if it is not present in
+ *          @grapharea.
+ **/
+gint
+gwy_graph_area_find(const GwyGraphArea *grapharea,
+                    const GwyGraphCurve *graphcurve)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), -1);
+    g_return_val_if_fail(GWY_IS_GRAPH_CURVE(graphcurve), -1);
+    GraphArea *priv = grapharea->priv;
+    GArray *curves = priv->curves;
+    for (guint i = 0; i < curves->len; i++) {
+        const CurveProxy *cproxy = &curve_proxy_index(curves, i);
+        if (cproxy->curve == graphcurve)
+            return i;
+    }
+    return -1;
 }
 
 /**
@@ -386,7 +540,7 @@ gwy_graph_area_set_xrange(GwyGraphArea *grapharea,
     if (!set_xrange(grapharea, range))
         return;
 
-    // TODO: Emit notification?
+    g_object_notify_by_pspec(G_OBJECT(grapharea), properties[PROP_XRANGE]);
 }
 
 /**
@@ -409,7 +563,7 @@ gwy_graph_area_get_xrange(const GwyGraphArea *grapharea,
 /**
  * gwy_graph_area_set_yrange:
  * @grapharea: A graph area.
- * @range: 
+ * @range: New ordinate range.
  *
  * Sets the range of the ordinate of a graph area.
  **/
@@ -422,7 +576,7 @@ gwy_graph_area_set_yrange(GwyGraphArea *grapharea,
     if (!set_yrange(grapharea, range))
         return;
 
-    // TODO: Emit notification?
+    g_object_notify_by_pspec(G_OBJECT(grapharea), properties[PROP_YRANGE]);
 }
 
 /**
@@ -461,8 +615,11 @@ gwy_graph_area_set_xgrid(GwyGraphArea *grapharea,
                          guint n)
 {
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
-    g_return_if_fail(ticks || !n);
-    // TODO
+    GraphArea *priv = grapharea->priv;
+    if (!set_grid(&priv->xgrid, ticks, n))
+        return;
+    if (priv->show_xgrid)
+        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
 }
 
 /**
@@ -484,8 +641,11 @@ gwy_graph_area_set_ygrid(GwyGraphArea *grapharea,
                          guint n)
 {
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
-    g_return_if_fail(ticks || !n);
-    // TODO
+    GraphArea *priv = grapharea->priv;
+    if (!set_grid(&priv->ygrid, ticks, n))
+        return;
+    if (priv->show_ygrid)
+        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
 }
 
 /**
@@ -602,6 +762,80 @@ gwy_graph_area_get_yscale(const GwyGraphArea *grapharea)
     return grapharea->priv->yscale;
 }
 
+/**
+ * gwy_graph_area_set_show_xgrid:
+ * @grapharea: A graph area.
+ * @show: %TRUE to show the vertical grid lines, %FALSE to hide them.
+ *
+ * Sets the visibility of vertical grid lines.
+ *
+ * The vertical grid lines represent abscissa ticks and are set with
+ * gwy_graph_area_set_xgrid().
+ **/
+void
+gwy_graph_area_set_show_xgrid(GwyGraphArea *grapharea,
+                              gboolean show)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    if (!set_show_xgrid(grapharea, show))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(grapharea), properties[PROP_SHOW_XGRID]);
+}
+
+/**
+ * gwy_graph_area_get_show_xgrid:
+ * @grapharea: A graph area.
+ *
+ * Gets the visibility of vertical grid lines.
+ *
+ * Returns: %TRUE if vertical grid lines are visible, %FALSE if they are
+ *          hidden.
+ **/
+gboolean
+gwy_graph_area_get_show_xgrid(const GwyGraphArea *grapharea)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), FALSE);
+    return grapharea->priv->show_xgrid;
+}
+
+/**
+ * gwy_graph_area_set_show_ygrid:
+ * @grapharea: A graph area.
+ * @show: %TRUE to show the horizontal grid lines, %FALSE to hide them.
+ *
+ * Sets the visibility of horizontal grid lines.
+ *
+ * The horizontal grid lines represent ordinare ticks and are set with
+ * gwy_graph_area_set_ygrid().
+ **/
+void
+gwy_graph_area_set_show_ygrid(GwyGraphArea *grapharea,
+                              gboolean show)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
+    if (!set_show_ygrid(grapharea, show))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(grapharea), properties[PROP_SHOW_YGRID]);
+}
+
+/**
+ * gwy_graph_area_get_show_ygrid:
+ * @grapharea: A graph area.
+ *
+ * Gets the visibility of horizontal grid lines.
+ *
+ * Returns: %TRUE if horizontal grid lines are visible, %FALSE if they are
+ *          hidden.
+ **/
+gboolean
+gwy_graph_area_get_show_ygrid(const GwyGraphArea *grapharea)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), FALSE);
+    return grapharea->priv->show_ygrid;
+}
+
 static void
 create_input_window(GwyGraphArea *grapharea)
 {
@@ -694,6 +928,54 @@ set_yrange(GwyGraphArea *grapharea,
     return TRUE;
 }
 
+static gboolean
+set_show_xgrid(GwyGraphArea *grapharea,
+               gboolean show)
+{
+    GraphArea *priv = grapharea->priv;
+    if (!show == !priv->show_xgrid)
+        return FALSE;
+
+    priv->show_xgrid = !!show;
+    return TRUE;
+}
+
+static gboolean
+set_show_ygrid(GwyGraphArea *grapharea,
+               gboolean show)
+{
+    GraphArea *priv = grapharea->priv;
+    if (!show == !priv->show_xgrid)
+        return FALSE;
+
+    priv->show_xgrid = !!show;
+    return TRUE;
+}
+
+static gboolean
+set_grid(GArray **pgrid,
+         const gdouble *ticks,
+         guint n)
+{
+    g_return_val_if_fail(ticks || !n, FALSE);
+    GArray *grid = *pgrid;
+    if (!n && (!grid || !grid->len))
+        return FALSE;
+
+    if (!grid)
+        grid = *pgrid = g_array_new(FALSE, FALSE, sizeof(gdouble));
+    else if (n == grid->len && memcmp(grid->data, ticks, n*sizeof(gdouble)))
+        return FALSE;
+
+    if (ticks >= (const gdouble*)grid->data
+        && ticks < (const gdouble*)grid->data + grid->len) {
+        g_warning("Subarray of ticks passed to set_grid().  FIXME.");
+    }
+    g_array_set_size(grid, 0);
+    g_array_append_vals(grid, ticks, n);
+    return TRUE;
+}
+
 static void
 clear_curves(GwyGraphArea *grapharea)
 {
@@ -701,6 +983,7 @@ clear_curves(GwyGraphArea *grapharea)
     GArray *curves = priv->curves;
     while (curves->len) {
         set_curve(grapharea, NULL, curves->len-1);
+        g_array_set_size(curves, curves->len-1);
     }
     // TODO: Emit some signal, invoke redraw if applicable, etc.
 }
@@ -727,25 +1010,131 @@ set_curve(GwyGraphArea *grapharea,
 
 static void
 curve_notify(GwyGraphArea *grapharea,
-             GParamSpec *pspec,
-             GwyGraphCurve *graphcurve)
+             G_GNUC_UNUSED GParamSpec *pspec,
+             G_GNUC_UNUSED GwyGraphCurve *graphcurve)
 {
-    if (gwy_strequal(pspec->name, "plot-type"))
-        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
-
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
 }
 
 static void
 curve_data_updated(GwyGraphArea *grapharea,
                    GwyGraphCurve *graphcurve)
 {
+    GwyPlotType plottype;
+    g_object_get(graphcurve, "plot-type", &plottype, NULL);
+    if (plottype != GWY_PLOT_HIDDEN)
+        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+}
 
+static void
+draw_xgrid(const GwyGraphArea *grapharea,
+           cairo_t *cr,
+           const cairo_rectangle_int_t *rect)
+{
+    GraphArea *priv = grapharea->priv;
+    GArray *grid = priv->xgrid;
+    GwyGraphScaleType scale = priv->xscale;
+    if (!priv->show_xgrid || !grid || !grid->len)
+        return;
+
+    gdouble q, off;
+    _gwy_graph_calculate_scaling(grapharea, rect, &q, &off, NULL, NULL);
+
+    cairo_save(cr);
+    setup_grid_style(cr);
+
+    for (guint i = 0; i < grid->len; i++) {
+        gdouble v = g_array_index(grid, gdouble, i);
+        if (scale == GWY_GRAPH_SCALE_SQRT)
+            v = gwy_ssqrt(v);
+        else if (scale == GWY_GRAPH_SCALE_LOG)
+            v = log(v);
+
+        v = q*v + off;
+        if (!isfinite(v) || !within_range(rect->x, rect->width, v, 1.0))
+            continue;
+
+        cairo_move_to(cr, v, rect->y);
+        cairo_rel_line_to(cr, 0.0, rect->height);
+    }
+
+    cairo_stroke(cr);
+    cairo_restore(cr);
+}
+
+static void
+draw_ygrid(const GwyGraphArea *grapharea,
+           cairo_t *cr,
+           const cairo_rectangle_int_t *rect)
+{
+    GraphArea *priv = grapharea->priv;
+    GArray *grid = priv->ygrid;
+    GwyGraphScaleType scale = priv->yscale;
+    if (!priv->show_ygrid || !grid || !grid->len)
+        return;
+
+    gdouble q, off;
+    _gwy_graph_calculate_scaling(grapharea, rect, NULL, NULL, &q, &off);
+
+    cairo_save(cr);
+    setup_grid_style(cr);
+
+    for (guint i = 0; i < grid->len; i++) {
+        gdouble v = g_array_index(grid, gdouble, i);
+        if (scale == GWY_GRAPH_SCALE_SQRT)
+            v = gwy_ssqrt(v);
+        else if (scale == GWY_GRAPH_SCALE_LOG)
+            v = log(v);
+
+        v = q*v + off;
+        if (!isfinite(v) || !within_range(rect->y, rect->height, v, 1.0))
+            continue;
+
+        cairo_move_to(cr, rect->x, v);
+        cairo_rel_line_to(cr, rect->width, 0.0);
+    }
+
+    cairo_stroke(cr);
+    cairo_restore(cr);
+}
+
+static void
+draw_curves(const GwyGraphArea *grapharea,
+            cairo_t *cr,
+            const cairo_rectangle_int_t *rect)
+{
+    GraphArea *priv = grapharea->priv;
+    GArray *curves = priv->curves;
+
+    for (guint i = 0; i < curves->len; i++) {
+        const CurveProxy *proxy = &curve_proxy_index(curves, i);
+        gwy_graph_curve_draw(proxy->curve, cr, rect, grapharea);
+    }
+}
+
+static void
+setup_grid_style(cairo_t *cr)
+{
+    cairo_set_source_rgb(cr, 0.85, 0.85, 0.85);
+    cairo_set_line_width(cr, 1.0);
+    gdouble dash[1] = { 2.0 };
+    cairo_set_dash(cr, dash, 1, 0.0);
 }
 
 /**
  * SECTION: graph-area
  * @title: GwyGraphArea
  * @short_description: Area of graph containing the plots
+ *
+ * Individual plots in the graph are represented with #GwyGraphCurve objects
+ * that carry the plot style for each plot and can encapsulate either
+ * #GwyCurves or #GwyLines.
+ *
+ * Sometimes the axis terminology may be confusing with respect to horizontal
+ * and vertical because, for instance, the vertical grid lines corresponds to
+ * values on the horizontal axis.  The rule used in function naming is simple:
+ * if a setting is related to the abscissa it contains ‘x’ in its name and if
+ * it is related to the ordinate it contains ‘y’.
  **/
 
 /**

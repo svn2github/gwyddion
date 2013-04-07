@@ -24,12 +24,9 @@
 #include "libgwyui/types.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/graph-curve.h"
+#include "libgwyui/graph-internal.h"
 
 #define GGP(x) GWY_GRAPH_POINT_##x
-#define within_range(from,len,x,tol) \
-    (fabs((x) - (from) - 0.5*(len)) <= 0.5*(len) + (tol))
-#define range_type(from,len,x,tol) \
-    (((x) + (tol) < (from) ? -1 : ((x) - (tol) > (from) + (len) ? 1 : 0)))
 
 enum {
     PROP_0,
@@ -168,19 +165,6 @@ static void     draw_circle                 (cairo_t *cr,
                                              gdouble y,
                                              gdouble halfside);
 static gpointer check_symbol_table_sanity   (gpointer arg);
-static void     calculate_scaling           (const GwyGraphArea *grapharea,
-                                             const cairo_rectangle_int_t *rect,
-                                             gdouble *qx,
-                                             gdouble *offx,
-                                             gdouble *qy,
-                                             gdouble *offy);
-static void     calculate_one_scaling       (gdouble srcfrom,
-                                             gdouble srcto,
-                                             gdouble destfrom,
-                                             gdouble destlen,
-                                             GwyGraphScaleType scale,
-                                             gdouble *q,
-                                             gdouble *off);
 static gboolean graph_curve_iter_init       (const GwyGraphCurve *graphcurve,
                                              GraphCurveIter *iter,
                                              GwyGraphScaleType xscale,
@@ -1084,7 +1068,7 @@ draw_points(const GwyGraphCurve *graphcurve,
         return;
 
     gdouble xq, xoff, yq, yoff;
-    calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
+    _gwy_graph_calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
 
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
@@ -1141,7 +1125,7 @@ draw_lines(const GwyGraphCurve *graphcurve,
         return;
 
     gdouble xq, xoff, yq, yoff;
-    calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
+    _gwy_graph_calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
 
     cairo_save(cr);
     cairo_set_line_width(cr, priv->line_width);
@@ -1230,57 +1214,6 @@ check_symbol_table_sanity(G_GNUC_UNUSED gpointer arg)
     }
 
     return GINT_TO_POINTER(ok);
-}
-
-static void
-calculate_scaling(const GwyGraphArea *grapharea,
-                  const cairo_rectangle_int_t *rect,
-                  gdouble *qx, gdouble *offx,
-                  gdouble *qy, gdouble *offy)
-{
-    GwyRange range;
-    gwy_graph_area_get_xrange(grapharea, &range);
-    calculate_one_scaling(range.from, range.to, rect->x, rect->width,
-                          gwy_graph_area_get_xscale(grapharea),
-                          qx, offx);
-    gwy_graph_area_get_yrange(grapharea, &range);
-    calculate_one_scaling(range.from, range.to, rect->y, rect->height,
-                          gwy_graph_area_get_yscale(grapharea),
-                          qy, offy);
-}
-
-static void
-calculate_one_scaling(gdouble srcfrom, gdouble srcto,
-                      gdouble destfrom, gdouble destlen,
-                      GwyGraphScaleType scale,
-                      gdouble *q, gdouble *off)
-{
-    if (scale == GWY_GRAPH_SCALE_SQRT) {
-        srcfrom = gwy_ssqrt(srcfrom);
-        srcto = gwy_ssqrt(srcto);
-    }
-    else if (scale == GWY_GRAPH_SCALE_LOG) {
-        if (srcfrom > 0.0)
-            srcfrom = log(srcfrom);
-        else {
-            g_warning("Logscale minimum is %g, fixing to e*DBLMIN", srcfrom);
-            srcfrom = log(G_MINDOUBLE) + 1.0;
-        }
-
-        if (srcto > 0.0)
-            srcto = log(srcto);
-        else {
-            g_warning("Logscale maximum is %g, fixing to DBLMAX/e", srcto);
-            srcto = log(G_MAXDOUBLE) - 1.0;
-        }
-    }
-    else {
-        g_assert(scale == GWY_GRAPH_SCALE_LINEAR);
-    }
-
-    gdouble srclen = srcto - srcfrom;
-    *q = destlen/srclen;
-    *off = destfrom - srcfrom*(*q);
 }
 
 static gboolean
