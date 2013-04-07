@@ -125,10 +125,6 @@ static gdouble  map_position_to_value              (GwyAdjustBar *adjbar,
                                                     gdouble length,
                                                     gdouble position);
 static gdouble  map_both_linear                    (gdouble value);
-static gdouble  map_value_sqrt                     (gdouble value);
-static gdouble  map_position_sqrt                  (gdouble position);
-static gdouble  map_value_log                      (gdouble value);
-static gdouble  map_position_log                   (gdouble position);
 static void     change_value                       (GtkWidget *widget,
                                                     gdouble newposition);
 static void     ensure_cursors                     (GwyAdjustBar *adjbar);
@@ -761,12 +757,12 @@ update_mapping(GwyAdjustBar *adjbar)
     if (priv->mapping == GWY_SCALE_MAPPING_LINEAR)
         priv->map_value = priv->map_position = map_both_linear;
     else if (priv->mapping == GWY_SCALE_MAPPING_SQRT) {
-        priv->map_value = map_value_sqrt;
-        priv->map_position = map_position_sqrt;
+        priv->map_value = gwy_ssqrt;
+        priv->map_position = gwy_ssqr;
     }
     else if (priv->mapping == GWY_SCALE_MAPPING_LOG) {
-        priv->map_value = map_value_log;
-        priv->map_position = map_position_log;
+        priv->map_value = log;
+        priv->map_position = exp;
     }
     priv->b = priv->map_value(lower);
     priv->a = (priv->map_value(upper) - priv->b)/length;
@@ -798,30 +794,6 @@ static gdouble
 map_both_linear(gdouble value)
 {
     return value;
-}
-
-static gdouble
-map_value_sqrt(gdouble value)
-{
-    return gwy_spow(value, 0.5);
-}
-
-static gdouble
-map_position_sqrt(gdouble position)
-{
-    return gwy_spow(position, 2.0);
-}
-
-static gdouble
-map_value_log(gdouble value)
-{
-    return log(value);
-}
-
-static gdouble
-map_position_log(gdouble position)
-{
-    return exp(position);
 }
 
 static void
