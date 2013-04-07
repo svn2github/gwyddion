@@ -30,70 +30,19 @@ G_BEGIN_DECLS
 #define NULL_DIST2 0.2
 #define ANGLE_STEP (G_PI/12.0)
 
-G_GNUC_UNUSED
-static void
-_gwy_shapes_constrain_horiz_vert(const GwyShapes *shapes, GwyXY *dxy)
-{
-    const cairo_matrix_t *matrix = &shapes->coords_to_view;
-    gdouble x = dxy->x, y = dxy->y;
-    cairo_matrix_transform_distance(matrix, &x, &y);
-    if (fabs(x) <= fabs(y))
-        dxy->x = 0.0;
-    else
-        dxy->y = 0.0;
-}
+G_GNUC_INTERNAL
+void _gwy_shapes_constrain_horiz_vert(const GwyShapes *shapes, GwyXY *dxy);
 
-G_GNUC_UNUSED
-static void
-_gwy_shapes_remove_null_box(GwyShapes *shapes, guint i)
-{
-    GwyCoords *coords = gwy_shapes_get_coords(shapes);
-    g_assert(gwy_coords_shape_size(coords) == 4);
-    gdouble xy[4];
-    gwy_coords_get(coords, i, xy);
-    gdouble lx = xy[2] - xy[0], ly = xy[3] - xy[1];
-    cairo_matrix_transform_distance(&shapes->coords_to_view, &lx, &ly);
-    cairo_matrix_transform_distance(&shapes->view_to_pixel, &lx, &ly);
-    if (lx*lx + ly*ly >= NULL_DIST2)
-        return;
+G_GNUC_INTERNAL
+void _gwy_shapes_remove_null_box(GwyShapes *shapes, guint i);
 
-    gwy_coords_delete(coords, i);
-    gwy_shapes_update(shapes);
-}
+G_GNUC_INTERNAL
+gboolean _gwy_shapes_snap_to_pixel_centre(const GwyShapes *shapes,
+                                          gdouble *x, gdouble *y);
 
-G_GNUC_UNUSED
-static gboolean
-_gwy_shapes_snap_to_pixel_centre(const GwyShapes *shapes,
-                                 gdouble *x, gdouble *y)
-{
-    if (!gwy_shapes_get_snapping(shapes))
-        return FALSE;
-
-    cairo_matrix_transform_point(&shapes->coords_to_view, x, y);
-    cairo_matrix_transform_point(&shapes->view_to_pixel, x, y);
-    *x = gwy_round_to_half(*x);
-    *y = gwy_round_to_half(*y);
-    cairo_matrix_transform_point(&shapes->pixel_to_view, x, y);
-    cairo_matrix_transform_point(&shapes->view_to_coords, x, y);
-    return TRUE;
-}
-
-G_GNUC_UNUSED
-static gboolean
-_gwy_shapes_snap_to_pixel_corner(const GwyShapes *shapes,
-                                 gdouble *x, gdouble *y)
-{
-    if (!gwy_shapes_get_snapping(shapes))
-        return FALSE;
-
-    cairo_matrix_transform_point(&shapes->coords_to_view, x, y);
-    cairo_matrix_transform_point(&shapes->view_to_pixel, x, y);
-    *x = gwy_round(*x);
-    *y = gwy_round(*y);
-    cairo_matrix_transform_point(&shapes->pixel_to_view, x, y);
-    cairo_matrix_transform_point(&shapes->view_to_coords, x, y);
-    return TRUE;
-}
+G_GNUC_INTERNAL
+gboolean _gwy_shapes_snap_to_pixel_corner(const GwyShapes *shapes,
+                                          gdouble *x, gdouble *y);
 
 G_END_DECLS
 

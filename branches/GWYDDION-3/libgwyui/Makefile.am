@@ -100,6 +100,7 @@ libgwyui3_la_SOURCES = \
 	ruler.c \
 	scroller.c \
 	shapes.c \
+	shapes-internal.c \
 	shapes-line.c \
 	shapes-point.c \
 	shapes-rectangle.c \
