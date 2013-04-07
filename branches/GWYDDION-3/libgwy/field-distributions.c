@@ -1603,7 +1603,7 @@ minkowski_volume(const GwyField *field,
  * @width: Part width (number of column).
  * @height: Part height (number of rows).
  * @min: Location to store the minimum.
- * @min: Location to store the maximum.
+ * @max: Location to store the maximum.
  *
  * Counts the number of edges between two pixels.
  *
