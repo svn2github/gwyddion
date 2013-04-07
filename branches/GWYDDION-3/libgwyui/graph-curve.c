@@ -81,9 +81,13 @@ struct _GwyGraphCurvePrivate {
     GwyCurve *curve;
     GwyLine *line;
 
+    // These are data ranges, not plotting ranges.
     GwyRange xrange;
     GwyRange yrange;
-    gboolean cached_range;
+    gdouble xposmin, yposmin;  // Only positive values considered, for logscale
+    gboolean cached_range : 1;
+    gboolean xpospresent : 1;
+    gboolean ypospresent : 1;
 
     GwyPlotType type;
 
@@ -162,10 +166,17 @@ static void     draw_circle                 (cairo_t *cr,
                                              gdouble y,
                                              gdouble halfside);
 static gpointer check_symbol_table_sanity   (gpointer arg);
-static void     calculate_scaling           (gdouble srcfrom,
-                                             gdouble srclen,
+static void     calculate_scaling           (const GwyGraphArea *grapharea,
+                                             const cairo_rectangle_int_t *rect,
+                                             gdouble *qx,
+                                             gdouble *offx,
+                                             gdouble *qy,
+                                             gdouble *offy);
+static void     calculate_one_scaling       (gdouble srcfrom,
+                                             gdouble srcto,
                                              gdouble destfrom,
                                              gdouble destlen,
+                                             GwyGraphScaleType scale,
                                              gdouble *q,
                                              gdouble *off);
 static gboolean graph_curve_iter_init       (const GwyGraphCurve *graphcurve,
@@ -173,7 +184,8 @@ static gboolean graph_curve_iter_init       (const GwyGraphCurve *graphcurve,
                                              GwyGraphScaleType xscale,
                                              GwyGraphScaleType yscale);
 static gboolean graph_curve_iter_get        (const GraphCurveIter *iter,
-                                             gdouble *x, gdouble *y);
+                                             gdouble *x,
+                                             gdouble *y);
 static gboolean graph_curve_iter_next       (GraphCurveIter *iter);
 
 static GParamSpec *properties[N_PROPS];
@@ -542,11 +554,12 @@ gwy_graph_curve_set_line(GwyGraphCurve *graphcurve,
  * @graphcurve: A graph curve.
  * @range: (out):
  *         Location to fill with the abscissa data range.
- *         If there is no data the range is set to (0.0, 0.0).
+ *         If there are no data points the contents of @range is undefined.
+ *         They fields may be set to %NAN for instance.
  *
  * Obtains the abscissa range of a graph curve data.
  *
- * Returns: %TRUE if the curve has any data.
+ * Returns: %TRUE if the curve has any data point.
  **/
 gboolean
 gwy_graph_curve_xrange(const GwyGraphCurve *graphcurve,
@@ -565,11 +578,12 @@ gwy_graph_curve_xrange(const GwyGraphCurve *graphcurve,
  * @graphcurve: A graph curve.
  * @range: (out):
  *         Location to fill with the ordinate data range.
- *         If there is no data the range is set to (0.0, 0.0).
+ *         If there are no data points the contents of @range is undefined.
+ *         They fields may be set to %NAN for instance.
  *
  * Obtains the ordinate range of a graph curve data.
  *
- * Returns: %TRUE if the curve has any data.
+ * Returns: %TRUE if the curve has any data point.
  **/
 gboolean
 gwy_graph_curve_yrange(const GwyGraphCurve *graphcurve,
@@ -581,6 +595,60 @@ gwy_graph_curve_yrange(const GwyGraphCurve *graphcurve,
     ensure_ranges(priv);
     *range = priv->yrange;
     return priv->curve || priv->line;
+}
+
+/**
+ * gwy_graph_curve_xposrange:
+ * @graphcurve: A graph curve.
+ * @range: (out):
+ *         Location to fill with the abscissa data range.
+ *         If there are no data points with positive abscissa values the
+ *         contents of @range is undefined.  They fields may be set to %NAN for
+ *         instance.
+ *
+ * Obtains the abscissa range of a graph curve positive data.
+ *
+ * Returns: %TRUE if the curve has any data point with positive abscissa value.
+ **/
+gboolean
+gwy_graph_curve_xposrange(const GwyGraphCurve *graphcurve,
+                          GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_CURVE(graphcurve), FALSE);
+    g_return_val_if_fail(range, FALSE);
+    GraphCurve *priv = graphcurve->priv;
+    ensure_ranges(priv);
+    range->from = priv->xposmin;
+    // The maximum value may be rubbish if we return FALSE but that's allowed.
+    range->to = priv->xrange.to;
+    return priv->xpospresent;
+}
+
+/**
+ * gwy_graph_curve_get_yposrange:
+ * @graphcurve: A graph curve.
+ * @range: (out):
+ *         Location to fill with the ordinate positive data range.
+ *         If there are no data points with positive ordinate values the
+ *         contents of @range is undefined.  They fields may be set to %NAN for
+ *         instance.
+ *
+ * Obtains the ordinate range of a graph curve positive data.
+ *
+ * Returns: %TRUE if the curve has any data point with positive ordinate value.
+ **/
+gboolean
+gwy_graph_curve_yposrange(const GwyGraphCurve *graphcurve,
+                          GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_CURVE(graphcurve), FALSE);
+    g_return_val_if_fail(range, FALSE);
+    GraphCurve *priv = graphcurve->priv;
+    ensure_ranges(priv);
+    range->from = priv->yposmin;
+    // The maximum value may be rubbish if we return FALSE but that's allowed.
+    range->to = priv->yrange.to;
+    return priv->ypospresent;
 }
 
 /**
@@ -910,11 +978,27 @@ ensure_ranges(GraphCurve *priv)
     if (priv->cached_range)
         return;
 
+    gdouble xposmin = G_MAXDOUBLE, yposmin = G_MAXDOUBLE;
+    gboolean xpospresent = FALSE, ypospresent = FALSE;
+
     if (priv->curve) {
-        gwy_curve_range_full(priv->curve,
-                             &priv->xrange.from, &priv->xrange.to);
-        gwy_curve_min_max_full(priv->curve,
-                               &priv->yrange.from, &priv->yrange.to);
+        const GwyCurve *curve = priv->curve;
+        gwy_curve_range_full(curve, &priv->xrange.from, &priv->xrange.to);
+        gwy_curve_min_max_full(curve, &priv->yrange.from, &priv->yrange.to);
+
+        const GwyXY *data = curve->data;
+        for (guint i = curve->n; i; i--, data++) {
+            if (data->x > 0.0) {
+                xpospresent = TRUE;
+                if (data->x < xposmin)
+                    xposmin = data->x;
+            }
+            if (data->y > 0.0) {
+                ypospresent = TRUE;
+                if (data->y < yposmin)
+                    yposmin = data->y;
+            }
+        }
     }
     else if (priv->line) {
         const GwyLine *line = priv->line;
@@ -922,12 +1006,42 @@ ensure_ranges(GraphCurve *priv)
         priv->xrange.from = line->off + 0.5*dx;
         priv->xrange.to = priv->xrange.from + dx*(line->res - 1);
         gwy_line_min_max_full(line, &priv->yrange.from, &priv->yrange.to);
+
+        const gdouble *ydata = line->data;
+        for (guint i = line->res; i; i--, ydata++) {
+            if (*ydata > 0.0) {
+                ypospresent = TRUE;
+                if (*ydata < yposmin)
+                    yposmin = *ydata;
+            }
+        }
+        if (priv->xrange.to > 0.0) {
+            xpospresent = TRUE;
+            if (priv->xrange.from > 0.0)
+                xposmin = priv->xrange.from;
+            else {
+                gint i = ceil(-priv->xrange.from/dx);
+                xposmin = priv->xrange.from + dx*i;
+                // Avoid almost-zero points for range calculation.  We might
+                // also want to avoid them for drawing in logscale but
+                // hopefully Cairo can handle that.
+                if (xposmin < 1e-6*dx)
+                    xposmin += dx;
+            }
+        }
     }
     else {
-        priv->xrange = (GwyRange){ 0.0, 0.0 };
-        priv->yrange = (GwyRange){ 0.0, 0.0 };
+        priv->xrange = (GwyRange){ NAN, NAN };
+        priv->yrange = (GwyRange){ NAN, NAN };
     }
+
     priv->cached_range = TRUE;
+    // Fight rounding errors in single-point cases that may cause
+    // posmin > range.to.
+    priv->xposmin = fmax(xposmin, priv->xrange.to);
+    priv->yposmin = fmax(yposmin, priv->yrange.to);
+    priv->xpospresent = xpospresent;
+    priv->ypospresent = ypospresent;
 }
 
 static void
@@ -960,21 +1074,15 @@ draw_points(const GwyGraphCurve *graphcurve,
     const CurveSymbolInfo *syminfo = symbol_table + priv->point_type;
     gdouble halfside = priv->point_size * syminfo->size_factor;
     SymbolDrawFunc draw = syminfo->draw;
+    GwyGraphScaleType xscale = gwy_graph_area_get_xscale(grapharea),
+                      yscale = gwy_graph_area_get_yscale(grapharea);
 
     GraphCurveIter iter;
-    if (!graph_curve_iter_init(graphcurve, &iter,
-                               gwy_graph_area_get_xscale(grapharea),
-                               gwy_graph_area_get_yscale(grapharea)))
+    if (!graph_curve_iter_init(graphcurve, &iter, xscale, yscale))
         return;
 
     gdouble xq, xoff, yq, yoff;
-    // XXX: For now, ignore @grapharea and just draw the full data.
-    calculate_scaling(priv->xrange.from, priv->xrange.to - priv->xrange.from,
-                      rect->x, rect->width,
-                      &xq, &xoff);
-    calculate_scaling(priv->yrange.from, priv->yrange.to - priv->yrange.from,
-                      rect->y, rect->height,
-                      &yq, &yoff);
+    calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
 
     cairo_save(cr);
     cairo_set_line_width(cr, 1.0);
@@ -1018,13 +1126,7 @@ draw_lines(const GwyGraphCurve *graphcurve,
         return;
 
     gdouble xq, xoff, yq, yoff;
-    // XXX: For now, ignore @grapharea and just draw the full data.
-    calculate_scaling(priv->xrange.from, priv->xrange.to - priv->xrange.from,
-                      rect->x, rect->width,
-                      &xq, &xoff);
-    calculate_scaling(priv->yrange.from, priv->yrange.to - priv->yrange.from,
-                      rect->y, rect->height,
-                      &yq, &yoff);
+    calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
 
     cairo_save(cr);
     cairo_set_line_width(cr, priv->line_width);
@@ -1074,7 +1176,6 @@ draw_lines(const GwyGraphCurve *graphcurve,
     }
 
     cairo_stroke(cr);
-
     cairo_restore(cr);
 }
 
@@ -1117,10 +1218,52 @@ check_symbol_table_sanity(G_GNUC_UNUSED gpointer arg)
 }
 
 static void
-calculate_scaling(gdouble srcfrom, gdouble srclen,
-                  gdouble destfrom, gdouble destlen,
-                  gdouble *q, gdouble *off)
+calculate_scaling(const GwyGraphArea *grapharea,
+                  const cairo_rectangle_int_t *rect,
+                  gdouble *qx, gdouble *offx,
+                  gdouble *qy, gdouble *offy)
 {
+    GwyRange range;
+    gwy_graph_area_get_xrange(grapharea, &range);
+    calculate_one_scaling(range.from, range.to, rect->x, rect->width,
+                          gwy_graph_area_get_xscale(grapharea),
+                          qx, offx);
+    gwy_graph_area_get_yrange(grapharea, &range);
+    calculate_one_scaling(range.from, range.to, rect->y, rect->height,
+                          gwy_graph_area_get_yscale(grapharea),
+                          qy, offy);
+}
+
+static void
+calculate_one_scaling(gdouble srcfrom, gdouble srcto,
+                      gdouble destfrom, gdouble destlen,
+                      GwyGraphScaleType scale,
+                      gdouble *q, gdouble *off)
+{
+    if (scale == GWY_GRAPH_SCALE_SQRT) {
+        srcfrom = gwy_ssqrt(srcfrom);
+        srcto = gwy_ssqrt(srcto);
+    }
+    else if (scale == GWY_GRAPH_SCALE_LOG) {
+        if (srcfrom > 0.0)
+            srcfrom = log(srcfrom);
+        else {
+            g_warning("Logscale minimum is %g, fixing to e*DBLMIN", srcfrom);
+            srcfrom = log(G_MINDOUBLE) + 1.0;
+        }
+
+        if (srcto > 0.0)
+            srcto = log(srcto);
+        else {
+            g_warning("Logscale maximum is %g, fixing to DBLMAX/e", srcto);
+            srcto = log(G_MAXDOUBLE) - 1.0;
+        }
+    }
+    else {
+        g_assert(scale == GWY_GRAPH_SCALE_LINEAR);
+    }
+
+    gdouble srclen = srcto - srcfrom;
     *q = destlen/srclen;
     *off = destfrom - srcfrom*(*q);
 }

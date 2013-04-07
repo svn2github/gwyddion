@@ -375,7 +375,7 @@ gwy_graph_area_n_curves(const GwyGraphArea *grapharea)
  * @grapharea: A graph area.
  * @range: New abscissa range.
  *
- * Sets the .
+ * Sets the range of the abscissa of a graph area.
  **/
 void
 gwy_graph_area_set_xrange(GwyGraphArea *grapharea,
@@ -395,7 +395,7 @@ gwy_graph_area_set_xrange(GwyGraphArea *grapharea,
  * @range: (out):
  *         Location to store the abscissa range.
  *
- * Gets the .
+ * Gets the range of the abscissa of a graph area.
  **/
 void
 gwy_graph_area_get_xrange(const GwyGraphArea *grapharea,
@@ -411,7 +411,7 @@ gwy_graph_area_get_xrange(const GwyGraphArea *grapharea,
  * @grapharea: A graph area.
  * @range: 
  *
- * Sets the .
+ * Sets the range of the ordinate of a graph area.
  **/
 void
 gwy_graph_area_set_yrange(GwyGraphArea *grapharea,
@@ -431,7 +431,7 @@ gwy_graph_area_set_yrange(GwyGraphArea *grapharea,
  * @range: (out):
  *         Location to store the ordinate range.
  *
- * Gets the .
+ * Gets the range of the ordinate of a graph area.
  **/
 void
 gwy_graph_area_get_yrange(const GwyGraphArea *grapharea,
@@ -439,7 +439,7 @@ gwy_graph_area_get_yrange(const GwyGraphArea *grapharea,
 {
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
     g_return_if_fail(range);
-    *range = grapharea->priv->xrange;
+    *range = grapharea->priv->yrange;
 }
 
 /**
