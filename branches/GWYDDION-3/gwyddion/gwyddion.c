@@ -356,20 +356,32 @@ create_coords_view_test(GwyRasterView *rasterview)
     return window;
 }
 
-static gboolean
-draw_curve(GtkWidget *widget, cairo_t *cr, GwyGraphArea *area)
+static GwyGraphCurve*
+make_random_curve(GwyRand *rng)
 {
-    cairo_rectangle_int_t rect;
-    gtk_widget_get_allocation(widget, &rect);
-    GObject *object = G_OBJECT(widget);
-    GwyGraphCurve *graphcurve = GWY_GRAPH_CURVE(g_object_get_data(object,
-                                                                  "curve"));
-    cairo_save(cr);
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_paint(cr);
-    cairo_restore(cr);
-    gwy_graph_curve_draw(graphcurve, cr, &rect, area);
-    return FALSE;
+    guint n = 60;
+    GwyCurve *curve = gwy_curve_new_sized(n);
+    gdouble x = 0.0, y = gwy_rand_double(rng), vy = 0.0;
+    for (guint i = 0; i < n; i++) {
+        curve->data[i].x = x;
+        curve->data[i].y = y;
+        x += 0.05 + 0.01*gwy_rand_double(rng);
+        y += vy;
+        vy += 0.01*gwy_rand_normal(rng);
+    }
+
+    GwyGraphCurve *graphcurve = gwy_graph_curve_new();
+    gwy_graph_curve_set_curve(graphcurve, curve);
+    g_object_unref(curve);
+    g_object_set(graphcurve,
+                 "point-color", gwy_rgba_get_preset_color(gwy_rand_int(rng)),
+                 "line-color", gwy_rgba_get_preset_color(gwy_rand_int(rng)),
+                 "plot-type", (guint)(gwy_rand_int(rng) % 4),
+                 "point-type", (guint)(gwy_rand_int(rng) % 18),
+                 "line-type", (guint)(gwy_rand_int(rng) % 3),
+                 NULL);
+
+    return graphcurve;
 }
 
 static GtkWidget*
@@ -380,39 +392,37 @@ create_graph_window(void)
     gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Graphing Test");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    GwyGraphArea *area = gwy_graph_area_new();
+    GtkWidget *areawidget = gwy_graph_area_new();
+    GwyGraphArea *area = GWY_GRAPH_AREA(areawidget);
+    gtk_container_add(GTK_CONTAINER(window), areawidget);
 
-    guint n = 60;
-    GwyCurve *curve = gwy_curve_new_sized(n);
     GwyRand *rng = gwy_rand_new();
-    gdouble x = 0.0, y = gwy_rand_double(rng), vy = 0.0;
-    for (guint i = 0; i < n; i++) {
-        curve->data[i].x = x;
-        curve->data[i].y = y;
-        x += 0.05 + 0.01*gwy_rand_double(rng);
-        y += vy;
-        vy += 0.1*gwy_rand_normal(rng);
+    GwyRange xrange = { G_MAXDOUBLE, -G_MAXDOUBLE },
+             yrange = { G_MAXDOUBLE, -G_MAXDOUBLE };
+
+    for (guint i = 0; i < 6; i++) {
+        GwyGraphCurve *graphcurve = make_random_curve(rng);
+        gwy_graph_area_add(area, graphcurve);
+
+        GwyRange range;
+        gwy_graph_curve_xrange(graphcurve, &range);
+        xrange.from = fmin(xrange.from, range.from);
+        xrange.to = fmax(xrange.to, range.to);
+        gwy_graph_curve_yrange(graphcurve, &range);
+        yrange.from = fmin(yrange.from, range.from);
+        yrange.to = fmax(yrange.to, range.to);
     }
+    gwy_graph_area_set_xrange(area, &xrange);
+    gwy_graph_area_set_yrange(area, &yrange);
 
-    GwyGraphCurve *graphcurve = gwy_graph_curve_new();
-    gwy_graph_curve_set_curve(graphcurve, curve);
-    g_object_unref(curve);
-    g_object_set(graphcurve,
-                 "point-color", gwy_rgba_get_preset_color(2),
-                 "line-color", gwy_rgba_get_preset_color(3),
-                 "point-size", 8.0,
-                 "plot-type", GWY_PLOT_LINE_POINTS,
-                 "line-type", GWY_GRAPH_LINE_DOTTED,
-                 NULL);
+    gdouble *grid = g_new(gdouble, 21);
+    for (guint i = 0; i < 21; i++)
+        grid[i] = i - 10.0;
+    gwy_graph_area_set_xgrid(area, grid, 21);
+    gwy_graph_area_set_ygrid(area, grid, 21);
+    g_free(grid);
 
-    // Enforce calculation of value ranges. This is not necessary once we
-    // actuall have a real graph widget.
-    GwyRange range;
-    gwy_graph_curve_xrange(graphcurve, &range);
-    gwy_graph_curve_yrange(graphcurve, &range);
-
-    g_object_set_data(G_OBJECT(window), "curve", graphcurve);
-    g_signal_connect_after(window, "draw", G_CALLBACK(draw_curve), area);
+    gwy_rand_free(rng);
 
     return window;
 }
