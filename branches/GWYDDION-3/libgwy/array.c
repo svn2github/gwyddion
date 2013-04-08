@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "libgwy/macros.h"
+#include "libgwy/listable.h"
 #include "libgwy/array.h"
 #include "libgwy/array-internal.h"
 
@@ -27,14 +28,6 @@
 
 #define gwy_data_index(a,p,i) \
     ((gpointer)((guchar*)(p) + (i)*((a)->size)))
-
-enum {
-    SGNL_ITEM_INSERTED,
-    SGNL_ITEM_DELETED,
-    SGNL_ITEM_UPDATED,
-    //SGNL_ITEMS_REORDERED,  maybe, if/when we add sort()
-    N_SIGNALS
-};
 
 struct _GwyArrayPrivate {
     GArray *items;
@@ -46,12 +39,15 @@ struct _GwyArrayPrivate {
 
 typedef struct _GwyArrayPrivate Array;
 
-static void         gwy_array_finalize(GObject *object);
-static void         gwy_array_dispose (GObject *object);
+static void     gwy_array_listable_init(GwyListableInterface *iface);
+static void     gwy_array_finalize     (GObject *object);
+static void     gwy_array_dispose      (GObject *object);
+static guint    listable_size          (const GwyListable *listable);
+static gpointer listable_get           (const GwyListable *listable,
+                                        guint pos);
 
-static guint signals[N_SIGNALS];
-
-G_DEFINE_TYPE(GwyArray, gwy_array, G_TYPE_OBJECT);
+G_DEFINE_TYPE_EXTENDED(GwyArray, gwy_array, G_TYPE_OBJECT, 0,
+                       GWY_IMPLEMENT_LISTABLE(gwy_array_listable_init));
 
 static void
 gwy_array_class_init(GwyArrayClass *klass)
@@ -62,73 +58,13 @@ gwy_array_class_init(GwyArrayClass *klass)
 
     gobject_class->dispose = gwy_array_dispose;
     gobject_class->finalize = gwy_array_finalize;
+}
 
-    /**
-     * GwyArray::item-inserted:
-     * @gwyarray: The #GwyArray which received the signal.
-     * @arg1: Position an item was inserted at.
-     *
-     * The ::item-inserted signal is emitted when an item is inserted into
-     * the array.
-     **/
-    signals[SGNL_ITEM_INSERTED]
-        = g_signal_new_class_handler("item-inserted",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__UINT,
-                                     G_TYPE_NONE, 1, G_TYPE_UINT);
-
-    /**
-     * GwyArray::item-deleted:
-     * @gwyarray: The #GwyArray which received the signal.
-     * @arg1: Position an item was deleted from.
-     *
-     * The ::item-deleted signal is emitted when an item is deleted from
-     * the array.
-     **/
-    signals[SGNL_ITEM_DELETED]
-        = g_signal_new_class_handler("item-deleted",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__UINT,
-                                     G_TYPE_NONE, 1, G_TYPE_UINT);
-
-    /**
-     * GwyArray::item-updated:
-     * @gwyarray: The #GwyArray which received the signal.
-     * @arg1: Position of updated item.
-     *
-     * The ::item-updated signal is emitted when an item in the array
-     * is updated.
-     **/
-    signals[SGNL_ITEM_UPDATED]
-        = g_signal_new_class_handler("item-updated",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__UINT,
-                                     G_TYPE_NONE, 1, G_TYPE_UINT);
-
-#if 0
-  /**
-   * GwyArray::items-reordered:
-   * @gwyarray: The #GwyArray which received the signal.
-   * @arg1: New item order map as in #GtkTreeModel,
-   *        @arg1[new_position] = old_position.
-   *
-   * The ::items-reordered signal is emitted when item in the array
-   * are reordered.
-   **/
-  signals[SGNL_ITEMS_REORDERED]
-      = g_signal_new_class_handler("items-reordered",
-                                   G_OBJECT_CLASS_TYPE(klass),
-                                   G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                   NULL, NULL, NULL,
-                                   g_cclosure_marshal_VOID__POINTER,
-                                   G_TYPE_NONE, 1, G_TYPE_POINTER);
-#endif
+static void
+gwy_array_listable_init(GwyListableInterface *iface)
+{
+    iface->get = listable_get;
+    iface->size = listable_size;
 }
 
 static void
@@ -295,8 +231,7 @@ gwy_array_updated(GwyArray *array,
     Array *priv = array->priv;
     g_return_if_fail(priv->items);
     g_return_if_fail(n < priv->items->len);
-
-    g_signal_emit(array, signals[SGNL_ITEM_UPDATED], 0, n);
+    gwy_listable_item_updated(GWY_LISTABLE(array), n);
 }
 
 /**
@@ -342,7 +277,7 @@ gwy_array_insert(GwyArray *array,
     for (guint i = 0; i < nitems; i++) {
         g_array_insert_vals(priv->items, n + i,
                             gwy_data_index(priv, items, i), 1);
-        g_signal_emit(array, signals[SGNL_ITEM_INSERTED], 0, n + i);
+        gwy_listable_item_inserted(GWY_LISTABLE(array), n + i);
     }
 
     return gwy_array_index(priv, n);
@@ -383,8 +318,7 @@ gwy_array_append(GwyArray *array,
     ensure_items(priv);
     for (guint i = 0; i < nitems; i++) {
         g_array_append_vals(priv->items, gwy_data_index(priv, items, i), 1);
-        g_signal_emit(array, signals[SGNL_ITEM_INSERTED], 0,
-                      priv->items->len - 1);
+        gwy_listable_item_inserted(GWY_LISTABLE(array), priv->items->len - 1);
     }
 
     return gwy_array_index(priv, priv->items->len - nitems);
@@ -422,7 +356,7 @@ gwy_array_delete(GwyArray *array,
         if (priv->destroy)
             priv->destroy(gwy_array_index(priv, j));
         g_array_remove_index(priv->items, j);
-        g_signal_emit(array, signals[SGNL_ITEM_DELETED], 0, j);
+        gwy_listable_item_deleted(GWY_LISTABLE(array), j);
     }
 }
 
@@ -462,7 +396,7 @@ gwy_array_replace(GwyArray *array,
             priv->destroy(gwy_array_index(priv, j));
         memcpy(gwy_array_index(priv, j), gwy_data_index(priv, items, i),
                priv->size);
-        g_signal_emit(array, signals[SGNL_ITEM_UPDATED], 0, j);
+        gwy_listable_item_updated(GWY_LISTABLE(array), j);
     }
 }
 
@@ -532,6 +466,19 @@ _gwy_array_set_data_silent(GwyArray *array,
     g_array_set_size(array->priv->items, 0);
     if (items && nitems)
         g_array_append_vals(array->priv->items, items, nitems);
+}
+
+static guint
+listable_size(const GwyListable *listable)
+{
+    return gwy_array_size(GWY_ARRAY(listable));
+}
+
+static gpointer
+listable_get(const GwyListable *listable,
+             guint pos)
+{
+    return gwy_array_get(GWY_ARRAY(listable), pos);
 }
 
 /**
