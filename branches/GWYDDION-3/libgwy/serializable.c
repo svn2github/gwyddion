@@ -457,7 +457,6 @@ gwy_serializable_assign(GwySerializable *destination,
 
 /**
  * GwySerializableInterface:
- * @g_interface: Parent class.
  * @n_items: <para>Returns the number of items the object will flatten to,
  *           including items of all contained objects (but excluding the object
  *           header items of self).  It should use gwy_serializable_n_items()
