@@ -21,7 +21,6 @@
 #define __LIBGWYUI_H__
 
 #include <libgwyui/adjust-bar.h>
-#include <libgwyui/array-store.h>
 #include <libgwyui/axis.h>
 #include <libgwyui/cairo-utils.h>
 #include <libgwyui/cell-renderer-gradient.h>

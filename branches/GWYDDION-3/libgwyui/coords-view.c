@@ -47,7 +47,7 @@ typedef struct {
 } DimInfo;
 
 struct _GwyCoordsViewPrivate {
-    GwyArrayStore *store;
+    GwyListStore *store;
     GwyShapes *shapes;
     gulong shapes_notify_id;
     GwyIntSet *shapes_selection;
@@ -684,7 +684,7 @@ set_coords(GwyCoordsView *view,
     }
     set_coords_type(view, G_OBJECT_TYPE(coords));
 
-    priv->store = gwy_array_store_new(GWY_ARRAY(coords));
+    priv->store = gwy_list_store_new(GWY_LISTABLE(coords));
     g_object_ref_sink(priv->store);
     gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(priv->store));
     return TRUE;
@@ -843,7 +843,7 @@ selection_changed(GwyCoordsView *view,
     for (guint i = 0; i < n; i++) {
         GtkTreeIter iter;
         // We know that this is actually very efficient.
-        gwy_array_store_get_iter(priv->store, i, &iter);
+        gwy_list_store_get_iter(priv->store, i, &iter);
         if (gtk_tree_selection_iter_is_selected(selection, &iter))
             indices[len++] =  i;
     }
@@ -1017,7 +1017,7 @@ shapes_selection_added(GwyCoordsView *view,
     GtkTreeView *treeview = GTK_TREE_VIEW(view);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     GtkTreeIter iter;
-    if (gwy_array_store_get_iter(priv->store, n, &iter)) {
+    if (gwy_list_store_get_iter(priv->store, n, &iter)) {
         priv->sync_shapes_to_view = TRUE;
         gtk_tree_selection_select_iter(selection, &iter);
         priv->sync_shapes_to_view = FALSE;
@@ -1039,7 +1039,7 @@ shapes_selection_removed(GwyCoordsView *view,
     GtkTreeView *treeview = GTK_TREE_VIEW(view);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     GtkTreeIter iter;
-    if (gwy_array_store_get_iter(priv->store, n, &iter)) {
+    if (gwy_list_store_get_iter(priv->store, n, &iter)) {
         priv->sync_shapes_to_view = TRUE;
         gtk_tree_selection_unselect_iter(selection, &iter);
         priv->sync_shapes_to_view = FALSE;

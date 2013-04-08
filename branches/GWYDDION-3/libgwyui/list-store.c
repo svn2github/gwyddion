@@ -535,12 +535,12 @@ gwy_list_store_iter_is_valid(const GwyListStore *store,
 /**
  * SECTION: list-store
  * @title: GwyListStore
- * @short_description: Tree model wrapper of #GwyList.
+ * @short_description: Tree model wrapper of #GwyListable.
  *
- * #GwyListStore is a simple adaptor class that wraps #GwyList in #GtkTreeModel
- * interface.  It is list-only and it does not have persistent iterators.  It
- * offers no methods to manipulate items, this should be done on the underlying
- * list.
+ * #GwyListStore is a simple adaptor class that wraps any #GwyListable object
+ * in #GtkTreeModel interface.  It is list-only and it does not have persistent
+ * iterators.  It offers no methods to manipulate items, this should be done on
+ * the underlying list.
  *
  * The backend is set upon construction and remains the same during the entire
  * life time of the wrapper.

@@ -20,7 +20,7 @@
 #ifndef __LIBGWYUI_COORDS_VIEW_H__
 #define __LIBGWYUI_COORDS_VIEW_H__
 
-#include <libgwyui/array-store.h>
+#include <libgwyui/list-store.h>
 #include <libgwyui/shapes.h>
 
 G_BEGIN_DECLS
