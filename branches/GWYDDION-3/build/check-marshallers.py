@@ -57,7 +57,9 @@ for filename in sys.argv[1:]:
             status = max(status, 1)
 
         objtype = args[1]
-        if objtype != 'G_OBJECT_CLASS_TYPE(klass)':
+        if objtype != 'type' \
+           and objtype != 'G_OBJECT_CLASS_TYPE(klass)' \
+           and objtype != 'G_TYPE_FROM_INTERFACE(iface)':
             sys.stderr.write('%s:%s: Object type %s should be '
                              'G_OBJECT_CLASS_TYPE(klass).\n'
                              % (filename, lineno, objtype))
