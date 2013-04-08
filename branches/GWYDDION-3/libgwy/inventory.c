@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,14 +23,11 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/serializable.h"
+#include "libgwy/listable.h"
 #include "libgwy/inventory.h"
 #include "libgwy/object-internal.h"
 
 enum {
-    SGNL_ITEM_INSERTED,
-    SGNL_ITEM_DELETED,
-    SGNL_ITEM_UPDATED,
-    SGNL_ITEMS_REORDERED,
     SGNL_DEFAULT_CHANGED,
     N_SIGNALS
 };
@@ -50,27 +47,33 @@ struct _GwyInventoryPrivate {
 
 typedef struct _GwyInventoryPrivate Inventory;
 
-static void         gwy_inventory_finalize(GObject *object);
-static void         gwy_inventory_dispose (GObject *object);
-static void         make_hash             (Inventory *inventory);
-static void         emit_item_updated     (GwyInventory *inventory,
-                                           GSequenceIter *iter);
-static void         discard_item          (GwyInventory *inventory,
-                                           GSequenceIter *iter);
-static void         register_item         (GwyInventory *inventory,
-                                           GSequenceIter *iter,
-                                           gpointer item);
-static void         item_changed          (GwyInventory *inventory,
-                                           gpointer item);
-static gboolean     item_is_in_order      (Inventory *inventory,
-                                           GSequenceIter *iter,
-                                           gpointer item);
-static const gchar* invent_item_name      (Inventory *inventory,
-                                           const gchar *prefix);
+static void         gwy_inventory_listable_init(GwyListableInterface *iface);
+static void         gwy_inventory_finalize     (GObject *object);
+static void         gwy_inventory_dispose      (GObject *object);
+static void         make_hash                  (Inventory *inventory);
+static void         emit_item_updated          (GwyInventory *inventory,
+                                                GSequenceIter *iter);
+static void         discard_item               (GwyInventory *inventory,
+                                                GSequenceIter *iter);
+static void         register_item              (GwyInventory *inventory,
+                                                GSequenceIter *iter,
+                                                gpointer item);
+static void         item_changed               (GwyInventory *inventory,
+                                                gpointer item);
+static gboolean     item_is_in_order           (Inventory *inventory,
+                                                GSequenceIter *iter,
+                                                gpointer item);
+static const gchar* invent_item_name           (Inventory *inventory,
+                                                const gchar *prefix);
+static guint        listable_size              (const GwyListable *listable);
+static gpointer     listable_get               (const GwyListable *listable,
+                                                guint pos);
 
 static guint signals[N_SIGNALS];
+static guint items_reordered = 0;
 
-G_DEFINE_TYPE(GwyInventory, gwy_inventory, G_TYPE_OBJECT);
+G_DEFINE_TYPE_EXTENDED(GwyInventory, gwy_inventory, G_TYPE_OBJECT, 0,
+                       GWY_IMPLEMENT_LISTABLE(gwy_inventory_listable_init));
 
 static void
 gwy_inventory_class_init(GwyInventoryClass *klass)
@@ -81,71 +84,6 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
 
     gobject_class->dispose = gwy_inventory_dispose;
     gobject_class->finalize = gwy_inventory_finalize;
-
-    /**
-     * GwyInventory::item-inserted:
-     * @gwyinventory: The #GwyInventory which received the signal.
-     * @arg1: Position the item was inserted at.
-     *
-     * The ::item-inserted signal is emitted when an item is inserted into
-     * the inventory.
-     **/
-    signals[SGNL_ITEM_INSERTED]
-        = g_signal_new_class_handler("item-inserted",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__UINT,
-                                     G_TYPE_NONE, 1, G_TYPE_UINT);
-
-    /**
-     * GwyInventory::item-deleted:
-     * @gwyinventory: The #GwyInventory which received the signal.
-     * @arg1: Position the item was deleted from.
-     *
-     * The ::item-deleted signal is emitted when an item is deleted from
-     * the inventory.
-     **/
-    signals[SGNL_ITEM_DELETED]
-        = g_signal_new_class_handler("item-deleted",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__UINT,
-                                     G_TYPE_NONE, 1, G_TYPE_UINT);
-
-    /**
-     * GwyInventory::item-updated:
-     * @gwyinventory: The #GwyInventory which received the signal.
-     * @arg1: Position of updated item.
-     *
-     * The ::item-updated signal is emitted when an item in the inventory
-     * is updated.
-     **/
-    signals[SGNL_ITEM_UPDATED]
-        = g_signal_new_class_handler("item-updated",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__UINT,
-                                     G_TYPE_NONE, 1, G_TYPE_UINT);
-
-    /**
-     * GwyInventory::items-reordered:
-     * @gwyinventory: The #GwyInventory which received the signal.
-     * @arg1: New item order map as in #GtkTreeModel,
-     *        @arg1[new_position] = old_position.
-     *
-     * The ::items-reordered signal is emitted when item in the inventory
-     * are reordered.
-     **/
-    signals[SGNL_ITEMS_REORDERED]
-        = g_signal_new_class_handler("items-reordered",
-                                     G_OBJECT_CLASS_TYPE(klass),
-                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                                     NULL, NULL, NULL,
-                                     g_cclosure_marshal_VOID__POINTER,
-                                     G_TYPE_NONE, 1, G_TYPE_POINTER);
 
     /**
      * GwyInventory::default-changed:
@@ -162,6 +100,14 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
                                      NULL, NULL, NULL,
                                      g_cclosure_marshal_VOID__VOID,
                                      G_TYPE_NONE, 0);
+}
+
+static void
+gwy_inventory_listable_init(GwyListableInterface *iface)
+{
+    iface->get = listable_get;
+    iface->size = listable_size;
+    items_reordered = g_signal_lookup("items-reordered", GWY_TYPE_LISTABLE);
 }
 
 static void
@@ -639,8 +585,7 @@ gwy_inventory_nth_updated(GwyInventory *inventory,
     Inventory *priv = inventory->priv;
     g_return_if_fail(priv->has_item_type);
     g_return_if_fail(n < (guint)g_sequence_get_length(priv->items));
-
-    g_signal_emit(inventory, signals[SGNL_ITEM_UPDATED], 0, n);
+    gwy_listable_item_updated(GWY_LISTABLE(inventory), n);
 }
 
 /**
@@ -684,8 +629,8 @@ gwy_inventory_insert(GwyInventory *inventory,
 
     register_item(inventory, iter, item);
 
-    g_signal_emit(inventory, signals[SGNL_ITEM_INSERTED], 0,
-                  g_sequence_iter_get_position(iter));
+    gwy_listable_item_inserted(GWY_LISTABLE(inventory),
+                               g_sequence_iter_get_position(iter));
     if (priv->default_key
         && gwy_strequal(name, priv->default_key))
         g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
@@ -738,7 +683,7 @@ gwy_inventory_insert_nth(GwyInventory *inventory,
     priv->is_sorted = item_is_in_order(priv, iter, item);
     register_item(inventory, iter, item);
 
-    g_signal_emit(inventory, signals[SGNL_ITEM_INSERTED], 0, n);
+    gwy_listable_item_inserted(GWY_LISTABLE(inventory), n);
     if (priv->default_key
         && gwy_strequal(name, priv->default_key))
         g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
@@ -767,8 +712,7 @@ gwy_inventory_restore_order(GwyInventory *inventory)
     // Remember old positions if we have to.
     guint nitems = (guint)g_sequence_get_length(priv->items);
     GSequenceIter **positions = NULL;
-    if (g_signal_has_handler_pending(inventory, signals[SGNL_ITEMS_REORDERED],
-                                     0, FALSE)) {
+    if (g_signal_has_handler_pending(inventory, items_reordered, 0, FALSE)) {
         positions = g_slice_alloc(sizeof(GSequenceIter*)*nitems);
         GSequenceIter *iter = g_sequence_get_begin_iter(priv->items);
         for (guint i = 0; i < nitems; i++) {
@@ -790,7 +734,7 @@ gwy_inventory_restore_order(GwyInventory *inventory)
         new_order[g_sequence_iter_get_position(positions[i])] = i;
 
     g_slice_free1(sizeof(GSequenceIter*)*nitems, positions);
-    g_signal_emit(inventory, signals[SGNL_ITEMS_REORDERED], 0, new_order);
+    gwy_listable_items_reordered(GWY_LISTABLE(inventory), new_order);
     g_slice_free1(sizeof(guint)*nitems, new_order);
 }
 
@@ -840,7 +784,7 @@ delete_item(GwyInventory *inventory,
                             && gwy_strequal(name, priv->default_key));
     discard_item(inventory, iter);
 
-    g_signal_emit(inventory, signals[SGNL_ITEM_DELETED], 0, n);
+    gwy_listable_item_deleted(GWY_LISTABLE(inventory), n);
     if (emit_change)
         g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 }
@@ -897,9 +841,9 @@ emit_reordered_for_move(GwyInventory *inventory,
                         guint nold,
                         guint nnew)
 {
-    if (nold == nnew
-        || !g_signal_has_handler_pending(inventory, signals[SGNL_ITEMS_REORDERED],
-                                         0, FALSE))
+    if (nold == nnew)
+        return;
+    if (!g_signal_has_handler_pending(inventory, items_reordered, 0, FALSE))
         return;
 
     Inventory *priv = inventory->priv;
@@ -924,7 +868,7 @@ emit_reordered_for_move(GwyInventory *inventory,
             new_order[i] = i;
     }
 
-    g_signal_emit(inventory, signals[SGNL_ITEMS_REORDERED], 0, new_order);
+    gwy_listable_items_reordered(GWY_LISTABLE(inventory), new_order);
     g_slice_free1(sizeof(guint)*nitems, new_order);
 }
 
@@ -941,7 +885,7 @@ emit_reordered_for_move(GwyInventory *inventory,
  *
  * If the item needs to be moved in order to keep the inventory sorted, this
  * will cause reordering of the items and emission of
- * GwyInventory::items-reordered.  Signals GwyInventory::item-updated and
+ * GwyListable::items-reordered.  Signals GwyListable::item-updated and
  * possibly GwyInventory::default-changed will be emitted subsequently, when
  * the item is already in the final position.
  *
@@ -1006,7 +950,7 @@ gwy_inventory_rename(GwyInventory *inventory,
         n = nnew;
     }
 
-    g_signal_emit(inventory, signals[SGNL_ITEM_UPDATED], 0, n);
+    gwy_listable_item_updated(GWY_LISTABLE(inventory), n);
     if (priv->default_key
         && (gwy_strequal(name, priv->default_key)
             || gwy_strequal(newname, priv->default_key)))
@@ -1092,8 +1036,8 @@ static void
 emit_item_updated(GwyInventory *inventory,
                   GSequenceIter *iter)
 {
-    g_signal_emit(inventory, signals[SGNL_ITEM_UPDATED], 0,
-                  g_sequence_iter_get_position(iter));
+    gwy_listable_item_updated(GWY_LISTABLE(inventory),
+                              g_sequence_iter_get_position(iter));
 }
 
 /**
@@ -1232,6 +1176,18 @@ invent_item_name(Inventory *inventory,
     return NULL;
 }
 
+static guint
+listable_size(const GwyListable *listable)
+{
+    return gwy_inventory_size(GWY_INVENTORY(listable));
+}
+
+static gpointer
+listable_get(const GwyListable *listable,
+             guint pos)
+{
+    return gwy_inventory_get_nth(GWY_INVENTORY(listable), pos);
+}
 
 /**
  * SECTION: inventory
