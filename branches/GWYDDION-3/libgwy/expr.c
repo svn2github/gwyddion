@@ -134,7 +134,7 @@ struct _GwyExprPrivate {
 typedef struct _GwyExprPrivate Expr;
 
 static void     gwy_expr_finalize      (GObject *object);
-static gpointer check_call_table_sanity(gpointer arg);
+static void     check_call_table_sanity(void);
 static void     token_list_delete      (GwyExprToken *tokens);
 
 #define make_function_1_1(name) \
@@ -256,8 +256,10 @@ G_DEFINE_TYPE(GwyExpr, gwy_expr, G_TYPE_OBJECT);
 static void
 gwy_expr_class_init(GwyExprClass *klass)
 {
-    static GOnce table_sanity_checked = G_ONCE_INIT;
-    g_once(&table_sanity_checked, check_call_table_sanity, NULL);
+    static gboolean table_sanity_checked = FALSE;
+
+    if (!table_sanity_checked)
+        check_call_table_sanity();
 
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
@@ -292,21 +294,15 @@ gwy_expr_finalize(GObject *object)
     G_OBJECT_CLASS(gwy_expr_parent_class)->finalize(object);
 }
 
-static gpointer
-check_call_table_sanity(G_GNUC_UNUSED gpointer arg)
+static void
+check_call_table_sanity(void)
 {
-    gboolean ok = TRUE;
-    guint i;
-
-    for (i = 1; i < G_N_ELEMENTS(call_table); i++) {
+    for (guint i = 1; i < G_N_ELEMENTS(call_table); i++) {
         if (call_table[i].type != i) {
             g_critical("Inconsistent call table: %u at pos %u\n",
                        call_table[i].type, i);
-            ok = FALSE;
         }
     }
-
-    return GINT_TO_POINTER(ok);
 }
 
 /**
