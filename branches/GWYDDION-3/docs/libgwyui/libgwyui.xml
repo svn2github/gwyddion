@@ -40,7 +40,6 @@
     <title>Utilities and auxiliary widgets</title>
     <xi:include href="xml/main.xml"/>
     <xi:include href="xml/stock.xml"/>
-    <xi:include href="xml/array-store.xml"/>
     <xi:include href="xml/list-store.xml"/>
     <xi:include href="xml/inventory-store.xml"/>
     <xi:include href="xml/choice.xml"/>
