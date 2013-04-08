@@ -545,13 +545,6 @@ gwy_list_store_iter_is_valid(const GwyListStore *store,
  * The backend is set upon construction and remains the same during the entire
  * life time of the wrapper.
  *
- * The backend list class must implement two #GwyList methods: gwy_list_get()
- * and gwy_list_size().  In addition it may define signals "item-inserted",
- * "item-deleted" and "item-updated" with one #guint argument representing the
- * item position.  Furthermore it may define signal "items-reordered" with one
- * #gpointer argument representing the new sort order – see #GtkTreeModel for a
- * description of the sort order argument.
- *
  * A #GwyListStore has always exactly two columns:
  * <variablelist>
  *   <varlistentry>
