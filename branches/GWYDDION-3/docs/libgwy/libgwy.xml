@@ -99,6 +99,7 @@
     <xi:include href="xml/array.xml"/>
     <xi:include href="xml/container.xml"/>
     <xi:include href="xml/inventory.xml"/>
+    <xi:include href="xml/listable.xml"/>
   </chapter>
   <chapter id='libgwy-resources'>
     <title>Resources</title>
