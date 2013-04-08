@@ -57,6 +57,7 @@ public_headers = \
 	$(srcdir)/line-distributions.h \
 	$(srcdir)/line-part.h \
 	$(srcdir)/line-statistics.h \
+	$(srcdir)/listable.h \
 	$(srcdir)/macros.h \
 	$(srcdir)/main.h \
 	$(srcdir)/mask-field.h \
@@ -166,6 +167,7 @@ libgwy3_la_SOURCES = \
 	line-part.c \
 	line-statistics.c \
 	line.c \
+	listable.c \
 	macros.c \
 	main.c \
 	mask-field-arithmetic.c \
