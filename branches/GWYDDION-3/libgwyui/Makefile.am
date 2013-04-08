@@ -30,6 +30,7 @@ public_headers = \
 	$(srcdir)/graph-area.h \
 	$(srcdir)/graph-curve.h \
 	$(srcdir)/inventory-store.h \
+	$(srcdir)/list-store.h \
 	$(srcdir)/main.h \
 	$(srcdir)/raster-area.h \
 	$(srcdir)/raster-view.h \
@@ -94,6 +95,7 @@ libgwyui3_la_SOURCES = \
 	graph-internal.c \
 	icons-gresource.c \
 	inventory-store.c \
+	list-store.c \
 	main.c \
 	marshal.c \
 	raster-area.c \
