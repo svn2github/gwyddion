@@ -44,10 +44,8 @@ gwy_serializable_default_init(G_GNUC_UNUSED GwySerializableInterface *iface)
 gsize
 gwy_serializable_n_items(GwySerializable *serializable)
 {
-    const GwySerializableInterface *iface;
-
-    g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), 0);
-    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    const GwySerializableInterface *iface
+        = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_val_if_fail(iface && iface->n_items, 1);
 
     return iface->n_items(serializable) + 1;
@@ -69,7 +67,6 @@ void
 gwy_serializable_itemize(GwySerializable *serializable,
                          GwySerializableItems *items)
 {
-    g_return_if_fail(GWY_IS_SERIALIZABLE(serializable));
     const GwySerializableInterface *iface
         = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_if_fail(iface && iface->itemize);
@@ -94,10 +91,8 @@ gwy_serializable_itemize(GwySerializable *serializable,
 void
 gwy_serializable_done(GwySerializable *serializable)
 {
-    const GwySerializableInterface *iface;
-
-    g_return_if_fail(GWY_IS_SERIALIZABLE(serializable));
-    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    const GwySerializableInterface *iface
+        = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_if_fail(iface);
 
     if (iface->done)
@@ -122,9 +117,8 @@ gwy_serializable_duplicate(GwySerializable *serializable)
     if (!serializable)
         return NULL;
 
-    const GwySerializableInterface *iface;
-    g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), NULL);
-    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    const GwySerializableInterface *iface
+        = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_val_if_fail(iface && iface->duplicate, NULL);
 
     return iface->duplicate(serializable);
@@ -143,18 +137,15 @@ void
 gwy_serializable_assign(GwySerializable *destination,
                         GwySerializable *source)
 {
-    const GwySerializableInterface *iface;
-
     if (source == destination)
         return;
 
-    g_return_if_fail(GWY_IS_SERIALIZABLE(destination));
+    const GwySerializableInterface *iface
+        = GWY_SERIALIZABLE_GET_INTERFACE(destination);
+    g_return_if_fail(iface && iface->assign);
     /* No need to check GWY_IS_SERIALIZABLE(source) */
     g_return_if_fail(g_type_is_a(G_TYPE_FROM_INSTANCE(source),
                                  G_TYPE_FROM_INSTANCE(destination)));
-
-    iface = GWY_SERIALIZABLE_GET_INTERFACE(destination);
-    g_return_if_fail(iface && iface->assign);
 
     return iface->assign(destination, source);
 }
@@ -505,7 +496,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * The object class must implement all the methods, except
  * #GwySerializableInterface.request() and #GwySerializableInterface.done()
- * that are optional.
+ * which are optional.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
