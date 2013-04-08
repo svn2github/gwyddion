@@ -61,6 +61,7 @@
 #include <libgwy/line-distributions.h>
 #include <libgwy/line-part.h>
 #include <libgwy/line-statistics.h>
+#include <libgwy/listable.h>
 #include <libgwy/macros.h>
 #include <libgwy/main.h>
 #include <libgwy/mask-field.h>
