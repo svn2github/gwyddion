@@ -93,7 +93,7 @@ typedef struct {
 } GwySerializableItems;
 
 typedef struct _GwySerializableInterface GwySerializableInterface;
-typedef struct _GwySerializable          GwySerializable;        /* dummy */
+typedef struct _GwySerializable          GwySerializable;           // dummy
 
 #define GWY_TYPE_SERIALIZABLE \
     (gwy_serializable_get_type())
@@ -115,21 +115,23 @@ typedef struct _GwySerializable          GwySerializable;        /* dummy */
     }
 
 struct _GwySerializableInterface {
+    /*<private>*/
     GTypeInterface g_interface;
 
     /* virtual table */
-    gsize                 (*n_items)  (GwySerializable *serializable);
-    gsize                 (*itemize)  (GwySerializable *serializable,
-                                       GwySerializableItems *items);
-    void                  (*done)     (GwySerializable *serializable);
+    /*<public>*/
+    gsize    (*n_items)  (GwySerializable *serializable);
+    gsize    (*itemize)  (GwySerializable *serializable,
+                          GwySerializableItems *items);
+    void     (*done)     (GwySerializable *serializable);
 
-    gboolean              (*construct)(GwySerializable *serializable,
-                                       GwySerializableItems *items,
-                                       GwyErrorList **error_list);
+    gboolean (*construct)(GwySerializable *serializable,
+                          GwySerializableItems *items,
+                          GwyErrorList **error_list);
 
-    GObject*              (*duplicate)(GwySerializable *serializable);
-    void                  (*assign)   (GwySerializable *destination,
-                                       GwySerializable *source);
+    GObject* (*duplicate)(GwySerializable *serializable);
+    void     (*assign)   (GwySerializable *destination,
+                          GwySerializable *source);
 };
 
 GType    gwy_serializable_get_type (void)                           G_GNUC_CONST;
