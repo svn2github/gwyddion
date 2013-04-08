@@ -134,35 +134,6 @@ gwy_listable_get(const GwyListable *listable,
 }
 
 /**
- * gwy_listable_find:
- * @listable: A listable.
- * @item: Item to find in @listable.
- *
- * Finds the position of an item in a listable.
- *
- * Returns: The item position if found, %GWY_LISTABLE_NOT_FOUND if it is not
- *          present.
- **/
-guint
-gwy_listable_find(const GwyListable *listable,
-                  gconstpointer item)
-{
-    GwyListableInterface *iface = GWY_LISTABLE_GET_INTERFACE(listable);
-    g_return_val_if_fail(iface, GWY_LISTABLE_NOT_FOUND);
-    if (iface->find)
-        return iface->find(listable, item);
-
-    g_return_val_if_fail(iface->size && iface->get, GWY_LISTABLE_NOT_FOUND);
-    guint n = iface->size(listable);
-    for (guint i = 0; i < n; i++) {
-        gconstpointer iitem = iface->get(listable, i);
-        if (iitem == item)
-            return i;
-    }
-    return GWY_LISTABLE_NOT_FOUND;
-}
-
-/**
  * gwy_listable_item_inserted:
  * @listable: A listable.
  * @pos: Position at which a new item was inserted.

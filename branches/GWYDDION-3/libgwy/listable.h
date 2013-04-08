@@ -57,16 +57,12 @@ struct _GwyListableInterface {
     guint    (*size)(const GwyListable *listable);
     gpointer (*get) (const GwyListable *listable,
                      guint pos);
-    gint     (*find)(const GwyListable *listable,
-                     gconstpointer item);
 };
 
 GType    gwy_listable_get_type       (void)                        G_GNUC_CONST;
 guint    gwy_listable_size           (const GwyListable *listable) G_GNUC_PURE;
 gpointer gwy_listable_get            (const GwyListable *listable,
                                       guint pos)                   G_GNUC_PURE;
-guint    gwy_listable_find           (const GwyListable *listable,
-                                      gconstpointer item)          G_GNUC_PURE;
 void     gwy_listable_item_inserted  (GwyListable *listable,
                                       guint pos);
 void     gwy_listable_item_deleted   (GwyListable *listable,
