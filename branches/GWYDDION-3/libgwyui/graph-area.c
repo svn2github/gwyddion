@@ -18,6 +18,7 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/listable.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/types.h"
 #include "libgwyui/cairo-utils.h"
@@ -40,6 +41,7 @@ enum {
 typedef struct {
     GwyGraphCurve *curve;
     gulong notify_id;
+    gulong updated_id;
     gulong data_updated_id;
 } CurveProxy;
 
@@ -58,6 +60,7 @@ struct _GwyGraphAreaPrivate {
     gboolean show_ygrid;
 };
 
+static void     gwy_graph_area_listable_init(GwyListableInterface *iface);
 static void     gwy_graph_area_finalize     (GObject *object);
 static void     gwy_graph_area_dispose      (GObject *object);
 static void     gwy_graph_area_set_property (GObject *object,
@@ -93,12 +96,14 @@ static gboolean set_show_ygrid              (GwyGraphArea *grapharea,
 static gboolean set_grid                    (GArray **pgrid,
                                              const gdouble *ticks,
                                              guint n);
-static void     clear_curves                (GwyGraphArea *grapharea);
 static gboolean set_curve                   (GwyGraphArea *grapharea,
                                              GwyGraphCurve *graphcurve,
                                              guint pos);
 static void     curve_notify                (GwyGraphArea *grapharea,
                                              GParamSpec *pspec,
+                                             GwyGraphCurve *graphcurve);
+static void     curve_updated               (GwyGraphArea *grapharea,
+                                             const gchar *name,
                                              GwyGraphCurve *graphcurve);
 static void     curve_data_updated          (GwyGraphArea *grapharea,
                                              GwyGraphCurve *graphcurve);
@@ -112,12 +117,16 @@ static void     draw_curves                 (const GwyGraphArea *grapharea,
                                              cairo_t *cr,
                                              const cairo_rectangle_int_t *rect);
 static void     setup_grid_style            (cairo_t *cr);
+static guint    listable_size               (const GwyListable *listable);
+static gpointer listable_get                (const GwyListable *listable,
+                                             guint pos);
 
 static GParamSpec *properties[N_PROPS];
 static const GwyRange default_range = { 0.1, 1.0 };
-static const CurveProxy null_proxy = { NULL, 0L, 0L };
+static const CurveProxy null_proxy = { NULL, 0L, 0L, 0L };
 
-G_DEFINE_TYPE(GwyGraphArea, gwy_graph_area, GTK_TYPE_WIDGET);
+G_DEFINE_TYPE_EXTENDED(GwyGraphArea, gwy_graph_area, GTK_TYPE_WIDGET, 0,
+                       GWY_IMPLEMENT_LISTABLE(gwy_graph_area_listable_init));
 
 static void
 gwy_graph_area_class_init(GwyGraphAreaClass *klass)
@@ -188,6 +197,13 @@ gwy_graph_area_class_init(GwyGraphAreaClass *klass)
 }
 
 static void
+gwy_graph_area_listable_init(GwyListableInterface *iface)
+{
+    iface->get = listable_get;
+    iface->size = listable_size;
+}
+
+static void
 gwy_graph_area_init(GwyGraphArea *grapharea)
 {
     grapharea->priv = G_TYPE_INSTANCE_GET_PRIVATE(grapharea,
@@ -214,7 +230,12 @@ static void
 gwy_graph_area_dispose(GObject *object)
 {
     GwyGraphArea *grapharea = GWY_GRAPH_AREA(object);
-    clear_curves(grapharea);
+    GraphArea *priv = grapharea->priv;
+    GArray *curves = priv->curves;
+    while (curves->len) {
+        set_curve(grapharea, NULL, curves->len-1);
+        g_array_set_size(curves, curves->len-1);
+    }
     G_OBJECT_CLASS(gwy_graph_area_parent_class)->dispose(object);
 }
 
@@ -394,8 +415,8 @@ gwy_graph_area_add(GwyGraphArea *grapharea,
     GArray *curves = priv->curves;
     g_array_append_val(curves, null_proxy);
     set_curve(grapharea, graphcurve, priv->curves->len-1);
+    gwy_listable_item_inserted(GWY_LISTABLE(grapharea), priv->curves->len-1);
     gtk_widget_queue_draw(GTK_WIDGET(grapharea));
-    // TODO: emit some signal, autorange may have changed
 }
 
 /**
@@ -421,8 +442,8 @@ gwy_graph_area_insert(GwyGraphArea *grapharea,
     }
     g_array_insert_val(curves, pos, null_proxy);
     set_curve(grapharea, graphcurve, pos);
+    gwy_listable_item_inserted(GWY_LISTABLE(grapharea), pos);
     gtk_widget_queue_draw(GTK_WIDGET(grapharea));
-    // TODO: emit some signal, autorange may have changed
 }
 
 /**
@@ -441,8 +462,8 @@ gwy_graph_area_remove(GwyGraphArea *grapharea,
     g_return_if_fail(pos < priv->curves->len);
     set_curve(grapharea, NULL, pos);
     g_array_remove_index(priv->curves, pos);
+    gwy_listable_item_deleted(GWY_LISTABLE(grapharea), pos);
     gtk_widget_queue_draw(GTK_WIDGET(grapharea));
-    // TODO: emit some signal, autorange may have changed
 }
 
 /**
@@ -977,18 +998,6 @@ set_grid(GArray **pgrid,
     return TRUE;
 }
 
-static void
-clear_curves(GwyGraphArea *grapharea)
-{
-    GraphArea *priv = grapharea->priv;
-    GArray *curves = priv->curves;
-    while (curves->len) {
-        set_curve(grapharea, NULL, curves->len-1);
-        g_array_set_size(curves, curves->len-1);
-    }
-    // TODO: Emit some signal, invoke redraw if applicable, etc.
-}
-
 static gboolean
 set_curve(GwyGraphArea *grapharea,
           GwyGraphCurve *graphcurve,
@@ -1001,6 +1010,9 @@ set_curve(GwyGraphArea *grapharea,
                                "notify", &curve_notify,
                                &proxy->notify_id,
                                G_CONNECT_SWAPPED,
+                               "updated", &curve_updated,
+                               &proxy->updated_id,
+                               G_CONNECT_SWAPPED,
                                "data-updated", &curve_data_updated,
                                &proxy->data_updated_id,
                                G_CONNECT_SWAPPED,
@@ -1012,15 +1024,28 @@ set_curve(GwyGraphArea *grapharea,
 static void
 curve_notify(GwyGraphArea *grapharea,
              G_GNUC_UNUSED GParamSpec *pspec,
-             G_GNUC_UNUSED GwyGraphCurve *graphcurve)
+             GwyGraphCurve *graphcurve)
 {
+    gwy_listable_item_updated(GWY_LISTABLE(grapharea),
+                              gwy_graph_area_find(grapharea, graphcurve));
     gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+}
+
+static void
+curve_updated(GwyGraphArea *grapharea,
+              G_GNUC_UNUSED const gchar *name,
+              GwyGraphCurve *graphcurve)
+{
+    gwy_listable_item_updated(GWY_LISTABLE(grapharea),
+                              gwy_graph_area_find(grapharea, graphcurve));
 }
 
 static void
 curve_data_updated(GwyGraphArea *grapharea,
                    GwyGraphCurve *graphcurve)
 {
+    gwy_listable_item_updated(GWY_LISTABLE(grapharea),
+                              gwy_graph_area_find(grapharea, graphcurve));
     GwyPlotType plottype;
     g_object_get(graphcurve, "plot-type", &plottype, NULL);
     if (plottype != GWY_PLOT_HIDDEN)
@@ -1122,14 +1147,29 @@ setup_grid_style(cairo_t *cr)
     cairo_set_dash(cr, dash, 1, 0.0);
 }
 
+static guint
+listable_size(const GwyListable *listable)
+{
+    return gwy_graph_area_n_curves(GWY_GRAPH_AREA(listable));
+}
+
+static gpointer
+listable_get(const GwyListable *listable,
+             guint pos)
+{
+    return gwy_graph_area_get(GWY_GRAPH_AREA(listable), pos);
+}
+
 /**
  * SECTION: graph-area
  * @title: GwyGraphArea
  * @short_description: Area of graph containing the plots
  *
+ * #GwyGraphArea is the core part of a graph, containing the plotted data.
  * Individual plots in the graph are represented with #GwyGraphCurve objects
  * that carry the plot style for each plot and can encapsulate either
- * #GwyCurves or #GwyLines.
+ * #GwyCurves or #GwyLines.  The graph area acts as a list of curves,
+ * implementing #GwyListable.
  *
  * Sometimes the axis terminology may be confusing with respect to horizontal
  * and vertical because, for instance, the vertical grid lines corresponds to
