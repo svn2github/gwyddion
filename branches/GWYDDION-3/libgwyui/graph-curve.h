@@ -92,35 +92,36 @@ struct _GwyGraphCurveClass {
     /*<public>*/
 };
 
-GType          gwy_graph_curve_get_type (void)                              G_GNUC_CONST;
-GwyGraphCurve* gwy_graph_curve_new      (void);
-GwyCurve*      gwy_graph_curve_get_curve(const GwyGraphCurve *graphcurve)   G_GNUC_PURE;
-void           gwy_graph_curve_set_curve(GwyGraphCurve *graphcurve,
-                                         GwyCurve *curve);
-GwyLine*       gwy_graph_curve_get_line (const GwyGraphCurve *graphcurve)   G_GNUC_PURE;
-void           gwy_graph_curve_set_line (GwyGraphCurve *graphcurve,
-                                         GwyLine *line);
-gboolean       gwy_graph_curve_xrange   (const GwyGraphCurve *graphcurve,
-                                         GwyRange *range);
-gboolean       gwy_graph_curve_yrange   (const GwyGraphCurve *graphcurve,
-                                         GwyRange *range);
-gboolean       gwy_graph_curve_xposrange(const GwyGraphCurve *graphcurve,
-                                         GwyRange *range);
-gboolean       gwy_graph_curve_yposrange(const GwyGraphCurve *graphcurve,
-                                         GwyRange *range);
-gchar*         gwy_graph_curve_name     (const GwyGraphCurve *graphcurve)   G_GNUC_PURE;
-void           gwy_graph_curve_xunit    (const GwyGraphCurve *graphcurve,
-                                         GwyUnit *unit);
-void           gwy_graph_curve_yunit    (const GwyGraphCurve *graphcurve,
-                                         GwyUnit *unit);
-void           gwy_graph_curve_draw     (const GwyGraphCurve *graphcurve,
-                                         cairo_t *cr,
-                                         const cairo_rectangle_int_t *rect,
-                                         const GwyGraphArea *grapharea);
+GType          gwy_graph_curve_get_type   (void)                               G_GNUC_CONST;
+GwyGraphCurve* gwy_graph_curve_new        (void);
+GwyCurve*      gwy_graph_curve_get_curve  (const GwyGraphCurve *graphcurve)    G_GNUC_PURE;
+void           gwy_graph_curve_set_curve  (GwyGraphCurve *graphcurve,
+                                           GwyCurve *curve);
+GwyLine*       gwy_graph_curve_get_line   (const GwyGraphCurve *graphcurve)    G_GNUC_PURE;
+void           gwy_graph_curve_set_line   (GwyGraphCurve *graphcurve,
+                                           GwyLine *line);
+gboolean       gwy_graph_curve_xrange     (const GwyGraphCurve *graphcurve,
+                                           GwyRange *range);
+gboolean       gwy_graph_curve_yrange     (const GwyGraphCurve *graphcurve,
+                                           GwyRange *range);
+gboolean       gwy_graph_curve_xposrange  (const GwyGraphCurve *graphcurve,
+                                           GwyRange *range);
+gboolean       gwy_graph_curve_yposrange  (const GwyGraphCurve *graphcurve,
+                                           GwyRange *range);
+gchar*         gwy_graph_curve_name       (const GwyGraphCurve *graphcurve)    G_GNUC_PURE;
+void           gwy_graph_curve_xunit      (const GwyGraphCurve *graphcurve,
+                                           GwyUnit *unit);
+void           gwy_graph_curve_yunit      (const GwyGraphCurve *graphcurve,
+                                           GwyUnit *unit);
+void           gwy_graph_curve_draw       (const GwyGraphCurve *graphcurve,
+                                           cairo_t *cr,
+                                           const cairo_rectangle_int_t *rect,
+                                           const GwyGraphArea *grapharea);
+void           gwy_graph_curve_draw_sample(const GwyGraphCurve *graphcurve,
+                                           cairo_t *cr,
+                                           const cairo_rectangle_int_t *rect);
 
 // TODO: We also want:
-// - draw a single symbol/line segment to given Cairo context for graph keys,
-//   choosers, etc.
 // - search (in screen coordinates) for nearest point/curve
 // - more plot types (histogram, errorbars, filled curves would be nice)
 // - secondary curve (for filling, errorbars); not sure if it should go here or

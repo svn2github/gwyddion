@@ -739,12 +739,56 @@ gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
     if (!priv->line && !priv->curve)
         return;
 
-    // For logscale just replace range values with their logarithms and then
-    // use log(x) in place of x everywhwere.
     if (priv->type == GWY_PLOT_POINTS || priv->type == GWY_PLOT_LINE_POINTS)
         draw_points(graphcurve, cr, rect, grapharea);
     if (priv->type == GWY_PLOT_LINE || priv->type == GWY_PLOT_LINE_POINTS)
         draw_lines(graphcurve, cr, rect, grapharea);
+}
+
+/**
+ * gwy_graph_curve_draw_sample:
+ * @graphcurve: A graph curve.
+ * @cr: Cairo context to draw to.
+ * @rect: Rectangle in Cairo user units representing the area where to draw.
+ *        The current clip rectangle must lie entirely within.
+ *
+ * Draws a sample representation of graph curve.
+ *
+ * This function draws a short line segment, a single point symbol, etc.
+ * according to the current style centered within the provided rectangle.
+ **/
+void
+gwy_graph_curve_draw_sample(const GwyGraphCurve *graphcurve,
+                            cairo_t *cr,
+                            const cairo_rectangle_int_t *rect)
+{
+    g_return_if_fail(GWY_IS_GRAPH_CURVE(graphcurve));
+    g_return_if_fail(cr);
+
+    GraphCurve *priv = graphcurve->priv;
+    gdouble xc = rect->x + 0.5*rect->width, yc = rect->y + 0.5*rect->height;
+
+    if (priv->type == GWY_PLOT_POINTS || priv->type == GWY_PLOT_LINE_POINTS) {
+        const CurveSymbolInfo *syminfo = symbol_table + priv->point_type;
+        gdouble halfside = priv->point_size * syminfo->size_factor;
+        cairo_save(cr);
+        cairo_set_line_width(cr, 1.0);
+        gwy_cairo_set_source_rgba(cr, &priv->point_color);
+        syminfo->draw(cr, xc, yc, halfside);
+        stroke_fill_point(syminfo, cr);
+        cairo_restore(cr);
+    }
+
+    if (priv->type == GWY_PLOT_LINE || priv->type == GWY_PLOT_LINE_POINTS) {
+        cairo_save(cr);
+        cairo_set_line_width(cr, priv->line_width);
+        gwy_cairo_set_source_rgba(cr, &priv->line_color);
+        setup_line_type(cr, priv->line_width, priv->line_type);
+        // TODO: We might want to use hinting here.
+        cairo_move_to(cr, rect->x, yc);
+        cairo_rel_line_to(cr, rect->width, yc);
+        cairo_restore(cr);
+    }
 }
 
 static gboolean
