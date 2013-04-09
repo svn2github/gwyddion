@@ -560,7 +560,7 @@ gwy_graph_curve_xrange(const GwyGraphCurve *graphcurve,
 }
 
 /**
- * gwy_graph_curve_get_yrange:
+ * gwy_graph_curve_yrange:
  * @graphcurve: A graph curve.
  * @range: (out):
  *         Location to fill with the ordinate data range.
@@ -611,7 +611,7 @@ gwy_graph_curve_xposrange(const GwyGraphCurve *graphcurve,
 }
 
 /**
- * gwy_graph_curve_get_yposrange:
+ * gwy_graph_curve_yposrange:
  * @graphcurve: A graph curve.
  * @range: (out):
  *         Location to fill with the ordinate positive data range.

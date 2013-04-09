@@ -1130,7 +1130,7 @@ gwy_shapes_set_cursor_type(GwyShapes *shapes,
 }
 
 /**
- * gwy_shapes_get_cursor:
+ * gwy_shapes_get_cursor_type:
  * @shapes: A group of geometrical shapes.
  *
  * Gets the requested cursor type.
