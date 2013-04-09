@@ -24,8 +24,6 @@
 
 G_BEGIN_DECLS
 
-#define GWY_LISTABLE_NOT_FOUND G_MAXUINT
-
 #define GWY_TYPE_LISTABLE \
     (gwy_listable_get_type())
 #define GWY_LISTABLE(obj) \
