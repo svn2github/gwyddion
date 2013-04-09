@@ -222,6 +222,21 @@ test_inventory_data(void)
     g_assert_cmpuint(item_destroy_count, ==, 5);
 }
 
+static void
+check_reordering(G_GNUC_UNUSED GwyInventory *inventory,
+                 guint *new_order,
+                 gboolean *expect_reorder)
+{
+    g_assert(*expect_reorder);
+    // The mapping is new_order[newpos] = oldpos.
+    g_assert_cmpuint(new_order[0], ==, 2);
+    g_assert_cmpuint(new_order[1], ==, 3);
+    g_assert_cmpuint(new_order[2], ==, 1);
+    g_assert_cmpuint(new_order[3], ==, 5);
+    g_assert_cmpuint(new_order[4], ==, 4);
+    g_assert_cmpuint(new_order[5], ==, 0);
+}
+
 void
 test_inventory_sorting(void)
 {
@@ -242,6 +257,7 @@ test_inventory_sorting(void)
     GwyInventory *inventory = gwy_inventory_new();
     g_assert(GWY_IS_INVENTORY(inventory));
     gwy_inventory_set_item_type(inventory, &item_type);
+    gboolean expect_reorder = FALSE;
     item_destroy_count = 0;
     sort_by_name = TRUE;
 
@@ -252,6 +268,8 @@ test_inventory_sorting(void)
                      G_CALLBACK(record_item_change), &update_log);
     g_signal_connect(inventory, "item-deleted",
                      G_CALLBACK(record_item_change), &delete_log);
+    g_signal_connect_swapped(inventory, "items-reordered",
+                             G_CALLBACK(check_reordering), &expect_reorder);
 
     gwy_inventory_insert(inventory, item_new("Bananna", 2));
     gwy_inventory_insert(inventory, item_new("Apple", 8));
@@ -278,7 +296,15 @@ test_inventory_sorting(void)
     g_assert_cmphex(delete_log, ==, 0);
     insert_log = 0;
 
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Apple"), ==, 0);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Bananna"), ==, 1);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Turd"), ==, 2);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Citrus"), ==, 3);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Date"), ==, 4);
+    g_assert_cmpuint(gwy_inventory_position(inventory, "Bogus"), ==, 5);
+
     sort_by_name = FALSE;
+    expect_reorder = TRUE;
     gwy_inventory_restore_order(inventory);
     g_assert_cmpuint(gwy_inventory_size(inventory), ==, 6);
     g_assert_cmphex(insert_log, ==, 0);
@@ -292,6 +318,7 @@ test_inventory_sorting(void)
     g_assert_cmpuint(gwy_inventory_position(inventory, "Date"), ==, 4);
     g_assert_cmpuint(gwy_inventory_position(inventory, "Apple"), ==, 5);
 
+    expect_reorder = FALSE;
     g_object_unref(inventory);
     g_assert_cmpuint(item_destroy_count, ==, 6);
 }
