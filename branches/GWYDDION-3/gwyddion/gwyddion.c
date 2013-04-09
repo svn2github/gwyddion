@@ -376,7 +376,7 @@ make_random_curve(GwyRand *rng)
     g_object_set(graphcurve,
                  "point-color", gwy_rgba_get_preset_color(gwy_rand_int(rng)),
                  "line-color", gwy_rgba_get_preset_color(gwy_rand_int(rng)),
-                 "plot-type", (guint)(gwy_rand_int(rng) % 4),
+                 "plot-type", (guint)(gwy_rand_int(rng) % 5),
                  "point-type", (guint)(gwy_rand_int(rng) % 18),
                  "line-type", (guint)(gwy_rand_int(rng) % 3),
                  NULL);
