@@ -85,6 +85,14 @@ void              gwy_graph_area_set_yrange    (GwyGraphArea *grapharea,
                                                 const GwyRange *range);
 void              gwy_graph_area_get_yrange    (const GwyGraphArea *grapharea,
                                                 GwyRange *range);
+gboolean          gwy_graph_area_full_xrange   (const GwyGraphArea *grapharea,
+                                                GwyRange *range);
+gboolean          gwy_graph_area_full_yrange   (const GwyGraphArea *grapharea,
+                                                GwyRange *range);
+gboolean          gwy_graph_area_full_xposrange(const GwyGraphArea *grapharea,
+                                                GwyRange *range);
+gboolean          gwy_graph_area_full_yposrange(const GwyGraphArea *grapharea,
+                                                GwyRange *range);
 void              gwy_graph_area_set_xgrid     (GwyGraphArea *grapharea,
                                                 const gdouble *ticks,
                                                 guint n);

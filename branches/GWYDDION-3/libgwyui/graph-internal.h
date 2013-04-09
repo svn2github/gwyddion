@@ -34,8 +34,9 @@ G_BEGIN_DECLS
 
 typedef struct {
     GwyRange full;
-    gdouble posmin;  // Only positive values considered, for logscale
+    GwyRange positive;
     gboolean cached : 1;
+    gboolean anypresent : 1;
     gboolean pospresent : 1;
 } GwyGraphDataRange;
 
@@ -46,6 +47,10 @@ void _gwy_graph_calculate_scaling(const GwyGraphArea *grapharea,
                                   gdouble *offx,
                                   gdouble *qy,
                                   gdouble *offy);
+
+G_GNUC_INTERNAL
+void _gwy_graph_data_range_union(GwyGraphDataRange *target,
+                                 const GwyGraphDataRange *operand);
 
 G_END_DECLS
 

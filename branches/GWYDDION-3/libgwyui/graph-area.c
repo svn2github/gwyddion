@@ -52,8 +52,10 @@ struct _GwyGraphAreaPrivate {
     GArray *curves;  // of CurveProxy
     GArray *xgrid;   // of gdouble
     GArray *ygrid;
-    GwyRange xrange;
+    GwyRange xrange;  // Plotting ranges
     GwyRange yrange;
+    GwyGraphDataRange xdatarange;  // Data ranges
+    GwyGraphDataRange ydatarange;
     GwyGraphScaleType xscale;
     GwyGraphScaleType yscale;
     gboolean show_xgrid;
@@ -117,6 +119,8 @@ static void     draw_curves                 (const GwyGraphArea *grapharea,
                                              cairo_t *cr,
                                              const cairo_rectangle_int_t *rect);
 static void     setup_grid_style            (cairo_t *cr);
+static void     ensure_data_xrange          (GraphArea *priv);
+static void     ensure_data_yrange          (GraphArea *priv);
 static guint    listable_size               (const GwyListable *listable);
 static gpointer listable_get                (const GwyListable *listable,
                                              guint pos);
@@ -616,6 +620,110 @@ gwy_graph_area_get_yrange(const GwyGraphArea *grapharea,
     g_return_if_fail(GWY_IS_GRAPH_AREA(grapharea));
     g_return_if_fail(range);
     *range = grapharea->priv->yrange;
+}
+
+/**
+ * gwy_graph_area_full_xrange:
+ * @grapharea: A graph area.
+ * @range: (out):
+ *         Location to store the abscissa range.
+ *         If the function returns %FALSE its contents is undefined.
+ *
+ * Finds the full abscissa data range of all visible curves in a graph area.
+ *
+ * Curves with plot type %GWY_PLOT_HIDDEN do not influence the range.
+ *
+ * Returns: %TRUE if the there are any visible data points.
+ **/
+gboolean
+gwy_graph_area_full_xrange(const GwyGraphArea *grapharea,
+                           GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), FALSE);
+    g_return_val_if_fail(range, FALSE);
+    GraphArea *priv = grapharea->priv;
+    ensure_data_xrange(priv);
+    *range = priv->xdatarange.full;
+    return priv->xdatarange.anypresent;
+}
+
+/**
+ * gwy_graph_area_full_yrange:
+ * @grapharea: A graph area.
+ * @range: (out):
+ *         Location to store the ordinate range.
+ *         If the function returns %FALSE its contents is undefined.
+ *
+ * Finds the full ordinate data range of all visible curves in a graph area.
+ *
+ * Curves with plot type %GWY_PLOT_HIDDEN do not influence the range.
+ *
+ * Returns: %TRUE if the there are any visible data points.
+ **/
+gboolean
+gwy_graph_area_full_yrange(const GwyGraphArea *grapharea,
+                           GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), FALSE);
+    g_return_val_if_fail(range, FALSE);
+    GraphArea *priv = grapharea->priv;
+    ensure_data_yrange(priv);
+    *range = priv->ydatarange.full;
+    return priv->ydatarange.anypresent;
+}
+
+/**
+ * gwy_graph_area_full_xposrange:
+ * @grapharea: A graph area.
+ * @range: (out):
+ *         Location to store the abscissa range.
+ *         If the function returns %FALSE its contents is undefined.
+ *
+ * Finds the full positive abscissa data range of all visible curves in a graph
+ * area.
+ *
+ * Curves with plot type %GWY_PLOT_HIDDEN and non-positive values do not
+ * influence the range.
+ *
+ * Returns: %TRUE if the there are any visible data points.
+ **/
+gboolean
+gwy_graph_area_full_xposrange(const GwyGraphArea *grapharea,
+                              GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), FALSE);
+    g_return_val_if_fail(range, FALSE);
+    GraphArea *priv = grapharea->priv;
+    ensure_data_xrange(priv);
+    *range = priv->xdatarange.positive;
+    return priv->xdatarange.pospresent;
+}
+
+/**
+ * gwy_graph_area_full_yposrange:
+ * @grapharea: A graph area.
+ * @range: (out):
+ *         Location to store the ordinate range.
+ *         If the function returns %FALSE its contents is undefined.
+ *
+ * Finds the full positive ordinate data range of all visible curves in a graph
+ * area.
+ *
+ * Curves with plot type %GWY_PLOT_HIDDEN and non-positive values do not
+ * influence the range.
+ *
+ * Returns: %TRUE if the there are any visible data points.
+ **/
+gboolean
+gwy_graph_area_full_yposrange(const GwyGraphArea *grapharea,
+                              GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AREA(grapharea), FALSE);
+    g_return_val_if_fail(range, FALSE);
+    GraphArea *priv = grapharea->priv;
+    ensure_data_yrange(priv);
+    *range = priv->ydatarange.positive;
+    return priv->ydatarange.pospresent;
 }
 
 /**
@@ -1145,6 +1253,54 @@ setup_grid_style(cairo_t *cr)
     cairo_set_line_width(cr, 1.0);
     gdouble dash[1] = { 2.0 };
     cairo_set_dash(cr, dash, 1, 0.0);
+}
+
+static void
+ensure_data_xrange(GraphArea *priv)
+{
+    GwyGraphDataRange *datarange = &priv->xdatarange;
+    if (datarange->cached)
+        return;
+
+    datarange->anypresent = datarange->pospresent = FALSE;
+    GArray *curves = priv->curves;
+    for (guint i = 0; i < curves->len; i++) {
+        const CurveProxy *cproxy = &curve_proxy_index(curves, i);
+        GwyPlotType plottype;
+        g_object_get(cproxy->curve, "plot-type", &plottype, NULL);
+        if (plottype == GWY_PLOT_HIDDEN)
+            continue;
+
+        GwyGraphDataRange range;
+        range.anypresent = gwy_graph_curve_xrange(cproxy->curve, &range.full);
+        range.pospresent = gwy_graph_curve_xposrange(cproxy->curve,
+                                                     &range.positive);
+        _gwy_graph_data_range_union(datarange, &range);
+    }
+}
+
+static void
+ensure_data_yrange(GraphArea *priv)
+{
+    GwyGraphDataRange *datarange = &priv->ydatarange;
+    if (datarange->cached)
+        return;
+
+    datarange->anypresent = datarange->pospresent = FALSE;
+    GArray *curves = priv->curves;
+    for (guint i = 0; i < curves->len; i++) {
+        const CurveProxy *cproxy = &curve_proxy_index(curves, i);
+        GwyPlotType plottype;
+        g_object_get(cproxy->curve, "plot-type", &plottype, NULL);
+        if (plottype == GWY_PLOT_HIDDEN)
+            continue;
+
+        GwyGraphDataRange range;
+        range.anypresent = gwy_graph_curve_yrange(cproxy->curve, &range.full);
+        range.pospresent = gwy_graph_curve_yposrange(cproxy->curve,
+                                                     &range.positive);
+        _gwy_graph_data_range_union(datarange, &range);
+    }
 }
 
 static guint

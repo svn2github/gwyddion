@@ -18,6 +18,7 @@
  */
 
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwyui/graph-internal.h"
 
 static void calculate_one_scaling(gdouble srcfrom,
@@ -82,6 +83,37 @@ calculate_one_scaling(gdouble srcfrom, gdouble srcto,
     gdouble qq = destlen/srclen;
     GWY_MAYBE_SET(q, qq);
     GWY_MAYBE_SET(off, destfrom - srcfrom*qq);
+}
+
+void
+_gwy_graph_data_range_union(GwyGraphDataRange *target,
+                            const GwyGraphDataRange *operand)
+{
+    if (operand->anypresent) {
+        if (target->anypresent) {
+            target->full.from = fmin(target->full.from, operand->full.from);
+            target->full.to = fmax(target->full.to, operand->full.to);
+        }
+        else {
+            target->full.from = operand->full.from;
+            target->full.to = operand->full.to;
+            target->anypresent = TRUE;
+        }
+    }
+
+    if (operand->pospresent) {
+        if (target->pospresent) {
+            target->positive.from = fmin(target->positive.from,
+                                         operand->positive.from);
+            target->positive.to = fmax(target->positive.to,
+                                       operand->positive.to);
+        }
+        else {
+            target->positive.from = operand->positive.from;
+            target->positive.to = operand->positive.to;
+            target->pospresent = TRUE;
+        }
+    }
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
