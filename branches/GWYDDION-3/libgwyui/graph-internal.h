@@ -32,6 +32,13 @@ G_BEGIN_DECLS
 #define range_type(from,len,x,tol) \
     (((x) + (tol) < (from) ? -1 : ((x) - (tol) > (from) + (len) ? 1 : 0)))
 
+typedef struct {
+    GwyRange full;
+    gdouble posmin;  // Only positive values considered, for logscale
+    gboolean cached : 1;
+    gboolean pospresent : 1;
+} GwyGraphDataRange;
+
 G_GNUC_INTERNAL
 void _gwy_graph_calculate_scaling(const GwyGraphArea *grapharea,
                                   const cairo_rectangle_int_t *rect,

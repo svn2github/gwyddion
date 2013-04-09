@@ -78,13 +78,9 @@ struct _GwyGraphCurvePrivate {
     GwyCurve *curve;
     GwyLine *line;
 
-    // These are data ranges, not plotting ranges.
-    GwyRange xrange;
-    GwyRange yrange;
-    gdouble xposmin, yposmin;  // Only positive values considered, for logscale
-    gboolean cached_range : 1;
-    gboolean xpospresent : 1;
-    gboolean ypospresent : 1;
+    // Data (not plotting) ranges.
+    GwyGraphDataRange xrange;
+    GwyGraphDataRange yrange;
 
     GwyPlotType type;
 
@@ -555,7 +551,7 @@ gwy_graph_curve_xrange(const GwyGraphCurve *graphcurve,
     g_return_val_if_fail(range, FALSE);
     GraphCurve *priv = graphcurve->priv;
     ensure_ranges(priv);
-    *range = priv->xrange;
+    *range = priv->xrange.full;
     return priv->curve || priv->line;
 }
 
@@ -579,7 +575,7 @@ gwy_graph_curve_yrange(const GwyGraphCurve *graphcurve,
     g_return_val_if_fail(range, FALSE);
     GraphCurve *priv = graphcurve->priv;
     ensure_ranges(priv);
-    *range = priv->yrange;
+    *range = priv->yrange.full;
     return priv->curve || priv->line;
 }
 
@@ -604,10 +600,10 @@ gwy_graph_curve_xposrange(const GwyGraphCurve *graphcurve,
     g_return_val_if_fail(range, FALSE);
     GraphCurve *priv = graphcurve->priv;
     ensure_ranges(priv);
-    range->from = priv->xposmin;
+    range->from = priv->xrange.posmin;
     // The maximum value may be rubbish if we return FALSE but that's allowed.
-    range->to = priv->xrange.to;
-    return priv->xpospresent;
+    range->to = priv->xrange.full.to;
+    return priv->xrange.pospresent;
 }
 
 /**
@@ -631,10 +627,10 @@ gwy_graph_curve_yposrange(const GwyGraphCurve *graphcurve,
     g_return_val_if_fail(range, FALSE);
     GraphCurve *priv = graphcurve->priv;
     ensure_ranges(priv);
-    range->from = priv->yposmin;
+    range->from = priv->yrange.posmin;
     // The maximum value may be rubbish if we return FALSE but that's allowed.
-    range->to = priv->yrange.to;
-    return priv->ypospresent;
+    range->to = priv->yrange.full.to;
+    return priv->yrange.pospresent;
 }
 
 /**
@@ -942,7 +938,8 @@ updated(GwyGraphCurve *graphcurve, const gchar *name)
 static void
 data_updated(GwyGraphCurve *graphcurve)
 {
-    graphcurve->priv->cached_range = FALSE;
+    GraphCurve *priv = graphcurve->priv;
+    priv->xrange.cached = priv->yrange.cached = FALSE;
     g_signal_emit(graphcurve, signals[SGNL_DATA_UPDATED], 0);
 }
 
@@ -961,7 +958,8 @@ all_updated(GwyGraphCurve *graphcurve)
 static void
 ensure_ranges(GraphCurve *priv)
 {
-    if (priv->cached_range)
+    GwyGraphDataRange *xrange = &priv->xrange, *yrange = &priv->yrange;
+    if (xrange->cached && yrange->cached)
         return;
 
     gdouble xposmin = G_MAXDOUBLE, yposmin = G_MAXDOUBLE;
@@ -969,8 +967,8 @@ ensure_ranges(GraphCurve *priv)
 
     if (priv->curve) {
         const GwyCurve *curve = priv->curve;
-        gwy_curve_range_full(curve, &priv->xrange.from, &priv->xrange.to);
-        gwy_curve_min_max_full(curve, &priv->yrange.from, &priv->yrange.to);
+        gwy_curve_range_full(curve, &xrange->full.from, &xrange->full.to);
+        gwy_curve_min_max_full(curve, &yrange->full.from, &yrange->full.to);
 
         const GwyXY *data = curve->data;
         for (guint i = curve->n; i; i--, data++) {
@@ -989,9 +987,9 @@ ensure_ranges(GraphCurve *priv)
     else if (priv->line) {
         const GwyLine *line = priv->line;
         gdouble dx = gwy_line_dx(line);
-        priv->xrange.from = line->off + 0.5*dx;
-        priv->xrange.to = priv->xrange.from + dx*(line->res - 1);
-        gwy_line_min_max_full(line, &priv->yrange.from, &priv->yrange.to);
+        xrange->full.from = line->off + 0.5*dx;
+        xrange->full.to = xrange->full.from + dx*(line->res - 1);
+        gwy_line_min_max_full(line, &yrange->full.from, &yrange->full.to);
 
         const gdouble *ydata = line->data;
         for (guint i = line->res; i; i--, ydata++) {
@@ -1001,13 +999,13 @@ ensure_ranges(GraphCurve *priv)
                     yposmin = *ydata;
             }
         }
-        if (priv->xrange.to > 0.0) {
+        if (xrange->full.to > 0.0) {
             xpospresent = TRUE;
-            if (priv->xrange.from > 0.0)
-                xposmin = priv->xrange.from;
+            if (xrange->full.from > 0.0)
+                xposmin = xrange->full.from;
             else {
-                gint i = ceil(-priv->xrange.from/dx);
-                xposmin = priv->xrange.from + dx*i;
+                gint i = ceil(-xrange->full.from/dx);
+                xposmin = xrange->full.from + dx*i;
                 // Avoid almost-zero points for range calculation.  We might
                 // also want to avoid them for drawing in logscale but
                 // hopefully Cairo can handle that.
@@ -1017,17 +1015,17 @@ ensure_ranges(GraphCurve *priv)
         }
     }
     else {
-        priv->xrange = (GwyRange){ NAN, NAN };
-        priv->yrange = (GwyRange){ NAN, NAN };
+        xrange->full = (GwyRange){ NAN, NAN };
+        yrange->full = (GwyRange){ NAN, NAN };
     }
 
-    priv->cached_range = TRUE;
+    xrange->cached = yrange->cached = TRUE;
     // Fight rounding errors in single-point cases that may cause
     // posmin > range.to.
-    priv->xposmin = fmax(xposmin, priv->xrange.to);
-    priv->yposmin = fmax(yposmin, priv->yrange.to);
-    priv->xpospresent = xpospresent;
-    priv->ypospresent = ypospresent;
+    xrange->posmin = fmax(xposmin, xrange->full.to);
+    yrange->posmin = fmax(yposmin, yrange->full.to);
+    xrange->pospresent = xpospresent;
+    yrange->pospresent = ypospresent;
 }
 
 static void
