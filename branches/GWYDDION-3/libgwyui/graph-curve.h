@@ -31,6 +31,7 @@ typedef enum {
     GWY_PLOT_POINTS,
     GWY_PLOT_LINE,
     GWY_PLOT_LINE_POINTS,
+    GWY_PLOT_FILLED,
 } GwyPlotType;
 
 typedef enum {

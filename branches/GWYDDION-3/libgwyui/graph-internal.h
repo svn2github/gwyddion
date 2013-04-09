@@ -52,6 +52,18 @@ G_GNUC_INTERNAL
 void _gwy_graph_data_range_union(GwyGraphDataRange *target,
                                  const GwyGraphDataRange *operand);
 
+G_GNUC_UNUSED
+static inline gdouble
+_gwy_graph_scale_data(gdouble v, GwyGraphScaleType scale)
+{
+    if (scale == GWY_GRAPH_SCALE_SQRT)
+        return gwy_ssqrt(v);
+    if (scale == GWY_GRAPH_SCALE_LOG)
+        return log(v);
+    g_assert(scale == GWY_GRAPH_SCALE_LINEAR);
+    return v;
+}
+
 G_END_DECLS
 
 #endif

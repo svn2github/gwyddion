@@ -1178,12 +1178,8 @@ draw_xgrid(const GwyGraphArea *grapharea,
     setup_grid_style(cr);
 
     for (guint i = 0; i < grid->len; i++) {
-        gdouble v = g_array_index(grid, gdouble, i);
-        if (scale == GWY_GRAPH_SCALE_SQRT)
-            v = gwy_ssqrt(v);
-        else if (scale == GWY_GRAPH_SCALE_LOG)
-            v = log(v);
-
+        gdouble v = _gwy_graph_scale_data(g_array_index(grid, gdouble, i),
+                                          scale);
         v = q*v + off;
         if (!isfinite(v) || !within_range(rect->x, rect->width, v, 1.0))
             continue;
@@ -1214,12 +1210,8 @@ draw_ygrid(const GwyGraphArea *grapharea,
     setup_grid_style(cr);
 
     for (guint i = 0; i < grid->len; i++) {
-        gdouble v = g_array_index(grid, gdouble, i);
-        if (scale == GWY_GRAPH_SCALE_SQRT)
-            v = gwy_ssqrt(v);
-        else if (scale == GWY_GRAPH_SCALE_LOG)
-            v = log(v);
-
+        gdouble v = _gwy_graph_scale_data(g_array_index(grid, gdouble, i),
+                                          scale);
         v = q*v + off;
         if (!isfinite(v) || !within_range(rect->y, rect->height, v, 1.0))
             continue;

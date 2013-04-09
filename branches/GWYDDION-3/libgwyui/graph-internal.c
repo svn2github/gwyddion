@@ -44,7 +44,7 @@ _gwy_graph_calculate_scaling(const GwyGraphArea *grapharea,
     }
     if (qy || offy) {
         gwy_graph_area_get_yrange(grapharea, &range);
-        calculate_one_scaling(range.from, range.to, rect->y, rect->height,
+        calculate_one_scaling(range.to, range.from, rect->y, rect->height,
                               gwy_graph_area_get_yscale(grapharea),
                               qy, offy);
     }

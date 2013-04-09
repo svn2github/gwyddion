@@ -39,6 +39,8 @@ enum {
     PROP_LINE_COLOR,
     PROP_LINE_TYPE,
     PROP_LINE_WIDTH,
+    PROP_FILL_COLOR,
+    PROP_BASELINE,
     N_PROPS
 };
 
@@ -92,6 +94,9 @@ struct _GwyGraphCurvePrivate {
     GwyGraphLineType line_type;
     gdouble line_width;
 
+    GwyRGBA fill_color;
+    gdouble baseline;
+
     gulong notify_id;
     gulong data_changed_id;
 };
@@ -124,6 +129,10 @@ static gboolean set_line_type               (GwyGraphCurve *graphcurve,
                                              GwyGraphLineType type);
 static gboolean set_line_width              (GwyGraphCurve *graphcurve,
                                              gdouble width);
+static gboolean set_fill_color              (GwyGraphCurve *graphcurve,
+                                             const GwyRGBA *color);
+static gboolean set_baseline                (GwyGraphCurve *graphcurve,
+                                             gdouble baseline);
 static void     curve_notify                (GwyGraphCurve *graphcurve,
                                              GParamSpec *pspec,
                                              GwyCurve *curve);
@@ -150,6 +159,10 @@ static void     draw_points                 (const GwyGraphCurve *graphcurve,
 static void     stroke_fill_point           (const CurveSymbolInfo *syminfo,
                                              cairo_t *cr);
 static void     draw_lines                  (const GwyGraphCurve *graphcurve,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect,
+                                             const GwyGraphArea *grapharea);
+static void     draw_filled                 (const GwyGraphCurve *graphcurve,
                                              cairo_t *cr,
                                              const cairo_rectangle_int_t *rect,
                                              const GwyGraphArea *grapharea);
@@ -278,6 +291,20 @@ gwy_graph_curve_class_init(GwyGraphCurveClass *klass)
                               0.0, G_MAXDOUBLE, 1.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_FILL_COLOR]
+        = g_param_spec_boxed("fill-color",
+                             "Fill color",
+                             "Fill color for filled plots.",
+                             GWY_TYPE_RGBA,
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_BASELINE]
+        = g_param_spec_double("baseline",
+                              "Baseline",
+                              "Baseline from which solid plots are filled.",
+                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
@@ -327,6 +354,7 @@ gwy_graph_curve_init(GwyGraphCurve *graphcurve)
     priv->line_type = GWY_GRAPH_LINE_SOLID;
     priv->line_color = (GwyRGBA){ 0.0, 0.0, 0.0, 1.0 };
     priv->line_width = 1.0;
+    priv->fill_color = (GwyRGBA){ 0.0, 0.0, 0.0, 0.25 };
 }
 
 static void
@@ -390,6 +418,14 @@ gwy_graph_curve_set_property(GObject *object,
         set_line_width(graphcurve, g_value_get_double(value));
         break;
 
+        case PROP_FILL_COLOR:
+        set_fill_color(graphcurve, g_value_get_boxed(value));
+        break;
+
+        case PROP_BASELINE:
+        set_baseline(graphcurve, g_value_get_double(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -439,6 +475,14 @@ gwy_graph_curve_get_property(GObject *object,
 
         case PROP_LINE_WIDTH:
         g_value_set_double(value, priv->line_width);
+        break;
+
+        case PROP_FILL_COLOR:
+        g_value_set_boxed(value, &priv->fill_color);
+        break;
+
+        case PROP_BASELINE:
+        g_value_set_double(value, priv->baseline);
         break;
 
         default:
@@ -739,9 +783,16 @@ gwy_graph_curve_draw(const GwyGraphCurve *graphcurve,
     if (!priv->line && !priv->curve)
         return;
 
-    if (priv->type == GWY_PLOT_POINTS || priv->type == GWY_PLOT_LINE_POINTS)
+    if (priv->type == GWY_PLOT_POINTS
+        || priv->type == GWY_PLOT_LINE_POINTS)
         draw_points(graphcurve, cr, rect, grapharea);
-    if (priv->type == GWY_PLOT_LINE || priv->type == GWY_PLOT_LINE_POINTS)
+
+    if (priv->type == GWY_PLOT_FILLED)
+        draw_filled(graphcurve, cr, rect, grapharea);
+
+    if (priv->type == GWY_PLOT_LINE
+        || priv->type == GWY_PLOT_LINE_POINTS
+        || priv->type == GWY_PLOT_FILLED)
         draw_lines(graphcurve, cr, rect, grapharea);
 }
 
@@ -768,7 +819,8 @@ gwy_graph_curve_draw_sample(const GwyGraphCurve *graphcurve,
     GraphCurve *priv = graphcurve->priv;
     gdouble xc = rect->x + 0.5*rect->width, yc = rect->y + 0.5*rect->height;
 
-    if (priv->type == GWY_PLOT_POINTS || priv->type == GWY_PLOT_LINE_POINTS) {
+    if (priv->type == GWY_PLOT_POINTS
+        || priv->type == GWY_PLOT_LINE_POINTS) {
         const CurveSymbolInfo *syminfo = symbol_table + priv->point_type;
         gdouble halfside = priv->point_size * syminfo->size_factor;
         cairo_save(cr);
@@ -779,14 +831,31 @@ gwy_graph_curve_draw_sample(const GwyGraphCurve *graphcurve,
         cairo_restore(cr);
     }
 
-    if (priv->type == GWY_PLOT_LINE || priv->type == GWY_PLOT_LINE_POINTS) {
+    if (priv->type == GWY_PLOT_LINE
+        || priv->type == GWY_PLOT_LINE_POINTS) {
         cairo_save(cr);
-        cairo_set_line_width(cr, priv->line_width);
-        gwy_cairo_set_source_rgba(cr, &priv->line_color);
-        setup_line_type(cr, priv->line_width, priv->line_type);
         // TODO: We might want to use hinting here.
         cairo_move_to(cr, rect->x, yc);
         cairo_rel_line_to(cr, rect->width, yc);
+        cairo_set_line_width(cr, priv->line_width);
+        gwy_cairo_set_source_rgba(cr, &priv->line_color);
+        setup_line_type(cr, priv->line_width, priv->line_type);
+        cairo_stroke(cr);
+        cairo_restore(cr);
+    }
+
+    if (priv->type == GWY_PLOT_FILLED) {
+        cairo_save(cr);
+        gdouble wh = 0.5*fmin(priv->line_width, 0.5*rect->width),
+                wv = 0.5*fmin(priv->line_width, 0.5*rect->height);
+        cairo_rectangle(cr,
+                        rect->x + wh, rect->y + wv,
+                        rect->width - 2.0*wh, rect->height - 2.0*wv);
+        gwy_cairo_set_source_rgba(cr, &priv->fill_color);
+        cairo_fill_preserve(cr);
+        gwy_cairo_set_source_rgba(cr, &priv->line_color);
+        setup_line_type(cr, priv->line_width, priv->line_type);
+        cairo_stroke(cr);
         cairo_restore(cr);
     }
 }
@@ -926,6 +995,33 @@ set_line_width(GwyGraphCurve *graphcurve,
         return FALSE;
 
     priv->line_width = width;
+    return TRUE;
+}
+
+static gboolean
+set_fill_color(GwyGraphCurve *graphcurve,
+               const GwyRGBA *color)
+{
+    GraphCurve *priv = graphcurve->priv;
+    if (color->r == priv->fill_color.r
+        && color->g == priv->fill_color.g
+        && color->b == priv->fill_color.b
+        && color->a == priv->fill_color.a)
+        return FALSE;
+
+    priv->fill_color = *color;
+    return TRUE;
+}
+
+static gboolean
+set_baseline(GwyGraphCurve *graphcurve,
+             gdouble baseline)
+{
+    GraphCurve *priv = graphcurve->priv;
+    if (priv->baseline == baseline)
+        return FALSE;
+
+    priv->baseline = baseline;
     return TRUE;
 }
 
@@ -1255,6 +1351,101 @@ draw_lines(const GwyGraphCurve *graphcurve,
 }
 
 static void
+draw_filled(const GwyGraphCurve *graphcurve,
+            cairo_t *cr,
+            const cairo_rectangle_int_t *rect,
+            const GwyGraphArea *grapharea)
+{
+    GraphCurve *priv = graphcurve->priv;
+
+    GraphCurveIter iter;
+    if (!graph_curve_iter_init(graphcurve, &iter,
+                               gwy_graph_area_get_xscale(grapharea),
+                               gwy_graph_area_get_yscale(grapharea)))
+        return;
+
+    gdouble xq, xoff, yq, yoff;
+    _gwy_graph_calculate_scaling(grapharea, rect, &xq, &xoff, &yq, &yoff);
+
+    gdouble baseline = priv->baseline;
+    GwyGraphScaleType yscale = gwy_graph_area_get_yscale(grapharea);
+    if (yscale == GWY_GRAPH_SCALE_LOG)
+        baseline = fmax(baseline, G_MINDOUBLE);
+    baseline = _gwy_graph_scale_data(baseline, yscale);
+    if (!isfinite(baseline))
+        return;
+    baseline = yq*baseline + yoff;
+    baseline = CLAMP(baseline, rect->y, rect->y + rect->height);
+
+    cairo_save(cr);
+    gwy_cairo_set_source_rgba(cr, &priv->fill_color);
+
+    gdouble x, y;
+    gint xtype, ytype;
+    if (graph_curve_iter_get(&iter, &x, &y)) {
+        x = xq*x + xoff;
+        y = yq*y + yoff;
+        xtype = range_type(rect->x, rect->width, x, 1.0);
+        ytype = range_type(rect->y, rect->height, y, 1.0);
+    }
+    else
+        xtype = ytype = 42;
+
+    gboolean skipping = TRUE;
+    gdouble firstx = -G_MAXDOUBLE;
+    while (graph_curve_iter_next(&iter)) {
+        gdouble xprev = x, yprev = y;
+        gint xprevtype = xtype, yprevtype = ytype;
+        if (graph_curve_iter_get(&iter, &x, &y)) {
+            x = xq*x + xoff;
+            y = yq*y + yoff;
+            xtype = range_type(rect->x, rect->width, x, 1.0);
+            ytype = range_type(rect->y, rect->height, y, 1.0);
+        }
+        else
+            xtype = ytype = 42;
+
+        // This means any of them is 42.
+        if (xtype + ytype + xprevtype + yprevtype > 30) {
+            if (!skipping) {
+                cairo_line_to(cr, xprev, baseline);
+                cairo_line_to(cr, firstx, baseline);
+                cairo_close_path(cr);
+                skipping = TRUE;
+            }
+            continue;
+        }
+
+        if ((xtype && xtype == xprevtype) || (ytype && ytype == yprevtype)) {
+            if (!skipping) {
+                cairo_line_to(cr, xprev, baseline);
+                cairo_line_to(cr, firstx, baseline);
+                cairo_close_path(cr);
+                skipping = TRUE;
+            }
+            continue;
+        }
+
+        if (skipping) {
+            cairo_move_to(cr, xprev, yprev);
+            firstx = xprev;
+            skipping = FALSE;
+        }
+        cairo_line_to(cr, x, y);
+    }
+
+    if (!skipping) {
+        cairo_line_to(cr, x, baseline);
+        cairo_line_to(cr, firstx, baseline);
+        cairo_close_path(cr);
+        skipping = TRUE;
+    }
+
+    cairo_fill(cr);
+    cairo_restore(cr);
+}
+
+static void
 draw_star(cairo_t *cr,
           gdouble x,
           gdouble y,
@@ -1332,15 +1523,8 @@ graph_curve_iter_get(const GraphCurveIter *iter,
         *y = iter->y[iter->i];
     }
 
-    if (iter->xscale == GWY_GRAPH_SCALE_SQRT)
-        *x = gwy_ssqrt(*x);
-    else if (iter->xscale == GWY_GRAPH_SCALE_LOG)
-        *x = log(*x);
-
-    if (iter->yscale == GWY_GRAPH_SCALE_SQRT)
-        *y = gwy_ssqrt(*y);
-    else if (iter->yscale == GWY_GRAPH_SCALE_LOG)
-        *y = log(*y);
+    *x = _gwy_graph_scale_data(*x, iter->xscale);
+    *y = _gwy_graph_scale_data(*y, iter->yscale);
 
     if (!isfinite(*x) || !isfinite(*y))
         return FALSE;
@@ -1398,6 +1582,7 @@ graph_curve_iter_next(GraphCurveIter *iter)
  * @GWY_PLOT_POINTS: Data are plotted with symbols.
  * @GWY_PLOT_LINE: Data are plotted with a line.
  * @GWY_PLOT_LINE_POINTS: Data are plotted with both symbols and a line.
+ * @GWY_PLOT_FILLED: Data are plotted as curves filled from the baseline.
  *
  * Graph plotting type.
  **/
