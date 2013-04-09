@@ -97,10 +97,16 @@ test_array_data(void)
     gwy_array_delete1(array, 1);
     gwy_array_delete1(array, 1);
     g_assert_cmpuint(gwy_array_size(array), ==, 2);
+    g_assert_cmpuint(gwy_listable_size(GWY_LISTABLE(array)), ==, 2);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0x322);
     delete_log = 0;
+
+    for (guint i = 0; i < 2; i++) {
+        g_assert(gwy_array_get(array, i)
+                 == gwy_listable_get(GWY_LISTABLE(array), i));
+    }
 
     color = gwy_array_get(array, 0);
     g_assert(color);

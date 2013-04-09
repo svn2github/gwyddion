@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -157,6 +157,7 @@ test_inventory_data(void)
     gwy_inventory_nth_updated(inventory, 1);
     gwy_inventory_nth_updated(inventory, 2);
     g_assert_cmpuint(gwy_inventory_size(inventory), ==, 3);
+    g_assert_cmpuint(gwy_listable_size(GWY_LISTABLE(inventory)), ==, 3);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0x123);
     g_assert_cmphex(delete_log, ==, 0);
@@ -176,6 +177,11 @@ test_inventory_data(void)
     g_assert_cmpstr(itemtest->name, ==, "Fixme");
     g_assert((itemtest = gwy_inventory_get_nth(inventory, 2)));
     g_assert_cmpstr(itemtest->name, ==, "Second");
+
+    for (guint i = 0; i < 3; i++) {
+        g_assert(gwy_inventory_get_nth(inventory, i)
+                 == gwy_listable_get(GWY_LISTABLE(inventory), i));
+    }
 
     gwy_inventory_forget_order(inventory);
     g_assert_cmphex(insert_log, ==, 0);
