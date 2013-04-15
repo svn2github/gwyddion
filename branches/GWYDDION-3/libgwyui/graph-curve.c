@@ -1391,6 +1391,9 @@ draw_filled(const GwyGraphCurve *graphcurve,
     else
         xtype = ytype = 42;
 
+    // FIXME: This is a copy of skipping algorithm for lines.  But bars are
+    // visible in the entire y-range between value and baseline.  Must take
+    // it into account.
     gboolean skipping = TRUE;
     gdouble firstx = -G_MAXDOUBLE;
     while (graph_curve_iter_next(&iter)) {
