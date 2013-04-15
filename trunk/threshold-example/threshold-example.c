@@ -62,7 +62,7 @@ typedef struct {
 } ThresholdControls;
 
 static gboolean    module_register                (void);
-static gboolean    threshold                      (GwyContainer *data,
+static void        threshold                      (GwyContainer *data,
                                                    GwyRunType run);
 static gboolean    threshold_dialog               (ThresholdArgs *args,
                                                    GwyDataField *dfield);
@@ -136,7 +136,7 @@ module_register(void)
     return TRUE;
 }
 
-static gboolean
+static void
 threshold(GwyContainer *data, GwyRunType run)
 {
     GwyDataField *dfield, *mfield, *sfield;
@@ -144,7 +144,7 @@ threshold(GwyContainer *data, GwyRunType run)
     ThresholdArgs args;
     gboolean ok;
 
-    g_return_val_if_fail(run & THRESHOLD_RUN_MODES, FALSE);
+    g_return_if_fail(run & THRESHOLD_RUN_MODES);
     /* Obtain the current data and mask fields */
     gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD_KEY, &dquark,
                                      GWY_APP_DATA_FIELD, &dfield,
@@ -167,8 +167,6 @@ threshold(GwyContainer *data, GwyRunType run)
                      &args);
         threshold_save_args(gwy_app_settings_get(), &args);
     }
-
-    return TRUE;
 }
 
 static void
