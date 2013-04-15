@@ -152,7 +152,7 @@ threshold(GwyContainer *data, GwyRunType run)
                                      GWY_APP_MASK_FIELD, &mfield,
                                      GWY_APP_SHOW_FIELD_KEY, &squark,
                                      GWY_APP_SHOW_FIELD, &sfield,
-                                     NULL);
+                                     0);
     /* Set up parameters */
     args = threshold_defaults;
     threshold_load_args(gwy_app_settings_get(), &args);
