@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -87,6 +87,10 @@ gboolean gwy_field_normalize  (GwyField *field,
                                gdouble mean,
                                gdouble rms,
                                GwyNormalizeFlags flags);
+void     gwy_field_sqrt       (GwyField *field,
+                               const GwyFieldPart *fpart,
+                               const GwyMaskField *mask,
+                               GwyMaskingType masking);
 void     gwy_field_apply_func (GwyField *field,
                                const GwyFieldPart *fpart,
                                const GwyMaskField *mask,

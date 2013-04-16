@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -431,6 +431,53 @@ gwy_field_normalize(GwyField *field,
     }
 
     return retval;
+}
+
+/**
+ * gwy_field_sqrt:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ *
+ * Takes square root of each pixel in a field.
+ *
+ * If the field contains negative values they become NaNs.
+ **/
+void
+gwy_field_sqrt(GwyField *field,
+               const GwyFieldPart *fpart,
+               const GwyMaskField *mask,
+               GwyMaskingType masking)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        return;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            gdouble *d = field->data + (row + i)*field->xres + col;
+            for (guint j = width; j; j--, d++)
+                *d = sqrt(*d);
+        }
+    }
+    else {
+        GwyMaskIter iter;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            gdouble *d = field->data + (row + i)*field->xres + col;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert)
+                    *d = sqrt(*d);
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+    gwy_field_invalidate(field);
 }
 
 /**
