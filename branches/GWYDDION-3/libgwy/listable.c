@@ -232,9 +232,6 @@ gwy_listable_items_reordered(GwyListable *listable,
  *        change unless a signal indicating insertion/deletion of an item is
  *        emitted and users of #GwyListable may cache the value.
  * @get: Gets the item at given position.
- * @find: Finds the position of an item by the item pointer.  This method need
- *        not be provided since it has a default implementation which just
- *        iterates through the items.
  *
  * Interface implemented by listable objects.
  *
