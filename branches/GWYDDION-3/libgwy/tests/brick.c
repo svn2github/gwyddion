@@ -1879,8 +1879,10 @@ summarize_lines_one(GwyBrickLineSummary quantity,
         GwyField *fullfield = gwy_field_new_sized(width, height, FALSE);
         GwyField *partfield = gwy_field_new_sized(xres, yres, TRUE);
 
-        gwy_brick_summarize_lines(brick, &bpart, fullfield, quantity);
-        gwy_brick_summarize_lines(brick, &bpart, partfield, quantity);
+        gwy_brick_summarize_lines(brick, &bpart, fullfield,
+                                  GWY_DIMEN_X, GWY_DIMEN_Y, quantity);
+        gwy_brick_summarize_lines(brick, &bpart, partfield,
+                                  GWY_DIMEN_X, GWY_DIMEN_Y, quantity);
 
         for (guint i = 0; i < yres; i++) {
             for (guint j = 0; j < xres; j++) {

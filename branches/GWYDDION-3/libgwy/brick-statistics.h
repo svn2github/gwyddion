@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 typedef enum {
     GWY_BRICK_LINE_MINIMUM,
     GWY_BRICK_LINE_MAXIMUM,
+    GWY_BRICK_LINE_RANGE,
     GWY_BRICK_LINE_MEAN,
     GWY_BRICK_LINE_RMS,
 } GwyBrickLineSummary;
@@ -35,6 +36,8 @@ typedef enum {
 void gwy_brick_summarize_lines(const GwyBrick *brick,
                                const GwyBrickPart *bpart,
                                GwyField *target,
+                               GwyDimenType coldim,
+                               GwyDimenType rowdim,
                                GwyBrickLineSummary quantity);
 
 G_END_DECLS

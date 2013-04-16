@@ -26,6 +26,20 @@
 #include "libgwy/field-internal.h"
 #include "libgwy/brick-internal.h"
 
+/*
+ * Going sequentially through the brick, where we have to move in the field
+ * when moving to the next column/row/level in the brick?
+ *
+ *  coldim  rowdim  |  colstep    rowstep        levelstep
+ * -----------------------------------------------------------
+ *    x       y     |     1     fxres-width    -fxres*height
+ *    x       z     |     1       -width        fxres-width
+ *    y       z     |     0          1          fxres-height
+ *    y       x     |   fxres   1-fxres*width     -height
+ *    z       x     |   fxres   -fxres*width         1
+ *    z       y     |     0         fxres      1-fxres*height
+ */
+
 /**
  * gwy_brick_summarize_lines:
  * @brick: A data brick.
@@ -35,6 +49,10 @@
  *          Its dimensions may match either @brick planes or @bpart.  In the
  *          former case the placement of result is determined by @bpart; in the
  *          latter case the result fills the entire @target.
+ * @coldim: Dimension (axis) in @brick which will form columns in the summary
+ *          field.
+ * @rowdim: Dimension (axis) in @brick which will form rows in the summary
+ *          field.
  * @quantity: The summary characteristics to calculate for each line.
  *
  * Characterises each line in a brick with a statistical quantity.
@@ -43,6 +61,7 @@ void
 gwy_brick_summarize_lines(const GwyBrick *brick,
                           const GwyBrickPart *bpart,
                           GwyField *target,
+                          GwyDimenType coldim, GwyDimenType rowdim,
                           GwyBrickLineSummary quantity)
 {
     guint col, row, level, width, height, depth;
@@ -148,6 +167,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
  * GwyBrickLineSummary:
  * @GWY_BRICK_LINE_MINIMUM: Minimum value.
  * @GWY_BRICK_LINE_MAXIMUM: Maximum value.
+ * @GWY_BRICK_LINE_RANGE: Difference between maximum and minimum values.
  * @GWY_BRICK_LINE_MEAN: Mean value.
  * @GWY_BRICK_LINE_RMS: Root mean square value.
  *
