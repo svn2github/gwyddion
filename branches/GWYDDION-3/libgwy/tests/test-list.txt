@@ -339,6 +339,7 @@ field/arithmetic/cache
 field/arithmetic/fill
 field/arithmetic/clamp
 field/arithmetic/normalize
+field/arithmetic/sqrt
 field/arithmetic/apply-func
 field/level/row/mean
 field/level/row/median
