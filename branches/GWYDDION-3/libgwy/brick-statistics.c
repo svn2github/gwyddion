@@ -140,17 +140,20 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         }
     }
     else {
+        GwyDimenType otherdim = coldim + rowdim - GWY_DIMEN_X;
         guint othersize = xsize + ysize - width;
         GwyField *tmp = gwy_field_new_sized(width, othersize, FALSE);
         GwyField *tmp2 = NULL;
-        if (quantity == GWY_BRICK_LINE_RANGE || quantity == GWY_BRICK_LINE_RMS)
+        if (quantity == GWY_BRICK_LINE_RANGE
+            || quantity == GWY_BRICK_LINE_RMS
+            || quantity == GWY_BRICK_LINE_NRMS)
             tmp2 = gwy_field_new_alike(tmp, FALSE);
 
-        if (coldim + rowdim == GWY_DIMEN_X + GWY_DIMEN_Y) {
+        if (otherdim == GWY_DIMEN_Y) {
             rowstep = 0;
             levelstep = -(gint)width*(gint)othersize;
         }
-        else if (coldim + rowdim == GWY_DIMEN_X + GWY_DIMEN_Z) {
+        else if (otherdim == GWY_DIMEN_Z) {
             rowstep = -(gint)width;
             levelstep = width;
         }
@@ -207,14 +210,12 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         else if (quantity == GWY_BRICK_LINE_NRMS) {
             gwy_field_clear_full(tmp);
             if (avgsize > 1) {
-                GwyFieldPart fpart = { fcol, frow, xsize, ysize };
-                if (coldim != GWY_DIMEN_X) {
-                    GWY_SWAP(guint, fpart.col, fpart.row);
-                    GWY_SWAP(guint, fpart.width, fpart.height);
-                }
+                GwyFieldPart fpart = {
+                    from[GWY_DIMEN_X], from[otherdim],
+                    size[GWY_DIMEN_X], size[otherdim]
+                };
                 gwy_brick_extract_plane(brick, tmp2, &fpart,
-                                        GWY_DIMEN_X,
-                                        coldim + rowdim - GWY_DIMEN_X,
+                                        GWY_DIMEN_X, otherdim,
                                         from[leveldim], FALSE);
                 summarize_lines(bbase, brick->xres, brick->yres,
                                 tmp->data, tmp2->data,
