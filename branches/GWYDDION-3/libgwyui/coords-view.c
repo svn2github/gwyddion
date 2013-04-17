@@ -1138,7 +1138,7 @@ select_or_unselect_range(GtkTreeSelection *selection,
  *
  * #GwyCoordsView displays a list of coordinates of some geometrical shapes
  * represented by a #GwyCoords object.  The underlying #GtkTreeModel is
- * a #GwyArrayStore created automatically for given coords object.  This array
+ * a #GwyListStore created automatically for given coords object.  This array
  * store is destroyed and created anew whenever a different coords object is
  * set.  So if you show different #GwyCoords objects in a single #GwyCoordsView
  * remember that you cannot assume that its tree view model stays the same.
