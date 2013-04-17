@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,6 +31,7 @@ gdouble gwy_line_sum_full    (const GwyLine *line);
 gdouble gwy_line_mean_full   (const GwyLine *line);
 gdouble gwy_line_median_full (const GwyLine *line);
 gdouble gwy_line_rms_full    (const GwyLine *line);
+gdouble gwy_line_nrms_full   (const GwyLine *line);
 gdouble gwy_line_length_full (const GwyLine *line);
 
 G_END_DECLS

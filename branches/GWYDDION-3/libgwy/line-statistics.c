@@ -114,7 +114,7 @@ gwy_line_median_full(const GwyLine *line)
  * gwy_line_rms_full:
  * @line: A one-dimensional data line.
  *
- * Calculates the rooms mean square value of a line.
+ * Calculates the root mean square difference from mean of a line.
  *
  * Returns: The root mean square of differences from the mean value.
  **/
@@ -124,15 +124,38 @@ gwy_line_rms_full(const GwyLine *line)
     g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
     const gdouble *d = line->data;
     gdouble rms = 0.0, avg = 0.0;
-    for (guint i = line->res; i; i--, d++) {
+    for (guint i = line->res; i; i--, d++)
         avg += *d;
-        rms += (*d)*(*d);
-    }
-    rms /= line->res;
     avg /= line->res;
-    rms -= avg*avg;
-    rms = sqrt(fmax(rms, 0.0));
-    return rms;
+    d = line->data;
+    for (guint i = line->res; i; i--, d++)
+        rms += (*d - avg)*(*d - avg);
+    return sqrt(rms/line->res);
+}
+
+/**
+ * gwy_line_nrms_full:
+ * @line: A one-dimensional data line.
+ *
+ * Calculates the root mean square difference from neighbour value of a line.
+ *
+ * If the line does not have at least two points, zero is returned.
+ *
+ * Returns: The root mean square of differences from neighbour values.
+ **/
+gdouble
+gwy_line_nrms_full(const GwyLine *line)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
+    if (line->res < 2)
+        return 0.0;
+    const gdouble *d = line->data;
+    gdouble rms = 0.0, prev = *(d++);
+    for (guint i = line->res-1; i; i--, d++) {
+        rms += (*d - prev)*(*d - prev);
+        prev = *d;
+    }
+    return sqrt(rms/(line->res - 1.0));
 }
 
 /**
