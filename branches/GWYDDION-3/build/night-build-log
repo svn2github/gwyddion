@@ -14,11 +14,11 @@ cd "$logdir" || exit 1
 
 
 cat >autogen.ignore <<':'
-^aclocal: installing `m4/([-a-z0-9]+)\.m4' from `/usr/share/aclocal/\1\.m4'
-^configure\.ac:[0-9]+: installing `build/[-a-z.]+'
-^Makefile\.am: installing `\./INSTALL'
-^libgwy[a-z]*/Makefile\.am: installing `build/depcomp'
-^docs/libgwy[a-z]*/Makefile\.am: installing `build/depcomp'
+^aclocal: installing [`']m4/([-a-z0-9]+)\.m4' from [`']/usr/share/aclocal/\1\.m4'
+^configure\.ac:[0-9]+: installing [`']build/[-a-z.]+'
+^Makefile\.am: installing [`']\./INSTALL'
+^libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
+^docs/libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
 ':'
 :
 
@@ -47,8 +47,8 @@ cat >build_introspection.ignore <<':'
 
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
-^libtool: install: warning: `[^ ]+/libgwy(ui|)3\.la' has not been installed in `/home/[^ ]+'$
-^libtool: install: warning: remember to run `libtool --finish /home/[^ ]+'$
+^libtool: install: warning: [`'][^ ]+/libgwy(ui|)3\.la' has not been installed in [`']/home/[^ ]+'$
+^libtool: install: warning: remember to run [`']libtool --finish /home/[^ ]+'$
 ':'
 :
 
@@ -61,9 +61,9 @@ cat >update_translations.ignore <<':'
 
 cat >build_rpm.ignore <<':'
 ^\+
-^libtool: install: warning: remember to run `libtool --finish /usr/lib64'$
-^libtool: install: warning: relinking `libgwy(ui|)3\.la'$
-^libtool: install: warning: `[^ ]+/libgwy(ui|)3\.la' has not been installed in `/usr/lib64'$
+^libtool: install: warning: remember to run [`']libtool --finish /usr/lib64'$
+^libtool: install: warning: relinking [`']libgwy(ui|)3\.la'$
+^libtool: install: warning: [`'][^ ]+/libgwy(ui|)3\.la' has not been installed in [`']/usr/lib64'$
 ^[0-9]+ blocks
 ':'
 :
