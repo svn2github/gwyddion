@@ -1774,11 +1774,11 @@ selection_assigned(GwyShapes *shapes,
  *                    implementation, however, subclasses will likely want to
  *                    extend it by updating visual clues such as hover.
  * @coords_item_inserted: Virtual method called when the @coords object
- *                        emits #GwyArray::item-inserted.
+ *                        emits #GwyListable::item-inserted.
  * @coords_item_deleted: Virtual method called when the @coords object
- *                       emits #GwyArray::item-deleted.
+ *                       emits #GwyListable::item-deleted.
  * @coords_item_updated: Virtual method called when the @coords object
- *                       emits #GwyArray::item-updated.
+ *                       emits #GwyListable::item-updated.
  * @selection_added: Virtual method called when the selection object
  *                   emits #GwyIntSet::added.
  * @selection_removed: Virtual method called when the selection object
