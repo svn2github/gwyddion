@@ -45,7 +45,7 @@ static void summarize_lines(const gdouble *bbase,
  *  coldim  rowdim  |  colstep    rowstep        levelstep
  * -----------------------------------------------------------
  *    x       y     |     1     fxres-width    -fxres*height
- *    x       z     |     1       -width        fxres-width
+ *    x       z     |     1       -width           fxres
  *    y       z     |     0          1          fxres-height
  *    y       x     |   fxres   1-fxres*width     -height
  *    z       x     |   fxres   -fxres*width         1
@@ -96,7 +96,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
     const guint from[] = { col, row, level };
     guint xres = res[coldim], yres = res[rowdim];
     guint xsize = size[coldim], ysize = size[rowdim], avgsize = size[leveldim];
-    guint fcol, frow;
+    guint fcol, frow, fwidth, fheight;
     if (target->xres == xsize && target->yres == ysize)
         fcol = frow = 0;
     else if (target->xres == xres && target->yres == yres) {
@@ -112,7 +112,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
     const gdouble *bbase = brick->data + (level*brick->yres + row)*brick->xres
                            + col;
     guint fstart = frow*target->xres + fcol;
-    GwyFieldPart fpart = { fcol, frow, width, height };
+    GwyFieldPart fpart = { fcol, frow, xsize, ysize };
     gint colstep, rowstep, levelstep;
     if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y) {
         colstep = 1;
@@ -122,7 +122,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
     else if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Z) {
         colstep = 1;
         rowstep = -(gint)width;
-        levelstep = target->xres - width;
+        levelstep = target->xres;
     }
     else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
         colstep = 0;
