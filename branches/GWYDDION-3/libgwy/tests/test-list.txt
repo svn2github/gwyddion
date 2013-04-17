@@ -469,6 +469,7 @@ brick/summarize/lines/maximum
 brick/summarize/lines/range
 brick/summarize/lines/mean
 brick/summarize/lines/rms
+brick/summarize/lines/nrms
 container/data
 container/refcount
 container/keys

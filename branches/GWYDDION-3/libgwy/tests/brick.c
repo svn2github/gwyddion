@@ -1946,7 +1946,7 @@ summarize_lines_one(GwyBrickLineSummary quantity,
         GwyField *fullfield = gwy_field_new_sized(fwidth, fheight, FALSE);
         GwyField *partfield = gwy_field_new_sized(fxres, fyres, TRUE);
         GwyField *linefield = gwy_field_new_sized(fwidth, fheight, FALSE);
-        gdouble eps = (quantity == GWY_BRICK_LINE_RMS) ? 1e-13 : 1e-15;
+        gdouble eps = 1e-15;
 
         gwy_brick_summarize_lines(brick, &bpart, fullfield,
                                   coldim, rowdim, quantity);
@@ -2076,6 +2076,19 @@ test_brick_summarize_lines_rms(void)
                 continue;
             summarize_lines_one(GWY_BRICK_LINE_RMS,
                                 coldim, rowdim, &gwy_line_rms_full);
+        }
+    }
+}
+
+void
+test_brick_summarize_lines_nrms(void)
+{
+    for (GwyDimenType coldim = GWY_DIMEN_X; coldim <= GWY_DIMEN_Z; coldim++) {
+        for (GwyDimenType rowdim = GWY_DIMEN_X; rowdim <= GWY_DIMEN_Z; rowdim++) {
+            if (rowdim == coldim)
+                continue;
+            summarize_lines_one(GWY_BRICK_LINE_NRMS,
+                                coldim, rowdim, &gwy_line_nrms_full);
         }
     }
 }
