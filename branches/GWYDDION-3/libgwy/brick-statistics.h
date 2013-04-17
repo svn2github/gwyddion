@@ -31,6 +31,7 @@ typedef enum {
     GWY_BRICK_LINE_RANGE,
     GWY_BRICK_LINE_MEAN,
     GWY_BRICK_LINE_RMS,
+    GWY_BRICK_LINE_NRMS,
 } GwyBrickLineSummary;
 
 void gwy_brick_summarize_lines(const GwyBrick *brick,

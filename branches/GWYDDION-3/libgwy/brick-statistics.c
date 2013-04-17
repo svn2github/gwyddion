@@ -20,37 +20,28 @@
 #include <math.h>
 #include "libgwy/macros.h"
 #include "libgwy/field-arithmetic.h"
+#include "libgwy/field-transform.h"
 #include "libgwy/brick.h"
+#include "libgwy/brick-arithmetic.h"
 #include "libgwy/brick-statistics.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/brick-internal.h"
 
-static void summarize_lines(const gdouble *bbase,
-                            guint bxres,
-                            guint byres,
-                            gdouble *f,
-                            const gdouble *g,
-                            guint width,
-                            guint height,
-                            guint depth,
-                            gint colstep,
-                            gint rowstep,
-                            gint levelstep,
-                            GwyBrickLineSummary quantity);
-/*
- * Going sequentially through the brick, where we have to move in the field
- * when moving to the next column/row/level in the brick?
- *
- *  coldim  rowdim  |  colstep    rowstep        levelstep
- * -----------------------------------------------------------
- *    x       y     |     1     fxres-width    -fxres*height
- *    x       z     |     1       -width           fxres
- *    y       z     |     0          1          fxres-height
- *    y       x     |   fxres   1-fxres*width     -height
- *    z       x     |   fxres   -fxres*width         1
- *    z       y     |     0         fxres      1-fxres*height
- */
+static void    summarize_lines(const gdouble *bbase,
+                               guint bxres,
+                               guint byres,
+                               gdouble *f,
+                               gdouble *g,
+                               guint width,
+                               guint height,
+                               guint depth,
+                               gint rowstep,
+                               gint levelstep,
+                               GwyBrickLineSummary quantity);
+static gdouble summarize_line (const gdouble *b,
+                               guint avgsize,
+                               GwyBrickLineSummary quantity);
 
 /**
  * gwy_brick_summarize_lines:
@@ -81,7 +72,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
     g_return_if_fail(coldim <= GWY_DIMEN_Z);
     g_return_if_fail(rowdim <= GWY_DIMEN_Z);
     g_return_if_fail(coldim != rowdim);
-    g_return_if_fail(quantity <= GWY_BRICK_LINE_RMS);
+    g_return_if_fail(quantity <= GWY_BRICK_LINE_NRMS);
 
     guint col, row, level, width, height, depth;
     if (!gwy_brick_check_part(brick, bpart,
@@ -111,96 +102,142 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
 
     const gdouble *bbase = brick->data + (level*brick->yres + row)*brick->xres
                            + col;
-    guint fstart = frow*target->xres + fcol;
-    GwyFieldPart fpart = { fcol, frow, xsize, ysize };
-    gint colstep, rowstep, levelstep;
-    if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y) {
-        colstep = 1;
-        rowstep = target->xres - width;
-        levelstep = -(gint)target->xres*(gint)height;
-    }
-    else if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Z) {
-        colstep = 1;
-        rowstep = -(gint)width;
-        levelstep = target->xres;
-    }
-    else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
-        colstep = 0;
-        rowstep = 1;
-        levelstep = target->xres - height;
-    }
-    else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_X) {
-        colstep = target->xres;
-        rowstep = 1 - (gint)target->xres*(gint)width;
-        levelstep = -(gint)height;
-    }
-    else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_X) {
-        colstep = target->xres;
-        rowstep = -(gint)target->xres*(gint)width;
-        levelstep = 1;
-    }
-    else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_Y) {
-        colstep = 0;
-        rowstep = target->xres;
-        levelstep = 1 - (gint)target->xres*(gint)height;
+
+    /*
+     * No dimension combination needs to lead to a bad memory access pattern.
+     * We have two basic situations:
+     * (a) Neither @coldim nor @rowdim is GWY_DIMEN_X.  Then x is the
+     *     summarised dimension and we can simply summarise one brick line
+     *     completely (accessing data sequentially), store the resulting value
+     *     to field and move to another line.
+     * (b) One of @coldim and @rowdim is GWY_DIMEN_X.  The we can always make x
+     *     dimension of brick aligned with x dimension of field (we create a
+     *     temporary field to achieve this).  Summarising one brick line thus
+     *     means accessing sequentially in both brick and field.  Finally, we
+     *     may need to perform a transposition of the field but this is done
+     *     only once.
+     */
+    gint rowstep, levelstep;
+    if (leveldim == GWY_DIMEN_X) {
+        if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
+            rowstep = 1;
+            levelstep = target->xres - height;
+        }
+        else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_Y) {
+            rowstep = target->xres;
+            levelstep = 1 - (gint)target->xres*(gint)height;
+        }
+        else {
+            g_assert_not_reached();
+        }
+
+        gdouble *f = target->data + frow*target->xres + fcol;
+        for (guint l = 0; l < depth; l++, f += levelstep) {
+            for (guint i = 0; i < height; i++, f += rowstep) {
+                *f = summarize_line(bbase + (l*brick->yres + i)*brick->xres,
+                                    avgsize, quantity);
+            }
+        }
     }
     else {
-        g_assert_not_reached();
-    }
+        guint othersize = xsize + ysize - width;
+        GwyField *tmp = gwy_field_new_sized(width, othersize, FALSE);
+        GwyField *tmp2 = NULL;
+        if (quantity == GWY_BRICK_LINE_RANGE || quantity == GWY_BRICK_LINE_RMS)
+            tmp2 = gwy_field_new_alike(tmp, FALSE);
 
-    if (quantity == GWY_BRICK_LINE_MINIMUM) {
-        gwy_field_fill(target, &fpart, NULL, GWY_MASK_IGNORE, G_MAXDOUBLE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        target->data + fstart, NULL,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        quantity);
-    }
-    else if (quantity == GWY_BRICK_LINE_MAXIMUM) {
-        gwy_field_fill(target, &fpart, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        target->data + fstart, NULL,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        quantity);
-    }
-    else if (quantity == GWY_BRICK_LINE_RANGE) {
-        GwyField *tmp = gwy_field_new_alike(target, FALSE);
-        gwy_field_fill(tmp, &fpart, NULL, GWY_MASK_IGNORE, G_MAXDOUBLE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        tmp->data + fstart, NULL,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        GWY_BRICK_LINE_MINIMUM);
-        gwy_field_fill(target, &fpart, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        target->data + fstart, NULL,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        GWY_BRICK_LINE_MAXIMUM);
-        gwy_field_add_field(tmp, &fpart, target, fpart.col, fpart.row, -1.0);
+        if (coldim + rowdim == GWY_DIMEN_X + GWY_DIMEN_Y) {
+            rowstep = 0;
+            levelstep = -(gint)width*(gint)othersize;
+        }
+        else if (coldim + rowdim == GWY_DIMEN_X + GWY_DIMEN_Z) {
+            rowstep = -(gint)width;
+            levelstep = width;
+        }
+        else {
+            g_assert_not_reached();
+        }
+
+        if (quantity == GWY_BRICK_LINE_MINIMUM) {
+            gwy_field_fill_full(tmp, G_MAXDOUBLE);
+            summarize_lines(bbase, brick->xres, brick->yres,
+                            tmp->data, NULL,
+                            width, height, depth, rowstep, levelstep,
+                            quantity);
+        }
+        else if (quantity == GWY_BRICK_LINE_MAXIMUM) {
+            gwy_field_fill_full(tmp, -G_MAXDOUBLE);
+            summarize_lines(bbase, brick->xres, brick->yres,
+                            tmp->data, NULL,
+                            width, height, depth, rowstep, levelstep,
+                            quantity);
+        }
+        else if (quantity == GWY_BRICK_LINE_RANGE) {
+            gwy_field_fill_full(tmp, -G_MAXDOUBLE);
+            gwy_field_fill_full(tmp2, G_MAXDOUBLE);
+            summarize_lines(bbase, brick->xres, brick->yres,
+                            tmp->data, tmp2->data,
+                            width, height, depth, rowstep, levelstep,
+                            quantity);
+            gwy_field_add_field(tmp2, NULL, tmp, 0, 0, -1.0);
+        }
+        else if (quantity == GWY_BRICK_LINE_MEAN) {
+            gwy_field_clear_full(tmp);
+            summarize_lines(bbase, brick->xres, brick->yres,
+                            tmp->data, NULL,
+                            width, height, depth, rowstep, levelstep,
+                            quantity);
+            gwy_field_multiply(tmp, NULL, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
+        }
+        else if (quantity == GWY_BRICK_LINE_RMS) {
+            gwy_field_clear_full(tmp2);
+            summarize_lines(bbase, brick->xres, brick->yres,
+                            tmp2->data, NULL,
+                            width, height, depth, rowstep, levelstep,
+                            GWY_BRICK_LINE_MEAN);
+            gwy_field_multiply(tmp2, NULL, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
+            gwy_field_clear_full(tmp);
+            summarize_lines(bbase, brick->xres, brick->yres,
+                            tmp->data, tmp2->data,
+                            width, height, depth, rowstep, levelstep,
+                            quantity);
+            gwy_field_multiply(tmp, NULL, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
+            gwy_field_sqrt(tmp, NULL, NULL, GWY_MASK_IGNORE);
+        }
+        else if (quantity == GWY_BRICK_LINE_NRMS) {
+            gwy_field_clear_full(tmp);
+            if (avgsize > 1) {
+                GwyFieldPart fpart = { fcol, frow, xsize, ysize };
+                if (coldim != GWY_DIMEN_X) {
+                    GWY_SWAP(guint, fpart.col, fpart.row);
+                    GWY_SWAP(guint, fpart.width, fpart.height);
+                }
+                gwy_brick_extract_plane(brick, tmp2, &fpart,
+                                        GWY_DIMEN_X,
+                                        coldim + rowdim - GWY_DIMEN_X,
+                                        from[leveldim], FALSE);
+                summarize_lines(bbase, brick->xres, brick->yres,
+                                tmp->data, tmp2->data,
+                                width, height, depth, rowstep, levelstep,
+                                quantity);
+                gwy_field_multiply(tmp, NULL, NULL, GWY_MASK_IGNORE,
+                                   1.0/(avgsize - 1.0));
+                gwy_field_sqrt(tmp, NULL, NULL, GWY_MASK_IGNORE);
+            }
+        }
+
+        GWY_OBJECT_UNREF(tmp2);
+        // TODO: Implement copy-congruent operation for fields.  I though it is
+        // too exotic but here we want copy-transpose @tmp to @target without
+        // any temporary fields.
+        if (coldim != GWY_DIMEN_X) {
+            tmp2 = gwy_field_new_congruent(tmp, NULL,
+                                           GWY_PLANE_MIRROR_DIAGONALLY);
+            g_object_unref(tmp);
+            tmp = tmp2;
+        }
+        gwy_field_copy(tmp, NULL, target, fcol, frow);
         g_object_unref(tmp);
-    }
-    else if (quantity == GWY_BRICK_LINE_MEAN) {
-        gwy_field_clear(target, &fpart, NULL, GWY_MASK_IGNORE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        target->data + fstart, NULL,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        quantity);
-        gwy_field_multiply(target, &fpart, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
-    }
-    else if (quantity == GWY_BRICK_LINE_RMS) {
-        GwyField *tmp = gwy_field_new_alike(target, FALSE);
-        gwy_field_clear(tmp, &fpart, NULL, GWY_MASK_IGNORE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        tmp->data + fstart, NULL,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        GWY_BRICK_LINE_MEAN);
-        gwy_field_multiply(tmp, &fpart, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
-        gwy_field_clear(target, &fpart, NULL, GWY_MASK_IGNORE);
-        summarize_lines(bbase, brick->xres, brick->yres,
-                        target->data + fstart, tmp->data + fstart,
-                        width, height, depth, colstep, rowstep, levelstep,
-                        GWY_BRICK_LINE_RMS);
-        g_object_unref(tmp);
-        gwy_field_multiply(target, &fpart, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
-        gwy_field_sqrt(target, &fpart, NULL, GWY_MASK_IGNORE);
     }
 
     _gwy_assign_unit(&target->priv->xunit, brick->priv->xunit);
@@ -211,9 +248,9 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
 
 static void
 summarize_lines(const gdouble *bbase, guint bxres, guint byres,
-                gdouble *f, const gdouble *g,
+                gdouble *f, gdouble *g,
                 guint width, guint height, guint depth,
-                gint colstep, gint rowstep, gint levelstep,
+                gint rowstep, gint levelstep,
                 GwyBrickLineSummary quantity)
 {
     // Stepping @g in the outer cycles is nonsense but harmless for
@@ -222,30 +259,113 @@ summarize_lines(const gdouble *bbase, guint bxres, guint byres,
         for (guint i = 0; i < height; i++, f += rowstep, g += rowstep) {
             const gdouble *b = bbase + (l*byres + i)*bxres;
             if (quantity == GWY_BRICK_LINE_MINIMUM) {
-                for (guint j = width; j; j--, b++, f += colstep) {
+                for (guint j = width; j; j--, b++, f++) {
                     if (*b < *f)
                         *f = *b;
                 }
             }
             else if (quantity == GWY_BRICK_LINE_MAXIMUM) {
-                for (guint j = width; j; j--, b++, f += colstep) {
+                for (guint j = width; j; j--, b++, f++) {
                     if (*b > *f)
                         *f = *b;
                 }
             }
+            else if (quantity == GWY_BRICK_LINE_RANGE) {
+                for (guint j = width; j; j--, b++, f++, g++) {
+                    if (*b > *f)
+                        *f = *b;
+                    if (*b < *g)
+                        *g = *b;
+                }
+            }
             else if (quantity == GWY_BRICK_LINE_MEAN) {
-                for (guint j = width; j; j--, b++, f += colstep)
+                for (guint j = width; j; j--, b++, f++)
                     *f += *b;
             }
             else if (quantity == GWY_BRICK_LINE_RMS) {
-                for (guint j = width; j; j--, b++, f += colstep, g += colstep)
+                for (guint j = width; j; j--, b++, f++, g++)
                     *f += (*b - *g)*(*b - *g);
+            }
+            else if (quantity == GWY_BRICK_LINE_NRMS) {
+                for (guint j = width; j; j--, b++, f++, g++) {
+                    *f += (*b - *g)*(*b - *g);
+                    *g = *b;
+                }
             }
             else {
                 g_return_if_reached();
             }
         }
     }
+}
+
+static gdouble
+summarize_line(const gdouble *b,
+               guint avgsize,
+               GwyBrickLineSummary quantity)
+{
+    if (quantity == GWY_BRICK_LINE_MINIMUM) {
+        gdouble v = G_MAXDOUBLE;
+        for (guint j = avgsize; j; j--, b++) {
+            if (*b < v)
+                v = *b;
+        }
+        return v;
+    }
+
+    if (quantity == GWY_BRICK_LINE_MAXIMUM) {
+        gdouble v = -G_MAXDOUBLE;
+        for (guint j = avgsize; j; j--, b++) {
+            if (*b > v)
+                v = *b;
+        }
+        return v;
+    }
+
+    if (quantity == GWY_BRICK_LINE_RANGE) {
+        gdouble vm = G_MAXDOUBLE, vM = -G_MAXDOUBLE;
+        for (guint j = avgsize; j; j--, b++) {
+            if (*b < vm)
+                vm = *b;
+            if (*b > vM)
+                vM = *b;
+        }
+        return vM - vm;
+    }
+
+    if (quantity == GWY_BRICK_LINE_MEAN) {
+        gdouble v = 0.0;
+        for (guint j = avgsize; j; j--, b++)
+            v += *b;
+        return v/avgsize;
+    }
+
+    if (quantity == GWY_BRICK_LINE_RMS) {
+        const gdouble *bb = b;
+        gdouble v = 0.0;
+        for (guint j = avgsize; j; j--, b++)
+            v += *b;
+        v /= avgsize;
+        b = bb;
+        gdouble s = 0.0;
+        for (guint j = avgsize; j; j--, b++)
+            s += (*b - v)*(*b - v);
+        return sqrt(s/avgsize);
+    }
+
+    if (quantity == GWY_BRICK_LINE_NRMS) {
+        if (avgsize < 2)
+            return 0.0;
+
+        gdouble prev = *(b++), v = 0.0;
+        for (guint j = avgsize-1; j; j--, b++) {
+            v += (*b - prev)*(*b - prev);
+            prev = *b;
+        }
+        return sqrt(v/(avgsize - 1.0));
+    }
+
+    g_assert_not_reached();
 }
 
 /**
@@ -261,7 +381,8 @@ summarize_lines(const gdouble *bbase, guint bxres, guint byres,
  * @GWY_BRICK_LINE_MAXIMUM: Maximum value.
  * @GWY_BRICK_LINE_RANGE: Difference between maximum and minimum values.
  * @GWY_BRICK_LINE_MEAN: Mean value.
- * @GWY_BRICK_LINE_RMS: Root mean square value.
+ * @GWY_BRICK_LINE_RMS: Root mean square value of differences from mean.
+ * @GWY_BRICK_LINE_NRMS: Root mean square value of neighbour differences.
  *
  * Summary quantities characterising individual brick lines.
  **/
