@@ -462,12 +462,13 @@ brick/compatibility/field/units
 brick/compatibility/line/res
 brick/compatibility/line/real
 brick/compatibility/line/units
-brick/summarize/lines/minimum
-brick/summarize/lines/maximum
-brick/summarize/lines/mean
-brick/summarize/lines/rms
 brick/extract/line
 brick/extract/plane
+brick/summarize/lines/minimum
+brick/summarize/lines/maximum
+brick/summarize/lines/range
+brick/summarize/lines/mean
+brick/summarize/lines/rms
 container/data
 container/refcount
 container/keys

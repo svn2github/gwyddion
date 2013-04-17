@@ -1854,8 +1854,11 @@ test_brick_compatibility_line_units(void)
     g_object_unref(brick);
 }
 
+// FIXME: This appears to be exactly as error prone as the library functions it
+// should be testing.
 static void
 summarize_lines_one(GwyBrickLineSummary quantity,
+                    GwyDimenType coldim, GwyDimenType rowdim,
                     gdouble (*line_stat_function)(const GwyLine *line))
 {
     enum { max_size = 19 };
@@ -1876,39 +1879,112 @@ summarize_lines_one(GwyBrickLineSummary quantity,
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         guint level = g_rand_int_range(rng, 0, zres-depth+1);
         GwyBrickPart bpart = { col, row, level, width, height, depth };
-        GwyField *fullfield = gwy_field_new_sized(width, height, FALSE);
-        GwyField *partfield = gwy_field_new_sized(xres, yres, TRUE);
+        guint fxres, fyres, fwidth, fheight, lres, loff, fcol, frow;
+        if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y) {
+            fxres = xres;
+            fyres = yres;
+            fwidth = width;
+            fheight = height;
+            lres = depth;
+            loff = level;
+            fcol = col;
+            frow = row;
+        }
+        else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_X) {
+            fxres = yres;
+            fyres = xres;
+            fwidth = height;
+            fheight = width;
+            lres = depth;
+            loff = level;
+            fcol = row;
+            frow = col;
+        }
+        else if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Z) {
+            fxres = xres;
+            fyres = zres;
+            fwidth = width;
+            fheight = depth;
+            lres = height;
+            loff = row;
+            fcol = col;
+            frow = level;
+        }
+        else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_X) {
+            fxres = zres;
+            fyres = xres;
+            fwidth = depth;
+            fheight = width;
+            lres = height;
+            loff = row;
+            fcol = level;
+            frow = col;
+        }
+        else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
+            fxres = yres;
+            fyres = zres;
+            fwidth = height;
+            fheight = depth;
+            lres = width;
+            loff = col;
+            fcol = row;
+            frow = level;
+        }
+        else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_Y) {
+            fxres = zres;
+            fyres = yres;
+            fwidth = depth;
+            fheight = height;
+            lres = width;
+            loff = col;
+            fcol = level;
+            frow = row;
+        }
+        else {
+            g_assert_not_reached();
+        }
+        GwyField *fullfield = gwy_field_new_sized(fwidth, fheight, FALSE);
+        GwyField *partfield = gwy_field_new_sized(fxres, fyres, TRUE);
+        GwyField *linefield = gwy_field_new_sized(fwidth, fheight, FALSE);
+        gdouble eps = (quantity == GWY_BRICK_LINE_RMS) ? 1e-13 : 1e-15;
 
         gwy_brick_summarize_lines(brick, &bpart, fullfield,
-                                  GWY_DIMEN_X, GWY_DIMEN_Y, quantity);
+                                  coldim, rowdim, quantity);
         gwy_brick_summarize_lines(brick, &bpart, partfield,
-                                  GWY_DIMEN_X, GWY_DIMEN_Y, quantity);
+                                  coldim, rowdim, quantity);
 
-        for (guint i = 0; i < yres; i++) {
-            for (guint j = 0; j < xres; j++) {
-                if (i < row || i >= row + height
-                    || j < col || j > col + width)
-                    g_assert_cmpfloat(partfield->data[i*xres + j], ==, 0.0);
+        GwyLine *line = gwy_line_new_sized(lres, FALSE);
+        GwyLinePart lpart = { loff, lres };
+        for (guint i = 0; i < fheight; i++) {
+            for (guint j = 0; j < fwidth; j++) {
+                gwy_brick_extract_line(brick, line, &lpart,
+                                       coldim, rowdim, j + fcol, i + frow,
+                                       FALSE);
+                linefield->data[i*fwidth + j] = line_stat_function(line);
             }
         }
 
-        GwyLine *line = gwy_line_new_sized(depth, FALSE);
-        GwyLinePart lpart = { level, depth };
-        for (guint i = 0; i < height; i++) {
-            for (guint j = 0; j < width; j++) {
-                gdouble vfull = fullfield->data[i*width + j],
-                        vpart = partfield->data[(i + row)*xres + (j + col)];
+        for (guint i = 0; i < fyres; i++) {
+            for (guint j = 0; j < fxres; j++) {
+                if (i < frow || i >= frow + fheight
+                    || j < fcol || j > fcol + fwidth)
+                    g_assert_cmpfloat(partfield->data[i*fxres + j], ==, 0.0);
+            }
+        }
+
+        for (guint i = 0; i < fheight; i++) {
+            for (guint j = 0; j < fwidth; j++) {
+                gdouble vfull = fullfield->data[i*fwidth + j],
+                        vpart = partfield->data[(i + frow)*fxres + (j + fcol)],
+                        vline = linefield->data[i*fwidth + j];
                 g_assert_cmpfloat(vpart, ==, vfull);
-                gwy_brick_extract_line(brick, line, &lpart,
-                                       GWY_DIMEN_X, GWY_DIMEN_Y,
-                                       j + col, i + row, FALSE);
-                gdouble vline = line_stat_function(line);
-                g_assert_cmpfloat(fabs(vfull - vline), <, 1e-14);
+                gwy_assert_floatval(vfull, vline, eps);
             }
         }
 
         g_object_unref(line);
         g_object_unref(brick);
+        g_object_unref(linefield);
         g_object_unref(partfield);
         g_object_unref(fullfield);
     }
@@ -1931,28 +2007,77 @@ line_max(const GwyLine *line)
     return max;
 }
 
+static gdouble
+line_range(const GwyLine *line)
+{
+    gdouble min, max;
+    gwy_line_min_max_full(line, &min, &max);
+    return max - min;
+}
+
 void
 test_brick_summarize_lines_minimum(void)
 {
-    summarize_lines_one(GWY_BRICK_LINE_MINIMUM, &line_min);
+    for (GwyDimenType coldim = GWY_DIMEN_X; coldim <= GWY_DIMEN_Z; coldim++) {
+        for (GwyDimenType rowdim = GWY_DIMEN_X; rowdim <= GWY_DIMEN_Z; rowdim++) {
+            if (rowdim == coldim)
+                continue;
+            summarize_lines_one(GWY_BRICK_LINE_MINIMUM,
+                                coldim, rowdim, &line_min);
+        }
+    }
 }
 
 void
 test_brick_summarize_lines_maximum(void)
 {
-    summarize_lines_one(GWY_BRICK_LINE_MAXIMUM, &line_max);
+    for (GwyDimenType coldim = GWY_DIMEN_X; coldim <= GWY_DIMEN_Z; coldim++) {
+        for (GwyDimenType rowdim = GWY_DIMEN_X; rowdim <= GWY_DIMEN_Z; rowdim++) {
+            if (rowdim == coldim)
+                continue;
+            summarize_lines_one(GWY_BRICK_LINE_MAXIMUM,
+                                coldim, rowdim, &line_max);
+        }
+    }
+}
+
+void
+test_brick_summarize_lines_range(void)
+{
+    for (GwyDimenType coldim = GWY_DIMEN_X; coldim <= GWY_DIMEN_Z; coldim++) {
+        for (GwyDimenType rowdim = GWY_DIMEN_X; rowdim <= GWY_DIMEN_Z; rowdim++) {
+            if (rowdim == coldim)
+                continue;
+            summarize_lines_one(GWY_BRICK_LINE_RANGE,
+                                coldim, rowdim, &line_range);
+        }
+    }
 }
 
 void
 test_brick_summarize_lines_mean(void)
 {
-    summarize_lines_one(GWY_BRICK_LINE_MEAN, &gwy_line_mean_full);
+    for (GwyDimenType coldim = GWY_DIMEN_X; coldim <= GWY_DIMEN_Z; coldim++) {
+        for (GwyDimenType rowdim = GWY_DIMEN_X; rowdim <= GWY_DIMEN_Z; rowdim++) {
+            if (rowdim == coldim)
+                continue;
+            summarize_lines_one(GWY_BRICK_LINE_MEAN,
+                                coldim, rowdim, &gwy_line_mean_full);
+        }
+    }
 }
 
 void
 test_brick_summarize_lines_rms(void)
 {
-    summarize_lines_one(GWY_BRICK_LINE_RMS, &gwy_line_rms_full);
+    for (GwyDimenType coldim = GWY_DIMEN_X; coldim <= GWY_DIMEN_Z; coldim++) {
+        for (GwyDimenType rowdim = GWY_DIMEN_X; rowdim <= GWY_DIMEN_Z; rowdim++) {
+            if (rowdim == coldim)
+                continue;
+            summarize_lines_one(GWY_BRICK_LINE_RMS,
+                                coldim, rowdim, &gwy_line_rms_full);
+        }
+    }
 }
 
 static void
