@@ -96,7 +96,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
     const guint from[] = { col, row, level };
     guint xres = res[coldim], yres = res[rowdim];
     guint xsize = size[coldim], ysize = size[rowdim], avgsize = size[leveldim];
-    guint fcol, frow, fwidth, fheight;
+    guint fcol, frow;
     if (target->xres == xsize && target->yres == ysize)
         fcol = frow = 0;
     else if (target->xres == xres && target->yres == yres) {
@@ -148,12 +148,6 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         g_assert_not_reached();
     }
 
-    if (quantity == GWY_BRICK_LINE_MINIMUM)
-    if (quantity == GWY_BRICK_LINE_MAXIMUM || quantity == GWY_BRICK_LINE_RANGE)
-        gwy_field_fill(target, &fpart, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
-    if (quantity == GWY_BRICK_LINE_MEAN || quantity == GWY_BRICK_LINE_RMS)
-        gwy_field_clear(target, &fpart, NULL, GWY_MASK_IGNORE);
-
     if (quantity == GWY_BRICK_LINE_MINIMUM) {
         gwy_field_fill(target, &fpart, NULL, GWY_MASK_IGNORE, G_MAXDOUBLE);
         summarize_lines(bbase, brick->xres, brick->yres,
@@ -174,12 +168,12 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         summarize_lines(bbase, brick->xres, brick->yres,
                         tmp->data + fstart, NULL,
                         width, height, depth, colstep, rowstep, levelstep,
-                        GWY_BRICK_LINE_MAXIMUM);
+                        GWY_BRICK_LINE_MINIMUM);
         gwy_field_fill(target, &fpart, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
         summarize_lines(bbase, brick->xres, brick->yres,
                         target->data + fstart, NULL,
                         width, height, depth, colstep, rowstep, levelstep,
-                        GWY_BRICK_LINE_MINIMUM);
+                        GWY_BRICK_LINE_MAXIMUM);
         gwy_field_add_field(tmp, &fpart, target, fpart.col, fpart.row, -1.0);
         g_object_unref(tmp);
     }
