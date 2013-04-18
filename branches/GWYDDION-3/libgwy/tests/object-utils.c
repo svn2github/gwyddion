@@ -334,4 +334,16 @@ test_object_utils_set_user_func(void)
     g_assert_cmpuint(destroy2_called, ==, 1);
 }
 
+const gchar*
+enum_nick(GType type, gint value)
+{
+    g_return_val_if_fail(g_type_is_a(type, G_TYPE_ENUM), "???");
+    GEnumClass *klass = g_type_class_ref(type);
+    g_return_val_if_fail(G_IS_ENUM_CLASS(klass), "???");
+    const GEnumValue *evalue = g_enum_get_value(klass, value);
+    const gchar *retval = evalue ? evalue->value_nick : "???";
+    g_type_class_unref(klass);
+    return retval;
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

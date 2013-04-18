@@ -42,6 +42,8 @@ void          assert_error_list             (GwyErrorList *error_list,
 void          dump_error_list               (GwyErrorList *error_list);
 gboolean      values_are_equal              (const GValue *value1,
                                              const GValue *value2);
+const gchar*  enum_nick                     (GType type,
+                                             gint value);
 GObject*      serialize_and_back            (GObject *object,
                                              CompareObjectDataFunc compare);
 gboolean      compare_properties            (GObject *object,
