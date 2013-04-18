@@ -179,7 +179,7 @@ transpose_to(const GwyField *source,
              GwyField *dest,
              guint destcol, guint destrow)
 {
-    guint dxres = dest->xres, dyres = dest->yres, sxres = source->xres;
+    guint dxres = dest->xres, sxres = source->xres;
     guint jmax = height/BLOCK_SIZE * BLOCK_SIZE;
     guint imax = width/BLOCK_SIZE * BLOCK_SIZE;
     const gdouble *sbase = source->data + sxres*row + col;

@@ -227,18 +227,13 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
             }
         }
 
-        GWY_OBJECT_UNREF(tmp2);
-        // TODO: Implement copy-congruent operation for fields.  I though it is
-        // too exotic but here we want copy-transpose @tmp to @target without
-        // any temporary fields.
-        if (coldim != GWY_DIMEN_X) {
-            tmp2 = gwy_field_new_congruent(tmp, NULL,
-                                           GWY_PLANE_MIRROR_DIAGONALLY);
-            g_object_unref(tmp);
-            tmp = tmp2;
-        }
-        gwy_field_copy(tmp, NULL, target, fcol, frow);
+        if (coldim == GWY_DIMEN_X)
+            gwy_field_copy(tmp, NULL, target, fcol, frow);
+        else
+            gwy_field_copy_congruent(tmp, NULL, target, fcol, frow,
+                                     GWY_PLANE_MIRROR_DIAGONALLY);
         g_object_unref(tmp);
+        GWY_OBJECT_UNREF(tmp2);
     }
 
     _gwy_assign_unit(&target->priv->xunit, brick->priv->xunit);
