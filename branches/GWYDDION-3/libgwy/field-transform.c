@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -189,18 +189,18 @@ transpose_to(const GwyField *source,
         for (guint jb = 0; jb < jmax; jb += BLOCK_SIZE)
             swap_block(sbase + (jb*sxres + ib), dbase + (ib*dxres + jb),
                        BLOCK_SIZE, BLOCK_SIZE, dxres, sxres);
-        if (jmax != dxres)
+        if (jmax != height)
             swap_block(sbase + (jmax*sxres + ib), dbase + (ib*dxres + jmax),
-                       dxres - jmax, BLOCK_SIZE, dxres, sxres);
+                       height - jmax, BLOCK_SIZE, dxres, sxres);
     }
-    if (imax != dyres) {
+    if (imax != width) {
         for (guint jb = 0; jb < jmax; jb += BLOCK_SIZE)
             swap_block(sbase + (jb*sxres + imax), dbase + (imax*dxres + jb),
-                       BLOCK_SIZE, dyres - imax, dxres, sxres);
-        if (jmax != dxres)
+                       BLOCK_SIZE, width - imax, dxres, sxres);
+        if (jmax != height)
             swap_block(sbase + (jmax*sxres + imax),
                        dbase + (imax*dxres + jmax),
-                       dxres - jmax, dyres - imax, dxres, sxres);
+                       height - jmax, width - imax, dxres, sxres);
     }
 }
 
@@ -227,15 +227,15 @@ transform_congruent_to(const GwyField *source,
         transpose_to(source, col, row, width, height, dest, destcol, destrow);
     else if (transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY) {
         transpose_to(source, col, row, width, height, dest, destcol, destrow);
-        mirror_centrally_in_place(dest, 0, 0, height, width);
+        mirror_centrally_in_place(dest, destcol, destrow, height, width);
     }
     else if (transformation == GWY_PLANE_ROTATE_CLOCKWISE) {
         transpose_to(source, col, row, width, height, dest, destcol, destrow);
-        mirror_horizontally_in_place(dest, 0, 0, height, width);
+        mirror_horizontally_in_place(dest, destcol, destrow, height, width);
     }
     else if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE) {
         transpose_to(source, col, row, width, height, dest, destcol, destrow);
-        mirror_vertically_in_place(dest, 0, 0, height, width);
+        mirror_vertically_in_place(dest, destcol, destrow, height, width);
     }
     else {
         g_assert_not_reached();
@@ -437,6 +437,96 @@ gwy_field_new_congruent(const GwyField *field,
                            transformation);
 
     return part;
+}
+
+/**
+ * gwy_field_copy_congruent:
+ * @field: A two-dimensional data field.
+ * @srcpart: (allow-none):
+ *           Area in field @src to copy.  Pass %NULL to copy entire @src.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Copies data from one field to another, performing a congruence
+ * transformation.
+ *
+ * The copied rectangle is defined by @srcpart; it is first transformed
+ * according to @transformation and then copied to @dest starting from
+ * (@destcol, @destrow).  More precisely, the result is the same as extracting
+ * the entire @srcpart from @src, transforming it according to @transformation
+ * and then copying with gwy_field_copy() to the destination.
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that corresponds to data inside @src and @dest
+ * is copied.  This can also mean no data are copied at all.
+ *
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
+ *
+ * This most general copy-and-transform function is seldom needed and may be a
+ * bit confusing.  Sometimes, however, a calculation is much better performed
+ * row-wise but you need to perform it on columns.  Then
+ * gwy_field_copy_congruent() comes handy:
+ * |[
+ * GwyField *workspace = gwy_field_new_congruent(field, &fpart,
+ *                                               GWY_PLANE_MIRROR_DIAGONALLY);
+ * // Do some row-wise operation with part...
+ * GwyFieldPart ppart = { 0, 0, fpart.height, fpart.width };
+ * gwy_field_copy_congruent(workspace, &ppart,
+ *                          field, fpart.col, fpart.row,
+ *                          GWY_PLANE_MIRROR_DIAGONALLY);
+ * g_object_unref(workspace);
+ * ]|
+ **/
+void
+gwy_field_copy_congruent(const GwyField *src,
+                         const GwyFieldPart *srcpart,
+                         GwyField *dest,
+                         guint destcol,
+                         guint destrow,
+                         GwyPlaneCongruenceType transformation)
+{
+    guint col, row, width, height;
+    gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
+    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                               is_trans, &col, &row, &width, &height))
+        return;
+    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+
+    // Now we have good dimensions of the copied area but at a bad position.
+    // The result should be the same as first performing the transformation of
+    // the entire source area, then limiting the size.  So if, for instance, we
+    // mirror horizontally, we need to take the right part not the left when
+    // shrinking.  So fix the position according to the good dimensions, then
+    // redo the size limitation.
+    GwyFieldPart fsrcpart = (srcpart
+                             ? *srcpart
+                             : (GwyFieldPart){ 0, 0, src->xres, src->yres });
+    GwyFieldPart transpart = { col, row, width, height };
+    if (transformation == GWY_PLANE_MIRROR_HORIZONTALLY
+        || transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY
+        || transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE
+        || transformation == GWY_PLANE_MIRROR_BOTH) {
+        guint right = MIN(src->xres, fsrcpart.col + fsrcpart.width);
+        g_assert(right >= transpart.col + transpart.width);
+        transpart.col = right - transpart.width;
+    }
+    if (transformation == GWY_PLANE_MIRROR_VERTICALLY
+        || transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY
+        || transformation == GWY_PLANE_ROTATE_CLOCKWISE
+        || transformation == GWY_PLANE_MIRROR_BOTH) {
+        guint lower = MIN(src->yres, fsrcpart.row + fsrcpart.height);
+        g_assert(lower >= transpart.row + transpart.height);
+        transpart.row = lower - transpart.height;
+    }
+    gboolean ok = gwy_field_limit_parts(src, &transpart, dest, destcol, destrow,
+                                        is_trans, &col, &row, &width, &height);
+    g_assert(ok);
+
+    transform_congruent_to(src, col, row, width, height,
+                           dest, destcol, destrow,
+                           transformation);
 }
 
 static void
