@@ -302,6 +302,29 @@ gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)
 }
 
 /**
+ * gwy_plane_congruence_invert:
+ * @transformation: Type of plane congruence transformation.
+ *
+ * Finds inverse transformation for a plane congruence transform.
+ *
+ * Most transformation are involutory, i.e. they are their own inversions, but
+ * rotations are not.
+ *
+ * Returns: The inverse transformation of @transformation.
+ **/
+GwyPlaneCongruenceType
+gwy_plane_congruence_invert(GwyPlaneCongruenceType transformation)
+{
+    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
+                         FALSE);
+    if (transformation == GWY_PLANE_ROTATE_CLOCKWISE)
+        return GWY_PLANE_ROTATE_COUNTERCLOCKWISE;
+    if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE)
+        return GWY_PLANE_ROTATE_CLOCKWISE;
+    return transformation;
+}
+
+/**
  * gwy_field_transform_congruent:
  * @field: A two-dimensional data field.
  * @transformation: Type of plane congruence transformation.

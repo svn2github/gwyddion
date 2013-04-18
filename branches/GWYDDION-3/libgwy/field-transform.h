@@ -36,23 +36,24 @@ typedef enum {
     GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
 } GwyPlaneCongruenceType;
 
-gboolean  gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation);
-void      gwy_field_transform_congruent        (GwyField *field,
-                                                GwyPlaneCongruenceType transformation);
-GwyField* gwy_field_new_congruent              (const GwyField *field,
-                                                const GwyFieldPart *fpart,
-                                                GwyPlaneCongruenceType transformation)  G_GNUC_MALLOC;
-void      gwy_field_copy_congruent             (const GwyField *src,
-                                                const GwyFieldPart *srcpart,
-                                                GwyField *dest,
-                                                guint destcol,
-                                                guint destrow,
-                                                GwyPlaneCongruenceType transformation);
-void      gwy_field_transform_offsets          (const GwyField *source,
-                                                const GwyFieldPart *srcpart,
-                                                GwyField *dest,
-                                                GwyPlaneCongruenceType transformation,
-                                                const GwyXY *origin);
+gboolean               gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)  G_GNUC_CONST;
+GwyPlaneCongruenceType gwy_plane_congruence_invert          (GwyPlaneCongruenceType transformation)  G_GNUC_CONST;
+void                   gwy_field_transform_congruent        (GwyField *field,
+                                                             GwyPlaneCongruenceType transformation);
+GwyField*              gwy_field_new_congruent              (const GwyField *field,
+                                                             const GwyFieldPart *fpart,
+                                                             GwyPlaneCongruenceType transformation)  G_GNUC_MALLOC;
+void                   gwy_field_copy_congruent             (const GwyField *src,
+                                                             const GwyFieldPart *srcpart,
+                                                             GwyField *dest,
+                                                             guint destcol,
+                                                             guint destrow,
+                                                             GwyPlaneCongruenceType transformation);
+void                   gwy_field_transform_offsets          (const GwyField *source,
+                                                             const GwyFieldPart *srcpart,
+                                                             GwyField *dest,
+                                                             GwyPlaneCongruenceType transformation,
+                                                             const GwyXY *origin);
 
 G_END_DECLS
 
