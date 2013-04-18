@@ -1488,6 +1488,47 @@ test_field_congruence_new_group(void)
 }
 
 void
+test_field_congruence_copy(void)
+{
+    enum { max_size = 17 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 500;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint sxres = g_rand_int_range(rng, 1, max_size);
+        guint syres = g_rand_int_range(rng, 1, max_size);
+        guint dxres = g_rand_int_range(rng, 1, max_size);
+        guint dyres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, sxres+1);
+        guint height = g_rand_int_range(rng, 1, syres+1);
+        guint col = g_rand_int_range(rng, 0, sxres+1-width);
+        guint row = g_rand_int_range(rng, 0, syres+1-height);
+        guint destcol = g_rand_int_range(rng, 0, dxres);
+        guint destrow = g_rand_int_range(rng, 0, dyres);
+        GwyPlaneCongruenceType trans = g_rand_int_range(rng, 0, 8);
+        GwyFieldPart srcpart = { col, row, width, height };
+        GwyField *source = gwy_field_new_sized(sxres, syres, FALSE);
+        GwyField *dest = gwy_field_new_sized(dxres, dyres, FALSE);
+        field_randomize(source, rng);
+        field_randomize(dest, rng);
+        GwyField *reference = gwy_field_duplicate(dest);
+        gwy_field_copy_congruent(source, &srcpart, dest, destcol, destrow,
+                                 trans);
+        GwyField *cut = gwy_field_new_part(source, &srcpart, FALSE);
+        gwy_field_transform_congruent(cut, trans);
+        gwy_field_copy(cut, NULL, reference, destcol, destrow);
+        field_assert_equal(dest, reference);
+
+        g_object_unref(cut);
+        g_object_unref(reference);
+        g_object_unref(dest);
+        g_object_unref(source);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_field_range(void)
 {
     enum { max_size = 76 };
