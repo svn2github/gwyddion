@@ -853,7 +853,8 @@ gwy_field_data_changed(GwyField *field,
 /**
  * gwy_field_copy:
  * @src: Source two-dimensional data data field.
- * @srcpart: Area in field @src to copy.  Pass %NULL to copy entire @src.
+ * @srcpart: (allow-none):
+ *           Area in field @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
