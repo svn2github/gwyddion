@@ -1529,6 +1529,35 @@ test_field_congruence_copy(void)
 }
 
 void
+test_field_congruence_invert(void)
+{
+    enum { max_size = 7 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *orig = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(orig, rng);
+        for (GwyPlaneCongruenceType trans = GWY_PLANE_IDENTITY;
+             trans <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE;
+             trans++) {
+            GwyField *transformed = gwy_field_new_congruent(orig, NULL, trans);
+            GwyPlaneCongruenceType itrans = gwy_plane_congruence_invert(trans);
+            GwyField *result = gwy_field_new_congruent(transformed, NULL,
+                                                       itrans);
+            field_assert_equal(result, orig);
+            g_object_unref(result);
+            g_object_unref(transformed);
+        }
+        g_object_unref(orig);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_field_range(void)
 {
     enum { max_size = 76 };

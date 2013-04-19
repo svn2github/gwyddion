@@ -311,6 +311,7 @@ field/congruence/new/3x2
 field/congruence/new/2x3
 field/congruence/new/group
 field/congruence/copy
+field/congruence/invert
 field/range
 field/process-quarters/unmasked/border
 field/process-quarters/unmasked/noborder
