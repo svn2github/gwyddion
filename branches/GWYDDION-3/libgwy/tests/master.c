@@ -366,10 +366,14 @@ incr_intervals_worker(gpointer taskp,
 {
     IncrIntervalsTask *task = (IncrIntervalsTask*)taskp;
     guint pos = task->segment->pos, len = task->segment->len;
-    guint *d = task->data;
 
+    // Make failure much more probable if blocking does not work by creating
+    // a time window between read and write.
+    guint *d = g_memdup(task->data + pos, len*sizeof(gdouble));
     for (guint i = 0; i < len; i++)
-        d[pos + i]++;
+        d[i]++;
+    gwy_assign(task->data + pos, d, len);
+    g_free(d);
 
     return taskp;
 }
