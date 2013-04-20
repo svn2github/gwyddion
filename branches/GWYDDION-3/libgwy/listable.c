@@ -122,7 +122,8 @@ gwy_listable_size(const GwyListable *listable)
  *
  * Gets the item at given position in a listable.
  *
- * Returns: The item at position @pos.
+ * Returns: (transfer none):
+ *          The item at position @pos.
  **/
 gpointer
 gwy_listable_get(const GwyListable *listable,
