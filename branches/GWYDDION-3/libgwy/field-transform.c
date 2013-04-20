@@ -464,7 +464,7 @@ gwy_field_new_congruent(const GwyField *field,
 
 /**
  * gwy_field_copy_congruent:
- * @field: A two-dimensional data field.
+ * @src: Source two-dimensional data data field.
  * @srcpart: (allow-none):
  *           Area in field @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination two-dimensional data field.
