@@ -6,9 +6,9 @@ max_versions = {
     'gobject': (2, 32),
     'gio': (2, 32),
     'pango': (1, 30),
-    'gdk': (3, 4),
+    'gdk': (3, 6),
     'gdk-pixbuf': (2, 22),
-    'gtk': (3, 4),
+    'gtk': (3, 6),
 }
 
 accept = frozenset([

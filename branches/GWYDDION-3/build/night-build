@@ -136,7 +136,8 @@ function check_doc_sections() {
 function check_deps_versions() {
   # Keep the `GENERATED' string quoted to prevent match here
   grep -r --include '*.[ch]' -L ' This is a 'GENERATED' file\>' . \
-    | xargs gtkdoc-depscan \
+    | xargs gtkdoc-depscan -b atk -b cairo -b gdk3 -b gdk-pxibuf -b gio \
+                           -b glib -b gobject -b gtk3 \
     | ./build/check-dep-versions.py
 }
 
