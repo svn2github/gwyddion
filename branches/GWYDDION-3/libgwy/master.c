@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -373,6 +373,7 @@ gwy_master_manage_tasks(GwyMaster *master,
     if (cancellable && g_cancellable_is_cancelled(cancellable))
         return FALSE;
 
+    gboolean aborted = FALSE;
     priv->exhausted = priv->cancelled = FALSE;
     priv->active_tasks = 0;
 
@@ -381,6 +382,14 @@ gwy_master_manage_tasks(GwyMaster *master,
         if (!priv->exhausted && !priv->cancelled) {
             while (priv->idle_workers) {
                 gpointer task = provide_task(user_data);
+                if (task == GWY_MASTER_TRY_AGAIN) {
+                    if (!priv->active_tasks) {
+                        aborted = TRUE;
+                        g_critical("Try-again task obtained when there are no "
+                                   "active tasks.  Aborting.");
+                    }
+                    break;
+                }
                 if (!task) {
                     priv->exhausted = TRUE;
                     break;
@@ -429,7 +438,7 @@ gwy_master_manage_tasks(GwyMaster *master,
     g_assert(priv->active_tasks == 0);
     g_assert(g_slist_length(priv->idle_workers) == priv->nworkers);
 
-    return !priv->cancelled;
+    return !aborted && !priv->cancelled;
 }
 
 /**
@@ -500,6 +509,23 @@ gwy_master_destroy_data(GwyMaster *master,
     else {
         notify_all_workers(master, MSG_DESTROY, destroy_data);
     }
+}
+
+/**
+ * gwy_master_try_again_task:
+ *
+ * Provides a pointer implementing the try-again task for parallel task
+ * manager.
+ *
+ * This is the function which implements %GWY_MASTER_TRY_AGAIN task.  In case
+ * you really must know, it returns its own address.
+ *
+ * Returns: A pointer distinct from user data.
+ **/
+gpointer
+gwy_master_try_again_task(void)
+{
+    return &gwy_master_try_again_task;
 }
 
 /**
@@ -613,6 +639,15 @@ gwy_master_destroy_data(GwyMaster *master,
  **/
 
 /**
+ * GWY_MASTER_TRY_AGAIN:
+ *
+ * Special task pointer meaning that more tasks will be available when some
+ * of the current tasks finish.
+ *
+ * See #GwyMasterTaskFunc.
+ **/
+
+/**
  * GwyMasterWorkerFunc:
  * @task: Task data returned by the task provider specified while calling
  *        gwy_master_manage_tasks().
@@ -668,8 +703,16 @@ gwy_master_destroy_data(GwyMaster *master,
  *
  * It is guaranteed that once it returns %NULL it will not be called any more.
  *
- * Returns: The new task, passed to the worker function if not %NULL.  If it is
- *          %NULL it means there is no more work to do.
+ * Instead of a pointer to user data, the function can also return
+ * %GWY_MASTER_TRY_AGAIN, indicating that more tasks are available but they
+ * cannot be dispatched before some current tasks finish.  It is not allowed to
+ * return %GWY_MASTER_TRY_AGAIN unless tasks with still unconsumed results
+ * still exist.
+ *
+ * Returns: The new task, passed to the worker function if not %NULL and not
+ *          GWY_MASTER_TRY_AGAIN.  The value should be really a pointer to some
+ *          your data, i.e. avoid GUINT_TO_POINTER() and similar tricks.  If it
+ *          is %NULL it means there is no more work to do.
  **/
 
 /**

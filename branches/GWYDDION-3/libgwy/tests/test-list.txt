@@ -107,6 +107,13 @@ master/sum/8
 master/sum/16
 master/sum/auto
 master/data
+master/try-again/1
+master/try-again/2
+master/try-again/3
+master/try-again/4
+master/try-again/8
+master/try-again/16
+master/try-again/auto
 master/cancel/1
 master/cancel/2
 master/cancel/3

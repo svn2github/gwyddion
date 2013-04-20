@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,8 @@
 #include <gio/gio.h>
 
 G_BEGIN_DECLS
+
+#define GWY_MASTER_TRY_AGAIN (gwy_master_try_again_task())
 
 #define GWY_TYPE_MASTER \
     (gwy_master_get_type())
@@ -59,8 +61,8 @@ struct _GwyMasterClass {
     GObjectClass g_object_class;
 };
 
-GType      gwy_master_get_type      (void)                                  G_GNUC_CONST;
-GwyMaster* gwy_master_new           (void)                                  G_GNUC_MALLOC;
+GType      gwy_master_get_type      (void)                                   G_GNUC_CONST;
+GwyMaster* gwy_master_new           (void)                                   G_GNUC_MALLOC;
 gboolean   gwy_master_create_workers(GwyMaster *master,
                                      guint nworkers,
                                      GError **error);
@@ -76,6 +78,8 @@ gboolean   gwy_master_manage_tasks  (GwyMaster *master,
                                      GwyMasterResultFunc consume_result,
                                      gpointer user_data,
                                      GCancellable *cancellable);
+gpointer   gwy_master_try_again_task(void)                                   G_GNUC_CONST;
+
 
 G_END_DECLS
 

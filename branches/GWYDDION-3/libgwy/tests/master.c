@@ -45,6 +45,19 @@ typedef struct {
     guint64 total_sum;
 } SumNumbersState;
 
+typedef struct {
+    guint *data;
+    GwyLinePart *segment;
+} IncrIntervalsTask;
+
+typedef struct {
+    GArray *segments;
+    guint *data;
+    GList *blocked;
+    guint current;
+    guint noverlaps;
+} IncrIntervalsState;
+
 static gpointer
 sum_numbers_worker(gpointer taskp,
                    G_GNUC_UNUSED gpointer data)
@@ -345,6 +358,165 @@ test_master_data(void)
 
         g_object_unref(master);
     }
+}
+
+static gpointer
+incr_intervals_worker(gpointer taskp,
+                      G_GNUC_UNUSED gpointer data)
+{
+    IncrIntervalsTask *task = (IncrIntervalsTask*)taskp;
+    guint pos = task->segment->pos, len = task->segment->len;
+    guint *d = task->data;
+
+    for (guint i = 0; i < len; i++)
+        d[pos + i]++;
+
+    return taskp;
+}
+
+static gpointer
+incr_intervals_task(gpointer user_data)
+{
+    IncrIntervalsState *state = (IncrIntervalsState*)user_data;
+    GArray *segments = state->segments;
+    if (state->current == segments->len)
+        return NULL;
+    g_assert_cmpuint(state->current, <, segments->len);
+
+    GwyLinePart *segment = &g_array_index(state->segments,
+                                          GwyLinePart, state->current);
+    for (GList *l = state->blocked; l; l = g_list_next(l)) {
+        GwyLinePart *s = (GwyLinePart*)l->data;
+        if (gwy_overlapping(segment->pos, segment->len, s->pos, s->len)) {
+            state->noverlaps++;
+            return GWY_MASTER_TRY_AGAIN;
+        }
+    }
+
+    state->blocked = g_list_append(state->blocked, segment);
+    IncrIntervalsTask *task = g_slice_new(IncrIntervalsTask);
+    task->segment = segment;
+    task->data = state->data;
+    state->current++;
+    return task;
+}
+
+static void
+incr_intervals_result(gpointer result,
+                      gpointer user_data)
+{
+    IncrIntervalsTask *task = (IncrIntervalsTask*)result;
+    IncrIntervalsState *state = (IncrIntervalsState*)user_data;
+
+    g_assert(g_list_find(state->blocked, task->segment));
+    state->blocked = g_list_remove(state->blocked, task->segment);
+    g_slice_free(IncrIntervalsTask, task);
+}
+
+static void
+master_try_again_one(guint nproc)
+{
+    GError *error = NULL;
+    enum { niter = 200, nsum = 20 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    //g_test_timer_start();
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyMaster *master = gwy_master_new();
+        guint64 size = g_rand_int_range(rng, 100, 1000);
+        guint *data = g_new0(guint, size);
+        GArray *segments = g_array_new(FALSE, FALSE, sizeof(GwyLinePart));
+
+        // Create random segments of @data ensuring that each item is contained
+        // in exactly @nsum segments.
+        for (guint s = 0; s < nsum; s++) {
+            guint start = 0;
+            while (start < size) {
+                guint step = g_rand_int_range(rng, 1, size/10);
+                if (step + start > size)
+                    step = size - start;
+                GwyLinePart segment = { start, step };
+                g_array_append_val(segments, segment);
+                start += step;
+            }
+        }
+        for (guint i = 0; i < size; i++) {
+            guint j1 = g_rand_int_range(rng, 0, segments->len);
+            guint j2 = g_rand_int_range(rng, 0, segments->len);
+            GWY_SWAP(GwyLinePart,
+                     g_array_index(segments, GwyLinePart, j1),
+                     g_array_index(segments, GwyLinePart, j2));
+        }
+
+        gboolean ok = gwy_master_create_workers(master, nproc, &error);
+        g_assert_no_error(error);
+        g_assert(ok);
+
+        IncrIntervalsState state = { segments, data, NULL, 0, 0 };
+        ok = gwy_master_manage_tasks(master, 0, &incr_intervals_worker,
+                                     &incr_intervals_task,
+                                     &incr_intervals_result,
+                                     &state,
+                                     NULL);
+        g_assert(ok);
+
+        for (guint i = 0; i < size; i++) {
+            g_assert_cmpuint(data[i], ==, nsum);
+        }
+
+        if (nproc == 1) {
+            g_assert_cmpuint(state.noverlaps, ==, 0);
+        }
+
+        g_object_unref(master);
+        g_free(data);
+        g_array_free(segments, TRUE);
+    }
+    //g_printerr("%g\n", g_test_timer_elapsed());
+
+    g_rand_free(rng);
+}
+
+void
+test_master_try_again_1(void)
+{
+    master_try_again_one(1);
+}
+
+void
+test_master_try_again_2(void)
+{
+    master_try_again_one(2);
+}
+
+void
+test_master_try_again_3(void)
+{
+    master_try_again_one(3);
+}
+
+void
+test_master_try_again_4(void)
+{
+    master_try_again_one(4);
+}
+
+void
+test_master_try_again_8(void)
+{
+    master_try_again_one(8);
+}
+
+void
+test_master_try_again_16(void)
+{
+    master_try_again_one(16);
+}
+
+void
+test_master_try_again_auto(void)
+{
+    master_try_again_one(0);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
