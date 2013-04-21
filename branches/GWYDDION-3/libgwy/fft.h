@@ -37,6 +37,11 @@ typedef enum {
     GWY_WINDOWING_KAISER25   = 9
 } GwyWindowingType;
 
+typedef enum {
+    GWY_TRANSFORM_BACKWARD = -1,
+    GWY_TRANSFORM_FORWARD  = 1
+} GwyTransformDirection;
+
 guint gwy_fft_nice_transform_size(guint size)                 G_GNUC_CONST;
 void  gwy_fft_window_sample      (gdouble *data,
                                   guint n,

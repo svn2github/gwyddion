@@ -41,6 +41,7 @@
 #include <libgwy/field-correlate.h>
 #include <libgwy/field-distributions.h>
 #include <libgwy/field-filter.h>
+#include <libgwy/field-inttrans.h>
 #include <libgwy/field-level.h>
 #include <libgwy/field-part.h>
 #include <libgwy/field-read.h>
