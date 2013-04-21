@@ -214,8 +214,15 @@ GOBJECT_INTROSPECTION_CHECK([0.10.0])
 
 #############################################################################
 # Other tools
+# xsltproc is used to generate test reports
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
+AM_CONDITIONAL([HAVE_XSLTPROC],[test "x$XSLTPROC" != xfalse])
+# gimp-console is used to export PNG icons from XCF
 AC_CHECK_PROGS([GIMP_CONSOLE],[gimp-console],[false])
+AM_CONDITIONAL([HAVE_GIMP_CONSOLE],[test "x$GIMP_CONSOLE" != xfalse])
+# inkscape is used to export PNG from SVG drawings in documentation
+AC_CHECK_PROGS([INKSCAPE],[inkscape],[false])
+AM_CONDITIONAL([HAVE_INKSCAPE],[test "x$INKSCAPE" != xfalse])
 
 #############################################################################
 # Valgrind
