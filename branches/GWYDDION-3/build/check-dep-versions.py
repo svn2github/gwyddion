@@ -2,13 +2,14 @@
 import sys, re
 
 max_versions = {
+    'cairo': (1, 10),
     'glib': (2, 32),
     'gobject': (2, 32),
     'gio': (2, 32),
-    'pango': (1, 30),
-    'gdk': (3, 6),
+    'pango': (1, 32),
+    'gdk3': (3, 6),
     'gdk-pixbuf': (2, 22),
-    'gtk': (3, 6),
+    'gtk3': (3, 6),
 }
 
 accept = frozenset([
