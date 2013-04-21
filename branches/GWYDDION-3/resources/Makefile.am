@@ -63,11 +63,14 @@ icondeps = pixmaps/16x21/pixmaps.deps
 
 # This rule re-exports all PNG icons from their XCF sources.  Only to be done
 # manually because we do not want GIMP as a regular build tool.  Hence we put
-# the output to *srcdir*.
+# the output to *srcdir*.  Keep this main rule out of the conditional to get
+# a better error message without gimp-console.
 icons: icons-16x21
 
+if HAVE_GIMP_CONSOLE
 icons-16x21:
 	@rm -f pixmaps/16x21/*.png
 	GIMP_CONSOLE=$(GIMP_CONSOLE) srcdir=$(srcdir)/pixmaps/16x21 destdir=$(srcdir)/pixmaps/16x21 $(top_srcdir)/build/export-xcf-layers.sh $(srcdir)/pixmaps/16x21/pixmaps.deps
+endif
 
 .PHONY: icons icons-16x21
