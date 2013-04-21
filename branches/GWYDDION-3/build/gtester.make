@@ -16,14 +16,18 @@ test: all $(test_program)$(EXEEXT)
 	$(AM_V_at)$(GTESTER) --verbose $(test_program)$(EXEEXT) $(TEST_FLAGS)
 	$(AM_V_at)rm -f core core.[0-9]*
 
-# Produce a test report
+# Produce a test report.
+# Keep the main rule out of the conditional for a better error message without
+# xsltproc.
 test-report: test-report.html test-report-brief.html
 
+if HAVE_XSLTPROC
 test-report.html: test-report.xml $(top_srcdir)/build/test-report.xsl
 	$(AM_V_GEN)$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report.xsl test-report.xml >test-report.html
 
 test-report-brief.html: test-report.xml $(top_srcdir)/build/test-report-brief.xsl
 	$(AM_V_GEN)$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report-brief.xsl test-report.xml >test-report-brief.html
+endif
 
 test-report.xml: $(test_program)$(EXEEXT)
 	$(AM_V_at)-$(GTESTER) $(test_program)$(EXEEXT) $(TEST_FLAGS) -k -o test-report.xml
