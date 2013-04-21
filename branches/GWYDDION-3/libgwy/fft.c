@@ -440,4 +440,15 @@ _gwy_fft_rigour(void)
  * Windowing types that can be applied to data before the Fourier transform.
  **/
 
+/**
+ * GwyTransformDirection:
+ * @GWY_TRANSFORM_BACKWARD: Backward (inverse) transform.
+ * @GWY_TRANSFORM_FORWARD: Forward (direct) transform.
+ *
+ * Direction of a transformation, namely integral transformation.
+ *
+ * In FFT, it is equal to sign of the exponent, that is the backward transform
+ * uses -1, the forward transform +1.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
