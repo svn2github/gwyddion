@@ -18,7 +18,8 @@ FIXXREF_OPTIONS = --extra-dir=../libgwyui/html
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
 HTML_IMAGES = \
-	$(srcdir)/memory-access.png
+	$(srcdir)/images/field-copy-congruent.png \
+	$(srcdir)/images/memory-access.png
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
@@ -34,7 +35,8 @@ include $(top_srcdir)/build/gwy-doc.make
 
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
-EXTRA_DIST +=
+EXTRA_DIST += \
+	$(srcdir)/images/field-copy-congruent.svg
 
 # Specialised introspection programs
 AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
@@ -53,3 +55,16 @@ builtin-fit-func.xml: fit-funcs$(EXEEXT)
 
 builtin-grain-value.xml: grain-values$(EXEEXT)
 	$(AM_V_GEN)$(LIBTOOL) --mode=execute ./grain-values$(EXEEXT) >builtin-grain-value.xml
+
+# Generate images to srcdir because they are distributed and only the
+# maintainer runs this rule.  Keep the main rule outside the conditional to get
+# a better error message without inkscape.
+images: \
+	$(srcdir)/images/field-copy-congruent.png
+
+if HAVE_INKSCAPE
+$(srcdir)/images/field-copy-congruent.png: $(srcdir)/images/field-copy-congruent.svg
+	$(AM_V_GEN)$(INKSCAPE) -z -D -d 90 -b white -e "$@" -f "$<" >/dev/null
+endif
+
+.PHONY: images
