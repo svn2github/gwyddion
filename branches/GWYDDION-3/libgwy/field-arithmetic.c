@@ -32,6 +32,50 @@
 
 enum { NORMALIZE_ALL = 0x07 };
 
+typedef gdouble (*SculptBlockFindFunc)(const gdouble *sbase,
+                                       const gdouble *dbase,
+                                       guint width,
+                                       guint height,
+                                       guint sxres,
+                                       guint dxres,
+                                       gdouble m);
+typedef void (*SculptBlockFunc)(const gdouble *sbase,
+                                gdouble *dbase,
+                                guint width,
+                                guint height,
+                                guint sxres,
+                                guint dxres,
+                                gdouble m);
+
+static gdouble sculpt_block_find_max(const gdouble *sbase,
+                                     const gdouble *dbase,
+                                     guint width,
+                                     guint height,
+                                     guint sxres,
+                                     guint dxres,
+                                     gdouble m);
+static gdouble sculpt_block_find_min(const gdouble *sbase,
+                                     const gdouble *dbase,
+                                     guint width,
+                                     guint height,
+                                     guint sxres,
+                                     guint dxres,
+                                     gdouble m);
+static void    sculpt_block_upward  (const gdouble *sbase,
+                                     gdouble *dbase,
+                                     guint width,
+                                     guint height,
+                                     guint sxres,
+                                     guint dxres,
+                                     gdouble m);
+static void    sculpt_block_downward(const gdouble *sbase,
+                                     gdouble *dbase,
+                                     guint width,
+                                     guint height,
+                                     guint sxres,
+                                     guint dxres,
+                                     gdouble m);
+
 /**
  * gwy_field_is_incompatible:
  * @field1: A data field.
@@ -590,6 +634,202 @@ gwy_field_add_field(const GwyField *src,
 }
 
 /**
+ * gwy_field_sculpt:
+ * @src: Source two-dimensional data field.
+ * @srcpart: Area in field @src to add.  Pass %NULL to add entire @src.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ * @method: Destination modification method.
+ * @periodic: Consider @dest periodic and wrap @src around if it sticks out of
+ *            @dest.
+ *
+ * Locally modifies one field to resemble another.
+ *
+ * The rectangle of modelling data is defined by @srcpart and the values are
+ * modified in @dest starting from (@destcol, @destrow).
+ *
+ * The source part @srcpart must be completely container in @src and @src
+ * and @dest must be two different fields.
+ *
+ * Positive values in @src determine the area of possible modification of
+ * @dest.  For %GWY_SCULPT_UPWARD the minimum @m of the corresponding pixels
+ * in @dest is found and then the values in @dest are modified to maximum of
+ * the current value and source value plus @m.  The net effect is that an
+ * upward protrusion is formed in @dest corresponding to @src shape.  For
+ * %GWY_SCULPT_DOWNWARD the modification is the same except downwards and
+ * using negative values in @src.
+ **/
+void
+gwy_field_sculpt(const GwyField *src,
+                 const GwyFieldPart *srcpart,
+                 GwyField *dest,
+                 gint destcol,
+                 gint destrow,
+                 GwySculptType method,
+                 gboolean periodic)
+{
+    guint col, row, width, height;
+    if (!gwy_field_check_part(src, srcpart, &col, &row, &width, &height))
+        return;
+    g_return_if_fail(GWY_IS_FIELD(dest));
+    g_return_if_fail(method <= GWY_SCULPT_DOWNWARD);
+
+    guint dxres = dest->xres, dyres = dest->yres;
+    if (periodic) {
+        // Hate rounding towards zero.
+        destcol = (destcol % dxres + dxres) % dxres;
+        destrow = (destrow % dyres + dyres) % dyres;
+        // Avoid complications if everything is in one block.
+        if (destcol + width <= dxres && destrow + height <= dyres)
+            periodic = FALSE;
+    }
+    else {
+        if (destcol > (gint)dxres
+            || destrow > (gint)dyres
+            || destcol + (gint)width <= 0
+            || destrow + (gint)height <= 0)
+            return;
+
+        if (destcol + width > dxres)
+            width = dxres - destcol;
+        if (destrow + height > dxres)
+            height = dxres - destrow;
+        if (destcol < 0) {
+            width += destcol;
+            destcol = 0;
+        }
+        if (destrow < 0) {
+            height += destrow;
+            destrow = 0;
+        }
+    }
+
+    const gdouble *sbase = src->data + row*src->xres + col;
+    gdouble *dbase = dest->data + destrow*dxres + destcol;
+    SculptBlockFindFunc findm;
+    SculptBlockFunc sculpt;
+    gdouble m;
+    if (method == GWY_SCULPT_UPWARD) {
+        m = G_MAXDOUBLE;
+        findm = &sculpt_block_find_max;
+        sculpt = &sculpt_block_upward;
+    }
+    else if (method == GWY_SCULPT_DOWNWARD) {
+        m = -G_MAXDOUBLE;
+        findm = &sculpt_block_find_min;
+        sculpt = &sculpt_block_downward;
+    }
+    else {
+        g_assert_not_reached();
+    }
+
+    if (!periodic) {
+        m = findm(sbase, dbase, width, height, src->xres, dxres, m);
+        sculpt(sbase, dbase, width, height, src->xres, dxres, m);
+        return;
+    }
+
+    guint i = 0, ii = destrow;
+    while (i < height) {
+        guint lower = MIN(dyres, ii + (height - i));
+        guint j = 0, jj = destcol;
+        while (j < width) {
+            guint right = MIN(dxres, jj + (width - j));
+            m = findm(sbase + i*src->xres + j,
+                      dest->data + ii*dxres + jj,
+                      right - jj, lower - ii, src->xres, dxres,
+                      m);
+            j += right - jj;
+            jj = 0;
+        }
+        i += lower - ii;
+        ii = 0;
+    }
+
+    i = 0, ii = destrow;
+    while (i < height) {
+        guint lower = MIN(dyres, ii + (height - i));
+        guint j = 0, jj = destcol;
+        while (j < width) {
+            guint right = MIN(dxres, jj + (width - j));
+            sculpt(sbase + i*src->xres + j,
+                   dest->data + ii*dxres + jj,
+                   right - jj, lower - ii, src->xres, dxres,
+                   m);
+            j += right - jj;
+            jj = 0;
+        }
+        i += lower - ii;
+        ii = 0;
+    }
+}
+
+static gdouble
+sculpt_block_find_max(const gdouble *sbase, const gdouble *dbase,
+                      guint width, guint height,
+                      guint sxres, guint dxres,
+                      gdouble m)
+{
+    for (guint i = 0; i < height; i++) {
+        const gdouble *s = sbase + i*sxres, *d = dbase + i*dxres;
+        for (guint j = 0; j < width; j++, s++, d++) {
+            if (*s > 0.0 && *d < m)
+                m = *d;
+        }
+    }
+    return m;
+}
+
+static gdouble
+sculpt_block_find_min(const gdouble *sbase, const gdouble *dbase,
+                      guint width, guint height,
+                      guint sxres, guint dxres,
+                      gdouble m)
+{
+    for (guint i = 0; i < height; i++) {
+        const gdouble *s = sbase + i*sxres, *d = dbase + i*dxres;
+        for (guint j = 0; j < width; j++, s++, d++) {
+            if (*s < 0.0 && *d > m)
+                m = *d;
+        }
+    }
+    return m;
+}
+
+static void
+sculpt_block_upward(const gdouble *sbase, gdouble *dbase,
+                    guint width, guint height,
+                    guint sxres, guint dxres,
+                    gdouble m)
+{
+    for (guint i = 0; i < height; i++) {
+        const gdouble *s = sbase + i*sxres;
+        gdouble *d = dbase + i*dxres;
+        for (guint j = 0; j < width; j++, s++, d++) {
+            if (*s > 0.0)
+                *d = fmax(*d, m + *s);
+        }
+    }
+}
+
+static void
+sculpt_block_downward(const gdouble *sbase, gdouble *dbase,
+                      guint width, guint height,
+                      guint sxres, guint dxres,
+                      gdouble m)
+{
+    for (guint i = 0; i < height; i++) {
+        const gdouble *s = sbase + i*sxres;
+        gdouble *d = dbase + i*dxres;
+        for (guint j = 0; j < width; j++, s++, d++) {
+            if (*s < 0.0)
+                *d = fmin(*d, m + *s);
+        }
+    }
+}
+
+/**
  * gwy_field_hypot_field:
  * @field: A two-dimensional data field.
  *         It may be one of @operand1, @operand2.
@@ -724,6 +964,16 @@ gwy_field_clamp(GwyField *field,
  *                             value.
  *
  * Flags controlling behaviour of normalisation functions.
+ **/
+
+/**
+ * GwySculptType:
+ * @GWY_SCULPT_UPWARD: Protrude the modified surface upwards.
+ * @GWY_SCULPT_DOWNWARD: Protrude the modified surface downwards.
+ *
+ * Type of local surface shaping operations.
+ *
+ * See gwy_field_sculpt() for details.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
