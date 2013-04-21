@@ -480,6 +480,13 @@ gwy_field_new_congruent(const GwyField *field,
  * (@destcol, @destrow).  More precisely, the result is the same as extracting
  * the entire @srcpart from @src, transforming it according to @transformation
  * and then copying with gwy_field_copy() to the destination.
+ * <informalfigure id='GwyField-fig-copy-congruent'>
+ *   <mediaobject>
+ *     <imageobject>
+ *       <imagedata fileref='field-copy-congruent.png' format='PNG'/>
+ *     </imageobject>
+ *   </mediaobject>
+ * </informalfigure>
  *
  * There are no limitations on the row and column indices or dimensions.  Only
  * the part of the rectangle that corresponds to data inside @src and @dest
