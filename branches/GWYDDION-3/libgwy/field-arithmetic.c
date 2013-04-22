@@ -697,10 +697,12 @@ gwy_field_sculpt(const GwyField *src,
             height = dxres - destrow;
         if (destcol < 0) {
             width += destcol;
+            col += destcol;
             destcol = 0;
         }
         if (destrow < 0) {
             height += destrow;
+            row += destrow;
             destrow = 0;
         }
     }
