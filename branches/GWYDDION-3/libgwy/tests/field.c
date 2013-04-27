@@ -6864,7 +6864,8 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
         guint width = g_rand_int_range(rng, 1, max_size);
         guint height = g_rand_int_range(rng, 1, max_size);
         GwyField *field = gwy_field_new_sized(width, height, FALSE);
-        gdouble level = g_rand_double_range(rng, -1.0, 1.0);
+        field_randomize(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
         guint featurewidth = g_rand_int_range(rng,
                                               1, MIN(max_feature, width)+1);
         guint featureheight = g_rand_int_range(rng,
@@ -6884,14 +6885,11 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
         gwy_field_add(feature, NULL, NULL, GWY_MASK_IGNORE, -1.0);
         gint col = g_rand_int_range(rng, 0, width+1 - featurewidth);
         gint row = g_rand_int_range(rng, 0, height+1 - featureheight);
-        gwy_field_fill_full(field, level);
         gwy_field_sculpt(feature, &fpart, field, col, row, method, periodic);
 
         GwyFieldPart rpart = {
             col, row, featurewidth, featureheight
         };
-        GwyField *reference = gwy_field_duplicate(field);
-        gwy_field_fill_full(reference, level);
         GwyMaskField *mask = NULL;
         gdouble lim = 0.0;
         if (method == GWY_SCULPT_UPWARD) {
