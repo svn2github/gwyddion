@@ -6852,4 +6852,124 @@ test_field_fft_row_humanize_inversion(void)
     g_rand_free(rng);
 }
 
+// Here we put the feature completely within the destination field.
+static void
+field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
+{
+    enum { max_size = 30, max_feature = 20 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 200;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(width, height, FALSE);
+        gdouble level = g_rand_double_range(rng, -1.0, 1.0);
+        guint featurewidth = g_rand_int_range(rng,
+                                              1, MIN(max_feature, width)+1);
+        guint featureheight = g_rand_int_range(rng,
+                                               1, MIN(max_feature, height)+1);
+        guint featurecol = g_rand_int_range(rng,
+                                            0, max_feature+1 - featurewidth);
+        guint featurerow = g_rand_int_range(rng,
+                                            0, max_feature+1 - featureheight);
+        GwyFieldPart fpart = {
+            featurecol, featurerow, featurewidth, featureheight
+        };
+        GwyField *feature = gwy_field_new_sized(max_feature, max_feature,
+                                                FALSE);
+        field_randomize(feature, rng);
+        // FIXME: Define some gwy_field_linear().
+        gwy_field_multiply(feature, NULL, NULL, GWY_MASK_IGNORE, 2.0);
+        gwy_field_add(feature, NULL, NULL, GWY_MASK_IGNORE, -1.0);
+        gint col = g_rand_int_range(rng, 0, width+1 - featurewidth);
+        gint row = g_rand_int_range(rng, 0, height+1 - featureheight);
+        gwy_field_fill_full(field, level);
+        gwy_field_sculpt(feature, &fpart, field, col, row, method, periodic);
+
+        GwyFieldPart rpart = {
+            col, row, featurewidth, featureheight
+        };
+        GwyField *reference = gwy_field_duplicate(field);
+        gwy_field_fill_full(reference, level);
+        GwyMaskField *mask = NULL;
+        gdouble lim = 0.0;
+        if (method == GWY_SCULPT_UPWARD) {
+            mask = gwy_mask_field_new_from_field(feature, &fpart,
+                                                 G_MAXDOUBLE, 0.0,
+                                                 TRUE);
+            gwy_field_min_max(reference, &rpart, mask, GWY_MASK_INCLUDE,
+                              &lim, NULL);
+            gwy_field_add(feature, &fpart, mask, GWY_MASK_INCLUDE, lim);
+            gwy_field_fill(feature, &fpart, mask, GWY_MASK_EXCLUDE,
+                           -G_MAXDOUBLE);
+            // FIXME: Define min/max of two fields, with masking.
+            for (guint i = 0; i < featureheight; i++) {
+                for (guint j = 0; j < featurewidth; j++) {
+                    gdouble v1 = gwy_field_get(feature,
+                                               j+featurecol, i+featurerow);
+                    gdouble v2 = gwy_field_get(reference,
+                                               j+col, i+row);
+                    gdouble v = fmax(v1, v2);
+                    gwy_field_set(reference, j+col, i+row, v);
+                }
+            }
+        }
+        if (method == GWY_SCULPT_DOWNWARD) {
+            mask = gwy_mask_field_new_from_field(feature, &fpart,
+                                                 0.0, -G_MAXDOUBLE,
+                                                 TRUE);
+            gwy_field_min_max(reference, &rpart, mask, GWY_MASK_INCLUDE,
+                              NULL, &lim);
+            gwy_field_add(feature, &fpart, mask, GWY_MASK_INCLUDE, lim);
+            gwy_field_fill(feature, &fpart, mask, GWY_MASK_EXCLUDE,
+                           G_MAXDOUBLE);
+            // FIXME: Define min/max of two fields, with masking.
+            for (guint i = 0; i < featureheight; i++) {
+                for (guint j = 0; j < featurewidth; j++) {
+                    gdouble v1 = gwy_field_get(feature,
+                                               j+featurecol, i+featurerow);
+                    gdouble v2 = gwy_field_get(reference,
+                                               j+col, i+row);
+                    gdouble v = fmin(v1, v2);
+                    gwy_field_set(reference, j+col, i+row, v);
+                }
+            }
+        }
+
+        field_assert_numerically_equal(field, reference, 1e-15);
+
+        g_object_unref(mask);
+        g_object_unref(reference);
+        g_object_unref(feature);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_arithmetic_sculpt_upward_contained(void)
+{
+    field_arithmetic_sculpt_one_contained(GWY_SCULPT_UPWARD, FALSE);
+}
+
+void
+test_field_arithmetic_sculpt_downward_contained(void)
+{
+    field_arithmetic_sculpt_one_contained(GWY_SCULPT_DOWNWARD, FALSE);
+}
+
+void
+test_field_arithmetic_sculpt_upward_contained_periodic(void)
+{
+    field_arithmetic_sculpt_one_contained(GWY_SCULPT_UPWARD, TRUE);
+}
+
+void
+test_field_arithmetic_sculpt_downward_contained_periodic(void)
+{
+    field_arithmetic_sculpt_one_contained(GWY_SCULPT_DOWNWARD, TRUE);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
