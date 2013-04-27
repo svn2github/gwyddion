@@ -6806,4 +6806,50 @@ test_field_read_curvature_at_centre(void)
     g_rand_free(rng);
 }
 
+void
+test_field_fft_humanize_inversion(void)
+{
+    enum { max_size = 16 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
+        field_randomize(reference, rng);
+        GwyField *field = gwy_field_duplicate(reference);
+        gwy_field_fft_humanize(field);
+        gwy_field_fft_dehumanize(field);
+        field_assert_equal(field, reference);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_fft_row_humanize_inversion(void)
+{
+    enum { max_size = 16 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
+        field_randomize(reference, rng);
+        GwyField *field = gwy_field_duplicate(reference);
+        gwy_field_row_fft_humanize(field);
+        gwy_field_row_fft_dehumanize(field);
+        field_assert_equal(field, reference);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

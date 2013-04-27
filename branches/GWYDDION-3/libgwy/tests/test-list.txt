@@ -438,6 +438,8 @@ field/distributions/minkowski/boundary
 field/distributions/minkowski/black
 field/distributions/minkowski/white
 field/distributions/minkowski/connectivity
+field/fft/humanize/inversion
+field/fft/row/humanize/inversion
 surface/serialize
 surface/serialize/failure/odd
 surface/props
