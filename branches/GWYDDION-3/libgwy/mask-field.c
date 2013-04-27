@@ -771,6 +771,14 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
  * open or semi-open intervals, namely [-∞,@lower) ∪ (@upper,∞] and
  * (@lower,@upper).
  *
+ * So the most common two cases are:
+ * |[
+ * // Finite closed interval [a, b].
+ * GwyMaskField *cmask = gwy_mask_field_new_from_field(field, NULL, a, b, FALSE);
+ * // Finite open interval (a, b).
+ * GwyMaskField *omask = gwy_mask_field_new_from_field(field, NULL, b, a, TRUE);
+ * ]|
+ *
  * Returns: (transfer full):
  *          A new two-dimensional mask field.
  **/

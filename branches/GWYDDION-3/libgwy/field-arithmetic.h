@@ -75,12 +75,18 @@ void     gwy_field_add        (GwyField *field,
                                const GwyFieldPart *fpart,
                                const GwyMaskField *mask,
                                GwyMaskingType masking,
-                               gdouble value);
+                               gdouble shift);
 void     gwy_field_multiply   (GwyField *field,
                                const GwyFieldPart *fpart,
                                const GwyMaskField *mask,
                                GwyMaskingType masking,
-                               gdouble value);
+                               gdouble factor);
+void     gwy_field_addmul     (GwyField *field,
+                               const GwyFieldPart *fpart,
+                               const GwyMaskField *mask,
+                               GwyMaskingType masking,
+                               gdouble factor,
+                               gdouble shift);
 guint    gwy_field_clamp      (GwyField *field,
                                const GwyFieldPart *fpart,
                                gdouble lower,
@@ -108,6 +114,16 @@ void     gwy_field_add_field  (const GwyField *src,
                                guint destcol,
                                guint destrow,
                                gdouble factor);
+void     gwy_field_min_field  (const GwyField *src,
+                               const GwyFieldPart *srcpart,
+                               GwyField *dest,
+                               guint destcol,
+                               guint destrow);
+void     gwy_field_max_field  (const GwyField *src,
+                               const GwyFieldPart *srcpart,
+                               GwyField *dest,
+                               guint destcol,
+                               guint destrow);
 void     gwy_field_sculpt     (const GwyField *src,
                                const GwyFieldPart *srcpart,
                                GwyField *dest,

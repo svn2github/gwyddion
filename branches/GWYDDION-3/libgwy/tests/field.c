@@ -6199,10 +6199,9 @@ test_field_correlate_normalize(void)
         gwy_field_normalize(kernel, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
                             GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
         gwy_field_copy(kernel, NULL, field, col, row);
-        gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE,
-                           -log(g_rand_double(rng)));
-        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE,
-                      20.0*(g_rand_double(rng) - 0.5));
+        gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE,
+                         -log(g_rand_double(rng)),
+                         20.0*(g_rand_double(rng) - 0.5));
         GwyField *score = gwy_field_new_alike(field, FALSE);
 
         gwy_field_correlate(field, NULL, score, kernel, NULL,
@@ -6880,9 +6879,7 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
         GwyField *feature = gwy_field_new_sized(max_feature, max_feature,
                                                 FALSE);
         field_randomize(feature, rng);
-        // FIXME: Define some gwy_field_linear().
-        gwy_field_multiply(feature, NULL, NULL, GWY_MASK_IGNORE, 2.0);
-        gwy_field_add(feature, NULL, NULL, GWY_MASK_IGNORE, -1.0);
+        gwy_field_addmul(feature, NULL, NULL, GWY_MASK_IGNORE, 2.0, -1.0);
         gint col = g_rand_int_range(rng, 0, width+1 - featurewidth);
         gint row = g_rand_int_range(rng, 0, height+1 - featureheight);
         gwy_field_sculpt(feature, &fpart, field, col, row, method, periodic);
@@ -6901,17 +6898,7 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
             gwy_field_add(feature, &fpart, mask, GWY_MASK_INCLUDE, lim);
             gwy_field_fill(feature, &fpart, mask, GWY_MASK_EXCLUDE,
                            -G_MAXDOUBLE);
-            // FIXME: Define min/max of two fields, with masking.
-            for (guint i = 0; i < featureheight; i++) {
-                for (guint j = 0; j < featurewidth; j++) {
-                    gdouble v1 = gwy_field_get(feature,
-                                               j+featurecol, i+featurerow);
-                    gdouble v2 = gwy_field_get(reference,
-                                               j+col, i+row);
-                    gdouble v = fmax(v1, v2);
-                    gwy_field_set(reference, j+col, i+row, v);
-                }
-            }
+            gwy_field_max_field(feature, &fpart, reference, col, row);
         }
         if (method == GWY_SCULPT_DOWNWARD) {
             mask = gwy_mask_field_new_from_field(feature, &fpart,
@@ -6922,17 +6909,7 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
             gwy_field_add(feature, &fpart, mask, GWY_MASK_INCLUDE, lim);
             gwy_field_fill(feature, &fpart, mask, GWY_MASK_EXCLUDE,
                            G_MAXDOUBLE);
-            // FIXME: Define min/max of two fields, with masking.
-            for (guint i = 0; i < featureheight; i++) {
-                for (guint j = 0; j < featurewidth; j++) {
-                    gdouble v1 = gwy_field_get(feature,
-                                               j+featurecol, i+featurerow);
-                    gdouble v2 = gwy_field_get(reference,
-                                               j+col, i+row);
-                    gdouble v = fmin(v1, v2);
-                    gwy_field_set(reference, j+col, i+row, v);
-                }
-            }
+            gwy_field_min_field(feature, &fpart, reference, col, row);
         }
 
         field_assert_numerically_equal(field, reference, 1e-15);

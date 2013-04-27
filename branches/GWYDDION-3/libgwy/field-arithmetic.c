@@ -297,16 +297,16 @@ gwy_field_fill_full(GwyField *field,
  * @mask: (allow-none):
  *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @value: Value to add to the data.
+ * @shift: Value to add to the data.
  *
- * Adds a value to data in a field.
+ * Adds a shift to data in a field.
  **/
 void
 gwy_field_add(GwyField *field,
               const GwyFieldPart *fpart,
               const GwyMaskField *mask,
               GwyMaskingType masking,
-              gdouble value)
+              gdouble shift)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -317,17 +317,17 @@ gwy_field_add(GwyField *field,
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
             for (guint j = width; j; j--, d++)
-                *d += value;
+                *d += shift;
         }
         if (width == field->xres && height == field->yres) {
             Field *priv = field->priv;
             priv->cached &= (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                              | CBIT(MED) | CBIT(ARE));
-            CVAL(priv, MIN) += value;
-            CVAL(priv, MAX) += value;
-            CVAL(priv, AVG) += value;
+            CVAL(priv, MIN) += shift;
+            CVAL(priv, MAX) += shift;
+            CVAL(priv, AVG) += shift;
             // RMS does not change
-            CVAL(priv, MED) += value;
+            CVAL(priv, MED) += shift;
             // ARE does not change
         }
         else
@@ -341,7 +341,7 @@ gwy_field_add(GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
-                    *d += value;
+                    *d += shift;
                 gwy_mask_iter_next(iter);
             }
         }
@@ -357,7 +357,7 @@ gwy_field_add(GwyField *field,
  * @mask: (allow-none):
  *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @value: Value to multiply the data with.
+ * @factor: Value to multiply the data with.
  *
  * Multiplies data in a field with a value.
  **/
@@ -366,7 +366,7 @@ gwy_field_multiply(GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMaskingType masking,
-                   gdouble value)
+                   gdouble factor)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -377,20 +377,27 @@ gwy_field_multiply(GwyField *field,
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
             for (guint j = width; j; j--, d++)
-                *d *= value;
+                *d *= factor;
         }
         if (width == field->xres && height == field->yres) {
             Field *priv = field->priv;
             priv->cached &= (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                              | CBIT(MSQ) | CBIT(MED));
-            CVAL(priv, MIN) *= value;
-            CVAL(priv, MAX) *= value;
-            if (value < 0.0)
+            CVAL(priv, MIN) *= factor;
+            CVAL(priv, MAX) *= factor;
+            if (factor < 0.0) {
+                gboolean MINbit = priv->cached & CBIT(MIN),
+                         MAXbit = priv->cached & CBIT(MAX);
                 DSWAP(CVAL(priv, MIN), CVAL(priv, MAX));
-            CVAL(priv, AVG) *= value;
-            CVAL(priv, RMS) *= fabs(value);
-            CVAL(priv, MSQ) *= value*value;
-            CVAL(priv, MED) *= value;
+                // We may select a neighbour median value.
+                priv->cached &= ~(CBIT(MIN) | CBIT(MAX) | CBIT(MED));
+                priv->cached |= ((MINbit ? CBIT(MAX) : 0)
+                                 | (MAXbit ? CBIT(MIN) : 0));
+            }
+            CVAL(priv, AVG) *= factor;
+            CVAL(priv, RMS) *= fabs(factor);
+            CVAL(priv, MSQ) *= factor*factor;
+            CVAL(priv, MED) *= factor;
         }
         else
             gwy_field_invalidate(field);
@@ -403,7 +410,80 @@ gwy_field_multiply(GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
-                    *d *= value;
+                    *d *= factor;
+                gwy_mask_iter_next(iter);
+            }
+        }
+        gwy_field_invalidate(field);
+    }
+}
+
+/**
+ * gwy_field_addmul:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to modify, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @factor: Value to multiply the data with.
+ * @shift: Value to add to the data.
+ *
+ * Applies a linear function to field data.
+ *
+ * Values in the field are changed according to the formula
+ * @znew = @factor*@zold + @shift.
+ **/
+void
+gwy_field_addmul(GwyField *field,
+                 const GwyFieldPart *fpart,
+                 const GwyMaskField *mask,
+                 GwyMaskingType masking,
+                 gdouble factor,
+                 gdouble shift)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        return;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            gdouble *d = field->data + (row + i)*field->xres + col;
+            for (guint j = width; j; j--, d++)
+                *d = (*d)*factor + shift;
+        }
+        if (width == field->xres && height == field->yres) {
+            Field *priv = field->priv;
+            priv->cached &= (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
+                             | CBIT(MED));
+            CVAL(priv, MIN) = CVAL(priv, MIN)*factor + shift;
+            CVAL(priv, MAX) = CVAL(priv, MAX)*factor + shift;
+            if (factor < 0.0) {
+                gboolean MINbit = priv->cached & CBIT(MIN),
+                         MAXbit = priv->cached & CBIT(MAX);
+                DSWAP(CVAL(priv, MIN), CVAL(priv, MAX));
+                // We may select a neighbour median value.
+                priv->cached &= ~(CBIT(MIN) | CBIT(MAX) | CBIT(MED));
+                priv->cached |= ((MINbit ? CBIT(MAX) : 0)
+                                 | (MAXbit ? CBIT(MIN) : 0));
+            }
+            CVAL(priv, AVG) = CVAL(priv, AVG)*factor + shift;
+            CVAL(priv, RMS) *= fabs(factor);
+            CVAL(priv, MED) = CVAL(priv, MED)*factor + shift;
+        }
+        else
+            gwy_field_invalidate(field);
+    }
+    else {
+        GwyMaskIter iter;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            gdouble *d = field->data + (row + i)*field->xres + col;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert)
+                    *d = (*d)*factor + shift;
                 gwy_mask_iter_next(iter);
             }
         }
@@ -580,7 +660,8 @@ gwy_field_apply_func(GwyField *field,
 /**
  * gwy_field_add_field:
  * @src: Source two-dimensional data field.
- * @srcpart: Area in field @src to add.  Pass %NULL to add entire @src.
+ * @srcpart: (allow-none):
+ *           Area in field @src to add.  Pass %NULL to add entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
@@ -634,9 +715,99 @@ gwy_field_add_field(const GwyField *src,
 }
 
 /**
+ * gwy_field_min_field:
+ * @src: Source two-dimensional data field.
+ * @srcpart: (allow-none):
+ *           Area in field @src representing the operand.  Pass %NULL to use
+ *           entire @src.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ *
+ * Modifies one field by taking minimum with another field values.
+ *
+ * The rectangle of operand data is defined by @srcpart and the values are
+ * modified in @dest starting from (@destcol, @destrow).
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corresponds to data inside @src and @dest
+ * is processed.  This can also mean @dest is not modified at all.
+ *
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
+ **/
+void
+gwy_field_min_field(const GwyField *src,
+                    const GwyFieldPart *srcpart,
+                    GwyField *dest,
+                    guint destcol,
+                    guint destrow)
+{
+    guint col, row, width, height;
+    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                               FALSE, &col, &row, &width, &height))
+        return;
+
+    const gdouble *srcbase = src->data + src->xres*row + col;
+    gdouble *destbase = dest->data + dest->xres*destrow + destcol;
+    for (guint i = 0; i < height; i++) {
+        const gdouble *srow = srcbase + i*src->xres;
+        gdouble *drow = destbase + i*dest->xres;
+        for (guint j = width; j; j--, srow++, drow++)
+            *drow = fmin(*drow, *srow);
+    }
+    gwy_field_invalidate(dest);
+}
+
+/**
+ * gwy_field_max_field:
+ * @src: Source two-dimensional data field.
+ * @srcpart: (allow-none):
+ *           Area in field @src representing the operand.  Pass %NULL to use
+ *           entire @src.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ *
+ * Modifies one field by taking maximum with another field values.
+ *
+ * The rectangle of operand data is defined by @srcpart and the values are
+ * modified in @dest starting from (@destcol, @destrow).
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corresponds to data inside @src and @dest
+ * is processed.  This can also mean @dest is not modified at all.
+ *
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
+ **/
+void
+gwy_field_max_field(const GwyField *src,
+                    const GwyFieldPart *srcpart,
+                    GwyField *dest,
+                    guint destcol,
+                    guint destrow)
+{
+    guint col, row, width, height;
+    if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
+                               FALSE, &col, &row, &width, &height))
+        return;
+
+    const gdouble *srcbase = src->data + src->xres*row + col;
+    gdouble *destbase = dest->data + dest->xres*destrow + destcol;
+    for (guint i = 0; i < height; i++) {
+        const gdouble *srow = srcbase + i*src->xres;
+        gdouble *drow = destbase + i*dest->xres;
+        for (guint j = width; j; j--, srow++, drow++)
+            *drow = fmax(*drow, *srow);
+    }
+    gwy_field_invalidate(dest);
+}
+
+/**
  * gwy_field_sculpt:
  * @src: Source two-dimensional data field.
- * @srcpart: Area in field @src to add.  Pass %NULL to add entire @src.
+ * @srcpart: (allow-none):
+ *           Area in field @src representing the operand.  Pass %NULL to use
+ *           entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
