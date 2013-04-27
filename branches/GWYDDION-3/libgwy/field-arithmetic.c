@@ -693,8 +693,8 @@ gwy_field_sculpt(const GwyField *src,
 
         if (destcol + width > dxres)
             width = dxres - destcol;
-        if (destrow + height > dxres)
-            height = dxres - destrow;
+        if (destrow + height > dyres)
+            height = dyres - destrow;
         if (destcol < 0) {
             width += destcol;
             col += destcol;
@@ -711,14 +711,14 @@ gwy_field_sculpt(const GwyField *src,
     gdouble *dbase = dest->data + destrow*dxres + destcol;
     SculptBlockFindFunc findm;
     SculptBlockFunc sculpt;
-    gdouble m;
+    gdouble m, mempty;
     if (method == GWY_SCULPT_UPWARD) {
-        m = G_MAXDOUBLE;
+        m = mempty = G_MAXDOUBLE;
         findm = &sculpt_block_find_max;
         sculpt = &sculpt_block_upward;
     }
     else if (method == GWY_SCULPT_DOWNWARD) {
-        m = -G_MAXDOUBLE;
+        m = mempty = -G_MAXDOUBLE;
         findm = &sculpt_block_find_min;
         sculpt = &sculpt_block_downward;
     }
@@ -728,6 +728,8 @@ gwy_field_sculpt(const GwyField *src,
 
     if (!periodic) {
         m = findm(sbase, dbase, width, height, src->xres, dxres, m);
+        if (m == mempty)
+            return;
         sculpt(sbase, dbase, width, height, src->xres, dxres, m);
         return;
     }
@@ -748,6 +750,8 @@ gwy_field_sculpt(const GwyField *src,
         i += lower - ii;
         ii = 0;
     }
+    if (m == mempty)
+        return;
 
     i = 0, ii = destrow;
     while (i < height) {
