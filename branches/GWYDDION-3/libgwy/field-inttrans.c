@@ -230,7 +230,7 @@ gwy_field_row_fft_humanize(GwyField *field)
     guint jm = xres/2;
     gdouble *buf = g_new(gdouble, xres-jm);
     gdouble *data = field->data;
-    for (guint i = 0; i < field->yres; i++) {
+    for (guint i = 0; i < yres; i++) {
         gdouble *row = data + i*xres;
         // The left part is the potentially larger.  This order ensures no
         // overlap troubles occur.
@@ -262,7 +262,7 @@ gwy_field_row_fft_dehumanize(GwyField *field)
     guint jm = xres/2;
     gdouble *buf = g_new(gdouble, xres-jm);
     gdouble *data = field->data;
-    for (guint i = 0; i < field->yres; i++) {
+    for (guint i = 0; i < yres; i++) {
         gdouble *row = data + i*xres;
         // The right part is the potentially larger.  This order ensures no
         // overlap troubles occur.
