@@ -259,6 +259,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
         fftw_destroy_plan(plan);
         complete_fft_real(myreout);
         complete_fft_imag(myimout);
+
         if (in == rein && direction == GWY_TRANSFORM_BACKWARD) {
             gdouble *im = myimout->data;
             for (guint k = xres*yres; k; k--, im++)
@@ -283,19 +284,17 @@ gwy_field_row_fft_raw(const GwyField *rein,
                                       | GWY_FIELD_COMPAT_UNITS);
         g_return_if_fail(gwy_field_is_incompatible(rein, imin, compat));
 
-        fftw_plan plan;
-        if (direction == GWY_TRANSFORM_FORWARD)
-            plan = fftw_plan_guru_split_dft(1, &trans_dims,
-                                            1, &repeat_dims,
-                                            rein->data, imin->data,
-                                            myreout->data, myimout->data,
-                                            flags);
-        else
-            plan = fftw_plan_guru_split_dft(1, &trans_dims,
-                                            1, &repeat_dims,
-                                            imin->data, rein->data,
-                                            myimout->data, myreout->data,
-                                            flags);
+        gdouble *reindata = rein->data, *imindata = imin->data,
+                *reoutdata = myreout->data, *imoutdata = myimout->data;
+        if (direction == GWY_TRANSFORM_BACKWARD) {
+            GWY_SWAP(gdouble*, reindata, imindata);
+            GWY_SWAP(gdouble*, reoutdata, imoutdata);
+        }
+        fftw_plan plan = fftw_plan_guru_split_dft(1, &trans_dims,
+                                                  1, &repeat_dims,
+                                                  reindata, imindata,
+                                                  reoutdata, imoutdata,
+                                                  flags);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
     }
