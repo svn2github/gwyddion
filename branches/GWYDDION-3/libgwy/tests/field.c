@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -6885,6 +6885,37 @@ test_field_fft_row_humanize_inversion(void)
     g_rand_free(rng);
 }
 
+static void
+sculpt_dumb(GwyField *field, const GwyFieldPart *rpart,
+            GwyField *feature, const GwyFieldPart *fpart,
+            GwySculptType method)
+{
+    GwyMaskField *mask = NULL;
+    gdouble lim;
+
+    if (method == GWY_SCULPT_UPWARD) {
+        mask = gwy_mask_field_new_from_field(feature, fpart,
+                                             G_MAXDOUBLE, 0.0, TRUE);
+        gwy_field_min_max(field, rpart, mask, GWY_MASK_INCLUDE, &lim, NULL);
+        gwy_field_add(feature, fpart, mask, GWY_MASK_INCLUDE, lim);
+        gwy_field_fill(feature, fpart, mask, GWY_MASK_EXCLUDE, -G_MAXDOUBLE);
+        gwy_field_max_field(feature, fpart, field, rpart->col, rpart->row);
+    }
+    else if (method == GWY_SCULPT_DOWNWARD) {
+        mask = gwy_mask_field_new_from_field(feature, fpart,
+                                             0.0, -G_MAXDOUBLE, TRUE);
+        gwy_field_min_max(field, rpart, mask, GWY_MASK_INCLUDE, NULL, &lim);
+        gwy_field_add(feature, fpart, mask, GWY_MASK_INCLUDE, lim);
+        gwy_field_fill(feature, fpart, mask, GWY_MASK_EXCLUDE, G_MAXDOUBLE);
+        gwy_field_min_field(feature, fpart, field, rpart->col, rpart->row);
+    }
+    else {
+        g_assert_not_reached();
+    }
+
+    g_object_unref(mask);
+}
+
 // Here we put the feature completely within the destination field.
 static void
 field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
@@ -6921,34 +6952,9 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
         GwyFieldPart rpart = {
             col, row, featurewidth, featureheight
         };
-        GwyMaskField *mask = NULL;
-        gdouble lim = 0.0;
-        if (method == GWY_SCULPT_UPWARD) {
-            mask = gwy_mask_field_new_from_field(feature, &fpart,
-                                                 G_MAXDOUBLE, 0.0,
-                                                 TRUE);
-            gwy_field_min_max(reference, &rpart, mask, GWY_MASK_INCLUDE,
-                              &lim, NULL);
-            gwy_field_add(feature, &fpart, mask, GWY_MASK_INCLUDE, lim);
-            gwy_field_fill(feature, &fpart, mask, GWY_MASK_EXCLUDE,
-                           -G_MAXDOUBLE);
-            gwy_field_max_field(feature, &fpart, reference, col, row);
-        }
-        if (method == GWY_SCULPT_DOWNWARD) {
-            mask = gwy_mask_field_new_from_field(feature, &fpart,
-                                                 0.0, -G_MAXDOUBLE,
-                                                 TRUE);
-            gwy_field_min_max(reference, &rpart, mask, GWY_MASK_INCLUDE,
-                              NULL, &lim);
-            gwy_field_add(feature, &fpart, mask, GWY_MASK_INCLUDE, lim);
-            gwy_field_fill(feature, &fpart, mask, GWY_MASK_EXCLUDE,
-                           G_MAXDOUBLE);
-            gwy_field_min_field(feature, &fpart, reference, col, row);
-        }
-
+        sculpt_dumb(reference, &rpart, feature, &fpart, method);
         field_assert_numerically_equal(field, reference, 1e-15);
 
-        g_object_unref(mask);
         g_object_unref(reference);
         g_object_unref(feature);
         g_object_unref(field);
@@ -6979,6 +6985,71 @@ void
 test_field_arithmetic_sculpt_downward_contained_periodic(void)
 {
     field_arithmetic_sculpt_one_contained(GWY_SCULPT_DOWNWARD, TRUE);
+}
+
+static void
+field_arithmetic_sculpt_one_periodic(GwySculptType method)
+{
+    enum { max_size = 30, max_feature = 20 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 200;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(width, height, FALSE);
+        // Must use a flat dest field to ensure uniform minima.
+        gwy_field_fill_full(field, 2.0*g_rand_double(rng) - 1.0);
+        GwyField *reference = gwy_field_duplicate(field);
+        // XXX: Unfortunately, we don't have a dumb extension method for a
+        // feature larger than field.
+        guint featurewidth = g_rand_int_range(rng,
+                                              1, MIN(max_feature, width)+1);
+        guint featureheight = g_rand_int_range(rng,
+                                               1, MIN(max_feature, height)+1);
+        guint featurecol = g_rand_int_range(rng,
+                                            0, max_feature+1 - featurewidth);
+        guint featurerow = g_rand_int_range(rng,
+                                            0, max_feature+1 - featureheight);
+        GwyFieldPart fpart = {
+            featurecol, featurerow, featurewidth, featureheight
+        };
+        GwyField *feature = gwy_field_new_sized(max_feature, max_feature,
+                                                FALSE);
+        field_randomize(feature, rng);
+        gwy_field_addmul(feature, NULL, NULL, GWY_MASK_IGNORE, 2.0, -1.0);
+        gint col = g_rand_int_range(rng, -4*width, 4*width+1);
+        gint row = g_rand_int_range(rng, -4*height, 4*height+1);
+        gwy_field_sculpt(feature, &fpart, field, col, row, method, TRUE);
+
+        for (gint i = -5; i <= 5; i++) {
+            for (gint j = -5; j <= 5; j++) {
+                gwy_field_sculpt(feature, &fpart, reference,
+                                 col + j*(gint)width, row + i*(gint)height,
+                                 method, FALSE);
+            }
+        }
+
+        field_assert_numerically_equal(field, reference, 1e-15);
+
+        g_object_unref(reference);
+        g_object_unref(feature);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_arithmetic_sculpt_upward_periodic(void)
+{
+    field_arithmetic_sculpt_one_periodic(GWY_SCULPT_UPWARD);
+}
+
+void
+test_field_arithmetic_sculpt_downward_periodic(void)
+{
+    field_arithmetic_sculpt_one_periodic(GWY_SCULPT_DOWNWARD);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -354,6 +354,8 @@ field/arithmetic/sculpt/upward/contained
 field/arithmetic/sculpt/downward/contained
 field/arithmetic/sculpt/upward/contained-periodic
 field/arithmetic/sculpt/downward/contained-periodic
+field/arithmetic/sculpt/upward/periodic
+field/arithmetic/sculpt/downward/periodic
 field/level/row/mean
 field/level/row/median
 field/level/row/mean-diff
