@@ -3243,31 +3243,65 @@ test_field_arithmetic_cache(void)
     g_assert_cmpfloat(min, ==, -1.0);
     g_assert_cmpfloat(max, ==, 2.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
-    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
     gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, 0.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -1.0);
     g_assert_cmpfloat(max, ==, 2.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
-    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
     gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -1.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 1.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
-    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
     gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, 1.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 1.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
-    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
     gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, -2.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 4.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 1.0);
-    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - sqrt(5.0)), <, 1e-15);
+    gwy_assert_floatval(gwy_field_rms_full(field), sqrt(5.0), 1e-15);
+
+    gwy_assign(field->data, data, xres*yres);
+    gwy_field_invalidate(field);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -1.0);
+    g_assert_cmpfloat(max, ==, 2.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
+    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, 1.0, 0.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -1.0);
+    g_assert_cmpfloat(max, ==, 2.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
+    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, 2.0, 2.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, 0.0);
+    g_assert_cmpfloat(max, ==, 6.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, 3.0);
+    gwy_assert_floatval(gwy_field_rms_full(field), sqrt(5.0), 1e-15);
+
+    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, -0.5, 1.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -2.0);
+    g_assert_cmpfloat(max, ==, 1.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
+    gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
+
     g_object_unref(field);
 }
 
