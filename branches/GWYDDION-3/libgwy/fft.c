@@ -448,7 +448,9 @@ _gwy_fft_rigour(void)
  * Direction of a transformation, namely integral transformation.
  *
  * In FFT, it is equal to sign of the exponent, that is the backward transform
- * uses -1, the forward transform +1.
+ * uses 1, the forward transform -1.  This is in line with FFTW so
+ * %GWY_TRANSFORM_FORWARD and %FFTW_FORWARD can be used interchangably (but it
+ * is the opposite of Gwyddion 1 and 2 convention).
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

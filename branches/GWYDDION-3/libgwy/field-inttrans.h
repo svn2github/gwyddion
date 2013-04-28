@@ -25,8 +25,7 @@
 
 G_BEGIN_DECLS
 
-void gwy_field_row_fft           (const GwyField *rin,
-                                  const GwyField *iin,
+void gwy_field_row_fft           (const GwyField *field,
                                   GwyField *rout,
                                   GwyField *iout,
                                   GwyWindowingType windowing,
@@ -38,8 +37,7 @@ void gwy_field_row_fft_raw       (GwyField *rin,
                                   GwyField *iout,
                                   GwyTransformDirection direction,
                                   gboolean preserveinput);
-void gwy_field_fft               (const GwyField *rin,
-                                  const GwyField *iin,
+void gwy_field_fft               (const GwyField *field,
                                   GwyField *rout,
                                   GwyField *iout,
                                   GwyWindowingType windowing,

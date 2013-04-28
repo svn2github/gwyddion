@@ -32,7 +32,7 @@ static void humanize_clear_cached(GwyField *field);
 
 /**
  * gwy_field_row_fft:
- * @rin: 
+ * @field: 
  * @iin: 
  * @rout: 
  * @iout: 
@@ -43,8 +43,7 @@ static void humanize_clear_cached(GwyField *field);
  * .
  **/
 void
-gwy_field_row_fft(const GwyField *rin,
-                  const GwyField *iin,
+gwy_field_row_fft(const GwyField *field,
                   GwyField *rout,
                   GwyField *iout,
                   GwyWindowingType windowing,
@@ -78,8 +77,7 @@ gwy_field_row_fft_raw(GwyField *rin,
 
 /**
  * gwy_field_fft:
- * @rin: 
- * @iin: 
+ * @field: 
  * @rout: 
  * @iout: 
  * @windowing: 
@@ -89,8 +87,7 @@ gwy_field_row_fft_raw(GwyField *rin,
  * .
  **/
 void
-gwy_field_fft(const GwyField *rin,
-              const GwyField *iin,
+gwy_field_fft(const GwyField *field,
               GwyField *rout,
               GwyField *iout,
               GwyWindowingType windowing,
