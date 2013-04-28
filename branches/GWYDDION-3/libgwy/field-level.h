@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -71,6 +71,8 @@ GwyLine* gwy_field_find_row_shifts(const GwyField *field,
                                    GwyMaskingType masking,
                                    GwyRowShiftMethod method,
                                    guint min_freedom);
+void     gwy_field_level_rows     (GwyField *field,
+                                   guint level);
 void     gwy_field_laplace_solve  (GwyField *field,
                                    const GwyMaskField *mask,
                                    guint grain_id);

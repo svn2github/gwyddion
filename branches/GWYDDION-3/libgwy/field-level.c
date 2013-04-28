@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -956,6 +956,104 @@ fail:
     _gwy_assign_unit(&shifts->priv->yunit, field->priv->zunit);
 
     return shifts;
+}
+
+/**
+ * gwy_field_level_rows:
+ * @field: A two-dimensional data field.
+ * @level: First row polynomial degree to preserve.  Passing 0 means the
+ *         function is no-op, 1 means removal of the constant term, 2 removal
+ *         of the linear term, 3 removal of the quadratic term. 
+ *         Degrees higher than 3 are not implemented.
+ *
+ * Performs a simple polynomial levelling of field rows.
+ *
+ * This functions is mainly useful as the first step in integral transforms
+ * and other more advanced methods.  It may not be so useful for actual row
+ * levelling.
+ **/
+void
+gwy_field_level_rows(GwyField *field,
+                     guint level)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(level <= 3);
+    if (!level)
+        return;
+
+    guint xres = field->xres, yres = field->yres;
+    if (xres <= level) {
+        gwy_field_clear_full(field);
+        return;
+    }
+
+    if (level == 1) {
+        for (guint i = 0; i < yres; i++) {
+            const gdouble *d = field->data + i*xres;
+            gdouble sz = 0.0;
+            for (guint j = xres; j; j--, d++)
+                sz += *d;
+            gdouble m = sz/xres;
+            gdouble *dd = field->data + i*xres;
+            for (guint j = xres; j; j--, dd++)
+                *dd -= m;
+        }
+    }
+    else if (level == 2) {
+        gdouble sxx;
+        if (xres & 1)
+            sxx = 8*gwy_power_sum((xres-1)/2, 2);
+        else
+            sxx = 2*gwy_power_sum(xres-1, 2) - 8*gwy_power_sum(xres/2 - 1, 2);
+
+        for (guint i = 0; i < yres; i++) {
+            const gdouble *d = field->data + i*xres;
+            gdouble sz = 0.0, szx = 0.0;
+            gint jj = 1 - (gint)xres;
+            for (guint j = xres; j; j--, d++, jj += 2) {
+                sz += *d;
+                szx += jj*(*d);
+            }
+            gdouble a = sz/xres;
+            gdouble b = szx/sxx;
+            gdouble *dd = field->data + i*xres;
+            jj = 1 - (gint)xres;
+            for (guint j = xres; j; j--, d++, jj += 2)
+                *dd -= a + jj*b;
+        }
+    }
+    else if (level == 3) {
+        gdouble sxx, sxxxx;
+        if (xres & 1) {
+            sxx = 8*gwy_power_sum((xres-1)/2, 2);
+            sxxxx = 32*gwy_power_sum((xres-1)/2, 4);
+        }
+        else {
+            sxx = 2*gwy_power_sum(xres-1, 2) - 8*gwy_power_sum(xres/2 - 1, 2);
+            sxxxx = 2*gwy_power_sum(xres-1, 4) - 32*gwy_power_sum(xres/2 - 1, 4);
+        }
+        gdouble D = xres*(gdouble)sxxxx - sxx*(gdouble)sxx;
+
+        for (guint i = 0; i < yres; i++) {
+            const gdouble *d = field->data + i*xres;
+            gdouble sz = 0.0, szx = 0.0, szxx = 0.0;
+            gint jj = 1 - (gint)xres;
+            for (guint j = xres; j; j--, d++, jj += 2) {
+                sz += *d;
+                szx += jj*(*d);
+                szxx += jj*jj*(*d);
+            }
+            gdouble a = (sxxxx*sz - sxx*szxx)/D;
+            gdouble b = szx/sxx;
+            gdouble c = (xres*szxx - sxx*sz)/D;
+            gdouble *dd = field->data + i*xres;
+            jj = 1 - (gint)xres;
+            for (guint j = xres; j; j--, d++, jj += 2)
+                *dd -= a + jj*(b + jj*c);
+        }
+    }
+
+    gwy_field_invalidate(field);
 }
 
 static gboolean
