@@ -22,15 +22,32 @@
 #include <complex.h>
 #include <fftw3.h>
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
+#include "libgwy/field-arithmetic.h"
 #include "libgwy/field-level.h"
 #include "libgwy/field-inttrans.h"
-#include "libgwy/field-internal.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
+#include "libgwy/field-internal.h"
 
 #define CBIT GWY_FIELD_CBIT
 
-static void humanize_in_place(GwyField *field);
+static void humanize_in_place    (GwyField *field);
 static void humanize_clear_cached(GwyField *field);
+static void humanize_xoffset     (GwyField *field);
+static void humanize_yoffset     (GwyField *field);
+static void dehumanize_xoffset   (GwyField *field);
+static void dehumanize_yoffset   (GwyField *field);
+static void complete_fft_real    (GwyField *field);
+static void complete_fft_imag    (GwyField *field);
+static void fftize_xdim          (GwyField *fftfield,
+                                  const GwyField *field);
+static void fftize_ydim          (GwyField *fftfield,
+                                  const GwyField *field);
+static void copy_xdim            (GwyField *fftfield,
+                                  const GwyField *field);
+static void copy_ydim            (GwyField *fftfield,
+                                  const GwyField *field);
 
 static GwyField*
 init_fft_field(const GwyField *src,
@@ -54,11 +71,22 @@ init_fft_field(const GwyField *src,
  *         Target data field for the imaginary part of the transform.
  *         It will be resized to match @field if necessary.
  * @windowing: Windowing type to use.
- * @preserverms: %TRUE to preserve RMS value.
+ * @preserverms: %TRUE to preserve RMS value.  More precisely, for each row,
+ *               the sum of squares of the output will be the same as the
+ *               sum of squares of the input after levelling.  If %FALSE is
+ *               passed the Fourier coefficients will be, in general, diminshed
+ *               due to windowing.
  * @level: Row levelling to apply, pass 0 for no row levelling.  See
  *         gwy_field_level_rows().
  *
- * Performs FFT of rows of a two-dimensional data field.
+ * Performs real-to-complex FFT of rows of a two-dimensional data field.
+ *
+ * This is a high-level method suitable in cases when the FFT output is to be
+ * analysed or displayed.  For modifications in frequency domain and
+ * transforming back, gwy_field_row_fft_raw() is usually more suitable.
+ *
+ * Zero frequency will be in the top left corner; use
+ * gwy_field_row_fft_humanize() if you want it in the centre.
  **/
 void
 gwy_field_row_fft(const GwyField *field,
@@ -83,53 +111,212 @@ gwy_field_row_fft(const GwyField *field,
 
     fftw_iodim trans_dims = { xres, 1, 1 };
     fftw_iodim repeat_dims = { yres, xres, xres };
+    guint flags = FFTW_DESTROY_INPUT | _gwy_fft_rigour();
     fftw_plan plan = fftw_plan_guru_split_dft_r2c(1, &trans_dims,
                                                   1, &repeat_dims,
                                                   myrein->data,
-                                                  myreout->data,
-                                                  myimout->data,
-                                                  FFTW_DESTROY_INPUT
-                                                  | _gwy_fft_rigour());
+                                                  myreout->data, myimout->data,
+                                                  flags);
     gwy_field_copy_full(field, myrein);
     gwy_field_level_rows(myrein, level);
+    gdouble *sqsum = NULL;
+    if (preserverms) {
+        sqsum = g_new0(gdouble, yres);
+        for (guint i = 0; i < yres; i++) {
+            const gdouble *d = myrein->data + i*xres;
+            gdouble s = 0.0;
+            for (guint j = xres; j; j--, d++)
+                s += (*d)*(*d);
+            sqsum[i] = s;
+        }
+    }
     gwy_field_fft_window(myrein, windowing, FALSE, TRUE);
     fftw_execute(plan);
     fftw_destroy_plan(plan);
-
-    // TODO: distribute the FFT result which occupies only the first xres/2+1
-    // values in each row.
-
     g_object_unref(myrein);
+
+    if (preserverms || reout)
+        complete_fft_real(myreout);
+    if (preserverms || imout)
+        complete_fft_imag(myimout);
+
+    if (preserverms) {
+        for (guint i = 0; i < yres; i++) {
+            gdouble *re = myreout->data + i*xres;
+            gdouble *im = myimout->data + i*xres;
+            gdouble s = 0.0;
+            if (sqsum[i]) {
+                for (guint j = xres; j; j--, re++, im++)
+                    s += (*re)*(*re) + (*im)*(*im);
+                // s == 0.0 should not really happen since we took the sqsum
+                // after levelling, but...
+                if (s)
+                    s = sqrt(sqsum[i]/s);
+            }
+            re = myreout->data + i*xres;
+            im = myimout->data + i*xres;
+            for (guint j = xres; j; j--, re++, im++) {
+                *re *= s;
+                *im *= s;
+            }
+        }
+        g_free(sqsum);
+    }
+    else {
+        gdouble q = 1.0/sqrt(xres);
+        if (reout)
+            gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+        if (imout)
+            gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+    }
+
     g_object_unref(myimout);
     g_object_unref(myreout);
 
-    // TODO: implement preserverms
-    // FIXME: we may want two preserverms modes:
-    // (a) plain preservation of the sum
-    // (b) correct preservation of the integral
-    // TODO: set dimensions and units of output fields
+    if (reout) {
+        fftize_xdim(reout, field);
+        copy_ydim(reout, field);
+        gwy_field_invalidate(reout);
+    }
+    if (imout) {
+        fftize_xdim(imout, field);
+        copy_ydim(imout, field);
+        gwy_field_invalidate(imout);
+    }
 }
 
 /**
  * gwy_field_row_fft_raw:
- * @rein: 
- * @imin: 
- * @reout: 
- * @imout: 
- * @direction: 
- * @preserveinput: 
+ * @rein: (allow-none):
+ *        Real input two-dimensional data field.
+ * @imin: (allow-none):
+ *        Imaginary input two-dimensional data field.
+ * @reout: (allow-none):
+ *         Target data field for the real part of the transform.
+ *         It will be resized to match @rein if necessary.
+ * @imout: (allow-none):
+ *         Target data field for the imaginary part of the transform.
+ *         It will be resized to match @rein if necessary.
+ * @direction: Transformation direction.
  *
- * .
+ * Performs raw FFT of rows of a two-dimensional data field.
+ *
+ * This is a low-level method suitable in cases when you intend to transform
+ * the data back and forth.  Function gwy_field_row_fft() is usually more
+ * suitable for analysis and display.
+ *
+ * Zero frequency will be in the top left corner; use
+ * gwy_field_row_fft_humanize() if you want it in the centre.
+ *
+ * Some input or output fields may be %NULL if you are not interested in the
+ * corresponding part or want to perform a real-to-complex (or
+ * imaginary-to-complex for that matter) transform.  To be precise, either or
+ * both of @reout and @imout can be %NULL.  The function reduces to no-op if
+ * both are %NULL.  If they are not both %NULL at least one of @rein and @imin
+ * must be given.  If both input fields are given they must be compatible.
+ *
+ * All fields must be different objects.
  **/
 void
-gwy_field_row_fft_raw(GwyField *rein,
-                      GwyField *imin,
+gwy_field_row_fft_raw(const GwyField *rein,
+                      const GwyField *imin,
                       GwyField *reout,
                       GwyField *imout,
-                      GwyTransformDirection direction,
-                      gboolean preserveinput)
+                      GwyTransformDirection direction)
 {
+    g_return_if_fail(!rein || GWY_IS_FIELD(rein));
+    g_return_if_fail(!imin || GWY_IS_FIELD(imin));
+    g_return_if_fail(!reout || GWY_IS_FIELD(reout));
+    g_return_if_fail(!imout || GWY_IS_FIELD(imout));
+    g_return_if_fail(!reout || (reout != rein && reout != imin));
+    g_return_if_fail(!imout || (imout != rein && imout != imin));
+    g_return_if_fail(direction == GWY_TRANSFORM_FORWARD
+                     || direction == GWY_TRANSFORM_BACKWARD);
 
+    // Require at least some input if any output is wanted.
+    if (!reout && !imout)
+        return;
+    g_return_if_fail(rein || imin);
+    g_return_if_fail(reout != imout);
+
+    const GwyField *in = rein ? rein : imin;
+    guint xres = in->xres, yres = in->yres;
+    GwyField *myreout = init_fft_field(in, reout);
+    GwyField *myimout = init_fft_field(in, imout);
+
+    fftw_iodim trans_dims = { xres, 1, 1 };
+    fftw_iodim repeat_dims = { yres, xres, xres };
+    guint flags = FFTW_PRESERVE_INPUT | _gwy_fft_rigour();
+    if (!rein || !imin) {
+        // R2C transform, possibly with some output fixup.
+        fftw_plan plan = fftw_plan_guru_split_dft_r2c(1, &trans_dims,
+                                                      1, &repeat_dims,
+                                                      in->data,
+                                                      myreout->data,
+                                                      myimout->data,
+                                                      flags);
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+        complete_fft_real(myreout);
+        complete_fft_imag(myimout);
+        if (in == rein && direction == GWY_TRANSFORM_BACKWARD) {
+            gdouble *im = myimout->data;
+            for (guint k = xres*yres; k; k--, im++)
+                *im = -(*im);
+        }
+        else if (in == imin && direction == GWY_TRANSFORM_FORWARD) {
+            gdouble *re = myreout->data, *im = myimout->data;
+            for (guint k = xres*yres; k; k--, re++, im++) {
+                GWY_SWAP(gdouble, *re, *im);
+                *re = -(*re);
+            }
+        }
+        else if (in == imin && direction == GWY_TRANSFORM_FORWARD) {
+            gdouble *re = myreout->data, *im = myimout->data;
+            for (guint k = xres*yres; k; k--, re++, im++)
+                GWY_SWAP(gdouble, *re, *im);
+        }
+    }
+    else {
+        GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
+                                      | GWY_FIELD_COMPAT_REAL
+                                      | GWY_FIELD_COMPAT_UNITS);
+        g_return_if_fail(gwy_field_is_incompatible(rein, imin, compat));
+
+        fftw_plan plan;
+        if (direction == GWY_TRANSFORM_FORWARD)
+            plan = fftw_plan_guru_split_dft(1, &trans_dims,
+                                            1, &repeat_dims,
+                                            rein->data, imin->data,
+                                            myreout->data, myimout->data,
+                                            flags);
+        else
+            plan = fftw_plan_guru_split_dft(1, &trans_dims,
+                                            1, &repeat_dims,
+                                            imin->data, rein->data,
+                                            myimout->data, myreout->data,
+                                            flags);
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+    }
+
+    g_object_unref(myimout);
+    g_object_unref(myreout);
+
+    gdouble q = 1.0/sqrt(xres);
+
+    if (reout) {
+        fftize_xdim(reout, in);
+        copy_ydim(reout, in);
+        gwy_field_invalidate(reout);
+        gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+    }
+    if (imout) {
+        fftize_xdim(imout, in);
+        copy_ydim(imout, in);
+        gwy_field_invalidate(imout);
+        gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+    }
 }
 
 /**
@@ -161,17 +348,15 @@ gwy_field_fft(const GwyField *field,
  * @reout: 
  * @imout: 
  * @direction: 
- * @preserveinput: 
  *
  * .
  **/
 void
-gwy_field_fft_raw(GwyField *rein,
-                  GwyField *imin,
+gwy_field_fft_raw(const GwyField *rein,
+                  const GwyField *imin,
                   GwyField *reout,
                   GwyField *imout,
-                  GwyTransformDirection direction,
-                  gboolean preserveinput)
+                  GwyTransformDirection direction)
 {
 
 }
@@ -245,6 +430,10 @@ gwy_field_fft_window(GwyField *field,
  * gwy_field_fft_dehumanize().  However, if any dimension is odd,
  * gwy_field_fft_humanize() and gwy_field_fft_dehumanize() are different,
  * therefore they must be paired properly.
+ *
+ * This method also changes the lateral offsets so that origin in real
+ * coordinates corresponds to the centre of pixel with the constant Fourier
+ * component (other methods behave similarly).
  **/
 void
 gwy_field_fft_humanize(GwyField *field)
@@ -269,7 +458,10 @@ gwy_field_fft_humanize(GwyField *field)
     }
     else
         humanize_in_place(field);
+
     humanize_clear_cached(field);
+    humanize_xoffset(field);
+    humanize_yoffset(field);
 }
 
 /**
@@ -308,7 +500,10 @@ gwy_field_fft_dehumanize(GwyField *field)
     }
     else
         humanize_in_place(field);
+
     humanize_clear_cached(field);
+    dehumanize_xoffset(field);
+    dehumanize_yoffset(field);
 }
 
 /**
@@ -341,6 +536,7 @@ gwy_field_row_fft_humanize(GwyField *field)
     }
     g_free(buf);
     humanize_clear_cached(field);
+    humanize_xoffset(field);
 }
 
 /**
@@ -373,6 +569,7 @@ gwy_field_row_fft_dehumanize(GwyField *field)
     }
     g_free(buf);
     humanize_clear_cached(field);
+    dehumanize_xoffset(field);
 }
 
 /*
@@ -404,6 +601,98 @@ humanize_clear_cached(GwyField *field)
 {
     field->priv->cached &= (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                             | CBIT(MSQ) | CBIT(MED));
+}
+
+static void
+humanize_xoffset(GwyField *field)
+{
+    if (field->xres & 1)
+        gwy_field_set_xoffset(field, -0.5*field->xreal);
+    else
+        gwy_field_set_xoffset(field, -0.5*(field->xreal + gwy_field_dx(field)));
+}
+
+static void
+dehumanize_xoffset(GwyField *field)
+{
+    gwy_field_set_xoffset(field, -0.5*gwy_field_dx(field));
+}
+
+static void
+humanize_yoffset(GwyField *field)
+{
+    if (field->yres & 1)
+        gwy_field_set_yoffset(field, -0.5*field->xreal);
+    else
+        gwy_field_set_yoffset(field, -0.5*(field->xreal + gwy_field_dy(field)));
+}
+
+static void
+dehumanize_yoffset(GwyField *field)
+{
+    gwy_field_set_yoffset(field, -0.5*gwy_field_dy(field));
+}
+
+static void
+complete_fft_real(GwyField *field)
+{
+    guint xres = field->xres, yres = field->yres;
+    guint len = (xres + 1)/2 - 1;
+    for (guint i = 0; i < yres; i++) {
+        const gdouble *re1 = field->data + (i*xres + 1);
+        gdouble *re2 = field->data + (i*xres + xres-1);
+        for (guint j = len; j; j--, re1++, re2++)
+            *re2 = *re1;
+    }
+}
+
+static void
+complete_fft_imag(GwyField *field)
+{
+    guint xres = field->xres, yres = field->yres;
+    guint len = (xres + 1)/2 - 1;
+    for (guint i = 0; i < yres; i++) {
+        const gdouble *im1 = field->data + (i*xres + 1);
+        gdouble *im2 = field->data + (i*xres + xres-1);
+        for (guint j = len; j; j--, im1++, im2++)
+            *im2 = -(*im1);
+    }
+}
+
+static void
+fftize_xdim(GwyField *fftfield,
+            const GwyField *field)
+{
+    gwy_field_set_xreal(fftfield, 2.0*G_PI/gwy_field_dx(field));
+    dehumanize_xoffset(fftfield);
+    gwy_unit_power(fftfield->priv->xunit, field->priv->xunit, -1);
+}
+
+static void
+fftize_ydim(GwyField *fftfield,
+            const GwyField *field)
+{
+    gwy_field_set_yreal(fftfield, 2.0*G_PI/gwy_field_dy(field));
+    dehumanize_yoffset(fftfield);
+    gwy_unit_power(fftfield->priv->yunit, field->priv->yunit, -1);
+}
+
+static void
+copy_xdim(GwyField *fftfield,
+          const GwyField *field)
+{
+    gwy_field_set_xreal(fftfield, field->xreal);
+    gwy_field_set_xoffset(fftfield, field->xoff);
+    _gwy_assign_unit(&fftfield->priv->xunit, field->priv->xunit);
+}
+
+static void
+copy_ydim(GwyField *fftfield,
+          const GwyField *field)
+{
+    gwy_field_set_yreal(fftfield, field->yreal);
+    gwy_field_set_yoffset(fftfield, field->yoff);
+    _gwy_assign_unit(&fftfield->priv->yunit, field->priv->yunit);
 }
 
 /**

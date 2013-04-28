@@ -31,24 +31,22 @@ void gwy_field_row_fft           (const GwyField *field,
                                   GwyWindowingType windowing,
                                   gboolean preserverms,
                                   guint level);
-void gwy_field_row_fft_raw       (GwyField *rein,
-                                  GwyField *imin,
+void gwy_field_row_fft_raw       (const GwyField *rein,
+                                  const GwyField *imin,
                                   GwyField *reout,
                                   GwyField *imout,
-                                  GwyTransformDirection direction,
-                                  gboolean preserveinput);
+                                  GwyTransformDirection direction);
 void gwy_field_fft               (const GwyField *field,
                                   GwyField *reout,
                                   GwyField *imout,
                                   GwyWindowingType windowing,
                                   gboolean preserverms,
                                   gint level);
-void gwy_field_fft_raw           (GwyField *rein,
-                                  GwyField *imin,
+void gwy_field_fft_raw           (const GwyField *rein,
+                                  const GwyField *imin,
                                   GwyField *reout,
                                   GwyField *imout,
-                                  GwyTransformDirection direction,
-                                  gboolean preserveinput);
+                                  GwyTransformDirection direction);
 void gwy_field_fft_window        (GwyField *field,
                                   GwyWindowingType windowing,
                                   gboolean columns,
