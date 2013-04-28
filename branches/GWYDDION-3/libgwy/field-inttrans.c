@@ -40,6 +40,10 @@ static void dehumanize_xoffset   (GwyField *field);
 static void dehumanize_yoffset   (GwyField *field);
 static void complete_fft_real    (GwyField *field);
 static void complete_fft_imag    (GwyField *field);
+static void fix_x2c_transform    (GwyField *reout,
+                                  GwyField *imout,
+                                  gboolean i2c,
+                                  GwyTransformDirection direction);
 static void fftize_xdim          (GwyField *fftfield,
                                   const GwyField *field);
 static void fftize_ydim          (GwyField *fftfield,
@@ -259,24 +263,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
         fftw_destroy_plan(plan);
         complete_fft_real(myreout);
         complete_fft_imag(myimout);
-
-        if (in == rein && direction == GWY_TRANSFORM_BACKWARD) {
-            gdouble *im = myimout->data;
-            for (guint k = xres*yres; k; k--, im++)
-                *im = -(*im);
-        }
-        else if (in == imin && direction == GWY_TRANSFORM_FORWARD) {
-            gdouble *re = myreout->data, *im = myimout->data;
-            for (guint k = xres*yres; k; k--, re++, im++) {
-                GWY_SWAP(gdouble, *re, *im);
-                *re = -(*re);
-            }
-        }
-        else if (in == imin && direction == GWY_TRANSFORM_FORWARD) {
-            gdouble *re = myreout->data, *im = myimout->data;
-            for (guint k = xres*yres; k; k--, re++, im++)
-                GWY_SWAP(gdouble, *re, *im);
-        }
+        fix_x2c_transform(reout, imout, in == imin, direction);
     }
     else {
         GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
@@ -655,6 +642,29 @@ complete_fft_imag(GwyField *field)
         gdouble *im2 = field->data + (i*xres + xres-1);
         for (guint j = len; j; j--, im1++, im2++)
             *im2 = -(*im1);
+    }
+}
+
+static void
+fix_x2c_transform(GwyField *reout, GwyField *imout,
+                  gboolean i2c, GwyTransformDirection direction)
+{
+    guint xres = reout->xres, yres = reout->yres;
+    gdouble *re = reout->data, *im = imout->data;
+
+    if (!i2c && direction == GWY_TRANSFORM_BACKWARD) {
+        for (guint k = xres*yres; k; k--, im++)
+            *im = -(*im);
+    }
+    else if (i2c && direction == GWY_TRANSFORM_FORWARD) {
+        for (guint k = xres*yres; k; k--, re++, im++) {
+            GWY_SWAP(gdouble, *re, *im);
+            *re = -(*re);
+        }
+    }
+    else if (i2c && direction == GWY_TRANSFORM_FORWARD) {
+        for (guint k = xres*yres; k; k--, re++, im++)
+            GWY_SWAP(gdouble, *re, *im);
     }
 }
 
