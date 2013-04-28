@@ -844,13 +844,14 @@ gwy_field_sculpt(const GwyField *src,
     if (!gwy_field_check_part(src, srcpart, &col, &row, &width, &height))
         return;
     g_return_if_fail(GWY_IS_FIELD(dest));
+    g_return_if_fail(dest != src);
     g_return_if_fail(method <= GWY_SCULPT_DOWNWARD);
 
     guint dxres = dest->xres, dyres = dest->yres;
     if (periodic) {
         // Hate rounding towards zero.
-        destcol = (destcol % dxres + dxres) % dxres;
-        destrow = (destrow % dyres + dyres) % dyres;
+        destcol = (destcol % (gint)dxres + dxres) % dxres;
+        destrow = (destrow % (gint)dyres + dyres) % dyres;
         // Avoid complications if everything is in one block.
         if (destcol + width <= dxres && destrow + height <= dyres)
             periodic = FALSE;
@@ -868,18 +869,17 @@ gwy_field_sculpt(const GwyField *src,
             height = dyres - destrow;
         if (destcol < 0) {
             width += destcol;
-            col += destcol;
+            col -= destcol;
             destcol = 0;
         }
         if (destrow < 0) {
             height += destrow;
-            row += destrow;
+            row -= destrow;
             destrow = 0;
         }
     }
 
     const gdouble *sbase = src->data + row*src->xres + col;
-    gdouble *dbase = dest->data + destrow*dxres + destcol;
     SculptBlockFindFunc findm;
     SculptBlockFunc sculpt;
     gdouble m, mempty;
@@ -898,6 +898,7 @@ gwy_field_sculpt(const GwyField *src,
     }
 
     if (!periodic) {
+        gdouble *dbase = dest->data + destrow*dxres + destcol;
         m = findm(sbase, dbase, width, height, src->xres, dxres, m);
         if (m == mempty)
             return;
