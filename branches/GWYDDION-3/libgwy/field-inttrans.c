@@ -22,53 +22,110 @@
 #include <complex.h>
 #include <fftw3.h>
 #include "libgwy/macros.h"
+#include "libgwy/field-level.h"
 #include "libgwy/field-inttrans.h"
 #include "libgwy/field-internal.h"
+#include "libgwy/math-internal.h"
 
 #define CBIT GWY_FIELD_CBIT
 
 static void humanize_in_place(GwyField *field);
 static void humanize_clear_cached(GwyField *field);
 
+static GwyField*
+init_fft_field(const GwyField *src,
+               GwyField *field)
+{
+    if (field) {
+        g_object_ref(field);
+        gwy_field_set_size(field, src->xres, src->yres, FALSE);
+        return field;
+    }
+    return gwy_field_new_sized(src->xres, src->yres, FALSE);
+}
+
 /**
  * gwy_field_row_fft:
- * @field: 
- * @iin: 
- * @rout: 
- * @iout: 
- * @windowing: 
- * @preserverms: 
- * @level: 
+ * @field: A two-dimensional data field.
+ * @reout: (allow-none):
+ *         Target data field for the real part of the transform.
+ *         It will be resized to match @field if necessary.
+ * @imout: (allow-none):
+ *         Target data field for the imaginary part of the transform.
+ *         It will be resized to match @field if necessary.
+ * @windowing: Windowing type to use.
+ * @preserverms: %TRUE to preserve RMS value.
+ * @level: Row levelling to apply, pass 0 for no row levelling.  See
+ *         gwy_field_level_rows().
  *
- * .
+ * Performs FFT of rows of a two-dimensional data field.
  **/
 void
 gwy_field_row_fft(const GwyField *field,
-                  GwyField *rout,
-                  GwyField *iout,
+                  GwyField *reout,
+                  GwyField *imout,
                   GwyWindowingType windowing,
                   gboolean preserverms,
                   guint level)
 {
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(!reout || GWY_IS_FIELD(reout));
+    g_return_if_fail(!imout || GWY_IS_FIELD(imout));
+    g_return_if_fail(windowing <= GWY_WINDOWING_KAISER25);
+    g_return_if_fail(level <= 3);
+    if (!reout && !imout)
+        return;
 
+    guint xres = field->xres, yres = field->yres;
+    GwyField *myreout = init_fft_field(field, reout);
+    GwyField *myimout = init_fft_field(field, imout);
+    GwyField *myrein = gwy_field_duplicate(field);
+
+    fftw_iodim trans_dims = { xres, 1, 1 };
+    fftw_iodim repeat_dims = { yres, xres, xres };
+    fftw_plan plan = fftw_plan_guru_split_dft_r2c(1, &trans_dims,
+                                                  1, &repeat_dims,
+                                                  myrein->data,
+                                                  myreout->data,
+                                                  myimout->data,
+                                                  FFTW_DESTROY_INPUT
+                                                  | _gwy_fft_rigour());
+    gwy_field_copy_full(field, myrein);
+    gwy_field_level_rows(myrein, level);
+    gwy_field_fft_window(myrein, windowing, FALSE, TRUE);
+    fftw_execute(plan);
+    fftw_destroy_plan(plan);
+
+    // TODO: distribute the FFT result which occupies only the first xres/2+1
+    // values in each row.
+
+    g_object_unref(myrein);
+    g_object_unref(myimout);
+    g_object_unref(myreout);
+
+    // TODO: implement preserverms
+    // FIXME: we may want two preserverms modes:
+    // (a) plain preservation of the sum
+    // (b) correct preservation of the integral
+    // TODO: set dimensions and units of output fields
 }
 
 /**
  * gwy_field_row_fft_raw:
- * @rin: 
- * @iin: 
- * @rout: 
- * @iout: 
+ * @rein: 
+ * @imin: 
+ * @reout: 
+ * @imout: 
  * @direction: 
  * @preserveinput: 
  *
  * .
  **/
 void
-gwy_field_row_fft_raw(GwyField *rin,
-                      GwyField *iin,
-                      GwyField *rout,
-                      GwyField *iout,
+gwy_field_row_fft_raw(GwyField *rein,
+                      GwyField *imin,
+                      GwyField *reout,
+                      GwyField *imout,
                       GwyTransformDirection direction,
                       gboolean preserveinput)
 {
@@ -78,8 +135,8 @@ gwy_field_row_fft_raw(GwyField *rin,
 /**
  * gwy_field_fft:
  * @field: 
- * @rout: 
- * @iout: 
+ * @reout: 
+ * @imout: 
  * @windowing: 
  * @preserverms: 
  * @level: 
@@ -88,8 +145,8 @@ gwy_field_row_fft_raw(GwyField *rin,
  **/
 void
 gwy_field_fft(const GwyField *field,
-              GwyField *rout,
-              GwyField *iout,
+              GwyField *reout,
+              GwyField *imout,
               GwyWindowingType windowing,
               gboolean preserverms,
               gint level)
@@ -99,24 +156,71 @@ gwy_field_fft(const GwyField *field,
 
 /**
  * gwy_field_fft_raw:
- * @rin: 
- * @iin: 
- * @rout: 
- * @iout: 
+ * @rein: 
+ * @imin: 
+ * @reout: 
+ * @imout: 
  * @direction: 
  * @preserveinput: 
  *
  * .
  **/
 void
-gwy_field_fft_raw(GwyField *rin,
-                  GwyField *iin,
-                  GwyField *rout,
-                  GwyField *iout,
+gwy_field_fft_raw(GwyField *rein,
+                  GwyField *imin,
+                  GwyField *reout,
+                  GwyField *imout,
                   GwyTransformDirection direction,
                   gboolean preserveinput)
 {
 
+}
+
+/**
+ * gwy_field_fft_window:
+ * @field: A two-dimensional data field.
+ * @windowing: Windowing method.
+ * @columns: %TRUE to perform column-wise windowing.
+ * @rows: %TRUE to perform row-wise windowing.
+ *
+ * Applies a FFT windowing type to a data field.
+ **/
+void
+gwy_field_fft_window(GwyField *field,
+                     GwyWindowingType windowing,
+                     gboolean columns,
+                     gboolean rows)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(windowing <= GWY_WINDOWING_KAISER25);
+
+    guint xres = field->xres, yres = field->yres;
+    guint size = MAX((columns ? yres : 0), (rows ? xres : 0));
+    if (!size)
+        return;
+
+    gdouble *window = g_new(gdouble, size);
+    if (rows) {
+        gwy_fft_window_sample(window, xres, windowing, 0);
+        for (guint i = 0; i < yres; i++) {
+            const gdouble *w = window;
+            gdouble *d = field->data + i*xres;
+            for (guint j = xres; j; j--, d++, w++)
+                *d *= *w;
+        }
+    }
+    if (columns) {
+        gwy_fft_window_sample(window, yres, windowing, 0);
+        for (guint i = 0; i < yres; i++) {
+            gdouble w = window[i];
+            gdouble *d = field->data + i*xres;
+            for (guint j = xres; j; j--, d++)
+                *d *= w;
+        }
+    }
+
+    g_free(window);
+    gwy_field_invalidate(field);
 }
 
 /**

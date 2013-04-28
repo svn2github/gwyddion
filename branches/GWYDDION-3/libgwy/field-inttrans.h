@@ -26,29 +26,33 @@
 G_BEGIN_DECLS
 
 void gwy_field_row_fft           (const GwyField *field,
-                                  GwyField *rout,
-                                  GwyField *iout,
+                                  GwyField *reout,
+                                  GwyField *imout,
                                   GwyWindowingType windowing,
                                   gboolean preserverms,
                                   guint level);
-void gwy_field_row_fft_raw       (GwyField *rin,
-                                  GwyField *iin,
-                                  GwyField *rout,
-                                  GwyField *iout,
+void gwy_field_row_fft_raw       (GwyField *rein,
+                                  GwyField *imin,
+                                  GwyField *reout,
+                                  GwyField *imout,
                                   GwyTransformDirection direction,
                                   gboolean preserveinput);
 void gwy_field_fft               (const GwyField *field,
-                                  GwyField *rout,
-                                  GwyField *iout,
+                                  GwyField *reout,
+                                  GwyField *imout,
                                   GwyWindowingType windowing,
                                   gboolean preserverms,
                                   gint level);
-void gwy_field_fft_raw           (GwyField *rin,
-                                  GwyField *iin,
-                                  GwyField *rout,
-                                  GwyField *iout,
+void gwy_field_fft_raw           (GwyField *rein,
+                                  GwyField *imin,
+                                  GwyField *reout,
+                                  GwyField *imout,
                                   GwyTransformDirection direction,
                                   gboolean preserveinput);
+void gwy_field_fft_window        (GwyField *field,
+                                  GwyWindowingType windowing,
+                                  gboolean columns,
+                                  gboolean rows);
 void gwy_field_fft_humanize      (GwyField *field);
 void gwy_field_fft_dehumanize    (GwyField *field);
 void gwy_field_row_fft_humanize  (GwyField *field);
