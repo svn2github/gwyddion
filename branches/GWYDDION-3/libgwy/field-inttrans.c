@@ -83,13 +83,13 @@ init_fft_field(const GwyField *src,
  * @level: Row levelling to apply, pass 0 for no row levelling.  See
  *         gwy_field_level_rows().
  *
- * Performs real-to-complex FFT of rows of a two-dimensional data field.
+ * Performs real-to-complex row-wise FFT of a two-dimensional data field.
  *
  * This is a high-level method suitable in cases when the FFT output is to be
  * analysed or displayed.  For modifications in frequency domain and
  * transforming back, gwy_field_row_fft_raw() is usually more suitable.
  *
- * Zero frequency will be in the top left corner; use
+ * Zero frequency will be in the leftmost column; use
  * gwy_field_row_fft_humanize() if you want it in the centre.
  **/
 void
@@ -203,13 +203,13 @@ gwy_field_row_fft(const GwyField *field,
  *         It will be resized to match @rein if necessary.
  * @direction: Transformation direction.
  *
- * Performs raw FFT of rows of a two-dimensional data field.
+ * Performs raw row-wise FFT of a two-dimensional data field.
  *
  * This is a low-level method suitable in cases when you intend to transform
  * the data back and forth.  Function gwy_field_row_fft() is usually more
  * suitable for analysis and display.
  *
- * Zero frequency will be in the top left corner; use
+ * Zero frequency will be in the leftmost column; use
  * gwy_field_row_fft_humanize() if you want it in the centre.
  *
  * Some input or output fields may be %NULL if you are not interested in the
@@ -329,13 +329,35 @@ gwy_field_fft(const GwyField *field,
 
 /**
  * gwy_field_fft_raw:
- * @rein: 
- * @imin: 
- * @reout: 
- * @imout: 
- * @direction: 
+ * @rein: (allow-none):
+ *        Real input two-dimensional data field.
+ * @imin: (allow-none):
+ *        Imaginary input two-dimensional data field.
+ * @reout: (allow-none):
+ *         Target data field for the real part of the transform.
+ *         It will be resized to match @rein if necessary.
+ * @imout: (allow-none):
+ *         Target data field for the imaginary part of the transform.
+ *         It will be resized to match @rein if necessary.
+ * @direction: Transformation direction.
  *
- * .
+ * Performs raw two-dimensional FFT of a two-dimensional data field.
+ *
+ * This is a low-level method suitable in cases when you intend to transform
+ * the data back and forth.  Function gwy_field_fft() is usually more
+ * suitable for analysis and display.
+ *
+ * Zero frequency will be in the top left corner; use gwy_field_fft_humanize()
+ * if you want it in the centre.
+ *
+ * Some input or output fields may be %NULL if you are not interested in the
+ * corresponding part or want to perform a real-to-complex (or
+ * imaginary-to-complex for that matter) transform.  To be precise, either or
+ * both of @reout and @imout can be %NULL.  The function reduces to no-op if
+ * both are %NULL.  If they are not both %NULL at least one of @rein and @imin
+ * must be given.  If both input fields are given they must be compatible.
+ *
+ * All fields must be different objects.
  **/
 void
 gwy_field_fft_raw(const GwyField *rein,
@@ -344,7 +366,86 @@ gwy_field_fft_raw(const GwyField *rein,
                   GwyField *imout,
                   GwyTransformDirection direction)
 {
+    g_return_if_fail(!rein || GWY_IS_FIELD(rein));
+    g_return_if_fail(!imin || GWY_IS_FIELD(imin));
+    g_return_if_fail(!reout || GWY_IS_FIELD(reout));
+    g_return_if_fail(!imout || GWY_IS_FIELD(imout));
+    g_return_if_fail(!reout || (reout != rein && reout != imin));
+    g_return_if_fail(!imout || (imout != rein && imout != imin));
+    g_return_if_fail(direction == GWY_TRANSFORM_FORWARD
+                     || direction == GWY_TRANSFORM_BACKWARD);
 
+    // Require at least some input if any output is wanted.
+    if (!reout && !imout)
+        return;
+    g_return_if_fail(rein || imin);
+    g_return_if_fail(reout != imout);
+
+    const GwyField *in = rein ? rein : imin;
+    guint xres = in->xres, yres = in->yres;
+    GwyField *myreout = init_fft_field(in, reout);
+    GwyField *myimout = init_fft_field(in, imout);
+
+    fftw_iodim trans_dims[] = { { yres, xres, xres }, { xres, 1, 1 } };
+    if (!rein || !imin) {
+        // R2C transform, possibly with some output fixup.
+        // According to the FFTW documentation, input preservation is not
+        // possible for multidimensional r2c transforms.
+        guint flags = FFTW_DESTROY_INPUT | _gwy_fft_rigour();
+        GwyField *tmp = gwy_field_new_alike(in, FALSE);
+        fftw_plan plan = fftw_plan_guru_split_dft_r2c(2, trans_dims,
+                                                      0, NULL,
+                                                      tmp->data,
+                                                      myreout->data,
+                                                      myimout->data,
+                                                      flags);
+        gwy_field_copy_full(in, tmp);
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+        g_object_unref(tmp);
+        complete_fft_real(myreout);
+        complete_fft_imag(myimout);
+        fix_x2c_transform(reout, imout, in == imin, direction);
+    }
+    else {
+        GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
+                                      | GWY_FIELD_COMPAT_REAL
+                                      | GWY_FIELD_COMPAT_UNITS);
+        g_return_if_fail(gwy_field_is_incompatible(rein, imin, compat));
+
+        gdouble *reindata = rein->data, *imindata = imin->data,
+                *reoutdata = myreout->data, *imoutdata = myimout->data;
+        if (direction == GWY_TRANSFORM_BACKWARD) {
+            GWY_SWAP(gdouble*, reindata, imindata);
+            GWY_SWAP(gdouble*, reoutdata, imoutdata);
+        }
+        guint flags = FFTW_PRESERVE_INPUT | _gwy_fft_rigour();
+        fftw_plan plan = fftw_plan_guru_split_dft(2, trans_dims,
+                                                  0, NULL,
+                                                  reindata, imindata,
+                                                  reoutdata, imoutdata,
+                                                  flags);
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+    }
+
+    g_object_unref(myimout);
+    g_object_unref(myreout);
+
+    gdouble q = 1.0/sqrt(xres*yres);
+
+    if (reout) {
+        fftize_xdim(reout, in);
+        fftize_ydim(reout, in);
+        gwy_field_invalidate(reout);
+        gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+    }
+    if (imout) {
+        fftize_xdim(imout, in);
+        fftize_ydim(imout, in);
+        gwy_field_invalidate(imout);
+        gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+    }
 }
 
 /**
