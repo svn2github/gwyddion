@@ -6851,6 +6851,8 @@ test_field_fft_humanize_inversion(void)
         guint height = g_rand_int_range(rng, 1, max_size);
         GwyField *reference = gwy_field_new_sized(width, height, FALSE);
         field_randomize(reference, rng);
+        gwy_field_set_xoffset(reference, -0.5*gwy_field_dx(reference));
+        gwy_field_set_yoffset(reference, -0.5*gwy_field_dy(reference));
         GwyField *field = gwy_field_duplicate(reference);
         gwy_field_fft_humanize(field);
         gwy_field_fft_dehumanize(field);
@@ -6874,6 +6876,7 @@ test_field_fft_row_humanize_inversion(void)
         guint height = g_rand_int_range(rng, 1, max_size);
         GwyField *reference = gwy_field_new_sized(width, height, FALSE);
         field_randomize(reference, rng);
+        gwy_field_set_xoffset(reference, -0.5*gwy_field_dx(reference));
         GwyField *field = gwy_field_duplicate(reference);
         gwy_field_row_fft_humanize(field);
         gwy_field_row_fft_dehumanize(field);
