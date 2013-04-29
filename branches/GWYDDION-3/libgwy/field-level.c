@@ -1018,7 +1018,7 @@ gwy_field_level_rows(GwyField *field,
             gdouble b = szx/sxx;
             gdouble *dd = field->data + i*xres;
             jj = 1 - (gint)xres;
-            for (guint j = xres; j; j--, d++, jj += 2)
+            for (guint j = xres; j; j--, dd++, jj += 2)
                 *dd -= a + jj*b;
         }
     }
@@ -1048,7 +1048,7 @@ gwy_field_level_rows(GwyField *field,
             gdouble c = (xres*szxx - sxx*sz)/D;
             gdouble *dd = field->data + i*xres;
             jj = 1 - (gint)xres;
-            for (guint j = xres; j; j--, d++, jj += 2)
+            for (guint j = xres; j; j--, dd++, jj += 2)
                 *dd -= a + jj*(b + jj*c);
         }
     }
