@@ -6915,55 +6915,6 @@ test_field_read_curvature_at_centre(void)
     g_rand_free(rng);
 }
 
-void
-test_field_fft_humanize_inversion(void)
-{
-    enum { max_size = 16 };
-    GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = 50;
-
-    for (guint iter = 0; iter < niter; iter++) {
-        guint width = g_rand_int_range(rng, 1, max_size);
-        guint height = g_rand_int_range(rng, 1, max_size);
-        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
-        field_randomize(reference, rng);
-        gwy_field_set_xoffset(reference, -0.5*gwy_field_dx(reference));
-        gwy_field_set_yoffset(reference, -0.5*gwy_field_dy(reference));
-        GwyField *field = gwy_field_duplicate(reference);
-        gwy_field_fft_humanize(field);
-        gwy_field_fft_dehumanize(field);
-        field_assert_equal(field, reference);
-        g_object_unref(field);
-        g_object_unref(reference);
-    }
-
-    g_rand_free(rng);
-}
-
-void
-test_field_fft_row_humanize_inversion(void)
-{
-    enum { max_size = 16 };
-    GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = 50;
-
-    for (guint iter = 0; iter < niter; iter++) {
-        guint width = g_rand_int_range(rng, 1, max_size);
-        guint height = g_rand_int_range(rng, 1, max_size);
-        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
-        field_randomize(reference, rng);
-        gwy_field_set_xoffset(reference, -0.5*gwy_field_dx(reference));
-        GwyField *field = gwy_field_duplicate(reference);
-        gwy_field_row_fft_humanize(field);
-        gwy_field_row_fft_dehumanize(field);
-        field_assert_equal(field, reference);
-        g_object_unref(field);
-        g_object_unref(reference);
-    }
-
-    g_rand_free(rng);
-}
-
 static void
 sculpt_dumb(GwyField *field, const GwyFieldPart *rpart,
             GwyField *feature, const GwyFieldPart *fpart,
@@ -7131,8 +7082,62 @@ test_field_arithmetic_sculpt_downward_periodic(void)
     field_arithmetic_sculpt_one_periodic(GWY_SCULPT_DOWNWARD);
 }
 
+void
+test_field_fft_humanize_inversion(void)
+{
+    enum { max_size = 16 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
+        field_randomize(reference, rng);
+        gwy_field_set_xoffset(reference, -0.5*gwy_field_dx(reference));
+        gwy_field_set_yoffset(reference, -0.5*gwy_field_dy(reference));
+        GwyField *field = gwy_field_duplicate(reference);
+        gwy_field_fft_humanize(field);
+        gwy_field_fft_dehumanize(field);
+        field_assert_equal(field, reference);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_row_fft_humanize_inversion(void)
+{
+    enum { max_size = 16 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
+        field_randomize(reference, rng);
+        gwy_field_set_xoffset(reference, -0.5*gwy_field_dx(reference));
+        GwyField *field = gwy_field_duplicate(reference);
+        gwy_field_row_fft_humanize(field);
+        gwy_field_row_fft_dehumanize(field);
+        field_assert_equal(field, reference);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
+typedef void (*RawFFTFunc)(const GwyField*, const GwyField*,
+                           GwyField*, GwyField*,
+                           GwyTransformDirection);
+
 static void
-field_fft_raw_inversion_c2c_one(GwyTransformDirection direction)
+field_fft_raw_inversion_c2c_one(GwyTransformDirection direction,
+                                RawFFTFunc fft)
 {
     enum { max_size = 17 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -7148,8 +7153,8 @@ field_fft_raw_inversion_c2c_one(GwyTransformDirection direction)
         field_randomize(imfield, rng);
         GwyField *rereference = gwy_field_duplicate(refield);
         GwyField *imreference = gwy_field_duplicate(imfield);
-        gwy_field_fft_raw(refield, imfield, fftre, fftim, direction);
-        gwy_field_fft_raw(fftre, fftim, refield, imfield, -direction);
+        fft(refield, imfield, fftre, fftim, direction);
+        fft(fftre, fftim, refield, imfield, -direction);
         field_assert_numerically_equal(refield, rereference, 1e-14);
         field_assert_numerically_equal(imfield, imreference, 1e-14);
         g_object_unref(rereference);
@@ -7164,19 +7169,36 @@ field_fft_raw_inversion_c2c_one(GwyTransformDirection direction)
 }
 
 void
+test_field_row_fft_raw_inversion_c2c_forward(void)
+{
+    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
+                                    &gwy_field_row_fft_raw);
+}
+
+void
+test_field_row_fft_raw_inversion_c2c_backward(void)
+{
+    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
+                                    &gwy_field_row_fft_raw);
+}
+
+void
 test_field_fft_raw_inversion_c2c_forward(void)
 {
-    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_FORWARD);
+    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
+                                    &gwy_field_fft_raw);
 }
 
 void
 test_field_fft_raw_inversion_c2c_backward(void)
 {
-    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_BACKWARD);
+    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
+                                    &gwy_field_fft_raw);
 }
 
 static void
 field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
+                                RawFFTFunc fft,
                                 gboolean real)
 {
     enum { max_size = 17 };
@@ -7190,12 +7212,8 @@ field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
         GwyField *field = gwy_field_new_sized(width, height, FALSE);
         field_randomize(field, rng);
         GwyField *reference = gwy_field_duplicate(field);
-        gwy_field_fft_raw(real ? field : NULL, real ? NULL : field,
-                          fftre, fftim,
-                          direction);
-        gwy_field_fft_raw(fftre, fftim,
-                          real ? field : NULL, real ? NULL : field,
-                          -direction);
+        fft(real ? field : NULL, real ? NULL : field, fftre, fftim, direction);
+        fft(fftre, fftim, real ? field : NULL, real ? NULL : field, -direction);
         field_assert_numerically_equal(field, reference, 1e-14);
         g_object_unref(reference);
         g_object_unref(field);
@@ -7207,27 +7225,59 @@ field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
 }
 
 void
+test_field_row_fft_raw_inversion_r2c_forward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                    &gwy_field_row_fft_raw, TRUE);
+}
+
+void
+test_field_row_fft_raw_inversion_r2c_backward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                    &gwy_field_row_fft_raw, TRUE);
+}
+
+void
+test_field_row_fft_raw_inversion_i2c_forward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                    &gwy_field_row_fft_raw, FALSE);
+}
+
+void
+test_field_row_fft_raw_inversion_i2c_backward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                    &gwy_field_row_fft_raw, FALSE);
+}
+
+void
 test_field_fft_raw_inversion_r2c_forward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD, TRUE);
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                    &gwy_field_fft_raw, TRUE);
 }
 
 void
 test_field_fft_raw_inversion_r2c_backward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD, TRUE);
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                    &gwy_field_fft_raw, TRUE);
 }
 
 void
 test_field_fft_raw_inversion_i2c_forward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD, FALSE);
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                    &gwy_field_fft_raw, FALSE);
 }
 
 void
 test_field_fft_raw_inversion_i2c_backward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD, FALSE);
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                    &gwy_field_fft_raw, FALSE);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

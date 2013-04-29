@@ -448,8 +448,14 @@ field/distributions/minkowski/boundary
 field/distributions/minkowski/black
 field/distributions/minkowski/white
 field/distributions/minkowski/connectivity
+field/row-fft/humanize/inversion
+field/row-fft/raw/inversion/c2c/forward
+field/row-fft/raw/inversion/c2c/backward
+field/row-fft/raw/inversion/r2c/forward
+field/row-fft/raw/inversion/r2c/backward
+field/row-fft/raw/inversion/i2c/forward
+field/row-fft/raw/inversion/i2c/backward
 field/fft/humanize/inversion
-field/fft-row/humanize/inversion
 field/fft/raw/inversion/c2c/forward
 field/fft/raw/inversion/c2c/backward
 field/fft/raw/inversion/r2c/forward
