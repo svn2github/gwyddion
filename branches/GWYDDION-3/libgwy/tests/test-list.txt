@@ -360,6 +360,10 @@ field/level/row/mean
 field/level/row/median
 field/level/row/mean-diff
 field/level/row/median-diff
+field/level/rows/0
+field/level/rows/1
+field/level/rows/2
+field/level/rows/3
 field/level/plane
 field/level/poly
 field/level/inclination

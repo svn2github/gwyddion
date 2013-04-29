@@ -2644,6 +2644,82 @@ test_field_level_row_median_diff(void)
 }
 
 static void
+field_level_rows_one(guint level)
+{
+    enum { max_size = 64 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 30;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gdouble a = g_rand_double_range(rng, -G_PI, G_PI);
+        gdouble b = g_rand_double_range(rng, -G_PI, G_PI);
+        gdouble c = g_rand_double_range(rng, -G_PI, G_PI);
+        gdouble d = g_rand_double_range(rng, -G_PI, G_PI);
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)/yres - 0.5;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)/xres - 0.5;
+                gwy_field_index(field, j, i) += sin(a + b*x + c*y + d*x*y);
+            }
+        }
+
+        gwy_field_level_rows(field, level);
+        for (guint i = 0; i < yres; i++) {
+            gdouble s[4] = { 0.0, 0.0, 0.0, 0.0 };
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)/xres - 0.5;
+                gdouble z = gwy_field_index(field, j, i);
+                s[0] += z;
+                s[1] += z*x;
+                s[2] += z*x*x;
+                s[3] += z*x*x*x;
+            }
+            for (guint k = 0; k < 4; k++)
+                s[k] /= xres;
+            for (guint k = 0; k < level; k++) {
+                gwy_assert_floatval(s[k], 0.0, 1e-14);
+            }
+            // In principle, this can fail.  But with negligible probability.
+            for (guint k = level; k < MIN(4, xres); k++) {
+                g_assert_cmpfloat(fabs(s[k]), >=, 1e-14);
+            }
+        }
+
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_level_rows_0(void)
+{
+    field_level_rows_one(0);
+}
+
+void
+test_field_level_rows_1(void)
+{
+    field_level_rows_one(1);
+}
+
+void
+test_field_level_rows_2(void)
+{
+    field_level_rows_one(2);
+}
+
+void
+test_field_level_rows_3(void)
+{
+    field_level_rows_one(3);
+}
+
+static void
 field_laplace_check_unmodif(const GwyField *field,
                             const GwyField *reference,
                             const guint *grains,
