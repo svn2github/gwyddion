@@ -38,6 +38,8 @@ static void      humanize_xoffset     (GwyField *field);
 static void      humanize_yoffset     (GwyField *field);
 static void      dehumanize_xoffset   (GwyField *field);
 static void      dehumanize_yoffset   (GwyField *field);
+static void      complete_row_fft_real(GwyField *field);
+static void      complete_row_fft_imag(GwyField *field);
 static void      complete_fft_real    (GwyField *field);
 static void      complete_fft_imag    (GwyField *field);
 static void      fix_x2c_transform    (GwyField *reout,
@@ -130,9 +132,9 @@ gwy_field_row_fft(const GwyField *field,
     g_object_unref(myrein);
 
     if (preserverms || reout)
-        complete_fft_real(myreout);
+        complete_row_fft_real(myreout);
     if (preserverms || imout)
-        complete_fft_imag(myimout);
+        complete_row_fft_imag(myimout);
 
     if (preserverms) {
         for (guint i = 0; i < yres; i++) {
@@ -251,8 +253,8 @@ gwy_field_row_fft_raw(const GwyField *rein,
                                                       flags);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
-        complete_fft_real(myreout);
-        complete_fft_imag(myimout);
+        complete_row_fft_real(myreout);
+        complete_row_fft_imag(myimout);
         fix_x2c_transform(reout, imout, in == imin, direction);
     }
     else {
@@ -711,7 +713,7 @@ dehumanize_yoffset(GwyField *field)
 }
 
 static void
-complete_fft_real(GwyField *field)
+complete_row_fft_real(GwyField *field)
 {
     guint xres = field->xres, yres = field->yres;
     guint len = (xres + 1)/2 - 1;
@@ -724,13 +726,51 @@ complete_fft_real(GwyField *field)
 }
 
 static void
-complete_fft_imag(GwyField *field)
+complete_row_fft_imag(GwyField *field)
 {
     guint xres = field->xres, yres = field->yres;
     guint len = (xres + 1)/2 - 1;
     for (guint i = 0; i < yres; i++) {
         const gdouble *im1 = field->data + (i*xres + 1);
         gdouble *im2 = field->data + (i*xres + xres-1);
+        for (guint j = len; j; j--, im1++, im2--)
+            *im2 = -(*im1);
+    }
+}
+
+static void
+complete_fft_real(GwyField *field)
+{
+    guint xres = field->xres, yres = field->yres;
+    guint len = (xres + 1)/2 - 1;
+
+    const gdouble *re1 = field->data + 1;
+    gdouble *re2 = field->data + (xres-1);
+    for (guint j = len; j; j--, re1++, re2--)
+        *re2 = *re1;
+
+    for (guint i = 1; i < yres; i++) {
+        re1 = field->data + (i*xres + 1);
+        re2 = field->data + ((yres - i)*xres + xres-1);
+        for (guint j = len; j; j--, re1++, re2--)
+            *re2 = *re1;
+    }
+}
+
+static void
+complete_fft_imag(GwyField *field)
+{
+    guint xres = field->xres, yres = field->yres;
+    guint len = (xres + 1)/2 - 1;
+
+    const gdouble *im1 = field->data + 1;
+    gdouble *im2 = field->data + (xres-1);
+    for (guint j = len; j; j--, im1++, im2--)
+        *im2 = -(*im1);
+
+    for (guint i = 1; i < yres; i++) {
+        im1 = field->data + (i*xres + 1);
+        im2 = field->data + ((yres - i)*xres + xres-1);
         for (guint j = len; j; j--, im1++, im2--)
             *im2 = -(*im1);
     }
@@ -753,7 +793,7 @@ fix_x2c_transform(GwyField *reout, GwyField *imout,
             *re = -(*re);
         }
     }
-    else if (i2c && direction == GWY_TRANSFORM_FORWARD) {
+    else if (i2c && direction == GWY_TRANSFORM_BACKWARD) {
         for (guint k = xres*yres; k; k--, re++, im++)
             GWY_SWAP(gdouble, *re, *im);
     }
