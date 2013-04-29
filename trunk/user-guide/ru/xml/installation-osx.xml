@@ -11,7 +11,7 @@
   <sect2 id="installation-osx-preparation">
     <title>Подготовка</title>
     <para>Чтобы установить и запустить <application>Gwyddion</application> вам нужны установленные Xcode Tools и X (SDK и App). Они находятся на системных CD/DVD-дисках. Xcode Tools находились на первом DVD как XcodeTools.mpkg в подкаталоге Xcode Tools, X11SDK находится под именем  X11SDK.pkg в подкаталоге Packages внутри Xcode Tools. X11 находится под именем X11User.pkg внутри <filename>System/Installation/Packages</filename> также на первом диске. Если у вас был набор на CD, диски могут различаться. Участники проекта MacPorts рекомендуют использовать наиболее новую версию XCode. Дополнительная информация доступна на <ulink url="http://www.macports.org/install.php">странице установки MacPorts</ulink>. Также у вас должен быть некоторый опыт работы с <application>Terminal.app</application>. Все команды в продолжении этого раздела надо вводить и запускать в <application>Terminal.app</application>.</para>
-    <para>Требуемые и опциональные пакеты для установки перед установкой <application>Gwyddion</application> описаны в разделе <link linkend="installation-dependencies">зависимости при установке</link>. Следующая таблица содержит их названия в двух разных коллекциях программного обеспечения.</para>
+    <para>Требуемые и опциональные пакеты для установки перед установкой <application>Gwyddion</application> описаны в разделе <link linkend="installation-dependencies">зависимости при установке</link>. Следующая таблица содержит их названия в двух разных коллекциях программного обеспечения:</para>
     <informaltable frame="none" id="table-osx-package-names">
       <tgroup cols="3">
         <?dblatex lll?>

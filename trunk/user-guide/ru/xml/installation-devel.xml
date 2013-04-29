@@ -21,17 +21,15 @@
   <para>После загрузки свежего снимка, запустите <userinput>./autogen.sh</userinput> с теми же аргументами, которые вы хотели бы передать <command>configure</command>. Следует отметить. что автоматически добавляются опции <option>--enable-maintainer-mode</option> и <option>--enable-gtk-doc</option>, чтобы убедиться, чт оправила создания и обновления различных файлов будут активны. В общем случае нужно использовать эту опцию <command>configure</command> каждый раз, когда вы собираетесь изменить исходный код программы нетривиальным путём.</para>
   <para>На некоторых системах <command>autogen.sh</command> может закончиться с ошибкой даже если у вас установлены требуемые версии autotools. Эти системы не устанавливают общие команды <command>autoconf</command> или <command>automake</command>, а делят их на версии, вроде <command>autoconf261</command> или <command>automake19</command>. Найти, например, <quote><command>automake</command>1.9 или новее</quote> без знания насколько новым он может быть будет весьма нетривиальной задачей.  Следовательно, <command>autogen.sh</command> даже не пытается этого сделать. Можно или создать не содержащие версий символические ссылки на команды с версиями или запустить <command>autogen.sh</command> следующим образом: <informalexample><userinput> AUTOCONF=autoconf261 AUTOHEADER=autoheader261 ./autogen.sh </userinput></informalexample> Может потребоваться установка следующих переменных: <envar>ACLOCAL</envar>, <envar>AUTOCONF</envar>, <envar>AUTOHEADER</envar>, <envar>AUTOM4TE</envar>, <envar>AUTOMAKE</envar>, <envar>LIBTOOLIZE</envar>. Дополнительно, некоторые операционные системы могут установить макрос <command>autoconf</command> в такое место, где <command>aclocal</command> по умолчанию их не найдёт. Это может быть исправлено установкой переменной <envar>ACLOCAL_FLAGS</envar>, где будут указаны дополнительные пути поиска для <command>aclocal</command>: <informalexample><userinput> ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh </userinput></informalexample></para>
   <para>Нередко требуется комбинировать эти настройки. Например, на FreeBSD, где все инструменты разделены по версиям, обычно требуется выполнить (разбито на строки для простоты чтения):
-  <informalexample><literallayout><userinput>
-  AUTOCONF=autoconf261 \
-  AUTOHEADER=autoheader261 \
-  AUTOM4TE=autom4te261 \
-  AUTOMAKE=automake19 \
-  ACLOCAL=aclocal19 \
-  ACLOCAL_FLAGS="-I /usr/local/share/aclocal" \
-  CPPFLAGS=-I/usr/local/include \
-  LDFLAGS=-L/usr/local/lib \
-  ./autogen.sh --prefix=<replaceable>...</replaceable>
-  </userinput></literallayout></informalexample></para>
+  <informalexample><literallayout><userinput>AUTOCONF=autoconf261 \
+AUTOHEADER=autoheader261 \
+AUTOM4TE=autom4te261 \
+AUTOMAKE=automake19 \
+ACLOCAL=aclocal19 \
+ACLOCAL_FLAGS="-I /usr/local/share/aclocal" \
+CPPFLAGS=-I/usr/local/include \
+LDFLAGS=-L/usr/local/lib \
+./autogen.sh --prefix=<replaceable>...</replaceable></userinput></literallayout></informalexample></para>
   <para>Если <command>autogen.sh</command> заканчивается удачно, далее программу можно собирать как обычно.</para>
   <sect2 id="installation-devel-ms-windows">
     <title>MS Windows</title>
