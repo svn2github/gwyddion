@@ -32,38 +32,28 @@
 
 #define CBIT GWY_FIELD_CBIT
 
-static void humanize_in_place    (GwyField *field);
-static void humanize_clear_cached(GwyField *field);
-static void humanize_xoffset     (GwyField *field);
-static void humanize_yoffset     (GwyField *field);
-static void dehumanize_xoffset   (GwyField *field);
-static void dehumanize_yoffset   (GwyField *field);
-static void complete_fft_real    (GwyField *field);
-static void complete_fft_imag    (GwyField *field);
-static void fix_x2c_transform    (GwyField *reout,
-                                  GwyField *imout,
-                                  gboolean i2c,
-                                  GwyTransformDirection direction);
-static void fftize_xdim          (GwyField *fftfield,
-                                  const GwyField *field);
-static void fftize_ydim          (GwyField *fftfield,
-                                  const GwyField *field);
-static void copy_xdim            (GwyField *fftfield,
-                                  const GwyField *field);
-static void copy_ydim            (GwyField *fftfield,
-                                  const GwyField *field);
-
-static GwyField*
-init_fft_field(const GwyField *src,
-               GwyField *field)
-{
-    if (field) {
-        g_object_ref(field);
-        gwy_field_set_size(field, src->xres, src->yres, FALSE);
-        return field;
-    }
-    return gwy_field_new_sized(src->xres, src->yres, FALSE);
-}
+static void      humanize_in_place    (GwyField *field);
+static void      humanize_clear_cached(GwyField *field);
+static void      humanize_xoffset     (GwyField *field);
+static void      humanize_yoffset     (GwyField *field);
+static void      dehumanize_xoffset   (GwyField *field);
+static void      dehumanize_yoffset   (GwyField *field);
+static void      complete_fft_real    (GwyField *field);
+static void      complete_fft_imag    (GwyField *field);
+static void      fix_x2c_transform    (GwyField *reout,
+                                       GwyField *imout,
+                                       gboolean i2c,
+                                       GwyTransformDirection direction);
+static void      fftize_xdim          (GwyField *fftfield,
+                                       const GwyField *field);
+static void      fftize_ydim          (GwyField *fftfield,
+                                       const GwyField *field);
+static void      copy_xdim            (GwyField *fftfield,
+                                       const GwyField *field);
+static void      copy_ydim            (GwyField *fftfield,
+                                       const GwyField *field);
+static GwyField* init_fft_field       (const GwyField *src,
+                                       GwyField *field);
 
 /**
  * gwy_field_row_fft:
@@ -269,7 +259,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
         GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
                                       | GWY_FIELD_COMPAT_REAL
                                       | GWY_FIELD_COMPAT_UNITS);
-        g_return_if_fail(gwy_field_is_incompatible(rein, imin, compat));
+        g_return_if_fail(!gwy_field_is_incompatible(rein, imin, compat));
 
         gdouble *reindata = rein->data, *imindata = imin->data,
                 *reoutdata = myreout->data, *imoutdata = myimout->data;
@@ -411,7 +401,7 @@ gwy_field_fft_raw(const GwyField *rein,
         GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
                                       | GWY_FIELD_COMPAT_REAL
                                       | GWY_FIELD_COMPAT_UNITS);
-        g_return_if_fail(gwy_field_is_incompatible(rein, imin, compat));
+        g_return_if_fail(!gwy_field_is_incompatible(rein, imin, compat));
 
         gdouble *reindata = rein->data, *imindata = imin->data,
                 *reoutdata = myreout->data, *imoutdata = myimout->data;
@@ -728,7 +718,7 @@ complete_fft_real(GwyField *field)
     for (guint i = 0; i < yres; i++) {
         const gdouble *re1 = field->data + (i*xres + 1);
         gdouble *re2 = field->data + (i*xres + xres-1);
-        for (guint j = len; j; j--, re1++, re2++)
+        for (guint j = len; j; j--, re1++, re2--)
             *re2 = *re1;
     }
 }
@@ -741,7 +731,7 @@ complete_fft_imag(GwyField *field)
     for (guint i = 0; i < yres; i++) {
         const gdouble *im1 = field->data + (i*xres + 1);
         gdouble *im2 = field->data + (i*xres + xres-1);
-        for (guint j = len; j; j--, im1++, im2++)
+        for (guint j = len; j; j--, im1++, im2--)
             *im2 = -(*im1);
     }
 }
@@ -775,7 +765,7 @@ fftize_xdim(GwyField *fftfield,
 {
     gwy_field_set_xreal(fftfield, 2.0*G_PI/gwy_field_dx(field));
     dehumanize_xoffset(fftfield);
-    gwy_unit_power(fftfield->priv->xunit, field->priv->xunit, -1);
+    gwy_unit_power(gwy_field_get_xunit(fftfield), field->priv->xunit, -1);
 }
 
 static void
@@ -784,7 +774,7 @@ fftize_ydim(GwyField *fftfield,
 {
     gwy_field_set_yreal(fftfield, 2.0*G_PI/gwy_field_dy(field));
     dehumanize_yoffset(fftfield);
-    gwy_unit_power(fftfield->priv->yunit, field->priv->yunit, -1);
+    gwy_unit_power(gwy_field_get_yunit(fftfield), field->priv->yunit, -1);
 }
 
 static void
@@ -803,6 +793,18 @@ copy_ydim(GwyField *fftfield,
     gwy_field_set_yreal(fftfield, field->yreal);
     gwy_field_set_yoffset(fftfield, field->yoff);
     _gwy_assign_unit(&fftfield->priv->yunit, field->priv->yunit);
+}
+
+static GwyField*
+init_fft_field(const GwyField *src,
+               GwyField *field)
+{
+    if (field) {
+        g_object_ref(field);
+        gwy_field_set_size(field, src->xres, src->yres, FALSE);
+        return field;
+    }
+    return gwy_field_new_sized(src->xres, src->yres, FALSE);
 }
 
 /**
