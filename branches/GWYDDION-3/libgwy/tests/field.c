@@ -7131,4 +7131,103 @@ test_field_arithmetic_sculpt_downward_periodic(void)
     field_arithmetic_sculpt_one_periodic(GWY_SCULPT_DOWNWARD);
 }
 
+static void
+field_fft_raw_inversion_c2c_one(GwyTransformDirection direction)
+{
+    enum { max_size = 17 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    GwyField *fftre = gwy_field_new(), *fftim = gwy_field_new();
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *refield = gwy_field_new_sized(width, height, FALSE);
+        GwyField *imfield = gwy_field_new_sized(width, height, FALSE);
+        field_randomize(refield, rng);
+        field_randomize(imfield, rng);
+        GwyField *rereference = gwy_field_duplicate(refield);
+        GwyField *imreference = gwy_field_duplicate(imfield);
+        gwy_field_fft_raw(refield, imfield, fftre, fftim, direction);
+        gwy_field_fft_raw(fftre, fftim, refield, imfield, -direction);
+        field_assert_numerically_equal(refield, rereference, 1e-14);
+        field_assert_numerically_equal(imfield, imreference, 1e-14);
+        g_object_unref(rereference);
+        g_object_unref(imreference);
+        g_object_unref(refield);
+        g_object_unref(imfield);
+    }
+    g_object_unref(fftre);
+    g_object_unref(fftim);
+
+    g_rand_free(rng);
+}
+
+void
+test_field_fft_raw_inversion_c2c_forward(void)
+{
+    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_FORWARD);
+}
+
+void
+test_field_fft_raw_inversion_c2c_backward(void)
+{
+    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_BACKWARD);
+}
+
+static void
+field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
+                                gboolean real)
+{
+    enum { max_size = 17 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    GwyField *fftre = gwy_field_new(), *fftim = gwy_field_new();
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(width, height, FALSE);
+        field_randomize(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
+        gwy_field_fft_raw(real ? field : NULL, real ? NULL : field,
+                          fftre, fftim,
+                          direction);
+        gwy_field_fft_raw(fftre, fftim,
+                          real ? field : NULL, real ? NULL : field,
+                          -direction);
+        field_assert_numerically_equal(field, reference, 1e-14);
+        g_object_unref(reference);
+        g_object_unref(field);
+    }
+    g_object_unref(fftre);
+    g_object_unref(fftim);
+
+    g_rand_free(rng);
+}
+
+void
+test_field_fft_raw_inversion_r2c_forward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD, TRUE);
+}
+
+void
+test_field_fft_raw_inversion_r2c_backward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD, TRUE);
+}
+
+void
+test_field_fft_raw_inversion_i2c_forward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD, FALSE);
+}
+
+void
+test_field_fft_raw_inversion_i2c_backward(void)
+{
+    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD, FALSE);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

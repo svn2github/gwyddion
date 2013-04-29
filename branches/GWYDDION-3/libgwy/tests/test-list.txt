@@ -449,7 +449,13 @@ field/distributions/minkowski/black
 field/distributions/minkowski/white
 field/distributions/minkowski/connectivity
 field/fft/humanize/inversion
-field/fft/row/humanize/inversion
+field/fft-row/humanize/inversion
+field/fft/raw/inversion/c2c/forward
+field/fft/raw/inversion/c2c/backward
+field/fft/raw/inversion/r2c/forward
+field/fft/raw/inversion/r2c/backward
+field/fft/raw/inversion/i2c/forward
+field/fft/raw/inversion/i2c/backward
 surface/serialize
 surface/serialize/failure/odd
 surface/props
