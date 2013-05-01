@@ -499,6 +499,22 @@ gwy_field_meansq(const GwyField *field,
 }
 
 /**
+ * gwy_field_meansq_full:
+ * @field: A two-dimensional data field.
+ *
+ * Calculates the mean square of an entire field.
+ *
+ * See gwy_field_meansq() for discussion.
+ *
+ * Returns: The mean square of data values.
+ **/
+gdouble
+gwy_field_meansq_full(const GwyField *field)
+{
+    return gwy_field_meansq(field, NULL, NULL, GWY_MASK_IGNORE);
+}
+
+/**
  * gwy_field_statistics:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):

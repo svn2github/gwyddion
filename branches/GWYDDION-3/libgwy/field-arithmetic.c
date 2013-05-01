@@ -299,7 +299,7 @@ gwy_field_fill_full(GwyField *field,
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @shift: Value to add to the data.
  *
- * Adds a shift to data in a field.
+ * Adds a value to data in a field.
  **/
 void
 gwy_field_add(GwyField *field,
@@ -347,6 +347,20 @@ gwy_field_add(GwyField *field,
         }
         gwy_field_invalidate(field);
     }
+}
+
+/**
+ * gwy_field_add_full:
+ * @field: A two-dimensional data field.
+ * @shift: Value to add to the data.
+ *
+ * Adds a value to data in an entire field.
+ **/
+void
+gwy_field_add_full(GwyField *field,
+                   gdouble shift)
+{
+    gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, shift);
 }
 
 /**
@@ -416,6 +430,20 @@ gwy_field_multiply(GwyField *field,
         }
         gwy_field_invalidate(field);
     }
+}
+
+/**
+ * gwy_field_multiply_full:
+ * @field: A two-dimensional data field.
+ * @factor: Value to multiply the data with.
+ *
+ * Multiplies data in an entire field with a value.
+ **/
+void
+gwy_field_multiply_full(GwyField *field,
+                        gdouble factor)
+{
+    gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, factor);
 }
 
 /**
@@ -492,6 +520,24 @@ gwy_field_addmul(GwyField *field,
 }
 
 /**
+ * gwy_field_addmul_full:
+ * @field: A two-dimensional data field.
+ * @shift: Value to add to the data.
+ * @factor: Value to multiply the data with.
+ *
+ * Applies a linear function to all field data.
+ *
+ * See gwy_field_addmul() for a discussion.
+ **/
+void
+gwy_field_addmul_full(GwyField *field,
+                      gdouble shift,
+                      gdouble factor)
+{
+    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, shift, factor);
+}
+
+/**
  * gwy_field_normalize:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
@@ -540,7 +586,7 @@ gwy_field_normalize(GwyField *field,
         if (frms) {
             q = rms/frms;
             if (flags & GWY_NORMALIZE_ENTIRE_DATA)
-                gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, q);
+                gwy_field_multiply_full(field, q);
             else
                 gwy_field_multiply(field, fpart, mask, masking, q);
         }
@@ -549,7 +595,7 @@ gwy_field_normalize(GwyField *field,
     }
     if ((flags & GWY_NORMALIZE_MEAN) && q*fmean != mean) {
         if (flags & GWY_NORMALIZE_ENTIRE_DATA)
-            gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, mean - q*fmean);
+            gwy_field_add_full(field, mean - q*fmean);
         else
             gwy_field_add(field, fpart, mask, masking, mean - q*fmean);
     }
@@ -566,7 +612,7 @@ gwy_field_normalize(GwyField *field,
  *        Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
- * Takes square root of each pixel in a field.
+ * Takes the square root of values in a field.
  *
  * If the field contains negative values they become NaNs.
  **/
@@ -602,6 +648,18 @@ gwy_field_sqrt(GwyField *field,
         }
     }
     gwy_field_invalidate(field);
+}
+
+/**
+ * gwy_field_sqrt_full:
+ * @field: A two-dimensional data field.
+ *
+ * Takes the square root of all values in a field.
+ **/
+void
+gwy_field_sqrt_full(GwyField *field)
+{
+    gwy_field_sqrt(field, NULL, NULL, GWY_MASK_IGNORE);
 }
 
 /**

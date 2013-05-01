@@ -3321,28 +3321,28 @@ test_field_arithmetic_cache(void)
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
     gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
 
-    gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, 0.0);
+    gwy_field_add_full(field, 0.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -1.0);
     g_assert_cmpfloat(max, ==, 2.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
     gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
 
-    gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -1.0);
+    gwy_field_add_full(field, -1.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 1.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
     gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
 
-    gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, 1.0);
+    gwy_field_multiply_full(field, 1.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 1.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
     gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
 
-    gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, -2.0);
+    gwy_field_multiply_full(field, -2.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 4.0);
@@ -3357,21 +3357,21 @@ test_field_arithmetic_cache(void)
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
     gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
 
-    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, 1.0, 0.0);
+    gwy_field_addmul_full(field, 1.0, 0.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -1.0);
     g_assert_cmpfloat(max, ==, 2.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
     gwy_assert_floatval(gwy_field_rms_full(field), 0.5*sqrt(5.0), 1e-15);
 
-    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, 2.0, 2.0);
+    gwy_field_addmul_full(field, 2.0, 2.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, 0.0);
     g_assert_cmpfloat(max, ==, 6.0);
     g_assert_cmpfloat(gwy_field_mean_full(field), ==, 3.0);
     gwy_assert_floatval(gwy_field_rms_full(field), sqrt(5.0), 1e-15);
 
-    gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE, -0.5, 1.0);
+    gwy_field_addmul_full(field, -0.5, 1.0);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -2.0);
     g_assert_cmpfloat(max, ==, 1.0);
@@ -3494,7 +3494,7 @@ test_field_arithmetic_clamp(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
-        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -0.5);
+        gwy_field_add_full(field, -0.5);
 
         guint width = g_rand_int_range(rng, 1, xres+1);
         guint height = g_rand_int_range(rng, 1, yres+1);
@@ -3588,7 +3588,7 @@ test_field_arithmetic_apply_func(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
-        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -0.5);
+        gwy_field_add_full(field, -0.5);
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
 
         guint width = g_rand_int_range(rng, 1, xres+1);
@@ -6209,8 +6209,7 @@ test_field_correlate_level(void)
         gwy_field_normalize(kernel, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
                             GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
         gwy_field_copy(kernel, NULL, field, col, row);
-        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE,
-                      20.0*(g_rand_double(rng) - 0.5));
+        gwy_field_add_full(field, 20.0*(g_rand_double(rng) - 0.5));
         GwyField *score = gwy_field_new_alike(field, FALSE);
 
         gwy_field_correlate(field, NULL, score, kernel, NULL,
@@ -6259,8 +6258,7 @@ test_field_correlate_scale_rms(void)
         gwy_field_normalize(kernel, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
                             GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
         gwy_field_copy(kernel, NULL, field, col, row);
-        gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE,
-                           -log(g_rand_double(rng)));
+        gwy_field_multiply_full(field, -log(g_rand_double(rng)));
         GwyField *score = gwy_field_new_alike(field, FALSE);
 
         gwy_field_correlate(field, NULL, score, kernel, NULL,
@@ -6309,9 +6307,9 @@ test_field_correlate_normalize(void)
         gwy_field_normalize(kernel, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
                             GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
         gwy_field_copy(kernel, NULL, field, col, row);
-        gwy_field_addmul(field, NULL, NULL, GWY_MASK_IGNORE,
-                         -log(g_rand_double(rng)),
-                         20.0*(g_rand_double(rng) - 0.5));
+        gwy_field_addmul_full(field,
+                              -log(g_rand_double(rng)),
+                              20.0*(g_rand_double(rng) - 0.5));
         GwyField *score = gwy_field_new_alike(field, FALSE);
 
         gwy_field_correlate(field, NULL, score, kernel, NULL,
@@ -6974,7 +6972,7 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
         GwyField *feature = gwy_field_new_sized(max_feature, max_feature,
                                                 FALSE);
         field_randomize(feature, rng);
-        gwy_field_addmul(feature, NULL, NULL, GWY_MASK_IGNORE, 2.0, -1.0);
+        gwy_field_addmul_full(feature, 2.0, -1.0);
         gint col = g_rand_int_range(rng, 0, width+1 - featurewidth);
         gint row = g_rand_int_range(rng, 0, height+1 - featureheight);
         gwy_field_sculpt(feature, &fpart, field, col, row, method, periodic);
@@ -7047,7 +7045,7 @@ field_arithmetic_sculpt_one_periodic(GwySculptType method)
         GwyField *feature = gwy_field_new_sized(max_feature, max_feature,
                                                 FALSE);
         field_randomize(feature, rng);
-        gwy_field_addmul(feature, NULL, NULL, GWY_MASK_IGNORE, 2.0, -1.0);
+        gwy_field_addmul_full(feature, 2.0, -1.0);
         gint col = g_rand_int_range(rng, -4*width, 4*width+1);
         gint row = g_rand_int_range(rng, -4*height, 4*height+1);
         gwy_field_sculpt(feature, &fpart, field, col, row, method, TRUE);

@@ -163,9 +163,9 @@ gwy_field_row_fft(const GwyField *field,
     else {
         gdouble q = 1.0/sqrt(xres);
         if (reout)
-            gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+            gwy_field_multiply_full(reout, q);
         if (imout)
-            gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+            gwy_field_multiply_full(imout, q);
     }
 
     g_object_unref(myimout);
@@ -294,13 +294,13 @@ gwy_field_row_fft_raw(const GwyField *rein,
         fftize_xdim(reout, in);
         copy_ydim(reout, in);
         gwy_field_invalidate(reout);
-        gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+        gwy_field_multiply_full(reout, q);
     }
     if (imout) {
         fftize_xdim(imout, in);
         copy_ydim(imout, in);
         gwy_field_invalidate(imout);
-        gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+        gwy_field_multiply_full(imout, q);
     }
 }
 
@@ -364,8 +364,7 @@ gwy_field_fft(const GwyField *field,
     gwy_field_copy_full(field, myrein);
 
     if (level == 1) {
-        gwy_field_add(myrein, NULL, NULL, GWY_MASK_IGNORE,
-                      -gwy_field_mean_full(myrein));
+        gwy_field_add_full(myrein, -gwy_field_mean_full(myrein));
     }
     else if (level == 2) {
         gdouble a, bx, by;
@@ -386,7 +385,7 @@ gwy_field_fft(const GwyField *field,
 
     gdouble msq = 0.0;
     if (preserverms)
-        msq = gwy_field_meansq(myrein, NULL, NULL, GWY_MASK_IGNORE);
+        msq = gwy_field_meansq_full(myrein);
 
     gwy_field_fft_window(myrein, windowing, TRUE, TRUE);
     fftw_execute(plan);
@@ -399,23 +398,23 @@ gwy_field_fft(const GwyField *field,
         complete_fft_imag(myimout);
 
     if (preserverms) {
-        gdouble msqre = gwy_field_meansq(myreout, NULL, NULL, GWY_MASK_IGNORE);
-        gdouble msqim = gwy_field_meansq(myimout, NULL, NULL, GWY_MASK_IGNORE);
+        gdouble msqre = gwy_field_meansq_full(myreout);
+        gdouble msqim = gwy_field_meansq_full(myimout);
         gdouble s = msqre + msqim;
         if (s) {
             s = sqrt(msq/s);
             if (reout)
-                gwy_field_multiply(myreout, NULL, NULL, GWY_MASK_IGNORE, s);
+                gwy_field_multiply_full(myreout, s);
             if (imout)
-                gwy_field_multiply(myimout, NULL, NULL, GWY_MASK_IGNORE, s);
+                gwy_field_multiply_full(myimout, s);
         }
     }
     else {
         gdouble q = 1.0/sqrt(xres*yres);
         if (reout)
-            gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+            gwy_field_multiply_full(reout, q);
         if (imout)
-            gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+            gwy_field_multiply_full(imout, q);
     }
 
     g_object_unref(myimout);
@@ -543,13 +542,13 @@ gwy_field_fft_raw(const GwyField *rein,
         fftize_xdim(reout, in);
         fftize_ydim(reout, in);
         gwy_field_invalidate(reout);
-        gwy_field_multiply(reout, NULL, NULL, GWY_MASK_IGNORE, q);
+        gwy_field_multiply_full(reout, q);
     }
     if (imout) {
         fftize_xdim(imout, in);
         fftize_ydim(imout, in);
         gwy_field_invalidate(imout);
-        gwy_field_multiply(imout, NULL, NULL, GWY_MASK_IGNORE, q);
+        gwy_field_multiply_full(imout, q);
     }
 }
 

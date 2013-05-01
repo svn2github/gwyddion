@@ -71,6 +71,7 @@ gdouble gwy_field_meansq           (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking);
+gdouble gwy_field_meansq_full      (const GwyField *field);
 void    gwy_field_statistics       (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,

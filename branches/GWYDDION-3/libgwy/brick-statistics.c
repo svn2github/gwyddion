@@ -190,7 +190,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
                             tmp->data, NULL,
                             width, height, depth, rowstep, levelstep,
                             quantity);
-            gwy_field_multiply(tmp, NULL, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
+            gwy_field_multiply_full(tmp, 1.0/avgsize);
         }
         else if (quantity == GWY_BRICK_LINE_RMS) {
             gwy_field_clear_full(tmp2);
@@ -198,14 +198,14 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
                             tmp2->data, NULL,
                             width, height, depth, rowstep, levelstep,
                             GWY_BRICK_LINE_MEAN);
-            gwy_field_multiply(tmp2, NULL, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
+            gwy_field_multiply_full(tmp2, 1.0/avgsize);
             gwy_field_clear_full(tmp);
             summarize_lines(bbase, brick->xres, brick->yres,
                             tmp->data, tmp2->data,
                             width, height, depth, rowstep, levelstep,
                             quantity);
-            gwy_field_multiply(tmp, NULL, NULL, GWY_MASK_IGNORE, 1.0/avgsize);
-            gwy_field_sqrt(tmp, NULL, NULL, GWY_MASK_IGNORE);
+            gwy_field_multiply_full(tmp, 1.0/avgsize);
+            gwy_field_sqrt_full(tmp);
         }
         else if (quantity == GWY_BRICK_LINE_NRMS) {
             gwy_field_clear_full(tmp);
@@ -221,9 +221,8 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
                                 tmp->data, tmp2->data,
                                 width, height, depth, rowstep, levelstep,
                                 quantity);
-                gwy_field_multiply(tmp, NULL, NULL, GWY_MASK_IGNORE,
-                                   1.0/(avgsize - 1.0));
-                gwy_field_sqrt(tmp, NULL, NULL, GWY_MASK_IGNORE);
+                gwy_field_multiply_full(tmp, 1.0/(avgsize - 1.0));
+                gwy_field_sqrt_full(tmp);
             }
         }
 
