@@ -243,8 +243,8 @@ gwy_field_row_fft_raw(const GwyField *rein,
 
     fftw_iodim trans_dims = { xres, 1, 1 };
     fftw_iodim repeat_dims = { yres, xres, xres };
-    // Use FFTW_ESTIMATE to avoid overwriting of the input field by
-    // planner.  Often it should be able to use gathered wisdom.
+    // Use FFTW_ESTIMATE to avoid overwriting of the input field by planner.
+    // Often it should be able to use gathered wisdom so ESTIMATE is not bad.
     guint flags = FFTW_PRESERVE_INPUT | FFTW_ESTIMATE;
     if (!rein || !imin) {
         // R2C transform, possibly with some output fixup.
@@ -262,6 +262,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
         fix_x2c_transform(reout, imout, in == imin, direction);
     }
     else {
+        // Full C2C transform.
         GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
                                       | GWY_FIELD_COMPAT_REAL
                                       | GWY_FIELD_COMPAT_UNITS);
@@ -384,28 +385,26 @@ gwy_field_fft_raw(const GwyField *rein,
     GwyField *myimout = init_fft_field(in, imout);
 
     fftw_iodim trans_dims[] = { { yres, xres, xres }, { xres, 1, 1 } };
+    // Use FFTW_ESTIMATE to avoid overwriting of the input field by planner.
+    // Often it should be able to use gathered wisdom so ESTIMATE is not bad.
+    guint flags = FFTW_PRESERVE_INPUT | FFTW_ESTIMATE;
     if (!rein || !imin) {
         // R2C transform, possibly with some output fixup.
-        // According to the FFTW documentation, input preservation is not
-        // possible for multidimensional r2c transforms.
-        guint flags = FFTW_DESTROY_INPUT | _gwy_fft_rigour();
-        GwyField *tmp = gwy_field_new_alike(in, FALSE);
         fftw_plan plan = fftw_plan_guru_split_dft_r2c(2, trans_dims,
                                                       0, NULL,
-                                                      tmp->data,
+                                                      in->data,
                                                       myreout->data,
                                                       myimout->data,
                                                       flags);
         g_assert(plan);
-        gwy_field_copy_full(in, tmp);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
-        g_object_unref(tmp);
         complete_fft_real(myreout);
         complete_fft_imag(myimout);
         fix_x2c_transform(reout, imout, in == imin, direction);
     }
     else {
+        // Full C2C transform.
         GwyFieldCompatFlags compat = (GWY_FIELD_COMPAT_RES
                                       | GWY_FIELD_COMPAT_REAL
                                       | GWY_FIELD_COMPAT_UNITS);
@@ -417,9 +416,6 @@ gwy_field_fft_raw(const GwyField *rein,
             GWY_SWAP(gdouble*, reindata, imindata);
             GWY_SWAP(gdouble*, reoutdata, imoutdata);
         }
-        // Use FFTW_ESTIMATE to avoid overwriting of the input field by
-        // planner.  Often it should be able to use gathered wisdom.
-        guint flags = FFTW_PRESERVE_INPUT | FFTW_ESTIMATE;
         fftw_plan plan = fftw_plan_guru_split_dft(2, trans_dims,
                                                   0, NULL,
                                                   reindata, imindata,
