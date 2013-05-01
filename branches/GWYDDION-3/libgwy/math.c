@@ -1203,6 +1203,38 @@ gwy_linear_fit(GwyLinearFitFunc function,
 }
 
 /**
+ * gwy_create_xy_poly_powers_sum:
+ * @degree: Polynomial degree.
+ * @xpowers: (out):
+ *           Array of gwy_triangular_matrix_length(@degree) items to fill with
+ *           powers of @x.
+ * @ypowers: (out):
+ *           Array of gwy_triangular_matrix_length(@degree) items to fill with
+ *           powers of @y.
+ *
+ * Constructs x and y powers for polynomial fitting in plane with limited total
+ * degree.
+ *
+ * The arrays are filled with all combinations of non-negative @x and @y powers
+ * that do not exceed, in the total degree, given @degree.
+ **/
+void
+gwy_create_xy_poly_powers_sum(guint degree,
+                              guint *xpowers,
+                              guint *ypowers)
+{
+    g_return_if_fail(xpowers && ypowers);
+
+    guint k = 0;
+    for (guint i = 0; i <= degree; i++) {
+        for (guint j = 0; j <= degree-i; j++) {
+            xpowers[k] = j;
+            ypowers[k] = i;
+        }
+    }
+}
+
+/**
  * gwy_assert_floatval:
  * @val: Floating point value to check.
  * @ref: Reference value for @val.

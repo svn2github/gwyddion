@@ -376,13 +376,7 @@ gwy_field_fft(const GwyField *field,
         guint np = gwy_triangular_matrix_length(level);
         guint *xpowers = g_new(guint, 2*np), *ypowers = xpowers + np;
         gdouble *coeffs = g_new(gdouble, np);
-        guint k = 0;
-        for (guint i = 0; i < level; i++) {
-            for (guint j = 0; j < level-i; j++) {
-                xpowers[k] = j;
-                ypowers[k] = i;
-            }
-        }
+        gwy_create_xy_poly_powers_sum(level-1, xpowers, ypowers);
         gwy_field_fit_poly(myrein, NULL, NULL, GWY_MASK_IGNORE,
                            xpowers, ypowers, np, coeffs);
         gwy_field_subtract_poly(myrein, xpowers, ypowers, np, coeffs);

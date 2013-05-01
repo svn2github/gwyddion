@@ -144,6 +144,10 @@ gboolean gwy_linear_fit        (GwyLinearFitFunc function,
                                 gdouble *residuum,
                                 gpointer user_data);
 
+void gwy_create_xy_poly_powers_sum(guint degree,
+                                   guint *xpowers,
+                                   guint *ypowers);
+
 // Use negated condition in if to catch NaNs.
 #define gwy_assert_floatval(val,ref,tol) \
     do { \
