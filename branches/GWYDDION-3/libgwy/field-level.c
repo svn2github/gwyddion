@@ -2327,7 +2327,7 @@ gwy_field_laplace_solve(GwyField *field,
  * More precisely, the zeroth column/row corresponds to abscissa value of -1,
  * whereas the last column/row to 1.
  *
- * This permits to easily apply the same polynomial levelling to resampled
+ * This permits an easy application the same polynomial levelling to resampled
  * fields, however, the primary reason is improving the orthogonality of the
  * polynomial terms (which is rather poor) in the common case.
  *

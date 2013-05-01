@@ -41,7 +41,7 @@ void gwy_field_fft               (const GwyField *field,
                                   GwyField *imout,
                                   GwyWindowingType windowing,
                                   gboolean preserverms,
-                                  gint level);
+                                  guint level);
 void gwy_field_fft_raw           (const GwyField *rein,
                                   const GwyField *imin,
                                   GwyField *reout,
