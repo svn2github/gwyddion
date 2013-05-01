@@ -962,6 +962,7 @@ gwy_field_row_acf(const GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(size, fftr, fftc,
                                           FFTW_DESTROY_INPUT
                                           | _gwy_fft_rigour());
+    g_assert(plan);
     gwy_clear(accum_data, size);
     gwy_clear(accum_mask, size);
 
@@ -1046,6 +1047,7 @@ grain_row_acf(const GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(size, fftr, fftc,
                                           FFTW_DESTROY_INPUT
                                           | _gwy_fft_rigour());
+    g_assert(plan);
     gwy_clear(accum_data, size);
     gwy_clear(accum_mask, size);
 
@@ -1289,6 +1291,7 @@ gwy_field_row_psdf(const GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, fftr, fftc,
                                           FFTW_DESTROY_INPUT
                                           | _gwy_fft_rigour());
+    g_assert(plan);
     for (guint i = 0; i < height; i++) {
         guint count = row_level_and_count(base + i*field->xres, fftr, width,
                                           mask, masking, maskcol, maskrow + i,
@@ -1432,6 +1435,7 @@ gwy_field_row_hhcf(const GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(size, fftr, fftc,
                                           FFTW_DESTROY_INPUT
                                           | _gwy_fft_rigour());
+    g_assert(plan);
     gwy_clear(accum_data, size);
     gwy_clear(accum_mask, size);
     gwy_clear(accum_v, size);

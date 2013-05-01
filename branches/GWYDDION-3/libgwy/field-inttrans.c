@@ -113,6 +113,7 @@ gwy_field_row_fft(const GwyField *field,
                                                   myrein->data,
                                                   myreout->data, myimout->data,
                                                   flags);
+    g_assert(plan);
     gwy_field_copy_full(field, myrein);
     gwy_field_level_rows(myrein, level);
     gdouble *sqsum = NULL;
@@ -253,6 +254,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
                                                       myreout->data,
                                                       myimout->data,
                                                       flags);
+        g_assert(plan);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
         complete_row_fft_real(myreout);
@@ -276,6 +278,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
                                                   reindata, imindata,
                                                   reoutdata, imoutdata,
                                                   flags);
+        g_assert(plan);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
     }
@@ -393,6 +396,7 @@ gwy_field_fft_raw(const GwyField *rein,
                                                       myreout->data,
                                                       myimout->data,
                                                       flags);
+        g_assert(plan);
         gwy_field_copy_full(in, tmp);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
@@ -421,6 +425,7 @@ gwy_field_fft_raw(const GwyField *rein,
                                                   reindata, imindata,
                                                   reoutdata, imoutdata,
                                                   flags);
+        g_assert(plan);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
     }

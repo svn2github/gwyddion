@@ -152,10 +152,12 @@ gwy_field_correlate(const GwyField *field,
     fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
                                            FFTW_DESTROY_INPUT
                                            | _gwy_fft_rigour());
+    g_assert(dplan);
     // The C2R plan the backward transform of the correlation.  Again, it's
     // used also for kernels.
     fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, datac, extdata,
                                            _gwy_fft_rigour());
+    g_assert(cplan);
 
     // Transform the kernel.
     _gwy_extend_kernel_rect(maskedkernel->data, kxres, kyres,
@@ -520,10 +522,12 @@ gwy_field_crosscorrelate(const GwyField *field,
     fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
                                            FFTW_DESTROY_INPUT
                                            | _gwy_fft_rigour());
+    g_assert(dplan);
     // The C2R plan the backward transform of the correlation.  Again, it's
     // used also for kernels.
     fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, datac, extdata,
                                            _gwy_fft_rigour());
+    g_assert(cplan);
 
     // Transform the kernel.
     _gwy_extend_kernel_rect(unitkernel->data, kxres, kyres,

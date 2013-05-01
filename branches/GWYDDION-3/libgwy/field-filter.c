@@ -337,9 +337,11 @@ row_convolve_fft(const GwyField *field,
     fftw_plan dplan = fftw_plan_dft_r2c_1d(size, extdata, datac,
                                            FFTW_DESTROY_INPUT
                                             | _gwy_fft_rigour());
+    g_assert(dplan);
     // The C2R plan the backward transform of the convolution of each row.
     fftw_plan cplan = fftw_plan_dft_c2r_1d(size, datac, extdata,
                                            _gwy_fft_rigour());
+    g_assert(cplan);
 
     // Transform the kernel.
     extend_kernel_row(kernel->data, kres, extdata, size);
@@ -758,15 +760,18 @@ convolve_fft(const GwyField *field,
     fftw_plan kplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, kernelc,
                                            FFTW_DESTROY_INPUT
                                            | _gwy_fft_rigour());
+    g_assert(kplan);
     // The R2C plan for transforming the extended data.  This one is in-place.
     fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
                                            FFTW_DESTROY_INPUT
                                            | _gwy_fft_rigour());
+    g_assert(dplan);
     // The C2R plan the backward transform of the convolution.  The input
     // is in fact in kernelc to make it an out-of-place transform.  So, again,
     // the output has cstride of only xsize.
     fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, kernelc, extdata,
                                            _gwy_fft_rigour());
+    g_assert(cplan);
 
     // Transform the kernel.
     _gwy_extend_kernel_rect(kernel->data, kxres, kyres,
