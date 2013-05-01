@@ -7154,6 +7154,8 @@ field_fft_raw_inversion_c2c_one(GwyTransformDirection direction,
         GwyField *rereference = gwy_field_duplicate(refield);
         GwyField *imreference = gwy_field_duplicate(imfield);
         fft(refield, imfield, fftre, fftim, direction);
+        field_assert_equal(refield, rereference);
+        field_assert_equal(imfield, imreference);
         fft(fftre, fftim, refield, imfield, -direction);
         field_assert_numerically_equal(refield, rereference, 1e-14);
         field_assert_numerically_equal(imfield, imreference, 1e-14);
@@ -7213,6 +7215,7 @@ field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
         field_randomize(field, rng);
         GwyField *reference = gwy_field_duplicate(field);
         fft(real ? field : NULL, real ? NULL : field, fftre, fftim, direction);
+        field_assert_equal(field, reference);
         fft(fftre, fftim, real ? field : NULL, real ? NULL : field, -direction);
         field_assert_numerically_equal(field, reference, 1e-14);
         g_object_unref(reference);
