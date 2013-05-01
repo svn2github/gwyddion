@@ -242,7 +242,9 @@ gwy_field_row_fft_raw(const GwyField *rein,
 
     fftw_iodim trans_dims = { xres, 1, 1 };
     fftw_iodim repeat_dims = { yres, xres, xres };
-    guint flags = FFTW_PRESERVE_INPUT | _gwy_fft_rigour();
+    // Use FFTW_ESTIMATE to avoid overwriting of the input field by
+    // planner.  Often it should be able to use gathered wisdom.
+    guint flags = FFTW_PRESERVE_INPUT | FFTW_ESTIMATE;
     if (!rein || !imin) {
         // R2C transform, possibly with some output fixup.
         fftw_plan plan = fftw_plan_guru_split_dft_r2c(1, &trans_dims,
@@ -411,7 +413,9 @@ gwy_field_fft_raw(const GwyField *rein,
             GWY_SWAP(gdouble*, reindata, imindata);
             GWY_SWAP(gdouble*, reoutdata, imoutdata);
         }
-        guint flags = FFTW_PRESERVE_INPUT | _gwy_fft_rigour();
+        // Use FFTW_ESTIMATE to avoid overwriting of the input field by
+        // planner.  Often it should be able to use gathered wisdom.
+        guint flags = FFTW_PRESERVE_INPUT | FFTW_ESTIMATE;
         fftw_plan plan = fftw_plan_guru_split_dft(2, trans_dims,
                                                   0, NULL,
                                                   reindata, imindata,
