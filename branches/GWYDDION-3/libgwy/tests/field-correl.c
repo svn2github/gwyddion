@@ -240,4 +240,199 @@ test_field_correlate_normalize(void)
     g_rand_free(rng);
 }
 
+static void
+field_assert_local_extrema(const GwyField *field,
+                           const GwyFieldPart *fpart,
+                           const GwyMaskField *mask,
+                           GwyMaskingType masking,
+                           const guint *expected_indices,
+                           guint expected_n,
+                           gboolean maxima,
+                           gboolean sharp)
+{
+    guint *indices = g_new(guint, expected_n+1);
+
+    for (guint ni = 0; ni <= expected_n+1; ni++) {
+        // Make failure visible.
+        for (guint j = 0; j < expected_n+1; j++)
+            indices[j] = G_MAXUINT;
+
+        guint nex = MIN(ni, expected_n);
+        guint n = gwy_field_local_extrema(field, fpart, mask, masking,
+                                          indices, ni, maxima, sharp);
+        g_assert_cmpuint(n, ==, nex);
+        for (guint j = 0; j < n; j++) {
+            //g_printerr("[%u] %u %u\n", j, indices[j] % field->xres, indices[j]/field->xres);
+            g_assert_cmpuint(indices[j], ==, expected_indices[j]);
+        }
+    }
+
+    g_free(indices);
+}
+
+static GwyField*
+field_local_extrema_create1(gint sign)
+{
+    enum { xres = 30, yres = 20 };
+    GwyField *field = field_make_planar(xres, yres, sign*0.1, sign*0.2);
+
+    gwy_field_index(field, 1, 1) = sign*3.0;
+    gwy_field_index(field, 6, 4) = sign*3.0;
+    gwy_field_index(field, 6, 5) = sign*3.0;
+    gwy_field_index(field, 24, 9) = sign*3.0;
+    gwy_field_index(field, 24, 10) = sign*3.0;
+    gwy_field_index(field, 25, 10) = sign*3.0;
+    gwy_field_index(field, 24, 11) = sign*3.0;
+
+    return field;
+}
+
+void
+test_field_local_extrema_value_max_full(void)
+{
+    GwyField *field = field_local_extrema_create1(1);
+    guint indices[] = {
+        10*field->xres + 24,
+        10*field->xres + 25,
+        11*field->xres + 24,
+        9*field->xres + 24,
+        5*field->xres + 6,
+        4*field->xres + 6,
+        1*field->xres + 1,
+        field->xres*field->yres - 1,
+    };
+    field_assert_local_extrema(field, NULL, NULL, GWY_MASK_IGNORE,
+                               indices, G_N_ELEMENTS(indices),
+                               TRUE, FALSE);
+    g_object_unref(field);
+}
+
+void
+test_field_local_extrema_value_min_full(void)
+{
+    GwyField *field = field_local_extrema_create1(-1);
+    guint indices[] = {
+        10*field->xres + 24,
+        10*field->xres + 25,
+        11*field->xres + 24,
+        9*field->xres + 24,
+        5*field->xres + 6,
+        4*field->xres + 6,
+        1*field->xres + 1,
+        field->xres*field->yres - 1,
+    };
+    field_assert_local_extrema(field, NULL, NULL, GWY_MASK_IGNORE,
+                               indices, G_N_ELEMENTS(indices),
+                               FALSE, FALSE);
+    g_object_unref(field);
+}
+
+void
+test_field_local_extrema_value_max_part(void)
+{
+    GwyField *field = field_local_extrema_create1(1);
+    GwyFieldPart fpart = { 1, 1, 24, 9 };
+    guint indices[] = {
+        9*field->xres + 24,
+        5*field->xres + 6,
+        4*field->xres + 6,
+        1*field->xres + 1,
+    };
+    field_assert_local_extrema(field, &fpart, NULL, GWY_MASK_IGNORE,
+                               indices, G_N_ELEMENTS(indices),
+                               TRUE, FALSE);
+    g_object_unref(field);
+}
+
+void
+test_field_local_extrema_value_min_part(void)
+{
+    GwyField *field = field_local_extrema_create1(-1);
+    GwyFieldPart fpart = { 1, 1, 24, 9 };
+    guint indices[] = {
+        9*field->xres + 24,
+        5*field->xres + 6,
+        4*field->xres + 6,
+        1*field->xres + 1,
+    };
+    field_assert_local_extrema(field, &fpart, NULL, GWY_MASK_IGNORE,
+                               indices, G_N_ELEMENTS(indices),
+                               FALSE, FALSE);
+    g_object_unref(field);
+}
+
+void
+test_field_local_extrema_value_max_masked(void)
+{
+    GwyField *field = field_local_extrema_create1(1);
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyMaskField *mask = random_mask_field(field->xres, field->yres, rng);
+    gwy_mask_field_set(mask, 24, 10, FALSE);
+    gwy_mask_field_set(mask, 25, 10, TRUE);
+    gwy_mask_field_set(mask, 24, 11, FALSE);
+    gwy_mask_field_set(mask, 24, 9, TRUE);
+    gwy_mask_field_set(mask, 6, 5, TRUE);
+    gwy_mask_field_set(mask, 6, 4, FALSE);
+    gwy_mask_field_set(mask, 1, 1, FALSE);
+    gwy_mask_field_set(mask, field->xres-1, field->yres-1, TRUE);
+    guint indices_include[] = {
+        10*field->xres + 25,
+        9*field->xres + 24,
+        5*field->xres + 6,
+        field->xres*field->yres - 1,
+    };
+    guint indices_exclude[] = {
+        10*field->xres + 24,
+        11*field->xres + 24,
+        4*field->xres + 6,
+        1*field->xres + 1,
+    };
+    field_assert_local_extrema(field, NULL, mask, GWY_MASK_INCLUDE,
+                               indices_include, G_N_ELEMENTS(indices_include),
+                               TRUE, FALSE);
+    field_assert_local_extrema(field, NULL, mask, GWY_MASK_EXCLUDE,
+                               indices_exclude, G_N_ELEMENTS(indices_exclude),
+                               TRUE, FALSE);
+    g_rand_free(rng);
+    g_object_unref(mask);
+    g_object_unref(field);
+}
+
+void
+test_field_local_extrema_value_min_masked(void)
+{
+    GwyField *field = field_local_extrema_create1(-1);
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyMaskField *mask = random_mask_field(field->xres, field->yres, rng);
+    gwy_mask_field_set(mask, 24, 10, FALSE);
+    gwy_mask_field_set(mask, 25, 10, TRUE);
+    gwy_mask_field_set(mask, 24, 11, FALSE);
+    gwy_mask_field_set(mask, 24, 9, TRUE);
+    gwy_mask_field_set(mask, 6, 5, TRUE);
+    gwy_mask_field_set(mask, 6, 4, FALSE);
+    gwy_mask_field_set(mask, 1, 1, FALSE);
+    gwy_mask_field_set(mask, field->xres-1, field->yres-1, TRUE);
+    guint indices_include[] = {
+        10*field->xres + 25,
+        9*field->xres + 24,
+        5*field->xres + 6,
+        field->xres*field->yres - 1,
+    };
+    guint indices_exclude[] = {
+        10*field->xres + 24,
+        11*field->xres + 24,
+        4*field->xres + 6,
+        1*field->xres + 1,
+    };
+    field_assert_local_extrema(field, NULL, mask, GWY_MASK_INCLUDE,
+                               indices_include, G_N_ELEMENTS(indices_include),
+                               FALSE, FALSE);
+    field_assert_local_extrema(field, NULL, mask, GWY_MASK_EXCLUDE,
+                               indices_exclude, G_N_ELEMENTS(indices_exclude),
+                               FALSE, FALSE);
+    g_rand_free(rng);
+    g_object_unref(mask);
+    g_object_unref(field);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
