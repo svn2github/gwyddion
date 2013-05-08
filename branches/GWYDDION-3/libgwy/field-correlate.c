@@ -49,8 +49,7 @@ static void     find_extremum       (const GwyField *field,
                                      guint i,
                                      GArray *extrema,
                                      guint n,
-                                     gboolean maxima,
-                                     gboolean sharp);
+                                     gboolean maxima);
 static void     gather_neighbours   (const GwyField *field,
                                      guint j,
                                      guint i,
@@ -695,20 +694,16 @@ gwy_field_crosscorrelate(const GwyField *field,
  *     significant extrema to find.  The search time may grow superlinearly
  *     with @n so it is not advisable to pass large @n values.
  * @maxima: %TRUE to search for maxima, %FALSE to search for minima.
- * @sharp: %TRUE to sort extrema by sharpness instead of value.
  *
  * Searches for local extrema in a two-dimensional data field.
  *
  * An extremum is defined as a value whose 8-neighbourhood contains only values
  * that are not larger/smaller than this value.
  *
- * If the extrema are sorted by value (@sharp is %FALSE) then first the pixel
- * values are compared.  In the case of equality, the values in the
- * 8-neighbourhood are sorted and compared.
- *
- * If the extrema are sorted by sharpness (@sharp is %TRUE) then the sharpness
- * is first determined, which is the sum of differences between the pixel value
- * and its 8 neighbours.  In the case of equality, value sorting is used.
+ * The extrema significance is determined by value.  First the pixel values are
+ * compared directly.  In the case of equality, the values in the
+ * 4-neighbourhood complemented with the average of the other 8-neighbourhood
+ * values are sorted and compared.
  *
  * Returns: The number of extrema actually reported in @values and @indices.
  *          This may be lower than @n, or even zero.
@@ -720,8 +715,7 @@ gwy_field_local_extrema(const GwyField *field,
                         GwyMaskingType masking,
                         guint *indices,
                         guint n,
-                        gboolean maxima,
-                        gboolean sharp)
+                        gboolean maxima)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -735,9 +729,8 @@ gwy_field_local_extrema(const GwyField *field,
 
     if (masking == GWY_MASK_IGNORE) {
         for (guint i = 0; i < height; i++) {
-            for (guint j = 0; j < width; j++) {
-                find_extremum(field, j+col, i+row, extrema, n, maxima, sharp);
-            }
+            for (guint j = 0; j < width; j++)
+                find_extremum(field, j+col, i+row, extrema, n, maxima);
         }
     }
     else {
@@ -747,8 +740,7 @@ gwy_field_local_extrema(const GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = 0; j < width; j++) {
                 if (!gwy_mask_iter_get(iter) == invert)
-                    find_extremum(field, j+col, i+row, extrema, n,
-                                  maxima, sharp);
+                    find_extremum(field, j+col, i+row, extrema, n, maxima);
                 gwy_mask_iter_next(iter);
             }
         }
@@ -770,8 +762,7 @@ find_extremum(const GwyField *field,
               guint j, guint i,
               GArray *extrema,
               guint n,
-              gboolean maxima,
-              gboolean sharp)
+              gboolean maxima)
 {
     guint k = i*field->xres + j;
     guint nex = extrema->len;
@@ -779,8 +770,8 @@ find_extremum(const GwyField *field,
     gdouble value = field->data[k];
     const ExtremumInfo *last = &g_array_index(extrema, ExtremumInfo, nex-1);
 
-    // If not sorting by sharpness, weed out non-candidates quickly by value.
-    if (!sharp && nex == n) {
+    // Weed out non-candidates quickly by value.
+    if (nex == n) {
         if ((maxima ? value : -value) < last->svalue)
             return;
     }
@@ -801,22 +792,7 @@ find_extremum(const GwyField *field,
         }
     }
 
-    // OK, we have an extremum.
-    if (sharp) {
-        gdouble s = 0.0;
-        for (guint m = 0; m < 8; m++)
-            s += ex.neighbours[m];
-        s = fabs(s - 8.0*value);
-
-        if (nex == n && s < last->svalue)
-            return;
-
-        ex.svalue = s;
-    }
-    else {
-        ex.svalue = maxima ? value : -value;
-    }
-
+    ex.svalue = maxima ? value : -value;
     ex.index = k;
     ex.sorted = FALSE;
     if (!nex) {

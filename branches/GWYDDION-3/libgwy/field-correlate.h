@@ -63,8 +63,7 @@ guint    gwy_field_local_extrema   (const GwyField *field,
                                     GwyMaskingType masking,
                                     guint *indices,
                                     guint n,
-                                    gboolean maxima,
-                                    gboolean sharp);
+                                    gboolean maxima);
 
 G_END_DECLS
 

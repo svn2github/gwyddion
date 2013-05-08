@@ -271,7 +271,7 @@ field_fft_one(GwyWindowingType windowing,
         guint nex, indices;
         GwyFieldPart fpart = { 0, height/2, width, height - height/2 };
         nex = gwy_field_local_extrema(fftre, &fpart, NULL, GWY_MASK_IGNORE,
-                                      &indices, 1, TRUE, FALSE);
+                                      &indices, 1, TRUE);
         g_assert_cmpuint(nex, ==, 1);
         guint i = indices/width, j = indices % width;
         gdouble dx = gwy_field_dx(fftre), dy = gwy_field_dy(fftre);

@@ -247,8 +247,7 @@ field_assert_local_extrema(const GwyField *field,
                            GwyMaskingType masking,
                            const guint *expected_indices,
                            guint expected_n,
-                           gboolean maxima,
-                           gboolean sharp)
+                           gboolean maxima)
 {
     guint *indices = g_new(guint, expected_n+1);
 
@@ -259,7 +258,7 @@ field_assert_local_extrema(const GwyField *field,
 
         guint nex = MIN(ni, expected_n);
         guint n = gwy_field_local_extrema(field, fpart, mask, masking,
-                                          indices, ni, maxima, sharp);
+                                          indices, ni, maxima);
         g_assert_cmpuint(n, ==, nex);
         for (guint j = 0; j < n; j++) {
             //g_printerr("[%u] %u %u\n", j, indices[j] % field->xres, indices[j]/field->xres);
@@ -288,7 +287,7 @@ field_local_extrema_create1(gint sign)
 }
 
 void
-test_field_local_extrema_value_max_full(void)
+test_field_local_extrema_max_full(void)
 {
     GwyField *field = field_local_extrema_create1(1);
     guint indices[] = {
@@ -302,13 +301,12 @@ test_field_local_extrema_value_max_full(void)
         field->xres*field->yres - 1,
     };
     field_assert_local_extrema(field, NULL, NULL, GWY_MASK_IGNORE,
-                               indices, G_N_ELEMENTS(indices),
-                               TRUE, FALSE);
+                               indices, G_N_ELEMENTS(indices), TRUE);
     g_object_unref(field);
 }
 
 void
-test_field_local_extrema_value_min_full(void)
+test_field_local_extrema_min_full(void)
 {
     GwyField *field = field_local_extrema_create1(-1);
     guint indices[] = {
@@ -322,13 +320,12 @@ test_field_local_extrema_value_min_full(void)
         field->xres*field->yres - 1,
     };
     field_assert_local_extrema(field, NULL, NULL, GWY_MASK_IGNORE,
-                               indices, G_N_ELEMENTS(indices),
-                               FALSE, FALSE);
+                               indices, G_N_ELEMENTS(indices), FALSE);
     g_object_unref(field);
 }
 
 void
-test_field_local_extrema_value_max_part(void)
+test_field_local_extrema_max_part(void)
 {
     GwyField *field = field_local_extrema_create1(1);
     GwyFieldPart fpart = { 1, 1, 24, 9 };
@@ -339,13 +336,12 @@ test_field_local_extrema_value_max_part(void)
         1*field->xres + 1,
     };
     field_assert_local_extrema(field, &fpart, NULL, GWY_MASK_IGNORE,
-                               indices, G_N_ELEMENTS(indices),
-                               TRUE, FALSE);
+                               indices, G_N_ELEMENTS(indices), TRUE);
     g_object_unref(field);
 }
 
 void
-test_field_local_extrema_value_min_part(void)
+test_field_local_extrema_min_part(void)
 {
     GwyField *field = field_local_extrema_create1(-1);
     GwyFieldPart fpart = { 1, 1, 24, 9 };
@@ -356,13 +352,12 @@ test_field_local_extrema_value_min_part(void)
         1*field->xres + 1,
     };
     field_assert_local_extrema(field, &fpart, NULL, GWY_MASK_IGNORE,
-                               indices, G_N_ELEMENTS(indices),
-                               FALSE, FALSE);
+                               indices, G_N_ELEMENTS(indices), FALSE);
     g_object_unref(field);
 }
 
 void
-test_field_local_extrema_value_max_masked(void)
+test_field_local_extrema_max_masked(void)
 {
     GwyField *field = field_local_extrema_create1(1);
     GRand *rng = g_rand_new_with_seed(42);
@@ -389,17 +384,17 @@ test_field_local_extrema_value_max_masked(void)
     };
     field_assert_local_extrema(field, NULL, mask, GWY_MASK_INCLUDE,
                                indices_include, G_N_ELEMENTS(indices_include),
-                               TRUE, FALSE);
+                               TRUE);
     field_assert_local_extrema(field, NULL, mask, GWY_MASK_EXCLUDE,
                                indices_exclude, G_N_ELEMENTS(indices_exclude),
-                               TRUE, FALSE);
+                               TRUE);
     g_rand_free(rng);
     g_object_unref(mask);
     g_object_unref(field);
 }
 
 void
-test_field_local_extrema_value_min_masked(void)
+test_field_local_extrema_min_masked(void)
 {
     GwyField *field = field_local_extrema_create1(-1);
     GRand *rng = g_rand_new_with_seed(42);
@@ -426,10 +421,10 @@ test_field_local_extrema_value_min_masked(void)
     };
     field_assert_local_extrema(field, NULL, mask, GWY_MASK_INCLUDE,
                                indices_include, G_N_ELEMENTS(indices_include),
-                               FALSE, FALSE);
+                               FALSE);
     field_assert_local_extrema(field, NULL, mask, GWY_MASK_EXCLUDE,
                                indices_exclude, G_N_ELEMENTS(indices_exclude),
-                               FALSE, FALSE);
+                               FALSE);
     g_rand_free(rng);
     g_object_unref(mask);
     g_object_unref(field);
