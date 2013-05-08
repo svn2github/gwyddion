@@ -51,6 +51,10 @@ static void     find_extremum       (const GwyField *field,
                                      guint n,
                                      gboolean maxima,
                                      gboolean sharp);
+static void     gather_neighbours   (const GwyField *field,
+                                     guint j,
+                                     guint i,
+                                     ExtremumInfo *ex);
 static gboolean neigbours_are_better(ExtremumInfo *ex,
                                      ExtremumInfo *cex,
                                      gboolean maxima);
@@ -769,7 +773,7 @@ find_extremum(const GwyField *field,
               gboolean maxima,
               gboolean sharp)
 {
-    guint xres = field->xres, yres = field->yres, k = i*xres + j;
+    guint k = i*field->xres + j;
     guint nex = extrema->len;
     ExtremumInfo ex;
     gdouble value = field->data[k];
@@ -781,35 +785,7 @@ find_extremum(const GwyField *field,
             return;
     }
 
-    // Gather the neighbours.
-    if (i && i+1 < yres && j && j+1 < xres) {
-        const gdouble *d = field->data + (k - xres - 1);
-        ex.neighbours[0] = *(d++);
-        ex.neighbours[1] = *(d++);
-        ex.neighbours[2] = *d;
-        d += xres-2;
-        ex.neighbours[3] = *d;
-        d += 2;
-        ex.neighbours[4] = *d;
-        d += xres-2;
-        ex.neighbours[5] = *(d++);
-        ex.neighbours[6] = *(d++);
-        ex.neighbours[7] = *d;
-    }
-    else {
-        // This is a rare case, don't have to optimise for it.
-        const gdouble *d = field->data;
-        guint im = (i ? i-1 : i), ip = (i+1 < yres ? i+1 : i);
-        guint jm = (j ? j-1 : j), jp = (j+1 < xres ? j+1 : j);
-        ex.neighbours[0] = d[im*xres + jm];
-        ex.neighbours[1] = d[im*xres + j];
-        ex.neighbours[2] = d[im*xres + jp];
-        ex.neighbours[3] = d[i*xres + jm];
-        ex.neighbours[4] = d[i*xres + jp];
-        ex.neighbours[5] = d[ip*xres + jm];
-        ex.neighbours[6] = d[ip*xres + j];
-        ex.neighbours[7] = d[ip*xres + jp];
-    }
+    gather_neighbours(field, j, i, &ex);
 
     // Check whether we have an extremum.
     if (maxima) {
@@ -843,7 +819,7 @@ find_extremum(const GwyField *field,
 
     ex.index = k;
     ex.sorted = FALSE;
-    if (nex < n) {
+    if (!nex) {
         g_array_append_val(extrema, ex);
         return;
     }
@@ -856,11 +832,65 @@ find_extremum(const GwyField *field,
                 && neigbours_are_better(&ex, cex, maxima)))
             break;
     }
-    if (m == extrema->len)
+    if (m == n)
         return;
 
-    g_array_set_size(extrema, n-1);
+    if (extrema->len == n)
+        g_array_set_size(extrema, n-1);
     g_array_insert_val(extrema, m, ex);
+}
+
+static void
+gather_neighbours(const GwyField *field,
+                  guint j, guint i,
+                  ExtremumInfo *ex)
+{
+    guint xres = field->xres, yres = field->yres, k = i*xres + j;
+
+    if (i && i+1 < yres && j && j+1 < xres) {
+        const gdouble *d = field->data + (k - xres - 1);
+        ex->neighbours[4] = *(d++);
+        ex->neighbours[0] = *(d++);
+        ex->neighbours[5] = *d;
+        d += xres-2;
+        ex->neighbours[1] = *d;
+        d += 2;
+        ex->neighbours[2] = *d;
+        d += xres-2;
+        ex->neighbours[6] = *(d++);
+        ex->neighbours[3] = *(d++);
+        ex->neighbours[7] = *d;
+        return;
+    }
+
+    // This is a rare case, don't have to optimise it.
+    const gdouble *d = field->data;
+    guint im = (i ? i-1 : i), ip = (i+1 < yres ? i+1 : i);
+    guint jm = (j ? j-1 : j), jp = (j+1 < xres ? j+1 : j);
+    // 4-neighbours
+    ex->neighbours[0] = d[im*xres + j];
+    ex->neighbours[1] = d[i*xres + jm];
+    ex->neighbours[2] = d[i*xres + jp];
+    ex->neighbours[3] = d[ip*xres + j];
+    // 8-neighbours
+    ex->neighbours[4] = d[im*xres + jm];
+    ex->neighbours[5] = d[im*xres + jp];
+    ex->neighbours[6] = d[ip*xres + jm];
+    ex->neighbours[7] = d[ip*xres + jp];
+}
+
+static inline void
+neighbours_ensure_sorted(ExtremumInfo *ex)
+{
+    if (ex->sorted)
+        return;
+
+    for (guint i = 5; i < 8; i++)
+        ex->neighbours[4] += ex->neighbours[i];
+
+    ex->neighbours[4] *= 0.25;
+    gwy_math_sort(ex->neighbours, NULL, 5);
+    ex->sorted = TRUE;
 }
 
 static gboolean
@@ -871,21 +901,24 @@ neigbours_are_better(ExtremumInfo *ex,
     // If this function is called often it is inefficient to check the sorting
     // each time.  But we expect equality does not occur often so we might not
     // have to sort at all.
-    if (!ex->sorted) {
-        gwy_math_sort(ex->neighbours, NULL, 8);
-        ex->sorted = TRUE;
-    }
+    neighbours_ensure_sorted(cex);
+    neighbours_ensure_sorted(ex);
 
-    if (!cex->sorted) {
-        gwy_math_sort(cex->neighbours, NULL, 8);
-        cex->sorted = TRUE;
+    if (maxima) {
+        for (gint i = 4; i >= 0; i--) {
+            if (ex->neighbours[i] < cex->neighbours[i])
+                return FALSE;
+            if (ex->neighbours[i] > cex->neighbours[i])
+                return TRUE;
+        }
     }
-
-    for (guint i = 0; i < 8; i++) {
-        if (ex->neighbours[i] < cex->neighbours[i])
-            return !maxima;
-        if (ex->neighbours[i] > cex->neighbours[i])
-            return maxima;
+    else {
+        for (guint i = 0; i < 5; i++) {
+            if (ex->neighbours[i] > cex->neighbours[i])
+                return FALSE;
+            if (ex->neighbours[i] < cex->neighbours[i])
+                return TRUE;
+        }
     }
     return FALSE;
 }
