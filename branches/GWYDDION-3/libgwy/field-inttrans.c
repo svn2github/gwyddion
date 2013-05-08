@@ -813,9 +813,9 @@ static void
 humanize_yoffset(GwyField *field)
 {
     if (field->yres & 1)
-        gwy_field_set_yoffset(field, -0.5*field->xreal);
+        gwy_field_set_yoffset(field, -0.5*field->yreal);
     else
-        gwy_field_set_yoffset(field, -0.5*(field->xreal + gwy_field_dy(field)));
+        gwy_field_set_yoffset(field, -0.5*(field->yreal + gwy_field_dy(field)));
 }
 
 static void
