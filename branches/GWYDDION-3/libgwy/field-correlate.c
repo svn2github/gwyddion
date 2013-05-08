@@ -39,7 +39,7 @@ enum {
 
 typedef struct {
     gdouble svalue;          // Value for sorting, not necessary the value.
-    gdouble neighbours[8];
+    gdouble neighbours[5];
     guint index;
     gboolean sorted;
 } ExtremumInfo;
@@ -53,7 +53,7 @@ static void     find_extremum       (const GwyField *field,
 static void     gather_neighbours   (const GwyField *field,
                                      guint j,
                                      guint i,
-                                     ExtremumInfo *ex);
+                                     gdouble *neighbours);
 static gboolean neigbours_are_better(ExtremumInfo *ex,
                                      ExtremumInfo *cex,
                                      gboolean maxima);
@@ -769,6 +769,7 @@ find_extremum(const GwyField *field,
     ExtremumInfo ex;
     gdouble value = field->data[k];
     const ExtremumInfo *last = &g_array_index(extrema, ExtremumInfo, nex-1);
+    gdouble neighbours[8];
 
     // Weed out non-candidates quickly by value.
     if (nex == n) {
@@ -776,18 +777,18 @@ find_extremum(const GwyField *field,
             return;
     }
 
-    gather_neighbours(field, j, i, &ex);
+    gather_neighbours(field, j, i, neighbours);
 
     // Check whether we have an extremum.
     if (maxima) {
         for (guint m = 0; m < 8; m++) {
-            if (value < ex.neighbours[m])
+            if (value < neighbours[m])
                 return;
         }
     }
     else {
         for (guint m = 0; m < 8; m++) {
-            if (value > ex.neighbours[m])
+            if (value > neighbours[m])
                 return;
         }
     }
@@ -795,6 +796,9 @@ find_extremum(const GwyField *field,
     ex.svalue = maxima ? value : -value;
     ex.index = k;
     ex.sorted = FALSE;
+    gwy_assign(ex.neighbours, neighbours, 4);
+    ex.neighbours[4] = 0.25*(neighbours[4] + neighbours[5]
+                             + neighbours[6] + neighbours[7]);
     if (!nex) {
         g_array_append_val(extrema, ex);
         return;
@@ -819,23 +823,23 @@ find_extremum(const GwyField *field,
 static void
 gather_neighbours(const GwyField *field,
                   guint j, guint i,
-                  ExtremumInfo *ex)
+                  gdouble *neighbours)
 {
     guint xres = field->xres, yres = field->yres, k = i*xres + j;
 
     if (i && i+1 < yres && j && j+1 < xres) {
         const gdouble *d = field->data + (k - xres - 1);
-        ex->neighbours[4] = *(d++);
-        ex->neighbours[0] = *(d++);
-        ex->neighbours[5] = *d;
+        neighbours[4] = *(d++);
+        neighbours[0] = *(d++);
+        neighbours[5] = *d;
         d += xres-2;
-        ex->neighbours[1] = *d;
+        neighbours[1] = *d;
         d += 2;
-        ex->neighbours[2] = *d;
+        neighbours[2] = *d;
         d += xres-2;
-        ex->neighbours[6] = *(d++);
-        ex->neighbours[3] = *(d++);
-        ex->neighbours[7] = *d;
+        neighbours[6] = *(d++);
+        neighbours[3] = *(d++);
+        neighbours[7] = *d;
         return;
     }
 
@@ -844,15 +848,15 @@ gather_neighbours(const GwyField *field,
     guint im = (i ? i-1 : i), ip = (i+1 < yres ? i+1 : i);
     guint jm = (j ? j-1 : j), jp = (j+1 < xres ? j+1 : j);
     // 4-neighbours
-    ex->neighbours[0] = d[im*xres + j];
-    ex->neighbours[1] = d[i*xres + jm];
-    ex->neighbours[2] = d[i*xres + jp];
-    ex->neighbours[3] = d[ip*xres + j];
+    neighbours[0] = d[im*xres + j];
+    neighbours[1] = d[i*xres + jm];
+    neighbours[2] = d[i*xres + jp];
+    neighbours[3] = d[ip*xres + j];
     // 8-neighbours
-    ex->neighbours[4] = d[im*xres + jm];
-    ex->neighbours[5] = d[im*xres + jp];
-    ex->neighbours[6] = d[ip*xres + jm];
-    ex->neighbours[7] = d[ip*xres + jp];
+    neighbours[4] = d[im*xres + jm];
+    neighbours[5] = d[im*xres + jp];
+    neighbours[6] = d[ip*xres + jm];
+    neighbours[7] = d[ip*xres + jp];
 }
 
 static inline void
@@ -861,10 +865,6 @@ neighbours_ensure_sorted(ExtremumInfo *ex)
     if (ex->sorted)
         return;
 
-    for (guint i = 5; i < 8; i++)
-        ex->neighbours[4] += ex->neighbours[i];
-
-    ex->neighbours[4] *= 0.25;
     gwy_math_sort(ex->neighbours, NULL, 5);
     ex->sorted = TRUE;
 }
