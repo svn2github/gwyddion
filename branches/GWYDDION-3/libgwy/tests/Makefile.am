@@ -7,6 +7,7 @@ testlibgwy_SOURCES = \
 	array.c \
 	boxed-serialization.c \
 	brick.c \
+	brick-arithm.c \
 	brick-part.c \
 	container.c \
 	coords.c \
@@ -15,7 +16,15 @@ testlibgwy_SOURCES = \
 	expr.c \
 	fft.c \
 	field.c \
+	field-arithm.c \
+	field-convolve.c \
+	field-correl.c \
+	field-distrib.c \
+	field-fft.c \
+	field-level.c \
 	field-part.c \
+	field-stats.c \
+	field-transform.c \
 	fitting.c \
 	fit-funcs.c \
 	gl-material.c \
@@ -29,6 +38,7 @@ testlibgwy_SOURCES = \
 	macros.c \
 	main.c \
 	mask-field.c \
+	mask-field-transform.c \
 	mask-line.c \
 	master.c \
 	math.c \

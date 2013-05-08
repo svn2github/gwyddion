@@ -85,11 +85,21 @@ GwyMaskField* random_mask_field_prob        (guint xres,
                                              guint yres,
                                              GRand *rng,
                                              gdouble probability);
+void          mask_field_randomize          (GwyMaskField *maskfield,
+                                             const guint32 *pool,
+                                             guint max_size,
+                                             GRand *rng);
+guint32*      mask_field_random_pool_new    (GRand *rng,
+                                             guint max_size);
+void          mask_field_random_pool_free   (guint32 *pool);
+void          mask_field_assert_equal       (const GwyMaskField *result,
+                                             const GwyMaskField *reference);
 void          mask_field_print              (const gchar *name,
                                              const GwyMaskField *maskfield);
 void          mask_field_print_grains       (const gchar *name,
                                              const GwyMaskField *maskfield,
                                              guint grain_id);
+GwyMaskField* mask_field_from_string        (const gchar *str);
 void          curve_randomize               (GwyCurve *field,
                                              GRand *rng);
 void          field_randomize               (GwyField *field,
@@ -106,6 +116,10 @@ void          field_assert_equal            (const GwyField *result,
 void          field_assert_numerically_equal(const GwyField *result,
                                              const GwyField *reference,
                                              gdouble eps);
+GwyField*     field_make_planar             (guint xres,
+                                             guint yres,
+                                             gdouble alpha,
+                                             gdouble beta);
 void          line_randomize                (GwyLine *field,
                                              GRand *rng);
 void          line_print                    (const gchar *name,
