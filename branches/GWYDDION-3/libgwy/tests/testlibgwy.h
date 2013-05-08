@@ -99,6 +99,8 @@ void          field_print                   (const gchar *name,
 void          field_print_row               (const gchar *name,
                                              const gdouble *data,
                                              gsize size);
+void          field_write_gsf               (const gchar *name,
+                                             const GwyField *field);
 void          field_assert_equal            (const GwyField *result,
                                              const GwyField *reference);
 void          field_assert_numerically_equal(const GwyField *result,
