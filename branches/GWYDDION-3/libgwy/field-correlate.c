@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010-2011 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,6 +36,24 @@ enum {
     CORRELATION_ALL = 0x07,
     CROSSCORRELATION_ALL = 0x0b,
 };
+
+typedef struct {
+    gdouble svalue;          // Value for sorting, not necessary the value.
+    gdouble neighbours[8];
+    guint index;
+    gboolean sorted;
+} ExtremumInfo;
+
+static void     find_extremum       (const GwyField *field,
+                                     guint j,
+                                     guint i,
+                                     GArray *extrema,
+                                     guint n,
+                                     gboolean maxima,
+                                     gboolean sharp);
+static gboolean neigbours_are_better(ExtremumInfo *ex,
+                                     ExtremumInfo *cex,
+                                     gboolean maxima);
 
 /**
  * gwy_field_correlate:
@@ -367,13 +385,13 @@ multiply_shifted_rects(const gdouble *extfield,
  * @fpart: (allow-none):
  *         Area in @field and @reference to process.  Pass %NULL to process
  *         entire fields.
- * @score: (out caller-allocates) (allow-none):
+ * @score: (allow-none):
  *         A two-dimensional data field where the scores will be placed,
  *         or %NULL.
- * @xoff: (out caller-allocates) (allow-none):
+ * @xoff: (allow-none):
  *        A two-dimensional data field where the horizontal shifts
  *        corresponding to the maximum scores will be placed, or %NULL.
- * @yoff: (out caller-allocates) (allow-none):
+ * @yoff: (allow-none):
  *        A two-dimensional data field where the horizontal shifts
  *        corresponding to the maximum scores will be placed, or %NULL.
  * @kernel: Mask defining the shape of the detail correlated, with ones in
@@ -654,6 +672,222 @@ gwy_field_crosscorrelate(const GwyField *field,
         gwy_field_invalidate(xoff);
     if (yoff)
         gwy_field_invalidate(yoff);
+}
+
+/**
+ * gwy_field_local_extrema:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to search.  Pass %NULL to search entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @indices: (out) (array length=n) (allow-none):
+ *           Array of size @n where the extrema positions should be stored.
+ *           Each position is stored as the direct index in @field, i.e.
+ *           @row*@xres + @col.  Pass %NULL if you are only interested in the
+ *           number of extrema.
+ * @n: Number of items in @values and @indices, i.e. the number of most
+ *     significant extrema to find.  The search time may grow superlinearly
+ *     with @n so it is not advisable to pass large @n values.
+ * @maxima: %TRUE to search for maxima, %FALSE to search for minima.
+ * @sharp: %TRUE to sort extrema by sharpness instead of value.
+ *
+ * Searches for local extrema in a two-dimensional data field.
+ *
+ * An extremum is defined as a value whose 8-neighbourhood contains only values
+ * that are not larger/smaller than this value.
+ *
+ * If the extrema are sorted by value (@sharp is %FALSE) then first the pixel
+ * values are compared.  In the case of equality, the values in the
+ * 8-neighbourhood are sorted and compared.
+ *
+ * If the extrema are sorted by sharpness (@sharp is %TRUE) then the sharpness
+ * is first determined, which is the sum of differences between the pixel value
+ * and its 8 neighbours.  In the case of equality, value sorting is used.
+ *
+ * Returns: The number of extrema actually reported in @values and @indices.
+ *          This may be lower than @n, or even zero.
+ **/
+guint
+gwy_field_local_extrema(const GwyField *field,
+                        const GwyFieldPart *fpart,
+                        const GwyMaskField *mask,
+                        GwyMaskingType masking,
+                        guint *indices,
+                        guint n,
+                        gboolean maxima,
+                        gboolean sharp)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        return 0;
+
+    if (!n)
+        return 0;
+
+    GArray *extrema = g_array_sized_new(FALSE, FALSE, sizeof(ExtremumInfo), n);
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                find_extremum(field, j+col, i+row, extrema, n, maxima, sharp);
+            }
+        }
+    }
+    else {
+        GwyMaskIter iter;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = 0; j < width; j++) {
+                if (!gwy_mask_iter_get(iter) == invert)
+                    find_extremum(field, j+col, i+row, extrema, n,
+                                  maxima, sharp);
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+
+    guint nex = extrema->len;
+    if (indices) {
+        for (guint i = 0; i < nex; i++)
+            indices[i] = g_array_index(extrema, ExtremumInfo, i).index;
+    }
+
+    g_array_free(extrema, TRUE);
+
+    return nex;
+}
+
+static void
+find_extremum(const GwyField *field,
+              guint j, guint i,
+              GArray *extrema,
+              guint n,
+              gboolean maxima,
+              gboolean sharp)
+{
+    guint xres = field->xres, yres = field->yres, k = i*xres + j;
+    guint nex = extrema->len;
+    ExtremumInfo ex;
+    gdouble value = field->data[k];
+    const ExtremumInfo *last = &g_array_index(extrema, ExtremumInfo, nex-1);
+
+    // If not sorting by sharpness, weed out non-candidates quickly by value.
+    if (!sharp && nex == n) {
+        if ((maxima ? value : -value) < last->svalue)
+            return;
+    }
+
+    // Gather the neighbours.
+    if (i && i+1 < yres && j && j+1 < xres) {
+        const gdouble *d = field->data + (k - xres - 1);
+        ex.neighbours[0] = *(d++);
+        ex.neighbours[1] = *(d++);
+        ex.neighbours[2] = *d;
+        d += xres-2;
+        ex.neighbours[3] = *d;
+        d += 2;
+        ex.neighbours[4] = *d;
+        d += xres-2;
+        ex.neighbours[5] = *(d++);
+        ex.neighbours[6] = *(d++);
+        ex.neighbours[7] = *d;
+    }
+    else {
+        // This is a rare case, don't have to optimise for it.
+        const gdouble *d = field->data;
+        guint im = (i ? i-1 : i), ip = (i+1 < yres ? i+1 : i);
+        guint jm = (j ? j-1 : j), jp = (j+1 < xres ? j+1 : j);
+        ex.neighbours[0] = d[im*xres + jm];
+        ex.neighbours[1] = d[im*xres + j];
+        ex.neighbours[2] = d[im*xres + jp];
+        ex.neighbours[3] = d[i*xres + jm];
+        ex.neighbours[4] = d[i*xres + jp];
+        ex.neighbours[5] = d[ip*xres + jm];
+        ex.neighbours[6] = d[ip*xres + j];
+        ex.neighbours[7] = d[ip*xres + jp];
+    }
+
+    // Check whether we have an extremum.
+    if (maxima) {
+        for (guint m = 0; m < 8; m++) {
+            if (value < ex.neighbours[m])
+                return;
+        }
+    }
+    else {
+        for (guint m = 0; m < 8; m++) {
+            if (value > ex.neighbours[m])
+                return;
+        }
+    }
+
+    // OK, we have an extremum.
+    if (sharp) {
+        gdouble s = 0.0;
+        for (guint m = 0; m < 8; m++)
+            s += ex.neighbours[m];
+        s = fabs(s - 8.0*value);
+
+        if (nex == n && s < last->svalue)
+            return;
+
+        ex.svalue = s;
+    }
+    else {
+        ex.svalue = maxima ? value : -value;
+    }
+
+    ex.index = k;
+    ex.sorted = FALSE;
+    if (nex < n) {
+        g_array_append_val(extrema, ex);
+        return;
+    }
+
+    ExtremumInfo *cex = (ExtremumInfo*)extrema->data;
+    guint m;
+    for (m = 0; m < extrema->len; m++, cex++) {
+        if (cex->svalue < ex.svalue
+            || (cex->svalue == ex.svalue
+                && neigbours_are_better(&ex, cex, maxima)))
+            break;
+    }
+    if (m == extrema->len)
+        return;
+
+    g_array_set_size(extrema, n-1);
+    g_array_insert_val(extrema, m, ex);
+}
+
+static gboolean
+neigbours_are_better(ExtremumInfo *ex,
+                     ExtremumInfo *cex,
+                     gboolean maxima)
+{
+    // If this function is called often it is inefficient to check the sorting
+    // each time.  But we expect equality does not occur often so we might not
+    // have to sort at all.
+    if (!ex->sorted) {
+        gwy_math_sort(ex->neighbours, NULL, 8);
+        ex->sorted = TRUE;
+    }
+
+    if (!cex->sorted) {
+        gwy_math_sort(cex->neighbours, NULL, 8);
+        cex->sorted = TRUE;
+    }
+
+    for (guint i = 0; i < 8; i++) {
+        if (ex->neighbours[i] < cex->neighbours[i])
+            return !maxima;
+        if (ex->neighbours[i] > cex->neighbours[i])
+            return maxima;
+    }
+    return FALSE;
 }
 
 /**

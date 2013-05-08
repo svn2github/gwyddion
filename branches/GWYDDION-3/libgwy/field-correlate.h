@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010-2011 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -57,6 +57,14 @@ void      gwy_field_crosscorrelate (const GwyField *field,
                                     GwyCrosscorrelationFlags flags,
                                     GwyExteriorType exterior,
                                     gdouble fill_value);
+guint    gwy_field_local_extrema   (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking,
+                                    guint *indices,
+                                    guint n,
+                                    gboolean maxima,
+                                    gboolean sharp);
 
 G_END_DECLS
 
