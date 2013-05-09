@@ -412,4 +412,185 @@ test_field_fft_sine_kaiser25_nopreserve_0(void)
     field_fft_one(GWY_WINDOWING_KAISER25, FALSE, 0);
 }
 
+static gdouble
+find_row_max_pos(const GwyField *field,
+                 guint row)
+{
+    guint xres = field->xres;
+    const gdouble *data = field->data + row*xres;
+    gdouble m = -G_MAXDOUBLE;
+    guint im = xres/2;
+
+    for (guint i = xres/2; i+1 < xres; i++) {
+        if (data[i] > m) {
+            m = data[i];
+            im = i;
+        }
+    }
+
+    gdouble p = (data[im] - data[im+1])/(data[im] - data[im-1]);
+    p = 0.5*(1.0 - p)/(p + 1.0) + im;
+    return gwy_field_dx(field)*(p + 0.5) + field->xoff;
+}
+
+static void
+field_row_fft_one(GwyWindowingType windowing,
+                  gboolean preserverms,
+                  guint level)
+{
+    guint sizes[] = { 120, 135 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 30;
+
+    GwyField *fftre = gwy_field_new(), *fftim = gwy_field_new();
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = sizes[g_rand_int(rng) & 1];
+        guint height = sizes[g_rand_int(rng) & 1];
+        GwyField *field = gwy_field_new_sized(width, height, FALSE);
+        gdouble alpha = g_rand_double_range(rng, 15.0, 90.0);
+        gdouble beta = g_rand_double_range(rng, 1.0, 10.0);
+        field_sine_wave_fill(field, alpha, beta);
+        gwy_field_row_fft(field, fftre, fftim, windowing, preserverms, level);
+        gwy_field_fft_humanize(fftre);
+        gwy_field_fft_humanize(fftim);
+        gwy_field_hypot_field(fftre, fftre, fftim);
+        if (!level && preserverms) {
+            gwy_assert_floatval(gwy_field_meansq_full(field),
+                                gwy_field_meansq_full(fftre),
+                                1e-13);
+        }
+
+        for (guint row = 0; row < height; row++) {
+            gdouble xc = find_row_max_pos(fftre, row);
+            //g_printerr("[%u] %g (%g)\n", row, xc, alpha);
+            gwy_assert_floatval(xc, alpha, 0.4*gwy_field_dx(fftre));
+        }
+        g_object_unref(field);
+    }
+    g_object_unref(fftre);
+    g_object_unref(fftim);
+
+    g_rand_free(rng);
+}
+
+void
+test_field_row_fft_sine_none_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_NONE, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_none_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_NONE, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_hann_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_HANN, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_hann_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_HANN, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_hamming_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_HAMMING, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_hamming_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_HAMMING, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_blackmann_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_BLACKMANN, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_blackmann_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_BLACKMANN, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_lanczos_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_LANCZOS, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_lanczos_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_LANCZOS, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_welch_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_WELCH, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_welch_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_WELCH, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_rect_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_RECT, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_rect_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_RECT, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_nuttall_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_NUTTALL, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_nuttall_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_NUTTALL, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_flat_top_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_FLAT_TOP, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_flat_top_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_FLAT_TOP, FALSE, 0);
+}
+
+void
+test_field_row_fft_sine_kaiser25_preserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_KAISER25, TRUE, 0);
+}
+
+void
+test_field_row_fft_sine_kaiser25_nopreserve_0(void)
+{
+    field_row_fft_one(GWY_WINDOWING_KAISER25, FALSE, 0);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
