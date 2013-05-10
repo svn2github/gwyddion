@@ -530,6 +530,13 @@ test_grain_value_builtin_maximum_bounding_angle(void)
 {
     test_one_value("Maximum bounding direction", "Boundary", TRUE,
                    &dumb_maximum_bounding_angle, &compare_bounding_direction);
+
+    GwyGrainValue *grainvalue = gwy_grain_value_new("Maximum bounding direction");
+    g_assert(gwy_grain_value_is_angle(grainvalue));
+    g_assert_cmpuint(gwy_grain_value_needs_same_units(grainvalue),
+                     ==,
+                     GWY_GRAIN_VALUE_SAME_UNITS_LATERAL);
+    g_object_unref(grainvalue);
 }
 
 static gdouble
@@ -623,6 +630,13 @@ test_grain_value_builtin_curvature_k1(void)
 {
     test_one_value("Curvature 1", "Curvature", TRUE,
                    &dumb_curvature_k1, NULL);
+
+    GwyGrainValue *grainvalue = gwy_grain_value_new("Curvature 1");
+    g_assert(!gwy_grain_value_is_angle(grainvalue));
+    g_assert_cmpuint(gwy_grain_value_needs_same_units(grainvalue),
+                     ==,
+                     GWY_GRAIN_VALUE_SAME_UNITS_ALL);
+    g_object_unref(grainvalue);
 }
 
 static gdouble
@@ -643,6 +657,13 @@ test_grain_value_builtin_curvature_k2(void)
 {
     test_one_value("Curvature 2", "Curvature", TRUE,
                    &dumb_curvature_k2, NULL);
+
+    GwyGrainValue *grainvalue = gwy_grain_value_new("Curvature 2");
+    g_assert(!gwy_grain_value_is_angle(grainvalue));
+    g_assert_cmpuint(gwy_grain_value_needs_same_units(grainvalue),
+                     ==,
+                     GWY_GRAIN_VALUE_SAME_UNITS_ALL);
+    g_object_unref(grainvalue);
 }
 
 static gdouble
@@ -663,6 +684,13 @@ test_grain_value_builtin_curvature_phi1(void)
 {
     test_one_value("Curvature direction 1", "Curvature", TRUE,
                    &dumb_curvature_phi1, NULL);
+
+    GwyGrainValue *grainvalue = gwy_grain_value_new("Curvature direction 1");
+    g_assert(gwy_grain_value_is_angle(grainvalue));
+    g_assert_cmpuint(gwy_grain_value_needs_same_units(grainvalue),
+                     ==,
+                     GWY_GRAIN_VALUE_SAME_UNITS_LATERAL);
+    g_object_unref(grainvalue);
 }
 
 static gdouble
@@ -683,6 +711,13 @@ test_grain_value_builtin_curvature_phi2(void)
 {
     test_one_value("Curvature direction 2", "Curvature", TRUE,
                    &dumb_curvature_phi2, NULL);
+
+    GwyGrainValue *grainvalue = gwy_grain_value_new("Curvature direction 2");
+    g_assert(gwy_grain_value_is_angle(grainvalue));
+    g_assert_cmpuint(gwy_grain_value_needs_same_units(grainvalue),
+                     ==,
+                     GWY_GRAIN_VALUE_SAME_UNITS_LATERAL);
+    g_object_unref(grainvalue);
 }
 
 static gdouble
@@ -985,10 +1020,28 @@ test_grain_value_user(void)
 
     GwyGrainValue *grainvalue = gwy_grain_value_new("TESTLIBGWY Height");
     g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
+    g_assert(!gwy_grain_value_is_angle(grainvalue));
+    g_assert(!gwy_grain_value_needs_same_units(grainvalue));
     GwyUserGrainValue *usergrainvalue = gwy_grain_value_get_resource(grainvalue);
     g_assert(usergrainvalue == height);
     g_object_unref(grainvalue);
     gwy_inventory_delete(usergrainvalues, "TESTLIBGWY Height");
+}
+
+void
+test_grain_value_ident(void)
+{
+    const gchar* const* names = gwy_grain_value_list_builtins();
+    guint n = g_strv_length((gchar**)names);
+
+    for (guint i = 0; i < n; i++) {
+        GwyGrainValue *grainvalue = gwy_grain_value_new(names[i]);
+        g_assert(GWY_IS_GRAIN_VALUE(grainvalue));
+        g_assert(gwy_grain_value_is_valid(grainvalue));
+        const gchar *ident = gwy_grain_value_get_ident(grainvalue);
+        g_assert(gwy_ascii_strisident(ident, "_", NULL));
+        g_object_unref(grainvalue);
+    }
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
