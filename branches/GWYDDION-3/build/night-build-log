@@ -56,8 +56,8 @@ cat >distcheck.ignore <<':'
 cat >update_translations.ignore <<':'
 ^TRANSLATION
 ^[.]{5,} done\.$
-^\d+ translated messages, \d+ fuzzy translations, \d+ untranslated messages\.$
-^\d+ translated messages, \d+ untranslated messages\.$
+^[0-9]+ translated messages?, [0-9]+ fuzzy translations?, [0-9]+ untranslated messages?\.$
+^[0-9]+ translated messages?, [0-9]+ untranslated messages?\.$
 ':'
 :
 
