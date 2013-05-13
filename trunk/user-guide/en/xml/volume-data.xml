@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='volume-data'>
+  <title>Volume Data</title>
+  <indexterm><primary>volume data</primary></indexterm>
+  <para>
+    Volume data are three-dimensional data representing, for instance,
+    grid spectroscopy (spectra in each image point) or time evolution of the
+    image.  So, depending on the point of view, they can be imagined as
+    either a stack of identically-sized images or as a set of curves forming
+    a regular grid (image).
+  </para>
+  <para>
+    <application>Gwyddion</application> currently offers some basic
+    visualization and extraction tools in the <guimenu>Volume</guimenu> menu.
+    Volume data windows, as shown in the following figure, provide the most
+    basic visualisation of volume data: an <quote>preview</quote> image,
+    representing one plane of the volume data or other associated
+    two-dimensional data.  The <xi:include href="eqi-x.xml"/> and
+    <xi:include href="eqi-x.xml"/> coordinates of the image correspond to the
+    <xi:include href="eqi-x.xml"/> and <xi:include href="eqi-x.xml"/>
+    coordinates of the volume data; the <xi:include href="eqi-z.xml"/>
+    coordinates can be imagined as orthogonal to the screen.
+  </para>
+  <informalfigure id='fig-volume-data-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='volume-data-window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        A volume data window displaying the associated two-dimensional preview
+        data.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Button <guibutton>Change Preview</guibutton> near the top of the window
+    can be used to change the preview image.  The preview can either be
+    calculated as a summary quantity characterising data along the invisible
+    <xi:include href="eqi-z.xml"/> direction (minimum, maximum, mean, …),
+    chosen as a section of the volume data, alternatively just any
+    two-dimensional data of the same dimensions can be shown as the preview.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

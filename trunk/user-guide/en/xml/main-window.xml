@@ -77,11 +77,24 @@
       <listitem>
         <para>
           is similar to <guimenu>Data Process</guimenu>, except it
-          consists of graph functions. <link linkend='graph-processing'>Graph
-            processing</link> includes function fitting, exporting graph data
+          consists of graph functions.
+          <link linkend='graph-processing'>Graph processing</link>
+          includes function fitting, exporting graph data
           etc.  Button panel <guilabel>Graph</guilabel> again contains
           a subset of the commonly used functions from <guimenu>Graph</guimenu>
           menu.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Volume</guimenu>
+      </term>
+      <listitem>
+        <para>
+          is similar to <guimenu>Data Process</guimenu>, except it
+          consists of <link linkend='volume-data'>volume data</link>
+          functions.
         </para>
       </listitem>
     </varlistentry>
