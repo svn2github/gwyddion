@@ -49,6 +49,7 @@
         <listitem><guilabel>Channels</guilabel></listitem>
         <listitem><guilabel>Graphs</guilabel></listitem>
         <listitem><guilabel>Spectra</guilabel></listitem>
+        <listitem><guilabel>Volume</guilabel></listitem>
       </itemizedlist>
       Each list shows names of the data objects and some additional properties
       that depend on the specific data type.  The names can be edited after
@@ -106,6 +107,14 @@
       connection with a two-dimensional data using the
       <link linkend='single-point-spectra'>spectroscopy tool</link>, there is
       no check-box controlling the visibility.
+    </para>
+  </sect2>
+  <sect2 id='data-browser-volume'>
+    <title>Volume</title>
+    <para>
+      The volume data list shows the data name and the number of levels in the
+      <xi:include href="eqi-z.xml"/> direction, i.e. perpendicular to the
+      section displayed in the window.
     </para>
   </sect2>
 </sect1>

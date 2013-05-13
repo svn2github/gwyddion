@@ -942,6 +942,200 @@
       </informaltable>
     </para>
   </sect2>
+  <sect2 id='gwyfile-volume'>
+    <title>Volume data</title>
+    <para>
+      The following table summarises the common keys of volume-related data in
+      the top-level container for volume data number 0.  For other volume data, the
+      number 0 has to be replaced with the corresponding volume data number.  Note
+      that volume data are often numbered sequentially, starting from 0, however,
+      they can have any numbers and the set of volume data numbers does not have
+      to be contiguous.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-volume-keys'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Key</entry>
+              <entry>Type</entry>
+              <entry>Meaning</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/brick/0</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyBrick'><type>GwyBrick</type></link></entry>
+              <entry>
+                Volume data.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/preview</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
+              <entry>
+                Two-dimensional data shown when the volume data is
+                displayed in a window.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/title</literal></entry>
+              <entry>string</entry>
+              <entry>
+                Volume data title, as shown in the data browser.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/visible</literal></entry>
+              <entry>boolean</entry>
+              <entry>
+                Whether the volume data should be displayed in a window when the file is loaded.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/preview/palette</literal></entry>
+              <entry>string</entry>
+              <entry>
+                Name of the false color gradient used to display the preview data.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/meta</literal></entry>
+              <entry><type>GwyContainer</type></entry>
+              <entry>
+                Volume data metadata.  The keys are directly the names as displayed in
+                the metadata browser and the string values are the values.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Volume data are represented as <type>GwyBrick</type> objects.  The components of
+      a <type>GwyBrick</type> are summarised in the following table:
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyBrick'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Component</entry>
+              <entry>Type</entry>
+              <entry>Meaning</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xres</literal></entry>
+              <entry>32bit integer</entry>
+              <entry>
+                Horizontal size in pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yres</literal></entry>
+              <entry>32bit integer</entry>
+              <entry>
+                Vertical size in pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>zres</literal></entry>
+              <entry>32bit integer</entry>
+              <entry>
+                Depth (number of levels) in pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>xreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Horizontal dimension in physical units.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Vertical dimension in physical units.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>zreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Depthwise dimension in physical units.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>xoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Horizontal offset of the top-left corner in physical units.
+                It usually occurs only if non-zero.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Vertical offset of the top-left corner in physical units.
+                It usually occurs only if non-zero.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>zoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Depthwise offset of the top-left corner in physical units.
+                It usually occurs only if non-zero.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_x</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unit of horizontal lateral dimensions.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_y</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unit of vertical lateral dimensions.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_z</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unit of depthwise dimensions.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_w</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unit of data values.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>array of doubles</entry>
+              <entry>
+                Field data, stored as a flat array of size
+                <varname>xres</varname>×<varname>yres</varname>×<varname>zres</varname>,
+                from the zeroth to the last plane, top to bottom and from left to right.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
   <sect2 id='gwyfile-auxiliary-objects'>
     <title>Auxiliary Objects</title>
     <para>

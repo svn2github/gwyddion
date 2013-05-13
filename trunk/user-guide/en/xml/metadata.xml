@@ -12,15 +12,18 @@
   </para>
   <para>
     Metadata are always per-channel.  The metadata for the current channel
-    can be displayed with
+    or volume data can be displayed with
+    <guimenuitem>Metadata Browser</guimenuitem>
+    command in the right-click context menu (in version 2.32 or newer) or
+    using
     <menuchoice>
       <guimenu>Meta</guimenu>
       <guimenuitem>Metadata Browser</guimenuitem>
     </menuchoice>
-    command.  The browser lists all available metadata as Name, Value pairs.
-    It also enables to modify and delete values or add new ones.  It is
-    possible to export all metadata of a channel to a text file with
-    <guibutton>Save</guibutton> button.
+    (in older versions).  The browser lists all available metadata as Name,
+    Value pairs. It also enables to modify and delete values or add new ones.
+    It is possible to export all metadata of a channel to a text file with
+    <guibutton>Export</guibutton> button.
   </para>
   <para>
     The level of metadata support differs widely between file formats.
