@@ -155,27 +155,38 @@
           <entry>Remove presentation from current data window.</entry>
         </row>
         <row>
+          <entry><keycap>Ctrl-Shift-B</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenuitem>Metadata Browser</guimenuitem>
+            </menuchoice>
+            (in the context menu)
+          </entry>
+          <entry>image or volume data window</entry>
+          <entry>Show metadata browser for the data.</entry>
+        </row>
+        <row>
           <entry><keycap>+</keycap></entry>
           <entry></entry>
-          <entry>data window</entry>
+          <entry>image or volume data window</entry>
           <entry>Zoom current data window in.</entry>
         </row>
         <row>
           <entry><keycap>=</keycap></entry>
           <entry></entry>
-          <entry>data window</entry>
+          <entry>image or volume data window</entry>
           <entry>Zoom current data window in.</entry>
         </row>
         <row>
           <entry><keycap>-</keycap></entry>
           <entry></entry>
-          <entry>data window</entry>
+          <entry>image or volume data window</entry>
           <entry>Zoom current data window out.</entry>
         </row>
         <row>
           <entry><keycap>Z</keycap></entry>
           <entry></entry>
-          <entry>data window</entry>
+          <entry>image or volume data window</entry>
           <entry>Zoom current data window 1:1.</entry>
         </row>
         <row>
