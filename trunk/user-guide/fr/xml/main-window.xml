@@ -6,15 +6,15 @@
   <title>La Fenêtre Principale</title>
   <para>
     La fenêtre principale, aussi appelée boîte à outils, est l'une des deux
-    fenêtres qui apparaît après le démarrage de Gwyddion (sans ouvrir de 
+    fenêtres qui apparaît après le démarrage de Gwyddion (sans ouvrir de
     fichier). La seconde est le <link linkend='data-browser'>navigateur de
     données</link>. La fermeture de cette fenêtre entraîne la fermeture de
     Gwyddion.
   </para>
   <para>
     La boîte à outils de Gwyddion contient l'ensemble des menus et plusieurs
-    groupes de boutons reliés aux fontions et outils les plus communs. Les 
-    menus regroupent les fonctions de la manière suivante : 
+    groupes de boutons reliés aux fontions et outils les plus communs. Les
+    menus regroupent les fonctions de la manière suivante :
   </para>
   <variablelist>
     <varlistentry>
@@ -23,10 +23,10 @@
       </term>
       <listitem>
         <para>
-          regroupe les commandes servant à 
+          regroupe les commandes servant à
           <link linkend='managing-files'>l'ouverture et la sauvegarde des
-          fichiers</link>. On y trouve aussi certaines commandes globales 
-          (telle que <guimenuitem>Quitter</guimenuitem>). L' 
+          fichiers</link>. On y trouve aussi certaines commandes globales
+          (telle que <guimenuitem>Quitter</guimenuitem>). L'
           <link linkend='document-history'>historique des fichiers récemment
           ouverts</link> est accessible avec
           <menuchoice>
@@ -43,9 +43,9 @@
       </term>
       <listitem>
         <para>
-          permet de modifier l'historique des commandes 
+          permet de modifier l'historique des commandes
           (<guimenuitem>Annuler</guimenuitem>, <guimenuitem>Rétablir</guimenuitem>)
-          et donne accès aux éditeurs des différentes ressources du logiciel, 
+          et donne accès aux éditeurs des différentes ressources du logiciel,
           telles que les gradients et matériaux pour les présentations en
           fausses couleurs et en 3D, ou la couleur par défaut pour le
           <link linkend='presentations-masks'>masquage des données</link>.
@@ -59,15 +59,15 @@
       <listitem>
         <para>
           est automatiquement créé à partir de tous les modules de traitement
-          des données présents dans le répertoire des modules de Gwyddion 
-          (en fonction du système d'exploitation). Ce menu ainsi que les 
+          des données présents dans le répertoire des modules de Gwyddion
+          (en fonction du système d'exploitation). Ce menu ainsi que les
           boutons du panneau <guilabel>Outils</guilabel> contient la plupart des
-          fonctions dont vous aurez besoin pour analyser vos données SPM. 
+          fonctions dont vous aurez besoin pour analyser vos données SPM.
           Quelques unes de ces fonctions snot aussi présentes dans le panneau
           <guilabel>Traitement des Données</guilabel>.  Ces boutons servent
-          de raccourcis vers les fonctions les plus courantes du menu 
-          <guimenu>Traitement des Données</guimenu>.  Toutes les fonctions du 
-          panneau <guilabel>Traitement des Données</guilabel> se trouvent 
+          de raccourcis vers les fonctions les plus courantes du menu
+          <guimenu>Traitement des Données</guimenu>.  Toutes les fonctions du
+          panneau <guilabel>Traitement des Données</guilabel> se trouvent
           également dans le menu.
         </para>
       </listitem>
@@ -83,7 +83,19 @@
           <link linkend='graph-processing'>traitement des graphes</link> permet
           d'ajuster des fonctions, d'exporter les données, etc. Le panneau
           <guilabel>Graphe</guilabel> contient lui aussi quelques unes des
-          fonctiosn les plus courantes du menu <guimenu>Graphe</guimenu>.
+          fonctions les plus courantes du menu <guimenu>Graphe</guimenu>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Volume</guimenu>
+      </term>
+      <listitem>
+        <para>
+          est similaire au menu <guimenu>Traitement des données</guimenu>,
+          exception faite qu'il ne propose uniquement des fonctions liées aux
+          <link linkend='volume-data'>données volumiques</link>.
         </para>
       </listitem>
     </varlistentry>
@@ -113,8 +125,8 @@
     <guimenu>Graphes</guimenu> décrits plus hauts.
   </para>
   <para>
-    Le panneau <guilabel>Outils</guilabel> contient les 
-    <link linkend='tools'>outils</link>, c'est-à-dire les fonctions 
+    Le panneau <guilabel>Outils</guilabel> contient les
+    <link linkend='tools'>outils</link>, c'est-à-dire les fonctions
     travaillant directement avec les sélections sur la fenêtre de données. Ces
     fonctions ne sont accessibles qu'à partir des boutons de ce panneau.
   </para>

@@ -56,7 +56,7 @@
           </entry>
         </row>
         <row>
-          <entry><keycap>Ctrl-Shift-S</keycap></entry>
+          <entry><keycap>Ctrl-Maj-S</keycap></entry>
           <entry>
             <menuchoice>
               <guimenu>Fichier</guimenu>
@@ -71,7 +71,7 @@
           </entry>
         </row>
         <row>
-          <entry><keycap>Ctrl-Shift-M</keycap></entry>
+          <entry><keycap>Ctrl-Maj-M</keycap></entry>
           <entry>
             <menuchoice>
               <guimenu>Fichier</guimenu>
@@ -156,7 +156,7 @@
           <entry>Supprime le masque de la fenêtre de données courante.</entry>
         </row>
         <row>
-          <entry><keycap>Ctrl-Shift-K</keycap></entry>
+          <entry><keycap>Ctrl-Maj-K</keycap></entry>
           <entry>
             <menuchoice>
               <guimenu>Editer</guimenu>
@@ -168,27 +168,38 @@
           <entry>Supprime la présentation de la fenêtre de données courante.</entry>
         </row>
         <row>
+          <entry><keycap>Ctrl-Maj-B</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenuitem>Navigateur des méta-données</guimenuitem>
+            </menuchoice>
+            (dans le menu contextuel)
+          </entry>
+          <entry>fenêtre de données ou de volume</entry>
+          <entry>Afiiche le navigateur des méta-données.</entry>
+        </row>
+        <row>
           <entry><keycap>+</keycap></entry>
           <entry></entry>
-          <entry>fenêtre de données</entry>
+          <entry>fenêtre de données ou de volume</entry>
           <entry>Zoom la fenêtre de données courante.</entry>
         </row>
         <row>
           <entry><keycap>=</keycap></entry>
           <entry></entry>
-          <entry>fenêtre de données</entry>
+          <entry>fenêtre de données ou de volume</entry>
           <entry>Zoome la fenêtre de données courante.</entry>
         </row>
         <row>
           <entry><keycap>-</keycap></entry>
           <entry></entry>
-          <entry>fenêtre de données</entry>
+          <entry>fenêtre de données ou de volume</entry>
           <entry>Dézoome la fenêtre de données courante.</entry>
         </row>
         <row>
           <entry><keycap>Z</keycap></entry>
           <entry></entry>
-          <entry>fenêtre de données</entry>
+          <entry>fenêtre de données ou de volume</entry>
           <entry>Affiche la fenêtre de données courante à l'échelle 1:1.</entry>
         </row>
         <row>
@@ -208,7 +219,7 @@
           </entry>
         </row>
         <row>
-          <entry><keycap>Ctrl-Shift-F</keycap></entry>
+          <entry><keycap>Ctrl-Maj-F</keycap></entry>
           <entry>
             <menuchoice>
               <guimenu>Traitement des Données</guimenu>

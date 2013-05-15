@@ -52,6 +52,7 @@
         <listitem><guilabel>Canaux</guilabel></listitem>
         <listitem><guilabel>Graphes</guilabel></listitem>
         <listitem><guilabel>Spectres</guilabel></listitem>
+        <listitem><guilabel>Volume</guilabel></listitem>
       </itemizedlist>
       Chaque liste donne les noms des données ainsi que certaines propriétés
       supplémentaires en fonction du type de données. Les noms peuvent être
@@ -113,6 +114,15 @@
       traités uniquement en relation avec les données bi-dimensionnelles à
       l'aide de
       <link linkend='single-point-spectra'>l'outil spectroscopie</link>.
+    </para>
+  </sect2>
+  <sect2 id='data-browser-volume'>
+    <title>Volume</title>
+    <para>
+      L'onglet volume affiche le nom des donnes et le nombre de niveaux selon la
+      The volume data list shows the data name and the number of levels in the
+      direction <xi:include href="eqi-z.xml"/>, c'est-à-dire perpendiculairement
+      à la section affichée dans la fenêtre.
     </para>
   </sect2>
 </sect1>

@@ -8,19 +8,22 @@
     On appelle méta-données les informations annexes et les valeurs décrivant
     certaines données ou conditions de mesures. Elle peuvent par exemple
     inclure le mode SPM, le biais de la sonde, la fréquence de scan, la date
-    de mesure ou des commentaire de l'utilisateur.
+    de mesure ou des commentaires de l'utilisateur.
   </para>
   <para>
     Les méta-données sont définies pour chaque canal. Celles du canal courant
-    peuvent être affichées avec commande
+    ou des données volumiques peuvent être affichées avec la commande
+    <guimenuitem>Navigateur de méta-données</guimenuitem> en affichant le menu
+    contextuel avec un clic droit (à partir de la version 2.32) ou en utilisant
     <menuchoice>
       <guimenu>Meta-données</guimenu>
       <guimenuitem>Navigateur de Meta-données</guimenuitem>
     </menuchoice>.
-    Le navigateur liste toutes les méta-données par paires Nom / Valeur.
+    (dans les versions précédentes). Le navigateur liste toutes les
+    méta-données par paires Nom / Valeur.
     Il est possible de modifier, supprimer ou ajouter des valeurs. Il est
     aussi possible d'exporter toutes les méta-données d'un canal vers un fichier
-    texte à l'aide du bouton <guibutton>Enregistrer</guibutton>.
+    texte à l'aide du bouton <guibutton>Exporter</guibutton>.
   </para>
   <para>
     Le niveau de support des méta-données varie fortement d'un format de fichier
