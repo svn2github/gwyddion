@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: main-window.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!-- @(#) $Id: main-window.xml 15036 2013-05-13 21:45:47Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="main-window">
   <title>Главное окно</title>
@@ -40,10 +40,18 @@
     </varlistentry>
     <varlistentry>
       <term>
+        <guimenu>Объём</guimenu>
+      </term>
+      <listitem>
+        <para>подобно функциям <guimenu>Обработки данных</guimenu>, за исключением того, что содержит функции работы с <link linkend="volume-data">объёмными данными</link> .</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
         <guimenu>Мета</guimenu>
       </term>
       <listitem>
-        <para>содержит команды. которые предоставляют различную вспомогательную информацию. А именно <link linkend="metadata">метаданные</link> для полей высот (т.е. скорость сканирования, напряжение на зонде и т.п.) и информацию о самой программе <application>Gwyddion</application>.</para>
+        <para>содержит команды, которые предоставляют различную вспомогательную информацию. А именно <link linkend="metadata">метаданные</link> для полей высот (т.е. скорость сканирования, напряжение на зонде и т.п.) и информацию о самой программе <application>Gwyddion</application>.</para>
       </listitem>
     </varlistentry>
   </variablelist>

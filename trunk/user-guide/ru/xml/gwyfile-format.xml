@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 12496 2011-06-01 10:59:41Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 15032 2013-05-13 14:22:45Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
@@ -30,7 +30,7 @@
     <title>Компоненты</title>
     <para>Каждый компонент состоит из трёх частей (в следующем порядке): <itemizedlist>
         <listitem>Имя, сохраненное в виде завершенной <constant>NUL</constant> строки.</listitem>
-        <listitem>Тип, сохранённый как один байт без знака (символ). Таблица возможных типов компонентов приведена ниже.</listitem>
+        <listitem>Тип, сохранённый как один байт без знака (символ). Таблица возможных типов компонент представлена ниже.</listitem>
         <listitem>Данные, сохранённые в формате, который подходит для определённого типа.</listitem>
       </itemizedlist></para>
   </sect2>
@@ -229,7 +229,7 @@
             <row>
               <entry><literal>/0/select/<replaceable>foo</replaceable></literal></entry>
               <entry>подкласс <type>GwySelection</type></entry>
-              <entry>Данные выделения. Каждый тип выделения имеет (обычно) отдельный тип объекта и сохраняется под отдельным именем; конкретное имя <replaceable>foo</replaceable> будет тем же, что показано в <link linkend="selection-manager">менеджере выделенного</link>.</entry>
+              <entry>Данные выделения. Каждый тип выделения имеет (обычно) отдельный тип объекта и сохраняется под отдельным именем; конкретное имя <replaceable>foo</replaceable> будет тем же, что показано в <link linkend="selection-manager">менеджер выделенного</link>.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -645,6 +645,143 @@
               <entry><literal>data</literal></entry>
               <entry>массив double</entry>
               <entry>Данные линии, сохранённые как массив <varname>res</varname>, слева направо .</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id="gwyfile-volume">
+    <title>Объёмные данные</title>
+    <para>Следующая таблица сводит воедино общие ключи для объёмных данных в контейнере верхнего уровня для объёмных данных с номером 0. Для других объёмных данных, число 0 должно быть заменено соответствующим номером объёмных данных. Следует отметить, что объёмные данные обычно нумеруются последовательно, начиная с 0, однако, они могут иметь любые номера и множество номеров объёмных данных не обязательно должно быть непрерывным.</para>
+    <para>
+      <informaltable id="table-gwyfile-volume-keys">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Ключ</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/brick/0</literal></entry>
+              <entry><link linkend="table-gwyfile-GwyBrick"><type>GwyBrick</type></link></entry>
+              <entry>Объёмные данные.</entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/preview</literal></entry>
+              <entry><link linkend="table-gwyfile-GwyDataField"><type>GwyDataField</type></link></entry>
+              <entry>Двумерные данные, демонстрируемые при показе объёмных данных в окне.</entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/title</literal></entry>
+              <entry>строка</entry>
+              <entry>Имя объёмных данных, как оно показывается в браузере данных</entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/visible</literal></entry>
+              <entry>булев</entry>
+              <entry>Следует ли отображать объёмные данные в окне при загрузке файлов.</entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/preview/palette</literal></entry>
+              <entry>строка</entry>
+              <entry>Имя градиента псевдоцвета используемого при отображении изображения предпросмотра.</entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/meta</literal></entry>
+              <entry><type>GwyContainer</type></entry>
+              <entry>Метаданные объёмных данных. Ключи это имена, которые будут отображаться в окне просмотра метаданных, строковые значения – значения данных.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Объёмные данные представлены как объекты <type>GwyBrick</type>. Компоненты <type>GwyBrick</type> представлены в следующей таблице:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwyBrick">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xres</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Горизонтальный размер в пикселях.</entry>
+            </row>
+            <row>
+              <entry><literal>yres</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Вертикальный размер в пикселях.</entry>
+            </row>
+            <row>
+              <entry><literal>zres</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Глубина (число уровней) в пикселях.</entry>
+            </row>
+            <row>
+              <entry><literal>xreal</literal></entry>
+              <entry>double</entry>
+              <entry>Горизонтальный размер в физических единицах.</entry>
+            </row>
+            <row>
+              <entry><literal>yreal</literal></entry>
+              <entry>double</entry>
+              <entry>Вертикальный размер в физических единицах.</entry>
+            </row>
+            <row>
+              <entry><literal>zreal</literal></entry>
+              <entry>double</entry>
+              <entry>Размер глубины в физических единицах.</entry>
+            </row>
+            <row>
+              <entry><literal>xoff</literal></entry>
+              <entry>double</entry>
+              <entry>Горизонтальное смещение верхнего левого угла в физических единицах. Обычно записывается только если не равно нулю.</entry>
+            </row>
+            <row>
+              <entry><literal>yoff</literal></entry>
+              <entry>double</entry>
+              <entry>Вертикальное смещение верхнего левого угла в физических единицах. Обычно записывается только если не равно нулю.</entry>
+            </row>
+            <row>
+              <entry><literal>zoff</literal></entry>
+              <entry>double</entry>
+              <entry>Смещение по глубине верхнего левого угла в физических единицах. Обычно записывается только если не равно нулю.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_x</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения горизонтальных размеров.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_y</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения вертикальных пространственных размеров.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_z</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения размеров по глубине.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_w</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения значений данных.</entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>массив double</entry>
+              <entry>Данные поля, сохранённые как плоский массив размера <varname>xres</varname>×<varname>yres</varname>, с нулевой до последней плоскости, сверху вниз и слева направо.</entry>
             </row>
           </tbody>
         </tgroup>

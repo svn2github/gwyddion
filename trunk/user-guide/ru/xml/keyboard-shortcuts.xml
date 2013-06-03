@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: keyboard-shortcuts.xml 13108 2011-12-03 10:52:58Z yeti-dn $ -->
+<!-- @(#) $Id: keyboard-shortcuts.xml 15037 2013-05-14 07:22:03Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="keyboard-shortcuts">
   <title>Комбинации клавиш</title>
@@ -143,27 +143,33 @@
           <entry>Удалить презентацию с текущего окна данных.</entry>
         </row>
         <row>
+          <entry><keycap>Ctrl-Shift-B</keycap></entry>
+          <entry><menuchoice><guimenuitem>Просмотр метаданных</guimenuitem></menuchoice> (в контекстном меню)</entry>
+          <entry>окно изображения или объёмных данных</entry>
+          <entry>Показать окно просмотра метаданных для отображаемых данных.</entry>
+        </row>
+        <row>
           <entry><keycap>+</keycap></entry>
           <entry/>
-          <entry>окно данных</entry>
+          <entry>окно изображения или объёмных данных</entry>
           <entry>Приблизить изображение в текущем окне данных.</entry>
         </row>
         <row>
           <entry><keycap>=</keycap></entry>
           <entry/>
-          <entry>окно данных</entry>
+          <entry>окно изображения или объёмных данных</entry>
           <entry>Приблизить изображение в текущем окне данных.</entry>
         </row>
         <row>
           <entry><keycap>-</keycap></entry>
           <entry/>
-          <entry>окно данных</entry>
+          <entry>окно изображения или объёмных данных</entry>
           <entry>Отодвинуть изображение в текущем окне данных.</entry>
         </row>
         <row>
           <entry><keycap>Z</keycap></entry>
           <entry/>
-          <entry>окно данных</entry>
+          <entry>окно изображения или объёмных данных</entry>
           <entry>Масштабировать текущее окно данных до масштаба 1:1.</entry>
         </row>
         <row>
