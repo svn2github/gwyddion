@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: volume-data.xml 15036 2013-05-13 21:45:47Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='volume-data'>
+  <title>Données volumiques</title>
+  <indexterm><primary>données volumiques</primary></indexterm>
+  <para>
+    Les données volumiques sont des données tri-dimensionnelles représentant
+    par exemple une grille de spectre (un spectre pour chaque point de l'image)
+    ou l'évolution temporelle d'une image. Ainsi, en fonction du point de vue,
+    on pourra considérer ses données comme un empilement d'image de mêmes
+    dimensions ou comme un ensemble de courbes formant une grille régulière
+    (image).
+  </para>
+  <para>
+    <application>Gwyddion</application> propose pour l'instant quelques
+    fonctions basiques de visualisation et d'extraction dans le menu
+    <guimenu>Volume</guimenu>. La fenêtre des données volumiques, représentée
+    dans la figure ci-dessous, fournit la visualisation la plus basique des
+    données : une image de <quote>prévisualisation</quote>, représentant un plan
+    des données volumiques ou d'autres données bi-dimensionnelles associées.
+    Les coordonnées <xi:include href="eqi-x.xml"/> et
+    <xi:include href="eqi-y.xml"/> de l'image correspondent aux coordonnées
+    <xi:include href="eqi-x.xml"/> et <xi:include href="eqi-y.xml"/> des données
+    volumiques ; les coordonnées <xi:include href="eqi-z.xml"/> peuvent être
+    imaginées comme étant perpendiculaires à l'écran.
+  </para>
+  <informalfigure id='fig-volume-data-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='volume-data-window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre de données volumiques affichant les données de prévisualisation
+        associées.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Le bouton <guibutton>Modifier la prévisualisation</guibutton> en haut de la
+    fenêtre peut être utilisé pour modifier l'image de prévisualisation. La
+    prévisualisation peut être soit calculée à partir d'une quantité
+    caractérisant les données selon la direction <xi:include href="eqi-z.xml"/>
+    (minimum, maximum, moyenne…), soit choisie à partir d'une section des
+    données, ou bien encore définie à partir de données bi-dimensionnelles de
+    mêmes dimensions.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
