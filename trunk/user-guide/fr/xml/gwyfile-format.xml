@@ -205,7 +205,7 @@
               <entry></entry>
             </row>
             <row>
-              <entry>tableau d'objects</entry>
+              <entry>tableau d'objets</entry>
               <entry><literal>O</literal></entry>
               <entry>O majuscule, et non zéro</entry>
             </row>
@@ -735,7 +735,7 @@
           <tbody>
             <row>
               <entry><literal>xdata</literal></entry>
-              <entry>array of doubles</entry>
+              <entry>tableau de doubles</entry>
               <entry>
                 Points d'abscisse.  Le nombre doit correspondre à
                 <literal>ydata</literal>.
@@ -743,7 +743,7 @@
             </row>
             <row>
               <entry><literal>ydata</literal></entry>
-              <entry>array of doubles</entry>
+              <entry>tableau de doubles</entry>
               <entry>
                 Points d'ordonnée.  Le nombre doit correspondre à <literal>xdata</literal>.
               </entry>
@@ -974,6 +974,203 @@
               <entry>
                 Données de ligne, enregistrées sous forme d'un tableau de
                 <varname>res</varname>, allant de gauche à droite.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-volume'>
+    <title>Données volumiques</title>
+    <para>
+      La table qui suit présente les clefs relatives aux données volumiques
+      présentes dans le conteneur de premier niveau des données volumiques
+      numérotées 0. Pour d'autres données volumiques, le 0 doit être remplacé
+      par leur numéro correspondant. Notez que les données volumiques sont
+      généralement numérotées de manière séquentielle, en partant de 0,
+      toutefois elles peuvent avoir n'importe quel nombre, et l'ensemble des
+      numéros des données volumiques n'est pas nécessairement contigu.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-volume-keys'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Clé</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/brick/0</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyBrick'><type>GwyBrick</type></link></entry>
+              <entry>
+                Données volumiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/preview</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataField'><type>GwyDataField</type></link></entry>
+              <entry>
+                Données bi-dimensionnelles affichées lorsque les données
+                volumiques sont prévisualisées.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/title</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Titre des données volumiques, affiché dans le navigateur de données.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/visible</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Spécifie si les données volumiques doivent être affichées dans
+                une fenêtre lors de l'ouverture du fichier.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/preview/palette</literal></entry>
+              <entry>chaîne de caractères</entry>
+              <entry>
+                Nom du gradient de couleurs utilisé pour afficher les données
+                de prévisualisation.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/brick/0/meta</literal></entry>
+              <entry><type>GwyContainer</type></entry>
+              <entry>
+                Volume data metadata.  The keys are directly the names as displayed in
+                the metadata browser and the string values are the values.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Volume data are represented as <type>GwyBrick</type> objects.  The components of
+      a <type>GwyBrick</type> are summarised in the following table:
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyBrick'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xres</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Taille horizontale en pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yres</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Taille verticale en pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>zres</literal></entry>
+              <entry>entier 32 bits</entry>
+              <entry>
+                Profondeur (nombre de niveaux) en pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>xreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Dimension horizontale en unités physiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Dimension verticale en unités physiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>zreal</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Profondeur en unités physiques.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>xoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Décalage horizontal du coin en haut à gauche, en unités
+                physiques. Il n'apparaît que s'il est non nul.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>yoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Décalage vertical du coin en haut à gauche, en unités
+                physiques. Il n'apparaît que s'il est non nul.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>zoff</literal></entry>
+              <entry>double</entry>
+              <entry>
+                Décalage de profondeur du coin en haut à gauche, en unités
+                physiques. Il n'apparaît que s'il est non nul.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_x</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des dimensions latérales horizontales.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_y</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des dimensions latérales verticales.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_z</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des dimensions de profondeur.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_w</literal></entry>
+              <entry><link linkend='table-gwyfile-GwySIUnit'><type>GwySIUnit</type></link></entry>
+              <entry>
+                Unités des valeurs.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>tableau de doubles</entry>
+              <entry>
+                Champ de données, enregistrées selon un tableau de dimensions
+                <varname>xres</varname>×<varname>yres</varname>×<varname>zres</varname>,
+                du plan zéro au dernier plan, de haut en bas et de gauche à droite.
               </entry>
             </row>
           </tbody>
