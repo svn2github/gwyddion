@@ -551,16 +551,13 @@ clear_queue_flags(guint *distances, guint xres,
     }
 }
 
-// TODO: The conditions for i and j are not necessary for l > 2 because we
-// cannot hit the border pixels.  Use a separate routine for l == 2.
 static void
-distance_transform_erode_sed(guint *distances, const guint *olddist,
-                             guint xres, guint yres,
-                             guint l,
-                             const GridPointList *inqueue,
-                             GridPointList *outqueue)
+distance_transform_erode_sed2(guint *distances, const guint *olddist,
+                              guint xres, guint yres,
+                              const GridPointList *inqueue,
+                              GridPointList *outqueue)
 {
-    guint hvsed2 = 2*l - 1, diag2 = 2*hvsed2;
+    enum { hvsed2 = 3, diag2 = 6 };
     outqueue->len = 0;
 
     for (guint q = 0; q < inqueue->len; q++) {
@@ -613,6 +610,65 @@ distance_transform_erode_sed(guint *distances, const guint *olddist,
 }
 
 static void
+distance_transform_erode_sed(guint *distances, const guint *olddist,
+                             guint xres,
+                             guint l,
+                             const GridPointList *inqueue,
+                             GridPointList *outqueue)
+{
+    guint hvsed2 = 2*l - 1, diag2 = 2*hvsed2;
+    outqueue->len = 0;
+
+    for (guint q = 0; q < inqueue->len; q++) {
+        const GridPoint *p = inqueue->points + q;
+        guint i = p->i, j = p->j;
+        guint k = i*xres + j;
+        guint d2hv = olddist[k] + hvsed2, d2d = olddist[k] + diag2;
+
+        if ((distances[k-xres-1] & ~QUEUED) > d2d) {
+            if (!(distances[k-xres-1] & QUEUED))
+                grid_point_list_add(outqueue, j-1, i-1);
+            distances[k-xres-1] = QUEUED | d2d;
+        }
+        if ((distances[k-xres] & ~QUEUED) > d2hv) {
+            if (!(distances[k-xres] & QUEUED))
+                grid_point_list_add(outqueue, j, i-1);
+            distances[k-xres] = QUEUED | d2hv;
+        }
+        if ((distances[k-xres+1] & ~QUEUED) > d2d) {
+            if (!(distances[k-xres+1] & QUEUED))
+                grid_point_list_add(outqueue, j+1, i-1);
+            distances[k-xres+1] = QUEUED | d2d;
+        }
+        if ((distances[k-1] & ~QUEUED) > d2hv) {
+            if (!(distances[k-1] & QUEUED))
+                grid_point_list_add(outqueue, j-1, i);
+            distances[k-1] = QUEUED | d2hv;
+        }
+        if ((distances[k+1] & ~QUEUED) > d2hv) {
+            if (!(distances[k+1] & QUEUED))
+                grid_point_list_add(outqueue, j+1, i);
+            distances[k+1] = QUEUED | d2hv;
+        }
+        if ((distances[k+xres-1] & ~QUEUED) > d2d) {
+            if (!(distances[k+xres-1] & QUEUED))
+                grid_point_list_add(outqueue, j-1, i+1);
+            distances[k+xres-1] = QUEUED | d2d;
+        }
+        if ((distances[k+xres] & ~QUEUED) > d2hv) {
+            if (!(distances[k+xres] & QUEUED))
+                grid_point_list_add(outqueue, j, i+1);
+            distances[k+xres] = QUEUED | d2hv;
+        }
+        if ((distances[k+xres+1] & ~QUEUED) > d2d) {
+            if (!(distances[k+xres+1] & QUEUED))
+                grid_point_list_add(outqueue, j+1, i+1);
+            distances[k+xres+1] = QUEUED | d2d;
+        }
+    }
+}
+
+static void
 distance_transform(const GwyMaskField *field)
 {
     MaskField *priv = field->priv;
@@ -637,8 +693,12 @@ distance_transform(const GwyMaskField *field)
             guint k = i*xres + j;
             workspace[k] = distances[k];
         }
-        distance_transform_erode_sed(distances, workspace, xres, yres, l,
-                                     inqueue, outqueue);
+        if (l == 2)
+            distance_transform_erode_sed2(distances, workspace, xres, yres,
+                                         inqueue, outqueue);
+        else
+            distance_transform_erode_sed(distances, workspace, xres, l,
+                                         inqueue, outqueue);
         clear_queue_flags(distances, xres, outqueue);
         GWY_SWAP(GridPointList*, inqueue, outqueue);
     }
