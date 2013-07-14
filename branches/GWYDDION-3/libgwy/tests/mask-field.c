@@ -1526,6 +1526,88 @@ test_mask_field_grain_remove(void)
     g_rand_free(rng);
 }
 
+// Calculated squared Euclidean distances by taking the minimum of distance
+// from the pixel to any outside pixel.
+static guint*
+distance_transform_dumb(GwyMaskField *mask)
+{
+    typedef struct { gint j, i; } GridPoint;
+    guint xres = mask->xres, yres = mask->yres;
+    GridPoint p;
+
+    GArray *outside = g_array_new(FALSE, FALSE, sizeof(GridPoint));
+    for (gint i = 0; i < (gint)yres; i++) {
+        p = (GridPoint) { -1, i };
+        g_array_append_val(outside, p);
+        p = (GridPoint) { xres, i };
+        g_array_append_val(outside, p);
+
+        for (gint j = 0; j < (gint)xres; j++) {
+            if (!gwy_mask_field_get(mask, j, i)) {
+                p = (GridPoint){ j, i };
+                g_array_append_val(outside, p);
+            }
+        }
+    }
+    for (gint j = 0; j < (gint)xres; j++) {
+        p = (GridPoint) { j, -1 };
+        g_array_append_val(outside, p);
+        p = (GridPoint) { j, yres };
+        g_array_append_val(outside, p);
+    }
+
+    guint *distances = g_new(guint, xres*yres);
+    for (gint i = 0; i < (gint)yres; i++) {
+        for (gint j = 0; j < (gint)xres; j++) {
+            if (!gwy_mask_field_get(mask, j, i)) {
+                distances[i*xres + j] = 0;
+                continue;
+            }
+
+            gdouble mind2 = G_MAXUINT;
+            for (guint k = 0; k < outside->len; k++) {
+                GridPoint *pt = &g_array_index(outside, GridPoint, k);
+                guint d2 = (pt->i - i)*(pt->i - i) + (pt->j - j)*(pt->j - j);
+                if (d2 < mind2)
+                    mind2 = d2;
+            }
+            distances[i*xres + j] = mind2;
+        }
+    }
+
+    g_array_free(outside, TRUE);
+
+    return distances;
+}
+
+void
+test_mask_field_grain_distance_transform(void)
+{
+    enum { max_size = 85 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField* maskfield = random_mask_field_prob(width, height, rng,
+                                                         0.95);
+
+        const guint *dist2 = gwy_mask_field_distance_transform(maskfield);
+        guint *dist2dumb = distance_transform_dumb(maskfield);
+
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                g_assert_cmpuint(dist2[i*width + j], ==, dist2dumb[i*width + j]);
+            }
+        }
+
+        g_free(dist2dumb);
+        g_object_unref(maskfield);
+    }
+    g_rand_free(rng);
+}
+
 // Undef macros to test the exported functions.
 #undef gwy_mask_field_get
 #undef gwy_mask_field_set

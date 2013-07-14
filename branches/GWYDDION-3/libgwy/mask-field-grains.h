@@ -27,6 +27,7 @@ G_BEGIN_DECLS
 
 guint               gwy_mask_field_n_grains            (const GwyMaskField *field);
 const guint*        gwy_mask_field_grain_numbers       (const GwyMaskField *field);
+const guint*        gwy_mask_field_distance_transform  (const GwyMaskField *field);
 const guint*        gwy_mask_field_grain_sizes         (const GwyMaskField *field);
 const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(const GwyMaskField *field);
 const GwyXY*        gwy_mask_field_grain_positions     (const GwyMaskField *field);

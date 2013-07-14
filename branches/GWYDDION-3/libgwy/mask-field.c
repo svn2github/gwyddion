@@ -179,6 +179,7 @@ free_caches(GwyMaskField *field)
 {
     MaskField *priv = field->priv;
     GWY_FREE(priv->grains);
+    GWY_FREE(priv->distances);
     GWY_FREE(priv->grain_sizes);
     GWY_FREE(priv->grain_bounding_boxes);
     GWY_FREE(priv->grain_positions);

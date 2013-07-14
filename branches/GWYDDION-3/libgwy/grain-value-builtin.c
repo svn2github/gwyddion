@@ -27,6 +27,7 @@
 #include "libgwy/field-level.h"
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/field-internal.h"
+#include "libgwy/mask-field-internal.h"
 #include "libgwy/grain-value-builtin.h"
 
 // There are several possible choices for the volume quadrature coefficients:
@@ -51,18 +52,6 @@ enum {
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
     NEED_VOLUME = (1 << 9),
 };
-
-// Must be signed, we use signed differences.
-typedef struct {
-    gint i;
-    gint j;
-} GridPoint;
-
-typedef struct {
-    guint size;
-    guint len;
-    GridPoint *points;
-} GridPointList;
 
 // Edges are used for inscribed discs.
 typedef struct {
@@ -500,20 +489,6 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .is_angle = TRUE,
     },
 };
-
-static inline void
-grid_point_list_add(GridPointList *list,
-                    gint j, gint i)
-{
-    if (G_UNLIKELY(list->len == list->size)) {
-        list->size = MAX(2*list->size, 16);
-        list->points = g_renew(GridPoint, list->points, list->size);
-    }
-
-    list->points[list->len].i = i;
-    list->points[list->len].j = j;
-    list->len++;
-}
 
 static inline void
 edge_list_add(EdgeList *list,
@@ -1573,7 +1548,7 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
 
     // Find the complete convex hulls.
-    GridPointList *vertices = g_slice_new0(GridPointList);
+    GridPointList *vertices = grid_point_list_new(0);
     for (guint gno = 1; gno <= ngrains; gno++) {
         gdouble vx = dx, vy = dy;
 
@@ -1610,8 +1585,7 @@ calc_convex_hull(GwyGrainValue *minsizegrainvalue,
         }
     }
 
-    g_free(vertices->points);
-    g_slice_free(GridPointList, vertices);
+    grid_point_list_free(vertices);
 }
 
 static guint*
@@ -2039,8 +2013,8 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
 
     guint *grain = NULL;
     guint grainsize = 0;
-    GridPointList *inqueue = g_slice_new0(GridPointList);
-    GridPointList *outqueue = g_slice_new0(GridPointList);
+    GridPointList *inqueue = grid_point_list_new(0);
+    GridPointList *outqueue = grid_point_list_new(0);
     GArray *candidates = g_array_new(FALSE, FALSE, sizeof(FooscribedDisc));
     EdgeList edges = { 0, 0, NULL };
 
@@ -2145,10 +2119,8 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
     }
 
     g_free(grain);
-    g_free(inqueue->points);
-    g_free(outqueue->points);
-    g_slice_free(GridPointList, inqueue);
-    g_slice_free(GridPointList, outqueue);
+    grid_point_list_free(inqueue);
+    grid_point_list_free(outqueue);
     g_free(edges.edges);
     g_array_free(candidates, TRUE);
 }

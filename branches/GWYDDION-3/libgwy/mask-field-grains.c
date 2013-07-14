@@ -487,6 +487,206 @@ gwy_mask_field_extract_grain(const GwyMaskField *field,
     }
 }
 
+enum {
+    SEDINF = 0x7fffffffu,
+    QUEUED = 0x80000000u,
+};
+
+static void
+init_to_infinity(const GwyMaskField *field)
+{
+    MaskField *priv = field->priv;
+    guint xres = field->xres, yres = field->yres;
+    guint *d = priv->distances;
+
+    for (guint i = 0; i < yres; i++) {
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(field, iter, 0, i);
+        for (guint j = xres; j; j--, d++) {
+            *d = gwy_mask_iter_get(iter) ? SEDINF : 0;
+            gwy_mask_iter_next(iter);
+        }
+    }
+}
+
+// Set squared distance for all points that have an 8-neighbour outside and
+// add them to the queue.
+static void
+distance_transform_first_step(guint *distances,
+                              guint xres, guint yres,
+                              GridPointList *queue)
+{
+    guint k = 0;
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            if (!distances[k])
+                continue;
+
+            if (i == 0 || i == yres-1 || j == 0 || j == xres-1) {
+                distances[k] = 1;
+                grid_point_list_add(queue, j, i);
+            }
+            else if (!distances[k-xres] || !distances[k-1]
+                     || !distances[k+1] || !distances[k+xres]) {
+                distances[k] = 1;
+                grid_point_list_add(queue, j, i);
+            }
+            else if (!distances[k-xres-1] || !distances[k-xres+1]
+                     || !distances[k+xres-1] || !distances[k+xres+1]) {
+                distances[k] = 2;
+                grid_point_list_add(queue, j, i);
+            }
+        }
+    }
+}
+
+static void
+clear_queue_flags(guint *distances, guint xres,
+                  const GridPointList *queue)
+{
+    for (guint q = 0; q < queue->len; q++) {
+        const GridPoint *p = queue->points + q;
+        distances[p->i*xres + p->j] &= ~QUEUED;
+    }
+}
+
+// TODO: The conditions for i and j are not necessary for l > 2 because we
+// cannot hit the border pixels.  Use a separate routine for l == 2.
+static void
+distance_transform_erode_sed(guint *distances, const guint *olddist,
+                             guint xres, guint yres,
+                             guint l,
+                             const GridPointList *inqueue,
+                             GridPointList *outqueue)
+{
+    guint hvsed2 = 2*l - 1, diag2 = 2*hvsed2;
+    outqueue->len = 0;
+
+    for (guint q = 0; q < inqueue->len; q++) {
+        const GridPoint *p = inqueue->points + q;
+        guint i = p->i, j = p->j;
+        guint k = i*xres + j;
+        guint d2hv = olddist[k] + hvsed2, d2d = olddist[k] + diag2;
+
+        if (i && j && (distances[k-xres-1] & ~QUEUED) > d2d) {
+            if (!(distances[k-xres-1] & QUEUED))
+                grid_point_list_add(outqueue, j-1, i-1);
+            distances[k-xres-1] = QUEUED | d2d;
+        }
+        if (i && (distances[k-xres] & ~QUEUED) > d2hv) {
+            if (!(distances[k-xres] & QUEUED))
+                grid_point_list_add(outqueue, j, i-1);
+            distances[k-xres] = QUEUED | d2hv;
+        }
+        if (i && j < xres-1 && (distances[k-xres+1] & ~QUEUED) > d2d) {
+            if (!(distances[k-xres+1] & QUEUED))
+                grid_point_list_add(outqueue, j+1, i-1);
+            distances[k-xres+1] = QUEUED | d2d;
+        }
+        if (j && (distances[k-1] & ~QUEUED) > d2hv) {
+            if (!(distances[k-1] & QUEUED))
+                grid_point_list_add(outqueue, j-1, i);
+            distances[k-1] = QUEUED | d2hv;
+        }
+        if (j < xres-1 && (distances[k+1] & ~QUEUED) > d2hv) {
+            if (!(distances[k+1] & QUEUED))
+                grid_point_list_add(outqueue, j+1, i);
+            distances[k+1] = QUEUED | d2hv;
+        }
+        if (i < yres-1 && j && (distances[k+xres-1] & ~QUEUED) > d2d) {
+            if (!(distances[k+xres-1] & QUEUED))
+                grid_point_list_add(outqueue, j-1, i+1);
+            distances[k+xres-1] = QUEUED | d2d;
+        }
+        if (i < yres-1 && (distances[k+xres] & ~QUEUED) > d2hv) {
+            if (!(distances[k+xres] & QUEUED))
+                grid_point_list_add(outqueue, j, i+1);
+            distances[k+xres] = QUEUED | d2hv;
+        }
+        if (i < yres-1 && j < xres-1 && (distances[k+xres+1] & ~QUEUED) > d2d) {
+            if (!(distances[k+xres+1] & QUEUED))
+                grid_point_list_add(outqueue, j+1, i+1);
+            distances[k+xres+1] = QUEUED | d2d;
+        }
+    }
+}
+
+static void
+distance_transform(const GwyMaskField *field)
+{
+    MaskField *priv = field->priv;
+    g_return_if_fail(!priv->distances);
+
+    guint xres = field->xres, yres = field->yres;
+    guint *distances = priv->distances = g_new(guint, xres*yres);
+    guint *workspace = g_new(guint, xres*yres);
+
+    init_to_infinity(field);
+
+    guint inisize = (guint)(8*sqrt(xres*yres) + 16);
+    GridPointList *inqueue = grid_point_list_new(inisize);
+    GridPointList *outqueue = grid_point_list_new(inisize);
+
+    distance_transform_first_step(distances, xres, yres, inqueue);
+
+    for (guint l = 2; inqueue->len; l++) {
+        for (guint q = 0; q < inqueue->len; q++) {
+            const GridPoint *p = inqueue->points + q;
+            guint i = p->i, j = p->j;
+            guint k = i*xres + j;
+            workspace[k] = distances[k];
+        }
+        distance_transform_erode_sed(distances, workspace, xres, yres, l,
+                                     inqueue, outqueue);
+        clear_queue_flags(distances, xres, outqueue);
+        GWY_SWAP(GridPointList*, inqueue, outqueue);
+    }
+
+    g_free(workspace);
+    grid_point_list_free(inqueue);
+    grid_point_list_free(outqueue);
+}
+
+/**
+ * gwy_mask_field_distance_transform:
+ * @field: A two-dimensional mask field.
+ *
+ * Obtains squared Euclidean distance transform of grains of a mask field.
+ *
+ * The squared Euclidean distance is best illustrated using the following
+ * example:
+ * |[
+ * 0 0 0 0 0 0 0
+ * 0 1 1 1 1 0 0
+ * 0 1 4 2 2 1 0
+ * 0 1 4 8 4 1 0
+ * 0 1 4 4 4 1 0
+ * 0 1 1 1 1 1 0
+ * 0 0 0 0 0 0 0
+ * ]|
+ *
+ * Returns: (transfer none):
+ *          Array of integers of the same number of items as @field
+ *          (without padding) filled with grain numbers of each pixel.  Empty
+ *          space is set to 0, pixels inside a grain are set to the squared
+ *          Euclidean distance of the pixel from the nearest non-grain pixel,
+ *          including image borders.
+ *          The returned array is owned by @field and becomes invalid when
+ *          the data change, gwy_mask_field_invalidate() is called or the
+ *          mask field is finalized.
+ **/
+const guint*
+gwy_mask_field_distance_transform(const GwyMaskField *field)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    MaskField *priv = field->priv;
+    if (!priv->distances)
+        distance_transform(field);
+
+    return priv->distances;
+}
+
 /**
  * SECTION: mask-field-grains
  * @section_id: GwyMaskField-grains

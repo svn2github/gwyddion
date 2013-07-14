@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 
 struct _GwyMaskFieldPrivate {
     guint *grains;
+    guint *distances;
     guint *grain_sizes;
     GwyFieldPart *grain_bounding_boxes;
     GwyXY *grain_positions;
@@ -54,6 +55,18 @@ typedef struct {
     GwyGrainSegment segments[];
 } GwyGrain;
 
+// Must be signed, we use signed differences.
+typedef struct {
+    gint i;
+    gint j;
+} GridPoint;
+
+typedef struct {
+    guint size;
+    guint len;
+    GridPoint *points;
+} GridPointList;
+
 /* Merge grains i and j in map with full resolution */
 static inline void
 resolve_grain_map(guint *m, guint i, guint j)
@@ -78,6 +91,40 @@ resolve_grain_map(guint *m, guint i, guint j)
         j = jj;
     }
     m[jj] = k;
+}
+
+G_GNUC_UNUSED
+static inline GridPointList*
+grid_point_list_new(guint prealloc)
+{
+    GridPointList *list = g_slice_new0(GridPointList);
+    prealloc = MAX(prealloc, 16);
+    list->size = prealloc;
+    list->points = g_new(GridPoint, list->size);
+    return list;
+}
+
+G_GNUC_UNUSED
+static inline void
+grid_point_list_add(GridPointList *list,
+                    gint j, gint i)
+{
+    if (G_UNLIKELY(list->len == list->size)) {
+        list->size = MAX(2*list->size, 16);
+        list->points = g_renew(GridPoint, list->points, list->size);
+    }
+
+    list->points[list->len].i = i;
+    list->points[list->len].j = j;
+    list->len++;
+}
+
+G_GNUC_UNUSED
+static void
+grid_point_list_free(GridPointList *list)
+{
+    g_free(list->points);
+    g_slice_free(GridPointList, list);
 }
 
 G_END_DECLS
