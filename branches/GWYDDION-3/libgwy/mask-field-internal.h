@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -67,6 +67,12 @@ typedef struct {
     GridPoint *points;
 } GridPointList;
 
+typedef struct {
+    guint size;
+    guint len;
+    gint *data;
+} IntList;
+
 /* Merge grains i and j in map with full resolution */
 static inline void
 resolve_grain_map(guint *m, guint i, guint j)
@@ -125,6 +131,38 @@ grid_point_list_free(GridPointList *list)
 {
     g_free(list->points);
     g_slice_free(GridPointList, list);
+}
+
+G_GNUC_UNUSED
+static inline IntList*
+int_list_new(guint prealloc)
+{
+    IntList *list = g_slice_new0(IntList);
+    prealloc = MAX(prealloc, 16);
+    list->size = prealloc;
+    list->data = g_new(gint, list->size);
+    return list;
+}
+
+G_GNUC_UNUSED
+static inline void
+int_list_add(IntList *list, gint i)
+{
+    if (G_UNLIKELY(list->len == list->size)) {
+        list->size = MAX(2*list->size, 16);
+        list->data = g_renew(gint, list->data, list->size);
+    }
+
+    list->data[list->len] = i;
+    list->len++;
+}
+
+G_GNUC_UNUSED
+static void
+int_list_free(IntList *list)
+{
+    g_free(list->data);
+    g_slice_free(IntList, list);
 }
 
 G_END_DECLS

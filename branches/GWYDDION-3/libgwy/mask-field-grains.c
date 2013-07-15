@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,11 @@
 #include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/mask-field-internal.h"
 #include "libgwy/grain-value-builtin.h"
+
+enum {
+    SEDINF = 0x7fffffffu,
+    QUEUED = 0x80000000u,
+};
 
 static inline guint32*
 ensure_map(guint max_no, guint *map, guint *mapsize)
@@ -487,11 +492,6 @@ gwy_mask_field_extract_grain(const GwyMaskField *field,
     }
 }
 
-enum {
-    SEDINF = 0x7fffffffu,
-    QUEUED = 0x80000000u,
-};
-
 static void
 init_to_infinity(const GwyMaskField *field)
 {
@@ -514,7 +514,7 @@ init_to_infinity(const GwyMaskField *field)
 static void
 distance_transform_first_step(guint *distances,
                               guint xres, guint yres,
-                              GridPointList *queue)
+                              IntList *queue)
 {
     guint k = 0;
 
@@ -525,86 +525,82 @@ distance_transform_first_step(guint *distances,
 
             if (i == 0 || i == yres-1 || j == 0 || j == xres-1) {
                 distances[k] = 1;
-                grid_point_list_add(queue, j, i);
+                int_list_add(queue, k);
             }
             else if (!distances[k-xres] || !distances[k-1]
                      || !distances[k+1] || !distances[k+xres]) {
                 distances[k] = 1;
-                grid_point_list_add(queue, j, i);
+                int_list_add(queue, k);
             }
             else if (!distances[k-xres-1] || !distances[k-xres+1]
                      || !distances[k+xres-1] || !distances[k+xres+1]) {
                 distances[k] = 2;
-                grid_point_list_add(queue, j, i);
+                int_list_add(queue, k);
             }
         }
-    }
-}
-
-static void
-clear_queue_flags(guint *distances, guint xres,
-                  const GridPointList *queue)
-{
-    for (guint q = 0; q < queue->len; q++) {
-        const GridPoint *p = queue->points + q;
-        distances[p->i*xres + p->j] &= ~QUEUED;
     }
 }
 
 static void
 distance_transform_erode_sed2(guint *distances, const guint *olddist,
                               guint xres, guint yres,
-                              const GridPointList *inqueue,
-                              GridPointList *outqueue)
+                              const IntList *inqueue,
+                              IntList *outqueue)
 {
     enum { hvsed2 = 3, diag2 = 6 };
     outqueue->len = 0;
 
     for (guint q = 0; q < inqueue->len; q++) {
-        const GridPoint *p = inqueue->points + q;
-        guint i = p->i, j = p->j;
-        guint k = i*xres + j;
+        guint k = inqueue->data[q], kk = k-xres-1;
+        guint i = k/xres, j = k % xres;
         guint d2hv = olddist[k] + hvsed2, d2d = olddist[k] + diag2;
 
-        if (i && j && (distances[k-xres-1] & ~QUEUED) > d2d) {
-            if (!(distances[k-xres-1] & QUEUED))
-                grid_point_list_add(outqueue, j-1, i-1);
-            distances[k-xres-1] = QUEUED | d2d;
+        if (i && j && (distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
-        if (i && (distances[k-xres] & ~QUEUED) > d2hv) {
-            if (!(distances[k-xres] & QUEUED))
-                grid_point_list_add(outqueue, j, i-1);
-            distances[k-xres] = QUEUED | d2hv;
+        kk++;
+        if (i && (distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if (i && j < xres-1 && (distances[k-xres+1] & ~QUEUED) > d2d) {
-            if (!(distances[k-xres+1] & QUEUED))
-                grid_point_list_add(outqueue, j+1, i-1);
-            distances[k-xres+1] = QUEUED | d2d;
+        kk++;
+        if (i && j < xres-1 && (distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
-        if (j && (distances[k-1] & ~QUEUED) > d2hv) {
-            if (!(distances[k-1] & QUEUED))
-                grid_point_list_add(outqueue, j-1, i);
-            distances[k-1] = QUEUED | d2hv;
+        kk += xres-2;
+        if (j && (distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if (j < xres-1 && (distances[k+1] & ~QUEUED) > d2hv) {
-            if (!(distances[k+1] & QUEUED))
-                grid_point_list_add(outqueue, j+1, i);
-            distances[k+1] = QUEUED | d2hv;
+        kk += 2;
+        if (j < xres-1 && (distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if (i < yres-1 && j && (distances[k+xres-1] & ~QUEUED) > d2d) {
-            if (!(distances[k+xres-1] & QUEUED))
-                grid_point_list_add(outqueue, j-1, i+1);
-            distances[k+xres-1] = QUEUED | d2d;
+        kk += xres-2;
+        if (i < yres-1 && j && (distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
-        if (i < yres-1 && (distances[k+xres] & ~QUEUED) > d2hv) {
-            if (!(distances[k+xres] & QUEUED))
-                grid_point_list_add(outqueue, j, i+1);
-            distances[k+xres] = QUEUED | d2hv;
+        kk++;
+        if (i < yres-1 && (distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if (i < yres-1 && j < xres-1 && (distances[k+xres+1] & ~QUEUED) > d2d) {
-            if (!(distances[k+xres+1] & QUEUED))
-                grid_point_list_add(outqueue, j+1, i+1);
-            distances[k+xres+1] = QUEUED | d2d;
+        kk++;
+        if (i < yres-1 && j < xres-1 && (distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
     }
 }
@@ -613,57 +609,62 @@ static void
 distance_transform_erode_sed(guint *distances, const guint *olddist,
                              guint xres,
                              guint l,
-                             const GridPointList *inqueue,
-                             GridPointList *outqueue)
+                             const IntList *inqueue,
+                             IntList *outqueue)
 {
     guint hvsed2 = 2*l - 1, diag2 = 2*hvsed2;
     outqueue->len = 0;
 
     for (guint q = 0; q < inqueue->len; q++) {
-        const GridPoint *p = inqueue->points + q;
-        guint i = p->i, j = p->j;
-        guint k = i*xres + j;
+        guint k = inqueue->data[q], kk = k-xres-1;
         guint d2hv = olddist[k] + hvsed2, d2d = olddist[k] + diag2;
 
-        if ((distances[k-xres-1] & ~QUEUED) > d2d) {
-            if (!(distances[k-xres-1] & QUEUED))
-                grid_point_list_add(outqueue, j-1, i-1);
-            distances[k-xres-1] = QUEUED | d2d;
+        if ((distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
-        if ((distances[k-xres] & ~QUEUED) > d2hv) {
-            if (!(distances[k-xres] & QUEUED))
-                grid_point_list_add(outqueue, j, i-1);
-            distances[k-xres] = QUEUED | d2hv;
+        kk++;
+        if ((distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if ((distances[k-xres+1] & ~QUEUED) > d2d) {
-            if (!(distances[k-xres+1] & QUEUED))
-                grid_point_list_add(outqueue, j+1, i-1);
-            distances[k-xres+1] = QUEUED | d2d;
+        kk++;
+        if ((distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
-        if ((distances[k-1] & ~QUEUED) > d2hv) {
-            if (!(distances[k-1] & QUEUED))
-                grid_point_list_add(outqueue, j-1, i);
-            distances[k-1] = QUEUED | d2hv;
+        kk += xres-2;
+        if ((distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if ((distances[k+1] & ~QUEUED) > d2hv) {
-            if (!(distances[k+1] & QUEUED))
-                grid_point_list_add(outqueue, j+1, i);
-            distances[k+1] = QUEUED | d2hv;
+        kk += 2;
+        if ((distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if ((distances[k+xres-1] & ~QUEUED) > d2d) {
-            if (!(distances[k+xres-1] & QUEUED))
-                grid_point_list_add(outqueue, j-1, i+1);
-            distances[k+xres-1] = QUEUED | d2d;
+        kk += xres-2;
+        if ((distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
-        if ((distances[k+xres] & ~QUEUED) > d2hv) {
-            if (!(distances[k+xres] & QUEUED))
-                grid_point_list_add(outqueue, j, i+1);
-            distances[k+xres] = QUEUED | d2hv;
+        kk++;
+        if ((distances[kk] & ~QUEUED) > d2hv) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2hv;
         }
-        if ((distances[k+xres+1] & ~QUEUED) > d2d) {
-            if (!(distances[k+xres+1] & QUEUED))
-                grid_point_list_add(outqueue, j+1, i+1);
-            distances[k+xres+1] = QUEUED | d2d;
+        kk++;
+        if ((distances[kk] & ~QUEUED) > d2d) {
+            if (!(distances[kk] & QUEUED))
+                int_list_add(outqueue, kk);
+            distances[kk] = QUEUED | d2d;
         }
     }
 }
@@ -681,31 +682,33 @@ distance_transform(const GwyMaskField *field)
     init_to_infinity(field);
 
     guint inisize = (guint)(8*sqrt(xres*yres) + 16);
-    GridPointList *inqueue = grid_point_list_new(inisize);
-    GridPointList *outqueue = grid_point_list_new(inisize);
+    IntList *inqueue = int_list_new(inisize);
+    IntList *outqueue = int_list_new(inisize);
 
     distance_transform_first_step(distances, xres, yres, inqueue);
 
     for (guint l = 2; inqueue->len; l++) {
         for (guint q = 0; q < inqueue->len; q++) {
-            const GridPoint *p = inqueue->points + q;
-            guint i = p->i, j = p->j;
-            guint k = i*xres + j;
+            guint k = inqueue->data[q];
             workspace[k] = distances[k];
         }
         if (l == 2)
             distance_transform_erode_sed2(distances, workspace, xres, yres,
-                                         inqueue, outqueue);
+                                          inqueue, outqueue);
         else
             distance_transform_erode_sed(distances, workspace, xres, l,
                                          inqueue, outqueue);
-        clear_queue_flags(distances, xres, outqueue);
-        GWY_SWAP(GridPointList*, inqueue, outqueue);
+
+        gint *qdata = outqueue->data;
+        for (guint q = outqueue->len; q; q--, qdata++)
+            distances[*qdata] &= ~QUEUED;
+
+        GWY_SWAP(IntList*, inqueue, outqueue);
     }
 
     g_free(workspace);
-    grid_point_list_free(inqueue);
-    grid_point_list_free(outqueue);
+    int_list_free(inqueue);
+    int_list_free(outqueue);
 }
 
 /**
