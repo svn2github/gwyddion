@@ -11,6 +11,7 @@ noinst_PROGRAMS = \
 	convolve-rect \
 	convolve-row \
 	count-bits \
+	distance-transform \
 	memory-access \
 	rand \
 	sort
@@ -19,6 +20,7 @@ clamp_SOURCES = clamp.c
 convolve_row_SOURCES = convolve-row.c
 convolve_rect_SOURCES = convolve-rect.c
 count_bits_SOURCES = count-bits.c
+distance_transform_SOURCES = distance-transform.c
 memory_access_SOURCES = memory-access.c
 rand_SOURCES = rand.c
 sort_SOURCES = sort.c
@@ -30,6 +32,7 @@ extra_sources = \
 	convolve-rect.c \
 	convolve-row.c \
 	count-bits.c \
+	distance-transform.c \
 	memory-access.c \
 	rand.c \
 	sort.c
