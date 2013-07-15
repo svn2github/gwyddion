@@ -518,17 +518,32 @@ distance_transform_first_step(guint *distances,
 {
     guint k = 0;
 
-    for (guint i = 0; i < yres; i++) {
-        for (guint j = 0; j < xres; j++, k++) {
+    for (guint j = xres; j; j--, k++) {
+        if (distances[k]) {
+            distances[k] = 1;
+            int_list_add(queue, k);
+        }
+    }
+
+    if (G_UNLIKELY(yres == 1))
+        return;
+
+    for (guint i = 1; i < yres-1; i++) {
+        if (distances[k]) {
+            distances[k] = 1;
+            int_list_add(queue, k);
+        }
+        k++;
+
+        if (G_UNLIKELY(xres == 1))
+            continue;
+
+        for (guint j = xres-2; j; j--, k++) {
             if (!distances[k])
                 continue;
 
-            if (i == 0 || i == yres-1 || j == 0 || j == xres-1) {
-                distances[k] = 1;
-                int_list_add(queue, k);
-            }
-            else if (!distances[k-xres] || !distances[k-1]
-                     || !distances[k+1] || !distances[k+xres]) {
+            if (!distances[k-xres] || !distances[k-1]
+                || !distances[k+1] || !distances[k+xres]) {
                 distances[k] = 1;
                 int_list_add(queue, k);
             }
@@ -537,6 +552,19 @@ distance_transform_first_step(guint *distances,
                 distances[k] = 2;
                 int_list_add(queue, k);
             }
+        }
+
+        if (distances[k]) {
+            distances[k] = 1;
+            int_list_add(queue, k);
+        }
+        k++;
+    }
+
+    for (guint j = xres; j; j--, k++) {
+        if (distances[k]) {
+            distances[k] = 1;
+            int_list_add(queue, k);
         }
     }
 }
