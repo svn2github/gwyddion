@@ -2033,7 +2033,7 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
 
         /* If the grain is rectangular, calculate the disc directly.
          * Large rectangular grains are rare but the point is to catch
-         * grains with width of height of 1 here. */
+         * grains with width or height of 1 here. */
         if (sizes[gno] == w*h) {
             gdouble sdx = 0.5*w*dx, sdy = 0.5*h*dy;
             if (inscrdrvalues)

@@ -73,6 +73,15 @@ typedef struct {
     gint *data;
 } IntList;
 
+G_GNUC_INTERNAL
+void _gwy_distance_transform_raw(guint *distances,
+                                 guint *workspace,
+                                 guint xres,
+                                 guint yres,
+                                 gboolean infinitised,
+                                 IntList *inqueue,
+                                 IntList *outqueue);
+
 /* Merge grains i and j in map with full resolution */
 static inline void
 resolve_grain_map(guint *m, guint i, guint j)

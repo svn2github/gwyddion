@@ -697,21 +697,36 @@ distance_transform_erode_sed(guint *distances, const guint *olddist,
     }
 }
 
-static void
-distance_transform(const GwyMaskField *field)
+/**
+ * _gwy_distance_transform_raw:
+ * @distances: Array @xres*@yres with nonzeroes within shapes.  If all non-zero
+ *             values are %SEDINF you can pass %TRUE for @infinitised.
+ * @workspace: Workspace of identical dimensions as @distances.
+ * @xres: Width.
+ * @yres: Height.
+ * @infinitised: Pass %TRUE only if all non-zero values are %SEDINF.
+ * @inqueue: Pre-allocated queue used by the algorithm.
+ * @outqueue: Second pre-allocated queue used by the algorithm.
+ *
+ * Performs distance transformation.
+ *
+ * When it finishes non-zero values in @distances are squared Euclidean
+ * distances from outside pixels (including outside the field).
+ *
+ * Workspace objects @workspace, @inqueue and @outqueue do not carry any
+ * information.  They are allocated by the caller to enable an efficient
+ * repeated use.
+ **/
+void
+_gwy_distance_transform_raw(guint *distances, guint *workspace,
+                            guint xres, guint yres, gboolean infinitised,
+                            IntList *inqueue, IntList *outqueue)
 {
-    MaskField *priv = field->priv;
-    g_return_if_fail(!priv->distances);
-
-    guint xres = field->xres, yres = field->yres;
-    guint *distances = priv->distances = g_new(guint, xres*yres);
-    guint *workspace = g_new(guint, xres*yres);
-
-    init_to_infinity(field);
-
-    guint inisize = (guint)(8*sqrt(xres*yres) + 16);
-    IntList *inqueue = int_list_new(inisize);
-    IntList *outqueue = int_list_new(inisize);
+    if (!infinitised) {
+        guint *d = distances;
+        for (guint i = xres*yres; i; i--, d++)
+            *d = *d ? SEDINF : 0;
+    }
 
     distance_transform_first_step(distances, xres, yres, inqueue);
 
@@ -733,6 +748,25 @@ distance_transform(const GwyMaskField *field)
 
         GWY_SWAP(IntList*, inqueue, outqueue);
     }
+}
+
+static void
+distance_transform(const GwyMaskField *field)
+{
+    MaskField *priv = field->priv;
+    g_return_if_fail(!priv->distances);
+
+    guint xres = field->xres, yres = field->yres;
+    guint *distances = priv->distances = g_new(guint, xres*yres);
+    guint *workspace = g_new(guint, xres*yres);
+
+    guint inisize = (guint)(8*sqrt(xres*yres) + 16);
+    IntList *inqueue = int_list_new(inisize);
+    IntList *outqueue = int_list_new(inisize);
+
+    init_to_infinity(field);
+    _gwy_distance_transform_raw(distances, workspace, xres, yres, TRUE,
+                                inqueue, outqueue);
 
     g_free(workspace);
     int_list_free(inqueue);
