@@ -219,6 +219,18 @@ for macro, body in identdefs.items():
             decls['MACRO'][macro] = decls['DEFINE'][macro]
             del decls['DEFINE'][macro]
 
+# Kill types that are named FooPrivate where Foo is also a type.  This keeps
+# symbols such as GPrivate and GStaticPrivate but gets rid of various rubbish.
+todelete = []
+for symbol in decls['STRUCT'].keys():
+    privsymbol = symbol + 'Private'
+    if privsymbol in decls['STRUCT']:
+        todelete.append(privsymbol)
+
+for symbol in todelete:
+    del decls['STRUCT'][symbol]
+del todelete
+
 if options.has_key('supplement'):
     override(decls, options['supplement'], True)
 
