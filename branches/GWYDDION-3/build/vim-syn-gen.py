@@ -96,31 +96,22 @@ deprecation_options_template = """\
 
 footer_template = """
 " Default highlighting
-if version >= 508 || !exists("did_%s_syntax_inits")
-  if version < 508
-    let did_%s_syntax_inits = 1
-    command -nargs=+ HiLink hi link <args>
-  else
-    command -nargs=+ HiLink hi def link <args>
-  endif
 %s
 %s
-  delcommand HiLink
-endif
 """
 
 deprecation_hi_link_template = """\
-  if exists("%s_deprecated_errors")
+if exists("%s_deprecated_errors")
 %s
-  elseif exists("%s_enable_deprecated")
+elseif exists("%s_enable_deprecated")
 %s
-  endif
+endif
 """
 
 normalize = lambda x: x.title().replace('_', '')
 
-hi_link_template = '  HiLink %s%s %s'
-hi_link_template_v = '    HiLink %s%s%s %s'
+hi_link_template = 'hi def link %s%s %s'
+hi_link_template_v = '    hi def link %s%s%s %s'
 
 re_decl = re.compile(r'<(?P<type>' + r'|'.join(types.keys()) + r')>\n'
                      + r'<NAME>(?P<ident>\w+)</NAME>\n'
@@ -292,8 +283,7 @@ if deprecated_types:
                                                           hi_links_depA)
 else:
     deprecated_hi_links = ''
-footer = footer_template % (syntax_name, syntax_name, hi_links,
-                            deprecated_hi_links)
+footer = footer_template % (hi_links, deprecated_hi_links)
 
 # Dump!
 output(header)
