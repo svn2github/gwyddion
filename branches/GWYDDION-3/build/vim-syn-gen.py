@@ -132,6 +132,7 @@ re_param_macro = re.compile(r'^\s*#\s*define\s+\w+\(', re.M)
 re_ident_macro = re.compile(r'^\s*#\s*define\s+\w+\s+'
                             + r'(?P<ident>[A-Za-z_]\w+)\s*$', re.M)
 re_filter = re.compile(options['filter_regexp'])
+re_deprecated = re.compile(r'^\s*<keyword\b.* name="(?P<name>.*?)".* deprecated=".*/>\s*$')
 
 def output(s):
     outputfile.write(s)
@@ -141,6 +142,27 @@ def types_present(decldict, value=''):
     pt = [t for t, d in decldict.items()
           if [k for k, v in d.items() if v == value]]
     return dict([(x, types[x]) for x in pt])
+
+def deprecated_from_devhelp2(filename):
+    dh2glob = os.path.join(os.path.dirname(filename), 'html', '*.devhelp2')
+    dh2files = list(glob.glob(dh2glob))
+    if not dh2files:
+        return set()
+    if len(dh2files) > 1:
+        sys.stderr.write("Multiple devhelp2 files %s" % ', '.join(dh2files))
+
+    deprecated = set()
+    for f in dh2files:
+        for line in file(f):
+            m = re_deprecated.search(line)
+            if not m:
+                continue
+
+            name = m.group('name').strip()
+            name = re.sub(r'\s*\(\s*\)$', '', name)
+            name = name.split()[-1]
+            deprecated.add(name)
+    return deprecated
 
 def output_decls(decldict, value=''):
     for t, d in decldict.items():
@@ -177,6 +199,7 @@ for filename in glob.glob(options['file_glob']):
         if re_filter.search(d['ident']):
             continue
 
+        # NB: This only works with gtk-doc up to 1.17 or so.
         if d['body'].find('<DEPRECATED/>') > -1:
             value = 'Deprecated'
         else:
@@ -194,6 +217,11 @@ for filename in glob.glob(options['file_glob']):
         if d['type'] == 'ENUM':
             for e in re_enum.finditer(d['body']):
                 decls['CONSTANT'][e.group('ident')] = value
+
+    for depr in deprecated_from_devhelp2(filename):
+        for x in types:
+            if depr in decls[x]:
+                decls[x][depr] = 'Deprecated'
 
 # Kill macros if the same symbol also exists as a regular function
 # (this fixes things like g_file_test()).
