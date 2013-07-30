@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,14 +28,14 @@ typedef struct {
     const GwySerializableBoxedInfo *info;
 } GwySerializableBoxedData;
 
-static GStaticMutex serializable_boxed_mutex = G_STATIC_MUTEX_INIT;
+G_LOCK_DEFINE_STATIC(serializable_boxed);
 static GArray *serializable_boxed_data = NULL;
 
 static const GwySerializableBoxedInfo*
 find_serializable_boxed_info(GType type)
 {
     g_return_val_if_fail(serializable_boxed_data, NULL);
-    g_static_mutex_lock(&serializable_boxed_mutex);
+    G_LOCK(serializable_boxed);
     GArray *data = serializable_boxed_data;
     for (guint i = 0; i < data->len; i++) {
         if (serializable_boxed_index(data, i).type == type) {
@@ -47,7 +47,7 @@ find_serializable_boxed_info(GType type)
                     = serializable_boxed_index(data, 0);
                 serializable_boxed_index(data, 0) = retval;
             }
-            g_static_mutex_unlock(&serializable_boxed_mutex);
+            G_UNLOCK(serializable_boxed);
             return retval.info;
         }
     }
@@ -93,7 +93,6 @@ gwy_serializable_boxed_register_static(GType type,
 {
     static gsize data_initialized = 0;
     if (G_UNLIKELY(g_once_init_enter(&data_initialized))) {
-        g_type_init();
         serializable_boxed_data = g_array_new(FALSE, FALSE,
                                               sizeof(GwySerializableBoxedData));
         g_once_init_leave(&data_initialized, 1);
@@ -107,11 +106,11 @@ gwy_serializable_boxed_register_static(GType type,
     g_return_if_fail(info->construct);
     g_return_if_fail(info->size || (info->assign && info->equal));
 
-    g_static_mutex_lock(&serializable_boxed_mutex);
+    G_LOCK(serializable_boxed);
     GArray *data = serializable_boxed_data;
     for (guint i = 0; i < data->len; i++) {
         if (G_UNLIKELY(serializable_boxed_index(data, i).type == type)) {
-            g_static_mutex_unlock(&serializable_boxed_mutex);
+            G_UNLOCK(serializable_boxed);
             g_warning("Type %s has been already registered as serializable "
                       "boxed.", g_type_name(type));
             return;
@@ -119,7 +118,7 @@ gwy_serializable_boxed_register_static(GType type,
     }
     GwySerializableBoxedData newitem = { type, info };
     g_array_append_val(serializable_boxed_data, newitem);
-    g_static_mutex_unlock(&serializable_boxed_mutex);
+    G_UNLOCK(serializable_boxed);
 }
 
 /**

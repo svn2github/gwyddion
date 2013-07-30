@@ -88,9 +88,6 @@ typedef gchar* (*GetModuleDirectoryFunc)(void);
  *
  * Forces the registration of all serializable libgwy types.
  *
- * It calls g_type_init() first to ensure the GLib object system is
- * initialised.
- *
  * Calling this function is not necessary to use object types defined in
  * libgwy, except perhaps if you implement custom deserialisers.  It is safe to
  * call this function more than once, subsequent calls are no-op.  It is safe
@@ -107,8 +104,6 @@ gwy_type_init(void)
 static gpointer
 init_types(G_GNUC_UNUSED gpointer arg)
 {
-    g_type_init();
-
     g_type_class_peek_static(GWY_TYPE_SERIALIZABLE);
 
     // Data objects
