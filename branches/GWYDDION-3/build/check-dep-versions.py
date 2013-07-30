@@ -3,9 +3,9 @@ import sys, re
 
 max_versions = {
     'cairo': (1, 10),
-    'glib': (2, 32),
-    'gobject': (2, 32),
-    'gio': (2, 32),
+    'glib': (2, 36),
+    'gobject': (2, 36),
+    'gio': (2, 36),
     'pango': (1, 32),
     'gdk3': (3, 6),
     'gdk-pixbuf': (2, 22),
