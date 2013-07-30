@@ -1,5 +1,5 @@
 Name:           gwyddion-release
-Version:        18
+Version:        19
 Release:        1%{?dist}
 Summary:        Gwyddion Fedora Repository Configuration
 
@@ -10,7 +10,7 @@ Source1:        gwyddion.repo
 Source2:        RPM-GPG-KEY-gwyddion
 BuildArch:      noarch
 
-Requires:       system-release >= 18
+Requires:       system-release >= 19
 
 %description
 Gwyddion RPM repository contains Gwyddion and extra MinGW packages used for
@@ -39,6 +39,9 @@ mkdir -p -m 755 \
 %config(noreplace) %{_sysconfdir}/yum.repos.d/gwyddion.repo
 
 %changelog
+* Tue Jul 30 2013 Yeti <yeti@gwyddion.net> - 19-1
+- Fedora 19
+
 * Sun Aug  5 2012 Yeti <yeti@gwyddion.net> - 18-1
 - Fedora 18
 
