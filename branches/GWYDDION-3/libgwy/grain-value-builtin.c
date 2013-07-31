@@ -1606,7 +1606,7 @@ extract_upsampled_square_pixel_grain(const guint *grains, guint xres,
     /* Do not bother with nearly square pixels and upsample also 2×2. */
     if (fabs(log(dy/dx)) < 0.05
         || (dy < dx && gwy_round(dx/dy*w2) == w2)
-        || (dy > dx && gwy_round(dy/dx*h2) ==h2)) {
+        || (dy > dx && gwy_round(dy/dx*h2) == h2)) {
         grain = grain_maybe_realloc(grain, w2, h2, grainsize);
         for (guint i = 0; i < h; i++) {
             guint k2 = w2*(2*i);
@@ -1737,7 +1737,7 @@ find_disc_centre_candidates(GArray *candidates, guint ncandmax,
                 for (guint m = 1; m < candidates->len; m++) {
                     const FooscribedDisc *candi = &g_array_index(candidates,
                                                                  FooscribedDisc,
-                                                                 i);
+                                                                 m);
                     if (candi->size < bestsize/2) {
                         g_array_set_size(candidates, m);
                         break;
@@ -2038,6 +2038,8 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
             inscrdxvalues[gno] = cand->x*qgeom + xoff;
         if (inscrdyvalues)
             inscrdyvalues[gno] = cand->y*qgeom + yoff;
+
+        //g_printerr("[%u] %g %g %g\n", gno, sqrt(cand->R2)*qgeom, cand->x*qgeom + xoff, cand->y*qgeom + yoff);
     }
 
     g_free(workspace);

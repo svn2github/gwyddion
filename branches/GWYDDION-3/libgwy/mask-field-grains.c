@@ -518,6 +518,7 @@ distance_transform_first_step(guint *distances,
 {
     guint k = 0;
 
+    queue->len = 0;
     for (guint j = xres; j; j--, k++) {
         if (distances[k]) {
             distances[k] = 1;
