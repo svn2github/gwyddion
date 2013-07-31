@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,8 +33,9 @@ G_BEGIN_DECLS
 // bounding box (in real coordinates)
 // XXX: Two quantities are derived: r_eq and V_min.  But they seem too useful
 // to leave their definitions to the users.
-// If this changes then the arrays in _gwy_grain_value_evaluate_builtins()
-// that are indexed by this enum must be updates (and providing this the
+//
+// If this enum changes then the arrays in _gwy_grain_value_evaluate_builtins()
+// that are indexed by this enum must be updated (and providing this the
 // values can be reordered freely).
 typedef enum {
     GWY_GRAIN_VALUE_CENTER_X = 0,
@@ -63,6 +64,8 @@ typedef enum {
     GWY_GRAIN_VALUE_CIRCUMCIRCLE_X,
     GWY_GRAIN_VALUE_CIRCUMCIRCLE_Y,
     GWY_GRAIN_VALUE_MEAN_RADIUS,
+    GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE,
+    GWY_GRAIN_VALUE_SHAPE_NUMBER,
     GWY_GRAIN_VALUE_VOLUME_0,
     GWY_GRAIN_VALUE_VOLUME_MIN,
     GWY_GRAIN_VALUE_VOLUME_LAPLACE,

@@ -50,11 +50,12 @@ enum {
     NEED_MAX = 1 << 3,
     NEED_XMEAN = (1 << 4) | NEED_SIZE,
     NEED_YMEAN = (1 << 5) | NEED_SIZE,
-    NEED_CENTER = NEED_XMEAN | NEED_YMEAN,
+    NEED_CENTRE = NEED_XMEAN | NEED_YMEAN,
     NEED_ZMEAN = (1 << 6) | NEED_SIZE,
-    NEED_LINEAR = (1 << 7) | NEED_ZMEAN | NEED_CENTER,
+    NEED_LINEAR = (1 << 7) | NEED_ZMEAN | NEED_CENTRE,
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
     NEED_VOLUME = (1 << 9),
+    NEED_EDMEAN = (1 << 10) | NEED_CENTRE,
 };
 
 // Edges are used for inscribed discs.
@@ -113,6 +114,7 @@ static const BuiltinGrainValueId satisfies_needs[] = {
     /* NEED_LINEAR */      G_MAXUINT,
     /* NEED_QUADRATIC */   G_MAXUINT,
     /* NEED_VOLUME */      GWY_GRAIN_VALUE_VOLUME_0,
+    /* NEED_EDMEAN */      GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE,
 };
 
 static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
@@ -302,7 +304,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_R,
-        .need = NEED_SIZE | NEED_CENTER,
+        .need = NEED_SIZE | NEED_CENTRE,
         .name = NC_("grain value", "Maximum inscribed disc radius"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "R_i",
@@ -312,7 +314,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_X,
-        .need = NEED_SIZE | NEED_CENTER,
+        .need = NEED_SIZE | NEED_CENTRE,
         .name = NC_("grain value", "Maximum inscribed disc center x position"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "x_i",
@@ -322,7 +324,7 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_INSCRIBED_DISC_Y,
-        .need = NEED_SIZE | NEED_CENTER,
+        .need = NEED_SIZE | NEED_CENTRE,
         .name = NC_("grain value", "Maximum inscribed disc center y position"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "y_i",
@@ -361,13 +363,32 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
     },
     {
         .id = GWY_GRAIN_VALUE_MEAN_RADIUS,
-        .need = NEED_CENTER,
+        .need = NEED_CENTRE,
         .name = NC_("grain value", "Mean radius"),
         .group = NC_("grain value group", "Boundary"),
         .ident = "R_m",
         .symbol = "<i>R</i><sub>m</sub>",
         .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .powerx = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE,
+        .need = NEED_EDMEAN,
+        .name = NC_("grain value", "Mean edge distance"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "d_e",
+        .symbol = "<i>d</i><sub>e</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SHAPE_NUMBER,
+        .need = NEED_EDMEAN,
+        .name = NC_("grain value", "Shape number"),
+        .group = NC_("grain value group", "Boundary"),
+        .ident = "F_s",
+        .symbol = "<i>F</i><sub>s</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
     },
     {
         .id = GWY_GRAIN_VALUE_VOLUME_0,
@@ -2109,6 +2130,7 @@ static void
 calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
                     GwyGrainValue *inscrdxgrainvalue,
                     GwyGrainValue *inscrdygrainvalue,
+                    GwyGrainValue *edmeangrainvalue,
                     const GwyGrainValue *xgrainvalue,
                     const GwyGrainValue *ygrainvalue,
                     const guint *grains,
@@ -2118,7 +2140,7 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
 {
     guint ngrains;
     const gdouble *xvalues, *yvalues;
-    gdouble *inscrdrvalues, *inscrdxvalues, *inscrdyvalues;
+    gdouble *inscrdrvalues, *inscrdxvalues, *inscrdyvalues, *edmeanvalues;
     if (all_null(3, &ngrains,
                  inscrdrgrainvalue, inscrdxgrainvalue, inscrdygrainvalue)
         || !check_target(inscrdrgrainvalue, &inscrdrvalues,
@@ -2127,12 +2149,14 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
                          GWY_GRAIN_VALUE_INSCRIBED_DISC_X)
         || !check_target(inscrdygrainvalue, &inscrdyvalues,
                          GWY_GRAIN_VALUE_INSCRIBED_DISC_Y)
+        || !check_target(edmeangrainvalue, &edmeanvalues,
+                         GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE)
         || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
         || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
     inscribed_discs_and_friends(inscrdrvalues, inscrdxvalues, inscrdyvalues,
-                                NULL,
+                                edmeanvalues,
                                 xvalues, yvalues,
                                 grains, sizes, ngrains, mask,
                                 gwy_field_dx(field), gwy_field_dy(field));
@@ -2413,6 +2437,36 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
 }
 
 static void
+calc_shape_number(GwyGrainValue *shapenograinvalue,
+                  const GwyGrainValue *edmeangrainvalue,
+                  const guint *grains,
+                  const guint *sizes,
+                  const GwyField *field)
+{
+    gdouble *shapenovalues;
+    const gdouble *edmeanvalues;
+    if (!shapenograinvalue
+        || !check_target(shapenograinvalue, &shapenovalues,
+                         GWY_GRAIN_VALUE_SHAPE_NUMBER)
+        || !check_dependence(edmeangrainvalue, &edmeanvalues,
+                             GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE))
+        return;
+
+    g_return_if_fail(sizes);
+    g_return_if_fail(grains);
+
+    guint ngrains = edmeangrainvalue->priv->ngrains;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble dxdy = dx*dy;
+
+    for (guint gno = 1; gno <= ngrains; gno++) {
+        gdouble edmean = edmeanvalues[gno];
+        gdouble area = sizes[gno]*dxdy;
+        shapenovalues[gno] = area/(9.0*G_PI*edmean*edmean);
+    }
+}
+
+static void
 linear_transform(GwyGrainValue *grainvalue,
                  gdouble q,
                  gdouble c)
@@ -2538,6 +2592,7 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
     calc_inscribed_disc(ourvalues[GWY_GRAIN_VALUE_INSCRIBED_DISC_R],
                         ourvalues[GWY_GRAIN_VALUE_INSCRIBED_DISC_X],
                         ourvalues[GWY_GRAIN_VALUE_INSCRIBED_DISC_Y],
+                        ourvalues[GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE],
                         ourvalues[GWY_GRAIN_VALUE_CENTER_X],
                         ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                         grains, sizes, mask, field);
@@ -2566,6 +2621,9 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                    ourvalues[GWY_GRAIN_VALUE_MEAN],
                    sizes, linear, quadratic, field);
+    calc_shape_number(ourvalues[GWY_GRAIN_VALUE_SHAPE_NUMBER],
+                      ourvalues[GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE],
+                      grains, sizes, field);
 
     // NB: This must be done last because other functions expect coordinates
     // in pixels.
