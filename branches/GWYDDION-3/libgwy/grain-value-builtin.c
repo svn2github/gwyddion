@@ -1919,17 +1919,35 @@ improve_inscribed_disc(FooscribedDisc *disc, EdgeList *edges, double dist)
     } while (eps > 1e-3 || improvement > 1e-3);
 }
 
-void
-_gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
-                                      gdouble *inscrdxvalues,
-                                      gdouble *inscrdyvalues,
-                                      const gdouble *xvalues,
-                                      const gdouble *yvalues,
-                                      const guint *grains,
-                                      const guint *sizes,
-                                      guint ngrains,
-                                      const GwyMaskField *mask,
-                                      gdouble dx, gdouble dy)
+static gdouble
+mean_euclidean_distance(const guint *sedt,
+                        guint n,
+                        gdouble dx, gdouble dy)
+{
+    guint i = n, np = 0;
+    gdouble dmean = 0.0;
+    while (i--) {
+        if (*sedt) {
+            dmean += sqrt(*sedt);
+            np++;
+        }
+        sedt++;
+    }
+    return (dmean/np - 0.5) * 0.5*(dx + dy);
+}
+
+static void
+inscribed_discs_and_friends(gdouble *inscrdrvalues,
+                            gdouble *inscrdxvalues,
+                            gdouble *inscrdyvalues,
+                            gdouble *meanedgedistancevalues,
+                            const gdouble *xvalues,
+                            const gdouble *yvalues,
+                            const guint *grains,
+                            const guint *sizes,
+                            guint ngrains,
+                            const GwyMaskField *mask,
+                            gdouble dx, gdouble dy)
 {
     enum { NCAND_MAX = 15 };
 
@@ -1938,11 +1956,13 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
     g_return_if_fail(xvalues);
     g_return_if_fail(yvalues);
     g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-    g_return_if_fail(inscrdrvalues || inscrdxvalues || inscrdyvalues);
+    g_return_if_fail(inscrdrvalues || inscrdxvalues || inscrdyvalues
+                     || meanedgedistancevalues);
 
     const GwyFieldPart *bbox = gwy_mask_field_grain_bounding_boxes(mask);
     guint xres = mask->xres;
     gdouble qgeom = sqrt(dx*dy);
+    gboolean nodiscs = !inscrdrvalues && !inscrdxvalues && !inscrdyvalues;
 
     guint *grain = NULL, *workspace = NULL;
     guint grainsize = 0;
@@ -1964,17 +1984,20 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
         guint w = bbox[gno].width, h = bbox[gno].height;
         gdouble xoff = dx*bbox[gno].col, yoff = dy*bbox[gno].row;
 
-        /* If the grain is rectangular, calculate the disc directly.
+        /* If the grain is rectangular, calculate the properties directly.
          * Large rectangular grains are rare but the point is to catch
          * grains with width or height of 1 here. */
         if (sizes[gno] == w*h) {
             gdouble sdx = 0.5*w*dx, sdy = 0.5*h*dy;
+            gdouble Lmax = fmax(sdx, sdy), Lmin = fmin(sdx, sdy);
             if (inscrdrvalues)
-                inscrdrvalues[gno] = 0.999999*MIN(sdx, sdy);
+                inscrdrvalues[gno] = 0.999999*Lmin;
             if (inscrdxvalues)
                 inscrdxvalues[gno] = sdx + xoff;
             if (inscrdyvalues)
                 inscrdyvalues[gno] = sdy + yoff;
+            if (meanedgedistancevalues)
+                meanedgedistancevalues[gno] = Lmin/6.0*(3.0 - Lmin/Lmax);
             continue;
         }
 
@@ -1999,6 +2022,16 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
 
         _gwy_distance_transform_raw(grain, workspace, width, height, TRUE,
                                     inqueue, outqueue);
+
+        if (meanedgedistancevalues) {
+            meanedgedistancevalues[gno] = mean_euclidean_distance(grain,
+                                                                  width*height,
+                                                                  w*dx/width,
+                                                                  h*dy/height);
+        }
+        if (nodiscs)
+            continue;
+
 #if 0
         g_printerr("Grain #%u, orig %ux%u, resampled to %ux%u\n",
                    gno, bbox[gno].width, bbox[gno].height, width, height);
@@ -2050,6 +2083,28 @@ _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
     g_array_free(candidates, TRUE);
 }
 
+/* This protected function is for in-library users that do not require all the
+ * fancy quantities.  Implementation is in inscribed_discs_and_friends() which
+ * possibly calculates mean edge distances, shape numbers and other stuff. */
+void
+_gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
+                                      gdouble *inscrdxvalues,
+                                      gdouble *inscrdyvalues,
+                                      const gdouble *xvalues,
+                                      const gdouble *yvalues,
+                                      const guint *grains,
+                                      const guint *sizes,
+                                      guint ngrains,
+                                      const GwyMaskField *mask,
+                                      gdouble dx, gdouble dy)
+{
+    inscribed_discs_and_friends(inscrdrvalues, inscrdxvalues, inscrdyvalues,
+                                NULL,
+                                xvalues, yvalues,
+                                grains, sizes, ngrains, mask,
+                                dx, dy);
+}
+
 static void
 calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
                     GwyGrainValue *inscrdxgrainvalue,
@@ -2076,12 +2131,11 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
         || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
         return;
 
-    _gwy_mask_field_grain_inscribed_discs(inscrdrvalues, inscrdxvalues,
-                                          inscrdyvalues,
-                                          xvalues, yvalues,
-                                          grains, sizes, ngrains, mask,
-                                          gwy_field_dx(field),
-                                          gwy_field_dy(field));
+    inscribed_discs_and_friends(inscrdrvalues, inscrdxvalues, inscrdyvalues,
+                                NULL,
+                                xvalues, yvalues,
+                                grains, sizes, ngrains, mask,
+                                gwy_field_dx(field), gwy_field_dy(field));
 
     if (inscrdxvalues) {
         gdouble off = field->xoff;
