@@ -1961,7 +1961,7 @@ static void
 inscribed_discs_and_friends(gdouble *inscrdrvalues,
                             gdouble *inscrdxvalues,
                             gdouble *inscrdyvalues,
-                            gdouble *meanedgedistancevalues,
+                            gdouble *edmeanvalues,
                             const gdouble *xvalues,
                             const gdouble *yvalues,
                             const guint *grains,
@@ -1978,7 +1978,7 @@ inscribed_discs_and_friends(gdouble *inscrdrvalues,
     g_return_if_fail(yvalues);
     g_return_if_fail(GWY_IS_MASK_FIELD(mask));
     g_return_if_fail(inscrdrvalues || inscrdxvalues || inscrdyvalues
-                     || meanedgedistancevalues);
+                     || edmeanvalues);
 
     const GwyFieldPart *bbox = gwy_mask_field_grain_bounding_boxes(mask);
     guint xres = mask->xres;
@@ -2017,8 +2017,8 @@ inscribed_discs_and_friends(gdouble *inscrdrvalues,
                 inscrdxvalues[gno] = sdx + xoff;
             if (inscrdyvalues)
                 inscrdyvalues[gno] = sdy + yoff;
-            if (meanedgedistancevalues)
-                meanedgedistancevalues[gno] = Lmin/6.0*(3.0 - Lmin/Lmax);
+            if (edmeanvalues)
+                edmeanvalues[gno] = Lmin/6.0*(3.0 - Lmin/Lmax);
             continue;
         }
 
@@ -2044,11 +2044,10 @@ inscribed_discs_and_friends(gdouble *inscrdrvalues,
         _gwy_distance_transform_raw(grain, workspace, width, height, TRUE,
                                     inqueue, outqueue);
 
-        if (meanedgedistancevalues) {
-            meanedgedistancevalues[gno] = mean_euclidean_distance(grain,
-                                                                  width*height,
-                                                                  w*dx/width,
-                                                                  h*dy/height);
+        if (edmeanvalues) {
+            edmeanvalues[gno] = mean_euclidean_distance(grain, width*height,
+                                                        w*dx/width,
+                                                        h*dy/height);
         }
         if (nodiscs)
             continue;
@@ -2141,8 +2140,9 @@ calc_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
     guint ngrains;
     const gdouble *xvalues, *yvalues;
     gdouble *inscrdrvalues, *inscrdxvalues, *inscrdyvalues, *edmeanvalues;
-    if (all_null(3, &ngrains,
-                 inscrdrgrainvalue, inscrdxgrainvalue, inscrdygrainvalue)
+    if (all_null(4, &ngrains,
+                 inscrdrgrainvalue, inscrdxgrainvalue, inscrdygrainvalue,
+                 edmeangrainvalue)
         || !check_target(inscrdrgrainvalue, &inscrdrvalues,
                          GWY_GRAIN_VALUE_INSCRIBED_DISC_R)
         || !check_target(inscrdxgrainvalue, &inscrdxvalues,
