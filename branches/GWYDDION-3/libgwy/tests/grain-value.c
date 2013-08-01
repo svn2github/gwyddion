@@ -932,6 +932,73 @@ test_grain_value_builtin_exscribed_circle(void)
 }
 
 void
+test_grain_value_builtin_edge_distance_circular(void)
+{
+    const gchar *names[2] = {
+        "Mean edge distance",
+        "Shape number",
+    };
+    enum { max_size = 85, niter = 100 };
+
+    GwyGrainValue *grainvalues[2];
+    for (guint i = 0; i < 2; i++) {
+        grainvalues[i] = gwy_grain_value_new(names[i]);
+        g_assert(grainvalues[i]);
+        g_assert(gwy_grain_value_is_valid(grainvalues[i]));
+        g_assert_cmpstr(gwy_grain_value_get_name(grainvalues[i]), ==, names[i]);
+        g_assert_cmpstr(gwy_grain_value_get_group(grainvalues[i]),
+                        ==, "Boundary");
+        g_assert_cmpuint(!gwy_grain_value_get_resource(grainvalues[i]), ==, 1);
+    }
+
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyField *grainfield = gwy_field_new();
+    GwyMaskField *grainmask = gwy_mask_field_new();
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 5, max_size);
+        guint yres = g_rand_int_range(rng, 5, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        // Since xreal = yreal = 1 This may require resampling up to 1:17.
+        GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+        gwy_mask_field_fill_ellipse(mask, NULL, TRUE, TRUE);
+        guint ngrains = gwy_mask_field_n_grains(mask);
+        g_assert_cmpuint(ngrains, ==, 1);
+
+        gwy_field_evaluate_grains(field, mask, grainvalues, 2);
+        const gdouble *values[2];
+        for (guint i = 0; i < 2; i++) {
+            guint grainvaluengrains;
+            values[i] = gwy_grain_value_data(grainvalues[i],
+                                             &grainvaluengrains);
+            g_assert(values[i]);
+            g_assert_cmpuint(grainvaluengrains, ==, ngrains);
+        }
+
+        // Exact circle has d_e = 1/6, F_s = 1.  A discretised circle has
+        // always smaller d_e and larger F_s.
+        gdouble edmean = values[0][1], shapeno = values[1][1];
+        g_assert_cmpfloat(edmean, <=, 1.0/6.0);
+        g_assert_cmpfloat(shapeno, >=, 1.0);
+        // Tolerance, not based on exact calculation.
+        gdouble badness = (fabs(log((gdouble)xres/yres))
+                          + 400.0/(xres*xres + yres*yres)
+                          + 1.0);
+        g_assert_cmpfloat(edmean, >=, 1.0/6.0 - 0.01*badness);
+        g_assert_cmpfloat(shapeno, <=, 1.0 + 0.15*badness);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+
+    g_object_unref(grainmask);
+    g_object_unref(grainfield);
+    for (guint i = 0; i < 2; i++)
+        g_object_unref(grainvalues[i]);
+    g_rand_free(rng);
+}
+
+void
 test_grain_value_evaluate_multiple(void)
 {
     enum { xres = 30, yres = 20, niter = 40, nmiter = 5 };
