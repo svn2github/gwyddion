@@ -787,15 +787,16 @@ test_grain_value_builtin_curvature_center_z(void)
 void
 test_grain_value_builtin_inscribed_disc(void)
 {
-    const gchar *names[3] = {
+    enum { NVALUES = 3 };
+    const gchar *names[NVALUES] = {
         "Maximum inscribed disc radius",
         "Maximum inscribed disc center x position",
         "Maximum inscribed disc center y position",
     };
     enum { max_size = 85, niter = 25, circsteps = 720 };
 
-    GwyGrainValue *grainvalues[3];
-    for (guint i = 0; i < 3; i++) {
+    GwyGrainValue *grainvalues[NVALUES];
+    for (guint i = 0; i < NVALUES; i++) {
         grainvalues[i] = gwy_grain_value_new(names[i]);
         g_assert(grainvalues[i]);
         g_assert(gwy_grain_value_is_valid(grainvalues[i]));
@@ -819,9 +820,9 @@ test_grain_value_builtin_inscribed_disc(void)
         guint ngrains = gwy_mask_field_n_grains(mask);
         const guint *grains = gwy_mask_field_grain_numbers(mask);
 
-        gwy_field_evaluate_grains(field, mask, grainvalues, 3);
-        const gdouble *values[3];
-        for (guint i = 0; i < 3; i++) {
+        gwy_field_evaluate_grains(field, mask, grainvalues, NVALUES);
+        const gdouble *values[NVALUES];
+        for (guint i = 0; i < NVALUES; i++) {
             guint grainvaluengrains;
             values[i] = gwy_grain_value_data(grainvalues[i],
                                              &grainvaluengrains);
@@ -857,7 +858,7 @@ test_grain_value_builtin_inscribed_disc(void)
 
     g_object_unref(grainmask);
     g_object_unref(grainfield);
-    for (guint i = 0; i < 3; i++)
+    for (guint i = 0; i < NVALUES; i++)
         g_object_unref(grainvalues[i]);
     g_rand_free(rng);
 }
@@ -865,15 +866,16 @@ test_grain_value_builtin_inscribed_disc(void)
 void
 test_grain_value_builtin_exscribed_circle(void)
 {
-    const gchar *names[3] = {
+    enum { NVALUES = 3 };
+    const gchar *names[NVALUES] = {
         "Minimum circumcircle radius",
         "Minimum circumcircle center x position",
         "Minimum circumcircle center y position",
     };
     enum { max_size = 85, niter = 25, circsteps = 720 };
 
-    GwyGrainValue *grainvalues[3];
-    for (guint i = 0; i < 3; i++) {
+    GwyGrainValue *grainvalues[NVALUES];
+    for (guint i = 0; i < NVALUES; i++) {
         grainvalues[i] = gwy_grain_value_new(names[i]);
         g_assert(grainvalues[i]);
         g_assert(gwy_grain_value_is_valid(grainvalues[i]));
@@ -897,9 +899,9 @@ test_grain_value_builtin_exscribed_circle(void)
         guint ngrains = gwy_mask_field_n_grains(mask);
         const guint *grains = gwy_mask_field_grain_numbers(mask);
 
-        gwy_field_evaluate_grains(field, mask, grainvalues, 3);
-        const gdouble *values[3];
-        for (guint i = 0; i < 3; i++) {
+        gwy_field_evaluate_grains(field, mask, grainvalues, NVALUES);
+        const gdouble *values[NVALUES];
+        for (guint i = 0; i < NVALUES; i++) {
             guint grainvaluengrains;
             values[i] = gwy_grain_value_data(grainvalues[i],
                                              &grainvaluengrains);
@@ -926,7 +928,7 @@ test_grain_value_builtin_exscribed_circle(void)
 
     g_object_unref(grainmask);
     g_object_unref(grainfield);
-    for (guint i = 0; i < 3; i++)
+    for (guint i = 0; i < NVALUES; i++)
         g_object_unref(grainvalues[i]);
     g_rand_free(rng);
 }
@@ -934,14 +936,15 @@ test_grain_value_builtin_exscribed_circle(void)
 void
 test_grain_value_builtin_edge_distance_circular(void)
 {
-    const gchar *names[2] = {
+    enum { NVALUES = 2 };
+    const gchar *names[NVALUES] = {
         "Mean edge distance",
         "Shape number",
     };
     enum { max_size = 85, niter = 100 };
 
-    GwyGrainValue *grainvalues[2];
-    for (guint i = 0; i < 2; i++) {
+    GwyGrainValue *grainvalues[NVALUES];
+    for (guint i = 0; i < NVALUES; i++) {
         grainvalues[i] = gwy_grain_value_new(names[i]);
         g_assert(grainvalues[i]);
         g_assert(gwy_grain_value_is_valid(grainvalues[i]));
@@ -965,9 +968,9 @@ test_grain_value_builtin_edge_distance_circular(void)
         guint ngrains = gwy_mask_field_n_grains(mask);
         g_assert_cmpuint(ngrains, ==, 1);
 
-        gwy_field_evaluate_grains(field, mask, grainvalues, 2);
-        const gdouble *values[2];
-        for (guint i = 0; i < 2; i++) {
+        gwy_field_evaluate_grains(field, mask, grainvalues, NVALUES);
+        const gdouble *values[NVALUES];
+        for (guint i = 0; i < NVALUES; i++) {
             guint grainvaluengrains;
             values[i] = gwy_grain_value_data(grainvalues[i],
                                              &grainvaluengrains);
@@ -993,7 +996,7 @@ test_grain_value_builtin_edge_distance_circular(void)
 
     g_object_unref(grainmask);
     g_object_unref(grainfield);
-    for (guint i = 0; i < 2; i++)
+    for (guint i = 0; i < NVALUES; i++)
         g_object_unref(grainvalues[i]);
     g_rand_free(rng);
 }
