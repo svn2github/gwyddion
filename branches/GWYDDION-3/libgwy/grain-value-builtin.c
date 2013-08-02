@@ -1778,16 +1778,17 @@ find_disc_centre_candidates(GArray *candidates, guint ncandmax,
 }
 
 static void
-find_all_edges(EdgeList *edges,
+find_all_edges(EdgeList *edges, GArray *verticesarray,
                const guint *grains, guint xres,
                guint gno, const GwyFieldPart *bbox,
                gdouble dx, gdouble dy)
 {
     guint col = bbox->col, row = bbox->row, w = bbox->width, h = bbox->height;
-    guint memsize = (w + 1)*sizeof(guint);
-    guint *vertices = g_slice_alloc(memsize);
 
-    memset(vertices, 0xff, memsize);
+    g_array_set_size(verticesarray, w+1);
+    guint *vertices = (guint*)verticesarray->data;
+    memset(vertices, 0xff, (w+1)*sizeof(guint));
+
     edges->len = 0;
     for (guint i = 0; i <= h; i++) {
         guint k = (i + row)*xres + col;
@@ -1832,8 +1833,6 @@ find_all_edges(EdgeList *edges,
             }
         }
     }
-
-    g_slice_free1(memsize, vertices);
 }
 
 static gdouble
@@ -1990,6 +1989,7 @@ inscribed_discs_and_friends(gdouble *inscrdrvalues,
     IntList *inqueue = int_list_new(0);
     IntList *outqueue = int_list_new(0);
     GArray *candidates = g_array_new(FALSE, FALSE, sizeof(FooscribedDisc));
+    GArray *vertices = g_array_new(FALSE, FALSE, sizeof(guint));
     EdgeList edges = { 0, 0, NULL };
 
     /*
@@ -2069,7 +2069,7 @@ inscribed_discs_and_friends(gdouble *inscrdrvalues,
                                                   grain, width, height,
                                                   sdx, sdy,
                                                   centrex, centrey);
-        find_all_edges(&edges, grains, xres, gno, bbox + gno,
+        find_all_edges(&edges, vertices, grains, xres, gno, bbox + gno,
                        dx/qgeom, dy/qgeom);
 
         /* Try a few first candidates for the inscribed disc centre. */
@@ -2100,6 +2100,7 @@ inscribed_discs_and_friends(gdouble *inscrdrvalues,
     int_list_free(inqueue);
     int_list_free(outqueue);
     g_free(edges.edges);
+    g_array_free(vertices, TRUE);
     g_array_free(candidates, TRUE);
 }
 
