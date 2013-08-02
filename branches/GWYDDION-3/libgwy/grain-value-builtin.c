@@ -513,6 +513,46 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
         .is_angle = TRUE,
     },
+    {
+        .id = GWY_GRAIN_VALUE_SEMIMAJOR_AXIS,
+        .need = NEED_CENTRE,
+        .name = NC_("grain value", "Semimajor axis length"),
+        .group = NC_("grain value group", "Moment"),
+        .ident = "a_maj",
+        .symbol = "<i>a</i><sub>maj</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SEMIMINOR_AXIS,
+        .need = NEED_CENTRE,
+        .name = NC_("grain value", "Semiminor axis length"),
+        .group = NC_("grain value group", "Moment"),
+        .ident = "a_min",
+        .symbol = "<i>a</i><sub>min</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .powerx = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SEMIMAJOR_ANGLE,
+        .need = NEED_CENTRE,
+        .name = NC_("grain value", "Semimajor axis direction"),
+        .group = NC_("grain value group", "Moment"),
+        .ident = "alpha_maj",
+        .symbol = "<i>α</i><sub>maj</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .is_angle = TRUE,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SEMIMINOR_ANGLE,
+        .need = NEED_CENTRE,
+        .name = NC_("grain value", "Semiminor axis direction"),
+        .group = NC_("grain value group", "Moment"),
+        .ident = "alpha_min",
+        .symbol = "<i>α</i><sub>min</sub>",
+        .same_units = GWY_GRAIN_VALUE_SAME_UNITS_LATERAL,
+        .is_angle = TRUE,
+    },
 };
 
 static inline void
@@ -2438,6 +2478,92 @@ calc_curvature(GwyGrainValue *xcgrainvalue,
 }
 
 static void
+calc_moments(GwyGrainValue *majgrainvalue,
+             GwyGrainValue *mingrainvalue,
+             GwyGrainValue *amajgrainvalue,
+             GwyGrainValue *amingrainvalue,
+             const GwyGrainValue *xgrainvalue,
+             const GwyGrainValue *ygrainvalue,
+             const guint *grains,
+             const guint *sizes,
+             const GwyField *field)
+{
+    guint ngrains;
+    gdouble *majvalues, *minvalues, *amajvalues, *aminvalues;
+    const gdouble *xvalues, *yvalues;
+    if (all_null(4, &ngrains, majgrainvalue, mingrainvalue, amajgrainvalue,
+                 amingrainvalue)
+        || !check_target(majgrainvalue, &majvalues,
+                         GWY_GRAIN_VALUE_SEMIMAJOR_AXIS)
+        || !check_target(mingrainvalue, &minvalues,
+                         GWY_GRAIN_VALUE_SEMIMINOR_AXIS)
+        || !check_target(amajgrainvalue, &amajvalues,
+                         GWY_GRAIN_VALUE_SEMIMAJOR_ANGLE)
+        || !check_target(amingrainvalue, &aminvalues,
+                         GWY_GRAIN_VALUE_SEMIMINOR_ANGLE)
+        || !check_dependence(xgrainvalue, &xvalues, GWY_GRAIN_VALUE_CENTER_X)
+        || !check_dependence(ygrainvalue, &yvalues, GWY_GRAIN_VALUE_CENTER_Y))
+        return;
+
+    g_return_if_fail(sizes);
+
+    guint xres = field->xres, yres = field->yres;
+    gdouble *moments = g_new0(gdouble, 3*(ngrains + 1));
+
+    for (guint i = 0, k = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            guint gno = grains[k];
+
+            if (!gno)
+                continue;
+
+            gdouble x = j - xvalues[gno], y = yvalues[gno] - i;
+            gdouble *m = moments + 3*gno;
+
+            m[0] += x*x;
+            m[1] += y*y;
+            m[2] += x*y;
+        }
+    }
+
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    for (guint gno = 1; gno <= ngrains; gno++) {
+        gdouble *m = moments + 3*gno;
+        // The second term is the pixel's own moment according to Steiner's
+        // theorem.  Its importance can be seen on single-pixel grains for
+        // which the first term is zero.
+        gdouble Jxx = dx*dx*(m[0] + sizes[gno]*dx*dx/12.0);
+        gdouble Jyy = dy*dy*(m[1] + sizes[gno]*dy*dy/12.0);
+        gdouble Jxy = dx*dy*m[2];
+
+        if (amajvalues || aminvalues) {
+            gdouble alpha = 0.0;
+            gdouble Jeps = 1e-9*fmax(Jxx, Jyy);
+            if (fabs(Jxx - Jyy) > Jeps || fabs(Jxy) > Jeps)
+                alpha = 0.5*atan2(2.0*Jxy, Jxx - Jyy);
+
+            if (amajvalues)
+                amajvalues[gno] = gwy_standardize_direction(alpha);
+            if (aminvalues)
+                aminvalues[gno] = gwy_standardize_direction(alpha + G_PI/2.0);
+        }
+
+        if (majvalues || minvalues) {
+            gdouble u = Jxx + Jyy,
+                    v = hypot(2.0*Jxy, Jxx - Jxy),
+                    w = cbrt(4.0*G_PI*(Jxx*Jyy - Jxy*Jxy));
+
+            if (majvalues)
+                majvalues[gno] = (u + v)/w;
+            if (minvalues)
+                minvalues[gno] = (u - v)/w;
+        }
+    }
+
+    g_free(moments);
+}
+
+static void
 calc_shape_number(GwyGrainValue *shapenograinvalue,
                   const GwyGrainValue *edmeangrainvalue,
                   const guint *grains,
@@ -2622,6 +2748,13 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                    ourvalues[GWY_GRAIN_VALUE_MEAN],
                    sizes, linear, quadratic, field);
+    calc_moments(ourvalues[GWY_GRAIN_VALUE_SEMIMAJOR_AXIS],
+                 ourvalues[GWY_GRAIN_VALUE_SEMIMINOR_AXIS],
+                 ourvalues[GWY_GRAIN_VALUE_SEMIMAJOR_ANGLE],
+                 ourvalues[GWY_GRAIN_VALUE_SEMIMINOR_ANGLE],
+                 ourvalues[GWY_GRAIN_VALUE_CENTER_X],
+                 ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
+                 grains, sizes, field);
     calc_shape_number(ourvalues[GWY_GRAIN_VALUE_SHAPE_NUMBER],
                       ourvalues[GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE],
                       grains, sizes, field);
