@@ -35,7 +35,8 @@ test-report.xml: $(test_program)$(EXEEXT)
 # Run the test program but do not execute any tests.  This produces a list of
 # ‘standard’ GLib errors we then filter out.
 $(test_program).supp: $(test_program)$(EXEEXT)
-	$(AM_V_GEN)$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
+	$(AM_V_GEN)G_SLICE=always-malloc $(LIBTOOL) --mode=execute valgrind \
+	    --log-fd=5 --gen-suppressions=all \
 	    --tool=memcheck --leak-check=full --show-reachable=no \
 	    $(test_program)$(EXEEXT) -l >/dev/null 5>$(test_program).supp
 	$(AM_V_AT)$(SED) -i -e '/^==/d' $(test_program).supp
@@ -43,7 +44,8 @@ $(test_program).supp: $(test_program)$(EXEEXT)
 # Run the test program with all tests (unless TEST_FLAGS says otherwise) under
 # valgrind and report any problems.
 test-valgrind: $(test_program).supp
-	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
+	G_SLICE=always-malloc $(LIBTOOL) --mode=execute valgrind \
+	    --tool=memcheck --leak-check=full \
 	    --show-reachable=no --suppressions=$(test_program).supp \
 	    --suppressions=$(srcdir)/$(test_default_suppressions) \
 	    --track-origins=yes --read-var-info=yes --num-callers=20 \
