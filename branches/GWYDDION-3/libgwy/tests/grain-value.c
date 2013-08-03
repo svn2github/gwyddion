@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -989,6 +989,147 @@ test_grain_value_builtin_edge_distance_circular(void)
                           + 1.0);
         g_assert_cmpfloat(edmean, >=, 1.0/6.0 - 0.01*badness);
         g_assert_cmpfloat(shapeno, <=, 1.0 + 0.15*badness);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+
+    g_object_unref(grainmask);
+    g_object_unref(grainfield);
+    for (guint i = 0; i < NVALUES; i++)
+        g_object_unref(grainvalues[i]);
+    g_rand_free(rng);
+}
+
+static void
+set_3x3(GwyMaskField *mask,
+        guint j, guint i)
+{
+    gwy_mask_field_set(mask, j-1, i-1, TRUE);
+    gwy_mask_field_set(mask, j, i-1, TRUE);
+    gwy_mask_field_set(mask, j+1, i-1, TRUE);
+    gwy_mask_field_set(mask, j-1, i, TRUE);
+    gwy_mask_field_set(mask, j, i, TRUE);
+    gwy_mask_field_set(mask, j+1, i, TRUE);
+    gwy_mask_field_set(mask, j-1, i+1, TRUE);
+    gwy_mask_field_set(mask, j, i+1, TRUE);
+    gwy_mask_field_set(mask, j+1, i+1, TRUE);
+}
+
+static void
+make_diagonal_line(GwyMaskField *mask, gboolean maindiag)
+{
+    guint xres = mask->xres, yres = mask->yres;
+
+    if (yres <= xres) {
+        for (guint j = 1; j < xres-1; j++) {
+            guint i = (2*(j - 1) + 1)*(yres - 2)/(2*(xres - 2)) + 1;
+            if (!maindiag)
+                i = yres-1 - i;
+            set_3x3(mask, j, i);
+        }
+    }
+    else {
+        for (guint i = 1; i < yres-1; i++) {
+            guint j = (2*(i - 1) + 1)*(xres - 2)/(2*(yres - 2)) + 1;
+            if (!maindiag)
+                j = xres-1 - j;
+            set_3x3(mask, j, i);
+        }
+    }
+}
+
+void
+test_grain_value_builtin_moment_lines(void)
+{
+    enum { NVALUES = 4 };
+    const gchar *names[NVALUES] = {
+        "Semimajor axis length",
+        "Semiminor axis length",
+        "Semimajor axis direction",
+        "Semiminor axis direction",
+    };
+    enum { max_size = 85, niter = 100 };
+
+    GwyGrainValue *grainvalues[NVALUES];
+    for (guint i = 0; i < NVALUES; i++) {
+        grainvalues[i] = gwy_grain_value_new(names[i]);
+        g_assert(grainvalues[i]);
+        g_assert(gwy_grain_value_is_valid(grainvalues[i]));
+        g_assert_cmpstr(gwy_grain_value_get_name(grainvalues[i]), ==, names[i]);
+        g_assert_cmpstr(gwy_grain_value_get_group(grainvalues[i]),
+                        ==, "Moment");
+        g_assert_cmpuint(!gwy_grain_value_get_resource(grainvalues[i]), ==, 1);
+    }
+
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyField *grainfield = gwy_field_new();
+    GwyMaskField *grainmask = gwy_mask_field_new();
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gdouble xreal = g_rand_double(rng) + 0.2;
+        gdouble yreal = g_rand_double(rng) + 0.2;
+        gdouble alpha = atan2(yreal, xreal);
+        gdouble diag = 0.5*hypot(xreal, yreal);
+        gdouble ortho = 1.5*hypot(gwy_field_dx(field), gwy_field_dy(field));
+        gdouble alphamaj, alphamin, amaj, amin;
+        gwy_field_set_xreal(field, xreal);
+        gwy_field_set_yreal(field, yreal);
+
+        gwy_mask_field_fill(mask, NULL, FALSE);
+        make_diagonal_line(mask, TRUE);
+        guint ngrains = gwy_mask_field_n_grains(mask);
+        g_assert_cmpuint(ngrains, ==, 1);
+
+        gwy_field_evaluate_grains(field, mask, grainvalues, NVALUES);
+        const gdouble *values[NVALUES];
+        for (guint i = 0; i < NVALUES; i++) {
+            guint grainvaluengrains;
+            values[i] = gwy_grain_value_data(grainvalues[i],
+                                             &grainvaluengrains);
+            g_assert(values[i]);
+            g_assert_cmpuint(grainvaluengrains, ==, ngrains);
+        }
+
+        amaj = values[0][1];
+        amin = values[1][1];
+        alphamaj = values[2][1];
+        alphamin = values[3][1];
+        gwy_assert_floatval(-alpha, alphamaj, 0.1);
+        gwy_assert_floatval(0.5*G_PI - alpha, alphamin, 0.1);
+        gwy_assert_floatval(amaj/diag, 1.05, 0.1);
+        // XXX: How to get better bounds?
+        g_assert_cmpfloat(amin/ortho, >=, 0.2);
+        g_assert_cmpfloat(amin/ortho, <=, 1.2);
+
+        gwy_mask_field_fill(mask, NULL, FALSE);
+        make_diagonal_line(mask, FALSE);
+        ngrains = gwy_mask_field_n_grains(mask);
+        g_assert_cmpuint(ngrains, ==, 1);
+
+        gwy_field_evaluate_grains(field, mask, grainvalues, NVALUES);
+        for (guint i = 0; i < NVALUES; i++) {
+            guint grainvaluengrains;
+            values[i] = gwy_grain_value_data(grainvalues[i],
+                                             &grainvaluengrains);
+            g_assert(values[i]);
+            g_assert_cmpuint(grainvaluengrains, ==, ngrains);
+        }
+
+        amaj = values[0][1];
+        amin = values[1][1];
+        alphamaj = values[2][1];
+        alphamin = values[3][1];
+        gwy_assert_floatval(amaj/diag, 1.05, 0.1);
+        gwy_assert_floatval(alpha, alphamaj, 0.1);
+        gwy_assert_floatval(alpha - 0.5*G_PI, alphamin, 0.1);
+        // XXX: How to get better bounds?
+        g_assert_cmpfloat(amin/ortho, >=, 0.2);
+        g_assert_cmpfloat(amin/ortho, <=, 1.2);
 
         g_object_unref(mask);
         g_object_unref(field);
