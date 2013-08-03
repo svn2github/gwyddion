@@ -637,6 +637,7 @@ grain-value/builtin/inscribed-disc
 grain-value/builtin/exscribed-circle
 grain-value/builtin/edge-distance/circular
 grain-value/builtin/moment/lines
+grain-value/builtin/moment/rectangles
 grain-value/ident
 grain-value/user
 grain-value/evaluate/multiple

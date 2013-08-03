@@ -1099,8 +1099,8 @@ test_grain_value_builtin_moment_lines(void)
         amin = values[1][1];
         alphamaj = values[2][1];
         alphamin = values[3][1];
-        gwy_assert_floatval(-alpha, alphamaj, 0.1);
-        gwy_assert_floatval(0.5*G_PI - alpha, alphamin, 0.1);
+        gwy_assert_floatval(alphamaj, -alpha, 0.1);
+        gwy_assert_floatval(alphamin, 0.5*G_PI - alpha, 0.1);
         gwy_assert_floatval(amaj/diag, 1.05, 0.1);
         // XXX: How to get better bounds?
         g_assert_cmpfloat(amin/ortho, >=, 0.2);
@@ -1125,11 +1125,91 @@ test_grain_value_builtin_moment_lines(void)
         alphamaj = values[2][1];
         alphamin = values[3][1];
         gwy_assert_floatval(amaj/diag, 1.05, 0.1);
-        gwy_assert_floatval(alpha, alphamaj, 0.1);
-        gwy_assert_floatval(alpha - 0.5*G_PI, alphamin, 0.1);
+        gwy_assert_floatval(alphamaj, alpha, 0.1);
+        gwy_assert_floatval(alphamin, alpha - 0.5*G_PI, 0.1);
         // XXX: How to get better bounds?
         g_assert_cmpfloat(amin/ortho, >=, 0.2);
         g_assert_cmpfloat(amin/ortho, <=, 1.2);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+
+    g_object_unref(grainmask);
+    g_object_unref(grainfield);
+    for (guint i = 0; i < NVALUES; i++)
+        g_object_unref(grainvalues[i]);
+    g_rand_free(rng);
+}
+
+void
+test_grain_value_builtin_moment_rectangles(void)
+{
+    enum { NVALUES = 4 };
+    const gchar *names[NVALUES] = {
+        "Semimajor axis length",
+        "Semiminor axis length",
+        "Semimajor axis direction",
+        "Semiminor axis direction",
+    };
+    enum { max_size = 25, niter = 100 };
+
+    GwyGrainValue *grainvalues[NVALUES];
+    for (guint i = 0; i < NVALUES; i++) {
+        grainvalues[i] = gwy_grain_value_new(names[i]);
+        g_assert(grainvalues[i]);
+        g_assert(gwy_grain_value_is_valid(grainvalues[i]));
+        g_assert_cmpstr(gwy_grain_value_get_name(grainvalues[i]), ==, names[i]);
+        g_assert_cmpstr(gwy_grain_value_get_group(grainvalues[i]),
+                        ==, "Moment");
+        g_assert_cmpuint(!gwy_grain_value_get_resource(grainvalues[i]), ==, 1);
+    }
+
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyField *grainfield = gwy_field_new();
+    GwyMaskField *grainmask = gwy_mask_field_new();
+    gdouble q = 1.0/sqrt(sqrt(3.0*G_PI));
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gdouble xreal = g_rand_double(rng) + 0.2;
+        gdouble yreal = g_rand_double(rng) + 0.2;
+        gwy_field_set_xreal(field, xreal);
+        gwy_field_set_yreal(field, yreal);
+
+        gwy_mask_field_fill(mask, NULL, TRUE);
+        guint ngrains = gwy_mask_field_n_grains(mask);
+        g_assert_cmpuint(ngrains, ==, 1);
+
+        gwy_field_evaluate_grains(field, mask, grainvalues, NVALUES);
+        const gdouble *values[NVALUES];
+        for (guint i = 0; i < NVALUES; i++) {
+            guint grainvaluengrains;
+            values[i] = gwy_grain_value_data(grainvalues[i],
+                                             &grainvaluengrains);
+            g_assert(values[i]);
+            g_assert_cmpuint(grainvaluengrains, ==, ngrains);
+        }
+
+        gdouble amaj = values[0][1];
+        gdouble amin = values[1][1];
+        gdouble alphamaj = values[2][1];
+        gdouble alphamin = values[3][1];
+        if (xreal >= yreal) {
+            gwy_assert_floatval(alphamaj, 0.0, 1e-14);
+            gwy_assert_floatval(alphamin, 0.5*G_PI, 1e-14);
+            gwy_assert_floatval(amaj, q*xreal, 1e-14);
+            gwy_assert_floatval(amin, q*yreal, 1e-14);
+        }
+        else {
+            gwy_assert_floatval(alphamaj, 0.5*G_PI, 1e-14);
+            gwy_assert_floatval(alphamin, 0.0, 1e-14);
+            gwy_assert_floatval(amaj, q*yreal, 1e-14);
+            gwy_assert_floatval(amin, q*xreal, 1e-14);
+        }
 
         g_object_unref(mask);
         g_object_unref(field);
