@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -2527,14 +2527,15 @@ calc_moments(GwyGrainValue *majgrainvalue,
     }
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble dx2 = dx*dx, dy2 = dy*dy, dxdy = dx*dy;
     for (guint gno = 1; gno <= ngrains; gno++) {
         gdouble *m = moments + 3*gno;
         // The second term is the pixel's own moment according to Steiner's
         // theorem.  Its importance can be seen on single-pixel grains for
         // which the first term is zero.
-        gdouble Jxx = dx*dx*(m[0] + sizes[gno]*dx*dx/12.0);
-        gdouble Jyy = dy*dy*(m[1] + sizes[gno]*dy*dy/12.0);
-        gdouble Jxy = dx*dy*m[2];
+        gdouble Jxx = dxdy*dx2*(m[0] + sizes[gno]/12.0);
+        gdouble Jyy = dxdy*dy2*(m[1] + sizes[gno]/12.0);
+        gdouble Jxy = dxdy*dxdy*m[2];
 
         if (amajvalues || aminvalues) {
             gdouble alpha = 0.0;
@@ -2550,13 +2551,13 @@ calc_moments(GwyGrainValue *majgrainvalue,
 
         if (majvalues || minvalues) {
             gdouble u = Jxx + Jyy,
-                    v = hypot(2.0*Jxy, Jxx - Jxy),
-                    w = cbrt(4.0*G_PI*(Jxx*Jyy - Jxy*Jxy));
+                    v = hypot(2.0*Jxy, Jxx - Jyy),
+                    w = sqrt(G_PI*sqrt(Jxx*Jyy - Jxy*Jxy));
 
             if (majvalues)
-                majvalues[gno] = (u + v)/w;
+                majvalues[gno] = sqrt((u + v)/w);
             if (minvalues)
-                minvalues[gno] = (u - v)/w;
+                minvalues[gno] = sqrt((u - v)/w);
         }
     }
 
