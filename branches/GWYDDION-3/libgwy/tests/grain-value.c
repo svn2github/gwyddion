@@ -317,6 +317,51 @@ test_grain_value_builtin_rms_intra(void)
                    &dumb_rms_intra, NULL);
 }
 
+static gdouble
+dumb_skewness_intra(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble retval;
+    gwy_field_statistics(field, NULL, mask, GWY_MASK_INCLUDE,
+                         NULL, NULL, NULL, &retval, NULL);
+    return retval;
+}
+
+static void
+compare_gamma(gdouble reference, gdouble result,
+              G_GNUC_UNUSED const GwyMaskField *mask,
+              G_GNUC_UNUSED guint grain_id)
+{
+    if (isnan(reference)) {
+        g_assert_cmpfloat(result, ==, 0.0);
+        return;
+    }
+
+    gwy_assert_floatval(result, reference, 1e-14);
+}
+
+void
+test_grain_value_builtin_skewness_intra(void)
+{
+    test_one_value("Value skewness (intragrain)", "Value", TRUE,
+                   &dumb_skewness_intra, &compare_gamma);
+}
+
+static gdouble
+dumb_kurtosis_intra(const GwyMaskField *mask, const GwyField *field)
+{
+    gdouble retval;
+    gwy_field_statistics(field, NULL, mask, GWY_MASK_INCLUDE,
+                         NULL, NULL, NULL, NULL, &retval);
+    return retval;
+}
+
+void
+test_grain_value_builtin_kurtosis_intra(void)
+{
+    test_one_value("Value kurtosis (intragrain)", "Value", TRUE,
+                   &dumb_kurtosis_intra, &compare_gamma);
+}
+
 static void
 boundary_minimum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
                           guint wul, guint wur, guint wlr, guint wll,
@@ -522,7 +567,7 @@ compare_bounding_direction(gdouble reference, gdouble result,
 {
     gdouble eps = 2e-9*fmax(fabs(result), fabs(reference));
     result = copysign(result, reference);
-    g_assert_cmpfloat(fabs(result - reference), <=, eps);
+    gwy_assert_floatval(result, reference, eps);
 }
 
 void

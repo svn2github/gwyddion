@@ -56,6 +56,7 @@ enum {
     NEED_QUADRATIC = (1 << 8) | NEED_LINEAR,
     NEED_VOLUME = (1 << 9),
     NEED_EDMEAN = (1 << 10) | NEED_CENTRE,
+    NEED_ZRMS = (1 << 11) | NEED_ZMEAN,
 };
 
 // Edges are used for inscribed discs.
@@ -115,6 +116,7 @@ static const BuiltinGrainValueId satisfies_needs[] = {
     /* NEED_QUADRATIC */   G_MAXUINT,
     /* NEED_VOLUME */      GWY_GRAIN_VALUE_VOLUME_0,
     /* NEED_EDMEAN */      GWY_GRAIN_VALUE_MEAN_EDGE_DISTANCE,
+    /* NEED_ZRMS */        GWY_GRAIN_VALUE_RMS_INTRA,
 };
 
 static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
@@ -232,6 +234,22 @@ static const BuiltinGrainValue builtin_table[GWY_GRAIN_NVALUES] = {
         .ident = "sigma_i",
         .symbol = "<i>σ</i><sub>i</sub>",
         .powerz = 1,
+    },
+    {
+        .id = GWY_GRAIN_VALUE_SKEWNESS_INTRA,
+        .need = NEED_ZMEAN | NEED_ZRMS,
+        .name = NC_("grain value", "Value skewness (intragrain)"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "gamma_1i",
+        .symbol = "<i>γ</i><sub>1i</sub>",
+    },
+    {
+        .id = GWY_GRAIN_VALUE_KURTOSIS_INTRA,
+        .need = NEED_ZMEAN | NEED_ZRMS,
+        .name = NC_("grain value", "Value kurtosis (intragrain)"),
+        .group = NC_("grain value group", "Value"),
+        .ident = "gamma_2i",
+        .symbol = "<i>γ</i><sub>2i</sub>",
     },
     {
         .id = GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH,
@@ -1217,6 +1235,51 @@ calc_flat_boundary_length(GwyGrainValue *grainvalue,
                 g_assert_not_reached();
             }
         }
+    }
+}
+
+static void
+calc_gamma(GwyGrainValue *skewgrainvalue,
+           GwyGrainValue *kurtgrainvalue,
+           const GwyGrainValue *meangrainvalue,
+           const GwyGrainValue *rmsgrainvalue,
+           const guint *grains,
+           const guint *sizes,
+           const GwyField *field)
+{
+    guint ngrains;
+    gdouble *skewvalues, *kurtvalues;
+    const gdouble *mean, *rms;
+    if (all_null(2, &ngrains, skewgrainvalue, kurtgrainvalue)
+        || !check_target(skewgrainvalue, &skewvalues,
+                         GWY_GRAIN_VALUE_SKEWNESS_INTRA)
+        || !check_target(kurtgrainvalue, &kurtvalues,
+                         GWY_GRAIN_VALUE_KURTOSIS_INTRA)
+        || !check_dependence(meangrainvalue, &mean, GWY_GRAIN_VALUE_MEAN)
+        || !check_dependence(rmsgrainvalue, &rms, GWY_GRAIN_VALUE_RMS_INTRA))
+        return;
+
+    guint nn = field->xres * field->yres;
+    const gdouble *d = field->data;
+    for (guint k = 0; k < nn; k++) {
+        guint gno = grains[k];
+        if (!gno)
+            continue;
+
+        gdouble zd = d[k] - mean[gno], zd2 = zd*zd;
+        if (skewvalues)
+            skewvalues[gno] += zd2*zd;
+        if (kurtvalues)
+            kurtvalues[gno] += zd2*zd2;
+    }
+
+    for (guint gno = 1; gno <= ngrains; gno++) {
+        guint size = sizes[gno];
+        gdouble r = rms[gno];
+        if (skewvalues)
+            skewvalues[gno] = r ? skewvalues[gno]/size/gwy_powi(r, 3) : 0.0;
+        if (kurtvalues)
+            kurtvalues[gno] = r ? kurtvalues[gno]/size/gwy_powi(r, 4) - 3 : 0.0;
     }
 }
 
@@ -2687,6 +2750,9 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                    ourvalues[GWY_GRAIN_VALUE_CENTER_Y],
                    ourvalues[GWY_GRAIN_VALUE_MEAN],
                    field);
+    calc_rms_intra(ourvalues[GWY_GRAIN_VALUE_RMS_INTRA],
+                   ourvalues[GWY_GRAIN_VALUE_MEAN],
+                   grains, sizes, field);
 
     // Values that do not directly correspond to auxiliary values and may
     // depend on them.
@@ -2700,9 +2766,11 @@ _gwy_grain_value_evaluate_builtins(const GwyField *field,
                           ourvalues[GWY_GRAIN_VALUE_MAXIMUM],
                           grains, field);
     calc_median(ourvalues[GWY_GRAIN_VALUE_MEDIAN], grains, sizes, field);
-    calc_rms_intra(ourvalues[GWY_GRAIN_VALUE_RMS_INTRA],
-                   ourvalues[GWY_GRAIN_VALUE_MEAN],
-                   grains, sizes, field);
+    calc_gamma(ourvalues[GWY_GRAIN_VALUE_SKEWNESS_INTRA],
+               ourvalues[GWY_GRAIN_VALUE_KURTOSIS_INTRA],
+               ourvalues[GWY_GRAIN_VALUE_MEAN],
+               ourvalues[GWY_GRAIN_VALUE_RMS_INTRA],
+               grains, sizes, field);
     calc_flat_boundary_length(ourvalues[GWY_GRAIN_VALUE_FLAT_BOUNDARY_LENGTH],
                               grains, field);
     calc_boundary_extrema(ourvalues[GWY_GRAIN_VALUE_BOUNDARY_MINIMUM],

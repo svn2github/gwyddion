@@ -618,6 +618,8 @@ grain-value/builtin/maximum
 grain-value/builtin/mean
 grain-value/builtin/median
 grain-value/builtin/rms-intra
+grain-value/builtin/skewness-intra
+grain-value/builtin/kurtosis-intra
 grain-value/builtin/boundary-minimum
 grain-value/builtin/boundary-maximum
 grain-value/builtin/projected-boundary-length
