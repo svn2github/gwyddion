@@ -205,7 +205,7 @@
    Memcheck:Leak
    fun:calloc
    fun:g_malloc0
-   fun:type_add_flags_W
+   ...
    fun:g_type_register_fundamental
 }
 
@@ -215,16 +215,7 @@
    fun:malloc
    fun:realloc
    fun:g_realloc
-   fun:type_add_flags_W
-   fun:g_type_register_fundamental
-}
-
-{
-   glib2-type-register-fundamental-3
-   Memcheck:Leak
-   fun:calloc
-   fun:g_malloc0
-   fun:type_data_make_W
+   ...
    fun:g_type_register_fundamental
 }
 
