@@ -726,14 +726,15 @@ test_field_statistics(void)
         GwyField *field = field_make_planar(xres, yres, alpha, beta);
 
         // TODO: Other characteristics.
-        gdouble rms, mean, rms_expected, mean_expected;
+        gdouble rms, mean, skewness, rms_expected, mean_expected;
         gwy_field_statistics(field, NULL, NULL, GWY_MASK_IGNORE,
-                             &mean, NULL, &rms, NULL, NULL);
+                             &mean, NULL, &rms, &skewness, NULL);
         mean_expected = 0.5*(alpha + beta);
         rms_expected = 0.5*sqrt((alpha*alpha*(1.0 - 1.0/yres/yres)
                                  + beta*beta*(1.0 - 1.0/xres/xres))/3.0);
         gwy_assert_floatval(mean, mean_expected, 1e-9*fabs(mean_expected));
         gwy_assert_floatval(rms, rms_expected, 1e-9*rms_expected);
+        gwy_assert_floatval(skewness, 0.0, 1e-9);
 
         field_randomize(field, rng);
         guint width = g_rand_int_range(rng, 1, xres+1);

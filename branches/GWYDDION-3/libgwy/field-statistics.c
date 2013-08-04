@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -571,14 +571,11 @@ gwy_field_statistics(const GwyField *field,
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             for (guint j = width; j; j--, d++) {
-                gdouble v = *d - avg;
+                gdouble v = *d - avg, v2 = v*v, v3 = v2*v, v4 = v3*v;
                 sumabs += fabs(v);
-                v *= v;
-                sum2 += v;
-                v *= v;
-                sum3 += v;
-                v *= v;
-                sum4 += v;
+                sum2 += v2;
+                sum3 += v3;
+                sum4 += v4;
             }
         }
         n = width*height;
@@ -595,14 +592,11 @@ gwy_field_statistics(const GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert) {
-                    gdouble v = *d - avg;
+                    gdouble v = *d - avg, v2 = v*v, v3 = v2*v, v4 = v3*v;
                     sumabs += fabs(v);
-                    v *= v;
-                    sum2 += v;
-                    v *= v;
-                    sum3 += v;
-                    v *= v;
-                    sum4 += v;
+                    sum2 += v2;
+                    sum3 += v3;
+                    sum4 += v4;
                     n++;
                 }
                 gwy_mask_iter_next(iter);
