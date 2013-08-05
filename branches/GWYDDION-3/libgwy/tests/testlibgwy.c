@@ -89,6 +89,7 @@ main(int argc, char *argv[])
 
     // Good on Valgrind, but do it consistently always.
     fftw_forget_wisdom();
+    gwy_resources_finalize();
 
     return status;
 }

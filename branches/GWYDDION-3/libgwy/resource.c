@@ -2065,6 +2065,7 @@ gwy_resources_load(GwyErrorList **error_list)
 void
 gwy_resources_finalize(void)
 {
+    gwy_resources_set_management_type(GWY_RESOURCE_MANAGEMENT_NONE);
     for (GSList *l = resource_classes; l; l = g_slist_next(l)) {
         GType type = (GType)GPOINTER_TO_SIZE(l->data);
         GwyResourceClass *klass = g_type_class_peek(type);
