@@ -380,7 +380,8 @@ gwy_master_manage_tasks(GwyMaster *master,
     while ((!priv->exhausted && !priv->cancelled) || priv->active_tasks) {
         // Obtain new tasks if we can and send them to idle workers.
         if (!priv->exhausted && !priv->cancelled) {
-            while (priv->idle_workers) {
+            while (g_slist_length(priv->idle_workers)
+                   > priv->nworkers - nworkers) {
                 gpointer task = provide_task(user_data);
                 if (task == GWY_MASTER_TRY_AGAIN) {
                     if (!priv->active_tasks) {
@@ -413,7 +414,6 @@ gwy_master_manage_tasks(GwyMaster *master,
         Message *message = g_async_queue_pop(queue);
         do {
             guint worker_id = message->worker_id;
-            g_assert(worker_id < nworkers);
             WorkerData *workerdata = priv->workers + worker_id;
             g_assert(workerdata->task_id == message->task_id);
             //g_printerr("GOT RESULT %lu from worker %u.\n", message->task_id, message->worker_id);

@@ -106,6 +106,12 @@ master/sum/4
 master/sum/8
 master/sum/16
 master/sum/auto
+master/sum/nworkers/1-1
+master/sum/nworkers/2-1
+master/sum/nworkers/3-1
+master/sum/nworkers/auto-1
+master/sum/nworkers/1-auto
+master/sum/nworkers/2-auto
 master/data
 master/try-again/1
 master/try-again/2

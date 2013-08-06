@@ -179,6 +179,73 @@ test_master_sum_auto(void)
     master_sum_numbers_one(0);
 }
 
+static void
+master_sum_nworkers(guint ncreate, guint nmanage)
+{
+    GError *error = NULL;
+    GRand *rng = g_rand_new_with_seed(42);
+
+    GwyMaster *master = gwy_master_new();
+    guint64 size = g_rand_int_range(rng, 1000, 1000000);
+    guint64 chunk_size = g_rand_int_range(rng, 1, size+1);
+
+    gboolean ok = gwy_master_create_workers(master, ncreate, &error);
+    g_assert_no_error(error);
+    g_assert(ok);
+
+    SumNumbersState state = { size, chunk_size, 0, 0 };
+    ok = gwy_master_manage_tasks(master, nmanage, &sum_numbers_worker,
+                                 &sum_numbers_task, &sum_numbers_result,
+                                 &state,
+                                 NULL);
+    g_assert(ok);
+
+    g_object_unref(master);
+
+    guint64 expected = gwy_power_sum(size-1, 1);
+    g_assert_cmpfloat(fabs(state.total_sum - expected),
+                      <=,
+                      1e-14*expected);
+
+    g_rand_free(rng);
+}
+
+void
+test_master_sum_nworkers_auto_1(void)
+{
+    master_sum_nworkers(0, 1);
+}
+
+void
+test_master_sum_nworkers_1_1(void)
+{
+    master_sum_nworkers(1, 1);
+}
+
+void
+test_master_sum_nworkers_1_auto(void)
+{
+    master_sum_nworkers(1, 0);
+}
+
+void
+test_master_sum_nworkers_2_1(void)
+{
+    master_sum_nworkers(2, 1);
+}
+
+void
+test_master_sum_nworkers_2_auto(void)
+{
+    master_sum_nworkers(2, 0);
+}
+
+void
+test_master_sum_nworkers_3_1(void)
+{
+    master_sum_nworkers(3, 1);
+}
+
 enum { TASK_TIME = 200 };
 
 static gpointer
