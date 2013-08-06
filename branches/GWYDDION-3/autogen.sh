@@ -110,6 +110,12 @@ check_tool() {
   fi
 }
 
+get_rid_of_mkdir_p() {
+  echo 'Getting rid of $(mkdir_p)'
+  sed -i -e 's/AM_PROG_MKDIR_P/AC_PROG_MKDIR_P/g' m4/intl.m4 m4/po.m4
+  sed -i -e 's/\$(mkdir_p)/$(MKDIR_P)/g' po*/Make*
+}
+
 if test -z "$*"; then
   echo "Note: To pass extra options to ./configure, specify them on the command line"
 fi
@@ -182,6 +188,7 @@ fi
   run $LIBTOOLIZE --automake --force $LIBTOOLIZE_FLAGS
   run $GTKDOCIZE --docdir docs --flavour no-tmpl $GTKDOCIZE_FLAGS
   run $ACLOCAL --force --install -I m4 $ACLOCAL_FLAGS
+  get_rid_of_mkdir_p
   run $AUTOCONF --force $AUTOCONF_FLAGS
   run $AUTOHEADER --force $AUTOHEADER_FLAGS
   run $AUTOMAKE --add-missing --force-missing $AUTOMAKE_FLAGS
