@@ -237,3 +237,18 @@
    fun:gobject_init_ctor
 }
 
+###########################################################################
+# Resource signal closure leaks.  I have verified we disconnect the signal
+# and release the last reference to the inventory in gwy_resources_finalize().
+# If anything is leaked, Glib does it.
+
+{
+   glib2-gobject-resource-inventory-closure
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:g_closure_new_simple
+   ...
+   fun:ensure_class_inventory
+}
+
