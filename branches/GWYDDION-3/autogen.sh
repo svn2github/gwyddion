@@ -114,6 +114,7 @@ get_rid_of_mkdir_p() {
   echo 'Getting rid of $(mkdir_p)'
   sed -i -e 's/AM_PROG_MKDIR_P/AC_PROG_MKDIR_P/g' m4/intl.m4 m4/po.m4
   sed -i -e 's/\$(mkdir_p)/$(MKDIR_P)/g' po*/Make*
+  sed -i -e 's/^mkdir_p *=.*/MKDIR_P = @MKDIR_P@/g' po*/Make*
 }
 
 if test -z "$*"; then
