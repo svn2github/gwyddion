@@ -243,7 +243,7 @@
 # If anything is leaked, Glib does it.
 
 {
-   glib2-gobject-resource-inventory-closure
+   glib2-gobject-resource-inventory-closure-1
    Memcheck:Leak
    fun:calloc
    fun:g_malloc0
@@ -252,3 +252,18 @@
    fun:ensure_class_inventory
 }
 
+# NB: By masking this one we may also mask real leaks.  However, it a closure
+# leaks the signal must be connected to some object and we get a report there,
+# unless we want to see the object alive but the closure destroyed.
+
+{
+   glib2-gobject-resource-inventory-closure-2
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:g_closure_new_simple
+   fun:g_cclosure_new_swap
+   fun:g_signal_connect_data
+   fun:register_item
+   fun:gwy_inventory_insert
+}
