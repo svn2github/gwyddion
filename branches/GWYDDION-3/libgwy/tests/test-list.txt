@@ -450,6 +450,7 @@ field/distributions/acf/grain
 field/distributions/hhcf/full
 field/distributions/hhcf/masked
 field/distributions/hhcf/partial
+field/distributions/asg/full
 field/distributions/psdf/full
 field/distributions/psdf/masked
 field/distributions/slope/simple-x

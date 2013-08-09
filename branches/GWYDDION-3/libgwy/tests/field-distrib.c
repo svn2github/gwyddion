@@ -1059,6 +1059,50 @@ test_field_distributions_hhcf_partial(void)
 }
 
 void
+test_field_distributions_asg_full(void)
+{
+    enum { size = 134 };
+    GRand *rng = g_rand_new_with_seed(43);
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (gint iscale = -12; iscale <= 12; iscale++) {
+            GwyField *field = gwy_field_new_sized(size, size, FALSE);
+            gdouble scale = exp10(0.5*iscale);
+
+            field_randomize(field, rng);
+            gwy_field_multiply_full(field, scale);
+            gdouble area = gwy_field_surface_area(field, NULL, NULL, 0);
+            gdouble ex_1 = area/(field->xreal*field->yreal) - 1.0;
+
+            GwyLine *asg = gwy_field_row_asg(field, NULL,
+                                             NULL, GWY_MASK_IGNORE, lvl);
+            GwyMaskField *mask = gwy_mask_field_new_sized(size, size, TRUE);
+            GwyLine *asg0 = gwy_field_row_asg(field, NULL,
+                                              mask, GWY_MASK_EXCLUDE, lvl);
+            gwy_mask_field_fill(mask, NULL, TRUE);
+            GwyLine *asg1 = gwy_field_row_asg(field, NULL,
+                                              mask, GWY_MASK_INCLUDE, lvl);
+
+            g_assert_cmpuint(asg->res, ==, field->xres-1);
+            line_assert_equal(asg0, asg);
+            line_assert_equal(asg1, asg);
+            // The estimate is rough because surface_area() uses a different
+            // definition of surface area than the ASG.
+            gwy_assert_floatval(0.75*asg->data[0], ex_1, 0.12*ex_1);
+
+            g_object_unref(asg);
+            g_object_unref(asg1);
+            g_object_unref(asg0);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_field_distributions_minkowski_volume(void)
 {
     enum { max_size = 30, niter = 400 };
