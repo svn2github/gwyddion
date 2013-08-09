@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@
 #include "libgwy/field-distributions.h"
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/mask-field-internal.h"
 
@@ -633,7 +634,7 @@ row_divide_nonzero(const gdouble *numerator,
 
 static void
 row_accum_cnorm(gdouble *accum,
-                gwycomplex *fftc,
+                const gwycomplex *fftc,
                 gsize size,
                 gdouble q)
 {
@@ -655,6 +656,33 @@ row_accum_cnorm(gdouble *accum,
         im = cimag(*fftc);
         v = q*(re*re + im*im);
         *out += v;
+    }
+}
+
+static void
+row_assign_cnorm(gdouble *reout,
+                 const gwycomplex *fftc,
+                 gsize size,
+                 gdouble q)
+{
+    q /= size;
+
+    gdouble *out = reout, *out2 = reout + (size-1);
+    gdouble re = creal(*fftc), im = cimag(*fftc), v = q*(re*re + im*im);
+    *out = v;
+    out++, fftc++;
+    for (guint j = (size + 1)/2 - 1; j; j--, fftc++, out++, out2--) {
+        re = creal(*fftc);
+        im = cimag(*fftc);
+        v = q*(re*re + im*im);
+        *out = v;
+        *out2 = v;
+    }
+    if (size % 2 == 0) {
+        re = creal(*fftc);
+        im = cimag(*fftc);
+        v = q*(re*re + im*im);
+        *out = v;
     }
 }
 
@@ -770,6 +798,16 @@ row_accumulate_vk(const gdouble *data,
     }
 }
 
+static void
+row_copy_subtract(const gdouble *in,
+                  gdouble *out,
+                  guint n,
+                  gdouble a)
+{
+    for (guint i = n; i; i--, in++, out++)
+        *out = *in - a;
+}
+
 // Level a row of data by subtracting the mean value.
 static void
 row_level(const gdouble *in,
@@ -781,10 +819,7 @@ row_level(const gdouble *in,
     for (guint i = n; i; i--, pdata++)
         sumsi += *pdata;
 
-    gdouble a = sumsi/n;
-    pdata = in;
-    for (guint i = n; i; i--, pdata++, out++)
-        *out = *pdata - a;
+    row_copy_subtract(in, out, n, sumsi/n);
 }
 
 // Level a row of data by subtracting the mean value of data under mask and
@@ -876,9 +911,7 @@ set_cf_units(const GwyField *field,
     // clear previously set units.
     if (field->priv->xunit)
         gwy_unit_assign(gwy_line_get_xunit(line), field->priv->xunit);
-    gwy_unit_power_multiply(gwy_line_get_yunit(line),
-                            field->priv->xunit, 1,
-                            field->priv->zunit, 2);
+    gwy_unit_power(gwy_line_get_yunit(line), field->priv->zunit, 2);
     if (!weights)
         return;
 
@@ -2335,10 +2368,137 @@ fail:
 }
 
 /**
+ * gwy_field_acf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @xrange: Maximum horizontal shift (in pixels) to include in the result.
+ *          It must not be larger than the field part width.
+ * @yrange: Maximum vertical shift (in pixels) to include in the result.
+ *          It must not be larger than the field part height.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *
+ * Calculated two-dimensional autocorrelation function (ACF) of a field.
+ *
+ * The returned field will have dimensions (2@xrange + 1)(2@yrange + 1), with
+ * the zero-shift autocorrelation function centered.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional data field with the requested functional.
+ **/
+GwyField*
+gwy_field_acf(const GwyField *field,
+              const GwyFieldPart *fpart,
+              guint xrange, guint yrange,
+              guint level)
+{
+    guint col, row, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return gwy_field_new();
+
+    if (level > 1) {
+        g_warning("Levelling degree %u is not supported, changing to 1.",
+                  level);
+        level = 1;
+    }
+    if (xrange >= width) {
+        g_warning("ACF x range is not smaller than width, fixing it.");
+        xrange = width-1;
+    }
+    if (yrange >= height) {
+        g_warning("ACF y range is not smaller than height, fixing it.");
+        yrange = height-1;
+    }
+
+    guint xsize = gwy_fft_nice_transform_size(width + xrange);
+    guint ysize = gwy_fft_nice_transform_size(height + yrange);
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    gsize cxsize = xsize/2 + 1;
+    gdouble *fftr = fftw_alloc_real(xsize*ysize);
+    gwycomplex *fftc = fftw_alloc_complex(cxsize*ysize);
+    fftw_plan plan = fftw_plan_dft_r2c_2d(ysize, xsize, fftr, fftc,
+                                          FFTW_DESTROY_INPUT
+                                          | _gwy_fft_rigour());
+    g_assert(plan);
+
+    guint xres = field->xres;
+    if (level == 1) {
+        gdouble mean = gwy_field_mean(field, fpart, NULL, GWY_MASK_IGNORE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *drow = field->data + (i + row)*xres + col;
+            gdouble *rrow = fftr + i*xsize;
+            row_copy_subtract(drow, rrow, width, mean);
+            gwy_clear(rrow + width, xsize - width);
+        }
+    }
+    else {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *drow = field->data + (i + row)*xres + col;
+            gdouble *rrow = fftr + i*xsize;
+            gwy_assign(rrow, drow, width);
+            gwy_clear(rrow + width, xsize - width);
+        }
+    }
+    gwy_clear(fftr + xsize*height, xsize*(ysize - height));
+
+    fftw_execute(plan);
+
+    for (guint i = 0; i < ysize; i++) {
+        const gwycomplex *crow = fftc + i*cxsize;
+        gdouble *rrow = fftr + i*xsize;
+        row_assign_cnorm(rrow, crow, xsize, 1.0/ysize);
+    }
+
+    fftw_execute(plan);
+    fftw_destroy_plan(plan);
+    fftw_free(fftr);
+
+    GwyField *cf = gwy_field_new_sized(2*xrange + 1, 2*yrange + 1, FALSE);
+    guint txres = cf->xres, tyres = cf->yres;
+    for (guint i = 0; i <= yrange; i++) {
+        const gwycomplex *crow = fftc + i*cxsize;
+        gdouble *frow = cf->data + (yrange + i)*txres + xrange;
+        gdouble *brow = cf->data + (yrange - i)*txres + xrange;
+        for (guint j = 0; j <= xrange; j++, crow++, frow++, brow--) {
+            gdouble v = creal(*crow);
+            // TODO: Proper normalisation.
+            *frow = *brow = v/(height - i)/(width - j);
+        }
+    }
+    for (guint i = 1; i <= yrange; i++) {
+        const gwycomplex *crow = fftc + (ysize - i)*cxsize;
+        gdouble *frow = cf->data + (yrange - i)*txres + (xrange+1);
+        gdouble *brow = cf->data + (yrange + i)*txres + (xrange-1);
+        for (guint j = 1; j <= xrange; j++, crow++, frow++, brow--) {
+            gdouble v = creal(*crow);
+            // TODO: Proper normalisation.
+            *frow = *brow = v/(height - i)/(width - j);
+        }
+    }
+    fftw_free(fftc);
+
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gwy_field_set_xreal(cf, dx*txres);
+    gwy_field_set_yreal(cf, dy*tyres);
+    gwy_field_set_xoffset(cf, -0.5*cf->xreal);
+    gwy_field_set_yoffset(cf, -0.5*cf->yreal);
+
+    _gwy_assign_unit(&cf->priv->xunit, field->priv->xunit);
+    _gwy_assign_unit(&cf->priv->yunit, field->priv->yunit);
+    gwy_unit_power(gwy_field_get_zunit(cf), field->priv->zunit, 2);
+
+    return cf;
+}
+
+/**
  * SECTION: field-distributions
  * @section_id: GwyField-distributions
  * @title: GwyField distributions
- * @short_description: One-dimensional distributions and functionals of fields
+ * @short_description: One- and two-dimensional distributions and functionals of fields
  *
  * Statistical distribution densities are normalised so that their integral,
  * that can also be calculated as gwy_line_mean(line)*line->real, is unity.
