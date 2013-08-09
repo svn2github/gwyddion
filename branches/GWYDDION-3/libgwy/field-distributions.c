@@ -904,7 +904,7 @@ set_cf_units(const GwyField *field,
  *           to the number of terms that contributed to each value.  They are
  *           suitable as fitting weight if the ACF is fitted.
  *
- * Calculates the row-wise autocorrelation function of a field.
+ * Calculates the row-wise autocorrelation function (ACF) of a field.
  *
  * The calculated ACF has the natural number of points, i.e. @width.
  *
@@ -1111,7 +1111,7 @@ grain_row_acf(const GwyField *field,
  *           to the number of terms that contributed to each value.  They are
  *           suitable as fitting weight if the ACF is fitted.
  *
- * Calculates the row-wise autocorrelation function of a field.
+ * Calculates the row-wise autocorrelation function (ACF) of a field.
  *
  * The calculated ACF has the natural number of points, i.e. the width of
  * the widest grain analysed.
@@ -1228,8 +1228,8 @@ gwy_field_grain_row_acf(const GwyField *field,
  *         (subtract the mean value of each row) are available at present.  For
  *         SPM data, you usually wish to pass 1.
  *
- * Calculates the row-wise power spectrum density function of a rectangular
- * part of a field.
+ * Calculates the row-wise power spectrum density function (PSDF) of a
+ * rectangular part of a field.
  *
  * The calculated PSDF has the natural number of points that follows from DFT,
  * i.e. @width/2+1.
@@ -1372,8 +1372,8 @@ fail:
  *           to the number of terms that contributed to each value.  They are
  *           suitable as fitting weight if the ACF is fitted.
  *
- * Calculates the row-wise height-height correlation function of a rectangular
- * part of a field.
+ * Calculates the row-wise height-height correlation function (HHCF) of a
+ * rectangular part of a field.
  *
  * The calculated HHCF has the natural number of points, i.e. @width.
  *
@@ -1538,6 +1538,80 @@ add_to_dist(GwyLine *dist, gdouble z)
         dist->data[0] += 1.0;
     else if (x <= dist->res-1)
         dist->data[(guint)ceil(x)] += 1.0;
+}
+
+/* Recalculate area excess based on second-order expansion to the true one,
+ * assuming the distribution is exponential. */
+static inline gdouble
+asg_correction(gdouble ex)
+{
+    if (ex < 1e-3)
+        return ex*(1.0 - ex*(1.0 - 3.0*ex*(1.0 - 5.0*ex*(1.0 - 7.0*ex*(1.0 - 9.0*ex*(1.0 - 11.0*ex))))));
+
+    return sqrt(0.5*G_PI*ex) * exp(0.5/ex) * erfc(sqrt(0.5/ex));
+}
+
+/**
+ * gwy_field_row_asg:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *         There is no difference for ASG.
+ *
+ * Calculates the row-wise area scale graph (ASG) of a rectangular part of a
+ * field.
+ *
+ * The calculated ASG has the natural number of points, i.e. @width-1.
+ *
+ * The ASG represents the apparent area excess (ratio of surface and projected
+ * area minus one) observed at given length scale.  The quantity calculated by
+ * this function serves a similar purpose as ASME B46.1 area scale graph but
+ * is defined differently, based on the HHCF.  See gwy_field_row_hhcf()
+ * for details of its calculation.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the ASG.
+ **/
+GwyLine*
+gwy_field_row_asg(const GwyField *field,
+                  const GwyFieldPart *fpart,
+                  const GwyMaskField *mask,
+                  GwyMaskingType masking,
+                  guint level)
+{
+    GwyLine *hhcf = gwy_field_row_hhcf(field, fpart, mask, masking, level,
+                                       NULL);
+    GwyLine *line = NULL;
+
+    if (hhcf->res < 2)
+        goto fail;
+
+    line = gwy_line_new_sized(hhcf->res - 1, FALSE);
+    gdouble dx = gwy_line_dx(hhcf);
+    gwy_line_set_real(line, dx*line->res);
+    gwy_line_set_offset(line, 0.5*dx);
+
+    for (guint i = 0; i < line->res; i++) {
+        gdouble t = (i + 0.5)*dx + line->off;
+        line->data[i] = asg_correction(hhcf->data[i+1]/(t*t));
+    }
+
+fail:
+    g_object_unref(hhcf);
+
+    if (!line)
+        line = gwy_line_new();
+
+    if (field->priv->xunit)
+        gwy_unit_assign(gwy_line_get_xunit(line), field->priv->xunit);
+
+    return line;
 }
 
 static GwyLine*

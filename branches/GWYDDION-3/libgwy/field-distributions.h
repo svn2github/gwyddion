@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -72,6 +72,11 @@ GwyLine* gwy_field_row_hhcf     (const GwyField *field,
                                  GwyMaskingType masking,
                                  guint level,
                                  GwyLine *weights)                G_GNUC_MALLOC;
+GwyLine* gwy_field_row_asg      (const GwyField *field,
+                                 const GwyFieldPart *fpart,
+                                 const GwyMaskField *mask,
+                                 GwyMaskingType masking,
+                                 guint level)                     G_GNUC_MALLOC;
 GwyLine* gwy_field_minkowski    (const GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
