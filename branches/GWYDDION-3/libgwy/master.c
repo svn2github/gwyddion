@@ -99,8 +99,6 @@ static void
 gwy_master_init(GwyMaster *master)
 {
     master->priv = G_TYPE_INSTANCE_GET_PRIVATE(master, GWY_TYPE_MASTER, Master);
-    Master *priv = master->priv;
-    priv->queue = g_async_queue_new();
 }
 
 static void
@@ -112,7 +110,10 @@ gwy_master_finalize(GObject *object)
     g_assert(!priv->active_tasks);
 
     retire_workers(master);
-    g_async_queue_unref(priv->queue);
+    if (priv->queue) {
+        g_async_queue_unref(priv->queue);
+        priv->queue = NULL;
+    }
 
     G_OBJECT_CLASS(gwy_master_parent_class)->finalize(object);
 }
@@ -273,6 +274,7 @@ gwy_master_create_workers(GwyMaster *master,
     if (nworkers < 1)
         nworkers = gwy_n_cpus();
 
+    priv->queue = g_async_queue_new();
     priv->workers = g_new0(WorkerData, nworkers);
     for (guint i = 0; i < nworkers; i++) {
         WorkerData *workerdata = priv->workers + i;
@@ -358,6 +360,7 @@ gwy_master_manage_tasks(GwyMaster *master,
 
     Master *priv = master->priv;
     g_return_val_if_fail(priv->workers, FALSE);
+    g_return_val_if_fail(priv->queue, FALSE);
 
     if (cancellable && g_cancellable_is_cancelled(cancellable))
         return FALSE;
