@@ -660,14 +660,14 @@ row_accum_cnorm(gdouble *accum,
 }
 
 static void
-row_assign_cnorm(gdouble *reout,
-                 const gwycomplex *fftc,
-                 gsize size,
-                 gdouble q)
+row2_assign_cnorm(gdouble *out,
+                  gdouble *out2,
+                  const gwycomplex *fftc,
+                  gsize size,
+                  gdouble q)
 {
     q /= size;
 
-    gdouble *out = reout, *out2 = reout + (size-1);
     gdouble re = creal(*fftc), im = cimag(*fftc), v = q*(re*re + im*im);
     *out = v;
     out++, fftc++;
@@ -2382,8 +2382,10 @@ fail:
  *
  * Calculated two-dimensional autocorrelation function (ACF) of a field.
  *
- * The returned field will have dimensions (2@xrange + 1)(2@yrange + 1), with
- * the zero-shift autocorrelation function centered.
+ * The returned field will have dimensions (2@xrange + 1)×(2@yrange + 1), with
+ * the zero-shift autocorrelation function in the centre.  Since the
+ * two-dimensional ACF has C₂ symmetry half of the output is redundant but it
+ * is included for convenience.
  *
  * Returns: (transfer full):
  *          A new two-dimensional data field with the requested functional.
@@ -2447,10 +2449,12 @@ gwy_field_acf(const GwyField *field,
 
     fftw_execute(plan);
 
-    for (guint i = 0; i < ysize; i++) {
+    row2_assign_cnorm(fftr, fftr + xsize-1, fftc, xsize, 1.0/ysize);
+    for (guint i = 1; i < ysize; i++) {
         const gwycomplex *crow = fftc + i*cxsize;
-        gdouble *rrow = fftr + i*xsize;
-        row_assign_cnorm(rrow, crow, xsize, 1.0/ysize);
+        gdouble *rrow = fftr + i*xsize,
+                *rrow2 = fftr + (ysize - i)*xsize + xsize-1;
+        row2_assign_cnorm(rrow, rrow2, crow, xsize, 1.0/ysize);
     }
 
     fftw_execute(plan);
@@ -2470,7 +2474,7 @@ gwy_field_acf(const GwyField *field,
         }
     }
     for (guint i = 1; i <= yrange; i++) {
-        const gwycomplex *crow = fftc + (ysize - i)*cxsize;
+        const gwycomplex *crow = fftc + (ysize - i)*cxsize + 1;
         gdouble *frow = cf->data + (yrange - i)*txres + (xrange+1);
         gdouble *brow = cf->data + (yrange + i)*txres + (xrange-1);
         for (guint j = 1; j <= xrange; j++, crow++, frow++, brow--) {
