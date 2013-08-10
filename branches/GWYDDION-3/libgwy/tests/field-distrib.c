@@ -87,7 +87,7 @@ fit_gaussian_psdf(const GwyLine *psdf,
 }
 
 void
-test_field_distributions_psdf_full(void)
+test_field_distributions_row_psdf_full(void)
 {
     enum { size = 400 };
     gdouble dx = 50e-9;
@@ -121,7 +121,7 @@ test_field_distributions_psdf_full(void)
 }
 
 void
-test_field_distributions_psdf_masked(void)
+test_field_distributions_row_psdf_masked(void)
 {
     enum { size = 400 };
     gdouble dx = 50e-9;
@@ -603,7 +603,7 @@ cf_dumb(const GwyField *field,
 }
 
 void
-test_field_distributions_acf_full(void)
+test_field_distributions_row_acf_full(void)
 {
     enum { max_size = 134 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -660,7 +660,7 @@ test_field_distributions_acf_full(void)
 }
 
 void
-test_field_distributions_acf_masked(void)
+test_field_distributions_row_acf_masked(void)
 {
     enum { max_size = 134 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -726,7 +726,7 @@ test_field_distributions_acf_masked(void)
 }
 
 void
-test_field_distributions_acf_partial(void)
+test_field_distributions_row_acf_partial(void)
 {
     enum { max_size = 134 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -817,7 +817,7 @@ extract_grain_with_data(const GwyMaskField *mask,
 }
 
 void
-test_field_distributions_acf_grain(void)
+test_field_distributions_row_acf_grain(void)
 {
     enum { max_size = 40, niter = 15 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -865,7 +865,7 @@ test_field_distributions_acf_grain(void)
 }
 
 void
-test_field_distributions_hhcf_full(void)
+test_field_distributions_row_hhcf_full(void)
 {
     enum { max_size = 134 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -922,7 +922,7 @@ test_field_distributions_hhcf_full(void)
 }
 
 void
-test_field_distributions_hhcf_masked(void)
+test_field_distributions_row_hhcf_masked(void)
 {
     enum { max_size = 134 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -988,7 +988,7 @@ test_field_distributions_hhcf_masked(void)
 }
 
 void
-test_field_distributions_hhcf_partial(void)
+test_field_distributions_row_hhcf_partial(void)
 {
     enum { max_size = 134 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1059,7 +1059,7 @@ test_field_distributions_hhcf_partial(void)
 }
 
 void
-test_field_distributions_asg_full(void)
+test_field_distributions_row_asg_full(void)
 {
     enum { size = 134 };
     GRand *rng = g_rand_new_with_seed(43);
