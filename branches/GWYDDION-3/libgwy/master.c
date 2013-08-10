@@ -520,7 +520,8 @@ gwy_master_destroy_data(GwyMaster *master,
  * This is the function which implements %GWY_MASTER_TRY_AGAIN task.  In case
  * you really must know, it returns its own address.
  *
- * Returns: A pointer distinct from user data.
+ * Returns: (transfer none):
+ *          A pointer distinct from user data.
  **/
 gpointer
 gwy_master_try_again_task(void)
