@@ -1062,7 +1062,7 @@ void
 test_field_distributions_row_asg_full(void)
 {
     enum { size = 134 };
-    GRand *rng = g_rand_new_with_seed(43);
+    GRand *rng = g_rand_new_with_seed(42);
 
     gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
@@ -1503,6 +1503,83 @@ next:
         g_object_unref(mask);
         g_object_unref(field);
     }
+    g_rand_free(rng);
+}
+
+static gdouble
+dumb_acf_2d(const GwyField *field, gint tx, gint ty)
+{
+    guint xres = field->xres, yres = field->yres;
+    const gdouble *data = field->data;
+    if (ty < 0) {
+        tx = -tx;
+        ty = -ty;
+    }
+    gboolean neg = tx < 0;
+    tx = ABS(tx);
+
+    gdouble g = 0.0;
+    for (guint i = 0; i < yres - ty; i++) {
+        if (neg) {
+            for (guint j = 0; j < xres - tx; j++)
+                g += data[i*xres + j + tx] * data[(i + ty)*xres + j];
+        }
+        else {
+            for (guint j = 0; j < xres - tx; j++)
+                g += data[i*xres + j] * data[(i + ty)*xres + j + tx];
+        }
+    }
+    return g/(xres - tx)/(yres - ty);
+}
+
+void
+test_field_distributions_acf_full(void)
+{
+    enum { max_size = 74, niter = 20, nvalue = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            guint xrange = g_rand_int_range(rng, 0, xres);
+            guint yrange = g_rand_int_range(rng, 0, yres);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+            field_randomize(field, rng);
+
+            GwyField *acf = gwy_field_acf(field, NULL, xrange, yrange, lvl);
+            GwyField *acf_full = gwy_field_acf(field, NULL, xres-1, yres-1, lvl);
+
+            if (lvl == 1)
+                gwy_field_add_full(field, -gwy_field_mean_full(field));
+
+            gint xr = xrange, yr = yrange;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = acf->data[(yr + i)*acf->xres + xr + j];
+                gdouble vref = dumb_acf_2d(field, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            xr = xres-1;
+            yr = yres-1;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = acf_full->data[(yr + i)*acf_full->xres + xr + j];
+                gdouble vref = dumb_acf_2d(field, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            g_object_unref(acf_full);
+            g_object_unref(acf);
+            g_object_unref(field);
+        }
+    }
+
     g_rand_free(rng);
 }
 
