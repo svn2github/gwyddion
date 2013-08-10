@@ -31,8 +31,9 @@
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
-#include "libgwy/field-internal.h"
+#include "libgwy/curve-internal.h"
 #include "libgwy/mask-field-internal.h"
+#include "libgwy/field-internal.h"
 
 typedef struct {
     guint n;              // Number of quarter-pixels considered.
@@ -2496,6 +2497,166 @@ gwy_field_acf(const GwyField *field,
     gwy_unit_power(gwy_field_get_zunit(cf), field->priv->zunit, 2);
 
     return cf;
+}
+
+static void
+gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
+                    gdouble real, gdouble off,
+                    gdouble x, gdouble y, gdouble z)
+{
+    gdouble l = (hypot(x, y) - off)/real*npoints;
+    gint il = floor(l);
+    il = CLAMP(il, 0, npoints-1);
+    gdouble w1 = fabs(l - il - 0.5), w0 = 1.0 - w1;
+    sums[il] += w0*z;
+    weights[il] += w0;
+    if (l > il + 0.5) {
+        if (G_LIKELY(il < npoints-1))
+            il++;
+    }
+    else {
+        if (G_LIKELY(il))
+            il--;
+    }
+    sums[il] += w1*z;
+    weights[il] = w1;
+}
+
+/**
+ * gwy_field_angular_average:
+ * @field: A two-dimensional data field.
+ *         Its @x and @y physical dimensions should have the same units.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @npoints: Resolution, i.e. the preferred number of returned curve points.
+ *           Pass zero to choose a suitable resolution automatically.
+ *
+ * Averages angularly data in a two-dimensional data field.
+ *
+ * Angular averaging results in one-dimensional data in which the abscissa is
+ * the distance from origin.  The averaging is carried out around the origin in
+ * physical coordinates.  Field functions calculating the Fourier transform,
+ * autocorrelation function and similar quantities usually arrange the data and
+ * set offsets so that this method can be used directly on their output.
+ *
+ * It is <emphasis>not</emphasis> guaranteed that the returned curve will have
+ * exactly @npoints points.  In fact, if the combination of field part
+ * selection and masking leaves no actual data to average, the returned curve
+ * will be empty regardless of @npoints.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional curve with angularly averaged field data.
+ **/
+GwyCurve*
+gwy_field_angular_average(const GwyField *field,
+                          const GwyFieldPart *fpart,
+                          const GwyMaskField *mask,
+                          GwyMaskingType masking,
+                          guint npoints)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    GwyCurve *curve = NULL;
+
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        goto fail;
+
+    if (!gwy_unit_equal(field->priv->xunit, field->priv->yunit))
+        g_warning("Angular averaging requires same lateral units.");
+
+    // Figure out suitable uniform sampling.  Since we return a curve a
+    // non-uniform sampling might be advantageous but I have no idea how to
+    // find a suitable one in the presence of a mask.
+    gdouble xreal = field->xreal, yreal = field->yreal,
+            xoff = field->xoff, yoff = field->yoff,
+            dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble Lul = hypot(xoff + 0.5*dx, yoff + 0.5*dx),
+            Lur = hypot(xoff + xreal - 0.5*dx, yoff + 0.5*dx),
+            Lll = hypot(xoff + 0.5*dx, yoff + yreal - 0.5*dx),
+            Llr = hypot(xoff + xreal - 0.5*dx, yoff + yreal - 0.5*dx);
+    gdouble Lmin = 0.0, Lmax = fmax(fmax(Lul, Lur), fmax(Lll, Llr));
+    // The minimum depends on whether the origin is within the field.
+    if (xoff*(xoff + xreal) > 0.0 || yoff*(yoff + yreal) > 0.0)
+        Lmin = fmin(fmin(Lul, Lur), fmin(Lll, Llr));
+
+    // Handle the silly case separately.
+    if (npoints == 1) {
+        gdouble mean = gwy_field_mean(field, fpart, mask, masking);
+        if (isfinite(mean)) {
+            curve = gwy_curve_new_sized(npoints);
+            curve->data[0] = (GwyXY){ 0.5*(Lmin + Lmax), mean };
+        }
+        goto fail;
+    }
+
+    if (!npoints) {
+        // This makes 1st item typically missing but it distinguishes nicely
+        // radii 1, √2 and 2 in the 2nd, 3rd and 4th item.
+        gdouble edl = 0.24*(gwy_field_dx(field) + gwy_field_dy(field));
+        npoints = gwy_round((Lmax - Lmin)/edl + 1.0);
+    }
+    gdouble dl = (Lmax - Lmin)/(npoints - 1);
+
+    guint xres = field->xres;
+    gdouble *sums = g_new0(gdouble, npoints);
+    gdouble *weights = g_new0(gdouble, npoints);
+    gdouble off = Lmin - 0.5*dl;
+    gdouble real = Lmax - Lmin + dl;
+
+    const gdouble *base = field->data + row*xres + col;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*xres;
+            gdouble y = (i + 0.5)*dy + yoff;
+            for (guint j = width; j; j--, d++) {
+                gdouble x = (j + 0.5)*dx + xoff;
+                gather_interpolated(sums, weights, npoints, real, off,
+                                    x, y, *d);
+            }
+        }
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            gdouble y = (i + 0.5)*dy + yoff;
+            const gdouble *d = base + i*xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    gdouble x = (j + 0.5)*dx + xoff;
+                    gather_interpolated(sums, weights, npoints, real, off,
+                                        x, y, *d);
+                }
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+
+    guint ngood = 0;
+    for (guint i = 0; i < npoints; i++)
+        ngood += (weights[i] > 1e-9);
+
+    curve = gwy_curve_new_sized(ngood);
+    for (guint i = 0, j = 0; i < npoints; i++) {
+        if (weights[i] > 1e-9) {
+            curve->data[j++] = (GwyXY){
+                (i + 0.5)*dl + off, sums[i]/weights[i],
+            };
+        }
+    }
+
+fail:
+    if (!curve)
+        curve = gwy_curve_new();
+
+    _gwy_assign_unit(&curve->priv->xunit, field->priv->xunit);
+    _gwy_assign_unit(&curve->priv->yunit, field->priv->zunit);
+
+    return curve;
 }
 
 /**
