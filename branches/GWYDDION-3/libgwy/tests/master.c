@@ -32,6 +32,8 @@
  *
  ***************************************************************************/
 
+#define DUMB_MASTER_FLAG 0x800000f
+
 typedef struct {
     guint64 from;
     guint64 to;
@@ -107,10 +109,16 @@ master_sum_numbers_one(guint nproc)
     GError *error = NULL;
     enum { niter = 200 };
     GRand *rng = g_rand_new_with_seed(42);
+    gboolean dumb = FALSE;
+
+    if (nproc & DUMB_MASTER_FLAG) {
+        nproc &= ~DUMB_MASTER_FLAG;
+        dumb = TRUE;
+    }
 
     //g_test_timer_start();
     for (guint iter = 0; iter < niter; iter++) {
-        GwyMaster *master = gwy_master_new();
+        GwyMaster *master = dumb ? gwy_master_new_dumb() : gwy_master_new();
         guint64 size = g_rand_int_range(rng, 1000, 1000000);
         guint64 chunk_size = g_rand_int_range(rng, 1, size+1);
 
@@ -177,6 +185,24 @@ void
 test_master_sum_auto(void)
 {
     master_sum_numbers_one(0);
+}
+
+void
+test_master_sum_dumb_1(void)
+{
+    master_sum_numbers_one(1 | DUMB_MASTER_FLAG);
+}
+
+void
+test_master_sum_dumb_2(void)
+{
+    master_sum_numbers_one(2 | DUMB_MASTER_FLAG);
+}
+
+void
+test_master_sum_dumb_auto(void)
+{
+    master_sum_numbers_one(0 | DUMB_MASTER_FLAG);
 }
 
 static void
@@ -293,13 +319,20 @@ master_cancel_one(guint nproc)
     else
         timeout = G_GUINT64_CONSTANT(10000000);
 
+    gboolean dumb = FALSE;
+
+    if (nproc & DUMB_MASTER_FLAG) {
+        nproc &= ~DUMB_MASTER_FLAG;
+        dumb = TRUE;
+    }
+
     if (g_test_trap_fork(timeout, 0)) {
         GError *error = NULL;
         enum { niter = 200 };
         GRand *rng = g_rand_new_with_seed(42);
 
         for (guint iter = 0; iter < niter; iter++) {
-            GwyMaster *master = gwy_master_new();
+            GwyMaster *master = dumb ? gwy_master_new_dumb() : gwy_master_new();
             guint delay = g_rand_int_range(rng, 0, 10000);
 
             gboolean ok = gwy_master_create_workers(master, nproc, &error);
@@ -383,6 +416,24 @@ void
 test_master_cancel_auto(void)
 {
     master_cancel_one(0);
+}
+
+void
+test_master_cancel_dumb_1(void)
+{
+    master_cancel_one(1 | DUMB_MASTER_FLAG);
+}
+
+void
+test_master_cancel_dumb_2(void)
+{
+    master_cancel_one(2 | DUMB_MASTER_FLAG);
+}
+
+void
+test_master_cancel_dumb_auto(void)
+{
+    master_cancel_one(0 | DUMB_MASTER_FLAG);
 }
 
 typedef struct {

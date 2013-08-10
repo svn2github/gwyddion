@@ -17,12 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: If create-data and destroy-data are implemented as messages (i.e.
-// the former is separated from the thread creation and the latter from RETIRE)
-// then we can perform complete teardown/setup cycle without terminating and
-// re-creating the threads.  Consequently, one Master could be recycled for
-// everything.
-
 #include "config.h"
 #include <string.h>
 #include "libgwy/macros.h"
@@ -71,6 +65,9 @@ struct _GwyMasterPrivate {
     gboolean cancelled;
     gboolean exhausted;
 
+    gboolean dumb;
+    gpointer dumb_worker_data;
+
     guint nworkers;
     WorkerData *workers;
 
@@ -79,9 +76,15 @@ struct _GwyMasterPrivate {
 
 typedef struct _GwyMasterPrivate Master;
 
-static void     gwy_master_finalize   (GObject *object);
-static void     retire_workers        (GwyMaster *master);
-static gpointer worker_thread_main    (gpointer thread_data);
+static void     gwy_master_finalize          (GObject *object);
+static void     retire_workers               (GwyMaster *master);
+static gpointer worker_thread_main           (gpointer thread_data);
+static gboolean dumb_master_do_tasks_yourself(GwyMaster *master,
+                                              GwyMasterWorkerFunc work,
+                                              GwyMasterTaskFunc provide_task,
+                                              GwyMasterResultFunc consume_result,
+                                              gpointer user_data,
+                                              GCancellable *cancellable);
 
 G_DEFINE_TYPE(GwyMaster, gwy_master, G_TYPE_OBJECT);
 
@@ -164,6 +167,10 @@ static void
 retire_workers(GwyMaster *master)
 {
     Master *priv = master->priv;
+    if (priv->dumb) {
+        priv->nworkers = 0;
+        return;
+    }
     notify_all_workers(master, MSG_RETIRE, NULL);
     for (guint i = 0; i < priv->nworkers; i++) {
         g_async_queue_unref(priv->workers[i].queue);
@@ -239,6 +246,34 @@ gwy_master_new(void)
 }
 
 /**
+ * gwy_master_new_dumb:
+ *
+ * Creates a new dumb parallel task manager.
+ *
+ * The dumb task manager does all the work serially in the main thread.  It
+ * is useful for testing and in cases the same code may be run both
+ * parallelised and serially, with no threading involved at all.
+ *
+ * All normal methods can be used and the work can be cancelled from other
+ * threads if a cancellable is passed to gwy_master_manage_tasks().  It is also
+ * permissible to pass a dumb manager to gwy_master_create_workers() although
+ * nothing will happen (successfully).
+ *
+ * However, since tasks are carried out serially the task provider must not
+ * return %GWY_MASTER_TRY_AGAIN because there is never any other parallel task
+ * to wait for.
+ *
+ * Returns: A new dumb parallel task manager.
+ **/
+GwyMaster*
+gwy_master_new_dumb(void)
+{
+    GwyMaster *master = g_object_newv(GWY_TYPE_MASTER, 0, NULL);
+    master->priv->dumb = TRUE;
+    return master;
+}
+
+/**
  * gwy_master_create_workers:
  * @master: Parallel task manager.
  * @nworkers: Number of worker threads to create.  Passing zero means leaving
@@ -268,6 +303,11 @@ gwy_master_create_workers(GwyMaster *master,
     Master *priv = master->priv;
     if (priv->workers) {
         g_warning("Master already has workers.");
+        return TRUE;
+    }
+
+    if (priv->dumb) {
+        priv->nworkers = 1;
         return TRUE;
     }
 
@@ -359,11 +399,18 @@ gwy_master_manage_tasks(GwyMaster *master,
     g_return_val_if_fail(work, FALSE);
 
     Master *priv = master->priv;
-    g_return_val_if_fail(priv->workers, FALSE);
-    g_return_val_if_fail(priv->queue, FALSE);
+    g_return_val_if_fail(priv->nworkers, FALSE);
 
     if (cancellable && g_cancellable_is_cancelled(cancellable))
         return FALSE;
+
+    if (priv->dumb)
+        return dumb_master_do_tasks_yourself(master, work,
+                                             provide_task, consume_result,
+                                             user_data, cancellable);
+
+    g_assert(priv->workers);
+    g_assert(priv->queue);
 
     GAsyncQueue *queue = priv->queue;
     nworkers = MIN(nworkers ? nworkers : G_MAXUINT, priv->nworkers);
@@ -473,6 +520,9 @@ gwy_master_create_data(GwyMaster *master,
     else if (G_UNLIKELY(!priv->nworkers)) {
         g_critical("No worker threads are available.");
     }
+    else if (priv->dumb) {
+        priv->dumb_worker_data = create_data ? create_data(user_data) : NULL;
+    }
     else {
         CreateDataFuncInfo info = { create_data, user_data };
         notify_all_workers(master, MSG_CREATE, &info);
@@ -509,6 +559,10 @@ gwy_master_destroy_data(GwyMaster *master,
     else if (G_UNLIKELY(!priv->nworkers)) {
         g_critical("No worker threads are available.");
     }
+    else if (priv->dumb) {
+        if (destroy_data)
+            destroy_data(priv->dumb_worker_data);
+    }
     else {
         notify_all_workers(master, MSG_DESTROY, destroy_data);
     }
@@ -530,6 +584,42 @@ gpointer
 gwy_master_try_again_task(void)
 {
     return &gwy_master_try_again_task;
+}
+
+static gboolean
+dumb_master_do_tasks_yourself(GwyMaster *master,
+                              GwyMasterWorkerFunc work,
+                              GwyMasterTaskFunc provide_task,
+                              GwyMasterResultFunc consume_result,
+                              gpointer user_data,
+                              GCancellable *cancellable)
+{
+    Master *priv = master->priv;
+    g_assert(priv->dumb);
+
+    priv->active_tasks = 1;
+    priv->exhausted = priv->cancelled = FALSE;
+    gboolean aborted = FALSE;
+    gpointer task;
+    while ((task = provide_task(user_data))) {
+        if (task == GWY_MASTER_TRY_AGAIN) {
+            g_critical("Try-again task obtained when there are no "
+                       "active tasks.  Aborting.");
+            aborted = TRUE;
+            break;
+        }
+        gpointer result = work(task, priv->dumb_worker_data);
+        if (consume_result)
+            consume_result(result, user_data);
+        if (cancellable && g_cancellable_is_cancelled(cancellable)) {
+            priv->cancelled = TRUE;
+            break;
+        }
+    }
+    priv->exhausted = TRUE;
+    priv->active_tasks = 0;
+
+    return !aborted && !priv->cancelled;
 }
 
 /**
@@ -647,6 +737,12 @@ gwy_master_try_again_task(void)
  *
  * Special task pointer meaning that more tasks will be available when some
  * of the current tasks finish.
+ *
+ * This mechanism allows the implementation of synchronisation points or
+ * inter-task blocking.  However, the only thing tasks can wait for is the
+ * finishin of other tasks.  It is not permitted to return
+ * %GWY_MASTER_TRY_AGAIN from the task provider when there is not any
+ * unfinished work.
  *
  * See #GwyMasterTaskFunc.
  **/

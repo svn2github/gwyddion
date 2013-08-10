@@ -63,6 +63,7 @@ struct _GwyMasterClass {
 
 GType      gwy_master_get_type      (void)                                   G_GNUC_CONST;
 GwyMaster* gwy_master_new           (void)                                   G_GNUC_MALLOC;
+GwyMaster* gwy_master_new_dumb(void) G_GNUC_MALLOC;
 gboolean   gwy_master_create_workers(GwyMaster *master,
                                      guint nworkers,
                                      GError **error);

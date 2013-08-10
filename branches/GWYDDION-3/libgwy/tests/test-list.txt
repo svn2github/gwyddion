@@ -112,6 +112,9 @@ master/sum/nworkers/3-1
 master/sum/nworkers/auto-1
 master/sum/nworkers/1-auto
 master/sum/nworkers/2-auto
+master/sum/dumb/1
+master/sum/dumb/2
+master/sum/dumb/auto
 master/data
 master/try-again/1
 master/try-again/2
@@ -127,6 +130,9 @@ master/cancel/4
 master/cancel/8
 master/cancel/16
 master/cancel/auto
+master/cancel/dumb/1
+master/cancel/dumb/2
+master/cancel/dumb/auto
 xy/boxed
 xyz/boxed
 range/boxed
