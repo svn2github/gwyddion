@@ -348,12 +348,14 @@ gwy_master_create_workers(GwyMaster *master,
  * @nworkers: Maximum number of parallel tasks to run.  The actual number will
  *            never be larger than the number of worker threads created by
  *            gwy_master_create_workers().  Pass zero for no specific limit.
- * @work: Worker function called, usually repeatedly, in worker threads
+ * @work: (scope call):
+ *        Worker function called, usually repeatedly, in worker threads
  *        to perform individual chunks of the work.
- * @provide_task: Function providing individual tasks.
- * @consume_result: (allow-none):
+ * @provide_task: (scope call):
+ *                Function providing individual tasks.
+ * @consume_result: (allow-none) (scope call):
  *                  Function consuming task results.
- * @user_data: (scope call):
+ * @user_data: (allow-none):
  *             User data passed to function @provide_task and @consume_result.
  * @cancellable: (allow-none):
  *               A #GCancellable for the calculation.
@@ -494,7 +496,7 @@ gwy_master_manage_tasks(GwyMaster *master,
 /**
  * gwy_master_create_data:
  * @master: Parallel task manager.
- * @create_data: (allow-none):
+ * @create_data: (allow-none) (scope call):
  *               Function to create worker data.  Passing %NULL is the same as
  *               passing a function that returns %NULL.
  * @user_data: User data passed to function @createdata.
@@ -532,7 +534,7 @@ gwy_master_create_data(GwyMaster *master,
 /**
  * gwy_master_destroy_data:
  * @master: Parallel task manager.
- * @destroy_data: (allow-none):
+ * @destroy_data: (allow-none) (scope call):
  *                Function to destroy worker data.  Passing %NULL is possible
  *                and it means no destruction will be performed; this is
  *                meaningful only when unsetting a previously set destruction
