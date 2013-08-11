@@ -2373,6 +2373,54 @@ fail:
     return line;
 }
 
+static void
+hhcf_running_sums(GwyField *rsum,
+                  const gdouble *data, guint stride, guint width, guint height,
+                  gdouble *buf)
+{
+    guint xres = rsum->xres, yres = rsum->yres;
+    guint xrange = xres/2, yrange = yres/2;
+    gdouble *rsdata = rsum->data;
+    g_assert(xres == 2*xrange+1);
+    g_assert(yres == 2*yrange+1);
+
+    // Same-sign HHCF arguments, sums growing along the major diagonal.
+    gwy_clear(buf, width);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *row1 = data + i*stride;
+        const gdouble *row2 = data + (height-1 - i)*stride + width-1;
+        gdouble s = 0.0;
+        for (guint j = 0; j < width; j++, row1++, row2--) {
+            gdouble z1 = *row1, z2 = *row2;
+            buf[j] += z1*z1 + z2*z2;
+            s += buf[j];
+            guint ii = height-1 - i, jj = width-1 - j;
+            if (ii <= yrange && jj <= xrange) {
+                rsdata[(yrange + ii)*xres + xrange + jj] = s;
+                rsdata[(yrange - ii)*xres + xrange - jj] = s;
+            }
+        }
+    }
+
+    // Opposite-sign HHCF arguments, sums growing along the minor diagonal.
+    gwy_clear(buf, width);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *row1 = data + (height-1 - i)*stride;
+        const gdouble *row2 = data + i*stride + width-1;
+        gdouble s = 0.0;
+        for (guint j = 0; j < width; j++, row1++, row2--) {
+            gdouble z1 = *row1, z2 = *row2;
+            buf[j] += z1*z1 + z2*z2;
+            s += buf[j];
+            guint ii = height-1 - i, jj = width-1 - j;
+            if (ii <= yrange && jj <= xrange) {
+                rsdata[(yrange + ii)*xres + xrange - jj] = s;
+                rsdata[(yrange - ii)*xres + xrange + jj] = s;
+            }
+        }
+    }
+}
+
 static GwyField*
 gwy_field_cf(const GwyField *field,
              const GwyFieldPart *fpart,
@@ -2429,14 +2477,24 @@ gwy_field_cf(const GwyField *field,
             gwy_clear(rrow + width, xsize - width);
         }
     }
-    gwy_clear(fftr + xsize*height, xsize*(ysize - height));
 
     GwyField *cf = gwy_field_new_sized(2*xrange + 1, 2*yrange + 1, TRUE);
     guint txres = cf->xres, tyres = cf->yres;
 
     if (type == CF_HHCF) {
-        // TODO: Initialise cf with running sums.
+        if (yrange)
+            hhcf_running_sums(cf, fftr, xsize, width, height,
+                              fftr + xsize*height);
+        else {
+            // If yrange=0 we cannot use the lower (to be zeroed) part of fftr
+            // as a temporary scratch space because there is no lower part.
+            gdouble *workspace = g_new(gdouble, width);
+            hhcf_running_sums(cf, fftr, xsize, width, height, workspace);
+            g_free(workspace);
+        }
     }
+
+    gwy_clear(fftr + xsize*height, xsize*(ysize - height));
 
     fftw_execute(plan);
 
@@ -2553,7 +2611,7 @@ gwy_field_acf(const GwyField *field,
  * field.
  *
  * The returned field will have dimensions (2@xrange + 1)×(2@yrange + 1), with
- * the zero-shift autocorrelation function in the centre.  Since the
+ * the zero-shift height-height correlation function in the centre.  Since the
  * two-dimensional HHCF has C₂ symmetry half of the output is redundant but it
  * is included for convenience.
  *
