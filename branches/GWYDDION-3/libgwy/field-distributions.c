@@ -2636,6 +2636,72 @@ gwy_field_hhcf(const GwyField *field,
     return gwy_field_cf(field, fpart, xrange, yrange, level, CF_HHCF);
 }
 
+/**
+ * gwy_field_asg:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @xrange: Maximum horizontal shift (in pixels) to include in the result.
+ *          It must not be larger than the field part width.
+ * @yrange: Maximum vertical shift (in pixels) to include in the result.
+ *          It must not be larger than the field part height.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *
+ * Calculated two-dimensional area scale graph (ASG) of a field.
+ *
+ * The returned field will have dimensions (2@xrange + 1)×(2@yrange + 1), with
+ * the zero-shift height-height correlation function in the centre.  Since the
+ * two-dimensional ASG has C₂ symmetry half of the output is redundant but it
+ * is included for convenience.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional data field with the requested functional.
+ **/
+GwyField*
+gwy_field_asg(const GwyField *field,
+              const GwyFieldPart *fpart,
+              guint xrange, guint yrange,
+              guint level)
+{
+    GwyField *asg = gwy_field_cf(field, fpart, xrange, yrange, level, CF_HHCF);
+    guint xres = asg->xres, yres = asg->yres;
+
+    if (xres == 1 && yres == 1)
+        g_warning("ASG with zero ranges is meaningless.");
+
+    // asg_correction() isn't exactly fast so try to cut down the amount of
+    // work to half by utilsing the C₂ symmetry.
+    for (guint i = 0; i < yres/2; i++) {
+        gdouble *d = asg->data + i*xres,
+                *d2 = asg->data + (yres - i)*xres - 1;
+        gdouble y = (i + 0.5)*gwy_field_dy(asg) + asg->yoff;
+        for (guint j = 0; j < xres; j++, d++, d2--) {
+            gdouble x = (j + 0.5)*gwy_field_dx(asg) + asg->xoff;
+            gdouble r2 = x*x + y*y;
+            *d = *d2 = asg_correction(*d/r2);
+        }
+    }
+
+    gdouble *d = asg->data + (yres/2)*xres, *d2 = d + xres-1;
+    for (guint j = 0; j < xres/2; j++) {
+        gdouble x = (j + 0.5)*gwy_field_dx(asg) + asg->xoff;
+        *d = *d2 = asg_correction(*d/(x*x));
+    }
+
+    // The central pixel can be sort-of-interpolated if at least one range
+    // is nonzero.
+    gdouble c = 0.0;
+    if (xres > 1)
+        c = fmax(c, asg->data[(yres/2)*xres + xres/2 + 1]);
+    if (yres > 1)
+        c = fmax(c, asg->data[(yres/2 + 1)*xres + xres/2]);
+    asg->data[(yres/2)*xres + xres/2] = c;
+
+    return asg;
+}
+
 static void
 gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
                     gdouble real, gdouble off,
