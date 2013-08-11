@@ -2521,7 +2521,16 @@ gwy_field_cf(const GwyField *field,
             }
         }
         else if (type == CF_HHCF) {
-            guint from = i ? 0 : 1;  // Don't process the central point twice.
+            guint from = 0;
+            if (!i) {
+                // Don't process the central point twice.
+                gdouble v = creal(*crow);
+                *frow = (*frow - 2.0*v)/height/width;
+                from++;
+                crow++;
+                frow++;
+                brow--;
+            }
             for (guint j = from; j <= xrange; j++, crow++, frow++, brow--) {
                 gdouble v = creal(*crow);
                 *frow = (*frow - 2.0*v)/(height - i)/(width - j);
