@@ -1646,6 +1646,151 @@ test_field_distributions_acf_partial(void)
 }
 
 static gdouble
+dumb_hhcf_2d(const GwyField *field, gint tx, gint ty)
+{
+    guint xres = field->xres, yres = field->yres;
+    const gdouble *data = field->data;
+    if (ty < 0) {
+        tx = -tx;
+        ty = -ty;
+    }
+    gboolean neg = tx < 0;
+    tx = ABS(tx);
+
+    gdouble g = 0.0;
+    for (guint i = 0; i < yres - ty; i++) {
+        if (neg) {
+            for (guint j = 0; j < xres - tx; j++) {
+                gdouble d = data[i*xres + j + tx] - data[(i + ty)*xres + j];
+                g += d*d;
+            }
+        }
+        else {
+            for (guint j = 0; j < xres - tx; j++) {
+                gdouble d = data[i*xres + j] - data[(i + ty)*xres + j + tx];
+                g += d*d;
+            }
+        }
+    }
+    return g/(xres - tx)/(yres - ty);
+}
+
+void
+test_field_distributions_hhcf_full(void)
+{
+    enum { max_size = 74, niter = 20, nvalue = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            guint xrange = g_rand_int_range(rng, 0, xres);
+            guint yrange = g_rand_int_range(rng, 0, yres);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+            field_randomize(field, rng);
+            gwy_field_filter_gaussian(field, NULL, field, 2.0, 2.0,
+                                      GWY_EXTERIOR_PERIODIC, 0.0);
+
+            GwyField *hhcf = gwy_field_hhcf(field, NULL, xrange, yrange,
+                                            lvl);
+            GwyField *hhcf_full = gwy_field_hhcf(field, NULL, xres-1, yres-1,
+                                                 lvl);
+
+            if (lvl == 1)
+                gwy_field_add_full(field, -gwy_field_mean_full(field));
+
+            gint xr = xrange, yr = yrange;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = hhcf->data[(yr + i)*hhcf->xres + xr + j];
+                gdouble vref = dumb_hhcf_2d(field, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            xr = xres-1;
+            yr = yres-1;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = hhcf_full->data[(yr + i)*hhcf_full->xres + xr + j];
+                gdouble vref = dumb_hhcf_2d(field, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            g_object_unref(hhcf_full);
+            g_object_unref(hhcf);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_hhcf_partial(void)
+{
+    enum { max_size = 74, niter = 30, nvalue = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            guint width = g_rand_int_range(rng, 1, xres+1);
+            guint height = g_rand_int_range(rng, 1, yres+1);
+            guint col = g_rand_int_range(rng, 0, xres-width+1);
+            guint row = g_rand_int_range(rng, 0, yres-height+1);
+            guint xrange = g_rand_int_range(rng, 0, width);
+            guint yrange = g_rand_int_range(rng, 0, height);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+            GwyFieldPart fpart = { col, row, width, height };
+
+            field_randomize(field, rng);
+
+            GwyField *hhcf = gwy_field_hhcf(field, &fpart, xrange, yrange,
+                                          lvl);
+            GwyField *hhcf_full = gwy_field_hhcf(field, &fpart, width-1, height-1,
+                                               lvl);
+
+            GwyField *subfield = gwy_field_new_part(field, &fpart, FALSE);
+            if (lvl == 1)
+                gwy_field_add_full(subfield, -gwy_field_mean_full(subfield));
+
+            gint xr = xrange, yr = yrange;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = hhcf->data[(yr + i)*hhcf->xres + xr + j];
+                gdouble vref = dumb_hhcf_2d(subfield, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            xr = width-1;
+            yr = height-1;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = hhcf_full->data[(yr + i)*hhcf_full->xres + xr + j];
+                gdouble vref = dumb_hhcf_2d(subfield, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            g_object_unref(hhcf_full);
+            g_object_unref(hhcf);
+            g_object_unref(subfield);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+static gdouble
 angavg_test_func_1(gdouble x, G_GNUC_UNUSED gpointer user_data)
 {
     return cos(x);

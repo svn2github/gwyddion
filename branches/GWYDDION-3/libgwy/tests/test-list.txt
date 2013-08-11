@@ -461,6 +461,8 @@ field/distributions/row-psdf/full
 field/distributions/row-psdf/masked
 field/distributions/acf/full
 field/distributions/acf/partial
+field/distributions/hhcf/full
+field/distributions/hhcf/partial
 field/distributions/angular-average/full
 field/distributions/angular-average/partial
 field/distributions/angular-average/masked
