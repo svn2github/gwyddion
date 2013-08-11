@@ -1701,6 +1701,7 @@ test_field_distributions_angular_average_full(void)
         GwyCurve *aavgn = gwy_field_angular_average(field, NULL,
                                                     NULL, GWY_MASK_IGNORE,
                                                     npoints);
+
         g_assert_cmpuint(aavg->n, >=, MIN(xres, yres)/2);
         g_assert_cmpuint(aavg->n, <=, 4*(xres + yres));
         for (guint i = 0; i < aavg->n; i++) {
@@ -1788,6 +1789,74 @@ test_field_distributions_angular_average_partial(void)
                                 0.08);
         }
 
+        g_object_unref(aavgn);
+        g_object_unref(aavg);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_angular_average_masked(void)
+{
+    enum { max_size = 74, niter = 100 };
+    static const GwyRealFunc funcs[] = {
+        &angavg_test_func_1, &angavg_test_func_2, &angavg_test_func_3,
+    };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 12, max_size);
+        guint yres = g_rand_int_range(rng, 12, max_size);
+        guint npoints = g_rand_int_range(rng, (xres+yres)/4, xres+yres);
+        gdouble xreal = g_rand_double(rng) + 0.2;
+        gdouble yreal = g_rand_double(rng) + 0.2;
+        gdouble xoff = 2.0*g_rand_double(rng) - 1.5;
+        gdouble yoff = 2.0*g_rand_double(rng) - 1.5;
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        g_object_set(field,
+                     "x-real", xreal, "y-real", yreal,
+                     "x-offset", xoff, "y-offset", yoff,
+                     NULL);
+        guint fid = g_rand_int_range(rng, 0, G_N_ELEMENTS(funcs));
+        GwyRealFunc func = funcs[fid];
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+
+        gwy_field_fill_full(field, NAN);
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = 0; j < xres; j++) {
+                if (gwy_mask_field_get(mask, j, i)) {
+                    gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                    field->data[i*xres + j] = func(hypot(x, y), NULL);
+                }
+            }
+        }
+
+        GwyCurve *aavg = gwy_field_angular_average(field, NULL,
+                                                   mask, GWY_MASK_INCLUDE, 0);
+        GwyCurve *aavgn = gwy_field_angular_average(field, NULL,
+                                                    mask, GWY_MASK_INCLUDE,
+                                                    npoints);
+
+        g_assert_cmpuint(aavg->n, >=, MIN(xres, yres)/2);
+        g_assert_cmpuint(aavg->n, <=, 4*(xres + yres));
+        for (guint i = 0; i < aavg->n; i++) {
+            g_assert(isfinite(aavg->data[i].y));
+            gwy_assert_floatval(aavg->data[i].y, func(aavg->data[i].x, NULL),
+                                0.03);
+        }
+
+        g_assert_cmpuint(aavgn->n, >=, MAX(npoints/3, 1));
+        g_assert_cmpuint(aavgn->n, <=, npoints+2);
+        for (guint i = 0; i < aavgn->n; i++) {
+            g_assert(isfinite(aavgn->data[i].y));
+            gwy_assert_floatval(aavgn->data[i].y, func(aavgn->data[i].x, NULL),
+                                0.08);
+        }
+
+        g_object_unref(mask);
         g_object_unref(aavgn);
         g_object_unref(aavg);
         g_object_unref(field);

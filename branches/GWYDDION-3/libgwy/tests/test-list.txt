@@ -463,6 +463,7 @@ field/distributions/acf/full
 field/distributions/acf/partial
 field/distributions/angular-average/full
 field/distributions/angular-average/partial
+field/distributions/angular-average/masked
 field/distributions/slope/simple-x
 field/distributions/slope/simple-y
 field/distributions/slope/simple-oblique
