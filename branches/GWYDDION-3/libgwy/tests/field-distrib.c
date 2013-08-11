@@ -1549,8 +1549,10 @@ test_field_distributions_acf_full(void)
 
             field_randomize(field, rng);
 
-            GwyField *acf = gwy_field_acf(field, NULL, xrange, yrange, lvl);
-            GwyField *acf_full = gwy_field_acf(field, NULL, xres-1, yres-1, lvl);
+            GwyField *acf = gwy_field_acf(field, NULL, xrange, yrange,
+                                          lvl);
+            GwyField *acf_full = gwy_field_acf(field, NULL, xres-1, yres-1,
+                                               lvl);
 
             if (lvl == 1)
                 gwy_field_add_full(field, -gwy_field_mean_full(field));
@@ -1576,6 +1578,66 @@ test_field_distributions_acf_full(void)
 
             g_object_unref(acf_full);
             g_object_unref(acf);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_acf_partial(void)
+{
+    enum { max_size = 74, niter = 30, nvalue = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            guint width = g_rand_int_range(rng, 1, xres+1);
+            guint height = g_rand_int_range(rng, 1, yres+1);
+            guint col = g_rand_int_range(rng, 0, xres-width+1);
+            guint row = g_rand_int_range(rng, 0, yres-height+1);
+            guint xrange = g_rand_int_range(rng, 0, width);
+            guint yrange = g_rand_int_range(rng, 0, height);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+            GwyFieldPart fpart = { col, row, width, height };
+
+            field_randomize(field, rng);
+
+            GwyField *acf = gwy_field_acf(field, &fpart, xrange, yrange,
+                                          lvl);
+            GwyField *acf_full = gwy_field_acf(field, &fpart, width-1, height-1,
+                                               lvl);
+
+            GwyField *subfield = gwy_field_new_part(field, &fpart, FALSE);
+            if (lvl == 1)
+                gwy_field_add_full(subfield, -gwy_field_mean_full(subfield));
+
+            gint xr = xrange, yr = yrange;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = acf->data[(yr + i)*acf->xres + xr + j];
+                gdouble vref = dumb_acf_2d(subfield, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            xr = width-1;
+            yr = height-1;
+            for (guint iv = 0; iv < nvalue; iv++) {
+                gint i = g_rand_int_range(rng, -yr, yr+1);
+                gint j = g_rand_int_range(rng, -xr, xr+1);
+                gdouble v = acf_full->data[(yr + i)*acf_full->xres + xr + j];
+                gdouble vref = dumb_acf_2d(subfield, j, i);
+                gwy_assert_floatval(v, vref, 1e-13);
+            }
+
+            g_object_unref(acf_full);
+            g_object_unref(acf);
+            g_object_unref(subfield);
             g_object_unref(field);
         }
     }

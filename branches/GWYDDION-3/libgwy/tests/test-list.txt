@@ -460,6 +460,7 @@ field/distributions/row-asg/full
 field/distributions/row-psdf/full
 field/distributions/row-psdf/masked
 field/distributions/acf/full
+field/distributions/acf/partial
 field/distributions/slope/simple-x
 field/distributions/slope/simple-y
 field/distributions/slope/simple-oblique
