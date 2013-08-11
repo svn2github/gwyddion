@@ -2649,6 +2649,9 @@ gwy_field_angular_average(const GwyField *field,
         }
     }
 
+    g_free(weights);
+    g_free(sums);
+
 fail:
     if (!curve)
         curve = gwy_curve_new();
