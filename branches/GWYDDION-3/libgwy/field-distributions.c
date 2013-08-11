@@ -35,6 +35,11 @@
 #include "libgwy/mask-field-internal.h"
 #include "libgwy/field-internal.h"
 
+typedef enum {
+    CF_ACF,
+    CF_HHCF,
+} CFType;
+
 typedef struct {
     guint n;              // Number of quarter-pixels considered.
     guint n_in_range;     // Number of quarter-pixels within range.
@@ -2368,34 +2373,12 @@ fail:
     return line;
 }
 
-/**
- * gwy_field_acf:
- * @field: A two-dimensional data field.
- * @fpart: (allow-none):
- *         Area in @field to process.  Pass %NULL to process entire @field.
- * @xrange: Maximum horizontal shift (in pixels) to include in the result.
- *          It must not be larger than the field part width.
- * @yrange: Maximum vertical shift (in pixels) to include in the result.
- *          It must not be larger than the field part height.
- * @level: The first polynomial degree to keep in the rows, lower degrees than
- *         @level are subtracted.  Note only values 0 (no levelling) and 1
- *         (subtract the mean value of each row) are available at present.
- *
- * Calculated two-dimensional autocorrelation function (ACF) of a field.
- *
- * The returned field will have dimensions (2@xrange + 1)×(2@yrange + 1), with
- * the zero-shift autocorrelation function in the centre.  Since the
- * two-dimensional ACF has C₂ symmetry half of the output is redundant but it
- * is included for convenience.
- *
- * Returns: (transfer full):
- *          A new two-dimensional data field with the requested functional.
- **/
-GwyField*
-gwy_field_acf(const GwyField *field,
-              const GwyFieldPart *fpart,
-              guint xrange, guint yrange,
-              guint level)
+static GwyField*
+gwy_field_cf(const GwyField *field,
+             const GwyFieldPart *fpart,
+             guint xrange, guint yrange,
+             guint level,
+             CFType type)
 {
     guint col, row, width, height;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
@@ -2407,11 +2390,11 @@ gwy_field_acf(const GwyField *field,
         level = 1;
     }
     if (xrange >= width) {
-        g_warning("ACF x range is not smaller than width, fixing it.");
+        g_warning("CF x range is not smaller than width, fixing it.");
         xrange = width-1;
     }
     if (yrange >= height) {
-        g_warning("ACF y range is not smaller than height, fixing it.");
+        g_warning("CF y range is not smaller than height, fixing it.");
         yrange = height-1;
     }
 
@@ -2448,6 +2431,13 @@ gwy_field_acf(const GwyField *field,
     }
     gwy_clear(fftr + xsize*height, xsize*(ysize - height));
 
+    GwyField *cf = gwy_field_new_sized(2*xrange + 1, 2*yrange + 1, TRUE);
+    guint txres = cf->xres, tyres = cf->yres;
+
+    if (type == CF_HHCF) {
+        // TODO: Initialise cf with running sums.
+    }
+
     fftw_execute(plan);
 
     row2_assign_cnorm(fftr, fftr + xsize-1, fftc, xsize, 1.0/ysize);
@@ -2462,26 +2452,41 @@ gwy_field_acf(const GwyField *field,
     fftw_destroy_plan(plan);
     fftw_free(fftr);
 
-    GwyField *cf = gwy_field_new_sized(2*xrange + 1, 2*yrange + 1, FALSE);
-    guint txres = cf->xres, tyres = cf->yres;
     for (guint i = 0; i <= yrange; i++) {
         const gwycomplex *crow = fftc + i*cxsize;
         gdouble *frow = cf->data + (yrange + i)*txres + xrange;
         gdouble *brow = cf->data + (yrange - i)*txres + xrange;
-        for (guint j = 0; j <= xrange; j++, crow++, frow++, brow--) {
-            gdouble v = creal(*crow);
-            // TODO: Proper normalisation.
-            *frow = *brow = v/(height - i)/(width - j);
+        if (type == CF_ACF) {
+            for (guint j = 0; j <= xrange; j++, crow++, frow++, brow--) {
+                gdouble v = creal(*crow);
+                *frow = *brow = v/(height - i)/(width - j);
+            }
+        }
+        else if (type == CF_HHCF) {
+            guint from = i ? 0 : 1;  // Don't process the central point twice.
+            for (guint j = from; j <= xrange; j++, crow++, frow++, brow--) {
+                gdouble v = creal(*crow);
+                *frow = (*frow - 2.0*v)/(height - i)/(width - j);
+                *brow = (*brow - 2.0*v)/(height - i)/(width - j);
+            }
         }
     }
     for (guint i = 1; i <= yrange; i++) {
         const gwycomplex *crow = fftc + (ysize - i)*cxsize + 1;
         gdouble *frow = cf->data + (yrange - i)*txres + (xrange+1);
         gdouble *brow = cf->data + (yrange + i)*txres + (xrange-1);
-        for (guint j = 1; j <= xrange; j++, crow++, frow++, brow--) {
-            gdouble v = creal(*crow);
-            // TODO: Proper normalisation.
-            *frow = *brow = v/(height - i)/(width - j);
+        if (type == CF_ACF) {
+            for (guint j = 1; j <= xrange; j++, crow++, frow++, brow--) {
+                gdouble v = creal(*crow);
+                *frow = *brow = v/(height - i)/(width - j);
+            }
+        }
+        else if (type == CF_HHCF) {
+            for (guint j = 1; j <= xrange; j++, crow++, frow++, brow--) {
+                gdouble v = creal(*crow);
+                *frow = (*frow - 2.0*v)/(height - i)/(width - j);
+                *brow = (*brow - 2.0*v)/(height - i)/(width - j);
+            }
         }
     }
     fftw_free(fftc);
@@ -2497,6 +2502,71 @@ gwy_field_acf(const GwyField *field,
     gwy_unit_power(gwy_field_get_zunit(cf), field->priv->zunit, 2);
 
     return cf;
+}
+
+/**
+ * gwy_field_acf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @xrange: Maximum horizontal shift (in pixels) to include in the result.
+ *          It must not be larger than the field part width.
+ * @yrange: Maximum vertical shift (in pixels) to include in the result.
+ *          It must not be larger than the field part height.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *
+ * Calculated two-dimensional autocorrelation function (ACF) of a field.
+ *
+ * The returned field will have dimensions (2@xrange + 1)×(2@yrange + 1), with
+ * the zero-shift autocorrelation function in the centre.  Since the
+ * two-dimensional ACF has C₂ symmetry half of the output is redundant but it
+ * is included for convenience.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional data field with the requested functional.
+ **/
+GwyField*
+gwy_field_acf(const GwyField *field,
+              const GwyFieldPart *fpart,
+              guint xrange, guint yrange,
+              guint level)
+{
+    return gwy_field_cf(field, fpart, xrange, yrange, level, CF_ACF);
+}
+
+/**
+ * gwy_field_hhcf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @xrange: Maximum horizontal shift (in pixels) to include in the result.
+ *          It must not be larger than the field part width.
+ * @yrange: Maximum vertical shift (in pixels) to include in the result.
+ *          It must not be larger than the field part height.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *
+ * Calculated two-dimensional height-height correlation function (HHCF) of a
+ * field.
+ *
+ * The returned field will have dimensions (2@xrange + 1)×(2@yrange + 1), with
+ * the zero-shift autocorrelation function in the centre.  Since the
+ * two-dimensional HHCF has C₂ symmetry half of the output is redundant but it
+ * is included for convenience.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional data field with the requested functional.
+ **/
+GwyField*
+gwy_field_hhcf(const GwyField *field,
+               const GwyFieldPart *fpart,
+               guint xrange, guint yrange,
+               guint level)
+{
+    return gwy_field_cf(field, fpart, xrange, yrange, level, CF_HHCF);
 }
 
 static void

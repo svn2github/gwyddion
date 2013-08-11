@@ -96,6 +96,11 @@ GwyField* gwy_field_acf            (const GwyField *field,
                                     guint xrange,
                                     guint yrange,
                                     guint level)                     G_GNUC_MALLOC;
+GwyField* gwy_field_hhcf           (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    guint xrange,
+                                    guint yrange,
+                                    guint level)                     G_GNUC_MALLOC;
 GwyCurve* gwy_field_angular_average(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
