@@ -1645,4 +1645,155 @@ test_field_distributions_acf_partial(void)
     g_rand_free(rng);
 }
 
+static gdouble
+angavg_test_func_1(gdouble x, G_GNUC_UNUSED gpointer user_data)
+{
+    return cos(x);
+}
+
+static gdouble
+angavg_test_func_2(gdouble x, G_GNUC_UNUSED gpointer user_data)
+{
+    return x*x/(1.0 + x);
+}
+
+static gdouble
+angavg_test_func_3(gdouble x, G_GNUC_UNUSED gpointer user_data)
+{
+    return exp(-0.5*x*x);
+}
+
+void
+test_field_distributions_angular_average_full(void)
+{
+    enum { max_size = 74, niter = 100 };
+    static const GwyRealFunc funcs[] = {
+        &angavg_test_func_1, &angavg_test_func_2, &angavg_test_func_3,
+    };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 12, max_size);
+        guint yres = g_rand_int_range(rng, 12, max_size);
+        guint npoints = g_rand_int_range(rng, (xres+yres)/4, xres+yres);
+        gdouble xreal = g_rand_double(rng) + 0.2;
+        gdouble yreal = g_rand_double(rng) + 0.2;
+        gdouble xoff = 2.0*g_rand_double(rng) - 1.5;
+        gdouble yoff = 2.0*g_rand_double(rng) - 1.5;
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        g_object_set(field,
+                     "x-real", xreal, "y-real", yreal,
+                     "x-offset", xoff, "y-offset", yoff,
+                     NULL);
+        guint fid = g_rand_int_range(rng, 0, G_N_ELEMENTS(funcs));
+        GwyRealFunc func = funcs[fid];
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                field->data[i*xres + j] = func(hypot(x, y), NULL);
+            }
+        }
+
+        GwyCurve *aavg = gwy_field_angular_average(field, NULL,
+                                                   NULL, GWY_MASK_IGNORE, 0);
+        GwyCurve *aavgn = gwy_field_angular_average(field, NULL,
+                                                    NULL, GWY_MASK_IGNORE,
+                                                    npoints);
+        g_assert_cmpuint(aavg->n, >=, MIN(xres, yres)/2);
+        g_assert_cmpuint(aavg->n, <=, 4*(xres + yres));
+        for (guint i = 0; i < aavg->n; i++) {
+            gwy_assert_floatval(aavg->data[i].y, func(aavg->data[i].x, NULL),
+                                0.02);
+        }
+
+        // For non-masked data we should get reasonably close to the requested
+        // npoints.
+        g_assert_cmpuint(aavgn->n, >=, MAX(5*npoints/6, 1));
+        g_assert_cmpuint(aavgn->n, <=, npoints+2);
+        for (guint i = 0; i < aavgn->n; i++) {
+            gwy_assert_floatval(aavgn->data[i].y, func(aavgn->data[i].x, NULL),
+                                0.06);
+        }
+
+        g_object_unref(aavgn);
+        g_object_unref(aavg);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_angular_average_partial(void)
+{
+    enum { max_size = 74, niter = 100 };
+    static const GwyRealFunc funcs[] = {
+        &angavg_test_func_1, &angavg_test_func_2, &angavg_test_func_3,
+    };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 12, max_size);
+        guint yres = g_rand_int_range(rng, 12, max_size);
+        guint width = g_rand_int_range(rng, 5, xres+1);
+        guint height = g_rand_int_range(rng, 5, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint npoints = g_rand_int_range(rng, (width+height)/4, width+height);
+        gdouble xreal = g_rand_double(rng) + 0.2;
+        gdouble yreal = g_rand_double(rng) + 0.2;
+        gdouble xoff = 2.0*g_rand_double(rng) - 1.5;
+        gdouble yoff = 2.0*g_rand_double(rng) - 1.5;
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        g_object_set(field,
+                     "x-real", xreal, "y-real", yreal,
+                     "x-offset", xoff, "y-offset", yoff,
+                     NULL);
+        GwyFieldPart fpart = { col, row, width, height };
+        guint fid = g_rand_int_range(rng, 0, G_N_ELEMENTS(funcs));
+        GwyRealFunc func = funcs[fid];
+
+        gwy_field_fill_full(field, NAN);
+        for (guint i = row; i < row + height; i++) {
+            gdouble y = (i + 0.5)*gwy_field_dy(field) + field->yoff;
+            for (guint j = col; j < col + width; j++) {
+                gdouble x = (j + 0.5)*gwy_field_dx(field) + field->xoff;
+                field->data[i*xres + j] = func(hypot(x, y), NULL);
+            }
+        }
+
+        GwyCurve *aavg = gwy_field_angular_average(field, &fpart,
+                                                   NULL, GWY_MASK_IGNORE, 0);
+        GwyCurve *aavgn = gwy_field_angular_average(field, &fpart,
+                                                    NULL, GWY_MASK_IGNORE,
+                                                    npoints);
+
+        g_assert_cmpuint(aavg->n, >=, MIN(width, height)/2);
+        g_assert_cmpuint(aavg->n, <=, 4*(width + height));
+        for (guint i = 0; i < aavg->n; i++) {
+            g_assert(isfinite(aavg->data[i].y));
+            gwy_assert_floatval(aavg->data[i].y, func(aavg->data[i].x, NULL),
+                                0.03);
+        }
+
+        // For non-masked data we should get reasonably close to the requested
+        // npoints.
+        g_assert_cmpuint(aavgn->n, >=, MAX(5*npoints/6, 1));
+        g_assert_cmpuint(aavgn->n, <=, npoints+2);
+        for (guint i = 0; i < aavgn->n; i++) {
+            g_assert(isfinite(aavgn->data[i].y));
+            gwy_assert_floatval(aavgn->data[i].y, func(aavgn->data[i].x, NULL),
+                                0.08);
+        }
+
+        g_object_unref(aavgn);
+        g_object_unref(aavg);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
