@@ -2519,7 +2519,7 @@ gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
             il--;
     }
     sums[il] += w1*z;
-    weights[il] = w1;
+    weights[il] += w1;
 }
 
 /**
@@ -2570,17 +2570,17 @@ gwy_field_angular_average(const GwyField *field,
     // Figure out suitable uniform sampling.  Since we return a curve a
     // non-uniform sampling might be advantageous but I have no idea how to
     // find a suitable one in the presence of a mask.
-    gdouble xreal = field->xreal, yreal = field->yreal,
-            xoff = field->xoff, yoff = field->yoff,
+    gdouble xoff = field->xoff, yoff = field->yoff,
             dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    gdouble Lul = hypot(xoff + 0.5*dx, yoff + 0.5*dx),
-            Lur = hypot(xoff + xreal - 0.5*dx, yoff + 0.5*dx),
-            Lll = hypot(xoff + 0.5*dx, yoff + yreal - 0.5*dx),
-            Llr = hypot(xoff + xreal - 0.5*dx, yoff + yreal - 0.5*dx);
-    gdouble Lmin = 0.0, Lmax = fmax(fmax(Lul, Lur), fmax(Lll, Llr));
-    // The minimum depends on whether the origin is within the field.
-    if (xoff*(xoff + xreal) > 0.0 || yoff*(yoff + yreal) > 0.0)
-        Lmin = fmin(fmin(Lul, Lur), fmin(Lll, Llr));
+    gdouble xl = (col + 0.5)*dx + xoff,
+            xr = (col + width - 0.5)*dx + xoff,
+            yu = (row + 0.5)*dy + yoff,
+            yl = (row + height - 0.5)*dy + yoff;
+    gdouble xm = (xl*xr > 0.0) ? fmin(fabs(xl), fabs(xr)) : 0.0;
+    gdouble ym = (yu*yl > 0.0) ? fmin(fabs(yu), fabs(yl)) : 0.0;
+    gdouble xM = fmax(fabs(xl), fabs(xr));
+    gdouble yM = fmax(fabs(yu), fabs(yl));
+    gdouble Lmin = hypot(xm, ym), Lmax = hypot(xM, yM);
 
     // Handle the silly case separately.
     if (npoints == 1) {
@@ -2610,9 +2610,9 @@ gwy_field_angular_average(const GwyField *field,
     if (masking == GWY_MASK_IGNORE) {
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*xres;
-            gdouble y = (i + 0.5)*dy + yoff;
-            for (guint j = width; j; j--, d++) {
-                gdouble x = (j + 0.5)*dx + xoff;
+            gdouble y = i*dy + yu;
+            for (guint j = 0; j < width; j++, d++) {
+                gdouble x = j*dx + xl;
                 gather_interpolated(sums, weights, npoints, real, off,
                                     x, y, *d);
             }
@@ -2621,13 +2621,13 @@ gwy_field_angular_average(const GwyField *field,
     else {
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
-            gdouble y = (i + 0.5)*dy + yoff;
+            gdouble y = i*dy + yu;
             const gdouble *d = base + i*xres;
             GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-            for (guint j = width; j; j--, d++) {
+            for (guint j = 0; j < width; j++, d++) {
                 if (!gwy_mask_iter_get(iter) == invert) {
-                    gdouble x = (j + 0.5)*dx + xoff;
+                    gdouble x = j*dx + xl;
                     gather_interpolated(sums, weights, npoints, real, off,
                                         x, y, *d);
                 }
