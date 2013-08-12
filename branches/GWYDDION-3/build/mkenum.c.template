@@ -9,28 +9,63 @@
  * Generated #GTypes for enumerated types.
  **/
 
+static gboolean
+check_enum(const GEnumValue *values, guint nvalues, gint value)
+{
+    while (nvalues--) {
+        if (values->value == value)
+            return TRUE;
+        values++;
+    }
+    return FALSE;
+}
+
+static gboolean
+check_flags(const GFlagsValue *values, guint nvalues, guint value)
+{
+    // Sequentially clear all known bits from @value.
+    // If we can get 0 then the value consits only of known flags.
+    // This is waste of time but I cannot get mkenum to just generate the value
+    // of all flags ORed together.
+    while (nvalues--) {
+        if (!(value &= ~(values->value)))
+            return TRUE;
+        values++;
+    }
+    return FALSE;
+}
+
 /*** END file-header ***/
 
 /*** BEGIN value-header ***/
+static const G@Type@Value values_@enum_name@[] = {
+/*** END value-header ***/
+
+/*** BEGIN value-production ***/
+    { @VALUENAME@, "@VALUENAME@", "@valuenick@" },
+/*** END value-production ***/
+
+/*** BEGIN value-tail ***/
+    { 0, NULL, NULL }
+};
+
 GType
 @enum_name@_get_type(void)
 {
     static GType etype = 0;
 
     if (etype == 0) {
-        static const G@Type@Value values[] = {
-/*** END value-header ***/
-
-/*** BEGIN value-production ***/
-            { @VALUENAME@, "@VALUENAME@", "@valuenick@" },
-/*** END value-production ***/
-
-/*** BEGIN value-tail ***/
-            { 0, NULL, NULL }
-        };
-        etype = g_@type@_register_static("@EnumName@", values);
+        etype = g_@type@_register_static("@EnumName@", values_@enum_name@);
     }
     return etype;
+}
+
+gboolean
+@enum_name@_is_valid(gint value)
+{
+    return check_@type@(values_@enum_name@,
+                        G_N_ELEMENTS(values_@enum_name@)-1,
+                        value);
 }
 
 /*** END value-tail ***/

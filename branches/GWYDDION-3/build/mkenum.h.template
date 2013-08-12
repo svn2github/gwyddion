@@ -9,7 +9,8 @@ G_BEGIN_DECLS
 /*** END file-header ***/
 
 /*** BEGIN value-header ***/
-GType @enum_name@_get_type(void) G_GNUC_CONST;
+GType    @enum_name@_get_type(void)       G_GNUC_CONST;
+gboolean @enum_name@_is_valid(gint value) G_GNUC_PURE;
 #define GWY_TYPE_@ENUMSHORT@ (@enum_name@_get_type())
 
 /*** END value-header ***/
