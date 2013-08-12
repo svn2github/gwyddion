@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
+#include "libgwy/types.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/math.h"
 #include "libgwy/unit.h"
@@ -741,7 +742,7 @@ gwy_user_grain_value_set_same_units(GwyUserGrainValue *usergrainvalue,
                                     GwyGrainValueSameUnits same_units)
 {
     g_return_if_fail(GWY_IS_USER_GRAIN_VALUE(usergrainvalue));
-    g_return_if_fail(same_units <= GWY_GRAIN_VALUE_SAME_UNITS_ALL);
+    g_return_if_fail(gwy_grain_value_same_units_is_valid(same_units));
     UserGrainValue *priv = usergrainvalue->priv;
     if (same_units != priv->same_units) {
         priv->same_units = same_units;

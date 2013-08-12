@@ -22,6 +22,7 @@
 #include <complex.h>
 #include <fftw3.h>
 #include "libgwy/macros.h"
+#include "libgwy/types.h"
 #include "libgwy/math.h"
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/field-level.h"
@@ -96,7 +97,7 @@ gwy_field_row_fft(const GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(!reout || GWY_IS_FIELD(reout));
     g_return_if_fail(!imout || GWY_IS_FIELD(imout));
-    g_return_if_fail(windowing <= GWY_WINDOWING_KAISER25);
+    g_return_if_fail(gwy_windowing_type_is_valid(windowing));
     g_return_if_fail(level <= 3);
     if (!reout && !imout)
         return;
@@ -343,7 +344,7 @@ gwy_field_fft(const GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(!reout || GWY_IS_FIELD(reout));
     g_return_if_fail(!imout || GWY_IS_FIELD(imout));
-    g_return_if_fail(windowing <= GWY_WINDOWING_KAISER25);
+    g_return_if_fail(gwy_windowing_type_is_valid(windowing));
     g_return_if_fail(level <= 8);
     if (!reout && !imout)
         return;
@@ -568,7 +569,7 @@ gwy_field_fft_window(GwyField *field,
                      gboolean rows)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    g_return_if_fail(windowing <= GWY_WINDOWING_KAISER25);
+    g_return_if_fail(gwy_windowing_type_is_valid(windowing));
 
     guint xres = field->xres, yres = field->yres;
     guint size = MAX((columns ? yres : 0), (rows ? xres : 0));
