@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -639,6 +639,48 @@ void
 test_master_try_again_auto(void)
 {
     master_try_again_one(0);
+}
+
+void
+test_master_default_acquisition(void)
+{
+    GwyMaster *master1 = gwy_master_acquire_default(FALSE);
+    g_assert(master1);
+    g_assert(GWY_IS_MASTER(master1));
+
+    GwyMaster *master2 = gwy_master_acquire_default(FALSE);
+    g_assert(!master2);
+
+    GwyMaster *master3 = gwy_master_acquire_default(TRUE);
+    g_assert(master3);
+    g_assert(GWY_IS_MASTER(master3));
+    g_assert(master3 != master1);
+
+    GwyMaster *master4 = gwy_master_acquire_default(TRUE);
+    g_assert(master4);
+    g_assert(GWY_IS_MASTER(master4));
+    g_assert(master4 != master1);
+    g_assert(master4 != master3);
+
+    gwy_master_release_default(master3);
+
+    GwyMaster *master5 = gwy_master_acquire_default(FALSE);
+    g_assert(!master5);
+
+    gwy_master_release_default(master1);
+
+    GwyMaster *master6 = gwy_master_acquire_default(FALSE);
+    g_assert(master6);
+    g_assert(GWY_IS_MASTER(master6));
+    // We do not hold any reference but we assert the library returned the
+    // same object so master1 is a meaningful pointer.
+    g_assert(master6 == master1);
+
+    GwyMaster *master7 = gwy_master_acquire_default(FALSE);
+    g_assert(!master7);
+
+    gwy_master_release_default(master6);
+    gwy_master_release_default(master4);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

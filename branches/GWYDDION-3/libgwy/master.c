@@ -86,6 +86,9 @@ static gboolean dumb_master_do_tasks_yourself(GwyMaster *master,
                                               gpointer user_data,
                                               GCancellable *cancellable);
 
+static GwyMaster *default_master = NULL;
+G_LOCK_DEFINE_STATIC(default_master);
+
 G_DEFINE_TYPE(GwyMaster, gwy_master, G_TYPE_OBJECT);
 
 static void
@@ -259,10 +262,6 @@ gwy_master_new(void)
  * permissible to pass a dumb manager to gwy_master_create_workers() although
  * nothing will happen (successfully).
  *
- * However, since tasks are carried out serially the task provider must not
- * return %GWY_MASTER_TRY_AGAIN because there is never any other parallel task
- * to wait for.
- *
  * Returns: A new dumb parallel task manager.
  **/
 GwyMaster*
@@ -274,8 +273,97 @@ gwy_master_new_dumb(void)
 }
 
 /**
+ * gwy_master_acquire_default:
+ * @allowdumb: %TRUE if a new dumb master should be returned when the default
+ *             master is busy.  %FALSE if %NULL should be returned in such
+ *             case.
+ *
+ * Acquires the default library-wide parallel task manager.
+ *
+ * The utilisation of the default master is exclusive.  Therefore, the
+ * acquisition succeeds only if the default master is not currently managing
+ * any tasks.  This is a simple mechanism to avoid recursive parallelisation.
+ *
+ * The behaviour in the case of failure is controlled by argument @allowdumb.
+ * If you prefer to just get a #GwyMaster in all cases, even if possibly
+ * single-threaded, pass %TRUE.  If you want to deal with unavailability of
+ * the default master yourself then pass %FALSE.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          A parallel task manager which <emphasis>must</emphasis> be released
+ *          with gwy_master_release_default() once finished.  %NULL can be
+ *          returned when @allowdumb is %FALSE.
+ **/
+GwyMaster*
+gwy_master_acquire_default(gboolean allowdumb)
+{
+    if (!G_TRYLOCK(default_master))
+        return allowdumb ? gwy_master_new_dumb() : NULL;
+
+    if (!default_master) {
+        GError *error = NULL;
+        // This reference is never released.
+        default_master = gwy_master_new();
+        if (!gwy_master_create_workers(default_master, 0, &error)) {
+            g_warning("Cannot create workers for the default master: %s. "
+                      "The default master will be dumb (single-threaded).",
+                      error->message);
+            g_clear_error(&error);
+            g_object_unref(default_master);
+            default_master = gwy_master_new_dumb();
+        }
+    }
+    g_assert(!default_master->priv->active_tasks);
+
+    return default_master;
+}
+
+/**
+ * gwy_master_release_default:
+ * @master: A parallel task manager acquired with gwy_master_acquire_default().
+ *
+ * Releases the default parallel task manager.
+ *
+ * You <emphasis>must</emphasis> call this function once your utilisation of
+ * the default master is finished to permit its use by other functions.  This
+ * applied regardless whether the work itself was finished or cancelled and
+ * regardless whether gwy_master_acquire_default() actually returned the
+ * default master or a new dumb master.
+ **/
+void
+gwy_master_release_default(GwyMaster *master)
+{
+    g_return_if_fail(GWY_IS_MASTER(master));
+    g_assert(!master->priv->active_tasks);
+
+    if (G_TRYLOCK(default_master)) {
+        if (master != default_master) {
+            // A new dumb master created because allowdumb=TRUE and the default
+            // master was busy.  But it is no longer.  So release the lock.
+            g_assert(master->priv->dumb);
+            g_object_unref(master);
+            G_UNLOCK(default_master);
+            return;
+        }
+        g_critical("gwy_master_release_default() was called without previous "
+                   "acquisition of the default master.");
+        // Now pretend it has been locked all the time and unlock it again.
+    }
+    else if (master != default_master) {
+        // A new dumb master created because allowdumb=TRUE and the default
+        // master was busy.  And it is still busy.  Do not release the lock.
+        g_assert(master->priv->dumb);
+        g_object_unref(master);
+        return;
+    }
+
+    // The master is actually the default master.  Release the lock.
+    G_UNLOCK(default_master);
+}
+
+/**
  * gwy_master_create_workers:
- * @master: Parallel task manager.
+ * @master: A parallel task manager.
  * @nworkers: Number of worker threads to create.  Passing zero means leaving
  *            the decision on @master which normally results in creating as
  *            many worker threads as there are available processor cores.
@@ -344,7 +432,7 @@ gwy_master_create_workers(GwyMaster *master,
 
 /**
  * gwy_master_manage_tasks:
- * @master: Parallel task manager.
+ * @master: A parallel task manager.
  * @nworkers: Maximum number of parallel tasks to run.  The actual number will
  *            never be larger than the number of worker threads created by
  *            gwy_master_create_workers().  Pass zero for no specific limit.
@@ -402,6 +490,7 @@ gwy_master_manage_tasks(GwyMaster *master,
 
     Master *priv = master->priv;
     g_return_val_if_fail(priv->nworkers, FALSE);
+    g_return_val_if_fail(!priv->active_tasks, FALSE);
 
     if (cancellable && g_cancellable_is_cancelled(cancellable))
         return FALSE;
@@ -427,7 +516,6 @@ gwy_master_manage_tasks(GwyMaster *master,
 
     gboolean aborted = FALSE;
     priv->exhausted = priv->cancelled = FALSE;
-    priv->active_tasks = 0;
 
     while ((!priv->exhausted && !priv->cancelled) || priv->active_tasks) {
         // Obtain new tasks if we can and send them to idle workers.
@@ -495,7 +583,7 @@ gwy_master_manage_tasks(GwyMaster *master,
 
 /**
  * gwy_master_create_data:
- * @master: Parallel task manager.
+ * @master: A parallel task manager.
  * @create_data: (allow-none) (scope call):
  *               Function to create worker data.  Passing %NULL is the same as
  *               passing a function that returns %NULL.
@@ -533,7 +621,7 @@ gwy_master_create_data(GwyMaster *master,
 
 /**
  * gwy_master_destroy_data:
- * @master: Parallel task manager.
+ * @master: A parallel task manager.
  * @destroy_data: (allow-none) (scope call):
  *                Function to destroy worker data.  Passing %NULL is possible
  *                and it means no destruction will be performed; this is

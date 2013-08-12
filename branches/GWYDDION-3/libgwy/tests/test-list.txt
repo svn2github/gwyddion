@@ -133,6 +133,7 @@ master/cancel/auto
 master/cancel/dumb/1
 master/cancel/dumb/2
 master/cancel/dumb/auto
+master/default/acquisition
 xy/boxed
 xyz/boxed
 range/boxed
