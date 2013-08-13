@@ -72,8 +72,8 @@ static GwyField* init_fft_field       (const GwyField *src,
  * @preserverms: %TRUE to preserve RMS value.  More precisely, for each row,
  *               the sum of squares of the output will be the same as the
  *               sum of squares of the input after levelling.  If %FALSE is
- *               passed the Fourier coefficients will be, in general, diminshed
- *               due to windowing.
+ *               passed the Fourier coefficients will be, in general,
+ *               diminished due to windowing.
  * @level: Row levelling to apply, pass 0 for no row levelling.  See
  *         gwy_field_level_rows().
  *
@@ -318,8 +318,8 @@ gwy_field_row_fft_raw(const GwyField *rein,
  * @preserverms: %TRUE to preserve RMS value.  More precisely,
  *               the sum of squares of the output will be the same as the
  *               sum of squares of the input after levelling.  If %FALSE is
- *               passed the Fourier coefficients will be, in general, diminshed
- *               due to windowing.
+ *               passed the Fourier coefficients will be, in general,
+ *               diminished due to windowing.
  * @level: Polynomial levelling degree to apply, pass 0 for no row levelling,
  *         the maximum value is 8.  All monomials with total power smaller than
  *         @level are subtracted.
