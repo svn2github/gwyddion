@@ -2872,8 +2872,44 @@ fail:
  * @short_description: One- and two-dimensional distributions and functionals of fields
  *
  * Statistical distribution densities are normalised so that their integral,
- * that can also be calculated as gwy_line_mean(line)*line->real, is unity.
- * Cumulative distribution values then always line in the interval [0,1].
+ * that can also be calculated as
+ * <code>gwy_line_mean(line)*line->real</code>, is unity.
+ * Cumulative distribution values then always lie in the interval [0,1].
+ *
+ * A large number of different Fast Fourier Transform conventions exists and
+ * this leads to lots of confusion when results obtained by different means
+ * are compared.  The conventions used in Gwyddion 3 are based on the following
+ * set of requirements:
+ * <itemizedlist>
+ *   <listitem>Fourier coefficients and PSDF are functions of spatial
+ *   wavevectors @k (often used in optics), i.e. angular spatial frequencies.
+ *   There is no 2π in the exponent.</listitem>
+ *   <listitem>Forward transform has negative sign in the exponent (see
+ *   #GwyTransformDirection), backward transform has positive sign.</listitem>
+ *   <listitem>Fourier transform at zero frequency is equal to the data
+ *   mean value, without any factors.</listitem>
+ *   <listitem>Autocorrelation function value at zero is equal to the mean
+ *   squared roughness σ².</listitem>
+ *   <listitem>Power spectrum density integrates to the mean squared roughness
+ *   σ².</listitem>
+ * </itemizedlist>
+ * Even though the requirements are reasonable some of the following
+ * consequences may seem counterintuitive:
+ * <itemizedlist>
+ *   <listitem>Fourier coefficients are the same physical quantity as data
+ *   and the units are the same: [@value].</listitem>
+ *   <listitem>Units of power spectrum density are
+ *   [@value²][@lateral<superscript>@d</superscript>], where @d is the
+ *   transform dimension.</listitem>
+ *   <listitem>While power spectrum density is proportional to Fourier
+ *   coefficients the proportionality factor is <emphasis>not</emphasis>
+ *   unitless as they are based on different conventions.</listitem>
+ *   <listitem>Forward transform has no prefactor.</listitem>
+ *   <listitem>Backward transform has prefactor 1/2π.</listitem>
+ *   <listitem>Autocorrelation function is the <emphasis>forward</emphasis>
+ *   transform of power spectrum density, even though the transform is from
+ *   reciprocal space to direct space.</listitem>
+ * </itemizedlist>
  **/
 
 /**
