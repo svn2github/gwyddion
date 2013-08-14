@@ -101,6 +101,10 @@ GwyField* gwy_field_hhcf           (const GwyField *field,
                                     guint xrange,
                                     guint yrange,
                                     guint level)                     G_GNUC_MALLOC;
+GwyField* gwy_field_psdf           (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    GwyWindowingType windowing,
+                                    guint level)                     G_GNUC_MALLOC;
 GwyField* gwy_field_asg            (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint xrange,

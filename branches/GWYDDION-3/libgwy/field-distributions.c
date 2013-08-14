@@ -26,7 +26,9 @@
 #include "libgwy/fft.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-distributions.h"
+#include "libgwy/field-arithmetic.h"
 #include "libgwy/field-statistics.h"
+#include "libgwy/field-inttrans.h"
 #include "libgwy/field-distributions.h"
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/math-internal.h"
@@ -1633,8 +1635,8 @@ gwy_field_row_asg(const GwyField *field,
 
     line = gwy_line_new_sized(hhcf->res - 1, FALSE);
     gdouble dx = gwy_line_dx(hhcf);
-    gwy_line_set_real(line, dx*line->res);
-    gwy_line_set_offset(line, 0.5*dx);
+    line->real = dx*line->res;
+    line->off = 0.5*dx;
 
     for (guint i = 0; i < line->res; i++) {
         gdouble t = (i + 0.5)*dx + line->off;
@@ -2559,10 +2561,10 @@ gwy_field_cf(const GwyField *field,
     fftw_free(fftc);
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    gwy_field_set_xreal(cf, dx*txres);
-    gwy_field_set_yreal(cf, dy*tyres);
-    gwy_field_set_xoffset(cf, -0.5*cf->xreal);
-    gwy_field_set_yoffset(cf, -0.5*cf->yreal);
+    cf->xreal = dx*txres;
+    cf->yreal = dy*tyres;
+    cf->xoff = -0.5*cf->xreal;
+    cf->yoff = -0.5*cf->yreal;
 
     _gwy_assign_unit(&cf->priv->xunit, field->priv->xunit);
     _gwy_assign_unit(&cf->priv->yunit, field->priv->yunit);
@@ -2634,6 +2636,107 @@ gwy_field_hhcf(const GwyField *field,
                guint level)
 {
     return gwy_field_cf(field, fpart, xrange, yrange, level, CF_HHCF);
+}
+
+/**
+ * gwy_field_psdf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @windowing: Windowing type to use.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *
+ * Calculated two-dimensional power spectrum density function (PSDF) of a
+ * field.
+ *
+ * The returned field will have odd dimensions with zero frequency in the
+ * centre.  For even dimensions of @field this means the Nyquist frequency
+ * will be repeated on both edges.  Since the two-dimensional PSDF has C₂
+ * symmetry half of the output is redundant but it is included for convenience.
+ *
+ * Returns: (transfer full):
+ *          A new two-dimensional data field with the requested functional.
+ **/
+GwyField*
+gwy_field_psdf(const GwyField *field,
+               const GwyFieldPart *fpart,
+               GwyWindowingType windowing,
+               guint level)
+{
+    guint col, row, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return gwy_field_new();
+
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    gsize cwidth = width/2 + 1;
+    GwyField *psdf = gwy_field_new_sized(width, height, FALSE);
+    gdouble *fftr = psdf->data;
+    gwycomplex *fftc = fftw_alloc_complex(cwidth*height);
+    fftw_plan plan = fftw_plan_dft_r2c_2d(height, width, fftr, fftc,
+                                          FFTW_DESTROY_INPUT
+                                          | _gwy_fft_rigour());
+    g_assert(plan);
+
+    gwy_field_copy(field, fpart, psdf, 0, 0);
+    if (level == 1)
+        gwy_field_add_full(psdf, -gwy_field_mean_full(psdf));
+
+    gdouble q = 1.0/(2.0*G_PI*width*height);
+    if (windowing) {
+        gdouble ms = gwy_field_meansq_full(psdf);
+        if (ms) {
+            gwy_field_fft_window(psdf, windowing, TRUE, TRUE);
+            gdouble wms = gwy_field_meansq_full(psdf);
+            if (wms)
+                q *= sqrt(ms/wms);
+        }
+    }
+    gwy_field_multiply_full(psdf, q);
+
+    fftw_execute(plan);
+
+    guint xrange = width/2, yrange = height/2;
+    gwy_field_set_size(psdf, 2*xrange + 1, 2*yrange + 1, FALSE);
+    guint txres = psdf->xres, tyres = psdf->yres;
+
+    for (guint i = 0; i <= yrange; i++) {
+        const gwycomplex *crow = fftc + i*cwidth;
+        gdouble *frow = psdf->data + (yrange + i)*txres + xrange;
+        gdouble *brow = psdf->data + (yrange - i)*txres + xrange;
+        for (guint j = 0; j <= xrange; j++, crow++, frow++, brow--) {
+            gdouble re = creal(*crow), im = cimag(*crow);
+            *frow = *brow = re*re + im*im;
+        }
+    }
+    for (guint i = 1; i <= yrange; i++) {
+        const gwycomplex *crow = fftc + (height - i)*cwidth + 1;
+        gdouble *frow = psdf->data + (yrange - i)*txres + (xrange+1);
+        gdouble *brow = psdf->data + (yrange + i)*txres + (xrange-1);
+        for (guint j = 1; j <= xrange; j++, crow++, frow++, brow--) {
+            gdouble re = creal(*crow), im = cimag(*crow);
+            *frow = *brow = re*re + im*im;
+        }
+    }
+    fftw_free(fftc);
+
+    psdf->xreal = 2.0*G_PI/gwy_field_dx(field)*txres/width;
+    psdf->yreal = 2.0*G_PI/gwy_field_dy(field)*tyres/height;
+    psdf->xoff = -0.5*psdf->xreal;
+    psdf->yoff = -0.5*psdf->yreal;
+    if (field->priv->xunit)
+        gwy_unit_power(gwy_field_get_xunit(psdf), field->priv->xunit, -1);
+    if (field->priv->yunit)
+        gwy_unit_power(gwy_field_get_yunit(psdf), field->priv->yunit, -1);
+
+    GwyUnit *zunit = gwy_field_get_zunit(psdf);
+    gwy_unit_multiply(zunit, field->priv->xunit, field->priv->yunit);
+    gwy_unit_power_multiply(zunit, zunit, 1, field->priv->zunit, 2);
+
+    return psdf;
 }
 
 /**
@@ -2886,8 +2989,8 @@ fail:
  *   There is no 2π in the exponent.</listitem>
  *   <listitem>Forward transform has negative sign in the exponent (see
  *   #GwyTransformDirection), backward transform has positive sign.</listitem>
- *   <listitem>Fourier transform at zero frequency is equal to the data
- *   mean value, without any factors.</listitem>
+ *   <listitem>Raw Fourier transform does not assign any density meaning to
+ *   the coefficients.</listitem>
  *   <listitem>Autocorrelation function value at zero is equal to the mean
  *   squared roughness σ².</listitem>
  *   <listitem>Power spectrum density integrates to the mean squared roughness
