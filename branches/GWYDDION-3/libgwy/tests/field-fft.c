@@ -117,28 +117,28 @@ void
 test_field_row_fft_inversion_c2c_forward(void)
 {
     field_fft_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
-                                &gwy_field_row_fft_raw);
+                                &gwy_field_row_fft);
 }
 
 void
 test_field_row_fft_inversion_c2c_backward(void)
 {
     field_fft_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
-                                &gwy_field_row_fft_raw);
+                                &gwy_field_row_fft);
 }
 
 void
 test_field_fft_inversion_c2c_forward(void)
 {
     field_fft_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
-                                &gwy_field_fft_raw);
+                                &gwy_field_fft);
 }
 
 void
 test_field_fft_inversion_c2c_backward(void)
 {
     field_fft_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
-                                &gwy_field_fft_raw);
+                                &gwy_field_fft);
 }
 
 static void
@@ -174,56 +174,56 @@ void
 test_field_row_fft_inversion_r2c_forward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                &gwy_field_row_fft_raw, TRUE);
+                                &gwy_field_row_fft, TRUE);
 }
 
 void
 test_field_row_fft_inversion_r2c_backward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                &gwy_field_row_fft_raw, TRUE);
+                                &gwy_field_row_fft, TRUE);
 }
 
 void
 test_field_row_fft_inversion_i2c_forward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                &gwy_field_row_fft_raw, FALSE);
+                                &gwy_field_row_fft, FALSE);
 }
 
 void
 test_field_row_fft_inversion_i2c_backward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                &gwy_field_row_fft_raw, FALSE);
+                                &gwy_field_row_fft, FALSE);
 }
 
 void
 test_field_fft_inversion_r2c_forward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                &gwy_field_fft_raw, TRUE);
+                                &gwy_field_fft, TRUE);
 }
 
 void
 test_field_fft_inversion_r2c_backward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                &gwy_field_fft_raw, TRUE);
+                                &gwy_field_fft, TRUE);
 }
 
 void
 test_field_fft_inversion_i2c_forward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                &gwy_field_fft_raw, FALSE);
+                                &gwy_field_fft, FALSE);
 }
 
 void
 test_field_fft_inversion_i2c_backward(void)
 {
     field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                &gwy_field_fft_raw, FALSE);
+                                &gwy_field_fft, FALSE);
 }
 
 static void
@@ -260,7 +260,7 @@ test_field_fft_sine(void)
                                                       GWY_WINDOWING_KAISER25+1);
         field_sine_wave_fill(field, alpha, beta);
         gwy_field_fft_window(field, windowing, TRUE, TRUE);
-        gwy_field_fft_raw(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
+        gwy_field_fft(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
         gwy_field_fft_humanize(fftre);
         gwy_field_fft_humanize(fftim);
         gwy_field_hypot_field(fftre, fftre, fftim);
@@ -327,7 +327,7 @@ test_field_row_fft_sine(void)
                                                       GWY_WINDOWING_KAISER25+1);
         field_sine_wave_fill(field, alpha, beta);
         gwy_field_fft_window(field, windowing, FALSE, TRUE);
-        gwy_field_row_fft_raw(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
+        gwy_field_row_fft(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
         gwy_field_fft_humanize(fftre);
         gwy_field_fft_humanize(fftim);
         gwy_field_hypot_field(fftre, fftre, fftim);

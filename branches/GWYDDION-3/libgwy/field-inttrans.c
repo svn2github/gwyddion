@@ -60,7 +60,7 @@ static GwyField* init_fft_field       (const GwyField *src,
                                        GwyField *field);
 
 /**
- * gwy_field_row_fft_raw:
+ * gwy_field_row_fft:
  * @rein: (allow-none):
  *        Real input two-dimensional data field.
  * @imin: (allow-none):
@@ -92,11 +92,11 @@ static GwyField* init_fft_field       (const GwyField *src,
  * All fields must be different objects.
  **/
 void
-gwy_field_row_fft_raw(const GwyField *rein,
-                      const GwyField *imin,
-                      GwyField *reout,
-                      GwyField *imout,
-                      GwyTransformDirection direction)
+gwy_field_row_fft(const GwyField *rein,
+                  const GwyField *imin,
+                  GwyField *reout,
+                  GwyField *imout,
+                  GwyTransformDirection direction)
 {
     g_return_if_fail(!rein || GWY_IS_FIELD(rein));
     g_return_if_fail(!imin || GWY_IS_FIELD(imin));
@@ -181,7 +181,7 @@ gwy_field_row_fft_raw(const GwyField *rein,
 }
 
 /**
- * gwy_field_fft_raw:
+ * gwy_field_fft:
  * @rein: (allow-none):
  *        Real input two-dimensional data field.
  * @imin: (allow-none):
@@ -213,11 +213,11 @@ gwy_field_row_fft_raw(const GwyField *rein,
  * All fields must be different objects.
  **/
 void
-gwy_field_fft_raw(const GwyField *rein,
-                  const GwyField *imin,
-                  GwyField *reout,
-                  GwyField *imout,
-                  GwyTransformDirection direction)
+gwy_field_fft(const GwyField *rein,
+              const GwyField *imin,
+              GwyField *reout,
+              GwyField *imout,
+              GwyTransformDirection direction)
 {
     g_return_if_fail(!rein || GWY_IS_FIELD(rein));
     g_return_if_fail(!imin || GWY_IS_FIELD(imin));
