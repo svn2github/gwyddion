@@ -482,8 +482,8 @@ gwy_unit_equal(const GwyUnit *unit, const GwyUnit *op)
  * gwy_unit_is_empty:
  * @unit: (allow-none):
  *        Physical units.
- *        %NULL can be passed for a dimensionless (empty) unit (the function
- *        returns %TRUE then).
+ *        %NULL can be passed for a dimensionless (empty) unit (the
+ *        function returns %TRUE then).
  *
  * Checks whether a physical unit is non-empty.
  *
