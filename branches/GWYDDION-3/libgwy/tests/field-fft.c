@@ -79,8 +79,8 @@ typedef void (*RawFFTFunc)(const GwyField*, const GwyField*,
                            GwyTransformDirection);
 
 static void
-field_fft_raw_inversion_c2c_one(GwyTransformDirection direction,
-                                RawFFTFunc fft)
+field_fft_inversion_c2c_one(GwyTransformDirection direction,
+                            RawFFTFunc fft)
 {
     enum { max_size = 17 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -114,35 +114,35 @@ field_fft_raw_inversion_c2c_one(GwyTransformDirection direction,
 }
 
 void
-test_field_row_fft_raw_inversion_c2c_forward(void)
+test_field_row_fft_inversion_c2c_forward(void)
 {
-    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
-                                    &gwy_field_row_fft_raw);
+    field_fft_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
+                                &gwy_field_row_fft_raw);
 }
 
 void
-test_field_row_fft_raw_inversion_c2c_backward(void)
+test_field_row_fft_inversion_c2c_backward(void)
 {
-    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
-                                    &gwy_field_row_fft_raw);
+    field_fft_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
+                                &gwy_field_row_fft_raw);
 }
 
 void
-test_field_fft_raw_inversion_c2c_forward(void)
+test_field_fft_inversion_c2c_forward(void)
 {
-    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
-                                    &gwy_field_fft_raw);
+    field_fft_inversion_c2c_one(GWY_TRANSFORM_FORWARD,
+                                &gwy_field_fft_raw);
 }
 
 void
-test_field_fft_raw_inversion_c2c_backward(void)
+test_field_fft_inversion_c2c_backward(void)
 {
-    field_fft_raw_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
-                                    &gwy_field_fft_raw);
+    field_fft_inversion_c2c_one(GWY_TRANSFORM_BACKWARD,
+                                &gwy_field_fft_raw);
 }
 
 static void
-field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
+field_fft_inversion_x2c_one(GwyTransformDirection direction,
                                 RawFFTFunc fft,
                                 gboolean real)
 {
@@ -171,63 +171,61 @@ field_fft_raw_inversion_x2c_one(GwyTransformDirection direction,
 }
 
 void
-test_field_row_fft_raw_inversion_r2c_forward(void)
+test_field_row_fft_inversion_r2c_forward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                    &gwy_field_row_fft_raw, TRUE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                &gwy_field_row_fft_raw, TRUE);
 }
 
 void
-test_field_row_fft_raw_inversion_r2c_backward(void)
+test_field_row_fft_inversion_r2c_backward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                    &gwy_field_row_fft_raw, TRUE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                &gwy_field_row_fft_raw, TRUE);
 }
 
 void
-test_field_row_fft_raw_inversion_i2c_forward(void)
+test_field_row_fft_inversion_i2c_forward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                    &gwy_field_row_fft_raw, FALSE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                &gwy_field_row_fft_raw, FALSE);
 }
 
 void
-test_field_row_fft_raw_inversion_i2c_backward(void)
+test_field_row_fft_inversion_i2c_backward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                    &gwy_field_row_fft_raw, FALSE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                &gwy_field_row_fft_raw, FALSE);
 }
 
 void
-test_field_fft_raw_inversion_r2c_forward(void)
+test_field_fft_inversion_r2c_forward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                    &gwy_field_fft_raw, TRUE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                &gwy_field_fft_raw, TRUE);
 }
 
 void
-test_field_fft_raw_inversion_r2c_backward(void)
+test_field_fft_inversion_r2c_backward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                    &gwy_field_fft_raw, TRUE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                &gwy_field_fft_raw, TRUE);
 }
 
 void
-test_field_fft_raw_inversion_i2c_forward(void)
+test_field_fft_inversion_i2c_forward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
-                                    &gwy_field_fft_raw, FALSE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_FORWARD,
+                                &gwy_field_fft_raw, FALSE);
 }
 
 void
-test_field_fft_raw_inversion_i2c_backward(void)
+test_field_fft_inversion_i2c_backward(void)
 {
-    field_fft_raw_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
-                                    &gwy_field_fft_raw, FALSE);
+    field_fft_inversion_x2c_one(GWY_TRANSFORM_BACKWARD,
+                                &gwy_field_fft_raw, FALSE);
 }
 
-// TODO: Adapt these for PSDF and/or perform windowing within the test.
-#if 0
 static void
 field_sine_wave_fill(GwyField *field,
                      gdouble alpha, gdouble beta)
@@ -244,32 +242,28 @@ field_sine_wave_fill(GwyField *field,
     }
 }
 
-static void
-field_fft_one(GwyWindowingType windowing,
-              gboolean preserverms,
-              guint level)
+void
+test_field_fft_sine(void)
 {
-    guint sizes[] = { 120, 135 };
     GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = 30;
+    gsize niter = 100;
 
     GwyField *fftre = gwy_field_new(), *fftim = gwy_field_new();
     for (guint iter = 0; iter < niter; iter++) {
-        guint width = sizes[g_rand_int(rng) & 1];
-        guint height = sizes[g_rand_int(rng) & 1];
+        guint width = g_rand_int_range(rng, 100, 200);
+        guint height = g_rand_int_range(rng, 100, 200);
         GwyField *field = gwy_field_new_sized(width, height, FALSE);
         gdouble alpha = g_rand_double_range(rng, 5.0, 90.0);
         gdouble beta = g_rand_double_range(rng, 5.0, 90.0);
+        GwyWindowingType windowing = g_rand_int_range(rng,
+                                                      0,
+                                                      GWY_WINDOWING_KAISER25+1);
         field_sine_wave_fill(field, alpha, beta);
-        gwy_field_fft(field, fftre, fftim, windowing, preserverms, level);
+        gwy_field_fft_window(field, windowing, TRUE, TRUE);
+        gwy_field_fft_raw(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
         gwy_field_fft_humanize(fftre);
         gwy_field_fft_humanize(fftim);
         gwy_field_hypot_field(fftre, fftre, fftim);
-        if (!level && preserverms) {
-            gwy_assert_floatval(gwy_field_meansq_full(field),
-                                gwy_field_meansq_full(fftre),
-                                1e-13);
-        }
         guint nex, indices;
         GwyFieldPart fpart = { 0, height/2, width, height - height/2 };
         nex = gwy_field_local_extrema(fftre, &fpart, NULL, GWY_MASK_IGNORE,
@@ -294,126 +288,6 @@ field_fft_one(GwyWindowingType windowing,
     g_rand_free(rng);
 }
 
-void
-test_field_fft_sine_none_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_NONE, TRUE, 0);
-}
-
-void
-test_field_fft_sine_hann_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_HANN, TRUE, 0);
-}
-
-void
-test_field_fft_sine_hamming_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_HAMMING, TRUE, 0);
-}
-
-void
-test_field_fft_sine_blackmann_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_BLACKMANN, TRUE, 0);
-}
-
-void
-test_field_fft_sine_lanczos_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_LANCZOS, TRUE, 0);
-}
-
-void
-test_field_fft_sine_welch_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_WELCH, TRUE, 0);
-}
-
-void
-test_field_fft_sine_rect_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_RECT, TRUE, 0);
-}
-
-void
-test_field_fft_sine_nuttall_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_NUTTALL, TRUE, 0);
-}
-
-void
-test_field_fft_sine_flat_top_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_FLAT_TOP, TRUE, 0);
-}
-
-void
-test_field_fft_sine_kaiser25_preserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_KAISER25, TRUE, 0);
-}
-
-void
-test_field_fft_sine_none_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_NONE, FALSE, 0);
-}
-
-void
-test_field_fft_sine_hann_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_HANN, FALSE, 0);
-}
-
-void
-test_field_fft_sine_hamming_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_HAMMING, FALSE, 0);
-}
-
-void
-test_field_fft_sine_blackmann_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_BLACKMANN, FALSE, 0);
-}
-
-void
-test_field_fft_sine_lanczos_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_LANCZOS, FALSE, 0);
-}
-
-void
-test_field_fft_sine_welch_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_WELCH, FALSE, 0);
-}
-
-void
-test_field_fft_sine_rect_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_RECT, FALSE, 0);
-}
-
-void
-test_field_fft_sine_nuttall_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_NUTTALL, FALSE, 0);
-}
-
-void
-test_field_fft_sine_flat_top_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_FLAT_TOP, FALSE, 0);
-}
-
-void
-test_field_fft_sine_kaiser25_nopreserve_0(void)
-{
-    field_fft_one(GWY_WINDOWING_KAISER25, FALSE, 0);
-}
-
 static gdouble
 find_row_max_pos(const GwyField *field,
                  guint row)
@@ -435,33 +309,28 @@ find_row_max_pos(const GwyField *field,
     return gwy_field_dx(field)*(p + 0.5) + field->xoff;
 }
 
-static void
-field_row_fft_one(GwyWindowingType windowing,
-                  gboolean preserverms,
-                  guint level)
+void
+test_field_row_fft_sine(void)
 {
-    guint sizes[] = { 120, 135 };
     GRand *rng = g_rand_new_with_seed(42);
-    gsize niter = 30;
+    gsize niter = 100;
 
     GwyField *fftre = gwy_field_new(), *fftim = gwy_field_new();
     for (guint iter = 0; iter < niter; iter++) {
-        guint width = sizes[g_rand_int(rng) & 1];
-        guint height = sizes[g_rand_int(rng) & 1];
+        guint width = g_rand_int_range(rng, 100, 200);
+        guint height = g_rand_int_range(rng, 100, 200);
         GwyField *field = gwy_field_new_sized(width, height, FALSE);
         gdouble alpha = g_rand_double_range(rng, 15.0, 90.0);
         gdouble beta = g_rand_double_range(rng, 1.0, 10.0);
+        GwyWindowingType windowing = g_rand_int_range(rng,
+                                                      0,
+                                                      GWY_WINDOWING_KAISER25+1);
         field_sine_wave_fill(field, alpha, beta);
-        gwy_field_row_fft(field, fftre, fftim, windowing, preserverms, level);
+        gwy_field_fft_window(field, windowing, FALSE, TRUE);
+        gwy_field_row_fft_raw(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
         gwy_field_fft_humanize(fftre);
         gwy_field_fft_humanize(fftim);
         gwy_field_hypot_field(fftre, fftre, fftim);
-        if (!level && preserverms) {
-            gwy_assert_floatval(gwy_field_meansq_full(field),
-                                gwy_field_meansq_full(fftre),
-                                1e-13);
-        }
-
         for (guint row = 0; row < height; row++) {
             gdouble xc = find_row_max_pos(fftre, row);
             //g_printerr("[%u] %g (%g)\n", row, xc, alpha);
@@ -474,126 +343,5 @@ field_row_fft_one(GwyWindowingType windowing,
 
     g_rand_free(rng);
 }
-
-void
-test_field_row_fft_sine_none_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_NONE, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_none_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_NONE, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_hann_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_HANN, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_hann_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_HANN, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_hamming_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_HAMMING, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_hamming_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_HAMMING, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_blackmann_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_BLACKMANN, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_blackmann_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_BLACKMANN, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_lanczos_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_LANCZOS, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_lanczos_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_LANCZOS, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_welch_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_WELCH, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_welch_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_WELCH, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_rect_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_RECT, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_rect_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_RECT, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_nuttall_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_NUTTALL, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_nuttall_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_NUTTALL, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_flat_top_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_FLAT_TOP, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_flat_top_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_FLAT_TOP, FALSE, 0);
-}
-
-void
-test_field_row_fft_sine_kaiser25_preserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_KAISER25, TRUE, 0);
-}
-
-void
-test_field_row_fft_sine_kaiser25_nopreserve_0(void)
-{
-    field_row_fft_one(GWY_WINDOWING_KAISER25, FALSE, 0);
-}
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
