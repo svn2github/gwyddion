@@ -2685,7 +2685,8 @@ gwy_field_psdf(const GwyField *field,
     if (level == 1)
         gwy_field_add_full(psdf, -gwy_field_mean_full(psdf));
 
-    gdouble q = 1.0/(2.0*G_PI*width*height);
+    gdouble q = sqrt(gwy_field_dx(field)/width
+                     *gwy_field_dy(field)/height)/(2.0*G_PI);
     if (windowing) {
         gdouble ms = gwy_field_meansq_full(psdf);
         if (ms) {
@@ -2698,6 +2699,7 @@ gwy_field_psdf(const GwyField *field,
     gwy_field_multiply_full(psdf, q);
 
     fftw_execute(plan);
+    gwy_field_invalidate(psdf);
 
     guint xrange = width/2, yrange = height/2;
     gwy_field_set_size(psdf, 2*xrange + 1, 2*yrange + 1, FALSE);
