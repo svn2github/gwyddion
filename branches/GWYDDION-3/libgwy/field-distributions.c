@@ -2808,6 +2808,114 @@ gwy_field_asg(const GwyField *field,
 }
 
 static void
+find_cf_ranges(guint width, guint height,
+               gdouble dx, gdouble dy,
+               guint *xrange, guint *yrange)
+{
+    gdouble wreal = width*dx, hreal = height*dy;
+    if (wreal <= hreal) {
+        *xrange = width-1;
+        *yrange = gwy_round(wreal/dy);
+        *yrange = MIN(*yrange, height-1);
+    }
+    else {
+        *yrange = height-1;
+        *xrange = gwy_round(hreal/dx);
+        *xrange = MIN(*xrange, width-1);
+    }
+}
+
+/**
+ * gwy_field_radial_acf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ * @npoints: Resolution, i.e. the preferred number of returned curve points.
+ *           Pass zero to choose a suitable resolution automatically.  It is
+ *           not guaranteed that the returned curve will have this number of
+ *           points.
+ *
+ * Calculates radial autocorrelation function (ACF) of a two-dimensional data
+ * field.
+ *
+ * Radial ACF is angularly averaged over direction, i.e. it depends only on
+ * distance from the origin.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional curve with the requested functional.
+ **/
+GwyCurve*
+gwy_field_radial_acf(GwyField *field,
+                     const GwyFieldPart *fpart,
+                     guint level,
+                     guint npoints)
+{
+    guint row, col, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return gwy_curve_new();
+
+    guint xrange, yrange;
+    find_cf_ranges(width, height, gwy_field_dx(field), gwy_field_dy(field),
+                   &xrange, &yrange);
+
+    GwyField *cf = gwy_field_acf(field, fpart, xrange, yrange, level);
+    GwyCurve *rcf = gwy_field_angular_average(field, NULL,
+                                              NULL, GWY_MASK_IGNORE,
+                                              npoints);
+    g_object_unref(cf);
+
+    return rcf;
+}
+
+/**
+ * gwy_field_radial_hhcf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ * @npoints: Resolution, i.e. the preferred number of returned curve points.
+ *           Pass zero to choose a suitable resolution automatically.  It is
+ *           not guaranteed that the returned curve will have this number of
+ *           points.
+ *
+ * Calculates radial height-height correlation function (HHCF) of a
+ * two-dimensional data field.
+ *
+ * Radial HHCF is angularly averaged over direction, i.e. it depends only on
+ * distance from the origin.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional curve with the requested functional.
+ **/
+GwyCurve*
+gwy_field_radial_hhcf(GwyField *field,
+                      const GwyFieldPart *fpart,
+                      guint level,
+                      guint npoints)
+{
+    guint row, col, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return gwy_curve_new();
+
+    guint xrange, yrange;
+    find_cf_ranges(width, height, gwy_field_dx(field), gwy_field_dy(field),
+                   &xrange, &yrange);
+
+    GwyField *cf = gwy_field_hhcf(field, fpart, xrange, yrange, level);
+    GwyCurve *rcf = gwy_field_angular_average(field, NULL,
+                                              NULL, GWY_MASK_IGNORE,
+                                              npoints);
+    g_object_unref(cf);
+
+    return rcf;
+}
+
+static void
 gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
                     gdouble real, gdouble off,
                     gdouble x, gdouble y, gdouble z)
