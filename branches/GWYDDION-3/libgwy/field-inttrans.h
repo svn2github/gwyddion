@@ -25,23 +25,11 @@
 
 G_BEGIN_DECLS
 
-void gwy_field_row_fft           (const GwyField *field,
-                                  GwyField *reout,
-                                  GwyField *imout,
-                                  GwyWindowingType windowing,
-                                  gboolean preserverms,
-                                  guint level);
 void gwy_field_row_fft_raw       (const GwyField *rein,
                                   const GwyField *imin,
                                   GwyField *reout,
                                   GwyField *imout,
                                   GwyTransformDirection direction);
-void gwy_field_fft               (const GwyField *field,
-                                  GwyField *reout,
-                                  GwyField *imout,
-                                  GwyWindowingType windowing,
-                                  gboolean preserverms,
-                                  guint level);
 void gwy_field_fft_raw           (const GwyField *rein,
                                   const GwyField *imin,
                                   GwyField *reout,
