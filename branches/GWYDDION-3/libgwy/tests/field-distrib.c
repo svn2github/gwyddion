@@ -94,6 +94,7 @@ test_field_distributions_row_psdf_full(void)
     gdouble sigma = 20e-9;
     gdouble T = 300e-9;
 
+    gwy_fft_load_wisdom();
     GRand *rng = g_rand_new_with_seed(42);
 
     GwyField *field = gwy_field_new_sized(size, size, FALSE);
@@ -128,6 +129,7 @@ test_field_distributions_row_psdf_masked(void)
     gdouble sigma = 20e-9;
     gdouble T = 300e-9;
 
+    gwy_fft_load_wisdom();
     GRand *rng = g_rand_new_with_seed(42);
 
     GwyField *field = gwy_field_new_sized(size, size, FALSE);
@@ -155,6 +157,39 @@ test_field_distributions_row_psdf_masked(void)
     g_object_unref(psdf);
     g_object_unref(mask);
     g_object_unref(field);
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_row_psdf_rms(void)
+{
+    enum { max_size = 174, niter = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    gwy_fft_load_wisdom();
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        GwyWindowingType windowing = g_rand_int_range(rng,
+                                                      0,
+                                                      GWY_WINDOWING_KAISER25+1);
+
+        field_randomize(field, rng);
+        GwyLine *psdf = gwy_field_row_psdf(field, NULL, NULL, GWY_MASK_IGNORE,
+                                           windowing, 0);
+        gdouble rms_ref = sqrt(gwy_field_meansq_full(field));
+        // sqrt(∫W dkx)
+        gdouble i1 = gwy_line_mean_full(psdf)*psdf->res;
+        psdf->data[0] = 0.0;
+        gdouble i2 = gwy_line_mean_full(psdf)*psdf->res;
+        gdouble rms_psdf = sqrt((i1 + i2)*gwy_line_dx(psdf));
+        gwy_assert_floatval(rms_psdf, rms_ref, 2.0*rms_ref/xres);
+
+        g_object_unref(psdf);
+        g_object_unref(field);
+    }
+
     g_rand_free(rng);
 }
 
@@ -1783,6 +1818,49 @@ test_field_distributions_hhcf_partial(void)
             g_object_unref(hhcf_full);
             g_object_unref(hhcf);
             g_object_unref(subfield);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_psdf_rms(void)
+{
+    enum { max_size = 74, niter = 50 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    gwy_fft_load_wisdom();
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 8, max_size);
+            guint yres = g_rand_int_range(rng, 8, max_size);
+            guint width = g_rand_int_range(rng, 6, xres+1);
+            guint height = g_rand_int_range(rng, 6, yres+1);
+            guint col = g_rand_int_range(rng, 0, xres-width+1);
+            guint row = g_rand_int_range(rng, 0, yres-height+1);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+            GwyFieldPart fpart = { col, row, width, height };
+            gwy_field_set_xreal(field, g_rand_double_range(rng, 0.1, 10.0));
+            gwy_field_set_yreal(field, g_rand_double_range(rng, 0.1, 10.0));
+            GwyWindowingType windowing = g_rand_int_range(rng,
+                                                          0,
+                                                          GWY_WINDOWING_KAISER25+1);
+
+            field_randomize(field, rng);
+            GwyField *psdf = gwy_field_psdf(field, &fpart, windowing, lvl);
+            gdouble rms_ref = (lvl
+                               ? gwy_field_rms(field, &fpart, NULL, 0)
+                               : sqrt(gwy_field_meansq(field, &fpart,
+                                                       NULL, 0)));
+            // sqrt(∫∫W dkx kdy)
+            GwyFieldPart intpart = { 0, 0, width, height };
+            gdouble rms_psdf = sqrt(gwy_field_mean(psdf, &intpart, NULL, 0)
+                                    *psdf->xreal*width/psdf->xres
+                                    *psdf->yreal*height/psdf->yres);
+            gwy_assert_floatval(rms_psdf, rms_ref, 1e-10*rms_ref);
+            g_object_unref(psdf);
             g_object_unref(field);
         }
     }

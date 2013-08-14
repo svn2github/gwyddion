@@ -460,10 +460,12 @@ field/distributions/row-hhcf/partial
 field/distributions/row-asg/full
 field/distributions/row-psdf/full
 field/distributions/row-psdf/masked
+field/distributions/row-psdf/rms
 field/distributions/acf/full
 field/distributions/acf/partial
 field/distributions/hhcf/full
 field/distributions/hhcf/partial
+field/distributions/psdf/rms
 field/distributions/angular-average/full
 field/distributions/angular-average/partial
 field/distributions/angular-average/masked
