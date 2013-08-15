@@ -2699,6 +2699,7 @@ gwy_field_psdf(const GwyField *field,
     gwy_field_multiply_full(psdf, q);
 
     fftw_execute(plan);
+    fftw_destroy_plan(plan);
     gwy_field_invalidate(psdf);
 
     guint xrange = width/2, yrange = height/2;
