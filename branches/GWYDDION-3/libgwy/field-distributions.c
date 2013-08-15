@@ -2791,7 +2791,7 @@ gwy_field_asg(const GwyField *field,
     }
 
     gdouble *d = asg->data + (yres/2)*xres, *d2 = d + xres-1;
-    for (guint j = 0; j < xres/2; j++) {
+    for (guint j = 0; j < xres/2; j++, d++, d2--) {
         gdouble x = (j + 0.5)*gwy_field_dx(asg) + asg->xoff;
         *d = *d2 = asg_correction(*d/(x*x));
     }
