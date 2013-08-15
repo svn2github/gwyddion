@@ -26,19 +26,12 @@
  ***************************************************************************/
 
 static void
-fit_gaussian_psdf(const GwyLine *psdf,
-                  gdouble *sigma,
-                  gdouble *T)
+fit_gaussian(const GwyXY *xydata, guint n,
+             gdouble *a, gdouble *b)
 {
     GwyFitFunc *fitfunc = gwy_fit_func_new("Gaussian");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
 
-    guint n = psdf->res;
-    GwyXY *xydata = g_new(GwyXY, n);
-    for (guint i = 0; i < n; i++) {
-        xydata[i].x = (i + 0.5)*gwy_line_dx(psdf);
-        xydata[i].y = psdf->data[i];
-    }
     gwy_fit_func_set_data(fitfunc, xydata, n);
 
     gboolean ok;
@@ -77,13 +70,24 @@ fit_gaussian_psdf(const GwyLine *psdf,
     guint b_id = gwy_fit_func_param_number(fitfunc, "b");
     g_assert_cmpuint(b_id, <, gwy_fit_func_n_params(fitfunc));
 
-    gdouble a = params[a_id], b = params[b_id];
+    *a = params[a_id];
+    *b = params[b_id];
 
     g_object_unref(fitfunc);
-    g_free(xydata);
+}
 
-    *sigma = sqrt(a*b*sqrt(G_PI));
-    *T = 2.0/b;
+static void
+fit_gaussian_line(const GwyLine *psdf,
+                  gdouble *a, gdouble *b)
+{
+    guint n = psdf->res;
+    GwyXY *xydata = g_new(GwyXY, n);
+    for (guint i = 0; i < n; i++) {
+        xydata[i].x = (i + 0.5)*gwy_line_dx(psdf);
+        xydata[i].y = psdf->data[i];
+    }
+    fit_gaussian(xydata, n, a, b);
+    g_free(xydata);
 }
 
 void
@@ -111,8 +115,10 @@ test_field_distributions_row_psdf_full(void)
 
     // There is no independent method to verify the PSDF.  Try to fit it and
     // check if we find reasonable surface roughness parameters.
-    gdouble sigma_fit, T_fit;
-    fit_gaussian_psdf(psdf, &sigma_fit, &T_fit);
+    gdouble a, b;
+    fit_gaussian_line(psdf, &a, &b);
+    gdouble sigma_fit = sqrt(a*b*sqrt(G_PI));
+    gdouble T_fit = 2.0/b;
     gwy_assert_floatval(sigma_fit, sigma, 0.1*sigma);
     gwy_assert_floatval(T_fit, T, 0.1*T);
 
@@ -149,8 +155,10 @@ test_field_distributions_row_psdf_masked(void)
 
     // There is no independent method to verify the PSDF.  Try to fit it and
     // check if we find reasonable surface roughness parameters.
-    gdouble sigma_fit, T_fit;
-    fit_gaussian_psdf(psdf, &sigma_fit, &T_fit);
+    gdouble a, b;
+    fit_gaussian_line(psdf, &a, &b);
+    gdouble sigma_fit = sqrt(a*b*sqrt(G_PI));
+    gdouble T_fit = 2.0/b;
     gwy_assert_floatval(sigma_fit, sigma, 0.1*sigma);
     gwy_assert_floatval(T_fit, T, 0.1*T);
 
@@ -1743,7 +1751,7 @@ test_field_distributions_hhcf_full(void)
                 gint j = g_rand_int_range(rng, -xr, xr+1);
                 gdouble v = hhcf->data[(yr + i)*hhcf->xres + xr + j];
                 gdouble vref = dumb_hhcf_2d(field, j, i);
-                gwy_assert_floatval(v, vref, 1e-13);
+                gwy_assert_floatval(v, vref, 1e-12);
             }
 
             xr = xres-1;
@@ -1753,7 +1761,7 @@ test_field_distributions_hhcf_full(void)
                 gint j = g_rand_int_range(rng, -xr, xr+1);
                 gdouble v = hhcf_full->data[(yr + i)*hhcf_full->xres + xr + j];
                 gdouble vref = dumb_hhcf_2d(field, j, i);
-                gwy_assert_floatval(v, vref, 1e-13);
+                gwy_assert_floatval(v, vref, 1e-12);
             }
 
             g_object_unref(hhcf_full);
@@ -1802,7 +1810,7 @@ test_field_distributions_hhcf_partial(void)
                 gint j = g_rand_int_range(rng, -xr, xr+1);
                 gdouble v = hhcf->data[(yr + i)*hhcf->xres + xr + j];
                 gdouble vref = dumb_hhcf_2d(subfield, j, i);
-                gwy_assert_floatval(v, vref, 1e-13);
+                gwy_assert_floatval(v, vref, 1e-12);
             }
 
             xr = width-1;
@@ -1812,7 +1820,7 @@ test_field_distributions_hhcf_partial(void)
                 gint j = g_rand_int_range(rng, -xr, xr+1);
                 gdouble v = hhcf_full->data[(yr + i)*hhcf_full->xres + xr + j];
                 gdouble vref = dumb_hhcf_2d(subfield, j, i);
-                gwy_assert_floatval(v, vref, 1e-13);
+                gwy_assert_floatval(v, vref, 1e-12);
             }
 
             g_object_unref(hhcf_full);
@@ -2085,6 +2093,79 @@ test_field_distributions_angular_average_masked(void)
         g_object_unref(field);
     }
 
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_radial_psdf_full(void)
+{
+    enum { size = 400 };
+    gdouble dx = 50e-9;
+    gdouble sigma = 20e-9;
+    gdouble T = 300e-9;
+
+    gwy_fft_load_wisdom();
+    GRand *rng = g_rand_new_with_seed(42);
+
+    GwyField *field = gwy_field_new_sized(size, size, FALSE);
+    gwy_field_set_xreal(field, size*dx);
+    gwy_field_set_yreal(field, size*dx);
+    for (guint i = 0; i < size*size; i++)
+        field->data[i] = 2.0*G_PI*sigma*T/dx*g_rand_double(rng);
+
+    gwy_field_filter_gaussian(field, NULL, field, 0.5*T/dx, 0.5*T/dx,
+                              GWY_EXTERIOR_PERIODIC, 0.0);
+
+    GwyCurve *psdf = gwy_field_radial_psdf(field, NULL,
+                                           GWY_WINDOWING_NONE, 1, 0);
+
+    // There is no independent method to verify the RPSDF.  Try to fit it and
+    // check if we find reasonable surface roughness parameters.
+    gdouble a, b;
+    fit_gaussian(psdf->data, psdf->n, &a, &b);
+    gdouble sigma_fit = b*sqrt(G_PI*a);
+    gdouble T_fit = 2.0/b;
+    gwy_assert_floatval(sigma_fit, sigma, 0.1*sigma);
+    gwy_assert_floatval(T_fit, T, 0.1*T);
+
+    g_object_unref(psdf);
+    g_object_unref(field);
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_radial_acf_full(void)
+{
+    enum { size = 400 };
+    gdouble dx = 50e-9;
+    gdouble sigma = 20e-9;
+    gdouble T = 300e-9;
+
+    gwy_fft_load_wisdom();
+    GRand *rng = g_rand_new_with_seed(42);
+
+    GwyField *field = gwy_field_new_sized(size, size, FALSE);
+    gwy_field_set_xreal(field, size*dx);
+    gwy_field_set_yreal(field, size*dx);
+    for (guint i = 0; i < size*size; i++)
+        field->data[i] = 2.0*G_PI*sigma*T/dx*g_rand_double(rng);
+
+    gwy_field_filter_gaussian(field, NULL, field, 0.5*T/dx, 0.5*T/dx,
+                              GWY_EXTERIOR_PERIODIC, 0.0);
+
+    GwyCurve *acf = gwy_field_radial_acf(field, NULL, 1, 0);
+
+    // There is no independent method to verify the RACF.  Try to fit it and
+    // check if we find reasonable surface roughness parameters.
+    gdouble a, b;
+    fit_gaussian(acf->data, acf->n, &a, &b);
+    gdouble sigma_fit = sqrt(a);
+    gdouble T_fit = b;
+    gwy_assert_floatval(sigma_fit, sigma, 0.1*sigma);
+    gwy_assert_floatval(T_fit, T, 0.1*T);
+
+    g_object_unref(acf);
+    g_object_unref(field);
     g_rand_free(rng);
 }
 
