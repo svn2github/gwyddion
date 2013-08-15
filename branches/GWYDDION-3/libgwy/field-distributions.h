@@ -96,12 +96,12 @@ GwyField* gwy_field_acf            (const GwyField *field,
                                     guint xrange,
                                     guint yrange,
                                     guint level)                     G_GNUC_MALLOC;
-GwyField* gwy_field_hhcf           (const GwyField *field,
+GwyField* gwy_field_hhcf           (const const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint xrange,
                                     guint yrange,
                                     guint level)                     G_GNUC_MALLOC;
-GwyField* gwy_field_psdf           (const GwyField *field,
+GwyField* gwy_field_psdf           (const const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     GwyWindowingType windowing,
                                     guint level)                     G_GNUC_MALLOC;
@@ -110,19 +110,19 @@ GwyField* gwy_field_asg            (const GwyField *field,
                                     guint xrange,
                                     guint yrange,
                                     guint level)                     G_GNUC_MALLOC;
-GwyCurve* gwy_field_radial_acf     (GwyField *field,
+GwyCurve* gwy_field_radial_acf     (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint level,
                                     guint npoints)                   G_GNUC_MALLOC;
-GwyCurve* gwy_field_radial_hhcf    (GwyField *field,
+GwyCurve* gwy_field_radial_hhcf    (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint level,
                                     guint npoints)                   G_GNUC_MALLOC;
-GwyCurve* gwy_field_radial_asg     (GwyField *field,
+GwyCurve* gwy_field_radial_asg     (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint level,
                                     guint npoints)                   G_GNUC_MALLOC;
-GwyCurve* gwy_field_radial_psdf    (GwyField *field,
+GwyCurve* gwy_field_radial_psdf    (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     GwyWindowingType windowing,
                                     guint level,

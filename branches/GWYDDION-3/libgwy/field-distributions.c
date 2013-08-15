@@ -2848,7 +2848,7 @@ find_cf_ranges(guint width, guint height,
  *          A new one-dimensional curve with the requested functional.
  **/
 GwyCurve*
-gwy_field_radial_acf(GwyField *field,
+gwy_field_radial_acf(const GwyField *field,
                      const GwyFieldPart *fpart,
                      guint level,
                      guint npoints)
@@ -2893,7 +2893,7 @@ gwy_field_radial_acf(GwyField *field,
  *          A new one-dimensional curve with the requested functional.
  **/
 GwyCurve*
-gwy_field_radial_hhcf(GwyField *field,
+gwy_field_radial_hhcf(const GwyField *field,
                       const GwyFieldPart *fpart,
                       guint level,
                       guint npoints)
@@ -2937,7 +2937,7 @@ gwy_field_radial_hhcf(GwyField *field,
  *          A new one-dimensional curve with the requested functional.
  **/
 GwyCurve*
-gwy_field_radial_asg(GwyField *field,
+gwy_field_radial_asg(const GwyField *field,
                      const GwyFieldPart *fpart,
                      guint level,
                      guint npoints)
@@ -2990,7 +2990,7 @@ gwy_field_radial_asg(GwyField *field,
  *          A new one-dimensional curve with the requested functional.
  **/
 GwyCurve*
-gwy_field_radial_psdf(GwyField *field,
+gwy_field_radial_psdf(const GwyField *field,
                       const GwyFieldPart *fpart,
                       GwyWindowingType windowing,
                       guint level,
