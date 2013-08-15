@@ -271,6 +271,24 @@ test_fit_func_builtin_psdf_exponential(void)
 }
 
 void
+test_fit_func_builtin_rpsdf_gaussian(void)
+{
+    const gchar *param_names[] = { "σ", "T" };
+    const gchar *param_units[] = { "s", "m^-1" };
+    fit_func_one("RPSDF Gaussian", "Radial Power Spectrum",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2, -1);
+}
+
+void
+test_fit_func_builtin_rpsdf_exponential(void)
+{
+    const gchar *param_names[] = { "σ", "T" };
+    const gchar *param_units[] = { "s", "m^-1" };
+    fit_func_one("RPSDF Exponential", "Radial Power Spectrum",
+                 G_N_ELEMENTS(param_names), param_names, param_units, 2, -1);
+}
+
+void
 test_fit_func_builtin_step(void)
 {
     const gchar *param_names[] = { "a", "β", "c", "x₀", "y₀" };

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010,2011 David Nečas (Yeti).
+ *  Copyright (C) 2010,2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -507,6 +507,96 @@ static const BuiltinFitFunc psdf_gauss_builtin = {
 
 /****************************************************************************
  *
+ * RPSDF Exponential
+ *
+ ****************************************************************************/
+
+static gboolean
+rpsdf_exp_function(gdouble x,
+                   const gdouble *param,
+                   gdouble *v)
+{
+    gdouble sigma = param[0], T_2 = param[1], u = x*T_2, w = 1.0 + u*u;
+    *v = 0.5*sigma*sigma*T_2*T_2/G_PI/cbrt(w*w*w);
+    return T_2 != 0;
+}
+
+static gboolean
+rpsdf_exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                   G_GNUC_UNUSED guint npoints,
+                   const gdouble *estim,
+                   gdouble *param)
+{
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN],
+            s = estim[ESTIMATOR_INTEGR];
+    if (ymax <= 0.0 || s <= 0.0) {
+        param[1] = 10.0/(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
+        param[0] = sqrt((ymax - ymin)/param[1]);
+        return FALSE;
+    }
+
+    param[0] = s*sqrt(2.0*G_PI/ymax);
+    param[1] = ymax/s;
+    return TRUE;
+}
+
+static const BuiltinFitFunc rpsdf_exp_builtin = {
+    .group = NC_("function group", "Radial Power Spectrum"),
+    .formula = "<i>σ</i>²<i>T</i>²/2π (1 + <i>K</i>²<i>T</i>²)<sup>−3/2</sup>",
+    .nparams = G_N_ELEMENTS(roughness_param),
+    .param = roughness_param,
+    .function = rpsdf_exp_function,
+    .estimate = rpsdf_exp_estimate,
+    .derive_units = psdf_derive_units,
+};
+
+/****************************************************************************
+ *
+ * RPSDF Gaussian
+ *
+ ****************************************************************************/
+
+static gboolean
+rpsdf_gauss_function(gdouble x,
+                     const gdouble *param,
+                     gdouble *v)
+{
+    gdouble sigma = param[0], T_2 = 0.5*param[1], u = x*T_2;
+    *v = sigma*sigma*T_2*T_2/G_PI*exp(-u*u);
+    return T_2 != 0;
+}
+
+static gboolean
+rpsdf_gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
+                     G_GNUC_UNUSED guint npoints,
+                     const gdouble *estim,
+                     gdouble *param)
+{
+    gdouble ymax = estim[ESTIMATOR_YMAX], ymin = estim[ESTIMATOR_YMIN],
+            s = estim[ESTIMATOR_INTEGR];
+    if (ymax <= 0.0 || s <= 0.0) {
+        param[1] = 10.0/(estim[ESTIMATOR_XMAX] - estim[ESTIMATOR_XMIN]);
+        param[0] = sqrt((ymax - ymin)/param[1]);
+        return FALSE;
+    }
+
+    param[0] = 2.0*s/sqrt(ymax);
+    param[1] = GWY_SQRT_PI*ymax/s;
+    return TRUE;
+}
+
+static const BuiltinFitFunc rpsdf_gauss_builtin = {
+    .group = NC_("function group", "Radial Power Spectrum"),
+    .formula = "<i>σ</i>²<i>T</i>²/4π exp(−<i>x</i>²<i>T</i>²/4)",
+    .nparams = G_N_ELEMENTS(roughness_param),
+    .param = roughness_param,
+    .function = rpsdf_gauss_function,
+    .estimate = rpsdf_gauss_estimate,
+    .derive_units = psdf_derive_units,
+};
+
+/****************************************************************************
+ *
  * Edge
  *
  ****************************************************************************/
@@ -703,6 +793,8 @@ _gwy_fit_func_setup_builtins(BuiltinFitFuncTable *builtins)
     add_builtin(NC_("function", "ACF Gaussian"), acf_gauss_builtin);
     add_builtin(NC_("function", "PSDF Exponential"), psdf_exp_builtin);
     add_builtin(NC_("function", "PSDF Gaussian"), psdf_gauss_builtin);
+    add_builtin(NC_("function", "RPSDF Exponential"), rpsdf_exp_builtin);
+    add_builtin(NC_("function", "RPSDF Gaussian"), rpsdf_gauss_builtin);
     add_builtin(NC_("function", "Step"), step_builtin);
     add_builtin(NC_("function", "Parabolic bump"), parabolic_bump_builtin);
     add_builtin(NC_("function", "Elliptic bump"), elliptic_bump_builtin);
