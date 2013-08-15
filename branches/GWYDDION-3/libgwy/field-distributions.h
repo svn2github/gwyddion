@@ -118,6 +118,15 @@ GwyCurve* gwy_field_radial_hhcf    (GwyField *field,
                                     const GwyFieldPart *fpart,
                                     guint level,
                                     guint npoints)                   G_GNUC_MALLOC;
+GwyCurve* gwy_field_radial_asg     (GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    guint level,
+                                    guint npoints)                   G_GNUC_MALLOC;
+GwyCurve* gwy_field_radial_psdf    (GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    GwyWindowingType windowing,
+                                    guint level,
+                                    guint npoints)                   G_GNUC_MALLOC;
 GwyCurve* gwy_field_angular_average(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,

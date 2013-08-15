@@ -2915,6 +2915,100 @@ gwy_field_radial_hhcf(GwyField *field,
     return rcf;
 }
 
+/**
+ * gwy_field_radial_asg:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ * @npoints: Resolution, i.e. the preferred number of returned curve points.
+ *           Pass zero to choose a suitable resolution automatically.  It is
+ *           not guaranteed that the returned curve will have this number of
+ *           points.
+ *
+ * Calculates radial area scale graph (ASG) of a two-dimensional data field.
+ *
+ * Radial ASG is angularly averaged over direction, i.e. it depends only on
+ * distance from the origin.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional curve with the requested functional.
+ **/
+GwyCurve*
+gwy_field_radial_asg(GwyField *field,
+                     const GwyFieldPart *fpart,
+                     guint level,
+                     guint npoints)
+{
+    guint row, col, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return gwy_curve_new();
+
+    guint xrange, yrange;
+    find_cf_ranges(width, height, gwy_field_dx(field), gwy_field_dy(field),
+                   &xrange, &yrange);
+
+    GwyField *asg = gwy_field_asg(field, fpart, xrange, yrange, level);
+    GwyCurve *rasg = gwy_field_angular_average(field, NULL,
+                                               NULL, GWY_MASK_IGNORE,
+                                               npoints);
+    g_object_unref(asg);
+
+    return rasg;
+}
+
+/**
+ * gwy_field_radial_psdf:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @windowing: Windowing type to use.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ * @npoints: Resolution, i.e. the preferred number of returned curve points.
+ *           Pass zero to choose a suitable resolution automatically.  It is
+ *           not guaranteed that the returned curve will have this number of
+ *           points.
+ *
+ * Calculates radial power spectrum density function (PSDF) of a
+ * two-dimensional data field.
+ *
+ * Radial PSDF is angularly averaged over direction, i.e. it depends only on
+ * distance from the origin.
+ *
+ * Despite the name, the returned function is not actually a
+ * <emphasis>density</emphasis>, it is just an average.  It must be mutliplied
+ * by 2π@K (@K being the spatial wavevector length) to integrate to σ².  On the
+ * other hand it is not identically zero at zero spatial frequency and
+ * resembles the one-dimensional PSDF a bit more (though the function form is,
+ * in general, different). This convention differs from Gwyddion 2.
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional curve with the requested functional.
+ **/
+GwyCurve*
+gwy_field_radial_psdf(GwyField *field,
+                      const GwyFieldPart *fpart,
+                      GwyWindowingType windowing,
+                      guint level,
+                      guint npoints)
+{
+    guint row, col, width, height;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
+        return gwy_curve_new();
+
+    GwyField *psdf = gwy_field_psdf(field, fpart, windowing, level);
+    GwyCurve *rpsdf = gwy_field_angular_average(field, NULL,
+                                                NULL, GWY_MASK_IGNORE,
+                                                npoints);
+    g_object_unref(psdf);
+
+    return rpsdf;
+}
+
 static void
 gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
                     gdouble real, gdouble off,
