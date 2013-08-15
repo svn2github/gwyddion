@@ -2862,7 +2862,7 @@ gwy_field_radial_acf(GwyField *field,
                    &xrange, &yrange);
 
     GwyField *cf = gwy_field_acf(field, fpart, xrange, yrange, level);
-    GwyCurve *rcf = gwy_field_angular_average(field, NULL,
+    GwyCurve *rcf = gwy_field_angular_average(cf, NULL,
                                               NULL, GWY_MASK_IGNORE,
                                               npoints);
     g_object_unref(cf);
@@ -2907,7 +2907,7 @@ gwy_field_radial_hhcf(GwyField *field,
                    &xrange, &yrange);
 
     GwyField *cf = gwy_field_hhcf(field, fpart, xrange, yrange, level);
-    GwyCurve *rcf = gwy_field_angular_average(field, NULL,
+    GwyCurve *rcf = gwy_field_angular_average(cf, NULL,
                                               NULL, GWY_MASK_IGNORE,
                                               npoints);
     g_object_unref(cf);
@@ -2951,7 +2951,7 @@ gwy_field_radial_asg(GwyField *field,
                    &xrange, &yrange);
 
     GwyField *asg = gwy_field_asg(field, fpart, xrange, yrange, level);
-    GwyCurve *rasg = gwy_field_angular_average(field, NULL,
+    GwyCurve *rasg = gwy_field_angular_average(asg, NULL,
                                                NULL, GWY_MASK_IGNORE,
                                                npoints);
     g_object_unref(asg);
@@ -3001,7 +3001,7 @@ gwy_field_radial_psdf(GwyField *field,
         return gwy_curve_new();
 
     GwyField *psdf = gwy_field_psdf(field, fpart, windowing, level);
-    GwyCurve *rpsdf = gwy_field_angular_average(field, NULL,
+    GwyCurve *rpsdf = gwy_field_angular_average(psdf, NULL,
                                                 NULL, GWY_MASK_IGNORE,
                                                 npoints);
     g_object_unref(psdf);
