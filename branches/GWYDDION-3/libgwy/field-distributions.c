@@ -2805,6 +2805,8 @@ gwy_field_asg(const GwyField *field,
         c = fmax(c, asg->data[(yres/2 + 1)*xres + xres/2]);
     asg->data[(yres/2)*xres + xres/2] = c;
 
+    gwy_unit_clear(asg->priv->zunit);
+
     return asg;
 }
 
