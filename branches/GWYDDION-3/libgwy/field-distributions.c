@@ -2860,9 +2860,9 @@ gwy_field_radial_acf(const GwyField *field,
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return gwy_curve_new();
 
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     guint xrange, yrange;
-    find_cf_ranges(width, height, gwy_field_dx(field), gwy_field_dy(field),
-                   &xrange, &yrange);
+    find_cf_ranges(width, height, dx, dy, &xrange, &yrange);
 
     GwyField *cf = gwy_field_acf(field, fpart, xrange, yrange, level);
     GwyCurve *rcf = gwy_field_angular_average(cf, NULL,
@@ -2905,9 +2905,9 @@ gwy_field_radial_hhcf(const GwyField *field,
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return gwy_curve_new();
 
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     guint xrange, yrange;
-    find_cf_ranges(width, height, gwy_field_dx(field), gwy_field_dy(field),
-                   &xrange, &yrange);
+    find_cf_ranges(width, height, dx, dy, &xrange, &yrange);
 
     GwyField *cf = gwy_field_hhcf(field, fpart, xrange, yrange, level);
     GwyCurve *rcf = gwy_field_angular_average(cf, NULL,
@@ -2949,15 +2949,26 @@ gwy_field_radial_asg(const GwyField *field,
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return gwy_curve_new();
 
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     guint xrange, yrange;
-    find_cf_ranges(width, height, gwy_field_dx(field), gwy_field_dy(field),
-                   &xrange, &yrange);
+    find_cf_ranges(width, height, dx, dy, &xrange, &yrange);
 
-    GwyField *asg = gwy_field_asg(field, fpart, xrange, yrange, level);
-    GwyCurve *rasg = gwy_field_angular_average(asg, NULL,
-                                               NULL, GWY_MASK_IGNORE,
-                                               npoints);
-    g_object_unref(asg);
+    GwyField *cf = gwy_field_hhcf(field, fpart, xrange, yrange, level);
+    GwyCurve *rasgf = gwy_field_angular_average(cf, NULL,
+                                                NULL, GWY_MASK_IGNORE,
+                                                npoints);
+    g_object_unref(cf);
+    g_return_val_if_fail(rasgf->n, rasgf);
+
+    GwyCurve *rasg = gwy_curve_new_part(rasgf,
+                                        0.8*fmin(dx, dy),
+                                        rasgf->data[rasgf->n-1].x);
+    g_object_unref(rasgf);
+
+    for (guint i = 0; i < rasg->n; i++) {
+        GwyXY *xy = rasg->data + i;
+        xy->y = asg_correction(xy->y/(xy->x*xy->x));
+    }
 
     return rasg;
 }
