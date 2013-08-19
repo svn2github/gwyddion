@@ -3028,7 +3028,8 @@ gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
                     gdouble real, gdouble off,
                     gdouble x, gdouble y, gdouble z)
 {
-    gdouble l = (hypot(x, y) - off)/real*npoints;
+    // XXX: hypot() avoids under- and overflows but it's much slower.
+    gdouble l = (sqrt(x*x + y*y) - off)/real*npoints;
     gint il = floor(l);
     il = CLAMP(il, 0, npoints-1);
     gdouble w1 = fabs(l - il - 0.5), w0 = 1.0 - w1;
