@@ -9,8 +9,14 @@ EXTRA_DIST = \
 	gwyddion3.vim \
 	gwyddion3.spec.in
 
-noinst_DATA = \
-	gwyddion3.vim
+# Cannot make dists without gtk-doc anyway.  So no problem here.
+if ENABLE_GTK_DOC
+gtkdoc_data = gwyddion3.vim
+else
+gtkdoc_data =
+endif
+
+noinst_DATA = $(gtkdoc_data)
 
 vim_syn_gen = $(top_srcdir)/build/vim-syn-gen.py
 gwyddion3_vim_cfg = $(srcdir)/gwyddion3-vim-cfg.py
