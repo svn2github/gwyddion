@@ -33,6 +33,7 @@
 #include "libgwy/mask-field-grains.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
+#include "libgwy/line-internal.h"
 #include "libgwy/curve-internal.h"
 #include "libgwy/mask-field-internal.h"
 #include "libgwy/field-internal.h"
@@ -354,8 +355,7 @@ gwy_field_value_dist(const GwyField *field,
 
     gwy_unit_assign(gwy_line_get_xunit(line), gwy_field_get_zunit(field));
     if (!cumulative)
-        gwy_unit_power(gwy_line_get_yunit(line),
-                       gwy_field_get_zunit(field), -1);
+        gwy_unit_power(gwy_line_get_yunit(line), line->priv->xunit, -1);
 
     return line;
 }
@@ -507,7 +507,7 @@ slope_dist_discr(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * only if @x and @y units of @field match.
  *
  * Slopes are calculated as horizontal or vertical derivatives of the value,
- * i.e. dz/dx or dz/dy.
+ * i.e. d@z/d@x or d@z/d@y.
  *
  * Pass @max <= @min to calculate the distribution in the full data range
  * (with masking still considered).
@@ -583,19 +583,168 @@ fail:
         || fabs(ddata.sin_alpha) < 1e-14) {
         gwy_unit_divide(gwy_line_get_xunit(line),
                         field->priv->zunit, field->priv->xunit);
-        if (!cumulative)
-            gwy_unit_power(gwy_line_get_yunit(line), field->priv->xunit, -1);
     }
     else if (fabs(ddata.cos_alpha) < 1e-14) {
         gwy_unit_divide(gwy_line_get_xunit(line),
                         field->priv->zunit, field->priv->yunit);
-        if (!cumulative)
-            gwy_unit_power(gwy_line_get_yunit(line), field->priv->yunit, -1);
     }
     else {
-        g_warning("X and Y units of field do not match.");
+        g_warning("Slope distribution requires identical lateral units.");
         // Do not set any units then.
     }
+
+    if (!cumulative)
+        gwy_unit_power(gwy_line_get_yunit(line), line->priv->xunit, -1);
+
+    return line;
+}
+
+static void
+tss_dist1(gdouble v,
+          DistributionData *ddata)
+{
+    if (ddata->analyse) {
+        if (v < ddata->min)
+            ddata->min = v;
+        if (v > ddata->max)
+            ddata->max = v;
+        ddata->n_in_range++;
+        ddata->n++;
+    }
+    else if (ddata->count) {
+        if (v >= ddata->min && v <= ddata->max)
+            ddata->n_in_range++;
+        ddata->n++;
+    }
+    else
+        ddata->left_sum += gwy_line_add_dist_delta(ddata->dist, v, 1.0);
+}
+
+static void
+tss_dist(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+         guint w1, guint w2, guint w3, guint w4,
+         gpointer user_data)
+{
+    DistributionData *ddata = (DistributionData*)user_data;
+    if (w1 + w2 + w3 + w4 < 3)
+        return;
+
+    gdouble v12 = (z1 - z2)/ddata->dx, u12 = v12*v12,
+            v23 = (z2 - z3)/ddata->dy, u23 = v23*v23,
+            v34 = (z3 - z4)/ddata->dx, u34 = v34*v34,
+            v41 = (z4 - z1)/ddata->dy, u41 = v41*v41;
+
+    if (w4 & w1 & w2)
+        tss_dist1(u41 + u12, ddata);
+    if (w1 & w2 & w3)
+        tss_dist1(u12 + u23, ddata);
+    if (w2 & w3 & w4)
+        tss_dist1(u23 + u34, ddata);
+    if (w3 & w4 & w1)
+        tss_dist1(u34 + u41, ddata);
+}
+
+/**
+ * gwy_field_tss_dist:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
+ *              density.
+ * @npoints: Distribution resolution, i.e. the number of histogram bins.
+ *           Pass zero to choose a suitable resolution automatically.
+ * @min: Minimum value of the range to calculate the distribution in.
+ * @max: Maximum value of the range to calculate the distribution in.
+ *
+ * Calculates the distribution of total squared slopes in a field.
+ *
+ * This distribution is meaningful only if @x and @y units of @field match.
+ *
+ * The total squared slopes is calculated as sum of squares of one-side 
+ * horizontal or vertical derivatives of the value, i.e. (d@z/d@x)² and
+ * (d@z/d@y)².
+ *
+ * Pass @max <= @min to calculate the distribution in the full data range
+ * (with masking still considered).
+ *
+ * Returns: (transfer full):
+ *          A new one-dimensional data line with the total squared slope
+ *          distribution.
+ **/
+GwyLine*
+gwy_field_tss_dist(const GwyField *field,
+                   const GwyFieldPart *fpart,
+                   const GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   gboolean cumulative,
+                   guint npoints,
+                   gdouble min, gdouble max)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    GwyLine *line = NULL;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        goto fail;
+
+    if (!gwy_unit_equal(field->priv->xunit, field->priv->yunit))
+        g_warning("Total squared slope distribution requires "
+                  "identical lateral units.");
+
+    gboolean explicit_range = min < max;
+
+    DistributionData ddata = {
+        0, 0,
+        !explicit_range, TRUE,
+        explicit_range ? min : G_MAXDOUBLE,
+        explicit_range ? max : -G_MAXDOUBLE,
+        0.0, NULL,
+        gwy_field_dx(field), gwy_field_dy(field),
+        0.0, 0.0,
+    };
+
+    // Run analyse (find range and count) or count (count in range).  If both
+    // is given by caller, this serves as a somewhat inefficient masked pixel
+    // counting method.
+    gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
+                               tss_dist, &ddata);
+
+    if (!npoints)
+        npoints = dist_points_for_n_points(ddata.n_in_range);
+    if (!npoints)
+        goto fail;
+
+    sanitise_range(&ddata.min, &ddata.max);
+
+    line = ddata.dist = gwy_line_new_sized(npoints, TRUE);
+    line->off = ddata.min;
+    line->real = ddata.max - ddata.min;
+
+    ddata.analyse = ddata.count = FALSE;
+    gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
+                               tss_dist, &ddata);
+
+    if (cumulative) {
+        gwy_line_accumulate(line, TRUE);
+        gwy_line_add(line, ddata.left_sum);
+        gwy_line_multiply(line, 1.0/ddata.n);
+    }
+    else
+        gwy_line_multiply(line, 1.0/(gwy_line_dx(line)*ddata.n));
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_multiply(gwy_line_get_xunit(line),
+                      field->priv->xunit, field->priv->yunit);
+    gwy_unit_power_multiply(gwy_line_get_xunit(line),
+                            gwy_line_get_xunit(line), -1,
+                            field->priv->zunit, 2);
+    if (!cumulative)
+        gwy_unit_power(gwy_line_get_yunit(line), field->priv->yunit, -1);
 
     return line;
 }
@@ -3090,7 +3239,7 @@ gwy_field_angular_average(const GwyField *field,
         goto fail;
 
     if (!gwy_unit_equal(field->priv->xunit, field->priv->yunit))
-        g_warning("Angular averaging requires same lateral units.");
+        g_warning("Angular averaging requires identical lateral units.");
 
     // Figure out suitable uniform sampling.  Since we return a curve a
     // non-uniform sampling might be advantageous but I have no idea how to
