@@ -49,8 +49,6 @@
 #define MIN_ARROW_WIDTH       6
 #define NO_ARROW 2
 
-typedef struct _GwySpinButtonPrivate GwySpinButtonPrivate;
-
 struct _GwySpinButtonPrivate {
     GtkAdjustment *adjustment;
 
