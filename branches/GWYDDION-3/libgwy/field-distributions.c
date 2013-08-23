@@ -3347,6 +3347,16 @@ fail:
  * <code>gwy_line_mean(line)*line->real</code>, is unity.
  * Cumulative distribution values then always lie in the interval [0,1].
  *
+ * Several functionals are known under different names.  The
+ * autocorrelation function (ACF) is occasionally confusingly called
+ * height-height correlation function.  Also autocovariance function is often
+ * used instead, which differs by normalisation to unity at zero and making the
+ * mean value zero, which is usually done when calculating the ACF but it is
+ * not a strict requirement.
+ *
+ * The height-height correlation function (HHCF) is also known as structure
+ * function or height difference correlation function.
+ *
  * A large number of different Fast Fourier Transform conventions exists and
  * this leads to lots of confusion when results obtained by different means
  * are compared.  The conventions used in Gwyddion 3 are based on the following
