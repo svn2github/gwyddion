@@ -983,7 +983,7 @@ propagate_non_extrema_marking(guint *types, const gdouble *d,
             if ((i && types[k-xres] && d[k] == d[k-xres])
                 || (j && types[k-1] && d[k] == d[k-1])
                 || (j < xres-1 && types[k+1] && d[k] == d[k+1])
-                || (i < yres-1 && types[k+yres] && d[k] == d[k+yres])) {
+                || (i < yres-1 && types[k+xres] && d[k] == d[k+xres])) {
                 types[k] = 1;
                 int_list_add(outqueue, k);
             }
