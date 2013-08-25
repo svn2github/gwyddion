@@ -510,8 +510,9 @@ gwy_mask_field_remove_grains(GwyMaskField *field,
         map[gno] = gno;
     for (guint i = 0; i < nids; i++) {
         guint gno = grain_ids[i];
-        if (G_UNLIKELY(gno > ngrains)) {
+        if (G_UNLIKELY(!gno || gno > ngrains)) {
             g_free(map);
+            g_return_if_fail(gno != 0);
             g_return_if_fail(grain_ids[i] <= ngrains);
         }
         map[gno] = 0;
