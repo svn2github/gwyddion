@@ -335,6 +335,29 @@ gwy_mask_field_grain_positions(const GwyMaskField *field)
     return field->priv->grain_positions;
 }
 
+// A silly case we do not want to handle in the generic algorithm, i.e. removal
+// of all grains.  We promise to keep the caches usable so do not simply call
+// gwy_mask_field_fill() as it would destroy them.
+static void
+update_caches_for_no_grains(GwyMaskField *field)
+{
+    MaskField *priv = field->priv;
+    guint xres = field->xres, yres = field->yres;
+    GwyFieldPart *bboxes = priv->grain_bounding_boxes;
+    guint *sizes = priv->grain_sizes;
+    guint *distances = priv->distances;
+
+    gwy_clear(field->data, field->stride*yres);
+    gwy_clear(priv->grains, xres*yres);
+    if (distances)
+        gwy_clear(distances, xres*yres);
+    priv->ngrains = 0;
+    if (sizes)
+        sizes[0] = xres*yres;
+    if (bboxes)
+        bboxes[0] = (GwyFieldPart){ 0, 0, xres, yres };
+}
+
 /**
  * gwy_mask_field_remove_grain:
  * @field: A two-dimensional mask field.
@@ -343,11 +366,14 @@ gwy_mask_field_grain_positions(const GwyMaskField *field)
  * Removes the grain of given number from a mask field.
  *
  * The grain number is the number used e.g. in gwy_mask_field_grain_numbers().
+ * For removal of many grains, method gwy_mask_field_remove_grains() is likely
+ * to be more efficient.
  *
  * The remaining grains are renumbered and the sizes and bounding boxes of
  * empty space updated so that you can continue to use the arrays returned
  * from e.g. gwy_mask_field_grain_sizes(), just with the number of grains one
- * smaller.
+ * smaller.  Of course, you <emphasis>cannot</emphasis> continue using the old
+ * grain numbers because of the renumbering.
  **/
 void
 gwy_mask_field_remove_grain(GwyMaskField *field,
@@ -367,18 +393,8 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     GwyFieldPart *bboxes = priv->grain_bounding_boxes;
     guint *sizes = priv->grain_sizes;
 
-    // A silly case we do not want to handle below as it is more convenient to
-    // assume grain 0 (empty space) has some pixels.  We promise to keep the
-    // cache usable so do not simply call gwy_mask_field_fill() as it would
-    // destroy the cache.
     if (ngrains == 1) {
-        gwy_clear(field->data, field->stride*yres);
-        gwy_clear(priv->grains, xres*yres);
-        priv->ngrains = 0;
-        if (sizes)
-            sizes[0] = xres*yres;
-        if (bboxes)
-            bboxes[0] = (GwyFieldPart){ 0, 0, xres, yres };
+        update_caches_for_no_grains(field);
         return;
     }
 
@@ -398,10 +414,14 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
         }
 
         guint *g = priv->grains;
+        guint *d = priv->distances;
         for (guint i = 0; i < yres; i++) {
             for (guint j = 0; j < xres; j++, g++) {
-                if (*g == grain_id)
+                if (*g == grain_id) {
                     *g = 0;
+                    if (d)
+                        d[i*xres + j] = 0;
+                }
                 else if (*g > grain_id)
                     (*g)--;
             }
@@ -416,11 +436,14 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
     }
     else {
         guint *g = priv->grains;
+        guint *d = priv->distances;
         for (guint i = 0; i < yres; i++) {
             for (guint j = 0; j < xres; j++, g++) {
                 if (*g == grain_id) {
                     gwy_mask_field_set(field, j, i, FALSE);
                     *g = 0;
+                    if (d)
+                        d[i*xres + j] = 0;
                 }
                 else if (*g > grain_id)
                     (*g)--;
@@ -434,6 +457,131 @@ gwy_mask_field_remove_grain(GwyMaskField *field,
         memmove(sizes + grain_id, sizes + (grain_id + 1),
                 (ngrains - grain_id)*sizeof(guint));
     }
+
+    GwyXY *pos = priv->grain_positions;
+    if (pos) {
+        memmove(pos + grain_id, pos + (grain_id + 1),
+                (ngrains - grain_id)*sizeof(GwyXY));
+    }
+
+    priv->ngrains--;
+}
+
+/**
+ * gwy_mask_field_remove_grains:
+ * @field: A two-dimensional mask field.
+ * @grain_ids: (array length=nids):
+ *             Array with grain numbers (from 1 to @ngrains).  The numbers may
+ *             repeat and do not need to be in any order.
+ * @nids: Number of items in @grain_ids.
+ *
+ * Removes many grains of given numbers from a mask field.
+ *
+ * The grain number is the number used e.g. in gwy_mask_field_grain_numbers().
+ * For removal of a single grain, method gwy_mask_field_remove_grain() is more
+ * efficient, especially if grain bounding boxes have been already computed.
+ *
+ * The remaining grains are renumbered and the sizes and bounding boxes of
+ * empty space updated so that you can continue to use the arrays returned
+ * from e.g. gwy_mask_field_grain_sizes(), just with the number of grains one
+ * smaller.  Of course, you <emphasis>cannot</emphasis> continue using the old
+ * grain numbers because of the renumbering.
+ **/
+void
+gwy_mask_field_remove_grains(GwyMaskField *field,
+                             const guint *grain_ids,
+                             guint nids)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(!nids || grain_ids);
+    if (!nids)
+        return;
+
+    // Normally the caller must have obtained the grain id somewhere so the
+    // grains are numbered.  But just in case...
+    gwy_mask_field_grain_numbers(field);
+
+    MaskField *priv = field->priv;
+    guint ngrains = priv->ngrains;
+
+    // Figure out the grain renumbering.
+    guint *map = g_new(guint, ngrains+1);
+    for (guint gno = 0; gno <= ngrains; gno++)
+        map[gno] = gno;
+    for (guint i = 0; i < nids; i++) {
+        guint gno = grain_ids[i];
+        if (G_UNLIKELY(gno > ngrains)) {
+            g_free(map);
+            g_return_if_fail(grain_ids[i] <= ngrains);
+        }
+        map[gno] = 0;
+    }
+
+    {
+        guint gg = 1;
+        for (guint gno = 1; gno <= ngrains; gno++) {
+            if (map[gno])
+                map[gno] = gg++;
+        }
+        if (gg == 1) {
+            g_free(map);
+            update_caches_for_no_grains(field);
+            return;
+        }
+    }
+
+    guint xres = field->xres, yres = field->yres;
+    guint *sizes = priv->grain_sizes;
+    guint *g = priv->grains;
+    guint *d = priv->distances;
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, g++) {
+            if (!*g)
+                continue;
+
+            if (!map[*g]) {
+                gwy_mask_field_set(field, j, i, FALSE);
+                *g = 0;
+                if (d)
+                    d[i*xres + j] = 0;
+            }
+            else
+                *g = map[*g];
+        }
+    }
+
+    // If we have grain data update them too.
+    if (sizes) {
+        for (guint gno = 1; gno <= ngrains; gno++) {
+            guint gg = map[gno];
+            if (gg)
+                sizes[gg] = sizes[gno];
+            else
+                sizes[0] += sizes[gno];
+        }
+    }
+
+    GwyFieldPart *bboxes = priv->grain_bounding_boxes;
+    if (bboxes) {
+        for (guint gno = 1; gno <= ngrains; gno++) {
+            guint gg = map[gno];
+            if (gg)
+                bboxes[gg] = bboxes[gno];
+            else
+                gwy_field_part_union(bboxes, bboxes + gno);
+        }
+    }
+
+    GwyXY *pos = priv->grain_positions;
+    if (pos) {
+        for (guint gno = 1; gno <= ngrains; gno++) {
+            guint gg = map[gno];
+            if (gg)
+                pos[gg] = pos[gno];
+        }
+    }
+
+    g_free(map);
 
     priv->ngrains--;
 }

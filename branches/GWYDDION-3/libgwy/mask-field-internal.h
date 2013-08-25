@@ -28,6 +28,8 @@
 G_BEGIN_DECLS
 
 struct _GwyMaskFieldPrivate {
+    // NB: gwy_mask_field_remove_grain[s]() must to be updated whenever new
+    // cached data are added because they guarantee cache carry-over!
     guint *grains;
     guint *distances;
     guint *grain_sizes;

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,6 +33,9 @@ const GwyFieldPart* gwy_mask_field_grain_bounding_boxes(const GwyMaskField *fiel
 const GwyXY*        gwy_mask_field_grain_positions     (const GwyMaskField *field);
 void                gwy_mask_field_remove_grain        (GwyMaskField *field,
                                                         guint grain_id);
+void                gwy_mask_field_remove_grains       (GwyMaskField *field,
+                                                        const guint *grain_ids,
+                                                        guint nids);
 void                gwy_mask_field_extract_grain       (const GwyMaskField *field,
                                                         GwyMaskField *target,
                                                         guint grain_id,
