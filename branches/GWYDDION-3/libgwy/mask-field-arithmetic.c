@@ -158,7 +158,8 @@ copy_part(const GwyMaskField *src,
 /**
  * gwy_mask_field_copy:
  * @src: Source two-dimensional mask field.
- * @srcrectangle: Area in field @src to copy.  Pass %NULL to copy entire @src.
+ * @srcrectangle: (allow-none):
+ *                Area in field @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination two-dimensional mask field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
