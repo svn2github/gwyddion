@@ -1616,6 +1616,302 @@ test_mask_field_grain_remove_multiple(void)
     g_rand_free(rng);
 }
 
+static void
+mask_field_mark_extrema_one(const gdouble *data, guint xres, guint yres,
+                            const gchar *expected_str,
+                            gboolean maxima)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_assign(field->data, data, xres*yres);
+    GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+    gwy_mask_field_mark_extrema(mask, field, maxima);
+    GwyMaskField *expected = mask_field_from_string(expected_str);
+    mask_field_assert_equal(mask, expected);
+    g_object_unref(expected);
+    g_object_unref(mask);
+    g_object_unref(field);
+}
+
+void
+test_mask_field_mark_maxima_maze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+        1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "### ### ###\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # ### #\n"
+        "# # #      \n"
+        "# # #######\n"
+        "# #     #  \n"
+        "# #########\n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_mask_field_mark_maxima_badmaze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 2,
+        1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+        1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "          #\n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_mask_field_mark_maxima_pinhole(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "######## ##\n"
+        "###########\n"
+        "###########\n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_mask_field_mark_maxima_tip(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "        #  \n"
+        "           \n"
+        "           \n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_mask_field_mark_maxima_chessboard(void)
+{
+    enum { xres = 12, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1,
+        1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1,
+        1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1,
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+        1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+        1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+    };
+    const gchar *expected_str =
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "      ###   \n"
+        "      ###   \n"
+        "      ###   \n"
+        "###      ###\n"
+        "###      ###\n"
+        "###      ###\n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_mask_field_mark_minima_maze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1,  0, -1, -1, -1,  0, -1, -1, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1, -1, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0,  0,  0,  0,  0,  0,
+        -1,  0, -1,  0, -1, -1, -1, -1, -1, -1, -1,
+        -1,  0, -1,  0,  0,  0,  0,  0, -1,  0,  0,
+        -1,  0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "### ### ###\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # ### #\n"
+        "# # #      \n"
+        "# # #######\n"
+        "# #     #  \n"
+        "# #########\n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_mask_field_mark_minima_badmaze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1,  0, -1, -1, -1,  0, -1, -1, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1, -1, -1,  0, -2,
+        -1,  0, -1,  0, -1,  0,  0,  0,  0,  0,  0,
+        -1,  0, -1,  0, -1, -1, -1, -1, -1, -1, -1,
+        -1,  0, -1,  0,  0,  0,  0,  0, -1,  0,  0,
+        -1,  0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "          #\n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_mask_field_mark_minima_pinhole(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,  0, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "######## ##\n"
+        "###########\n"
+        "###########\n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_mask_field_mark_minima_tip(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -2, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "        #  \n"
+        "           \n"
+        "           \n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_mask_field_mark_minima_chessboard(void)
+{
+    enum { xres = 12, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1, -2, -2, -2,  0,  0,  0, -1, -1, -1,
+        -1, -1, -1, -2, -2, -2,  0,  0,  0, -1, -1, -1,
+        -1, -1, -1, -2, -2, -2,  0,  0,  0, -1, -1, -1,
+         0,  0,  0, -1, -1, -1, -2, -2, -2,  0,  0,  0,
+         0,  0,  0, -1, -1, -1, -2, -2, -2,  0,  0,  0,
+         0,  0,  0, -1, -1, -1, -2, -2, -2,  0,  0,  0,
+        -1, -1, -1,  0,  0,  0, -1, -1, -1, -2, -2, -2,
+        -1, -1, -1,  0,  0,  0, -1, -1, -1, -2, -2, -2,
+        -1, -1, -1,  0,  0,  0, -1, -1, -1, -2, -2, -2,
+    };
+    const gchar *expected_str =
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "      ###   \n"
+        "      ###   \n"
+        "      ###   \n"
+        "###      ###\n"
+        "###      ###\n"
+        "###      ###\n";
+    mask_field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
 // Calculated squared Euclidean distances by taking the minimum of distance
 // from the pixel to any outside pixel.
 static guint*

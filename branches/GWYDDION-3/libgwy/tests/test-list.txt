@@ -288,6 +288,16 @@ mask-field/grain/positions
 mask-field/grain/remove
 mask-field/grain/remove-multiple
 mask-field/grain/distance-transform
+mask-field/mark/maxima/maze
+mask-field/mark/maxima/badmaze
+mask-field/mark/maxima/pinhole
+mask-field/mark/maxima/tip
+mask-field/mark/maxima/chessboard
+mask-field/mark/minima/maze
+mask-field/mark/minima/badmaze
+mask-field/mark/minima/pinhole
+mask-field/mark/minima/tip
+mask-field/mark/minima/chessboard
 mask-field/shrink
 mask-field/grow
 mask-field/congruence/in-place/4x3
