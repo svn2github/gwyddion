@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -1506,6 +1506,96 @@ test_mask_field_grain_remove(void)
         ngrains_new = gwy_mask_field_n_grains(copy);
         grains_new = gwy_mask_field_grain_numbers(copy);
         g_assert_cmpuint(ngrains_new, ==, ngrains);
+        for (guint k = 0; k < xres*yres; k++) {
+            g_assert_cmpuint(grains_new[k], ==, grains[k]);
+        }
+        const GwyFieldPart *bboxes_ref = gwy_mask_field_grain_bounding_boxes(copy);
+        const guint *sizes_ref = gwy_mask_field_grain_sizes(copy);
+        for (guint i = 0; i <= ngrains; i++) {
+            g_assert_cmpuint(sizes[i], ==, sizes_ref[i]);
+            g_assert_cmpuint(bboxes[i].col, ==, bboxes_ref[i].col);
+            g_assert_cmpuint(bboxes[i].row, ==, bboxes_ref[i].row);
+            g_assert_cmpuint(bboxes[i].width, ==, bboxes_ref[i].width);
+            g_assert_cmpuint(bboxes[i].height, ==, bboxes_ref[i].height);
+        }
+
+        g_object_unref(copy);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_mask_field_grain_remove_multiple(void)
+{
+    enum { max_size = 214, niter = 1000 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble prob = g_rand_double(rng);
+        GwyMaskField *field = random_mask_field_prob(xres, yres, rng, prob);
+
+        guint ngrains = gwy_mask_field_n_grains(field);
+        const guint *grains = gwy_mask_field_grain_numbers(field);
+        if (!ngrains) {
+            g_object_unref(field);
+            continue;
+        }
+
+        guint nremove = g_rand_int_range(rng, 1, MIN(ngrains+1, 31));
+        guint *grainlist = g_new(guint, nremove);
+        for (guint i = 0; i < nremove; i++)
+            grainlist[i] = g_rand_int_range(rng, 1, ngrains+1);
+
+        // Verify that the grains were removed in @copy.
+        GwyMaskField *copy = gwy_mask_field_duplicate(field);
+        gwy_mask_field_remove_grains(copy, grainlist, nremove);
+
+        const guint *grains_new = gwy_mask_field_grain_numbers(copy);
+
+        for (guint i = 0; i < yres; i++) {
+            GwyMaskIter iter1, iter2;
+            gwy_mask_field_iter_init(field, iter1, 0, i);
+            gwy_mask_field_iter_init(copy, iter2, 0, i);
+            for (guint j = 0; j < xres; j++) {
+                gboolean value = gwy_mask_iter_get(iter1);
+                gboolean value_new = gwy_mask_iter_get(iter2);
+                gboolean should_be_removed = !value;
+                if (!should_be_removed) {
+                    for (guint m = 0; m < nremove; m++) {
+                        if (grains[i*xres + j] == grainlist[m]) {
+                            should_be_removed = TRUE;
+                            break;
+                        }
+                    }
+                }
+                if (should_be_removed) {
+                    g_assert_cmpuint(value_new, ==, 0);
+                    g_assert_cmpuint(grains_new[i*xres + j], ==, 0);
+                }
+                else {
+                    g_assert_cmpuint(value_new, ==, value);
+                    g_assert_cmpuint(grains_new[i*xres + j], !=, 0);
+                }
+                gwy_mask_iter_next(iter1);
+                gwy_mask_iter_next(iter2);
+            }
+        }
+
+        g_free(grainlist);
+
+        // Locate the grains from scratch.
+        // Verify the same result was obtained.
+        gwy_mask_field_copy(copy, NULL, field, 0, 0);
+        gwy_mask_field_invalidate(field);
+        const GwyFieldPart *bboxes = gwy_mask_field_grain_bounding_boxes(field);
+        const guint *sizes = gwy_mask_field_grain_sizes(field);
+        ngrains = gwy_mask_field_n_grains(field);
+        grains = gwy_mask_field_grain_numbers(field);
+
         for (guint k = 0; k < xres*yres; k++) {
             g_assert_cmpuint(grains_new[k], ==, grains[k]);
         }
