@@ -940,6 +940,37 @@ gwy_cholesky_invert(gdouble *a, guint n)
     return TRUE;
 }
 
+/**
+ * gwy_cholesky_multiply:
+ * @matrix: Lower triangular part of a symmetric, presumably positive definite,
+ *          matrix.  See gwy_lower_triangular_matrix_index() for storage
+ *          details.
+ * @vec: (inout):
+ *       Vector to be multiplied, it will be modified in place.
+ * @n: Dimension of @matrix.
+ *
+ * Multiplies a vector by a triangular matrix.
+ *
+ * The operation can be considered either left-multiplication of column vector
+ * by upper right triangular matrix, or right-multiplication of row vector with
+ * lower left triangular matrix.  The result is the same.
+ *
+ * The matrix will be typically obtained by gwy_cholesky_decompose() but this
+ * method does not require any property such as positive definiteness.
+ **/
+void
+gwy_cholesky_multiply(const gdouble *a, gdouble *vec, guint n)
+{
+    gdouble x[n];
+    gwy_clear(x, n);
+    for (guint i = 0; i < n; i++) {
+        gdouble vi = vec[i];
+        for (guint j = 0; j <= i; j++, a++)
+            x[j] += (*a)*vi;
+    }
+    gwy_assign(vec, x, n);
+}
+
 // Note it does not return the norm but the norm divided by √n.
 static gdouble
 symetrical_norm2(const gdouble *a, guint n)
