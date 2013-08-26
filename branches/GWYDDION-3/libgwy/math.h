@@ -124,6 +124,9 @@ gboolean gwy_cholesky_invert   (gdouble *matrix,
                                 guint n);
 gdouble  gwy_cholesky_condition(const gdouble *matrix,
                                 guint n)               G_GNUC_PURE;
+void     gwy_cholesky_multiply (const gdouble *matrix,
+                                gdouble *vec,
+                                guint n);
 gboolean gwy_linalg_solve      (gdouble *matrix,
                                 gdouble *rhs,
                                 gdouble *result,

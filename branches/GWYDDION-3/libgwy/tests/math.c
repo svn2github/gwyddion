@@ -993,7 +993,7 @@ test_cholesky_make_matrix(gdouble *d,
                           GRand *rng)
 {
     for (guint j = 0; j < n; j++) {
-        SLi(d, j, j) = exp(g_rand_double_range(rng, -5.0, 5.0));
+        SLi(d, j, j) = exp(g_rand_double_range(rng, -2.0, 5.0));
         for (guint k = 0; k < j; k++) {
             SLi(d, j, k) = (g_rand_double_range(rng, -1.0, 1.0)
                             + g_rand_double_range(rng, -1.0, 1.0)
@@ -1038,46 +1038,61 @@ test_math_cholesky(void)
 
             /* Decomposition */
             test_cholesky_matsquare(matrix, decomp, n);
+            gdouble cond = gwy_cholesky_condition(matrix, n);
+            g_assert(isfinite(cond));
             test_cholesky_matvec(solution, matrix, vector, n);
             g_assert(gwy_cholesky_decompose(matrix, n));
             for (guint j = 0; j < matlen; j++) {
                 eps = gwy_powi(10.0, (gint)j - 15);
-                g_assert_cmpfloat(fabs(matrix[j] - decomp[j]),
-                                  <=,
-                                  eps * (fabs(matrix[j]) + fabs(decomp[j])));
+                gwy_assert_floatval(matrix[j], decomp[j],
+                                    eps*(fabs(matrix[j]) + fabs(decomp[j])));
             }
 
             /* Solution */
-            eps = gwy_powi(10.0, (gint)n - 11);
+            eps = gwy_powi(10.0, (gint)n - 12);
             gwy_cholesky_solve(matrix, solution, n);
             for (guint j = 0; j < n; j++) {
-                g_assert_cmpfloat(fabs(solution[j] - vector[j]),
-                                  <=,
-                                  eps * (fabs(solution[j]) + fabs(vector[j])));
+                gwy_assert_floatval(solution[j], vector[j],
+                                    eps*(fabs(solution[j]) + fabs(vector[j])));
             }
 
             /* Inversion */
             test_cholesky_matsquare(matrix, decomp, n);
-            memcpy(inverted, matrix, matlen*sizeof(gdouble));
+            gwy_assign(inverted, matrix, matlen);
             g_assert(gwy_cholesky_invert(inverted, n));
             /* Multiplication with inverted must give unity */
             test_cholesky_matmul(unity, matrix, inverted, n);
             for (guint j = 0; j < n; j++) {
-                eps = gwy_powi(10.0, (gint)n - 10);
+                eps = gwy_powi(10.0, (gint)n - 12);
                 for (guint k = 0; k < j; k++) {
-                    g_assert_cmpfloat(fabs(SLi(unity, j, k)), <=, eps);
+                    gwy_assert_floatval(SLi(unity, j, k), 0.0, eps);
                 }
-                eps = gwy_powi(10.0, (gint)n - 11);
-                g_assert_cmpfloat(fabs(SLi(unity, j, j) - 1.0), <=, eps);
+                eps = gwy_powi(10.0, (gint)n - 12);
+                gwy_assert_floatval(SLi(unity, j, j), 1.0, eps);
             }
             /* Double inversion must give the original */
             eps = gwy_powi(10.0, (gint)n - 12);
             g_assert(gwy_cholesky_invert(inverted, n));
             for (guint j = 0; j < matlen; j++) {
-                g_assert_cmpfloat(fabs(matrix[j] - inverted[j]),
-                                  <=,
-                                  eps * (fabs(matrix[j]) + fabs(inverted[j])));
+                gwy_assert_floatval(matrix[j], inverted[j],
+                                    eps*(fabs(matrix[j]) + fabs(inverted[j])));
             }
+
+            /* Square of multiplication with decomposition must give the same
+             * as dot product with the matrix. */
+            test_cholesky_make_matrix(decomp, n, rng);
+            test_cholesky_matsquare(matrix, decomp, n);
+            test_cholesky_make_vector(vector, n, rng);
+            test_cholesky_matvec(solution, matrix, vector, n);
+            gdouble sref = 0.0;
+            for (guint j = 0; j < n; j++)
+                sref += vector[j]*solution[j];
+            gwy_cholesky_multiply(decomp, vector, n);
+            gdouble s = 0.0;
+            for (guint j = 0; j < n; j++)
+                s += vector[j]*vector[j];
+
+            gwy_assert_floatval(s, sref, 1e-15*sref);
         }
 
         g_free(vector);
