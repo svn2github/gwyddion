@@ -1021,7 +1021,7 @@ test_math_cholesky(void)
     /* Make it realy reproducible. */
     GRand *rng = g_rand_new_with_seed(42);
 
-    for (guint n = 1; n < nmax; n++) {
+    for (guint n = 1; n <= nmax; n++) {
         guint matlen = CHOLESKY_MATRIX_LEN(n);
         /* Use descriptive names for less cryptic g_assert() messages. */
         gdouble *matrix = g_new(gdouble, matlen);
@@ -1077,22 +1077,6 @@ test_math_cholesky(void)
                 gwy_assert_floatval(matrix[j], inverted[j],
                                     eps*(fabs(matrix[j]) + fabs(inverted[j])));
             }
-
-            /* Square of multiplication with decomposition must give the same
-             * as dot product with the matrix. */
-            test_cholesky_make_matrix(decomp, n, rng);
-            test_cholesky_matsquare(matrix, decomp, n);
-            test_cholesky_make_vector(vector, n, rng);
-            test_cholesky_matvec(solution, matrix, vector, n);
-            gdouble sref = 0.0;
-            for (guint j = 0; j < n; j++)
-                sref += vector[j]*solution[j];
-            gwy_cholesky_multiply(decomp, vector, n);
-            gdouble s = 0.0;
-            for (guint j = 0; j < n; j++)
-                s += vector[j]*vector[j];
-
-            gwy_assert_floatval(s, sref, 1e-15*sref);
         }
 
         g_free(vector);
@@ -1101,6 +1085,89 @@ test_math_cholesky(void)
         g_free(decomp);
         g_free(inverted);
         g_free(unity);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_math_cholesky_multiply_right(void)
+{
+    enum { nmax = 8, niter = 50 };
+    /* Make it realy reproducible. */
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 1; n <= nmax; n++) {
+        guint matlen = CHOLESKY_MATRIX_LEN(n);
+        /* Use descriptive names for less cryptic g_assert() messages. */
+        gdouble *matrix = g_new(gdouble, matlen);
+        gdouble *decomp = g_new(gdouble, matlen);
+        gdouble *vector = g_new(gdouble, n);
+        gdouble *multiplied = g_new(gdouble, n);
+
+        for (guint iter = 0; iter < niter; iter++) {
+            /* Square of multiplication with decomposition must give the same
+             * as dot product with the matrix. */
+            test_cholesky_make_matrix(decomp, n, rng);
+            test_cholesky_matsquare(matrix, decomp, n);
+            test_cholesky_make_vector(vector, n, rng);
+            test_cholesky_matvec(multiplied, matrix, vector, n);
+            gdouble sref = 0.0;
+            for (guint j = 0; j < n; j++)
+                sref += vector[j]*multiplied[j];
+            gwy_cholesky_multiply_right(vector, decomp, n);
+            gdouble s = 0.0;
+            for (guint j = 0; j < n; j++)
+                s += vector[j]*vector[j];
+
+            gwy_assert_floatval(s, sref, 1e-15*sref);
+        }
+
+        g_free(vector);
+        g_free(multiplied);
+        g_free(matrix);
+        g_free(decomp);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_math_cholesky_multiply_left(void)
+{
+    enum { nmax = 8, niter = 50 };
+    /* Make it realy reproducible. */
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 1; n <= nmax; n++) {
+        guint matlen = CHOLESKY_MATRIX_LEN(n);
+        /* Use descriptive names for less cryptic g_assert() messages. */
+        gdouble *matrix = g_new(gdouble, matlen);
+        gdouble *decomp = g_new(gdouble, matlen);
+        gdouble *vector = g_new(gdouble, n);
+        gdouble *reference = g_new(gdouble, n);
+        gdouble *multiplied = g_new(gdouble, n);
+
+        for (guint iter = 0; iter < niter; iter++) {
+            /* Verify U^T(M^-1)U x = x */
+            test_cholesky_make_matrix(decomp, n, rng);
+            test_cholesky_matsquare(matrix, decomp, n);
+            test_cholesky_make_vector(reference, n, rng);
+            gwy_assign(vector, reference, n);
+            gwy_cholesky_invert(matrix, n);
+            gwy_cholesky_multiply_left(decomp, vector, n);
+            test_cholesky_matvec(multiplied, matrix, vector, n);
+            gwy_cholesky_multiply_right(multiplied, decomp, n);
+            gdouble eps = gwy_powi(10.0, (gint)n - 12);
+            for (guint j = 0; j < n; j++) {
+                gwy_assert_floatval(multiplied[j], reference[j], eps);
+            }
+        }
+
+        g_free(vector);
+        g_free(multiplied);
+        g_free(matrix);
+        g_free(decomp);
     }
 
     g_rand_free(rng);

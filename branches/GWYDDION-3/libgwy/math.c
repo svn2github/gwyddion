@@ -941,15 +941,15 @@ gwy_cholesky_invert(gdouble *a, guint n)
 }
 
 /**
- * gwy_cholesky_multiply:
+ * gwy_cholesky_multiply_right:
+ * @vec: (inout):
+ *       Vector to be multiplied, it will be modified in place.
  * @matrix: Lower triangular part of a symmetric, presumably positive definite,
  *          matrix.  See gwy_lower_triangular_matrix_index() for storage
  *          details.
- * @vec: (inout):
- *       Vector to be multiplied, it will be modified in place.
- * @n: Dimension of @matrix.
+ * @n: Dimension of @matrix and @vec.
  *
- * Multiplies a vector by a triangular matrix.
+ * Multiplies a column vector by a upper right triangular matrix.
  *
  * The operation can be considered either left-multiplication of column vector
  * by upper right triangular matrix, or right-multiplication of row vector with
@@ -959,7 +959,7 @@ gwy_cholesky_invert(gdouble *a, guint n)
  * method does not require any property such as positive definiteness.
  **/
 void
-gwy_cholesky_multiply(const gdouble *a, gdouble *vec, guint n)
+gwy_cholesky_multiply_right(gdouble *vec, const gdouble *a, guint n)
 {
     gdouble x[n];
     gwy_clear(x, n);
@@ -969,6 +969,38 @@ gwy_cholesky_multiply(const gdouble *a, gdouble *vec, guint n)
             x[j] += (*a)*vi;
     }
     gwy_assign(vec, x, n);
+}
+
+/**
+ * gwy_cholesky_multiply_left:
+ * @matrix: Lower triangular part of a symmetric, presumably positive definite,
+ *          matrix.  See gwy_lower_triangular_matrix_index() for storage
+ *          details.
+ * @vec: (inout):
+ *       Vector to be multiplied, it will be modified in place.
+ * @n: Dimension of @matrix and @vec.
+ *
+ * Multiplies a column vector by a lower left triangular matrix.
+ *
+ * The operation can be considered either left-multiplication of column vector
+ * by lower left triangular matrix, or right-multiplication of row vector with
+ * upper right triangular matrix.  The result is the same.
+ *
+ * The matrix will be typically obtained by gwy_cholesky_decompose() but this
+ * method does not require any property such as positive definiteness.
+ **/
+void
+gwy_cholesky_multiply_left(const gdouble *a, gdouble *vec, guint n)
+{
+    a += MATRIX_LEN(n) - 1;
+    for (guint i = n; i; i--) {
+        gdouble s = 0;
+        const gdouble *v = vec + (i-1);
+        for (guint j = i; j; j--, v--, a--)
+            s += (*a)*(*v);
+        // Overwrite vec[i] with the result, we will not need the tail values.
+        vec[i-1] = s;
+    }
 }
 
 // Note it does not return the norm but the norm divided by √n.
