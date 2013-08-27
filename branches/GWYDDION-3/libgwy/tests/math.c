@@ -1165,6 +1165,7 @@ test_math_cholesky_multiply_left(void)
         }
 
         g_free(vector);
+        g_free(reference);
         g_free(multiplied);
         g_free(matrix);
         g_free(decomp);
