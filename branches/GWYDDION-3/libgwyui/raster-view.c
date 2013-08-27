@@ -516,7 +516,7 @@ GwyRuler*
 gwy_raster_view_get_hruler(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return rasterview->priv->hruler;
+    return GWY_RULER(rasterview->priv->hruler);
 }
 
 /**
@@ -532,7 +532,7 @@ GwyRuler*
 gwy_raster_view_get_vruler(const GwyRasterView *rasterview)
 {
     g_return_val_if_fail(GWY_IS_RASTER_VIEW(rasterview), NULL);
-    return rasterview->priv->vruler;
+    return GWY_RULER(rasterview->priv->vruler);
 }
 
 /**

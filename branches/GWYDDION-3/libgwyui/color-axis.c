@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -143,6 +143,11 @@ static void         draw_distribution                   (GwyColorAxis *coloraxis
                                                          gdouble breadth,
                                                          gdouble stripebreadth,
                                                          gdouble length);
+static void         draw_mark                           (GwyAxis *axis,
+                                                         cairo_t *cr,
+                                                         const cairo_matrix_t *matrix,
+                                                         gdouble length,
+                                                         gdouble stripebreadth);
 static void         set_up_transform                    (GtkPositionType edge,
                                                          cairo_matrix_t *matrix,
                                                          gdouble width,
@@ -216,6 +221,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     axis_class->get_horizontal_labels = gwy_color_axis_get_horizontal_labels;
     axis_class->get_split_width = gwy_color_axis_get_split_width;
     axis_class->get_units_affinity = gwy_color_axis_get_units_affinity;
+    //axis_class->redraw_mark = gwy_color_axis_redraw_mark;
 
     properties[PROP_GRADIENT]
         = g_param_spec_object("gradient",
@@ -471,6 +477,7 @@ gwy_color_axis_draw(GtkWidget *widget,
     draw_stripe(priv->gradient, cr, edge, &matrix, length, stripebreadth);
     draw_labels(ticks, nticks, cr, edge, context, layout, &matrix,
                 breadth, stripebreadth, max_ascent, max_descent);
+    draw_mark(axis, cr, &matrix, length, stripebreadth);
 
     return FALSE;
 }
@@ -949,6 +956,49 @@ draw_distribution(GwyColorAxis *coloraxis,
     cairo_close_path(cr);
     cairo_set_source_rgba(cr, 0.6, 0.6, 1.0, 0.4);
     cairo_fill(cr);
+    cairo_restore(cr);
+}
+
+static void
+draw_mark(GwyAxis *axis, cairo_t *cr,
+          const cairo_matrix_t *matrix,
+          gdouble length, gdouble stripebreadth)
+{
+    gdouble mark = gwy_axis_get_mark(axis);
+    if (!gwy_axis_get_show_mark(axis) || !isfinite(mark))
+        return;
+
+    gdouble x = gwy_axis_value_to_position(axis, mark),
+            hs = stripebreadth*tick_level_sizes[GWY_AXIS_TICK_MINOR],
+            y = hs + 0.5*stripebreadth;
+    if (x < -hs || x > length + hs)
+        return;
+
+    cairo_matrix_transform_point(matrix, &x, &y);
+
+    cairo_save(cr);
+
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    if (edge == GTK_POS_TOP)
+        gwy_cairo_triangle_down(cr, x, y, hs);
+    else if (edge == GTK_POS_BOTTOM)
+        gwy_cairo_triangle_up(cr, x, y, hs);
+    else if (edge == GTK_POS_LEFT)
+        gwy_cairo_triangle_right(cr, x, y, hs);
+    else if (edge == GTK_POS_RIGHT)
+        gwy_cairo_triangle_left(cr, x, y, hs);
+    else {
+        g_assert_not_reached();
+    }
+
+    GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(axis));
+    GdkRGBA rgba;
+    // FIXME: Theming.
+    cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
+    cairo_fill_preserve(cr);
+    gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
+    gdk_cairo_set_source_rgba(cr, &rgba);
+    cairo_stroke(cr);
     cairo_restore(cr);
 }
 

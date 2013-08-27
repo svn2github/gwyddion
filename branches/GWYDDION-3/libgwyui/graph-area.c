@@ -999,7 +999,6 @@ destroy_input_window(GwyGraphArea *grapharea)
     GraphArea *priv = grapharea->priv;
     if (!priv->input_window)
         return;
-    gdk_window_set_user_data(priv->input_window, NULL);
     gdk_window_destroy(priv->input_window);
     priv->input_window = NULL;
 }

@@ -1455,7 +1455,6 @@ destroy_window(GwyRasterArea *rasterarea)
     if (!priv->window)
         return;
 
-    gdk_window_set_user_data(priv->window, NULL);
     gdk_window_destroy(priv->window);
     priv->window = NULL;
 }

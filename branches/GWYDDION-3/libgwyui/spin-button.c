@@ -687,7 +687,6 @@ gwy_spin_button_unrealize(GtkWidget *widget)
     GTK_WIDGET_CLASS(gwy_spin_button_parent_class)->unrealize(widget);
 
     if (priv->panel) {
-        gdk_window_set_user_data(priv->panel, NULL);
         gdk_window_destroy(priv->panel);
         priv->panel = NULL;
     }

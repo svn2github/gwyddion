@@ -660,7 +660,6 @@ destroy_input_window(GwyAdjustBar *adjbar)
     AdjustBar *priv = adjbar->priv;
     if (!priv->input_window)
         return;
-    gdk_window_set_user_data(priv->input_window, NULL);
     gdk_window_destroy(priv->input_window);
     priv->input_window = NULL;
 }
