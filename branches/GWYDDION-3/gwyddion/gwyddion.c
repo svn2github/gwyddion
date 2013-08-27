@@ -152,6 +152,23 @@ create_test_rectangles(void)
     return shapes;
 }
 
+static gboolean
+show_value_on_coloraxis(GwyRasterArea *rasterarea,
+                        GdkEventMotion *event,
+                        GwyColorAxis *coloraxis)
+{
+    const cairo_matrix_t *matrix
+        = gwy_raster_area_get_widget_to_field_matrix(rasterarea);
+    gdouble x = event->x, y = event->y;
+    cairo_matrix_transform_point(matrix, &x, &y);
+    GwyField *field = gwy_raster_area_get_field(rasterarea);
+    gdouble z = gwy_field_value_interpolated(field, x, y,
+                                             GWY_INTERPOLATION_LINEAR,
+                                             GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+    gwy_axis_set_mark(GWY_AXIS(coloraxis), z);
+    return FALSE;
+}
+
 static GtkWidget*
 create_raster_window(guint xres, guint yres)
 {
@@ -182,6 +199,11 @@ create_raster_window(guint xres, guint yres)
 
     GwyShapes *shapes = create_test_rectangles();
     gwy_raster_area_set_shapes(rasterarea, shapes);
+
+    GwyColorAxis *coloraxis = gwy_raster_view_get_color_axis(GWY_RASTER_VIEW(rasterview));
+    gwy_axis_set_show_mark(GWY_AXIS(coloraxis), TRUE);
+    g_signal_connect(rasterarea, "motion-notify-event",
+                     G_CALLBACK(show_value_on_coloraxis), coloraxis);
 
     return window;
 }
