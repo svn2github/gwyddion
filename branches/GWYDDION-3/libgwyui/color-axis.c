@@ -112,6 +112,7 @@ static void         gwy_color_axis_get_units_affinity   (const GwyAxis *axis,
                                                          GwyAxisUnitPlacement *secondary);
 static void         gwy_color_axis_modify_range         (GwyColorAxis *coloraxis,
                                                          const GwyRange *range);
+static void         gwy_color_axis_redraw_mark          (GwyAxis *axis);
 static void         draw_ticks                          (const GwyAxisTick *ticks,
                                                          guint nticks,
                                                          cairo_t *cr,
@@ -221,7 +222,7 @@ gwy_color_axis_class_init(GwyColorAxisClass *klass)
     axis_class->get_horizontal_labels = gwy_color_axis_get_horizontal_labels;
     axis_class->get_split_width = gwy_color_axis_get_split_width;
     axis_class->get_units_affinity = gwy_color_axis_get_units_affinity;
-    //axis_class->redraw_mark = gwy_color_axis_redraw_mark;
+    axis_class->redraw_mark = gwy_color_axis_redraw_mark;
 
     properties[PROP_GRADIENT]
         = g_param_spec_object("gradient",
@@ -636,6 +637,47 @@ gwy_color_axis_modify_range(GwyColorAxis *coloraxis,
                             const GwyRange *range)
 {
     gwy_axis_request_range(GWY_AXIS(coloraxis), range);
+}
+
+static void
+gwy_color_axis_redraw_mark(GwyAxis *axis)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    gdouble mark = gwy_axis_get_mark(axis);
+    if (!isfinite(mark))
+        return;
+
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+
+    ColorAxis *priv = GWY_COLOR_AXIS(axis)->priv;
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean vertical = (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT);
+    gdouble length = (vertical ? allocation.height : allocation.width),
+            breadth = (vertical ? allocation.width : allocation.height),
+            stripebreadth = gwy_round(priv->stripewidth*breadth);
+    cairo_matrix_t matrix;
+    set_up_transform(edge, &matrix, allocation.width, allocation.height);
+
+    gdouble x = gwy_axis_value_to_position(axis, mark),
+            hs = stripebreadth*tick_level_sizes[GWY_AXIS_TICK_MINOR],
+            y = hs + 0.5*stripebreadth;
+    if (x < -hs || x > length + hs)
+        return;
+
+    cairo_matrix_transform_point(&matrix, &x, &y);
+
+    cairo_rectangle_int_t rect = {
+        (gint)floor(x - hs - 1.0 + allocation.x),
+        (gint)floor(y - hs - 1.0 + allocation.y),
+        (gint)ceil(2.0*hs + 2.01),
+        (gint)ceil(2.0*hs + 2.01),
+    };
+
+    cairo_region_t *region = cairo_region_create_rectangle(&rect);
+    cairo_region_intersect_rectangle(region, &allocation);
+    gtk_widget_queue_draw_region(widget, region);
+    cairo_region_destroy(region);
 }
 
 /**
