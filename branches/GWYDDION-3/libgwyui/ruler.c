@@ -34,34 +34,35 @@ struct _GwyRulerPrivate {
 
 typedef struct _GwyRulerPrivate Ruler;
 
-static void            gwy_ruler_dispose             (GObject *object);
-static void            gwy_ruler_finalize            (GObject *object);
-static void            gwy_ruler_get_preferred_width (GtkWidget *widget,
-                                                      gint *minimum,
-                                                      gint *natural);
-static void            gwy_ruler_get_preferred_height(GtkWidget *widget,
-                                                      gint *minimum,
-                                                      gint *natural);
-static gboolean        gwy_ruler_draw                (GtkWidget *widget,
-                                                      cairo_t *cr);
-static void            gwy_ruler_redraw_mark         (GwyAxis *axis);
-static void            draw_mark                     (GwyAxis *axis,
-                                                      cairo_t *cr,
-                                                      const cairo_matrix_t *matrix,
-                                                      gdouble length,
-                                                      gdouble breadth);
-static gint            preferred_breadth             (GtkWidget *widget);
-static void            draw_line_transformed         (cairo_t *cr,
-                                                      const cairo_matrix_t *matrix,
-                                                      gdouble xf,
-                                                      gdouble yf,
-                                                      gdouble xt,
-                                                      gdouble yt);
-static GtkPositionType calculate_scaling             (GwyAxis *axis,
-                                                      GtkAllocation *allocation,
-                                                      gdouble *length,
-                                                      gdouble *breadth,
-                                                      cairo_matrix_t *matrix);
+static void     gwy_ruler_dispose             (GObject *object);
+static void     gwy_ruler_finalize            (GObject *object);
+static void     gwy_ruler_get_preferred_width (GtkWidget *widget,
+                                               gint *minimum,
+                                               gint *natural);
+static void     gwy_ruler_get_preferred_height(GtkWidget *widget,
+                                               gint *minimum,
+                                               gint *natural);
+static gboolean gwy_ruler_draw                (GtkWidget *widget,
+                                               cairo_t *cr);
+static void     gwy_ruler_redraw_mark         (GwyAxis *axis);
+static void     draw_mark                     (GwyAxis *axis,
+                                               cairo_t *cr,
+                                               const cairo_matrix_t *matrix,
+                                               gdouble length,
+                                               gdouble breadth);
+static gint     preferred_breadth             (GtkWidget *widget);
+static void     draw_line_transformed         (cairo_t *cr,
+                                               const cairo_matrix_t *matrix,
+                                               gdouble xf,
+                                               gdouble yf,
+                                               gdouble xt,
+                                               gdouble yt);
+static void     calculate_scaling             (GwyAxis *axis,
+                                               GtkAllocation *allocation,
+                                               GtkPositionType *pedge,
+                                               gdouble *length,
+                                               gdouble *breadth,
+                                               cairo_matrix_t *matrix);
 
 static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.45, 0.25 };
 
@@ -141,9 +142,8 @@ gwy_ruler_draw(GtkWidget *widget,
     GtkAllocation allocation;
     gdouble length, breadth;
     cairo_matrix_t matrix;
-    GtkPositionType edge = calculate_scaling(axis,
-                                             &allocation, &length, &breadth,
-                                             &matrix);
+    GtkPositionType edge;
+    calculate_scaling(axis, &allocation, &edge, &length, &breadth, &matrix);
 
     GdkRGBA rgba;
     gtk_render_background(context, cr,
@@ -218,7 +218,7 @@ gwy_ruler_redraw_mark(GwyAxis *axis)
     GtkAllocation allocation;
     gdouble length, breadth;
     cairo_matrix_t matrix;
-    calculate_scaling(axis, &allocation, &length, &breadth, &matrix);
+    calculate_scaling(axis, &allocation, NULL, &length, &breadth, &matrix);
 
     gdouble x = gwy_axis_value_to_position(axis, mark),
             hs = 0.2*breadth, y = hs;
@@ -319,9 +319,10 @@ draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
     cairo_line_to(cr, xt, yt);
 }
 
-static GtkPositionType
+static void
 calculate_scaling(GwyAxis *axis,
                   GtkAllocation *allocation,
+                  GtkPositionType *pedge,
                   gdouble *length, gdouble *breadth,
                   cairo_matrix_t *matrix)
 {
@@ -344,7 +345,7 @@ calculate_scaling(GwyAxis *axis,
         g_assert_not_reached();
     }
 
-    return edge;
+    GWY_MAYBE_SET(pedge, edge);
 }
 
 /**
