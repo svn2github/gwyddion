@@ -621,7 +621,7 @@ check_item(guint n,
 /**
  * SECTION: inventory-store
  * @title: GwyInventoryStore
- * @short_description: Tree model wrapper of #GwyInventory.
+ * @short_description: Tree model wrapper of GwyInventory.
  *
  * #GwyInventoryStore is a simple adaptor class that wraps #GwyInventory in
  * #GtkTreeModel interface.  It is list-only and has persistent iterators.  It

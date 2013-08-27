@@ -102,7 +102,7 @@ gwy_error_list_clear(GwyErrorList **list)
 /**
  * SECTION: error-list
  * @title: GwyErrorList
- * @short_description: List of #GError<!-- -->s
+ * @short_description: List of GErrors
  *
  * GwyErrorList is a plain #GSList containing pointers to #GErrors as the
  * @data members.  You can use all #GSList functions on #GwyErrorList, a few
