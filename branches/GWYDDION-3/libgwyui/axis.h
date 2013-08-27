@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -78,6 +78,7 @@ struct _GwyAxisClass {
     void (*get_units_affinity)(const GwyAxis *axis,
                                GwyAxisUnitPlacement *primary,
                                GwyAxisUnitPlacement *secondary);
+    void (*redraw_mark)(GwyAxis *axis);
 };
 
 #define GWY_TYPE_AXIS_TICK (gwy_axis_tick_get_type())
@@ -100,6 +101,12 @@ gboolean           gwy_axis_get_show_labels      (const GwyAxis *axis)          
 void               gwy_axis_set_edge             (GwyAxis *axis,
                                                   GtkPositionType edge);
 GtkPositionType    gwy_axis_get_edge             (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_set_show_mark        (GwyAxis *axis,
+                                                  gboolean showmark);
+gboolean           gwy_axis_get_show_mark        (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_set_mark             (GwyAxis *axis,
+                                                  gdouble mark);
+gdouble            gwy_axis_get_mark             (const GwyAxis *axis)              G_GNUC_PURE;
 void               gwy_axis_set_snap_to_ticks    (GwyAxis *axis,
                                                   gboolean snaptoticks);
 gboolean           gwy_axis_get_snap_to_ticks    (const GwyAxis *axis)              G_GNUC_PURE;

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -62,6 +62,8 @@ enum {
     PROP_SHOW_LABELS,
     PROP_SHOW_UNITS,
     PROP_MAX_TICK_LEVEL,
+    PROP_SHOW_MARK,
+    PROP_MARK,
     N_PROPS,
 };
 
@@ -73,6 +75,7 @@ struct _GwyAxisPrivate {
 
     GwyRange request;
     GwyRange range;
+    gdouble mark;
 
     GtkPositionType edge;
     GwyAxisTickLevel max_tick_level;
@@ -80,6 +83,7 @@ struct _GwyAxisPrivate {
     gboolean ticks_at_edges : 1;
     gboolean show_labels : 1;
     gboolean show_units : 1;
+    gboolean show_mark : 1;
 
     gboolean ticks_are_valid : 1;
     gboolean must_fix_units : 1;
@@ -127,6 +131,10 @@ static gboolean        set_edge                  (GwyAxis *axis,
                                                   GtkPositionType edge);
 static gboolean        set_max_tick_level        (GwyAxis *axis,
                                                   GwyAxisTickLevel level);
+static gboolean        set_show_mark             (GwyAxis *axis,
+                                                  gboolean setting);
+static gboolean        set_mark                  (GwyAxis *axis,
+                                                  gdouble value);
 static gboolean        request_range             (GwyAxis *axis,
                                                   const GwyRange *range);
 static void            unit_changed              (GwyAxis *axis,
@@ -312,6 +320,20 @@ gwy_axis_class_init(GwyAxisClass *klass)
                             GWY_AXIS_TICK_MINOR,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_SHOW_MARK]
+        = g_param_spec_boolean("show-mark",
+                               "Show mark",
+                               "Whether to show a mark at the mark value.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_MARK]
+        = g_param_spec_double("mark",
+                              "Mark",
+                              "Value at which a mark should be shown.",
+                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -393,6 +415,14 @@ gwy_axis_set_property(GObject *object,
         set_show_units(axis, g_value_get_boolean(value));
         break;
 
+        case PROP_SHOW_MARK:
+        set_show_mark(axis, g_value_get_boolean(value));
+        break;
+
+        case PROP_MARK:
+        set_mark(axis, g_value_get_double(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -442,6 +472,14 @@ gwy_axis_get_property(GObject *object,
 
         case PROP_SHOW_UNITS:
         g_value_set_boolean(value, priv->show_units);
+        break;
+
+        case PROP_SHOW_MARK:
+        g_value_set_boolean(value, priv->show_mark);
+        break;
+
+        case PROP_MARK:
+        g_value_set_double(value, priv->mark);
         break;
 
         default:
@@ -708,6 +746,73 @@ gwy_axis_set_snap_to_ticks(GwyAxis *axis,
 }
 
 /**
+ * gwy_axis_set_show_mark:
+ * @axis: An axis.
+ * @showmark: %TRUE to show a mark at GwyAxis::mark position, %FALSE to
+ *            disable it.
+ *
+ * Sets whether a mark should be drawn on an axis.
+ **/
+void
+gwy_axis_set_show_mark(GwyAxis *axis,
+                       gboolean showmark)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!set_show_mark(axis, showmark))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_MARK]);
+}
+
+/**
+ * gwy_axis_get_show_mark:
+ * @axis: An axis.
+ *
+ * Gets whether a mark should be drawn on an axis.
+ *
+ * Returns: %TRUE if a mark is drawn, %FALSE if it is not.
+ **/
+gboolean
+gwy_axis_get_show_mark(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    return axis->priv->show_mark;
+}
+
+/**
+ * gwy_axis_set_mark:
+ * @axis: An axis.
+ * @mark: Mark position, in real #GwyAxis coordinates.
+ *
+ * Sets the position of the mark drawn on an axis.
+ **/
+void
+gwy_axis_set_mark(GwyAxis *axis,
+                  gdouble mark)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!set_mark(axis, mark))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_MARK]);
+}
+
+/**
+ * gwy_axis_get_mark:
+ * @axis: An axis.
+ *
+ * Gets the position of the mark drawn on an axis.
+ *
+ * Returns: The mark position, in real #GwyAxis coordinates.
+ **/
+gdouble
+gwy_axis_get_mark(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NAN);
+    return axis->priv->mark;
+}
+
+/**
  * gwy_axis_get_pango_layout:
  * @axis: An axis.
  *
@@ -772,6 +877,21 @@ gwy_axis_ticks(GwyAxis *axis,
 
     *nticks = priv->ticks->len;
     return (const GwyAxisTick*)priv->ticks->data;
+}
+
+// I cannot see why this should be public.  So don't.
+static void
+gwy_axis_redraw_mark(GwyAxis *axis)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!gtk_widget_is_drawable(GTK_WIDGET(axis)))
+        return;
+
+    GwyAxisClass *klass = GWY_AXIS_GET_CLASS(axis);
+    if (klass->redraw_mark)
+        klass->redraw_mark(axis);
+    else
+        gtk_widget_queue_draw(GTK_WIDGET(axis));
 }
 
 /**
@@ -946,6 +1066,33 @@ set_ticks_at_edges(GwyAxis *axis,
 
     priv->ticks_at_edges = setting;
     invalidate_ticks(axis);
+    return TRUE;
+}
+
+static gboolean
+set_show_mark(GwyAxis *axis,
+              gboolean setting)
+{
+    Axis *priv = axis->priv;
+    if (!setting == !priv->show_mark)
+        return FALSE;
+
+    priv->show_mark = setting;
+    gwy_axis_redraw_mark(axis);
+    return TRUE;
+}
+
+static gboolean
+set_mark(GwyAxis *axis,
+         gdouble value)
+{
+    Axis *priv = axis->priv;
+    if (value == priv->mark || !priv->show_mark)
+        return FALSE;
+
+    gwy_axis_redraw_mark(axis);
+    priv->mark = value;
+    gwy_axis_redraw_mark(axis);
     return TRUE;
 }
 
@@ -1783,6 +1930,12 @@ gwy_axis_get_input_window(const GwyAxis *axis)
  *                      If %NULL, the default placement is assumed which is
  *                      at zero and then, if zero is not possible, at the first
  *                      tick.
+ * @redraw_mark: Ensures the mark area is invalidated and queued for drawing.
+ *               It can be %NULL; in this case the entire widget is redrawn
+ *               when the mark moves or becomes visible/invisible.  When the
+ *               mark is moved this method is called twice: once with the old
+ *               position and once with the new position.  The method is called
+ *               only if the widget is drawable.
  *
  * Class of graphs and data view axes.
  **/

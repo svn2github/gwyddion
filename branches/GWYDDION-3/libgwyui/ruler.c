@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,31 +28,14 @@
 
 #define pangoscale ((gdouble)PANGO_SCALE)
 
-enum {
-    PROP_0,
-    PROP_SHOW_MARK,
-    PROP_MARK,
-    N_PROPS,
-};
-
 struct _GwyRulerPrivate {
-    gdouble mark;
-    gdouble mark_pos;
-    gboolean show_mark;
+    gushort dummy;
 };
 
 typedef struct _GwyRulerPrivate Ruler;
 
 static void            gwy_ruler_dispose             (GObject *object);
 static void            gwy_ruler_finalize            (GObject *object);
-static void            gwy_ruler_set_property        (GObject *object,
-                                                      guint prop_id,
-                                                      const GValue *value,
-                                                      GParamSpec *pspec);
-static void            gwy_ruler_get_property        (GObject *object,
-                                                      guint prop_id,
-                                                      GValue *value,
-                                                      GParamSpec *pspec);
 static void            gwy_ruler_get_preferred_width (GtkWidget *widget,
                                                       gint *minimum,
                                                       gint *natural);
@@ -61,16 +44,12 @@ static void            gwy_ruler_get_preferred_height(GtkWidget *widget,
                                                       gint *natural);
 static gboolean        gwy_ruler_draw                (GtkWidget *widget,
                                                       cairo_t *cr);
-static gboolean        set_show_mark                 (GwyRuler *ruler,
-                                                      gboolean setting);
-static gboolean        set_mark                      (GwyRuler *ruler,
-                                                      gdouble value);
-static void            draw_mark                     (GwyRuler *ruler,
+static void            gwy_ruler_redraw_mark         (GwyAxis *axis);
+static void            draw_mark                     (GwyAxis *axis,
                                                       cairo_t *cr,
                                                       const cairo_matrix_t *matrix,
                                                       gdouble length,
                                                       gdouble breadth);
-static void            invalidate_mark_area          (GwyRuler *ruler);
 static gint            preferred_breadth             (GtkWidget *widget);
 static void            draw_line_transformed         (cairo_t *cr,
                                                       const cairo_matrix_t *matrix,
@@ -84,8 +63,6 @@ static GtkPositionType calculate_scaling             (GwyAxis *axis,
                                                       gdouble *breadth,
                                                       cairo_matrix_t *matrix);
 
-static GParamSpec *properties[N_PROPS];
-
 static const gdouble tick_level_sizes[4] = { 1.0, 0.9, 0.45, 0.25 };
 
 G_DEFINE_TYPE(GwyRuler, gwy_ruler, GWY_TYPE_AXIS);
@@ -95,34 +72,18 @@ gwy_ruler_class_init(GwyRulerClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+    GwyAxisClass *axis_class = GWY_AXIS_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(Ruler));
 
     gobject_class->dispose = gwy_ruler_dispose;
     gobject_class->finalize = gwy_ruler_finalize;
-    gobject_class->get_property = gwy_ruler_get_property;
-    gobject_class->set_property = gwy_ruler_set_property;
 
     widget_class->get_preferred_width = gwy_ruler_get_preferred_width;
     widget_class->get_preferred_height = gwy_ruler_get_preferred_height;
     widget_class->draw = gwy_ruler_draw;
 
-    properties[PROP_SHOW_MARK]
-        = g_param_spec_boolean("show-mark",
-                               "Show mark",
-                               "Whether to show a mark at the mark value.",
-                               FALSE,
-                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_MARK]
-        = g_param_spec_double("mark",
-                              "Mark",
-                              "Value at which a mark should be shown.",
-                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    for (guint i = 1; i < N_PROPS; i++)
-        g_object_class_install_property(gobject_class, i, properties[i]);
+    axis_class->redraw_mark = gwy_ruler_redraw_mark;
 }
 
 static void
@@ -141,52 +102,6 @@ static void
 gwy_ruler_dispose(GObject *object)
 {
     G_OBJECT_CLASS(gwy_ruler_parent_class)->dispose(object);
-}
-
-static void
-gwy_ruler_set_property(GObject *object,
-                      guint prop_id,
-                      const GValue *value,
-                      GParamSpec *pspec)
-{
-    GwyRuler *ruler = GWY_RULER(object);
-
-    switch (prop_id) {
-        case PROP_SHOW_MARK:
-        set_show_mark(ruler, g_value_get_boolean(value));
-        break;
-
-        case PROP_MARK:
-        set_mark(ruler, g_value_get_double(value));
-        break;
-
-        default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-        break;
-    }
-}
-
-static void
-gwy_ruler_get_property(GObject *object,
-                      guint prop_id,
-                      GValue *value,
-                      GParamSpec *pspec)
-{
-    Ruler *priv = GWY_RULER(object)->priv;
-
-    switch (prop_id) {
-        case PROP_SHOW_MARK:
-        g_value_set_boolean(value, priv->show_mark);
-        break;
-
-        case PROP_MARK:
-        g_value_set_double(value, priv->mark);
-        break;
-
-        default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-        break;
-    }
 }
 
 static void
@@ -237,8 +152,7 @@ gwy_ruler_draw(GtkWidget *widget,
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_set_line_width(cr, 1.0);
 
-    GwyRuler *ruler = GWY_RULER(widget);
-    draw_mark(ruler, cr, &matrix, length, breadth);
+    draw_mark(axis, cr, &matrix, length, breadth);
 
     guint nticks;
     const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
@@ -293,6 +207,39 @@ gwy_ruler_draw(GtkWidget *widget,
     return FALSE;
 }
 
+static void
+gwy_ruler_redraw_mark(GwyAxis *axis)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    gdouble mark = gwy_axis_get_mark(axis);
+    if (!isfinite(mark))
+        return;
+
+    GtkAllocation allocation;
+    gdouble length, breadth;
+    cairo_matrix_t matrix;
+    calculate_scaling(axis, &allocation, &length, &breadth, &matrix);
+
+    gdouble x = gwy_axis_value_to_position(axis, mark),
+            hs = 0.2*breadth, y = hs;
+    if (x < -hs || x > length + hs)
+        return;
+
+    cairo_matrix_transform_point(&matrix, &x, &y);
+
+    cairo_rectangle_int_t rect = {
+        (gint)floor(x - hs - 1.0 + allocation.x),
+        (gint)floor(y - hs - 1.0 + allocation.y),
+        (gint)ceil(2.0*hs + 2.01),
+        (gint)ceil(2.0*hs + 2.01),
+    };
+
+    cairo_region_t *region = cairo_region_create_rectangle(&rect);
+    cairo_region_intersect_rectangle(region, &allocation);
+    gtk_widget_queue_draw_region(widget, region);
+    cairo_region_destroy(region);
+}
+
 /**
  * gwy_ruler_new:
  *
@@ -306,114 +253,19 @@ gwy_ruler_new(void)
     return g_object_newv(GWY_TYPE_RULER, 0, NULL);
 }
 
-/**
- * gwy_ruler_set_show_mark:
- * @ruler: A ruler.
- * @showmark: %TRUE to show a mark at GwyRuler::mark position, %FALSE to
- *            disable it.
- *
- * Sets whether a mark should be drawn on a ruler.
- **/
-void
-gwy_ruler_set_show_mark(GwyRuler *ruler,
-                        gboolean showmark)
-{
-    g_return_if_fail(GWY_IS_RULER(ruler));
-    if (!set_show_mark(ruler, showmark))
-        return;
-
-    g_object_notify_by_pspec(G_OBJECT(ruler), properties[PROP_SHOW_MARK]);
-}
-
-/**
- * gwy_ruler_get_show_mark:
- * @ruler: A ruler.
- *
- * Gets whether a mark should be drawn on a ruler.
- *
- * Returns: %TRUE if a mark is drawn, %FALSE if it is not.
- **/
-gboolean
-gwy_ruler_get_show_mark(const GwyRuler *ruler)
-{
-    g_return_val_if_fail(GWY_IS_RULER(ruler), FALSE);
-    return ruler->priv->show_mark;
-}
-
-/**
- * gwy_ruler_set_mark:
- * @ruler: A ruler.
- * @mark: Mark position, in real #GwyAxis coordinates.
- *
- * Sets the position of the mark drawn on a ruler.
- **/
-void
-gwy_ruler_set_mark(GwyRuler *ruler,
-                   gdouble mark)
-{
-    g_return_if_fail(GWY_IS_RULER(ruler));
-    if (!set_mark(ruler, mark))
-        return;
-
-    g_object_notify_by_pspec(G_OBJECT(ruler), properties[PROP_MARK]);
-}
-
-/**
- * gwy_ruler_get_mark:
- * @ruler: A ruler.
- *
- * Gets the position of the mark drawn on a ruler.
- *
- * Returns: The mark position, in real #GwyAxis coordinates.
- **/
-gdouble
-gwy_ruler_get_mark(const GwyRuler *ruler)
-{
-    g_return_val_if_fail(GWY_IS_RULER(ruler), NAN);
-    return ruler->priv->mark;
-}
-
-static gboolean
-set_show_mark(GwyRuler *ruler,
-              gboolean setting)
-{
-    Ruler *priv = ruler->priv;
-    if (!setting == !priv->show_mark)
-        return FALSE;
-
-    priv->show_mark = setting;
-    invalidate_mark_area(ruler);
-    return TRUE;
-}
-
-static gboolean
-set_mark(GwyRuler *ruler,
-         gdouble value)
-{
-    Ruler *priv = ruler->priv;
-    if (value == priv->mark)
-        return FALSE;
-
-    invalidate_mark_area(ruler);
-    priv->mark = value;
-    invalidate_mark_area(ruler);
-    return TRUE;
-}
-
 static void
-draw_mark(GwyRuler *ruler, cairo_t *cr,
+draw_mark(GwyAxis *axis, cairo_t *cr,
           const cairo_matrix_t *matrix,
           gdouble length, gdouble breadth)
 {
-    Ruler *priv = ruler->priv;
-    if (!priv->show_mark || !isfinite(priv->mark))
+    gdouble mark = gwy_axis_get_mark(axis);
+    if (!gwy_axis_get_show_mark(axis) || !isfinite(mark))
         return;
 
-    GwyAxis *axis = GWY_AXIS(ruler);
     GtkPositionType edge = gwy_axis_get_edge(axis);
     guint nticks;
     gwy_axis_ticks(axis, &nticks);
-    gdouble x = gwy_axis_value_to_position(axis, priv->mark),
+    gdouble x = gwy_axis_value_to_position(axis, mark),
             hs = 0.2*breadth, y = hs;
     if (x < -hs || x > length + hs)
         return;
@@ -433,7 +285,7 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
         g_assert_not_reached();
     }
 
-    GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(ruler));
+    GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(axis));
     GdkRGBA rgba;
     // FIXME: Theming.
     cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
@@ -442,40 +294,6 @@ draw_mark(GwyRuler *ruler, cairo_t *cr,
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_stroke(cr);
     cairo_restore(cr);
-}
-
-static void
-invalidate_mark_area(GwyRuler *ruler)
-{
-    GtkWidget *widget = GTK_WIDGET(ruler);
-    Ruler *priv = ruler->priv;
-    if (!gtk_widget_is_drawable(widget) || !isfinite(priv->mark))
-        return;
-
-    GwyAxis *axis = GWY_AXIS(widget);
-    GtkAllocation allocation;
-    gdouble length, breadth;
-    cairo_matrix_t matrix;
-    calculate_scaling(axis, &allocation, &length, &breadth, &matrix);
-
-    gdouble x = gwy_axis_value_to_position(axis, priv->mark),
-            hs = 0.2*breadth, y = hs;
-    if (x < -hs || x > length + hs)
-        return;
-
-    cairo_matrix_transform_point(&matrix, &x, &y);
-
-    cairo_rectangle_int_t rect = {
-        (gint)floor(x - hs - 1.0 + allocation.x),
-        (gint)floor(y - hs - 1.0 + allocation.y),
-        (gint)ceil(2.0*hs + 2.01),
-        (gint)ceil(2.0*hs + 2.01),
-    };
-
-    cairo_region_t *region = cairo_region_create_rectangle(&rect);
-    cairo_region_intersect_rectangle(region, &allocation);
-    gtk_widget_queue_draw_region(widget, region);
-    cairo_region_destroy(region);
 }
 
 static gint

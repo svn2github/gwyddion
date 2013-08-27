@@ -69,9 +69,9 @@ struct _GwyRasterViewPrivate {
     gulong vadjustment_changed_id;
     gulong vadjustment_value_changed_id;
 
-    GwyRuler *hruler;
+    GwyAxis *hruler;
     GtkScrollbar *hscrollbar;
-    GwyRuler *vruler;
+    GwyAxis *vruler;
     GtkScrollbar *vscrollbar;
 
     GwyColorAxis *coloraxis;
@@ -303,16 +303,16 @@ gwy_raster_view_init(GwyRasterView *rasterview)
     gtk_widget_show(vscrollbar);
 
     GtkWidget *hruler = gwy_ruler_new();
-    priv->hruler = GWY_RULER(hruler);
-    gwy_axis_set_edge(GWY_AXIS(hruler), GTK_POS_TOP);
+    priv->hruler = GWY_AXIS(hruler);
+    gwy_axis_set_edge(priv->hruler, GTK_POS_TOP);
     gtk_widget_add_events(hruler, GDK_BUTTON_PRESS_MASK);
     g_object_set(hruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, hruler, 2, 1, 1, 1);
     gtk_widget_show(hruler);
 
     GtkWidget *vruler = gwy_ruler_new();
-    priv->vruler = GWY_RULER(vruler);
-    gwy_axis_set_edge(GWY_AXIS(vruler), GTK_POS_LEFT);
+    priv->vruler = GWY_AXIS(vruler);
+    gwy_axis_set_edge(priv->vruler, GTK_POS_LEFT);
     gtk_widget_add_events(vruler, GDK_BUTTON_PRESS_MASK);
     g_object_set(vruler, "max-tick-level", 3, NULL);
     gtk_grid_attach(grid, vruler, 1, 2, 1, 1);
@@ -690,8 +690,8 @@ static void
 set_ruler_units_to_field(GwyRasterView *rasterview)
 {
     RasterView *priv = rasterview->priv;
-    GwyUnit *hunit = gwy_axis_get_unit(GWY_AXIS(priv->hruler));
-    GwyUnit *vunit = gwy_axis_get_unit(GWY_AXIS(priv->vruler));
+    GwyUnit *hunit = gwy_axis_get_unit(priv->hruler);
+    GwyUnit *vunit = gwy_axis_get_unit(priv->vruler);
     GwyUnit *xunit = gwy_field_get_xunit(priv->field);
     GwyUnit *yunit = gwy_field_get_yunit(priv->field);
     gwy_unit_assign(hunit, xunit);
@@ -723,10 +723,8 @@ set_scale_type(GwyRasterView *rasterview,
     priv->scale_type = scaletype;
     update_ruler_ranges(rasterview);
     if (scaletype == GWY_COORD_SCALE_PIXEL) {
-        gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->hruler)),
-                                 "px", NULL);
-        gwy_unit_set_from_string(gwy_axis_get_unit(GWY_AXIS(priv->vruler)),
-                                 "px", NULL);
+        gwy_unit_set_from_string(gwy_axis_get_unit(priv->hruler), "px", NULL);
+        gwy_unit_set_from_string(gwy_axis_get_unit(priv->vruler), "px", NULL);
     }
     else {
         if (priv->field)
@@ -825,8 +823,8 @@ update_ruler_ranges(GwyRasterView *rasterview)
             hrange.to = vrange.to = 1.0;
         }
     }
-    gwy_axis_request_range(GWY_AXIS(priv->hruler), &hrange);
-    gwy_axis_request_range(GWY_AXIS(priv->vruler), &vrange);
+    gwy_axis_request_range(priv->hruler, &hrange);
+    gwy_axis_request_range(priv->vruler, &vrange);
 }
 
 static void
@@ -905,8 +903,8 @@ area_motion_notify(GwyRasterView *rasterview,
         matrix = gwy_raster_area_get_widget_to_field_matrix(area);
         cairo_matrix_transform_point(matrix, &x, &y);
     }
-    gwy_ruler_set_mark(priv->hruler, x);
-    gwy_ruler_set_mark(priv->vruler, y);
+    gwy_axis_set_mark(priv->hruler, x);
+    gwy_axis_set_mark(priv->vruler, y);
     return FALSE;
 }
 
@@ -916,8 +914,8 @@ area_enter_notify(GwyRasterView *rasterview,
                   G_GNUC_UNUSED GwyRasterArea *area)
 {
     RasterView *priv = rasterview->priv;
-    gwy_ruler_set_show_mark(priv->hruler, TRUE);
-    gwy_ruler_set_show_mark(priv->vruler, TRUE);
+    gwy_axis_set_show_mark(priv->hruler, TRUE);
+    gwy_axis_set_show_mark(priv->vruler, TRUE);
     return FALSE;
 }
 
@@ -927,8 +925,8 @@ area_leave_notify(GwyRasterView *rasterview,
                   G_GNUC_UNUSED GwyRasterArea *area)
 {
     RasterView *priv = rasterview->priv;
-    gwy_ruler_set_show_mark(priv->hruler, FALSE);
-    gwy_ruler_set_show_mark(priv->vruler, FALSE);
+    gwy_axis_set_show_mark(priv->hruler, FALSE);
+    gwy_axis_set_show_mark(priv->vruler, FALSE);
     return FALSE;
 }
 
