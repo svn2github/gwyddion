@@ -27,6 +27,7 @@ public_headers = \
 	$(srcdir)/coords-view.h \
 	$(srcdir)/field-render.h \
 	$(srcdir)/graph-area.h \
+	$(srcdir)/graph-axis.h \
 	$(srcdir)/graph-curve.h \
 	$(srcdir)/inventory-store.h \
 	$(srcdir)/list-store.h \
@@ -89,6 +90,7 @@ libgwyui3_la_SOURCES = \
 	coords-view.c \
 	field-render.c \
 	graph-area.c \
+	graph-axis.c \
 	graph-curve.c \
 	graph-internal.c \
 	icons-gresource.c \
