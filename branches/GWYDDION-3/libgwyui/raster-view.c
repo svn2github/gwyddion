@@ -383,7 +383,6 @@ gwy_raster_view_dispose(GObject *object)
     G_OBJECT_CLASS(gwy_raster_view_parent_class)->dispose(object);
 }
 
-
 static void
 gwy_raster_view_finalize(GObject *object)
 {
@@ -573,7 +572,7 @@ gwy_raster_view_get_vscrollbar(const GwyRasterView *rasterview)
  * gwy_raster_view_get_color_axis:
  * @rasterview: A raster view.
  *
- * Gets the color axis widget used by a raster view.
+ * Gets the colour axis widget used by a raster view.
  *
  * Returns: (transfer none):
  *          #GwyColorAxis widget used by the raster view as the colour axis.
@@ -1404,7 +1403,7 @@ range_value_set(GwyRasterView *rasterview,
 /**
  * SECTION: raster-view
  * @title: GwyRasterView
- * @short_description: Display fields with rulers and color axes
+ * @short_description: Display fields with rulers and colour axes
  **/
 
 /**
