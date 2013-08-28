@@ -58,7 +58,7 @@ static void     draw_line_transformed         (cairo_t *cr,
                                                gdouble xt,
                                                gdouble yt);
 static void     calculate_scaling             (GwyAxis *axis,
-                                               GtkAllocation *allocation,
+                                               cairo_rectangle_int_t *allocation,
                                                GtkPositionType *pedge,
                                                gdouble *length,
                                                gdouble *breadth,
@@ -139,7 +139,7 @@ gwy_ruler_draw(GtkWidget *widget,
 {
     GwyAxis *axis = GWY_AXIS(widget);
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gdouble length, breadth;
     cairo_matrix_t matrix;
     GtkPositionType edge;
@@ -215,7 +215,7 @@ gwy_ruler_redraw_mark(GwyAxis *axis)
     if (!isfinite(mark))
         return;
 
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gdouble length, breadth;
     cairo_matrix_t matrix;
     calculate_scaling(axis, &allocation, NULL, &length, &breadth, &matrix);
@@ -321,7 +321,7 @@ draw_line_transformed(cairo_t *cr, const cairo_matrix_t *matrix,
 
 static void
 calculate_scaling(GwyAxis *axis,
-                  GtkAllocation *allocation,
+                  cairo_rectangle_int_t *allocation,
                   GtkPositionType *pedge,
                   gdouble *length, gdouble *breadth,
                   cairo_matrix_t *matrix)

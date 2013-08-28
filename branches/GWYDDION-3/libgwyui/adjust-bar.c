@@ -87,7 +87,7 @@ static void     gwy_adjust_bar_get_preferred_height(GtkWidget *widget,
                                                     gint *minimum,
                                                     gint *natural);
 static void     gwy_adjust_bar_size_allocate       (GtkWidget *widget,
-                                                    GtkAllocation *allocation);
+                                                    cairo_rectangle_int_t *allocation);
 static gboolean gwy_adjust_bar_draw                (GtkWidget *widget,
                                                     cairo_t *cr);
 static gboolean gwy_adjust_bar_enter_notify        (GtkWidget *widget,
@@ -348,14 +348,14 @@ gwy_adjust_bar_get_preferred_height(GtkWidget *widget,
 
 static void
 gwy_adjust_bar_size_allocate(GtkWidget *widget,
-                             GtkAllocation *allocation)
+                             cairo_rectangle_int_t *allocation)
 {
     GtkBin *bin = GTK_BIN(widget);
 
     gtk_widget_set_allocation(widget, allocation);
     GtkWidget *child = gtk_bin_get_child(bin);
     if (child && gtk_widget_get_visible(child)) {
-        GtkAllocation child_allocation;
+        cairo_rectangle_int_t child_allocation;
         gint border_width = gtk_container_get_border_width(GTK_CONTAINER(bin));
         child_allocation.x = allocation->x + border_width + HPADDING;
         child_allocation.y = allocation->y + border_width + VPADDING;
@@ -630,7 +630,7 @@ create_input_window(GwyAdjustBar *adjbar)
     if (priv->input_window)
         return;
 
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(widget, &allocation);
     GdkWindowAttr attributes = {
         .x = allocation.x,

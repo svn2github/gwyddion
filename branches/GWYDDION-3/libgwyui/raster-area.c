@@ -159,7 +159,7 @@ static void     gwy_raster_area_get_preferred_height(GtkWidget *widget,
                                                      gint *minimum,
                                                      gint *natural);
 static void     gwy_raster_area_size_allocate       (GtkWidget *widget,
-                                                     GtkAllocation *allocation);
+                                                     cairo_rectangle_int_t *allocation);
 static gboolean gwy_raster_area_motion_notify       (GtkWidget *widget,
                                                      GdkEventMotion *event);
 static gboolean gwy_raster_area_button_press        (GtkWidget *widget,
@@ -1416,7 +1416,7 @@ create_window(GwyRasterArea *rasterarea)
     if (priv->window)
         return;
 
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(widget, &allocation);
 
     GdkWindowAttr attributes = {
@@ -1525,9 +1525,9 @@ gwy_raster_area_get_preferred_height(GtkWidget *widget,
 
 static void
 gwy_raster_area_size_allocate(GtkWidget *widget,
-                              GtkAllocation *allocation)
+                              cairo_rectangle_int_t *allocation)
 {
-    GtkAllocation prev_allocation;
+    cairo_rectangle_int_t prev_allocation;
     gtk_widget_get_allocation(widget, &prev_allocation);
 
     GTK_WIDGET_CLASS(gwy_raster_area_parent_class)->size_allocate(widget,
@@ -1796,7 +1796,7 @@ gwy_raster_area_zoom(GwyRasterArea *rasterarea,
 
         GwyField *field = priv->field;
         GtkWidget *widget = GTK_WIDGET(rasterarea);
-        GtkAllocation allocation;
+        cairo_rectangle_int_t allocation;
         gtk_widget_get_allocation(widget, &allocation);
         gdouble xscale = (gdouble)allocation.width/field->xres;
         gdouble yscale = (gdouble)allocation.height/field->yres;
@@ -2757,7 +2757,7 @@ static void
 set_hadjustment_values(GwyRasterArea *rasterarea)
 {
     RasterArea *priv = rasterarea->priv;
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(GTK_WIDGET(rasterarea), &allocation);
     set_adjustment_values(priv->hadjustment,
                           allocation.width, calculate_full_width(rasterarea));
@@ -2767,7 +2767,7 @@ static void
 set_vadjustment_values(GwyRasterArea *rasterarea)
 {
     RasterArea *priv = rasterarea->priv;
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(GTK_WIDGET(rasterarea), &allocation);
     set_adjustment_values(priv->vadjustment,
                           allocation.height, calculate_full_height(rasterarea));

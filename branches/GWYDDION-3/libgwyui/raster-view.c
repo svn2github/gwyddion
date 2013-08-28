@@ -320,7 +320,7 @@ gwy_raster_view_init(GwyRasterView *rasterview)
 
     GtkWidget *coloraxis = gwy_color_axis_new();
     priv->coloraxis = GWY_COLOR_AXIS(coloraxis);
-    g_object_ref(priv->coloraxis);
+    g_object_ref(priv->coloraxis);  // Must exist even if different tab is shown
     gwy_axis_set_edge(GWY_AXIS(coloraxis), GTK_POS_RIGHT);
     g_object_set(coloraxis,
                  "max-tick-level", 2,

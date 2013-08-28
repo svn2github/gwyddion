@@ -118,7 +118,7 @@ static void     gwy_spin_button_get_preferred_width(GtkWidget *widget,
                                                     gint *minimum,
                                                     gint *natural);
 static void     gwy_spin_button_size_allocate      (GtkWidget *widget,
-                                                    GtkAllocation *allocation);
+                                                    cairo_rectangle_int_t *allocation);
 static gint     gwy_spin_button_draw               (GtkWidget *widget,
                                                     cairo_t *cr);
 static gint     gwy_spin_button_button_press       (GtkWidget *widget,
@@ -621,7 +621,7 @@ gwy_spin_button_realize(GtkWidget *widget)
     GwySpinButtonPrivate *priv = spinbutton->priv;
     GtkStyleContext *context;
     GtkStateFlags state;
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     GtkRequisition requisition;
     GdkWindowAttr attributes;
     gint attributes_mask;
@@ -796,11 +796,11 @@ gwy_spin_button_get_preferred_width(GtkWidget *widget,
 
 static void
 gwy_spin_button_size_allocate(GtkWidget *widget,
-                              GtkAllocation *allocation)
+                              cairo_rectangle_int_t *allocation)
 {
     GwySpinButton *spin = GWY_SPIN_BUTTON(widget);
     GwySpinButtonPrivate *priv = spin->priv;
-    GtkAllocation panel_allocation;
+    cairo_rectangle_int_t panel_allocation;
     GtkRequisition requisition;
     GtkStyleContext *context;
     GtkStateFlags state;

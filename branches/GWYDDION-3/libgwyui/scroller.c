@@ -59,7 +59,7 @@ static void     gwy_scroller_get_preferred_height(GtkWidget *widget,
                                                   gint *minimum,
                                                   gint *natural);
 static void     gwy_scroller_size_allocate       (GtkWidget *widget,
-                                                  GtkAllocation *allocation);
+                                                  cairo_rectangle_int_t *allocation);
 static gboolean gwy_scroller_scroll_event        (GtkWidget *widget,
                                                   GdkEventScroll *event);
 static GType    gwy_scroller_child_type          (GtkContainer *container);
@@ -266,7 +266,7 @@ gwy_scroller_get_preferred_height(G_GNUC_UNUSED GtkWidget *widget,
 
 static void
 gwy_scroller_size_allocate(GtkWidget *widget,
-                           GtkAllocation *allocation)
+                           cairo_rectangle_int_t *allocation)
 {
     GtkBin *bin = GTK_BIN(widget);
     GtkWidget *child = gtk_bin_get_child(bin);

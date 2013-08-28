@@ -78,7 +78,7 @@ static void     gwy_graph_area_unrealize    (GtkWidget *widget);
 static void     gwy_graph_area_map          (GtkWidget *widget);
 static void     gwy_graph_area_unmap        (GtkWidget *widget);
 static void     gwy_graph_area_size_allocate(GtkWidget *widget,
-                                             GtkAllocation *allocation);
+                                             cairo_rectangle_int_t *allocation);
 static gboolean gwy_graph_area_draw         (GtkWidget *widget,
                                              cairo_t *cr);
 static void     create_input_window         (GwyGraphArea *grapharea);
@@ -359,7 +359,7 @@ gwy_graph_area_unmap(GtkWidget *widget)
 
 static void
 gwy_graph_area_size_allocate(GtkWidget *widget,
-                             GtkAllocation *allocation)
+                             cairo_rectangle_int_t *allocation)
 {
     GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
     GraphArea *priv = grapharea->priv;
@@ -377,8 +377,12 @@ gwy_graph_area_draw(GtkWidget *widget,
                     cairo_t *cr)
 {
     GwyGraphArea *grapharea = GWY_GRAPH_AREA(widget);
-    cairo_rectangle_int_t rect;
-    gtk_widget_get_allocation(widget, &rect);
+    cairo_rectangle_int_t rect = {
+        .x = 0,
+        .y = 0,
+        .width = gtk_widget_get_allocated_width(widget),
+        .height = gtk_widget_get_allocated_height(widget),
+    };
     cairo_save(cr);
     cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
     cairo_paint(cr);
@@ -975,7 +979,7 @@ create_input_window(GwyGraphArea *grapharea)
     if (priv->input_window)
         return;
 
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(widget, &allocation);
     GdkWindowAttr attributes = {
         .x = allocation.x,

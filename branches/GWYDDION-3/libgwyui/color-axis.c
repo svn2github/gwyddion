@@ -93,7 +93,7 @@ static void         gwy_color_axis_get_preferred_height (GtkWidget *widget,
                                                          gint *minimum,
                                                          gint *natural);
 static void         gwy_color_axis_size_allocate        (GtkWidget *widget,
-                                                         GtkAllocation *allocation);
+                                                         cairo_rectangle_int_t *allocation);
 static void         gwy_color_axis_realize              (GtkWidget *widget);
 static void         gwy_color_axis_unrealize            (GtkWidget *widget);
 static gboolean     gwy_color_axis_draw                 (GtkWidget *widget,
@@ -420,7 +420,7 @@ gwy_color_axis_get_preferred_height(GtkWidget *widget,
 
 static void
 gwy_color_axis_size_allocate(GtkWidget *widget,
-                             GtkAllocation *allocation)
+                             cairo_rectangle_int_t *allocation)
 {
     GTK_WIDGET_CLASS(gwy_color_axis_parent_class)->size_allocate(widget,
                                                                  allocation);
@@ -651,7 +651,7 @@ gwy_color_axis_redraw_mark(GwyAxis *axis)
     if (!isfinite(mark))
         return;
 
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(widget, &allocation);
 
     ColorAxis *priv = GWY_COLOR_AXIS(axis)->priv;

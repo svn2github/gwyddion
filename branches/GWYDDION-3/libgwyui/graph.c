@@ -123,6 +123,8 @@ gwy_graph_init(GwyGraph *graph)
 
     GtkWidget *area = gwy_graph_area_new();
     priv->area = GWY_GRAPH_AREA(area);
+    gtk_widget_set_hexpand(area, TRUE);
+    gtk_widget_set_vexpand(area, TRUE);
     gtk_grid_attach(grid, area, 1, 1, 1, 1);
     gtk_widget_show(area);
 
@@ -130,7 +132,7 @@ gwy_graph_init(GwyGraph *graph)
         GtkWidget *widget = gwy_graph_axis_new();
         GwyAxis *axis = GWY_AXIS(widget);
         priv->axis[edge] = GWY_GRAPH_AXIS(widget);
-        gwy_axis_set_edge(axis, GTK_POS_TOP);
+        gwy_axis_set_edge(axis, edge);
         gtk_grid_attach(grid, widget,
                         axis_attachments[2*edge], axis_attachments[2*edge + 1],
                         1, 1);
@@ -141,12 +143,6 @@ gwy_graph_init(GwyGraph *graph)
 static void
 gwy_graph_dispose(GObject *object)
 {
-    GwyGraph *graph = GWY_GRAPH(object);
-    Graph *priv = graph->priv;
-    GWY_OBJECT_UNREF(priv->area);
-    for (GtkPositionType edge = GTK_POS_LEFT; edge <= GTK_POS_BOTTOM; edge++) {
-        GWY_OBJECT_UNREF(priv->axis[edge]);
-    }
     G_OBJECT_CLASS(gwy_graph_parent_class)->dispose(object);
 }
 

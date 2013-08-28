@@ -116,7 +116,7 @@ static void            gwy_axis_map              (GtkWidget *widget);
 static void            gwy_axis_unmap            (GtkWidget *widget);
 static void            gwy_axis_style_updated    (GtkWidget *widget);
 static void            gwy_axis_size_allocate    (GtkWidget *widget,
-                                                  GtkAllocation *allocation);
+                                                  cairo_rectangle_int_t *allocation);
 static void            create_input_window       (GwyAxis *axis);
 static void            destroy_input_window      (GwyAxis *axis);
 static gboolean        set_snap_to_ticks         (GwyAxis *axis,
@@ -540,7 +540,7 @@ gwy_axis_style_updated(GtkWidget *widget)
 
 static void
 gwy_axis_size_allocate(GtkWidget *widget,
-                       GtkAllocation *allocation)
+                       cairo_rectangle_int_t *allocation)
 {
     GwyAxis *axis = GWY_AXIS(widget);
     Axis *priv = axis->priv;
@@ -941,7 +941,7 @@ create_input_window(GwyAxis *axis)
     if (priv->input_window)
         return;
 
-    GtkAllocation allocation;
+    cairo_rectangle_int_t allocation;
     gtk_widget_get_allocation(widget, &allocation);
     GdkWindowAttr attributes = {
         .x = allocation.x,
