@@ -28,6 +28,7 @@
 #include <libgwyui/color-axis.h>
 #include <libgwyui/coords-view.h>
 #include <libgwyui/field-render.h>
+#include <libgwyui/graph.h>
 #include <libgwyui/graph-area.h>
 #include <libgwyui/graph-axis.h>
 #include <libgwyui/graph-curve.h>
