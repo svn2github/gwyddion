@@ -56,6 +56,7 @@ struct _GwyColorAxisPrivate {
     gboolean editable_range;
     BoundaryType boundary;
 
+    BoundaryType drag_boundary;
     gboolean dragging;
     gdouble drag_start_pos;
     gdouble drag_q;
@@ -532,6 +533,7 @@ gwy_color_axis_button_press(GtkWidget *widget,
 
     GwyAxis *axis = GWY_AXIS(widget);
     BoundaryType boundary = find_boundary(axis, event->x, event->y);
+    priv->drag_boundary = boundary;
     update_cursor(coloraxis, boundary);
     if (boundary == BOUNDARY_NONE)
         return FALSE;
@@ -564,6 +566,7 @@ gwy_color_axis_button_release(GtkWidget *widget,
     BoundaryType boundary = find_boundary(axis, event->x, event->y);
     drag_boundary(coloraxis, event->x, event->y, boundary);
     update_cursor(coloraxis, boundary);
+    priv->drag_boundary = BOUNDARY_NONE;
     priv->dragging = FALSE;
 
     return FALSE;
@@ -585,6 +588,7 @@ gwy_color_axis_motion_notify(GtkWidget *widget,
     if (event->state & GDK_BUTTON1_MASK) {
         if (!priv->dragging
             && boundary != BOUNDARY_NONE
+            && boundary == priv->drag_boundary
             && fabs(pos - priv->drag_start_pos) >= DRAG_MIN_DIST) {
             priv->dragging = TRUE;
         }
