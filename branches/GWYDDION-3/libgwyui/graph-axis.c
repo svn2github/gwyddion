@@ -40,45 +40,49 @@ struct _GwyGraphAxisPrivate {
 
 typedef struct _GwyGraphAxisPrivate GraphAxis;
 
-static void     gwy_graph_axis_dispose             (GObject *object);
-static void     gwy_graph_axis_finalize            (GObject *object);
-static void     gwy_graph_axis_set_property        (GObject *object,
-                                                    guint prop_id,
-                                                    const GValue *value,
-                                                    GParamSpec *pspec);
-static void     gwy_graph_axis_get_property        (GObject *object,
-                                                    guint prop_id,
-                                                    GValue *value,
-                                                    GParamSpec *pspec);
-static void     gwy_graph_axis_get_preferred_width (GtkWidget *widget,
-                                                    gint *minimum,
-                                                    gint *natural);
-static void     gwy_graph_axis_get_preferred_height(GtkWidget *widget,
-                                                    gint *minimum,
-                                                    gint *natural);
-static gboolean gwy_graph_axis_draw                (GtkWidget *widget,
-                                                    cairo_t *cr);
-static void     gwy_graph_axis_redraw_mark         (GwyAxis *axis);
-static void     draw_mark                          (GwyAxis *axis,
-                                                    cairo_t *cr,
-                                                    const cairo_matrix_t *matrix,
-                                                    gdouble length,
-                                                    gdouble breadth);
-static gint     preferred_breadth                  (GtkWidget *widget);
-static void     draw_line_transformed              (cairo_t *cr,
-                                                    const cairo_matrix_t *matrix,
-                                                    gdouble xf,
-                                                    gdouble yf,
-                                                    gdouble xt,
-                                                    gdouble yt);
-static void     calculate_scaling                  (GwyAxis *axis,
-                                                    GtkAllocation *allocation,
-                                                    GtkPositionType *pedge,
-                                                    gdouble *length,
-                                                    gdouble *breadth,
-                                                    cairo_matrix_t *matrix);
-static gboolean set_label                          (GwyGraphAxis *graphaxis,
-                                                    const gchar *label);
+static void     gwy_graph_axis_dispose              (GObject *object);
+static void     gwy_graph_axis_finalize             (GObject *object);
+static void     gwy_graph_axis_set_property         (GObject *object,
+                                                     guint prop_id,
+                                                     const GValue *value,
+                                                     GParamSpec *pspec);
+static void     gwy_graph_axis_get_property         (GObject *object,
+                                                     guint prop_id,
+                                                     GValue *value,
+                                                     GParamSpec *pspec);
+static void     gwy_graph_axis_get_preferred_width  (GtkWidget *widget,
+                                                     gint *minimum,
+                                                     gint *natural);
+static void     gwy_graph_axis_get_preferred_height (GtkWidget *widget,
+                                                     gint *minimum,
+                                                     gint *natural);
+static gboolean gwy_graph_axis_draw                 (GtkWidget *widget,
+                                                     cairo_t *cr);
+static gboolean gwy_graph_axis_get_horizontal_labels(const GwyAxis *axis);
+static void     gwy_graph_axis_get_units_affinity   (const GwyAxis *axis,
+                                                     GwyAxisUnitPlacement *primary,
+                                                     GwyAxisUnitPlacement *secondary);
+static void     gwy_graph_axis_redraw_mark          (GwyAxis *axis);
+static void     draw_mark                           (GwyAxis *axis,
+                                                     cairo_t *cr,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble length,
+                                                     gdouble breadth);
+static gint     preferred_breadth                   (GtkWidget *widget);
+static void     draw_line_transformed               (cairo_t *cr,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble xf,
+                                                     gdouble yf,
+                                                     gdouble xt,
+                                                     gdouble yt);
+static void     calculate_scaling                   (GwyAxis *axis,
+                                                     GtkAllocation *allocation,
+                                                     GtkPositionType *pedge,
+                                                     gdouble *length,
+                                                     gdouble *breadth,
+                                                     cairo_matrix_t *matrix);
+static gboolean set_label                           (GwyGraphAxis *graphaxis,
+                                                     const gchar *label);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -105,6 +109,8 @@ gwy_graph_axis_class_init(GwyGraphAxisClass *klass)
     widget_class->draw = gwy_graph_axis_draw;
 
     // TODO: assign axis_class->...
+    axis_class->get_units_affinity = gwy_graph_axis_get_units_affinity;
+    axis_class->get_horizontal_labels = gwy_graph_axis_get_horizontal_labels;
     axis_class->redraw_mark = gwy_graph_axis_redraw_mark;
 
     properties[PROP_LABEL]
@@ -283,6 +289,53 @@ gwy_graph_axis_draw(GtkWidget *widget,
     return FALSE;
 }
 
+static gboolean
+gwy_graph_axis_get_horizontal_labels(G_GNUC_UNUSED const GwyAxis *axis)
+{
+    return TRUE;
+}
+
+static void
+gwy_graph_axis_get_units_affinity(G_GNUC_UNUSED const GwyAxis *axis,
+                                  GwyAxisUnitPlacement *primary,
+                                  GwyAxisUnitPlacement *secondary)
+{
+    *primary = *secondary = GWY_AXIS_UNITS_NEVER;
+}
+
+static void
+gwy_graph_axis_redraw_mark(GwyAxis *axis)
+{
+    GtkWidget *widget = GTK_WIDGET(axis);
+    gdouble mark = gwy_axis_get_mark(axis);
+    if (!gwy_axis_get_show_mark(axis) || !isfinite(mark))
+        return;
+
+    GtkAllocation allocation;
+    gdouble length, breadth;
+    cairo_matrix_t matrix;
+    calculate_scaling(axis, &allocation, NULL, &length, &breadth, &matrix);
+
+    gdouble x = gwy_axis_value_to_position(axis, mark),
+            hs = 0.2*breadth, y = hs;
+    if (x < -hs || x > length + hs)
+        return;
+
+    cairo_matrix_transform_point(&matrix, &x, &y);
+
+    cairo_rectangle_int_t rect = {
+        (gint)floor(x - hs - 1.0 + allocation.x),
+        (gint)floor(y - hs - 1.0 + allocation.y),
+        (gint)ceil(2.0*hs + 2.01),
+        (gint)ceil(2.0*hs + 2.01),
+    };
+
+    cairo_region_t *region = cairo_region_create_rectangle(&rect);
+    cairo_region_intersect_rectangle(region, &allocation);
+    gtk_widget_queue_draw_region(widget, region);
+    cairo_region_destroy(region);
+}
+
 /**
  * gwy_graph_axis_new:
  *
@@ -372,39 +425,6 @@ draw_mark(GwyAxis *axis, cairo_t *cr,
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_stroke(cr);
     cairo_restore(cr);
-}
-
-static void
-gwy_graph_axis_redraw_mark(GwyAxis *axis)
-{
-    GtkWidget *widget = GTK_WIDGET(axis);
-    gdouble mark = gwy_axis_get_mark(axis);
-    if (!gwy_axis_get_show_mark(axis) || !isfinite(mark))
-        return;
-
-    GtkAllocation allocation;
-    gdouble length, breadth;
-    cairo_matrix_t matrix;
-    calculate_scaling(axis, &allocation, NULL, &length, &breadth, &matrix);
-
-    gdouble x = gwy_axis_value_to_position(axis, mark),
-            hs = 0.2*breadth, y = hs;
-    if (x < -hs || x > length + hs)
-        return;
-
-    cairo_matrix_transform_point(&matrix, &x, &y);
-
-    cairo_rectangle_int_t rect = {
-        (gint)floor(x - hs - 1.0 + allocation.x),
-        (gint)floor(y - hs - 1.0 + allocation.y),
-        (gint)ceil(2.0*hs + 2.01),
-        (gint)ceil(2.0*hs + 2.01),
-    };
-
-    cairo_region_t *region = cairo_region_create_rectangle(&rect);
-    cairo_region_intersect_rectangle(region, &allocation);
-    gtk_widget_queue_draw_region(widget, region);
-    cairo_region_destroy(region);
 }
 
 static gint
