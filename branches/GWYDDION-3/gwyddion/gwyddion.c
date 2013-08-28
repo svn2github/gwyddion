@@ -414,10 +414,11 @@ create_graph_window(void)
     gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Graphing Test");
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    GtkWidget *areawidget = gwy_graph_area_new();
-    GwyGraphArea *area = GWY_GRAPH_AREA(areawidget);
-    gtk_container_add(GTK_CONTAINER(window), areawidget);
+    GtkWidget *graphwidget = gwy_graph_new();
+    GwyGraph *graph = GWY_GRAPH(graphwidget);
+    gtk_container_add(GTK_CONTAINER(window), graphwidget);
 
+    GwyGraphArea *area = gwy_graph_get_area(graph);
     GwyRand *rng = gwy_rand_new();
     GwyRange xrange = { G_MAXDOUBLE, -G_MAXDOUBLE },
              yrange = { G_MAXDOUBLE, -G_MAXDOUBLE };
