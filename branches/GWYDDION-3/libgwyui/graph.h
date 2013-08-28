@@ -52,11 +52,13 @@ struct _GwyGraphClass {
     GtkGridClass grid_class;
 };
 
-GType         gwy_graph_get_type(void)                  G_GNUC_CONST;
-GtkWidget*    gwy_graph_new     (void)                  G_GNUC_MALLOC;
-GwyGraphArea* gwy_graph_get_area(const GwyGraph *graph) G_GNUC_PURE;
-GwyGraphAxis* gwy_graph_get_axis(const GwyGraph *graph,
-                                 GtkPositionType edge)  G_GNUC_PURE;
+GType         gwy_graph_get_type       (void)                  G_GNUC_CONST;
+GtkWidget*    gwy_graph_new            (void)                  G_GNUC_MALLOC;
+GwyGraphArea* gwy_graph_get_area       (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_left_axis  (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_right_axis (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_top_axis   (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_bottom_axis(const GwyGraph *graph) G_GNUC_PURE;
 
 G_END_DECLS
 
