@@ -132,7 +132,10 @@ gwy_graph_init(GwyGraph *graph)
         GtkWidget *widget = gwy_graph_axis_new();
         GwyAxis *axis = GWY_AXIS(widget);
         priv->axis[edge] = GWY_GRAPH_AXIS(widget);
-        gwy_axis_set_edge(axis, edge);
+        g_object_set(axis,
+                     "edge", edge,
+                     "ticks-at-edges", TRUE,
+                     NULL);
         gtk_grid_attach(grid, widget,
                         axis_attachments[2*edge], axis_attachments[2*edge + 1],
                         1, 1);
