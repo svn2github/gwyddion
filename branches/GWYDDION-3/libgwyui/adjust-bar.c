@@ -23,6 +23,7 @@
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/widget-utils.h"
 #include "libgwyui/types.h"
+#include "libgwyui/adjustment.h"
 #include "libgwyui/adjust-bar.h"
 
 enum {
@@ -56,6 +57,8 @@ struct _GwyAdjustBarPrivate {
     gdouble oldvalue;    // This is to avoid acting on no-change notifications.
     gboolean adjustment_ok : 1;
     gboolean dragging : 1;
+    gboolean canreset : 1;
+    gboolean didreset : 1;
 
     GwyScaleMappingType mapping;
     MappingFunc map_value;
@@ -441,6 +444,16 @@ gwy_adjust_bar_button_press(GtkWidget *widget,
         return FALSE;
 
     AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
+    if (event->type == GDK_2BUTTON_PRESS) {
+        // Behave consistently whether we actually can reset or not.
+        if (priv->canreset)
+            gwy_adjustment_reset(GWY_ADJUSTMENT(priv->adjustment));
+        priv->didreset = TRUE;
+        priv->dragging = FALSE;
+        return TRUE;
+    }
+
+    priv->didreset = FALSE;
     priv->dragging = TRUE;
     change_value(widget, event->x);
     return TRUE;
@@ -454,7 +467,9 @@ gwy_adjust_bar_button_release(GtkWidget *widget,
         return FALSE;
 
     AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
-    change_value(widget, event->x);
+    if (!priv->didreset)
+        change_value(widget, event->x);
+    priv->didreset = FALSE;
     priv->dragging = FALSE;
     return TRUE;
 }
@@ -464,6 +479,9 @@ gwy_adjust_bar_motion_notify(GtkWidget *widget,
                              GdkEventMotion *event)
 {
     if (!(event->state & GDK_BUTTON1_MASK))
+        return FALSE;
+    AdjustBar *priv = GWY_ADJUST_BAR(widget)->priv;
+    if (priv->didreset)
         return FALSE;
 
     change_value(widget, event->x);
@@ -517,6 +535,9 @@ gwy_adjust_bar_new(void)
  *              Adjustment to use for the value.
  *
  * Sets the adjustment that a adjustment bar visualises.
+ *
+ * If the adjustment is a #GwyAdjustment then the value can be reset to default
+ * by double-click.
  **/
 void
 gwy_adjust_bar_set_adjustment(GwyAdjustBar *adjbar,
@@ -597,6 +618,7 @@ set_adjustment(GwyAdjustBar *adjbar,
                                NULL))
         return FALSE;
 
+    priv->canreset = adjustment && GWY_IS_ADJUSTMENT(adjustment);
     update_mapping(adjbar);
     gtk_widget_queue_draw(GTK_WIDGET(adjbar));
     return TRUE;
