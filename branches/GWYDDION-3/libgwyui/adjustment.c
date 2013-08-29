@@ -131,6 +131,12 @@ gwy_adjustment_new(void)
 
 /**
  * gwy_adjustment_new_set:
+ * @value: Initial value.
+ * @defaultval: Default value.
+ * @lower: Minimum value.
+ * @upper: Maximum value.
+ * @step_increment: Step increment.
+ * @page_increment: Page increment.
  *
  * Creates a new adjustable bounded value with given ranges and value.
  *
