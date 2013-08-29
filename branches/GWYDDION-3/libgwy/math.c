@@ -941,7 +941,41 @@ gwy_cholesky_invert(gdouble *a, guint n)
 }
 
 /**
- * gwy_cholesky_multiply_right:
+ * gwy_cholesky_multiply:
+ * @matrix: Lower triangular part of a symmetric matrix.  See
+ *          gwy_lower_triangular_matrix_index() for storage details.
+ * @vec: (inout):
+ *       Vector to be multiplied, it will be modified in place.
+ * @n: Dimension of @matrix and @vec.
+ *
+ * Multiplies a vector with a symmetrical matrix in triangular storage form.
+ *
+ * Note this function interprets @matrix as symmetrical,
+ * <emphasis>not</emphasis> triangular, even though only half of the matrix
+ * is kept.  See gwy_triangular_multiply_right() and
+ * gwy_triangular_multiply_left() for multiplication with triangular matrices.
+ *
+ * Since the matrix is symmetrical, left and right multiplication lead to the
+ * same result.  The matrix does not need to be positive definite.
+ **/
+void
+gwy_cholesky_multiply(const gdouble *m, gdouble *v, guint n)
+{
+    gdouble a[n];
+    for (guint i = 0; i < n; i++) {
+        a[i] = 0.0;
+        for (guint j = 0; j < n; j++) {
+            guint ij = MAX(i, j);
+            guint ji = MIN(i, j);
+            a[i] += SLi(m, ij, ji) * v[j];
+        }
+    }
+    gwy_assign(v, a, n);
+}
+
+
+/**
+ * gwy_triangular_multiply_right:
  * @vec: (inout):
  *       Vector to be multiplied, it will be modified in place.
  * @matrix: Lower triangular part of a symmetric, presumably positive definite,
@@ -956,10 +990,10 @@ gwy_cholesky_invert(gdouble *a, guint n)
  * lower left triangular matrix.  The result is the same.
  *
  * The matrix will be typically obtained by gwy_cholesky_decompose() but this
- * method does not require any property such as positive definiteness.
+ * function does not require any property such as positive definiteness.
  **/
 void
-gwy_cholesky_multiply_right(gdouble *vec, const gdouble *a, guint n)
+gwy_triangular_multiply_right(gdouble *vec, const gdouble *a, guint n)
 {
     gdouble x[n];
     gwy_clear(x, n);
@@ -972,7 +1006,7 @@ gwy_cholesky_multiply_right(gdouble *vec, const gdouble *a, guint n)
 }
 
 /**
- * gwy_cholesky_multiply_left:
+ * gwy_triangular_multiply_left:
  * @matrix: Lower triangular part of a symmetric, presumably positive definite,
  *          matrix.  See gwy_lower_triangular_matrix_index() for storage
  *          details.
@@ -987,10 +1021,10 @@ gwy_cholesky_multiply_right(gdouble *vec, const gdouble *a, guint n)
  * upper right triangular matrix.  The result is the same.
  *
  * The matrix will be typically obtained by gwy_cholesky_decompose() but this
- * method does not require any property such as positive definiteness.
+ * function does not require any property such as positive definiteness.
  **/
 void
-gwy_cholesky_multiply_left(const gdouble *a, gdouble *vec, guint n)
+gwy_triangular_multiply_left(const gdouble *a, gdouble *vec, guint n)
 {
     a += MATRIX_LEN(n) - 1;
     for (guint i = n; i; i--) {

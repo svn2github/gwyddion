@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -974,14 +974,8 @@ test_cholesky_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
 static void
 test_cholesky_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
 {
-    for (guint i = 0; i < n; i++) {
-        a[i] = 0.0;
-        for (guint j = 0; j < n; j++) {
-            guint ij = MAX(i, j);
-            guint ji = MIN(i, j);
-            a[i] += SLi(m, ij, ji) * v[j];
-        }
-    }
+    gwy_assign(a, v, n);
+    gwy_cholesky_multiply(m, a, n);
 }
 
 /* Generate the decomposition.  As long as it has positive numbers on the
@@ -1091,7 +1085,7 @@ test_math_cholesky(void)
 }
 
 void
-test_math_cholesky_multiply_right(void)
+test_math_triangular_multiply_right(void)
 {
     enum { nmax = 8, niter = 50 };
     /* Make it realy reproducible. */
@@ -1115,7 +1109,7 @@ test_math_cholesky_multiply_right(void)
             gdouble sref = 0.0;
             for (guint j = 0; j < n; j++)
                 sref += vector[j]*multiplied[j];
-            gwy_cholesky_multiply_right(vector, decomp, n);
+            gwy_triangular_multiply_right(vector, decomp, n);
             gdouble s = 0.0;
             for (guint j = 0; j < n; j++)
                 s += vector[j]*vector[j];
@@ -1133,7 +1127,7 @@ test_math_cholesky_multiply_right(void)
 }
 
 void
-test_math_cholesky_multiply_left(void)
+test_math_triangular_multiply_left(void)
 {
     enum { nmax = 8, niter = 50 };
     /* Make it realy reproducible. */
@@ -1155,9 +1149,9 @@ test_math_cholesky_multiply_left(void)
             test_cholesky_make_vector(reference, n, rng);
             gwy_assign(vector, reference, n);
             gwy_cholesky_invert(matrix, n);
-            gwy_cholesky_multiply_left(decomp, vector, n);
+            gwy_triangular_multiply_left(decomp, vector, n);
             test_cholesky_matvec(multiplied, matrix, vector, n);
-            gwy_cholesky_multiply_right(multiplied, decomp, n);
+            gwy_triangular_multiply_right(multiplied, decomp, n);
             gdouble eps = gwy_powi(10.0, (gint)n - 12);
             for (guint j = 0; j < n; j++) {
                 gwy_assert_floatval(multiplied[j], reference[j], eps);

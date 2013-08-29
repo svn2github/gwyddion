@@ -36,8 +36,8 @@ math/line-point-distance/inside
 math/sort
 math/median
 math/cholesky
-math/cholesky/multiply-right
-math/cholesky/multiply-left
+math/triangular/multiply-right
+math/triangular/multiply-left
 math/linalg
 math/linalg/fail
 math/fit/poly
