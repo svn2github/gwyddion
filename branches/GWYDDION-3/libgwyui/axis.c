@@ -1355,8 +1355,12 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
+            // Increase precision if the position does not coincide with a
+            // normal major tick.
             guint prec = gwy_value_format_get_precision(priv->vf);
-            gwy_value_format_set_precision(priv->vf, prec+1);
+            gdouble rem = fmod(fabs(from), fabs(bs))/fabs(bs);
+            if (rem > 0.001 && rem < 0.999)
+                gwy_value_format_set_precision(priv->vf, prec+1);
             format_value_label(axis, tick.value,
                                units_pos == GWY_AXIS_UNITS_FIRST
                                || (units_pos == GWY_AXIS_UNITS_ZERO
@@ -1377,8 +1381,12 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         };
 
         if (priv->show_labels) {
+            // Increase precision if the position does not coincide with a
+            // normal major tick.
             guint prec = gwy_value_format_get_precision(priv->vf);
-            gwy_value_format_set_precision(priv->vf, prec+1);
+            gdouble rem = fmod(fabs(from), fabs(bs))/fabs(bs);
+            if (rem > 0.001 && rem < 0.999)
+                gwy_value_format_set_precision(priv->vf, prec+1);
             format_value_label(axis, tick.value,
                                units_pos == GWY_AXIS_UNITS_LAST
                                || (units_pos == GWY_AXIS_UNITS_ZERO
