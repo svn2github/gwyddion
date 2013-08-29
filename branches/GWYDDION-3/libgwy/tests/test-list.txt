@@ -36,6 +36,7 @@ math/line-point-distance/inside
 math/sort
 math/median
 math/cholesky
+math/cholesky/dotprod
 math/triangular/multiply-right
 math/triangular/multiply-left
 math/linalg

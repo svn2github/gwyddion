@@ -127,6 +127,10 @@ gdouble  gwy_cholesky_condition       (const gdouble *matrix,
 void     gwy_cholesky_multiply        (const gdouble *matrix,
                                        gdouble *vec,
                                        guint n);
+gdouble  gwy_cholesky_dotprod         (const gdouble *matrix,
+                                       const gdouble *veca,
+                                       const gdouble *vecb,
+                                       guint n);
 void     gwy_triangular_multiply_right(gdouble *vec,
                                        const gdouble *matrix,
                                        guint n);

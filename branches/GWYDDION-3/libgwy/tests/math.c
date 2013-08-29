@@ -1168,4 +1168,50 @@ test_math_triangular_multiply_left(void)
     g_rand_free(rng);
 }
 
+void
+test_math_cholesky_dotprod(void)
+{
+    enum { nmax = 8, niter = 50 };
+    /* Make it realy reproducible. */
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint n = 1; n <= nmax; n++) {
+        guint matlen = CHOLESKY_MATRIX_LEN(n);
+        /* Use descriptive names for less cryptic g_assert() messages. */
+        gdouble *matrix = g_new(gdouble, matlen);
+        gdouble *vectora = g_new(gdouble, n);
+        gdouble *vectorb = g_new(gdouble, n);
+        gdouble *multiplieda = g_new(gdouble, n);
+        gdouble *multipliedb = g_new(gdouble, n);
+
+        for (guint iter = 0; iter < niter; iter++) {
+            test_cholesky_make_matrix(matrix, n, rng);
+            test_cholesky_make_vector(vectora, n, rng);
+            test_cholesky_make_vector(vectorb, n, rng);
+            gwy_assign(multiplieda, vectora, n);
+            gwy_assign(multipliedb, vectorb, n);
+            gwy_cholesky_multiply(matrix, multiplieda, n);
+            gwy_cholesky_multiply(matrix, multipliedb, n);
+            gdouble dotproda = 0.0, dotprodb = 0.0;
+            for (guint i = 0; i < n; i++) {
+                dotproda += vectora[i]*multipliedb[i];
+                dotprodb += vectorb[i]*multiplieda[i];
+            }
+            gdouble dotprod = gwy_cholesky_dotprod(matrix, vectora, vectorb, n);
+            gdouble eps = gwy_powi(10.0, (gint)n - 15)*(fabs(dotproda)
+                                                        + fabs(dotprodb));
+            gwy_assert_floatval(dotprod, dotproda, eps);
+            gwy_assert_floatval(dotprod, dotprodb, eps);
+        }
+
+        g_free(vectorb);
+        g_free(vectora);
+        g_free(multipliedb);
+        g_free(multiplieda);
+        g_free(matrix);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

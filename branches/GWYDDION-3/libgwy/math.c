@@ -973,6 +973,35 @@ gwy_cholesky_multiply(const gdouble *m, gdouble *v, guint n)
     gwy_assign(v, a, n);
 }
 
+/**
+ * gwy_cholesky_dotprod:
+ * @matrix: Lower triangular part of a symmetric matrix.  Presumably positive
+ *          semidefinite in order to actually represent a scalar product.
+ *          See gwy_lower_triangular_matrix_index() for storage details.
+ * @veca: First vector of the scalar product.
+ * @vecb: Second vector of the scalar product.
+ * @n: Dimension of @matrix, @veca and @vecb.
+ *
+ * Calculates dot product of two vectors given a symmetrical matrix.
+ *
+ * Returns: The scalar product of the two vectors.
+ **/
+gdouble
+gwy_cholesky_dotprod(const gdouble *m,
+                     const gdouble *a,
+                     const gdouble *b,
+                     guint n)
+{
+    gdouble s = 0.0;
+    for (guint i = 0; i < n; i++) {
+        gdouble ai = a[i], bi = b[i];
+        for (guint j = 0; j < i; j++, m++)
+            s += (*m)*(ai*b[j] + a[j]*bi);
+        s += (*m)*ai*bi;
+        m++;
+    }
+    return s;
+}
 
 /**
  * gwy_triangular_multiply_right:
