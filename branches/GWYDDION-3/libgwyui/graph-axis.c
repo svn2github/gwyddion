@@ -36,6 +36,7 @@ enum {
 
 struct _GwyGraphAxisPrivate {
     gchar *label;
+    guint ticksbreadth;
 };
 
 typedef struct _GwyGraphAxisPrivate GraphAxis;
@@ -215,12 +216,14 @@ gwy_graph_axis_draw(GtkWidget *widget,
                     cairo_t *cr)
 {
     GwyAxis *axis = GWY_AXIS(widget);
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     cairo_rectangle_int_t allocation;
     gdouble length, breadth;
     cairo_matrix_t matrix;
     GtkPositionType edge;
     calculate_scaling(axis, &allocation, &edge, &length, &breadth, &matrix);
+    gdouble ticksbreadth = MIN(priv->ticksbreadth, breadth);
 
     cairo_save(cr);
     cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
@@ -242,7 +245,7 @@ gwy_graph_axis_draw(GtkWidget *widget,
     for (guint i = 0; i < nticks; i++) {
         gdouble pos = ticks[i].position;
         gdouble s = tick_level_sizes[ticks[i].level];
-        draw_line_transformed(cr, &matrix, pos, 0, pos, s*breadth);
+        draw_line_transformed(cr, &matrix, pos, 0, pos, s*ticksbreadth);
         if (ticks[i].label) {
             max_ascent = MAX(max_ascent, PANGO_ASCENT(ticks[i].extents));
             max_descent = MAX(max_descent, PANGO_DESCENT(ticks[i].extents));
@@ -250,41 +253,42 @@ gwy_graph_axis_draw(GtkWidget *widget,
     }
     cairo_stroke(cr);
 
-#if 0
     PangoLayout *layout = gwy_axis_get_pango_layout(axis);
     gdouble a = max_ascent/pangoscale, d = max_descent/pangoscale;
+    gdouble mtlen = ticksbreadth*tick_level_sizes[GWY_AXIS_TICK_MAJOR];
     for (guint i = 0; i < nticks; i++) {
         if (!ticks[i].label)
             continue;
 
-        gdouble x = ticks[i].position, y = breadth;
+        gdouble x = ticks[i].position, y = ticksbreadth;
         cairo_matrix_transform_point(&matrix, &x, &y);
         pango_layout_set_markup(layout, ticks[i].label, -1);
-        if (edge == GTK_POS_BOTTOM) {
+        if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM) {
             if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                x -= 2.0 + ticks[i].extents.width/pangoscale;
+                x -= 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
             else
                 x += 2.0;
-            y = breadth - (a + d);
-        }
-        else if (edge == GTK_POS_LEFT) {
-            y += 2.0;
-            x += a + d;
-        }
-        else if (edge == GTK_POS_TOP) {
-            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                x -= 2.0 + ticks[i].extents.width/pangoscale;
+
+            if (edge == GTK_POS_TOP)
+                y = breadth - mtlen - d;
             else
-                x += 2.0;
-            y = a;
+                y = mtlen + a;
         }
-        else if (edge == GTK_POS_RIGHT) {
-            y += 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
-            x = breadth - (a + d);
+        else if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
+            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+                y -= 2.0 + ticks[i].extents.height/pangoscale;
+            else
+                y += 2.0;
+
+            // FIXME: Right edge position does not look good with negative
+            // numbers.  We would need something more sophisticated...
+            if (edge == GTK_POS_LEFT)
+                x = breadth - mtlen - ticks[i].extents.width/pangoscale;
+            else
+                x = mtlen;
         }
         gtk_render_layout(context, cr, x, y, layout);
     }
-#endif
 
     return FALSE;
 }
@@ -311,13 +315,15 @@ gwy_graph_axis_redraw_mark(GwyAxis *axis)
     if (!gwy_axis_get_show_mark(axis) || !isfinite(mark))
         return;
 
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     cairo_rectangle_int_t allocation;
     gdouble length, breadth;
     cairo_matrix_t matrix;
     calculate_scaling(axis, &allocation, NULL, &length, &breadth, &matrix);
+    gdouble tickbreadth = MIN(priv->ticksbreadth, breadth);
 
     gdouble x = gwy_axis_value_to_position(axis, mark),
-            hs = 0.2*breadth, y = hs;
+            hs = 0.5*tickbreadth, y = hs;
     if (x < -hs || x > length + hs)
         return;
 
@@ -396,8 +402,9 @@ draw_mark(GwyAxis *axis, cairo_t *cr,
     GtkPositionType edge = gwy_axis_get_edge(axis);
     guint nticks;
     gwy_axis_ticks(axis, &nticks);
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     gdouble x = gwy_axis_value_to_position(axis, mark),
-            hs = 0.2*breadth, y = hs;
+            hs = 0.5*breadth*priv->ticksbreadth, y = hs;
     if (x < -hs || x > length + hs)
         return;
 
@@ -436,7 +443,11 @@ preferred_breadth(GtkWidget *widget)
     gint breadth;
     pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
     pango_layout_get_size(layout, NULL, &breadth);
-    breadth = 18*breadth/(5*PANGO_SCALE);
+    // FIXME: Unlike color axis, we want to request larger width to accommodate
+    // the tick labels.
+    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
+    breadth = 16*breadth/(5*PANGO_SCALE);
+    priv->ticksbreadth = breadth/3;
     return MAX(breadth, 4);
 }
 
