@@ -477,8 +477,9 @@ gwy_color_axis_draw(GtkWidget *widget,
     draw_ticks(ticks, nticks, cr, context, &matrix, stripebreadth,
                &max_ascent, &max_descent);
     draw_stripe(priv->gradient, cr, edge, &matrix, length, stripebreadth);
-    draw_labels(ticks, nticks, cr, edge, context, layout, &matrix,
-                breadth, stripebreadth, max_ascent, max_descent);
+    if (gwy_axis_get_show_labels(axis))
+        draw_labels(ticks, nticks, cr, edge, context, layout, &matrix,
+                    breadth, stripebreadth, max_ascent, max_descent);
     draw_mark(axis, cr, &matrix, length, stripebreadth);
 
     return FALSE;
