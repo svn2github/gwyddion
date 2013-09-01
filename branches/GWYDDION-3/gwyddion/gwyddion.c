@@ -257,12 +257,16 @@ create_widget_test(void)
     gtk_grid_set_row_spacing(grid, 2);
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
-    GtkAdjustment *adj1 = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
-    attach_adjustment(grid, 0, adj1, "_Value with a long name:", "µm",
+    GwyAdjustment *adj1 = gwy_adjustment_new_set(10.0, 10.0,
+                                                 0.0, 1000.0, 1.0, 10.0);
+    attach_adjustment(grid, 0, GTK_ADJUSTMENT(adj1),
+                      "_Value with a long name:", "µm",
                       NULL, NULL);
 
-    GtkAdjustment *adj2 = gtk_adjustment_new(10.0, 0.0, 1000.0, 1.0, 10.0, 0.0);
-    attach_adjustment(grid, 1, adj2, "_Short value:", "px",
+    GwyAdjustment *adj2 = gwy_adjustment_new_set(10.0, 100.0,
+                                                 0.0, 1000.0, 1.0, 10.0);
+    attach_adjustment(grid, 1, GTK_ADJUSTMENT(adj2),
+                      "_Short value:", "px",
                       set_sensitive, GINT_TO_POINTER(FALSE));
 
     GtkWidget *entry = gtk_entry_new();
@@ -444,6 +448,16 @@ create_graph_window(void)
     gwy_graph_area_set_xgrid(area, grid, 21);
     gwy_graph_area_set_ygrid(area, grid, 21);
     g_free(grid);
+
+    GwyGraphAxis *gaxis;
+    gaxis = gwy_graph_get_top_axis(graph);
+    gwy_graph_axis_set_label(gaxis, "Top");
+    gaxis = gwy_graph_get_bottom_axis(graph);
+    gwy_graph_axis_set_label(gaxis, "Bottom");
+    gaxis = gwy_graph_get_left_axis(graph);
+    gwy_graph_axis_set_label(gaxis, "Left");
+    gaxis = gwy_graph_get_right_axis(graph);
+    gwy_graph_axis_set_label(gaxis, "Right");
 
     gwy_rand_free(rng);
 
