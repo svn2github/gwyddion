@@ -387,8 +387,11 @@ gwy_color_axis_get_preferred_width(GtkWidget *widget,
     gint breadth, height;
     pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
     pango_layout_get_size(layout, &breadth, &height);
-    priv->stripewidth = (gdouble)height/(breadth + height);
-    breadth = (breadth + height)/(PANGO_SCALE);
+    gint width = (gwy_axis_get_show_tick_labels(axis)
+                  ? breadth + height
+                  : breadth);
+    priv->stripewidth = (gdouble)height/width;
+    breadth = width/(PANGO_SCALE);
     *minimum = *natural = MAX(breadth, 6);
 }
 
@@ -413,8 +416,14 @@ gwy_color_axis_get_preferred_height(GtkWidget *widget,
     gint breadth;
     pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
     pango_layout_get_size(layout, NULL, &breadth);
-    priv->stripewidth = 5.0/13.0;
-    breadth = 13*breadth/(5*PANGO_SCALE);
+    if (gwy_axis_get_show_tick_labels(axis)) {
+        priv->stripewidth = 5.0/13.0;
+        breadth = 13*breadth/(5*PANGO_SCALE);
+    }
+    else {
+        priv->stripewidth = 0.5;
+        breadth = 2*breadth/(PANGO_SCALE);
+    }
     *minimum = *natural = MAX(breadth, 4);
 }
 
@@ -477,7 +486,7 @@ gwy_color_axis_draw(GtkWidget *widget,
     draw_ticks(ticks, nticks, cr, context, &matrix, stripebreadth,
                &max_ascent, &max_descent);
     draw_stripe(priv->gradient, cr, edge, &matrix, length, stripebreadth);
-    if (gwy_axis_get_show_labels(axis))
+    if (gwy_axis_get_show_tick_labels(axis))
         draw_labels(ticks, nticks, cr, edge, context, layout, &matrix,
                     breadth, stripebreadth, max_ascent, max_descent);
     draw_mark(axis, cr, &matrix, length, stripebreadth);

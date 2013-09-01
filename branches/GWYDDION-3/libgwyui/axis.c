@@ -59,8 +59,8 @@ enum {
     PROP_RANGE,
     PROP_SNAP_TO_TICKS,
     PROP_TICKS_AT_EDGES,
-    PROP_SHOW_LABELS,
-    PROP_SHOW_UNITS,
+    PROP_SHOW_TICK_LABELS,
+    PROP_SHOW_UNIT,
     PROP_MAX_TICK_LEVEL,
     PROP_SHOW_MARK,
     PROP_MARK,
@@ -81,8 +81,8 @@ struct _GwyAxisPrivate {
     GwyAxisTickLevel max_tick_level;
     gboolean snap_to_ticks : 1;
     gboolean ticks_at_edges : 1;
-    gboolean show_labels : 1;
-    gboolean show_units : 1;
+    gboolean show_tick_labels : 1;
+    gboolean show_unit : 1;
     gboolean show_mark : 1;
 
     gboolean ticks_are_valid : 1;
@@ -123,9 +123,9 @@ static gboolean        set_snap_to_ticks         (GwyAxis *axis,
                                                   gboolean setting);
 static gboolean        set_ticks_at_edges        (GwyAxis *axis,
                                                   gboolean setting);
-static gboolean        set_show_labels           (GwyAxis *axis,
+static gboolean        set_show_tick_labels      (GwyAxis *axis,
                                                   gboolean setting);
-static gboolean        set_show_units            (GwyAxis *axis,
+static gboolean        set_show_unit             (GwyAxis *axis,
                                                   gboolean setting);
 static gboolean        set_edge                  (GwyAxis *axis,
                                                   GtkPositionType edge);
@@ -289,16 +289,16 @@ gwy_axis_class_init(GwyAxisClass *klass)
                                FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_SHOW_LABELS]
-        = g_param_spec_boolean("show-labels",
-                               "Show labels",
+    properties[PROP_SHOW_TICK_LABELS]
+        = g_param_spec_boolean("show-tick-labels",
+                               "Show tick labels",
                                "Whether labels should be shown at major ticks.",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_SHOW_UNITS]
-        = g_param_spec_boolean("show-units",
-                               "Show units",
+    properties[PROP_SHOW_UNIT]
+        = g_param_spec_boolean("show-unit",
+                               "Show unit",
                                "Whether units should be shown next to a major "
                                "tick.",
                                TRUE,
@@ -348,8 +348,8 @@ gwy_axis_init(GwyAxis *axis)
     priv->unit_changed_id = g_signal_connect_swapped(priv->unit, "changed",
                                                      G_CALLBACK(unit_changed),
                                                      axis);
-    priv->show_labels = TRUE;
-    priv->show_units = TRUE;
+    priv->show_tick_labels = TRUE;
+    priv->show_unit = TRUE;
     priv->edge = GTK_POS_BOTTOM;
     priv->max_tick_level = GWY_AXIS_TICK_MINOR;
     priv->length = 1;
@@ -407,12 +407,12 @@ gwy_axis_set_property(GObject *object,
         set_ticks_at_edges(axis, g_value_get_boolean(value));
         break;
 
-        case PROP_SHOW_LABELS:
-        set_show_labels(axis, g_value_get_boolean(value));
+        case PROP_SHOW_TICK_LABELS:
+        set_show_tick_labels(axis, g_value_get_boolean(value));
         break;
 
-        case PROP_SHOW_UNITS:
-        set_show_units(axis, g_value_get_boolean(value));
+        case PROP_SHOW_UNIT:
+        set_show_unit(axis, g_value_get_boolean(value));
         break;
 
         case PROP_SHOW_MARK:
@@ -466,12 +466,12 @@ gwy_axis_get_property(GObject *object,
         g_value_set_boolean(value, priv->ticks_at_edges);
         break;
 
-        case PROP_SHOW_LABELS:
-        g_value_set_boolean(value, priv->show_labels);
+        case PROP_SHOW_TICK_LABELS:
+        g_value_set_boolean(value, priv->show_tick_labels);
         break;
 
-        case PROP_SHOW_UNITS:
-        g_value_set_boolean(value, priv->show_units);
+        case PROP_SHOW_UNIT:
+        g_value_set_boolean(value, priv->show_unit);
         break;
 
         case PROP_SHOW_MARK:
@@ -639,7 +639,7 @@ gwy_axis_get_unit(const GwyAxis *axis)
 }
 
 /**
- * gwy_axis_get_show_labels:
+ * gwy_axis_get_show_tick_labels:
  * @axis: An axis.
  *
  * Reports whether an axis shows tick labels.
@@ -647,28 +647,61 @@ gwy_axis_get_unit(const GwyAxis *axis)
  * Returns: %TRUE if @axis shows tick labels; %FALSE if they are not shown.
  **/
 gboolean
-gwy_axis_get_show_labels(const GwyAxis *axis)
+gwy_axis_get_show_tick_labels(const GwyAxis *axis)
 {
     g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
-    return !!axis->priv->show_labels;
+    return !!axis->priv->show_tick_labels;
 }
 
 /**
- * gwy_axis_set_show_labels:
+ * gwy_axis_set_show_tick_labels:
  * @axis: An axis.
  * @showlabels: %TRUE to show tick labels; %FALSE to not show them.
  *
  * Sets whether an axis should show tick labels.
  **/
 void
-gwy_axis_set_show_labels(GwyAxis *axis,
-                         gboolean showlabels)
+gwy_axis_set_show_tick_labels(GwyAxis *axis,
+                              gboolean showlabels)
 {
     g_return_if_fail(GWY_IS_AXIS(axis));
-    if (!set_show_labels(axis, showlabels))
+    if (!set_show_tick_labels(axis, showlabels))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_LABELS]);
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_TICK_LABELS]);
+}
+
+/**
+ * gwy_axis_get_show_unit:
+ * @axis: An axis.
+ *
+ * Reports whether an axis shows units.
+ *
+ * Returns: %TRUE if @axis shows units; %FALSE if they are not shown.
+ **/
+gboolean
+gwy_axis_get_show_unit(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    return !!axis->priv->show_unit;
+}
+
+/**
+ * gwy_axis_set_show_unit:
+ * @axis: An axis.
+ * @showlabels: %TRUE to show units; %FALSE to not show them.
+ *
+ * Sets whether an axis should show units.
+ **/
+void
+gwy_axis_set_show_unit(GwyAxis *axis,
+                        gboolean showunits)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    if (!set_show_unit(axis, showunits))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_UNIT]);
 }
 
 /**
@@ -986,6 +1019,7 @@ set_edge(GwyAxis *axis,
     priv->ticks_are_valid = FALSE;
     gtk_widget_queue_resize(GTK_WIDGET(axis));
     position_set_style_classes(GTK_WIDGET(axis), edge);
+    GWY_OBJECT_UNREF(priv->layout);
     return TRUE;
 }
 
@@ -1029,28 +1063,28 @@ set_snap_to_ticks(GwyAxis *axis,
 }
 
 static gboolean
-set_show_labels(GwyAxis *axis,
-                gboolean setting)
+set_show_tick_labels(GwyAxis *axis,
+                     gboolean setting)
 {
     Axis *priv = axis->priv;
-    if (!setting == !priv->show_labels)
+    if (!setting == !priv->show_tick_labels)
         return FALSE;
 
-    priv->show_labels = setting;
+    priv->show_tick_labels = setting;
     // TODO: Subclasses may want to queue resize here?
     invalidate_ticks(axis);
     return TRUE;
 }
 
 static gboolean
-set_show_units(GwyAxis *axis,
-               gboolean setting)
+set_show_unit(GwyAxis *axis,
+              gboolean setting)
 {
     Axis *priv = axis->priv;
-    if (!setting == !priv->show_units)
+    if (!setting == !priv->show_unit)
         return FALSE;
 
-    priv->show_units = setting;
+    priv->show_unit = setting;
     invalidate_ticks(axis);
     return TRUE;
 }
@@ -1100,7 +1134,7 @@ unit_changed(GwyAxis *axis,
              G_GNUC_UNUSED GwyUnit *unit)
 {
     Axis *priv = axis->priv;
-    if (priv->show_units)
+    if (priv->show_unit)
         invalidate_ticks(axis);
 }
 
@@ -1331,7 +1365,7 @@ fill_tick_arrays(GwyAxis *axis, guint level,
     guint length = priv->length;
     GwyAxisUnitPlacement units_pos = GWY_AXIS_UNITS_NEVER;
 
-    if (priv->show_units) {
+    if (priv->show_unit) {
         GwyAxisUnitPlacement units_pos_secondary;
         gwy_axis_get_units_affinity(axis, &units_pos, &units_pos_secondary);
         if (units_pos == GWY_AXIS_UNITS_ZERO) {
@@ -1354,7 +1388,7 @@ fill_tick_arrays(GwyAxis *axis, guint level,
             .level = GWY_AXIS_TICK_EDGE
         };
 
-        if (priv->show_labels) {
+        if (priv->show_tick_labels) {
             // Increase precision if the position does not coincide with a
             // normal major tick.
             guint prec = gwy_value_format_get_precision(priv->vf);
@@ -1380,7 +1414,7 @@ fill_tick_arrays(GwyAxis *axis, guint level,
             .level = GWY_AXIS_TICK_EDGE
         };
 
-        if (priv->show_labels) {
+        if (priv->show_tick_labels) {
             // Increase precision if the position does not coincide with a
             // normal major tick.
             guint prec = gwy_value_format_get_precision(priv->vf);
@@ -1417,7 +1451,7 @@ fill_tick_arrays(GwyAxis *axis, guint level,
             continue;
 
         tick.position = (tick.value - from)/(to - from)*length;
-        if (priv->show_labels && level == GWY_AXIS_TICK_MAJOR) {
+        if (priv->show_tick_labels && level == GWY_AXIS_TICK_MAJOR) {
             format_value_label(axis, tick.value,
                                (units_pos == GWY_AXIS_UNITS_ZERO
                                 && tick.value == 0.0)
@@ -1473,7 +1507,7 @@ remove_too_close_ticks(GwyAxis *axis)
         g_array_remove_index(ticks, 1);
     }
 
-    if (!priv->show_labels)
+    if (!priv->show_tick_labels)
         return;
 
     // Tick label collisions.  This is a bit tricky as labels can have
@@ -1752,16 +1786,16 @@ estimate_major_distance(GwyAxis *axis,
                         const GwyRange *request)
 {
     Axis *priv = axis->priv;
-    if (!priv->show_labels)
+    if (!priv->show_tick_labels)
         return fmin(MIN_MAJOR_DIST, priv->length);
 
     // FIXME: With perpendicular labels the label + units may be actually
     // two-line.  The label measurement probably needs to involve subclasses.
     gint width, height, w, h;
-    format_value_label(axis, request->from, priv->show_units);
+    format_value_label(axis, request->from, priv->show_unit);
     pango_layout_get_size(priv->layout, &width, &height);
 
-    format_value_label(axis, request->to, priv->show_units);
+    format_value_label(axis, request->to, priv->show_unit);
     pango_layout_get_size(priv->layout, &w, &h);
     width = MAX(width, w);
     height = MAX(height, h);

@@ -31,12 +31,21 @@
 enum {
     PROP_0,
     PROP_LABEL,
+    PROP_SHOW_LABEL,
+    PROP_SHOW_TICKS,
     N_PROPS,
 };
 
 struct _GwyGraphAxisPrivate {
     gchar *label;
     guint ticksbreadth;
+    gboolean show_label : 1;
+    gboolean show_ticks : 1;
+
+    PangoLayout *layout;   // This one may be rotated, unlike parent axis'.
+
+    // Scratch space
+    GString *str;
 };
 
 typedef struct _GwyGraphAxisPrivate GraphAxis;
@@ -74,12 +83,16 @@ static void     draw_labels                         (GwyAxis *axis,
                                                      const cairo_matrix_t *matrix,
                                                      gdouble length,
                                                      gdouble breadth);
+static void     draw_axis_label                     (GwyAxis *axis,
+                                                     cairo_t *cr,
+                                                     const cairo_matrix_t *matrix,
+                                                     gdouble length,
+                                                     gdouble breadth);
 static void     draw_mark                           (GwyAxis *axis,
                                                      cairo_t *cr,
                                                      const cairo_matrix_t *matrix,
                                                      gdouble length,
                                                      gdouble breadth);
-static gint     preferred_breadth                   (GtkWidget *widget);
 static void     draw_line_transformed               (cairo_t *cr,
                                                      const cairo_matrix_t *matrix,
                                                      gdouble xf,
@@ -93,6 +106,13 @@ static void     calculate_scaling                   (GwyAxis *axis,
                                                      cairo_matrix_t *matrix);
 static gboolean set_label                           (GwyGraphAxis *graphaxis,
                                                      const gchar *label);
+static gboolean set_show_label                      (GwyGraphAxis *graphaxis,
+                                                     gboolean setting);
+static gboolean set_show_ticks                      (GwyGraphAxis *graphaxis,
+                                                     gboolean setting);
+static void     edge_changed                        (GwyAxis *axis);
+static void     ensure_layout                       (GwyGraphAxis *graphaxis);
+static void     rotate_pango_layout                 (GwyGraphAxis *graphaxis);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -118,7 +138,6 @@ gwy_graph_axis_class_init(GwyGraphAxisClass *klass)
     widget_class->get_preferred_height = gwy_graph_axis_get_preferred_height;
     widget_class->draw = gwy_graph_axis_draw;
 
-    // TODO: assign axis_class->...
     axis_class->get_units_affinity = gwy_graph_axis_get_units_affinity;
     axis_class->get_horizontal_labels = gwy_graph_axis_get_horizontal_labels;
     axis_class->redraw_mark = gwy_graph_axis_redraw_mark;
@@ -130,6 +149,20 @@ gwy_graph_axis_class_init(GwyGraphAxisClass *klass)
                               NULL,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_SHOW_LABEL]
+        = g_param_spec_boolean("show-label",
+                               "Show label",
+                               "Whether to show the axis label.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SHOW_TICKS]
+        = g_param_spec_boolean("show-ticks",
+                               "Show ticks",
+                               "Whether to show ticks on the axis.",
+                               TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -140,17 +173,27 @@ gwy_graph_axis_init(GwyGraphAxis *graphaxis)
     graphaxis->priv = G_TYPE_INSTANCE_GET_PRIVATE(graphaxis,
                                                   GWY_TYPE_GRAPH_AXIS,
                                                   GraphAxis);
+    GraphAxis *priv = graphaxis->priv;
+    priv->show_label = TRUE;
+    priv->show_ticks = TRUE;
+    g_signal_connect(graphaxis, "notify::edge",
+                     G_CALLBACK(edge_changed), NULL);
 }
 
 static void
 gwy_graph_axis_finalize(GObject *object)
 {
+    GraphAxis *priv = GWY_GRAPH_AXIS(object)->priv;
+    GWY_FREE(priv->label);
+    GWY_STRING_FREE(priv->str);
     G_OBJECT_CLASS(gwy_graph_axis_parent_class)->finalize(object);
 }
 
 static void
 gwy_graph_axis_dispose(GObject *object)
 {
+    GraphAxis *priv = GWY_GRAPH_AXIS(object)->priv;
+    GWY_OBJECT_UNREF(priv->layout);
     G_OBJECT_CLASS(gwy_graph_axis_parent_class)->dispose(object);
 }
 
@@ -165,6 +208,14 @@ gwy_graph_axis_set_property(GObject *object,
     switch (prop_id) {
         case PROP_LABEL:
         set_label(graphaxis, g_value_get_string(value));
+        break;
+
+        case PROP_SHOW_LABEL:
+        set_show_label(graphaxis, g_value_get_boolean(value));
+        break;
+
+        case PROP_SHOW_TICKS:
+        set_show_ticks(graphaxis, g_value_get_boolean(value));
         break;
 
         default:
@@ -186,6 +237,14 @@ gwy_graph_axis_get_property(GObject *object,
         g_value_set_string(value, priv->label);
         break;
 
+        case PROP_SHOW_LABEL:
+        g_value_set_boolean(value, priv->show_label);
+        break;
+
+        case PROP_SHOW_TICKS:
+        g_value_set_boolean(value, priv->show_ticks);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -200,10 +259,24 @@ gwy_graph_axis_get_preferred_width(GtkWidget *widget,
     GwyAxis *axis = GWY_AXIS(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
 
-    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM) {
         *minimum = *natural = 1;
-    else
-        *minimum = *natural = preferred_breadth(widget);
+        return;
+    }
+
+    *minimum = *natural = 20;
+    PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
+    g_return_if_fail(layout);
+
+    gint breadth;
+    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
+    pango_layout_get_size(layout, NULL, &breadth);
+    // FIXME: Unlike color axis, we want to request larger width to accommodate
+    // the tick labels.
+    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
+    breadth = 16*breadth/(5*PANGO_SCALE);
+    priv->ticksbreadth = breadth/3;
+    *minimum = *natural = MAX(breadth, 6);
 }
 
 static void
@@ -214,10 +287,24 @@ gwy_graph_axis_get_preferred_height(GtkWidget *widget,
     GwyAxis *axis = GWY_AXIS(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
 
-    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT)
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
         *minimum = *natural = 1;
-    else
-        *minimum = *natural = preferred_breadth(widget);
+        return;
+    }
+
+    *minimum = *natural = 20;
+    PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
+    g_return_if_fail(layout);
+
+    gint breadth;
+    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
+    pango_layout_get_size(layout, NULL, &breadth);
+    // FIXME: Unlike color axis, we want to request larger width to accommodate
+    // the tick labels.
+    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
+    breadth = 16*breadth/(5*PANGO_SCALE);
+    priv->ticksbreadth = breadth/3;
+    *minimum = *natural = MAX(breadth, 4);
 }
 
 static gboolean
@@ -244,6 +331,7 @@ gwy_graph_axis_draw(GtkWidget *widget,
     draw_mark(axis, cr, &matrix, length, breadth);
     draw_ticks(axis, cr, &matrix, length, breadth);
     draw_labels(axis, cr, &matrix, length, breadth);
+    draw_axis_label(axis, cr, &matrix, length, breadth);
 
     return FALSE;
 }
@@ -345,6 +433,82 @@ gwy_graph_axis_get_label(const GwyGraphAxis *graphaxis)
     return graphaxis->priv->label;
 }
 
+/**
+ * gwy_graph_axis_set_show_label:
+ * @graphaxis: A graph axis.
+ * @showlabel: %TRUE to show the axis label, %FALSE to disable it.
+ *
+ * Sets whether a graph axis should show the axis label.
+ *
+ * The display of units can be controlled separately using
+ * gwy_axis_set_show_units().
+ **/
+void
+gwy_graph_axis_set_show_label(GwyGraphAxis *graphaxis,
+                              gboolean showlabel)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AXIS(graphaxis));
+    if (!set_show_label(graphaxis, showlabel))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(graphaxis), properties[PROP_SHOW_LABEL]);
+}
+
+/**
+ * gwy_graph_axis_get_show_label:
+ * @graphaxis: A graph axis.
+ *
+ * Gets whether a graph axis should show the axis label.
+ *
+ * Returns: %TRUE if the axis label is shown, %FALSE if it is disabled.
+ **/
+gboolean
+gwy_graph_axis_get_show_label(const GwyGraphAxis *graphaxis)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AXIS(graphaxis), FALSE);
+    return graphaxis->priv->show_label;
+}
+
+/**
+ * gwy_graph_axis_set_show_ticks:
+ * @graphaxis: A graph axis.
+ * @showticks: %TRUE to show the ticks, %FALSE to disable them.
+ *
+ * Sets whether a graph axis should show ticks.
+ *
+ * Disabling the ticks disables them completely.  This means tick labels are
+ * not show either, regardless of what is set with
+ * gwy_axis_set_show_tick_labels().
+ *
+ * If both ticks and the axis label are disabled the axis is drawn just as a
+ * single line.
+ **/
+void
+gwy_graph_axis_set_show_ticks(GwyGraphAxis *graphaxis,
+                              gboolean showticks)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AXIS(graphaxis));
+    if (!set_show_ticks(graphaxis, showticks))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(graphaxis), properties[PROP_SHOW_TICKS]);
+}
+
+/**
+ * gwy_graph_axis_get_show_ticks:
+ * @graphaxis: A graph axis.
+ *
+ * Gets whether a graph axis should show ticks.
+ *
+ * Returns: %TRUE if the ticks are shown, %FALSE if they are disabled.
+ **/
+gboolean
+gwy_graph_axis_get_show_ticks(const GwyGraphAxis *graphaxis)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AXIS(graphaxis), FALSE);
+    return graphaxis->priv->show_ticks;
+}
+
 static void
 draw_ticks(GwyAxis *axis, cairo_t *cr,
            const cairo_matrix_t *matrix,
@@ -369,7 +533,7 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
             const cairo_matrix_t *matrix,
             G_GNUC_UNUSED gdouble length, gdouble breadth)
 {
-    if (!gwy_axis_get_show_labels(axis))
+    if (!gwy_axis_get_show_tick_labels(axis))
         return;
 
     guint nticks;
@@ -426,6 +590,62 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
 }
 
 static void
+draw_axis_label(GwyAxis *axis, cairo_t *cr,
+                G_GNUC_UNUSED const cairo_matrix_t *matrix,
+                gdouble length, gdouble breadth)
+{
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
+    if (!priv->show_label)
+        return;
+
+    ensure_layout(GWY_GRAPH_AXIS(axis));
+    PangoLayout *layout = priv->layout;
+
+    GString *str = priv->str;
+    g_string_truncate(str, 0);
+    g_string_append(str, "<small>");
+    if (priv->label && *priv->label)
+        g_string_append(str, priv->label);
+
+    GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(axis));
+    GwyUnit *unit = gwy_axis_get_unit(axis);
+    if (gwy_axis_get_show_unit(axis) && !gwy_unit_is_empty(unit)) {
+        if (str->len)
+            g_string_append(str, " ");
+        g_string_append(str, "[");
+        gchar *unitstr = gwy_unit_to_string(unit, GWY_VALUE_FORMAT_PANGO);
+        g_string_append(str, unitstr);
+        g_free(unitstr);
+        g_string_append(str, "]");
+    }
+    g_string_append(str, "</small>");
+
+    pango_layout_set_markup(layout, str->str, str->len);
+    PangoRectangle extents;
+    pango_layout_get_extents(priv->layout, NULL, &extents);
+
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    gdouble x = 0.0, y = 0.0;
+    if (edge == GTK_POS_TOP) {
+        x = 0.5*(length - extents.width/pangoscale);
+        y = PANGO_ASCENT(extents)/pangoscale + 1.0;
+    }
+    else if (edge == GTK_POS_BOTTOM) {
+        x = 0.5*(length - extents.width/pangoscale);
+        y = breadth - PANGO_DESCENT(extents)/pangoscale - 1.0;
+    }
+    else if (edge == GTK_POS_LEFT) {
+        x = PANGO_ASCENT(extents)/pangoscale + 1.0;
+        y = 0.5*(length - extents.width/pangoscale);
+    }
+    else if (edge == GTK_POS_RIGHT) {
+        x = breadth - PANGO_DESCENT(extents)/pangoscale - 1.0;
+        y = 0.5*(length - extents.width/pangoscale);
+    }
+    gtk_render_layout(context, cr, x, y, layout);
+}
+
+static void
 draw_mark(GwyAxis *axis, cairo_t *cr,
           const cairo_matrix_t *matrix,
           gdouble length, gdouble breadth)
@@ -467,23 +687,6 @@ draw_mark(GwyAxis *axis, cairo_t *cr,
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_stroke(cr);
     cairo_restore(cr);
-}
-
-static gint
-preferred_breadth(GtkWidget *widget)
-{
-    PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
-    g_return_val_if_fail(layout, 20);
-
-    gint breadth;
-    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
-    pango_layout_get_size(layout, NULL, &breadth);
-    // FIXME: Unlike color axis, we want to request larger width to accommodate
-    // the tick labels.
-    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
-    breadth = 16*breadth/(5*PANGO_SCALE);
-    priv->ticksbreadth = breadth/3;
-    return MAX(breadth, 4);
 }
 
 static void
@@ -532,6 +735,76 @@ set_label(GwyGraphAxis *graphaxis,
 
     gtk_widget_queue_draw(GTK_WIDGET(graphaxis));
     return TRUE;
+}
+
+static gboolean
+set_show_label(GwyGraphAxis *graphaxis,
+               gboolean setting)
+{
+    GraphAxis *priv = graphaxis->priv;
+    if (!setting == !priv->show_label)
+        return FALSE;
+
+    priv->show_label = setting;
+    gtk_widget_queue_resize(GTK_WIDGET(graphaxis));
+    return TRUE;
+}
+
+static gboolean
+set_show_ticks(GwyGraphAxis *graphaxis,
+               gboolean setting)
+{
+    GraphAxis *priv = graphaxis->priv;
+    if (!setting == !priv->show_ticks)
+        return FALSE;
+
+    priv->show_ticks = setting;
+    gtk_widget_queue_resize(GTK_WIDGET(graphaxis));
+    return TRUE;
+}
+
+static void
+edge_changed(GwyAxis *axis)
+{
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
+    GWY_OBJECT_UNREF(priv->layout);
+}
+
+static void
+ensure_layout(GwyGraphAxis *graphaxis)
+{
+    GraphAxis *priv = graphaxis->priv;
+
+    if (!priv->layout) {
+        priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(graphaxis),
+                                                      NULL);
+        pango_layout_set_alignment(priv->layout, PANGO_ALIGN_LEFT);
+        rotate_pango_layout(graphaxis);
+    }
+
+    if (!priv->str) {
+        priv->str = g_string_new(NULL);
+    }
+}
+
+static void
+rotate_pango_layout(GwyGraphAxis *graphaxis)
+{
+    GtkPositionType edge = gwy_axis_get_edge(GWY_AXIS(graphaxis));
+    PangoLayout *layout = graphaxis->priv->layout;
+    g_return_if_fail(layout);
+
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
+        return;
+
+    PangoMatrix matrix = PANGO_MATRIX_INIT;
+    const PangoMatrix *cmatrix;
+    PangoContext *context = pango_layout_get_context(layout);
+    if ((cmatrix = pango_context_get_matrix(context)))
+        matrix = *cmatrix;
+    pango_matrix_rotate(&matrix, 90.0);
+    pango_context_set_matrix(context, &matrix);
+    pango_layout_context_changed(layout);
 }
 
 /**

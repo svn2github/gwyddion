@@ -50,11 +50,17 @@ struct _GwyGraphAxisClass {
     GwyAxisClass axis_class;
 };
 
-GType        gwy_graph_axis_get_type (void)                          G_GNUC_CONST;
-GtkWidget*   gwy_graph_axis_new      (void)                          G_GNUC_MALLOC;
-void         gwy_graph_axis_set_label(GwyGraphAxis *graphaxis,
-                                      const gchar *label);
-const gchar* gwy_graph_axis_get_label(const GwyGraphAxis *graphaxis) G_GNUC_PURE;
+GType        gwy_graph_axis_get_type      (void)                          G_GNUC_CONST;
+GtkWidget*   gwy_graph_axis_new           (void)                          G_GNUC_MALLOC;
+void         gwy_graph_axis_set_label     (GwyGraphAxis *graphaxis,
+                                           const gchar *label);
+const gchar* gwy_graph_axis_get_label     (const GwyGraphAxis *graphaxis) G_GNUC_PURE;
+void         gwy_graph_axis_set_show_label(GwyGraphAxis *graphaxis,
+                                           gboolean showlabel);
+gboolean     gwy_graph_axis_get_show_label(const GwyGraphAxis *graphaxis) G_GNUC_PURE;
+void         gwy_graph_axis_set_show_ticks(GwyGraphAxis *graphaxis,
+                                           gboolean showticks);
+gboolean     gwy_graph_axis_get_show_ticks(const GwyGraphAxis *graphaxis) G_GNUC_PURE;
 
 G_END_DECLS
 

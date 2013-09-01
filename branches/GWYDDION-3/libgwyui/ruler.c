@@ -235,7 +235,7 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
             const cairo_matrix_t *matrix,
             G_GNUC_UNUSED gdouble length, gdouble breadth)
 {
-    if (!gwy_axis_get_show_labels(axis))
+    if (!gwy_axis_get_show_tick_labels(axis))
         return;
 
     guint nticks;
@@ -332,9 +332,11 @@ draw_mark(GwyAxis *axis, cairo_t *cr,
 static gint
 preferred_breadth(GtkWidget *widget)
 {
-    PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
+    GwyAxis *axis = GWY_AXIS(widget);
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
     g_return_val_if_fail(layout, 20);
 
+    // We fit the labels between ticks so don't depend on "show-labels".
     gint breadth;
     pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
     pango_layout_get_size(layout, NULL, &breadth);

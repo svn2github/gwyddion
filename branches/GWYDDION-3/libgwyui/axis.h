@@ -95,9 +95,12 @@ void               gwy_axis_get_requested_range  (GwyAxis *axis,
 void               gwy_axis_get_range            (const GwyAxis *axis,
                                                   GwyRange *range);
 GwyUnit*           gwy_axis_get_unit             (const GwyAxis *axis)              G_GNUC_PURE;
-void               gwy_axis_set_show_labels      (GwyAxis *axis,
+void               gwy_axis_set_show_tick_labels (GwyAxis *axis,
                                                   gboolean showlabels);
-gboolean           gwy_axis_get_show_labels      (const GwyAxis *axis)              G_GNUC_PURE;
+gboolean           gwy_axis_get_show_tick_labels (const GwyAxis *axis)              G_GNUC_PURE;
+void               gwy_axis_set_show_unit        (GwyAxis *axis,
+                                                  gboolean showunits);
+gboolean           gwy_axis_get_show_unit        (const GwyAxis *axis)              G_GNUC_PURE;
 void               gwy_axis_set_edge             (GwyAxis *axis,
                                                   GtkPositionType edge);
 GtkPositionType    gwy_axis_get_edge             (const GwyAxis *axis)              G_GNUC_PURE;
