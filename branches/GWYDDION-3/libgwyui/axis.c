@@ -163,7 +163,7 @@ static GwyAxisStepType decrease_step_type        (GwyAxisStepType steptype,
                                                   gdouble dx,
                                                   gdouble min_incr);
 static void            ensure_layout_and_ticks   (GwyAxis *axis);
-static void            rotate_pango_layout       (GwyAxis *axis);
+static void            rotate_pango_context      (GwyAxis *axis);
 static void            clear_tick                (gpointer item);
 static gdouble         estimate_major_distance   (GwyAxis *axis,
                                                   const GwyRange *request);
@@ -965,6 +965,40 @@ gwy_axis_value_to_position(GwyAxis *axis,
     return (value - from)/(to - from)*length;
 }
 
+/**
+ * gwy_axis_estimate_value_format:
+ * @axis: An axis.
+ * @range: (out) (allow-none):
+ *         Range used to estimate the format.  It may differ from the request
+ *         in edge cases.
+ *
+ * Estimates value format for an axis.
+ *
+ * The value format ultimately depends on the axis size.  But this is a sort
+ * of circular dependence.  For bootstrapping in subclasses, this method can be
+ * called even if the axis has not been realised yet and does not guarantee to
+ * return exactly the same format, just something that should be reasonably
+ * close.
+ *
+ * Returns: (transfer full):
+ *          A newly allocated value format with %GWY_VALUE_FORMAT_PANGO style.
+ **/
+GwyValueFormat*
+gwy_axis_estimate_value_format(GwyAxis *axis,
+                               GwyRange *range)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
+
+    Axis *priv = axis->priv;
+    GwyRange request = priv->request;
+    fix_request(&request);
+    GWY_MAYBE_SET(range, request);
+    return gwy_unit_format_with_resolution
+                                (priv->unit, GWY_VALUE_FORMAT_PANGO,
+                                 fmax(fabs(request.from), fabs(request.to)),
+                                 fabs(request.to - request.from)/12.0);
+}
+
 static void
 create_input_window(GwyAxis *axis)
 {
@@ -1235,17 +1269,13 @@ static void
 calculate_ticks(GwyAxis *axis)
 {
     Axis *priv = axis->priv;
-    GwyRange request = priv->request;
-    fix_request(&request);
 
     // XXX: This is for labels *along* the axis.  The labels can be also
     // perpendicular.  OTOH for consistent interlabel distance this might be
     // good, in fact.
     GWY_OBJECT_UNREF(priv->vf);
-    priv->vf = gwy_unit_format_with_resolution
-                               (priv->unit, GWY_VALUE_FORMAT_PANGO,
-                                fmax(fabs(request.from), fabs(request.to)),
-                                fabs(request.to - request.from)/12.0);
+    GwyRange request;
+    priv->vf = gwy_axis_estimate_value_format(axis, &request);
     ensure_layout_and_ticks(axis);
     priv->split_width = gwy_axis_get_split_width(axis);
 
@@ -1707,7 +1737,7 @@ ensure_layout_and_ticks(GwyAxis *axis)
     if (!priv->layout) {
         priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(axis), NULL);
         pango_layout_set_alignment(priv->layout, PANGO_ALIGN_LEFT);
-        rotate_pango_layout(axis);
+        rotate_pango_context(axis);
     }
 
     if (!priv->ticks) {
@@ -1720,7 +1750,7 @@ ensure_layout_and_ticks(GwyAxis *axis)
 }
 
 static void
-rotate_pango_layout(GwyAxis *axis)
+rotate_pango_context(GwyAxis *axis)
 {
     gboolean horizontal = gwy_axis_get_horizontal_labels(axis);
     GtkPositionType edge = axis->priv->edge;

@@ -126,6 +126,8 @@ void               gwy_axis_get_units_affinity   (const GwyAxis *axis,
                                                   GwyAxisUnitPlacement *primary,
                                                   GwyAxisUnitPlacement *secondary);
 GdkWindow*         gwy_axis_get_input_window     (const GwyAxis *axis)              G_GNUC_PURE;
+GwyValueFormat*    gwy_axis_estimate_value_format(GwyAxis *axis,
+                                                  GwyRange *range)                  G_GNUC_MALLOC;
 
 G_END_DECLS
 
