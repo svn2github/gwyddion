@@ -21,6 +21,7 @@
 #include "libgwy/math.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
+#include "libgwy/fft.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/graph-axis.h"
 
@@ -41,8 +42,6 @@ struct _GwyGraphAxisPrivate {
     guint ticksbreadth;
     gboolean show_label : 1;
     gboolean show_ticks : 1;
-
-    PangoLayout *layout;   // This one may be rotated, unlike parent axis'.
 
     // Scratch space
     GString *str;
@@ -110,9 +109,8 @@ static gboolean set_show_label                      (GwyGraphAxis *graphaxis,
                                                      gboolean setting);
 static gboolean set_show_ticks                      (GwyGraphAxis *graphaxis,
                                                      gboolean setting);
-static void     edge_changed                        (GwyAxis *axis);
-static void     ensure_layout                       (GwyGraphAxis *graphaxis);
-static void     rotate_pango_layout                 (GwyGraphAxis *graphaxis);
+static void     rotate_pango_context                (GwyGraphAxis *graphaxis,
+                                                     GwyTransformDirection direction);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -174,10 +172,9 @@ gwy_graph_axis_init(GwyGraphAxis *graphaxis)
                                                   GWY_TYPE_GRAPH_AXIS,
                                                   GraphAxis);
     GraphAxis *priv = graphaxis->priv;
+    priv->str = g_string_new(NULL);
     priv->show_label = TRUE;
     priv->show_ticks = TRUE;
-    g_signal_connect(graphaxis, "notify::edge",
-                     G_CALLBACK(edge_changed), NULL);
 }
 
 static void
@@ -192,8 +189,6 @@ gwy_graph_axis_finalize(GObject *object)
 static void
 gwy_graph_axis_dispose(GObject *object)
 {
-    GraphAxis *priv = GWY_GRAPH_AXIS(object)->priv;
-    GWY_OBJECT_UNREF(priv->layout);
     G_OBJECT_CLASS(gwy_graph_axis_parent_class)->dispose(object);
 }
 
@@ -256,10 +251,15 @@ gwy_graph_axis_get_preferred_width(GtkWidget *widget,
                                    gint *minimum,
                                    gint *natural)
 {
+    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
     GwyAxis *axis = GWY_AXIS(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean show_ticks = priv->show_ticks;
+    gboolean show_label = priv->show_label;
+    gboolean show_labels = gwy_axis_get_show_tick_labels(axis) && show_ticks;
+    gboolean is_empty = !show_ticks && !show_label;
 
-    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM) {
+    if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM || is_empty) {
         *minimum = *natural = 1;
         return;
     }
@@ -268,14 +268,44 @@ gwy_graph_axis_get_preferred_width(GtkWidget *widget,
     PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
     g_return_if_fail(layout);
 
-    gint breadth;
-    pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
-    pango_layout_get_size(layout, NULL, &breadth);
-    // FIXME: Unlike color axis, we want to request larger width to accommodate
-    // the tick labels.
-    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
-    breadth = 16*breadth/(5*PANGO_SCALE);
-    priv->ticksbreadth = breadth/3;
+    gint h = 0, w = 0;
+    if (show_label || show_ticks) {
+        pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
+        pango_layout_get_size(layout, NULL, &h);
+    }
+
+    if (show_labels) {
+        GwyRange range;
+        GwyValueFormat *vf = gwy_axis_estimate_value_format(axis, &range);
+        GString *str = priv->str;
+        gint wf, wt;
+
+        g_string_assign(str, "<small>");
+        g_string_append(str, gwy_value_format_print_number(vf, range.from));
+        g_string_append(str, "</small>");
+        pango_layout_set_markup(layout, str->str, str->len);
+        pango_layout_get_size(layout, &wf, NULL);
+
+        g_string_assign(str, "<small>");
+        g_string_append(str, gwy_value_format_print_number(vf, range.to));
+        g_string_append(str, "</small>");
+        pango_layout_set_markup(layout, str->str, str->len);
+        pango_layout_get_size(layout, &wt, NULL);
+
+        g_object_unref(vf);
+        w = MAX(wf, wt);
+    }
+
+    gint breadth = 0;
+    if (show_ticks)
+        breadth += 5*h;
+    if (show_labels)
+        breadth += 5*w;
+    if (show_label)
+        breadth += 6*h;
+
+    breadth = breadth/(5*PANGO_SCALE);
+    priv->ticksbreadth = h/PANGO_SCALE;
     *minimum = *natural = MAX(breadth, 6);
 }
 
@@ -284,10 +314,15 @@ gwy_graph_axis_get_preferred_height(GtkWidget *widget,
                                     gint *minimum,
                                     gint *natural)
 {
+    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
     GwyAxis *axis = GWY_AXIS(widget);
     GtkPositionType edge = gwy_axis_get_edge(axis);
+    gboolean show_ticks = priv->show_ticks;
+    gboolean show_label = priv->show_label;
+    gboolean show_labels = gwy_axis_get_show_tick_labels(axis) && show_ticks;
+    gboolean is_empty = !show_ticks && !show_label;
 
-    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
+    if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT || is_empty) {
         *minimum = *natural = 1;
         return;
     }
@@ -296,14 +331,18 @@ gwy_graph_axis_get_preferred_height(GtkWidget *widget,
     PangoLayout *layout = gwy_axis_get_pango_layout(GWY_AXIS(widget));
     g_return_if_fail(layout);
 
-    gint breadth;
+    gint b;
     pango_layout_set_markup(layout, TESTMARKUP, sizeof(TESTMARKUP)-1);
-    pango_layout_get_size(layout, NULL, &breadth);
-    // FIXME: Unlike color axis, we want to request larger width to accommodate
-    // the tick labels.
-    GraphAxis *priv = GWY_GRAPH_AXIS(widget)->priv;
-    breadth = 16*breadth/(5*PANGO_SCALE);
-    priv->ticksbreadth = breadth/3;
+    pango_layout_get_size(layout, NULL, &b);
+    gint breadth = 0;
+    if (show_ticks)
+        breadth += 5*b;
+    if (show_labels)
+        breadth += 5*b;
+    if (show_label)
+        breadth += 6*b;
+    breadth = breadth/(5*PANGO_SCALE);
+    priv->ticksbreadth = b/PANGO_SCALE;
     *minimum = *natural = MAX(breadth, 4);
 }
 
@@ -514,16 +553,18 @@ draw_ticks(GwyAxis *axis, cairo_t *cr,
            const cairo_matrix_t *matrix,
            gdouble length, gdouble breadth)
 {
-    guint nticks;
-    const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
     GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
-    gdouble ticksbreadth = MIN(priv->ticksbreadth, breadth);
-
     draw_line_transformed(cr, matrix, 0, 0.5, length, 0.5);
-    for (guint i = 0; i < nticks; i++) {
-        gdouble pos = ticks[i].position;
-        gdouble s = tick_level_sizes[ticks[i].level];
-        draw_line_transformed(cr, matrix, pos, 0, pos, s*ticksbreadth);
+    if (priv->show_ticks) {
+        guint nticks;
+        const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
+        gdouble ticksbreadth = MIN(priv->ticksbreadth, breadth);
+
+        for (guint i = 0; i < nticks; i++) {
+            gdouble pos = ticks[i].position;
+            gdouble s = tick_level_sizes[ticks[i].level];
+            draw_line_transformed(cr, matrix, pos, 0, pos, s*ticksbreadth);
+        }
     }
     cairo_stroke(cr);
 }
@@ -533,7 +574,8 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
             const cairo_matrix_t *matrix,
             G_GNUC_UNUSED gdouble length, gdouble breadth)
 {
-    if (!gwy_axis_get_show_tick_labels(axis))
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
+    if (!priv->show_ticks || !gwy_axis_get_show_tick_labels(axis))
         return;
 
     guint nticks;
@@ -547,7 +589,6 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
         }
     }
 
-    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     gdouble ticksbreadth = MIN(priv->ticksbreadth, breadth);
     GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(axis));
     PangoLayout *layout = gwy_axis_get_pango_layout(axis);
@@ -598,12 +639,8 @@ draw_axis_label(GwyAxis *axis, cairo_t *cr,
     if (!priv->show_label)
         return;
 
-    ensure_layout(GWY_GRAPH_AXIS(axis));
-    PangoLayout *layout = priv->layout;
-
     GString *str = priv->str;
-    g_string_truncate(str, 0);
-    g_string_append(str, "<small>");
+    g_string_assign(str, "<small>");
     if (priv->label && *priv->label)
         g_string_append(str, priv->label);
 
@@ -620,9 +657,11 @@ draw_axis_label(GwyAxis *axis, cairo_t *cr,
     }
     g_string_append(str, "</small>");
 
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
+    rotate_pango_context(GWY_GRAPH_AXIS(axis), GWY_TRANSFORM_FORWARD);
     pango_layout_set_markup(layout, str->str, str->len);
     PangoRectangle extents;
-    pango_layout_get_extents(priv->layout, NULL, &extents);
+    pango_layout_get_extents(layout, NULL, &extents);
 
     GtkPositionType edge = gwy_axis_get_edge(axis);
     gdouble x = 0.0, y = 0.0;
@@ -643,6 +682,8 @@ draw_axis_label(GwyAxis *axis, cairo_t *cr,
         y = 0.5*(length + extents.width/pangoscale);
     }
     gtk_render_layout(context, cr, x, y, layout);
+
+    rotate_pango_context(GWY_GRAPH_AXIS(axis), GWY_TRANSFORM_BACKWARD);
 }
 
 static void
@@ -764,34 +805,12 @@ set_show_ticks(GwyGraphAxis *graphaxis,
 }
 
 static void
-edge_changed(GwyAxis *axis)
+rotate_pango_context(GwyGraphAxis *graphaxis,
+                     GwyTransformDirection direction)
 {
-    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
-    GWY_OBJECT_UNREF(priv->layout);
-}
-
-static void
-ensure_layout(GwyGraphAxis *graphaxis)
-{
-    GraphAxis *priv = graphaxis->priv;
-
-    if (!priv->layout) {
-        priv->layout = gtk_widget_create_pango_layout(GTK_WIDGET(graphaxis),
-                                                      NULL);
-        pango_layout_set_alignment(priv->layout, PANGO_ALIGN_LEFT);
-        rotate_pango_layout(graphaxis);
-    }
-
-    if (!priv->str) {
-        priv->str = g_string_new(NULL);
-    }
-}
-
-static void
-rotate_pango_layout(GwyGraphAxis *graphaxis)
-{
-    GtkPositionType edge = gwy_axis_get_edge(GWY_AXIS(graphaxis));
-    PangoLayout *layout = graphaxis->priv->layout;
+    GwyAxis *axis = GWY_AXIS(graphaxis);
+    GtkPositionType edge = gwy_axis_get_edge(axis);
+    PangoLayout *layout = gwy_axis_get_pango_layout(axis);
     g_return_if_fail(layout);
 
     if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM)
@@ -802,7 +821,10 @@ rotate_pango_layout(GwyGraphAxis *graphaxis)
     PangoContext *context = pango_layout_get_context(layout);
     if ((cmatrix = pango_context_get_matrix(context)))
         matrix = *cmatrix;
-    pango_matrix_rotate(&matrix, 90.0);
+    if (direction == GWY_TRANSFORM_FORWARD)
+        pango_matrix_rotate(&matrix, 90.0);
+    else
+        pango_matrix_rotate(&matrix, -90.0);
     pango_context_set_matrix(context, &matrix);
     pango_layout_context_changed(layout);
 }
