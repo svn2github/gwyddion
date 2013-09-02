@@ -689,13 +689,13 @@ gwy_axis_get_show_unit(const GwyAxis *axis)
 /**
  * gwy_axis_set_show_unit:
  * @axis: An axis.
- * @showlabels: %TRUE to show units; %FALSE to not show them.
+ * @showunit: %TRUE to show units; %FALSE to not show them.
  *
  * Sets whether an axis should show units.
  **/
 void
 gwy_axis_set_show_unit(GwyAxis *axis,
-                        gboolean showunits)
+                       gboolean showunits)
 {
     g_return_if_fail(GWY_IS_AXIS(axis));
     if (!set_show_unit(axis, showunits))
