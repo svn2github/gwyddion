@@ -636,11 +636,11 @@ draw_axis_label(GwyAxis *axis, cairo_t *cr,
     }
     else if (edge == GTK_POS_LEFT) {
         x = PANGO_ASCENT(extents)/pangoscale + 1.0;
-        y = 0.5*(length - extents.width/pangoscale);
+        y = 0.5*(length + extents.width/pangoscale);
     }
     else if (edge == GTK_POS_RIGHT) {
         x = breadth - PANGO_DESCENT(extents)/pangoscale - 1.0;
-        y = 0.5*(length - extents.width/pangoscale);
+        y = 0.5*(length + extents.width/pangoscale);
     }
     gtk_render_layout(context, cr, x, y, layout);
 }
