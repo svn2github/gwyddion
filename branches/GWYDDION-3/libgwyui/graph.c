@@ -42,16 +42,18 @@ struct _GwyGraphPrivate {
 
 typedef struct _GwyGraphPrivate Graph;
 
-static void gwy_graph_dispose     (GObject *object);
-static void gwy_graph_finalize    (GObject *object);
-static void gwy_graph_set_property(GObject *object,
-                                   guint prop_id,
-                                   const GValue *value,
-                                   GParamSpec *pspec);
-static void gwy_graph_get_property(GObject *object,
-                                   guint prop_id,
-                                   GValue *value,
-                                   GParamSpec *pspec);
+static void     gwy_graph_dispose     (GObject *object);
+static void     gwy_graph_finalize    (GObject *object);
+static void     gwy_graph_set_property(GObject *object,
+                                       guint prop_id,
+                                       const GValue *value,
+                                       GParamSpec *pspec);
+static void     gwy_graph_get_property(GObject *object,
+                                       guint prop_id,
+                                       GValue *value,
+                                       GParamSpec *pspec);
+static gboolean gwy_graph_draw        (GtkWidget *widget,
+                                       cairo_t *cr);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -61,7 +63,7 @@ static void
 gwy_graph_class_init(GwyGraphClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-    //GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(Graph));
 
@@ -69,6 +71,8 @@ gwy_graph_class_init(GwyGraphClass *klass)
     gobject_class->finalize = gwy_graph_finalize;
     gobject_class->get_property = gwy_graph_get_property;
     gobject_class->set_property = gwy_graph_set_property;
+
+    widget_class->draw = gwy_graph_draw;
 
     properties[PROP_AREA]
         = g_param_spec_object("area",
@@ -203,6 +207,17 @@ gwy_graph_get_property(GObject *object,
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
     }
+}
+
+static gboolean
+gwy_graph_draw(GtkWidget *widget,
+               cairo_t *cr)
+{
+    cairo_save(cr);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_paint(cr);
+    cairo_restore(cr);
+    return GTK_WIDGET_CLASS(gwy_graph_parent_class)->draw(widget, cr);
 }
 
 /**

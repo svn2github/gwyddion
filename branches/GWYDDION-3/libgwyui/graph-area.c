@@ -118,6 +118,9 @@ static void     draw_ygrid                  (const GwyGraphArea *grapharea,
 static void     draw_curves                 (const GwyGraphArea *grapharea,
                                              cairo_t *cr,
                                              const cairo_rectangle_int_t *rect);
+static void     draw_frame                  (const GwyGraphArea *grapharea,
+                                             cairo_t *cr,
+                                             const cairo_rectangle_int_t *rect);
 static void     setup_grid_style            (cairo_t *cr);
 static void     ensure_data_xrange          (GraphArea *priv);
 static void     ensure_data_yrange          (GraphArea *priv);
@@ -383,13 +386,10 @@ gwy_graph_area_draw(GtkWidget *widget,
         .width = gtk_widget_get_allocated_width(widget),
         .height = gtk_widget_get_allocated_height(widget),
     };
-    cairo_save(cr);
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_paint(cr);
-    cairo_restore(cr);
     draw_xgrid(grapharea, cr, &rect);
     draw_ygrid(grapharea, cr, &rect);
     draw_curves(grapharea, cr, &rect);
+    draw_frame(grapharea, cr, &rect);
     return FALSE;
 }
 
@@ -1239,6 +1239,27 @@ draw_curves(const GwyGraphArea *grapharea,
         const CurveProxy *proxy = &curve_proxy_index(curves, i);
         gwy_graph_curve_draw(proxy->curve, cr, rect, grapharea);
     }
+}
+
+static void
+draw_frame(const GwyGraphArea *grapharea,
+           cairo_t *cr,
+           const cairo_rectangle_int_t *rect)
+{
+    GtkStyleContext *context
+        = gtk_widget_get_style_context(GTK_WIDGET(grapharea));
+
+    cairo_save(cr);
+
+    GdkRGBA rgba;
+    gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
+    gdk_cairo_set_source_rgba(cr, &rgba);
+    cairo_set_line_width(cr, 1.0);
+
+    cairo_rectangle(cr, 0.5, 0.5, rect->width-1, rect->height-1);
+    cairo_stroke(cr);
+
+    cairo_restore(cr);
 }
 
 static void

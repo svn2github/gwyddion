@@ -357,11 +357,6 @@ gwy_graph_axis_draw(GtkWidget *widget,
     cairo_matrix_t matrix;
     calculate_scaling(axis, &allocation, &length, &breadth, &matrix);
 
-    cairo_save(cr);
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_paint(cr);
-    cairo_restore(cr);
-
     GdkRGBA rgba;
     gtk_style_context_get_color(context, GTK_STATE_NORMAL, &rgba);
     gdk_cairo_set_source_rgba(cr, &rgba);
@@ -554,17 +549,17 @@ draw_ticks(GwyAxis *axis, cairo_t *cr,
            gdouble length, gdouble breadth)
 {
     GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
-    draw_line_transformed(cr, matrix, 0, 0.5, length, 0.5);
-    if (priv->show_ticks) {
-        guint nticks;
-        const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
-        gdouble ticksbreadth = MIN(priv->ticksbreadth, breadth);
+    if (!priv->show_ticks)
+        return;
 
-        for (guint i = 0; i < nticks; i++) {
-            gdouble pos = ticks[i].position;
-            gdouble s = tick_level_sizes[ticks[i].level];
-            draw_line_transformed(cr, matrix, pos, 0, pos, s*ticksbreadth);
-        }
+    guint nticks;
+    const GwyAxisTick *ticks = gwy_axis_ticks(axis, &nticks);
+    gdouble ticksbreadth = MIN(priv->ticksbreadth, breadth);
+
+    for (guint i = 0; i < nticks; i++) {
+        gdouble pos = ticks[i].position;
+        gdouble s = tick_level_sizes[ticks[i].level];
+        draw_line_transformed(cr, matrix, pos, 0, pos, s*ticksbreadth);
     }
     cairo_stroke(cr);
 }
@@ -691,6 +686,10 @@ draw_mark(GwyAxis *axis, cairo_t *cr,
           const cairo_matrix_t *matrix,
           gdouble length, gdouble breadth)
 {
+    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
+    if (!priv->show_ticks)
+        return;
+
     gdouble mark = gwy_axis_get_mark(axis);
     if (!gwy_axis_get_show_mark(axis) || !isfinite(mark))
         return;
@@ -698,7 +697,6 @@ draw_mark(GwyAxis *axis, cairo_t *cr,
     GtkPositionType edge = gwy_axis_get_edge(axis);
     guint nticks;
     gwy_axis_ticks(axis, &nticks);
-    GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     gdouble x = gwy_axis_value_to_position(axis, mark),
             hs = 0.5*breadth*priv->ticksbreadth, y = hs;
     if (x < -hs || x > length + hs)
