@@ -546,7 +546,7 @@ gwy_graph_axis_get_show_ticks(const GwyGraphAxis *graphaxis)
 static void
 draw_ticks(GwyAxis *axis, cairo_t *cr,
            const cairo_matrix_t *matrix,
-           gdouble length, gdouble breadth)
+           G_GNUC_UNUSED gdouble length, gdouble breadth)
 {
     GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     if (!priv->show_ticks)
