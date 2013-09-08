@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Drawing Library Reference Manual</title>
+    <xi:include href="releaseinfo.xml"/>
+  </bookinfo>
+
+  <para>
+    This library contains low-level data visualization and color handling
+    functions.
+  </para>
+  <xi:include href="xml/gwyrgba.xml"/>
+  <xi:include href="xml/gwygradient.xml"/>
+  <xi:include href="xml/gwyglmaterial.xml"/>
+  <xi:include href="xml/gwypixfield.xml"/>
+  <xi:include href="xml/gwyselection.xml"/>
+  <xi:include href="xml/gwydraw.xml"/>
+  <!-- API INDICES BEGIN -->
+  <index id="api-index-full">
+    <title>Index of all symbols</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-deprecated" role="deprecated">
+    <title>Index of deprecated symbols</title>
+    <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-2-16" role="2.16">
+    <title>Index of new symbols in 2.16</title>
+    <xi:include href="xml/api-index-2.16.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-2-32" role="2.32">
+    <title>Index of new symbols in 2.32</title>
+    <xi:include href="xml/api-index-2.32.xml"><xi:fallback /></xi:include>
+  </index>
+  <!-- API INDICES END -->
+</book>
