@@ -705,6 +705,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module s94file.c -->
+    <row>
+      <entry>S94 STM</entry>
+      <entry>.s94</entry>
+      <entry>s94file</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module sdfile.c -->
     <row>
       <entry>Surfstand Surface</entry>
@@ -847,6 +856,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module tescan.c -->
+    <row>
+      <entry>Tescan MIRA SEM</entry>
+      <entry>.tif</entry>
+      <entry>tescan</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module tiaser.c -->
     <row>
       <entry>FEI Tecnai imaging and analysis (anciennement Emispec)</entry>
@@ -913,7 +931,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     <!-- From module wsxmfile.c -->
     <row>
       <entry>Nanotec WSxM</entry>
-      <entry>.tom</entry>
+      <entry>.tom, .stp</entry>
       <entry>wsxmfile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
