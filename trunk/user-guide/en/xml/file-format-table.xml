@@ -704,6 +704,15 @@ supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module s94file.c -->
+    <row>
+      <entry>S94 STM files</entry>
+      <entry>.s94</entry>
+      <entry>s94file</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module sdfile.c -->
     <row>
       <entry>Surfstand Surface Data File</entry>
@@ -846,6 +855,15 @@ supported.</para></footnote></entry>
       <entry>No</entry>
       <entry>No</entry>
     </row>
+    <!-- From module tescan.c -->
+    <row>
+      <entry>Tescan MIRA SEM images</entry>
+      <entry>.tif</entry>
+      <entry>tescan</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
     <!-- From module tiaser.c -->
     <row>
       <entry>FEI Tecnai imaging and analysis (former Emispec) data</entry>
@@ -912,7 +930,7 @@ supported.</para></footnote></entry>
     <!-- From module wsxmfile.c -->
     <row>
       <entry>Nanotec WSxM</entry>
-      <entry>.tom</entry>
+      <entry>.tom,, .stp</entry>
       <entry>wsxmfile</entry>
       <entry>Yes</entry>
       <entry>No</entry>
