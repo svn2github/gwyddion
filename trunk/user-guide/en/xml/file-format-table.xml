@@ -7,7 +7,7 @@
     <primary>supported formats</primary>
   </indexterm>
   <tgroup cols='6' align='left'>
-    <?dblatex XXlccc?>
+    <?dblatex XXlcccc?>
     <thead>
       <row>
         <entry>File Format</entry>
@@ -16,6 +16,7 @@
         <entry>Read</entry>
         <entry>Write</entry>
         <entry>SPS</entry>
+        <entry>Volume</entry>
       </row>
     </thead>
     <tbody>
@@ -26,8 +27,9 @@
       <entry>.aist</entry>
       <entry>aistfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module alicona.c -->
     <row>
@@ -35,8 +37,9 @@
       <entry>.al3d</entry>
       <entry>alicona</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ambfile.c -->
     <row>
@@ -44,8 +47,9 @@
       <entry>.amb</entry>
       <entry>ambfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module anfatec.c -->
     <row>
@@ -53,8 +57,9 @@
       <entry>.par, .int</entry>
       <entry>anfatec</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module apedaxfile.c -->
     <row>
@@ -62,8 +67,9 @@
       <entry>.dax</entry>
       <entry>apedaxfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module apefile.c -->
     <row>
@@ -71,17 +77,19 @@
       <entry>.dat</entry>
       <entry>apefile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module asciiexport.c -->
     <row>
       <entry>Text matrix of data values</entry>
       <entry>.txt</entry>
       <entry>asciiexport</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module assing-afm.c -->
     <row>
@@ -90,7 +98,8 @@
       <entry>assing-afm</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module attocube.c -->
     <row>
@@ -98,8 +107,9 @@
       <entry>.asc</entry>
       <entry>attocube</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module bcrfile.c -->
     <row>
@@ -107,17 +117,9 @@
       <entry>.bcr, .bcrf</entry>
       <entry>bcrfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
-    </row>
-    <!-- From module burleigh.c -->
-    <row>
-      <entry>Burleigh IMG v2.1</entry>
-      <entry>.img</entry>
-      <entry>burleigh</entry>
-      <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh_bii.c -->
     <row>
@@ -125,8 +127,19 @@
       <entry>.bii</entry>
       <entry>burleigh_bii</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module burleigh.c -->
+    <row>
+      <entry>Burleigh IMG v2.1</entry>
+      <entry>.img</entry>
+      <entry>burleigh</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh_exp.c -->
     <row>
@@ -134,8 +147,9 @@
       <entry>.txt, .bin</entry>
       <entry>burleigh_exp</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module codevfile.c -->
     <row>
@@ -143,8 +157,9 @@
       <entry>.int</entry>
       <entry>codevfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module createc.c -->
     <row>
@@ -152,8 +167,9 @@
       <entry>.dat</entry>
       <entry>createc</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module csmfile.c -->
     <row>
@@ -161,8 +177,9 @@
       <entry>.csm</entry>
       <entry>csmfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dm3file.c -->
     <row>
@@ -170,8 +187,9 @@
       <entry>.dm3</entry>
       <entry>dm3file</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dmefile.c -->
     <row>
@@ -179,8 +197,9 @@
       <entry>.img</entry>
       <entry>dmefile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dumbfile.c -->
     <row>
@@ -188,8 +207,9 @@
       <entry>.dump</entry>
       <entry>dumbfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ecsfile.c -->
     <row>
@@ -197,8 +217,9 @@
       <entry>.img</entry>
       <entry>ecsfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ezdfile.c -->
     <row>
@@ -206,8 +227,9 @@
       <entry>.ezd, .nid</entry>
       <entry>ezdfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gdeffile.c -->
     <row>
@@ -215,8 +237,9 @@
       <entry>.gdf</entry>
       <entry>gdeffile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gsffile.c -->
     <row>
@@ -225,7 +248,8 @@
       <entry>gsffile</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gwyfile.c -->
     <row>
@@ -235,6 +259,7 @@
       <entry>Yes</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gxyzffile.c -->
     <row>
@@ -243,7 +268,8 @@
       <entry>gxyzffile</entry>
       <entry>Yes<footnote id="table-file-formats-fn1" label="a"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hdf4file.c -->
     <row>
@@ -251,8 +277,9 @@
       <entry>.hdf</entry>
       <entry>hdf4file</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hitachi-afm.c -->
     <row>
@@ -260,8 +287,9 @@
       <entry>.afm</entry>
       <entry>hitachi-afm</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hitachi-sem.c -->
     <row>
@@ -269,8 +297,9 @@
       <entry>.txt, +, image</entry>
       <entry>hitachi-sem</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module igorfile.c -->
     <row>
@@ -278,8 +307,9 @@
       <entry>.ibw</entry>
       <entry>igorfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module intematix.c -->
     <row>
@@ -287,8 +317,9 @@
       <entry>.sdf</entry>
       <entry>intematix</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module iso28600.c -->
     <row>
@@ -298,6 +329,7 @@
       <entry>Yes</entry>
       <entry>Yes</entry>
       <entry>Limited<footnote id="table-file-formats-fn2" label="b"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
+      <entry>—</entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -305,8 +337,9 @@
       <entry>.tif</entry>
       <entry>jeol</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module jpkscan.c -->
     <row>
@@ -314,8 +347,9 @@
       <entry>.jpk</entry>
       <entry>jpkscan</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module lextfile.c -->
     <row>
@@ -323,8 +357,9 @@
       <entry>.lext</entry>
       <entry>lextfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module magellan.c -->
     <row>
@@ -332,8 +367,9 @@
       <entry>.tif</entry>
       <entry>magellan</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module mapvue.c -->
     <row>
@@ -341,8 +377,9 @@
       <entry>.map</entry>
       <entry>mapvue</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- Module matfile.c contains no magic. -->
     <!-- From module metropro.c -->
@@ -351,8 +388,9 @@
       <entry>.dat</entry>
       <entry>metropro</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module microprof.c -->
     <row>
@@ -360,16 +398,18 @@
       <entry>.txt</entry>
       <entry>microprof</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>MicroProf FRT</entry>
       <entry>.frt</entry>
       <entry>microprof</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module miffile.c -->
     <row>
@@ -377,8 +417,9 @@
       <entry>.mif</entry>
       <entry>miffile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module mifile.c -->
     <row>
@@ -386,8 +427,9 @@
       <entry>.mi</entry>
       <entry>mifile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -395,8 +437,9 @@
       <entry>.mul</entry>
       <entry>mulfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoeducator.c -->
     <row>
@@ -404,8 +447,9 @@
       <entry>.mspm, .stm, .spm</entry>
       <entry>nanoeducator</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Yes</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanomagnetics.c -->
     <row>
@@ -413,8 +457,9 @@
       <entry>.nmi</entry>
       <entry>nanomagnetics</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -422,8 +467,9 @@
       <entry>.nan</entry>
       <entry>nanonics</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanonis.c -->
     <row>
@@ -431,8 +477,9 @@
       <entry>.sxm</entry>
       <entry>nanonis</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoobserver.c -->
     <row>
@@ -440,8 +487,9 @@
       <entry>.nao</entry>
       <entry>nanoobserver</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscan.c -->
     <row>
@@ -449,8 +497,9 @@
       <entry>.xml</entry>
       <entry>nanoscan</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscantech.c -->
     <row>
@@ -458,7 +507,18 @@
       <entry>.nstdat</entry>
       <entry>nanoscantech</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
+    </row>
+    <!-- From module nanoscope.c -->
+    <row>
+      <entry>Veeco Nanoscope III</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
       <entry>Yes</entry>
     </row>
     <!-- From module nanoscope-ii.c -->
@@ -467,17 +527,9 @@
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope-ii</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
-    </row>
-    <!-- From module nanoscope.c -->
-    <row>
-      <entry>Veeco Nanoscope III</entry>
-      <entry>.001, .002, etc.</entry>
-      <entry>nanoscope</entry>
-      <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -485,8 +537,9 @@
       <entry>.spm</entry>
       <entry>nanotop</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module netcdf.c -->
     <row>
@@ -494,8 +547,9 @@
       <entry>.nc</entry>
       <entry>netcdf</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nrrdfile.c -->
     <row>
@@ -504,7 +558,8 @@
       <entry>nrrdfile</entry>
       <entry>Yes<footnote id="table-file-formats-fn3" label="c"><para>Not all variants are implemented.</para></footnote></entry>
       <entry>Yes<footnote id="table-file-formats-fn4" label="d"><para>Data are exported in a fixed attached native-endian float point format.</para></footnote></entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nt-mdt.c -->
     <row>
@@ -512,7 +567,8 @@
       <entry>.mdt</entry>
       <entry>nt-mdt</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>Yes</entry>
       <entry>Yes</entry>
     </row>
     <!-- From module oldmda.c -->
@@ -521,8 +577,9 @@
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>Yes</entry>
     </row>
     <!-- From module ols.c -->
     <row>
@@ -530,8 +587,9 @@
       <entry>.ols</entry>
       <entry>ols</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicron.c -->
     <row>
@@ -539,8 +597,9 @@
       <entry>.par, .tf*, .tb*, .sf*, .sb*</entry>
       <entry>omicron</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Yes</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicronflat.c -->
     <row>
@@ -548,8 +607,9 @@
       <entry>.*_flat</entry>
       <entry>omicronflat</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicronmatrix.c -->
     <row>
@@ -557,8 +617,9 @@
       <entry>.mtrx</entry>
       <entry>omicronmatrix</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module opdfile.c -->
     <row>
@@ -566,16 +627,18 @@
       <entry>.opd</entry>
       <entry>opdfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Wyko ASCII</entry>
       <entry>.asc</entry>
       <entry>opdfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pixmap.c -->
     <row>
@@ -585,7 +648,8 @@
       <entry>Yes<footnote id="table-file-formats-fn5" label="e"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.</para></footnote></entry>
       <entry>Yes<footnote id="table-file-formats-fn6" label="f"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
 export is possible to PNG, TIFF and PNM.</para></footnote></entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pltfile.c -->
     <row>
@@ -593,8 +657,9 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>.plt</entry>
       <entry>pltfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pnifile.c -->
     <row>
@@ -602,8 +667,9 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>.pni</entry>
       <entry>pnifile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module psia.c -->
     <row>
@@ -611,8 +677,9 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>.tiff,, .tif</entry>
       <entry>psia</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pt3file.c -->
     <row>
@@ -620,8 +687,9 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>.pt3</entry>
       <entry>pt3file</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module quesant.c -->
     <row>
@@ -629,8 +697,9 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>.afm</entry>
       <entry>quesant</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawfile.c -->
     <row>
@@ -638,16 +707,18 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>any</entry>
       <entry>rawfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Raw binary files</entry>
       <entry>any</entry>
       <entry>rawfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawgraph.c -->
     <row>
@@ -656,8 +727,9 @@ export is possible to PNG, TIFF and PNM.</para></footnote></entry>
       <entry>rawgraph</entry>
       <entry>Yes<footnote id="table-file-formats-fn7" label="g"><para>At present, only simple two-column data, imported as graph curves, are
 supported.</para></footnote></entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawxyz.c -->
     <row>
@@ -665,8 +737,9 @@ supported.</para></footnote></entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
       <entry>Yes<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-sm3.c -->
     <row>
@@ -674,8 +747,9 @@ supported.</para></footnote></entry>
       <entry>.sm3</entry>
       <entry>rhk-sm3</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -683,8 +757,9 @@ supported.</para></footnote></entry>
       <entry>.sm4</entry>
       <entry>rhk-sm4</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -692,8 +767,9 @@ supported.</para></footnote></entry>
       <entry>.sm2</entry>
       <entry>rhk-spm32</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Limited<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -701,8 +777,9 @@ supported.</para></footnote></entry>
       <entry>.mcr, .mct, .mce</entry>
       <entry>robotics</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module s94file.c -->
     <row>
@@ -710,8 +787,9 @@ supported.</para></footnote></entry>
       <entry>.s94</entry>
       <entry>s94file</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sdfile.c -->
     <row>
@@ -720,15 +798,17 @@ supported.</para></footnote></entry>
       <entry>sdfile</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Micromap SDFA</entry>
       <entry>.sdfa</entry>
       <entry>sdfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module seiko.c -->
     <row>
@@ -736,8 +816,9 @@ supported.</para></footnote></entry>
       <entry>.xqb, .xqd, .xqt, .xqp</entry>
       <entry>seiko</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sensofar.c -->
     <row>
@@ -745,8 +826,9 @@ supported.</para></footnote></entry>
       <entry>.plu</entry>
       <entry>sensofar</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sensolytics.c -->
     <row>
@@ -754,8 +836,9 @@ supported.</para></footnote></entry>
       <entry>.dat</entry>
       <entry>sensolytics</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module shimadzu.c -->
     <row>
@@ -763,16 +846,18 @@ supported.</para></footnote></entry>
       <entry>.sph, .spp, .001, .002, etc.</entry>
       <entry>shimadzu</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Shimadzu ASCII</entry>
       <entry>.txt</entry>
       <entry>shimadzu</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sicmfile.c -->
     <row>
@@ -780,8 +865,9 @@ supported.</para></footnote></entry>
       <entry>.img</entry>
       <entry>sicmfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sis.c -->
     <row>
@@ -789,8 +875,9 @@ supported.</para></footnote></entry>
       <entry>.sis</entry>
       <entry>sis</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spip-asc.c -->
     <row>
@@ -798,17 +885,9 @@ supported.</para></footnote></entry>
       <entry>.asc</entry>
       <entry>spip-asc</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
-    </row>
-    <!-- From module spml.c -->
-    <row>
-      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
-      <entry>.xml</entry>
-      <entry>spml</entry>
-      <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spmlab.c -->
     <row>
@@ -816,8 +895,9 @@ supported.</para></footnote></entry>
       <entry>.tfr, .ffr, etc.</entry>
       <entry>spmlab</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spmlabf.c -->
     <row>
@@ -825,8 +905,19 @@ supported.</para></footnote></entry>
       <entry>.flt</entry>
       <entry>spmlabf</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module stmprg.c -->
     <row>
@@ -834,8 +925,9 @@ supported.</para></footnote></entry>
       <entry>tp*, ta*</entry>
       <entry>stmprg</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module stpfile.c -->
     <row>
@@ -843,8 +935,9 @@ supported.</para></footnote></entry>
       <entry>.stp</entry>
       <entry>stpfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module surffile.c -->
     <row>
@@ -852,8 +945,9 @@ supported.</para></footnote></entry>
       <entry>.sur</entry>
       <entry>surffile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module tescan.c -->
     <row>
@@ -861,8 +955,9 @@ supported.</para></footnote></entry>
       <entry>.tif</entry>
       <entry>tescan</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module tiaser.c -->
     <row>
@@ -870,7 +965,8 @@ supported.</para></footnote></entry>
       <entry>.ser</entry>
       <entry>tiaser</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>Yes</entry>
       <entry>Yes</entry>
     </row>
     <!-- From module unisoku.c -->
@@ -879,17 +975,19 @@ supported.</para></footnote></entry>
       <entry>.hdr, .dat</entry>
       <entry>unisoku</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module vtkfile.c -->
     <row>
       <entry>VTK structured grid file</entry>
       <entry>.vtk</entry>
       <entry>vtkfile</entry>
-      <entry>No</entry>
+      <entry>—</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wipfile.c -->
     <row>
@@ -897,7 +995,8 @@ supported.</para></footnote></entry>
       <entry>.wip</entry>
       <entry>wipfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>Yes</entry>
       <entry>Yes</entry>
     </row>
     <!-- From module witec-asc.c -->
@@ -906,8 +1005,9 @@ supported.</para></footnote></entry>
       <entry>.dat</entry>
       <entry>witec-asc</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module witfile.c -->
     <row>
@@ -915,8 +1015,9 @@ supported.</para></footnote></entry>
       <entry>.wit</entry>
       <entry>witfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wsffile.c -->
     <row>
@@ -924,8 +1025,9 @@ supported.</para></footnote></entry>
       <entry>.wsf</entry>
       <entry>wsffile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wsxmfile.c -->
     <row>
@@ -933,8 +1035,9 @@ supported.</para></footnote></entry>
       <entry>.tom,, .stp</entry>
       <entry>wsxmfile</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module zeiss.c -->
     <row>
@@ -942,8 +1045,9 @@ supported.</para></footnote></entry>
       <entry>.tif</entry>
       <entry>zeiss</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hdrimage.cc -->
     <row>
@@ -952,7 +1056,8 @@ supported.</para></footnote></entry>
       <entry>hdrimage.cc</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>No</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     </tbody>
   </tgroup>
