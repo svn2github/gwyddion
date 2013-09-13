@@ -6,7 +6,7 @@
     <primary>поддерживаемые форматы</primary>
   </indexterm>
   <tgroup cols="6" align="left">
-    <?dblatex XXlccc?>
+    <?dblatex XXlcccc?>
     <thead>
       <row>
         <entry>Формат файлов</entry>
@@ -15,6 +15,7 @@
         <entry>Чтение</entry>
         <entry>Запись</entry>
         <entry>Спектроскопия</entry>
+        <entry>Объём</entry>
       </row>
     </thead>
     <tbody>
@@ -25,8 +26,9 @@
       <entry>.aist</entry>
       <entry>aistfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module alicona.c -->
     <row>
@@ -34,8 +36,9 @@
       <entry>.al3d</entry>
       <entry>alicona</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ambfile.c -->
     <row>
@@ -43,8 +46,9 @@
       <entry>.amb</entry>
       <entry>ambfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module anfatec.c -->
     <row>
@@ -52,8 +56,9 @@
       <entry>.par, .int</entry>
       <entry>anfatec</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module apedaxfile.c -->
     <row>
@@ -61,8 +66,9 @@
       <entry>.dax</entry>
       <entry>apedaxfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module apefile.c -->
     <row>
@@ -70,17 +76,19 @@
       <entry>.dat</entry>
       <entry>apefile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module asciiexport.c -->
     <row>
       <entry>Текстовая матрица значений данных</entry>
       <entry>.txt</entry>
       <entry>asciiexport</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module assing-afm.c -->
     <row>
@@ -89,7 +97,8 @@
       <entry>assing-afm</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module attocube.c -->
     <row>
@@ -97,8 +106,9 @@
       <entry>.asc</entry>
       <entry>attocube</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module bcrfile.c -->
     <row>
@@ -106,17 +116,9 @@
       <entry>.bcr, .bcrf</entry>
       <entry>bcrfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
-    <!-- From module burleigh.c -->
-    <row>
-      <entry>Burleigh IMG v2.1</entry>
-      <entry>.img</entry>
-      <entry>burleigh</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh_bii.c -->
     <row>
@@ -124,8 +126,19 @@
       <entry>.bii</entry>
       <entry>burleigh_bii</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module burleigh.c -->
+    <row>
+      <entry>Burleigh IMG v2.1</entry>
+      <entry>.img</entry>
+      <entry>burleigh</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh_exp.c -->
     <row>
@@ -133,8 +146,9 @@
       <entry>.txt, .bin</entry>
       <entry>burleigh_exp</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module codevfile.c -->
     <row>
@@ -142,8 +156,9 @@
       <entry>.int</entry>
       <entry>codevfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module createc.c -->
     <row>
@@ -151,8 +166,9 @@
       <entry>.dat</entry>
       <entry>createc</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module csmfile.c -->
     <row>
@@ -160,8 +176,9 @@
       <entry>.csm</entry>
       <entry>csmfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dm3file.c -->
     <row>
@@ -169,8 +186,9 @@
       <entry>.dm3</entry>
       <entry>dm3file</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dmefile.c -->
     <row>
@@ -178,8 +196,9 @@
       <entry>.img</entry>
       <entry>dmefile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dumbfile.c -->
     <row>
@@ -187,8 +206,9 @@
       <entry>.dump</entry>
       <entry>dumbfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ecsfile.c -->
     <row>
@@ -196,8 +216,9 @@
       <entry>.img</entry>
       <entry>ecsfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ezdfile.c -->
     <row>
@@ -205,8 +226,9 @@
       <entry>.ezd, .nid</entry>
       <entry>ezdfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gdeffile.c -->
     <row>
@@ -214,8 +236,9 @@
       <entry>.gdf</entry>
       <entry>gdeffile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gsffile.c -->
     <row>
@@ -224,7 +247,8 @@
       <entry>gsffile</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gwyfile.c -->
     <row>
@@ -234,6 +258,7 @@
       <entry>Да</entry>
       <entry>Да</entry>
       <entry>Да</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gxyzffile.c -->
     <row>
@@ -242,7 +267,8 @@
       <entry>gxyzffile</entry>
       <entry>Да<footnote id="table-file-formats-fn1" label="a"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hdf4file.c -->
     <row>
@@ -250,8 +276,9 @@
       <entry>.hdf</entry>
       <entry>hdf4file</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hitachi-afm.c -->
     <row>
@@ -259,8 +286,9 @@
       <entry>.afm</entry>
       <entry>hitachi-afm</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hitachi-sem.c -->
     <row>
@@ -268,8 +296,9 @@
       <entry>.txt, +, image</entry>
       <entry>hitachi-sem</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module igorfile.c -->
     <row>
@@ -277,8 +306,9 @@
       <entry>.ibw</entry>
       <entry>igorfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module intematix.c -->
     <row>
@@ -286,8 +316,9 @@
       <entry>.sdf</entry>
       <entry>intematix</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module iso28600.c -->
     <row>
@@ -297,6 +328,7 @@
       <entry>Да</entry>
       <entry>Да</entry>
       <entry>Ограничена<footnote id="table-file-formats-fn2" label="b"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
+      <entry>—</entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -304,8 +336,9 @@
       <entry>.tif</entry>
       <entry>jeol</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module jpkscan.c -->
     <row>
@@ -313,8 +346,9 @@
       <entry>.jpk</entry>
       <entry>jpkscan</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module lextfile.c -->
     <row>
@@ -322,8 +356,9 @@
       <entry>.lext</entry>
       <entry>lextfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module magellan.c -->
     <row>
@@ -331,8 +366,9 @@
       <entry>.tif</entry>
       <entry>magellan</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module mapvue.c -->
     <row>
@@ -340,8 +376,9 @@
       <entry>.map</entry>
       <entry>mapvue</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- Module matfile.c contains no magic. -->
     <!-- From module metropro.c -->
@@ -350,8 +387,9 @@
       <entry>.dat</entry>
       <entry>metropro</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module microprof.c -->
     <row>
@@ -359,16 +397,18 @@
       <entry>.txt</entry>
       <entry>microprof</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>MicroProf FRT</entry>
       <entry>.frt</entry>
       <entry>microprof</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module miffile.c -->
     <row>
@@ -376,8 +416,9 @@
       <entry>.mif</entry>
       <entry>miffile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module mifile.c -->
     <row>
@@ -385,8 +426,9 @@
       <entry>.mi</entry>
       <entry>mifile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -394,8 +436,9 @@
       <entry>.mul</entry>
       <entry>mulfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoeducator.c -->
     <row>
@@ -403,8 +446,9 @@
       <entry>.mspm, .stm, .spm</entry>
       <entry>nanoeducator</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Да</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanomagnetics.c -->
     <row>
@@ -412,8 +456,9 @@
       <entry>.nmi</entry>
       <entry>nanomagnetics</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -421,8 +466,9 @@
       <entry>.nan</entry>
       <entry>nanonics</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanonis.c -->
     <row>
@@ -430,8 +476,9 @@
       <entry>.sxm</entry>
       <entry>nanonis</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoobserver.c -->
     <row>
@@ -439,8 +486,9 @@
       <entry>.nao</entry>
       <entry>nanoobserver</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscan.c -->
     <row>
@@ -448,8 +496,9 @@
       <entry>.xml</entry>
       <entry>nanoscan</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscantech.c -->
     <row>
@@ -457,7 +506,18 @@
       <entry>.nstdat</entry>
       <entry>nanoscantech</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>Да</entry>
+      <entry>Да</entry>
+    </row>
+    <!-- From module nanoscope.c -->
+    <row>
+      <entry>Veeco Nanoscope III</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
       <entry>Да</entry>
     </row>
     <!-- From module nanoscope-ii.c -->
@@ -466,17 +526,9 @@
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope-ii</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
-    <!-- From module nanoscope.c -->
-    <row>
-      <entry>Veeco Nanoscope III</entry>
-      <entry>.001, .002, etc.</entry>
-      <entry>nanoscope</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -484,8 +536,9 @@
       <entry>.spm</entry>
       <entry>nanotop</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module netcdf.c -->
     <row>
@@ -493,8 +546,9 @@
       <entry>.nc</entry>
       <entry>netcdf</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nrrdfile.c -->
     <row>
@@ -503,7 +557,8 @@
       <entry>nrrdfile</entry>
       <entry>Да<footnote id="table-file-formats-fn3" label="c"><para>Не все варианты реализованы.</para></footnote></entry>
       <entry>Да<footnote id="table-file-formats-fn4" label="d"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nt-mdt.c -->
     <row>
@@ -511,7 +566,8 @@
       <entry>.mdt</entry>
       <entry>nt-mdt</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>Да</entry>
       <entry>Да</entry>
     </row>
     <!-- From module oldmda.c -->
@@ -520,8 +576,9 @@
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>Да</entry>
     </row>
     <!-- From module ols.c -->
     <row>
@@ -529,8 +586,9 @@
       <entry>.ols</entry>
       <entry>ols</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicron.c -->
     <row>
@@ -538,8 +596,9 @@
       <entry>.par, .tf*, .tb*, .sf*, .sb*</entry>
       <entry>omicron</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Да</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicronflat.c -->
     <row>
@@ -547,8 +606,9 @@
       <entry>.*_flat</entry>
       <entry>omicronflat</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicronmatrix.c -->
     <row>
@@ -556,8 +616,9 @@
       <entry>.mtrx</entry>
       <entry>omicronmatrix</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module opdfile.c -->
     <row>
@@ -565,16 +626,18 @@
       <entry>.opd</entry>
       <entry>opdfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Wyko ASCII</entry>
       <entry>.asc</entry>
       <entry>opdfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pixmap.c -->
     <row>
@@ -583,7 +646,8 @@
       <entry>pixmap</entry>
       <entry>Да<footnote id="table-file-formats-fn5" label="e"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
       <entry>Да<footnote id="table-file-formats-fn6" label="f"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pltfile.c -->
     <row>
@@ -591,8 +655,9 @@
       <entry>.plt</entry>
       <entry>pltfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pnifile.c -->
     <row>
@@ -600,8 +665,9 @@
       <entry>.pni</entry>
       <entry>pnifile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module psia.c -->
     <row>
@@ -609,8 +675,9 @@
       <entry>.tiff,, .tif</entry>
       <entry>psia</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pt3file.c -->
     <row>
@@ -618,8 +685,9 @@
       <entry>.pt3</entry>
       <entry>pt3file</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module quesant.c -->
     <row>
@@ -627,8 +695,9 @@
       <entry>.afm</entry>
       <entry>quesant</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawfile.c -->
     <row>
@@ -636,16 +705,18 @@
       <entry>any</entry>
       <entry>rawfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Необработанные двоичные данные</entry>
       <entry>any</entry>
       <entry>rawfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawgraph.c -->
     <row>
@@ -653,8 +724,9 @@
       <entry>any</entry>
       <entry>rawgraph</entry>
       <entry>Да<footnote id="table-file-formats-fn7" label="g"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawxyz.c -->
     <row>
@@ -662,8 +734,9 @@
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
       <entry>Да<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-sm3.c -->
     <row>
@@ -671,8 +744,9 @@
       <entry>.sm3</entry>
       <entry>rhk-sm3</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -680,8 +754,9 @@
       <entry>.sm4</entry>
       <entry>rhk-sm4</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -689,8 +764,9 @@
       <entry>.sm2</entry>
       <entry>rhk-spm32</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -698,8 +774,9 @@
       <entry>.mcr, .mct, .mce</entry>
       <entry>robotics</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module s94file.c -->
     <row>
@@ -707,8 +784,9 @@
       <entry>.s94</entry>
       <entry>s94file</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sdfile.c -->
     <row>
@@ -717,15 +795,17 @@
       <entry>sdfile</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Micromap SDFA</entry>
       <entry>.sdfa</entry>
       <entry>sdfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module seiko.c -->
     <row>
@@ -733,8 +813,9 @@
       <entry>.xqb, .xqd, .xqt, .xqp</entry>
       <entry>seiko</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sensofar.c -->
     <row>
@@ -742,8 +823,9 @@
       <entry>.plu</entry>
       <entry>sensofar</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sensolytics.c -->
     <row>
@@ -751,8 +833,9 @@
       <entry>.dat</entry>
       <entry>sensolytics</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module shimadzu.c -->
     <row>
@@ -760,16 +843,18 @@
       <entry>.sph, .spp, .001, .002, etc.</entry>
       <entry>shimadzu</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Shimadzu ASCII</entry>
       <entry>.txt</entry>
       <entry>shimadzu</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sicmfile.c -->
     <row>
@@ -777,8 +862,9 @@
       <entry>.img</entry>
       <entry>sicmfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sis.c -->
     <row>
@@ -786,8 +872,9 @@
       <entry>.sis</entry>
       <entry>sis</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spip-asc.c -->
     <row>
@@ -795,17 +882,9 @@
       <entry>.asc</entry>
       <entry>spip-asc</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
-    <!-- From module spml.c -->
-    <row>
-      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
-      <entry>.xml</entry>
-      <entry>spml</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spmlab.c -->
     <row>
@@ -813,8 +892,9 @@
       <entry>.tfr, .ffr, etc.</entry>
       <entry>spmlab</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spmlabf.c -->
     <row>
@@ -822,8 +902,19 @@
       <entry>.flt</entry>
       <entry>spmlabf</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module stmprg.c -->
     <row>
@@ -831,8 +922,9 @@
       <entry>tp*, ta*</entry>
       <entry>stmprg</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module stpfile.c -->
     <row>
@@ -840,8 +932,9 @@
       <entry>.stp</entry>
       <entry>stpfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module surffile.c -->
     <row>
@@ -849,8 +942,9 @@
       <entry>.sur</entry>
       <entry>surffile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module tescan.c -->
     <row>
@@ -858,8 +952,9 @@
       <entry>.tif</entry>
       <entry>tescan</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module tiaser.c -->
     <row>
@@ -867,7 +962,8 @@
       <entry>.ser</entry>
       <entry>tiaser</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>Да</entry>
       <entry>Да</entry>
     </row>
     <!-- From module unisoku.c -->
@@ -876,17 +972,19 @@
       <entry>.hdr, .dat</entry>
       <entry>unisoku</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module vtkfile.c -->
     <row>
       <entry>Файл структурной сетки VTK</entry>
       <entry>.vtk</entry>
       <entry>vtkfile</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wipfile.c -->
     <row>
@@ -894,7 +992,8 @@
       <entry>.wip</entry>
       <entry>wipfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>Да</entry>
       <entry>Да</entry>
     </row>
     <!-- From module witec-asc.c -->
@@ -903,8 +1002,9 @@
       <entry>.dat</entry>
       <entry>witec-asc</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module witfile.c -->
     <row>
@@ -912,8 +1012,9 @@
       <entry>.wit</entry>
       <entry>witfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wsffile.c -->
     <row>
@@ -921,8 +1022,9 @@
       <entry>.wsf</entry>
       <entry>wsffile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wsxmfile.c -->
     <row>
@@ -930,8 +1032,9 @@
       <entry>.tom,, .stp</entry>
       <entry>wsxmfile</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module zeiss.c -->
     <row>
@@ -939,8 +1042,9 @@
       <entry>.tif</entry>
       <entry>zeiss</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hdrimage.cc -->
     <row>
@@ -949,7 +1053,8 @@
       <entry>hdrimage.cc</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Нет</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     </tbody>
   </tgroup>
