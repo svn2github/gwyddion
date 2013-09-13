@@ -600,26 +600,30 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
         if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM) {
             if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
                 x -= 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
-            else
+            else if (i == 0)
                 x += 2.0;
+            else
+                x -= 0.5*PANGO_RBEARING(ticks[i].extents)/pangoscale;
 
             if (edge == GTK_POS_TOP)
-                y = breadth - mtlen - d;
+                y = breadth - (mtlen + 1) - d;
             else
-                y = mtlen + a;
+                y = (mtlen + 1) + a;
         }
         else if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
-            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
+            if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
                 y -= 2.0 + ticks[i].extents.height/pangoscale;
-            else
+            else if (i == nticks-1)
                 y += 2.0;
+            else
+                y -= 0.5*ticks[i].extents.height/pangoscale;
 
             // FIXME: Right edge position does not look good with negative
             // numbers.  We would need something more sophisticated...
             if (edge == GTK_POS_LEFT)
-                x = breadth - mtlen - ticks[i].extents.width/pangoscale;
+                x = breadth - (mtlen + 1) - ticks[i].extents.width/pangoscale;
             else
-                x = mtlen;
+                x = mtlen + 1;
         }
         gtk_render_layout(context, cr, x, y, layout);
     }
@@ -752,13 +756,13 @@ calculate_scaling(GwyAxis *axis,
     *breadth = (vertical ? allocation->width : allocation->height);
 
     if (edge == GTK_POS_TOP)
-        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, allocation->height);
+        cairo_matrix_init(matrix, 1.0, 0.0, 0.0, -1.0, 0.0, *breadth);
     else if (edge == GTK_POS_LEFT)
-        cairo_matrix_init(matrix, 0.0, 1.0, -1.0, 0.0, allocation->width, 0.0);
+        cairo_matrix_init(matrix, 0.0, -1.0, -1.0, 0.0, *breadth, *length);
     else if (edge == GTK_POS_BOTTOM)
         cairo_matrix_init_identity(matrix);
     else if (edge == GTK_POS_RIGHT)
-        cairo_matrix_init(matrix, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+        cairo_matrix_init(matrix, 0.0, -1.0, 1.0, 0.0, 0.0, *length);
     else {
         g_assert_not_reached();
     }

@@ -67,6 +67,11 @@ enum {
     N_PROPS,
 };
 
+enum {
+    SGNL_TICKS_PLACED,
+    N_SIGNALS
+};
+
 struct _GwyAxisPrivate {
     GdkWindow *input_window;
 
@@ -87,9 +92,13 @@ struct _GwyAxisPrivate {
 
     gboolean ticks_are_valid : 1;
     gboolean must_fix_units : 1;
+    gboolean mirroring : 1;
     guint length;
     GwyValueFormat *vf;
     GArray *ticks;
+
+    GwyAxis *mirror;
+    gulong mirror_ticks_placed_id;
 
     // Scratch space
     PangoLayout *layout;
@@ -135,6 +144,8 @@ static gboolean        set_show_mark             (GwyAxis *axis,
                                                   gboolean setting);
 static gboolean        set_mark                  (GwyAxis *axis,
                                                   gdouble value);
+static gboolean        set_mirror                (GwyAxis *axis,
+                                                  GwyAxis *mirror);
 static gboolean        request_range             (GwyAxis *axis,
                                                   const GwyRange *range);
 static void            unit_changed              (GwyAxis *axis,
@@ -171,8 +182,11 @@ static void            fix_request               (GwyRange *request);
 static void            format_value_label        (GwyAxis *axis,
                                                   gdouble value,
                                                   gboolean with_units);
+static void            mirror_ticks_placed       (GwyAxis *axis);
+static void            mirror_ticks              (GwyAxis *axis);
 
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 static const GwyRange default_range = { -1.0, 1.0 };
 
@@ -336,6 +350,22 @@ gwy_axis_class_init(GwyAxisClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    /**
+     * GwyRasterArea::ticks-placed:
+     * @gwyaxis: The #GwyAxis which received the signal.
+     *
+     * The ::ticks-placed signal is emitted when tick positions and labels are
+     * recalculated.  It is <emphasis>not</emphasis> emitted by axes which
+     * mirror the ticks of an another axis.
+     */
+    signals[SGNL_TICKS_PLACED]
+        = g_signal_new_class_handler("ticks-placed",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
@@ -872,9 +902,43 @@ gwy_axis_get_pango_layout(GwyAxis *axis)
 }
 
 /**
+ * gwy_axis_set_mirror:
+ * @axis: An axis.
+ * @mirror: (allow-none):
+ *          Another axis this axis should take ticks from.  Pass %NULL to unset
+ *          mirroring.
+ *
+ * Sets the axis whose ticks an axis mirrors.
+ **/
+void
+gwy_axis_set_mirror(GwyAxis *axis,
+                    GwyAxis *mirror)
+{
+    g_return_if_fail(GWY_IS_AXIS(axis));
+    g_return_if_fail(!mirror || GWY_IS_AXIS(mirror));
+    set_mirror(axis, mirror);
+}
+
+/**
+ * gwy_axis_get_mirror:
+ * @axis: An axis.
+ *
+ * Gets the axis whose ticks an axis mirrors.
+ *
+ * Returns: (transfer none) (allow-none):
+ *          The axis this axis takes ticks from.
+ **/
+GwyAxis*
+gwy_axis_get_mirror(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
+    return axis->priv->mirror;
+}
+
+/**
  * gwy_axis_ticks:
  * @axis: An axis.
- * @nticks: (out):
+ * @nticks: (out) (allow-none):
  *          Location where the number of returned ticks will be stored.
  *
  * Obtains the list of ticks for an axis.
@@ -902,13 +966,12 @@ gwy_axis_ticks(GwyAxis *axis,
                guint *nticks)
 {
     g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
-    g_return_val_if_fail(nticks, NULL);
 
     Axis *priv = axis->priv;
     if (!priv->ticks_are_valid)
         calculate_ticks(axis);
 
-    *nticks = priv->ticks->len;
+    GWY_MAYBE_SET(nticks, priv->ticks->len);
     return (const GwyAxisTick*)priv->ticks->data;
 }
 
@@ -1163,6 +1226,23 @@ set_mark(GwyAxis *axis,
     return TRUE;
 }
 
+static gboolean
+set_mirror(GwyAxis *axis,
+           GwyAxis *mirror)
+{
+    Axis *priv = axis->priv;
+    g_return_val_if_fail(mirror != axis, FALSE);
+    if (!gwy_set_member_object(axis, mirror, GWY_TYPE_AXIS, &priv->mirror,
+                               "ticks-placed", &mirror_ticks_placed,
+                               &priv->mirror_ticks_placed_id,
+                               G_CONNECT_SWAPPED,
+                               NULL))
+        return FALSE;
+
+    invalidate_ticks(axis);
+    return TRUE;
+}
+
 static void
 unit_changed(GwyAxis *axis,
              G_GNUC_UNUSED GwyUnit *unit)
@@ -1269,6 +1349,10 @@ static void
 calculate_ticks(GwyAxis *axis)
 {
     Axis *priv = axis->priv;
+    if (priv->mirror) {
+        mirror_ticks(axis);
+        return;
+    }
 
     // XXX: This is for labels *along* the axis.  The labels can be also
     // perpendicular.  OTOH for consistent interlabel distance this might be
@@ -1288,13 +1372,16 @@ calculate_ticks(GwyAxis *axis)
 
     if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
+        gboolean range_changed = !gwy_equal(&request, &priv->range);
         priv->range = request;
         priv->ticks_are_valid = TRUE;
         // TODO: We could, more or less, simply continue, without any of the
         // ugly iterative business below.  There will not be any labels or
         // even ticks drawn at reasonable places, but what the fuck.  The
         // only thing to prevent seriously is overlapping labels.
-        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+        if (range_changed)
+            g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+        g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
         return;
     }
 
@@ -1302,6 +1389,7 @@ calculate_ticks(GwyAxis *axis)
     GwyAxisStepType steptype = GWY_AXIS_STEP_0;
     // Silence GCC.  And make any uninitialised use pretty obvious.
     gdouble base = NAN, step = NAN, bs = NAN;
+    GwyRange oldrange = priv->range;
     do {
         priv->range = request;
         if (state != LESS_TICKS) {
@@ -1371,8 +1459,11 @@ calculate_ticks(GwyAxis *axis)
         }
     }
 
+    gboolean range_changed = !gwy_equal(&oldrange, &priv->range);
     priv->ticks_are_valid = TRUE;
-    g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+    if (range_changed)
+        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+    g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
 }
 
 // NB: If level is GWY_AXIS_TICK_MAJOR it creates also EDGE-level ticks.
@@ -1882,6 +1973,48 @@ format_value_label(GwyAxis *axis,
     gwy_value_format_set_glue(priv->vf, oldglue);
     g_free(glue);
     g_free(oldglue);
+}
+
+static void
+mirror_ticks_placed(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    // We get called also when the mirroring is invoked from mirror_ticks().
+    if (priv->mirroring)
+        return;
+
+    mirror_ticks(axis);
+}
+
+static void
+mirror_ticks(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    g_return_if_fail(priv->mirror);
+    // Catch multiple axes recursively mirroring each other.
+    g_return_if_fail(!priv->mirroring);
+
+    priv->mirroring = TRUE;
+    GwyAxis *mirror = priv->mirror;
+    guint nticks;
+    const GwyAxisTick *ticks = gwy_axis_ticks(mirror, &nticks);
+    g_array_set_size(priv->ticks, 0);
+    for (guint i = 0; i < nticks; i++) {
+        GwyAxisTick tick = ticks[i];
+        if (tick.label)
+            tick.label = g_strdup(tick.label);
+        g_array_append_val(priv->ticks, tick);
+    }
+
+    GwyRange range;
+    gwy_axis_get_range(mirror, &range);
+    gboolean range_changed = !gwy_equal(&range, &priv->range);
+    priv->range = range;
+    priv->mirroring = FALSE;
+
+    priv->ticks_are_valid = TRUE;
+    if (range_changed)
+        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
 }
 
 /**

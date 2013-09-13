@@ -59,6 +59,12 @@ GwyGraphAxis* gwy_graph_get_left_axis  (const GwyGraph *graph) G_GNUC_PURE;
 GwyGraphAxis* gwy_graph_get_right_axis (const GwyGraph *graph) G_GNUC_PURE;
 GwyGraphAxis* gwy_graph_get_top_axis   (const GwyGraph *graph) G_GNUC_PURE;
 GwyGraphAxis* gwy_graph_get_bottom_axis(const GwyGraph *graph) G_GNUC_PURE;
+void          gwy_graph_set_x_autorange(GwyGraph *graph,
+                                        gboolean setting);
+gboolean      gwy_graph_get_x_autorange(const GwyGraph *graph) G_GNUC_PURE;
+void          gwy_graph_set_y_autorange(GwyGraph *graph,
+                                        gboolean setting);
+gboolean      gwy_graph_get_y_autorange(const GwyGraph *graph) G_GNUC_PURE;
 
 G_END_DECLS
 

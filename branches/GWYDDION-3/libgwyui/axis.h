@@ -114,6 +114,9 @@ void               gwy_axis_set_snap_to_ticks    (GwyAxis *axis,
                                                   gboolean snaptoticks);
 gboolean           gwy_axis_get_snap_to_ticks    (const GwyAxis *axis)              G_GNUC_PURE;
 PangoLayout*       gwy_axis_get_pango_layout     (GwyAxis *axis);
+void               gwy_axis_set_mirror           (GwyAxis *axis,
+                                                  GwyAxis *mirror);
+GwyAxis*           gwy_axis_get_mirror           (const GwyAxis *axis);
 const GwyAxisTick* gwy_axis_ticks                (GwyAxis *axis,
                                                   guint *nticks);
 gdouble            gwy_axis_position_to_value    (GwyAxis *axis,

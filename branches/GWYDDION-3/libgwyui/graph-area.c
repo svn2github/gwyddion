@@ -41,8 +41,8 @@ enum {
 typedef struct {
     GwyGraphCurve *curve;
     gulong notify_id;
-    gulong updated_id;
-    gulong data_updated_id;
+    gulong changed_id;
+    gulong data_changed_id;
 } CurveProxy;
 
 typedef struct _GwyGraphAreaPrivate GraphArea;
@@ -104,10 +104,10 @@ static gboolean set_curve                   (GwyGraphArea *grapharea,
 static void     curve_notify                (GwyGraphArea *grapharea,
                                              GParamSpec *pspec,
                                              GwyGraphCurve *graphcurve);
-static void     curve_updated               (GwyGraphArea *grapharea,
+static void     curve_changed               (GwyGraphArea *grapharea,
                                              const gchar *name,
                                              GwyGraphCurve *graphcurve);
-static void     curve_data_updated          (GwyGraphArea *grapharea,
+static void     curve_data_changed          (GwyGraphArea *grapharea,
                                              GwyGraphCurve *graphcurve);
 static void     draw_xgrid                  (const GwyGraphArea *grapharea,
                                              cairo_t *cr,
@@ -1016,6 +1016,7 @@ set_xscale(GwyGraphArea *grapharea,
         return FALSE;
 
     priv->xscale = scale;
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
     return TRUE;
 }
 
@@ -1028,6 +1029,7 @@ set_yscale(GwyGraphArea *grapharea,
         return FALSE;
 
     priv->yscale = scale;
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
     return TRUE;
 }
 
@@ -1043,6 +1045,7 @@ set_xrange(GwyGraphArea *grapharea,
         return FALSE;
 
     priv->xrange = *range;
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
     return TRUE;
 }
 
@@ -1058,6 +1061,7 @@ set_yrange(GwyGraphArea *grapharea,
         return FALSE;
 
     priv->yrange = *range;
+    gtk_widget_queue_draw(GTK_WIDGET(grapharea));
     return TRUE;
 }
 
@@ -1070,6 +1074,9 @@ set_show_xgrid(GwyGraphArea *grapharea,
         return FALSE;
 
     priv->show_xgrid = !!show;
+    if (priv->xgrid && priv->xgrid->len)
+        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+
     return TRUE;
 }
 
@@ -1082,6 +1089,9 @@ set_show_ygrid(GwyGraphArea *grapharea,
         return FALSE;
 
     priv->show_xgrid = !!show;
+    if (priv->ygrid && priv->ygrid->len)
+        gtk_widget_queue_draw(GTK_WIDGET(grapharea));
+
     return TRUE;
 }
 
@@ -1121,11 +1131,11 @@ set_curve(GwyGraphArea *grapharea,
                                "notify", &curve_notify,
                                &proxy->notify_id,
                                G_CONNECT_SWAPPED,
-                               "updated", &curve_updated,
-                               &proxy->updated_id,
+                               "changed", &curve_changed,
+                               &proxy->changed_id,
                                G_CONNECT_SWAPPED,
-                               "data-updated", &curve_data_updated,
-                               &proxy->data_updated_id,
+                               "data-changed", &curve_data_changed,
+                               &proxy->data_changed_id,
                                G_CONNECT_SWAPPED,
                                NULL))
         return FALSE;
@@ -1143,7 +1153,7 @@ curve_notify(GwyGraphArea *grapharea,
 }
 
 static void
-curve_updated(GwyGraphArea *grapharea,
+curve_changed(GwyGraphArea *grapharea,
               G_GNUC_UNUSED const gchar *name,
               GwyGraphCurve *graphcurve)
 {
@@ -1152,7 +1162,7 @@ curve_updated(GwyGraphArea *grapharea,
 }
 
 static void
-curve_data_updated(GwyGraphArea *grapharea,
+curve_data_changed(GwyGraphArea *grapharea,
                    GwyGraphCurve *graphcurve)
 {
     gwy_listable_item_updated(GWY_LISTABLE(grapharea),
@@ -1265,7 +1275,7 @@ draw_frame(const GwyGraphArea *grapharea,
 static void
 setup_grid_style(cairo_t *cr)
 {
-    cairo_set_source_rgb(cr, 0.85, 0.85, 0.85);
+    cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
     cairo_set_line_width(cr, 1.0);
     gdouble dash[1] = { 2.0 };
     cairo_set_dash(cr, dash, 1, 0.0);

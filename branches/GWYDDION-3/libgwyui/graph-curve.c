@@ -45,8 +45,8 @@ enum {
 };
 
 enum {
-    SGNL_DATA_UPDATED,
-    SGNL_UPDATED,
+    SGNL_DATA_CHANGED,
+    SGNL_CHANGED,
     N_SIGNALS
 };
 
@@ -143,10 +143,10 @@ static void     line_notify                 (GwyGraphCurve *graphcurve,
                                              GwyLine *line);
 static void     line_data_changed           (GwyGraphCurve *graphcurve,
                                              GwyLine *line);
-static void     updated                     (GwyGraphCurve *graphcurve,
+static void     changed                     (GwyGraphCurve *graphcurve,
                                              const gchar *name);
-static void     data_updated                (GwyGraphCurve *graphcurve);
-static void     all_updated                 (GwyGraphCurve *graphcurve);
+static void     data_changed                (GwyGraphCurve *graphcurve);
+static void     all_changed                 (GwyGraphCurve *graphcurve);
 static void     ensure_xrange               (GraphCurve *priv);
 static void     ensure_yrange               (GraphCurve *priv);
 static void     setup_line_type             (cairo_t *cr,
@@ -309,15 +309,15 @@ gwy_graph_curve_class_init(GwyGraphCurveClass *klass)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
-     * GwyGraphCurve::updated:
+     * GwyGraphCurve::changed:
      * @gwygraphcurve: The #GwyGraphCurve which received the signal.
-     * @arg1: Name of the updated property of the data backend.
+     * @arg1: Name of the changed property of the data backend.
      *
-     * The ::updated signal is emitted when properties of the curve data
+     * The ::changed signal is emitted when properties of the curve data
      * backend change.
      **/
-    signals[SGNL_UPDATED]
-        = g_signal_new_class_handler("updated",
+    signals[SGNL_CHANGED]
+        = g_signal_new_class_handler("changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_DETAILED,
                                      NULL, NULL, NULL,
@@ -326,13 +326,13 @@ gwy_graph_curve_class_init(GwyGraphCurveClass *klass)
                                      G_TYPE_STRING);
 
     /**
-     * GwyGraphCurve::data-updated:
+     * GwyGraphCurve::data-changed:
      * @gwygraphcurve: The #GwyGraphCurve which received the signal.
      *
-     * The ::data-updated signal is emitted when the curve data change.
+     * The ::data-changed signal is emitted when the curve data change.
      **/
-    signals[SGNL_DATA_UPDATED]
-        = g_signal_new_class_handler("data-updated",
+    signals[SGNL_DATA_CHANGED]
+        = g_signal_new_class_handler("data-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
                                      G_SIGNAL_RUN_FIRST,
                                      NULL, NULL, NULL,
@@ -880,7 +880,7 @@ set_curve(GwyGraphCurve *graphcurve,
                                NULL))
         return FALSE;
 
-    all_updated(graphcurve);
+    all_changed(graphcurve);
     return TRUE;
 }
 
@@ -904,7 +904,7 @@ set_line(GwyGraphCurve *graphcurve,
                                NULL))
         return FALSE;
 
-    all_updated(graphcurve);
+    all_changed(graphcurve);
     return TRUE;
 }
 
@@ -1032,9 +1032,9 @@ curve_notify(GwyGraphCurve *graphcurve,
 {
     g_assert(curve == graphcurve->priv->curve);
     if (gwy_strequal(pspec->name, "n-points"))
-        data_updated(graphcurve);
+        data_changed(graphcurve);
     else
-        updated(graphcurve, pspec->name);
+        changed(graphcurve, pspec->name);
 }
 
 static void
@@ -1042,7 +1042,7 @@ curve_data_changed(GwyGraphCurve *graphcurve,
                    GwyCurve *curve)
 {
     g_assert(curve == graphcurve->priv->curve);
-    data_updated(graphcurve);
+    data_changed(graphcurve);
 }
 
 static void
@@ -1052,9 +1052,9 @@ line_notify(GwyGraphCurve *graphcurve,
 {
     g_assert(line == graphcurve->priv->line);
     if (gwy_stramong(pspec->name, "res", "real", "offset", NULL))
-        data_updated(graphcurve);
+        data_changed(graphcurve);
     else
-        updated(graphcurve, pspec->name);
+        changed(graphcurve, pspec->name);
 }
 
 static void
@@ -1062,34 +1062,34 @@ line_data_changed(GwyGraphCurve *graphcurve,
                   GwyLine *line)
 {
     g_assert(line == graphcurve->priv->line);
-    data_updated(graphcurve);
+    data_changed(graphcurve);
 }
 
 static void
-updated(GwyGraphCurve *graphcurve, const gchar *name)
+changed(GwyGraphCurve *graphcurve, const gchar *name)
 {
-    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+    g_signal_emit(graphcurve, signals[SGNL_CHANGED],
                   g_quark_from_string(name), name);
 }
 
 static void
-data_updated(GwyGraphCurve *graphcurve)
+data_changed(GwyGraphCurve *graphcurve)
 {
     GraphCurve *priv = graphcurve->priv;
     priv->xrange.cached = priv->yrange.cached = FALSE;
-    g_signal_emit(graphcurve, signals[SGNL_DATA_UPDATED], 0);
+    g_signal_emit(graphcurve, signals[SGNL_DATA_CHANGED], 0);
 }
 
 static void
-all_updated(GwyGraphCurve *graphcurve)
+all_changed(GwyGraphCurve *graphcurve)
 {
-    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+    g_signal_emit(graphcurve, signals[SGNL_CHANGED],
                   g_quark_from_static_string("xunit"), "xunit");
-    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+    g_signal_emit(graphcurve, signals[SGNL_CHANGED],
                   g_quark_from_static_string("yunit"), "yunit");
-    g_signal_emit(graphcurve, signals[SGNL_UPDATED],
+    g_signal_emit(graphcurve, signals[SGNL_CHANGED],
                   g_quark_from_static_string("name"), "name");
-    data_updated(graphcurve);
+    data_changed(graphcurve);
 }
 
 static void
