@@ -877,7 +877,7 @@ test_sort_is_ordered_with_index(const gdouble *array, const guint *index_array,
 }
 
 void
-test_math_sort(void)
+test_math_sort_double(void)
 {
     gsize nmin = 0, nmax = 65536;
 
@@ -891,11 +891,11 @@ test_math_sort(void)
         for (gsize i = 0; i < n; i++)
             orig_array[i] = sin(n/G_SQRT2 + 1.618*i);
 
-        memcpy(array, orig_array, n*sizeof(gdouble));
+        gwy_assign(array, orig_array, n);
         gwy_math_sort(array, NULL, n);
         g_assert(test_sort_is_strictly_ordered(array, n));
 
-        memcpy(array, orig_array, n*sizeof(gdouble));
+        gwy_assign(array, orig_array, n);
         for (gsize i = 0; i < n; i++)
             index_array[i] = i;
         gwy_math_sort(array, index_array, n);
@@ -928,6 +928,48 @@ test_math_median(void)
     }
     g_rand_free(rng);
     g_free(data);
+}
+
+static void
+bubble_sort(guint *array, gsize n)
+{
+    gboolean changed = TRUE;
+    while (changed) {
+        changed = FALSE;
+        for (guint i = 1; i < n; i++) {
+            if (array[i] < array[i-1]) {
+                GWY_SWAP(guint, array[i], array[i-1]);
+                changed = TRUE;
+            }
+        }
+        n--;
+    }
+}
+
+void
+test_math_sort_uint(void)
+{
+    gsize nmin = 0, nmax = 65536;
+    GRand *rng = g_rand_new_with_seed(42);
+
+    if (g_test_quick())
+        nmax = 8192;
+
+    guint *array = g_new(guint, nmax);
+    guint *orig_array = g_new(guint, nmax);
+    for (gsize n = nmin; n < nmax; n = 7*n/6 + 1) {
+        for (gsize i = 0; i < n; i++)
+            orig_array[i] = g_rand_int(rng);
+
+        gwy_assign(array, orig_array, n);
+        gwy_sort_uint(array, n);
+        bubble_sort(orig_array, n);
+        for (guint i = 0; i < n; i++)
+            g_assert_cmpuint(array[i], ==, orig_array[i]);
+    }
+    g_free(orig_array);
+    g_free(array);
+    g_rand_free(rng);
 }
 
 /***************************************************************************

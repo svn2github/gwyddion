@@ -1468,8 +1468,10 @@ gwy_double_direct_compare(gconstpointer pa,
 /**
  * gwy_math_sort:
  * @n: Number of items in @array.
- * @array: Array of doubles to sort in place.
- * @index_array: Array of integer identifiers of the items that are permuted
+ * @array: (inout) (array length=n):
+ *         Array of doubles to sort in place.
+ * @index_array: (inout) (allow-none) (array length=n):
+ *               Array of integer identifiers of the items that are permuted
  *               simultaneously with @array.  Pass %NULL if the identity
  *               of the items need not be preserved.
  *
@@ -1533,12 +1535,6 @@ gwy_math_sort(gdouble *array,
  * on Athlon 64. */
 #define MAX_THRESH 12
 
-/* Stack node declarations used to store unfulfilled partition obligations. */
-typedef struct {
-    gdouble *lo;
-    gdouble *hi;
-} stack_node;
-
 /* The next 4 #defines implement a very fast in-line stack abstraction. */
 /* The stack needs log (total_elements) entries (we could even subtract
    log(MAX_THRESH)).  Since total_elements has type size_t, we get as
@@ -1577,6 +1573,12 @@ static void
 sort_plain(gdouble *array,
            gsize n)
 {
+    // Stack node declarations used to store unfulfilled partition obligations.
+    typedef struct {
+        gdouble *lo;
+        gdouble *hi;
+    } stack_node;
+
     if (n < 2)
         /* Avoid lossage with unsigned arithmetic below.  */
         return;
@@ -1715,13 +1717,6 @@ jump_over:
     }
 }
 
-typedef struct {
-    gdouble *lo;
-    gdouble *hi;
-    guint *loi;
-    guint *hii;
-} stacki_node;
-
 /* FIXME: It is questionable whether it is still more efficient to use pointers
  * instead of array indices when it effectively doubles the number of
  * variables.  This might force some variables from registers to memory... */
@@ -1730,6 +1725,14 @@ sort_with_index(gdouble *array,
                 guint *index_array,
                 gsize n)
 {
+    // Stack node declarations used to store unfulfilled partition obligations.
+    typedef struct {
+        gdouble *lo;
+        gdouble *hi;
+        guint *loi;
+        guint *hii;
+    } stack_node;
+
     if (n < 2)
         /* Avoid lossage with unsigned arithmetic below.  */
         return;
@@ -1739,8 +1742,8 @@ sort_with_index(gdouble *array,
         gdouble *hi = lo + (n - 1);
         guint *loi = index_array;
         guint *hii = loi + (n - 1);
-        stacki_node stack[STACK_SIZE];
-        stacki_node *top = stack + 1;
+        stack_node stack[STACK_SIZE];
+        stack_node *top = stack + 1;
 
         while (STACK_NOT_EMPTY) {
             gdouble *left_ptr;
@@ -1929,6 +1932,162 @@ jump_over:
                 for (hii = loi = run_ptri; --loi >= tmp_ptri; hii = loi)
                     *hii = *loi;
                 *hii = i;
+            }
+        }
+    }
+}
+
+/**
+ * gwy_sort_uint:
+ * @n: Number of items in @array.
+ * @array: (inout) (array length=n):
+ *         Array of unsigned integers to sort in place.
+ *
+ * Sorts an array of unsigned integers using a quicksort algorithm.
+ **/
+void
+gwy_sort_uint(guint *array,
+              gsize n)
+{
+    // Stack node declarations used to store unfulfilled partition obligations.
+    typedef struct {
+        guint *lo;
+        guint *hi;
+    } stack_node;
+
+    if (n < 2)
+        /* Avoid lossage with unsigned arithmetic below.  */
+        return;
+
+    if (n > MAX_THRESH) {
+        guint *lo = array;
+        guint *hi = lo + (n - 1);
+        stack_node stack[STACK_SIZE];
+        stack_node *top = stack + 1;
+
+        while (STACK_NOT_EMPTY) {
+            guint *left_ptr;
+            guint *right_ptr;
+
+            /* Select median value from among LO, MID, and HI. Rearrange
+               LO and HI so the three values are sorted. This lowers the
+               probability of picking a pathological pivot value and
+               skips a comparison for both the LEFT_PTR and RIGHT_PTR in
+               the while loops. */
+
+            guint *mid = lo + ((hi - lo) >> 1);
+
+            if (*mid < *lo)
+                ISWAP(*mid, *lo);
+            if (*hi < *mid)
+                ISWAP(*mid, *hi);
+            else
+                goto jump_over;
+            if (*mid < *lo)
+                ISWAP(*mid, *lo);
+
+jump_over:
+          left_ptr  = lo + 1;
+          right_ptr = hi - 1;
+
+          /* Here's the famous ``collapse the walls'' section of quicksort.
+             Gotta like those tight inner loops!  They are the main reason
+             that this algorithm runs much faster than others. */
+          do {
+              while (*left_ptr < *mid)
+                  left_ptr++;
+
+              while (*mid < *right_ptr)
+                  right_ptr--;
+
+              if (left_ptr < right_ptr) {
+                  ISWAP(*left_ptr, *right_ptr);
+                  if (mid == left_ptr)
+                      mid = right_ptr;
+                  else if (mid == right_ptr)
+                      mid = left_ptr;
+                  left_ptr++;
+                  right_ptr--;
+              }
+              else if (left_ptr == right_ptr) {
+                  left_ptr++;
+                  right_ptr--;
+                  break;
+              }
+          }
+          while (left_ptr <= right_ptr);
+
+          /* Set up pointers for next iteration.  First determine whether
+             left and right partitions are below the threshold size.  If so,
+             ignore one or both.  Otherwise, push the larger partition's
+             bounds on the stack and continue sorting the smaller one. */
+
+          if ((gsize)(right_ptr - lo) <= MAX_THRESH) {
+              if ((gsize)(hi - left_ptr) <= MAX_THRESH)
+                  /* Ignore both small partitions. */
+                  POP(lo, hi);
+              else
+                  /* Ignore small left partition. */
+                  lo = left_ptr;
+          }
+          else if ((gsize)(hi - left_ptr) <= MAX_THRESH)
+              /* Ignore small right partition. */
+              hi = right_ptr;
+          else if ((right_ptr - lo) > (hi - left_ptr)) {
+              /* Push larger left partition indices. */
+              PUSH(lo, right_ptr);
+              lo = left_ptr;
+          }
+          else {
+              /* Push larger right partition indices. */
+              PUSH(left_ptr, hi);
+              hi = right_ptr;
+          }
+        }
+    }
+
+    /* Once the BASE_PTR array is partially sorted by quicksort the rest
+       is completely sorted using insertion sort, since this is efficient
+       for partitions below MAX_THRESH size. BASE_PTR points to the beginning
+       of the array to sort, and END_PTR points at the very last element in
+       the array (*not* one beyond it!). */
+
+    {
+        guint *const end_ptr = array + (n - 1);
+        guint *tmp_ptr = array;
+        guint *thresh = MIN(end_ptr, array + MAX_THRESH);
+        guint *run_ptr;
+
+        /* Find smallest element in first threshold and place it at the
+           array's beginning.  This is the smallest array element,
+           and the operation speeds up insertion sort's inner loop. */
+
+        for (run_ptr = tmp_ptr + 1; run_ptr <= thresh; run_ptr++) {
+            if (*run_ptr < *tmp_ptr)
+                tmp_ptr = run_ptr;
+        }
+
+        if (tmp_ptr != array)
+            ISWAP(*tmp_ptr, *array);
+
+        /* Insertion sort, running from left-hand-side up to right-hand-side.
+         */
+
+        run_ptr = array + 1;
+        while (++run_ptr <= end_ptr) {
+            tmp_ptr = run_ptr - 1;
+            while (*run_ptr < *tmp_ptr)
+                tmp_ptr--;
+
+            tmp_ptr++;
+            if (tmp_ptr != run_ptr) {
+                guint *hi, *lo;
+                guint d;
+
+                d = *run_ptr;
+                for (hi = lo = run_ptr; --lo >= tmp_ptr; hi = lo)
+                    *hi = *lo;
+                *hi = d;
             }
         }
     }

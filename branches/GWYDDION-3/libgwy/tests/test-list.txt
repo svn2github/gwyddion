@@ -33,7 +33,8 @@ math/curvature/at-origin/sloped
 math/line-point-distance/before
 math/line-point-distance/after
 math/line-point-distance/inside
-math/sort
+math/sort/double
+math/sort/uint
 math/median
 math/cholesky
 math/cholesky/dotprod

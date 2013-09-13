@@ -108,6 +108,8 @@ void     gwy_math_sort               (gdouble *array,
                                       gsize n);
 gdouble  gwy_math_median             (gdouble *array,
                                       gsize n);
+void     gwy_sort_uint               (guint *array,
+                                      gsize n);
 
 #define gwy_triangular_matrix_length(n) \
     (((n) + 1)*(n)/2)
