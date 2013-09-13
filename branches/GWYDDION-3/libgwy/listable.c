@@ -39,7 +39,7 @@ gwy_listable_default_init(G_GNUC_UNUSED GwyListableInterface *iface)
 
     /**
      * GwyListable::item-inserted:
-     * @gwyarray: The #GwyListable which received the signal.
+     * @gwylistable: The #GwyListable which received the signal.
      * @arg1: Position an item was inserted at.
      *
      * The ::item-inserted signal is emitted when an item is inserted into
@@ -54,7 +54,7 @@ gwy_listable_default_init(G_GNUC_UNUSED GwyListableInterface *iface)
 
     /**
      * GwyListable::item-deleted:
-     * @gwyarray: The #GwyListable which received the signal.
+     * @gwylistable: The #GwyListable which received the signal.
      * @arg1: Position an item was deleted from.
      *
      * The ::item-deleted signal is emitted when an item is deleted from
@@ -69,7 +69,7 @@ gwy_listable_default_init(G_GNUC_UNUSED GwyListableInterface *iface)
 
     /**
      * GwyListable::item-updated:
-     * @gwyarray: The #GwyListable which received the signal.
+     * @gwylistable: The #GwyListable which received the signal.
      * @arg1: Position of updated item.
      *
      * The ::item-updated signal is emitted when an item in the listable
@@ -84,7 +84,7 @@ gwy_listable_default_init(G_GNUC_UNUSED GwyListableInterface *iface)
 
   /**
    * GwyListable::items-reordered:
-   * @gwyarray: The #GwyListable which received the signal.
+   * @gwylistable: The #GwyListable which received the signal.
    * @arg1: New item order map as in #GtkTreeModel,
    *        @arg1[new_position] = old_position.
    *
