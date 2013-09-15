@@ -1448,14 +1448,6 @@ test_field_filter_median_direct(void)
 }
 
 void
-test_field_filter_median_gsequence(void)
-{
-    gwy_tune_algorithms("median-filter-method", "gsequence");
-    field_filter_median_one();
-    gwy_tune_algorithms("median-filter-method", "auto");
-}
-
-void
 test_field_filter_median_bucket(void)
 {
     gwy_tune_algorithms("median-filter-method", "bucket");

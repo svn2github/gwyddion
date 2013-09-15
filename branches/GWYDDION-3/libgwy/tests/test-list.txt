@@ -450,7 +450,6 @@ field/filter/standard/scharr
 field/filter/standard/step
 field/filter/standard/dechecker
 field/filter/median/direct
-field/filter/median/gsequence
 field/filter/median/bucket
 field/correlate/plain
 field/correlate/level

@@ -86,8 +86,6 @@ _gwy_tune_median_filter_method(const gchar *method)
         median_filter_method = MEDIAN_FILTER_AUTO;
     else if (gwy_strequal(method, "direct"))
         median_filter_method = MEDIAN_FILTER_DIRECT;
-    else if (gwy_strequal(method, "gsequence"))
-        median_filter_method = MEDIAN_FILTER_GSEQUENCE;
     else if (gwy_strequal(method, "bucket"))
         median_filter_method = MEDIAN_FILTER_BUCKET;
     else {
@@ -1961,158 +1959,6 @@ filter_median_bucket_split(const GwyField *field,
     }
 }
 
-// XXX: This is quite slow to compared to the direct method even at medium
-// sizes.  The trouble is (a) GSequence is not well suited to this specific
-// problem (b) using a generic container and comparison-by-func-call makes
-// everything take twice the time it could.
-static void
-filter_median_gsequence(const GwyField *field,
-                        guint col, guint row,
-                        guint width, guint height,
-                        GwyField *target,
-                        guint targetcol, guint targetrow,
-                        const GwyMaskField *kernel,
-                        RectExtendFunc extend_rect,
-                        gdouble fill_value)
-{
-    typedef union { gdouble d; gpointer p; } DPMangle;
-    GCompareDataFunc compare = (GCompareDataFunc)&gwy_double_direct_compare;
-
-    // We can use pointers to point to the orig floating-point data instead of
-    // storing the data within the sequence directly.  But why bother.
-    if (sizeof(gdouble) > sizeof(gpointer))
-        g_warning("A double-precission value does not fit into a pointer. "
-                  "Proceeding with fingers crossed.");
-
-    guint xres = field->xres, yres = field->yres,
-          kxres = kernel->xres, kyres = kernel->yres;
-    guint xsize = width + kxres - 1, ysize = height + kyres - 1;
-    guint extend_left, extend_right, extend_up, extend_down;
-    _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
-    _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
-    gdouble *extdata = g_new(gdouble, xsize*ysize);
-    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
-
-    extend_rect(field->data, xres, extdata, xsize,
-                col, row, width, height, xres, yres,
-                extend_left, extend_right, extend_up, extend_down, fill_value);
-
-    // All the really fast algorithms are, unfortunately, histogram-based and
-    // work only for tiny-precision data.
-    GSequence *workspace = g_sequence_new(NULL);
-    GSequenceIter **iters = g_new(GSequenceIter*, kxres*kyres);
-
-    // Fill the workspace with the contents of the initial kernel.
-    for (guint ki = 0; ki < kyres; ki++) {
-        for (guint kj = 0; kj < kxres; kj++) {
-            DPMangle dp = { .d = extdata[ki*xsize + kj] };
-            GSequenceIter *si = g_sequence_insert_sorted(workspace, dp.p,
-                                                         compare, NULL);
-            iters[ki*kxres + kj] = si;
-        }
-    }
-
-    // Scan.  A bit counterintiutively, we scan by column because this means
-    // the samples added/removed to the workspace in each step form a
-    // contiguous block in a single row.
-    guint medpos = kxres*kyres/2;
-    guint i = 0, j = 0;
-    while (TRUE) {
-        // Downward pass of the zig-zag pattern.
-        while (TRUE) {
-            // Extract the median
-            GSequenceIter *si = g_sequence_get_iter_at_pos(workspace, medpos);
-            DPMangle dp = { .p = g_sequence_get(si) };
-            //g_printerr("[%u][%u] %g %p\n", j, i, dp.d, dp.p);
-            targetbase[i*target->xres + j] = dp.d;
-            if (i == height-1)
-                break;
-
-            // Move down
-            GSequenceIter **replrow = iters + (i % kyres)*kxres;
-            for (guint kj = 0; kj < kxres; kj++)
-                g_sequence_remove(replrow[kj]);
-            const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
-            for (guint kj = 0; kj < kxres; kj++) {
-                dp.d = extdatarow[kj];
-                replrow[kj] = g_sequence_insert_sorted(workspace, dp.p,
-                                                       compare, NULL);
-            }
-            i++;
-        }
-        if (j == width-1)
-            break;
-
-        // Move right (at the bottom)
-        {
-            // Make sure the physical last column is also last logically.
-            // This removes column modulos when moving up/down.
-            for (guint ki = 0; ki < kyres; ki++) {
-                g_sequence_remove(iters[ki*kxres]);
-                memmove(iters + ki*kxres, iters + ki*kxres + 1,
-                        (kxres-1)*sizeof(GSequenceIter*));
-            }
-            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
-            GSequenceIter **replcol = iters + kxres-1;
-            for (guint ki = 0; ki < kyres; ki++) {
-                DPMangle dp = { .d = extdatacol[ki*xsize] };
-                guint k = (ki + i) % kyres;
-                replcol[k*kxres] = g_sequence_insert_sorted(workspace, dp.p,
-                                                            compare, NULL);
-            }
-        }
-        j++;
-
-        // Upward pass of the zig-zag pattern.
-        while (TRUE) {
-            // Extract the median
-            GSequenceIter *si = g_sequence_get_iter_at_pos(workspace, medpos);
-            DPMangle dp = { .p = g_sequence_get(si) };
-            //g_printerr("[%u][%u] %g %p\n", j, i, dp.d, dp.p);
-            targetbase[i*target->xres + j] = dp.d;
-            if (i == 0)
-                break;
-
-            // Move up
-            GSequenceIter **replrow = iters + ((i + kyres-1) % kyres)*kxres;
-            for (guint kj = 0; kj < kxres; kj++)
-                g_sequence_remove(replrow[kj]);
-            const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
-            for (guint kj = 0; kj < kxres; kj++) {
-                dp.d = extdatarow[kj];
-                replrow[kj] = g_sequence_insert_sorted(workspace, dp.p,
-                                                       compare, NULL);
-            }
-            i--;
-        }
-        if (j == width-1)
-            break;
-
-        // Move right (at the top)
-        {
-            // Make sure the physical last column is also last logically.
-            // This removes column modulos when moving up/down.
-            for (guint ki = 0; ki < kyres; ki++) {
-                g_sequence_remove(iters[ki*kxres]);
-                memmove(iters + ki*kxres, iters + ki*kxres + 1,
-                        (kxres-1)*sizeof(GSequenceIter*));
-            }
-            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
-            GSequenceIter **replcol = iters + kxres-1;
-            for (guint ki = 0; ki < kyres; ki++) {
-                DPMangle dp = { .d = extdatacol[ki*xsize] };
-                replcol[ki*kxres] = g_sequence_insert_sorted(workspace, dp.p,
-                                                             compare, NULL);
-            }
-        }
-        j++;
-    }
-
-    g_free(iters);
-    g_sequence_free(workspace);
-    g_free(extdata);
-}
-
 /**
  * gwy_field_filter_median:
  * @field: A two-dimensional data field.
@@ -2151,16 +1997,12 @@ gwy_field_filter_median(const GwyField *field,
     if (!extend_rect)
         return;
 
-    if (median_filter_method == MEDIAN_FILTER_BUCKET)
+    if (median_filter_method == MEDIAN_FILTER_BUCKET
+        || (median_filter_method == MEDIAN_FILTER_AUTO
+            && kernel->xres*kernel->yres >= 60))
         filter_median_bucket_split(field, col, row, width, height,
                                    target, targetcol, targetrow, kernel,
                                    extend_rect, fill_value);
-    else if (median_filter_method == MEDIAN_FILTER_GSEQUENCE
-        || (median_filter_method == MEDIAN_FILTER_AUTO
-            && kernel->xres*kernel->yres > 10000))
-        filter_median_gsequence(field, col, row, width, height,
-                                target, targetcol, targetrow, kernel,
-                                extend_rect, fill_value);
     else
         filter_median_direct(field, col, row, width, height,
                              target, targetcol, targetrow, kernel,
