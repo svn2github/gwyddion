@@ -7,15 +7,16 @@
     <primary>formats supportés</primary>
   </indexterm>
   <tgroup cols='6' align='left'>
-    <?dblatex XXlccc?>
+    <?dblatex XXlcccc?>
     <thead>
       <row>
         <entry>Format de fichier</entry>
         <entry>Extensions</entry>
         <entry>Module</entry>
         <entry>Lecture</entry>
-        <entry>Ecriture</entry>
+        <entry>Écriture</entry>
         <entry>SPS</entry>
+        <entry>Volume</entry>
       </row>
     </thead>
     <tbody>
@@ -26,8 +27,8 @@
       <entry>.aist</entry>
       <entry>aistfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module alicona.c -->
     <row>
@@ -35,8 +36,9 @@
       <entry>.al3d</entry>
       <entry>alicona</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ambfile.c -->
     <row>
@@ -44,8 +46,9 @@
       <entry>.amb</entry>
       <entry>ambfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module anfatec.c -->
     <row>
@@ -53,8 +56,9 @@
       <entry>.par, .int</entry>
       <entry>anfatec</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module apedaxfile.c -->
     <row>
@@ -62,8 +66,9 @@
       <entry>.dax</entry>
       <entry>apedaxfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module apefile.c -->
     <row>
@@ -71,17 +76,19 @@
       <entry>.dat</entry>
       <entry>apefile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module asciiexport.c -->
     <row>
       <entry>Matrice de données au format texte</entry>
       <entry>.txt</entry>
       <entry>asciiexport</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module assing-afm.c -->
     <row>
@@ -90,7 +97,8 @@
       <entry>assing-afm</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module attocube.c -->
     <row>
@@ -98,8 +106,9 @@
       <entry>.asc</entry>
       <entry>attocube</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module bcrfile.c -->
     <row>
@@ -107,8 +116,9 @@
       <entry>.bcr, .bcrf</entry>
       <entry>bcrfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh.c -->
     <row>
@@ -116,8 +126,9 @@
       <entry>.img</entry>
       <entry>burleigh</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh_bii.c -->
     <row>
@@ -125,8 +136,9 @@
       <entry>.bii</entry>
       <entry>burleigh_bii</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module burleigh_exp.c -->
     <row>
@@ -134,8 +146,9 @@
       <entry>.txt, .bin</entry>
       <entry>burleigh_exp</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module codevfile.c -->
     <row>
@@ -143,8 +156,9 @@
       <entry>.int</entry>
       <entry>codevfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module createc.c -->
     <row>
@@ -152,8 +166,9 @@
       <entry>.dat</entry>
       <entry>createc</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module csmfile.c -->
     <row>
@@ -161,8 +176,9 @@
       <entry>.csm</entry>
       <entry>csmfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dm3file.c -->
     <row>
@@ -170,8 +186,9 @@
       <entry>.dm3</entry>
       <entry>dm3file</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dmefile.c -->
     <row>
@@ -179,8 +196,9 @@
       <entry>.img</entry>
       <entry>dmefile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module dumbfile.c -->
     <row>
@@ -188,8 +206,9 @@
       <entry>.dump</entry>
       <entry>dumbfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ecsfile.c -->
     <row>
@@ -197,8 +216,9 @@
       <entry>.img</entry>
       <entry>ecsfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module ezdfile.c -->
     <row>
@@ -206,8 +226,9 @@
       <entry>.ezd, .nid</entry>
       <entry>ezdfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gdeffile.c -->
     <row>
@@ -215,8 +236,9 @@
       <entry>.gdf</entry>
       <entry>gdeffile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gsffile.c -->
     <row>
@@ -225,7 +247,8 @@
       <entry>gsffile</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gwyfile.c -->
     <row>
@@ -235,6 +258,7 @@
       <entry>Oui</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
+      <entry>—</entry>
     </row>
     <!-- From module gxyzffile.c -->
     <row>
@@ -243,7 +267,8 @@
       <entry>gxyzffile</entry>
       <entry>Oui<footnote id="table-file-formats-fn1" label="a"><para>Les données XYZ sont interpolées selon une grille régulière lors de l'import.</para></footnote></entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hdf4file.c -->
     <row>
@@ -251,8 +276,9 @@
       <entry>.hdf</entry>
       <entry>hdf4file</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hitachi-afm.c -->
     <row>
@@ -260,8 +286,9 @@
       <entry>.afm</entry>
       <entry>hitachi-afm</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hitachi-sem.c -->
     <row>
@@ -269,8 +296,9 @@
       <entry>.txt, +, image</entry>
       <entry>hitachi-sem</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module igorfile.c -->
     <row>
@@ -278,8 +306,9 @@
       <entry>.ibw</entry>
       <entry>igorfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module intematix.c -->
     <row>
@@ -287,8 +316,9 @@
       <entry>.sdf</entry>
       <entry>intematix</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module iso28600.c -->
     <row>
@@ -298,6 +328,7 @@
       <entry>Oui</entry>
       <entry>Oui</entry>
       <entry>Limité<footnote id="table-file-formats-fn2" label="b"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
+      <entry>—</entry>
     </row>
     <!-- From module jeol.c -->
     <row>
@@ -305,8 +336,9 @@
       <entry>.tif</entry>
       <entry>jeol</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module jpkscan.c -->
     <row>
@@ -314,8 +346,9 @@
       <entry>.jpk</entry>
       <entry>jpkscan</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module lextfile.c -->
     <row>
@@ -323,8 +356,9 @@
       <entry>.lext</entry>
       <entry>lextfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module magellan.c -->
     <row>
@@ -332,8 +366,9 @@
       <entry>.tif</entry>
       <entry>magellan</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module mapvue.c -->
     <row>
@@ -341,8 +376,9 @@
       <entry>.map</entry>
       <entry>mapvue</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- Module matfile.c contains no magic. -->
     <!-- From module metropro.c -->
@@ -351,8 +387,9 @@
       <entry>.dat</entry>
       <entry>metropro</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module microprof.c -->
     <row>
@@ -360,16 +397,18 @@
       <entry>.txt</entry>
       <entry>microprof</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>MicroProf FRT</entry>
       <entry>.frt</entry>
       <entry>microprof</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module miffile.c -->
     <row>
@@ -377,8 +416,9 @@
       <entry>.mif</entry>
       <entry>miffile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module mifile.c -->
     <row>
@@ -386,8 +426,9 @@
       <entry>.mi</entry>
       <entry>mifile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module mulfile.c -->
     <row>
@@ -395,8 +436,9 @@
       <entry>.mul</entry>
       <entry>mulfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoeducator.c -->
     <row>
@@ -404,8 +446,9 @@
       <entry>.mspm, .stm, .spm</entry>
       <entry>nanoeducator</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Oui</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanomagnetics.c -->
     <row>
@@ -413,8 +456,9 @@
       <entry>.nmi</entry>
       <entry>nanomagnetics</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -422,8 +466,9 @@
       <entry>.nan</entry>
       <entry>nanonics</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanonis.c -->
     <row>
@@ -431,8 +476,9 @@
       <entry>.sxm</entry>
       <entry>nanonis</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoobserver.c -->
     <row>
@@ -440,8 +486,9 @@
       <entry>.nao</entry>
       <entry>nanoobserver</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscan.c -->
     <row>
@@ -449,8 +496,9 @@
       <entry>.xml</entry>
       <entry>nanoscan</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscantech.c -->
     <row>
@@ -458,7 +506,8 @@
       <entry>.nstdat</entry>
       <entry>nanoscantech</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>Oui</entry>
       <entry>Oui</entry>
     </row>
     <!-- From module nanoscope-ii.c -->
@@ -467,8 +516,9 @@
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope-ii</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nanoscope.c -->
     <row>
@@ -476,8 +526,9 @@
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Oui</entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -485,8 +536,9 @@
       <entry>.spm</entry>
       <entry>nanotop</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module netcdf.c -->
     <row>
@@ -494,8 +546,9 @@
       <entry>.nc</entry>
       <entry>netcdf</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nrrdfile.c -->
     <row>
@@ -504,7 +557,8 @@
       <entry>nrrdfile</entry>
       <entry>Oui<footnote id="table-file-formats-fn3" label="c"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
       <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module nt-mdt.c -->
     <row>
@@ -512,7 +566,8 @@
       <entry>.mdt</entry>
       <entry>nt-mdt</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>Oui</entry>
       <entry>Oui</entry>
     </row>
     <!-- From module oldmda.c -->
@@ -521,8 +576,9 @@
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>Oui</entry>
     </row>
     <!-- From module ols.c -->
     <row>
@@ -530,8 +586,9 @@
       <entry>.ols</entry>
       <entry>ols</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicron.c -->
     <row>
@@ -539,8 +596,9 @@
       <entry>.par, .tf*, .tb*, .sf*, .sb*</entry>
       <entry>omicron</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Oui</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicronflat.c -->
     <row>
@@ -548,8 +606,9 @@
       <entry>.*_flat</entry>
       <entry>omicronflat</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module omicronmatrix.c -->
     <row>
@@ -557,8 +616,9 @@
       <entry>.mtrx</entry>
       <entry>omicronmatrix</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module opdfile.c -->
     <row>
@@ -566,16 +626,18 @@
       <entry>.opd</entry>
       <entry>opdfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Wyko ASCII</entry>
       <entry>.asc</entry>
       <entry>opdfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pixmap.c -->
     <row>
@@ -586,7 +648,8 @@
 Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Oui<footnote id="table-file-formats-fn6" label="f"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
       en niveaux de gris 16bit est possible vers les formats PNG, TIFF et PNM.</para></footnote></entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pltfile.c -->
     <row>
@@ -594,8 +657,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.plt</entry>
       <entry>pltfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pnifile.c -->
     <row>
@@ -603,8 +667,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.pni</entry>
       <entry>pnifile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module psia.c -->
     <row>
@@ -612,8 +677,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.tiff</entry>
       <entry>psia</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module pt3file.c -->
     <row>
@@ -621,8 +687,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.pt3</entry>
       <entry>pt3file</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module quesant.c -->
     <row>
@@ -630,8 +697,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.afm</entry>
       <entry>quesant</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawfile.c -->
     <row>
@@ -639,16 +707,18 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>-</entry>
       <entry>rawfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Fichier binaire quelconque</entry>
       <entry>-</entry>
       <entry>rawfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawgraph.c -->
     <row>
@@ -657,8 +727,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rawgraph</entry>
       <entry>Oui<footnote id="table-file-formats-fn7" label="g"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rawxyz.c -->
     <row>
@@ -666,8 +737,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
       <entry>Oui<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-sm3.c -->
     <row>
@@ -675,8 +747,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.sm3</entry>
       <entry>rhk-sm3</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-sm4.c -->
     <row>
@@ -684,8 +757,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.sm4</entry>
       <entry>rhk-sm4</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module rhk-spm32.c -->
     <row>
@@ -693,8 +767,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.sm2</entry>
       <entry>rhk-spm32</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>—</entry>
     </row>
     <!-- From module robotics.c -->
     <row>
@@ -702,8 +777,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.mcr, .mct, .mce</entry>
       <entry>robotics</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module s94file.c -->
     <row>
@@ -711,8 +787,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.s94</entry>
       <entry>s94file</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sdfile.c -->
     <row>
@@ -721,15 +798,17 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>sdfile</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Micromap SDFA</entry>
       <entry>.sdfa</entry>
       <entry>sdfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module seiko.c -->
     <row>
@@ -737,8 +816,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.xqb, .xqd, .xqp, .xqt</entry>
       <entry>seiko</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sensofar.c -->
     <row>
@@ -746,8 +826,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.plu</entry>
       <entry>sensofar</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sensolytics.c -->
     <row>
@@ -755,8 +836,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.dat</entry>
       <entry>sensolytics</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module shimadzu.c -->
     <row>
@@ -764,16 +846,18 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.sph, .spp, .001, .002, etc.</entry>
       <entry>shimadzu</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <row>
       <entry>Shimadzu ASCII</entry>
       <entry>.txt</entry>
       <entry>shimadzu</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sicmfile.c -->
     <row>
@@ -781,8 +865,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.img</entry>
       <entry>sicmfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module sis.c -->
     <row>
@@ -790,8 +875,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.sis</entry>
       <entry>sis</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spip-asc.c -->
     <row>
@@ -799,8 +885,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.asc</entry>
       <entry>spip-asc</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spml.c -->
     <row>
@@ -808,8 +895,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.xml</entry>
       <entry>spml</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spmlab.c -->
     <row>
@@ -817,8 +905,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.tfr, .ffr, etc.</entry>
       <entry>spmlab</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module spmlabf.c -->
     <row>
@@ -826,8 +915,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.flt</entry>
       <entry>spmlabf</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module stmprg.c -->
     <row>
@@ -835,8 +925,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>tp*, ta*</entry>
       <entry>stmprg</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module stpfile.c -->
     <row>
@@ -844,8 +935,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.stp</entry>
       <entry>stpfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module surffile.c -->
     <row>
@@ -853,8 +945,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.sur</entry>
       <entry>surffile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module tescan.c -->
     <row>
@@ -862,8 +955,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.tif</entry>
       <entry>tescan</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module tiaser.c -->
     <row>
@@ -871,7 +965,8 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.ser</entry>
       <entry>tiaser</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>Oui</entry>
       <entry>Oui</entry>
     </row>
     <!-- From module unisoku.c -->
@@ -880,17 +975,19 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.hdr, .dat</entry>
       <entry>unisoku</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module vtkfile.c -->
     <row>
       <entry>Grille structurée VTK</entry>
       <entry>.vtk</entry>
       <entry>vtkfile</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wipfile.c -->
     <row>
@@ -898,7 +995,8 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.wip</entry>
       <entry>wipfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>Oui</entry>
       <entry>Oui</entry>
     </row>
     <!-- From module witec-asc.c -->
@@ -907,8 +1005,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.dat</entry>
       <entry>witec-asc</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module witfile.c -->
     <row>
@@ -916,8 +1015,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.wit</entry>
       <entry>witfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wsffile.c -->
     <row>
@@ -925,8 +1025,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.wsf</entry>
       <entry>wsffile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module wsxmfile.c -->
     <row>
@@ -934,8 +1035,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.tom, .stp</entry>
       <entry>wsxmfile</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module zeiss.c -->
     <row>
@@ -943,8 +1045,9 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>.tif</entry>
       <entry>zeiss</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     <!-- From module hdrimage.cc -->
     <row>
@@ -953,7 +1056,8 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>hdrimage.cc</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Non</entry>
+      <entry>—</entry>
+      <entry>—</entry>
     </row>
     </tbody>
   </tgroup>

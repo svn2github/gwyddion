@@ -73,6 +73,22 @@
                 à la dérivée horizontale.
               </entry>
             </row>
+            <row>
+              <entry><varname>x</varname></entry>
+              <entry>
+                Coordonnée horizontale du pixel (en unités réelles). Elle est la
+                même pour tous les champs pour des raisons de compatibilité
+                (voir plus bas).
+              </entry>
+            </row>
+            <row>
+              <entry><varname>y</varname></entry>
+              <entry>
+                Coordonnée verticale du pixel (en unités réelles). Elle est la
+                même pour tous les champs pour des raisons de compatibilité
+                (voir plus bas).
+              </entry>
+            </row>
           </tbody>
         </tgroup>
       </informaltable>
