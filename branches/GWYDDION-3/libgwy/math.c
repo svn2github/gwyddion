@@ -1572,7 +1572,7 @@ sort_plain(gdouble *array,
     /* Note: Specialization makes the insertion sort part relatively more
      * efficient, after some benchmarking this seems be about the best value
      * on Athlon 64. */
-    enum { MAX_THRESH = 12 };
+    enum { MAX_THRESH = 20 };
 
     // Stack node declarations used to store unfulfilled partition obligations.
     typedef struct {
@@ -1730,7 +1730,7 @@ void
 gwy_sort_uint(guint *array,
               gsize n)
 {
-    enum { MAX_THRESH = 12 };
+    enum { MAX_THRESH = 15 };
 
     // Stack node declarations used to store unfulfilled partition obligations.
     typedef struct {
@@ -1875,6 +1875,7 @@ jump_over:
         }
     }
 }
+
 /* FIXME: It is questionable whether it is still more efficient to use pointers
  * instead of array indices when it effectively doubles the number of
  * variables.  This might force some variables from registers to memory... */
@@ -1883,7 +1884,7 @@ sort_with_index(gdouble *array,
                 guint *index_array,
                 gsize n)
 {
-    enum { MAX_THRESH = 8 };
+    enum { MAX_THRESH = 12 };
 
     // Stack node declarations used to store unfulfilled partition obligations.
     typedef struct {
