@@ -57,6 +57,7 @@ enum {
     MEDIAN_FILTER_AUTO,
     MEDIAN_FILTER_DIRECT,
     MEDIAN_FILTER_GSEQUENCE,
+    MEDIAN_FILTER_BUCKET,
 };
 
 static guint convolution_method = CONVOLUTION_AUTO;
@@ -87,6 +88,8 @@ _gwy_tune_median_filter_method(const gchar *method)
         median_filter_method = MEDIAN_FILTER_DIRECT;
     else if (gwy_strequal(method, "gsequence"))
         median_filter_method = MEDIAN_FILTER_GSEQUENCE;
+    else if (gwy_strequal(method, "bucket"))
+        median_filter_method = MEDIAN_FILTER_BUCKET;
     else {
         g_warning("Unknown median filter method %s.", method);
     }
@@ -1603,6 +1606,317 @@ filter_median_direct(const GwyField *field,
     g_free(extdata);
 }
 
+static void
+order_transform(gdouble *data,
+                guint *orderfield,
+                guint *workspace,
+                guint xres, guint yres)
+{
+    guint n = xres*yres;
+    for (guint i = 0; i < n; i++)
+        workspace[i] = i;
+    gwy_math_sort(data, workspace, n);
+    for (guint i = 0; i < n; i++)
+        orderfield[workspace[i]] = i;
+}
+
+/*
+ * @buckets: Array of size of entire image, split into buckets of size
+ *           1 << bshift, each currently holds bucket_len[bi] items and if it
+ *           is sorted then bucket_sorted[i] == TRUE.
+ * @revindex: Array of size of entire image, indexed by integral values from
+ *            order transform and keeping positions of the values in buckets.
+ * @values: Array of the size of entire image, and organised the same way as
+ *          the image and holding the integral values from order transform.
+ */
+static void
+sort_bucket(guint *buckets,
+            gboolean *bucket_sorted,
+            const guint *bucket_len,
+            guint bshift,
+            guint bi,
+            guint *revindex)
+{
+    if (bucket_sorted[bi])
+        return;
+
+    guint b0 = bi << bshift;
+    guint *bbase = buckets + b0;
+    guint blen = bucket_len[bi];
+    gwy_sort_uint(bbase, blen);
+    // Update the reverse index in one pass once all the sorting is done.
+    for (guint i = 0; i < blen; i++)
+        revindex[bbase[i]] = b0 + i;
+    bucket_sorted[bi] = TRUE;
+}
+
+static void
+bucket_remove_values(guint *buckets,
+                     guint *bucket_len,
+                     gboolean *bucket_sorted,
+                     guint bshift,
+                     const guint *values,
+                     guint nvalues,
+                     guint stride,
+                     guint *revindex,
+                     guint median,
+                     gint *addedbelow,
+                     gint *addedabove)
+{
+    guint bmask = (1U << bshift) - 1U;
+    while (nvalues--) {
+        const guint v = *values;
+        const guint absbpos = revindex[v];
+        const guint bi = absbpos >> bshift;
+        const guint bpos = absbpos & bmask;
+        const guint blen = bucket_len[bi];
+        if (v < median)
+            (*addedbelow)--;
+        if (v > median)
+            (*addedabove)--;
+        if (bpos < blen-1) {
+            // Move the last item to position of v (which is being removed).
+            guint p = (bi << bshift) + blen-1;
+            guint w = buckets[p];
+            revindex[w] = absbpos;
+            buckets[absbpos] = w;
+            bucket_sorted[bi] = FALSE;
+        }
+        bucket_len[bi]--;
+        values += stride;
+    }
+}
+
+static void
+bucket_add_values(guint *buckets,
+                  guint *bucket_len,
+                  gboolean *bucket_sorted,
+                  guint bshift,
+                  const guint *values,
+                  guint nvalues,
+                  guint stride,
+                  guint *revindex,
+                  guint median,
+                  gint *addedbelow,
+                  gint *addedabove)
+{
+    while (nvalues--) {
+        const guint v = *values;
+        const guint bi = v >> bshift;
+        const guint blen = bucket_len[bi];
+        const guint absbpos = (bi << bshift) + blen;
+        if (v < median)
+            (*addedbelow)++;
+        if (v > median)
+            (*addedabove)++;
+        // Append item to the end.
+        revindex[v] = absbpos;
+        buckets[absbpos] = v;
+        bucket_sorted[bi] = !blen;
+        bucket_len[bi]++;
+        values += stride;
+    }
+}
+
+static guint
+bucket_median(guint *buckets,
+              const guint *bucket_len,
+              gboolean *bucket_sorted,
+              guint bshift,
+              guint oldmedian,
+              gint addedbelow,
+              gint addedabove,
+              guint *revindex)
+{
+    // If the same number of elements was added above and below then we don't
+    // care how it happened: the median did not change.  Return and don't
+    // complicate the logic below with zeroes.
+    if (!addedabove && !addedbelow)
+        return oldmedian;
+
+    guint bi = oldmedian >> bshift;
+    sort_bucket(buckets, bucket_sorted, bucket_len, bshift, bi, revindex);
+
+    guint *bbase = buckets + (bi << bshift);
+    guint blen = bucket_len[bi];
+    gint medpos;
+    gboolean medremoved = TRUE;
+    for (medpos = 0; medpos < (gint)blen; medpos++) {
+        if (bbase[medpos] == oldmedian) {
+            medremoved = FALSE;
+            break;
+        }
+        if (bbase[medpos] > oldmedian)
+            break;
+    }
+    // Position in this bucket where the new median should be.  It can be huge
+    // if we need to go to following buckets and negative if we need to go to
+    // preceding buckets.
+    if (medremoved) {
+        if (addedabove > 0)
+            medpos += addedabove-1;
+        else
+            medpos -= addedbelow;
+    }
+    else
+        medpos += addedabove;
+
+    while (medpos >= (gint)bucket_len[bi]) {
+        medpos -= (gint)bucket_len[bi];
+        bi++;
+    }
+    while (medpos < 0) {
+        bi--;
+        medpos += (gint)bucket_len[bi];
+    }
+
+    sort_bucket(buckets, bucket_sorted, bucket_len, bshift, bi, revindex);
+
+    return buckets[(bi << bshift) + medpos];
+}
+
+static void
+filter_median_bucket(const GwyField *field,
+                     guint col, guint row,
+                     guint width, guint height,
+                     GwyField *target,
+                     guint targetcol, guint targetrow,
+                     const GwyMaskField *kernel,
+                     RectExtendFunc extend_rect,
+                     gdouble fill_value)
+{
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    guint kn = kxres*kyres;
+    guint xsize = width + kxres - 1, ysize = height + kyres - 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+    guint n = xsize*ysize;
+    g_assert(n >= kn);
+    gdouble *extdata = g_new(gdouble, n);
+    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+
+    extend_rect(field->data, xres, extdata, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+
+    gdouble bsizemin = n/(kn*(log(kn) + 1.0));  // Avoid too many buckets.
+    gdouble bsizemax = 2.0*sqrt(kn);            // Avoid too large buckets.
+    guint bshift;
+    if (bsizemin <= bsizemax)
+        bshift = gwy_round(0.5*log2(bsizemin*bsizemax));
+    else
+        bshift = gwy_round(log2(bsizemin));
+    bshift = MAX(bshift, 1);
+
+    guint bsize = 1 << bshift;
+    guint nbuckets = (n + bsize)/bsize;
+    guint *intvalues = g_new(guint, n);
+    guint *buckets = g_new(guint, n);
+    guint *revindex = g_new(guint, n);
+    guint *bucket_len = g_new0(guint, nbuckets);
+    gboolean *bucket_sorted = g_new0(gboolean, nbuckets);
+
+    // Use buckets temporarily as scratch buffer.
+    order_transform(extdata, intvalues, buckets, xsize, ysize);
+
+    // Find the median for top left corner separately.
+    for (guint ki = 0; ki < kyres; ki++)
+        gwy_assign(buckets + ki*kxres, intvalues + ki*xsize, kxres);
+    gwy_sort_uint(buckets, kn);
+    guint median = buckets[kn/2];
+    targetbase[0] = extdata[median];
+
+    // Fill the workspace with the contents of the initial kernel.
+    for (guint ki = 0; ki < kyres; ki++) {
+        gint dumb = 0;
+        bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
+                          intvalues + ki*xsize, kxres, 1, revindex,
+                          G_MAXUINT, &dumb, &dumb);
+    }
+
+    // Scan.  A bit counterintiutively, we scan by column because this means
+    // the samples added/removed to the workspace in each step form a
+    // contiguous block in a single row.
+    guint i = 0, j = 0;
+    gint addedabove, addedbelow;
+    while (TRUE) {
+        guint *base;
+
+        // Downward pass of the zig-zag pattern.
+        while (i < height-1) {
+            addedabove = addedbelow = 0;
+            base = intvalues + i*xsize + j;
+            bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
+                                 base, kxres, 1, revindex,
+                                 median, &addedbelow, &addedabove);
+            bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
+                              base + kyres*xsize, kxres, 1, revindex,
+                              median, &addedbelow, &addedabove);
+            median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
+                                   median, addedbelow, addedabove, revindex);
+            i++;
+            targetbase[i*target->xres + j] = extdata[median];
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the bottom)
+        addedabove = addedbelow = 0;
+        base = intvalues + i*xsize + j;
+        bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
+                             base, kyres, xsize, revindex,
+                             median, &addedbelow, &addedabove);
+        bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
+                          base + kxres, kyres, xsize, revindex,
+                          median, &addedbelow, &addedabove);
+        median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
+                               median, addedbelow, addedabove, revindex);
+        j++;
+        targetbase[i*target->xres + j] = extdata[median];
+
+        // Upward pass of the zig-zag pattern.
+        while (i) {
+            addedabove = addedbelow = 0;
+            base = intvalues + i*xsize + j;
+            bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
+                                 base + (kyres - 1)*xsize, kxres, 1, revindex,
+                                 median, &addedbelow, &addedabove);
+            bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
+                              base - xsize, kxres, 1, revindex,
+                              median, &addedbelow, &addedabove);
+            median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
+                                   median, addedbelow, addedabove, revindex);
+            i--;
+            targetbase[i*target->xres + j] = extdata[median];
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the top)
+        addedabove = addedbelow = 0;
+        base = intvalues + i*xsize + j;
+        bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
+                             base, kyres, xsize, revindex,
+                             median, &addedbelow, &addedabove);
+        bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
+                          base + kxres, kyres, xsize, revindex,
+                          median, &addedbelow, &addedabove);
+        median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
+                               median, addedbelow, addedabove, revindex);
+        j++;
+        targetbase[i*target->xres + j] = extdata[median];
+    }
+
+    g_free(extdata);
+    g_free(intvalues);
+    g_free(revindex);
+    g_free(buckets);
+    g_free(bucket_len);
+    g_free(bucket_sorted);
+}
+
 // XXX: This is quite slow to compared to the direct method even at medium
 // sizes.  The trouble is (a) GSequence is not well suited to this specific
 // problem (b) using a generic container and comparison-by-func-call makes
@@ -1793,7 +2107,11 @@ gwy_field_filter_median(const GwyField *field,
     if (!extend_rect)
         return;
 
-    if (median_filter_method == MEDIAN_FILTER_GSEQUENCE
+    if (median_filter_method == MEDIAN_FILTER_BUCKET)
+        filter_median_bucket(field, col, row, width, height,
+                             target, targetcol, targetrow, kernel,
+                             extend_rect, fill_value);
+    else if (median_filter_method == MEDIAN_FILTER_GSEQUENCE
         || (median_filter_method == MEDIAN_FILTER_AUTO
             && kernel->xres*kernel->yres > 10000))
         filter_median_gsequence(field, col, row, width, height,

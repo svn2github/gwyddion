@@ -1455,6 +1455,14 @@ test_field_filter_median_gsequence(void)
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 
+void
+test_field_filter_median_bucket(void)
+{
+    gwy_tune_algorithms("median-filter-method", "bucket");
+    field_filter_median_one();
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
 static void
 field_move_periodically(GwyField *field,
                         gint xmove, gint ymove)
