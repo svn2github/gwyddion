@@ -1917,6 +1917,50 @@ filter_median_bucket(const GwyField *field,
     g_free(bucket_sorted);
 }
 
+static void
+filter_median_bucket_split(const GwyField *field,
+                           guint col, guint row,
+                           guint width, guint height,
+                           GwyField *target,
+                           guint targetcol, guint targetrow,
+                           const GwyMaskField *kernel,
+                           RectExtendFunc extend_rect,
+                           gdouble fill_value)
+{
+    guint ncols = MIN(width*height/(900*900), width);
+    if (ncols < 2) {
+        filter_median_bucket(field, col, row, width, height,
+                             target, targetcol, targetrow, kernel,
+                             extend_rect, fill_value);
+        return;
+    }
+
+    GwyField *tmptarget = NULL;
+    guint tmpcol = 0, tmprow = 0;
+    if (target == field)
+        tmptarget = gwy_field_new_sized(width, height, FALSE);
+    else {
+        tmptarget = target;
+        tmpcol = targetcol;
+        tmprow = targetrow;
+    }
+
+    guint colwidth = width/ncols;
+    for (guint colfrom = 0; colfrom < width; colfrom += colwidth) {
+        guint colend = MIN(colfrom + colwidth, width);
+        filter_median_bucket(field,
+                             col + colfrom, row,
+                             colend - colfrom, height,
+                             tmptarget, tmpcol + colfrom, tmprow,
+                             kernel, extend_rect, fill_value);
+    }
+
+    if (tmptarget != target) {
+        gwy_field_copy(tmptarget, NULL, target, targetcol, targetrow);
+        g_object_unref(tmptarget);
+    }
+}
+
 // XXX: This is quite slow to compared to the direct method even at medium
 // sizes.  The trouble is (a) GSequence is not well suited to this specific
 // problem (b) using a generic container and comparison-by-func-call makes
@@ -2108,9 +2152,9 @@ gwy_field_filter_median(const GwyField *field,
         return;
 
     if (median_filter_method == MEDIAN_FILTER_BUCKET)
-        filter_median_bucket(field, col, row, width, height,
-                             target, targetcol, targetrow, kernel,
-                             extend_rect, fill_value);
+        filter_median_bucket_split(field, col, row, width, height,
+                                   target, targetcol, targetrow, kernel,
+                                   extend_rect, fill_value);
     else if (median_filter_method == MEDIAN_FILTER_GSEQUENCE
         || (median_filter_method == MEDIAN_FILTER_AUTO
             && kernel->xres*kernel->yres > 10000))
