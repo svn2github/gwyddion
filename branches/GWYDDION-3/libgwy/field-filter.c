@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010-2011 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *  Copyright (C) 2005 Rok Zitko.
  *
