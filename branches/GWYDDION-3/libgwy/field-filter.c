@@ -1999,7 +1999,7 @@ filter_median_split(const MedianFilterData *mfdata,
         return;
     }
 
-    guint colwidth = MAX(width/ncols, (mfdata->kernel->xres + 1)/2);
+    guint colwidth = MAX(width/ncols, mfdata->kernel->xres);
     if (colwidth >= width) {
         medfunc(mfdata);
         return;
