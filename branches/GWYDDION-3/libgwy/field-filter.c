@@ -1925,7 +1925,7 @@ filter_median_bucket_split(const GwyField *field,
                            RectExtendFunc extend_rect,
                            gdouble fill_value)
 {
-    guint ncols = MIN(width*height/(900*900), width);
+    guint ncols = MIN(width*height/(500*500), width);
     if (ncols < 2) {
         filter_median_bucket(field, col, row, width, height,
                              target, targetcol, targetrow, kernel,
@@ -1999,7 +1999,7 @@ gwy_field_filter_median(const GwyField *field,
 
     if (median_filter_method == MEDIAN_FILTER_BUCKET
         || (median_filter_method == MEDIAN_FILTER_AUTO
-            && kernel->xres*kernel->yres >= 60))
+            && kernel->xres*kernel->yres >= 50))
         filter_median_bucket_split(field, col, row, width, height,
                                    target, targetcol, targetrow, kernel,
                                    extend_rect, fill_value);
