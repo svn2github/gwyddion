@@ -1399,7 +1399,7 @@ median_filter_dumb(const GwyField *field,
 }
 
 static void
-field_filter_median_one(void)
+field_filter_median_small_one(void)
 {
     enum { max_size = 36, niter = 100 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1440,18 +1440,75 @@ field_filter_median_one(void)
 }
 
 void
-test_field_filter_median_direct(void)
+test_field_filter_median_direct_small(void)
 {
     gwy_tune_algorithms("median-filter-method", "direct");
-    field_filter_median_one();
+    field_filter_median_small_one();
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 
 void
-test_field_filter_median_bucket(void)
+test_field_filter_median_bucket_small(void)
 {
     gwy_tune_algorithms("median-filter-method", "bucket");
-    field_filter_median_one();
+    field_filter_median_small_one();
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
+static void
+field_filter_median_large_one(void)
+{
+    enum { max_ksize = 20, niter = 5 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 300, 2000);
+        guint yres = g_rand_int_range(rng, 300, 2000);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint kxres = g_rand_int_range(rng, 1, max_ksize);
+        guint kyres = g_rand_int_range(rng, 1, max_ksize);
+
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(source, rng);
+        GwyField *target = gwy_field_new_sized(width, height, FALSE);
+        GwyField *reference = gwy_field_new_alike(target, FALSE);
+        // FIXME: Kernel is ignored apart from its dimensions and we, too,
+        // compare to the median with a rectangular kernel. Create a
+        // one-filled mask that reflects that.
+        GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
+        gwy_mask_field_fill(kernel, NULL, TRUE);
+        GwyFieldPart fpart = { col, row, width, height };
+        gwy_field_filter_median(source, &fpart, target, kernel,
+                                GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+        median_filter_dumb(source, &fpart, reference, kernel,
+                           GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+
+        field_assert_equal(target, reference);
+
+        g_object_unref(reference);
+        g_object_unref(kernel);
+        g_object_unref(target);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_filter_median_direct_large(void)
+{
+    gwy_tune_algorithms("median-filter-method", "direct");
+    field_filter_median_large_one();
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
+void
+test_field_filter_median_bucket_large(void)
+{
+    gwy_tune_algorithms("median-filter-method", "bucket");
+    field_filter_median_large_one();
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 

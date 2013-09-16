@@ -449,8 +449,10 @@ field/filter/standard/prewitt
 field/filter/standard/scharr
 field/filter/standard/step
 field/filter/standard/dechecker
-field/filter/median/direct
-field/filter/median/bucket
+field/filter/median/direct/small
+field/filter/median/direct/large
+field/filter/median/bucket/small
+field/filter/median/bucket/large
 field/correlate/plain
 field/correlate/level
 field/correlate/scale-rms
