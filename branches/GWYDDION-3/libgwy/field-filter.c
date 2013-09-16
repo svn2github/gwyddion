@@ -60,6 +60,20 @@ enum {
     MEDIAN_FILTER_BUCKET,
 };
 
+typedef struct {
+    const GwyField *field;
+    guint col;
+    guint row;
+    guint width;
+    guint height;
+    GwyField *target;
+    guint targetcol;
+    guint targetrow;
+    const GwyMaskField *kernel;
+    RectExtendFunc extend_rect;
+    gdouble fill_value;
+} MedianFilterData;
+
 static guint convolution_method = CONVOLUTION_AUTO;
 static guint median_filter_method = MEDIAN_FILTER_AUTO;
 
@@ -1500,15 +1514,16 @@ median_from_pointers(const gdouble **array, gsize n)
 }
 
 static void
-filter_median_direct(const GwyField *field,
-                     guint col, guint row,
-                     guint width, guint height,
-                     GwyField *target,
-                     guint targetcol, guint targetrow,
-                     const GwyMaskField *kernel,
-                     RectExtendFunc extend_rect,
-                     gdouble fill_value)
+filter_median_direct(const MedianFilterData *mfdata)
 {
+    const GwyField *field = mfdata->field;
+    guint width = mfdata->width;
+    guint height = mfdata->height;
+    GwyField *target = mfdata->target;
+    guint targetcol = mfdata->targetcol;
+    guint targetrow = mfdata->targetrow;
+    const GwyMaskField *kernel = mfdata->kernel;
+
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
     guint kn = kxres*kyres;
@@ -1519,9 +1534,10 @@ filter_median_direct(const GwyField *field,
     gdouble *extdata = g_new(gdouble, xsize*ysize);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
 
-    extend_rect(field->data, xres, extdata, xsize,
-                col, row, width, height, xres, yres,
-                extend_left, extend_right, extend_up, extend_down, fill_value);
+    mfdata->extend_rect(field->data, xres, extdata, xsize,
+                        mfdata->col, mfdata->row, width, height, xres, yres,
+                        extend_left, extend_right, extend_up, extend_down,
+                        mfdata->fill_value);
 
     gdouble *workspace = g_new(gdouble, kn);
     // Declare @pointers with const to get an error if something tries to
@@ -1774,15 +1790,16 @@ bucket_median(guint *buckets,
 }
 
 static void
-filter_median_bucket(const GwyField *field,
-                     guint col, guint row,
-                     guint width, guint height,
-                     GwyField *target,
-                     guint targetcol, guint targetrow,
-                     const GwyMaskField *kernel,
-                     RectExtendFunc extend_rect,
-                     gdouble fill_value)
+filter_median_bucket(const MedianFilterData *mfdata)
 {
+    const GwyField *field = mfdata->field;
+    guint width = mfdata->width;
+    guint height = mfdata->height;
+    GwyField *target = mfdata->target;
+    guint targetcol = mfdata->targetcol;
+    guint targetrow = mfdata->targetrow;
+    const GwyMaskField *kernel = mfdata->kernel;
+
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
     guint kn = kxres*kyres;
@@ -1790,14 +1807,16 @@ filter_median_bucket(const GwyField *field,
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
     _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+
     guint n = xsize*ysize;
     g_assert(n >= kn);
     gdouble *extdata = g_new(gdouble, n);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
 
-    extend_rect(field->data, xres, extdata, xsize,
-                col, row, width, height, xres, yres,
-                extend_left, extend_right, extend_up, extend_down, fill_value);
+    mfdata->extend_rect(field->data, xres, extdata, xsize,
+                        mfdata->col, mfdata->row, width, height, xres, yres,
+                        extend_left, extend_right, extend_up, extend_down,
+                        mfdata->fill_value);
 
     gdouble bsizemin = n/(kn*(log(kn) + 1.0));  // Avoid too many buckets.
     gdouble bsizemax = 2.0*sqrt(kn);            // Avoid too large buckets.
@@ -1916,45 +1935,41 @@ filter_median_bucket(const GwyField *field,
 }
 
 static void
-filter_median_bucket_split(const GwyField *field,
-                           guint col, guint row,
-                           guint width, guint height,
-                           GwyField *target,
-                           guint targetcol, guint targetrow,
-                           const GwyMaskField *kernel,
-                           RectExtendFunc extend_rect,
-                           gdouble fill_value)
+filter_median_bucket_split(const MedianFilterData *mfdata)
 {
+    guint width = mfdata->width, height = mfdata->height;
+    guint targetcol = mfdata->targetcol, targetrow = mfdata->targetrow;
     guint ncols = MIN(width*height/(500*500), width);
     if (ncols < 2) {
-        filter_median_bucket(field, col, row, width, height,
-                             target, targetcol, targetrow, kernel,
-                             extend_rect, fill_value);
+        filter_median_bucket(mfdata);
         return;
     }
 
     GwyField *tmptarget = NULL;
     guint tmpcol = 0, tmprow = 0;
-    if (target == field)
+    if (mfdata->target == mfdata->field)
         tmptarget = gwy_field_new_sized(width, height, FALSE);
     else {
-        tmptarget = target;
+        tmptarget = mfdata->target;
         tmpcol = targetcol;
         tmprow = targetrow;
     }
 
     guint colwidth = width/ncols;
+    MedianFilterData mfdatacol = *mfdata;
+    mfdatacol.target = tmptarget;
+    mfdatacol.targetrow = tmprow;
+
     for (guint colfrom = 0; colfrom < width; colfrom += colwidth) {
         guint colend = MIN(colfrom + colwidth, width);
-        filter_median_bucket(field,
-                             col + colfrom, row,
-                             colend - colfrom, height,
-                             tmptarget, tmpcol + colfrom, tmprow,
-                             kernel, extend_rect, fill_value);
+        mfdatacol.col = mfdata->col + colfrom;
+        mfdatacol.width = colend - colfrom;
+        mfdatacol.targetcol = tmpcol + colfrom;
+        filter_median_bucket(&mfdatacol);
     }
 
-    if (tmptarget != target) {
-        gwy_field_copy(tmptarget, NULL, target, targetcol, targetrow);
+    if (tmptarget != mfdata->target) {
+        gwy_field_copy(tmptarget, NULL, mfdata->target, targetcol, targetrow);
         g_object_unref(tmptarget);
     }
 }
@@ -1997,16 +2012,21 @@ gwy_field_filter_median(const GwyField *field,
     if (!extend_rect)
         return;
 
+    MedianFilterData mfdata = {
+        .field = field,
+        .col = col, .row = row, .width = width, .height = height,
+        .target = target,
+        .targetcol = targetcol, .targetrow = targetrow,
+        .kernel = kernel,
+        .extend_rect = extend_rect, .fill_value = fill_value,
+    };
+
     if (median_filter_method == MEDIAN_FILTER_BUCKET
         || (median_filter_method == MEDIAN_FILTER_AUTO
             && kernel->xres*kernel->yres >= 50))
-        filter_median_bucket_split(field, col, row, width, height,
-                                   target, targetcol, targetrow, kernel,
-                                   extend_rect, fill_value);
+        filter_median_bucket_split(&mfdata);
     else
-        filter_median_direct(field, col, row, width, height,
-                             target, targetcol, targetrow, kernel,
-                             extend_rect, fill_value);
+        filter_median_direct(&mfdata);
 
     if (target != field) {
         _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
