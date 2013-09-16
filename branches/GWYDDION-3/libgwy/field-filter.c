@@ -26,6 +26,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/math.h"
 #include "libgwy/fft.h"
+#include "libgwy/master.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-transform.h"
 #include "libgwy/field-filter.h"
@@ -35,16 +36,6 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
-
-typedef void (*RowExtendFunc)(const gdouble *in,
-                              gdouble *out,
-                              guint pos,
-                              guint width,
-                              guint res,
-                              guint extend_left,
-                              guint extend_right,
-                              gdouble value);
-typedef gdouble (*DoubleArrayFunc)(gdouble *results);
 
 // Permit to choose the algorithm explicitly in testing and benchmarking.
 enum {
@@ -73,6 +64,30 @@ typedef struct {
     RectExtendFunc extend_rect;
     gdouble fill_value;
 } MedianFilterData;
+
+typedef void (*RowExtendFunc)(const gdouble *in,
+                              gdouble *out,
+                              guint pos,
+                              guint width,
+                              guint res,
+                              guint extend_left,
+                              guint extend_right,
+                              gdouble value);
+typedef gdouble (*DoubleArrayFunc)(gdouble *results);
+typedef void (*MedianFilterFunc)(const MedianFilterData *mfdata);
+
+typedef struct {
+    MedianFilterData mfdata;
+    MedianFilterFunc medfunc;
+    guint colwidth;
+    guint col;
+    guint targetcol;
+} MedianFilterState;
+
+typedef struct {
+    MedianFilterData mfdata;
+    MedianFilterFunc medfunc;
+} MedianFilterTask;
 
 static guint convolution_method = CONVOLUTION_AUTO;
 static guint median_filter_method = MEDIAN_FILTER_AUTO;
@@ -1934,14 +1949,53 @@ filter_median_bucket(const MedianFilterData *mfdata)
     g_free(bucket_sorted);
 }
 
+static gpointer
+filter_median_task(gpointer user_data)
+{
+    MedianFilterState *state = (MedianFilterState*)user_data;
+    if (state->col >= state->mfdata.width)
+        return NULL;
+
+    MedianFilterTask *task = g_slice_new(MedianFilterTask);
+    task->mfdata = state->mfdata;
+    task->medfunc = state->medfunc;
+
+    guint colend = MIN(state->col + state->colwidth, state->mfdata.width);
+    task->mfdata.col = state->mfdata.col + state->col;
+    task->mfdata.width = colend - state->col;
+    task->mfdata.targetcol = state->targetcol + state->col;
+    state->col = colend;
+
+    return task;
+}
+
+static gpointer
+filter_median_worker(gpointer taskp,
+                     G_GNUC_UNUSED gpointer data)
+{
+    MedianFilterTask *task = (MedianFilterTask*)taskp;
+    task->medfunc(&task->mfdata);
+    return taskp;
+}
+
 static void
-filter_median_bucket_split(const MedianFilterData *mfdata)
+filter_median_result(gpointer result,
+                     G_GNUC_UNUSED gpointer user_data)
+{
+    MedianFilterTask *task = (MedianFilterTask*)result;
+    g_slice_free(MedianFilterTask, task);
+}
+
+static void
+filter_median_split(const MedianFilterData *mfdata,
+                    MedianFilterFunc medfunc,
+                    guint split_threshold)
 {
     guint width = mfdata->width, height = mfdata->height;
     guint targetcol = mfdata->targetcol, targetrow = mfdata->targetrow;
-    guint ncols = MIN(width*height/(500*500), width);
+    guint ncols = MIN(width*height/split_threshold, width);
     if (ncols < 2) {
-        filter_median_bucket(mfdata);
+        medfunc(mfdata);
         return;
     }
 
@@ -1960,13 +2014,18 @@ filter_median_bucket_split(const MedianFilterData *mfdata)
     mfdatacol.target = tmptarget;
     mfdatacol.targetrow = tmprow;
 
-    for (guint colfrom = 0; colfrom < width; colfrom += colwidth) {
-        guint colend = MIN(colfrom + colwidth, width);
-        mfdatacol.col = mfdata->col + colfrom;
-        mfdatacol.width = colend - colfrom;
-        mfdatacol.targetcol = tmpcol + colfrom;
-        filter_median_bucket(&mfdatacol);
-    }
+    GwyMaster *master = gwy_master_acquire_default(TRUE);
+    MedianFilterState state = {
+        .mfdata = mfdatacol, .medfunc = medfunc,
+        .col = 0, .colwidth = colwidth, .targetcol = tmpcol,
+    };
+    gwy_master_manage_tasks(master, 0,
+                            &filter_median_worker,
+                            &filter_median_task,
+                            &filter_median_result,
+                            &state,
+                            NULL);
+    gwy_master_release_default(master);
 
     if (tmptarget != mfdata->target) {
         gwy_field_copy(tmptarget, NULL, mfdata->target, targetcol, targetrow);
@@ -2024,7 +2083,7 @@ gwy_field_filter_median(const GwyField *field,
     if (median_filter_method == MEDIAN_FILTER_BUCKET
         || (median_filter_method == MEDIAN_FILTER_AUTO
             && kernel->xres*kernel->yres >= 50))
-        filter_median_bucket_split(&mfdata);
+        filter_median_split(&mfdata, &filter_median_bucket, 500*500);
     else
         filter_median_direct(&mfdata);
 
