@@ -424,30 +424,12 @@ create_graph_window(void)
 
     GwyGraphArea *area = gwy_graph_get_area(graph);
     GwyRand *rng = gwy_rand_new();
-    GwyRange xrange = { G_MAXDOUBLE, -G_MAXDOUBLE },
-             yrange = { G_MAXDOUBLE, -G_MAXDOUBLE };
 
     for (guint i = 0; i < 6; i++) {
         GwyGraphCurve *graphcurve = make_random_curve(rng);
         gwy_graph_area_add(area, graphcurve);
-
-        GwyRange range;
-        gwy_graph_curve_xrange(graphcurve, &range);
-        xrange.from = fmin(xrange.from, range.from);
-        xrange.to = fmax(xrange.to, range.to);
-        gwy_graph_curve_yrange(graphcurve, &range);
-        yrange.from = fmin(yrange.from, range.from);
-        yrange.to = fmax(yrange.to, range.to);
     }
-    gwy_graph_area_set_xrange(area, &xrange);
-    gwy_graph_area_set_yrange(area, &yrange);
-
-    gdouble *grid = g_new(gdouble, 21);
-    for (guint i = 0; i < 21; i++)
-        grid[i] = i - 10.0;
-    gwy_graph_area_set_xgrid(area, grid, 21);
-    gwy_graph_area_set_ygrid(area, grid, 21);
-    g_free(grid);
+    gwy_rand_free(rng);
 
     GwyGraphAxis *gaxis;
     gaxis = gwy_graph_get_top_axis(graph);
@@ -458,8 +440,6 @@ create_graph_window(void)
     gwy_graph_axis_set_label(gaxis, "Left");
     gaxis = gwy_graph_get_right_axis(graph);
     gwy_graph_axis_set_label(gaxis, "Right");
-
-    gwy_rand_free(rng);
 
     return window;
 }
