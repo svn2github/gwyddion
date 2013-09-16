@@ -119,6 +119,7 @@ void               gwy_axis_set_mirror           (GwyAxis *axis,
 GwyAxis*           gwy_axis_get_mirror           (const GwyAxis *axis);
 const GwyAxisTick* gwy_axis_ticks                (GwyAxis *axis,
                                                   guint *nticks);
+gdouble            gwy_axis_get_base             (const GwyAxis *axis)              G_GNUC_PURE;
 gdouble            gwy_axis_position_to_value    (GwyAxis *axis,
                                                   gdouble position)                 G_GNUC_PURE;
 gdouble            gwy_axis_value_to_position    (GwyAxis *axis,

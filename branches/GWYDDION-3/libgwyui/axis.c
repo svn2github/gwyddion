@@ -57,6 +57,7 @@ enum {
     PROP_EDGE,
     PROP_RANGE_REQUEST,
     PROP_RANGE,
+    PROP_BASE,
     PROP_SNAP_TO_TICKS,
     PROP_TICKS_AT_EDGES,
     PROP_SHOW_TICK_LABELS,
@@ -96,6 +97,7 @@ struct _GwyAxisPrivate {
     guint length;
     GwyValueFormat *vf;
     GArray *ticks;
+    gdouble base;
 
     GwyAxis *mirror;
     gulong mirror_ticks_placed_id;
@@ -287,6 +289,13 @@ gwy_axis_class_init(GwyAxisClass *klass)
                               GWY_TYPE_RANGE,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_BASE]
+         = g_param_spec_double("base",
+                               "Base",
+                               "Base scale of the axis.",
+                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
+                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
     properties[PROP_SNAP_TO_TICKS]
         = g_param_spec_boolean("snap-to-ticks",
                                "Snap to ticks",
@@ -384,6 +393,7 @@ gwy_axis_init(GwyAxis *axis)
     priv->max_tick_level = GWY_AXIS_TICK_MINOR;
     priv->length = 1;
     priv->range = priv->request = default_range;
+    priv->base = 1.0;
     gtk_widget_set_has_window(GTK_WIDGET(axis), FALSE);
 }
 
@@ -486,6 +496,10 @@ gwy_axis_get_property(GObject *object,
 
         case PROP_RANGE:
         g_value_set_boxed(value, &priv->range);
+        break;
+
+        case PROP_BASE:
+        g_value_set_double(value, priv->base);
         break;
 
         case PROP_SNAP_TO_TICKS:
@@ -991,6 +1005,26 @@ gwy_axis_redraw_mark(GwyAxis *axis)
 }
 
 /**
+ * gwy_axis_get_base:
+ * @axis: An axis.
+ *
+ * Obtains the base scale with which all displayed tick labels are divided.
+ *
+ * If the base is 1000 then value 1200 may be displayed as 1.2.
+ * If the base is 0.001 then value 0.05 may be displayed as 50.
+ *
+ * Logarithmic axis usually have base scale of 1.
+ *
+ * Returns: The base scale of the axis.
+ **/
+gdouble
+gwy_axis_get_base(const GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), 1.0);
+    return axis->priv->base;
+}
+
+/**
  * gwy_axis_position_to_value:
  * @axis: An axis.
  * @position: Pixel (widget) position on the axis.
@@ -1373,14 +1407,18 @@ calculate_ticks(GwyAxis *axis)
     if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
         gboolean range_changed = !gwy_equal(&request, &priv->range);
+        gboolean base_changed = (priv->base != 1.0);
         priv->range = request;
         priv->ticks_are_valid = TRUE;
         // TODO: We could, more or less, simply continue, without any of the
         // ugly iterative business below.  There will not be any labels or
         // even ticks drawn at reasonable places, but what the fuck.  The
         // only thing to prevent seriously is overlapping labels.
+        priv->base = 1.0;
         if (range_changed)
             g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+        if (base_changed)
+            g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_BASE]);
         g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
         return;
     }
@@ -1460,9 +1498,13 @@ calculate_ticks(GwyAxis *axis)
     }
 
     gboolean range_changed = !gwy_equal(&oldrange, &priv->range);
+    gboolean base_changed = (priv->base != base);
     priv->ticks_are_valid = TRUE;
+    priv->base = base;
     if (range_changed)
         g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+    if (base_changed)
+        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_BASE]);
     g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
 }
 
