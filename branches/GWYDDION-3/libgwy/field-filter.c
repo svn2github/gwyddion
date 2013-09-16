@@ -1999,6 +1999,12 @@ filter_median_split(const MedianFilterData *mfdata,
         return;
     }
 
+    guint colwidth = MAX(width/ncols, (mfdata->kernel->xres + 1)/2);
+    if (colwidth >= width) {
+        medfunc(mfdata);
+        return;
+    }
+
     GwyField *tmptarget = NULL;
     guint tmpcol = 0, tmprow = 0;
     if (mfdata->target == mfdata->field)
@@ -2009,7 +2015,6 @@ filter_median_split(const MedianFilterData *mfdata,
         tmprow = targetrow;
     }
 
-    guint colwidth = width/ncols;
     MedianFilterData mfdatacol = *mfdata;
     mfdatacol.target = tmptarget;
     mfdatacol.targetrow = tmprow;
