@@ -36,13 +36,22 @@
 #define tick_index(a, i) g_array_index((a), GwyAxisTick, (i))
 
 typedef enum {
-    GWY_AXIS_STEP_0,
-    GWY_AXIS_STEP_1,
-    GWY_AXIS_STEP_2,
-    GWY_AXIS_STEP_2_5,
-    GWY_AXIS_STEP_5,
-    GWY_AXIS_STEP_NSTEPS
-} GwyAxisStepType;
+    GWY_AXIS_LIN_STEP_0,
+    GWY_AXIS_LIN_STEP_1,
+    GWY_AXIS_LIN_STEP_2,
+    GWY_AXIS_LIN_STEP_2_5,
+    GWY_AXIS_LIN_STEP_5,
+    GWY_AXIS_LIN_STEP_NSTEPS
+} GwyAxisLinStepType;
+
+typedef enum {
+    GWY_AXIS_LOG_STEP_0,
+    GWY_AXIS_LOG_STEP_LIN,
+    GWY_AXIS_LOG_STEP_125,
+    GWY_AXIS_LOG_STEP_10,
+    GWY_AXIS_LOG_STEP_POW10,
+    GWY_AXIS_LOG_STEP_NSTEPS
+} GwyAxisLogStepType;
 
 typedef enum {
    FINALLY_OK,
@@ -96,7 +105,6 @@ struct _GwyAxisPrivate {
     guint length;
     GwyValueFormat *vf;
     GArray *ticks;
-    gdouble base;
 
     GwyAxis *mirror;
     gulong mirror_ticks_placed_id;
@@ -110,88 +118,93 @@ struct _GwyAxisPrivate {
 
 typedef struct _GwyAxisPrivate Axis;
 
-static void            gwy_axis_dispose          (GObject *object);
-static void            gwy_axis_finalize         (GObject *object);
-static void            gwy_axis_set_property     (GObject *object,
-                                                  guint prop_id,
-                                                  const GValue *value,
-                                                  GParamSpec *pspec);
-static void            gwy_axis_get_property     (GObject *object,
-                                                  guint prop_id,
-                                                  GValue *value,
-                                                  GParamSpec *pspec);
-static void            gwy_axis_realize          (GtkWidget *widget);
-static void            gwy_axis_unrealize        (GtkWidget *widget);
-static void            gwy_axis_map              (GtkWidget *widget);
-static void            gwy_axis_unmap            (GtkWidget *widget);
-static void            gwy_axis_style_updated    (GtkWidget *widget);
-static void            gwy_axis_size_allocate    (GtkWidget *widget,
-                                                  cairo_rectangle_int_t *allocation);
-static void            create_input_window       (GwyAxis *axis);
-static void            destroy_input_window      (GwyAxis *axis);
-static gboolean        set_snap_to_ticks         (GwyAxis *axis,
-                                                  gboolean setting);
-static gboolean        set_ticks_at_edges        (GwyAxis *axis,
-                                                  gboolean setting);
-static gboolean        set_show_tick_labels      (GwyAxis *axis,
-                                                  gboolean setting);
-static gboolean        set_show_unit             (GwyAxis *axis,
-                                                  gboolean setting);
-static gboolean        set_edge                  (GwyAxis *axis,
-                                                  GtkPositionType edge);
-static gboolean        set_max_tick_level        (GwyAxis *axis,
-                                                  GwyAxisTickLevel level);
-static gboolean        set_show_mark             (GwyAxis *axis,
-                                                  gboolean setting);
-static gboolean        set_mark                  (GwyAxis *axis,
-                                                  gdouble value);
-static gboolean        set_mirror                (GwyAxis *axis,
-                                                  GwyAxis *mirror);
-static gboolean        request_range             (GwyAxis *axis,
-                                                  const GwyRange *range);
-static void            unit_changed              (GwyAxis *axis,
-                                                  GwyUnit *unit);
-static void            invalidate_ticks          (GwyAxis *axis);
-static void            position_set_style_classes(GtkWidget *widget,
-                                                  GtkPositionType position);
-static void            calculate_ticks           (GwyAxis *axis);
-static void            fill_tick_arrays          (GwyAxis *axis,
-                                                  GwyAxisTickLevel level,
-                                                  gdouble bs,
-                                                  gdouble largerbs);
-static void            remove_too_close_ticks    (GwyAxis *axis);
-static void            improve_hinting           (GwyAxis *axis);
-static gboolean        zero_is_inside            (gdouble start,
-                                                  guint n,
-                                                  gdouble bs);
-static gboolean        precision_is_sufficient   (GwyValueFormat *vf,
-                                                  gdouble bs);
-static void            snap_range_to_ticks       (GwyRange *range,
-                                                  gdouble bs);
-static GwyAxisStepType choose_step_type          (gdouble *step,
-                                                  gdouble *base);
-static GwyAxisStepType decrease_step_type        (GwyAxisStepType steptype,
-                                                  gdouble *base,
-                                                  gdouble dx,
-                                                  gdouble min_incr);
-static void            ensure_layout_and_ticks   (GwyAxis *axis);
-static void            rotate_pango_context      (GwyAxis *axis);
-static void            clear_tick                (gpointer item);
-static gdouble         estimate_major_distance   (GwyAxis *axis,
-                                                  const GwyRange *request);
-static void            fix_request               (GwyRange *request);
-static void            format_value_label        (GwyAxis *axis,
-                                                  gdouble value,
-                                                  gboolean with_units);
-static void            mirror_ticks_placed       (GwyAxis *axis);
-static void            mirror_ticks              (GwyAxis *axis);
+static void               gwy_axis_dispose           (GObject *object);
+static void               gwy_axis_finalize          (GObject *object);
+static void               gwy_axis_set_property      (GObject *object,
+                                                      guint prop_id,
+                                                      const GValue *value,
+                                                      GParamSpec *pspec);
+static void               gwy_axis_get_property      (GObject *object,
+                                                      guint prop_id,
+                                                      GValue *value,
+                                                      GParamSpec *pspec);
+static void               gwy_axis_realize           (GtkWidget *widget);
+static void               gwy_axis_unrealize         (GtkWidget *widget);
+static void               gwy_axis_map               (GtkWidget *widget);
+static void               gwy_axis_unmap             (GtkWidget *widget);
+static void               gwy_axis_style_updated     (GtkWidget *widget);
+static void               gwy_axis_size_allocate     (GtkWidget *widget,
+                                                      cairo_rectangle_int_t *allocation);
+static void               create_input_window        (GwyAxis *axis);
+static void               destroy_input_window       (GwyAxis *axis);
+static gboolean           set_snap_to_ticks          (GwyAxis *axis,
+                                                      gboolean setting);
+static gboolean           set_ticks_at_edges         (GwyAxis *axis,
+                                                      gboolean setting);
+static gboolean           set_show_tick_labels       (GwyAxis *axis,
+                                                      gboolean setting);
+static gboolean           set_show_unit              (GwyAxis *axis,
+                                                      gboolean setting);
+static gboolean           set_edge                   (GwyAxis *axis,
+                                                      GtkPositionType edge);
+static gboolean           set_max_tick_level         (GwyAxis *axis,
+                                                      GwyAxisTickLevel level);
+static gboolean           set_show_mark              (GwyAxis *axis,
+                                                      gboolean setting);
+static gboolean           set_mark                   (GwyAxis *axis,
+                                                      gdouble value);
+static gboolean           set_mirror                 (GwyAxis *axis,
+                                                      GwyAxis *mirror);
+static gboolean           request_range              (GwyAxis *axis,
+                                                      const GwyRange *range);
+static void               unit_changed               (GwyAxis *axis,
+                                                      GwyUnit *unit);
+static void               invalidate_ticks           (GwyAxis *axis);
+static void               position_set_style_classes (GtkWidget *widget,
+                                                      GtkPositionType position);
+static void               calculate_ticks_lin        (GwyAxis *axis);
+static void               calculate_ticks_log        (GwyAxis *axis);
+static void               fill_tick_arrays           (GwyAxis *axis,
+                                                      GwyAxisTickLevel level,
+                                                      gdouble bs,
+                                                      gdouble largerbs);
+static void               remove_too_close_ticks     (GwyAxis *axis);
+static void               improve_hinting            (GwyAxis *axis);
+static gboolean           zero_is_inside             (gdouble start,
+                                                      guint n,
+                                                      gdouble bs);
+static gboolean           precision_is_sufficient    (GwyValueFormat *vf,
+                                                      gdouble bs);
+static void               snap_range_to_ticks        (GwyRange *range,
+                                                      gdouble bs);
+static GwyAxisLinStepType choose_step_type_lin           (gdouble *step,
+                                                      gdouble *base);
+static GwyAxisLogStepType choose_step_type_log           (gdouble *step,
+                                                      gdouble *base);
+static GwyAxisLinStepType decrease_step_type         (GwyAxisLinStepType steptype,
+                                                      gdouble *base,
+                                                      gdouble dx,
+                                                      gdouble min_incr);
+static void               ensure_layout_and_ticks    (GwyAxis *axis);
+static void               rotate_pango_context       (GwyAxis *axis);
+static void               clear_tick                 (gpointer item);
+static gdouble            estimate_major_distance_log(GwyAxis *axis,
+                                                      const GwyRange *request);
+static gdouble            estimate_major_distance_lin(GwyAxis *axis,
+                                                      const GwyRange *request);
+static void               fix_request                (GwyRange *request);
+static void               format_value_label         (GwyAxis *axis,
+                                                      gdouble value,
+                                                      gboolean with_units);
+static void               mirror_ticks_placed        (GwyAxis *axis);
+static void               mirror_ticks               (GwyAxis *axis);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
 
 static const GwyRange default_range = { -1.0, 1.0 };
 
-static const gdouble step_sizes[GWY_AXIS_STEP_NSTEPS] = {
+static const gdouble step_sizes_lin[GWY_AXIS_LIN_STEP_NSTEPS] = {
     0.0, 1.0, 2.0, 2.5, 5.0,
 };
 
@@ -385,7 +398,6 @@ gwy_axis_init(GwyAxis *axis)
     priv->max_tick_level = GWY_AXIS_TICK_MINOR;
     priv->length = 1;
     priv->range = priv->request = default_range;
-    priv->base = 1.0;
     gtk_widget_set_has_window(GTK_WIDGET(axis), FALSE);
 }
 
@@ -971,7 +983,7 @@ gwy_axis_ticks(GwyAxis *axis,
 
     Axis *priv = axis->priv;
     if (!priv->ticks_are_valid)
-        calculate_ticks(axis);
+        calculate_ticks_lin(axis);
 
     GWY_MAYBE_SET(nticks, priv->ticks->len);
     return (const GwyAxisTick*)priv->ticks->data;
@@ -1369,7 +1381,7 @@ compare_ticks_descending(gconstpointer a, gconstpointer b)
 //     majot step to the next larger.  Go to (3).
 // (8) Take minor step as the next smaller for obtained major step.
 static void
-calculate_ticks(GwyAxis *axis)
+calculate_ticks_lin(GwyAxis *axis)
 {
     Axis *priv = axis->priv;
     if (priv->mirror) {
@@ -1386,12 +1398,12 @@ calculate_ticks(GwyAxis *axis)
     ensure_layout_and_ticks(axis);
     priv->split_width = gwy_axis_get_split_width(axis);
 
+    GArray *ticks = priv->ticks;
+    g_array_set_size(ticks, 0);
+
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
-    gdouble majdist = estimate_major_distance(axis, &request);
-    GArray *ticks = priv->ticks;
-
-    g_array_set_size(ticks, 0);
+    gdouble majdist = estimate_major_distance_lin(axis, &request);
 
     if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
@@ -1402,7 +1414,6 @@ calculate_ticks(GwyAxis *axis)
         // ugly iterative business below.  There will not be any labels or
         // even ticks drawn at reasonable places, but what the fuck.  The
         // only thing to prevent seriously is overlapping labels.
-        priv->base = 1.0;
         if (range_changed)
             g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
         g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
@@ -1410,18 +1421,18 @@ calculate_ticks(GwyAxis *axis)
     }
 
     State state = FIRST_TRY;
-    GwyAxisStepType steptype = GWY_AXIS_STEP_0;
+    GwyAxisLinStepType steptype = GWY_AXIS_LIN_STEP_0;
     // Silence GCC.  And make any uninitialised use pretty obvious.
     gdouble base = NAN, step = NAN, bs = NAN;
     GwyRange oldrange = priv->range;
     do {
         priv->range = request;
         if (state != LESS_TICKS) {
-            majdist = estimate_major_distance(axis, &request);
+            majdist = estimate_major_distance_lin(axis, &request);
             step = fabs(priv->range.to - priv->range.from)/(length/majdist);
-            steptype = choose_step_type(&step, &base);
+            steptype = choose_step_type_lin(&step, &base);
         }
-        step = step_sizes[steptype];
+        step = step_sizes_lin[steptype];
         bs = descending ? -base*step : base*step;
         if (priv->snap_to_ticks)
             snap_range_to_ticks(&priv->range, bs);
@@ -1441,7 +1452,7 @@ calculate_ticks(GwyAxis *axis)
             else {
                 state = LESS_TICKS;
                 base *= 10;
-                steptype = GWY_AXIS_STEP_1;
+                steptype = GWY_AXIS_LIN_STEP_1;
             }
         }
     } while (state != FINALLY_OK);
@@ -1454,7 +1465,7 @@ calculate_ticks(GwyAxis *axis)
         steptype = decrease_step_type(steptype, &base, dx, MIN_TICK_DIST);
         if (!steptype)
             break;
-        step = step_sizes[steptype];
+        step = step_sizes_lin[steptype];
         bs = descending ? -base*step : base*step;
         fill_tick_arrays(axis, i, bs, largerbs);
     }
@@ -1485,7 +1496,6 @@ calculate_ticks(GwyAxis *axis)
 
     gboolean range_changed = !gwy_equal(&oldrange, &priv->range);
     priv->ticks_are_valid = TRUE;
-    priv->base = base;
     if (range_changed)
         g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
     g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
@@ -1611,6 +1621,142 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         }
         g_array_append_val(ticks, tick);
     }
+}
+
+static void
+calculate_ticks_log(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    if (priv->mirror) {
+        mirror_ticks(axis);
+        return;
+    }
+
+    // XXX: This is for labels *along* the axis.  The labels can be also
+    // perpendicular.  OTOH for consistent interlabel distance this might be
+    // good, in fact.
+    GWY_OBJECT_UNREF(priv->vf);
+    GwyRange request;
+    priv->vf = gwy_axis_estimate_value_format(axis, &request);
+    ensure_layout_and_ticks(axis);
+    priv->split_width = gwy_axis_get_split_width(axis);
+
+    GArray *ticks = priv->ticks;
+    g_array_set_size(ticks, 0);
+
+    if (request.from <= 0.0 || request.to <= 0.0) {
+        g_warning("Log-scale axis cannot have negative range.");
+        gboolean range_changed = !gwy_equal(&request, &priv->range);
+        priv->range = (GwyRange){ 0.1, 10.0 };
+        priv->ticks_are_valid = TRUE;
+        if (range_changed)
+            g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+        g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
+        return;
+    }
+
+    gboolean descending = (request.to < request.from);
+    guint length = priv->length;
+    gdouble majdist = estimate_major_distance_log(axis, &request);
+
+    if (length < 2) {
+        g_warning("Cannot fit any major ticks.  Implement some fallback.");
+        gboolean range_changed = !gwy_equal(&request, &priv->range);
+        priv->range = request;
+        priv->ticks_are_valid = TRUE;
+        // TODO: We could, more or less, simply continue, without any of the
+        // ugly iterative business below.  There will not be any labels or
+        // even ticks drawn at reasonable places, but what the fuck.  The
+        // only thing to prevent seriously is overlapping labels.
+        if (range_changed)
+            g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+        g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
+        return;
+    }
+
+    State state = FIRST_TRY;
+    GwyAxisLogStepType steptype = GWY_AXIS_LOG_STEP_0;
+    // Silence GCC.  And make any uninitialised use pretty obvious.
+    gdouble base = NAN, step = NAN, bs = NAN;
+    GwyRange oldrange = priv->range;
+    do {
+        priv->range = request;
+        if (state != LESS_TICKS) {
+            majdist = estimate_major_distance_log(axis, &request);
+            step = fabs(log(priv->range.to/priv->range.from))/(length/majdist);
+            steptype = choose_step_type_log(&step, &base);
+        }
+#if 0
+        step = step_sizes[steptype];
+        bs = descending ? -base*step : base*step;
+        if (priv->snap_to_ticks)
+            snap_range_to_ticks(&priv->range, bs);
+
+        guint precision = gwy_value_format_get_precision(priv->vf);
+        if (precision_is_sufficient(priv->vf, bs)) {
+            if (state == FIRST_TRY && precision > 0)
+                gwy_value_format_set_precision(priv->vf, precision-1);
+            else
+                state = FINALLY_OK;
+        }
+        else {
+            if (state == FIRST_TRY) {
+                state = ADD_DIGITS;
+                gwy_value_format_set_precision(priv->vf, precision+1);
+            }
+            else {
+                state = LESS_TICKS;
+                base *= 10;
+                steptype = GWY_AXIS_LOG_STEP_1;
+            }
+        }
+#endif
+    } while (state != FINALLY_OK);
+
+#if 0
+    gdouble dx = fabs(priv->range.to - priv->range.from)/length;
+    priv->units_at = NAN;
+    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0);
+    for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
+        gdouble largerbs = bs;
+        steptype = decrease_step_type(steptype, &base, dx, MIN_TICK_DIST);
+        if (!steptype)
+            break;
+        step = step_sizes[steptype];
+        bs = descending ? -base*step : base*step;
+        fill_tick_arrays(axis, i, bs, largerbs);
+    }
+
+    g_array_sort(ticks, descending
+                 ? compare_ticks_descending
+                 : compare_ticks_ascending);
+    priv->must_fix_units = FALSE;
+    remove_too_close_ticks(axis);
+    improve_hinting(axis);
+
+    if (priv->must_fix_units) {
+        g_assert(isfinite(priv->units_at));
+        for (guint i = 0; i < ticks->len; i++) {
+            GwyAxisTick *tick = &tick_index(ticks, i);
+            if (tick->value == priv->units_at) {
+                guint prec = gwy_value_format_get_precision(priv->vf);
+                gwy_value_format_set_precision(priv->vf, prec+1);
+                format_value_label(axis, tick->value, TRUE);
+                gwy_value_format_set_precision(priv->vf, prec);
+                pango_layout_get_extents(priv->layout, NULL, &tick->extents);
+                g_free(tick->label);
+                tick->label = g_strdup(priv->str->str);
+                break;
+            }
+        }
+    }
+#endif
+
+    gboolean range_changed = !gwy_equal(&oldrange, &priv->range);
+    priv->ticks_are_valid = TRUE;
+    if (range_changed)
+        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
+    g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
 }
 
 static void
@@ -1776,8 +1922,8 @@ snap_range_to_ticks(GwyRange *range,
     }
 }
 
-static GwyAxisStepType
-choose_step_type(gdouble *step, gdouble *base)
+static GwyAxisLinStepType
+choose_step_type_lin(gdouble *step, gdouble *base)
 {
     *base = gwy_powi(10.0, (gint)floor(log10(*step) + EPS));
     *step /= *base;
@@ -1792,49 +1938,66 @@ choose_step_type(gdouble *step, gdouble *base)
     }
 
     if (*step <= 1.0)
-        return GWY_AXIS_STEP_1;
+        return GWY_AXIS_LIN_STEP_1;
     if (*step <= 2.0)
-        return GWY_AXIS_STEP_2;
+        return GWY_AXIS_LIN_STEP_2;
     if (*step <= 2.5)
-        return GWY_AXIS_STEP_2_5;
-    return GWY_AXIS_STEP_5;
+        return GWY_AXIS_LIN_STEP_2_5;
+    return GWY_AXIS_LIN_STEP_5;
 }
 
-static GwyAxisStepType
-decrease_step_type(GwyAxisStepType steptype,
+static GwyAxisLogStepType
+choose_step_type_log(gdouble *step, gdouble *base)
+{
+    *base = 1.0;
+
+    if (*step <= 0.05)
+        return GWY_AXIS_LOG_STEP_LIN;
+    if (*step <= 1.5)
+        return GWY_AXIS_LOG_STEP_125;
+    if (*step <= 3.0)
+        return GWY_AXIS_LOG_STEP_10;
+
+    gint n = gwy_round(log2(*step/3.0));
+    *step = 3*gwy_powi(2.0, n);
+    return GWY_AXIS_LOG_STEP_POW10;
+}
+
+static GwyAxisLinStepType
+decrease_step_type(GwyAxisLinStepType steptype,
                    gdouble *base,
                    gdouble dx,
                    gdouble min_incr)
 {
-    GwyAxisStepType new_scale = GWY_AXIS_STEP_0;
+    GwyAxisLinStepType new_scale = GWY_AXIS_LIN_STEP_0;
 
     switch (steptype) {
-        case GWY_AXIS_STEP_1:
+        case GWY_AXIS_LIN_STEP_1:
         *base /= 10.0;
         if (*base*2.0/dx >= min_incr)
-            new_scale = GWY_AXIS_STEP_5;
+            new_scale = GWY_AXIS_LIN_STEP_5;
         else if (*base*2.5/dx >= min_incr)
-            new_scale = GWY_AXIS_STEP_2_5;
+            new_scale = GWY_AXIS_LIN_STEP_2_5;
         else if (*base*5.0/dx >= min_incr)
-            new_scale = GWY_AXIS_STEP_5;
+            new_scale = GWY_AXIS_LIN_STEP_5;
         break;
 
-        case GWY_AXIS_STEP_2:
+        case GWY_AXIS_LIN_STEP_2:
         if (*base/dx >= min_incr)
-            new_scale = GWY_AXIS_STEP_1;
+            new_scale = GWY_AXIS_LIN_STEP_1;
         break;
 
-        case GWY_AXIS_STEP_2_5:
+        case GWY_AXIS_LIN_STEP_2_5:
         *base /= 10.0;
         if (*base*5.0/dx > min_incr)
-            new_scale = GWY_AXIS_STEP_5;
+            new_scale = GWY_AXIS_LIN_STEP_5;
         break;
 
-        case GWY_AXIS_STEP_5:
+        case GWY_AXIS_LIN_STEP_5:
         if (*base/dx >= min_incr)
-            new_scale = GWY_AXIS_STEP_1;
+            new_scale = GWY_AXIS_LIN_STEP_1;
         else if (*base*2.5/dx >= min_incr)
-            new_scale = GWY_AXIS_STEP_2_5;
+            new_scale = GWY_AXIS_LIN_STEP_2_5;
         break;
 
         default:
@@ -1926,10 +2089,9 @@ fix_request(GwyRange *request)
     }
 }
 
-// FIXME: How to support logarithmic (or possibly other) axes?
 static gdouble
-estimate_major_distance(GwyAxis *axis,
-                        const GwyRange *request)
+estimate_major_distance_lin(GwyAxis *axis,
+                            const GwyRange *request)
 {
     Axis *priv = axis->priv;
     if (!priv->show_tick_labels)
@@ -1942,6 +2104,36 @@ estimate_major_distance(GwyAxis *axis,
     pango_layout_get_size(priv->layout, &width, &height);
 
     format_value_label(axis, request->to, priv->show_unit);
+    pango_layout_get_size(priv->layout, &w, &h);
+    width = MAX(width, w);
+    height = MAX(height, h);
+
+    gdouble size;
+    if (priv->edge == GTK_POS_TOP || priv->edge == GTK_POS_BOTTOM)
+        size = width;
+    else
+        size = (gwy_axis_get_horizontal_labels(axis) ? height : width);
+
+    return fmax(size/pangoscale + 0.5*MIN_TICK_DIST, MIN_MAJOR_DIST);
+}
+
+static gdouble
+estimate_major_distance_log(GwyAxis *axis,
+                            const GwyRange *request)
+{
+    Axis *priv = axis->priv;
+    if (!priv->show_tick_labels)
+        return fmin(MIN_MAJOR_DIST, priv->length);
+
+    // FIXME: With perpendicular labels the label + units may be actually
+    // two-line.  The label measurement probably needs to involve subclasses.
+    gint width, height, w, h;
+    gdouble v = gwy_powi(10.0, gwy_round(log10(request->from)));
+    format_value_label(axis, v, priv->show_unit);
+    pango_layout_get_size(priv->layout, &width, &height);
+
+    v = gwy_powi(10.0, gwy_round(log10(request->to)));
+    format_value_label(axis, v, priv->show_unit);
     pango_layout_get_size(priv->layout, &w, &h);
     width = MAX(width, w);
     height = MAX(height, h);
