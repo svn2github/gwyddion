@@ -138,8 +138,8 @@ test_math_intersecting(void)
 void
 test_math_power_sum(void)
 {
-    for (guint p = 0; p <= 11; p++) {
-        for (guint n = 0; n <= p+2; n++) {
+    for (guint p = 0; p <= 20; p++) {
+        for (guint n = 0; n <= p+3; n++) {
             gdouble expected_sum = 0.0;
 
             for (guint i = 1; i <= n; i++)

@@ -431,7 +431,7 @@ gwy_ssqr(gdouble x)
  * integral @x from 1 to @n.  If you want to sum from 0 then add 1 if @p is 0.
  *
  * The sum is calculated using an explicit formula, implemented only for
- * a limited set of powers @p, at present up to 11.
+ * a limited set of powers @p, at present up to 20.
  *
  * Returns: Sum of first @n integers raised to power @p.
  **/
@@ -457,6 +457,16 @@ gwy_power_sum(guint n,
             return (((((10*x + 45)*x + 60)*y - 42)*y + 20)*y - 3)*x/90;
         if (p == 10)
             return ((((((6*x + 33)*x + 55)*y - 66)*y + 66)*y - 33)*y + 5)*x/66;
+        if (p == 12)
+            return (((((((210*x + 1365)*x + 2730)*y - 5005)*y + 8580)*y - 9009)*y + 4550)*y - 691)*x/2730;
+        if (p == 14)
+            return ((((((((6*x + 45)*x + 105)*y - 273)*y + 715)*y - 1287)*y + 1365)*y - 691)*y + 105)*x/90;
+        if (p == 16)
+            return (((((((((30*x + 255)*x + 680)*y - 2380)*y + 8840)*y - 24310)*y + 44200)*y - 46988)*y + 23800)*y - 3617)*x/510;
+        if (p == 18)
+            return ((((((((((210*x + 1995)*x + 5985)*y - 27132)*y + 135660)*y - 529074)*y + 1469650)*y - 2678316)*y + 2848860)*y - 1443183)*y + 219335)*x/3990;
+        if (p == 20)
+            return (((((((((((330*x + 3465)*x + 11550)*y - 65835)*y + 426360)*y - 2238390)*y + 8817900)*y - 24551230)*y + 44767800)*y - 47625039)*y + 24126850)*y - 3666831)*x/6930;
     }
     else {
         gdouble a = x*(x + 1)/2;
@@ -467,11 +477,19 @@ gwy_power_sum(guint n,
         if (p == 5)
             return (4*a - 1)*a*a/3;
         if (p == 7)
-            return ((12*a - 8)*a + 2)*a*a/6;
+            return ((6*a - 4)*a + 1)*a*a/3;
         if (p == 9)
             return (((16*a - 20)*a + 12)*a - 3)*a*a/5;
         if (p == 11)
-            return ((((32*a - 64)*a + 68)*a - 40)*a + 10)*a*a/6;
+            return ((((16*a - 32)*a + 34)*a - 20)*a + 5)*a*a/3;
+        if (p == 13)
+            return (((((960*a - 2800)*a + 4592)*a - 4720)*a + 2764)*a - 691)*a*a/105;
+        if (p == 15)
+            return ((((((48*a - 192)*a + 448)*a - 704)*a + 718)*a - 420)*a + 105)*a*a/3;
+        if (p == 17)
+            return (((((((1280*a - 6720)*a + 21120)*a - 46880)*a + 72912)*a - 74220)*a + 43404)*a - 10851)*a*a/45;
+        if (p == 19)
+            return ((((((((5376*a - 35840)*a + 145824)*a - 433536)*a + 950544)*a - 1474592)*a + 1500334)*a - 877340)*a + 219335)*a*a/105;
     }
 
     g_critical("Power %u is too high.  Implement me!", p);

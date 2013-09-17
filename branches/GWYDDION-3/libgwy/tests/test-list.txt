@@ -22,7 +22,7 @@ math/ssqrt
 math/ssqr
 math/overlapping
 math/intersecting
-math/power_sum
+math/power-sum
 math/curvature/at-centre/flat
 math/curvature/at-centre/centered
 math/curvature/at-centre/shifted
