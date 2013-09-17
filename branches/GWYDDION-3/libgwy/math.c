@@ -425,7 +425,7 @@ gwy_ssqr(gdouble x)
  * @n: Number of terms in the sum.
  * @p: Power.
  *
- * Sums first N integers raised to speficied power.
+ * Sums first N integers raised to the speficied power.
  *
  * The function calculates the sum of @x<superscript>@p</superscript> for
  * integral @x from 1 to @n.  If you want to sum from 0 then add 1 if @p is 0.
@@ -497,6 +497,49 @@ gwy_power_sum(guint n,
     for (guint i = 1; i <= n; i++)
         s += gwy_powi(i, p);
     return s;
+}
+
+/**
+ * gwy_power_sum_range:
+ * @from: First integer of the range.
+ * @to: Last integer of the range.
+ * @p: Power.
+ *
+ * Sums integers from a given range raised to the speficied power.
+ *
+ * The function calculates the sum of @x<superscript>@p</superscript> for
+ * integral @x from @from to @to.  The interval may include zero, assuming
+ * 0⁰ ≡ 1 in this case.  It is also possible to pass @from larger than @to,
+ * the sum is the same as when they are ordered normally.
+ *
+ * Returns: Sum of integers @from, …, @to raised to power @p.
+ **/
+gdouble
+gwy_power_sum_range(gint from, gint to, guint p)
+{
+    GWY_ORDER(gint, from, to);
+
+    if (!p)
+        return to+1 - from;
+
+    if (to == from)
+        return gwy_powi(from, p);
+
+    if (!from)
+        return gwy_power_sum(to, p);
+
+    gdouble sign = (p % 2) ? -1.0 : 1.0;
+    if (!to)
+        return sign*gwy_power_sum(-from, p);
+
+    if (from > 0)
+        return gwy_power_sum(to, p) - gwy_power_sum(from-1, p);
+
+    if (to < 0)
+        return sign*(gwy_power_sum(-from, p) - gwy_power_sum(-to-1, p));
+
+    g_assert(to > 0 && from < 0);
+    return gwy_power_sum(to, p) + sign*gwy_power_sum(-from, p);
 }
 
 /**
@@ -1284,14 +1327,16 @@ gwy_linalg_invert(gdouble *a,
  * An example demonstrating the fitting of one-dimensional data with a
  * quadratic polynomial:
  * |[
- * gdouble
- * *poly2(guint i, gdouble *fvalues, GwyXY *data)
+ * gboolean
+ * *poly2(guint i, gdouble *fvalues, gdouble *value, gpointer user_data)
  * {
+ *     const GwyXY *data = (const GwyXY*)user_data;
  *     gdouble x = data[i].x;
  *     fvalues[0] = 1.0;
  *     fvalues[1] = x;
  *     fvalues[2] = x*x;
- *     return data[i].y;
+ *     *value = data[i].y;
+ *     return TRUE;
  * }
  *
  * gboolean

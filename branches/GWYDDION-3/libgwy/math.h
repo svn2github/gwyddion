@@ -79,6 +79,9 @@ gdouble  gwy_ssqrt                   (gdouble x)                      G_GNUC_CON
 gdouble  gwy_ssqr                    (gdouble x)                      G_GNUC_CONST;
 gdouble  gwy_power_sum               (guint n,
                                       guint p)                        G_GNUC_CONST;
+gdouble  gwy_power_sum_range         (gint from,
+                                      gint to,
+                                      guint p)                        G_GNUC_CONST;
 gdouble  gwy_standardize_direction   (gdouble phi)                    G_GNUC_CONST;
 gboolean gwy_overlapping             (guint pos1,
                                       guint len1,

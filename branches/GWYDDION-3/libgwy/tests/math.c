@@ -147,10 +147,28 @@ test_math_power_sum(void)
 
             gdouble sum = gwy_power_sum(n, p);
 
-            g_assert_cmpfloat(fabs(sum - expected_sum),
-                              <=,
-                              1e-14*(fabs(sum) + fabs(expected_sum)));
+            gwy_assert_floatval(sum, expected_sum,
+                                1e-14*(fabs(sum) + fabs(expected_sum)));
         }
+    }
+}
+
+void
+test_math_power_sum_range(void)
+{
+    enum { pmax = 20, niter = 300 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        gint from = g_rand_int_range(rng, -100, 101);
+        gint to = g_rand_int_range(rng, -100, 101);
+        guint p = g_rand_int_range(rng, 0, pmax+1);
+        gdouble expected_sum = 0.0;
+        for (gint i = MIN(from, to); i <= MAX(from, to); i++)
+            expected_sum += gwy_powi(i, p);
+        gdouble sum = gwy_power_sum_range(from, to, p);
+        gwy_assert_floatval(sum, expected_sum,
+                            1e-14*(fabs(sum) + fabs(expected_sum)));
     }
 }
 
