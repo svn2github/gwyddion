@@ -389,8 +389,8 @@ make_random_curve(GwyRand *rng)
     GwyCurve *curve = gwy_curve_new_sized(n);
     gdouble x = 0.0, y = gwy_rand_double(rng), vy = 0.0;
     for (guint i = 0; i < n; i++) {
-        curve->data[i].x = x;
-        curve->data[i].y = y;
+        curve->data[i].x = 1e-15*x;
+        curve->data[i].y = 1e9*y;
         x += 0.05 + 0.01*gwy_rand_double(rng);
         y += vy;
         vy += 0.01*gwy_rand_normal(rng);
