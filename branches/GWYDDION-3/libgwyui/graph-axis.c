@@ -644,16 +644,16 @@ draw_axis_label(GwyAxis *axis, cairo_t *cr,
         g_string_append(str, priv->label);
 
     GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(axis));
-    GwyUnit *unit = gwy_axis_get_unit(axis);
-    if (gwy_axis_get_show_unit(axis) && !gwy_unit_is_empty(unit)) {
+    GwyValueFormat *vf = gwy_axis_get_value_format(axis);
+    const gchar *unitstr = vf ? gwy_value_format_get_units(vf) : NULL;
+    if (gwy_axis_get_show_unit(axis) && unitstr && strlen(unitstr)) {
         if (str->len)
             g_string_append(str, " ");
         g_string_append(str, "[");
-        gchar *unitstr = gwy_unit_to_string(unit, GWY_VALUE_FORMAT_PANGO);
         g_string_append(str, unitstr);
-        g_free(unitstr);
         g_string_append(str, "]");
     }
+    GWY_OBJECT_UNREF(vf);
     g_string_append(str, "</small>");
 
     PangoLayout *layout = gwy_axis_get_pango_layout(axis);

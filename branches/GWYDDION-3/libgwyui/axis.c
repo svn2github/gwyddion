@@ -57,7 +57,6 @@ enum {
     PROP_EDGE,
     PROP_RANGE_REQUEST,
     PROP_RANGE,
-    PROP_BASE,
     PROP_SNAP_TO_TICKS,
     PROP_TICKS_AT_EDGES,
     PROP_SHOW_TICK_LABELS,
@@ -289,13 +288,6 @@ gwy_axis_class_init(GwyAxisClass *klass)
                               GWY_TYPE_RANGE,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_BASE]
-         = g_param_spec_double("base",
-                               "Base",
-                               "Base scale of the axis.",
-                               G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-
     properties[PROP_SNAP_TO_TICKS]
         = g_param_spec_boolean("snap-to-ticks",
                                "Snap to ticks",
@@ -496,10 +488,6 @@ gwy_axis_get_property(GObject *object,
 
         case PROP_RANGE:
         g_value_set_boxed(value, &priv->range);
-        break;
-
-        case PROP_BASE:
-        g_value_set_double(value, priv->base);
         break;
 
         case PROP_SNAP_TO_TICKS:
@@ -1005,23 +993,24 @@ gwy_axis_redraw_mark(GwyAxis *axis)
 }
 
 /**
- * gwy_axis_get_base:
+ * gwy_axis_get_value_format:
  * @axis: An axis.
  *
- * Obtains the base scale with which all displayed tick labels are divided.
+ * Obtains the value format used for formatting of tick labels.
  *
- * If the base is 1000 then value 1200 may be displayed as 1.2.
- * If the base is 0.001 then value 0.05 may be displayed as 50.
- *
- * Logarithmic axis usually have base scale of 1.
- *
- * Returns: The base scale of the axis.
+ * Returns: (transfer full) (allow-none):
+ *          The value format used for formatting tick labels.  The returned
+ *          object must be released with g_object_unref().  It is only valid
+ *          until the axis ticks change.
  **/
-gdouble
-gwy_axis_get_base(const GwyAxis *axis)
+GwyValueFormat*
+gwy_axis_get_value_format(const GwyAxis *axis)
 {
-    g_return_val_if_fail(GWY_IS_AXIS(axis), 1.0);
-    return axis->priv->base;
+    g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
+    Axis *priv = axis->priv;
+    if (!priv->vf)
+        return NULL;
+    return (GwyValueFormat*)g_object_ref(priv->vf);
 }
 
 /**
@@ -1407,7 +1396,6 @@ calculate_ticks(GwyAxis *axis)
     if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
         gboolean range_changed = !gwy_equal(&request, &priv->range);
-        gboolean base_changed = (priv->base != 1.0);
         priv->range = request;
         priv->ticks_are_valid = TRUE;
         // TODO: We could, more or less, simply continue, without any of the
@@ -1417,8 +1405,6 @@ calculate_ticks(GwyAxis *axis)
         priv->base = 1.0;
         if (range_changed)
             g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
-        if (base_changed)
-            g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_BASE]);
         g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
         return;
     }
@@ -1498,13 +1484,10 @@ calculate_ticks(GwyAxis *axis)
     }
 
     gboolean range_changed = !gwy_equal(&oldrange, &priv->range);
-    gboolean base_changed = (priv->base != base);
     priv->ticks_are_valid = TRUE;
     priv->base = base;
     if (range_changed)
         g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
-    if (base_changed)
-        g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_BASE]);
     g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
 }
 
