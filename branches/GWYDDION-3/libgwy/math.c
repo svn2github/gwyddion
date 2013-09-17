@@ -430,8 +430,9 @@ gwy_ssqr(gdouble x)
  * The function calculates the sum of @x<superscript>@p</superscript> for
  * integral @x from 1 to @n.  If you want to sum from 0 then add 1 if @p is 0.
  *
- * The sum is calculated using an explicit formula, implemented only for
- * a limited set of powers @p, at present up to 20.
+ * For small powers (at present up to @p = 20), the sum is calculated using an
+ * explicit formula which is fast.  For large powers, the result is calculated
+ * using a naïve summation which may be slow.
  *
  * Returns: Sum of first @n integers raised to power @p.
  **/
@@ -492,8 +493,10 @@ gwy_power_sum(guint n,
             return ((((((((5376*a - 35840)*a + 145824)*a - 433536)*a + 950544)*a - 1474592)*a + 1500334)*a - 877340)*a + 219335)*a*a/105;
     }
 
-    g_critical("Power %u is too high.  Implement me!", p);
-    return 1.0;
+    gdouble s = 0.0;
+    for (guint i = 1; i <= n; i++)
+        s += gwy_powi(i, p);
+    return s;
 }
 
 /**
