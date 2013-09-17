@@ -99,7 +99,7 @@ void               gwy_axis_set_show_tick_labels (GwyAxis *axis,
                                                   gboolean showlabels);
 gboolean           gwy_axis_get_show_tick_labels (const GwyAxis *axis)              G_GNUC_PURE;
 void               gwy_axis_set_show_unit        (GwyAxis *axis,
-                                                  gboolean showunits);
+                                                  gboolean showunit);
 gboolean           gwy_axis_get_show_unit        (const GwyAxis *axis)              G_GNUC_PURE;
 void               gwy_axis_set_edge             (GwyAxis *axis,
                                                   GtkPositionType edge);

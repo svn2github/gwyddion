@@ -739,10 +739,10 @@ gwy_axis_get_show_unit(const GwyAxis *axis)
  **/
 void
 gwy_axis_set_show_unit(GwyAxis *axis,
-                       gboolean showunits)
+                       gboolean showunit)
 {
     g_return_if_fail(GWY_IS_AXIS(axis));
-    if (!set_show_unit(axis, showunits))
+    if (!set_show_unit(axis, showunit))
         return;
 
     g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_SHOW_UNIT]);
