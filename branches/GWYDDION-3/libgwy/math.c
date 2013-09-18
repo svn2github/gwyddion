@@ -525,6 +525,29 @@ gwy_power_sum_range(gint from, gint to, guint p)
     if (to == from)
         return gwy_powi(from, p);
 
+    // 20 is the maximum power supported by gwy_power_sum().
+    if (p > 20 || (guint)(to - from) < p) {
+        if (!(p % 2) && from < 0 && to > 0) {
+            gint m = MIN(-from, to), M = MAX(-from, to);
+            gdouble s = 0.0;
+            for (gint i = 1; i <= m; i++)
+                s += 2.0*gwy_powi(i, p);
+            for (gint i = m+1; i <= M; i++)
+                s += gwy_powi(i, p);
+            return s;
+        }
+        if (p % 2 && from < 0 && to > 0) {
+            if (ABS(to) >= ABS(from))
+                from = 1-from;
+            else
+                to = -1-to;
+        }
+        gdouble s = 0.0;
+        for (gint i = from; i <= to; i++)
+            s += gwy_powi(i, p);
+        return s;
+    }
+
     if (!from)
         return gwy_power_sum(to, p);
 

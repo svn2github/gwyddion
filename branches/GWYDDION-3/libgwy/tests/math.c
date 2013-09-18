@@ -156,7 +156,7 @@ test_math_power_sum(void)
 void
 test_math_power_sum_range(void)
 {
-    enum { pmax = 20, niter = 300 };
+    enum { pmax = 30, niter = 400 };
     GRand *rng = g_rand_new_with_seed(42);
 
     for (guint iter = 0; iter < niter; iter++) {
