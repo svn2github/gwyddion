@@ -170,6 +170,8 @@ test_math_power_sum_range(void)
         gwy_assert_floatval(sum, expected_sum,
                             1e-14*(fabs(sum) + fabs(expected_sum)));
     }
+
+    g_rand_free(rng);
 }
 
 void
