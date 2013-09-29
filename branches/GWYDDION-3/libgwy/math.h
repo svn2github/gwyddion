@@ -82,6 +82,10 @@ gdouble  gwy_power_sum               (guint n,
 gdouble  gwy_power_sum_range         (gint from,
                                       gint to,
                                       guint p)                        G_GNUC_CONST;
+gdouble  gwy_norm_coord_power_sum    (gint from,
+                                      gint to,
+                                      guint size,
+                                      guint p)                        G_GNUC_CONST;
 gdouble  gwy_standardize_direction   (gdouble phi)                    G_GNUC_CONST;
 gboolean gwy_overlapping             (guint pos1,
                                       guint len1,

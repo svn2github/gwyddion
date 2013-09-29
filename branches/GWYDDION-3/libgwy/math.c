@@ -566,6 +566,60 @@ gwy_power_sum_range(gint from, gint to, guint p)
 }
 
 /**
+ * gwy_norm_coord_power_sum:
+ * @from: First integer of the subrange.
+ * @to: Last integer of the subrange.
+ * @size: Total pixel dimension, it must be positive.
+ * @p: Power.
+ *
+ * Sums normalised coordinates from a given range raised to the speficied
+ * power.
+ *
+ * The function calculates the sum of @x<superscript>@p</superscript>
+ * where @x = 2@j/(@size − 1) − 1 and index @j goes from @from to @to
+ * (inclusively).  This corresponds to normalisation of coordinates in
+ * <link linkend='GwyField-level'>field levelling</link>.
+ *
+ * Under normal circumstances @from and @to are between 0 to @size-1.
+ *
+ * If @size is 1 the result is NaN unless @from = @to = 0.  Then the result is
+ * 0 for all positive powers and 1 for @p = 0.
+ *
+ * Returns: Sum of normalised coordinates corresponding to indices
+ *          @from, …, @to, raised to power @p.
+ **/
+gdouble
+gwy_norm_coord_power_sum(gint from, gint to, guint size, guint p)
+{
+    g_return_val_if_fail(size, 1.0);
+    if (size == 1) {
+        if (from || to)
+            return NAN;
+        return p ? 0.0 : 1.0;
+    }
+
+    GWY_ORDER(gint, from, to);
+
+    // So we calculate ∑_{n=f}^t ((2n-k)/k)^p, where k = size-1.
+    // This depends on whether k is even or odd.
+    gint k = size-1, k2 = k/2;
+    if (to == from)
+        return gwy_powi((2.0*from - k)/k, p);
+
+    gdouble c = gwy_powi(2.0/k, p);
+    if (k % 2) {
+        // This introduces cancellation error of the order of size/p which
+        // should be acceptable for size ≈ 10³.
+        return c*(gwy_power_sum_range(2*(from - k2) - 1,
+                                      2*(to - k2) - 1, p)/exp2(p)
+                  - gwy_power_sum_range(from - k2, to - k2 - 1, p));
+    }
+    else {
+        return c*gwy_power_sum_range(from - k2, to - k2, p);
+    }
+}
+
+/**
  * gwy_standardize_direction:
  * @phi: An angle (in radians).
  *

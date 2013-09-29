@@ -175,6 +175,32 @@ test_math_power_sum_range(void)
 }
 
 void
+test_math_power_sum_norm_coord(void)
+{
+    enum { pmax = 30, niter = 500 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        gint from = g_rand_int_range(rng, -100, 101);
+        gint to = g_rand_int_range(rng, -100, 101);
+        guint size = g_rand_int_range(rng, 50, 200);
+        guint p = g_rand_int_range(rng, 0, pmax+1);
+        // XXX: This is actually more prone to cancellation errors than the
+        // library function.
+        gdouble expected_sum = 0.0;
+        for (gint i = MIN(from, to); i <= MAX(from, to); i++)
+            expected_sum += gwy_powi(2.0*i/(size - 1.0) - 1.0, p);
+        if (from + to == (gint)size-1 && p % 2 == 1)
+            expected_sum = 0.0;
+        gdouble sum = gwy_norm_coord_power_sum(from, to, size, p);
+        gwy_assert_floatval(sum, expected_sum,
+                            1e-14*(fabs(sum) + fabs(expected_sum)));
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_math_curvature_at_centre_flat(void)
 {
     GwyCurvatureParams curv;
