@@ -19,6 +19,9 @@
 
 #include "testlibgwy.h"
 
+#define CHOLESKY_MATRIX_LEN(n) (((n) + 1)*(n)/2)
+#define SLi gwy_lower_triangular_matrix_index
+
 /***************************************************************************
  *
  * Basic math functions
@@ -886,6 +889,61 @@ test_math_fit_poly(void)
     }
 }
 
+static gdouble*
+calc_hessian(GwyLinearFitFunc func,
+             guint npoints,
+             guint nparams,
+             gpointer user_data)
+{
+    gdouble fvalues[nparams];
+    guint matlen = gwy_triangular_matrix_length(nparams);
+    gdouble *hessian = g_new0(gdouble, matlen);
+
+    for (guint i = 0; i < npoints; i++) {
+        gdouble y;
+        if (!func(i, fvalues, &y, user_data))
+            continue;
+
+        for (guint j = 0; j < nparams; j++) {
+            for (guint k = 0; k <= j; k++)
+                SLi(hessian, j, k) += fvalues[j]*fvalues[k];
+        }
+    }
+
+    return hessian;
+}
+
+void
+test_math_fit_hessian_poly(void)
+{
+    for (guint degree = 0; degree <= 4; degree++) {
+        for (guint ndata = (degree + 2) | 1; ndata < 30; ndata += 2) {
+            PolyData1 polydata = { 1.0, ndata/2, degree };
+            gdouble coeffs[degree+1], residuum;
+            gdouble *hessian = calc_hessian(poly1, ndata, degree+1, &polydata);
+            gboolean ok = gwy_linear_fit_hessian(poly1, ndata, hessian,
+                                                 coeffs, degree+1,
+                                                 &residuum, &polydata);
+            g_assert(ok);
+
+            gdouble eps = 1e-15;
+            for (guint i = 0; i <= degree; i += 2)
+                g_assert_cmpfloat(fabs(coeffs[i]), <, eps);
+
+            if (degree >= 3) {
+                g_assert_cmpfloat(fabs(coeffs[1]), <, eps);
+                g_assert_cmpfloat(fabs(coeffs[3] - polydata.K), <, eps);
+            }
+            else if (degree == 1 || degree == 2) {
+                gdouble t = 1.0/(ndata/2);
+                t = 3.0/5.0*(1.0 + t*(1.0 - t/3.0));
+                g_assert_cmpfloat(fabs(coeffs[1] - t*polydata.K), <, eps);
+            }
+            g_free(hessian);
+        }
+    }
+}
+
 /***************************************************************************
  *
  * Math sorting
@@ -1023,9 +1081,6 @@ test_math_sort_uint(void)
  * Cholesky
  *
  ***************************************************************************/
-
-#define CHOLESKY_MATRIX_LEN(n) (((n) + 1)*(n)/2)
-#define SLi gwy_lower_triangular_matrix_index
 
 /* Square a triangular matrix. */
 static void

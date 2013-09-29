@@ -165,6 +165,13 @@ gboolean gwy_linear_fit        (GwyLinearFitFunc function,
                                 guint nparams,
                                 gdouble *residuum,
                                 gpointer user_data);
+gboolean gwy_linear_fit_hessian(GwyLinearFitFunc function,
+                                guint npoints,
+                                const gdouble *hessian,
+                                gdouble *params,
+                                guint nparams,
+                                gdouble *residuum,
+                                gpointer user_data);
 
 void gwy_create_xy_poly_powers_sum(guint degree,
                                    guint *xpowers,

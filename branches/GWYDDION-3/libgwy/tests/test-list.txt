@@ -45,6 +45,7 @@ math/triangular/multiply-left
 math/linalg
 math/linalg/fail
 math/fit/poly
+math/fit-hessian/poly
 interpolation/constant
 interpolation/linear/interpolating
 interpolation/linear/non-interpolating

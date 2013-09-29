@@ -1440,9 +1440,8 @@ gwy_linear_fit(GwyLinearFitFunc function,
     g_return_val_if_fail(function && params, FALSE);
 
     guint matrix_len = MATRIX_LEN(nparams);
-    gdouble hessian[matrix_len];
+    gdouble *hessian = g_new0(gdouble, matrix_len);
     gdouble fval[nparams];
-    gwy_clear(hessian, matrix_len);
     gwy_clear(params, nparams);
     gdouble sumy2 = 0.0;
 
@@ -1458,11 +1457,91 @@ gwy_linear_fit(GwyLinearFitFunc function,
             }
         }
     }
-    if (!gwy_cholesky_decompose(hessian, nparams))
+    if (!gwy_cholesky_decompose(hessian, nparams)) {
+        g_free(hessian);
         return FALSE;
+    }
     if (residuum)
         gwy_assign(fval, params, nparams);
     gwy_cholesky_solve(hessian, params, nparams);
+    g_free(hessian);
+    if (residuum) {
+        for (guint j = 0; j < nparams; j++)
+            sumy2 -= params[j]*fval[j];
+        *residuum = MAX(sumy2, 0.0);
+    }
+    return TRUE;
+}
+
+/**
+ * gwy_linear_fit:
+ * @function: (scope call):
+ *            Function to fit.
+ * @npoints: Number of fitted points, it must be larger than the number of
+ *           parameters.
+ * @hessian: Precalculated ‘Hessian’.  More precisely, sums of base function
+ *           products @f_i*@f_j, stored as a lower triangular matrix.
+ * @params: (out) (array length=nparams):
+ *          Array of length @nparams to store the parameters (coefficients)
+ *          corresponding to the minimum on success.  It will be overwritten
+ *          also on failure but not with anything useful.
+ * @nparams: The number of parameters.
+ * @residuum: Location to store the residual sum of squares to, or %NULL if
+ *            you are not interested.
+ * @user_data: User data to pass to @function.
+ *
+ * Performs a linear least-squares fit with given Hessian.
+ *
+ * The number of Hessian matrix elements grows quadratically with the number
+ * of parameters.  For a larger number of fitting parameters, its calculation
+ * time can easily dominate.  In some cases, for instance polynomial base
+ * functions on a rectangular area, the Hessian can be precalculated by other
+ * means, which makes this function more efficient than gwy_linear_fit().
+ *
+ * If @hessian is not positive definite this function returns immediately,
+ * without ever calling @function.
+ *
+ * Returns: %TRUE on success, %FALSE on failure namely when the matrix is not
+ *          found to be positive definite.
+ **/
+gboolean
+gwy_linear_fit_hessian(GwyLinearFitFunc function,
+                       guint npoints,
+                       const gdouble *hessian,
+                       gdouble *params,
+                       guint nparams,
+                       gdouble *residuum,
+                       gpointer user_data)
+{
+    g_return_val_if_fail(npoints > nparams, FALSE);
+    g_return_val_if_fail(nparams > 0, FALSE);
+    g_return_val_if_fail(function && params, FALSE);
+    g_return_val_if_fail(hessian, FALSE);
+
+    guint matrix_len = MATRIX_LEN(nparams);
+    gdouble *myhessian = g_new(gdouble, matrix_len);
+    gwy_assign(myhessian, hessian, matrix_len);
+    if (!gwy_cholesky_decompose(myhessian, nparams)) {
+        g_free(myhessian);
+        return FALSE;
+    }
+
+    gdouble fval[nparams];
+    gwy_clear(params, nparams);
+    gdouble sumy2 = 0.0;
+
+    for (guint i = 0; i < npoints; i++) {
+        gdouble y;
+        if (function(i, fval, &y, user_data)) {
+            sumy2 += y*y;
+            for (guint j = 0; j < nparams; j++)
+                params[j] += y*fval[j];
+        }
+    }
+    if (residuum)
+        gwy_assign(fval, params, nparams);
+    gwy_cholesky_solve(myhessian, params, nparams);
+    g_free(myhessian);
     if (residuum) {
         for (guint j = 0; j < nparams; j++)
             sumy2 -= params[j]*fval[j];
