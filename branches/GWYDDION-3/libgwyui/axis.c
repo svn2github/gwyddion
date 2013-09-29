@@ -383,7 +383,7 @@ gwy_axis_class_init(GwyAxisClass *klass)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
     /**
-     * GwyRasterArea::ticks-placed:
+     * GwyAxis::ticks-placed:
      * @gwyaxis: The #GwyAxis which received the signal.
      *
      * The ::ticks-placed signal is emitted when tick positions and labels are
