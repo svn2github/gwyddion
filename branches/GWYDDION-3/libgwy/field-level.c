@@ -615,8 +615,13 @@ gwy_field_fit_poly(const GwyField *field,
     };
     gboolean ok;
     if (masking == GWY_MASK_IGNORE) {
-        ok = gwy_linear_fit(poly_fit, width*height, coeffs, nterms, NULL,
-                            &data);
+        gdouble *hessian = hessian_for_powers(xpowers, ypowers, nterms,
+                                              col, width, field->xres,
+                                              row, height, field->yres);
+        ok = gwy_linear_fit_hessian(poly_fit, width*height, hessian,
+                                    coeffs, nterms, NULL,
+                                    &data);
+        g_free(hessian);
     }
     else {
         data.invert = (masking == GWY_MASK_EXCLUDE);
