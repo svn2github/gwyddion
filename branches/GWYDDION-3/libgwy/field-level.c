@@ -171,6 +171,26 @@ plane_fit_mask(guint id,
     return ok;
 }
 
+static gdouble*
+hessian_for_powers(const guint *xpowers, const guint *ypowers, guint nterms,
+                   guint col, guint width, guint xres,
+                   guint row, guint height, guint yres)
+{
+    guint matlen = gwy_triangular_matrix_length(nterms);
+    gdouble *hessian = g_new(gdouble, matlen);
+    for (guint i = 0; i < nterms; i++) {
+        for (guint j = 0; j <= i; j++) {
+            gdouble xsum = gwy_norm_coord_power_sum(col, col + width-1, xres,
+                                                    xpowers[i] + xpowers[j]);
+            gdouble ysum = gwy_norm_coord_power_sum(row, row + height-1, yres,
+                                                    ypowers[i] + ypowers[j]);
+            gwy_lower_triangular_matrix_index(hessian, i, j) = xsum*ysum;
+        }
+    }
+
+    return hessian;
+}
+
 /**
  * gwy_field_fit_plane:
  * @field: A two-dimensional data field.
@@ -219,8 +239,15 @@ gwy_field_fit_plane(const GwyField *field,
     gdouble params[3];
     gboolean ok;
     if (masking == GWY_MASK_IGNORE) {
-        ok = gwy_linear_fit(plane_fit, width*height, params, 3, NULL,
-                            &data);
+        const guint xpowers[3] = { 0, 1, 0 };
+        const guint ypowers[3] = { 0, 0, 1 };
+        gdouble *hessian = hessian_for_powers(xpowers, ypowers, 3,
+                                              col, width, field->xres,
+                                              row, height, field->yres);
+        ok = gwy_linear_fit_hessian(plane_fit, width*height, hessian,
+                                    params, 3, NULL,
+                                    &data);
+        g_free(hessian);
     }
     else {
         data.invert = (masking == GWY_MASK_EXCLUDE);
