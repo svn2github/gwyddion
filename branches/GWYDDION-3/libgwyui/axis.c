@@ -175,11 +175,14 @@ static gboolean           zero_is_inside             (gdouble start,
                                                       gdouble bs);
 static gboolean           precision_is_sufficient    (GwyValueFormat *vf,
                                                       gdouble bs);
-static void               snap_range_to_ticks        (GwyRange *range,
+static void               snap_range_to_ticks_lin    (GwyRange *range,
                                                       gdouble bs);
-static GwyAxisLinStepType choose_step_type_lin           (gdouble *step,
+static void               snap_range_to_ticks_log    (GwyRange *range,
+                                                      GwyAxisLogStepType steptype,
+                                                      gdouble bs);
+static GwyAxisLinStepType choose_step_type_lin       (gdouble *step,
                                                       gdouble *base);
-static GwyAxisLogStepType choose_step_type_log           (gdouble *step,
+static GwyAxisLogStepType choose_step_type_log       (gdouble *step,
                                                       gdouble *base);
 static GwyAxisLinStepType decrease_step_type         (GwyAxisLinStepType steptype,
                                                       gdouble *base,
@@ -206,6 +209,20 @@ static const GwyRange default_range = { -1.0, 1.0 };
 
 static const gdouble step_sizes_lin[GWY_AXIS_LIN_STEP_NSTEPS] = {
     0.0, 1.0, 2.0, 2.5, 5.0,
+};
+
+// Base-10 logarithms of integers.  First two entries should be unused.
+static const gdouble log10_table[10] = {
+    NAN,
+    0.0,
+    0.3010299956639811952137388,
+    0.4771212547196624372950278,
+    0.6020599913279623904274777,
+    0.6989700043360188047862611,
+    0.7781512503836436325087667,
+    0.8450980400142568307122162,
+    0.9030899869919435856412166,
+    0.9542425094393248745900557,
 };
 
 G_DEFINE_ABSTRACT_TYPE(GwyAxis, gwy_axis, GTK_TYPE_WIDGET);
@@ -1435,7 +1452,7 @@ calculate_ticks_lin(GwyAxis *axis)
         step = step_sizes_lin[steptype];
         bs = descending ? -base*step : base*step;
         if (priv->snap_to_ticks)
-            snap_range_to_ticks(&priv->range, bs);
+            snap_range_to_ticks_lin(&priv->range, bs);
 
         guint precision = gwy_value_format_get_precision(priv->vf);
         if (precision_is_sufficient(priv->vf, bs)) {
@@ -1624,6 +1641,20 @@ fill_tick_arrays(GwyAxis *axis, guint level,
 }
 
 static void
+range_lin_to_log(GwyRange *range)
+{
+    range->from = log10(range->from);
+    range->to = log10(range->to);
+}
+
+static void
+range_log_to_lin(GwyRange *range)
+{
+    range->from = gwy_powi(10.0, range->from);
+    range->to = gwy_powi(10.0, range->to);
+}
+
+static void
 calculate_ticks_log(GwyAxis *axis)
 {
     Axis *priv = axis->priv;
@@ -1637,6 +1668,8 @@ calculate_ticks_log(GwyAxis *axis)
     // good, in fact.
     GWY_OBJECT_UNREF(priv->vf);
     GwyRange request;
+    // XXX: This is nonsense as we do not use the fixed-magnitude format, we
+    // use more something like %g (or 10^{%T}).
     priv->vf = gwy_axis_estimate_value_format(axis, &request);
     ensure_layout_and_ticks(axis);
     priv->split_width = gwy_axis_get_split_width(axis);
@@ -1655,12 +1688,16 @@ calculate_ticks_log(GwyAxis *axis)
         return;
     }
 
+    // XXX: From here we use the logarithmed range and request.
+    // Transform it back to linear values before returning!
     gboolean descending = (request.to < request.from);
     guint length = priv->length;
+    range_lin_to_log(&request);
     gdouble majdist = estimate_major_distance_log(axis, &request);
 
     if (length < 2) {
         g_warning("Cannot fit any major ticks.  Implement some fallback.");
+        range_log_to_lin(&request);
         gboolean range_changed = !gwy_equal(&request, &priv->range);
         priv->range = request;
         priv->ticks_are_valid = TRUE;
@@ -1678,39 +1715,24 @@ calculate_ticks_log(GwyAxis *axis)
     GwyAxisLogStepType steptype = GWY_AXIS_LOG_STEP_0;
     // Silence GCC.  And make any uninitialised use pretty obvious.
     gdouble base = NAN, step = NAN, bs = NAN;
-    GwyRange oldrange = priv->range;
+    GwyRange oldrange = priv->range;    // Linear.
     do {
         priv->range = request;
         if (state != LESS_TICKS) {
             majdist = estimate_major_distance_log(axis, &request);
-            step = fabs(log(priv->range.to/priv->range.from))/(length/majdist);
+            step = fabs(priv->range.to - priv->range.from)/(length/majdist);
             steptype = choose_step_type_log(&step, &base);
         }
-#if 0
-        step = step_sizes[steptype];
+        // If step type is GWY_AXIS_LOG_STEP_POW10 then step already contains
+        // the right step but for others it's implicit.
         bs = descending ? -base*step : base*step;
         if (priv->snap_to_ticks)
-            snap_range_to_ticks(&priv->range, bs);
+            snap_range_to_ticks_log(&priv->range, steptype, bs);
 
-        guint precision = gwy_value_format_get_precision(priv->vf);
-        if (precision_is_sufficient(priv->vf, bs)) {
-            if (state == FIRST_TRY && precision > 0)
-                gwy_value_format_set_precision(priv->vf, precision-1);
-            else
-                state = FINALLY_OK;
-        }
-        else {
-            if (state == FIRST_TRY) {
-                state = ADD_DIGITS;
-                gwy_value_format_set_precision(priv->vf, precision+1);
-            }
-            else {
-                state = LESS_TICKS;
-                base *= 10;
-                steptype = GWY_AXIS_LOG_STEP_1;
-            }
-        }
-#endif
+        // FIXME: Linear axis has some precision-is-OK logic here.
+        // The precision is always sufficient for logscale.
+        // We may need to check too dense ticks though (how?).
+        state = FINALLY_OK;
     } while (state != FINALLY_OK);
 
 #if 0
@@ -1752,6 +1774,7 @@ calculate_ticks_log(GwyAxis *axis)
     }
 #endif
 
+    range_log_to_lin(&priv->range);
     gboolean range_changed = !gwy_equal(&oldrange, &priv->range);
     priv->ticks_are_valid = TRUE;
     if (range_changed)
@@ -1909,8 +1932,8 @@ precision_is_sufficient(GwyValueFormat *vf, gdouble bs)
 }
 
 static void
-snap_range_to_ticks(GwyRange *range,
-                    gdouble bs)
+snap_range_to_ticks_lin(GwyRange *range,
+                        gdouble bs)
 {
     if (bs < 0.0) {
         range->from = ceil(range->from/bs)*bs;
@@ -1919,6 +1942,71 @@ snap_range_to_ticks(GwyRange *range,
     else {
         range->from = floor(range->from/bs)*bs;
         range->to = ceil(range->to/bs)*bs;
+    }
+}
+
+// FIXME: This may need some error tolerance.
+static gdouble
+snap_log_tick_up(gdouble value,
+                 GwyAxisLogStepType steptype)
+{
+    gdouble limit = ceil(value);
+
+    if (steptype == GWY_AXIS_LOG_STEP_125) {
+        if (limit - 1.0 + log10_table[2] >= value)
+            return limit - 1.0 + log10_table[2];
+        if (limit - 1.0 + log10_table[5] >= value)
+            return limit - 1.0 + log10_table[5];
+        return limit;
+    }
+
+    g_return_val_if_fail(steptype == GWY_AXIS_LOG_STEP_LIN, limit);
+    for (guint i = 2; i <= 9; i++) {
+        if (limit - 1.0 + log10_table[i] >= value)
+            return limit - 1.0 + log10_table[i];
+    }
+    return limit;
+}
+
+static gdouble
+snap_log_tick_down(gdouble value,
+                   GwyAxisLogStepType steptype)
+{
+    gdouble limit = floor(value);
+
+    if (steptype == GWY_AXIS_LOG_STEP_125) {
+        if (limit + log10_table[5] <= value)
+            return limit + log10_table[5];
+        if (limit + log10_table[2] <= value)
+            return limit + log10_table[2];
+        return limit;
+    }
+
+    g_return_val_if_fail(steptype == GWY_AXIS_LOG_STEP_LIN, limit);
+    for (guint i = 9; i >= 2; i--) {
+        if (limit + log10_table[i] <= value)
+            return limit + log10_table[i];
+    }
+    return limit;
+}
+
+static void
+snap_range_to_ticks_log(GwyRange *range,
+                        GwyAxisLogStepType steptype,
+                        gdouble bs)
+{
+    if (steptype >= GWY_AXIS_LOG_STEP_10) {
+        snap_range_to_ticks_lin(range, bs);
+        return;
+    }
+
+    if (bs < 0.0) {
+        range->from = snap_log_tick_up(range->from, steptype);
+        range->to = snap_log_tick_down(range->to, steptype);
+    }
+    else {
+        range->from = snap_log_tick_down(range->from, steptype);
+        range->to = snap_log_tick_up(range->to, steptype);
     }
 }
 
@@ -1955,8 +2043,10 @@ choose_step_type_log(gdouble *step, gdouble *base)
         return GWY_AXIS_LOG_STEP_LIN;
     if (*step <= 1.5)
         return GWY_AXIS_LOG_STEP_125;
-    if (*step <= 3.0)
+    if (*step <= 3.0) {
+        *step = 1.0;
         return GWY_AXIS_LOG_STEP_10;
+    }
 
     gint n = gwy_round(log2(*step/3.0));
     *step = 3*gwy_powi(2.0, n);
@@ -2128,11 +2218,11 @@ estimate_major_distance_log(GwyAxis *axis,
     // FIXME: With perpendicular labels the label + units may be actually
     // two-line.  The label measurement probably needs to involve subclasses.
     gint width, height, w, h;
-    gdouble v = gwy_powi(10.0, gwy_round(log10(request->from)));
+    gdouble v = gwy_powi(10.0, gwy_round(request->from));
     format_value_label(axis, v, priv->show_unit);
     pango_layout_get_size(priv->layout, &width, &height);
 
-    v = gwy_powi(10.0, gwy_round(log10(request->to)));
+    v = gwy_powi(10.0, gwy_round(request->to));
     format_value_label(axis, v, priv->show_unit);
     pango_layout_get_size(priv->layout, &w, &h);
     width = MAX(width, w);
