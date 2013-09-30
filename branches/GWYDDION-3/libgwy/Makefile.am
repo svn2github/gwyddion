@@ -143,9 +143,12 @@ libgwy3_la_SOURCES = \
 	fft.c \
 	field-arithmetic.c \
 	field-correlate.c \
+	field-distributions--minkowski.c \
 	field-distributions.c \
+	field-filter--median.c \
 	field-filter.c \
 	field-inttrans.c \
+	field-level--laplace.c \
 	field-level.c \
 	field-part.c \
 	field-read.c \
@@ -180,6 +183,7 @@ libgwy3_la_SOURCES = \
 	mask-line-arithmetic.c \
 	mask-line.c \
 	master.c \
+	math--sort.c \
 	math.c \
 	object-internal.c \
 	object-utils.c \

@@ -104,6 +104,12 @@ void _gwy_tune_convolution_method(const gchar *method);
 G_GNUC_INTERNAL
 void _gwy_tune_median_filter_method(const gchar *method);
 
+static inline guint
+dist_points_for_n_points(guint n)
+{
+    return gwy_round(3.49*cbrt(n));
+}
+
 G_END_DECLS
 
 #endif
