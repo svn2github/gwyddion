@@ -1976,16 +1976,16 @@ snap_log_tick_up(gdouble value,
     gdouble limit = ceil(value);
 
     if (steptype == GWY_AXIS_LOG_STEP_125) {
-        if (limit - 1.0 + log10_table[2] >= value)
+        if (limit - 1.0 + log10_table[2] + EPS >= value)
             return limit - 1.0 + log10_table[2];
-        if (limit - 1.0 + log10_table[5] >= value)
+        if (limit - 1.0 + log10_table[5] + EPS >= value)
             return limit - 1.0 + log10_table[5];
         return limit;
     }
 
     g_return_val_if_fail(steptype == GWY_AXIS_LOG_STEP_LIN, limit);
     for (guint i = 2; i <= 9; i++) {
-        if (limit - 1.0 + log10_table[i] >= value)
+        if (limit - 1.0 + log10_table[i] + EPS >= value)
             return limit - 1.0 + log10_table[i];
     }
     return limit;
@@ -1998,16 +1998,16 @@ snap_log_tick_down(gdouble value,
     gdouble limit = floor(value);
 
     if (steptype == GWY_AXIS_LOG_STEP_125) {
-        if (limit + log10_table[5] <= value)
+        if (limit + log10_table[5] - EPS <= value)
             return limit + log10_table[5];
-        if (limit + log10_table[2] <= value)
+        if (limit + log10_table[2] - EPS <= value)
             return limit + log10_table[2];
         return limit;
     }
 
     g_return_val_if_fail(steptype == GWY_AXIS_LOG_STEP_LIN, limit);
     for (guint i = 9; i >= 2; i--) {
-        if (limit + log10_table[i] <= value)
+        if (limit + log10_table[i] - EPS <= value)
             return limit + log10_table[i];
     }
     return limit;
@@ -2052,8 +2052,7 @@ choose_step_type_lin(gdouble *step, gdouble *base)
         return GWY_AXIS_LIN_STEP_1;
     if (*step <= 2.0)
         return GWY_AXIS_LIN_STEP_2;
-    if (*step <= 2.5)
-        return GWY_AXIS_LIN_STEP_2_5;
+
     return GWY_AXIS_LIN_STEP_5;
 }
 
