@@ -61,6 +61,9 @@ gboolean     gwy_graph_axis_get_show_label(const GwyGraphAxis *graphaxis) G_GNUC
 void         gwy_graph_axis_set_show_ticks(GwyGraphAxis *graphaxis,
                                            gboolean showticks);
 gboolean     gwy_graph_axis_get_show_ticks(const GwyGraphAxis *graphaxis) G_GNUC_PURE;
+void         gwy_graph_axis_set_log_scale (GwyGraphAxis *graphaxis,
+                                           gboolean logscale);
+gboolean     gwy_graph_axis_get_log_scale (const GwyGraphAxis *graphaxis) G_GNUC_PURE;
 
 G_END_DECLS
 

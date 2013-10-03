@@ -51,6 +51,7 @@ public_built_headers = \
 	$(mkenum_name).h
 
 private_headers = \
+	axis-internal.h \
 	graph-internal.h \
 	shapes-internal.h
 

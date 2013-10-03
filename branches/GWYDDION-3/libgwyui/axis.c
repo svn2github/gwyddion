@@ -23,6 +23,7 @@
 #include "libgwy/object-utils.h"
 #include "libgwyui/types.h"
 #include "libgwyui/axis.h"
+#include "libgwyui/axis-internal.h"
 
 #define EPS 1e-12
 #define ALMOST_BLOODY_INFINITY (1e-3*G_MAXDOUBLE)
@@ -170,6 +171,7 @@ static void               fill_tick_arrays           (GwyAxis *axis,
                                                       GwyAxisTickLevel level,
                                                       gdouble bs,
                                                       gdouble largerbs);
+static gint               estimate_log_base          (const GwyRange *request);
 static void               remove_too_close_ticks     (GwyAxis *axis);
 static void               improve_hinting            (GwyAxis *axis);
 static gboolean           zero_is_inside             (gdouble start,
@@ -1004,8 +1006,12 @@ gwy_axis_ticks(GwyAxis *axis,
     g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
 
     Axis *priv = axis->priv;
-    if (!priv->ticks_are_valid)
-        calculate_ticks_lin(axis);
+    if (!priv->ticks_are_valid) {
+        if (priv->logscale)
+            calculate_ticks_log(axis);
+        else
+            calculate_ticks_lin(axis);
+    }
 
     GWY_MAYBE_SET(nticks, priv->ticks->len);
     return (const GwyAxisTick*)priv->ticks->data;
@@ -1115,10 +1121,22 @@ gwy_axis_estimate_value_format(GwyAxis *axis,
     GwyRange request = priv->request;
     fix_request(&request);
     GWY_MAYBE_SET(range, request);
-    return gwy_unit_format_with_resolution
-                                (priv->unit, GWY_VALUE_FORMAT_PANGO,
-                                 fmax(fabs(request.from), fabs(request.to)),
-                                 fabs(request.to - request.from)/12.0);
+
+    if (!priv->logscale) {
+        return gwy_unit_format_with_resolution
+                                    (priv->unit, GWY_VALUE_FORMAT_PANGO,
+                                     fmax(fabs(request.from), fabs(request.to)),
+                                     fabs(request.to - request.from)/12.0);
+    }
+
+    gint base = gwy_round(estimate_log_base(&request));
+    GwyValueFormat *vf = gwy_unit_format_for_power10(priv->unit,
+                                                     GWY_VALUE_FORMAT_PANGO,
+                                                     base);
+    gwy_value_format_set_exponential(vf, TRUE);
+    gwy_value_format_set_precision(vf, 0);
+
+    return vf;
 }
 
 static void
@@ -1731,16 +1749,8 @@ calculate_ticks_log(GwyAxis *axis)
     State state = FIRST_TRY;
     GwyAxisLogStepType steptype = GWY_AXIS_LOG_STEP_0;
     // Silence GCC.  And make any uninitialised use pretty obvious.
-    gdouble base = NAN, step = NAN, bs = NAN;
+    gdouble step = NAN, bs = NAN;
     GwyRange oldrange = priv->range;    // Linear.
-    // A reasonable base order of magnitude.
-    gdouble min = fmin(request.from, request.to);
-    gdouble max = fmax(request.from, request.to);
-    base = ceil(min);
-    if (base - min > max - base)
-        base = floor(min);
-    if (min <= 1.0 && max >= -1.0)
-        base = 0.0;
 
     do {
         priv->range = request;
@@ -1803,6 +1813,22 @@ calculate_ticks_log(GwyAxis *axis)
     if (range_changed)
         g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
     g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
+}
+
+static gint
+estimate_log_base(const GwyRange *request)
+{
+    // A reasonable base order of magnitude.  This is used only with the
+    // LIN and 125 steps.
+    gdouble min = fmin(request->from, request->to);
+    gdouble max = fmax(request->from, request->to);
+    gdouble base = ceil(min);
+    if (base - min > max - base)
+        base = floor(min);
+    if (min <= 1.0 && max >= -1.0)
+        base = 0.0;
+
+    return 3*gwy_round(base/3.0);
 }
 
 static void
@@ -2124,18 +2150,28 @@ decrease_step_type_log(GwyAxisLogStepType steptype,
                        gdouble dx,
                        gdouble min_incr)
 {
-    if (steptype == GWY_AXIS_LOG_STEP_0)
+    if (steptype <= GWY_AXIS_LOG_STEP_LIN)
         return GWY_AXIS_LOG_STEP_0;
 
-    if (steptype <= GWY_AXIS_LOG_STEP_10)
-        return steptype - 1;
+    if (steptype == GWY_AXIS_LOG_STEP_125) {
+        if ((1.0 - log10_table[9])/dx >= min_incr)
+            return GWY_AXIS_LOG_STEP_LIN;
+        return GWY_AXIS_LOG_STEP_0;
+    }
 
-    // TODO
+    if (steptype == GWY_AXIS_LOG_STEP_10) {
+        // 2/1 and 10/5 are the same interval.
+        if (log10_table[2]/dx >= min_incr)
+            return GWY_AXIS_LOG_STEP_125;
+        return GWY_AXIS_LOG_STEP_0;
+    }
+
     *step /= 3.0;
-    if (*step == 1.0)
-        return GWY_AXIS_LOG_STEP_10;
+    if (*step/dx >= min_incr) {
+        return (*step == 1.0) ? GWY_AXIS_LOG_STEP_10 : GWY_AXIS_LOG_STEP_POW10;
+    }
 
-    return GWY_AXIS_LOG_STEP_POW10;
+    return GWY_AXIS_LOG_STEP_0;
 }
 
 static void
@@ -2446,6 +2482,27 @@ gwy_axis_get_input_window(const GwyAxis *axis)
 {
     g_return_val_if_fail(GWY_IS_AXIS(axis), NULL);
     return axis->priv->input_window;
+}
+
+gboolean
+_gwy_axis_set_logscale(GwyAxis *axis,
+                       gboolean setting)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    Axis *priv = axis->priv;
+    if (!priv->logscale == !setting)
+        return FALSE;
+
+    axis->priv->logscale = !!setting;
+    invalidate_ticks(axis);
+    return TRUE;
+}
+
+gboolean
+_gwy_axis_get_logscale(GwyAxis *axis)
+{
+    g_return_val_if_fail(GWY_IS_AXIS(axis), FALSE);
+    return axis->priv->logscale;
 }
 
 /**

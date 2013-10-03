@@ -24,6 +24,7 @@
 #include "libgwy/fft.h"
 #include "libgwyui/cairo-utils.h"
 #include "libgwyui/graph-axis.h"
+#include "libgwyui/axis-internal.h"
 
 #define TESTMARKUP "<small>(q₁¹)</small>"
 
@@ -34,6 +35,7 @@ enum {
     PROP_LABEL,
     PROP_SHOW_LABEL,
     PROP_SHOW_TICKS,
+    PROP_LOG_SCALE,
     N_PROPS,
 };
 
@@ -161,6 +163,13 @@ gwy_graph_axis_class_init(GwyGraphAxisClass *klass)
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_LOG_SCALE]
+        = g_param_spec_boolean("log-scale",
+                               "Log scale",
+                               "Whether the axis scale is logarithmic.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 }
@@ -213,6 +222,10 @@ gwy_graph_axis_set_property(GObject *object,
         set_show_ticks(graphaxis, g_value_get_boolean(value));
         break;
 
+        case PROP_LOG_SCALE:
+        _gwy_axis_set_logscale(GWY_AXIS(object), g_value_get_boolean(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -238,6 +251,10 @@ gwy_graph_axis_get_property(GObject *object,
 
         case PROP_SHOW_TICKS:
         g_value_set_boolean(value, priv->show_ticks);
+        break;
+
+        case PROP_LOG_SCALE:
+        g_value_set_boolean(value, _gwy_axis_get_logscale(GWY_AXIS(object)));
         break;
 
         default:
@@ -541,6 +558,41 @@ gwy_graph_axis_get_show_ticks(const GwyGraphAxis *graphaxis)
 {
     g_return_val_if_fail(GWY_IS_GRAPH_AXIS(graphaxis), FALSE);
     return graphaxis->priv->show_ticks;
+}
+
+/**
+ * gwy_graph_axis_set_log_scale:
+ * @graphaxis: A graph axis.
+ * @logscale: %TRUE to make the axis scale logarithmic, %FALSE to make it
+ *            linear.
+ *
+ * Sets whether a graph axis scale is linear or logarithmic.
+ **/
+void
+gwy_graph_axis_set_log_scale(GwyGraphAxis *graphaxis,
+                             gboolean logscale)
+{
+    g_return_if_fail(GWY_IS_GRAPH_AXIS(graphaxis));
+    if (!_gwy_axis_set_logscale(GWY_AXIS(graphaxis), logscale))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(graphaxis), properties[PROP_LOG_SCALE]);
+}
+
+/**
+ * gwy_graph_axis_get_log_scale:
+ * @graphaxis: A graph axis.
+ *
+ * Gets whether a graph axis scale is linear or logarithmic.
+ *
+ * Returns: %TRUE if the axis scale is logarithmic, %FALSE if the scale is
+ *          linear.
+ **/
+gboolean
+gwy_graph_axis_get_log_scale(const GwyGraphAxis *graphaxis)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH_AXIS(graphaxis), FALSE);
+    return _gwy_axis_get_logscale(GWY_AXIS(graphaxis));
 }
 
 static void
