@@ -699,8 +699,8 @@ format_exponential(GString *str,
     // Do not output things like 1×10⁶, print just 10⁶.
     gdouble l = gwy_powi(0.1, precision);
     if (style == GWY_VALUE_FORMAT_PLAIN
-        || fabs(value) > 1.0 + l
-        || fabs(value) < 1.0 - l) {
+        || fabs(value) > 1.0 + 0.5*l
+        || fabs(value) < 1.0 - 0.5*l) {
         g_string_append_printf(str, "%.*g", precision, value);
         if (style == GWY_VALUE_FORMAT_UNICODE
             || style == GWY_VALUE_FORMAT_PANGO)
