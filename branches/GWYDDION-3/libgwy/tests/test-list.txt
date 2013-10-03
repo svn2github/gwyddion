@@ -13,6 +13,7 @@ str/isident/ascii
 str/isident/utf8
 str/case/equal-ascii
 str/case/hash-ascii
+str/utf8/append-exponent
 get-n-cpus
 pack
 math/powi/actual
@@ -174,7 +175,14 @@ unit/format/digits
 unit/format/abnormal
 value-format/props
 value-format/unit
-value-format/abnormal
+value-format/exponential/plain
+value-format/exponential/pango
+value-format/exponential/unicode
+value-format/exponential/tex
+value-format/abnormal/plain
+value-format/abnormal/pango
+value-format/abnormal/unicode
+value-format/abnormal/tex
 int-set/serialize
 int-set/serialize/failure/odd
 int-set/serialize/failure/noncanon

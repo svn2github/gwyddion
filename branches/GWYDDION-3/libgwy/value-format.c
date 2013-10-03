@@ -615,9 +615,13 @@ format_exponential(GString *str,
                    GwyValueFormatStyle style)
 {
     guint len = str->len;
-    g_string_append_printf(str, "%.*g", precision, value);
+    if (fabs(value) >= 1.0 && fabs(value) < 1500.0) {
+        g_string_append_printf(str, "%g", value);
+        return;
+    }
 
-    if (style == GWY_VALUE_FORMAT_PLAIN || !strchr(str->str, 'e'))
+    g_string_append_printf(str, "%.*g", precision, value);
+    if (!strchr(str->str, 'e'))
         return;
 
     g_return_if_fail(value);
@@ -629,8 +633,10 @@ format_exponential(GString *str,
 
     // Do not output things like 1×10⁶, print just 10⁶.
     gdouble l = gwy_powi(0.1, precision);
-    if (fabs(value) > 1.0 + l || fabs(value) < 1.0 - l) {
-        g_string_append_printf(str, "%.*f", precision, value);
+    if (style == GWY_VALUE_FORMAT_PLAIN
+        || fabs(value) > 1.0 + l
+        || fabs(value) < 1.0 - l) {
+        g_string_append_printf(str, "%.*g", precision, value);
         if (style == GWY_VALUE_FORMAT_UNICODE
             || style == GWY_VALUE_FORMAT_PANGO)
             g_string_append(str, "×");
@@ -640,7 +646,11 @@ format_exponential(GString *str,
     else if (value < 0.0)
         g_string_append_c(str, '-');
 
-    if (style == GWY_VALUE_FORMAT_UNICODE) {
+    if (style == GWY_VALUE_FORMAT_PLAIN) {
+        g_string_append(str, "e");
+        g_string_append_printf(str, "%d", base10);
+    }
+    else if (style == GWY_VALUE_FORMAT_UNICODE) {
         g_string_append(str, "10");
         gwy_utf8_append_exponent(str, base10);
     }

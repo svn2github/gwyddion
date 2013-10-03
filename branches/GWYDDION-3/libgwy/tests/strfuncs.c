@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -416,6 +416,26 @@ test_str_case_hash_ascii(void)
     g_string_free(str2, TRUE);
     g_string_free(str1, TRUE);
     g_rand_free(rng);
+}
+
+void
+test_str_utf8_append_exponent(void)
+{
+    GString *str = g_string_new(NULL);
+
+    g_string_truncate(str, 0);
+    gwy_utf8_append_exponent(str, 0);
+    g_assert_cmpstr(str->str, ==, "⁰");
+
+    g_string_truncate(str, 0);
+    gwy_utf8_append_exponent(str, 123456789);
+    g_assert_cmpstr(str->str, ==, "¹²³⁴⁵⁶⁷⁸⁹");
+
+    g_string_truncate(str, 0);
+    gwy_utf8_append_exponent(str, -123456789);
+    g_assert_cmpstr(str->str, ==, "⁻¹²³⁴⁵⁶⁷⁸⁹");
+
+    g_string_free(str, TRUE);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -146,7 +146,107 @@ test_value_format_props(void)
 }
 
 void
-test_value_format_abnormal(void)
+test_value_format_exponential_plain(void)
+{
+    GwyValueFormat *format;
+
+    format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PLAIN,
+                                      0, 1, " ", "m");
+    gwy_value_format_set_exponential(format, TRUE);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.0),
+                    ==, "1 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 0.01),
+                    ==, "0.01 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1000.0),
+                    ==, "1000 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1e6),
+                    ==, "1e6 m");
+    g_assert_cmpstr(gwy_value_format_print(format, -1e6),
+                    ==, "-1e6 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 2e6),
+                    ==, "2e6 m");
+    g_assert_cmpstr(gwy_value_format_print(format, -3e-8),
+                    ==, "-3e-8 m");
+    g_object_unref(format);
+}
+
+void
+test_value_format_exponential_pango(void)
+{
+    GwyValueFormat *format;
+
+    format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,
+                                      0, 1, " ", "m");
+    gwy_value_format_set_exponential(format, TRUE);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.0),
+                    ==, "1 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 0.01),
+                    ==, "0.01 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1000.0),
+                    ==, "1000 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1e6),
+                    ==, "10<sup>6</sup> m");
+    g_assert_cmpstr(gwy_value_format_print(format, -1e6),
+                    ==, "−10<sup>6</sup> m");
+    g_assert_cmpstr(gwy_value_format_print(format, 2e6),
+                    ==, "2×10<sup>6</sup> m");
+    g_assert_cmpstr(gwy_value_format_print(format, -3e-8),
+                    ==, "−3×10<sup>−8</sup> m");
+    g_object_unref(format);
+}
+
+void
+test_value_format_exponential_unicode(void)
+{
+    GwyValueFormat *format;
+
+    format = gwy_value_format_new_set(GWY_VALUE_FORMAT_UNICODE,
+                                      0, 1, " ", "m");
+    gwy_value_format_set_exponential(format, TRUE);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.0),
+                    ==, "1 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 0.01),
+                    ==, "0.01 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1000.0),
+                    ==, "1000 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1e6),
+                    ==, "10⁶ m");
+    g_assert_cmpstr(gwy_value_format_print(format, -1e6),
+                    ==, "-10⁶ m");
+    g_assert_cmpstr(gwy_value_format_print(format, 2e6),
+                    ==, "2×10⁶ m");
+    g_assert_cmpstr(gwy_value_format_print(format, -3e-8),
+                    ==, "-3×10⁻⁸ m");
+    g_object_unref(format);
+}
+
+void
+test_value_format_exponential_tex(void)
+{
+    GwyValueFormat *format;
+
+    format = gwy_value_format_new_set(GWY_VALUE_FORMAT_TEX,
+                                      0, 1, " ", "m");
+    gwy_value_format_set_exponential(format, TRUE);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.0),
+                    ==, "1 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 0.01),
+                    ==, "0.01 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1000.0),
+                    ==, "1000 m");
+    g_assert_cmpstr(gwy_value_format_print(format, 1e6),
+                    ==, "10^{6} m");
+    g_assert_cmpstr(gwy_value_format_print(format, -1e6),
+                    ==, "-10^{6} m");
+    g_assert_cmpstr(gwy_value_format_print(format, 2e6),
+                    ==, "2\\times10^{6} m");
+    g_assert_cmpstr(gwy_value_format_print(format, -3e-8),
+                    ==, "-3\\times10^{-8} m");
+    g_object_unref(format);
+}
+
+void
+test_value_format_abnormal_plain(void)
 {
     GwyValueFormat *format;
 
@@ -164,6 +264,28 @@ test_value_format_abnormal(void)
     g_assert_cmpstr(gwy_value_format_print(format, G_MAXDOUBLE),
                     ==, "+Inf kg");
     g_object_unref(format);
+}
+
+void
+test_value_format_abnormal_unicode(void)
+{
+    GwyValueFormat *format;
+
+    format = gwy_value_format_new_set(GWY_VALUE_FORMAT_UNICODE,
+                                      -3, 3, " ", "ms");
+    g_assert_cmpstr(gwy_value_format_print(format, NAN),
+                    ==, "NaN ms");
+    g_assert_cmpstr(gwy_value_format_print(format, INFINITY),
+                    ==, "+∞ ms");
+    g_assert_cmpstr(gwy_value_format_print(format, -INFINITY),
+                    ==, "-∞ ms");
+    g_object_unref(format);
+}
+
+void
+test_value_format_abnormal_pango(void)
+{
+    GwyValueFormat *format;
 
     format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,
                                       -3, 3, " ", "ms");
@@ -174,6 +296,12 @@ test_value_format_abnormal(void)
     g_assert_cmpstr(gwy_value_format_print(format, -INFINITY),
                     ==, "−∞ ms");
     g_object_unref(format);
+}
+
+void
+test_value_format_abnormal_tex(void)
+{
+    GwyValueFormat *format;
 
     format = gwy_value_format_new_set(GWY_VALUE_FORMAT_TEX,
                                       -3, 3, " ", "m");
