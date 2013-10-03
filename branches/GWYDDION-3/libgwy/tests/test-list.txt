@@ -175,6 +175,7 @@ unit/format/digits
 unit/format/abnormal
 value-format/props
 value-format/unit
+value-format/append
 value-format/exponential/plain
 value-format/exponential/pango
 value-format/exponential/unicode

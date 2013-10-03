@@ -64,7 +64,14 @@ static gboolean set_glue                     (GwyValueFormat *format,
                                               const gchar *glue);
 static gboolean set_units                    (GwyValueFormat *format,
                                               const gchar *units);
+static void     append_to_gstring            (GwyValueFormat *format,
+                                              GString *str,
+                                              gdouble value);
+static void     append_number_to_gstring     (GwyValueFormat *format,
+                                              GString *str,
+                                              gdouble value);
 static void     format_number                (GwyValueFormat *format,
+                                              GString *str,
                                               gdouble value);
 static void     format_exponential           (GString *str,
                                               gdouble value,
@@ -337,15 +344,8 @@ gwy_value_format_print(GwyValueFormat *format,
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
     ValueFormat *priv = format->priv;
 
-    format_number(format, value);
-
-    if (priv->glue)
-        g_string_append(priv->value, priv->glue);
-    if (priv->units)
-        g_string_append(priv->value, priv->units);
-
-    if (priv->style == GWY_VALUE_FORMAT_PANGO)
-        fix_utf8_minus(priv->value);
+    ensure_value(priv);
+    append_to_gstring(format, priv->value, value);
 
     return priv->value->str;
 }
@@ -371,12 +371,49 @@ gwy_value_format_print_number(GwyValueFormat *format,
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
     ValueFormat *priv = format->priv;
 
-    format_number(format, value);
-
-    if (priv->style == GWY_VALUE_FORMAT_PANGO)
-        fix_utf8_minus(priv->value);
+    ensure_value(priv);
+    append_number_to_gstring(format, priv->value, value);
 
     return priv->value->str;
+}
+
+/**
+ * gwy_value_format_append:
+ * @format: A value format.
+ * @str: A #GString string to which the formatted value should be appended.
+ * @value: Value to format using @format.
+ *
+ * Formats a value using given format to a #GString, with units.
+ **/
+void
+gwy_value_format_append(GwyValueFormat *format,
+                        GString *str,
+                        gdouble value)
+{
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_if_fail(str);
+    append_to_gstring(format, str, value);
+}
+
+/**
+ * gwy_value_format_append_number:
+ * @format: A value format.
+ * @str: A #GString string to which the formatted value should be appended.
+ * @value: Value to format using @format.
+ *
+ * Formats a value using given format to a #GString.
+ *
+ * Neither the units nor glue are included in the formatted value.  This is
+ * useful if the units are displayed elsewhere, e.g. in a table header.
+ **/
+void
+gwy_value_format_append_number(GwyValueFormat *format,
+                               GString *str,
+                               gdouble value)
+{
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_if_fail(str);
+    append_number_to_gstring(format, str, value);
 }
 
 /**
@@ -589,22 +626,50 @@ set_units(GwyValueFormat *format,
 }
 
 static void
+append_to_gstring(GwyValueFormat *format,
+                  GString *str,
+                  gdouble value)
+{
+    format_number(format, str, value);
+
+    ValueFormat *priv = format->priv;
+    if (priv->glue)
+        g_string_append(str, priv->glue);
+    if (priv->units)
+        g_string_append(str, priv->units);
+
+    if (priv->style == GWY_VALUE_FORMAT_PANGO)
+        fix_utf8_minus(str);
+}
+
+static void
+append_number_to_gstring(GwyValueFormat *format,
+                         GString *str,
+                         gdouble value)
+{
+    format_number(format, str, value);
+
+    ValueFormat *priv = format->priv;
+    if (priv->style == GWY_VALUE_FORMAT_PANGO)
+        fix_utf8_minus(str);
+}
+
+static void
 format_number(GwyValueFormat *format,
+              GString *str,
               gdouble value)
 {
     ValueFormat *priv = format->priv;
 
-    ensure_value(priv);
     value /= priv->base;
     if (isfinite(value)) {
         if (priv->exponential)
-            format_exponential(priv->value, value, priv->precision,
-                               priv->style);
+            format_exponential(str, value, priv->precision, priv->style);
         else
-            g_string_append_printf(priv->value, "%.*f", priv->precision, value);
+            g_string_append_printf(str, "%.*f", priv->precision, value);
     }
     else {
-        format_abnormal(priv->value, value, priv->style);
+        format_abnormal(str, value, priv->style);
     }
 }
 

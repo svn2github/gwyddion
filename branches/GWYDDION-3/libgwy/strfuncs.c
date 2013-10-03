@@ -369,7 +369,7 @@ gwy_memmem(gconstpointer haystack,
 
 /**
  * gwy_utf8_append_exponent:
- * @str: A #GString string.
+ * @str: A #GString string to which the exponent should be appended.
  * @power: Integer exponent.
  *
  * Renders an integer exponent to a GString using Unicode superscript

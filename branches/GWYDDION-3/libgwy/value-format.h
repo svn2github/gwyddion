@@ -68,6 +68,12 @@ const gchar*    gwy_value_format_print          (GwyValueFormat *format,
                                                  gdouble value);
 const gchar*    gwy_value_format_print_number   (GwyValueFormat *format,
                                                  gdouble value);
+void            gwy_value_format_append         (GwyValueFormat *format,
+                                                 GString *str,
+                                                 gdouble value);
+void            gwy_value_format_append_number  (GwyValueFormat *format,
+                                                 GString *str,
+                                                 gdouble value);
 const gchar*    gwy_value_format_get_units      (GwyValueFormat *format)    G_GNUC_PURE;
 void            gwy_value_format_set_units      (GwyValueFormat *format,
                                                  const gchar *units);
