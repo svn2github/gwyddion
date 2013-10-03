@@ -1390,7 +1390,7 @@ gwy_linear_fit(GwyLinearFitFunc function,
 }
 
 /**
- * gwy_linear_fit:
+ * gwy_linear_fit_hessian:
  * @function: (scope call):
  *            Function to fit.
  * @npoints: Number of fitted points, it must be larger than the number of
