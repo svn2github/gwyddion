@@ -101,8 +101,6 @@ static GwyValueFormat* create_abnormal_format    (const GwyUnit *unit,
                                                   GwyValueFormatStyle style);
 static void            append_power_plain        (GString *str,
                                                   gint power);
-static void            append_power_unicode      (GString *str,
-                                                  gint power);
 static void            format_unit               (const Unit *unit,
                                                   const GwyUnitStyleSpec *fs,
                                                   gint power10,
@@ -178,7 +176,7 @@ static const GwyUnitStyleSpec format_style_plain = {
 
 static const GwyUnitStyleSpec format_style_unicode = {
     "×", "10", "", NULL, " ", "/", " ",
-    &append_power_unicode,
+    &gwy_utf8_append_exponent,
 };
 
 static const GwyUnitStyleSpec format_style_pango = {
@@ -192,7 +190,6 @@ static const GwyUnitStyleSpec format_style_TeX = {
 };
 
 static const GwyUnitStyleSpec *format_styles[] = {
-    NULL,
     &format_style_plain,
     &format_style_unicode,
     &format_style_pango,
@@ -1519,31 +1516,6 @@ append_power_plain(GString *str,
                    gint power)
 {
     g_string_append_printf(str, "%d", power);
-}
-
-static void
-append_power_unicode(GString *str,
-                     gint power)
-{
-    gchar buf[32];
-
-    g_snprintf(buf, sizeof(buf), "%d", power);
-    for (guint i = 0; buf[i]; i++) {
-        if (buf[i] == '0' || (buf[i] >= '4' && buf[i] <= '9'))
-            g_string_append_unichar(str, 0x2070 + buf[i] - '0');
-        else if (buf[i] == '1')
-            g_string_append_len(str, "¹", sizeof("¹")-1);
-        else if (buf[i] == '2')
-            g_string_append_len(str, "²", sizeof("²")-1);
-        else if (buf[i] == '3')
-            g_string_append_len(str, "³", sizeof("³")-1);
-        else if (buf[i] == '-')
-            g_string_append_len(str, "⁻", sizeof("⁻")-1);
-        else {
-            g_warning("Weird digits in number %s\n", buf);
-            g_string_append_c(str, buf[i]);
-        }
-    }
 }
 
 static void

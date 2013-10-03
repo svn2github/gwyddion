@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -48,6 +48,8 @@ gpointer gwy_memmem             (gconstpointer haystack,
                                  gsize haystack_len,
                                  gconstpointer needle,
                                  gsize needle_len)          G_GNUC_PURE;
+void     gwy_utf8_append_exponent(GString *str,
+                                  gint power);
 
 typedef struct _GwyStrLineIter GwyStrLineIter;
 

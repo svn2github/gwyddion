@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,11 +35,13 @@ enum {
     PROP_PRECISION,
     PROP_GLUE,
     PROP_UNITS,
+    PROP_EXPONENTIAL,
     N_PROPS
 };
 
 struct _GwyValueFormatPrivate {
     guint precision;
+    gboolean exponential;
     gdouble base;
     gchar *glue;
     gchar *units;
@@ -49,20 +51,30 @@ struct _GwyValueFormatPrivate {
 
 typedef struct _GwyValueFormatPrivate ValueFormat;
 
-static void gwy_value_format_finalize    (GObject *object);
-static void gwy_value_format_set_property(GObject *object,
-                                          guint prop_id,
-                                          const GValue *value,
-                                          GParamSpec *pspec);
-static void gwy_value_format_get_property(GObject *object,
-                                          guint prop_id,
-                                          GValue *value,
-                                          GParamSpec *pspec);
-static void format_abnormal              (GString *str,
-                                          gdouble value,
-                                          GwyValueFormatStyle style);
-static void ensure_value                 (ValueFormat *format);
-static void fix_utf8_minus               (GString *str);
+static void     gwy_value_format_finalize    (GObject *object);
+static void     gwy_value_format_set_property(GObject *object,
+                                              guint prop_id,
+                                              const GValue *value,
+                                              GParamSpec *pspec);
+static void     gwy_value_format_get_property(GObject *object,
+                                              guint prop_id,
+                                              GValue *value,
+                                              GParamSpec *pspec);
+static gboolean set_glue                     (GwyValueFormat *format,
+                                              const gchar *glue);
+static gboolean set_units                    (GwyValueFormat *format,
+                                              const gchar *units);
+static void     format_number                (GwyValueFormat *format,
+                                              gdouble value);
+static void     format_exponential           (GString *str,
+                                              gdouble value,
+                                              guint precision,
+                                              GwyValueFormatStyle style);
+static void     format_abnormal              (GString *str,
+                                              gdouble value,
+                                              GwyValueFormatStyle style);
+static void     ensure_value                 (ValueFormat *format);
+static void     fix_utf8_minus               (GString *str);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -79,13 +91,24 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
     gobject_class->get_property = gwy_value_format_get_property;
     gobject_class->set_property = gwy_value_format_set_property;
 
+    /**
+     * GwyValueFormat:style:
+     *
+     * Value format style.
+     *
+     * What output style is this format intended to be used with.  This
+     * property is mostly informative, set by the creator of the value format.
+     * Setting it does <emphasis>not</emphasis> mean the format is
+     * automatically converted to another style.  However, it has some direct
+     * influence on the formatting, e.g. the use of UTF-8 minus sign,
+     * formatting of infinities and NaNs and exponential notation in the
+     * exponential style.
+     **/
     properties[PROP_STYLE]
         = g_param_spec_enum("style",
                             "Value format style",
                             "What output style is this format intended to be "
-                            "used with.  This property is informative; "
-                            "setting it does not mean the format is "
-                            "automatically converted to another style.",
+                            "used with.",
                             GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -113,15 +136,35 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                               NULL,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * GwyValueFormat:glue:
+     *
+     * Glue between number and units.
+     *
+     * String put between the number and units if a value is formatted.
+     * This is usually a kind of multiplication symbol (×, *, …), white space,
+     * it may also be empty.
+     **/
     properties[PROP_GLUE]
         = g_param_spec_string("glue",
-                              "Glue between number and units",
+                              "Glue",
                               "String put between the number and units if a "
-                              "value is formatted.  Usually a kind of "
-                              "multiplication symbol, space, may also be "
-                              "empty.",
+                              "value is formatted.",
                               NULL,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+
+    /**
+     * GwyValueFormat:exponential:
+     *
+     * Whether the format is in exponential style.
+     **/
+    properties[PROP_EXPONENTIAL]
+        = g_param_spec_boolean("exponential",
+                               "Exponential",
+                               "Whether the format is in exponential style.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -171,11 +214,15 @@ gwy_value_format_set_property(GObject *object,
         break;
 
         case PROP_GLUE:
-        gwy_value_format_set_glue(format, g_value_get_string(value));
+        set_glue(format, g_value_get_string(value));
         break;
 
         case PROP_UNITS:
-        gwy_value_format_set_units(format, g_value_get_string(value));
+        set_units(format, g_value_get_string(value));
+        break;
+
+        case PROP_EXPONENTIAL:
+        priv->exponential = g_value_get_boolean(value);
         break;
 
         default:
@@ -212,6 +259,10 @@ gwy_value_format_get_property(GObject *object,
 
         case PROP_UNITS:
         g_value_set_string(value, priv->units);
+        break;
+
+        case PROP_EXPONENTIAL:
+        g_value_set_boolean(value, priv->exponential);
         break;
 
         default:
@@ -286,22 +337,15 @@ gwy_value_format_print(GwyValueFormat *format,
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
     ValueFormat *priv = format->priv;
 
-    ensure_value(priv);
-    if (isfinite(value)) {
-        g_string_printf(priv->value, "%.*f%s%s",
-                        priv->precision, value/priv->base,
-                        priv->glue ? priv->glue : "",
-                        priv->units ? priv->units : "");
-        if (priv->style == GWY_VALUE_FORMAT_PANGO)
-            fix_utf8_minus(priv->value);
-    }
-    else {
-        format_abnormal(priv->value, value, priv->style);
-        if (priv->glue)
-            g_string_append(priv->value, priv->glue);
-        if (priv->units)
-            g_string_append(priv->value, priv->units);
-    }
+    format_number(format, value);
+
+    if (priv->glue)
+        g_string_append(priv->value, priv->glue);
+    if (priv->units)
+        g_string_append(priv->value, priv->units);
+
+    if (priv->style == GWY_VALUE_FORMAT_PANGO)
+        fix_utf8_minus(priv->value);
 
     return priv->value->str;
 }
@@ -327,14 +371,10 @@ gwy_value_format_print_number(GwyValueFormat *format,
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
     ValueFormat *priv = format->priv;
 
-    ensure_value(priv);
-    if (isfinite(value)) {
-        g_string_printf(priv->value, "%.*f", priv->precision, value/priv->base);
-        if (priv->style == GWY_VALUE_FORMAT_PANGO)
-            fix_utf8_minus(priv->value);
-    }
-    else
-        format_abnormal(priv->value, value, priv->style);
+    format_number(format, value);
+
+    if (priv->style == GWY_VALUE_FORMAT_PANGO)
+        fix_utf8_minus(priv->value);
 
     return priv->value->str;
 }
@@ -367,8 +407,7 @@ gwy_value_format_set_units(GwyValueFormat *format,
                            const gchar *units)
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
-    ValueFormat *priv = format->priv;
-    if (gwy_assign_string(&priv->units, units))
+    if (set_units(format, units))
         g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_UNITS]);
 }
 
@@ -400,8 +439,7 @@ gwy_value_format_set_glue(GwyValueFormat *format,
                           const gchar *glue)
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
-    ValueFormat *priv = format->priv;
-    if (gwy_assign_string(&priv->glue, glue))
+    if (set_glue(format, glue))
         g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_GLUE]);
 }
 
@@ -475,6 +513,52 @@ gwy_value_format_set_base(GwyValueFormat *format,
 }
 
 /**
+ * gwy_value_format_get_exponential:
+ * @format: A value format.
+ *
+ * Gets whether a value format uses the exponential style.
+ *
+ * Returns: %TRUE of the exponential style is used, %FALSE if normal formatting
+ *          with fixed base and precision is used.
+ **/
+gboolean
+gwy_value_format_get_exponential(GwyValueFormat *format)
+{
+    g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), 1.0);
+    return format->priv->exponential;
+}
+
+/**
+ * gwy_value_format_set_exponential:
+ * @format: A value format.
+ * @exponential: %TRUE to use the exponential style, %FALSE to use the normal
+ *               formatting.
+ *
+ * Sets whether a value format uses the exponential style.
+ *
+ * The exponential style is similar to C printf format <literal>%g</literal>.
+ * Values around unity (in absolute value) are formatted such as 0.1 or 50.
+ * Values many orders of magnitude far from unity are formatted in the
+ * exponential style, e.g. 10<superscript>15</superscript>.
+ *
+ * Usually, the base of the format should be set to unity when the exponential
+ * style is used to avoid numbers such as 5 × 10<superscript>6</superscript>
+ * 10<superscript>12</superscript>.  However, in some cases you might want to
+ * get 10<superscript>4</superscript> µm and you can set up the format so.
+ **/
+void
+gwy_value_format_set_exponential(GwyValueFormat *format,
+                                 gboolean exponential)
+{
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    if (!exponential == !format->priv->exponential)
+        return;
+
+    format->priv->exponential = !!exponential;
+    g_object_notify_by_pspec(G_OBJECT(format), properties[PROP_EXPONENTIAL]);
+}
+
+/**
  * gwy_value_format_set_power10:
  * @format: A value format.
  * @power10: Power of 10 for the new base.
@@ -490,24 +574,106 @@ gwy_value_format_set_power10(GwyValueFormat *format,
     gwy_value_format_set_base(format, gwy_powi(10.0, power10));
 }
 
+static gboolean
+set_glue(GwyValueFormat *format,
+         const gchar *glue)
+{
+    return gwy_assign_string(&format->priv->glue, glue);
+}
+
+static gboolean
+set_units(GwyValueFormat *format,
+          const gchar *units)
+{
+    return gwy_assign_string(&format->priv->units, units);
+}
+
+static void
+format_number(GwyValueFormat *format,
+              gdouble value)
+{
+    ValueFormat *priv = format->priv;
+
+    ensure_value(priv);
+    value /= priv->base;
+    if (isfinite(value)) {
+        if (priv->exponential)
+            format_exponential(priv->value, value, priv->precision,
+                               priv->style);
+        else
+            g_string_append_printf(priv->value, "%.*f", priv->precision, value);
+    }
+    else {
+        format_abnormal(priv->value, value, priv->style);
+    }
+}
+
+static void
+format_exponential(GString *str,
+                   gdouble value,
+                   guint precision,
+                   GwyValueFormatStyle style)
+{
+    guint len = str->len;
+    g_string_append_printf(str, "%.*g", precision, value);
+
+    if (style == GWY_VALUE_FORMAT_PLAIN || !strchr(str->str, 'e'))
+        return;
+
+    g_return_if_fail(value);
+
+    // Well, it won't be so easy.  Start again.
+    g_string_truncate(str, len);
+    gint base10 = (gint)floor(log10(fabs(value)));
+    value /= gwy_powi(10.0, base10);
+
+    // Do not output things like 1×10⁶, print just 10⁶.
+    gdouble l = gwy_powi(0.1, precision);
+    if (fabs(value) > 1.0 + l || fabs(value) < 1.0 - l) {
+        g_string_append_printf(str, "%.*f", precision, value);
+        if (style == GWY_VALUE_FORMAT_UNICODE
+            || style == GWY_VALUE_FORMAT_PANGO)
+            g_string_append(str, "×");
+        else if (style == GWY_VALUE_FORMAT_TEX)
+            g_string_append(str, "\\times");
+    }
+    else if (value < 0.0)
+        g_string_append_c(str, '-');
+
+    if (style == GWY_VALUE_FORMAT_UNICODE) {
+        g_string_append(str, "10");
+        gwy_utf8_append_exponent(str, base10);
+    }
+    else if (style == GWY_VALUE_FORMAT_PANGO) {
+        g_string_append(str, "10<sup>");
+        g_string_append_printf(str, "%d", base10);
+        g_string_append(str, "</sup>");
+    }
+    else if (style == GWY_VALUE_FORMAT_TEX) {
+        g_string_append(str, "10^{");
+        g_string_append_printf(str, "%d", base10);
+        g_string_append(str, "}");
+    }
+}
+
 static void
 format_abnormal(GString *str,
                 gdouble value,
                 GwyValueFormatStyle style)
 {
     static const gchar *plus_inf_values[] = {
-        "+Inf", "+Inf", "+∞", "+∞", "+\\infty"
+        "+Inf", "+∞", "+∞", "+\\infty"
     };
     static const gchar *minus_inf_values[] = {
-        "-Inf", "-Inf", "-∞", "−∞", "-\\infty"
+        "-Inf", "-∞", "−∞", "-\\infty"
     };
 
     if (isnan(value))
-        g_string_assign(str, "NaN");
+        g_string_append(str, "NaN");
     else if (isinf(value) < 0)
-        g_string_assign(str, minus_inf_values[style]);
+        g_string_append(str, minus_inf_values[style]);
     else
-        g_string_assign(str, plus_inf_values[style]);
+        g_string_append(str, plus_inf_values[style]);
 }
 
 static void
@@ -515,6 +681,8 @@ ensure_value(ValueFormat *format)
 {
     if (!format->value)
         format->value = g_string_new(NULL);
+    else
+        g_string_truncate(format->value, 0);
 }
 
 static void
@@ -533,7 +701,6 @@ fix_utf8_minus(GString *str)
         lastpos += 2;
     }
 }
-
 
 /**
  * SECTION: value-format
@@ -589,9 +756,6 @@ fix_utf8_minus(GString *str)
 
 /**
  * GwyValueFormatStyle:
- * @GWY_VALUE_FORMAT_NONE: No units.  This value is unused by #GwyValueFormat
- *                         itself and must not be requested as a format
- *                         style.
  * @GWY_VALUE_FORMAT_PLAIN: Plain style using only ASCII characters, as one
  *                          would use on a text terminal, suitable for output
  *                          to text files.

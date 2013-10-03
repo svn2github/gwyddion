@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_VALUE_FORMAT_NONE = 0,
     GWY_VALUE_FORMAT_PLAIN,
     GWY_VALUE_FORMAT_UNICODE,
     GWY_VALUE_FORMAT_PANGO,
@@ -58,31 +57,34 @@ struct _GwyValueFormatClass {
     GObjectClass g_object_class;
 };
 
-GType           gwy_value_format_get_type     (void)                      G_GNUC_CONST;
-GwyValueFormat* gwy_value_format_new          (void)                      G_GNUC_MALLOC;
-GwyValueFormat* gwy_value_format_new_set      (GwyValueFormatStyle style,
-                                               gint power10,
-                                               guint precision,
-                                               const gchar *glue,
-                                               const gchar *units)        G_GNUC_MALLOC;
-const gchar*    gwy_value_format_print        (GwyValueFormat *format,
-                                               gdouble value);
-const gchar*    gwy_value_format_print_number (GwyValueFormat *format,
-                                               gdouble value);
-const gchar*    gwy_value_format_get_units    (GwyValueFormat *format)    G_GNUC_PURE;
-void            gwy_value_format_set_units    (GwyValueFormat *format,
-                                               const gchar *units);
-const gchar*    gwy_value_format_get_glue     (GwyValueFormat *format)    G_GNUC_PURE;
-void            gwy_value_format_set_glue     (GwyValueFormat *format,
-                                               const gchar *glue);
-guint           gwy_value_format_get_precision(GwyValueFormat *format)    G_GNUC_PURE;
-void            gwy_value_format_set_precision(GwyValueFormat *format,
-                                               guint precision);
-gdouble         gwy_value_format_get_base     (GwyValueFormat *format)    G_GNUC_PURE;
-void            gwy_value_format_set_base     (GwyValueFormat *format,
-                                               gdouble base);
-void            gwy_value_format_set_power10  (GwyValueFormat *format,
-                                               gint power10);
+GType           gwy_value_format_get_type       (void)                      G_GNUC_CONST;
+GwyValueFormat* gwy_value_format_new            (void)                      G_GNUC_MALLOC;
+GwyValueFormat* gwy_value_format_new_set        (GwyValueFormatStyle style,
+                                                 gint power10,
+                                                 guint precision,
+                                                 const gchar *glue,
+                                                 const gchar *units)        G_GNUC_MALLOC;
+const gchar*    gwy_value_format_print          (GwyValueFormat *format,
+                                                 gdouble value);
+const gchar*    gwy_value_format_print_number   (GwyValueFormat *format,
+                                                 gdouble value);
+const gchar*    gwy_value_format_get_units      (GwyValueFormat *format)    G_GNUC_PURE;
+void            gwy_value_format_set_units      (GwyValueFormat *format,
+                                                 const gchar *units);
+const gchar*    gwy_value_format_get_glue       (GwyValueFormat *format)    G_GNUC_PURE;
+void            gwy_value_format_set_glue       (GwyValueFormat *format,
+                                                 const gchar *glue);
+guint           gwy_value_format_get_precision  (GwyValueFormat *format)    G_GNUC_PURE;
+void            gwy_value_format_set_precision  (GwyValueFormat *format,
+                                                 guint precision);
+gdouble         gwy_value_format_get_base       (GwyValueFormat *format)    G_GNUC_PURE;
+void            gwy_value_format_set_base       (GwyValueFormat *format,
+                                                 gdouble base);
+gboolean        gwy_value_format_get_exponential(GwyValueFormat *format)    G_GNUC_PURE;
+void            gwy_value_format_set_exponential(GwyValueFormat *format,
+                                                 gboolean exponential);
+void            gwy_value_format_set_power10    (GwyValueFormat *format,
+                                                 gint power10);
 
 G_END_DECLS
 

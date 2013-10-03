@@ -158,6 +158,11 @@ test_value_format_abnormal(void)
                     ==, "+Inf kg");
     g_assert_cmpstr(gwy_value_format_print(format, -INFINITY),
                     ==, "-Inf kg");
+    // Check overflow of value/base.
+    g_assert_cmpstr(gwy_value_format_print(format, -G_MAXDOUBLE),
+                    ==, "-Inf kg");
+    g_assert_cmpstr(gwy_value_format_print(format, G_MAXDOUBLE),
+                    ==, "+Inf kg");
     g_object_unref(format);
 
     format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,

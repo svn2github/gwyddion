@@ -368,6 +368,39 @@ gwy_memmem(gconstpointer haystack,
 }
 
 /**
+ * gwy_utf8_append_exponent:
+ * @str: A #GString string.
+ * @power: Integer exponent.
+ *
+ * Renders an integer exponent to a GString using Unicode superscript
+ * characters.
+ **/
+void
+gwy_utf8_append_exponent(GString *str,
+                         gint power)
+{
+    gchar buf[32];
+
+    g_snprintf(buf, sizeof(buf), "%d", power);
+    for (guint i = 0; buf[i]; i++) {
+        if (buf[i] == '0' || (buf[i] >= '4' && buf[i] <= '9'))
+            g_string_append_unichar(str, 0x2070 + buf[i] - '0');
+        else if (buf[i] == '1')
+            g_string_append_len(str, "¹", sizeof("¹")-1);
+        else if (buf[i] == '2')
+            g_string_append_len(str, "²", sizeof("²")-1);
+        else if (buf[i] == '3')
+            g_string_append_len(str, "³", sizeof("³")-1);
+        else if (buf[i] == '-')
+            g_string_append_len(str, "⁻", sizeof("⁻")-1);
+        else {
+            g_warning("Weird digits in number %s\n", buf);
+            g_string_append_c(str, buf[i]);
+        }
+    }
+}
+
+/**
  * gwy_str_next_line:
  * @buffer: Text buffer (writable).
  *
