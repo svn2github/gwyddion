@@ -170,8 +170,20 @@ static void               calculate_ticks_log        (GwyAxis *axis);
 static void               fill_tick_arrays           (GwyAxis *axis,
                                                       GwyAxisTickLevel level,
                                                       gdouble bs,
-                                                      gdouble largerbs);
+                                                      gdouble largerbs,
+                                                      GwyAxisLogStepType logsteptype);
+static void               find_start_and_nticks      (gdouble from,
+                                                      gdouble to,
+                                                      gdouble bs,
+                                                      GwyAxisLogStepType logsteptype,
+                                                      gdouble *start,
+                                                      guint *n,
+                                                      guint *logstart);
 static gint               estimate_log_base          (const GwyRange *request);
+static gdouble            next_tick_log              (gdouble x,
+                                                      guint *idx,
+                                                      GwyAxisLogStepType steptype,
+                                                      gboolean increasing);
 static void               remove_too_close_ticks     (GwyAxis *axis);
 static void               improve_hinting            (GwyAxis *axis);
 static gboolean           zero_is_inside             (gdouble start,
@@ -181,6 +193,10 @@ static gboolean           precision_is_sufficient    (GwyValueFormat *vf,
                                                       gdouble bs);
 static void               snap_range_to_ticks_lin    (GwyRange *range,
                                                       gdouble bs);
+static gdouble            snap_log_tick_up           (gdouble value,
+                                                      GwyAxisLogStepType steptype);
+static gdouble            snap_log_tick_down         (gdouble value,
+                                                      GwyAxisLogStepType steptype);
 static void               snap_range_to_ticks_log    (GwyRange *range,
                                                       GwyAxisLogStepType steptype,
                                                       gdouble bs);
@@ -1501,7 +1517,7 @@ calculate_ticks_lin(GwyAxis *axis)
 
     gdouble dx = fabs(priv->range.to - priv->range.from)/length;
     priv->units_at = NAN;
-    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0);
+    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0, GWY_AXIS_LOG_STEP_0);
     for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
         gdouble largerbs = bs;
         steptype = decrease_step_type_lin(steptype, &base, dx, MIN_TICK_DIST);
@@ -1509,7 +1525,7 @@ calculate_ticks_lin(GwyAxis *axis)
             break;
         step = step_sizes_lin[steptype];
         bs = descending ? -base*step : base*step;
-        fill_tick_arrays(axis, i, bs, largerbs);
+        fill_tick_arrays(axis, i, bs, largerbs, GWY_AXIS_LOG_STEP_0);
     }
 
     g_array_sort(ticks, descending
@@ -1541,138 +1557,6 @@ calculate_ticks_lin(GwyAxis *axis)
     if (range_changed)
         g_object_notify_by_pspec(G_OBJECT(axis), properties[PROP_RANGE]);
     g_signal_emit(axis, signals[SGNL_TICKS_PLACED], 0);
-}
-
-// NB: If level is GWY_AXIS_TICK_MAJOR it creates also EDGE-level ticks.
-// Furthermore edge+major ticks must be placed first (for proper units
-// position location).
-static void
-fill_tick_arrays(GwyAxis *axis, guint level,
-                 gdouble bs, gdouble largerbs)
-{
-    const PangoRectangle no_extents = { 0, 0, 0, 0 };
-    Axis *priv = axis->priv;
-    gdouble from = priv->range.from, to = priv->range.to;
-    gdouble start = if_zero_then_exactly(bs > 0.0
-                                         ? ceil(from/bs - EPS)*bs
-                                         : floor(from/bs + EPS)*bs,
-                                         bs);
-    guint n = (guint)floor((to - start)/bs + EPS);
-    GArray *ticks = priv->ticks;
-    GString *str = priv->str;
-    guint length = priv->length;
-    GwyAxisUnitPlacement units_pos = GWY_AXIS_UNITS_NEVER;
-
-    if (priv->show_unit) {
-        GwyAxisUnitPlacement units_pos_secondary;
-        gwy_axis_get_units_affinity(axis, &units_pos, &units_pos_secondary);
-        if (units_pos == GWY_AXIS_UNITS_ZERO) {
-            if (!zero_is_inside(start, n, bs)) {
-                units_pos = units_pos_secondary;
-                if (units_pos == GWY_AXIS_UNITS_ZERO) {
-                    g_warning("Secondary units affinity should not be "
-                              "GWY_AXIS_UNITS_ZERO again.");
-                    units_pos = GWY_AXIS_UNITS_FIRST;
-                }
-            }
-        }
-    }
-
-    // Tick at the leading edge.
-    if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
-        GwyAxisTick tick = {
-            .value = from, .position = 0.0,
-            .label = NULL, .extents = no_extents,
-            .level = GWY_AXIS_TICK_EDGE
-        };
-        gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
-                            && tick.value == 0.0);
-        gboolean at_first = (units_pos == GWY_AXIS_UNITS_FIRST);
-
-        if (priv->logscale)
-            tick.value = pow(10.0, tick.value);
-
-        if (priv->show_tick_labels) {
-            // Increase precision if the position does not coincide with a
-            // normal major tick.
-            guint prec = gwy_value_format_get_precision(priv->vf);
-            gdouble rem = fmod(fabs(from), fabs(bs))/fabs(bs);
-            if (rem > 0.001 && rem < 0.999)
-                gwy_value_format_set_precision(priv->vf, prec+1);
-            format_value_label(axis, tick.value, at_first || at_zero);
-            gwy_value_format_set_precision(priv->vf, prec);
-            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(str->str);
-        }
-        g_array_append_val(ticks, tick);
-    }
-
-    // Tick at the trailing edge.  Needs to be moved backward to fit within.
-    if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
-        GwyAxisTick tick = {
-            .value = to, .position = length,
-            .label = NULL, .extents = no_extents,
-            .level = GWY_AXIS_TICK_EDGE
-        };
-        gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
-                            && tick.value == 0.0);
-        gboolean at_last = (units_pos == GWY_AXIS_UNITS_LAST);
-
-        if (priv->logscale)
-            tick.value = pow(10.0, tick.value);
-
-        if (priv->show_tick_labels) {
-            // Increase precision if the position does not coincide with a
-            // normal major tick.
-            guint prec = gwy_value_format_get_precision(priv->vf);
-            gdouble rem = fmod(fabs(from), fabs(bs))/fabs(bs);
-            if (rem > 0.001 && rem < 0.999)
-                gwy_value_format_set_precision(priv->vf, prec+1);
-            format_value_label(axis, tick.value, at_last || at_zero);
-            gwy_value_format_set_precision(priv->vf, prec);
-            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(str->str);
-        }
-        g_array_append_val(ticks, tick);
-    }
-
-    if (priv->max_tick_level < GWY_AXIS_TICK_MAJOR)
-        return;
-
-    // Normal ticks between
-    for (guint i = 0; i <= n; i++) {
-        GwyAxisTick tick = {
-            .value = if_zero_then_exactly(i*bs + start, bs), .position = 0.0,
-            .label = NULL, .extents = no_extents, .level = level
-        };
-        gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
-                            && tick.value == 0.0);
-        gboolean at_first = (units_pos == GWY_AXIS_UNITS_FIRST
-                             && ticks->len == 0);
-        gboolean at_last = (units_pos == GWY_AXIS_UNITS_LAST
-                            && !priv->ticks_at_edges
-                            && i == n);
-
-        if (priv->logscale)
-            tick.value = pow(10.0, tick.value);
-
-        // Skip ticks coinciding with more major ones.
-        if (largerbs
-            && fabs(tick.value/largerbs - gwy_round(tick.value/largerbs)) < EPS)
-            continue;
-        if (priv->ticks_at_edges && (fabs((tick.value - from)/bs) < EPS
-                                     || fabs((tick.value - to)/bs) < EPS))
-            continue;
-
-        tick.position = (tick.value - from)/(to - from)*length;
-        if (priv->show_tick_labels && level == GWY_AXIS_TICK_MAJOR) {
-            format_value_label(axis, tick.value,
-                               at_zero || at_first || at_last);
-            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
-            tick.label = g_strdup(str->str);
-        }
-        g_array_append_val(ticks, tick);
-    }
 }
 
 static void
@@ -1773,14 +1657,14 @@ calculate_ticks_log(GwyAxis *axis)
 
     gdouble dx = fabs(priv->range.to - priv->range.from)/length;
     priv->units_at = NAN;
-    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0);
+    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0, steptype);
     for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
         gdouble largerbs = bs;
         steptype = decrease_step_type_log(steptype, &step, dx, MIN_TICK_DIST);
         if (!steptype)
             break;
         bs = descending ? -step : step;
-        fill_tick_arrays(axis, i, bs, largerbs);
+        fill_tick_arrays(axis, i, bs, largerbs, steptype);
     }
 
     g_array_sort(ticks, descending
@@ -1829,6 +1713,222 @@ estimate_log_base(const GwyRange *request)
         base = 0.0;
 
     return 3*gwy_round(base/3.0);
+}
+
+// NB: If level is GWY_AXIS_TICK_MAJOR it creates also EDGE-level ticks.
+// Furthermore edge+major ticks must be placed first (for proper units
+// position location).
+static void
+fill_tick_arrays(GwyAxis *axis, guint level,
+                 gdouble bs, gdouble largerbs, GwyAxisLogStepType logsteptype)
+{
+    const PangoRectangle no_extents = { 0, 0, 0, 0 };
+    Axis *priv = axis->priv;
+    gdouble from = priv->range.from, to = priv->range.to;
+    gdouble start;
+    guint n, logstart;
+    GArray *ticks = priv->ticks;
+    GString *str = priv->str;
+    guint length = priv->length;
+    GwyAxisUnitPlacement units_pos = GWY_AXIS_UNITS_NEVER;
+
+    find_start_and_nticks(from, to, bs, logsteptype, &start, &n, &logstart);
+
+    if (priv->show_unit) {
+        GwyAxisUnitPlacement units_pos_secondary;
+        gwy_axis_get_units_affinity(axis, &units_pos, &units_pos_secondary);
+        if (units_pos == GWY_AXIS_UNITS_ZERO) {
+            if (!zero_is_inside(start, n, bs)) {
+                units_pos = units_pos_secondary;
+                if (units_pos == GWY_AXIS_UNITS_ZERO) {
+                    g_warning("Secondary units affinity should not be "
+                              "GWY_AXIS_UNITS_ZERO again.");
+                    units_pos = GWY_AXIS_UNITS_FIRST;
+                }
+            }
+        }
+    }
+
+    // Tick at the leading edge.
+    if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
+        GwyAxisTick tick = {
+            .value = from, .position = 0.0,
+            .label = NULL, .extents = no_extents,
+            .level = GWY_AXIS_TICK_EDGE
+        };
+        gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
+                            && tick.value == 0.0);
+        gboolean at_first = (units_pos == GWY_AXIS_UNITS_FIRST);
+
+        if (priv->logscale)
+            tick.value = pow(10.0, tick.value);
+
+        if (priv->show_tick_labels) {
+            // Increase precision if the position does not coincide with a
+            // normal major tick.
+            guint prec = gwy_value_format_get_precision(priv->vf);
+            gdouble rem = fmod(fabs(from), fabs(bs))/fabs(bs);
+            if (rem > 0.001 && rem < 0.999)
+                gwy_value_format_set_precision(priv->vf, prec+1);
+            format_value_label(axis, tick.value, at_first || at_zero);
+            gwy_value_format_set_precision(priv->vf, prec);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(str->str);
+        }
+        g_array_append_val(ticks, tick);
+    }
+
+    // Tick at the trailing edge.  Needs to be moved backward to fit within.
+    if (level == GWY_AXIS_TICK_MAJOR && priv->ticks_at_edges) {
+        GwyAxisTick tick = {
+            .value = to, .position = length,
+            .label = NULL, .extents = no_extents,
+            .level = GWY_AXIS_TICK_EDGE
+        };
+        gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
+                            && tick.value == 0.0);
+        gboolean at_last = (units_pos == GWY_AXIS_UNITS_LAST);
+
+        if (priv->logscale)
+            tick.value = pow(10.0, tick.value);
+
+        if (priv->show_tick_labels) {
+            // Increase precision if the position does not coincide with a
+            // normal major tick.
+            guint prec = gwy_value_format_get_precision(priv->vf);
+            gdouble rem = fmod(fabs(from), fabs(bs))/fabs(bs);
+            if (rem > 0.001 && rem < 0.999)
+                gwy_value_format_set_precision(priv->vf, prec+1);
+            format_value_label(axis, tick.value, at_last || at_zero);
+            gwy_value_format_set_precision(priv->vf, prec);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(str->str);
+        }
+        g_array_append_val(ticks, tick);
+    }
+
+    if (priv->max_tick_level < GWY_AXIS_TICK_MAJOR)
+        return;
+
+    // Normal ticks between
+    for (guint i = 0; i <= n; i++) {
+        // TODO: Must use next_tick_log() for logsvale;
+        GwyAxisTick tick = {
+            .value = if_zero_then_exactly(i*bs + start, bs), .position = 0.0,
+            .label = NULL, .extents = no_extents, .level = level
+        };
+        gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
+                            && tick.value == 0.0);
+        gboolean at_first = (units_pos == GWY_AXIS_UNITS_FIRST
+                             && ticks->len == 0);
+        gboolean at_last = (units_pos == GWY_AXIS_UNITS_LAST
+                            && !priv->ticks_at_edges
+                            && i == n);
+
+        // Skip ticks coinciding with more major ones.
+        // FIXME: Must reformulate for logscale.
+        if (largerbs
+            && fabs(tick.value/largerbs - gwy_round(tick.value/largerbs)) < EPS)
+            continue;
+        if (priv->ticks_at_edges && (fabs((tick.value - from)/bs) < EPS
+                                     || fabs((tick.value - to)/bs) < EPS))
+            continue;
+
+        if (priv->logscale)
+            tick.value = pow(10.0, tick.value);
+
+        tick.position = (tick.value - from)/(to - from)*length;
+        if (priv->show_tick_labels && level == GWY_AXIS_TICK_MAJOR) {
+            format_value_label(axis, tick.value,
+                               at_zero || at_first || at_last);
+            pango_layout_get_extents(priv->layout, NULL, &tick.extents);
+            tick.label = g_strdup(str->str);
+        }
+        g_array_append_val(ticks, tick);
+    }
+}
+
+static void
+find_start_and_nticks(gdouble from, gdouble to, gdouble bs,
+                      GwyAxisLogStepType logsteptype,
+                      gdouble *start, guint *n, guint *logstart)
+{
+    gboolean increasing = (bs > 0.0);
+    *logstart = 0;
+
+    if (logsteptype != GWY_AXIS_LOG_STEP_LIN
+        && logsteptype != GWY_AXIS_LOG_STEP_125) {
+        *start = if_zero_then_exactly(increasing
+                                      ? ceil(from/bs - EPS)*bs
+                                      : floor(from/bs + EPS)*bs,
+                                      bs);
+        *n = (guint)floor((to - *start)/bs + EPS);
+        return;
+    }
+
+    *start = (increasing
+              ? snap_log_tick_up(from, logsteptype)
+              : snap_log_tick_down(from, logsteptype));
+    *n = 0;
+
+    // Find which tick it is in the table.
+    while (fabs(log10_table[*logstart] - *start) > 1e-6)
+        (*logstart)++;
+
+    gdouble v = *start;
+    guint idx = *logstart;
+    while (v <= to + EPS) {
+        (*n)++;
+        v = next_tick_log(v, &idx, logsteptype, increasing);
+    }
+}
+
+static gdouble
+next_tick_log(gdouble x, guint *idx,
+              GwyAxisLogStepType steptype, gboolean increasing)
+{
+    if (increasing) {
+        if (steptype == GWY_AXIS_LOG_STEP_125) {
+            if (*idx == 1)
+                *idx = 2;
+            else if (*idx == 2)
+                *idx = 5;
+            else
+                *idx = 10;
+        }
+        else {
+            (*idx)++;
+        }
+
+        if (*idx == 10) {
+            *idx = 1;
+            return ceil(x);
+        }
+
+        return floor(x) + log10_table[*idx];
+    }
+    else {
+        if (steptype == GWY_AXIS_LOG_STEP_125) {
+            if (*idx == 1) {
+                *idx = 5;
+                x -= 1.0;
+            }
+            else if (*idx == 2)
+                *idx = 1;
+            else
+                *idx = 2;
+        }
+        else {
+            (*idx)--;
+
+            if (*idx == 0) {
+                *idx = 9;
+                x -= 0.9;
+            }
+        }
+
+        return floor(x) + log10_table[*idx];
+    }
 }
 
 static void
@@ -1994,7 +2094,6 @@ snap_range_to_ticks_lin(GwyRange *range,
     }
 }
 
-// FIXME: This may need some error tolerance.
 static gdouble
 snap_log_tick_up(gdouble value,
                  GwyAxisLogStepType steptype)
