@@ -42,6 +42,7 @@ typedef struct {
     IntList *lower;
     IntList *left;
     IntList *right;
+    guint npixels;  // Total, not just edges.
 } KernelEdges;
 
 typedef struct {
@@ -100,6 +101,7 @@ kernel_edges_new(guint xres, guint yres)
     edges->lower = int_list_new(xres);
     edges->left = int_list_new(yres);
     edges->right = int_list_new(yres);
+    edges->npixels = 0;
 
     return edges;
 }
@@ -122,6 +124,7 @@ analyse_kernel_edges(const GwyMaskField *kernel)
     guint xres = kernel->xres, yres = kernel->yres;
     KernelEdges *edges = kernel_edges_new(xres, yres);
 
+    edges->npixels = 0;
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++) {
             if (!gwy_mask_field_get(kernel, j, 0))
@@ -136,11 +139,43 @@ analyse_kernel_edges(const GwyMaskField *kernel)
                 int_list_add(edges->upper, k);
             if (i == yres-1 || !gwy_mask_field_get(kernel, j, i+1))
                 int_list_add(edges->lower, k);
+            edges->npixels++;
         }
     }
 
     g_assert(edges->upper->len == edges->lower->len);
     g_assert(edges->left->len == edges->right->len);
+
+    return edges;
+}
+
+static IntList*
+adapt_int_list(const IntList *klist,
+               guint kxres, guint xres)
+{
+    guint len = klist->len;
+    IntList *list = int_list_new(len);
+    list->len = len;
+
+    for (guint k = 0; k < len; k++) {
+        guint pos = klist->data[k];
+        list->data[k] = (pos/kxres)*xres + (pos % kxres);
+    }
+
+    return list;
+}
+
+static KernelEdges*
+adapt_kernel_edges(const KernelEdges *kedges,
+                   guint kxres, guint xres)
+{
+    KernelEdges *edges = g_slice_new(KernelEdges);
+
+    edges->upper = adapt_int_list(kedges->upper, kxres, xres);
+    edges->lower = adapt_int_list(kedges->lower, kxres, xres);
+    edges->left = adapt_int_list(kedges->left, kxres, xres);
+    edges->right = adapt_int_list(kedges->right, kxres, xres);
+    edges->npixels = kedges->npixels;
 
     return edges;
 }
@@ -229,6 +264,7 @@ filter_median_direct(const MedianFilterData *mfdata)
     _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
     gdouble *extdata = g_new(gdouble, xsize*ysize);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+    KernelEdges *edges = adapt_kernel_edges(mfdata->edges, kxres, xsize);
 
     mfdata->extend_rect(field->data, xres, extdata, xsize,
                         mfdata->col, mfdata->row, width, height, xres, yres,
@@ -311,6 +347,7 @@ filter_median_direct(const MedianFilterData *mfdata)
         j++;
     }
 
+    kernel_edges_free(edges);
     g_free(pointers);
     g_free(workspace);
     g_free(extdata);
@@ -508,6 +545,7 @@ filter_median_bucket(const MedianFilterData *mfdata)
     g_assert(n >= kn);
     gdouble *extdata = g_new(gdouble, n);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+    KernelEdges *edges = adapt_kernel_edges(mfdata->edges, kxres, xsize);
 
     mfdata->extend_rect(field->data, xres, extdata, xsize,
                         mfdata->col, mfdata->row, width, height, xres, yres,
@@ -622,6 +660,7 @@ filter_median_bucket(const MedianFilterData *mfdata)
         targetbase[i*target->xres + j] = extdata[median];
     }
 
+    kernel_edges_free(edges);
     g_free(extdata);
     g_free(intvalues);
     g_free(revindex);
