@@ -25,6 +25,7 @@
 #include "libgwy/master.h"
 #include "libgwy/field-filter.h"
 #include "libgwy/field-internal.h"
+#include "libgwy/mask-field-internal.h"
 #include "libgwy/object-internal.h"
 
 enum {
@@ -32,6 +33,16 @@ enum {
     MEDIAN_FILTER_DIRECT,
     MEDIAN_FILTER_BUCKET,
 };
+
+// Offsets with respect to the top left corner of kernel pixels representing
+// the lower, upper, left and right edges.  These are pixels we must add or
+// remove when the kernel is moved.
+typedef struct {
+    IntList *upper;
+    IntList *lower;
+    IntList *left;
+    IntList *right;
+} KernelEdges;
 
 typedef struct {
     const GwyField *field;
@@ -43,6 +54,7 @@ typedef struct {
     guint targetcol;
     guint targetrow;
     const GwyMaskField *kernel;
+    KernelEdges *edges;
     RectExtendFunc extend_rect;
     gdouble fill_value;
 } MedianFilterData;
@@ -77,6 +89,60 @@ _gwy_tune_median_filter_method(const gchar *method)
     else {
         g_warning("Unknown median filter method %s.", method);
     }
+}
+
+static KernelEdges*
+kernel_edges_new(guint xres, guint yres)
+{
+    KernelEdges *edges = g_slice_new(KernelEdges);
+
+    edges->upper = int_list_new(xres);
+    edges->lower = int_list_new(xres);
+    edges->left = int_list_new(yres);
+    edges->right = int_list_new(yres);
+
+    return edges;
+}
+
+static void
+kernel_edges_free(KernelEdges *edges)
+{
+    int_list_free(edges->upper);
+    int_list_free(edges->lower);
+    int_list_free(edges->left);
+    int_list_free(edges->right);
+    g_slice_free(KernelEdges, edges);
+}
+
+/* Note this function returns the indices assuming kernel xres.  For faster
+ * lookup in the extended field we recalculate them for its xres later. */
+static KernelEdges*
+analyse_kernel_edges(const GwyMaskField *kernel)
+{
+    guint xres = kernel->xres, yres = kernel->yres;
+    KernelEdges *edges = kernel_edges_new(xres, yres);
+
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++) {
+            if (!gwy_mask_field_get(kernel, j, 0))
+                continue;
+
+            guint k = i*xres + j;
+            if (!j || !gwy_mask_field_get(kernel, j-1, i))
+                int_list_add(edges->left, k);
+            if (j == xres-1 || !gwy_mask_field_get(kernel, j+1, i))
+                int_list_add(edges->right, k);
+            if (!i || !gwy_mask_field_get(kernel, j, i-1))
+                int_list_add(edges->upper, k);
+            if (i == yres-1 || !gwy_mask_field_get(kernel, j, i+1))
+                int_list_add(edges->lower, k);
+        }
+    }
+
+    g_assert(edges->upper->len == edges->lower->len);
+    g_assert(edges->left->len == edges->right->len);
+
+    return edges;
 }
 
 /* Find the median of an array of pointers to doubles, shuffling the pointers
@@ -691,12 +757,14 @@ gwy_field_filter_median(const GwyField *field,
     if (!extend_rect)
         return;
 
+    KernelEdges *edges = analyse_kernel_edges(kernel);
+
     MedianFilterData mfdata = {
         .field = field,
         .col = col, .row = row, .width = width, .height = height,
         .target = target,
         .targetcol = targetcol, .targetrow = targetrow,
-        .kernel = kernel,
+        .kernel = kernel, .edges = edges,
         .extend_rect = extend_rect, .fill_value = fill_value,
     };
 
@@ -706,6 +774,8 @@ gwy_field_filter_median(const GwyField *field,
         filter_median_split(&mfdata, &filter_median_bucket, 500*500);
     else
         filter_median_direct(&mfdata);
+
+    kernel_edges_free(edges);
 
     if (target != field) {
         _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
