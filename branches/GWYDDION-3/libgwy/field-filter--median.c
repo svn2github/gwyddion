@@ -34,6 +34,13 @@ enum {
     MEDIAN_FILTER_BUCKET,
 };
 
+enum {
+    UPPER = 0,
+    LOWER = 1,
+    LEFT = 2,
+    RIGHT = 3,
+};
+
 // Offsets with respect to the top left corner of kernel pixels representing
 // the lower, upper, left and right edges.  These are pixels we must add or
 // remove when the kernel is moved.
@@ -42,7 +49,6 @@ typedef struct {
     IntList *lower;
     IntList *left;
     IntList *right;
-    guint npixels;  // Total, not just edges.
 } KernelEdges;
 
 typedef struct {
@@ -56,6 +62,7 @@ typedef struct {
     guint targetrow;
     const GwyMaskField *kernel;
     KernelEdges *edges;
+    guint kn;
     RectExtendFunc extend_rect;
     gdouble fill_value;
 } MedianFilterData;
@@ -101,7 +108,6 @@ kernel_edges_new(guint xres, guint yres)
     edges->lower = int_list_new(xres);
     edges->left = int_list_new(yres);
     edges->right = int_list_new(yres);
-    edges->npixels = 0;
 
     return edges;
 }
@@ -124,10 +130,9 @@ analyse_kernel_edges(const GwyMaskField *kernel)
     guint xres = kernel->xres, yres = kernel->yres;
     KernelEdges *edges = kernel_edges_new(xres, yres);
 
-    edges->npixels = 0;
     for (guint i = 0; i < yres; i++) {
         for (guint j = 0; j < xres; j++) {
-            if (!gwy_mask_field_get(kernel, j, 0))
+            if (!gwy_mask_field_get(kernel, j, i))
                 continue;
 
             guint k = i*xres + j;
@@ -139,7 +144,6 @@ analyse_kernel_edges(const GwyMaskField *kernel)
                 int_list_add(edges->upper, k);
             if (i == yres-1 || !gwy_mask_field_get(kernel, j, i+1))
                 int_list_add(edges->lower, k);
-            edges->npixels++;
         }
     }
 
@@ -175,7 +179,6 @@ adapt_kernel_edges(const KernelEdges *kedges,
     edges->lower = adapt_int_list(kedges->lower, kxres, xres);
     edges->left = adapt_int_list(kedges->left, kxres, xres);
     edges->right = adapt_int_list(kedges->right, kxres, xres);
-    edges->npixels = kedges->npixels;
 
     return edges;
 }
@@ -404,7 +407,6 @@ bucket_remove_values(guint *buckets,
                      guint bshift,
                      const guint *values,
                      guint nvalues,
-                     guint stride,
                      guint *revindex,
                      guint median,
                      gint *addedbelow,
@@ -430,7 +432,7 @@ bucket_remove_values(guint *buckets,
             bucket_sorted[bi] = FALSE;
         }
         bucket_len[bi]--;
-        values += stride;
+        values++;
     }
 }
 
@@ -441,7 +443,6 @@ bucket_add_values(guint *buckets,
                   guint bshift,
                   const guint *values,
                   guint nvalues,
-                  guint stride,
                   guint *revindex,
                   guint median,
                   gint *addedbelow,
@@ -461,7 +462,7 @@ bucket_add_values(guint *buckets,
         buckets[absbpos] = v;
         bucket_sorted[bi] = !blen;
         bucket_len[bi]++;
-        values += stride;
+        values++;
     }
 }
 
@@ -522,6 +523,31 @@ bucket_median(guint *buckets,
     return buckets[(bi << bshift) + medpos];
 }
 
+static guint
+gather_edge_intvalues(const KernelEdges *edges,
+                      const guint *base,
+                      guint edge,
+                      guint *target)
+{
+    const IntList *list = NULL;
+
+    if (edge == UPPER)
+        list = edges->upper;
+    else if (edge == LOWER)
+        list = edges->lower;
+    else if (edge == LEFT)
+        list = edges->left;
+    else if (edge == RIGHT)
+        list = edges->right;
+
+    g_return_val_if_fail(list, 0);
+
+    for (guint k = 0; k < list->len; k++)
+        *(target++) = base[list->data[k]];
+
+    return list->len;
+}
+
 static void
 filter_median_bucket(const MedianFilterData *mfdata)
 {
@@ -535,7 +561,7 @@ filter_median_bucket(const MedianFilterData *mfdata)
 
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
-    guint kn = kxres*kyres;
+    guint kn = mfdata->kn;
     guint xsize = width + kxres - 1, ysize = height + kyres - 1;
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
@@ -567,47 +593,65 @@ filter_median_bucket(const MedianFilterData *mfdata)
     guint *buckets = g_new(guint, n);
     guint *revindex = g_new(guint, n);
     guint *bucket_len = g_new0(guint, nbuckets);
+    guint *transferbuf = g_new(guint, MAX(edges->upper->len, edges->left->len));
     gboolean *bucket_sorted = g_new0(gboolean, nbuckets);
 
     // Use buckets temporarily as scratch buffer.
     order_transform(extdata, intvalues, buckets, xsize, ysize);
 
     // Find the median for top left corner separately.
-    for (guint ki = 0; ki < kyres; ki++)
-        gwy_assign(buckets + ki*kxres, intvalues + ki*xsize, kxres);
+    guint k = 0;
+    for (guint ki = 0; ki < kyres; ki++) {
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(kernel, iter, 0, ki);
+        for (guint kj = 0; kj < kxres; kj++) {
+            if (gwy_mask_iter_get(iter))
+                buckets[k++] = intvalues[ki*xsize + kj];
+            gwy_mask_iter_next(iter);
+        }
+    }
+    g_assert(k == kn);
     gwy_sort_uint(buckets, kn);
     guint median = buckets[kn/2];
     targetbase[0] = extdata[median];
 
     // Fill the workspace with the contents of the initial kernel.
     for (guint ki = 0; ki < kyres; ki++) {
-        gint dumb = 0;
-        bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
-                          intvalues + ki*xsize, kxres, 1, revindex,
-                          G_MAXUINT, &dumb, &dumb);
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(kernel, iter, 0, ki);
+        for (guint kj = 0; kj < kxres; kj++) {
+            if (gwy_mask_iter_get(iter)) {
+                gint dumb = 0;
+                bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
+                                  intvalues + ki*xsize + kj, 1, revindex,
+                                  G_MAXUINT, &dumb, &dumb);
+            }
+            gwy_mask_iter_next(iter);
+        }
     }
 
     // Scan.  A bit counterintiutively, we scan by column because this means
     // the samples added/removed to the workspace in each step form a
     // contiguous block in a single row.
     guint i = 0, j = 0;
-    gint addedabove, addedbelow;
+    gint addedabove, addedbelow, ne;
+    const guint *base = intvalues;
     while (TRUE) {
-        guint *base;
-
         // Downward pass of the zig-zag pattern.
         while (i < height-1) {
             addedabove = addedbelow = 0;
-            base = intvalues + i*xsize + j;
+            ne = gather_edge_intvalues(edges, base, UPPER, transferbuf);
             bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
-                                 base, kxres, 1, revindex,
+                                 transferbuf, ne, revindex,
                                  median, &addedbelow, &addedabove);
+            i++;
+            base += xsize;
+            ne = gather_edge_intvalues(edges, base, LOWER, transferbuf);
             bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
-                              base + kyres*xsize, kxres, 1, revindex,
+                              transferbuf, ne, revindex,
                               median, &addedbelow, &addedabove);
             median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
                                    median, addedbelow, addedabove, revindex);
-            i++;
             targetbase[i*target->xres + j] = extdata[median];
         }
         if (j == width-1)
@@ -615,31 +659,35 @@ filter_median_bucket(const MedianFilterData *mfdata)
 
         // Move right (at the bottom)
         addedabove = addedbelow = 0;
-        base = intvalues + i*xsize + j;
+        ne = gather_edge_intvalues(edges, base, LEFT, transferbuf);
         bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
-                             base, kyres, xsize, revindex,
+                             transferbuf, ne, revindex,
                              median, &addedbelow, &addedabove);
+        j++;
+        base++;
+        ne = gather_edge_intvalues(edges, base, RIGHT, transferbuf);
         bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
-                          base + kxres, kyres, xsize, revindex,
+                          transferbuf, ne, revindex,
                           median, &addedbelow, &addedabove);
         median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
                                median, addedbelow, addedabove, revindex);
-        j++;
         targetbase[i*target->xres + j] = extdata[median];
 
         // Upward pass of the zig-zag pattern.
         while (i) {
             addedabove = addedbelow = 0;
-            base = intvalues + i*xsize + j;
+            ne = gather_edge_intvalues(edges, base, LOWER, transferbuf);
             bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
-                                 base + (kyres - 1)*xsize, kxres, 1, revindex,
+                                 transferbuf, ne, revindex,
                                  median, &addedbelow, &addedabove);
+            i--;
+            base -= xsize;
+            ne = gather_edge_intvalues(edges, base, UPPER, transferbuf);
             bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
-                              base - xsize, kxres, 1, revindex,
+                              transferbuf, ne, revindex,
                               median, &addedbelow, &addedabove);
             median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
                                    median, addedbelow, addedabove, revindex);
-            i--;
             targetbase[i*target->xres + j] = extdata[median];
         }
         if (j == width-1)
@@ -647,20 +695,23 @@ filter_median_bucket(const MedianFilterData *mfdata)
 
         // Move right (at the top)
         addedabove = addedbelow = 0;
-        base = intvalues + i*xsize + j;
+        ne = gather_edge_intvalues(edges, base, LEFT, transferbuf);
         bucket_remove_values(buckets, bucket_len, bucket_sorted, bshift,
-                             base, kyres, xsize, revindex,
+                             transferbuf, ne, revindex,
                              median, &addedbelow, &addedabove);
+        j++;
+        base++;
+        ne = gather_edge_intvalues(edges, base, RIGHT, transferbuf);
         bucket_add_values(buckets, bucket_len, bucket_sorted, bshift,
-                          base + kxres, kyres, xsize, revindex,
+                          transferbuf, ne, revindex,
                           median, &addedbelow, &addedabove);
         median = bucket_median(buckets, bucket_len, bucket_sorted, bshift,
                                median, addedbelow, addedabove, revindex);
-        j++;
         targetbase[i*target->xres + j] = extdata[median];
     }
 
     kernel_edges_free(edges);
+    g_free(transferbuf);
     g_free(extdata);
     g_free(intvalues);
     g_free(revindex);
@@ -769,8 +820,9 @@ filter_median_split(const MedianFilterData *mfdata,
  *          placement of result is determined by @fpart; in the latter case
  *          the result fills the entire @target.
  * @kernel: Kernel mask defining the shape of the area of which the median
- *          is taken.  XXX: At present its content is ignored, the shape is
- *          always a rectangle of @kernel dimensions.
+ *          is taken.  It must have at least one pixel set.  It is recommended
+ *          not to have any empty borders in the kernel; make the field fit
+ *          closely the non-zero region.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
@@ -796,6 +848,15 @@ gwy_field_filter_median(const GwyField *field,
     if (!extend_rect)
         return;
 
+    guint kn = gwy_mask_field_count(kernel, NULL, TRUE);
+    if (!kn) {
+        g_warning("Median filter requires a non-empty kernel.");
+        // Do something basically sane.
+        if (target != field || targetcol != col || targetrow != row)
+            gwy_field_copy(field, fpart, target, targetcol, targetrow);
+        return;
+    }
+
     KernelEdges *edges = analyse_kernel_edges(kernel);
 
     MedianFilterData mfdata = {
@@ -803,10 +864,12 @@ gwy_field_filter_median(const GwyField *field,
         .col = col, .row = row, .width = width, .height = height,
         .target = target,
         .targetcol = targetcol, .targetrow = targetrow,
-        .kernel = kernel, .edges = edges,
+        .kernel = kernel, .edges = edges, .kn = kn,
         .extend_rect = extend_rect, .fill_value = fill_value,
     };
 
+    // FIXME: Using kn, edges and kxres*kyres we can assess how scattered the
+    // kernel is and prefer the direct filter for sparse kernels.
     if (median_filter_method == MEDIAN_FILTER_BUCKET
         || (median_filter_method == MEDIAN_FILTER_AUTO
             && kernel->xres*kernel->yres >= 50))

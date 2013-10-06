@@ -1389,7 +1389,8 @@ median_filter_dumb(const GwyField *field,
         for (guint j = 0; j < width; j++) {
             gwy_field_copy(extended, &(GwyFieldPart){ j, i, kxres, kyres },
                            workspace, 0, 0);
-            gdouble median = gwy_field_median_full(workspace);
+            gdouble median = gwy_field_median(workspace, NULL, kernel,
+                                              GWY_MASK_INCLUDE);
             gwy_field_index(target, targetcol + j, targetrow + i) = median;
         }
     }
@@ -1399,7 +1400,7 @@ median_filter_dumb(const GwyField *field,
 }
 
 static void
-field_filter_median_small_one(void)
+field_filter_median_small_one(guint shape)
 {
     enum { max_size = 36, niter = 100 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1413,16 +1414,28 @@ field_filter_median_small_one(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         guint kxres = g_rand_int_range(rng, 1, max_size);
         guint kyres = g_rand_int_range(rng, 1, max_size);
+        if (shape == 1) {
+            kxres = MAX(3, kxres);
+            kyres = MAX(3, kyres);
+        }
 
         GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(source, rng);
         GwyField *target = gwy_field_new_sized(width, height, FALSE);
         GwyField *reference = gwy_field_new_alike(target, FALSE);
-        // FIXME: Kernel is ignored apart from its dimensions and we, too,
-        // compare to the median with a rectangular kernel. Create a
-        // one-filled mask that reflects that.
         GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
-        gwy_mask_field_fill(kernel, NULL, TRUE);
+
+        if (shape == 0)
+            gwy_mask_field_fill(kernel, NULL, TRUE);
+        else if (shape == 1) {
+            gwy_mask_field_fill(kernel, NULL, FALSE);
+            gwy_mask_field_fill(kernel,
+                                &(GwyFieldPart){ 1, 1, kxres-1, kyres-1 },
+                                TRUE);
+        }
+        else
+            gwy_mask_field_fill_ellipse(kernel, NULL, TRUE, TRUE);
+
         GwyFieldPart fpart = { col, row, width, height };
         gwy_field_filter_median(source, &fpart, target, kernel,
                                 GWY_EXTERIOR_MIRROR_EXTEND, NAN);
@@ -1440,23 +1453,55 @@ field_filter_median_small_one(void)
 }
 
 void
-test_field_filter_median_direct_small(void)
+test_field_filter_median_direct_small_rect(void)
 {
     gwy_tune_algorithms("median-filter-method", "direct");
-    field_filter_median_small_one();
+    field_filter_median_small_one(0);
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 
 void
-test_field_filter_median_bucket_small(void)
+test_field_filter_median_bucket_small_rect(void)
 {
     gwy_tune_algorithms("median-filter-method", "bucket");
-    field_filter_median_small_one();
+    field_filter_median_small_one(0);
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
+void
+test_field_filter_median_direct_small_shrunkrect(void)
+{
+    gwy_tune_algorithms("median-filter-method", "direct");
+    field_filter_median_small_one(1);
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
+void
+test_field_filter_median_bucket_small_shrunkrect(void)
+{
+    gwy_tune_algorithms("median-filter-method", "bucket");
+    field_filter_median_small_one(1);
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
+void
+test_field_filter_median_direct_small_ellipse(void)
+{
+    gwy_tune_algorithms("median-filter-method", "direct");
+    field_filter_median_small_one(2);
+    gwy_tune_algorithms("median-filter-method", "auto");
+}
+
+void
+test_field_filter_median_bucket_small_ellipse(void)
+{
+    gwy_tune_algorithms("median-filter-method", "bucket");
+    field_filter_median_small_one(2);
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 
 static void
-field_filter_median_large_one(void)
+field_filter_median_large_rect_one(void)
 {
     enum { max_ksize = 20, niter = 5 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1475,9 +1520,6 @@ field_filter_median_large_one(void)
         field_randomize(source, rng);
         GwyField *target = gwy_field_new_sized(width, height, FALSE);
         GwyField *reference = gwy_field_new_alike(target, FALSE);
-        // FIXME: Kernel is ignored apart from its dimensions and we, too,
-        // compare to the median with a rectangular kernel. Create a
-        // one-filled mask that reflects that.
         GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
         gwy_mask_field_fill(kernel, NULL, TRUE);
         GwyFieldPart fpart = { col, row, width, height };
@@ -1497,18 +1539,18 @@ field_filter_median_large_one(void)
 }
 
 void
-test_field_filter_median_direct_large(void)
+test_field_filter_median_direct_large_rect(void)
 {
     gwy_tune_algorithms("median-filter-method", "direct");
-    field_filter_median_large_one();
+    field_filter_median_large_rect_one();
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 
 void
-test_field_filter_median_bucket_large(void)
+test_field_filter_median_bucket_large_rect(void)
 {
     gwy_tune_algorithms("median-filter-method", "bucket");
-    field_filter_median_large_one();
+    field_filter_median_large_rect_one();
     gwy_tune_algorithms("median-filter-method", "auto");
 }
 
