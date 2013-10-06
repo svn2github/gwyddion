@@ -462,8 +462,8 @@ field/filter/standard/scharr
 field/filter/standard/step
 field/filter/standard/dechecker
 field/filter/median/direct/small/rect
-#field/filter/median/direct/small/shrunkrect
-#field/filter/median/direct/small/ellipse
+field/filter/median/direct/small/shrunkrect
+field/filter/median/direct/small/ellipse
 field/filter/median/direct/large/rect
 field/filter/median/bucket/small/rect
 field/filter/median/bucket/small/shrunkrect

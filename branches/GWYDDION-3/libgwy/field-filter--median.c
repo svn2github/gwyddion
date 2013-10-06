@@ -183,6 +183,22 @@ adapt_kernel_edges(const KernelEdges *kedges,
     return edges;
 }
 
+static const IntList*
+kernel_edge_list(const KernelEdges *edges,
+                 guint edge)
+{
+    if (edge == UPPER)
+        return edges->upper;
+    if (edge == LOWER)
+        return edges->lower;
+    if (edge == LEFT)
+        return edges->left;
+    if (edge == RIGHT)
+        return edges->right;
+
+    g_return_val_if_reached(NULL);
+}
+
 /* Find the median of an array of pointers to doubles, shuffling the pointers
  * but leaving the double values intact. */
 static gdouble
@@ -247,6 +263,68 @@ median_from_pointers(const gdouble **array, gsize n)
     }
 }
 
+static guint
+extract_masked_data_double_with_revmap(const gdouble *data,
+                                       guint xres,
+                                       const GwyMaskField *kernel,
+                                       gdouble *values,
+                                       guint *revmap)
+{
+    guint kxres = kernel->xres, kyres = kernel->yres;
+    guint k = 0;
+
+    for (guint ki = 0; ki < kyres; ki++) {
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(kernel, iter, 0, ki);
+        for (guint kj = 0; kj < kxres; kj++) {
+            if (gwy_mask_iter_get(iter)) {
+                revmap[ki*xres + kj] = k;
+                values[k++] = data[ki*xres + kj];
+            }
+            gwy_mask_iter_next(iter);
+        }
+    }
+
+    return k;
+}
+
+static void
+remove_edge_data_with_revmap(const KernelEdges *edges,
+                             guint basepos,
+                             guint edge,
+                             guint *revmap,
+                             guint *freelist)
+{
+    const IntList *list = kernel_edge_list(edges, edge);
+    g_return_if_fail(list);
+
+    for (guint k = 0; k < list->len; k++) {
+        guint pos = basepos + list->data[k];
+        guint wsppos = revmap[pos];
+        *(freelist++) = wsppos;
+    }
+}
+
+static void
+add_edge_data_with_revmap(const KernelEdges *edges,
+                          const gdouble *data,
+                          guint basepos,
+                          guint edge,
+                          gdouble *workspace,
+                          guint *revmap,
+                          guint *freelist)
+{
+    const IntList *list = kernel_edge_list(edges, edge);
+    g_return_if_fail(list);
+
+    for (guint k = 0; k < list->len; k++) {
+        guint pos = basepos + list->data[k];
+        guint wsppos = *(freelist++);
+        workspace[wsppos] = data[pos];
+        revmap[pos] = wsppos;
+    }
+}
+
 static void
 filter_median_direct(const MedianFilterData *mfdata)
 {
@@ -260,12 +338,15 @@ filter_median_direct(const MedianFilterData *mfdata)
 
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
-    guint kn = kxres*kyres;
+    guint kn = mfdata->kn;
     guint xsize = width + kxres - 1, ysize = height + kyres - 1;
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
     _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
-    gdouble *extdata = g_new(gdouble, xsize*ysize);
+
+    guint n = xsize*ysize;
+    g_assert(n >= kn);
+    gdouble *extdata = g_new(gdouble, n);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
     KernelEdges *edges = adapt_kernel_edges(mfdata->edges, kxres, xsize);
 
@@ -275,18 +356,19 @@ filter_median_direct(const MedianFilterData *mfdata)
                         mfdata->fill_value);
 
     gdouble *workspace = g_new(gdouble, kn);
+    guint *revmap = g_new(guint, n);
+    guint *freelist = g_new(guint, MAX(edges->upper->len, edges->left->len));
     // Declare @pointers with const to get an error if something tries to
     // modify @workspace through them.
     const gdouble **pointers = g_new(const gdouble*, kn);
+    for (guint k = 0; k < kn; k++)
+        pointers[k] = workspace + k;
 
     // Fill the workspace with the contents of the initial kernel.
-    for (guint ki = 0; ki < kyres; ki++) {
-        for (guint kj = 0; kj < kxres; kj++) {
-            guint k = ki*kxres + kj;
-            workspace[k] = extdata[ki*xsize + kj];
-            pointers[k] = workspace + k;
-        }
-    }
+    guint k = extract_masked_data_double_with_revmap(extdata, xsize, kernel,
+                                                     workspace, revmap);
+    g_assert(k == kn);
+    targetbase[0] = median_from_pointers(pointers, kn);
 
     // Scan.  A bit counterintiutively, we scan by column because this means
     // the samples added/removed to the workspace in each step form a
@@ -294,63 +376,49 @@ filter_median_direct(const MedianFilterData *mfdata)
     guint i = 0, j = 0;
     while (TRUE) {
         // Downward pass of the zig-zag pattern.
-        while (TRUE) {
-            // Extract the median
-            targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
-            if (i == height-1)
-                break;
-
-            // Move down
-            gdouble *replrow = workspace + (i % kyres)*kxres;
-            const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
-            gwy_assign(replrow, extdatarow, kxres);
+        while (i < height-1) {
+            remove_edge_data_with_revmap(edges, i*xsize + j, UPPER,
+                                         revmap, freelist);
             i++;
+            add_edge_data_with_revmap(edges, extdata, i*xsize + j, LOWER,
+                                      workspace, revmap, freelist);
+            targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
         }
         if (j == width-1)
             break;
 
         // Move right (at the bottom)
-        {
-            // Make sure the physical last column is also last logically.
-            // This removes column modulos when moving up/down.
-            memmove(workspace, workspace+1, (kxres*kyres-1)*sizeof(gdouble));
-            gdouble *replcol = workspace + kxres-1;
-            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
-            for (guint ki = 0; ki < kyres; ki++)
-                replcol[((ki + i) % kyres)*kxres] = extdatacol[ki*xsize];
-        }
+        remove_edge_data_with_revmap(edges, i*xsize + j, LEFT,
+                                     revmap, freelist);
         j++;
+        add_edge_data_with_revmap(edges, extdata, i*xsize + j, RIGHT,
+                                  workspace, revmap, freelist);
+        targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
 
         // Upward pass of the zig-zag pattern.
-        while (TRUE) {
-            // Extract the median
-            targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
-            if (i == 0)
-                break;
-
-            // Move up
-            gdouble *replrow = workspace + ((i + kyres-1) % kyres)*kxres;
-            const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
-            gwy_assign(replrow, extdatarow, kxres);
+        while (i) {
+            remove_edge_data_with_revmap(edges, i*xsize + j, LOWER,
+                                         revmap, freelist);
             i--;
+            add_edge_data_with_revmap(edges, extdata, i*xsize + j, UPPER,
+                                      workspace, revmap, freelist);
+            targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
         }
         if (j == width-1)
             break;
 
         // Move right (at the top)
-        {
-            // Make sure the physical last column is also last logically.
-            // This removes column modulos when moving up/down.
-            memmove(workspace, workspace+1, (kxres*kyres-1)*sizeof(gdouble));
-            gdouble *replcol = workspace + kxres-1;
-            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
-            for (guint ki = 0; ki < kyres; ki++)
-                replcol[ki*kxres] = extdatacol[ki*xsize];
-        }
+        remove_edge_data_with_revmap(edges, i*xsize + j, LEFT,
+                                     revmap, freelist);
         j++;
+        add_edge_data_with_revmap(edges, extdata, i*xsize + j, RIGHT,
+                                  workspace, revmap, freelist);
+        targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
     }
 
     kernel_edges_free(edges);
+    g_free(revmap);
+    g_free(freelist);
     g_free(pointers);
     g_free(workspace);
     g_free(extdata);
@@ -529,23 +597,35 @@ gather_edge_intvalues(const KernelEdges *edges,
                       guint edge,
                       guint *target)
 {
-    const IntList *list = NULL;
-
-    if (edge == UPPER)
-        list = edges->upper;
-    else if (edge == LOWER)
-        list = edges->lower;
-    else if (edge == LEFT)
-        list = edges->left;
-    else if (edge == RIGHT)
-        list = edges->right;
-
+    const IntList *list = kernel_edge_list(edges, edge);
     g_return_val_if_fail(list, 0);
 
     for (guint k = 0; k < list->len; k++)
         *(target++) = base[list->data[k]];
 
     return list->len;
+}
+
+static guint
+extract_masked_data_uint(const guint *data,
+                         guint xres,
+                         const GwyMaskField *kernel,
+                         guint *values)
+{
+    guint kxres = kernel->xres, kyres = kernel->yres;
+    guint k = 0;
+
+    for (guint ki = 0; ki < kyres; ki++) {
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(kernel, iter, 0, ki);
+        for (guint kj = 0; kj < kxres; kj++) {
+            if (gwy_mask_iter_get(iter))
+                values[k++] = data[ki*xres + kj];
+            gwy_mask_iter_next(iter);
+        }
+    }
+
+    return k;
 }
 
 static void
@@ -600,16 +680,7 @@ filter_median_bucket(const MedianFilterData *mfdata)
     order_transform(extdata, intvalues, buckets, xsize, ysize);
 
     // Find the median for top left corner separately.
-    guint k = 0;
-    for (guint ki = 0; ki < kyres; ki++) {
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(kernel, iter, 0, ki);
-        for (guint kj = 0; kj < kxres; kj++) {
-            if (gwy_mask_iter_get(iter))
-                buckets[k++] = intvalues[ki*xsize + kj];
-            gwy_mask_iter_next(iter);
-        }
-    }
+    guint k = extract_masked_data_uint(intvalues, xsize, kernel, buckets);
     g_assert(k == kn);
     gwy_sort_uint(buckets, kn);
     guint median = buckets[kn/2];
@@ -872,10 +943,10 @@ gwy_field_filter_median(const GwyField *field,
     // kernel is and prefer the direct filter for sparse kernels.
     if (median_filter_method == MEDIAN_FILTER_BUCKET
         || (median_filter_method == MEDIAN_FILTER_AUTO
-            && kernel->xres*kernel->yres >= 50))
+            && kernel->xres*kernel->yres >= 100))
         filter_median_split(&mfdata, &filter_median_bucket, 500*500);
     else
-        filter_median_direct(&mfdata);
+        filter_median_split(&mfdata, &filter_median_direct, 500*500);
 
     kernel_edges_free(edges);
 
