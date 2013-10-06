@@ -573,10 +573,10 @@ gwy_value_format_get_exponential(GwyValueFormat *format)
  *
  * Sets whether a value format uses the exponential style.
  *
- * The exponential style is similar to C printf format <literal>%g</literal>.
- * Values around unity (in absolute value) are formatted such as 0.1 or 50.
- * Values many orders of magnitude far from unity are formatted in the
- * exponential style, e.g. 10<superscript>15</superscript>.
+ * The exponential style is similar to C printf format "&percnt;g".  Values
+ * around unity (in absolute value) are formatted such as 0.1 or 50.  Values
+ * many orders of magnitude far from unity are formatted in the exponential
+ * style, e.g.  10<superscript>15</superscript>.
  *
  * Usually, the base of the format should be set to unity when the exponential
  * style is used to avoid numbers such as 5 × 10<superscript>6</superscript>
