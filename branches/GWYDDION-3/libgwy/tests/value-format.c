@@ -322,18 +322,18 @@ test_value_format_append(void)
 
     format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PLAIN,
                                       -6, 2, " ", "s");
-
     g_string_assign(str, "L = ");
     gwy_value_format_append_number(format, str, 1.126e-6);
     g_assert_cmpstr(str->str, ==, "L = 1.13");
+    g_object_unref(format);
 
     format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,
                                       0, 1, " ", "m");
     gwy_value_format_set_exponential(format, TRUE);
-
     g_string_assign(str, "Value is ");
     gwy_value_format_append(format, str, 1.0);
     g_assert_cmpstr(str->str, ==, "Value is 1 m");
+    g_object_unref(format);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
