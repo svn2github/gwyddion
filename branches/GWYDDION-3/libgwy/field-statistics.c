@@ -270,8 +270,7 @@ gwy_field_median(const GwyField *field,
         return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
-    gsize bufsize = width*height*sizeof(gdouble);
-    gdouble *buffer = g_slice_alloc(bufsize);
+    gdouble *buffer = g_new(gdouble, width*height);
 
     if (masking == GWY_MASK_IGNORE) {
         // No mask.  If full field is processed we must use the cache.
@@ -281,7 +280,7 @@ gwy_field_median(const GwyField *field,
         for (guint i = 0; i < height; i++)
             gwy_assign(buffer + i*width, base + i*field->xres, width);
         gdouble median = gwy_math_median(buffer, width*height);
-        g_slice_free1(bufsize, buffer);
+        g_free(buffer);
         if (full_field) {
             CVAL(field->priv, MED) = median;
             field->priv->cached |= CBIT(MED);
@@ -304,7 +303,7 @@ gwy_field_median(const GwyField *field,
     }
 
     gdouble median = (p != buffer) ? gwy_math_median(buffer, p - buffer) : NAN;
-    g_slice_free1(bufsize, buffer);
+    g_free(buffer);
     return median;
 }
 
@@ -630,6 +629,154 @@ fail:
     GWY_MAYBE_SET(rms, 0.0);
     GWY_MAYBE_SET(skew, NAN);
     GWY_MAYBE_SET(kurtosis, NAN);
+}
+
+/**
+ * gwy_field_entropy:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match either the dimensions of @field or the
+ *        rectangular part.  In the first case the mask is placed over the
+ *        entire field, in the second case over the part.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ *
+ * Estimates the entropy of field data distribution.
+ *
+ * The estimate is calculated as @S = ln(@n Δ) − 1/@n ∑ @n_@i ln(@n_@i), where
+ * @n is the number of pixels considered, Δ the bin size and @n_@i the count in
+ * the @i-th bin.  If @S is plotted as a function of the bin size Δ, it is,
+ * generally, a growing function with a plateau for ‘reasonable’ bin sizes.
+ * The estimate is taken at the plateau.
+ *
+ * Returns: The estimated entropy of the data values.  The entropy of no data
+ *          is NaN, the entropy of single-valued data is infinity.
+ **/
+gdouble
+gwy_field_entropy(const GwyField *field,
+                  const GwyFieldPart *fpart,
+                  const GwyMaskField *mask,
+                  GwyMaskingType masking)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        return NAN;
+
+    guint n = width*height;
+    if (masking != GWY_MASK_IGNORE) {
+        GwyFieldPart mpart = { maskcol, maskrow, width, height };
+        n = gwy_mask_field_part_count(mask, &mpart,
+                                      masking == GWY_MASK_INCLUDE);
+        if (!n)
+            return NAN;
+    }
+
+    gdouble min, max;
+    gwy_field_min_max(field, fpart, mask, masking, &min, &max);
+    if (min == max)
+        return HUGE_VAL;
+    // Return explicit estimates for n < 4, making maxdiv at least 2.
+    if (n == 2)
+        return log(max - min);
+    if (n == 3)
+        return log(max - min) + 0.5*log(1.5) - G_LN2/3.0;
+
+    guint maxdiv = (guint)floor(log2(n) + 1e-12);
+    g_assert(maxdiv >= 2);
+    guint size = 1 << maxdiv;
+    guint *counts = g_new0(guint, size);
+    gdouble *ecurve = g_new(gdouble, maxdiv+1);
+    const gdouble *base = field->data + row*field->xres + col;
+
+    // Gather counts at the finest scale.
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            for (guint j = width; j; j--, d++) {
+                gint k = floor((*d - min)/(max - min));
+                k = CLAMP(k, 0, (gint)size-1);
+                counts[k]++;
+            }
+        }
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    gint k = floor((*d - min)/(max - min));
+                    k = CLAMP(k, 0, (gint)size-1);
+                    counts[k]++;
+                }
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+
+    // Calculate the entropy for all bin sizes in the logarithmic progression.
+    for (guint div = 0; div <= maxdiv; div++) {
+        gdouble S = 0.0;
+        guint *ck = counts;
+        for (guint k = size; k; k--, ck++) {
+            if (*ck)
+                S += (*ck)*log(*ck);
+        }
+        S = log(n*(max - min)/size) - S/n;
+        ecurve[div] = S;
+        size >>= 1;
+
+        // Make the bins twice as large.
+        guint *ck2 = counts;
+        ck = counts;
+        for (guint k = size; k; k--, ck2 += 2)
+            *(ck++) = *(ck2) + *(ck2 + 1);
+    }
+
+    g_free(counts);
+
+    // Find the flattest part of the curve and use the value there as the
+    // entropy estimate.  Handle the too-few-pixels cases gracefully.
+    gdouble S;
+    if (maxdiv < 5) {
+        gdouble mindiff = G_MAXDOUBLE;
+        guint imin = 1;
+
+        for (guint k = 0; k <= maxdiv-2; k++) {
+            gdouble diff = (fabs(ecurve[k] - ecurve[k+1])
+                            + fabs(ecurve[k+1] - ecurve[k+2]));
+            if (diff < mindiff) {
+                mindiff = diff;
+                imin = k+1;
+            }
+        }
+        S = ecurve[imin];
+    }
+    else {
+        gdouble mindiff = G_MAXDOUBLE;
+        guint imin = 2;
+
+        for (guint k = 0; k <= maxdiv-4; k++) {
+            gdouble diff = (fabs(ecurve[k] - ecurve[k+1])
+                            + fabs(ecurve[k+1] - ecurve[k+2])
+                            + fabs(ecurve[k+2] - ecurve[k+3])
+                            + fabs(ecurve[k+3] - ecurve[k+4]));
+            if (diff < mindiff) {
+                mindiff = diff;
+                imin = k+2;
+            }
+        }
+        S = (ecurve[imin-1] + ecurve[imin] + ecurve[imin+1])/3.0;
+    }
+
+    g_free(ecurve);
+
+    return S;
 }
 
 /**

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -81,6 +81,10 @@ void    gwy_field_statistics       (const GwyField *field,
                                     gdouble *rms,
                                     gdouble *skew,
                                     gdouble *kurtosis);
+gdouble gwy_field_entropy          (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking);
 gdouble gwy_field_surface_area     (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
