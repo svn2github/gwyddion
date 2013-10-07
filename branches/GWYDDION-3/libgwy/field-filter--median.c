@@ -662,7 +662,7 @@ filter_median_bucket(const MedianFilterData *mfdata)
     gdouble bsizemax = 2.0*sqrt(kn);            // Avoid too large buckets.
     guint bshift;
     if (bsizemin <= bsizemax)
-        bshift = gwy_round(0.5*log2(bsizemin*bsizemax));
+        bshift = gwy_round(0.25*log2(bsizemin*bsizemin*bsizemin*bsizemax));
     else
         bshift = gwy_round(log2(bsizemin));
     bshift = MAX(bshift, 1);
