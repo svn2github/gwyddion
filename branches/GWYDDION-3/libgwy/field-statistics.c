@@ -683,8 +683,8 @@ xlnx_int(guint x)
  *
  * Estimates the entropy of field data distribution.
  *
- * The estimate is calculated as @S = ln(@n Δ) − 1/@n ∑ @n_@i ln(@n_@i), where
- * @n is the number of pixels considered, Δ the bin size and @n_@i the count in
+ * The estimate is calculated as @S = ln(@n Δ) − 1/@n ∑ @n_i ln(@n_i), where
+ * @n is the number of pixels considered, Δ the bin size and @n_i the count in
  * the @i-th bin.  If @S is plotted as a function of the bin size Δ, it is,
  * generally, a growing function with a plateau for ‘reasonable’ bin sizes.
  * The estimate is taken at the plateau.
