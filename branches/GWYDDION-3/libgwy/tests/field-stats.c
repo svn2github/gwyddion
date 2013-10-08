@@ -799,7 +799,7 @@ field_median_one(GwyMaskingType masking)
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
         guint yres = g_rand_int_range(rng, 1, max_size);
-        GwyField *field = gwy_field_new_sized(xres, yres, TRUE);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
 
         guint width = g_rand_int_range(rng, 1, xres+1);
@@ -855,6 +855,175 @@ void
 test_field_median_ignore(void)
 {
     field_median_one(GWY_MASK_IGNORE);
+}
+
+static void
+field_entropy_one(GwyMaskingType masking,
+                  guint type)
+{
+    enum { max_size = 178 };
+    GRand *rng = g_rand_new_with_seed(42);
+    GwyRand *zrng = gwy_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint count = width*height;
+        if (masking == GWY_MASK_INCLUDE)
+            count = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        else if (masking == GWY_MASK_EXCLUDE)
+            count = gwy_mask_field_part_count(mask, &fpart, FALSE);
+
+        if (count < 16)
+            continue;
+
+        gdouble param = exp(10.0*g_rand_double(rng) - 5.0);
+
+        if (type == 0) {
+            for (guint i = 0; i < xres*yres; i++)
+                field->data[i] = param*gwy_rand_double(zrng);
+        }
+        else if (type == 1) {
+            for (guint i = 0; i < xres*yres; i++)
+                field->data[i] = param*gwy_rand_normal(zrng);
+        }
+        else if (type == 2) {
+            for (guint i = 0; i < xres*yres; i++)
+                field->data[i] = param*gwy_rand_exp_positive(zrng);
+        }
+
+        gdouble entropy = gwy_field_entropy(field, &fpart, mask, masking);
+
+        gdouble expected = 0.0;
+        if (type == 0)
+            expected = log(param);
+        else if (type == 1)
+            expected = 0.5 + log(GWY_SQRT_PI*G_SQRT2*param);
+        else if (type == 2)
+            expected = 1.0 + log(param);
+
+        // Note this is not an absolute criterion, depending on what numbers
+        // we get from the generator, the difference may be larger.
+        gdouble eps = 3.5/sqrt(count);
+        if (type == 0)
+            eps = 12.0/count;
+        gwy_assert_floatval(expected, entropy, eps);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    gwy_rand_free(zrng);
+    g_rand_free(rng);
+}
+
+void
+test_field_entropy_uniform_ignore(void)
+{
+    field_entropy_one(GWY_MASK_IGNORE, 0);
+}
+
+void
+test_field_entropy_uniform_include(void)
+{
+    field_entropy_one(GWY_MASK_INCLUDE, 0);
+}
+
+void
+test_field_entropy_uniform_exclude(void)
+{
+    field_entropy_one(GWY_MASK_IGNORE, 0);
+}
+
+void
+test_field_entropy_normal_ignore(void)
+{
+    field_entropy_one(GWY_MASK_EXCLUDE, 1);
+}
+
+void
+test_field_entropy_normal_include(void)
+{
+    field_entropy_one(GWY_MASK_INCLUDE, 1);
+}
+
+void
+test_field_entropy_normal_exclude(void)
+{
+    field_entropy_one(GWY_MASK_IGNORE, 1);
+}
+
+void
+test_field_entropy_exponential_ignore(void)
+{
+    field_entropy_one(GWY_MASK_EXCLUDE, 2);
+}
+
+void
+test_field_entropy_exponential_include(void)
+{
+    field_entropy_one(GWY_MASK_INCLUDE, 2);
+}
+
+void
+test_field_entropy_exponential_exclude(void)
+{
+    field_entropy_one(GWY_MASK_EXCLUDE, 2);
+}
+
+void
+test_field_entropy_tiny(void)
+{
+    GwyField *field = gwy_field_new_sized(2, 2, FALSE);
+    GwyMaskField *mask = gwy_mask_field_new_sized(2, 2, TRUE);
+    field->data[0] = 0.0;
+    field->data[1] = 0.0;
+    field->data[2] = 1.0;
+    field->data[3] = 1.0;
+
+    gdouble entropy;
+
+    entropy = gwy_field_entropy(field, NULL, NULL, GWY_MASK_IGNORE);
+    gwy_assert_floatval(entropy, 0.0, 1e-16);
+
+    entropy = gwy_field_entropy(field, &(GwyFieldPart){ 0, 0, 1, 2 },
+                                NULL, GWY_MASK_IGNORE);
+    gwy_assert_floatval(entropy, 0.0, 1e-16);
+
+    entropy = gwy_field_entropy(field, &(GwyFieldPart){ 0, 0, 2, 1 },
+                                NULL, GWY_MASK_IGNORE);
+    g_assert(isinf(entropy));
+
+    gwy_mask_field_set(mask, 0, 0, TRUE);
+    gwy_mask_field_set(mask, 1, 1, TRUE);
+    entropy = gwy_field_entropy(field, NULL, mask, GWY_MASK_INCLUDE);
+    gwy_assert_floatval(entropy, 0.0, 1e-16);
+
+    entropy = gwy_field_entropy(field, NULL, mask, GWY_MASK_EXCLUDE);
+    gwy_assert_floatval(entropy, 0.0, 1e-16);
+
+    gwy_mask_field_set(mask, 0, 0, FALSE);
+    entropy = gwy_field_entropy(field, NULL, mask, GWY_MASK_INCLUDE);
+    g_assert(isinf(entropy));
+
+    entropy = gwy_field_entropy(field, NULL, mask, GWY_MASK_EXCLUDE);
+    gwy_assert_floatval(entropy, log(3.0)/2.0 - 5.0/6.0*log(2.0), 1e-16);
+
+    gwy_mask_field_set(mask, 1, 1, FALSE);
+    entropy = gwy_field_entropy(field, NULL, mask, GWY_MASK_INCLUDE);
+    g_assert(isnan(entropy));
+
+    g_object_unref(mask);
+    g_object_unref(field);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -372,6 +372,16 @@ field/statistics
 field/median/include
 field/median/exclude
 field/median/ignore
+field/entropy/uniform/ignore
+field/entropy/uniform/include
+field/entropy/uniform/exclude
+field/entropy/normal/ignore
+field/entropy/normal/include
+field/entropy/normal/exclude
+field/entropy/exponential/ignore
+field/entropy/exponential/include
+field/entropy/exponential/exclude
+field/entropy/tiny
 field/surface-area/planar
 field/surface-area/masked
 field/volume/planar/gwyddion2

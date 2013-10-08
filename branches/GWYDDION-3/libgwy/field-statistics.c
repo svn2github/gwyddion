@@ -651,6 +651,8 @@ fail:
  * generally, a growing function with a plateau for ‘reasonable’ bin sizes.
  * The estimate is taken at the plateau.
  *
+ * It should be noted that this estimate may be biased.
+ *
  * Returns: The estimated entropy of the data values.  The entropy of no data
  *          is NaN, the entropy of single-valued data is infinity.
  **/
@@ -696,7 +698,7 @@ gwy_field_entropy(const GwyField *field,
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             for (guint j = width; j; j--, d++) {
-                gint k = floor((*d - min)/(max - min));
+                gint k = floor((*d - min)/(max - min)*size);
                 k = CLAMP(k, 0, (gint)size-1);
                 counts[k]++;
             }
@@ -710,7 +712,7 @@ gwy_field_entropy(const GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert) {
-                    gint k = floor((*d - min)/(max - min));
+                    gint k = floor((*d - min)/(max - min)*size);
                     k = CLAMP(k, 0, (gint)size-1);
                     counts[k]++;
                 }
@@ -723,9 +725,11 @@ gwy_field_entropy(const GwyField *field,
     for (guint div = 0; div <= maxdiv; div++) {
         gdouble S = 0.0;
         guint *ck = counts;
+        guint p = 0;
         for (guint k = size; k; k--, ck++) {
             if (*ck)
                 S += (*ck)*log(*ck);
+            p += *ck;
         }
         S = log(n*(max - min)/size) - S/n;
         ecurve[div] = S;
