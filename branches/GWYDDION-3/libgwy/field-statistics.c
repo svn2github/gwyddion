@@ -631,6 +631,44 @@ fail:
     GWY_MAYBE_SET(kurtosis, NAN);
 }
 
+static inline gdouble
+xlnx_int(guint x)
+{
+    static const gdouble xlnx_table[] = {
+        0.0,
+        0.0,
+        1.38629436111989061882,
+        3.29583686600432907417,
+        5.54517744447956247532,
+        8.04718956217050187300,
+        10.75055681536833000486,
+        13.62137104338719313570,
+        16.63553233343868742600,
+        19.77502119602597444511,
+        23.02585092994045684010,
+        26.37684800078207598466,
+        29.81887979745600372264,
+        33.34434164699997756865,
+        36.94680261461362060328,
+        40.62075301653315098985,
+        44.36141955583649980256,
+        48.16462684895567336408,
+        52.02669164213096445960,
+        55.94434060416236874000,
+        59.91464547107981986860,
+        63.93497119219188292650,
+        68.00293397388294877634,
+        72.11636696637044288840,
+        76.27329192835069487136,
+        80.47189562170501873000,
+    };
+
+    if (x < G_N_ELEMENTS(xlnx_table))
+        return xlnx_table[x];
+
+    return x*log(x);
+}
+
 /**
  * gwy_field_entropy:
  * @field: A two-dimensional data field.
@@ -725,12 +763,8 @@ gwy_field_entropy(const GwyField *field,
     for (guint div = 0; div <= maxdiv; div++) {
         gdouble S = 0.0;
         guint *ck = counts;
-        guint p = 0;
-        for (guint k = size; k; k--, ck++) {
-            if (*ck)
-                S += (*ck)*log(*ck);
-            p += *ck;
-        }
+        for (guint k = size; k; k--, ck++)
+            S += xlnx_int(*ck);
         S = log(n*(max - min)/size) - S/n;
         ecurve[div] = S;
         size >>= 1;
