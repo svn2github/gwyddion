@@ -156,6 +156,31 @@ G_GNUC_INTERNAL
 const gchar* const* _gwy_grain_value_list_builtin_idents(void);
 
 G_GNUC_INTERNAL
+void _gwy_grain_value_builtin_convex_hull(GwyGrainValue *minsizegrainvalue,
+                                          GwyGrainValue *minanglegrainvalue,
+                                          GwyGrainValue *maxsizegrainvalue,
+                                          GwyGrainValue *maxanglegrainvalue,
+                                          GwyGrainValue *chullareagrainvalue,
+                                          GwyGrainValue *excircrgrainvalue,
+                                          GwyGrainValue *excircxgrainvalue,
+                                          GwyGrainValue *excircygrainvalue,
+                                          const guint *grains,
+                                          const guint *anyboundpos,
+                                          const GwyField *field);
+
+G_GNUC_INTERNAL
+void _gwy_grain_value_builtin_inscribed_disc(GwyGrainValue *inscrdrgrainvalue,
+                                             GwyGrainValue *inscrdxgrainvalue,
+                                             GwyGrainValue *inscrdygrainvalue,
+                                             GwyGrainValue *edmeangrainvalue,
+                                             const GwyGrainValue *xgrainvalue,
+                                             const GwyGrainValue *ygrainvalue,
+                                             const guint *grains,
+                                             const guint *sizes,
+                                             const GwyMaskField *mask,
+                                             const GwyField *field);
+
+G_GNUC_INTERNAL
 void _gwy_mask_field_grain_inscribed_discs(gdouble *inscrdrvalues,
                                            gdouble *inscrdxvalues,
                                            gdouble *inscrdyvalues,

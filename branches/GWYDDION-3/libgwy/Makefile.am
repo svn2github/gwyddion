@@ -162,6 +162,7 @@ libgwy3_la_SOURCES = \
 	fitter.c \
 	gl-material.c \
 	gradient.c \
+	grain-value-builtin--chull.c \
 	grain-value-builtin.c \
 	grain-value.c \
 	int-set.c \
