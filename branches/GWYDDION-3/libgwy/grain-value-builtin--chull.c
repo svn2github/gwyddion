@@ -74,54 +74,6 @@ static const gdouble shift_directions[NDIRECTIONS*2] = {
     0.1305261922200517, 0.9914448613738104,
 };
 
-static gboolean
-all_null(guint n, guint *ngrains, ...)
-{
-    va_list ap;
-    va_start(ap, ngrains);
-    for (guint i = 0; i < n; i++) {
-        const GwyGrainValue *grainvalue = va_arg(ap, const GwyGrainValue*);
-        if (grainvalue) {
-            GWY_MAYBE_SET(ngrains, grainvalue->priv->ngrains);
-            va_end(ap);
-            return FALSE;
-        }
-    }
-    va_end(ap);
-    return TRUE;
-}
-
-static gboolean
-check_target(GwyGrainValue *grainvalue,
-             gdouble **values,
-             BuiltinGrainValueId id)
-{
-    if (!grainvalue) {
-        *values = NULL;
-        return TRUE;
-    }
-
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_val_if_fail(builtin && builtin->id == id, FALSE);
-    *values = priv->values;
-    return TRUE;
-}
-
-static gboolean
-check_dependence(const GwyGrainValue *grainvalue,
-                 const gdouble **values,
-                 BuiltinGrainValueId id)
-{
-    *values = NULL;
-    g_return_val_if_fail(grainvalue, FALSE);
-    GrainValue *priv = grainvalue->priv;
-    const BuiltinGrainValue *builtin = priv->builtin;
-    g_return_val_if_fail(builtin && builtin->id == id, FALSE);
-    *values = priv->values;
-    return TRUE;
-}
-
 static inline void
 edge_list_add(EdgeList *list,
               gdouble xa, gdouble ya,
