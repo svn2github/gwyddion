@@ -382,6 +382,7 @@ field/entropy/exponential/ignore
 field/entropy/exponential/include
 field/entropy/exponential/exclude
 field/entropy/tiny
+#field/entropy/outliers
 field/surface-area/planar
 field/surface-area/masked
 field/volume/planar/gwyddion2

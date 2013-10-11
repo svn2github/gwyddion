@@ -20,7 +20,9 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/object-utils.h"
 #include "libgwy/field-statistics.h"
+#include "libgwy/mask-field-arithmetic.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
@@ -705,9 +707,9 @@ gwy_field_entropy(const GwyField *field,
                               &col, &row, &width, &height, &maskcol, &maskrow))
         return NAN;
 
+    GwyFieldPart mpart = { maskcol, maskrow, width, height };
     guint n = width*height;
     if (masking != GWY_MASK_IGNORE) {
-        GwyFieldPart mpart = { maskcol, maskrow, width, height };
         n = gwy_mask_field_part_count(mask, &mpart,
                                       masking == GWY_MASK_INCLUDE);
         if (!n)
@@ -723,6 +725,45 @@ gwy_field_entropy(const GwyField *field,
         return log(max - min);
     if (n == 3)
         return log(max - min) + 0.5*log(1.5) - G_LN2/3.0;
+
+    // Detect the presence of outliers.
+    // FIXME FIXME FIXME This does not work.  We need some robust method in
+    // which the outlies are not able to influence the criterion significantly.
+    gdouble kappa = sqrt(sqrt(n)), mean = 0.5*(max + min), sigma = max - min;
+    if (kappa >= 6.0) {
+        gwy_field_statistics(field, fpart, mask, masking,
+                             &mean, &sigma, NULL, NULL, NULL);
+    }
+
+    gdouble lower = mean - kappa*sigma, upper = mean + kappa*sigma;
+    GwyMaskField *tmpmask = NULL;
+    if (max > upper || min < lower) {
+        // We have serious outlies, must get rid of them and update min, max.
+        // Do that by fixing the mask but keeping @n.  This corresponds to the
+        // reasonable assumption each outlier would get its own bin and thus
+        // contribute zero to the n_i*log(n_i) sum.  There is a reasoanble
+        // upper bound on the error so induced.
+        tmpmask = gwy_mask_field_new_from_field(field, fpart, lower, upper,
+                                                masking == GWY_MASK_EXCLUDE);
+        if (masking != GWY_MASK_IGNORE) {
+            GwyLogicalOperator op = (masking == GWY_MASK_EXCLUDE
+                                     ? GWY_LOGICAL_OR
+                                     : GWY_LOGICAL_AND);
+            if (mask->xres == width && mask->yres == height)
+                gwy_mask_field_logical(tmpmask, mask, NULL, op);
+            else {
+                GwyMaskField *xmask = gwy_mask_field_new_part(mask, &mpart);
+                gwy_mask_field_logical(tmpmask, xmask, NULL, op);
+                g_object_unref(xmask);
+            }
+        }
+        else {
+            masking = GWY_MASK_INCLUDE;
+        }
+        mask = tmpmask;
+        maskcol = maskrow = 0;
+        gwy_field_min_max(field, fpart, mask, masking, &min, &max);
+    }
 
     guint maxdiv = (guint)floor(log2(n) + 1e-12);
     g_assert(maxdiv >= 2);
@@ -813,6 +854,7 @@ gwy_field_entropy(const GwyField *field,
     }
 
     g_free(ecurve);
+    GWY_OBJECT_UNREF(tmpmask);
 
     return S;
 }

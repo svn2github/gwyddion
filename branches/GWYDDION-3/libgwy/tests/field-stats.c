@@ -859,12 +859,13 @@ test_field_median_ignore(void)
 
 static void
 field_entropy_one(GwyMaskingType masking,
-                  guint type)
+                  guint type,
+                  gboolean outliers)
 {
     enum { max_size = 178 };
     GRand *rng = g_rand_new_with_seed(42);
     GwyRand *zrng = gwy_rand_new_with_seed(42);
-    gsize niter = 50;
+    gsize niter = outliers ? 20 : 50;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 8, max_size);
@@ -884,8 +885,12 @@ field_entropy_one(GwyMaskingType masking,
         else if (masking == GWY_MASK_EXCLUDE)
             count = gwy_mask_field_part_count(mask, &fpart, FALSE);
 
-        if (count < 16)
+        if (count < 16 || (outliers && count < 216)) {
+            g_object_unref(field);
+            g_object_unref(mask);
+            iter = MIN(iter-1, iter);
             continue;
+        }
 
         gdouble param = exp(10.0*g_rand_double(rng) - 5.0);
 
@@ -900,6 +905,14 @@ field_entropy_one(GwyMaskingType masking,
         else if (type == 2) {
             for (guint i = 0; i < xres*yres; i++)
                 field->data[i] = param*gwy_rand_exp_positive(zrng);
+        }
+
+        guint nout = outliers ? (guint)sqrt(sqrt(count) + 2.0) : 0;
+        while (nout) {
+            guint i = g_rand_int_range(rng, row, row+height+1);
+            guint j = g_rand_int_range(rng, col, col+width+1);
+            field->data[i*xres + j] = 1e30*(g_rand_double(rng) - 0.5);
+            nout--;
         }
 
         gdouble entropy = gwy_field_entropy(field, &fpart, mask, masking);
@@ -929,55 +942,63 @@ field_entropy_one(GwyMaskingType masking,
 void
 test_field_entropy_uniform_ignore(void)
 {
-    field_entropy_one(GWY_MASK_IGNORE, 0);
+    field_entropy_one(GWY_MASK_IGNORE, 0, FALSE);
 }
 
 void
 test_field_entropy_uniform_include(void)
 {
-    field_entropy_one(GWY_MASK_INCLUDE, 0);
+    field_entropy_one(GWY_MASK_INCLUDE, 0, FALSE);
 }
 
 void
 test_field_entropy_uniform_exclude(void)
 {
-    field_entropy_one(GWY_MASK_IGNORE, 0);
+    field_entropy_one(GWY_MASK_IGNORE, 0, FALSE);
 }
 
 void
 test_field_entropy_normal_ignore(void)
 {
-    field_entropy_one(GWY_MASK_EXCLUDE, 1);
+    field_entropy_one(GWY_MASK_EXCLUDE, 1, FALSE);
 }
 
 void
 test_field_entropy_normal_include(void)
 {
-    field_entropy_one(GWY_MASK_INCLUDE, 1);
+    field_entropy_one(GWY_MASK_INCLUDE, 1, FALSE);
 }
 
 void
 test_field_entropy_normal_exclude(void)
 {
-    field_entropy_one(GWY_MASK_IGNORE, 1);
+    field_entropy_one(GWY_MASK_IGNORE, 1, FALSE);
 }
 
 void
 test_field_entropy_exponential_ignore(void)
 {
-    field_entropy_one(GWY_MASK_EXCLUDE, 2);
+    field_entropy_one(GWY_MASK_EXCLUDE, 2, FALSE);
 }
 
 void
 test_field_entropy_exponential_include(void)
 {
-    field_entropy_one(GWY_MASK_INCLUDE, 2);
+    field_entropy_one(GWY_MASK_INCLUDE, 2, FALSE);
 }
 
 void
 test_field_entropy_exponential_exclude(void)
 {
-    field_entropy_one(GWY_MASK_EXCLUDE, 2);
+    field_entropy_one(GWY_MASK_EXCLUDE, 2, FALSE);
+}
+
+void
+test_field_entropy_outliers(void)
+{
+    field_entropy_one(GWY_MASK_IGNORE, 0, TRUE);
+    field_entropy_one(GWY_MASK_INCLUDE, 0, TRUE);
+    field_entropy_one(GWY_MASK_EXCLUDE, 0, TRUE);
 }
 
 void
