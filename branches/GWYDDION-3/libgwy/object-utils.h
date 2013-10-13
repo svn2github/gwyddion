@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -39,17 +39,19 @@ gboolean gwy_set_user_func            (gpointer func,
                                        gpointer func_field,
                                        gpointer data_field,
                                        GDestroyNotify *destroy_field);
-
 gboolean gwy_set_member_object        (gpointer instance,
                                        gpointer member_object,
                                        GType expected_type,
                                        gpointer member_field,
-                                       ...)                     G_GNUC_NULL_TERMINATED;
+                                       ...)                            G_GNUC_NULL_TERMINATED;
 gboolean gwy_assign_string            (gchar **target,
                                        const gchar *newvalue);
 void     gwy_override_class_properties(GObjectClass *oclass,
                                        GParamSpec **properties,
-                                       ...)                     G_GNUC_NULL_TERMINATED;
+                                       ...)                            G_GNUC_NULL_TERMINATED;
+GType*   gwy_all_type_children        (GType type,
+                                       gboolean concrete,
+                                       guint *n)                       G_GNUC_MALLOC;
 
 G_END_DECLS
 

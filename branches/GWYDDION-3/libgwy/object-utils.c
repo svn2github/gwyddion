@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -291,6 +291,50 @@ gwy_override_class_properties(GObjectClass *oclass,
     va_end(ap);
 
     g_free(pspecs);
+}
+
+static void
+gather_children_recursively(GArray *array,
+                            GType type,
+                            gboolean concrete)
+{
+    guint n;
+    GType *children = g_type_children(type, &n);
+
+    for (guint i = 0; i < n; i++) {
+        GType ctype = children[i];
+        if (!concrete || !G_TYPE_IS_ABSTRACT(ctype))
+            g_array_append_val(array, ctype);
+
+        gather_children_recursively(array, ctype, concrete);
+    }
+
+    g_free(children);
+}
+
+/**
+ * gwy_all_type_children:
+ * @type: A #GType, presumably derivable and instantiatable.
+ * @concrete: %TRUE to gather only concrete types (i.e. those we can actually
+ *            create instances of), %FALSE to gather all types, even abstract.
+ * @n: (out) (allow-none):
+ *     Optional return location for the number of items in the returned array.
+ *
+ * Lists all children of given type, no matter how deeply derived.
+ *
+ * Returns: (array length=n) (transfer full):
+ *          A newly allocated and zero-terminated array of type IDs, listing
+ *          the child types. It must be freed with g_free().
+ **/
+GType*
+gwy_all_type_children(GType type,
+                      gboolean concrete,
+                      guint *n)
+{
+    GArray *result = g_array_new(FALSE, FALSE, sizeof(GType));
+    gather_children_recursively(result, type, concrete);
+    GWY_MAYBE_SET(n, result->len);
+    return (GType*)g_array_free(result, FALSE);
 }
 
 /**

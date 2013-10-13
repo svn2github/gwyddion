@@ -346,4 +346,63 @@ enum_nick(GType type, gint value)
     return retval;
 }
 
+static void
+assert_type_present(const GType *types, guint n, GType type)
+{
+    gboolean found = FALSE;
+    for (guint i = 0; i < n; i++) {
+        if (types[i] == type)
+            return;
+    }
+    g_critical("Type %s not found in the list", g_type_name(type));
+    g_assert(found);
+}
+
+static void
+assert_type_absent(const GType *types, guint n, GType type)
+{
+    gboolean found = FALSE;
+    for (guint i = 0; i < n; i++) {
+        if (types[i] == type) {
+            found = TRUE;
+            g_critical("Type %s found unexpectedly in the list",
+                       g_type_name(type));
+            g_assert(!found);
+            return;
+        }
+    }
+}
+
+void
+test_object_utils_all_type_children_all(void)
+{
+    gwy_type_init();
+    guint n;
+    GType *types = gwy_all_type_children(GWY_TYPE_ARRAY, FALSE, &n);
+
+    assert_type_present(types, n, GWY_TYPE_COORDS);
+    assert_type_present(types, n, GWY_TYPE_COORDS_POINT);
+    assert_type_present(types, n, GWY_TYPE_COORDS_RECTANGLE);
+    assert_type_present(types, n, GWY_TYPE_COORDS_LINE);
+    g_assert_cmpuint(n, ==, 4);
+
+    g_free(types);
+}
+
+void
+test_object_utils_all_type_children_concrete(void)
+{
+    gwy_type_init();
+    guint n;
+    GType *types = gwy_all_type_children(GWY_TYPE_ARRAY, TRUE, &n);
+
+    assert_type_absent(types, n, GWY_TYPE_COORDS);
+    assert_type_present(types, n, GWY_TYPE_COORDS_POINT);
+    assert_type_present(types, n, GWY_TYPE_COORDS_RECTANGLE);
+    assert_type_present(types, n, GWY_TYPE_COORDS_LINE);
+    g_assert_cmpuint(n, ==, 3);
+
+    g_free(types);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
