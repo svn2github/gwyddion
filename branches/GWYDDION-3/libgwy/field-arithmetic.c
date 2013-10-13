@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "libgwy/macros.h"
+#include "libgwy/types.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/math-internal.h"
@@ -903,7 +904,7 @@ gwy_field_sculpt(const GwyField *src,
         return;
     g_return_if_fail(GWY_IS_FIELD(dest));
     g_return_if_fail(dest != src);
-    g_return_if_fail(method <= GWY_SCULPT_DOWNWARD);
+    g_return_if_fail(gwy_sculpt_type_is_valid(method));
 
     guint dxres = dest->xres, dyres = dest->yres;
     if (periodic) {

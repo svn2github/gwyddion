@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@
 #include <libgwy/field-filter.h>
 #include <libgwy/field-inttrans.h>
 #include <libgwy/field-level.h>
+#include <libgwy/field-mark.h>
 #include <libgwy/field-part.h>
 #include <libgwy/field-read.h>
 #include <libgwy/field-statistics.h>

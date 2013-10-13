@@ -375,6 +375,15 @@ field/statistics
 field/median/include
 field/median/exclude
 field/median/ignore
+field/outliers/ignore/up
+field/outliers/ignore/down
+field/outliers/ignore/both
+field/outliers/include/up
+field/outliers/include/down
+field/outliers/include/both
+field/outliers/exclude/up
+field/outliers/exclude/down
+field/outliers/exclude/both
 field/entropy/uniform/ignore
 field/entropy/uniform/include
 field/entropy/uniform/exclude

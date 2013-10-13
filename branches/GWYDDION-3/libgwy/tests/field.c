@@ -2049,4 +2049,148 @@ test_field_read_curvature_at_centre(void)
     g_rand_free(rng);
 }
 
+static void
+field_outliers_one(GwyMaskingType masking,
+                   GwyDeviationType deviation)
+{
+    enum { max_size = 178 };
+    GRand *rng = g_rand_new_with_seed(42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint count = width*height;
+        if (masking == GWY_MASK_INCLUDE)
+            count = gwy_mask_field_part_count(mask, &fpart, TRUE);
+        else if (masking == GWY_MASK_EXCLUDE)
+            count = gwy_mask_field_part_count(mask, &fpart, FALSE);
+
+        guint nout = g_rand_int_range(rng, 0, MAX(count/20, 1) + 1), ti = nout;
+        guint nupper = 0, nlower = 0;
+        while (ti) {
+            guint i = g_rand_int_range(rng, row, row+height);
+            guint j = g_rand_int_range(rng, col, col+width);
+            if (masking == GWY_MASK_INCLUDE && !gwy_mask_field_get(mask, j, i))
+                continue;
+            if (masking == GWY_MASK_EXCLUDE && gwy_mask_field_get(mask, j, i))
+                continue;
+            // Already changed this value.
+            if (fabs(field->data[i*xres + j]) > 2.0)
+                continue;
+
+            gdouble v = 1e30*(g_rand_double(rng) - 0.5);
+            field->data[i*xres + j] = v;
+            if (v > 0.0)
+                nupper++;
+            else
+                nlower++;
+            ti--;
+        }
+        g_assert_cmpuint(nout, ==, nlower + nupper);
+
+        GwyMaskField *outliers = gwy_mask_field_new_sized(width, height, FALSE);
+        guint result = gwy_field_mark_outliers(field, &fpart, outliers,
+                                               mask, masking, deviation, 4.0);
+        if (masking == GWY_MASK_EXCLUDE)
+            gwy_mask_field_logical(mask, NULL, NULL, GWY_LOGICAL_NA);
+
+        guint nset;
+        if (masking != GWY_MASK_IGNORE) {
+            GwyMaskField *maskpart = gwy_mask_field_new_part(mask, &fpart);
+            nset = gwy_mask_field_count(outliers, maskpart, TRUE);
+            g_object_unref(maskpart);
+        }
+        else
+            nset = gwy_mask_field_count(outliers, NULL, TRUE);
+        g_assert_cmpuint(nset, ==, result);
+
+        if (count >= 6) {
+            if (deviation == GWY_DEVIATION_UP)
+                g_assert_cmpuint(result, ==, nupper);
+            else if (deviation == GWY_DEVIATION_DOWN)
+                g_assert_cmpuint(result, ==, nlower);
+            else if (deviation == GWY_DEVIATION_BOTH)
+                g_assert_cmpuint(result, ==, nupper + nlower);
+            else
+                g_assert_not_reached();
+        }
+        else {
+            // FIXME: This is the current implementation, not an absolute
+            // criterion.  If we can detect outliers in very small sample sizes
+            // update this.
+            g_assert_cmpuint(result, ==, 0);
+        }
+
+        g_object_unref(outliers);
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_outliers_ignore_up(void)
+{
+    field_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_UP);
+}
+
+void
+test_field_outliers_ignore_down(void)
+{
+    field_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_DOWN);
+}
+
+void
+test_field_outliers_ignore_both(void)
+{
+    field_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_BOTH);
+}
+
+void
+test_field_outliers_include_up(void)
+{
+    field_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_UP);
+}
+
+void
+test_field_outliers_include_down(void)
+{
+    field_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_DOWN);
+}
+
+void
+test_field_outliers_include_both(void)
+{
+    field_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_BOTH);
+}
+
+void
+test_field_outliers_exclude_up(void)
+{
+    field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_UP);
+}
+
+void
+test_field_outliers_exclude_down(void)
+{
+    field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_DOWN);
+}
+
+void
+test_field_outliers_exclude_both(void)
+{
+    field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_BOTH);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

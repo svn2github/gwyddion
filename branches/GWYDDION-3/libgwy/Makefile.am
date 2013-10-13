@@ -39,6 +39,7 @@ public_headers = \
 	$(srcdir)/field-filter.h \
 	$(srcdir)/field-inttrans.h \
 	$(srcdir)/field-level.h \
+	$(srcdir)/field-mark.h \
 	$(srcdir)/field-part.h \
 	$(srcdir)/field-read.h \
 	$(srcdir)/field-statistics.h \
@@ -150,6 +151,7 @@ libgwy3_la_SOURCES = \
 	field-inttrans.c \
 	field-level--laplace.c \
 	field-level.c \
+	field-mark.c \
 	field-part.c \
 	field-read.c \
 	field-statistics.c \

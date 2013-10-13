@@ -619,13 +619,13 @@ logical_part(const GwyMaskField *src,
  * @operand: A two-dimensional mask field representing second operand of the
  *           logical operation.  It can be %NULL for degenerate operations that
  *           do not depend on the second operand.
- * @opcol: Operand column in @dest.
- * @oprow: Operand row in @dest.
+ * @opcol: Starting column in @operand.
+ * @oprow: Starting row in @operand.
  * @op: Logical operation to perform.
  *
  * Modifies a mask field by logical operation with another mask field.
  *
- * The copied rectangle is defined by @fpart and it is modified using data
+ * The processed rectangle is defined by @fpart and it is modified using data
  * in @operand starting from (@opcol, @oprow).  Note that although this method
  * resembles gwy_mask_field_copy() the arguments convention is different: the
  * destination comes first then the operand, similarly to in

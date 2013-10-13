@@ -1673,9 +1673,9 @@ gwy_field_check_mask(const GwyField *field,
  *         return;
  *
  *     guint targetcol, targetrow;
- *     if !gwy_field_check_target_mask(field, target,
- *                                     &(GwyFieldPart){ col, row, width, height },
- *                                     &targetcol, &targetrow))
+ *     if (!gwy_field_check_target_mask(field, target,
+ *                                      &(GwyFieldPart){ col, row, width, height },
+ *                                      &targetcol, &targetrow))
  *         return;
  *
  *     // Perform the marking of @field part given by @col, @row, @width and
