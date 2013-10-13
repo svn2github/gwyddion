@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -179,6 +179,11 @@ gboolean gwy_field_check_mask       (const GwyField *field,
                                      guint *height,
                                      guint *maskcol,
                                      guint *maskrow);
+gboolean gwy_field_check_target_mask(const GwyField *field,
+                                     const GwyMaskField *target,
+                                     const GwyFieldPart *fpart,
+                                     guint *targetcol,
+                                     guint *targetrow);
 
 G_END_DECLS
 

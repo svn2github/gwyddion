@@ -1637,6 +1637,91 @@ gwy_field_check_mask(const GwyField *field,
 }
 
 /**
+ * gwy_field_check_target_mask:
+ * @field: A two-dimensional data field.
+ * @target: A two-dimensional mask field.
+ * @fpart: (allow-none):
+ *         Area in @field and/or @target, possibly %NULL which means entire
+ *         @field.
+ * @targetcol: Location to store the actual column index of the upper-left
+ *             corner of the part in the target.
+ * @targetrow: Location to store the actual row index of the upper-left corner
+ *             of the part in the target.
+ *
+ * Validates the position and dimensions of a target mask field.
+ *
+ * Dimensions of @target must match either @field or @fpart.  In the first case
+ * the rectangular part is the same in @field and @target.  In the second case
+ * the target corresponds only to the field part.
+ *
+ * If the position and dimensions are valid @targetcol and @targetrow are set
+ * to the actual position in @target.  If the function returns %FALSE their
+ * values are undefined.
+ *
+ * This function is typically used in marking functions that set a mask field
+ * using the values from a data field.
+ * Example (note gwy_field_mark_outliers() can mark outliers):
+ * |[
+ * void
+ * mark_outliers(const GwyField *field,
+ *               const GwyFieldPart *fpart,
+ *               GwyMaskField *target)
+ * {
+ *     guint col, row, width, height;
+ *     if (!gwy_field_check_part(field, fpart,
+ *                               &col, &row, &width, &height))
+ *         return;
+ *
+ *     guint targetcol, targetrow;
+ *     if !gwy_field_check_target_mask(field, target,
+ *                                     &(GwyFieldPart){ col, row, width, height },
+ *                                     &targetcol, &targetrow))
+ *         return;
+ *
+ *     // Perform the marking of @field part given by @col, @row, @width and
+ *     // @height and put the result into an equally-sized area in @target at
+ *     // @targetcol, @targetrow...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @field or @target is not a #GwyField instance or the
+ *          position or dimensions is invalid (a critical error is emitted in
+ *          these cases) or the actual part is zero-sized.
+ **/
+gboolean
+gwy_field_check_target_mask(const GwyField *field,
+                            const GwyMaskField *target,
+                            const GwyFieldPart *fpart,
+                            guint *targetcol,
+                            guint *targetrow)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(target), FALSE);
+
+    // We normally always pass non-NULL @fpart but permit also NULL.
+    if (!fpart)
+        fpart = &(GwyFieldPart){ 0, 0, field->xres, field->yres };
+    else if (!fpart->width || !fpart->height)
+        return FALSE;
+
+    if (target->xres == field->xres && target->yres == field->yres) {
+        *targetcol = fpart->col;
+        *targetrow = fpart->row;
+        return TRUE;
+    }
+    if (target->xres == fpart->width && target->yres == fpart->height) {
+        *targetcol = *targetrow = 0;
+        return TRUE;
+    }
+
+    g_critical("Target field dimensions match neither source field nor the "
+               "part.");
+    return FALSE;
+}
+
+/**
  * gwy_field_format_xy:
  * @field: A two-dimensional data field.
  * @style: Output format style.
