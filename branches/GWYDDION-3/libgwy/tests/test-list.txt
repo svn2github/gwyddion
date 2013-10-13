@@ -393,8 +393,10 @@ field/entropy/normal/exclude
 field/entropy/exponential/ignore
 field/entropy/exponential/include
 field/entropy/exponential/exclude
+field/entropy/outliers/ignore
+field/entropy/outliers/include
+field/entropy/outliers/exclude
 field/entropy/tiny
-#field/entropy/outliers
 field/surface-area/planar
 field/surface-area/masked
 field/volume/planar/gwyddion2

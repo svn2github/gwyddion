@@ -908,11 +908,10 @@ field_entropy_one(GwyMaskingType masking,
         }
 
         guint nout = outliers ? (guint)sqrt(sqrt(count) + 2.0) : 0;
-        while (nout) {
-            guint i = g_rand_int_range(rng, row, row+height+1);
-            guint j = g_rand_int_range(rng, col, col+width+1);
+        for (guint k = 0; k < nout; k++) {
+            guint i = g_rand_int_range(rng, row, row+height);
+            guint j = g_rand_int_range(rng, col, col+width);
             field->data[i*xres + j] = 1e30*(g_rand_double(rng) - 0.5);
-            nout--;
         }
 
         gdouble entropy = gwy_field_entropy(field, &fpart, mask, masking);
@@ -930,6 +929,11 @@ field_entropy_one(GwyMaskingType masking,
         gdouble eps = 3.5/sqrt(count);
         if (type == 0)
             eps = 12.0/count;
+        if (nout) {
+            gdouble r = (gdouble)nout/count;
+            eps += 2.0*r*(fmax(fabs(expected), 1.0)
+                          + fabs(log(param/sqrt(count))));
+        }
         gwy_assert_floatval(expected, entropy, eps);
 
         g_object_unref(mask);
@@ -994,10 +998,20 @@ test_field_entropy_exponential_exclude(void)
 }
 
 void
-test_field_entropy_outliers(void)
+test_field_entropy_outliers_ignore(void)
 {
     field_entropy_one(GWY_MASK_IGNORE, 0, TRUE);
+}
+
+void
+test_field_entropy_outliers_include(void)
+{
     field_entropy_one(GWY_MASK_INCLUDE, 0, TRUE);
+}
+
+void
+test_field_entropy_outliers_exclude(void)
+{
     field_entropy_one(GWY_MASK_EXCLUDE, 0, TRUE);
 }
 

@@ -987,7 +987,8 @@ gwy_mask_field_grow(GwyMaskField *field,
  * @GWY_LOGICAL_NIMPL: Negated implication @A ⇏ @B, @A ∧ ¬@B, mask
  *                     subtraction.
  * @GWY_LOGICAL_A: First operand @A, no change to the mask.
- * @GWY_LOGICAL_NCIMPL: Negated converse implication @A ⇍ @B, ¬@A ∧ @B.
+ * @GWY_LOGICAL_NCIMPL: Negated converse implication @A ⇍ @B, ¬@A ∧ @B,
+ *                      mask subtraction with exchanged arguments.
  * @GWY_LOGICAL_B: Second operand @B, mask copying.
  * @GWY_LOGICAL_XOR: Exclusive disjunction @A ⊻ @B, symmetrical mask
  *                   subtraction.

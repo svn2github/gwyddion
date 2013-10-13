@@ -79,7 +79,11 @@ gwy_field_mark_outliers(const GwyField *field,
                                      &(GwyFieldPart){ col, row, width, height },
                                      &targetcol, &targetrow))
          return 0;
+
     g_return_val_if_fail(gwy_deviation_type_is_valid(deviation), 0);
+    g_return_val_if_fail(threshold >= 0.0, 0);
+    if (threshold == 0.0)
+        threshold = 3.5;
 
     GwyFieldPart mpart = { maskcol, maskrow, width, height };
     GwyFieldPart tpart = { targetrow, targetrow, width, height };
