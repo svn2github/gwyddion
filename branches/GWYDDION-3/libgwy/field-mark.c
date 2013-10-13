@@ -21,7 +21,9 @@
 #include "libgwy/math.h"
 #include "libgwy/types.h"
 #include "libgwy/mask-field-arithmetic.h"
+#include "libgwy/field-statistics.h"
 #include "libgwy/field-mark.h"
+#include "libgwy/mask-field-internal.h"
 
 // √2 erf⁻¹(2/3)
 #define K2_3 0.9674215661017013
@@ -205,6 +207,185 @@ gwy_field_mark_outliers(const GwyField *field,
     }
 
     return nout;
+}
+
+// Mark sharp maxima with 2, known non-maxima with 1.
+static guint
+mark_maxima(const GwyField *field,
+            guint *types)
+{
+    guint xres = field->xres, yres = field->yres;
+    const gdouble *d = field->data;
+
+    guint k = 0, unmarked = xres*yres;
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            // Mark non-maxima.
+            if ((i && d[k] < d[k-xres])
+                || (j && d[k] < d[k-1])
+                || (j < xres-1 && d[k] < d[k+1])
+                || (i < yres-1 && d[k] < d[k+xres])) {
+                types[k] = 1;
+                unmarked--;
+            }
+            // Mark maxima.
+            else if ((!i || d[k] > d[k-xres])
+                     && (!j || d[k] > d[k-1])
+                     && (j == xres-1 || d[k] > d[k+1])
+                     && (i == yres-1 || d[k] > d[k+xres])) {
+                types[k] = 2;
+                unmarked--;
+            }
+        }
+    }
+
+    return unmarked;
+}
+
+// Mark sharp minima with 2, known non-minima with 1.
+static guint
+mark_minima(const GwyField *field,
+            guint *types)
+{
+    guint xres = field->xres, yres = field->yres;
+    const gdouble *d = field->data;
+
+    guint k = 0, unmarked = xres*yres;
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            // Mark non-minima.
+            if ((i && d[k] > d[k-xres])
+                || (j && d[k] > d[k-1])
+                || (j < xres-1 && d[k] > d[k+1])
+                || (i < yres-1 && d[k] > d[k+xres])) {
+                types[k] = 1;
+                unmarked--;
+            }
+            // Mark minima.
+            else if ((!i || d[k] < d[k-xres])
+                     && (!j || d[k] < d[k-1])
+                     && (j == xres-1 || d[k] < d[k+1])
+                     && (i == yres-1 || d[k] < d[k+xres])) {
+                types[k] = 2;
+                unmarked--;
+            }
+        }
+    }
+
+    return unmarked;
+}
+
+// Propagate non-maxima type to all pixels of the same value.  Or minima. This
+// alogorithm no longer depends on how the states was marked, it just
+// propagates the 1 state though identical values.
+static void
+propagate_non_extrema_marking(guint *types, const gdouble *d,
+                              guint xres, guint yres)
+{
+    IntList *inqueue = int_list_new(16);
+    IntList *outqueue = int_list_new(16);
+    guint k = 0;
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++, k++) {
+            if (types[k])
+                continue;
+            // If the value is equal to some neighbour which is a known
+            // non-maximum then this pixel is also non-maximum.  (If the
+            // neighbour is a known maximum this pixel cannot be unknown.)
+            if ((i && types[k-xres] && d[k] == d[k-xres])
+                || (j && types[k-1] && d[k] == d[k-1])
+                || (j < xres-1 && types[k+1] && d[k] == d[k+1])
+                || (i < yres-1 && types[k+xres] && d[k] == d[k+xres])) {
+                types[k] = 1;
+                int_list_add(outqueue, k);
+            }
+        }
+    }
+    GWY_SWAP(IntList*, inqueue, outqueue);
+
+    while (inqueue->len) {
+        for (guint m = 0; m < inqueue->len; m++) {
+            k = inqueue->data[m];
+            guint i = k/xres, j = k % xres;
+
+            // Propagate the non-maximum type to all still unknown
+            // neighbours.  Since we set them to known immediately, double
+            // queuing is avoided.
+            if (i && !types[k-xres]) {
+                types[k-xres] = 1;
+                int_list_add(outqueue, k-xres);
+            }
+            if (j && !types[k-1]) {
+                types[k-1] = 1;
+                int_list_add(outqueue, k-1);
+            }
+            if (j < xres-1 && !types[k+1]) {
+                types[k+1] = 1;
+                int_list_add(outqueue, k+1);
+            }
+            if (i < yres-1 && !types[k+xres]) {
+                types[k+xres] = 1;
+                int_list_add(outqueue, k+xres);
+            }
+        }
+
+        inqueue->len = 0;
+        GWY_SWAP(IntList*, inqueue, outqueue);
+    }
+
+    int_list_free(inqueue);
+    int_list_free(outqueue);
+}
+
+// TODO: Support parts/masks.
+/**
+ * gwy_field_mark_extrema:
+ * @field: A two-dimensional data field.
+ * @extrema: Target mask field for the extrema mask.
+ * @maxima: %TRUE to mark maxima, %FALSE to mark minima.
+ *
+ * Marks local maxima or minima in a two-dimensional field.
+ *
+ * Maximum is a contiguous set of pixels that have the same value and this
+ * value is sharply greater than the value of any pixel touching the set.  A
+ * minimum is defined analogously.  A field filled with a single value is
+ * considered to have neither minimum nor maximum.
+ **/
+void
+gwy_field_mark_extrema(const GwyField *field,
+                       GwyMaskField *extrema,
+                       gboolean maxima)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GWY_IS_MASK_FIELD(extrema));
+    guint xres = field->xres, yres = field->yres;
+    g_return_if_fail(extrema->xres == xres);
+    g_return_if_fail(extrema->yres == yres);
+
+    gwy_mask_field_fill(extrema, NULL, FALSE);
+
+    gdouble min, max;
+    gwy_field_min_max_full(field, &min, &max);
+    // This takes care of 1×1 fields too.
+    if (min == max)
+        return;
+
+    guint *types = g_new0(guint, xres*yres);
+    guint unmarked = (maxima ? mark_maxima : mark_minima)(field, types);
+
+    if (unmarked)
+        propagate_non_extrema_marking(types, field->data, xres, yres);
+
+    // Mark 1 as 0 (non-extremum); mark 0 and 2 as 1 (extremum).  The remaining
+    // 0s are exactly those flat areas which cannot be made non-maximum, i.e.
+    // they must be maxima.  Assume extrema are relatively sparse so prefer
+    // fast iteration compared to fast mask bit setting.
+    for (guint k = 0; k < xres*yres; k++) {
+        if (!(types[k] & 1))
+            gwy_mask_field_set(extrema, k % xres, k/xres, TRUE);
+    }
+
+    g_free(types);
 }
 
 /**

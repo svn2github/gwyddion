@@ -2193,4 +2193,300 @@ test_field_outliers_exclude_both(void)
     field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_BOTH);
 }
 
+static void
+field_mark_extrema_one(const gdouble *data, guint xres, guint yres,
+                       const gchar *expected_str,
+                       gboolean maxima)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_assign(field->data, data, xres*yres);
+    GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+    gwy_field_mark_extrema(field, mask, maxima);
+    GwyMaskField *expected = mask_field_from_string(expected_str);
+    mask_field_assert_equal(mask, expected);
+    g_object_unref(expected);
+    g_object_unref(mask);
+    g_object_unref(field);
+}
+
+void
+test_field_mark_maxima_maze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+        1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "### ### ###\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # ### #\n"
+        "# # #      \n"
+        "# # #######\n"
+        "# #     #  \n"
+        "# #########\n";
+    field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_field_mark_maxima_badmaze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 2,
+        1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+        1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "          #\n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n";
+    field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_field_mark_maxima_pinhole(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "######## ##\n"
+        "###########\n"
+        "###########\n";
+    field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_field_mark_maxima_tip(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "        #  \n"
+        "           \n"
+        "           \n";
+    field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_field_mark_maxima_chessboard(void)
+{
+    enum { xres = 12, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1,
+        1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1,
+        1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1,
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+        1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+        1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+    };
+    const gchar *expected_str =
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "      ###   \n"
+        "      ###   \n"
+        "      ###   \n"
+        "###      ###\n"
+        "###      ###\n"
+        "###      ###\n";
+    field_mark_extrema_one(data, xres, yres, expected_str, TRUE);
+}
+
+void
+test_field_mark_minima_maze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1,  0, -1, -1, -1,  0, -1, -1, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1, -1, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0,  0,  0,  0,  0,  0,
+        -1,  0, -1,  0, -1, -1, -1, -1, -1, -1, -1,
+        -1,  0, -1,  0,  0,  0,  0,  0, -1,  0,  0,
+        -1,  0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "### ### ###\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # # # #\n"
+        "# # # ### #\n"
+        "# # #      \n"
+        "# # #######\n"
+        "# #     #  \n"
+        "# #########\n";
+    field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_field_mark_minima_badmaze(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1,  0, -1, -1, -1,  0, -1, -1, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1,  0, -1,  0, -1,
+        -1,  0, -1,  0, -1,  0, -1, -1, -1,  0, -2,
+        -1,  0, -1,  0, -1,  0,  0,  0,  0,  0,  0,
+        -1,  0, -1,  0, -1, -1, -1, -1, -1, -1, -1,
+        -1,  0, -1,  0,  0,  0,  0,  0, -1,  0,  0,
+        -1,  0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "          #\n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n";
+    field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_field_mark_minima_pinhole(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,  0, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "###########\n"
+        "######## ##\n"
+        "###########\n"
+        "###########\n";
+    field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_field_mark_minima_tip(void)
+{
+    enum { xres = 11, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -2, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    };
+    const gchar *expected_str =
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "           \n"
+        "        #  \n"
+        "           \n"
+        "           \n";
+    field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
+void
+test_field_mark_minima_chessboard(void)
+{
+    enum { xres = 12, yres = 9 };
+    static const gdouble data[xres*yres] = {
+        -1, -1, -1, -2, -2, -2,  0,  0,  0, -1, -1, -1,
+        -1, -1, -1, -2, -2, -2,  0,  0,  0, -1, -1, -1,
+        -1, -1, -1, -2, -2, -2,  0,  0,  0, -1, -1, -1,
+         0,  0,  0, -1, -1, -1, -2, -2, -2,  0,  0,  0,
+         0,  0,  0, -1, -1, -1, -2, -2, -2,  0,  0,  0,
+         0,  0,  0, -1, -1, -1, -2, -2, -2,  0,  0,  0,
+        -1, -1, -1,  0,  0,  0, -1, -1, -1, -2, -2, -2,
+        -1, -1, -1,  0,  0,  0, -1, -1, -1, -2, -2, -2,
+        -1, -1, -1,  0,  0,  0, -1, -1, -1, -2, -2, -2,
+    };
+    const gchar *expected_str =
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "   ###   ###\n"
+        "      ###   \n"
+        "      ###   \n"
+        "      ###   \n"
+        "###      ###\n"
+        "###      ###\n"
+        "###      ###\n";
+    field_mark_extrema_one(data, xres, yres, expected_str, FALSE);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

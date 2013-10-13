@@ -41,9 +41,6 @@ void                gwy_mask_field_extract_grain       (const GwyMaskField *fiel
                                                         GwyMaskField *target,
                                                         guint grain_id,
                                                         guint border_width);
-void                gwy_mask_field_mark_extrema        (GwyMaskField *field,
-                                                        const GwyField *heightfield,
-                                                        gboolean maxima);
 
 G_END_DECLS
 
