@@ -2050,8 +2050,8 @@ test_field_read_curvature_at_centre(void)
 }
 
 static void
-field_outliers_one(GwyMaskingType masking,
-                   GwyDeviationType deviation)
+field_mark_outliers_one(GwyMaskingType masking,
+                        GwyDeviationType deviation)
 {
     enum { max_size = 178 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -2140,57 +2140,57 @@ field_outliers_one(GwyMaskingType masking,
 }
 
 void
-test_field_outliers_ignore_up(void)
+test_field_mark_outliers_ignore_up(void)
 {
-    field_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_UP);
+    field_mark_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_UP);
 }
 
 void
-test_field_outliers_ignore_down(void)
+test_field_mark_outliers_ignore_down(void)
 {
-    field_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_DOWN);
+    field_mark_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_DOWN);
 }
 
 void
-test_field_outliers_ignore_both(void)
+test_field_mark_outliers_ignore_both(void)
 {
-    field_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_BOTH);
+    field_mark_outliers_one(GWY_MASK_IGNORE, GWY_DEVIATION_BOTH);
 }
 
 void
-test_field_outliers_include_up(void)
+test_field_mark_outliers_include_up(void)
 {
-    field_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_UP);
+    field_mark_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_UP);
 }
 
 void
-test_field_outliers_include_down(void)
+test_field_mark_outliers_include_down(void)
 {
-    field_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_DOWN);
+    field_mark_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_DOWN);
 }
 
 void
-test_field_outliers_include_both(void)
+test_field_mark_outliers_include_both(void)
 {
-    field_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_BOTH);
+    field_mark_outliers_one(GWY_MASK_INCLUDE, GWY_DEVIATION_BOTH);
 }
 
 void
-test_field_outliers_exclude_up(void)
+test_field_mark_outliers_exclude_up(void)
 {
-    field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_UP);
+    field_mark_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_UP);
 }
 
 void
-test_field_outliers_exclude_down(void)
+test_field_mark_outliers_exclude_down(void)
 {
-    field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_DOWN);
+    field_mark_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_DOWN);
 }
 
 void
-test_field_outliers_exclude_both(void)
+test_field_mark_outliers_exclude_both(void)
 {
-    field_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_BOTH);
+    field_mark_outliers_one(GWY_MASK_EXCLUDE, GWY_DEVIATION_BOTH);
 }
 
 static void
