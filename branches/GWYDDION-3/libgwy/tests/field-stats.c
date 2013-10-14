@@ -926,9 +926,9 @@ field_entropy_one(GwyMaskingType masking,
 
         // Note this is not an absolute criterion, depending on what numbers
         // we get from the generator, the difference may be larger.
-        gdouble eps = 3.5/sqrt(count);
+        gdouble eps = 4.0/sqrt(count);
         if (type == 0)
-            eps = 12.0/count;
+            eps = 15.0/count;
         if (nout) {
             gdouble r = (gdouble)nout/count;
             eps += 2.0*r*(fmax(fabs(expected), 1.0)
