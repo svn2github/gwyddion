@@ -1822,7 +1822,7 @@ fill_tick_arrays(GwyAxis *axis, guint level,
         if (priv->logscale)
             value = next_tick_log(value, &idx, logsteptype, to >= from);
         else
-            value += if_zero_then_exactly((i + 1)*bs + start, bs);
+            value = if_zero_then_exactly((i + 1)*bs + start, bs);
 
         gboolean at_zero = (units_pos == GWY_AXIS_UNITS_ZERO
                             && tick.value == 0.0);
