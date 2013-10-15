@@ -444,6 +444,50 @@ create_graph_window(void)
     return window;
 }
 
+static gboolean
+axis_draw_line(GtkWidget *axis,
+               cairo_t *cr)
+{
+    gdouble w = gtk_widget_get_allocated_width(axis);
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_set_line_width(cr, 1.0);
+    cairo_move_to(cr, 0.0, 0.5);
+    cairo_line_to(cr, w, 0.5);
+    cairo_stroke(cr);
+    return FALSE;
+}
+
+static GtkWidget*
+create_axes_window(void)
+{
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size(GTK_WINDOW(window), 640, 360);
+    gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Axis Test");
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    GtkGrid *grid = (GtkGrid*)gtk_grid_new();
+    gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
+
+    static const GwyRange ranges[] = {
+        { 0.0, 15.0 },
+        { 1.0, 2.0 },
+        { 0.0, 1235.0 },
+        { -5.0, 0.1 },
+        { -0.000001, -0.00001 },
+        { 3.234231e6, 8.34321e8 },
+    };
+    for (guint i = 0; i < G_N_ELEMENTS(ranges); i++) {
+        GtkWidget *axis = gwy_graph_axis_new();
+        g_object_set(axis, "hexpand", TRUE, "margin", 8, NULL);
+        gwy_axis_set_edge(GWY_AXIS(axis), GTK_POS_BOTTOM);
+        gwy_axis_request_range(GWY_AXIS(axis), ranges + i);
+        gtk_grid_attach(grid, GTK_WIDGET(axis), 0, i, 1, 1);
+        g_signal_connect(axis, "draw", G_CALLBACK(axis_draw_line), NULL);
+    }
+
+    return window;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -481,6 +525,9 @@ main(int argc, char *argv[])
 
     GtkWidget *gwindow = create_graph_window();
     gtk_widget_show_all(gwindow);
+
+    GtkWidget *awindow = create_axes_window();
+    gtk_widget_show_all(awindow);
 
     gtk_main();
 
