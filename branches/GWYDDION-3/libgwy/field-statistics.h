@@ -94,6 +94,12 @@ gdouble gwy_field_volume           (const GwyField *field,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking,
                                     GwyFieldVolumeMethod method);
+gdouble gwy_field_material_volume  (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking,
+                                    gboolean material,
+                                    gdouble base);
 guint   gwy_field_count_above_below(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,

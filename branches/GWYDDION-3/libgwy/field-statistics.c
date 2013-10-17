@@ -43,6 +43,20 @@ typedef struct {
     gdouble wortho;
 } VolumeQuadratureData;
 
+typedef struct {
+    gdouble base;
+    gdouble v;
+} MaterialQuadratureData;
+
+// We store only the self and orthogonal weight, the diagonal is always 1.
+static const gdouble volume_weights[][2] = {
+    { 484.0, 22.0, },  // Default = biqudratic
+    { 52.0, 10.0, },   // Gwyddion2
+    { 36.0, 6.0, },    // Triangular
+    { 28.0, 4.0, },    // Bilinear
+    { 484.0, 22.0, },  // Biqudratic
+};
+
 /**
  * gwy_field_min_max:
  * @field: A two-dimensional data field.
@@ -1144,23 +1158,191 @@ gwy_field_volume(const GwyField *field,
                  GwyMaskingType masking,
                  GwyFieldVolumeMethod method)
 {
-    // We store only the self and orthogonal weight, the diagonal is always 1.
-    static const gdouble weights[][2] = {
-        { 484.0, 22.0, },  // Default = biqudratic
-        { 52.0, 10.0, },   // Gwyddion2
-        { 36.0, 6.0, },    // Triangular
-        { 28.0, 4.0, },    // Bilinear
-        { 484.0, 22.0, },  // Biqudratic
-    };
     g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
-    g_return_val_if_fail(method < G_N_ELEMENTS(weights), 0.0);
+    g_return_val_if_fail(method < G_N_ELEMENTS(volume_weights), 0.0);
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
-    gdouble wself = weights[method][0], wortho = weights[method][1];
-    VolumeQuadratureData vqdata = { 0.0, 0.25*wself, 0.5*wortho };
+    gdouble wself = volume_weights[method][0],
+            wortho = volume_weights[method][1];
+    VolumeQuadratureData vqdata = {
+        .s = 0.0, .wself = 0.25*wself, .wortho = 0.5*wortho
+    };
     gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
                                volume_quadrature, &vqdata);
     gdouble volume = vqdata.s*dx*dy/(wself + 4.0*wortho + 4.0);
+    return volume;
+}
+
+static gdouble
+volume_triprism_material(gdouble za, gdouble zb, gdouble zc)
+{
+    gdouble min1 = fmin(za, zc);
+    gdouble min = fmin(min1, zb);
+    if (min >= 0.0)
+        return za + zb + zc;
+
+    gdouble max1 = fmax(za, zc);
+    gdouble max = fmax(max1, zb);
+    if (max <= 0.0)
+        return 0.0;
+
+    // Zero level crosses the triangle, must calculate the positive part.
+    gdouble mid = zb;
+    if (min1 != min)
+        mid = min1;
+    else if (max1 != max)
+        mid = max1;
+
+    if (mid <= 0.0)
+        return max*max*max/(max - min)/(max - mid);
+
+    gdouble p = mid/(max - min), q = max/(mid - min);
+    return p*mid + q*max - p*q*min;
+}
+
+static void
+volume_material_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                           guint w1, guint w2, guint w3, guint w4,
+                           gpointer user_data)
+{
+    MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
+    z1 -= mqdata->base;
+    z2 -= mqdata->base;
+    z3 -= mqdata->base;
+    z4 -= mqdata->base;
+
+    gdouble v = 0.0;
+    gdouble zc = 0.5*(z1 + z2 + z3 + z4);
+    if (w1) {
+        v += (volume_triprism_material(0.5*(z1 + z2), z1, zc)
+              + volume_triprism_material(0.5*(z4 + z1), zc, z1));
+    }
+    if (w2) {
+        v += (volume_triprism_material(0.5*(z1 + z2), z2, zc)
+              + volume_triprism_material(0.5*(z2 + z3), zc, z2));
+    }
+    if (w3) {
+        v += (volume_triprism_material(0.5*(z2 + z3), zc, z3)
+              + volume_triprism_material(0.4*(z3 + z4), z3, zc));
+    }
+    if (w4) {
+        v += (volume_triprism_material(0.5*(z4 + z1), zc, z4)
+              + volume_triprism_material(0.5*(z3 + z4), z4, zc));
+    }
+    mqdata->v += v;
+}
+
+static gdouble
+volume_triprism_voids(gdouble za, gdouble zb, gdouble zc)
+{
+    gdouble min1 = fmin(za, zc);
+    gdouble min = fmin(min1, zb);
+    if (min >= 0.0)
+        return 0.0;
+
+    gdouble max1 = fmax(za, zc);
+    gdouble max = fmax(max1, zb);
+    if (max <= 0.0)
+        return za + zb + zc;
+
+    // Zero level crosses the triangle, must calculate the negative part.
+    gdouble mid = zb;
+    if (min1 != min)
+        mid = min1;
+    else if (max1 != max)
+        mid = max1;
+
+    if (mid >= 0.0)
+        return min*min*min/(min - max)/(min - mid);
+
+    gdouble p = mid/(min - max), q = min/(min - mid);
+    return p*mid + q*min - p*q*max;
+}
+
+static void
+volume_voids_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                        guint w1, guint w2, guint w3, guint w4,
+                        gpointer user_data)
+{
+    MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
+    z1 -= mqdata->base;
+    z2 -= mqdata->base;
+    z3 -= mqdata->base;
+    z4 -= mqdata->base;
+
+    gdouble v = 0.0;
+    gdouble zc = 0.5*(z1 + z2 + z3 + z4);
+    if (w1) {
+        v += (volume_triprism_voids(0.5*(z1 + z2), z1, zc)
+              + volume_triprism_voids(0.5*(z4 + z1), zc, z1));
+    }
+    if (w2) {
+        v += (volume_triprism_voids(0.5*(z1 + z2), z2, zc)
+              + volume_triprism_voids(0.5*(z2 + z3), zc, z2));
+    }
+    if (w3) {
+        v += (volume_triprism_voids(0.5*(z2 + z3), zc, z3)
+              + volume_triprism_voids(0.4*(z3 + z4), z3, zc));
+    }
+    if (w4) {
+        v += (volume_triprism_voids(0.5*(z4 + z1), zc, z4)
+              + volume_triprism_voids(0.5*(z3 + z4), z4, zc));
+    }
+    mqdata->v += v;
+}
+
+/**
+ * gwy_field_material_volume:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @material: %TRUE to calculate the material volume above @base, %FALSE to
+ *            calculate the volume of voids below @base.
+ * @base: Base level above or below which the volume is to be calculated.
+ *        Usually, but not necessarily, it is the field minimum or maximum.
+ *
+ * Calculates the volume of material or voids between a field surface and given
+ * base level.
+ *
+ * This functions differs from gwy_field_volume() substantially.  If material
+ * volume above a certain base is calculated then only the parts of the surface
+ * that are above the base contribute to the result.  The parts below the base
+ * do not contribute at all, whereas in gwy_field_volume() they contribute a
+ * negative volume.
+ *
+ * The quadrature method corresponds to %GWY_FIELD_VOLUME_TRIANGULAR since
+ * this method actually specifies the surface shape and its intersections with
+ * the base level are well-defined.
+ *
+ * Returns: The volume of material above @base and below the field.
+ **/
+gdouble
+gwy_field_material_volume(const GwyField *field,
+                          const GwyFieldPart *fpart,
+                          const GwyMaskField *mask,
+                          GwyMaskingType masking,
+                          gboolean material,
+                          gdouble base)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
+
+    MaterialQuadratureData mqdata = { .base = base, .v = 0.0 };
+    if (material)
+        gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
+                                   volume_material_quadrature, &mqdata);
+    else {
+        // This integrates the volume below as negative.  Must invert the
+        // result.
+        gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
+                                   volume_voids_quadrature, &mqdata);
+        mqdata.v = -mqdata.v;
+    }
+
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
+    gdouble volume = mqdata.v*dx*dy/24.0;
     return volume;
 }
 
