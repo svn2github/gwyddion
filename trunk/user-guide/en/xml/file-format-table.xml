@@ -1049,6 +1049,16 @@ supported.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module zemax.c -->
+    <row>
+      <entry>Zemax grid sag data</entry>
+      <entry>.dat</entry>
+      <entry>zemax</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module hdrimage.cc -->
     <row>
       <entry>OpenEXR images</entry>
