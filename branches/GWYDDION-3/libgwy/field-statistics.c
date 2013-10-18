@@ -1196,7 +1196,7 @@ volume_triprism_material(gdouble za, gdouble zb, gdouble zc)
     if (mid <= 0.0)
         return max*max*max/(max - min)/(max - mid);
 
-    gdouble p = mid/(max - min), q = max/(mid - min);
+    gdouble p = mid/(mid - min), q = max/(max - min);
     return p*mid + q*max - p*q*min;
 }
 
@@ -1212,7 +1212,7 @@ volume_material_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     z4 -= mqdata->base;
 
     gdouble v = 0.0;
-    gdouble zc = 0.5*(z1 + z2 + z3 + z4);
+    gdouble zc = 0.25*(z1 + z2 + z3 + z4);
     if (w1) {
         v += (volume_triprism_material(0.5*(z1 + z2), z1, zc)
               + volume_triprism_material(0.5*(z4 + z1), zc, z1));
@@ -1223,7 +1223,7 @@ volume_material_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     }
     if (w3) {
         v += (volume_triprism_material(0.5*(z2 + z3), zc, z3)
-              + volume_triprism_material(0.4*(z3 + z4), z3, zc));
+              + volume_triprism_material(0.5*(z3 + z4), z3, zc));
     }
     if (w4) {
         v += (volume_triprism_material(0.5*(z4 + z1), zc, z4)
@@ -1255,7 +1255,7 @@ volume_triprism_voids(gdouble za, gdouble zb, gdouble zc)
     if (mid >= 0.0)
         return min*min*min/(min - max)/(min - mid);
 
-    gdouble p = mid/(min - max), q = min/(min - mid);
+    gdouble p = mid/(mid - max), q = min/(min - max);
     return p*mid + q*min - p*q*max;
 }
 
@@ -1271,7 +1271,7 @@ volume_voids_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     z4 -= mqdata->base;
 
     gdouble v = 0.0;
-    gdouble zc = 0.5*(z1 + z2 + z3 + z4);
+    gdouble zc = 0.25*(z1 + z2 + z3 + z4);
     if (w1) {
         v += (volume_triprism_voids(0.5*(z1 + z2), z1, zc)
               + volume_triprism_voids(0.5*(z4 + z1), zc, z1));
@@ -1282,7 +1282,7 @@ volume_voids_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     }
     if (w3) {
         v += (volume_triprism_voids(0.5*(z2 + z3), zc, z3)
-              + volume_triprism_voids(0.4*(z3 + z4), z3, zc));
+              + volume_triprism_voids(0.5*(z3 + z4), z3, zc));
     }
     if (w4) {
         v += (volume_triprism_voids(0.5*(z4 + z1), zc, z4)
