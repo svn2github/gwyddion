@@ -1025,7 +1025,7 @@ gwy_field_count_above_below(const GwyField *field,
 }
 
 /**
- * surface_area_nonsquare:
+ * pixel_quarter_area:
  * @z1: Z-value in first corner.
  * @z2: Z-value in second corner.
  * @z3: Z-value in third corner.
@@ -1112,7 +1112,7 @@ gwy_field_surface_area(const GwyField *field,
                                           && fpart->row == 0)));
     SurfaceAreaData sadata = { 0.0, dx, dy };
     gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                               &pixel_quarter_area, &sadata);
+                               &pixel_quarter_area, NULL, &sadata);
     gdouble area = sadata.s*dx*dy/16.0;
     if (full_field) {
         CVAL(field->priv, ARE) = area;
@@ -1168,7 +1168,7 @@ gwy_field_volume(const GwyField *field,
         .s = 0.0, .wself = 0.25*wself, .wortho = 0.5*wortho
     };
     gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                               volume_quadrature, &vqdata);
+                               volume_quadrature, NULL, &vqdata);
     gdouble volume = vqdata.s*dx*dy/(wself + 4.0*wortho + 4.0);
     return volume;
 }
@@ -1332,12 +1332,12 @@ gwy_field_material_volume(const GwyField *field,
     MaterialQuadratureData mqdata = { .base = base, .v = 0.0 };
     if (material)
         gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                                   volume_material_quadrature, &mqdata);
+                                   volume_material_quadrature, NULL, &mqdata);
     else {
         // This integrates the volume below as negative.  Must invert the
         // result.
         gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                                   volume_voids_quadrature, &mqdata);
+                                   volume_voids_quadrature, NULL, &mqdata);
         mqdata.v = -mqdata.v;
     }
 
@@ -1352,6 +1352,7 @@ process_quarters_unmasked(const GwyField *field,
                           guint width, guint height,
                           gboolean include_borders,
                           GwyFieldQuartersFunc function,
+                          GwyFieldAllQuartersFunc allfunction,
                           gpointer user_data)
 {
     guint xres = field->xres;
@@ -1382,8 +1383,14 @@ process_quarters_unmasked(const GwyField *field,
         if (include_borders || col > 0)
             function(d1[F], d1[1], d2[1], d2[F], 0, 1, 1, 0, user_data);
         d1++, d2++;
-        for (guint j = width-1; j; j--, d1++, d2++)
-            function(d1[0], d1[1], d2[1], d2[0], 1, 1, 1, 1, user_data);
+        if (allfunction) {
+            for (guint j = width-1; j; j--, d1++, d2++)
+                allfunction(d1[0], d1[1], d2[1], d2[0], user_data);
+        }
+        else {
+            for (guint j = width-1; j; j--, d1++, d2++)
+                function(d1[0], d1[1], d2[1], d2[0], 1, 1, 1, 1, user_data);
+        }
         if (include_borders || col + width < xres)
             function(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 1, user_data);
     }
@@ -1411,6 +1418,7 @@ process_quarters_masked(const GwyField *field,
                         guint maskcol, guint maskrow,
                         gboolean include_borders,
                         GwyFieldQuartersFunc function,
+                        GwyFieldAllQuartersFunc allfunction,
                         gpointer user_data)
 {
     guint xres = field->xres;
@@ -1459,15 +1467,35 @@ process_quarters_masked(const GwyField *field,
         d1++, d2++;
         gwy_mask_iter_next(iter1);
         gwy_mask_iter_next(iter2);
-        for (guint j = width-1; j; j--, d1++, d2++) {
-            w1 = w2;
-            w2 = !gwy_mask_iter_get(iter1) == invert;
-            w4 = w3;
-            w3 = !gwy_mask_iter_get(iter2) == invert;
-            if (w1 | w2 | w3 | w4)
-                function(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4, user_data);
-            gwy_mask_iter_next(iter1);
-            gwy_mask_iter_next(iter2);
+        if (allfunction) {
+            for (guint j = width-1; j; j--, d1++, d2++) {
+                w1 = w2;
+                w2 = !gwy_mask_iter_get(iter1) == invert;
+                w4 = w3;
+                w3 = !gwy_mask_iter_get(iter2) == invert;
+                if (w1 | w2 | w3 | w4) {
+                    if (w1 & w2 & w3 & w4)
+                        allfunction(d1[0], d1[1], d2[1], d2[0], user_data);
+                    else
+                        function(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4,
+                                 user_data);
+                }
+                gwy_mask_iter_next(iter1);
+                gwy_mask_iter_next(iter2);
+            }
+        }
+        else {
+            for (guint j = width-1; j; j--, d1++, d2++) {
+                w1 = w2;
+                w2 = !gwy_mask_iter_get(iter1) == invert;
+                w4 = w3;
+                w3 = !gwy_mask_iter_get(iter2) == invert;
+                if (w1 | w2 | w3 | w4)
+                    function(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4,
+                             user_data);
+                gwy_mask_iter_next(iter1);
+                gwy_mask_iter_next(iter2);
+            }
         }
         w1 = w2;
         w4 = w3;
@@ -1510,7 +1538,12 @@ process_quarters_masked(const GwyField *field,
  *                   borders in the processing, %FALSE to exclude them.
  * @function: (scope call):
  *            Function to apply to each set of four neighbour pixels.
- * @user_data: User data passed to @function.
+ * @allfunction: (scope call) (allow-none):
+ *               Function to apply to sets of four neighbour pixels if all four
+ *               are included.  This function is optional, it is sufficient
+ *               to supply @function.  However, knowing that all four pixels
+ *               are included often permits a simpler and faster calculation.
+ * @user_data: User data passed to @function and @allfunction (if given).
  *
  * Processes a field by quarter-pixels.
  *
@@ -1537,6 +1570,7 @@ gwy_field_process_quarters(const GwyField *field,
                            GwyMaskingType masking,
                            gboolean include_borders,
                            GwyFieldQuartersFunc function,
+                           GwyFieldAllQuartersFunc allfunction,
                            gpointer user_data)
 {
     g_return_if_fail(function);
@@ -1549,10 +1583,12 @@ gwy_field_process_quarters(const GwyField *field,
     if (masking != GWY_MASK_IGNORE)
         process_quarters_masked(field, col, row, width, height,
                                 mask, masking, maskcol, maskrow,
-                                include_borders, function, user_data);
+                                include_borders,
+                                function, allfunction, user_data);
     else
         process_quarters_unmasked(field, col, row, width, height,
-                                  include_borders, function, user_data);
+                                  include_borders,
+                                  function, allfunction, user_data);
 }
 
 /**
@@ -1586,6 +1622,21 @@ gwy_field_process_quarters(const GwyField *field,
  * Note the values and weights are passed in a clock-wise order around the
  * square starting from the top-left corner.  This means that subsequent values
  * share a side of the square but the order is different from a 2×2 field.
+ **/
+
+/**
+ * GwyFieldAllQuartersFunc:
+ * @zul: Upper-left value.
+ * @zur: Upper-right value.
+ * @zlr: Lower-right value.
+ * @zll: Lower-left value.
+ * @user_data: User data passed to gwy_field_process_quarters().
+ *
+ * Type of function used in processing fields by quarters for all four quarters
+ * included.
+ *
+ * This is a simpler variant #GwyFieldQuartersFunc used in the case of all four
+ * quarters are included.  Therefore, no weights need to be passed.
  **/
 
 /**

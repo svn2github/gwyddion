@@ -96,6 +96,14 @@ sum_quarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
     *s += zul*wul + zur*wur + zlr*wlr + zll*wll;
 }
 
+static void
+sum_allquarters(gdouble zul, gdouble zur, gdouble zlr, gdouble zll,
+                gpointer user_data)
+{
+    gdouble *s = (gdouble*)user_data;
+    *s += zul + zur + zlr + zll;
+}
+
 void
 test_field_process_quarters_unmasked_border(void)
 {
@@ -112,10 +120,13 @@ test_field_process_quarters_unmasked_border(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyFieldPart fpart = { col, row, width, height };
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gboolean useallfunc = g_rand_boolean(rng);
         field_randomize(field, rng);
         gdouble result = 0.0;
-        gwy_field_process_quarters(field, &fpart, NULL, 0,
-                                   TRUE, sum_quarters, &result);
+        gwy_field_process_quarters(field, &fpart, NULL, 0, TRUE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result);
         gdouble reference = 0.0;
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
@@ -145,10 +156,13 @@ test_field_process_quarters_unmasked_noborder(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyFieldPart fpart = { col, row, width, height };
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gboolean useallfunc = g_rand_boolean(rng);
         field_randomize(field, rng);
         gdouble result = 0.0;
-        gwy_field_process_quarters(field, &fpart, NULL, 0,
-                                   FALSE, sum_quarters, &result);
+        gwy_field_process_quarters(field, &fpart, NULL, 0, FALSE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result);
         gdouble reference = 0.0;
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
@@ -180,15 +194,22 @@ test_field_process_quarters_masked_border(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyFieldPart fpart = { col, row, width, height };
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gboolean useallfunc = g_rand_boolean(rng);
         field_randomize(field, rng);
         GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, 0.5);
         gdouble result = 0.0, result0 = 0.0, result1 = 0.0;
-        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_IGNORE,
-                                   TRUE, sum_quarters, &result);
-        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_EXCLUDE,
-                                   TRUE, sum_quarters, &result0);
-        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_INCLUDE,
-                                   TRUE, sum_quarters, &result1);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_IGNORE, TRUE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_EXCLUDE, TRUE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result0);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_INCLUDE, TRUE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result1);
         gdouble reference = 0.0, reference0 = 0.0, reference1 = 0.0;
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {
@@ -226,15 +247,22 @@ test_field_process_quarters_masked_noborder(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyFieldPart fpart = { col, row, width, height };
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        gboolean useallfunc = g_rand_boolean(rng);
         field_randomize(field, rng);
         GwyMaskField *mask = random_mask_field_prob(xres, yres, rng, 0.5);
         gdouble result = 0.0, result0 = 0.0, result1 = 0.0;
-        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_IGNORE,
-                                   FALSE, sum_quarters, &result);
-        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_EXCLUDE,
-                                   FALSE, sum_quarters, &result0);
-        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_INCLUDE,
-                                   FALSE, sum_quarters, &result1);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_IGNORE, FALSE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_EXCLUDE, FALSE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result0);
+        gwy_field_process_quarters(field, &fpart, mask, GWY_MASK_INCLUDE, FALSE,
+                                   sum_quarters,
+                                   useallfunc ? sum_allquarters : NULL,
+                                   &result1);
         gdouble reference = 0.0, reference0 = 0.0, reference1 = 0.0;
         for (guint i = 0; i < height; i++) {
             for (guint j = 0; j < width; j++) {

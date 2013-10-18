@@ -381,7 +381,7 @@ dumb_boundary_minimum(const GwyMaskField *mask, const GwyField *field)
 {
     gdouble min = G_MAXDOUBLE;
     gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
-                               &boundary_minimum_quarters, &min);
+                               &boundary_minimum_quarters, NULL, &min);
     return min;
 }
 
@@ -411,7 +411,7 @@ dumb_boundary_maximum(const GwyMaskField *mask, const GwyField *field)
 {
     gdouble max = -G_MAXDOUBLE;
     gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
-                               &boundary_maximum_quarters, &max);
+                               &boundary_maximum_quarters, NULL, &max);
     return max;
 }
 
@@ -444,7 +444,8 @@ dumb_projected_boundary_length(const GwyMaskField *mask, const GwyField *field)
         0.0,
     };
     gwy_field_process_quarters(field, NULL, mask, GWY_MASK_INCLUDE, FALSE,
-                               &projected_boundary_length_quarters, &p[0]);
+                               &projected_boundary_length_quarters, NULL,
+                               &p[0]);
     return p[16];
 }
 

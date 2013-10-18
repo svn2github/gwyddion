@@ -144,7 +144,7 @@ field_value_dist_cont(const GwyField *field,
     // is given by caller, this serves as a somewhat inefficient masked pixel
     // counting method.
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               value_dist_cont, ddata);
+                               value_dist_cont, NULL, ddata);
 
     if (!npoints)
         npoints = dist_points_for_n_points(ddata->n_in_range/4.0);
@@ -159,7 +159,7 @@ field_value_dist_cont(const GwyField *field,
 
     ddata->analyse = ddata->count = FALSE;
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               value_dist_cont, ddata);
+                               value_dist_cont, NULL, ddata);
 }
 
 static void
@@ -543,7 +543,7 @@ gwy_field_slope_dist(const GwyField *field,
     // is given by caller, this serves as a somewhat inefficient masked pixel
     // counting method.
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               func, &ddata);
+                               func, NULL, &ddata);
 
     if (!npoints)
         npoints = dist_points_for_n_points(ddata.n_in_range/4.0);
@@ -558,7 +558,7 @@ gwy_field_slope_dist(const GwyField *field,
 
     ddata.analyse = ddata.count = FALSE;
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               func, &ddata);
+                               func, NULL, &ddata);
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);
@@ -702,7 +702,7 @@ gwy_field_tss_dist(const GwyField *field,
     // is given by caller, this serves as a somewhat inefficient masked pixel
     // counting method.
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               tss_dist, &ddata);
+                               tss_dist, NULL, &ddata);
 
     if (!npoints)
         npoints = dist_points_for_n_points(ddata.n_in_range);
@@ -717,7 +717,7 @@ gwy_field_tss_dist(const GwyField *field,
 
     ddata.analyse = ddata.count = FALSE;
     gwy_field_process_quarters(field, fpart, mask, masking, FALSE,
-                               tss_dist, &ddata);
+                               tss_dist, NULL, &ddata);
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);
