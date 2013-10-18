@@ -409,6 +409,8 @@ field/volume/masked/gwyddion2
 field/volume/masked/triangular
 field/volume/masked/bilinear
 field/volume/masked/biquadratic
+field/volume/material/planar
+field/volume/voids/planar
 field/compatibility/res
 field/compatibility/real
 field/compatibility/units
