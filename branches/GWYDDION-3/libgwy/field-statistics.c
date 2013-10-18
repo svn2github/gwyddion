@@ -41,6 +41,7 @@ typedef struct {
     gdouble s;
     gdouble wself;
     gdouble wortho;
+    gdouble wall;
 } VolumeQuadratureData;
 
 typedef struct {
@@ -1080,6 +1081,43 @@ pixel_quarter_area(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
 }
 
 /**
+ * pixel_allquarter_area:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @user_data: #SurfaceAreaData.
+ *
+ * Calculates approximate area of a one general rectangular pixel with some
+ * corners possibly missing.
+ **/
+static void
+pixel_allquarter_area(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                      gpointer user_data)
+{
+    SurfaceAreaData *sadata = (SurfaceAreaData*)user_data;
+    gdouble dx = sadata->dx, dy = sadata->dy,
+            d21 = (z2 - z1)/dx, d23 = (z2 - z3)/dy,
+            d14 = (z1 - z4)/dy, d34 = (z3 - z4)/dx,
+            d1423 = 0.75*d14 + 0.25*d23, d2134 = 0.75*d21 + 0.25*d34,
+            d2314 = 0.75*d23 + 0.25*d14, d3421 = 0.75*d34 + 0.25*d21,
+            D1423 = d1423*d1423, D2134 = d2134*d2134,
+            D2314 = d2314*d2314, D3421 = d3421*d3421,
+            D21 = 1.0 + d21*d21, D14 = 1.0 + d14*d14,
+            D34 = 1.0 + d34*d34, D23 = 1.0 + d23*d23,
+            Dv = 1.0 + 0.25*(d14 + d23)*(d14 + d23),
+            Dh = 1.0 + 0.25*(d21 + d34)*(d21 + d34);
+    gdouble s = 2.0*(sqrt(Dv + D2134) + sqrt(Dh + D2314)
+                     + sqrt(Dv + D3421) + sqrt(Dh + D1423));
+    s += (sqrt(D21 + D1423) + sqrt(D14 + D2134)
+          + sqrt(D21 + D2314) + sqrt(D23 + D2134)
+          + sqrt(D34 + D2314) + sqrt(D23 + D3421)
+          + sqrt(D34 + D1423) + sqrt(D14 + D3421));
+
+    sadata->s += s;
+}
+
+/**
  * gwy_field_surface_area:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
@@ -1112,7 +1150,8 @@ gwy_field_surface_area(const GwyField *field,
                                           && fpart->row == 0)));
     SurfaceAreaData sadata = { 0.0, dx, dy };
     gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                               &pixel_quarter_area, NULL, &sadata);
+                               &pixel_quarter_area, &pixel_allquarter_area,
+                               &sadata);
     gdouble area = sadata.s*dx*dy/16.0;
     if (full_field) {
         CVAL(field->priv, ARE) = area;
@@ -1131,6 +1170,14 @@ volume_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
     gdouble so = ((w1 + w3)*(z2 + z4) + (w2 + w4)*(z1 + z3))*vqdata->wortho;
     gdouble sd = w1*z3 + w2*z4 + w3*z1 + w4*z2;
     vqdata->s += ss + so + sd;
+}
+
+static void
+volume_quadrature_all(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                      gpointer user_data)
+{
+    VolumeQuadratureData *vqdata = (VolumeQuadratureData*)user_data;
+    vqdata->s += (z1 + z2 + z3 + z4)*vqdata->wall;
 }
 
 /**
@@ -1165,10 +1212,14 @@ gwy_field_volume(const GwyField *field,
     gdouble wself = volume_weights[method][0],
             wortho = volume_weights[method][1];
     VolumeQuadratureData vqdata = {
-        .s = 0.0, .wself = 0.25*wself, .wortho = 0.5*wortho
+        .s = 0.0,
+        .wself = 0.25*wself,
+        .wortho = 0.5*wortho,
+        .wall = 0.25*wself + wortho + 1.0,
     };
     gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                               volume_quadrature, NULL, &vqdata);
+                               &volume_quadrature, &volume_quadrature_all,
+                               &vqdata);
     gdouble volume = vqdata.s*dx*dy/(wself + 4.0*wortho + 4.0);
     return volume;
 }
@@ -1200,19 +1251,12 @@ volume_triprism_material(gdouble za, gdouble zb, gdouble zc)
     return p*mid + q*max - p*q*min;
 }
 
-static void
-volume_material_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
-                           guint w1, guint w2, guint w3, guint w4,
-                           gpointer user_data)
+static gdouble
+volume_material_quadrature1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                           guint w1, guint w2, guint w3, guint w4)
 {
-    MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
-    z1 -= mqdata->base;
-    z2 -= mqdata->base;
-    z3 -= mqdata->base;
-    z4 -= mqdata->base;
-
-    gdouble v = 0.0;
     gdouble zc = 0.25*(z1 + z2 + z3 + z4);
+    gdouble v = 0.0;
     if (w1) {
         v += (volume_triprism_material(0.5*(z1 + z2), z1, zc)
               + volume_triprism_material(0.5*(z4 + z1), zc, z1));
@@ -1229,34 +1273,41 @@ volume_material_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
         v += (volume_triprism_material(0.5*(z4 + z1), zc, z4)
               + volume_triprism_material(0.5*(z3 + z4), z4, zc));
     }
-    mqdata->v += v;
+    return v;
+}
+
+static void
+volume_material_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                           guint w1, guint w2, guint w3, guint w4,
+                           gpointer user_data)
+{
+    MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
+    mqdata->v += volume_material_quadrature1(z1 - mqdata->base,
+                                             z2 - mqdata->base,
+                                             z3 - mqdata->base,
+                                             z4 - mqdata->base,
+                                             w1, w2, w3, w4);
 }
 
 static gdouble
-volume_triprism_voids(gdouble za, gdouble zb, gdouble zc)
+volume_material_quadrature_all1(gdouble z1, gdouble z2, gdouble z3, gdouble z4)
 {
-    gdouble min1 = fmin(za, zc);
-    gdouble min = fmin(min1, zb);
-    if (min >= 0.0)
-        return 0.0;
+    gdouble zc = 0.25*(z1 + z2 + z3 + z4);
+    return 2.0*(volume_triprism_material(zc, z1, z2)
+                + volume_triprism_material(zc, z2, z3)
+                + volume_triprism_material(zc, z3, z4)
+                + volume_triprism_material(zc, z4, z1));
+}
 
-    gdouble max1 = fmax(za, zc);
-    gdouble max = fmax(max1, zb);
-    if (max <= 0.0)
-        return za + zb + zc;
-
-    // Zero level crosses the triangle, must calculate the negative part.
-    gdouble mid = zb;
-    if (min1 != min)
-        mid = min1;
-    else if (max1 != max)
-        mid = max1;
-
-    if (mid >= 0.0)
-        return min*min*min/(min - max)/(min - mid);
-
-    gdouble p = mid/(mid - max), q = min/(min - max);
-    return p*mid + q*min - p*q*max;
+static void
+volume_material_quadrature_all(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                               gpointer user_data)
+{
+    MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
+    mqdata->v += volume_material_quadrature_all1(z1 - mqdata->base,
+                                                 z2 - mqdata->base,
+                                                 z3 - mqdata->base,
+                                                 z4 - mqdata->base);
 }
 
 static void
@@ -1265,30 +1316,22 @@ volume_voids_quadrature(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
                         gpointer user_data)
 {
     MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
-    z1 -= mqdata->base;
-    z2 -= mqdata->base;
-    z3 -= mqdata->base;
-    z4 -= mqdata->base;
+    mqdata->v += volume_material_quadrature1(mqdata->base - z1,
+                                             mqdata->base - z2,
+                                             mqdata->base - z3,
+                                             mqdata->base - z4,
+                                             w1, w2, w3, w4);
+}
 
-    gdouble v = 0.0;
-    gdouble zc = 0.25*(z1 + z2 + z3 + z4);
-    if (w1) {
-        v += (volume_triprism_voids(0.5*(z1 + z2), z1, zc)
-              + volume_triprism_voids(0.5*(z4 + z1), zc, z1));
-    }
-    if (w2) {
-        v += (volume_triprism_voids(0.5*(z1 + z2), z2, zc)
-              + volume_triprism_voids(0.5*(z2 + z3), zc, z2));
-    }
-    if (w3) {
-        v += (volume_triprism_voids(0.5*(z2 + z3), zc, z3)
-              + volume_triprism_voids(0.5*(z3 + z4), z3, zc));
-    }
-    if (w4) {
-        v += (volume_triprism_voids(0.5*(z4 + z1), zc, z4)
-              + volume_triprism_voids(0.5*(z3 + z4), z4, zc));
-    }
-    mqdata->v += v;
+static void
+volume_voids_quadrature_all(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+                            gpointer user_data)
+{
+    MaterialQuadratureData *mqdata = (MaterialQuadratureData*)user_data;
+    mqdata->v += volume_material_quadrature_all1(mqdata->base - z1,
+                                                 mqdata->base - z2,
+                                                 mqdata->base - z3,
+                                                 mqdata->base - z4);
 }
 
 /**
@@ -1332,13 +1375,14 @@ gwy_field_material_volume(const GwyField *field,
     MaterialQuadratureData mqdata = { .base = base, .v = 0.0 };
     if (material)
         gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                                   volume_material_quadrature, NULL, &mqdata);
+                                   &volume_material_quadrature,
+                                   &volume_material_quadrature_all,
+                                   &mqdata);
     else {
-        // This integrates the volume below as negative.  Must invert the
-        // result.
         gwy_field_process_quarters(field, fpart, mask, masking, TRUE,
-                                   volume_voids_quadrature, NULL, &mqdata);
-        mqdata.v = -mqdata.v;
+                                   &volume_voids_quadrature,
+                                   &volume_voids_quadrature_all,
+                                   &mqdata);
     }
 
     gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
