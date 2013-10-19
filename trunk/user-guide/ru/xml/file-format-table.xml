@@ -572,7 +572,7 @@
     </row>
     <!-- From module oldmda.c -->
     <row>
-      <entry>старый формат MDA от NT-MDT</entry>
+      <entry>Старый формат MDA от NT-MDT</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
       <entry>Да</entry>
@@ -1041,6 +1041,16 @@
       <entry>Сканы SEM Carl Zeiss</entry>
       <entry>.tif</entry>
       <entry>zeiss</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module zemax.c -->
+    <row>
+      <entry>Данные искривления сетки Zemax</entry>
+      <entry>.dat</entry>
+      <entry>zemax</entry>
       <entry>Да</entry>
       <entry>—</entry>
       <entry>—</entry>
