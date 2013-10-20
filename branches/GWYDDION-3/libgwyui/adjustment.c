@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+#include "libgwy/math.h"
 #include "libgwy/macros.h"
 #include "libgwy/object-utils.h"
 #include "libgwyui/adjustment.h"
@@ -30,19 +32,31 @@ enum {
 typedef struct _GwyAdjustmentPrivate Adjustment;
 
 struct _GwyAdjustmentPrivate {
+    // Property based.
+    GObject *object;
+    GParamSpec *property;
+    gboolean is_integral;
+
+    // Plain adjustment.
     gdouble defaultval;
 };
 
-static void     gwy_adjustment_set_property(GObject *object,
-                                            guint prop_id,
-                                            const GValue *value,
-                                            GParamSpec *pspec);
-static void     gwy_adjustment_get_property(GObject *object,
-                                            guint prop_id,
-                                            GValue *value,
-                                            GParamSpec *pspec);
-static gboolean set_default                (GwyAdjustment *adj,
-                                            gdouble value);
+static void     gwy_adjustment_dispose        (GObject *object);
+static void     gwy_adjustment_set_property   (GObject *object,
+                                               guint prop_id,
+                                               const GValue *value,
+                                               GParamSpec *pspec);
+static void     gwy_adjustment_get_property   (GObject *object,
+                                               guint prop_id,
+                                               GValue *value,
+                                               GParamSpec *pspec);
+static gdouble  get_property_value_as_double  (GObject *object,
+                                               GParamSpec *pspec);
+static void     set_property_value_from_double(GObject *object,
+                                               GParamSpec *pspec,
+                                               gdouble v);
+static gboolean set_default                   (GwyAdjustment *adj,
+                                               gdouble value);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -57,6 +71,7 @@ gwy_adjustment_class_init(GwyAdjustmentClass *klass)
 
     gobject_class->get_property = gwy_adjustment_get_property;
     gobject_class->set_property = gwy_adjustment_set_property;
+    gobject_class->dispose = gwy_adjustment_dispose;
 
     properties[PROP_DEFAULT]
         = g_param_spec_double("default",
@@ -75,6 +90,14 @@ gwy_adjustment_init(GwyAdjustment *adjustment)
     adjustment->priv = G_TYPE_INSTANCE_GET_PRIVATE(adjustment,
                                                    GWY_TYPE_ADJUSTMENT,
                                                    Adjustment);
+}
+
+static void
+gwy_adjustment_dispose(GObject *object)
+{
+    Adjustment *priv = GWY_ADJUSTMENT(object)->priv;
+    GWY_OBJECT_UNREF(priv->object);
+    priv->property = NULL;
 }
 
 static void
@@ -159,11 +182,118 @@ gwy_adjustment_new_set(gdouble value,
 }
 
 /**
+ * gwy_adjustment_new_for_property:
+ * @object: (transfer full):
+ *          An object.
+ * @propname: Name of property to create adjustment for.  The property must be
+ *            of integral or double type.
+ *
+ * Creates a new adjustment with ranges, default and current value given by
+ * the property of an object.
+ *
+ * Changes to the property value are reflected by changes in the adjustment
+ * value and vice versa.  The adjustment takes a reference to @object.
+ *
+ * You can limit the adjustment range further than what is permitted by the
+ * property after the construction.  Extending it is not allowed.
+ *
+ * Returns: A newly created adjustment.
+ **/
+GwyAdjustment*
+gwy_adjustment_new_for_property(GObject *object,
+                                const gchar *propname)
+{
+    GwyAdjustment *adj = gwy_adjustment_new();
+    g_return_val_if_fail(G_IS_OBJECT(object), adj);
+    g_object_ref(object);
+    Adjustment *priv = adj->priv;
+    priv->object = object;
+
+    g_return_val_if_fail(propname, adj);
+    GObjectClass *klass = G_OBJECT_GET_CLASS(object);
+    GParamSpec *property = g_object_class_find_property(klass, propname);
+    g_return_val_if_fail(property, adj);
+    priv->property = property;
+
+    gdouble lower, upper, defaultval;
+    priv->is_integral = TRUE;
+
+    // Try the types by descending probability.
+    if (G_IS_PARAM_SPEC_DOUBLE(property)) {
+        GParamSpecDouble *pspec = G_PARAM_SPEC_DOUBLE(property);
+        lower = pspec->minimum;
+        upper = pspec->maximum;
+        defaultval = pspec->default_value;
+        priv->is_integral = FALSE;
+    }
+    else if (G_IS_PARAM_SPEC_UINT(property)) {
+        GParamSpecUInt *pspec = G_PARAM_SPEC_UINT(property);
+        lower = pspec->minimum;
+        upper = pspec->maximum;
+        defaultval = pspec->default_value;
+    }
+    else if (G_IS_PARAM_SPEC_INT(property)) {
+        GParamSpecInt *pspec = G_PARAM_SPEC_INT(property);
+        lower = pspec->minimum;
+        upper = pspec->maximum;
+        defaultval = pspec->default_value;
+    }
+    else if (G_IS_PARAM_SPEC_LONG(property)) {
+        GParamSpecLong *pspec = G_PARAM_SPEC_LONG(property);
+        lower = pspec->minimum;
+        upper = pspec->maximum;
+        defaultval = pspec->default_value;
+    }
+    else if (G_IS_PARAM_SPEC_ULONG(property)) {
+        GParamSpecULong *pspec = G_PARAM_SPEC_ULONG(property);
+        lower = pspec->minimum;
+        upper = pspec->maximum;
+        defaultval = pspec->default_value;
+    }
+    else if (G_IS_PARAM_SPEC_FLOAT(property)) {
+        GParamSpecFloat *pspec = G_PARAM_SPEC_FLOAT(property);
+        lower = pspec->minimum;
+        upper = pspec->maximum;
+        defaultval = pspec->default_value;
+        priv->is_integral = FALSE;
+    }
+    else {
+        g_critical("Cannot create adjustment for value type %s.",
+                   g_type_name(property->value_type));
+        return adj;
+    }
+
+    gdouble value = get_property_value_as_double(object, property);
+    gdouble step_increment, page_increment;
+    // XXX: This needs more elaboration.
+    if (priv->is_integral) {
+        step_increment = 1.0;
+        page_increment = MIN(upper - lower, 10.0);
+    }
+    else {
+        step_increment = MAX((upper - lower)/100000.0, fabs(lower));
+        step_increment = gwy_powi(10.0, gwy_round(log10(step_increment)));
+        page_increment = sqrt(step_increment*(upper - lower));
+        page_increment = gwy_powi(10.0, gwy_round(log10(page_increment)));
+    }
+
+    gtk_adjustment_configure(GTK_ADJUSTMENT(adj),
+                             value, lower, upper,
+                             step_increment, page_increment, 0.0);
+    adj->priv->defaultval = defaultval;
+
+    return adj;
+}
+
+/**
  * gwy_adjustment_set_default:
  * @adjustment: An adjustment.
  * @defaultval: Value which should become the default.
  *
  * Sets the default value of an a adjustment.
+ *
+ * It is not allowed to change the default if the adjustment is backed by an
+ * object property.
  *
  * Generally, the default value should be within the adjustment range (at least
  * when it is used).
@@ -221,11 +351,94 @@ gwy_adjustment_reset(GwyAdjustment *adj)
     gtk_adjustment_set_value(gtkadj, dval);
 }
 
+/**
+ * gwy_adjustment_get_object:
+ * @adjustment: An adjustment.
+ *
+ * Gets the object whose property is backing an adjustment.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          The object passed to gwy_adjustment_new_for_property().  Hence,
+ *          possibly %NULL.
+ **/
+GObject*
+gwy_adjustment_get_object(const GwyAdjustment *adj)
+{
+    g_return_val_if_fail(GWY_IS_ADJUSTMENT(adj), NULL);
+    return adj->priv->object;
+}
+
+/**
+ * gwy_adjustment_get_property_name:
+ * @adjustment: An adjustment.
+ *
+ * Gets the name of property which is backing an adjustment.
+ *
+ * Returns: (allow-none):
+ *          The property name of object passed to
+ *          gwy_adjustment_new_for_property().
+ *          Hence, possibly %NULL.
+ **/
+const gchar*
+gwy_adjustment_get_property_name(const GwyAdjustment *adj)
+{
+    g_return_val_if_fail(GWY_IS_ADJUSTMENT(adj), NULL);
+    Adjustment *priv = adj->priv;
+    if (!priv->property)
+        return NULL;
+    return priv->property->name;
+}
+
+static gdouble
+get_property_value_as_double(GObject *object,
+                             GParamSpec *pspec)
+{
+    GValue propvalue;
+    gwy_clear1(propvalue);
+    g_value_init(&propvalue, pspec->value_type);
+    g_object_get_property(object, pspec->name, &propvalue);
+
+    GValue dblvalue;
+    gwy_clear1(dblvalue);
+    g_value_init(&dblvalue, G_TYPE_DOUBLE);
+    gboolean ok = g_value_transform(&propvalue, &dblvalue);
+    g_value_unset(&propvalue);
+    g_assert(ok);
+
+    gdouble v = g_value_get_double(&dblvalue);
+    g_value_unset(&dblvalue);
+    return v;
+}
+
+static void
+set_property_value_from_double(GObject *object,
+                               GParamSpec *pspec,
+                               gdouble v)
+{
+    GValue dblvalue;
+    gwy_clear1(dblvalue);
+    g_value_init(&dblvalue, G_TYPE_DOUBLE);
+    // FIXME: Should we try harder to round integers well?  Maybe the caller
+    // should.
+    g_value_set_double(&dblvalue, v);
+
+    GValue propvalue;
+    gwy_clear1(propvalue);
+    g_value_init(&propvalue, pspec->value_type);
+    gboolean ok = g_value_transform(&dblvalue, &propvalue);
+    g_value_unset(&dblvalue);
+    g_assert(ok);
+
+    g_object_set_property(object, pspec->name, &propvalue);
+    g_value_unset(&propvalue);
+}
+
 static gboolean
 set_default(GwyAdjustment *adj,
             gdouble defaultval)
 {
     Adjustment *priv = adj->priv;
+    g_return_val_if_fail(!priv->object, FALSE);
     if (defaultval == priv->defaultval)
         return FALSE;
 
@@ -241,6 +454,9 @@ set_default(GwyAdjustment *adj,
  * #GwyAdjustment extends #GtkAdjustment in one aspect: It has a default value.
  * Thus it is possible to reset it to default generically with
  * gwy_adjustment_reset().
+ *
+ * #GwyAdjustment can also be bound to the value of a numeric property of an
+ * arbitrary object by creating it with gwy_adjustment_new_for_property().
  **/
 
 /**

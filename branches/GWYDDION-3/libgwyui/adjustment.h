@@ -50,18 +50,22 @@ struct _GwyAdjustmentClass {
     GtkAdjustmentClass adjustment_class;
 };
 
-GType          gwy_adjustment_get_type   (void)                            G_GNUC_CONST;
-GwyAdjustment* gwy_adjustment_new        (void)                            G_GNUC_MALLOC;
-GwyAdjustment* gwy_adjustment_new_set    (gdouble value,
-                                          gdouble defaultval,
-                                          gdouble lower,
-                                          gdouble upper,
-                                          gdouble step_increment,
-                                          gdouble page_increment)          G_GNUC_MALLOC;
-void           gwy_adjustment_set_default(GwyAdjustment *adjustment,
-                                          gdouble defaultval);
-gdouble        gwy_adjustment_get_default(const GwyAdjustment *adjustment) G_GNUC_PURE;
-void           gwy_adjustment_reset      (GwyAdjustment *adjustment);
+GType          gwy_adjustment_get_type         (void)                             G_GNUC_CONST;
+GwyAdjustment* gwy_adjustment_new              (void)                             G_GNUC_MALLOC;
+GwyAdjustment* gwy_adjustment_new_set          (gdouble value,
+                                                gdouble defaultval,
+                                                gdouble lower,
+                                                gdouble upper,
+                                                gdouble step_increment,
+                                                gdouble page_increment)           G_GNUC_MALLOC;
+GwyAdjustment* gwy_adjustment_new_for_property (GObject *object,
+                                                const gchar *propname)            G_GNUC_MALLOC;
+void           gwy_adjustment_set_default      (GwyAdjustment *adjustment,
+                                                gdouble defaultval);
+gdouble        gwy_adjustment_get_default      (const GwyAdjustment *adjustment)  G_GNUC_PURE;
+void           gwy_adjustment_reset            (GwyAdjustment *adjustment);
+GObject*       gwy_adjustment_get_object       (const GwyAdjustment *adjustment);
+const gchar*   gwy_adjustment_get_property_name(const GwyAdjustment *adjustment);
 
 G_END_DECLS
 
