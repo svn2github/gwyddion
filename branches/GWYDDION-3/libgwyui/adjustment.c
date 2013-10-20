@@ -35,7 +35,10 @@ struct _GwyAdjustmentPrivate {
     // Property based.
     GObject *object;
     GParamSpec *property;
-    gboolean is_integral;
+    gulong notify_id;
+
+    gboolean is_integral : 1;
+    gboolean in_update : 1;
 
     // Plain adjustment.
     gdouble defaultval;
@@ -50,6 +53,8 @@ static void     gwy_adjustment_get_property   (GObject *object,
                                                guint prop_id,
                                                GValue *value,
                                                GParamSpec *pspec);
+static void     adjustment_value_changed      (GwyAdjustment *adj);
+static void     property_value_changed        (GwyAdjustment *adj);
 static gdouble  get_property_value_as_double  (GObject *object,
                                                GParamSpec *pspec);
 static void     set_property_value_from_double(GObject *object,
@@ -96,8 +101,10 @@ static void
 gwy_adjustment_dispose(GObject *object)
 {
     Adjustment *priv = GWY_ADJUSTMENT(object)->priv;
+    GWY_SIGNAL_HANDLER_DISCONNECT(priv->object, priv->notify_id);
     GWY_OBJECT_UNREF(priv->object);
     priv->property = NULL;
+    G_OBJECT_CLASS(gwy_adjustment_parent_class)->dispose(object);
 }
 
 static void
@@ -282,6 +289,17 @@ gwy_adjustment_new_for_property(GObject *object,
                              step_increment, page_increment, 0.0);
     adj->priv->defaultval = defaultval;
 
+    gchar *detailed_signal = g_strconcat("notify::", propname, NULL);
+    priv->notify_id
+        = g_signal_connect_swapped(priv->object, detailed_signal,
+                                   G_CALLBACK(property_value_changed), adj);
+    g_free(detailed_signal);
+
+    // Do not override notify(), connect here to self to only pay the penalty
+    // for the signal if needed.
+    g_signal_connect(adj, "notify::value",
+                     G_CALLBACK(adjustment_value_changed), NULL);
+
     return adj;
 }
 
@@ -387,6 +405,34 @@ gwy_adjustment_get_property_name(const GwyAdjustment *adj)
     if (!priv->property)
         return NULL;
     return priv->property->name;
+}
+
+static void
+adjustment_value_changed(GwyAdjustment *adj)
+{
+    Adjustment *priv = adj->priv;
+    if (!priv->property)
+        return;
+
+    if (!priv->in_update) {
+        gdouble v = gtk_adjustment_get_value(GTK_ADJUSTMENT(adj));
+        priv->in_update = TRUE;
+        set_property_value_from_double(priv->object, priv->property, v);
+        priv->in_update = FALSE;
+    }
+}
+
+static void
+property_value_changed(GwyAdjustment *adj)
+{
+    Adjustment *priv = adj->priv;
+
+    if (!priv->in_update) {
+        gdouble v = get_property_value_as_double(priv->object, priv->property);
+        priv->in_update = TRUE;
+        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), v);
+        priv->in_update = FALSE;
+    }
 }
 
 static gdouble
