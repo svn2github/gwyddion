@@ -170,7 +170,6 @@ static void               calculate_ticks_log        (GwyAxis *axis);
 static void               fill_tick_arrays           (GwyAxis *axis,
                                                       GwyAxisTickLevel level,
                                                       gdouble bs,
-                                                      gdouble largerbs,
                                                       GwyAxisLogStepType logsteptype);
 static void               find_start_and_nticks      (gdouble from,
                                                       gdouble to,
@@ -184,6 +183,7 @@ static gdouble            next_tick_log              (gdouble x,
                                                       guint *idx,
                                                       GwyAxisLogStepType steptype,
                                                       gboolean increasing);
+static void               remove_coinciding_ticks    (GwyAxis *axis);
 static void               remove_too_close_ticks     (GwyAxis *axis);
 static void               improve_hinting            (GwyAxis *axis);
 static gboolean           zero_is_inside             (gdouble start,
@@ -1398,9 +1398,15 @@ compare_ticks_ascending(gconstpointer a, gconstpointer b)
     if (ta->value > tb->value)
         return 1;
 
-    g_warning("Two ticks at the same value %g; positions %g and %g, "
-              "levels %u and %u.",
-              ta->value, ta->position, tb->position, ta->level, tb->level);
+    // Always put lower levels first.
+    if (ta->level < tb->level)
+        return -1;
+    if (ta->level > tb->level)
+        return 1;
+
+    g_warning("Two ticks at the same value %g and level %u; "
+              "positions are %g and %g.",
+              ta->value, ta->level, ta->position, tb->position);
     return 0;
 }
 
@@ -1415,9 +1421,15 @@ compare_ticks_descending(gconstpointer a, gconstpointer b)
     if (ta->value < tb->value)
         return 1;
 
-    g_warning("Two ticks at the same value %g; positions %g and %g, "
-              "levels %u and %u.",
-              ta->value, ta->position, tb->position, ta->level, tb->level);
+    // Always put lower levels first.
+    if (ta->level < tb->level)
+        return -1;
+    if (ta->level > tb->level)
+        return 1;
+
+    g_warning("Two ticks at the same value %g and level %u; "
+              "positions are %g and %g.",
+              ta->value, ta->level, ta->position, tb->position);
     return 0;
 }
 
@@ -1517,21 +1529,21 @@ calculate_ticks_lin(GwyAxis *axis)
 
     gdouble dx = fabs(priv->range.to - priv->range.from)/length;
     priv->units_at = NAN;
-    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0, GWY_AXIS_LOG_STEP_0);
+    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, GWY_AXIS_LOG_STEP_0);
     for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
-        gdouble largerbs = bs;
         steptype = decrease_step_type_lin(steptype, &base, dx, MIN_TICK_DIST);
         if (!steptype)
             break;
         step = step_sizes_lin[steptype];
         bs = descending ? -base*step : base*step;
-        fill_tick_arrays(axis, i, bs, largerbs, GWY_AXIS_LOG_STEP_0);
+        fill_tick_arrays(axis, i, bs, GWY_AXIS_LOG_STEP_0);
     }
 
     g_array_sort(ticks, descending
                  ? compare_ticks_descending
                  : compare_ticks_ascending);
     priv->must_fix_units = FALSE;
+    remove_coinciding_ticks(axis);
     remove_too_close_ticks(axis);
     improve_hinting(axis);
 
@@ -1657,20 +1669,20 @@ calculate_ticks_log(GwyAxis *axis)
 
     gdouble dx = fabs(priv->range.to - priv->range.from)/length;
     priv->units_at = NAN;
-    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, 0.0, steptype);
+    fill_tick_arrays(axis, GWY_AXIS_TICK_MAJOR, bs, steptype);
     for (guint i = GWY_AXIS_TICK_MINOR; i <= priv->max_tick_level; i++) {
-        gdouble largerbs = bs;
         steptype = decrease_step_type_log(steptype, &step, dx, MIN_TICK_DIST);
         if (!steptype)
             break;
         bs = descending ? -step : step;
-        fill_tick_arrays(axis, i, bs, largerbs, steptype);
+        fill_tick_arrays(axis, i, bs, steptype);
     }
 
     g_array_sort(ticks, descending
                  ? compare_ticks_descending
                  : compare_ticks_ascending);
     priv->must_fix_units = FALSE;
+    remove_coinciding_ticks(axis);
     remove_too_close_ticks(axis);
     improve_hinting(axis);
 
@@ -1720,7 +1732,7 @@ estimate_log_base(const GwyRange *request)
 // position location).
 static void
 fill_tick_arrays(GwyAxis *axis, guint level,
-                 gdouble bs, gdouble largerbs, GwyAxisLogStepType logsteptype)
+                 gdouble bs, GwyAxisLogStepType logsteptype)
 {
     const PangoRectangle no_extents = { 0, 0, 0, 0 };
     Axis *priv = axis->priv;
@@ -1832,11 +1844,8 @@ fill_tick_arrays(GwyAxis *axis, guint level,
                             && !priv->ticks_at_edges
                             && i == n);
 
-        // Skip ticks coinciding with more major ones.
-        // FIXME: Must reformulate for logscale.
-        if (largerbs
-            && fabs(tick.value/largerbs - gwy_round(tick.value/largerbs)) < EPS)
-            continue;
+        // Skip ticks coinciding with edge ticks because this avoids formatting
+        // of major tick labels.  Leave the rest for remove_coinciding_ticks().
         if (priv->ticks_at_edges && (fabs((tick.value - from)/bs) < EPS
                                      || fabs((tick.value - to)/bs) < EPS))
             continue;
@@ -1869,7 +1878,8 @@ find_start_and_nticks(gdouble from, gdouble to, gdouble bs,
                                       ? ceil(from/bs - EPS)*bs
                                       : floor(from/bs + EPS)*bs,
                                       bs);
-        *n = (guint)floor((to - *start)/bs + EPS);
+        gdouble nn = fmax((to - *start)/bs, 0.0);
+        *n = (guint)floor(nn + EPS);
         return;
     }
 
@@ -1935,6 +1945,24 @@ next_tick_log(gdouble x, guint *idx,
         }
 
         return floor(x) + log10_table[*idx];
+    }
+}
+
+static void
+remove_coinciding_ticks(GwyAxis *axis)
+{
+    Axis *priv = axis->priv;
+    GArray *ticks = priv->ticks;
+    guint n = ticks->len;
+
+    if (n < 2)
+        return;
+
+    for (guint i = n-1; i; i--) {
+        GwyAxisTick *tick1 = &tick_index(ticks, i), *tick2 = tick1 - 1;
+        if (tick1->level > tick2->level
+            && fabs(tick1->position - tick2->position) < 0.1)
+            g_array_remove_index(ticks, i);
     }
 }
 
