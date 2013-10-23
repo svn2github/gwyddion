@@ -457,9 +457,59 @@ axis_draw_line(GtkWidget *axis,
     return FALSE;
 }
 
+static void
+configure_axes(GtkGrid *grid)
+{
+    enum { NAXES = 6 };
+    static const GwyRange linear_ranges[] = {
+        { 0.0, 15.0 },
+        { 1.0, 2.0 },
+        { 0.0, 1235.0 },
+        { -5.0, 0.1 },
+        { -0.000001, -0.00001 },
+        { 3.234231e6, 8.34321e8 },
+    };
+    static const GwyRange logarithmic_ranges[] = {
+        { 5.0, 14.0 },
+        { 0.2, 24.0 },
+        { 9e3, 2e6 },
+        { 1e-5, 1e2 },
+        { 3e-6, 4e12 },
+        { 1e-30, 1e50 },
+    };
+
+    gboolean increasing = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(grid),
+                                                             "increasing"));
+    gboolean logscale = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(grid),
+                                                           "logscale"));
+
+    static const GwyRange *ranges;
+    ranges = logscale ? logarithmic_ranges : linear_ranges;
+
+    for (guint i = 0; i < NAXES; i++) {
+        GtkWidget *axis = gtk_grid_get_child_at(grid, 0, i);
+        gwy_graph_axis_set_log_scale(GWY_GRAPH_AXIS(axis), logscale);
+        GwyRange range = ranges[i];
+        if (!increasing)
+            GWY_SWAP(gdouble, range.from, range.to);
+        gwy_axis_request_range(GWY_AXIS(axis), &range);
+    }
+}
+
+static void
+axes_toggle_changed(GtkToggleButton *toggle,
+                    GtkGrid *grid)
+{
+    const gchar *id = (const gchar*)g_object_get_data(G_OBJECT(toggle), "id");
+    gboolean value = gtk_toggle_button_get_active(toggle);
+    g_object_set_data(G_OBJECT(grid), id, GUINT_TO_POINTER(value));
+    configure_axes(grid);
+}
+
 static GtkWidget*
 create_axes_window(void)
 {
+    enum { NAXES = 6 };
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 640, 360);
     gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Axis Test");
@@ -468,22 +518,34 @@ create_axes_window(void)
     GtkGrid *grid = (GtkGrid*)gtk_grid_new();
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
-    static const GwyRange ranges[] = {
-        { 0.0, 15.0 },
-        { 1.0, 2.0 },
-        { 0.0, 1235.0 },
-        { -5.0, 0.1 },
-        { -0.000001, -0.00001 },
-        { 3.234231e6, 8.34321e8 },
-    };
-    for (guint i = 0; i < G_N_ELEMENTS(ranges); i++) {
+    for (guint i = 0; i < NAXES; i++) {
         GtkWidget *axis = gwy_graph_axis_new();
         g_object_set(axis, "hexpand", TRUE, "margin", 8, NULL);
         gwy_axis_set_edge(GWY_AXIS(axis), GTK_POS_BOTTOM);
-        gwy_axis_request_range(GWY_AXIS(axis), ranges + i);
         gtk_grid_attach(grid, GTK_WIDGET(axis), 0, i, 1, 1);
         g_signal_connect(axis, "draw", G_CALLBACK(axis_draw_line), NULL);
     }
+
+    GtkWidget *hbox = gtk_grid_new();
+    gtk_grid_attach(grid, hbox, 0, NAXES, 1, 1);
+
+    GtkWidget *increasing = gtk_check_button_new_with_label("Increasing");
+    g_object_set_data(G_OBJECT(increasing), "id", (gpointer)"increasing");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(increasing), TRUE);
+    gtk_grid_attach(GTK_GRID(hbox), increasing, 0, 0, 1, 1);
+    g_object_set_data(G_OBJECT(grid), "increasing", GUINT_TO_POINTER(TRUE));
+    g_signal_connect(increasing, "toggled",
+                     G_CALLBACK(axes_toggle_changed), grid);
+
+    GtkWidget *logscale = gtk_check_button_new_with_label("Logscale");
+    g_object_set_data(G_OBJECT(logscale), "id", (gpointer)"logscale");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale), FALSE);
+    gtk_grid_attach(GTK_GRID(hbox), logscale, 1, 0, 1, 1);
+    g_object_set_data(G_OBJECT(grid), "logscale", GUINT_TO_POINTER(FALSE));
+    g_signal_connect(logscale, "toggled",
+                     G_CALLBACK(axes_toggle_changed), grid);
+
+    configure_axes(grid);
 
     return window;
 }
