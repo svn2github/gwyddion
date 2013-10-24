@@ -338,6 +338,86 @@ gwy_all_type_children(GType type,
 }
 
 /**
+ * gwy_genum_value_nick:
+ * @enumtype: Enum value type.
+ * @value: A value from the enumerated type.  Or possibly another value; the
+ *         functions tries to return a result useful for debugging in such
+ *         case.
+ *
+ * Finds the nick of an enum value.
+ *
+ * This is a debugging function.  Location to a static storage is returned so
+ * you cannot use multiple return values in a single printf() call, for
+ * instance.  This function is, of course, also thread-unsafe.
+ *
+ * Returns: Nick of the value.
+ **/
+const gchar*
+gwy_genum_value_nick(GType enumtype,
+                     gint value)
+{
+    static GString *result = NULL;
+    if (!result)
+        result = g_string_new(NULL);
+
+    g_return_val_if_fail(G_TYPE_IS_ENUM(enumtype), "<INVALID-TYPE>");
+    GEnumClass *klass = g_type_class_ref(enumtype);
+    GEnumValue *enumvalue = g_enum_get_value(klass, value);
+    if (enumvalue)
+        g_string_assign(result, enumvalue->value_nick);
+    else
+        g_string_printf(result, "<INVALID-VALUE %d>", value);
+    g_type_class_unref(klass);
+    return result->str;
+}
+
+/**
+ * gwy_gflags_value_nick:
+ * @flagstype: Flags value type.
+ * @value: Any combination of flags from the flags type.  Or possibly another
+ *         value; the functions tries to return a result useful for debugging
+ *         in such case.
+ *
+ * Constructs the string representation of the nicks of a flags value.
+ *
+ * This is a debugging function.  Location to a static storage is returned so
+ * you cannot use multiple return values in a single printf() call, for
+ * instance.  This function is, of course, also thread-unsafe.
+ *
+ * Returns: Nicks of the flags, joined together with "|".
+ **/
+const gchar*
+gwy_gflags_value_nick(GType flagstype,
+                      guint value)
+{
+    static GString *result = NULL;
+    if (!result)
+        result = g_string_new(NULL);
+
+    g_return_val_if_fail(G_TYPE_IS_FLAGS(flagstype), "<INVALID-TYPE>");
+    GFlagsClass *klass = g_type_class_ref(flagstype);
+    if (!value)
+        return "0";
+
+    g_string_truncate(result, 0);
+    GFlagsValue *flagsvalue = g_flags_get_first_value(klass, value);
+    while (flagsvalue) {
+        if (result->len)
+            g_string_append_c(result, '|');
+        g_string_append(result, flagsvalue->value_nick);
+        value &= ~flagsvalue->value;
+        flagsvalue = g_flags_get_first_value(klass, value);
+    }
+    if (value) {
+        if (result->len)
+            g_string_append_c(result, '|');
+        g_string_append_printf(result, "<INVALID-FLAGS 0x%x>", value);
+    }
+    g_type_class_unref(klass);
+    return result->str;
+}
+
+/**
  * SECTION: object-utils
  * @title: Object utils
  * @short_description: GObject utility functions

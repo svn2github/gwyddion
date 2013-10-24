@@ -58,6 +58,8 @@ object-utils/set-user-func
 object-utils/assign-string
 object-utils/all-type-children/all
 object-utils/all-type-children/concrete
+object-utils/enum-nick
+object-utils/flags-nick
 expr/evaluate
 expr/vector
 expr/garbage

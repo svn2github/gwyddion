@@ -334,18 +334,6 @@ test_object_utils_set_user_func(void)
     g_assert_cmpuint(destroy2_called, ==, 1);
 }
 
-const gchar*
-enum_nick(GType type, gint value)
-{
-    g_return_val_if_fail(g_type_is_a(type, G_TYPE_ENUM), "???");
-    GEnumClass *klass = g_type_class_ref(type);
-    g_return_val_if_fail(G_IS_ENUM_CLASS(klass), "???");
-    const GEnumValue *evalue = g_enum_get_value(klass, value);
-    const gchar *retval = evalue ? evalue->value_nick : "???";
-    g_type_class_unref(klass);
-    return retval;
-}
-
 static void
 assert_type_present(const GType *types, guint n, GType type)
 {
@@ -403,6 +391,50 @@ test_object_utils_all_type_children_concrete(void)
     g_assert_cmpuint(n, ==, 3);
 
     g_free(types);
+}
+
+void
+test_object_utils_enum_nick(void)
+{
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+                                         GWY_WINDOWING_NONE),
+                    ==, "none");
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+                                         GWY_WINDOWING_FLAT_TOP),
+                    ==, "flat-top");
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+                                         GWY_WINDOWING_KAISER25),
+                    ==, "kaiser25");
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+                                         1000),
+                    ==, "<INVALID-VALUE 1000>");
+}
+
+void
+test_object_utils_flags_nick(void)
+{
+    g_assert_cmpstr(gwy_gflags_value_nick(GWY_TYPE_LINE_COMPAT_FLAGS,
+                                          0),
+                    ==, "0");
+    g_assert_cmpstr(gwy_gflags_value_nick(GWY_TYPE_LINE_COMPAT_FLAGS,
+                                          GWY_LINE_COMPAT_RES),
+                    ==, "res");
+    g_assert_cmpstr(gwy_gflags_value_nick(GWY_TYPE_LINE_COMPAT_FLAGS,
+                                          GWY_LINE_COMPAT_RES
+                                          | GWY_LINE_COMPAT_DX),
+                    ==, "res|dx");
+    g_assert_cmpstr(gwy_gflags_value_nick(GWY_TYPE_LINE_COMPAT_FLAGS,
+                                          GWY_LINE_COMPAT_RES
+                                          | GWY_LINE_COMPAT_DX
+                                          | GWY_LINE_COMPAT_VALUE),
+                    ==, "res|dx|value");
+    g_assert_cmpstr(gwy_gflags_value_nick(GWY_TYPE_LINE_COMPAT_FLAGS,
+                                          GWY_LINE_COMPAT_DX
+                                          | 0x10000),
+                    ==, "dx|<INVALID-FLAGS 0x10000>");
+    g_assert_cmpstr(gwy_gflags_value_nick(GWY_TYPE_LINE_COMPAT_FLAGS,
+                                          0x10000),
+                    ==, "<INVALID-FLAGS 0x10000>");
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

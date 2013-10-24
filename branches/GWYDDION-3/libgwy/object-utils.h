@@ -33,25 +33,29 @@ G_BEGIN_DECLS
         if (hid && obj) { g_signal_handler_disconnect(obj, hid); (hid) = 0; } \
     } while (0)
 
-gboolean gwy_set_user_func            (gpointer func,
-                                       gpointer data,
-                                       GDestroyNotify destroy,
-                                       gpointer func_field,
-                                       gpointer data_field,
-                                       GDestroyNotify *destroy_field);
-gboolean gwy_set_member_object        (gpointer instance,
-                                       gpointer member_object,
-                                       GType expected_type,
-                                       gpointer member_field,
-                                       ...)                            G_GNUC_NULL_TERMINATED;
-gboolean gwy_assign_string            (gchar **target,
-                                       const gchar *newvalue);
-void     gwy_override_class_properties(GObjectClass *oclass,
-                                       GParamSpec **properties,
-                                       ...)                            G_GNUC_NULL_TERMINATED;
-GType*   gwy_all_type_children        (GType type,
-                                       gboolean concrete,
-                                       guint *n)                       G_GNUC_MALLOC;
+gboolean     gwy_set_user_func            (gpointer func,
+                                           gpointer data,
+                                           GDestroyNotify destroy,
+                                           gpointer func_field,
+                                           gpointer data_field,
+                                           GDestroyNotify *destroy_field);
+gboolean     gwy_set_member_object        (gpointer instance,
+                                           gpointer member_object,
+                                           GType expected_type,
+                                           gpointer member_field,
+                                           ...)                            G_GNUC_NULL_TERMINATED;
+gboolean     gwy_assign_string            (gchar **target,
+                                           const gchar *newvalue);
+void         gwy_override_class_properties(GObjectClass *oclass,
+                                           GParamSpec **properties,
+                                           ...)                            G_GNUC_NULL_TERMINATED;
+GType*       gwy_all_type_children        (GType type,
+                                           gboolean concrete,
+                                           guint *n)                       G_GNUC_MALLOC;
+const gchar* gwy_genum_value_nick         (GType enumtype,
+                                           gint value)                     G_GNUC_PURE;
+const gchar* gwy_gflags_value_nick        (GType flagstype,
+                                           guint value)                    G_GNUC_PURE;
 
 G_END_DECLS
 
