@@ -3,6 +3,8 @@
 #include "libgwy/libgwy.h"
 #include "libgwyui/libgwyui.h"
 
+enum { NAXES = 6 };
+
 typedef struct {
     GwyField *field1;
     GwyField *field2;
@@ -460,7 +462,6 @@ axis_draw_line(GtkWidget *axis,
 static void
 configure_axes(GtkGrid *grid)
 {
-    enum { NAXES = 6 };
     static const GwyRange linear_ranges[] = {
         { 0.0, 15.0 },
         { 1.0, 2.0 },
@@ -471,10 +472,10 @@ configure_axes(GtkGrid *grid)
     };
     static const GwyRange logarithmic_ranges[] = {
         { 5.0, 14.0 },
+        { 3e-6, 4e12 },
         { 0.2, 24.0 },
         { 9e3, 2e6 },
         { 1e-5, 1e2 },
-        { 3e-6, 4e12 },
         { 1e-30, 1e50 },
     };
 
@@ -509,7 +510,6 @@ axes_toggle_changed(GtkToggleButton *toggle,
 static GtkWidget*
 create_axes_window(void)
 {
-    enum { NAXES = 6 };
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 640, 360);
     gtk_window_set_title(GTK_WINDOW(window), "Gwy3 Axis Test");
