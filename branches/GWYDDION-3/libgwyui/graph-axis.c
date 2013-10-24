@@ -659,8 +659,12 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
 
             if (edge == GTK_POS_TOP)
                 y = breadth - (mtlen + 1) - d;
-            else
-                y = (mtlen + 1) + a;
+            else {
+                // XXX: We use descent difference to shift the baseline
+                // because, for some reason, ascents are zero.
+                y = (mtlen + 1) + a
+                    + (d - PANGO_DESCENT(ticks[i].extents)/pangoscale);
+            }
         }
         else if (edge == GTK_POS_LEFT || edge == GTK_POS_RIGHT) {
             if (i == 0 && ticks[i].level == GWY_AXIS_TICK_EDGE)
