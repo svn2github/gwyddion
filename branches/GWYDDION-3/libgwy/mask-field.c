@@ -1033,7 +1033,7 @@ gwy_mask_field_part_count(const GwyMaskField *field,
 guint
 gwy_mask_field_part_count_masking(const GwyMaskField *field,
                                   const GwyFieldPart *fpart,
-                                  GwyMaskingType masking)
+                                  GwyMasking masking)
 {
     g_return_val_if_fail(!field || GWY_IS_MASK_FIELD(field), 0);
     if (masking == GWY_MASK_IGNORE)

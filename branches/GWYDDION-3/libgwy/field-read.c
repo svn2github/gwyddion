@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ elliptical_xlen(gdouble eta, gdouble rx, guint ax)
 static gdouble
 exterior_value(const GwyField *field,
                gint col, gint row,
-               GwyExteriorType exterior,
+               GwyExterior exterior,
                gdouble fill_value)
 {
     // Interior
@@ -82,7 +82,7 @@ static gboolean
 exterior_mask(const GwyMaskField *field,
               gboolean invert,
               gint col, gint row,
-              GwyExteriorType exterior)
+              GwyExterior exterior)
 {
     // No masking
     if (!field)
@@ -149,7 +149,7 @@ exterior_mask(const GwyMaskField *field,
 gdouble
 gwy_field_value(const GwyField *field,
                 gint col, gint row,
-                GwyExteriorType exterior,
+                GwyExterior exterior,
                 gdouble fill_value)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
@@ -186,8 +186,8 @@ gwy_field_value(const GwyField *field,
 gdouble
 gwy_field_value_interpolated(const GwyField *field,
                              gdouble x, gdouble y,
-                             GwyInterpolationType interpolation,
-                             GwyExteriorType exterior,
+                             GwyInterpolation interpolation,
+                             GwyExterior exterior,
                              gdouble fill_value)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
@@ -218,11 +218,11 @@ gwy_field_value_interpolated(const GwyField *field,
 static guint
 local_centre(const GwyField *field,
              const GwyMaskField *mask,
-             GwyMaskingType masking,
+             GwyMasking masking,
              gint col, gint row,
              gint ax, gint ay,
              gboolean elliptical,
-             GwyExteriorType exterior,
+             GwyExterior exterior,
              gdouble fill_value,
              gdouble *xmean, gdouble *ymean, gdouble *zmean)
 {
@@ -282,11 +282,11 @@ local_centre(const GwyField *field,
 gdouble
 gwy_field_value_averaged(const GwyField *field,
                          const GwyMaskField *mask,
-                         GwyMaskingType masking,
+                         GwyMasking masking,
                          gint col, gint row,
                          guint ax, guint ay,
                          gboolean elliptical,
-                         GwyExteriorType exterior,
+                         GwyExterior exterior,
                          gdouble fill_value)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
@@ -357,11 +357,11 @@ gwy_field_value_averaged(const GwyField *field,
 gboolean
 gwy_field_slope(const GwyField *field,
                 const GwyMaskField *mask,
-                GwyMaskingType masking,
+                GwyMasking masking,
                 gint col, gint row,
                 guint ax, guint ay,
                 gboolean elliptical,
-                GwyExteriorType exterior,
+                GwyExterior exterior,
                 gdouble fill_value,
                 gdouble *a,
                 gdouble *bx, gdouble *by)
@@ -465,12 +465,12 @@ gwy_field_slope(const GwyField *field,
 gint
 gwy_field_curvature(const GwyField *field,
                     const GwyMaskField *mask,
-                    GwyMaskingType masking,
+                    GwyMasking masking,
                     gint col, gint row,
                     guint ax, guint ay,
                     gboolean elliptical,
                     gboolean at_centre,
-                    GwyExteriorType exterior,
+                    GwyExterior exterior,
                     gdouble fill_value,
                     GwyCurvatureParams *curvature)
 {
@@ -611,7 +611,7 @@ gwy_field_curvature(const GwyField *field,
  **/
 GwyField*
 gwy_field_interpolation_coeffs(GwyField *field,
-                               GwyInterpolationType interpolation)
+                               GwyInterpolation interpolation)
 {
     if (gwy_interpolation_has_interpolating_basis(interpolation))
         return g_object_ref(field);
@@ -664,8 +664,8 @@ gwy_field_profile(GwyField *field,
                   guint res,
                   gdouble thickness,
                   guint averaging,
-                  GwyInterpolationType interpolation,
-                  GwyExteriorType exterior,
+                  GwyInterpolation interpolation,
+                  GwyExterior exterior,
                   gdouble fill_value)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);

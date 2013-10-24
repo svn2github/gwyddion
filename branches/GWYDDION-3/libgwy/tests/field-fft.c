@@ -255,9 +255,9 @@ test_field_fft_sine(void)
         GwyField *field = gwy_field_new_sized(width, height, FALSE);
         gdouble alpha = g_rand_double_range(rng, 5.0, 90.0);
         gdouble beta = g_rand_double_range(rng, 5.0, 90.0);
-        GwyWindowingType windowing = g_rand_int_range(rng,
-                                                      0,
-                                                      GWY_WINDOWING_KAISER25+1);
+        GwyWindowing windowing = g_rand_int_range(rng,
+                                                  0,
+                                                  GWY_WINDOWING_KAISER25+1);
         field_sine_wave_fill(field, alpha, beta);
         gwy_field_fft_window(field, windowing, TRUE, TRUE);
         gwy_field_fft(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);
@@ -322,9 +322,9 @@ test_field_row_fft_sine(void)
         GwyField *field = gwy_field_new_sized(width, height, FALSE);
         gdouble alpha = g_rand_double_range(rng, 15.0, 90.0);
         gdouble beta = g_rand_double_range(rng, 1.0, 10.0);
-        GwyWindowingType windowing = g_rand_int_range(rng,
-                                                      0,
-                                                      GWY_WINDOWING_KAISER25+1);
+        GwyWindowing windowing = g_rand_int_range(rng,
+                                                  0,
+                                                  GWY_WINDOWING_KAISER25+1);
         field_sine_wave_fill(field, alpha, beta);
         gwy_field_fft_window(field, windowing, FALSE, TRUE);
         gwy_field_row_fft(field, NULL, fftre, fftim, GWY_TRANSFORM_FORWARD);

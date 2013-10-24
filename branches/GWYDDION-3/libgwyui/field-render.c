@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -511,7 +511,7 @@ gwy_field_find_color_range(const GwyField *field,
 {
     g_return_if_fail(range);
 
-    GwyMaskingType masking = GWY_MASK_IGNORE;
+    GwyMasking masking = GWY_MASK_IGNORE;
     // This is not a real setting because @from and @to can require different
     // masking.  Just request something if masking should be checked.
     if (from == GWY_COLOR_RANGE_MASKED || to == GWY_COLOR_RANGE_MASKED)

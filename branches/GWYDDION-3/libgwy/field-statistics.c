@@ -86,7 +86,7 @@ void
 gwy_field_min_max(const GwyField *field,
                   const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking,
+                  GwyMasking masking,
                   gdouble *min,
                   gdouble *max)
 {
@@ -192,7 +192,7 @@ gdouble
 gwy_field_mean(const GwyField *field,
                const GwyFieldPart *fpart,
                const GwyMaskField *mask,
-               GwyMaskingType masking)
+               GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -280,7 +280,7 @@ gdouble
 gwy_field_median(const GwyField *field,
                  const GwyFieldPart *fpart,
                  const GwyMaskField *mask,
-                 GwyMaskingType masking)
+                 GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -367,7 +367,7 @@ gdouble
 gwy_field_rms(const GwyField *field,
               const GwyFieldPart *fpart,
               const GwyMaskField *mask,
-              GwyMaskingType masking)
+              GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -466,7 +466,7 @@ gdouble
 gwy_field_meansq(const GwyField *field,
                  const GwyFieldPart *fpart,
                  const GwyMaskField *mask,
-                 GwyMaskingType masking)
+                 GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -565,7 +565,7 @@ void
 gwy_field_statistics(const GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
-                     GwyMaskingType masking,
+                     GwyMasking masking,
                      gdouble *mean, gdouble *ra, gdouble *rms,
                      gdouble *skew, gdouble *kurtosis)
 {
@@ -716,7 +716,7 @@ gdouble
 gwy_field_entropy(const GwyField *field,
                   const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking)
+                  GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -937,7 +937,7 @@ guint
 gwy_field_count_above_below(const GwyField *field,
                             const GwyFieldPart *fpart,
                             const GwyMaskField *mask,
-                            GwyMaskingType masking,
+                            GwyMasking masking,
                             gdouble above, gdouble below,
                             gboolean strict,
                             guint *nabove, guint *nbelow)
@@ -1138,7 +1138,7 @@ gdouble
 gwy_field_surface_area(const GwyField *field,
                        const GwyFieldPart *fpart,
                        const GwyMaskField *mask,
-                       GwyMaskingType masking)
+                       GwyMasking masking)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
 
@@ -1202,7 +1202,7 @@ gdouble
 gwy_field_volume(const GwyField *field,
                  const GwyFieldPart *fpart,
                  const GwyMaskField *mask,
-                 GwyMaskingType masking,
+                 GwyMasking masking,
                  GwyFieldVolumeMethod method)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
@@ -1366,7 +1366,7 @@ gdouble
 gwy_field_material_volume(const GwyField *field,
                           const GwyFieldPart *fpart,
                           const GwyMaskField *mask,
-                          GwyMaskingType masking,
+                          GwyMasking masking,
                           gboolean material,
                           gdouble base)
 {
@@ -1458,7 +1458,7 @@ process_quarters_masked(const GwyField *field,
                         guint col, guint row,
                         guint width, guint height,
                         const GwyMaskField *mask,
-                        GwyMaskingType masking,
+                        GwyMasking masking,
                         guint maskcol, guint maskrow,
                         gboolean include_borders,
                         GwyFieldQuartersFunc function,
@@ -1611,7 +1611,7 @@ void
 gwy_field_process_quarters(const GwyField *field,
                            const GwyFieldPart *fpart,
                            const GwyMaskField *mask,
-                           GwyMaskingType masking,
+                           GwyMasking masking,
                            gboolean include_borders,
                            GwyFieldQuartersFunc function,
                            GwyFieldAllQuartersFunc allfunction,

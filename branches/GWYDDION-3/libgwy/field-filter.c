@@ -71,7 +71,7 @@ _gwy_tune_convolution_method(const gchar *method)
 }
 
 void
-_gwy_ensure_defined_exterior(GwyExteriorType *exterior,
+_gwy_ensure_defined_exterior(GwyExterior *exterior,
                              gdouble *fill_value)
 {
     if (*exterior == GWY_EXTERIOR_UNDEFINED) {
@@ -241,7 +241,7 @@ row_extend_fill(const gdouble *in, gdouble *out,
 }
 
 static RowExtendFunc
-get_row_extend_func(GwyExteriorType exterior)
+get_row_extend_func(GwyExterior exterior)
 {
     if (exterior == GWY_EXTERIOR_UNDEFINED)
         return &row_extend_undef;
@@ -376,7 +376,7 @@ gwy_field_row_convolve(const GwyField *field,
                        const GwyFieldPart *fpart,
                        GwyField *target,
                        const GwyLine *kernel,
-                       GwyExteriorType exterior,
+                       GwyExterior exterior,
                        gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
@@ -587,7 +587,7 @@ rect_extend_fill(const gdouble *in, guint inrowstride,
 }
 
 RectExtendFunc
-_gwy_get_rect_extend_func(GwyExteriorType exterior)
+_gwy_get_rect_extend_func(GwyExterior exterior)
 {
     if (exterior == GWY_EXTERIOR_UNDEFINED)
         return &rect_extend_undef;
@@ -808,7 +808,7 @@ gwy_field_convolve(const GwyField *field,
                    const GwyFieldPart *fpart,
                    GwyField *target,
                    const GwyField *kernel,
-                   GwyExteriorType exterior,
+                   GwyExterior exterior,
                    gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
@@ -890,7 +890,7 @@ gwy_field_new_extended(const GwyField *field,
                        const GwyFieldPart *fpart,
                        guint left, guint right,
                        guint up, guint down,
-                       GwyExteriorType exterior,
+                       GwyExterior exterior,
                        gdouble fill_value,
                        gboolean keep_offsets)
 {
@@ -956,7 +956,7 @@ gwy_field_extend(const GwyField *field,
                  GwyField *target,
                  guint left, guint right,
                  guint up, guint down,
-                 GwyExteriorType exterior,
+                 GwyExterior exterior,
                  gdouble fill_value,
                  gboolean keep_offsets)
 {
@@ -1049,7 +1049,7 @@ gwy_field_filter_gaussian(const GwyField *field,
                           const GwyFieldPart* rectangle,
                           GwyField *target,
                           gdouble hsigma, gdouble vsigma,
-                          GwyExteriorType exterior,
+                          GwyExterior exterior,
                           gdouble fill_value)
 {
     // The fields and rectangle are checked by the actual convolution funcs.
@@ -1188,7 +1188,7 @@ filter_5x5(const GwyField *field,
            const GwyFieldPart *fpart,
            GwyField *target,
            GwyFilterType filter,
-           GwyExteriorType exterior,
+           GwyExterior exterior,
            gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
@@ -1253,7 +1253,7 @@ combined_gradient_filter(const GwyField *field,
                          GwyField *target,
                          const gdouble *kdata1, const gdouble *kdata2,
                          guint kxres, guint kyres,
-                         GwyExteriorType exterior,
+                         GwyExterior exterior,
                          gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
@@ -1303,7 +1303,7 @@ gwy_field_filter_standard(const GwyField *field,
                           const GwyFieldPart* rectangle,
                           GwyField *target,
                           GwyFilterType filter,
-                          GwyExteriorType exterior,
+                          GwyExterior exterior,
                           gdouble fill_value)
 {
     static const gdouble laplace[] = {

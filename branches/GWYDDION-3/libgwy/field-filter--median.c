@@ -904,7 +904,7 @@ gwy_field_filter_median(const GwyField *field,
                         const GwyFieldPart *fpart,
                         GwyField *target,
                         const GwyMaskField *kernel,
-                        GwyExteriorType exterior,
+                        GwyExterior exterior,
                         gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;

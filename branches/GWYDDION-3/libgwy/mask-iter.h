@@ -28,7 +28,7 @@ typedef enum {
     GWY_MASK_IGNORE  = 0,
     GWY_MASK_INCLUDE = 1,
     GWY_MASK_EXCLUDE = 2,
-} GwyMaskingType;
+} GwyMasking;
 
 typedef struct {
     guint32 *p;

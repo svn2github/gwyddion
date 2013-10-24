@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ static gdouble gwy_fft_window_kaiser25 (guint i, guint n);
 
 static guint fft_rigour = FFTW_ESTIMATE;
 
-/* The order must match GwyWindowingType enum */
+/* The order must match GwyWindowing enum */
 static const GwyFFTWindowingFunc windowings[] = {
     &gwy_fft_window_none,
     &gwy_fft_window_hann,
@@ -238,7 +238,7 @@ gwy_fft_window_kaiser25(guint i, guint n)
 void
 gwy_fft_window_sample(gdouble *data,
                       guint n,
-                      GwyWindowingType windowing,
+                      GwyWindowing windowing,
                       guint normalize)
 {
     g_return_if_fail(data);
@@ -425,7 +425,7 @@ _gwy_fft_rigour(void)
  **/
 
 /**
- * GwyWindowingType:
+ * GwyWindowing:
  * @GWY_WINDOWING_NONE: No windowing is applied.
  * @GWY_WINDOWING_HANN: Hann window.
  * @GWY_WINDOWING_HAMMING: Hamming window.

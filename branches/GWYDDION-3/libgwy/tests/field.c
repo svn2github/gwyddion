@@ -875,11 +875,11 @@ static void
 field_check_mask_good(guint xres, guint yres,
                       guint mxres, guint myres,
                       const GwyFieldPart *fpart,
-                      GwyMaskingType masking,
+                      GwyMasking masking,
                       guint expected_col, guint expected_row,
                       guint expected_width, guint expected_height,
                       guint expected_maskcol, guint expected_maskrow,
-                      GwyMaskingType expected_masking)
+                      GwyMasking expected_masking)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     GwyMaskField *mask = ((mxres && myres)
@@ -947,7 +947,7 @@ static void
 field_check_mask_empty(guint xres, guint yres,
                        guint mxres, guint myres,
                        const GwyFieldPart *fpart,
-                       GwyMaskingType masking)
+                       GwyMasking masking)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     GwyMaskField *mask = ((mxres && myres)
@@ -983,7 +983,7 @@ static void
 field_check_mask_bad(guint xres, guint yres,
                      guint mxres, guint myres,
                      const GwyFieldPart *fpart,
-                     GwyMaskingType masking)
+                     GwyMasking masking)
 {
     if (g_test_trap_fork(0,
                          G_TEST_TRAP_SILENCE_STDOUT
@@ -1455,7 +1455,7 @@ median_filter_dumb(const GwyField *field,
                    const GwyFieldPart *fpart,
                    GwyField *target,
                    const GwyMaskField *kernel,
-                   GwyExteriorType exterior,
+                   GwyExterior exterior,
                    gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
@@ -1718,7 +1718,7 @@ test_field_correlate_crosscorrelate(void)
 }
 
 static void
-field_read_exterior_one(GwyExteriorType exterior)
+field_read_exterior_one(GwyExterior exterior)
 {
     enum { max_size = 31, niter = 80 };
 
@@ -2050,7 +2050,7 @@ test_field_read_curvature_at_centre(void)
 }
 
 static void
-field_mark_outliers_one(GwyMaskingType masking,
+field_mark_outliers_one(GwyMasking masking,
                         GwyDeviationType deviation)
 {
     enum { max_size = 178 };

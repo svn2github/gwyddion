@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -727,7 +727,7 @@ GwyField*
 gwy_field_new_resampled(const GwyField *field,
                         guint xres,
                         guint yres,
-                        GwyInterpolationType interpolation)
+                        GwyInterpolation interpolation)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     g_return_val_if_fail(xres && yres, NULL);
@@ -1577,7 +1577,7 @@ gwy_field_check_target(const GwyField *field,
  * calculate_rms(const GwyField *field,
  *               const GwyFieldPart *fpart,
  *               const GwyMaskField *mask,
- *               GwyMaskingType masking)
+ *               GwyMasking masking)
  * {
  *     guint col, row, width, height, maskcol, maskrow;
  *     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -1602,7 +1602,7 @@ gboolean
 gwy_field_check_mask(const GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
-                     GwyMaskingType *masking,
+                     GwyMasking *masking,
                      guint *col, guint *row,
                      guint *width, guint *height,
                      guint *maskcol, guint *maskrow)

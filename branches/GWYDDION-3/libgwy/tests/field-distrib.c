@@ -179,9 +179,9 @@ test_field_distributions_row_psdf_rms(void)
         guint xres = g_rand_int_range(rng, 8, max_size);
         guint yres = g_rand_int_range(rng, 8, max_size);
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-        GwyWindowingType windowing = g_rand_int_range(rng,
-                                                      0,
-                                                      GWY_WINDOWING_KAISER25+1);
+        GwyWindowing windowing = g_rand_int_range(rng,
+                                                  0,
+                                                  GWY_WINDOWING_KAISER25+1);
 
         field_randomize(field, rng);
         GwyLine *psdf = gwy_field_row_psdf(field, NULL, NULL, GWY_MASK_IGNORE,
@@ -582,7 +582,7 @@ test_field_distributions_value_cont_range(void)
 static void
 level_for_cf(GwyField *field,
              const GwyMaskField *mask,
-             GwyMaskingType masking)
+             GwyMasking masking)
 {
     for (guint i = 0; i < field->yres; i++) {
         GwyFieldPart fpart = { 0, i, field->xres, 1 };
@@ -596,7 +596,7 @@ static GwyLine*
 cf_dumb(const GwyField *field,
         const GwyFieldPart *fpart,
         const GwyMaskField *mask,
-        GwyMaskingType masking,
+        GwyMasking masking,
         gboolean level,
         gboolean do_hhcf,
         GwyLine *weights)
@@ -1164,7 +1164,7 @@ test_field_distributions_minkowski_volume(void)
         GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(width, height, rng);
-        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
+        GwyMasking masking = (GwyMasking)g_rand_int_range(rng, 0, 3);
 
         GwyLine *volumedist = gwy_field_minkowski(field, &fpart,
                                                   mask, masking,
@@ -1211,7 +1211,7 @@ static guint
 count_black_white_edges_dumb(const GwyField *field,
                              const GwyFieldPart *fpart,
                              const GwyMaskField *mask,
-                             GwyMaskingType masking,
+                             GwyMasking masking,
                              gdouble threshold,
                              guint *bw_edge_count)
 {
@@ -1283,7 +1283,7 @@ test_field_distributions_minkowski_boundary(void)
         GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(width, height, rng);
-        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
+        GwyMasking masking = (GwyMasking)g_rand_int_range(rng, 0, 3);
 
         GwyLine *boundarydist = gwy_field_minkowski(field, &fpart,
                                                     mask, masking,
@@ -1344,7 +1344,7 @@ test_field_distributions_minkowski_black(void)
         GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(width, height, rng);
-        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
+        GwyMasking masking = (GwyMasking)g_rand_int_range(rng, 0, 3);
 
         GwyLine *blackdist = gwy_field_minkowski(field, &fpart,
                                                  mask, masking,
@@ -1415,7 +1415,7 @@ test_field_distributions_minkowski_white(void)
         GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(width, height, rng);
-        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
+        GwyMasking masking = (GwyMasking)g_rand_int_range(rng, 0, 3);
 
         GwyLine *whitedist = gwy_field_minkowski(field, &fpart,
                                                  mask, masking,
@@ -1486,7 +1486,7 @@ test_field_distributions_minkowski_connectivity(void)
         GwyFieldPart fpart = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(width, height, rng);
-        GwyMaskingType masking = (GwyMaskingType)g_rand_int_range(rng, 0, 3);
+        GwyMasking masking = (GwyMasking)g_rand_int_range(rng, 0, 3);
 
         GwyLine *conndist = gwy_field_minkowski(field, &fpart,
                                                 mask, masking,
@@ -1852,9 +1852,9 @@ test_field_distributions_psdf_rms(void)
             GwyFieldPart fpart = { col, row, width, height };
             gwy_field_set_xreal(field, g_rand_double_range(rng, 0.1, 10.0));
             gwy_field_set_yreal(field, g_rand_double_range(rng, 0.1, 10.0));
-            GwyWindowingType windowing = g_rand_int_range(rng,
-                                                          0,
-                                                          GWY_WINDOWING_KAISER25+1);
+            GwyWindowing windowing = g_rand_int_range(rng,
+                                                      0,
+                                                      GWY_WINDOWING_KAISER25+1);
 
             field_randomize(field, rng);
             GwyField *psdf = gwy_field_psdf(field, &fpart, windowing, lvl);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009 David Nečas (Yeti).
+ *  Copyright (C) 2007,2009,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,17 +35,17 @@ typedef enum {
     GWY_WINDOWING_NUTTALL    = 7,
     GWY_WINDOWING_FLAT_TOP   = 8,
     GWY_WINDOWING_KAISER25   = 9
-} GwyWindowingType;
+} GwyWindowing;
 
 typedef enum {
     GWY_TRANSFORM_FORWARD  = -1,
     GWY_TRANSFORM_BACKWARD = 1
 } GwyTransformDirection;
 
-guint gwy_fft_nice_transform_size(guint size)                 G_GNUC_CONST;
+guint gwy_fft_nice_transform_size(guint size)             G_GNUC_CONST;
 void  gwy_fft_window_sample      (gdouble *data,
                                   guint n,
-                                  GwyWindowingType windowing,
+                                  GwyWindowing windowing,
                                   guint normalize);
 void  gwy_fft_load_wisdom        (void);
 void  gwy_fft_save_wisdom        (void);

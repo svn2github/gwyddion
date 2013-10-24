@@ -77,7 +77,7 @@ void _gwy_field_set_cache_for_flat(GwyField *field,
                                    gdouble value);
 
 G_GNUC_INTERNAL
-void _gwy_ensure_defined_exterior(GwyExteriorType *exterior,
+void _gwy_ensure_defined_exterior(GwyExterior *exterior,
                                   gdouble *fill_value);
 
 G_GNUC_INTERNAL
@@ -87,7 +87,7 @@ void _gwy_make_symmetrical_extension(guint size,
                                      guint *extend_end);
 
 G_GNUC_INTERNAL
-RectExtendFunc _gwy_get_rect_extend_func(GwyExteriorType exterior);
+RectExtendFunc _gwy_get_rect_extend_func(GwyExterior exterior);
 
 G_GNUC_INTERNAL
 void _gwy_extend_kernel_rect(const gdouble *kernel,

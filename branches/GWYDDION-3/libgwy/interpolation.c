@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2005,2009,2010 David Nečas (Yeti).
+ *  Copyright (C) 2005,2009-2010,2013 David Nečas (Yeti).
  *  Copyright (C) 2003 Petr Klapetek.
  *  E-mail: yeti@gwyddion.net.
  *
@@ -34,7 +34,7 @@ static const gdouble synth_func_values_omoms4[] = {
 
 static inline void
 gwy_interpolation_get_weights(gdouble x,
-                              GwyInterpolationType interpolation,
+                              GwyInterpolation interpolation,
                               gdouble *w)
 {
     gdouble t, u, v;
@@ -156,7 +156,7 @@ gwy_interpolation_get_weights(gdouble x,
 gdouble
 gwy_interpolate_1d(gdouble x,
                    const gdouble *coeff,
-                   GwyInterpolationType interpolation)
+                   GwyInterpolation interpolation)
 {
     g_return_val_if_fail(x >= 0.0 && x <= 1.0, 0.0);
     guint suplen = gwy_interpolation_get_support_size(interpolation);
@@ -190,7 +190,7 @@ gwy_interpolate_2d(gdouble x,
                    gdouble y,
                    guint rowstride,
                    const gdouble *coeff,
-                   GwyInterpolationType interpolation)
+                   GwyInterpolation interpolation)
 {
     gdouble wx[SUPPORT_LENGTH_MAX], wy[SUPPORT_LENGTH_MAX];
     gint i, j, suplen;
@@ -397,7 +397,7 @@ deconvolve3_columns(guint width,
  *          of this type.
  **/
 gboolean
-gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation)
+gwy_interpolation_has_interpolating_basis(GwyInterpolation interpolation)
 {
     switch (interpolation) {
         case GWY_INTERPOLATION_BSPLINE1:
@@ -429,7 +429,7 @@ gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation)
  * Returns: The length of the support interval of the interpolation basis.
  **/
 guint
-gwy_interpolation_get_support_size(GwyInterpolationType interpolation)
+gwy_interpolation_get_support_size(GwyInterpolation interpolation)
 {
     switch (interpolation) {
         case GWY_INTERPOLATION_BSPLINE1:
@@ -472,7 +472,7 @@ gwy_interpolation_get_support_size(GwyInterpolationType interpolation)
 void
 gwy_interpolation_resolve_coeffs_1d(gdouble *data,
                                     guint n,
-                                    GwyInterpolationType interpolation)
+                                    GwyInterpolation interpolation)
 {
     if (gwy_interpolation_has_interpolating_basis(interpolation))
         return;
@@ -523,7 +523,7 @@ gwy_interpolation_resolve_coeffs_2d(gdouble *data,
                                     guint width,
                                     guint height,
                                     guint rowstride,
-                                    GwyInterpolationType interpolation)
+                                    GwyInterpolation interpolation)
 {
     if (interpolation == GWY_INTERPOLATION_BSPLINE1
         || interpolation == GWY_INTERPOLATION_BSPLINE2
@@ -584,7 +584,7 @@ gwy_interpolation_resample_block_1d(gdouble *data,
                                     guint length,
                                     gdouble *newdata,
                                     guint newlength,
-                                    GwyInterpolationType interpolation,
+                                    GwyInterpolation interpolation,
                                     gboolean preserve)
 {
     gdouble *coeffs = NULL;
@@ -627,7 +627,7 @@ calculate_weights_for_rescale(guint oldn,
                               guint newn,
                               gint *positions,
                               gdouble *weights,
-                              GwyInterpolationType interpolation)
+                              GwyInterpolation interpolation)
 {
     guint suplen = gwy_interpolation_get_support_size(interpolation);
     gdouble q = (gdouble)oldn/newn;
@@ -669,7 +669,7 @@ gwy_interpolation_resample_block_2d(gdouble *data,
                                     guint newwidth,
                                     guint newheight,
                                     guint newrowstride,
-                                    GwyInterpolationType interpolation,
+                                    GwyInterpolation interpolation,
                                     gboolean preserve)
 {
     gdouble *coeffs = NULL;
@@ -756,8 +756,8 @@ gwy_interpolation_shift_block_1d(gdouble *data,
                                  gdouble *newdata,
                                  guint length,
                                  gdouble offset,
-                                 GwyInterpolationType interpolation,
-                                 GwyExteriorType exterior,
+                                 GwyInterpolation interpolation,
+                                 GwyExterior exterior,
                                  gdouble fill_value,
                                  gboolean preserve)
 {
@@ -862,7 +862,7 @@ gwy_interpolation_shift_block_1d(gdouble *data,
  **/
 
 /**
- * GwyInterpolationType:
+ * GwyInterpolation:
  * @GWY_INTERPOLATION_BSPLINE1: First-order (constant) B-spline interpolation.
  *                              Also known as symmetric nearest neighbour
  *                              interpolation, which differs from rounding in
@@ -889,7 +889,7 @@ gwy_interpolation_shift_block_1d(gdouble *data,
  **/
 
 /**
- * GwyExteriorType:
+ * GwyExterior:
  * @GWY_EXTERIOR_UNDEFINED: The values corresponding to or calculated from
  *                          exterior data values are undefined, they may be
  *                          left unset or set to bogus values, including NaN.

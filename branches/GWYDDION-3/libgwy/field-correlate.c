@@ -97,7 +97,7 @@ gwy_field_correlate(const GwyField *field,
                     const GwyField *kernel,
                     const GwyMaskField *kmask,
                     GwyCorrelationFlags flags,
-                    GwyExteriorType exterior,
+                    GwyExterior exterior,
                     gdouble fill_value)
 {
     guint col, row, width, height, scorecol, scorerow;
@@ -442,7 +442,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                          guint colsearch,
                          guint rowsearch,
                          GwyCrosscorrelationFlags flags,
-                         GwyExteriorType exterior,
+                         GwyExterior exterior,
                          gdouble fill_value)
 {
     // Check if all target fields are compatible; @target is set to whichever
@@ -712,7 +712,7 @@ guint
 gwy_field_local_extrema(const GwyField *field,
                         const GwyFieldPart *fpart,
                         const GwyMaskField *mask,
-                        GwyMaskingType masking,
+                        GwyMasking masking,
                         guint *indices,
                         guint n,
                         gboolean maxima)

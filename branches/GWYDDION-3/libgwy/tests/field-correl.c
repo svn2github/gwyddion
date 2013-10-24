@@ -244,7 +244,7 @@ static void
 field_assert_local_extrema(const GwyField *field,
                            const GwyFieldPart *fpart,
                            const GwyMaskField *mask,
-                           GwyMaskingType masking,
+                           GwyMasking masking,
                            const guint *expected_indices,
                            guint expected_n,
                            gboolean maxima)

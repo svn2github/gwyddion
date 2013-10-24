@@ -136,7 +136,7 @@ static void
 field_value_dist_cont(const GwyField *field,
                       const GwyFieldPart *fpart,
                       const GwyMaskField *mask,
-                      GwyMaskingType masking,
+                      GwyMasking masking,
                       guint npoints,
                       DistributionData *ddata)
 {
@@ -166,7 +166,7 @@ static void
 value_dist_discr_analyse(const GwyField *field,
                          const GwyFieldPart *fpart,
                          const GwyMaskField *mask,
-                         GwyMaskingType masking,
+                         GwyMasking masking,
                          guint maskcol, guint maskrow,
                          guint width, guint height,
                          DistributionData *ddata)
@@ -194,7 +194,7 @@ value_dist_discr_analyse(const GwyField *field,
 static void
 value_dist_discr_process(const GwyField *field,
                          const GwyMaskField *mask,
-                         GwyMaskingType masking,
+                         GwyMasking masking,
                          guint col, guint row,
                          guint width, guint height,
                          guint maskcol, guint maskrow,
@@ -252,7 +252,7 @@ static void
 field_value_dist_discr(const GwyField *field,
                        const GwyFieldPart *fpart,
                        const GwyMaskField *mask,
-                       GwyMaskingType masking,
+                       GwyMasking masking,
                        guint npoints,
                        DistributionData *ddata)
 {
@@ -311,7 +311,7 @@ GwyLine*
 gwy_field_value_dist(const GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
-                     GwyMaskingType masking,
+                     GwyMasking masking,
                      gboolean cumulative,
                      gboolean continuous,
                      guint npoints,
@@ -512,7 +512,7 @@ GwyLine*
 gwy_field_slope_dist(const GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
-                     GwyMaskingType masking,
+                     GwyMasking masking,
                      gdouble angle,
                      gboolean cumulative,
                      gboolean continuous,
@@ -671,7 +671,7 @@ GwyLine*
 gwy_field_tss_dist(const GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
+                   GwyMasking masking,
                    gboolean cumulative,
                    guint npoints,
                    gdouble min, gdouble max)
@@ -1020,7 +1020,7 @@ row_level_and_count(const gdouble *in,
                     gdouble *out,
                     guint width,
                     const GwyMaskField *mask,
-                    GwyMaskingType masking,
+                    GwyMasking masking,
                     guint maskcol,
                     guint maskrow,
                     guint level)
@@ -1105,7 +1105,7 @@ GwyLine*
 gwy_field_row_acf(const GwyField *field,
                   const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking,
+                  GwyMasking masking,
                   guint level,
                   GwyLine *weights)
 {
@@ -1216,7 +1216,7 @@ grain_row_acf(const GwyField *field,
               guint col, guint row,
               guint width, guint height,
               const GwyMaskField *mask,
-              GwyMaskingType masking,
+              GwyMasking masking,
               guint level,
               gdouble *fftr,
               gwycomplex *fftc,
@@ -1366,7 +1366,7 @@ gwy_field_grain_row_acf(const GwyField *field,
 
     GwyMaskField *grainmask = gwy_mask_field_new();
     for (grain_id = gfrom; grain_id <= gto; grain_id++) {
-        GwyMaskingType masking = grain_id ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
+        GwyMasking masking = grain_id ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
         const GwyFieldPart *bbox = bboxes + grain_id;
 
         gwy_mask_field_extract_grain(mask, grainmask, grain_id, 0);
@@ -1433,8 +1433,8 @@ GwyLine*
 gwy_field_row_psdf(const GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
-                   GwyWindowingType windowing,
+                   GwyMasking masking,
+                   GwyWindowing windowing,
                    guint level)
 {
     guint col, row, width, height, maskcol, maskrow;
@@ -1574,7 +1574,7 @@ GwyLine*
 gwy_field_row_hhcf(const GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
+                   GwyMasking masking,
                    guint level,
                    GwyLine *weights)
 {
@@ -1755,7 +1755,7 @@ GwyLine*
 gwy_field_row_asg(const GwyField *field,
                   const GwyFieldPart *fpart,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking,
+                  GwyMasking masking,
                   guint level)
 {
     GwyLine *hhcf = gwy_field_row_hhcf(field, fpart, mask, masking, level,
@@ -2074,7 +2074,7 @@ gwy_field_hhcf(const GwyField *field,
 GwyField*
 gwy_field_psdf(const GwyField *field,
                const GwyFieldPart *fpart,
-               GwyWindowingType windowing,
+               GwyWindowing windowing,
                guint level)
 {
     guint col, row, width, height;
@@ -2418,7 +2418,7 @@ gwy_field_radial_asg(const GwyField *field,
 GwyCurve*
 gwy_field_radial_psdf(const GwyField *field,
                       const GwyFieldPart *fpart,
-                      GwyWindowingType windowing,
+                      GwyWindowing windowing,
                       guint level,
                       guint npoints)
 {
@@ -2491,7 +2491,7 @@ GwyCurve*
 gwy_field_angular_average(const GwyField *field,
                           const GwyFieldPart *fpart,
                           const GwyMaskField *mask,
-                          GwyMaskingType masking,
+                          GwyMasking masking,
                           guint npoints)
 {
     guint col, row, width, height, maskcol, maskrow;

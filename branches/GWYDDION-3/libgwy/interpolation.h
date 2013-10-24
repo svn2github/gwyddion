@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2005,2009 David Nečas (Yeti).
+ *  Copyright (C) 2005,2009,2013 David Nečas (Yeti).
  *  Copyright (C) 2003 Petr Klapetek.
  *  E-mail: yeti@gwyddion.net.
  *
@@ -40,7 +40,7 @@ typedef enum {
     GWY_INTERPOLATION_SCHAUM4  = 7,
     GWY_INTERPOLATION_SCHAUM   = GWY_INTERPOLATION_SCHAUM4,
     GWY_INTERPOLATION_BSPLINE6 = 8,
-} GwyInterpolationType;
+} GwyInterpolation;
 
 typedef enum {
     GWY_EXTERIOR_UNDEFINED,
@@ -48,31 +48,31 @@ typedef enum {
     GWY_EXTERIOR_MIRROR_EXTEND,
     GWY_EXTERIOR_PERIODIC,
     GWY_EXTERIOR_FIXED_VALUE
-} GwyExteriorType;
+} GwyExterior;
 
 gdouble  gwy_interpolate_1d                       (gdouble x,
                                                    const gdouble *coeff,
-                                                   GwyInterpolationType interpolation) G_GNUC_PURE;
+                                                   GwyInterpolation interpolation) G_GNUC_PURE;
 gdouble  gwy_interpolate_2d                       (gdouble x,
                                                    gdouble y,
                                                    guint rowstride,
                                                    const gdouble *coeff,
-                                                   GwyInterpolationType interpolation) G_GNUC_PURE;
-gboolean gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation) G_GNUC_CONST;
-guint    gwy_interpolation_get_support_size       (GwyInterpolationType interpolation) G_GNUC_CONST;
+                                                   GwyInterpolation interpolation) G_GNUC_PURE;
+gboolean gwy_interpolation_has_interpolating_basis(GwyInterpolation interpolation) G_GNUC_CONST;
+guint    gwy_interpolation_get_support_size       (GwyInterpolation interpolation) G_GNUC_CONST;
 void     gwy_interpolation_resolve_coeffs_1d      (gdouble *data,
                                                    guint n,
-                                                   GwyInterpolationType interpolation);
+                                                   GwyInterpolation interpolation);
 void     gwy_interpolation_resolve_coeffs_2d      (gdouble *data,
                                                    guint width,
                                                    guint height,
                                                    guint rowstride,
-                                                   GwyInterpolationType interpolation);
+                                                   GwyInterpolation interpolation);
 void     gwy_interpolation_resample_block_1d      (gdouble *data,
                                                    guint length,
                                                    gdouble *newdata,
                                                    guint newlength,
-                                                   GwyInterpolationType interpolation,
+                                                   GwyInterpolation interpolation,
                                                    gboolean preserve);
 void     gwy_interpolation_resample_block_2d      (gdouble *data,
                                                    guint width,
@@ -82,14 +82,14 @@ void     gwy_interpolation_resample_block_2d      (gdouble *data,
                                                    guint newwidth,
                                                    guint newheight,
                                                    guint newrowstride,
-                                                   GwyInterpolationType interpolation,
+                                                   GwyInterpolation interpolation,
                                                    gboolean preserve);
 void     gwy_interpolation_shift_block_1d         (gdouble *data,
                                                    gdouble *newdata,
                                                    guint length,
                                                    gdouble offset,
-                                                   GwyInterpolationType interpolation,
-                                                   GwyExteriorType exterior,
+                                                   GwyInterpolation interpolation,
+                                                   GwyExterior exterior,
                                                    gdouble fill_value,
                                                    gboolean preserve);
 

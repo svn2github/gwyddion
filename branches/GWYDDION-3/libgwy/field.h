@@ -68,23 +68,23 @@ struct _GwyFieldClass {
 #define gwy_field_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType           gwy_field_get_type       (void)                               G_GNUC_CONST;
-GwyField*       gwy_field_new            (void)                               G_GNUC_MALLOC;
+GType           gwy_field_get_type       (void)                           G_GNUC_CONST;
+GwyField*       gwy_field_new            (void)                           G_GNUC_MALLOC;
 GwyField*       gwy_field_new_sized      (guint xres,
                                           guint yres,
-                                          gboolean clear)                     G_GNUC_MALLOC;
+                                          gboolean clear)                 G_GNUC_MALLOC;
 GwyField*       gwy_field_new_alike      (const GwyField *model,
-                                          gboolean clear)                     G_GNUC_MALLOC;
+                                          gboolean clear)                 G_GNUC_MALLOC;
 GwyField*       gwy_field_new_part       (const GwyField *field,
                                           const GwyFieldPart *fpart,
-                                          gboolean keep_offsets)              G_GNUC_MALLOC;
+                                          gboolean keep_offsets)          G_GNUC_MALLOC;
 GwyField*       gwy_field_new_resampled  (const GwyField *field,
                                           guint xres,
                                           guint yres,
-                                          GwyInterpolationType interpolation) G_GNUC_MALLOC;
+                                          GwyInterpolation interpolation) G_GNUC_MALLOC;
 GwyField*       gwy_field_new_from_mask  (const GwyMaskField *mask,
                                           gdouble zero,
-                                          gdouble one)                        G_GNUC_MALLOC;
+                                          gdouble one)                    G_GNUC_MALLOC;
 void            gwy_field_set_size       (GwyField *field,
                                           guint xres,
                                           guint yres,
@@ -108,22 +108,22 @@ void            gwy_field_set_xoffset    (GwyField *field,
 void            gwy_field_set_yoffset    (GwyField *field,
                                           gdouble yoffset);
 void            gwy_field_clear_offsets  (GwyField *field);
-GwyUnit*        gwy_field_get_xunit      (const GwyField *field)              G_GNUC_PURE;
-GwyUnit*        gwy_field_get_yunit      (const GwyField *field)              G_GNUC_PURE;
-GwyUnit*        gwy_field_get_zunit      (const GwyField *field)              G_GNUC_PURE;
-gboolean        gwy_field_xy_units_match (const GwyField *field)              G_GNUC_PURE;
-gboolean        gwy_field_xyz_units_match(const GwyField *field)              G_GNUC_PURE;
+GwyUnit*        gwy_field_get_xunit      (const GwyField *field)          G_GNUC_PURE;
+GwyUnit*        gwy_field_get_yunit      (const GwyField *field)          G_GNUC_PURE;
+GwyUnit*        gwy_field_get_zunit      (const GwyField *field)          G_GNUC_PURE;
+gboolean        gwy_field_xy_units_match (const GwyField *field)          G_GNUC_PURE;
+gboolean        gwy_field_xyz_units_match(const GwyField *field)          G_GNUC_PURE;
 GwyValueFormat* gwy_field_format_x       (const GwyField *field,
-                                          GwyValueFormatStyle style)          G_GNUC_MALLOC;
+                                          GwyValueFormatStyle style)      G_GNUC_MALLOC;
 GwyValueFormat* gwy_field_format_y       (const GwyField *field,
-                                          GwyValueFormatStyle style)          G_GNUC_MALLOC;
+                                          GwyValueFormatStyle style)      G_GNUC_MALLOC;
 GwyValueFormat* gwy_field_format_xy      (const GwyField *field,
-                                          GwyValueFormatStyle style)          G_GNUC_MALLOC;
+                                          GwyValueFormatStyle style)      G_GNUC_MALLOC;
 GwyValueFormat* gwy_field_format_z       (const GwyField *field,
-                                          GwyValueFormatStyle style)          G_GNUC_MALLOC;
+                                          GwyValueFormatStyle style)      G_GNUC_MALLOC;
 void            gwy_field_set_name       (GwyField *field,
                                           const gchar *name);
-const gchar*    gwy_field_get_name       (const GwyField *field)              G_GNUC_PURE;
+const gchar*    gwy_field_get_name       (const GwyField *field)          G_GNUC_PURE;
 
 #define gwy_field_index(field, col, row) \
     ((field)->data[(field)->xres*(row) + (col)])
@@ -172,7 +172,7 @@ gboolean gwy_field_check_target     (const GwyField *field,
 gboolean gwy_field_check_mask       (const GwyField *field,
                                      const GwyFieldPart *fpart,
                                      const GwyMaskField *mask,
-                                     GwyMaskingType *masking,
+                                     GwyMasking *masking,
                                      guint *col,
                                      guint *row,
                                      guint *width,

@@ -176,7 +176,7 @@ void
 gwy_field_clear(GwyField *field,
                 const GwyFieldPart *fpart,
                 const GwyMaskField *mask,
-                GwyMaskingType masking)
+                GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -236,7 +236,7 @@ void
 gwy_field_fill(GwyField *field,
                const GwyFieldPart *fpart,
                const GwyMaskField *mask,
-               GwyMaskingType masking,
+               GwyMasking masking,
                gdouble value)
 {
     if (!value) {
@@ -306,7 +306,7 @@ void
 gwy_field_add(GwyField *field,
               const GwyFieldPart *fpart,
               const GwyMaskField *mask,
-              GwyMaskingType masking,
+              GwyMasking masking,
               gdouble shift)
 {
     guint col, row, width, height, maskcol, maskrow;
@@ -380,7 +380,7 @@ void
 gwy_field_multiply(GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
+                   GwyMasking masking,
                    gdouble factor)
 {
     guint col, row, width, height, maskcol, maskrow;
@@ -467,7 +467,7 @@ void
 gwy_field_addmul(GwyField *field,
                  const GwyFieldPart *fpart,
                  const GwyMaskField *mask,
-                 GwyMaskingType masking,
+                 GwyMasking masking,
                  gdouble factor,
                  gdouble shift)
 {
@@ -560,7 +560,7 @@ gboolean
 gwy_field_normalize(GwyField *field,
                     const GwyFieldPart *fpart,
                     const GwyMaskField *mask,
-                    GwyMaskingType masking,
+                    GwyMasking masking,
                     gdouble mean,
                     gdouble rms,
                     GwyNormalizeFlags flags)
@@ -621,7 +621,7 @@ void
 gwy_field_sqrt(GwyField *field,
                const GwyFieldPart *fpart,
                const GwyMaskField *mask,
-               GwyMaskingType masking)
+               GwyMasking masking)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!gwy_field_check_mask(field, fpart, mask, &masking,
@@ -682,7 +682,7 @@ void
 gwy_field_apply_func(GwyField *field,
                      const GwyFieldPart *fpart,
                      const GwyMaskField *mask,
-                     GwyMaskingType masking,
+                     GwyMasking masking,
                      GwyRealFunc function,
                      gpointer user_data)
 {

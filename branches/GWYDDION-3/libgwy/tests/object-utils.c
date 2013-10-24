@@ -396,16 +396,16 @@ test_object_utils_all_type_children_concrete(void)
 void
 test_object_utils_enum_nick(void)
 {
-    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING,
                                          GWY_WINDOWING_NONE),
                     ==, "none");
-    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING,
                                          GWY_WINDOWING_FLAT_TOP),
                     ==, "flat-top");
-    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING,
                                          GWY_WINDOWING_KAISER25),
                     ==, "kaiser25");
-    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING_TYPE,
+    g_assert_cmpstr(gwy_genum_value_nick(GWY_TYPE_WINDOWING,
                                          1000),
                     ==, "<INVALID-VALUE 1000>");
 }

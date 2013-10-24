@@ -36,7 +36,7 @@ void gwy_field_fft               (const GwyField *rein,
                                   GwyField *imout,
                                   GwyTransformDirection direction);
 void gwy_field_fft_window        (GwyField *field,
-                                  GwyWindowingType windowing,
+                                  GwyWindowing windowing,
                                   gboolean columns,
                                   gboolean rows);
 void gwy_field_fft_humanize      (GwyField *field);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011 David Nečas (Yeti).
+ *  Copyright (C) 2011,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -30,47 +30,47 @@ G_BEGIN_DECLS
 gdouble   gwy_field_value               (const GwyField *field,
                                          gint col,
                                          gint row,
-                                         GwyExteriorType exterior,
-                                         gdouble fill_value)                  G_GNUC_PURE;
+                                         GwyExterior exterior,
+                                         gdouble fill_value)              G_GNUC_PURE;
 gdouble   gwy_field_value_interpolated  (const GwyField *field,
                                          gdouble x,
                                          gdouble y,
-                                         GwyInterpolationType interpolation,
-                                         GwyExteriorType exterior,
-                                         gdouble fill_value)                  G_GNUC_PURE;
+                                         GwyInterpolation interpolation,
+                                         GwyExterior exterior,
+                                         gdouble fill_value)              G_GNUC_PURE;
 gdouble   gwy_field_value_averaged      (const GwyField *field,
                                          const GwyMaskField *mask,
-                                         GwyMaskingType masking,
+                                         GwyMasking masking,
                                          gint col,
                                          gint row,
                                          guint ax,
                                          guint ay,
                                          gboolean elliptical,
-                                         GwyExteriorType exterior,
-                                         gdouble fill_value)                  G_GNUC_PURE;
+                                         GwyExterior exterior,
+                                         gdouble fill_value)              G_GNUC_PURE;
 gboolean  gwy_field_slope               (const GwyField *field,
                                          const GwyMaskField *mask,
-                                         GwyMaskingType masking,
+                                         GwyMasking masking,
                                          gint col,
                                          gint row,
                                          guint ax,
                                          guint ay,
                                          gboolean elliptical,
-                                         GwyExteriorType exterior,
+                                         GwyExterior exterior,
                                          gdouble fill_value,
                                          gdouble *a,
                                          gdouble *bx,
                                          gdouble *by);
 gint      gwy_field_curvature           (const GwyField *field,
                                          const GwyMaskField *mask,
-                                         GwyMaskingType masking,
+                                         GwyMasking masking,
                                          gint col,
                                          gint row,
                                          guint ax,
                                          guint ay,
                                          gboolean elliptical,
                                          gboolean at_centre,
-                                         GwyExteriorType exterior,
+                                         GwyExterior exterior,
                                          gdouble fill_value,
                                          GwyCurvatureParams *curvature);
 GwyCurve* gwy_field_profile             (GwyField *field,
@@ -81,11 +81,11 @@ GwyCurve* gwy_field_profile             (GwyField *field,
                                          guint res,
                                          gdouble thickness,
                                          guint averaging,
-                                         GwyInterpolationType interpolation,
-                                         GwyExteriorType exterior,
-                                         gdouble fill_value)                  G_GNUC_MALLOC;
+                                         GwyInterpolation interpolation,
+                                         GwyExterior exterior,
+                                         gdouble fill_value)              G_GNUC_MALLOC;
 GwyField* gwy_field_interpolation_coeffs(GwyField *field,
-                                         GwyInterpolationType interpolation);
+                                         GwyInterpolation interpolation);
 
 G_END_DECLS
 

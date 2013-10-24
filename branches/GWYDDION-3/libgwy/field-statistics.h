@@ -52,7 +52,7 @@ typedef void (*GwyFieldAllQuartersFunc)(gdouble zul,
 void    gwy_field_min_max          (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking,
+                                    GwyMasking masking,
                                     gdouble *min,
                                     gdouble *max);
 void    gwy_field_min_max_full     (const GwyField *field,
@@ -61,27 +61,27 @@ void    gwy_field_min_max_full     (const GwyField *field,
 gdouble gwy_field_mean             (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking);
+                                    GwyMasking masking);
 gdouble gwy_field_mean_full        (const GwyField *field);
 gdouble gwy_field_median           (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking);
+                                    GwyMasking masking);
 gdouble gwy_field_median_full      (const GwyField *field);
 gdouble gwy_field_rms              (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking);
+                                    GwyMasking masking);
 gdouble gwy_field_rms_full         (const GwyField *field);
 gdouble gwy_field_meansq           (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking);
+                                    GwyMasking masking);
 gdouble gwy_field_meansq_full      (const GwyField *field);
 void    gwy_field_statistics       (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking,
+                                    GwyMasking masking,
                                     gdouble *mean,
                                     gdouble *ra,
                                     gdouble *rms,
@@ -90,26 +90,26 @@ void    gwy_field_statistics       (const GwyField *field,
 gdouble gwy_field_entropy          (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking);
+                                    GwyMasking masking);
 gdouble gwy_field_surface_area     (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking);
+                                    GwyMasking masking);
 gdouble gwy_field_volume           (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking,
+                                    GwyMasking masking,
                                     GwyFieldVolumeMethod method);
 gdouble gwy_field_material_volume  (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking,
+                                    GwyMasking masking,
                                     gboolean material,
                                     gdouble base);
 guint   gwy_field_count_above_below(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking,
+                                    GwyMasking masking,
                                     gdouble above,
                                     gdouble below,
                                     gboolean strict,
@@ -118,7 +118,7 @@ guint   gwy_field_count_above_below(const GwyField *field,
 void    gwy_field_process_quarters (const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
-                                    GwyMaskingType masking,
+                                    GwyMasking masking,
                                     gboolean include_borders,
                                     GwyFieldQuartersFunc function,
                                     GwyFieldAllQuartersFunc allfunction,

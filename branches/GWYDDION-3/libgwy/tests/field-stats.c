@@ -986,7 +986,7 @@ test_field_statistics(void)
 }
 
 static void
-field_median_one(GwyMaskingType masking)
+field_median_one(GwyMasking masking)
 {
     enum { max_size = 75 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -1054,7 +1054,7 @@ test_field_median_ignore(void)
 }
 
 static void
-field_entropy_one(GwyMaskingType masking,
+field_entropy_one(GwyMasking masking,
                   guint type,
                   gboolean outliers)
 {

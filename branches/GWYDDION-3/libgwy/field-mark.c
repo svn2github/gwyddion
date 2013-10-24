@@ -65,7 +65,7 @@ gwy_field_mark_outliers(const GwyField *field,
                         const GwyFieldPart *fpart,
                         GwyMaskField *outliers,
                         const GwyMaskField *mask,
-                        GwyMaskingType masking,
+                        GwyMasking masking,
                         GwyDeviationType deviation,
                         gdouble threshold)
 {

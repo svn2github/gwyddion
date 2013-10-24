@@ -62,33 +62,33 @@ GwyFieldCompatFlags gwy_field_is_incompatible(const GwyField *field1,
 void     gwy_field_clear        (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking);
+                                 GwyMasking masking);
 void     gwy_field_clear_full   (GwyField *field);
 void     gwy_field_fill         (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking,
+                                 GwyMasking masking,
                                  gdouble value);
 void     gwy_field_fill_full    (GwyField *field,
                                  gdouble value);
 void     gwy_field_add          (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking,
+                                 GwyMasking masking,
                                  gdouble shift);
 void     gwy_field_add_full     (GwyField *field,
                                  gdouble shift);
 void     gwy_field_multiply     (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking,
+                                 GwyMasking masking,
                                  gdouble factor);
 void     gwy_field_multiply_full(GwyField *field,
                                  gdouble factor);
 void     gwy_field_addmul       (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking,
+                                 GwyMasking masking,
                                  gdouble factor,
                                  gdouble shift);
 void     gwy_field_addmul_full  (GwyField *field,
@@ -101,19 +101,19 @@ guint    gwy_field_clamp        (GwyField *field,
 gboolean gwy_field_normalize    (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking,
+                                 GwyMasking masking,
                                  gdouble mean,
                                  gdouble rms,
                                  GwyNormalizeFlags flags);
 void     gwy_field_sqrt         (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking);
+                                 GwyMasking masking);
 void     gwy_field_sqrt_full    (GwyField *field);
 void     gwy_field_apply_func   (GwyField *field,
                                  const GwyFieldPart *fpart,
                                  const GwyMaskField *mask,
-                                 GwyMaskingType masking,
+                                 GwyMasking masking,
                                  GwyRealFunc function,
                                  gpointer user_data);
 void     gwy_field_add_field    (const GwyField *src,

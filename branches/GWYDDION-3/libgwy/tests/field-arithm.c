@@ -592,7 +592,7 @@ test_field_arithmetic_normalize(void)
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        GwyMaskingType masking = g_rand_boolean(rng) ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
+        GwyMasking masking = g_rand_boolean(rng) ? GWY_MASK_INCLUDE : GWY_MASK_EXCLUDE;
 
         gdouble wantmean = 20.0*(g_rand_double(rng) - 0.5);
         gdouble wantrms = -log(g_rand_double(rng));
@@ -712,7 +712,7 @@ static void
 field_arithmetic_one_func(void (*field_func)(GwyField *field,
                                              const GwyFieldPart *fpart,
                                              const GwyMaskField *mask,
-                                             GwyMaskingType masking),
+                                             GwyMasking masking),
                           gdouble (*scalar_func)(gdouble x))
 {
     enum { max_size = 70 };

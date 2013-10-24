@@ -311,12 +311,12 @@ gwy_field_fft(const GwyField *rein,
  **/
 void
 gwy_field_fft_window(GwyField *field,
-                     GwyWindowingType windowing,
+                     GwyWindowing windowing,
                      gboolean columns,
                      gboolean rows)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    g_return_if_fail(gwy_windowing_type_is_valid(windowing));
+    g_return_if_fail(gwy_windowing_is_valid(windowing));
 
     guint xres = field->xres, yres = field->yres;
     guint size = MAX((columns ? yres : 0), (rows ? xres : 0));

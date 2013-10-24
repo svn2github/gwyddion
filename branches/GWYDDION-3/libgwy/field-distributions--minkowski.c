@@ -58,7 +58,7 @@ minkowski_volume(const GwyField *field,
                  guint col, guint row,
                  guint width, guint height,
                  const GwyMaskField *mask,
-                 GwyMaskingType masking,
+                 GwyMasking masking,
                  guint maskcol, guint maskrow,
                  guint npoints,
                  gdouble min, gdouble max)
@@ -139,7 +139,7 @@ count_edges(const GwyField *field,
             guint col, guint row,
             guint width, guint height,
             const GwyMaskField *mask,
-            GwyMaskingType masking,
+            GwyMasking masking,
             guint maskcol, guint maskrow,
             gdouble *min, gdouble *max)
 {
@@ -240,7 +240,7 @@ calculate_min_max_dist(const GwyField *field,
                        guint col, guint row,
                        guint width, guint height,
                        const GwyMaskField *mask,
-                       GwyMaskingType masking,
+                       GwyMasking masking,
                        guint maskcol, guint maskrow,
                        GwyLine *mindist, GwyLine *maxdist)
 {
@@ -313,7 +313,7 @@ minkowski_boundary(const GwyField *field,
                    guint col, guint row,
                    guint width, guint height,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
+                   GwyMasking masking,
                    guint maskcol, guint maskrow,
                    guint npoints,
                    gdouble min, gdouble max)
@@ -368,7 +368,7 @@ discretise_heights(const GwyField *field,
                    guint col, guint row,
                    guint width, guint height,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
+                   GwyMasking masking,
                    guint maskcol, guint maskrow,
                    guint npoints,
                    gdouble min, gdouble max,
@@ -514,7 +514,7 @@ grain_number_dist(const GwyField *field,
                   guint col, guint row,
                   guint width, guint height,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking,
+                  GwyMasking masking,
                   guint maskcol, guint maskrow,
                   gboolean white,
                   guint npoints,
@@ -647,7 +647,7 @@ minkowski_ngrains(const GwyField *field,
                   guint col, guint row,
                   guint width, guint height,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking,
+                  GwyMasking masking,
                   guint maskcol, guint maskrow,
                   gboolean white,
                   guint npoints,
@@ -668,7 +668,7 @@ minkowski_connectivity(const GwyField *field,
                        guint col, guint row,
                        guint width, guint height,
                        const GwyMaskField *mask,
-                       GwyMaskingType masking,
+                       GwyMasking masking,
                        guint maskcol, guint maskrow,
                        guint npoints,
                        gdouble min, gdouble max)
@@ -722,8 +722,8 @@ GwyLine*
 gwy_field_minkowski(const GwyField *field,
                     const GwyFieldPart *fpart,
                     const GwyMaskField *mask,
-                    GwyMaskingType masking,
-                    GwyMinkowskiFunctionalType type,
+                    GwyMasking masking,
+                    GwyMinkowskiFunctional type,
                     guint npoints,
                     gdouble min, gdouble max)
 {
@@ -774,7 +774,7 @@ fail:
 }
 
 /**
- * GwyMinkowskiFunctionalType:
+ * GwyMinkowskiFunctional:
  * @GWY_MINKOWSKI_VOLUME: Fraction of ‘white’ pixels from the total
  *                        number of pixels.
  * @GWY_MINKOWSKI_BOUNDARY: Fraction of ‘black–white’ pixel edges from the

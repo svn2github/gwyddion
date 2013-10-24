@@ -252,7 +252,7 @@ gwy_mask_scale_row_weighted(GwyMaskIter srciter,
  **/
 
 /**
- * GwyMaskingType:
+ * GwyMasking:
  * @GWY_MASK_EXCLUDE: Exclude data under mask, i.e. take into account only
  *                    data not covered by the mask.
  * @GWY_MASK_INCLUDE: Take into account only data under the mask.

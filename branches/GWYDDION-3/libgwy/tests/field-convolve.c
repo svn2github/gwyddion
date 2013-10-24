@@ -30,7 +30,7 @@ exterior_value_dumb(const gdouble *data,
                     guint size,
                     guint stride,
                     gint pos,
-                    GwyExteriorType exterior,
+                    GwyExterior exterior,
                     gdouble fill_value)
 {
     // Interior
@@ -64,7 +64,7 @@ exterior_value_dumb(const gdouble *data,
 static gdouble
 exterior_value_dumb_2d(GwyField *field,
                        gint xpos, gint ypos,
-                       GwyExteriorType exterior,
+                       GwyExterior exterior,
                        gdouble fill_value)
 {
     // Interior
@@ -105,7 +105,7 @@ exterior_value_dumb_2d(GwyField *field,
 
 // The behaviour for interiors should not depend on the exterior type
 static void
-field_convolve_row_interior_one(GwyExteriorType exterior)
+field_convolve_row_interior_one(GwyExterior exterior)
 {
     enum { yres = 3 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -158,7 +158,7 @@ field_convolve_row_interior_one(GwyExteriorType exterior)
 }
 
 static void
-field_convolve_row_exterior_one(GwyExteriorType exterior)
+field_convolve_row_exterior_one(GwyExterior exterior)
 {
     enum { yres = 3 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -354,7 +354,7 @@ static void
 field_convolve_simple_one(const GwyField *source,
                           const GwyField *kernel,
                           const GwyField *reference,
-                          GwyExteriorType exterior)
+                          GwyExterior exterior)
 {
     GwyField *field = gwy_field_new_alike(source, FALSE);
     gwy_field_convolve(source, NULL, field, kernel, exterior, G_E);
@@ -645,7 +645,7 @@ test_field_convolve_field_simple_odd_even_fft(void)
 }
 
 static void
-field_convolve_field_one(GwyExteriorType exterior)
+field_convolve_field_one(GwyExterior exterior)
 {
     enum { max_size = 30, niter = 200 };
 
@@ -776,7 +776,7 @@ test_field_convolve_field_fixed_fft(void)
 }
 
 static void
-field_extend_one(GwyExteriorType exterior)
+field_extend_one(GwyExterior exterior)
 {
     enum { max_size = 35 };
 

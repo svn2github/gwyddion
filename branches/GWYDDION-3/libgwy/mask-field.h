@@ -165,7 +165,7 @@ guint gwy_mask_field_part_count        (const GwyMaskField *field,
                                         gboolean value);
 guint gwy_mask_field_part_count_masking(const GwyMaskField *field,
                                         const GwyFieldPart *fpart,
-                                        GwyMaskingType masking);
+                                        GwyMasking masking);
 guint gwy_mask_field_count_rows        (const GwyMaskField *field,
                                         const GwyFieldPart *fpart,
                                         gboolean value,

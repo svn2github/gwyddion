@@ -157,7 +157,7 @@ gboolean
 gwy_field_fit_plane(const GwyField *field,
                     const GwyFieldPart *fpart,
                     const GwyMaskField *mask,
-                    GwyMaskingType masking,
+                    GwyMasking masking,
                     gdouble *a, gdouble *bx, gdouble *by)
 {
     guint col, row, width, height, maskcol, maskrow;
@@ -283,7 +283,7 @@ gboolean
 gwy_field_inclination(const GwyField *field,
                       const GwyFieldPart *fpart,
                       const GwyMaskField *mask,
-                      GwyMaskingType masking,
+                      GwyMasking masking,
                       gdouble damping,
                       gdouble *bx,
                       gdouble *by)
@@ -515,7 +515,7 @@ gboolean
 gwy_field_fit_poly(const GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
-                   GwyMaskingType masking,
+                   GwyMasking masking,
                    const guint *xpowers, const guint *ypowers,
                    guint nterms,
                    gdouble *coeffs)
@@ -668,7 +668,7 @@ static gboolean
 fit_row_mean(const GwyField *field,
              guint row,
              const GwyMaskField *mask,
-             GwyMaskingType masking,
+             GwyMasking masking,
              guint maskrow,
              guint min_freedom,
              gdouble *value)
@@ -704,7 +704,7 @@ static guint
 fit_row_median(const GwyField *field,
                guint row,
                const GwyMaskField *mask,
-               GwyMaskingType masking,
+               GwyMasking masking,
                guint maskrow,
                guint min_freedom,
                gdouble *buffer,
@@ -739,7 +739,7 @@ static void
 fit_row_mean_diff(const GwyField *field,
                   guint row,
                   const GwyMaskField *mask,
-                  GwyMaskingType masking,
+                  GwyMasking masking,
                   guint maskrow,
                   guint min_freedom,
                   gdouble *shift)
@@ -775,7 +775,7 @@ static void
 fit_row_median_diff(const GwyField *field,
                     guint row,
                     const GwyMaskField *mask,
-                    GwyMaskingType masking,
+                    GwyMasking masking,
                     guint maskrow,
                     guint min_freedom,
                     gdouble *buffer,
@@ -853,7 +853,7 @@ find_shifts_of_good_rows(GwyLine *shifts,
 GwyLine*
 gwy_field_find_row_shifts(const GwyField *field,
                           const GwyMaskField *mask,
-                          GwyMaskingType masking,
+                          GwyMasking masking,
                           GwyRowShiftMethod method,
                           guint min_freedom)
 {

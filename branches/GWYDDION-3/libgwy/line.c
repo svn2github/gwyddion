@@ -789,7 +789,7 @@ gwy_line_new_part(const GwyLine *line,
 GwyLine*
 gwy_line_new_resampled(const GwyLine *line,
                        guint res,
-                       GwyInterpolationType interpolation)
+                       GwyInterpolation interpolation)
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     g_return_val_if_fail(res, NULL);
