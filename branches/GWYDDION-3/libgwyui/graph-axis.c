@@ -619,7 +619,7 @@ draw_ticks(GwyAxis *axis, cairo_t *cr,
 static void
 draw_labels(GwyAxis *axis, cairo_t *cr,
             const cairo_matrix_t *matrix,
-            G_GNUC_UNUSED gdouble length, gdouble breadth)
+            gdouble length, gdouble breadth)
 {
     GraphAxis *priv = GWY_GRAPH_AXIS(axis)->priv;
     if (!priv->show_ticks || !gwy_axis_get_show_tick_labels(axis))
@@ -650,12 +650,15 @@ draw_labels(GwyAxis *axis, cairo_t *cr,
         cairo_matrix_transform_point(matrix, &x, &y);
         pango_layout_set_markup(layout, ticks[i].label, -1);
         if (edge == GTK_POS_TOP || edge == GTK_POS_BOTTOM) {
-            if (i == nticks-1 && ticks[i].level == GWY_AXIS_TICK_EDGE)
-                x -= 2.0 + PANGO_RBEARING(ticks[i].extents)/pangoscale;
+            gdouble rbearing = PANGO_RBEARING(ticks[i].extents)/pangoscale;
+            if (i == nticks-1) {
+                gdouble stickout = x + 2.0 + 0.5*rbearing - length;
+                x -= 0.5*rbearing + fmax(stickout, 0.0);
+            }
             else if (i == 0)
                 x += 2.0;
             else
-                x -= 0.5*PANGO_RBEARING(ticks[i].extents)/pangoscale;
+                x -= 0.5*rbearing;
 
             if (edge == GTK_POS_TOP)
                 y = breadth - (mtlen + 1) - d;
