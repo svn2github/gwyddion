@@ -680,7 +680,7 @@ format_exponential(GString *str,
                    GwyValueFormatStyle style)
 {
     guint len = str->len;
-    if (fabs(value) >= 1.0 && fabs(value) < 1500.0) {
+    if (fabs(value) >= 1.0 && fabs(value) < 9999.5) {
         g_string_append_printf(str, "%g", value);
         return;
     }
