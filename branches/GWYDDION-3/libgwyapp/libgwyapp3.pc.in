@@ -7,9 +7,9 @@ datarootdir=@datarootdir@
 gwylibdir=@libdir@/@PACKAGE@
 gwydatadir=@datadir@/@PACKAGE@
 
-Name: libgwyui3
-Description: Gwyddion3 user interface library
+Name: libgwyapp3
+Description: Gwyddion3 application library
 Version: @VERSION@
-Requires: gtk+-3.0
-Libs: -L${libdir} -lgwyui3 -lgwy3
+Requires: gtk+-3.0 gmodule-2.0
+Libs: -L${libdir} -lgwyapp3 -lgwyui3 -lgwy3
 Cflags: -I${includedir}/gwyddion3 -I${libdir}/gwyddion3/include

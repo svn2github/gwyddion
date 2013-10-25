@@ -2,7 +2,7 @@
 # $Id$
 
 EXTRA_DIST = \
-	check-dep-versions.py \
+	check-dep-versions.py.in \
 	check-doc-sections.sh \
 	check-library-symbols.py \
 	check-marshallers.py \

@@ -9,6 +9,7 @@
  * Generated #GTypes for enumerated types.
  **/
 
+G_GNUC_UNUSED
 static gboolean
 check_enum(const GEnumValue *values, guint nvalues, gint value)
 {
@@ -20,6 +21,7 @@ check_enum(const GEnumValue *values, guint nvalues, gint value)
     return FALSE;
 }
 
+G_GNUC_UNUSED
 static gboolean
 check_flags(const GFlagsValue *values, guint nvalues, guint value)
 {

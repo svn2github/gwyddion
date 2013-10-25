@@ -2,14 +2,14 @@
 import sys, re
 
 max_versions = {
-    'cairo': (1, 10),
-    'glib': (2, 36),
-    'gobject': (2, 36),
-    'gio': (2, 36),
-    'pango': (1, 32),
-    'gdk3': (3, 6),
-    'gdk-pixbuf': (2, 22),
-    'gtk3': (3, 6),
+    'cairo': '1.10',
+    'glib': '@GWY_REQUIRED_GLIB@',
+    'gobject': '@GWY_REQUIRED_GLIB@',
+    'gio': '@GWY_REQUIRED_GLIB@',
+    'pango': '1.32',
+    'gdk3': '@GWY_REQUIRED_GTK@',
+    'gdk-pixbuf': '@GWY_REQUIRED_GDKPIXBUF@',
+    'gtk3': '@GWY_REQUIRED_GTK@',
 }
 
 accept = frozenset([
@@ -18,6 +18,9 @@ accept = frozenset([
 req_re = re.compile(r'^(?P<location>\S+)\s+'
                     r'(?P<package>\S+?)-(?P<major>[0-9]+)\.(?P<minor>[0-9]+)\s+'
                     r'required for (?P<reason>.*)$')
+
+for pkg in max_versions.keys():
+    max_versions[pkg] = tuple(int(x) for x in max_versions[pkg].split('.'))
 
 exitstatus = 0
 for line in sys.stdin:

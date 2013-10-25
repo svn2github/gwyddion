@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([gwy_version_major],[2])
-m4_define([gwy_version_minor],[99])
+m4_define([gwy_version_major],[3])
+m4_define([gwy_version_minor],[0])
 m4_define([gwy_version_micro],[0])
 m4_define([gwy_version_extra],[])
 m4_define([gwy_version_string],
@@ -19,6 +19,7 @@ AC_CONFIG_FILES([
   Makefile
   m4/Makefile
   build/Makefile
+  build/check-dep-versions.py
   resources/Makefile
   resources/gradients/Makefile
   libgwy/Makefile
@@ -28,6 +29,8 @@ AC_CONFIG_FILES([
   libgwy/benchmarks/Makefile
   libgwyui/Makefile
   libgwyui/libgwyui3.pc
+  libgwyapp/Makefile
+  libgwyapp/libgwyapp3.pc
   gwyddion/Makefile
   po/Makefile.in
   po-libgwy/Makefile.in
@@ -39,7 +42,7 @@ AC_CONFIG_FILES([
   gwyddion3.spec:data/gwyddion3.spec.in \
 ])
 
-AM_INIT_AUTOMAKE([1.11 gnu -Wall -Wno-portability dist-xz no-dist-gzip std-options nostdinc silent-rules])
+AM_INIT_AUTOMAKE([1.13 gnu -Wall -Wno-portability dist-xz no-dist-gzip std-options nostdinc])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
@@ -64,7 +67,9 @@ gwy_lib_path=`echo "$sys_lib_search_path_spec" | sed -e 's/  */:/g'`
 AC_DEFINE_UNQUOTED([GWY_LIB_PATH],["$gwy_lib_path"],
                    [Define to system library search path])
 
-PKG_PROG_PKG_CONFIG([0.22])
+m4_define([gwy_required_pkgconfig],[0.22])
+AC_SUBST([GWY_REQUIRED_PKGCONFIG],[gwy_required_pkgconfig])
+PKG_PROG_PKG_CONFIG([gwy_required_pkgconfig])
 
 #############################################################################
 # Win32.
@@ -120,48 +125,56 @@ fi
 # I18n
 GETTEXT_PACKAGE=gwyddion3
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.18])
+m4_define([gwy_required_gettext],[0.18])
+AC_SUBST([GWY_REQUIRED_GETTEXT],[gwy_required_intltool])
+AM_GNU_GETTEXT_VERSION([gwy_required_gettext])
 AC_SUBST(GETTEXT_PACKAGE)
 
-IT_PROG_INTLTOOL([0.41],[no-xml])
+m4_define([gwy_required_intltool],[0.41])
+AC_SUBST([GWY_REQUIRED_INTLTOOL],[gwy_required_intltool])
+IT_PROG_INTLTOOL([gwy_required_intltool],[no-xml])
 
 #############################################################################
 # Gtk-doc
-GTK_DOC_CHECK([1.17])
+m4_define([gwy_required_gtkdoc],[1.19])
+AC_SUBST([GWY_REQUIRED_GTKDOC],[gwy_required_gtkdoc])
+GTK_DOC_CHECK([gwy_required_gtkdoc])
 
 #############################################################################
 # Python
-AM_PATH_PYTHON([2.2])
+m4_define([gwy_required_python],[2.2])
+AC_SUBST([GWY_REQUIRED_PYTHON],[gwy_required_python])
+AM_PATH_PYTHON([gwy_required_python])
 
 #############################################################################
-# Math Functions
+# Libc functions
+GWY_GLIBC
 GWY_CHECK_LIBM
 AC_CHECK_FUNCS([sincos])
-
-#############################################################################
-# According to the manual page, GLIBC memmem() was broken until version 2.1.
-# If we detect the GNU C library check its version, otherwise assume it's OK.
-AC_CHECK_FUNCS([memmem])
-GWY_GLIBC
-memmem_ok=yes
-if test "x$GLIBC" = xyes; then
-  gl_GLIBC21
-  if test "x$GLIBC21" != xyes; then
-     memmem_ok=no
-  fi
-fi
-if test "x$memmem_ok" = xyes; then
-  AC_DEFINE([HAVE_WORKING_MEMMEM],1,[Define if we have working memmem()])
-fi
+GWY_CHECK_MEMMEM
 
 #############################################################################
 # Base libraries
 # All libraries that are required should be checked here.
 # TODO: use macros from m4/gwy-pkg.m4 once we can make the errors meaningful.
-PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.36])
-PKG_CHECK_MODULES([FFTW],[fftw3 >= 3.3])
-PKG_CHECK_MODULES([GDKPIXBUF],[gdk-pixbuf-2.0 >= 2.22])
-PKG_CHECK_MODULES([GTK],[gtk+-3.0 >= 3.6])
+# XXX: Investigate if using AM PATH_GTK_3_0 and PATH_GLIB_2_0, which are
+#      complicated and run test programs, would bring anything useful.
+m4_define([gwy_required_glib],[2.36])
+AC_SUBST([GWY_REQUIRED_GLIB],[gwy_required_glib])
+PKG_CHECK_MODULES([GIO],[gio-2.0 >= gwy_required_glib])
+PKG_CHECK_MODULES([GMODULE],[gmodule-2.0 >= gwy_required_glib])
+
+m4_define([gwy_required_fftw],[3.3])
+AC_SUBST([GWY_REQUIRED_FFTW],[gwy_required_fftw])
+PKG_CHECK_MODULES([FFTW],[fftw3 >= gwy_required_fftw])
+
+m4_define([gwy_required_gdkpixbuf],[2.22])
+AC_SUBST([GWY_REQUIRED_GDKPIXBUF],[gwy_required_gdkpixbuf])
+PKG_CHECK_MODULES([GDKPIXBUF],[gdk-pixbuf-2.0 >= gwy_required_gdkpixbuf])
+
+m4_define([gwy_required_gtk],[3.6])
+AC_SUBST([GWY_REQUIRED_GTK],[gwy_required_gtk])
+PKG_CHECK_MODULES([GTK],[gtk+-3.0 >= gwy_required_gtk])
 
 # Needs to be configured out in stable versions.  Deprecations come and go.
 AC_SUBST([LIBGWY_COMPAT_CPPFLAGS],["-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE"])
@@ -173,12 +186,8 @@ AC_SUBST([LIBGWYUI_DEPS_CFLAGS],["$GTK_CFLAGS $GDKPIXBUF_CFLAGS"])
 AC_SUBST([LIBGWYUI_DEPS_LIBS],["$GTK_LIBS $GDKPIXBUF_LIBS"])
 
 AC_SUBST([LIBGWYAPP_COMPAT_CPPFLAGS],["$LIBGWYUI_COMPAT_CPPFLAGS"])
-AC_SUBST([LIBGWYAPP_DEPS_CFLAGS],["$GTK_CFLAGS $GDKPIXBUF_CFLAGS"])
-AC_SUBST([LIBGWYAPP_DEPS_LIBS],["$GTK_LIBS $GDKPIXBUF_LIBS"])
-
-PKG_CHECK_MODULES([CAIRO_XLIB],[cairo-xlib],
-                  [gwy_enable_cairo_xlib=yes],[gwy_enable_cairo_xlib=no])
-AM_CONDITIONAL([HAVE_CAIRO_XLIB],[test "x$gwy_enable_cairo_xlib" = xyes])
+AC_SUBST([LIBGWYAPP_DEPS_CFLAGS],["$GTK_CFLAGS $GDKPIXBUF_CFLAGS $GMODULE_CFLAGS"])
+AC_SUBST([LIBGWYAPP_DEPS_LIBS],["$GTK_LIBS $GDKPIXBUF_LIBS $GMODULE_LIBS"])
 
 #############################################################################
 # GLib tools
@@ -199,24 +208,29 @@ fi
 
 AC_CHECK_PROGS([GTESTER],[gtester],[false])
 
-#AC_MSG_CHECKING([for gobject-query])
-#GOBJECT_QUERY=`$PKG_CONFIG --variable=gobject_query glib-2.0`
-#AC_MSG_RESULT([$GOBJECT_QUERY])
-#AC_SUBST(GOBJECT_QUERY)
-
 AC_PATH_PROG([GDK_PIXBUF_PIXDATA],[gdk-pixbuf-pixdata],[`which cp`])
 
 # FIXME: Once G-IR supports boxed types change this to the required version.
-GOBJECT_INTROSPECTION_CHECK([0.10.0])
+m4_define([gwy_required_gir],[0.10.0])
+AC_SUBST([GWY_REQUIRED_GIR],[gwy_required_gir])
+GOBJECT_INTROSPECTION_CHECK([gwy_required_gir])
 
 #############################################################################
 # Other tools
+
+# cairo-xlib is used for widget screenshots (render-widgets) in documentation.
+PKG_CHECK_MODULES([CAIRO_XLIB],[cairo-xlib],
+                  [gwy_enable_cairo_xlib=yes],[gwy_enable_cairo_xlib=no])
+AM_CONDITIONAL([HAVE_CAIRO_XLIB],[test "x$gwy_enable_cairo_xlib" = xyes])
+
 # xsltproc is used to generate test reports
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
 AM_CONDITIONAL([HAVE_XSLTPROC],[test "x$XSLTPROC" != xfalse])
+
 # gimp-console is used to export PNG icons from XCF
 AC_CHECK_PROGS([GIMP_CONSOLE],[gimp-console],[false])
 AM_CONDITIONAL([HAVE_GIMP_CONSOLE],[test "x$GIMP_CONSOLE" != xfalse])
+
 # inkscape is used to export PNG from SVG drawings in documentation
 AC_CHECK_PROGS([INKSCAPE],[inkscape],[false])
 AM_CONDITIONAL([HAVE_INKSCAPE],[test "x$INKSCAPE" != xfalse])

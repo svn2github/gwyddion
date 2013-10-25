@@ -9,5 +9,6 @@ m4_files = \
 	gwy-glibc.m4 \
 	gwy-gnuc-visibility.m4 \
 	gwy-math.m4 \
+	gwy-memmem.m4 \
 	gwy-pkg.m4
 
