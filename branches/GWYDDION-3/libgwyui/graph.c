@@ -32,8 +32,10 @@ enum {
     PROP_RIGHT_AXIS,
     PROP_TOP_AXIS,
     PROP_BOTTOM_AXIS,
-    PROP_X_AUTORANGE,
-    PROP_Y_AUTORANGE,
+    PROP_X_AUTO_RANGE,
+    PROP_Y_AUTO_RANGE,
+    PROP_X_LOG_SCALE,
+    PROP_Y_LOG_SCALE,
     N_PROPS,
 };
 
@@ -43,6 +45,8 @@ struct _GwyGraphPrivate {
 
     gboolean xautorange : 1;
     gboolean yautorange : 1;
+    gboolean xlogscale : 1;
+    gboolean ylogscale : 1;
 };
 
 typedef void (*SetGridFunc)(GwyGraphArea *area,
@@ -64,9 +68,13 @@ static void     gwy_graph_get_property(GObject *object,
 static void     gwy_graph_realize     (GtkWidget *widget);
 static gboolean gwy_graph_draw        (GtkWidget *widget,
                                        cairo_t *cr);
-static gboolean set_x_autorange       (GwyGraph *graph,
+static gboolean set_x_auto_range      (GwyGraph *graph,
                                        gboolean setting);
-static gboolean set_y_autorange       (GwyGraph *graph,
+static gboolean set_y_auto_range      (GwyGraph *graph,
+                                       gboolean setting);
+static gboolean set_x_log_scale       (GwyGraph *graph,
+                                       gboolean setting);
+static gboolean set_y_log_scale       (GwyGraph *graph,
                                        gboolean setting);
 static void     area_item_updated     (GwyGraph *graph,
                                        guint i);
@@ -143,18 +151,32 @@ gwy_graph_class_init(GwyGraphClass *klass)
                               GWY_TYPE_GRAPH_AXIS,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_X_AUTORANGE]
-        = g_param_spec_boolean("x-autorange",
-                               "X autorange",
+    properties[PROP_X_AUTO_RANGE]
+        = g_param_spec_boolean("x-auto-range",
+                               "X auto range",
                                "Whether abscissa adapts automatically to data.",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_Y_AUTORANGE]
-        = g_param_spec_boolean("y-autorange",
-                               "Y autorange",
+    properties[PROP_Y_AUTO_RANGE]
+        = g_param_spec_boolean("y-auto-range",
+                               "Y auto range",
                                "Whether ordinate adapts automatically to data.",
                                TRUE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_X_LOG_SCALE]
+        = g_param_spec_boolean("x-log-scale",
+                               "X log scale",
+                               "Whether abscissa scale is logarithmic.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_Y_LOG_SCALE]
+        = g_param_spec_boolean("y-log-scale",
+                               "Y log scale",
+                               "Whether ordinate scale is logarithmic.",
+                               FALSE,
                                G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
@@ -239,12 +261,20 @@ gwy_graph_set_property(GObject *object,
     GwyGraph *graph = GWY_GRAPH(object);
 
     switch (prop_id) {
-        case PROP_X_AUTORANGE:
-        set_x_autorange(graph, g_value_get_boolean(value));
+        case PROP_X_AUTO_RANGE:
+        set_x_auto_range(graph, g_value_get_boolean(value));
         break;
 
-        case PROP_Y_AUTORANGE:
-        set_y_autorange(graph, g_value_get_boolean(value));
+        case PROP_Y_AUTO_RANGE:
+        set_y_auto_range(graph, g_value_get_boolean(value));
+        break;
+
+        case PROP_X_LOG_SCALE:
+        set_x_log_scale(graph, g_value_get_boolean(value));
+        break;
+
+        case PROP_Y_LOG_SCALE:
+        set_y_log_scale(graph, g_value_get_boolean(value));
         break;
 
         default:
@@ -282,12 +312,20 @@ gwy_graph_get_property(GObject *object,
         g_value_set_object(value, priv->axis[GTK_POS_BOTTOM]);
         break;
 
-        case PROP_X_AUTORANGE:
+        case PROP_X_AUTO_RANGE:
         g_value_set_boolean(value, priv->xautorange);
         break;
 
-        case PROP_Y_AUTORANGE:
+        case PROP_Y_AUTO_RANGE:
         g_value_set_boolean(value, priv->yautorange);
+        break;
+
+        case PROP_X_LOG_SCALE:
+        g_value_set_boolean(value, priv->xlogscale);
+        break;
+
+        case PROP_Y_LOG_SCALE:
+        g_value_set_boolean(value, priv->ylogscale);
         break;
 
         default:
@@ -410,7 +448,7 @@ gwy_graph_get_bottom_axis(const GwyGraph *graph)
 }
 
 /**
- * gwy_graph_set_x_autorange:
+ * gwy_graph_set_x_auto_range:
  * @graph: A graph.
  * @setting: %TRUE to enable automatic adaptation of abscissa to data, %FALSE
  *           to disable it.
@@ -422,18 +460,18 @@ gwy_graph_get_bottom_axis(const GwyGraph *graph)
  * horizontal axes will then adapt automatically.
  **/
 void
-gwy_graph_set_x_autorange(GwyGraph *graph,
-                          gboolean setting)
+gwy_graph_set_x_auto_range(GwyGraph *graph,
+                           gboolean setting)
 {
     g_return_if_fail(GWY_IS_GRAPH(graph));
-    if (!set_x_autorange(graph, setting))
+    if (!set_x_auto_range(graph, setting))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(graph), properties[PROP_X_AUTORANGE]);
+    g_object_notify_by_pspec(G_OBJECT(graph), properties[PROP_X_AUTO_RANGE]);
 }
 
 /**
- * gwy_graph_get_x_autorange:
+ * gwy_graph_get_x_auto_range:
  * @graph: A graph.
  *
  * Gets whether the abscissa of a graph adapts automatically to data.
@@ -441,14 +479,14 @@ gwy_graph_set_x_autorange(GwyGraph *graph,
  * Returns: %TRUE if the abscissa adapts to data, %FALSE if its range is fixed.
  **/
 gboolean
-gwy_graph_get_x_autorange(const GwyGraph *graph)
+gwy_graph_get_x_auto_range(const GwyGraph *graph)
 {
     g_return_val_if_fail(GWY_IS_GRAPH(graph), FALSE);
     return graph->priv->xautorange;
 }
 
 /**
- * gwy_graph_set_y_autorange:
+ * gwy_graph_set_y_auto_range:
  * @graph: A graph.
  * @setting: %TRUE to enable automatic adaptation of ordinate to data, %FALSE
  *           to disable it.
@@ -460,34 +498,110 @@ gwy_graph_get_x_autorange(const GwyGraph *graph)
  * vertical axes will then adapt automatically.
  **/
 void
-gwy_graph_set_y_autorange(GwyGraph *graph,
-                          gboolean setting)
+gwy_graph_set_y_auto_range(GwyGraph *graph,
+                           gboolean setting)
 {
     g_return_if_fail(GWY_IS_GRAPH(graph));
-    if (!set_y_autorange(graph, setting))
+    if (!set_y_auto_range(graph, setting))
         return;
 
-    g_object_notify_by_pspec(G_OBJECT(graph), properties[PROP_Y_AUTORANGE]);
+    g_object_notify_by_pspec(G_OBJECT(graph), properties[PROP_Y_AUTO_RANGE]);
 }
 
 /**
- * gwy_graph_get_y_autorange:
+ * gwy_graph_get_y_auto_range:
  * @graph: A graph.
  *
  * Gets whether the ordinate of a graph adapts automatically to data.
  *
- * Returns: %TRUE if the abscissa adapts to data, %FALSE if its range is fixed.
+ * Returns: %TRUE if the ordinate adapts to data, %FALSE if its range is fixed.
  **/
 gboolean
-gwy_graph_get_y_autorange(const GwyGraph *graph)
+gwy_graph_get_y_auto_range(const GwyGraph *graph)
 {
     g_return_val_if_fail(GWY_IS_GRAPH(graph), FALSE);
     return graph->priv->yautorange;
 }
 
+/**
+ * gwy_graph_set_x_logscale:
+ * @graph: A graph.
+ * @setting: %TRUE for logarithmic scale, %FALSE for linear scale.
+ *
+ * Sets whether the abscissa of a graph is logarithmic.
+ *
+ * Changing the logscale means that both bottom and top axes are set to
+ * logarithmic scale, and also the horizontal scale of the graph area is
+ * set to logarithmic.
+ **/
+void
+gwy_graph_set_x_logscale(GwyGraph *graph,
+                          gboolean setting)
+{
+    g_return_if_fail(GWY_IS_GRAPH(graph));
+    if (!set_x_log_scale(graph, setting))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(graph), properties[PROP_X_LOG_SCALE]);
+}
+
+/**
+ * gwy_graph_get_x_logscale:
+ * @graph: A graph.
+ *
+ * Gets whether the scale of the abscissa of a graph is logarithmic.
+ *
+ * Returns: %TRUE if the scale of abscissa is logarithmic, %FALSE if it is
+ *          linear.
+ **/
+gboolean
+gwy_graph_get_x_logscale(const GwyGraph *graph)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH(graph), FALSE);
+    return graph->priv->xlogscale;
+}
+
+/**
+ * gwy_graph_set_y_logscale:
+ * @graph: A graph.
+ * @setting: %TRUE for logarithmic scale, %FALSE for linear scale.
+ *
+ * Sets whether the ordinate of a graph is logarithmic.
+ *
+ * Changing the logscale means that both left and right axes are set to
+ * logarithmic scale, and also the vertical scale of the graph area is
+ * set to logarithmic.
+ **/
+void
+gwy_graph_set_y_logscale(GwyGraph *graph,
+                          gboolean setting)
+{
+    g_return_if_fail(GWY_IS_GRAPH(graph));
+    if (!set_y_log_scale(graph, setting))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(graph), properties[PROP_Y_LOG_SCALE]);
+}
+
+/**
+ * gwy_graph_get_y_logscale:
+ * @graph: A graph.
+ *
+ * Gets whether the scale of the ordinate of a graph is logarithmic.
+ *
+ * Returns: %TRUE if the scale of ordinate is logarithmic, %FALSE if it is
+ *          linear.
+ **/
+gboolean
+gwy_graph_get_y_logscale(const GwyGraph *graph)
+{
+    g_return_val_if_fail(GWY_IS_GRAPH(graph), FALSE);
+    return graph->priv->ylogscale;
+}
+
 static gboolean
-set_x_autorange(GwyGraph *graph,
-                gboolean setting)
+set_x_auto_range(GwyGraph *graph,
+                 gboolean setting)
 {
     Graph *priv = graph->priv;
     if (!setting == !priv->xautorange)
@@ -503,8 +617,8 @@ set_x_autorange(GwyGraph *graph,
 }
 
 static gboolean
-set_y_autorange(GwyGraph *graph,
-                gboolean setting)
+set_y_auto_range(GwyGraph *graph,
+                 gboolean setting)
 {
     Graph *priv = graph->priv;
     if (!setting == !priv->yautorange)
@@ -515,6 +629,38 @@ set_y_autorange(GwyGraph *graph,
         negotiate_yrange(graph);
     else
         set_fixed_yrange(graph);
+
+    return TRUE;
+}
+
+static gboolean
+set_x_log_scale(GwyGraph *graph,
+                gboolean setting)
+{
+    Graph *priv = graph->priv;
+    if (!setting == !priv->xlogscale)
+        return FALSE;
+
+    priv->xlogscale = !!setting;
+    gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_BOTTOM], setting);
+    gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_TOP], setting);
+    // TODO
+
+    return TRUE;
+}
+
+static gboolean
+set_y_log_scale(GwyGraph *graph,
+                gboolean setting)
+{
+    Graph *priv = graph->priv;
+    if (!setting == !priv->ylogscale)
+        return FALSE;
+
+    priv->ylogscale = !!setting;
+    gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_LEFT], setting);
+    gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_RIGHT], setting);
+    // TODO
 
     return TRUE;
 }

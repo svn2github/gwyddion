@@ -52,19 +52,25 @@ struct _GwyGraphClass {
     GtkGridClass grid_class;
 };
 
-GType         gwy_graph_get_type       (void)                  G_GNUC_CONST;
-GtkWidget*    gwy_graph_new            (void)                  G_GNUC_MALLOC;
-GwyGraphArea* gwy_graph_get_area       (const GwyGraph *graph) G_GNUC_PURE;
-GwyGraphAxis* gwy_graph_get_left_axis  (const GwyGraph *graph) G_GNUC_PURE;
-GwyGraphAxis* gwy_graph_get_right_axis (const GwyGraph *graph) G_GNUC_PURE;
-GwyGraphAxis* gwy_graph_get_top_axis   (const GwyGraph *graph) G_GNUC_PURE;
-GwyGraphAxis* gwy_graph_get_bottom_axis(const GwyGraph *graph) G_GNUC_PURE;
-void          gwy_graph_set_x_autorange(GwyGraph *graph,
-                                        gboolean setting);
-gboolean      gwy_graph_get_x_autorange(const GwyGraph *graph) G_GNUC_PURE;
-void          gwy_graph_set_y_autorange(GwyGraph *graph,
-                                        gboolean setting);
-gboolean      gwy_graph_get_y_autorange(const GwyGraph *graph) G_GNUC_PURE;
+GType         gwy_graph_get_type        (void)                  G_GNUC_CONST;
+GtkWidget*    gwy_graph_new             (void)                  G_GNUC_MALLOC;
+GwyGraphArea* gwy_graph_get_area        (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_left_axis   (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_right_axis  (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_top_axis    (const GwyGraph *graph) G_GNUC_PURE;
+GwyGraphAxis* gwy_graph_get_bottom_axis (const GwyGraph *graph) G_GNUC_PURE;
+void          gwy_graph_set_x_auto_range(GwyGraph *graph,
+                                         gboolean setting);
+gboolean      gwy_graph_get_x_auto_range(const GwyGraph *graph) G_GNUC_PURE;
+void          gwy_graph_set_y_auto_range(GwyGraph *graph,
+                                         gboolean setting);
+gboolean      gwy_graph_get_y_auto_range(const GwyGraph *graph) G_GNUC_PURE;
+void          gwy_graph_set_x_log_scale (GwyGraph *graph,
+                                         gboolean setting);
+gboolean      gwy_graph_get_x_log_scale (const GwyGraph *graph) G_GNUC_PURE;
+void          gwy_graph_set_y_log_scale (GwyGraph *graph,
+                                         gboolean setting);
+gboolean      gwy_graph_get_y_log_scale (const GwyGraph *graph) G_GNUC_PURE;
 
 G_END_DECLS
 
