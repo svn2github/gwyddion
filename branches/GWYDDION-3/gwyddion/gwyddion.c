@@ -3,7 +3,7 @@
 #include "libgwy/libgwy.h"
 #include "libgwyui/libgwyui.h"
 
-enum { NAXES = 6 };
+enum { NAXES = 7 };
 
 typedef struct {
     GwyField *field1;
@@ -423,6 +423,7 @@ create_graph_window(void)
     GtkWidget *graphwidget = gwy_graph_new();
     GwyGraph *graph = GWY_GRAPH(graphwidget);
     gtk_container_add(GTK_CONTAINER(window), graphwidget);
+    gwy_graph_set_x_log_scale(graph, TRUE);
 
     GwyGraphArea *area = gwy_graph_get_area(graph);
     GwyRand *rng = gwy_rand_new();
@@ -469,14 +470,16 @@ configure_axes(GtkGrid *grid)
         { -5.0, 0.1 },
         { -0.000001, -0.00001 },
         { 3.234231e6, 8.34321e8 },
+        { -0.1, 2.33e4 },
     };
     static const GwyRange logarithmic_ranges[] = {
+        { 1e-5, 1e2 },
+        { 0.2, 24.0 },
         { 5.0, 14.0 },
         { 3e-6, 4e12 },
-        { 0.2, 24.0 },
         { 9e3, 2e6 },
-        { 1e-5, 1e2 },
         { 1e-30, 1e50 },
+        { 2.3e6, 7e6 },
     };
 
     gboolean increasing = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(grid),
