@@ -524,7 +524,7 @@ gwy_graph_get_y_auto_range(const GwyGraph *graph)
 }
 
 /**
- * gwy_graph_set_x_logscale:
+ * gwy_graph_set_x_log_scale:
  * @graph: A graph.
  * @setting: %TRUE for logarithmic scale, %FALSE for linear scale.
  *
@@ -535,7 +535,7 @@ gwy_graph_get_y_auto_range(const GwyGraph *graph)
  * set to logarithmic.
  **/
 void
-gwy_graph_set_x_logscale(GwyGraph *graph,
+gwy_graph_set_x_log_scale(GwyGraph *graph,
                           gboolean setting)
 {
     g_return_if_fail(GWY_IS_GRAPH(graph));
@@ -546,7 +546,7 @@ gwy_graph_set_x_logscale(GwyGraph *graph,
 }
 
 /**
- * gwy_graph_get_x_logscale:
+ * gwy_graph_get_x_log_scale:
  * @graph: A graph.
  *
  * Gets whether the scale of the abscissa of a graph is logarithmic.
@@ -555,14 +555,14 @@ gwy_graph_set_x_logscale(GwyGraph *graph,
  *          linear.
  **/
 gboolean
-gwy_graph_get_x_logscale(const GwyGraph *graph)
+gwy_graph_get_x_log_scale(const GwyGraph *graph)
 {
     g_return_val_if_fail(GWY_IS_GRAPH(graph), FALSE);
     return graph->priv->xlogscale;
 }
 
 /**
- * gwy_graph_set_y_logscale:
+ * gwy_graph_set_y_log_scale:
  * @graph: A graph.
  * @setting: %TRUE for logarithmic scale, %FALSE for linear scale.
  *
@@ -573,7 +573,7 @@ gwy_graph_get_x_logscale(const GwyGraph *graph)
  * set to logarithmic.
  **/
 void
-gwy_graph_set_y_logscale(GwyGraph *graph,
+gwy_graph_set_y_log_scale(GwyGraph *graph,
                           gboolean setting)
 {
     g_return_if_fail(GWY_IS_GRAPH(graph));
@@ -584,7 +584,7 @@ gwy_graph_set_y_logscale(GwyGraph *graph,
 }
 
 /**
- * gwy_graph_get_y_logscale:
+ * gwy_graph_get_y_log_scale:
  * @graph: A graph.
  *
  * Gets whether the scale of the ordinate of a graph is logarithmic.
@@ -593,7 +593,7 @@ gwy_graph_set_y_logscale(GwyGraph *graph,
  *          linear.
  **/
 gboolean
-gwy_graph_get_y_logscale(const GwyGraph *graph)
+gwy_graph_get_y_log_scale(const GwyGraph *graph)
 {
     g_return_val_if_fail(GWY_IS_GRAPH(graph), FALSE);
     return graph->priv->ylogscale;
