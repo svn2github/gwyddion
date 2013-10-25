@@ -1025,7 +1025,9 @@ gwy_axis_ticks(GwyAxis *axis,
 
     Axis *priv = axis->priv;
     if (!priv->ticks_are_valid) {
-        if (priv->logscale)
+        if (priv->mirror)
+            mirror_ticks(axis);
+        else if (priv->logscale)
             calculate_ticks_log(axis);
         else
             calculate_ticks_lin(axis);
@@ -1457,10 +1459,6 @@ static void
 calculate_ticks_lin(GwyAxis *axis)
 {
     Axis *priv = axis->priv;
-    if (priv->mirror) {
-        mirror_ticks(axis);
-        return;
-    }
 
     // XXX: This is for labels *along* the axis.  The labels can be also
     // perpendicular.  OTOH for consistent interlabel distance this might be
@@ -1578,10 +1576,6 @@ static void
 calculate_ticks_log(GwyAxis *axis)
 {
     Axis *priv = axis->priv;
-    if (priv->mirror) {
-        mirror_ticks(axis);
-        return;
-    }
 
     // XXX: This is for labels *along* the axis.  The labels can be also
     // perpendicular.  OTOH for consistent interlabel distance this might be
