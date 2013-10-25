@@ -60,7 +60,7 @@ gwy_calc_finalize(GObject *object)
 /**
  * gwy_calc_error_quark:
  *
- * Returns error domain for expression parsing and evaluation.
+ * Provides error domain for expression parsing and evaluation.
  *
  * See and use %GWY_CALC_ERROR.
  *

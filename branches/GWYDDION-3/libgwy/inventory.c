@@ -255,7 +255,7 @@ gwy_inventory_set_item_type(GwyInventory *inventory,
  * gwy_inventory_size:
  * @inventory: An inventory.
  *
- * Returns the number of items in an inventory.
+ * Obtains the number of items in an inventory.
  *
  * Returns: The number of items.
  **/
@@ -272,7 +272,7 @@ gwy_inventory_size(GwyInventory *inventory)
  * gwy_inventory_can_make_copies:
  * @inventory: An inventory.
  *
- * Returns whether an inventory can create new items itself.
+ * Checks whether an inventory can create new items itself.
  *
  * Returns: %TRUE if inventory can create new items itself.
  **/
@@ -289,7 +289,7 @@ gwy_inventory_can_make_copies(GwyInventory *inventory)
  * gwy_inventory_get_item_type:
  * @inventory: An inventory.
  *
- * Returns the type of item an inventory holds.
+ * Provides the type of item an inventory holds.
  *
  * Returns: The item type.  It is owned by inventory and must not be modified
  *          or freed.
@@ -369,7 +369,7 @@ gwy_inventory_get_or_default(GwyInventory *inventory,
  *     array, you can simply iterate over it until gwy_inventory_get_nth()
  *     returns %NULL.
  *
- * Returns item at given position in an inventory.
+ * Obtains the item at given position in an inventory.
  *
  * Returns: (transfer none):
  *          Item at given position.
@@ -483,7 +483,7 @@ gwy_inventory_find(GwyInventory *inventory,
  * gwy_inventory_get_default:
  * @inventory: An inventory.
  *
- * Returns the default item of an inventory.
+ * Obtains the default item of an inventory.
  *
  * Returns: (transfer none):
  *          The default item.  If there is no default item, %NULL is returned.
@@ -507,7 +507,7 @@ gwy_inventory_get_default(GwyInventory *inventory)
  * gwy_inventory_get_default_name:
  * @inventory: An inventory.
  *
- * Returns the name of the default item of an inventory.
+ * Obtains the name of the default item of an inventory.
  *
  * Returns: The default item name, %NULL if no default name is set.
  *          Item of this name may or may not exist in the inventory.

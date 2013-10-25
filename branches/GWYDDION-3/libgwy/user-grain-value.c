@@ -867,7 +867,7 @@ gwy_user_grain_value_parse(GwyResource *resource,
 /**
  * gwy_user_grain_value_error_quark:
  *
- * Returns error domain for user-defined grain value manipulation.
+ * Provides error domain for user-defined grain value manipulation.
  *
  * See and use %GWY_USER_GRAIN_VALUE_ERROR.
  *

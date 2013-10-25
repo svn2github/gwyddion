@@ -182,7 +182,7 @@ gwy_array_set_item_type(GwyArray *array,
  * gwy_array_size:
  * @array: An array.
  *
- * Returns the number of items in an array.
+ * Provides the number of items in an array.
  *
  * Returns: The number of items.
  **/
@@ -199,7 +199,7 @@ gwy_array_size(GwyArray *array)
  * @array: An array.
  * @n: Item position.
  *
- * Returns pointer to an item of an array.
+ * Provides pointer to an item of an array.
  *
  * Returns: (transfer none):
  *          Item at position @n, %NULL if there is no such item.
@@ -404,7 +404,7 @@ gwy_array_replace(GwyArray *array,
  * gwy_array_get_data:
  * @array: An array.
  *
- * Returns pointer to array data.
+ * Provides pointer to array data.
  *
  * Returns: (transfer none):
  *          The complete array data, owned by the array.  It must not be

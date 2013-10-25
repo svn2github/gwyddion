@@ -456,7 +456,7 @@ gwy_gradient_color(const GwyGradient *gradient,
  * @gradient: A colour gradient to get samples of.
  * @nsamples: A location to store the number of samples (or %NULL).
  *
- * Returns colour gradient sampled to integers in #GdkPixbuf‐like scheme.
+ * Provides colour gradient sampled to integers in #GdkPixbuf‐like scheme.
  *
  * The returned samples are owned by @gradient and must not be modified or
  * freed.  They are automatically updated when the gradient changes, although
@@ -621,7 +621,7 @@ gwy_gradient_sample_to_pixbuf(GwyGradient *gradient,
  * gwy_gradient_n_points:
  * @gradient: A colour gradient.
  *
- * Returns the number of points in a colour gradient.
+ * Obtains the number of points in a colour gradient.
  *
  * Returns: The number of points in @gradient.
  **/
@@ -637,7 +637,7 @@ gwy_gradient_n_points(const GwyGradient *gradient)
  * @gradient: A colour gradient.
  * @n: Colour point index in @gradient.
  *
- * Returns the point at given index of a colour gradient.
+ * Obtains the point at given index of a colour gradient.
  *
  * Returns: Colour point at @n.
  **/
@@ -846,7 +846,7 @@ gwy_gradient_delete(GwyGradient *gradient,
  * @gradient: A colour gradient.
  * @npoints: A location to store the number of colour points (or %NULL).
  *
- * Returns the complete set of colour points of a gradient.
+ * Obtains the complete set of colour points of a gradient.
  *
  * Returns: Complete set @gradient's colour points.  The returned array is
  *          owned by @gradient and must not be modified or freed.

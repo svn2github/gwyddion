@@ -817,7 +817,7 @@ fail:
 /**
  * gwy_user_fit_func_error_quark:
  *
- * Returns error domain for user-defined fitting function manipulation.
+ * Provides error domain for user-defined fitting function manipulation.
  *
  * See and use %GWY_USER_FIT_FUNC_ERROR.
  *

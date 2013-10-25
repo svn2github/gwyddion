@@ -404,7 +404,7 @@ gwy_container_size(GwyContainer *container)
  * @container: A container.
  * @key: Quark item key.
  *
- * Returns the type of value in a container identified by given quark key.
+ * Gets the type of value in a container identified by given quark key.
  *
  * Returns: The value type as #GType; 0 if there is no such value.
  **/

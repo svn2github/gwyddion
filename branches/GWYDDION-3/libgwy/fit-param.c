@@ -584,7 +584,7 @@ gwy_fit_param_check_estimate(const gchar *estimate,
 /**
  * gwy_fit_param_error_quark:
  *
- * Returns error domain for user-defined fitting function parameter
+ * Provides error domain for user-defined fitting function parameter
  * manipulation.
  *
  * See and use %GWY_FIT_PARAM_ERROR.

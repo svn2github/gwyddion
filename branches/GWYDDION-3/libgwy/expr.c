@@ -308,7 +308,7 @@ check_call_table_sanity(void)
 /**
  * gwy_expr_error_quark:
  *
- * Returns error domain for expression parsing and evaluation.
+ * Provides error domain for expression parsing and evaluation.
  *
  * See and use %GWY_EXPR_ERROR.
  *
