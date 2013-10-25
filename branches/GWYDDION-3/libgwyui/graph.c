@@ -642,9 +642,13 @@ set_x_log_scale(GwyGraph *graph,
         return FALSE;
 
     priv->xlogscale = !!setting;
+
+    GwyGraphScaleType scale = (setting
+                               ? GWY_GRAPH_SCALE_LOG
+                               : GWY_GRAPH_SCALE_LINEAR);
+    gwy_graph_area_set_xscale(priv->area, scale);
     gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_BOTTOM], setting);
     gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_TOP], setting);
-    // TODO
 
     return TRUE;
 }
@@ -658,9 +662,13 @@ set_y_log_scale(GwyGraph *graph,
         return FALSE;
 
     priv->ylogscale = !!setting;
+
+    GwyGraphScaleType scale = (setting
+                               ? GWY_GRAPH_SCALE_LOG
+                               : GWY_GRAPH_SCALE_LINEAR);
+    gwy_graph_area_set_yscale(priv->area, scale);
     gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_LEFT], setting);
     gwy_graph_axis_set_log_scale(priv->axis[GTK_POS_RIGHT], setting);
-    // TODO
 
     return TRUE;
 }
