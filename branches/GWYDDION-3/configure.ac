@@ -38,6 +38,7 @@ AC_CONFIG_FILES([
   docs/Makefile
   docs/libgwy/Makefile
   docs/libgwyui/Makefile
+  docs/libgwyapp/Makefile
   data/Makefile
   gwyddion3.spec:data/gwyddion3.spec.in \
 ])
