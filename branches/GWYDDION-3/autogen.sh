@@ -23,6 +23,22 @@ inherit_reqver() {
   fi
 }
 
+# Get required version of a maintainer tool from configure.ac.  This ensures
+# the version required here and in configure.ac is the same.
+# Expected format: m4_define([IDENTIFIER],[VERSION...])
+inherit_reqver_m4def() {
+  local identifier=$1
+  local v
+  v=$(sed "s/^m4_define(\\[$identifier\\], *\\[\([0-9]*\)\.\([0-9]*\).*/\1 \2/;t;d" configure.ac)
+  if test -n "$v"; then
+    echo $v
+  else
+    echo "ERROR: Cannot find $identifier in configure.ac!"
+    echo "       Check your setup and complain to $project maintainer."
+    exit 1
+  fi
+}
+
 # Get program version in the form MAJOR.MINOR.  Expected --version output:
 # TOOL-NAME (SUITE NAME) VERSION(EXTRA)
 # Where SUITE NAME and EXTRA parts are optional.
@@ -140,10 +156,10 @@ CONFIGURE_FLAGS="--enable-gtk-doc"
 # Get required versions from configure.ac
 AUTOCONF_REQVER=$(inherit_reqver AC_PREREQ)
 AUTOMAKE_REQVER=$(inherit_reqver AM_INIT_AUTOMAKE)
-GETTEXT_REQVER=$(inherit_reqver AM_GNU_GETTEXT_VERSION)
-GTKDOC_REQVER=$(inherit_reqver GTK_DOC_CHECK)
-INTLTOOL_REQVER=$(inherit_reqver IT_PROG_INTLTOOL)
-LIBTOOL_REQVER="1 5"
+GETTEXT_REQVER=$(inherit_reqver_m4def gwy_required_gettext)
+GTKDOC_REQVER=$(inherit_reqver_m4def gwy_required_gtkdoc)
+INTLTOOL_REQVER=$(inherit_reqver_m4def gwy_required_intltool)
+LIBTOOL_REQVER=$(inherit_reqver LT_PREREQ)
 
 # Check tool versions
 check_tool Autoconf "AUTOCONF"    "AUTOHEADER" $AUTOCONF_REQVER ftp://ftp.gnu.org/pub/gnu/autoconf/

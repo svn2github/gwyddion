@@ -58,8 +58,9 @@ AC_DISABLE_STATIC
 AC_PROG_CC_C99
 AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
-AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+LT_PREREQ([2.0])
+LT_INIT([dlopen win32-dll shared disable-static])
 AC_PROG_INSTALL
 GWY_CHECK_EU_NM
 
@@ -126,8 +127,9 @@ fi
 GETTEXT_PACKAGE=gwyddion3
 AM_GNU_GETTEXT([external])
 m4_define([gwy_required_gettext],[0.18])
-AC_SUBST([GWY_REQUIRED_GETTEXT],[gwy_required_intltool])
-AM_GNU_GETTEXT_VERSION([gwy_required_gettext])
+AC_SUBST([GWY_REQUIRED_GETTEXT],[gwy_required_gettext])
+# Autopoint was written by monkeys.  Must spell out the version.
+AM_GNU_GETTEXT_VERSION([0.18])
 AC_SUBST(GETTEXT_PACKAGE)
 
 m4_define([gwy_required_intltool],[0.41])
