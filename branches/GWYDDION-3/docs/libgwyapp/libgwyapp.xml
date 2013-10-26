@@ -19,7 +19,7 @@
     <xi:include href="xml/tree_index.sgml"/>
   </chapter>
 -->
-  <chapter id='libgwyapp-module'>
+  <chapter id='libgwyapp-modules'>
     <title>Modules</title>
     <xi:include href="xml/module.xml"/>
   </chapter>
@@ -27,7 +27,5 @@
     <title>Index of all symbols</title>
     <xi:include href="xml/api-index-full.xml"/>
   </index>
-<!--
   <xi:include href="xml/annotation-glossary.xml"/>
--->
 </book>

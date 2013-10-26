@@ -20,6 +20,8 @@
 #ifndef __LIBGWYAPP_MODULE_H__
 #define __LIBGWYAPP_MODULE_H__
 
+#include <libgwy/error-list.h>
+#include <glib-object.h>
 #include <gmodule.h>
 
 G_BEGIN_DECLS
@@ -60,6 +62,7 @@ typedef enum {
 
 typedef struct _GwyModuleInfo GwyModuleInfo;
 
+typedef GType                (*GwyGetTypeFunc)       (void);
 typedef const GwyModuleInfo* (*GwyModuleQueryFunc)   (void);
 typedef gboolean             (*GwyModuleRegisterFunc)(GError **error);
 
@@ -73,7 +76,28 @@ struct _GwyModuleInfo {
     const gchar *date;
 };
 
-GQuark                  gwy_module_error_quark      (void);
+typedef struct {
+    const gchar *name;
+    GwyGetTypeFunc get_type;
+} GwyModuleProvidedType;
+
+GQuark               gwy_module_error_quark   (void)                               G_GNUC_CONST;
+gboolean             gwy_module_provide_type  (const gchar *name,
+                                               GwyGetTypeFunc gettype,
+                                               GError **error);
+guint                gwy_module_provide       (GwyErrorList **errorlist,
+                                               const gchar *name,
+                                               ...)                                G_GNUC_NULL_TERMINATED;
+guint                gwy_module_providev      (const GwyModuleProvidedType *types,
+                                               guint ntypes,
+                                               GwyErrorList **errorlist);
+const GwyModuleInfo* gwy_module_load          (const gchar *filename,
+                                               GError **error);
+guint                gwy_module_load_library  (const gchar *filename,
+                                               GwyErrorList **errorlist);
+guint                gwy_module_load_directory(const gchar *path,
+                                               GwyErrorList **errorlist);
+void                 gwy_module_register_types(void);
 
 G_END_DECLS
 
