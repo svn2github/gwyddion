@@ -26,8 +26,6 @@
 
 G_BEGIN_DECLS
 
-typedef GwyModuleInfo* (*GwyModuleQueryFunc)(void);
-
 G_END_DECLS
 
 #endif

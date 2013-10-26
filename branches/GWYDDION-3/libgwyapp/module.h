@@ -32,9 +32,19 @@ G_BEGIN_DECLS
 #define __GWY_MODULE_EXTERN_C /* */
 #endif
 
-#define GWY_DEFINE_MODULE(mod_info, filename) \
-    __GWY_MODULE_EXTERN_C G_MODULE_EXPORT GwyModuleInfo* \
-    gwy_module_query_##filename(void) { return &mod_info; } \
+#ifndef GWY_MODULE_BUILDING_LIBRARY
+#define GWY_DEFINE_MODULE(mod_info,name) \
+    __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleInfo* \
+    gwy_module_query_##name(void) { return &mod_info; }
+#else
+#define GWY_DEFINE_MODULE(mod_info,name) \
+    __GWY_MODULE_EXTERN_C G_GNUC_INTERNAL const GwyModuleInfo* \
+    gwy_module_query_##name(void) { return &mod_info; }
+#endif
+
+#define GWY_DEFINE_MODULE_LIBRARY(mod_query_list) \
+    __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleQuery** \
+    gwy_module_query(void) { return mod_query_list; }
 
 #define GWY_MODULE_ERROR gwy_module_error_quark()
 
@@ -50,7 +60,8 @@ typedef enum {
 
 typedef struct _GwyModuleInfo GwyModuleInfo;
 
-typedef gboolean (*GwyModuleRegisterFunc)(GError **error);
+typedef const GwyModuleInfo* (*GwyModuleQueryFunc)   (void);
+typedef gboolean             (*GwyModuleRegisterFunc)(GError **error);
 
 struct _GwyModuleInfo {
     guint32 abi_version;

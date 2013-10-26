@@ -74,6 +74,35 @@ gwy_module_error_quark(void)
  **/
 
 /**
+ * GWY_DEFINE_MODULE_LIBRARY:
+ * @mod_info_list: Array of module query functions, terminated with %NULL,
+ *                 to be returned as the list of modules in the library.
+ *
+ * Macro expanding to code necessary for registration of a module library.
+ *
+ * Module library is used for consolidation of a large numer of shared
+ * dynamically loaded libraries to one.  This probably only makes sense within
+ * Gwyddion itself, which may contain hundreds of modules.  Standalone modules
+ * should use %GWY_DEFINE_MODULE.
+ *
+ * If modules are consolidated into a module library, preprocessor macro
+ * %GWY_MODULE_BUILDING_LIBRARY should be defined to indicate this.  Invididual
+ * module query functions are then linked as internal to the library, only one
+ * library-level query function is exported.
+ **/
+
+/**
+ * GwyModuleQueryFunc:
+ *
+ * Module query function type.
+ *
+ * The module query function is provided, under normal circumstances, by
+ * macro %GWY_DEFINE_MODULE.
+ *
+ * Returns: The module information structure.
+ **/
+
+/**
  * GwyModuleRegisterFunc:
  *
  * Module registration function type.
