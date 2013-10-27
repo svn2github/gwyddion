@@ -40,7 +40,9 @@ AC_CONFIG_FILES([
   docs/libgwyui/Makefile
   docs/libgwyapp/Makefile
   data/Makefile
-  gwyddion3.spec:data/gwyddion3.spec.in \
+  gwyddion3.spec:data/gwyddion3.spec.in
+],[
+  chmod +x build/check-dep-versions.py
 ])
 
 AM_INIT_AUTOMAKE([1.13 gnu -Wall -Wno-portability dist-xz no-dist-gzip std-options nostdinc])
