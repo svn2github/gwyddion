@@ -5,7 +5,7 @@ projectdir=$PWD
 logdir="$projectdir/_logs"
 installprefix="$projectdir/_inst"
 libdirs="libgwy libgwyui libgwyapp"
-podirs="po po-libgwy po-libgwyui"
+podirs="po po-libgwy po-libgwyui po-libgwyapp"
 oks="build documentation install dists"
 
 source $HOME/.bashrc

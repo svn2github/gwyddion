@@ -4,7 +4,7 @@
 # into POTFILES.in in one po directory and to POTFILES.skip in all others.
 
 # All po directories
-subdirs="po po-libgwy po-libgwyui"
+subdirs="po po-libgwy po-libgwyui po-libgwyapp"
 
 # Directories to scan
 # PO-DIRECTORY:SOURCE-CODE-DIRECTORY
@@ -12,6 +12,7 @@ subdirs="po po-libgwy po-libgwyui"
 POTFILES_map="
 po-libgwy:libgwy
 po-libgwyui:libgwyui
+po-libgwyapp:libgwyapp
 "
 
 # Files to ignore everywhere
