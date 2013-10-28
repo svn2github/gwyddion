@@ -20,65 +20,86 @@
 #include "config.h"
 #include <stdarg.h>
 #include <glib/gi18n-lib.h>
+#include <gio/gio.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/int-set.h"
 #include "libgwy/object-utils.h"
 #include "libgwyapp/module.h"
 
-#define MODULE_INFO_SYMBOL "__gwy_module_info"
-
-// 1. Find modules.  Create hash table of modules, set module prioritity and
-//    order within the priority group.
-//    Ignore modules we have already seen using @modules.
-
-// FIXME: We should log ALL module registration failures separately, including
-// from gwy_module_provide_type() and similar functions which may fail
-// non-fatally (overriden class).  This should be available for later
-// inspection.
-
 typedef struct {
     const GwyModuleInfo *module_info;
+    GModule *mod;
+    GQuark qname;
+    gulong priority;
+    gboolean from_library : 1;
+    gboolean did_type_registration : 1;
+} ModuleInfo;
+
+typedef struct {
+    GError *error;
     gchar *path;
     GQuark qname;
-    GQuark library_qpath;
-    gulong group_priority;
-    gulong module_priority;
-    gboolean did_type_registration;
-} ExtModuleInfo;
+    gboolean from_library;
+} FailedModuleInfo;
 
 typedef struct {
     GQuark qname;
     GQuark module_qname;
     GType type;
-} ExtTypeInfo;
+} TypeInfo;
 
-static GQuark       queue_one_module             (const gchar *filename,
+static GQuark        queue_one_module            (const gchar *filename,
                                                   GError **error);
-static gboolean     queue_one_module_with_name   (const gchar *filename,
+static gboolean      queue_opened_module         (GModule *mod,
+                                                  const GwyModuleInfo *module_info,
                                                   GQuark qname,
                                                   GError **error);
-static gboolean     err_unset_metadata           (GError **error,
+static guint         queue_module_library        (const gchar *filename,
+                                                  GwyErrorList **errorlist);
+static guint         queue_opened_module_library (GModule *mod,
+                                                  const GwyModuleLibraryRecord *records,
+                                                  GwyErrorList **errorlist);
+static guint         queue_one_module_or_library (const gchar *filename,
+                                                  GwyErrorList **errorlist);
+static gconstpointer open_module_file            (const gchar *filename,
+                                                  const gchar *module_info_symbol,
+                                                  GModule **mod,
+                                                  GError **error);
+static void          close_module                (GModule *mod,
+                                                  const gchar *filename);
+static gboolean      handle_overriding           (ModuleInfo *modinfo,
+                                                  GError **error);
+static ModuleInfo*   fill_module_info            (const GwyModuleInfo *module_info,
+                                                  GQuark qname,
+                                                  GModule *mod,
+                                                  gboolean from_library,
+                                                  GError **error);
+static gboolean      err_unset_metadata          (GError **error,
                                                   const gchar *metadata,
                                                   const gchar *name,
-                                                  const gchar *filename);
-static void         log_module_failure           (GError *error,
-                                                  const gchar *modname,
-                                                  const gchar *filename);
-static gchar*       module_name_from_path        (const gchar *filename,
+                                                  GModule *mod);
+static void          log_module_failure          (GError *error,
+                                                  GQuark qname,
+                                                  const gchar *filename,
+                                                  gboolean from_library);
+static gchar*        module_name_from_path       (const gchar *filename,
                                                   GError **error);
-static GPtrArray*   gather_unregistered_modules  (void);
-static gint         compare_unregistered_modinfo (gconstpointer a,
+static gboolean      module_name_is_valid        (const gchar *name,
+                                                  GError **error);
+static GPtrArray*    gather_unregistered_modules (void);
+static gint          compare_unregistered_modinfo(gconstpointer a,
                                                   gconstpointer b);
-static gboolean     register_one_type            (const GwyModuleProvidedType *mptype,
+static gboolean      register_one_type           (const GwyModuleProvidedType *mptype,
                                                   GQuark module_qname,
                                                   GError **error);
-static GHashTable*  ensure_module_table          (void);
-static void         module_registration_info_free(gpointer p);
-static GHashTable*  ensure_type_table            (void);
-static void         type_registration_info_free  (gpointer p);
-static const gchar* module_source_string         (const ExtModuleInfo *modinfo);
+static GHashTable*   ensure_module_table         (void);
+static void          module_info_free            (gpointer p);
+static GArray*       ensure_failed_module_table  (void);
+static void          failed_module_info_free     (gpointer p);
+static GHashTable*   ensure_type_table           (void);
+static void          type_info_free              (gpointer p);
 
-static guint group_priority = 0;
 static guint module_priority = 0;
 
 /**
@@ -103,11 +124,16 @@ gwy_module_error_quark(void)
 
 /**
  * gwy_register_modules:
- * @errorlist: 
+ * @errorlist: (allow-none):
+ *             Location to store possible errors.
+ *             Errors from %GWY_MODULE_ERROR or %G_IO_ERROR domain can occur.
  *
- * .
+ * Loads modules and registers the extension classes using the default rules.
  *
- * Returns: 
+ * The module search paths are given by the compiled-in path, installation
+ * path, environment variables and user home directory.
+ *
+ * Returns: The number of registered modules.
  **/
 guint
 gwy_register_modules(GwyErrorList **errorlist)
@@ -119,15 +145,26 @@ gwy_register_modules(GwyErrorList **errorlist)
  * gwy_module_load:
  * @filename: Absolute file name of the module file to load.
  * @error: Location to store possible error.
+ *         Errors from %GWY_MODULE_ERROR domain can occur.
  *
- * .
+ * Loads a single module from given file.
  *
- * Returns: 
+ * This function only loads the module and queues it for registration.  You
+ * need to call also gwy_module_register_types() some time in the future to
+ * finish the registration.
+ *
+ * Note the module is loaded using g_module_open() so its rules for file name
+ * amendments apply.
+ *
+ * Returns: (allow-none):
+ *          The module information for the module, or %NULL on failure.
  **/
 const GwyModuleInfo*
 gwy_module_load(const gchar *filename,
                 GError **error)
 {
+    g_return_val_if_fail(filename, NULL);
+
     GQuark qname = queue_one_module(filename, error);
     if (!qname)
         return NULL;
@@ -142,48 +179,109 @@ gwy_module_load(const gchar *filename,
  * @filename: Absolute file name of the module library file to load.
  * @errorlist: (allow-none):
  *             Location to store possible errors.
+ *             Errors from %GWY_MODULE_ERROR domain can occur.
  *
- * .
+ * Loads a single module library from given file.
  *
- * Returns: 
+ * This function only loads the library, examines the modules inside and queues
+ * them for registration.  You need to call also gwy_module_register_types()
+ * some time in the future to finish the registration.
+ *
+ * Note the module library is loaded using g_module_open() so its rules for
+ * file name amendments apply.
+ *
+ * Returns: The number of modules successfully loaded from the library (they
+ *          may be overriden later though).  A library providing no modules
+ *          is considered failed.
  **/
 guint
 gwy_module_load_library(const gchar *filename,
                         GwyErrorList **errorlist)
 {
-
-    // TODO
-    return 0;
+    g_return_val_if_fail(filename, 0);
+    return queue_module_library(filename, errorlist);
 }
 
 /**
  * gwy_module_load_directory:
- * @path:
+ * @path: Name of directory to be scanned for modules and module libraries.
+ *        Subdirectories are <emphasis>not</emphasis> scanned.
  * @errorlist: (allow-none):
  *             Location to store possible errors.
+ *             Errors from %GWY_MODULE_ERROR or %G_IO_ERROR domain can occur.
  *
- * .
+ * Loads modules and module libraries from a directory.
  *
- * Returns: 
+ * This function only loads the modules or libraries and queues them for
+ * registration.  You need to call also gwy_module_register_types() some time
+ * in the future to finish the registration.
+ *
+ * Returns: The number of shared libraries that were found and loaded as either
+ *          modules of module libraries.
  **/
 guint
 gwy_module_load_directory(const gchar *path,
                           GwyErrorList **errorlist)
 {
+    static const gchar attrs[] = (G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                                  G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
+                                  G_FILE_ATTRIBUTE_STANDARD_IS_BACKUP ","
+                                  G_FILE_ATTRIBUTE_STANDARD_NAME);
 
-    // TODO
-    return 0;
+    g_return_val_if_fail(path, 0);
+    GFile *file = g_file_new_for_path(path);
+    GError *error = NULL;
+    GFileEnumerator *enumerator = g_file_enumerate_children(file, attrs, 0,
+                                                            NULL, &error);
+    if (!enumerator) {
+        gwy_error_list_propagate(errorlist, error);
+        g_object_unref(file);
+        return 0;
+    }
+
+    guint count = 0;
+    for (GFileInfo *fileinfo = g_file_enumerator_next_file(enumerator, NULL,
+                                                           &error);
+         fileinfo;
+         (void)g_object_unref(fileinfo),
+         (fileinfo = g_file_enumerator_next_file(enumerator, NULL, &error))) {
+        if (g_file_info_get_is_hidden(fileinfo)
+            || g_file_info_get_is_backup(fileinfo))
+            continue;
+
+        GFileType filetype = g_file_info_get_file_type(fileinfo);
+        if (filetype != G_FILE_TYPE_REGULAR
+            && filetype != G_FILE_TYPE_SYMBOLIC_LINK)
+            continue;
+
+        const gchar *name = g_file_info_get_name(fileinfo);
+        if (!g_str_has_suffix(name, "." G_MODULE_SUFFIX))
+            continue;
+
+        gchar *fullname = g_build_filename(path, name, NULL);
+        if (queue_one_module_or_library(fullname, errorlist))
+            count++;
+        g_free(fullname);
+    }
+
+    if (error)
+        gwy_error_list_propagate(errorlist, error);
+
+    g_object_unref(enumerator);
+    g_object_unref(file);
+    return count;
 }
 
 /**
  * gwy_module_register_types:
  * @errorlist: (allow-none):
  *             Location to store possible errors.
+ *             Errors from %GWY_MODULE_ERROR domain can occur.
  *
  * Registers extension types from all modules that were loaded but their types
  * were not registered yet.
  *
- * Returns: The number of modules processed.
+ * Returns: The number of new types registered.
  **/
 guint
 gwy_module_register_types(GwyErrorList **errorlist)
@@ -192,27 +290,45 @@ gwy_module_register_types(GwyErrorList **errorlist)
     if (!todo_list)
         return 0;
 
+    GHashTable *libraries_seen = g_hash_table_new(g_str_hash, g_str_equal);
+    guint count = 0;
     for (guint i = 0; i < todo_list->len; i++) {
-        ExtModuleInfo *modinfo = g_ptr_array_index(todo_list, i);
+        ModuleInfo *modinfo = g_ptr_array_index(todo_list, i);
         const GwyModuleInfo *module_info = modinfo->module_info;
         for (guint j = 0; j < module_info->ntypes; j++) {
             GError *error = NULL;
-            if (!register_one_type(module_info->types + j,
+            if (register_one_type(module_info->types + j,
                                    modinfo->qname,
                                    &error)) {
+                count++;
+            }
+            else {
                 // TODO: log the error somewhere
                 gwy_error_list_propagate(errorlist, error);
             }
         }
+
+        if (modinfo->from_library) {
+            const gchar *path = g_module_name(modinfo->mod);
+            if (!g_hash_table_lookup(libraries_seen, path)) {
+                g_module_make_resident(modinfo->mod);
+                g_hash_table_insert(libraries_seen, (gpointer)path,
+                                    GUINT_TO_POINTER(TRUE));
+            }
+        }
+        else {
+            g_module_make_resident(modinfo->mod);
+        }
         modinfo->did_type_registration = TRUE;
     }
 
-    guint count = todo_list->len;
+    g_hash_table_unref(libraries_seen);
     g_ptr_array_free(todo_list, TRUE);
 
     return count;
 }
 
+// For a module file.
 static GQuark
 queue_one_module(const gchar *filename,
                  GError **error)
@@ -221,68 +337,280 @@ queue_one_module(const gchar *filename,
     gchar *modname;
 
     if (!(modname = module_name_from_path(filename, &err))) {
-        log_module_failure(err, "?", filename);
+        log_module_failure(err, 0, filename, FALSE);
         g_propagate_error(error, err);
         return 0;
     }
 
+    // XXX: Somewhere here we had code for avoiding attempt to load pygyw if
+    // Python is not available.
+
     GQuark qname = g_quark_from_string(modname);
     g_free(modname);
 
-    if (!queue_one_module_with_name(filename, qname, &err)) {
-        log_module_failure(err, modname, filename);
+    gchar *symbol = g_strconcat(G_STRINGIFY(GWY_MODULE_INFO_SYMBOL), "_",
+                                g_quark_to_string(qname), NULL);
+    GModule *mod = NULL;
+    const GwyModuleInfo *module_info = open_module_file(filename, symbol,
+                                                        &mod, error);
+    if (!module_info) {
+        g_free(symbol);
+        return 0;
+    }
+
+    if (!queue_opened_module(mod, module_info, qname, &err)) {
+        log_module_failure(err, qname, filename, FALSE);
         g_propagate_error(error, err);
+        g_free(symbol);
+        close_module(mod, filename);
         return 0;
     }
 
     return qname;
 }
 
+// The caller must do log_module_failure()!
 static gboolean
-queue_one_module_with_name(const gchar *filename,
-                           GQuark qname,
-                           GError **error)
+queue_opened_module(GModule *mod,
+                    const GwyModuleInfo *module_info,
+                    GQuark qname,
+                    GError **error)
+{
+    ModuleInfo *modinfo = NULL;
+    if (!(modinfo = fill_module_info(module_info, qname, mod, FALSE, error)))
+        return FALSE;
+
+    if (!handle_overriding(modinfo, error)) {
+        module_info_free(modinfo);
+        return FALSE;
+    }
+
+    GHashTable *modules = ensure_module_table();
+    gpointer key = GUINT_TO_POINTER(qname);
+    g_hash_table_insert(modules, key, modinfo);
+
+    return TRUE;
+}
+
+static guint
+queue_module_library(const gchar *filename,
+                     GwyErrorList **errorlist)
+{
+    const gchar *symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
+    GModule *mod = NULL;
+    GError *error = NULL;
+    const GwyModuleLibraryRecord *records = open_module_file(filename, symbol,
+                                                             &mod, &error);
+    if (!records) {
+        log_module_failure(error, 0, filename, TRUE);
+        gwy_error_list_propagate(errorlist, error);
+        return 0;
+    }
+
+    return queue_opened_module_library(mod, records, errorlist);
+}
+
+static guint
+queue_opened_module_library(GModule *mod,
+                            const GwyModuleLibraryRecord *records,
+                            GwyErrorList **errorlist)
 {
     GHashTable *modules = ensure_module_table();
-    ExtModuleInfo *modinfo = NULL;
-    gpointer key = GUINT_TO_POINTER(qname);
+    GError *error = NULL;
+    guint count = 0, i;
 
-    if ((modinfo = g_hash_table_lookup(modules, key))) {
-        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_DUPLICATE_MODULE,
-                    // TRANSLATORS: Error message.
-                    _("Module ‘%s’ was already registered from ‘%s’."),
-                    g_quark_to_string(qname), module_source_string(modinfo));
-        return FALSE;
+    for (i = 0; records[i].name; i++) {
+        GQuark qname = g_quark_from_string(records[i].name);
+        if (!module_name_is_valid(records[i].name, &error)) {
+            log_module_failure(error, qname, g_module_name(mod), TRUE);
+            gwy_error_list_propagate(errorlist, error);
+            continue;
+        }
+
+        ModuleInfo *modinfo = NULL;
+        if (!(modinfo = fill_module_info(records[i].info, qname, mod, TRUE,
+                                         &error))) {
+            log_module_failure(error, qname, g_module_name(mod), TRUE);
+            gwy_error_list_propagate(errorlist, error);
+            continue;
+        }
+
+        if (!handle_overriding(modinfo, &error)) {
+            log_module_failure(error, qname, g_module_name(mod), TRUE);
+            gwy_error_list_propagate(errorlist, error);
+            module_info_free(modinfo);
+            continue;
+        }
+
+        gpointer key = GUINT_TO_POINTER(qname);
+        g_hash_table_insert(modules, key, modinfo);
+        count++;
     }
 
-    // XXX: Somewhere here we had code for avoiding attempt to load pygyw if
-    // Python is not available.
+    if (count)
+        return count;
 
-    GModule *mod = g_module_open(filename, G_MODULE_BIND_LAZY);
-    if (!mod) {
+    if (!i) {
+        g_set_error(&error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_EMPTY_LIBRARY,
+                    _("Module library ‘%s’ is empty."),
+                    g_module_name(mod));
+        log_module_failure(error, 0, g_module_name(mod), TRUE);
+        gwy_error_list_propagate(errorlist, error);
+    }
+    // We should have at least error logged for this library one way or
+    // another when we choose to fail.
+    close_module(mod, NULL);
+
+    return 0;
+}
+
+static guint
+queue_one_module_or_library(const gchar *filename,
+                            GwyErrorList **errorlist)
+{
+    const gchar *library_symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
+    GModule *mod = NULL;
+    GError *error = NULL;
+
+    // First try opening the file as a module library.
+    const GwyModuleLibraryRecord *records = open_module_file(filename,
+                                                             library_symbol,
+                                                             &mod, &error);
+    if (records)
+        return queue_opened_module_library(mod, records, errorlist);
+
+    if (error->code == GWY_MODULE_ERROR_OPEN) {
+        log_module_failure(error, 0, filename, TRUE);
+        gwy_error_list_propagate(errorlist, error);
+        return 0;
+    }
+
+    g_assert(error->code == GWY_MODULE_ERROR_OPEN);
+    g_clear_error(&error);
+
+    // Then as a single module.
+    GQuark qname = queue_one_module(filename, &error);
+    if (!qname) {
+        gwy_error_list_propagate(errorlist, error);
+        return 0;
+    }
+
+    return 1;
+}
+
+static gconstpointer
+open_module_file(const gchar *filename,
+                 const gchar *module_info_symbol,
+                 GModule **mod,
+                 GError **error)
+{
+    *mod = g_module_open(filename, G_MODULE_BIND_LAZY);
+    if (!*mod) {
         g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_OPEN,
                     // TRANSLATORS: Error message.
-                    "Cannot open module ‘%s’: %s", filename, g_module_error());
-        return FALSE;
+                    "Cannot open module ‘%s’: %s",
+                    filename, g_module_error());
+        return NULL;
     }
 
-    gchar *symbol = g_strconcat(MODULE_INFO_SYMBOL, "_",
-                                g_quark_to_string(qname), NULL);
-    const GwyModuleInfo *module_info = NULL;
-    if (!g_module_symbol(mod, symbol, (gpointer)&module_info) || !module_info) {
+    gpointer info;
+    if (!g_module_symbol(*mod, module_info_symbol, &info) || !info) {
         g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_INFO,
                     // TRANSLATORS: Error message.
                     _("Cannot find module info ‘%s’ in ‘%s’."),
-                    symbol, filename);
-        goto fail;
+                    module_info_symbol, filename);
+        close_module(*mod, filename);
+        *mod = NULL;
+        return NULL;
     }
 
+    return info;
+}
+
+static void
+close_module(GModule *mod, const gchar *filename)
+{
+    gchar *modfilename = NULL;
+
+    // We cannot get the file name after we close the module, even
+    // unsuccessfull, because it may be freed.
+    if (!filename) {
+        modfilename = g_strdup(g_module_name(mod));
+        filename = modfilename;
+    }
+
+    if (g_module_close(mod)) {
+        GWY_FREE(modfilename);
+        return;
+    }
+
+    g_warning("Cannot close module ‘%s’: %s", filename, g_module_error());
+    GWY_FREE(modfilename);
+}
+
+static gboolean
+handle_overriding(ModuleInfo *modinfo,
+                  GError **error)
+{
+    GHashTable *modules = ensure_module_table();
+    gpointer key = GUINT_TO_POINTER(modinfo->qname);
+    ModuleInfo *othermodinfo = NULL;
+
+    if (!(othermodinfo = g_hash_table_lookup(modules, key)))
+        return TRUE;
+
+    if (othermodinfo->did_type_registration) {
+        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_DUPLICATE_MODULE,
+                    // TRANSLATORS: Error message.
+                    _("Module ‘%s’ was already registered from ‘%s’ and "
+                      "can no longer be overriden by ‘%s’."),
+                    g_quark_to_string(modinfo->qname),
+                    g_module_name(othermodinfo->mod),
+                    g_module_name(modinfo->mod));
+        return FALSE;
+    }
+
+    // Override the previous module, stealing its priority.
+    GError *err = NULL;
+    g_set_error(&err, GWY_MODULE_ERROR, GWY_MODULE_ERROR_OVERRIDEN,
+                // TRANSLATORS: Error message.
+                _("Module ‘%s’ loaded from ‘%s’ was overriden by ‘%s’."),
+                g_quark_to_string(modinfo->qname),
+                g_module_name(othermodinfo->mod),
+                g_module_name(modinfo->mod));
+    // This makes a copy of everything
+    log_module_failure(err,
+                       othermodinfo->qname, g_module_name(othermodinfo->mod),
+                       othermodinfo->from_library);
+    g_clear_error(&err);
+
+    if (!othermodinfo->from_library) {
+        g_module_close(othermodinfo->mod);
+        othermodinfo->mod = NULL;
+    }
+
+    modinfo->priority = othermodinfo->priority;
+    g_hash_table_remove(modules, key);
+
+    return TRUE;
+}
+
+// @module_info can come from either a separate module or a library here.
+static ModuleInfo*
+fill_module_info(const GwyModuleInfo *module_info,
+                 GQuark qname,
+                 GModule *mod,
+                 gboolean from_library,
+                 GError **error)
+{
     if (module_info->abi_version != GWY_MODULE_ABI_VERSION) {
         g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_ABI,
                     // TRANSLATORS: Error message.
                     _("Module ABI version %u of ‘%s’ differs from %u."),
-                    module_info->abi_version, filename, GWY_MODULE_ABI_VERSION);
-        goto fail;
+                    module_info->abi_version,
+                    g_module_name(mod),
+                    GWY_MODULE_ABI_VERSION);
+        return NULL;
     }
 
     if (module_info->ntypes && !module_info->types) {
@@ -290,62 +618,61 @@ queue_one_module_with_name(const gchar *filename,
                     // TRANSLATORS: Error message.
                     _("Module ‘%s’ declares non-zero number of types but it "
                       "does not provide any."),
-                    filename);
-        goto fail;
+                    g_module_name(mod));
+        return NULL;
     }
 
     if (err_unset_metadata(error, module_info->author, "author",
-                           filename)
+                           mod)
         || err_unset_metadata(error, module_info->version, "version",
-                              filename)
+                              mod)
         || err_unset_metadata(error, module_info->copyright, "copyright",
-                              filename)
+                              mod)
         || err_unset_metadata(error, module_info->date, "date",
-                              filename)
+                              mod)
         || err_unset_metadata(error, module_info->description, "description",
-                              filename))
-        goto fail;
+                              mod))
+        return NULL;
 
-
-    modinfo = g_slice_new0(ExtModuleInfo);
+    ModuleInfo *modinfo = g_slice_new0(ModuleInfo);
     modinfo->module_info = module_info;
-    modinfo->path = g_strdup(filename);
+    modinfo->mod = mod;
     modinfo->qname = qname;
-    modinfo->group_priority = group_priority;
-    modinfo->module_priority = module_priority++;
-    g_hash_table_insert(modules, key, modinfo);
-    g_module_make_resident(mod);
-
-    return TRUE;
-
-fail:
-    g_free(symbol);
-    if (!g_module_close(mod)) {
-        g_critical("Cannot unload module ‘%s’: %s", filename, g_module_error());
-    }
-    return FALSE;
+    modinfo->from_library = from_library;
+    modinfo->priority = module_priority++;
+    return modinfo;
 }
 
 static gboolean
 err_unset_metadata(GError **error,
                    const gchar *metadata,
                    const gchar *name,
-                   const gchar *filename)
+                   GModule *mod)
 {
     if (metadata && *metadata)
         return FALSE;
 
     g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_METADATA,
                 _("Module ‘%s’ metadata does not define field ‘%s’."),
-                filename, name);
+                g_module_name(mod), name);
     return TRUE;
 }
 
 static void
 log_module_failure(GError *error,
-                   const gchar *modname,
-                   const gchar *filename)
+                   GQuark qname,
+                   const gchar *filename,
+                   gboolean from_library)
 {
+    FailedModuleInfo info = {
+        .error = g_error_copy(error),
+        .path = g_strdup(filename),
+        .qname = qname,
+        .from_library = from_library,
+    };
+
+    GArray *modules = ensure_failed_module_table();
+    g_array_append_val(modules, info);
 }
 
 static gchar*
@@ -368,16 +695,26 @@ module_name_from_path(const gchar *filename,
     if ((p = strchr(modname, '.')))
         *p = '\0';
 
-    if (!gwy_ascii_strisident(modname, "_", NULL)) {
-        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_MODULE_NAME,
-                    // TRANSLATORS: Error message.
-                    _("Module name ‘%s’ is not a valid identifier."),
-                    modname);
+    if (!module_name_is_valid(modname, error)) {
         g_free(modname);
         return NULL;
     }
 
     return modname;
+}
+
+static gboolean
+module_name_is_valid(const gchar *name,
+                     GError **error)
+{
+    if (gwy_ascii_strisident(name, "_", NULL))
+        return TRUE;
+
+    g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_MODULE_NAME,
+                // TRANSLATORS: Error message.
+                _("Module name ‘%s’ is not a valid identifier."),
+                name);
+    return FALSE;
 }
 
 static GPtrArray*
@@ -390,7 +727,7 @@ gather_unregistered_modules(void)
 
     g_hash_table_iter_init(&iter, modules);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        ExtModuleInfo *modinfo = (ExtModuleInfo*)value;
+        ModuleInfo *modinfo = (ModuleInfo*)value;
         if (modinfo->did_type_registration)
             continue;
 
@@ -411,21 +748,13 @@ static gint
 compare_unregistered_modinfo(gconstpointer a,
                              gconstpointer b)
 {
-    const ExtModuleInfo **pmodinfoa = (const ExtModuleInfo**)a;
-    const ExtModuleInfo **pmodinfob = (const ExtModuleInfo**)b;
-    const ExtModuleInfo *modinfoa = *pmodinfoa, *modinfob = *pmodinfob;
+    const ModuleInfo **pmodinfoa = (const ModuleInfo**)a;
+    const ModuleInfo **pmodinfob = (const ModuleInfo**)b;
+    const ModuleInfo *modinfoa = *pmodinfoa, *modinfob = *pmodinfob;
 
-    // Group priority is reversed, we start from system modules.  Overriding
-    // has been already performed.
-    if (modinfoa->group_priority > modinfob->group_priority)
+    if (modinfoa->priority < modinfob->priority)
         return -1;
-    if (modinfoa->group_priority < modinfob->group_priority)
-        return 1;
-
-    // Within a group, register the modules as we found them.
-    if (modinfoa->module_priority < modinfob->module_priority)
-        return -1;
-    if (modinfoa->module_priority > modinfob->module_priority)
+    if (modinfoa->priority > modinfob->priority)
         return 1;
 
     return 0;
@@ -436,19 +765,20 @@ register_one_type(const GwyModuleProvidedType *mptype,
                   GQuark module_qname,
                   GError **error)
 {
-    if (!mptype->get_type) {
-        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_GET_TYPE,
-                    // TRANSLATORS: Error message.
-                    _("Module ‘%s’ supplied a NULL get-type function."),
-                    g_quark_to_string(module_qname));
-        return FALSE;
-    }
-
     if (!mptype->name) {
         g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_TYPE_NAME,
                     // TRANSLATORS: Error message.
                     _("NULL type name was supplied by module ‘%s’."),
                     g_quark_to_string(module_qname));
+        return FALSE;
+    }
+
+    if (!mptype->get_type) {
+        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_GET_TYPE,
+                    // TRANSLATORS: Error message.
+                    _("Module ‘%s’ supplied a NULL get-type function "
+                      "for type ‘%s’."),
+                    g_quark_to_string(module_qname), mptype->name);
         return FALSE;
     }
 
@@ -472,7 +802,7 @@ register_one_type(const GwyModuleProvidedType *mptype,
     }
 
     GHashTable *types = ensure_type_table();
-    ExtTypeInfo *typeinfo = NULL;
+    TypeInfo *typeinfo = NULL;
     GQuark qname = g_quark_from_string(mptype->name);
     gpointer key = GUINT_TO_POINTER(qname);
     if ((typeinfo = g_hash_table_lookup(types, key))) {
@@ -505,7 +835,7 @@ register_one_type(const GwyModuleProvidedType *mptype,
         return FALSE;
     }
 
-    typeinfo = g_slice_new(ExtTypeInfo);
+    typeinfo = g_slice_new(TypeInfo);
     typeinfo->qname = qname;
     typeinfo->module_qname = module_qname;
     typeinfo->type = type;
@@ -522,17 +852,37 @@ ensure_module_table(void)
     if (G_LIKELY(modules))
         return modules;
 
-    modules = g_hash_table_new_full(NULL, NULL,
-                                    NULL, module_registration_info_free);
+    modules = g_hash_table_new_full(NULL, NULL, NULL, module_info_free);
     return modules;
 }
 
 static void
-module_registration_info_free(gpointer p)
+module_info_free(gpointer p)
 {
-    ExtModuleInfo *modinfo = (ExtModuleInfo*)p;
-    GWY_FREE(modinfo->path);
-    g_slice_free(ExtModuleInfo, modinfo);
+    // GModules are apparently always kind-of-leaked.
+    g_slice_free(ModuleInfo, p);
+}
+
+static GArray*
+ensure_failed_module_table(void)
+{
+    static GArray *modules = NULL;
+
+    if (G_LIKELY(modules))
+        return modules;
+
+    modules = g_array_new(FALSE, FALSE, sizeof(FailedModuleInfo));
+    g_array_set_clear_func(modules, failed_module_info_free);
+    return modules;
+}
+
+static void
+failed_module_info_free(gpointer p)
+{
+    FailedModuleInfo *info = (FailedModuleInfo*)p;
+    g_clear_error(&info->error);
+    GWY_FREE(info->path);
+    g_slice_free(FailedModuleInfo, info);
 }
 
 static GHashTable*
@@ -543,23 +893,14 @@ ensure_type_table(void)
     if (G_LIKELY(types))
         return types;
 
-    types = g_hash_table_new_full(NULL, NULL,
-                                  NULL, type_registration_info_free);
+    types = g_hash_table_new_full(NULL, NULL, NULL, type_info_free);
     return types;
 }
 
 static void
-type_registration_info_free(gpointer p)
+type_info_free(gpointer p)
 {
-    g_slice_free(ExtTypeInfo, p);
-}
-
-static const gchar*
-module_source_string(const ExtModuleInfo *modinfo)
-{
-    if (modinfo->library_qpath)
-        return g_quark_to_string(modinfo->library_qpath);
-    return modinfo->path;
+    g_slice_free(TypeInfo, p);
 }
 
 /************************** Documentation ****************************/
@@ -571,32 +912,57 @@ module_source_string(const ExtModuleInfo *modinfo)
  * @short_description: Loading and registration of modules
  *
  * Usually, modules are loaded and their extension types registered using
- * gwy_register_modules().
+ * a single call to gwy_register_modules().  The details are described
+ * below.
  *
- * Loading of modules supports overriding of system modules with user-supplied
- * modules.  A simple resolution mechanism is used.  All modules are found.
- * The search should start with the highest priority sources (user modules) and
- * continue to lowest priority modules (system modules).  Each call to
- * gwy_module_load(), gwy_module_load_library() or gwy_module_load_directory()
- * essentially creates a priority group.  Multiple modules of the same name
- * within one group lead to undefined behaviour, i.e. an arbitrary one may be
- * loaded and the other rejected.  In the case of multiple occurences of module
- * of the same name, the first seen source has the highest priority and
- * overrides the module seen later.
- *
- * Extension classes are then actually registered using
- * gwy_module_register_types() in the order they would be seen if the
- * registration started from lowest priority sources (system modules).
- * However, overriding takes place.
- *
- * Occasionally you may want to run some code in order to construct the
- * #GwyModuleInfo structure dynamically.  This can be for instance the case of
- * a file module which itself needs to query the capabilities of some library.
- * The way to achieve this is define GLib a module initialisation function.
- * See #GModuleCheckInit for a description.  Such function can also return an
- * error which is a way modules can prevent themselves from being loaded when
- * they decide they cannot function correctly.  It may or may not be useful to
- * also provide a GLib module unload function, for which see #GModuleUnload.
+ * <refsect2 id='libgwyapp-module-process'>
+ * <title>Module registration process</title>
+ * <para>Loading of modules supports overriding of system modules with
+ * user-supplied modules.  Although modules are, in general, independent and it
+ * is not possible to declare one module as depending on other, it is also
+ * ensured system modules are loaded first.  A simple resolution mechanism is
+ * used.</para>
+ * <para>First, modules are gathered and dlopen()ed using functions such as
+ * gwy_module_load(), gwy_module_load_library() or gwy_module_load_directory().
+ * Since a module of the same name as one found earlier overrides the earlier
+ * module, this should happen in the order from system modules to user
+ * modules.  Function gwy_register_modules() ensures the required ordering,
+ * however, it is something to keep in mind if you run the loading functions
+ * manually. No extension class get-type functions are run at this
+ * stage.</para>
+ * <para>Extension classes are registered using gwy_module_register_types() in
+ * the same order they were found, i.e. from lowest priority sources
+ * (system modules) to highest priority sources (user modules).  However,
+ * overriding takes place.  Classes of the overriding module module are
+ * registered in place of the overriden module, i.e. they ‘cut the
+ * queue’.</para>
+ * <para>After class registration the modules become permanent and can no
+ * longer be overriden.  So although it is possible to load another batch of
+ * modules and call gwy_module_register_types() again, in the case of name
+ * clash the new module fails and the already registered one prevails.</para>
+ * </refsect2>
+ * <refsect2 id='libgwyapp-module-initialisation'>
+ * <title>Module initialisation/unloading</title>
+ * <para>The module definition macro %GWY_DEFINE_MODULE provides a static data
+ * structure describing the module.  Occasionally you may want to run some code
+ * in order to construct the #GwyModuleInfo structure dynamically.  This can be
+ * for instance the case of a file module which itself needs to query the
+ * capabilities of some library.</para>
+ * <para>The way to achieve this is define a GLib module initialisation
+ * function <literal>g_module_check_init</literal><literal>()</literal>.
+ * See #GModuleCheckInit for a description.
+ * Such function can also return an error.  This enables modules to prevent
+ * themselves from being loaded when they decide they cannot function
+ * correctly.</para>
+ * <para>For unloading, a GLib module unload function
+ * <literal>g_module_unload</literal><literal>()</literal> can be provided.  It
+ * is run when the module is unloaded, see #GModuleUnload.  Gwyddion does not
+ * unload modules once they have been sucessfully registered by making them
+ * resident with g_module_make_resident().  Therefore, the unloading might be a
+ * concern only for failed and overriden modules.</para>
+ * <para>Note modules requiring this functionality are not suitable for
+ * inclusion into a module library.</para>
+ * </refsect2>
  **/
 
 /**
@@ -645,9 +1011,9 @@ module_source_string(const ExtModuleInfo *modinfo)
 
 /**
  * GWY_DEFINE_MODULE_LIBRARY:
- * @mod_info_list: Array of module info structures, terminated with
- *                 %GWY_MODULE_INFO_SENTINEL, to be returned as the list of
- *                 modules in the library.
+ * @mod_info_list: Array of #GwyModuleLibraryRecord records, terminated with
+ *                 a record with %NULL name ans %GWY_MODULE_INFO_SENTINEL info;
+ *                 to be returned as the list of modules in the library.
  *
  * Macro expanding to code necessary for registration of a module library.
  *
@@ -663,26 +1029,85 @@ module_source_string(const ExtModuleInfo *modinfo)
  * function for each of the extensions.
  *
  * If modules are consolidated into a module library, preprocessor macro
- * %GWY_MODULE_BUILDING_LIBRARY should be defined to indicate this.  Invididual
- * module query functions defined with %GWY_DEFINE_MODULE are then linked as
- * internal to the library.  Only one library-level symbol, defined with
- * %GWY_DEFINE_MODULE_LIBRARY, is exported.
+ * <literal>GWY_MODULE_BUILDING_LIBRARY</literal> should be defined to indicate
+ * this.  Invididual module query functions defined with %GWY_DEFINE_MODULE are
+ * then linked as internal to the library.  Only one library-level symbol,
+ * defined with %GWY_DEFINE_MODULE_LIBRARY, is exported.
  **/
 
 /**
  * GwyModuleInfo:
  * @abi_version: Gwyddion module ABI version, should be always
  *               #GWY_MODULE_ABI_VERSION.
- * @register_func: Module registration function (the function run by Gwyddion
- *                 module system, actually registering particular module
- *                 features).
- * @blurb: Description of the module purpose.
+ * @ntypes: Number of registered types, i.e. number of elements in @types.
+ * @description: Description of the module purpose.
  * @author: Module author(s).
  * @version: Module version.
  * @copyright: Who has copyright on this module.
  * @date: Date (year).
+ * @types: Array of @ntypes items describing the extension classes the module
+ *         provides.
  *
  * Module information provided to GWY_DEFINE_MODULE().
+ **/
+
+/**
+ * GwyModuleError:
+ * @GWY_MODULE_ERROR_MODULE_NAME: Module name is not given or it is not a valid
+ *                                identifier.
+ * @GWY_MODULE_ERROR_DUPLICATE_MODULE: Module name clashes with an already
+ *                                     registered module.
+ * @GWY_MODULE_ERROR_EMPTY_LIBRARY: Module library does not contain any
+ *                                  modules.  This may not be considered a
+ *                                  hard error, anyway, such library is
+ *                                  unloaded and reported as failed.
+ * @GWY_MODULE_ERROR_OVERRIDEN: The module was overriden by a higher-priority
+ *                              source.
+ * @GWY_MODULE_ERROR_OPEN: Opening the module with dlopen() (or a similar
+ *                         mechanism) failed.  This includes cases when the
+ *                         module provides an initialisation function and this
+ *                         function returns an error.
+ * @GWY_MODULE_ERROR_INFO: Module info (or module library info) was not found
+ *                         in the file or it was %NULL.
+ * @GWY_MODULE_ERROR_ABI: Module ABI version mismatch.
+ * @GWY_MODULE_ERROR_TYPES: Module provided inconsistent information about
+ *                          extension types.
+ * @GWY_MODULE_ERROR_METADATA: Module metadata (author, copyright, ...) are
+ *                             missing or invalid.
+ * @GWY_MODULE_ERROR_DUPLICATE_TYPE: Module attempted to register types that
+ *                                   already exist.
+ * @GWY_MODULE_ERROR_TYPE_NAME: Extension type name is not valid.
+ * @GWY_MODULE_ERROR_GET_TYPE: Extension type get-type functions is not valid.
+ *
+ * Error codes for module loading and extension type registration.
+ **/
+
+/**
+ * GwyGetTypeFunc:
+ *
+ * Type of get-type function for extension types.
+ *
+ * The function signature is the same as for all other functions providing a
+ * #GType within GLib.
+ *
+ * Returns: The type.
+ **/
+
+/**
+ * GwyModuleProvidedType:
+ * @name: Type name in CamelCase, e.g. "GwyExtHappyUnicorn".
+ * @get_type: Function to obtain the #GType for the type.
+ *
+ * Record defining one extension type provided by a module.
+ **/
+
+/**
+ * GwyModuleLibraryRecord:
+ * @name: Module name.  Exactly the same string as the identifier provided to
+ *        %GWY_DEFINE_MODULE of this module.
+ * @info: Module information.
+ *
+ * Type of module record in a module library.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
