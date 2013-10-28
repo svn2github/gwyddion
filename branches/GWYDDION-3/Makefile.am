@@ -11,6 +11,7 @@ SUBDIRS = \
 	po \
 	po-libgwy \
 	po-libgwyui \
+	po-libgwyapp \
 	docs \
 	data
 
