@@ -37,67 +37,62 @@ G_BEGIN_DECLS
 #ifndef GWY_MODULE_BUILDING_LIBRARY
 #define GWY_DEFINE_MODULE(mod_info,name) \
     __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleInfo* \
-    gwy_module_query_##name(void) { return &mod_info; }
+    __gwy_module_info_##name = mod_info
 #else
 #define GWY_DEFINE_MODULE(mod_info,name) \
     __GWY_MODULE_EXTERN_C G_GNUC_INTERNAL const GwyModuleInfo* \
-    gwy_module_query_##name(void) { return &mod_info; }
+    __gwy_module_info_##name = mod_info
 #endif
 
-#define GWY_DEFINE_MODULE_LIBRARY(mod_query_list) \
-    __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleQuery** \
-    gwy_module_query(void) { return mod_query_list; }
+#define GWY_DEFINE_MODULE_LIBRARY(mod_info_list) \
+    __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleInfo* \
+    __gwy_module_query = mod_info_list
+
+#define GWY_MODULE_INFO_SENTINEL \
+    ((GwyModuleInfo){ 0, 0, NULL, NULL, NULL, NULL, NULL, NULL })
 
 #define GWY_MODULE_ERROR gwy_module_error_quark()
 
 typedef enum {
-    GWY_MODULE_ERROR_NAME,
-    GWY_MODULE_ERROR_DUPLICATE,
+    GWY_MODULE_ERROR_MODULE_NAME,
+    GWY_MODULE_ERROR_DUPLICATE_MODULE,
     GWY_MODULE_ERROR_OPEN,
-    GWY_MODULE_ERROR_QUERY,
-    GWY_MODULE_ERROR_ABI,
     GWY_MODULE_ERROR_INFO,
-    GWY_MODULE_ERROR_REGISTER
+    GWY_MODULE_ERROR_ABI,
+    GWY_MODULE_ERROR_TYPES,
+    GWY_MODULE_ERROR_METADATA,
+    GWY_MODULE_ERROR_DUPLICATE_TYPE,
+    GWY_MODULE_ERROR_TYPE_NAME,
+    GWY_MODULE_ERROR_GET_TYPE,
 } GwyModuleError;
 
-typedef struct _GwyModuleInfo GwyModuleInfo;
-
-typedef GType                (*GwyGetTypeFunc)       (void);
-typedef const GwyModuleInfo* (*GwyModuleQueryFunc)   (void);
-typedef gboolean             (*GwyModuleRegisterFunc)(GError **error);
-
-struct _GwyModuleInfo {
-    guint32 abi_version;
-    GwyModuleRegisterFunc register_func;
-    const gchar *blurb;
-    const gchar *author;
-    const gchar *version;
-    const gchar *copyright;
-    const gchar *date;
-};
+typedef GType (*GwyGetTypeFunc)(void);
 
 typedef struct {
     const gchar *name;
     GwyGetTypeFunc get_type;
 } GwyModuleProvidedType;
 
-GQuark               gwy_module_error_quark   (void)                               G_GNUC_CONST;
-gboolean             gwy_module_provide_type  (const gchar *name,
-                                               GwyGetTypeFunc gettype,
-                                               GError **error);
-guint                gwy_module_provide       (GwyErrorList **errorlist,
-                                               const gchar *name,
-                                               ...)                                G_GNUC_NULL_TERMINATED;
-guint                gwy_module_providev      (const GwyModuleProvidedType *types,
-                                               guint ntypes,
-                                               GwyErrorList **errorlist);
+typedef struct {
+    guint32 abi_version;
+    guint32 ntypes;
+    const gchar *description;
+    const gchar *author;
+    const gchar *version;
+    const gchar *copyright;
+    const gchar *date;
+    const GwyModuleProvidedType *types;
+} GwyModuleInfo;
+
+GQuark               gwy_module_error_quark   (void)                      G_GNUC_CONST;
+guint                gwy_register_modules     (GwyErrorList **errorlist);
 const GwyModuleInfo* gwy_module_load          (const gchar *filename,
                                                GError **error);
 guint                gwy_module_load_library  (const gchar *filename,
                                                GwyErrorList **errorlist);
 guint                gwy_module_load_directory(const gchar *path,
                                                GwyErrorList **errorlist);
-void                 gwy_module_register_types(void);
+guint                gwy_module_register_types(GwyErrorList **errorlist);
 
 G_END_DECLS
 
