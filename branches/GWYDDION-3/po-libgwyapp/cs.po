@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libgwyui3\n"
 "Report-Msgid-Bugs-To: yeti@gwyddion.net\n"
-"POT-Creation-Date: 2012-11-04 14:24+0100\n"
-"PO-Revision-Date: 2013-10-27 06:55+0100\n"
+"POT-Creation-Date: 2013-10-28 10:16+0100\n"
+"PO-Revision-Date: 2013-10-28 10:18+0100\n"
 "Last-Translator: David Nečas (Yeti) <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -17,3 +17,84 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:253
+#, c-format
+msgid "Module ‘%s’ was already registered from ‘%s’."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:275
+#, c-format
+msgid "Cannot find module info ‘%s’ in ‘%s’."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:283
+#, c-format
+msgid "Module ABI version %u of ‘%s’ differs from %u."
+msgstr "ABI verze %u modulu ‚%s‘ se liší od %u."
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:291
+#, c-format
+msgid ""
+"Module ‘%s’ declares non-zero number of types but it does not provide any."
+msgstr ""
+
+#: ../libgwyapp/module.c:339
+#, c-format
+msgid "Module ‘%s’ metadata does not define field ‘%s’."
+msgstr "Metadata modulu ‚%s‘ nedefinují položku ‚%s‘."
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:374
+#, c-format
+msgid "Module name ‘%s’ is not a valid identifier."
+msgstr "Název modulu ‚%s‘ není platný identifikátor."
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:442
+#, c-format
+msgid "Module ‘%s’ supplied a NULL get-type function."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:450
+#, c-format
+msgid "NULL type name was supplied by module ‘%s’."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:458
+#, c-format
+msgid "Class name ‘%s’ in module ‘%s’ is not a valid identifier."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:468
+#, c-format
+msgid "Class name ‘%s’ in module ‘%s’ does not have the form GwyExtSomething."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:481
+#, c-format
+msgid ""
+"Type ‘%s’, which module ‘%s’ is attempting to register, has been already "
+"registered by module ‘%s’."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:492
+#, c-format
+msgid ""
+"Type ‘%s’, which module ‘%s’ is attempting to register,  has been already "
+"registered."
+msgstr ""
+
+#. TRANSLATORS: Error message.
+#: ../libgwyapp/module.c:502
+#, c-format
+msgid "Module ‘%s’ get-type function for type ‘%s’ returned NULL."
+msgstr ""
