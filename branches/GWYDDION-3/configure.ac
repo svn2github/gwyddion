@@ -42,9 +42,9 @@ AC_CONFIG_FILES([
   docs/libgwyapp/Makefile
   data/Makefile
   gwyddion3.spec:data/gwyddion3.spec.in
-],[
-  chmod +x build/check-dep-versions.py
 ])
+AC_CONFIG_COMMANDS([check-dep-versions],
+                   [chmod +x build/check-dep-versions.py])
 
 AM_INIT_AUTOMAKE([1.13 gnu -Wall -Wno-portability dist-xz no-dist-gzip std-options nostdinc])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
