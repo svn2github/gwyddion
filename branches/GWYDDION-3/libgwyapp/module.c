@@ -93,6 +93,9 @@ static gint          compare_unregistered_modinfo(gconstpointer a,
 static gboolean      register_one_type           (const GwyModuleProvidedType *mptype,
                                                   GQuark module_qname,
                                                   GError **error);
+static ModuleInfo*   lookup_module               (const gchar *name,
+                                                  gboolean registered,
+                                                  gboolean queued);
 static GHashTable*   ensure_module_table         (void);
 static void          module_info_free            (gpointer p);
 static GArray*       ensure_failed_module_table  (void);
@@ -151,6 +154,114 @@ gwy_register_modules(GwyErrorList **errorlist)
     }
     gwy_module_register_types(errorlist);
     return count;
+}
+
+/**
+ * gwy_module_list:
+ *
+ * Obtains the list of all loaded and registered modules.
+ *
+ * Modules that are only queued for type registration are not included.
+ *
+ * Returns: (array zero-terminated=1) (transfer container):
+ *          A %NULL-terminated array of module names, in no particular order.
+ *          The array itself must be freed with g_free(), the strings must not.
+ **/
+const gchar**
+gwy_module_list(void)
+{
+    GHashTable *modules = ensure_module_table();
+    GPtrArray *name_list = g_ptr_array_new();
+    GHashTableIter iter;
+    gpointer key, value;
+
+    g_hash_table_iter_init(&iter, modules);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        ModuleInfo *modinfo = (ModuleInfo*)value;
+        if (!modinfo->did_type_registration)
+            continue;
+
+        g_ptr_array_add(name_list, (gpointer)g_quark_to_string(modinfo->qname));
+    }
+
+    g_ptr_array_add(name_list, NULL);
+    return (const gchar**)g_ptr_array_free(name_list, FALSE);
+}
+
+/**
+ * gwy_module_get_author:
+ * @name: Module name.
+ *
+ * Obtains the author of a registered module.
+ *
+ * Returns: The author as a string owned by the module.
+ **/
+const gchar*
+gwy_module_get_author(const gchar *name)
+{
+    ModuleInfo *modinfo = lookup_module(name, TRUE, FALSE);
+    return modinfo ? modinfo->module_info->author : NULL;
+}
+
+/**
+ * gwy_module_get_description:
+ * @name: Module name.
+ *
+ * Obtains the description of a registered module.
+ *
+ * Returns: The description as a string owned by the module.
+ **/
+const gchar*
+gwy_module_get_description(const gchar *name)
+{
+    ModuleInfo *modinfo = lookup_module(name, TRUE, FALSE);
+    // FIXME: Translate here or later?
+    return modinfo ? modinfo->module_info->description : NULL;
+}
+
+/**
+ * gwy_module_get_version:
+ * @name: Module name.
+ *
+ * Obtains the version of a registered module.
+ *
+ * Returns: The version as a string owned by the module.
+ **/
+const gchar*
+gwy_module_get_version(const gchar *name)
+{
+    ModuleInfo *modinfo = lookup_module(name, TRUE, FALSE);
+    return modinfo ? modinfo->module_info->version : NULL;
+}
+
+/**
+ * gwy_module_get_copyright:
+ * @name: Module name.
+ *
+ * Obtains the copyright holder of a registered module.
+ *
+ * Returns: The copyright holder as a string owned by the module.
+ **/
+const gchar*
+gwy_module_get_copyright(const gchar *name)
+{
+    ModuleInfo *modinfo = lookup_module(name, TRUE, FALSE);
+    return modinfo ? modinfo->module_info->copyright : NULL;
+}
+
+/**
+ * gwy_module_get_date:
+ * @name: Module name.
+ *
+ * Obtains the date of a registered module.
+ *
+ * Returns: The date as a string owned by the module.
+ **/
+const gchar*
+gwy_module_get_date(const gchar *name)
+{
+    ModuleInfo *modinfo = lookup_module(name, TRUE, FALSE);
+    return modinfo ? modinfo->module_info->date : NULL;
 }
 
 /**
@@ -854,6 +965,25 @@ register_one_type(const GwyModuleProvidedType *mptype,
     g_hash_table_insert(types, key, typeinfo);
 
     return TRUE;
+}
+
+static ModuleInfo*
+lookup_module(const gchar *name,
+              gboolean registered,
+              gboolean queued)
+{
+    GQuark qname = g_quark_try_string(name);
+    if (!qname)
+        return NULL;
+
+    GHashTable *modules = ensure_module_table();
+    gpointer key = GUINT_TO_POINTER(qname);
+    ModuleInfo *modinfo = g_hash_table_lookup(modules, key);
+    if (!queued && !modinfo->did_type_registration)
+        return NULL;
+    if (!registered && modinfo->did_type_registration)
+        return NULL;
+    return modinfo;
 }
 
 static GHashTable*

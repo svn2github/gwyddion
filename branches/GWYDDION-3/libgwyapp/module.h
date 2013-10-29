@@ -93,15 +93,21 @@ typedef struct {
     const GwyModuleInfo *info;
 } GwyModuleLibraryRecord;
 
-GQuark               gwy_module_error_quark   (void)                      G_GNUC_CONST;
-guint                gwy_register_modules     (GwyErrorList **errorlist);
-const GwyModuleInfo* gwy_module_load          (const gchar *filename,
-                                               GError **error);
-guint                gwy_module_load_library  (const gchar *filename,
-                                               GwyErrorList **errorlist);
-guint                gwy_module_load_directory(const gchar *path,
-                                               GwyErrorList **errorlist);
-guint                gwy_module_register_types(GwyErrorList **errorlist);
+GQuark               gwy_module_error_quark    (void)                      G_GNUC_CONST;
+guint                gwy_register_modules      (GwyErrorList **errorlist);
+const gchar**        gwy_module_list           (void)                      G_GNUC_MALLOC;
+const gchar*         gwy_module_get_author     (const gchar *name);
+const gchar*         gwy_module_get_description(const gchar *name);
+const gchar*         gwy_module_get_version    (const gchar *name);
+const gchar*         gwy_module_get_copyright  (const gchar *name);
+const gchar*         gwy_module_get_date       (const gchar *name);
+const GwyModuleInfo* gwy_module_load           (const gchar *filename,
+                                                GError **error);
+guint                gwy_module_load_library   (const gchar *filename,
+                                                GwyErrorList **errorlist);
+guint                gwy_module_load_directory (const gchar *path,
+                                                GwyErrorList **errorlist);
+guint                gwy_module_register_types (GwyErrorList **errorlist);
 
 G_END_DECLS
 
