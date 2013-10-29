@@ -1,5 +1,7 @@
 # $Id$
 
+SUBDIRS = . tests
+
 library = libgwyui
 Library = GwyUI
 library_minor_version = 0

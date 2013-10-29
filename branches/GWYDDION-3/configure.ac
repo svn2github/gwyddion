@@ -29,6 +29,7 @@ AC_CONFIG_FILES([
   libgwy/benchmarks/Makefile
   libgwyui/Makefile
   libgwyui/libgwyui3.pc
+  libgwyui/tests/Makefile
   libgwyapp/Makefile
   libgwyapp/libgwyapp3.pc
   gwyddion/Makefile
