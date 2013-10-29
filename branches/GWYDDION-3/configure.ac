@@ -1,10 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 m4_define([gwy_version_major],[3])
 m4_define([gwy_version_minor],[0])
-m4_define([gwy_version_micro],[0])
 m4_define([gwy_version_extra],[])
 m4_define([gwy_version_string],
-          [gwy_version_major.gwy_version_minor.gwy_version_micro[]gwy_version_extra])
+          [gwy_version_major.gwy_version_minor[]gwy_version_extra])
 m4_define([gwy_url],[http://gwyddion.net/])
 
 AC_INIT([Gwyddion], [gwy_version_string], [yeti@gwyddion.net])
@@ -52,7 +51,6 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
 AC_SUBST([GWY_VERSION_MINOR],[gwy_version_minor])
-AC_SUBST([GWY_VERSION_MICRO],[gwy_version_micro])
 AC_SUBST([GWY_VERSION_STRING],[gwy_version_string])
 AC_SUBST([PACKAGE_SUFFIX],[3])
 AM_CONDITIONAL([UNSTABLE_LIBRARY_RELEASE],[true])
