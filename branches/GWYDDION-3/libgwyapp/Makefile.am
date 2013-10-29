@@ -29,8 +29,7 @@ public_headers = \
 public_built_headers = \
 	$(mkenum_name).h
 
-private_headers = \
-	module-internal.h
+private_headers =
 
 private_built_headers =
 
