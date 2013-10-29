@@ -38,7 +38,7 @@ function autogen() {
 function build() {
   # Exclude documentation to get a separate log
   sed -ri '/^SUBDIRS *=/s/^/###NIGHT-BUILD###/' docs/Makefile
-  make -k all gwyddion3_vim_sources= \
+  make -k all gwyddion4_vim_sources= \
     && touch .ok-build
   sed -ri 's/^###NIGHT-BUILD###//' docs/Makefile
 }
@@ -69,8 +69,8 @@ function build_documentation() {
   make -C docs -k docs-prepare \
       && make -C docs -k docs \
       && touch .ok-documentation
-  rm -f data/gwyddion3.vim
-  make -C data gwyddion3.vim
+  rm -f data/gwyddion4.vim
+  make -C data gwyddion4.vim
 }
 
 function build_introspection() {

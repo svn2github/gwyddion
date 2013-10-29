@@ -1,8 +1,8 @@
 # $Id$
 
-bin_PROGRAMS = gwyddion3
+bin_PROGRAMS = gwyddion4
 
-gwyddion3_SOURCES = \
+gwyddion4_SOURCES = \
 	gwyddion.c
 
 AM_CFLAGS = $(LIBGWYAPP_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
@@ -16,9 +16,9 @@ AM_CPPFLAGS = \
 AM_LDFLAGS = \
 	$(LIBGWYAPP_DEPS_LIBS) \
 	$(HOST_LDFLAGS) \
-	$(top_builddir)/libgwy/libgwy3.la \
-	$(top_builddir)/libgwyui/libgwyui3.la \
-	$(top_builddir)/libgwyapp/libgwyapp3.la
+	$(top_builddir)/libgwy/libgwy4.la \
+	$(top_builddir)/libgwyui/libgwyui4.la \
+	$(top_builddir)/libgwyapp/libgwyapp4.la
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*

@@ -14,11 +14,11 @@ mkenum_name = types
 genmarshal_name = marshal
 genmarshal_prefix = _gwy_cclosure_marshal
 main_header = $(srcdir)/libgwyui.h
-GwyUI3_3_0_gir_INCLUDES = Gtk-3.0
-GwyUI3_3_0_gir_PACKAGES = gtk+-3.0
-GwyUI3_3_0_gir_SCANNERFLAGS = \
-	--include-uninstalled=$(top_builddir)/libgwy/Gwy3-3.0.gir \
-	--library=$(top_builddir)/libgwy/libgwy3.la
+GwyUI_4_0_gir_INCLUDES = Gtk-3.0
+GwyUI_4_0_gir_PACKAGES = gtk+-3.0
+GwyUI_4_0_gir_SCANNERFLAGS = \
+	--include-uninstalled=$(top_builddir)/libgwy/Gwy-4.0.gir \
+	--library=$(top_builddir)/libgwy/libgwy4.la
 INTROSPECTION_COMPILER_ARGS = \
 	--includedir=$(top_builddir)/libgwy
 
@@ -78,17 +78,17 @@ EXTRA_DIST = $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers) $(private_built_headers) $(resource_files)
 MAINTAINERCLEANFILES =
-libgwyui3_la_DEPENDENCIES =
+libgwyui4_la_DEPENDENCIES =
 BUILT_SOURCES = $(resource_files)
 
 # lib_LTLIBRARIES must be a literal, no variables
-lib_LTLIBRARIES = libgwyui3.la
+lib_LTLIBRARIES = libgwyui4.la
 nodist_libgwyuiinclude_HEADERS = $(public_built_headers)
 libgwyuiinclude_HEADERS = $(public_headers)
 toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
-libgwyui3_la_SOURCES = \
+libgwyui4_la_SOURCES = \
 	adjust-bar.c \
 	adjustment.c \
 	axis.c \
@@ -142,9 +142,9 @@ AM_CPPFLAGS = \
 # Changing ifaces     C:   R:   0
 library_so_version = 0:0:0
 
-libgwyui3_la_LDFLAGS = \
+libgwyui4_la_LDFLAGS = \
 	$(LIBGWYUI_DEPS_LIBS) \
-	$(top_builddir)/libgwy/libgwy3.la \
+	$(top_builddir)/libgwy/libgwy4.la \
 	$(HOST_LDFLAGS) \
 	$(GWY_LIBRARY_LDFLAGS) \
 	$(version_info) \
@@ -173,7 +173,7 @@ clean-local:
 distclean-local:
 	rm -rf coverage
 
-check-marshallers: $(libgwyui3_la_SOURCES)
-	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwyui3_la_SOURCES)
+check-marshallers: $(libgwyui4_la_SOURCES)
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwyui4_la_SOURCES)
 
 .PHONY: check-marshallers

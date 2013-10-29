@@ -12,8 +12,8 @@ test_program = ./tests/testlibgwy
 test_default_suppressions = libgwy-default.supp
 mkenum_name = types
 main_header = $(srcdir)/libgwy.h
-Gwy3_3_0_gir_INCLUDES = Gio-2.0
-Gwy3_3_0_gir_PACKAGES = gio-2.0
+Gwy_4_0_gir_INCLUDES = Gio-2.0
+Gwy_4_0_gir_PACKAGES = gio-2.0
 
 public_headers = \
 	$(srcdir)/array.h \
@@ -115,17 +115,17 @@ EXTRA_DIST = version.h.in $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers) $(private_built_headers)
 MAINTAINERCLEANFILES =
-libgwy3_la_DEPENDENCIES =
+libgwy4_la_DEPENDENCIES =
 BUILT_SOURCES =
 
 # lib_LTLIBRARIES must be a literal, no variables
-lib_LTLIBRARIES = libgwy3.la
+lib_LTLIBRARIES = libgwy4.la
 nodist_libgwyinclude_HEADERS = $(public_built_headers)
 libgwyinclude_HEADERS = $(public_headers)
 toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
-libgwy3_la_SOURCES = \
+libgwy4_la_SOURCES = \
 	array.c \
 	brick-arithmetic.c \
 	brick-part.c \
@@ -225,7 +225,7 @@ AM_CPPFLAGS = \
 # Changing ifaces     C:   R:   0
 library_so_version = 0:0:0
 
-libgwy3_la_LDFLAGS = \
+libgwy4_la_LDFLAGS = \
 	$(LIBGWY_DEPS_LIBS) \
 	$(HOST_LDFLAGS) \
 	$(GWY_LIBRARY_LDFLAGS) \
@@ -244,11 +244,11 @@ distclean-local:
 
 check-local: check-serializable-types
 
-check-serializable-types: $(libgwy3_la_SOURCES)
+check-serializable-types: $(libgwy4_la_SOURCES)
 	$(AM_V_at)cd $(srcdir) \
-		&& $(PYTHON) ../build/check-serializable-types.py main.c $(libgwy3_la_SOURCES)
+		&& $(PYTHON) ../build/check-serializable-types.py main.c $(libgwy4_la_SOURCES)
 
-check-marshallers: $(libgwy3_la_SOURCES)
-	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwy3_la_SOURCES)
+check-marshallers: $(libgwy4_la_SOURCES)
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwy4_la_SOURCES)
 
 .PHONY: check-serializable-types check-marshallers

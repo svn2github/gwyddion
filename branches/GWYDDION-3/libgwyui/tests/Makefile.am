@@ -11,7 +11,7 @@ raster_view_SOURCES   = raster-view.c
 
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(VALGRIND_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir) $(LIBGWYUI_COMPAT_CPPFLAGS)
-AM_LDFLAGS = ../libgwyui3.la ../../libgwy/libgwy3.la $(HOST_LDFLAGS) $(LIBGWYUI_DEPS_LIBS)
+AM_LDFLAGS = ../libgwyui4.la ../../libgwy/libgwy4.la $(HOST_LDFLAGS) $(LIBGWYUI_DEPS_LIBS)
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out

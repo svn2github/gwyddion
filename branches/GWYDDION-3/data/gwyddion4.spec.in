@@ -2,7 +2,7 @@
 %{expand:%global distro_is_redhat %(test ! -f /etc/redhat-release; echo $?)}
 %{expand:%global distro_is_suse %(test ! -f /etc/SuSE-release; echo $?)}
 
-Name:          gwyddion3
+Name:          gwyddion4
 Version:       @PACKAGE_VERSION@
 Release:       1
 Summary:       An SPM data visualization and analysis tool
@@ -60,11 +60,11 @@ BuildRequires: %{fftw3devel} >= @GWY_REQUIRED_FFTW@
 
 
 %package libs
-Summary:       Gwyddion3 libraries
+Summary:       Gwyddion4 libraries
 Group:         System Environment/Libraries
 
 %package libs-devel
-Summary:       Development files for Gwyddion3
+Summary:       Development files for Gwyddion4
 Group:         Development/Libraries
 Requires:      %{name}-libs%{?_isa} = %{version}-%{release}
 # This pulls everything else
@@ -77,12 +77,12 @@ analysis tool written with Gtk+.
 
 
 %description libs
-Gwyddion3 data processing and visualisation libraries.
+Gwyddion4 data processing and visualisation libraries.
 
 
 %description libs-devel
-Header files, libraries and tools for development of Gwyddion3 modules and/or
-Gwyddion3-based applications.  This package also contains the API docmentation.
+Header files, libraries and tools for development of Gwyddion4 modules and/or
+Gwyddion4-based applications.  This package also contains the API docmentation.
 
 
 %prep
@@ -114,22 +114,22 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 
 %files
 %defattr(644,root,root)
-%{_bindir}/gwyddion3
+%{_bindir}/gwyddion4
 %doc AUTHORS COPYING INSTALL.gwyddion NEWS README
 
 
 %files libs -f %{name}-libgwy.lang -f %{name}-libgwyui.lang -f %{name}-libgwyapp.lang
 %defattr(-,root,root)
 # For unstable releases
-%{_libdir}/libgwy3-@PACKAGE_VERSION@.so
-%{_libdir}/libgwyui3-@PACKAGE_VERSION@.so
-%{_libdir}/libgwyapp3-@PACKAGE_VERSION@.so
-#%{_libdir}/libgwy3.so.*
-#%{_libdir}/libgwyui3.so.*
-#%{_libdir}/libgwyapp3.so.*
-%{typelibdir}/Gwy3-3.0.typelib
-%{typelibdir}/GwyUI3-3.0.typelib
-%{typelibdir}/GwyApp3-3.0.typelib
+%{_libdir}/libgwy4-@PACKAGE_VERSION@.so
+%{_libdir}/libgwyui4-@PACKAGE_VERSION@.so
+%{_libdir}/libgwyapp4-@PACKAGE_VERSION@.so
+#%{_libdir}/libgwy4.so.*
+#%{_libdir}/libgwyui4.so.*
+#%{_libdir}/libgwyapp4.so.*
+%{typelibdir}/Gwy-4.0.typelib
+%{typelibdir}/GwyUI-4.0.typelib
+%{typelibdir}/GwyApp-4.0.typelib
 
 
 %files libs-devel
@@ -143,15 +143,15 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %dir %{pkgincludedir}/libgwyui
 %dir %{pkgincludedir}/libgwyapp
 %dir %{pkgincludedir}
-%{_libdir}/libgwy3.so
-%{_libdir}/libgwyui3.so
-%{_libdir}/libgwyapp3.so
-%{girdir}/Gwy3-3.0.gir
-%{girdir}/GwyUI3-3.0.gir
-%{girdir}/GwyApp3-3.0.gir
-%{pkgconfigdir}/libgwy3.pc
-%{pkgconfigdir}/libgwyui3.pc
-%{pkgconfigdir}/libgwyapp3.pc
+%{_libdir}/libgwy4.so
+%{_libdir}/libgwyui4.so
+%{_libdir}/libgwyapp4.so
+%{girdir}/Gwy-4.0.gir
+%{girdir}/GwyUI-4.0.gir
+%{girdir}/GwyApp-4.0.gir
+%{pkgconfigdir}/libgwy4.pc
+%{pkgconfigdir}/libgwyui4.pc
+%{pkgconfigdir}/libgwyapp4.pc
 %doc %{gtkdocdir}/libgwy/*
 %doc %{gtkdocdir}/libgwyui/*
 %doc %{gtkdocdir}/libgwyapp/*

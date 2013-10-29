@@ -6,8 +6,8 @@
 
 pkgconfigdatadir = $(libdir)/pkgconfig
 
-Library_ver = $(Library)$(libsuffix)-$(libsuffix).$(library_minor_version)
-Library_with_ver = $(Library)$(libsuffix)_$(libsuffix)_$(library_minor_version)
+Library_ver = $(Library)-$(libsuffix).$(library_minor_version)
+Library_with_ver = $(Library)_$(libsuffix)_$(library_minor_version)
 library_la = .libs/$(library)$(libsuffix).la
 library_decl = $(top_builddir)/docs/$(library)/$(library)-decl.txt
 library_def = $(library)$(libsuffix).def

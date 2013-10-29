@@ -226,7 +226,7 @@ for subdir in $podirs; do
                         insert-header.sin Makevars.template quot.sed \
                         remove-potcdate.sin Rules-quot
   )
-  domain=gwyddion3${subdir#po}
+  domain=gwyddion4${subdir#po}
   if test $subdir != po; then
     rm -f $subdir/Makefile.in.in
     sed -e "s#^\\(GETTEXT_PACKAGE = \\)@GETTEXT_PACKAGE@#\\1$domain#" \
@@ -246,6 +246,6 @@ echo ./configure $CONFIGURE_FLAGS "$@"
 
 # This has to be done somewhere.
 for subdir in $podirs; do
-  domain=gwyddion3${subdir#po}
+  domain=gwyddion4${subdir#po}
   make -C $subdir $domain.pot
 done

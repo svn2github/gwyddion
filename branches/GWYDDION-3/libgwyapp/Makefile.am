@@ -12,13 +12,13 @@ mkenum_name = types
 genmarshal_name = marshal
 genmarshal_prefix = _gwy_cclosure_marshal
 main_header = $(srcdir)/libgwyapp.h
-GwyApp3_3_0_gir_INCLUDES = Gtk-3.0
-GwyApp3_3_0_gir_PACKAGES = gtk+-3.0
-GwyApp3_3_0_gir_SCANNERFLAGS = \
-	--include-uninstalled=$(top_builddir)/libgwy/Gwy3-3.0.gir \
-	--include-uninstalled=$(top_builddir)/libgwyui/GwyUI3-3.0.gir \
-	--library=$(top_builddir)/libgwy/libgwy3.la \
-	--library=$(top_builddir)/libgwyui/libgwyui3.la
+GwyApp_4_0_gir_INCLUDES = Gtk-3.0
+GwyApp_4_0_gir_PACKAGES = gtk+-3.0
+GwyApp_4_0_gir_SCANNERFLAGS = \
+	--include-uninstalled=$(top_builddir)/libgwy/Gwy-4.0.gir \
+	--include-uninstalled=$(top_builddir)/libgwyui/GwyUI-4.0.gir \
+	--library=$(top_builddir)/libgwy/libgwy4.la \
+	--library=$(top_builddir)/libgwyui/libgwyui4.la
 INTROSPECTION_COMPILER_ARGS = \
 	--includedir=$(top_builddir)/libgwy \
 	--includedir=$(top_builddir)/libgwyui
@@ -41,17 +41,17 @@ EXTRA_DIST = $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers) $(private_built_headers) $(resource_files)
 MAINTAINERCLEANFILES =
-libgwyapp3_la_DEPENDENCIES =
+libgwyapp4_la_DEPENDENCIES =
 BUILT_SOURCES = $(resource_files)
 
 # lib_LTLIBRARIES must be a literal, no variables
-lib_LTLIBRARIES = libgwyapp3.la
+lib_LTLIBRARIES = libgwyapp4.la
 nodist_libgwyappinclude_HEADERS = $(public_built_headers)
 libgwyappinclude_HEADERS = $(public_headers)
 toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
-libgwyapp3_la_SOURCES = \
+libgwyapp4_la_SOURCES = \
 	module.c \
 	types.c
 
@@ -73,10 +73,10 @@ AM_CPPFLAGS = \
 # Changing ifaces     C:   R:   0
 library_so_version = 0:0:0
 
-libgwyapp3_la_LDFLAGS = \
+libgwyapp4_la_LDFLAGS = \
 	$(LIBGWYAPP_DEPS_LIBS) \
-	$(top_builddir)/libgwyui/libgwyui3.la \
-	$(top_builddir)/libgwy/libgwy3.la \
+	$(top_builddir)/libgwyui/libgwyui4.la \
+	$(top_builddir)/libgwy/libgwy4.la \
 	$(HOST_LDFLAGS) \
 	$(GWY_LIBRARY_LDFLAGS) \
 	$(version_info) \
@@ -93,7 +93,7 @@ clean-local:
 distclean-local:
 	rm -rf coverage
 
-check-marshallers: $(libgwyapp3_la_SOURCES)
-	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwyapp3_la_SOURCES)
+check-marshallers: $(libgwyapp4_la_SOURCES)
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwyapp4_la_SOURCES)
 
 .PHONY: check-marshallers

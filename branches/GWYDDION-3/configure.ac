@@ -23,14 +23,14 @@ AC_CONFIG_FILES([
   resources/gradients/Makefile
   libgwy/Makefile
   libgwy/version.h
-  libgwy/libgwy3.pc
+  libgwy/libgwy4.pc
   libgwy/tests/Makefile
   libgwy/benchmarks/Makefile
   libgwyui/Makefile
-  libgwyui/libgwyui3.pc
+  libgwyui/libgwyui4.pc
   libgwyui/tests/Makefile
   libgwyapp/Makefile
-  libgwyapp/libgwyapp3.pc
+  libgwyapp/libgwyapp4.pc
   gwyddion/Makefile
   po/Makefile.in
   po-libgwy/Makefile.in
@@ -41,7 +41,7 @@ AC_CONFIG_FILES([
   docs/libgwyui/Makefile
   docs/libgwyapp/Makefile
   data/Makefile
-  gwyddion3.spec:data/gwyddion3.spec.in
+  gwyddion4.spec:data/gwyddion4.spec.in
 ])
 AC_CONFIG_COMMANDS([check-dep-versions],
                    [chmod +x build/check-dep-versions.py])
@@ -52,7 +52,7 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
 AC_SUBST([GWY_VERSION_MINOR],[gwy_version_minor])
 AC_SUBST([GWY_VERSION_STRING],[gwy_version_string])
-AC_SUBST([PACKAGE_SUFFIX],[3])
+AC_SUBST([PACKAGE_SUFFIX],[4])
 AM_CONDITIONAL([UNSTABLE_LIBRARY_RELEASE],[true])
 
 AC_CANONICAL_HOST
@@ -127,7 +127,7 @@ fi
 
 #############################################################################
 # I18n
-GETTEXT_PACKAGE=gwyddion3
+GETTEXT_PACKAGE=gwyddion4
 AM_GNU_GETTEXT([external])
 m4_define([gwy_required_gettext],[0.18])
 AC_SUBST([GWY_REQUIRED_GETTEXT],[gwy_required_gettext])

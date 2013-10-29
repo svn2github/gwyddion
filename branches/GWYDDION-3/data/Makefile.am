@@ -2,16 +2,16 @@
 # $Id$
 
 MAINTAINERCLEANFILES = \
-	gwyddion3.vim
+	gwyddion4.vim
 
 EXTRA_DIST = \
-	gwyddion3-vim-cfg.py \
-	gwyddion3.vim \
-	gwyddion3.spec.in
+	gwyddion4-vim-cfg.py \
+	gwyddion4.vim \
+	gwyddion4.spec.in
 
 # Cannot make dists without gtk-doc anyway.  So no problem here.
 if ENABLE_GTK_DOC
-gtkdoc_data = gwyddion3.vim
+gtkdoc_data = gwyddion4.vim
 else
 gtkdoc_data =
 endif
@@ -19,13 +19,13 @@ endif
 noinst_DATA = $(gtkdoc_data)
 
 vim_syn_gen = $(top_srcdir)/build/vim-syn-gen.py
-gwyddion3_vim_cfg = $(srcdir)/gwyddion3-vim-cfg.py
-gwyddion3_vim_sources = \
+gwyddion4_vim_cfg = $(srcdir)/gwyddion4-vim-cfg.py
+gwyddion4_vim_sources = \
 	$(top_builddir)/docs/libgwy/libgwy-decl.txt \
 	$(top_builddir)/docs/libgwyui/libgwyui-decl.txt
 
-gwyddion3.vim: $(gwyddion3_vim_sources) $(gwyddion3_vim_cfg) $(vim_syn_gen)
-	$(AM_V_GEN)$(PYTHON) $(vim_syn_gen) $(gwyddion3_vim_cfg) gwyddion3.vim
+gwyddion4.vim: $(gwyddion4_vim_sources) $(gwyddion4_vim_cfg) $(vim_syn_gen)
+	$(AM_V_GEN)$(PYTHON) $(vim_syn_gen) $(gwyddion4_vim_cfg) gwyddion4.vim
 
 # VPATH fix
 distclean-local:

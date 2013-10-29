@@ -43,7 +43,7 @@ EXTRA_DIST += README.images
 # Specialised introspection programs
 AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
 AM_CFLAGS =  $(LIBGWYUI_DEPS_CFLAGS) $(CAIRO_XLIB_CFLAGS) $(HOST_CFLAGS)
-AM_LDFLAGS = $(LIBGWYUI_DEPS_LIBS) $(CAIRO_XLIB_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy3.la  $(top_builddir)/libgwyui/libgwyui3.la
+AM_LDFLAGS = $(LIBGWYUI_DEPS_LIBS) $(CAIRO_XLIB_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy4.la  $(top_builddir)/libgwyui/libgwyui4.la
 
 if HAVE_CAIRO_XLIB
 render_widgets = render-widgets
