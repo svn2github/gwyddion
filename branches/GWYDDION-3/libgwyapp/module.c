@@ -22,8 +22,8 @@
 #include <glib/gi18n-lib.h>
 #include <gio/gio.h>
 #include "libgwy/macros.h"
+#include "libgwy/main.h"
 #include "libgwy/strfuncs.h"
-#include "libgwy/int-set.h"
 #include "libgwy/object-utils.h"
 #include "libgwyapp/module.h"
 
@@ -100,7 +100,7 @@ static void          failed_module_info_free     (gpointer p);
 static GHashTable*   ensure_type_table           (void);
 static void          type_info_free              (gpointer p);
 
-static guint module_priority = 0;
+static gulong module_priority = 0;
 
 /**
  * gwy_module_error_quark:
@@ -133,12 +133,24 @@ gwy_module_error_quark(void)
  * The module search paths are given by the compiled-in path, installation
  * path, environment variables and user home directory.
  *
- * Returns: The number of registered modules.
+ * Returns: The number of loaded modules and module libraries.  Since the
+ *          failure to load a single module is not fatal, it is possible that
+ *          non-zero count is returned and simultaneously some errors are
+ *          logged to @errorlist.
  **/
 guint
 gwy_register_modules(GwyErrorList **errorlist)
 {
-    return 0;
+    gchar **pathlist = gwy_library_search_path("modules");
+    guint count = 0;
+    for (guint i = 0; pathlist[i]; i++) {
+        if (!g_file_test(pathlist[i], G_FILE_TEST_IS_DIR))
+            continue;
+
+        count += gwy_module_load_directory(pathlist[i], errorlist);
+    }
+    gwy_module_register_types(errorlist);
+    return count;
 }
 
 /**
