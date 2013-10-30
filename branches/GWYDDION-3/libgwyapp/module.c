@@ -422,11 +422,11 @@ gwy_module_register_types(GwyErrorList **errorlist)
         for (guint j = 0; j < module_info->ntypes; j++) {
             GError *error = NULL;
             if (register_one_type(module_info->types + j,
-                                   modinfo->qname,
-                                   &error)) {
+                                  modinfo->qname,
+                                  &error)) {
                 count++;
             }
-            else {
+            if (error) {
                 // TODO: log the error somewhere
                 gwy_error_list_propagate(errorlist, error);
             }
@@ -981,6 +981,16 @@ register_one_type(const GwyModuleProvidedType *mptype,
                       "NULL."),
                     g_quark_to_string(module_qname), mptype->name);
         return FALSE;
+    }
+
+    // They lied to us!  Treat it as non-fatal but stil feel deceived.
+    if (!gwy_strequal(g_type_name(type), mptype->name)) {
+        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_TYPE_NAME,
+                    // TRANSLATORS: Error message.
+                    _("Module ‘%s’ declared to provide the type ‘%s’, but "
+                      "it registered the type ‘%s’."),
+                    g_quark_to_string(module_qname), mptype->name,
+                    g_type_name(type));
     }
 
     typeinfo = g_slice_new(TypeInfo);
