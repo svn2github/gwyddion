@@ -46,6 +46,21 @@ static const GwyModuleInfo module_info = {
 
 GWY_DEFINE_MODULE(&module_info, test);
 
+G_MODULE_EXPORT const gchar*
+g_module_check_init(GModule *module)
+{
+    g_printerr("test:g_module_check_init called (%s).\n",
+               g_module_name(module));
+    return NULL;
+}
+
+G_MODULE_EXPORT void
+g_module_unload(GModule *module)
+{
+    g_printerr("test:g_module_unload called (%s).\n",
+               g_module_name(module));
+}
+
 static void
 gwy_ext_test_init(G_GNUC_UNUSED GwyExtTest *test)
 {
