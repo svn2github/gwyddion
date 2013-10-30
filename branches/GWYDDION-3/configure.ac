@@ -32,6 +32,7 @@ AC_CONFIG_FILES([
   libgwyapp/Makefile
   libgwyapp/libgwyapp4.pc
   gwyddion/Makefile
+  modules/Makefile
   po/Makefile.in
   po-libgwy/Makefile.in
   po-libgwyui/Makefile.in
@@ -76,13 +77,18 @@ AC_SUBST([GWY_REQUIRED_PKGCONFIG],[gwy_required_pkgconfig])
 PKG_PROG_PKG_CONFIG([gwy_required_pkgconfig])
 
 #############################################################################
+# Simple linking of modules with resolution through the executable.
+AM_CONDITIONAL([LINK_MODULE_DEPENDENCIES],
+               [test "x$allow_undefined_flag" = xunsupported])
+
+#############################################################################
 # Win32.
 AC_MSG_CHECKING([for native Win32])
 case "$host_os" in
   mingw*)
     os_win32=yes
     HOST_CFLAGS="-mms-bitfields"
-    HOST_LDFLAGS="-mwindows"
+    HOST_LDFLAGS="-mwindows -no-undefined"
     ;;
   *)
     os_win32=no

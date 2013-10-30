@@ -8,6 +8,7 @@ SUBDIRS = \
 	libgwyui \
 	libgwyapp \
 	gwyddion \
+	modules \
 	po \
 	po-libgwy \
 	po-libgwyui \

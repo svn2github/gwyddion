@@ -27,7 +27,7 @@ endif
 pkgconfigdata_DATA = $(library)$(libsuffix).pc
 
 if OS_WIN32
-library_host_ldflags = -no-undefined -export-symbols $(library)$(libsuffix).def
+library_host_ldflags = -export-symbols $(library)$(libsuffix).def
 endif
 
 if UNSTABLE_LIBRARY_RELEASE
