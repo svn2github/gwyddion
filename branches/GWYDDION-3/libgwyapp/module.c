@@ -62,9 +62,10 @@ static guint         queue_opened_module_library (GModule *mod,
                                                   GwyErrorList **errorlist);
 static guint         queue_one_module_or_library (const gchar *filename,
                                                   GwyErrorList **errorlist);
-static gconstpointer open_module_file            (const gchar *filename,
+static GModule*      open_module_file            (const gchar *filename,
+                                                  GError **error);
+static gconstpointer find_module_info            (GModule *module,
                                                   const gchar *module_info_symbol,
-                                                  GModule **mod,
                                                   GError **error);
 static void          close_module                (GModule *mod,
                                                   const gchar *filename);
@@ -452,12 +453,13 @@ gwy_module_register_types(GwyErrorList **errorlist)
 }
 
 // For a module file.
+// Thus *must* get non-NULL error.
 static GQuark
 queue_one_module(const gchar *filename,
                  GError **error)
 {
-    GError *err = NULL;
     gchar *modname;
+    GError *err = NULL;
 
     if (!(modname = module_name_from_path(filename, &err))) {
         log_module_failure(err, 0, filename, FALSE);
@@ -471,20 +473,21 @@ queue_one_module(const gchar *filename,
     GQuark qname = g_quark_from_string(modname);
     g_free(modname);
 
-    gchar *symbol = g_strconcat(G_STRINGIFY(GWY_MODULE_INFO_SYMBOL), "_",
-                                g_quark_to_string(qname), NULL);
-    GModule *mod = NULL;
-    const GwyModuleInfo *module_info = open_module_file(filename, symbol,
-                                                        &mod, error);
-    if (!module_info) {
-        g_free(symbol);
+    GModule *mod = open_module_file(filename, &err);
+    if (!mod) {
+        log_module_failure(err, qname, filename, FALSE);
+        g_propagate_error(error, err);
         return 0;
     }
 
-    if (!queue_opened_module(mod, module_info, qname, &err)) {
+    gchar *symbol = g_strconcat(G_STRINGIFY(GWY_MODULE_INFO_SYMBOL), "_",
+                                g_quark_to_string(qname), NULL);
+    const GwyModuleInfo *module_info = find_module_info(mod, symbol, &err);
+    g_free(symbol);
+
+    if (!module_info || !queue_opened_module(mod, module_info, qname, &err)) {
         log_module_failure(err, qname, filename, FALSE);
         g_propagate_error(error, err);
-        g_free(symbol);
         close_module(mod, filename);
         return 0;
     }
@@ -519,14 +522,21 @@ static guint
 queue_module_library(const gchar *filename,
                      GwyErrorList **errorlist)
 {
-    const gchar *symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
-    GModule *mod = NULL;
     GError *error = NULL;
-    const GwyModuleLibraryRecord *records = open_module_file(filename, symbol,
-                                                             &mod, &error);
+    GModule *mod = open_module_file(filename, &error);
+    if (!mod) {
+        log_module_failure(error, 0, filename, TRUE);
+        gwy_error_list_propagate(errorlist, error);
+        return 0;
+    }
+
+    const gchar *symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
+    const GwyModuleLibraryRecord *records = find_module_info(mod, symbol,
+                                                             &error);
     if (!records) {
         log_module_failure(error, 0, filename, TRUE);
         gwy_error_list_propagate(errorlist, error);
+        close_module(mod, filename);
         return 0;
     }
 
@@ -591,63 +601,78 @@ static guint
 queue_one_module_or_library(const gchar *filename,
                             GwyErrorList **errorlist)
 {
-    const gchar *library_symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
-    GModule *mod = NULL;
     GError *error = NULL;
-
-    // First try opening the file as a module library.
-    const GwyModuleLibraryRecord *records = open_module_file(filename,
-                                                             library_symbol,
-                                                             &mod, &error);
-    if (records)
-        return queue_opened_module_library(mod, records, errorlist);
-
-    if (error->code == GWY_MODULE_ERROR_OPEN) {
+    GModule *mod = open_module_file(filename, &error);
+    if (!mod) {
         log_module_failure(error, 0, filename, TRUE);
         gwy_error_list_propagate(errorlist, error);
         return 0;
     }
 
-    g_assert(error->code == GWY_MODULE_ERROR_OPEN);
-    g_clear_error(&error);
+    // First try opening the file as a module library.  Ignore the lookup error.
+    const gchar *library_symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
+    const GwyModuleLibraryRecord *records = find_module_info(mod,
+                                                             library_symbol,
+                                                             NULL);
+    if (records)
+        return queue_opened_module_library(mod, records, errorlist);
 
     // Then as a single module.
-    GQuark qname = queue_one_module(filename, &error);
-    if (!qname) {
+    gchar *modname;
+    if (!(modname = module_name_from_path(filename, &error))) {
+        log_module_failure(error, 0, filename, FALSE);
         gwy_error_list_propagate(errorlist, error);
+        close_module(mod, filename);
+        return 0;
+    }
+
+    GQuark qname = g_quark_from_string(modname);
+    g_free(modname);
+
+    gchar *symbol = g_strconcat(G_STRINGIFY(GWY_MODULE_INFO_SYMBOL), "_",
+                                g_quark_to_string(qname), NULL);
+    const GwyModuleInfo *module_info = find_module_info(mod, symbol, &error);
+    g_free(symbol);
+
+    if (!module_info || !queue_opened_module(mod, module_info, qname, &error)) {
+        log_module_failure(error, qname, filename, FALSE);
+        gwy_error_list_propagate(errorlist, error);
+        close_module(mod, filename);
         return 0;
     }
 
     return 1;
 }
 
-static gconstpointer
+static GModule*
 open_module_file(const gchar *filename,
-                 const gchar *module_info_symbol,
-                 GModule **mod,
                  GError **error)
 {
-    *mod = g_module_open(filename, G_MODULE_BIND_LAZY);
-    if (!*mod) {
-        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_OPEN,
-                    // TRANSLATORS: Error message.
-                    "Cannot open module ‘%s’: %s",
-                    filename, g_module_error());
-        return NULL;
-    }
+    GModule *mod = g_module_open(filename, G_MODULE_BIND_LAZY);
+    if (mod)
+        return mod;
 
+    g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_OPEN,
+                // TRANSLATORS: Error message.
+                "Cannot open module ‘%s’: %s",
+                filename, g_module_error());
+    return NULL;
+}
+
+static gconstpointer
+find_module_info(GModule *mod,
+                 const gchar *module_info_symbol,
+                 GError **error)
+{
     gpointer info;
-    if (!g_module_symbol(*mod, module_info_symbol, &info) || !info) {
-        g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_INFO,
-                    // TRANSLATORS: Error message.
-                    _("Cannot find module info ‘%s’ in ‘%s’."),
-                    module_info_symbol, filename);
-        close_module(*mod, filename);
-        *mod = NULL;
-        return NULL;
-    }
+    if (g_module_symbol(mod, module_info_symbol, &info) && info)
+        return info;
 
-    return info;
+    g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_INFO,
+                // TRANSLATORS: Error message.
+                _("Cannot find module info ‘%s’ in ‘%s’."),
+                module_info_symbol, g_module_name(mod));
+    return NULL;
 }
 
 static void
