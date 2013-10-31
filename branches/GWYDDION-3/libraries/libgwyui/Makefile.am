@@ -128,10 +128,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/libraries \
 	$(LIBGWYUI_COMPAT_CPPFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)-libgwyui\" \
-	-DG_LOG_DOMAIN=\"Gwy\" \
-	-DGWY_LIBDIR=\"$(pkglibdir)\" \
-	-DGWY_DATADIR=\"$(pkgdatadir)\" \
-	-DGWY_LOCALE_DIR=\"$(localedir)\"
+	-DG_LOG_DOMAIN=\"Gwy\"
 
 # In following order do:
 # Any code change     C:   R++: A
