@@ -76,6 +76,7 @@ static gchar *libdir = NULL;
 static gchar *datadir = NULL;
 static gchar *localedir = NULL;
 static gchar *userdir = NULL;
+static const gchar *libdirname = "lib";  // lib32 or lib64 or whatever.
 
 #ifdef G_OS_WIN32
 static HMODULE libgwy_dll = NULL;
@@ -344,20 +345,29 @@ try_remove_trailing_directory(gchar *path, guint len,
     return FALSE;
 }
 
-/* FIXME: We must keep the suffix somewhere if it's lib64 or lib32 for
- * module path reconstruction. */
 static void
 fix_module_directory(gchar *path)
 {
+    static const gchar *libsubdirs[] = {
+        G_DIR_SEPARATOR_S "bin",
+        G_DIR_SEPARATOR_S "lib",
+        G_DIR_SEPARATOR_S "lib64",
+        G_DIR_SEPARATOR_S "lib32",
+        G_DIR_SEPARATOR_S "lib/64",
+    };
+
     if (!path)
         return;
 
     guint len = strlen(path);
-    if (try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "bin")
-        || try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "lib")
-        || try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "lib64")
-        || try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "lib32"))
-        return;
+    for (guint i = 0; i < G_N_ELEMENTS(libsubdirs); i++) {
+        if (try_remove_trailing_directory(path, len, libsubdirs[i])) {
+            // "bin" is not a lib directory.
+            if (i)
+                libdirname = libsubdirs[i];
+            return;
+        }
+    }
 
     return;
 }
@@ -385,6 +395,8 @@ libdir_seems_good(const gchar *path)
 
     /* FIXME FIXME: If libgwy is installed separately from the application, the
      * "modules" subdirectory might not exist! */
+    // Checking for libgwy4.??? is difficult because it depends on getting
+    // right the ??? part.
     /*
     gchar *subdir = g_build_filename(path, "modules", NULL);
     gboolean ok = directory_seems_good(subdir, R_OK | X_OK);
@@ -441,10 +453,10 @@ check_base_dir(const gchar *basedir,
                gchar **pdatadir,
                gchar **plocaledir)
 {
-    /* TODO: Multilib support: (1) from fix_module_directory()
-     * (2) from AC_LIB_PREPARE_MULTILIB result */
+    /* TODO: Multilib support: (1) from fix_module_directory() -- done
+     * (2) from AC_LIB_PREPARE_MULTILIB result, variable acl_libdirstem */
     if (plibdir) {
-        gchar *path = g_build_filename(basedir, "lib", PACKAGEDIR, NULL);
+        gchar *path = g_build_filename(basedir, libdirname, PACKAGEDIR, NULL);
         if (libdir_seems_good(path))
             *plibdir = path;
         else
@@ -480,7 +492,7 @@ find_self_impl(G_GNUC_UNUSED gpointer arg)
     const gchar *dir;
     guint i;
 
-    /* Explicite variables */
+    // Explicit variables.
     if ((dir = g_getenv("GWYDDION_LIBDIR")) && libdir_seems_good(dir))
         libdir = g_strdup(dir);
     if ((dir = g_getenv("GWYDDION_DATADIR")) && datadir_seems_good(dir))
@@ -490,7 +502,7 @@ find_self_impl(G_GNUC_UNUSED gpointer arg)
     if (libdir && datadir && localedir)
         return GUINT_TO_POINTER(TRUE);
 
-    /* Operating system dependent location mechanisms */
+    // Operating system dependent location mechanisms.
     for (i = 0; i < G_N_ELEMENTS(get_module_directory); i++) {
         if ((basedir = get_module_directory[i]())) {
             fix_module_directory(basedir);
@@ -504,7 +516,7 @@ find_self_impl(G_GNUC_UNUSED gpointer arg)
             return GUINT_TO_POINTER(TRUE);
     }
 
-    /* Compile-time defaults */
+    // Compile-time defaults.
     if ((dir = GWY_LIBDIR) && libdir_seems_good(dir))
         libdir = g_strdup(dir);
     if ((dir = GWY_DATADIR) && datadir_seems_good(dir))
