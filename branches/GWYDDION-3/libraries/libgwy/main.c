@@ -66,10 +66,10 @@
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
 
 #ifdef G_OS_WIN32
-#define PACKAGEDIR "Gwyddion3"
+#define PACKAGEDIR "Gwyddion4"
 #endif
 #ifdef G_OS_UNIX
-#define PACKAGEDIR "gwyddion3"
+#define PACKAGEDIR "gwyddion4"
 #endif
 
 static gchar *libdir = NULL;
@@ -546,8 +546,8 @@ find_self(void)
  *
  * This is where modules and other architecture-dependent files reside.
  * For instance, for a standard Unix installation and %NULL @subdir the return
- * value would be "/usr/local/lib64/gwyddion3".  On MS Windows, it can be
- * something like "C:\Program Files\Gwyddion3\lib\gwyddion3".
+ * value would be "/usr/local/lib64/gwyddion4".  On MS Windows, it can be
+ * something like "C:\Program Files\Gwyddion4\lib\gwyddion4".
  *
  * The highest precedence for determinig this directory has the environment
  * variable <envar>GWYDDION_LIBDIR</envar>, the libgwy and Gwyddion
@@ -577,8 +577,8 @@ gwy_library_directory(const gchar *subdir)
  * This is where pixmaps, false color gradients and other
  * architecture-independent files reside.  For instance, for a standard Unix
  * installation and %NULL @subdir the return value would be
- * "/usr/local/share/gwyddion3".  On MS Windows, it can be something like
- * "C:\Program Files\Gwyddion3\share\gwyddion3".
+ * "/usr/local/share/gwyddion4".  On MS Windows, it can be something like
+ * "C:\Program Files\Gwyddion4\share\gwyddion4".
  *
  * The highest precedence for determinig this directory has the environment
  * variable <envar>GWYDDION_DATADIR</envar>, the libgwy and Gwyddion
@@ -695,8 +695,8 @@ find_user_dir(G_GNUC_UNUSED gpointer arg)
  *
  * This is where the user configuration and resources reside.  For instance,
  * for a typical Unix user yeti and %NULL @subdir the return value would be
- * "/home/yeti/.gwyddion3".  On MS Windows, it can be something like
- * "C:\Documents and Settings\yeti\Application Data\Gwyddion3".  Even though it
+ * "/home/yeti/.gwyddion4".  On MS Windows, it can be something like
+ * "C:\Documents and Settings\yeti\Application Data\Gwyddion4".  Even though it
  * is unlikely that Yeti has an MS Windows account.
  *
  * The highest precedence for determinig this directory has the environment
@@ -769,8 +769,8 @@ add_from_list(GPtrArray *paths,
  * The list should be searched in given order.
  *
  * On a typical Unix system the list might look for instance
- * "/home/yeti/.gwyddion3", "/usr/local/lib64/gwyddion3",
- * "/usr/lib64/gwyddion3".  On MS Windows, it will be probably quite short.
+ * "/home/yeti/.gwyddion4", "/usr/local/lib64/gwyddion4",
+ * "/usr/lib64/gwyddion4".  On MS Windows, it will be probably quite short.
  *
  * Returns: (transfer full):
  *          %NULL-terminated list of directories, to be freed with
@@ -798,8 +798,8 @@ gwy_library_search_path(const gchar *subdir)
  * The list should be searched in given order.
  *
  * On a typical Unix system the list might look for instance
- * "/home/yeti/.gwyddion3", "/usr/local/share/gwyddion3",
- * "/usr/share/gwyddion3".  On MS Windows, it will be probably quite short.
+ * "/home/yeti/.gwyddion4", "/usr/local/share/gwyddion4",
+ * "/usr/share/gwyddion4".  On MS Windows, it will be probably quite short.
  *
  * Returns: (transfer full):
  *          %NULL-terminated list of directories, to be freed with
