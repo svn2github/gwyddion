@@ -32,7 +32,18 @@ main(int argc, char *argv[])
 
     gwy_resources_load(NULL);
     gwy_register_stock_items();
-    gwy_register_modules(NULL);
+
+    GwyErrorList *errorlist = NULL;
+    gwy_register_modules(&errorlist);
+    for (GwyErrorList *e = errorlist; e; e = g_slist_next(e)) {
+        GError *err = (GError*)e->data;
+        g_printerr("(%u:%u) %s\n", err->domain, err->code, err->message);
+    }
+    gwy_error_list_clear(&errorlist);
+
+    GType type = g_type_from_name("GwyExtTest");
+    g_printerr("GwyExtTest: %u\n", (guint)type);
+    g_type_class_ref(type);
 
     return 0;
 }
