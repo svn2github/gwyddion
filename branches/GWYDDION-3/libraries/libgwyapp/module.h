@@ -34,21 +34,19 @@ G_BEGIN_DECLS
 #define __GWY_MODULE_EXTERN_C /* */
 #endif
 
-#define GWY_MODULE_INFO_SYMBOL gwy_module_info
-
 #ifndef GWY_MODULE_BUILDING_LIBRARY
 #define GWY_DEFINE_MODULE(mod_info,name) \
     __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleInfo* \
-    GWY_MODULE_INFO_SYMBOL##_##name = mod_info
+    gwy_module_info_##name = mod_info
 #else
 #define GWY_DEFINE_MODULE(mod_info,name) \
     __GWY_MODULE_EXTERN_C G_GNUC_INTERNAL const GwyModuleInfo* \
-    GWY_MODULE_INFO_SYMBOL##_##name = mod_info
+    gwy_module_info_##name = mod_info
 #endif
 
 #define GWY_DEFINE_MODULE_LIBRARY(mod_info_list) \
     __GWY_MODULE_EXTERN_C G_MODULE_EXPORT const GwyModuleLibraryRecord* \
-    GWY_MODULE_INFO_SYMBOL = mod_info_list
+    gwy_module_info = mod_info_list
 
 #define GWY_MODULE_INFO_SENTINEL \
     ((GwyModuleInfo){ 0, 0, NULL, NULL, NULL, NULL, NULL, NULL })
