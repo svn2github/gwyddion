@@ -70,7 +70,7 @@ typedef enum {
     GWY_MODULE_ERROR_GET_TYPE,
 } GwyModuleError;
 
-typedef GType (*GwyGetTypeFunc)(void);
+typedef GType (*GwyGetTypeFunc)(const gchar *name);
 
 typedef struct {
     const gchar *name;

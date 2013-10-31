@@ -30,7 +30,7 @@ typedef struct {
 G_DEFINE_TYPE(GwyExtTest, gwy_ext_test, G_TYPE_OBJECT);
 
 static const GwyModuleProvidedType module_types[] = {
-    { "GwyExtTestType", gwy_ext_test_get_type },
+    { "GwyExtTestType", (GwyGetTypeFunc)&gwy_ext_test_get_type },
 };
 
 static const GwyModuleInfo module_info = {

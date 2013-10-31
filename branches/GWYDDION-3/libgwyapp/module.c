@@ -973,7 +973,7 @@ register_one_type(const GwyModuleProvidedType *mptype,
         return FALSE;
     }
 
-    GType type = mptype->get_type();
+    GType type = mptype->get_type(mptype->name);
     if (!type) {
         g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_GET_TYPE,
                     // TRANSLATORS: Error message.
@@ -1261,11 +1261,12 @@ type_info_free(gpointer p)
 
 /**
  * GwyGetTypeFunc:
+ * @name: Type name.
  *
  * Type of get-type function for extension types.
  *
- * The function signature is the same as for all other functions providing a
- * #GType within GLib.
+ * The function must provide the #GType of the same name as passed as the
+ * argument, or return zero on failure (which should not happen, in general).
  *
  * Returns: The type.
  **/
