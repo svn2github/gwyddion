@@ -1,6 +1,6 @@
 # $Id$
 
-moduledir = $(pkglibdir)/modules
+moduledir = $(pkglibdir)$(PACKAGE_SUFFIX)/modules
 
 module_LTLIBRARIES = \
 	test.la
