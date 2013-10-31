@@ -212,9 +212,9 @@ AM_CPPFLAGS = \
 	$(LIBGWY_COMPAT_CPPFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)-libgwy\" \
 	-DG_LOG_DOMAIN=\"Gwy\" \
-	-DGWY_LIBDIR=\"$(pkglibdir)\" \
-	-DGWY_DATADIR=\"$(pkgdatadir)\" \
-	-DGWY_LOCALE_DIR=\"$(localedir)\"
+	-DGWY_LIBDIR=\"$(pkglibdir)$(PACKAGE_SUFFIX)\" \
+	-DGWY_DATADIR=\"$(pkgdatadir)$(PACKAGE_SUFFIX)\" \
+	-DGWY_LOCALE_DIR=\"$(localedir)$(PACKAGE_SUFFIX)\"
 
 # In following order do:
 # Any code change     C:   R++: A
