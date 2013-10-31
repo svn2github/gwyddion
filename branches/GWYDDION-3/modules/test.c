@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libgwyapp/libgwyapp.h"
+#include <libgwyapp.h>
 
 typedef struct {
     GObject gobject;

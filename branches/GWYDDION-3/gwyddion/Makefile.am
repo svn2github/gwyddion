@@ -8,7 +8,8 @@ gwyddion4_SOURCES = \
 AM_CFLAGS = $(LIBGWYAPP_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
-	-I$(top_srcdir) \
+	-I$(top_builddir)/libraries \
+	-I$(top_srcdir)/libraries \
 	$(LIBGWYAPP_COMPAT_CPPFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DG_LOG_DOMAIN=\"Gwy\"
@@ -16,9 +17,9 @@ AM_CPPFLAGS = \
 AM_LDFLAGS = \
 	$(LIBGWYAPP_DEPS_LIBS) \
 	$(HOST_LDFLAGS) \
-	$(top_builddir)/libgwy/libgwy4.la \
-	$(top_builddir)/libgwyui/libgwyui4.la \
-	$(top_builddir)/libgwyapp/libgwyapp4.la
+	$(top_builddir)/libraries/libgwy/libgwy4.la \
+	$(top_builddir)/libraries/libgwyui/libgwyui4.la \
+	$(top_builddir)/libraries/libgwyapp/libgwyapp4.la
 
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*

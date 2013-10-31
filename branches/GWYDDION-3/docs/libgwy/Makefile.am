@@ -13,7 +13,7 @@ ADDOBJECTS_OPTIONS = --standard-files=types
 
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html
-FIXXREF_OPTIONS = --extra-dir=../libgwyui/html
+FIXXREF_OPTIONS = --extra-dir=../libgwyui/html --extra-dir=../libgwyapp/html
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -39,9 +39,12 @@ EXTRA_DIST += \
 	$(srcdir)/images/field-copy-congruent.svg
 
 # Specialised introspection programs
-AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_builddir)/libraries -I$(top_srcdir)/libraries
 AM_CFLAGS =  $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS)
-AM_LDFLAGS = $(LIBGWY_DEPS_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy4.la
+AM_LDFLAGS = \
+	$(LIBGWY_DEPS_LIBS) \
+	$(HOST_LDFLAGS) \
+	$(top_builddir)/libraries/libgwy/libgwy4.la
 CLEANFILES += builtin-fit-func.xml builtin-grain-value.xml
 
 noinst_PROGRAMS = fit-funcs grain-values

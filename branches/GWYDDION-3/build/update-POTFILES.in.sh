@@ -10,9 +10,9 @@ subdirs="po po-libgwy po-libgwyui po-libgwyapp"
 # PO-DIRECTORY:SOURCE-CODE-DIRECTORY
 # We do not have any translatable content for the main domain.
 POTFILES_map="
-po-libgwy:libgwy
-po-libgwyui:libgwyui
-po-libgwyapp:libgwyapp
+po-libgwy:libraries/libgwy
+po-libgwyui:libraries/libgwyui
+po-libgwyapp:libraries/libgwyapp
 "
 
 # Files to ignore everywhere
@@ -45,7 +45,7 @@ done
 for m in $POTFILES_map; do
   podir=${m%:*}
   srcdir=${m#*:}
-  files="$(find $srcdir -name \*.\[ch\] \
+  files="$(find $srcdir -maxdepth 1 -name \*.\[ch\] \
            | xargs egrep -l '\<(_|Q_|N_|C_|NC_|[a-z_]{,5}gettext)\(' \
            | sort)"
   for subdir in $subdirs; do

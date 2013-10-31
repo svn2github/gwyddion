@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "libgwy/libgwy.h"
+#include <libgwy.h>
 
 #define id "libgwy-builtin-grain-value"
 #define title "Builtin grain values"

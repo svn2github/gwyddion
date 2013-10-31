@@ -18,9 +18,7 @@
  */
 
 #include <cairo/cairo-xlib.h>
-#include <gtk/gtk.h>
-#include <libgwy/libgwy.h>
-#include <libgwyui/libgwyui.h>
+#include <libgwyui.h>
 
 #define SMALL_WIDTH  240
 #define SMALL_HEIGHT 75

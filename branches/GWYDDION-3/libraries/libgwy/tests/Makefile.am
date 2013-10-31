@@ -70,8 +70,15 @@ test-list.c: test-list.txt
 	$(AM_V_GEN) $(expand_test_list) C testlibgwy <test-list.txt >test-list.c
 
 AM_CFLAGS = $(LIBGWY_DEPS_CFLAGS) $(VALGRIND_CFLAGS) $(GWY_CFLAGS)
-AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir) $(LIBGWY_COMPAT_CPPFLAGS)
-AM_LDFLAGS = ../libgwy4.la $(HOST_LDFLAGS) $(LIBGWY_DEPS_LIBS)
+AM_CPPFLAGS = \
+	-I$(top_builddir) \
+	-I$(top_builddir)/libraries \
+	-I$(top_srcdir)/libraries \
+	$(LIBGWY_COMPAT_CPPFLAGS)
+AM_LDFLAGS = \
+	../libgwy4.la \
+	$(HOST_LDFLAGS) \
+	$(LIBGWY_DEPS_LIBS)
 
 # The tests are run in the parent directory
 test:

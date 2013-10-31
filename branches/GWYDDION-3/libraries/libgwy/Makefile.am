@@ -6,12 +6,10 @@ library = libgwy
 Library = Gwy
 library_minor_version = 0
 libsuffix = $(PACKAGE_SUFFIX)
-toplevelincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 test_program = ./tests/testlibgwy
 test_default_suppressions = libgwy-default.supp
 mkenum_name = types
-main_header = $(srcdir)/libgwy.h
 Gwy_4_0_gir_INCLUDES = Gio-2.0
 Gwy_4_0_gir_PACKAGES = gio-2.0
 
@@ -122,7 +120,6 @@ BUILT_SOURCES =
 lib_LTLIBRARIES = libgwy4.la
 nodist_libgwyinclude_HEADERS = $(public_built_headers)
 libgwyinclude_HEADERS = $(public_headers)
-toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwy4_la_SOURCES = \
@@ -210,7 +207,8 @@ libgwy4_la_SOURCES = \
 AM_CFLAGS = $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
-	-I$(top_srcdir) \
+	-I$(top_builddir)/libraries \
+	-I$(top_srcdir)/libraries \
 	$(LIBGWY_COMPAT_CPPFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)-libgwy\" \
 	-DG_LOG_DOMAIN=\"Gwy\" \

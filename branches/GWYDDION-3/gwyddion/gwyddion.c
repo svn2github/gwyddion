@@ -1,8 +1,5 @@
 #include <stdlib.h>
-#include <gtk/gtk.h>
-#include "libgwy/libgwy.h"
-#include "libgwyui/libgwyui.h"
-#include "libgwyapp/libgwyapp.h"
+#include <libgwyapp.h>
 
 G_GNUC_NORETURN
 static gboolean

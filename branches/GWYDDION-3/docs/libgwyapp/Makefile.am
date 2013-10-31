@@ -36,7 +36,12 @@ include $(top_srcdir)/build/gwy-doc.make
 #EXTRA_DIST +=
 
 # Specialised introspection programs
-AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_builddir)/libraries -I$(top_srcdir)/libraries
 AM_CFLAGS =  $(LIBGWYAPP_DEPS_CFLAGS) $(HOST_CFLAGS)
-AM_LDFLAGS = $(LIBGWYAPP_DEPS_LIBS) $(HOST_LDFLAGS) $(top_builddir)/libgwy/libgwy4.la  $(top_builddir)/libgwyui/libgwyui4.la $(top_builddir)/libgwyapp/libgwyapp4.la
+AM_LDFLAGS = \
+	$(LIBGWYAPP_DEPS_LIBS) \
+	$(HOST_LDFLAGS) \
+	$(top_builddir)/libraries/libgwy/libgwy4.la \
+	$(top_builddir)/libraries/libgwyui/libgwyui4.la \
+	$(top_builddir)/libraries/libgwyapp/libgwyapp4.la
 

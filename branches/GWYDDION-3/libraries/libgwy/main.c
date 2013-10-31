@@ -60,7 +60,7 @@
 #define _SC_NPROC_ONLN _SC_NPROCESSORS_ONLN
 #endif
 
-#include "libgwy/libgwy.h"
+#include "libgwy.h"
 #include "libgwy/field-internal.h"
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);

@@ -6,21 +6,19 @@ library = libgwyui
 Library = GwyUI
 library_minor_version = 0
 libsuffix = $(PACKAGE_SUFFIX)
-toplevelincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)
 libgwyuiincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 #test_program = ./tests/testlibgwyui
 #test_default_suppressions = libgwyui-default.supp
 mkenum_name = types
 genmarshal_name = marshal
 genmarshal_prefix = _gwy_cclosure_marshal
-main_header = $(srcdir)/libgwyui.h
 GwyUI_4_0_gir_INCLUDES = Gtk-3.0
 GwyUI_4_0_gir_PACKAGES = gtk+-3.0
 GwyUI_4_0_gir_SCANNERFLAGS = \
-	--include-uninstalled=$(top_builddir)/libgwy/Gwy-4.0.gir \
-	--library=$(top_builddir)/libgwy/libgwy4.la
+	--include-uninstalled=$(top_builddir)/libraries/libgwy/Gwy-4.0.gir \
+	--library=$(top_builddir)/libraries/libgwy/libgwy4.la
 INTROSPECTION_COMPILER_ARGS = \
-	--includedir=$(top_builddir)/libgwy
+	--includedir=$(top_builddir)/libraries/libgwy
 
 public_headers = \
 	$(srcdir)/adjust-bar.h \
@@ -85,7 +83,6 @@ BUILT_SOURCES = $(resource_files)
 lib_LTLIBRARIES = libgwyui4.la
 nodist_libgwyuiinclude_HEADERS = $(public_built_headers)
 libgwyuiinclude_HEADERS = $(public_headers)
-toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyui4_la_SOURCES = \
@@ -127,7 +124,8 @@ libgwyui4_la_SOURCES = \
 AM_CFLAGS = $(LIBGWYUI_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
-	-I$(top_srcdir) \
+	-I$(top_builddir)/libraries \
+	-I$(top_srcdir)/libraries \
 	$(LIBGWYUI_COMPAT_CPPFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)-libgwyui\" \
 	-DG_LOG_DOMAIN=\"Gwy\" \
@@ -144,7 +142,7 @@ library_so_version = 0:0:0
 
 libgwyui4_la_LDFLAGS = \
 	$(LIBGWYUI_DEPS_LIBS) \
-	$(top_builddir)/libgwy/libgwy4.la \
+	$(top_builddir)/libraries/libgwy/libgwy4.la \
 	$(HOST_LDFLAGS) \
 	$(GWY_LIBRARY_LDFLAGS) \
 	$(version_info) \

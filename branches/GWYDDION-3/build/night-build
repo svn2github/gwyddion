@@ -74,15 +74,18 @@ function build_documentation() {
 }
 
 function build_introspection() {
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     rm -f Gwy*.{gir,typelib}
     make GOBJECT_INTROSPECTION_SCANNER_FLAGS=--warn-all
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function unit_test() {
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make test-report
@@ -94,6 +97,7 @@ function unit_test() {
     fi
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function check_debug() {
@@ -102,41 +106,50 @@ function check_debug() {
 }
 
 function check_headers() {
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make check-headers
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function check_symbols() {
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make check-symbols
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function check_marshallers() {
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make check-marshallers
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function check_doc_sections() {
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd docs/$dir >/dev/null
     ../../build/check-doc-sections.sh
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function check_deps_versions() {
   # Keep the `GENERATED' string quoted to prevent match here
   grep -r --include '*.[ch]' -L ' This is a 'GENERATED' file\>' \
-    libgwy libgwyui gwyddion resources \
+    libraries/libgwy libraries/libgwyui libraries/libgwyapp \
+    gwyddion modules resources \
     | xargs gtkdoc-depscan -b atk -b cairo -b gdk3 -b gdk-pixbuf -b gio \
                            -b glib -b gobject -b gtk3 \
     | ./build/check-dep-versions.py
@@ -156,15 +169,18 @@ function distcheck() {
 
 function coverage() {
   # Must be run after install, recompiles things with different CFLAGS.
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     ../build/coverage-test.sh
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function unit_test_valgrind() {
   # Must be run after install, recompiles things with different CFLAGS.
+  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
     if grep -q -s '^test-valgrind:' Makefile; then
@@ -174,6 +190,7 @@ function unit_test_valgrind() {
     fi
     popd >/dev/null
   done
+  popd >/dev/null
 }
 
 function build_rpm() {

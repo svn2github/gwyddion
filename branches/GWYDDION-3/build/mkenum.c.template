@@ -1,5 +1,5 @@
 /*** BEGIN file-header ***/
-#include "@LIBRARY@/@LIBRARY@.h"
+#include "@LIBRARY@.h"
 
 /**
  * SECTION: @SELF@

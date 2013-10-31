@@ -20,6 +20,7 @@
 #ifndef __LIBGWYAPP_H__
 #define __LIBGWYAPP_H__
 
+#include <libgwyui.h>
 #include <libgwyapp/module.h>
 #include <libgwyapp/types.h>
 

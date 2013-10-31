@@ -10,13 +10,14 @@ DOC_SOURCE_DIR = $(DOC_MODULE)
 DOC_MAIN_SGML_FILE = $(DOC_MODULE).xml
 
 GWY_DOC_CFLAGS = \
-	-I$(top_srcdir) \
 	-I$(top_builddir) \
+	-I$(top_builddir)/libraries \
+	-I$(top_srcdir)/libraries \
 	$(LIBGWY_DEPS_CFLAGS)
 GWY_DOC_LIBS = \
-	$(top_builddir)/libgwyapp/libgwyapp4.la \
-	$(top_builddir)/libgwyui/libgwyui4.la \
-	$(top_builddir)/libgwy/libgwy4.la \
+	$(top_builddir)/libraries/libgwyapp/libgwyapp4.la \
+	$(top_builddir)/libraries/libgwyui/libgwyui4.la \
+	$(top_builddir)/libraries/libgwy/libgwy4.la \
 	$(LIBGWY_DEPS_LIBS)
 
 GTKDOC_CC = $(LIBTOOL) --mode=compile $(CC) $(GWY_DOC_CFLAGS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -68,9 +69,9 @@ REPORT_FILES = \
 CLEANFILES = $(SCAN_FILES) $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS)
 
 HFILE_GLOB = \
-	$(top_srcdir)/$(DOC_SOURCE_DIR)/*.h \
-	$(top_builddir)/$(DOC_SOURCE_DIR)/*.h
-CFILE_GLOB = $(top_srcdir)/$(DOC_SOURCE_DIR)/*.c
+	$(top_srcdir)/libraries/$(DOC_SOURCE_DIR)/*.h \
+	$(top_builddir)/libraries/$(DOC_SOURCE_DIR)/*.h
+CFILE_GLOB = $(top_srcdir)/libraries/$(DOC_SOURCE_DIR)/*.c
 
 if ENABLE_GTK_DOC
 all-local: xref-build.stamp
@@ -94,8 +95,8 @@ docs-prepare: html-build.stamp
 # things based on that.  Remove once not necessary.
 scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	$(AM_V_GEN)gtkdoc-scan --module=$(DOC_MODULE) \
-	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
-	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
+	    --source-dir=$(top_srcdir)/libraries/$(DOC_SOURCE_DIR) \
+	    --source-dir=$(top_builddir)/libraries/$(DOC_SOURCE_DIR) \
 	    --ignore-headers="$(IGNORE_SRC)" \
 	    --rebuild-sections --rebuild-types \
 	    --deprecated-guards="GWY_DISABLE_DEPRECATED" \
@@ -121,8 +122,8 @@ $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)
 
 sgml-build.stamp: $(CFILE_GLOB) $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files)
 	$(AM_V_GEN)gtkdoc-mkdb --module=$(DOC_MODULE) \
-	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
-	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
+	    --source-dir=$(top_srcdir)/libraries/$(DOC_SOURCE_DIR) \
+	    --source-dir=$(top_builddir)/libraries/$(DOC_SOURCE_DIR) \
 	    --ignore-files="$(IGNORE_SRC)" \
 	    --sgml-mode --output-format=xml \
 	    --expand-content-files="$(expand_content_files)" \

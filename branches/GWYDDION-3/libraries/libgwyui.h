@@ -20,6 +20,7 @@
 #ifndef __LIBGWYUI_H__
 #define __LIBGWYUI_H__
 
+#include <libgwy.h>
 #include <libgwyui/adjust-bar.h>
 #include <libgwyui/adjustment.h>
 #include <libgwyui/axis.h>

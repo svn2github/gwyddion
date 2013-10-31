@@ -17,7 +17,7 @@ cat >autogen.ignore <<':'
 ^aclocal: installing [`']m4/([-a-z0-9]+)\.m4' from [`']/usr/share/aclocal/\1\.m4'
 ^configure\.ac:[0-9]+: installing [`']build/[-a-z.]+'
 ^Makefile\.am: installing [`']\./INSTALL'
-^libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
+^libraries/libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
 ^docs/libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
 ':'
 :
@@ -25,6 +25,7 @@ cat >autogen.ignore <<':'
 
 cat >build.ignore <<':'
 ^/usr/include/bits/cmathcalls.h:[0-9]+: syntax error, unexpected identifier, expecting .* _Complex
+^libtool: install: warning: relinking [`']libgwy(app|ui|)4\.la'$
 ':'
 :
 
@@ -167,15 +168,16 @@ function extract_translation_stats() {
 
 function extract_coverage_stats() {
   for dir in $libdirs; do
-    if test -s "$projectdir/$dir/$dir-test-report.html"; then
-      mv -f "$projectdir/$dir"/$dir-test-report{,-brief}.html .
-      if test -s "$projectdir/$dir/coverage/coverage.html"; then
+    ldir=libraries/$dir
+    if test -s "$projectdir/$ldir/$dir-test-report.html"; then
+      mv -f "$projectdir/$ldir"/$dir-test-report{,-brief}.html .
+      if test -s "$projectdir/$ldir/coverage/coverage.html"; then
         sed -rn -e 's:(<a href=")([^"]*)\.c\.gcov":\1'"$dir"'/\2-gcov.log":' \
-             -e '/<table/,/<\/table>/p' "$projectdir/$dir/coverage/coverage.html" \
+             -e '/<table/,/<\/table>/p' "$projectdir/$ldir/coverage/coverage.html" \
              >$dir-coverage.html
       fi
-      if test -d "$projectdir/$dir/coverage"; then
-        pushd "$projectdir/$dir/coverage" >/dev/null
+      if test -d "$projectdir/$ldir/coverage"; then
+        pushd "$projectdir/$ldir/coverage" >/dev/null
         rename -- .c.gcov -gcov.log *.c.gcov
         popd >/dev/null
       fi

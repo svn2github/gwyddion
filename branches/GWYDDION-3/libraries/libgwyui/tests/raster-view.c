@@ -1,7 +1,5 @@
 #include <stdlib.h>
-#include <gtk/gtk.h>
-#include "libgwy/libgwy.h"
-#include "libgwyui/libgwyui.h"
+#include <libgwyui.h>
 
 typedef struct {
     GwyField *field1;

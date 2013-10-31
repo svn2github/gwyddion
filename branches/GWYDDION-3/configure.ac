@@ -10,7 +10,7 @@ AC_INIT([Gwyddion], [gwy_version_string], [yeti@gwyddion.net])
 AC_REVISION([$Id$])
 
 AC_PREREQ(2.63)
-AC_CONFIG_SRCDIR([libgwy/libgwy.h])
+AC_CONFIG_SRCDIR([libraries/libgwy.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h:build/config.h.in])
@@ -21,16 +21,17 @@ AC_CONFIG_FILES([
   build/check-dep-versions.py
   resources/Makefile
   resources/gradients/Makefile
-  libgwy/Makefile
-  libgwy/version.h
-  libgwy/libgwy4.pc
-  libgwy/tests/Makefile
-  libgwy/benchmarks/Makefile
-  libgwyui/Makefile
-  libgwyui/libgwyui4.pc
-  libgwyui/tests/Makefile
-  libgwyapp/Makefile
-  libgwyapp/libgwyapp4.pc
+  libraries/Makefile
+  libraries/libgwy/Makefile
+  libraries/libgwy/version.h
+  libraries/libgwy/libgwy4.pc
+  libraries/libgwy/tests/Makefile
+  libraries/libgwy/benchmarks/Makefile
+  libraries/libgwyui/Makefile
+  libraries/libgwyui/libgwyui4.pc
+  libraries/libgwyui/tests/Makefile
+  libraries/libgwyapp/Makefile
+  libraries/libgwyapp/libgwyapp4.pc
   gwyddion/Makefile
   modules/Makefile
   po/Makefile.in
