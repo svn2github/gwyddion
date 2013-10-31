@@ -27,10 +27,12 @@ typedef struct {
     GObjectClass gobject_class;
 } GwyExtTestClass;
 
+// This also exports symbol gwy_ext_test_get_type.  Should be harmless but
+// is is also useless.
 G_DEFINE_TYPE(GwyExtTest, gwy_ext_test, G_TYPE_OBJECT);
 
 static const GwyModuleProvidedType module_types[] = {
-    { "GwyExtTestType", (GwyGetTypeFunc)&gwy_ext_test_get_type },
+    { "GwyExtTest", (GwyGetTypeFunc)&gwy_ext_test_get_type },
 };
 
 static const GwyModuleInfo module_info = {
