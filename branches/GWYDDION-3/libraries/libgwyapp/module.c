@@ -27,6 +27,8 @@
 #include "libgwy/object-utils.h"
 #include "libgwyapp/module.h"
 
+#define GWY_MODULE_INFO_SYMBOL "gwy_module_info"
+
 typedef struct {
     const GwyModuleInfo *module_info;
     GModule *mod;
@@ -480,7 +482,7 @@ queue_one_module(const gchar *filename,
         return 0;
     }
 
-    gchar *symbol = g_strconcat(G_STRINGIFY(GWY_MODULE_INFO_SYMBOL), "_",
+    gchar *symbol = g_strconcat(GWY_MODULE_INFO_SYMBOL "_",
                                 g_quark_to_string(qname), NULL);
     const GwyModuleInfo *module_info = find_module_info(mod, symbol, &err);
     g_free(symbol);
@@ -530,7 +532,7 @@ queue_module_library(const gchar *filename,
         return 0;
     }
 
-    const gchar *symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
+    const gchar *symbol = GWY_MODULE_INFO_SYMBOL;
     const GwyModuleLibraryRecord *records = find_module_info(mod, symbol,
                                                              &error);
     if (!records) {
@@ -610,7 +612,7 @@ queue_one_module_or_library(const gchar *filename,
     }
 
     // First try opening the file as a module library.  Ignore the lookup error.
-    const gchar *library_symbol = G_STRINGIFY(GWY_MODULE_INFO_SYMBOL);
+    const gchar *library_symbol = GWY_MODULE_INFO_SYMBOL;
     const GwyModuleLibraryRecord *records = find_module_info(mod,
                                                              library_symbol,
                                                              NULL);
@@ -629,7 +631,7 @@ queue_one_module_or_library(const gchar *filename,
     GQuark qname = g_quark_from_string(modname);
     g_free(modname);
 
-    gchar *symbol = g_strconcat(G_STRINGIFY(GWY_MODULE_INFO_SYMBOL), "_",
+    gchar *symbol = g_strconcat(GWY_MODULE_INFO_SYMBOL "_",
                                 g_quark_to_string(qname), NULL);
     const GwyModuleInfo *module_info = find_module_info(mod, symbol, &error);
     g_free(symbol);
@@ -664,9 +666,14 @@ find_module_info(GModule *mod,
                  const gchar *module_info_symbol,
                  GError **error)
 {
-    gpointer info;
-    if (g_module_symbol(mod, module_info_symbol, &info) && info)
-        return info;
+    // This gets the pointer to the pointer.  Dereference it once if non-NULL.
+    gpointer ppinfo;
+    if (g_module_symbol(mod, module_info_symbol, &ppinfo) && ppinfo) {
+        gpointer *pinfo = ppinfo;
+        gpointer info = *pinfo;
+        if (info)
+            return info;
+    }
 
     g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_INFO,
                 // TRANSLATORS: Error message.
@@ -940,7 +947,7 @@ register_one_type(const GwyModuleProvidedType *mptype,
     }
 
     if (!g_str_has_prefix(mptype->name, "GwyExt")
-        || !g_ascii_isupper(mptype->name[7])) {
+        || !g_ascii_isupper(mptype->name[6])) {
         g_set_error(error, GWY_MODULE_ERROR, GWY_MODULE_ERROR_TYPE_NAME,
                     // TRANSLATORS: Error message.
                     _("Class name ‘%s’ in module ‘%s’ does not have the form "
