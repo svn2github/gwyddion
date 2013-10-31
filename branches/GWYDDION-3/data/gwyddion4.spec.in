@@ -115,6 +115,9 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %files
 %defattr(644,root,root)
 %{_bindir}/gwyddion4
+%{pkglibdir}/modules/*.so
+%dir %{pkglibdir}/modules
+%dir %{pkglibdir}
 %doc AUTHORS COPYING INSTALL.gwyddion NEWS README
 
 
