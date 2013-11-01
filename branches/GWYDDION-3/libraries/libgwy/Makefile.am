@@ -245,7 +245,7 @@ check-local: check-serializable-types
 
 check-serializable-types: $(libgwy4_la_SOURCES)
 	$(AM_V_at)cd $(srcdir) \
-		&& $(PYTHON) ../build/check-serializable-types.py main.c $(libgwy4_la_SOURCES)
+		&& $(PYTHON) $(top_srcdir)/build/check-serializable-types.py main.c $(libgwy4_la_SOURCES)
 
 check-marshallers: $(libgwy4_la_SOURCES)
 	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwy4_la_SOURCES)
