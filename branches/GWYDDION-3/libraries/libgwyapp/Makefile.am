@@ -33,6 +33,7 @@ private_built_headers =
 
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
+mean_header = $(top_srcdir)/libraries/libgwyapp.h
 
 # Must init
 EXTRA_DIST = $(test_default_suppressions)
