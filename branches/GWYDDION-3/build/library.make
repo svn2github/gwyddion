@@ -57,15 +57,8 @@ check-symbols: $(library_la) $(library_decl)
 	    "$(EU_NM)" $(library_la) $(library_decl) $(srcdir)
 
 check-headers: $(library_headers)
-	$(AM_V_at)result=true; \
-	for x in $(library_headers); do \
-	    x='#include <$(library)/'$$(basename $$x)'>'; \
-	    if ! grep -qF "$$x" $(main_header); then \
-	       echo "$(main_header) lacks $$x" 1>&2; \
-	       result=false; \
-	    fi; \
-	done; \
-	$$result
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-library-headers.py \
+	    $(library) $(main_header) $(library_headers)
 
 $(library_def): $(library_objects)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/generate-library-def.py \
