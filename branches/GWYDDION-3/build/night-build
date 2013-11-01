@@ -107,31 +107,19 @@ function check_debug() {
 
 function check_headers() {
   pushd libraries >/dev/null
-  for dir in $libdirs; do
-    pushd $dir >/dev/null
-    make check-headers
-    popd >/dev/null
-  done
+  make -k check-headers
   popd >/dev/null
 }
 
 function check_symbols() {
   pushd libraries >/dev/null
-  for dir in $libdirs; do
-    pushd $dir >/dev/null
-    make check-symbols
-    popd >/dev/null
-  done
+  make -k check-headers
   popd >/dev/null
 }
 
 function check_marshallers() {
   pushd libraries >/dev/null
-  for dir in $libdirs; do
-    pushd $dir >/dev/null
-    make check-marshallers
-    popd >/dev/null
-  done
+  make -k check-marshallers
   popd >/dev/null
 }
 

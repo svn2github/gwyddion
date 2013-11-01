@@ -27,6 +27,7 @@ EXTRA_DIST = \
 	mkenum.h.template \
 	mkenum.make \
 	Makevars.in \
+	recursive.make \
 	resource-2to3.sh \
 	test-report.xsl \
 	test-report-brief.xsl \

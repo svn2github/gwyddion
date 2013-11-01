@@ -12,6 +12,7 @@ library_la = .libs/$(library)$(libsuffix).la
 library_decl = $(top_builddir)/docs/$(library)/$(library)-decl.txt
 library_def = $(library)$(libsuffix).def
 library_objects = $($(library)$(libsuffix)_la_OBJECTS)
+library_sources = $($(library)$(libsuffix)_la_SOURCES)
 $(eval $(library)$(libsuffix)_la_DEPENDENCIES += $(library_def))
 
 INTROSPECTION_GIRS = $(Library_ver).gir
@@ -20,7 +21,7 @@ INTROSPECTION_SCANNER_ARGS = \
 	-I$(top_srcdir)/libraries -I$(top_builddir)/libraries \
 	$(GOBJECT_INTROSPECTION_SCANNER_FLAGS)
 $(eval $(Library_with_ver)_gir_LIBS = $(library)$(libsuffix).la)
-$(eval $(Library_with_ver)_gir_FILES = $($(library)$(libsuffix)_la_SOURCES) $(library_headers) $(library)$(libsuffix).la)
+$(eval $(Library_with_ver)_gir_FILES = $(library_sources) $(library_headers) $(library)$(libsuffix).la)
 girdir = $(datadir)/gir-1.0
 typelibdir = $(libdir)/girepository-1.0
 if HAVE_INTROSPECTION
@@ -60,12 +61,16 @@ check-headers: $(library_headers)
 	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-library-headers.py \
 	    $(library) $(main_header) $(library_headers)
 
+check-marshallers: $(library_sources)
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py \
+	    $(library_sources)
+
 $(library_def): $(library_objects)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/generate-library-def.py \
 	     "$(EU_NM)" $(library_objects) >$(library_def)
 
-.PHONY: check-symbols check-headers
+.PHONY: check-symbols check-headers check-marshallers
 # run make check-symbols as part of make check
-check-local: check-symbols check-headers
+check-local: check-symbols check-headers check-marshallers
 
 # vim: set ft=automake ts=4 sw=4 noet :

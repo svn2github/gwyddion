@@ -169,7 +169,3 @@ clean-local:
 distclean-local:
 	rm -rf coverage
 
-check-marshallers: $(libgwyui4_la_SOURCES)
-	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(libgwyui4_la_SOURCES)
-
-.PHONY: check-marshallers
