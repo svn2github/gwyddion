@@ -25,7 +25,6 @@ cat >autogen.ignore <<':'
 
 cat >build.ignore <<':'
 ^/usr/include/bits/cmathcalls.h:[0-9]+: syntax error, unexpected identifier, expecting .* _Complex
-^libtool: install: warning: relinking [`']libgwy(app|ui|)4\.la'$
 ':'
 :
 
@@ -37,6 +36,12 @@ cat >build_documentation.ignore <<':'
 ^.*: warning: no link for: 'GwyFoo
 ^Use of uninitialized value within %DeclarationTypes in lc at /usr/bin/gtkdoc-mkdb line [0-9]+\.
 ^WARNING: Malformed symbol name: "The Poke\(\) method" \(type=method\) in gio\.$
+':'
+:
+
+
+cat >install.ignore <<':'
+^libtool: install: warning: relinking [`']libgwy(app|ui|)4\.la'$
 ':'
 :
 
