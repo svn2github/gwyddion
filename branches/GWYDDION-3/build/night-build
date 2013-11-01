@@ -136,13 +136,11 @@ function check_marshallers() {
 }
 
 function check_doc_sections() {
-  pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd docs/$dir >/dev/null
     ../../build/check-doc-sections.sh
     popd >/dev/null
   done
-  popd >/dev/null
 }
 
 function check_deps_versions() {
@@ -172,7 +170,7 @@ function coverage() {
   pushd libraries >/dev/null
   for dir in $libdirs; do
     pushd $dir >/dev/null
-    ../build/coverage-test.sh
+    ../../build/coverage-test.sh
     popd >/dev/null
   done
   popd >/dev/null
