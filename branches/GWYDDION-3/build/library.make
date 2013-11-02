@@ -62,8 +62,8 @@ check-headers: $(library_headers)
 	    $(library) $(main_header) $(library_headers)
 
 check-marshallers: $(library_sources)
-	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-marshallers.py \
-	    $(library_sources)
+	$(AM_V_at)cd $(srcdir) && \
+	$(PYTHON) $(top_srcdir)/build/check-marshallers.py $(library_sources)
 
 $(library_def): $(library_objects)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/generate-library-def.py \
