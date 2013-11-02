@@ -1236,6 +1236,21 @@ type_info_free(gpointer p)
  **/
 
 /**
+ * GWY_MODULE_INFO_SENTINEL:
+ *
+ * Empty module info entry used for termination of a module info list provided
+ * by a module library.
+ **/
+
+/**
+ * GWY_MODULE_ERROR:
+ *
+ * Error domain for loading and registration of modules. Errors in this domain
+ * will be from the #GwyModuleError enumeration. See #GError for information on
+ * error domains.
+ **/
+
+/**
  * GwyModuleError:
  * @GWY_MODULE_ERROR_MODULE_NAME: Module name is not given or it is not a valid
  *                                identifier.
