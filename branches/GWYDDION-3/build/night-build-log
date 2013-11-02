@@ -71,6 +71,7 @@ cat >update_translations.ignore <<':'
 cat >build_rpm.ignore <<':'
 ^\+
 ^libtool: install: warning: remember to run [`']libtool --finish /usr/lib64'$
+^libtool: install: warning: remember to run [`']libtool --finish /usr/lib64/gwyddion4/modules'$
 ^libtool: install: warning: relinking [`']libgwy(app|ui|)4\.la'$
 ^libtool: install: warning: [`'][^ ]+/libgwy(app|ui|)4\.la' has not been installed in [`']/usr/lib64'$
 ^[0-9]+ blocks
