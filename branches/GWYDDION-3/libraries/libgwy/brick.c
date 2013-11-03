@@ -1314,16 +1314,16 @@ gwy_brick_check_part(const GwyBrick *brick,
 gboolean
 gwy_brick_check_plane_part(const GwyBrick *brick,
                            const GwyFieldPart *fpart,
-                           GwyDimenType coldim, GwyDimenType rowdim,
+                           GwyDimension coldim, GwyDimension rowdim,
                            guint *col, guint *row, guint level,
                            guint *width, guint *height)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
-    g_return_val_if_fail(coldim <= GWY_DIMEN_Z, FALSE);
-    g_return_val_if_fail(rowdim <= GWY_DIMEN_Z, FALSE);
+    g_return_val_if_fail(coldim <= GWY_DIMENSION_Z, FALSE);
+    g_return_val_if_fail(rowdim <= GWY_DIMENSION_Z, FALSE);
     g_return_val_if_fail(coldim != rowdim, FALSE);
 
-    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+    GwyDimension leveldim = (GWY_DIMENSION_X + GWY_DIMENSION_Y + GWY_DIMENSION_Z
                              - coldim - rowdim);
     const guint res[] = { brick->xres, brick->yres, brick->zres };
     g_return_val_if_fail(level < res[leveldim], FALSE);
@@ -1385,16 +1385,16 @@ gwy_brick_check_plane_part(const GwyBrick *brick,
 gboolean
 gwy_brick_check_line_part(const GwyBrick *brick,
                           const GwyLinePart *lpart,
-                          GwyDimenType coldim, GwyDimenType rowdim,
+                          GwyDimension coldim, GwyDimension rowdim,
                           guint col, guint row,
                           guint *level, guint *depth)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), FALSE);
-    g_return_val_if_fail(coldim <= GWY_DIMEN_Z, FALSE);
-    g_return_val_if_fail(rowdim <= GWY_DIMEN_Z, FALSE);
+    g_return_val_if_fail(coldim <= GWY_DIMENSION_Z, FALSE);
+    g_return_val_if_fail(rowdim <= GWY_DIMENSION_Z, FALSE);
     g_return_val_if_fail(coldim != rowdim, FALSE);
 
-    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+    GwyDimension leveldim = (GWY_DIMENSION_X + GWY_DIMENSION_Y + GWY_DIMENSION_Z
                              - coldim - rowdim);
     const guint res[] = { brick->xres, brick->yres, brick->zres };
     g_return_val_if_fail(col < res[coldim], FALSE);

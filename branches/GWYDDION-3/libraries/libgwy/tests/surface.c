@@ -296,7 +296,8 @@ test_surface_regularize_full(void)
                                 gwy_field_get_zunit(field)));
 
         GwyField *newfield = gwy_surface_regularize_full
-                               (surface, GWY_SURFACE_REGULARIZE_PREVIEW, 0, 0);
+                                 (surface, GWY_SURFACE_REGULARIZATION_PREVIEW,
+                                  0, 0);
         g_assert_cmpuint(newfield->xres*newfield->yres, ==, surface->n);
         g_assert_cmpfloat(fabs(newfield->xreal - field->xreal),
                           <=,
@@ -332,7 +333,8 @@ test_surface_regularize_full(void)
                                 gwy_field_get_zunit(field)));
 
         newfield = gwy_surface_regularize_full
-                               (surface, GWY_SURFACE_REGULARIZE_PREVIEW, 0, 0);
+                                  (surface, GWY_SURFACE_REGULARIZATION_PREVIEW,
+                                   0, 0);
         g_assert_cmpuint(newfield->xres*newfield->yres, ==, surface->n);
         g_assert_cmpfloat(fabs(newfield->xreal - field->xreal),
                           <=,
@@ -405,8 +407,9 @@ test_surface_regularize_part(void)
         GwyFieldPart fpart = { col, row, width, height };
         GwyField *part = gwy_field_new_part(field, &fpart, TRUE);
         GwyField *newfield = gwy_surface_regularize
-                                     (surface, GWY_SURFACE_REGULARIZE_PREVIEW,
-                                      xfrom, xto, yfrom, yto, width, height);
+                                       (surface,
+                                        GWY_SURFACE_REGULARIZATION_PREVIEW,
+                                        xfrom, xto, yfrom, yto, width, height);
         g_assert_cmpuint(newfield->xres*newfield->yres, ==, width*height);
         g_assert_cmpfloat(fabs(newfield->xreal - part->xreal),
                           <=,
@@ -463,8 +466,9 @@ test_surface_regularize_interpolation(void)
                                 gwy_field_get_zunit(field)));
 
         GwyField *newfield = gwy_surface_regularize_full
-                                     (surface, GWY_SURFACE_REGULARIZE_PREVIEW,
-                                      2*xres - 1, 2*yres - 1);
+                                           (surface,
+                                            GWY_SURFACE_REGULARIZATION_PREVIEW,
+                                            2*xres - 1, 2*yres - 1);
         g_assert_cmpuint(newfield->xres, ==, 2*xres - 1);
         g_assert_cmpuint(newfield->yres, ==, 2*yres - 1);
         // The new field should be a half-pixel smaller (in real units) because

@@ -28,8 +28,8 @@
 G_BEGIN_DECLS
 
 typedef enum {
-    GWY_SURFACE_REGULARIZE_PREVIEW,
-} GwySurfaceRegularizeType;
+    GWY_SURFACE_REGULARIZATION_PREVIEW,
+} GwySurfaceRegularization;
 
 #define GWY_TYPE_SURFACE \
     (gwy_surface_get_type())
@@ -84,11 +84,11 @@ void            gwy_surface_invalidate     (GwySurface *surface);
 void            gwy_surface_set_from_field (GwySurface *surface,
                                             const GwyField *field);
 GwyField*       gwy_surface_regularize_full(const GwySurface *surface,
-                                            GwySurfaceRegularizeType method,
+                                            GwySurfaceRegularization method,
                                             guint xres,
                                             guint yres)                      G_GNUC_MALLOC;
 GwyField*       gwy_surface_regularize     (const GwySurface *surface,
-                                            GwySurfaceRegularizeType method,
+                                            GwySurfaceRegularization method,
                                             gdouble xfrom,
                                             gdouble xto,
                                             gdouble yfrom,

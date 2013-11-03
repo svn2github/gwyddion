@@ -100,7 +100,7 @@ static void
 field_congr_inplace_one(const gdouble *orig,
                         const gdouble *reference,
                         guint xres, guint yres,
-                        GwyPlaneCongruenceType transformation)
+                        GwyPlaneCongruence transformation)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
     gwy_field_set_xreal(field, xres);
@@ -129,7 +129,7 @@ static void
 field_congr_new_one(const gdouble *orig,
                     const gdouble *reference,
                     guint xres, guint yres,
-                    GwyPlaneCongruenceType transformation)
+                    GwyPlaneCongruence transformation)
 {
     GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
     gwy_field_set_xreal(source, xres);
@@ -159,7 +159,7 @@ static void
 field_congruence_3x2(void (*test)(const gdouble *orig,
                                   const gdouble *reference,
                                   guint xres, guint yres,
-                                  GwyPlaneCongruenceType transformation))
+                                  GwyPlaneCongruence transformation))
 {
     enum { xres = 3, yres = 2 };
     const gdouble orig[xres*yres] = {
@@ -226,7 +226,7 @@ static void
 field_congruence_2x3(void (*test)(const gdouble *orig,
                                   const gdouble *reference,
                                   guint xres, guint yres,
-                                  GwyPlaneCongruenceType transformation))
+                                  GwyPlaneCongruence transformation))
 {
     enum { xres = 2, yres = 3 };
     const gdouble orig[xres*yres] = {
@@ -305,9 +305,9 @@ test_field_congruence_in_place_group(void)
         field_randomize(field, rng);
         GwyField *reference = gwy_field_duplicate(field);
 
-        GwyPlaneCongruenceType trans1 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType trans2 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType compound = plane_congruence_group[trans1][trans2];
+        GwyPlaneCongruence trans1 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence trans2 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence compound = plane_congruence_group[trans1][trans2];
         gwy_field_transform_congruent(field, trans1);
         gwy_field_transform_congruent(field, trans2);
         gwy_field_transform_congruent(reference, compound);
@@ -335,9 +335,9 @@ test_field_congruence_new_group(void)
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
 
-        GwyPlaneCongruenceType trans1 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType trans2 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType compound = plane_congruence_group[trans1][trans2];
+        GwyPlaneCongruence trans1 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence trans2 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence compound = plane_congruence_group[trans1][trans2];
         GwyField *reference = gwy_field_new_congruent(field, NULL, compound);
         GwyField *tmp = gwy_field_new_congruent(field, NULL, trans1);
         GwyField *result = gwy_field_new_congruent(tmp, NULL, trans2);
@@ -370,7 +370,7 @@ test_field_congruence_copy(void)
         guint row = g_rand_int_range(rng, 0, syres+1-height);
         guint destcol = g_rand_int_range(rng, 0, dxres);
         guint destrow = g_rand_int_range(rng, 0, dyres);
-        GwyPlaneCongruenceType trans = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence trans = g_rand_int_range(rng, 0, 8);
         GwyFieldPart srcpart = { col, row, width, height };
         GwyField *source = gwy_field_new_sized(sxres, syres, FALSE);
         GwyField *dest = gwy_field_new_sized(dxres, dyres, FALSE);
@@ -405,11 +405,11 @@ test_field_congruence_invert(void)
         guint yres = g_rand_int_range(rng, 1, max_size);
         GwyField *orig = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(orig, rng);
-        for (GwyPlaneCongruenceType trans = GWY_PLANE_IDENTITY;
+        for (GwyPlaneCongruence trans = GWY_PLANE_IDENTITY;
              trans <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE;
              trans++) {
             GwyField *transformed = gwy_field_new_congruent(orig, NULL, trans);
-            GwyPlaneCongruenceType itrans = gwy_plane_congruence_invert(trans);
+            GwyPlaneCongruence itrans = gwy_plane_congruence_invert(trans);
             GwyField *result = gwy_field_new_congruent(transformed, NULL,
                                                        itrans);
             field_assert_equal(result, orig);

@@ -59,6 +59,7 @@
 #include "libgwy/main.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
+#include "libgwy/types.h"
 #include "libgwy/resource.h"
 #include "libgwy/object-internal.h"
 
@@ -207,7 +208,7 @@ static GParamSpec *properties[N_PROPS];
 static GSList *resource_classes = NULL;
 G_LOCK_DEFINE_STATIC(resource_classes);
 
-static GwyResourceManagementType management_type = GWY_RESOURCE_MANAGEMENT_NONE;
+static GwyResourceManagement management_method = GWY_RESOURCE_MANAGEMENT_NONE;
 static GList *update_queue = NULL;
 G_LOCK_DEFINE_STATIC(update_queue);
 static guint flush_source_id = 0;
@@ -1504,7 +1505,7 @@ get_timestamp(void)
 static void
 manage_create(GwyResource *resource)
 {
-    if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
+    if (management_method == GWY_RESOURCE_MANAGEMENT_NONE
         || !resource->priv->managed)
         return;
 
@@ -1533,7 +1534,7 @@ manage_create(GwyResource *resource)
 static void
 manage_delete(GwyResource *resource)
 {
-    if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
+    if (management_method == GWY_RESOURCE_MANAGEMENT_NONE
         || !resource->priv->managed)
         return;
 
@@ -1564,7 +1565,7 @@ manage_delete(GwyResource *resource)
 static void
 manage_update(GwyResource *resource)
 {
-    if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
+    if (management_method == GWY_RESOURCE_MANAGEMENT_NONE
         || !resource->priv->managed)
         return;
 
@@ -1580,7 +1581,7 @@ manage_update(GwyResource *resource)
         G_UNLOCK(update_queue);
     }
     priv->mtime = get_timestamp();
-    if (management_type == GWY_RESOURCE_MANAGEMENT_MANUAL)
+    if (management_method == GWY_RESOURCE_MANAGEMENT_MANUAL)
         return;
 
     if (!flush_source_id)
@@ -1913,31 +1914,31 @@ gwy_resource_type_set_managed(GType type,
 }
 
 /**
- * gwy_resources_get_management_type:
+ * gwy_resources_get_management:
  *
- * Reports the current on-disk resource management type.
+ * Reports the current on-disk resource management method.
  *
- * Returns: The current management type.  Note management can be still off for
- *          individual classes.
+ * Returns: The current management method.  Note management can be still off
+ *          for individual classes.
  **/
-GwyResourceManagementType
-gwy_resources_get_management_type(void)
+GwyResourceManagement
+gwy_resources_get_management(void)
 {
-    return management_type;
+    return management_method;
 }
 
 /**
- * gwy_resources_set_management_type:
- * @type: Requested management type.
+ * gwy_resources_set_management:
+ * @method: Requested management method.
  *
  * Sets if and how are resource managed on disk.
  *
  * Resources that have been queued for saving before the type is changed will
- * be still saved even if the management type is set to
+ * be still saved even if the management method is set to
  * %GWY_RESOURCE_MANAGEMENT_NONE.
  *
- * If the current type is %GWY_RESOURCE_MANAGEMENT_MANUAL and the management is
- * switched off the modified resources simply remain in the queue and can be
+ * If the current method is %GWY_RESOURCE_MANAGEMENT_MANUAL and the management
+ * is switched off the modified resources simply remain in the queue and can be
  * saved with gwy_resource_type_flush() or gwy_resources_flush().  If the
  * management is chaned to %GWY_RESOURCE_MANAGEMENT_MAIN they will be saved
  * during normal operation.
@@ -1946,20 +1947,18 @@ gwy_resources_get_management_type(void)
  * loop.
  **/
 void
-gwy_resources_set_management_type(GwyResourceManagementType type)
+gwy_resources_set_management(GwyResourceManagement method)
 {
-    g_return_if_fail(type == GWY_RESOURCE_MANAGEMENT_NONE
-                     || type == GWY_RESOURCE_MANAGEMENT_MANUAL
-                     || type == GWY_RESOURCE_MANAGEMENT_MAIN);
+    g_return_if_fail(gwy_resource_management_is_valid(method));
 
-    if (management_type == type)
+    if (management_method == method)
         return;
 
     // MAIN promises the resources will be saved automatically so, fullfill it.
-    if (management_type == GWY_RESOURCE_MANAGEMENT_MAIN)
+    if (management_method == GWY_RESOURCE_MANAGEMENT_MAIN)
         gwy_resources_flush();
 
-    management_type = type;
+    management_method = method;
 }
 
 /**
@@ -2065,7 +2064,7 @@ gwy_resources_load(GwyErrorList **error_list)
 void
 gwy_resources_finalize(void)
 {
-    gwy_resources_set_management_type(GWY_RESOURCE_MANAGEMENT_NONE);
+    gwy_resources_set_management(GWY_RESOURCE_MANAGEMENT_NONE);
     for (GSList *l = resource_classes; l; l = g_slist_next(l)) {
         GType type = (GType)GPOINTER_TO_SIZE(l->data);
         GwyResourceClass *klass = g_type_class_peek(type);
@@ -2393,7 +2392,7 @@ gwy_resource_dump_data_line(const gdouble *data,
  **/
 
 /**
- * GwyResourceManagementType:
+ * GwyResourceManagement:
  * @GWY_RESOURCE_MANAGEMENT_NONE: Changed resources are not tracked apart from
  *                                setting GwyResource:modified and no
  *                                changes are written to disk automatically.
@@ -2416,7 +2415,7 @@ gwy_resource_dump_data_line(const gdouble *data,
  *
  * The initial state is %GWY_RESOURCE_MANAGEMENT_NONE, i.e. you have to
  * excplitily enable resource management with
- * gwy_resources_set_management_type() if you want automated or semiautomated
+ * gwy_resources_set_management() if you want automated or semiautomated
  * management.
  **/
 

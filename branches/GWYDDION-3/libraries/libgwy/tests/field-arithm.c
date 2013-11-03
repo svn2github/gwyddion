@@ -800,12 +800,12 @@ test_field_arithmetic_sqrt(void)
 static void
 sculpt_dumb(GwyField *field, const GwyFieldPart *rpart,
             GwyField *feature, const GwyFieldPart *fpart,
-            GwySculptType method)
+            GwySculpting method)
 {
     GwyMaskField *mask = NULL;
     gdouble lim;
 
-    if (method == GWY_SCULPT_UPWARD) {
+    if (method == GWY_SCULPTING_UPWARD) {
         mask = gwy_mask_field_new_from_field(feature, fpart,
                                              G_MAXDOUBLE, 0.0, TRUE);
         gwy_field_min_max(field, rpart, mask, GWY_MASK_INCLUDE, &lim, NULL);
@@ -813,7 +813,7 @@ sculpt_dumb(GwyField *field, const GwyFieldPart *rpart,
         gwy_field_fill(feature, fpart, mask, GWY_MASK_EXCLUDE, -G_MAXDOUBLE);
         gwy_field_max_field(feature, fpart, field, rpart->col, rpart->row);
     }
-    else if (method == GWY_SCULPT_DOWNWARD) {
+    else if (method == GWY_SCULPTING_DOWNWARD) {
         mask = gwy_mask_field_new_from_field(feature, fpart,
                                              0.0, -G_MAXDOUBLE, TRUE);
         gwy_field_min_max(field, rpart, mask, GWY_MASK_INCLUDE, NULL, &lim);
@@ -830,7 +830,7 @@ sculpt_dumb(GwyField *field, const GwyFieldPart *rpart,
 
 // Here we put the feature completely within the destination field.
 static void
-field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
+field_arithmetic_sculpt_one_contained(GwySculpting method, gboolean periodic)
 {
     enum { max_size = 30, max_feature = 20 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -878,29 +878,29 @@ field_arithmetic_sculpt_one_contained(GwySculptType method, gboolean periodic)
 void
 test_field_arithmetic_sculpt_upward_contained(void)
 {
-    field_arithmetic_sculpt_one_contained(GWY_SCULPT_UPWARD, FALSE);
+    field_arithmetic_sculpt_one_contained(GWY_SCULPTING_UPWARD, FALSE);
 }
 
 void
 test_field_arithmetic_sculpt_downward_contained(void)
 {
-    field_arithmetic_sculpt_one_contained(GWY_SCULPT_DOWNWARD, FALSE);
+    field_arithmetic_sculpt_one_contained(GWY_SCULPTING_DOWNWARD, FALSE);
 }
 
 void
 test_field_arithmetic_sculpt_upward_contained_periodic(void)
 {
-    field_arithmetic_sculpt_one_contained(GWY_SCULPT_UPWARD, TRUE);
+    field_arithmetic_sculpt_one_contained(GWY_SCULPTING_UPWARD, TRUE);
 }
 
 void
 test_field_arithmetic_sculpt_downward_contained_periodic(void)
 {
-    field_arithmetic_sculpt_one_contained(GWY_SCULPT_DOWNWARD, TRUE);
+    field_arithmetic_sculpt_one_contained(GWY_SCULPTING_DOWNWARD, TRUE);
 }
 
 static void
-field_arithmetic_sculpt_one_periodic(GwySculptType method)
+field_arithmetic_sculpt_one_periodic(GwySculpting method)
 {
     enum { max_size = 30, max_feature = 20 };
     GRand *rng = g_rand_new_with_seed(42);
@@ -955,13 +955,13 @@ field_arithmetic_sculpt_one_periodic(GwySculptType method)
 void
 test_field_arithmetic_sculpt_upward_periodic(void)
 {
-    field_arithmetic_sculpt_one_periodic(GWY_SCULPT_UPWARD);
+    field_arithmetic_sculpt_one_periodic(GWY_SCULPTING_UPWARD);
 }
 
 void
 test_field_arithmetic_sculpt_downward_periodic(void)
 {
-    field_arithmetic_sculpt_one_periodic(GWY_SCULPT_DOWNWARD);
+    field_arithmetic_sculpt_one_periodic(GWY_SCULPTING_DOWNWARD);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

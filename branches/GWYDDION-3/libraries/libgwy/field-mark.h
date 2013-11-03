@@ -29,7 +29,7 @@ typedef enum {
     GWY_DEVIATION_BOTH,
     GWY_DEVIATION_DOWN,
     GWY_DEVIATION_UP,
-} GwyDeviationType;
+} GwyDeviation;
 
 void  gwy_field_mark_extrema (const GwyField *field,
                               GwyMaskField *extrema,
@@ -39,7 +39,7 @@ guint gwy_field_mark_outliers(const GwyField *field,
                               GwyMaskField *outliers,
                               const GwyMaskField *mask,
                               GwyMasking masking,
-                              GwyDeviationType deviation,
+                              GwyDeviation deviation,
                               gdouble threshold);
 
 G_END_DECLS

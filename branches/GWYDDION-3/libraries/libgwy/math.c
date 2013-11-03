@@ -1573,11 +1573,11 @@ gwy_assertion_message_floatval(const char *domain,
  **/
 
 /**
- * GwyDimenType:
- * @GWY_DIMEN_X: First dimension (@x).
- * @GWY_DIMEN_Y: Second dimension (@y).
- * @GWY_DIMEN_Z: Third dimension (@z).
- * @GWY_DIMEN_W: Fourth dimension (@w).
+ * GwyDimension:
+ * @GWY_DIMENSION_X: First dimension (@x).
+ * @GWY_DIMENSION_Y: Second dimension (@y).
+ * @GWY_DIMENSION_Z: Third dimension (@z).
+ * @GWY_DIMENSION_W: Fourth dimension (@w).
  *
  * Type of dimension axes.
  *

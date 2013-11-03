@@ -28,7 +28,7 @@
 static void
 mask_field_congr_inplace_one(const gchar *orig_str,
                              const gchar *reference_str,
-                             GwyPlaneCongruenceType transformation)
+                             GwyPlaneCongruence transformation)
 {
     GwyMaskField *field = mask_field_from_string(orig_str);
     gwy_mask_field_transform_congruent(field, transformation);
@@ -41,7 +41,7 @@ mask_field_congr_inplace_one(const gchar *orig_str,
 static void
 mask_field_congr_new_one(const gchar *orig_str,
                          const gchar *reference_str,
-                         GwyPlaneCongruenceType transformation)
+                         GwyPlaneCongruence transformation)
 {
     GwyMaskField *source = mask_field_from_string(orig_str);
     GwyMaskField *field = gwy_mask_field_new_congruent(source, NULL,
@@ -56,7 +56,7 @@ mask_field_congr_new_one(const gchar *orig_str,
 void
 mask_field_congruence_4x3(void (*test)(const gchar *orig_str,
                                        const gchar *reference_str,
-                                       GwyPlaneCongruenceType transformation))
+                                       GwyPlaneCongruence transformation))
 {
     const gchar *orig_str =
         "####\n"
@@ -120,7 +120,7 @@ test_mask_field_congruence_new_4x3(void)
 static void
 mask_field_congruence_3x4(void (*test)(const gchar *orig_str,
                                        const gchar *reference_str,
-                                       GwyPlaneCongruenceType transformation))
+                                       GwyPlaneCongruence transformation))
 {
     const gchar *orig_str =
         "###\n"
@@ -184,7 +184,7 @@ test_mask_field_congruence_new_3x4(void)
 static void
 mask_field_congruence_33x4(void (*test)(const gchar *orig_str,
                                         const gchar *reference_str,
-                                        GwyPlaneCongruenceType transformation))
+                                        GwyPlaneCongruence transformation))
 {
     const gchar *orig_str =
         "#################################\n"
@@ -382,9 +382,9 @@ test_mask_field_congruence_in_place_group(void)
         mask_field_randomize(field, pool, max_size, rng);
         GwyMaskField *reference = gwy_mask_field_duplicate(field);
 
-        GwyPlaneCongruenceType trans1 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType trans2 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType compound = plane_congruence_group[trans1][trans2];
+        GwyPlaneCongruence trans1 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence trans2 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence compound = plane_congruence_group[trans1][trans2];
         gwy_mask_field_transform_congruent(field, trans1);
         gwy_mask_field_transform_congruent(field, trans2);
         gwy_mask_field_transform_congruent(reference, compound);
@@ -414,9 +414,9 @@ test_mask_field_congruence_new_group(void)
         GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
         mask_field_randomize(field, pool, max_size, rng);
 
-        GwyPlaneCongruenceType trans1 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType trans2 = g_rand_int_range(rng, 0, 8);
-        GwyPlaneCongruenceType compound = plane_congruence_group[trans1][trans2];
+        GwyPlaneCongruence trans1 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence trans2 = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence compound = plane_congruence_group[trans1][trans2];
         GwyMaskField *reference = gwy_mask_field_new_congruent(field, NULL,
                                                                compound);
         GwyMaskField *tmp = gwy_mask_field_new_congruent(field, NULL, trans1);
@@ -452,7 +452,7 @@ test_mask_field_congruence_new_unaligned(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyFieldPart fpart = { col, row, width, height };
         GwyMaskField *part = gwy_mask_field_new_part(field, &fpart);
-        GwyPlaneCongruenceType trans = g_rand_int_range(rng, 0, 8);
+        GwyPlaneCongruence trans = g_rand_int_range(rng, 0, 8);
         // We assume here that aligned transformations were tested and work.
         GwyMaskField *reference = gwy_mask_field_new_congruent(part, NULL,
                                                                trans);

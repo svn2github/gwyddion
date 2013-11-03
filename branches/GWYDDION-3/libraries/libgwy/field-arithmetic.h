@@ -51,9 +51,9 @@ typedef enum {
 } GwyNormalizeFlags;
 
 typedef enum {
-    GWY_SCULPT_UPWARD,
-    GWY_SCULPT_DOWNWARD,
-} GwySculptType;
+    GWY_SCULPTING_UPWARD,
+    GWY_SCULPTING_DOWNWARD,
+} GwySculpting;
 
 GwyFieldCompatFlags gwy_field_is_incompatible(const GwyField *field1,
                                               const GwyField *field2,
@@ -137,7 +137,7 @@ void     gwy_field_sculpt       (const GwyField *src,
                                  GwyField *dest,
                                  gint destcol,
                                  gint destrow,
-                                 GwySculptType method,
+                                 GwySculpting method,
                                  gboolean periodic);
 void     gwy_field_hypot_field  (GwyField *field,
                                  const GwyField *operand1,

@@ -1305,9 +1305,9 @@ test_field_new_part(void)
 }
 
 static void
-field_filter_gradient_one(GwyFilterType hfilter,
-                          GwyFilterType vfilter,
-                          GwyFilterType absfilter,
+field_filter_gradient_one(GwyStandardFilter hfilter,
+                          GwyStandardFilter vfilter,
+                          GwyStandardFilter absfilter,
                           const gdouble *signature)
 {
     static const gdouble step_pattern[] = { -1.0, -1.0, 0.0, 1.0, 1.0 };
@@ -1358,9 +1358,9 @@ void
 test_field_filter_standard_sobel(void)
 {
     static const gdouble signature[] = { -1.0, -3.0/4.0, 0.0, 3.0/4.0, 1.0 };
-    field_filter_gradient_one(GWY_FILTER_HSOBEL,
-                              GWY_FILTER_VSOBEL,
-                              GWY_FILTER_SOBEL,
+    field_filter_gradient_one(GWY_STANDARD_FILTER_HSOBEL,
+                              GWY_STANDARD_FILTER_VSOBEL,
+                              GWY_STANDARD_FILTER_SOBEL,
                               signature);
 }
 
@@ -1368,9 +1368,9 @@ void
 test_field_filter_standard_prewitt(void)
 {
     static const gdouble signature[] = { -1.0, -2.0/3.0, 0.0, 2.0/3.0, 1.0 };
-    field_filter_gradient_one(GWY_FILTER_HPREWITT,
-                              GWY_FILTER_VPREWITT,
-                              GWY_FILTER_PREWITT,
+    field_filter_gradient_one(GWY_STANDARD_FILTER_HPREWITT,
+                              GWY_STANDARD_FILTER_VPREWITT,
+                              GWY_STANDARD_FILTER_PREWITT,
                               signature);
 }
 
@@ -1378,9 +1378,9 @@ void
 test_field_filter_standard_scharr(void)
 {
     static const gdouble signature[] = { -1.0, -13.0/16.0, 0.0, 13.0/16.0, 1.0 };
-    field_filter_gradient_one(GWY_FILTER_HSCHARR,
-                              GWY_FILTER_VSCHARR,
-                              GWY_FILTER_SCHARR,
+    field_filter_gradient_one(GWY_STANDARD_FILTER_HSCHARR,
+                              GWY_STANDARD_FILTER_VSCHARR,
+                              GWY_STANDARD_FILTER_SCHARR,
                               signature);
 }
 
@@ -1409,7 +1409,7 @@ test_field_filter_standard_step(void)
     GwyField *field = gwy_field_new_alike(pattern, FALSE);
     GwyField *reference = gwy_field_new_alike(pattern, FALSE);
     gwy_assign(reference->data, expected, 9*9);
-    gwy_field_filter_standard(pattern, NULL, field, GWY_FILTER_STEP,
+    gwy_field_filter_standard(pattern, NULL, field, GWY_STANDARD_FILTER_STEP,
                               GWY_EXTERIOR_BORDER_EXTEND, 0.0);
     field_assert_numerically_equal(field, reference, 1e-14);
 
@@ -1441,7 +1441,7 @@ test_field_filter_standard_dechecker(void)
     }
     gwy_field_invalidate(field);
 
-    gwy_field_filter_standard(field, NULL, field, GWY_FILTER_DECHECKER,
+    gwy_field_filter_standard(field, NULL, field, GWY_STANDARD_FILTER_DECHECKER,
                               GWY_EXTERIOR_PERIODIC, 0.0);
     // Large tolerance, the reconstruction is approximate
     field_assert_numerically_equal(field, source, 3e-4);
@@ -2051,7 +2051,7 @@ test_field_read_curvature_at_centre(void)
 
 static void
 field_mark_outliers_one(GwyMasking masking,
-                        GwyDeviationType deviation)
+                        GwyDeviation deviation)
 {
     enum { max_size = 178 };
     GRand *rng = g_rand_new_with_seed(42);

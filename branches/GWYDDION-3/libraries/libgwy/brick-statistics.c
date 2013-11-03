@@ -66,11 +66,11 @@ void
 gwy_brick_summarize_lines(const GwyBrick *brick,
                           const GwyBrickPart *bpart,
                           GwyField *target,
-                          GwyDimenType coldim, GwyDimenType rowdim,
+                          GwyDimension coldim, GwyDimension rowdim,
                           GwyBrickLineSummary quantity)
 {
-    g_return_if_fail(coldim <= GWY_DIMEN_Z);
-    g_return_if_fail(rowdim <= GWY_DIMEN_Z);
+    g_return_if_fail(coldim <= GWY_DIMENSION_Z);
+    g_return_if_fail(rowdim <= GWY_DIMENSION_Z);
     g_return_if_fail(coldim != rowdim);
     g_return_if_fail(quantity <= GWY_BRICK_LINE_NRMS);
 
@@ -80,7 +80,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         return;
 
     g_return_if_fail(GWY_IS_FIELD(target));
-    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+    GwyDimension leveldim = (GWY_DIMENSION_X + GWY_DIMENSION_Y + GWY_DIMENSION_Z
                              - coldim - rowdim);
     const guint res[] = { brick->xres, brick->yres, brick->zres };
     const guint size[] = { width, height, depth };
@@ -106,24 +106,24 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
     /*
      * No dimension combination needs to lead to a bad memory access pattern.
      * We have two basic situations:
-     * (a) Neither @coldim nor @rowdim is GWY_DIMEN_X.  Then x is the
+     * (a) Neither @coldim nor @rowdim is GWY_DIMENSION_X.  Then x is the
      *     summarised dimension and we can simply summarise one brick line
      *     completely (accessing data sequentially), store the resulting value
      *     to field and move to another line.
-     * (b) One of @coldim and @rowdim is GWY_DIMEN_X.  The we can always make x
-     *     dimension of brick aligned with x dimension of field (we create a
-     *     temporary field to achieve this).  Summarising one brick line thus
-     *     means accessing sequentially in both brick and field.  Finally, we
-     *     may need to perform a transposition of the field but this is done
-     *     only once.
+     * (b) One of @coldim and @rowdim is GWY_DIMENSION_X.  The we can always
+     *     make x dimension of brick aligned with x dimension of field (we
+     *     create a temporary field to achieve this).  Summarising one brick
+     *     line thus means accessing sequentially in both brick and field.
+     *     Finally, we may need to perform a transposition of the field but
+     *     this is done only once.
      */
     gint rowstep, levelstep;
-    if (leveldim == GWY_DIMEN_X) {
-        if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
+    if (leveldim == GWY_DIMENSION_X) {
+        if (coldim == GWY_DIMENSION_Y && rowdim == GWY_DIMENSION_Z) {
             rowstep = 1;
             levelstep = target->xres - height;
         }
-        else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_Y) {
+        else if (coldim == GWY_DIMENSION_Z && rowdim == GWY_DIMENSION_Y) {
             rowstep = target->xres;
             levelstep = 1 - (gint)target->xres*(gint)height;
         }
@@ -140,7 +140,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         }
     }
     else {
-        GwyDimenType otherdim = coldim + rowdim - GWY_DIMEN_X;
+        GwyDimension otherdim = coldim + rowdim - GWY_DIMENSION_X;
         guint othersize = xsize + ysize - width;
         GwyField *tmp = gwy_field_new_sized(width, othersize, FALSE);
         GwyField *tmp2 = NULL;
@@ -149,11 +149,11 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
             || quantity == GWY_BRICK_LINE_NRMS)
             tmp2 = gwy_field_new_alike(tmp, FALSE);
 
-        if (otherdim == GWY_DIMEN_Y) {
+        if (otherdim == GWY_DIMENSION_Y) {
             rowstep = 0;
             levelstep = -(gint)width*(gint)othersize;
         }
-        else if (otherdim == GWY_DIMEN_Z) {
+        else if (otherdim == GWY_DIMENSION_Z) {
             rowstep = -(gint)width;
             levelstep = width;
         }
@@ -211,11 +211,11 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
             gwy_field_clear_full(tmp);
             if (avgsize > 1) {
                 GwyFieldPart fpart = {
-                    from[GWY_DIMEN_X], from[otherdim],
-                    size[GWY_DIMEN_X], size[otherdim]
+                    from[GWY_DIMENSION_X], from[otherdim],
+                    size[GWY_DIMENSION_X], size[otherdim]
                 };
                 gwy_brick_extract_plane(brick, tmp2, &fpart,
-                                        GWY_DIMEN_X, otherdim,
+                                        GWY_DIMENSION_X, otherdim,
                                         from[leveldim], FALSE);
                 summarize_lines(bbase, brick->xres, brick->yres,
                                 tmp->data, tmp2->data,
@@ -226,7 +226,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
             }
         }
 
-        if (coldim == GWY_DIMEN_X)
+        if (coldim == GWY_DIMENSION_X)
             gwy_field_copy(tmp, NULL, target, fcol, frow);
         else
             gwy_field_copy_congruent(tmp, NULL, target, fcol, frow,

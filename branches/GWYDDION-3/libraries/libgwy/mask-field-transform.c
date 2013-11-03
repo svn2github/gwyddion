@@ -21,6 +21,7 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/types.h"
 #include "libgwy/mask-field-transform.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/mask-field-internal.h"
@@ -636,10 +637,10 @@ swap_xy_src_aligned(const GwyMaskField *source,
  **/
 void
 gwy_mask_field_transform_congruent(GwyMaskField *field,
-                                   GwyPlaneCongruenceType transformation)
+                                   GwyPlaneCongruence transformation)
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
-    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    g_return_if_fail(gwy_plane_congruence_is_valid(transformation));
 
     if (!gwy_plane_congruence_is_transposition(transformation)) {
         if (transformation == GWY_PLANE_IDENTITY)
@@ -688,7 +689,7 @@ transform_congruent_to(const GwyMaskField *source,
                        guint col, guint row,
                        guint width, guint height,
                        GwyMaskField *dest,
-                       GwyPlaneCongruenceType transformation)
+                       GwyPlaneCongruence transformation)
 {
     GwyFieldPart fpart = { col, row, width, height };
 
@@ -790,13 +791,12 @@ transform_congruent_to(const GwyMaskField *source,
 GwyMaskField*
 gwy_mask_field_new_congruent(const GwyMaskField *field,
                              const GwyFieldPart *fpart,
-                             GwyPlaneCongruenceType transformation)
+                             GwyPlaneCongruence transformation)
 {
     guint col, row, width, height;
     if (!gwy_mask_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
-    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
-                         NULL);
+    g_return_val_if_fail(gwy_plane_congruence_is_valid(transformation), NULL);
 
     gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
     guint dwidth = is_trans ? height : width;

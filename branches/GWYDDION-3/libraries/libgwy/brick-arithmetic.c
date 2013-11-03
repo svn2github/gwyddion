@@ -149,9 +149,9 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
  * The field is checked for compatibility with planes in the brick, specified
  * by @coldim and @rowdim.
  *
- * For instance, in the basic case when @coldim is %GWY_DIMEN_X and @rowdim
- * is %GWY_DIMEN_Y, X- and Y-quantities in both objects correspond, while Z of
- * @field corresponds to W of @brick.  Z of @brick does not correspond to
+ * For instance, in the basic case when @coldim is %GWY_DIMENSION_X and @rowdim
+ * is %GWY_DIMENSION_Y, X- and Y-quantities in both objects correspond, while Z
+ * of @field corresponds to W of @brick.  Z of @brick does not correspond to
  * anything in @field and is not compared.
  *
  * Returns: Zero if all tested properties are compatible.  Flags corresponding
@@ -160,14 +160,14 @@ gwy_brick_is_incompatible(const GwyBrick *brick1,
 GwyFieldCompatFlags
 gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
                                      const GwyField *field,
-                                     GwyDimenType coldim,
-                                     GwyDimenType rowdim,
+                                     GwyDimension coldim,
+                                     GwyDimension rowdim,
                                      GwyFieldCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), check);
     g_return_val_if_fail(GWY_IS_FIELD(field), check);
-    g_return_val_if_fail(coldim <= GWY_DIMEN_Z, check);
-    g_return_val_if_fail(rowdim <= GWY_DIMEN_Z, check);
+    g_return_val_if_fail(coldim <= GWY_DIMENSION_Z, check);
+    g_return_val_if_fail(rowdim <= GWY_DIMENSION_Z, check);
     g_return_val_if_fail(coldim != rowdim, check);
 
     const guint res[] = { brick->xres, brick->yres, brick->zres };
@@ -255,7 +255,7 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
  * The line is checked for compatibility with lines along @dim axis in the
  * brick.
  *
- * For instance, in the basic case when @dim is %GWY_DIMEN_Z, X of @line
+ * For instance, in the basic case when @dim is %GWY_DIMENSION_Z, X of @line
  * corresponds to Z of @brick while Y of @line corresponds to W of @brick.  X
  * and Y of @brick do not correspond to anything in @line and are not compared.
  *
@@ -265,12 +265,12 @@ gwy_brick_is_incompatible_with_field(const GwyBrick *brick,
 GwyLineCompatFlags
 gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
                                     const GwyLine *line,
-                                    GwyDimenType dim,
+                                    GwyDimension dim,
                                     GwyLineCompatFlags check)
 {
     g_return_val_if_fail(GWY_IS_BRICK(brick), check);
     g_return_val_if_fail(GWY_IS_LINE(line), check);
-    g_return_val_if_fail(dim <= GWY_DIMEN_Z, check);
+    g_return_val_if_fail(dim <= GWY_DIMENSION_Z, check);
 
     const guint res[] = { brick->xres, brick->yres, brick->zres };
     const gdouble real[] = { brick->xreal, brick->yreal, brick->zreal };
@@ -348,13 +348,13 @@ gwy_brick_is_incompatible_with_line(const GwyBrick *brick,
  * column and row dimensions of the brick.
  *
  * Dimensions @coldim and @rowdim must be different and belong to the set
- * { %GWY_DIMEN_X, %GWY_DIMEN_Y, %GWY_DIMEN_Z }.
+ * { %GWY_DIMENSION_X, %GWY_DIMENSION_Y, %GWY_DIMENSION_Z }.
  **/
 void
 gwy_brick_extract_plane(const GwyBrick *brick,
                         GwyField *target,
                         const GwyFieldPart *fpart,
-                        GwyDimenType coldim, GwyDimenType rowdim,
+                        GwyDimension coldim, GwyDimension rowdim,
                         guint level,
                         gboolean keep_offsets)
 {
@@ -376,32 +376,32 @@ gwy_brick_extract_plane(const GwyBrick *brick,
     const gdouble *bbase;
     guint stride, stride2;
 
-    if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y) {
+    if (coldim == GWY_DIMENSION_X && rowdim == GWY_DIMENSION_Y) {
         bbase = brick->data + (level*brick->yres + brow)*brick->xres + bcol;
         stride = 1;
         stride2 = brick->xres;
     }
-    else if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Z) {
+    else if (coldim == GWY_DIMENSION_X && rowdim == GWY_DIMENSION_Z) {
         bbase = brick->data + (brow*brick->yres + level)*brick->xres + bcol;
         stride = 1;
         stride2 = brick->xres*brick->yres;
     }
-    else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_Z) {
+    else if (coldim == GWY_DIMENSION_Y && rowdim == GWY_DIMENSION_Z) {
         bbase = brick->data + (brow*brick->yres + bcol)*brick->xres + level;
         stride = brick->xres;
         stride2 = brick->xres*brick->yres;
     }
-    else if (coldim == GWY_DIMEN_Y && rowdim == GWY_DIMEN_X) {
+    else if (coldim == GWY_DIMENSION_Y && rowdim == GWY_DIMENSION_X) {
         bbase = brick->data + (level*brick->yres + bcol)*brick->xres + brow;
         stride = brick->xres;
         stride2 = 1;
     }
-    else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_X) {
+    else if (coldim == GWY_DIMENSION_Z && rowdim == GWY_DIMENSION_X) {
         bbase = brick->data + (bcol*brick->yres + level)*brick->xres + brow;
         stride = brick->xres*brick->yres;
         stride2 = 1;
     }
-    else if (coldim == GWY_DIMEN_Z && rowdim == GWY_DIMEN_Y) {
+    else if (coldim == GWY_DIMENSION_Z && rowdim == GWY_DIMENSION_Y) {
         bbase = brick->data + (bcol*brick->yres + brow)*brick->xres + level;
         stride = brick->xres*brick->yres;
         stride2 = brick->xres;
@@ -410,7 +410,7 @@ gwy_brick_extract_plane(const GwyBrick *brick,
         g_return_if_reached();
     }
 
-    if (coldim == GWY_DIMEN_X && rowdim == GWY_DIMEN_Y
+    if (coldim == GWY_DIMENSION_X && rowdim == GWY_DIMENSION_Y
         && bwidth == brick->xres && fwidth == target->xres) {
         g_assert(bcol == 0 && fcol == 0);
         gwy_assign(fbase, bbase, fwidth*fheight);
@@ -481,13 +481,13 @@ gwy_brick_extract_plane(const GwyBrick *brick,
  * is better to process the data by plane.
  *
  * Dimensions @coldim and @rowdim must be different and belong to the set
- * { %GWY_DIMEN_X, %GWY_DIMEN_Y, %GWY_DIMEN_Z }.
+ * { %GWY_DIMENSION_X, %GWY_DIMENSION_Y, %GWY_DIMENSION_Z }.
  **/
 void
 gwy_brick_extract_line(const GwyBrick *brick,
                        GwyLine *target,
                        const GwyLinePart *lpart,
-                       GwyDimenType coldim, GwyDimenType rowdim,
+                       GwyDimension coldim, GwyDimension rowdim,
                        guint col, guint row,
                        gboolean keep_offsets)
 {
@@ -496,7 +496,7 @@ gwy_brick_extract_line(const GwyBrick *brick,
     // @col and @row only say where to read the line, order does not matter.
     // Defined order reduces the number of cases to consider in actual copying.
     if (coldim > rowdim) {
-        GWY_SWAP(GwyDimenType, coldim, rowdim);
+        GWY_SWAP(GwyDimension, coldim, rowdim);
         GWY_SWAP(guint, col, row);
     }
     if (!gwy_brick_check_line_part(brick, lpart, coldim, rowdim,
@@ -505,7 +505,7 @@ gwy_brick_extract_line(const GwyBrick *brick,
 
     // Now the indices are good but along coldim and rowdim.
     const guint res[] = { brick->xres, brick->yres, brick->zres };
-    GwyDimenType leveldim = (GWY_DIMEN_X + GWY_DIMEN_Y + GWY_DIMEN_Z
+    GwyDimension leveldim = (GWY_DIMENSION_X + GWY_DIMENSION_Y + GWY_DIMENSION_Z
                              - coldim - rowdim);
     if (!gwy_line_check_target_part(target, lpart, res[leveldim], &pos, &len))
         return;
@@ -516,17 +516,17 @@ gwy_brick_extract_line(const GwyBrick *brick,
     gdouble *lbase = target->data + pos;
     const gdouble *bbase;
     guint stride;
-    if (leveldim == GWY_DIMEN_Z) {
+    if (leveldim == GWY_DIMENSION_Z) {
         // @col is column, @row is row, @level is level
         bbase = brick->data + (level*brick->yres + row)*brick->xres + col;
         stride = brick->xres * brick->yres;
     }
-    else if (leveldim == GWY_DIMEN_Y) {
+    else if (leveldim == GWY_DIMENSION_Y) {
         // @col is column, @row is level, @level is row
         bbase = brick->data + (row*brick->yres + level)*brick->xres + col;
         stride = brick->xres;
     }
-    else if (leveldim == GWY_DIMEN_X) {
+    else if (leveldim == GWY_DIMENSION_X) {
         // @col is row, @row is level, @level is column
         bbase = brick->data + (row*brick->yres + col)*brick->xres + level;
         stride = 1;

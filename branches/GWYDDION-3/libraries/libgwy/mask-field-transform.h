@@ -26,10 +26,10 @@
 G_BEGIN_DECLS
 
 void          gwy_mask_field_transform_congruent(GwyMaskField *field,
-                                                 GwyPlaneCongruenceType transformation);
+                                                 GwyPlaneCongruence transformation);
 GwyMaskField* gwy_mask_field_new_congruent      (const GwyMaskField *field,
                                                  const GwyFieldPart *fpart,
-                                                 GwyPlaneCongruenceType transformation)  G_GNUC_MALLOC;
+                                                 GwyPlaneCongruence transformation)  G_GNUC_MALLOC;
 
 G_END_DECLS
 

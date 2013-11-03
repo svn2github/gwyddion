@@ -799,7 +799,7 @@ regularise_preview(const GwySurface *surface,
 
 static GwyField*
 regularise(const GwySurface *surface,
-           GwySurfaceRegularizeType method,
+           GwySurfaceRegularization method,
            gboolean full,
            gdouble xfrom, gdouble xto,
            gdouble yfrom, gdouble yto,
@@ -857,7 +857,7 @@ regularise(const GwySurface *surface,
         field->yreal = (ylen)*yres/(yres - 1.0);
     field->yoff = yfrom - 0.5*gwy_field_dy(field);
 
-    if (method == GWY_SURFACE_REGULARIZE_PREVIEW)
+    if (method == GWY_SURFACE_REGULARIZATION_PREVIEW)
         regularise_preview(surface, field);
     else
         g_assert_not_reached();
@@ -895,7 +895,7 @@ regularise(const GwySurface *surface,
  **/
 GwyField*
 gwy_surface_regularize_full(const GwySurface *surface,
-                            GwySurfaceRegularizeType method,
+                            GwySurfaceRegularization method,
                             guint xres, guint yres)
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
@@ -927,7 +927,7 @@ gwy_surface_regularize_full(const GwySurface *surface,
  **/
 GwyField*
 gwy_surface_regularize(const GwySurface *surface,
-                       GwySurfaceRegularizeType method,
+                       GwySurfaceRegularization method,
                        gdouble xfrom, gdouble xto,
                        gdouble yfrom, gdouble yto,
                        guint xres, guint yres)
@@ -1207,11 +1207,11 @@ gwy_surface_set(const GwySurface *surface,
  **/
 
 /**
- * GwySurfaceRegularizeType:
- * @GWY_SURFACE_REGULARIZE_PREVIEW: Quick and dirty method that does not
- *                                  require triangulation.  It should, however,
- *                                  provide a result usable for displaying the
- *                                  surface.
+ * GwySurfaceRegularization:
+ * @GWY_SURFACE_REGULARIZATION_PREVIEW: Quick and dirty method that does not
+ *                                      require triangulation.  It should,
+ *                                      however, provide a result usable for
+ *                                      displaying the surface.
  *
  * Surface regularisation method.
  **/

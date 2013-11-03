@@ -37,8 +37,8 @@ typedef enum {
 void gwy_brick_summarize_lines(const GwyBrick *brick,
                                const GwyBrickPart *bpart,
                                GwyField *target,
-                               GwyDimenType coldim,
-                               GwyDimenType rowdim,
+                               GwyDimension coldim,
+                               GwyDimension rowdim,
                                GwyBrickLineSummary quantity);
 
 G_END_DECLS

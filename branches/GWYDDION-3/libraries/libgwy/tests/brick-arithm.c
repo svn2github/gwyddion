@@ -426,147 +426,147 @@ test_brick_compatibility_field_res(void)
     GwyField *field4 = gwy_field_new_sized(2, 2, FALSE);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, GWY_FIELD_COMPAT_RES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, GWY_FIELD_COMPAT_XRES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, GWY_FIELD_COMPAT_YRES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, GWY_FIELD_COMPAT_DX);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, GWY_FIELD_COMPAT_DY);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, GWY_FIELD_COMPAT_DXDY);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, GWY_FIELD_COMPAT_DX);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, GWY_FIELD_COMPAT_DX);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, GWY_FIELD_COMPAT_DY);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, GWY_FIELD_COMPAT_DY);
 
@@ -592,147 +592,147 @@ test_brick_compatibility_field_real(void)
     gwy_field_set_yreal(field4, 2.0);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YRES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, GWY_FIELD_COMPAT_REAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, GWY_FIELD_COMPAT_XREAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_XREAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_YREAL),
                      ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_REAL),
                      ==, GWY_FIELD_COMPAT_YREAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, GWY_FIELD_COMPAT_DX);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, GWY_FIELD_COMPAT_DY);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, GWY_FIELD_COMPAT_DXDY);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, GWY_FIELD_COMPAT_DX);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, GWY_FIELD_COMPAT_DX);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DY),
                      ==, GWY_FIELD_COMPAT_DY);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_DXDY),
                      ==, GWY_FIELD_COMPAT_DY);
 
@@ -764,51 +764,51 @@ test_brick_compatibility_field_units(void)
     gwy_unit_set_from_string(gwy_field_get_zunit(field4), "A", NULL);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_LATERAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_VALUE),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field1, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field1, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_UNITS),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_LATERAL),
                      ==, GWY_FIELD_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_VALUE),
                      ==, GWY_FIELD_COMPAT_VALUE);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field2, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field2, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_UNITS),
                      ==, GWY_FIELD_COMPAT_UNITS);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_LATERAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_VALUE),
                      ==, GWY_FIELD_COMPAT_VALUE);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field3, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field3, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_UNITS),
                      ==, GWY_FIELD_COMPAT_VALUE);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_LATERAL),
                      ==, GWY_FIELD_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_VALUE),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_field
-                           (brick, field4, GWY_DIMEN_X, GWY_DIMEN_Y,
+                           (brick, field4, GWY_DIMENSION_X, GWY_DIMENSION_Y,
                             GWY_FIELD_COMPAT_UNITS),
                      ==, GWY_FIELD_COMPAT_LATERAL);
 
@@ -827,27 +827,27 @@ test_brick_compatibility_line_res(void)
     GwyLine *line2 = gwy_line_new_sized(5, FALSE);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_RES),
                      ==, GWY_LINE_COMPAT_RES);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_DX),
                      ==, GWY_LINE_COMPAT_DX);
 
@@ -866,27 +866,27 @@ test_brick_compatibility_line_real(void)
     gwy_line_set_real(line2, 2.0);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_RES),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_REAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_REAL),
                      ==, GWY_LINE_COMPAT_REAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_DX),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_DX),
                      ==, GWY_LINE_COMPAT_DX);
 
@@ -914,51 +914,51 @@ test_brick_compatibility_line_units(void)
     gwy_unit_set_from_string(gwy_line_get_yunit(line4), "A", NULL);
 
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_LATERAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_VALUE),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line1, GWY_DIMEN_Z,
+                           (brick, line1, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_UNITS),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_LATERAL),
                      ==, GWY_LINE_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_VALUE),
                      ==, GWY_LINE_COMPAT_VALUE);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line2, GWY_DIMEN_Z,
+                           (brick, line2, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_UNITS),
                      ==, GWY_LINE_COMPAT_UNITS);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line3, GWY_DIMEN_Z,
+                           (brick, line3, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_LATERAL),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line3, GWY_DIMEN_Z,
+                           (brick, line3, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_VALUE),
                      ==, GWY_LINE_COMPAT_VALUE);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line3, GWY_DIMEN_Z,
+                           (brick, line3, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_UNITS),
                      ==, GWY_LINE_COMPAT_VALUE);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line4, GWY_DIMEN_Z,
+                           (brick, line4, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_LATERAL),
                      ==, GWY_LINE_COMPAT_LATERAL);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line4, GWY_DIMEN_Z,
+                           (brick, line4, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_VALUE),
                      ==, 0);
     g_assert_cmpuint(gwy_brick_is_incompatible_with_line
-                           (brick, line4, GWY_DIMEN_Z,
+                           (brick, line4, GWY_DIMENSION_Z,
                             GWY_LINE_COMPAT_UNITS),
                      ==, GWY_LINE_COMPAT_LATERAL);
 

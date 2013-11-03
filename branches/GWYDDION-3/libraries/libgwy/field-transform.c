@@ -22,6 +22,7 @@
 #include "libgwy/math.h"
 #include "libgwy/field-transform.h"
 #include "libgwy/mask-field.h"
+#include "libgwy/types.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
@@ -210,7 +211,7 @@ transform_congruent_to(const GwyField *source,
                        guint width, guint height,
                        GwyField *dest,
                        guint destcol, guint destrow,
-                       GwyPlaneCongruenceType transformation)
+                       GwyPlaneCongruence transformation)
 {
     if (transformation == GWY_PLANE_IDENTITY)
         copy_to(source, col, row, width, height, dest, destcol, destrow);
@@ -291,10 +292,9 @@ transform_congruent_to(const GwyField *source,
  * Returns: %TRUE if @transformation is transposing.
  **/
 gboolean
-gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)
+gwy_plane_congruence_is_transposition(GwyPlaneCongruence transformation)
 {
-    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
-                         FALSE);
+    g_return_val_if_fail(gwy_plane_congruence_is_valid(transformation), FALSE);
     return (transformation == GWY_PLANE_MIRROR_DIAGONALLY
             || transformation == GWY_PLANE_MIRROR_ANTIDIAGONALLY
             || transformation == GWY_PLANE_ROTATE_CLOCKWISE
@@ -312,11 +312,11 @@ gwy_plane_congruence_is_transposition(GwyPlaneCongruenceType transformation)
  *
  * Returns: The inverse transformation of @transformation.
  **/
-GwyPlaneCongruenceType
-gwy_plane_congruence_invert(GwyPlaneCongruenceType transformation)
+GwyPlaneCongruence
+gwy_plane_congruence_invert(GwyPlaneCongruence transformation)
 {
-    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
-                         FALSE);
+    g_return_val_if_fail(gwy_plane_congruence_is_valid(transformation),
+                         GWY_PLANE_IDENTITY);
     if (transformation == GWY_PLANE_ROTATE_CLOCKWISE)
         return GWY_PLANE_ROTATE_COUNTERCLOCKWISE;
     if (transformation == GWY_PLANE_ROTATE_COUNTERCLOCKWISE)
@@ -344,10 +344,10 @@ gwy_plane_congruence_invert(GwyPlaneCongruenceType transformation)
  **/
 void
 gwy_field_transform_congruent(GwyField *field,
-                              GwyPlaneCongruenceType transformation)
+                              GwyPlaneCongruence transformation)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    g_return_if_fail(gwy_plane_congruence_is_valid(transformation));
 
     if (!gwy_plane_congruence_is_transposition(transformation)) {
         if (transformation == GWY_PLANE_IDENTITY)
@@ -428,13 +428,12 @@ gwy_field_transform_congruent(GwyField *field,
 GwyField*
 gwy_field_new_congruent(const GwyField *field,
                         const GwyFieldPart *fpart,
-                        GwyPlaneCongruenceType transformation)
+                        GwyPlaneCongruence transformation)
 {
     guint col, row, width, height;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height))
         return NULL;
-    g_return_val_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE,
-                         NULL);
+    g_return_val_if_fail(gwy_plane_congruence_is_valid(transformation), NULL);
 
     gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
     guint dwidth = is_trans ? height : width;
@@ -515,14 +514,14 @@ gwy_field_copy_congruent(const GwyField *src,
                          GwyField *dest,
                          guint destcol,
                          guint destrow,
-                         GwyPlaneCongruenceType transformation)
+                         GwyPlaneCongruence transformation)
 {
     guint col, row, width, height;
     gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
     if (!gwy_field_limit_parts(src, srcpart, dest, destcol, destrow,
                                is_trans, &col, &row, &width, &height))
         return;
-    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    g_return_if_fail(gwy_plane_congruence_is_valid(transformation));
 
     // Now we have good dimensions of the copied area but at a bad position.
     // The result should be the same as first performing the transformation of
@@ -563,7 +562,7 @@ static void
 transform_offsets(GwyField *dest,
                   gdouble xoff, gdouble yoff,
                   gdouble xend, gdouble yend,
-                  GwyPlaneCongruenceType transformation,
+                  GwyPlaneCongruence transformation,
                   gdouble xaxis,
                   gdouble yaxis)
 {
@@ -644,13 +643,13 @@ void
 gwy_field_transform_offsets(const GwyField *source,
                             const GwyFieldPart *srcpart,
                             GwyField *dest,
-                            GwyPlaneCongruenceType transformation,
+                            GwyPlaneCongruence transformation,
                             const GwyXY *origin)
 {
     guint col, row, width, height;
     if (!gwy_field_check_part(source, srcpart, &col, &row, &width, &height))
         return;
-    g_return_if_fail(transformation <= GWY_PLANE_ROTATE_COUNTERCLOCKWISE);
+    g_return_if_fail(gwy_plane_congruence_is_valid(transformation));
     g_return_if_fail(GWY_IS_FIELD(dest));
     gboolean is_trans = gwy_plane_congruence_is_transposition(transformation);
     if (is_trans)
@@ -699,7 +698,7 @@ gwy_field_transform_offsets(const GwyField *source,
  **/
 
 /**
- * GwyPlaneCongruenceType:
+ * GwyPlaneCongruence:
  * @GWY_PLANE_IDENTITY: Identity, i.e. no transformation at all.
  * @GWY_PLANE_MIRROR_HORIZONTALLY: Horizontal mirroring, i.e. reflection about
  *                                 a vertical axis.
@@ -715,7 +714,7 @@ gwy_field_transform_offsets(const GwyField *source,
  *
  * Type of plane congruences.
  *
- * More precisely, #GwyPlaneCongruenceType represents transformations that
+ * More precisely, #GwyPlaneCongruence represents transformations that
  * can be performed with pixel fields, leading to precise 1-to-1 pixel-wise
  * mapping.
  **/

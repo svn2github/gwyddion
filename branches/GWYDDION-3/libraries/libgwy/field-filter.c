@@ -1187,7 +1187,7 @@ static void
 filter_5x5(const GwyField *field,
            const GwyFieldPart *fpart,
            GwyField *target,
-           GwyFilterType filter,
+           GwyStandardFilter filter,
            GwyExterior exterior,
            gdouble fill_value)
 {
@@ -1217,11 +1217,11 @@ filter_5x5(const GwyField *field,
             for (guint ii = 0; ii < 5; ii++)
                 gwy_assign(workspace + 5*ii, extdata + (i + ii)*xsize + j, 5);
 
-            if (filter == GWY_FILTER_KUWAHARA)
+            if (filter == GWY_STANDARD_FILTER_KUWAHARA)
                 *trow = kuwahara_block(workspace);
-            else if (filter == GWY_FILTER_STEP)
+            else if (filter == GWY_STANDARD_FILTER_STEP)
                 *trow = step_block(workspace);
-            else if (filter == GWY_FILTER_NONLINEARITY)
+            else if (filter == GWY_STANDARD_FILTER_NONLINEARITY)
                 *trow = nonlinearity_block(workspace, dx, dy);
             else {
                 g_return_if_reached();
@@ -1302,7 +1302,7 @@ void
 gwy_field_filter_standard(const GwyField *field,
                           const GwyFieldPart* rectangle,
                           GwyField *target,
-                          GwyFilterType filter,
+                          GwyStandardFilter filter,
                           GwyExterior exterior,
                           gdouble fill_value)
 {
@@ -1366,41 +1366,41 @@ gwy_field_filter_standard(const GwyField *field,
     };
 
 
-    if (filter == GWY_FILTER_KUWAHARA
-        || filter == GWY_FILTER_STEP
-        || filter == GWY_FILTER_NONLINEARITY)
+    if (filter == GWY_STANDARD_FILTER_KUWAHARA
+        || filter == GWY_STANDARD_FILTER_STEP
+        || filter == GWY_STANDARD_FILTER_NONLINEARITY)
         filter_5x5(field, rectangle, target, filter, exterior, fill_value);
-    else if (filter == GWY_FILTER_SOBEL)
+    else if (filter == GWY_STANDARD_FILTER_SOBEL)
         combined_gradient_filter(field, rectangle, target,
                                  hsobel, vsobel, 3, 3,
                                  exterior, fill_value);
-    else if (filter == GWY_FILTER_PREWITT)
+    else if (filter == GWY_STANDARD_FILTER_PREWITT)
         combined_gradient_filter(field, rectangle, target,
                                  hprewitt, vprewitt, 3, 3,
                                  exterior, fill_value);
-    else if (filter == GWY_FILTER_SCHARR)
+    else if (filter == GWY_STANDARD_FILTER_SCHARR)
         combined_gradient_filter(field, rectangle, target,
                                  hscharr, vscharr, 3, 3,
                                  exterior, fill_value);
     else {
         GwyField *kernel;
-        if (filter == GWY_FILTER_LAPLACE)
+        if (filter == GWY_STANDARD_FILTER_LAPLACE)
             kernel = make_kernel_from_data(laplace, 3, 3);
-        if (filter == GWY_FILTER_LAPLACE_SCHARR)
+        if (filter == GWY_STANDARD_FILTER_LAPLACE_SCHARR)
             kernel = make_kernel_from_data(laplace_scharr, 3, 3);
-        else if (filter == GWY_FILTER_HSOBEL)
+        else if (filter == GWY_STANDARD_FILTER_HSOBEL)
             kernel = make_kernel_from_data(hsobel, 3, 3);
-        else if (filter == GWY_FILTER_VSOBEL)
+        else if (filter == GWY_STANDARD_FILTER_VSOBEL)
             kernel = make_kernel_from_data(vsobel, 3, 3);
-        else if (filter == GWY_FILTER_HPREWITT)
+        else if (filter == GWY_STANDARD_FILTER_HPREWITT)
             kernel = make_kernel_from_data(hprewitt, 3, 3);
-        else if (filter == GWY_FILTER_VPREWITT)
+        else if (filter == GWY_STANDARD_FILTER_VPREWITT)
             kernel = make_kernel_from_data(vprewitt, 3, 3);
-        else if (filter == GWY_FILTER_HSCHARR)
+        else if (filter == GWY_STANDARD_FILTER_HSCHARR)
             kernel = make_kernel_from_data(hscharr, 3, 3);
-        else if (filter == GWY_FILTER_VSCHARR)
+        else if (filter == GWY_STANDARD_FILTER_VSCHARR)
             kernel = make_kernel_from_data(vscharr, 3, 3);
-        else if (filter == GWY_FILTER_DECHECKER)
+        else if (filter == GWY_STANDARD_FILTER_DECHECKER)
             kernel = make_kernel_from_data(dechecker, 5, 5);
         else {
             g_critical("Bad standard filter type %u.", filter);
@@ -1426,42 +1426,47 @@ gwy_field_filter_standard(const GwyField *field,
  **/
 
 /**
- * GwyFilterType:
- * @GWY_FILTER_LAPLACE: Laplacian filter.
- *                      It represents the limit of Laplacian of Gaussians for
- *                      small Gaussian size.
- * @GWY_FILTER_LAPLACE_SCHARR: Scharr's Laplacian filter optimised for
- *                             rotational symmetry.
- * @GWY_FILTER_HSOBEL: Horizontal Sobel filter.
- *                     It represents the horizontal derivative.
- * @GWY_FILTER_VSOBEL: Vertical Sobel filter.
- *                     It represents the vertical derivative.
- * @GWY_FILTER_SOBEL: Sobel filter.
- *                    It represents the absolute value of the derivative.
- * @GWY_FILTER_HPREWITT: Horizontal Prewitt filter.
- *                       It represents the horizontal derivative.
- * @GWY_FILTER_VPREWITT: Vertical Prewitt filter.
- *                       It represents the vertical derivative.
- * @GWY_FILTER_PREWITT: Prewitt filter.
- *                      It represents the absolute value of the derivative.
- * @GWY_FILTER_HSCHARR: Horizontal Scharr filter.
- *                      It represents the horizontal derivative.
- * @GWY_FILTER_VSCHARR: Vertical Scharr filter.
- *                      It represents the vertical derivative.
- * @GWY_FILTER_SCHARR: Scharr filter.
- *                     It represents the absolute value of the derivative.
- * @GWY_FILTER_DECHECKER: Checker-pattern removal filter.
- *                        It behaves like a slightly smoothing filter except
- *                        for single-pixel checker pattern that, if present, is
- *                        almost completely removed.
- * @GWY_FILTER_KUWAHARA: Kuwahara edge-preserving smoothing filter.  This is
- *                       a non-linear (non-convolution) filter.
- * @GWY_FILTER_STEP: Non-linear rank-based step detection filter.  It is
- *                   somewhat more smoothing than Sobel, Prewitt and Scharr but
- *                   considerably more noise-resistant.
- * @GWY_FILTER_NONLINEARITY: Local non-linearity edge detection filter.
- *                           It really detects edges, not steps as most other
- *                           filters do.
+ * GwyStandardFilter:
+ * @GWY_STANDARD_FILTER_LAPLACE: Laplacian filter.
+ *                               It represents the limit of Laplacian of
+ *                               Gaussians for small Gaussian size.
+ * @GWY_STANDARD_FILTER_LAPLACE_SCHARR: Scharr's Laplacian filter optimised for
+ *                                      rotational symmetry.
+ * @GWY_STANDARD_FILTER_HSOBEL: Horizontal Sobel filter.
+ *                              It represents the horizontal derivative.
+ * @GWY_STANDARD_FILTER_VSOBEL: Vertical Sobel filter.
+ *                              It represents the vertical derivative.
+ * @GWY_STANDARD_FILTER_SOBEL: Sobel filter.
+ *                             It represents the absolute value of the
+ *                             derivative.
+ * @GWY_STANDARD_FILTER_HPREWITT: Horizontal Prewitt filter.
+ *                                It represents the horizontal derivative.
+ * @GWY_STANDARD_FILTER_VPREWITT: Vertical Prewitt filter.
+ *                                It represents the vertical derivative.
+ * @GWY_STANDARD_FILTER_PREWITT: Prewitt filter.
+ *                               It represents the absolute value of the
+ *                               derivative.
+ * @GWY_STANDARD_FILTER_HSCHARR: Horizontal Scharr filter.
+ *                               It represents the horizontal derivative.
+ * @GWY_STANDARD_FILTER_VSCHARR: Vertical Scharr filter.
+ *                               It represents the vertical derivative.
+ * @GWY_STANDARD_FILTER_SCHARR: Scharr filter.
+ *                              It represents the absolute value of the
+ *                              derivative.
+ * @GWY_STANDARD_FILTER_DECHECKER: Checker-pattern removal filter.
+ *                                 It behaves like a slightly smoothing filter
+ *                                 except for single-pixel checker pattern
+ *                                 that, if present, is almost completely
+ *                                 removed.
+ * @GWY_STANDARD_FILTER_KUWAHARA: Kuwahara edge-preserving smoothing filter.
+ *                                This is a non-linear (non-convolution)
+ *                                filter.
+ * @GWY_STANDARD_FILTER_STEP: Non-linear rank-based step detection filter.
+ *                            It is somewhat more smoothing than Sobel, Prewitt
+ *                            and Scharr but considerably more noise-resistant.
+ * @GWY_STANDARD_FILTER_NONLINEARITY: Local non-linearity edge detection
+ *                                    filter.  It really detects edges, not
+ *                                    steps as most other filters do.
  *
  * Predefined standard filter types.
  *

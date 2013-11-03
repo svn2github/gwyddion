@@ -883,11 +883,11 @@ gwy_field_max_field(const GwyField *src,
  * and @dest must be two different fields.
  *
  * Positive values in @src determine the area of possible modification of
- * @dest.  For %GWY_SCULPT_UPWARD the minimum @m of the corresponding pixels
+ * @dest.  For %GWY_SCULPTING_UPWARD the minimum @m of the corresponding pixels
  * in @dest is found and then the values in @dest are modified to maximum of
  * the current value and source value plus @m.  The net effect is that an
  * upward protrusion is formed in @dest corresponding to @src shape.  For
- * %GWY_SCULPT_DOWNWARD the modification is the same except downwards and
+ * %GWY_SCULPTING_DOWNWARD the modification is the same except downwards and
  * using negative values in @src.
  **/
 void
@@ -896,7 +896,7 @@ gwy_field_sculpt(const GwyField *src,
                  GwyField *dest,
                  gint destcol,
                  gint destrow,
-                 GwySculptType method,
+                 GwySculpting method,
                  gboolean periodic)
 {
     guint col, row, width, height;
@@ -904,7 +904,7 @@ gwy_field_sculpt(const GwyField *src,
         return;
     g_return_if_fail(GWY_IS_FIELD(dest));
     g_return_if_fail(dest != src);
-    g_return_if_fail(gwy_sculpt_type_is_valid(method));
+    g_return_if_fail(gwy_sculpting_is_valid(method));
 
     guint dxres = dest->xres, dyres = dest->yres;
     if (periodic) {
@@ -942,12 +942,12 @@ gwy_field_sculpt(const GwyField *src,
     SculptBlockFindFunc findm;
     SculptBlockFunc sculpt;
     gdouble m, mempty;
-    if (method == GWY_SCULPT_UPWARD) {
+    if (method == GWY_SCULPTING_UPWARD) {
         m = mempty = G_MAXDOUBLE;
         findm = &sculpt_block_find_max;
         sculpt = &sculpt_block_upward;
     }
-    else if (method == GWY_SCULPT_DOWNWARD) {
+    else if (method == GWY_SCULPTING_DOWNWARD) {
         m = mempty = -G_MAXDOUBLE;
         findm = &sculpt_block_find_min;
         sculpt = &sculpt_block_downward;
@@ -1204,9 +1204,9 @@ gwy_field_clamp(GwyField *field,
  **/
 
 /**
- * GwySculptType:
- * @GWY_SCULPT_UPWARD: Protrude the modified surface upwards.
- * @GWY_SCULPT_DOWNWARD: Protrude the modified surface downwards.
+ * GwySculpting:
+ * @GWY_SCULPTING_UPWARD: Protrude the modified surface upwards.
+ * @GWY_SCULPTING_DOWNWARD: Protrude the modified surface downwards.
  *
  * Type of local surface shaping operations.
  *

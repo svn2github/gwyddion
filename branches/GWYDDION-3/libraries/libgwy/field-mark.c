@@ -66,7 +66,7 @@ gwy_field_mark_outliers(const GwyField *field,
                         GwyMaskField *outliers,
                         const GwyMaskField *mask,
                         GwyMasking masking,
-                        GwyDeviationType deviation,
+                        GwyDeviation deviation,
                         gdouble threshold)
 {
     guint col, row, width, height, maskcol, maskrow;
@@ -80,7 +80,7 @@ gwy_field_mark_outliers(const GwyField *field,
                                      &targetcol, &targetrow))
          return 0;
 
-    g_return_val_if_fail(gwy_deviation_type_is_valid(deviation), 0);
+    g_return_val_if_fail(gwy_deviation_is_valid(deviation), 0);
     g_return_val_if_fail(threshold >= 0.0, 0);
     if (threshold == 0.0)
         threshold = 3.5;
@@ -400,7 +400,7 @@ gwy_field_mark_extrema(const GwyField *field,
  **/
 
 /**
- * GwyDeviationType:
+ * GwyDeviation:
  * @GWY_DEVIATION_BOTH: Deviation towards both smaller and larger values.
  * @GWY_DEVIATION_DOWN: Deviation towards smaller values.
  * @GWY_DEVIATION_UP: Deviation towards larger values.

@@ -29,11 +29,11 @@ G_BEGIN_DECLS
 #define GWY_SQRT_PI 1.77245385090551602729816748334114518279754945612237
 
 typedef enum {
-    GWY_DIMEN_X = 0,
-    GWY_DIMEN_Y = 1,
-    GWY_DIMEN_Z = 2,
-    GWY_DIMEN_W = 3,
-} GwyDimenType;
+    GWY_DIMENSION_X = 0,
+    GWY_DIMENSION_Y = 1,
+    GWY_DIMENSION_Z = 2,
+    GWY_DIMENSION_W = 3,
+} GwyDimension;
 
 typedef struct {
     gdouble x;

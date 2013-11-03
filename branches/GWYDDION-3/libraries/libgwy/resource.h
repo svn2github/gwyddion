@@ -47,7 +47,7 @@ typedef enum {
     GWY_RESOURCE_MANAGEMENT_NONE = 0,
     GWY_RESOURCE_MANAGEMENT_MANUAL,
     GWY_RESOURCE_MANAGEMENT_MAIN,
-} GwyResourceManagementType;
+} GwyResourceManagement;
 
 GQuark gwy_resource_error_quark(void) G_GNUC_CONST;
 
@@ -132,8 +132,8 @@ void                        gwy_resource_type_set_managed          (GType type,
 gchar*                      gwy_resource_type_get_managed_directory(GType type);
 void                        gwy_resource_type_set_managed_directory(GType type,
                                                                     const gchar *dirname);
-GwyResourceManagementType   gwy_resources_get_management_type      (void)                                   G_GNUC_PURE;
-void                        gwy_resources_set_management_type      (GwyResourceManagementType type);
+GwyResourceManagement       gwy_resources_get_management_type      (void)                                   G_GNUC_PURE;
+void                        gwy_resources_set_management_type      (GwyResourceManagement type);
 void                        gwy_resource_type_flush                (GType type);
 void                        gwy_resources_flush                    (void);
 void                        gwy_resources_lock                     (void);
