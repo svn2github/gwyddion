@@ -132,8 +132,8 @@ void                        gwy_resource_type_set_managed          (GType type,
 gchar*                      gwy_resource_type_get_managed_directory(GType type);
 void                        gwy_resource_type_set_managed_directory(GType type,
                                                                     const gchar *dirname);
-GwyResourceManagement       gwy_resources_get_management_type      (void)                                   G_GNUC_PURE;
-void                        gwy_resources_set_management_type      (GwyResourceManagement type);
+GwyResourceManagement       gwy_resources_get_management           (void)                                   G_GNUC_PURE;
+void                        gwy_resources_set_management           (GwyResourceManagement type);
 void                        gwy_resource_type_flush                (GType type);
 void                        gwy_resources_flush                    (void);
 void                        gwy_resources_lock                     (void);
