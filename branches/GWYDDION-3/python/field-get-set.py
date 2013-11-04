@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# vim: set fileencoding=utf-8 :
 # Measure the execution speed of various method how to multiply all field
 # values with 1.1.  The speed can differ by factor 10⁴...
 import os, re
@@ -29,6 +30,10 @@ time_mult('lib',
 time_mult('set-data',
           'd = [1.1*x for x in field.get_data(None, None, 0)]\n'
           'field.set_data(None, None, 0, d)',
+          1)
+
+time_mult('set-data-inline',
+          'field.set_data(None, None, 0, [1.1*x for x in field.get_data(None, None, 0)])',
           1)
 
 time_mult('apply-lambda',
