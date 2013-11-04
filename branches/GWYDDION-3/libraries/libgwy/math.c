@@ -923,6 +923,37 @@ gwy_cholesky_decompose(gdouble *a, guint n)
 }
 
 /**
+ * gwy_cholesky_decompose__gi: (rename-to gwy_cholesky_decompose)
+ * @inmatrix: (array length=nin) (in):
+ *            Lower triangular part of positive definite matrix.
+ * @nin: (in):
+ * @nout: (out):
+ *
+ * Decomposes a symmetric positive definite matrix.
+ *
+ * Returns: (array length=nout) (transfer full) (allow-none):
+ *          Lower triangular part of the decomposision, if it succeeded.
+ **/
+gdouble*
+gwy_cholesky_decompose__gi(const gdouble *inmatrix,
+                           guint nin,
+                           guint *nout)
+{
+    *nout = 0;
+    guint n = floor(sqrt(2.0*nin));
+    g_return_val_if_fail(gwy_triangular_matrix_length(n) == nin, NULL);
+
+    gdouble *a = g_memdup(inmatrix, nin*sizeof(gdouble));
+    if (gwy_cholesky_decompose(a, n)) {
+        *nout = n;
+        return a;
+    }
+
+    g_free(a);
+    return NULL;
+}
+
+/**
  * gwy_cholesky_solve:
  * @decomp: Lower triangular part of Cholesky decomposition as computed
  *          by gwy_cholesky_decompose().
@@ -954,6 +985,41 @@ gwy_cholesky_solve(const gdouble *a, gdouble *b, guint n)
             b[j-1] -= SLi(a, i, j-1)*b[i];
         b[j-1] /= SLi(a, j-1, j-1);
     }
+}
+
+/**
+ * gwy_cholesky_solve__gi: (rename-to gwy_cholesky_solve)
+ * @inmatrix: (array length=nin) (in):
+ *            Lower triangular part of decomposed positive definite matrix.
+ * @nin: (in):
+ * @inrhs: (array length=nrhs) (in):
+ *         Right hand side vector.
+ * @nrhs: (in):
+ * @noutrhs: (out):
+ *
+ * Solves a system of linear equations with predecomposed symmetric positive
+ * definite matrix.
+ *
+ * Once the matrix is decomposed, this function can be used repeatedly to
+ * calculate the solution of the system with different right-hand sides.
+ *
+ * Returns: (array length=noutrhs) (transfer full) (allow-none):
+ *          Solution of the linear system.
+ **/
+gdouble*
+gwy_cholesky_solve__gi(const gdouble *inmatrix,
+                       guint nin,
+                       const gdouble *inrhs,
+                       guint nrhs,
+                       guint *noutrhs)
+{
+    *noutrhs = 0;
+    g_return_val_if_fail(gwy_triangular_matrix_length(nrhs) == nin, NULL);
+
+    gdouble *sol = g_memdup(inrhs, nin*sizeof(gdouble));
+    gwy_cholesky_solve(inmatrix, sol, nrhs);
+    *noutrhs = nrhs;
+    return sol;
 }
 
 /**
@@ -995,6 +1061,37 @@ gwy_cholesky_invert(gdouble *a, guint n)
             a[q + i] = x[i];
     }
     return TRUE;
+}
+
+/**
+ * gwy_cholesky_invert__gi: (rename-to gwy_cholesky_invert)
+ * @inmatrix: (array length=nin) (in):
+ *            Lower triangular part of positive definite matrix.
+ * @nin: (in):
+ * @nout: (out):
+ *
+ * Inverts a symmetric positive definite matrix.
+ *
+ * Returns: (array length=nout) (transfer full) (allow-none):
+ *          Lower triangular part of the inverse matrix, if it succeeded.
+ **/
+gdouble*
+gwy_cholesky_invert__gi(const gdouble *inmatrix,
+                        guint nin,
+                        guint *nout)
+{
+    *nout = 0;
+    guint n = floor(sqrt(2.0*nin));
+    g_return_val_if_fail(gwy_triangular_matrix_length(n) == nin, NULL);
+
+    gdouble *a = g_memdup(inmatrix, nin*sizeof(gdouble));
+    if (gwy_cholesky_invert(a, n)) {
+        *nout = n;
+        return a;
+    }
+
+    g_free(a);
+    return NULL;
 }
 
 /**

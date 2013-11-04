@@ -214,6 +214,20 @@ GType     gwy_range_get_type(void)                  G_GNUC_CONST;
 GwyRange* gwy_range_copy    (const GwyRange *range) G_GNUC_MALLOC;
 void      gwy_range_free    (GwyRange *range);
 
+#ifdef __GI_SCANNER__
+gdouble* gwy_cholesky_decompose__gi(const gdouble *inmatrix,
+                                    guint nin,
+                                    guint *nout) G_GNUC_MALLOC;
+gdouble* gwy_cholesky_solve__gi(const gdouble *inmatrix,
+                                guint nin,
+                                const gdouble *inrhs,
+                                guint nrhs,
+                                guint *noutrhs) G_GNUC_MALLOC;
+gdouble* gwy_cholesky_invert__gi(const gdouble *inmatrix,
+                                 guint nin,
+                                 guint *nout) G_GNUC_MALLOC;
+#endif
+
 G_END_DECLS
 
 #endif
