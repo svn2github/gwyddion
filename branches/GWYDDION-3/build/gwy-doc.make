@@ -113,6 +113,7 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 		$(PYTHON) $(ADD_OBJECTS) $(DOC_MODULE)-sections.txt $(DOC_MODULE).hierarchy $(DOC_MODULE).interfaces $(ADDOBJECTS_OPTIONS); \
 		$(AWK) '/^[^ ]/{ignore=0}; /^(GFlags|GEnum|GBoxed)/{ignore=1}; {if(!ignore)print}' $(DOC_MODULE).hierarchy >$(DOC_MODULE).tmp && mv -f $(DOC_MODULE).tmp $(DOC_MODULE).hierarchy; \
 	fi
+	$(AM_V_at)sed -i '/__gi$$/d' $(DOC_MODULE)-sections.txt
 	$(AM_V_at)touch scan-build.stamp
 
 $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt: scan-build.stamp
