@@ -1925,6 +1925,129 @@ gwy_field_set(const GwyField *field,
 }
 
 /**
+ * gwy_field_get_data:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to extract, possibly %NULL which means entire @field.
+ * @mask: (allow-none):
+ *        A two-dimensional mask field.
+ * @masking: Masking mode to use.
+ * @ndata: (out):
+ *         Location to store the count of extracted data points.
+ *
+ * Extracts values from a data field into a newly allocated flat array.
+ *
+ * This function, paired with gwy_field_set_data() can be namely useful in
+ * language bindings.  Occassionally, however, extraction of values into a flat
+ * array is useful also in C, namely with masking.
+ *
+ * Returns: (array length=ndata) (transfer full):
+ *          A newly allocated array containing the values.
+ **/
+gdouble*
+gwy_field_get_data(const GwyField *field,
+                   const GwyFieldPart *fpart,
+                   const GwyMaskField *mask,
+                   GwyMasking masking,
+                   guint *ndata)
+{
+    *ndata = 0;
+
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow))
+        return g_new0(gdouble, 1);
+
+    guint xres = field->xres;
+    const gdouble *base = field->data + row*xres + col;
+    if (masking == GWY_MASK_IGNORE) {
+        *ndata = width*height;
+        gdouble *data = g_new(gdouble, *ndata);
+        for (guint i = 0; i < height; i++)
+            gwy_assign(data + i*width, base + i*xres, width);
+        return data;
+    }
+
+    GwyFieldPart mpart = { maskcol, maskrow, width, height };
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+
+    *ndata = gwy_mask_field_part_count(mask, &mpart, !invert);
+    gdouble *data = g_new(gdouble, *ndata);
+    guint count = 0;
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*xres;
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+        for (guint j = width; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert)
+                data[count++] = *d;
+            gwy_mask_iter_next(iter);
+        }
+    }
+    g_assert(count == *ndata);
+
+    return data;
+}
+
+/**
+ * gwy_field_set_data:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to set, possibly %NULL which means entire @field.
+ * @mask: (allow-none):
+ *        A two-dimensional mask field.
+ * @masking: Masking mode to use.
+ * @data: (array length=ndata):
+ *        Data values to copy to the field.
+ * @ndata: The number of data values to put to the field.  It must match the
+ *         number of pixels in the area, including masking.  Usually, the
+ *         count is obtained by a preceding gwy_field_get_data() call.
+ *
+ * Puts back values from a flat array to a data field.
+ *
+ * See gwy_field_get_data() for discussion.
+ **/
+void
+gwy_field_set_data(const GwyField *field,
+                   const GwyFieldPart *fpart,
+                   const GwyMaskField *mask,
+                   GwyMasking masking,
+                   const gdouble *data,
+                   guint ndata)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!gwy_field_check_mask(field, fpart, mask, &masking,
+                              &col, &row, &width, &height, &maskcol, &maskrow)
+        || !ndata)
+        return;
+
+    guint xres = field->xres;
+    gdouble *base = field->data + row*xres + col;
+    if (masking == GWY_MASK_IGNORE) {
+        g_return_if_fail(ndata == width*height);
+        for (guint i = 0; i < height; i++)
+            gwy_assign(base + i*xres, data + i*width, width);
+        return;
+    }
+
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint count = 0;
+    for (guint i = 0; i < height; i++) {
+        gdouble *d = base + i*xres;
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+        for (guint j = width; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert) {
+                g_return_if_fail(count < ndata);
+                *d = data[count++];
+            }
+            gwy_mask_iter_next(iter);
+        }
+    }
+    g_return_if_fail(count == ndata);
+}
+
+/**
  * SECTION: field
  * @title: GwyField
  * @short_description: Two-dimensional data in regular grid

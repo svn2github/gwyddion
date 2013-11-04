@@ -132,13 +132,24 @@ const gchar*    gwy_field_get_name       (const GwyField *field)          G_GNUC
 #define gwy_field_dy(field) \
     ((field)->yreal/(field)->yres)
 
-gdouble gwy_field_get(const GwyField *field,
-                      guint col,
-                      guint row);
-void    gwy_field_set(const GwyField *field,
-                      guint col,
-                      guint row,
-                      gdouble value);
+gdouble  gwy_field_get     (const GwyField *field,
+                            guint col,
+                            guint row)                 G_GNUC_PURE;
+void     gwy_field_set     (const GwyField *field,
+                            guint col,
+                            guint row,
+                            gdouble value);
+gdouble* gwy_field_get_data(const GwyField *field,
+                            const GwyFieldPart *fpart,
+                            const GwyMaskField *mask,
+                            GwyMasking masking,
+                            guint *ndata)              G_GNUC_MALLOC;
+void     gwy_field_set_data(const GwyField *field,
+                            const GwyFieldPart *fpart,
+                            const GwyMaskField *mask,
+                            GwyMasking masking,
+                            const gdouble *data,
+                            guint ndata);
 
 gboolean gwy_field_check_part       (const GwyField *field,
                                      const GwyFieldPart *fpart,

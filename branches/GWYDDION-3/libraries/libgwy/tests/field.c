@@ -1159,6 +1159,84 @@ test_field_set(void)
 }
 
 void
+test_field_get_data_unmasked(void)
+{
+    enum { max_size = 50, niter = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
+        guint width = g_rand_int_range(rng, 0, xres+1);
+        guint height = g_rand_int_range(rng, 0, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres+1 - width);
+        guint row = g_rand_int_range(rng, 0, yres+1 - height);
+        GwyFieldPart fpart = { col, row, width, height };
+
+        guint ndata;
+        gdouble *data = gwy_field_get_data(field, &fpart, NULL, GWY_MASK_IGNORE,
+                                           &ndata);
+        g_assert_cmpuint(ndata, ==, width*height);
+        for (guint i = 0; i < ndata; i++)
+            data[i] *= 2.0;
+        gwy_field_set_data(field, &fpart, NULL, GWY_MASK_IGNORE, data, ndata);
+
+        gwy_field_multiply(reference, &fpart, NULL, GWY_MASK_IGNORE, 2.0);
+        field_assert_equal(field, reference);
+
+        g_free(data);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_get_data_masked(void)
+{
+    enum { max_size = 50, niter = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        GwyField *reference = gwy_field_duplicate(field);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres+1 - width);
+        guint row = g_rand_int_range(rng, 0, yres+1 - height);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyMaskField *mask = random_mask_field(width, height, rng);
+        GwyMasking masking = (g_rand_boolean(rng)
+                              ? GWY_MASK_INCLUDE
+                              : GWY_MASK_EXCLUDE);
+
+        guint ndata;
+        gdouble *data = gwy_field_get_data(field, &fpart, mask, masking,
+                                           &ndata);
+        for (guint i = 0; i < ndata; i++)
+            data[i] *= 2.0;
+        gwy_field_set_data(field, &fpart, mask, masking, data, ndata);
+
+        gwy_field_multiply(reference, &fpart, mask, masking, 2.0);
+        field_assert_equal(field, reference);
+
+        g_free(data);
+        g_object_unref(mask);
+        g_object_unref(field);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_field_clear_offsets(void)
 {
     GwyField *field = gwy_field_new_sized(4, 4, TRUE);

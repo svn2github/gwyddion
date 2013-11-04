@@ -326,6 +326,8 @@ field/units
 field/units-assign
 field/get
 field/set
+field/get-data/unmasked
+field/get-data/masked
 field/clear-offsets
 field/check-part/good
 field/check-part/empty
