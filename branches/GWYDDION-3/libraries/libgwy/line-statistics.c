@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -75,7 +75,7 @@ gwy_line_sum_full(const GwyLine *line)
  * gwy_line_mean_full:
  * @line: A one-dimensional data line.
  *
- * Calculates the mean value of a line.
+ * Calculates the mean value of an entire line.
  *
  * Returns: The mean value.
  **/
@@ -88,6 +88,57 @@ gwy_line_mean_full(const GwyLine *line)
     for (guint i = line->res; i; i--, d++)
         mean += *d;
     return mean/line->res;
+}
+
+/**
+ * gwy_line_mean:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line to fill.  Pass %NULL to process entire @line.
+ * @mask: (allow-none):
+ *        A one dimensional mask line determing which values to take into
+ *        account.
+ * @masking: Masking mode to use.
+ *
+ * Calculates the mean value of a line.
+ *
+ * Returns: The mean value.  The mean value of no data is NaN.
+ **/
+gdouble
+gwy_line_mean(const GwyLine *line,
+              const GwyLinePart *lpart,
+              const GwyMaskLine *mask,
+              GwyMasking masking)
+{
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking, &pos, &len, &maskpos))
+        return NAN;
+
+    const gdouble *d = line->data + pos;
+    gdouble mean = 0.0;
+    guint n = 0;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = len; j; j--, d++)
+            mean += *d;
+        n = len;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskIter iter;
+        gwy_mask_line_iter_init(mask, iter, maskpos);
+        for (guint j = len; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert) {
+                mean += *d;
+                n++;
+            }
+            gwy_mask_iter_next(iter);
+        }
+    }
+
+    if (!n)
+        return NAN;
+    return mean/n;
 }
 
 /**
@@ -114,7 +165,7 @@ gwy_line_median_full(const GwyLine *line)
  * gwy_line_rms_full:
  * @line: A one-dimensional data line.
  *
- * Calculates the root mean square difference from mean of a line.
+ * Calculates the root mean square difference from mean of an entire line.
  *
  * Returns: The root mean square of differences from the mean value.
  **/
@@ -131,6 +182,62 @@ gwy_line_rms_full(const GwyLine *line)
     for (guint i = line->res; i; i--, d++)
         rms += (*d - avg)*(*d - avg);
     return sqrt(rms/line->res);
+}
+
+/**
+ * gwy_line_rms:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line to fill.  Pass %NULL to process entire @line.
+ * @mask: (allow-none):
+ *        A one dimensional mask line determing which values to take into
+ *        account.
+ * @masking: Masking mode to use.
+ *
+ * Calculates the root mean square of a line.
+ *
+ * Returns: The root mean square of differences from the mean value.  The rms
+ *          of no data is zero.
+ **/
+gdouble
+gwy_line_rms(const GwyLine *line,
+             const GwyLinePart *lpart,
+             const GwyMaskLine *mask,
+             GwyMasking masking)
+{
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking, &pos, &len, &maskpos))
+        return NAN;
+
+    const gdouble *d = line->data + pos;
+    gdouble rms = 0.0;
+    guint n = 0;
+    gdouble avg = gwy_line_mean(line, lpart, mask, masking);
+    if (isnan(avg))
+        return 0.0;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = len; j; j--, d++) {
+            gdouble v = *d - avg;
+            rms += v*v;
+        }
+        n = len;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskIter iter;
+        gwy_mask_line_iter_init(mask, iter, maskpos);
+        for (guint j = len; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert) {
+                gdouble v = *d - avg;
+                rms += v*v;
+                n++;
+            }
+            gwy_mask_iter_next(iter);
+        }
+    }
+
+    return sqrt(rms/n);
 }
 
 /**

@@ -942,6 +942,93 @@ test_line_compatibility_units(void)
     g_object_unref(line3);
 }
 
+static void
+line_arithmetic_operation_one(void (*operation)(GwyLine *line,
+                                                const GwyLinePart *fpart,
+                                                const GwyMaskLine *mask,
+                                                GwyMasking masking,
+                                                gdouble value),
+                              void (*operation_full)(GwyLine *line,
+                                                     gdouble value))
+{
+    enum { max_size = 129, niter = 60 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyLine *line = gwy_line_new_sized(res, TRUE);
+
+        guint len = g_rand_int_range(rng, 1, res+1);
+        guint pos = g_rand_int_range(rng, 0, res-len+1);
+        GwyLinePart lpart = { pos, len };
+        GwyMaskLine *mask = random_mask_line(len, rng);
+        GwyMasking masking = (g_rand_boolean(rng)
+                              ? GWY_MASK_INCLUDE
+                              : GWY_MASK_EXCLUDE);
+        guint n = gwy_mask_line_count(mask, NULL, masking == GWY_MASK_INCLUDE);
+
+        if (n == 0 || n == len) {
+            g_object_unref(mask);
+            g_object_unref(line);
+            continue;
+        }
+
+        gdouble value = g_rand_double(rng);
+        line_randomize(line, rng);
+        GwyLine *original = gwy_line_duplicate(line);
+        GwyLine *full = gwy_line_duplicate(line);
+        GwyLine *diff = gwy_line_new_alike(line, FALSE);
+        gdouble avg, rms;
+
+        operation(line, &lpart, mask, masking, value);
+        operation_full(full, value);
+
+        // Included data must match full.
+        gwy_line_copy_full(line, diff);
+        gwy_line_add_line(full, NULL, diff, 0, -1.0);
+
+        avg = gwy_line_mean(diff, &lpart, mask, masking);
+        rms = gwy_line_rms(diff, &lpart, mask, masking);
+        gwy_assert_floatval(avg, 0.0, 1e-14);
+        gwy_assert_floatval(rms, 0.0, 1e-14);
+
+        // Excluded data must match original.
+        gwy_line_copy_full(line, diff);
+        gwy_line_add_line(original, NULL, diff, 0, -1.0);
+
+        masking = GWY_MASK_INCLUDE + GWY_MASK_EXCLUDE - masking;
+        avg = gwy_line_mean(diff, &lpart, mask, masking);
+        rms = gwy_line_rms(diff, &lpart, mask, masking);
+        gwy_assert_floatval(avg, 0.0, 1e-14);
+        gwy_assert_floatval(rms, 0.0, 1e-14);
+
+        g_object_unref(diff);
+        g_object_unref(full);
+        g_object_unref(original);
+        g_object_unref(mask);
+        g_object_unref(line);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_line_arithmetic_masking_fill(void)
+{
+    line_arithmetic_operation_one(gwy_line_fill, gwy_line_fill_full);
+}
+
+void
+test_line_arithmetic_masking_add(void)
+{
+    line_arithmetic_operation_one(gwy_line_add, gwy_line_add_full);
+}
+
+void
+test_line_arithmetic_masking_multiply(void)
+{
+    line_arithmetic_operation_one(gwy_line_multiply, gwy_line_multiply_full);
+}
+
 void
 test_line_add_dist_uniform(void)
 {

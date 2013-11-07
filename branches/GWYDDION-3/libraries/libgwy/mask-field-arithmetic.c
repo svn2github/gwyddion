@@ -461,10 +461,12 @@ gwy_mask_field_invert(GwyMaskField *field,
  * gwy_mask_field_logical:
  * @field: A two-dimensional mask field to modify and the first operand of
  *         the logical operation.
- * @operand: A two-dimensional mask field representing second operand of the
+ * @operand: (allow-none):
+ *           A two-dimensional mask field representing second operand of the
  *           logical operation.  It can be %NULL for degenerate operations that
  *           do not depend on the second operand.
- * @mask: A two-dimensional mask field determining to which bits of
+ * @mask: (allow-none):
+ *        A two-dimensional mask field determining to which bits of
  *        @field to apply the logical operation to.  If it is %NULL the
  *        opperation is applied to all bits (as if all bits in @mask were set).
  * @op: Logical operation to perform.
@@ -616,7 +618,8 @@ logical_part(const GwyMaskField *src,
  *         the logical operation.
  * @fpart: (allow-none):
  *         Area in @field to process.  Pass %NULL to process entire @field.
- * @operand: A two-dimensional mask field representing second operand of the
+ * @operand: (allow-none):
+ *           A two-dimensional mask field representing second operand of the
  *           logical operation.  It can be %NULL for degenerate operations that
  *           do not depend on the second operand.
  * @opcol: Starting column in @operand.

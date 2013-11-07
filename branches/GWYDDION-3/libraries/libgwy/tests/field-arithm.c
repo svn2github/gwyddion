@@ -531,6 +531,96 @@ test_field_arithmetic_fill(void)
     g_rand_free(rng);
 }
 
+static void
+field_arithmetic_operation_one(void (*operation)(GwyField *field,
+                                                 const GwyFieldPart *fpart,
+                                                 const GwyMaskField *mask,
+                                                 GwyMasking masking,
+                                                 gdouble value),
+                               void (*operation_full)(GwyField *field,
+                                                      gdouble value))
+{
+    enum { max_size = 28, niter = 60 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, TRUE);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyFieldPart fpart = { col, row, width, height };
+        GwyMaskField *mask = random_mask_field(width, height, rng);
+        GwyMasking masking = (g_rand_boolean(rng)
+                              ? GWY_MASK_INCLUDE
+                              : GWY_MASK_EXCLUDE);
+        guint n = gwy_mask_field_count(mask, NULL, masking == GWY_MASK_INCLUDE);
+
+        if (n == 0 || n == width*height) {
+            g_object_unref(mask);
+            g_object_unref(field);
+            continue;
+        }
+
+        gdouble value = g_rand_double(rng);
+        field_randomize(field, rng);
+        GwyField *original = gwy_field_duplicate(field);
+        GwyField *full = gwy_field_duplicate(field);
+        GwyField *diff = gwy_field_new_alike(field, FALSE);
+        gdouble avg, rms;
+
+        operation(field, &fpart, mask, masking, value);
+        operation_full(full, value);
+
+        // Included data must match full.
+        gwy_field_copy_full(field, diff);
+        gwy_field_add_field(full, NULL, diff, 0, 0, -1.0);
+
+        avg = gwy_field_mean(diff, &fpart, mask, masking);
+        rms = gwy_field_rms(diff, &fpart, mask, masking);
+        gwy_assert_floatval(avg, 0.0, 1e-14);
+        gwy_assert_floatval(rms, 0.0, 1e-14);
+
+        // Excluded data must match original.
+        gwy_field_copy_full(field, diff);
+        gwy_field_add_field(original, NULL, diff, 0, 0, -1.0);
+
+        masking = GWY_MASK_INCLUDE + GWY_MASK_EXCLUDE - masking;
+        avg = gwy_field_mean(diff, &fpart, mask, masking);
+        rms = gwy_field_rms(diff, &fpart, mask, masking);
+        gwy_assert_floatval(avg, 0.0, 1e-14);
+        gwy_assert_floatval(rms, 0.0, 1e-14);
+
+        g_object_unref(diff);
+        g_object_unref(full);
+        g_object_unref(original);
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_arithmetic_masking_fill(void)
+{
+    field_arithmetic_operation_one(gwy_field_fill, gwy_field_fill_full);
+}
+
+void
+test_field_arithmetic_masking_add(void)
+{
+    field_arithmetic_operation_one(gwy_field_add, gwy_field_add_full);
+}
+
+void
+test_field_arithmetic_masking_multiply(void)
+{
+    field_arithmetic_operation_one(gwy_field_multiply, gwy_field_multiply_full);
+}
+
 void
 test_field_arithmetic_clamp(void)
 {

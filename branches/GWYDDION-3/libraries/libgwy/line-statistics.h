@@ -29,8 +29,16 @@ void    gwy_line_min_max_full(const GwyLine *line,
                               gdouble *max);
 gdouble gwy_line_sum_full    (const GwyLine *line);
 gdouble gwy_line_mean_full   (const GwyLine *line);
+gdouble gwy_line_mean        (const GwyLine *line,
+                              const GwyLinePart *lpart,
+                              const GwyMaskLine *mask,
+                              GwyMasking masking);
 gdouble gwy_line_median_full (const GwyLine *line);
 gdouble gwy_line_rms_full    (const GwyLine *line);
+gdouble gwy_line_rms         (const GwyLine *line,
+                              const GwyLinePart *lpart,
+                              const GwyMaskLine *mask,
+                              GwyMasking masking);
 gdouble gwy_line_nrms_full   (const GwyLine *line);
 gdouble gwy_line_length_full (const GwyLine *line);
 

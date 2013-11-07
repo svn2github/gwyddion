@@ -258,6 +258,9 @@ line/serialize/failure/nodata
 line/distribute/simple
 line/distribute/unbiased
 line/outer-product
+line/arithmetic/masking/fill
+line/arithmetic/masking/add
+line/arithmetic/masking/multiply
 line/compatibility/res
 line/compatibility/real
 line/compatibility/units
@@ -429,6 +432,9 @@ field/arithmetic/clamp
 field/arithmetic/normalize
 field/arithmetic/sqrt
 field/arithmetic/apply-func
+field/arithmetic/masking/fill
+field/arithmetic/masking/add
+field/arithmetic/masking/multiply
 field/arithmetic/sculpt/upward/contained
 field/arithmetic/sculpt/downward/contained
 field/arithmetic/sculpt/upward/contained-periodic
