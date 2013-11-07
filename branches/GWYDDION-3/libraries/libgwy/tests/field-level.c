@@ -232,7 +232,7 @@ test_field_row_level_one(GwyRowShiftMethod method)
         GwyLine *foundshifts1 = gwy_field_find_row_shifts(field,
                                                           NULL, GWY_MASK_IGNORE,
                                                           method, 1);
-        gwy_line_multiply(foundshifts1, -1.0);
+        gwy_line_multiply_full(foundshifts1, -1.0);
         gwy_line_accumulate(foundshifts1, FALSE);
         gwy_field_shift_rows(field, foundshifts1);
         g_object_unref(foundshifts1);
@@ -243,7 +243,7 @@ test_field_row_level_one(GwyRowShiftMethod method)
         GwyLine *foundshifts2 = gwy_field_find_row_shifts(field,
                                                           mask, GWY_MASK_INCLUDE,
                                                           method, 1);
-        gwy_line_multiply(foundshifts2, -1.0);
+        gwy_line_multiply_full(foundshifts2, -1.0);
         gwy_line_accumulate(foundshifts2, FALSE);
         gwy_field_shift_rows(field, foundshifts2);
         g_object_unref(foundshifts2);

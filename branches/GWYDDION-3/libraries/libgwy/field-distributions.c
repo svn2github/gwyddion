@@ -337,11 +337,11 @@ gwy_field_value_dist(const GwyField *field,
     if (line) {
         if (cumulative) {
             gwy_line_accumulate(line, TRUE);
-            gwy_line_add(line, ddata.left_sum);
-            gwy_line_multiply(line, 1.0/ddata.n);
+            gwy_line_add_full(line, ddata.left_sum);
+            gwy_line_multiply_full(line, 1.0/ddata.n);
         }
         else
-            gwy_line_multiply(line, 1.0/(gwy_line_dx(line)*ddata.n));
+            gwy_line_multiply_full(line, 1.0/(gwy_line_dx(line)*ddata.n));
     }
     else
         line = gwy_line_new();
@@ -562,11 +562,11 @@ gwy_field_slope_dist(const GwyField *field,
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);
-        gwy_line_add(line, ddata.left_sum);
-        gwy_line_multiply(line, 1.0/ddata.n);
+        gwy_line_add_full(line, ddata.left_sum);
+        gwy_line_multiply_full(line, 1.0/ddata.n);
     }
     else
-        gwy_line_multiply(line, 1.0/(gwy_line_dx(line)*ddata.n));
+        gwy_line_multiply_full(line, 1.0/(gwy_line_dx(line)*ddata.n));
 
 fail:
     if (!line)
@@ -721,11 +721,11 @@ gwy_field_tss_dist(const GwyField *field,
 
     if (cumulative) {
         gwy_line_accumulate(line, TRUE);
-        gwy_line_add(line, ddata.left_sum);
-        gwy_line_multiply(line, 1.0/ddata.n);
+        gwy_line_add_full(line, ddata.left_sum);
+        gwy_line_multiply_full(line, 1.0/ddata.n);
     }
     else
-        gwy_line_multiply(line, 1.0/(gwy_line_dx(line)*ddata.n));
+        gwy_line_multiply_full(line, 1.0/(gwy_line_dx(line)*ddata.n));
 
 fail:
     if (!line)
@@ -1522,7 +1522,7 @@ gwy_field_row_psdf(const GwyField *field,
     fftw_free(fftc);
     fftw_free(fftr);
 
-    gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI));
+    gwy_line_multiply_full(line, gwy_field_dx(field)/(2*G_PI));
     line->real = G_PI/gwy_field_dx(field);
     line->off = -0.5*gwy_line_dx(line);
 

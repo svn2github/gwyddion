@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -145,6 +145,15 @@ mask_line_randomize(GwyMaskLine *maskline,
     guint32 *data = maskline->data;
     memcpy(data, pool + offset, required*sizeof(guint32));
     gwy_mask_line_invalidate(maskline);
+}
+
+GwyMaskLine*
+random_mask_line(guint res, GRand *rng)
+{
+    GwyMaskLine *line = gwy_mask_line_new_sized(res, FALSE);
+    for (guint i = 0; i < (res + 31)/32; i++)
+        line->data[i] = g_rand_int(rng);
+    return line;
 }
 
 static void

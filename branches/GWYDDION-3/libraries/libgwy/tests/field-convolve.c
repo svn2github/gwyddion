@@ -121,7 +121,7 @@ field_convolve_row_interior_one(GwyExterior exterior)
 
             GwyFieldPart fpart = { k0, 0, res - kres/2 - k0, yres };
             for (guint pos = 0; pos < kres; pos++) {
-                gwy_line_clear(kernel, NULL);
+                gwy_line_clear_full(kernel);
                 kernel->data[pos] = 1.0;
 
                 g_assert_cmpuint(fpart.col + fpart.width, <=, res);
@@ -179,7 +179,7 @@ field_convolve_row_exterior_one(GwyExterior exterior)
             guint pos = g_rand_int_range(rng, 0, kres);
             GwyFieldPart fpart = { col, 0, width, yres };
 
-            gwy_line_clear(kernel, NULL);
+            gwy_line_clear_full(kernel);
             kernel->data[pos] = 1.0;
             gwy_field_copy_full(source, field);
             gwy_field_row_convolve(field, &fpart, field, kernel,

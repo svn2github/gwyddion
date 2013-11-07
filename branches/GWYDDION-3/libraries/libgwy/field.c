@@ -2005,7 +2005,7 @@ gwy_field_get_data(const GwyField *field,
  *
  * Puts back values from a flat array to a data field.
  *
- * See gwy_field_get_data() for discussion.
+ * See gwy_field_get_data() for a discussion.
  **/
 void
 gwy_field_set_data(const GwyField *field,

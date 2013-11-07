@@ -1013,7 +1013,7 @@ make_gaussian_kernel(GwyLine *kernel,
         x /= sigma;
         s += kernel->data[k] = exp(-x*x/2.0);
     }
-    gwy_line_multiply(kernel, 1.0/s);
+    gwy_line_multiply_full(kernel, 1.0/s);
 
     return TRUE;
 }

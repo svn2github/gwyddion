@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2011 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -75,6 +75,8 @@ void          int_set_randomize_range       (GwyIntSet *intset,
 void          int_set_assert_equal          (const GwyIntSet *result,
                                              const GwyIntSet *reference);
 void          unit_randomize                (GwyUnit *unit,
+                                             GRand *rng);
+GwyMaskLine*  random_mask_line              (guint res,
                                              GRand *rng);
 void          mask_line_print               (const gchar *name,
                                              const GwyMaskLine *maskline);

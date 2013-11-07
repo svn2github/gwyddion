@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,6 +42,8 @@ G_BEGIN_DECLS
 
 typedef struct _GwyLine      GwyLine;
 typedef struct _GwyLineClass GwyLineClass;
+
+#include <libgwy/mask-line.h>
 
 struct _GwyLine {
     GObject g_object;
@@ -106,11 +108,22 @@ const gchar*    gwy_line_get_name      (const GwyLine *line)            G_GNUC_P
 #define gwy_line_dx(line) \
     ((line)->real/(line)->res)
 
-gdouble gwy_line_get(const GwyLine *line,
-                     guint pos);
-void    gwy_line_set(const GwyLine *line,
-                     guint pos,
-                     gdouble value);
+gdouble  gwy_line_get     (const GwyLine *line,
+                           guint pos);
+void     gwy_line_set     (const GwyLine *line,
+                           guint pos,
+                           gdouble value);
+gdouble* gwy_line_get_data(const GwyLine *line,
+                           const GwyLinePart *fpart,
+                           const GwyMaskLine *mask,
+                           GwyMasking masking,
+                           guint *ndata)             G_GNUC_MALLOC;
+void     gwy_line_set_data(const GwyLine *line,
+                           const GwyLinePart *fpart,
+                           const GwyMaskLine *mask,
+                           GwyMasking masking,
+                           const gdouble *data,
+                           guint ndata);
 
 gboolean gwy_line_check_part       (const GwyLine *line,
                                     const GwyLinePart *lpart,
@@ -121,6 +134,13 @@ gboolean gwy_line_check_target_part(const GwyLine *line,
                                     guint len_full,
                                     guint *pos,
                                     guint *len);
+gboolean gwy_line_check_mask       (const GwyLine *line,
+                                    const GwyLinePart *lpart,
+                                    const GwyMaskLine *mask,
+                                    GwyMasking *masking,
+                                    guint *pos,
+                                    guint *len,
+                                    guint *maskpos);
 gboolean gwy_line_limit_parts      (const GwyLine *src,
                                     const GwyLinePart *srcpart,
                                     const GwyLine *dest,

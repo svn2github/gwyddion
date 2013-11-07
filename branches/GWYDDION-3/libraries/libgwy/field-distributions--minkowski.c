@@ -351,7 +351,7 @@ minkowski_boundary(const GwyField *field,
     gwy_line_accumulate(maxdist, FALSE);
     gwy_line_add_line(maxdist, NULL, mindist, 0, -1.0);
     g_object_unref(maxdist);
-    gwy_line_multiply(mindist, 1.0/nedges);
+    gwy_line_multiply_full(mindist, 1.0/nedges);
 
     return line;
 }

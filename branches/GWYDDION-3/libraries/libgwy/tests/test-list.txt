@@ -243,9 +243,14 @@ line/units
 line/units-assign
 line/get
 line/set
+line/get-data/unmasked
+line/get-data/masked
 line/check-part/good
 line/check-part/empty
 line/check-part/bad
+line/check-mask/good
+line/check-mask/empty
+line/check-mask/bad
 line/copy
 line/new-part
 line/serialize

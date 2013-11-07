@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,14 +40,31 @@ GwyLineCompatFlags gwy_line_is_incompatible(const GwyLine *line1,
                                             const GwyLine *line2,
                                             GwyLineCompatFlags check);
 
+void      gwy_line_add_full     (GwyLine *line,
+                                 gdouble value);
 void      gwy_line_add          (GwyLine *line,
+                                 const GwyLinePart *lpart,
+                                 const GwyMaskLine *mask,
+                                 GwyMasking masking,
+                                 gdouble value);
+void      gwy_line_multiply_full(GwyLine *line,
                                  gdouble value);
 void      gwy_line_multiply     (GwyLine *line,
+                                 const GwyLinePart *lpart,
+                                 const GwyMaskLine *mask,
+                                 GwyMasking masking,
                                  gdouble value);
+void      gwy_line_clear_full   (GwyLine *line);
 void      gwy_line_clear        (GwyLine *line,
-                                 const GwyLinePart *lpart);
+                                 const GwyLinePart *lpart,
+                                 const GwyMaskLine *mask,
+                                 GwyMasking masking);
+void      gwy_line_fill_full    (GwyLine *line,
+                                 gdouble value);
 void      gwy_line_fill         (GwyLine *line,
                                  const GwyLinePart *lpart,
+                                 const GwyMaskLine *mask,
+                                 GwyMasking masking,
                                  gdouble value);
 void      gwy_line_add_line     (const GwyLine *src,
                                  const GwyLinePart *srcpart,

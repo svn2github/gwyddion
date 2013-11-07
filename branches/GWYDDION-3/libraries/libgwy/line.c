@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -561,6 +561,97 @@ gwy_line_check_part(const GwyLine *line,
 }
 
 /**
+ * gwy_line_check_mask:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line, possibly %NULL.
+ * @mask: (allow-none):
+ *        A one-dimensional mask line.
+ * @masking: Masking mode.  If it is %GWY_MASK_IGNORE the mask is completely
+ *           ignored.  If, on the other hand, @mask is %NULL the mode is
+ *           <emphasis>set</emphasis> to %GWY_MASK_IGNORE.
+ * @pos: Location to store the actual position of the part start.
+ * @len: Location to store the actual length (number of items)
+ *       of the part.
+ * @maskpos: Location to store the actual start position in the mask.
+ *
+ * Validates the position and dimensions of a masked line segment.
+ *
+ * If @lpart is %NULL entire @line is to be used.  Otherwise @lpart must be
+ * contained in @line.
+ *
+ * The dimensions of @mask, if non-%NULL, must match either @line or @lpart.
+ * In the first case the segment is the same in @line and @mask.  In the second
+ * case the mask covers only the line segment.
+ *
+ * If the position and dimensions are valid @pos, @len and @maskpos are set to
+ * the actual segment in @line.  If the function returns %FALSE their values
+ * are undefined.
+ *
+ * This function is typically used in functions that operate on a part of a
+ * line and allow masking.  See gwy_line_check_part() for checking of line
+ * parts only.  Example (note gwy_line_rms() calculates the rms):
+ * |[
+ * gdouble
+ * calculate_rms(const GwyLine *line,
+ *               const GwyLinePart *lpart,
+ *               const GwyMaskLine *mask,
+ *               GwyMasking masking)
+ * {
+ *     guint pos, len, maskpos;
+ *     if (!gwy_line_check_mask(line, lpart, mask, &masking,
+ *                              &pos, &len, &maskpos))
+ *         return 0.0;
+ *
+ *     // Calculate rms of area given by @pos and @len in @line using @mask
+ *     // part given by @maskpos and @len if @masking is not GWY_MASK_IGNORE...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if the position and dimensions are valid and the caller
+ *          should proceed.  %FALSE if the caller should not proceed, either
+ *          because @line is not a #GwyLine instance, @mask is not a
+ *          #GwyMaskLine instance or the position or dimensions is invalid (a
+ *          critical error is emitted in these cases) or the actual segment is
+ *          zero-sized.
+ **/
+gboolean
+gwy_line_check_mask(const GwyLine *line,
+                    const GwyLinePart *lpart,
+                    const GwyMaskLine *mask,
+                    GwyMasking *masking,
+                    guint *pos,
+                    guint *len,
+                    guint *maskpos)
+{
+    if (!gwy_line_check_part(line, lpart, pos, len))
+        return FALSE;
+    if (mask && (*masking == GWY_MASK_INCLUDE
+                 || *masking == GWY_MASK_EXCLUDE)) {
+        g_return_val_if_fail(GWY_IS_MASK_LINE(mask), FALSE);
+        if (mask->res == line->res)
+            *maskpos = *pos;
+        else if (mask->res == *len)
+            *maskpos = 0;
+        else {
+            g_critical("Mask dimensions match neither the entire line "
+                       "nor the part.");
+            return FALSE;
+        }
+    }
+    else {
+        if (*masking != GWY_MASK_INCLUDE
+            && *masking != GWY_MASK_EXCLUDE
+            && *masking != GWY_MASK_IGNORE)
+            g_critical("Invalid masking mode %u.", *masking);
+        *masking = GWY_MASK_IGNORE;
+        *maskpos = 0;
+    }
+
+    return TRUE;
+}
+
+/**
  * gwy_line_check_target_part:
  * @line: A one-dimensional data line.
  * @lpart: (allow-none):
@@ -840,7 +931,7 @@ gwy_line_set_size(GwyLine *line,
         g_object_notify_by_pspec(G_OBJECT(line), properties[PROP_RES]);
     }
     else if (clear)
-        gwy_line_clear(line, NULL);
+        gwy_line_clear_full(line);
 }
 
 /**
@@ -1134,6 +1225,120 @@ gwy_line_set(const GwyLine *line,
     g_return_if_fail(GWY_IS_LINE(line));
     g_return_if_fail(pos < line->res);
     gwy_line_index(line, pos) = value;
+}
+
+/**
+ * gwy_line_get_data:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line to extract, possibly %NULL which means entire
+ *         @line.
+ * @mask: (allow-none):
+ *        A one-dimensional mask line.
+ * @masking: Masking mode to use.
+ * @ndata: (out):
+ *         Location to store the count of extracted data points.
+ *
+ * Extracts values from a data line into a newly allocated flat array.
+ *
+ * This function, paired with gwy_line_set_data() can be namely useful in
+ * language bindings.  Occassionally, however, extraction of values into a flat
+ * array is useful also in C, namely with masking.
+ *
+ * Returns: (array length=ndata) (transfer full):
+ *          A newly allocated array containing the values.
+ **/
+gdouble*
+gwy_line_get_data(const GwyLine *line,
+                  const GwyLinePart *lpart,
+                  const GwyMaskLine *mask,
+                  GwyMasking masking,
+                  guint *ndata)
+{
+    *ndata = 0;
+
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking,
+                             &pos, &len, &maskpos))
+        return g_new0(gdouble, 1);
+
+    if (masking == GWY_MASK_IGNORE) {
+        *ndata = len;
+        gdouble *data = g_new(gdouble, *ndata);
+        gwy_assign(data, line->data + pos, len);
+        return data;
+    }
+
+    GwyLinePart mpart = { maskpos, len };
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+
+    *ndata = gwy_mask_line_part_count(mask, &mpart, !invert);
+    gdouble *data = g_new(gdouble, *ndata);
+    guint count = 0;
+    const gdouble *d = line->data + pos;
+    GwyMaskIter iter;
+    gwy_mask_line_iter_init(mask, iter, maskpos);
+    for (guint j = len; j; j--, d++) {
+        if (!gwy_mask_iter_get(iter) == invert)
+            data[count++] = *d;
+        gwy_mask_iter_next(iter);
+    }
+    g_assert(count == *ndata);
+
+    return data;
+}
+
+/**
+ * gwy_line_set_data:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Area in @line to set, possibly %NULL which means entire @line.
+ * @mask: (allow-none):
+ *        A two-dimensional mask line.
+ * @masking: Masking mode to use.
+ * @data: (array length=ndata):
+ *        Data values to copy to the line.
+ * @ndata: The number of data values to put to the line.  It must match the
+ *         number of pixels in the segment, including masking.  Usually, the
+ *         count is obtained by a preceding gwy_line_get_data() call.
+ *
+ * Puts back values from a flat array to a data line.
+ *
+ * See gwy_line_get_data() for a discussion.
+ **/
+void
+gwy_line_set_data(const GwyLine *line,
+                  const GwyLinePart *lpart,
+                  const GwyMaskLine *mask,
+                  GwyMasking masking,
+                  const gdouble *data,
+                  guint ndata)
+{
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking,
+                             &pos, &len, &maskpos)
+        || !ndata)
+        return;
+
+    if (masking == GWY_MASK_IGNORE) {
+        g_return_if_fail(ndata == len);
+        gwy_assign(line->data + pos, data, len);
+        return;
+    }
+
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint count = 0;
+    gdouble *d = line->data + pos;
+    GwyMaskIter iter;
+    gwy_mask_line_iter_init(mask, iter, maskpos);
+    for (guint j = len; j; j--, d++) {
+        if (!gwy_mask_iter_get(iter) == invert) {
+            g_return_if_fail(count < ndata);
+            *d = data[count++];
+        }
+        gwy_mask_iter_next(iter);
+    }
+    g_return_if_fail(count == ndata);
 }
 
 /**

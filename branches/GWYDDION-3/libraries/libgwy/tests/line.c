@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -403,6 +403,118 @@ test_line_check_part_bad(void)
     line_check_part_bad(25, &(GwyLinePart){ 25, 1 });
 }
 
+static void
+line_check_mask_good(guint res, guint mres,
+                     const GwyLinePart *fpart,
+                     GwyMasking masking,
+                     guint expected_pos,
+                     guint expected_len,
+                     guint expected_maskpos,
+                     GwyMasking expected_masking)
+{
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    GwyMaskLine *mask = (mres ? gwy_mask_line_new_sized(mres, FALSE) : NULL);
+    guint pos, len, maskpos;
+
+    g_assert(gwy_line_check_mask(line, fpart, mask, &masking,
+                                 &pos, &len, &maskpos));
+    g_assert_cmpuint(masking, ==, expected_masking);
+    g_assert_cmpuint(pos, ==, expected_pos);
+    g_assert_cmpuint(len, ==, expected_len);
+    g_assert_cmpuint(maskpos, ==, expected_maskpos);
+    GWY_OBJECT_UNREF(mask);
+    g_object_unref(line);
+}
+
+void
+test_line_check_mask_good(void)
+{
+    // Full line, ignoring the mask.
+    line_check_mask_good(17, 0, NULL, GWY_MASK_IGNORE,
+                         0, 17, 0, GWY_MASK_IGNORE);
+    line_check_mask_good(17, 0, NULL, GWY_MASK_INCLUDE,
+                         0, 17, 0, GWY_MASK_IGNORE);
+    line_check_mask_good(17, 0, NULL, GWY_MASK_EXCLUDE,
+                         0, 17, 0, GWY_MASK_IGNORE);
+    line_check_mask_good(17, 17, NULL, GWY_MASK_IGNORE,
+                         0, 17, 0, GWY_MASK_IGNORE);
+
+    // Full line, full mask.
+    line_check_mask_good(17, 17, NULL, GWY_MASK_INCLUDE,
+                         0, 17, 0, GWY_MASK_INCLUDE);
+    line_check_mask_good(17, 17, NULL, GWY_MASK_EXCLUDE,
+                         0, 17, 0, GWY_MASK_EXCLUDE);
+
+    // Partial line, partial mask.
+    line_check_mask_good(17, 17, &(GwyLinePart){ 1, 14 }, GWY_MASK_INCLUDE,
+                         1, 14, 1, GWY_MASK_INCLUDE);
+    line_check_mask_good(17, 17, &(GwyLinePart){ 1, 14 }, GWY_MASK_EXCLUDE,
+                         1, 14, 1, GWY_MASK_EXCLUDE);
+    line_check_mask_good(17, 17, &(GwyLinePart){ 1, 14 }, GWY_MASK_IGNORE,
+                         1, 14, 0, GWY_MASK_IGNORE);
+
+    // Partial line, full mask.
+    line_check_mask_good(17, 14, &(GwyLinePart){ 1, 14 }, GWY_MASK_INCLUDE,
+                         1, 14, 0, GWY_MASK_INCLUDE);
+    line_check_mask_good(17, 14, &(GwyLinePart){ 1, 14 }, GWY_MASK_EXCLUDE,
+                         1, 14, 0, GWY_MASK_EXCLUDE);
+    line_check_mask_good(17, 14, &(GwyLinePart){ 1, 14 }, GWY_MASK_IGNORE,
+                         1, 14, 0, GWY_MASK_IGNORE);
+}
+
+static void
+line_check_mask_empty(guint res, guint mres,
+                      const GwyLinePart *fpart,
+                      GwyMasking masking)
+{
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    GwyMaskLine *mask = (mres ? gwy_mask_line_new_sized(mres, FALSE) : NULL);
+
+    guint pos, len, maskpos;
+    g_assert(!gwy_line_check_mask(line, fpart, mask, &masking,
+                                  &pos, &len, &maskpos));
+    GWY_OBJECT_UNREF(mask);
+    g_object_unref(line);
+}
+
+void
+test_line_check_mask_empty(void)
+{
+    line_check_mask_empty(17, 0, &(GwyLinePart){ 0, 0 }, GWY_MASK_INCLUDE);
+    line_check_mask_empty(17, 0, &(GwyLinePart){ 17, 0 }, GWY_MASK_INCLUDE);
+    line_check_mask_empty(17, 0, &(GwyLinePart){ 1000, 0 }, GWY_MASK_INCLUDE);
+    line_check_mask_empty(17, 17, &(GwyLinePart){ 0, 0 }, GWY_MASK_INCLUDE);
+    line_check_mask_empty(17, 17, &(GwyLinePart){ 17, 0 }, GWY_MASK_INCLUDE);
+    line_check_mask_empty(17, 17, &(GwyLinePart){ 1000, 0 }, GWY_MASK_INCLUDE);
+}
+
+static void
+line_check_mask_bad(guint res, guint mres,
+                    const GwyLinePart *fpart,
+                    GwyMasking masking)
+{
+    if (g_test_trap_fork(0,
+                         G_TEST_TRAP_SILENCE_STDOUT
+                         | G_TEST_TRAP_SILENCE_STDERR)) {
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        GwyMaskLine *mask = (mres ? gwy_mask_line_new_sized(mres, FALSE) : NULL);
+        guint pos, len, maskpos;
+        gwy_line_check_mask(line, fpart, mask, &masking,
+                            &pos, &len, &maskpos);
+        exit(0);
+    }
+    g_test_trap_assert_failed();
+    g_test_trap_assert_stderr("*CRITICAL*");
+}
+
+void
+test_line_check_mask_bad(void)
+{
+    line_check_mask_bad(17, 0, &(GwyLinePart){ 2, 16 }, GWY_MASK_INCLUDE);
+    line_check_mask_bad(17, 15, NULL, GWY_MASK_INCLUDE);
+    line_check_mask_bad(17, 8, &(GwyLinePart){ 2, 7 }, GWY_MASK_INCLUDE);
+}
+
 void
 test_line_get(void)
 {
@@ -442,6 +554,76 @@ test_line_set(void)
             g_assert_cmpfloat(line->data[k], ==, k);
         }
         g_object_unref(line);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_line_get_data_unmasked(void)
+{
+    enum { max_size = 250, niter = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        line_randomize(line, rng);
+        GwyLine *reference = gwy_line_duplicate(line);
+        guint len = g_rand_int_range(rng, 0, res+1);
+        guint pos = g_rand_int_range(rng, 0, res+1 - len);
+        GwyLinePart lpart = { pos, len };
+
+        guint ndata;
+        gdouble *data = gwy_line_get_data(line, &lpart, NULL, GWY_MASK_IGNORE,
+                                          &ndata);
+        g_assert_cmpuint(ndata, ==, len);
+        for (guint i = 0; i < ndata; i++)
+            data[i] *= 2.0;
+        gwy_line_set_data(line, &lpart, NULL, GWY_MASK_IGNORE, data, ndata);
+
+        gwy_line_multiply(reference, &lpart, NULL, GWY_MASK_IGNORE, 2.0);
+        line_assert_equal(line, reference);
+
+        g_free(data);
+        g_object_unref(line);
+        g_object_unref(reference);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_line_get_data_masked(void)
+{
+    enum { max_size = 250, niter = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        line_randomize(line, rng);
+        GwyLine *reference = gwy_line_duplicate(line);
+        guint len = g_rand_int_range(rng, 1, res+1);
+        guint pos = g_rand_int_range(rng, 0, res+1 - len);
+        GwyLinePart lpart = { pos, len };
+        GwyMaskLine *mask = random_mask_line(len, rng);
+        GwyMasking masking = (g_rand_boolean(rng)
+                              ? GWY_MASK_INCLUDE
+                              : GWY_MASK_EXCLUDE);
+        guint ndata;
+        gdouble *data = gwy_line_get_data(line, &lpart, mask, masking, &ndata);
+        for (guint i = 0; i < ndata; i++)
+            data[i] *= 2.0;
+        gwy_line_set_data(line, &lpart, mask, masking, data, ndata);
+
+        gwy_line_multiply(reference, &lpart, mask, masking, 2.0);
+        line_assert_equal(line, reference);
+
+        g_free(data);
+        g_object_unref(mask);
+        g_object_unref(line);
+        g_object_unref(reference);
     }
 
     g_rand_free(rng);
@@ -771,7 +953,7 @@ test_line_add_dist_uniform(void)
     gwy_line_set_offset(line, xmin);
 
     // Exactly full
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, xmin, xmax, G_PI);
     //print_line("full", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -781,7 +963,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Right half
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, xmin - (xmax - xmin), xmax, G_PI);
     //print_line("right", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.5*G_PI), <=, 1e-14);
@@ -791,7 +973,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Left half
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, xmin, xmax + (xmax - xmin), G_PI);
     //print_line("left", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.5*G_PI), <=, 1e-14);
@@ -801,7 +983,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Inside
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, 0.0, 1.0, G_PI);
     //print_line("inside", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -811,7 +993,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Within one bin
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, 0.01, 0.02, G_PI);
     //print_line("one-bin", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -821,7 +1003,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Partial bins
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, xmin + 0.75*binsize, xmax - 0.75*binsize,
                               G_PI);
     //print_line("partial", line);
@@ -833,7 +1015,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Ends in the first.
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, xmin - binsize, xmin + binsize/3, G_PI);
     //print_line("first-end", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI/4), <=, 1e-14);
@@ -843,7 +1025,7 @@ test_line_add_dist_uniform(void)
     }
 
     // Begins in the last.
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_uniform(line, xmax - binsize/3, xmax + binsize, G_PI);
     //print_line("last-begining", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI/4), <=, 1e-14);
@@ -866,7 +1048,7 @@ test_line_add_dist_left_triangular(void)
     gwy_line_set_offset(line, xmin);
 
     // Exactly full
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line, xmin, xmax, G_PI);
     //print_line("full", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -876,7 +1058,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Right half
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line, xmin - (xmax - xmin), xmax, G_PI);
     //print_line("right", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.75*G_PI), <=, 1e-14);
@@ -886,7 +1068,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Left half
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line, xmin, xmax + (xmax - xmin), G_PI);
     //print_line("left", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.25*G_PI), <=, 1e-14);
@@ -896,7 +1078,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Inside
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line, 0.0, 1.0, G_PI);
     //print_line("inside", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -908,7 +1090,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Within one bin
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line, 0.01, 0.02, G_PI);
     //print_line("one-bin", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -918,7 +1100,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Partial bins
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line,
                                       xmin + 0.75*binsize, xmax - 0.75*binsize,
                                       G_PI);
@@ -937,7 +1119,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Ends in the first.
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line,
                                       xmin - binsize, xmin + binsize/3, G_PI);
     //print_line("first-end", line);
@@ -948,7 +1130,7 @@ test_line_add_dist_left_triangular(void)
     }
 
     // Begins in the last.
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_left_triangular(line,
                                       xmax - binsize/3, xmax + binsize, G_PI);
     //print_line("last-begining", line);
@@ -972,7 +1154,7 @@ test_line_add_dist_right_triangular(void)
     gwy_line_set_offset(line, xmin);
 
     // Exactly full
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line, xmin, xmax, G_PI);
     //print_line("full", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -982,7 +1164,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Right half
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line, xmin - (xmax - xmin), xmax, G_PI);
     //print_line("right", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.25*G_PI), <=, 1e-14);
@@ -992,7 +1174,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Left half
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line, xmin, xmax + (xmax - xmin), G_PI);
     //print_line("right", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - 0.75*G_PI), <=, 1e-14);
@@ -1002,7 +1184,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Inside
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line, 0.0, 1.0, G_PI);
     //print_line("inside", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -1014,7 +1196,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Within one bin
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line, 0.01, 0.02, G_PI);
     //print_line("one-bin", line);
     g_assert_cmpfloat(fabs(gwy_line_sum_full(line) - G_PI), <=, 1e-14);
@@ -1024,7 +1206,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Partial bins
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line,
                                        xmin + 0.75*binsize, xmax - 0.75*binsize,
                                        G_PI);
@@ -1043,7 +1225,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Ends in the first.
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line,
                                        xmin - binsize, xmin + binsize/3, G_PI);
     //print_line("first-end", line);
@@ -1054,7 +1236,7 @@ test_line_add_dist_right_triangular(void)
     }
 
     // Begins in the last.
-    gwy_line_clear(line, NULL);
+    gwy_line_clear_full(line);
     gwy_line_add_dist_right_triangular(line,
                                        xmax - binsize/3, xmax + binsize, G_PI);
     //print_line("last-begining", line);

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -89,21 +89,73 @@ gwy_line_is_incompatible(const GwyLine *line1,
 }
 
 /**
+ * gwy_line_clear_full:
+ * @line: A one-dimensional data line.
+ *
+ * Fills an entire line with zeroes.
+ **/
+void
+gwy_line_clear_full(GwyLine *line)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+    gwy_clear(line->data, line->res);
+}
+
+/**
  * gwy_line_clear:
  * @line: A one-dimensional data line.
  * @lpart: (allow-none):
  *         Segment in @line to clear.  Pass %NULL to clear entire @line.
+ * @mask: (allow-none):
+ *        A one dimensional mask line determing which values to clear.
+ * @masking: Masking mode to use.
  *
  * Fills a line with zeroes.
  **/
 void
 gwy_line_clear(GwyLine *line,
-               const GwyLinePart *lpart)
+               const GwyLinePart *lpart,
+               const GwyMaskLine *mask,
+               GwyMasking masking)
 {
-    guint pos, len;
-    if (!gwy_line_check_part(line, lpart, &pos, &len))
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking, &pos, &len, &maskpos))
         return;
-    gwy_clear(line->data + pos, len);
+
+    if (masking == GWY_MASK_IGNORE) {
+        gwy_clear(line->data + pos, len);
+    }
+    else {
+        gdouble *d = line->data + pos;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskIter iter;
+        gwy_mask_line_iter_init(mask, iter, maskpos);
+        for (guint j = len; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert)
+                *d = 0.0;
+            gwy_mask_iter_next(iter);
+        }
+    }
+}
+
+/**
+ * gwy_line_fill_full:
+ * @line: A one-dimensional data line.
+ *
+ * Fills an entire line with the specified value.
+ **/
+void
+gwy_line_fill_full(GwyLine *line,
+                   gdouble value)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+    if (!value) {
+        gwy_line_clear_full(line);
+        return;
+    }
+    gdouble *d = line->data;
+    for (guint i = line->res; i; i--, d++)
+        *d = value;
 }
 
 /**
@@ -111,6 +163,9 @@ gwy_line_clear(GwyLine *line,
  * @line: A one-dimensional data line.
  * @lpart: (allow-none):
  *         Segment in @line to fill.  Pass %NULL to fill entire @line.
+ * @mask: (allow-none):
+ *        A one dimensional mask line determing which values to set.
+ * @masking: Masking mode to use.
  * @value: Value to fill the segment with.
  *
  * Fills a line with the specified value.
@@ -118,27 +173,46 @@ gwy_line_clear(GwyLine *line,
 void
 gwy_line_fill(GwyLine *line,
               const GwyLinePart *lpart,
+              const GwyMaskLine *mask,
+              GwyMasking masking,
               gdouble value)
 {
-    guint pos, len;
-    if (!gwy_line_check_part(line, lpart, &pos, &len))
+    if (!value) {
+        gwy_line_clear(line, lpart, mask, masking);
+        return;
+    }
+
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking, &pos, &len, &maskpos))
         return;
 
-    gdouble *p = line->data + pos;
-    for (guint j = len; j; j--)
-        *(p++) = value;
+    gdouble *d = line->data + pos;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = len; j; j--, d++)
+            *d = value;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskIter iter;
+        gwy_mask_line_iter_init(mask, iter, maskpos);
+        for (guint j = len; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert)
+                *d = value;
+            gwy_mask_iter_next(iter);
+        }
+    }
 }
 
 /**
- * gwy_line_add:
+ * gwy_line_add_full:
  * @line: A one-dimensional data line.
- * @value: Value to add to data.
+ * @value: Value to add to the data.
  *
  * Adds a value to all line items.
  **/
 void
-gwy_line_add(GwyLine *line,
-             gdouble value)
+gwy_line_add_full(GwyLine *line,
+                  gdouble value)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     gdouble *p = line->data;
@@ -147,20 +221,100 @@ gwy_line_add(GwyLine *line,
 }
 
 /**
- * gwy_line_multiply:
+ * gwy_line_add:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line to fill.  Pass %NULL to fill entire @line.
+ * @mask: (allow-none):
+ *        A one dimensional mask line determing which values to set.
+ * @masking: Masking mode to use.
+ * @value: Value to add to the data.
+ *
+ * Adds a value to line data.
+ **/
+void
+gwy_line_add(GwyLine *line,
+             const GwyLinePart *lpart,
+             const GwyMaskLine *mask,
+             GwyMasking masking,
+             gdouble value)
+{
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking, &pos, &len, &maskpos))
+        return;
+
+    gdouble *d = line->data + pos;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = len; j; j--, d++)
+            *d += value;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskIter iter;
+        gwy_mask_line_iter_init(mask, iter, maskpos);
+        for (guint j = len; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert)
+                *d += value;
+            gwy_mask_iter_next(iter);
+        }
+    }
+}
+
+/**
+ * gwy_line_multiply_full:
  * @line: A one-dimensional data line.
  * @value: Value to multiply data with.
  *
  * Multiplies all line items with a value.
  **/
 void
-gwy_line_multiply(GwyLine *line,
-                  gdouble value)
+gwy_line_multiply_full(GwyLine *line,
+                       gdouble value)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     gdouble *p = line->data;
     for (guint i = line->res; i; i--, p++)
         *p *= value;
+}
+
+/**
+ * gwy_line_multiply:
+ * @line: A one-dimensional data line.
+ * @lpart: (allow-none):
+ *         Segment in @line to fill.  Pass %NULL to fill entire @line.
+ * @mask: (allow-none):
+ *        A one dimensional mask line determing which values to set.
+ * @masking: Masking mode to use.
+ * @value: Value to multiply the data with.
+ *
+ * Adds a value to line data.
+ **/
+void
+gwy_line_multiply(GwyLine *line,
+                  const GwyLinePart *lpart,
+                  const GwyMaskLine *mask,
+                  GwyMasking masking,
+                  gdouble value)
+{
+    guint pos, len, maskpos;
+    if (!gwy_line_check_mask(line, lpart, mask, &masking, &pos, &len, &maskpos))
+        return;
+
+    gdouble *d = line->data + pos;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = len; j; j--, d++)
+            *d *= value;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskIter iter;
+        gwy_mask_line_iter_init(mask, iter, maskpos);
+        for (guint j = len; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert)
+                *d *= value;
+            gwy_mask_iter_next(iter);
+        }
+    }
 }
 
 /**
