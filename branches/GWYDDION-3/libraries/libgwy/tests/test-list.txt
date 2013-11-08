@@ -513,6 +513,14 @@ field/filter/median/bucket/small/rect
 field/filter/median/bucket/small/shrunkrect
 field/filter/median/bucket/small/ellipse
 field/filter/median/bucket/large/rect
+field/filter/min/direct/small/rect
+field/filter/min/direct/small/shrunkrect
+field/filter/min/direct/small/ellipse
+field/filter/min/direct/large/rect
+field/filter/max/direct/small/rect
+field/filter/max/direct/small/shrunkrect
+field/filter/max/direct/small/ellipse
+field/filter/max/direct/large/rect
 field/correlate/plain
 field/correlate/level
 field/correlate/scale-rms

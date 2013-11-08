@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010-2011 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -86,6 +86,18 @@ void      gwy_field_filter_standard(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     GwyField *target,
                                     GwyStandardFilter filter,
+                                    GwyExterior exterior,
+                                    gdouble fill_value);
+void      gwy_field_filter_min     (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    GwyField *target,
+                                    const GwyMaskField *kernel,
+                                    GwyExterior exterior,
+                                    gdouble fill_value);
+void      gwy_field_filter_max     (const GwyField *field,
+                                    const GwyFieldPart *fpart,
+                                    GwyField *target,
+                                    const GwyMaskField *kernel,
                                     GwyExterior exterior,
                                     gdouble fill_value);
 void      gwy_field_filter_median  (const GwyField *field,

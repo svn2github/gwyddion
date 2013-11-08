@@ -35,6 +35,12 @@ enum {
 };
 
 enum {
+    RANK_FILTER_MIN = -1,
+    RANK_FILTER_MAX = -2,
+    RANK_FILTER_MEDIAN = -3,
+};
+
+enum {
     UPPER = 0,
     LOWER = 1,
     LEFT = 2,
@@ -65,22 +71,22 @@ typedef struct {
     guint kn;
     RectExtendFunc extend_rect;
     gdouble fill_value;
-} MedianFilterData;
+} RankFilterData;
 
-typedef void (*MedianFilterFunc)(const MedianFilterData *mfdata);
+typedef void (*RankFilterFunc)(const RankFilterData *rfdata);
 
 typedef struct {
-    MedianFilterData mfdata;
-    MedianFilterFunc medfunc;
+    RankFilterData rfdata;
+    RankFilterFunc medfunc;
     guint colwidth;
     guint col;
     guint targetcol;
-} MedianFilterState;
+} RankFilterState;
 
 typedef struct {
-    MedianFilterData mfdata;
-    MedianFilterFunc medfunc;
-} MedianFilterTask;
+    RankFilterData rfdata;
+    RankFilterFunc medfunc;
+} RankFilterTask;
 
 static guint median_filter_method = MEDIAN_FILTER_AUTO;
 
@@ -326,19 +332,19 @@ add_edge_data_with_revmap(const KernelEdges *edges,
 }
 
 static void
-filter_median_direct(const MedianFilterData *mfdata)
+filter_median_direct(const RankFilterData *rfdata)
 {
-    const GwyField *field = mfdata->field;
-    guint width = mfdata->width;
-    guint height = mfdata->height;
-    GwyField *target = mfdata->target;
-    guint targetcol = mfdata->targetcol;
-    guint targetrow = mfdata->targetrow;
-    const GwyMaskField *kernel = mfdata->kernel;
+    const GwyField *field = rfdata->field;
+    guint width = rfdata->width;
+    guint height = rfdata->height;
+    GwyField *target = rfdata->target;
+    guint targetcol = rfdata->targetcol;
+    guint targetrow = rfdata->targetrow;
+    const GwyMaskField *kernel = rfdata->kernel;
 
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
-    guint kn = mfdata->kn;
+    guint kn = rfdata->kn;
     guint xsize = width + kxres - 1, ysize = height + kyres - 1;
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
@@ -348,12 +354,12 @@ filter_median_direct(const MedianFilterData *mfdata)
     g_assert(n >= kn);
     gdouble *extdata = g_new(gdouble, n);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
-    KernelEdges *edges = adapt_kernel_edges(mfdata->edges, kxres, xsize);
+    KernelEdges *edges = adapt_kernel_edges(rfdata->edges, kxres, xsize);
 
-    mfdata->extend_rect(field->data, xres, extdata, xsize,
-                        mfdata->col, mfdata->row, width, height, xres, yres,
+    rfdata->extend_rect(field->data, xres, extdata, xsize,
+                        rfdata->col, rfdata->row, width, height, xres, yres,
                         extend_left, extend_right, extend_up, extend_down,
-                        mfdata->fill_value);
+                        rfdata->fill_value);
 
     gdouble *workspace = g_new(gdouble, kn);
     guint *revmap = g_new(guint, n);
@@ -420,6 +426,349 @@ filter_median_direct(const MedianFilterData *mfdata)
     g_free(revmap);
     g_free(freelist);
     g_free(pointers);
+    g_free(workspace);
+    g_free(extdata);
+}
+
+static gdouble
+block_maximum(const gdouble *d, guint n)
+{
+    gdouble m = *d;
+    while (--n) {
+        d++;
+        if (*d > m)
+            m = *d;
+    }
+    return m;
+}
+
+static gdouble
+block_minimum(const gdouble *d, guint n)
+{
+    gdouble m = *d;
+    while (--n) {
+        d++;
+        if (*d < m)
+            m = *d;
+    }
+    return m;
+}
+
+static gboolean
+remove_edge_data_with_revmap_check(const KernelEdges *edges,
+                                   guint basepos,
+                                   guint edge,
+                                   const gdouble *workspace,
+                                   gdouble value,
+                                   guint *revmap,
+                                   guint *freelist)
+{
+    const IntList *list = kernel_edge_list(edges, edge);
+    g_return_val_if_fail(list, FALSE);
+
+    gboolean retval = FALSE;
+    for (guint k = 0; k < list->len; k++) {
+        guint pos = basepos + list->data[k];
+        guint wsppos = revmap[pos];
+        if (G_UNLIKELY(workspace[wsppos] == value))
+            retval = TRUE;
+        *(freelist++) = wsppos;
+    }
+    return retval;
+}
+
+static gdouble
+add_edge_data_with_revmap_maximum(const KernelEdges *edges,
+                                  const gdouble *data,
+                                  guint basepos,
+                                  guint edge,
+                                  gdouble *workspace,
+                                  guint *revmap,
+                                  guint *freelist)
+{
+    const IntList *list = kernel_edge_list(edges, edge);
+    g_return_val_if_fail(list, -G_MAXDOUBLE);
+
+    gdouble max = -G_MAXDOUBLE;
+    for (guint k = 0; k < list->len; k++) {
+        guint pos = basepos + list->data[k];
+        guint wsppos = *(freelist++);
+        gdouble v = workspace[wsppos] = data[pos];
+        if (v > max)
+            max = v;
+        revmap[pos] = wsppos;
+    }
+
+    return max;
+}
+
+static gdouble
+add_edge_data_with_revmap_minimum(const KernelEdges *edges,
+                                  const gdouble *data,
+                                  guint basepos,
+                                  guint edge,
+                                  gdouble *workspace,
+                                  guint *revmap,
+                                  guint *freelist)
+{
+    const IntList *list = kernel_edge_list(edges, edge);
+    g_return_val_if_fail(list, G_MAXDOUBLE);
+
+    gdouble min = -G_MAXDOUBLE;
+    for (guint k = 0; k < list->len; k++) {
+        guint pos = basepos + list->data[k];
+        guint wsppos = *(freelist++);
+        gdouble v = workspace[wsppos] = data[pos];
+        if (v < min)
+            min = v;
+        revmap[pos] = wsppos;
+    }
+
+    return min;
+}
+
+static void
+filter_maximum_direct(const RankFilterData *rfdata)
+{
+    const GwyField *field = rfdata->field;
+    guint width = rfdata->width;
+    guint height = rfdata->height;
+    GwyField *target = rfdata->target;
+    guint targetcol = rfdata->targetcol;
+    guint targetrow = rfdata->targetrow;
+    const GwyMaskField *kernel = rfdata->kernel;
+
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    guint kn = rfdata->kn;
+    guint xsize = width + kxres - 1, ysize = height + kyres - 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+
+    guint n = xsize*ysize;
+    g_assert(n >= kn);
+    gdouble *extdata = g_new(gdouble, n);
+    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+    KernelEdges *edges = adapt_kernel_edges(rfdata->edges, kxres, xsize);
+
+    rfdata->extend_rect(field->data, xres, extdata, xsize,
+                        rfdata->col, rfdata->row, width, height, xres, yres,
+                        extend_left, extend_right, extend_up, extend_down,
+                        rfdata->fill_value);
+
+    gdouble *workspace = g_new(gdouble, kn);
+    guint *revmap = g_new(guint, n);
+    guint *freelist = g_new(guint, MAX(edges->upper->len, edges->left->len));
+
+    // Fill the workspace with the contents of the initial kernel.
+    guint k = extract_masked_data_double_with_revmap(extdata, xsize, kernel,
+                                                     workspace, revmap);
+    g_assert(k == kn);
+    gdouble max = targetbase[0] = block_maximum(workspace, kn);
+
+    // Scan.  A bit counterintiutively, we scan by column because this means
+    // the samples added/removed to the workspace in each step form a
+    // contiguous block in a single row.
+    guint i = 0, j = 0;
+    while (TRUE) {
+        gboolean s;
+        gdouble m;
+        // Downward pass of the zig-zag pattern.
+        while (i < height-1) {
+            s = remove_edge_data_with_revmap_check(edges, i*xsize + j, UPPER,
+                                                   workspace, max,
+                                                   revmap, freelist);
+            i++;
+            m = add_edge_data_with_revmap_maximum(edges, extdata, i*xsize + j,
+                                                  LOWER,
+                                                  workspace, revmap, freelist);
+            if (m >= max)
+                max = m;
+            else if (s)
+                max = block_maximum(workspace, kn);
+
+            targetbase[i*target->xres + j] = max;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the bottom)
+        s = remove_edge_data_with_revmap_check(edges, i*xsize + j, LEFT,
+                                               workspace, max,
+                                               revmap, freelist);
+        j++;
+        m = add_edge_data_with_revmap_maximum(edges, extdata, i*xsize + j,
+                                              RIGHT,
+                                              workspace, revmap, freelist);
+        if (m >= max)
+            max = m;
+        else if (s)
+            max = block_maximum(workspace, kn);
+
+        targetbase[i*target->xres + j] = max;
+
+        // Upward pass of the zig-zag pattern.
+        while (i) {
+            s = remove_edge_data_with_revmap_check(edges, i*xsize + j, LOWER,
+                                                   workspace, max,
+                                                   revmap, freelist);
+            i--;
+            m = add_edge_data_with_revmap_maximum(edges, extdata, i*xsize + j,
+                                                  UPPER,
+                                                  workspace, revmap, freelist);
+            if (m >= max)
+                max = m;
+            else if (s)
+                max = block_maximum(workspace, kn);
+
+            targetbase[i*target->xres + j] = max;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the top)
+        s = remove_edge_data_with_revmap_check(edges, i*xsize + j, LEFT,
+                                               workspace, max,
+                                               revmap, freelist);
+        j++;
+        m = add_edge_data_with_revmap_maximum(edges, extdata, i*xsize + j,
+                                              RIGHT,
+                                              workspace, revmap, freelist);
+        if (m >= max)
+            max = m;
+        else if (s)
+            max = block_maximum(workspace, kn);
+
+        targetbase[i*target->xres + j] = max;
+    }
+
+    kernel_edges_free(edges);
+    g_free(revmap);
+    g_free(freelist);
+    g_free(workspace);
+    g_free(extdata);
+}
+
+static void
+filter_minimum_direct(const RankFilterData *rfdata)
+{
+    const GwyField *field = rfdata->field;
+    guint width = rfdata->width;
+    guint height = rfdata->height;
+    GwyField *target = rfdata->target;
+    guint targetcol = rfdata->targetcol;
+    guint targetrow = rfdata->targetrow;
+    const GwyMaskField *kernel = rfdata->kernel;
+
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    guint kn = rfdata->kn;
+    guint xsize = width + kxres - 1, ysize = height + kyres - 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    _gwy_make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+
+    guint n = xsize*ysize;
+    g_assert(n >= kn);
+    gdouble *extdata = g_new(gdouble, n);
+    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+    KernelEdges *edges = adapt_kernel_edges(rfdata->edges, kxres, xsize);
+
+    rfdata->extend_rect(field->data, xres, extdata, xsize,
+                        rfdata->col, rfdata->row, width, height, xres, yres,
+                        extend_left, extend_right, extend_up, extend_down,
+                        rfdata->fill_value);
+
+    gdouble *workspace = g_new(gdouble, kn);
+    guint *revmap = g_new(guint, n);
+    guint *freelist = g_new(guint, MAX(edges->upper->len, edges->left->len));
+
+    // Fill the workspace with the contents of the initial kernel.
+    guint k = extract_masked_data_double_with_revmap(extdata, xsize, kernel,
+                                                     workspace, revmap);
+    g_assert(k == kn);
+    gdouble min = targetbase[0] = block_minimum(workspace, kn);
+
+    // Scan.  A bit counterintiutively, we scan by column because this means
+    // the samples added/removed to the workspace in each step form a
+    // contiguous block in a single row.
+    guint i = 0, j = 0;
+    while (TRUE) {
+        gboolean s;
+        gdouble m;
+        // Downward pass of the zig-zag pattern.
+        while (i < height-1) {
+            s = remove_edge_data_with_revmap_check(edges, i*xsize + j, UPPER,
+                                                   workspace, min,
+                                                   revmap, freelist);
+            i++;
+            m = add_edge_data_with_revmap_minimum(edges, extdata, i*xsize + j,
+                                                  LOWER,
+                                                  workspace, revmap, freelist);
+            if (m <= min)
+                min = m;
+            else if (s)
+                min = block_minimum(workspace, kn);
+
+            targetbase[i*target->xres + j] = min;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the bottom)
+        s = remove_edge_data_with_revmap_check(edges, i*xsize + j, LEFT,
+                                               workspace, min,
+                                               revmap, freelist);
+        j++;
+        m = add_edge_data_with_revmap_minimum(edges, extdata, i*xsize + j,
+                                              RIGHT,
+                                              workspace, revmap, freelist);
+        if (m <= min)
+            min = m;
+        else if (s)
+            min = block_minimum(workspace, kn);
+
+        targetbase[i*target->xres + j] = min;
+
+        // Upward pass of the zig-zag pattern.
+        while (i) {
+            s = remove_edge_data_with_revmap_check(edges, i*xsize + j, LOWER,
+                                                   workspace, min,
+                                                   revmap, freelist);
+            i--;
+            m = add_edge_data_with_revmap_minimum(edges, extdata, i*xsize + j,
+                                                  UPPER,
+                                                  workspace, revmap, freelist);
+            if (m <= min)
+                min = m;
+            else if (s)
+                min = block_minimum(workspace, kn);
+
+            targetbase[i*target->xres + j] = min;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the top)
+        s = remove_edge_data_with_revmap_check(edges, i*xsize + j, LEFT,
+                                               workspace, min,
+                                               revmap, freelist);
+        j++;
+        m = add_edge_data_with_revmap_minimum(edges, extdata, i*xsize + j,
+                                              RIGHT,
+                                              workspace, revmap, freelist);
+        if (m <= min)
+            min = m;
+        else if (s)
+            min = block_minimum(workspace, kn);
+
+        targetbase[i*target->xres + j] = min;
+    }
+
+    kernel_edges_free(edges);
+    g_free(revmap);
+    g_free(freelist);
     g_free(workspace);
     g_free(extdata);
 }
@@ -629,19 +978,19 @@ extract_masked_data_uint(const guint *data,
 }
 
 static void
-filter_median_bucket(const MedianFilterData *mfdata)
+filter_median_bucket(const RankFilterData *rfdata)
 {
-    const GwyField *field = mfdata->field;
-    guint width = mfdata->width;
-    guint height = mfdata->height;
-    GwyField *target = mfdata->target;
-    guint targetcol = mfdata->targetcol;
-    guint targetrow = mfdata->targetrow;
-    const GwyMaskField *kernel = mfdata->kernel;
+    const GwyField *field = rfdata->field;
+    guint width = rfdata->width;
+    guint height = rfdata->height;
+    GwyField *target = rfdata->target;
+    guint targetcol = rfdata->targetcol;
+    guint targetrow = rfdata->targetrow;
+    const GwyMaskField *kernel = rfdata->kernel;
 
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
-    guint kn = mfdata->kn;
+    guint kn = rfdata->kn;
     guint xsize = width + kxres - 1, ysize = height + kyres - 1;
     guint extend_left, extend_right, extend_up, extend_down;
     _gwy_make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
@@ -651,12 +1000,12 @@ filter_median_bucket(const MedianFilterData *mfdata)
     g_assert(n >= kn);
     gdouble *extdata = g_new(gdouble, n);
     gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
-    KernelEdges *edges = adapt_kernel_edges(mfdata->edges, kxres, xsize);
+    KernelEdges *edges = adapt_kernel_edges(rfdata->edges, kxres, xsize);
 
-    mfdata->extend_rect(field->data, xres, extdata, xsize,
-                        mfdata->col, mfdata->row, width, height, xres, yres,
+    rfdata->extend_rect(field->data, xres, extdata, xsize,
+                        rfdata->col, rfdata->row, width, height, xres, yres,
                         extend_left, extend_right, extend_up, extend_down,
-                        mfdata->fill_value);
+                        rfdata->fill_value);
 
     gdouble bsizemin = n/(kn*(log(kn) + 1.0));  // Avoid too many buckets.
     gdouble bsizemax = 2.0*sqrt(kn);            // Avoid too large buckets.
@@ -792,92 +1141,166 @@ filter_median_bucket(const MedianFilterData *mfdata)
 }
 
 static gpointer
-filter_median_task(gpointer user_data)
+rank_filter_task(gpointer user_data)
 {
-    MedianFilterState *state = (MedianFilterState*)user_data;
-    if (state->col >= state->mfdata.width)
+    RankFilterState *state = (RankFilterState*)user_data;
+    if (state->col >= state->rfdata.width)
         return NULL;
 
-    MedianFilterTask *task = g_slice_new(MedianFilterTask);
-    task->mfdata = state->mfdata;
+    RankFilterTask *task = g_slice_new(RankFilterTask);
+    task->rfdata = state->rfdata;
     task->medfunc = state->medfunc;
 
-    guint colend = MIN(state->col + state->colwidth, state->mfdata.width);
-    task->mfdata.col = state->mfdata.col + state->col;
-    task->mfdata.width = colend - state->col;
-    task->mfdata.targetcol = state->targetcol + state->col;
+    guint colend = MIN(state->col + state->colwidth, state->rfdata.width);
+    task->rfdata.col = state->rfdata.col + state->col;
+    task->rfdata.width = colend - state->col;
+    task->rfdata.targetcol = state->targetcol + state->col;
     state->col = colend;
 
     return task;
 }
 
 static gpointer
-filter_median_worker(gpointer taskp,
-                     G_GNUC_UNUSED gpointer data)
+rank_filter_worker(gpointer taskp,
+                   G_GNUC_UNUSED gpointer data)
 {
-    MedianFilterTask *task = (MedianFilterTask*)taskp;
-    task->medfunc(&task->mfdata);
+    RankFilterTask *task = (RankFilterTask*)taskp;
+    task->medfunc(&task->rfdata);
     return taskp;
 }
 
 static void
-filter_median_result(gpointer result,
-                     G_GNUC_UNUSED gpointer user_data)
+rank_filter_result(gpointer result,
+                   G_GNUC_UNUSED gpointer user_data)
 {
-    MedianFilterTask *task = (MedianFilterTask*)result;
-    g_slice_free(MedianFilterTask, task);
+    RankFilterTask *task = (RankFilterTask*)result;
+    g_slice_free(RankFilterTask, task);
 }
 
 static void
-filter_median_split(const MedianFilterData *mfdata,
-                    MedianFilterFunc medfunc,
-                    guint split_threshold)
+filter_rank_split(const RankFilterData *rfdata,
+                  RankFilterFunc medfunc,
+                  guint split_threshold)
 {
-    guint width = mfdata->width, height = mfdata->height;
-    guint targetcol = mfdata->targetcol, targetrow = mfdata->targetrow;
+    guint width = rfdata->width, height = rfdata->height;
+    guint targetcol = rfdata->targetcol, targetrow = rfdata->targetrow;
     guint ncols = MIN(width*height/split_threshold, width);
     if (ncols < 2) {
-        medfunc(mfdata);
+        medfunc(rfdata);
         return;
     }
 
-    guint colwidth = MAX(width/ncols, mfdata->kernel->xres);
+    guint colwidth = MAX(width/ncols, rfdata->kernel->xres);
     if (colwidth >= width) {
-        medfunc(mfdata);
+        medfunc(rfdata);
         return;
     }
 
     GwyField *tmptarget = NULL;
     guint tmpcol = 0, tmprow = 0;
-    if (mfdata->target == mfdata->field)
+    if (rfdata->target == rfdata->field)
         tmptarget = gwy_field_new_sized(width, height, FALSE);
     else {
-        tmptarget = mfdata->target;
+        tmptarget = rfdata->target;
         tmpcol = targetcol;
         tmprow = targetrow;
     }
 
-    MedianFilterData mfdatacol = *mfdata;
-    mfdatacol.target = tmptarget;
-    mfdatacol.targetrow = tmprow;
+    RankFilterData rfdatacol = *rfdata;
+    rfdatacol.target = tmptarget;
+    rfdatacol.targetrow = tmprow;
 
     GwyMaster *master = gwy_master_acquire_default(TRUE);
-    MedianFilterState state = {
-        .mfdata = mfdatacol, .medfunc = medfunc,
+    RankFilterState state = {
+        .rfdata = rfdatacol, .medfunc = medfunc,
         .col = 0, .colwidth = colwidth, .targetcol = tmpcol,
     };
     gwy_master_manage_tasks(master, 0,
-                            &filter_median_worker,
-                            &filter_median_task,
-                            &filter_median_result,
+                            &rank_filter_worker,
+                            &rank_filter_task,
+                            &rank_filter_result,
                             &state,
                             NULL);
     gwy_master_release_default(master);
 
-    if (tmptarget != mfdata->target) {
-        gwy_field_copy(tmptarget, NULL, mfdata->target, targetcol, targetrow);
+    if (tmptarget != rfdata->target) {
+        gwy_field_copy(tmptarget, NULL, rfdata->target, targetcol, targetrow);
         g_object_unref(tmptarget);
     }
+}
+
+void
+rank_filter(const GwyField *field,
+            const GwyFieldPart *fpart,
+            GwyField *target,
+            gint rank,
+            const GwyMaskField *kernel,
+            GwyExterior exterior,
+            gdouble fill_value)
+{
+    enum { SPLIT_THRESHOLD = 500*500 };
+
+    guint col, row, width, height, targetcol, targetrow;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
+                                   &targetcol, &targetrow))
+        return;
+
+    g_return_if_fail(GWY_IS_MASK_FIELD(kernel));
+    RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    guint kn = gwy_mask_field_count(kernel, NULL, TRUE);
+    if (!kn) {
+        g_warning("Rank filter requires a non-empty kernel.");
+        // Do something basically sane.
+        if (target != field || targetcol != col || targetrow != row)
+            gwy_field_copy(field, fpart, target, targetcol, targetrow);
+        return;
+    }
+
+    KernelEdges *edges = analyse_kernel_edges(kernel);
+
+    RankFilterData rfdata = {
+        .field = field,
+        .col = col, .row = row, .width = width, .height = height,
+        .target = target,
+        .targetcol = targetcol, .targetrow = targetrow,
+        .kernel = kernel, .edges = edges, .kn = kn,
+        .extend_rect = extend_rect, .fill_value = fill_value,
+    };
+
+    if (rank == RANK_FILTER_MEDIAN) {
+        // FIXME: Using kn, edges and kxres*kyres we can assess how scattered
+        // the kernel is and prefer the direct filter for sparse kernels.
+        if (median_filter_method == MEDIAN_FILTER_BUCKET
+            || (median_filter_method == MEDIAN_FILTER_AUTO
+                && kernel->xres*kernel->yres >= 70))
+            filter_rank_split(&rfdata, &filter_median_bucket, SPLIT_THRESHOLD);
+        else
+            filter_rank_split(&rfdata, &filter_median_direct, SPLIT_THRESHOLD);
+    }
+    else if (rank == RANK_FILTER_MIN) {
+        filter_rank_split(&rfdata, &filter_minimum_direct, SPLIT_THRESHOLD);
+    }
+    else if (rank == RANK_FILTER_MAX) {
+        filter_rank_split(&rfdata, &filter_maximum_direct, SPLIT_THRESHOLD);
+    }
+    else {
+        g_critical("Unknown rank type %d\n", rank);
+    }
+
+    kernel_edges_free(edges);
+
+    if (target != field) {
+        _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
+        _gwy_assign_unit(&target->priv->yunit, field->priv->yunit);
+        _gwy_assign_unit(&target->priv->zunit, field->priv->zunit);
+    }
+
+    gwy_field_invalidate(target);
 }
 
 /**
@@ -897,7 +1320,7 @@ filter_median_split(const MedianFilterData *mfdata,
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
- * Processes a field with median filter.
+ * Processes a field with the median filter.
  **/
 void
 gwy_field_filter_median(const GwyField *field,
@@ -907,56 +1330,70 @@ gwy_field_filter_median(const GwyField *field,
                         GwyExterior exterior,
                         gdouble fill_value)
 {
-    guint col, row, width, height, targetcol, targetrow;
-    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
-        || !gwy_field_check_target(field, target,
-                                   &(GwyFieldPart){ col, row, width, height },
-                                   &targetcol, &targetrow))
-        return;
+    rank_filter(field, fpart, target, RANK_FILTER_MEDIAN, kernel,
+                exterior, fill_value);
+}
 
-    g_return_if_fail(GWY_IS_MASK_FIELD(kernel));
-    RectExtendFunc extend_rect = _gwy_get_rect_extend_func(exterior);
-    if (!extend_rect)
-        return;
+/**
+ * gwy_field_filter_max:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
+ *          the result fills the entire @target.
+ * @kernel: Kernel mask defining the shape of the area of which the maximum
+ *          is taken.  It must have at least one pixel set.  It is recommended
+ *          not to have any empty borders in the kernel; make the field fit
+ *          closely the non-zero region.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ *
+ * Processes a field with the maximum filter.
+ **/
+void
+gwy_field_filter_max(const GwyField *field,
+                     const GwyFieldPart *fpart,
+                     GwyField *target,
+                     const GwyMaskField *kernel,
+                     GwyExterior exterior,
+                     gdouble fill_value)
+{
+    rank_filter(field, fpart, target, RANK_FILTER_MAX, kernel,
+                exterior, fill_value);
+}
 
-    guint kn = gwy_mask_field_count(kernel, NULL, TRUE);
-    if (!kn) {
-        g_warning("Median filter requires a non-empty kernel.");
-        // Do something basically sane.
-        if (target != field || targetcol != col || targetrow != row)
-            gwy_field_copy(field, fpart, target, targetcol, targetrow);
-        return;
-    }
-
-    KernelEdges *edges = analyse_kernel_edges(kernel);
-
-    MedianFilterData mfdata = {
-        .field = field,
-        .col = col, .row = row, .width = width, .height = height,
-        .target = target,
-        .targetcol = targetcol, .targetrow = targetrow,
-        .kernel = kernel, .edges = edges, .kn = kn,
-        .extend_rect = extend_rect, .fill_value = fill_value,
-    };
-
-    // FIXME: Using kn, edges and kxres*kyres we can assess how scattered the
-    // kernel is and prefer the direct filter for sparse kernels.
-    if (median_filter_method == MEDIAN_FILTER_BUCKET
-        || (median_filter_method == MEDIAN_FILTER_AUTO
-            && kernel->xres*kernel->yres >= 100))
-        filter_median_split(&mfdata, &filter_median_bucket, 500*500);
-    else
-        filter_median_split(&mfdata, &filter_median_direct, 500*500);
-
-    kernel_edges_free(edges);
-
-    if (target != field) {
-        _gwy_assign_unit(&target->priv->xunit, field->priv->xunit);
-        _gwy_assign_unit(&target->priv->yunit, field->priv->yunit);
-        _gwy_assign_unit(&target->priv->zunit, field->priv->zunit);
-    }
-
-    gwy_field_invalidate(target);
+/**
+ * gwy_field_filter_min:
+ * @field: A two-dimensional data field.
+ * @fpart: (allow-none):
+ *         Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @fpart.  In the former case the
+ *          placement of result is determined by @fpart; in the latter case
+ *          the result fills the entire @target.
+ * @kernel: Kernel mask defining the shape of the area of which the maximum
+ *          is taken.  It must have at least one pixel set.  It is recommended
+ *          not to have any empty borders in the kernel; make the field fit
+ *          closely the non-zero region.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ *
+ * Processes a field with the minimum filter.
+ **/
+void
+gwy_field_filter_min(const GwyField *field,
+                     const GwyFieldPart *fpart,
+                     GwyField *target,
+                     const GwyMaskField *kernel,
+                     GwyExterior exterior,
+                     gdouble fill_value)
+{
+    rank_filter(field, fpart, target, RANK_FILTER_MIN, kernel,
+                exterior, fill_value);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

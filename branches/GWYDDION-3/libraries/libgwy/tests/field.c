@@ -1722,6 +1722,198 @@ test_field_filter_median_bucket_large_rect(void)
 }
 
 static void
+minmax_filter_dumb(const GwyField *field,
+                   const GwyFieldPart *fpart,
+                   GwyField *target,
+                   const GwyMaskField *kernel,
+                   gboolean maximum,
+                   GwyExterior exterior,
+                   gdouble fill_value)
+{
+    guint col, row, width, height, targetcol, targetrow;
+    if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)
+        || !gwy_field_check_target(field, target,
+                                   &(GwyFieldPart){ col, row, width, height },
+                                   &targetcol, &targetrow)) {
+        g_return_if_reached();
+    }
+
+    guint kxres = kernel->xres, kyres = kernel->yres;
+    guint extx = kxres - 1, exty = kyres - 1;
+    GwyField *extended = gwy_field_new_extended(field, fpart,
+                                                extx/2, extx - extx/2,
+                                                exty/2, exty - exty/2,
+                                                exterior, fill_value, TRUE);
+    GwyField *workspace = gwy_field_new_sized(kxres, kyres, FALSE);
+
+    for (guint i = 0; i < height; i++) {
+        for (guint j = 0; j < width; j++) {
+            gwy_field_copy(extended, &(GwyFieldPart){ j, i, kxres, kyres },
+                           workspace, 0, 0);
+            gdouble min, max;
+            gwy_field_min_max(workspace, NULL, kernel,
+                              GWY_MASK_INCLUDE, &min, &max);
+            gdouble v = maximum ? max : min;
+            gwy_field_index(target, targetcol + j, targetrow + i) = v;
+        }
+    }
+
+    g_object_unref(workspace);
+    g_object_unref(extended);
+}
+
+static void
+field_filter_minmax_small_one(guint shape, gboolean maximum)
+{
+    enum { max_size = 36, niter = 100 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint kxres = g_rand_int_range(rng, 1, max_size);
+        guint kyres = g_rand_int_range(rng, 1, max_size);
+        if (shape == 1) {
+            kxres = MAX(3, kxres);
+            kyres = MAX(3, kyres);
+        }
+
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(source, rng);
+        GwyField *target = gwy_field_new_sized(width, height, FALSE);
+        GwyField *reference = gwy_field_new_alike(target, FALSE);
+        GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
+
+        if (shape == 0)
+            gwy_mask_field_fill(kernel, NULL, TRUE);
+        else if (shape == 1) {
+            gwy_mask_field_fill(kernel, NULL, FALSE);
+            gwy_mask_field_fill(kernel,
+                                &(GwyFieldPart){ 1, 1, kxres-1, kyres-1 },
+                                TRUE);
+        }
+        else
+            gwy_mask_field_fill_ellipse(kernel, NULL, TRUE, TRUE);
+
+        GwyFieldPart fpart = { col, row, width, height };
+        if (maximum) {
+            gwy_field_filter_max(source, &fpart, target, kernel,
+                                 GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+        }
+        else {
+            gwy_field_filter_min(source, &fpart, target, kernel,
+                                 GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+        }
+        minmax_filter_dumb(source, &fpart, reference, kernel, maximum,
+                           GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+
+        field_assert_equal(target, reference);
+
+        g_object_unref(reference);
+        g_object_unref(kernel);
+        g_object_unref(target);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_filter_max_direct_small_rect(void)
+{
+    field_filter_minmax_small_one(0, TRUE);
+}
+
+void
+test_field_filter_max_direct_small_shrunkrect(void)
+{
+    field_filter_minmax_small_one(1, TRUE);
+}
+
+void
+test_field_filter_max_direct_small_ellipse(void)
+{
+    field_filter_minmax_small_one(2, TRUE);
+}
+
+void
+test_field_filter_min_direct_small_rect(void)
+{
+    field_filter_minmax_small_one(0, TRUE);
+}
+
+void
+test_field_filter_min_direct_small_shrunkrect(void)
+{
+    field_filter_minmax_small_one(1, TRUE);
+}
+
+void
+test_field_filter_min_direct_small_ellipse(void)
+{
+    field_filter_minmax_small_one(2, TRUE);
+}
+
+static void
+field_filter_minmax_large_rect_one(gboolean maximum)
+{
+    enum { max_ksize = 20, niter = 5 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 300, 2000);
+        guint yres = g_rand_int_range(rng, 300, 2000);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint kxres = g_rand_int_range(rng, 1, max_ksize);
+        guint kyres = g_rand_int_range(rng, 1, max_ksize);
+
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(source, rng);
+        GwyField *target = gwy_field_new_sized(width, height, FALSE);
+        GwyField *reference = gwy_field_new_alike(target, FALSE);
+        GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
+        gwy_mask_field_fill(kernel, NULL, TRUE);
+        GwyFieldPart fpart = { col, row, width, height };
+        if (maximum) {
+            gwy_field_filter_max(source, &fpart, target, kernel,
+                                 GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+        }
+        else {
+            gwy_field_filter_min(source, &fpart, target, kernel,
+                                 GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+        }
+        minmax_filter_dumb(source, &fpart, reference, kernel, maximum,
+                           GWY_EXTERIOR_MIRROR_EXTEND, NAN);
+
+        field_assert_equal(target, reference);
+
+        g_object_unref(reference);
+        g_object_unref(kernel);
+        g_object_unref(target);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_filter_max_direct_large_rect(void)
+{
+    field_filter_minmax_large_rect_one(TRUE);
+}
+
+void
+test_field_filter_min_direct_large_rect(void)
+{
+    field_filter_minmax_large_rect_one(TRUE);
+}
+
+static void
 field_move_periodically(GwyField *field,
                         gint xmove, gint ymove)
 {
