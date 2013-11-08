@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='toolbox-configuration'>
+  <title>Toolbox configuration</title>
+  <indexterm><primary>Toolbox</primary></indexterm>
+  <para>
+    The lower part of the <link linkend='main-window'>toolbox</link> containing
+    the buttons for functions and tools can be customised by editing file
+    <filename>ui/toolbox.xml</filename>.  Similarly to custom
+    <link linkend='keyboard-shortcuts'>keyboard shortcuts</link>, the file
+    should be placed in the user's directory, which usually means
+    <filename>~/.gwyddion</filename> (Unix) or
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+    A good starting point for customisation is the default
+    <filename>ui/toolbox.xml</filename> file installed with Gwyddion under
+    <filename>share/gwyddion</filename>.
+  </para>
+  <para>
+    The number buttons in a row is controlled by the <literal>width</literal>
+    attribute of the top level element <literal>toolbox</literal>.  To change
+    it to five just change the begining of the file to
+    <informalexample>
+      <programlisting><![CDATA[<toolbox width='5'>]]></programlisting>
+    </informalexample>
+  </para>
+  <para>
+    Expandable and collapsable groups of buttons such as
+    <guilabel>Data Process</guilabel> or <guilabel>Tools</guilabel> are
+    created with <literal>group</literal>.  You can creates as many or as few
+    groups as you want and mix functions of different kinds in one group if
+    you wish.  Each group must be identified with a unique
+    <literal>id</literal> attribute which is, among other things, used to
+    remember which group was collapsed and which expanded.  The attribute
+    <literal>title</literal> determines the title:
+    <informalexample>
+      <programlisting><![CDATA[<group id='proc' title='Data Process'>]]></programlisting>
+    </informalexample>
+  </para>
+  <para>
+    Individual buttons are created with elements <literal>item</literal>:
+    <informalexample>
+      <programlisting><![CDATA[<item type='proc' function='edge_step' icon='gwy_edge'/>]]></programlisting>
+    </informalexample>
+    Each item must have the <literal>type</literal> attribute, defining the
+    function type.  Unless the type is <literal>'empty'</literal> it must also
+    have a <literal>function</literal> attribute defining the specific
+    function.  Function names can be located in the module browser
+    (<menuchoice>
+      <guimenu>Meta</guimenu>
+      <guimenuitem>Module Browser</guimenuitem>
+    </menuchoice>).
+    The available function types are listed in the following table:
+  </para>
+  <informaltable frame='topbot' id='table-toolbox-xml-types'>
+    <tgroup cols='2' align='left'>
+    <?dblatex lX?>
+      <thead>
+        <row>
+          <entry>Type name</entry>
+          <entry>Function kind</entry>
+        </row>
+      </thead>
+      <tbody valign='top'>
+        <row>
+          <entry><literal>empty</literal></entry>
+          <entry>
+            Empty placeholder that can be used for separation or row
+            alignment.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>builtin</literal></entry>
+          <entry>
+            A built-in function, which includes zooming in and out and 3D view
+            activation.  There are exacly four:
+            <literal>'display_3d'</literal>,
+            <literal>'zoom_in'</literal>,
+            <literal>'zoom_out'</literal>
+            and
+            <literal>'zoom_1_1'</literal>.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>proc</literal></entry>
+          <entry>
+            A two-dimensional data (image) processing function.  It has prefix
+            <literal>proc::</literal> in the module browser.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>graph</literal></entry>
+          <entry>
+            A graph function.  It has prefix
+            <literal>graph::</literal> in the module browser.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>volume</literal></entry>
+          <entry>
+            A volume data function.  It has prefix
+            <literal>volume::</literal> in the module browser.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>tool</literal></entry>
+          <entry>
+            A tool.  It has prefix
+            <literal>tool::</literal> in the module browser.
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <para>
+    It may be also necessary to specify an <literal>icon</literal> for the
+    button.  Some module functions have icons predefined but not all have.
+    A <ulink url='http://gwyddion.net/documentation/libgwydgets/libgwydgets-gwystock.php'>Gwyddion stock icon</ulink>
+    can be used or possibly a
+    <ulink url='https://developer.gnome.org/gtk2/stable/gtk2-Stock-Items.html'>Gtk+ stock icon</ulink>.
+    Note Gwyddion icon names have words separated with underscores while Gtk+
+    icon names use dashes.
+  </para>
+  <para>
+    Tools are accessible only from the toolbox so not listing a tool in
+    <filename>ui/toolbox.xml</filename> renders it unavailable.  Therefore,
+    a special empty item
+    <informalexample>
+      <programlisting><![CDATA[<item type='tool'/>]]></programlisting>
+    </informalexample>
+    can be used to place all tools that have not been explicitly placed yet
+    to the corresponding position (in a pretty much arbitrary order).
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

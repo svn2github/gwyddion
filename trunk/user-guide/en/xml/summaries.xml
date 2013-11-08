@@ -5,9 +5,9 @@
 <chapter id='summaries' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Summaries and Tables</title>
   <para>
-    This chapter provides reference for various formats, syntaxes and command
-    options that you might find helpful.  Most are related to advanced use
-    of Gwyddion, except perhaps the
+    This chapter provides the reference for various formats, syntaxes and
+    command options that you might find helpful.  Most are related to advanced
+    use of Gwyddion, except perhaps the
     <link linkend='keyboard-shortcuts'>table of common keyboard shortcuts</link>
     and
     <link linkend='file-formats'>table of supported file formats</link>.
@@ -19,6 +19,7 @@
   <xi:include href='pixmap-image-keys.xml'/>
   <xi:include href='expressions.xml'/>
   <xi:include href='resources.xml'/>
+  <xi:include href='toolbox-configuration.xml'/>
   <xi:include href='gwyfile-format.xml'/>
   <xi:include href='simple-field-format.xml'/>
   <xi:include href='simple-xyz-format.xml'/>

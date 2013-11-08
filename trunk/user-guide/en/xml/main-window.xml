@@ -4,6 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='main-window'>
   <title>Main Window</title>
+  <indexterm><primary>Toolbox</primary></indexterm>
   <para>
     The main window, also called toolbox, is one of the two Gwyddion windows
     that appear after program start (with no files given to open), the other

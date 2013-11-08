@@ -4,6 +4,10 @@
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='keyboard-shortcuts'>
   <title>Keyboard Shortcuts</title>
+  <indexterm>
+    <primary>Keyboard shortcuts</primary>
+    <secondary>standard</secondary>
+  </indexterm>
   <informaltable frame='topbot' id='table-keyboard-shortcuts'>
     <tgroup cols='4' align='left'>
     <?dblatex llXX?>
@@ -222,6 +226,10 @@
       </tbody>
     </tgroup>
   </informaltable>
+  <indexterm>
+    <primary>Keyboard shortcuts</primary>
+    <secondary>custom</secondary>
+  </indexterm>
   <para>
     You can assign your own keyboard shortcuts to all functions in the menus
     and it is also possible to invoke tools with keyboard shortcuts.

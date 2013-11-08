@@ -4,6 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='tools'>
   <title>Tools</title>
+  <indexterm><primary>Toolbox</primary></indexterm>
   <para>
     Functions from <guimenu>Data Process</guimenu> menu and button panel
     either execute immediately or after asking for parameters and settings
