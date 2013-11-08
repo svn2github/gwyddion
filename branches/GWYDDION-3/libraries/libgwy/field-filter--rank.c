@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-// Including before fftw3.h ensures fftw_complex is C99 ‘double complex’.
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/math.h"
@@ -1238,7 +1237,7 @@ rank_filter(const GwyField *field,
             GwyExterior exterior,
             gdouble fill_value)
 {
-    enum { SPLIT_THRESHOLD = 500*500 };
+    enum { SPLIT_THRESHOLD = 250*250 };
 
     guint col, row, width, height, targetcol, targetrow;
     if (!gwy_field_check_part(field, fpart, &col, &row, &width, &height)

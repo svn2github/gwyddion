@@ -144,7 +144,7 @@ libgwy4_la_SOURCES = \
 	field-correlate.c \
 	field-distributions--minkowski.c \
 	field-distributions.c \
-	field-filter--median.c \
+	field-filter--rank.c \
 	field-filter.c \
 	field-inttrans.c \
 	field-level--laplace.c \
