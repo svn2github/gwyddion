@@ -22,7 +22,9 @@ function extract_funcs() {
 }
 
 function extract_files() {
-  extract_table File "$@" | grep -v ' \.\./libgwy[^ ]\.h' | sort -g -r
+  extract_table File "$@" \
+    | grep -E -v ' \.\./\.\./libraries/libgwy[^ ]+\.h' \
+    | sort -g -r
 }
 
 function print_header() {
