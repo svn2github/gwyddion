@@ -19,16 +19,25 @@ def time_mult(name, code, n):
 
 time_mult('lib',
           'field.multiply_full(1.1)',
-          100)
+          1000)
 
 time_mult('set-data',
           'd = [1.1*x for x in field.get_data(None, None, 0)]\n'
           'field.set_data(None, None, 0, d)',
-          1)
+          10)
+
+time_mult('set-data-full',
+          'd = [1.1*x for x in field.get_data_full()]\n'
+          'field.set_data_full(d)',
+          10)
 
 time_mult('set-data-inline',
           'field.set_data(None, None, 0, [1.1*x for x in field.get_data(None, None, 0)])',
-          1)
+          10)
+
+time_mult('set-data-full-inline',
+          'field.set_data_full([1.1*x for x in field.get_data_full()])',
+          10)
 
 time_mult('apply-lambda',
           'field.apply_func(None, None, 0, lambda x, y: 1.1*x, None)',
