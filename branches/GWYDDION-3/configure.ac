@@ -32,6 +32,8 @@ AC_CONFIG_FILES([
   libraries/libgwyui/tests/Makefile
   libraries/libgwyapp/Makefile
   libraries/libgwyapp/libgwyapp4.pc
+  python/Makefile
+  python/overrides/Makefile
   gwyddion/Makefile
   modules/Makefile
   po/Makefile.in

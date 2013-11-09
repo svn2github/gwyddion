@@ -2,14 +2,8 @@
 # vim: set fileencoding=utf-8 :
 # Measure the execution speed of various method how to multiply all field
 # values with 1.1.  The speed can differ by factor 10⁴...
-import os, re
+import typelibpath
 from timeit import timeit
-
-gipath = '/lib/girepository-1.0'
-prefix_re = re.compile(r'(?m)^S\["prefix"\]="(?P<prefix>[^"]+)"$')
-prefix = prefix_re.search(file('../config.status').read()).group('prefix')
-os.environ['GI_TYPELIB_PATH'] = prefix + gipath
-
 from gi.repository import Gwy
 
 field = Gwy.Field.new_sized(400, 400, False)

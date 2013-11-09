@@ -1,0 +1,5 @@
+import os
+# Fix the path as a side effect upon import.
+gidir = '/girepository-1.0'
+libdir = ''
+os.environ['GI_TYPELIB_PATH'] = libdir + gidir
