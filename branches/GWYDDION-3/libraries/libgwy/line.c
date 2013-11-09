@@ -1297,8 +1297,7 @@ gwy_line_get_data(const GwyLine *line,
  * Provides the values of an entire data line as a flat array.
  *
  * This function, paired with gwy_line_set_data_full() can be namely useful in
- * language bindings.  Occassionally, however, extraction of values into a flat
- * array is useful also in C, namely with masking.
+ * language bindings.
  *
  * Note that unlike gwy_line_get_data(), this function returns a pointer
  * directly to @line's data.

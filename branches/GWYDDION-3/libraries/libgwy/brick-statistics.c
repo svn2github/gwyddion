@@ -100,8 +100,7 @@ gwy_brick_summarize_lines(const GwyBrick *brick,
         return;
     }
 
-    const gdouble *bbase = brick->data + (level*brick->yres + row)*brick->xres
-                           + col;
+    const gdouble *bbase = BBASE(brick, col, row, level);
 
     /*
      * No dimension combination needs to lead to a bad memory access pattern.

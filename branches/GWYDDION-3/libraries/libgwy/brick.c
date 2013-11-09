@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,9 +26,6 @@
 #include "libgwy/brick-arithmetic.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/brick-internal.h"
-
-#define BASE(brick, col, row, level) \
-    (brick->data + ((level)*brick->yres + (row))*brick->xres + (col))
 
 enum { N_ITEMS = 15 };
 
@@ -903,8 +900,8 @@ gwy_brick_copy(const GwyBrick *src,
         gwy_brick_invalidate(dest);
     }
     else {
-        const gdouble *src0 = BASE(src, col, row, level);
-        gdouble *dest0 = BASE(dest, destcol, destrow, destlevel);
+        const gdouble *src0 = BBASE(src, col, row, level);
+        gdouble *dest0 = BBASE(dest, destcol, destrow, destlevel);
         for (guint l = 0; l < depth; l++) {
             const gdouble *src1 = src0 + l*src->xres*src->yres;
             gdouble *dest1 = dest0 + l*dest->xres*dest->yres;
@@ -1586,7 +1583,7 @@ gwy_brick_check_target(const GwyBrick *brick,
  * data brick.
  *
  * The created format has a sufficient precision to represent coordinates
- * of neighbour pixels as different values.
+ * of neighbour voxels as different values.
  *
  * Returns: (transfer full):
  *          A newly created value format.
@@ -1611,7 +1608,7 @@ gwy_brick_format_x(const GwyBrick *brick,
  * data brick.
  *
  * The created format has a sufficient precision to represent coordinates
- * of neighbour pixels as different values.
+ * of neighbour voxels as different values.
  *
  * Returns: (transfer full):
  *          A newly created value format.
@@ -1635,7 +1632,7 @@ gwy_brick_format_y(const GwyBrick *brick,
  * Finds a suitable format for displaying lateral coordinates in a data brick.
  *
  * The created format has a sufficient precision to represent coordinates
- * of neighbour pixels as different values.
+ * of neighbour voxels as different values.
  *
  * This function can be used only if units of @x and @y are identical which is
  * common but does not hold universally.  If it holds this function is usually
@@ -1673,7 +1670,7 @@ gwy_brick_format_xy(const GwyBrick *brick,
  * Finds a suitable format for displaying depth coordinates in a data brick.
  *
  * The created format has a sufficient precision to represent coordinates
- * of neighbour pixels as different values.
+ * of neighbour voxels as different values.
  *
  * Returns: (transfer full):
  *          A newly created value format.
@@ -1783,6 +1780,57 @@ gwy_brick_set(const GwyBrick *brick,
 }
 
 /**
+ * gwy_brick_get_data_full:
+ * @brick: A two-dimensional data brick.
+ * @ndata: (out):
+ *         Location to store the count of extracted data points.
+ *
+ * Provides the values of an entire data brick as a flat array.
+ *
+ * This function, paired with gwy_brick_set_data_full() can be namely useful in
+ * language bindings.
+ *
+ * Note that this function returns a pointer
+ * directly to @brick's data.
+ *
+ * Returns: (array length=ndata) (transfer none):
+ *          The array containing the brick values.
+ **/
+const gdouble*
+gwy_brick_get_data_full(const GwyBrick *brick,
+                        guint *ndata)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), NULL);
+    *ndata = brick->xres*brick->yres*brick->zres;
+    return brick->data;
+}
+
+/**
+ * gwy_brick_set_data_full:
+ * @brick: A two-dimensional data brick.
+ * @data: (array length=ndata):
+ *        Data values to copy to the brick.
+ * @ndata: The number of data values to put to the brick.  It must match the
+ *         number of brick pixels.  This parameter is useful namely for
+ *         bindings.
+ *
+ * Puts back values from a flat array to an entire data brick.
+ *
+ * See gwy_brick_get_data_full() for a discussion.
+ **/
+void
+gwy_brick_set_data_full(GwyBrick *brick,
+                        const gdouble *data,
+                        guint ndata)
+{
+    g_return_if_fail(GWY_IS_BRICK(brick));
+    g_return_if_fail(data);
+    g_return_if_fail(ndata == brick->xres*brick->yres*brick->zres);
+    gwy_assign(brick->data, data, ndata);
+    gwy_brick_invalidate(brick);
+}
+
+/**
  * SECTION: brick
  * @title: GwyBrick
  * @short_description: Three-dimensional data in regular grid
@@ -1794,7 +1842,7 @@ gwy_brick_set(const GwyBrick *brick,
  * fastest index, row index is the meidum index and level index is the slow
  * one, the top left corner indices are (0,0,0).  The array is contiguous, i.e.
  * there is no padding at the end of each row or level (and neither beween
- * pixels).  No methods to get and set individual values or rows and columns
+ * voxels).  No methods to get and set individual values or rows and columns
  * are provided except gwy_brick_index().  The usual mode of operation is to
  * access the data directly, bearing a few things in mind:
  * <itemizedlist>
@@ -1816,9 +1864,9 @@ gwy_brick_set(const GwyBrick *brick,
 
 /**
  * GwyBrick:
- * @xres: X-resolution, i.e. width in pixels.
- * @yres: Y-resolution, i.e. height in pixels.
- * @zres: Z-resolution, i.e. depth in pixels.
+ * @xres: X-resolution, i.e. width in voxels.
+ * @yres: Y-resolution, i.e. height in voxels.
+ * @zres: Z-resolution, i.e. depth in voxels.
  * @xreal: Width in physical units.
  * @yreal: Height in physical units.
  * @zreal: Depth in physical units.
@@ -1866,7 +1914,7 @@ gwy_brick_set(const GwyBrick *brick,
  * @row: Row index in @brick.
  * @level: Level index in @brick.
  *
- * Accesses a three-dimensional data brick pixel.
+ * Accesses a three-dimensional data brick voxel.
  *
  * This macro may evaluate its arguments several times.
  * This macro expands to a left-hand side expression.
@@ -1886,7 +1934,7 @@ gwy_brick_set(const GwyBrick *brick,
  * gwy_brick_dx:
  * @brick: A three-dimensional data brick.
  *
- * Calculates the horizontal pixel size in physical units.
+ * Calculates the horizontal voxel size in physical units.
  *
  * This macro may evaluate its arguments several times.
  **/
@@ -1895,7 +1943,7 @@ gwy_brick_set(const GwyBrick *brick,
  * gwy_brick_dy:
  * @brick: A three-dimensional data brick.
  *
- * Calculates the vertical pixel size in physical units.
+ * Calculates the vertical voxel size in physical units.
  *
  * This macro may evaluate its arguments several times.
  **/
@@ -1904,7 +1952,7 @@ gwy_brick_set(const GwyBrick *brick,
  * gwy_brick_dz:
  * @brick: A three-dimensional data brick.
  *
- * Calculates the depth-ward pixel size in physical units.
+ * Calculates the depth-wise voxel size in physical units.
  *
  * This macro may evaluate its arguments several times.
  **/

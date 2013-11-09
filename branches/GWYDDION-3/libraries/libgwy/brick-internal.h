@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,9 @@
 #include "libgwy/brick.h"
 
 G_BEGIN_DECLS
+
+#define BBASE(brick, col, row, level) \
+    (brick->data + ((level)*brick->yres + (row))*brick->xres + (col))
 
 struct _GwyBrickPrivate {
     GwyUnit *xunit;

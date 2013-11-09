@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -137,15 +137,20 @@ const gchar*    gwy_brick_get_name       (const GwyBrick *brick)       G_GNUC_PU
 #define gwy_brick_dz(brick) \
     ((brick)->zreal/(brick)->zres)
 
-gdouble gwy_brick_get(const GwyBrick *brick,
-                      guint col,
-                      guint row,
-                      guint level);
-void    gwy_brick_set(const GwyBrick *brick,
-                      guint col,
-                      guint row,
-                      guint level,
-                      gdouble value);
+gdouble        gwy_brick_get          (const GwyBrick *brick,
+                                       guint col,
+                                       guint row,
+                                       guint level)           G_GNUC_PURE;
+void           gwy_brick_set          (const GwyBrick *brick,
+                                       guint col,
+                                       guint row,
+                                       guint level,
+                                       gdouble value);
+const gdouble* gwy_brick_get_data_full(const GwyBrick *brick,
+                                       guint *ndata)          G_GNUC_PURE;
+void           gwy_brick_set_data_full(GwyBrick *brick,
+                                       const gdouble *data,
+                                       guint ndata);
 
 gboolean gwy_brick_check_part      (const GwyBrick *brick,
                                     const GwyBrickPart *bpart,

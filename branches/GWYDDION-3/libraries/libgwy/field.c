@@ -1938,8 +1938,7 @@ gwy_field_set(const GwyField *field,
  * Extracts values from a data field into a newly allocated flat array.
  *
  * This function, paired with gwy_field_set_data() can be namely useful in
- * language bindings.  Occassionally, however, extraction of values into a flat
- * array is useful also in C, namely with masking.
+ * language bindings.
  *
  * Note that unlike gwy_field_get_data_full(), this function returns a newly
  * allocated array.

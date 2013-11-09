@@ -377,32 +377,32 @@ gwy_brick_extract_plane(const GwyBrick *brick,
     guint stride, stride2;
 
     if (coldim == GWY_DIMENSION_X && rowdim == GWY_DIMENSION_Y) {
-        bbase = brick->data + (level*brick->yres + brow)*brick->xres + bcol;
+        bbase = BBASE(brick, bcol, brow, level);
         stride = 1;
         stride2 = brick->xres;
     }
     else if (coldim == GWY_DIMENSION_X && rowdim == GWY_DIMENSION_Z) {
-        bbase = brick->data + (brow*brick->yres + level)*brick->xres + bcol;
+        bbase = BBASE(brick, bcol, level, brow);
         stride = 1;
         stride2 = brick->xres*brick->yres;
     }
     else if (coldim == GWY_DIMENSION_Y && rowdim == GWY_DIMENSION_Z) {
-        bbase = brick->data + (brow*brick->yres + bcol)*brick->xres + level;
+        bbase = BBASE(brick, level, bcol, brow);
         stride = brick->xres;
         stride2 = brick->xres*brick->yres;
     }
     else if (coldim == GWY_DIMENSION_Y && rowdim == GWY_DIMENSION_X) {
-        bbase = brick->data + (level*brick->yres + bcol)*brick->xres + brow;
+        bbase = BBASE(brick, brow, bcol, level);
         stride = brick->xres;
         stride2 = 1;
     }
     else if (coldim == GWY_DIMENSION_Z && rowdim == GWY_DIMENSION_X) {
-        bbase = brick->data + (bcol*brick->yres + level)*brick->xres + brow;
+        bbase = BBASE(brick, brow, level, bcol);
         stride = brick->xres*brick->yres;
         stride2 = 1;
     }
     else if (coldim == GWY_DIMENSION_Z && rowdim == GWY_DIMENSION_Y) {
-        bbase = brick->data + (bcol*brick->yres + brow)*brick->xres + level;
+        bbase = BBASE(brick, level, brow, bcol);
         stride = brick->xres*brick->yres;
         stride2 = brick->xres;
     }
@@ -518,17 +518,17 @@ gwy_brick_extract_line(const GwyBrick *brick,
     guint stride;
     if (leveldim == GWY_DIMENSION_Z) {
         // @col is column, @row is row, @level is level
-        bbase = brick->data + (level*brick->yres + row)*brick->xres + col;
+        bbase = BBASE(brick, col, row, level);
         stride = brick->xres * brick->yres;
     }
     else if (leveldim == GWY_DIMENSION_Y) {
         // @col is column, @row is level, @level is row
-        bbase = brick->data + (row*brick->yres + level)*brick->xres + col;
+        bbase = BBASE(brick, col, level, row);
         stride = brick->xres;
     }
     else if (leveldim == GWY_DIMENSION_X) {
         // @col is row, @row is level, @level is column
-        bbase = brick->data + (row*brick->yres + col)*brick->xres + level;
+        bbase = BBASE(brick, level, col, row);
         stride = 1;
     }
     else {
