@@ -5,7 +5,6 @@ SUBDIRS = overrides
 all-local: typelibpath.py
 
 dist_noinst_SCRIPTS = \
-	constructors.py \
 	field-get-set.py
 
 EXTRA_DIST = \
