@@ -1228,7 +1228,7 @@ filter_rank_split(const RankFilterData *rfdata,
     }
 }
 
-void
+static void
 rank_filter(const GwyField *field,
             const GwyFieldPart *fpart,
             GwyField *target,
