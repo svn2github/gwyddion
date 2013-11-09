@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='toolbox-configuration'>
-  <title>Toolbox configuration</title>
+  <title>Toolbox Configuration</title>
   <indexterm><primary>Toolbox</primary></indexterm>
   <para>
     The lower part of the <link linkend='main-window'>toolbox</link> containing
@@ -115,7 +115,8 @@
   </informaltable>
   <para>
     It may be also necessary to specify an <literal>icon</literal> for the
-    button.  Some module functions have icons predefined but not all have.
+    button.  Some module functions have icons predefined but not all have
+    because the number of available functions is huge.
     A <ulink url='http://gwyddion.net/documentation/libgwydgets/libgwydgets-gwystock.php'>Gwyddion stock icon</ulink>
     can be used or possibly a
     <ulink url='https://developer.gnome.org/gtk2/stable/gtk2-Stock-Items.html'>Gtk+ stock icon</ulink>.
@@ -123,7 +124,19 @@
     icon names use dashes.
   </para>
   <para>
-    Tools are accessible only from the toolbox so not listing a tool in
+    If you cannot choose from the provided set of icons it is also possible
+    to draw your own icon and put it to
+    <filename>~/.gwyddion/pixmaps</filename> (or its equivalent on other
+    systems), using the same naming convention as Gwyddion icons.
+    It may be useful to start from the
+    <link linkend='http://www.gimp.org/'>GIMP</link> XCF
+    <ulink url='https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/'>source images</ulink>
+    for the icons since they contain individual pieces that can be mixed and
+    matched.  If you draw a nice icon you are of course encouraged to submit
+    it for inclusion in Gwyddion.
+  </para>
+  <para>
+    Since tools are accessible only from the toolbox, not listing a tool in
     <filename>ui/toolbox.xml</filename> renders it unavailable.  Therefore,
     a special empty item
     <informalexample>
