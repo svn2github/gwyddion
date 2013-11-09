@@ -884,7 +884,7 @@ gwy_line_point_distance2(gdouble lx0, gdouble ly0, gdouble lx1, gdouble ly1,
 }
 
 /**
- * gwy_cholesky_decompose:
+ * gwy_cholesky_decompose: (skip)
  * @matrix: Lower triangular part of a symmetric, presumably positive definite,
  *          matrix.  See gwy_lower_triangular_matrix_index() for storage
  *          details.
@@ -954,7 +954,7 @@ gwy_cholesky_decompose__gi(const gdouble *inmatrix,
 }
 
 /**
- * gwy_cholesky_solve:
+ * gwy_cholesky_solve: (skip)
  * @decomp: Lower triangular part of Cholesky decomposition as computed
  *          by gwy_cholesky_decompose().
  * @rhs: Right hand side vector.  It is modified in place, on return it
@@ -1023,7 +1023,7 @@ gwy_cholesky_solve__gi(const gdouble *inmatrix,
 }
 
 /**
- * gwy_cholesky_invert:
+ * gwy_cholesky_invert: (skip)
  * @matrix: Lower triangular part of a symmetric, presumably positive definite,
  *          matrix.  See gwy_lower_triangular_matrix_index() for storage
  *          details.
