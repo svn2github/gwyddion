@@ -28,9 +28,9 @@
   <para>
     Expandable and collapsable groups of buttons such as
     <guilabel>Data Process</guilabel> or <guilabel>Tools</guilabel> are
-    created with <literal>group</literal>.  You can creates as many or as few
-    groups as you want and mix functions of different kinds in one group if
-    you wish.  Each group must be identified with a unique
+    created with tag <literal>group</literal>.  You can create as many or as
+    few groups as you want.  Functions of different kinds can placed in one
+    group if you wish.  Each group must be identified with a unique
     <literal>id</literal> attribute which is, among other things, used to
     remember which group was collapsed and which expanded.  The attribute
     <literal>title</literal> determines the title:
@@ -50,7 +50,11 @@
     (<menuchoice>
       <guimenu>Meta</guimenu>
       <guimenuitem>Module Browser</guimenuitem>
-    </menuchoice>).
+    </menuchoice>),
+    where they are listed in <guilabel>Registered functions</guilabel> for
+    each module; or in the
+    <ulink url='http://gwyddion.net/module-list.php'>on-line module
+    browser</ulink>.
     The available function types are listed in the following table:
   </para>
   <informaltable frame='topbot' id='table-toolbox-xml-types'>
@@ -114,9 +118,9 @@
     </tgroup>
   </informaltable>
   <para>
-    It may be also necessary to specify an <literal>icon</literal> for the
-    button.  Some module functions have icons predefined but not all have
-    because the number of available functions is huge.
+    The button icon is specified using the <literal>icon</literal> attribute.
+    Some module functions have icons predefined (so you do not have to specify
+    it) but not all have because the number of available functions is huge.
     A <ulink url='http://gwyddion.net/documentation/libgwydgets/libgwydgets-gwystock.php'>Gwyddion stock icon</ulink>
     can be used or possibly a
     <ulink url='https://developer.gnome.org/gtk2/stable/gtk2-Stock-Items.html'>Gtk+ stock icon</ulink>.
