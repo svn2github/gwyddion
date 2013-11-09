@@ -342,7 +342,7 @@ gwy_fit_param_assign_impl(GwySerializable *destination,
 }
 
 /**
- * gwy_fit_param_new:
+ * gwy_fit_param_new: (constructor)
  * @name: Parameter name.  It must be a valid identifier.
  *
  * Creates a new fitting parameter.
@@ -357,7 +357,7 @@ gwy_fit_param_new(const gchar *name)
 }
 
 /**
- * gwy_fit_param_new_set:
+ * gwy_fit_param_new_set: (constructor)
  * @name: Parameter name.  It must be a valid identifier.
  * @power_x: Power of the abscissa contained in the parameter.
  * @power_y: Power of the ordinate contained in the parameter.

@@ -372,7 +372,7 @@ gwy_curve_get_property(GObject *object,
 }
 
 /**
- * gwy_curve_new:
+ * gwy_curve_new: (constructor)
  *
  * Creates a new empty curve.
  *
@@ -390,7 +390,7 @@ gwy_curve_new(void)
 }
 
 /**
- * gwy_curve_new_sized:
+ * gwy_curve_new_sized: (constructor)
  * @n: Number of points.
  *
  * Creates a new curve with preallocated size.
@@ -412,7 +412,7 @@ gwy_curve_new_sized(guint n)
 }
 
 /**
- * gwy_curve_new_from_data:
+ * gwy_curve_new_from_data: (constructor)
  * @points: (array length=n):
  *          Array of @n points with the curve data.
  * @n: Number of points.
@@ -439,7 +439,7 @@ gwy_curve_new_from_data(const GwyXY *points,
 }
 
 /**
- * gwy_curve_new_alike:
+ * gwy_curve_new_alike: (constructor)
  * @model: A curve to use as the template.
  *
  * Creates a new empty curve similar to another curve.
@@ -461,7 +461,7 @@ gwy_curve_new_alike(const GwyCurve *model)
 }
 
 /**
- * gwy_curve_new_part:
+ * gwy_curve_new_part: (constructor)
  * @curve: A curve.
  * @from: Left end of the interval.
  * @to: Righ end of the interval.
@@ -520,7 +520,7 @@ copy_line_to_curve(const GwyLine *line,
 }
 
 /**
- * gwy_curve_new_from_line:
+ * gwy_curve_new_from_line: (constructor)
  * @line: A one-dimensional data line.
  *
  * Creates a new curve from a one-dimensional data line.

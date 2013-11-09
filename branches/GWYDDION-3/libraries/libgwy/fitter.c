@@ -600,7 +600,7 @@ fitter_invert_hessian(Fitter *fitter)
  ****************************************************************************/
 
 /**
- * gwy_fitter_new:
+ * gwy_fitter_new: (constructor)
  *
  * Creates a new non-linear least-squares fitter.
  *

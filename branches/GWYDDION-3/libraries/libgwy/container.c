@@ -352,7 +352,7 @@ gwy_container_assign_impl(GwySerializable *destination,
 }
 
 /**
- * gwy_container_new:
+ * gwy_container_new: (constructor)
  *
  * Creates a new data container.
  *
@@ -2400,7 +2400,7 @@ dequote_token(const gchar *tok, gsize *len)
 }
 
 /**
- * gwy_container_new_from_text:
+ * gwy_container_new_from_text: (constructor)
  * @text: Text containing container contents as dumped by
  *        gwy_container_dump_to_text().
  *

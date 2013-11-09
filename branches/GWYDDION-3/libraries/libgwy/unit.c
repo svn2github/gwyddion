@@ -338,7 +338,7 @@ gwy_unit_assign_impl(GwySerializable *destination,
 }
 
 /**
- * gwy_unit_new:
+ * gwy_unit_new: (constructor)
  *
  * Creates a new physical unit.
  *
@@ -351,7 +351,7 @@ gwy_unit_new(void)
 }
 
 /**
- * gwy_unit_new_from_string:
+ * gwy_unit_new_from_string: (constructor)
  * @unit_string: Unit string.   It can be %NULL for an empty unit.
  * @power10: Location to store the power of 10, or %NULL to ignore.
  *

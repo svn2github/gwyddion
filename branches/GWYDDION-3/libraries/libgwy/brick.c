@@ -646,7 +646,7 @@ gwy_brick_get_property(GObject *object,
 }
 
 /**
- * gwy_brick_new:
+ * gwy_brick_new: (constructor)
  *
  * Creates a new three-dimensional data brick.
  *
@@ -664,7 +664,7 @@ gwy_brick_new(void)
 }
 
 /**
- * gwy_brick_new_sized:
+ * gwy_brick_new_sized: (constructor)
  * @xres: Horizontal resolution (width).
  * @yres: Vertical resolution (height).
  * @zres: Number of layers (depth).
@@ -694,7 +694,7 @@ gwy_brick_new_sized(guint xres,
 }
 
 /**
- * gwy_brick_new_alike:
+ * gwy_brick_new_alike: (constructor)
  * @model: A three-dimensional data brick to use as the template.
  * @clear: %TRUE to fill the new brick data with zeroes, %FALSE to leave it
  *         uninitialised.
@@ -722,7 +722,7 @@ gwy_brick_new_alike(const GwyBrick *model,
 }
 
 /**
- * gwy_brick_new_part:
+ * gwy_brick_new_part: (constructor)
  * @brick: A three-dimensional data brick.
  * @bpart: (allow-none):
  *         Part of @brick to extract to the new brick.  Passing %NULL

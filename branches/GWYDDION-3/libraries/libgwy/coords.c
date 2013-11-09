@@ -464,7 +464,7 @@ gwy_coords_get_property(GObject *object,
 }
 
 /**
- * gwy_coords_new_subset:
+ * gwy_coords_new_subset: (constructor)
  * @coords: A group of coordinates of some geometrical objects.
  * @indices: (allow-none):
  *           Set of indices of objects to extract to the new coords objects.

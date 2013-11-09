@@ -402,7 +402,7 @@ validate(GwyUserGrainValue *usergrainvalue,
 }
 
 /**
- * gwy_user_grain_value_new:
+ * gwy_user_grain_value_new: (constructor)
  *
  * Creates a new user grain value.
  *

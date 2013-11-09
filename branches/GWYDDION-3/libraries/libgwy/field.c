@@ -583,7 +583,7 @@ gwy_field_get_property(GObject *object,
 }
 
 /**
- * gwy_field_new:
+ * gwy_field_new: (constructor)
  *
  * Creates a new two-dimensional data field.
  *
@@ -601,7 +601,7 @@ gwy_field_new(void)
 }
 
 /**
- * gwy_field_new_sized:
+ * gwy_field_new_sized: (constructor)
  * @xres: Horizontal resolution (width).
  * @yres: Vertical resolution (height).
  * @clear: %TRUE to fill the new field data with zeroes, %FALSE to leave it
@@ -628,7 +628,7 @@ gwy_field_new_sized(guint xres,
 }
 
 /**
- * gwy_field_new_alike:
+ * gwy_field_new_alike: (constructor)
  * @model: A two-dimensional data field to use as the template.
  * @clear: %TRUE to fill the new field data with zeroes, %FALSE to leave it
  *         uninitialised.
@@ -655,7 +655,7 @@ gwy_field_new_alike(const GwyField *model,
 }
 
 /**
- * gwy_field_new_part:
+ * gwy_field_new_part: (constructor)
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
  *         Area in @field to extract to the new field.  Passing %NULL
@@ -712,7 +712,7 @@ gwy_field_new_part(const GwyField *field,
 }
 
 /**
- * gwy_field_new_resampled:
+ * gwy_field_new_resampled: (constructor)
  * @field: A two-dimensional data field.
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
@@ -749,7 +749,7 @@ gwy_field_new_resampled(const GwyField *field,
 }
 
 /**
- * gwy_field_new_from_mask:
+ * gwy_field_new_from_mask: (constructor)
  * @mask: Two-dimensional mask field used as a template for the created field.
  * @zero: Field value that will correspond to zeroes in the mask.
  * @one: Field value that will correspond to ones in the mask.

@@ -1392,7 +1392,7 @@ ensure_constants(Expr *priv)
  ****************************************************************************/
 
 /**
- * gwy_expr_new:
+ * gwy_expr_new: (constructor)
  *
  * Creates a new expression evaluator.
  *

@@ -157,7 +157,7 @@ gwy_fit_task_class_init(GwyFitTaskClass *klass)
 }
 
 /**
- * gwy_fit_task_new:
+ * gwy_fit_task_new: (constructor)
  *
  * Creates a new non-linear least-squares fitting task.
  *

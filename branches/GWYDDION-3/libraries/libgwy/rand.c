@@ -89,7 +89,7 @@ randomise(guint64 *seed, guint n)
 }
 
 /**
- * gwy_rand_new:
+ * gwy_rand_new: (constructor)
  *
  * Creates a new random number generator.
  *
@@ -147,7 +147,7 @@ gwy_rand_assign(GwyRand *destination,
 }
 
 /**
- * gwy_rand_new_with_seed:
+ * gwy_rand_new_with_seed: (constructor)
  * @seed: Value to initialize the random number generator with.
  *
  * Creates a new random number generator initialized with given integer seed.
@@ -163,8 +163,9 @@ gwy_rand_new_with_seed(guint64 seed)
 }
 
 /**
- * gwy_rand_new_with_seed_array:
- * @seed: Array of @seed_length seed values to initialize the random number
+ * gwy_rand_new_with_seed_array: (constructor)
+ * @seed: (array length=seed_length):
+ *        Array of @seed_length seed values to initialize the random number
  *        generator with.
  * @seed_length: Number of items in @seed.
  *

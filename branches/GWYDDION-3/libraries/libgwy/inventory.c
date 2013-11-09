@@ -160,7 +160,7 @@ lookup_item(Inventory *inventory,
 }
 
 /**
- * gwy_inventory_new:
+ * gwy_inventory_new: (constructor)
  *
  * Creates a new inventory.
  *
@@ -173,7 +173,7 @@ gwy_inventory_new(void)
 }
 
 /**
- * gwy_inventory_new_with_type:
+ * gwy_inventory_new_with_type: (constructor)
  * @itype: Type of items the inventory will contain.
  *
  * Creates a new inventory with specified item type.
@@ -189,7 +189,7 @@ gwy_inventory_new_with_type(const GwyInventoryItemType *itype)
 }
 
 /**
- * gwy_inventory_new_with_items:
+ * gwy_inventory_new_with_items: (constructor)
  * @itype: Type of items the inventory will contain.
  * @nitems: The number of pointers in @items.
  * @pitems: Array of item pointers to fill the newly created inventory with.

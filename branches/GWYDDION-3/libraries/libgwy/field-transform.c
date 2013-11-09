@@ -409,7 +409,7 @@ gwy_field_transform_congruent(GwyField *field,
 }
 
 /**
- * gwy_field_new_congruent:
+ * gwy_field_new_congruent: (constructor)
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
  *         Area in @field to extract to the new field.  Passing %NULL extracts

@@ -442,7 +442,7 @@ fail:
 }
 
 /**
- * gwy_user_fit_func_new:
+ * gwy_user_fit_func_new: (constructor)
  *
  * Creates a new user fitting function.
  *

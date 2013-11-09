@@ -279,7 +279,7 @@ gwy_value_format_get_property(GObject *object,
 }
 
 /**
- * gwy_value_format_new:
+ * gwy_value_format_new: (constructor)
  *
  * Creates a new value format.
  *
@@ -292,7 +292,7 @@ gwy_value_format_new(void)
 }
 
 /**
- * gwy_value_format_new_set:
+ * gwy_value_format_new_set: (constructor)
  * @style: Output format style.
  * @power10: Power of 10 to use for base.
  * @precision: Number of digits after decimal point.

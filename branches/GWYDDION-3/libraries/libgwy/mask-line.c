@@ -501,7 +501,7 @@ gwy_mask_line_limit_parts(const GwyMaskLine *src,
 }
 
 /**
- * gwy_mask_line_new:
+ * gwy_mask_line_new: (constructor)
  *
  * Creates a new one-dimensional mask line.
  *
@@ -519,7 +519,7 @@ gwy_mask_line_new(void)
 }
 
 /**
- * gwy_mask_line_new_sized:
+ * gwy_mask_line_new_sized: (constructor)
  * @res: Line resolution (width).
  * @clear: %TRUE to fill the new mask line with zeroes, %FALSE to leave it
  *         uninitialised.
@@ -543,7 +543,7 @@ gwy_mask_line_new_sized(guint res,
 }
 
 /**
- * gwy_mask_line_new_part:
+ * gwy_mask_line_new_part: (constructor)
  * @line: A one-dimensional mask line.
  * @lpart: (allow-none):
  *         Segment in @line to extract to the new line.  Passing %NULL
@@ -578,7 +578,7 @@ gwy_mask_line_new_part(const GwyMaskLine *line,
 }
 
 /**
- * gwy_mask_line_new_resampled:
+ * gwy_mask_line_new_resampled: (constructor)
  * @line: A one-dimensional mask line.
  * @res: Desired resolution.
  *

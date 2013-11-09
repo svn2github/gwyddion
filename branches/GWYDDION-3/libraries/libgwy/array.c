@@ -109,7 +109,7 @@ ensure_items(Array *priv)
 }
 
 /**
- * gwy_array_new:
+ * gwy_array_new: (constructor)
  *
  * Creates a new array.
  *
@@ -122,7 +122,7 @@ gwy_array_new(void)
 }
 
 /**
- * gwy_array_new_with_data:
+ * gwy_array_new_with_data: (constructor)
  * @size: Item size, in bytes.
  * @destroy: Function to call on items before they are removed from the array.
  *           May be %NULL.

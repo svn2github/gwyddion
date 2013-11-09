@@ -396,7 +396,7 @@ gwy_gradient_load_builtins(GwyErrorList **error_list)
 }
 
 /**
- * gwy_gradient_new:
+ * gwy_gradient_new: (constructor)
  *
  * Creates a new colour gradient.
  *

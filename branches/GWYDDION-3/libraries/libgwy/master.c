@@ -236,7 +236,7 @@ worker_thread_main(gpointer thread_data)
 }
 
 /**
- * gwy_master_new:
+ * gwy_master_new: (constructor)
  *
  * Creates a new parallel task manager.
  *
@@ -249,7 +249,7 @@ gwy_master_new(void)
 }
 
 /**
- * gwy_master_new_dumb:
+ * gwy_master_new_dumb: (constructor)
  *
  * Creates a new dumb parallel task manager.
  *

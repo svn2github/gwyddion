@@ -383,7 +383,7 @@ gwy_surface_get_property(GObject *object,
 }
 
 /**
- * gwy_surface_new:
+ * gwy_surface_new: (constructor)
  *
  * Creates a new empty surface.
  *
@@ -401,7 +401,7 @@ gwy_surface_new(void)
 }
 
 /**
- * gwy_surface_new_sized:
+ * gwy_surface_new_sized: (constructor)
  * @n: Number of points.
  *
  * Creates a new surface with preallocated size.
@@ -422,7 +422,7 @@ gwy_surface_new_sized(guint n)
 }
 
 /**
- * gwy_surface_new_from_data:
+ * gwy_surface_new_from_data: (constructor)
  * @points: Array of @n points with the surface data.
  * @n: Number of points.
  *
@@ -433,7 +433,7 @@ gwy_surface_new_sized(guint n)
  **/
 GwySurface*
 gwy_surface_new_from_data(const GwyXYZ *points,
-                        guint n)
+                          guint n)
 {
     g_return_val_if_fail(!n || points, NULL);
 
@@ -445,7 +445,7 @@ gwy_surface_new_from_data(const GwyXYZ *points,
 }
 
 /**
- * gwy_surface_new_alike:
+ * gwy_surface_new_alike: (constructor)
  * @model: A surface to use as the template.
  *
  * Creates a new empty surface similar to another surface.
@@ -467,7 +467,7 @@ gwy_surface_new_alike(const GwySurface *model)
 }
 
 /**
- * gwy_surface_new_part:
+ * gwy_surface_new_part: (constructor)
  * @surface: A surface.
  * @xfrom: Minimum x-coordinate value.
  * @xto: Maximum x-coordinate value.
@@ -550,7 +550,7 @@ copy_field_to_surface(const GwyField *field,
 }
 
 /**
- * gwy_surface_new_from_field:
+ * gwy_surface_new_from_field: (constructor)
  * @field: A one-dimensional data field.
  *
  * Creates a new surface from a one-dimensional data field.

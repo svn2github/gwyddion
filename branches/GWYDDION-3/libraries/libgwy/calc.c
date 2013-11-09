@@ -84,7 +84,7 @@ gwy_calc_error_quark(void)
  ****************************************************************************/
 
 /**
- * gwy_calc_new:
+ * gwy_calc_new: (constructor)
  *
  * Creates a new asynchronous calculation.
  *

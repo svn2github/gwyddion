@@ -416,7 +416,7 @@ gwy_mask_field_get_property(GObject *object,
 }
 
 /**
- * gwy_mask_field_new:
+ * gwy_mask_field_new: (constructor)
  *
  * Creates a new two-dimensional mask field.
  *
@@ -434,7 +434,7 @@ gwy_mask_field_new(void)
 }
 
 /**
- * gwy_mask_field_new_sized:
+ * gwy_mask_field_new_sized: (constructor)
  * @xres: Horizontal resolution (width).
  * @yres: Vertical resolution (height).
  * @clear: %TRUE to fill the new mask field with zeroes, %FALSE to leave it
@@ -646,7 +646,7 @@ gwy_mask_field_limit_parts(const GwyMaskField *src,
 }
 
 /**
- * gwy_mask_field_new_part:
+ * gwy_mask_field_new_part: (constructor)
  * @field: A two-dimensional mask field.
  * @fpart: (allow-none):
  *         Area in @field to extract to the new field.  Passing %NULL
@@ -681,7 +681,7 @@ gwy_mask_field_new_part(const GwyMaskField *field,
 }
 
 /**
- * gwy_mask_field_new_resampled:
+ * gwy_mask_field_new_resampled: (constructor)
  * @field: A two-dimensional mask field.
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
@@ -751,7 +751,7 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
 }
 
 /**
- * gwy_mask_field_new_from_field:
+ * gwy_mask_field_new_from_field: (constructor)
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
  *         Area in @field to extract to the new mask field.  Passing %NULL

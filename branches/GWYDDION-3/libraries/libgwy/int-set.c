@@ -265,7 +265,7 @@ gwy_int_set_assign_impl(GwySerializable *destination,
 }
 
 /**
- * gwy_int_set_new:
+ * gwy_int_set_new: (constructor)
  *
  * Creates a new integer set.
  *
@@ -278,7 +278,7 @@ gwy_int_set_new(void)
 }
 
 /**
- * gwy_int_set_new_with_values:
+ * gwy_int_set_new_with_values: (constructor)
  * @values: (array length=n):
  *          Integers to fill the integer set with.  They may repeat and may be
  *          in non-ascending order, however, if they do the construction is

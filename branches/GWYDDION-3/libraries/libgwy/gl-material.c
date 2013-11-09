@@ -547,7 +547,7 @@ gwy_gl_material_setup_inventory(GwyInventory *inventory)
 }
 
 /**
- * gwy_gl_material_new:
+ * gwy_gl_material_new: (constructor)
  *
  * Creates a new GL material.
  *

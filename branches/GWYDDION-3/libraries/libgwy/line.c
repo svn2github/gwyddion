@@ -429,7 +429,7 @@ gwy_line_get_property(GObject *object,
 }
 
 /**
- * gwy_line_new:
+ * gwy_line_new: (constructor)
  *
  * Creates a new one-dimensional data line.
  *
@@ -447,7 +447,7 @@ gwy_line_new(void)
 }
 
 /**
- * gwy_line_new_sized:
+ * gwy_line_new_sized: (constructor)
  * @res: Line resolution (width).
  * @clear: %TRUE to fill the new line data with zeroes, %FALSE to leave it
  *         uninitialised.
@@ -471,7 +471,7 @@ gwy_line_new_sized(guint res,
 }
 
 /**
- * gwy_line_new_alike:
+ * gwy_line_new_alike: (constructor)
  * @model: A one-dimensional data line to use as the template.
  * @clear: %TRUE to fill the new line data with zeroes, %FALSE to leave it
  *         uninitialised.
@@ -815,7 +815,7 @@ gwy_line_limit_parts(const GwyLine *src,
 }
 
 /**
- * gwy_line_new_part:
+ * gwy_line_new_part: (constructor)
  * @line: A one-dimensional data line.
  * @lpart: (allow-none):
  *         Segment in @line to extract to the new line.  Passing %NULL
@@ -867,7 +867,7 @@ gwy_line_new_part(const GwyLine *line,
 }
 
 /**
- * gwy_line_new_resampled:
+ * gwy_line_new_resampled: (constructor)
  * @line: A one-dimensional data line.
  * @res: Desired resolution.
  * @interpolation: Interpolation method to use.
