@@ -108,22 +108,27 @@ const gchar*    gwy_line_get_name      (const GwyLine *line)            G_GNUC_P
 #define gwy_line_dx(line) \
     ((line)->real/(line)->res)
 
-gdouble  gwy_line_get     (const GwyLine *line,
-                           guint pos);
-void     gwy_line_set     (const GwyLine *line,
-                           guint pos,
-                           gdouble value);
-gdouble* gwy_line_get_data(const GwyLine *line,
-                           const GwyLinePart *lpart,
-                           const GwyMaskLine *mask,
-                           GwyMasking masking,
-                           guint *ndata)             G_GNUC_MALLOC;
-void     gwy_line_set_data(const GwyLine *line,
-                           const GwyLinePart *lpart,
-                           const GwyMaskLine *mask,
-                           GwyMasking masking,
-                           const gdouble *data,
-                           guint ndata);
+gdouble        gwy_line_get          (const GwyLine *line,
+                                      guint pos)                G_GNUC_PURE;
+void           gwy_line_set          (const GwyLine *line,
+                                      guint pos,
+                                      gdouble value);
+gdouble*       gwy_line_get_data     (const GwyLine *line,
+                                      const GwyLinePart *lpart,
+                                      const GwyMaskLine *mask,
+                                      GwyMasking masking,
+                                      guint *ndata)             G_GNUC_MALLOC;
+const gdouble* gwy_line_get_data_full(const GwyLine *line,
+                                      guint *ndata)             G_GNUC_PURE;
+void           gwy_line_set_data     (GwyLine *line,
+                                      const GwyLinePart *lpart,
+                                      const GwyMaskLine *mask,
+                                      GwyMasking masking,
+                                      const gdouble *data,
+                                      guint ndata);
+void           gwy_line_set_data_full(GwyLine *line,
+                                      const gdouble *data,
+                                      guint ndata);
 
 gboolean gwy_line_check_part       (const GwyLine *line,
                                     const GwyLinePart *lpart,

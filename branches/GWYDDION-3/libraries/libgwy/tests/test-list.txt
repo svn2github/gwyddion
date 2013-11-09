@@ -245,6 +245,7 @@ line/get
 line/set
 line/get-data/unmasked
 line/get-data/masked
+line/get-data/full
 line/check-part/good
 line/check-part/empty
 line/check-part/bad
@@ -336,6 +337,7 @@ field/get
 field/set
 field/get-data/unmasked
 field/get-data/masked
+field/get-data/full
 field/clear-offsets
 field/check-part/good
 field/check-part/empty

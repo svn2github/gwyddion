@@ -1289,6 +1289,33 @@ gwy_line_get_data(const GwyLine *line,
 }
 
 /**
+ * gwy_line_get_data_full:
+ * @line: A one-dimensional data line.
+ * @ndata: (out):
+ *         Location to store the count of extracted data points.
+ *
+ * Provides the values of an entire data line as a flat array.
+ *
+ * This function, paired with gwy_line_set_data_full() can be namely useful in
+ * language bindings.  Occassionally, however, extraction of values into a flat
+ * array is useful also in C, namely with masking.
+ *
+ * Note that unlike gwy_line_get_data(), this function returns a pointer
+ * directly to @line's data.
+ *
+ * Returns: (array length=ndata) (transfer none):
+ *          The array containing the line values.
+ **/
+const gdouble*
+gwy_line_get_data_full(const GwyLine *line,
+                       guint *ndata)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
+    *ndata = line->res;
+    return line->data;
+}
+
+/**
  * gwy_line_set_data:
  * @line: A one-dimensional data line.
  * @lpart: (allow-none):
@@ -1307,7 +1334,7 @@ gwy_line_get_data(const GwyLine *line,
  * See gwy_line_get_data() for a discussion.
  **/
 void
-gwy_line_set_data(const GwyLine *line,
+gwy_line_set_data(GwyLine *line,
                   const GwyLinePart *lpart,
                   const GwyMaskLine *mask,
                   GwyMasking masking,
@@ -1339,6 +1366,30 @@ gwy_line_set_data(const GwyLine *line,
         gwy_mask_iter_next(iter);
     }
     g_return_if_fail(count == ndata);
+}
+
+/**
+ * gwy_line_set_data_full:
+ * @line: A one-dimensional data line.
+ * @data: (array length=ndata):
+ *        Data values to copy to the line.
+ * @ndata: The number of data values to put to the line.  It must match the
+ *         number of line pixels.  This parameter is useful namely for
+ *         bindings.
+ *
+ * Puts back values from a flat array to an entire data line.
+ *
+ * See gwy_line_get_data_full() for a discussion.
+ **/
+void
+gwy_line_set_data_full(GwyLine *line,
+                       const gdouble *data,
+                       guint ndata)
+{
+    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_if_fail(data);
+    g_return_if_fail(ndata == line->res);
+    gwy_assign(line->data, data, ndata);
 }
 
 /**

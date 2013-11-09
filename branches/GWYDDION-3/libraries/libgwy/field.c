@@ -1941,6 +1941,9 @@ gwy_field_set(const GwyField *field,
  * language bindings.  Occassionally, however, extraction of values into a flat
  * array is useful also in C, namely with masking.
  *
+ * Note that unlike gwy_field_get_data_full(), this function returns a newly
+ * allocated array.
+ *
  * Returns: (array length=ndata) (transfer full):
  *          A newly allocated array containing the values.
  **/
@@ -1990,6 +1993,33 @@ gwy_field_get_data(const GwyField *field,
 }
 
 /**
+ * gwy_field_get_data_full:
+ * @field: A two-dimensional data field.
+ * @ndata: (out):
+ *         Location to store the count of extracted data points.
+ *
+ * Provides the values of an entire data field as a flat array.
+ *
+ * This function, paired with gwy_field_set_data_full() can be namely useful in
+ * language bindings.  Occassionally, however, extraction of values into a flat
+ * array is useful also in C, namely with masking.
+ *
+ * Note that unlike gwy_field_get_data(), this function returns a pointer
+ * directly to @field's data.
+ *
+ * Returns: (array length=ndata) (transfer none):
+ *          The array containing the field values.
+ **/
+const gdouble*
+gwy_field_get_data_full(const GwyField *field,
+                        guint *ndata)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    *ndata = field->xres*field->yres;
+    return field->data;
+}
+
+/**
  * gwy_field_set_data:
  * @field: A two-dimensional data field.
  * @fpart: (allow-none):
@@ -2008,7 +2038,7 @@ gwy_field_get_data(const GwyField *field,
  * See gwy_field_get_data() for a discussion.
  **/
 void
-gwy_field_set_data(const GwyField *field,
+gwy_field_set_data(GwyField *field,
                    const GwyFieldPart *fpart,
                    const GwyMaskField *mask,
                    GwyMasking masking,
@@ -2027,6 +2057,7 @@ gwy_field_set_data(const GwyField *field,
         g_return_if_fail(ndata == width*height);
         for (guint i = 0; i < height; i++)
             gwy_assign(base + i*xres, data + i*width, width);
+        gwy_field_invalidate(field);
         return;
     }
 
@@ -2044,7 +2075,33 @@ gwy_field_set_data(const GwyField *field,
             gwy_mask_iter_next(iter);
         }
     }
+    gwy_field_invalidate(field);
     g_return_if_fail(count == ndata);
+}
+
+/**
+ * gwy_field_set_data_full:
+ * @field: A two-dimensional data field.
+ * @data: (array length=ndata):
+ *        Data values to copy to the field.
+ * @ndata: The number of data values to put to the field.  It must match the
+ *         number of field pixels.  This parameter is useful namely for
+ *         bindings.
+ *
+ * Puts back values from a flat array to an entire data field.
+ *
+ * See gwy_field_get_data_full() for a discussion.
+ **/
+void
+gwy_field_set_data_full(GwyField *field,
+                        const gdouble *data,
+                        guint ndata)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(data);
+    g_return_if_fail(ndata == field->xres*field->yres);
+    gwy_assign(field->data, data, ndata);
+    gwy_field_invalidate(field);
 }
 
 /**

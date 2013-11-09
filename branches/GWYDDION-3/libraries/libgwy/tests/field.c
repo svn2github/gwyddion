@@ -1237,6 +1237,38 @@ test_field_get_data_masked(void)
 }
 
 void
+test_field_get_data_full(void)
+{
+    enum { max_size = 50, niter = 10 };
+    GRand *rng = g_rand_new_with_seed(42);
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+
+        guint ndata, ndata_full, ndata_expected = xres*yres;
+        gdouble *data = gwy_field_get_data(field, NULL, NULL, GWY_MASK_IGNORE,
+                                           &ndata);
+        const gdouble *fulldata = gwy_field_get_data_full(field, &ndata_full);
+        g_assert_cmpuint(ndata, ==, ndata_expected);
+        g_assert_cmpuint(ndata_full, ==, ndata_expected);
+        for (guint i = 0; i < ndata; i++)
+            data[i] *= 2.0;
+        gwy_field_set_data_full(field, data, ndata);
+
+        for (guint i = 0; i < ndata; i++)
+            g_assert_cmpfloat(fulldata[i], ==, data[i]);
+
+        g_free(data);
+        g_object_unref(field);
+    }
+
+    g_rand_free(rng);
+}
+
+void
 test_field_clear_offsets(void)
 {
     GwyField *field = gwy_field_new_sized(4, 4, TRUE);
