@@ -353,7 +353,8 @@ gwy_unit_new(void)
 /**
  * gwy_unit_new_from_string: (constructor)
  * @unit_string: Unit string.   It can be %NULL for an empty unit.
- * @power10: Location to store the power of 10, or %NULL to ignore.
+ * @power10: (out) (allow-none):
+ *           Location to store the power of 10, or %NULL to ignore.
  *
  * Creates a new physical unit from a string representation.
  *
@@ -384,7 +385,8 @@ gwy_unit_new_from_string(const char *unit_string,
  * gwy_unit_set_from_string:
  * @unit: A physical unit.
  * @unit_string: Unit string.  It can be %NULL for an empty unit.
- * @power10: Location to store the power of 10, or %NULL to ignore.
+ * @power10: (out) (allow-none):
+ *           Location to store the power of 10, or %NULL to ignore.
  *
  * Sets a physical unit from a string representation.
  *
