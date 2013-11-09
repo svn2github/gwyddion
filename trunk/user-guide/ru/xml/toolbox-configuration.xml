@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="toolbox-configuration">
+  <title>Настройка панели инструментов</title>
+  <indexterm><primary>Панель инструментов</primary></indexterm>
+  <para>Нижняя часть <link linkend="main-window">окна инструментов</link>, содержащая кнопки функций и инструментов, может быть настроена редактированием файла <filename>ui/toolbox.xml</filename>. По аналогии с настройкой <link linkend="keyboard-shortcuts">комбинаций клавиш</link>, файл должен находиться в домашнем каталоге пользователя, что обычно подразумевает <filename>~/.gwyddion</filename> (в Unix) или <filename>Documents and Settings\gwyddion</filename> (в MS Windows). Хорошим примером для начальной настройки может служить файл с настройками по умолчанию <filename>ui/toolbox.xml</filename>, который устанавливается в <filename>share/gwyddion</filename>.</para>
+  <para>Число кнопок в ряду регулируется атрибутом <literal>width</literal> элемента верхнего уровня <literal>toolbox</literal>. Чтобы изменить его на пять просто замените начало файла на <informalexample><programlisting><![CDATA[<toolbox width='5'>]]></programlisting></informalexample></para>
+  <para>Расширяемые и сжимаемые группы кнопок, такие как <guilabel>Обработка данных</guilabel> или <guilabel>Инструменты</guilabel> создаются тегом <literal>group</literal>. Можно создать столько групп, сколько нужно. Функции различных типов можно собирать в одну группу по желанию. Каждая группа должна быть снабжена уникальным атрибутом <literal>id</literal>, который, кроме всего прочего, используется для запоминания какая из групп была свёрнута, а какая развёрнута. Атрибут<literal>title</literal> задаёт название группы: <informalexample><programlisting><![CDATA[<group id='proc' title='Data Process'>]]></programlisting></informalexample></para>
+  <para>Отдельные кнопки создаются с помощью элементов <literal>item</literal>: <informalexample><programlisting><![CDATA[<item type='proc' function='edge_step' icon='gwy_edge'/>]]></programlisting></informalexample> Каждый такое элемент должен содержать атрибут <literal>type</literal>, определяющий тип функции. Если тип функции не является пустым — <literal>'empty'</literal>, элемент также должен содержать атрибут <literal>function</literal>, задающий определённую функцию. Имена функций можно найти в окне просмотра модулей (<menuchoice><guimenu>Мета</guimenu><guimenuitem>Просмотр модулей</guimenuitem></menuchoice>), где они перечислены в списке <guilabel>Зарегистрированные функции</guilabel> для каждого модуля; или в <ulink url="http://gwyddion.net/module-list.php">онлайновом браузере модулей</ulink>. Доступные типы функций перечислены в следующей таблице:</para>
+  <informaltable frame="topbot" id="table-toolbox-xml-types">
+    <tgroup cols="2" align="left">
+    <?dblatex lX?>
+      <thead>
+        <row>
+          <entry>Имя типа</entry>
+          <entry>Тип функции</entry>
+        </row>
+      </thead>
+      <tbody valign="top">
+        <row>
+          <entry><literal>empty</literal></entry>
+          <entry>Пустой заполнитель, который можно использовать для разделения или выравнивания строк.</entry>
+        </row>
+        <row>
+          <entry><literal>builtin</literal></entry>
+          <entry>Встроенная функция, которые включают приближение, удаление, активацию режима 3D-просмотра. Всего их ровно четыре: <literal>'display_3d'</literal>, <literal>'zoom_in'</literal>, <literal>'zoom_out'</literal> и <literal>'zoom_1_1'</literal>.</entry>
+        </row>
+        <row>
+          <entry><literal>proc</literal></entry>
+          <entry>Функции обработки двумерных данных (изображений). Они имеют префикс <literal>proc::</literal> в окне просмотра модулей.</entry>
+        </row>
+        <row>
+          <entry><literal>graph</literal></entry>
+          <entry>Функции обработки графиков. Они имеют префикс <literal>graph::</literal> в окне просмотра модулей.</entry>
+        </row>
+        <row>
+          <entry><literal>volume</literal></entry>
+          <entry>Функции обработки объёмных данных. Они имеют префикс <literal>volume::</literal> в окне просмотра модулей.</entry>
+        </row>
+        <row>
+          <entry><literal>tool</literal></entry>
+          <entry>Инструменты. Они имеют префикс <literal>tool::</literal> в окне просмотра модулей.</entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <para>Изображение на кнопке задаётся атрибутом <literal>icon</literal>. Некоторые функции модулей уже содержат заданные изображения (которые не нужно указывать вручную), но этот список довольно ограничен в силу огромного количества доступных функций. Можно использовать изображения из коллекций <ulink url="http://gwyddion.net/documentation/libgwydgets/libgwydgets-gwystock.php">Gwyddion stock icon</ulink> и <ulink url="https://developer.gnome.org/gtk2/stable/gtk2-Stock-Items.html">Gtk+ stock icon</ulink>. Следует отметить, что названия изображений в коллекции Gwyddion используют символ подчёркивания для связывания отдельных слов, иконки Gtk+ используют тире.</para>
+  <para>Если предложенного набора изображений недостаточно, чтобы выбрать нужное, можно нарисовать свою иконку и поместить её в <filename>~/.gwyddion/pixmaps</filename> (или эквивалентное место в других операционных системах), используя то же соглашение о наименовании элементов, что и иконки в Gwyddion. Может быть полезно начать с <ulink url="https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/">исходных файлов</ulink> XCF от <link linkend="http://www.gimp.org/">GIMP</link> для иконок, поскольку они уже содержат отдельные элементы, которые можно смешивать и использовать друг с другом. Если у вас получилась красивая иконка, её разумеется можно прислать для включения в состав Gwyddion.</para>
+  <para>Поскольку инструменты доступны только из окна инструментов, не указание их в <filename>ui/toolbox.xml</filename> делает их полностью недоступными. Следовательно, специальный пустой элемент <informalexample><programlisting><![CDATA[<item type='tool'/>]]></programlisting></informalexample> можно использовать для размещения всех инструментов, которые ещё не перемещены в заданную позицию (в достаточно произвольном порядке).</para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
