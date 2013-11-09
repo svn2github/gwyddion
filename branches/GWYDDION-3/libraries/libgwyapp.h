@@ -21,6 +21,9 @@
 #define __LIBGWYAPP_H__
 
 #include <libgwyui.h>
+#include <libgwyapp/data-list.h>
+#include <libgwyapp/data.h>
+#include <libgwyapp/file.h>
 #include <libgwyapp/module.h>
 #include <libgwyapp/types.h>
 

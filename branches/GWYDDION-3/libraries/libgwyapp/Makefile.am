@@ -22,6 +22,9 @@ INTROSPECTION_COMPILER_ARGS = \
 	--includedir=$(top_builddir)/libraries/libgwyui
 
 public_headers = \
+	$(srcdir)/data-list.h \
+	$(srcdir)/data.h \
+	$(srcdir)/file.h \
 	$(srcdir)/module.h
 
 public_built_headers = \
@@ -50,6 +53,9 @@ libgwyappinclude_HEADERS = $(public_headers)
 noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyapp4_la_SOURCES = \
+	data-list.c \
+	data.c \
+	file.c \
 	module.c \
 	types.c
 
