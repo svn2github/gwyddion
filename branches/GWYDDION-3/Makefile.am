@@ -7,6 +7,7 @@ SUBDIRS = \
 	libraries \
 	gwyddion \
 	modules \
+	python \
 	po \
 	po-libgwy \
 	po-libgwyui \
