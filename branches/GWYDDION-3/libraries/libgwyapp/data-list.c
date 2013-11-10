@@ -298,7 +298,7 @@ gwy_data_list_get_ids(const GwyDataList *datalist,
  * Returns: The number of possible data kinds.
  **/
 guint
-gwy_files_n_data_kinds(void)
+gwy_data_kinds_n_kinds(void)
 {
     return GWY_DATA_NKINDS;
 }

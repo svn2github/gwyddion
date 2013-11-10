@@ -21,7 +21,6 @@
 #define __LIBGWYAPP_FILE_H__
 
 #include <glib-object.h>
-#include <libgwyapp/data-list.h>
 
 G_BEGIN_DECLS
 
@@ -60,6 +59,12 @@ typedef union {
 
 typedef struct _GwyFile      GwyFile;
 typedef struct _GwyFileClass GwyFileClass;
+
+G_END_DECLS
+
+#include <libgwyapp/data-list.h>
+
+G_BEGIN_DECLS
 
 struct _GwyFile {
     GObject g_object;

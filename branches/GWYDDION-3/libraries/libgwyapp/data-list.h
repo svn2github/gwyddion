@@ -54,7 +54,12 @@ typedef enum {
 typedef struct _GwyDataList      GwyDataList;
 typedef struct _GwyDataListClass GwyDataListClass;
 
+G_END_DECLS
+
 #include <libgwyapp/data.h>
+#include <libgwyapp/file.h>
+
+G_BEGIN_DECLS
 
 struct _GwyDataList {
     GwyArray array;
@@ -71,7 +76,8 @@ struct _GwyDataListClass {
 
 GType        gwy_data_list_get_type     (void)                        G_GNUC_CONST;
 GwyDataList* gwy_data_list_new          (void)                        G_GNUC_MALLOC;
-GwyDataList* gwy_data_list_new_for_type (GType type)                  G_GNUC_MALLOC;
+GwyDataList* gwy_data_list_new_for_file (GwyFile *file,
+                                         GType type)                  G_GNUC_MALLOC;
 void         gwy_data_list_set_data_type(GwyDataList *datalist,
                                          GType type);
 GType        gwy_data_list_get_data_type(const GwyDataList *datalist) G_GNUC_PURE;

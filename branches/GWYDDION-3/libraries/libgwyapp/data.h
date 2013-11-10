@@ -40,7 +40,11 @@ G_BEGIN_DECLS
 typedef struct _GwyData      GwyData;
 typedef struct _GwyDataClass GwyDataClass;
 
+G_END_DECLS
+
 #include <libgwyapp/data-list.h>
+
+G_BEGIN_DECLS
 
 struct _GwyData {
     GObject g_object;
