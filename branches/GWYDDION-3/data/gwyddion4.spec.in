@@ -135,7 +135,7 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{typelibdir}/Gwy-4.0.typelib
 %{typelibdir}/GwyUI-4.0.typelib
 %{typelibdir}/GwyApp-4.0.typelib
-%{python_sitearch}/gi/overrides/Gwy.py
+%{python_sitearch}/gi/overrides/Gwy.*
 
 %files libs-devel
 %defattr(-,root,root)
