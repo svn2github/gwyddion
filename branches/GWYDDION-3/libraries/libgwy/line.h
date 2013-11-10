@@ -43,7 +43,11 @@ G_BEGIN_DECLS
 typedef struct _GwyLine      GwyLine;
 typedef struct _GwyLineClass GwyLineClass;
 
+G_END_DECLS
+
 #include <libgwy/mask-line.h>
+
+G_BEGIN_DECLS
 
 struct _GwyLine {
     GObject g_object;

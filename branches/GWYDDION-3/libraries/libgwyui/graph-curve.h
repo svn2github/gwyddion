@@ -78,7 +78,11 @@ typedef enum {
 typedef struct _GwyGraphCurve      GwyGraphCurve;
 typedef struct _GwyGraphCurveClass GwyGraphCurveClass;
 
+G_END_DECLS
+
 #include <libgwyui/graph-area.h>
+
+G_BEGIN_DECLS
 
 struct _GwyGraphCurve {
     GInitiallyUnowned unowned;

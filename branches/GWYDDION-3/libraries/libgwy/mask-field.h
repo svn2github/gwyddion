@@ -42,7 +42,11 @@ G_BEGIN_DECLS
 typedef struct _GwyMaskField      GwyMaskField;
 typedef struct _GwyMaskFieldClass GwyMaskFieldClass;
 
+G_END_DECLS
+
 #include <libgwy/field.h>
+
+G_BEGIN_DECLS
 
 struct _GwyMaskField {
     GObject g_object;

@@ -46,7 +46,11 @@ typedef enum {
 typedef struct _GwyGraphArea      GwyGraphArea;
 typedef struct _GwyGraphAreaClass GwyGraphAreaClass;
 
+G_END_DECLS
+
 #include <libgwyui/graph-curve.h>
+
+G_BEGIN_DECLS
 
 struct _GwyGraphArea {
     GtkWidget widget;
