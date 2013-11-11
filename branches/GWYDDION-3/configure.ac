@@ -156,7 +156,7 @@ GTK_DOC_CHECK([gwy_required_gtkdoc])
 
 #############################################################################
 # Python
-m4_define([gwy_required_python],[2.2])
+m4_define([gwy_required_python],[2.6])
 AC_SUBST([GWY_REQUIRED_PYTHON],[gwy_required_python])
 AM_PATH_PYTHON([gwy_required_python])
 
