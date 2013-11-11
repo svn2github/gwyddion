@@ -13,17 +13,16 @@
       data management and similar tasks.
     </para>
   </preface>
-<!--
   <chapter id='libgwyapp-object-hierarchy'>
     <title>Object hierarchy</title>
     <xi:include href="xml/tree_index.sgml"/>
   </chapter>
--->
   <chapter id='libgwyapp-data-management'>
     <title>Data management</title>
     <xi:include href="xml/file.xml"/>
     <xi:include href="xml/data-list.xml"/>
     <xi:include href="xml/data.xml"/>
+    <xi:include href="xml/channel-data.xml"/>
   </chapter>
   <chapter id='libgwyapp-modules'>
     <title>Modules</title>

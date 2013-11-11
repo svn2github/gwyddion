@@ -20,6 +20,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
+#include "libgwyapp/channel-data.h"
 #include "libgwyapp/data.h"
 
 enum {
@@ -53,7 +54,7 @@ static gboolean set_data_list        (GwyData *data,
 
 static GParamSpec *properties[N_PROPS];
 
-G_DEFINE_TYPE(GwyData, gwy_data, G_TYPE_OBJECT);
+G_DEFINE_ABSTRACT_TYPE(GwyData, gwy_data, G_TYPE_OBJECT);
 
 static void
 gwy_data_class_init(GwyDataClass *klass)

@@ -22,6 +22,7 @@
 #include "libgwy/object-utils.h"
 #include "libgwyapp/types.h"
 #include "libgwyapp/file.h"
+#include "libgwyapp/channel-data.h"
 #include "libgwyapp/data.h"
 #include "libgwyapp/data-list.h"
 
@@ -58,11 +59,13 @@ static gboolean set_data_type             (GwyDataList *datalist,
                                            GType type);
 static gboolean set_file                  (GwyDataList *datalist,
                                            GwyFile *file);
+static void     init_kind_to_type_map     (void);
 
 static GParamSpec *properties[N_PROPS];
+static GType kind_to_type_map[GWY_DATA_NKINDS];
 
-// FIXME: Must implement GwyListable
-G_DEFINE_TYPE(GwyDataList, gwy_data_list, GWY_TYPE_ARRAY);
+G_DEFINE_TYPE_WITH_CODE(GwyDataList, gwy_data_list, GWY_TYPE_ARRAY,
+                        init_kind_to_type_map(););
 
 static void
 gwy_data_list_class_init(GwyDataListClass *klass)
@@ -303,6 +306,52 @@ gwy_data_kinds_n_kinds(void)
     return GWY_DATA_NKINDS;
 }
 
+/**
+ * gwy_data_kind_to_type:
+ * @kind: Data kind.
+ *
+ * Transforms a data kind identifier to the type of the corresponding data
+ * item.
+ *
+ * Returns: The #GType corresponding to @kind.
+ **/
+GType
+gwy_data_kind_to_type(GwyDataKind kind)
+{
+    g_return_val_if_fail(kind > GWY_DATA_UNKNOWN && kind < GWY_DATA_NKINDS, 0);
+    // This invokes init_kind_to_type_map() if necessary.
+    if (G_LIKELY(GWY_TYPE_DATA_LIST))
+        return kind_to_type_map[kind];
+    g_assert_not_reached();
+    return 0;
+}
+
+/**
+ * gwy_data_type_to_kind:
+ * @type: Type of data.
+ *
+ * Transforms a data item type to the corresponding data kind identifier.
+ *
+ * Returns: The data kind corresponding to @type.
+ **/
+GwyDataKind
+gwy_data_type_to_kind(GType type)
+{
+    // This invokes init_kind_to_type_map() if necessary.
+    g_return_val_if_fail(GWY_IS_DATA(type), GWY_DATA_UNKNOWN);
+    for (guint kind = 0; kind < GWY_DATA_NKINDS; kind++) {
+        if (kind_to_type_map[kind] == type)
+            return kind;
+    }
+    // Can we get here?
+    for (guint kind = 0; kind < GWY_DATA_NKINDS; kind++) {
+        if (g_type_is_a(type, kind_to_type_map[kind]))
+            return kind;
+    }
+    g_assert_not_reached();
+    return 0;
+}
+
 static gboolean
 set_data_type(GwyDataList *datalist, GType type)
 {
@@ -334,6 +383,12 @@ set_file(GwyDataList *datalist,
     // FIXME: We should hold a weak ref/pointer to avoid file becoming
     // invalid.
     return TRUE;
+}
+
+static void
+init_kind_to_type_map(void)
+{
+    kind_to_type_map[GWY_DATA_CHANNEL] = GWY_TYPE_CHANNEL_DATA;
 }
 
 /************************** Documentation ****************************/

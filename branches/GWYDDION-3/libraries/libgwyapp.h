@@ -21,6 +21,7 @@
 #define __LIBGWYAPP_H__
 
 #include <libgwyui.h>
+#include <libgwyapp/channel-data.h>
 #include <libgwyapp/data-list.h>
 #include <libgwyapp/data.h>
 #include <libgwyapp/file.h>
