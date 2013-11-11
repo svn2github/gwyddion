@@ -17,5 +17,5 @@ install-data-hook:
 
 uninstall-hook:
 	$(AM_V_AT)if test "x$(DESTDIR)" = x && grep '^# Gwyddion placeholder\.' "$(overridesinit)" >/dev/null 2>/dev/null; then \
-	    && rm -f "$(overridesinit)"; \
+	    rm -f "$(overridesinit)"; \
 	fi
