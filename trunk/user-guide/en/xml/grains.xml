@@ -63,24 +63,26 @@
     </para>
     <orderedlist>
       <listitem>
-        At each point of the inverted surface the virtual water drop was
-        placed. In the case that the drop was not already in a local minimum it
+        Grain location phase: At each point of the inverted surface the virtual water drop was
+        placed (amount of water is controlled by parameter <guilabel>Drop size</guilabel>). In the case that the drop was not already in a local minimum it
         followed the steepest descent path to minimize its potential energy. As
         soon as the drop reached any local minimum it stopped here and rested
         on the surface. In this way it filled the local minimum partially by
         its volume (see figure below and its caption). This process was
-        repeated several times. As the result a system of lakes of different
+        repeated several times (parameter <guilabel>Number of steps</guilabel>). As the result a system of lakes of different
         sizes filling the inverted surface depressions was obtained. Then the
-        area of each of the lakes was evaluated and the smallest lakes were
+        area of each of the lakes was evaluated and the smallest lakes are
         removed under assumption that they were formed in the local minima
-        originated by noise. The larger lakes were used to identify the
-        positions of the grains. In this way the noise in the AFM data was
-        eliminated.
+        originated by noise (all lakes smaller than parameter <guilabel>Threshold</guilabel> are removed). The larger lakes were used to identify the
+        positions of the grains for segmentation in the next step. In this way the noise in the AFM data was
+        eliminated. As a result 
       </listitem>
       <listitem>
-        The grains found in the step 1 were marked (each one by a different
+        Segmentation phase: The grains found in the step 1 were marked (each one by a different
         number). The water drops continued in falling to the surface and
-        filling the local minima. As the grains were already identified and
+        filling the local minima (amount of water is controlled by parameter <guilabel>Drop size</guilabel>). 
+        Total number of steps of sphlashing a drop at every surface position is controlled by parameter <guilabel>Number of steps</guilabel>. 
+        As the grains were already identified and
         marked after the first step, the next five situations could happen as
         soon as the drop reached a local minimum.
         <orderedlist>
@@ -114,7 +116,9 @@
     </orderedlist>
     <para>
       In this way we can identify the grain positions and then determine the
-      volume occupied by each grain separately.
+      volume occupied by each grain separately. If features of interest are valleys rather than
+      grains (hills), 
+      parameter <guilabel>Invert height</guilabel> can be used.
     </para>
     <informalfigure id='fig-grain-marking'>
       <mediaobject>
