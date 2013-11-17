@@ -425,7 +425,7 @@ gwy_rand_byte(GwyRand *rng)
  *
  * The returned value is equally distributed over the open interval (0,1).
  * The smallest returned value is 2⁻⁶⁵ and the largest is the largest IEEE
- * double value smaller than 1.  Note if it is transformed to another
+ * double value still smaller than 1.  Note if it is transformed to another
  * interval, the openness is, generally, not guaranteed.
  *
  * The returned value is obtained from a 64bit random integer.  This means
@@ -593,7 +593,9 @@ generate_exp(GwyRand *rng)
  * Obtains the next one-side exponentially distributed number from a random
  * number generator.
  *
- * The probability distribution function is exp(-@x) on (0,∞).
+ * The probability distribution function is exp(−@x) on (0,∞).
+ *
+ * It has mean value 1 and unit variance.
  *
  * Returns: Random floating point number.
  **/
@@ -610,7 +612,9 @@ gwy_rand_exp_positive(GwyRand *rng)
  * Obtains the next two-side exponentially distributed number from a random
  * number generator.
  *
- * The probability distribution function is exp(-|@x|)/2 on (-∞,∞).
+ * The probability distribution function is exp(−|@x|)/2 on (−∞,∞).
+ *
+ * It has zero mean value and variance 2.
  *
  * Returns: Random floating point number.
  **/
@@ -783,7 +787,9 @@ generate_normal(GwyRand *rng)
  * Obtains the next half-normally distributed number from a random number
  * generator.
  *
- * The probability distribution function is exp(-@x²/2)*sqrt(2/π) on (0,∞).
+ * The probability distribution function is exp(−@x²/2)*sqrt(2/π) on (0,∞).
+ *
+ * It has mean value sqrt(2/π) and variance 1 − .2/π.
  *
  * Returns: Random floating point number.
  **/
@@ -799,7 +805,9 @@ gwy_rand_normal_positive(GwyRand *rng)
  *
  * Obtains the next normally distributed number from a random number generator.
  *
- * The probability distribution function is exp(-@x²/2)/sqrt(2π) on (-∞,∞).
+ * The probability distribution function is exp(−@x²/2)/sqrt(2π) on (−∞,∞).
+ *
+ * It has zero mean value and unity variance.
  *
  * Returns: Random floating point number.
  **/
@@ -838,7 +846,9 @@ generate_triangle(GwyRand *rng)
  * Obtains the next half-triangular distributed number from a random number
  * generator.
  *
- * The probability distribution function is 2(1-x) on (0,1).
+ * The probability distribution function is 2(1 − @x) on (0,1).
+ *
+ * It has mean value 1/3 and variance 1/18.
  *
  * Returns: Random floating point number.
  **/
@@ -855,7 +865,9 @@ gwy_rand_triangle_positive(GwyRand *rng)
  * Obtains the next triangular distributed number from a random number
  * generator.
  *
- * The probability distribution function is 1-|x| on (-1,1).
+ * The probability distribution function is 1 − |@x| on (−1,1).
+ *
+ * It has zero mean value and variance 1/6.
  *
  * Returns: Random floating point number.
  **/
