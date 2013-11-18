@@ -1873,7 +1873,8 @@ gwy_brick_set_data_full(GwyBrick *brick,
  * @xoff: X-offset of the top-upper-left corner from [0,0,0] in physical units.
  * @yoff: Y-offset of the top-upper-left corner from [0,0,0] in physical units.
  * @zoff: Z-offset of the top-upper-left corner from [0,0,0] in physical units.
- * @data: Brick data.  See the introductory section for details.
+ * @data: (skip):
+ *        Brick data.  See the introductory section for details.
  *
  * Object representing three-dimensional data in a regular grid.
  *

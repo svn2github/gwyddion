@@ -2183,7 +2183,8 @@ gwy_field_set_data_full(GwyField *field,
  * @yreal: Height in physical units.
  * @xoff: X-offset of the top-left corner from [0,0] in physical units.
  * @yoff: Y-offset of the top-left corner from [0,0] in physical units.
- * @data: Field data.  See the introductory section for details.
+ * @data: (skip):
+ *        Field data.  See the introductory section for details.
  *
  * Object representing two-dimensional data in a regular grid.
  *

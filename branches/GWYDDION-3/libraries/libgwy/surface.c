@@ -1152,7 +1152,8 @@ gwy_surface_set(const GwySurface *surface,
 /**
  * GwySurface:
  * @n: Number of points.
- * @data: Surface data.  See the introductory section for details.
+ * @data: (skip):
+ *        Surface data.  See the introductory section for details.
  *
  * Object representing surface data.
  *

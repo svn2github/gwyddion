@@ -975,7 +975,8 @@ gwy_curve_set(const GwyCurve *curve,
 /**
  * GwyCurve:
  * @n: Number of points.
- * @data: Curve data.  See the introductory section for details.
+ * @data: (skip):
+ *        Curve data.  See the introductory section for details.
  *
  * Object representing curve data.
  *

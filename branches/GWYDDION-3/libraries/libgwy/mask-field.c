@@ -1234,7 +1234,8 @@ gwy_mask_field_set(const GwyMaskField *field,
  * @yres: Y-resolution, i.e. height in pixels.
  * @stride: Row length in #guint32 items (not bytes, bear this in mind
  *          especially when passing the data to Cairo).
- * @data: Mask data.  See the introductory section for details.
+ * @data: (skip):
+ *        Mask data.  See the introductory section for details.
  *
  * Object representing two-dimensional bit mask.
  *

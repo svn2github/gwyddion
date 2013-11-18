@@ -1406,7 +1406,8 @@ gwy_line_set_data_full(GwyLine *line,
  * @res: Resolution, i.e. length in pixels.
  * @real: Length in physical units.
  * @off: Offset of the line start from 0 in physical units.
- * @data: Line data.  See the introductory section for details.
+ * @data: (skip):
+ *        Line data.  See the introductory section for details.
  *
  * Object representing one-dimensional data in a regular grid.
  *
