@@ -216,7 +216,12 @@ gwy_file_get_data_list(const GwyFile *file,
 {
     g_return_val_if_fail(GWY_IS_FILE(file), NULL);
     g_return_val_if_fail(kind < GWY_DATA_NKINDS, NULL);
-    return file->priv->data_lists[kind];
+    File *priv = file->priv;
+    if (G_UNLIKELY(!priv->data_lists[kind])) {
+        GType type = gwy_data_kind_to_type(kind);
+        priv->data_lists[kind] = gwy_data_list_new_for_file(file, type);
+    }
+    return priv->data_lists[kind];
 }
 
 static void
@@ -257,7 +262,7 @@ ensure_file_list(void)
 {
     static GPtrArray *files = NULL;
 
-    if (!G_UNLIKELY(!files))
+    if (G_UNLIKELY(!files))
         files = g_ptr_array_new();
 
     return files;

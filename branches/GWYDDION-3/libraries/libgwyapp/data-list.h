@@ -76,7 +76,7 @@ struct _GwyDataListClass {
 
 GType        gwy_data_list_get_type     (void)                        G_GNUC_CONST;
 GwyDataList* gwy_data_list_new          (void)                        G_GNUC_MALLOC;
-GwyDataList* gwy_data_list_new_for_file (GwyFile *file,
+GwyDataList* gwy_data_list_new_for_file (const GwyFile *file,
                                          GType type)                  G_GNUC_MALLOC;
 void         gwy_data_list_set_data_type(GwyDataList *datalist,
                                          GType type);

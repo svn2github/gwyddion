@@ -208,12 +208,12 @@ gwy_data_list_new(void)
  *          A new data list.
  **/
 GwyDataList*
-gwy_data_list_new_for_file(GwyFile *file,
+gwy_data_list_new_for_file(const GwyFile *file,
                            GType type)
 {
     return g_object_new(GWY_TYPE_DATA_LIST,
                         "file", file,
-                        "type", type,
+                        "data-type", type,
                         NULL);
 }
 
