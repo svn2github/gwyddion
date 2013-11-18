@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -1133,6 +1133,62 @@ gwy_surface_set(const GwySurface *surface,
     g_return_if_fail(GWY_IS_SURFACE(surface));
     g_return_if_fail(pos < surface->n);
     gwy_surface_index(surface, pos) = point;
+}
+
+/**
+ * gwy_surface_get_data_full:
+ * @surface: A surface.
+ * @n: (out):
+ *     Location to store the count of extracted data points.
+ *
+ * Provides the values of an entire surface as a flat array.
+ *
+ * This function, paired with gwy_surface_set_data_full() can be namely useful
+ * in language bindings.
+ *
+ * Note that this function returns a pointer directly to @surface's data.
+ *
+ * Returns: (array length=n) (transfer none):
+ *          The array containing the surface points.
+ **/
+const GwyXYZ*
+gwy_surface_get_data_full(const GwySurface *surface,
+                          guint *n)
+{
+    g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
+    *n = surface->n;
+    return surface->data;
+}
+
+/**
+ * gwy_surface_set_data_full:
+ * @surface: A surface.
+ * @points: (array length=n):
+ *          Data points to copy to the surface.  They replace whatever
+ *          points are in @surface now.
+ * @n: The number of points in @data.
+ *
+ * Puts back values from a flat array to an entire data surface.
+ *
+ * See gwy_surface_get_data_full() for a discussion.
+ **/
+void
+gwy_surface_set_data_full(GwySurface *surface,
+                          const GwyXYZ *points,
+                          guint n)
+{
+    g_return_if_fail(GWY_IS_SURFACE(surface));
+    g_return_if_fail(points || !n);
+    gboolean notify = FALSE;
+    if (surface->n != n) {
+        surface->n = n;
+        alloc_data(surface);
+        notify = TRUE;
+    }
+    if (n)
+        gwy_assign(surface->data, points, n);
+    if (notify)
+        g_object_notify_by_pspec(G_OBJECT(surface), properties[PROP_N_POINTS]);
 }
 
 /**

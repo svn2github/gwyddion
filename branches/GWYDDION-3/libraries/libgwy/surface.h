@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -108,11 +108,16 @@ const gchar*    gwy_surface_get_name       (const GwySurface *surface)       G_G
 #define gwy_surface_index(surface, pos) \
     ((surface)->data[pos])
 
-GwyXYZ gwy_surface_get(const GwySurface *surface,
-                       guint pos);
-void   gwy_surface_set(const GwySurface *surface,
-                       guint pos,
-                       GwyXYZ point);
+GwyXYZ        gwy_surface_get          (const GwySurface *surface,
+                                        guint pos)                 G_GNUC_PURE;
+void          gwy_surface_set          (const GwySurface *surface,
+                                        guint pos,
+                                        GwyXYZ point);
+const GwyXYZ* gwy_surface_get_data_full(const GwySurface *surface,
+                                        guint *n)                  G_GNUC_PURE;
+void          gwy_surface_set_data_full(GwySurface *surface,
+                                        const GwyXYZ *points,
+                                        guint n);
 
 G_END_DECLS
 

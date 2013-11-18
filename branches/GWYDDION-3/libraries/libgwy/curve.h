@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010,2012 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -96,11 +96,16 @@ const gchar*    gwy_curve_get_name       (const GwyCurve *curve)              G_
 #define gwy_curve_index(curve, pos) \
     ((curve)->data[pos])
 
-GwyXY gwy_curve_get(const GwyCurve *curve,
-                    guint pos);
-void  gwy_curve_set(const GwyCurve *curve,
-                    guint pos,
-                    GwyXY point);
+GwyXY        gwy_curve_get          (const GwyCurve *curve,
+                                     guint pos)             G_GNUC_PURE;
+void         gwy_curve_set          (const GwyCurve *curve,
+                                     guint pos,
+                                     GwyXY point);
+const GwyXY* gwy_curve_get_data_full(const GwyCurve *curve,
+                                     guint *n)              G_GNUC_PURE;
+void         gwy_curve_set_data_full(GwyCurve *curve,
+                                     const GwyXY *points,
+                                     guint n);
 
 G_END_DECLS
 

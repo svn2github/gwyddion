@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010,2012 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -955,6 +955,62 @@ gwy_curve_set(const GwyCurve *curve,
     g_return_if_fail(GWY_IS_CURVE(curve));
     g_return_if_fail(pos < curve->n);
     gwy_curve_index(curve, pos) = point;
+}
+
+/**
+ * gwy_curve_get_data_full:
+ * @curve: A curve.
+ * @n: (out):
+ *     Location to store the count of extracted data points.
+ *
+ * Provides the values of an entire curve as a flat array.
+ *
+ * This function, paired with gwy_curve_set_data_full() can be namely useful in
+ * language bindings.
+ *
+ * Note that this function returns a pointer directly to @curve's data.
+ *
+ * Returns: (array length=n) (transfer none):
+ *          The array containing the curve points.
+ **/
+const GwyXY*
+gwy_curve_get_data_full(const GwyCurve *curve,
+                        guint *n)
+{
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    *n = curve->n;
+    return curve->data;
+}
+
+/**
+ * gwy_curve_set_data_full:
+ * @curve: A curve.
+ * @points: (array length=n):
+ *          Data points to copy to the curve.  They replace whatever
+ *          points are in @curve now.
+ * @n: The number of points in @data.
+ *
+ * Puts back values from a flat array to an entire data curve.
+ *
+ * See gwy_curve_get_data_full() for a discussion.
+ **/
+void
+gwy_curve_set_data_full(GwyCurve *curve,
+                        const GwyXY *points,
+                        guint n)
+{
+    g_return_if_fail(GWY_IS_CURVE(curve));
+    g_return_if_fail(points || !n);
+    gboolean notify = FALSE;
+    if (curve->n != n) {
+        curve->n = n;
+        alloc_data(curve);
+        notify = TRUE;
+    }
+    if (n)
+        gwy_assign(curve->data, points, n);
+    if (notify)
+        g_object_notify_by_pspec(G_OBJECT(curve), properties[PROP_N_POINTS]);
 }
 
 /**
