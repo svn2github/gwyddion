@@ -21,7 +21,7 @@
     <title>Data management</title>
     <xi:include href="xml/file.xml"/>
     <xi:include href="xml/data-list.xml"/>
-    <xi:include href="xml/data.xml"/>
+    <xi:include href="xml/data-item.xml"/>
     <xi:include href="xml/channel-data.xml"/>
   </chapter>
   <chapter id='libgwyapp-modules'>

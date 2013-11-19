@@ -23,8 +23,8 @@ INTROSPECTION_COMPILER_ARGS = \
 
 public_headers = \
 	$(srcdir)/channel-data.h \
+	$(srcdir)/data-item.h \
 	$(srcdir)/data-list.h \
-	$(srcdir)/data.h \
 	$(srcdir)/file.h \
 	$(srcdir)/module.h
 
@@ -55,8 +55,8 @@ noinst_HEADERS = $(private_headers) $(private_built_headers)
 
 libgwyapp4_la_SOURCES = \
 	channel-data.c \
+	data-item.c \
 	data-list.c \
-	data.c \
 	file.c \
 	module.c \
 	types.c

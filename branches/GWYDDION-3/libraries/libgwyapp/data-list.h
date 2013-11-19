@@ -56,7 +56,7 @@ typedef struct _GwyDataListClass GwyDataListClass;
 
 G_END_DECLS
 
-#include <libgwyapp/data.h>
+#include <libgwyapp/data-item.h>
 #include <libgwyapp/file.h>
 
 G_BEGIN_DECLS

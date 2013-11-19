@@ -49,7 +49,7 @@ static gboolean set_field                    (GwyChannelData *channeldata,
 
 static GParamSpec *properties[N_PROPS];
 
-G_DEFINE_TYPE(GwyChannelData, gwy_channel_data, GWY_TYPE_DATA);
+G_DEFINE_TYPE(GwyChannelData, gwy_channel_data, GWY_TYPE_DATA_ITEM);
 
 static void
 gwy_channel_data_class_init(GwyChannelDataClass *klass)

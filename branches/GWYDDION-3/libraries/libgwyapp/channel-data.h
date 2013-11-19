@@ -22,7 +22,7 @@
 
 #include <glib-object.h>
 #include <libgwy/field.h>
-#include <libgwyapp/data.h>
+#include <libgwyapp/data-item.h>
 
 G_BEGIN_DECLS
 
@@ -43,13 +43,13 @@ typedef struct _GwyChannelData      GwyChannelData;
 typedef struct _GwyChannelDataClass GwyChannelDataClass;
 
 struct _GwyChannelData {
-    GwyData gwy_data;
+    GwyDataItem data_item;
     struct _GwyChannelDataPrivate *priv;
 };
 
 struct _GwyChannelDataClass {
     /*<private>*/
-    GwyDataClass gwy_data_class;
+    GwyDataItemClass data_item_class;
 };
 
 GType           gwy_channel_data_get_type      (void)                              G_GNUC_CONST;

@@ -21,9 +21,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 #include "libgwyapp/types.h"
-#include "libgwyapp/file.h"
 #include "libgwyapp/channel-data.h"
-#include "libgwyapp/data.h"
 #include "libgwyapp/data-list.h"
 
 // FIXME: Duplicated with file.c.
@@ -83,7 +81,7 @@ gwy_data_list_class_init(GwyDataListClass *klass)
         = g_param_spec_gtype("data-type",
                              "Data type",
                              "Type of data in the list.",
-                             GWY_TYPE_DATA,
+                             GWY_TYPE_DATA_ITEM,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
                              | G_PARAM_CONSTRUCT_ONLY);
 
@@ -186,7 +184,7 @@ gwy_data_list_get_property(GObject *object,
  *
  * This constructor exists namely for bindings.  Usually, it is better to
  * create the data list directly for a specific type of data using
- * gwy_data_list_new_for_type().
+ * gwy_data_list_new_for_file().
  *
  * Returns: (transfer full):
  *          A new data list.
@@ -338,7 +336,6 @@ GwyDataKind
 gwy_data_type_to_kind(GType type)
 {
     // This invokes init_kind_to_type_map() if necessary.
-    g_return_val_if_fail(GWY_IS_DATA(type), GWY_DATA_UNKNOWN);
     for (guint kind = 0; kind < GWY_DATA_NKINDS; kind++) {
         if (kind_to_type_map[kind] == type)
             return kind;
@@ -348,8 +345,8 @@ gwy_data_type_to_kind(GType type)
         if (g_type_is_a(type, kind_to_type_map[kind]))
             return kind;
     }
-    g_assert_not_reached();
-    return 0;
+    g_critical("Type 0x%lx is not a data item type.", (gulong)type);
+    return GWY_DATA_UNKNOWN;
 }
 
 static gboolean
@@ -360,12 +357,11 @@ set_data_type(GwyDataList *datalist, GType type)
     if (type == priv->type)
         return FALSE;
     g_return_val_if_fail(!priv->type, FALSE);
-    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_DATA), FALSE);
+    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_DATA_ITEM), FALSE);
     g_return_val_if_fail(!G_TYPE_IS_ABSTRACT(type), FALSE);
 
     priv->type = type;
-    // TODO
-    priv->kind = 12345;
+    priv->kind = gwy_data_type_to_kind(type);
     g_object_notify_by_pspec(G_OBJECT(datalist), properties[PROP_DATA_KIND]);
     return TRUE;
 }

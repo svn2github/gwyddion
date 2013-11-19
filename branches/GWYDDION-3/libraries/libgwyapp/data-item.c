@@ -20,8 +20,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
-#include "libgwyapp/channel-data.h"
-#include "libgwyapp/data.h"
+#include "libgwyapp/data-item.h"
 
 enum {
     PROP_0,
@@ -30,51 +29,51 @@ enum {
     N_PROPS
 };
 
-struct _GwyDataPrivate {
+struct _GwyDataItemPrivate {
     GwyDataList *parent_list;
     guint id;
 };
 
-typedef struct _GwyDataPrivate Data;
+typedef struct _GwyDataItemPrivate DataItem;
 
-static void     gwy_data_finalize    (GObject *object);
-static void     gwy_data_dispose     (GObject *object);
-static void     gwy_data_set_property(GObject *object,
-                                      guint prop_id,
-                                      const GValue *value,
-                                      GParamSpec *pspec);
-static void     gwy_data_get_property(GObject *object,
-                                      guint prop_id,
-                                      GValue *value,
-                                      GParamSpec *pspec);
-static gboolean set_id               (GwyData *data,
-                                      guint id);
-static gboolean set_data_list        (GwyData *data,
-                                      GwyDataList *datalist);
+static void     gwy_data_item_finalize    (GObject *object);
+static void     gwy_data_item_dispose     (GObject *object);
+static void     gwy_data_item_set_property(GObject *object,
+                                           guint prop_id,
+                                           const GValue *value,
+                                           GParamSpec *pspec);
+static void     gwy_data_item_get_property(GObject *object,
+                                           guint prop_id,
+                                           GValue *value,
+                                           GParamSpec *pspec);
+static gboolean set_id                    (GwyDataItem *dataitem,
+                                           guint id);
+static gboolean set_data_list             (GwyDataItem *dataitem,
+                                           GwyDataList *datalist);
 
 static GParamSpec *properties[N_PROPS];
 
-G_DEFINE_ABSTRACT_TYPE(GwyData, gwy_data, G_TYPE_OBJECT);
+G_DEFINE_ABSTRACT_TYPE(GwyDataItem, gwy_data_item, G_TYPE_OBJECT);
 
 static void
-gwy_data_class_init(GwyDataClass *klass)
+gwy_data_item_class_init(GwyDataItemClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
-    g_type_class_add_private(klass, sizeof(Data));
+    g_type_class_add_private(klass, sizeof(DataItem));
 
-    gobject_class->dispose = gwy_data_dispose;
-    gobject_class->finalize = gwy_data_finalize;
-    gobject_class->get_property = gwy_data_get_property;
-    gobject_class->set_property = gwy_data_set_property;
+    gobject_class->dispose = gwy_data_item_dispose;
+    gobject_class->finalize = gwy_data_item_finalize;
+    gobject_class->get_property = gwy_data_item_get_property;
+    gobject_class->set_property = gwy_data_item_set_property;
 
     properties[PROP_ID]
         = g_param_spec_uint("id",
                             "Id",
                             "Unique identified of the data in the list.",
-                             0, G_MAXUINT32, 0,
-                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
-                             | G_PARAM_CONSTRUCT_ONLY);
+                            0, G_MAXUINT32, 0,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
+                            | G_PARAM_CONSTRUCT_ONLY);
 
     properties[PROP_DATA_LIST]
         = g_param_spec_object("data-list",
@@ -89,41 +88,41 @@ gwy_data_class_init(GwyDataClass *klass)
 }
 
 static void
-gwy_data_init(GwyData *data)
+gwy_data_item_init(GwyDataItem *dataitem)
 {
-    data->priv = G_TYPE_INSTANCE_GET_PRIVATE(data,
-                                                 GWY_TYPE_DATA, Data);
+    dataitem->priv = G_TYPE_INSTANCE_GET_PRIVATE(dataitem,
+                                                 GWY_TYPE_DATA_ITEM, DataItem);
 }
 
 static void
-gwy_data_finalize(GObject *object)
+gwy_data_item_finalize(GObject *object)
 {
-    //GwyData *data = GWY_DATA(object);
-    G_OBJECT_CLASS(gwy_data_parent_class)->finalize(object);
+    //GwyDataItem *dataitem = GWY_DATA_ITEM(object);
+    G_OBJECT_CLASS(gwy_data_item_parent_class)->finalize(object);
 }
 
 static void
-gwy_data_dispose(GObject *object)
+gwy_data_item_dispose(GObject *object)
 {
-    //GwyData *data = GWY_DATA(object);
-    G_OBJECT_CLASS(gwy_data_parent_class)->dispose(object);
+    //GwyDataItem *dataitem = GWY_DATA_ITEM(object);
+    G_OBJECT_CLASS(gwy_data_item_parent_class)->dispose(object);
 }
 
 static void
-gwy_data_set_property(GObject *object,
-                      guint prop_id,
-                      const GValue *value,
-                      GParamSpec *pspec)
+gwy_data_item_set_property(GObject *object,
+                           guint prop_id,
+                           const GValue *value,
+                           GParamSpec *pspec)
 {
-    GwyData *data = GWY_DATA(object);
+    GwyDataItem *dataitem = GWY_DATA_ITEM(object);
 
     switch (prop_id) {
         case PROP_ID:
-        set_id(data, g_value_get_uint(value));
+        set_id(dataitem, g_value_get_uint(value));
         break;
 
         case PROP_DATA_LIST:
-        set_data_list(data, g_value_get_object(value));
+        set_data_list(dataitem, g_value_get_object(value));
         break;
 
         default:
@@ -133,13 +132,13 @@ gwy_data_set_property(GObject *object,
 }
 
 static void
-gwy_data_get_property(GObject *object,
-                      guint prop_id,
-                      GValue *value,
-                      GParamSpec *pspec)
+gwy_data_item_get_property(GObject *object,
+                           guint prop_id,
+                           GValue *value,
+                           GParamSpec *pspec)
 {
-    GwyData *data = GWY_DATA(object);
-    Data *priv = data->priv;
+    GwyDataItem *dataitem = GWY_DATA_ITEM(object);
+    DataItem *priv = dataitem->priv;
 
     switch (prop_id) {
         case PROP_ID:
@@ -157,23 +156,23 @@ gwy_data_get_property(GObject *object,
 }
 
 /**
- * gwy_data_get_id:
- * @data: A high-level data item.
+ * gwy_data_item_get_id:
+ * @dataitem: A high-level data item.
  *
  * Gets the unique identifier of a data item within its list.
  *
  * Returns: The unique identifier of the data item.
  **/
 guint
-gwy_data_get_id(const GwyData *data)
+gwy_data_item_get_id(const GwyDataItem *dataitem)
 {
-    g_return_val_if_fail(GWY_IS_DATA(data), 0);
-    return data->priv->id;
+    g_return_val_if_fail(GWY_IS_DATA_ITEM(dataitem), 0);
+    return dataitem->priv->id;
 }
 
 /**
- * gwy_data_get_data_list:
- * @data: A high-level data item.
+ * gwy_data_item_get_data_list:
+ * @dataitem: A high-level data item.
  *
  * Gets the data list a data item belongs to.
  *
@@ -181,17 +180,17 @@ gwy_data_get_id(const GwyData *data)
  *          The data list the data item belongs to.
  **/
 GwyDataList*
-gwy_data_get_data_list(const GwyData *data)
+gwy_data_item_get_data_list(const GwyDataItem *dataitem)
 {
-    g_return_val_if_fail(GWY_IS_DATA(data), NULL);
-    return data->priv->parent_list;
+    g_return_val_if_fail(GWY_IS_DATA_ITEM(dataitem), NULL);
+    return dataitem->priv->parent_list;
 }
 
 static gboolean
-set_id(GwyData *data,
+set_id(GwyDataItem *dataitem,
        guint id)
 {
-    Data *priv = data->priv;
+    DataItem *priv = dataitem->priv;
     if (id == priv->id)
         return FALSE;
 
@@ -200,10 +199,10 @@ set_id(GwyData *data,
 }
 
 static gboolean
-set_data_list(GwyData *data,
+set_data_list(GwyDataItem *dataitem,
               GwyDataList *datalist)
 {
-    Data *priv = data->priv;
+    DataItem *priv = dataitem->priv;
     if (datalist == priv->parent_list)
         return FALSE;
 
@@ -216,30 +215,30 @@ set_data_list(GwyData *data,
 /************************** Documentation ****************************/
 
 /**
- * SECTION: data
- * @title: GwyData
+ * SECTION: data-item
+ * @title: GwyDataItem
  * @short_description: High-level data item
  *
- * #GwyData represent the high-level concept of a data item, for instance a
+ * #GwyDataItem represent the high-level concept of a data item, for instance a
  * channel (image) or volume data.  The corresponding raw data may be
  * represented with a low-level object such as #GwyField or #GwyBrick.
  * However, a channel or volume data can have various other properties and
  * settings: false colour mapping setup, metadata, associated selections and
- * mask, etc.  The purpose of #GwyData subclasses is to manage all these pieces
- * together.
+ * mask, etc.  The purpose of #GwyDataItem subclasses is to manage all these
+ * pieces together.
  **/
 
 /**
- * GwyData:
+ * GwyDataItem:
  *
  * Object representing one high-level data item.
  *
- * The #GwyData struct contains private data only and should be accessed
+ * The #GwyDataItem struct contains private data only and should be accessed
  * using the functions below.
  **/
 
 /**
- * GwyDataClass:
+ * GwyDataItemClass:
  *
  * Class of high-level data items.
  **/
