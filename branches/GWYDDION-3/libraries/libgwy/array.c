@@ -187,7 +187,7 @@ gwy_array_set_item_type(GwyArray *array,
  * Returns: The number of items.
  **/
 guint
-gwy_array_size(GwyArray *array)
+gwy_array_size(const GwyArray *array)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), 0);
     Array *priv = array->priv;
