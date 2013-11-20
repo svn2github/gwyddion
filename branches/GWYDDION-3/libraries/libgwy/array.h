@@ -60,7 +60,7 @@ void      gwy_array_set_item_type(GwyArray *array,
                                   gsize size,
                                   GDestroyNotify destroy);
 guint     gwy_array_size         (const GwyArray *array)   G_GNUC_PURE;
-gpointer  gwy_array_get          (GwyArray *array,
+gpointer  gwy_array_get          (const GwyArray *array,
                                   guint n)                 G_GNUC_PURE;
 
 #define gwy_array_insert1(array,n,item) \
@@ -88,7 +88,7 @@ void     gwy_array_replace (GwyArray *array,
                             guint nitems);
 void     gwy_array_updated (GwyArray *array,
                             guint n);
-gpointer gwy_array_get_data(GwyArray *array) G_GNUC_PURE;
+gpointer gwy_array_get_data(const GwyArray *array) G_GNUC_PURE;
 void     gwy_array_set_data(GwyArray *array,
                             gconstpointer items,
                             guint nitems);

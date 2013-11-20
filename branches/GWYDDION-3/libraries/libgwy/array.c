@@ -205,7 +205,7 @@ gwy_array_size(const GwyArray *array)
  *          Item at position @n, %NULL if there is no such item.
  **/
 gpointer
-gwy_array_get(GwyArray *array,
+gwy_array_get(const GwyArray *array,
               guint n)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
@@ -412,7 +412,7 @@ gwy_array_replace(GwyArray *array,
  *          array do not change.  If the array is empty, %NULL is returned.
  **/
 gpointer
-gwy_array_get_data(GwyArray *array)
+gwy_array_get_data(const GwyArray *array)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
     Array *priv = array->priv;
