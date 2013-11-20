@@ -47,13 +47,13 @@ G_END_DECLS
 G_BEGIN_DECLS
 
 struct _GwyDataItem {
-    GObject g_object;
+    GInitiallyUnowned unowned;
     struct _GwyDataItemPrivate *priv;
 };
 
 struct _GwyDataItemClass {
     /*<private>*/
-    GObjectClass g_object_class;
+    GInitiallyUnownedClass unowned_class;
 };
 
 GType        gwy_data_item_get_type     (void)                        G_GNUC_CONST;

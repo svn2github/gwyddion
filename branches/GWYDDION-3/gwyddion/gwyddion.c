@@ -43,7 +43,15 @@ print_version(G_GNUC_UNUSED const gchar *name,
 static void
 generate_data(App *app)
 {
-    g_printerr("generate_data: %p\n", app->file);
+    GwyField *field = gwy_field_new_sized(400, 400, TRUE);
+    gwy_field_subtract_plane(field, 0.0, -1.0, 1.0);
+
+    GwyChannelData *channel = gwy_channel_data_new();
+    gwy_channel_data_set_field(channel, field);
+    g_object_unref(field);
+
+    GwyDataList *channels = gwy_file_get_data_list(app->file, GWY_DATA_CHANNEL);
+    gwy_data_list_add(channels, GWY_DATA_ITEM(channel));
 }
 
 static void

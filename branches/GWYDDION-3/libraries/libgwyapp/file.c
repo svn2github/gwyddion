@@ -21,10 +21,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 #include "libgwyapp/file.h"
-
-// FIXME: Duplicated with data-list.c.
-#define GWY_DATA_NKINDS (GWY_DATA_SURFACE+1)
-#define MAX_FILE_ID 0xffffff
+#include "libgwyapp/data-list-internal.h"
 
 enum {
     PROP_0,
@@ -76,7 +73,7 @@ gwy_file_class_init(GwyFileClass *klass)
                             "Id",
                             "Unique file identified within the running "
                             "program.",
-                            1, MAX_FILE_ID, 1,
+                            0, MAX_FILE_ID, MAX_FILE_ID,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
@@ -175,7 +172,7 @@ gwy_file_new(void)
 guint
 gwy_file_get_id(const GwyFile *file)
 {
-    g_return_val_if_fail(GWY_IS_FILE(file), 0);
+    g_return_val_if_fail(GWY_IS_FILE(file), MAX_FILE_ID);
     return file->priv->id;
 }
 
@@ -231,12 +228,19 @@ assign_next_free_id(GwyFile *file)
 
     G_LOCK(file_list);
     GPtrArray *files = ensure_file_list();
-    do {
+
+    while (G_UNLIKELY(find_file_by_id(file_id))) {
         ++file_id;
         if (G_UNLIKELY(file_id == MAX_FILE_ID))
-            file_id = 1;
-    } while (G_UNLIKELY(find_file_by_id(file_id)));
+            file_id = 0;
+    }
     file->priv->id = file_id;
+
+    // Avoid id recycling if file is created and immediately destroyed.
+    ++file_id;
+    if (G_UNLIKELY(file_id == MAX_FILE_ID))
+        file_id = 0;
+
     g_ptr_array_add(files, file);
     G_UNLOCK(file_list);
 }

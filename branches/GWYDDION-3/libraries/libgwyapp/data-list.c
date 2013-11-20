@@ -23,9 +23,7 @@
 #include "libgwyapp/types.h"
 #include "libgwyapp/channel-data.h"
 #include "libgwyapp/data-list.h"
-
-// FIXME: Duplicated with file.c.
-#define GWY_DATA_NKINDS (GWY_DATA_SURFACE+1)
+#include "libgwyapp/data-list-internal.h"
 
 enum {
     PROP_0,
@@ -37,27 +35,33 @@ enum {
 
 struct _GwyDataListPrivate {
     GwyFile *parent_file;
+    guint item_id;
     GwyDataKind kind;
     GType type;
 };
 
 typedef struct _GwyDataListPrivate DataList;
 
-static void     gwy_data_list_finalize    (GObject *object);
-static void     gwy_data_list_dispose     (GObject *object);
-static void     gwy_data_list_set_property(GObject *object,
-                                           guint prop_id,
-                                           const GValue *value,
-                                           GParamSpec *pspec);
-static void     gwy_data_list_get_property(GObject *object,
-                                           guint prop_id,
-                                           GValue *value,
-                                           GParamSpec *pspec);
-static gboolean set_data_type             (GwyDataList *datalist,
-                                           GType type);
-static gboolean set_file                  (GwyDataList *datalist,
-                                           GwyFile *file);
-static void     init_kind_to_type_map     (void);
+static void                gwy_data_list_finalize    (GObject *object);
+static void                gwy_data_list_dispose     (GObject *object);
+static void                gwy_data_list_set_property(GObject *object,
+                                                      guint prop_id,
+                                                      const GValue *value,
+                                                      GParamSpec *pspec);
+static void                gwy_data_list_get_property(GObject *object,
+                                                      guint prop_id,
+                                                      GValue *value,
+                                                      GParamSpec *pspec);
+static gboolean            set_data_type             (GwyDataList *datalist,
+                                                      GType type);
+static gboolean            set_file                  (GwyDataList *datalist,
+                                                      GwyFile *file);
+static void                init_kind_to_type_map     (void);
+static guint               find_item_index_by_id     (const GwyDataList *datalist,
+                                                      guint id);
+static guint               advance_to_next_free_id   (GwyDataList *datalist);
+static const GwyDataItem** get_item_list             (const GwyDataList *datalist,
+                                                      guint *pn);
 
 static GParamSpec *properties[N_PROPS];
 static GType kind_to_type_map[GWY_DATA_NKINDS];
@@ -110,6 +114,9 @@ gwy_data_list_init(GwyDataList *datalist)
 {
     datalist->priv = G_TYPE_INSTANCE_GET_PRIVATE(datalist,
                                                  GWY_TYPE_DATA_LIST, DataList);
+
+    gwy_array_set_item_type(GWY_ARRAY(datalist),
+                            sizeof(gpointer), g_object_unref);
 }
 
 static void
@@ -283,8 +290,95 @@ gwy_data_list_get_ids(const GwyDataList *datalist,
                       guint *nids)
 {
     g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), NULL);
-    *nids = 0;
-    return NULL;
+    guint n;
+    const GwyDataItem **items = get_item_list(datalist, &n);
+    *nids = n;
+    if (!n)
+        return NULL;
+
+    guint *ids = g_new(guint, n);
+    for (guint i = 0; i < n; i++)
+        ids[i] = gwy_data_item_get_id(items[i]);
+    return ids;
+}
+
+/**
+ * gwy_data_list_add:
+ * @datalist: A list of one kind of data.
+ * @dataitem: A high-level data item of the corresponding kind.
+ *
+ * Adds an item to a list of one kind of data.
+ *
+ * Adding the item to the list sinks any floating reference.
+ *
+ * Returns: The identifier of the added item.
+ **/
+guint
+gwy_data_list_add(GwyDataList *datalist,
+                  GwyDataItem *dataitem)
+{
+    g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), MAX_ITEM_ID);
+    DataList *priv = datalist->priv;
+    g_return_val_if_fail(priv->type
+                         && G_TYPE_CHECK_INSTANCE_TYPE(dataitem, priv->type),
+                         MAX_ITEM_ID);
+    g_return_val_if_fail(gwy_data_item_get_data_list(dataitem) == NULL,
+                         MAX_ITEM_ID);
+
+    guint id = advance_to_next_free_id(datalist);
+    g_object_ref_sink(dataitem);
+    g_object_freeze_notify(G_OBJECT(dataitem));
+    _gwy_data_item_set_list_and_id(dataitem, datalist, id);
+    gwy_array_append(GWY_ARRAY(datalist), &dataitem, 1);
+    g_object_thaw_notify(G_OBJECT(dataitem));
+
+    return id;
+}
+
+/**
+ * gwy_data_list_add_with_id:
+ * @datalist: A list of one kind of data.
+ * @dataitem: A high-level data item of the corresponding kind.
+ * @id: Requested identifier.
+ *
+ * Adds an item to a list of one kind of data, requesting a speficic
+ * identifier.
+ *
+ * This method may or may not succeed, depending on whether @id is free or
+ * occupied.  While it can be useful for (de)serialisation and some dirty
+ * trick, you should rarely need it. The usual method to add a data item is
+ * gwy_data_list_add().
+ *
+ * Adding the item to the list sinks any floating reference.  Of course, if the
+ * item is not added no reference is sunk.
+ *
+ * Returns: %TRUE if the item was added with the requested identifier, %FALSE
+ *          if that identifier is already occupied.
+ **/
+gboolean
+gwy_data_list_add_with_id(GwyDataList *datalist,
+                          GwyDataItem *dataitem,
+                          guint id)
+{
+    g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), FALSE);
+    g_return_val_if_fail(id <= MAX_ITEM_ID, FALSE);
+    DataList *priv = datalist->priv;
+    g_return_val_if_fail(priv->type
+                         && G_TYPE_CHECK_INSTANCE_TYPE(dataitem, priv->type),
+                         FALSE);
+    g_return_val_if_fail(gwy_data_item_get_data_list(dataitem) == NULL,
+                         FALSE);
+
+    if (find_item_index_by_id(datalist, id) != G_MAXUINT)
+        return FALSE;
+
+    g_object_ref_sink(dataitem);
+    g_object_freeze_notify(G_OBJECT(dataitem));
+    _gwy_data_item_set_list_and_id(dataitem, datalist, id);
+    gwy_array_append(GWY_ARRAY(datalist), &dataitem, 1);
+    g_object_thaw_notify(G_OBJECT(dataitem));
+
+    return TRUE;
 }
 
 /**
@@ -385,6 +479,49 @@ static void
 init_kind_to_type_map(void)
 {
     kind_to_type_map[GWY_DATA_CHANNEL] = GWY_TYPE_CHANNEL_DATA;
+}
+
+static guint
+find_item_index_by_id(const GwyDataList *datalist,
+                      guint id)
+{
+    guint n;
+    const GwyDataItem **items = get_item_list(datalist, &n);
+    for (guint i = 0; i < n; i++) {
+        if (gwy_data_item_get_id(items[i]) == id)
+            return i;
+    }
+    return G_MAXUINT;
+}
+
+static guint
+advance_to_next_free_id(GwyDataList *datalist)
+{
+    DataList *priv = datalist->priv;
+    while (find_item_index_by_id(datalist, priv->item_id) != G_MAXUINT) {
+        ++priv->item_id;
+        if (G_UNLIKELY(priv->item_id == MAX_ITEM_ID))
+            priv->item_id = 0;
+    }
+
+    guint retval = priv->item_id;
+    // Avoid id recycling if item is created and immediately destroyed.
+    ++priv->item_id;
+    if (G_UNLIKELY(priv->item_id == MAX_ITEM_ID))
+        priv->item_id = 0;
+
+    return retval;
+}
+
+static const GwyDataItem**
+get_item_list(const GwyDataList *datalist,
+              guint *pn)
+{
+    const GwyArray *array = GWY_ARRAY(datalist);
+    if (pn)
+        *pn = gwy_array_size(array);
+
+    return (const GwyDataItem**)gwy_array_get_data(array);
 }
 
 /************************** Documentation ****************************/

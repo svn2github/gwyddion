@@ -21,6 +21,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/object-utils.h"
 #include "libgwyapp/data-item.h"
+#include "libgwyapp/data-list-internal.h"
 
 enum {
     PROP_0,
@@ -46,14 +47,10 @@ static void     gwy_data_item_get_property(GObject *object,
                                            guint prop_id,
                                            GValue *value,
                                            GParamSpec *pspec);
-static gboolean set_id                    (GwyDataItem *dataitem,
-                                           guint id);
-static gboolean set_data_list             (GwyDataItem *dataitem,
-                                           GwyDataList *datalist);
 
 static GParamSpec *properties[N_PROPS];
 
-G_DEFINE_ABSTRACT_TYPE(GwyDataItem, gwy_data_item, G_TYPE_OBJECT);
+G_DEFINE_ABSTRACT_TYPE(GwyDataItem, gwy_data_item, G_TYPE_INITIALLY_UNOWNED);
 
 static void
 gwy_data_item_class_init(GwyDataItemClass *klass)
@@ -71,17 +68,15 @@ gwy_data_item_class_init(GwyDataItemClass *klass)
         = g_param_spec_uint("id",
                             "Id",
                             "Unique identified of the data in the list.",
-                            0, G_MAXUINT32, 0,
-                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
-                            | G_PARAM_CONSTRUCT_ONLY);
+                            0, MAX_ITEM_ID, MAX_ITEM_ID,
+                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_DATA_LIST]
         = g_param_spec_object("data-list",
                               "Data list",
                               "Data list the data belong to.",
                               GWY_TYPE_DATA_LIST,
-                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
-                              | G_PARAM_CONSTRUCT_ONLY);
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
@@ -111,20 +106,12 @@ gwy_data_item_dispose(GObject *object)
 static void
 gwy_data_item_set_property(GObject *object,
                            guint prop_id,
-                           const GValue *value,
+                           G_GNUC_UNUSED const GValue *value,
                            GParamSpec *pspec)
 {
-    GwyDataItem *dataitem = GWY_DATA_ITEM(object);
+    //GwyDataItem *dataitem = GWY_DATA_ITEM(object);
 
     switch (prop_id) {
-        case PROP_ID:
-        set_id(dataitem, g_value_get_uint(value));
-        break;
-
-        case PROP_DATA_LIST:
-        set_data_list(dataitem, g_value_get_object(value));
-        break;
-
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -186,30 +173,23 @@ gwy_data_item_get_data_list(const GwyDataItem *dataitem)
     return dataitem->priv->parent_list;
 }
 
-static gboolean
-set_id(GwyDataItem *dataitem,
-       guint id)
+void
+_gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
+                               GwyDataList *datalist,
+                               guint id)
 {
+    g_return_if_fail(GWY_IS_DATA_ITEM(dataitem));
+    g_return_if_fail(GWY_IS_DATA_LIST(datalist));
+    g_return_if_fail(id < MAX_ITEM_ID);
     DataItem *priv = dataitem->priv;
-    if (id == priv->id)
-        return FALSE;
-
+    g_return_if_fail(!priv->parent_list || priv->parent_list == datalist);
+    g_return_if_fail(priv->id == MAX_ITEM_ID || priv->id == id);
     priv->id = id;
-    return TRUE;
-}
-
-static gboolean
-set_data_list(GwyDataItem *dataitem,
-              GwyDataList *datalist)
-{
-    DataItem *priv = dataitem->priv;
-    if (datalist == priv->parent_list)
-        return FALSE;
-
+    priv->parent_list = datalist;
     // FIXME: We should hold a weak ref/pointer to avoid parent_list becoming
     // invalid.
-    priv->parent_list = datalist;
-    return TRUE;
+    g_object_notify_by_pspec(G_OBJECT(datalist), properties[PROP_DATA_LIST]);
+    g_object_notify_by_pspec(G_OBJECT(datalist), properties[PROP_ID]);
 }
 
 /************************** Documentation ****************************/

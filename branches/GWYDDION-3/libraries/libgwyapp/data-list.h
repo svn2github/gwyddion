@@ -84,6 +84,11 @@ GType        gwy_data_list_get_data_type(const GwyDataList *datalist) G_GNUC_PUR
 GwyDataKind  gwy_data_list_get_data_kind(const GwyDataList *datalist) G_GNUC_PURE;
 guint*       gwy_data_list_get_ids      (const GwyDataList *datalist,
                                          guint *nids)                 G_GNUC_MALLOC;
+guint        gwy_data_list_add          (GwyDataList *datalist,
+                                         GwyDataItem *dataitem);
+gboolean     gwy_data_list_add_with_id  (GwyDataList *datalist,
+                                         GwyDataItem *dataitem,
+                                         guint id);
 
 GType       gwy_data_kind_to_type (GwyDataKind kind) G_GNUC_CONST;
 GwyDataKind gwy_data_type_to_kind (GType type)       G_GNUC_CONST;
