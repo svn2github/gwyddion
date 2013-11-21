@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 #include "config.h"
 #include <string.h>
 #include <stdlib.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
@@ -34,7 +35,7 @@
 
 #define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
 
-enum { N_ITEMS = 1 };
+enum { N_ITEMS = 2 };
 
 enum {
     SGNL_CHANGED,
@@ -67,7 +68,8 @@ typedef struct {
 
 struct _GwyUnitPrivate {
     GArray *units;
-    gchar *serialize_str;
+    const gchar **serialize_str;
+    gint32 *serialize_pow;
 };
 
 typedef struct _GwyUnitPrivate Unit;
@@ -197,7 +199,8 @@ static const GwyUnitStyleSpec *format_styles[] = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    { .name = "unitstr", .ctype = GWY_SERIALIZABLE_STRING, },
+    { .name = "units",  .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
+    { .name = "powers", .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
 };
 
 static guint signals[N_SIGNALS];
@@ -267,20 +270,33 @@ gwy_unit_itemize(GwySerializable *serializable,
                  GwySerializableItems *items)
 {
     GwyUnit *unit = GWY_UNIT(serializable);
+    Unit *priv = unit->priv;
+    GArray *units = priv->units;
+    guint nu = units->len;
 
-    unit->priv->serialize_str = gwy_unit_to_string(unit,
-                                                   GWY_VALUE_FORMAT_PLAIN);
-    if (!*unit->priv->serialize_str) {
-        GWY_FREE(unit->priv->serialize_str);
+    if (!nu)
         return 0;
-    }
 
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
+
+    priv->serialize_str = g_new(const gchar*, nu);
+    priv->serialize_pow = g_new(gint, nu);
+    for (guint i = 0; i < nu; i++) {
+        const GwySimpleUnit *u = &simple_unit_index(units, i);
+        priv->serialize_str[i] = g_quark_to_string(u->unit);
+        priv->serialize_pow[i] = u->power;
+    }
 
     GwySerializableItem *it = items->items + items->n;
 
     *it = serialize_items[0];
-    it->value.v_string = unit->priv->serialize_str;
+    it->value.v_string_array = (gchar**)priv->serialize_str;
+    it->array_size = nu;
+    it++, items->n++;
+
+    *it = serialize_items[1];
+    it->value.v_int32_array = priv->serialize_pow;
+    it->array_size = nu;
     it++, items->n++;
 
     return N_ITEMS;
@@ -291,6 +307,7 @@ gwy_unit_done(GwySerializable *serializable)
 {
     GwyUnit *unit = GWY_UNIT(serializable);
     GWY_FREE(unit->priv->serialize_str);
+    GWY_FREE(unit->priv->serialize_pow);
 }
 
 static gboolean
@@ -298,15 +315,48 @@ gwy_unit_construct(GwySerializable *serializable,
                    GwySerializableItems *items,
                    GwyErrorList **error_list)
 {
-    GwySerializableItem item = serialize_items[0];
-    gwy_deserialize_filter_items(&item, N_ITEMS, items, NULL,
+    GwyUnit *unit = GWY_UNIT(serializable);
+    Unit *priv = unit->priv;
+
+    GwySerializableItem its[N_ITEMS];
+    memcpy(its, serialize_items, sizeof(serialize_items));
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwyUnit", error_list);
 
-    GwyUnit *unit = GWY_UNIT(serializable);
-    gwy_unit_set_from_string(unit, item.value.v_string, NULL);
-    GWY_FREE(item.value.v_string);
+    gboolean ok = FALSE;
+    gulong nu = its[0].array_size;
+    gchar **unit_str = its[0].value.v_string_array;
+    gint32 *unit_pow = its[1].value.v_int32_array;
 
-    return TRUE;
+    // This should also catch one array being present but not the other.
+    if (its[1].array_size != nu) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
+                           // TRANSLATORS: Error message.
+                           _("Number of units %lu of GwyUnit does not match "
+                             "the number of their powers %lu."),
+                           nu, (gulong)its[1].array_size);
+        goto fail;
+    }
+
+    g_array_set_size(priv->units, nu);
+    for (gulong i = 0; i < nu; i++) {
+        simple_unit_index(priv->units, i) = (GwySimpleUnit){
+            .unit = g_quark_from_string(unit_str[i]),
+            .power = CLAMP(unit_pow[i], -12, 12),
+        };
+    }
+    canonicalize(priv->units);
+
+    ok = TRUE;
+
+fail:
+    for (guint i = 0; i < nu; i++)
+        GWY_FREE(unit_str[i]);
+    GWY_FREE(unit_str);
+    GWY_FREE(unit_pow);
+
+    return ok;
 }
 
 static GObject*
