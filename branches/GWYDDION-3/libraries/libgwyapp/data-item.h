@@ -54,11 +54,21 @@ struct _GwyDataItem {
 struct _GwyDataItemClass {
     /*<private>*/
     GInitiallyUnownedClass unowned_class;
+
+    /*<public>*/
+    GObject*     (*get_data)(const GwyDataItem *dataitem);
+    const gchar* (*get_name)(const GwyDataItem *dataitem);
+    void         (*set_name)(GwyDataItem *dataitem,
+                             const gchar *name);
 };
 
 GType        gwy_data_item_get_type     (void)                        G_GNUC_CONST;
 guint        gwy_data_item_get_id       (const GwyDataItem *dataitem) G_GNUC_PURE;
 GwyDataList* gwy_data_item_get_data_list(const GwyDataItem *dataitem) G_GNUC_PURE;
+GObject*     gwy_data_item_get_data     (const GwyDataItem *dataitem) G_GNUC_PURE;
+const gchar* gwy_data_item_get_name     (const GwyDataItem *dataitem) G_GNUC_PURE;
+void         gwy_data_item_set_name     (GwyDataItem *dataitem,
+                                         const gchar *name);
 
 G_END_DECLS
 

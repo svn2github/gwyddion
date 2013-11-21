@@ -51,7 +51,10 @@ generate_data(App *app)
     g_object_unref(field);
 
     GwyDataList *channels = gwy_file_get_data_list(app->file, GWY_DATA_CHANNEL);
-    gwy_data_list_add(channels, GWY_DATA_ITEM(channel));
+    guint id = gwy_data_list_add(channels, GWY_DATA_ITEM(channel));
+    gchar *title = g_strdup_printf("Generated %u", id);
+    gwy_field_set_name(field, title);
+    g_free(title);
 }
 
 static void
@@ -75,15 +78,70 @@ create_leftbar(App *app)
     return menu;
 }
 
+static void
+render_id(G_GNUC_UNUSED GtkTreeViewColumn *column,
+          GtkCellRenderer *renderer,
+          GtkTreeModel *model,
+          GtkTreeIter *iter,
+          G_GNUC_UNUSED gpointer data)
+{
+    GwyDataItem **dataitem = NULL;
+    gtk_tree_model_get(model, iter, 1, &dataitem, -1);
+    gchar buf[12];
+    g_snprintf(buf, sizeof(buf), "%u", gwy_data_item_get_id(*dataitem));
+    g_object_set(renderer, "text", buf, NULL);
+}
+
+static void
+render_name(G_GNUC_UNUSED GtkTreeViewColumn *column,
+            GtkCellRenderer *renderer,
+            GtkTreeModel *model,
+            GtkTreeIter *iter,
+            G_GNUC_UNUSED gpointer data)
+{
+    GwyDataItem **dataitem = NULL;
+    gtk_tree_model_get(model, iter, 1, &dataitem, -1);
+    const gchar *name = gwy_data_item_get_name(*dataitem);
+    g_object_set(renderer, "text", name ? name : "Untitled", NULL);
+}
+
+static GtkWidget*
+create_data_list_view(GwyDataList *datalist)
+{
+    GwyListStore *store = gwy_list_store_new(GWY_LISTABLE(datalist));
+    GtkTreeModel *model = GTK_TREE_MODEL(store);
+    GtkWidget *datalistview = gtk_tree_view_new_with_model(model);
+    GtkTreeView *treeview = GTK_TREE_VIEW(datalistview);
+
+    GtkTreeViewColumn *column_id = gtk_tree_view_column_new();
+    gtk_tree_view_column_set_title(column_id, "Id");
+    gtk_tree_view_column_set_expand(column_id, FALSE);
+    gtk_tree_view_append_column(treeview, column_id);
+    GtkCellRenderer *renderer_id = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_alignment(renderer_id, 1.0, 0.5);
+    gtk_tree_view_column_pack_start(column_id, renderer_id, TRUE);
+    gtk_tree_view_column_set_cell_data_func(column_id, renderer_id,
+                                            render_id, NULL, NULL);
+
+    GtkTreeViewColumn *column_name = gtk_tree_view_column_new();
+    gtk_tree_view_column_set_title(column_name, "Name");
+    gtk_tree_view_column_set_expand(column_name, TRUE);
+    gtk_tree_view_append_column(treeview, column_name);
+    GtkCellRenderer *renderer_name = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_alignment(renderer_name, 1.0, 0.5);
+    gtk_tree_view_column_pack_start(column_name, renderer_name, TRUE);
+    gtk_tree_view_column_set_cell_data_func(column_name, renderer_name,
+                                            render_name, NULL, NULL);
+
+    return datalistview;
+}
+
 static GtkWidget*
 create_rightbar(App *app)
 {
     GwyDataList *channels = gwy_file_get_data_list(app->file, GWY_DATA_CHANNEL);
     g_printerr("!!! %p %s\n", channels, G_OBJECT_TYPE_NAME(channels));
-    GwyListStore *list = gwy_list_store_new(GWY_LISTABLE(channels));
-    GtkTreeModel *model = GTK_TREE_MODEL(list);
-
-    GtkWidget *channelview = gtk_tree_view_new_with_model(model);
+    GtkWidget *channelview = create_data_list_view(channels);
 
     GtkWidget *scwin = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),

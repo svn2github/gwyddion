@@ -205,7 +205,8 @@ gwy_data_list_new(void)
 /**
  * gwy_data_list_new_for_file: (constructor)
  * @file: The file the data list will belong to.
- * @type: Type of data this list will hold.  It must be derived from #GwyData.
+ * @type: Type of data this list will hold.  It must be a concrete type derived
+ *        from #GwyDataItem.
  *
  * Creates a new data list for data of specified type and file.
  *
@@ -216,6 +217,8 @@ GwyDataList*
 gwy_data_list_new_for_file(const GwyFile *file,
                            GType type)
 {
+    g_assert(g_type_is_a(type, GWY_TYPE_DATA_ITEM));
+    g_assert(!G_TYPE_IS_ABSTRACT(type));
     return g_object_new(GWY_TYPE_DATA_LIST,
                         "file", file,
                         "data-type", type,

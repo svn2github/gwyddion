@@ -37,16 +37,16 @@ struct _GwyDataItemPrivate {
 
 typedef struct _GwyDataItemPrivate DataItem;
 
-static void     gwy_data_item_finalize    (GObject *object);
-static void     gwy_data_item_dispose     (GObject *object);
-static void     gwy_data_item_set_property(GObject *object,
-                                           guint prop_id,
-                                           const GValue *value,
-                                           GParamSpec *pspec);
-static void     gwy_data_item_get_property(GObject *object,
-                                           guint prop_id,
-                                           GValue *value,
-                                           GParamSpec *pspec);
+static void         gwy_data_item_finalize    (GObject *object);
+static void         gwy_data_item_dispose     (GObject *object);
+static void         gwy_data_item_set_property(GObject *object,
+                                               guint prop_id,
+                                               const GValue *value,
+                                               GParamSpec *pspec);
+static void         gwy_data_item_get_property(GObject *object,
+                                               guint prop_id,
+                                               GValue *value,
+                                               GParamSpec *pspec);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -87,6 +87,7 @@ gwy_data_item_init(GwyDataItem *dataitem)
 {
     dataitem->priv = G_TYPE_INSTANCE_GET_PRIVATE(dataitem,
                                                  GWY_TYPE_DATA_ITEM, DataItem);
+    dataitem->priv->id = MAX_ITEM_ID;
 }
 
 static void
@@ -173,6 +174,74 @@ gwy_data_item_get_data_list(const GwyDataItem *dataitem)
     return dataitem->priv->parent_list;
 }
 
+/**
+ * gwy_data_item_get_data:
+ * @dataitem: A high-level data item.
+ *
+ * Gets the primary data object of a data item.
+ *
+ * The primary data object is a #GwyField for channels, #GwyCurve or #GwyLine
+ * for graphs, #GwyBrick for volume data, etc.  This method just represent
+ * generic means of obtaining it.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          The primary data object of the item.  This method may return %NULL
+ *          only for items not belonging to any #GwyDataList.
+ **/
+GObject*
+gwy_data_item_get_data(const GwyDataItem *dataitem)
+{
+    g_return_val_if_fail(GWY_IS_DATA_ITEM(dataitem), NULL);
+    GwyDataItemClass *klass = GWY_DATA_ITEM_GET_CLASS(dataitem);
+    // XXX: This should be also available via the "data" property.  So no
+    // dedicated method will be necessary.
+    g_return_val_if_fail(klass && klass->get_data, NULL);
+    return klass->get_data(dataitem);
+}
+
+/**
+ * gwy_data_item_get_name:
+ * @dataitem: A high-level data item.
+ *
+ * Gets the name of a data item.
+ *
+ * The name is determined by the primary data object (#GwyField, #GwyCurve,
+ * #GwyBrick, etc.).  This method just represent generic means of obtaining it.
+ *
+ * Returns: (allow-none):
+ *          Name of the primary data object, possibly %NULL.
+ **/
+const gchar*
+gwy_data_item_get_name(const GwyDataItem *dataitem)
+{
+    g_return_val_if_fail(GWY_IS_DATA_ITEM(dataitem), NULL);
+    GwyDataItemClass *klass = GWY_DATA_ITEM_GET_CLASS(dataitem);
+    g_return_val_if_fail(klass && klass->get_name, NULL);
+    return klass->get_name(dataitem);
+}
+
+/**
+ * gwy_data_item_set_name:
+ * @dataitem: A high-level data item.
+ * @name: (allow-none):
+ *        New item name.
+ *
+ * Sets the name of a data item.
+ *
+ * The name is set on by the primary data object (#GwyField, #GwyCurve,
+ * #GwyBrick, etc.).  This method just represent generic means of obtaining it.
+ * It is an error to call it when no primary data object has been set yet.
+ **/
+void
+gwy_data_item_set_name(GwyDataItem *dataitem,
+                       const gchar *name)
+{
+    g_return_if_fail(GWY_IS_DATA_ITEM(dataitem));
+    GwyDataItemClass *klass = GWY_DATA_ITEM_GET_CLASS(dataitem);
+    g_return_if_fail(klass && klass->set_name);
+    klass->set_name(dataitem, name);
+}
+
 void
 _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
                                GwyDataList *datalist,
@@ -219,6 +288,11 @@ _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
 
 /**
  * GwyDataItemClass:
+ * @get_data: Obtains the primary data object for the item.
+ * @get_name: Obtains the name of primary data object (usually its "name"
+ *            property).
+ * @set_name: Changes the name of primary data object (usually its "name"
+ *            property).
  *
  * Class of high-level data items.
  **/

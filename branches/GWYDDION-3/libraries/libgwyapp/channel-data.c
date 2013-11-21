@@ -34,18 +34,22 @@ struct _GwyChannelDataPrivate {
 
 typedef struct _GwyChannelDataPrivate ChannelData;
 
-static void     gwy_channel_data_finalize    (GObject *object);
-static void     gwy_channel_data_dispose     (GObject *object);
-static void     gwy_channel_data_set_property(GObject *object,
-                                              guint prop_id,
-                                              const GValue *value,
-                                              GParamSpec *pspec);
-static void     gwy_channel_data_get_property(GObject *object,
-                                              guint prop_id,
-                                              GValue *value,
-                                              GParamSpec *pspec);
-static gboolean set_field                    (GwyChannelData *channeldata,
-                                              GwyField *field);
+static void         gwy_channel_data_finalize    (GObject *object);
+static void         gwy_channel_data_dispose     (GObject *object);
+static void         gwy_channel_data_set_property(GObject *object,
+                                                  guint prop_id,
+                                                  const GValue *value,
+                                                  GParamSpec *pspec);
+static void         gwy_channel_data_get_property(GObject *object,
+                                                  guint prop_id,
+                                                  GValue *value,
+                                                  GParamSpec *pspec);
+static GObject*     gwy_channel_data_get_data    (const GwyDataItem *dataitem);
+static const gchar* gwy_channel_data_get_name    (const GwyDataItem *dataitem);
+static void         gwy_channel_data_set_name    (GwyDataItem *dataitem,
+                                                  const gchar *name);
+static gboolean     set_field                    (GwyChannelData *channeldata,
+                                                  GwyField *field);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -55,6 +59,7 @@ static void
 gwy_channel_data_class_init(GwyChannelDataClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    GwyDataItemClass *item_class = GWY_DATA_ITEM_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(ChannelData));
 
@@ -62,6 +67,10 @@ gwy_channel_data_class_init(GwyChannelDataClass *klass)
     gobject_class->finalize = gwy_channel_data_finalize;
     gobject_class->get_property = gwy_channel_data_get_property;
     gobject_class->set_property = gwy_channel_data_set_property;
+
+    item_class->get_data = gwy_channel_data_get_data;
+    item_class->get_name = gwy_channel_data_get_name;
+    item_class->set_name = gwy_channel_data_set_name;
 
     properties[PROP_FIELD]
         = g_param_spec_object("field",
@@ -135,6 +144,31 @@ gwy_channel_data_get_property(GObject *object,
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
     }
+}
+
+static GObject*
+gwy_channel_data_get_data(const GwyDataItem *dataitem)
+{
+    ChannelData *priv = GWY_CHANNEL_DATA(dataitem)->priv;
+    return (GObject*)priv->field;
+}
+
+static const gchar*
+gwy_channel_data_get_name(const GwyDataItem *dataitem)
+{
+    ChannelData *priv = GWY_CHANNEL_DATA(dataitem)->priv;
+    if (!priv->field)
+        return NULL;
+    return gwy_field_get_name(priv->field);
+}
+
+static void
+gwy_channel_data_set_name(GwyDataItem *dataitem,
+                          const gchar *name)
+{
+    ChannelData *priv = GWY_CHANNEL_DATA(dataitem)->priv;
+    g_return_if_fail(priv->field);
+    gwy_field_set_name(priv->field, name);
 }
 
 /**
