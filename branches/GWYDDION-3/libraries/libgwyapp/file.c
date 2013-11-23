@@ -73,7 +73,7 @@ gwy_file_class_init(GwyFileClass *klass)
                             "Id",
                             "Unique file identified within the running "
                             "program.",
-                            0, MAX_FILE_ID, MAX_FILE_ID,
+                            0, GWY_FILE_MAX_ID, GWY_FILE_MAX_ID,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
@@ -172,7 +172,7 @@ gwy_file_new(void)
 guint
 gwy_file_get_id(const GwyFile *file)
 {
-    g_return_val_if_fail(GWY_IS_FILE(file), MAX_FILE_ID);
+    g_return_val_if_fail(GWY_IS_FILE(file), GWY_FILE_MAX_ID);
     return file->priv->id;
 }
 
@@ -231,14 +231,14 @@ assign_next_free_id(GwyFile *file)
 
     while (G_UNLIKELY(find_file_by_id(file_id))) {
         ++file_id;
-        if (G_UNLIKELY(file_id == MAX_FILE_ID))
+        if (G_UNLIKELY(file_id == GWY_FILE_MAX_ID))
             file_id = 0;
     }
     file->priv->id = file_id;
 
     // Avoid id recycling if file is created and immediately destroyed.
     ++file_id;
-    if (G_UNLIKELY(file_id == MAX_FILE_ID))
+    if (G_UNLIKELY(file_id == GWY_FILE_MAX_ID))
         file_id = 0;
 
     g_ptr_array_add(files, file);
@@ -306,6 +306,16 @@ ensure_file_list(void)
  * @datano: Identifier of the data within the file.
  *
  * Unique idenitfier of any data object type within one program instance.
+ **/
+
+/**
+ * GWY_FILE_MAX_ID:
+ *
+ * Maximum possible identifier of a file.
+ *
+ * Files are never get actually assigned identifier %GWY_FILE_MAX_ID; the
+ * maximum permitted value is %GWY_FILE_MAX_ID-1.  So, in many circumstances
+ * it is used to represent an invalid identifier and stands for ‘no file’.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

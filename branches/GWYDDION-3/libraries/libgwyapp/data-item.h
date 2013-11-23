@@ -20,9 +20,11 @@
 #ifndef __LIBGWYAPP_DATA_ITEM_H__
 #define __LIBGWYAPP_DATA_ITEM_H__
 
-#include <glib-object.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
+
+#define GWY_DATA_ITEM_MAX_ID G_MAXUINT
 
 #define GWY_TYPE_DATA_ITEM \
     (gwy_data_item_get_type())
@@ -56,10 +58,12 @@ struct _GwyDataItemClass {
     GInitiallyUnownedClass unowned_class;
 
     /*<public>*/
-    GObject*     (*get_data)(const GwyDataItem *dataitem);
-    const gchar* (*get_name)(const GwyDataItem *dataitem);
-    void         (*set_name)(GwyDataItem *dataitem,
-                             const gchar *name);
+    GObject*     (*get_data)        (const GwyDataItem *dataitem);
+    const gchar* (*get_name)        (const GwyDataItem *dataitem);
+    void         (*set_name)        (GwyDataItem *dataitem,
+                                     const gchar *name);
+    GdkPixbuf*   (*render_thumbnail)(GwyDataItem *dataitem,
+                                     guint maxsize);
 };
 
 GType        gwy_data_item_get_type     (void)                        G_GNUC_CONST;
@@ -69,6 +73,9 @@ GObject*     gwy_data_item_get_data     (const GwyDataItem *dataitem) G_GNUC_PUR
 const gchar* gwy_data_item_get_name     (const GwyDataItem *dataitem) G_GNUC_PURE;
 void         gwy_data_item_set_name     (GwyDataItem *dataitem,
                                          const gchar *name);
+void         gwy_data_item_invalidate   (GwyDataItem *dataitem);
+GdkPixbuf*   gwy_data_item_get_thumbnail(GwyDataItem *dataitem,
+                                         guint maxsize)               G_GNUC_MALLOC;
 
 G_END_DECLS
 

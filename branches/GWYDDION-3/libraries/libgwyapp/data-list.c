@@ -320,13 +320,13 @@ guint
 gwy_data_list_add(GwyDataList *datalist,
                   GwyDataItem *dataitem)
 {
-    g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), MAX_ITEM_ID);
+    g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), GWY_DATA_ITEM_MAX_ID);
     DataList *priv = datalist->priv;
     g_return_val_if_fail(priv->type
                          && G_TYPE_CHECK_INSTANCE_TYPE(dataitem, priv->type),
-                         MAX_ITEM_ID);
+                         GWY_DATA_ITEM_MAX_ID);
     g_return_val_if_fail(gwy_data_item_get_data_list(dataitem) == NULL,
-                         MAX_ITEM_ID);
+                         GWY_DATA_ITEM_MAX_ID);
 
     guint id = advance_to_next_free_id(datalist);
     g_object_ref_sink(dataitem);
@@ -364,7 +364,7 @@ gwy_data_list_add_with_id(GwyDataList *datalist,
                           guint id)
 {
     g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), FALSE);
-    g_return_val_if_fail(id <= MAX_ITEM_ID, FALSE);
+    g_return_val_if_fail(id <= GWY_DATA_ITEM_MAX_ID, FALSE);
     DataList *priv = datalist->priv;
     g_return_val_if_fail(priv->type
                          && G_TYPE_CHECK_INSTANCE_TYPE(dataitem, priv->type),
@@ -503,14 +503,14 @@ advance_to_next_free_id(GwyDataList *datalist)
     DataList *priv = datalist->priv;
     while (find_item_index_by_id(datalist, priv->item_id) != G_MAXUINT) {
         ++priv->item_id;
-        if (G_UNLIKELY(priv->item_id == MAX_ITEM_ID))
+        if (G_UNLIKELY(priv->item_id == GWY_DATA_ITEM_MAX_ID))
             priv->item_id = 0;
     }
 
     guint retval = priv->item_id;
     // Avoid id recycling if item is created and immediately destroyed.
     ++priv->item_id;
-    if (G_UNLIKELY(priv->item_id == MAX_ITEM_ID))
+    if (G_UNLIKELY(priv->item_id == GWY_DATA_ITEM_MAX_ID))
         priv->item_id = 0;
 
     return retval;

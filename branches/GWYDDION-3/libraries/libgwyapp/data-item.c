@@ -24,6 +24,10 @@
 #include "libgwyapp/data-list-internal.h"
 
 enum {
+    THUMBNAIL_SIZE = 64
+};
+
+enum {
     PROP_0,
     PROP_ID,
     PROP_DATA_LIST,
@@ -33,6 +37,8 @@ enum {
 struct _GwyDataItemPrivate {
     GwyDataList *parent_list;
     guint id;
+
+    GdkPixbuf *thumbnail;
 };
 
 typedef struct _GwyDataItemPrivate DataItem;
@@ -68,7 +74,7 @@ gwy_data_item_class_init(GwyDataItemClass *klass)
         = g_param_spec_uint("id",
                             "Id",
                             "Unique identified of the data in the list.",
-                            0, MAX_ITEM_ID, MAX_ITEM_ID,
+                            0, GWY_DATA_ITEM_MAX_ID, GWY_DATA_ITEM_MAX_ID,
                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_DATA_LIST]
@@ -87,7 +93,7 @@ gwy_data_item_init(GwyDataItem *dataitem)
 {
     dataitem->priv = G_TYPE_INSTANCE_GET_PRIVATE(dataitem,
                                                  GWY_TYPE_DATA_ITEM, DataItem);
-    dataitem->priv->id = MAX_ITEM_ID;
+    dataitem->priv->id = GWY_DATA_ITEM_MAX_ID;
 }
 
 static void
@@ -100,7 +106,9 @@ gwy_data_item_finalize(GObject *object)
 static void
 gwy_data_item_dispose(GObject *object)
 {
-    //GwyDataItem *dataitem = GWY_DATA_ITEM(object);
+    GwyDataItem *dataitem = GWY_DATA_ITEM(object);
+    DataItem *priv = dataitem->priv;
+    GWY_OBJECT_UNREF(priv->thumbnail);
     G_OBJECT_CLASS(gwy_data_item_parent_class)->dispose(object);
 }
 
@@ -242,6 +250,67 @@ gwy_data_item_set_name(GwyDataItem *dataitem,
     klass->set_name(dataitem, name);
 }
 
+/**
+ * gwy_data_item_invalidate:
+ * @dataitem: A high-level data item.
+ *
+ * Invalidates cached data, namely the thumbnail, of a data item.
+ **/
+void
+gwy_data_item_invalidate(GwyDataItem *dataitem)
+{
+    g_return_if_fail(GWY_IS_DATA_ITEM(dataitem));
+    DataItem *priv = dataitem->priv;
+    GWY_OBJECT_UNREF(priv->thumbnail);
+}
+
+/**
+ * gwy_data_item_get_thumbnail:
+ * @dataitem: A high-level data item.
+ * @maxsize: Maximum width and height.  The width and height of the returned
+ *           thumbnail does not exceed @maxsize but they may be smaller.
+ *           Passing 0 means the default dimensions are used (which often
+ *           means a cached thumbnail can be returned).
+ *
+ * Gets the thumbnail for a data item.
+ *
+ * If a subclass does not provide thumbnails or, for whatever reason, the
+ * thumbnail cannot be created this method returns %NULL.
+ *
+ * Returns: (allow-none) (transfer full):
+ *          A pixbuf with the thumbnail.  The caller always owns a reference
+ *          but must not modify the pixbuf because it may be the cached (i.e.
+ *          shared) thumbnail.
+ **/
+GdkPixbuf*
+gwy_data_item_get_thumbnail(GwyDataItem *dataitem,
+                            guint maxsize)
+{
+    g_return_val_if_fail(GWY_IS_DATA_ITEM(dataitem), NULL);
+    GwyDataItemClass *klass = GWY_DATA_ITEM_GET_CLASS(dataitem);
+    DataItem *priv = dataitem->priv;
+    gboolean cache_it = FALSE;
+    if (!maxsize)
+        maxsize = THUMBNAIL_SIZE;
+    if (maxsize == THUMBNAIL_SIZE) {
+        if (priv->thumbnail) {
+            g_object_ref(priv->thumbnail);
+            return priv->thumbnail;
+        }
+        cache_it = TRUE;
+    }
+    g_return_val_if_fail(klass, NULL);
+    if (!klass->render_thumbnail)
+        return NULL;
+
+    GdkPixbuf *thumbnail = klass->render_thumbnail(dataitem, maxsize);
+    if (cache_it && thumbnail) {
+        priv->thumbnail = g_object_ref(thumbnail);
+    }
+
+    return thumbnail;
+}
+
 void
 _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
                                GwyDataList *datalist,
@@ -249,10 +318,10 @@ _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
 {
     g_return_if_fail(GWY_IS_DATA_ITEM(dataitem));
     g_return_if_fail(GWY_IS_DATA_LIST(datalist));
-    g_return_if_fail(id < MAX_ITEM_ID);
+    g_return_if_fail(id < GWY_DATA_ITEM_MAX_ID);
     DataItem *priv = dataitem->priv;
     g_return_if_fail(!priv->parent_list || priv->parent_list == datalist);
-    g_return_if_fail(priv->id == MAX_ITEM_ID || priv->id == id);
+    g_return_if_fail(priv->id == GWY_DATA_ITEM_MAX_ID || priv->id == id);
     priv->id = id;
     priv->parent_list = datalist;
     // FIXME: We should hold a weak ref/pointer to avoid parent_list becoming
@@ -293,8 +362,23 @@ _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
  *            property).
  * @set_name: Changes the name of primary data object (usually its "name"
  *            property).
+ * @render_thumbnail: Renders a thumbnail at speficied size.  Thumbnails at
+ *                    the default size are cached by #GwyDataItem and
+ *                    subclasses do not need perform any caching for them.
  *
  * Class of high-level data items.
+ **/
+
+/**
+ * GWY_DATA_ITEM_MAX_ID:
+ *
+ * Maximum possible identifier of a data item.
+ *
+ * This is also the identifier of newly created data items not yet in any list.
+ * Data items within a data list never get assigned identifier
+ * %GWY_DATA_ITEM_MAX_ID; the maximum permitted value is
+ * %GWY_DATA_ITEM_MAX_ID-1.  So, in many circumstances it is used to represent
+ * an invalid identifier and stands for ‘no data’.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

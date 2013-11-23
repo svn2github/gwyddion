@@ -29,9 +29,6 @@ G_BEGIN_DECLS
 
 #define GWY_DATA_NKINDS (GWY_DATA_SURFACE+1)
 
-#define MAX_FILE_ID 0xffffff
-#define MAX_ITEM_ID G_MAXUINT
-
 G_GNUC_INTERNAL
 void _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
                                     GwyDataList *datalist,

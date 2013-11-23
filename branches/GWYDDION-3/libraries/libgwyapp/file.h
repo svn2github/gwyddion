@@ -24,6 +24,8 @@
 
 G_BEGIN_DECLS
 
+#define GWY_FILE_MAX_ID 0xffffff
+
 #ifndef __GI_SCANNER__
 typedef union {
     guint64 gid;
