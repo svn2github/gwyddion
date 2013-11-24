@@ -23,8 +23,13 @@
 typedef struct {
     GtkWidget *window;
     GtkWidget *leftbar;
+
     GtkWidget *rightbar;
+    GtkWidget *channelview;
+
     GtkWidget *dataarea;
+    GtkWidget *rasterview;
+
     GwyFile *file;
 } App;
 
@@ -43,8 +48,15 @@ print_version(G_GNUC_UNUSED const gchar *name,
 static void
 generate_data(App *app)
 {
-    GwyField *field = gwy_field_new_sized(400, 400, TRUE);
-    gwy_field_subtract_plane(field, 0.0, -1.0, 1.0);
+    GwyField *field = gwy_field_new_sized(400, 400, FALSE);
+    GwyRand *rng = gwy_rand_new();
+    guint n = field->xres*field->yres;
+    for (guint i = 0; i < n; i++)
+        field->data[i] = gwy_rand_double(rng);
+    gwy_field_filter_gaussian(field, NULL, field, 3.0, 3.0,
+                              GWY_EXTERIOR_PERIODIC, NAN);
+    gwy_field_normalize(field, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
+                        GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
 
     GwyChannelData *channel = gwy_channel_data_new();
     gwy_channel_data_set_field(channel, field);
@@ -161,25 +173,58 @@ create_data_list_view(GwyDataList *datalist)
     return datalistview;
 }
 
+static void
+show_channel(App *app)
+{
+    GtkTreeView *treeview = GTK_TREE_VIEW(app->channelview);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
+        g_printerr("Nothing selected.\n");
+        return;
+    }
+
+    GwyDataItem **dataitem = NULL;
+    gtk_tree_model_get(model, &iter, 1, &dataitem, -1);
+    g_return_if_fail(GWY_IS_CHANNEL_DATA(*dataitem));
+
+    GwyRasterView *rasterview = GWY_RASTER_VIEW(app->rasterview);
+    GwyRasterArea *rasterarea = gwy_raster_view_get_area(rasterview);
+    gwy_channel_data_show_in_raster_area(GWY_CHANNEL_DATA(*dataitem),
+                                         rasterarea);
+}
+
 static GtkWidget*
 create_rightbar(App *app)
 {
+    GtkWidget *bar = gtk_grid_new();
+
     GwyDataList *channels = gwy_file_get_data_list(app->file, GWY_DATA_CHANNEL);
-    g_printerr("!!! %p %s\n", channels, G_OBJECT_TYPE_NAME(channels));
     GtkWidget *channelview = create_data_list_view(channels);
+    app->channelview = channelview;
 
     GtkWidget *scwin = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(scwin), channelview);
 
-    return scwin;
+    gtk_widget_set_vexpand(scwin, TRUE);
+    gtk_grid_attach(GTK_GRID(bar), scwin, 0, 0, 1, 1);
+
+    GtkWidget *button = gtk_button_new_with_mnemonic("_Show");
+    gtk_grid_attach(GTK_GRID(bar), button, 0, 1, 1, 1);
+    g_signal_connect_swapped(button, "clicked",
+                             G_CALLBACK(show_channel), app);
+
+    return bar;
 }
 
 static GtkWidget*
-create_data_area(G_GNUC_UNUSED App *app)
+create_data_area(App *app)
 {
     GtkWidget *rasterview = gwy_raster_view_new();
+    app->rasterview = rasterview;
 
     return rasterview;
 }

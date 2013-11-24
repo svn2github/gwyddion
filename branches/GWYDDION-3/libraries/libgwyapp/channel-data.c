@@ -40,9 +40,9 @@ struct _GwyChannelDataPrivate {
     guint mask_id;
 
     GwyRasterArea *rasterarea;
-    gulong raster_area_destroy_id;
-    gulong raster_area_notify_id;
-    //gboolean raster_area_updating;
+    gulong rasterarea_destroy_id;
+    gulong rasterarea_notify_id;
+    gboolean rasterarea_updating;
 };
 
 typedef struct _GwyChannelDataPrivate ChannelData;
@@ -77,6 +77,7 @@ static void         raster_area_destroy              (GwyChannelData *channeldat
 static void         show_in_raster_area              (GwyChannelData *channeldata);
 static void         unshow_in_raster_area            (GwyChannelData *channeldata,
                                                       gboolean destroying);
+static void         update_raster_area_gradient      (GwyChannelData *channeldata);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -442,8 +443,8 @@ void
 gwy_channel_data_show_in_raster_area(GwyChannelData *channeldata,
                                      GwyRasterArea *rasterarea)
 {
+    g_printerr("SHOW-IN-RASTER-AREA %p %p\n", channeldata, rasterarea);
     g_return_if_fail(GWY_IS_CHANNEL_DATA(channeldata));
-    g_return_if_fail(!rasterarea || GWY_IS_RASTER_AREA(rasterarea));
     ChannelData *priv = GWY_CHANNEL_DATA(channeldata)->priv;
     if (rasterarea) {
         g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
@@ -451,18 +452,31 @@ gwy_channel_data_show_in_raster_area(GwyChannelData *channeldata,
                                                    GWY_DATA_ITEM_QUARK);
         if (cdata == channeldata && priv->rasterarea == rasterarea)
             return;
-        g_return_if_fail(!cdata && !priv->rasterarea);
+
+        g_assert(cdata != channeldata && priv->rasterarea != rasterarea);
+
+        // Some other channel is shown in @rasterarea.  Unshow it.
+        if (cdata)
+            gwy_channel_data_show_in_raster_area(cdata, NULL);
     }
 
-    if (priv->rasterarea)
-        unshow_in_raster_area(channeldata, FALSE);
+    // This channel is shown elsewhere.  Unshow it.
+    gwy_set_member_object(channeldata, NULL, GWY_TYPE_RASTER_AREA,
+                          &priv->rasterarea,
+                          "notify", &raster_area_notify,
+                          &priv->rasterarea_notify_id, G_CONNECT_SWAPPED,
+                          "destroy", &raster_area_destroy,
+                          &priv->rasterarea_destroy_id, G_CONNECT_SWAPPED,
+                          NULL);
+
+    unshow_in_raster_area(channeldata, FALSE);
 
     gwy_set_member_object(channeldata, rasterarea, GWY_TYPE_RASTER_AREA,
                           &priv->rasterarea,
                           "notify", &raster_area_notify,
-                          &priv->raster_area_notify_id, G_CONNECT_SWAPPED,
+                          &priv->rasterarea_notify_id, G_CONNECT_SWAPPED,
                           "destroy", &raster_area_destroy,
-                          &priv->raster_area_destroy_id, G_CONNECT_SWAPPED,
+                          &priv->rasterarea_destroy_id, G_CONNECT_SWAPPED,
                           NULL);
 
     if (rasterarea)
@@ -492,7 +506,9 @@ set_gradient_name(GwyChannelData *channeldata,
     if (!gwy_assign_string(&priv->gradient_name, name))
         return FALSE;
 
-    // TODO: If there is a raster area/view, update it.
+    if (priv->rasterarea && !priv->rasterarea_updating)
+        update_raster_area_gradient(channeldata);
+
     return TRUE;
 }
 
@@ -517,11 +533,35 @@ set_mask_id(GwyChannelData *channeldata,
 
 static void
 raster_area_notify(GwyChannelData *channeldata,
-                   G_GNUC_UNUSED GParamSpec *pspec,
+                   GParamSpec *pspec,
                    GwyRasterArea *rasterarea)
 {
     ChannelData *priv = channeldata->priv;
     g_return_if_fail(priv->rasterarea == rasterarea);
+
+    if (priv->rasterarea_updating)
+        return;
+
+    priv->rasterarea_updating = TRUE;
+
+    if (gwy_strequal(pspec->name, "gradient")) {
+        GwyGradient *grad = gwy_raster_area_get_gradient(rasterarea);
+        if (grad) {
+            GwyResource *resource = GWY_RESOURCE(grad);
+            if (gwy_resource_is_managed(resource)) {
+                const gchar *name = gwy_resource_get_name(resource);
+                gwy_channel_data_set_gradient_name(channeldata, name);
+            }
+            else {
+                g_warning("ChannelData cannot follow unmanaged gradients "
+                          "(yet).");
+            }
+        }
+        else
+            gwy_channel_data_set_gradient_name(channeldata, NULL);
+    }
+
+    priv->rasterarea_updating = FALSE;
 }
 
 static void
@@ -531,7 +571,7 @@ raster_area_destroy(GwyChannelData *channeldata,
     ChannelData *priv = channeldata->priv;
     g_return_if_fail(priv->rasterarea == rasterarea);
 
-    priv->raster_area_destroy_id = 0;
+    priv->rasterarea_destroy_id = 0;
     unshow_in_raster_area(channeldata, TRUE);
 }
 
@@ -540,21 +580,21 @@ show_in_raster_area(GwyChannelData *channeldata)
 {
     ChannelData *priv = channeldata->priv;
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->rasterarea);
+    g_printerr("SHOW %p %p\n", channeldata, rasterarea);
+
+    g_object_set_qdata(G_OBJECT(rasterarea), GWY_DATA_ITEM_QUARK, channeldata);
+    priv->rasterarea_updating = TRUE;
 
     if (priv->field)
         gwy_raster_area_set_field(rasterarea, priv->field);
 
-    if (priv->gradient_name) {
-        GwyInventory *gradients = gwy_gradients();
-        GwyGradient *grad = gwy_inventory_get(gradients, priv->gradient_name);
-        if (grad)
-            gwy_raster_area_set_gradient(rasterarea, grad);
-    }
+    update_raster_area_gradient(channeldata);
 
     if (priv->mask_id != GWY_DATA_ITEM_MAX_ID) {
         // TODO
     }
 
+    priv->rasterarea_updating = FALSE;
     // TODO: Connect backwards.  A number of properties can be changed in the
     // GUI and we need to be notified and reflect them.
 }
@@ -564,12 +604,16 @@ unshow_in_raster_area(GwyChannelData *channeldata,
                       gboolean destroying)
 {
     ChannelData *priv = channeldata->priv;
+    g_printerr("UNSHOW %p %p\n", channeldata, priv->rasterarea);
     if (!priv->rasterarea)
         return;
+
+    g_object_set_qdata(G_OBJECT(priv->rasterarea), GWY_DATA_ITEM_QUARK, NULL);
 
     if (!destroying) {
         // Dont' bother otherwise.
         GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->rasterarea);
+        priv->rasterarea_updating = TRUE;
         gwy_raster_area_set_gradient(rasterarea, NULL);
         gwy_raster_area_set_mask(rasterarea, NULL);
         gwy_raster_area_set_shapes(rasterarea, NULL);
@@ -579,9 +623,24 @@ unshow_in_raster_area(GwyChannelData *channeldata,
         gwy_raster_area_set_field(rasterarea, NULL);
 
         // FIXME: More?  Disconnect forward signals?  Emit notification?
+        priv->rasterarea_updating = FALSE;
     }
 
     priv->rasterarea = NULL;
+}
+
+static void
+update_raster_area_gradient(GwyChannelData *channeldata)
+{
+    ChannelData *priv = channeldata->priv;
+    g_return_if_fail(priv->rasterarea);
+
+    GwyGradient *grad = NULL;
+    if (priv->gradient_name) {
+        GwyInventory *gradients = gwy_gradients();
+        grad = gwy_inventory_get(gradients, priv->gradient_name);
+    }
+    gwy_raster_area_set_gradient(priv->rasterarea, grad);
 }
 
 /************************** Documentation ****************************/
