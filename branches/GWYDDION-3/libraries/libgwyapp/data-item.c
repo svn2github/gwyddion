@@ -330,6 +330,8 @@ _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,
     g_object_notify_by_pspec(G_OBJECT(datalist), properties[PROP_ID]);
 }
 
+G_DEFINE_QUARK(gwy-data-item, _gwy_data_item);
+
 /************************** Documentation ****************************/
 
 /**

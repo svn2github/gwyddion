@@ -27,7 +27,12 @@
 
 G_BEGIN_DECLS
 
+#define GWY_DATA_ITEM_QUARK _gwy_data_item_quark()
+
 #define GWY_DATA_NKINDS (GWY_DATA_SURFACE+1)
+
+G_GNUC_INTERNAL
+GQuark _gwy_data_item_quark(void) G_GNUC_CONST;
 
 G_GNUC_INTERNAL
 void _gwy_data_item_set_list_and_id(GwyDataItem *dataitem,

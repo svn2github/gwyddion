@@ -79,6 +79,22 @@ create_leftbar(App *app)
 }
 
 static void
+render_thumb(G_GNUC_UNUSED GtkTreeViewColumn *column,
+             GtkCellRenderer *renderer,
+             GtkTreeModel *model,
+             GtkTreeIter *iter,
+             G_GNUC_UNUSED gpointer data)
+{
+    GwyDataItem **dataitem = NULL;
+    gtk_tree_model_get(model, iter, 1, &dataitem, -1);
+    GdkPixbuf *pixbuf = gwy_data_item_get_thumbnail(*dataitem, 0);
+    if (pixbuf) {
+        g_object_set(renderer, "pixbuf", pixbuf, NULL);
+        g_object_unref(pixbuf);
+    }
+}
+
+static void
 render_id(G_GNUC_UNUSED GtkTreeViewColumn *column,
           GtkCellRenderer *renderer,
           GtkTreeModel *model,
@@ -112,6 +128,15 @@ create_data_list_view(GwyDataList *datalist)
     GtkTreeModel *model = GTK_TREE_MODEL(store);
     GtkWidget *datalistview = gtk_tree_view_new_with_model(model);
     GtkTreeView *treeview = GTK_TREE_VIEW(datalistview);
+
+    GtkTreeViewColumn *column_thumb = gtk_tree_view_column_new();
+    gtk_tree_view_column_set_title(column_thumb, "Image");
+    gtk_tree_view_column_set_expand(column_thumb, FALSE);
+    gtk_tree_view_append_column(treeview, column_thumb);
+    GtkCellRenderer *renderer_thumb = gtk_cell_renderer_pixbuf_new();
+    gtk_tree_view_column_pack_start(column_thumb, renderer_thumb, TRUE);
+    gtk_tree_view_column_set_cell_data_func(column_thumb, renderer_thumb,
+                                            render_thumb, NULL, NULL);
 
     GtkTreeViewColumn *column_id = gtk_tree_view_column_new();
     gtk_tree_view_column_set_title(column_id, "Id");

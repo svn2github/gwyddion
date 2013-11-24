@@ -21,8 +21,8 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/gradient.h"
 #include "libgwy/object-utils.h"
-#include "libgwyui/raster-area.h"
 #include "libgwyapp/channel-data.h"
+#include "libgwyapp/data-list-internal.h"
 
 enum { BITS_PER_SAMPLE = 8 };
 
@@ -39,8 +39,10 @@ struct _GwyChannelDataPrivate {
     gchar *gradient_name;
     guint mask_id;
 
-    GtkWidget *rasterarea;
-    gulong rasterarea_destroy_id;
+    GwyRasterArea *rasterarea;
+    gulong raster_area_destroy_id;
+    gulong raster_area_notify_id;
+    //gboolean raster_area_updating;
 };
 
 typedef struct _GwyChannelDataPrivate ChannelData;
@@ -67,8 +69,14 @@ static gboolean     set_gradient_name                (GwyChannelData *channeldat
                                                       const gchar *name);
 static gboolean     set_mask_id                      (GwyChannelData *channeldata,
                                                       guint id);
-static void         rasterarea_destroyed             (GwyChannelData *channeldata,
+static void         raster_area_notify               (GwyChannelData *channeldata,
+                                                      GParamSpec *pspec,
                                                       GwyRasterArea *rasterarea);
+static void         raster_area_destroy              (GwyChannelData *channeldata,
+                                                      GwyRasterArea *rasterarea);
+static void         show_in_raster_area              (GwyChannelData *channeldata);
+static void         unshow_in_raster_area            (GwyChannelData *channeldata,
+                                                      gboolean destroying);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -142,12 +150,7 @@ gwy_channel_data_dispose(GObject *object)
 {
     GwyChannelData *channeldata = GWY_CHANNEL_DATA(object);
     ChannelData *priv = channeldata->priv;
-    // FIXME: What about the raster area?  We may let it live on its own
-    // though it will not, of course, reflect any changes to the logical
-    // channel, only to the underlying physical objects.  We ***MUST*** at
-    // least ensure no odd signal handlers remain connected.
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->rasterarea,
-                                  priv->rasterarea_destroy_id);
+    gwy_channel_data_show_in_raster_area(channeldata, NULL);
     GWY_OBJECT_UNREF(priv->field);
     G_OBJECT_CLASS(gwy_channel_data_parent_class)->dispose(object);
 }
@@ -422,50 +425,48 @@ gwy_channel_data_get_raster_area(const GwyChannelData *channeldata)
 }
 
 /**
- * gwy_channel_data_create_raster_area:
+ * gwy_channel_data_show_in_raster_area:
  * @channeldata: A channel data item.
+ * @rasterarea: (allow-none) (transfer none):
+ *              A raster area widget.
  *
- * Creates a raster area widget for a channel data.
+ * Sets up a raster area to show a channel data.
  *
  * The widget will follow the channel data changes and, conversely, user
  * changes of the raster area settings will be reflected in the channel data.
  *
- * Only one such widget can exist.  This method does not return the raster area
- * to avoid the temptation to use it instead of
- * gwy_channel_data_get_raster_area().
+ * At most one such widget can exist at a time; calling this method when the
+ * channel is already shown elsewhere will un-show it there first.
  **/
-// XXX: This is not good because we might want to create a RasterView and
-// in such case the RasterArea cannot be created independently.  So either
-// we need a own-this-widget function or RasterView needs changeable
-// RasterAreas.  The former is probably more realistic.
 void
-gwy_channel_data_create_raster_area(GwyChannelData *channeldata)
+gwy_channel_data_show_in_raster_area(GwyChannelData *channeldata,
+                                     GwyRasterArea *rasterarea)
 {
     g_return_if_fail(GWY_IS_CHANNEL_DATA(channeldata));
+    g_return_if_fail(!rasterarea || GWY_IS_RASTER_AREA(rasterarea));
     ChannelData *priv = GWY_CHANNEL_DATA(channeldata)->priv;
-    g_return_if_fail(!priv->rasterarea);
-
-    priv->rasterarea = gwy_raster_area_new();
-    GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->rasterarea);
-    if (priv->field)
-        gwy_raster_area_set_field(rasterarea, priv->field);
-    if (priv->gradient_name) {
-        GwyInventory *gradients = gwy_gradients();
-        GwyGradient *grad = gwy_inventory_get(gradients, priv->gradient_name);
-        if (grad)
-            gwy_raster_area_set_gradient(rasterarea, grad);
-    }
-    if (priv->mask_id != GWY_DATA_ITEM_MAX_ID) {
-        // TODO
+    if (rasterarea) {
+        g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
+        GwyChannelData *cdata = g_object_get_qdata(G_OBJECT(rasterarea),
+                                                   GWY_DATA_ITEM_QUARK);
+        if (cdata == channeldata && priv->rasterarea == rasterarea)
+            return;
+        g_return_if_fail(!cdata && !priv->rasterarea);
     }
 
-    // TODO: Connect backwards.  A number of properties can be changed in the
-    // GUI and we need to be notified and reflect them.
+    if (priv->rasterarea)
+        unshow_in_raster_area(channeldata, FALSE);
 
-    priv->rasterarea_destroy_id
-        = g_signal_connect_swapped(rasterarea, "destroy",
-                                   G_CALLBACK(rasterarea_destroyed),
-                                   channeldata);
+    gwy_set_member_object(channeldata, rasterarea, GWY_TYPE_RASTER_AREA,
+                          &priv->rasterarea,
+                          "notify", &raster_area_notify,
+                          &priv->raster_area_notify_id, G_CONNECT_SWAPPED,
+                          "destroy", &raster_area_destroy,
+                          &priv->raster_area_destroy_id, G_CONNECT_SWAPPED,
+                          NULL);
+
+    if (rasterarea)
+        show_in_raster_area(channeldata);
 }
 
 static gboolean
@@ -515,15 +516,72 @@ set_mask_id(GwyChannelData *channeldata,
 }
 
 static void
-rasterarea_destroyed(GwyChannelData *channeldata,
-                     GwyRasterArea *rasterarea)
+raster_area_notify(GwyChannelData *channeldata,
+                   G_GNUC_UNUSED GParamSpec *pspec,
+                   GwyRasterArea *rasterarea)
 {
     ChannelData *priv = channeldata->priv;
-    g_return_if_fail((GwyRasterArea*)priv->rasterarea == rasterarea);
+    g_return_if_fail(priv->rasterarea == rasterarea);
+}
+
+static void
+raster_area_destroy(GwyChannelData *channeldata,
+                    GwyRasterArea *rasterarea)
+{
+    ChannelData *priv = channeldata->priv;
+    g_return_if_fail(priv->rasterarea == rasterarea);
+
+    priv->raster_area_destroy_id = 0;
+    unshow_in_raster_area(channeldata, TRUE);
+}
+
+static void
+show_in_raster_area(GwyChannelData *channeldata)
+{
+    ChannelData *priv = channeldata->priv;
+    GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->rasterarea);
+
+    if (priv->field)
+        gwy_raster_area_set_field(rasterarea, priv->field);
+
+    if (priv->gradient_name) {
+        GwyInventory *gradients = gwy_gradients();
+        GwyGradient *grad = gwy_inventory_get(gradients, priv->gradient_name);
+        if (grad)
+            gwy_raster_area_set_gradient(rasterarea, grad);
+    }
+
+    if (priv->mask_id != GWY_DATA_ITEM_MAX_ID) {
+        // TODO
+    }
+
+    // TODO: Connect backwards.  A number of properties can be changed in the
+    // GUI and we need to be notified and reflect them.
+}
+
+static void
+unshow_in_raster_area(GwyChannelData *channeldata,
+                      gboolean destroying)
+{
+    ChannelData *priv = channeldata->priv;
+    if (!priv->rasterarea)
+        return;
+
+    if (!destroying) {
+        // Dont' bother otherwise.
+        GwyRasterArea *rasterarea = GWY_RASTER_AREA(priv->rasterarea);
+        gwy_raster_area_set_gradient(rasterarea, NULL);
+        gwy_raster_area_set_mask(rasterarea, NULL);
+        gwy_raster_area_set_shapes(rasterarea, NULL);
+        gwy_raster_area_set_range_from_method(rasterarea, GWY_COLOR_RANGE_FULL);
+        gwy_raster_area_set_range_to_method(rasterarea, GWY_COLOR_RANGE_FULL);
+        // FIXME: There other things: mask colour, ...
+        gwy_raster_area_set_field(rasterarea, NULL);
+
+        // FIXME: More?  Disconnect forward signals?  Emit notification?
+    }
 
     priv->rasterarea = NULL;
-    priv->rasterarea_destroy_id = 0;
-    // TODO: More?
 }
 
 /************************** Documentation ****************************/

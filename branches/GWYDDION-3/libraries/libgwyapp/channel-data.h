@@ -20,8 +20,7 @@
 #ifndef __LIBGWYAPP_CHANNEL_DATA_H__
 #define __LIBGWYAPP_CHANNEL_DATA_H__
 
-#include <gtk/gtk.h>
-#include <libgwy/field.h>
+#include <libgwyui/raster-area.h>
 #include <libgwyapp/data-item.h>
 
 G_BEGIN_DECLS
@@ -52,20 +51,21 @@ struct _GwyChannelDataClass {
     GwyDataItemClass data_item_class;
 };
 
-GType           gwy_channel_data_get_type          (void)                               G_GNUC_CONST;
-GwyChannelData* gwy_channel_data_new               (void)                               G_GNUC_MALLOC;
-GwyChannelData* gwy_channel_data_new_with_field    (GwyField *field)                    G_GNUC_MALLOC;
-void            gwy_channel_data_set_field         (GwyChannelData *channeldata,
-                                                    GwyField *field);
-GwyField*       gwy_channel_data_get_field         (const GwyChannelData *channeldata)  G_GNUC_PURE;
-void            gwy_channel_data_set_gradient_name (GwyChannelData *channeldata,
-                                                    const gchar *name);
-const gchar*    gwy_channel_data_get_gradient_name (const GwyChannelData *channeldata)  G_GNUC_PURE;
-void            gwy_channel_data_set_mask_id       (GwyChannelData *channeldata,
-                                                    guint id);
-guint           gwy_channel_data_get_mask_id       (const GwyChannelData *channeldata)  G_GNUC_PURE;
-GtkWidget*      gwy_channel_data_get_raster_area   (const GwyChannelData *channeldata);
-void            gwy_channel_data_create_raster_area(GwyChannelData *channeldata);
+GType           gwy_channel_data_get_type           (void)                              G_GNUC_CONST;
+GwyChannelData* gwy_channel_data_new                (void)                              G_GNUC_MALLOC;
+GwyChannelData* gwy_channel_data_new_with_field     (GwyField *field)                   G_GNUC_MALLOC;
+void            gwy_channel_data_set_field          (GwyChannelData *channeldata,
+                                                     GwyField *field);
+GwyField*       gwy_channel_data_get_field          (const GwyChannelData *channeldata) G_GNUC_PURE;
+void            gwy_channel_data_set_gradient_name  (GwyChannelData *channeldata,
+                                                     const gchar *name);
+const gchar*    gwy_channel_data_get_gradient_name  (const GwyChannelData *channeldata) G_GNUC_PURE;
+void            gwy_channel_data_set_mask_id        (GwyChannelData *channeldata,
+                                                     guint id);
+guint           gwy_channel_data_get_mask_id        (const GwyChannelData *channeldata) G_GNUC_PURE;
+GtkWidget*      gwy_channel_data_get_raster_area    (const GwyChannelData *channeldata) G_GNUC_PURE;
+void            gwy_channel_data_show_in_raster_area(GwyChannelData *channeldata,
+                                                     GwyRasterArea *rasterarea);
 
 G_END_DECLS
 
