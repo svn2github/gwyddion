@@ -264,26 +264,6 @@ gwy_resource_get_type(void)
     return type;
 }
 
-/**
- * gwy_resource_error_quark:
- *
- * Gets the error domain for resource operations.
- *
- * See and use %GWY_RESOURCE_ERROR.
- *
- * Returns: The error domain.
- **/
-GQuark
-gwy_resource_error_quark(void)
-{
-    static GQuark error_domain = 0;
-
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("gwy-resource-error-quark");
-
-    return error_domain;
-}
-
 static void
 gwy_resource_serializable_init(GwySerializableInterface *iface)
 {
@@ -2290,6 +2270,16 @@ gwy_resource_dump_data_line(const gdouble *data,
     return buffer;
 }
 
+/**
+ * gwy_resource_error_quark:
+ *
+ * Gets the error domain for resource operations.
+ *
+ * See and use %GWY_RESOURCE_ERROR.
+ *
+ * Returns: The error domain.
+ **/
+G_DEFINE_QUARK(gwy-resource-error-quark, gwy_resource_error);
 
 /**
  * SECTION: resource

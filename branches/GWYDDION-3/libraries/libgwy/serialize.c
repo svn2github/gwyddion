@@ -79,26 +79,6 @@ static GwySerializableItems* unpack_items          (const guchar *buffer,
                                                     GwyErrorList **error_list);
 static void                  free_items            (GwySerializableItems *items);
 
-/**
- * gwy_deserialize_error_quark:
- *
- * Gets the error domain for deserialisation.
- *
- * See and use %GWY_DESERIALIZE_ERROR.
- *
- * Returns: The error domain.
- **/
-GQuark
-gwy_deserialize_error_quark(void)
-{
-    static GQuark error_domain = 0;
-
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("gwy-deserialize-error-quark");
-
-    return error_domain;
-}
-
 static void
 buffer_alloc(GwySerializableBuffer *buffer,
              gsize size)
@@ -1761,6 +1741,16 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
     return TRUE;
 }
 
+/**
+ * gwy_deserialize_error_quark:
+ *
+ * Gets the error domain for deserialisation.
+ *
+ * See and use %GWY_DESERIALIZE_ERROR.
+ *
+ * Returns: The error domain.
+ **/
+G_DEFINE_QUARK(gwy-deserialize-error-quark, gwy_deserialize_error);
 
 /**
  * SECTION: serialize

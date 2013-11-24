@@ -873,17 +873,7 @@ gwy_user_grain_value_parse(GwyResource *resource,
  *
  * Returns: The error domain.
  **/
-GQuark
-gwy_user_grain_value_error_quark(void)
-{
-    static GQuark error_domain = 0;
-
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("gwy-user-grain-value-error-quark");
-
-    return error_domain;
-}
-
+G_DEFINE_QUARK(gwy-user-grain-value-error-quark, gwy_user_grain_value_error);
 
 /************************** Documentation ****************************/
 

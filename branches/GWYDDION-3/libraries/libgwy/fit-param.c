@@ -591,17 +591,7 @@ gwy_fit_param_check_estimate(const gchar *estimate,
  *
  * Returns: The error domain.
  **/
-GQuark
-gwy_fit_param_error_quark(void)
-{
-    static GQuark error_domain = 0;
-
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("gwy-fit-param-error-quark");
-
-    return error_domain;
-}
-
+G_DEFINE_QUARK(gwy-fit-param-error-quark, gwy_fit_param_error);
 
 /**
  * SECTION: fit-param

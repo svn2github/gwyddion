@@ -314,16 +314,7 @@ check_call_table_sanity(void)
  *
  * Returns: The error domain.
  **/
-GQuark
-gwy_expr_error_quark(void)
-{
-    static GQuark error_domain = 0;
-
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("gwy-expr-error-quark");
-
-    return error_domain;
-}
+G_DEFINE_QUARK(gwy-expr-error-quark, gwy_expr_error);
 
 /****************************************************************************
  *
