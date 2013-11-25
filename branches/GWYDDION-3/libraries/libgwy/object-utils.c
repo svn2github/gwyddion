@@ -21,6 +21,7 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/serializable-boxed.h"
 #include "libgwy/object-utils.h"
 
 /**
@@ -235,6 +236,46 @@ gwy_assign_string(gchar **target,
 }
 
 /**
+ * gwy_assign_boxed:
+ * @target: Pointer to target boxed, typically a struct field.
+ * @newvalue: New value of the boxed, may be %NULL.
+ *
+ * Assigns a serialisable boxed value, checking for equality and handling
+ * %NULL<!-- -->s.
+ *
+ * This function simplifies handling of serialisable boxed value setters,
+ * using gwy_serializable_boxed_equal() and gwy_serializable_boxed_assign()
+ * for correct comparison and value assignment.
+ *
+ * Any of the old and new value can be %NULL.  If both values are equal
+ * (including both unset), the function returns %FALSE.
+ *
+ * Returns: %TRUE if the target boxed has changed.
+ **/
+gboolean
+gwy_assign_boxed(gpointer *target,
+                 gconstpointer newvalue,
+                 GType boxed_type)
+{
+    if (*target && newvalue) {
+        if (!gwy_serializable_boxed_equal(boxed_type, *target, newvalue)) {
+            gwy_serializable_boxed_assign(boxed_type, *target, newvalue);
+            return TRUE;
+        }
+    }
+    else if (*target) {
+        g_boxed_free(boxed_type, *target);
+        *target = NULL;
+        return TRUE;
+    }
+    else if (newvalue) {
+        *target = g_boxed_copy(boxed_type, newvalue);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/**
  * gwy_override_class_properties:
  * @oclass: An object class.
  * @properties: Array of properties, indexed by the property id, to store
@@ -335,6 +376,150 @@ gwy_all_type_children(GType type,
     gather_children_recursively(result, type, concrete);
     GWY_MAYBE_SET(n, result->len);
     return (GType*)g_array_free(result, FALSE);
+}
+
+static GParamSpec*
+replicate_param_spec(GParamSpec *sourcepspec)
+{
+    GType type = G_PARAM_SPEC_TYPE(sourcepspec),
+          value_type = sourcepspec->value_type;
+    const gchar *name = sourcepspec->name;
+    const gchar *nick = g_param_spec_get_nick(sourcepspec);
+    const gchar *blurb = g_param_spec_get_blurb(sourcepspec);
+    gchar *pname = NULL, *pnick = NULL, *pblurb = NULL;
+    GParamFlags flags = sourcepspec->flags;
+    GParamSpec *pspec = NULL;
+
+    if (!(flags & G_PARAM_STATIC_NAME))
+        name = pname = g_strdup(name);
+    if (!(flags & G_PARAM_STATIC_NICK))
+        nick = pnick = g_strdup(nick);
+    if (!(flags & G_PARAM_STATIC_BLURB))
+        blurb = pblurb = g_strdup(blurb);
+
+    // Require exact type matches for replication.  Otherwise it would not
+    // be replication...
+    if (type == G_TYPE_PARAM_DOUBLE) {
+        GParamSpecDouble *sspec = G_PARAM_SPEC_DOUBLE(sourcepspec);
+        pspec = g_param_spec_double(name, nick, blurb,
+                                    sspec->minimum, sspec->maximum,
+                                    sspec->default_value,
+                                    flags);
+        G_PARAM_SPEC_DOUBLE(pspec)->epsilon = sspec->epsilon;
+    }
+    else if (type == G_TYPE_PARAM_BOOLEAN) {
+        GParamSpecBoolean *sspec = G_PARAM_SPEC_BOOLEAN(sourcepspec);
+        pspec = g_param_spec_boolean(name, nick, blurb,
+                                     sspec->default_value,
+                                     flags);
+    }
+    else if (type == G_TYPE_PARAM_INT) {
+        GParamSpecInt *sspec = G_PARAM_SPEC_INT(sourcepspec);
+        pspec = g_param_spec_int(name, nick, blurb,
+                                 sspec->minimum, sspec->maximum,
+                                 sspec->default_value,
+                                 flags);
+    }
+    else if (type == G_TYPE_PARAM_UINT) {
+        GParamSpecUInt *sspec = G_PARAM_SPEC_UINT(sourcepspec);
+        pspec = g_param_spec_uint(name, nick, blurb,
+                                  sspec->minimum, sspec->maximum,
+                                  sspec->default_value,
+                                  flags);
+    }
+    else if (type == G_TYPE_PARAM_ENUM) {
+        GParamSpecEnum *sspec = G_PARAM_SPEC_ENUM(sourcepspec);
+        pspec = g_param_spec_enum(name, nick, blurb,
+                                  value_type, sspec->default_value,
+                                  flags);
+    }
+    else if (type == G_TYPE_PARAM_FLAGS) {
+        GParamSpecFlags *sspec = G_PARAM_SPEC_FLAGS(sourcepspec);
+        pspec = g_param_spec_flags(name, nick, blurb,
+                                   value_type, sspec->default_value,
+                                   flags);
+    }
+    else if (type == G_TYPE_PARAM_STRING) {
+        GParamSpecString *sspec = G_PARAM_SPEC_STRING(sourcepspec);
+        pspec = g_param_spec_string(name, nick, blurb,
+                                    sspec->default_value,
+                                    flags);
+    }
+    else if (type == G_TYPE_PARAM_BOXED) {
+        pspec = g_param_spec_boxed(name, nick, blurb, value_type, flags);
+    }
+    else if (type == G_TYPE_PARAM_OBJECT) {
+        pspec = g_param_spec_object(name, nick, blurb, value_type, flags);
+    }
+    else {
+        g_critical("Cannot replicate param spec of type %s.",
+                   G_PARAM_SPEC_TYPE_NAME(sourcepspec));
+    }
+
+    GWY_FREE(pname);
+    GWY_FREE(pnick);
+    GWY_FREE(pblurb);
+
+    return pspec;
+}
+
+/**
+ * gwy_replicate_class_properties:
+ * @klass: Target object class.
+ * @fromtype: Type of source object class.
+ * @properties: Optional array where to store the created #GParamSpec objects,
+ *              starting from index @id.  Pass %NULL to ignore.
+ * @id: Property id of the first property to install, and index of the item in
+ *      @properties corresponding to the first property (if given).
+ * @...: First property name, second property name, ... Terminated with %NULL.
+ *
+ * Replicates properties from one class to another.
+ *
+ * Returns: Property id that follows all the assigned properties.  Equal to
+ *          @id + number of property names (except in case of catastrophic
+ *          failure).
+ **/
+guint
+gwy_replicate_class_properties(GObjectClass *klass,
+                               GType fromtype,
+                               GParamSpec **properties,
+                               guint id,
+                               ...)
+{
+    g_return_val_if_fail(G_IS_OBJECT_CLASS(klass), id);
+    g_return_val_if_fail(g_type_is_a(fromtype, G_TYPE_OBJECT), id);
+
+    GObjectClass *sourceclass = g_type_class_ref(fromtype);
+    g_return_val_if_fail(G_IS_OBJECT_CLASS(sourceclass), id);
+
+    va_list ap;
+    va_start(ap, id);
+    const gchar *name;
+    while ((name = va_arg(ap, const gchar*))) {
+        GParamSpec *sourcepspec = g_object_class_find_property(sourceclass,
+                                                               name);
+        if (!sourcepspec) {
+            g_critical("Class %s has no property called %s.",
+                       G_OBJECT_CLASS_NAME(sourceclass), name);
+            continue;
+        }
+        GParamSpec *pspec = replicate_param_spec(sourcepspec);
+        if (!pspec)
+            continue;
+
+        g_object_class_install_property(klass, id, pspec);
+        if (properties)
+            properties[id] = pspec;
+
+        id++;
+    }
+    va_end(ap);
+
+    // Hopefully this will not wipe out the params again.  But nothing bad
+    // should happen because now @klass references them.
+    g_type_class_unref(sourceclass);
+
+    return id;
 }
 
 /**
