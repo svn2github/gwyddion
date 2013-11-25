@@ -319,6 +319,9 @@ disconnect_sensitivity_leader(GtkWidget *leader,
  * They can also be disconnected explicitly with
  * gwy_toggle_remove_visibility_follower().
  **/
+// FIXME: This can be mostly achieved by g_object_bind_property().
+// Furthermore, Gtk+ 3.10+ has GtkStack (it comes with the terrible ‘modern’
+// switcher though, that would have to be replaced anyway).
 void
 gwy_toggle_add_visibility_follower(GObject *toggle,
                                    GtkWidget *follower)

@@ -32,36 +32,23 @@ enum {
 typedef struct _GwyAdjustmentPrivate Adjustment;
 
 struct _GwyAdjustmentPrivate {
-    // Property based.
-    GObject *object;
-    GParamSpec *property;
-    gulong notify_id;
-
-    gboolean is_integral : 1;
-    gboolean in_update : 1;
-
-    // Plain adjustment.
     gdouble defaultval;
+
+    // Property-based.
+    GBinding *binding;
 };
 
-static void     gwy_adjustment_dispose        (GObject *object);
-static void     gwy_adjustment_set_property   (GObject *object,
-                                               guint prop_id,
-                                               const GValue *value,
-                                               GParamSpec *pspec);
-static void     gwy_adjustment_get_property   (GObject *object,
-                                               guint prop_id,
-                                               GValue *value,
-                                               GParamSpec *pspec);
-static void     adjustment_value_changed      (GwyAdjustment *adj);
-static void     property_value_changed        (GwyAdjustment *adj);
-static gdouble  get_property_value_as_double  (GObject *object,
-                                               GParamSpec *pspec);
-static void     set_property_value_from_double(GObject *object,
-                                               GParamSpec *pspec,
-                                               gdouble v);
-static gboolean set_default                   (GwyAdjustment *adj,
-                                               gdouble value);
+static void     gwy_adjustment_dispose     (GObject *object);
+static void     gwy_adjustment_set_property(GObject *object,
+                                            guint prop_id,
+                                            const GValue *value,
+                                            GParamSpec *pspec);
+static void     gwy_adjustment_get_property(GObject *object,
+                                            guint prop_id,
+                                            GValue *value,
+                                            GParamSpec *pspec);
+static gboolean set_default                (GwyAdjustment *adj,
+                                            gdouble value);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -101,9 +88,12 @@ static void
 gwy_adjustment_dispose(GObject *object)
 {
     Adjustment *priv = GWY_ADJUSTMENT(object)->priv;
-    GWY_SIGNAL_HANDLER_DISCONNECT(priv->object, priv->notify_id);
-    GWY_OBJECT_UNREF(priv->object);
-    priv->property = NULL;
+    // Clean up in case the binding survives us somehow.
+    if (priv->binding) {
+        g_object_remove_weak_pointer(G_OBJECT(priv->binding),
+                                     (gpointer*)&priv->binding);
+        GWY_OBJECT_UNREF(priv->binding);
+    }
     G_OBJECT_CLASS(gwy_adjustment_parent_class)->dispose(object);
 }
 
@@ -147,7 +137,7 @@ gwy_adjustment_get_property(GObject *object,
 }
 
 /**
- * gwy_adjustment_new:
+ * gwy_adjustment_new: (constructor)
  *
  * Creates a new adjustable bounded value.
  *
@@ -160,7 +150,7 @@ gwy_adjustment_new(void)
 }
 
 /**
- * gwy_adjustment_new_set:
+ * gwy_adjustment_new_set: (constructor)
  * @value: Initial value.
  * @defaultval: Default value.
  * @lower: Minimum value.
@@ -190,7 +180,7 @@ gwy_adjustment_new_set(gdouble value,
 
 /**
  * gwy_adjustment_new_for_property:
- * @object: (transfer full):
+ * @object: (transfer none):
  *          An object.
  * @propname: Name of property to create adjustment for.  The property must be
  *            of integral or double type.
@@ -199,7 +189,10 @@ gwy_adjustment_new_set(gdouble value,
  * the property of an object.
  *
  * Changes to the property value are reflected by changes in the adjustment
- * value and vice versa.  The adjustment takes a reference to @object.
+ * value and vice versa.  The adjustment does not take a reference to @object.
+ * If @object ceases to exist before the adjustment does the adjustment will
+ * remain configured the same way, just the value will not be synchronised with
+ * anything.
  *
  * You can limit the adjustment range further than what is permitted by the
  * property after the construction.  Extending it is not allowed.
@@ -212,18 +205,15 @@ gwy_adjustment_new_for_property(GObject *object,
 {
     GwyAdjustment *adj = gwy_adjustment_new();
     g_return_val_if_fail(G_IS_OBJECT(object), adj);
-    g_object_ref(object);
     Adjustment *priv = adj->priv;
-    priv->object = object;
 
     g_return_val_if_fail(propname, adj);
     GObjectClass *klass = G_OBJECT_GET_CLASS(object);
     GParamSpec *property = g_object_class_find_property(klass, propname);
     g_return_val_if_fail(property, adj);
-    priv->property = property;
 
     gdouble lower, upper, defaultval;
-    priv->is_integral = TRUE;
+    gboolean is_integral = TRUE;
 
     // Try the types by descending probability.
     if (G_IS_PARAM_SPEC_DOUBLE(property)) {
@@ -231,7 +221,7 @@ gwy_adjustment_new_for_property(GObject *object,
         lower = pspec->minimum;
         upper = pspec->maximum;
         defaultval = pspec->default_value;
-        priv->is_integral = FALSE;
+        is_integral = FALSE;
     }
     else if (G_IS_PARAM_SPEC_UINT(property)) {
         GParamSpecUInt *pspec = G_PARAM_SPEC_UINT(property);
@@ -262,7 +252,7 @@ gwy_adjustment_new_for_property(GObject *object,
         lower = pspec->minimum;
         upper = pspec->maximum;
         defaultval = pspec->default_value;
-        priv->is_integral = FALSE;
+        is_integral = FALSE;
     }
     else {
         g_critical("Cannot create adjustment for value type %s.",
@@ -270,14 +260,16 @@ gwy_adjustment_new_for_property(GObject *object,
         return adj;
     }
 
-    gdouble value = get_property_value_as_double(object, property);
-    gdouble step_increment, page_increment;
+    // Construct a harmless value for the gtk_adjustment_configure() call.
+    gdouble step_increment, page_increment, value;
     // XXX: This needs more elaboration.
-    if (priv->is_integral) {
+    if (is_integral) {
+        value = gwy_round(0.5*(lower + upper));
         step_increment = 1.0;
         page_increment = MIN(upper - lower, 10.0);
     }
     else {
+        value = 0.5*(lower + upper);
         step_increment = MAX((upper - lower)/100000.0, fabs(lower));
         step_increment = gwy_powi(10.0, gwy_round(log10(step_increment)));
         page_increment = sqrt(step_increment*(upper - lower));
@@ -287,18 +279,14 @@ gwy_adjustment_new_for_property(GObject *object,
     gtk_adjustment_configure(GTK_ADJUSTMENT(adj),
                              value, lower, upper,
                              step_increment, page_increment, 0.0);
-    adj->priv->defaultval = defaultval;
-
-    gchar *detailed_signal = g_strconcat("notify::", propname, NULL);
-    priv->notify_id
-        = g_signal_connect_swapped(priv->object, detailed_signal,
-                                   G_CALLBACK(property_value_changed), adj);
-    g_free(detailed_signal);
-
-    // Do not override notify(), connect here to self to only pay the penalty
-    // for the signal if needed.
-    g_signal_connect(adj, "notify::value",
-                     G_CALLBACK(adjustment_value_changed), NULL);
+    priv->defaultval = defaultval;
+    // This takes care of value synchronisation from the property to us.
+    priv->binding = g_object_bind_property(object, propname,
+                                           adj, "value",
+                                           G_BINDING_BIDIRECTIONAL
+                                           | G_BINDING_SYNC_CREATE);
+    g_object_add_weak_pointer(G_OBJECT(priv->binding),
+                              (gpointer*)&priv->binding);
 
     return adj;
 }
@@ -383,7 +371,8 @@ GObject*
 gwy_adjustment_get_object(const GwyAdjustment *adj)
 {
     g_return_val_if_fail(GWY_IS_ADJUSTMENT(adj), NULL);
-    return adj->priv->object;
+    Adjustment *priv = adj->priv;
+    return priv->binding ? g_binding_get_source(priv->binding) : NULL;
 }
 
 /**
@@ -402,81 +391,7 @@ gwy_adjustment_get_property_name(const GwyAdjustment *adj)
 {
     g_return_val_if_fail(GWY_IS_ADJUSTMENT(adj), NULL);
     Adjustment *priv = adj->priv;
-    if (!priv->property)
-        return NULL;
-    return priv->property->name;
-}
-
-static void
-adjustment_value_changed(GwyAdjustment *adj)
-{
-    Adjustment *priv = adj->priv;
-    if (!priv->property)
-        return;
-
-    if (!priv->in_update) {
-        gdouble v = gtk_adjustment_get_value(GTK_ADJUSTMENT(adj));
-        priv->in_update = TRUE;
-        set_property_value_from_double(priv->object, priv->property, v);
-        priv->in_update = FALSE;
-    }
-}
-
-static void
-property_value_changed(GwyAdjustment *adj)
-{
-    Adjustment *priv = adj->priv;
-
-    if (!priv->in_update) {
-        gdouble v = get_property_value_as_double(priv->object, priv->property);
-        priv->in_update = TRUE;
-        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), v);
-        priv->in_update = FALSE;
-    }
-}
-
-static gdouble
-get_property_value_as_double(GObject *object,
-                             GParamSpec *pspec)
-{
-    GValue propvalue;
-    gwy_clear1(propvalue);
-    g_value_init(&propvalue, pspec->value_type);
-    g_object_get_property(object, pspec->name, &propvalue);
-
-    GValue dblvalue;
-    gwy_clear1(dblvalue);
-    g_value_init(&dblvalue, G_TYPE_DOUBLE);
-    gboolean ok = g_value_transform(&propvalue, &dblvalue);
-    g_value_unset(&propvalue);
-    g_assert(ok);
-
-    gdouble v = g_value_get_double(&dblvalue);
-    g_value_unset(&dblvalue);
-    return v;
-}
-
-static void
-set_property_value_from_double(GObject *object,
-                               GParamSpec *pspec,
-                               gdouble v)
-{
-    GValue dblvalue;
-    gwy_clear1(dblvalue);
-    g_value_init(&dblvalue, G_TYPE_DOUBLE);
-    // FIXME: Should we try harder to round integers well?  Maybe the caller
-    // should.
-    g_value_set_double(&dblvalue, v);
-
-    GValue propvalue;
-    gwy_clear1(propvalue);
-    g_value_init(&propvalue, pspec->value_type);
-    gboolean ok = g_value_transform(&dblvalue, &propvalue);
-    g_value_unset(&dblvalue);
-    g_assert(ok);
-
-    g_object_set_property(object, pspec->name, &propvalue);
-    g_value_unset(&propvalue);
+    return priv->binding ? g_binding_get_source_property(priv->binding) : NULL;
 }
 
 static gboolean
@@ -484,7 +399,7 @@ set_default(GwyAdjustment *adj,
             gdouble defaultval)
 {
     Adjustment *priv = adj->priv;
-    g_return_val_if_fail(!priv->object, FALSE);
+    g_return_val_if_fail(!priv->binding, FALSE);
     if (defaultval == priv->defaultval)
         return FALSE;
 
