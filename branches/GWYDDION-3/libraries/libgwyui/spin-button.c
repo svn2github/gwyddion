@@ -52,25 +52,25 @@
 struct _GwySpinButtonPrivate {
     GtkAdjustment *adjustment;
 
-    GdkWindow     *panel;
+    GdkWindow *panel;
 
-    guint32        timer;
+    guint32 timer;
 
     GtkSpinButtonUpdatePolicy update_policy;
 
-    gdouble        climb_rate;
-    gdouble        timer_step;
+    gdouble climb_rate;
+    gdouble timer_step;
 
-    guint          button        : 2;
+    guint button        : 2;
     /* valid: GTK_ARROW_UP=0, GTK_ARROW_DOWN=1 or 2=NONE/BOTH */
-    guint          click_child   : 2;
-    guint          digits        : 10;
-    guint          in_child      : 2;
-    guint          need_timer    : 1;
-    guint          numeric       : 1;
-    guint          snap_to_ticks : 1;
-    guint          timer_calls   : 3;
-    guint          wrap          : 1;
+    guint click_child   : 2;
+    guint digits        : 10;
+    guint in_child      : 2;
+    guint need_timer    : 1;
+    guint numeric       : 1;
+    guint snap_to_ticks : 1;
+    guint timer_calls   : 3;
+    guint wrap          : 1;
 };
 
 enum {
@@ -185,12 +185,13 @@ G_DEFINE_TYPE_WITH_CODE(GwySpinButton, gwy_spin_button, GTK_TYPE_ENTRY,
                                               gwy_spin_button_editable_init));
 
 static void
-gwy_spin_button_class_init(GwySpinButtonClass *class)
+gwy_spin_button_class_init(GwySpinButtonClass *klass)
 {
-    GObjectClass *gobject_class = G_OBJECT_CLASS(class);
-    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(class);
-    GtkEntryClass *entry_class = GTK_ENTRY_CLASS(class);
-    GParamSpec *pspec;
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+    GtkEntryClass *entry_class = GTK_ENTRY_CLASS(klass);
+
+    g_type_class_add_private(klass, sizeof(GwySpinButtonPrivate));
 
     gobject_class->finalize = gwy_spin_button_finalize;
     gobject_class->set_property = gwy_spin_button_set_property;
@@ -219,9 +220,9 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     entry_class->activate = gwy_spin_button_activate;
     entry_class->get_text_area_size = gwy_spin_button_get_text_area_size;
 
-    class->input = NULL;
-    class->output = NULL;
-    class->change_value = gwy_spin_button_real_change_value;
+    klass->input = NULL;
+    klass->output = NULL;
+    klass->change_value = gwy_spin_button_real_change_value;
 
     properties[PROP_ADJUSTMENT]
         = g_param_spec_object("adjustment",
@@ -283,19 +284,21 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     properties[PROP_VALUE]
         = g_param_spec_double("value",
                               "Value",
-                              "Reads the current value, or sets a new value",
+                              "The current value",
                               -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
 
-    pspec = g_param_spec_enum("shadow-type",
-                              "Shadow Type",
-                              "Style of bevel around the spin button",
-                              GTK_TYPE_SHADOW_TYPE,
-                              GTK_SHADOW_IN,
-                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+    GParamSpec *pspec = g_param_spec_enum("shadow-type",
+                                          "Shadow Type",
+                                          "Style of bevel around the "
+                                          "spin button",
+                                          GTK_TYPE_SHADOW_TYPE,
+                                          GTK_SHADOW_IN,
+                                          G_PARAM_READABLE
+                                          | G_PARAM_STATIC_STRINGS);
     gtk_widget_class_install_style_property_parser(widget_class, pspec,
                                                    gtk_rc_property_parse_enum);
 
@@ -401,7 +404,7 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
                      G_TYPE_NONE, 1,
                      GTK_TYPE_SCROLL_TYPE);
 
-    GtkBindingSet *binding_set = gtk_binding_set_by_class(class);
+    GtkBindingSet *binding_set = gtk_binding_set_by_class(klass);
 
     add_spin_binding(binding_set, GDK_KEY_Up, 0, GTK_SCROLL_STEP_UP);
     add_spin_binding(binding_set, GDK_KEY_KP_Up, 0, GTK_SCROLL_STEP_UP);
@@ -411,8 +414,6 @@ gwy_spin_button_class_init(GwySpinButtonClass *class)
     add_spin_binding(binding_set, GDK_KEY_Page_Down, 0, GTK_SCROLL_PAGE_DOWN);
     add_spin_binding(binding_set, GDK_KEY_Page_Up, GDK_CONTROL_MASK, GTK_SCROLL_END);
     add_spin_binding(binding_set, GDK_KEY_Page_Down, GDK_CONTROL_MASK, GTK_SCROLL_START);
-
-    g_type_class_add_private(class, sizeof(GwySpinButtonPrivate));
 }
 
 static void
@@ -1916,8 +1917,8 @@ gwy_spin_button_set_adjustment(GwySpinButton *spinbutton,
  * Return value: (transfer none):
  *               The adjustment used by @spinbutton.
  **/
-GtkAdjustment *
-               gwy_spin_button_get_adjustment(GwySpinButton *spinbutton)
+GtkAdjustment*
+gwy_spin_button_get_adjustment(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), NULL);
 
@@ -1961,7 +1962,7 @@ gwy_spin_button_set_digits(GwySpinButton *spinbutton,
  * Returns: the current precision
  **/
 guint
-gwy_spin_button_get_digits(GwySpinButton *spinbutton)
+gwy_spin_button_get_digits(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), 0);
 
@@ -2095,7 +2096,7 @@ void
  * Return value: the value of @spinbutton
  **/
 gdouble
-gwy_spin_button_get_value(GwySpinButton *spinbutton)
+gwy_spin_button_get_value(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), 0.0);
 
@@ -2111,7 +2112,7 @@ gwy_spin_button_get_value(GwySpinButton *spinbutton)
  * Return value: the value of @spinbutton
  **/
 gint
-gwy_spin_button_get_value_as_int(GwySpinButton *spinbutton)
+gwy_spin_button_get_value_as_int(const GwySpinButton *spinbutton)
 {
     GwySpinButtonPrivate *priv;
     gdouble val;
@@ -2192,7 +2193,7 @@ gwy_spin_button_set_update_policy(GwySpinButton *spinbutton,
  * Return value: the current update policy
  **/
 GtkSpinButtonUpdatePolicy
-gwy_spin_button_get_update_policy(GwySpinButton *spinbutton)
+gwy_spin_button_get_update_policy(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), GTK_UPDATE_ALWAYS);
 
@@ -2235,7 +2236,7 @@ gwy_spin_button_set_numeric(GwySpinButton *spinbutton,
  * Return value: %TRUE if only numeric text can be entered
  **/
 gboolean
-gwy_spin_button_get_numeric(GwySpinButton *spinbutton)
+gwy_spin_button_get_numeric(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), FALSE);
 
@@ -2281,7 +2282,7 @@ gwy_spin_button_set_wrap(GwySpinButton *spinbutton,
  * Return value: %TRUE if the spin button wraps around
  **/
 gboolean
-gwy_spin_button_get_wrap(GwySpinButton *spinbutton)
+gwy_spin_button_get_wrap(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), FALSE);
 
@@ -2351,7 +2352,7 @@ gwy_spin_button_set_snap_to_ticks(GwySpinButton *spinbutton,
  * Return value: %TRUE if values are snapped to the nearest step
  **/
 gboolean
-gwy_spin_button_get_snap_to_ticks(GwySpinButton *spinbutton)
+gwy_spin_button_get_snap_to_ticks(const GwySpinButton *spinbutton)
 {
     g_return_val_if_fail(GWY_IS_SPIN_BUTTON(spinbutton), FALSE);
 
@@ -2541,7 +2542,7 @@ entry_get_borders(GtkEntry *entry,
  * SECTION:spin-button
  * @title: GwySpinButton
  * @short_description: Retrieve an integer or floating-point number from
- *     the user
+ *                     the user
  * @see_also: #GtkEntry
  * @image: GwySpinButton.png
  *

@@ -30,7 +30,7 @@
  *  GTK+ at ftp://ftp.gtk.org/pub/gtk/.
  */
 
-/*  Modified by Yeti 2012.
+/*  Modified by Yeti 2012-2013.
  *  This file branched off the last good commit of GtkSpinButton before
  *  horizontal madness arrived: 68c74e142709458b95ccc76d8d21c3f038e42ecf */
 
@@ -86,7 +86,6 @@ struct _GwySpinButtonClass {
     void (*reserved4) (void);
 };
 
-
 GType                     gwy_spin_button_get_type         (void)                              G_GNUC_CONST;
 void                      gwy_spin_button_configure        (GwySpinButton *spinbutton,
                                                             GtkAdjustment *adjustment,
@@ -100,10 +99,10 @@ GtkWidget*                gwy_spin_button_new_with_range   (gdouble min,
                                                             gdouble step)                      G_GNUC_MALLOC;
 void                      gwy_spin_button_set_adjustment   (GwySpinButton *spinbutton,
                                                             GtkAdjustment *adjustment);
-GtkAdjustment*            gwy_spin_button_get_adjustment   (GwySpinButton *spinbutton);
+GtkAdjustment*            gwy_spin_button_get_adjustment   (const GwySpinButton *spinbutton);
 void                      gwy_spin_button_set_digits       (GwySpinButton *spinbutton,
                                                             guint digits);
-guint                     gwy_spin_button_get_digits       (GwySpinButton *spinbutton);
+guint                     gwy_spin_button_get_digits       (const GwySpinButton *spinbutton)   G_GNUC_PURE;
 void                      gwy_spin_button_set_increments   (GwySpinButton *spinbutton,
                                                             gdouble step,
                                                             gdouble page);
@@ -116,25 +115,25 @@ void                      gwy_spin_button_set_range        (GwySpinButton *spinb
 void                      gwy_spin_button_get_range        (GwySpinButton *spinbutton,
                                                             gdouble *min,
                                                             gdouble *max);
-gdouble                   gwy_spin_button_get_value        (GwySpinButton *spinbutton);
-gint                      gwy_spin_button_get_value_as_int (GwySpinButton *spinbutton);
+gdouble                   gwy_spin_button_get_value        (const GwySpinButton *spinbutton)   G_GNUC_PURE;
+gint                      gwy_spin_button_get_value_as_int (const GwySpinButton *spinbutton)   G_GNUC_PURE;
 void                      gwy_spin_button_set_value        (GwySpinButton *spinbutton,
                                                             gdouble value);
 void                      gwy_spin_button_set_update_policy(GwySpinButton *spinbutton,
                                                             GtkSpinButtonUpdatePolicy policy);
-GtkSpinButtonUpdatePolicy gwy_spin_button_get_update_policy(GwySpinButton *spinbutton);
+GtkSpinButtonUpdatePolicy gwy_spin_button_get_update_policy(const GwySpinButton *spinbutton)   G_GNUC_PURE;
 void                      gwy_spin_button_set_numeric      (GwySpinButton *spinbutton,
                                                             gboolean numeric);
-gboolean                  gwy_spin_button_get_numeric      (GwySpinButton *spinbutton);
+gboolean                  gwy_spin_button_get_numeric      (const GwySpinButton *spinbutton)   G_GNUC_PURE;
 void                      gwy_spin_button_spin             (GwySpinButton *spinbutton,
                                                             GtkSpinType direction,
                                                             gdouble increment);
 void                      gwy_spin_button_set_wrap         (GwySpinButton *spinbutton,
                                                             gboolean wrap);
-gboolean                  gwy_spin_button_get_wrap         (GwySpinButton *spinbutton);
+gboolean                  gwy_spin_button_get_wrap         (const GwySpinButton *spinbutton)   G_GNUC_PURE;
 void                      gwy_spin_button_set_snap_to_ticks(GwySpinButton *spinbutton,
                                                             gboolean snap_to_ticks);
-gboolean                  gwy_spin_button_get_snap_to_ticks(GwySpinButton *spinbutton);
+gboolean                  gwy_spin_button_get_snap_to_ticks(const GwySpinButton *spinbutton)   G_GNUC_PURE;
 void                      gwy_spin_button_update           (GwySpinButton *spinbutton);
 
 G_END_DECLS
