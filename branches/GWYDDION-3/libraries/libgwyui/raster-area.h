@@ -81,8 +81,7 @@ void              gwy_raster_area_set_range_to_method   (GwyRasterArea *rasterar
 GwyColorRangeType gwy_raster_area_get_range_to_method   (const GwyRasterArea *rasterarea) G_GNUC_PURE;
 void              gwy_raster_area_set_user_range        (GwyRasterArea *rasterarea,
                                                          const GwyRange *range);
-void              gwy_raster_area_get_user_range        (const GwyRasterArea *rasterarea,
-                                                         GwyRange *range);
+const GwyRange*   gwy_raster_area_get_user_range        (const GwyRasterArea *rasterarea) G_GNUC_PURE;
 gboolean          gwy_raster_area_get_range             (const GwyRasterArea *rasterarea,
                                                          GwyRange *range);
 void              gwy_raster_area_set_mask_color        (GwyRasterArea *rasterarea,

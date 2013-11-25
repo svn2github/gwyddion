@@ -117,7 +117,7 @@ struct _GwyRasterAreaPrivate {
 
     GwyColorRangeType range_from_method;
     GwyColorRangeType range_to_method;
-    GwyRange user_range;
+    GwyRange *user_range;
     GwyRange range;
     gboolean range_valid;
 
@@ -125,8 +125,8 @@ struct _GwyRasterAreaPrivate {
     gulong shapes_updated_id;
     gulong shapes_cursor_type_id;
 
-    GwyRGBA mask_color;
-    GwyRGBA grain_number_color;
+    GwyRGBA *mask_color;
+    GwyRGBA *grain_number_color;
     gboolean number_grains;
 
     PangoLayout *layout;
@@ -137,122 +137,122 @@ struct _GwyRasterAreaPrivate {
 
 typedef struct _GwyRasterAreaPrivate RasterArea;
 
-static void     gwy_raster_area_finalize            (GObject *object);
-static void     gwy_raster_area_dispose             (GObject *object);
-static void     gwy_raster_area_set_property        (GObject *object,
-                                                     guint prop_id,
-                                                     const GValue *value,
-                                                     GParamSpec *pspec);
-static void     gwy_raster_area_get_property        (GObject *object,
-                                                     guint prop_id,
-                                                     GValue *value,
-                                                     GParamSpec *pspec);
-static void     gwy_raster_area_style_updated       (GtkWidget *widget);
-static void     gwy_raster_area_realize             (GtkWidget *widget);
-static void     gwy_raster_area_unrealize           (GtkWidget *widget);
-static void     gwy_raster_area_map                 (GtkWidget *widget);
-static void     gwy_raster_area_unmap               (GtkWidget *widget);
-static void     gwy_raster_area_get_preferred_width (GtkWidget *widget,
-                                                     gint *minimum,
-                                                     gint *natural);
-static void     gwy_raster_area_get_preferred_height(GtkWidget *widget,
-                                                     gint *minimum,
-                                                     gint *natural);
-static void     gwy_raster_area_size_allocate       (GtkWidget *widget,
-                                                     cairo_rectangle_int_t *allocation);
-static gboolean gwy_raster_area_motion_notify       (GtkWidget *widget,
-                                                     GdkEventMotion *event);
-static gboolean gwy_raster_area_button_press        (GtkWidget *widget,
-                                                     GdkEventButton *event);
-static gboolean gwy_raster_area_button_release      (GtkWidget *widget,
-                                                     GdkEventButton *event);
-static gboolean gwy_raster_area_key_press           (GtkWidget *widget,
-                                                     GdkEventKey *event);
-static gboolean gwy_raster_area_key_release         (GtkWidget *widget,
-                                                     GdkEventKey *event);
-static gboolean gwy_raster_area_leave_notify        (GtkWidget *widget,
-                                                     GdkEventCrossing *event);
-static gboolean gwy_raster_area_scroll              (GwyRasterArea *rasterarea,
-                                                     GtkScrollType scrolltype);
-static gboolean gwy_raster_area_zoom                (GwyRasterArea *rasterarea,
-                                                     GwyZoomType zoomtype);
-static void     calculate_position_and_size         (GwyRasterArea *rasterarea);
-static void     update_matrices                     (GwyRasterArea *rasterarea);
-static void     ensure_range                        (GwyRasterArea *rasterarea);
-static void     ensure_layout                       (GwyRasterArea *rasterarea);
-static gboolean gwy_raster_area_draw                (GtkWidget *widget,
-                                                     cairo_t *cr);
-static void     destroy_field_surface               (GwyRasterArea *rasterarea);
-static void     destroy_mask_surface                (GwyRasterArea *rasterarea);
-static gboolean set_field                           (GwyRasterArea *rasterarea,
-                                                     GwyField *field);
-static gboolean set_mask                            (GwyRasterArea *rasterarea,
-                                                     GwyMaskField *mask);
-static gboolean set_gradient                        (GwyRasterArea *rasterarea,
-                                                     GwyGradient *gradient);
-static gboolean set_shapes                          (GwyRasterArea *rasterarea,
-                                                     GwyShapes *shapes);
-static void     set_shapes_transforms               (GwyRasterArea *rasterarea);
-static void     shapes_cursor_type                  (GwyRasterArea *rasterarea);
-static gboolean set_mask_color                      (GwyRasterArea *rasterarea,
-                                                     const GwyRGBA *color);
-static gboolean set_grain_number_color              (GwyRasterArea *rasterarea,
-                                                     const GwyRGBA *color);
-static gboolean set_scrollable                      (GwyRasterArea *rasterarea,
-                                                     gboolean setting);
-static gboolean set_zoomable                        (GwyRasterArea *rasterarea,
-                                                     gboolean setting);
-static gboolean set_range_from_method               (GwyRasterArea *rasterarea,
-                                                     GwyColorRangeType method);
-static gboolean set_range_to_method                 (GwyRasterArea *rasterarea,
-                                                     GwyColorRangeType method);
-static gboolean set_user_range                      (GwyRasterArea *rasterarea,
-                                                     const GwyRange *range);
-static void     field_notify                        (GwyRasterArea *rasterarea,
-                                                     GParamSpec *pspec,
-                                                     GwyField *field);
-static void     mask_notify                         (GwyRasterArea *rasterarea,
-                                                     GParamSpec *pspec,
-                                                     GwyMaskField *mask);
-static void     field_data_changed                  (GwyRasterArea *rasterarea,
-                                                     GwyFieldPart *fpart,
-                                                     GwyField *field);
-static void     mask_data_changed                   (GwyRasterArea *rasterarea,
-                                                     GwyFieldPart *fpart,
-                                                     GwyMaskField *mask);
-static void     queue_draw_field_part               (GwyRasterArea *rasterarea,
-                                                     const GwyFieldPart *fpart);
-static void     gradient_data_changed               (GwyRasterArea *rasterarea,
-                                                     GwyGradient *gradient);
-static void     shapes_updated                      (GwyRasterArea *rasterarea,
-                                                     GwyShapes *shapes);
-static gboolean enable_scrolling_again              (gpointer user_data);
-static gboolean scroll_to_current_point             (GwyRasterArea *rasterarea,
-                                                     GwyShapes *shapes);
-static gboolean set_hadjustment                     (GwyRasterArea *rasterarea,
-                                                     GtkAdjustment *adjustment);
-static gboolean set_vadjustment                     (GwyRasterArea *rasterarea,
-                                                     GtkAdjustment *adjustment);
-static void     set_hadjustment_values              (GwyRasterArea *rasterarea);
-static void     set_vadjustment_values              (GwyRasterArea *rasterarea);
-static void     adjustment_value_changed            (GwyRasterArea *rasterarea);
-static void     freeze_adjustments_notify           (GwyRasterArea *rasterarea,
-                                                     gboolean horizontal,
-                                                     gboolean vertical);
-static void     thaw_adjustments_notify             (GwyRasterArea *rasterarea,
-                                                     gboolean horizontal,
-                                                     gboolean vertical);
-static gboolean set_zoom                            (GwyRasterArea *rasterarea,
-                                                     gdouble zoom);
-static gboolean set_real_aspect_ratio               (GwyRasterArea *rasterarea,
-                                                     gboolean setting);
-static gboolean set_number_grains                   (GwyRasterArea *rasterarea,
-                                                     gboolean setting);
-static guint    calculate_full_width                (const GwyRasterArea *rasterarea);
-static guint    calculate_full_height               (const GwyRasterArea *rasterarea);
+static void           gwy_raster_area_finalize            (GObject *object);
+static void           gwy_raster_area_dispose             (GObject *object);
+static void           gwy_raster_area_set_property        (GObject *object,
+                                                           guint prop_id,
+                                                           const GValue *value,
+                                                           GParamSpec *pspec);
+static void           gwy_raster_area_get_property        (GObject *object,
+                                                           guint prop_id,
+                                                           GValue *value,
+                                                           GParamSpec *pspec);
+static void           gwy_raster_area_style_updated       (GtkWidget *widget);
+static void           gwy_raster_area_realize             (GtkWidget *widget);
+static void           gwy_raster_area_unrealize           (GtkWidget *widget);
+static void           gwy_raster_area_map                 (GtkWidget *widget);
+static void           gwy_raster_area_unmap               (GtkWidget *widget);
+static void           gwy_raster_area_get_preferred_width (GtkWidget *widget,
+                                                           gint *minimum,
+                                                           gint *natural);
+static void           gwy_raster_area_get_preferred_height(GtkWidget *widget,
+                                                           gint *minimum,
+                                                           gint *natural);
+static void           gwy_raster_area_size_allocate       (GtkWidget *widget,
+                                                           cairo_rectangle_int_t *allocation);
+static gboolean       gwy_raster_area_motion_notify       (GtkWidget *widget,
+                                                           GdkEventMotion *event);
+static gboolean       gwy_raster_area_button_press        (GtkWidget *widget,
+                                                           GdkEventButton *event);
+static gboolean       gwy_raster_area_button_release      (GtkWidget *widget,
+                                                           GdkEventButton *event);
+static gboolean       gwy_raster_area_key_press           (GtkWidget *widget,
+                                                           GdkEventKey *event);
+static gboolean       gwy_raster_area_key_release         (GtkWidget *widget,
+                                                           GdkEventKey *event);
+static gboolean       gwy_raster_area_leave_notify        (GtkWidget *widget,
+                                                           GdkEventCrossing *event);
+static gboolean       gwy_raster_area_scroll              (GwyRasterArea *rasterarea,
+                                                           GtkScrollType scrolltype);
+static gboolean       gwy_raster_area_zoom                (GwyRasterArea *rasterarea,
+                                                           GwyZoomType zoomtype);
+static void           calculate_position_and_size         (GwyRasterArea *rasterarea);
+static void           update_matrices                     (GwyRasterArea *rasterarea);
+static void           ensure_range                        (GwyRasterArea *rasterarea);
+static void           ensure_layout                       (GwyRasterArea *rasterarea);
+static gboolean       gwy_raster_area_draw                (GtkWidget *widget,
+                                                           cairo_t *cr);
+static void           destroy_field_surface               (GwyRasterArea *rasterarea);
+static void           destroy_mask_surface                (GwyRasterArea *rasterarea);
+static gboolean       set_field                           (GwyRasterArea *rasterarea,
+                                                           GwyField *field);
+static gboolean       set_mask                            (GwyRasterArea *rasterarea,
+                                                           GwyMaskField *mask);
+static gboolean       set_gradient                        (GwyRasterArea *rasterarea,
+                                                           GwyGradient *gradient);
+static gboolean       set_shapes                          (GwyRasterArea *rasterarea,
+                                                           GwyShapes *shapes);
+static void           set_shapes_transforms               (GwyRasterArea *rasterarea);
+static void           shapes_cursor_type                  (GwyRasterArea *rasterarea);
+static gboolean       set_mask_color                      (GwyRasterArea *rasterarea,
+                                                           const GwyRGBA *color);
+static gboolean       set_grain_number_color              (GwyRasterArea *rasterarea,
+                                                           const GwyRGBA *color);
+static gboolean       set_scrollable                      (GwyRasterArea *rasterarea,
+                                                           gboolean setting);
+static gboolean       set_zoomable                        (GwyRasterArea *rasterarea,
+                                                           gboolean setting);
+static gboolean       set_range_from_method               (GwyRasterArea *rasterarea,
+                                                           GwyColorRangeType method);
+static gboolean       set_range_to_method                 (GwyRasterArea *rasterarea,
+                                                           GwyColorRangeType method);
+static gboolean       set_user_range                      (GwyRasterArea *rasterarea,
+                                                           const GwyRange *range);
+static void           field_notify                        (GwyRasterArea *rasterarea,
+                                                           GParamSpec *pspec,
+                                                           GwyField *field);
+static void           mask_notify                         (GwyRasterArea *rasterarea,
+                                                           GParamSpec *pspec,
+                                                           GwyMaskField *mask);
+static void           field_data_changed                  (GwyRasterArea *rasterarea,
+                                                           GwyFieldPart *fpart,
+                                                           GwyField *field);
+static void           mask_data_changed                   (GwyRasterArea *rasterarea,
+                                                           GwyFieldPart *fpart,
+                                                           GwyMaskField *mask);
+static void           queue_draw_field_part               (GwyRasterArea *rasterarea,
+                                                           const GwyFieldPart *fpart);
+static void           gradient_data_changed               (GwyRasterArea *rasterarea,
+                                                           GwyGradient *gradient);
+static void           shapes_updated                      (GwyRasterArea *rasterarea,
+                                                           GwyShapes *shapes);
+static gboolean       enable_scrolling_again              (gpointer user_data);
+static gboolean       scroll_to_current_point             (GwyRasterArea *rasterarea,
+                                                           GwyShapes *shapes);
+static gboolean       set_hadjustment                     (GwyRasterArea *rasterarea,
+                                                           GtkAdjustment *adjustment);
+static gboolean       set_vadjustment                     (GwyRasterArea *rasterarea,
+                                                           GtkAdjustment *adjustment);
+static void           set_hadjustment_values              (GwyRasterArea *rasterarea);
+static void           set_vadjustment_values              (GwyRasterArea *rasterarea);
+static void           adjustment_value_changed            (GwyRasterArea *rasterarea);
+static void           freeze_adjustments_notify           (GwyRasterArea *rasterarea,
+                                                           gboolean horizontal,
+                                                           gboolean vertical);
+static void           thaw_adjustments_notify             (GwyRasterArea *rasterarea,
+                                                           gboolean horizontal,
+                                                           gboolean vertical);
+static gboolean       set_zoom                            (GwyRasterArea *rasterarea,
+                                                           gdouble zoom);
+static gboolean       set_real_aspect_ratio               (GwyRasterArea *rasterarea,
+                                                           gboolean setting);
+static gboolean       set_number_grains                   (GwyRasterArea *rasterarea,
+                                                           gboolean setting);
+static guint          calculate_full_width                (const GwyRasterArea *rasterarea);
+static guint          calculate_full_height               (const GwyRasterArea *rasterarea);
+static const GwyRGBA* mask_color_or_default               (const GwyRasterArea *rasterarea);
+static const GwyRGBA* grain_number_color_or_default       (const GwyRasterArea *rasterarea);
 
-static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
-static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
 static const GwyRange void_range = { 0.0, 0.0 };
 
 static GParamSpec *properties[N_TOTAL_PROPS];
@@ -546,11 +546,8 @@ gwy_raster_area_init(GwyRasterArea *rasterarea)
                                                    RasterArea);
     RasterArea *priv = rasterarea->priv;
     priv->field_aspect_ratio = 1.0;
-    priv->mask_color = mask_color_default;
-    priv->grain_number_color = grain_number_color_default;
     priv->range_from_method = GWY_COLOR_RANGE_FULL;
     priv->range_to_method = GWY_COLOR_RANGE_FULL;
-    priv->user_range = void_range;
     update_matrices(rasterarea);
     gtk_widget_set_can_focus(GTK_WIDGET(rasterarea), TRUE);
 }
@@ -565,8 +562,9 @@ static void
 gwy_raster_area_dispose(GObject *object)
 {
     GwyRasterArea *rasterarea = GWY_RASTER_AREA(object);
+    RasterArea *priv = rasterarea->priv;
 
-    GWY_OBJECT_UNREF(rasterarea->priv->layout);
+    GWY_OBJECT_UNREF(priv->layout);
     set_field(rasterarea, NULL);
     set_mask(rasterarea, NULL);
     set_gradient(rasterarea, NULL);
@@ -575,7 +573,10 @@ gwy_raster_area_dispose(GObject *object)
     set_vadjustment(rasterarea, NULL);
     destroy_field_surface(rasterarea);
     destroy_mask_surface(rasterarea);
-    rasterarea->priv->area_widget = NULL;
+    GWY_SLICE_FREE(GwyRange, priv->user_range);
+    GWY_SLICE_FREE(GwyRGBA, priv->mask_color);
+    GWY_SLICE_FREE(GwyRGBA, priv->grain_number_color);
+    priv->area_widget = NULL;
 
     G_OBJECT_CLASS(gwy_raster_area_parent_class)->dispose(object);
 }
@@ -973,10 +974,10 @@ gwy_raster_area_get_range_to_method(const GwyRasterArea *rasterarea)
 /**
  * gwy_raster_area_set_user_range:
  * @rasterarea: A raster area.
- * @range: (allow-none):
+ * @range: (allow-none) (transfer none):
  *         The user false colour mapping range.  It has effect only on
  *         range endpoints with %GWY_COLOR_RANGE_USER mapping type.  Passing
- *         %NULL resets it to default (0,0).
+ *         %NULL unsets the range.
  *
  * Sets the user false colour mapping range of a raster area.
  **/
@@ -985,8 +986,6 @@ gwy_raster_area_set_user_range(GwyRasterArea *rasterarea,
                                const GwyRange *range)
 {
     g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
-    if (!range)
-        range = &void_range;
     if (!set_user_range(rasterarea, range))
         return;
 
@@ -996,26 +995,26 @@ gwy_raster_area_set_user_range(GwyRasterArea *rasterarea,
 /**
  * gwy_raster_area_get_user_range:
  * @rasterarea: A raster area.
- * @range: (out):
- *         Return location for the user false colour mapping range.
  *
  * Gets the user false colour mapping range of a raster area.
+ *
+ * Returns: (allow-none) (transfer none):
+ *          The user false colour mapping range, if set.
  **/
-void
-gwy_raster_area_get_user_range(const GwyRasterArea *rasterarea,
-                               GwyRange *range)
+const GwyRange*
+gwy_raster_area_get_user_range(const GwyRasterArea *rasterarea)
 {
-    g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
-    g_return_if_fail(range);
-    *range = rasterarea->priv->user_range;
+    g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
+    return rasterarea->priv->user_range;
 }
 
 /**
  * gwy_raster_area_get_range:
  * @rasterarea: A raster area.
  * @range: (out) (allow-none):
- *         Actual false colour mapping range.  It is set, even if the function
- *         returns %FALSE.  The utility of a stale range is limited though.
+ *         Actual false colour mapping range.  It is set, even if the
+ *         function returns %FALSE.  The utility of a stale range is limited
+ *         though.
  *
  * Obtains the actual false colour mapping range of a raster area.
  *
@@ -1041,7 +1040,8 @@ gwy_raster_area_get_range(const GwyRasterArea *rasterarea,
 /**
  * gwy_raster_area_set_mask_color:
  * @rasterarea: A raster area.
- * @color: A colour.
+ * @color: (allow-none) (transfer none):
+ *         A colour.
  *
  * Sets the colour a raster area will use for mask visualisation.
  **/
@@ -1050,7 +1050,6 @@ gwy_raster_area_set_mask_color(GwyRasterArea *rasterarea,
                                const GwyRGBA *color)
 {
     g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
-    g_return_if_fail(color);
     if (!set_mask_color(rasterarea, color))
         return;
 
@@ -1063,20 +1062,21 @@ gwy_raster_area_set_mask_color(GwyRasterArea *rasterarea,
  *
  * Obtains the colour used by a raster area for mask visualisation.
  *
- * Returns: (transfer none):
+ * Returns: (allow-none) (transfer none):
  *          The colour used by @rasterarea for mask visualisation.
  **/
 const GwyRGBA*
 gwy_raster_area_get_mask_color(const GwyRasterArea *rasterarea)
 {
     g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
-    return &GWY_RASTER_AREA(rasterarea)->priv->mask_color;
+    return rasterarea->priv->mask_color;
 }
 
 /**
  * gwy_raster_area_set_grain_number_color:
  * @rasterarea: A raster area.
- * @color: A colour.
+ * @color: (allow-none) (transfer none):
+ *         A colour.  Pass %NULL to unset the colour and use the default.
  *
  * Sets the colour a raster area will use for grain number visualisation.
  **/
@@ -1085,7 +1085,6 @@ gwy_raster_area_set_grain_number_color(GwyRasterArea *rasterarea,
                                        const GwyRGBA *color)
 {
     g_return_if_fail(GWY_IS_RASTER_AREA(rasterarea));
-    g_return_if_fail(color);
     if (!set_grain_number_color(rasterarea, color))
         return;
 
@@ -1099,14 +1098,14 @@ gwy_raster_area_set_grain_number_color(GwyRasterArea *rasterarea,
  *
  * Obtains the colour used by a raster area for grain number visualisation.
  *
- * Returns: (transfer none):
+ * Returns: (allow-none) (transfer none):
  *          The colour used by @rasterarea for grain number visualisation.
  **/
 const GwyRGBA*
 gwy_raster_area_get_grain_number_color(const GwyRasterArea *rasterarea)
 {
     g_return_val_if_fail(GWY_IS_RASTER_AREA(rasterarea), NULL);
-    return &GWY_RASTER_AREA(rasterarea)->priv->grain_number_color;
+    return GWY_RASTER_AREA(rasterarea)->priv->grain_number_color;
 }
 
 /**
@@ -1988,7 +1987,7 @@ ensure_range(GwyRasterArea *rasterarea)
         (guint)ceil(frect->x + frect->width) - (guint)floor(frect->x),
         (guint)ceil(frect->y + frect->height) - (guint)floor(frect->y),
     };
-    priv->range = priv->user_range;
+    priv->range = priv->user_range ? *priv->user_range : void_range;
     gwy_field_find_color_range(priv->field, &fpart, priv->mask,
                                priv->range_from_method, priv->range_to_method,
                                &priv->range);
@@ -2110,7 +2109,7 @@ draw_grain_numbers(GwyRasterArea *rasterarea,
     guint ngrains = gwy_mask_field_n_grains(priv->mask);
     const GwyXY *positions = gwy_mask_field_grain_positions(priv->mask);
 
-    const GwyRGBA *color = &priv->grain_number_color;
+    const GwyRGBA *color = grain_number_color_or_default(rasterarea);
     cairo_save(cr);
     gwy_cairo_set_source_rgba(cr, color);
     for (guint gno = 1; gno <= ngrains; gno++) {
@@ -2120,7 +2119,7 @@ draw_grain_numbers(GwyRasterArea *rasterarea,
     }
     if (priv->active_grain) {
         guint gno = priv->active_grain;
-        const GwyRGBA *mcolor = &priv->mask_color;
+        const GwyRGBA *mcolor = mask_color_or_default(rasterarea);
         // FIXME
         GwyRGBA acolor = {
             .r = 1.4*color->r - 0.4*mcolor->r,
@@ -2166,7 +2165,8 @@ draw_mask(GwyRasterArea *rasterarea,
         return;
 
     cairo_save(cr);
-    gwy_cairo_set_source_rgba(cr, &priv->mask_color);
+    const GwyRGBA *mcolor = mask_color_or_default(rasterarea);
+    gwy_cairo_set_source_rgba(cr, mcolor);
     cairo_mask_surface(cr, priv->mask_surface,
                        priv->image_rectangle.x, priv->image_rectangle.y);
     cairo_restore(cr);
@@ -2396,13 +2396,9 @@ set_mask_color(GwyRasterArea *rasterarea,
                const GwyRGBA *color)
 {
     RasterArea *priv = rasterarea->priv;
-    if (color->r == priv->mask_color.r
-        && color->g == priv->mask_color.g
-        && color->b == priv->mask_color.b
-        && color->a == priv->mask_color.a)
+    if (!gwy_assign_boxed((gpointer*)&priv->mask_color, color, GWY_TYPE_RGBA))
         return FALSE;
 
-    priv->mask_color = *color;
     if (priv->mask)
         gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
@@ -2413,13 +2409,10 @@ set_grain_number_color(GwyRasterArea *rasterarea,
                        const GwyRGBA *color)
 {
     RasterArea *priv = rasterarea->priv;
-    if (color->r == priv->mask_color.r
-        && color->g == priv->mask_color.g
-        && color->b == priv->mask_color.b
-        && color->a == priv->mask_color.a)
+    if (!gwy_assign_boxed((gpointer*)&priv->grain_number_color, color,
+                          GWY_TYPE_RGBA))
         return FALSE;
 
-    priv->grain_number_color = *color;
     if (priv->mask && priv->number_grains)
         gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
@@ -2494,19 +2487,22 @@ set_user_range(GwyRasterArea *rasterarea,
                const GwyRange *range)
 {
     RasterArea *priv = rasterarea->priv;
-    if (gwy_equal(range, &priv->user_range))
+    if (!gwy_assign_boxed((gpointer*)&priv->user_range, range, GWY_TYPE_RANGE))
         return FALSE;
 
-    priv->user_range = *range;
     gboolean fromisuser = (priv->range_from_method == GWY_COLOR_RANGE_USER);
     gboolean toisuser = (priv->range_to_method == GWY_COLOR_RANGE_USER);
     if (!fromisuser && !toisuser)
         return TRUE;
 
     if (fromisuser)
-        priv->range.from = priv->user_range.from;
+        priv->range.from = (priv->user_range
+                            ? priv->user_range->from
+                            : void_range.from);
     if (toisuser)
-        priv->range.to = priv->user_range.to;
+        priv->range.to = (priv->user_range
+                          ? priv->user_range->to
+                          : void_range.to);
 
     priv->field_surface_valid = FALSE;
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
@@ -2917,6 +2913,26 @@ set_number_grains(GwyRasterArea *rasterarea,
 
     gtk_widget_queue_draw(GTK_WIDGET(rasterarea));
     return TRUE;
+}
+
+static const GwyRGBA*
+mask_color_or_default(const GwyRasterArea *rasterarea)
+{
+    static const GwyRGBA mask_color_default = { 1.0, 0.0, 0.0, 0.5 };
+
+    RasterArea *priv = rasterarea->priv;
+    return priv->mask_color ? priv->mask_color : &mask_color_default;
+}
+
+static const GwyRGBA*
+grain_number_color_or_default(const GwyRasterArea *rasterarea)
+{
+    static const GwyRGBA grain_number_color_default = { 0.7, 0.0, 0.9, 1.0 };
+
+    RasterArea *priv = rasterarea->priv;
+    return (priv->grain_number_color
+            ? priv->grain_number_color
+            : &grain_number_color_default);
 }
 
 /**

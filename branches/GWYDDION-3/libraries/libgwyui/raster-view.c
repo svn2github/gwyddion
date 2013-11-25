@@ -183,6 +183,8 @@ static void       range_method_changed        (GwyRasterView *rasterview,
                                                GwyChoice *choice);
 static void       range_value_set             (GwyRasterView *rasterview,
                                                GtkEntry *entry);
+static void       get_area_user_range_or_range(GwyRasterArea *area,
+                                               GwyRange *range);
 
 static GParamSpec *properties[N_PROPS];
 
@@ -373,9 +375,6 @@ gwy_raster_view_dispose(GObject *object)
     set_field(rasterview, NULL);
     set_hadjustment(rasterview, NULL);
     set_vadjustment(rasterview, NULL);
-    GWY_OBJECT_UNREF(priv->coloraxis);
-    GWY_OBJECT_UNREF(priv->ranges_tab);
-    GWY_OBJECT_UNREF(priv->gradients_tab);
     if (priv->ruler_popup) {
         gtk_widget_destroy(GTK_WIDGET(priv->ruler_popup));
         priv->ruler_popup = NULL;
@@ -959,9 +958,10 @@ coloraxis_modify_range(GwyRasterView *rasterview,
     GwyRasterArea *area = rasterview->priv->area;
     RasterView *priv = rasterview->priv;
     GwyRange arearange;
-    gwy_raster_area_get_user_range(area, &arearange);
+
+    get_area_user_range_or_range(area, &arearange);
     if (gwy_equal(reqrange, &arearange))
-        return;
+           return;
 
     if (priv->requesting_axis_range) {
         g_warning("Recursion in false colour mapping range area/axis sync?!");
@@ -1382,14 +1382,15 @@ range_value_set(GwyRasterView *rasterview,
 {
     RasterView *priv = rasterview->priv;
     const gchar *text = gtk_entry_get_text(entry);
-    GwyRange arearange;
-    gwy_raster_area_get_user_range(priv->area, &arearange);
     gchar *end;
     gdouble newvalue = g_strtod(text, &end);
     if ((const gchar*)end == text) {
         // TODO: Fix the entry back to the current range.
         return;
     }
+
+    GwyRange arearange;
+    get_area_user_range_or_range(priv->area, &arearange);
 
     newvalue *= gwy_value_format_get_base(priv->range_vf);
     if (entry == priv->range_from.value)
@@ -1398,6 +1399,17 @@ range_value_set(GwyRasterView *rasterview,
         arearange.to = newvalue;
 
     gwy_raster_area_set_user_range(priv->area, &arearange);
+}
+
+static void
+get_area_user_range_or_range(GwyRasterArea *area,
+                             GwyRange *range)
+{
+    const GwyRange *urange = gwy_raster_area_get_user_range(area);
+    if (urange)
+        *range = *urange;
+    else
+        gwy_raster_area_get_range(area, range);
 }
 
 /**
