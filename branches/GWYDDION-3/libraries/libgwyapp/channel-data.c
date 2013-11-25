@@ -31,12 +31,26 @@ enum {
     PROP_FIELD,
     PROP_GRADIENT_NAME,
     PROP_MASK_ID,
-    N_PROPS
+    N_PROPS,
+    PROP_RANGE_FROM_METHOD,
+    PROP_RANGE_TO_METHOD,
+    PROP_MASK_COLOR,
+    PROP_USER_RANGE,
+    PROP_ZOOM,
+    PROP_REAL_ASPECT_RATIO,
+    N_TOTAL_PROPS
 };
 
 struct _GwyChannelDataPrivate {
+    /* RasterArea settings */
     GwyField *field;
     gchar *gradient_name;
+    GwyColorRangeType range_from_method;
+    GwyColorRangeType range_to_method;
+    GwyRGBA mask_color;
+    GwyRange user_range;
+    gdouble zoom;
+    gboolean real_aspect_ratio;
     guint mask_id;
 
     GwyRasterArea *rasterarea;
@@ -69,6 +83,18 @@ static gboolean     set_gradient_name                (GwyChannelData *channeldat
                                                       const gchar *name);
 static gboolean     set_mask_id                      (GwyChannelData *channeldata,
                                                       guint id);
+static gboolean     set_range_from_method            (GwyChannelData *channeldata,
+                                                      GwyColorRangeType method);
+static gboolean     set_range_to_method              (GwyChannelData *channeldata,
+                                                      GwyColorRangeType method);
+static gboolean     set_mask_color                   (GwyChannelData *channeldata,
+                                                      const GwyRGBA *color);
+static gboolean     set_user_range                   (GwyChannelData *channeldata,
+                                                      const GwyRange *range);
+static gboolean     set_zoom                         (GwyChannelData *channeldata,
+                                                      gdouble zoom);
+static gboolean     set_real_aspect_ratio            (GwyChannelData *channeldata,
+                                                      gdouble setting);
 static void         raster_area_notify               (GwyChannelData *channeldata,
                                                       GParamSpec *pspec,
                                                       GwyRasterArea *rasterarea);
@@ -78,8 +104,10 @@ static void         show_in_raster_area              (GwyChannelData *channeldat
 static void         unshow_in_raster_area            (GwyChannelData *channeldata,
                                                       gboolean destroying);
 static void         update_raster_area_gradient      (GwyChannelData *channeldata);
+static void         update_raster_area_property      (GwyChannelData *channeldata,
+                                                      guint propid);
 
-static GParamSpec *properties[N_PROPS];
+static GParamSpec *properties[N_TOTAL_PROPS];
 
 G_DEFINE_TYPE(GwyChannelData, gwy_channel_data, GWY_TYPE_DATA_ITEM);
 
@@ -125,6 +153,16 @@ gwy_channel_data_class_init(GwyChannelDataClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    gwy_replicate_class_properties(gobject_class, GWY_TYPE_RASTER_AREA,
+                                   properties, N_PROPS,
+                                   "range-from-method",
+                                   "range-to-method",
+                                   "mask-color",
+                                   "user-range",
+                                   "zoom",
+                                   "real-aspect-ratio",
+                                   NULL);
 }
 
 static void
@@ -177,6 +215,30 @@ gwy_channel_data_set_property(GObject *object,
         set_mask_id(channeldata, g_value_get_uint(value));
         break;
 
+        case PROP_RANGE_FROM_METHOD:
+        set_range_from_method(channeldata, g_value_get_enum(value));
+        break;
+
+        case PROP_RANGE_TO_METHOD:
+        set_range_to_method(channeldata, g_value_get_enum(value));
+        break;
+
+        case PROP_MASK_COLOR:
+        set_mask_color(channeldata, g_value_get_boxed(value));
+        break;
+
+        case PROP_USER_RANGE:
+        set_user_range(channeldata, g_value_get_boxed(value));
+        break;
+
+        case PROP_ZOOM:
+        set_zoom(channeldata, g_value_get_double(value));
+        break;
+
+        case PROP_REAL_ASPECT_RATIO:
+        set_real_aspect_ratio(channeldata, g_value_get_boolean(value));
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -203,6 +265,30 @@ gwy_channel_data_get_property(GObject *object,
 
         case PROP_MASK_ID:
         g_value_set_uint(value, priv->mask_id);
+        break;
+
+        case PROP_RANGE_FROM_METHOD:
+        g_value_set_enum(value, priv->range_from_method);
+        break;
+
+        case PROP_RANGE_TO_METHOD:
+        g_value_set_enum(value, priv->range_to_method);
+        break;
+
+        case PROP_MASK_COLOR:
+        g_value_set_boxed(value, &priv->mask_color);
+        break;
+
+        case PROP_USER_RANGE:
+        g_value_set_boxed(value, &priv->user_range);
+        break;
+
+        case PROP_ZOOM:
+        g_value_set_double(value, priv->zoom);
+        break;
+
+        case PROP_REAL_ASPECT_RATIO:
+        g_value_set_boolean(value, priv->real_aspect_ratio);
         break;
 
         default:
@@ -506,9 +592,7 @@ set_gradient_name(GwyChannelData *channeldata,
     if (!gwy_assign_string(&priv->gradient_name, name))
         return FALSE;
 
-    if (priv->rasterarea && !priv->rasterarea_updating)
-        update_raster_area_gradient(channeldata);
-
+    update_raster_area_gradient(channeldata);
     return TRUE;
 }
 
@@ -528,6 +612,82 @@ set_mask_id(GwyChannelData *channeldata,
     // cross-notification.  This means a GwyDataList needs detailed signals in
     // addition not just those required for GtkTreeModel, with integer-like
     // details – not good.
+    return TRUE;
+}
+
+static gboolean
+set_range_from_method(GwyChannelData *channeldata,
+                      GwyColorRangeType method)
+{
+    ChannelData *priv = channeldata->priv;
+    if (method == priv->range_from_method)
+        return FALSE;
+
+    priv->range_from_method = method;
+    update_raster_area_property(channeldata, PROP_RANGE_FROM_METHOD);
+    return TRUE;
+}
+
+static gboolean
+set_range_to_method(GwyChannelData *channeldata,
+                    GwyColorRangeType method)
+{
+    ChannelData *priv = channeldata->priv;
+    if (method == priv->range_to_method)
+        return FALSE;
+
+    priv->range_to_method = method;
+    update_raster_area_property(channeldata, PROP_RANGE_TO_METHOD);
+    return TRUE;
+}
+
+static gboolean
+set_mask_color(GwyChannelData *channeldata,
+               const GwyRGBA *color)
+{
+    ChannelData *priv = channeldata->priv;
+    if (!gwy_assign_boxed((gpointer*)&priv->mask_color, color, GWY_TYPE_RGBA))
+        return FALSE;
+
+    update_raster_area_property(channeldata, PROP_MASK_COLOR);
+    return TRUE;
+}
+
+static gboolean
+set_user_range(GwyChannelData *channeldata,
+               const GwyRange *range)
+{
+    ChannelData *priv = channeldata->priv;
+    if (!gwy_assign_boxed((gpointer*)&priv->user_range, range, GWY_TYPE_RANGE))
+        return FALSE;
+
+    update_raster_area_property(channeldata, PROP_USER_RANGE);
+    return TRUE;
+}
+
+static gboolean
+set_zoom(GwyChannelData *channeldata,
+         gdouble zoom)
+{
+    ChannelData *priv = channeldata->priv;
+    if (zoom == priv->zoom)
+        return FALSE;
+
+    priv->zoom = zoom;
+    update_raster_area_property(channeldata, PROP_ZOOM);
+    return TRUE;
+}
+
+static gboolean
+set_real_aspect_ratio(GwyChannelData *channeldata,
+                      gdouble setting)
+{
+    ChannelData *priv = channeldata->priv;
+    if (setting == priv->real_aspect_ratio)
+        return FALSE;
+
+    priv->real_aspect_ratio = setting;
+    update_raster_area_property(channeldata, PROP_REAL_ASPECT_RATIO);
     return TRUE;
 }
 
@@ -560,6 +720,27 @@ raster_area_notify(GwyChannelData *channeldata,
         else
             gwy_channel_data_set_gradient_name(channeldata, NULL);
     }
+    else if (gwy_strequal(pspec->name, "range-from-method"))
+        set_range_from_method(channeldata,
+                              gwy_raster_area_get_range_from_method(rasterarea));
+    else if (gwy_strequal(pspec->name, "range-to-method"))
+        set_range_to_method(channeldata,
+                            gwy_raster_area_get_range_to_method(rasterarea));
+    else if (gwy_strequal(pspec->name, "mask-color"))
+        set_mask_color(channeldata, gwy_raster_area_get_mask_color(rasterarea));
+    else if (gwy_strequal(pspec->name, "user-range")) {
+        set_user_range(channeldata, gwy_raster_area_get_user_range(rasterarea));
+    }
+    else if (gwy_strequal(pspec->name, "zoom")) {
+        gdouble zoom;
+        g_object_get(rasterarea, "zoom", &zoom, NULL);
+        set_zoom(channeldata, zoom);
+    }
+    else if (gwy_strequal(pspec->name, "real-aspect-ratio")) {
+        gboolean real_aspect_ratio;
+        g_object_get(rasterarea, "real-aspect-ratio", &real_aspect_ratio, NULL);
+        set_real_aspect_ratio(channeldata, real_aspect_ratio);
+    }
 
     priv->rasterarea_updating = FALSE;
 }
@@ -583,18 +764,25 @@ show_in_raster_area(GwyChannelData *channeldata)
     g_printerr("SHOW %p %p\n", channeldata, rasterarea);
 
     g_object_set_qdata(G_OBJECT(rasterarea), GWY_DATA_ITEM_QUARK, channeldata);
-    priv->rasterarea_updating = TRUE;
 
-    if (priv->field)
+    if (priv->field) {
+        priv->rasterarea_updating = TRUE;
         gwy_raster_area_set_field(rasterarea, priv->field);
+        priv->rasterarea_updating = FALSE;
+    }
 
     update_raster_area_gradient(channeldata);
+    update_raster_area_property(channeldata, PROP_RANGE_FROM_METHOD);
+    update_raster_area_property(channeldata, PROP_RANGE_TO_METHOD);
+    update_raster_area_property(channeldata, PROP_MASK_COLOR);
+    update_raster_area_property(channeldata, PROP_USER_RANGE);
+    update_raster_area_property(channeldata, PROP_ZOOM);
+    update_raster_area_property(channeldata, PROP_REAL_ASPECT_RATIO);
 
     if (priv->mask_id != GWY_DATA_ITEM_MAX_ID) {
         // TODO
     }
 
-    priv->rasterarea_updating = FALSE;
     // TODO: Connect backwards.  A number of properties can be changed in the
     // GUI and we need to be notified and reflect them.
 }
@@ -633,14 +821,36 @@ static void
 update_raster_area_gradient(GwyChannelData *channeldata)
 {
     ChannelData *priv = channeldata->priv;
-    g_return_if_fail(priv->rasterarea);
+    if (!priv->rasterarea || priv->rasterarea_updating)
+        return;
 
     GwyGradient *grad = NULL;
     if (priv->gradient_name) {
         GwyInventory *gradients = gwy_gradients();
         grad = gwy_inventory_get(gradients, priv->gradient_name);
     }
+    priv->rasterarea_updating = TRUE;
     gwy_raster_area_set_gradient(priv->rasterarea, grad);
+    priv->rasterarea_updating = FALSE;
+}
+
+static void
+update_raster_area_property(GwyChannelData *channeldata, guint propid)
+{
+    ChannelData *priv = channeldata->priv;
+    if (!priv->rasterarea || priv->rasterarea_updating)
+        return;
+
+    GParamSpec *pspec = properties[propid];
+    const gchar *name = pspec->name;
+    GValue value = G_VALUE_INIT;
+    priv->rasterarea_updating = TRUE;
+    g_value_init(&value, pspec->value_type);
+    g_printerr("%s %s\n", name, G_PARAM_SPEC_TYPE_NAME(pspec));
+    g_object_get_property(G_OBJECT(channeldata), name, &value);
+    g_object_set_property(G_OBJECT(priv->rasterarea), name, &value);
+    g_value_unset(&value);
+    priv->rasterarea_updating = FALSE;
 }
 
 /************************** Documentation ****************************/
