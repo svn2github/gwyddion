@@ -239,6 +239,8 @@ gwy_assign_string(gchar **target,
  * gwy_assign_boxed:
  * @target: Pointer to target boxed, typically a struct field.
  * @newvalue: New value of the boxed, may be %NULL.
+ * @boxed_type: Type of the boxed value.  It must be a registered serialisable
+ *              type (see gwy_serializable_boxed_register_static()).
  *
  * Assigns a serialisable boxed value, checking for equality and handling
  * %NULL<!-- -->s.
