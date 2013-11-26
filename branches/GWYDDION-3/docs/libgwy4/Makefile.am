@@ -1,8 +1,13 @@
 # Process this file with automake to produce Makefile.in
 # $Id$
 
+# The directory containing the source code. Relative to $(top_srcdir).
+# gtk-doc will search all .c & .h files beneath here for inline comments
+# documenting the functions and macros.
+DOC_SOURCE_DIR = libgwy
+
 # The name of the module, e.g. 'glib'.
-DOC_MODULE = libgwy
+DOC_MODULE = libgwy4
 
 # Source files to ignore, put both headers and code here.  Also directories.
 IGNORE_SRC = libgwy.h tests benchmarks
@@ -13,7 +18,7 @@ ADDOBJECTS_OPTIONS = --standard-files=types
 
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html
-FIXXREF_OPTIONS = --extra-dir=../libgwyui/html --extra-dir=../libgwyapp/html
+FIXXREF_OPTIONS = --extra-dir=../libgwyui4/html --extra-dir=../libgwyapp4/html
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png

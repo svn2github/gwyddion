@@ -19,7 +19,7 @@ cat >autogen.ignore <<':'
 ^configure\.ac:[0-9]+: installing [`']build/[-a-z.]+'
 ^Makefile\.am: installing [`']\./INSTALL'
 ^libraries/libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
-^docs/libgwy[a-z]*/Makefile\.am: installing [`']build/depcomp'
+^docs/libgwy[a-z]*4/Makefile\.am: installing [`']build/depcomp'
 ':'
 :
 
@@ -159,7 +159,7 @@ function extract_build_introspection() {
 function extract_documentation_stats() {
   logfile=build_documentation.log
   htmlfile=documentation-stats.html
-  logs=$(echo "$libdirs" | sed -r "s:[a-z0-9]+:$projectdir/docs/\\0/\\0-undocumented.txt:g")
+  logs=$(echo "$libdirs" | sed -r "s:[a-z0-9]+:$projectdir/docs/\\04/\\04-undocumented.txt:g")
   "$projectdir/build/documentation-stats.py" $logs >"$htmlfile"
   cp $logs "$logdir"
 }

@@ -157,9 +157,9 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{pkgconfigdir}/libgwy4.pc
 %{pkgconfigdir}/libgwyui4.pc
 %{pkgconfigdir}/libgwyapp4.pc
-%doc %{gtkdocdir}/libgwy/*
-%doc %{gtkdocdir}/libgwyui/*
-%doc %{gtkdocdir}/libgwyapp/*
-%doc %dir %{gtkdocdir}/libgwy
-%doc %dir %{gtkdocdir}/libgwyui
-%doc %dir %{gtkdocdir}/libgwyapp
+%doc %{gtkdocdir}/libgwy4/*
+%doc %{gtkdocdir}/libgwyui4/*
+%doc %{gtkdocdir}/libgwyapp4/*
+%doc %dir %{gtkdocdir}/libgwy4
+%doc %dir %{gtkdocdir}/libgwyui4
+%doc %dir %{gtkdocdir}/libgwyapp4

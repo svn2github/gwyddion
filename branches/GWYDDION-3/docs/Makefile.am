@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = libgwy libgwyui libgwyapp
+SUBDIRS = libgwy4 libgwyui4 libgwyapp4
 
 EXTRA_DIST = style.css
 

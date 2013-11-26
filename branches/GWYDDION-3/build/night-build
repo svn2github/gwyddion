@@ -125,7 +125,7 @@ function check_marshallers() {
 
 function check_doc_sections() {
   for dir in $libdirs; do
-    pushd docs/$dir >/dev/null
+    pushd docs/${dir}4 >/dev/null
     ../../build/check-doc-sections.sh
     popd >/dev/null
   done

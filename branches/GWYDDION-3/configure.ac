@@ -41,9 +41,9 @@ AC_CONFIG_FILES([
   po-libgwyui/Makefile.in
   po-libgwyapp/Makefile.in
   docs/Makefile
-  docs/libgwy/Makefile
-  docs/libgwyui/Makefile
-  docs/libgwyapp/Makefile
+  docs/libgwy4/Makefile
+  docs/libgwyui4/Makefile
+  docs/libgwyapp4/Makefile
   data/Makefile
   gwyddion4.spec:data/gwyddion4.spec.in
 ])

@@ -1,11 +1,6 @@
 # Generic gtk-doc rules.
 # $Id$
 
-# The directory containing the source code. Relative to $(top_srcdir).
-# gtk-doc will search all .c & .h files beneath here for inline comments
-# documenting the functions and macros.
-DOC_SOURCE_DIR = $(DOC_MODULE)
-
 # The top-level SGML file. You can change this if you want to.
 DOC_MAIN_SGML_FILE = $(DOC_MODULE).xml
 

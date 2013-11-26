@@ -11,7 +11,7 @@ stat_types = {
 total_width = 200
 
 def parse(filename):
-    group = re.sub(r'.*/(?P<group>\w+)-undocumented\.txt', r'\g<group>', filename)
+    group = re.sub(r'.*/(?P<group>\w+)4-undocumented\.txt', r'\g<group>', filename)
     stat = {'group': group}
     total = 0
     for line in file(filename):
