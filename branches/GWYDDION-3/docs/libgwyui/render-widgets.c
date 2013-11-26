@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -205,9 +205,61 @@ create_adjust_bar(void)
     GtkAdjustment *adj = gtk_adjustment_new(55.0, 0.0, 99.0, 0.1, 1.0, 0.0);
     GtkWidget *widget = g_object_new(GWY_TYPE_ADJUST_BAR,
                                      "adjustment", adj,
-                                     "use-underline", TRUE,
-                                     "label", "Adjustment value",
                                      NULL);
+    GtkWidget *label = gtk_bin_get_child(GTK_BIN(widget));
+    gtk_label_set_text_with_mnemonic(GTK_LABEL(label), "Adjustment value");
+    gtk_widget_set_size_request(widget, MEDIUM_WIDTH, -1);
+    gtk_widget_show_all(widget);
+
+    return widget;
+}
+
+static GtkWidget*
+create_graph_area(void)
+{
+    GwyRange xrange = { -2.0, 1.2 }, yrange = { -0.2, 1.2 };
+    gdouble sigma = 0.8;
+    GwyLine *line = gwy_line_new_sized(120, FALSE);
+    gwy_line_set_real(line, xrange.to - xrange.from);
+    gwy_line_set_offset(line, xrange.from);
+    for (guint i = 0; i < line->res; i++) {
+        gdouble x = (i + 0.5)*gwy_line_dx(line) + line->off;
+        g_printerr("%g %g\n", x, exp(-0.5*gwy_powi(x/sigma, 2)));
+        line->data[i] = exp(-0.5*gwy_powi(x/sigma, 2));
+    }
+    GwyRand *rng = gwy_rand_new_with_seed(42);
+    GwyCurve *curve = gwy_curve_new_sized(20);
+    for (guint i = 0; i < curve->n; i++) {
+        gdouble x = gwy_rand_double(rng)*(xrange.to - xrange.from) + xrange.from;
+        gdouble y = 0.1*gwy_rand_normal(rng) + exp(-0.5*gwy_powi(x/sigma, 2));
+        curve->data[i] = (GwyXY){ x, y };
+    }
+    gwy_curve_sort(curve);
+
+    GtkWidget *widget = g_object_new(GWY_TYPE_GRAPH_AREA,
+                                     "xrange", &xrange,
+                                     "yrange", &yrange,
+                                     NULL);
+    gtk_widget_set_size_request(widget, MEDIUM_WIDTH, MEDIUM_HEIGHT);
+
+    GwyGraphCurve *gc1 = g_object_new(GWY_TYPE_GRAPH_CURVE,
+                                      "curve", curve,
+                                      "plot-type", GWY_PLOT_POINTS,
+                                      "point-type", GWY_GRAPH_POINT_CROSS,
+                                      "point-color", gwy_rgba_get_preset_color(1),
+                                      NULL);
+    gwy_graph_area_add(GWY_GRAPH_AREA(widget), gc1);
+
+    GwyGraphCurve *gc2 = g_object_new(GWY_TYPE_GRAPH_CURVE,
+                                      "line", line,
+                                      "plot-type", GWY_PLOT_LINE,
+                                      "line-color", gwy_rgba_get_preset_color(3),
+                                      NULL);
+    gwy_graph_area_add(GWY_GRAPH_AREA(widget), gc2);
+
+    g_object_unref(line);
+    g_object_unref(curve);
+
     return widget;
 }
 
@@ -222,6 +274,7 @@ main(int argc, char *argv[])
     ctors = g_slist_prepend(ctors, create_spin_button);
     ctors = g_slist_prepend(ctors, create_adjust_bar);
     ctors = g_slist_prepend(ctors, create_raster_area);
+    ctors = g_slist_prepend(ctors, create_graph_area);
 
     dummywindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_widget_show(dummywindow);

@@ -20,6 +20,7 @@ FIXXREF_OPTIONS = --extra-dir=../libgwy/html
 HTML_IMAGES = \
 	$(srcdir)/images/GwyAdjustBar.png \
 	$(srcdir)/images/GwyColorAxis.png \
+	$(srcdir)/images/GwyGraphArea.png \
 	$(srcdir)/images/GwyRasterArea.png \
 	$(srcdir)/images/GwyRuler.png \
 	$(srcdir)/images/GwySpinButton.png
