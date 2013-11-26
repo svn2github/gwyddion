@@ -263,6 +263,37 @@ test_object_utils_assign_string(void)
     // can only be done in valgrind...
 }
 
+void
+test_object_utils_assign_boxed(void)
+{
+    GwyRange *p = NULL;
+    GType type = GWY_TYPE_RANGE;
+
+    g_assert(!gwy_assign_boxed((gpointer*)&p, NULL, type));
+    g_assert(p == NULL);
+
+    g_assert(gwy_assign_boxed((gpointer*)&p, &(GwyRange){ 0.0, 1.0 }, type));
+    g_assert(p);
+    g_assert_cmpfloat(p->from, ==, 0.0);
+    g_assert_cmpfloat(p->to, ==, 1.0);
+
+    g_assert(!gwy_assign_boxed((gpointer*)&p, &(GwyRange){ 0.0, 1.0 } , type));
+    g_assert(p);
+    g_assert_cmpfloat(p->from, ==, 0.0);
+    g_assert_cmpfloat(p->to, ==, 1.0);
+
+    g_assert(gwy_assign_boxed((gpointer*)&p, &(GwyRange){ 0.0, 0.5 }, type));
+    g_assert(p);
+    g_assert_cmpfloat(p->from, ==, 0.0);
+    g_assert_cmpfloat(p->to, ==, 0.5);
+
+    g_assert(gwy_assign_boxed((gpointer*)&p, NULL, type));
+    g_assert(p == NULL);
+
+    // FIXME: We would like to check that there are no leaks etc.  Probably
+    // can only be done in valgrind...
+}
+
 static guint destroy1_called = 0, destroy2_called = 0;
 
 static void
