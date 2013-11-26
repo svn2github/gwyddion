@@ -610,6 +610,7 @@ gwy_gflags_value_nick(GType flagstype,
 /**
  * SECTION: object-utils
  * @title: Object utils
+ * @section_id: libgwy4-object-utils
  * @short_description: GObject utility functions
  **/
 

@@ -1091,7 +1091,7 @@ type_info_free(gpointer p)
 
 /**
  * SECTION: module
- * @section_id: libgwyapp-module
+ * @section_id: libgwyapp4-module
  * @title: Module registration
  * @short_description: Loading and registration of modules
  *

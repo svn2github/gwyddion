@@ -418,6 +418,7 @@ disconnect_visibility_toggle(GObject *toggle,
 /**
  * SECTION: widget-utils
  * @title: Widget utils
+ * @section_id: libgwyui4-widget-utils
  * @short_description: Utility widget functions missing from Gtk+
  **/
 

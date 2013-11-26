@@ -836,7 +836,8 @@ gwy_interpolation_shift_block_1d(gdouble *data,
 
 /**
  * SECTION: interpolation
- * @title: interpolation
+ * @title: Interpolation
+ * @section_id: libgwy4-interpolation
  * @short_description: Low-level interpolation functions
  *
  * Data interpolation is usually pixel-like in Gwyddion, not function-like.

@@ -599,6 +599,7 @@ gwy_str_line_iter_lineno(const GwyStrLineIter *iter)
 /**
  * SECTION: strfuncs
  * @title: String functions
+ * @section_id: libgwy4-strfuncs
  * @short_description: String utility functions
  **/
 

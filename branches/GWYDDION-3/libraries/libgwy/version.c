@@ -75,7 +75,8 @@ gwy_version_string(void)
 
 /**
  * SECTION: version
- * @title: version
+ * @title: Version
+ * @section_id: libgwy4-version
  * @short_description: Version information
  *
  * Macros like %GWY_VERSION_MAJOR can be used for compile-time version checks,

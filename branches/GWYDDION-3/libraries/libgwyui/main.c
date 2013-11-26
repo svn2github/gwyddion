@@ -71,7 +71,8 @@ process_ui_gresource(G_GNUC_UNUSED gpointer arg)
 
 /**
  * SECTION: main
- * @title: main
+ * @title: Main
+ * @section_id: libgwyui4-main
  * @short_description: Library-level functions
  **/
 

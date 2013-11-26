@@ -1754,7 +1754,8 @@ G_DEFINE_QUARK(gwy-deserialize-error-quark, gwy_deserialize_error);
 
 /**
  * SECTION: serialize
- * @title: serialize
+ * @title: Serialize
+ * @section_id: libgwy4-serialize
  * @short_description: Serialisers and deserialisers
  * @see_also: #GwySerializable
  *

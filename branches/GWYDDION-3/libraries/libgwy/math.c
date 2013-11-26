@@ -1645,7 +1645,8 @@ gwy_assertion_message_floatval(const char *domain,
 
 /**
  * SECTION: math
- * @title: math
+ * @title: Math
+ * @section_id: libgwy4-math
  * @short_description: Mathematical functions
  *
  * Some of the less standard but useful mathematical functions is provided to

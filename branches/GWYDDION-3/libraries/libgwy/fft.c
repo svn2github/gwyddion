@@ -421,6 +421,7 @@ _gwy_fft_rigour(void)
 /**
  * SECTION: fft
  * @title: FFT
+ * @section_id: libgwy4-fft
  * @short_description: Fourier Transform tools
  **/
 

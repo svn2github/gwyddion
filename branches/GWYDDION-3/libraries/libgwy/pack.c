@@ -967,7 +967,8 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
 
 /**
  * SECTION: pack
- * @title: pack
+ * @title: Pack
+ * @section_id: libgwy4-pack
  * @short_description: Binary data packing and unpacking
  *
  * Format specifiers must start with a byte order mark.

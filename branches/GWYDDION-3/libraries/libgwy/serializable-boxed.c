@@ -232,7 +232,8 @@ gwy_serializable_boxed_construct(GType type,
 
 /**
  * SECTION: serializable-boxed
- * @title: serializable-boxed
+ * @title: Serializable boxed
+ * @section_id: libgwy4-serializable-boxed
  * @short_description: Making boxed types serialisable
  *
  * The serialisable boxed protocol is an analogue of the serialisable object

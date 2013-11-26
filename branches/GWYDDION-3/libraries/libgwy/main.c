@@ -935,7 +935,8 @@ gwy_tune_algorithms(const gchar *key,
 
 /**
  * SECTION: main
- * @title: main
+ * @title: Main
+ * @section_id: libgwy4-main
  * @short_description: Library-level functions
  *
  * Note that none of the directories returned by the path finding functions is

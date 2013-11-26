@@ -27,7 +27,8 @@
 
 /**
  * SECTION: macros
- * @title: macros
+ * @title: Macros
+ * @section_id: libgwy4-macros
  * @short_description: Miscellaneous utility macros
  *
  * Several macros are wrappers of resource freeing functions.  They differ from

@@ -383,7 +383,8 @@ register_icon_size(const gchar *name, guint i)
 
 /**
  * SECTION: stock
- * @title: stock
+ * @title: Stock
+ * @section_id: libgwyui4-stock
  * @short_description: Stock items
  *
  * Gwyddion registers a number of stock icons and also some new icon sizes.
