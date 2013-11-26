@@ -584,6 +584,8 @@ field/fft/inversion/r2c/backward
 field/fft/inversion/i2c/forward
 field/fft/inversion/i2c/backward
 field/fft/sine
+# After field, it derives from it.
+object-utils/replicate-properties
 surface/serialize
 surface/serialize/failure/odd
 surface/props

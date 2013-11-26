@@ -501,11 +501,14 @@ gwy_replicate_class_properties(GObjectClass *klass,
         if (!sourcepspec) {
             g_critical("Class %s has no property called %s.",
                        G_OBJECT_CLASS_NAME(sourceclass), name);
+            id++;
             continue;
         }
         GParamSpec *pspec = replicate_param_spec(sourcepspec);
-        if (!pspec)
+        if (!pspec) {
+            id++;
             continue;
+        }
 
         g_object_class_install_property(klass, id, pspec);
         if (properties)

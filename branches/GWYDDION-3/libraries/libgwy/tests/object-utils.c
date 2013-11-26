@@ -34,11 +34,11 @@ typedef struct _GwyPropTestClass GwyPropTestClass;
     (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_PROP_TEST, GwyPropTestClass))
 
 struct _GwyPropTestClass {
-    GwyFitterClass g_object_class;
+    GwyFitterClass fitter_class;
 };
 
 struct _GwyPropTest {
-    GwyFitter g_object;
+    GwyFitter fitter;
     guint set_n_params;
     guint get_n_params;
     guint set_lambda_start;
@@ -46,15 +46,15 @@ struct _GwyPropTest {
 };
 
 enum {
-    PROP_0,
+    PROP_0_TEST,
     PROP_LAMBDA_START,
     PROP_N_PARAMS,
-    N_PROPS
+    N_PROPS_TEST
 };
 
 G_DEFINE_TYPE(GwyPropTest, gwy_prop_test, GWY_TYPE_FITTER);
 
-static GParamSpec *properties[N_PROPS];
+static GParamSpec *properties_prop[N_PROPS_TEST];
 
 static void
 must_not_be_called(void)
@@ -120,15 +120,15 @@ gwy_prop_test_class_init(GwyPropTestClass *klass)
     gobject_class->set_property = gwy_prop_test_set_property;
     gobject_class->get_property = gwy_prop_test_get_property;
 
-    gwy_override_class_properties(gobject_class, properties,
+    gwy_override_class_properties(gobject_class, properties_prop,
                                   "lambda-start", PROP_LAMBDA_START,
                                   "n-params", PROP_N_PARAMS,
                                   NULL);
-    g_assert(properties[PROP_0] == NULL);
-    g_assert(properties[PROP_LAMBDA_START] != NULL);
-    g_assert_cmpstr(properties[PROP_LAMBDA_START]->name, ==, "lambda-start");
-    g_assert(properties[PROP_N_PARAMS] != NULL);
-    g_assert_cmpstr(properties[PROP_N_PARAMS]->name, ==, "n-params");
+    g_assert(properties_prop[PROP_0_TEST] == NULL);
+    g_assert(properties_prop[PROP_LAMBDA_START] != NULL);
+    g_assert_cmpstr(properties_prop[PROP_LAMBDA_START]->name, ==, "lambda-start");
+    g_assert(properties_prop[PROP_N_PARAMS] != NULL);
+    g_assert_cmpstr(properties_prop[PROP_N_PARAMS]->name, ==, "n-params");
 }
 
 static void
@@ -159,6 +159,182 @@ test_object_utils_override_properties(void)
     g_assert_cmpuint(proptest->set_n_params, ==, 1);
     g_assert_cmpuint(proptest->get_lambda_start, ==, 0);
     g_assert_cmpuint(proptest->get_n_params, ==, 1);
+    g_object_unref(object);
+}
+
+GType gwy_repl_test_get_type(void) G_GNUC_CONST;
+
+typedef struct _GwyReplTest      GwyReplTest;
+typedef struct _GwyReplTestClass GwyReplTestClass;
+
+#define GWY_TYPE_REPL_TEST \
+    (gwy_repl_test_get_type())
+#define GWY_REPL_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_REPL_TEST, GwyReplTest))
+#define GWY_IS_REPL_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_REPL_TEST))
+#define GWY_REPL_TEST_GET_CLASS(obj) \
+    (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_REPL_TEST, GwyReplTestClass))
+
+struct _GwyReplTestClass {
+    GObjectClass g_object_class;
+};
+
+struct _GwyReplTest {
+    GObject g_object;
+    gchar *name;
+    guint xres;
+    gdouble yreal;
+    GwyUnit *zunit;
+};
+
+enum {
+    PROP_0_REPL,
+    N_PROPS_REPL,
+    PROP_NAME = N_PROPS_REPL,
+    PROP_XRES,
+    PROP_YREAL,
+    PROP_ZUNIT,
+    N_TOTAL_PROPS_REPL
+};
+
+G_DEFINE_TYPE(GwyReplTest, gwy_repl_test, G_TYPE_OBJECT);
+
+static GParamSpec *properties_repl[N_TOTAL_PROPS_REPL];
+
+static void
+gwy_repl_test_set_property(GObject *object,
+                           guint prop_id,
+                           const GValue *value,
+                           G_GNUC_UNUSED GParamSpec *pspec)
+{
+    GwyReplTest *repltest = GWY_REPL_TEST(object);
+
+    switch (prop_id) {
+        case PROP_NAME:
+        gwy_assign_string(&repltest->name, g_value_get_string(value));
+        break;
+
+        case PROP_XRES:
+        repltest->xres = g_value_get_uint(value);
+        break;
+
+        case PROP_YREAL:
+        repltest->yreal = g_value_get_double(value);
+        break;
+
+        case PROP_ZUNIT:
+        gwy_set_member_object(repltest, g_value_get_object(value),
+                              GWY_TYPE_UNIT, &repltest->zunit,
+                              NULL);
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
+    }
+}
+
+static void
+gwy_repl_test_get_property(GObject *object,
+                           guint prop_id,
+                           GValue *value,
+                           G_GNUC_UNUSED GParamSpec *pspec)
+{
+    GwyReplTest *repltest = GWY_REPL_TEST(object);
+
+    switch (prop_id) {
+        case PROP_NAME:
+        g_value_set_string(value, repltest->name);
+        break;
+
+        case PROP_XRES:
+        g_value_set_uint(value, repltest->xres);
+        break;
+
+        case PROP_YREAL:
+        g_value_set_double(value, repltest->yreal);
+        break;
+
+        case PROP_ZUNIT:
+        g_value_set_object(value, repltest->zunit);
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
+    }
+}
+
+static void
+gwy_repl_test_dispose(GObject *object)
+{
+    GwyReplTest *repltest = GWY_REPL_TEST(object);
+    GWY_FREE(repltest->name);
+    GWY_OBJECT_UNREF(repltest->zunit);
+    G_OBJECT_CLASS(gwy_repl_test_parent_class)->dispose(object);
+}
+
+static void
+gwy_repl_test_class_init(GwyReplTestClass *klass)
+{
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    gobject_class->dispose = gwy_repl_test_dispose;
+    gobject_class->set_property = gwy_repl_test_set_property;
+    gobject_class->get_property = gwy_repl_test_get_property;
+
+    guint n = gwy_replicate_class_properties(gobject_class, GWY_TYPE_FIELD,
+                                             properties_repl, N_PROPS_REPL,
+                                             "name", "x-res", "y-real", "zunit",
+                                             NULL);
+    g_assert_cmpuint(n, ==, N_TOTAL_PROPS_REPL);
+
+    g_assert(properties_repl[PROP_0_REPL] == NULL);
+    g_assert(properties_repl[PROP_NAME] != NULL);
+    g_assert_cmpstr(properties_repl[PROP_NAME]->name, ==, "name");
+    g_assert(properties_repl[PROP_XRES] != NULL);
+    g_assert_cmpstr(properties_repl[PROP_XRES]->name, ==, "x-res");
+    g_assert(properties_repl[PROP_YREAL] != NULL);
+    g_assert_cmpstr(properties_repl[PROP_YREAL]->name, ==, "y-real");
+    g_assert(properties_repl[PROP_ZUNIT] != NULL);
+    g_assert_cmpstr(properties_repl[PROP_ZUNIT]->name, ==, "zunit");
+}
+
+static void
+gwy_repl_test_init(GwyReplTest *repltest)
+{
+    repltest->xres = 144;
+    repltest->yreal = 1.0;
+    repltest->zunit = gwy_unit_new_from_string("m", NULL);
+}
+
+void
+test_object_utils_replicate_properties(void)
+{
+    GObject *object = g_object_new(GWY_TYPE_REPL_TEST, NULL);
+    GwyReplTest *repltest = GWY_REPL_TEST(object);
+
+    g_object_set(repltest, "name", "John Doe", NULL);
+    gchar *name = NULL;
+    g_object_get(repltest, "name", &name, NULL);
+    g_assert_cmpstr(name, ==, "John Doe");
+
+    guint xres = 0;
+    g_object_get(repltest, "x-res", &xres, NULL);
+    g_assert_cmpuint(xres, ==, 144);
+
+    g_object_set(repltest, "y-real", G_PI, NULL);
+    gdouble yreal = 0.0;
+    g_object_get(repltest, "y-real", &yreal, NULL);
+    g_assert_cmpfloat(yreal, ==, G_PI);
+
+    GwyUnit *unit = NULL, *unit2 = gwy_unit_new_from_string("m", NULL);
+    g_object_get(repltest, "zunit", &unit, NULL);
+    g_assert(gwy_unit_equal(unit, unit2));
+    g_object_unref(unit);
+    g_object_unref(unit2);
+
     g_object_unref(object);
 }
 
