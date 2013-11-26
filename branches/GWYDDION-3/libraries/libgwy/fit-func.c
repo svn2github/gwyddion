@@ -938,7 +938,7 @@ gwy_fit_func_list_builtins(void)
  * from the units of fitted data.
  *
  * It can wrap either a built-in fitting function (see
- * <link linkend='libgwy-builtin-fit-func'>Builtin fit funcs</link>
+ * <link linkend='libgwy4-builtin-fit-func'>Builtin fit funcs</link>
  * for a list) or user function resources
  * #GwyUserFitFunc.
  **/

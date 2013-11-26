@@ -341,7 +341,6 @@ gwy_cairo_asterisk(cairo_t *cr,
 
 /**
  * SECTION: cairo-utils
- * @section_id: libgwyui-Cairo-utils
  * @title: Cairo drawing utils
  * @short_description: Auxiliary and impedance matching functions for Cairo
  *                     drawing

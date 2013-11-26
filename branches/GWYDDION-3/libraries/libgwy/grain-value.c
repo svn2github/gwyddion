@@ -786,7 +786,7 @@ _gwy_grain_value_list_builtin_idents(void)
  * units of the data field.
  *
  * A #GwyGrainValue can wrap either a built-in grain value (see
- * <link linkend='libgwy-builtin-grain-value'>Builtin grain values</link>
+ * <link linkend='libgwy4-builtin-grain-value'>Builtin grain values</link>
  * for a list) or user grain value resources #GwyUserGrainValue.
  *
  * After evaluation using gwy_field_evaluate_grains() it holds the results,

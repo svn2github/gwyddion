@@ -2049,7 +2049,7 @@ gwy_container_take_object(GwyContainer *container,
  * The container stored the boxed type by value, i.e. a copy is made.
  *
  * The boxed type must implement the
- * <link linkend="libgwy-serializable-boxed">serializable boxed</link>.
+ * <link linkend="libgwy4-serializable-boxed">serializable boxed</link>.
  * to allow serialisation and other operations with the container.
  * |[
  * GwyRGBA color = { 0, 0, 0, 0 };

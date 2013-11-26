@@ -155,7 +155,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * SECTION: serializable
  * @title: GwySerializable
  * @short_description: Serialisable value-like object interface
- * @see_also: <link linkend="libgwy-serialize">serialize</link>
+ * @see_also: <link linkend="libgwy4-serialize">serialize</link>
  *
  * #GwySerializable is an abstract interface for data-like objects that can be
  * serialised and deserialised.  You can serialise any object implementing this
@@ -185,7 +185,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * <function>gwy_foo_assign<!-- -->()</function>, respectively, where
  * <literal>foo</literal> is the lowercase class name.
  *
- * <refsect2 id='libgwy-serializable-implementing'>
+ * <refsect2 id='libgwy4-serializable-implementing'>
  * <title>Implementing #GwySerializable</title>
  * <para>You can implement serialisation and deserialisation in your
  * classes.  There is a convenience macro %GWY_IMPLEMENT_SERIALIZABLE available

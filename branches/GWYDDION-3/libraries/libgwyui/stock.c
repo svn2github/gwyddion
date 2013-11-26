@@ -383,7 +383,6 @@ register_icon_size(const gchar *name, guint i)
 
 /**
  * SECTION: stock
- * @section_id: libgwyui-stock
  * @title: stock
  * @short_description: Stock items
  *

@@ -1767,7 +1767,7 @@ G_DEFINE_QUARK(gwy-deserialize-error-quark, gwy_deserialize_error);
  * nature.  For instance, a #GInitiallyUnowned will have a floating reference,
  * a plain #GObject will have a reference count of 1, etc.
  *
- * <refsect2 id='libgwy-serialize-details'>
+ * <refsect2 id='libgwy4-serialize-details'>
  * <title>Details of Serialization</title>
  * <para>The following information is not necessary for implementing
  * #GwySerializable interface in your classes, but it can help prevent wrong
