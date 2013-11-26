@@ -32,7 +32,7 @@ enum {
     PROP_GRADIENT_NAME,
     PROP_MASK_ID,
     N_PROPS,
-    PROP_RANGE_FROM_METHOD,
+    PROP_RANGE_FROM_METHOD = N_PROPS,
     PROP_RANGE_TO_METHOD,
     PROP_MASK_COLOR,
     PROP_USER_RANGE,
@@ -47,8 +47,8 @@ struct _GwyChannelDataPrivate {
     gchar *gradient_name;
     GwyColorRangeType range_from_method;
     GwyColorRangeType range_to_method;
-    GwyRGBA mask_color;
-    GwyRange user_range;
+    GwyRGBA *mask_color;
+    GwyRange *user_range;
     gdouble zoom;
     gboolean real_aspect_ratio;
     guint mask_id;
@@ -276,11 +276,11 @@ gwy_channel_data_get_property(GObject *object,
         break;
 
         case PROP_MASK_COLOR:
-        g_value_set_boxed(value, &priv->mask_color);
+        g_value_set_boxed(value, priv->mask_color);
         break;
 
         case PROP_USER_RANGE:
-        g_value_set_boxed(value, &priv->user_range);
+        g_value_set_boxed(value, priv->user_range);
         break;
 
         case PROP_ZOOM:
