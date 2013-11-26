@@ -1346,6 +1346,7 @@ listable_get(const GwyListable *listable,
  * SECTION: graph-area
  * @title: GwyGraphArea
  * @short_description: Area of graph containing the plots
+ * @image: GwyGraphArea.png
  *
  * #GwyGraphArea is the core part of a graph, containing the plotted data.
  * Individual plots in the graph are represented with #GwyGraphCurve objects
