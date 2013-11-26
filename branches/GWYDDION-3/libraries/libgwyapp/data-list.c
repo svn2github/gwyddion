@@ -19,6 +19,7 @@
 
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/listable.h"
 #include "libgwy/object-utils.h"
 #include "libgwyapp/types.h"
 #include "libgwyapp/channel-data.h"
@@ -52,6 +53,13 @@ static void                gwy_data_list_get_property(GObject *object,
                                                       guint prop_id,
                                                       GValue *value,
                                                       GParamSpec *pspec);
+static void                add_item_with_id          (GwyDataList *datalist,
+                                                      GwyDataItem *item,
+                                                      guint id);
+static void                item_thumbnail_changed    (GwyDataList *datalist,
+                                                      GwyDataItem *dataitem);
+static void                item_info_changed         (GwyDataList *datalist,
+                                                      GwyDataItem *dataitem);
 static gboolean            set_data_type             (GwyDataList *datalist,
                                                       GType type);
 static gboolean            set_file                  (GwyDataList *datalist,
@@ -329,11 +337,7 @@ gwy_data_list_add(GwyDataList *datalist,
                          GWY_DATA_ITEM_MAX_ID);
 
     guint id = advance_to_next_free_id(datalist);
-    g_object_ref_sink(dataitem);
-    g_object_freeze_notify(G_OBJECT(dataitem));
-    _gwy_data_item_set_list_and_id(dataitem, datalist, id);
-    gwy_array_append(GWY_ARRAY(datalist), &dataitem, 1);
-    g_object_thaw_notify(G_OBJECT(dataitem));
+    add_item_with_id(datalist, dataitem, id);
 
     return id;
 }
@@ -375,11 +379,7 @@ gwy_data_list_add_with_id(GwyDataList *datalist,
     if (find_item_index_by_id(datalist, id) != G_MAXUINT)
         return FALSE;
 
-    g_object_ref_sink(dataitem);
-    g_object_freeze_notify(G_OBJECT(dataitem));
-    _gwy_data_item_set_list_and_id(dataitem, datalist, id);
-    gwy_array_append(GWY_ARRAY(datalist), &dataitem, 1);
-    g_object_thaw_notify(G_OBJECT(dataitem));
+    add_item_with_id(datalist, dataitem, id);
 
     return TRUE;
 }
@@ -444,6 +444,42 @@ gwy_data_type_to_kind(GType type)
     }
     g_critical("Type 0x%lx is not a data item type.", (gulong)type);
     return GWY_DATA_UNKNOWN;
+}
+
+static void
+add_item_with_id(GwyDataList *datalist,
+                 GwyDataItem *dataitem,
+                 guint id)
+{
+    g_object_ref_sink(dataitem);
+    g_object_freeze_notify(G_OBJECT(dataitem));
+    _gwy_data_item_set_list_and_id(dataitem, datalist, id);
+    g_signal_connect_swapped(dataitem, "thumbnail-changed",
+                             G_CALLBACK(item_thumbnail_changed), datalist);
+    g_signal_connect_swapped(dataitem, "info-changed",
+                             G_CALLBACK(item_info_changed), datalist);
+    gwy_array_append(GWY_ARRAY(datalist), &dataitem, 1);
+    g_object_thaw_notify(G_OBJECT(dataitem));
+}
+
+static void
+item_thumbnail_changed(GwyDataList *datalist,
+                       GwyDataItem *dataitem)
+{
+    guint id = gwy_data_item_get_id(dataitem);
+    guint i = find_item_index_by_id(datalist, id);
+    g_return_if_fail(i < G_MAXUINT);
+    gwy_listable_item_updated(GWY_LISTABLE(datalist), i);
+}
+
+static void
+item_info_changed(GwyDataList *datalist,
+                  GwyDataItem *dataitem)
+{
+    guint id = gwy_data_item_get_id(dataitem);
+    guint i = find_item_index_by_id(datalist, id);
+    g_return_if_fail(i < G_MAXUINT);
+    gwy_listable_item_updated(GWY_LISTABLE(datalist), i);
 }
 
 static gboolean

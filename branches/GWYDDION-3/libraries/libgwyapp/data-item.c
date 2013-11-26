@@ -34,6 +34,12 @@ enum {
     N_PROPS
 };
 
+enum {
+    SGNL_THUMBNAIL_CHANGED,
+    SGNL_INFO_CHANGED,
+    N_SIGNALS
+};
+
 struct _GwyDataItemPrivate {
     GwyDataList *parent_list;
     guint id;
@@ -55,6 +61,7 @@ static void         gwy_data_item_get_property(GObject *object,
                                                GParamSpec *pspec);
 
 static GParamSpec *properties[N_PROPS];
+static guint signals[N_SIGNALS];
 
 G_DEFINE_ABSTRACT_TYPE(GwyDataItem, gwy_data_item, G_TYPE_INITIALLY_UNOWNED);
 
@@ -86,6 +93,37 @@ gwy_data_item_class_init(GwyDataItemClass *klass)
 
     for (guint i = 1; i < N_PROPS; i++)
         g_object_class_install_property(gobject_class, i, properties[i]);
+
+    /**
+     * GwyDataItem::thumbnail-changed:
+     * @gwydataitem: The #GwyDataItem which received the signal.
+     *
+     * The ::thumbnail-changed signal is emitted when thumbnails of the
+     * data item become invalid and need to be re-rendered.
+     */
+    signals[SGNL_THUMBNAIL_CHANGED]
+        = g_signal_new_class_handler("thumbnail-changed",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
+
+    /**
+     * GwyDataItem::info-changed:
+     * @gwydataitem: The #GwyDataItem which received the signal.
+     *
+     * The ::info-changed signal is emitted when information such as name
+     * or flags of the data item change and need to be updated in any widget
+     * listing the data item.
+     */
+    signals[SGNL_INFO_CHANGED]
+        = g_signal_new_class_handler("info-changed",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
@@ -251,17 +289,48 @@ gwy_data_item_set_name(GwyDataItem *dataitem,
 }
 
 /**
- * gwy_data_item_invalidate:
+ * gwy_data_item_invalidate_thumbnail:
  * @dataitem: A high-level data item.
  *
- * Invalidates cached data, namely the thumbnail, of a data item.
+ * Invalidates the cached thumbnail of a data item.
+ *
+ * This means any thumbnail or icon of the data item will have to be
+ * re-rendered.  If the thumbnail is already invalid nothing happens; otherwise
+ * signal GwyDataItem::thumbnail-changed is emitted.
+ *
+ * See gwy_data_item_invalidate_info() for invalidation of name and other
+ * informational data.
  **/
 void
-gwy_data_item_invalidate(GwyDataItem *dataitem)
+gwy_data_item_invalidate_thumbnail(GwyDataItem *dataitem)
 {
     g_return_if_fail(GWY_IS_DATA_ITEM(dataitem));
     DataItem *priv = dataitem->priv;
+    if (!priv->thumbnail)
+        return;
+
     GWY_OBJECT_UNREF(priv->thumbnail);
+    g_signal_emit(dataitem, signals[SGNL_THUMBNAIL_CHANGED], 0);
+}
+
+/**
+ * gwy_data_item_invalidate_info:
+ * @dataitem: A high-level data item.
+ *
+ * Invalidates the cached information of a data item.
+ *
+ * This means any information about the data item such as name or flags will
+ * have to be updated in a widget listing the data item.  Signal
+ * GwyDataItem::info-changed is emitted.
+ *
+ * See gwy_data_item_invalidate_thumbnail() for invalidation of thumbnails
+ * which have a separate signal.
+ **/
+void
+gwy_data_item_invalidate_info(GwyDataItem *dataitem)
+{
+    g_return_if_fail(GWY_IS_DATA_ITEM(dataitem));
+    g_signal_emit(dataitem, signals[SGNL_INFO_CHANGED], 0);
 }
 
 /**
@@ -289,7 +358,6 @@ gwy_data_item_get_thumbnail(GwyDataItem *dataitem,
     g_return_val_if_fail(GWY_IS_DATA_ITEM(dataitem), NULL);
     GwyDataItemClass *klass = GWY_DATA_ITEM_GET_CLASS(dataitem);
     DataItem *priv = dataitem->priv;
-    gboolean cache_it = FALSE;
     if (!maxsize)
         maxsize = THUMBNAIL_SIZE;
     if (maxsize == THUMBNAIL_SIZE) {
@@ -297,15 +365,18 @@ gwy_data_item_get_thumbnail(GwyDataItem *dataitem,
             g_object_ref(priv->thumbnail);
             return priv->thumbnail;
         }
-        cache_it = TRUE;
     }
     g_return_val_if_fail(klass, NULL);
     if (!klass->render_thumbnail)
         return NULL;
 
     GdkPixbuf *thumbnail = klass->render_thumbnail(dataitem, maxsize);
-    if (cache_it && thumbnail) {
-        priv->thumbnail = g_object_ref(thumbnail);
+    if (!priv->thumbnail) {
+        // Always render the default thumbnail along with whatever is requested.
+        if (maxsize == THUMBNAIL_SIZE)
+            priv->thumbnail = g_object_ref(thumbnail);
+        else
+            priv->thumbnail = klass->render_thumbnail(dataitem, THUMBNAIL_SIZE);
     }
 
     return thumbnail;

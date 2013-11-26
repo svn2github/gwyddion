@@ -336,7 +336,20 @@ gwy_channel_data_render_thumbnail(GwyDataItem *dataitem,
                                        BITS_PER_SAMPLE,
                                        maxsize, maxsize);
     GwyGradient *grad = gwy_gradients_get(priv->gradient_name);
-    gwy_field_render_pixbuf(priv->field, pixbuf, grad, NULL, NULL);
+
+    GwyRange range;
+    if (priv->range_from_method != GWY_COLOR_RANGE_USER
+        || priv->range_to_method != GWY_COLOR_RANGE_USER)
+        gwy_field_find_color_range(priv->field, NULL, NULL,
+                                   priv->range_from_method,
+                                   priv->range_to_method,
+                                   &range);
+    if (priv->range_from_method == GWY_COLOR_RANGE_USER && priv->user_range)
+        range.from = priv->user_range->from;
+    if (priv->range_to_method == GWY_COLOR_RANGE_USER && priv->user_range)
+        range.to = priv->user_range->to;
+
+    gwy_field_render_pixbuf(priv->field, pixbuf, grad, NULL, &range);
 
     return pixbuf;
 }
@@ -581,6 +594,7 @@ set_field(GwyChannelData *channeldata,
         return FALSE;
 
     // TODO: If there is a raster area/view, update it.
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -593,6 +607,7 @@ set_gradient_name(GwyChannelData *channeldata,
         return FALSE;
 
     update_raster_area_gradient(channeldata);
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -612,6 +627,7 @@ set_mask_id(GwyChannelData *channeldata,
     // cross-notification.  This means a GwyDataList needs detailed signals in
     // addition not just those required for GtkTreeModel, with integer-like
     // details – not good.
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -625,6 +641,7 @@ set_range_from_method(GwyChannelData *channeldata,
 
     priv->range_from_method = method;
     update_raster_area_property(channeldata, PROP_RANGE_FROM_METHOD);
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -638,6 +655,7 @@ set_range_to_method(GwyChannelData *channeldata,
 
     priv->range_to_method = method;
     update_raster_area_property(channeldata, PROP_RANGE_TO_METHOD);
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -650,6 +668,7 @@ set_mask_color(GwyChannelData *channeldata,
         return FALSE;
 
     update_raster_area_property(channeldata, PROP_MASK_COLOR);
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -662,6 +681,7 @@ set_user_range(GwyChannelData *channeldata,
         return FALSE;
 
     update_raster_area_property(channeldata, PROP_USER_RANGE);
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 
@@ -688,6 +708,7 @@ set_real_aspect_ratio(GwyChannelData *channeldata,
 
     priv->real_aspect_ratio = setting;
     update_raster_area_property(channeldata, PROP_REAL_ASPECT_RATIO);
+    gwy_data_item_invalidate_thumbnail(GWY_DATA_ITEM(channeldata));
     return TRUE;
 }
 

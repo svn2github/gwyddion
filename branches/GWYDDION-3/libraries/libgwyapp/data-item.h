@@ -66,16 +66,17 @@ struct _GwyDataItemClass {
                                      guint maxsize);
 };
 
-GType        gwy_data_item_get_type     (void)                        G_GNUC_CONST;
-guint        gwy_data_item_get_id       (const GwyDataItem *dataitem) G_GNUC_PURE;
-GwyDataList* gwy_data_item_get_data_list(const GwyDataItem *dataitem) G_GNUC_PURE;
-GObject*     gwy_data_item_get_data     (const GwyDataItem *dataitem) G_GNUC_PURE;
-const gchar* gwy_data_item_get_name     (const GwyDataItem *dataitem) G_GNUC_PURE;
-void         gwy_data_item_set_name     (GwyDataItem *dataitem,
-                                         const gchar *name);
-void         gwy_data_item_invalidate   (GwyDataItem *dataitem);
-GdkPixbuf*   gwy_data_item_get_thumbnail(GwyDataItem *dataitem,
-                                         guint maxsize)               G_GNUC_MALLOC;
+GType        gwy_data_item_get_type            (void)                        G_GNUC_CONST;
+guint        gwy_data_item_get_id              (const GwyDataItem *dataitem) G_GNUC_PURE;
+GwyDataList* gwy_data_item_get_data_list       (const GwyDataItem *dataitem) G_GNUC_PURE;
+GObject*     gwy_data_item_get_data            (const GwyDataItem *dataitem) G_GNUC_PURE;
+const gchar* gwy_data_item_get_name            (const GwyDataItem *dataitem) G_GNUC_PURE;
+void         gwy_data_item_set_name            (GwyDataItem *dataitem,
+                                                const gchar *name);
+void         gwy_data_item_invalidate_thumbnail(GwyDataItem *dataitem);
+void         gwy_data_item_invalidate_info     (GwyDataItem *dataitem);
+GdkPixbuf*   gwy_data_item_get_thumbnail       (GwyDataItem *dataitem,
+                                                guint maxsize)               G_GNUC_MALLOC;
 
 G_END_DECLS
 

@@ -53,7 +53,10 @@ generate_data(App *app)
     guint n = field->xres*field->yres;
     for (guint i = 0; i < n; i++)
         field->data[i] = gwy_rand_double(rng);
-    gwy_field_filter_gaussian(field, NULL, field, 3.0, 3.0,
+    gdouble tau = 2.0 + 10.0*gwy_rand_double(rng);
+    gwy_rand_free(rng);
+
+    gwy_field_filter_gaussian(field, NULL, field, tau, tau,
                               GWY_EXTERIOR_PERIODIC, NAN);
     gwy_field_normalize(field, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
                         GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
@@ -174,18 +177,15 @@ create_data_list_view(GwyDataList *datalist)
 }
 
 static void
-show_channel(App *app)
+channel_view_row_activated(GtkTreeView *treeview,
+                           GtkTreePath *path,
+                           G_GNUC_UNUSED GtkTreeViewColumn *column,
+                           App *app)
 {
-    GtkTreeView *treeview = GTK_TREE_VIEW(app->channelview);
-    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
-    GtkTreeModel *model;
-    GtkTreeIter iter;
-    if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
-        g_printerr("Nothing selected.\n");
-        return;
-    }
-
+    GtkTreeModel *model = gtk_tree_view_get_model(treeview);
     GwyDataItem **dataitem = NULL;
+    GtkTreeIter iter;
+    gtk_tree_model_get_iter(model, &iter, path);
     gtk_tree_model_get(model, &iter, 1, &dataitem, -1);
     g_return_if_fail(GWY_IS_CHANNEL_DATA(*dataitem));
 
@@ -202,6 +202,8 @@ create_rightbar(App *app)
 
     GwyDataList *channels = gwy_file_get_data_list(app->file, GWY_DATA_CHANNEL);
     GtkWidget *channelview = create_data_list_view(channels);
+    g_signal_connect(channelview, "row-activated",
+                     G_CALLBACK(channel_view_row_activated), app);
     app->channelview = channelview;
 
     GtkWidget *scwin = gtk_scrolled_window_new(NULL, NULL);
@@ -211,11 +213,6 @@ create_rightbar(App *app)
 
     gtk_widget_set_vexpand(scwin, TRUE);
     gtk_grid_attach(GTK_GRID(bar), scwin, 0, 0, 1, 1);
-
-    GtkWidget *button = gtk_button_new_with_mnemonic("_Show");
-    gtk_grid_attach(GTK_GRID(bar), button, 0, 1, 1, 1);
-    g_signal_connect_swapped(button, "clicked",
-                             G_CALLBACK(show_channel), app);
 
     return bar;
 }
@@ -237,7 +234,7 @@ create_app_window(void)
     app->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     GtkWindow *window = GTK_WINDOW(app->window);
     gtk_window_set_title(window, "Gwyddion");
-    gtk_window_set_default_size(window, 600, 480);
+    gtk_window_set_default_size(window, 840, 480);
 
     app->file = gwy_file_new();
 
@@ -276,6 +273,10 @@ main(int argc, char *argv[])
     }
 
     gwy_resources_load(NULL);
+    g_object_set(gwy_gradients_get("Gray"), "preferred", TRUE, NULL);
+    g_object_set(gwy_gradients_get("Sky"), "preferred", TRUE, NULL);
+    g_object_set(gwy_gradients_get("Gwyddion.net"), "preferred", TRUE, NULL);
+    g_object_set(gwy_gradients_get("Spectral"), "preferred", TRUE, NULL);
     gwy_register_stock_items();
 
     GwyErrorList *errorlist = NULL;
