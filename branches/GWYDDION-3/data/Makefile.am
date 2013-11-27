@@ -21,8 +21,9 @@ noinst_DATA = $(gtkdoc_data)
 vim_syn_gen = $(top_srcdir)/build/vim-syn-gen.py
 gwyddion4_vim_cfg = $(srcdir)/gwyddion4-vim-cfg.py
 gwyddion4_vim_sources = \
-	$(top_builddir)/docs/libgwy/libgwy-decl.txt \
-	$(top_builddir)/docs/libgwyui/libgwyui-decl.txt
+	$(top_builddir)/docs/libgwy4/libgwy4-decl.txt \
+	$(top_builddir)/docs/libgwyui4/libgwyui4-decl.txt \
+	$(top_builddir)/docs/libgwyapp4/libgwyapp4-decl.txt
 
 gwyddion4.vim: $(gwyddion4_vim_sources) $(gwyddion4_vim_cfg) $(vim_syn_gen)
 	$(AM_V_GEN)$(PYTHON) $(vim_syn_gen) $(gwyddion4_vim_cfg) gwyddion4.vim
