@@ -1049,6 +1049,16 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module zemax.c -->
+    <row>
+      <entry>Zemax grid sag</entry>
+      <entry>.dat</entry>
+      <entry>zemax</entry>
+      <entry>Oui</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module hdrimage.cc -->
     <row>
       <entry>images OpenEXR</entry>

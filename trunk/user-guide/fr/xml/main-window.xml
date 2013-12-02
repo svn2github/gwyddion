@@ -3,7 +3,8 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='main-window'>
-  <title>La Fenêtre Principale</title>
+  <title>La Fenêtre principale</title>
+  <indexterm><primary>Boîte à outils</primary></indexterm>
   <para>
     La fenêtre principale, aussi appelée boîte à outils, est l'une des deux
     fenêtres qui apparaît après le démarrage de Gwyddion (sans ouvrir de

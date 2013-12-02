@@ -3,7 +3,11 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='keyboard-shortcuts'>
-  <title>Raccourcis Clavier</title>
+  <title>Raccourcis clavier</title>
+  <indexterm>
+    <primary>Raccourcis clavier</primary>
+    <secondary>standards</secondary>
+  </indexterm>
   <informaltable frame='topbot' id='table-keyboard-shortcuts'>
     <tgroup cols='4' align='left'>
     <?dblatex llXX?>
@@ -237,6 +241,10 @@
       </tbody>
     </tgroup>
   </informaltable>
+  <indexterm>
+    <primary>Raccourcis clavier</primary>
+    <secondary>personnalisés</secondary>
+  </indexterm>
   <para>
     Vous pouvez appliquer vos propre raccourcis clavier pour toutes les
     fonctions des menus, et il est aussi possible de lancer les outils à partir

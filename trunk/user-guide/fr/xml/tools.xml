@@ -4,6 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='tools'>
   <title>Outils</title>
+  <indexterm><primary>Boîte à outils</primary></indexterm>
   <para>
     Les fonctions du menu <guimenu>Traitement des Données</guimenu> et des
     boutons de la fenêtre principale s'exécutent immédiatement ou après réglages
