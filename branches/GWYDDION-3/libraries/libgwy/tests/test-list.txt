@@ -14,7 +14,6 @@ str/isident/utf8
 str/case/equal-ascii
 str/case/hash-ascii
 str/utf8/append-exponent
-get-n-cpus
 pack
 math/powi/actual
 math/powi/our

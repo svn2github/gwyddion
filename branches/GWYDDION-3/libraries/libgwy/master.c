@@ -400,7 +400,7 @@ gwy_master_create_workers(GwyMaster *master,
     }
 
     if (nworkers < 1)
-        nworkers = gwy_n_cpus();
+        nworkers = g_get_num_processors();
 
     priv->queue = g_async_queue_new();
     priv->workers = g_new0(WorkerData, nworkers);
