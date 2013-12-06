@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <libgwy.h>
 
-#define id "libgwy-builtin-fit-func"
+#define id "libgwy4-builtin-fit-func"
 #define title "Builtin fit funcs"
 #define generated "GENERATED"
 

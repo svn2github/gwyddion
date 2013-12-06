@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <libgwy.h>
 
-#define id "libgwy-builtin-grain-value"
+#define id "libgwy4-builtin-grain-value"
 #define title "Builtin grain values"
 #define generated "GENERATED"
 
