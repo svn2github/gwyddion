@@ -1872,6 +1872,42 @@ gwy_field_get_name(const GwyField *field)
 }
 
 /**
+ * gwy_field_dx:
+ * @field: A two-dimensional data field.
+ *
+ * Calculates the horizontal pixel size in physical units.
+ *
+ * Returns: The horizontal size of one pixel.
+ **/
+gdouble
+gwy_field_dx(const GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
+    return field->xreal/field->xres;
+}
+
+/**
+ * gwy_field_dy:
+ * @field: A two-dimensional data field.
+ *
+ * Calculates the vertical pixel size in physical units.
+ *
+ * Returns: The vertical size of one pixel.
+ **/
+gdouble
+gwy_field_dy(const GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
+    return field->yreal/field->yres;
+}
+
+
+
+
+
+
+
+/**
  * gwy_field_get:
  * @field: A two-dimensional data field.
  * @col: Column index in @field.
@@ -2238,24 +2274,6 @@ gwy_field_set_data_full(GwyField *field,
  * // Write it elsewhere.
  * gwy_field_index(field, 3, 4) = value;
  * ]|
- **/
-
-/**
- * gwy_field_dx:
- * @field: A two-dimensional data field.
- *
- * Calculates the horizontal pixel size in physical units.
- *
- * This macro may evaluate its arguments several times.
- **/
-
-/**
- * gwy_field_dy:
- * @field: A two-dimensional data field.
- *
- * Calculates the vertical pixel size in physical units.
- *
- * This macro may evaluate its arguments several times.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

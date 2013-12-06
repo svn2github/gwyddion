@@ -1357,4 +1357,16 @@ test_math_cholesky_dotprod(void)
     g_rand_free(rng);
 }
 
+void
+test_math_triangular_matrix_length(void)
+{
+    enum { nmax = 20 };
+
+    for (guint i = 1; i < nmax; i++) {
+        g_assert_cmpuint(gwy_triangular_matrix_length(i),
+                         ==,
+                         gwy_power_sum(i, 1));
+    }
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

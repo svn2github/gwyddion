@@ -1644,6 +1644,72 @@ gwy_assertion_message_floatval(const char *domain,
 }
 
 /**
+ * gwy_triangular_matrix_length:
+ * @n: Matrix dimension.
+ *
+ * Calculates the length of an array necessary to store a triangular matrix.
+ *
+ * The length is the same for triangular matrices of both kinds and also for
+ * symmetrical matrices although the element interpretation differs.
+ *
+ * Returns: The number of storage elements for a triangular matrix of size @n.
+ **/
+guint
+gwy_triangular_matrix_length(guint n)
+{
+    return (n + 1)*n/2;
+}
+
+/**
+ * gwy_round:
+ * @x: Double value.
+ *
+ * Rounds a number to nearest integer.
+ *
+ * It expands to a #glong so the result is of an integral type.  Half-integers
+ * are rounded up, as usual.
+ *
+ * This macro evaluates its argument only once.
+ *
+ * For language bindings, this macro is also provided as a (much slower)
+ * function.
+ *
+ * Returns: Value of @x rounded to an integer.
+ **/
+#undef gwy_round
+glong
+gwy_round(gdouble x)
+{
+    return _gwy_round(x);
+}
+
+/**
+ * gwy_round_to_half:
+ * @x: Double value.
+ *
+ * Rounds a number to nearest half-integer.
+ *
+ * The result the nearest number of form @n+½ which is closest to @x.  Integers
+ * are rounded up.
+ *
+ * This function may be useful for Cairo drawing if you want sharp instead
+ * precisely positioned lines of an odd width.
+ *
+ * This macro evaluates its argument only once.
+ *
+ * For language bindings, this macro is also provided as a (much slower)
+ * function.
+ *
+ * Returns: Value of @x rounded to a half-integer.
+ **/
+#undef gwy_round_to_half
+gdouble
+gwy_round_to_half(gdouble x)
+{
+    return _gwy_round_to_half(x);
+}
+
+/**
  * SECTION: math
  * @title: Math
  * @section_id: libgwy4-math
@@ -1776,45 +1842,6 @@ gwy_assertion_message_floatval(const char *domain,
  * The type of a plain real-valued function.
  *
  * Returns: Function value for input value @value.
- **/
-
-/**
- * gwy_round:
- * @x: Double value.
- *
- * Rounds a number to nearest integer.
- *
- * It expands to a #glong so the result is of an integral type.  Half-integers
- * are rounded up, as usual.
- *
- * This macro evaluates its argument only once.
- **/
-
-/**
- * gwy_round_to_half:
- * @x: Double value.
- *
- * Rounds a number to nearest half-integer.
- *
- * The result the nearest number of form @n+½ which is closest to @x.  Integers
- * are rounded up.
- *
- * This function may be useful for Cairo drawing if you want sharp instead
- * precisely positioned lines of an odd width.
- *
- * This macro evaluates its argument only once.
- **/
-
-/**
- * gwy_triangular_matrix_length:
- * @n: Matrix dimension.
- *
- * Evaluates to the length of an array necessary to store a triangular matrix.
- *
- * This macro may evaluate its arguments several times.
- *
- * The length is the same for triangular matrices of both kinds and also for
- * symmetrical matrices although the element interpretation differs.
  **/
 
 /**

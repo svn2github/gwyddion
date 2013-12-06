@@ -1722,6 +1722,51 @@ gwy_brick_get_name(const GwyBrick *brick)
 }
 
 /**
+ * gwy_brick_dx:
+ * @brick: A three-dimensional data brick.
+ *
+ * Calculates the horizontal voxel size in physical units.
+ *
+ * Returns: The horizontal size of one voxel.
+ **/
+gdouble
+gwy_brick_dx(const GwyBrick *brick)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), 0.0);
+    return brick->xreal/brick->xres;
+}
+
+/**
+ * gwy_brick_dy:
+ * @brick: A three-dimensional data brick.
+ *
+ * Calculates the horizontal voxel size in physical units.
+ *
+ * Returns: The vertical size of one voxel.
+ **/
+gdouble
+gwy_brick_dy(const GwyBrick *brick)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), 0.0);
+    return brick->yreal/brick->yres;
+}
+
+/**
+ * gwy_brick_dz:
+ * @brick: A three-dimensional data brick.
+ *
+ * Calculates the depth-wise voxel size in physical units.
+ *
+ * Returns: The depth-wise size of one voxel.
+ **/
+gdouble
+gwy_brick_dz(const GwyBrick *brick)
+{
+    g_return_val_if_fail(GWY_IS_BRICK(brick), 0.0);
+    return brick->zreal/brick->zres;
+}
+
+/**
  * gwy_brick_get:
  * @brick: A three-dimensional data brick.
  * @col: Column index in @brick.
@@ -1929,33 +1974,6 @@ gwy_brick_set_data_full(GwyBrick *brick,
  * // Write it elsewhere.
  * gwy_brick_index(brick, 4, 5, 6) = value;
  * ]|
- **/
-
-/**
- * gwy_brick_dx:
- * @brick: A three-dimensional data brick.
- *
- * Calculates the horizontal voxel size in physical units.
- *
- * This macro may evaluate its arguments several times.
- **/
-
-/**
- * gwy_brick_dy:
- * @brick: A three-dimensional data brick.
- *
- * Calculates the vertical voxel size in physical units.
- *
- * This macro may evaluate its arguments several times.
- **/
-
-/**
- * gwy_brick_dz:
- * @brick: A three-dimensional data brick.
- *
- * Calculates the depth-wise voxel size in physical units.
- *
- * This macro may evaluate its arguments several times.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

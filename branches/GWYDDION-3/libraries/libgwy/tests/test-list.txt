@@ -38,6 +38,7 @@ math/line-point-distance/inside
 math/sort/double
 math/sort/uint
 math/median
+math/triangular-matrix-length
 math/cholesky
 math/cholesky/dotprod
 math/triangular/multiply-right
@@ -272,6 +273,7 @@ curve/props
 curve/units-assign
 curve/get
 curve/set
+curve/get-data
 curve/data-changed
 curve/serialize
 curve/serialize/failure/odd
@@ -591,6 +593,7 @@ surface/props
 surface/units-assign
 surface/get
 surface/set
+surface/get-data
 surface/data-changed
 surface/regularize/full
 surface/regularize/part

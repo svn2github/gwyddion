@@ -106,11 +106,10 @@ GwyValueFormat* gwy_line_format_y      (const GwyLine *line,
 void            gwy_line_set_name      (GwyLine *line,
                                         const gchar *name);
 const gchar*    gwy_line_get_name      (const GwyLine *line)            G_GNUC_PURE;
+gdouble         gwy_line_dx            (const GwyLine *line)            G_GNUC_PURE;
 
 #define gwy_line_index(line, pos) \
     ((line)->data[pos])
-#define gwy_line_dx(line) \
-    ((line)->real/(line)->res)
 
 gdouble        gwy_line_get          (const GwyLine *line,
                                       guint pos)                G_GNUC_PURE;

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2010,2012 David Nečas (Yeti).
+ *  Copyright (C) 2010-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -171,6 +171,32 @@ test_curve_set(void)
     }
 
     g_rand_free(rng);
+}
+
+void
+test_curve_get_data(void)
+{
+    const GwyXY data[] = {
+        { .x = 1.0, .y = G_PI },
+        { .x = 1.5, .y = G_SQRT2 },
+    };
+    guint count_n = 0;
+    GwyCurve *curve = gwy_curve_new();
+    g_signal_connect_swapped(curve, "notify::n-points",
+                             G_CALLBACK(record_signal), &count_n);
+    gwy_curve_set_data_full(curve, data, G_N_ELEMENTS(data));
+    g_assert_cmpuint(count_n, ==, 1);
+    g_assert_cmpuint(curve->n, ==, G_N_ELEMENTS(data));
+    g_assert((const GwyXY*)curve->data != data);
+    guint n;
+    const GwyXY *curvedata = gwy_curve_get_data_full(curve, &n);
+    g_assert_cmpuint(n, ==, G_N_ELEMENTS(data));
+    g_assert(curvedata == (const GwyXY*)curve->data);
+    for (guint i = 0; i < n; i++) {
+        g_assert_cmpfloat(curvedata[i].x, ==, data[i].x);
+        g_assert_cmpfloat(curvedata[i].y, ==, data[i].y);
+    }
+    g_object_unref(curve);
 }
 
 void

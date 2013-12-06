@@ -992,6 +992,9 @@ gwy_curve_get_data_full(const GwyCurve *curve,
  *
  * Puts back values from a flat array to an entire data curve.
  *
+ * This method does <emphasis>not</emphasis> sort the data by abscissa value.
+ * Use gwy_curve_sort() afterwards if you set unsorted data.
+ *
  * See gwy_curve_get_data_full() for a discussion.
  **/
 void

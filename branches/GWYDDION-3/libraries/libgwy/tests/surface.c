@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2011-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -150,6 +150,33 @@ test_surface_set(void)
     }
 
     g_rand_free(rng);
+}
+
+void
+test_surface_get_data(void)
+{
+    const GwyXYZ data[] = {
+        { .x = 1.0, .y = G_PI, .z = -1.25 },
+        { .x = 1.5, .y = G_SQRT2, .z = GWY_SQRT3 },
+    };
+    guint count_n = 0;
+    GwySurface *surface = gwy_surface_new();
+    g_signal_connect_swapped(surface, "notify::n-points",
+                             G_CALLBACK(record_signal), &count_n);
+    gwy_surface_set_data_full(surface, data, G_N_ELEMENTS(data));
+    g_assert_cmpuint(count_n, ==, 1);
+    g_assert_cmpuint(surface->n, ==, G_N_ELEMENTS(data));
+    g_assert((const GwyXYZ*)surface->data != data);
+    guint n;
+    const GwyXYZ *surfacedata = gwy_surface_get_data_full(surface, &n);
+    g_assert_cmpuint(n, ==, G_N_ELEMENTS(data));
+    g_assert(surfacedata == (const GwyXYZ*)surface->data);
+    for (guint i = 0; i < n; i++) {
+        g_assert_cmpfloat(surfacedata[i].x, ==, data[i].x);
+        g_assert_cmpfloat(surfacedata[i].y, ==, data[i].y);
+        g_assert_cmpfloat(surfacedata[i].z, ==, data[i].z);
+    }
+    g_object_unref(surface);
 }
 
 void

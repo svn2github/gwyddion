@@ -1183,6 +1183,21 @@ gwy_line_get_name(const GwyLine *line)
 }
 
 /**
+ * gwy_line_dx:
+ * @line: A one-dimensional data line.
+ *
+ * Calculates the pixel size in physical units.
+ *
+ * Returns: The pixel size.
+ **/
+gdouble
+gwy_line_dx(const GwyLine *line)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
+    return line->real/line->res;
+}
+
+/**
  * gwy_line_get:
  * @line: A one-dimensional data line.
  * @pos: Position in @line.
@@ -1460,15 +1475,6 @@ gwy_line_set_data_full(GwyLine *line,
  * // Write it elsewhere.
  * gwy_line_index(line, 6) = value;
  * ]|
- **/
-
-/**
- * gwy_line_dx:
- * @line: A one-dimensional data line.
- *
- * Calculates the pixel size in physical units.
- *
- * This macro may evaluate its arguments several times.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

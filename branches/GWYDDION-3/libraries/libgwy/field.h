@@ -128,13 +128,11 @@ GwyValueFormat* gwy_field_format_z       (const GwyField *field,
 void            gwy_field_set_name       (GwyField *field,
                                           const gchar *name);
 const gchar*    gwy_field_get_name       (const GwyField *field)          G_GNUC_PURE;
+gdouble         gwy_field_dx             (const GwyField *field)          G_GNUC_PURE;
+gdouble         gwy_field_dy             (const GwyField *field)          G_GNUC_PURE;
 
 #define gwy_field_index(field, col, row) \
     ((field)->data[(field)->xres*(row) + (col)])
-#define gwy_field_dx(field) \
-    ((field)->xreal/(field)->xres)
-#define gwy_field_dy(field) \
-    ((field)->yreal/(field)->yres)
 
 gdouble        gwy_field_get          (const GwyField *field,
                                        guint col,

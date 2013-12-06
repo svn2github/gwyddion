@@ -70,8 +70,14 @@ double gwy_powi(double x, int i) G_GNUC_CONST;
 #  define gwy_powi __builtin_powi
 #endif
 
-#define gwy_round(x) ((glong)floor((x) + 0.5))
-#define gwy_round_to_half(x) (floor((x) + 1.0) - 0.5)
+glong   gwy_round        (gdouble x) G_GNUC_CONST;
+gdouble gwy_round_to_half(gdouble x) G_GNUC_CONST;
+
+#define gwy_round _gwy_round
+#define gwy_round_to_half _gwy_round_to_half
+
+#define _gwy_round(x) ((glong)floor((x) + 0.5))
+#define _gwy_round_to_half(x) (floor((x) + 1.0) - 0.5)
 
 gdouble  gwy_spow                    (gdouble x,
                                       gdouble p)                      G_GNUC_CONST;
@@ -118,8 +124,7 @@ gdouble  gwy_math_median             (gdouble *array,
 void     gwy_sort_uint               (guint *array,
                                       gsize n);
 
-#define gwy_triangular_matrix_length(n) \
-    (((n) + 1)*(n)/2)
+guint    gwy_triangular_matrix_length(guint n) G_GNUC_CONST;
 
 #define gwy_lower_triangular_matrix_index(a, i, j) \
     ((a)[(i)*((i) + 1)/2 + (j)])
