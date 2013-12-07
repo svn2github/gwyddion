@@ -35,6 +35,7 @@ public_headers = \
 	$(srcdir)/graph-axis.h \
 	$(srcdir)/graph-curve.h \
 	$(srcdir)/inventory-store.h \
+	$(srcdir)/list-selection-binding.h \
 	$(srcdir)/list-store.h \
 	$(srcdir)/main.h \
 	$(srcdir)/raster-area.h \
@@ -103,6 +104,7 @@ libgwyui4_la_SOURCES = \
 	graph-internal.c \
 	icons-gresource.c \
 	inventory-store.c \
+	list-selection-binding.c \
 	list-store.c \
 	main.c \
 	marshal.c \

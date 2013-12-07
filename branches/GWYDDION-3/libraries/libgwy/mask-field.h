@@ -64,9 +64,9 @@ struct _GwyMaskFieldClass {
 };
 
 #define gwy_mask_field_duplicate(field) \
-        (GWY_MASK_FIELD(gwy_serializable_duplicate(GWY_SERIALIZABLE(field))))
+    (GWY_MASK_FIELD(gwy_serializable_duplicate(GWY_SERIALIZABLE(field))))
 #define gwy_mask_field_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType         gwy_mask_field_get_type      (void)                      G_GNUC_CONST;
 GwyMaskField* gwy_mask_field_new           (void)                      G_GNUC_MALLOC;

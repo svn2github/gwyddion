@@ -20,13 +20,13 @@ public_headers = \
 	$(srcdir)/brick-part.h \
 	$(srcdir)/brick-statistics.h \
 	$(srcdir)/calc.h \
-	$(srcdir)/container.h \
 	$(srcdir)/coords.h \
 	$(srcdir)/coords-line.h \
 	$(srcdir)/coords-point.h \
 	$(srcdir)/coords-rectangle.h \
 	$(srcdir)/curve.h \
 	$(srcdir)/curve-statistics.h \
+	$(srcdir)/dict.h \
 	$(srcdir)/error-list.h \
 	$(srcdir)/expr.h \
 	$(srcdir)/fft.h \
@@ -130,13 +130,13 @@ libgwy4_la_SOURCES = \
 	brick-statistics.c \
 	brick.c \
 	calc.c \
-	container.c \
 	coords-line.c \
 	coords-point.c \
 	coords-rectangle.c \
 	coords.c \
 	curve-statistics.c \
 	curve.c \
+	dict.c \
 	error-list.c \
 	expr.c \
 	fft.c \

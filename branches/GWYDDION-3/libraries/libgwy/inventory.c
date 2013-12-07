@@ -39,7 +39,6 @@ struct _GwyInventoryPrivate {
     GwyInventoryItemType item_type;
     gboolean has_item_type : 1;
     gboolean is_sorted : 1;
-    gboolean is_object : 1;
     gboolean is_watchable : 1;
     gboolean can_make_copies : 1;
     gchar *default_key;
@@ -57,12 +56,12 @@ static void         discard_item               (GwyInventory *inventory,
                                                 GSequenceIter *iter);
 static void         register_item              (GwyInventory *inventory,
                                                 GSequenceIter *iter,
-                                                gpointer item);
+                                                GObject *item);
 static void         item_changed               (GwyInventory *inventory,
-                                                gpointer item);
+                                                GObject *item);
 static gboolean     item_is_in_order           (Inventory *inventory,
                                                 GSequenceIter *iter,
-                                                gpointer item);
+                                                GObject *item);
 static const gchar* invent_item_name           (Inventory *inventory,
                                                 const gchar *prefix);
 static guint        listable_size              (const GwyListable *listable);
@@ -191,8 +190,9 @@ gwy_inventory_new_with_type(const GwyInventoryItemType *itype)
 /**
  * gwy_inventory_new_with_items: (constructor)
  * @itype: Type of items the inventory will contain.
+ * @items: (transfer none) (array length=nitems):
+ *         Array of item pointers to fill the newly created inventory with.
  * @nitems: The number of pointers in @items.
- * @pitems: Array of item pointers to fill the newly created inventory with.
  *
  * Creates a new inventory and fills it with items.
  *
@@ -201,14 +201,13 @@ gwy_inventory_new_with_type(const GwyInventoryItemType *itype)
 GwyInventory*
 gwy_inventory_new_with_items(const GwyInventoryItemType *itype,
                              guint nitems,
-                             gpointer pitems)
+                             GObject **items)
 {
     GwyInventory *inventory = gwy_inventory_new_with_type(itype);
     Inventory *priv = inventory->priv;
-    gpointer *items = pitems;
 
     for (guint i = 0; i < nitems; i++) {
-        gpointer item = items[i];
+        GObject *item = items[i];
         GSequenceIter *iter = g_sequence_append(priv->items, item);
         if (priv->is_sorted && i)
             priv->is_sorted = (itype->compare(items[i-1], item) < 0);
@@ -236,17 +235,11 @@ gwy_inventory_set_item_type(GwyInventory *inventory,
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     Inventory *priv = inventory->priv;
     g_return_if_fail(g_sequence_get_length(priv->items) == 0);
+    g_return_if_fail(g_type_is_a(itype->type, G_TYPE_OBJECT));
 
     priv->has_item_type = TRUE;
     priv->item_type = *itype;
-    if (itype->type) {
-        priv->is_object = g_type_is_a(itype->type, G_TYPE_OBJECT);
-        priv->is_watchable = (itype->watchable_signal != NULL);
-    }
-    else {
-        priv->is_object = priv->is_watchable = FALSE;
-    }
-
+    priv->is_watchable = (itype->watchable_signal != NULL);
     priv->can_make_copies = itype->rename && itype->copy;
     priv->is_sorted = (itype->compare != NULL);
 }
@@ -313,7 +306,7 @@ gwy_inventory_get_item_type(GwyInventory *inventory)
  * Returns: (transfer none):
  *          Item called @name, or %NULL if there is no such item.
  **/
-gpointer
+GObject*
 gwy_inventory_get(GwyInventory *inventory,
                   const gchar *name)
 {
@@ -323,7 +316,7 @@ gwy_inventory_get(GwyInventory *inventory,
     GSequenceIter *iter;
 
     if ((iter = lookup_item(priv, name)))
-        return g_sequence_get(iter);
+        return (GObject*)g_sequence_get(iter);
     else
         return NULL;
 }
@@ -341,7 +334,7 @@ gwy_inventory_get(GwyInventory *inventory,
  * Returns: (transfer none):
  *          Item called @name, or default item.
  **/
-gpointer
+GObject*
 gwy_inventory_get_or_default(GwyInventory *inventory,
                              const gchar *name)
 {
@@ -355,7 +348,7 @@ gwy_inventory_get_or_default(GwyInventory *inventory,
             && (iter = lookup_item(priv, priv->default_key)))
         || ((iter = g_sequence_get_begin_iter(priv->items))
             && !g_sequence_iter_is_end(iter)))
-        return g_sequence_get(iter);
+        return (GObject*)g_sequence_get(iter);
 
     return NULL;
 }
@@ -374,7 +367,7 @@ gwy_inventory_get_or_default(GwyInventory *inventory,
  * Returns: (transfer none):
  *          Item at given position.
  **/
-gpointer
+GObject*
 gwy_inventory_get_nth(GwyInventory *inventory,
                       guint n)
 {
@@ -386,7 +379,8 @@ gwy_inventory_get_nth(GwyInventory *inventory,
     if (G_UNLIKELY(n == nitems))
         return NULL;
     else
-        return g_sequence_get(g_sequence_get_iter_at_pos(priv->items, n));
+        return (GObject*)g_sequence_get(g_sequence_get_iter_at_pos(priv->items,
+                                                                   n));
 }
 
 /**
@@ -458,7 +452,7 @@ gwy_inventory_foreach(GwyInventory *inventory,
  *          The first item for which @predicate returned %TRUE.  If there is no
  *          such item in the inventory, %NULL is returned.
  **/
-gpointer
+GObject*
 gwy_inventory_find(GwyInventory *inventory,
                    GwyInventoryFindFunc predicate,
                    gpointer user_data)
@@ -473,7 +467,7 @@ gwy_inventory_find(GwyInventory *inventory,
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter), i++) {
         if (predicate(i, g_sequence_get(iter), user_data))
-            return g_sequence_get(iter);
+            return (GObject*)g_sequence_get(iter);
     }
 
     return NULL;
@@ -488,7 +482,7 @@ gwy_inventory_find(GwyInventory *inventory,
  * Returns: (transfer none):
  *          The default item.  If there is no default item, %NULL is returned.
  **/
-gpointer
+GObject*
 gwy_inventory_get_default(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
@@ -499,7 +493,7 @@ gwy_inventory_get_default(GwyInventory *inventory)
 
     GSequenceIter *iter;
     if ((iter = lookup_item(priv, priv->default_key)))
-        return g_sequence_get(iter);
+        return (GObject*)g_sequence_get(iter);
     return NULL;
 }
 
@@ -603,9 +597,9 @@ gwy_inventory_nth_updated(GwyInventory *inventory,
  * Returns: (transfer none):
  *          @item, for convenience.
  **/
-gpointer
+GObject*
 gwy_inventory_insert(GwyInventory *inventory,
-                     gpointer item)
+                     GObject *item)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     Inventory *priv = inventory->priv;
@@ -654,9 +648,9 @@ gwy_inventory_insert(GwyInventory *inventory,
  * Returns: (transfer none):
  *          @item, for convenience.
  **/
-gpointer
+GObject*
 gwy_inventory_insert_nth(GwyInventory *inventory,
-                         gpointer item,
+                         GObject *item,
                          guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
@@ -773,7 +767,7 @@ delete_item(GwyInventory *inventory,
 {
     Inventory *priv = inventory->priv;
     if (priv->item_type.is_modifiable) {
-        gpointer item = g_sequence_get(iter);
+        GObject *item = (GObject*)g_sequence_get(iter);
         if (!priv->item_type.is_modifiable(item)) {
             g_warning("Cannot delete non-modifiable item ‘%s’", name);
             return;
@@ -892,7 +886,7 @@ emit_reordered_for_move(GwyInventory *inventory,
  * Returns: (transfer none):
  *          The item, for convenience.
  **/
-gpointer
+GObject*
 gwy_inventory_rename(GwyInventory *inventory,
                      const gchar *name,
                      const gchar *newname)
@@ -909,7 +903,7 @@ gwy_inventory_rename(GwyInventory *inventory,
         return NULL;
     }
 
-    gpointer item = g_sequence_get(iter);
+    GObject *item = (GObject*)g_sequence_get(iter);
     if (priv->item_type.is_modifiable
         && !priv->item_type.is_modifiable(item)) {
         g_warning("Cannot rename non-modifiable item ‘%s’", name);
@@ -956,7 +950,7 @@ gwy_inventory_rename(GwyInventory *inventory,
             || gwy_strequal(newname, priv->default_key)))
         g_signal_emit(inventory, signals[SGNL_DEFAULT_CHANGED], 0);
 
-    return iter;
+    return item;
 }
 
 /**
@@ -975,7 +969,7 @@ gwy_inventory_rename(GwyInventory *inventory,
  * Returns: (transfer none):
  *          The newly added item.
  **/
-gpointer
+GObject*
 gwy_inventory_copy(GwyInventory *inventory,
                    const gchar *name,
                    const gchar *newname)
@@ -999,7 +993,7 @@ gwy_inventory_copy(GwyInventory *inventory,
         return NULL;
     }
 
-    gpointer item = g_sequence_get(iter);
+    GObject *item = (GObject*)g_sequence_get(iter);
     if (!name)
         name = priv->item_type.get_name(item);
 
@@ -1019,8 +1013,7 @@ gwy_inventory_copy(GwyInventory *inventory,
     }
     gwy_inventory_insert(inventory, item);
     // Insert took a reference we don't want two.
-    if (priv->is_object)
-        g_object_unref(item);
+    g_object_unref(item);
 
     return item;
 }
@@ -1049,7 +1042,7 @@ emit_item_updated(GwyInventory *inventory,
  **/
 static void
 item_changed(GwyInventory *inventory,
-             gpointer item)
+             GObject *item)
 {
     const gchar *name = inventory->priv->item_type.get_name(item);
     GSequenceIter *iter = lookup_item(inventory->priv, name);
@@ -1064,7 +1057,7 @@ discard_item(GwyInventory *inventory,
              GSequenceIter *iter)
 {
     Inventory *priv = inventory->priv;
-    gpointer item = g_sequence_get(iter);
+    GObject *item = (GObject*)g_sequence_get(iter);
     g_return_if_fail(item);
     if (priv->is_watchable)
         g_signal_handlers_disconnect_by_func(item, item_changed, inventory);
@@ -1072,33 +1065,30 @@ discard_item(GwyInventory *inventory,
     g_hash_table_remove(priv->hash, priv->item_type.get_name(item));
     if (priv->item_type.destroy)
         priv->item_type.destroy(item);
-    if (priv->is_object)
-        g_object_unref(item);
+    g_object_unref(item);
 }
 
 static void
 register_item(GwyInventory *inventory,
               GSequenceIter *iter,
-              gpointer item)
+              GObject *item)
 {
     Inventory *priv = inventory->priv;
     if (priv->hash)
         g_hash_table_insert(priv->hash,
                             (gpointer)priv->item_type.get_name(item), iter);
 
-    if (priv->is_object) {
-        g_object_ref_sink(item);
-        if (priv->is_watchable)
-            g_signal_connect_swapped(item,
-                                     priv->item_type.watchable_signal,
-                                     G_CALLBACK(item_changed), inventory);
-    }
+    g_object_ref_sink(item);
+    if (priv->is_watchable)
+        g_signal_connect_swapped(item,
+                                 priv->item_type.watchable_signal,
+                                 G_CALLBACK(item_changed), inventory);
 }
 
 static gboolean
 item_is_in_order(Inventory *inventory,
                  GSequenceIter *iter,
-                 gpointer item)
+                 GObject *item)
 {
     gboolean is_sorted = inventory->is_sorted;
     gint (*cmp)(gconstpointer, gconstpointer) = inventory->item_type.compare;
@@ -1117,12 +1107,12 @@ make_hash(Inventory *inventory)
     g_assert(!inventory->hash);
     inventory->hash = g_hash_table_new(g_str_hash, g_str_equal);
 
-    const gchar* (*get_name)(gconstpointer) = inventory->item_type.get_name;
+    const gchar* (*get_name)(const GObject*) = inventory->item_type.get_name;
     for (GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter)) {
-        g_hash_table_insert(inventory->hash,
-                           (gpointer)get_name(g_sequence_get(iter)), iter);
+        GObject *item = (GObject*)g_sequence_get(iter);
+        g_hash_table_insert(inventory->hash, (gpointer)get_name(item), iter);
     }
 }
 
@@ -1186,7 +1176,7 @@ static gpointer
 listable_get(const GwyListable *listable,
              guint pos)
 {
-    return gwy_inventory_get_nth(GWY_INVENTORY(listable), pos);
+    return (gpointer)gwy_inventory_get_nth(GWY_INVENTORY(listable), pos);
 }
 
 /**
@@ -1213,10 +1203,9 @@ listable_get(const GwyListable *listable,
  * #GtkTreeModel<!-- -->s.  Upon modification, it emits signals that directly
  * map onto #GtkTreeModel signals.
  *
- * Item can have `traits', that is data that can be obtained generically. They
- * are similar to #GObject properties.  Actually, if items are objects, they
- * should simply map object properties to traits.  But it is possible to define
- * traits for simple structures too.
+ * Item can have `traits', that is data that can be obtained generically and
+ * can be represented as columns of a tree model based upon the inventory.
+ * Often they are directly mapped to object properties.
  **/
 
 /**
@@ -1236,11 +1225,9 @@ listable_get(const GwyListable *listable,
 
 /**
  * GwyInventoryItemType:
- * @type: Object type, if item is object or other type with registered GType.
- *        May be zero to indicate an unregistered item type.
- *        If items are objects inventory takes a reference on them.  Therefore
- *        it is usually unnecessary to set g_object_unref() as
- *        #GwyInventoryItemType.destroy().
+ * @type: Object type.  May be zero to indicate an unregistered item type.
+ *        Inventory takes a reference to the object items and releases it when
+ *        the object is deleted.
  * @watchable_signal: Item signal name to watch, used only for objects.
  *                    When item emits this signal, inventory emits
  *                    "item-updated" signal for it.

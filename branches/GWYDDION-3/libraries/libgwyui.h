@@ -36,6 +36,7 @@
 #include <libgwyui/graph-curve.h>
 #include <libgwyui/inventory-store.h>
 #include <libgwyui/list-store.h>
+#include <libgwyui/list-selection-binding.h>
 #include <libgwyui/main.h>
 #include <libgwyui/raster-area.h>
 #include <libgwyui/raster-view.h>

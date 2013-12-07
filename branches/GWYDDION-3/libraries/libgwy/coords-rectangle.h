@@ -51,9 +51,9 @@ struct _GwyCoordsRectangleClass {
 };
 
 #define gwy_coords_rectangle_duplicate(coordsrectangle) \
-        (GWY_COORDS_RECTANGLE(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordsrectangle))))
+    (GWY_COORDS_RECTANGLE(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordsrectangle))))
 #define gwy_coords_rectangle_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType      gwy_coords_rectangle_get_type(void) G_GNUC_CONST;
 GwyCoords* gwy_coords_rectangle_new     (void) G_GNUC_MALLOC;

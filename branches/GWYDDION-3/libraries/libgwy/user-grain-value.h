@@ -67,9 +67,9 @@ struct _GwyUserGrainValueClass {
 };
 
 #define gwy_user_grain_value_duplicate(usergrainvalue) \
-        (GWY_USER_GRAIN_VALUE(gwy_serializable_duplicate(GWY_SERIALIZABLE(usergrainvalue))))
+    (GWY_USER_GRAIN_VALUE(gwy_serializable_duplicate(GWY_SERIALIZABLE(usergrainvalue))))
 #define gwy_user_grain_value_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType                  gwy_user_grain_value_get_type      (void)                                    G_GNUC_CONST;
 GwyUserGrainValue*     gwy_user_grain_value_new           (void)                                    G_GNUC_MALLOC;

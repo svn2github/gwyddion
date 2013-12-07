@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -53,16 +53,16 @@ typedef struct _GwyInventoryItemType GwyInventoryItemType;
 struct _GwyInventoryItemType {
     GType         type;
     const gchar  *watchable_signal;
-    const gchar* (*get_name)       (gconstpointer item);
-    gboolean     (*is_modifiable)  (gconstpointer item);
+    const gchar* (*get_name)       (const GObject *item);
+    gboolean     (*is_modifiable)  (const GObject *item);
     GCompareFunc compare;
-    void         (*rename)         (gpointer item,
+    void         (*rename)         (GObject *item,
                                     const gchar *newname);
-    GDestroyNotify destroy;
-    gpointer     (*copy)           (gconstpointer item);
+    void         (*destroy)        (GObject *item);
+    GObject*     (*copy)           (const GObject *item);
     const GType* (*get_traits)     (guint *ntraits);
     const gchar* (*get_trait_name) (guint i);
-    void         (*get_trait_value)(gconstpointer item,
+    void         (*get_trait_value)(const GObject *item,
                                     guint i,
                                     GValue *value);
 };
@@ -81,10 +81,10 @@ struct _GwyInventoryClass {
 };
 
 typedef void (*GwyInventoryForeachFunc)(guint n,
-                                        gpointer item,
+                                        GObject *item,
                                         gpointer user_data);
 typedef gboolean (*GwyInventoryFindFunc)(guint n,
-                                         gpointer item,
+                                         GObject *item,
                                          gpointer user_data);
 
 /* FIXME: GSequence can change internally when an item is looked up.
@@ -94,49 +94,49 @@ GwyInventory*               gwy_inventory_new             (void)                
 GwyInventory*               gwy_inventory_new_with_type   (const GwyInventoryItemType *itype)  G_GNUC_MALLOC;
 GwyInventory*               gwy_inventory_new_with_items  (const GwyInventoryItemType *itype,
                                                            guint nitems,
-                                                           gpointer pitems)                    G_GNUC_MALLOC;
+                                                           GObject **items)                    G_GNUC_MALLOC;
 void                        gwy_inventory_set_item_type   (GwyInventory *inventory,
                                                            const GwyInventoryItemType *itype);
 guint                       gwy_inventory_size            (GwyInventory *inventory)            G_GNUC_PURE;
 const GwyInventoryItemType* gwy_inventory_get_item_type   (GwyInventory *inventory)            G_GNUC_PURE;
 gboolean                    gwy_inventory_can_make_copies (GwyInventory *inventory)            G_GNUC_PURE;
-gpointer                    gwy_inventory_get             (GwyInventory *inventory,
+GObject*                    gwy_inventory_get             (GwyInventory *inventory,
                                                            const gchar *name)                  G_GNUC_PURE;
-gpointer                    gwy_inventory_get_or_default  (GwyInventory *inventory,
+GObject*                    gwy_inventory_get_or_default  (GwyInventory *inventory,
                                                            const gchar *name)                  G_GNUC_PURE;
-gpointer                    gwy_inventory_get_nth         (GwyInventory *inventory,
+GObject*                    gwy_inventory_get_nth         (GwyInventory *inventory,
                                                            guint n)                            G_GNUC_PURE;
 guint                       gwy_inventory_position        (GwyInventory *inventory,
                                                            const gchar *name)                  G_GNUC_PURE;
 void                        gwy_inventory_foreach         (GwyInventory *inventory,
                                                            GwyInventoryForeachFunc function,
                                                            gpointer user_data);
-gpointer                    gwy_inventory_find            (GwyInventory *inventory,
+GObject*                    gwy_inventory_find            (GwyInventory *inventory,
                                                            GwyInventoryFindFunc predicate,
                                                            gpointer user_data);
 void                        gwy_inventory_set_default_name(GwyInventory *inventory,
                                                            const gchar *name);
 const gchar*                gwy_inventory_get_default_name(GwyInventory *inventory)            G_GNUC_PURE;
-gpointer                    gwy_inventory_get_default     (GwyInventory *inventory)            G_GNUC_PURE;
+GObject*                    gwy_inventory_get_default     (GwyInventory *inventory)            G_GNUC_PURE;
 void                        gwy_inventory_updated         (GwyInventory *inventory,
                                                            const gchar *name);
 void                        gwy_inventory_nth_updated     (GwyInventory *inventory,
                                                            guint n);
 void                        gwy_inventory_restore_order   (GwyInventory *inventory);
 void                        gwy_inventory_forget_order    (GwyInventory *inventory);
-gpointer                    gwy_inventory_insert          (GwyInventory *inventory,
-                                                           gpointer item);
-gpointer                    gwy_inventory_insert_nth      (GwyInventory *inventory,
-                                                           gpointer item,
+GObject*                    gwy_inventory_insert          (GwyInventory *inventory,
+                                                           GObject *item);
+GObject*                    gwy_inventory_insert_nth      (GwyInventory *inventory,
+                                                           GObject *item,
                                                            guint n);
 void                        gwy_inventory_delete          (GwyInventory *inventory,
                                                            const gchar *name);
 void                        gwy_inventory_delete_nth      (GwyInventory *inventory,
                                                            guint n);
-gpointer                    gwy_inventory_rename          (GwyInventory *inventory,
+GObject*                    gwy_inventory_rename          (GwyInventory *inventory,
                                                            const gchar *name,
                                                            const gchar *newname);
-gpointer                    gwy_inventory_copy            (GwyInventory *inventory,
+GObject*                    gwy_inventory_copy            (GwyInventory *inventory,
                                                            const gchar *name,
                                                            const gchar *newname);
 

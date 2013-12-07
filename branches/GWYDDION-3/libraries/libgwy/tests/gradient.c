@@ -284,7 +284,7 @@ test_gradient_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
 
-    gradient = gwy_inventory_get_default(gradients);
+    gradient = (GwyGradient*)gwy_inventory_get_default(gradients);
     g_assert(GWY_IS_GRADIENT(gradient));
     resource = GWY_RESOURCE(gradient);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_GRADIENT_DEFAULT);
@@ -297,7 +297,7 @@ test_gradient_inventory(void)
 
     gwy_inventory_copy(gradients, GWY_GRADIENT_DEFAULT, "Another");
     g_assert_cmpuint(gwy_inventory_size(gradients), ==, 2);
-    gradient = gwy_inventory_get(gradients, "Another");
+    gradient = (GwyGradient*)gwy_inventory_get(gradients, "Another");
     resource = GWY_RESOURCE(gradient);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
     gboolean modified;

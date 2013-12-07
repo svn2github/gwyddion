@@ -387,7 +387,7 @@ gwy_gradient_load_builtins(GwyErrorList **error_list)
             Gradient *priv = gradient->priv;
             g_array_set_size(priv->points, 0);
             g_array_append_vals(priv->points, points, len);
-            gwy_inventory_insert(inventory, gradient);
+            gwy_inventory_insert(inventory, G_OBJECT(gradient));
             g_object_unref(gradient);
         }
         points += len;
@@ -1042,7 +1042,7 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
                                          "modifiable", FALSE,
                                          "name", GWY_GRADIENT_DEFAULT,
                                          NULL);
-    gwy_inventory_insert(inventory, gradient);
+    gwy_inventory_insert(inventory, G_OBJECT(gradient));
     g_object_unref(gradient);
 }
 

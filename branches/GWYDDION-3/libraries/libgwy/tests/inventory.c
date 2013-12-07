@@ -25,32 +25,60 @@
  *
  ***************************************************************************/
 
+GType gwy_item_test_get_type(void) G_GNUC_CONST;
+
+#define GWY_TYPE_ITEM_TEST \
+    (gwy_item_test_get_type())
+#define GWY_ITEM_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_ITEM_TEST, GwyItemTest))
+#define GWY_IS_ITEM_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_ITEM_TEST))
+#define GWY_ITEM_TEST_GET_CLASS(obj) \
+    (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_ITEM_TEST, GwyItemTestClass))
+
 typedef struct {
+    GObject g_object;
     gchar *name;
     gint value;
 } GwyItemTest;
 
+typedef struct {
+    GObjectClass gobject_class;
+} GwyItemTestClass;
+
 static int item_destroy_count;
 static gboolean sort_by_name;
 
-static GwyItemTest*
+G_DEFINE_TYPE(GwyItemTest, gwy_item_test, G_TYPE_OBJECT);
+
+static void
+gwy_item_test_init(G_GNUC_UNUSED GwyItemTest *item)
+{
+}
+
+static void
+gwy_item_test_class_init(G_GNUC_UNUSED GwyItemTestClass *klass)
+{
+}
+
+static GObject*
 item_new(const gchar *name, gint value)
 {
-    GwyItemTest *itemtest = g_slice_new(GwyItemTest);
+    GwyItemTest *itemtest = g_object_newv(GWY_TYPE_ITEM_TEST, 0, NULL);
     itemtest->name = g_strdup(name);
     itemtest->value = value;
-    return itemtest;
+    return (GObject*)itemtest;
 }
 
 static const gchar*
-item_get_name(gconstpointer item)
+item_get_name(const GObject *item)
 {
     const GwyItemTest *itemtest = (const GwyItemTest*)item;
     return itemtest->name;
 }
 
 static gboolean
-item_is_modifiable(gconstpointer item)
+item_is_modifiable(const GObject *item)
 {
     const GwyItemTest *itemtest = (const GwyItemTest*)item;
     return itemtest->value >= 0;
@@ -78,7 +106,7 @@ item_compare_tricky(gconstpointer a,
 }
 
 static void
-item_rename(gpointer item,
+item_rename(GObject *item,
             const gchar *newname)
 {
     GwyItemTest *itemtest = (GwyItemTest*)item;
@@ -87,21 +115,22 @@ item_rename(gpointer item,
 }
 
 static void
-item_destroy(gpointer item)
+item_destroy(GObject *item)
 {
     GwyItemTest *itemtest = (GwyItemTest*)item;
     g_free(itemtest->name);
-    g_slice_free(GwyItemTest, item);
+    g_object_unref(item);
     item_destroy_count++;
 }
 
-static gpointer
-item_copy(gconstpointer item)
+static GObject*
+item_copy(const GObject *item)
 {
     const GwyItemTest *itemtest = (const GwyItemTest*)item;
-    GwyItemTest *copy = g_slice_dup(GwyItemTest, item);
+    GwyItemTest *copy = g_object_newv(GWY_TYPE_ITEM_TEST, 0, NULL);
+    copy->value = itemtest->value;
     copy->name = g_strdup(itemtest->name);
-    return copy;
+    return (GObject*)copy;
 }
 
 void
@@ -164,18 +193,18 @@ test_inventory_data(void)
     update_log = 0;
 
     GwyItemTest *itemtest;
-    g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get(inventory, "Fixme")));
     g_assert_cmpint(itemtest->value, ==, -1);
-    g_assert((itemtest = gwy_inventory_get(inventory, "Second")));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get(inventory, "Second")));
     g_assert_cmpint(itemtest->value, ==, 2);
-    g_assert((itemtest = gwy_inventory_get(inventory, "First")));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get(inventory, "First")));
     g_assert_cmpint(itemtest->value, ==, 1);
 
-    g_assert((itemtest = gwy_inventory_get_nth(inventory, 0)));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get_nth(inventory, 0)));
     g_assert_cmpstr(itemtest->name, ==, "First");
-    g_assert((itemtest = gwy_inventory_get_nth(inventory, 1)));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get_nth(inventory, 1)));
     g_assert_cmpstr(itemtest->name, ==, "Fixme");
-    g_assert((itemtest = gwy_inventory_get_nth(inventory, 2)));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get_nth(inventory, 2)));
     g_assert_cmpstr(itemtest->name, ==, "Second");
 
     for (guint i = 0; i < 3; i++) {
@@ -200,12 +229,12 @@ test_inventory_data(void)
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0);
 
-    g_assert((itemtest = gwy_inventory_get_nth(inventory, 0)));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get_nth(inventory, 0)));
     g_assert_cmpstr(itemtest->name, ==, "Abel");
-    g_assert((itemtest = gwy_inventory_get_nth(inventory, 3)));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get_nth(inventory, 3)));
     g_assert_cmpstr(itemtest->name, ==, "Kain");
 
-    g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get(inventory, "Fixme")));
     itemtest->value = 3;
     gwy_inventory_rename(inventory, "Fixme", "Third");
     g_assert_cmphex(insert_log, ==, 0x0);
@@ -213,7 +242,7 @@ test_inventory_data(void)
     g_assert_cmphex(delete_log, ==, 0x0);
     insert_log = update_log = delete_log = 0;
 
-    g_assert((itemtest = gwy_inventory_get_nth(inventory, 4)));
+    g_assert((itemtest = (GwyItemTest*)gwy_inventory_get_nth(inventory, 4)));
     g_assert_cmpstr(itemtest->name, ==, "Third");
 
     gwy_inventory_delete_nth(inventory, 0);
@@ -331,7 +360,7 @@ test_inventory_sorting(void)
 
 static gboolean
 predicate1(G_GNUC_UNUSED guint n,
-           G_GNUC_UNUSED gpointer item,
+           G_GNUC_UNUSED GObject *item,
            G_GNUC_UNUSED gpointer user_data)
 {
     return FALSE;
@@ -339,7 +368,7 @@ predicate1(G_GNUC_UNUSED guint n,
 
 static gboolean
 predicate2(G_GNUC_UNUSED guint n,
-           G_GNUC_UNUSED gpointer item,
+           G_GNUC_UNUSED GObject *item,
            G_GNUC_UNUSED gpointer user_data)
 {
     return TRUE;
@@ -347,7 +376,7 @@ predicate2(G_GNUC_UNUSED guint n,
 
 static gboolean
 predicate3(guint n,
-           G_GNUC_UNUSED gpointer item,
+           G_GNUC_UNUSED GObject *item,
            G_GNUC_UNUSED gpointer user_data)
 {
     return n % 2;
@@ -355,7 +384,7 @@ predicate3(guint n,
 
 static gboolean
 predicate4(G_GNUC_UNUSED guint n,
-           gpointer item,
+           GObject *item,
            G_GNUC_UNUSED gpointer user_data)
 {
     GwyItemTest *itemtest = (GwyItemTest*)item;
@@ -364,7 +393,7 @@ predicate4(G_GNUC_UNUSED guint n,
 
 static void
 sum_values(G_GNUC_UNUSED guint n,
-           gpointer item,
+           GObject *item,
            gpointer user_data)
 {
     GwyItemTest *itemtest = (GwyItemTest*)item;
@@ -413,20 +442,21 @@ test_inventory_functional(void)
     g_assert_cmphex(delete_log, ==, 0);
     insert_log = 0;
 
-    GwyItemTest *itemtest = gwy_inventory_find(inventory, predicate1, NULL);
+    GwyItemTest *itemtest = (GwyItemTest*)gwy_inventory_find(inventory,
+                                                             predicate1, NULL);
     g_assert(!itemtest);
 
-    itemtest = gwy_inventory_find(inventory, predicate2, NULL);
+    itemtest = (GwyItemTest*)gwy_inventory_find(inventory, predicate2, NULL);
     g_assert(itemtest);
     g_assert_cmpstr(itemtest->name, ==, "Apple");
     g_assert_cmpint(itemtest->value, ==, 8);
 
-    itemtest = gwy_inventory_find(inventory, predicate3, NULL);
+    itemtest = (GwyItemTest*)gwy_inventory_find(inventory, predicate3, NULL);
     g_assert(itemtest);
     g_assert_cmpstr(itemtest->name, ==, "Bananna");
     g_assert_cmpint(itemtest->value, ==, 2);
 
-    itemtest = gwy_inventory_find(inventory, predicate4, NULL);
+    itemtest = (GwyItemTest*)gwy_inventory_find(inventory, predicate4, NULL);
     g_assert(itemtest);
     g_assert_cmpstr(itemtest->name, ==, "Date");
     g_assert_cmpint(itemtest->value, ==, 4);

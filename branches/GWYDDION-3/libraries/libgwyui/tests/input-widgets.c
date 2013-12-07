@@ -56,6 +56,19 @@ set_sensitive(gpointer widget, gpointer user_data)
     gtk_widget_set_sensitive(widget, GPOINTER_TO_INT(user_data));
 }
 
+static void
+fix_adj_bar3(gpointer widget, G_GNUC_UNUSED gpointer user_data)
+{
+    if (GWY_IS_ADJUST_BAR(widget)) {
+        gwy_adjust_bar_set_snap_to_ticks(GWY_ADJUST_BAR(widget), TRUE);
+        gwy_adjust_bar_set_mapping(GWY_ADJUST_BAR(widget),
+                                   GWY_SCALE_MAPPING_LINEAR);
+    }
+
+    if (GWY_IS_SPIN_BUTTON(widget))
+        gwy_spin_button_set_digits(GWY_SPIN_BUTTON(widget), 0);
+}
+
 static GtkWidget*
 create_widget_test(void)
 {
@@ -81,11 +94,17 @@ create_widget_test(void)
                       "_Short value:", "px",
                       set_sensitive, GINT_TO_POINTER(FALSE));
 
+    GwyAdjustment *adj3 = gwy_adjustment_new_set(0.0, 0.0,
+                                                 0.0, 20.0, 1.0, 5.0);
+    attach_adjustment(grid, 2, GTK_ADJUSTMENT(adj3),
+                      "S_napped value:", "count",
+                      fix_adj_bar3, NULL);
+
     GtkWidget *entry = gtk_entry_new();
-    gtk_grid_attach(grid, entry, 1, 2, 2, 1);
+    gtk_grid_attach(grid, entry, 1, 3, 2, 1);
     GtkWidget *label = gtk_label_new_with_mnemonic("_Entry:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
-    gtk_grid_attach(grid, label, 0, 2, 1, 1);
+    gtk_grid_attach(grid, label, 0, 3, 1, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), entry);
 
     GwyChoiceOption options[] = {
@@ -97,10 +116,10 @@ create_widget_test(void)
                                                     G_N_ELEMENTS(options));
     gwy_choice_set_active(choice, 2);
     GtkWidget *combo = gwy_choice_create_combo(choice);
-    gtk_grid_attach(grid, combo, 1, 3, 2, 1);
+    gtk_grid_attach(grid, combo, 1, 4, 2, 1);
     label = gtk_label_new_with_mnemonic("_Choice:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
-    gtk_grid_attach(grid, label, 0, 3, 1, 1);
+    gtk_grid_attach(grid, label, 0, 4, 1, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), combo);
 
     return window;

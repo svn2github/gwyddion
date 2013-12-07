@@ -56,6 +56,7 @@ typedef struct _GwyDataListClass GwyDataListClass;
 
 G_END_DECLS
 
+#include <libgwy/int-set.h>
 #include <libgwyapp/data-item.h>
 #include <libgwyapp/file.h>
 
@@ -84,6 +85,7 @@ GType        gwy_data_list_get_data_type(const GwyDataList *datalist) G_GNUC_PUR
 GwyDataKind  gwy_data_list_get_data_kind(const GwyDataList *datalist) G_GNUC_PURE;
 guint*       gwy_data_list_get_ids      (const GwyDataList *datalist,
                                          guint *nids)                 G_GNUC_MALLOC;
+GwyIntSet*   gwy_data_list_get_selection(GwyDataList *datalist)       G_GNUC_PURE;
 guint        gwy_data_list_add          (GwyDataList *datalist,
                                          GwyDataItem *dataitem);
 gboolean     gwy_data_list_add_with_id  (GwyDataList *datalist,

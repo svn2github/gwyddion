@@ -51,9 +51,9 @@ struct _GwyCoordsLineClass {
 };
 
 #define gwy_coords_line_duplicate(coordsline) \
-        (GWY_COORDS_LINE(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordsline))))
+    (GWY_COORDS_LINE(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordsline))))
 #define gwy_coords_line_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType      gwy_coords_line_get_type(void) G_GNUC_CONST;
 GwyCoords* gwy_coords_line_new     (void) G_GNUC_MALLOC;

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -537,6 +537,77 @@ test_int_set_fill(void)
         g_object_unref(copy);
         g_object_unref(original);
     }
+    g_rand_free(rng);
+}
+
+void
+test_int_set_intersection(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    enum { niter = 250 };
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *intset = gwy_int_set_new(),
+                  *operand = gwy_int_set_new(),
+                  *reference = gwy_int_set_new();
+        int_set_randomize(intset, rng);
+        int_set_randomize(operand, rng);
+
+        guint n;
+        gint *values = gwy_int_set_values(intset, &n);
+        for (guint i = 0; i < n; i++) {
+            if (gwy_int_set_contains(operand, values[i]))
+                gwy_int_set_add(reference, values[i]);
+        }
+        g_free(values);
+
+        gwy_int_set_intersect(intset, operand);
+        int_set_assert_order(reference);
+        int_set_assert_order(intset);
+        int_set_assert_equal(intset, reference);
+
+        g_object_unref(reference);
+        g_object_unref(operand);
+        g_object_unref(intset);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_int_set_union(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    enum { niter = 250 };
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *intset = gwy_int_set_new(),
+                  *operand = gwy_int_set_new(),
+                  *reference = gwy_int_set_new();
+        int_set_randomize(intset, rng);
+        int_set_randomize(operand, rng);
+
+        guint n;
+        gint *values = gwy_int_set_values(intset, &n);
+        for (guint i = 0; i < n; i++)
+            gwy_int_set_add(reference, values[i]);
+        g_free(values);
+
+        values = gwy_int_set_values(operand, &n);
+        for (guint i = 0; i < n; i++)
+            gwy_int_set_add(reference, values[i]);
+        g_free(values);
+
+        gwy_int_set_union(intset, operand);
+        int_set_assert_order(reference);
+        int_set_assert_order(intset);
+        int_set_assert_equal(intset, reference);
+
+        g_object_unref(reference);
+        g_object_unref(operand);
+        g_object_unref(intset);
+    }
+
     g_rand_free(rng);
 }
 

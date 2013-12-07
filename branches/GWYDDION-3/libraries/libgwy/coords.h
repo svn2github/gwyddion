@@ -91,9 +91,9 @@ typedef gboolean (*GwyCoordsFilterFunc)(GwyCoords *coords,
                                         gpointer user_data);
 
 #define gwy_coords_duplicate(coords) \
-        (GWY_COORDS(gwy_serializable_duplicate(GWY_SERIALIZABLE(coords))))
+    (GWY_COORDS(gwy_serializable_duplicate(GWY_SERIALIZABLE(coords))))
 #define gwy_coords_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType        gwy_coords_get_type             (void)                               G_GNUC_CONST;
 GwyCoords*   gwy_coords_new_subset           (const GwyCoords *coords,

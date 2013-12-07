@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 enum {
     PROP_0,
     PROP_ADJUSTMENT,
+    PROP_SNAP_TO_TICKS,
     PROP_MAPPING,
     N_PROPS,
 };
@@ -55,6 +56,7 @@ struct _GwyAdjustBarPrivate {
     gulong adjustment_value_changed_id;
     gulong adjustment_changed_id;
     gdouble oldvalue;    // This is to avoid acting on no-change notifications.
+    gboolean snap_to_ticks : 1;
     gboolean adjustment_ok : 1;
     gboolean dragging : 1;
     gboolean canreset : 1;
@@ -110,6 +112,8 @@ static void     gwy_adjust_bar_change_value        (GwyAdjustBar *adjbar,
                                                     gdouble newvalue);
 static gboolean set_adjustment                     (GwyAdjustBar *adjbar,
                                                     GtkAdjustment *adjustment);
+static gboolean set_snap_to_ticks                  (GwyAdjustBar *adjbar,
+                                                    gboolean setting);
 static gboolean set_mapping                        (GwyAdjustBar *adjbar,
                                                     GwyScaleMappingType mapping);
 static void     create_input_window                (GwyAdjustBar *adjbar);
@@ -132,6 +136,8 @@ static void     change_value                       (GtkWidget *widget,
                                                     gdouble newposition);
 static void     ensure_cursors                     (GwyAdjustBar *adjbar);
 static void     discard_cursors                    (GwyAdjustBar *adjbar);
+static gdouble  snap_value                         (const GwyAdjustBar *adjbar,
+                                                    gdouble value);
 
 static GParamSpec *properties[N_PROPS];
 static guint signals[N_SIGNALS];
@@ -175,6 +181,14 @@ gwy_adjust_bar_class_init(GwyAdjustBarClass *klass)
                               "Adjustment representing the value.",
                               GTK_TYPE_ADJUSTMENT,
                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_SNAP_TO_TICKS]
+        = g_param_spec_boolean("snap-to-ticks",
+                               "Snap to ticks",
+                               "Whether only values that are multiples of step "
+                               "size are allowed.",
+                               FALSE,
+                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_MAPPING]
         = g_param_spec_enum("mapping",
@@ -249,6 +263,10 @@ gwy_adjust_bar_set_property(GObject *object,
         set_adjustment(adjbar, g_value_get_object(value));
         break;
 
+        case PROP_SNAP_TO_TICKS:
+        set_snap_to_ticks(adjbar, g_value_get_boolean(value));
+        break;
+
         case PROP_MAPPING:
         set_mapping(adjbar, g_value_get_enum(value));
         break;
@@ -270,6 +288,10 @@ gwy_adjust_bar_get_property(GObject *object,
     switch (prop_id) {
         case PROP_ADJUSTMENT:
         g_value_set_object(value, priv->adjustment);
+        break;
+
+        case PROP_SNAP_TO_TICKS:
+        g_value_set_boolean(value, priv->snap_to_ticks);
         break;
 
         case PROP_MAPPING:
@@ -509,7 +531,8 @@ gwy_adjust_bar_change_value(GwyAdjustBar *adjbar,
         return;
 
     gdouble value = gtk_adjustment_get_value(priv->adjustment);
-    if (newvalue == value)
+    newvalue = snap_value(adjbar, newvalue);
+    if (fabs(newvalue - value) <= 1e-12*fmax(fabs(newvalue), fabs(value)))
         return;
 
     gtk_adjustment_set_value(priv->adjustment, newvalue);
@@ -569,6 +592,51 @@ gwy_adjust_bar_get_adjustment(const GwyAdjustBar *adjbar)
 }
 
 /**
+ * gwy_adjust_bar_set_snap_to_ticks:
+ * @adjbar: A adjustment bar.
+ * @setting: %TRUE to restrict values to multiples of step size,
+ *           %FALSE to permit any values.
+ *
+ * Sets the snapping behaviour of an adjustment bar.
+ *
+ * Note the ‘multiples of step size’ condition in fact applies to the
+ * difference from the minimum value.  The maximum adjustment value is always
+ * permissible, even if it does not satisfy this condition.  Values modified by
+ * the user (i.e.  emission of signal "change-value") are snapped, however,
+ * values set explicitly gtk_adjustment_set_value() are kept intact.
+ *
+ * Setting this option to %TRUE immediately causes an adjustment value change
+ * if it does not satisfy the condition.
+ *
+ * It is usually a poor idea to enable snapping for non-linear mappings.
+ **/
+void
+gwy_adjust_bar_set_snap_to_ticks(GwyAdjustBar *adjbar,
+                                 gboolean setting)
+{
+    g_return_if_fail(GWY_IS_ADJUST_BAR(adjbar));
+    if (!set_snap_to_ticks(adjbar, setting))
+        return;
+
+    g_object_notify_by_pspec(G_OBJECT(adjbar), properties[PROP_SNAP_TO_TICKS]);
+}
+
+/**
+ * gwy_adjust_bar_get_snap_to_ticks:
+ * @adjbar: A adjustment bar.
+ *
+ * Sets the snapping behaviour of an adjustment bar.
+ *
+ * Returns: %TRUE if values are restricted to multiples of step size.
+ **/
+gboolean
+gwy_adjust_bar_get_snap_to_ticks(const GwyAdjustBar *adjbar)
+{
+    g_return_val_if_fail(GWY_IS_ADJUST_BAR(adjbar), FALSE);
+    return !!adjbar->priv->snap_to_ticks;
+}
+
+/**
  * gwy_adjust_bar_set_mapping:
  * @adjbar: A adjustment bar.
  * @mapping: Mapping function type between values and screen positions in the
@@ -625,6 +693,25 @@ set_adjustment(GwyAdjustBar *adjbar,
 }
 
 static gboolean
+set_snap_to_ticks(GwyAdjustBar *adjbar,
+                  gboolean setting)
+{
+    AdjustBar *priv = adjbar->priv;
+    if (!setting == priv->snap_to_ticks)
+        return FALSE;
+
+    priv->snap_to_ticks = !!setting;
+    if (setting && priv->adjustment) {
+        gdouble value = gtk_adjustment_get_value(priv->adjustment);
+        gdouble snapped = snap_value(adjbar, value);
+        if (fabs(snapped - value) > 1e-12*fmax(fabs(snapped), fabs(value)))
+            gtk_adjustment_set_value(priv->adjustment, snapped);
+    }
+
+    return TRUE;
+}
+
+static gboolean
 set_mapping(GwyAdjustBar *adjbar,
             GwyScaleMappingType mapping)
 {
@@ -638,6 +725,7 @@ set_mapping(GwyAdjustBar *adjbar,
     }
 
     // FIXME: Cancel editting?  At present it's stateles...
+    priv->mapping = mapping;
     update_mapping(adjbar);
     gtk_widget_queue_draw(GTK_WIDGET(adjbar));
     return TRUE;
@@ -852,6 +940,33 @@ discard_cursors(GwyAdjustBar *adjbar)
 {
     AdjustBar *priv = adjbar->priv;
     GWY_OBJECT_UNREF(priv->cursor_move);
+}
+
+static gdouble
+snap_value(const GwyAdjustBar *adjbar,
+           gdouble value)
+{
+    AdjustBar *priv = adjbar->priv;
+    if (!priv->adjustment)
+        return value;
+
+    gdouble step = gtk_adjustment_get_step_increment(priv->adjustment);
+    if (!step)
+        return value;
+
+    gdouble lower = gtk_adjustment_get_lower(priv->adjustment);
+    gdouble upper = gtk_adjustment_get_upper(priv->adjustment);
+    gdouble m = 0.5*fmin(step, upper - lower);
+    if (value >= upper - m)
+        return upper;
+
+    value = gwy_round((value - lower)/step)*step;
+    if (value > upper)
+        value -= step;
+    if (value < lower)
+        value = lower;
+
+    return value;
 }
 
 /**

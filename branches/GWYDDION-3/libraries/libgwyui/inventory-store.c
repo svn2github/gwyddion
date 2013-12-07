@@ -97,7 +97,7 @@ static void              inventory_items_reordered          (GwyInventoryStore *
 static void              set_inventory                      (GwyInventoryStore *store,
                                                              GwyInventory *inventory);
 static gboolean          check_item                         (guint n,
-                                                             gpointer item,
+                                                             GObject *item,
                                                              gpointer user_data);
 
 static GParamSpec *properties[N_PROPS];
@@ -606,7 +606,7 @@ gwy_inventory_store_iter_is_valid(const GwyInventoryStore *store,
 
 static gboolean
 check_item(guint n,
-           gpointer item,
+           GObject *item,
            gpointer user_data)
 {
     GtkTreeIter *iter = (GtkTreeIter*)user_data;

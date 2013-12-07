@@ -6,29 +6,30 @@
   <bookinfo>
     <title>Gwyddion4 Application Library Reference Manual</title>
   </bookinfo>
-  <preface id='libgwyapp-preface'>
+  <preface id='libgwyapp4-preface'>
     <title>Introduction</title>
     <para>
       This library contains application-level functions for module handling,
       data management and similar tasks.
     </para>
   </preface>
-  <chapter id='libgwyapp-object-hierarchy'>
+  <chapter id='libgwyapp4-object-hierarchy'>
     <title>Object hierarchy</title>
     <xi:include href="xml/tree_index.sgml"/>
   </chapter>
-  <chapter id='libgwyapp-data-management'>
+  <chapter id='libgwyapp4-data-management'>
     <title>Data management</title>
     <xi:include href="xml/file.xml"/>
     <xi:include href="xml/data-list.xml"/>
     <xi:include href="xml/data-item.xml"/>
     <xi:include href="xml/channel-data.xml"/>
   </chapter>
-  <chapter id='libgwyapp-modules'>
+  <chapter id='libgwyapp4-modules'>
     <title>Modules</title>
     <xi:include href="xml/module.xml"/>
+    <xi:include href="xml/channel-ext.xml"/>
   </chapter>
-  <index id='libgwyapp-symbol-index'>
+  <index id='libgwyapp4-symbol-index'>
     <title>Index of all symbols</title>
     <xi:include href="xml/api-index-full.xml"/>
   </index>

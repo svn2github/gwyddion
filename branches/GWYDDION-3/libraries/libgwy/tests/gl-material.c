@@ -232,7 +232,7 @@ test_gl_material_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
 
-    gl_material = gwy_inventory_get_default(gl_materials);
+    gl_material = (GwyGLMaterial*)gwy_inventory_get_default(gl_materials);
     g_assert(GWY_IS_GL_MATERIAL(gl_material));
     resource = GWY_RESOURCE(gl_material);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==,
@@ -246,7 +246,7 @@ test_gl_material_inventory(void)
 
     gwy_inventory_copy(gl_materials, GWY_GL_MATERIAL_DEFAULT, "Another");
     g_assert_cmpuint(gwy_inventory_size(gl_materials), ==, 3);
-    gl_material = gwy_inventory_get(gl_materials, "Another");
+    gl_material = (GwyGLMaterial*)gwy_inventory_get(gl_materials, "Another");
     resource = GWY_RESOURCE(gl_material);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
     gboolean modified;

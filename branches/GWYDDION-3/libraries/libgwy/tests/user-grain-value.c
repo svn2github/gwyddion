@@ -243,7 +243,7 @@ test_user_grain_value_inventory(void)
 
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
-    gwy_inventory_insert(usergrainvalues, usergrainvalue);
+    gwy_inventory_insert(usergrainvalues, G_OBJECT(usergrainvalue));
     g_object_unref(usergrainvalue);
     g_assert(gwy_resource_is_managed(resource));
     g_assert_cmpuint(gwy_inventory_size(usergrainvalues), ==, 1);
@@ -258,12 +258,12 @@ test_user_grain_value_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
 
-    usergrainvalue = gwy_inventory_get_default(usergrainvalues);
+    usergrainvalue = (GwyUserGrainValue*)gwy_inventory_get_default(usergrainvalues);
     g_assert(!usergrainvalue);
 
     gwy_inventory_copy(usergrainvalues, "Bloat", "Another");
     g_assert_cmpuint(gwy_inventory_size(usergrainvalues), ==, 2);
-    usergrainvalue = gwy_inventory_get(usergrainvalues, "Another");
+    usergrainvalue = (GwyUserGrainValue*)gwy_inventory_get(usergrainvalues, "Another");
     resource = GWY_RESOURCE(usergrainvalue);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
     gboolean modified;

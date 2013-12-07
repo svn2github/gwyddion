@@ -136,19 +136,19 @@ static void               gwy_resource_get_property       (GObject *object,
                                                            guint prop_id,
                                                            GValue *value,
                                                            GParamSpec *pspec);
-static gboolean           gwy_resource_is_modifiable_impl (gconstpointer item);
-static const gchar*       gwy_resource_get_item_name      (gconstpointer item);
+static const gchar*       gwy_resource_get_item_name      (const GObject *item);
+static gboolean           gwy_resource_is_modifiable_impl (const GObject *item);
 static gboolean           gwy_resource_compare            (gconstpointer item1,
                                                            gconstpointer item2);
-static void               gwy_resource_rename             (gpointer item,
+static void               gwy_resource_rename             (GObject *item,
                                                            const gchar *new_name);
-static gpointer           gwy_resource_copy               (gconstpointer item);
+static GObject*           gwy_resource_copy               (const GObject *item);
 static const GType*       gwy_resource_get_traits         (guint *ntraits);
 static const gchar*       gwy_resource_get_trait_name     (guint i);
-static void               gwy_resource_get_trait_value    (gconstpointer item,
+static void               gwy_resource_get_trait_value    (const GObject *item,
                                                            guint i,
                                                            GValue *value);
-static void               gwy_resource_delete             (gpointer item);
+static void               gwy_resource_delete             (GObject *item);
 static void               set_is_managed                  (GwyResource *resource,
                                                            gboolean managed);
 static void               inventory_item_inserted         (GwyInventory *inventory,
@@ -476,7 +476,7 @@ gwy_resource_assign_impl(GwySerializable *destination,
 
     g_return_if_fail(dest->priv->modifiable);
     if (!dest->priv->managed)
-        gwy_resource_rename(dest, src->priv->name);
+        gwy_resource_rename(G_OBJECT(dest), src->priv->name);
 
     // XXX: The rest are management properties, not value.  Do not assign them.
 }
@@ -557,16 +557,16 @@ gwy_resource_get_property(GObject *object,
 }
 
 static const gchar*
-gwy_resource_get_item_name(gconstpointer item)
+gwy_resource_get_item_name(const GObject *item)
 {
-    GwyResource *resource = (GwyResource*)item;
+    const GwyResource *resource = (const GwyResource*)item;
     return resource->priv->name;
 }
 
 static gboolean
-gwy_resource_is_modifiable_impl(gconstpointer item)
+gwy_resource_is_modifiable_impl(const GObject *item)
 {
-    GwyResource *resource = (GwyResource*)item;
+    const GwyResource *resource = (const GwyResource*)item;
     return resource->priv->modifiable;
 }
 
@@ -586,7 +586,7 @@ gwy_resource_compare(gconstpointer item1,
 }
 
 static void
-gwy_resource_rename(gpointer item,
+gwy_resource_rename(GObject *item,
                     const gchar *new_name)
 {
     GwyResource *resource = (GwyResource*)item;
@@ -598,12 +598,12 @@ gwy_resource_rename(gpointer item,
         g_object_notify_by_pspec(G_OBJECT(item), properties[PROP_NAME]);
 }
 
-static gpointer
-gwy_resource_copy(gconstpointer item)
+static GObject*
+gwy_resource_copy(const GObject *item)
 {
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(item);
     g_return_val_if_fail(klass && klass->copy, NULL);
-    return klass->copy(GWY_RESOURCE(item));
+    return (GObject*)klass->copy(GWY_RESOURCE(item));
 }
 
 static const GType*
@@ -623,7 +623,7 @@ gwy_resource_get_trait_name(guint i)
 }
 
 static void
-gwy_resource_get_trait_value(gconstpointer item,
+gwy_resource_get_trait_value(const GObject *item,
                              guint i,
                              GValue *value)
 {
@@ -633,7 +633,7 @@ gwy_resource_get_trait_value(gconstpointer item,
 }
 
 static void
-gwy_resource_delete(gpointer item)
+gwy_resource_delete(GObject *item)
 {
     GwyResource *resource = GWY_RESOURCE(item);
     manage_delete(resource);
@@ -655,7 +655,7 @@ inventory_item_inserted(GwyInventory *inventory,
                         GwyResourceClass *klass)
 {
     g_return_if_fail(klass->priv->inventory == inventory);
-    GwyResource *resource = gwy_inventory_get_nth(inventory, i);
+    GwyResource *resource = (GwyResource*)gwy_inventory_get_nth(inventory, i);
     Resource *priv = resource->priv;
     GObject *object = G_OBJECT(resource);
     g_object_freeze_notify(object);
@@ -698,7 +698,7 @@ gwy_resource_set_name(GwyResource *resource,
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
     g_return_if_fail(!resource->priv->managed);
-    gwy_resource_rename(resource, name);
+    gwy_resource_rename(G_OBJECT(resource), name);
 }
 
 /**
@@ -1754,7 +1754,7 @@ gwy_resource_type_load_directory(GType type,
         if (G_LIKELY(resource) && name_is_unique(resource, cpriv, &error)) {
             Resource *priv = resource->priv;
             priv->on_disk = TRUE;
-            gwy_inventory_insert(cpriv->inventory, resource);
+            gwy_inventory_insert(cpriv->inventory, G_OBJECT(resource));
             g_object_unref(resource);
         }
         else {
@@ -1801,7 +1801,8 @@ name_is_unique(GwyResource *resource,
                GError **error)
 {
     Resource *priv = resource->priv;
-    GwyResource *obstacle = gwy_inventory_get(klass->inventory, priv->name);
+    GwyResource *obstacle = (GwyResource*)gwy_inventory_get(klass->inventory,
+                                                            priv->name);
     if (!obstacle)
         return TRUE;
 

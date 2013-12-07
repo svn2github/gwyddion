@@ -65,9 +65,9 @@ struct _GwyLineClass {
 };
 
 #define gwy_line_duplicate(line) \
-        (GWY_LINE(gwy_serializable_duplicate(GWY_SERIALIZABLE(line))))
+    (GWY_LINE(gwy_serializable_duplicate(GWY_SERIALIZABLE(line))))
 #define gwy_line_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType           gwy_line_get_type      (void)                           G_GNUC_CONST;
 GwyLine*        gwy_line_new           (void)                           G_GNUC_MALLOC;

@@ -328,7 +328,7 @@ test_fit_func_user(void)
     g_assert(GWY_IS_USER_FIT_FUNC(linear));
     GwyResource *resource = GWY_RESOURCE(linear);
     gwy_resource_set_name(resource, "TESTLIBGWY Linear");
-    gwy_inventory_insert(userfitfuncs, linear);
+    gwy_inventory_insert(userfitfuncs, G_OBJECT(linear));
     g_object_unref(linear);
     g_assert(gwy_user_fit_func_set_formula(linear, "a+b*x", NULL));
     gwy_user_fit_func_set_group(linear, "User");

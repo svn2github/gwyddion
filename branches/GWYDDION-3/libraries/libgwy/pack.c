@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -955,6 +955,66 @@ gwy_unpack_data(const gchar *format,
 }
 
 /**
+ * gwy_read_pascal_real_le:
+ * @ppv: Pointer to a pointer to a little-endian six-byte Pascal Real
+ *       in a memory buffer.
+ *
+ * Reads a six-byte Pascale Real value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The floating point value read from the buffer as a #gdouble.
+ **/
+gdouble
+gwy_read_pascal_real_le(const guchar **ppv)
+{
+    if (!(*ppv)[0]) {
+        *ppv += 6;
+        return 0.0;
+    }
+
+    gdouble x = 1.0 + (((((*ppv)[1]/256.0 + (*ppv)[2])/256.0 + (*ppv)[3])/256.0
+                        + (*ppv)[4])/256.0 + ((*ppv)[5] & 0x7f))/128.0;
+    if ((*ppv)[5] & 0x80)
+        x = -x;
+
+    x *= gwy_powi(2.0, (gint)(*ppv)[0] - 129);
+
+    *ppv += 6;
+
+    return x;
+}
+
+/**
+ * gwy_read_pascal_real_be:
+ * @ppv: Pointer to a pointer to a big-endian six-byte Pascal Real
+ *       in a memory buffer.
+ *
+ * Reads a six-byte Pascale Real value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The floating point value read from the buffer as a #gdouble.
+ **/
+gdouble
+gwy_read_pascal_real_be(const guchar **ppv)
+{
+    if (!(*ppv)[5]) {
+        *ppv += 6;
+        return 0.0;
+    }
+
+    gdouble x = 1.0 + (((((*ppv)[4]/256.0 + (*ppv)[3])/256.0 + (*ppv)[2])/256.0
+                        + (*ppv)[1])/256.0 + ((*ppv)[0] & 0x7f))/128.0;
+    if ((*ppv)[0] & 0x80)
+        x = -x;
+
+    x *= gwy_powi(2.0, (gint)(*ppv)[5] - 129);
+
+    *ppv += 6;
+
+    return x;
+}
+
+/**
  * gwy_pack_error_quark:
  *
  * Gets the error domain for binary data packing and unpacking.
@@ -1144,6 +1204,193 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  *
  * Errors in this domain will be from the #GwyPackError enumeration.
  * See #GError for information on error domains.
+ **/
+
+/**
+ * gwy_read_gboolean8:
+ * @ppv: Pointer to a pointer to boolean (stored as a signle byte)
+ *       in a memory buffer.
+ *
+ * Reads a boolean value stored as a signle byte from a
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gboolean value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gint16_le:
+ * @ppv: Pointer to a pointer to a little-endian signed 16bit integer
+ *       in a memory buffer.
+ *
+ * Reads a signed 16bit integer value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gint16 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gint16_be:
+ * @ppv: Pointer to a pointer to a big-endian signed 16bit integer
+ *       in a memory buffer.
+ *
+ * Reads a signed 16bit integer value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gint16 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_guint16_le:
+ * @ppv: Pointer to a pointer to a little-endian unsigned 16bit integer
+ *       in a memory buffer.
+ *
+ * Reads an unsigned 16bit integer value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #guint16 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_guint16_be:
+ * @ppv: Pointer to a pointer to a big-endian unsigned 16bit integer
+ *       in a memory buffer.
+ *
+ * Reads an unsigned 16bit integer value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #guint16 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gint32_le:
+ * @ppv: Pointer to a pointer to a little-endian signed 32bit integer
+ *       in a memory buffer.
+ *
+ * Reads a signed 32bit integer value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gint32 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gint32_be:
+ * @ppv: Pointer to a pointer to a big-endian signed 32bit integer
+ *       in a memory buffer.
+ *
+ * Reads a signed 32bit integer value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gint32 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_guint32_le:
+ * @ppv: Pointer to a pointer to a little-endian unsigned 32bit integer
+ *       in a memory buffer.
+ *
+ * Reads an unsigned 32bit integer value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #guint32 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_guint32_be:
+ * @ppv: Pointer to a pointer to a big-endian unsigned 32bit integer
+ *       in a memory buffer.
+ *
+ * Reads an unsigned 32bit integer value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #guint32 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gint64_le:
+ * @ppv: Pointer to a pointer to a little-endian signed 64bit integer
+ *       in a memory buffer.
+ *
+ * Reads a signed 64bit integer value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gint64 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gint64_be:
+ * @ppv: Pointer to a pointer to a big-endian signed 64bit integer
+ *       in a memory buffer.
+ *
+ * Reads a signed 64bit integer value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gint64 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_guint64_le:
+ * @ppv: Pointer to a pointer to a little-endian unsigned 64bit integer
+ *       in a memory buffer.
+ *
+ * Reads an unsigned 64bit integer value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #guint64 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_guint64_be:
+ * @ppv: Pointer to a pointer to a big-endian unsigned 64bit integer
+ *       in a memory buffer.
+ *
+ * Reads an unsigned 64bit integer value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #guint64 value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gfloat_le:
+ * @ppv: Pointer to a pointer to a little-endian single-precision IEEE float
+ *       in a memory buffer.
+ *
+ * Reads a single-precision IEEE float value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gfloat value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gfloat_be:
+ * @ppv: Pointer to a pointer to a big-endian single-precision IEEE float
+ *       in a memory buffer.
+ *
+ * Reads a single-precision IEEE float value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gfloat value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gdouble_le:
+ * @ppv: Pointer to a pointer to a little-endian double-precision IEEE float
+ *       in a memory buffer.
+ *
+ * Reads a double-precision IEEE float value from a little-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gdouble value read from the buffer.
+ **/
+
+/**
+ * gwy_read_gdouble_be:
+ * @ppv: Pointer to a pointer to a big-endian double-precision IEEE float
+ *       in a memory buffer.
+ *
+ * Reads a double-precision IEEE float value from a big-endian
+ * binary data buffer, moving the buffer pointer to point just after the value.
+ *
+ * Returns: The #gdouble value read from the buffer.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

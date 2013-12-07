@@ -1339,7 +1339,7 @@ test_grain_value_user(void)
     g_assert(GWY_IS_USER_GRAIN_VALUE(height));
     GwyResource *resource = GWY_RESOURCE(height);
     gwy_resource_set_name(resource, "TESTLIBGWY Height");
-    gwy_inventory_insert(usergrainvalues, height);
+    gwy_inventory_insert(usergrainvalues, G_OBJECT(height));
     g_object_unref(height);
     GError *error = NULL;
     g_assert(gwy_user_grain_value_set_formula(height, "z_max-z_min", &error));

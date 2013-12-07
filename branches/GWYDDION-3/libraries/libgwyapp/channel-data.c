@@ -848,7 +848,7 @@ update_raster_area_gradient(GwyChannelData *channeldata)
     GwyGradient *grad = NULL;
     if (priv->gradient_name) {
         GwyInventory *gradients = gwy_gradients();
-        grad = gwy_inventory_get(gradients, priv->gradient_name);
+        grad = (GwyGradient*)gwy_inventory_get(gradients, priv->gradient_name);
     }
     priv->rasterarea_updating = TRUE;
     gwy_raster_area_set_gradient(priv->rasterarea, grad);

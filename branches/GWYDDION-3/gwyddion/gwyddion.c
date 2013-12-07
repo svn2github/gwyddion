@@ -136,6 +136,12 @@ render_name(G_GNUC_UNUSED GtkTreeViewColumn *column,
     g_object_set(renderer, "text", name ? name : "Untitled", NULL);
 }
 
+static void
+selection_changed(GtkTreeSelection *selection)
+{
+    g_printerr("Selection %p changed.\n", selection);
+}
+
 static GtkWidget*
 create_data_list_view(GwyDataList *datalist)
 {
@@ -172,6 +178,11 @@ create_data_list_view(GwyDataList *datalist)
     gtk_tree_view_column_pack_start(column_name, renderer_name, TRUE);
     gtk_tree_view_column_set_cell_data_func(column_name, renderer_name,
                                             render_name, NULL, NULL);
+
+    //GwyIntSet *intset = gwy_data_list_get_selection(datalist);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+    gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
+    g_signal_connect(selection, "changed", G_CALLBACK(selection_changed), NULL);
 
     return datalistview;
 }

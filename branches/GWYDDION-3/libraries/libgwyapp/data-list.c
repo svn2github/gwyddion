@@ -36,6 +36,7 @@ enum {
 
 struct _GwyDataListPrivate {
     GwyFile *parent_file;
+    GwyIntSet *selection;
     guint item_id;
     GwyDataKind kind;
     GType type;
@@ -122,9 +123,12 @@ gwy_data_list_init(GwyDataList *datalist)
 {
     datalist->priv = G_TYPE_INSTANCE_GET_PRIVATE(datalist,
                                                  GWY_TYPE_DATA_LIST, DataList);
-
     gwy_array_set_item_type(GWY_ARRAY(datalist),
-                            sizeof(gpointer), g_object_unref);
+                            sizeof(gpointer),
+                            (GDestroyNotify)g_clear_object);
+
+    DataList *priv = datalist->priv;
+    priv->selection = gwy_int_set_new();
 }
 
 static void
@@ -137,7 +141,9 @@ gwy_data_list_finalize(GObject *object)
 static void
 gwy_data_list_dispose(GObject *object)
 {
-    //GwyDataList *datalist = GWY_DATA_LIST(object);
+    GwyDataList *datalist = GWY_DATA_LIST(object);
+    DataList *priv = datalist->priv;
+    GWY_OBJECT_UNREF(priv->selection);
     G_OBJECT_CLASS(gwy_data_list_parent_class)->dispose(object);
 }
 
@@ -311,6 +317,32 @@ gwy_data_list_get_ids(const GwyDataList *datalist,
     for (guint i = 0; i < n; i++)
         ids[i] = gwy_data_item_get_id(items[i]);
     return ids;
+}
+
+/**
+ * gwy_data_list_get_selection:
+ * @datalist: A list of one kind of data.
+ *
+ * Gets the id set representing the selected data.
+ *
+ * This is a permanent object owned by @datalist, changing the set changes
+ * the selection.  It represents the application-wide notion of ‘active’ data
+ * item of given type in the file.  Different users that work with this notion
+ * have to synchronise it using the set.
+ *
+ * Often, but not always, the selection may be limited to a single data item.
+ *
+ * FIXME: Maybe this need to be indicated/enforced already on the level of
+ * #GwyDataList?
+ *
+ * Returns: (transfer none):
+ *          The integer set object representing selected ids.
+ **/
+GwyIntSet*
+gwy_data_list_get_selection(GwyDataList *datalist)
+{
+    g_return_val_if_fail(GWY_IS_DATA_LIST(datalist), NULL);
+    return datalist->priv->selection;
 }
 
 /**

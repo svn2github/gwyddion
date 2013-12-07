@@ -6,18 +6,18 @@
   <bookinfo>
     <title>Gwyddion4 Library Reference Manual</title>
   </bookinfo>
-  <preface id='libgwy-preface'>
+  <preface id='libgwy4-preface'>
     <title>Introduction</title>
     <para>
       This library contains fundamental classes and interfaces, data processing
       functions for one- and two-dimensional data and various utilities.
     </para>
   </preface>
-  <chapter id='libgwy-object-hierarchy'>
+  <chapter id='libgwy4-object-hierarchy'>
     <title>Object hierarchy</title>
     <xi:include href="xml/tree_index.sgml"/>
   </chapter>
-  <chapter id='libgwy-fundamentals'>
+  <chapter id='libgwy4-fundamentals'>
     <title>Fundamentals</title>
     <xi:include href="xml/main.xml"/>
     <xi:include href="xml/version.xml"/>
@@ -28,7 +28,7 @@
     <xi:include href="xml/calc.xml"/>
     <xi:include href="xml/master.xml"/>
   </chapter>
-  <chapter id='libgwy-mathematical-tools'>
+  <chapter id='libgwy4-mathematical-tools'>
     <title>Numerical Tools</title>
     <xi:include href="xml/math.xml"/>
     <xi:include href="xml/interpolation.xml"/>
@@ -41,7 +41,7 @@
     <xi:include href="xml/unit.xml"/>
     <xi:include href="xml/value-format.xml"/>
   </chapter>
-  <chapter id='libgwy-one-dimensional-data'>
+  <chapter id='libgwy4-one-dimensional-data'>
     <title>One-Dimensional Data</title>
     <para>
       Two basic data objects represent one-dimensional data:
@@ -60,7 +60,7 @@
     <xi:include href="xml/mask-iter.xml"/>
     <xi:include href="xml/mask-line.xml"/>
   </chapter>
-  <chapter id='libgwy-two-dimensional-data'>
+  <chapter id='libgwy4-two-dimensional-data'>
     <title>Two-Dimensional Data</title>
     <para>
       Two basic data objects represent two-dimensional data:
@@ -89,21 +89,21 @@
     <xi:include href="xml/surface-statistics.xml"/>
     <xi:include href="xml/grain-value.xml"/>
   </chapter>
-  <chapter id='libgwy-three-dimensional-data'>
+  <chapter id='libgwy4-three-dimensional-data'>
     <title>Three-Dimensional Data</title>
     <xi:include href="xml/brick-part.xml"/>
     <xi:include href="xml/brick.xml"/>
     <xi:include href="xml/brick-arithmetic.xml"/>
     <xi:include href="xml/brick-statistics.xml"/>
   </chapter>
-  <chapter id='libgwy-data-containers'>
+  <chapter id='libgwy4-data-containers'>
     <title>Data Containers</title>
     <xi:include href="xml/array.xml"/>
-    <xi:include href="xml/container.xml"/>
+    <xi:include href="xml/dict.xml"/>
     <xi:include href="xml/inventory.xml"/>
     <xi:include href="xml/listable.xml"/>
   </chapter>
-  <chapter id='libgwy-resources'>
+  <chapter id='libgwy4-resources'>
     <title>Resources</title>
     <xi:include href="xml/rgba.xml"/>
     <xi:include href="xml/resource.xml"/>
@@ -115,7 +115,7 @@
     <xi:include href="builtin-grain-value.xml"/>
     <xi:include href="xml/user-grain-value.xml"/>
   </chapter>
-  <chapter id='libgwy-selections'>
+  <chapter id='libgwy4-selections'>
     <title>Selections</title>
     <xi:include href="xml/coords.xml"/>
     <xi:include href="xml/coords-point.xml"/>
@@ -123,14 +123,14 @@
     <xi:include href="xml/coords-rectangle.xml"/>
     <xi:include href="xml/int-set.xml"/>
   </chapter>
-  <chapter id='libgwy-utilities'>
+  <chapter id='libgwy4-utilities'>
     <title>Utilities</title>
     <xi:include href="xml/macros.xml"/>
     <xi:include href="xml/strfuncs.xml"/>
     <xi:include href="xml/object-utils.xml"/>
     <xi:include href="xml/pack.xml"/>
   </chapter>
-  <index id='libgwy-symbol-index'>
+  <index id='libgwy4-symbol-index'>
     <title>Index of all symbols</title>
     <xi:include href="xml/api-index-full.xml"/>
   </index>

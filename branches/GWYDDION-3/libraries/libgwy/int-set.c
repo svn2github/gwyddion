@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -65,6 +65,10 @@ static int      int_compare                  (const void *pa,
                                               const void *pb);
 static guint    uniq                         (gint *values,
                                               guint n);
+static GArray*  intersect_ranges             (const GwyIntSet *intseta,
+                                              const GwyIntSet *intsetb);
+static GArray*  union_ranges                 (const GwyIntSet *intseta,
+                                              const GwyIntSet *intsetb);
 static guint    ranges_size                  (const GArray *ranges);
 static gboolean is_strictly_ascending        (const gint *values,
                                               guint n);
@@ -632,7 +636,8 @@ gwy_int_set_update(GwyIntSet *intset,
     /* Best not to try to iterate over @ranges while we change it by
      * gwy_int_set_remove().  Use a temporary copy to see what values were
      * there originally. */
-    GwyIntRange *r = (GwyIntRange*)g_slice_copy(n*sizeof(GwyIntRange), ranges->data);
+    GwyIntRange *r = (GwyIntRange*)g_slice_copy(n*sizeof(GwyIntRange),
+                                                ranges->data);
     for (guint i = 0; i < n; i++) {
         for (gint value = r[i].from; value <= r[i].to; value++) {
             if (!is_present(tmpranges, value))
@@ -777,6 +782,60 @@ gwy_int_set_ranges(const GwyIntSet *intset,
 }
 
 /**
+ * gwy_int_set_intersect:
+ * @intset: A set of integers.
+ * @operand: Another set of integers.
+ *
+ * Intersects a set of integers with another set.
+ **/
+void
+gwy_int_set_intersect(GwyIntSet *intset,
+                      const GwyIntSet *operand)
+{
+    g_return_if_fail(GWY_IS_INT_SET(intset));
+    g_return_if_fail(GWY_IS_INT_SET(operand));
+    if (operand == intset)
+        return;
+
+    GArray *intersected = intersect_ranges(intset, operand);
+    if (ranges_size(intersected) == ranges_size(intset->priv->ranges)) {
+        g_array_free(intersected, TRUE);
+        return;
+    }
+
+    GWY_SWAP(GArray*, intset->priv->ranges, intersected);
+    g_array_free(intersected, TRUE);
+    g_signal_emit(intset, signals[SGNL_ASSIGNED], 0);
+}
+
+/**
+ * gwy_int_set_union:
+ * @intset: A set of integers.
+ * @operand: Another set of integers.
+ *
+ * Creates a union of a set of integers with another set.
+ **/
+void
+gwy_int_set_union(GwyIntSet *intset,
+                  const GwyIntSet *operand)
+{
+    g_return_if_fail(GWY_IS_INT_SET(intset));
+    g_return_if_fail(GWY_IS_INT_SET(operand));
+    if (operand == intset)
+        return;
+
+    GArray *merged = union_ranges(intset, operand);
+    if (ranges_size(merged) == ranges_size(intset->priv->ranges)) {
+        g_array_free(merged, TRUE);
+        return;
+    }
+
+    GWY_SWAP(GArray*, intset->priv->ranges, merged);
+    g_array_free(merged, TRUE);
+    g_signal_emit(intset, signals[SGNL_ASSIGNED], 0);
+}
+
+/**
  * gwy_int_set_foreach:
  * @intset: A set of integers.
  * @function: (scope call):
@@ -873,6 +932,108 @@ gwy_int_set_next(const GwyIntSet *intset,
         iter->value = r[iter->priv].from;
     }
     return TRUE;
+}
+
+static GArray*
+intersect_ranges(const GwyIntSet *intseta,
+                 const GwyIntSet *intsetb)
+{
+    const IntSet *priva = intseta->priv, *privb = intsetb->priv;
+    const GArray *arraya = priva->ranges, *arrayb = privb->ranges;
+    const GwyIntRange *rangea = (const GwyIntRange*)arraya->data;
+    const GwyIntRange *rangeb = (const GwyIntRange*)arrayb->data;
+    guint lena = arraya->len, lenb = arrayb->len;
+    GArray *intersection = g_array_new(FALSE, FALSE, sizeof(GwyIntRange));
+    guint ia = 0, ib = 0;
+
+    while (ia < lena && ib < lenb) {
+        if (rangea[ia].to < rangeb[ib].from)
+            ia++;
+        else if (rangea[ia].from > rangeb[ib].to)
+            ib++;
+        else {
+            // There is an intersection.
+            GwyIntRange range = {
+                .from = MAX(rangea[ia].from, rangeb[ib].from),
+                .to = MIN(rangea[ia].to, rangeb[ib].to),
+            };
+            g_assert(range.to >= range.from);
+            g_array_append_val(intersection, range);
+            if (rangea[ia].to <= rangeb[ib].to)
+                ia++;
+            else
+                ib++;
+        }
+    }
+
+    return intersection;
+}
+
+static GArray*
+union_ranges(const GwyIntSet *intseta,
+             const GwyIntSet *intsetb)
+{
+    const IntSet *priva = intseta->priv, *privb = intsetb->priv;
+    const GArray *arraya = priva->ranges, *arrayb = privb->ranges;
+    const GwyIntRange *rangea = (const GwyIntRange*)arraya->data;
+    const GwyIntRange *rangeb = (const GwyIntRange*)arrayb->data;
+    guint lena = arraya->len, lenb = arrayb->len;
+    GArray *merged = g_array_new(FALSE, FALSE, sizeof(GwyIntRange));
+    guint ia = 0, ib = 0;
+    gint from = G_MAXINT, to;
+
+    // In order to create a canonical output we must grow a single range as
+    // long as possible and only terminate it when it cannot be merged with
+    // the following.
+    while (ia < lena || ib < lenb) {
+        gboolean usea = (ia < lena && (ib == lenb
+                                       || rangea[ia].from < rangeb[ib].from
+                                       || (rangea[ia].from == rangeb[ib].from
+                                           && rangea[ia].to <= rangeb[ib].to)));
+        if (from == G_MAXINT) {
+            if (usea) {
+                from = rangea[ia].from;
+                to = rangea[ia].to;
+                ia++;
+            }
+            else {
+                from = rangeb[ib].from;
+                to = rangeb[ib].to;
+                ib++;
+            }
+        }
+        else if (usea) {
+            if (rangea[ia].from <= to+1) {
+                to = MAX(rangea[ia].to, to);
+                ia++;
+            }
+            else {
+                GwyIntRange range = { .from = from, .to = to };
+                g_array_append_val(merged, range);
+                from = G_MAXINT;
+            }
+        }
+        else {
+            if (rangeb[ib].from <= to+1) {
+                to = MAX(rangeb[ib].to, to);
+                ib++;
+            }
+            else {
+                GwyIntRange range = { .from = from, .to = to };
+                g_array_append_val(merged, range);
+                from = G_MAXINT;
+            }
+        }
+    }
+
+    if (from != G_MAXINT) {
+        GwyIntRange range = { .from = from, .to = to };
+        g_array_append_val(merged, range);
+    }
+
+    //g_assert(ranges_are_canonical(merged));
+
+    return merged;
 }
 
 static guint

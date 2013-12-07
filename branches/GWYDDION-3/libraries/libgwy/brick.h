@@ -67,9 +67,9 @@ struct _GwyBrickClass {
 };
 
 #define gwy_brick_duplicate(brick) \
-        (GWY_BRICK(gwy_serializable_duplicate(GWY_SERIALIZABLE(brick))))
+    (GWY_BRICK(gwy_serializable_duplicate(GWY_SERIALIZABLE(brick))))
 #define gwy_brick_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType           gwy_brick_get_type       (void)                        G_GNUC_CONST;
 GwyBrick*       gwy_brick_new            (void)                        G_GNUC_MALLOC;

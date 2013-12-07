@@ -57,9 +57,9 @@ struct _GwyCurveClass {
 };
 
 #define gwy_curve_duplicate(curve) \
-        (GWY_CURVE(gwy_serializable_duplicate(GWY_SERIALIZABLE(curve))))
+    (GWY_CURVE(gwy_serializable_duplicate(GWY_SERIALIZABLE(curve))))
 #define gwy_curve_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType           gwy_curve_get_type       (void)                      G_GNUC_CONST;
 GwyCurve*       gwy_curve_new            (void)                      G_GNUC_MALLOC;

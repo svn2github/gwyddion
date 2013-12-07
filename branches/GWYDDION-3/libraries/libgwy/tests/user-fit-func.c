@@ -258,7 +258,7 @@ test_user_fit_func_inventory(void)
 
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
-    gwy_inventory_insert(userfitfuncs, userfitfunc);
+    gwy_inventory_insert(userfitfuncs, G_OBJECT(userfitfunc));
     g_object_unref(userfitfunc);
     g_assert(gwy_resource_is_managed(resource));
     g_assert_cmpuint(gwy_inventory_size(userfitfuncs), ==, 1);
@@ -273,12 +273,12 @@ test_user_fit_func_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
 
-    userfitfunc = gwy_inventory_get_default(userfitfuncs);
+    userfitfunc = (GwyUserFitFunc*)gwy_inventory_get_default(userfitfuncs);
     g_assert(!userfitfunc);
 
     gwy_inventory_copy(userfitfuncs, "Linear 2", "Another");
     g_assert_cmpuint(gwy_inventory_size(userfitfuncs), ==, 2);
-    userfitfunc = gwy_inventory_get(userfitfuncs, "Another");
+    userfitfunc = (GwyUserFitFunc*)gwy_inventory_get(userfitfuncs, "Another");
     resource = GWY_RESOURCE(userfitfunc);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
     gboolean modified;

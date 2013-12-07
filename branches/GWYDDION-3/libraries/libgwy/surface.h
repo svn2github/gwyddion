@@ -61,9 +61,9 @@ struct _GwySurfaceClass {
 };
 
 #define gwy_surface_duplicate(surface) \
-        (GWY_SURFACE(gwy_serializable_duplicate(GWY_SERIALIZABLE(surface))))
+    (GWY_SURFACE(gwy_serializable_duplicate(GWY_SERIALIZABLE(surface))))
 #define gwy_surface_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType           gwy_surface_get_type       (void)                            G_GNUC_CONST;
 GwySurface*     gwy_surface_new            (void)                            G_GNUC_MALLOC;

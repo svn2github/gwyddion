@@ -59,9 +59,9 @@ struct _GwyFitParamClass {
 };
 
 #define gwy_fit_param_duplicate(fitparam) \
-        (GWY_FIT_PARAM(gwy_serializable_duplicate(GWY_SERIALIZABLE(fitparam))))
+    (GWY_FIT_PARAM(gwy_serializable_duplicate(GWY_SERIALIZABLE(fitparam))))
 #define gwy_fit_param_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType        gwy_fit_param_get_type      (void)                        G_GNUC_CONST;
 GwyFitParam* gwy_fit_param_new           (const gchar *name)           G_GNUC_MALLOC;

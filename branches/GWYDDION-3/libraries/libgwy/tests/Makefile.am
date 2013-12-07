@@ -9,9 +9,9 @@ testlibgwy_SOURCES = \
 	brick.c \
 	brick-arithm.c \
 	brick-part.c \
-	container.c \
 	coords.c \
 	curve.c \
+	dict.c \
 	error-list.c \
 	expr.c \
 	fft.c \

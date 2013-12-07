@@ -24,7 +24,7 @@
 
 G_BEGIN_DECLS
 
-#define GWY_DATA_ITEM_MAX_ID G_MAXUINT
+#define GWY_DATA_ITEM_MAX_ID G_MAXINT
 
 #define GWY_TYPE_DATA_ITEM \
     (gwy_data_item_get_type())

@@ -26,13 +26,13 @@
 #include <libgwy/brick-part.h>
 #include <libgwy/brick-statistics.h>
 #include <libgwy/calc.h>
-#include <libgwy/container.h>
 #include <libgwy/coords.h>
 #include <libgwy/coords-line.h>
 #include <libgwy/coords-point.h>
 #include <libgwy/coords-rectangle.h>
 #include <libgwy/curve.h>
 #include <libgwy/curve-statistics.h>
+#include <libgwy/dict.h>
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/fft.h>

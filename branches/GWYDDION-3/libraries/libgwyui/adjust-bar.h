@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -57,14 +57,17 @@ struct _GwyAdjustBarClass {
     GtkBinClass bin_class;
 };
 
-GType               gwy_adjust_bar_get_type           (void)                         G_GNUC_CONST;
-GtkWidget*          gwy_adjust_bar_new                (void)                         G_GNUC_MALLOC;
-void                gwy_adjust_bar_set_adjustment     (GwyAdjustBar *adjbar,
-                                                       GtkAdjustment *adjustment);
-GtkAdjustment*      gwy_adjust_bar_get_adjustment     (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
-void                gwy_adjust_bar_set_mapping        (GwyAdjustBar *adjbar,
-                                                       GwyScaleMappingType mapping);
-GwyScaleMappingType gwy_adjust_bar_get_mapping        (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
+GType               gwy_adjust_bar_get_type         (void)                         G_GNUC_CONST;
+GtkWidget*          gwy_adjust_bar_new              (void)                         G_GNUC_MALLOC;
+void                gwy_adjust_bar_set_adjustment   (GwyAdjustBar *adjbar,
+                                                     GtkAdjustment *adjustment);
+GtkAdjustment*      gwy_adjust_bar_get_adjustment   (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
+void                gwy_adjust_bar_set_snap_to_ticks(GwyAdjustBar *adjbar,
+                                                     gboolean setting);
+gboolean            gwy_adjust_bar_get_snap_to_ticks(const GwyAdjustBar *adjbar)   G_GNUC_PURE;
+void                gwy_adjust_bar_set_mapping      (GwyAdjustBar *adjbar,
+                                                     GwyScaleMappingType mapping);
+GwyScaleMappingType gwy_adjust_bar_get_mapping      (const GwyAdjustBar *adjbar)   G_GNUC_PURE;
 
 G_END_DECLS
 

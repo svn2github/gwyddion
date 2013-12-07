@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012 David Nečas (Yeti).
+ *  Copyright (C) 2012-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -65,9 +65,9 @@ typedef struct {
 } GwyIntSetIter;
 
 #define gwy_int_set_duplicate(intset) \
-        (GWY_INT_SET(gwy_serializable_duplicate(GWY_SERIALIZABLE(intset))))
+    (GWY_INT_SET(gwy_serializable_duplicate(GWY_SERIALIZABLE(intset))))
 #define gwy_int_set_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType              gwy_int_set_get_type       (void)                          G_GNUC_CONST;
 GwyIntSet*         gwy_int_set_new            (void)                          G_GNUC_MALLOC;
@@ -95,6 +95,10 @@ gint*              gwy_int_set_values         (const GwyIntSet *intset,
                                                guint *len)                    G_GNUC_MALLOC;
 const GwyIntRange* gwy_int_set_ranges         (const GwyIntSet *intset,
                                                guint *n)                      G_GNUC_PURE;
+void               gwy_int_set_intersect      (GwyIntSet *intset,
+                                               const GwyIntSet *operand);
+void               gwy_int_set_union          (GwyIntSet *intset,
+                                               const GwyIntSet *operand);
 void               gwy_int_set_foreach        (const GwyIntSet *intset,
                                                GwyIntSetForeachFunc function,
                                                gpointer user_data);

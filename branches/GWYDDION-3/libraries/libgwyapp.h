@@ -22,6 +22,7 @@
 
 #include <libgwyui.h>
 #include <libgwyapp/channel-data.h>
+#include <libgwyapp/channel-ext.h>
 #include <libgwyapp/data-item.h>
 #include <libgwyapp/data-list.h>
 #include <libgwyapp/file.h>

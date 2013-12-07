@@ -51,9 +51,9 @@ struct _GwyCoordsPointClass {
 };
 
 #define gwy_coords_point_duplicate(coordspoint) \
-        (GWY_COORDS_POINT(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordspoint))))
+    (GWY_COORDS_POINT(gwy_serializable_duplicate(GWY_SERIALIZABLE(coordspoint))))
 #define gwy_coords_point_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType      gwy_coords_point_get_type(void) G_GNUC_CONST;
 GwyCoords* gwy_coords_point_new     (void) G_GNUC_MALLOC;

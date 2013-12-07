@@ -61,9 +61,9 @@ struct _GwyUserFitFuncClass {
 };
 
 #define gwy_user_fit_func_duplicate(userfitfunc) \
-        (GWY_USER_FIT_FUNC(gwy_serializable_duplicate(GWY_SERIALIZABLE(userfitfunc))))
+    (GWY_USER_FIT_FUNC(gwy_serializable_duplicate(GWY_SERIALIZABLE(userfitfunc))))
 #define gwy_user_fit_func_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+    (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType           gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
 GwyUserFitFunc* gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;

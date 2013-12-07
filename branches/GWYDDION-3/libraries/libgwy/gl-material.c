@@ -534,7 +534,7 @@ gwy_gl_material_setup_inventory(GwyInventory *inventory)
                                "modifiable", FALSE,
                                "name", GWY_GL_MATERIAL_DEFAULT,
                                NULL);
-    gwy_inventory_insert(inventory, gl_material);
+    gwy_inventory_insert(inventory, G_OBJECT(gl_material));
     g_object_unref(gl_material);
     // None
     gl_material = g_object_new(GWY_TYPE_GL_MATERIAL,
@@ -542,7 +542,7 @@ gwy_gl_material_setup_inventory(GwyInventory *inventory)
                                "name", GWY_GL_MATERIAL_NONE,
                                NULL);
     *gl_material->priv = null_material;
-    gwy_inventory_insert(inventory, gl_material);
+    gwy_inventory_insert(inventory, G_OBJECT(gl_material));
     g_object_unref(gl_material);
 }
 

@@ -13,11 +13,11 @@
       various user interface utilities.
     </para>
   </preface>
-  <chapter id='libgwyui-object-hierarchy'>
+  <chapter id='libgwyui4-object-hierarchy'>
     <title>Object hierarchy</title>
     <xi:include href="xml/tree_index.sgml"/>
   </chapter>
-  <chapter id='libgwyui-field'>
+  <chapter id='libgwyui4-field'>
     <title>Field Views</title>
     <xi:include href="xml/field-render.xml"/>
     <xi:include href="xml/raster-area.xml"/>
@@ -30,14 +30,19 @@
     <xi:include href="xml/ruler.xml"/>
     <xi:include href="xml/color-axis.xml"/>
   </chapter>
-  <chapter id='libgwyui-graphs'>
+  <chapter id='libgwyui4-graphs'>
     <title>Graphs</title>
     <xi:include href="xml/graph.xml"/>
     <xi:include href="xml/graph-area.xml"/>
     <xi:include href="xml/graph-axis.xml"/>
     <xi:include href="xml/graph-curve.xml"/>
   </chapter>
-  <chapter id='libgwyui-utils'>
+  <chapter id='libgwyui4-input-widgets'>
+    <title>Input widgets</title>
+    <xi:include href="xml/spin-button.xml"/>
+    <xi:include href="xml/adjust-bar.xml"/>
+  </chapter>
+  <chapter id='libgwyui4-utils'>
     <title>Utilities and auxiliary widgets</title>
     <xi:include href="xml/main.xml"/>
     <xi:include href="xml/stock.xml"/>
@@ -48,13 +53,12 @@
     <xi:include href="xml/resource-list.xml"/>
     <xi:include href="xml/coords-view.xml"/>
     <xi:include href="xml/cell-renderer-gradient.xml"/>
-    <xi:include href="xml/spin-button.xml"/>
     <xi:include href="xml/adjustment.xml"/>
-    <xi:include href="xml/adjust-bar.xml"/>
     <xi:include href="xml/cairo-utils.xml"/>
     <xi:include href="xml/widget-utils.xml"/>
+    <xi:include href="xml/list-selection-binding.xml"/>
   </chapter>
-  <index id='libgwyui-symbol-index'>
+  <index id='libgwyui4-symbol-index'>
     <title>Index of all symbols</title>
     <xi:include href="xml/api-index-full.xml"/>
   </index>

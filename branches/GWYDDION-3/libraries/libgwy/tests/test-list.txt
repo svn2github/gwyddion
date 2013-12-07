@@ -199,6 +199,8 @@ int-set/ranges
 int-set/update
 int-set/index
 int-set/fill
+int-set/intersection
+int-set/union
 int-set/foreach
 int-set/iter
 coords/point/new
@@ -629,12 +631,12 @@ brick/summarize/lines/range
 brick/summarize/lines/mean
 brick/summarize/lines/rms
 brick/summarize/lines/nrms
-container/data
-container/refcount
-container/keys
-container/serialize
-container/text
-container/boxed
+dict/data
+dict/refcount
+dict/keys
+dict/serialize
+dict/text
+dict/boxed
 array/data
 inventory/data
 inventory/sorting
