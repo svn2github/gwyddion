@@ -38,7 +38,8 @@ by --with-dest=WHERE option which can take the following values:
         to its type
 
     WHERE=/foo/bar
-        the module will be installed to exactly this directory
+        the module will be installed to exactly this directory (it must be
+        and absolute path)
 
 Running
 
@@ -58,9 +59,13 @@ This has only been tested with Fedora cross-compilation support. You need to
 install the mingw32-gwyddion-libs package that contains the cross-compiled
 versions of Gwyddion libraries.
 
-Specify the host system to configure:
+Specify the host system to configure for 32bit
 
-    ./configure --host=i686-pc-mingw32 --build=$(/usr/share/libtool/config/config.guess) PKG_CONFIG_PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib [OPTIONS...]
+    ./configure --host=i686-w64-mingw32 --build=$(/usr/share/libtool/config/config.guess) PKG_CONFIG_PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib [OPTIONS...]
+
+or 64bit
+
+    ./configure --host=x86_64-w64-mingw32 --build=$(/usr/share/libtool/config/config.guess) PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib [OPTIONS...]
 
 and then continue as in a normal Unix compilation to produce a MS Windows
 DLL of the module.
