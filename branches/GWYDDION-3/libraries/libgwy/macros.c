@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -148,6 +148,29 @@
  * ]|
  *
  * The array is freed completely and the return value of g_array_free() is
+ * not made accessible.  The use cases when the return value is needed rarely
+ * overlap with this clean-up use.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
+/**
+ * GWY_PTR_ARRAY_FREE:
+ * @array: A #GPtrArray (must be an l-value).
+ *
+ * Frees a #GPtrArray (including data) if it is allocated.
+ *
+ * This is an idempotent wrapper of g_ptr_array_free(): if @array is not %NULL
+ * g_array_free() is called on it and @array is set to %NULL.  Pseudocode:
+ * |[
+ * if (array) {
+ *     g_ptr_array_free(array, TRUE);
+ *     array = NULL;
+ * }
+ * ]|
+ *
+ * The array is freed completely and the return value of g_ptr_array_free() is
  * not made accessible.  The use cases when the return value is needed rarely
  * overlap with this clean-up use.
  *

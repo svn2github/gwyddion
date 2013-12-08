@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009-2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,9 @@
 
 #define GWY_ARRAY_FREE(array) \
     do { if (array) { g_array_free(array, TRUE); (array) = NULL; } } while (0)
+
+#define GWY_PTR_ARRAY_FREE(array) \
+    do { if (array) { g_ptr_array_free(array, TRUE); (array) = NULL; } } while (0)
 
 #define GWY_SLICE_FREE(type, ptr) \
     do { if (ptr) { g_slice_free(type, ptr); (ptr) = NULL; } } while (0)
