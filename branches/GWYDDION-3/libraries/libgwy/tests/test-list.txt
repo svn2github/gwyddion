@@ -28,6 +28,8 @@ pack/read/int64/le
 pack/read/int64/be
 pack/read/uint64/le
 pack/read/uint64/be
+pack/read/double/le
+pack/read/double/be
 math/powi/actual
 math/powi/our
 math/spow

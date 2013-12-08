@@ -459,4 +459,146 @@ test_pack_read_uint64_be(void)
     g_assert_cmpuint(v, ==, G_MAXUINT64);
 }
 
+void
+test_pack_read_double_le(void)
+{
+    static const guchar double_data[] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xef, 0x7f,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff,
+        0x18, 0x2d, 0x44, 0x54, 0xfb, 0x21, 0x09, 0x40,
+    };
+
+    const guchar *p = double_data;
+    gdouble v;
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 8);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 16);
+    g_assert_cmpfloat(v, >, 1.0);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 24);
+    g_assert_cmpfloat(v, ==, 2.0);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 32);
+    g_assert_cmpfloat(v, ==, -2.0);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 40);
+    g_assert_cmpfloat(v, ==, G_MAXDOUBLE);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 48);
+    g_assert_cmpfloat(v, ==, G_MINDOUBLE);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 56);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 64);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, -1.0);
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 72);
+    g_assert_cmpfloat(v, >=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 80);
+    g_assert_cmpfloat(v, <=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_double_le(&p);
+    g_assert_cmpuint(p - double_data, ==, 88);
+    g_assert_cmpfloat(v, ==, (gdouble)G_PI);
+}
+
+void
+test_pack_read_double_be(void)
+{
+    static const guchar double_data[] = {
+        0x3f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x3f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x7f, 0xef, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x40, 0x09, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18,
+    };
+
+    const guchar *p = double_data;
+    gdouble v;
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 8);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 16);
+    g_assert_cmpfloat(v, >, 1.0);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 24);
+    g_assert_cmpfloat(v, ==, 2.0);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 32);
+    g_assert_cmpfloat(v, ==, -2.0);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 40);
+    g_assert_cmpfloat(v, ==, G_MAXDOUBLE);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 48);
+    g_assert_cmpfloat(v, ==, G_MINDOUBLE);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 56);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 64);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, -1.0);
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 72);
+    g_assert_cmpfloat(v, >=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 80);
+    g_assert_cmpfloat(v, <=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_double_be(&p);
+    g_assert_cmpuint(p - double_data, ==, 88);
+    g_assert_cmpfloat(v, ==, (gdouble)G_PI);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
