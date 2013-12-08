@@ -21,6 +21,7 @@
 #define __LIBGWY_INT_SET_H__
 
 #include <glib-object.h>
+#include <libgwy/serializable.h>
 
 G_BEGIN_DECLS
 
