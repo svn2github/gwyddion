@@ -69,6 +69,8 @@ static GArray*  intersect_ranges             (const GwyIntSet *intseta,
                                               const GwyIntSet *intsetb);
 static GArray*  union_ranges                 (const GwyIntSet *intseta,
                                               const GwyIntSet *intsetb);
+static GArray*  subtract_ranges              (const GwyIntSet *intseta,
+                                              const GwyIntSet *intsetb);
 static guint    ranges_size                  (const GArray *ranges);
 static gboolean is_strictly_ascending        (const gint *values,
                                               guint n);
@@ -813,7 +815,7 @@ gwy_int_set_intersect(GwyIntSet *intset,
  * @intset: A set of integers.
  * @operand: Another set of integers.
  *
- * Creates a union of a set of integers with another set.
+ * Performs a union of a set of integers with another set.
  **/
 void
 gwy_int_set_union(GwyIntSet *intset,
@@ -832,6 +834,35 @@ gwy_int_set_union(GwyIntSet *intset,
 
     GWY_SWAP(GArray*, intset->priv->ranges, merged);
     g_array_free(merged, TRUE);
+    g_signal_emit(intset, signals[SGNL_ASSIGNED], 0);
+}
+
+/**
+ * gwy_int_set_subtract:
+ * @intset: A set of integers.
+ * @operand: Another set of integers.
+ *
+ * Removes values present in another set from a set of integers.
+ **/
+void
+gwy_int_set_subtract(GwyIntSet *intset,
+                     const GwyIntSet *operand)
+{
+    g_return_if_fail(GWY_IS_INT_SET(intset));
+    g_return_if_fail(GWY_IS_INT_SET(operand));
+    if (operand == intset) {
+        gwy_int_set_fill(intset, NULL, 0);
+        return;
+    }
+
+    GArray *subtracted = subtract_ranges(intset, operand);
+    if (ranges_size(subtracted) == ranges_size(intset->priv->ranges)) {
+        g_array_free(subtracted, TRUE);
+        return;
+    }
+
+    GWY_SWAP(GArray*, intset->priv->ranges, subtracted);
+    g_array_free(subtracted, TRUE);
     g_signal_emit(intset, signals[SGNL_ASSIGNED], 0);
 }
 
@@ -1032,8 +1063,56 @@ union_ranges(const GwyIntSet *intseta,
     }
 
     //g_assert(ranges_are_canonical(merged));
-
     return merged;
+}
+
+static GArray*
+subtract_ranges(const GwyIntSet *intseta,
+                const GwyIntSet *intsetb)
+{
+    const IntSet *priva = intseta->priv, *privb = intsetb->priv;
+    const GArray *arraya = priva->ranges, *arrayb = privb->ranges;
+    const GwyIntRange *rangea = (const GwyIntRange*)arraya->data;
+    const GwyIntRange *rangeb = (const GwyIntRange*)arrayb->data;
+    guint lena = arraya->len, lenb = arrayb->len;
+    GArray *difference = g_array_new(FALSE, FALSE, sizeof(GwyIntRange));
+
+    for (guint ia = 0, ib = 0; ia < lena; ia++) {
+        while (ib < lenb && rangeb[ib].to < rangea[ia].from)
+            ib++;
+
+        if (ib == lenb || rangeb[ib].from > rangea[ia].to) {
+            g_array_append_val(difference, rangea[ia]);
+            continue;
+        }
+
+        if (rangeb[ib].from <= rangea[ia].from
+            && rangeb[ib].to >= rangea[ia].to)
+            continue;
+
+        gint from = rangea[ia].from;
+        if (rangeb[ib].from <= from) {
+            // Intersecting from left and not covering entire rangea.
+            from = rangeb[ib].to+1;
+            ib++;
+        }
+        while (ib < lenb && rangeb[ib].from <= rangea[ia].to) {
+            GwyIntRange range = {
+                .from = from, .to = MIN(rangea[ia].to, rangeb[ib].from-1),
+            };
+            g_array_append_val(difference, range);
+            from = rangeb[ib].to+1;
+            ib++;
+        }
+        if (from <= rangea[ia].to) {
+            GwyIntRange range = { .from = from, .to = rangea[ia].to };
+            g_array_append_val(difference, range);
+        }
+        if (ib)
+            ib--;
+    }
+
+    return difference;
 }
 
 static guint

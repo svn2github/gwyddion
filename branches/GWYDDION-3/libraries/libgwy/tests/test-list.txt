@@ -201,6 +201,7 @@ int-set/index
 int-set/fill
 int-set/intersection
 int-set/union
+int-set/subtract
 int-set/foreach
 int-set/iter
 coords/point/new

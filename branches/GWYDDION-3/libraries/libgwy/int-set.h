@@ -102,6 +102,8 @@ void               gwy_int_set_union          (GwyIntSet *intset,
 void               gwy_int_set_foreach        (const GwyIntSet *intset,
                                                GwyIntSetForeachFunc function,
                                                gpointer user_data);
+void               gwy_int_set_subtract       (GwyIntSet *intset,
+                                               const GwyIntSet *operand);
 gboolean           gwy_int_set_first          (const GwyIntSet *intset,
                                                GwyIntSetIter *iter);
 gboolean           gwy_int_set_next           (const GwyIntSet *intset,

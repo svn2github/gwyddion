@@ -544,7 +544,7 @@ void
 test_int_set_intersection(void)
 {
     GRand *rng = g_rand_new_with_seed(42);
-    enum { niter = 250 };
+    enum { niter = 500 };
 
     for (guint iter = 0; iter < niter; iter++) {
         GwyIntSet *intset = gwy_int_set_new(),
@@ -578,7 +578,7 @@ void
 test_int_set_union(void)
 {
     GRand *rng = g_rand_new_with_seed(42);
-    enum { niter = 250 };
+    enum { niter = 500 };
 
     for (guint iter = 0; iter < niter; iter++) {
         GwyIntSet *intset = gwy_int_set_new(),
@@ -599,6 +599,43 @@ test_int_set_union(void)
         g_free(values);
 
         gwy_int_set_union(intset, operand);
+        int_set_assert_order(reference);
+        int_set_assert_order(intset);
+        int_set_assert_equal(intset, reference);
+
+        g_object_unref(reference);
+        g_object_unref(operand);
+        g_object_unref(intset);
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_int_set_subtract(void)
+{
+    GRand *rng = g_rand_new_with_seed(42);
+    enum { niter = 500 };
+
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyIntSet *intset = gwy_int_set_new(),
+                  *operand = gwy_int_set_new(),
+                  *reference = gwy_int_set_new();
+        int_set_randomize(intset, rng);
+        int_set_randomize(operand, rng);
+
+        guint n;
+        gint *values = gwy_int_set_values(intset, &n);
+        for (guint i = 0; i < n; i++)
+            gwy_int_set_add(reference, values[i]);
+        g_free(values);
+
+        values = gwy_int_set_values(operand, &n);
+        for (guint i = 0; i < n; i++)
+            gwy_int_set_remove(reference, values[i]);
+        g_free(values);
+
+        gwy_int_set_subtract(intset, operand);
         int_set_assert_order(reference);
         int_set_assert_order(intset);
         int_set_assert_equal(intset, reference);
