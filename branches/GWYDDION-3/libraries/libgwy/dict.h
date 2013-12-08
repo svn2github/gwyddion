@@ -85,6 +85,9 @@ gboolean      gwy_dict_get_value_n   (const GwyDict *dict,
 void          gwy_dict_set_value     (GwyDict *dict,
                                       GQuark key,
                                       const GValue *value);
+void          gwy_dict_set_value_n   (GwyDict *dict,
+                                      const gchar *name,
+                                      const GValue *value);
 gboolean      gwy_dict_remove        (GwyDict *dict,
                                       GQuark key);
 gboolean      gwy_dict_remove_n      (GwyDict *dict,
