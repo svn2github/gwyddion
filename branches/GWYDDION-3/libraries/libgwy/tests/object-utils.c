@@ -319,6 +319,7 @@ test_object_utils_replicate_properties(void)
     gchar *name = NULL;
     g_object_get(repltest, "name", &name, NULL);
     g_assert_cmpstr(name, ==, "John Doe");
+    g_free(name);
 
     guint xres = 0;
     g_object_get(repltest, "x-res", &xres, NULL);
