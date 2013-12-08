@@ -21,6 +21,8 @@
 #include "libgwy/object-utils.h"
 #include "libgwyui/list-selection-binding.h"
 
+#define BINDING_KEY "gwy-list-selection-binding"
+
 enum {
     PROP_0,
     PROP_INT_SET,
@@ -39,25 +41,68 @@ struct _GwyListSelectionBindingPrivate {
     gulong removed_id;
 
     GArray *selections;
+
+    GwyIntSet *toadd_set;
+    GwyIntSet *toremove_set;
+    GPtrArray *toadd_paths;
+    GPtrArray *toremove_paths;
+
+    GtkTreePath *path;
+    GtkTreeSelection *source_selection;
 };
+
+typedef void (*ListSelectionFunc)(SelectionInfo *info,
+                                  GwyListSelectionBinding *binding);
 
 typedef struct _GwyListSelectionBindingPrivate ListSelectionBinding;
 
-static void           gwy_list_selection_binding_finalize            (GObject *object);
-static void           gwy_list_selection_binding_dispose             (GObject *object);
-static void           gwy_list_selection_binding_set_property        (GObject *object,
-                                                           guint prop_id,
-                                                           const GValue *value,
-                                                           GParamSpec *pspec);
-static void           gwy_list_selection_binding_get_property        (GObject *object,
-                                                           guint prop_id,
-                                                           GValue *value,
-                                                           GParamSpec *pspec);
+static void gwy_list_selection_binding_finalize    (GObject *object);
+static void gwy_list_selection_binding_dispose     (GObject *object);
+static void gwy_list_selection_binding_set_property(GObject *object,
+                                                    guint prop_id,
+                                                    const GValue *value,
+                                                    GParamSpec *pspec);
+static void gwy_list_selection_binding_get_property(GObject *object,
+                                                    guint prop_id,
+                                                    GValue *value,
+                                                    GParamSpec *pspec);
+static void set_intset                             (GwyListSelectionBinding *binding,
+                                                    GwyIntSet *intset);
+static void intset_weak_notify                     (gpointer user_data,
+                                                    GObject *where_the_object_was);
+static void selection_weak_notify                  (gpointer user_data,
+                                                    GObject *where_the_object_was);
+static void unbind_all                             (GwyListSelectionBinding *binding);
+static void unbind_selection                       (GwyListSelectionBinding *binding,
+                                                    SelectionInfo *info);
+static void block_selection                        (SelectionInfo *info,
+                                                    GwyListSelectionBinding *binding);
+static void unblock_selection                      (SelectionInfo *info,
+                                                    GwyListSelectionBinding *binding);
+static void do_with_all_selections                 (ListSelectionFunc func,
+                                                    GwyListSelectionBinding *binding);
+static void select_path                            (SelectionInfo *info,
+                                                    GwyListSelectionBinding *binding);
+static void intset_added_sync_to_selections        (GwyListSelectionBinding *binding,
+                                                    gint value);
+static void unselect_path                          (SelectionInfo *info,
+                                                    GwyListSelectionBinding *binding);
+static void intset_removed_sync_to_selections      (GwyListSelectionBinding *binding,
+                                                    gint value);
+static void sync_selection                         (SelectionInfo *info,
+                                                    GwyListSelectionBinding *binding);
+static void sync_intset_to_selections              (GwyListSelectionBinding *binding);
+static void sync_selection_to_intset               (GwyListSelectionBinding *binding,
+                                                    GtkTreeSelection *selection);
+static void block_intset                           (GwyListSelectionBinding *binding);
+static void unblock_intset                         (GwyListSelectionBinding *binding);
 
 static GParamSpec *properties[N_PROPS];
+static GQuark binding_quark = 0;
 
-G_DEFINE_TYPE(GwyListSelectionBinding, gwy_list_selection_binding,
-              G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_CODE(GwyListSelectionBinding, gwy_list_selection_binding,
+                        G_TYPE_OBJECT,
+                        binding_quark = g_quark_from_static_string(BINDING_KEY););
 
 static void
 gwy_list_selection_binding_class_init(GwyListSelectionBindingClass *klass)
@@ -98,6 +143,10 @@ gwy_list_selection_binding_finalize(GObject *object)
 {
     ListSelectionBinding *priv = GWY_LIST_SELECTION_BINDING(object)->priv;
     g_array_free(priv->selections, TRUE);
+    GWY_OBJECT_UNREF(priv->toadd_set);
+    GWY_OBJECT_UNREF(priv->toremove_set);
+    GWY_PTR_ARRAY_FREE(priv->toadd_paths);
+    GWY_PTR_ARRAY_FREE(priv->toremove_paths);
     G_OBJECT_CLASS(gwy_list_selection_binding_parent_class)->finalize(object);
 }
 
@@ -105,11 +154,7 @@ static void
 gwy_list_selection_binding_dispose(GObject *object)
 {
     GwyListSelectionBinding *binding = GWY_LIST_SELECTION_BINDING(object);
-    gwy_list_selection_binding_unbind(binding);
-
-    ListSelectionBinding *priv = binding->priv;
-    GWY_OBJECT_UNREF(priv->intset);
-
+    unbind_all(binding);
     G_OBJECT_CLASS(gwy_list_selection_binding_parent_class)->dispose(object);
 }
 
@@ -119,11 +164,11 @@ gwy_list_selection_binding_set_property(GObject *object,
                                         const GValue *value,
                                         GParamSpec *pspec)
 {
-    ListSelectionBinding *priv = GWY_LIST_SELECTION_BINDING(object)->priv;
+    GwyListSelectionBinding *binding = GWY_LIST_SELECTION_BINDING(object);
 
     switch (prop_id) {
         case PROP_INT_SET:
-        priv->intset = g_value_get_object(value);
+        set_intset(binding, g_value_get_object(value));
         break;
 
         default:
@@ -157,7 +202,8 @@ gwy_list_selection_binding_get_property(GObject *object,
  *
  * Creates a binding between a list tree view selection and set of integers.
  *
- * Returns: A new list selection binding.
+ * Returns: (transfer none):
+ *          A new list selection binding.
  **/
 GwyListSelectionBinding*
 gwy_list_selection_binding_new(GwyIntSet *intset)
@@ -185,6 +231,26 @@ gwy_list_selection_binding_add(GwyListSelectionBinding *binding,
     GtkTreeModel *model = gtk_tree_view_get_model(treeview);
     GtkTreeModelFlags flags = gtk_tree_model_get_flags(model);
     g_return_if_fail(flags & GTK_TREE_MODEL_LIST_ONLY);
+
+    gpointer otherbinding;
+    if ((otherbinding = g_object_get_qdata(G_OBJECT(selection),
+                                           binding_quark))) {
+        g_warning("GtkTreeSelection %p is already bound with binding %p.",
+                  selection, otherbinding);
+        return;
+    }
+
+    ListSelectionBinding *priv = binding->priv;
+    g_object_set_qdata(G_OBJECT(selection), binding_quark, binding);
+    g_object_weak_ref(G_OBJECT(selection), selection_weak_notify, binding);
+
+    SelectionInfo info = { .selection = selection, .changed_id = 0 };
+    sync_selection(&info, binding);
+    guint id = g_signal_connect_swapped(selection, "changed",
+                                        G_CALLBACK(sync_selection_to_intset),
+                                        binding);
+    info.changed_id = id;
+    g_array_append_val(priv->selections, info);
 }
 
 /**
@@ -213,302 +279,316 @@ gwy_list_selection_binding_remove(GwyListSelectionBinding *binding,
  * Unbinds all tree selections from the integer set.
  *
  * This explicit unbinding function is namely useful for garbage-collected
- * languages where the destruction of the binding may be delayed.  In C you can
- * just release the last reference to @binding and it will go away.
+ * languages where the destruction of the binding may be delayed.
  **/
 void
 gwy_list_selection_binding_unbind(GwyListSelectionBinding *binding)
 {
     g_return_if_fail(GWY_IS_LIST_SELECTION_BINDING(binding));
 
-}
-
-#if 0
-// XXX: This is too ad-hocish.  Create a data structure for each association,
-// holding for each association:
-// - The associated GtkTreeSelection.
-// - Id of the signal to the tree selection.
-// And once:
-// - Ids of the GwyIntSet
-//
-// Proceed more agressively in the selection-to-intset path: We know that we
-// are going to sync the other selections, if any, so do that explicitly while
-// preventing any back-updates.  This turns selections-to-intset into a special
-// kind of intset-to-selections which needs to sync from one of the selections
-// first (blocking any intset signals).
-
-static void
-sync_single_selection_to_intset(GtkTreeSelection *selection,
-                                GwyIntSet *intset)
-{
-    GtkTreeModel *model;
-    GtkTreeIter iter;
-    if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
-        GtkTreePath *path = gtk_tree_model_get_path(model, &iter);
-        gint depth;
-        gint *indices = gtk_tree_path_get_indices_with_depth(path, &depth);
-        g_assert(depth == 1);
-        gwy_int_set_update(intset, indices, 1);
-        gtk_tree_path_free(path);
-    }
-    else {
-        gwy_int_set_update(intset, NULL, 0);
-    }
+    unbind_all(binding);
+    g_object_unref(binding);
 }
 
 static void
-sync_multiple_selection_to_intset(GtkTreeSelection *selection,
-                                  GwyIntSet *intset)
+set_intset(GwyListSelectionBinding *binding,
+           GwyIntSet *intset)
 {
-    GList *paths = gtk_tree_selection_get_selected_rows(selection, NULL);
-    guint n = g_list_length(paths);
+    ListSelectionBinding *priv = binding->priv;
+    if (intset == priv->intset)
+        return;
+
+    gpointer otherbinding;
+    if ((otherbinding = g_object_get_qdata(G_OBJECT(intset), binding_quark))) {
+        g_warning("GwyIntSet %p is already bound with binding %p.",
+                  intset, otherbinding);
+        return;
+    }
+
+    g_return_if_fail(!priv->intset);
+    priv->intset = intset;
+    g_object_set_qdata(G_OBJECT(priv->intset), binding_quark, binding);
+    g_object_weak_ref(G_OBJECT(intset), intset_weak_notify, binding);
+
+    priv->assigned_id
+        = g_signal_connect_swapped(intset, "assigned",
+                                   G_CALLBACK(sync_intset_to_selections),
+                                   binding);
+    priv->added_id
+        = g_signal_connect_swapped(intset, "added",
+                                   G_CALLBACK(intset_added_sync_to_selections),
+                                   binding);
+    priv->removed_id
+        = g_signal_connect_swapped(intset, "removed",
+                                   G_CALLBACK(intset_removed_sync_to_selections),
+                                   binding);
+}
+
+static void
+intset_weak_notify(gpointer user_data,
+                   G_GNUC_UNUSED GObject *where_the_object_was)
+{
+    GwyListSelectionBinding *binding = (GwyListSelectionBinding*)user_data;
+    ListSelectionBinding *priv = binding->priv;
+    priv->intset = NULL;
+    priv->removed_id = priv->added_id = priv->assigned_id = 0;
+    // This cleans up the selections if any.
+    g_object_unref(binding);
+}
+
+static void
+selection_weak_notify(gpointer user_data,
+                      GObject *where_the_object_was)
+{
+    GwyListSelectionBinding *binding = (GwyListSelectionBinding*)user_data;
+    ListSelectionBinding *priv = binding->priv;
+    for (guint i = 0; i < priv->selections->len; i++) {
+        SelectionInfo *info = &g_array_index(priv->selections,
+                                             SelectionInfo, i);
+        if (info->selection == (GtkTreeSelection*)where_the_object_was) {
+            g_array_remove_index(priv->selections, i);
+            break;
+        }
+    }
+}
+
+static void
+unbind_all(GwyListSelectionBinding *binding)
+{
+    ListSelectionBinding *priv = binding->priv;
+
+    if (priv->intset) {
+        g_object_weak_unref(G_OBJECT(priv->intset),
+                            intset_weak_notify, binding);
+        g_signal_handler_disconnect(priv->intset, priv->assigned_id);
+        g_signal_handler_disconnect(priv->intset, priv->added_id);
+        g_signal_handler_disconnect(priv->intset, priv->removed_id);
+        g_object_set_qdata(G_OBJECT(priv->intset), binding_quark, NULL);
+        priv->intset = NULL;
+    }
+
+    while (priv->selections->len) {
+        SelectionInfo *info = &g_array_index(priv->selections,
+                                             SelectionInfo,
+                                             priv->selections->len-1);
+        unbind_selection(binding, info);
+        g_array_set_size(priv->selections, priv->selections->len-1);
+    }
+}
+
+static void
+unbind_selection(GwyListSelectionBinding *binding,
+                 SelectionInfo *info)
+{
+    g_object_weak_unref(G_OBJECT(info->selection),
+                        selection_weak_notify, binding);
+    g_signal_handler_disconnect(info->selection, info->changed_id);
+    g_object_set_qdata(G_OBJECT(info->selection), binding_quark, NULL);
+    info->changed_id = 0;
+    info->selection = NULL;
+}
+
+static void
+block_selection(SelectionInfo *info,
+                G_GNUC_UNUSED GwyListSelectionBinding *binding)
+{
+    g_signal_handler_block(info->selection, info->changed_id);
+}
+
+static void
+unblock_selection(SelectionInfo *info,
+                  G_GNUC_UNUSED GwyListSelectionBinding *binding)
+{
+    g_signal_handler_unblock(info->selection, info->changed_id);
+}
+
+static void
+do_with_all_selections(ListSelectionFunc func,
+                       GwyListSelectionBinding *binding)
+{
+    ListSelectionBinding *priv = binding->priv;
+    GArray *selections = priv->selections;
+    guint n = selections->len;
+
+    for (guint i = 0; i < n; i++) {
+        SelectionInfo *info = &g_array_index(selections, SelectionInfo, i);
+        func(info, binding);
+    }
+}
+
+static void
+select_path(SelectionInfo *info, GwyListSelectionBinding *binding)
+{
+    gtk_tree_selection_select_path(info->selection, binding->priv->path);
+}
+
+static void
+intset_added_sync_to_selections(GwyListSelectionBinding *binding,
+                                gint value)
+{
+    do_with_all_selections(block_selection, binding);
+    binding->priv->path = gtk_tree_path_new_from_indices(value, -1);
+    do_with_all_selections(select_path, binding);
+    gtk_tree_path_free(binding->priv->path);
+    binding->priv->path = NULL;
+    do_with_all_selections(unblock_selection, binding);
+}
+
+static void
+unselect_path(SelectionInfo *info, GwyListSelectionBinding *binding)
+{
+    gtk_tree_selection_unselect_path(info->selection, binding->priv->path);
+}
+
+static void
+intset_removed_sync_to_selections(GwyListSelectionBinding *binding,
+                                  gint value)
+{
+    do_with_all_selections(block_selection, binding);
+    binding->priv->path = gtk_tree_path_new_from_indices(value, -1);
+    do_with_all_selections(unselect_path, binding);
+    gtk_tree_path_free(binding->priv->path);
+    binding->priv->path = NULL;
+    do_with_all_selections(unblock_selection, binding);
+}
+
+static void
+gather_row_indices(G_GNUC_UNUSED GtkTreeModel *model,
+                   GtkTreePath *path,
+                   G_GNUC_UNUSED GtkTreeIter *iter,
+                   gpointer user_data)
+{
+    gint **selected = (gint**)user_data;
+    gint *indices = gtk_tree_path_get_indices(path);
+    **selected = indices[0];
+    (*selected)++;
+}
+
+// XXX: This is ugly because GtkTreeSelection does not have efficient methods
+// to obtain the rows.
+static void
+transform_selection_to_intset(GtkTreeSelection *selection,
+                              GwyIntSet *intset)
+{
+    guint n = gtk_tree_selection_count_selected_rows(selection);
+    if (!n) {
+        gwy_int_set_fill(intset, NULL, 0);
+        return;
+    }
+
     gint *selected = g_new(gint, n);
-
-    n = 0;
-    for (GList *l = paths; l; l = g_list_next(l)) {
-        GtkTreePath *path = (GtkTreePath*)l->data;
-        gint depth;
-        gint *indices = gtk_tree_path_get_indices_with_depth(path, &depth);
-        g_assert(depth == 1);
-        selected[n++] = indices[0];
-    }
-    g_list_free_full(paths, (GDestroyNotify)gtk_tree_path_free);
-
-    gwy_int_set_update(intset, selected, n);
+    gint *s = selected;
+    gtk_tree_selection_selected_foreach(selection, gather_row_indices, &s);
+    g_assert(s - selected == n);
+    gwy_int_set_fill(intset, selected, n);
     g_free(selected);
 }
 
-/*
- * Connected to GtkTreeSelection::changed.  Updates the associated GwyIntSet,
- * ensuring that we do not attempt to propagate the changes back.
- *
- * Bad things:
- * - GwyIntSet has multiple signals we need to block.
- * - GtkTreeSelection doesn't provide any information how the selection has
- *   changed.
- * Good things:
- * - gwy_int_set_update() does not emit anything if the set does not change.
- */
 static void
-sync_selection_to_intset(GtkTreeSelection *selection,
-                         GwyIntSet *intset)
+transform_intset_to_path_ranges(GwyIntSet *intset,
+                                GPtrArray *paths)
 {
-    gulong assign_id = g_signal_handler_find(intset,
-                                             G_SIGNAL_MATCH_FUNC
-                                             | G_SIGNAL_MATCH_DATA,
-                                             0, 0, NULL,
-                                             sync_intset_to_selections,
-                                             selection);
-    g_return_if_fail(assign_id);
-    gulong removed_id = g_signal_handler_find(intset,
-                                              G_SIGNAL_MATCH_FUNC
-                                              | G_SIGNAL_MATCH_DATA,
-                                              0, 0, NULL,
-                                              intset_removed_sync_to_selections,
-                                              selection);
-    g_return_if_fail(removed_id);
-    gulong added_id = g_signal_handler_find(intset,
-                                            G_SIGNAL_MATCH_FUNC
-                                            | G_SIGNAL_MATCH_DATA,
-                                            0, 0, NULL,
-                                            intset_added_sync_to_selections,
-                                            selection);
-    g_return_if_fail(added_id);
+    g_ptr_array_set_size(paths, 0);
 
-    g_signal_handler_block(intset, assign_id);
-    g_signal_handler_block(intset, removed_id);
-    g_signal_handler_block(intset, added_id);
+    guint n;
+    const GwyIntRange *ranges = gwy_int_set_ranges(intset, &n);
+    for (guint i = 0; i < n; i++) {
+        GtkTreePath *path;
 
-    GtkSelectionMode mode = gtk_tree_selection_get_mode(selection);
-
-    if (mode == GTK_SELECTION_NONE
-        || mode == GTK_SELECTION_SINGLE
-        || mode == GTK_SELECTION_BROWSE)
-        sync_single_selection_to_intset(selection, intset);
-    else
-        sync_multiple_selection_to_intset(selection, intset);
-
-    g_signal_handler_unblock(intset, added_id);
-    g_signal_handler_unblock(intset, removed_id);
-    g_signal_handler_unblock(intset, assign_id);
-}
-
-static void
-intset_removed_sync_to_selection(GwyIntSet *intset,
-                                 gint value,
-                                 GtkTreeSelection *selection)
-{
-    gulong *ids;
-    GSList *assocs = find_and_block_sel_to_inset(intset, &ids);
-    unselect_by_index(selection, value);
-    unblock_and_free_sel_to_intset(assocs, ids);
-}
-
-static void
-intset_added_sync_to_selection(GwyIntSet *intset,
-                               gint value,
-                               GtkTreeSelection *selection)
-{
-    gulong *ids;
-    GSList *assocs = find_and_block_sel_to_inset(intset, &ids);
-    select_by_index(selection, value);
-    unblock_and_free_sel_to_intset(assocs, ids);
-}
-
-static void
-sync_intset_to_multiple_selection(GwyIntSet *intset,
-                                  GtkTreeSelection *selection)
-{
-    GList *paths = gtk_tree_selection_get_selected_rows(selection, NULL);
-    guint n = g_list_length(paths);
-    gint *toremove = g_new(gint, n);
-
-    // Gather indices to add in toadd and indices to remove in toremove.
-    guint nremove = 0;
-    GwyIntSet *toadd = gwy_int_set_duplicate(intset);
-    for (GList *l = paths; l; l = g_list_next(l)) {
-        GtkTreePath *path = (GtkTreePath*)l->data;
-        gint depth;
-        gint *indices = gtk_tree_path_get_indices_with_depth(path, &depth);
-        g_assert(depth == 1);
-        if (gwy_int_set_contains(toadd, indices[0]))
-            gwy_int_set_remove(toadd);
-        else
-            toremove[nremove++] = indices[0];
+        path = gtk_tree_path_new_from_indices(ranges[i].from, -1);
+        g_ptr_array_add(paths, path);
+        path = gtk_tree_path_new_from_indices(ranges[i].to, -1);
+        g_ptr_array_add(paths, path);
     }
-    g_list_free_full(paths, (GDestroyNotify)gtk_tree_path_free);
+}
 
-    // Remove
-    GtkTreePath *path = gtk_tree_path_new_from_indices(0, -1);
-    gint *indices = gtk_tree_path_get_indices(path);
-    for (guint i = 0; i < nremove; i++) {
-        // FIXME: Is this correct?
-        indices[0] = toremove[i];
-        gtk_tree_selection_unselect_path(selection, path);
+/* Constructs operations necessary to bring @out_of_sync_selection to sync
+ * with the @binding's intset. */
+static void
+find_ranges_to_select_and_deselect(GwyListSelectionBinding *binding,
+                                   GtkTreeSelection *out_of_sync_selection)
+{
+    ListSelectionBinding *priv = binding->priv;
+    if (!priv->toremove_set) {
+        priv->toremove_set = gwy_int_set_new();
+        priv->toadd_set = gwy_int_set_new();
+        priv->toremove_paths = g_ptr_array_new();
+        g_ptr_array_set_free_func(priv->toremove_paths,
+                                  (GDestroyNotify)g_ptr_array_unref);
+        priv->toadd_paths = g_ptr_array_new();
+        g_ptr_array_set_free_func(priv->toadd_paths,
+                                  (GDestroyNotify)g_ptr_array_unref);
     }
-    g_free(toremove);
-
-    // Add
-    GwyIntSetIter iter;
-    if (gwy_int_set_first(toadd, &iter)) {
-        do {
-            // FIXME: Is this correct?
-            indices[0] = iter.value;
-            gtk_tree_selection_select_path(selection, path);
-        } while (gwy_int_set_next(toadd, &iter));
-    }
-
-    gtk_tree_path_free(path);
-    g_object_unref(toadd);
+    transform_selection_to_intset(out_of_sync_selection, priv->toremove_set);
+    gwy_int_set_assign(priv->toadd_set, priv->intset);
+    gwy_int_set_subtract(priv->toadd_set, priv->toremove_set);
+    gwy_int_set_subtract(priv->toremove_set, priv->intset);
+    transform_intset_to_path_ranges(priv->toadd_set, priv->toadd_paths);
+    transform_intset_to_path_ranges(priv->toremove_set, priv->toremove_paths);
 }
 
 static void
-sync_intset_to_signle_selection(GwyIntSet *intset,
-                                GtkTreeSelection *selection)
+sync_selection(SelectionInfo *info, GwyListSelectionBinding *binding)
 {
-    GwyIntSetIter iter;
-    if (!gwy_int_set_first(intset, &iter)) {
-        gtk_tree_selection_unselect_all(selection);
+    ListSelectionBinding *priv = binding->priv;
+    if (info->selection == priv->source_selection)
         return;
+
+    find_ranges_to_select_and_deselect(binding, info->selection);
+
+    for (guint i = 0; i < priv->toremove_paths->len/2; i++) {
+        GtkTreePath *frompath = g_ptr_array_index(priv->toremove_paths, 2*i);
+        GtkTreePath *topath = g_ptr_array_index(priv->toremove_paths, 2*i + 1);
+        gtk_tree_selection_unselect_range(info->selection, frompath, topath);
     }
+    g_ptr_array_set_size(priv->toremove_paths, 0);
 
-    if (gtk_tree_selection_get_mode(selection) == GTK_SELECTION_NONE) {
-        g_warning("Int set contains values but tree selection mode is NONE.");
-        return;
+    for (guint i = 0; i < priv->toadd_paths->len/2; i++) {
+        GtkTreePath *frompath = g_ptr_array_index(priv->toadd_paths, 2*i);
+        GtkTreePath *topath = g_ptr_array_index(priv->toadd_paths, 2*i + 1);
+        gtk_tree_selection_select_range(info->selection, frompath, topath);
     }
-
-    select_by_index(selection, iter.value);
-
-    if (gwy_int_set_next(intset, &iter)) {
-        g_warning("Int set contains more than one value for "
-                  "non-multiple selection.");
-    }
-}
-
-/*
- * Connected to GwyIntSet::assigned.  Updates an associated GtkTreeSelection.
- *
- * Bad things:
- * - It's a PITA to get currently selected indices from GtkTreeSelection.
- * - Someone may try to update the IntSet in a way incompatible with the
- *   current selection mode (single/browse).
- * - There can be multiple selections.  We need to block all
- *   selection-to-intset handlers, even for the other selections because in
- *   this case we only want a single round of updates.
- */
-static void
-sync_intset_to_selections(GwyIntSet *intset,
-                          GtkTreeSelection *selection)
-{
-    gulong *ids;
-    GSList *assocs = find_and_block_sel_to_inset(intset, &ids);
-    GtkSelectionMode mode = gtk_tree_selection_get_mode(selection);
-
-    if (mode == GTK_SELECTION_NONE
-        || mode == GTK_SELECTION_SINGLE
-        || mode == GTK_SELECTION_BROWSE)
-        sync_intset_to_single_selection(selection, intset);
-    else
-        sync_intset_to_multiple_selection(selection, intset);
-
-    unblock_and_free_sel_to_intset(assocs, ids);
+    g_ptr_array_set_size(priv->toadd_paths, 0);
 }
 
 static void
-select_by_index(GtkTreeSelection *selection, gint value)
+sync_intset_to_selections(GwyListSelectionBinding *binding)
 {
-    GtkTreePath *path = gtk_tree_path_new_from_indices(value, -1);
-    gtk_tree_selection_select_path(selection, path);
-    gtk_tree_path_free(path);
+    do_with_all_selections(block_selection, binding);
+    do_with_all_selections(sync_selection, binding);
+    do_with_all_selections(unblock_selection, binding);
 }
 
 static void
-unselect_by_index(GtkTreeSelection *selection, gint value)
+sync_selection_to_intset(GwyListSelectionBinding *binding,
+                         GtkTreeSelection *selection)
 {
-    GtkTreePath *path = gtk_tree_path_new_from_indices(value, -1);
-    gtk_tree_selection_unselect_path(selection, path);
-    gtk_tree_path_free(path);
-}
-
-static GSList*
-find_and_block_sel_to_inset(GwyIntSet *intset,
-                            gulong **pids)
-{
-    GSList *assocs = g_object_get_qdata(G_OBJECT(intset),
-                                        "gwy-associated-tree-selections");
-    g_return_if_fail(assocs);
-
-    guint nassoc = g_slist_length(assocs);
-    gulong *ids = g_new(gulong, nassoc);
-    GSList *l;
-    for (guint i = 0, l = assocs; i < nassoc; i++, l = g_slist_next(l)) {
-        GtkTreeSelection *sel = (GtkTreeSelection*)l->data;
-        ids[i] = g_signal_handler_find(sel,
-                                       G_SIGNAL_MATCH_FUNC
-                                       | G_SIGNAL_MATCH_DATA,
-                                       0, 0, NULL,
-                                       sync_selection_to_intset, intset);
-        g_assert(ids[i]);
-        g_signal_handler_block(sel, ids[i]);
-    }
-
-    *pids = ids;
-    return assocs;
+    ListSelectionBinding *priv = binding->priv;
+    block_intset(binding);
+    priv->source_selection = selection;
+    transform_selection_to_intset(selection, priv->intset);
+    sync_intset_to_selections(binding);
+    priv->source_selection = NULL;
+    unblock_intset(binding);
 }
 
 static void
-unblock_and_free_sel_to_intset(GSList *assocs, guint *ids)
+block_intset(GwyListSelectionBinding *binding)
 {
-    GSList *l;
-
-    for (guint i = 0, l = assocs; i < nassoc; i++, l = g_slist_next(l)) {
-        GtkTreeSelection *sel = (GtkTreeSelection*)l->data;
-        g_signal_handler_unblock(selection, ids[i]);
-    }
-
-    g_free(ids);
+    ListSelectionBinding *priv = binding->priv;
+    g_signal_handler_block(priv->intset, priv->assigned_id);
+    g_signal_handler_block(priv->intset, priv->removed_id);
+    g_signal_handler_block(priv->intset, priv->added_id);
 }
-#endif
+
+static void
+unblock_intset(GwyListSelectionBinding *binding)
+{
+    ListSelectionBinding *priv = binding->priv;
+    g_signal_handler_unblock(priv->intset, priv->assigned_id);
+    g_signal_handler_unblock(priv->intset, priv->removed_id);
+    g_signal_handler_unblock(priv->intset, priv->added_id);
+}
 
 /**
  * SECTION: list-selection-binding
@@ -518,7 +598,17 @@ unblock_and_free_sel_to_intset(GSList *assocs, guint *ids)
  * #GwyListSelectionBinding is a synchronisation mechanism between a #GwyIntSet
  * and an aribtrary number of #GtkTreeSelection objects.  The selections must
  * correspond to a list-type tree view (since #GwyIntSet obviously represent
- * only flat indices) and they should use the same selection mode.
+ * only flat indices). The tree views should be based on the same model and the
+ * selections should use the same selection mode although this is not enforced.
+ * So different modes and models are permitted but you must ensure it does not
+ * result in an attempt to select something impossible somewhere.
+ *
+ * One integer set can be bound to several selections (that then become
+ * synchronised), however, one selection can be bound only to at most one
+ * integer set.
+ *
+ * The binding is severed when the integer set is destroyed, with
+ * gwy_list_selection_binding_unbind() or by destroying the binding object.
  **/
 
 /**
