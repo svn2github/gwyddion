@@ -1207,7 +1207,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gboolean8:
+ * gwy_read_boolean8:
  * @ppv: Pointer to a pointer to boolean (stored as a signle byte)
  *       in a memory buffer.
  *
@@ -1218,7 +1218,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gint16_le:
+ * gwy_read_int16_le:
  * @ppv: Pointer to a pointer to a little-endian signed 16bit integer
  *       in a memory buffer.
  *
@@ -1229,7 +1229,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gint16_be:
+ * gwy_read_int16_be:
  * @ppv: Pointer to a pointer to a big-endian signed 16bit integer
  *       in a memory buffer.
  *
@@ -1240,7 +1240,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_guint16_le:
+ * gwy_read_uint16_le:
  * @ppv: Pointer to a pointer to a little-endian unsigned 16bit integer
  *       in a memory buffer.
  *
@@ -1251,7 +1251,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_guint16_be:
+ * gwy_read_uint16_be:
  * @ppv: Pointer to a pointer to a big-endian unsigned 16bit integer
  *       in a memory buffer.
  *
@@ -1262,7 +1262,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gint32_le:
+ * gwy_read_int32_le:
  * @ppv: Pointer to a pointer to a little-endian signed 32bit integer
  *       in a memory buffer.
  *
@@ -1273,7 +1273,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gint32_be:
+ * gwy_read_int32_be:
  * @ppv: Pointer to a pointer to a big-endian signed 32bit integer
  *       in a memory buffer.
  *
@@ -1284,7 +1284,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_guint32_le:
+ * gwy_read_uint32_le:
  * @ppv: Pointer to a pointer to a little-endian unsigned 32bit integer
  *       in a memory buffer.
  *
@@ -1295,7 +1295,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_guint32_be:
+ * gwy_read_uint32_be:
  * @ppv: Pointer to a pointer to a big-endian unsigned 32bit integer
  *       in a memory buffer.
  *
@@ -1306,7 +1306,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gint64_le:
+ * gwy_read_int64_le:
  * @ppv: Pointer to a pointer to a little-endian signed 64bit integer
  *       in a memory buffer.
  *
@@ -1317,7 +1317,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gint64_be:
+ * gwy_read_int64_be:
  * @ppv: Pointer to a pointer to a big-endian signed 64bit integer
  *       in a memory buffer.
  *
@@ -1328,7 +1328,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_guint64_le:
+ * gwy_read_uint64_le:
  * @ppv: Pointer to a pointer to a little-endian unsigned 64bit integer
  *       in a memory buffer.
  *
@@ -1339,7 +1339,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_guint64_be:
+ * gwy_read_uint64_be:
  * @ppv: Pointer to a pointer to a big-endian unsigned 64bit integer
  *       in a memory buffer.
  *
@@ -1350,7 +1350,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gfloat_le:
+ * gwy_read_float_le:
  * @ppv: Pointer to a pointer to a little-endian single-precision IEEE float
  *       in a memory buffer.
  *
@@ -1361,7 +1361,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gfloat_be:
+ * gwy_read_float_be:
  * @ppv: Pointer to a pointer to a big-endian single-precision IEEE float
  *       in a memory buffer.
  *
@@ -1372,7 +1372,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gdouble_le:
+ * gwy_read_double_le:
  * @ppv: Pointer to a pointer to a little-endian double-precision IEEE float
  *       in a memory buffer.
  *
@@ -1383,7 +1383,7 @@ G_DEFINE_QUARK(gwy-pack-error-quark, gwy_pack_error);
  **/
 
 /**
- * gwy_read_gdouble_be:
+ * gwy_read_double_be:
  * @ppv: Pointer to a pointer to a big-endian double-precision IEEE float
  *       in a memory buffer.
  *

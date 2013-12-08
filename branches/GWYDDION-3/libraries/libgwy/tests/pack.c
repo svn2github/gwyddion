@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2013 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  ***************************************************************************/
 
 void
-test_pack(void)
+test_pack_format(void)
 {
     enum { expected_size = 57 };
     struct {
@@ -85,6 +85,378 @@ test_pack(void)
     }
 
     g_free(buf);
+}
+
+void
+test_pack_read_boolean(void)
+{
+    static const guchar boolean8_data[] = { 0x00, 0x01, 0x80, 0xff };
+    const guchar *p = boolean8_data;
+    gboolean v;
+
+    v = gwy_read_boolean8(&p);
+    g_assert_cmpint(p - boolean8_data, ==, 1);
+    g_assert_cmpint(v, ==, FALSE);
+
+    v = gwy_read_boolean8(&p);
+    g_assert_cmpint(p - boolean8_data, ==, 2);
+    g_assert_cmpint(v, ==, TRUE);
+
+    v = gwy_read_boolean8(&p);
+    g_assert_cmpint(p - boolean8_data, ==, 3);
+    g_assert_cmpint(v, ==, TRUE);
+
+    v = gwy_read_boolean8(&p);
+    g_assert_cmpint(p - boolean8_data, ==, 4);
+    g_assert_cmpint(v, ==, TRUE);
+}
+
+void
+test_pack_read_int16_le(void)
+{
+    static const guchar int16_data[] = {
+        0x34, 0x12,
+        0xff, 0x7f,
+        0x00, 0x80,
+        0xff, 0xff,
+    };
+    const guchar *p = int16_data;
+    gint16 v;
+
+    v = gwy_read_int16_le(&p);
+    g_assert_cmpint(p - int16_data, ==, 2);
+    g_assert_cmpint(v, ==, 0x1234);
+
+    v = gwy_read_int16_le(&p);
+    g_assert_cmpint(p - int16_data, ==, 4);
+    g_assert_cmpint(v, ==, G_MAXINT16);
+
+    v = gwy_read_int16_le(&p);
+    g_assert_cmpint(p - int16_data, ==, 6);
+    g_assert_cmpint(v, ==, G_MININT16);
+
+    v = gwy_read_int16_le(&p);
+    g_assert_cmpint(p - int16_data, ==, 8);
+    g_assert_cmpint(v, ==, -1);
+}
+
+void
+test_pack_read_int16_be(void)
+{
+    static const guchar int16_data[] = {
+        0x12, 0x34,
+        0x7f, 0xff,
+        0x80, 0x00,
+        0xff, 0xff,
+    };
+    const guchar *p = int16_data;
+    gint16 v;
+
+    v = gwy_read_int16_be(&p);
+    g_assert_cmpint(p - int16_data, ==, 2);
+    g_assert_cmpint(v, ==, 0x1234);
+
+    v = gwy_read_int16_be(&p);
+    g_assert_cmpint(p - int16_data, ==, 4);
+    g_assert_cmpint(v, ==, G_MAXINT16);
+
+    v = gwy_read_int16_be(&p);
+    g_assert_cmpint(p - int16_data, ==, 6);
+    g_assert_cmpint(v, ==, G_MININT16);
+
+    v = gwy_read_int16_be(&p);
+    g_assert_cmpint(p - int16_data, ==, 8);
+    g_assert_cmpint(v, ==, -1);
+}
+
+void
+test_pack_read_uint16_le(void)
+{
+    static const guchar uint16_data[] = {
+        0x34, 0x12,
+        0xff, 0x7f,
+        0x00, 0x80,
+        0xff, 0xff,
+    };
+    const guchar *p = uint16_data;
+    guint16 v;
+
+    v = gwy_read_uint16_le(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 2);
+    g_assert_cmpuint(v, ==, 0x1234u);
+
+    v = gwy_read_uint16_le(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 4);
+    g_assert_cmpuint(v, ==, 0x7fffu);
+
+    v = gwy_read_uint16_le(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 6);
+    g_assert_cmpuint(v, ==, 0x8000u);
+
+    v = gwy_read_uint16_le(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 8);
+    g_assert_cmpuint(v, ==, G_MAXUINT16);
+}
+
+void
+test_pack_read_uint16_be(void)
+{
+    static const guchar uint16_data[] = {
+        0x12, 0x34,
+        0x7f, 0xff,
+        0x80, 0x00,
+        0xff, 0xff,
+    };
+    const guchar *p = uint16_data;
+    guint16 v;
+
+    v = gwy_read_uint16_be(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 2);
+    g_assert_cmpuint(v, ==, 0x1234u);
+
+    v = gwy_read_uint16_be(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 4);
+    g_assert_cmpuint(v, ==, 0x7fffu);
+
+    v = gwy_read_uint16_be(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 6);
+    g_assert_cmpuint(v, ==, 0x8000u);
+
+    v = gwy_read_uint16_be(&p);
+    g_assert_cmpuint(p - uint16_data, ==, 8);
+    g_assert_cmpuint(v, ==, G_MAXUINT16);
+}
+
+void
+test_pack_read_int32_le(void)
+{
+    static const guchar int32_data[] = {
+        0x78, 0x56, 0x34, 0x12,
+        0xff, 0xff, 0xff, 0x7f,
+        0x00, 0x00, 0x00, 0x80,
+        0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = int32_data;
+    gint32 v;
+
+    v = gwy_read_int32_le(&p);
+    g_assert_cmpint(p - int32_data, ==, 4);
+    g_assert_cmpint(v, ==, 0x12345678);
+
+    v = gwy_read_int32_le(&p);
+    g_assert_cmpint(p - int32_data, ==, 8);
+    g_assert_cmpint(v, ==, G_MAXINT32);
+
+    v = gwy_read_int32_le(&p);
+    g_assert_cmpint(p - int32_data, ==, 12);
+    g_assert_cmpint(v, ==, G_MININT32);
+
+    v = gwy_read_int32_le(&p);
+    g_assert_cmpint(p - int32_data, ==, 16);
+    g_assert_cmpint(v, ==, -1);
+}
+
+void
+test_pack_read_int32_be(void)
+{
+    static const guchar int32_data[] = {
+        0x12, 0x34, 0x56, 0x78,
+        0x7f, 0xff, 0xff, 0xff,
+        0x80, 0x00, 0x00, 0x00,
+        0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = int32_data;
+    gint32 v;
+
+    v = gwy_read_int32_be(&p);
+    g_assert_cmpint(p - int32_data, ==, 4);
+    g_assert_cmpint(v, ==, 0x12345678);
+
+    v = gwy_read_int32_be(&p);
+    g_assert_cmpint(p - int32_data, ==, 8);
+    g_assert_cmpint(v, ==, G_MAXINT32);
+
+    v = gwy_read_int32_be(&p);
+    g_assert_cmpint(p - int32_data, ==, 12);
+    g_assert_cmpint(v, ==, G_MININT32);
+
+    v = gwy_read_int32_be(&p);
+    g_assert_cmpint(p - int32_data, ==, 16);
+    g_assert_cmpint(v, ==, -1);
+}
+
+void
+test_pack_read_uint32_le(void)
+{
+    static const guchar uint32_data[] = {
+        0x78, 0x56, 0x34, 0x12,
+        0xff, 0xff, 0xff, 0x7f,
+        0x00, 0x00, 0x00, 0x80,
+        0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = uint32_data;
+    guint32 v;
+
+    v = gwy_read_uint32_le(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 4);
+    g_assert_cmpuint(v, ==, 0x12345678u);
+
+    v = gwy_read_uint32_le(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 8);
+    g_assert_cmpuint(v, ==, 0x7fffffffu);
+
+    v = gwy_read_uint32_le(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 12);
+    g_assert_cmpuint(v, ==, 0x80000000u);
+
+    v = gwy_read_uint32_le(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 16);
+    g_assert_cmpuint(v, ==, G_MAXUINT32);
+}
+
+void
+test_pack_read_uint32_be(void)
+{
+    static const guchar uint32_data[] = {
+        0x12, 0x34, 0x56, 0x78,
+        0x7f, 0xff, 0xff, 0xff,
+        0x80, 0x00, 0x00, 0x00,
+        0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = uint32_data;
+    guint32 v;
+
+    v = gwy_read_uint32_be(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 4);
+    g_assert_cmpuint(v, ==, 0x12345678u);
+
+    v = gwy_read_uint32_be(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 8);
+    g_assert_cmpuint(v, ==, 0x7fffffffu);
+
+    v = gwy_read_uint32_be(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 12);
+    g_assert_cmpuint(v, ==, 0x80000000u);
+
+    v = gwy_read_uint32_be(&p);
+    g_assert_cmpuint(p - uint32_data, ==, 16);
+    g_assert_cmpuint(v, ==, G_MAXUINT32);
+}
+
+void
+test_pack_read_int64_le(void)
+{
+    static const guchar int64_data[] = {
+        0xf0, 0xde, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = int64_data;
+    gint64 v;
+
+    v = gwy_read_int64_le(&p);
+    g_assert_cmpint(p - int64_data, ==, 8);
+    g_assert_cmpint(v, ==, G_GINT64_CONSTANT(0x123456789abcdef0));
+
+    v = gwy_read_int64_le(&p);
+    g_assert_cmpint(p - int64_data, ==, 16);
+    g_assert_cmpint(v, ==, G_MAXINT64);
+
+    v = gwy_read_int64_le(&p);
+    g_assert_cmpint(p - int64_data, ==, 24);
+    g_assert_cmpint(v, ==, G_MININT64);
+
+    v = gwy_read_int64_le(&p);
+    g_assert_cmpint(p - int64_data, ==, 32);
+    g_assert_cmpint(v, ==, -1);
+}
+
+void
+test_pack_read_int64_be(void)
+{
+    static const guchar int64_data[] = {
+        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+        0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = int64_data;
+    gint64 v;
+
+    v = gwy_read_int64_be(&p);
+    g_assert_cmpint(p - int64_data, ==, 8);
+    g_assert_cmpint(v, ==, G_GINT64_CONSTANT(0x123456789abcdef0));
+
+    v = gwy_read_int64_be(&p);
+    g_assert_cmpint(p - int64_data, ==, 16);
+    g_assert_cmpint(v, ==, G_MAXINT64);
+
+    v = gwy_read_int64_be(&p);
+    g_assert_cmpint(p - int64_data, ==, 24);
+    g_assert_cmpint(v, ==, G_MININT64);
+
+    v = gwy_read_int64_be(&p);
+    g_assert_cmpint(p - int64_data, ==, 32);
+    g_assert_cmpint(v, ==, -1);
+}
+
+void
+test_pack_read_uint64_le(void)
+{
+    static const guchar uint64_data[] = {
+        0xf0, 0xde, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = uint64_data;
+    guint64 v;
+
+    v = gwy_read_uint64_le(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 8);
+    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x123456789abcdef0u));
+
+    v = gwy_read_uint64_le(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 16);
+    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x7fffffffffffffffu));
+
+    v = gwy_read_uint64_le(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 24);
+    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x8000000000000000u));
+
+    v = gwy_read_uint64_le(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 32);
+    g_assert_cmpuint(v, ==, G_MAXUINT64);
+}
+
+void
+test_pack_read_uint64_be(void)
+{
+    static const guchar uint64_data[] = {
+        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+        0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    };
+    const guchar *p = uint64_data;
+    guint64 v;
+
+    v = gwy_read_uint64_be(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 8);
+    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x123456789abcdef0u));
+
+    v = gwy_read_uint64_be(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 16);
+    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x7fffffffffffffffu));
+
+    v = gwy_read_uint64_be(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 24);
+    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x8000000000000000u));
+
+    v = gwy_read_uint64_be(&p);
+    g_assert_cmpuint(p - uint64_data, ==, 32);
+    g_assert_cmpuint(v, ==, G_MAXUINT64);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
