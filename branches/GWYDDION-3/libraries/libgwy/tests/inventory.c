@@ -152,6 +152,7 @@ test_inventory_data(void)
 
     GwyInventory *inventory = gwy_inventory_new();
     g_assert(GWY_IS_INVENTORY(inventory));
+    item_type.type = GWY_TYPE_ITEM_TEST;
     gwy_inventory_set_item_type(inventory, &item_type);
     item_destroy_count = 0;
 
@@ -291,6 +292,7 @@ test_inventory_sorting(void)
 
     GwyInventory *inventory = gwy_inventory_new();
     g_assert(GWY_IS_INVENTORY(inventory));
+    item_type.type = GWY_TYPE_ITEM_TEST;
     gwy_inventory_set_item_type(inventory, &item_type);
     gboolean expect_reorder = FALSE;
     item_destroy_count = 0;
@@ -420,6 +422,7 @@ test_inventory_functional(void)
 
     GwyInventory *inventory = gwy_inventory_new();
     g_assert(GWY_IS_INVENTORY(inventory));
+    item_type.type = GWY_TYPE_ITEM_TEST;
     gwy_inventory_set_item_type(inventory, &item_type);
     item_destroy_count = 0;
     sort_by_name = TRUE;
