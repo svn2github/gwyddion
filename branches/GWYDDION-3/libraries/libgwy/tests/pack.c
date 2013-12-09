@@ -460,6 +460,148 @@ test_pack_read_uint64_be(void)
 }
 
 void
+test_pack_read_float_le(void)
+{
+    static const guchar float_data[] = {
+        0x00, 0x00, 0x80, 0x3f,
+        0x01, 0x00, 0x80, 0x3f,
+        0x00, 0x00, 0x00, 0x40,
+        0x00, 0x00, 0x00, 0xc0,
+        0xff, 0xff, 0x7f, 0x7f,
+        0x00, 0x00, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x80,
+        0x00, 0x00, 0x80, 0x7f,
+        0x00, 0x00, 0x80, 0xff,
+        0xdb, 0x0f, 0x49, 0x40,
+    };
+
+    const guchar *p = float_data;
+    gfloat v;
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 4);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 8);
+    g_assert_cmpfloat(v, >, 1.0);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 12);
+    g_assert_cmpfloat(v, ==, 2.0);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 16);
+    g_assert_cmpfloat(v, ==, -2.0);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 20);
+    g_assert_cmpfloat(v, ==, G_MAXFLOAT);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 24);
+    g_assert_cmpfloat(v, ==, G_MINFLOAT);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 28);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 32);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, -1.0);
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 36);
+    g_assert_cmpfloat(v, >=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 40);
+    g_assert_cmpfloat(v, <=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_float_le(&p);
+    g_assert_cmpuint(p - float_data, ==, 44);
+    g_assert_cmpfloat(v, ==, (gfloat)G_PI);
+}
+
+void
+test_pack_read_float_be(void)
+{
+    static const guchar float_data[] = {
+        0x3f, 0x80, 0x00, 0x00,
+        0x3f, 0x80, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x00,
+        0xc0, 0x00, 0x00, 0x00,
+        0x7f, 0x7f, 0xff, 0xff,
+        0x00, 0x80, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x80, 0x00, 0x00, 0x00,
+        0x7f, 0x80, 0x00, 0x00,
+        0xff, 0x80, 0x00, 0x00,
+        0x40, 0x49, 0x0f, 0xdb,
+    };
+
+    const guchar *p = float_data;
+    gfloat v;
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 4);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 8);
+    g_assert_cmpfloat(v, >, 1.0);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 12);
+    g_assert_cmpfloat(v, ==, 2.0);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 16);
+    g_assert_cmpfloat(v, ==, -2.0);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 20);
+    g_assert_cmpfloat(v, ==, G_MAXFLOAT);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 24);
+    g_assert_cmpfloat(v, ==, G_MINFLOAT);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 28);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 32);
+    g_assert_cmpfloat(v, ==, 0.0);
+    v = copysign(1.0, v);
+    g_assert_cmpfloat(v, ==, -1.0);
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 36);
+    g_assert_cmpfloat(v, >=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 40);
+    g_assert_cmpfloat(v, <=, 0.0);
+    g_assert(isinf(v));
+
+    v = gwy_read_float_be(&p);
+    g_assert_cmpuint(p - float_data, ==, 44);
+    g_assert_cmpfloat(v, ==, (gfloat)G_PI);
+}
+
+void
 test_pack_read_double_le(void)
 {
     static const guchar double_data[] = {
