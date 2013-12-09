@@ -415,15 +415,15 @@ test_pack_read_uint64_le(void)
 
     v = gwy_read_uint64_le(&p);
     g_assert_cmpuint(p - uint64_data, ==, 8);
-    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x123456789abcdef0u));
+    g_assert_cmpuint(v, ==, G_GUINT64_CONSTANT(0x123456789abcdef0));
 
     v = gwy_read_uint64_le(&p);
     g_assert_cmpuint(p - uint64_data, ==, 16);
-    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x7fffffffffffffffu));
+    g_assert_cmpuint(v, ==, G_GUINT64_CONSTANT(0x7fffffffffffffff));
 
     v = gwy_read_uint64_le(&p);
     g_assert_cmpuint(p - uint64_data, ==, 24);
-    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x8000000000000000u));
+    g_assert_cmpuint(v, ==, G_GUINT64_CONSTANT(0x8000000000000000));
 
     v = gwy_read_uint64_le(&p);
     g_assert_cmpuint(p - uint64_data, ==, 32);
@@ -444,15 +444,15 @@ test_pack_read_uint64_be(void)
 
     v = gwy_read_uint64_be(&p);
     g_assert_cmpuint(p - uint64_data, ==, 8);
-    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x123456789abcdef0u));
+    g_assert_cmpuint(v, ==, G_GUINT64_CONSTANT(0x123456789abcdef0));
 
     v = gwy_read_uint64_be(&p);
     g_assert_cmpuint(p - uint64_data, ==, 16);
-    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x7fffffffffffffffu));
+    g_assert_cmpuint(v, ==, G_GUINT64_CONSTANT(0x7fffffffffffffff));
 
     v = gwy_read_uint64_be(&p);
     g_assert_cmpuint(p - uint64_data, ==, 24);
-    g_assert_cmpuint(v, ==, G_GINT64_CONSTANT(0x8000000000000000u));
+    g_assert_cmpuint(v, ==, G_GUINT64_CONSTANT(0x8000000000000000));
 
     v = gwy_read_uint64_be(&p);
     g_assert_cmpuint(p - uint64_data, ==, 32);
