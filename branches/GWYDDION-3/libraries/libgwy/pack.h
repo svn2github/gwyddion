@@ -199,7 +199,7 @@ gwy_read_float_le(const guchar **ppv)
 {
     union { guint32 i; gfloat f; } v;
     const guint32 *pv = (const guint32*)(*ppv);
-    v.i = GUINT32_FROM_BE(*pv);
+    v.i = GUINT32_FROM_LE(*pv);
     *ppv += sizeof(gfloat);
     return v.f;
 }
@@ -209,7 +209,7 @@ gwy_read_float_be(const guchar **ppv)
 {
     union { guint32 i; gfloat f; } v;
     const guint32 *pv = (const guint32*)(*ppv);
-    v.i = GUINT32_FROM_LE(*pv);
+    v.i = GUINT32_FROM_BE(*pv);
     *ppv += sizeof(gfloat);
     return v.f;
 }
