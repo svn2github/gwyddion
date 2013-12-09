@@ -30,6 +30,8 @@ pack/read/uint64/le
 pack/read/uint64/be
 pack/read/double/le
 pack/read/double/be
+pack/read/pascal-real/le
+pack/read/pascal-real/be
 math/powi/actual
 math/powi/our
 math/spow

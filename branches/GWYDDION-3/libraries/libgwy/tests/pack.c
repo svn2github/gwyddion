@@ -601,4 +601,84 @@ test_pack_read_double_be(void)
     g_assert_cmpfloat(v, ==, (gdouble)G_PI);
 }
 
+void
+test_pack_read_pascal_real_le(void)
+{
+    static const guchar real_data[] = {
+        0x81, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x82, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x82, 0x00, 0x00, 0x00, 0x00, 0x80,
+        0xa2, 0x40, 0x0d, 0x07, 0xf7, 0x37,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+
+    const guchar *p = real_data;
+    gdouble v;
+
+    v = gwy_read_pascal_real_le(&p);
+    g_assert_cmpuint(p - real_data, ==, 6);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_pascal_real_le(&p);
+    g_assert_cmpuint(p - real_data, ==, 12);
+    g_assert_cmpfloat(v, ==, 2.0);
+
+    v = gwy_read_pascal_real_le(&p);
+    g_assert_cmpuint(p - real_data, ==, 18);
+    g_assert_cmpfloat(v, ==, -2.0);
+
+    v = gwy_read_pascal_real_le(&p);
+    g_assert_cmpuint(p - real_data, ==, 24);
+    g_assert_cmpfloat(v, ==, 12345678901.0);
+
+    v = gwy_read_pascal_real_le(&p);
+    g_assert_cmpuint(p - real_data, ==, 30);
+    g_assert_cmpfloat(v, ==, 1.7014118346031449e+38);
+
+    v = gwy_read_pascal_real_le(&p);
+    g_assert_cmpuint(p - real_data, ==, 36);
+    g_assert_cmpfloat(v, ==, 2.938735877055719e-39);
+}
+
+void
+test_pack_read_pascal_real_be(void)
+{
+    static const guchar real_data[] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x81,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x82,
+        0x80, 0x00, 0x00, 0x00, 0x00, 0x82,
+        0x37, 0xf7, 0x07, 0x0d, 0x40, 0xa2,
+        0x7f, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    };
+
+    const guchar *p = real_data;
+    gdouble v;
+
+    v = gwy_read_pascal_real_be(&p);
+    g_assert_cmpuint(p - real_data, ==, 6);
+    g_assert_cmpfloat(v, ==, 1.0);
+
+    v = gwy_read_pascal_real_be(&p);
+    g_assert_cmpuint(p - real_data, ==, 12);
+    g_assert_cmpfloat(v, ==, 2.0);
+
+    v = gwy_read_pascal_real_be(&p);
+    g_assert_cmpuint(p - real_data, ==, 18);
+    g_assert_cmpfloat(v, ==, -2.0);
+
+    v = gwy_read_pascal_real_be(&p);
+    g_assert_cmpuint(p - real_data, ==, 24);
+    g_assert_cmpfloat(v, ==, 12345678901.0);
+
+    v = gwy_read_pascal_real_be(&p);
+    g_assert_cmpuint(p - real_data, ==, 30);
+    g_assert_cmpfloat(v, ==, 1.7014118346031449e+38);
+
+    v = gwy_read_pascal_real_be(&p);
+    g_assert_cmpuint(p - real_data, ==, 36);
+    g_assert_cmpfloat(v, ==, 2.938735877055719e-39);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
