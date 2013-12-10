@@ -977,7 +977,7 @@ gwy_read_pascal_real_le(const guchar **ppv)
     if ((*ppv)[5] & 0x80)
         x = -x;
 
-    x *= gwy_powi(2.0, (gint)(*ppv)[0] - 129);
+    x *= gwy_powi(2.0, (gint)(*ppv)[0] - PASCAL_REAL_BIAS);
 
     *ppv += 6;
 
@@ -1007,7 +1007,7 @@ gwy_read_pascal_real_be(const guchar **ppv)
     if ((*ppv)[0] & 0x80)
         x = -x;
 
-    x *= gwy_powi(2.0, (gint)(*ppv)[5] - 129);
+    x *= gwy_powi(2.0, (gint)(*ppv)[5] - PASCAL_REAL_BIAS);
 
     *ppv += 6;
 
