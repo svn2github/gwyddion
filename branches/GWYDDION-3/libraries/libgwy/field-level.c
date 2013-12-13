@@ -309,7 +309,8 @@ gwy_field_inclination(const GwyField *field,
     gdouble sigma2 = 0.0;
     guint n = 0;
     if (masking == GWY_MASK_IGNORE) {
-        for (guint i = 0; i+1 < height; i++) {
+#pragma omp parallel for reduction(+:sigma2)
+        for (guint i = 0; i < height-1; i++) {
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             for (guint j = width-1; j; j--, d1++, d2++) {
                 gdouble vx = 0.5*(d1[1] + d2[1] - d1[0] - d2[0])/dx;
@@ -320,9 +321,10 @@ gwy_field_inclination(const GwyField *field,
         n = width*height;
     }
     else {
-        GwyMaskIter iter1, iter2;
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        for (guint i = 0; i+1 < height; i++) {
+#pragma omp parallel for reduction(+:sigma2) reduction(+:n)
+        for (guint i = 0; i < height-1; i++) {
+            GwyMaskIter iter1, iter2;
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow);
             gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow+1);
@@ -351,7 +353,8 @@ gwy_field_inclination(const GwyField *field,
 
     gdouble sumvx = 0.0, sumvy = 0.0, sumvz = 0.0;
     if (masking == GWY_MASK_IGNORE) {
-        for (guint i = 0; i+1 < height; i++) {
+#pragma omp parallel for reduction(+:sumvx) reduction(+:sumvy) reduction(+:sumvz)
+        for (guint i = 0; i < height-1; i++) {
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             for (guint j = width-1; j; j--, d1++, d2++) {
                 gdouble vx = 0.5*(d1[1] + d2[1] - d1[0] - d2[0])/dx;
@@ -364,9 +367,10 @@ gwy_field_inclination(const GwyField *field,
         }
     }
     else {
-        GwyMaskIter iter1, iter2;
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        for (guint i = 0; i+1 < height; i++) {
+#pragma omp parallel for reduction(+:sumvx) reduction(+:sumvy) reduction(+:sumvz)
+        for (guint i = 0; i < height-1; i++) {
+            GwyMaskIter iter1, iter2;
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow);
             gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow+1);
