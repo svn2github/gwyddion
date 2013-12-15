@@ -136,9 +136,117 @@
      window.
     </para>
   </sect2>
+  <sect2 id='correct-affine'>
+    <title>Affine Distortion</title>
+    <indexterm>
+       <primary>distortion in xy plane</primary>
+       <secondary>affine</secondary>
+     </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Affine Distortion</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Affine distortion in the horizontal plane caused by thermal drift is
+      common for instance in STM.  If the image contains a regular strcutre,
+      for instance atomic lattice of known parameters, the distortion can be
+      easily corrected using this function.
+    </para>
+    <para>
+      The affine transformation is specified by moving the lattice selection
+      on the preview with mouse until it matches the regular features present
+      in the image.  For images of periodic lattices, it is usually easier to
+      select the lattice in the autocorrelation function image
+      (<guilabel>2D ACF</guilabel>).  Also, only a rough match needs to be
+      found manually in this case.  Button <guibutton>Refine</guibutton>
+      refines the selected lattice vectors to the nearest maxima in
+      autocorrelation function with subpixel precision.
+    </para>
+    <para>
+      The correct lengths of the lattice vectors
+      <xi:include href="eqi-a_1.xml"/> and <xi:include href="eqi-a_2.xml"/>
+      and the angle <xi:include href="eqi-phi.xml"/> between them, entered to
+      the dialog, determine the affine transformation to perform.  A few common
+      lattice types (such as HOPG surface) are offered predefined, but it is
+      possible to enter arbitrary lengths and angle.
+    </para>
+    <informalfigure id='fig-affine-correction'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='correct-affine.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='correct-affine.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Affine correction example:
+          (a) original image exhibiting an affine distortion,
+          (b) correction dialog with the lattice selected on the
+              two-dimensional autocorrelation,
+          (c) corrected image.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      It should be noted that the correction method described above causes all
+      lateral scale information in the image to be lost because the new lateral
+      scale is fully determined by the correct lattice vectors.  This is
+      usually the best option for STM images of known lattices, however, for a
+      general skew or affine correction it can be impractical.  Therefore, the
+      dialog offers three different scaling choices:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Exactly as specified</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Lattice vectors in the corrected image will have the specified
+            lenghts and angle between them.  Scale information of the original
+            image is discarded completely.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Preserve area</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Lattice vectors in the corrected image will have the specified
+            ratio of lengths and angle between them.  However, the overall
+            scale is calculated as to make the affine transformation
+            area-preserving.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Preserve X scale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Lattice vectors in the corrected image will have the specified
+            ratio of lengths and angle between them.  However, the overall
+            scale is calculated as to make the affine transformation
+            preserve the original <xi:include href="eqi-x.xml"/>-axis scale.
+            This is somewhat analogous to the scale treatment in
+            <link linkend='drift-compensation'>Drift compensation</link>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
   <sect2 id='polynomial-distort'>
     <title>Polynomial Distortion</title>
-    <indexterm><primary>distortion in xy plane</primary></indexterm>
+    <indexterm>
+       <primary>distortion in xy plane</primary>
+       <secondary>polynomial</secondary>
+     </indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
