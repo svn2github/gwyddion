@@ -129,12 +129,6 @@
      self-explanatory – image or FFT coefficients can be outputted by module
      (or both).
     </para>
-    <para>
-     Note that the filter usually resamples the data to size that fits to
-     the available FFT algorithm (FFTW or Gwyddion FFT). As this may affect
-     results, the resampled image size information is stated in the module
-     window.
-    </para>
   </sect2>
   <sect2 id='correct-affine'>
     <title>Affine Distortion</title>
