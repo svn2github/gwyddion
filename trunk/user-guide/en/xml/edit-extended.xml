@@ -146,18 +146,19 @@
     <para>
       Affine distortion in the horizontal plane caused by thermal drift is
       common for instance in STM.  If the image contains a regular strcutre,
-      for instance atomic lattice of known parameters, the distortion can be
-      easily corrected using this function.
+      for instance an atomic lattice of known parameters, the distortion can
+      be easily corrected using this function.
     </para>
     <para>
-      The affine transformation is specified by moving the lattice selection
-      on the preview with mouse until it matches the regular features present
-      in the image.  For images of periodic lattices, it is usually easier to
+      The affine distortion correction requires to first select the distorted
+      lattice in the image.  This is done by moving the lattice selection on
+      the preview with mouse until it matches the regular features present in
+      the image.  For images of periodic lattices, it is usually easier to
       select the lattice in the autocorrelation function image
-      (<guilabel>2D ACF</guilabel>).  Also, only a rough match needs to be
-      found manually in this case.  Button <guibutton>Refine</guibutton>
-      refines the selected lattice vectors to the nearest maxima in
-      autocorrelation function with subpixel precision.
+      (<guilabel>2D ACF</guilabel>).
+      Also, only a rough match needs to be found manually in this case.  Button
+      <guibutton>Refine</guibutton> refines the selected lattice vectors to the
+      nearest maxima in autocorrelation function with subpixel precision.
     </para>
     <para>
       The correct lengths of the lattice vectors
@@ -188,9 +189,9 @@
       It should be noted that the correction method described above causes all
       lateral scale information in the image to be lost because the new lateral
       scale is fully determined by the correct lattice vectors.  This is
-      usually the best option for STM images of known lattices, however, for a
-      general skew or affine correction it can be impractical.  Therefore, the
-      dialog offers three different scaling choices:
+      usually the best option for STM images of known atomic lattices, however,
+      for a general skew or affine correction it can be impractical.
+      Therefore, the dialog offers three different scaling choices:
     </para>
     <variablelist>
       <varlistentry>
