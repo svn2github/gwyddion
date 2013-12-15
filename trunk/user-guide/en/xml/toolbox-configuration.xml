@@ -133,7 +133,7 @@
     <filename>~/.gwyddion/pixmaps</filename> (or its equivalent on other
     systems), using the same naming convention as Gwyddion icons.
     It may be useful to start from the
-    <ulink url='http://www.gimp.org/'>GIMP</link> XCF
+    <ulink url='http://www.gimp.org/'>GIMP</ulink> XCF
     <ulink url='https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/'>source images</ulink>
     for the icons since they contain individual pieces that can be mixed and
     matched.  If you draw a nice icon you are of course encouraged to submit
