@@ -33,7 +33,7 @@
     La compilation croisée complète suit les étapes suivantes :
   </para>
   <itemizedlist>
-    <listitem>configuration pour mingw32,</listitem>
+    <listitem>configuration pour mingw64/mingw32,</listitem>
     <listitem>compilation,</listitem>
     <listitem>installation dans une zone temporaire,</listitem>
     <listitem>création d'un installeur avec NSIS.</listitem>
@@ -50,16 +50,17 @@
       seule fois.
     </para>
     <sect3 id='installation-cross-mingw32-setup-base'>
-      <title>Paquets MinGW32 de base</title>
+      <title>Paquets MinGW de base</title>
       <para>
         Lancez en tant que root :
         <informalexample>
           <literallayout>
-            <userinput>yum install mingw32-{gcc-c++,gtk2,libxml2,minizip}</userinput>
+            <userinput>yum install mingw{32,64}-{gcc-c++,gtk2,libxml2,minizip}</userinput>
           </literallayout>
         </informalexample>
-        pour installer les paquets mingw32 nécessaire (plusieurs autres paquets
-        seront installés en tant que dépendances de ceux donnés donnés ici).
+        pour installer les paquets mingw32 et mingw64 nécessaires
+        (plusieurs autres paquets seront installés en tant que dépendances de
+        ceux donnés ici).
       </para>
     </sect3>
     <sect3 id='installation-cross-mingw32-setup-repo'>
@@ -71,8 +72,7 @@
         <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/</ulink>,
         il est toutefois certainement plus aisé de les installer avec
         <command>yum</command>. Pour cela il suffit de télécharger et installer
-        le paquet de configuration du site gwyddion.net
-        <ulink url='http://gwyddion.net/download/fedora/17/x86_64/os/gwyddion-release-17-1.fc17.noarch.rpm'>gwyddion-release-17-1.fc17.noarch.rpm</ulink>.
+        <ulink url='http://gwyddion.net/download.php#stable-fedora'>répertoire du paquet de configuration</ulink> sur gwyddion.net.
         L'installation donne accès à tous les paquets supplémentaires pour
         MinGW. Après installation, vous pouvez lancer
         <informalexample>
@@ -151,13 +151,15 @@
       </para>
       <para>
         L'outil le plus important que vous obtiendrez est le script
-        <command>cross-build</command> qui automatise les étapes de compilation
-        croisée. Avant de l'utiliser pour la première fois, consultez le fichier
-        <filename>setup</filename> qui définit la localisation des différents
-        éléments. Le contenu par défaut ressemble à ceci:
+        <command>cross-build-32</command>  (ou <command>cross-build-64</command>)
+        qui automatise les étapes de compilation croisée.
+        Avant de l'utiliser pour la première fois, consultez le fichier
+        <filename>setup32</filename> qui définit la localisation des différents
+        éléments (ou <filename>setup64</filename> pour la cible 64 bits).
+        Le contenu par défaut ressemble à ceci:
         <informalexample>
-          <programlisting>source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32
-mingw32_prefix=/usr/i686-pc-mingw32/sys-root/mingw
+          <programlisting>source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw
+mingw_prefix=/usr/i686-pc-mingw32/sys-root/mingw
 target_prefix=$HOME/opt/gwyddion-mingw32
 python_dir=$HOME/.wine/drive_c/Python27
 nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
@@ -187,11 +189,20 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       La configuration est fastidieuse mais elle vaut la peine d'être faite car
       la compilation est alors extrêmement simple. Lancez
       <informalexample>
-        <literallayout><userinput>./cross-build</userinput></literallayout>
+        <literallayout><userinput>./cross-build-32</userinput></literallayout>
       </informalexample>
-      dans le répertoire <filename>mingw32-cross-compile</filename>. C'est tout.
+      dans le répertoire <filename>mingw32-cross-compile</filename> pour
+      compiler l'installeur Win32. Et c'est tout.
       En cas de succès un installeur de Gwyddion pour Windows intégrant GTK+
-      sera créé dans <varname>$target_prefix</varname>.
+      sera créé dans <varname>$target_prefix</varname>. De même,
+      l'installeur Win64 est compilé avec
+      <informalexample>
+        <literallayout><userinput>./cross-build-64</userinput></literallayout>
+      </informalexample>
+      Notez que les scripts lancent <filename>autogen.sh</filename> mais ne
+      nettoient pas le répertoire du code source. Il vous sera certainement
+      nécessaire de le faire manuellement si vous compilez Gwyddion de manière
+      répétée.
     </para>
     <para>
       En attendant vous pourrez aller boire un café – ou étudier le script

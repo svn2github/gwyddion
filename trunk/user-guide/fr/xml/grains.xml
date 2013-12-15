@@ -65,24 +65,33 @@
     </para>
     <orderedlist>
       <listitem>
-        Une goutte virtuelle est déposée en chaque point de la surface inversée.
+        Phase de localisation des grains : une goutte virtuelle est déposée en
+        chaque point de la surface inversée (la quantité d'eau est contrôlée par
+        le paramètre <guilabel>Taille de goutte</guilabel>).
         Dans le cas où la goutte ne se trouve pas déjà sur un minimum local,
         celle-ci suit la pente la plus forte afin de minimiser son énergie
         potentielle. La goutte s'arrête dès qu'elle atteind un minimum local.
         Elle remplit ainsi partiellement le minimum local en fonction de son
         volume (voir la figure et sa légende ci-dessous). Ce procédé est répété
-        plusieurs fois. Il en résulte un ensemble de lacs de différentes tailles
+        plusieurs fois (avec le paramètre <guilabel>Nombre de pas</guilabel>).
+        Il en résulte un ensemble de lacs de différentes tailles
         remplissant la surface inversée. Les surfaces des lacs sont ensuite
         évaluées, et les plus petits d'entre eux sont supprimés, en prenant pour
         hypothèse que ceux-ci se sont formés dans les minima locaux provoqués
-        par le bruit. Les lacs les plus importants sont utilisés pour identifier
-        la position des grains. On élimine ainsi le bruit de mesure présent dans
-        les données AFM.
+        par le bruit (tous les lacs plus petits que le paramètre
+        <guilabel>Seuil</guilabel> sont supprimées). Les lacs les plus
+        importants sont utilisés pour identifier
+        la position des grains pour la segmentation lors de l'étape suivante.
+        On élimine ainsi le bruit de mesure présent dans les données AFM.
       </listitem>
       <listitem>
-        Les grains trouvés lors de la première étape sont marqués (chacun avec
-        un numéro différent). Les gouttes continuent de tomber vers la surface
-        et de remplir les minima locaux. Comme les grains ont déjà été marqués
+        Phase de segmentataion : les grains trouvés lors de la première étape
+        sont marqués (chacun avec un numéro différent). Les gouttes continuent
+        de tomber vers la surface et de remplir les minima locaux (la quantité
+        d'eau est contrôlée par le paramètre <guilabel>Taille de goutte</guilabel>).
+        Le nombre total d'étapes d'aspersion de gouttes en chaque point de la
+        surface est contrôlé par le paramètre <guilabel>Nombre d'étapes</guilabel>.
+        Comme les grains ont déjà été marqués
         et identifiés lors de la première étape, les situations suivantes
         peuvent apparaître dès qu'une goutte atteind un minimum local :
         <orderedlist>
@@ -115,7 +124,9 @@
     </orderedlist>
     <para>
       On peut ainsi identifier la position des grains et déterminer ensuite le
-      volume occupé par chaque grain.
+      volume occupé par chaque grain. On peut utiliser le paramètre
+      <guilabel>Inverser les hauteurs</guilabel> dans le cas où les zones
+      d'intérêt sont des vallées plutôt que des collines (grains)
     </para>
     <informalfigure id='fig-grain-marking'>
       <mediaobject>
