@@ -12,7 +12,10 @@
     within particle analysis (to mark particles located on flat surface).
   </para>
   <para id='grain-threshold'>
-    <indexterm><primary>threshold grain marking</primary></indexterm>
+    <indexterm>
+      <primary>grain marking</primary>
+      <secondary>threshold</secondary>
+    </indexterm>
     Thresholding methods can be accessed within Gwyddion as
     <menuchoice>
       <guimenu>Data Process</guimenu>
@@ -22,6 +25,37 @@
     Height, slope and curvature thresholding is implemented within this module.
     The results of each individual thresholding methods can be merged together
     using several operators.
+  </para>
+  <para id='grain-threshold-otsu'>
+    <indexterm>
+      <primary>grain marking</primary>
+      <secondary>threshold</secondary>
+      <tertiary>Otsu's method</tertiary>
+    </indexterm>
+    The automated Otsu's thresholding method is available as
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Mark by Otsu's</guimenuitem>
+    </menuchoice>.
+    This method classifies the data values into two classes, minimising the
+    intra-class variances within both.  It is most suitable for images that
+    contain two relatively well defined value levels.
+  </para>
+  <para id='grain-edge'>
+    <indexterm>
+      <primary>grain marking</primary>
+      <secondary>edge-based</secondary>
+    </indexterm>
+    Another grain marking function,
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Mark by Edge Detection</guimenuitem>
+    </menuchoice>,
+    is based on edge detection (local curvature).  The image is processed with
+    a difference-of-Gaussians filter of a given size and thresholding is then
+    performed on this filtered image instead of the original.
   </para>
   <para id='grain-remove-thresholding'>
     Similarly, the grains can be removed from the mask using
@@ -42,7 +76,10 @@
   </para>
   <sect2 id='grain-watershed'>
     <title>Watershed</title>
-    <indexterm><primary>watershed grain marking</primary></indexterm>
+    <indexterm>
+      <primary>grain marking</primary>
+      <secondary>watershed</secondary>
+    </indexterm>
     <para>
       For more complicated data structures the effectiveness of thresholding
       algorithms can be very poor. For these data a <emphasis>watershed
