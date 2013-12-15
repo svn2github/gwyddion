@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: toolbox-configuration.xml 15575 2013-11-09 09:31:29Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='toolbox-configuration'>
+  <title>Configuration de la boîte à outils</title>
+  <indexterm><primary>Boîte à outils</primary></indexterm>
+  <para>
+    La partie basse de la <link linkend='main-window'>boîte à outils</link>
+    contenant les boutons des fonctions et des outils peut être personnalisée
+    en éditant le fichier <filename>ui/toolbox.xml</filename>. De façon
+    similaire aux <link linkend='keyboard-shortcuts'>raccourcis-clavier</link>,
+    le fichier doit être placé dans le répertoire utilisateur, c'est-à-dire
+    <filename>~/.gwyddion</filename> (Unix) ou
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+    Le fichier par défaut <filename>ui/toolbox.xml</filename> installé avec
+    Gwyddion dans le dossier <filename>share/gwyddion</filename> peut servir
+    de bon point de départ.
+  </para>
+  <para>
+    Le nombre de boutons dans une ligne est contrôlé par le paramètre
+    <literal>width</literal> de l'élément <literal>toolbox</literal>. Pour le
+    passer à cinq par exemple, il suffit simplement de modifier le début du
+    fichier en
+    <informalexample>
+      <programlisting><![CDATA[<toolbox width='5'>]]></programlisting>
+    </informalexample>
+  </para>
+  <para>
+    Les groupes de boutons extensibles ou refermables tels que
+    <guilabel>Traitement des données</guilabel> ou <guilabel>Outils</guilabel>
+    sont créés avec la balise <literal>group</literal>. Vous pouvez créer
+    autant de groupes que vous le désirez. Des fonctions de différents types
+    peuvent même être placées dans un même groupe si vous le souhaitez. Chaque
+    groupe doit être identifié par un paramètre <literal>id</literal> unique qui
+    est utilisé, entre autres, pour mémoriser quels groupes sont refermés et
+    quels sont ceux étendus. L'élément <literal>title</literal> détermine le
+    titre :
+    <informalexample>
+      <programlisting><![CDATA[<group id='proc' title='Traitement des données'>]]></programlisting>
+    </informalexample>
+  </para>
+  <para>
+    Les boutons sont créés par l'élément <literal>item</literal> :
+    <informalexample>
+      <programlisting><![CDATA[<item type='proc' function='edge_step' icon='gwy_edge'/>]]></programlisting>
+    </informalexample>
+    Chaque item doit avoir un attribut <literal>type</literal>, définissant le
+    type de fonction. Sauf si le type est <literal>'empty'</literal>, il doit
+    aussi avoir un attribut <literal>function</literal> définissant la fonction
+    utilisée. Les noms des différentes fonctions sont disponibles dans le
+    navigateur de modules
+    (<menuchoice>
+      <guimenu>Info</guimenu>
+      <guimenuitem>Navigateur de modules</guimenuitem>
+    </menuchoice>),
+    dans lequel elles sont listées dans les
+    <guilabel>Fonctions enregistrées</guilabel> de chaque module ; ou dans le
+    <ulink url='http://gwyddion.net/module-list.php'>navigateur de modules en ligne </ulink>.
+    Les types de fonctions disponibles sont listées dans le tableau suivant :
+  </para>
+  <informaltable frame='topbot' id='table-toolbox-xml-types'>
+    <tgroup cols='2' align='left'>
+    <?dblatex lX?>
+      <thead>
+        <row>
+          <entry>Type</entry>
+          <entry>Fonction</entry>
+        </row>
+      </thead>
+      <tbody valign='top'>
+        <row>
+          <entry><literal>empty</literal></entry>
+          <entry>
+            Élément vide pouvant être utilisé comme séparateur ou pour
+            l'alignement des lignes.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>builtin</literal></entry>
+          <entry>
+            Fonction interne, incluant le zoom et la vue 3D. Il y en a
+            exactement quatre :
+            <literal>'display_3d'</literal>,
+            <literal>'zoom_in'</literal>,
+            <literal>'zoom_out'</literal>
+            and
+            <literal>'zoom_1_1'</literal>.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>proc</literal></entry>
+          <entry>
+            Fonction de traitement bi-dimensionnelle (image). Elle correspond
+            au préfixe <literal>proc::</literal> dans le navigateur de modules.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>graph</literal></entry>
+          <entry>
+            Fonction de graphe. Elle correspond au préfixe
+            <literal>graph::</literal> dans le navigateur de modules.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>volume</literal></entry>
+          <entry>
+            Fonction pour données volumiques.  Elle correspond au préfixe
+            <literal>volume::</literal> dans le navigateur de modules.
+          </entry>
+        </row>
+        <row>
+          <entry><literal>tool</literal></entry>
+          <entry>
+            Outil.  Elle correspond au préfixe
+            <literal>tool::</literal> dans le navigateur de modules.
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <para>
+    L'icône du bouton est sopécifiée grâce à l'attribut <literal>icon</literal>.
+    Certaines fonctions ont des icônes prédéfinies (dans ce  cas vous n'avez pas
+    à la spécifier), mais pas toutes car le nombre de fonctions disponibles est
+    conséquent.
+    Une <ulink url='http://gwyddion.net/documentation/libgwydgets/libgwydgets-gwystock.php'>icône Gwyddion</ulink>
+    peut être utilisée, ou bien une
+    <ulink url='https://developer.gnome.org/gtk2/stable/gtk2-Stock-Items.html'>icône Gtk+</ulink>.
+    Notez que les noms des icônes Gwyddion utilisent des tirets bas tadis que
+    les noms des icônes Gtk+ utilisent des traits d'union.
+  </para>
+  <para>
+    S'il est impossible de choisir une icône parmi celles proposées, il vous
+    est toujours possible de dessiner vos propres icônes et les placer dans
+    <filename>~/.gwyddion/pixmaps</filename> (ou son équivalent sur d'autres
+    systèmes d'exploitation), en utilisant la même convention que celle utilisée
+    pour nommer les icônes Gwyddion icons. Il peut être intéressant de démarrer
+    à partir des
+    <ulink url='https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/'>images sources</ulink>
+    au format <link linkend='http://www.gimp.org/'>GIMP</link> XCF
+    car elles contiennent des éléments qui peuvent être associés. Si votre icône
+    est de bonne facture, nous vous encourageons bien évidemment à la soumettre
+    pour l'inclure dans Gwyddion.
+  </para>
+  <para>
+    Comme les outils ne sont accessibles qu'à partir de la boîte à outils, le
+    fait de ne pas en lister une dans <filename>ui/toolbox.xml</filename> la
+    rend indisponible. À cet effet, un élément vide spécial
+    <informalexample>
+      <programlisting><![CDATA[<item type='tool'/>]]></programlisting>
+    </informalexample>
+    peut être utilisé pour y placer tous les outils n'ayant pas été
+    explicitement placés ailleurs (dans un ordre plus ou moins arbitraire).
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
