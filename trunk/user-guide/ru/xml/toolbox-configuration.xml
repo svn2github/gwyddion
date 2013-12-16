@@ -24,7 +24,7 @@
         </row>
         <row>
           <entry><literal>builtin</literal></entry>
-          <entry>Встроенная функция, которые включают приближение, удаление, активацию режима 3D-просмотра. Всего их ровно четыре: <literal>'display_3d'</literal>, <literal>'zoom_in'</literal>, <literal>'zoom_out'</literal> и <literal>'zoom_1_1'</literal>.</entry>
+          <entry>Встроенные функции, которые включают приближение, удаление, активацию режима 3D-просмотра. Всего их ровно четыре: <literal>'display_3d'</literal>, <literal>'zoom_in'</literal>, <literal>'zoom_out'</literal> и <literal>'zoom_1_1'</literal>.</entry>
         </row>
         <row>
           <entry><literal>proc</literal></entry>
@@ -46,7 +46,7 @@
     </tgroup>
   </informaltable>
   <para>Изображение на кнопке задаётся атрибутом <literal>icon</literal>. Некоторые функции модулей уже содержат заданные изображения (которые не нужно указывать вручную), но этот список довольно ограничен в силу огромного количества доступных функций. Можно использовать изображения из коллекций <ulink url="http://gwyddion.net/documentation/libgwydgets/libgwydgets-gwystock.php">Gwyddion stock icon</ulink> и <ulink url="https://developer.gnome.org/gtk2/stable/gtk2-Stock-Items.html">Gtk+ stock icon</ulink>. Следует отметить, что названия изображений в коллекции Gwyddion используют символ подчёркивания для связывания отдельных слов, иконки Gtk+ используют тире.</para>
-  <para>Если предложенного набора изображений недостаточно, чтобы выбрать нужное, можно нарисовать свою иконку и поместить её в <filename>~/.gwyddion/pixmaps</filename> (или эквивалентное место в других операционных системах), используя то же соглашение о наименовании элементов, что и иконки в Gwyddion. Может быть полезно начать с <ulink url="https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/">исходных файлов</ulink> XCF от <link linkend="http://www.gimp.org/">GIMP</link> для иконок, поскольку они уже содержат отдельные элементы, которые можно смешивать и использовать друг с другом. Если у вас получилась красивая иконка, её разумеется можно прислать для включения в состав Gwyddion.</para>
+  <para>Если предложенного набора изображений недостаточно, чтобы выбрать нужное, можно нарисовать свою иконку и поместить её в <filename>~/.gwyddion/pixmaps</filename> (или эквивалентное место в других операционных системах), используя то же соглашение о наименовании элементов, что и иконки в Gwyddion. Может быть полезно начать с <ulink url="https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/">исходных файлов</ulink> <ulink url="http://www.gimp.org/">GIMP</ulink> XCF для иконок, поскольку они уже содержат отдельные элементы, которые можно смешивать и использовать друг с другом. Если у вас получилась красивая иконка, её разумеется можно прислать для включения в состав Gwyddion.</para>
   <para>Поскольку инструменты доступны только из окна инструментов, не указание их в <filename>ui/toolbox.xml</filename> делает их полностью недоступными. Следовательно, специальный пустой элемент <informalexample><programlisting><![CDATA[<item type='tool'/>]]></programlisting></informalexample> можно использовать для размещения всех инструментов, которые ещё не перемещены в заданную позицию (в достаточно произвольном порядке).</para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
