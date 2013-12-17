@@ -1,0 +1,37 @@
+--- gtksourceview-2.11.2.orig/configure	2010-06-08 11:56:36.000000000 +0200
++++ gtksourceview-2.11.2/configure	2013-12-17 22:47:45.181294819 +0100
+@@ -10808,33 +10808,7 @@ $as_echo "$complCFLAGS" >&6; }
+ 
+ 
+ 
+-if test "$USE_MAINTAINER_MODE" = "yes"; then
+-	enable_deprecations=yes
+-else
+-	enable_deprecations=no
+-fi
+-
+-# Check whether --enable-deprecations was given.
+-if test "${enable_deprecations+set}" = set; then :
+-  enableval=$enable_deprecations; enable_deprecations=$enableval
+-fi
+-
+-
+-if test "$enable_deprecations" = "yes"; then
+-	DISABLE_DEPRECATED_CFLAGS="\
+--DG_DISABLE_DEPRECATED \
+--DGDK_DISABLE_DEPRECATED \
+--DGTK_DISABLE_DEPRECATED \
+--DGDK_PIXBUF_DISABLE_DEPRECATED \
+--DGNOME_DISABLE_DEPRECATED"
+-
+-	if $PKG_CONFIG --atleast-version 2.90 $GTK_REQUIRED; then
+-		DISABLE_DEPRECATED_CFLAGS="$DISABLE_DEPRECATED_CFLAGS -DGSEAL_ENABLE"
+-	fi
+-
+-
+-fi
+-
++DISABLE_DEPRECATED_CFLAGS=
+ 
+ 
+ if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then

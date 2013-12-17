@@ -4,7 +4,7 @@
 
 Name:           mingw-gtksourceview2
 Version:        2.11.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        MinGW Windows library for viewing source files
 
 # the library itself is LGPL, some .lang files are GPL
@@ -13,6 +13,8 @@ Group:          Development/Libraries
 URL:            http://www.gtk.org
 Source0:        http://download.gnome.org/sources/gtksourceview/%{release_version}/gtksourceview-%{version}.tar.bz2
 Patch0:         mingw-libtool-win64-lib.patch
+Patch1:         gtksourceview-2.11.2-force-gtk2.patch
+Patch2:         gtksourceview-2.11.2-deprecations.patch
 
 BuildArch:      noarch
 
@@ -76,6 +78,8 @@ version 2.
 %prep
 %setup -q -n gtksourceview-%{version}
 %patch0 -p1 -b .win64
+%patch1 -p1 -b .gtk2
+%patch2 -p1 -b .deprecations
 sed -i -e 's/\<G_CONST_RETURN\>/const/g' \
        -e 's/\<G_UNICODE_COMBINING_MARK\>/G_UNICODE_SPACING_MARK/g' \
        -e 's/\<gtk_set_locale\>/setlocale/g' \
@@ -86,6 +90,7 @@ sed -i -e 's/\<G_CONST_RETURN\>/const/g' \
 %{mingw_configure} \
   --disable-static \
   --disable-gtk-doc \
+  --enable-deprecations=no \
   --disable-introspection
 
 %{mingw_make} %{?_smp_mflags}
@@ -132,6 +137,11 @@ rm -rf $RPM_BUILD_ROOT%{mingw64_datadir}/gtk-doc
 
 
 %changelog
+* Tue Dec 17 2013 Yeti <yeti@gwyddion.net> - 2.11.2-5
+- Botched configure logic fixed
+- Enforce compilation with Gtk+2 even if Gtk+3 is available
+- Enforce disabling of deprecation
+
 * Mon Feb 18 2013 Yeti <yeti@gwyddion.net> - 2.11.2-4
 - Rebuilt for F18
 
