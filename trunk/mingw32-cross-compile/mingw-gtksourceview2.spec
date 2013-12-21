@@ -4,7 +4,7 @@
 
 Name:           mingw-gtksourceview2
 Version:        2.11.2
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        MinGW Windows library for viewing source files
 
 # the library itself is LGPL, some .lang files are GPL
@@ -15,6 +15,7 @@ Source0:        http://download.gnome.org/sources/gtksourceview/%{release_versio
 Patch0:         mingw-libtool-win64-lib.patch
 Patch1:         gtksourceview-2.11.2-force-gtk2.patch
 Patch2:         gtksourceview-2.11.2-deprecations.patch
+Patch3:         gtksourceview-2.11.2-notests.patch
 
 BuildArch:      noarch
 
@@ -80,6 +81,7 @@ version 2.
 %patch0 -p1 -b .win64
 %patch1 -p1 -b .gtk2
 %patch2 -p1 -b .deprecations
+%patch3 -p1 -b .notests
 sed -i -e 's/\<G_CONST_RETURN\>/const/g' \
        -e 's/\<G_UNICODE_COMBINING_MARK\>/G_UNICODE_SPACING_MARK/g' \
        -e 's/\<gtk_set_locale\>/setlocale/g' \
@@ -137,6 +139,11 @@ rm -rf $RPM_BUILD_ROOT%{mingw64_datadir}/gtk-doc
 
 
 %changelog
+* Sat Dec 21 2013 Yeti <yeti@gwyddion.net> - 2.11.2-6
+- Force not building tests
+- Corrected dates in old changelogs
+- Rebuilt for F19
+
 * Tue Dec 17 2013 Yeti <yeti@gwyddion.net> - 2.11.2-5
 - Botched configure logic fixed
 - Enforce compilation with Gtk+2 even if Gtk+3 is available
@@ -155,6 +162,6 @@ rm -rf $RPM_BUILD_ROOT%{mingw64_datadir}/gtk-doc
 - Added explict cross-pkg-config dependencies, seem needed
 - Do not package libtool .la files
 
-* Thu Jul 11 2012 Yeti <yeti@gwyddion.net> - 2.11.2-1
+* Thu Jul 12 2012 Yeti <yeti@gwyddion.net> - 2.11.2-1
 - Initial release
 
