@@ -138,7 +138,7 @@
     pour nommer les icônes Gwyddion icons. Il peut être intéressant de démarrer
     à partir des
     <ulink url='https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/pixmaps/'>images sources</ulink>
-    au format <link linkend='http://www.gimp.org/'>GIMP</link> XCF
+    au format <ulink url='http://www.gimp.org/'>GIMP</ulink> XCF
     car elles contiennent des éléments qui peuvent être associés. Si votre icône
     est de bonne facture, nous vous encourageons bien évidemment à la soumettre
     pour l'inclure dans Gwyddion.
