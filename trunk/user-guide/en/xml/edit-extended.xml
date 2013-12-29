@@ -51,7 +51,7 @@
           Global offsets are calculated from the local ones.  At present the
           method is very simple as it seems sufficient in most cases: local
           drift derivatives are fitted for each row onto the local drift
-          estimations and the global drift is then obtained by intergration
+          estimations and the global drift is then obtained by integration
           (i.e. summing the local drifts).
         </listitem>
       </orderedlist>
@@ -99,7 +99,7 @@
     </para>
     <para>
       Within the 1D FFT filter the frequencies that should be removed from
-      spectrum (suppress type: null) or supressed to value of neighbouring
+      spectrum (suppress type: null) or suppressed to value of neighbouring
       frequencies (suppress type: suppress) can be selected by marking
       appropriate areas in the power spectrum graph. The selection can be
       inverted easily using the Filter type choice. 1D FFT filter can be used
@@ -145,7 +145,7 @@
     </para>
     <para>
       Affine distortion in the horizontal plane caused by thermal drift is
-      common for instance in STM.  If the image contains a regular strcutre,
+      common for instance in STM.  If the image contains a regular structure,
       for instance an atomic lattice of known parameters, the distortion can
       be easily corrected using this function.
     </para>
@@ -201,7 +201,7 @@
         <listitem>
           <para>
             Lattice vectors in the corrected image will have the specified
-            lenghts and angle between them.  Scale information of the original
+            lengths and angle between them.  Scale information of the original
             image is discarded completely.
           </para>
         </listitem>
@@ -282,7 +282,7 @@
     </para>
     <para>
       Calculates denoised image on the basis of two measurements of the same area
-      - one performed in x direction and on in y direction (and rotated back to be aligned
+      – one performed in x direction and one in y direction (and rotated back to be aligned
       the same way as the x direction one). It is based on
       work of E. Anguiano and M. Aguilar (see [<link linkend='xy-denoise-ref-1'>1</link>]).
       Module performs FFT of both images, combines information from both images in reciprocal space, and then
