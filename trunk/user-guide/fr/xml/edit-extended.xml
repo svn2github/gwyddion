@@ -131,20 +131,126 @@
      être filtrées doivent ainsi être sélectionnées en 2D à l'aide d'un éditeur
      de masque. Comme les fréquences sont liées au centre de l'image
      (correspondant à la fréquence nulle), le masque peut être lié à ce centre
-     (origine des coordonnées) lors de l'édition. Il existe de plus différents
+     (origine des coordonnées) lors de l'édition. De plus, il existe différents
      types d'affichage et de sortie – l'image ou le module des coefficients
      peuvent être extraits (ou les deux à la fois).
     </para>
+  </sect2>
+  <sect2 id='correct-affine'>
+    <title>Distorsion affine </title>
+    <indexterm>
+       <primary>distorsion dans le plan xy</primary>
+       <secondary>affine</secondary>
+     </indexterm>
     <para>
-     Notez que le filtre ré-échantillonne généralement les données à une
-     dimension adaptée à l'algorithme de FFT (FFTW ou Gwyddion FFT). Comme cela
-     peut affecter les résultats, une information sur la taille de l'image
-     ré-échantillonnée est affichée dans la fenêtre du module.
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Correction des données</guisubmenu>
+        <guimenuitem>Distorsion affine</guimenuitem>
+      </menuchoice>
     </para>
+    <para>
+      La distorsion affine dans le plan horizontal provoquée par une dérive
+      thermique est assez courante dans les mesures STM. Si l'image contient
+      une structure régulière, par exemple un réseau atomique dont les
+      paramètres sont connus, on peut facilement corriger la distorsion à l'aide
+      de cette fonction.
+    </para>
+    <para>
+      La correction de la distorsion affine nécessite d'abord de sélectionner
+      le réseau distordu dans l'image. Cette opération est réalisée en déplaçant
+      à la souris la sélection du réseau sur l'aperçu jusqu'à ce qu'elle
+      corresponde aux motifs réguliers présents dans l'image. Pour les images
+      de réseau réguliers, il est en général plus aisé de sélectionner le réseau
+      sur l'image de la fonction d'autocorrélation (<guilabel>2D ACF</guilabel>).
+      De plus, seule une correspondance approximative est nécessaire dans ce cas.
+      Le bouton <guibutton>Raffiner</guibutton> permet ensuite d'ajuster les
+      vecteurs du réseau sur les maxima d'autocorrélation, avec une précision
+      inférieure au pixel.
+    </para>
+    <para>
+      Les longueurs d'autocorrélation des vecteurs du réseau
+      <xi:include href="eqi-a_1.xml"/> et <xi:include href="eqi-a_2.xml"/>
+      et l'angle <xi:include href="eqi-phi.xml"/> entre eux, entrés dans la
+      fenêtre de dialogue, déterminent la transformation affine à appliquer.
+      Quelques valeurs communes (telles que celles d'une surface en graphite
+      HOPG) sont prédéfinies, mais il est possible d'entrer des valeurs
+      arbitraires).
+    </para>
+    <informalfigure id='fig-affine-correction'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='correct-affine.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='correct-affine.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Exemple de correction affine :
+          (a) image originale affectée d'une distorsion affine,
+          (b) fenêtre de dialogue de correction avec le réseau sélectionné sur
+              la fonction d'autocorrélation bi-dimensionnelle,
+          (c) image corrigée.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Notez que la méthode de correction décrite plus haut aboutit à la perte
+      des échelles latérales car celle-ci est alors complètement déterminée par
+      les vecteurs corrects du réseau. Il s'agit généralement de la meilleure
+      option pour les images STM dont les réseaux sont connus, toutefois elle
+      peut s'avérer peu pratique dans certains cas. La fenêtre de dialogue
+      propose ainsi trois choix de mise à l'échelle :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Tel que spécifié</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Les vecteurs du réseau de l'image corrigée auront les longueurs et
+            l'angle spécifiés. L'échelle de l'image originale est complètement
+            perdue.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Conserver l'aire</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Les vecteurs du réseau de l'image corrigée auront le même rapport
+            des longueurs et l'angle. Toutefois, l'échelle globale est calculée
+            de manière à ce que la transformation affine préserve l'aire de
+            l'image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Conserver l'échelle X</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Les vecteurs du réseau de l'image corrigée auront le même rapport
+            des longueurs et l'angle. Toutefois, l'échelle globale est calculée
+            de manière à ce que la transformation affine préserve l'échelle
+            selon l'axe <xi:include href="eqi-x.xml"/> de l'image originale.
+            Il s'agit d'un traitement de l'échelle analogue à celui de la
+            <link linkend='drift-compensation'>compensation de la dérive</link>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </sect2>
   <sect2 id='polynomial-distort'>
     <title>Distorsion Polynômiale</title>
-    <indexterm><primary>distorsion dans le plan xy</primary></indexterm>
+    <indexterm>
+      <primary>distorsion dans le plan xy</primary>
+      <secondary>polynômiale</secondary>
+    </indexterm>
     <para>
       <menuchoice>
         <guimenu>Traitement des Données</guimenu>
