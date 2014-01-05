@@ -347,7 +347,7 @@
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Presentation</guisubmenu>
-        <guimenuitem>Local contrast</guimenuitem>
+        <guimenuitem>Local Contrast</guimenuitem>
       </menuchoice>
     </para>
     <para>
@@ -355,6 +355,35 @@
       variation at the same time.  This is achieved by calculation of local
       value range, or variation, around each data sample and stretching it to
       equalize this variation over all data.
+    </para>
+  </sect2>
+  <sect2 id='rank'>
+    <title>Rank</title>
+    <indexterm><primary>local rank transform</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Rank</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      An alternative local contrast enhancement method.  It is an equalising
+      high-pass filter, somewhat complementary to the median filter.  Each
+      pixel value is transformed to its rank among all values from a certain
+      neihbourhood.  The neighbourhood radius can be specified as
+      <guilabel>Kernel size</guilabel>.
+    </para>
+    <para>
+      The net effect is that all local maxima are equalised to the same maximum
+      value, all local minima to the same minimum value, and values that are
+      neither maxima nor minima are transformed to the range between based on
+      their rank.  Since the output of the filter with radius
+      <xi:include href="eqi-r.xml"/>
+      can contain at most
+      <xi:include href="eqi-pi-r-plus-1-over-2-to-2.xml"/>
+      different values (approximately), the filter also leads to value
+      discretisation, especially for small kernel sizes.
     </para>
   </sect2>
   <sect2 id='logscale'>
