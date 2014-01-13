@@ -348,6 +348,14 @@
               </entry>
             </row>
             <row>
+              <entry><literal>/0/data/log</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyStringList'><type>GwyStringList</type></link></entry>
+              <entry>
+                Channel log as a list of string log entries.  They have the format
+                <literal><replaceable>type</replaceable>::<replaceable>function</replaceable>(<replaceable>param</replaceable>=<replaceable>value</replaceable>, …)@<replaceable>time</replaceable></literal>.
+              </entry>
+            </row>
+            <row>
               <entry><literal>/0/select/<replaceable>foo</replaceable></literal></entry>
               <entry>a <type>GwySelection</type> subclass</entry>
               <entry>
@@ -1008,6 +1016,14 @@
                 the metadata browser and the string values are the values.
               </entry>
             </row>
+            <row>
+              <entry><literal>/brick/0/log</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyStringList'><type>GwyStringList</type></link></entry>
+              <entry>
+                Volume data log as a list of string log entries.  They have the format
+                <literal><replaceable>type</replaceable>::<replaceable>function</replaceable>(<replaceable>param</replaceable>=<replaceable>value</replaceable>, …)@<replaceable>time</replaceable></literal>.
+              </entry>
+            </row>
           </tbody>
         </tgroup>
       </informaltable>
@@ -1196,6 +1212,34 @@
               <entry>
                 Selection data.  The number of items that form one selection object is
                 determined by the selection type.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      The components of a <type>GwyStringList</type> are summarised in the following table.
+      Note if <type>GwyStringList</type>s are used to represent logs, the strings have a
+      specific structure described above.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyStringList'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Component</entry>
+              <entry>Type</entry>
+              <entry>Meaning</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>strings</literal></entry>
+              <entry>array of strings</entry>
+              <entry>
+                List of string items.
               </entry>
             </row>
           </tbody>
