@@ -40,6 +40,7 @@
   <xi:include href='single-point-spectra.xml'/>
   <xi:include href='volume-data.xml'/>
   <xi:include href='metadata.xml'/>
+  <xi:include href='logging.xml'/>
   <xi:include href='raw-file-import.xml'/>
   <xi:include href='specific-data-import.xml'/>
   <xi:include href='plugins.xml'/>

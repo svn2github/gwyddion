@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='logging'>
+  <title>Logging</title>
+  <para>
+    Gwyddion records data modification operations for each channel or volume
+    data in so-called log.  When data are saved to a <filename>.gwy</filename>
+    file, the log is saved along with them.  The log can be displayed by
+    selecting the
+    <guimenuitem>View Log</guimenuitem>
+    command in the right-click context menu of the channel or volume data
+    window.  This is useful for recalling later what corrections you applied,
+    how a mask or presentation was created, etc.  It should be noted that
+    the logs are informational; they are not intended nor suitable for
+    auditing purposes.
+  </para>
+  <para>
+    The log view is live: if you keep it open you can see individual data
+    processing operations appearing there as you perform them.
+  </para>
+  <para>
+    A simple log example is shown in the following figure.  For each operation,
+    the type, name, parameters and time are recorded.  The type can be for
+    instance file import, data processing function or tool application.
+    The function names correspond to those show in the module browser
+    (<menuchoice>
+      <guimenu>Meta</guimenu>
+      <guimenuitem>Module Browser</guimenuitem>
+    </menuchoice>),
+    where they are listed in <guilabel>Registered functions</guilabel> for
+    each module; or in the
+    <ulink url='http://gwyddion.net/module-list.php'>on-line module
+    browser</ulink>.  The parameter list represents the settings of the
+    function at the time it was used.  Since the log is only informative,
+    the parameters may or may not allow a precise reconstruction of the
+    operation.  For typical simple operations, they should be sufficient.
+    In the case of complex or interactive operations involving multiple
+    channels, the log entry may not be detailed enough.  The time is recorded
+    in the local time zone when the operation is performed; it is not
+    recalculated when you send the files around the world and display
+    elsewhere.
+  </para>
+  <informalfigure id='fig-log-viewer'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='log-viewer.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Log viewer showing a simple data processing operation log for a
+        channel, starting with file import from an SPM vendor format and
+        continuing with the application of data processing functions, tools
+        and undo.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    The entire log can be exported to a text file using the
+    <guibutton>Export</guibutton> button.  It not possible to modify the log
+    entries as that would defeat the purpose of logging somehow, but you
+    can clear the entire log with <guibutton>Clear</guibutton>.
+  </para>
+  <sect2 id='logging-disabling'>
+    <title>Disabling logging</title>
+    <para>
+      In some circumstances, you may wish to store or publish
+      <filename>.gwy</filename> files without logs.  Therefore, logging is
+      controllable on several levels:
+      <itemizedlist>
+        <listitem>
+          <para>
+            It can be enabled and disabled globally using
+            <menuchoice>
+              <guimenu>Edit</guimenu>
+              <guimenuitem>Logging Enabled</guimenuitem>
+            </menuchoice>.
+            When logging is disabled no new log entries are added.  Existing
+            logs are not removed though and you can still view them.  They are
+            also still saved to <filename>.gwy</filename> files.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The log for a specific channel or volume data can be cleared with
+            button <guibutton>Clear</guibutton> in the viewer.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            All logs in the current file can be removed using
+            <menuchoice>
+              <guimenu>File</guimenu>
+              <guimenuitem>Remove All Logs</guimenuitem>
+            </menuchoice>.
+            Of course, if logging is enabled and you start modifying the data,
+            new logs will be created and the new data operations recorded in
+            them.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
