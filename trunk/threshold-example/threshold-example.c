@@ -76,6 +76,7 @@ static void        threshold_do                   (GwyContainer *data,
                                                    GQuark mquark,
                                                    GwyDataField *sfield,
                                                    GQuark squark,
+                                                   gint id,
                                                    ThresholdArgs *args);
 static void        fractile_changed               (GtkAdjustment *adj,
                                                    ThresholdControls *controls);
@@ -143,11 +144,13 @@ threshold(GwyContainer *data, GwyRunType run)
     GQuark dquark, mquark, squark;
     ThresholdArgs args;
     gboolean ok;
+    gint id;
 
     g_return_if_fail(run & THRESHOLD_RUN_MODES);
     /* Obtain the current data and mask fields */
     gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD_KEY, &dquark,
                                      GWY_APP_DATA_FIELD, &dfield,
+                                     GWY_APP_DATA_FIELD_ID, &id,
                                      GWY_APP_MASK_FIELD_KEY, &mquark,
                                      GWY_APP_MASK_FIELD, &mfield,
                                      GWY_APP_SHOW_FIELD_KEY, &squark,
@@ -163,9 +166,9 @@ threshold(GwyContainer *data, GwyRunType run)
     /* Possibly present the GUI */
     ok = (run != GWY_RUN_INTERACTIVE) || threshold_dialog(&args, dfield);
     if (ok) {
-        threshold_do(data, dfield, dquark, mfield, mquark, sfield, squark,
-                     &args);
         threshold_save_args(gwy_app_settings_get(), &args);
+        threshold_do(data, dfield, dquark, mfield, mquark, sfield, squark, id,
+                     &args);
     }
 }
 
@@ -177,6 +180,7 @@ threshold_do(GwyContainer *data,
              GQuark mquark,
              GwyDataField *sfield,
              GQuark squark,
+             G_GNUC_UNUSED gint id,   /* Only used in 2.35+ */
              ThresholdArgs *args)
 {
     switch (args->mode) {
@@ -222,6 +226,13 @@ threshold_do(GwyContainer *data,
         g_assert_not_reached();
         break;
     }
+
+    /* Log the data processing operation.  Whatever we do, it modifies the same
+     * channel so no branching is necessary.  Logging is available in Gwyddion
+     * 2.35 or newer. */
+#if (GWY_VERSION_MAJOR == 2 && GWY_VERSION_MINOR >= 35)
+    gwy_app_channel_log_add(data, id, id, "proc::" THRESHOLD_MOD_NAME, NULL);
+#endif
 }
 
 static GwyDataField*
@@ -388,7 +399,7 @@ mode_changed(GtkToggleButton *button,
 }
 
 static const gchar fractile_key[] = "/module/" THRESHOLD_MOD_NAME "/fractile";
-static const gchar mode_key[] = "/module/" THRESHOLD_MOD_NAME "/mode";
+static const gchar mode_key[]     = "/module/" THRESHOLD_MOD_NAME "/mode";
 
 static void
 threshold_load_args(GwyContainer *container,
