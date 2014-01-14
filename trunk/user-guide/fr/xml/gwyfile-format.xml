@@ -368,6 +368,15 @@
               </entry>
             </row>
             <row>
+              <entry><literal>/0/data/log</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyStringList'><type>GwyStringList</type></link></entry>
+              <entry>
+                Journal de modification du canal sous forme d'une liste de
+                chaînes de caractères. Elles sont le format
+                <literal><replaceable>type</replaceable>::<replaceable>fonction</replaceable>(<replaceable>param</replaceable>=<replaceable>valeur</replaceable>, …)@<replaceable>date</replaceable></literal>.
+              </entry>
+            </row>
+            <row>
               <entry><literal>/0/select/<replaceable>foo</replaceable></literal></entry>
               <entry>une sous-classe de <type>GwySelection</type></entry>
               <entry>
@@ -1050,6 +1059,15 @@
                 the metadata browser and the string values are the values.
               </entry>
             </row>
+            <row>
+              <entry><literal>/brick/0/log</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyStringList'><type>GwyStringList</type></link></entry>
+              <entry>
+                Journal de modification du volume sous forme d'une liste de
+                chaîne de caractères. Elles ont le format
+                <literal><replaceable>type</replaceable>::<replaceable>fonction</replaceable>(<replaceable>param</replaceable>=<replaceable>valeur</replaceable>, …)@<replaceable>date</replaceable></literal>.
+              </entry>
+            </row>
           </tbody>
         </tgroup>
       </informaltable>
@@ -1242,6 +1260,35 @@
               <entry>
                 Données de sélection. Le nombre d'éléments formant un objet
                 sélection est déterminé par le type de sélection.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Les composants d'un <type>GwyStringList</type> sont résumés dans la table
+      suivante. Notez que les <type>GwyStringList</type>s sont utilisés pour
+      représenter les entrées du journal de modification, les chaînes ont la
+      structure spécifique décrite plus haut.
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-GwyStringList'>
+        <tgroup cols='3' align='left'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Composant</entry>
+              <entry>Type</entry>
+              <entry>Signification</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>strings</literal></entry>
+              <entry>tableau chaînes de caractères</entry>
+              <entry>
+                Liste des chaînes de caractères.
               </entry>
             </row>
           </tbody>

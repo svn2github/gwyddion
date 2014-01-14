@@ -367,6 +367,34 @@
       manière à égaliser cette variation sur toutes les données.
     </para>
   </sect2>
+  <sect2 id='rank'>
+    <title>Rang</title>
+    <indexterm><primary>transformée de rang locale</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Présentation</guisubmenu>
+        <guimenuitem>Rang</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Méthode alternative d'amélioration locale du contraste. Il s'agit d'un
+      filtre égaliseur passe-haut, complémentaire du filtre médian. Chaque
+      valeur de pixel est transformée en sa valeur de rang parmi toutes les
+      valeurs dans un voisinage donné. Le rayon de voisinage est défini avec la
+      <guilabel>taille du noyau</guilabel>.
+    </para>
+    <para>
+      L'effet net est que tous les maxima locaux sont égalisés à la même valeur
+      maximale, tous les minima à la même valeur minimale, et toutes les valeurs
+      n'étant un maximum ou un minimum sont transformées dans la plage définie
+      en fonction de leur rang. Comme la sortie du filtre de rayon
+      <xi:include href="eqi-r.xml"/> contient au plus
+      <xi:include href="eqi-pi-r-plus-1-over-2-to-2.xml"/> valeurs différentes
+      (approximativement), le filtre aboutit aussi à une discrétisation des
+      valeurs, en particulier pour les noyaux de petite taille.
+    </para>
+  </sect2>
   <sect2 id='logscale'>
   <title>Echelle logarithmique</title>
     <indexterm><primary>échelle logarithmique</primary></indexterm>
