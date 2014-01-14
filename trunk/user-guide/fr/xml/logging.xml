@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: logging.xml 15867 2014-01-13 18:57:29Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='logging'>
+  <title>Journal des modifications</title>
+  <para>
+    Gwyddion enregistre les modifications des données pour chaque canal ou
+    volume dans un journal. Lorsque les données sont sauvées dans un fichier
+    <filename>.gwy</filename>, le journal est enregistré avec les données.Le
+    journal peut être affiché en sélectionnant la commande
+    <guimenuitem>Voir le journal</guimenuitem> du menu contextuel lancé
+    avec un clic-droit dans la fenêtre de données du canal ou du volume. Cette
+    fonctionnalité est utile pour retrouver les opérations appliquées, ou la
+    manière dont un masque ou une présentation ont été créés, etc. Notez que
+    les journaux sont donnés à titre d'information, ils ne sont pas destinés
+    ou adaptés à des fins d'audit.
+  </para>
+  <para>
+    L'affichage du journal se fait en direct : si vous laissez la fenêtre
+    ouverte vous pourrez voir les différentes opérations apparaître au fur et à
+    mesure que vous les appliquez.
+  </para>
+  <para>
+    Un exemple basique de journal est donnée dans la figure qui suit. Pour
+    chaque opération, le type, le nom, les paramètres et la date sont
+    enregistrés. Le type peut être par exemple l'import de fichier, une fonction
+    de traitement des données ou l'application d'un outil. Les noms des
+    fonctions correspondent à ceux donnés dans le navigateur de modules
+    (<menuchoice>
+      <guimenu>Metadonnées</guimenu>
+      <guimenuitem>Navigateur de modules</guimenuitem>
+    </menuchoice>),
+    dans lequel elles sont listées dans les
+    <guilabel>fonctions enregistrées</guilabel> pour chaque module ; ou dans le
+    <ulink url='http://gwyddion.net/module-list.php'>navigateur de modules en
+    ligne</ulink>.
+    La liste des paramètres représente les réglages de la fonction au moment où
+    celle-ci est utilisée. Comme le journal est donné à titre d'information, les
+    paramètres peuvent permettre ou non une reconstruction précise de
+    l'opération. Cela devrait suffire pour des opérations simples. Par contre
+    l'entrée du journal risque d'être insuffisamment détaillée dans le cas
+    d'opérations complexes ou interactives impliquant plusieurs canaux. La date
+    est enregistrée en se basant sur la zone horaire locale lorsque l'opération
+    est appliquée, elle n'est pas recalculée lorsque vous envoyez ou affichez
+    les fichiers dans une autre zone horaire.
+  </para>
+  <informalfigure id='fig-log-viewer'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='log-viewer.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Afficheur de journal montrant des opérations simples de traitement sur
+        un canal, démarrant avec l'import du fichier à partir d'un format SPM
+        propriétaire, et continuant avec l'application de fonctions de
+        traitement et d'outils, et enfin une annulation.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Le journal peut être exporté vers un fichier texte à l'aide du bouton
+    <guibutton>Exporter</guibutton>. Il n'est pas possible de modifier les
+    entrées car cela irait à l'encontre de l'objectif du journal, mais vous
+    pouvez toutefois effacer la totalité du journal avec le bouton
+    <guibutton>Effacer</guibutton>.
+  </para>
+  <sect2 id='logging-disabling'>
+    <title>Désactiver le journal</title>
+    <para>
+      Dans certains cas vous souhaiterez peut-être enregistrer ou publier des
+      fichiers <filename>.gwy</filename> sans journal. À cette fin, le journal
+      est contrôlable à plusieurs niveaux :
+      <itemizedlist>
+        <listitem>
+          <para>
+            Il peut être activée ou désactivé globalement dans le menu
+            <menuchoice>
+              <guimenu>Editer</guimenu>
+              <guimenuitem>Journal activé</guimenuitem>
+            </menuchoice>.
+            Lorsque la journalisation est désactivée, aucune nouvelle entrée
+            n'est ajoutée. Les journaux existants ne sont pas supprimés et vous
+            pouvez toujours les visualiser. Ils sont aussi toujours enregistrés
+            dans les fichiers <filename>.gwy</filename>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Le journal d'un canal ou d'un volume particulier peut être effacé
+            avec le bouton <guibutton>Effacer</guibutton> dans l'afficheur de
+            journal.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Tous les journaux du fichier courant peuvent être supprimés avec le
+            menu
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guimenuitem>Supprimer tous les journaux</guimenuitem>
+            </menuchoice>.
+            Évidemment, si la journalisation est activée et que vous continuez
+            de modifier les données, de nouvelles entrées seront créées et les
+            nouvelle opérations seront enregistrées dans le journal.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
