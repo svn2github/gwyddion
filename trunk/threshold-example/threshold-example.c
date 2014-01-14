@@ -1,6 +1,6 @@
 /*
  *  @(#) $Id$
- *  Copyright (C) 2003,2004,2008 David Necas (Yeti)
+ *  Copyright (C) 2003,2004,2008,2014 David Necas (Yeti)
  *  E-mail: yeti@gwyddion.net
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,16 +34,16 @@
 
 #define THRESHOLD_FMAP_SIZE 1024
 
-enum {
+typedef enum {
     THRESHOLD_CHANGE_DATA = 0,
     THRESHOLD_CHANGE_MASK,
     THRESHOLD_CHANGE_PRESENTATION
-};
+} ThresholdMode;
 
 /* Data for this function. */
 typedef struct {
     gdouble fractile;
-    gsize mode;
+    ThresholdMode mode;
     /* interface only */
     gdouble absolute;
     gdouble min;
@@ -240,13 +240,10 @@ create_auxiliary_data_field(GwyContainer *data,
                             GwyDataField *dfield,
                             GQuark quark)
 {
-    GwySIUnit *siunit;
     GwyDataField *afield;
 
     afield = gwy_data_field_new_alike(dfield, FALSE);
-    siunit = gwy_si_unit_new(NULL);
-    gwy_data_field_set_si_unit_z(afield, siunit);
-    g_object_unref(siunit);
+    gwy_si_unit_set_from_string(gwy_data_field_get_si_unit_z(afield), NULL);
     gwy_container_set_object(data, quark, afield);
     g_object_unref(afield);
 
@@ -257,11 +254,12 @@ static gboolean
 threshold_dialog(ThresholdArgs *args,
                  GwyDataField *dfield)
 {
+    enum { RESPONSE_RESET = 1 };
+
     GtkWidget *dialog, *table, *spin, *widget;
     GSList *group;
     GwySIValueFormat *fmt;
     ThresholdControls controls;
-    enum { RESPONSE_RESET = 1 };
     gint response;
 
     controls.args = args;
@@ -407,12 +405,10 @@ threshold_load_args(GwyContainer *container,
 {
     *args = threshold_defaults;
 
-    if (gwy_container_contains_by_name(container, fractile_key))
-        args->fractile = gwy_container_get_double_by_name(container,
-                                                          fractile_key);
+    gwy_container_gis_double_by_name(container, fractile_key, &args->fractile);
+    gwy_container_gis_enum_by_name(container, mode_key, &args->mode);
+
     args->fractile = CLAMP(args->fractile, 0.0, 1.0);
-    if (gwy_container_contains_by_name(container, mode_key))
-        args->mode = gwy_container_get_int32_by_name(container, mode_key);
     args->mode = CLAMP(args->mode, 0, 2);
 }
 
@@ -420,10 +416,8 @@ static void
 threshold_save_args(GwyContainer *container,
                 ThresholdArgs *args)
 {
-    gwy_container_set_double_by_name(container, fractile_key,
-                                     args->fractile);
-    gwy_container_set_int32_by_name(container, mode_key,
-                                    args->mode);
+    gwy_container_set_double_by_name(container, fractile_key, args->fractile);
+    gwy_container_set_int32_by_name(container, mode_key, args->mode);
 }
 
 static void
