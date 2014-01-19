@@ -13,7 +13,7 @@
     command in the right-click context menu of the channel or volume data
     window.  This is useful for recalling later what corrections you applied,
     how a mask or presentation was created, etc.  It should be noted that
-    the logs are informational; they are not intended nor suitable for
+    the logs are informational; they are neither intended nor suitable for
     auditing purposes.
   </para>
   <para>
@@ -24,7 +24,7 @@
     A simple log example is shown in the following figure.  For each operation,
     the type, name, parameters and time are recorded.  The type can be for
     instance file import, data processing function or tool application.
-    The function names correspond to those show in the module browser
+    The function names correspond to those shown in the module browser
     (<menuchoice>
       <guimenu>Meta</guimenu>
       <guimenuitem>Module Browser</guimenuitem>
@@ -93,9 +93,11 @@
               <guimenu>File</guimenu>
               <guimenuitem>Remove All Logs</guimenuitem>
             </menuchoice>.
-            Of course, if logging is enabled and you start modifying the data,
-            new logs will be created and the new data operations recorded in
-            them.
+            As with any other file modification, the file needs to be saved
+            afterwards for the log removal to have any effect on the on-disk
+            file.  And, of course, if logging is enabled and you start
+            modifying the data, new logs will be created and the new data
+            operations recorded in them.
           </para>
         </listitem>
       </itemizedlist>
