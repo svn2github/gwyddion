@@ -101,14 +101,13 @@
     </varlistentry>
     <varlistentry>
       <term>
-        <guimenu>Meta</guimenu>
+        <guimenu>Info</guimenu>
       </term>
       <listitem>
         <para>
-          contains commands that provide various auxiliary information.
-          Namely height field <link linkend='metadata'>metadata</link> (e.g.
-          scanning speed, tip voltage, etc.) and information about
-          <application>Gwyddion</application> itself.
+          contains commands that provide various auxiliary information about
+          <application>Gwyddion</application>, such as program version or the
+          list of loaded modules and their functions.
         </para>
       </listitem>
     </varlistentry>
