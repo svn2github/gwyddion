@@ -70,7 +70,7 @@ for lineno, line in enumerate(sys.stdin):
         indent = m.group('indent')
         unix_fileglob = fileglob.replace('\\', '/')
         unix_filespec = os.path.join(target_prefix, unix_fileglob)
-        if unix_fileglob.find('*'):
+        if unix_fileglob.find('*') or unix_fileglob.find('?') or unix_fileglob.find('['):
             filelist = glob.glob(unix_filespec)
             if not filelist:
                 sys.stderr.write('Line %u: File glob "%s" does not match anything.\n' % (lineno, fileglob))
