@@ -175,7 +175,7 @@ GWY_CHECK_MEMMEM
 # TODO: use macros from m4/gwy-pkg.m4 once we can make the errors meaningful.
 # XXX: Investigate if using AM PATH_GTK_3_0 and PATH_GLIB_2_0, which are
 #      complicated and run test programs, would bring anything useful.
-m4_define([gwy_required_glib],[2.36])
+m4_define([gwy_required_glib],[2.38])
 AC_SUBST([GWY_REQUIRED_GLIB],[gwy_required_glib])
 PKG_CHECK_MODULES([GIO],[gio-2.0 >= gwy_required_glib])
 PKG_CHECK_MODULES([GMODULE],[gmodule-2.0 >= gwy_required_glib])
