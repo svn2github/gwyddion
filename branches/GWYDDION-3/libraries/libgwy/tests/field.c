@@ -905,30 +905,54 @@ test_field_check_target_empty(void)
 }
 
 static void
-field_check_target_bad(guint xres, guint yres,
-                       guint txres, guint tyres,
-                       const GwyFieldPart *fpart)
+field_check_target_bad_subprocess_one(guint xres, guint yres,
+                                      guint txres, guint tyres,
+                                      const GwyFieldPart *fpart)
 {
-    if (g_test_trap_fork(0,
-                         G_TEST_TRAP_SILENCE_STDOUT
-                         | G_TEST_TRAP_SILENCE_STDERR)) {
-        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-        GwyField *target = gwy_field_new_sized(txres, tyres, FALSE);
-        guint col, row;
-        gwy_field_check_target(field, target, fpart, &col, &row);
-        exit(0);
-    }
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyField *target = gwy_field_new_sized(txres, tyres, FALSE);
+    guint col, row;
+    gwy_field_check_target(field, target, fpart, &col, &row);
+}
+
+void
+test_field_check_target_bad_subprocess_17251625(void)
+{
+    field_check_target_bad_subprocess_one(17, 25, 16, 25,
+                                          &(GwyFieldPart){ 0, 0, 17, 25 });
+}
+
+void
+test_field_check_target_bad_subprocess_17251726(void)
+{
+    field_check_target_bad_subprocess_one(17, 25, 17, 26,
+                                          &(GwyFieldPart){ 0, 0, 17, 25 });
+}
+
+void
+test_field_check_target_bad_subprocess_172577(void)
+{
+    field_check_target_bad_subprocess_one(17, 25, 7, 7,
+                                          &(GwyFieldPart){ 3, 4, 7, 8 });
+}
+
+void
+test_field_check_target_bad_subprocess_172588(void)
+{
+    field_check_target_bad_subprocess_one(17, 25, 8, 8,
+                                          &(GwyFieldPart){ 3, 4, 7, 8 });
 }
 
 void
 test_field_check_target_bad(void)
 {
-    field_check_target_bad(17, 25, 16, 25, &(GwyFieldPart){ 0, 0, 17, 25 });
-    field_check_target_bad(17, 25, 17, 26, &(GwyFieldPart){ 0, 0, 17, 25 });
-    field_check_target_bad(17, 25, 7, 7, &(GwyFieldPart){ 3, 4, 7, 8 });
-    field_check_target_bad(17, 25, 8, 8, &(GwyFieldPart){ 3, 4, 7, 8 });
+    assert_subprocesses_critical_fail("/testlibgwy/field/check-target/bad",
+                                      0, 0,
+                                      "/17251625",
+                                      "/17251726",
+                                      "/172577",
+                                      "/172588",
+                                      NULL);
 }
 
 static void
@@ -1040,41 +1064,79 @@ test_field_check_mask_empty(void)
 }
 
 static void
-field_check_mask_bad(guint xres, guint yres,
+field_check_mask_bad_subprocess_one(guint xres, guint yres,
                      guint mxres, guint myres,
                      const GwyFieldPart *fpart,
                      GwyMasking masking)
 {
-    if (g_test_trap_fork(0,
-                         G_TEST_TRAP_SILENCE_STDOUT
-                         | G_TEST_TRAP_SILENCE_STDERR)) {
-        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-        GwyMaskField *mask = ((mxres && myres)
-                              ? gwy_mask_field_new_sized(mxres, myres, FALSE)
-                              : NULL);
-        guint col, row, width, height, maskcol, maskrow;
-        gwy_field_check_mask(field, fpart, mask, &masking,
-                             &col, &row, &width, &height,
-                             &maskcol, &maskrow);
-        exit(0);
-    }
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyMaskField *mask = ((mxres && myres)
+                          ? gwy_mask_field_new_sized(mxres, myres, FALSE)
+                          : NULL);
+    guint col, row, width, height, maskcol, maskrow;
+    gwy_field_check_mask(field, fpart, mask, &masking,
+                         &col, &row, &width, &height,
+                         &maskcol, &maskrow);
+}
+
+void
+test_field_check_mask_bad_subprocess_172500231619(void)
+{
+    field_check_mask_bad_subprocess_one(17, 25, 0, 0,
+                                        &(GwyFieldPart){ 2, 3, 16, 19 },
+                                        GWY_MASK_INCLUDE);
+}
+
+void
+test_field_check_mask_bad_subprocess_172500231123(void)
+{
+    field_check_mask_bad_subprocess_one(17, 25, 0, 0,
+                                        &(GwyFieldPart){ 2, 3, 11, 23 },
+                                        GWY_MASK_INCLUDE);
+}
+
+void
+test_field_check_mask_bad_subprocess_17251726(void)
+{
+    field_check_mask_bad_subprocess_one(17, 25, 17, 26,
+                                        NULL, GWY_MASK_INCLUDE);
+}
+
+void
+test_field_check_mask_bad_subprocess_17251525(void)
+{
+    field_check_mask_bad_subprocess_one(17, 25, 15, 25,
+                                        NULL, GWY_MASK_INCLUDE);
+}
+
+void
+test_field_check_mask_bad_subprocess_1725772378(void)
+{
+    field_check_mask_bad_subprocess_one(17, 25, 7, 7,
+                                        &(GwyFieldPart){ 2, 3, 7, 8 },
+                                        GWY_MASK_INCLUDE);
+}
+
+void
+test_field_check_mask_bad_subprocess_1725882378(void)
+{
+    field_check_mask_bad_subprocess_one(17, 25, 8, 8,
+                                        &(GwyFieldPart){ 2, 3, 7, 8 },
+                                        GWY_MASK_INCLUDE);
 }
 
 void
 test_field_check_mask_bad(void)
 {
-    field_check_mask_bad(17, 25, 0, 0, &(GwyFieldPart){ 2, 3, 16, 19 },
-                         GWY_MASK_INCLUDE);
-    field_check_mask_bad(17, 25, 0, 0, &(GwyFieldPart){ 2, 3, 11, 23 },
-                         GWY_MASK_INCLUDE);
-    field_check_mask_bad(17, 25, 17, 26, NULL, GWY_MASK_INCLUDE);
-    field_check_mask_bad(17, 25, 15, 25, NULL, GWY_MASK_INCLUDE);
-    field_check_mask_bad(17, 25, 7, 7, &(GwyFieldPart){ 2, 3, 7, 8 },
-                         GWY_MASK_INCLUDE);
-    field_check_mask_bad(17, 25, 8, 8, &(GwyFieldPart){ 2, 3, 7, 8 },
-                         GWY_MASK_INCLUDE);
+    assert_subprocesses_critical_fail("/testlibgwy/field/check-mask/bad",
+                                      0, 0,
+                                      "/172500231619",
+                                      "/172500231123",
+                                      "/17251726",
+                                      "/17251525",
+                                      "/1725772378",
+                                      "/1725882378",
+                                      NULL);
 }
 
 static void
@@ -1136,34 +1198,54 @@ test_field_check_target_mask_empty(void)
 }
 
 static void
-field_check_target_mask_bad(guint xres, guint yres,
-                            guint txres, guint tyres,
-                            const GwyFieldPart *fpart)
+field_check_target_mask_bad_subprocess_one(guint xres, guint yres,
+                                           guint txres, guint tyres,
+                                           const GwyFieldPart *fpart)
 {
-    if (g_test_trap_fork(0,
-                         G_TEST_TRAP_SILENCE_STDOUT
-                         | G_TEST_TRAP_SILENCE_STDERR)) {
-        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-        GwyMaskField *target = gwy_mask_field_new_sized(txres, tyres, FALSE);
-        guint col, row;
-        gwy_field_check_target_mask(field, target, fpart, &col, &row);
-        exit(0);
-    }
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyMaskField *target = gwy_mask_field_new_sized(txres, tyres, FALSE);
+    guint col, row;
+    gwy_field_check_target_mask(field, target, fpart, &col, &row);
+}
+
+void
+test_field_check_target_mask_bad_subprocess_17251625001725(void)
+{
+    field_check_target_mask_bad_subprocess_one(17, 25, 16, 25,
+                                               &(GwyFieldPart){ 0, 0, 17, 25 });
+}
+
+void
+test_field_check_target_mask_bad_subprocess_17251726001725(void)
+{
+    field_check_target_mask_bad_subprocess_one(17, 25, 17, 26,
+                                               &(GwyFieldPart){ 0, 0, 17, 25 });
+}
+
+void
+test_field_check_target_mask_bad_subprocess_1725773478(void)
+{
+    field_check_target_mask_bad_subprocess_one(17, 25, 7, 7,
+                                               &(GwyFieldPart){ 3, 4, 7, 8 });
+}
+
+void
+test_field_check_target_mask_bad_subprocess_1725883478(void)
+{
+    field_check_target_mask_bad_subprocess_one(17, 25, 8, 8,
+                                               &(GwyFieldPart){ 3, 4, 7, 8 });
 }
 
 void
 test_field_check_target_mask_bad(void)
 {
-    field_check_target_mask_bad(17, 25, 16, 25,
-                                &(GwyFieldPart){ 0, 0, 17, 25 });
-    field_check_target_mask_bad(17, 25, 17, 26,
-                                &(GwyFieldPart){ 0, 0, 17, 25 });
-    field_check_target_mask_bad(17, 25, 7, 7,
-                                &(GwyFieldPart){ 3, 4, 7, 8 });
-    field_check_target_mask_bad(17, 25, 8, 8,
-                                &(GwyFieldPart){ 3, 4, 7, 8 });
+    assert_subprocesses_critical_fail("/testlibgwy/field/check-target-mask/bad",
+                                      0, 0,
+                                      "/17251625001725",
+                                      "/17251726001725",
+                                      "/1725773478",
+                                      "/1725883478",
+                                      NULL);
 }
 
 void
