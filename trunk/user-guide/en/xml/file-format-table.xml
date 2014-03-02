@@ -21,6 +21,16 @@
     </thead>
     <tbody>
     <!-- This is a GENERATED file. -->
+    <!-- From module accurexii-txt.c -->
+    <row>
+      <entry>Accurex II text data</entry>
+      <entry>.txt</entry>
+      <entry>accurexii-txt</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module aistfile.c -->
     <row>
       <entry>AIST-NT</entry>
@@ -259,7 +269,7 @@
       <entry>Yes</entry>
       <entry>Yes</entry>
       <entry>Yes</entry>
-      <entry>—</entry>
+      <entry>Yes</entry>
     </row>
     <!-- From module gxyzffile.c -->
     <row>
@@ -576,7 +586,7 @@
       <entry>NT-MDT old MDA</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
-      <entry>Yes</entry>
+      <entry>—</entry>
       <entry>—</entry>
       <entry>—</entry>
       <entry>Yes</entry>
@@ -586,6 +596,16 @@
       <entry>Olympus LEXT 3000</entry>
       <entry>.ols</entry>
       <entry>ols</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module ometiff.c -->
+    <row>
+      <entry>Open Microscopy OME TIFF</entry>
+      <entry>.ome.tiff,, .ome.tif</entry>
+      <entry>ometiff</entry>
       <entry>Yes</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -813,7 +833,7 @@ supported.</para></footnote></entry>
     <!-- From module seiko.c -->
     <row>
       <entry>Seiko SII</entry>
-      <entry>.xqb, .xqd, .xqt, .xqp</entry>
+      <entry>.xqb, .xqd, .xqt, .xqp, .xqj, .xqi</entry>
       <entry>seiko</entry>
       <entry>Yes</entry>
       <entry>—</entry>
