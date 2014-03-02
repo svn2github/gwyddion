@@ -34,118 +34,122 @@
 typedef void (*CompareObjectDataFunc)(GObject *object, GObject *reference);
 
 // Helpers
-void          base62_format                 (guint x,
-                                             gchar *out,
-                                             guint outsize);
-void          assert_error_list             (GwyErrorList *error_list,
-                                             GwyErrorList *expected_errors);
-void          dump_error_list               (GwyErrorList *error_list);
-gboolean      values_are_equal              (const GValue *value1,
-                                             const GValue *value2);
-const gchar*  enum_nick                     (GType type,
-                                             gint value);
-GObject*      serialize_and_back            (GObject *object,
-                                             CompareObjectDataFunc compare);
-gboolean      compare_properties            (GObject *object,
-                                             GObject *reference);
-void          serializable_duplicate        (GwySerializable *serializable,
-                                             CompareObjectDataFunc compare);
-void          serializable_assign           (GwySerializable *serializable,
-                                             CompareObjectDataFunc compare);
-gpointer      serialize_boxed_and_back      (gpointer boxed,
-                                             GType type);
-void          deserialize_assert_failure    (GMemoryOutputStream *stream,
-                                             GwyErrorList *expected_errors);
-gboolean      data_stream_put_double        (GDataOutputStream *stream,
-                                             gdouble data,
-                                             GCancellable *cancellable,
-                                             GError **error);
-gboolean      data_stream_put_string0       (GDataOutputStream *stream,
-                                             const gchar *str,
-                                             GCancellable *cancellable,
-                                             GError **error);
-void          record_item_change            (GObject *object,
-                                             guint pos,
-                                             guint64 *counter);
-void          record_signal                 (guint *counter);
-void          int_set_randomize_range       (GwyIntSet *intset,
-                                             GRand *rng,
-                                             gint min,
-                                             gint max);
-void          int_set_assert_equal          (const GwyIntSet *result,
-                                             const GwyIntSet *reference);
-void          unit_randomize                (GwyUnit *unit,
-                                             GRand *rng);
-GwyMaskLine*  random_mask_line              (guint res,
-                                             GRand *rng);
-void          mask_line_print               (const gchar *name,
-                                             const GwyMaskLine *maskline);
-GwyMaskField* random_mask_field             (guint xres,
-                                             guint yres,
-                                             GRand *rng);
-GwyMaskField* random_mask_field_prob        (guint xres,
-                                             guint yres,
-                                             GRand *rng,
-                                             gdouble probability);
-void          mask_field_randomize          (GwyMaskField *maskfield,
-                                             const guint32 *pool,
-                                             guint max_size,
-                                             GRand *rng);
-guint32*      mask_field_random_pool_new    (GRand *rng,
-                                             guint max_size);
-void          mask_field_random_pool_free   (guint32 *pool);
-void          mask_field_assert_equal       (const GwyMaskField *result,
-                                             const GwyMaskField *reference);
-void          mask_field_print              (const gchar *name,
-                                             const GwyMaskField *maskfield);
-void          mask_field_print_grains       (const gchar *name,
-                                             const GwyMaskField *maskfield,
-                                             guint grain_id);
-GwyMaskField* mask_field_from_string        (const gchar *str);
-void          curve_randomize               (GwyCurve *field,
-                                             GRand *rng);
-void          field_randomize               (GwyField *field,
-                                             GRand *rng);
-void          field_print                   (const gchar *name,
-                                             const GwyField *field);
-void          field_print_row               (const gchar *name,
-                                             const gdouble *data,
-                                             gsize size);
-void          field_write_gsf               (const gchar *name,
-                                             const GwyField *field);
-void          field_assert_equal            (const GwyField *result,
-                                             const GwyField *reference);
-void          field_assert_numerically_equal(const GwyField *result,
-                                             const GwyField *reference,
-                                             gdouble eps);
-GwyField*     field_make_planar             (guint xres,
-                                             guint yres,
-                                             gdouble alpha,
-                                             gdouble beta);
-void          line_randomize                (GwyLine *field,
-                                             GRand *rng);
-void          line_print                    (const gchar *name,
-                                             const GwyLine *line);
-void          line_assert_equal             (const GwyLine *result,
-                                             const GwyLine *reference);
-void          line_assert_numerically_equal (const GwyLine *result,
-                                             const GwyLine *reference,
-                                             gdouble eps);
-void          brick_print                   (const gchar *name,
-                                             const GwyBrick *brick);
-void          brick_part_assert_equal       (const GwyBrickPart *part,
-                                             const GwyBrickPart *refpart);
-void          field_part_assert_equal       (const GwyFieldPart *part,
-                                             const GwyFieldPart *refpart);
-void          line_part_assert_equal        (const GwyLinePart *part,
-                                             const GwyLinePart *refpart);
-void          check_congruence_group_sanity (void);
-void          resource_check_file           (GwyResource *resource,
-                                             const gchar *filename);
-void          resource_assert_load_error    (const gchar *string,
-                                             GType type,
-                                             guint errdomain,
-                                             gint errcode);
+void          assert_subprocesses_critical_fail(const gchar *prefix,
+                                                guint64 timeout,
+                                                GTestSubprocessFlags test_flags,
+                                                ...);
+void          base62_format                    (guint x,
+                                                gchar *out,
+                                                guint outsize);
+void          assert_error_list                (GwyErrorList *error_list,
+                                                GwyErrorList *expected_errors);
+void          dump_error_list                  (GwyErrorList *error_list);
+gboolean      values_are_equal                 (const GValue *value1,
+                                                const GValue *value2);
+const gchar*  enum_nick                        (GType type,
+                                                gint value);
+GObject*      serialize_and_back               (GObject *object,
+                                                CompareObjectDataFunc compare);
+gboolean      compare_properties               (GObject *object,
+                                                GObject *reference);
+void          serializable_duplicate           (GwySerializable *serializable,
+                                                CompareObjectDataFunc compare);
+void          serializable_assign              (GwySerializable *serializable,
+                                                CompareObjectDataFunc compare);
+gpointer      serialize_boxed_and_back         (gpointer boxed,
+                                                GType type);
+void          deserialize_assert_failure       (GMemoryOutputStream *stream,
+                                                GwyErrorList *expected_errors);
+gboolean      data_stream_put_double           (GDataOutputStream *stream,
+                                                gdouble data,
+                                                GCancellable *cancellable,
+                                                GError **error);
+gboolean      data_stream_put_string0          (GDataOutputStream *stream,
+                                                const gchar *str,
+                                                GCancellable *cancellable,
+                                                GError **error);
+void          record_item_change               (GObject *object,
+                                                guint pos,
+                                                guint64 *counter);
+void          record_signal                    (guint *counter);
+void          int_set_randomize_range          (GwyIntSet *intset,
+                                                GRand *rng,
+                                                gint min,
+                                                gint max);
+void          int_set_assert_equal             (const GwyIntSet *result,
+                                                const GwyIntSet *reference);
+void          unit_randomize                   (GwyUnit *unit,
+                                                GRand *rng);
+GwyMaskLine*  random_mask_line                 (guint res,
+                                                GRand *rng);
+void          mask_line_print                  (const gchar *name,
+                                                const GwyMaskLine *maskline);
+GwyMaskField* random_mask_field                (guint xres,
+                                                guint yres,
+                                                GRand *rng);
+GwyMaskField* random_mask_field_prob           (guint xres,
+                                                guint yres,
+                                                GRand *rng,
+                                                gdouble probability);
+void          mask_field_randomize             (GwyMaskField *maskfield,
+                                                const guint32 *pool,
+                                                guint max_size,
+                                                GRand *rng);
+guint32*      mask_field_random_pool_new       (GRand *rng,
+                                                guint max_size);
+void          mask_field_random_pool_free      (guint32 *pool);
+void          mask_field_assert_equal          (const GwyMaskField *result,
+                                                const GwyMaskField *reference);
+void          mask_field_print                 (const gchar *name,
+                                                const GwyMaskField *maskfield);
+void          mask_field_print_grains          (const gchar *name,
+                                                const GwyMaskField *maskfield,
+                                                guint grain_id);
+GwyMaskField* mask_field_from_string           (const gchar *str);
+void          curve_randomize                  (GwyCurve *field,
+                                                GRand *rng);
+void          field_randomize                  (GwyField *field,
+                                                GRand *rng);
+void          field_print                      (const gchar *name,
+                                                const GwyField *field);
+void          field_print_row                  (const gchar *name,
+                                                const gdouble *data,
+                                                gsize size);
+void          field_write_gsf                  (const gchar *name,
+                                                const GwyField *field);
+void          field_assert_equal               (const GwyField *result,
+                                                const GwyField *reference);
+void          field_assert_numerically_equal   (const GwyField *result,
+                                                const GwyField *reference,
+                                                gdouble eps);
+GwyField*     field_make_planar                (guint xres,
+                                                guint yres,
+                                                gdouble alpha,
+                                                gdouble beta);
+void          line_randomize                   (GwyLine *field,
+                                                GRand *rng);
+void          line_print                       (const gchar *name,
+                                                const GwyLine *line);
+void          line_assert_equal                (const GwyLine *result,
+                                                const GwyLine *reference);
+void          line_assert_numerically_equal    (const GwyLine *result,
+                                                const GwyLine *reference,
+                                                gdouble eps);
+void          brick_print                      (const gchar *name,
+                                                const GwyBrick *brick);
+void          brick_part_assert_equal          (const GwyBrickPart *part,
+                                                const GwyBrickPart *refpart);
+void          field_part_assert_equal          (const GwyFieldPart *part,
+                                                const GwyFieldPart *refpart);
+void          line_part_assert_equal           (const GwyLinePart *part,
+                                                const GwyLinePart *refpart);
+void          check_congruence_group_sanity    (void);
+void          resource_check_file              (GwyResource *resource,
+                                                const gchar *filename);
+void          resource_assert_load_error       (const gchar *string,
+                                                GType type,
+                                                guint errdomain,
+                                                gint errcode);
 
 extern const guint plane_congruence_group[8][8];
 

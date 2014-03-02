@@ -22,6 +22,7 @@
 #include "testlibgwy.h"
 #include "test-list.h"
 #include <stdlib.h>
+#include <stdarg.h>
 #include <locale.h>
 #include <glib/gstdio.h>
 #include <fftw3.h>
@@ -62,6 +63,32 @@ remove_testdata(void)
     g_rmdir(TEST_DATA_DIR);
 }
 
+void
+assert_subprocesses_critical_fail(const gchar *prefix,
+                                  guint64 timeout,
+                                  GTestSubprocessFlags test_flags,
+                                  ...)
+{
+    GString *str = g_string_new(prefix);
+    g_string_append(str, "/subprocess");
+    guint len = str->len;
+
+    va_list ap;
+    va_start(ap, test_flags);
+
+    const gchar *subpath;
+    while ((subpath = va_arg(ap, const gchar*))) {
+        g_string_truncate(str, len);
+        g_string_append(str, subpath);
+        g_test_trap_subprocess(str->str, timeout, test_flags);
+        g_test_trap_assert_failed();
+        g_test_trap_assert_stderr("*CRITICAL*");
+    }
+    va_end(ap);
+
+    g_string_free(str, TRUE);
+}
+
 /***************************************************************************
  *
  * Main
@@ -82,10 +109,15 @@ main(int argc, char *argv[])
 
 #include "test-list.c"
 
-    remove_testdata();
-    g_mkdir(TEST_DATA_DIR, 0700);
+    if (!g_test_subprocess()) {
+        remove_testdata();
+        g_mkdir(TEST_DATA_DIR, 0700);
+    }
+
     gint status = g_test_run();
-    remove_testdata();
+
+    if (!g_test_subprocess())
+        remove_testdata();
 
     // Good on Valgrind, but do it consistently always.
     fftw_forget_wisdom();

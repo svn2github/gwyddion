@@ -695,25 +695,13 @@ test_field_check_part_bad_subprocess_02511(void)
 void
 test_field_check_part_bad(void)
 {
-    g_test_trap_subprocess("/testlibgwy/field/check-part/bad/subprocess/00181",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-part/bad/subprocess/00126",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-part/bad/subprocess/17011",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-part/bad/subprocess/02511",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    assert_subprocesses_critical_fail("/testlibgwy/field/check-part/bad",
+                                      0, 0,
+                                      "/00181",
+                                      "/00126",
+                                      "/17011",
+                                      "/02511",
+                                      NULL);
 }
 
 static void
@@ -851,40 +839,15 @@ test_field_check_target_part_bad_subprocess_NULLy(void)
 void
 test_field_check_target_part_bad(void)
 {
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/00181",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/00126",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/00181",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/17011",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/02511",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/NULLx",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
-
-    g_test_trap_subprocess("/testlibgwy/field/check-target-part/bad/subprocess/NULLy",
-                           0, 0);
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    assert_subprocesses_critical_fail("/testlibgwy/field/check-target-part/bad",
+                                      0, 0,
+                                      "/00181",
+                                      "/00126",
+                                      "/17011",
+                                      "/02511",
+                                      "/NULLx",
+                                      "/NULLy",
+                                      NULL);
 }
 
 static void
