@@ -48,7 +48,7 @@
     have a <literal>function</literal> attribute defining the specific
     function.  Function names can be located in the module browser
     (<menuchoice>
-      <guimenu>Meta</guimenu>
+      <guimenu>Info</guimenu>
       <guimenuitem>Module Browser</guimenuitem>
     </menuchoice>),
     where they are listed in <guilabel>Registered functions</guilabel> for

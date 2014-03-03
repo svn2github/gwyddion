@@ -26,7 +26,7 @@
     instance file import, data processing function or tool application.
     The function names correspond to those shown in the module browser
     (<menuchoice>
-      <guimenu>Meta</guimenu>
+      <guimenu>Info</guimenu>
       <guimenuitem>Module Browser</guimenuitem>
     </menuchoice>),
     where they are listed in <guilabel>Registered functions</guilabel> for

@@ -69,7 +69,7 @@
     <para>
       If the data browser is closed it can be recalled using the
       <menuchoice>
-        <guimenu>Meta</guimenu>
+        <guimenu>Info</guimenu>
         <guimenuitem>Show Data Browser</guimenuitem>
       </menuchoice>
       command.
