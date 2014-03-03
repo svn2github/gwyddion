@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2012-2013 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -381,26 +381,34 @@ test_line_check_part_empty(void)
 }
 
 static void
-line_check_part_bad(guint res,
-                    const GwyLinePart *lpart)
+line_check_part_bad_subprocess_one(guint res,
+                                   const GwyLinePart *lpart)
 {
-    if (g_test_trap_fork(0,
-                         G_TEST_TRAP_SILENCE_STDOUT
-                         | G_TEST_TRAP_SILENCE_STDERR)) {
-        GwyLine *line = gwy_line_new_sized(res, FALSE);
-        guint pos, len;
-        gwy_line_check_part(line, lpart, &pos, &len);
-        exit(0);
-    }
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    guint pos, len;
+    gwy_line_check_part(line, lpart, &pos, &len);
+}
+
+void
+test_line_check_part_bad_subprocess_026(void)
+{
+    line_check_part_bad_subprocess_one(25, &(GwyLinePart){ 0, 26 });
+}
+
+void
+test_line_check_part_bad_subprocess_251(void)
+{
+    line_check_part_bad_subprocess_one(25, &(GwyLinePart){ 25, 1 });
 }
 
 void
 test_line_check_part_bad(void)
 {
-    line_check_part_bad(25, &(GwyLinePart){ 0, 26 });
-    line_check_part_bad(25, &(GwyLinePart){ 25, 1 });
+    assert_subprocesses_critical_fail("/testlibgwy/line/check-part/bad",
+                                      0, 0,
+                                      "/026",
+                                      "/251",
+                                      NULL);
 }
 
 static void
@@ -489,30 +497,47 @@ test_line_check_mask_empty(void)
 }
 
 static void
-line_check_mask_bad(guint res, guint mres,
-                    const GwyLinePart *fpart,
-                    GwyMasking masking)
+line_check_mask_bad_subprocess_one(guint res, guint mres,
+                                   const GwyLinePart *fpart,
+                                   GwyMasking masking)
 {
-    if (g_test_trap_fork(0,
-                         G_TEST_TRAP_SILENCE_STDOUT
-                         | G_TEST_TRAP_SILENCE_STDERR)) {
-        GwyLine *line = gwy_line_new_sized(res, FALSE);
-        GwyMaskLine *mask = (mres ? gwy_mask_line_new_sized(mres, FALSE) : NULL);
-        guint pos, len, maskpos;
-        gwy_line_check_mask(line, fpart, mask, &masking,
-                            &pos, &len, &maskpos);
-        exit(0);
-    }
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    GwyMaskLine *mask = (mres ? gwy_mask_line_new_sized(mres, FALSE) : NULL);
+    guint pos, len, maskpos;
+    gwy_line_check_mask(line, fpart, mask, &masking,
+                        &pos, &len, &maskpos);
+}
+
+void
+test_line_check_mask_bad_subprocess_170216(void)
+{
+    line_check_mask_bad_subprocess_one(17, 0, &(GwyLinePart){ 2, 16 },
+                                       GWY_MASK_INCLUDE);
+}
+
+void
+test_line_check_mask_bad_subprocess_1715NULL(void)
+{
+    line_check_mask_bad_subprocess_one(17, 15, NULL,
+                                       GWY_MASK_INCLUDE);
+}
+
+void
+test_line_check_mask_bad_subprocess_17827(void)
+{
+    line_check_mask_bad_subprocess_one(17, 8, &(GwyLinePart){ 2, 7 },
+                                       GWY_MASK_INCLUDE);
 }
 
 void
 test_line_check_mask_bad(void)
 {
-    line_check_mask_bad(17, 0, &(GwyLinePart){ 2, 16 }, GWY_MASK_INCLUDE);
-    line_check_mask_bad(17, 15, NULL, GWY_MASK_INCLUDE);
-    line_check_mask_bad(17, 8, &(GwyLinePart){ 2, 7 }, GWY_MASK_INCLUDE);
+    assert_subprocesses_critical_fail("/testlibgwy/line/check-mask/bad",
+                                      0, 0,
+                                      "/170216",
+                                      "/1715NULL",
+                                      "/17827",
+                                      NULL);
 }
 
 void

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2012-2013 David Nečas (Yeti).
+ *  Copyright (C) 2012-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -311,14 +311,8 @@ cancel_cancel(gpointer user_data)
 }
 
 static void
-master_cancel_one(guint nproc)
+master_cancel_subprocess_one(guint nproc)
 {
-    guint64 timeout;
-    if (RUNNING_ON_VALGRIND)
-        timeout = G_GUINT64_CONSTANT(1000000000);
-    else
-        timeout = G_GUINT64_CONSTANT(10000000);
-
     gboolean dumb = FALSE;
 
     if (nproc & DUMB_MASTER_FLAG) {
@@ -326,114 +320,179 @@ master_cancel_one(guint nproc)
         dumb = TRUE;
     }
 
-    if (g_test_trap_fork(timeout, 0)) {
-        GError *error = NULL;
-        enum { niter = 200 };
-        GRand *rng = g_rand_new_with_seed(42);
+    GError *error = NULL;
+    enum { niter = 200 };
+    GRand *rng = g_rand_new_with_seed(42);
 
-        for (guint iter = 0; iter < niter; iter++) {
-            GwyMaster *master = dumb ? gwy_master_new_dumb() : gwy_master_new();
-            guint delay = g_rand_int_range(rng, 0, 10000);
+    for (guint iter = 0; iter < niter; iter++) {
+        GwyMaster *master = dumb ? gwy_master_new_dumb() : gwy_master_new();
+        guint delay = g_rand_int_range(rng, 0, 10000);
 
-            gboolean ok = gwy_master_create_workers(master, nproc, &error);
-            g_assert_no_error(error);
-            g_assert(ok);
+        gboolean ok = gwy_master_create_workers(master, nproc, &error);
+        g_assert_no_error(error);
+        g_assert(ok);
 
-            GCancellable *cancellable = g_cancellable_new();
-            g_object_set_data(G_OBJECT(cancellable),
-                              "delay", GUINT_TO_POINTER(delay));
-            GThread *cthread = g_thread_new("canceller", &cancel_cancel,
-                                            cancellable);
-            g_assert(cthread);
+        GCancellable *cancellable = g_cancellable_new();
+        g_object_set_data(G_OBJECT(cancellable),
+                          "delay", GUINT_TO_POINTER(delay));
+        GThread *cthread = g_thread_new("canceller", &cancel_cancel,
+                                        cancellable);
+        g_assert(cthread);
 
-            guint count = 0;
-            ok = gwy_master_manage_tasks(master, 0, &cancel_worker,
-                                         &cancel_task, &cancel_result,
-                                         &count, cancellable);
-            g_assert(!ok);
+        guint count = 0;
+        ok = gwy_master_manage_tasks(master, 0, &cancel_worker,
+                                     &cancel_task, &cancel_result,
+                                     &count, cancellable);
+        g_assert(!ok);
 
-            // Wait until the cancellation is performed.  Fixes master being
-            // destroyed and test terminated before cancel_cancel() gets to
-            // finish.
-            g_thread_join(cthread);
+        // Wait until the cancellation is performed.  Fixes master being
+        // destroyed and test terminated before cancel_cancel() gets to
+        // finish.
+        g_thread_join(cthread);
 
-            g_object_unref(master);
-            g_object_unref(cancellable);
+        g_object_unref(master);
+        g_object_unref(cancellable);
 
-            // The actual number of calls can differ wildly depending on the
-            // scheduling.  How to check something meaningful?
-            //gdouble expected_count = (gdouble)delay/TASK_TIME;
-        }
-        g_rand_free(rng);
-        exit(0);
+        // The actual number of calls can differ wildly depending on the
+        // scheduling.  How to check something meaningful?
+        //gdouble expected_count = (gdouble)delay/TASK_TIME;
     }
-    else {
-         g_test_trap_assert_passed();
-    }
+    g_rand_free(rng);
 }
 
-// XXX: The cancellation tests occasionally (rarely) fail.  This is because
-// g_test_trap_fork() interacts badly with threads and should be avoided, see
-// https://bugzilla.gnome.org/show_bug.cgi?id=679683
-// It must rewritten once something better is available.
+void
+test_master_cancel_1_subprocess(void)
+{
+    master_cancel_subprocess_one(1);
+}
+
+void
+test_master_cancel_2_subprocess(void)
+{
+    master_cancel_subprocess_one(2);
+}
+
+void
+test_master_cancel_3_subprocess(void)
+{
+    master_cancel_subprocess_one(3);
+}
+
+void
+test_master_cancel_4_subprocess(void)
+{
+    master_cancel_subprocess_one(4);
+}
+
+void
+test_master_cancel_8_subprocess(void)
+{
+    master_cancel_subprocess_one(8);
+}
+
+void
+test_master_cancel_16_subprocess(void)
+{
+    master_cancel_subprocess_one(16);
+}
+
+void
+test_master_cancel_auto_subprocess(void)
+{
+    master_cancel_subprocess_one(0);
+}
+
+void
+test_master_cancel_dumb_1_subprocess(void)
+{
+    master_cancel_subprocess_one(1 | DUMB_MASTER_FLAG);
+}
+
+void
+test_master_cancel_dumb_2_subprocess(void)
+{
+    master_cancel_subprocess_one(2 | DUMB_MASTER_FLAG);
+}
+
+void
+test_master_cancel_dumb_auto_subprocess(void)
+{
+    master_cancel_subprocess_one(0 | DUMB_MASTER_FLAG);
+}
+
+static void
+master_cancel_one(const gchar *path)
+{
+    guint64 timeout;
+    if (RUNNING_ON_VALGRIND)
+        timeout = G_GUINT64_CONSTANT(1000000000);
+    else
+        timeout = G_GUINT64_CONSTANT(10000000);
+
+    gchar *fullpath = g_strconcat(path, "/subprocess", NULL);
+    g_test_trap_subprocess(fullpath, timeout, 0);
+    g_test_trap_assert_passed();
+    g_free(fullpath);
+}
+
 void
 test_master_cancel_1(void)
 {
-    master_cancel_one(1);
+    master_cancel_one("/testlibgwy/master/cancel/1");
 }
 
 void
 test_master_cancel_2(void)
 {
-    master_cancel_one(2);
+    master_cancel_one("/testlibgwy/master/cancel/2");
 }
 
 void
 test_master_cancel_3(void)
 {
-    master_cancel_one(3);
+    master_cancel_one("/testlibgwy/master/cancel/3");
 }
 
 void
 test_master_cancel_4(void)
 {
-    master_cancel_one(4);
+    master_cancel_one("/testlibgwy/master/cancel/4");
 }
 
 void
 test_master_cancel_8(void)
 {
-    master_cancel_one(8);
+    master_cancel_one("/testlibgwy/master/cancel/8");
 }
 
 void
 test_master_cancel_16(void)
 {
-    master_cancel_one(16);
+    master_cancel_one("/testlibgwy/master/cancel/16");
 }
 
 void
 test_master_cancel_auto(void)
 {
-    master_cancel_one(0);
+    master_cancel_one("/testlibgwy/master/cancel/auto");
 }
 
 void
 test_master_cancel_dumb_1(void)
 {
-    master_cancel_one(1 | DUMB_MASTER_FLAG);
+    master_cancel_one("/testlibgwy/master/cancel/dumb/1");
 }
 
 void
 test_master_cancel_dumb_2(void)
 {
-    master_cancel_one(2 | DUMB_MASTER_FLAG);
+    master_cancel_one("/testlibgwy/master/cancel/dumb/2");
 }
 
 void
 test_master_cancel_dumb_auto(void)
 {
-    master_cancel_one(0 | DUMB_MASTER_FLAG);
+    master_cancel_one("/testlibgwy/master/cancel/dumb/auto");
 }
 
 typedef struct {

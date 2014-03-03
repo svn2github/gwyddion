@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2013 David Nečas (Yeti).
+ *  Copyright (C) 2009-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -720,28 +720,52 @@ test_mask_field_check_part_empty(void)
 }
 
 static void
-mask_field_check_part_bad(guint xres, guint yres,
-                     const GwyFieldPart *fpart)
+mask_field_check_part_bad_subprocess_one(guint xres, guint yres,
+                                         const GwyFieldPart *fpart)
 {
-    if (g_test_trap_fork(0,
-                         G_TEST_TRAP_SILENCE_STDOUT
-                         | G_TEST_TRAP_SILENCE_STDERR)) {
-        GwyMaskField *mask_field = gwy_mask_field_new_sized(xres, yres, FALSE);
-        guint col, row, width, height;
-        gwy_mask_field_check_part(mask_field, fpart, &col, &row, &width, &height);
-        exit(0);
-    }
-    g_test_trap_assert_failed();
-    g_test_trap_assert_stderr("*CRITICAL*");
+    GwyMaskField *mask_field = gwy_mask_field_new_sized(xres, yres, FALSE);
+    guint col, row, width, height;
+    gwy_mask_field_check_part(mask_field, fpart, &col, &row, &width, &height);
+}
+
+void
+test_mask_field_check_part_bad_subprocess_00181(void)
+{
+    mask_field_check_part_bad_subprocess_one(17, 25,
+                                             &(GwyFieldPart){ 0, 0, 18, 1 });
+}
+
+void
+test_mask_field_check_part_bad_subprocess_00126(void)
+{
+    mask_field_check_part_bad_subprocess_one(17, 25,
+                                             &(GwyFieldPart){ 0, 0, 1, 26 });
+}
+
+void
+test_mask_field_check_part_bad_subprocess_17011(void)
+{
+    mask_field_check_part_bad_subprocess_one(17, 25,
+                                             &(GwyFieldPart){ 17, 0, 1, 1 });
+}
+
+void
+test_mask_field_check_part_bad_subprocess_02511(void)
+{
+    mask_field_check_part_bad_subprocess_one(17, 25,
+                                             &(GwyFieldPart){ 0, 25, 1, 1 });
 }
 
 void
 test_mask_field_check_part_bad(void)
 {
-    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 18, 1 });
-    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 0, 1, 26 });
-    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 17, 0, 1, 1 });
-    mask_field_check_part_bad(17, 25, &(GwyFieldPart){ 0, 25, 1, 1 });
+    assert_subprocesses_critical_fail("/testlibgwy/mask-field/check-part/bad",
+                                      0, 0,
+                                      "/00181",
+                                      "/00126",
+                                      "/17011",
+                                      "/02511",
+                                      NULL);
 }
 
 void
