@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2013 David Nečas (Yeti).
+ *  Copyright (C) 2009-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -2279,7 +2279,7 @@ gwy_field_radial_acf(const GwyField *field,
     GwyField *cf = gwy_field_acf(field, fpart, xrange, yrange, level);
     GwyCurve *rcf = gwy_field_angular_average(cf, NULL,
                                               NULL, GWY_MASK_IGNORE,
-                                              npoints);
+                                              NULL, npoints);
     g_object_unref(cf);
 
     return rcf;
@@ -2324,7 +2324,7 @@ gwy_field_radial_hhcf(const GwyField *field,
     GwyField *cf = gwy_field_hhcf(field, fpart, xrange, yrange, level);
     GwyCurve *rcf = gwy_field_angular_average(cf, NULL,
                                               NULL, GWY_MASK_IGNORE,
-                                              npoints);
+                                              NULL, npoints);
     g_object_unref(cf);
 
     return rcf;
@@ -2368,7 +2368,7 @@ gwy_field_radial_asg(const GwyField *field,
     GwyField *cf = gwy_field_hhcf(field, fpart, xrange, yrange, level);
     GwyCurve *rasgf = gwy_field_angular_average(cf, NULL,
                                                 NULL, GWY_MASK_IGNORE,
-                                                npoints);
+                                                NULL, npoints);
     g_object_unref(cf);
     g_return_val_if_fail(rasgf->n, rasgf);
 
@@ -2429,7 +2429,7 @@ gwy_field_radial_psdf(const GwyField *field,
     GwyField *psdf = gwy_field_psdf(field, fpart, windowing, level);
     GwyCurve *rpsdf = gwy_field_angular_average(psdf, NULL,
                                                 NULL, GWY_MASK_IGNORE,
-                                                npoints);
+                                                NULL, npoints);
     g_object_unref(psdf);
 
     return rpsdf;
@@ -2468,6 +2468,10 @@ gather_interpolated(gdouble *sums, gdouble *weights, gint npoints,
  * @mask: (allow-none):
  *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @centre: (allow-none):
+ *          Centre around with the circular averaging will be pefromed.
+ *          Passing %NULL means averaging around the origin (0.0, 0.0) in
+ *          physical coordinates.
  * @npoints: Resolution, i.e. the preferred number of returned curve points.
  *           Pass zero to choose a suitable resolution automatically.
  *
@@ -2492,6 +2496,7 @@ gwy_field_angular_average(const GwyField *field,
                           const GwyFieldPart *fpart,
                           const GwyMaskField *mask,
                           GwyMasking masking,
+                          const GwyXY *centre,
                           guint npoints)
 {
     guint col, row, width, height, maskcol, maskrow;
@@ -2507,7 +2512,10 @@ gwy_field_angular_average(const GwyField *field,
     // Figure out suitable uniform sampling.  Since we return a curve a
     // non-uniform sampling might be advantageous but I have no idea how to
     // find a suitable one in the presence of a mask.
-    gdouble xoff = field->xoff, yoff = field->yoff,
+    gdouble cx = centre ? centre->x : 0.0,
+            cy = centre ? centre->y : 0.0;
+    // Virtually shift the centre to the origin.
+    gdouble xoff = field->xoff - cx, yoff = field->yoff - cy,
             dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     gdouble xl = (col + 0.5)*dx + xoff,
             xr = (col + width - 0.5)*dx + xoff,

@@ -1928,10 +1928,11 @@ test_field_distributions_angular_average_full(void)
         }
 
         GwyCurve *aavg = gwy_field_angular_average(field, NULL,
-                                                   NULL, GWY_MASK_IGNORE, 0);
+                                                   NULL, GWY_MASK_IGNORE,
+                                                   NULL, 0);
         GwyCurve *aavgn = gwy_field_angular_average(field, NULL,
                                                     NULL, GWY_MASK_IGNORE,
-                                                    npoints);
+                                                    NULL, npoints);
 
         g_assert_cmpuint(aavg->n, >=, MIN(xres, yres)/2);
         g_assert_cmpuint(aavg->n, <=, 4*(xres + yres));
@@ -1997,10 +1998,11 @@ test_field_distributions_angular_average_partial(void)
         }
 
         GwyCurve *aavg = gwy_field_angular_average(field, &fpart,
-                                                   NULL, GWY_MASK_IGNORE, 0);
+                                                   NULL, GWY_MASK_IGNORE,
+                                                   NULL, 0);
         GwyCurve *aavgn = gwy_field_angular_average(field, &fpart,
                                                     NULL, GWY_MASK_IGNORE,
-                                                    npoints);
+                                                    NULL, npoints);
 
         g_assert_cmpuint(aavg->n, >=, MIN(width, height)/2);
         g_assert_cmpuint(aavg->n, <=, 4*(width + height));
@@ -2066,10 +2068,11 @@ test_field_distributions_angular_average_masked(void)
         }
 
         GwyCurve *aavg = gwy_field_angular_average(field, NULL,
-                                                   mask, GWY_MASK_INCLUDE, 0);
+                                                   mask, GWY_MASK_INCLUDE,
+                                                   NULL, 0);
         GwyCurve *aavgn = gwy_field_angular_average(field, NULL,
                                                     mask, GWY_MASK_INCLUDE,
-                                                    npoints);
+                                                    NULL, npoints);
 
         g_assert_cmpuint(aavg->n, >=, MIN(xres, yres)/2);
         g_assert_cmpuint(aavg->n, <=, 4*(xres + yres));

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2013 David Nečas (Yeti).
+ *  Copyright (C) 2009-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -139,6 +139,7 @@ GwyCurve* gwy_field_angular_average(const GwyField *field,
                                     const GwyFieldPart *fpart,
                                     const GwyMaskField *mask,
                                     GwyMasking masking,
+                                    const GwyXY *centre,
                                     guint npoints)                   G_GNUC_MALLOC;
 
 G_END_DECLS
