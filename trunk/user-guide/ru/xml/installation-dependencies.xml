@@ -85,7 +85,7 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Добавляет поддержку сжатия в некоторых форматах файлов (Createc, NRRD).</para>
+        <para>Добавляет поддержку некоторых форматов файлов (SPML) и поддержку сжатия в некоторых других форматах (Createc, NRRD, метаданные RHK SM4 PRM).</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-bzip2">
@@ -107,7 +107,7 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Позволяет импортировать некоторые сжатые форматы данных (NanoObserver, NanoScanTech).</para>
+        <para>Позволяет импортировать некоторые сжатые форматы данных (APE DAX, NanoObserver, NanoScanTech).</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-png">
