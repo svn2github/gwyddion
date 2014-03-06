@@ -21,12 +21,23 @@
     </thead>
     <tbody>
     <!-- This is a GENERATED file. -->
+    <!-- From module accurexii-txt.c -->
+    <row>
+      <entry>Accurex II texte</entry>
+      <entry>.txt</entry>
+      <entry>accurexii-txt</entry>
+      <entry>Oui</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module aistfile.c -->
     <row>
       <entry>AIST-NT</entry>
       <entry>.aist</entry>
       <entry>aistfile</entry>
       <entry>Oui</entry>
+      <entry>—</entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
@@ -258,7 +269,7 @@
       <entry>Oui</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>—</entry>
+      <entry>Oui</entry>
     </row>
     <!-- From module gxyzffile.c -->
     <row>
@@ -575,7 +586,7 @@
       <entry>NT-MDT old MDA</entry>
       <entry>.sxml, .dat</entry>
       <entry>oldmda</entry>
-      <entry>Oui</entry>
+      <entry>Yes</entry>
       <entry>—</entry>
       <entry>—</entry>
       <entry>Oui</entry>
@@ -585,6 +596,16 @@
       <entry>Olympus LEXT 3000</entry>
       <entry>.ols</entry>
       <entry>ols</entry>
+      <entry>Oui</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module ometiff.c -->
+    <row>
+      <entry>Open Microscopy OME TIFF</entry>
+      <entry>.ome.tiff, .ome.tif</entry>
+      <entry>ometiff</entry>
       <entry>Oui</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -813,7 +834,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     <!-- From module seiko.c -->
     <row>
       <entry>Seiko SII</entry>
-      <entry>.xqb, .xqd, .xqp, .xqt</entry>
+      <entry>.xqb, .xqd, .xqp, .xqt, .xqj, .xqi</entry>
       <entry>seiko</entry>
       <entry>Oui</entry>
       <entry>—</entry>

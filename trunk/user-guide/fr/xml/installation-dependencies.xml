@@ -140,8 +140,9 @@
           <emphasis>Facultatif.</emphasis>
         </para>
         <para>
-          Support de la compression pour certains formats de fichier (Createc,
-          NRRD).
+          Support de certains formats de fichiers (SPML) et de la 
+          compression pour d'autres formats de fichiers (Createc,
+          NRRD, métadonnées RHK SM4 PRM).
         </para>
       </listitem>
     </varlistentry>
@@ -168,8 +169,8 @@
           <emphasis>Facultatif.</emphasis>
         </para>
         <para>
-          Permet l'import de certains formats compressés (NanoObserver,
-          NanoScanTech).
+          Permet l'import de certains formats compressés (APE DAX, 
+          NanoObserver, NanoScanTech).
         </para>
       </listitem>
     </varlistentry>
