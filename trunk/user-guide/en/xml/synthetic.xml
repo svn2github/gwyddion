@@ -649,5 +649,105 @@
       </mediaobject>
     </informalfigure>
   </sect2>
+  <sect2 id='columnar-synthesis'>
+    <title>Columnar films</title>
+    <para>
+      The columnar film growth simulation utilises a simple Monte Carlo
+      deposition algorithm in which small particles are incident on the
+      surface from directions generated according to given paramerters,
+      and they stick to the surface around the point where they hit it,
+      increasing the height there locally.  The shadowing effect then causes
+      more particles to stick to higher parts of the surface and less
+      particles to the lower parts.  This positive local height feedback
+      leads to the formation of columns.
+      The algorithm considers the horizontal plane to be filled with identical
+      copies of the surface, hence, the generated surfaces are also periodic
+      (i.e. perfectly tilable).
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Coverage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The average number of times a particle is generated above each
+            surface pixel.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Height</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Local height increase occurring when the particle sticks to
+            a pixel.  Since the horizontal size of the particle is always one
+            pixel the height is measured in pixels.  A height of one pixel
+            essentially means cubical particles, as far as growth is
+            concerned.  From the point of view of collision detection the
+            particles are considered infinitely small.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Inclination</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Central inclination angle with which the particles are generated
+            (angle of incidence).  The value of zero means very small angles
+            of incidence have the highest probability.  Large values mean
+            that the particles are more likely to impinge at large angles
+            than at small angles.  But for large direction variance, the
+            distribution is still isotropic in the horizontal plane.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Direction</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Central direction in the horizontal plane with which the
+            particles are generated.  Large variance means the distribution
+            is isotropic in the horizontal plane; for small variances the
+            growth is anisotopic.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Relaxation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Method for determination of the pixel the particle will finally
+            stick to.  Two options exist at this moment.  Weak relaxation, in
+            which only the two pixels just immediately before collision and
+            after collision are considered and the particle sticks to the
+            lower of them.  In the case of strong relaxation, a 3×3
+            neighbourhood is considered and the particle again sticks to the
+            lowest pixel.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-columnar'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-columnar.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial columnar surfaces: loosely packed columns (left);
+          tightly packed columns (centre); directional growth with strong
+          relaxation (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
