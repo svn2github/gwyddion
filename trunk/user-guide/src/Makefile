@@ -4,7 +4,7 @@ GWY_CFLAGS := $(shell pkg-config --cflags gwyddion)
 GWY_LIBS := $(shell pkg-config --libs gwyddion)
 COMMON_CFLAGS = -Wall -W -O2 -g
 
-OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o randomly-rough.o grain-quantity-dump.o
+OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o randomly-rough.o grain-quantity-dump.o waveform.o
 
 DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20) wavelet-haar
 WAVELET_GRAPHS = $(patsubst %,%.svg,$(DAUBECHIES))
@@ -24,14 +24,18 @@ GAUSSIAN = $(patsubst %,gaussian-%,acf hhcf psdf)
 GAUSSIAN_GRAPHS = $(patsubst %,%.svg,$(GAUSSIAN))
 GAUSSIAN_DATA = $(patsubst %,%.dat,$(GAUSSIAN))
 
+WAVEFORM = $(patsubst %,waveform-%,cosine invcosh flattop)
+WAVEFORM_DATA = $(patsubst %,%.dat,$(WAVEFORM))
+WAVEFORM_GRAPHS = waveform.svg
+
 GRAINQ_DATA = grain-quantities.xml
 
 # These things are cleaned!
 GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS)
 DATA = $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA) $(GRAINQ_DATA) fftw-wisdom.dat
-PROGRAMS = wavelet-plot windowing randomly-rough grain-quantity-dump
+PROGRAMS = wavelet-plot windowing randomly-rough grain-quantity-dump waveform
 
-all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS) $(GRAINQ_DATA)
+all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS) $(WAVEFORM_GRAPHS) $(GRAINQ_DATA)
 
 wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi style.gpi
 	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
@@ -102,8 +106,20 @@ grain-quantity-dump: grain-quantity-dump.o
 grain-quantity-dump.o: grain-quantity-dump.c
 	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
 
+waveform.svg: waveform.gpi style.gpi $(WAVEFORM_DATA)
+	gnuplot $<
+
+waveform-%.dat: waveform
+	./$< $* >$@
+
+waveform.o: waveform.c
+	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
+
+waveform: waveform.o
+	$(CC) $(GWY_LIBS) -o $@ $^
+
 clean:
 	rm -f $(PROGRAMS) $(OBJECTS) $(DATA) $(GRAPHS)
 
 .PHONY: clean
-.PRECIOUS: $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA)
+.PRECIOUS: $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA) $(WAVEFORM_DATA)

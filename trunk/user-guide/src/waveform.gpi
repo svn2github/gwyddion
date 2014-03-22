@@ -1,0 +1,35 @@
+set term svg size 440,165 enhanced font 'DejaVu Sans,6' lw 0.7
+load 'style.gpi'
+
+set output 'waveform.svg'
+set format y ''
+set format x ''
+set xtics 0.25
+
+set multiplot
+
+set title 'Cosine' offset 0,-0.5
+unset key
+set size 0.37,1.0
+set origin -0.04,0.0
+set ytics 0.5
+plot 'waveform-cosine.dat' u 1:2 title 'cosine waveform' ls 2, \
+  '' u 1:3 title 'sine waveform' ls 1
+
+set title 'Inverse cosh'
+set key bottom right
+set size 0.37,1.0
+set origin 0.30,0.0
+set ytics 1.2
+plot 'waveform-invcosh.dat' u 1:2 title 'cosine waveform' ls 2, \
+  '' u 1:3 title 'sine waveform' ls 1
+
+set title 'Flat top'
+unset key
+set size 0.37,1.0
+set origin 0.64,0.0
+set ytics 0.4
+plot 'waveform-flattop.dat' u 1:2 title 'cosine waveform' ls 2, \
+  '' u 1:3 title 'sine waveform' ls 1
+
+unset multiplot
