@@ -662,7 +662,8 @@
       leads to the formation of columns.
       The algorithm considers the horizontal plane to be filled with identical
       copies of the surface, hence, the generated surfaces are also periodic
-      (i.e. perfectly tilable).
+      (i.e. perfectly tilable).  The surface generator has the following
+      parameters:
     </para>
     <variablelist>
       <varlistentry>
@@ -745,6 +746,28 @@
           Artificial columnar surfaces: loosely packed columns (left);
           tightly packed columns (centre); directional growth with strong
           relaxation (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='wave-synthesis'>
+    <title>Waves</title>
+    <para>
+      The wave synthesis method composes the image using interference of waves
+      from a number of point sources.
+    </para>
+    <informalfigure id='fig-synthetic-wave-waveform'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='waveform.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='waveform.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Sine and cosine waveforms for the available wave types.  Only the
+          cosine form is used for displacement images; the entire complex wave
+          is used for intensity and phase images.
         </caption>
       </mediaobject>
     </informalfigure>
