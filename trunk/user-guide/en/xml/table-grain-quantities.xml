@@ -203,6 +203,21 @@
         <entry>Curvature</entry>
         <entry>Curvature angle 2</entry>
       </row>
+      <row>
+        <entry><varname>a_e1</varname></entry>
+        <entry>Moment</entry>
+        <entry>Major semiaxis of equivalent ellipse</entry>
+      </row>
+      <row>
+        <entry><varname>a_e2</varname></entry>
+        <entry>Moment</entry>
+        <entry>Minor semiaxis of equivalent ellipse</entry>
+      </row>
+      <row>
+        <entry><varname>phi_e1</varname></entry>
+        <entry>Moment</entry>
+        <entry>Orientation of equivalent ellipse</entry>
+      </row>
     </tbody>
   </tgroup>
 </informaltable>
