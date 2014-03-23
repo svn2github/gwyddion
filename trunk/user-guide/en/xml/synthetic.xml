@@ -644,7 +644,8 @@
           with a deformation with a large autocorrelation length (left);
           non-uniformly spaced ridges with moderate slopes between the top and
           bottom planes, deformed with a deformation with a small
-          autocorrelation length (right).
+          autocorrelation length (centre); unperturbed pattern of rounded holes
+          with a large variation in size and depth (right).
         </caption>
       </mediaobject>
     </informalfigure>
@@ -754,7 +755,11 @@
     <title>Waves</title>
     <para>
       The wave synthesis method composes the image using interference of waves
-      from a number of point sources.
+      from a number of point sources.  Beside the normal cosine wave, a few
+      other wave types are available, each having a cosine and sine form that
+      differ by phase shift <xi:include href="eqi-pi-over-2"/> in all frequency
+      components.  When the wave is treated as complex, the cosine form is its
+      real part and its sine form is its imaginary part.
     </para>
     <informalfigure id='fig-synthetic-wave-waveform'>
       <mediaobject>
@@ -765,9 +770,101 @@
           <imagedata fileref='waveform.png' format='PNG'/>
         </imageobject>
         <caption>
-          Sine and cosine waveforms for the available wave types.  Only the
+          Sine and cosine wave forms for the available wave types.  Only the
           cosine form is used for displacement images; the entire complex wave
           is used for intensity and phase images.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      The generator has the following options:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Quantity</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantity to display in the image.  Displacement is the sum of the
+            real parts.  Amplitude is the absolute value of the complex wave.
+            Phase is the phase angle of the complex wave.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Number of waves</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The number of point sources the waves propagate from.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Wave form</guilabel>
+        </term>
+        <listitem>
+          <para>
+            One of the wave forms described above.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Amplitude</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Approximate amplitude (rms) of heights in the generated image.
+            Note it differs from the amplitude of individual waves: the
+            amplitude of heights in the generated image would grow with the
+            square root of the number of waves in such case, whereas it in
+            fact stays approxiately constant unless the amplitude changes.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Frequency</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Spatial frequency of the waves.  It is relative to the image size,
+            i.e. the value of 1.0 means wavelength equal to the lenght of the
+            image side.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>X center</guilabel>,
+          <guilabel>Y center</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Locations of the point sources.  Zero corresponds to the image
+            centre. The positions are also measured in image sizes.
+            Generally, at least one of the corresponding variances should be
+            non-zero; otherwise all the point sources coincide (some
+            interesting patterns can be still generated with varying frequency
+            though).
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-waves'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-waves.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial wave surfaces: displacement image generated with fairly
+          large frequency variation (left); amplitude image for inverse cosh
+          wave form (centre); phase image for a small cluster of far-away
+          sources (right).
         </caption>
       </mediaobject>
     </informalfigure>
