@@ -732,8 +732,9 @@
             which only the two pixels just immediately before collision and
             after collision are considered and the particle sticks to the
             lower of them.  In the case of strong relaxation, a 3×3
-            neighbourhood is considered and the particle again sticks to the
-            lowest pixel.
+            neighbourhood is considered in addition.  The particle can move
+            to a lower neighbour pixel with a certain probability before
+            sticking permanently.
           </para>
         </listitem>
       </varlistentry>
