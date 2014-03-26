@@ -21,7 +21,9 @@
     case you have to ask the producers of Gwyddion executables to build them
     with 3D support or build Gwyddion yourself from source code. If it is the
     latter case, refer to your operating system guide on how to enable OpenGL
-    3D capabilities.
+    3D capabilities.  If you experience a poor performance of the 3D view in
+    MS Windows try disabling desktop composition for Gwyddion (in
+    <guilabel>Compatibility</guilabel> tab of the Gwyddion shortcut).
   </para>
   <para>
     The 3D window has two possible forms: with basic and expanded controls.
