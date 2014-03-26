@@ -758,9 +758,9 @@
       The wave synthesis method composes the image using interference of waves
       from a number of point sources.  Beside the normal cosine wave, a few
       other wave types are available, each having a cosine and sine form that
-      differ by phase shift <xi:include href="eqi-pi-over-2"/> in all frequency
-      components.  When the wave is treated as complex, the cosine form is its
-      real part and its sine form is its imaginary part.
+      differ by phase shift <xi:include href="eqi-pi-over-2.xml"/> in all
+      frequency components.  When the wave is treated as complex, the cosine
+      form is its real part and its sine form is its imaginary part.
     </para>
     <informalfigure id='fig-synthetic-wave-waveform'>
       <mediaobject>
@@ -869,6 +869,132 @@
         </caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id='domain-synthesis'>
+    <title>Domains</title>
+    <para>
+      The simulation implements a hybrid non-equilibrium Ising model [1],
+      combining a discrete short-scale discrete Ising model with continuous
+      slow inhibitor.  The discrete variable
+      <xi:include href="eqi-u.xml"/> has two possible values, between
+      which it can flip probabilistically based on energy corresponding to 
+      surface tension between the two domains, temperature and local value of
+      the inhibitor field.  The continuous inhibitor field
+      <xi:include href="eqi-v.xml"/> is governed by a local differential
+      equation coupled to the variable <xi:include href="eqi-u.xml"/>.  The
+      boundary conditions of the simulation are periodic, hence, the generated
+      images are also periodic (i.e. perfectly tilable).
+    </para>
+    <para>
+      The calculation has the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Number of iterations</guilabel>
+        </term>
+        <listitem>
+          <para>
+            One iteration consists of four steps: A Monte Carlo update of
+            <xi:include href="eqi-u.xml"/>, a time step of solution of the
+            differential equation for <xi:include href="eqi-v.xml"/>, another
+            Monte Carlo step and another differential euqation time step.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Temperature</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Temperature determines the probability with which the two-state
+            variable <xi:include href="eqi-u.xml"/> can flip to the other value
+            if it results in a configurations with higher energy or similar
+            (flips that lower the energy a lot occur unconditonally).  A larger
+            temperature means less separation between the two
+            <xi:include href="eqi-u.xml"/> domains.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Inhibitor strength</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Strength with which the continuous variable biases the energy
+            of each pixel.  For large values the inhibitor has larger influence
+            compared to the surface tension.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Inhibitor coupling</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Coupling factor between <xi:include href="eqi-u.xml"/> and
+            <xi:include href="eqi-v.xml"/> in the differential equation for
+            <xi:include href="eqi-v.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Bias</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Bias in the differential equation for
+            <xi:include href="eqi-v.xml"/> towards larger or smaller values.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Monte Carlo time step</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Time step in the differential equation corresponding to one
+            Monte Carlo step.  So this parameter determines the relative speed
+            of the two processes.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Height</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Range of values of the created images.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-domains'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-domains.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial domain surfaces: spiral waves with long-range order
+          (left);
+          short-range ordered spiral waves at a higher temperature (centre);
+          the continous variable for a low-temperature situation with
+          small strength and coupling (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='synthetic-ref'>
+    <title>References</title>
+    <para id='synthetic-ref-1'>
+      [1] L. M. Pismen, M. I. Monine, G. V. Tchernikov: Physica D, (2004) 199 p 82
+    </para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

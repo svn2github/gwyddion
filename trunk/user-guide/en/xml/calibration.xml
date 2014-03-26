@@ -5,9 +5,7 @@
 <sect1 id='caldata'>
   <title>Calibration and uncertainties</title>
   <sect2 id='caldata-overview'>
-    <title>
-      Calibration data
-    </title>
+    <title>Calibration data</title>
     <para>
       Calibration data can be used to provide correction of measured data
       or perform uncertainty calculations. Generally, calibration data can be
