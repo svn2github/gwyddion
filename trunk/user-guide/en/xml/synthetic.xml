@@ -877,13 +877,28 @@
       combining a discrete short-scale discrete Ising model with continuous
       slow inhibitor.  The discrete variable
       <xi:include href="eqi-u.xml"/> has two possible values, between
-      which it can flip probabilistically based on energy corresponding to 
-      surface tension between the two domains, temperature and local value of
-      the inhibitor field.  The continuous inhibitor field
+      which it can flip probabilistically with probability
+    </para>
+    <xi:include href="eq-ising-flipping.xml"/>
+    <para>
+      where <xi:include href='eqi-Delta-E.xml'/> is the change of energy
+      resulting from flipping and <xi:include href='eqi-T.xml'/> is the
+      temperature.  The energy is given by the number neighbours in the
+      opposite state in the directions along the coordinate axes, in the
+      diagonals and bias caused by the inhibitor field:
+    </para>
+    <xi:include href="eq-ising-energy.xml"/>
+    <para>
+      The continuous inhibitor field
       <xi:include href="eqi-v.xml"/> is governed by a local differential
-      equation coupled to the variable <xi:include href="eqi-u.xml"/>.  The
-      boundary conditions of the simulation are periodic, hence, the generated
-      images are also periodic (i.e. perfectly tilable).
+      equation coupled to the variable <xi:include href="eqi-u.xml"/>:
+    </para>
+    <xi:include href="eq-ising-diffeq.xml"/>
+    <para>
+      where <xi:include href='eqi-mu.xml'/> is inhibitor coupling and
+      <xi:include href='eqi-nu.xml'/> is bias.
+      The boundary conditions of the simulation are periodic, hence, the
+      generated images are also periodic (i.e. perfectly tilable).
     </para>
     <para>
       The calculation has the following parameters:
