@@ -744,6 +744,31 @@
       regard to other possible surface features).
     </para>
   </sect2>
+  <sect2 id='grain-edt'>
+    <title>Euclidean Distance Transform</title>
+    <indexterm><primary>distance transform</primary></indexterm>
+    <para>
+      The Euclidean distance transform assigns to each pixel its distance to
+      the grain (mask) boundary.  It is, in a certain sense, complementary to
+      the watershed.
+    </para>
+    <para>
+      If it is applied to grain interiors the distance is zero outside grains
+      and increases towards the grain ‘centres’.  Conversely, it can be
+      applied to the exteriors and it is then highest for pixels farthest
+      from any grain.  It is also possible to calculate signed two-side
+      transform which is the difference of the two transforms, i.e. it is
+      positive inside grains and negative outside.
+    </para>
+    <para>
+      Option <guilabel>Shrink from border</guilabel> controls the handling of
+      borders.  When it is enabled, image boundaries are considerd to be
+      also grain (or non-grain) boundaries.  Pixels on the image edge thus
+      cannot receive large values.  When it is disabled, the grains (or
+      non-grains) are effectively infinitely large outside the image.
+      So pixels close to the boundary can receive large distance values.
+    </para>
+  </sect2>
   <sect2 id='grain-analysis-ref'>
     <title>References</title>
     <para id='grain-analysis-ref-1'>
