@@ -580,6 +580,33 @@
           </itemizedlist>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>Moment-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Major semiaxis of equivalent ellipse</guilabel>,
+              the length of the major semiaxis of an ellipse which has the
+              same second order moments in the horizontal plane.
+            </listitem>
+          </itemizedlist>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Minor semiaxis of equivalent ellipse</guilabel>,
+              the length of the minor semiaxis of an ellipse which has the
+              same second order moments in the horizontal plane.
+            </listitem>
+          </itemizedlist>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Orientation of equivalent ellipse</guilabel>,
+              the direction of the major semiaxis of an ellipse which has the
+              same second order moments in the horizontal plane.  For
+              a circular grain, the angle is set to zero by definition.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <informalfigure id='fig-grain-bounding-dims'>
       <mediaobject>
