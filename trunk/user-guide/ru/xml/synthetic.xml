@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: synthetic.xml 16045 2014-03-24 10:03:20Z yeti-dn $ -->
+<!-- @(#) $Id: synthetic.xml 16069 2014-03-27 13:30:22Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="synthetic">
   <title>Синтетические поверхности</title>
@@ -432,7 +432,7 @@
   </sect2>
   <sect2 id="wave-synthesis">
     <title>Волны</title>
-    <para>Метод волнового синтеза генерирует изображение на основе интерференции волн от набора точечных источников. Помимо обычной косинусоидальной волны, доступны несколько других форм волны, каждая из которых имеет чётный и нечётный вариант, различающиеся на сдвиг фазы <xi:include href="eqi-pi-over-2"/> во всех частотных компонентах. Когда волна рассматривается как комлексная, чётная часть (косинусоида) образует действительную часть и нечётная (синусоида) образует мнимую часть.</para>
+    <para>Метод волнового синтеза генерирует изображение на основе интерференции волн от набора точечных источников. Помимо обычной косинусоидальной волны, доступны несколько других форм волны, каждая из которых имеет чётный и нечётный вариант, различающиеся на сдвиг фазы <xi:include href="eqi-pi-over-2"/> во всех частотных компонентах. Когда волна рассматривается как комплексная, чётная часть (косинусоида) образует действительную часть, а нечётная (синусоида) образует мнимую.</para>
     <informalfigure id="fig-synthetic-wave-waveform">
       <mediaobject>
         <imageobject>
@@ -501,6 +501,87 @@
         <caption>Искуственные волнистые поверхности: карта смещений сгенерированная с достаточно большим разбросом частот (слева); изображение амплитуды для волны в форме обратного cosh (по центру); изображение фазы для малого кластера далёких источников (справа).</caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id="domain-synthesis">
+    <title>Домены</title>
+    <para>Расчёт реализует гибридную неравновесную модель Изинга  [1], совмещающую дискретную модель Изинга для малых расстояний с непрерывным медленным ингибитором. Дискретная переменная <xi:include href="eqi-u.xml"/> имеет два возможных значения, которые она меняет с вероятностью</para>
+    <xi:include href="eq-ising-flipping.xml"/>
+    <para>где <xi:include href="eqi-Delta-E.xml"/> – изменение энергии в результате смены состояния и <xi:include href="eqi-T.xml"/> – температура. Энергия задаётся числом соседей в противоположном состоянии в направлениях вдоль координатных осей, по диагоналям и смещением, вызванным полем ингибитора.</para>
+    <xi:include href="eq-ising-energy.xml"/>
+    <para>Непрерывное поле ингибитора <xi:include href="eqi-v.xml"/> описывается локальным дифференциальным уравнением, связанным с переменной <xi:include href="eqi-u.xml"/>:</para>
+    <xi:include href="eq-ising-diffeq.xml"/>
+    <para>где <xi:include href="eqi-mu.xml"/> – связь ингибитора и <xi:include href="eqi-nu.xml"/> – смещение. Граничные условия для расчёта периодические, следовательно, генерируемые изображения также будут периодическими (т.е. идеально совмещаться друг с другом на границе).</para>
+    <para>Расчёт управляется следующими параметрами:</para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Число шагов</guilabel>
+        </term>
+        <listitem>
+          <para>Одна итерация расчёта состоит из четырёх шагов: обновление <xi:include href="eqi-u.xml"/> методом Монте-Карло, шаг по времени в решении дифференциального уравнения для <xi:include href="eqi-v.xml"/>, другой шаг Монте-Карло и ещё один шаг по времени в дифференциальном уравнении.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Температура</guilabel>
+        </term>
+        <listitem>
+          <para>Температура определяет вероятность, с которой переменная с двумя состояниями <xi:include href="eqi-u.xml"/> может переходить из одного в другое с энергией большей или равной (смена состояния, которая сильно понижает энергию, происходит сама по себе). Большая температура означает меньшее разделение между двумя доменами <xi:include href="eqi-u.xml"/>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Сила ингибитора</guilabel>
+        </term>
+        <listitem>
+          <para>Сила, с которой непрерывная переменная смещает энергию в каждом пикселе. Для больших значений ингибитор играет большую роль по сравнению с поверхностным натяжением.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Связь ингибитора</guilabel>
+        </term>
+        <listitem>
+          <para>Фактор связи между <xi:include href="eqi-u.xml"/> и <xi:include href="eqi-v.xml"/> в дифференциальном уравнении для <xi:include href="eqi-v.xml"/>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Смещение</guilabel>
+        </term>
+        <listitem>
+          <para>Смещение в дифференциальном уравнении для <xi:include href="eqi-v.xml"/> в сторону больших или меньших значений.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Временной шаг метода Монте-Карло</guilabel>
+        </term>
+        <listitem>
+          <para>Временной шаг в дифференциальном уравнении, соответствующий одному шагу в методе Монте-Карло. Таким образом, этот параметр определяет относительную скорость двух этих процессов.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Высота</guilabel>
+        </term>
+        <listitem>
+          <para>Диапазон значений создаваемых изображений.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id="fig-synthetic-domains">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="synthetic-domains.png" format="PNG"/>
+        </imageobject>
+        <caption>Искусственные доменные поверхности: спиральные волны с дальним порядком (слева); упорядоченные спиральные волны с близким порядком при большей температуре (по центру); непрерывное изменение при ситуации низкой температуры с малой силой и связью (справа).</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id="synthetic-ref">
+    <title>Ссылки</title>
+    <para id="synthetic-ref-1">[1] L. M. Pismen, M. I. Monine, G. V. Tchernikov: Physica D, (2004) 199 p 82</para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
