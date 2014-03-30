@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2012-2013 David Nečas (Yeti).
+ *  Copyright (C) 2009,2012-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -436,6 +436,77 @@ test_str_utf8_append_exponent(void)
     g_assert_cmpstr(str->str, ==, "⁻¹²³⁴⁵⁶⁷⁸⁹");
 
     g_string_free(str, TRUE);
+}
+
+static void
+str_gstring_replace_one(const gchar *string,
+                        const gchar *old,
+                        const gchar *replacement,
+                        gint count,
+                        const gchar *expected_result,
+                        guint expected_nrepl)
+{
+    //g_printerr("<<<%s>>>\n", string);
+    GString *str = g_string_new(string);
+    guint nrepl = gwy_gstring_replace(str, old, replacement, count);
+    g_assert_cmpstr(str->str, ==, expected_result);
+    g_assert_cmpuint(nrepl, ==, expected_nrepl);
+    g_string_free(str, TRUE);
+}
+
+void
+test_str_gstring_replace_null_old(void)
+{
+    str_gstring_replace_one("", NULL, NULL, 0, "", 0);
+    str_gstring_replace_one("", NULL, "a", 0, "", 0);
+    str_gstring_replace_one("", NULL, "a", -1, "a", 1);
+    str_gstring_replace_one("", NULL, "a", 1, "a", 1);
+    str_gstring_replace_one("b", NULL, "a", -1, "aba", 2);
+    str_gstring_replace_one("b", NULL, "a", 2, "aba", 2);
+    str_gstring_replace_one("b", NULL, "a", 1, "ab", 1);
+    str_gstring_replace_one("test", NULL, "::", 2, "::t::est", 2);
+    str_gstring_replace_one("test", NULL, "::", 4, "::t::e::s::t", 4);
+    str_gstring_replace_one("test", NULL, "::", 5, "::t::e::s::t::", 5);
+    str_gstring_replace_one("test", NULL, "::", -1, "::t::e::s::t::", 5);
+}
+
+void
+test_str_gstring_replace_null_replacement(void)
+{
+    str_gstring_replace_one("", NULL, NULL, 0, "", 0);
+    str_gstring_replace_one("aba", "a", NULL, 0, "aba", 0);
+    str_gstring_replace_one("aba", "a", NULL, 1, "ba", 1);
+    str_gstring_replace_one("aba", "a", NULL, 2, "b", 2);
+    str_gstring_replace_one("aba", "a", NULL, -1, "b", 2);
+    str_gstring_replace_one("aaaaa", "a", NULL, -1, "", 5);
+    str_gstring_replace_one("aaaaa", "aa", NULL, -1, "a", 2);
+    str_gstring_replace_one("abaaaa", "aa", NULL, -1, "ab", 2);
+    str_gstring_replace_one("abaabaa", "aa", NULL, -1, "abb", 2);
+    str_gstring_replace_one("abaabaa", "baa", NULL, -1, "a", 2);
+    str_gstring_replace_one("abaabaa", "baa", NULL, 3, "a", 2);
+    str_gstring_replace_one("abaabaa", "baa", NULL, 1, "abaa", 1);
+    str_gstring_replace_one("abaabaa", "a", NULL, -1, "bb", 5);
+    str_gstring_replace_one("abaabaa", "a", NULL, 2, "babaa", 2);
+}
+
+void
+test_str_gstring_replace_general(void)
+{
+    str_gstring_replace_one("test", "a", "b", -1, "test", 0);
+    str_gstring_replace_one("test", "t", "T", -1, "TesT", 2);
+    str_gstring_replace_one("test", "t", "T", 1, "Test", 1);
+    str_gstring_replace_one("test", "t", "TT", -1, "TTesTT", 2);
+    str_gstring_replace_one("test", "t", "TT", 1, "TTest", 1);
+    str_gstring_replace_one("testte", "te", "Zz", 1, "Zzstte", 1);
+    str_gstring_replace_one("testte", "te", "Zz", -1, "ZzstZz", 2);
+    str_gstring_replace_one("aaaaaa", "aa", "b", -1, "bbb", 3);
+    str_gstring_replace_one("aaaaaa", "aa", "b", 1, "baaaa", 1);
+    str_gstring_replace_one("aaaaaa", "aa", "bob", 1, "bobaaaa", 1);
+    str_gstring_replace_one("aaaaaa", "aa", "bob", -1, "bobbobbob", 3);
+    str_gstring_replace_one("xaaaaaaz", "aa", "b", -1, "xbbbz", 3);
+    str_gstring_replace_one("xaaaaaaz", "aa", "b", 1, "xbaaaaz", 1);
+    str_gstring_replace_one("xaaaaaaz", "aa", "bob", 1, "xbobaaaaz", 1);
+    str_gstring_replace_one("xaaaaaaz", "aa", "bob", -1, "xbobbobbobz", 3);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

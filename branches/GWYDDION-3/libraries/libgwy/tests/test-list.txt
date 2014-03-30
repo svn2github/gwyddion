@@ -14,6 +14,9 @@ str/isident/utf8
 str/case/equal-ascii
 str/case/hash-ascii
 str/utf8/append-exponent
+str/gstring/replace/null-old
+str/gstring/replace/null-replacement
+str/gstring/replace/general
 pack/format
 pack/read/boolean
 pack/read/int16/le

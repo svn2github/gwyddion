@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011-2012 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011-2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -379,6 +379,8 @@ void
 gwy_utf8_append_exponent(GString *str,
                          gint power)
 {
+    g_return_if_fail(str);
+
     gchar buf[32];
 
     g_snprintf(buf, sizeof(buf), "%d", power);
@@ -398,6 +400,168 @@ gwy_utf8_append_exponent(GString *str,
             g_string_append_c(str, buf[i]);
         }
     }
+}
+
+/**
+ * gwy_gstring_replace:
+ * @str: A #GString string to modify in place.
+ * @old: (allow-none):
+ *       The character sequence to find and replace.  Passing %NULL is the same
+ *       as passing the empty string.
+ * @replacement: (allow-none):
+ *               The character sequence that should replace @old.  Passing
+ *               %NULL is the same as passing the empty string.
+ * @count: The maximum number of replacements to make.  A negative number means
+ *         replacing all occurrences of @old.  Note zero means just zero, i.e.
+ *         no replacements are made.
+ *
+ * Replaces non-overlapping occurrences of one string with another in a
+ * #GString.
+ *
+ * Passing %NULL or the empty string for @replacement will cause the occurrences
+ * of @old to be removed.
+ *
+ * Passing %NULL or the empty string for @old means a match occurs at every
+ * position in the string, including after the last character.  So @replacement
+ * will be inserted at every position in this case.
+ *
+ * Returns: The number of replacements made.  A non-zero value means
+ *          the string has been modified, no-op replacements do not count.
+ **/
+guint
+gwy_gstring_replace(GString *str,
+                    const gchar *old,
+                    const gchar *replacement,
+                    gint count)
+{
+    g_return_val_if_fail(str, 0);
+
+    if (!old)
+        old = "";
+    guint oldlen = strlen(old);
+
+    /* Do we need to do anywork at all? */
+    if (!count)
+        return 0;
+    guint ucount = (count < 0) ? G_MAXUINT : (guint)count;
+
+    gchar *p = str->str;
+    if (oldlen && !(p = strstr(str->str, old)))
+        return 0;
+
+    if (!replacement)
+        replacement = "";
+    guint repllen = strlen(replacement);
+
+    /* Equal lengths, we can do the replacement in place easily. */
+    if (oldlen == repllen) {
+        if (gwy_strequal(old, replacement))
+            return 0;
+
+        guint n = 0;
+        while (p) {
+            memcpy(p, replacement, repllen);
+            if (++n == ucount)
+                break;
+            p = strstr(p + oldlen, old);
+        }
+
+        return n;
+    }
+
+    /* Empty old string: the slightly silly case.  It has a different oldlen
+     * semantics so handle it specially. */
+    if (!oldlen) {
+        ucount = MIN(ucount, str->len + 1);
+
+        if (ucount == 1) {
+            g_string_prepend(str, replacement);
+            return 1;
+        }
+
+        gchar *oldcopy = g_strdup(str->str);
+        guint len = str->len;
+        g_string_set_size(str, str->len + ucount*repllen);
+        g_string_truncate(str, 0);
+        p = str->str;
+        for (guint i = 0; i < ucount; i++) {
+            memcpy(p, replacement, repllen);
+            p += repllen;
+            *p = oldcopy[i];
+            p++;
+        }
+
+        if (ucount < len)
+            memcpy(p, oldcopy + ucount, len - ucount);
+
+        g_free(oldcopy);
+
+        return ucount;
+    }
+
+    /* The general case.  Count the actual replacement number. */
+    guint n = 0;
+    for (gchar *q = p; q; q = strstr(q + oldlen, old)) {
+        if (++n == ucount)
+            break;
+    }
+    ucount = MIN(n, ucount);
+
+    guint newlen = str->len;
+    if (repllen >= oldlen)
+        newlen += ucount*(repllen - oldlen);
+    else
+        newlen -= ucount*(oldlen - repllen);
+
+    if (!newlen) {
+        g_string_truncate(str, 0);
+        return ucount;
+    }
+
+    /* For just one replacement, do the operation directly. */
+    if (ucount == 1) {
+        guint pos = p - str->str;
+        if (repllen > oldlen) {
+            g_string_insert_len(str, pos, replacement, repllen - oldlen);
+            memcpy(str->str + pos + (repllen - oldlen),
+                   replacement + (repllen - oldlen), oldlen);
+        }
+        else {
+            g_string_erase(str, pos, oldlen - repllen);
+            memcpy(str->str + pos, replacement, repllen);
+        }
+        return 1;
+    }
+
+    /* For more replacements, rebuild the string from scratch in a buffer. */
+    gchar *newstr = g_new(gchar, newlen);
+
+    memcpy(newstr, str->str, p - str->str);
+    gchar *newp = newstr + (p - str->str);
+
+    n = 0;
+    for (gchar *q = p; q; p = q) {
+        if (repllen) {
+            memcpy(newp, replacement, repllen);
+            newp += repllen;
+        }
+
+        if (++n == ucount)
+            break;
+        if (!(q = strstr(q + oldlen, old)))
+            break;
+
+        memcpy(newp, p + oldlen, (q - p) - oldlen);
+        newp += (q - p) - oldlen;
+    }
+
+    memcpy(newp, p + oldlen, str->len - oldlen - (p - str->str));
+
+    g_string_truncate(str, 0);
+    g_string_append_len(str, newstr, newlen);
+    g_free(newstr);
+
+    return ucount;
 }
 
 /**
