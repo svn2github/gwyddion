@@ -2,8 +2,8 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
           'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<inlineequation id='eq-ising-energy'>
-  <inlinemediaobject>
+<informalequation id='eq-ising-energy'>
+  <mediaobject>
     <imageobject>
       <imagedata fileref='eq-ising-energy.png' format='PNG'/>
     </imageobject>
@@ -14,6 +14,6 @@ E = n_{\rm o} + \frac12 n_{\rm d} + Buv
 ]]>
       </phrase>
     </textobject>
-  </inlinemediaobject>
-</inlineequation>
+  </mediaobject>
+</informalequation>
 <!-- vim: set ts=2 sw=2 et : -->
