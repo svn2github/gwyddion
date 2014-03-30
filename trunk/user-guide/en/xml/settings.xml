@@ -11,12 +11,12 @@
     parameters as well.
   </para>
   <para>
-    The permanent storage for the settings is file
+    The permanent storage for the settings is the file
     <filename>settings</filename> in a user's directory, this usually means
     under <filename>~/.gwyddion</filename> (Unix) or
     <filename>Documents and Settings\gwyddion</filename> (MS Windows).
-    The file read when Gwyddion starts and written when it terminates.  You
-    should keep this in mind if you want to do some manual modifications.
+    The file is only read when Gwyddion starts and written when it terminates.
+    You should keep this in mind if you want to do some manual modifications.
     Unknown entries in the settings are ignored but preserved.
   </para>
   <para>
@@ -26,8 +26,8 @@
     </informalexample>
     followed by lines with individual parameters and values (that form,
     technically, a serialised <type>GwyContainer</type>). Gwyddion writes the
-    entries in alphabetical order but this is not a requirement and you do not
-    have to keep the order when modifying the file.
+    entries in the alphabetical order but this is not a requirement and you do
+    not have to keep the order when modifying the file.
   </para>
   <para>
     Each parameter line has the form
@@ -105,7 +105,8 @@
     </informaltable>
   </para>
   <para>
-    Some potentially useful settings that can be modified by editing the file:
+    Some potentially useful program-wide options that can be modified by
+    editing the settings file:
   </para>
   <para>
     <informaltable id='table-settings-keys'>
