@@ -19,6 +19,7 @@
   <xi:include href='pixmap-image-keys.xml'/>
   <xi:include href='expressions.xml'/>
   <xi:include href='resources.xml'/>
+  <xi:include href='settings.xml'/>
   <xi:include href='toolbox-configuration.xml'/>
   <xi:include href='gwyfile-format.xml'/>
   <xi:include href='simple-field-format.xml'/>

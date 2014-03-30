@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='settings' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Settings</title>
+  <para>
+    Gwyddion module functions remember parameters values between invocations
+    and also between individual sessions.  The place where all the values are
+    stored is called settings.  The settings include a few program-wide
+    parameters as well.
+  </para>
+  <para>
+    The permanent storage for the settings is file
+    <filename>settings</filename> in a user's directory, this usually means
+    under <filename>~/.gwyddion</filename> (Unix) or
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+    The file read when Gwyddion starts and written when it terminates.  You
+    should keep this in mind if you want to do some manual modifications.
+    Unknown entries in the settings are ignored but preserved.
+  </para>
+  <para>
+    The settings file starts with a magic header line
+    <informalexample>
+      <programlisting>Gwyddion Settings 1.0</programlisting>
+    </informalexample>
+    followed by lines with individual parameters and values (that form,
+    technically, a serialised <type>GwyContainer</type>). Gwyddion writes the
+    entries in alphabetical order but this is not a requirement and you do not
+    have to keep the order when modifying the file.
+  </para>
+  <para>
+    Each parameter line has the form
+    <informalexample>
+      <programlisting>"<replaceable>key</replaceable>" <replaceable>type</replaceable> <replaceable>value</replaceable></programlisting>
+    </informalexample>
+    Typical module settings keys start with
+    <literal>/module/<replaceable>modulename</replaceable></literal>, although
+    in a few cases the module name part is not actually the module name, either
+    because several modules share settings or for historical reasons.
+    Program-wide setting keys start with <literal>/app/</literal>.
+    All possible value types are listed in the following table.
+  </para>
+  <para>
+    <informaltable id='table-settings-types'>
+      <tgroup cols='2' align='left'>
+        <?dblatex lX?>
+        <thead>
+          <row>
+            <entry>Type</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>boolean</entry>
+            <entry>
+              Logical value that can be either <literal>True</literal>
+              or <literal>False</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry>char</entry>
+            <entry>
+              Single character.  Normal characters are represented directly
+              using a single character.  Special characters are
+              represented using the hexadecimal notation as
+              <literal>0x<replaceable>XX</replaceable></literal>.  This
+              parameter type is not actually used much by modules.
+            </entry>
+          </row>
+          <row>
+            <entry>int32</entry>
+            <entry>
+              Signed 32bit integer.  Gwyddion writes them in decimal notation
+              but reads also other notations such as hexadecimal.
+            </entry>
+          </row>
+          <row>
+            <entry>int64</entry>
+            <entry>
+              Signed 64bit integer.  Gwyddion writes them in decimal notation
+              but reads also other notations such as hexadecimal.
+            </entry>
+          </row>
+          <row>
+            <entry>double</entry>
+            <entry>
+              Floating point number.  They can be in the scientific format,
+              e.g.  <literal>1.23e-4</literal>.  They are represented in the
+              standard C/POSIX locale, i.e. decimal dot is used (not comma or
+              other separators).
+            </entry>
+          </row>
+          <row>
+            <entry>string</entry>
+            <entry>
+              String of characters in double quotes, generally UTF-8 encoded.
+              Special characters, including contained double quotes, are
+              escaped using the standard backslash notation.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    Some potentially useful settings that can be modified by editing the file:
+  </para>
+  <para>
+    <informaltable id='table-settings-keys'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Key</entry>
+            <entry>Type</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>/app/restore-tool-position</entry>
+            <entry>boolean</entry>
+            <entry>
+              If set to <literal>True</literal>, Gwyddion restores not only
+              size of tool dialogs but also their positions (if possible).
+              For well-behaved window managers this is more likely to be
+              annoying than helpful but in MS Windows you might want to try
+              enabling it.
+            </entry>
+          </row>
+          <row>
+            <entry>/app/3d/axes/disable</entry>
+            <entry>boolean</entry>
+            <entry>
+              If set to <literal>True</literal>, axis labels will never be
+              drawn on <link linkend='opengl-3d-view'>OpenGL 3D views</link>,
+              even if enabled.  This can help with certain troublesome 3D
+              driver/card/GtkGLExt combinations in which Gwyddion is likely
+              to crash when it tries to draw the axes.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

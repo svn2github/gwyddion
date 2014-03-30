@@ -32,7 +32,8 @@
     where they are listed in <guilabel>Registered functions</guilabel> for
     each module; or in the
     <ulink url='http://gwyddion.net/module-list.php'>on-line module
-    browser</ulink>.  The parameter list represents the settings of the
+    browser</ulink>.  The parameter list represents the
+    <link linkend='settings'>settings</link> of the
     function at the time it was used.  Since the log is only informative,
     the parameters may or may not allow a precise reconstruction of the
     operation.  For typical simple operations, they should be sufficient.
