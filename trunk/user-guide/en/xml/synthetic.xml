@@ -461,6 +461,21 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <informalfigure id='fig-synthetic-noise'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-noise.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Different artificial noise applied to the same surface:
+          symmetrical Gaussian noise (left);
+          positive exponential noise (centre);
+          negative exponential noise (right).
+          All images have the same false colour scale and all noises have the
+          same RMS.
+        </caption>
+      </mediaobject>
+    </informalfigure>
   </sect2>
   <sect2 id='line-noise-synthesis'>
     <title>Line Noise</title>
@@ -893,7 +908,7 @@
       The continuous inhibitor field
       <xi:include href="eqi-v.xml"/> is governed by a local differential
       equation coupled to the variable <xi:include href="eqi-u.xml"/>:
-    <xi:include href="eq-ising-diffeq.xml"/>
+      <xi:include href="eq-ising-diffeq.xml"/>
       where <xi:include href='eqi-mu.xml'/> is inhibitor coupling and
       <xi:include href='eqi-nu.xml'/> is bias.
       The boundary conditions of the simulation are periodic, hence, the
