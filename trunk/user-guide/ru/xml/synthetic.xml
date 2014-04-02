@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: synthetic.xml 16069 2014-03-27 13:30:22Z yeti-dn $ -->
+<!-- @(#) $Id: synthetic.xml 16093 2014-03-30 16:17:36Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="synthetic">
   <title>Синтетические поверхности</title>
@@ -266,6 +266,14 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <informalfigure id="fig-synthetic-noise">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="synthetic-noise.png" format="PNG"/>
+        </imageobject>
+        <caption>Различные виды искусственного шума, добавленные к одной и той же поверхности: симметричный гауссов шум (слева), положительный экспоненциальный шум (по центру), отрицательный экспоненциальный шум (справа). Все изображения показаны с одинаковой шкалой псевдоцвета и все виды шума имеют одинаковое среднеквадратичное отклонение.</caption>
+      </mediaobject>
+    </informalfigure>
   </sect2>
   <sect2 id="line-noise-synthesis">
     <title>Линейный шум</title>
@@ -504,13 +512,9 @@
   </sect2>
   <sect2 id="domain-synthesis">
     <title>Домены</title>
-    <para>Расчёт реализует гибридную неравновесную модель Изинга  [1], совмещающую дискретную модель Изинга для малых расстояний с непрерывным медленным ингибитором. Дискретная переменная <xi:include href="eqi-u.xml"/> имеет два возможных значения, которые она меняет с вероятностью</para>
-    <xi:include href="eq-ising-flipping.xml"/>
-    <para>где <xi:include href="eqi-Delta-E.xml"/> – изменение энергии в результате смены состояния и <xi:include href="eqi-T.xml"/> – температура. Энергия задаётся числом соседей в противоположном состоянии в направлениях вдоль координатных осей, по диагоналям и смещением, вызванным полем ингибитора.</para>
-    <xi:include href="eq-ising-energy.xml"/>
-    <para>Непрерывное поле ингибитора <xi:include href="eqi-v.xml"/> описывается локальным дифференциальным уравнением, связанным с переменной <xi:include href="eqi-u.xml"/>:</para>
-    <xi:include href="eq-ising-diffeq.xml"/>
-    <para>где <xi:include href="eqi-mu.xml"/> – связь ингибитора и <xi:include href="eqi-nu.xml"/> – смещение. Граничные условия для расчёта периодические, следовательно, генерируемые изображения также будут периодическими (т.е. идеально совмещаться друг с другом на границе).</para>
+    <para>Расчёт реализует гибридную неравновесную модель Изинга  [1], совмещающую дискретную модель Изинга для малых расстояний с непрерывным медленным ингибитором.</para>
+    <para>Дискретная переменная <xi:include href="eqi-u.xml"/> имеет два возможных значения, которые она меняет с вероятностью <xi:include href="eq-ising-flipping.xml"/> где <xi:include href="eqi-Delta-E.xml"/> – изменение энергии в результате смены состояния и <xi:include href="eqi-T.xml"/> – температура. Энергия задаётся числом соседей в противоположном состоянии в направлениях вдоль координатных осей, по диагоналям и смещением, вызванным полем ингибитора.</para>
+    <para>Непрерывное поле ингибитора <xi:include href="eqi-v.xml"/> задано локальным дифференциальным уравнением, связанным с переменной  <xi:include href="eqi-u.xml"/>: <xi:include href="eq-ising-diffeq.xml"/> где <xi:include href="eqi-mu.xml"/> – связь ингибитора и <xi:include href="eqi-nu.xml"/> – смещение. Граничные условия для расчёта периодические, следовательно, генерируемые изображения также будут периодическими (т.е. идеально совмещаться друг с другом на границе).</para>
     <para>Расчёт управляется следующими параметрами:</para>
     <variablelist>
       <varlistentry>
