@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="gwymodule-tutorial-overview" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Gwyddion Module Overview</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Gwyddion Module Overview</refname>
+    <refpurpose>
+      Overview of <application>Gwyddion</application> modules
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Module Types</title>
+    <para>
+      <application>Gwyddion</application> is quite a modular application.  In
+      fact, most of its basic functionallity is provided by modules.  Modules
+      allow to easily extend <application>Gwyddion</application> without the
+      need to recompile.  However, it is currently impossible to load, unload
+      and change modules while <application>Gwyddion</application> is running,
+      therefore it has to be restarted when the set of modules change. Modules
+      are then automatically detected, registered and the functions provided by
+      modules are added to <application>Gwyddion</application> menus and/or
+      toolboxes.
+    </para>
+    <para>
+      There are several distinct module types:
+      <itemizedlist>
+        <listitem><para>
+          <link linkend="gwymodule-tutorial-process">data processing
+          modules</link> that provide functions for processing of
+          two-dimensional data arrays (e.g. <emphasis>Fast Fourier
+          Transform</emphasis> module), or changing the graphical presentation
+          of data (e.g. <emphasis>shading</emphasis> module). Data processing
+          modules usually get data (i.e. two-dimensional field of SPM data),
+          possibly ask for processing options and do the requested data
+          processing. More interactive functions are typically better
+          implemented as tool modules.
+        </para></listitem>
+        <listitem><para>
+          <link linkend="gwymodule-tutorial-file">file loading and saving
+          modules</link> that handle import and export of foreign file formats,
+          also the <application>Gwyddion</application> native file format is
+          handled by a module.
+        </para></listitem>
+        <listitem><para>
+          <link linkend="gwymodule-tutorial-graph">graph modules</link> that
+          operate on one-dimensional data (graphs), e.g. profiles obtained by
+          <emphasis>Profile selection</emphasis> tool. An example is
+          <emphasis>Function fit</emphasis> module.
+        </para></listitem>
+        <listitem><para>
+          <link linkend="gwymodule-tutorial-tool">tool modules</link> that
+          provide tools operating on two-dimensional data directly in
+          application data windows. They have typically more interactive
+          interface than processing modules and allow to select objects on the
+          data with mouse.  Examples include <emphasis>Read value</emphasis> or
+          <emphasis>Three-point leveling</emphasis> tools.
+        </para></listitem>
+        <listitem><para>
+          <link linkend="gwymodule-tutorial-layer">layer modules</link> that
+          implement two-dimensional data selections as <emphasis>rectangular
+          selection</emphasis> or <emphasis>line selection</emphasis>.
+          Selections are mostly employed in tool modules, however several data
+          processing modules use them too.
+        </para></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      The above types are in fact <emphasis>function</emphasis> types, not
+      module types.  One module often provides a single function, but it can
+      also provide a whole bunch of completely unrelated functions, even of
+      different types.  However, it is usual to group functions containing
+      considreable amount of common code to one module (to allow sharing), and
+      use separate modules for unrelated functions.
+    </para>
+    <para>
+      More precisely, a file (i.e., a shared/dynamically linked library) always
+      corresponds to a one <application>Gwyddion</application> module.
+      A module can register zero or more functions (features) of arbitrary
+      type.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Data Representation</title>
+    <para>
+      The object representing a data file in Gwyddion is #GwyContainer.
+      It is a general container that can hold values of mixes types: atomic,
+      strings or objects.  Its items are identified with #GQuark<!--x-->s,
+      that is either by strings or by integers associated with the strings.
+    </para>
+    <para>
+      Two-dimensional data arrays (represented with #GwyDataField) or
+      one-dimensional curve data (represented with #GwyGraphModel and
+      #GwyGraphCurveModel) and auxiliary data are stored at keys resembling
+      Unix file paths and forming a kind of hierarchical structure.
+      For instance the data of the zeroth channel and its title can be
+      obtained with
+    </para>
+    <informalexample><programlisting><![CDATA[
+data_field = gwy_container_get_object_by_name(container, "/0/data");
+title      = gwy_container_get_string_by_name(container, "/0/data/title");
+]]></programlisting></informalexample>
+    <para>
+      The location of certain items is given by historical reasons and do not
+      always make much sense.  Fortunately a module author is rarely forced to
+      resort to this low-level interface. The
+      <link linkend="libgwyapp-data-browser">data browser</link> provides
+      high-level view of the file and means to perform all common operations.
+    </para>
+    <para>
+      In the high-level view, channels and graphs in a file are simply numbered
+      by small integers (each data type has its own numbering) and to uniquely
+      identify an object one uses the (container, id) couple.
+      The id number an object does not change during its lifetime (however,
+      it can change when the file is saved, closed and then opend again).
+      There are also functions with similar interface, operating on auxiliary
+      data.
+    </para>
+    <para>
+      For example to add a new data field to a container (file) we call
+    </para>
+    <informalexample><programlisting><![CDATA[
+new_id = gwy_app_data_browser_add_data_field(data_field, container, TRUE);
+]]></programlisting></informalexample>
+    <para>
+      The function gwy_app_data_browser_add_data_field() takes care of finding
+      a free id, storing the data field at the right key and even creation of
+      a window showing the new data field.
+    </para>
+  </refsect1>
+</refentry>
+
