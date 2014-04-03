@@ -6,7 +6,7 @@
   <para>Функции модулей в Gwyddion запоминают значения параметров между вызовами и между сеансами работы с программой. Место хранения этих параметров называется настройками. Настройки также содержат некоторое количество параметров, относящихся к основной программе.</para>
   <para>Постоянным хранилищем настроек является файл <filename>settings</filename> в каталоге пользователя, что обычно означает каталог <filename>~/.gwyddion</filename> (в Unix) или <filename>Documents and Settings\gwyddion</filename> (в MS Windows). Этот файл читается только при старте программы и записывается при завершении её работы. Следует иметь это в виду если вы собираетесь исправить что-то в нём вручную. Неизвестные настройки в этом файле игнорируются, но сохраняются.</para>
   <para>Файл настроек начинается с магической строки заголовка <informalexample><programlisting>Gwyddion Settings 1.0</programlisting></informalexample> за которой следуют строки с отдельными параметрами и значениями (которые формируют, технически, переведённый в последовательный вид <type>GwyContainer</type>). Gwyddion записывает элементы в алфавитном порядке, но это не является обязательным требованием и вам не нужно сохранять этот порядок при модификации файла.</para>
-  <para>Каждая строка параметров записывается в форме <informalexample><programlisting>"<replaceable>key</replaceable>" <replaceable>type</replaceable><replaceable>value</replaceable></programlisting></informalexample> Типичные ключи настроек модуля начинаются с <literal>/module/<replaceable>modulename</replaceable></literal>, хотя в некоторых случаях часть имени модуля не является по сути именем, либо потому что несколько модулей разделяют общие настройки, либо по причинам исторического характера. Ключи настройки самой программы начинаются с <literal>/app/</literal>. Все возможные типы значений перечислены в следующей таблице.</para>
+  <para>Каждая строка параметров записывается в форме <informalexample><programlisting>"<replaceable>key</replaceable>" <replaceable>type</replaceable> <replaceable>value</replaceable></programlisting></informalexample> Типичные ключи настроек модуля начинаются с <literal>/module/<replaceable>modulename</replaceable></literal>, хотя в некоторых случаях часть имени модуля не является по сути именем, либо потому что несколько модулей разделяют общие настройки, либо по причинам исторического характера. Ключи настройки самой программы начинаются с <literal>/app/</literal>. Все возможные типы значений перечислены в следующей таблице.</para>
   <para>
     <informaltable id="table-settings-types">
       <tgroup cols="2" align="left">
@@ -67,7 +67,7 @@
           <row>
             <entry>/app/3d/axes/disable</entry>
             <entry>boolean</entry>
-            <entry>Если установлено в <literal>True</literal>, подписи осей не будут рисоваться в <link linkend="opengl-3d-view">окнах трёхмерного просмотра OpenGL</link>, даже если они включены. Это может помочь с некоторыми проблемными комбинациями видеодрайвера/видеокарты/GtkGLExt с которыми Gwyddion падает при попытке отрисовки этих осей.</entry>
+            <entry>Если установлено в <literal>True</literal>, подписи осей не будут рисоваться в <link linkend="opengl-3d-view">окнах трёхмерного просмотра OpenGL</link>, даже если они включены. Это может помочь с некоторыми проблемными комбинациями видеодрайвера/видеокарты/GtkGLExt, с которыми Gwyddion падает при попытке отрисовки этих осей.</entry>
           </row>
         </tbody>
       </tgroup>
