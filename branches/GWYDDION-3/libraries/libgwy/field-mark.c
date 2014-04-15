@@ -352,10 +352,10 @@ propagate_non_extrema_marking(guint *types, const gdouble *d,
  *
  * Marks local maxima or minima in a two-dimensional field.
  *
- * Maximum is a contiguous set of pixels that have the same value and this
- * value is sharply greater than the value of any pixel touching the set.  A
- * minimum is defined analogously.  A field filled with a single value is
- * considered to have neither minimum nor maximum.
+ * Local (or regional) maximum is a contiguous set of pixels that have the same
+ * value and this value is sharply greater than the value of any pixel touching
+ * the set.  A minimum is defined analogously.  A field filled with a single
+ * value is considered to have neither minimum nor maximum.
  **/
 void
 gwy_field_mark_extrema(const GwyField *field,
