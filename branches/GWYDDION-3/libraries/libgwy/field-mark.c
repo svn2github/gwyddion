@@ -210,6 +210,8 @@ gwy_field_mark_outliers(const GwyField *field,
         }
     }
 
+    gwy_mask_field_invalidate(extrema);
+
     return nout;
 }
 
@@ -390,6 +392,8 @@ gwy_field_mark_extrema(const GwyField *field,
     }
 
     g_free(types);
+
+    gwy_mask_field_invalidate(extrema);
 }
 
 /**
