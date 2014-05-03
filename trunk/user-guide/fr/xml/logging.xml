@@ -35,10 +35,11 @@
     <guilabel>fonctions enregistrées</guilabel> pour chaque module ; ou dans le
     <ulink url='http://gwyddion.net/module-list.php'>navigateur de modules en
     ligne</ulink>.
-    La liste des paramètres représente les réglages de la fonction au moment où
+    La liste des paramètres représente les 
+    <link linkend='settings'>réglages</link> de la fonction au moment où
     celle-ci est utilisée. Comme le journal est donné à titre d'information, les
     paramètres peuvent permettre ou non une reconstruction précise de
-    l'opération. Cela devrait suffire pour des opérations simples. Par contre
+    l'opération. Cela devrait suffire pour des opérations simples, par contre
     l'entrée du journal risque d'être insuffisamment détaillée dans le cas
     d'opérations complexes ou interactives impliquant plusieurs canaux. La date
     est enregistrée en se basant sur la zone horaire locale lorsque l'opération

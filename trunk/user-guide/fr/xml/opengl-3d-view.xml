@@ -23,7 +23,10 @@
     Gwyddion de les compiler avec le support 3D, soit compiler
     vous-même Gwyddion à partir du code source. Dans le second cas, il faudra
     vous référer au guide de système d'exploitatoin pour déterminer la manière
-    d'activer les fonctionnalités OpenGL 3D.
+    d'activer les fonctionnalités OpenGL 3D. Si vous rencontrez des 
+    problèmes de performance pour l'affichage 3D sous MS Windows, vous
+    pouvez essayer de désactiver les effets visuels pour Gwyddion (dans
+    l'onglet <guilabel>Compatibilité</guilabel> du raccourci de Gwyddion).
   </para>
   <para>
     La fenêtre 3D peut se présenter sous deux formes : avec les contrôles

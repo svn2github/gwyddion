@@ -12,16 +12,50 @@
     (pour marquer les particules présentes sur une surface plane).
   </para>
   <para id='grain-threshold'>
-    <indexterm><primary>marquage de grain par seuil</primary></indexterm>
+    <indexterm>
+	  <primary>marquage de grain</primary>
+	  <secondary>seuil</secondary>
+	</indexterm>
     Les méthodes de seuillage sont accessibles dans le menu
     <menuchoice>
       <guimenu>Traitement des données</guimenu>
       <guisubmenu>Grains</guisubmenu>
       <guimenuitem>Marquer par seuil</guimenuitem>
     </menuchoice>.
-    Les seuiilage par hauteur, pente et courbure sont implémentés dans ce
+    Les seuillage par hauteur, pente et courbure sont implémentés dans ce
     module. Les résultats de chacune de ces méthodes de seuillage peuvent être
-    fusionnés à l'aide d'opérateurs.
+    fusionnés à l'aide de plusieurs opérateurs.
+  </para>
+  <para id='grain-threshold-otsu'>
+    <indexterm>
+      <primary>marquage de grain</primary>
+      <secondary>seuil</secondary>
+      <tertiary>méthode d'Otsu</tertiary>
+    </indexterm>
+    La méthode de marquage d'Otsu est accessible dans 
+    <menuchoice>
+      <guimenu>Traitements des données</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Marquer par la méthode d'Otsu</guimenuitem>
+    </menuchoice>.
+    Cette méthode sépare les valeurs en deux classes, en minimisant l'écart de
+    variance propre à chaque classe. Elle est particulièrement adaptée aux 
+    images contenant deux niveaux de valeurs relativement bien définis..
+  </para>
+  <para id='grain-edge'>
+    <indexterm>
+      <primary>marquage de grain</primary>
+      <secondary>détection de bord</secondary>
+    </indexterm>
+    Une autre fonctio de marquage,
+    <menuchoice>
+      <guimenu>Traitement des données</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Marquer par détection de bord</guimenuitem>
+    </menuchoice>,
+    est basée sur la détection de bord (courbure locale). L'image est traitée à
+    l'aide d'un filtre de différence de gaussiennes d'une taille donnée, puis le
+    seuillage est effectué sur l'image filtrée plutôt que sur l'originale.
   </para>
   <para id='grain-remove-thresholding'>
     De manière similaire, les grains peuvent être supprimés du masque à l'aide
@@ -44,11 +78,14 @@
   </para>
   <sect2 id='grain-watershed'>
     <title>Segmentation</title>
-    <indexterm><primary>marquage de grain par segmentation</primary></indexterm>
+    <indexterm>
+	  <primary>marquage de grain</primary>
+	  <secondary>segmentation</secondary>
+	</indexterm>
     <para>
       Dans le cas de structures plus complexes, les algorithmes de seuillage vus
       précédemment peuvent être inéfficaces. Dans ce cas l'algorithme de
-      <emphasis>segmentation</emphasis> peut être utilisé de manière beaucoups
+      <emphasis>segmentation</emphasis> peut être utilisé de manière beaucoup
       plus efficace pour le marquage de grains ou de particules.
     </para>
     <para>
@@ -56,8 +93,8 @@
       minima locaux et pour la segmentation d'image en traitement d'image.
       Comme le problème de la détermination de la position des grains peut être
       considéré comme un problème de détection d'extrema locaux, cet algorithme
-      peut être utilisé pour des besoins de segmentation o ude marquage de
-      grains. par souci de simplicité nous traiterons des données inversées
+      peut être utilisé pour des besoins de segmentation ou de marquage de
+      grains. Par souci de simplicité nous traiterons des données inversées
       selon la direction <xi:include href="eqi-z.xml"/> pour la description de
       l'algorithme (c'est-à-dire que le sommet des grains sont des des minima locaux dans le
       texte qui suit). Deux niveaux de traitement sont appliqués pour l'analyse
@@ -91,9 +128,9 @@
         d'eau est contrôlée par le paramètre <guilabel>Taille de goutte</guilabel>).
         Le nombre total d'étapes d'aspersion de gouttes en chaque point de la
         surface est contrôlé par le paramètre <guilabel>Nombre d'étapes</guilabel>.
-        Comme les grains ont déjà été marqués
-        et identifiés lors de la première étape, les situations suivantes
-        peuvent apparaître dès qu'une goutte atteind un minimum local :
+        Comme les grains ont déjà été marqués et identifiés lors de la première 
+        étape, les situations suivantes peuvent apparaître dès qu'une goutte 
+        atteind un minimum local :
         <orderedlist>
           <listitem>
             La goutte atteind un endroit déjà marqué comme étant un grain. Dans
@@ -550,6 +587,33 @@
           </itemizedlist>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>Caractéristiques liées au moment</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Demi-grand axe de l'ellipse équivalente</guilabel>,
+              longueur du demi-grand axe de l'ellipse ayant les mêmes moments
+              d'ordre deux dans le plan horizontal.
+            </listitem>
+          </itemizedlist>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Demi-petit axe de l'ellipse équivalente</guilabel>,
+              longueur du demi-petit axe de l'ellipse ayant les mêmes moments
+              d'ordre deux dans le plan horizontal.
+            </listitem>
+          </itemizedlist>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Orientation de l'ellipse équivalente</guilabel>,
+              direction du demi-grand axe de l'ellipse ayant les mêmes moments
+              d'ordre deux dans le plan horizontal. L'angle vaut par définition
+              zéro pour un grain circulaire.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <informalfigure id='fig-grain-bounding-dims'>
       <mediaobject>
@@ -658,7 +722,7 @@
       <menuchoice>
         <guimenu>Traitement des données</guimenu>
         <guisubmenu>Grains</guisubmenu>
-        <guimenuitem>Sélectionner les cercles ciconscrits</guimenuitem>
+        <guimenuitem>Sélectionner les cercles circonscrits</guimenuitem>
       </menuchoice>.
       Ces fonctions créent des sélections circulaires représentant les disques
       et cercles correspondants pour chaque grain, celles-ci pouvant être
@@ -687,6 +751,32 @@
       l'équation de Laplace, ce qui donne une transition douce des décalages
       entre les grains (toutefois on ne considère pas les autres éléments
       présents sur la surface).
+    </para>
+  </sect2>
+  <sect2 id='grain-edt'>
+    <title>Carte de distances euclidiennes</title>
+    <indexterm><primary>carte de distances</primary></indexterm>
+    <para>
+      La carte de distances euclidiennes donne pour chaque pixel sa distance
+      par rapport au bord du grain (masque). Elle est, d'une certaine manière,
+      complémentaire à la segmentation.
+    </para>
+    <para>
+      Lorsqu'elle est appliquée à l'intérieur des grains, la distance vaut zéro
+      en-dehors de ceux-ci, et augmente vers leurs «centres». À l'inverse, elle
+      peut être appliquée à l'extérieur des grains, dans ce cas la valeur est 
+      plus élevée pour les pixels les plus éloignés des grains. Il est aussi
+      possible de calculer une carte signée pour les deux côtés, avec des 
+      valeurs positives à l'intérieur des grains, et négatives à l'extérieur.
+    </para>
+    <para>
+      L'option <guilabel>éroder à partir des bords</guilabel> contrôle le
+      comportement du calcul sur les bords de l'image. Lorsqu'elle est activée,
+      les bords de l'image sont considérés comme étant aussi les bords d'un 
+      grain (si le bord est marqué). De cette manière, les bords de l'image ne 
+      peuvent se voir attribuer une valeur élevée. En étant désactivée, les
+      grains sont considérés comme s'étendant à l'infini en dehors de l'image.
+      Les pixels en bord d'image peuvent dans ce cas avoir des valeurs élevées.
     </para>
   </sect2>
   <sect2 id='grain-analysis-ref'>

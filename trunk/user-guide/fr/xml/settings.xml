@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: settings.xml 16092 2014-03-30 16:02:11Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='settings' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Configuration</title>
+  <para>
+    Les fonctions proposées par Gwyddion conservent les valeurs des paramètres
+    entre les différentes appels ou d'une session à une autre. Ces valeurs sont
+    spécifiées dans un fichier de configuration. Ce fichier contient aussi 
+    quelques paramètres liés au programme.
+  </para>
+  <para>
+    L'enregistrement de la configuration se fait dans le fichier
+    <filename>settings</filename> du répertoire utilisateur, c'est-à-dire
+    dans <filename>~/.gwyddion</filename> (Unix) ou
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
+    Le fichier n'est lu que lors du lancement de Gwyddion, et écrit lors de sa
+    fermeture. Gardez cet aspect en tête si vous souhaitez modifier manuellement
+    ce fichier. Les entrées inconnues du fichier sont ignorées mais conservées.
+  </para>
+  <para>
+    Le fichier de configuration démarre avec la ligne d'en-tête
+    <informalexample>
+      <programlisting>Gwyddion Settings 1.0</programlisting>
+    </informalexample>
+    suivies par les lignes pour chaque paramètre et la valeur associée (formant,
+    techniquement parlant, un <type>GwyContainer</type> sérialisé). Gwyddion
+    écrit les entrées dans l'ordre alphabétique, mais cela n'est pas 
+    obligatoire, et vous pouvez ne pas conserver cet ordre lorsque vous modifiez
+    le fichier.
+  </para>
+  <para>
+    Chaque ligne de paramètre est de la forme
+    <informalexample>
+      <programlisting>"<replaceable>clef</replaceable>" <replaceable>type</replaceable> <replaceable>valeur</replaceable></programlisting>
+    </informalexample>
+    Les réglages des modules commencent par
+    <literal>/module/<replaceable>nomdumodule</replaceable></literal>, bien que
+    dans certains cas la partie correspondant au nom du module ne corresponde
+    pas exactement au nom du module ; soit parce que plusieurs modules partagent
+    le même réglage, soit pour des raisons historiques.
+    Les réglages du programme commencent par <literal>/app/</literal>.
+    Les valeurs possibles sont listées dans le tableau qui suit.
+  </para>
+  <para>
+    <informaltable id='table-settings-types'>
+      <tgroup cols='2' align='left'>
+        <?dblatex lX?>
+        <thead>
+          <row>
+            <entry>Type</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>booléen</entry>
+            <entry>
+              Valeur logique pouvant être soit <literal>True</literal>
+              soit <literal>False</literal>.
+            </entry>
+          </row>
+          <row>
+            <entry>char</entry>
+            <entry>
+              Caractère unique. Les caractères normaux sont directement 
+              représentés par un caractère unique. Les caractères spéciaux sont
+              représentés par la notation hexadécimale
+              <literal>0x<replaceable>XX</replaceable></literal>.  Ce type de
+              paramètre n'est pas couramment utilisé par les modules.
+            </entry>
+          </row>
+          <row>
+            <entry>int32</entry>
+            <entry>
+              Entier 32 bits signé. Gwyddion l'écrit sous forme décimale mais
+              il peut ausi lire d'autres formats telle que la notation 
+              hexadécimale.
+            </entry>
+          </row>
+          <row>
+            <entry>int64</entry>
+            <entry>
+              Entier 64 bits signé. Gwyddion l'écrit sous forme décimale mais
+              il peut ausi lire d'autres formats telle que la notation 
+              hexadécimale.
+            </entry>
+          </row>
+          <row>
+            <entry>double</entry>
+            <entry>
+              Nombre à virgule flottante. Il peut être sous la forme 
+              scientifique, par exemple <literal>1.23e-4</literal>. Il est donné
+              au format C/POSIX, c'est-à-dire que le caractère décimal est le
+              point (pas de virgule ou d'autre caractère).
+            </entry>
+          </row>
+          <row>
+            <entry>string</entry>
+            <entry>
+              Chaîne de caractères entre guillemets droits, généralement encodé
+              au format UTF-8. Les caractères spéciaux, incluant les guillemets
+              droits inclus dans une chaîne, peuvent être introduits à l'aide
+              de la barre oblique inversée (antislash).
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    Quelques options utiles du programme peuvent être modifiées en éditant le 
+    fichier de configuration :
+  </para>
+  <para>
+    <informaltable id='table-settings-keys'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Clef</entry>
+            <entry>Type</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>/app/restore-tool-position</entry>
+            <entry>booléen</entry>
+            <entry>
+              En le réglant sur <literal>True</literal>, Gwyddion enregistre
+              non seulement la taille des boîtes de dialogue des outils, mais
+              aussi leur position (lorsque cela est possible). Cette option peut
+              être gênant si votre gestionnaire de fenêtre fonctionne
+              correctement, mais elle peut s'avérer utile si vous travaillez 
+              sous MS Windows.
+            </entry>
+          </row>
+          <row>
+            <entry>/app/3d/axes/disable</entry>
+            <entry>booléen</entry>
+            <entry>
+              En le réglant sur <literal>True</literal>, les labels des axes
+              ne sont plus affichés dans la 
+              <link linkend='opengl-3d-view'>vue OpenGL 3D</link>, même si 
+              ceux-ci sont activés. Cela peut vous être utile si vous êtes
+              confronté à une combinaison pilote/carte/GtkGLExt posant problème
+              et avec laquelle Gwyddion peut planter en tentant de dessiner les
+              axes.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

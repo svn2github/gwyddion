@@ -203,6 +203,21 @@
         <entry>Courbure</entry>
         <entry>Orientation de la courbure 2</entry>
       </row>
+      <row>
+        <entry><varname>a_e1</varname></entry>
+        <entry>Moment</entry>
+        <entry>Demi-grand axe de l'ellipse équivalente</entry>
+      </row>
+      <row>
+        <entry><varname>a_e2</varname></entry>
+        <entry>Moment</entry>
+        <entry>Demi-petit axe de l'ellipse équivalente</entry>
+      </row>
+      <row>
+        <entry><varname>phi_e1</varname></entry>
+        <entry>Moment</entry>
+        <entry>Orientation de l'ellipse équivalente</entry>
+      </row>
     </tbody>
   </tgroup>
 </informaltable>

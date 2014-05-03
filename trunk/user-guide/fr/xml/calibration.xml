@@ -5,16 +5,7 @@
 <sect1 id='caldata'>
   <title>Calibration et uncertitudes</title>
   <sect2 id='caldata-overview'>
-    <title>
-      Données de calibration
-      <guiicon>
-        <inlinemediaobject>
-          <imageobject>
-            <imagedata fileref='gwy_filter-24.png' format='PNG'/>
-          </imageobject>
-        </inlinemediaobject>
-      </guiicon>
-    </title>
+    <title>Données de calibration</title>
     <para>
       Les données de calibration peuvent être utilisées pour corriger les
       données mesurées ou pour réaliser des calculs d'incertitude. Elles peuvent
@@ -24,7 +15,7 @@
       peuvent alors être utilisées pour la correction des données. De manière
       similaire, la valeur d'incertitude est le plus souvent déterminée pour
       chaque axe à partir d'un bulletin de calibration et d'un budget
-      d'incertitude du proécédé de mesure.
+      d'incertitude du procédé de mesure.
     </para>
     <para>
       Dans les cas plus complexes; les données de calibration peuvent être
@@ -45,14 +36,14 @@
       métrologie.
     </para>
     <para>
-      Un ensemble d'outils est disponible dans Gwyddion pour faciliter le
+      Plusieurs outils sont disponible dans Gwyddion pour faciliter le
       traitement des incertitudes locales. Les données de calibration primaire,
       liées aux platines de translation, peuvent être déterminées ou chargées.
-      Elles peuvent être attibuées à une mesure SPM particulière afin de créer
+      Elles peuvent être attribuées à une mesure SPM particulière afin de créer
       un jeu de calibrations. Elles sont utilisées de manière automatique par
       les outils et modules pour lesquels un calcul de propagation des
       incertitudes peut être réalisé, de manière à déterminer une incertitude
-      de mesure finale..
+      de mesure finale.
     </para>
   </sect2>
   <sect2 id='caldata-create'>

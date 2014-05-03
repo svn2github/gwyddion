@@ -6,7 +6,7 @@
   <title>Synthèse de surfaces</title>
   <para>
     En plus des fonction d'analyse des surfaces mesurées, Gwyddion propose
-    plusieurs générateurs de surfaces artificielles pouvant servir pour des
+    plusieurs générateurs de surfaces artificielles pouvant servir pour des 
     tests ou des simulations en dehors de Gwyddion.
   </para>
   <para>
@@ -36,7 +36,7 @@
       </term>
       <listitem>
         <para>
-          Cette option, lorsqu'elle est activée, force les résolutions
+          Cette option, lorsqu'elle est activée, force les résolutions 
           horizontale et verticale à être identiques.
         </para>
       </listitem>
@@ -120,12 +120,12 @@
       </term>
       <listitem>
         <para>
-          Il s'agit de la graine du générateur de nombres aléatoires.
-          Le fait de choisir les mêmes paramètres et résolutions ainsi
-          que la même graine aboutira à la génération de la même surface,
-          même sur des ordinateurs différents. Des graines différentes
-          donnent des surfaces différentes ayant des caractéristiques
-          identiques selon les paramètres utilisés par le générateur.
+          Il s'agit de la graine du générateur de nombres aléatoires. Le fait de 
+          choisir les mêmes paramètres et résolutions ainsi que la même graine 
+          aboutira à la génération de la même surface, même sur des ordinateurs 
+          différents. Des graines différentes donnent des surfaces différentes 
+          ayant des caractéristiques identiques selon les paramètres utilisés 
+          par le générateur.
         </para>
       </listitem>
     </varlistentry>
@@ -145,10 +145,11 @@
       </term>
       <listitem>
         <para>
-          Activer cette option permet d'utiliser une nouvelle graine à
-          chaque fois que le générateur est lancé. Cela permet de relancer
-          facilement le générateur avec une nouvelle rgaine en tapant
-          <keycap>Ctrl-F</keycap> (voir les <link linkend='keyboard-shortcuts'>raccourcis clavier</link>).
+          Activer cette option permet d'utiliser une nouvelle graine à chaque 
+          fois que le générateur est lancé. Cela permet de relancer facilement 
+          le générateur avec une nouvelle rgaine en tapant
+          <keycap>Ctrl-F</keycap> 
+          (voir les <link linkend='keyboard-shortcuts'>raccourcis clavier</link>).
         </para>
       </listitem>
     </varlistentry>
@@ -156,17 +157,17 @@
   <sect2 id='spectral-synthesis'>
     <title>Synthèse spectrale</title>
     <para>
-      Le module de synthèse spectrale permet de créer des surfaces
-      aléatoires en calculant la transformée de Fourier de la surface à
-      partir des paramètres spécifiés, puis en appliquant la transformée
-      inverse pour obtenir la surface réelle. Les surfaces générées sont
-      périodiques (c'est-à-dire parfaitement juxtaposables).
+      Le module de synthèse spectrale permet de créer des surfaces aléatoires en 
+      calculant la transformée de Fourier de la surface à partir des paramètres 
+      spécifiés, puis en appliquant la transformée inverse pour obtenir la 
+      surface réelle. Les surfaces générées sont périodiques (c'est-à-dire 
+      parfaitement juxtaposables).
     </para>
     <para>
       Les paramètres de Fourier définissent la forme de la PSD, c'est-à-dire les
       modules des coefficients de Fourier, les phases étant choisies
-      aléatoirement. Actuellement toutes les surfaces générées sont
-      isotropes, c'est-à-dire que leur PSD est radialement symétrique.
+      aléatoirement. Actuellement toutes les surfaces générées sont isotropes, 
+      c'est-à-dire que leur PSD est radialement symétrique.
     </para>
     <variablelist>
       <varlistentry>
@@ -175,11 +176,11 @@
         </term>
         <listitem>
           <para>
-            Moyenne quadratique (RMS, root mean square) des hauteurs
-            (ou des différences au plan moyen, qui est cependant
-            toujours le plan <xi:include href="eqi-z-is-0.xml"/> ). Le
-            bouton <guilabel>Identique au canal courant</guilabel>
-            ajuste la valeur RMS à celle du canal courant.
+            Moyenne quadratique (RMS, root mean square) des hauteurs (ou des 
+            différences au plan moyen, qui est cependant toujours le plan 
+            <xi:include href="eqi-z-is-0.xml"/> ). Le bouton 
+            <guilabel>Identique au canal courant</guilabel> ajuste la valeur RMS 
+            à celle du canal courant.
           </para>
         </listitem>
       </varlistentry>
@@ -189,11 +190,10 @@
         </term>
         <listitem>
           <para>
-            Fréquences spatiales minimum et maximum. En augmentant la
-            fréquence minimum l'image aura tendance à
-            <quote>s'applatir</quote>, c'est-à-dire que les motifs larges seront
-            supprimés. La diminution de la fréquence maximum limitera la
-            finesse des détails.
+            Fréquences spatiales minimum et maximum. En augmentant la fréquence 
+            minimum l'image aura tendance à <quote>s'applatir</quote>, 
+            c'est-à-dire que les motifs larges seront supprimés. La diminution 
+            de la fréquence maximum limitera la finesse des détails.
           </para>
         </listitem>
       </varlistentry>
@@ -204,8 +204,8 @@
         <listitem>
           <para>
             Active la multiplication des coefficients de Fourier par une
-            fonction gaussienne, ce qui correspond dans l'espace réel à
-            une convolution par une gaussienne.
+            fonction gaussienne, ce qui correspond dans l'espace réel à une 
+            convolution par une gaussienne.
           </para>
         </listitem>
       </varlistentry>
@@ -223,10 +223,10 @@
             correspond à une densité spectrale de puissance uni-dimensionnelle
             lorentizienne, et donnant par ailleurs une fonction
             d'auto-corrélation exponentielle (voir la section
-            <link linkend='autocorrelation-1d'>analyse statistique</link> for
-            pour une discussion sur les fonctions d'auto-corrélation). Ce
-            facteur décroît relativement lentement, une résolution finie jouera
-            donc un rôle plus important que dans le cas d'une gaussienne.
+            <link linkend='autocorrelation-1d'>analyse statistique</link> pour 
+            une discussion sur les fonctions d'auto-corrélation). Ce facteur 
+            décroît relativement lentement, une résolution finie jouera donc un 
+            rôle plus important que dans le cas d'une gaussienne.
           </para>
         </listitem>
       </varlistentry>
@@ -237,7 +237,8 @@
         <listitem>
           <para>
             Longueur d'auto-corrélation du facteur gaussienne ou lorentzien
-            (voir la section <link linkend='autocorrelation-1d'>analyse statistique</link>
+            (voir la section 
+            <link linkend='autocorrelation-1d'>analyse statistique</link>
             pour une discussion sur les fonctions d'auto-corrélation).
           </para>
         </listitem>
@@ -329,8 +330,7 @@
         </term>
         <listitem>
           <para>
-            Taille latérale des objets, il s'agit en général du carré
-            circonscrit.
+            Taille latérale des objets, il s'agit en général du carré circonscrit.
           </para>
         </listitem>
       </varlistentry>
@@ -445,9 +445,9 @@
           <para>
             Le bruit peut être symétrique autour de zéro, ou uniquement positif
             ou négatif. La valeur moyenne de la distribution symétrique est
-            nulle, c'est-à-dire que la valeur moyenne des données ne change pas si l'on y
-            ajoute un bruit symétrique. La valeur moyenne augmente ou diminue si
-            le bruit ajouté est respectivement positif ou négatif.
+            nulle, c'est-à-dire que la valeur moyenne des données ne change pas 
+            si l'on y ajoute un bruit symétrique. La valeur moyenne augmente ou 
+            diminue si le bruit ajouté est respectivement positif ou négatif.
           </para>
         </listitem>
       </varlistentry>
@@ -464,6 +464,20 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <informalfigure id='fig-synthetic-noise'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-noise.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Différents bruits artificiels appliqués à la même surface : bruit 
+          gaussien symétrique (à gauche) ; bruit exponentiel positif 
+          (au centre) ; bruit exponentiel négatif (à droite). Toutes les images 
+          ont la même échelle de couleurs et tous les bruits ont la même valeur 
+          RMS.
+        </caption>
+      </mediaobject>
+    </informalfigure>
   </sect2>
   <sect2 id='line-noise-synthesis'>
     <title>Bruit linéaire</title>
@@ -480,8 +494,9 @@
       Deux types de défauts sont disponibles : les sauts et les rayures. Les
       sauts représentent des changements de valeur abrupts qui se prolongent
       jusqu'à la fin du scan (ou jusqu'à ce qu'un autre saut apparaisse). Les
-      rayures représentent des changements de valeur ayant une durée finie, c'est-à-dire
-      que les valeurs retrouvent leur niveau original au bout d'un certain temps..
+      rayures représentent des changements de valeur ayant une durée finie, 
+      c'est-à-dire que les valeurs retrouvent leur niveau original au bout d'un 
+      certain temps..
     </para>
     <para>
       Les sauts possèdent les paramètres suivants :
@@ -588,15 +603,15 @@
       Les motifs géométriques réguliers font partie des surfaces couramment
       rencontrées en microscopie en tant que standards ou comme échantillons de
       test, parmi lesquels on trouve les crénaux, les marches ou les trous.
-      Chaque type de motif a ses propres paramètres géométriques permettant de modifier la
-      forme et les dimensions de différents éléments du motif. Chaque paramètre
-      possède un contrôle de variance similaire à la
+      Chaque type de motif a ses propres paramètres géométriques permettant de 
+      modifier la forme et les dimensions de différents éléments du motif. 
+      Chaque paramètre possède un contrôle de variance similaire à la
       <link linkend='object-synthesis'>Synthèse d'objets</link>, qui permet de
       créer des motifs irréguliers sous certains aspects.
     </para>
     <para>
       Le placement du motif dans le plan horizontal est contrôlé par les
-      paramètres de l'onglet <guilabel>Placement</guilabel>, ccommun à tous les
+      paramètres de l'onglet <guilabel>Placement</guilabel>, commun à tous les
       types de motif :
     </para>
     <variablelist>
@@ -607,7 +622,7 @@
         <listitem>
           <para>
             Rotation du motif par rapport à une orientation de base, mesurée
-            dasn le sens inverse des aiguilles d'une montre.
+            dans le sens inverse des aiguilles d'une montre.
           </para>
         </listitem>
       </varlistentry>
@@ -616,7 +631,7 @@
       Cet onglet contient aussi les paramètres de déformation. L'activation de
       la variation des paramètres géométriques rend la surface plus ou moins
       irrégulière, mais la forme des éléments reste la même. La
-      La <guilabel>Déformation</guilabel> est une méthode complémentaire pour
+      <guilabel>déformation</guilabel> est une méthode complémentaire pour
       introduire une certaine irrégularité en distordant le motif dans le plan
       <xi:include href="eqi-xy.xml"/>. Elle possède deux paramètres :
     </para>
@@ -656,11 +671,381 @@
           orientées à 30°, modifiées par une déformation ayant une grande
           longueur d'autocorrélation (à gauche) ; crénaux séparés de manière non
           uniforme avec des pentes modérées entre les niveaux haut et bas, ainsi
-          qu'une déformation ayant une courte longueur d'autocorrélation (à
-          droite).
+          qu'une déformation ayant une courte longueur d'autocorrélation (au 
+          centre) ; motif non perturbé de trous arrondis avec une variation 
+          importante de taille et profondeur (à droite).
         </caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id='columnar-synthesis'>
+    <title>Films à croissance colonnaire</title>
+    <para>
+      La simulation de croissance colonnaire utilise un algorithme simple de 
+      déposition de type Monte Carlo, dans lequel de petites particules tombent 
+      sur la surface selon des directions définies par divers paramètres, et 
+      s'accrochent à la surface autour du point au niveau duquel elles la 
+      rencontrent, augmentant ainsi localement la hauteur. L'effet d'ombrage
+      fait qu'une plus grande partie des particules s'accrochera aux parties les 
+      plus élevées de la surface, et qu'une moindre partie atteindra les parties 
+      les plus basses. Cette rétroaction positive aboutit à la formation de
+      colonnes. L'algorithme considère le plan horizontal comme étant rempli de 
+      copies identiques de la surface, par conséquent la surface générée est 
+      elle aussi périodique (c'est-à-dire parfaitement juxtaposable). Le 
+      générateur de surface utilise les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Couverture</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Nombre moyen de fois où une particule est généré au-dessus de chaque 
+            pixel de la surface.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Hauteur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Augmentation locale de la hauteur lorsqu'une particule s'accroche à 
+            un pixel. Comme la taille horizontale de la particule est toujours 
+            d'un pixel, la hauteur est elle aussi mesurée en pixels. Une hauteur 
+            d'un pixel correspond à des particules cubiques, si l'on considère 
+            la croissance de la surface. Du point de vue du calcul de collision, 
+            les particules sont considérées comme étant ponctuelles.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Inclinaison</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Angle central d'inclinaison pour lequel les particules sont générées 
+            (angle d'incidence). Une valeur de zéro signifie que de très petits 
+            angles d'incidence auront la probabilité la plus élevée. Une valeur 
+            élevée signifie que les particules rencontreront majoritairement la 
+            surface avec une incidence élevée. Toutefois, si la variance de la 
+            direction d'incidence (voir ci-après) est élevée, la distribution 
+            restera isotrope dans le plan horizontal.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Direction</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Direction centrale d'incidence dans le plan horizontal selon 
+            laquelle les particules sont générées. Une variance élevée aboutira 
+            à une distribution isotrope dans le plan horizontal, tandis qu'une 
+            variance faible donnera une croissance anisotrope.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Relaxation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Méthode utilisée pour déterminet le pixel sur lequel la particule 
+            s'accrochera au final. Il existe deux options pour l'instant. La 
+            relaxation faible, avec laquelle seuls les deux derniers pixels 
+            immédiatement avant et après la collision sont pris en compte, dans 
+            ce cas la particule s'accroche au plus bas des deux. Dans le cas de 
+            la relaxation forte, l'algorithme prendra en compte un voisinnage 
+            supplémentaire de 3×3 pixels. La particule peut se déplacer vers un 
+            pixel plus bas du voisinnage avec une certaine probabilité, avant de 
+            s'y accrocher définitivement. 
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-columnar'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-columnar.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces à croissance colonnaire artificielle : colonnes peu 
+          compressées (à gauche) ; colonnes compressées (au centre) ; croissance 
+          directionnelle avec une forte relaxation (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='wave-synthesis'>
+    <title>Ondes</title>
+    <para>
+      La synthèse par ondes génère une image en utilisant les interférences 
+      d'ondes provenant d'un nombre déterminé de sources. En plus de la 
+      traditionnelle sinusoïde, quelques autres types d'onde sont disponibles, 
+      chacun ayant une forme cosinus et une sinus, l'une et l'autre ne différant 
+      que par un déphasage de <xi:include href="eqi-pi-over-2.xml"/> dans toutes 
+      les composantes fréquentielles. Lorsqu'on considère une onde complexe, la 
+      forme cosinus correspond à sa partie réelle, tandis que la forme sinus 
+      correspond à sa partie imaginaire.
+    </para>
+    <informalfigure id='fig-synthetic-wave-waveform'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='waveform.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='waveform.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Formes sinus et cosinus des différentes types d'onde disponibles. 
+          Seule la forme cosinus est utilisée pour les images de déplacement ; 
+          l'onde complexe complète est utilisée pour les images d'intensité et 
+          de phase.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Le générateur dispose des options suivantes : 
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Quantité</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantité affichée dans l'image. Le déplacement est la somme des 
+            parties réelles. L'amplitude est la valeur absolue de l'onde 
+            complexe. La phase correspond à l'angle de phase de l'onde complexe.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Nombre d'ondes</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Nombre de sources ponctuelles à partir desquelles les ondes
+            se propagent.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Forme d'onde</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Forme d'onde décrite plus haut.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Amplitude</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Amplitude approximative (RMS) des hauteurs de l'image générée. Notez 
+            qu'elle diffère de l'amplitude des ondes individuelles : dans ce cas 
+            l'amplitude des hauteurs croisserait selon la racine carrée du 
+            nombre d'ondes, alors que dans les faits elle reste à peu près 
+            constante à moins qu'on ne modifie l'amplitude.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Fréquence</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Fréquence spatiale des ondes. Elle est relative à la taille de 
+            l'image, c'est-à-dire qu'une valeur de 1.0 correspond à une longueur 
+            d'onde égale à la largeur de l'image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Centre X</guilabel>,
+          <guilabel>Centre Y</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Localisation des sources. La valeur zéro correspond au centre de 
+            l'image. Les positions sont aussi mesurées relativement à la taille 
+            de l'image. De manière générale, au moins une des valeurs de 
+            variance correspondantes devraient être non-nulles ; dans le cas 
+            contraire toutes les sources sont au même endroit (on peut tout de 
+            même dans ce cas obtenir des motifs intéressants en faisant varier 
+            les fréquences).
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-waves'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-waves.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles basées sur des ondes : image de déplacement 
+          générée avec une plage de fréquence assez large (à gauche) ; image 
+          d'amplitude utilisant l'onde de type argument cosinus hyperbolique (au 
+          centre) ; image de phase donnée par un ensemble réduit de sources 
+          lointaines (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='domain-synthesis'>
+    <title>Domaines</title>
+    <para>
+      Ce module implémente un modèle d'Ising hybride hors d'équilibre [1],
+      combinant un modèle d'Ising discret de petite échelle avec un inhibiteur 
+      continu et lent. 
+    </para>
+    <para>
+      La variable discrète <xi:include href="eqi-u.xml"/> a deux valeurs 
+      possibles, entre lesquelles elle peut basculer de manière probabiliste 
+      selon la loi <xi:include href="eq-ising-flipping.xml"/> où 
+      <xi:include href='eqi-Delta-E.xml'/> est le changement d'énergie résultant 
+      du basculement et <xi:include href='eqi-T.xml'/> est la température. 
+      L'énergie est donnée par le nombre de voisins dans l'état opposé selon les 
+      axes de coordonnées, les diagonales, et le biais donné par le champ 
+      d'inhibition : <xi:include href="eq-ising-energy.xml"/>
+    </para>
+    <para>
+      L'inhibiteur continu <xi:include href="eqi-v.xml"/> est gouverné par une 
+      équation différentielle locale couplée à la variable 
+      <xi:include href="eqi-u.xml"/> :
+      <xi:include href="eq-ising-diffeq.xml"/>
+      où <xi:include href='eqi-mu.xml'/> est le couplage d'inhibition
+      et <xi:include href='eqi-nu.xml'/> est le biais.
+      Les conditions aux limites de la simulation sont périodiques, par
+      conséquent les images générées sont elles aussi périodiques (c'est-à-dire
+      parfaitement juxtaposables).
+    </para>
+    <para>
+      Le calcul dépend des paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Nombre d'itérations</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Une itération consiste en quatre étapes : une mise à jour par 
+            Monte-Carlo de <xi:include href="eqi-u.xml"/>, une étape temporelle 
+            de la solution de l'équation différentielle pour
+            <xi:include href="eqi-v.xml"/>, une autre étape de Monte-Carlo et 
+            enfin une autre étape temporelle de l'équation différentielle.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Température</guilabel>
+        </term>
+        <listitem>
+          <para>
+            La température détermine la probablité selon laquelle la variable à 
+            deux états <xi:include href="eqi-u.xml"/> peut basculer vers l'autre 
+            valeur s'il en résulte une configuration ayant une énergie 
+            supérieure ou équivalente (les basculements abaissant fortement 
+            l'énergie ont lieu de manière inconditionnelle). Une température 
+            élevée aboutira à une séparation moindre entre les deux domaines
+            <xi:include href="eqi-u.xml"/> .
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Force de l'inhibiteur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Force avec laquelle la variable continue biaise l'énergie de chaque 
+            pixel. Une valeur élevée donnera une à l'inhibiteur une influence 
+            plus élevée comparée à celle de la tension de surface.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Couplage de l'inhibiteur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Facteur de couplage entre <xi:include href="eqi-u.xml"/> et
+            <xi:include href="eqi-v.xml"/> dans l'équation différentielle
+            pour <xi:include href="eqi-v.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Biais</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Biais dans l'équation différentielle pour
+            <xi:include href="eqi-v.xml"/> vers des valeurs plus faibles ou plus 
+            élevées.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Étape temporelle de Monte-Carlo</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Étape temporelle correspondant à une étape de Monte-Carlo dans 
+            l'équation différentielle. Ce paramètre détermine donc la vitesse 
+            relative des deux processus.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Hauteur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Plage de valeur des images créées par le module.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-domains'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-domains.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles basées sur des domaines : ondes spirales 
+          étendues (à gauche) ; ondes spirales resserrées à une température plus 
+          élevée (au centre) ; valeur de la variable continue pour un cas à 
+          faible température avec un inhibiteur et un couplage faibles.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='synthetic-ref'>
+    <title>Références</title>
+    <para id='synthetic-ref-1'>
+      [1] L. M. Pismen, M. I. Monine, G. V. Tchernikov: Physica D, (2004) 199 p 82
+    </para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
