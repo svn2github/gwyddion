@@ -59,11 +59,14 @@
       modifiés en double-cliquant dessus.
     </para>
     <para>
-      Les canaux, graphes et spectres peuvent être supprimés, dupliqués ou
-      extraits individuellement vers un nouveau fichier Gwyddion natif à l'aide
-      des boutons situés en bas du navigateur. Il est aussi possible de les
-      copier vers un nouveau fichier en faisant glisser une ligne du navigateur
-      vers une fenêtre quelconque du fichier ciblé.
+      Les canaux, graphes, spectres ou données volumiquespeuvent être supprimés, 
+			dupliqués ou extraits individuellement vers un nouveau fichier Gwyddion 
+			natif à l'aide des boutons situés en bas du navigateur. Il est aussi
+			possible de les copier vers un nouveau fichier en faisant glisser une 
+			ligne du navigateur vers une fenêtre quelconque du fichier ciblé. Pour
+			renommer un élément, sélectionnez-le puis pressez la touche 
+			To rename a data item, select it and press <keycode>Entrée</keycode> ou 
+			faites un triple clic dessus avec la souris.
     </para>
     <para>
       Le bouton fermer situé en haut à droite du navigateur permet de fermer le
