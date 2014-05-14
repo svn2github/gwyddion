@@ -10,8 +10,10 @@
     <textobject role='tex'>
       <phrase>
 <![CDATA[
-\vartheta = \atan\hypot\left({\d z\over\d x}, {\d z\over\d y}\right)\;,\quad
-\varphi = \atan_2\left({\d z\over\d y}, -{\d z\over\d x}\right)
+\vec v = \left({\d z\over\d x}, {\d z\over\d y}\right)\;,\quad
+v = |\vec v|\;,\quad
+\vartheta = \atan v\;,\quad
+\varphi = \atan_2(v_y, -v_x)
 ]]>
       </phrase>
     </textobject>
