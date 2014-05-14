@@ -607,6 +607,10 @@
       In addition to the graph displaying the values for individual
       rows/columns, the mean value and standard deviation of the selected
       quantity is calculated from the set of individual row/column values.
+      It must be emphasised that the standard deviation of the selected
+      quantity represents the dispersion of values for individual rows/columns
+      and cannot be interpreted as an error of the analogous two-dimensional
+      quantity.
     </para>
   </sect2>
   <sect2 id='slope-distribution'>
@@ -632,22 +636,49 @@
       as central derivatives (one-side on the borders of the image) or,
       if <guilabel>Use local plane fitting</guilabel> is enabled, by fitting
       a local plane through the neighbourhood of each point and using its
-      gradient.  <guimenuitem>Slope Distribution</guimenuitem> has also
-      another mode operation called <guilabel>Per-angle graph</guilabel>,
-      in which it plots the distribution of <xi:include href="eqi-r-to-2.xml"/>
-      over <xi:include href="eqi-phi.xml"/> where we introduced polar
-      coordinates <xi:include href="eqi-coords-r-phi.xml"/> in the plane of
-      derivatives. The relation between the derivative Cartesian coordinates of
-      the two-dimensional slope distribution and the
-      <link linkend='inclinations-coordinates'>facet inclination angles</link>
-      are given by the following formula:
-      <xi:include href="eq-facet-theta-phi.xml"/>
+      gradient.
     </para>
+    <indexterm>
+      <primary>angle distribution</primary>
+      <secondary>1D</secondary>
+    </indexterm>
+    <para>
+      <guimenuitem>Slope Distribution</guimenuitem> can also plot
+      summary graphs representing one-dimensional distributions of quantities
+      related to the local slopes and
+      <link linkend='inclinations-coordinates'>facet inclination angles</link>
+      given by the following formula:
+      <xi:include href="eq-facet-theta-phi.xml"/>
+      Three different plots are available:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <guimenuitem>Inclination (θ)</guimenuitem>, the distribution of the
+        inclination angle <xi:include href="eqi-theta.xml"/>
+        from the horizontal plane.  Of course, representing
+        the slope as an angle requires the value and the dimensions to be the
+        same physical quantity.
+      </listitem>
+      <listitem>
+        <guimenuitem>Inclination (gradient)</guimenuitem> is similar to
+        the <xi:include href="eqi-theta.xml"/> plot, except the distribution of
+        the derivative <xi:include href="eqi-v.xml"/> is plotted instead of the
+        angle.
+      </listitem>
+      <listitem>
+        <guimenuitem>Inclination (φ)</guimenuitem> visualises the integral of
+        <xi:include href="eqi-v-to-2.xml"/> for each direction
+        <xi:include href="eqi-phi.xml"/> in the horizontal plane.
+        This means it is not a plain distribution of
+        <xi:include href="eqi-phi.xml"/> because areas with larger slopes
+        contribute more significantly than flat areas.
+      </listitem>
+    </itemizedlist>
     <para id='angle-distribution'>
       <guimenuitem>Angle Distribution</guimenuitem> function is
       a visualization tool that does not calculate a distribution in the
-      strict sense.  For each derivative <xi:include href="eqi-v.xml"/> the
-      circle of points satisfying
+      strict sense.  For each derivative <xi:include href="eqi-vec-v.xml"/>
+      the circle of points satisfying
       <xi:include href="eq-angle-distribution.xml"/>
       is drawn.  The number of points on the circle is given by
       <guilabel>Number of steps</guilabel>.
