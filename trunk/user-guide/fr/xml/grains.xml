@@ -57,36 +57,40 @@
     l'aide d'un filtre de différence de gaussiennes d'une taille donnée, puis le
     seuillage est effectué sur l'image filtrée plutôt que sur l'originale.
   </para>
-  <para id='grain-remove-thresholding'>
-    De manière similaire, les grains peuvent être supprimés du masque à l'aide
-    du menu
+  <para id='grain-remove-touching-edges'>
+    Les grains en contact avec l'un des bords de l'image peuvent être supprimés 
+    du masque à l'aide du menu
     <menuchoice>
       <guimenu>Traitement des données</guimenu>
       <guisubmenu>Grains</guisubmenu>
-      <guimenuitem>Supprimer par seuil</guimenuitem>
+      <guimenuitem>Supprimer les grains en contact avec les bords</guimenuitem>
     </menuchoice>.
-    Les seuillages par hauteur maximale et/ou surface peuvent être utilisés pour
-    éliminer de faux grains provoqués par exemple par du bruit ou des particules
-    de poussière. Vous pouvez aussi utiliser l'outil interactif de
-    <link linkend='tool-remove-grains'>suppression des grains</link> pour
-    réaliser cette tâche manuellement.
-  </para>
-  <para>
-    Cette fonction peut aussi supprimer tous les grains en contact avec les
-    bords de l'image, ce qui peut s'avérer utile si l'on considère que ces
-    grains sont incomplets et que l'on souhaite les exclure de l'analyse.
+    Cette fonction est utile si de tels grains sont considérés comme incomplets
+    et doivent être exclus de l'analyse. Plusieurs autres fonctions de l'outil
+    d'<link linkend='mask-editor'>édition de masque</link> peuvent être utiles
+    pour modifier la forme des grains après le marquage.
   </para>
   <sect2 id='grain-watershed'>
-    <title>Segmentation</title>
+    <title>
+      Ligne de partage des eaux
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_water-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
     <indexterm>
 	  <primary>marquage de grain</primary>
-	  <secondary>segmentation</secondary>
+	  <secondary>ligne de partage des eaux</secondary>
 	</indexterm>
     <para>
       Dans le cas de structures plus complexes, les algorithmes de seuillage vus
-      précédemment peuvent être inéfficaces. Dans ce cas l'algorithme de
-      <emphasis>segmentation</emphasis> peut être utilisé de manière beaucoup
-      plus efficace pour le marquage de grains ou de particules.
+      précédemment peuvent être inefficaces. Dans ce cas l'algorithme de
+      segmentation par <emphasis>ligne des partage des eaux</emphasis> peut être 
+      utilisé de manière beaucoup plus efficace pour le marquage de grains ou de 
+      particules.
     </para>
     <para>
       L'algorithme de segmentation est généralement utilisé pour la détection de
@@ -96,9 +100,10 @@
       peut être utilisé pour des besoins de segmentation ou de marquage de
       grains. Par souci de simplicité nous traiterons des données inversées
       selon la direction <xi:include href="eqi-z.xml"/> pour la description de
-      l'algorithme (c'est-à-dire que le sommet des grains sont des des minima locaux dans le
-      texte qui suit). Deux niveaux de traitement sont appliqués pour l'analyse
-      de grain (voir [<link linkend='grain-analysis-ref-1'>1</link>]) :
+      l'algorithme (c'est-à-dire que le sommet des grains sont des des minima 
+      locaux dans le texte qui suit). Deux niveaux de traitement sont appliqués 
+      pour l'analyse de grain (voir 
+      [<link linkend='grain-analysis-ref-1'>1</link>]) :
     </para>
     <orderedlist>
       <listitem>
@@ -728,6 +733,59 @@
       et cercles correspondants pour chaque grain, celles-ci pouvant être
       affichées par la suite avec le
       <link linkend='tool-selection-manager'>gestionnaire de sélections</link>.
+    </para>
+  </sect2>
+  <sect2 id='grain-filter'>
+    <title>
+      Filtrage des grains
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      Les grains marqués peuvent être filtrés par seuillage sur différentes
+      quantités à l'aide de la fonction
+      <menuchoice>
+        <guimenu>Traitements des données</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Filtrer</guimenuitem>
+      </menuchoice>.
+      Ce module peut être utilisé pour des opérations basiques, telle que la
+      suppression de petits grains à l'aide d'un seuillage basé sur l'aire, ou
+      des filtrages bien plus complexes à l'aide d'expressions logiques
+      impliquant différentes quantités.
+    </para>
+    <para>
+      Le filtre conserve les grains satisfaisant les conditions définies dans
+      <guilabel>Conserver les grains satisfaisant</guilabel> et supprime tous 
+      les autres. La condition est exprimée par l'association logique de une à 
+      trois conditions, notées <varname>A</varname>, <varname>B</varname> et
+      <varname>C</varname>. L'expression la plus simple est juste 
+      <varname>A</varname>, qui impose que la quantité <varname>A</varname> 
+      soit entre les seuils définis.
+    </para>
+    <para>
+      Chaque condition consiste en deux seuils haut et bas pour une quantité
+      donnée, par exemple l'aire ou la valeur minimale. Les valeurs doivent
+      appartenir à l'intervalle [bas,haut] pour satisfaire la condition
+      et conserver ainsi les grains. Notez qu'il est possible de choisir un 
+      seuil bas plus élevé que le seuil haut. Dans ce cas la condition est
+      inversée, c'est-à-dire que le grain est conservé si la valeur est en 
+      dehors de l'intervalle [haut,bas].
+    </para>
+    <para>
+      Les quantités sont assignées à <varname>A</varname>,
+      <varname>B</varname> et <varname>C</varname> en sélectionnant la quantité
+      dans la liste puis en cliquant sur le bouton correspondant dans 
+      <guilabel>Assigner à</guilabel>. L'ensemble des quantités sélectionnées
+      est affiché dans les en-têtes
+      <guilabel>Condition A</guilabel>,
+      <guilabel>Condition B</guilabel> et
+      <guilabel>Condition C</guilabel>.
     </para>
   </sect2>
   <sect2 id='grain-level'>

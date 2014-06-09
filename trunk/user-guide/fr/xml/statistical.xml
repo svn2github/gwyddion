@@ -10,7 +10,7 @@
     Gwyddion propose différentes manières d'effectuer cette analyse. Cette
     section présente les différents outils et modules statistiques présents
     dans Gwyddion, et donne aussi les équations de base utilisées pour
-    développer les algorithmes mis en œuvre..
+    développer les algorithmes mis en œuvre.
   </para>
   <para>
     Les données de microscopie à balayage sont généralement représentées par des
@@ -621,6 +621,9 @@
       En complément du graphe, la valeur moyenne et l'écart type de la quantité
       sélectionnée sont calculés à partir des valeurs obtenues pour les lignes
       ou les colonnes.
+      À noter que l'écart type de la quantité sélectionnée représente la 
+      dispersion des valeurs des lignes ou colonnes individuelles, à ne pas
+      interpréter comme l'rreur de la quantité bi-dimensionnelle équivalente.
     </para>
   </sect2>
   <sect2 id='slope-distribution'>
@@ -646,21 +649,48 @@
       (en se basant sur un seul côté en bord d'image), ou si l'option
       <guilabel>utiliser l'ajustement du plan local</guilabel> est activée, en
       ajustant un plan sur les pixels environnants et en utilisant les gradients
-      de celui-ci. La <guimenuitem>distribution des pentes</guimenuitem> propose
-      aussi un autre mode appelé <guilabel>graphe directionnel</guilabel>, qui
-      affiche la distribution <xi:include href="eqi-r-to-2.xml"/> sur
-      <xi:include href="eqi-phi.xml"/> où l'on utilise les coordonnées polaires
-      <xi:include href="eqi-coords-r-phi.xml"/> dans le plan des dérivées. Les
-      relations entre les coordonnées cartésiennes de la distribution
-      bi-dimensionnelle des pentes et les
-      <link linkend='inclinations-coordinates'>angles d'inclinaison des facettes</link>
-      sont données par les formules suivantes :
-      <xi:include href="eq-facet-theta-phi.xml"/>
+      de celui-ci. 
     </para>
+    <indexterm>
+      <primary>distribution angulaire</primary>
+      <secondary>1D</secondary>
+    </indexterm>
+    <para>
+      La <guimenuitem>distribution des pentes</guimenuitem> peut aussi afficher
+      des graphes représentant les distributions uni-dimensionnelles de 
+      quantités aux pentes locales et aux
+      <link linkend='inclinations-coordinates'>angles d'inclinaison des facettes</link>
+      donnés par la formule suivante :
+      <xi:include href="eq-facet-theta-phi.xml"/>
+      Trois types de graphes sont disponibles :
+    </para>
+    <itemizedlist>
+      <listitem>
+        L'<guimenuitem>inclinaison (θ)</guimenuitem>, c'est-à-dire la 
+        distribution de l'angle d'inclinaison <xi:include href="eqi-theta.xml"/>
+        par rapport au plan horizontale. La représentation de la pente sous
+        forme d'angle nécessite bien évidemment que les valeurs et dimensions 
+        réprésentent la même quantité physique.
+      </listitem>
+      <listitem>
+        L'<guimenuitem>inclinaison (gradient)</guimenuitem> est similaire au 
+        graphe de <xi:include href="eqi-theta.xml"/>, excepté que l'on 
+        affiche la distribution de la dérivée <xi:include href="eqi-v.xml"/> au 
+        lieu de l'angle.
+      </listitem>
+      <listitem>
+        L'<guimenuitem>inclinaison (φ)</guimenuitem> affiche l'intégrale de
+        <xi:include href="eqi-v-to-2.xml"/> pour chaque direction
+        <xi:include href="eqi-phi.xml"/> dans le plan horizontal. Cela signifie
+        qu'il ne s'agit d'une simple distribution de 
+        <xi:include href="eqi-phi.xml"/> car les zones présentant des pentes
+        élevées contribuent plus que les zones planes.
+      </listitem>
+    </itemizedlist>
     <para id='angle-distribution'>
       La <guimenuitem>distribution angulaire</guimenuitem> est un outil de
       visualisation qui ne calcule pas une distribution au sens strict du terme.
-      Pour chaque dérivée <xi:include href="eqi-v.xml"/>, elle affiche le cercle
+      Pour chaque dérivée <xi:include href="eqi-vec-v.xml"/>, elle affiche le cercle
       de points satisfaisant <xi:include href="eq-angle-distribution.xml"/>
       Le nombre de points sur le cercle est donné par le
       <guilabel>nombre de pas</guilabel>.
