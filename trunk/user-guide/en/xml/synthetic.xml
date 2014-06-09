@@ -157,10 +157,11 @@
   <sect2 id='spectral-synthesis'>
     <title>Spectral</title>
     <para>
-      Spectral synthesis module creates randomly rough surfaces by constructing
-      the Fourier transform of the surface according to specified parameters
-      and then performing the inverse Fourier transform to obtain the real
-      surface.  The generated surfaces are periodic (i.e. perfectly tilable).
+      The spectral synthesis module creates randomly rough surfaces by
+      constructing the Fourier transform of the surface according to specified
+      parameters and then performing the inverse Fourier transform to obtain
+      the real surface.  The generated surfaces are periodic (i.e. perfectly
+      tilable).
     </para>
     <para>
       The Fourier image parameters define the shape of the PSDF, i.e. the
@@ -1015,6 +1016,221 @@
           short-range ordered spiral waves at a higher temperature (centre);
           the continous variable for a low-temperature situation with
           small strength and coupling (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='lattice-synthesis'>
+    <title>Lattice</title>
+    <para>
+      The lattice synthesis module creates surfaces based on randomised
+      two-dimensional lattices.  It has two major parts.  The first part,
+      controlled by parameters in tab <guilabel>Lattice</guilabel>, is the
+      creation of a set of points in plane that are organised to a more or less
+      randomised lattice.  The second part, controlled by parameters in tab
+      <guilabel>Surface</guilabel>, is the actual construction of a surface
+      based on quantities calculated from Voronoi tessellation and/or Delaunay
+      triangulation of the set of points.
+    </para>
+    <para>
+      The creation of the lattice has the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Lattice</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The base lattice type.  The random lattice corresponds to
+            completely randomly placed points.  Other types (square, hexagonal,
+            triangular) correspond to regular organisations of points.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Size</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The average cell size.  More precisely, this parameter describes
+            the mean point density.  It is equal to the side of the square if
+            the same number of points was organised to a square lattice.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Relaxation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Amount to which the lattice is allowed to relax.  The relaxation
+            process pushes points away from very close neighbours and towards
+            large empty space.  The net result is that cell sizes become more
+            uniform.  Of course, relaxation has no effect on regular lattices.
+            It should be noted that relaxation requires progressive
+            retessellation and large relaxation parameter values can slow down
+            the surface generation considerably.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Orientation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The rotation of the lattice with respect to some base orientation,
+            measured counterclockwise.  It is only available for regular
+            lattices as the random lattice is isotropic.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Amplitude</guilabel>,
+          <guilabel>Lateral scale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Parameters that control the lattice deformation.  They have the
+            same meaning as in
+            <link linkend='pattern-synthesis'>Pattern synthesis</link>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      The final surface is constructed as a weighted sum of a subset of basic
+      quantities derived from the Voronoi tessellation or Delaunay
+      triangulation.  Each quantity can be enabled and disabled.  When it
+      is selected in the list, its weight in the sum and its thresholding
+      parameters can be modified using the sliders.  The lower and upper
+      threshold cut the value range (which is always normalised to
+      <xi:include href='eqi-interval-0-1.xml'/>) by changing all values larger
+      than the upper threshold equal to the thresold value and similarly for
+      the lower thresold.
+    </para>
+    <para>
+      Some of the basic quantities are calculated from lateral coordinates
+      only.  Some, however, are calculated from random values
+      (<quote>heights</quote>) assigned to each point in the set.  The
+      available quantities include:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Random constant</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Rounding interpolation between the random values assigned to each
+            point of the set.  This means each Voronoi cell is filled with
+            a constant random value.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Random linear</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Linear interpolation between the random values assigned to each
+            point of the set.  Thus the surface is continuous, with each
+            Delaunay triangle corresponding to a facet.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Random bumpy</guilabel>
+        </term>
+        <listitem>
+          <para>
+            An interpolation similar to the previous one, but non-linear,
+            creating relatively level areas around each point of the set.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Radial distance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance to the closest point of the set.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Segmented distance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance to the closest Voronoi cell border, scaled in each cell
+            segment so that the set point is in the same distance from all
+            borders.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Segmented random</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The same quantity as segmented distance, but multiplied by the
+            radndom value assigned to the point of the set.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Border distance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance to the closest Voronoi cell border.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Border random</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The same quantity as border distance, but multiplied by the
+            radndom value assigned to the point of the set.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Second nearest distance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance to the second nearest point of the set.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-lattice'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-lattice.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial lattice surfaces: faceted surface created by
+          random linear interpolation (left);
+          bumps in a distorted triangular pattern (centre);
+          distorted rectangular pattern with arease separated by trenches
+          (right).
         </caption>
       </mediaobject>
     </informalfigure>
