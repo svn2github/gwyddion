@@ -57,25 +57,29 @@
     a difference-of-Gaussians filter of a given size and thresholding is then
     performed on this filtered image instead of the original.
   </para>
-  <para id='grain-remove-thresholding'>
-    Similarly, the grains can be removed from the mask using
+  <para id='grain-remove-touching-edges'>
+    Grains that touch image eges can be removed using
     <menuchoice>
       <guimenu>Data Process</guimenu>
       <guisubmenu>Grains</guisubmenu>
-      <guimenuitem>Remove Grains</guimenuitem>
+      <guimenuitem>Remove Edge-Touching</guimenuitem>
     </menuchoice> menu choice.
-    Maximum height and/or size thresholding methods can be used to eliminate
-    false grains occurred by noise or some dust particles, for example. You can
-    use also interactive <link linkend='tool-remove-grains'>grain removal</link>
-    tool for doing this manually.
-  </para>
-  <para>
-    This function can also remove all grains that touch image sides which is
-    useful if such grains are considered incomplete and must be excluded from
-    analysis.
+    This is useful if such grains are considered incomplete and must be
+    excluded from analysis.  Several other other functions that may be useful
+    for modification of grain shapes after marking are performed by the
+    <link linkend='mask-editor'>Mask Editor</link> tool.
   </para>
   <sect2 id='grain-watershed'>
-    <title>Watershed</title>
+    <title>
+      Watershed
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_water-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
     <indexterm>
       <primary>grain marking</primary>
       <secondary>watershed</secondary>
@@ -721,6 +725,58 @@
       corresponding disc or circle for each grain that can be subsequently
       displayed using <link linkend='tool-selection-manager'>Selection
       Manager tool</link>.
+    </para>
+  </sect2>
+  <sect2 id='grain-filter'>
+    <title>
+      Grain Filtering
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      Marked grains can be filtered by thresholding by any of the
+      available grain quantities using
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Filter</guimenuitem>
+      </menuchoice> menu choice.
+      The module can be used for basic operations, such as removal of tiny
+      grains using a pixel area threshold, as well as complex filtering using
+      logical expressions involving several grain quantitities.
+    </para>
+    <para>
+      The filter retains grains that satisfy the condition specified as
+      <guilabel>Keep grains satisfying</guilabel> and removes all other
+      grains.  The condition is expressed as a logical expression of one to
+      three individual thresholding conditions, denoted <varname>A</varname>,
+      <varname>B</varname> and <varname>C</varname>. The simplest expression
+      is just <varname>A</varname>, stating that quantity
+      <varname>A</varname> must lie within given thresholds.
+    </para>
+    <para>
+      Each condition consits of lower and upper thresholds for one grain
+      quantity, for instance pixel area or minimum value.  The values must
+      lie within the interval [lower,upper] to satisfy the condition and thus
+      retain the grains.  Note it is possible to choose the lower threshold
+      larger than the upper threshold.  In this case the condition is
+      inverted, i.e. the grain is retained if the value lies outside
+      [upper,lower].
+    </para>
+    <para>
+      Individual grain quantities are assigned to <varname>A</varname>,
+      <varname>B</varname> and <varname>C</varname> by selecting the
+      quantity in the list and clicking on the corresponding button in
+      <guilabel>Set selected as</guilabel>.  The currently selected set of
+      quantities is displayed in the
+      <guilabel>Condition A</guilabel>,
+      <guilabel>Condition B</guilabel> and
+      <guilabel>Condition C</guilabel> headers.
     </para>
   </sect2>
   <sect2 id='grain-level'>
