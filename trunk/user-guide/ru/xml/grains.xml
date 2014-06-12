@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: grains.xml 16071 2014-03-27 13:47:04Z yeti-dn $ -->
+<!-- @(#) $Id: grains.xml 16282 2014-06-09 14:57:17Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="grain-analysis">
   <title>Анализ зёрен</title>
@@ -8,10 +8,9 @@
   <para id="grain-threshold"><indexterm><primary>выделение зёрен</primary><secondary>по порогу</secondary></indexterm> В Gwyddion пороговые методы доступны в меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Пометить по порогу</guimenuitem></menuchoice>. В этом модуле реализованы пороги по высоте, наклону и кривизне. Результаты отдельных пороговых методов можно объединять вместе используя несколько операторов.</para>
   <para id="grain-threshold-otsu"><indexterm><primary>выделение зёрен</primary><secondary>по порогу</secondary><tertiary>метод Оцу</tertiary></indexterm> В Gwyddion автоматический метод Оцу доступен в меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Пометить по методу Оцу</guimenuitem></menuchoice>. Этот метод классифицирует значения данных в два класса, минимизируя дисперсию внутри класса для обоих. Метод хорошо подходит для изображений, которые содержат два относительно хорошо определённых диапазона значений.</para>
   <para id="grain-edge"><indexterm><primary>выделение зёрен</primary><secondary>краевой метод</secondary></indexterm> Другой вариант функции выделения зёрен, доступный в меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Пометить по краю</guimenuitem></menuchoice> основан на обнаружении краёв (или локальной кривизне функции высоты). Изображение обрабатывается фильтром "разница гауссианов" заданного размера и детекция порога затем применяется к обработанному фильтром изображению вместо исходного.</para>
-  <para id="grain-remove-thresholding">Подобным образом можно удалить зёрна с маски используя пункт меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Удалить зёрна</guimenuitem></menuchoice>. Методы максимальной высоты и порога размера можно использовать для удаления ложных зёрен, вызванных шумом или, например, пылинками. Также можно использовать интерактивный инструмент<link linkend="tool-remove-grains">удаления зёрен</link> для удаления их вручную.</para>
-  <para>Эта функция также может удалить все зёрна, которые касаются края изображения, что может быть полезно если эти зёрна считаются неполными и требуется исключить их из анализа</para>
+  <para id="grain-remove-touching-edges">Зёрна, которые касаются границ изображения, можно удалить используя команду меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Удалить у границы</guimenuitem></menuchoice>. Это может быть полезно в том случае, когда эти зёрна нужно рассматривать как неполные и их нужно исключить из анализа. Некоторые другие функции, которые можно использовать для модификации формы зерён после их выделения, вызываются из инструмента <link linkend="mask-editor">Редактор маски</link>.</para>
   <sect2 id="grain-watershed">
-    <title>Водораздел</title>
+    <title>Водораздел <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_grains_water-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
     <indexterm>
       <primary>выделение зёрен</primary>
       <secondary>водораздел</secondary>
@@ -236,6 +235,13 @@
       </mediaobject>
     </informalfigure>
     <para>Вписанные диски и описанные окружности зёрен можно визуализировать используя функции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Выбрать вписанные диски</guimenuitem></menuchoice> и <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Выбрать описанные окружности</guimenuitem></menuchoice>. Эти функции создают круговые выделенные области, представляющие соответствующие диски или окружности для каждого зерна. которые затем можно показать с помощью <link linkend="tool-selection-manager">инструмента "Менеджер выделенных областей"</link>.</para>
+  </sect2>
+  <sect2 id="grain-filter">
+    <title>Фильтр зёрен <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_grains_remove-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <para>Помеченные зёрна можно фильтровать по порогу любой из доступных для зёрен величин используя меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Фильтр</guimenuitem></menuchoice>. Этот модуль можно использовать для основных операций, таких как удаление слишком мелких зёрен используя порог площади в пикселях, а также для сложной фильтрации, использующей логические операции над несколькими величинами, относящимися к параметрам зёрен.</para>
+    <para>Фильтр сохраняет зёрна, которые удовлетворяют условию, заданному как <guilabel>Оставлять зёрна, удовлетворяющие</guilabel> и удаляет все остальные. Условие задаётся как логическое выражение, содержащее от одного до трёх пороговых условий, обозначенных как  <varname>A</varname>, <varname>B</varname> и <varname>C</varname>. Простейшее условие это просто <varname>A</varname>, означающее, что величина <varname>A</varname> должна лежать между заданными порогами.</para>
+    <para>Каждое условие состоит из верхнего и нижнего порога для одной величины, относящейся к зёрнам, например, площади в пикселях или значению минимума. Значения должны лежать в диапазоне [нижний,верхний] чтобы удовлетворить условию и тем самым сохранить это зерно. Следует отметить, что можно выбрать нижний порог больше верхнего. В этом случае условие инвертируется, т.е. зерно сохраняется если значение лежит вне диапазона  [нижний,верхний].</para>
+    <para>Отдельные величины для зёрен присваиваются <varname>A</varname>, <varname>B</varname> и <varname>C</varname> выбором величины из списка и нажатием на соответствующую кнопку в <guilabel>Установить выбранное как</guilabel>. Текущий выбранный набор величин показан в заголовках <guilabel>Условие A</guilabel>, <guilabel>Условие B</guilabel> и <guilabel>Условие C</guilabel>.</para>
   </sect2>
   <sect2 id="grain-level">
     <title>Выравнивание зёрен</title>
