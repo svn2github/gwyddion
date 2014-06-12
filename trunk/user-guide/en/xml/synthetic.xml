@@ -1062,7 +1062,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Relaxation</guilabel>
+          <guilabel>Lattice relaxation</guilabel>
         </term>
         <listitem>
           <para>
@@ -1073,6 +1073,18 @@
             It should be noted that relaxation requires progressive
             retessellation and large relaxation parameter values can slow down
             the surface generation considerably.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Height relaxation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Amount to which the random values assigned to each point (see
+            below) are allowed to relax.  The relaxation process is similar
+            to diffusion and leads to overal smoothing of the random values.
           </para>
         </listitem>
       </varlistentry>
