@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: synthetic.xml 16285 2014-06-10 07:01:21Z yeti-dn $ -->
+<!-- @(#) $Id: synthetic.xml 16298 2014-06-12 18:02:27Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="synthetic">
   <title>Синтетические поверхности</title>
@@ -606,10 +606,18 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Релаксация</guilabel>
+          <guilabel>Релаксация решетки</guilabel>
         </term>
         <listitem>
           <para>Величина, на которую решетке можно релаксировать. Процесс релаксации отталкивает точки от очень близких соседей в сторону большой пустой области. В целом это приводит к тому, что размеры ячеек становятся более равномерными. Естественно, процесс релаксации не влияет на правильные решетки. Следует отметить, что релаксация требует прогрессивной ретесселяции и большой параметр релаксации может существенно замедлить генерацию поверхности.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Релаксация высоты</guilabel>
+        </term>
+        <listitem>
+          <para>Величина, на которую могут релаксировать случайные значения, присвоенные каждой точке (см. ниже). Процесс релаксации похож на диффузию и приводит к общему сглаживанию случайных значений.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
