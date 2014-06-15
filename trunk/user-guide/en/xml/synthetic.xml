@@ -900,9 +900,14 @@
       <xi:include href="eq-ising-flipping.xml"/>
       where <xi:include href='eqi-Delta-E.xml'/> is the change of energy
       resulting from flipping and <xi:include href='eqi-T.xml'/> is the
-      temperature.  The energy is given by the number neighbours in the
-      opposite state in the directions along the coordinate axes, in the
-      diagonals and bias caused by the inhibitor field:
+      temperature.  The energy is given by the number of neighbours in the
+      opposite state in the directions along the coordinate axes
+      <xi:include href="eqi-n_o.xml"/>,
+      the number of neighbours in the opposite state in the directions along
+      diagonals
+      <xi:include href="eqi-n_d.xml"/>
+      and also by bias caused by the inhibitor field
+      <xi:include href="eqi-v.xml"/>:
       <xi:include href="eq-ising-energy.xml"/>
     </para>
     <para>
@@ -910,8 +915,8 @@
       <xi:include href="eqi-v.xml"/> is governed by a local differential
       equation coupled to the variable <xi:include href="eqi-u.xml"/>:
       <xi:include href="eq-ising-diffeq.xml"/>
-      where <xi:include href='eqi-mu.xml'/> is inhibitor coupling and
-      <xi:include href='eqi-nu.xml'/> is bias.
+      where <xi:include href='eqi-mu.xml'/> is the inhibitor coupling and
+      <xi:include href='eqi-nu.xml'/> is the bias parameter.
       The boundary conditions of the simulation are periodic, hence, the
       generated images are also periodic (i.e. perfectly tilable).
     </para>
@@ -929,12 +934,19 @@
             <xi:include href="eqi-u.xml"/>, a time step of solution of the
             differential equation for <xi:include href="eqi-v.xml"/>, another
             Monte Carlo step and another differential euqation time step.
+            The values of <xi:include href="eqi-v.xml"/> shown correspond
+            to the second update. The quantity shown as
+            <xi:include href="eqi-u.xml"/> is the average from the two values
+            surrounding in time the corresponding value of
+            <xi:include href="eqi-v.xml"/>.  Hence the images of
+            <xi:include href="eqi-u.xml"/> are three-valued, not two-valued.
           </para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>
           <guilabel>Temperature</guilabel>
+          <xi:include href='eqi-T.xml'/>
         </term>
         <listitem>
           <para>
@@ -950,6 +962,7 @@
       <varlistentry>
         <term>
           <guilabel>Inhibitor strength</guilabel>
+          <xi:include href='eqi-B.xml'/>
         </term>
         <listitem>
           <para>
@@ -962,6 +975,7 @@
       <varlistentry>
         <term>
           <guilabel>Inhibitor coupling</guilabel>
+          <xi:include href='eqi-mu.xml'/>
         </term>
         <listitem>
           <para>
@@ -974,6 +988,7 @@
       <varlistentry>
         <term>
           <guilabel>Bias</guilabel>
+          <xi:include href='eqi-nu.xml'/>
         </term>
         <listitem>
           <para>
