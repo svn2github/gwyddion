@@ -206,7 +206,9 @@
       <xsl:text>}&#10;</xsl:text>
       <xsl:apply-templates mode='tabular' select='thead'/>
       <xsl:apply-templates select='tbody'/>
-      <xsl:text>\noalign{\hrule}&#10;</xsl:text>
+      <xsl:if test='@frame != "none"'>
+        <xsl:text>\noalign{\hrule}&#10;</xsl:text>
+      </xsl:if>
       <xsl:text>\end{tabular}&#10;</xsl:text>
     </xsl:otherwise>
   </xsl:choose>
