@@ -310,6 +310,119 @@
             include half-spheres, boxes, pyramids, tetrahedrons and some more
             weird shapes.
           </para>
+          <informaltable frame='none' align='center' id='table-synthetic-objects'>
+            <tgroup frame='none' cols='3'>
+              <?dblatex ccc?>
+              <tbody>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-sphere.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-box.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-cone.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Sphere</entry>
+                  <entry>Box</entry>
+                  <entry>Cone</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-pyramid.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-diamond.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-tetrahedron.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Pyramid</entry>
+                  <entry>Diamond</entry>
+                  <entry>Tetrahedron</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-nugget.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-thatch.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-tent.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Nugget</entry>
+                  <entry>Thatch</entry>
+                  <entry>Tent</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-gaussian.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-doughnut.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry/>
+                </row>
+                <row>
+                  <entry>Gaussian</entry>
+                  <entry>Doughnut</entry>
+                  <entry/>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
         </listitem>
       </varlistentry>
       <varlistentry>
