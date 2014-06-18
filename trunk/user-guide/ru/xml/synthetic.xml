@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: synthetic.xml 16298 2014-06-12 18:02:27Z yeti-dn $ -->
+<!-- @(#) $Id: synthetic.xml 16304 2014-06-15 07:30:42Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="synthetic">
   <title>Синтетические поверхности</title>
@@ -173,6 +173,119 @@
         </term>
         <listitem>
           <para>Форма (вид) помещаемых объектов. В настоящее время можно использовать полусферы, коробки, пирамиды, тетраэдры и некоторые более странные формы.</para>
+          <informaltable frame="none" align="center" id="table-synthetic-objects">
+            <tgroup frame="none" cols="3">
+              <?dblatex ccc?>
+              <tbody>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-sphere.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-box.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-cone.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Сфера</entry>
+                  <entry>Параллелепипед</entry>
+                  <entry>Конус</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-pyramid.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-diamond.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-tetrahedron.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Пирамида</entry>
+                  <entry>Бриллиант</entry>
+                  <entry>Тетраэдр</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-nugget.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-thatch.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-tent.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Частица</entry>
+                  <entry>Камыш</entry>
+                  <entry>Палатка</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-gaussian.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="synthetic-object-doughnut.png" format="PNG"/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry/>
+                </row>
+                <row>
+                  <entry>Гауссиана</entry>
+                  <entry>Бублик</entry>
+                  <entry/>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -513,8 +626,8 @@
   <sect2 id="domain-synthesis">
     <title>Домены</title>
     <para>Расчёт реализует гибридную неравновесную модель Изинга  [1], совмещающую дискретную модель Изинга для малых расстояний с непрерывным медленным ингибитором.</para>
-    <para>Дискретная переменная <xi:include href="eqi-u.xml"/> имеет два возможных значения, которые она меняет с вероятностью <xi:include href="eq-ising-flipping.xml"/> где <xi:include href="eqi-Delta-E.xml"/> – изменение энергии в результате смены состояния и <xi:include href="eqi-T.xml"/> – температура. Энергия задаётся числом соседей в противоположном состоянии в направлениях вдоль координатных осей, по диагоналям и смещением, вызванным полем ингибитора.</para>
-    <para>Непрерывное поле ингибитора <xi:include href="eqi-v.xml"/> задано локальным дифференциальным уравнением, связанным с переменной  <xi:include href="eqi-u.xml"/>: <xi:include href="eq-ising-diffeq.xml"/> где <xi:include href="eqi-mu.xml"/> – связь ингибитора и <xi:include href="eqi-nu.xml"/> – смещение. Граничные условия для расчёта периодические, следовательно, генерируемые изображения также будут периодическими (т.е. идеально совмещаться друг с другом на границе).</para>
+    <para>Дискретная переменная <xi:include href="eqi-u.xml"/> имеет два возможных значения, которые она меняет с вероятностью <xi:include href="eq-ising-flipping.xml"/> где <xi:include href="eqi-Delta-E.xml"/> – изменение энергии в результате смены состояния и <xi:include href="eqi-T.xml"/> – температура. Энергия задаётся числом соседей в противоположном состоянии в направлениях вдоль координатных осей <xi:include href="eqi-n_o.xml"/>, числом соседей в противоположном состоянии в направлении по диагоналям <xi:include href="eqi-n_d.xml"/> и также смещением, вызванным полем ингибитора  <xi:include href="eqi-v.xml"/>: <xi:include href="eq-ising-energy.xml"/></para>
+    <para>Непрерывное поле ингибитора <xi:include href="eqi-v.xml"/> задано локальным дифференциальным уравнением, связанным с переменной  <xi:include href="eqi-u.xml"/>: <xi:include href="eq-ising-diffeq.xml"/> где <xi:include href="eqi-mu.xml"/> – связь ингибитора и <xi:include href="eqi-nu.xml"/> – параметр смещения. Граничные условия для расчёта периодические, следовательно, генерируемые изображения также будут периодическими (т.е. идеально совмещаться друг с другом на границе).</para>
     <para>Расчёт управляется следующими параметрами:</para>
     <variablelist>
       <varlistentry>
@@ -522,12 +635,13 @@
           <guilabel>Число шагов</guilabel>
         </term>
         <listitem>
-          <para>Одна итерация расчёта состоит из четырёх шагов: обновление <xi:include href="eqi-u.xml"/> методом Монте-Карло, шаг по времени в решении дифференциального уравнения для <xi:include href="eqi-v.xml"/>, другой шаг Монте-Карло и ещё один шаг по времени в дифференциальном уравнении.</para>
+          <para>Одна итерация расчёта состоит из четырёх шагов: обновление <xi:include href="eqi-u.xml"/> методом Монте-Карло, шаг по времени в решении дифференциального уравнения для <xi:include href="eqi-v.xml"/>, другой шаг Монте-Карло и ещё один шаг по времени в дифференциальном уравнении. Показываемые значения <xi:include href="eqi-v.xml"/> соответствуют второму обновлению. Значение, показываемое как <xi:include href="eqi-u.xml"/> это среднее из двух значений, наиболее близких по времени к соответствующему значению <xi:include href="eqi-v.xml"/>. Таким образом, изображения <xi:include href="eqi-u.xml"/> трёхзначные, а не двузначные. </para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>
           <guilabel>Температура</guilabel>
+          <xi:include href="eqi-T.xml"/>
         </term>
         <listitem>
           <para>Температура определяет вероятность, с которой переменная с двумя состояниями <xi:include href="eqi-u.xml"/> может переходить из одного в другое с энергией большей или равной (смена состояния, которая сильно понижает энергию, происходит сама по себе). Большая температура означает меньшее разделение между двумя доменами <xi:include href="eqi-u.xml"/>.</para>
@@ -536,6 +650,7 @@
       <varlistentry>
         <term>
           <guilabel>Сила ингибитора</guilabel>
+          <xi:include href="eqi-B.xml"/>
         </term>
         <listitem>
           <para>Сила, с которой непрерывная переменная смещает энергию в каждом пикселе. Для больших значений ингибитор играет большую роль по сравнению с поверхностным натяжением.</para>
@@ -544,6 +659,7 @@
       <varlistentry>
         <term>
           <guilabel>Связь ингибитора</guilabel>
+          <xi:include href="eqi-mu.xml"/>
         </term>
         <listitem>
           <para>Фактор связи между <xi:include href="eqi-u.xml"/> и <xi:include href="eqi-v.xml"/> в дифференциальном уравнении для <xi:include href="eqi-v.xml"/>.</para>
@@ -552,6 +668,7 @@
       <varlistentry>
         <term>
           <guilabel>Смещение</guilabel>
+          <xi:include href="eqi-nu.xml"/>
         </term>
         <listitem>
           <para>Смещение в дифференциальном уравнении для <xi:include href="eqi-v.xml"/> в сторону больших или меньших значений.</para>
