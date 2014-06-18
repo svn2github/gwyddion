@@ -166,7 +166,7 @@
       MS Windows Python installer can be obtained at
       <ulink url="http://python.org/download/releases/">http://python.org/download/releases/</ulink>.
       Since pygwy requires Python 2 install the latest Python 2.7 version,
-      which will probably be <filename>python-2.7.3.msi</filename>.
+      which will probably be <filename>python-2.7.7.msi</filename>.
     </para>
     <para>
       Three packages are required for PyGTK2: PyGTK, PyCairo and PyGObject.
