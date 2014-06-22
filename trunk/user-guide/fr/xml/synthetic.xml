@@ -308,6 +308,119 @@
             disponibles : demi-sphères, boîtes, pyramides, tétraèdres ainsi que
             quelques autres plus tordues.
           </para>
+          <informaltable frame='none' align='center' id='table-synthetic-objects'>
+            <tgroup frame='none' cols='3'>
+              <?dblatex ccc?>
+              <tbody>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-sphere.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-box.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-cone.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Sphere</entry>
+                  <entry>Box</entry>
+                  <entry>Cone</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-pyramid.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-diamond.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-tetrahedron.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Pyramid</entry>
+                  <entry>Diamond</entry>
+                  <entry>Tetrahedron</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-nugget.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-thatch.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-tent.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                </row>
+                <row>
+                  <entry>Nugget</entry>
+                  <entry>Thatch</entry>
+                  <entry>Tent</entry>
+                </row>
+                <row>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-gaussian.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref='synthetic-object-doughnut.png' format='PNG'/>
+                      </imageobject>
+                    </inlinemediaobject>
+                  </entry>
+                  <entry/>
+                </row>
+                <row>
+                  <entry>Gaussian</entry>
+                  <entry>Doughnut</entry>
+                  <entry/>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>         
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -920,8 +1033,11 @@
       <xi:include href='eqi-Delta-E.xml'/> est le changement d'énergie résultant 
       du basculement et <xi:include href='eqi-T.xml'/> est la température. 
       L'énergie est donnée par le nombre de voisins dans l'état opposé selon les 
-      axes de coordonnées, les diagonales, et le biais donné par le champ 
-      d'inhibition : <xi:include href="eq-ising-energy.xml"/>
+      axes de coordonnées <xi:include href="eqi-n_o.xml"/>, le nombre de voisins 
+      dans l'état opposé selon les diagonales <xi:include href="eqi-n_d.xml"/>, 
+      ainsi que le biais donné par le champ d'inhibition 
+      <xi:include href="eqi-v.xml"/> : 
+      <xi:include href="eq-ising-energy.xml"/>
     </para>
     <para>
       L'inhibiteur continu <xi:include href="eqi-v.xml"/> est gouverné par une 
@@ -929,7 +1045,7 @@
       <xi:include href="eqi-u.xml"/> :
       <xi:include href="eq-ising-diffeq.xml"/>
       où <xi:include href='eqi-mu.xml'/> est le couplage d'inhibition
-      et <xi:include href='eqi-nu.xml'/> est le biais.
+      et <xi:include href='eqi-nu.xml'/> est le paramètre de biais.
       Les conditions aux limites de la simulation sont périodiques, par
       conséquent les images générées sont elles aussi périodiques (c'est-à-dire
       parfaitement juxtaposables).
@@ -949,12 +1065,20 @@
             de la solution de l'équation différentielle pour
             <xi:include href="eqi-v.xml"/>, une autre étape de Monte-Carlo et 
             enfin une autre étape temporelle de l'équation différentielle.
+            Les valeurs affichées de <xi:include href="eqi-v.xml"/> 
+            correspondent à la seconde mise à jour. La quantité
+            <xi:include href="eqi-u.xml"/> est la moyenne des deux valeurs
+            entourant dans le temps la valeur correspondante de
+            <xi:include href="eqi-v.xml"/>.  Les images de
+            <xi:include href="eqi-u.xml"/> sont donc constituées de trois 
+            valeurs, et non deux.
           </para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>
           <guilabel>Température</guilabel>
+          <xi:include href='eqi-T.xml'/>
         </term>
         <listitem>
           <para>
@@ -971,6 +1095,7 @@
       <varlistentry>
         <term>
           <guilabel>Force de l'inhibiteur</guilabel>
+          <xi:include href='eqi-B.xml'/>
         </term>
         <listitem>
           <para>
@@ -983,6 +1108,7 @@
       <varlistentry>
         <term>
           <guilabel>Couplage de l'inhibiteur</guilabel>
+          <xi:include href='eqi-mu.xml'/>
         </term>
         <listitem>
           <para>
@@ -995,6 +1121,7 @@
       <varlistentry>
         <term>
           <guilabel>Biais</guilabel>
+          <xi:include href='eqi-nu.xml'/>
         </term>
         <listitem>
           <para>
@@ -1037,6 +1164,236 @@
           étendues (à gauche) ; ondes spirales resserrées à une température plus 
           élevée (au centre) ; valeur de la variable continue pour un cas à 
           faible température avec un inhibiteur et un couplage faibles.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='lattice-synthesis'>
+    <title>Maillage</title>
+    <para>
+      Le module de synthèse de maillage crée des surfaces basée sur des mailles
+      bi-dimensionnelles aléatoires. Il comporte deux parties principales. La 
+      première, contrôlée par l'onglet <guilabel>Maillage</guilabel>, permet
+      la création d'un ensemble de points dans le plan organisés selone un
+      maillage plus ou moins aléatoire. La seconde, contrôlée par l'onglet
+      <guilabel>Surface</guilabel>, permet la construction de la surface basée
+      sur des quantités calculées par pavage de Voronoi et/ou par triangulation 
+      de Delaunay sur l'ensemble des points définis précédemment.
+    </para>
+    <para>
+      La création du maillage est contrôlée par les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Maillage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Type de maille de base. La maillage aléatoire consiste en des points
+            placés aléatoirement. Les autres types (carrée, hexagonale, 
+            triangulaire) correspondent à des arrangements de points réguliers.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Taille</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Taille moyenne des cellules. Ce paramètre décrit la densité moyenne
+            despoints. Elle est égale au côté du carré si le même nombre de 
+            points était organiséé en un maillage carré.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Relaxation du maillage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantité de relaxation permise pour la maille. Le processus de 
+            relaxation éloigne les points de leurs proches voisins et les
+            rapproche des espaces vides. Le résultat final est que la taille
+            de cellule devient de plus en plus uniforme. Évidemment, la 
+            relaxation n'a aucun impact sur un maillage régulier. Notez que la
+            relaxation nécessite un repavage progressif et qu'une valeur 
+            élevée de relaxation peut sensiblement ralentir la génération de la
+            surface.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Relaxation des hauteurs</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantité de relaxation permise pour les valeurs aléatoires 
+            assignées à chaque point (voir plus bas). Le processus de 
+            relaxation est similaire à la diffusion et aboutit à un lissage
+            des valeurs aléatoires.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Orientation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Rotation du maillage par rapport à l'orientation de base, mesurée 
+            dans le sens inverse des aiguilles d'une montre. Elle n'est 
+            disponible que pour les maillages réguliers car le maillage 
+            aléatoire est isotrope.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Amplitude</guilabel>,
+          <guilabel>Échelle latérale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Paramètres contrôlant la déformation du maillage. Ils ont la même
+            signification que dans la 
+            <link linkend='pattern-synthesis'>synthèse de motifs</link>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      La surface finale est construite selon une somme pondérée d'un ensemble
+      de quantités basiques dérivées du pavage de Voronoi ou de la 
+      triangulation de Delaunay. Chaque quantité peut être activée ou non. 
+      Lorsque l'une d'elles est sélectionnée dans la liste, sa pondération et
+      ses paramètres de seuil peuvent être modifiés grâce aux curseurs. Les
+      seuils hat et bas permettent de couper la plage de valeurs (qui est
+      toujours normalisée à <xi:include href='eqi-interval-0-1.xml'/>) en 
+      substituant toutes les valeurs supérieures au seuil haut par la valeur de
+      seuil et en faisant l'inverse pour le seuil bas.
+    </para>
+    <para>
+      Certaines quantités sont calculées uniquement d'après les coordonnées 
+      latérales. D'autres sont calculées à partir de valeurs aléatoires
+      (<quote>heuteurs</quote>) appliquées à chaque point de l'ensemble. On 
+      trouve parmi les quantités proposées :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Aléatoire constant</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Interpolation arrondie entre les valeurs aléatoires assignées à 
+            chaque point de l'ensemble. Cela signifie que chaque cellule de
+            Voronoi est remplie par une valeur alétoire constante.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Aléatoire linéaire</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Interpolation linéiare entre les valeurs aléatoires assignées à 
+            chaque point de l'ensemble. La surface est alors continue, chaque
+            triangle de Delaunay étant une facette.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Aléatoire bosselé</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Interpolation similaire à la précédente, mais cette fois non
+            linéaire,  aboutissant à des zones relativement planes autour de
+            chaque point.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Distance radiale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance au point le plus proche.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Distance segmentée</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance au bord le plus proche de la cellule de Voronoi, mise à 
+            l'échelle pour chaque segment de la cellule de manière à ce que
+            le point soit à la même distance de tous les bords de sa cellule.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Aléatoire segmenté</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantité identique à la distance segmentée, mais multipliée par la
+            valeur aléatoire assignée au point.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Distance de bord</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance au bord le plus proche de la cellule de Voronoi.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Bord aléatoire</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Quantité identique à la distance de bord, mais multipliée par la
+            valeur aléatoire assignée au point.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Second point le plus proche</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distance au second point le plus proche de l'ensemble.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-lattice'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-lattice.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles basées sur des maillages : surface à facettes
+          créée par interpolation linéaire aléatoire (à gauche) ; bosses sur 
+          un motif triangulaire distordu (au centre) ; motif rectangulaire 
+          distordu avec segments séparés par des tranchées (à droite).
         </caption>
       </mediaobject>
     </informalfigure>

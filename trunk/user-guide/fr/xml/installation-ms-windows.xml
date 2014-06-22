@@ -166,7 +166,7 @@
       <ulink url="http://python.org/download/releases/">http://python.org/download/releases/</ulink>.
       Pygwy nécessite Python 2, il vous faudra donc installer la dernière
       version de Python 2.7, soit probablement
-      <filename>python-2.7.3.msi</filename>.
+      <filename>python-2.7.7.msi</filename>.
     </para>
     <para>
       Trois paquets sont nécessaires pour faire fonctionner PyGTK2 : PyGTK,
