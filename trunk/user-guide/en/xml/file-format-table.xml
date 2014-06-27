@@ -1009,6 +1009,16 @@ supported.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module win_stm.c -->
+    <row>
+      <entry>WinSTM data</entry>
+      <entry>.stm</entry>
+      <entry>win_stm</entry>
+      <entry>Yes</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module wipfile.c -->
     <row>
       <entry>WITec Project data</entry>
