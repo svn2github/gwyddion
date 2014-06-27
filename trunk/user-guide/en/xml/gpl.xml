@@ -464,9 +464,9 @@
     </para>
     <programlisting>
       Gnomovision version 69, Copyright (C) year name of author Gnomovision
-      comes with ABSOLUTELY NO WARRANTY; for details type <quote>show w</quote>. 
+      comes with ABSOLUTELY NO WARRANTY; for details type "show w". 
       This is free software, and you are welcome to redistribute it under
-      certain conditions; type <quote>show c</quote> for details.
+      certain conditions; type "show c" for details.
     </programlisting>
     <para>
       The hypothetical commands <quote>show w</quote> and <quote>show
@@ -483,7 +483,7 @@
     <informalexample>
       <literallayout>
       Yoyodyne, Inc., hereby disclaims all copyright interest in the
-      program `Gnomovision' (which makes passes at compilers) written
+      program “Gnomovision” (which makes passes at compilers) written
       by James Hacker.
 
       &lt;signature of Ty Coon&gt;, 1 April 1989
