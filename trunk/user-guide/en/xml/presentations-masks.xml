@@ -160,7 +160,7 @@
             </menuchoice>
             menu.  More advanced functions include the grain-oriented
             <link linkend='remove-grains'>Remove Grains tool</link> and
-            <link linkend='grain-remove-thresholding'>Remove by Threshold</link>
+            <link linkend='grain-filter'>Grain Filter</link>
             that provide different means to remove parts of the mask, as well
             as
             <link linkend='mask-editor'>Mask Editor tool</link> and
