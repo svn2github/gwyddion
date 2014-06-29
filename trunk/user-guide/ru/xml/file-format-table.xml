@@ -860,7 +860,7 @@
     <!-- From module shimadzu.c -->
     <row>
       <entry>Shimadzu</entry>
-      <entry>.sph, .spp, .001, .002, etc.</entry>
+      <entry>.sph, .spp, .001, .002, и т.п.</entry>
       <entry>shimadzu</entry>
       <entry>Да</entry>
       <entry>—</entry>
@@ -1003,6 +1003,16 @@
       <entry>vtkfile</entry>
       <entry>—</entry>
       <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module win_stm.c -->
+    <row>
+      <entry>Данные WinSTM</entry>
+      <entry>.stm</entry>
+      <entry>win_stm</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
