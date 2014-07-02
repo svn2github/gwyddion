@@ -517,13 +517,13 @@ MA 02110-1301, USA.
     <programlisting>
       Gnomovision version 69, Copyright (C) année et nom de l'auteur
 Gnomovision fonctionne ABSOLUMENT SANS GARANTIE. Pour de plus amples
-détails, tapez <quote>show w</quote>. Ceci est un logiciel libre et vous avez le
-droit de le redistribuer sous certaines conditions ; tapez <quote>show c</quote>
+détails, tapez "show w". Ceci est un logiciel libre et vous avez le
+droit de le redistribuer sous certaines conditions ; tapez "show c"
 pour de plus amples détails.
     </programlisting>
     <para>
       Les commandes hypothétiques <quote>show w</quote> et
-      <quote>"show c</quote> doivent ouvrir les parties appropriées de la
+      <quote>show c</quote> doivent ouvrir les parties appropriées de la
       Licence Publique Générale. Naturellement, les commandes que vous utilisez
       peuvent être dénommées autrement et il peut même s'agir de clics de souris
       ou de rubriques de menu, selon ce que permet votre programme.
@@ -536,7 +536,7 @@ pour de plus amples détails.
     <informalexample>
       <literallayout>
       Yoyodine, Inc., par les présentes, se désiste de tout intérêt de copyright
-      sur le programme <quote>Gnomovision</quote> (qui fait des passages au
+      sur le programme "Gnomovision" (qui fait des passages au
       niveau des compilateurs)
 
       Ecrit par James Hacker

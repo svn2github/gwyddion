@@ -166,8 +166,8 @@
               <guisubmenu>Masque</guisubmenu>
             </menuchoice>.
             On trouve parmi les fonctions plus avancées
-            <link linkend='remove-grains'>l'outil de suppression de grains</link> et
-            <link linkend='grain-remove-thresholding'>la suppression de grain par seuil</link>
+            <link linkend='remove-grains'>l'outil de suppression des grains</link> 
+            et le <link linkend='grain-filter'>filtrage des grains</link>
             qui donnent différentes manières de supprimer des parties du masque,
             ainsi que <link linkend='mask-editor'>l'éditeur de masque</link> et
             <link linkend='mark-with'>marquer avec</link>, orientés sur
