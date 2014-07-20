@@ -266,6 +266,15 @@
               </entry>
             </row>
             <row>
+              <entry><literal>/0/data/realsquare</literal></entry>
+              <entry>boolean</entry>
+              <entry>
+                Whether the channel should be displayed as
+                <guilabel>Physically square</guilabel> (as opposed to
+                <guilabel>Pixelwise square</guilabel>).
+              </entry>
+            </row>
+            <row>
               <entry><literal>/0/base/palette</literal></entry>
               <entry>string</entry>
               <entry>
