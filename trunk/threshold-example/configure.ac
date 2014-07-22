@@ -1,7 +1,7 @@
 dnl Lines you likely have to change in your own modules are marked with #####.
 
 #####AC_INIT([Module name], [module version], [bugreport address])
-AC_INIT([Threshold-example], [2.3], [yeti@gwyddion.net])
+AC_INIT([Threshold-example], [2.4], [yeti@gwyddion.net])
 AC_PREREQ(2.60)
 #####MODULE_TYPE=file, process, graph, tool, layer or leave empty
 MODULE_TYPE=process

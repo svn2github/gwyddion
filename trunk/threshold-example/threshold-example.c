@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
+#include <libgwyddion/gwyversion.h>
 #include <libgwymodule/gwymodule.h>
 #include <libprocess/stats.h>
 #include <libprocess/filters.h>
@@ -229,8 +230,10 @@ threshold_do(GwyContainer *data,
 
     /* Log the data processing operation.  Whatever we do, it modifies the same
      * channel so no branching is necessary.  Logging is available in Gwyddion
-     * 2.35 or newer. */
-#if (GWY_VERSION_MAJOR == 2 && GWY_VERSION_MINOR >= 35)
+     * 2.35 or newer.  Since 2.38 a simpler interface is available.  */
+#if (GWY_VERSION_MAJOR == 2 && GWY_VERSION_MINOR >= 38)
+    gwy_app_channel_log_add_proc(data, id, id);
+#elif (GWY_VERSION_MAJOR == 2 && GWY_VERSION_MINOR >= 35)
     gwy_app_channel_log_add(data, id, id, "proc::" THRESHOLD_MOD_NAME, NULL);
 #endif
 }
@@ -271,6 +274,15 @@ threshold_dialog(ThresholdArgs *args,
                                          NULL);
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    /* Add a help button.  Built-in modules described in the user guide would
+     * use a smarter help setup function, but for a standalone module we have
+     * to provide an URI.  Help functions are available in Gwyddion 2.38 or
+     * newer. */
+#if (GWY_VERSION_MAJOR == 2 && GWY_VERSION_MINOR >= 38)
+    gwy_help_add_to_window_uri(GTK_WINDOW(dialog),
+                               "http://gwyddion.net/apps/#sample-module",
+                               GWY_HELP_DEFAULT);
+#endif
 
     table = gtk_table_new(7, 3, FALSE);
     gtk_table_set_row_spacings(GTK_TABLE(table), 2);
