@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 15868 2014-01-13 19:56:54Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 16406 2014-07-20 15:41:01Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
@@ -170,6 +170,11 @@
               <entry><literal>/0/data/visible</literal></entry>
               <entry>булев</entry>
               <entry>Должен ли канал показываться в окне при открытии файла данных</entry>
+            </row>
+            <row>
+              <entry><literal>/0/data/realsquare</literal></entry>
+              <entry>булев</entry>
+              <entry>Должен ли канал показываться в окне в режиме <guilabel>Равные масштабы осей</guilabel> (или, наоборот, в режиме <guilabel>Квадратные пиксели</guilabel>).</entry>
             </row>
             <row>
               <entry><literal>/0/base/palette</literal></entry>
