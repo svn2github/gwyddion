@@ -21,6 +21,12 @@
       </thead>
       <tbody valign='top'>
         <row>
+          <entry><keycap>F1</keycap></entry>
+          <entry/>
+          <entry>almost all windows</entry>
+          <entry>Open a relevant section of this user guide in a web browser.</entry>
+        </row>
+        <row>
           <entry><keycap>Ctrl-Q</keycap></entry>
           <entry>
             <menuchoice>
