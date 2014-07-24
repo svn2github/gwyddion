@@ -134,7 +134,7 @@
               <entry>string</entry>
               <entry><literal>s</literal></entry>
               <entry>
-                <constant>NUL</constant>-terminated
+                <constant>NUL</constant>-terminated and UTF-8 encoded
               </entry>
             </row>
             <row>
@@ -158,7 +158,7 @@
     <para>
       <informaltable id='table-gwyfile-array-types'>
         <tgroup cols='3' align='left'>
-          <?dblatex lll?>
+          <?dblatex llX?>
           <thead>
             <row>
               <entry>Type</entry>
@@ -722,14 +722,14 @@
               <entry><literal>xdata</literal></entry>
               <entry>array of doubles</entry>
               <entry>
-                Abscissa points.  The number of point must match <literal>ydata</literal>.
+                Abscissa points.  The number of points must match <literal>ydata</literal>.
               </entry>
             </row>
             <row>
               <entry><literal>ydata</literal></entry>
               <entry>array of doubles</entry>
               <entry>
-                Ordinate points.  The number of point must match <literal>xdata</literal>.
+                Ordinate points.  The number of points must match <literal>xdata</literal>.
               </entry>
             </row>
             <row>
@@ -1154,6 +1154,17 @@
                 Field data, stored as a flat array of size
                 <varname>xres</varname>×<varname>yres</varname>×<varname>zres</varname>,
                 from the zeroth to the last plane, top to bottom and from left to right.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>calibration</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataLine'><type>GwyDataLine</type></link></entry>
+              <entry>
+                Calibration of the <xi:include href='eqi-z.html'/> axis to
+                represent non-linear sampling in this dimension.
+                The number of points must be equal to <varname>zres</varname>.
+                This component is present only if non-linear sampling is
+                used.
               </entry>
             </row>
           </tbody>
