@@ -42,12 +42,14 @@
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-libxml2">
-      <term><ulink url="http://xmlsoft.org/">LibXML2</ulink> ≥ 2.<varname>x</varname></term>
+      <term>
+        <ulink url="http://xmlsoft.org/">LibXML2</ulink>
+      </term>
       <listitem>
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Разрешает импорт файлов SPML.</para>
+        <para>Разрешает импорт файлов SPML и APE DAX.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-fftw">
@@ -107,7 +109,7 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Позволяет импортировать некоторые сжатые форматы данных (APE DAX, NanoObserver, NanoScanTech).</para>
+        <para>Позволяет импортировать некоторые сжатые форматы данных (APE DAX, NanoObserver, NanoScanTech, OpenGPS).</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-png">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: keyboard-shortcuts.xml 15572 2013-11-08 17:11:47Z yeti-dn $ -->
+<!-- @(#) $Id: keyboard-shortcuts.xml 16435 2014-07-24 19:54:45Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="keyboard-shortcuts">
   <title>Комбинации клавиш</title>
@@ -19,6 +19,12 @@
         </row>
       </thead>
       <tbody valign="top">
+        <row>
+          <entry><keycap>F1</keycap></entry>
+          <entry/>
+          <entry>все окна</entry>
+          <entry>Открывает соответствующий раздел руководства пользователя в браузере.</entry>
+        </row>
         <row>
           <entry><keycap>Ctrl-Q</keycap></entry>
           <entry>
