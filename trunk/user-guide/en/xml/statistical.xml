@@ -117,6 +117,10 @@
         Mean inclination of facets in area: computed by averaging normalized
         facet direction vectors.
       </listitem>
+      <listitem>
+        Variation, which is calculated as the integral of the absolute value
+        of the local gradient.
+      </listitem>
     </itemizedlist>
     <tip>
       By default, the Statistical Quantities tool will display figures based

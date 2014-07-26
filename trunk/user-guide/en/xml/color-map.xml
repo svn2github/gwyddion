@@ -109,11 +109,17 @@
             </listitem>
             <listitem>
               by selecting a range on the height distribution graph in the
-              tool window or
+              tool window,
             </listitem>
             <listitem>
               by selecting an area on the data window, the range is then
-              set from the minimum to maximum of the data in this area only.
+              set from the minimum to maximum of the data in this area only or
+            </listitem>
+            <listitem>
+              by pressing buttons <guibutton>Set to Masked</guibutton> or
+              <guibutton>Set to Unmasked</guibutton> that set the range to
+              the range of values that are under or not under the mask,
+              respectively.
             </listitem>
           </itemizedlist>
           <para>
