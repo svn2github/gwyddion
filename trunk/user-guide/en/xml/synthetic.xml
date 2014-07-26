@@ -1148,6 +1148,122 @@
       </mediaobject>
     </informalfigure>
   </sect2>
+  <sect2 id='diffusion-synthesis'>
+    <title>Diffusion</title>
+    <para>
+      The simulation implements a Monte Carlo discrete diffusion limited
+      aggregation model.  Pixel-shaped particles fall onto the surface and move
+      around it until they stick to a cluster, slowly forming a monolayer.  The
+      flux of incoming particles is low so that only a few particles are free
+      to move at any given time and the particles can travel a considerable
+      distance on the surface before sticking.  For typical parameter values,
+      this leads to the formation of <quote>fractal flake</quote> clusters.
+    </para>
+    <para>
+      The calculation has the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Coverage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The average number of times a particle falls onto any given pixel.
+            Coverage value of 1 means the surface would be covered by a
+            monolayer, assuming the particles cover it uniformly.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Flux</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The average number particles falling onto any given pixel per
+            simulation step.  Smaller values of flux lead to larger structures
+            as the particles diffuse for longer time before they meet another
+            particle.  The value is given as a decimal logarithm, indicated by
+            the units <guilabel>log₁₀</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Height</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The height of one particle which gives the height of the steps
+            in the resulting image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Sticking probability</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The probability that a free particle will finally stick and stop
+            moving when it touches another single particle.  Probabilities that
+            the particle will stick if it touches two or three particles
+            increase progressively depending on this value.  The sticking
+            probability is always zero for a particle with no neighbours and
+            always one for a particle with all four neighbours.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Activation probability</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The probability a particle that has not stuck will move if it
+            touches another particle.  The probability for more touching
+            particles decreases as a power of the single-particle probability.
+            Particles without any neighbours can always move freely.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Passing Schwoebel probability</guilabel>
+        </term>
+        <listitem>
+          <para>
+            A particle that has fallen on the top of an already formed cluster
+            can have reduced probability to descend to the lower layer due to
+            so called Schwoebel barrier.  If this parameter is 1 there is no
+            such barrier, i.e. particles can descend freely.  Conversely,
+            probability 0 means particles can never descend to the lower layer.
+            The value is given as a decimal logarithm, indicated by the units
+            <guilabel>log₁₀</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Note that some parameter combinations, namely very small flux combined
+      with very small Schwoebel barrier passing probability, can lead to
+      excessively long simulation times.
+    </para>
+    <informalfigure id='fig-synthetic-diffusion'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-diffusion.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial diffusion surfaces: sparse clusters with high sticking
+          probability (left); dense clusters with low sticking probability
+          (centre); mutltilayer fractal structures with high Schwoebel barrier
+          (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
   <sect2 id='lattice-synthesis'>
     <title>Lattice</title>
     <para>
