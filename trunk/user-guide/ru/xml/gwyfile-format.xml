@@ -801,7 +801,7 @@
             <row>
               <entry><literal>calibration</literal></entry>
               <entry><link linkend="table-gwyfile-GwyDataLine"><type>GwyDataLine</type></link></entry>
-              <entry>Калибровка оси <xi:include href="eqi-z.html"/>, представляющая нелинейные отсчёты шкалы в этом направлении. Число точек должно быть равно <varname>zres</varname>. Этот компонент присутствует только если используется нелинейная шкала.</entry>
+              <entry>Калибровка оси <xi:include href="eqi-z.xml"/>, представляющая нелинейные отсчёты шкалы в этом направлении. Число точек должно быть равно <varname>zres</varname>. Этот компонент присутствует только если используется нелинейная шкала.</entry>
             </row>
           </tbody>
         </tgroup>

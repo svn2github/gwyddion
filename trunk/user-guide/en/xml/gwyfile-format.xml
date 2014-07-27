@@ -1160,7 +1160,7 @@
               <entry><literal>calibration</literal></entry>
               <entry><link linkend='table-gwyfile-GwyDataLine'><type>GwyDataLine</type></link></entry>
               <entry>
-                Calibration of the <xi:include href='eqi-z.html'/> axis to
+                Calibration of the <xi:include href='eqi-z.xml'/> axis to
                 represent non-linear sampling in this dimension.
                 The number of points must be equal to <varname>zres</varname>.
                 This component is present only if non-linear sampling is
