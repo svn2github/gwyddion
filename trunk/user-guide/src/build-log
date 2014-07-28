@@ -8,31 +8,32 @@ eval $(grep "^LANGUAGES=" configure.ac)
 source $HOME/.bashrc
 cd $logdir
 
+
 cat >user_guide_xhtml.ignore <<':'
 ^$
 ^Writing xhtml/.*\.html .*
-^(inkscape:[0-9]\+): Gdk-CRITICAL \*\*: gdk_display_list_devices: assertion `GDK_IS_DISPLAY (display)' failed
 ':'
 :
 
 
 cat >user_guide_pdf.ignore <<':'
 ^$
-^(inkscape:[0-9]\+): Gdk-CRITICAL \*\*: gdk_display_list_devices: assertion `GDK_IS_DISPLAY (display)' failed
-^/usr/lib/python2\.6/site-packages/dbtexmf/dblatex/grubber/util\.py:8: DeprecationWarning: the md5 module is deprecated; use hashlib instead
 ^  import md5
+^Build the book set list\.\.\.
 ^Build the listings\.\.\.
-^XSLT stylesheets DocBook *- *LaTeX 2e (0\.2\.[0-9]*)
+^XSLT stylesheets DocBook *- *LaTeX 2e (0\.3\.[0-9]*)
 ^=\+$
 ^Build user-guide\.pdf
-^processing index /[-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.
+^processing index /[-a-zA-Z/]\+/pdf/user-guide\.idx\.\.\.
 ^This is makeindex, version .*
 ^Scanning style file /usr/share/dblatex/latex/scripts/doc\.ist\.\.\.\.done ([0-9]\+ attributes redefined, 0 ignored)\.
-^Scanning input file /[-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.\.done ([0-9]\+ entries accepted, 0 rejected)\.
+^Scanning input file /[-a-zA-Z/]\+/pdf/user-guide\.idx\.\.\.\.done ([0-9]\+ entries accepted, 0 rejected)\.
 ^Sorting entries\.\.\.\.done ([0-9]\+ comparisons)\.
-^Generating output file /[-a-zA-Z/]\+/pdf/user-guide_tmp\.ind\.\.\.\.done ([0-9]\+ lines written, 0 warnings)\.
-^Output written in /[-a-zA-Z/]\+/pdf/user-guide_tmp\.ind\.
-^Transcript written in /[-a-zA-Z/]\+/pdf/user-guide_tmp\.ilg\.
+^Generating output file user-guide\.ind\.\.\.\.done ([0-9]\+ lines written, 0 warnings)\.
+^Output written in user-guide\.ind\.
+^Transcript written in user-guide\.ilg\.
+^'user-guide.pdf' successfully built
+^/[-a-zA-Z/]\+/pdf not removed
 ':'
 :
 
