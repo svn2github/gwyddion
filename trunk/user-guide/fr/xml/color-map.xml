@@ -111,12 +111,19 @@
             </listitem>
             <listitem>
               en sélectionnant une plage dans le graphe de distribution des
-              hauteurs dans la fenêtre de l'outil ou
+              hauteurs dans la fenêtre de l'outil,
             </listitem>
             <listitem>
               en sélectionnant une zone dans la fenêtre d'affichage des données,
               la plage est alors réglée sur les valeurs minimale et maximale
-              des données présentes dans la zone sélectionnée.
+              des données présentes dans la zone sélectionnée ou
+            </listitem>
+            <listitem>
+              en pressant les boutons 
+              <guibutton>ajuster à la partie masquée</guibutton> ou
+              <guibutton>ajuster à la partie non-masquée</guibutton> qui permet
+              d'ajuster respectivement la plage de valeurs à celle située sous 
+              le masque ou en dehors de celui-ci.
             </listitem>
           </itemizedlist>
           <para>

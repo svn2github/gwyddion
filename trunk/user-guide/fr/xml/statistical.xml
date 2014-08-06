@@ -117,6 +117,10 @@
         Inclinaison moyenne des facettes : calculée en moyennant les vecteurs
         normaux des facettes.
       </listitem>
+      <listitem>
+        Variation : calculée par l'intégrale des valeurs absolues du gradient
+        local.
+      </listitem>
     </itemizedlist>
     <tip>
       L'outil statistiques affiche par défaut les données en se basant sur

@@ -71,14 +71,13 @@
       <varlistentry id='dependency-libxml2'>
         <term>
           <ulink url='http://xmlsoft.org/'>LibXML2</ulink>
-          ≥ 2.<varname>x</varname>
         </term>
         <listitem>
           <para>
             <emphasis>Facultatif.</emphasis>
           </para>
           <para>
-            Permet l'import des fichiers SPML.
+            Permet l'import des fichiers SPML et APE DAX.
           </para>
         </listitem>
       </varlistentry>
@@ -170,7 +169,7 @@
         </para>
         <para>
           Permet l'import de certains formats compressés (APE DAX, 
-          NanoObserver, NanoScanTech).
+          NanoObserver, NanoScanTech, OpenGPS).
         </para>
       </listitem>
     </varlistentry>

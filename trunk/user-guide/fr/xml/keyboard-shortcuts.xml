@@ -21,6 +21,13 @@
       </thead>
       <tbody valign='top'>
         <row>
+          <entry><keycap>F1</keycap></entry>
+          <entry/>
+          <entry>pratiquement toutes les fenêtres</entry>
+          <entry>Ouvre la section correspondante du manuel utilisateur dans un
+          navigateur internet.</entry>
+        </row>
+        <row>
           <entry><keycap>Ctrl-Q</keycap></entry>
           <entry>
             <menuchoice>
