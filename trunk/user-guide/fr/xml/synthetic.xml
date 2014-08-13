@@ -1168,6 +1168,134 @@
       </mediaobject>
     </informalfigure>
   </sect2>
+  <sect2 id='diffusion-synthesis'>
+    <title>Diffusion</title>
+    <para>
+      Cette simulation propose un modèle d'agrégation limitée par diffusion basé
+      sur une méthode de Monte-Carlo discrète. Des particules en forme de pixel
+      tombent sur la surface et se déplacent sur celle-ci jusqu'à ce qu'elles
+      adhèrent à un agrégat, formant ainsi lentement une mono-couche. Le flux de
+      particules est faible de manière à ce que quelques particules seulement
+      soient libres de se déplacer à un moment donné ; celles-ci peuvent donc
+      parcourir un chemin conséquent avant d'adhérer à la surface. L'utilisation
+      des paramètres par défaut aboutit à la formation d'agrégats en forme de 
+      <quote>flocons fractals</quote>.
+    </para>
+    <para>
+      Le calcul utilise les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Couverture</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Nombre moyen de fois où une particule tombe sur un pixel donné. Une
+            valeur de couverture de 1 signifie que la surface serait couverte
+            par une mono-couche, en supposant que les particules la couvre
+            uniformément.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Flux</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Nombre moyen de fois où une particule tombe sur un pixel donné à 
+            chaque étape de la simulation. Un flux faible aboutit à des 
+            structures plus étendues car les particules diffusent pendant une 
+            durée plus longue avant de rencontrer une autre particule. La valeur
+            est donnée en logarithme décimal, indiqué par l'unité 
+            <guilabel>log₁₀</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Hauteur</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Hauteur d'une particule, ce qui donne la hauteur des sauts dans
+            l'image finale.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Probabilité d'adhérence</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Probabilité qu'une particule libre adhérera et cessera donc de se 
+            déplacer lors du contact avec une autre particule. La probabilité 
+            que la particule adhère si elle touche deux ou trois particules
+            augmente en fonction de cette valeur. La probabilité d'adhérence
+            est toujours nulle pour une particule isolée, et vaut toujours un
+            si la particule est entourée de quatre particules voisines.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Probabilité d'activation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Probabilité qu'une particule n'ayant pas adhéré se déplace si elle
+            touche une autre particule. La probabilité de toucher plus de
+            particules décroît selon une loi en puissance de la probabilité pour
+            une particule unique. Les particules sans aucune voisine peuvent
+            toujours se déplacer librement.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Probabilité de la barrière de Schwoebel</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Une particule tombant sur le dessus d'un amas déjà formé a une 
+            probabilité réduite de descendre sur la couche précédente à cause de
+            ce que l'on appelle la barrière de Schwoebel. Si ce paramètre vaut 1
+            cette barrière est inexistante, c'est-à-dire que les particules sont
+            libres de descendre sur la couche précédente. À l'inverse, une
+            probabilité nulle signifie que les particules ne peuvent jamais
+            descendre sur la couches précédente. 
+            A particle that has fallen on the top of an already formed cluster
+            can have reduced probability to descend to the lower layer due to
+            so called Schwoebel barrier.  If this parameter is 1 there is no
+            such barrier, i.e. particles can descend freely.  Conversely,
+            probability 0 means particles can never descend to the lower layer.
+            La valeur est donnée en logarithme décimal, indiqué par l'unité 
+            <guilabel>log₁₀</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Notez que certaines combinaisons de paramètres, par exemple un très 
+      faible flux combiné à une très faible probabilité de la barrière de 
+      Schwoebel, peuvent aboutir à des temps de calcul extrêmement longs.
+    </para>
+    <informalfigure id='fig-synthetic-diffusion'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-diffusion.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles obtenues par diffusion : amas épars avec une 
+          forte probabilité d'adhérence (à gauche) ; amas denses avec une faible
+          probabilité d'adhérence (au centre) ; structures fractales 
+          multi-couches avec une forte barrière de Schwoebel (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
   <sect2 id='lattice-synthesis'>
     <title>Maillage</title>
     <para>

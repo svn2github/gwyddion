@@ -143,7 +143,7 @@
               <entry>chaîne de caractères</entry>
               <entry><literal>s</literal></entry>
               <entry>
-                Se terminant par <constant>NUL</constant>
+                Se terminant par <constant>NUL</constant> encodé au format UTF-8
               </entry>
             </row>
             <row>
@@ -168,7 +168,7 @@
     <para>
       <informaltable id='table-gwyfile-array-types'>
         <tgroup cols='3' align='left'>
-          <?dblatex lll?>
+          <?dblatex llX?>
           <thead>
             <row>
               <entry>Type</entry>
@@ -278,6 +278,15 @@
               <entry>
                 Détermine si le canal doit être affiché lors du chargement du
                 fichier.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>/0/data/realsquare</literal></entry>
+              <entry>booléen</entry>
+              <entry>
+                Détermine si le canal doit être affiché avec les 
+                <guilabel>pixels réels</guilabel> (par opposition aux
+                <guilabel>pixels carrés</guilabel>).
               </entry>
             </row>
             <row>
@@ -746,7 +755,7 @@
               <entry><literal>xdata</literal></entry>
               <entry>tableau de doubles</entry>
               <entry>
-                Points d'abscisse.  Le nombre doit correspondre à
+                Points d'abscisse. Le nombre doit correspondre à
                 <literal>ydata</literal>.
               </entry>
             </row>
@@ -754,7 +763,8 @@
               <entry><literal>ydata</literal></entry>
               <entry>tableau de doubles</entry>
               <entry>
-                Points d'ordonnée.  Le nombre doit correspondre à <literal>xdata</literal>.
+                Points d'ordonnée. Le nombre doit correspondre à 
+                <literal>xdata</literal>.
               </entry>
             </row>
             <row>
@@ -1189,6 +1199,17 @@
                 Champ de données, enregistrées selon un tableau de dimensions
                 <varname>xres</varname>×<varname>yres</varname>×<varname>zres</varname>,
                 du plan zéro au dernier plan, de haut en bas et de gauche à droite.
+              </entry>
+            </row>
+            <row>
+              <entry><literal>calibration</literal></entry>
+              <entry><link linkend='table-gwyfile-GwyDataLine'><type>GwyDataLine</type></link></entry>
+              <entry>
+                Calibration de l'axe <xi:include href='eqi-z.xml'/> permettant 
+                de réprésenter un échantillonnage non linéaire de cette 
+                dimension. Le nombre de points doit être égal à 
+                <varname>zres</varname>. Ce composant n'est présent que si un 
+                échantillonnage non linéaire est utilisé.
               </entry>
             </row>
           </tbody>
