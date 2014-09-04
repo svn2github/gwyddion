@@ -5,7 +5,7 @@
 <sect1 id='gwyfile-format'>
   <title>Format of Gwyddion Files</title>
   <para>
-    <application>Gwyddion</application> native data files consists of
+    A <application>Gwyddion</application> native data file consists of
     a tree-like structure of serialized objects.  Generally, these objects
     can be of various kind and contain other embedded objects (hence the
     tree-like structure).  It can be instructive to play with
