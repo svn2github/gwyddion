@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 16436 2014-07-24 20:05:12Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 16504 2014-09-04 13:46:23Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
-  <para>Родные для <application>Gwyddion</application> файлы данных состоят из древоподобной структуры сериализованных объектов. В общем случае эти объекты могут быть различного вида и включать в себя другие объекты (вследствие древовидной структуры). В понимании работы может сильно помочь <ulink url="http://gwyddion.net/gwydump.php"><command>gwydump</command></ulink>, простой демонстратор структуры файла, который доступен на сайте проекта, если с ним поработать какое-то время и посмотреть содержимое различных файлов.</para>
+  <para>Файл данных собственного формата <application>Gwyddion</application> состоит из древоподобной структуры сериализованных объектов. В общем случае эти объекты могут быть различного вида и включать в себя другие объекты (вследствие древовидной структуры). В понимании работы может сильно помочь <ulink url="http://gwyddion.net/gwydump.php"><command>gwydump</command></ulink>, простой демонстратор структуры файла, который доступен на сайте проекта, если с ним поработать какое-то время и посмотреть содержимое различных файлов.</para>
   <para>Прежде всего, мы описываем физическую структуру файла безотносительно возможной интерпретации содержимого.</para>
   <sect2 id="gwyfile-byte-order">
     <title>Порядок байтов</title>
@@ -801,7 +801,7 @@
             <row>
               <entry><literal>calibration</literal></entry>
               <entry><link linkend="table-gwyfile-GwyDataLine"><type>GwyDataLine</type></link></entry>
-              <entry>Калибровка оси <xi:include href="eqi-z.xml"/>, представляющая нелинейные отсчёты шкалы в этом направлении. Число точек должно быть равно <varname>zres</varname>. Этот компонент присутствует только если используется нелинейная шкала.</entry>
+              <entry>Калибровка оси <xi:include href="eqi-z.html"/>, представляющая нелинейные отсчёты шкалы в этом направлении. Число точек должно быть равно <varname>zres</varname>. Этот компонент присутствует только если используется нелинейная дискретизация вдоль этой оси.</entry>
             </row>
           </tbody>
         </tgroup>
