@@ -5,8 +5,8 @@
 <sect1 id='gwyfile-format'>
   <title>Format des fichiers Gwyddion</title>
   <para>
-    Les fichiers de données au format <application>Gwyddion</application>
-    consistent en une structure en arborescence de plusieurs objets sérialisés.
+    Un fichier de données au format <application>Gwyddion</application>
+    consiste en une structure en arborescence de plusieurs objets sérialisés.
     En général ces objets peuvent être de différents types ou même contenir
     d'autres objets (ce qui explique l'arborescence). L'utilisation de
     <ulink url='http://gwyddion.net/gwydump.php'><command>gwydump</command></ulink>,
