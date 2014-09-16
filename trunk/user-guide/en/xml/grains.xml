@@ -936,15 +936,13 @@
     <title>References</title>
     <para id='grain-analysis-ref-1'>
       [1] <ulink url='http://klapetek.cz/download.html'>
-        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter and Helmut Sitter:
-        Acta Physica Slovaca, 3 (223-230) 2003
+      Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter and Helmut Sitter:
+      Acta Physica Slovaca, 3 (223-230) 2003
       </ulink>
     </para>
     <para id='grain-analysis-ref-2'>
-      [2] <ulink url='http://klapetek.cz/download.html'>
-        Luc Vincent and Pierre Soille:
-        IEEE Transactions on Pattern Analysis and Machine Intelligence, 13 (583–598) 1991.
-      </ulink>
+      [2] Luc Vincent and Pierre Soille:
+      IEEE Transactions on Pattern Analysis and Machine Intelligence, 13 (583–598) 1991
     </para>
   </sect2>
   <!--  Doesn't work well, needs serious formatting improvements.
