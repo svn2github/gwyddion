@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: grains.xml 16282 2014-06-09 14:57:17Z yeti-dn $ -->
+<!-- @(#) $Id: grains.xml 16550 2014-09-16 14:06:21Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="grain-analysis">
   <title>Анализ зёрен</title>
@@ -15,6 +15,13 @@
       <primary>выделение зёрен</primary>
       <secondary>водораздел</secondary>
     </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Обработка данных</guimenu>
+        <guisubmenu>Зёрна</guisubmenu>
+        <guimenuitem>Пометить по водоразделу</guimenuitem>
+      </menuchoice>
+    </para>
     <para>Для более сложных структур данных эффективность пороговых алгоритмов может оказаться весьма плохой. Для этих данных выделение зёрен или частиц  более эффективно можно проводить с помощью <emphasis>алгоритма водораздела</emphasis>.</para>
     <para>Алгоритм водораздела обычно задействуется для определения локальных минимумов и разделения изображения на сегменты в обработке изображений. Поскольку проблема определения положения зёрен может сводиться к проблеме нахождения локальных экстремумов на поверхности, этот алгоритм также можно использовать для нужд разделения и выделения зёрен. Для удобства в дальнейшем мы будем считать данные инвертированными в направлении <xi:include href="eqi-z.xml"/> при описании этого алгоритма (т.е. вершины зёрен формируют локальные минимумы в нижеследующем тексте). Мы применяем две стадии анализа зёрен (см. [<link linkend="grain-analysis-ref-1">1</link>]):</para>
     <orderedlist>
@@ -36,6 +43,72 @@
         <caption>Изображение зернистой структуры поверхности (a) и соответствующие результаты порога по высоте (b), кривизне (c), и алгоритма водораздела (d). С помощью алгоритма водораздела можно разделить изображение на сегменты даже лучше.</caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id="grain-segmentation">
+    <title>Сегментация</title>
+    <indexterm>
+      <primary>выделение зёрен</primary>
+      <secondary>сегментация</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Обработка данных</guimenu>
+        <guisubmenu>Зёрна</guisubmenu>
+        <guimenuitem>Пометить сегментацией</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>Эта функция реализует другой подход, основанный на <emphasis>алгоритме водораздела</emphasis>, в данном случае классический алгоритм Винсента для водораздела в цифровых пространствах  [<link linkend="grain-analysis-ref-2">2</link>], который применяется к предобработанному изображению. В общем случае результатом будет изображение, полностью сегментированное на фрагменты, каждый пиксель либо принадлежит фрагменту, либо разделяет два соседних. По умолчанию алгоритм помечает <emphasis>впадины</emphasis>. Чтобы пометить направленные вверх зёрна, что встечается чаще на изображениях АСМ, можно использовать опцию <guilabel>Инвертировать высоту</guilabel>.</para>
+    <para>Для предобработки доступны следующие параметры:</para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Гауссово сглаживание</guilabel>
+        </term>
+        <listitem>
+          <para>Дисперсия гауссова сглаживающего фильтра, применяемого к изображению. Нулевое значение соответствует отсутствию сглаживания.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Добавить градиент</guilabel>
+        </term>
+        <listitem>
+          <para>Относительный вес локального градиента, добавленного к данным. Большие значения соответствуют тому, что области с большими локальными уклонами будут стремиться стать границами зёрен.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Добавить кривизну</guilabel>
+        </term>
+        <listitem>
+          <para>Относительный вес локальной кривизны, добавленной к данным. Большие значения соответствуют тому, что локальные вогнутые области будут стремиться стать границами зёрен.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Высота барьера</guilabel>
+        </term>
+        <listitem>
+          <para>Относительный уровень высоты, выше которого пиксели никогда не присваиваются к любому из зёрен. Если не выставлено в 100%, эта настройка создаёт исключение для свойства полной сегментации.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Уровень предзаполнения</guilabel>
+        </term>
+        <listitem>
+          <para>Относительный уровень высоты, до которого поверхность предзаполняется, затирая любые детали на дне глубоких впадин.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Предварительно заполнять с минимумов</guilabel>
+        </term>
+        <listitem>
+          <para>Относительный уровень высоты, до которого поверхность предзаполняется из каждого локального минимума, затирая любые детали на дне впадин.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </sect2>
   <sect2 id="grain-analysis-statistics">
     <title>Статистика</title>
@@ -258,7 +331,8 @@
   </sect2>
   <sect2 id="grain-analysis-ref">
     <title>Источники</title>
-    <para id="grain-analysis-ref-1">[1] <ulink url="http://klapetek.cz/download.html"> Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter: Acta Physica Slovaca, 3 (223-230), 2003 </ulink></para>
+    <para id="grain-analysis-ref-1">[1] <ulink url="http://klapetek.cz/download.html"> Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter and Helmut Sitter: Acta Physica Slovaca, 3 (223-230) 2003 </ulink></para>
+    <para id="grain-analysis-ref-2">[2] Luc Vincent and Pierre Soille: IEEE Transactions on Pattern Analysis and Machine Intelligence, 13 (583–598) 1991</para>
   </sect2>
   <!--  Doesn't work well, needs serious formatting improvements.
   <bibliography>
