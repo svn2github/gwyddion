@@ -85,6 +85,13 @@
       <secondary>watershed</secondary>
     </indexterm>
     <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Mark by Watershed</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
       For more complicated data structures the effectiveness of thresholding
       algorithms can be very poor. For these data a <emphasis>watershed
         algorithm</emphasis> can be used more effectively for grain or particle
@@ -174,6 +181,106 @@
         </caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id='grain-segmentation'>
+    <title>Segmentation</title>
+    <indexterm>
+      <primary>grain marking</primary>
+      <secondary>segmentation</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Mark by Segmentation</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      This function a different approach based on a <emphasis>watershed
+      algorithm</emphasis>, in this case the classical Vincent algorithm
+      for watershed in digital spaces
+      [<link linkend='grain-analysis-ref-2'>2</link>], which is applied to
+      a preprocessed image.  Generally, the result is an image fully
+      segmented to motifs, each pixel belonging to one or separating two of
+      them.  By default, the algorithm marks <emphasis>valleys</emphasis>.
+      To mark upward grains, which is more common in AFM, use the opton
+      <guilabel>Invert height</guilabel>.
+    </para>
+    <para>
+      The preprocessing has the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Gaussian smoothing</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Dispersion of Gaussian smoothing filter applied to the data.
+            A zero value means no smoothing.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Add gradient</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Relative weight of local gradient added to the data.  Large
+            values mean areas with large local slope tend to become grain
+            boundaries.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Add curvature</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Relative weight of local gradient added to the data.  Large
+            values mean locally concave areas with tend to become grain
+            boundaries.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Barrier level</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Relative height level above which pixels are never assigned to
+            any grain.  If not 100%, this creates an exception to the
+            full-segmentation property.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Prefill level</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Relative height level up to which the surface is prefilled,
+            obliterating any details at the bottoms of deep valleys.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Prefill from minima</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Relative height level up to which the surface is prefilled from
+            each local minimum, obliterating any details at the bottoms of
+            valleys.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </sect2>
   <sect2 id='grain-analysis-statistics'>
     <title>Statistics</title>
@@ -829,8 +936,14 @@
     <title>References</title>
     <para id='grain-analysis-ref-1'>
       [1] <ulink url='http://klapetek.cz/download.html'>
-        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
-        Acta Physica Slovaca, 3 (223-230), 2003
+        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter and Helmut Sitter:
+        Acta Physica Slovaca, 3 (223-230) 2003
+      </ulink>
+    </para>
+    <para id='grain-analysis-ref-2'>
+      [2] <ulink url='http://klapetek.cz/download.html'>
+        Luc Vincent and Pierre Soille:
+        IEEE Transactions on Pattern Analysis and Machine Intelligence, 13 (583–598) 1991.
       </ulink>
     </para>
   </sect2>
