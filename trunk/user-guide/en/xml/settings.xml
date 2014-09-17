@@ -142,6 +142,18 @@
               to crash when it tries to draw the axes.
             </entry>
           </row>
+          <row>
+            <entry>/app/help/user-guide-base</entry>
+            <entry>string</entry>
+            <entry>
+              Base location of the user guide for help.  If not set, the
+              default on-line location is used, i.e. something like
+              <literal>"http://gwyddion.net/documentation/user-guide-en"</literal>,
+              depending on the language.  If you want to use a local copy of
+              the HTML guide, set this setting to directory name, for instance
+              <literal>"/home/yeti/docs/gwyddion-user-guide-xhtml-en-2014-09-17"</literal>.
+            </entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>

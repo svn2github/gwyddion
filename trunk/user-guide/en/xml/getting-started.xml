@@ -18,6 +18,22 @@
     playing.  The clarification of the basic ideas and components provided
     here will hopefully ease the discoverying.
   </para>
+  <para>
+    You can also get help for the current function or window from within
+    Gwyddion.  Pressing <keycode>F1</keycode> or clicking on the
+    <guibutton>Help</guibutton> button will in most windows show a relevant
+    part of the on-line version of this guide in a web browser.
+    The starting page of guide can be displayed by
+    <menuchoice>
+      <guimenu>Info</guimenu>
+      <guisubmenu>User Guide</guisubmenu>
+    </menuchoice>.
+    Of course, this works if you are on-line and Gwyddion finds a suitable
+    web browser.  See the
+    <link linkend='table-settings-keys'>settings tweaks</link>
+    if you want or need to tweak the setup, e.g. for an off-line version of
+    the guide.
+  </para>
   <tip>
     Command
     <menuchoice>
