@@ -69,6 +69,11 @@
             <entry>boolean</entry>
             <entry>Если установлено в <literal>True</literal>, подписи осей не будут рисоваться в <link linkend="opengl-3d-view">окнах трёхмерного просмотра OpenGL</link>, даже если они включены. Это может помочь с некоторыми проблемными комбинациями видеодрайвера/видеокарты/GtkGLExt, с которыми Gwyddion падает при попытке отрисовки этих осей.</entry>
           </row>
+          <row>
+            <entry>/app/help/user-guide-base</entry>
+            <entry>string</entry>
+            <entry>Место размещения руководства пользователя для работы справочной системы. Если не задано, будет использоваться значение по умолчанию, указывающее на онлайновую версию, т.е., нечто вроде <literal>"http://gwyddion.net/documentation/user-guide-en"</literal>, в зависисмости от языка. Если вы хотите использовать локальную версию руководства пользователя в формате HTML, установите это значение в название каталога, например, <literal>"/home/yeti/docs/gwyddion-user-guide-xhtml-en-2014-09-17"</literal>.</entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>

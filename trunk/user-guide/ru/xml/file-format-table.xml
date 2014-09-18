@@ -240,6 +240,26 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module femtoscan-txt.c -->
+    <row>
+      <entry>Текстовые данные FemtoScan</entry>
+      <entry>.txt</entry>
+      <entry>femtoscan-txt</entry>
+      <entry>Да<footnote id="table-file-formats-fn1" label="a"><para>Предполагается семплирование с регулярным интервалом в обоих направлениях (X и Y).</para></footnote></entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module fitsfile.c -->
+    <row>
+      <entry>Flexible Image Transport System (FITS)</entry>
+      <entry>.fits,, .fit</entry>
+      <entry>fitsfile</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module gdeffile.c -->
     <row>
       <entry>DME GDEF</entry>
@@ -275,7 +295,7 @@
       <entry>Данные Gwyddion XYZ</entry>
       <entry>.gxyzf</entry>
       <entry>gxyzffile</entry>
-      <entry>Да<footnote id="table-file-formats-fn1" label="a"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn2" label="b"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
       <entry>Да</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -337,7 +357,7 @@
       <entry>iso28600</entry>
       <entry>Да</entry>
       <entry>Да</entry>
-      <entry>Ограничена<footnote id="table-file-formats-fn2" label="b"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
+      <entry>Ограничена<footnote id="table-file-formats-fn3" label="c"><para>Кривые спектров импортируются как графики, информация о позиции теряется.</para></footnote></entry>
       <entry>—</entry>
     </row>
     <!-- From module jeol.c -->
@@ -355,6 +375,16 @@
       <entry>JPK Instruments</entry>
       <entry>.jpk</entry>
       <entry>jpkscan</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module jspmfile.c -->
+    <row>
+      <entry>JEOL JSPM</entry>
+      <entry>.tif</entry>
+      <entry>jspmfile</entry>
       <entry>Да</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -437,7 +467,7 @@
       <entry>mifile</entry>
       <entry>Да</entry>
       <entry>—</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module mulfile.c -->
@@ -527,7 +557,7 @@
       <entry>nanoscope</entry>
       <entry>Да</entry>
       <entry>—</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>Да</entry>
     </row>
     <!-- From module nanoscope-ii.c -->
@@ -565,8 +595,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Да<footnote id="table-file-formats-fn3" label="c"><para>Не все варианты реализованы.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn4" label="d"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn4" label="d"><para>Не все варианты реализованы.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn5" label="e"><para>Данные экспортируются в фиксированный присоединённый формат с плавающей точкой с родным порядком следования байтов для данной архитектуры.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
@@ -659,13 +689,23 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module opengps.c -->
+    <row>
+      <entry>OpenGPS X3P (ISO 5436-2)</entry>
+      <entry>.x3p</entry>
+      <entry>opengps</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module pixmap.c -->
     <row>
       <entry>Изображения</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Да<footnote id="table-file-formats-fn5" label="e"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, различается от системы к системе.</para></footnote></entry>
-      <entry>Да<footnote id="table-file-formats-fn6" label="f"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn6" label="f"><para>Поддержка импорта основана на Gdk-Pixbuf и, следовательно, может меняться от системы к системе.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn7" label="g"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
@@ -743,7 +783,7 @@
       <entry>Текстовые данные графиков (необработанные)</entry>
       <entry>any</entry>
       <entry>rawgraph</entry>
-      <entry>Да<footnote id="table-file-formats-fn7" label="g"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
+      <entry>Да<footnote id="table-file-formats-fn8" label="h"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -753,7 +793,7 @@
       <entry>Данные XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Да<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Да<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
       <entry>—</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -765,7 +805,7 @@
       <entry>rhk-sm3</entry>
       <entry>Да</entry>
       <entry>—</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module rhk-sm4.c -->
@@ -775,7 +815,7 @@
       <entry>rhk-sm4</entry>
       <entry>Да</entry>
       <entry>—</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module rhk-spm32.c -->
@@ -785,7 +825,7 @@
       <entry>rhk-spm32</entry>
       <entry>Да</entry>
       <entry>—</entry>
-      <entry>Ограничена<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Ограничена<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module robotics.c -->
