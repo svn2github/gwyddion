@@ -198,6 +198,19 @@
         </para>
       </listitem>
     </varlistentry>
+    <varlistentry id='dependency-cfitsio'>
+      <term>
+        <ulink url='http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html'>cfitsio</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables import of Flexible Image Transport System (FITS) files.
+        </para>
+      </listitem>
+    </varlistentry>
     <varlistentry id='dependency-pygtk2'>
       <term>
         <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, including codegen
