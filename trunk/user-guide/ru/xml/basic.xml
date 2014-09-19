@@ -25,16 +25,7 @@
     <title>Считывание значений</title>
     <para>Простейший способ чтения данных это поместить курсор мыши поверх точки, в которой необходимо считать значение. Координаты при этом показываются в строке состояния <link linkend="data-windows">окна данных</link> или <link linkend="graph-windows">окна графика</link>.</para>
     <sect3 id="read-value">
-      <title>
-        Read Value Tool
-        <guiicon>
-          <inlinemediaobject>
-            <imageobject>
-              <imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/>
-            </imageobject>
-          </inlinemediaobject>
-        </guiicon>
-      </title>
+      <title>Инструмент считать значение <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
       <indexterm><primary>инструмент чтения значения</primary></indexterm>
       <indexterm><primary>измерение уклона</primary></indexterm>
       <indexterm>
@@ -69,16 +60,7 @@
       </informalfigure>
     </sect3>
     <sect3 id="distance">
-      <title>
-        Distance Tool
-        <guiicon>
-          <inlinemediaobject>
-            <imageobject>
-              <imagedata fileref="gwy_distance-24.png" format="PNG"/>
-            </imageobject>
-          </inlinemediaobject>
-        </guiicon>
-      </title>
+      <title>Инструмент измерения расстояний <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_distance-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
       <indexterm><primary>инструмент Расстояние</primary></indexterm>
       <indexterm><primary>измерение расстояний </primary></indexterm>
       <indexterm><primary>измерение углов</primary></indexterm>
@@ -98,16 +80,7 @@
     </sect3>
   </sect2>
   <sect2 id="profile">
-    <title>
-      Profile Extraction
-      <guiicon>
-        <inlinemediaobject>
-          <imageobject>
-            <imagedata fileref="gwy_profile-24.png" format="PNG"/>
-          </imageobject>
-        </inlinemediaobject>
-      </guiicon>
-    </title>
+    <title>Извлечение профиля <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_profile-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
     <indexterm><primary>извлечение профиля</primary></indexterm>
     <para>Инструмент извлечения профиля доступен с панели инструментов. Можно использовать мышь для рисования нескольких профилей на изображении, которые впоследствии могут быть перемещены и настроены. Диалоговое окно включает в себя мгновенный предпросмотр графика. Профили могут быть различной <quote>толщины</quote>, что означает использование большего числа точек данных в направлении поперёк направления профиля для расчёта точки профиля для более широких профилей. Это может быть весьма полезно для уменьшения шума при измерении объектов правильной формы.</para>
     <para>После того, как профили выбраны, они могут быть извлечены в графики (как отдельные, так и сгруппированные в одном окне графика), которые в свою очередь могут быть проанализированы соответствующими функциями.</para>
