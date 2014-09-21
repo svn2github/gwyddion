@@ -92,6 +92,15 @@
       </tgroup>
     </informaltable>
   </sect2>
+  <sect2 id="installation-ms-windows-missing">
+    <title>Отсутствующие возможности</title>
+    <para>Gwyddion поддерживает большое число опциональных возможностей, которые зависят от наличия сторонних библиотек. Бинарные сборки под MS Windows содержат большую часть из них, но некоторые не включены в настоящее время:</para>
+    <itemizedlist>
+      <listitem>импорт и экспорт изображений с большой глубиной цвета OpenEXR </listitem>
+      <listitem>импорт файлов Flexible Image Transport System (FITS)</listitem>
+      <listitem>поддержка Pygwy в 64битных сборках (оно поддерживается только в 32битных сборках).</listitem>
+    </itemizedlist>
+  </sect2>
   <sect2 id="installation-ms-windows-pygwy">
     <title>Включение pygwy</title>
     <para>Интерфейс написания скриптов на Python, pygwy, включен в инсталятор, но необходимо отдельно установить Python и PyGTK2 чтобы заработали скрипты на Python. Это можно сделать как до установки Gwyddion, так и в любое время после. Если отсутствуют Python и PyGTK2, pygwy просто не будет регистрировать себя при запуске Gwyddion.</para>
