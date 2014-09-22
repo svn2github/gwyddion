@@ -62,7 +62,7 @@
             </entry>
           </row>
           <row>
-            <entry>char</entry>
+            <entry>caractère</entry>
             <entry>
               Caractère unique. Les caractères normaux sont directement 
               représentés par un caractère unique. Les caractères spéciaux sont
@@ -97,7 +97,7 @@
             </entry>
           </row>
           <row>
-            <entry>string</entry>
+            <entry>chaîne de caractères</entry>
             <entry>
               Chaîne de caractères entre guillemets droits, généralement encodé
               au format UTF-8. Les caractères spéciaux, incluant les guillemets
@@ -148,6 +148,20 @@
               confronté à une combinaison pilote/carte/GtkGLExt posant problème
               et avec laquelle Gwyddion peut planter en tentant de dessiner les
               axes.
+            </entry>
+          </row>
+          <row>
+            <entry>/app/help/user-guide-base</entry>
+            <entry>chaîne de caractères</entry>
+            <entry>
+              Localisation du guide utilisateur pour l'aide. Si celle-ci n'est
+              pas définie, la version en ligne est utilisée, c'est-à-dire qu'un
+              lien semblable à
+              <literal>"http://gwyddion.net/documentation/user-guide-fr"</literal>,
+              sera lancé.  Si vous souhaitez utiliser une copie locale du guide
+              HTML, définissez dans cette entrée le nom du répertoire, par 
+              exemple
+              <literal>"/home/yeti/docs/gwyddion-user-guide-xhtml-en-2014-09-17"</literal>.
             </entry>
           </row>
         </tbody>

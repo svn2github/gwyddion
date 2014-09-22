@@ -152,6 +152,26 @@
       </tgroup>
     </informaltable>
   </sect2>
+  <sect2 id='installation-ms-windows-missing'>
+    <title>Fonctionnalités manquantes</title>
+    <para>
+      Gwyddion possède plusieurs fonctionnalités dépendant de librairies 
+      tierces. Le paquet MS Windows en contient la plupart mais certaines 
+      d'entre elles ne sont incluses pour l'instant :
+    </para>
+    <itemizedlist>
+      <listitem>
+        Import et export d'images OpenEXR HDR.
+      </listitem>
+      <listitem>
+        Import d'images FITS (Flexible Image Transport System).
+      </listitem>
+      <listitem>
+        Support de Pygwy pour la version 64bit (il n'est supporté que dans la
+        version 32bit).
+      </listitem>
+    </itemizedlist>
+  </sect2>
   <sect2 id='installation-ms-windows-pygwy'>
     <title>Activation de pygwy</title>
     <para>

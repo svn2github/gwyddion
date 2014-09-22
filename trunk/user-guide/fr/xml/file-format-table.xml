@@ -241,6 +241,26 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module femtoscan-txt.c -->
+    <row>
+      <entry>Données texte FemtoScan</entry>
+      <entry>.txt</entry>
+      <entry>femtoscan-txt</entry>
+      <entry>Oui<footnote id="table-file-formats-fn1" label="a"><para>En assumant un échantillonnage régulier selon X et Y.</para></footnote></entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module fitsfile.c -->
+    <row>
+      <entry>Flexible Image Transport System (FITS)</entry>
+      <entry>.fits,, .fit</entry>
+      <entry>fitsfile</entry>
+      <entry>Oui</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module gdeffile.c -->
     <row>
       <entry>DME GDEF</entry>
@@ -276,7 +296,7 @@
       <entry>Gwyddion XYZ</entry>
       <entry>.gxyzf</entry>
       <entry>gxyzffile</entry>
-      <entry>Oui<footnote id="table-file-formats-fn1" label="a"><para>Les données XYZ sont interpolées selon une grille régulière lors de l'import.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn2" label="b"><para>Les données XYZ sont interpolées selon une grille régulière lors de l'import.</para></footnote></entry>
       <entry>Oui</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -338,7 +358,7 @@
       <entry>iso28600</entry>
       <entry>Oui</entry>
       <entry>Oui</entry>
-      <entry>Limité<footnote id="table-file-formats-fn2" label="b"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
+      <entry>Limité<footnote id="table-file-formats-fn3" label="c"><para>Les courbes spectrales sont importées en tant que graphes, les informations de position sont perdues.</para></footnote></entry>
       <entry>—</entry>
     </row>
     <!-- From module jeol.c -->
@@ -356,6 +376,16 @@
       <entry>JPK Instruments</entry>
       <entry>.jpk</entry>
       <entry>jpkscan</entry>
+      <entry>Oui</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module jspmfile.c -->
+    <row>
+      <entry>JEOL JSPM</entry>
+      <entry>.tif</entry>
+      <entry>jspmfile</entry>
       <entry>Oui</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -438,7 +468,7 @@
       <entry>mifile</entry>
       <entry>Oui</entry>
       <entry>—</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module mulfile.c -->
@@ -538,7 +568,7 @@
       <entry>nanoscope</entry>
       <entry>Oui</entry>
       <entry>—</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>Oui</entry>
     </row>
     <!-- From module nanotop.c -->
@@ -566,8 +596,8 @@
       <entry>Nearly raw raster data (NRRD)</entry>
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
-      <entry>Oui<footnote id="table-file-formats-fn3" label="c"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn5" label="e	"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
@@ -660,14 +690,24 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
-    <!-- From module pixmap.c -->
+     <!-- From module opengps.c -->
+    <row>
+      <entry>OpenGPS X3P (ISO 5436-2)</entry>
+      <entry>.x3p</entry>
+      <entry>opengps</entry>
+      <entry>Oui</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+   <!-- From module pixmap.c -->
     <row>
       <entry>Images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
-      <entry>Oui<footnote id="table-file-formats-fn5" label="e"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
+      <entry>Oui<footnote id="table-file-formats-fn6" label="f"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
 Le format 16bit n'est  pas supporté.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn6" label="f"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
+      <entry>Oui<footnote id="table-file-formats-fn7" label="g"><para>En général avec perte de données, proposé pour des raisons de présentation. L'export
       en niveaux de gris 16bit est possible vers les formats PNG, TIFF et PNM.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -745,8 +785,8 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     <row>
       <entry>Graphe au format texte (brut)</entry>
       <entry>-</entry>
-      <entry>rawgraph</entry>
-      <entry>Oui<footnote id="table-file-formats-fn7" label="g"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
+      <entry>rawgraph</entry
+      <entry>Oui<footnote id="table-file-formats-fn8" label="h"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -757,7 +797,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Coordonnées XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
-      <entry>Oui<footnoteref linkend="table-file-formats-fn1" label="a"/></entry>
+      <entry>Oui<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
       <entry>—</entry>
       <entry>—</entry>
       <entry>—</entry>
@@ -769,7 +809,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-sm3</entry>
       <entry>Oui</entry>
       <entry>—</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module rhk-sm4.c -->
@@ -779,7 +819,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-sm4</entry>
       <entry>Oui</entry>
       <entry>—</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module rhk-spm32.c -->
@@ -789,7 +829,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rhk-spm32</entry>
       <entry>Oui</entry>
       <entry>—</entry>
-      <entry>Limité<footnoteref linkend="table-file-formats-fn2" label="b"/></entry>
+      <entry>Limité<footnoteref linkend="table-file-formats-fn3" label="c"/></entry>
       <entry>—</entry>
     </row>
     <!-- From module robotics.c -->

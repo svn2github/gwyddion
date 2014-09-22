@@ -20,6 +20,22 @@
     et des composants fournies ici devraient normalement faciliter ces
     découvertes.
   </para>
+  <para>
+    Vous pouvez aussi obtenir de l'aide pour la fonction en cours depuis Gwyddion.
+    En pressant la touche <keycode>F1</keycode> ou en cliquant sur le bouton
+    <guibutton>Aide</guibutton>, vous aboutirez pour la plupart de fenêtres dans 
+    la section idoine de la version en ligne de ce manuel dans un navigateur 
+    internet. La page de garde du guide peut être affichée en allant dans
+    <menuchoice>
+      <guimenu>Info</guimenu>
+      <guisubmenu>Manuel utilisateur</guisubmenu>
+    </menuchoice>.
+    Bien évidemment, cela fonctionnera uniquement si vous êtes connecté à
+    internet, et que Gwyddion trouve un navigateur. Voir la partie sur les 
+    <link linkend='table-settings-keys'>réglages</link> si vous souhaitez ou 
+    avez besoin de bidouiller votre installation, par exemple pour utiliser une
+    version hors-ligne du manuel.
+  </para>
   <tip>
     Commande
     <menuchoice>
