@@ -106,7 +106,7 @@
           </entry>
         </row>
         <row id='dependency-zlib'>
-          <entry><ulink url='http://www.gzip.org/zlib/'>zlib</ulink></entry>
+          <entry><ulink url='http://www.zlib.net/'>zlib</ulink></entry>
           <entry/>
           <entry>Optional</entry>
           <entry>
@@ -115,7 +115,7 @@
           </entry>
         </row>
         <row id='dependency-minizip'>
-          <entry><ulink url='http://www.gzip.org/zlib/'>minizip</ulink></entry>
+          <entry><ulink url='http://www.zlib.net/'>minizip</ulink></entry>
           <entry/>
           <entry>Optional</entry>
           <entry>
