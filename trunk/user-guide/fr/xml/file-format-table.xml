@@ -597,7 +597,7 @@
       <entry>.nrrd</entry>
       <entry>nrrdfile</entry>
       <entry>Oui<footnote id="table-file-formats-fn4" label="d"><para>Toutes les variantes ne sont pas implementées.</para></footnote></entry>
-      <entry>Oui<footnote id="table-file-formats-fn5" label="e	"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
+      <entry>Oui<footnote id="table-file-formats-fn5" label="e"><para>Les données sont exportées selon un format fixé en virgule flottante avec un ordre des octets natif.</para></footnote></entry>
       <entry>—</entry>
       <entry>—</entry>
     </row>
@@ -785,7 +785,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     <row>
       <entry>Graphe au format texte (brut)</entry>
       <entry>-</entry>
-      <entry>rawgraph</entry
+      <entry>rawgraph</entry>
       <entry>Oui<footnote id="table-file-formats-fn8" label="h"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
       <entry>—</entry>
