@@ -66,13 +66,13 @@
           <entry>Подсветка синтаксиса в командной строке оболочки Python.</entry>
         </row>
         <row id="dependency-zlib">
-          <entry><ulink url="http://www.gzip.org/zlib/">zlib</ulink></entry>
+          <entry><ulink url="http://www.zlib.net/">zlib</ulink></entry>
           <entry/>
           <entry>Опционально</entry>
           <entry>Импорт файлов данных в формате SPML и импорт данных, сжатых gzip, в некоторых других форматах (Createc, NRRD, метаданные RHK SM4 PRM).</entry>
         </row>
         <row id="dependency-minizip">
-          <entry><ulink url="http://www.gzip.org/zlib/">minizip</ulink></entry>
+          <entry><ulink url="http://www.zlib.net/">minizip</ulink></entry>
           <entry/>
           <entry>Опционально</entry>
           <entry>Импорт файлов данных APE DAX, NanoObserver, NanoScanTech и OpenGPS.</entry>
