@@ -47,7 +47,7 @@
       <primary>marquage de grain</primary>
       <secondary>détection de bord</secondary>
     </indexterm>
-    Une autre fonctio de marquage,
+    Une autre fonction de marquage,
     <menuchoice>
       <guimenu>Traitement des données</guimenu>
       <guisubmenu>Grains</guisubmenu>
@@ -85,6 +85,13 @@
 	  <primary>marquage de grain</primary>
 	  <secondary>ligne de partage des eaux</secondary>
 	</indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Marquer par ligne de partage des eaux</guimenuitem>
+      </menuchoice>
+    </para>
     <para>
       Dans le cas de structures plus complexes, les algorithmes de seuillage vus
       précédemment peuvent être inefficaces. Dans ce cas l'algorithme de
@@ -184,6 +191,107 @@
         </caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id='grain-segmentation'>
+    <title>Segmentation</title>
+    <indexterm>
+      <primary>marquage de grains</primary>
+      <secondary>immersion</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des données</guimenu>
+        <guisubmenu>Grains</guisubmenu>
+        <guimenuitem>Marquer par immersion</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Cette fonction est une approche différente basée sur  
+      <emphasis>l'algorithme de ligne de marquage des eaux</emphasis>, ici 
+      l'algorithme classique de Vincent de segmentation dans les espaces
+      numériques [<link linkend='grain-analysis-ref-2'>2</link>], que l'on 
+      applique à une image pré-traitée. En général, le résultat est une image
+      complètement segmentée en motifs, chaque pixel appartenant à un motif ou
+      séparant deux d'entre eux. L'algorithme marque par défaut les
+      <emphasis>vallées</emphasis>. Pour marquer les grains en reliefs, ce qui
+      est le plus courant en microscopie, utilisez l'option 
+      <guilabel>inverser les hauteurs</guilabel>.
+    </para>
+    <para>
+      Le pré-traitement propose les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Floutage gaussien</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Dispersion du filtre gaussien appliqué aux données.
+            Une valeur nulle indique qu'aucun filtrage n'est appliqué.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Ajouter un gradient</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Poids relatif du gradient local ajouté aux données. Une valeur
+            importante signifie que les zones ayant une pente locale importante
+            auront tendance à devenir des bords de grains.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Ajouter de la courbure</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Poids relatif de la courbure locale ajoutée aux données. Une valeur
+            importante signifie que les zones localement concaves auront 
+            tendance à devenir des bords de grains.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Niveau de barrière</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Hauteur relative au-dessus de laquelle les pixels ne peuvent être
+            assignés à des grains. Si elle diffère de 100 %, cela crée une
+            exception à une segmentation complète de l'image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Niveau de pré-remplissage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Hauteur relative jusqu'à laquelle la surface est pré-remplie, 
+            supprimant tous les détails au fond des vallées.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Pré-remplir à partir du minima</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Hauteur relative jusqu'à laquelle la surface est pré-remplie à 
+            partir de chaque minimum local, supprimant tous les détails au fond
+            des vallées.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </sect2>
   <sect2 id='grain-analysis-statistics'>
     <title>Statistiques</title>
@@ -841,9 +949,13 @@
     <title>Références</title>
     <para id='grain-analysis-ref-1'>
       [1] <ulink url='http://klapetek.cz/download.html'>
-        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
-        Acta Physica Slovaca, 3 (223-230), 2003
+        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter and Helmut Sitter:
+        Acta Physica Slovaca, 3 (223-230) 2003
       </ulink>
+    </para>
+    <para id='grain-analysis-ref-2'>
+      [2] Luc Vincent and Pierre Soille:
+      IEEE Transactions on Pattern Analysis and Machine Intelligence, 13 (583–598) 1991
     </para>
   </sect2>
   <!--  Doesn't work well, needs serious formatting improvements.
