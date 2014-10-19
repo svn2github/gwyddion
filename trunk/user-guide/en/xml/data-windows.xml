@@ -35,7 +35,7 @@
     of buttons at the Gwyddion main window.
   </para>
   <indexterm><primary>aspect ratio</primary></indexterm>
-  <para>
+  <para id='physical-aspect-ratio'>
     The arrow in the upper left corner brings the aspect ratio switch menu.
     The data can be displayed either with pixels mapped with 1:1 aspect ratio
     to screen pixels (<guilabel>Pixelwise Square</guilabel>), or with
