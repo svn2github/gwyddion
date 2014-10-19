@@ -1,0 +1,396 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='image-export'>
+  <title>Image Export</title>
+  <para>
+    Microscopy data often need to rendered into image formats, usually for
+    presentation purposes, occasionally to open them in programs that do
+    not support any SPM data formats.  Both is achieved the same way in
+    <application>Gwyddion</application>: by selecting
+    <menuchoice>
+      <guimenu>File</guimenu>
+      <guimenuitem>Save As</guimenuitem>
+    </menuchoice>
+    and choosing a file name corresponding to an image format, e.g.
+    <filename>channel.png</filename> or <filename>channel.tiff</filename>.
+    The reference section <link linkend='pixmap-image-keys'>High-Depth Image
+    Formats</link> describes the export of data as high-depth greyscale images
+    that should be still usable as quantiative data.  For supported formats
+    you can enabled it using the <guilabel>Export as 16 bit
+    grayscale</guilabel> check-box at the top of the image export dialog. The
+    rest of this section discusses the creation of nice images for publications
+    and presentations.
+  </para>
+  <para>
+    <application>Gwyddion</application> can render images into a number of
+    formats, including for instance PNG, PDF, SVG, EPS, TIFF, BMP, PPM, TARGA
+    and JPEG.  Depending on the intent, some may be more suitable more than
+    others.  Generally, the following choices can be recommended:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <ulink url='https://www.adobe.com/devnet/pdf/pdf_reference_archive.html'>PDF (Portable Document Format)</ulink>
+      for high-quality rendering suitable for printing, with all text and lines
+      perfectly sharp and clean at any scale.  Gwyddion also suports output to
+      EPS (Encapsulated PostScript) for the same purpose, however, some
+      features currently seem to work better in the PDF output.
+    </listitem>
+    <listitem>
+      <ulink url='http://libpng.org/pub/png/'>PNG (Portable Network Graphics)</ulink>
+      for web pages, low-resolution previews, thumbnails and icons, and also if
+      you have to use a raster image format because it is the only option.
+      PNG is a modern and widely supported raster image format with good
+      loseless compression and a number of nifty features.
+    </listitem>
+    <listitem>
+      <ulink url='http://www.w3.org/Graphics/SVG/'>SVG (Scalable Vector Graphics)</ulink>
+      for subsequent editing and processing.  SVG is a modern vector graphics
+      format.  You can open in a vector image editor such as
+      <ulink url='http://inkscape.org/'>Inkscape</ulink> and modify it or
+      combine with other images – keeping all text and lines perfectly sharp
+      and clean.
+    </listitem>
+  </itemizedlist>
+  <informalfigure id='fig-imgexport-screenshot'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='imgexport-screenshot.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Image export dialog screenshot showing the <guilabel>Basic</guilabel>
+        options page.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    The image export options are divided into several groups, as seen in the
+    above screenshot.
+  </para>
+  <sect2 id='image-export-basic'>
+    <title>Basic</title>
+    <para>
+      <guilabel>Basic</guilabel> options specify various overall sizes and
+      scales.  The <guilabel>Physical Dimensions</guilabel> part differs for
+      raster and vector images.  For raster images the physical dimensions are
+      specified as follows:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Zoom</guilabel></term>
+        <listitem>
+          <para>
+            Scaling of data pixels to image pixels.  The default zoom 1 means
+            data pixels correspond exactly to image pixels.  Upscaling is
+            possible with zoom larger than 1, and downscaling with zoom
+            smaller than 1.  For data with non-square pixels displayed with
+            <link linkend='physical-aspect-ratio'>physical aspect ratio</link>,
+            the zoom is applied to the shorted side of the pixel, whichever it
+            is.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Width</guilabel></term>
+        <listitem>
+          <para>
+            Width of the rectangle corresponding to data in the exported image
+            (not width of the entire image), in pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Height</guilabel></term>
+        <listitem>
+          <para>
+            Height of the rectangle corresponding to data in the exported image
+            (not height of the entire image), in pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Vector images do not have finite pixel resolution, therefore, the
+      physical dimensions can be instead given as follows:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Pixel size</guilabel></term>
+        <listitem>
+          <para>
+            Size of one data pixel in millimetres.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Pixels per inch</guilabel></term>
+        <listitem>
+          <para>
+            Number of data pixels per one inch.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Width</guilabel></term>
+        <listitem>
+          <para>
+            Width of the rectangle corresponding to data in the exported image
+            (not width of the entire image), in millimetres.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Height</guilabel></term>
+        <listitem>
+          <para>
+            Height of the rectangle corresponding to data in the exported image
+            (not height of the entire image), in millimetres.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-imgexport-dimensions'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-dimensions.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-dimensions.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Illustration of the basic size parameters.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      The remaining size and scale parameters, denoted
+      <guilabel>Parameters</guilabel>, are common to both image types.
+      However, for raster images they are in pixels while for vector images
+      they are in typographical points.  More precisely, this is true if they
+      are given as absolute, i.e. the option
+      <guilabel>Tie sizes to data pixels</guilabel> is not selected.  If this
+      option is selected all sizes are relative to data pixels, i.e. they
+      scale together with the image data when the physical dimensions change.
+      The parameters, illustrated in the figure above, include:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Font</guilabel></term>
+        <listitem>
+          <para>
+            The font used to draw all labels.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Font size</guilabel></term>
+        <listitem>
+          <para>
+            Font size, in pixels or typographical points as described above.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Line thickness</guilabel></term>
+        <listitem>
+          <para>
+            Thickness of lines: borders, ticks, inset scale bar and selections.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Outline thickness</guilabel></term>
+        <listitem>
+          <para>
+            Thickness of outlines that can be drawn around the inset scale bar
+            and selections.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Border width</guilabel></term>
+        <listitem>
+          <para>
+            Width of empty border around the entire image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Tick length</guilabel></term>
+        <listitem>
+          <para>
+            Length of ruler and false colour map ticks.  This setting also
+            controls the inset scale bar ticks and crosses drawn for the
+            point-like selection.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='image-export-lateral'>
+    <title>Lateral Scale</title>
+    <para>
+      Settings in the <guilabel>Lateral Scale</guilabel> page control how the
+      lateral dimensions are visualised.  There are two basic choices displayed
+      in the figure below, rulers and an inset scale bar, and the lateral
+      scale information can be also disabled entirely.  The inset scale bar
+      has the following settings:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Length</guilabel></term>
+        <listitem>
+          <para>
+            The length can be set manually to an arbitrary value which does not
+            result in too short or too long bar.  Press
+            <keycode>Enter</keycode> to update the preview when you edit the
+            length.  Button <guibutton>Auto</guibutton> selects a suitable
+            length automaticaly (this is also done when the manually entered
+            length is not found reasonable).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Placement</guilabel></term>
+        <listitem>
+          <para>
+            The bar can be placed along the upper or lower edge and aligned
+            to either side or centered.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Horizontal gap</guilabel></term>
+        <listitem>
+          <para>
+            Horizontal gap between the bar and the closer vertical edge of the
+            data area (meaningful only if the bar is not centered).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Vertical gap</guilabel></term>
+        <listitem>
+          <para>
+            Horizontal gap between the bar and the closer horizontal edge of
+            the data area.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Color</guilabel></term>
+        <listitem>
+          <para>
+            Color with which the bar is drawn.  Buttons
+            <guibutton>Black</guibutton> and <guibutton>White</guibutton>
+            allow choosing quickly the basic colors.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Outline color</guilabel></term>
+        <listitem>
+          <para>
+            Color of the outlines.  Note if the outline width is zero (the
+            default), no outlines are drawn, hence changing the color has no
+            effect.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Opacity</guilabel></term>
+        <listitem>
+          <para>
+            Opacity with which the inset scale bar is drawn.  This settings
+            permits drawing the bar as semi-transparent.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Draw ticks</guilabel></term>
+        <listitem>
+          <para>
+            If enabled, the bar has vertical ticks at its ends.  When disabled,
+            the bar is just a line.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Draw label</guilabel></term>
+        <listitem>
+          <para>
+            If enabled, the bar length is displayed under the bar.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-imgexport-lateral'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-lateral.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-lateral.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Lateral scale visualisation types.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='image-export-value'>
+    <title>Value</title>
+    <para>
+      Settings in the <guilabel>Value</guilabel> page control the rendering
+      of values and false colour mapping.
+    </para>
+    <informalfigure id='fig-imgexport-gaps'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-gaps.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-gaps.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Illustration of the various gap settings (for channel title, in the
+          position at the top).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <informalfigure id='fig-imgexport-fmscales'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-fmscales.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-fmscales.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Rendering of the false color map scale depending on the mapping type.
+          For the standard linear mapping, whether full or fixed range, ticks
+          with values are drawn.  For an adaptive mapping the color gradient
+          is drawn the same, but tick positions correspond to the adaptive
+          mapping and interior ticks are drawn without labels (to avoid
+          overlapping labels).  If a presentation is shown, the values are
+          considered scaled arbitrarily thus no values and interior ticks are
+          displayed.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='image-export-selection'>
+    <title>Selection</title>
+    <para>
+      TODO
+    </para>
+  </sect2>
+  <sect2 id='image-export-presets'>
+    <title>Presets</title>
+    <para>
+      TODO
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
