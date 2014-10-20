@@ -2,13 +2,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
 "POT-Creation-Date: 2014-10-20 20:40+0200\n"
-"PO-Revision-Date: 2011-11-06 12:30+0100\n"
+"PO-Revision-Date: 2014-10-20 21:43+0100\n"
 "Last-Translator: François RIGUET <francheu@caramail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: unrotate-symmetries.svg:30(format) step-edge.svg:188(format)
 #: profile-interpolation.svg:338(format) imgexport-lateral.svg:23(format)
@@ -153,67 +153,67 @@ msgstr "Interpolaton Key, haute résolution"
 #: imgexport-lateral.svg:798(tspan)
 #, no-wrap
 msgid "Inset scale bar"
-msgstr ""
+msgstr "Échelle intérieure"
 
 #: imgexport-lateral.svg:809(tspan)
 #, no-wrap
 msgid "Rulers"
-msgstr ""
+msgstr "Règles"
 
 #: imgexport-gaps.svg:415(tspan)
 #, no-wrap
 msgid "Title gap"
-msgstr ""
+msgstr "Écart du titre"
 
 #: imgexport-gaps.svg:616(tspan)
 #, no-wrap
 msgid "False color gap"
-msgstr ""
+msgstr "Écart de l'échelle de couleur"
 
 #: imgexport-gaps.svg:663(tspan)
 #, no-wrap
 msgid "Inset horizontal gap"
-msgstr ""
+msgstr "Écart horizontal de l'échelleintérieure"
 
 #: imgexport-gaps.svg:674(tspan)
 #, no-wrap
 msgid "Vertical gap"
-msgstr ""
+msgstr "Écart vertical"
 
 #: imgexport-fmscales.svg:597(tspan)
 #, no-wrap
 msgid "Linear mapping"
-msgstr ""
+msgstr "Échelle linéaire"
 
 #: imgexport-fmscales.svg:1121(tspan)
 #, no-wrap
 msgid "Adaptive mapping"
-msgstr ""
+msgstr "Échelle adaptative"
 
 #: imgexport-fmscales.svg:1132(tspan)
 #, no-wrap
 msgid "Presentation"
-msgstr ""
+msgstr "Présentation"
 
 #: imgexport-dimensions.svg:425(tspan)
 #, no-wrap
 msgid "Line thickness"
-msgstr ""
+msgstr "Épaisseur des lignes"
 
 #: imgexport-dimensions.svg:456(tspan)
 #, no-wrap
 msgid "Font size"
-msgstr ""
+msgstr "Taille de la police"
 
 #: imgexport-dimensions.svg:483(tspan)
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Tick length"
-msgstr "longueur"
+msgstr "Longueur des graduations"
 
 #: imgexport-dimensions.svg:510(tspan)
 #, no-wrap
 msgid "Outline thickness"
-msgstr ""
+msgstr "Épaisseur du pourtour"
 
 #: boundary-length.svg:713(tspan)
 #, no-wrap
