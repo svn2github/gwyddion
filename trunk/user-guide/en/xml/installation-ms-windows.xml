@@ -168,7 +168,7 @@
         Flexible Image Transport System (FITS) file import.
       </listitem>
       <listitem>
-        Pygwy support in 64bit the packages (it is supported only in the 32bit
+        Pygwy support in the 64bit packages (it is supported only in the 32bit
         packages).
       </listitem>
     </itemizedlist>
