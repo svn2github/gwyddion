@@ -6,9 +6,9 @@
   <title>Logging</title>
   <para>
     Gwyddion records data modification operations for each channel or volume
-    data in so-called log.  When data are saved to a <filename>.gwy</filename>
-    file, the log is saved along with them.  The log can be displayed by
-    selecting the
+    data in so-called log.  When the data are saved to
+    a <filename>.gwy</filename> file, the log is saved along with them.  The
+    log can be displayed by selecting the
     <guimenuitem>View Log</guimenuitem>
     command in the right-click context menu of the channel or volume data
     window.  This is useful for recalling later what corrections you applied,
