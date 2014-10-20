@@ -1,42 +1,43 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
-"POT-Creation-Date: 2009-11-16 15:45+0100\n"
+"POT-Creation-Date: 2014-10-20 20:40+0200\n"
 "PO-Revision-Date: 2011-11-06 12:30+0100\n"
 "Last-Translator: François RIGUET <francheu@caramail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: unrotate-symmetries.svg:30(format)
-#: step-edge.svg:188(format)
-#: profile-interpolation.svg:338(format)
-#: boundary-length.svg:29(format)
+#: unrotate-symmetries.svg:30(format) step-edge.svg:188(format)
+#: profile-interpolation.svg:338(format) imgexport-lateral.svg:23(format)
+#: imgexport-gaps.svg:23(format) imgexport-fmscales.svg:23(format)
+#: imgexport-dimensions.svg:23(format) boundary-length.svg:29(format)
 msgid "image/svg+xml"
 msgstr "image/svg+xml"
 
-#: unrotate-symmetries.svg:261(text)
+#: unrotate-symmetries.svg:105(text)
 #, no-wrap
 msgid "Parallel"
 msgstr "Parallèle"
 
-#: unrotate-symmetries.svg:270(text)
+#: unrotate-symmetries.svg:169(text)
 #, no-wrap
 msgid "Triangular"
 msgstr "Triangulaire"
 
-#: unrotate-symmetries.svg:279(text)
+#: unrotate-symmetries.svg:210(text)
 #, no-wrap
 msgid "Square"
 msgstr "Carré"
 
-#: unrotate-symmetries.svg:288(text)
+#: unrotate-symmetries.svg:251(text)
 #, no-wrap
 msgid "Rhombic"
 msgstr "Rhombique"
 
-#: unrotate-symmetries.svg:297(text)
+#: unrotate-symmetries.svg:316(text)
 #, no-wrap
 msgid "Hexagonal"
 msgstr "Hexagonal"
@@ -46,8 +47,7 @@ msgstr "Hexagonal"
 msgid "Step"
 msgstr "Saut"
 
-#: step-edge.svg:285(tspan)
-#: step-edge.svg:346(tspan)
+#: step-edge.svg:285(tspan) step-edge.svg:346(tspan)
 #, no-wrap
 msgid "Edge"
 msgstr "Bord"
@@ -62,53 +62,42 @@ msgstr "Profil à résolution naturelle"
 msgid "High resolution profile"
 msgstr "Profil à haute résolution"
 
-#: profile-interpolation.svg:444(tspan)
-#: profile-interpolation.svg:1063(tspan)
+#: profile-interpolation.svg:444(tspan) profile-interpolation.svg:1063(tspan)
 #: profile-interpolation.svg:2060(tspan)
 msgid "3"
 msgstr "3"
 
-#: profile-interpolation.svg:475(tspan)
-#: profile-interpolation.svg:1094(tspan)
-#: profile-interpolation.svg:2091(tspan)
-#: profile-interpolation.svg:2339(tspan)
+#: profile-interpolation.svg:475(tspan) profile-interpolation.svg:1094(tspan)
+#: profile-interpolation.svg:2091(tspan) profile-interpolation.svg:2339(tspan)
 msgid "4"
 msgstr "4"
 
-#: profile-interpolation.svg:506(tspan)
-#: profile-interpolation.svg:1125(tspan)
+#: profile-interpolation.svg:506(tspan) profile-interpolation.svg:1125(tspan)
 #: profile-interpolation.svg:2122(tspan)
 msgid "5"
 msgstr "5"
 
-#: profile-interpolation.svg:537(tspan)
-#: profile-interpolation.svg:1156(tspan)
-#: profile-interpolation.svg:2153(tspan)
-#: profile-interpolation.svg:2370(tspan)
+#: profile-interpolation.svg:537(tspan) profile-interpolation.svg:1156(tspan)
+#: profile-interpolation.svg:2153(tspan) profile-interpolation.svg:2370(tspan)
 msgid "6"
 msgstr "6"
 
-#: profile-interpolation.svg:568(tspan)
-#: profile-interpolation.svg:1187(tspan)
+#: profile-interpolation.svg:568(tspan) profile-interpolation.svg:1187(tspan)
 #: profile-interpolation.svg:2184(tspan)
 msgid "7"
 msgstr "7"
 
-#: profile-interpolation.svg:599(tspan)
-#: profile-interpolation.svg:1218(tspan)
-#: profile-interpolation.svg:2215(tspan)
-#: profile-interpolation.svg:2401(tspan)
+#: profile-interpolation.svg:599(tspan) profile-interpolation.svg:1218(tspan)
+#: profile-interpolation.svg:2215(tspan) profile-interpolation.svg:2401(tspan)
 msgid "8"
 msgstr "8"
 
-#: profile-interpolation.svg:630(tspan)
-#: profile-interpolation.svg:1249(tspan)
+#: profile-interpolation.svg:630(tspan) profile-interpolation.svg:1249(tspan)
 #: profile-interpolation.svg:2246(tspan)
 msgid "9"
 msgstr "9"
 
-#: profile-interpolation.svg:951(tspan)
-#: profile-interpolation.svg:1570(tspan)
+#: profile-interpolation.svg:951(tspan) profile-interpolation.svg:1570(tspan)
 #: profile-interpolation.svg:2600(tspan)
 msgid "z [nm]"
 msgstr "z [nm]"
@@ -161,6 +150,71 @@ msgstr "x [nm]"
 msgid "Key interpolation, high resolution"
 msgstr "Interpolaton Key, haute résolution"
 
+#: imgexport-lateral.svg:798(tspan)
+#, no-wrap
+msgid "Inset scale bar"
+msgstr ""
+
+#: imgexport-lateral.svg:809(tspan)
+#, no-wrap
+msgid "Rulers"
+msgstr ""
+
+#: imgexport-gaps.svg:415(tspan)
+#, no-wrap
+msgid "Title gap"
+msgstr ""
+
+#: imgexport-gaps.svg:616(tspan)
+#, no-wrap
+msgid "False color gap"
+msgstr ""
+
+#: imgexport-gaps.svg:663(tspan)
+#, no-wrap
+msgid "Inset horizontal gap"
+msgstr ""
+
+#: imgexport-gaps.svg:674(tspan)
+#, no-wrap
+msgid "Vertical gap"
+msgstr ""
+
+#: imgexport-fmscales.svg:597(tspan)
+#, no-wrap
+msgid "Linear mapping"
+msgstr ""
+
+#: imgexport-fmscales.svg:1121(tspan)
+#, no-wrap
+msgid "Adaptive mapping"
+msgstr ""
+
+#: imgexport-fmscales.svg:1132(tspan)
+#, no-wrap
+msgid "Presentation"
+msgstr ""
+
+#: imgexport-dimensions.svg:425(tspan)
+#, no-wrap
+msgid "Line thickness"
+msgstr ""
+
+#: imgexport-dimensions.svg:456(tspan)
+#, no-wrap
+msgid "Font size"
+msgstr ""
+
+#: imgexport-dimensions.svg:483(tspan)
+#, fuzzy, no-wrap
+msgid "Tick length"
+msgstr "longueur"
+
+#: imgexport-dimensions.svg:510(tspan)
+#, no-wrap
+msgid "Outline thickness"
+msgstr ""
+
 #: boundary-length.svg:713(tspan)
 #, no-wrap
 msgid "(a)"
@@ -211,8 +265,7 @@ msgstr "L = 6 + 6√2"
 msgid "length"
 msgstr "longueur"
 
-#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2.
+#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
 #: boundary-length.svg:0(None)
 msgid "translator-credits"
 msgstr "François RIGUET <francheu@caramail.com>, 2009, 2011."
-

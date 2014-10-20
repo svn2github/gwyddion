@@ -1,40 +1,43 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
-"POT-Creation-Date: 2009-11-16 15:44+0100\n"
+"POT-Creation-Date: 2014-10-20 20:40+0200\n"
 "PO-Revision-Date: 2009-11-16 15:44+0100\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: US-English\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: unrotate-symmetries.svg:30(format) step-edge.svg:188(format)
-#: profile-interpolation.svg:338(format) boundary-length.svg:29(format)
+#: profile-interpolation.svg:338(format) imgexport-lateral.svg:23(format)
+#: imgexport-gaps.svg:23(format) imgexport-fmscales.svg:23(format)
+#: imgexport-dimensions.svg:23(format) boundary-length.svg:29(format)
 msgid "image/svg+xml"
 msgstr ""
 
-#: unrotate-symmetries.svg:261(text)
+#: unrotate-symmetries.svg:105(text)
 #, no-wrap
 msgid "Parallel"
 msgstr ""
 
-#: unrotate-symmetries.svg:270(text)
+#: unrotate-symmetries.svg:169(text)
 #, no-wrap
 msgid "Triangular"
 msgstr ""
 
-#: unrotate-symmetries.svg:279(text)
+#: unrotate-symmetries.svg:210(text)
 #, no-wrap
 msgid "Square"
 msgstr ""
 
-#: unrotate-symmetries.svg:288(text)
+#: unrotate-symmetries.svg:251(text)
 #, no-wrap
 msgid "Rhombic"
 msgstr ""
 
-#: unrotate-symmetries.svg:297(text)
+#: unrotate-symmetries.svg:316(text)
 #, no-wrap
 msgid "Hexagonal"
 msgstr ""
@@ -147,6 +150,71 @@ msgstr ""
 msgid "Key interpolation, high resolution"
 msgstr ""
 
+#: imgexport-lateral.svg:798(tspan)
+#, no-wrap
+msgid "Inset scale bar"
+msgstr ""
+
+#: imgexport-lateral.svg:809(tspan)
+#, no-wrap
+msgid "Rulers"
+msgstr ""
+
+#: imgexport-gaps.svg:415(tspan)
+#, no-wrap
+msgid "Title gap"
+msgstr ""
+
+#: imgexport-gaps.svg:616(tspan)
+#, no-wrap
+msgid "False color gap"
+msgstr ""
+
+#: imgexport-gaps.svg:663(tspan)
+#, no-wrap
+msgid "Inset horizontal gap"
+msgstr ""
+
+#: imgexport-gaps.svg:674(tspan)
+#, no-wrap
+msgid "Vertical gap"
+msgstr ""
+
+#: imgexport-fmscales.svg:597(tspan)
+#, no-wrap
+msgid "Linear mapping"
+msgstr ""
+
+#: imgexport-fmscales.svg:1121(tspan)
+#, no-wrap
+msgid "Adaptive mapping"
+msgstr ""
+
+#: imgexport-fmscales.svg:1132(tspan)
+#, no-wrap
+msgid "Presentation"
+msgstr ""
+
+#: imgexport-dimensions.svg:425(tspan)
+#, no-wrap
+msgid "Line thickness"
+msgstr ""
+
+#: imgexport-dimensions.svg:456(tspan)
+#, no-wrap
+msgid "Font size"
+msgstr ""
+
+#: imgexport-dimensions.svg:483(tspan)
+#, no-wrap
+msgid "Tick length"
+msgstr ""
+
+#: imgexport-dimensions.svg:510(tspan)
+#, no-wrap
+msgid "Outline thickness"
+msgstr ""
+
 #: boundary-length.svg:713(tspan)
 #, no-wrap
 msgid "(a)"
@@ -197,7 +265,7 @@ msgstr ""
 msgid "length"
 msgstr ""
 
-#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2.
+#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
 #: boundary-length.svg:0(None)
 msgid "translator-credits"
 msgstr "Yeti <yeti@gwyddion.net>, 2009"
