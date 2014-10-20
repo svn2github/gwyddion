@@ -86,7 +86,7 @@
             possible with zoom larger than 1, and downscaling with zoom
             smaller than 1.  For data with non-square pixels displayed with
             <link linkend='physical-aspect-ratio'>physical aspect ratio</link>,
-            the zoom is applied to the shorted side of the pixel, whichever it
+            the zoom is applied to the shorter side of the pixel, whichever it
             is.
           </para>
         </listitem>
@@ -166,13 +166,13 @@
     <para>
       The remaining size and scale parameters, denoted
       <guilabel>Parameters</guilabel>, are common to both image types.
-      However, for raster images they are in pixels while for vector images
-      they are in typographical points.  More precisely, this is true if they
-      are given as absolute, i.e. the option
+      However, for raster images the values are in pixels while for vector
+      images they are in typographical points.  More precisely, this is true if
+      they are given as absolute, i.e. the option
       <guilabel>Tie sizes to data pixels</guilabel> is not selected.  If this
-      option is selected all sizes are relative to data pixels, i.e. they
-      scale together with the image data when the physical dimensions change.
-      The parameters, illustrated in the figure above, include:
+      option is selected all sizes are relative to data pixels, i.e. they scale
+      together with the image data when the physical dimensions change.  The
+      parameters, illustrated in the figure above, include:
     </para>
     <variablelist>
       <varlistentry>
@@ -233,18 +233,18 @@
     <para>
       Settings in the <guilabel>Lateral Scale</guilabel> page control how the
       lateral dimensions are visualised.  There are two basic choices displayed
-      in the figure below, rulers and an inset scale bar, and the lateral
-      scale information can be also disabled entirely.  The inset scale bar
-      has the following settings:
+      in the figure below, rulers and an inset scale bar.  The lateral scale
+      can be also disabled entirely.  The inset scale bar has the following
+      settings:
     </para>
     <variablelist>
       <varlistentry>
         <term><guilabel>Length</guilabel></term>
         <listitem>
           <para>
-            The length can be set manually to an arbitrary value which does not
-            result in too short or too long bar.  Press
-            <keycode>Enter</keycode> to update the preview when you edit the
+            The bar length can be set manually to an arbitrary value which does
+            not result in too short or too long bar.  Press
+            <keycode>Enter</keycode> to update the preview when you modify the
             length.  Button <guibutton>Auto</guibutton> selects a suitable
             length automaticaly (this is also done when the manually entered
             length is not found reasonable).
@@ -353,12 +353,12 @@
           <para>
             The interpolation type can be noticeable for particularly for
             large zooms.  In the case of vector image formats, the final
-            rendering is in fact done when then the image is viewed or
-            printed.  Hence the available interpolations are limited
-            to two types . Round, in which each data pixels are drawn as
-            sharp rectangles, and Linear, in which data values are linearly
-            interpolated between original pixels.  In the case of raster
-            images, you can choose from the full set of
+            rendering is done when then the image is viewed or printed.  Hence
+            the available interpolations are limited to two types. Round, in
+            which each data pixels are drawn as sharp rectangles, and Linear,
+            in which data values are linearly interpolated between original
+            pixels.  In the case of raster images, you can choose from the full
+            set of
             <link linkend='interpolation'>interpolations</link> supported by
             Gwyddion.
           </para>
@@ -396,7 +396,7 @@
           mapping and interior ticks are drawn without labels (to avoid
           overlapping labels).  If a
           <link linkend='presentations-introduction'>presentation</link>
-          is shown, the values are considered scaled arbitrarily thus no
+          is shown, the values are considered arbitrarily scaled thus no
           values and interior ticks are displayed.
         </caption>
       </mediaobject>
@@ -435,14 +435,106 @@
   <sect2 id='image-export-selection'>
     <title>Selection</title>
     <para>
-      TODO
+      Any kind of <link linkend='selections'>selection</link> stored with the
+      data can be also shown in the image.  If the check-box
+      <guilabel>Draw selection</guilabel> is enabled you can choose the
+      selection to draw from the list below.  The colors are specified in
+      the same manner as for the inset scale bar:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Color</guilabel></term>
+        <listitem>
+          <para>
+            Color with which the selection is drawn.  Buttons
+            <guibutton>Black</guibutton> and <guibutton>White</guibutton>
+            allow choosing quickly the basic colors.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Outline color</guilabel></term>
+        <listitem>
+          <para>
+            Color of the outlines.  Note if the outline width is zero (the
+            default), no outlines are drawn, hence changing the color has no
+            effect.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Opacity</guilabel></term>
+        <listitem>
+          <para>
+            Opacity with which the selection is drawn.  This settings permits
+            drawing the selection as semi-transparent.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Beside the colors, some selection types have further options, for
+      instance whether individual shapes are numbered.  If you are using a
+      <link linkend='tools'>tool</link> that has some shapes selected on the
+      data, the kind of the selection to draw and the specific options are
+      preset to match the current tool.  This is usually the most convenient
+      way to get the selection drawn as you intend.  However, any existing
+      selection can be drawn and the options adjusted manually if you wish.
     </para>
   </sect2>
   <sect2 id='image-export-presets'>
     <title>Presets</title>
     <para>
-      TODO
+      Different sets of image rendering options are useful in different
+      occasions.  A set of options can be saved as a preset and recalled
+      later.  The list in the <guilabel>Presets</guilabel> page shows all
+      saved presets that can be managed using the buttons below:
     </para>
+    <variablelist>
+      <varlistentry>
+        <term><guibutton>Load</guibutton></term>
+        <listitem>
+          <para>
+            Loads the currently selected preset, i.e. sets the image rendering
+            options according to the preset.  The inset scale bar length can be
+            set to the automatic value if the stored length is not found
+            reasonable.  Also the selection type and its options are kept
+            intact, only the colors are set according to the preset.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guibutton>Store</guibutton></term>
+        <listitem>
+          <para>
+            Stores the current options under the name given as
+            <guilabel>Preset name</guilabel>.  The name also serves as a file
+            name so it is advisable to avoid odd characters in the preset
+            name.  If a preset of the same name already exists, it is
+            overwritten.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guibutton>Rename</guibutton></term>
+        <listitem>
+          <para>
+            Renames the currently selected preset to the name given as
+            <guilabel>Preset name</guilabel>.  The preset does not have to be
+            loaded for renaming.  It is not possible to overwrite an existing
+            preset by renaming.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guibutton>Delete</guibutton></term>
+        <listitem>
+          <para>
+            Deletes the currently selected preset.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
