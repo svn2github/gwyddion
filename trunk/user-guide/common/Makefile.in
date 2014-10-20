@@ -39,6 +39,10 @@ UNFOLDED_XML_SOURCE := $(PACKAGE).xml
 
 TRANSLATABLE_SVGS = \
 	boundary-length \
+	imgexport-dimensions \
+	imgexport-fmscales \
+	imgexport-gaps \
+	imgexport-lateral \
 	profile-interpolation \
 	step-edge \
 	unrotate-symmetries
