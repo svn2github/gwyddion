@@ -15,7 +15,7 @@
   </para>
   <para>
     Minimum required versions are listed for some packages.  If no specific
-    version is listed, it seems the minimum version is so old that it did not
+    version is listed, the minimum version is so old that it did not
     seem useful to determine it exactly.  Specific environments may be listed
     in the Dependency column, meaning the package is useful only in this
     environment.
