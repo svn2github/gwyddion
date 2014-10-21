@@ -2,16 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
 "POT-Creation-Date: 2014-10-20 20:40+0200\n"
-"PO-Revision-Date: 2009-11-17 09:28+0300\n"
+"PO-Revision-Date: 2014-10-21 09:04+0300\n"
 "Last-Translator: Daniil Bratashov <dn2010@gmail.com>\n"
 "Language-Team: ru <ru@li.org>\n"
-"Language: \n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Russian\n"
-"X-Poedit-Country: RUSSIAN FEDERATION\n"
 "X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Poedit 1.5.7\n"
 
 #: unrotate-symmetries.svg:30(format) step-edge.svg:188(format)
 #: profile-interpolation.svg:338(format) imgexport-lateral.svg:23(format)
@@ -156,67 +155,67 @@ msgstr "Бикубическая интерполяция, высокое раз
 #: imgexport-lateral.svg:798(tspan)
 #, no-wrap
 msgid "Inset scale bar"
-msgstr ""
+msgstr "Вложенный масштабный отрезок"
 
 #: imgexport-lateral.svg:809(tspan)
 #, no-wrap
 msgid "Rulers"
-msgstr ""
+msgstr "Направляющие"
 
 #: imgexport-gaps.svg:415(tspan)
 #, no-wrap
 msgid "Title gap"
-msgstr ""
+msgstr "Зазор заголовка"
 
 #: imgexport-gaps.svg:616(tspan)
 #, no-wrap
 msgid "False color gap"
-msgstr ""
+msgstr "Зазор шкалы псевдоцвета"
 
 #: imgexport-gaps.svg:663(tspan)
 #, no-wrap
 msgid "Inset horizontal gap"
-msgstr ""
+msgstr "Горизонтальный зазор масштабного отрезка"
 
 #: imgexport-gaps.svg:674(tspan)
 #, no-wrap
 msgid "Vertical gap"
-msgstr ""
+msgstr "Вертикальный зазор:"
 
 #: imgexport-fmscales.svg:597(tspan)
 #, no-wrap
 msgid "Linear mapping"
-msgstr ""
+msgstr "Линейная шкала"
 
 #: imgexport-fmscales.svg:1121(tspan)
 #, no-wrap
 msgid "Adaptive mapping"
-msgstr ""
+msgstr "Адаптивная шкала"
 
 #: imgexport-fmscales.svg:1132(tspan)
 #, no-wrap
 msgid "Presentation"
-msgstr ""
+msgstr "Презентация"
 
 #: imgexport-dimensions.svg:425(tspan)
 #, no-wrap
 msgid "Line thickness"
-msgstr ""
+msgstr "Толщина линии"
 
 #: imgexport-dimensions.svg:456(tspan)
 #, no-wrap
 msgid "Font size"
-msgstr ""
+msgstr "Размер шрифта"
 
 #: imgexport-dimensions.svg:483(tspan)
-#, fuzzy, no-wrap
+#, no-wrap
 msgid "Tick length"
-msgstr "и её длина"
+msgstr "Длина засечек"
 
 #: imgexport-dimensions.svg:510(tspan)
 #, no-wrap
 msgid "Outline thickness"
-msgstr ""
+msgstr "Толщина контура"
 
 #: boundary-length.svg:713(tspan)
 #, no-wrap
