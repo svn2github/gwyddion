@@ -40,6 +40,8 @@
   <xi:include href="develop.xml"/>
   <xi:include href="gpl.xml"/>
   <xi:include href="fdl.xml"/>
+  <!-- FIXME: The page header still says B. GNU Free Documentation License
+       in Index. -->
   <index id="subject-index"/>
 </book>
 <!-- vim: set ts=2 sw=2 et : -->
