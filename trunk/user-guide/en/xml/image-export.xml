@@ -5,9 +5,9 @@
 <sect1 id='image-export'>
   <title>Image Export</title>
   <para>
-    Microscopy data often need to rendered into image formats, usually for
+    Microscopy data often need to be rendered into image formats, usually for
     presentation purposes, occasionally to open them in programs that do
-    not support any SPM data formats.  Both is achieved the same way in
+    not support any SPM data format.  Both is achieved the same way in
     <application>Gwyddion</application>: by selecting
     <menuchoice>
       <guimenu>File</guimenu>
@@ -18,7 +18,7 @@
     The reference section <link linkend='pixmap-image-keys'>High-Depth Image
     Formats</link> describes the export of data as high-depth greyscale images
     that should be still usable as quantiative data.  For supported formats
-    you can enabled it using the <guilabel>Export as 16 bit
+    you can enable it using the <guilabel>Export as 16 bit
     grayscale</guilabel> check-box at the top of the image export dialog. The
     rest of this section discusses the creation of nice images for publications
     and presentations.
@@ -26,7 +26,7 @@
   <para>
     <application>Gwyddion</application> can render images into a number of
     formats, including for instance PNG, PDF, SVG, EPS, TIFF, BMP, PPM, TARGA
-    and JPEG.  Depending on the intent, some may be more suitable more than
+    and JPEG.  Depending on the intent, some may be more suitable than
     others.  Generally, the following choices can be recommended:
   </para>
   <itemizedlist>
@@ -81,8 +81,8 @@
         <term><guilabel>Zoom</guilabel></term>
         <listitem>
           <para>
-            Scaling of data pixels to image pixels.  The default zoom 1 means
-            data pixels correspond exactly to image pixels.  Upscaling is
+            Scaling of data pixels to image pixels.  The default zoom of 1
+            means data pixels correspond exactly to image pixels.  Upscaling is
             possible with zoom larger than 1, and downscaling with zoom
             smaller than 1.  For data with non-square pixels displayed with
             <link linkend='physical-aspect-ratio'>physical aspect ratio</link>,
@@ -220,7 +220,7 @@
         <term><guilabel>Tick length</guilabel></term>
         <listitem>
           <para>
-            Length of ruler and false colour map ticks.  This setting also
+            Length of ruler and false color map ticks.  This setting also
             controls the inset scale bar ticks and crosses drawn for the
             point-like selection.
           </para>
@@ -243,7 +243,7 @@
         <listitem>
           <para>
             The bar length can be set manually to an arbitrary value which does
-            not result in too short or too long bar.  Press
+            not result in a too short or too long bar.  Press
             <keycode>Enter</keycode> to update the preview when you modify the
             length.  Button <guibutton>Auto</guibutton> selects a suitable
             length automaticaly (this is also done when the manually entered
@@ -302,7 +302,7 @@
         <term><guilabel>Opacity</guilabel></term>
         <listitem>
           <para>
-            Opacity with which the inset scale bar is drawn.  This settings
+            Opacity with which the inset scale bar is drawn.  This setting
             permits drawing the bar as semi-transparent.
           </para>
         </listitem>
@@ -343,7 +343,7 @@
     <title>Value</title>
     <para>
       Settings in the <guilabel>Value</guilabel> page control the rendering
-      of values and false colour mapping.  Two basic settings control the
+      of values and false color mapping.  Two basic settings control the
       rendering of field data:
     </para>
     <variablelist>
@@ -351,16 +351,16 @@
         <term><guilabel>Interpolation</guilabel></term>
         <listitem>
           <para>
-            The interpolation type can be noticeable for particularly for
+            The interpolation type can be noticeable particularly for
             large zooms.  In the case of vector image formats, the final
             rendering is done when then the image is viewed or printed.  Hence
             the available interpolations are limited to two types. Round, in
-            which each data pixels are drawn as sharp rectangles, and Linear,
-            in which data values are linearly interpolated between original
-            pixels.  In the case of raster images, you can choose from the full
-            set of
+            which each data pixel is drawn as a sharp rectangle, and Linear,
+            in which values in the rendered image are linearly interpolated
+            between original data pixels.  In the case of raster images, you
+            can choose from the full set of
             <link linkend='interpolation'>interpolations</link> supported by
-            Gwyddion.
+            Gwyddion because the interpolation is done during the export.
           </para>
         </listitem>
       </varlistentry>
@@ -466,7 +466,7 @@
         <term><guilabel>Opacity</guilabel></term>
         <listitem>
           <para>
-            Opacity with which the selection is drawn.  This settings permits
+            Opacity with which the selection is drawn.  This setting permits
             drawing the selection as semi-transparent.
           </para>
         </listitem>
@@ -485,7 +485,7 @@
   <sect2 id='image-export-presets'>
     <title>Presets</title>
     <para>
-      Different sets of image rendering options are useful in different
+      Different sets of image rendering options are useful on different
       occasions.  A set of options can be saved as a preset and recalled
       later.  The list in the <guilabel>Presets</guilabel> page shows all
       saved presets that can be managed using the buttons below:
