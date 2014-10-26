@@ -8,9 +8,9 @@
      xmlns:xlink="http://www.w3.org/1999/xlink"
      xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
      xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-     width="307.91949"
+     width="322.98148"
      height="123.16721"
-     viewBox="0 0 246.33559 98.533774"
+     viewBox="0 0 258.38517 98.533774"
      version="1.1"
      id="svg2"
      inkscape:version="0.48.5 r10040"
@@ -44,8 +44,8 @@
          fit-margin-right="0"
          fit-margin-bottom="0"
          inkscape:zoom="3.2532321"
-         inkscape:cx="165.34107"
-         inkscape:cy="55.503617"
+         inkscape:cx="114.62228"
+         inkscape:cy="55.503619"
          inkscape:window-x="0"
          inkscape:window-y="33"
          inkscape:window-maximized="1"
@@ -59,8 +59,8 @@
              visible="true"
              enabled="true"
              snapvisiblegridlinesonly="true"
-             originx="34.506122mm"
-             originy="-0.78076148mm" />
+             originx="38.756938mm"
+             originy="-0.78076101mm" />
     </sodipodi:namedview>
     <defs
          id="defs4">
@@ -384,13 +384,13 @@
     <rect
          style="color:#000000;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          id="rect3266"
-         width="246.3356"
+         width="258.38519"
          height="98.533775"
-         x="-8.1483959e-06"
+         x="-6.9116404e-06"
          y="0" />
     <use
          xlink:href="#surface37969"
-         transform="matrix(5.2111222,0,0,5.2111222,-160.76787,-280.8946)"
+         transform="matrix(5.2111222,0,0,5.2111222,-148.71831,-280.8946)"
          id="use126"
          x="0"
          y="0"
@@ -398,34 +398,34 @@
          height="82.353088" />
     <path
          style="color:#000000;fill:none;stroke:#c70000;stroke-width:0.61745459;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-         d="m 191.26677,19.767261 0,29.821472"
+         d="m 203.31633,19.767261 0,29.821472"
          id="path4036"
          inkscape:connector-curvature="0"
          sodipodi:nodetypes="cc" />
     <path
          style="color:#000000;fill:#c70000;fill-opacity:1;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-         d="m 189.04156,30.801332 2.22521,2.225204 2.2252,-2.225204 z"
+         d="m 201.09112,30.801332 2.22521,2.225204 2.2252,-2.225204 z"
          id="path4041"
          inkscape:connector-curvature="0" />
     <path
          inkscape:connector-curvature="0"
          id="path4043"
-         d="m 189.04156,38.725254 2.22521,-2.225205 2.2252,2.225205 z"
+         d="m 201.09112,38.725254 2.22521,-2.225205 2.2252,2.225205 z"
          style="color:#000000;fill:#c70000;fill-opacity:1;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     <text
          xml:space="preserve"
          style="font-size:9.87927532px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;text-indent:0;text-align:end;text-decoration:none;line-height:100%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:end;baseline-shift:baseline;color:#000000;fill:#c70000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Liberation Sans Narrow;-inkscape-font-specification:Liberation Sans Narrow Condensed"
-         x="241.19035"
+         x="253.23991"
          y="15.428698"
          id="text4045"
          sodipodi:linespacing="100%"><tspan
              sodipodi:role="line"
              id="tspan4047"
-             x="241.19035"
+             x="253.23991"
              y="15.428698">Line thickness</tspan></text>
     <g
          id="g4057"
-         transform="matrix(1.5436366,0,0,1.5436366,40.642068,-21.01339)">
+         transform="matrix(1.5436366,0,0,1.5436366,52.691625,-21.01339)">
         <path
              style="color:#000000;fill:none;stroke:#c70000;stroke-width:0.40000004;stroke-linecap:butt;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
              d="m 31.579174,50.611743 0,20.33623"
@@ -447,65 +447,65 @@
          sodipodi:linespacing="100%"
          id="text4062"
          y="75.890617"
-         x="82.878197"
+         x="94.927757"
          style="font-size:9.87927532px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;text-indent:0;text-align:end;text-decoration:none;line-height:100%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:end;baseline-shift:baseline;color:#000000;fill:#c70000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Liberation Sans Narrow;-inkscape-font-specification:Liberation Sans Narrow Condensed"
          xml:space="preserve"><tspan
              y="75.890617"
-             x="82.878197"
+             x="94.927757"
              id="tspan4064"
              sodipodi:role="line">Font size</tspan></text>
     <path
          style="color:#000000;fill:none;stroke:#c70000;stroke-width:0.61745471;stroke-linecap:butt;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-         d="m 58.690955,24.619005 0,20.603792"
+         d="m 70.740512,24.619005 0,20.603792"
          id="path4088"
          inkscape:connector-curvature="0"
          sodipodi:nodetypes="cc" />
     <path
          style="color:#000000;fill:#c70000;fill-opacity:1;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-         d="m 60.916155,25.799727 -2.2252,-2.225205 -2.22519,2.225205 z"
+         d="m 72.965712,25.799727 -2.2252,-2.225205 -2.22519,2.225205 z"
          id="path4090"
          inkscape:connector-curvature="0" />
     <path
          inkscape:connector-curvature="0"
          id="path4092"
-         d="m 56.465765,43.943916 2.22519,2.225205 2.2252,-2.225205 z"
+         d="m 68.515322,43.943916 2.22519,2.225205 2.2252,-2.225205 z"
          style="color:#000000;fill:#c70000;fill-opacity:1;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     <text
          sodipodi:linespacing="100%"
          id="text4097"
          y="37.787392"
-         x="52.332981"
+         x="64.382538"
          style="font-size:9.87927532px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;text-indent:0;text-align:end;text-decoration:none;line-height:100%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:end;baseline-shift:baseline;color:#000000;fill:#c70000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Liberation Sans Narrow;-inkscape-font-specification:Liberation Sans Narrow Condensed"
          xml:space="preserve"><tspan
              y="37.787392"
-             x="52.332981"
+             x="64.382538"
              id="tspan4099"
              sodipodi:role="line">Tick length</tspan></text>
     <path
          sodipodi:nodetypes="cc"
          inkscape:connector-curvature="0"
          id="path4101"
-         d="m 87.100525,20.953495 0,24.364798"
+         d="m 99.150082,20.953495 0,24.364798"
          style="color:#000000;fill:none;stroke:#c70000;stroke-width:0.61745459;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     <path
          inkscape:connector-curvature="0"
          id="path4103"
-         d="m 84.875325,29.899794 2.2252,2.225204 2.2252,-2.225204 z"
+         d="m 96.924882,29.899794 2.2252,2.225204 2.225198,-2.225204 z"
          style="color:#000000;fill:#c70000;fill-opacity:1;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     <path
          style="color:#000000;fill:#c70000;fill-opacity:1;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-         d="m 84.875325,35.308904 2.2252,-2.225206 2.2252,2.225206 z"
+         d="m 96.924882,35.308904 2.2252,-2.225206 2.225198,2.225206 z"
          id="path4105"
          inkscape:connector-curvature="0" />
     <text
          xml:space="preserve"
          style="font-size:9.87927532px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;text-indent:0;text-align:start;text-decoration:none;line-height:100%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#c70000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Liberation Sans Narrow;-inkscape-font-specification:Liberation Sans Narrow Condensed"
-         x="86.734917"
+         x="98.784477"
          y="17.376383"
          id="text4107"
          sodipodi:linespacing="100%"><tspan
              sodipodi:role="line"
              id="tspan4109"
-             x="86.734917"
+             x="98.784477"
              y="17.376383">Outline thickness</tspan></text>
 </svg>
