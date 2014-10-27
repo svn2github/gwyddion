@@ -80,12 +80,10 @@ struct _GwyFitterPrivate {
     gdouble *param;
     gdouble *param_best;
     gdouble *gradient;
-    gdouble *scaled_gradient;
     gdouble *diag;
     gdouble *step;
     /* Things of size MATRIX_LEN(nparam) */
     gdouble *hessian;
-    gdouble *scaled_hessian;
     gdouble *normal_matrix;
     gdouble *inv_hessian;
 };
@@ -344,18 +342,16 @@ fitter_set_n_param(Fitter *fitter,
     fitter->nparam = nparam;
 
     g_free(fitter->workspace);
-    fitter->workspace = nparam ? g_new(gdouble, 6*nparam + 4*matrix_len) : NULL;
+    fitter->workspace = nparam ? g_new(gdouble, 5*nparam + 3*matrix_len) : NULL;
 
     fitter->param = fitter->workspace;
     fitter->param_best = fitter->param + nparam;
     fitter->gradient = fitter->param_best + nparam;
-    fitter->scaled_gradient = fitter->gradient + nparam;
-    fitter->diag = fitter->scaled_gradient + nparam;
+    fitter->diag = fitter->gradient + nparam;
     fitter->step = fitter->diag + nparam;
 
     fitter->hessian = fitter->step + nparam;
-    fitter->scaled_hessian = fitter->hessian + matrix_len;
-    fitter->normal_matrix = fitter->scaled_hessian + matrix_len;
+    fitter->normal_matrix = fitter->hessian + matrix_len;
     fitter->inv_hessian = fitter->normal_matrix + matrix_len;
 }
 
@@ -427,34 +423,29 @@ eval_gradient_with_check(Fitter *fitter,
 }
 
 static inline void
-scale(Fitter *fitter)
+extract_hessian_diagonal(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
-    gdouble *h = fitter->hessian, *sh = fitter->scaled_hessian,
-            *g = fitter->gradient, *sg = fitter->scaled_gradient,
-            *d = fitter->diag;
+    const gdouble *h = fitter->hessian;
+    gdouble *d = fitter->diag;
+
+    for (guint j = 0; j < nparam; j++)
+        d[j] = SLi(h, j, j);
 
     for (guint j = 0; j < nparam; j++) {
-        gdouble a = SLi(h, j, j);
-        d[j] = (a > 0.0) ? sqrt(a) : 1.0;
-        sg[j] = g[j]/d[j];
-        for (guint k = 0; k < j; k++)
-            SLi(sh, j, k) = SLi(h, j, k)/(d[j]*d[k]);
-        /* The point of the explicit assigment of 1.0 is not to avoid a
-         * division but to make the fitting work with parmeters that have no
-         * influence on the function, permitting a simple implementation of
-         * fixed parameters. */
-        SLi(sh, j, j) = 1.0;
+        if (!(d[j] > 0.0))
+            d[j] = 1.0;
     }
 }
 
 static inline void
-add_to_diagonal(guint nparam,
-                gdouble *hessian,
-                gdouble x)
+add_vector_to_diagonal(guint nparam,
+                       gdouble *hessian,
+                       const gdouble *a,
+                       gdouble x)
 {
     for (guint j = 0; j < nparam; j++)
-        SLi(hessian, j, j) += x;
+        SLi(hessian, j, j) += x*a[j];
 }
 
 static inline gboolean
@@ -480,13 +471,11 @@ static inline void
 update_param(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
-    gdouble *p = fitter->param, *pb = fitter->param_best,
-            *s = fitter->step, *d = fitter->diag;
+    const gdouble *pb = fitter->param_best, *s = fitter->step;
+    gdouble *p = fitter->param;
 
-    for (guint j = 0; j < nparam; j++) {
-        s[j] /= d[j];
+    for (guint j = 0; j < nparam; j++)
         p[j] = pb[j] - s[j];
-    }
 }
 
 static gboolean
@@ -510,17 +499,17 @@ fitter_minimize(Fitter *fitter,
     fitter->nsuccesses = 0;
 
     while (fitter->iter++ < fitter->settings.iter_max) {
-        scale(fitter);
+        extract_hessian_diagonal(fitter);
         while (fitter->lambda <= fitter->settings.lambda_max) {
             fitter->status = GWY_FITTER_STATUS_NONE;
-            gwy_assign(fitter->normal_matrix, fitter->scaled_hessian,
-                       matrix_len);
-            add_to_diagonal(nparam, fitter->normal_matrix, fitter->lambda);
+            gwy_assign(fitter->normal_matrix, fitter->hessian, matrix_len);
+            add_vector_to_diagonal(nparam, fitter->normal_matrix,
+                                   fitter->diag, fitter->lambda);
             if (!gwy_cholesky_decompose(fitter->normal_matrix, nparam)) {
                 fitter->status = GWY_FITTER_STATUS_CANNOT_STEP;
                 goto step_fail;
             }
-            gwy_assign(fitter->step, fitter->scaled_gradient, nparam);
+            gwy_assign(fitter->step, fitter->gradient, nparam);
             gwy_cholesky_solve(fitter->normal_matrix, fitter->step, nparam);
             update_param(fitter);
             if ((fitter->constrain
