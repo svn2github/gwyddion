@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Nečas (Yeti).
+ *  Copyright (C) 2009,2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #define __LIBGWY_FITTER_H__
 
 #include <glib-object.h>
+#include <libgwy/matrix.h>
 
 G_BEGIN_DECLS
 
@@ -44,6 +45,11 @@ typedef gboolean (*GwyFitterGradientFunc)(const gdouble *param,
                                           gdouble *gradient,
                                           gdouble *hessian,
                                           gpointer user_data);
+
+typedef gboolean (*GwyFitterMatrixGradientFunc)(const gdouble *param,
+                                                gdouble *gradient,
+                                                GwyMatrix *hessian,
+                                                gpointer user_data);
 
 typedef gboolean (*GwyFitterConstrainFunc)(const gdouble *param,
                                            gboolean *ok,
@@ -75,30 +81,36 @@ struct _GwyFitterClass {
     GObjectClass g_object_class;
 };
 
-GType      gwy_fitter_get_type       (void)                                 G_GNUC_CONST;
-GwyFitter* gwy_fitter_new            (void)                                 G_GNUC_MALLOC;
-void       gwy_fitter_set_n_params   (GwyFitter *fitter,
-                                      guint nparams);
-guint      gwy_fitter_get_n_params   (GwyFitter *fitter)                    G_GNUC_PURE;
-void       gwy_fitter_set_params     (GwyFitter *fitter,
-                                      const gdouble *params);
-gboolean   gwy_fitter_get_params     (GwyFitter *fitter,
-                                      gdouble *params);
-void       gwy_fitter_set_funcs      (GwyFitter *fitter,
-                                      GwyFitterResiduumFunc eval_residuum,
-                                      GwyFitterGradientFunc eval_gradient);
-void       gwy_fitter_set_constraint (GwyFitter *fitter,
-                                      GwyFitterConstrainFunc constrain);
-gdouble    gwy_fitter_get_lambda     (GwyFitter *fitter)                    G_GNUC_PURE;
-guint      gwy_fitter_iter_number    (GwyFitter *fitter)                    G_GNUC_PURE;
-gboolean   gwy_fitter_fit            (GwyFitter *fitter,
-                                      gpointer user_data);
-guint      gwy_fitter_status         (GwyFitter *fitter)                    G_GNUC_PURE;
-gdouble    gwy_fitter_residuum       (GwyFitter *fitter)                    G_GNUC_PURE;
-gdouble    gwy_fitter_eval_residuum  (GwyFitter *fitter,
-                                      gpointer user_data);
-gboolean   gwy_fitter_inverse_hessian(GwyFitter *fitter,
-                                      gdouble *ihessian);
+GType      gwy_fitter_get_type        (void)                                       G_GNUC_CONST;
+GwyFitter* gwy_fitter_new             (void)                                       G_GNUC_MALLOC;
+void       gwy_fitter_set_n_params    (GwyFitter *fitter,
+                                       guint nparams);
+guint      gwy_fitter_get_n_params    (GwyFitter *fitter)                          G_GNUC_PURE;
+void       gwy_fitter_set_params      (GwyFitter *fitter,
+                                       const gdouble *params);
+gboolean   gwy_fitter_get_params      (GwyFitter *fitter,
+                                       gdouble *params);
+void       gwy_fitter_set_funcs       (GwyFitter *fitter,
+                                       GwyFitterResiduumFunc eval_residuum,
+                                       GwyFitterGradientFunc eval_gradient);
+void       gwy_fitter_set_matrix_funcs(GwyFitter *fitter,
+                                       GwyFitterResiduumFunc eval_residuum,
+                                       GwyFitterMatrixGradientFunc eval_gradient);
+void       gwy_fitter_set_matrix      (GwyFitter *fitter,
+                                       GwyMatrix *matrix);
+GwyMatrix* gwy_fitter_get_matrix      (const GwyFitter *fitter)                    G_GNUC_PURE;
+void       gwy_fitter_set_constraint  (GwyFitter *fitter,
+                                       GwyFitterConstrainFunc constrain);
+gdouble    gwy_fitter_get_lambda      (GwyFitter *fitter)                          G_GNUC_PURE;
+guint      gwy_fitter_iter_number     (GwyFitter *fitter)                          G_GNUC_PURE;
+gboolean   gwy_fitter_fit             (GwyFitter *fitter,
+                                       gpointer user_data);
+guint      gwy_fitter_status          (GwyFitter *fitter)                          G_GNUC_PURE;
+gdouble    gwy_fitter_residuum        (GwyFitter *fitter)                          G_GNUC_PURE;
+gdouble    gwy_fitter_eval_residuum   (GwyFitter *fitter,
+                                       gpointer user_data);
+gboolean   gwy_fitter_inverse_hessian (GwyFitter *fitter,
+                                       gdouble *ihessian);
 
 G_END_DECLS
 

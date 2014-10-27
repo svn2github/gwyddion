@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009,2011 David Nečas (Yeti).
+ *  Copyright (C) 2009,2011,2014 David Nečas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -72,20 +72,22 @@ struct _GwyFitterPrivate {
     gdouble f;
     gdouble f_best;
     GwyFitterGradientFunc eval_gradient;
+    GwyFitterMatrixGradientFunc eval_gradient_matrix;
     GwyFitterResiduumFunc eval_residuum;
     GwyFitterConstrainFunc constrain;
-    /* The real allocation */
-    gdouble *workspace;
     /* Things of size nparam */
+    gdouble *workspace1;    /* The real allocation */
     gdouble *param;
     gdouble *param_best;
     gdouble *gradient;
     gdouble *diag;
     gdouble *step;
     /* Things of size MATRIX_LEN(nparam) */
+    gdouble *workspace2;    /* The real allocation */
     gdouble *hessian;
-    gdouble *normal_matrix;
     gdouble *inv_hessian;
+    /* The abstract matrix interface */
+    GwyMatrix *matrix_hessian;
 };
 
 typedef struct _GwyFitterPrivate Fitter;
@@ -219,6 +221,10 @@ static void
 gwy_fitter_finalize(GObject *object)
 {
     GwyFitter *fitter = GWY_FITTER(object);
+    if (fitter->priv->matrix_hessian) {
+        gwy_matrix_unref(fitter->priv->matrix_hessian);
+        fitter->priv->matrix_hessian = NULL;
+    }
     fitter_set_n_param(fitter->priv, 0);
     G_OBJECT_CLASS(gwy_fitter_parent_class)->finalize(object);
 }
@@ -338,21 +344,23 @@ fitter_set_n_param(Fitter *fitter,
     if (fitter->fitting)
         g_critical("Number of parameters changed during an iteration.");
 
-    guint matrix_len = MATRIX_LEN(nparam);
     fitter->nparam = nparam;
 
-    g_free(fitter->workspace);
-    fitter->workspace = nparam ? g_new(gdouble, 5*nparam + 3*matrix_len) : NULL;
-
-    fitter->param = fitter->workspace;
+    g_free(fitter->workspace1);
+    fitter->workspace1 = nparam ? g_new(gdouble, 5*nparam) : NULL;
+    fitter->param = fitter->workspace1;
     fitter->param_best = fitter->param + nparam;
     fitter->gradient = fitter->param_best + nparam;
     fitter->diag = fitter->gradient + nparam;
     fitter->step = fitter->diag + nparam;
 
-    fitter->hessian = fitter->step + nparam;
-    fitter->normal_matrix = fitter->hessian + matrix_len;
-    fitter->inv_hessian = fitter->normal_matrix + matrix_len;
+    GWY_FREE(fitter->workspace2);
+    if (!fitter->matrix_hessian) {
+        guint matrix_len = MATRIX_LEN(nparam);
+        fitter->workspace2 = nparam ? g_new(gdouble, 2*matrix_len) : NULL;
+        fitter->hessian = fitter->workspace2;
+        fitter->inv_hessian = fitter->hessian + matrix_len;
+    }
 }
 
 /* Paranoid evaluation of residuum and derivatives.
@@ -429,23 +437,40 @@ extract_hessian_diagonal(Fitter *fitter)
     const gdouble *h = fitter->hessian;
     gdouble *d = fitter->diag;
 
-    for (guint j = 0; j < nparam; j++)
+    for (guint j = 0; j < nparam; j++) {
         d[j] = SLi(h, j, j);
+    }
+}
+
+// Do the replacement with zeroes at the diagonal 1.0 directly here so that
+// diag[] remembers the original Hessian diagonal and we can always restore
+// it.
+static inline void
+add_to_diagonal(Fitter *fitter)
+{
+    guint nparam = fitter->nparam;
+    gdouble *h = fitter->hessian;
+    const gdouble *d = fitter->diag;
+    gdouble lambda = fitter->lambda;
 
     for (guint j = 0; j < nparam; j++) {
-        if (!(d[j] > 0.0))
-            d[j] = 1.0;
+        gdouble dj = d[j];
+        if (!(dj > 0.0))
+            dj = 1.0;
+
+        SLi(h, j, j) += lambda*dj;
     }
 }
 
 static inline void
-add_vector_to_diagonal(guint nparam,
-                       gdouble *hessian,
-                       const gdouble *a,
-                       gdouble x)
+restore_diagonal(Fitter *fitter)
 {
+    guint nparam = fitter->nparam;
+    gdouble *h = fitter->hessian;
+    const gdouble *d = fitter->diag;
+
     for (guint j = 0; j < nparam; j++)
-        SLi(hessian, j, j) += x*a[j];
+        SLi(h, j, j) = d[j];
 }
 
 static inline gboolean
@@ -478,12 +503,25 @@ update_param(Fitter *fitter)
         p[j] = pb[j] - s[j];
 }
 
+static inline gboolean
+solve_step(Fitter *fitter)
+{
+    guint nparam = fitter->nparam;
+
+    gwy_assign(fitter->inv_hessian, fitter->hessian, MATRIX_LEN(nparam));
+    if (!gwy_cholesky_decompose(fitter->inv_hessian, nparam)) {
+        return FALSE;
+    }
+    gwy_assign(fitter->step, fitter->gradient, nparam);
+    gwy_cholesky_solve(fitter->inv_hessian, fitter->step, nparam);
+    return TRUE;
+}
+
 static gboolean
 fitter_minimize(Fitter *fitter,
                 gpointer user_data)
 {
     guint nparam = fitter->nparam;
-    guint matrix_len = MATRIX_LEN(nparam);
 
     fitter->iter = 0;
     fitter->lambda = fitter->settings.lambda_start;
@@ -502,15 +540,11 @@ fitter_minimize(Fitter *fitter,
         extract_hessian_diagonal(fitter);
         while (fitter->lambda <= fitter->settings.lambda_max) {
             fitter->status = GWY_FITTER_STATUS_NONE;
-            gwy_assign(fitter->normal_matrix, fitter->hessian, matrix_len);
-            add_vector_to_diagonal(nparam, fitter->normal_matrix,
-                                   fitter->diag, fitter->lambda);
-            if (!gwy_cholesky_decompose(fitter->normal_matrix, nparam)) {
+            add_to_diagonal(fitter);
+            if (!solve_step(fitter)) {
                 fitter->status = GWY_FITTER_STATUS_CANNOT_STEP;
                 goto step_fail;
             }
-            gwy_assign(fitter->step, fitter->gradient, nparam);
-            gwy_cholesky_solve(fitter->normal_matrix, fitter->step, nparam);
             update_param(fitter);
             if ((fitter->constrain
                  && !fitter->constrain(fitter->param, NULL, user_data))) {
@@ -530,6 +564,7 @@ fitter_minimize(Fitter *fitter,
 step_fail:
             fitter->nsuccesses = 0;
             fitter->lambda *= fitter->settings.lambda_increase;
+            restore_diagonal(fitter);
         }
         if (!fitter->nsuccesses) {
             if (fitter->status)
@@ -749,6 +784,103 @@ gwy_fitter_set_funcs(GwyFitter *fitter,
     priv->status = GWY_FITTER_STATUS_NONE;
     priv->eval_residuum = eval_residuum;
     priv->eval_gradient = eval_gradient;
+    priv->eval_gradient_matrix = NULL;
+}
+
+/**
+ * gwy_fitter_set_matrix_funcs:
+ * @fitter: A non-linear least-squares fitter.
+ * @eval_residuum: Function to calculate the sum of squares.
+ * @eval_gradient: Function to calculate the gradient and Hessian.
+ *
+ * Sets the model functions of a fitter.
+ *
+ * This is the abstract low-level interface.  In most cases you do not want to
+ * calculate Hessian yourself, instead, you want to provide just the function
+ * to fit and the data to fit.  See #GwyFitTask for the high-level interface.
+ *
+ * Even if you want to calculate Hessian yourself, you can usually represent
+ * it as an array of doubles.  However, if the Hessian is for instance a huge
+ * sparse matrix or it is actually stored in the GPU, #GwyFitter can work with
+ * that and does not need to access the matrix elements directly.
+ *
+ * The abstract matrix must be square and support the following functions
+ * to be usable with #GwyFitter:
+ * gwy_matrix_n_cols(), gwy_matrix_n_rows(), gwy_matrix_inv_multiply(),
+ * gwy_matrix_get_diagonal(), gwy_matrix_set_diagonal().
+ **/
+void
+gwy_fitter_set_matrix_funcs(GwyFitter *fitter,
+                            GwyFitterResiduumFunc eval_residuum,
+                            GwyFitterMatrixGradientFunc eval_gradient)
+{
+    g_return_if_fail(GWY_IS_FITTER(fitter));
+    g_return_if_fail(eval_residuum && eval_gradient);
+    Fitter *priv = fitter->priv;
+    priv->status = GWY_FITTER_STATUS_NONE;
+    priv->eval_residuum = eval_residuum;
+    priv->eval_gradient = NULL;
+    priv->eval_gradient_matrix = eval_gradient;
+}
+
+/**
+ * gwy_fitter_set_matrix:
+ * @fitter: A non-linear least-squares fitter.
+ * @matrix: (allow-none):
+ *          Abstract matrix to use for the Hessian and normal matrix.
+ *
+ * Sets the abstract matrix used with the low-level interface.
+ *
+ * The fitter takes a reference to the matrix.  This reference is only released
+ * by calling this method with a different matrix (possibly %NULL) or
+ * destroying the fitter.
+ *
+ * Setting the matrix immediately sets the number of parameters to the matrix
+ * order.  If the matrix is set to %NULL, the number of parameters is set to
+ * zero.  While the low-level matrix functions are used, the number of
+ * parameters must not be changed.
+ *
+ * See gwy_fitter_set_matrix_funcs() for more discussion.
+ **/
+void
+gwy_fitter_set_matrix(GwyFitter *fitter,
+                      GwyMatrix *matrix)
+{
+    g_return_if_fail(GWY_IS_FITTER(fitter));
+    Fitter *priv = fitter->priv;
+    if (priv->matrix_hessian == matrix)
+        return;
+
+    guint nparam = 0;
+    if (matrix) {
+        nparam = gwy_matrix_n_cols(matrix);
+        g_return_if_fail(gwy_matrix_n_rows(matrix) == nparam);
+        gwy_matrix_ref(matrix);
+    }
+    if (priv->matrix_hessian)
+        gwy_matrix_unref(priv->matrix_hessian);
+
+    priv->matrix_hessian = matrix;
+    fitter_set_n_param(fitter->priv, nparam);
+}
+
+/**
+ * gwy_fitter_get_matrix:
+ * @fitter: A non-linear least-squares fitter.
+ *
+ * Sets the abstract matrix used with the low-level interface.
+ *
+ * See gwy_fitter_set_matrix() and gwy_fitter_set_matrix_funcs() for a
+ * discussion.
+ *
+ * Returns: (allow-none):
+ *          The matrix used by the low level-interface, if any.
+ **/
+GwyMatrix*
+gwy_fitter_get_matrix(const GwyFitter *fitter)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), NULL);
+    return fitter->priv->matrix_hessian;
 }
 
 /**

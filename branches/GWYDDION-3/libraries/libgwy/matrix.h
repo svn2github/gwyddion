@@ -47,9 +47,9 @@ void       gwy_matrix_set_inv_multiply_func(GwyMatrix *matrix,
 void       gwy_matrix_set_diagonal_funcs   (GwyMatrix *matrix,
                                             GwyMatrixGetDiagFunc getdiag,
                                             GwyMatrixSetDiagFunc setdiag);
-gpointer   gwy_matrix_model                (const GwyMatrix *matrix);
-guint      gwy_matrix_n_rows               (const GwyMatrix *matrix);
-guint      gwy_matrix_n_cols               (const GwyMatrix *matrix);
+gpointer   gwy_matrix_model                (const GwyMatrix *matrix)       G_GNUC_PURE;
+guint      gwy_matrix_n_rows               (const GwyMatrix *matrix)       G_GNUC_PURE;
+guint      gwy_matrix_n_cols               (const GwyMatrix *matrix)       G_GNUC_PURE;
 gboolean   gwy_matrix_multiply             (GwyMatrix *matrix,
                                             const gdouble *vector,
                                             gdouble *result);
