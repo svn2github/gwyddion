@@ -68,6 +68,7 @@ public_headers = \
 	$(srcdir)/mask-line.h \
 	$(srcdir)/master.h \
 	$(srcdir)/math.h \
+	$(srcdir)/matrix.h \
 	$(srcdir)/object-utils.h \
 	$(srcdir)/pack.h \
 	$(srcdir)/rand.h \
@@ -186,6 +187,7 @@ libgwy4_la_SOURCES = \
 	master.c \
 	math--sort.c \
 	math.c \
+	matrix.c \
 	object-internal.c \
 	object-utils.c \
 	pack.c \

@@ -74,6 +74,7 @@
 #include <libgwy/mask-line.h>
 #include <libgwy/master.h>
 #include <libgwy/math.h>
+#include <libgwy/matrix.h>
 #include <libgwy/object-utils.h>
 #include <libgwy/pack.h>
 #include <libgwy/rand.h>

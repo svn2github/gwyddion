@@ -40,6 +40,7 @@
     <xi:include href="xml/expr.xml"/>
     <xi:include href="xml/unit.xml"/>
     <xi:include href="xml/value-format.xml"/>
+    <xi:include href="xml/matrix.xml"/>
   </chapter>
   <chapter id='libgwy4-one-dimensional-data'>
     <title>One-Dimensional Data</title>
