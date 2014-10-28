@@ -180,7 +180,7 @@
             from the mean plane which, however, always is the
             <xi:include href="eqi-z-is-0.xml"/> plane).  Button
             <guilabel>Like Current Channel</guilabel> sets the RMS value to
-            those of the current channel.
+            that of the current channel.
           </para>
         </listitem>
       </varlistentry>
@@ -1487,6 +1487,112 @@
           bumps in a distorted triangular pattern (centre);
           distorted rectangular pattern with segments separated by trenches
           (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='brownian-synthesis'>
+    <title>Brownian</title>
+    <para>
+      The module generates, among other things, surfaces with profiles similar
+      to samples of fractional Brownian motion.  The construction method is,
+      however, not very sophisticated.  Starting from corners of the image,
+      interior points are recursively linearly interpolated along the
+      horizontal and vertical axes, adding noise that scales with distance
+      according to the given Hurst exponent.  Some of the surfaces are
+      essentially the same as those generated using
+      <link linkend='spectral-synthesis'>spectral synthesis</link>, however,
+      constructing them in the direct space instead of frequency space allows
+      different modifications of their properties.
+    </para>
+    <para>
+      The generator has the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Hurst exponent</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The design Hurst exponent <xi:include href='eqi-H.xml'/>.
+            For the normal values between 0 and 1, the square root of
+            <link linkend='height-height-correlation-1d'>height-height
+              correlation function</link>
+            grows as <xi:include href='eqi-H.xml'/>-th power of the distance.
+            The construction algorithm permits formally even negative values
+            beause it stops at the finite resolution of one pixel.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Stationarity scale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Scale at which stationarity is enforced (note Fractional Brownian
+            motion is not a stationary).  When this scale is comparable to the
+            image size or larger, it has little effect.  However, when it is
+            small the image becomes <quote>homogeneised</quote> instead of
+            self-similar above this scale.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Distribution</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distribution of the noise added during the generation.  Uniform
+            and Gaussian result in essentially the same surfaces
+            (statistically); the former is faster though.  More heavy-tailed
+            distributions, i.e. exponential and especially power, lead to
+            prominent peaks and valleys.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Power</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Power <xi:include href='eqi-alpha.xml'/> for the power
+            distribution.  The probability density function is proportional to
+            <xi:include href="eq-fBm-power-pdf.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The root mean square value of the heights (or of the differences
+            from the mean plane which, however, always is the
+            <xi:include href="eqi-z-is-0.xml"/> plane).  Note this value
+            applies to the specific generated image, not the process as such,
+            which does not have finite RMS.  Button <guilabel>Like Current
+              Channel</guilabel> sets the RMS value to that of the current
+            channel.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-brownian'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-brownian.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial Brownian surfaces:
+          classic surface generated with H about 0.7 (left);
+          nebula-like image generated with a heavy-tailed power distribution
+          (centre);
+          the effect of small stationarity scale (right).
         </caption>
       </mediaobject>
     </informalfigure>
