@@ -56,8 +56,28 @@
           <entry>2.14.0</entry>
           <entry><emphasis role='strong'>Required</emphasis></entry>
           <entry>
-            Everything.  GLib is required by GTK+ but Gwyddion need a slightly newer
-            version than strictly required by GTK+ 2.8.
+            Everything.  GLib is a base library also required by GTK+, but Gwyddion
+            needs a slightly newer version than strictly required by GTK+ 2.8.
+          </entry>
+        </row>
+        <row id='dependency-pango'>
+          <entry><ulink url='http://www.pango.org/'>Pango</ulink></entry>
+          <entry>1.10</entry>
+          <entry><emphasis role='strong'>Required</emphasis></entry>
+          <entry>
+            All text rendering.  Gwyddion needs a slightly newer version
+            than strictly required by GTK+ 2.8.  This entry implies pangocairo,
+            which is an optional component of Pango and in principle can be disabled.
+            However, it is normally included in Pango packages.
+          </entry>
+        </row>
+        <row id='dependency-cairo'>
+          <entry><ulink url='http://www.cairographics.org/'>Cairo</ulink></entry>
+          <entry>1.2</entry>
+          <entry><emphasis role='strong'>Required</emphasis></entry>
+          <entry>
+            All drawing within GTK+.  Gwyddion needs a slightly newer version
+            than strictly required by GTK+ 2.8.  Version at least 1.6 is recommended.
           </entry>
         </row>
         <row id='dependency-gtkxlext'>
