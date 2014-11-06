@@ -52,18 +52,28 @@
       <para>
         Run as root:
         <informalexample>
-          <literallayout><userinput>yum install mingw{32,64}-{gcc-c++,gtk2,libxml2,minizip}</userinput></literallayout>
+          <literallayout><userinput>yum install mingw{32,64}-{gcc-c++,gtk2,libxml2,minizip,fftw,gtkglext}</userinput></literallayout>
         </informalexample>
-        to install the necessary mingw32 and mingw64 packages (several more
+        to install the necessary mingw32 and mingw64 packages.  Several more
         packages will be installed as dependencies of those explicitly given
-        here).
+        here.  Note that, technically, some of the packages are
+        <link linkend='installation-dependencies'>optional dependencies</link>
+        and you can build a MS Windows installer without them (after some
+        adjustments).  Neverhteless the standard installers include these
+        packages and the cross-compilation scripts expect them to be present by
+        default.
       </para>
     </sect3>
     <sect3 id='installation-cross-mingw32-setup-repo'>
       <title>Gwyddion.net repository</title>
       <para>
         MinGW versions of a few packages used by Gwyddion are not available in
-        Fedora yet.  You can build them using the patches and spec files at
+        Fedora yet (or any more).  Presently the only missing package is
+        gtksourceview2 which is only used by pygwy.
+      </para>
+      <para>
+        You can build these additional packages using the patches and spec
+        files at
         <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/</ulink>,
         however, it should be much easier to just install them using
         <command>yum</command>.  For this, download and install the
@@ -71,12 +81,12 @@
         The installation makes available all the additional MinGW packages.
         After installing it you can run
         <informalexample>
-          <literallayout><userinput>yum install mingw32-{fftw,gtkglext,gtksourceview2}</userinput></literallayout>
+          <literallayout><userinput>yum install mingw32-gtksourceview2</userinput></literallayout>
         </informalexample>
-        Incidentally, the repository also contains a native Gwyddion package
-        that you can install to use Gwyddion on Fedora; and a package with
-        cross-compiled Gwyddion libraries that can be used to cross-compile
-        modules.
+        Incidentally, the repository also contains a native x86_64 Gwyddion
+        package that you can install to use Gwyddion on Fedora; and a package
+        with cross-compiled Gwyddion libraries that can be used to
+        cross-compile modules.
       </para>
     </sect3>
     <sect3 id='installation-cross-mingw32-setup-wine'>
@@ -156,7 +166,7 @@ python_dir=$HOME/.wine/drive_c/Python27
 nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
         </informalexample>
         Variable <varname>source_dir</varname> specifies the location of the
-        untarred or checked-out Gwyddion source code and it will likely need to
+        unpacked or checked-out Gwyddion source code and it will likely need to
         be adjusted.  Variable <varname>target_prefix</varname> specifies the
         installation directory (staging area) for the cross-compiled Gwyddion.
         The default value should be reasonable and you do not need to change it
@@ -189,14 +199,22 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       <informalexample>
         <literallayout><userinput>./cross-build-64</userinput></literallayout>
       </informalexample>
-      Note the scripts run <filename>autogen.sh</filename> but do not clean
-      the source code directory.  You may wish to do that manually if you
-      compile Gwyddion repeatedly.
     </para>
     <para>
       You can make a coffee meanwhile – or study the
       <filename>cross-build</filename> script (it is actually quite short and
       clear).
+    </para>
+    <para>
+      Note the cross-build scripts run <filename>autogen.sh</filename> but do
+      not clean the source code directory.  You may wish to do that manually if
+      you compile Gwyddion repeatedly.  Especially if you build for both
+      architectures in the same directory, make sure to run
+      <informalexample>
+        <literallayout><userinput>make distclean</userinput></literallayout>
+      </informalexample>
+      between the builds to get the source directory back to a well-defined
+      state.
     </para>
   </sect2>
   <sect2 id='installation-cross-mingw32-running'>
