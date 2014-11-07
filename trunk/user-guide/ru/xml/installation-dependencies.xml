@@ -35,6 +35,18 @@
           <entry><emphasis role="strong">Требуется</emphasis></entry>
           <entry>Всё. Glib нужна для работы GTK+, но Gwyddion требует чуть более новую версию, чем строго требуется для GTK+ 2.8.</entry>
         </row>
+        <row id="dependency-pango">
+          <entry><ulink url="http://www.pango.org/">Pango</ulink></entry>
+          <entry>1.10</entry>
+          <entry><emphasis role="strong">Требуется</emphasis></entry>
+          <entry>Вся отрисовка текста. Gwyddion требует чуть более новую версию, чем жестко требуется для GTK+ 2.8. Кроме того, этот элемент подразумевает pangocairo, который является опциональным компонентом Pango и в принципе может быть отключен. Однако, обычно его включают в пакеты Pango.</entry>
+        </row>
+        <row id="dependency-cairo">
+          <entry><ulink url="http://www.cairographics.org/">Cairo</ulink></entry>
+          <entry>1.2</entry>
+          <entry><emphasis role="strong">Требуется</emphasis></entry>
+          <entry>Всё рисование в GTK+. Gwyddion требует чуть более новую версию, чем жестко требуется для GTK+ 2.8. Рекомендуется использовать версию по крайней мере 1.6.</entry>
+        </row>
         <row id="dependency-gtkxlext">
           <entry><ulink url="http://gtkglext.sourceforge.net/">GtkGLExt</ulink></entry>
           <entry>1.0</entry>
