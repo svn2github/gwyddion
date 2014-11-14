@@ -240,6 +240,16 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module femtoscan.c -->
+    <row>
+      <entry>FemtoScan SPM</entry>
+      <entry>,spm.</entry>
+      <entry>femtoscan</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module femtoscan-txt.c -->
     <row>
       <entry>Текстовые данные FemtoScan</entry>
@@ -340,6 +350,7 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- Module imgexport.c contains no magic. -->
     <!-- From module intematix.c -->
     <row>
       <entry>Intematix SDF</entry>
@@ -610,6 +621,16 @@
       <entry>Да</entry>
       <entry>Да</entry>
     </row>
+    <!-- From module nxiifile.c -->
+    <row>
+      <entry>EM4SYS NX II</entry>
+      <entry>.bmp</entry>
+      <entry>nxiifile</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
     <!-- From module oldmda.c -->
     <row>
       <entry>Старый формат MDA от NT-MDT</entry>
@@ -798,6 +819,16 @@
       <entry>—</entry>
       <entry>—</entry>
     </row>
+    <!-- From module renishaw.c -->
+    <row>
+      <entry>Файл данных Renishaw WiRE</entry>
+      <entry>.wdf</entry>
+      <entry>renishaw</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>Да</entry>
+      <entry>Да</entry>
+    </row>
     <!-- From module rhk-sm3.c -->
     <row>
       <entry>RHK Instruments SM3</entry>
@@ -971,6 +1002,16 @@
       <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
       <entry>.xml</entry>
       <entry>spml</entry>
+      <entry>Да</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+      <entry>—</entry>
+    </row>
+    <!-- From module spmxfile.c -->
+    <row>
+      <entry>Данные ATC SPMxFormat</entry>
+      <entry>.spm</entry>
+      <entry>spmxfile</entry>
       <entry>Да</entry>
       <entry>—</entry>
       <entry>—</entry>
