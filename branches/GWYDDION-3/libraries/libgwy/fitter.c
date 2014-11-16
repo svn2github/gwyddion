@@ -46,6 +46,7 @@ typedef enum {
     VALID_PARAMS,
     VALID_FUNCTION,
     VALID_HESSIAN,
+    VALID_INV_HESSIAN_DIAG,
     VALID_INV_HESSIAN,
 } GwyFitterValid;
 
@@ -82,6 +83,7 @@ struct _GwyFitterPrivate {
     gdouble *gradient;
     gdouble *diag;
     gdouble *step;
+    gdouble *inv_diag;
     /* Things of size MATRIX_LEN(nparam) */
     gdouble *workspace2;    /* The real allocation */
     gdouble *hessian;
@@ -347,12 +349,13 @@ fitter_set_n_param(Fitter *fitter,
     fitter->nparam = nparam;
 
     g_free(fitter->workspace1);
-    fitter->workspace1 = nparam ? g_new(gdouble, 5*nparam) : NULL;
+    fitter->workspace1 = nparam ? g_new(gdouble, 6*nparam) : NULL;
     fitter->param = fitter->workspace1;
     fitter->param_best = fitter->param + nparam;
     fitter->gradient = fitter->param_best + nparam;
     fitter->diag = fitter->gradient + nparam;
     fitter->step = fitter->diag + nparam;
+    fitter->inv_diag = fitter->step + nparam;
 
     GWY_FREE(fitter->workspace2);
     if (!fitter->matrix_hessian) {
@@ -486,13 +489,12 @@ set_diagonal_from_array(Fitter *fitter, const gdouble *a)
 // Do the replacement with zeroes at the diagonal 1.0 directly here so that
 // diag[] remembers the original Hessian diagonal and we can always restore
 // it.
-// XXX: Uses fitter->step[] as a scratch buffer!
 static inline gboolean
 add_to_diagonal(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     const gdouble *d = fitter->diag;
-    gdouble *buf = fitter->step;
+    gdouble *buf = fitter->step;    // XXX: Reuses step[] as a scratch buffer
     gdouble lambda = fitter->lambda;
 
     for (guint j = 0; j < nparam; j++) {
@@ -519,13 +521,27 @@ too_small_param_change(Fitter *fitter)
     /* Not sure how fitter->f_best gets there but otherwise the condition does
      * not scale with fitted function values. */
     gdouble eps = fitter->settings.param_change_min * sqrt(fitter->f_best);
+    gdouble *buf = fitter->inv_diag;
 
     /* FIXME: If we get here the new parameters have been accepted so it would
-     * be really nice if the Hessian was OK too.  What to do if it isn't? */
-    if (fitter_invert_hessian(fitter))
-        return FALSE;
+     * be really nice if the Hessian was OK too.  What to do if it isn't?
+     * At present we pretend the change was not too small.  */
+    if (fitter->eval_gradient_matrix) {
+        if (!gwy_matrix_get_inv_diagonal(fitter->matrix_hessian, buf))
+            return FALSE;
+    }
+    else {
+        if (!fitter_invert_hessian(fitter))
+            return FALSE;
+
+        for (guint j = 0; j < nparam; j++)
+            buf[j] = SLi(fitter->inv_hessian, j, j);
+    }
+
+    fitter->valid = MAX(fitter->valid, VALID_INV_HESSIAN_DIAG);
     for (guint j = 0; j < nparam; j++) {
-        if (fitter->step[j] > eps * sqrt(SLi(fitter->inv_hessian, j, j)))
+        gdouble step_min = eps * sqrt(fmax(buf[j], 0.0));
+        if (fitter->step[j] > step_min)
             return FALSE;
     }
     return TRUE;
@@ -545,6 +561,11 @@ update_param(Fitter *fitter)
 static inline gboolean
 solve_step(Fitter *fitter)
 {
+    if (fitter->eval_gradient_matrix) {
+        return gwy_matrix_inv_multiply(fitter->matrix_hessian,
+                                       fitter->gradient, fitter->step);
+    }
+
     guint nparam = fitter->nparam;
 
     gwy_assign(fitter->inv_hessian, fitter->hessian, MATRIX_LEN(nparam));
@@ -641,6 +662,9 @@ step_fail:
 static gboolean
 fitter_invert_hessian(Fitter *fitter)
 {
+    if (fitter->eval_gradient_matrix)
+        return FALSE;
+
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
     gwy_assign(fitter->inv_hessian, fitter->hessian, matrix_len);
@@ -648,7 +672,7 @@ fitter_invert_hessian(Fitter *fitter)
     gboolean zero[nparam];
     gwy_clear(zero, nparam);
     for (guint i = 0; i < nparam; i++) {
-        if (SLi(fitter->inv_hessian, i, i) == 0.0) {
+        if (fitter->diag[i] == 0.0) {
             SLi(fitter->inv_hessian, i, i) = 1.0;
             zero[i] = TRUE;
         }
