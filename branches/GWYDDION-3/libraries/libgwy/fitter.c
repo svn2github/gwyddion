@@ -398,59 +398,101 @@ eval_gradient_with_check(Fitter *fitter,
 {
     gdouble *h = fitter->hessian, *g = fitter->gradient;
     guint nparam = fitter->nparam;
-    gboolean ok = TRUE;
+    gboolean ok;
 
-    if (!fitter->eval_gradient(fitter->param, g, h, user_data)) {
-        fitter->status = GWY_FITTER_STATUS_GRADIENT_FAILURE;
-        ok = FALSE;
+    fitter->status = GWY_FITTER_STATUS_GRADIENT_FAILURE;
+    if (fitter->eval_gradient_matrix) {
+        ok = fitter->eval_gradient_matrix(fitter->param,
+                                          g, fitter->matrix_hessian, user_data);
+    }
+    else if (fitter->eval_gradient) {
+        ok = fitter->eval_gradient(fitter->param, g, h, user_data);
     }
     else {
+        g_return_val_if_reached(FALSE);
+    }
+
+    if (ok) {
         for (guint i = 0; i < nparam; i++) {
             if (isnan(g[i])) {
                 fitter->status = GWY_FITTER_STATUS_SILENT_FAILURE;
                 ok = FALSE;
                 break;
             }
-            for (guint j = 0; j <= i; j++) {
-                if (isnan(SLi(h, i, j))) {
-                    fitter->status = GWY_FITTER_STATUS_SILENT_FAILURE;
-                    ok = FALSE;
-                    break;
+            // XXX: We cannot detect silent failure for abstract matrix
+            // operations.  Must trust the matrix implementation.
+            if (!fitter->eval_gradient_matrix) {
+                for (guint j = 0; j <= i; j++) {
+                    if (isnan(SLi(h, i, j))) {
+                        fitter->status = GWY_FITTER_STATUS_SILENT_FAILURE;
+                        ok = FALSE;
+                        break;
+                    }
                 }
             }
         }
     }
 
-    if (ok)
-        fitter->valid = MAX(fitter->valid, VALID_HESSIAN);
-    else if (fitter->constrain
-             && !fitter->constrain(fitter->param, NULL, user_data))
-        fitter->status = GWY_FITTER_STATUS_PARAM_OFF_BOUNDS;
+    if (!ok) {
+        if (fitter->constrain
+                 && !fitter->constrain(fitter->param, NULL, user_data))
+            fitter->status = GWY_FITTER_STATUS_PARAM_OFF_BOUNDS;
+        return FALSE;
+    }
 
-    return ok;
+    fitter->valid = MAX(fitter->valid, VALID_HESSIAN);
+    return TRUE;
 }
 
-static inline void
+static inline gboolean
 extract_hessian_diagonal(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
-    const gdouble *h = fitter->hessian;
     gdouble *d = fitter->diag;
 
-    for (guint j = 0; j < nparam; j++) {
-        d[j] = SLi(h, j, j);
+    if (fitter->matrix_hessian) {
+        if (gwy_matrix_get_diagonal(fitter->matrix_hessian, d))
+            return TRUE;
+        fitter->status = GWY_FITTER_STATUS_MATRIX_FAILURE;
+        return FALSE;
     }
+
+    const gdouble *h = fitter->hessian;
+    for (guint j = 0; j < nparam; j++)
+        d[j] = SLi(h, j, j);
+
+    return TRUE;
+}
+
+static inline gboolean
+set_diagonal_from_array(Fitter *fitter, const gdouble *a)
+{
+    guint nparam = fitter->nparam;
+
+    if (fitter->matrix_hessian) {
+        if (gwy_matrix_set_diagonal(fitter->matrix_hessian, a))
+            return TRUE;
+        fitter->status = GWY_FITTER_STATUS_MATRIX_FAILURE;
+        return FALSE;
+    }
+
+    gdouble *h = fitter->hessian;
+    for (guint j = 0; j < nparam; j++)
+        SLi(h, j, j) += a[j];
+
+    return TRUE;
 }
 
 // Do the replacement with zeroes at the diagonal 1.0 directly here so that
 // diag[] remembers the original Hessian diagonal and we can always restore
 // it.
-static inline void
+// XXX: Uses fitter->step[] as a scratch buffer!
+static inline gboolean
 add_to_diagonal(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
-    gdouble *h = fitter->hessian;
     const gdouble *d = fitter->diag;
+    gdouble *buf = fitter->step;
     gdouble lambda = fitter->lambda;
 
     for (guint j = 0; j < nparam; j++) {
@@ -458,19 +500,16 @@ add_to_diagonal(Fitter *fitter)
         if (!(dj > 0.0))
             dj = 1.0;
 
-        SLi(h, j, j) += lambda*dj;
+        buf[j] = lambda*dj;
     }
+
+    return set_diagonal_from_array(fitter, buf);
 }
 
-static inline void
+static inline gboolean
 restore_diagonal(Fitter *fitter)
 {
-    guint nparam = fitter->nparam;
-    gdouble *h = fitter->hessian;
-    const gdouble *d = fitter->diag;
-
-    for (guint j = 0; j < nparam; j++)
-        SLi(h, j, j) = d[j];
+    return set_diagonal_from_array(fitter, fitter->diag);
 }
 
 static inline gboolean
@@ -537,10 +576,12 @@ fitter_minimize(Fitter *fitter,
     fitter->nsuccesses = 0;
 
     while (fitter->iter++ < fitter->settings.iter_max) {
-        extract_hessian_diagonal(fitter);
+        if (!extract_hessian_diagonal(fitter))
+            return FALSE;
         while (fitter->lambda <= fitter->settings.lambda_max) {
             fitter->status = GWY_FITTER_STATUS_NONE;
-            add_to_diagonal(fitter);
+            if (!add_to_diagonal(fitter))
+                return FALSE;
             if (!solve_step(fitter)) {
                 fitter->status = GWY_FITTER_STATUS_CANNOT_STEP;
                 goto step_fail;
@@ -564,7 +605,13 @@ fitter_minimize(Fitter *fitter,
 step_fail:
             fitter->nsuccesses = 0;
             fitter->lambda *= fitter->settings.lambda_increase;
-            restore_diagonal(fitter);
+            if (!restore_diagonal(fitter))
+                return FALSE;
+            // FIXME: If we get here with GWY_FITTER_STATUS_PARAM_OFF_BOUNDS,
+            // we should call constrain() to find out which parameters are
+            // off bounds and temporarily treat them as fixed (i.e. set
+            // the corresponding gradient elements to 0.0).  Probably in
+            // addition to the lamba increase.  Or just hard-fix them...
         }
         if (!fitter->nsuccesses) {
             if (fitter->status)
@@ -918,9 +965,17 @@ gwy_fitter_fit(GwyFitter *fitter,
     g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
     Fitter *priv = fitter->priv;
     priv->status = GWY_FITTER_STATUS_NONE;
-    g_return_val_if_fail(priv->valid >= VALID_PARAMS, FALSE);
-    g_return_val_if_fail(priv->eval_gradient && priv->eval_residuum, FALSE);
     g_return_val_if_fail(priv->nparam, FALSE);
+    g_return_val_if_fail(priv->valid >= VALID_PARAMS, FALSE);
+    g_return_val_if_fail(priv->eval_gradient || priv->eval_gradient_matrix,
+                         FALSE);
+    if (priv->eval_gradient_matrix) {
+        GwyMatrix *matrix = priv->matrix_hessian;
+        g_return_val_if_fail(matrix, FALSE);
+        g_return_val_if_fail(gwy_matrix_n_rows(matrix) == priv->nparam, FALSE);
+        g_return_val_if_fail(gwy_matrix_n_cols(matrix) == priv->nparam, FALSE);
+    }
+    g_return_val_if_fail(priv->eval_residuum, FALSE);
     priv->fitting = TRUE;
     gboolean ok = fitter_minimize(fitter->priv, user_data);
     priv->fitting = FALSE;
@@ -1067,6 +1122,8 @@ gwy_fitter_inverse_hessian(GwyFitter *fitter,
  *                                      squares smaller than given limit.
  * @GWY_FITTER_STATUS_CANNOT_STEP: It was not possible to calculate the
  *                                 parameter changes due to numerical errors.
+ * @GWY_FITTER_STATUS_MATRIX_FAILURE: An abstract matrix operation, such as
+ *                                    diagonal extraction or setting, failed.
  *
  * Non-linear least-squares fitter status.
  *

@@ -35,6 +35,7 @@ typedef enum {
     GWY_FITTER_STATUS_PARAM_OFF_BOUNDS = 6,
     GWY_FITTER_STATUS_TOO_SMALL_CHANGE = 7,
     GWY_FITTER_STATUS_CANNOT_STEP      = 8,
+    GWY_FITTER_STATUS_MATRIX_FAILURE   = 9,
 } GwyFitterStatus;
 
 typedef gboolean (*GwyFitterResiduumFunc)(const gdouble *param,
