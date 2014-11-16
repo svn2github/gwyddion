@@ -25,11 +25,17 @@ struct _GwyMatrix {
     guint ncols;
     gpointer model;
     GDestroyNotify destroy;
+    GwyMatrixOperation operations;
     GwyMatrixMultiplyFunc multiply;
     GwyMatrixMultiplyFunc inv_multiply;
     GwyMatrixGetDiagFunc get_diag;
     GwyMatrixSetDiagFunc set_diag;
+    GwyMatrixGetDiagFunc get_inv_diag;
 };
+
+static void add_remove_op(GwyMatrix *matrix,
+                          GwyMatrixOperation op,
+                          gboolean add);
 
 /**
  * gwy_matrix_new:
@@ -103,6 +109,24 @@ gwy_matrix_unref(GwyMatrix *matrix)
 }
 
 /**
+ * gwy_matrix_check_operations:
+ * @matrix: An abstract matrix.
+ * @ops: Set of operation to check.
+ *
+ * Check whether an abstract matrix supports given operations.
+ *
+ * Returns: %TRUE if all operations corresponding to bits set in @ops are
+ *          supported by @matrix.
+ **/
+gboolean
+gwy_matrix_check_operations(const GwyMatrix *matrix,
+                            GwyMatrixOperation ops)
+{
+    g_return_val_if_fail(matrix, FALSE);
+    return (ops & matrix->operations) == ops;
+}
+
+/**
  * gwy_matrix_set_multiply_func:
  * @matrix: An abstract matrix.
  * @func: Multiplication function.
@@ -116,6 +140,7 @@ gwy_matrix_set_multiply_func(GwyMatrix *matrix,
 {
     g_return_if_fail(matrix);
     matrix->multiply = func;
+    add_remove_op(matrix, GWY_MATRIX_MULTIPLY, !!func);
 }
 
 /**
@@ -135,6 +160,7 @@ gwy_matrix_set_inv_multiply_func(GwyMatrix *matrix,
     g_return_if_fail(matrix);
     g_warn_if_fail(matrix->nrows == matrix->ncols);
     matrix->inv_multiply = func;
+    add_remove_op(matrix, GWY_MATRIX_INV_MULTIPLY, !!func);
 }
 
 /**
@@ -156,6 +182,27 @@ gwy_matrix_set_diagonal_funcs(GwyMatrix *matrix,
     g_warn_if_fail(matrix->nrows == matrix->ncols);
     matrix->set_diag = setdiag;
     matrix->get_diag = getdiag;
+    add_remove_op(matrix, GWY_MATRIX_GET_DIAGONAL, !!getdiag);
+    add_remove_op(matrix, GWY_MATRIX_SET_DIAGONAL, !!setdiag);
+}
+
+/**
+ * gwy_matrix_set_inv_diagonal_func:
+ * @matrix: An abstract matrix.
+ * @getdiag: Inverse diagonal extraction function.
+ *
+ * Sets the inverse diagonal extraction function for an abstract matrix.
+ *
+ * Obviously, this function only makes sense if the matrix is square.
+ **/
+void
+gwy_matrix_set_inv_diagonal_func(GwyMatrix *matrix,
+                                 GwyMatrixGetDiagFunc getdiag)
+{
+    g_return_if_fail(matrix);
+    g_warn_if_fail(matrix->nrows == matrix->ncols);
+    matrix->get_inv_diag = getdiag;
+    add_remove_op(matrix, GWY_MATRIX_GET_INV_DIAGONAL, !!getdiag);
 }
 
 /**
@@ -277,8 +324,29 @@ gwy_matrix_get_diagonal(GwyMatrix *matrix,
     g_return_val_if_fail(diag, FALSE);
     if (!matrix->get_diag)
         return FALSE;
-    matrix->get_diag(matrix, diag);
-    return TRUE;
+    return matrix->get_diag(matrix, diag);
+}
+
+/**
+ * gwy_matrix_get_diagonal:
+ * @matrix: An abstract matrix.
+ * @diag: Vector to put the inverse diagonal elements to.  The array must have
+ *        the same number of elements as the matrix rows and columns.
+ *
+ * Extracts the inverse diagonal elements of an abstract matrix.
+ *
+ * Returns: %TRUE if the operation succeeded, %FALSE on failure (including
+ *          the case when no inverse diagonal extraction function is set).
+ **/
+gboolean
+gwy_matrix_get_inv_diagonal(GwyMatrix *matrix,
+                            gdouble *invdiag)
+{
+    g_return_val_if_fail(matrix, FALSE);
+    g_return_val_if_fail(invdiag, FALSE);
+    if (!matrix->get_inv_diag)
+        return FALSE;
+    return matrix->get_inv_diag(matrix, invdiag);
 }
 
 /**
@@ -300,8 +368,18 @@ gwy_matrix_set_diagonal(GwyMatrix *matrix,
     g_return_val_if_fail(diag, FALSE);
     if (!matrix->set_diag)
         return FALSE;
-    matrix->set_diag(matrix, diag);
-    return TRUE;
+    return matrix->set_diag(matrix, diag);
+}
+
+static void
+add_remove_op(GwyMatrix *matrix,
+              GwyMatrixOperation op,
+              gboolean add)
+{
+    if (add)
+        matrix->operations |= op;
+    else
+        matrix->operations &= ~op;
 }
 
 /************************** Documentation ****************************/
@@ -322,6 +400,18 @@ gwy_matrix_set_diagonal(GwyMatrix *matrix,
  **/
 
 /**
+ * GwyMatrixOperation:
+ * @GWY_MATRIX_MULTIPLY: Direct multiplication.
+ * @GWY_MATRIX_INV_MULTIPLY: Multiplication by inverse matrix.
+ * @GWY_MATRIX_GET_DIAGONAL: Extraction of the diagonal.
+ * @GWY_MATRIX_GET_INV_DIAGONAL: Setting the diagonal.
+ * @GWY_MATRIX_SET_DIAGONAL: Extraction of the diagonal of the inverse matrix.
+ *
+ * Type of operations that may be (or may be not) supported by an abstract
+ * matrix.
+ **/
+
+/**
  * GwyMatrixMultiplyFunc:
  * @matrix: An abstract matrix.
  * @vector: Vector to multiply.
@@ -339,19 +429,17 @@ gwy_matrix_set_diagonal(GwyMatrix *matrix,
  *
  * Diagonal extraction function type for an abstract matrix.
  *
- * The function has no return value.  It is assumed that if it is defined it
- * can succeed.
+ * Returns: %TRUE on success, %FALSE on failure.
  **/
 
 /**
- * GwyMatrixGetDiagFunc:
+ * GwyMatrixSetDiagFunc:
  * @matrix: An abstract matrix.
  * @diag: Vector to set the diagonal elements to.
  *
  * Diagonal replacement function type for an abstract matrix.
  *
- * The function has no return value.  It is assumed that if it is defined it
- * can succeed.
+ * Returns: %TRUE on success, %FALSE on failure.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
