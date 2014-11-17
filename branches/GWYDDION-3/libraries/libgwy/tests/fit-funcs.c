@@ -107,10 +107,14 @@ fit_func_one(const gchar *name,
         g_assert(evaluate_ok);
     }
 
+    // Cheap sorting by x-value.
     GwyCurve *curve = gwy_curve_duplicate(curve0);
-    // Use multiplicative randomizing to avoid negative values also here
+    gwy_curve_assign(curve0, curve);
+    // NB: We used to have multiplicative noise here but it screwed up error
+    // estimates of ‘σ’ of PSDF or ‘a’ of bumps big time.  Must use noise that
+    // cooresponds to what the fitting assumes.
     for (guint j = 0; j < ndata; j++) {
-        curve->data[j].y *= (1.0 + g_rand_double_range(rng, -0.1, 0.1));
+        curve->data[j].y += g_rand_double_range(rng, -0.3, 0.3);
         //g_printerr("%g %g\n", curve->data[j].x, curve->data[j].y);
     }
     gwy_fit_func_set_data(fitfunc, curve->data, curve->n);
@@ -142,29 +146,47 @@ fit_func_one(const gchar *name,
     g_assert(gwy_fitter_get_params(fitter, param));
     if (g_test_verbose()) {
         for (guint i = 0; i < nparams; i++)
-            g_printerr("Fitting result %s = %g\n",
-                       gwy_fit_func_param_name(fitfunc, i), param[i]);
+            g_printerr("Fitting result %s = %g (true error %g, relative %g)\n",
+                       gwy_fit_func_param_name(fitfunc, i),
+                       param[i],
+                       param[i] - param0[i],
+                       (param[i] - param0[i])/fabs(param0[i]));
     }
 
     /* Conservative result check */
-    gdouble eps = 0.3;
+    gdouble eps = 0.25;
     for (guint i = 0; i < nparams; i++) {
         g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, eps*fabs(param0[i]));
     }
 
     /* Error estimate check */
     gdouble error[nparams];
-    eps = 1.5;
+    eps = 0.05;
     g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
     if (g_test_verbose()) {
         for (guint i = 0; i < nparams; i++)
-            g_printerr("Estimated error %s = %g\n",
-                       gwy_fit_func_param_name(fitfunc, i), error[i]);
+            g_printerr("Estimated error %s = %g (true error %g, ratio %g)\n",
+                       gwy_fit_func_param_name(fitfunc, i),
+                       error[i],
+                       param[i] - param0[i],
+                       fabs(param[i] - param0[i])/error[i]);
     }
     for (guint i = 0; i < nparams; i++) {
         g_assert_cmpfloat(error[i], >=, 0.0);
         g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, (1.0 + eps)*error[i]);
     }
+
+    /* Plot */
+#if 0
+    for (guint j = 0; j < ndata; j++) {
+        const GwyXY *pt0 = curve0->data + j;
+        const GwyXY *pt = curve->data + j;
+        gdouble y;
+        gwy_fit_func_evaluate(fitfunc, pt->x, param, &y);
+        g_assert_cmpfloat(pt0->x, ==, pt->x);
+        printf("%g %g %g %g\n", pt0->x, pt0->y, pt->y, y);
+    }
+#endif
 
     /* Units */
     GwyUnit *xunit = gwy_unit_new_from_string("m", NULL);
