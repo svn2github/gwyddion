@@ -481,7 +481,7 @@ set_diagonal_from_array(Fitter *fitter, const gdouble *a)
 
     gdouble *h = fitter->hessian;
     for (guint j = 0; j < nparam; j++)
-        SLi(h, j, j) += a[j];
+        SLi(h, j, j) = a[j];
 
     return TRUE;
 }
@@ -489,12 +489,13 @@ set_diagonal_from_array(Fitter *fitter, const gdouble *a)
 // Do the replacement with zeroes at the diagonal 1.0 directly here so that
 // diag[] remembers the original Hessian diagonal and we can always restore
 // it.
+// XXX: Reuses step[] as a scratch buffer
 static inline gboolean
 add_to_diagonal(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     const gdouble *d = fitter->diag;
-    gdouble *buf = fitter->step;    // XXX: Reuses step[] as a scratch buffer
+    gdouble *buf = fitter->step;
     gdouble lambda = fitter->lambda;
 
     for (guint j = 0; j < nparam; j++) {
@@ -502,7 +503,7 @@ add_to_diagonal(Fitter *fitter)
         if (!(dj > 0.0))
             dj = 1.0;
 
-        buf[j] = lambda*dj;
+        buf[j] = d[j] + lambda*dj;
     }
 
     return set_diagonal_from_array(fitter, buf);
@@ -541,7 +542,10 @@ too_small_param_change(Fitter *fitter)
     fitter->valid = MAX(fitter->valid, VALID_INV_HESSIAN_DIAG);
     for (guint j = 0; j < nparam; j++) {
         gdouble step_min = eps * sqrt(fmax(buf[j], 0.0));
-        if (fitter->step[j] > step_min)
+    }
+    for (guint j = 0; j < nparam; j++) {
+        gdouble step_min = eps * sqrt(fmax(buf[j], 0.0));
+        if (fabs(fitter->step[j]) > step_min)
             return FALSE;
     }
     return TRUE;
