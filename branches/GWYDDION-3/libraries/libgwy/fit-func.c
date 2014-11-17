@@ -520,13 +520,17 @@ gwy_fit_func_param_unit(GwyFitFunc *fitfunc,
  * underlying #GwyFitter.
  *
  * The initial estimate method depends on the function used.  There is no
- * absolute guarantee of quality, however if the data points approximately
+ * absolute guarantee of quality.  However, if the data points approximately
  * match the fitted function the fit will typically converge from the returned
  * estimate.
  *
  * The parameters are filled also on failure to produce a reasonable estimate
  * for given data, though just with some neutral values that should not give
  * raise to NaNs and infinities.
+ *
+ * Returns: %TRUE if the estimate was succesful, i.e. the estimator thinks the
+ *          data do not seem completely incompatible with this function and
+ *          the estimated parameters should be reasonable.
  **/
 gboolean
 gwy_fit_func_estimate(GwyFitFunc *fitfunc,
