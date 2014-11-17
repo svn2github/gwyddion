@@ -542,9 +542,6 @@ too_small_param_change(Fitter *fitter)
     fitter->valid = MAX(fitter->valid, VALID_INV_HESSIAN_DIAG);
     for (guint j = 0; j < nparam; j++) {
         gdouble step_min = eps * sqrt(fmax(buf[j], 0.0));
-    }
-    for (guint j = 0; j < nparam; j++) {
-        gdouble step_min = eps * sqrt(fmax(buf[j], 0.0));
         if (fabs(fitter->step[j]) > step_min)
             return FALSE;
     }
