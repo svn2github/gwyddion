@@ -1200,6 +1200,26 @@ gwy_fitter_inverse_hessian(GwyFitter *fitter,
  **/
 
 /**
+ * GwyFitterMatrixGradientFunc:
+ * @param: Values of parameters.  Note the parameters are not modifiable, if
+ *         the function needs a modifiable array of parameters it must make a
+ *         copy of @param.
+ * @gradient: Array of the same length as @param to store the derivatives of
+ *            the residuum by individual parameters to.
+ * @hessian: Abstract matrix to be updated to the the Hessian.
+ * @user_data: Data passed to gwy_fitter_fit().
+ *
+ * The type of function calculating the gradient and Hessian for the abstract
+ * matrix interface of #GwyFitter.
+ *
+ * See #GwyFitterGradientFunc for some discussion.
+ *
+ * Returns: %TRUE if the evaluation succeeded, %FALSE on failure, e.g. due to
+ *          a parameter domain error.  If %FALSE is returned @gradient and
+ *          @hessian elements may be left unset or set to bogus values.
+ **/
+
+/**
  * GwyFitterConstrainFunc:
  * @param: Values of parameters.
  * @ok: Array of the same length as @param to store the satisfaction of the

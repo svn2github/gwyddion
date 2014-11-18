@@ -1834,7 +1834,7 @@ gwy_dict_set_boolean_n(GwyDict *dict, const gchar *name, gboolean value)
 }
 
 /**
- * gwy_dict_set_char:
+ * gwy_dict_set_schar:
  * @dict: A dictionary.
  * @key: Quark item key.
  * @value: A character.

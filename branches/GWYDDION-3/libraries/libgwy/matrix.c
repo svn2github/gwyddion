@@ -328,7 +328,7 @@ gwy_matrix_get_diagonal(GwyMatrix *matrix,
 }
 
 /**
- * gwy_matrix_get_diagonal:
+ * gwy_matrix_get_inv_diagonal:
  * @matrix: An abstract matrix.
  * @diag: Vector to put the inverse diagonal elements to.  The array must have
  *        the same number of elements as the matrix rows and columns.
@@ -388,6 +388,14 @@ add_remove_op(GwyMatrix *matrix,
  * SECTION: matrix
  * @title: GwyMatrix
  * @short_description: Abstraction of a matrix
+ *
+ * #GwyMatrix is an abstract matrix interface.  It can represent various
+ * sparse matrices, matrices stored in specialised hadrware, etc.
+ *
+ * A newly created #GwyMatrix does not support any operations.  It is necessary
+ * to set the functions actually performing algebraic operations using
+ * functions such as gwy_matrix_set_multiply_func().  Which operations need to
+ * be provided, that depends on how the matrix will be used.
  **/
 
 /**
