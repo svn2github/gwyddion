@@ -330,8 +330,8 @@ gwy_matrix_get_diagonal(GwyMatrix *matrix,
 /**
  * gwy_matrix_get_inv_diagonal:
  * @matrix: An abstract matrix.
- * @diag: Vector to put the inverse diagonal elements to.  The array must have
- *        the same number of elements as the matrix rows and columns.
+ * @invdiag: Vector to put the inverse diagonal elements to.  The array must
+ *           have the same number of elements as the matrix rows and columns.
  *
  * Extracts the inverse diagonal elements of an abstract matrix.
  *
