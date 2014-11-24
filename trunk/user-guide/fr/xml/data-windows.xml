@@ -36,7 +36,7 @@
     boutons du panneau <guilabel>Outils</guilabel>.
   </para>
   <indexterm><primary>Rapport d'aspect</primary></indexterm>
-  <para>
+  <para id='physical-aspect-ratio'>
     La flèche dans le coin gauche de la fenêtre donne accès au menu de 
     changement du rapport d'aspect. Les données peuvent être affichées avec
     un rapport d'aspect de 1:1 par rapport aux pixels de l'écran

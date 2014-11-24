@@ -55,20 +55,29 @@
         Lancez en tant que root :
         <informalexample>
           <literallayout>
-            <userinput>yum install mingw{32,64}-{gcc-c++,gtk2,libxml2,minizip}</userinput>
+            <userinput>yum install mingw{32,64}-{gcc-c++,gtk2,libxml2,minizip,fftw,gtkglext}</userinput>
           </literallayout>
         </informalexample>
-        pour installer les paquets mingw32 et mingw64 nécessaires
-        (plusieurs autres paquets seront installés en tant que dépendances de
-        ceux donnés ici).
+        pour installer les paquets mingw32 et mingw64 nécessaires.
+        Plusieurs autres paquets seront installés en tant que dépendances de
+        ceux donnés ici. Notez que, techniquement, certains des paquets sont des
+        <link linkend='installation-dependencies'>dépendances facultatives</link>
+        et que vous pouvez compiler un installeur MS Windows sans eux (après 
+        quelques ajustements). En tout état de cause, les installeurs standards
+        incluent ces paquets et les scripts de compilation croisée s'attendent
+        à ce qu'ils soient présents par défaut.
       </para>
     </sect3>
     <sect3 id='installation-cross-mingw32-setup-repo'>
-      <title>Gwyddion.net repository</title>
+      <title>Dépôt Gwyddion.net</title>
       <para>
         Les versions MinGW de quelques paquets utilisés par Gwyddion ne sont pas
-        encore disponibles sous Fedora. Vous pouvez les compiler à l'aide des
-        patches et fichiers de spécifications disponibles sur
+        encore (ou plus) disponibles sous Fedora. Actuellement, le seul paquet 
+        manquant est gtksourceview2 qui n'est utilisé que par pygwy. 
+      </para>
+      <para>
+        Vous pouvez compiler ces paquets aditionnels à l'aide des patches et 
+        fichiers de spécifications disponibles sur
         <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/</ulink>,
         il est toutefois certainement plus aisé de les installer avec
         <command>yum</command>. Pour cela il suffit de télécharger et installer
@@ -76,9 +85,9 @@
         L'installation donne accès à tous les paquets supplémentaires pour
         MinGW. Après installation, vous pouvez lancer
         <informalexample>
-          <literallayout><userinput>yum install mingw32-{fftw,gtkglext,gtksourceview2}</userinput></literallayout>
+          <literallayout><userinput>yum install mingw32-gtksourceview2</userinput></literallayout>
         </informalexample>
-        Incidemment, le répertoire contient aussi un paquet Gwyddion natif que
+        Incidemment, le répertoire contient aussi un paquet Gwyddion x86_64 natif que
         vous pouvez installer pour utiliser Gwyddion sous Fedora, ainsi qu'un
         paquet fournissant des librairies Gwyddion compilées que vous pourez
         utiliser pour faire la compilation croisée des modules.
@@ -199,14 +208,22 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       <informalexample>
         <literallayout><userinput>./cross-build-64</userinput></literallayout>
       </informalexample>
-      Notez que les scripts lancent <filename>autogen.sh</filename> mais ne
-      nettoient pas le répertoire du code source. Il vous sera certainement
-      nécessaire de le faire manuellement si vous compilez Gwyddion de manière
-      répétée.
     </para>
     <para>
       En attendant vous pourrez aller boire un café – ou étudier le script
       <filename>cross-build</filename> (qui est en fait plutôt court et clair).
+    </para>
+    <para>
+      Notez que les scripts lancent <filename>autogen.sh</filename> mais ne
+      nettoient pas le répertoire du code source. Il vous sera certainement
+      nécessaire de le faire manuellement si vous compilez Gwyddion de manière
+      répétée. En particulier, si vous compilez pour les deux architectures dans
+      le même dossier, assurez-vous de lancer
+      <informalexample>
+        <literallayout><userinput>make distclean</userinput></literallayout>
+      </informalexample>
+      entre deux compilations pour remettre le répertoire source dans un état
+      convenable.
     </para>
   </sect2>
   <sect2 id='installation-cross-mingw32-running'>

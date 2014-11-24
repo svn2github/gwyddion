@@ -15,7 +15,7 @@
   </para>
   <para>
     Les versions minimales nécessaires sont données pour certains paquets. Si 
-    aucune version n'est précisée, cela signifie que la version minimales est
+    aucune version n'est précisée, cela signifie que la version minimale est
     si ancienne qu'il n'a pas semblé nécessaire de la déterminer de manière 
     exacte. Certains environnements spécifiques peuvent être listés dans la 
     colonne dépendances, ce qui veut dire que ce paquet n'est utile qu'à 
@@ -59,8 +59,31 @@
           <entry>2.14.0</entry>
           <entry><emphasis role='strong'>Nécessaire</emphasis></entry>
           <entry>
-            Tout.  GLib est nécessaire pour GTK+ mais Gwyddion a besoin d'une
-            version légèrement plus récente que celle requise par GTK+ 2.8.
+            Tout.  GLib est une librairie de base aussi nécessaire pour GTK+,
+             mais Gwyddion a besoin d'une version légèrement plus récente que 
+             celle strictement requise par GTK+ 2.8.
+          </entry>
+        </row>
+        <row id='dependency-pango'>
+          <entry><ulink url='http://www.pango.org/'>Pango</ulink></entry>
+          <entry>1.10</entry>
+          <entry><emphasis role='strong'>Nécessaire</emphasis></entry>
+          <entry>
+            Pour le rendu de texte. Gwyddion a besoin d'une version légèrement 
+            plus récente que celle strictement requise par GTK+ 2.8. Cette 
+            entrée implique pangocairo, qui est un composant facultatif de Pango
+            et qui peut être en principe désactivé. Il est toutefois normalement
+            inclus dans les paquets Pango.
+          </entry>
+        </row>
+        <row id='dependency-cairo'>
+          <entry><ulink url='http://www.cairographics.org/'>Cairo</ulink></entry>
+          <entry>1.2</entry>
+          <entry><emphasis role='strong'>Nécessaire</emphasis></entry>
+          <entry>
+            Tous les dessins dans GTK+. Gwyddion a besoin d'une version légèrement 
+            plus récente que celle strictement requise par GTK+ 2.8. La version
+            1.6 au minimum est recommandée.
           </entry>
         </row>
         <row id='dependency-gtkxlext'>
