@@ -1,0 +1,564 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: image-export.xml 16725 2014-10-20 20:57:35Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='image-export'>
+  <title>Export d'image</title>
+  <para>
+    Les données doivent souvent être exportées sous forme d'images, en général
+    pour des besoins de présentation, plus rarement pour les ouvrir dans des
+    logiciels ne supportant pas les formats de fichiers de données SPM. Dans les
+    deux cas, l'export s'effectue dans <application>Gwyddion</application> en
+    sélectionnat : 
+    <menuchoice>
+      <guimenu>Fichier</guimenu>
+      <guimenuitem>Enregistrer sous</guimenuitem>
+    </menuchoice>
+    puis en choisissant un nom de fichier correspondant à un format image, par
+    exemple <filename>canal.png</filename> ou <filename>canal.tiff</filename>.
+    La section <link linkend='pixmap-image-keys'>formats d'image à grande dynamique</link> 
+    décrit l'export de données sous forme d'images en niveaux de gris à grande
+    dynamique, qui permettent de conserver des données utilisables d'un point de
+    vue quantitatif. Vous pouvez activer cette option pour les formats la 
+    supportant en cochant la case <guilabel>Exporter en niveaux de gris 16 bits</guilabel> 
+    en haut de la fenêtre d'export. Le reste de la section présente la création
+    d'images de bonne qualité pour les publications et les présentations.
+  </para>
+  <para>
+    <application>Gwyddion</application> peut exporter les images sous différents
+    formats, par exemple PNG, PDF, SVG, EPS, TIFF, BMP, PPM, TARGA ou JPEG. En 
+    fonction de l'utilisation finale, certains formats seront plus adaptés que
+    d'autres. De manière générale, on recommandera les choix suivants :
+  </para>
+  <itemizedlist>
+    <listitem>
+      Le format <ulink url='https://www.adobe.com/devnet/pdf/pdf_reference_archive.html'>PDF (Portable Document Format)</ulink>
+      pour un rendu de haute qualité adapté à l'impression, avec le texte et les
+      lignes parfaitement nets quelle que soit l'échelle. Gwyddion propose aussi
+      l'export au format EPS (Encapsulated PostScript) dans le même but, 
+      toutefois certaines fonctionnalités semblent mieux fonctionner avec le 
+      format PDF.
+    </listitem>
+    <listitem>
+      Le format <ulink url='http://libpng.org/pub/png/'>PNG (Portable Network Graphics)</ulink>
+      pour les pages internet, les aperçus en basse résolution, les vignettes et
+      les icônes, ou si une image pixellisée est pour vous la seule option 
+      possible. Il s'agit d'un format moderne et très répandu proposant une
+      bonne compression sans perte ainsi que certaines fonctionnalités 
+      sympathiques.
+    </listitem>
+    <listitem>
+      Le format <ulink url='http://www.w3.org/Graphics/SVG/'>SVG (Scalable Vector Graphics)</ulink>
+      permettant une édition ultérieure. SVG est un format d'image vectorielle
+      moderne que vous pouvez ouvrir dans un éditeur tel qu'
+      <ulink url='http://inkscape.org/'>Inkscape</ulink> pour modifier votre 
+      image ou la combiner avec d'autres – tout en conservant le texte et les
+      lignes parfaitement nets.
+    </listitem>
+  </itemizedlist>
+  <informalfigure id='fig-imgexport-screenshot'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='imgexport-screenshot.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Capture d'écran de la fenêtre d'export montrant l'onglet des options
+        <guilabel>basiques</guilabel>.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Les options d'export sont réparties en plusieurs groupes, tel qu'on peut le
+    constater sur la capture d'écran ci-dessus.
+  </para>
+  <sect2 id='image-export-basic'>
+    <title>Basique</title>
+    <para>
+      Les options <guilabel>basiques</guilabel> permettent de spécifier les 
+      dimensions et l'échelle de l'image. La partie 
+      <guilabel>dimensions physiques</guilabel> change entre les images 
+      vectorielles et celles pixellisées. Pour ces dernières, les dimensions 
+      physiques sont spécifiées comme suit :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Zoom</guilabel></term>
+        <listitem>
+          <para>
+            Mise à l'échelle entre les pixels de donnée et les pixels de 
+            l'image. La valeur par défaut de 1 signifie que chaque pixel de 
+            donnée correspond exactement à un pixel de l'image. On peut agrandir
+            l'image en utilisant une valeur de zoom supérieure à 1 ; 
+            inversement, une valeur inférieure à 1 permet de réduire l'image.
+            Concernant les données ayant des pixels rectangulaires affichés avec
+            le <link linkend='physical-aspect-ratio'>rapport d'aspect physique</link>,
+            la valeur de zoom est appliquée au côté le plus petit du pixel.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Largeur</guilabel></term>
+        <listitem>
+          <para>
+            Largeur du rectangle correspondant aux données dans l'image exportée 
+            (différente de la largeur de l'image complète), en pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Hauteur</guilabel></term>
+        <listitem>
+          <para>
+            Hauteur du rectangle correspondant aux données dans l'image exportée 
+            (différente de la hauteur de l'image complète), en pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Les images vectorielles n'ont pas de résolution propore, les dimensions
+      physiques sont donc données comme suit :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Taille des pixels</guilabel></term>
+        <listitem>
+          <para>
+            Taille d'un pixel de donnée en millimètres.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Pixels par pouce</guilabel></term>
+        <listitem>
+          <para>
+            Nombre de pixels de donnée par pouce.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Largeur</guilabel></term>
+        <listitem>
+          <para>
+            Largeur du rectangle correspondant aux données dans l'image exportée 
+            (différente de la largeur de l'image complète), en millimètres.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Hauteur</guilabel></term>
+        <listitem>
+          <para>
+            Hauteur du rectangle correspondant aux données dans l'image exportée 
+            (différente de la hauteur de l'image complète), en millimètres.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-imgexport-dimensions'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-dimensions.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-dimensions.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Illustration des paramètres de base de taille de l'image.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Les paramètres de taille et d'échelle restants, notés
+      <guilabel>paramètres</guilabel>, sont communs aux deux types d'image.
+      Toutefois, pour les images pixellisées les valeurs sont en pixels tandis
+      que pour les images vectorielles celles-ci sont données en points 
+      typographiques. Plus précisément, cet aspect est vrai si les paramètres 
+      sont donnés en valeur absolue, c'est-à-dire si l'option 
+      <guilabel>lier les dimensions aux pixels</guilabel> n'est pas 
+      sélectionnée. Si cette option est activée, toutes les dimensions seront
+      relatives aux dimensions des pixels de donnée, c'est-à-dire qu'elles 
+      seront mises à l'échelle en même temps que l'image lorsque les dimensions
+      physiques changent. Les paramètres, illustrés dans la figure qui suit, 
+      incluent :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Police</guilabel></term>
+        <listitem>
+          <para>
+            Police utilisée pour dessiner toutes les annotations.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Taille de police</guilabel></term>
+        <listitem>
+          <para>
+            Taille de police, en pixels ou en points typographiques, tel que 
+            décrit plus haut.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Épaisseur de ligne</guilabel></term>
+        <listitem>
+          <para>
+            Épaisseur des lignes : bordures, graduations, barre d'échelle et 
+            sélections.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Épaisseur des contours</guilabel></term>
+        <listitem>
+          <para>
+            Épaisseur des contours pouvant être dessinés autour de la barre 
+            d'échelle ou des sélections.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Épaisseur des bordures</guilabel></term>
+        <listitem>
+          <para>
+            Largeur du bord vide entourant la totalité de l'image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Longueur des graduations</guilabel></term>
+        <listitem>
+          <para>
+            Longueur des graduations de l'échelle de largeur extérieure et de 
+            l'échelle de couleur. Ce réglage contrôle aussi la longueur des 
+            extrémités de la barre d'échelle et la taille des croix pour les 
+            sélections pouctuelles.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='image-export-lateral'>
+    <title>Échelle latérale</title>
+    <para>
+      Les réglages de l'onglet <guilabel>échelle latérale</guilabel> contrôlent 
+      la manière dont les dimensions latérales sont visualisées. Deux choix
+      basiques sont montrés dans la figure ci-dessous, les graduations 
+      extérieures et la barre d'échelle. L'échelle latérale peut aussi être
+      complètement désactivée. La barre d'échelle possède les paramètres 
+      suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Longueur</guilabel></term>
+        <listitem>
+          <para>
+            La longueur de la barre peut être ajustée manuellement à une valeur
+            arbritraire, du moment qu'elle aboutisse à une longueur de barre qui 
+            ne soit ni trop courte ni trop longue. Pressez la touche
+            <keycode>entrée</keycode> pour mettre à jour l'aperçu lorsque vous
+            modifiez la longueur. Le bouton <guibutton>auto</guibutton> 
+            sélectionne une valeur adéquate de manière automatique (la même 
+            valeur est utilisée lorsque la valeur entrée manuellement ne donne
+            pas une longueur de barre correcte).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Positionnement</guilabel></term>
+        <listitem>
+          <para>
+            La barre peut être positionnée le long du bord supérieur ou 
+            inférieur de l'image, et alignée de chaque côté ou centrée.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Écart horizontal</guilabel></term>
+        <listitem>
+          <para>
+            Écart horizontal entre la barre et le bord vertical de l'image
+            le plus proche (applicable seulement si la barre n'est pas centrée).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Écart vertical</guilabel></term>
+        <listitem>
+          <para>
+            Écart vertical entre la barre et le bord horizontal de l'image
+            le plus proche.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Couleur</guilabel></term>
+        <listitem>
+          <para>
+            Couleur de la barre. Les boutons <guibutton>noir</guibutton> et 
+            <guibutton>blanc</guibutton> permettent de choisir facilement ces
+            couleurs de base.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Couleur des contours</guilabel></term>
+        <listitem>
+          <para>
+            Couleur des contours.  Notez que si l'épaisseur des contours est 
+            nulle (valeur par défaut), aucun contour ne sera dessiné, la 
+            modification de la couleur n'aura donc aucun effet.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Opacité</guilabel></term>
+        <listitem>
+          <para>
+            Opacité de la barre d'échelle. Ce réglage permet de dessiner la 
+            barre de façon semi-transparente.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Afficher les extrémités</guilabel></term>
+        <listitem>
+          <para>
+            En activant cette option, la barre aura une barre verticale à ses
+            extrémités. La barre ne sera qu'une simple ligne en la désactivant.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Afficher l'annotation</guilabel></term>
+        <listitem>
+          <para>
+            En activant cette option, la longueur est indiquée sous la barre.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-imgexport-lateral'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-lateral.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-lateral.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Types d'affichage de l'échelle latérale.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='image-export-value'>
+    <title>Valeurs</title>
+    <para>
+      Les réglages de l'onglet <guilabel>valeurs</guilabel> contrôlent le rendu
+      des valeurs et de l'échelle de couleurs. Deux réglages de base contrôlent
+      ce rendu :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Interpolation</guilabel></term>
+        <listitem>
+          <para>
+            Le type d'interpolation peut avoir un effet notable lors d'un 
+            agrandissement élevé. Dans les cas des images vectorielles, le rendu
+            final est effectué lorsque l'image est affichée ou imprimée. Les 
+            types d'interpolation disponibles sont donc limités à deux. Arrondi, 
+            pour lequel chaque pixel est affiché sous forme de rectangles 
+            uniformes, et linéaire, pour lequel les valeurs affichées sont 
+            interpolées linéairement entre les pixels originaux. Dans le cas des
+            images pixellisées, vous pouvez choisir parmi la liste complète des
+            <link linkend='interpolation'>interpolations</link> proposée par
+            Gwyddion car l'interpolation est réalisée lors de l'export.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Dessiner le masque</guilabel></term>
+        <listitem>
+          <para>
+            En activant cette option, le 
+            <link linkend='masks-introduction'>masque</link> est affiché 
+            par-dessus les données en utilisant la même couleur que dans la 
+            fenêtre des données.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      L'échelle de valeur peut être rendue sous forme de l'échelle de fausses
+      couleurs ou désactivée. L'échelle est dessinée différemment en fonction du
+      type d'affichage de
+      <link linkend='color-map'>l'échelle de couleur</link>, tel qu'illustré
+      ci-dessous.
+    </para>
+    <informalfigure id='fig-imgexport-fmscales'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-fmscales.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-fmscales.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Rendu de l'échelle de fausses couleurs en fonction du type d'échelle.
+          Pour l'affichage linéaire, qu'il soit complet ou fixé à une plage 
+          donnée, les graduations sont affichées avec leurs valeurs. Pour 
+          l'échelle adaptative, le gradient est affiché de la même façon, mais 
+          la position des graduations correspond à l'échelle adaptative et les
+          graduations intérieures sont affichées sans valeur (pour éviter 
+          qu'elles se chevauchent). Si une 
+          <link linkend='presentations-introduction'>preéentation</link> est
+          affichée, les valeurs sont considérées comme arbitraires, ainsi aucune
+          graduation ni valeur ne sera affichée.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Le titre du canal peut être ajouté en haut de l'image ou le long de 
+      l'échelle de fausses couleurs. En cochant ou non la case
+      <guilabel>ajouter les unités dans le titre</guilabel>, le placement des
+      unités peut être choisi entre le titre et l'échelle de couleur. Notez que 
+      si le titre est désactivé, y ajouter les unités les fera complètement 
+      disparaître.
+    </para>
+    <para>
+      Les réglages <guilabel>écart horizontal</guilabel> pour l'échelle de 
+      fausses couleurs et <guilabel>écart</guilabel> pour le titre contrôlent
+      les écarts entre eux et les bordss de l'image correspondant, tel que 
+      décrit dans la figure qui suit. Si le titre du canal est affiché le long
+      de l'échelle de couleur l'écart peut être négatif, ce qui fait que le 
+      titre peut se trouver dans les graduations. Lorsque le titre est placé 
+      au-dessus de l'image, une écart négatif sera ignoré.
+    </para>
+    <informalfigure id='fig-imgexport-gaps'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='imgexport-gaps.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='imgexport-gaps.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Illustration des différents réglages d'écart (pour le titre du canal, 
+          placé en haut de l'image).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='image-export-selection'>
+    <title>Sélection</title>
+    <para>
+      Tous les types de <link linkend='selections'>sélections</link> 
+      enregistrées avec les données peuvent aussi être affichés sur l'image. Si
+      la case <guilabel>dessiner les sélections</guilabel> est activée, vous
+      pourrez choisir les sélections à afficher dans la liste située en-dessous.
+      Les couleurs sont spécifiées de la même manière que pour la barre 
+      d'échelle :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Couleur</guilabel></term>
+        <listitem>
+          <para>
+            Couleur avec laquelle les sélections sont dessinées
+            Color with which the selection is drawn. Les boutons 
+            <guibutton>noir</guibutton> et <guibutton>blanc</guibutton> 
+            permettent de choisir facilement ces couleurs de base.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Couleur des contours</guilabel></term>
+        <listitem>
+          <para>
+            Couleur des contours. Notez que si l'épaisseur des contours est 
+            nulle (valeur par défaut), aucun contour ne sera dessiné, la 
+            modification de la couleur n'aura donc aucun effet.  
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Opacité</guilabel></term>
+        <listitem>
+          <para>
+            Opacité des sélections. Ce réglage permet de dessiner les 
+            sélections de façon semi-transparente.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      En dehors des couleurs, certains types de sélection possèdent plus 
+      d'options, comme par exemple la numérotation individuelle. Si vous 
+      utilisez un <link linkend='tools'>outil</link> ayant certaines sélections
+      sur les données, le type de sélection à dessiner et les options 
+      spécifiques seront prédéfinies de manière à correspondre à l'outil 
+      utilisé. Il s'agit en général de la manière la plus pratique pour afficher
+      les sélections tel que vous le souhaitez. Si vous le souhaitez, vous 
+      pouvez tout de même ajuster manuellement les paramètres de manière à 
+      afficher n'importe quelle sélection.
+    </para>
+  </sect2>
+  <sect2 id='image-export-presets'>
+    <title>Préréglages</title>
+    <para>
+      Différents réglages peuvent être utiles en fonction des occasions. Un 
+      ensemble d'options peut être enregistré sous forme de préréglage pour être
+      rappelé plus tard. La liste affichée dans l'onglet 
+      <guilabel>préréglages</guilabel> donne tous les préréglages que l'on
+      peut gérer avec les boutons suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><guibutton>Charger</guibutton></term>
+        <listitem>
+          <para>
+            Charge le préréglage sélectionné, c'est-à-dire que les options de
+            rendu sont modifiées en conséquence. La barre d'échelle pourra être
+            ajustée à la valeur automatique si la valeur enregistrée ne convient
+            pas. De même le type de sélection et les options correspondantes ne
+            sont pas modifiées, seules les couleurs sont modifiées en accord 
+            avec le préréglage.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guibutton>Enregistrer</guibutton></term>
+        <listitem>
+          <para>
+            Enregistre les options courantes sous le nom donné dans la case
+            <guilabel>nom du préréglage</guilabel>. Le nom sert aussi de nom de
+            fichier, il est donc conseillé d'éviter les caractères exotiques. Si
+            un préréglage ayant le même nom existe déjà, celui-ci sera écrasé.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guibutton>Renommer</guibutton></term>
+        <listitem>
+          <para>
+            Renomme le préréglage sélectionné avec le nom donné dans la case
+            <guilabel>nom du préréglage</guilabel>. Le préréglage ne doit pas
+            être nécessairement chargé pour pouvoir être renommé. Il n'est pas
+            possible d'écraser un préréglage existant en en renommant un autre.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guibutton>Supprimer</guibutton></term>
+        <listitem>
+          <para>
+            Supprime le préréglage sélectionné.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
