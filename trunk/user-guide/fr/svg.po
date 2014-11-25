@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
 "POT-Creation-Date: 2014-10-20 20:40+0200\n"
-"PO-Revision-Date: 2014-10-20 21:43+0100\n"
+"PO-Revision-Date: 2014-11-26 00:03+0100\n"
 "Last-Translator: François RIGUET <francheu@caramail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -153,12 +153,12 @@ msgstr "Interpolaton Key, haute résolution"
 #: imgexport-lateral.svg:798(tspan)
 #, no-wrap
 msgid "Inset scale bar"
-msgstr "Échelle intérieure"
+msgstr "Barre d'échelle"
 
 #: imgexport-lateral.svg:809(tspan)
 #, no-wrap
 msgid "Rulers"
-msgstr "Règles"
+msgstr "Échelle extérieure"
 
 #: imgexport-gaps.svg:415(tspan)
 #, no-wrap
@@ -173,7 +173,7 @@ msgstr "Écart de l'échelle de couleur"
 #: imgexport-gaps.svg:663(tspan)
 #, no-wrap
 msgid "Inset horizontal gap"
-msgstr "Écart horizontal de l'échelleintérieure"
+msgstr "Écart horizontal de la barre d'échelle"
 
 #: imgexport-gaps.svg:674(tspan)
 #, no-wrap
@@ -213,7 +213,7 @@ msgstr "Longueur des graduations"
 #: imgexport-dimensions.svg:510(tspan)
 #, no-wrap
 msgid "Outline thickness"
-msgstr "Épaisseur du pourtour"
+msgstr "Épaisseur du contour"
 
 #: boundary-length.svg:713(tspan)
 #, no-wrap
