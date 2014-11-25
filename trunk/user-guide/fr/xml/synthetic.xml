@@ -1526,6 +1526,114 @@
       </mediaobject>
     </informalfigure>
   </sect2>
+  <sect2 id='brownian-synthesis'>
+    <title>Mouvement brownien</title>
+    <para>
+      Ce module génère des surfaces dont les profils sont similaires à des
+      échantillons de mouvement brownien fractionnaire. La méthode de 
+      construction n'est cependant pas très sophistiquée. On démarre des coins 
+      de l'image, puis les points intérieurs sont interpolés linéairement de
+      manière récursive le long des axes vertical et horizontal, en y ajoutant
+      du bruit dont l'échelle est liée à la distance <emphasis>via</emphasis>
+      l'exposant de Hurst. Certaines surfaces générées seront très similaires à 
+      celles obtenues avec la
+      <link linkend='spectral-synthesis'>synthèse spectrale</link>, mais le fait 
+      de les construire dans l'espace direct plutôt que dans l'espace des 
+      fréquences permet des modifications différentes de leurs propriétés.
+    </para>
+    <para>
+      Le générateur propose les paramètres suivants :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Exposant de Hurst</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Valeur nominale de l'exposant de Hurst <xi:include href='eqi-H.xml'/>.
+            Pour les valeurs normales entre 0 et 1, la racine carrée de la 
+            <link linkend='height-height-correlation-1d'>fonction de corrélation hauteur-hauteur</link>
+            augmente selon la <xi:include href='eqi-H.xml'/>-ème puissance de la
+            distance. L'algorithme de construction permet aussi les valeurs 
+            négatives car il s'arrête à la résolution finie d'un pixel.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Échelle de stationnarité</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Échelle à laquelle la stationnarité est imposée (notez que le 
+            mouvement brownien fractionnaire n'est pas stationnaire). Elle a peu
+            d'effet lorsque qu'ell est comparable ou plus largue que la taille 
+            de l'image. Par contre lorsqu'elle est petite l'image se retrouve 
+            <quote>homogénéisée</quote> au lieu d'être auto-similaire au-delà de
+            cette échelle.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Distribution</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Distribution du bruit ajouté lors de la génération. Les 
+            distributions uniforme et gaussienne donneront globalement les 
+            mêmes surfaces (d'un point de vue statistique) ; le second type est
+            toutefois plus rapide. Des distributions à <quote>queue lourde</quote>, 
+            c'est-à-dire exponentielle ou plus particulièrement en puissance, 
+            aboutiront à des pics et des vallées plus prononcés.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Puissance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Puissance <xi:include href='eqi-alpha.xml'/> pour la distribution du
+            même nom. La densité de probabilité est proportionnelle à 
+            <xi:include href="eq-fBm-power-pdf.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Moyenne quadratique des hauteurs (ou de la différence par rapport au
+            plan moyen, qui est toutefois toujours le plan
+            <xi:include href="eqi-z-is-0.xml"/>).  Notez que cette valeur 
+            s'applique à l'image générée, et non au procédé qui la génère, qui 
+            n'a lui pas de valeur RMS finie. Le bouton 
+            <guilabel>identique au canal courant</guilabel> ajuste la valeur
+            RMS à celle du canal actif lors du lancement du module.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-brownian'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-brownian.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surfaces artificielles basées sur un mouvement brownien : surface 
+          classique générée avec une valeur de H d'environ 0,7 (à gauche) ; 
+          image nébuleuse générée grâce à une distribution en puissance à 
+          <quote>queue lourde</quote> (au centre) ; effet d'une faible échelle 
+          de stationnarité (à droite).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
   <sect2 id='synthetic-ref'>
     <title>Références</title>
     <para id='synthetic-ref-1'>
