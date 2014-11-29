@@ -20,7 +20,7 @@
       génériques d'installation pour GNU autotools.
   </para>
   <sect2 id='installation-unix-source-quick'>
-      <title>Instructions Rapides</title>
+      <title>Instructions rapides</title>
       <para>
         Si vous connaissez l'exercice :
       </para>
@@ -32,7 +32,7 @@ make install</userinput></literallayout>
       </informalexample>
     </sect2>
     <sect2 id='installation-unix-source-unpacking'>
-      <title>Dépaquetage des Sources</title>
+      <title>Dépaquetage des sources</title>
       <para>
         Dépaqueter les archives du code source avec
         <informalexample>
@@ -175,10 +175,10 @@ export LDFLAGS</userinput></literallayout>
     </para>
   </sect2>
   <sect2 id='installation-unix-source-configuration2'>
-    <title>Configuration tweaks</title>
+    <title>Ajustements supplémentaires</title>
     <para>
       Des fonctionnalités optionnelles peuvent être activées/désactivées avec
-      des options telles que
+      des paramètres tels que
       <option>--with-foo</option>/<option>--without-foo</option>
       ou <option>--enable-foo</option>/<option>--disable-foo</option>.
       La compilation avec FFTW3 peut par exemple être désactivée avec :

@@ -16,7 +16,7 @@
   <para>
     <application>Gwyddion</application> propose pour l'instant quelques
     fonctions basiques de visualisation et d'extraction dans le menu
-    <guimenu>Volume</guimenu>. La fenêtre des données volumiques, représentée
+    <guimenu>Données volumiques</guimenu>. La fenêtre des données volumiques, représentée
     dans la figure ci-dessous, fournit la visualisation la plus basique des
     données : une image de <quote>prévisualisation</quote>, représentant un plan
     des données volumiques ou d'autres données bi-dimensionnelles associées.

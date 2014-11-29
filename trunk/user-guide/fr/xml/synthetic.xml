@@ -336,9 +336,9 @@
                   </entry>
                 </row>
                 <row>
-                  <entry>Sphere</entry>
-                  <entry>Box</entry>
-                  <entry>Cone</entry>
+                  <entry>Sphère</entry>
+                  <entry>Boîte</entry>
+                  <entry>Cône</entry>
                 </row>
                 <row>
                   <entry>
@@ -364,9 +364,9 @@
                   </entry>
                 </row>
                 <row>
-                  <entry>Pyramid</entry>
-                  <entry>Diamond</entry>
-                  <entry>Tetrahedron</entry>
+                  <entry>Pyramide</entry>
+                  <entry>Losange</entry>
+                  <entry>Tétraèdre</entry>
                 </row>
                 <row>
                   <entry>
@@ -392,9 +392,9 @@
                   </entry>
                 </row>
                 <row>
-                  <entry>Nugget</entry>
-                  <entry>Thatch</entry>
-                  <entry>Tent</entry>
+                  <entry>Pépite</entry>
+                  <entry>Chaume</entry>
+                  <entry>Tente</entry>
                 </row>
                 <row>
                   <entry>
@@ -414,8 +414,8 @@
                   <entry/>
                 </row>
                 <row>
-                  <entry>Gaussian</entry>
-                  <entry>Doughnut</entry>
+                  <entry>Gaussienne</entry>
+                  <entry>Beignet</entry>
                   <entry/>
                 </row>
               </tbody>

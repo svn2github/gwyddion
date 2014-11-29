@@ -413,7 +413,7 @@
           la position des graduations correspond à l'échelle adaptative et les
           graduations intérieures sont affichées sans valeur (pour éviter 
           qu'elles se chevauchent). Si une 
-          <link linkend='presentations-introduction'>preéentation</link> est
+          <link linkend='presentations-introduction'>présentation</link> est
           affichée, les valeurs sont considérées comme arbitraires, ainsi aucune
           graduation ni valeur ne sera affichée.
         </caption>
