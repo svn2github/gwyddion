@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
 "POT-Creation-Date: 2014-11-30 14:20+0100\n"
-"PO-Revision-Date: 2014-10-23 09:12+0300\n"
+"PO-Revision-Date: 2014-11-30 19:24+0300\n"
 "Last-Translator: Daniil Bratashov <dn2010@gmail.com>\n"
 "Language-Team: ru <ru@li.org>\n"
 "Language: ru_RU\n"
@@ -180,12 +180,12 @@ msgstr "Горизонтальный зазор отрезка"
 #: imgexport-gaps.svg:578(tspan)
 #, no-wrap
 msgid "Vertical gap"
-msgstr "Вертикальный зазор:"
+msgstr "Вертикальный зазор"
 
 #: imgexport-gaps.svg:600(tspan)
 #, no-wrap
 msgid "Channel title"
-msgstr ""
+msgstr "Заголовок канала"
 
 #: imgexport-fmscales.svg:597(tspan)
 #, no-wrap
