@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
-"POT-Creation-Date: 2014-10-20 20:40+0200\n"
+"POT-Creation-Date: 2014-11-30 14:20+0100\n"
 "PO-Revision-Date: 2014-10-23 09:12+0300\n"
 "Last-Translator: Daniil Bratashov <dn2010@gmail.com>\n"
 "Language-Team: ru <ru@li.org>\n"
@@ -167,20 +167,25 @@ msgstr "Направляющие"
 msgid "Title gap"
 msgstr "Зазор заголовка"
 
-#: imgexport-gaps.svg:616(tspan)
+#: imgexport-gaps.svg:520(tspan)
 #, no-wrap
 msgid "False color gap"
 msgstr "Зазор шкалы псевдоцвета"
 
-#: imgexport-gaps.svg:663(tspan)
+#: imgexport-gaps.svg:567(tspan)
 #, no-wrap
 msgid "Inset horizontal gap"
 msgstr "Горизонтальный зазор отрезка"
 
-#: imgexport-gaps.svg:674(tspan)
+#: imgexport-gaps.svg:578(tspan)
 #, no-wrap
 msgid "Vertical gap"
 msgstr "Вертикальный зазор:"
+
+#: imgexport-gaps.svg:600(tspan)
+#, no-wrap
+msgid "Channel title"
+msgstr ""
 
 #: imgexport-fmscales.svg:597(tspan)
 #, no-wrap

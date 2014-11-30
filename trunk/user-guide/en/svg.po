@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
-"POT-Creation-Date: 2014-10-20 20:40+0200\n"
+"POT-Creation-Date: 2014-11-30 14:20+0100\n"
 "PO-Revision-Date: 2009-11-16 15:44+0100\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: US-English\n"
@@ -165,19 +165,24 @@ msgstr ""
 msgid "Title gap"
 msgstr ""
 
-#: imgexport-gaps.svg:616(tspan)
+#: imgexport-gaps.svg:520(tspan)
 #, no-wrap
 msgid "False color gap"
 msgstr ""
 
-#: imgexport-gaps.svg:663(tspan)
+#: imgexport-gaps.svg:567(tspan)
 #, no-wrap
 msgid "Inset horizontal gap"
 msgstr ""
 
-#: imgexport-gaps.svg:674(tspan)
+#: imgexport-gaps.svg:578(tspan)
 #, no-wrap
 msgid "Vertical gap"
+msgstr ""
+
+#: imgexport-gaps.svg:600(tspan)
+#, no-wrap
+msgid "Channel title"
 msgstr ""
 
 #: imgexport-fmscales.svg:597(tspan)

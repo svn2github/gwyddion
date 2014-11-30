@@ -1,10 +1,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
-"POT-Creation-Date: 2014-10-20 20:40+0200\n"
+"POT-Creation-Date: 2014-11-30 14:20+0100\n"
 "PO-Revision-Date: 2014-11-29 20:56+0100\n"
 "Last-Translator: François RIGUET <francheu@caramail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -165,20 +166,25 @@ msgstr "Échelle extérieure"
 msgid "Title gap"
 msgstr "Écart du titre"
 
-#: imgexport-gaps.svg:616(tspan)
+#: imgexport-gaps.svg:520(tspan)
 #, no-wrap
 msgid "False color gap"
 msgstr "Écart de l'échelle de couleur"
 
-#: imgexport-gaps.svg:663(tspan)
+#: imgexport-gaps.svg:567(tspan)
 #, no-wrap
 msgid "Inset horizontal gap"
 msgstr "Écart horizontal de la barre d'échelle"
 
-#: imgexport-gaps.svg:674(tspan)
+#: imgexport-gaps.svg:578(tspan)
 #, no-wrap
 msgid "Vertical gap"
 msgstr "Écart vertical"
+
+#: imgexport-gaps.svg:600(tspan)
+#, no-wrap
+msgid "Channel title"
+msgstr ""
 
 #: imgexport-fmscales.svg:597(tspan)
 #, no-wrap
