@@ -2,10 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
 "POT-Creation-Date: 2014-11-30 14:20+0100\n"
-"PO-Revision-Date: 2014-11-29 20:56+0100\n"
+"PO-Revision-Date: 2014-12-14 13:57+0100\n"
 "Last-Translator: François RIGUET <francheu@caramail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -184,7 +183,7 @@ msgstr "Écart vertical"
 #: imgexport-gaps.svg:600(tspan)
 #, no-wrap
 msgid "Channel title"
-msgstr ""
+msgstr "Titre du canal"
 
 #: imgexport-fmscales.svg:597(tspan)
 #, no-wrap
