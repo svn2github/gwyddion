@@ -177,6 +177,15 @@
             Import and export of OpenEXR HDR images.
           </entry>
         </row>
+        <row id='dependency-cxx'>
+          <entry>C++ compiler</entry>
+          <entry/>
+          <entry>Optional</entry>
+          <entry>
+            Import and export of OpenEXR HDR images and import of other
+            high-depth images.
+          </entry>
+        </row>
         <row id='dependency-cfitsio'>
           <entry><ulink url='http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html'>cfitsio</ulink></entry>
           <entry/>
