@@ -113,6 +113,12 @@
           <entry>Опционально</entry>
           <entry>Импорт и экспорт изображений OpenEXR HDR.</entry>
         </row>
+        <row id="dependency-cxx">
+          <entry>компилятор C++</entry>
+          <entry/>
+          <entry>Опционально</entry>
+          <entry>Импорт и экспорт изображений OpenEXR HDR и импорт других изображений с большой глубиной цвета.</entry>
+        </row>
         <row id="dependency-cfitsio">
           <entry><ulink url="http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html">cfitsio</ulink></entry>
           <entry/>
